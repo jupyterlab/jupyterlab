@@ -105,7 +105,7 @@ interface ICodeCellModel extends ICellModel {
   /**
    * The code cell's prompt number. Will be null if the cell has not been run.
    */
-  executionCount: number;
+  executionCount: nbformat.ExecutionCount;
 
   /**
    * The cell outputs.
@@ -359,15 +359,15 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
   /**
    * The execution count of the cell.
    */
-  get executionCount(): number {
-    return this._executionCount;
+  get executionCount(): nbformat.ExecutionCount {
+    return this._executionCount || null;
   }
-  set executionCount(newValue: number) {
+  set executionCount(newValue: nbformat.ExecutionCount) {
     if (newValue === this._executionCount) {
       return;
     }
     let oldValue = this.executionCount;
-    this._executionCount = newValue;
+    this._executionCount = newValue || null;
     this.contentChanged.emit(void 0);
     this.stateChanged.emit({ name: 'executionCount', oldValue, newValue });
   }
@@ -396,7 +396,7 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
    */
   toJSON(): nbformat.ICodeCell {
     let cell = super.toJSON() as nbformat.ICodeCell;
-    cell.execution_count = this.executionCount;
+    cell.execution_count = this.executionCount || null;
     let outputs = this.outputs;
     cell.outputs = [];
     for (let i = 0; i < outputs.length; i++) {
@@ -409,5 +409,5 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
   }
 
   private _outputs: OutputAreaModel = null;
-  private _executionCount: number = null;
+  private _executionCount: nbformat.ExecutionCount = null;
 }
