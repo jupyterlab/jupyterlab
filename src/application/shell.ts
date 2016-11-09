@@ -235,6 +235,7 @@ class ApplicationShell extends Widget {
       return;
     }
     this._dockPanel.addWidget(widget, { mode: 'tab-after' });
+    this._dockPanel.activateWidget(widget);
   }
 
   /**
