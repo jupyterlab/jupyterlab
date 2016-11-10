@@ -105,28 +105,9 @@ class EditorWidget extends CodeMirrorWidget {
         doc.setValue(text);
       }
     });
-    CodeMirror.on(doc, 'beforeChange', (instance, change) => {
+    CodeMirror.on(doc, 'change', (instance, change) => {
       if (change.origin !== 'setValue') {
-        let start = doc.indexFromPos( change.from );
-        //Note: this needs to be `beforeChange`, otherwise
-        //the end index can be wrong.
-        let end = doc.indexFromPos( change.to );
-        let addValue = change.text.join('\n');
-        let removeValue = change.removed.join('\n');
-        if (removeValue) {
-          model.changeText( {type: 'remove',
-                             start: start,
-                             end: end,
-                             value: removeValue
-          });
-        }
-        if (addValue) {
-          model.changeText( {type: 'insert',
-                             start: start,
-                             end: end,
-                             value: addValue
-          });
-        }
+        model.fromString(instance.getValue());
       }
     });
   }
