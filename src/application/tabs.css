@@ -49,7 +49,7 @@
 }
 
 
-.p-TabBar .p-TabBar-tab {
+.p-TabBar-tab {
   flex: 0 1 var(--jp-private-horizontal-tab-width);
   min-height: calc(var(--jp-private-horizontal-tab-height) + var(--jp-border-width));
   /* For some reason Firefox needs us to give a max-height as well...*/
@@ -66,12 +66,12 @@
 }
 
 
-.p-TabBar .p-TabBar-tab:hover:not(.p-mod-current) {
+.p-TabBar-tab:hover:not(.p-mod-current) {
   background: var(--jp-layout-color1);
 }
 
 
-.p-TabBar .p-TabBar-tab:first-child {
+.p-TabBar-tab:first-child {
   margin-left: 0;
 }
 
