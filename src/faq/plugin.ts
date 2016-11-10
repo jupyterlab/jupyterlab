@@ -287,7 +287,7 @@ class FaqWidget extends VDomWidget<FaqModel> {
         h.li({className: ANSWER_CLASS},
           'You can open an issue on our ',
           h.a({className: ANCHOR_CLASS,
-               href: 'https://github.com/jupyter/jupyterlab/issues',
+               href: 'https://github.com/jupyterlab/jupyterlab/issues',
                target: '_blank'},
             'github repository'
           ),
@@ -321,7 +321,7 @@ class FaqWidget extends VDomWidget<FaqModel> {
           ),
           '. Also, feel free to ask questions on our ',
           h.a({className: ANCHOR_CLASS,
-               href: 'https://github.com/jupyter/jupyterlab',
+               href: 'https://github.com/jupyterlab/jupyterlab',
                target: '_blank'},
                'github'
           ),
