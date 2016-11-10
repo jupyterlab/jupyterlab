@@ -238,12 +238,12 @@ class ApplicationShell extends Widget {
    * Widgets must have a unique `id` property, which will be used as the DOM id.
    */
   addToMainArea(widget: Widget): void {
-    // TODO
     if (!widget.id) {
       console.error('widgets added to app shell must have unique id property');
       return;
     }
     this._dockPanel.addWidget(widget, { mode: 'tab-after' });
+    this._dockPanel.activateWidget(widget);
   }
 
   /**
