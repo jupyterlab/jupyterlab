@@ -24,20 +24,12 @@ import {
 import * as utils
   from './utils';
 
-/**
-* The class named added to material icons
-*/
-const MATERIAL_CLASS = 'jp-MaterialIcon';
 
 /**
  * The class name added to the breadcrumb node.
  */
 const BREADCRUMB_CLASS = 'jp-BreadCrumbs';
 
-/**
-* The class name added to add the home icon for the breadcrumbs
-*/
-const BREADCRUMB_HOME = 'jp-HomeIcon';
 /**
  * The class name added to the breadcrumb node.
  */
@@ -353,8 +345,8 @@ namespace Private {
    */
   export
   function createCrumbs(): HTMLElement[] {
-    let home = document.createElement('span');
-    home.className = BREADCRUMB_HOME + " " + BREADCRUMB_ITEM_CLASS;
+    let home = document.createElement('i');
+    home.className = 'fa fa-home ' + BREADCRUMB_ITEM_CLASS;
     let ellipsis = document.createElement('i');
     ellipsis.className = 'fa fa-ellipsis-h ' + BREADCRUMB_ITEM_CLASS;
     let parent = document.createElement('span');
