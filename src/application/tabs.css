@@ -28,7 +28,7 @@
 
 
 .p-TabBar.p-mod-horizontal {
-  min-height: calc( var(--jp-private-horizontal-tab-height) + 2.0*var(--jp-border-width) );
+  min-height: calc(var(--jp-private-horizontal-tab-height) + 2.0 * var(--jp-border-width));
 }
 
 
@@ -37,12 +37,12 @@
 }
 
 
-.p-TabBar.p-mod-top {
+.p-TabBar.jp-mod-top {
   border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
 
-.p-TabBar.p-mod-bottom {
+.p-TabBar.jp-mod-bottom {
   border-top: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
@@ -63,12 +63,12 @@
 }
 
 
-.p-TabBar.p-mod-top > .p-TabBar-content {
+.p-TabBar.jp-mod-top > .p-TabBar-content {
   align-items: flex-end;
 }
 
 
-.p-TabBar.p-mod-bottom > .p-TabBar-content {
+.p-TabBar.jp-mod-bottom > .p-TabBar-content {
   align-items: flex-start;
 }
 
@@ -87,8 +87,8 @@
 }
 
 
-.p-TabBar.p-mod-top .p-TabBar-tab,
-.p-TabBar.p-mod-bottom .p-TabBar-tab {
+.p-TabBar.jp-mod-top .p-TabBar-tab,
+.p-TabBar.jp-mod-bottom .p-TabBar-tab {
   flex: 0 1 var(--jp-private-horizontal-tab-width);
   min-height: calc(var(--jp-private-horizontal-tab-height) + var(--jp-border-width));
   /* For some reason Firefox needs us to give a max-height as well...*/
@@ -99,18 +99,18 @@
 }
 
 
-.p-TabBar.p-mod-top .p-TabBar-tab {
+.p-TabBar.jp-mod-top .p-TabBar-tab {
   border-bottom: none;
 }
 
 
-.p-TabBar.p-mod-bottom .p-TabBar-tab {
+.p-TabBar.jp-mod-bottom .p-TabBar-tab {
   border-top: none;
 }
 
 
-.p-TabBar.p-mod-top .p-TabBar-tab:first-child,
-.p-TabBar.p-mod-bottom .p-TabBar-tab:first-child {
+.p-TabBar.jp-mod-top .p-TabBar-tab:first-child,
+.p-TabBar.jp-mod-bottom .p-TabBar-tab:first-child {
   margin-left: 0;
 }
 
@@ -125,18 +125,18 @@
   color: var(--jp-ui-font-color0);
 }
 
-.p-TabBar.p-mod-top .p-TabBar-tab.p-mod-current,
-.p-TabBar.p-mod-bottom .p-TabBar-tab.p-mod-current {
+.p-TabBar.jp-mod-top .p-TabBar-tab.p-mod-current,
+.p-TabBar.jp-mod-bottom .p-TabBar-tab.p-mod-current {
   min-height: calc(var(--jp-private-horizontal-tab-height) + 2*var(--jp-border-width));
 }
 
 
-.p-TabBar.p-mod-top .p-TabBar-tab.p-mod-current {
+.p-TabBar.jp-mod-top .p-TabBar-tab.p-mod-current {
   transform: translateY(var(--jp-border-width));
 }
 
 
-.p-TabBar.p-mod-bottom .p-TabBar-tab.p-mod-current {
+.p-TabBar.jp-mod-bottom .p-TabBar-tab.p-mod-current {
   transform: translateY(-1*var(--jp-border-width));
 }
 
