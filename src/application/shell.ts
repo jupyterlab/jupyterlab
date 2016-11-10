@@ -97,16 +97,7 @@ class ApplicationShell extends Widget {
 
     let topPanel = this._topPanel = new Panel();
     let hboxPanel = this._hboxPanel = new BoxPanel();
-    let dockPanel = this._dockPanel = new DockPanel({
-      renderer: {
-        createTabBar: () => {
-          let bar = new TabBar();
-          bar.addClass('jp-mod-top');
-          return bar;
-        },
-        createHandle: DockPanel.defaultRenderer.createHandle
-      }
-    });
+    let dockPanel = this._dockPanel = new DockPanel();
     let hsplitPanel = this._hsplitPanel = new SplitPanel();
     let leftHandler = this._leftHandler = new SideBarHandler('left');
     let rightHandler = this._rightHandler = new SideBarHandler('right');

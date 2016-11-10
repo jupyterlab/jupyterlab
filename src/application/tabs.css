@@ -21,6 +21,7 @@
 
 
 .p-TabBar {
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
   overflow: visible;
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
@@ -28,32 +29,12 @@
 
 
 .p-TabBar.p-mod-horizontal {
-  min-height: calc(var(--jp-private-horizontal-tab-height) + 2.0 * var(--jp-border-width));
+  min-height: calc(var(--jp-private-horizontal-tab-height) + 2 * var(--jp-border-width));
 }
 
 
 .p-TabBar.p-mod-vertical {
   min-width: 80px;
-}
-
-
-.p-TabBar.jp-mod-top {
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
-}
-
-
-.p-TabBar.jp-mod-bottom {
-  border-top: var(--jp-border-width) solid var(--jp-border-color1);
-}
-
-
-.p-TabBar.p-mod-left {
-  border-right: var(--jp-border-width) solid var(--jp-border-color1);
-}
-
-
-.p-TabBar.p-mod-right {
-  border-left: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
 
@@ -63,32 +44,12 @@
 }
 
 
-.p-TabBar.jp-mod-top > .p-TabBar-content {
+.p-TabBar > .p-TabBar-content {
   align-items: flex-end;
 }
 
 
-.p-TabBar.jp-mod-bottom > .p-TabBar-content {
-  align-items: flex-start;
-}
-
-
-.p-TabBar-tab {
-  padding: 0px 10px;
-  background: var(--jp-layout-color2);
-  border: var(--jp-border-width) solid var(--jp-border-color1);
-  position: relative;
-  overflow: visible;
-}
-
-
-.p-TabBar-tab:hover:not(.p-mod-current) {
-  background: var(--jp-layout-color1);
-}
-
-
-.p-TabBar.jp-mod-top .p-TabBar-tab,
-.p-TabBar.jp-mod-bottom .p-TabBar-tab {
+.p-TabBar .p-TabBar-tab {
   flex: 0 1 var(--jp-private-horizontal-tab-width);
   min-height: calc(var(--jp-private-horizontal-tab-height) + var(--jp-border-width));
   /* For some reason Firefox needs us to give a max-height as well...*/
@@ -96,21 +57,21 @@
   min-width: 35px;
   margin-left: calc(-1*var(--jp-border-width));
   line-height: var(--jp-private-horizontal-tab-height);
-}
-
-
-.p-TabBar.jp-mod-top .p-TabBar-tab {
+  padding: 0px 10px;
+  background: var(--jp-layout-color2);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
   border-bottom: none;
+  position: relative;
+  overflow: visible;
 }
 
 
-.p-TabBar.jp-mod-bottom .p-TabBar-tab {
-  border-top: none;
+.p-TabBar .p-TabBar-tab:hover:not(.p-mod-current) {
+  background: var(--jp-layout-color1);
 }
 
 
-.p-TabBar.jp-mod-top .p-TabBar-tab:first-child,
-.p-TabBar.jp-mod-bottom .p-TabBar-tab:first-child {
+.p-TabBar .p-TabBar-tab:first-child {
   margin-left: 0;
 }
 
@@ -118,26 +79,9 @@
 
 .p-TabBar-tab.p-mod-current {
   background: var(--jp-layout-color1);
-}
-
-
-.p-TabBar-tab.p-mod-current {
   color: var(--jp-ui-font-color0);
-}
-
-.p-TabBar.jp-mod-top .p-TabBar-tab.p-mod-current,
-.p-TabBar.jp-mod-bottom .p-TabBar-tab.p-mod-current {
-  min-height: calc(var(--jp-private-horizontal-tab-height) + 2*var(--jp-border-width));
-}
-
-
-.p-TabBar.jp-mod-top .p-TabBar-tab.p-mod-current {
+  min-height: calc(var(--jp-private-horizontal-tab-height) + 2 * var(--jp-border-width));
   transform: translateY(var(--jp-border-width));
-}
-
-
-.p-TabBar.jp-mod-bottom .p-TabBar-tab.p-mod-current {
-  transform: translateY(-1*var(--jp-border-width));
 }
 
 
