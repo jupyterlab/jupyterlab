@@ -261,9 +261,11 @@ class TerminalWidget extends Widget {
 
     this._term.on('data', (data: string) => {
       if (this._session) {
-        this._session.send({
-          type: 'stdin',
-          content: [data]
+        this._session.ready().then(() => {
+          this._session.send({
+            type: 'stdin',
+            content: [data]
+          });
         });
       }
     });
@@ -327,9 +329,11 @@ class TerminalWidget extends Widget {
     let rows = Math.floor(height / this._rowHeight) - 1;
     let cols = Math.floor(width / this._colWidth) - 1;
     this._term.resize(cols, rows);
-    this._session.send({
-      type: 'set_size',
-      content: [rows, cols, height, width]
+    this._session.ready().then(() => {
+      this._session.send({
+        type: 'set_size',
+        content: [rows, cols, height, width]
+      });
     });
     this._dirty = false;
     this.update();
