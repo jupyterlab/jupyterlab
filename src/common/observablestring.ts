@@ -18,7 +18,7 @@ interface IObservableString extends IDisposable {
   /**
    * A signal emitted when the string has changed.
    */
-  changed: ISignal<IObservableString, string>;
+  changed: ISignal<IObservableString, ObservableString.IChangedArgs>;
 
   /**
    * The value of the string.
@@ -26,14 +26,26 @@ interface IObservableString extends IDisposable {
   text : string;
 
   /**
+   * Insert a string, where `index` is the starting
+   * index, and `text` is the string to insert.
+   */
+  insert(index: number, text: string): void;
+
+  /**
+   * Remove a substring, where `start` is the starting
+   * index, and `end` is the ending index.
+   */
+  remove(start: number, end: number): void;
+
+  /**
    * Set the ObservableString to an empty string.
    */
-  clear() : void;
+  clear(): void;
 
   /**
    * Dispose of the resources held by the string.
    */
-  dispose() : void;
+  dispose(): void;
 }
 
 /**
@@ -43,23 +55,26 @@ export
 class ObservableString implements IObservableString {
 
   constructor(initialText: string = '') {
-    this._text = initialText;
-    this.changed.emit('');
+    this.text = initialText;
   }
 
   /**
    * A signal emitted when the string has changed.
    */
-  changed: ISignal<IObservableString, string>;
+  changed: ISignal<IObservableString, ObservableString.IChangedArgs>;
 
 
   /**
    * Set the value of the string.
    */
   set text( value: string ) {
-    let oldValue = this._text;
     this._text = value;
-    this.changed.emit(oldValue);
+    this.changed.emit({
+      type: 'set',
+      start: 0,
+      end: value.length,
+      value: value
+    });
   }
 
   /**
@@ -70,19 +85,55 @@ class ObservableString implements IObservableString {
   }
 
   /**
-   * Test whether the string has been disposed.
+   * Insert a string, where `index` is the starting
+   * index, and `text` is the string to insert.
    */
-  get isDisposed(): boolean {
-    return this._isDisposed;
+  insert(index: number, text: string): void {
+    this._text = this._text.slice(0, index) +
+                 text +
+                 this._text.slice(index);
+    this.changed.emit({
+      type: 'insert',
+      start: index,
+      end: index + text.length,
+      value: text
+    });
   }
 
+  /**
+   * Remove a substring, where `start` is the starting
+   * index, and `end` is the ending index.
+   */
+  remove(start: number, end: number): void {
+    let oldValue: string = this._text.slice(start, end);
+    this._text = this._text.slice(0, start) +
+                 this._text.slice(end);
+    this.changed.emit({
+      type: 'remove',
+      start: start,
+      end: end,
+      value: oldValue
+    });
+  }
 
   /**
    * Set the ObservableString to an empty string.
    */
   clear(): void {
     this._text = '';
-    this.changed.emit(void 0);
+    this.changed.emit({
+      type: 'set',
+      start: 0,
+      end: 0,
+      value: ''
+    });
+  }
+
+  /**
+   * Test whether the string has been disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
   }
 
   /**
@@ -99,6 +150,65 @@ class ObservableString implements IObservableString {
 
   private _text = '';
   private _isDisposed : boolean = false;
+}
+
+/**
+ * The namespace for `ObservableVector` class statics.
+ */
+export
+namespace ObservableString {
+
+  /**
+   * The change types which occur on an observable string.
+   */
+  export
+  type ChangeType =
+    /**
+     * Text was inserted
+     */
+    'insert' |
+
+    /**
+     * Text was removed
+     */
+    'remove' |
+
+    /**
+     * Text was set
+     */
+    'set';
+
+  /**
+   * The changed args object which is emitted by an observable string.
+   */
+  export
+  interface IChangedArgs {
+    /**
+     * The type of change undergone by the list.
+     */
+    type: ChangeType;
+
+    /**
+     * The starting index of the change
+     */
+    start: number;
+
+    /**
+     * The end index of the change
+     */
+    end: number;
+
+    /**
+     * The value of the change.
+     * If `ChangeType` is `set`, then
+     * this is the new value of the string.
+     * If `ChangeType` is `insert` this is
+     * the value of the inserted string.
+     * If `ChangeType` is remove this is the
+     * value of the removed substring.
+     */
+    value: string;
+  }
 }
 
 // Define the signals for the `ObservableString` class.

@@ -37,6 +37,10 @@ import {
   IChangedArgs as IChangedArgsGeneric
 } from '../common/interfaces';
 
+import {
+  ObservableString
+} from '../common/observablestring';
+
 
 /* tslint:disable */
 /**
@@ -560,6 +564,12 @@ namespace DocumentRegistry {
      * Should emit a [contentChanged] signal.
      */
     fromString(value: string): void;
+
+    /**
+     * Change the text of the model, according
+     * to the arguments in `ObservableString.IChangedArgs`.
+     */
+    changeText(change: ObservableString.IChangedArgs): void;
 
     /**
      * Serialize the model to JSON.

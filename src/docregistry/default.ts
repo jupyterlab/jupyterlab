@@ -26,6 +26,10 @@ import {
   DocumentRegistry
 } from './index';
 
+import {
+  ObservableString
+} from '../common/observablestring';
+
 
 /**
  * The default implementation of a document model.
@@ -117,7 +121,7 @@ class DocumentModel implements DocumentRegistry.IModel {
    * Serialize the model to a string.
    */
   toString(): string {
-    return this._text;
+    return this._text.text;
   }
 
   /**
@@ -127,19 +131,33 @@ class DocumentModel implements DocumentRegistry.IModel {
    * Should emit a [contentChanged] signal.
    */
   fromString(value: string): void {
-    if (this._text === value) {
+    if (this._text.text === value) {
       return;
     }
-    this._text = value;
+    this._text.text = value;
     this.contentChanged.emit(void 0);
     this.dirty = true;
+  }
+
+  /**
+   * Change the text of the model, according
+   * to the arguments in `ObservableString.IChangedArgs`.
+   */
+  changeText(change: ObservableString.IChangedArgs) : void {
+    if (change.type === 'remove') {
+      this._text.remove(change.start, change.end);
+    } else if (change.type === 'insert') {
+      this._text.insert(change.start, change.value);
+    } else if (change.type === 'set') {
+      this._text.text = change.value;
+    }
   }
 
   /**
    * Serialize the model to JSON.
    */
   toJSON(): any {
-    return JSON.stringify(this._text);
+    return JSON.stringify(this._text.text);
   }
 
   /**
@@ -152,7 +170,7 @@ class DocumentModel implements DocumentRegistry.IModel {
     this.fromString(JSON.parse(value));
   }
 
-  private _text = '';
+  private _text = new ObservableString('');
   private _defaultLang = '';
   private _dirty = false;
   private _readOnly = false;
