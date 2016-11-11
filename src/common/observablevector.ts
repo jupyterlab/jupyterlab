@@ -254,7 +254,7 @@ interface IObservableVector<T> extends IDisposable, ISequence<T> {
   insertAll(index: number, values: IterableOrArrayLike<T>): number;
 
   /**
-   * Remove a range of items from the list.
+   * Remove a range of items from the vector.
    *
    * @param startIndex - The start index of the range to remove (inclusive).
    *
@@ -281,19 +281,19 @@ interface IObservableVector<T> extends IDisposable, ISequence<T> {
 export
 class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
   /**
-   * A signal emitted when the list has changed.
+   * A signal emitted when the vector has changed.
    */
   changed: ISignal<ObservableVector<T>, ObservableVector.IChangedArgs<T>>;
 
   /**
-   * Test whether the list has been disposed.
+   * Test whether the vector has been disposed.
    */
   get isDisposed(): boolean {
     return this._isDisposed;
   }
 
   /**
-   * Dispose of the resources held by the list.
+   * Dispose of the resources held by the vector.
    */
   dispose(): void {
     if (this.isDisposed) {
@@ -585,7 +585,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
   }
 
   /**
-   * Remove a range of items from the list.
+   * Remove a range of items from the vector.
    *
    * @param startIndex - The start index of the range to remove (inclusive).
    *
@@ -627,37 +627,37 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
 export
 namespace ObservableVector {
   /**
-   * The change types which occur on an observable list.
+   * The change types which occur on an observable vector.
    */
   export
   type ChangeType =
     /**
-     * Item(s) were added to the list.
+     * Item(s) were added to the vector.
      */
     'add' |
 
     /**
-     * An item was moved within the list.
+     * An item was moved within the vector.
      */
     'move' |
 
     /**
-     * Item(s) were removed from the list.
+     * Item(s) were removed from the vector.
      */
     'remove' |
 
     /**
-     * An item was set in the list.
+     * An item was set in the vector.
      */
     'set';
 
   /**
-   * The changed args object which is emitted by an observable list.
+   * The changed args object which is emitted by an observable vector.
    */
   export
   interface IChangedArgs<T> {
     /**
-     * The type of change undergone by the list.
+     * The type of change undergone by the vector.
      */
     type: ChangeType;
 
