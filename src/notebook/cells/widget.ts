@@ -496,7 +496,7 @@ class CodeCellWidget extends BaseCellWidget {
     this._output.trusted = this.trusted;
     this._collapsedCursor = model.getMetadata('collapsed');
     this._scrolledCursor = model.getMetadata('scrolled');
-    this.setPrompt(`${model.executionCount}`);
+    this.setPrompt(`${model.executionCount || ''}`);
   }
 
   /**
