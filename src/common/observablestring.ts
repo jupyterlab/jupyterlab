@@ -26,14 +26,20 @@ interface IObservableString extends IDisposable {
   text : string;
 
   /**
-   * Insert a string, where `index` is the starting
-   * index, and `text` is the string to insert.
+   * Insert a substring.
+   *
+   * @param index - The starting index.
+   *
+   * @param text - The substring to insert.
    */
   insert(index: number, text: string): void;
 
   /**
-   * Remove a substring, where `start` is the starting
-   * index, and `end` is the ending index.
+   * Remove a substring.
+   *
+   * @param start - The starting index.
+   *
+   * @param end - The ending index.
    */
   remove(start: number, end: number): void;
 
@@ -54,6 +60,9 @@ interface IObservableString extends IDisposable {
 export
 class ObservableString implements IObservableString {
 
+  /**
+   * Construct a new observable string.
+   */
   constructor(initialText: string = '') {
     this.text = initialText;
   }
@@ -85,8 +94,11 @@ class ObservableString implements IObservableString {
   }
 
   /**
-   * Insert a string, where `index` is the starting
-   * index, and `text` is the string to insert.
+   * Insert a substring.
+   *
+   * @param index - The starting index.
+   *
+   * @param text - The substring to insert.
    */
   insert(index: number, text: string): void {
     this._text = this._text.slice(0, index) +
@@ -101,8 +113,11 @@ class ObservableString implements IObservableString {
   }
 
   /**
-   * Remove a substring, where `start` is the starting
-   * index, and `end` is the ending index.
+   * Remove a substring.
+   *
+   * @param start - The starting index.
+   *
+   * @param end - The ending index.
    */
   remove(start: number, end: number): void {
     let oldValue: string = this._text.slice(start, end);
@@ -157,24 +172,23 @@ class ObservableString implements IObservableString {
  */
 export
 namespace ObservableString {
-
   /**
    * The change types which occur on an observable string.
    */
   export
   type ChangeType =
     /**
-     * Text was inserted
+     * Text was inserted.
      */
     'insert' |
 
     /**
-     * Text was removed
+     * Text was removed.
      */
     'remove' |
 
     /**
-     * Text was set
+     * Text was set.
      */
     'set';
 
@@ -189,21 +203,25 @@ namespace ObservableString {
     type: ChangeType;
 
     /**
-     * The starting index of the change
+     * The starting index of the change.
      */
     start: number;
 
     /**
-     * The end index of the change
+     * The end index of the change.
      */
     end: number;
 
     /**
      * The value of the change.
+     *
+     * ### Notes
      * If `ChangeType` is `set`, then
      * this is the new value of the string.
+     *
      * If `ChangeType` is `insert` this is
      * the value of the inserted string.
+     *
      * If `ChangeType` is remove this is the
      * value of the removed substring.
      */
