@@ -128,11 +128,11 @@ class AboutWidget extends VDomWidget<AboutModel> {
     let notebookDesc = this.model.notebookDesc;
 
     let headerRow =
-    h.div({className: 'row'},
-      h.div({className: 'column'},
+    h.div({className: 'jp-About-row'},
+      h.div({className: 'jp-About-column'},
         h.span({className: 'jp-img jp-About-logo'}),
-        h.p({className: 'header'}, title),
-        h.div({className: 'desc-one'},
+        h.p({className: 'jp-About-header'}, title),
+        h.div({className: 'jp-About-desc-one'},
           h.p(headerText[0]),
           h.p(headerText[1],
             h.b(headerText[2])
@@ -147,77 +147,77 @@ class AboutWidget extends VDomWidget<AboutModel> {
     );
 
     let mainAreaCommandPaletteRow =
-    h.div({className: 'row'},
-      h.div({className: 'one-half column'},
-        h.p({className: 'desc-two-header'},
+    h.div({className: 'jp-About-row'},
+      h.div({className: 'jp-About-one-half jp-About-column'},
+        h.p({className: 'jp-About-desc-two-header'},
           h.a({href: '#main-area'},
             h.span({className: 'jp-img jp-About-hero-mainarea'}),
             pluginHeaders[0]
           )
         ),
-        h.p({className: 'desc-two'}, mainAreaDesc[0])
+        h.p({className: 'jp-About-desc-two'}, mainAreaDesc[0])
       ),
-      h.div({className: 'one-half column'},
-        h.p({className: 'desc-two-header'},
+      h.div({className: 'jp-About-one-half jp-About-column'},
+        h.p({className: 'jp-About-desc-two-header'},
           h.a({href: '#command'},
             h.span({className: 'jp-img jp-About-hero-command'}),
             pluginHeaders[1]
           )
         ),
-        h.p({className: 'desc-two'}, commandPaletteDesc[0])
+        h.p({className: 'jp-About-desc-two'}, commandPaletteDesc[0])
       )
     );
 
     let filebrowserNotebookRow =
-    h.div({className: 'row'},
-      h.div({className: 'one-half column'},
-        h.p({className: 'desc-two-header'},
+    h.div({className: 'jp-About-row'},
+      h.div({className: 'jp-About-one-half jp-About-column'},
+        h.p({className: 'jp-About-desc-two-header'},
           h.a({href: '#filebrowser'},
             h.span({className: 'jp-img jp-About-hero-filebrowser'}),
             pluginHeaders[2]
           )
         ),
-        h.p({className: 'desc-two'}, filebrowserDesc[0]),
+        h.p({className: 'jp-About-desc-two'}, filebrowserDesc[0]),
       ),
-      h.div({className: 'one-half column'},
-        h.p({className: 'desc-two-header'},
+      h.div({className: 'jp-About-one-half jp-About-column'},
+        h.p({className: 'jp-About-desc-two-header'},
           h.a({href: '#notebook'},
             h.span({className: 'jp-img jp-About-hero-notebook'}),
             pluginHeaders[3]
           )
         ),
-        h.p({className: 'desc-two'}, notebookDesc[0])
+        h.p({className: 'jp-About-desc-two'}, notebookDesc[0])
       )
     );
 
     let mainAreaPage =
-    h.div({className: 'section'},
+    h.div({className: 'jp-About-section'},
       h.a({id: 'main-area'}),
-      h.div({className: 'sectioncenter'},
-        h.p({className: 'header content'},
+      h.div({className: 'jp-About-sectioncenter'},
+        h.p({className: 'jp-About-header jp-About-content'},
           h.span({className: 'jp-img jp-About-hero-mainarea'}),
           pluginHeaders[0]
         ),
         h.span({className: 'jp-img jp-About-mainarea'}),
-        h.p({className: 'content-desc'}, mainAreaDesc[1]),
-        h.p({className: 'content-desc'}, mainAreaDesc[2]),
+        h.p({className: 'jp-About-content-desc'}, mainAreaDesc[1]),
+        h.p({className: 'jp-About-content-desc'}, mainAreaDesc[2]),
         h.a({href: '#command'},
-          h.span({className: 'nav-button'})
+          h.span({className: 'jp-About-nav-button'})
         )
       )
     );
 
     let commandPalettePage =
-    h.div({className: 'section'},
+    h.div({className: 'jp-About-section'},
       h.a({id: 'command'}),
-      h.div({className: 'sectioncenter'},
-        h.p({className: 'header content'},
+      h.div({className: 'jp-About-sectioncenter'},
+        h.p({className: 'jp-About-header jp-About-content'},
           h.span({className: 'jp-img jp-About-hero-command'}),
           pluginHeaders[1]
         ),
         h.span({className: 'jp-img jp-About-command'}),
-        h.p({className: 'content-desc'}, commandPaletteDesc[1]),
-        h.div({className: 'content-desc'},
+        h.p({className: 'jp-About-content-desc'}, commandPaletteDesc[1]),
+        h.div({className: 'jp-About-content-desc'},
           h.p(commandPaletteDesc[2]),
           h.ul(
             h.li(commandPaletteDesc[3]),
@@ -228,51 +228,51 @@ class AboutWidget extends VDomWidget<AboutModel> {
           )
         ),
         h.a({href: '#filebrowser'},
-          h.span({className: 'nav-button'})
+          h.span({className: 'jp-About-nav-button'})
         )
       )
     );
 
     let filebrowserPage =
-    h.div({className: 'section'},
+    h.div({className: 'jp-About-section'},
       h.a({id: 'filebrowser'}),
-      h.div({className: 'sectioncenter'},
-        h.p({className: 'header content'},
+      h.div({className: 'jp-About-sectioncenter'},
+        h.p({className: 'jp-About-header jp-About-content'},
           h.span({className: 'jp-img jp-About-hero-filebrowser'}),
           pluginHeaders[2]
         ),
         h.span({className: 'jp-img jp-About-fb'}),
-        h.p({className: 'content-desc'}, filebrowserDesc[1]),
+        h.p({className: 'jp-About-content-desc'}, filebrowserDesc[1]),
         h.a({href: '#notebook'},
-          h.span({className: 'nav-button'})
+          h.span({className: 'jp-About-nav-button'})
         )
       )
     );
 
     let notebookPage =
-    h.div({className: 'section'},
+    h.div({className: 'jp-About-section'},
       h.a({id: 'notebook'}),
-      h.div({className: 'sectioncenter'},
-        h.p({className: 'header content'},
+      h.div({className: 'jp-About-sectioncenter'},
+        h.p({className: 'jp-About-header jp-About-content'},
           h.span({className: 'jp-img jp-About-hero-notebook'}),
           pluginHeaders[3]
         ),
         h.span({className: 'jp-img jp-About-nb'}),
-        h.p({className: 'content-desc'}, notebookDesc[1])
+        h.p({className: 'jp-About-content-desc'}, notebookDesc[1])
       )
     );
 
     let domTree =
     h.div({id: 'about'},
-      h.div({className: 'section'},
-        h.div({className: 'sectioncenter'},
-          h.div({className: 'container'},
+      h.div({className: 'jp-About-section'},
+        h.div({className: 'jp-About-sectioncenter'},
+          h.div({className: 'jp-About-container'},
             headerRow,
             mainAreaCommandPaletteRow,
             filebrowserNotebookRow
           ),
           h.a({href: '#main-area'},
-            h.span({className: 'nav-button'})
+            h.span({className: 'jp-About-nav-button'})
           )
         )
       ),
