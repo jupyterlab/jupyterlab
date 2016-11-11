@@ -23,7 +23,7 @@ interface IObservableString extends IDisposable {
   /**
    * The value of the string.
    */
-  text : string;
+  text: string;
 
   /**
    * Insert a substring.
@@ -59,7 +59,6 @@ interface IObservableString extends IDisposable {
  */
 export
 class ObservableString implements IObservableString {
-
   /**
    * Construct a new observable string.
    */
@@ -135,13 +134,7 @@ class ObservableString implements IObservableString {
    * Set the ObservableString to an empty string.
    */
   clear(): void {
-    this._text = '';
-    this.changed.emit({
-      type: 'set',
-      start: 0,
-      end: 0,
-      value: ''
-    });
+    this.text = '';
   }
 
   /**
