@@ -19,7 +19,6 @@
 | Tabs in the dock panel
 |----------------------------------------------------------------------------*/
 
-
 .p-DockPanel-tabBar {
   border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
   overflow: visible;
@@ -48,8 +47,6 @@
 .p-DockPanel-tabBar .p-TabBar-tab {
   flex: 0 1 var(--jp-private-horizontal-tab-width);
   min-height: calc(var(--jp-private-horizontal-tab-height) + var(--jp-border-width));
-  /* For some reason Firefox needs us to give a max-height as well...*/
-  /*max-height: calc(var(--jp-private-horizontal-tab-height) + var(--jp-border-width));*/
   min-width: 35px;
   margin-left: calc(-1*var(--jp-border-width));
   line-height: var(--jp-private-horizontal-tab-height);
@@ -165,52 +162,4 @@
   min-width: var(--jp-private-horizontal-tab-width);
   padding: 0px 10px;
   transform: translateX(-40%) translateY(-58%);
-}
-
-
-/*-----------------------------------------------------------------------------
-| TabPanel
-|----------------------------------------------------------------------------*/
-
-
-.p-TabPanel-stackedPanel {
-  padding: 0px;
-  background: var(--jp-dockpanel-content-background);
-  border: var(--jp-border-width) solid #C0C0C0;
-}
-
-
-.p-TabPanel.p-mod-top-to-bottom > .p-TabPanel-stackedPanel {
-  border-top: none;
-}
-
-
-.p-TabPanel.p-mod-bottom-to-top > .p-TabPanel-stackedPanel {
-  border-bottom: none;
-}
-
-
-.p-TabPanel.p-mod-left-to-right > .p-TabPanel-stackedPanel {
-  border-left: none;
-}
-
-
-.p-TabPanel.p-mod-right-to-left > .p-TabPanel-stackedPanel {
-  border-right: none;
-}
-
-
-/*-----------------------------------------------------------------------------
-| Tabs in the dock panel
-|----------------------------------------------------------------------------*/
-
-
-.p-DockPanel-tabBar .p-TabBar-tab.jp-mod-current:before {
-  position: absolute;
-  top: calc(-1 * var(--jp-border-width));
-  left: calc(-1 * var(--jp-border-width));
-  content: '';
-  height: var(--jp-private-horizontal-tab-active-top-border);
-  width: calc(100% + 2*var(--jp-border-width));
-  background: var(--jp-brand-color1);
 }
