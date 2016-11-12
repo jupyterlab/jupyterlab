@@ -139,9 +139,8 @@ function activateLanding(app: JupyterLab, services: IServiceManager, pathTracker
     execute: () => {
       if (!widget.isAttached) {
         app.shell.addToMainArea(widget);
-      } else {
-        app.shell.activateMain(widget.id);
       }
+      app.shell.activateMain(widget.id);
     }
   });
 
@@ -151,4 +150,5 @@ function activateLanding(app: JupyterLab, services: IServiceManager, pathTracker
   });
 
   app.shell.addToMainArea(widget);
+  app.shell.activateMain(widget.id);
 }

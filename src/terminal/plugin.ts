@@ -89,6 +89,7 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
       term.title.closable = true;
       term.title.icon = `${LANDSCAPE_ICON_CLASS} ${TERMINAL_ICON_CLASS}`;
       app.shell.addToMainArea(term);
+      app.shell.activateMain(term.id);
       tracker.add(term);
       let promise: Promise<TerminalSession.ISession>;
       if (name) {

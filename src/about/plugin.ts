@@ -44,9 +44,8 @@ function activateAbout(app: JupyterLab, palette: ICommandPalette): void {
     execute: () => {
       if (!widget.isAttached) {
         app.shell.addToMainArea(widget);
-      } else {
-        app.shell.activateMain(widget.id);
       }
+      app.shell.activateMain(widget.id);
     }
   });
   palette.addItem({ command, category: 'Help' });

@@ -105,11 +105,9 @@ function activateInspector(app: JupyterLab, palette: ICommandPalette): IInspecto
     if (!manager.inspector || manager.inspector.isDisposed) {
       manager.inspector = newInspector();
       app.shell.addToMainArea(manager.inspector);
-      return;
     }
     if (manager.inspector.isAttached) {
       app.shell.activateMain(manager.inspector.id);
-      return;
     }
   }
 
