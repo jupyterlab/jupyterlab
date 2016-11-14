@@ -14,7 +14,7 @@
   flex: 1 1 auto;
   flex-direction: column;
   border-top: var(--jp-border-width) solid var(--jp-border-color1);
-  margin-top: 4px;
+  margin-top: -1px;
 }
 
 
