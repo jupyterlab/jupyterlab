@@ -9,6 +9,126 @@ import {
   VDomModel, VDomWidget
 } from '../common/vdom';
 
+/**
+ * The id name added to the About plugin root DOM node.
+ */
+const ABOUT_ID = 'about';
+
+/**
+ * The class name added to each page in the About plugin.
+ */
+const SECTION_CLASS = 'jp-About-section';
+
+/**
+ * The class name added to center content.
+ */
+const SECTION_CENTER_CLASS = 'jp-About-sectioncenter';
+
+/**
+ * The class name added to group elements on the initial page.
+ */
+const CONTAINER_CLASS = 'CONTAINER_CLASS';
+
+/**
+ * The class name added to elements in a row.
+ */
+const ROW_CLASS = 'jp-About-row';
+
+/**
+ * The class name added to elements in a column.
+ */
+const COLUMN_CLASS = 'jp-About-column';
+
+/**
+ * The class name used specify postion of elements.
+ */
+const HALF_CLASS = 'jp-About-one-half';
+
+/**
+ * The class name added to the About plugin description on the intial page.
+ */
+const DESC_ONE_CLASS = 'jp-About-desc-one';
+
+/**
+ * The class name added to other plugin descriptions on the intial page.
+ */
+const DESC_TWO_CLASS = 'jp-About-desc-two';
+
+/**
+ * The class name added to headers of other plugins on the intial page.
+ */
+const DESC_TWO_HEADER_CLASS = 'jp-About-desc-two-header';
+
+/**
+ * The class name added to headers.
+ */
+const HEADER_CLASS = 'jp-About-header';
+
+/**
+ * The class name added to plugin pages.
+ */
+const CONTENT_CLASS = 'jp-About-content';
+
+/**
+ * The class name added to descriptions on plugin pages.
+ */
+const CONTENT_DESC_CLASS = 'jp-About-content-desc';
+
+/**
+ * The class name added to the navigation down button.
+ */
+const NAV_CLASS = 'jp-About-nav-button';
+
+/**
+ * The class name added to all images and icons.
+ */
+const IMAGE_CLASS = 'jp-img';
+
+/**
+ * The class name added to the JupyterLab logo.
+ */
+const LOGO_CLASS = 'jp-About-logo';
+
+/**
+ * The class name added to the main area icon.
+ */
+const MAIN_AREA_ICON_CLASS = 'jp-About-hero-mainarea';
+
+/**
+ * The class name added the command palette icon.
+ */
+const COMMAND_ICON_CLASS = 'jp-About-hero-command';
+
+/**
+ * The class name added to the filebrowser icon.
+ */
+const FILEBROWSER_ICON_CLASS = 'jp-About-hero-filebrowser';
+
+/**
+ * The class name added for the notebook icon.
+ */
+const NOTEBOOK_ICON_CLASS = 'jp-About-hero-notebook';
+
+/**
+ * The class name added to the main area image.
+ */
+const MAIN_AREA_IMAGE_CLASS = 'jp-About-mainarea';
+
+/**
+ * The class name added to the command palette image.
+ */
+const COMMAND_IMAGE_CLASS = 'jp-About-command';
+
+/**
+ * The class name added to the filebrowser image.
+ */
+const FILEBROWSER_IMAGE_CLASS = 'jp-About-fb';
+
+/**
+ * The class name added to the notebook image.
+ */
+const NOTEBOOK_IMAGE_CLASS = 'jp-About-nb';
+
 export
 class AboutModel extends VDomModel {
   constructor() {
@@ -128,11 +248,11 @@ class AboutWidget extends VDomWidget<AboutModel> {
     let notebookDesc = this.model.notebookDesc;
 
     let headerRow =
-    h.div({className: 'jp-About-row'},
-      h.div({className: 'jp-About-column'},
-        h.span({className: 'jp-img jp-About-logo'}),
-        h.p({className: 'jp-About-header'}, title),
-        h.div({className: 'jp-About-desc-one'},
+    h.div({className: ROW_CLASS},
+      h.div({className: COLUMN_CLASS},
+        h.span({className: IMAGE_CLASS + ' ' + LOGO_CLASS}),
+        h.p({className: HEADER_CLASS}, title),
+        h.div({className: DESC_ONE_CLASS},
           h.p(headerText[0]),
           h.p(headerText[1],
             h.b(headerText[2])
@@ -147,77 +267,77 @@ class AboutWidget extends VDomWidget<AboutModel> {
     );
 
     let mainAreaCommandPaletteRow =
-    h.div({className: 'jp-About-row'},
-      h.div({className: 'jp-About-one-half jp-About-column'},
-        h.p({className: 'jp-About-desc-two-header'},
+    h.div({className: ROW_CLASS},
+      h.div({className: HALF_CLASS + ' ' + COLUMN_CLASS},
+        h.p({className: DESC_TWO_HEADER_CLASS},
           h.a({href: '#main-area'},
-            h.span({className: 'jp-img jp-About-hero-mainarea'}),
+            h.span({className: IMAGE_CLASS + ' ' + MAIN_AREA_ICON_CLASS}),
             pluginHeaders[0]
           )
         ),
-        h.p({className: 'jp-About-desc-two'}, mainAreaDesc[0])
+        h.p({className: DESC_TWO_CLASS}, mainAreaDesc[0])
       ),
-      h.div({className: 'jp-About-one-half jp-About-column'},
-        h.p({className: 'jp-About-desc-two-header'},
+      h.div({className: HALF_CLASS + ' ' + COLUMN_CLASS},
+        h.p({className: DESC_TWO_HEADER_CLASS},
           h.a({href: '#command'},
-            h.span({className: 'jp-img jp-About-hero-command'}),
+            h.span({className: IMAGE_CLASS + ' ' + COMMAND_ICON_CLASS}),
             pluginHeaders[1]
           )
         ),
-        h.p({className: 'jp-About-desc-two'}, commandPaletteDesc[0])
+        h.p({className: DESC_TWO_CLASS}, commandPaletteDesc[0])
       )
     );
 
     let filebrowserNotebookRow =
-    h.div({className: 'jp-About-row'},
-      h.div({className: 'jp-About-one-half jp-About-column'},
-        h.p({className: 'jp-About-desc-two-header'},
+    h.div({className: ROW_CLASS},
+      h.div({className: HALF_CLASS + ' ' + COLUMN_CLASS},
+        h.p({className: DESC_TWO_HEADER_CLASS},
           h.a({href: '#filebrowser'},
-            h.span({className: 'jp-img jp-About-hero-filebrowser'}),
+            h.span({className: IMAGE_CLASS + ' ' + FILEBROWSER_ICON_CLASS}),
             pluginHeaders[2]
           )
         ),
-        h.p({className: 'jp-About-desc-two'}, filebrowserDesc[0]),
+        h.p({className: DESC_TWO_CLASS}, filebrowserDesc[0]),
       ),
-      h.div({className: 'jp-About-one-half jp-About-column'},
-        h.p({className: 'jp-About-desc-two-header'},
+      h.div({className: HALF_CLASS + ' ' + COLUMN_CLASS},
+        h.p({className: DESC_TWO_HEADER_CLASS},
           h.a({href: '#notebook'},
-            h.span({className: 'jp-img jp-About-hero-notebook'}),
+            h.span({className: IMAGE_CLASS + ' ' + NOTEBOOK_ICON_CLASS}),
             pluginHeaders[3]
           )
         ),
-        h.p({className: 'jp-About-desc-two'}, notebookDesc[0])
+        h.p({className: DESC_TWO_CLASS}, notebookDesc[0])
       )
     );
 
     let mainAreaPage =
-    h.div({className: 'jp-About-section'},
+    h.div({className: SECTION_CLASS},
       h.a({id: 'main-area'}),
-      h.div({className: 'jp-About-sectioncenter'},
-        h.p({className: 'jp-About-header jp-About-content'},
-          h.span({className: 'jp-img jp-About-hero-mainarea'}),
+      h.div({className: SECTION_CENTER_CLASS},
+        h.p({className: HEADER_CLASS + ' ' + CONTENT_CLASS},
+          h.span({className: IMAGE_CLASS + ' ' + MAIN_AREA_ICON_CLASS}),
           pluginHeaders[0]
         ),
-        h.span({className: 'jp-img jp-About-mainarea'}),
-        h.p({className: 'jp-About-content-desc'}, mainAreaDesc[1]),
-        h.p({className: 'jp-About-content-desc'}, mainAreaDesc[2]),
+        h.span({className: IMAGE_CLASS + ' ' + MAIN_AREA_IMAGE_CLASS}),
+        h.p({className: CONTENT_DESC_CLASS}, mainAreaDesc[1]),
+        h.p({className: CONTENT_DESC_CLASS}, mainAreaDesc[2]),
         h.a({href: '#command'},
-          h.span({className: 'jp-About-nav-button'})
+          h.span({className: NAV_CLASS})
         )
       )
     );
 
     let commandPalettePage =
-    h.div({className: 'jp-About-section'},
+    h.div({className: SECTION_CLASS},
       h.a({id: 'command'}),
-      h.div({className: 'jp-About-sectioncenter'},
-        h.p({className: 'jp-About-header jp-About-content'},
-          h.span({className: 'jp-img jp-About-hero-command'}),
+      h.div({className: SECTION_CENTER_CLASS},
+        h.p({className: HEADER_CLASS + ' ' + CONTENT_CLASS},
+          h.span({className: IMAGE_CLASS + ' ' + COMMAND_ICON_CLASS}),
           pluginHeaders[1]
         ),
-        h.span({className: 'jp-img jp-About-command'}),
-        h.p({className: 'jp-About-content-desc'}, commandPaletteDesc[1]),
-        h.div({className: 'jp-About-content-desc'},
+        h.span({className: IMAGE_CLASS + ' ' + COMMAND_IMAGE_CLASS}),
+        h.p({className: CONTENT_DESC_CLASS}, commandPaletteDesc[1]),
+        h.div({className: CONTENT_DESC_CLASS},
           h.p(commandPaletteDesc[2]),
           h.ul(
             h.li(commandPaletteDesc[3]),
@@ -228,51 +348,51 @@ class AboutWidget extends VDomWidget<AboutModel> {
           )
         ),
         h.a({href: '#filebrowser'},
-          h.span({className: 'jp-About-nav-button'})
+          h.span({className: NAV_CLASS})
         )
       )
     );
 
     let filebrowserPage =
-    h.div({className: 'jp-About-section'},
+    h.div({className: SECTION_CLASS},
       h.a({id: 'filebrowser'}),
-      h.div({className: 'jp-About-sectioncenter'},
-        h.p({className: 'jp-About-header jp-About-content'},
-          h.span({className: 'jp-img jp-About-hero-filebrowser'}),
+      h.div({className: SECTION_CENTER_CLASS},
+        h.p({className: HEADER_CLASS + ' ' + CONTENT_CLASS},
+          h.span({className: IMAGE_CLASS + ' ' + FILEBROWSER_ICON_CLASS}),
           pluginHeaders[2]
         ),
-        h.span({className: 'jp-img jp-About-fb'}),
-        h.p({className: 'jp-About-content-desc'}, filebrowserDesc[1]),
+        h.span({className: IMAGE_CLASS + ' ' + FILEBROWSER_IMAGE_CLASS}),
+        h.p({className: CONTENT_DESC_CLASS}, filebrowserDesc[1]),
         h.a({href: '#notebook'},
-          h.span({className: 'jp-About-nav-button'})
+          h.span({className: NAV_CLASS})
         )
       )
     );
 
     let notebookPage =
-    h.div({className: 'jp-About-section'},
+    h.div({className: SECTION_CLASS},
       h.a({id: 'notebook'}),
-      h.div({className: 'jp-About-sectioncenter'},
-        h.p({className: 'jp-About-header jp-About-content'},
-          h.span({className: 'jp-img jp-About-hero-notebook'}),
+      h.div({className: SECTION_CENTER_CLASS},
+        h.p({className: HEADER_CLASS + ' ' + CONTENT_CLASS},
+          h.span({className: IMAGE_CLASS + ' ' + NOTEBOOK_ICON_CLASS}),
           pluginHeaders[3]
         ),
-        h.span({className: 'jp-img jp-About-nb'}),
-        h.p({className: 'jp-About-content-desc'}, notebookDesc[1])
+        h.span({className: IMAGE_CLASS + ' ' + NOTEBOOK_IMAGE_CLASS}),
+        h.p({className: CONTENT_DESC_CLASS}, notebookDesc[1])
       )
     );
 
     let domTree =
-    h.div({id: 'about'},
-      h.div({className: 'jp-About-section'},
-        h.div({className: 'jp-About-sectioncenter'},
-          h.div({className: 'jp-About-container'},
+    h.div({id: ABOUT_ID},
+      h.div({className: SECTION_CLASS},
+        h.div({className: SECTION_CENTER_CLASS},
+          h.div({className: CONTAINER_CLASS},
             headerRow,
             mainAreaCommandPaletteRow,
             filebrowserNotebookRow
           ),
           h.a({href: '#main-area'},
-            h.span({className: 'jp-About-nav-button'})
+            h.span({className: NAV_CLASS})
           )
         )
       ),
