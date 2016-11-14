@@ -327,12 +327,12 @@ class NotebookPanel extends Widget {
    * Update the kernel spec.
    */
   private _updateSpec(kernel: Kernel.IKernel): void {
-    kernel.ready().then(() => {
+    kernel.spec().then(spec => {
       let specCursor = this.model.getMetadata('kernelspec');
       specCursor.setValue({
         name: kernel.name,
-        display_name: kernel.spec.display_name,
-        language: kernel.spec.language
+        display_name: spec.display_name,
+        language: spec.language
       });
     });
   }

@@ -123,12 +123,9 @@ function updateKernelNameItem(widget: Widget, kernel: Kernel.IKernel): void {
   if (!kernel) {
     return;
   }
-  if (kernel.spec) {
-    widget.node.textContent = kernel.spec.display_name;
-  }
-  kernel.ready().then(() => {
+  kernel.spec().then(spec => {
     if (!widget.isDisposed) {
-      widget.node.textContent = kernel.spec.display_name;
+      widget.node.textContent = spec.display_name;
     }
   });
 }
