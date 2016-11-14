@@ -305,9 +305,9 @@ describe('notebook/notebook/default-toolbar', () => {
         let item = createKernelNameItem(panel);
         startKernel(context).then(kernel => {
           console.log('started kernel');
-          return kernel.ready();
-        }).then(() => {
-          let name = context.kernel.spec.display_name;
+          return kernel.spec();
+        }).then(spec => {
+          let name = spec.display_name;
           expect(item.node.textContent).to.be(name);
           done();
         }).catch(done);
