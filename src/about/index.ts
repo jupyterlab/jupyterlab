@@ -27,7 +27,7 @@ const SECTION_CENTER_CLASS = 'jp-About-sectioncenter';
 /**
  * The class name added to group elements on the initial page.
  */
-const CONTAINER_CLASS = 'CONTAINER_CLASS';
+const CONTAINER_CLASS = 'jp-About-container';
 
 /**
  * The class name added to elements in a row.
