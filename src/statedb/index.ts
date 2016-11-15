@@ -54,6 +54,12 @@ interface IStateDB {
   /**
    * Retrieve a saved bundle from the database.
    *
+   * @param id - The identifier used to save retrieve a data bundle.
+   *
+   * @param namespace - An optional namespace to help categories saved bundles.
+   *
+   * @returns A promise that bears a the saved bundle.
+   *
    * #### Notes
    * If a namespace is not provided, the default value will be `'statedb'`.
    */
@@ -61,11 +67,19 @@ interface IStateDB {
 
   /**
    * Retrieve all the saved bundles for a namespace.
+   *
+   * @param namespace - The namespace to retrieve.
+   *
+   * @returns A promise that bears a collection of saved bundles.
    */
   fetchNamespace(namespace: string): Promise<ISaveBundle[]>;
 
   /**
    * Save a bundle in the database.
+   *
+   * @param bundle - The bundle being saved.
+   *
+   * @returns A promise that is rejected if saving fails and succeeds otherwise.
    */
   save(bundle: ISaveBundle): Promise<void>;
 }
