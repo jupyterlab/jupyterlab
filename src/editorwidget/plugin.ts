@@ -50,6 +50,10 @@ import {
   IEditorTracker, EditorWidget, EditorWidgetFactory
 } from './widget';
 
+import {
+  IEditorFactory
+} from '../codeeditor';
+
 
 /**
  * The class name for all main area portrait tab icons.
@@ -88,7 +92,8 @@ export
 const plugin: JupyterLabPlugin<IEditorTracker> = {
   id: 'jupyter.services.editor-handler',
   requires: [
-    IDocumentRegistry, IMainMenu, ICommandPalette, IStateDB, ILayoutRestorer
+    IDocumentRegistry, IMainMenu, ICommandPalette, IStateDB, ILayoutRestorer,
+    IEditorFactory
   ],
   provides: IEditorTracker,
   activate: activateEditorHandler,
@@ -99,7 +104,7 @@ const plugin: JupyterLabPlugin<IEditorTracker> = {
 /**
  * Sets up the editor widget
  */
-function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB, layout: ILayoutRestorer): IEditorTracker {
+function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB, layout: ILayoutRestorer, editorFactory: IEditorFactory): IEditorTracker {
   const factory = new EditorWidgetFactory({
     name: FACTORY,
     fileExtensions: ['*'],
@@ -143,7 +148,8 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
   function toggleLineNums() {
     if (tracker.currentWidget) {
       let editor = tracker.currentWidget.editor;
-      editor.setOption('lineNumbers', !editor.getOption('lineNumbers'));
+      // TODO: move to Codemirror
+      // editor.setOption('lineNumbers', !editor.getOption('lineNumbers'));
     }
   }
 
@@ -153,7 +159,8 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
   function toggleLineWrap() {
     if (tracker.currentWidget) {
       let editor = tracker.currentWidget.editor;
-      editor.setOption('lineWrapping', !editor.getOption('lineWrapping'));
+      // TODO: move to Codemirror
+      // editor.setOption('lineWrapping', !editor.getOption('lineWrapping'));
     }
   }
 
@@ -163,7 +170,8 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
   function toggleMatchBrackets() {
     if (tracker.currentWidget) {
       let editor = tracker.currentWidget.editor;
-      editor.setOption('matchBrackets', !editor.getOption('matchBrackets'));
+      // TODO: move to Codemirror
+      // editor.setOption('matchBrackets', !editor.getOption('matchBrackets'));
     }
   }
 
@@ -172,9 +180,10 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
    */
   function toggleVim() {
     tracker.forEach(widget => {
-      let keymap = widget.editor.getOption('keyMap') === 'vim' ? 'default'
-        : 'vim';
-      widget.editor.setOption('keyMap', keymap);
+      // TODO: move to Codemirror
+      // let keymap = widget.editor.getOption('keyMap') === 'vim' ? 'default'
+      //   : 'vim';
+      // widget.editor.setOption('keyMap', keymap);
     });
   }
 
@@ -203,13 +212,14 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
     settings.addItem({ command: cmdIds.matchBrackets });
     settings.addItem({ command: cmdIds.vimMode });
 
-    commands.addCommand(cmdIds.changeTheme, {
-      label: args => args['theme'] as string,
-      execute: args => {
-        let name: string = args['theme'] as string || DEFAULT_CODEMIRROR_THEME;
-        tracker.forEach(widget => { widget.editor.setOption('theme', name); });
-      }
-    });
+    // TODO: move to codemirror
+    // commands.addCommand(cmdIds.changeTheme, {
+    //   label: args => args['theme'] as string,
+    //   execute: args => {
+    //     let name: string = args['theme'] as string || DEFAULT_CODEMIRROR_THEME;
+    //     tracker.forEach(widget => { widget.editor.setOption('theme', name); });
+    //   }
+    // });
 
     [
      'jupyter', 'default', 'abcdef', 'base16-dark', 'base16-light',
@@ -286,12 +296,9 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
         return;
       }
       // Get the selected code from the editor.
-      let doc = widget.editor.getDoc();
-      let code = doc.getSelection();
-      if (!code) {
-        let { line } = doc.getCursor();
-        code = doc.getLine(line);
-      }
+      let editorModel = widget.editor.model;
+      let selection = editorModel.selections.front;
+      let code = editorModel.value.substring(selection.start, selection.end);
       commands.execute('console:inject', { id, code });
     },
     label: 'Run Code',
