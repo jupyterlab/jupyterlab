@@ -13,6 +13,10 @@ import {
 } from '../codeeditor/editor';
 
 import {
+  requireMode
+} from './';
+
+import {
   IChangedArgs
 } from '../common/interfaces';
 
@@ -35,6 +39,10 @@ class CodeMirrorModel implements CodeEditor.IModel {
     CodeMirror.on(doc, 'cursorActivity', this._onCursorActivity.bind(this));
     CodeMirror.on(doc, 'beforeSelectionChange',
                   this._onDocSelectionChanged.bind(this));
+  }
+
+  get doc(): CodeMirror.Doc {
+    return this._doc;
   }
 
   /**
@@ -163,6 +171,15 @@ class CodeMirrorModel implements CodeEditor.IModel {
     this._doc.clearHistory();
   }
 
+  /**
+   * Update mime type from given path.
+   */
+  setMimeTypeFromPath(path: string): void {
+    let mode = CodeMirror.findModeByFileName(path);
+    requireMode(mode).then((modespec) => {
+      this.mimeType = modespec.mime;
+    });
+  }
 
   private _onSelectionChanged(sender: ObservableVector<CodeEditor.ITextSelection>, change: ObservableVector.IChangedArgs<CodeEditor.ITextSelection>): void {
     // TODO
@@ -183,5 +200,5 @@ class CodeMirrorModel implements CodeEditor.IModel {
 }
 
 
-defineSignal(CodeEditor.Model.prototype, 'valueChanged');
-defineSignal(CodeEditor.Model.prototype, 'mimeTypeChanged');
+defineSignal(CodeMirrorModel.prototype, 'valueChanged');
+defineSignal(CodeMirrorModel.prototype, 'mimeTypeChanged');
