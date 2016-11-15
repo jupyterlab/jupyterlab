@@ -5,6 +5,7 @@ import './commandlinker/commandlinker.spec';
 
 import './common/activitymonitor.spec';
 import './common/instancetracker.spec';
+import './common/observablestring.spec';
 import './common/observablevector.spec';
 import './common/vdom.spec';
 
