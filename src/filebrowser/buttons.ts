@@ -254,9 +254,8 @@ class FileButtons extends Widget {
     if (event.button !== 0) {
       return;
     }
-    this._model.refresh().catch(error => {
-      utils.showErrorMessage(this, 'Server Connection Error', error);
-    });
+    // Force a refresh of the current directory.
+    this._model.cd('.');
   };
 
   /**
@@ -401,10 +400,8 @@ namespace Private {
    */
   export
   function createNewFolder(widget: FileButtons): void {
-    widget.model.newUntitled({ type: 'directory' }).then(contents => {
-      widget.model.refresh();
-    }).catch(error => {
-      utils.showErrorMessage(widget, 'New Folder Error', error);
+    widget.model.newUntitled({ type: 'directory' }).catch(error => {
+      utils.showErrorMessage('New Folder Error', error);
     });
   }
 
@@ -448,10 +445,8 @@ namespace Private {
   export
   function uploadFiles(widget: FileButtons, files: File[]): void {
     let pending = files.map(file => uploadFile(widget, file));
-    Promise.all(pending).then(() => {
-      widget.model.refresh();
-    }).catch(error => {
-      utils.showErrorMessage(widget, 'Upload Error', error);
+    Promise.all(pending).catch(error => {
+      utils.showErrorMessage('Upload Error', error);
     });
   }
 

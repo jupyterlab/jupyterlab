@@ -246,8 +246,6 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: Documen
         let context = docManager.contextForWidget(tracker.currentWidget);
         return context.saveAs().then(() => {
           return context.createCheckpoint();
-        }).then(() => {
-          return fbModel.refresh();
         });
       }
     }

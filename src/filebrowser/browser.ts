@@ -69,11 +69,6 @@ const BUTTON_CLASS = 'jp-FileBrowser-buttons';
  */
 const LISTING_CLASS = 'jp-FileBrowser-listing';
 
-/**
- * The duration of auto-refresh in ms.
- */
-const REFRESH_DURATION = 10000;
-
 
 /**
  * A widget which hosts a file browser.
@@ -98,7 +93,6 @@ class FileBrowser extends Widget {
     let model = this._model = options.model;
     let renderer = options.renderer;
 
-    model.refreshed.connect(this._handleRefresh, this);
     this._crumbs = new BreadCrumbs({ model });
     this._buttons = new FileButtons({
       commands, keymap, manager, model
@@ -166,7 +160,7 @@ class FileBrowser extends Widget {
         if (!foundDir) {
           foundDir = true;
           this._model.cd(item.name).catch(error =>
-            showErrorMessage(this, 'Open directory', error)
+            showErrorMessage('Open directory', error)
           );
         }
       } else {
@@ -280,17 +274,6 @@ class FileBrowser extends Widget {
   }
 
   /**
-   * Refresh the current directory.
-   *
-   * @returns A promise that resolves when the operation is complete.
-   */
-  refresh(): Promise<void> {
-    return this._model.refresh().catch(error => {
-      showErrorMessage(this, 'Server Connection Error', error);
-    });
-  }
-
-  /**
    * Select next item.
    */
   selectNext(): void {
@@ -315,30 +298,6 @@ class FileBrowser extends Widget {
     return this._listing.pathForClick(event);
   }
 
-  /**
-   * A message handler invoked on an `'after-attach'` message.
-   */
-  protected onAfterAttach(msg: Message): void {
-    super.onAfterAttach(msg);
-    this.refresh();
-  }
-
-  /**
-   * A message handler invoked on an `'after-show'` message.
-   */
-  protected onAfterShow(msg: Message): void {
-    super.onAfterShow(msg);
-    this.refresh();
-  }
-
-  /**
-   * Handle a model refresh.
-   */
-  private _handleRefresh(): void {
-    clearTimeout(this._timeoutId);
-    this._timeoutId = setTimeout(() => this.refresh(), REFRESH_DURATION);
-  }
-
   private _buttons: FileButtons = null;
   private _commands: CommandRegistry = null;
   private _crumbs: BreadCrumbs = null;
@@ -346,7 +305,6 @@ class FileBrowser extends Widget {
   private _listing: DirListing = null;
   private _manager: DocumentManager = null;
   private _model: FileBrowserModel = null;
-  private _timeoutId = -1;
 }
 
 
