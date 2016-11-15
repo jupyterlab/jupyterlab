@@ -40,8 +40,8 @@ class StateDB implements IStateDB {
    * The `id` values of stored items in the state database are formatted:
    * `'namespace:identifier'`, which is the same convention that command
    * identifiers in JupyterLab use as well. While this is not a technical
-   * requirement for `fetch()` and `save()`, it *is* necessary for using the
-   * `fetchNamespace()` method.
+   * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
+   * using the `fetchNamespace()` method.
    *
    * The promise returned by this method may be rejected if an error occurs in
    * retrieving the data. Non-existence of an `id` will succeed, however.
@@ -86,6 +86,18 @@ class StateDB implements IStateDB {
   }
 
   /**
+   * Remove a value from the database.
+   *
+   * @param id - The identifier for the data being removed.
+   *
+   * @returns A promise that is rejected if remove fails and succeeds otherwise.
+   */
+  remove(id: string): Promise<void> {
+    window.localStorage.removeItem(id);
+    return Promise.resolve(void 0);
+  }
+
+  /**
    * Save a value in the database.
    *
    * @param id - The identifier for the data being saved.
@@ -98,8 +110,8 @@ class StateDB implements IStateDB {
    * The `id` values of stored items in the state database are formatted:
    * `'namespace:identifier'`, which is the same convention that command
    * identifiers in JupyterLab use as well. While this is not a technical
-   * requirement for `fetch()` and `save()`, it *is* necessary for using the
-   * `fetchNamespace()` method.
+   * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
+   * using the `fetchNamespace()` method.
    */
   save(id: string, data: JSONValue): Promise<void> {
     window.localStorage.setItem(id, JSON.stringify(data));

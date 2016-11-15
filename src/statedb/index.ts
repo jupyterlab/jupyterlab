@@ -35,8 +35,8 @@ interface IStateDB {
    * The `id` values of stored items in the state database are formatted:
    * `'namespace:identifier'`, which is the same convention that command
    * identifiers in JupyterLab use as well. While this is not a technical
-   * requirement for `fetch()` and `save()`, it *is* necessary for using the
-   * `fetchNamespace()` method.
+   * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
+   * using the `fetchNamespace()` method.
    *
    * The promise returned by this method may be rejected if an error occurs in
    * retrieving the data. Non-existence of an `id` will succeed, however.
@@ -62,6 +62,15 @@ interface IStateDB {
   fetchNamespace(namespace: string): Promise<JSONValue[]>;
 
   /**
+   * Remove a value from the database.
+   *
+   * @param id - The identifier for the data being removed.
+   *
+   * @returns A promise that is rejected if remove fails and succeeds otherwise.
+   */
+  remove(id: string): Promise<void>;
+
+  /**
    * Save a value in the database.
    *
    * @param id - The identifier for the data being saved.
@@ -74,8 +83,8 @@ interface IStateDB {
    * The `id` values of stored items in the state database are formatted:
    * `'namespace:identifier'`, which is the same convention that command
    * identifiers in JupyterLab use as well. While this is not a technical
-   * requirement for `fetch()` and `save()`, it *is* necessary for using the
-   * `fetchNamespace()` method.
+   * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
+   * using the `fetchNamespace()` method.
    */
   save(id: string, data: JSONValue): Promise<void>;
 }
