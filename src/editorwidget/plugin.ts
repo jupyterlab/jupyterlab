@@ -19,8 +19,8 @@ import {
 } from '../application';
 
 import {
-  DEFAULT_CODEMIRROR_THEME
-} from '../codemirror/widget';
+  DEFAULT_CODEMIRROR_THEME, CodeMirrorEditor
+} from '../codemirror/editor';
 
 import {
   ICommandPalette
@@ -49,6 +49,15 @@ import {
 import {
   IEditorTracker, EditorWidget, EditorWidgetFactory
 } from './widget';
+
+import {
+  IEditorFactory
+} from '../codeeditor';
+
+import 'codemirror/addon/edit/matchbrackets.js';
+import 'codemirror/addon/edit/closebrackets.js';
+import 'codemirror/addon/comment/comment.js';
+import 'codemirror/keymap/vim.js';
 
 
 /**
@@ -88,7 +97,7 @@ export
 const plugin: JupyterLabPlugin<IEditorTracker> = {
   id: 'jupyter.services.editor-handler',
   requires: [
-    IDocumentRegistry, IMainMenu, ICommandPalette, IStateDB, ILayoutRestorer
+    IDocumentRegistry, IMainMenu, ICommandPalette, IStateDB, ILayoutRestorer, IEditorFactory
   ],
   provides: IEditorTracker,
   activate: activateEditorHandler,
@@ -99,8 +108,8 @@ const plugin: JupyterLabPlugin<IEditorTracker> = {
 /**
  * Sets up the editor widget
  */
-function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB, layout: ILayoutRestorer): IEditorTracker {
-  const factory = new EditorWidgetFactory({
+function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB, layout: ILayoutRestorer, editorFactory: IEditorFactory): IEditorTracker {
+  const factory = new EditorWidgetFactory(editorFactory, {
     name: FACTORY,
     fileExtensions: ['*'],
     defaultFor: ['*']
@@ -142,8 +151,8 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
    */
   function toggleLineNums() {
     if (tracker.currentWidget) {
-      let editor = tracker.currentWidget.editor;
-      editor.setOption('lineNumbers', !editor.getOption('lineNumbers'));
+      const editor = tracker.currentWidget.editor as CodeMirrorEditor;
+      editor.editor.setOption('lineNumbers', !editor.editor.getOption('lineNumbers'));
     }
   }
 
@@ -152,8 +161,8 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
    */
   function toggleLineWrap() {
     if (tracker.currentWidget) {
-      let editor = tracker.currentWidget.editor;
-      editor.setOption('lineWrapping', !editor.getOption('lineWrapping'));
+      const editor = tracker.currentWidget.editor as CodeMirrorEditor;
+      editor.editor.setOption('lineWrapping', !editor.editor.getOption('lineWrapping'));
     }
   }
 
@@ -162,8 +171,8 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
    */
   function toggleMatchBrackets() {
     if (tracker.currentWidget) {
-      let editor = tracker.currentWidget.editor;
-      editor.setOption('matchBrackets', !editor.getOption('matchBrackets'));
+      const editor = tracker.currentWidget.editor as CodeMirrorEditor;
+      editor.editor.setOption('matchBrackets', !editor.editor.getOption('matchBrackets'));
     }
   }
 
@@ -172,9 +181,9 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
    */
   function toggleVim() {
     tracker.forEach(widget => {
-      let keymap = widget.editor.getOption('keyMap') === 'vim' ? 'default'
-        : 'vim';
-      widget.editor.setOption('keyMap', keymap);
+      const editor = tracker.currentWidget.editor as CodeMirrorEditor;
+      const keymap = editor.editor.getOption('keyMap') === 'vim' ? 'default' : 'vim';
+      editor.editor.setOption('keyMap', keymap);
     });
   }
 
@@ -207,7 +216,10 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
       label: args => args['theme'] as string,
       execute: args => {
         let name: string = args['theme'] as string || DEFAULT_CODEMIRROR_THEME;
-        tracker.forEach(widget => { widget.editor.setOption('theme', name); });
+        tracker.forEach(widget => {
+          const editor = widget.editor as CodeMirrorEditor;
+          editor.editor.setOption('theme', name);
+        });
       }
     });
 
@@ -286,12 +298,9 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
         return;
       }
       // Get the selected code from the editor.
-      let doc = widget.editor.getDoc();
-      let code = doc.getSelection();
-      if (!code) {
-        let { line } = doc.getCursor();
-        code = doc.getLine(line);
-      }
+      let editorModel = widget.editor.model;
+      let selection = editorModel.selections.front;
+      let code = editorModel.value.substring(selection.start, selection.end);
       commands.execute('console:inject', { id, code });
     },
     label: 'Run Code',
