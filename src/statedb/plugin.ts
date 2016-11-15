@@ -11,6 +11,12 @@ import {
 
 
 /**
+ * The default namespace used by the application state database.
+ */
+const NAMESPACE = 'statedb';
+
+
+/**
  * The default state database for storing application state.
  */
 export
@@ -32,13 +38,18 @@ class StateDB implements IStateDB {
    *
    * @param namespace - An optional namespace to help categories saved bundles.
    *
-   * @returns A promise that bears a the saved bundle.
+   * @returns A promise that bears a saved bundle or rejects if unavailable.
    *
    * #### Notes
    * If a namespace is not provided, the default value will be `'statedb'`.
    */
   fetch(id: string, namespace?: string): Promise<ISaveBundle> {
-    return null;
+    let key = `${namespace || NAMESPACE}:${id}`;
+    try {
+      return Promise.resolve(JSON.parse(window.localStorage.getItem(key)));
+    } catch (error) {
+      return Promise.reject(error);
+    }
   }
 
   /**
@@ -49,7 +60,18 @@ class StateDB implements IStateDB {
    * @returns A promise that bears a collection of saved bundles.
    */
   fetchNamespace(namespace: string): Promise<ISaveBundle[]> {
-    return null;
+    let bundles: ISaveBundle[] = [];
+    for (let i = 0, len = window.localStorage.length; i < len; i++) {
+      let key = window.localStorage.key(i);
+      if (key.indexOf(`${key}:`) === 0) {
+        try {
+          bundles.push(JSON.parse(window.localStorage.getItem(key)));
+        } catch (error) {
+          console.warn(error);
+        }
+      }
+    }
+    return Promise.resolve(bundles);
   }
 
   /**
@@ -60,6 +82,8 @@ class StateDB implements IStateDB {
    * @returns A promise that is rejected if saving fails and succeeds otherwise.
    */
   save(bundle: ISaveBundle): Promise<void> {
-    return null;
+    let key = `${bundle.namespace || NAMESPACE}:${bundle.id}`;
+    window.localStorage.setItem(key, JSON.stringify(bundle));
+    return Promise.resolve(void 0);
   }
 }

@@ -58,7 +58,7 @@ interface IStateDB {
    *
    * @param namespace - An optional namespace to help categories saved bundles.
    *
-   * @returns A promise that bears a the saved bundle.
+   * @returns A promise that bears a saved bundle or rejects if unavailable.
    *
    * #### Notes
    * If a namespace is not provided, the default value will be `'statedb'`.
