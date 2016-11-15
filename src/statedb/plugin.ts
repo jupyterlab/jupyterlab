@@ -2,18 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  JSONValue
+} from 'phosphor/lib/algorithm/json';
+
+import {
   JupyterLab, JupyterLabPlugin
 } from '../application';
 
 import {
-  ISaveBundle, IStateDB
+  IStateDB
 } from './index';
-
-
-/**
- * The default namespace used by the application state database.
- */
-const NAMESPACE = 'statedb';
 
 
 /**
@@ -36,17 +34,21 @@ class StateDB implements IStateDB {
    *
    * @param id - The identifier used to save retrieve a data bundle.
    *
-   * @param namespace - An optional namespace to help categories saved bundles.
-   *
-   * @returns A promise that bears a saved bundle or rejects if unavailable.
+   * @returns A promise that bears a data payload if available.
    *
    * #### Notes
-   * If a namespace is not provided, the default value will be `'statedb'`.
+   * The `id` values of stored items in the state database are formatted:
+   * `'namespace:identifier'`, which is the same convention that command
+   * identifiers in JupyterLab use as well. While this is not a technical
+   * requirement for `fetch()` and `save()`, it *is* necessary for using the
+   * `fetchNamespace()` method.
+   *
+   * The promise returned by this method may be rejected if an error occurs in
+   * retrieving the data. Non-existence of an `id` will succeed, however.
    */
-  fetch(id: string, namespace?: string): Promise<ISaveBundle> {
-    let key = `${namespace || NAMESPACE}:${id}`;
+  fetch(id: string): Promise<JSONValue> {
     try {
-      return Promise.resolve(JSON.parse(window.localStorage.getItem(key)));
+      return Promise.resolve(JSON.parse(window.localStorage.getItem(id)));
     } catch (error) {
       return Promise.reject(error);
     }
@@ -57,33 +59,50 @@ class StateDB implements IStateDB {
    *
    * @param namespace - The namespace to retrieve.
    *
-   * @returns A promise that bears a collection of saved bundles.
+   * @returns A promise that bears a collection data payloads for a namespace.
+   *
+   * #### Notes
+   * Namespaces are entirely conventional entities. The `id` values of stored
+   * items in the state database are formatted: `'namespace:identifier'`, which
+   * is the same convention that command identifiers in JupyterLab use as well.
+   *
+   * If there are any errors in retrieving the data, they will be logged to the
+   * console in order to optimistically return any extant data without failing.
+   * This promise will always succeed.
    */
-  fetchNamespace(namespace: string): Promise<ISaveBundle[]> {
-    let bundles: ISaveBundle[] = [];
+  fetchNamespace(namespace: string): Promise<JSONValue[]> {
+    let data: JSONValue[] = [];
     for (let i = 0, len = window.localStorage.length; i < len; i++) {
       let key = window.localStorage.key(i);
-      if (key.indexOf(`${key}:`) === 0) {
+      if (key.indexOf(`${namespace}:`) === 0) {
         try {
-          bundles.push(JSON.parse(window.localStorage.getItem(key)));
+          data.push(JSON.parse(window.localStorage.getItem(key)));
         } catch (error) {
           console.warn(error);
         }
       }
     }
-    return Promise.resolve(bundles);
+    return Promise.resolve(data);
   }
 
   /**
-   * Save a bundle in the database.
+   * Save a value in the database.
    *
-   * @param bundle - The bundle being saved.
+   * @param id - The identifier for the data being saved.
+   *
+   * @param data - The data being saved.
    *
    * @returns A promise that is rejected if saving fails and succeeds otherwise.
+   *
+   * #### Notes
+   * The `id` values of stored items in the state database are formatted:
+   * `'namespace:identifier'`, which is the same convention that command
+   * identifiers in JupyterLab use as well. While this is not a technical
+   * requirement for `fetch()` and `save()`, it *is* necessary for using the
+   * `fetchNamespace()` method.
    */
-  save(bundle: ISaveBundle): Promise<void> {
-    let key = `${bundle.namespace || NAMESPACE}:${bundle.id}`;
-    window.localStorage.setItem(key, JSON.stringify(bundle));
+  save(id: string, data: JSONValue): Promise<void> {
+    window.localStorage.setItem(id, JSON.stringify(data));
     return Promise.resolve(void 0);
   }
 }
