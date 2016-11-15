@@ -74,6 +74,7 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
     color: 'white',
     fontSize: 13
   };
+  let terms: string[] = [];
 
   // Sync tracker with currently focused widget.
   app.shell.currentChanged.connect((sender, args) => {
@@ -97,9 +98,27 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
       } else {
         promise = services.terminals.startNew();
       }
-      promise.then(session => { term.session = session; });
+      promise.then(session => {
+        term.session = session;
+        terms.push(session.name);
+        window.sessionStorage.setItem('jupyter:terminals', JSON.stringify(terms));
+        name = session.name;
+        term.disposed.connect(() => {
+          let index = terms.indexOf(name);
+          if (index !== -1) {
+            terms.splice(index, 1);
+            window.sessionStorage.setItem('jupyter:terminals', JSON.stringify(terms));
+          }
+        });
+      });
     }
   });
+
+  terms = JSON.parse(window.sessionStorage.getItem('jupyter:terminals')) as string[] || [];
+  for (let name of terms) {
+    app.commands.execute('terminal:create-new', { name });
+  }
+
   commands.addCommand(increaseTerminalFontSize, {
     label: 'Increase Terminal Font Size',
     execute: () => {
