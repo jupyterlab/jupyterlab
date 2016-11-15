@@ -155,7 +155,7 @@ namespace CodeEditor {
     getOffsetAt(position: IPosition): number;
 
     /**
-     * Find a position fot the given offset.
+     * Find a position for the given offset.
      */
     getPositionAt(offset: number): IPosition;
 
@@ -173,6 +173,11 @@ namespace CodeEditor {
      * Clear the undo history.
      */
     clearHistory(): void;
+
+    /**
+     * Update mime type 
+     */
+    setMimeTypeFromPath(path: string): void;
   }
 
   /**
@@ -398,6 +403,13 @@ namespace CodeEditor {
      */
     clearHistory(): void { /* no-op */ }
 
+    /**
+     * Set mime type for given path.
+     */
+    setMimeTypeFromPath(path: string): void {
+      this.mimeType = '';
+    }
+
     private _mimetype = '';
     private _value = '';
     private _selections = new ObservableVector<ITextSelection>();
@@ -524,6 +536,8 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
       break;
     case 'input':
       this._evtInput(event);
+      break;
+    default:
       break;
     }
   }
