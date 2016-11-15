@@ -98,9 +98,11 @@
     "lib/*.css",
     "lib/*.d.ts",
     "lib/*.js",
+    "lib/*.js.map",
     "lib/**/*.css",
     "lib/**/*.d.ts",
     "lib/**/*.js",
+    "lib/**/*.js.map",
     "lib/**/*.svg",
     "lib/**/*.gif",
     "scripts/dedupe.js"
