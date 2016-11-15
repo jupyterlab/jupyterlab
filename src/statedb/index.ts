@@ -51,6 +51,21 @@ interface ISaveBundle {
  */
 export
 interface IStateDB {
-  fetch(): Promise<ISaveBundle>;
-  save(): Promise<void>;
+  /**
+   * Retrieve a saved bundle from the database.
+   *
+   * #### Notes
+   * If a namespace is not provided, the default value will be `'statedb'`.
+   */
+  fetch(id: string, namespace?: string): Promise<ISaveBundle>;
+
+  /**
+   * Retrieve all the saved bundles for a namespace.
+   */
+  fetchNamespace(namespace: string): Promise<ISaveBundle[]>;
+
+  /**
+   * Save a bundle in the database.
+   */
+  save(bundle: ISaveBundle): Promise<void>;
 }
