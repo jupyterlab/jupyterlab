@@ -19,9 +19,10 @@ import {
  */
 export
 const stateProvider: JupyterLabPlugin<IStateDB> = {
-  id: 'jupyter.providers.statedb',
-  activate: () => new StateDB(),
-  autoStart: true
+  id: 'jupyter.services.statedb',
+  activate: (): IStateDB => new StateDB(),
+  autoStart: true,
+  provides: IStateDB
 };
 
 
