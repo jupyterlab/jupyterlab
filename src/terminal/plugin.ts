@@ -89,12 +89,7 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
     tracker.sync(args.newValue);
   });
 
-  // Reload any terminals whose state has been stored.
-  state.fetchNamespace(NAMESPACE).then(terms => {
-    let create = 'terminal:create-new';
-    terms.forEach(name => { app.commands.execute(create, { name }); });
-  });
-
+  // Add terminal commands.
   commands.addCommand(newTerminalId, {
     label: 'New Terminal',
     caption: 'Start a new terminal session',
@@ -173,6 +168,14 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
     }
   });
 
+  // Reload any terminals whose state has been stored.
+  Promise.all([state.fetchNamespace(NAMESPACE), app.started])
+    .then(([terms]) => {
+      let create = 'terminal:create-new';
+      terms.forEach(name => { app.commands.execute(create, { name }); });
+    });
+
+  // Add command palette items.
   let category = 'Terminal';
   [
     newTerminalId,
@@ -181,6 +184,7 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
     toggleTerminalTheme
   ].forEach(command => palette.addItem({ command, category }));
 
+  // Add menu items.
   let menu = new Menu({ commands, keymap });
   menu.title.label = 'Terminal';
   menu.addItem({ command: newTerminalId });
