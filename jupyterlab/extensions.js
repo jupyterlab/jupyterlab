@@ -27,5 +27,6 @@ module.exports = [
   require('../lib/running/plugin').runningSessionsExtension,
   require('../lib/services/plugin').servicesProvider,
   require('../lib/shortcuts/plugin').shortcutsExtension,
+  require('../lib/statedb/plugin').stateProvider,
   require('../lib/terminal/plugin').terminalExtension
 ];

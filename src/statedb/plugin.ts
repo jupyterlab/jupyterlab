@@ -32,7 +32,7 @@ class StateDB implements IStateDB {
   /**
    * The maximum allowed length of the data after it has been serialized.
    */
-  readonly maxLength = 2048;
+  readonly maxLength = 2000;
 
   /**
    * Retrieve a saved bundle from the database.
@@ -124,7 +124,7 @@ class StateDB implements IStateDB {
       let length = serialized.length;
       let max = this.maxLength;
       if (length > max) {
-        throw new Error(`serialized data (${length}) exceeds maximum (${max})`);
+        throw new Error(`Serialized data (${length}) exceeds maximum (${max})`);
       }
       window.localStorage.setItem(id, serialized);
       return Promise.resolve(void 0);
