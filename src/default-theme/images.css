@@ -43,11 +43,11 @@
 }
 
 .jp-AddIcon {
-  background-image: url(images/add.svg);
+  background-image: url(icons/add.svg);
 }
 
 .jp-UploadIcon {
-  background-image: url(images/file_browser/upload.svg);
+  background-image: url(icons/upload.svg);
 }
 
 .jp-RefreshIcon {
@@ -59,7 +59,7 @@
 }
 
 .jp-HomeIcon {
-  background-image: url(images/file_browser/home.svg);
+  background-image: url(icons/home.svg);
   min-width: 14px;
   min-height: 14px;
   background-size: 14px;
@@ -68,11 +68,11 @@
 }
 
 .jp-OpenFolderIcon {
-  background-image: url(images/file_browser/directory.svg);
+  background-image: url(icons/directory.svg);
 }
 
 .jp-NotebookIcon {
-  background-image: url(images/file_browser/notebook.svg);
+  background-image: url(icons/notebook.svg);
 }
 
 .jp-JupyterIcon {
