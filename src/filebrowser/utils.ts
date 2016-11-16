@@ -41,16 +41,8 @@ const CONTENTS_MIME = 'application/x-jupyter-icontents';
  * An error message dialog to show in the filebrowser widget.
  */
 export
-function showErrorMessage(host: Widget, title: string, error: Error): Promise<void> {
+function showErrorMessage(title: string, error: Error): Promise<void> {
   console.error(error);
-  if (!host.isAttached) {
-    return;
-  }
-  // Find the file browser node.
-  let node = host.node;
-  while (!node.classList.contains(FILE_BROWSER_CLASS)) {
-    node = node.parentElement;
-  }
   let options = {
     title: title,
     body: error.message || `File ${title}`,

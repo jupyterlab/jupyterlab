@@ -345,10 +345,9 @@ class DirListing extends Widget {
     this._clipboard.clear();
     this._isCut = false;
     this.removeClass(CLIPBOARD_CLASS);
-    return Promise.all(promises).then(
-      () => this._model.refresh(),
-      error => utils.showErrorMessage(this, 'Paste Error', error)
-    );
+    return Promise.all(promises).catch(error => {
+      utils.showErrorMessage('Paste Error', error);
+    });
   }
 
   /**
@@ -394,10 +393,9 @@ class DirListing extends Widget {
         promises.push(this._model.copy(item.path, this._model.path));
       }
     }
-    return Promise.all(promises).then(
-      () => this._model.refresh(),
-      error => utils.showErrorMessage(this, 'Duplicate file', error)
-    );
+    return Promise.all(promises).catch(error => {
+      utils.showErrorMessage('Duplicate file', error);
+    });
   }
 
   /**
@@ -426,10 +424,9 @@ class DirListing extends Widget {
         promises.push(this._model.shutdown(session.id));
       }
     });
-    return Promise.all(promises).then(
-      () => this._model.refresh(),
-      error => utils.showErrorMessage(this, 'Shutdown kernel', error)
-    );
+    return Promise.all(promises).catch(error => {
+      utils.showErrorMessage('Shutdown kernel', error);
+    });
   }
 
   /**
@@ -865,7 +862,7 @@ class DirListing extends Widget {
     let item = this._sortedItems.at(i);
     if (item.type === 'directory') {
       model.cd(item.name).catch(error =>
-        showErrorMessage(this, 'Open directory', error)
+        showErrorMessage('Open directory', error)
       );
     } else {
       let path = item.path;
@@ -961,10 +958,9 @@ class DirListing extends Widget {
       let newPath = path + name;
       promises.push(renameFile(this._model, name, newPath));
     }
-    Promise.all(promises).then(
-      () => this._model.refresh(),
-      error => utils.showErrorMessage(this, 'Move Error', error)
-    );
+    Promise.all(promises).catch(error => {
+      utils.showErrorMessage('Move Error', error);
+    });
   }
 
   /**
@@ -1139,10 +1135,9 @@ class DirListing extends Widget {
     for (let name of names) {
       promises.push(this._model.deleteFile(name));
     }
-    return Promise.all(promises).then(
-      () => this._model.refresh(),
-      error => utils.showErrorMessage(this, 'Delete file', error)
-    );
+    return Promise.all(promises).catch(error => {
+      utils.showErrorMessage('Delete file', error);
+    });
   }
 
   /**
@@ -1163,10 +1158,7 @@ class DirListing extends Widget {
         return;
       }
       return renameFile(this._model, original, newName).catch(error => {
-        utils.showErrorMessage(this, 'Rename Error', error);
-        return original;
-      }).then(() => {
-        this._model.refresh();
+        utils.showErrorMessage('Rename Error', error);
         return newName;
       });
     });

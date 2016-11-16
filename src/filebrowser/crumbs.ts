@@ -143,7 +143,7 @@ class BreadCrumbs extends Widget {
       if (node.classList.contains(BREADCRUMB_ITEM_CLASS)) {
         let index = this._crumbs.indexOf(node);
         this._model.cd(BREAD_CRUMB_PATHS[index]).catch(error =>
-          utils.showErrorMessage(this, 'Open Error', error)
+          utils.showErrorMessage('Open Error', error)
         );
 
         // Stop the event propagation.
@@ -249,19 +249,16 @@ class BreadCrumbs extends Widget {
           return showDialog(options).then(button => {
             if (button.text === 'OVERWRITE') {
               return this._model.deleteFile(newPath).then(() => {
-                return this._model.rename(name, newPath).then(() => {
-                  return this._model.refresh();
-                });
+                return this._model.rename(name, newPath);
               });
             }
           });
         }
       }));
     }
-    Promise.all(promises).then(
-      () => this._model.refresh(),
-      err => utils.showErrorMessage(this, 'Move Error', err)
-    );
+    Promise.all(promises).catch(err => {
+      utils.showErrorMessage('Move Error', err);
+    });
   }
 
   private _model: FileBrowserModel = null;

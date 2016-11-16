@@ -29,6 +29,21 @@ import {
   IPathTracker
 } from './tracker';
 
+import {
+  showErrorMessage
+} from './utils';
+
+
+/**
+ * The duration of auto-refresh in ms.
+ */
+const REFRESH_DURATION = 10000;
+
+/**
+ * The enforced time between refreshes in ms.
+ */
+const MIN_REFRESH = 1000;
+
 
 /**
  * An implementation of a file browser model.
@@ -45,9 +60,12 @@ class FileBrowserModel implements IDisposable, IPathTracker {
   constructor(options: FileBrowserModel.IOptions) {
     this._manager = options.manager;
     this._model = { path: '', name: '/', type: 'directory' };
-    this.cd();
     this._manager.contents.fileChanged.connect(this._onFileChanged, this);
     this._manager.sessions.runningChanged.connect(this._onRunningChanged, this);
+    this._scheduleUpdate();
+    this._refreshId = setInterval(() => {
+      this._scheduleUpdate();
+    }, REFRESH_DURATION);
   }
 
   /**
@@ -98,6 +116,9 @@ class FileBrowserModel implements IDisposable, IPathTracker {
     if (this.isDisposed) {
       return;
     }
+    clearTimeout(this._timeoutId);
+    clearInterval(this._refreshId);
+    clearTimeout(this._blackoutId);
     this._model = null;
     this._sessions.clear();
     this._items.clear();
@@ -160,23 +181,11 @@ class FileBrowserModel implements IDisposable, IPathTracker {
       }
       this._onRunningChanged(manager.sessions, manager.sessions.running());
       this.refreshed.emit(void 0);
+    }).catch(error => {
+      showErrorMessage('Server Connection Error', error);
+      this._pendingPath = null;
     });
     return this._pending;
-  }
-
-  /**
-   * Refresh the current directory.
-   *
-   * @returns A promise that resolves when the action is complete.
-   */
-  refresh(): Promise<void> {
-    return this.cd('.').catch(error => {
-      console.error(error);
-      let msg = 'Unable to refresh the directory listing due to ';
-      msg += 'lost server connection.';
-      error.message = msg;
-      throw error;
-    });
   }
 
   /**
@@ -388,13 +397,43 @@ class FileBrowserModel implements IDisposable, IPathTracker {
     let value = change.oldValue;
     if (value && value.path && ContentsManager.dirname(value.path) === path) {
       this.fileChanged.emit(change);
+      this._scheduleUpdate();
       return;
     }
     value = change.newValue;
     if (value && value.path && ContentsManager.dirname(value.path) === path) {
       this.fileChanged.emit(change);
+      this._scheduleUpdate();
       return;
     }
+  }
+
+  /**
+   * Handle internal model refresh logic.
+   */
+  private _scheduleUpdate(): void {
+    // Send immediately if there is no pending action, otherwise defer.
+    if (this._blackoutId !== -1) {
+      this._requested = true;
+      return;
+    }
+    this._timeoutId = setTimeout(() => {
+      this.cd('.');
+      if (this._requested && this._blackoutId !== -1) {
+        this._requested = false;
+        clearTimeout(this._blackoutId);
+        this._timeoutId = setTimeout(() => {
+          this._scheduleUpdate();
+        }, MIN_REFRESH);
+      } else {
+        this._blackoutId = setTimeout(() => {
+          this._blackoutId = -1;
+          if (this._requested) {
+            this._scheduleUpdate();
+          }
+        }, MIN_REFRESH);
+      }
+    }, 0);
   }
 
   private _maxUploadSizeMb = 15;
@@ -405,6 +444,10 @@ class FileBrowserModel implements IDisposable, IPathTracker {
   private _model: Contents.IModel;
   private _pendingPath: string = null;
   private _pending: Promise<void> = null;
+  private _timeoutId = -1;
+  private _refreshId = -1;
+  private _blackoutId = -1;
+  private _requested = false;
 }
 
 

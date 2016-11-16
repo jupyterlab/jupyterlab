@@ -30,7 +30,7 @@ describe('filebrowser/model', () => {
     model = new FileBrowserModel({ manager });
     model.newUntitled({ type: 'file' }).then(contents => {
       name = contents.name;
-      return model.refresh();
+      return model.cd();
     }).then(done, done);
   });
 
@@ -72,7 +72,7 @@ describe('filebrowser/model', () => {
           expect(arg).to.be(void 0);
           done();
         });
-        model.refresh().catch(done);
+        model.cd().catch(done);
       });
 
       it('should be emitted when the path changes', (done) => {
@@ -161,9 +161,9 @@ describe('filebrowser/model', () => {
           return manager.sessions.startNew({ path: contents.path });
         }).then(s => {
           session = s;
-          return model.refresh();
+          return model.cd();
         }).then(() => {
-          expect(model.sessions().next).to.be.ok();
+          expect(model.sessions().next()).to.be.ok();
           return session.shutdown();
         }).then(() => {
           done();
@@ -214,21 +214,6 @@ describe('filebrowser/model', () => {
 
     });
 
-    describe('#refresh()', () => {
-
-      it('should refresh the current directory', (done) => {
-        let len = toArray(model.items()).length;
-        model.newUntitled({ type: 'file' }).then(contents => {
-          expect(toArray(model.items()).length).to.be(len);
-          return model.refresh();
-        }).then(() => {
-          expect(toArray(model.items()).length).to.be(len + 1);
-          done();
-        }).catch(done);
-      });
-
-    });
-
     describe('#copy()', () => {
 
       it('should copy a file', (done) => {
@@ -245,7 +230,7 @@ describe('filebrowser/model', () => {
       it('should delete a file ', (done) => {
         let len = toArray(model.items()).length;
         model.deleteFile(name).then(() => {
-          return model.refresh();
+          return model.cd();
         }).then(() => {
           expect(toArray(model.items()).length).to.be(len - 1);
           done();
