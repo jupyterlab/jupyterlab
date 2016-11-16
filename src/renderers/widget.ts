@@ -285,11 +285,7 @@ class RenderedSVG extends Widget {
 
   constructor(options: RenderMime.IRendererOptions<string>) {
     super();
-    let source = options.source;
-    if (options.sanitizer) {
-      source = options.sanitizer.sanitize(source);
-    }
-    this.node.innerHTML = source;
+    this.node.innerHTML = options.source;
     let svgElement = this.node.getElementsByTagName('svg')[0];
     if (!svgElement) {
       throw new Error('SVGRender: Error: Failed to create <svg> element');

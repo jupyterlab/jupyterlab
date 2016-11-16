@@ -237,9 +237,9 @@ describe('renderers', () => {
 
     describe('#isSanitizable()', () => {
 
-      it('should be `true`', () => {
+      it('should be `false`', () => {
         let t = new SVGRenderer();
-        expect(t.isSanitizable('image/svg+xml')).to.be(true);
+        expect(t.isSanitizable('image/svg+xml')).to.be(false);
       });
 
     });
@@ -261,15 +261,6 @@ describe('renderers', () => {
         let w = t.render({ mimetype: 'image/svg+xml', source });
         let svgEl = w.node.getElementsByTagName('svg')[0];
         expect(svgEl).to.be.ok();
-      });
-
-      it('should sanitize when a sanitizer is given', () => {
-        const source = '<svg><script>window.x = 1</script></svg>';
-        let t = new SVGRenderer();
-        let w = t.render({
-          mimetype: 'image/svg+xml', source, sanitizer: defaultSanitizer
-        });
-        expect(w.node.innerHTML).to.be('<svg></svg>');
       });
 
     });
