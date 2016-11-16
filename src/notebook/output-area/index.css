@@ -30,8 +30,36 @@
 |----------------------------------------------------------------------------*/
 
 
+.jp-Output-stdin {
+  line-height: var(--jp-code-line-height);
+  padding-top: var(--jp-code-padding);
+  display: flex;
+}
+
+
 .jp-Output-stdinPrompt {
-  padding-right: 8px;
+  padding-right: var(--jp-code-padding);
+  vertical-align: baseline;
+  flex: 0 0 auto;
+}
+
+
+.jp-Output-stdinInput {
+  font-family: monospace;
+  font-size: inherit;
+  color: inherit;
+  width: auto;
+  /* make sure input baseline aligns with prompt */
+  vertical-align: baseline;
+  /* padding + margin = 0.5em between prompt and cursor */
+  padding: 0em 0.25em;
+  margin: 0em 0.25em;
+  flex: 0 0 70%;
+}
+
+
+.jp-Output-stdinInput:focus {
+    box-shadow: none;
 }
 
 
@@ -63,6 +91,7 @@
   display: flex;
   flex-direction: row;
   color: var(--jp-content-font-color1);
+  padding: var(--jp-code-padding)
 }
 
 
@@ -122,10 +151,12 @@
 
 .jp-Output-executeResult.jp-RenderedText {
   padding-top: var(--jp-code-padding);
+  text-align: left;
 }
 
 
 .jp-Output-result.jp-RenderedText {
+  text-align: left;
   padding-left: var(--jp-code-padding);
   font-size: var(--jp-code-font-size);
   line-height: var(--jp-code-line-height);
