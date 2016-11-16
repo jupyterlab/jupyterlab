@@ -6,7 +6,7 @@ import {
 } from 'phosphor/lib/algorithm/json';
 
 import {
-  JupyterLab, JupyterLabPlugin
+  JupyterLabPlugin
 } from '../application';
 
 import {
@@ -20,7 +20,7 @@ import {
 export
 const stateProvider: JupyterLabPlugin<IStateDB> = {
   id: 'jupyter.providers.statedb',
-  activate: (app: JupyterLab): IStateDB => new StateDB(),
+  activate: () => new StateDB(),
   autoStart: true
 };
 
@@ -29,6 +29,11 @@ const stateProvider: JupyterLabPlugin<IStateDB> = {
  * The default concrete implementation of a state database.
  */
 class StateDB implements IStateDB {
+  /**
+   * The maximum allowed length of the data after it has been serialized.
+   */
+  readonly maxLength = 2048;
+
   /**
    * Retrieve a saved bundle from the database.
    *
@@ -114,7 +119,17 @@ class StateDB implements IStateDB {
    * using the `fetchNamespace()` method.
    */
   save(id: string, data: JSONValue): Promise<void> {
-    window.localStorage.setItem(id, JSON.stringify(data));
-    return Promise.resolve(void 0);
+    try {
+      let serialized = JSON.stringify(data);
+      let length = serialized.length;
+      let max = this.maxLength;
+      if (length > max) {
+        throw new Error(`serialized data (${length}) exceeds maximum (${max})`);
+      }
+      window.localStorage.setItem(id, serialized);
+      return Promise.resolve(void 0);
+    } catch (error) {
+      return Promise.reject(error);
+    }
   }
 }

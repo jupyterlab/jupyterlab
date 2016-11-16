@@ -25,6 +25,11 @@ const IStateDB = new Token<IStateDB>('jupyter.services.statedb');
 export
 interface IStateDB {
   /**
+   * The maximum allowed length of the data after it has been serialized.
+   */
+  readonly maxLength: number;
+
+  /**
    * Retrieve a saved bundle from the database.
    *
    * @param id - The identifier used to save retrieve a data bundle.
