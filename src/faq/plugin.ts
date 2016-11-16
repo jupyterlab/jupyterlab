@@ -235,7 +235,7 @@ function activateFAQ(app: JupyterLab, palette: ICommandPalette): void {
   issuesLink.className = 'jp-FAQ-a';
   let issuesLinkText = document.createTextNode('github repository');
   issuesLink.appendChild(issuesLinkText);
-  issuesLink.href = 'https://github.com/jupyter/jupyterlab/issues';
+  issuesLink.href = 'https://github.com/jupyterlab/jupyterlab/issues';
   issuesLink.target = '_blank';
   developerQ1Ans.appendChild(issuesLink);
 
@@ -306,7 +306,7 @@ function activateFAQ(app: JupyterLab, palette: ICommandPalette): void {
   githubLink.className = 'jp-FAQ-a';
   let githubLinkText = document.createTextNode('github');
   githubLink.appendChild(githubLinkText);
-  githubLink.href = 'https://github.com/jupyter/jupyterlab';
+  githubLink.href = 'https://github.com/jupyterlab/jupyterlab';
   githubLink.target = '_blank';
   developerQ3Ans.appendChild(githubLink);
 
