@@ -98,16 +98,6 @@ describe('rendermime/index', () => {
         expect(widget.node.innerHTML).to.be('<h1>foo </h1>');
       });
 
-      it('should sanitize svg', () => {
-        let bundle: RenderMime.MimeMap<string> = {
-          'image/svg+xml': '<svg><script>windox.x=1</script></svg>'
-        };
-        let r = defaultRenderMime();
-        let widget = r.render({ bundle });
-        expect(widget.node.innerHTML.indexOf('svg')).to.not.be(-1);
-        expect(widget.node.innerHTML.indexOf('script')).to.be(-1);
-      });
-
       it('should render json data', () => {
         let bundle: RenderMime.MimeMap<JSONObject> = {
           'application/json': { 'foo': 1 }

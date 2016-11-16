@@ -162,7 +162,7 @@ class SVGRenderer implements RenderMime.IRenderer {
    * Whether the input can safely sanitized for a given mimetype.
    */
   isSanitizable(mimetype: string): boolean {
-    return this.mimetypes.indexOf(mimetype) !== -1;
+    return false;
   }
 
   /**
