@@ -118,6 +118,7 @@ class FileBrowserModel implements IDisposable, IPathTracker {
     }
     clearTimeout(this._timeoutId);
     clearInterval(this._refreshId);
+    clearTimeout(this._blackoutId);
     this._model = null;
     this._sessions.clear();
     this._items.clear();

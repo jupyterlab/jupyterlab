@@ -163,7 +163,7 @@ describe('filebrowser/model', () => {
           session = s;
           return model.cd();
         }).then(() => {
-          expect(model.sessions().next).to.be.ok();
+          expect(model.sessions().next()).to.be.ok();
           return session.shutdown();
         }).then(() => {
           done();
