@@ -246,6 +246,7 @@ describe('docregistry/context', () => {
         let name = manager.specs.default;
         context.changeKernel({ name }).then(() => {
           expect(context.kernel.name).to.be(name);
+          console.log('\n\nchanging kernel to null');
           return context.changeKernel(null);
         }).then(() => {
           expect(context.kernel).to.be(null);
