@@ -236,7 +236,9 @@ function addCommands(app: JupyterLab, services: IServiceManager): void {
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
-        restartKernel(current.kernel, current.node);
+        restartKernel(current.kernel, current.node).then(() => {
+          current.activate();
+        });
       }
     }
   });
@@ -247,6 +249,7 @@ function addCommands(app: JupyterLab, services: IServiceManager): void {
       if (current) {
         let promise = restartKernel(current.kernel, current.node);
         promise.then(result => {
+          current.activate();
           if (result) {
             NotebookActions.clearAllOutputs(current.content);
           }
@@ -261,6 +264,7 @@ function addCommands(app: JupyterLab, services: IServiceManager): void {
       if (current) {
         let promise = restartKernel(current.kernel, current.node);
         promise.then(result => {
+          current.activate();
           NotebookActions.runAll(current.content, current.context.kernel);
         });
       }
@@ -508,8 +512,11 @@ function addCommands(app: JupyterLab, services: IServiceManager): void {
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
-        let { context, node } = current;
-        selectKernelForContext(context, services.sessions, node);
+        let context = current.context;
+        let node = current.node;
+        selectKernelForContext(context, services.sessions, node).then(() => {
+          current.activate();
+        });
       }
     }
   });
