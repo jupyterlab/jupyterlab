@@ -42,9 +42,8 @@
   background-repeat: no-repeat;
 }
 
-
 .jp-NotebookIcon {
-  background-image: url(images/file_browser/notebook.svg);
+  background-image: url(icons/notebook.svg);
 }
 
 .jp-JupyterIcon {
