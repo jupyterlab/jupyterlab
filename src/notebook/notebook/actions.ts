@@ -86,6 +86,7 @@ namespace NotebookActions {
 
     widget.activeCellIndex++;
     widget.scrollToActiveCell();
+    widget.activate();
   }
 
   /**

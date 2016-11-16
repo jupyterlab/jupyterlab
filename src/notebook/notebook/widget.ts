@@ -857,7 +857,7 @@ class Notebook extends StaticNotebook {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this.node.focus();
+    this._ensureFocus();
   }
 
   /**
@@ -867,18 +867,7 @@ class Notebook extends StaticNotebook {
     let activeCell = this.activeCell;
     // Ensure we have the correct focus.
     if (this.node.contains(document.activeElement)) {
-      if (this.mode === 'edit' && activeCell) {
-        activeCell.editor.activate();
-      } else {
-        // If an editor currently has focus, focus our node.
-        // Otherwise, another input field has focus and should keep it.
-        let w = find(this.layout, widget => {
-          return (widget as BaseCellWidget).editor.hasFocus();
-        });
-        if (w) {
-          this.node.focus();
-        }
-      }
+      this._ensureFocus();
     }
 
     // Set the appropriate classes on the cells.
@@ -966,6 +955,24 @@ class Notebook extends StaticNotebook {
       // Move the cursor to the first character.
       if (this.activeCellIndex > prev) {
         this.activeCell.editor.setCursorPosition(0);
+      }
+    }
+  }
+
+  private _ensureFocus(): void {
+    let activeCell = this.activeCell;
+    if (this.mode === 'edit' && activeCell) {
+      activeCell.editor.activate();
+    } else if (!this.node.contains(document.activeElement)) {
+      this.node.focus();
+    } else {
+      // If an editor currently has focus, focus our node.
+      // Otherwise, another input field has focus and should keep it.
+      let w = find(this.layout, widget => {
+        return (widget as BaseCellWidget).editor.hasFocus();
+      });
+      if (w) {
+        this.node.focus();
       }
     }
   }
