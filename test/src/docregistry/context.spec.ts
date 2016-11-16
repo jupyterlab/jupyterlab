@@ -238,8 +238,6 @@ describe('docregistry/context', () => {
         let name = manager.specs.default;
         context.changeKernel({ name }).then(() => {
           expect(context.kernel.name).to.be(name);
-          return context.changeKernel(null);
-        }).then(() => {
           done();
         }).catch(done);
       });

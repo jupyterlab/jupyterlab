@@ -208,9 +208,9 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       }
     } else {
       if (session) {
+        this._session = null;
         return session.shutdown().then(() => {
           session.dispose();
-          this._session = null;
           this.kernelChanged.emit(null);
           return void 0;
         });
