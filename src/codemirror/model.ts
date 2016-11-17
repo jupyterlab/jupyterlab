@@ -5,6 +5,10 @@ import * as CodeMirror
   from 'codemirror';
 
 import {
+  find
+} from 'phosphor/lib/algorithm/searching';
+
+import {
   ISignal, clearSignalData, defineSignal
 } from 'phosphor/lib/core/signaling';
 
@@ -116,6 +120,18 @@ class CodeMirrorModel implements CodeEditor.IModel {
    */
   get selections(): ObservableVector<CodeEditor.ITextSelection> {
     return this._selections;
+  }
+
+  /**
+   * Returns the primary cursor position.
+   */
+  getCursorPosition(): CodeEditor.IPosition {
+    let selections = this.selections;
+    let cursor = find(selections, (selection) => { return selection.start === selection.end; });
+    if (cursor) {
+      return this.getPositionAt(cursor.start);
+    }
+    return null;
   }
 
   /**

@@ -66,11 +66,12 @@ class EditorWidget extends CodeEditorWidget {
   /**
    * Construct a new editor widget.
    */
-  constructor(editor: CodeEditor.IEditor, context: DocumentRegistry) {
-    super(editor);
+  constructor(editorFactory: (host: Widget) => CodeEditor.IEditor, context: DocumentRegistry.Context) {
+    super(editorFactory);
     this.addClass(EDITOR_CLASS);
     this._context = context;
     let model = context.model;
+    let editor = this.editor;
 
     let doc = editor.getDoc();
 
@@ -136,12 +137,14 @@ class EditorWidgetFactory extends ABCWidgetFactory<EditorWidget, DocumentRegistr
    * Create a new widget given a context.
    */
   protected createNewWidget(context: DocumentRegistry.Context): EditorWidget {
-    let editor = this._editorFactory.newDocument({
-        lineNumbers: true,
-        readOnly: false,
-        wordWrap: true,
-    });
-    return new EditorWidget(editor, context);
+    return new EditorWidget((host: Widget) => {
+      let editor = this._editorFactory.newDocumentEditor(host.node, {
+          lineNumbers: true,
+          readOnly: false,
+          wordWrap: true,
+      });
+      return editor;
+    }, context);
   }
 
   private _editorFactory: IEditorFactory = null;
