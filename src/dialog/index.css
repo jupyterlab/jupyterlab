@@ -25,11 +25,16 @@
 
 
 .jp-Dialog-content {
+  display: flex;
+  flex-direction: column;
   margin-left: auto;
   margin-right: auto;
   background: #FAFAFA;
   padding: 24px;
-  width: 300px;
+  min-width: 300px;
+  max-width: 500px;
+  min-height: 300px;
+  max-height: 500px;
   box-sizing: border-box;
   box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.5);
   word-wrap: break-word;
@@ -37,6 +42,7 @@
 
 
 .jp-Dialog-header {
+  flex: 0 0 auto;
   padding-bottom: 12px;
   font-size: 20px;
   font-weight: 300;
@@ -45,18 +51,22 @@
 
 
 .jp-Dialog-body {
+  flex: 1 1 auto;
   font-size: 15px;
   background: #FAFAFA;
+  overflow: auto;
 }
 
 
 .jp-Dialog-bodyContent {
   font-size: 15px;
   outline: none;
+  overflow: auto;
 }
 
 
 .jp-Dialog-footer {
+  flex: 0 0 auto;
   float: right;
   margin-top: 24px;
 }
