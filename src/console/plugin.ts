@@ -6,10 +6,6 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  find
-} from 'phosphor/lib/algorithm/searching';
-
-import {
   JSONObject
 } from 'phosphor/lib/algorithm/json';
 
@@ -328,9 +324,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
    */
   function createConsole(session: Session.ISession, name: string): void {
     let panel = new ConsolePanel({
-      session,
-      rendermime: rendermime.clone(),
-      renderer: renderer
+      session, rendermime: rendermime.clone(), renderer
     });
     let specs = manager.specs;
     let displayName = specs.kernelspecs[session.kernel.name].display_name;
