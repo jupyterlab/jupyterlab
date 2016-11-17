@@ -37,6 +37,7 @@ lab.registerPlugins([
   require('jupyterlab/lib/running/plugin').runningSessionsExtension,
   require('jupyterlab/lib/services/plugin').servicesProvider,
   require('jupyterlab/lib/shortcuts/plugin').shortcutsExtension,
+  require('jupyterlab/lib/statedb/plugin').stateProvider,
   require('jupyterlab/lib/terminal/plugin').terminalExtension
 ]);
 

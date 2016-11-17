@@ -30,6 +30,10 @@ import {
 } from '../services';
 
 import {
+  IStateDB
+} from '../statedb';
+
+import {
   TerminalWidget
 } from './index';
 
@@ -45,6 +49,11 @@ const LANDSCAPE_ICON_CLASS = 'jp-MainAreaLandscapeIcon';
 const TERMINAL_ICON_CLASS = 'jp-ImageTerminal';
 
 /**
+ * The terminal plugin state namespace.
+ */
+const NAMESPACE = 'terminals';
+
+/**
  * The terminal widget instance tracker.
  */
 const tracker = new InstanceTracker<TerminalWidget>();
@@ -56,13 +65,13 @@ const tracker = new InstanceTracker<TerminalWidget>();
 export
 const terminalExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.terminal',
-  requires: [IServiceManager, IMainMenu, ICommandPalette],
+  requires: [IServiceManager, IMainMenu, ICommandPalette, IStateDB],
   activate: activateTerminal,
   autoStart: true
 };
 
 
-function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette): void {
+function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB): void {
   let { commands, keymap } = app;
   let newTerminalId = 'terminal:create-new';
   let increaseTerminalFontSize = 'terminal:increase-font';
@@ -80,6 +89,7 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
     tracker.sync(args.newValue);
   });
 
+  // Add terminal commands.
   commands.addCommand(newTerminalId, {
     label: 'New Terminal',
     caption: 'Start a new terminal session',
@@ -97,9 +107,15 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
       } else {
         promise = services.terminals.startNew();
       }
-      promise.then(session => { term.session = session; });
+      promise.then(session => {
+        let key = `${NAMESPACE}:${session.name}`;
+        term.session = session;
+        state.save(key, session.name);
+        term.disposed.connect(() => { state.remove(key); });
+      });
     }
   });
+
   commands.addCommand(increaseTerminalFontSize, {
     label: 'Increase Terminal Font Size',
     execute: () => {
@@ -109,6 +125,7 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
       }
     }
   });
+
   commands.addCommand(decreaseTerminalFontSize, {
     label: 'Decrease Terminal Font Size',
     execute: () => {
@@ -118,6 +135,7 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
       }
     }
   });
+
   commands.addCommand(toggleTerminalTheme, {
     label: 'Toggle Terminal Theme',
     caption: 'Switch Terminal Background and Font Colors',
@@ -135,6 +153,7 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
       });
     }
   });
+
   commands.addCommand(openTerminalId, {
     execute: args => {
       let name = args['name'] as string;
@@ -149,6 +168,14 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
     }
   });
 
+  // Reload any terminals whose state has been stored.
+  Promise.all([state.fetchNamespace(NAMESPACE), app.started])
+    .then(([terms]) => {
+      let create = 'terminal:create-new';
+      terms.forEach(name => { app.commands.execute(create, { name }); });
+    });
+
+  // Add command palette items.
   let category = 'Terminal';
   [
     newTerminalId,
@@ -157,6 +184,7 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
     toggleTerminalTheme
   ].forEach(command => palette.addItem({ command, category }));
 
+  // Add menu items.
   let menu = new Menu({ commands, keymap });
   menu.title.label = 'Terminal';
   menu.addItem({ command: newTerminalId });

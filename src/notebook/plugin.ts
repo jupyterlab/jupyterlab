@@ -39,6 +39,10 @@ import {
 } from '../services';
 
 import {
+  IStateDB
+} from '../statedb';
+
+import {
   INotebookTracker, NotebookModelFactory, NotebookPanel, NotebookTracker,
   NotebookWidgetFactory, NotebookActions
 } from './index';
@@ -53,6 +57,11 @@ const PORTRAIT_ICON_CLASS = 'jp-MainAreaPortraitIcon';
  * The class name for the notebook icon from the default theme.
  */
 const NOTEBOOK_ICON_CLASS = 'jp-ImageNotebook';
+
+/**
+ * The notebook plugin state namespace.
+ */
+const NAMESPACE = 'notebooks';
 
 /**
  * The notebook instance tracker.
@@ -121,7 +130,8 @@ const notebookTrackerProvider: JupyterLabPlugin<INotebookTracker> = {
     IMainMenu,
     ICommandPalette,
     IInspector,
-    NotebookPanel.IRenderer
+    NotebookPanel.IRenderer,
+    IStateDB
   ],
   activate: activateNotebookHandler,
   autoStart: true
@@ -131,7 +141,7 @@ const notebookTrackerProvider: JupyterLabPlugin<INotebookTracker> = {
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector, renderer: NotebookPanel.IRenderer): INotebookTracker {
+function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector, renderer: NotebookPanel.IRenderer, state: IStateDB): INotebookTracker {
   let widgetFactory = new NotebookWidgetFactory({
     name: 'Notebook',
     fileExtensions: ['.ipynb'],
@@ -180,7 +190,25 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     inspector.source = widget.content.inspectionHandler;
     // Add the notebook panel to the tracker.
     tracker.add(widget);
+    // Add the notebook path to the state database.
+    let key = `${NAMESPACE}:${widget.context.path}`;
+    state.save(key, widget.context.path);
+    // Remove the notebook path from the state database on disposal.
+    widget.disposed.connect(() => { state.remove(key); });
+    // Keep track of path changes in the state database.
+    widget.context.pathChanged.connect((sender, path) => {
+      state.remove(key);
+      key = `${NAMESPACE}:${path}`;
+      state.save(key, path);
+    });
   });
+
+  // Reload any notebooks whose state has been stored.
+  Promise.all([state.fetchNamespace(NAMESPACE), app.started])
+    .then(([paths]) => {
+      let open = 'file-operations:open';
+      paths.forEach(path => { app.commands.execute(open, { path }); });
+    });
 
   // Add main menu notebook menu.
   mainMenu.addMenu(createMenu(app), { rank: 20 });
