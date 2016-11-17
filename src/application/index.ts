@@ -41,6 +41,10 @@ class JupyterLab extends Application<ApplicationShell> {
    * Start the JupyterLab application.
    */
   start(options: Application.IStartOptions = {}): Promise<void> {
+    if (this._startedFlag) {
+      return Promise.resolve(void 0);
+    }
+    this._startedFlag = true;
     return super.start(options).then(() => { this._startedResolve(); });
   }
 
@@ -51,6 +55,7 @@ class JupyterLab extends Application<ApplicationShell> {
     return new ApplicationShell();
   }
 
-  private _startedResolve: () => void;
+  private _startedFlag = false;
   private _startedPromise: Promise<void> = null;
+  private _startedResolve: () => void = null;
 }
