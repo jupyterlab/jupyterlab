@@ -54,6 +54,10 @@ import {
 } from '../services';
 
 import {
+  IStateDB
+} from '../statedb';
+
+import {
   IConsoleTracker, ConsolePanel, ConsoleContent
 } from './index';
 
@@ -72,7 +76,8 @@ const consoleTrackerProvider: JupyterLabPlugin<IConsoleTracker> = {
     IInspector,
     ICommandPalette,
     IPathTracker,
-    ConsoleContent.IRenderer
+    ConsoleContent.IRenderer,
+    IStateDB
   ],
   activate: activateConsole,
   autoStart: true
@@ -95,6 +100,11 @@ const CONSOLE_ICON_CLASS = 'jp-ImageCodeConsole';
 const CONSOLE_REGEX = /^console-(\d)+-[0-9a-f]+$/;
 
 /**
+ * The console plugin state namespace.
+ */
+const NAMESPACE = 'consoles';
+
+/**
  * The console panel instance tracker.
  */
 const tracker = new InstanceTracker<ConsolePanel>();
@@ -114,7 +124,7 @@ interface ICreateConsoleArgs extends JSONObject {
 /**
  * Activate the console extension.
  */
-function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, renderer: ConsoleContent.IRenderer): IConsoleTracker {
+function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, renderer: ConsoleContent.IRenderer, state: IStateDB): IConsoleTracker {
   let manager = services.sessions;
 
   let { commands, keymap } = app;
@@ -360,7 +370,17 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     inspector.source = panel.content.inspectionHandler;
     // Add the console panel to the tracker.
     tracker.add(panel);
+    // Add the console to the state database.
+    let key = `${NAMESPACE}:${session.id}`;
+    state.save(key, session.id);
+    // Remove the console from the state database on disposal.
+    panel.disposed.connect(() => { state.remove(key); });
   }
+
+  // Reload any consoles whose state has been stored.
+  Promise.all([state.fetchNamespace(NAMESPACE), app.started]).then(([ids]) => {
+    ids.forEach(id => { app.commands.execute('console:open', { id }); });
+  });
 
   command = 'console:switch-kernel';
   commands.addCommand(command, {
