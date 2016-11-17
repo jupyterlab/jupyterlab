@@ -415,6 +415,16 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         this.kernelChanged.emit(kernel);
       });
       return session.kernel;
+    }).catch(err => {
+      let response = JSON.parse(err.xhr.response);
+      let body = document.createElement('pre');
+      body.textContent = response['traceback'];
+      showDialog({
+        title: 'Error Starting Kernel',
+        body,
+        buttons: [okButton]
+      });
+      return Promise.reject(err);
     });
   }
 
