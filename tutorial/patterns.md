@@ -93,6 +93,13 @@ The subclassed methods would be called before the subclass constructor has
 finished evaluating, resulting in undefined state.
 
 
+## Getters vs. Methods
+
+Prefer a method when the return value must be computed each time.
+Prefer a getter for simple attribute lookup.
+A getter should yield the same value every time.
+
+
 ## Data Structures
 
 Prefer to use Phosphor [Phosphor `Vector`](http://phosphorjs.github.io/phosphor/api/classes/_collections_vector_.vector.html) 
@@ -117,6 +124,7 @@ value should not need to be accessed randomly.
 Prefer an `ISequence` when:
 - A return value or public attribute based on an internal `Vector` where the 
 value may need to be accessed randomly.
+
 
 ## DOM Events
 
