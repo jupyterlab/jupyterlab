@@ -15,6 +15,8 @@
   --jp-private-notebook-cell-prompt-width: 90px;
   --jp-private-notebook-cell-inprompt-color: #303F9F;
   --jp-private-notebook-cell-outprompt-color: #D84315;
+  --jp-private-notebook-cell-font-family: 'Helvetica';
+  --jp-private-notebook-cell-prompt-letter-spacing: 2px;
 }
 
 
