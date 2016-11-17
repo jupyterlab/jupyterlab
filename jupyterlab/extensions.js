@@ -27,5 +27,6 @@ module.exports = [
   require('../lib/running/plugin').runningSessionsExtension,
   require('../lib/services/plugin').servicesProvider,
   require('../lib/shortcuts/plugin').shortcutsExtension,
-  require('../lib/terminal/plugin').terminalExtension
+  require('../lib/terminal/plugin').terminalExtension,
+  require('jupyterlab/lib/keyboardshortcuts/plugin').keyboardShortcutsExtension
 ];
