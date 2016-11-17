@@ -24,12 +24,12 @@ import {
 /**
  * The class name added to toolbar interrupt button.
  */
-const TOOLBAR_INTERRUPT_CLASS = 'jp-Kernel-toolbarInterrupt';
+const TOOLBAR_INTERRUPT_CLASS = 'jp-StopIcon';
 
 /**
  * The class name added to toolbar restart button.
  */
-const TOOLBAR_RESTART_CLASS = 'jp-Kernel-toolbarRestart';
+const TOOLBAR_RESTART_CLASS = 'jp-RefreshIcon';
 
 /**
  * The class name added to toolbar kernel name text.
