@@ -38,8 +38,14 @@ describe('docregistry/context', () => {
       context = new Context({ manager, factory, path: 'foo' });
     });
 
-    afterEach(() => {
+    afterEach((done) => {
+      if (context.kernel) {
+        context.kernel.ready().then(() => {
+          context.dispose();
+        }).then(done, done);
+      }
       context.dispose();
+      done();
     });
 
     describe('#constructor()', () => {
@@ -58,9 +64,7 @@ describe('docregistry/context', () => {
         context.kernelChanged.connect((sender, args) => {
           expect(sender).to.be(context);
           expect(args.name).to.be(name);
-          context.changeKernel(null).then(() => {
-            done();
-          }).catch(done);
+          done();
         });
         context.changeKernel({ name });
       });
@@ -158,8 +162,6 @@ describe('docregistry/context', () => {
         let name = manager.specs.default;
         context.changeKernel({ name }).then(() => {
           expect(context.kernel.name).to.be(name);
-          return context.changeKernel(null);
-        }).then(() => {
           done();
         }).catch(done);
       });
@@ -238,15 +240,15 @@ describe('docregistry/context', () => {
         let name = manager.specs.default;
         context.changeKernel({ name }).then(() => {
           expect(context.kernel.name).to.be(name);
-          done();
-        }).catch(done);
+        }).then(done, done);
       });
 
       it('should shut down the session if given `null`', (done) => {
         let name = manager.specs.default;
         context.changeKernel({ name }).then(() => {
           expect(context.kernel.name).to.be(name);
-          console.log('\n\nchanging kernel to null');
+          return context.kernel.ready();
+        }).then(() => {
           return context.changeKernel(null);
         }).then(() => {
           expect(context.kernel).to.be(null);
