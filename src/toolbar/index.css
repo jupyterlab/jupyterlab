@@ -29,6 +29,11 @@
   font-family: FontAwesome;
   text-align: center;
   display: inline-block;
+  height: 24px;
+  width: 32px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 16px;
 }
 
 

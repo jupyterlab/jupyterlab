@@ -36,32 +36,32 @@ import {
 /**
  * The class name added to toolbar save button.
  */
-const TOOLBAR_SAVE_CLASS = 'jp-Notebook-toolbarSave';
+const TOOLBAR_SAVE_CLASS = 'jp-SaveIcon';
 
 /**
  * The class name added to toolbar insert button.
  */
-const TOOLBAR_INSERT_CLASS = 'jp-Notebook-toolbarInsert';
+const TOOLBAR_INSERT_CLASS = 'jp-AddIcon';
 
 /**
  * The class name added to toolbar cut button.
  */
-const TOOLBAR_CUT_CLASS = 'jp-Notebook-toolbarCut';
+const TOOLBAR_CUT_CLASS = 'jp-CutIcon';
 
 /**
  * The class name added to toolbar copy button.
  */
-const TOOLBAR_COPY_CLASS = 'jp-Notebook-toolbarCopy';
+const TOOLBAR_COPY_CLASS = 'jp-CopyIcon';
 
 /**
  * The class name added to toolbar paste button.
  */
-const TOOLBAR_PASTE_CLASS = 'jp-Notebook-toolbarPaste';
+const TOOLBAR_PASTE_CLASS = 'jp-PasteIcon';
 
 /**
  * The class name added to toolbar run button.
  */
-const TOOLBAR_RUN_CLASS = 'jp-Notebook-toolbarRun';
+const TOOLBAR_RUN_CLASS = 'jp-RunIcon';
 
 /**
  * The class name added to toolbar cell type dropdown wrapper.
