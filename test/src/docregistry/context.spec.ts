@@ -43,9 +43,10 @@ describe('docregistry/context', () => {
         context.kernel.ready().then(() => {
           context.dispose();
         }).then(done, done);
+      } else {
+        context.dispose();
+        done();
       }
-      context.dispose();
-      done();
     });
 
     describe('#constructor()', () => {
