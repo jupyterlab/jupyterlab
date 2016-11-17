@@ -93,18 +93,3 @@
 .jp-FolderIcon {
   background-image: url(images/landingfolder.svg);
 }
-
-
-.jp-MainAreaLandscapeIcon {
-  background-repeat: no-repeat;
-  margin-right: 2px;
-  width: 22px;
-}
-
-
-.jp-MainAreaPortraitIcon {
-  background-position: 0 1px;
-  background-repeat: no-repeat;
-  margin-right: 0;
-  width: 20px;
-}
