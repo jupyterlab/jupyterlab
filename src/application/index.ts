@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  utils
+} from '@jupyterlab/services';
+
+import {
   Application
 } from 'phosphor/lib/ui/application';
 
@@ -23,18 +27,10 @@ type JupyterLabPlugin<T> = Application.IPlugin<JupyterLab, T>;
 export
 class JupyterLab extends Application<ApplicationShell> {
   /**
-   * Create a new JupyterLab instance.
-   */
-  constructor() {
-    super();
-    this._startedPromise = new Promise(fn => { this._startedResolve = fn; });
-  }
-
-  /**
    * A promise that resolves when the JupyterLab application is started.
    */
   get started(): Promise<void> {
-    return this._startedPromise;
+    return this._startedDelegate.promise;
   }
 
   /**
@@ -45,7 +41,9 @@ class JupyterLab extends Application<ApplicationShell> {
       return Promise.resolve(void 0);
     }
     this._startedFlag = true;
-    return super.start(options).then(() => { this._startedResolve(); });
+    return super.start(options).then(() => {
+      this._startedDelegate.resolve(void 0);
+    });
   }
 
   /**
@@ -55,7 +53,6 @@ class JupyterLab extends Application<ApplicationShell> {
     return new ApplicationShell();
   }
 
+  private _startedDelegate = new utils.PromiseDelegate<void>();
   private _startedFlag = false;
-  private _startedPromise: Promise<void> = null;
-  private _startedResolve: () => void = null;
 }
