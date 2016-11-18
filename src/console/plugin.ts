@@ -243,6 +243,9 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
           name = `Console ${name.match(CONSOLE_REGEX)[1]}`;
           createConsole(session, name);
           return session.id;
+        }).catch(reason => {
+          // Remove console from the state database if session does not exist.
+          state.remove(`${NAMESPACE}:${args.id}`);
         });
       }
 
