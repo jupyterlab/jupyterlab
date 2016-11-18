@@ -117,6 +117,30 @@ describe('filebrowser/model', () => {
           simulate(items[1], 'click');
         });
 
+        it('should switch to the home directory', (done) => {
+          Widget.attach(crumbs, document.body);
+          sendMessage(crumbs, WidgetMessage.UpdateRequest);
+          let items = crumbs.node.getElementsByClassName(ITEM_CLASS);
+          expect(items.length).to.be(3);
+          model.pathChanged.connect(() => {
+            expect(model.path).to.be('');
+            done();
+          });
+          simulate(items[0], 'click');
+        });
+
+        it('should refresh the current directory', (done) => {
+          Widget.attach(crumbs, document.body);
+          sendMessage(crumbs, WidgetMessage.UpdateRequest);
+          let items = crumbs.node.getElementsByClassName(ITEM_CLASS);
+          expect(items.length).to.be(3);
+          model.refreshed.connect(() => {
+            expect(model.path).to.be(path);
+            done();
+          });
+          simulate(items[2], 'click');
+        });
+
       });
 
     });
