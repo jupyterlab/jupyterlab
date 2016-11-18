@@ -94,68 +94,66 @@ const ANSWER_CLASS = 'jp-FAQ-answer';
  */
 const ANCHOR_CLASS = 'jp-FAQ-a';
 
-
+/**
+ * FaqModel holds data which the FaqWidget will render.
+ */
 class FaqModel extends VDomModel {
+  // Title of the FAQ plugin.
+  readonly title: string;
+  // Contain subheadings for each section.
+  readonly subHeadings: string[];
+  // Contain questions for `the basics` section.
+  readonly basicsQuestions: string[];
+  // Contain questions for the `features` section.
+  readonly featuresQuestions: string[];
+  // Contain questions for the `developer` section.
+  readonly developerQuestions: string[];
+
+  /**
+   * Construct a new faq model.
+   */
   constructor() {
     super();
-    this._title = 'Frequently Asked Questions';
-    this._subHeadings = [
+    this.title = 'Frequently Asked Questions';
+    this.subHeadings = [
       'THE BASICS',
       'FEATURES',
       'DEVELOPER'
     ];
-    this._basicsQuestions = [
+    this.basicsQuestions = [
       'What is JupyterLab?',
       'What is a Jupyter Notebook?',
       'How stable is JupyterLab?',
       'I\'m confused with the interface. How do I navigate around JupyterLab?'
     ];
-    this._featuresQuestions = [
+    this.featuresQuestions = [
       'How do I add more kernels/languages to JupyterLab?',
       'How can I share my notebooks?'
     ];
-    this._developerQuestions = [
+    this.developerQuestions = [
       'How do I report a bug?',
       'I have security concerns about JupyterLab.',
       'How can I contribute?'
     ];
   }
-
-  get title(): string {
-    return this._title;
-  }
-
-  get subHeadings(): string[] {
-    return this._subHeadings;
-  }
-
-  get basicsQuestions(): string[] {
-    return this._basicsQuestions;
-  }
-
-  get featuresQuestions(): string[] {
-    return this._featuresQuestions;
-  }
-
-  get developerQuestions(): string[] {
-    return this._developerQuestions;
-  }
-
-
-  private _title: string;
-  private _subHeadings: string[];
-  private _basicsQuestions: string[];
-  private _featuresQuestions: string[];
-  private _developerQuestions: string[];
 }
 
+/**
+ * A virtual-DOM-based widget for the FAQ plugin.
+ */
 class FaqWidget extends VDomWidget<FaqModel> {
+  /**
+   * Construct a new faq widget.
+   */
   constructor(app: JupyterLab) {
     super();
     this._app = app;
     this.addClass(FAQ_CLASS);
   }
 
+  /**
+   * Render the faq plugin to virtual DOM nodes.
+   */
   protected render(): VNode[] {
     let subHeadings = this.model.subHeadings;
     let basicsQuestions = this.model.basicsQuestions;
