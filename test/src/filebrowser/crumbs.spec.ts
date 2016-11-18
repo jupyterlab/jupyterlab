@@ -16,6 +16,10 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
+  simulate
+} from 'simulate-event';
+
+import {
   BreadCrumbs, FileBrowserModel
 } from '../../../lib/filebrowser';
 
@@ -96,8 +100,13 @@ describe('filebrowser/model', () => {
 
       context('click', () => {
 
-        it('should switch to the child directory', () => {
-
+        it('should switch to the child directory', (done) => {
+          let child = crumbs.node.getElementsByClassName('jp-BreadCrumbs-item')[1];
+          model.pathChanged.connect(() => {
+            expect(model.path).to.be(parent);
+            done();
+          });
+          simulate(child, 'click');
         });
 
       });
