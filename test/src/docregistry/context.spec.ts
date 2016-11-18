@@ -27,7 +27,7 @@ describe('docregistry/context', () => {
 
   before((done) => {
     manager = new ServiceManager();
-    manager.ready().then(done, done);
+    manager.ready.then(done, done);
   });
 
   describe('Context', () => {
@@ -40,7 +40,7 @@ describe('docregistry/context', () => {
 
     afterEach((done) => {
       if (context.kernel) {
-        context.kernel.ready().then(() => {
+        context.kernel.ready.then(() => {
           context.dispose();
         }).then(done, done);
       } else {
@@ -104,7 +104,7 @@ describe('docregistry/context', () => {
 
       it('should indicate whether the context is ready', (done) => {
         expect(context.isReady).to.be(false);
-        context.ready().then(() => {
+        context.ready.then(() => {
           expect(context.isReady).to.be(true);
           done();
         }).catch(done);
@@ -116,7 +116,7 @@ describe('docregistry/context', () => {
     describe('#ready()', () => {
 
       it('should resolve when the file is saved for the first time', (done) => {
-        context.ready().then(done, done);
+        context.ready.then(done, done);
         context.save().catch(done);
       });
 
@@ -126,7 +126,7 @@ describe('docregistry/context', () => {
           format: factory.fileFormat,
           content: 'foo'
         });
-        context.ready().then(done, done);
+        context.ready.then(done, done);
         context.revert().catch(done);
       });
 
@@ -184,7 +184,7 @@ describe('docregistry/context', () => {
       });
 
       it('should be set after poulation', (done) => {
-        context.ready().then(() => {
+        context.ready.then(() => {
           expect(context.contentsModel.name).to.be('foo');
           done();
         });
@@ -248,7 +248,7 @@ describe('docregistry/context', () => {
         let name = manager.specs.default;
         context.changeKernel({ name }).then(() => {
           expect(context.kernel.name).to.be(name);
-          return context.kernel.ready();
+          return context.kernel.ready;
         }).then(() => {
           return context.changeKernel(null);
         }).then(() => {
