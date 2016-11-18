@@ -204,7 +204,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
   });
 
   // Reload any notebooks whose state has been stored.
-  Promise.all([state.fetchNamespace(NAMESPACE), app.started, services.ready()])
+  Promise.all([state.fetchNamespace(NAMESPACE), app.started, services.ready])
     .then(([items]) => {
       let open = 'file-operations:open';
       items.forEach(item => { app.commands.execute(open, item.value); });
