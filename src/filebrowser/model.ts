@@ -164,9 +164,6 @@ class FileBrowserModel implements IDisposable, IPathTracker {
     let oldValue = this.path;
     let options: Contents.IFetchOptions = { content: true };
     this._pendingPath = newValue;
-    if (newValue === '.') {
-      newValue = this.path;
-    }
     if (oldValue !== newValue) {
       this._sessions.clear();
     }
