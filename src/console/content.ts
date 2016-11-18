@@ -498,7 +498,7 @@ class ConsoleContent extends Widget {
    */
   private _initialize(): void {
     let kernel = this._session.kernel;
-    kernel.ready().then(() => {
+    kernel.ready.then(() => {
       this._handleInfo(kernel.info);
     });
   }

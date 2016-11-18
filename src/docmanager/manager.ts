@@ -294,7 +294,7 @@ class DocumentManager implements IDisposable {
       manager: this._serviceManager
     });
     Private.saveHandlerProperty.set(context, handler);
-    context.ready().then(() => {
+    context.ready.then(() => {
       handler.start();
     });
     context.disposed.connect(() => {

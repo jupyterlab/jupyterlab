@@ -96,7 +96,7 @@ describe('notebook/notebook/panel', () => {
 
   before((done) => {
     manager = new ServiceManager();
-    manager.ready().then(done, done);
+    manager.ready.then(done, done);
   });
 
   beforeEach(() => {
@@ -273,7 +273,7 @@ describe('notebook/notebook/panel', () => {
         model.fromJSON(DEFAULT_CONTENT);
         expect(model.cells.canUndo).to.be(true);
         panel.context = context;
-        context.ready().then(() => {
+        context.ready.then(() => {
           expect(model.cells.canUndo).to.be(false);
           done();
         });

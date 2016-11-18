@@ -45,7 +45,7 @@ describe('docmanager/manager', () => {
 
   before((done) => {
     services = new ServiceManager();
-    services.ready().then(done, done);
+    services.ready.then(done, done);
   });
 
   beforeEach(() => {
@@ -314,7 +314,7 @@ describe('docmanager/manager', () => {
             }
           });
           let context = manager.contextForWidget(widget);
-          context.ready().then(() => {
+          context.ready.then(() => {
             manager.closeFile(model.path);
           });
         }).catch(done);
@@ -345,7 +345,7 @@ describe('docmanager/manager', () => {
             }
           });
           let context = manager.contextForWidget(widget);
-          context.ready().then(() => {
+          context.ready.then(() => {
             manager.closeAll();
           });
         }).catch(done);

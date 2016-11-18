@@ -129,7 +129,7 @@ function selectKernel(options: IKernelSelection): Promise<Kernel.IModel> {
  */
 export
 function selectKernelForContext(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, manager: Session.IManager, host?: HTMLElement): Promise<void> {
-  return manager.ready().then(() => {
+  return manager.ready.then(() => {
     let options: IKernelSelection = {
       name: context.path.split('/').pop(),
       specs: manager.specs,

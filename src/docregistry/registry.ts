@@ -632,7 +632,7 @@ namespace DocumentRegistry {
     /**
      * A promise that is fulfilled when the context is ready.
      */
-    ready(): Promise<void>;
+    readonly ready: Promise<void>;
 
     /**
      * Start the default kernel for the context.

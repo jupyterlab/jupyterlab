@@ -113,7 +113,7 @@ class DocumentWidgetManager implements IDisposable {
     context.fileChanged.connect(() => {
       this.setCaption(widget);
     });
-    context.ready().then(() => {
+    context.ready.then(() => {
       this.setCaption(widget);
     });
     return widget;

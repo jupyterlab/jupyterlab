@@ -283,7 +283,7 @@ class NotebookPanel extends Widget {
 
     // Clear the cells when the context is initially populated.
     if (!newValue.isReady) {
-      newValue.ready().then(() => {
+      newValue.ready.then(() => {
         let model = newValue.model;
         // Clear the undo state of the cells.
         if (model) {
@@ -307,7 +307,7 @@ class NotebookPanel extends Widget {
     if (!this.model || !kernel) {
       return;
     }
-    kernel.ready().then(() => {
+    kernel.ready.then(() => {
       if (this.model) {
         this._updateLanguage(kernel.info.language_info);
       }
@@ -327,7 +327,7 @@ class NotebookPanel extends Widget {
    * Update the kernel spec.
    */
   private _updateSpec(kernel: Kernel.IKernel): void {
-    kernel.spec().then(spec => {
+    kernel.getSpec().then(spec => {
       let specCursor = this.model.getMetadata('kernelspec');
       specCursor.setValue({
         name: kernel.name,

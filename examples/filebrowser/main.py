@@ -1,5 +1,5 @@
 """
-An example demonstrating a stand-alone "filebrowser" example.
+An example demonstrating a stand-alone "filebrowser".
 
 Copyright (c) Jupyter Development Team.
 Distributed under the terms of the Modified BSD License.
@@ -50,13 +50,16 @@ def main(argv):
     """Start the 'filebrowser' example.
 
     - Start the Tornado main event loop for the Jupyter notebook server
-    - Set up the main page event handler for the 'console' example
+    - Set up the main page event handler for the 'filebrowser' example
 
     """
-    url = "http://localhost:%s" % PORT
-
-    nb_command = [sys.executable, '-m', 'notebook', '--no-browser', '--debug',
-                  '--NotebookApp.allow_origin="%s"' % url]
+    nb_command = [sys.executable, '-m', 'notebook', '--no-browser',
+                  '--debug',
+                  # FIXME: allow-origin=* only required for notebook < 4.3
+                  '--NotebookApp.allow_origin="*"',
+                  # disable user password:
+                  '--NotebookApp.password=',
+              ]
     nb_server = subprocess.Popen(nb_command, stderr=subprocess.STDOUT,
                                  stdout=subprocess.PIPE)
 
@@ -67,7 +70,7 @@ def main(argv):
             continue
         print(line)
         if 'Jupyter Notebook is running at:' in line:
-            base_url = re.search('(http.*?)$', line).groups()[0]
+            base_url = re.search(r'(http[^\?]+)', line).groups()[0]
             break
 
     while 1:
@@ -96,14 +99,11 @@ def main(argv):
     app = tornado.web.Application(handlers, static_path='build',
                                   template_path='.',
                                   compiled_template_cache=False)
-
     app.listen(PORT, 'localhost')
 
     # For Windows, add no-op to wake every 5 seconds (5000 ms) to handle
     # signals that may be ignored by the Tornado main event loop
     if sys.platform.startswith('win'):
-        # add no-op to wake every 5s
-        # to handle signals that may be ignored by the inner loop
         pc = ioloop.PeriodicCallback(lambda: None, 5000)
         pc.start()
 

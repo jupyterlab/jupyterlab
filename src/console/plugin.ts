@@ -236,7 +236,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
 
       // If we get a session, use it.
       if (args.id) {
-        return manager.ready().then(() => {
+        return manager.ready.then(() => {
           return manager.connectTo(args.id);
         }).then(session => {
           name = session.path.split('/').pop();
@@ -255,7 +255,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       path = `${path}/console-${count}-${utils.uuid()}`;
 
       // Get the kernel model.
-      return manager.ready().then(() => {
+      return manager.ready.then(() => {
         return getKernel(args, name);
       }).then(kernel => {
         if (!kernel) {
@@ -312,7 +312,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     if (args.kernel) {
       return Promise.resolve(args.kernel);
     }
-    return manager.ready().then(() => {
+    return manager.ready.then(() => {
       let options = {
         name,
         specs: manager.specs,
@@ -393,7 +393,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       let widget = current.content;
       let session = widget.session;
       let lang = '';
-      manager.ready().then(() => {
+      manager.ready.then(() => {
         let specs = manager.specs;
         if (session.kernel) {
           lang = specs.kernelspecs[session.kernel.name].language;

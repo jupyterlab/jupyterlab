@@ -47,7 +47,7 @@ const FILE_CONFLICT_CLASS = 'jp-mod-conflict';
 export
 function createFromDialog(model: FileBrowserModel, manager: DocumentManager, creatorName: string): Promise<Widget> {
   let handler = new CreateFromHandler(model, manager, creatorName);
-  return manager.services.ready().then(() => {
+  return manager.services.ready.then(() => {
     return handler.populate();
   }).then(() => {
     return handler.showDialog();
@@ -61,7 +61,7 @@ function createFromDialog(model: FileBrowserModel, manager: DocumentManager, cre
 export
 function openWithDialog(path: string, manager: DocumentManager, host?: HTMLElement): Promise<Widget> {
   let handler: OpenWithHandler;
-  return manager.services.ready().then(() => {
+  return manager.services.ready.then(() => {
     handler = new OpenWithHandler(path, manager);
     return showDialog({
       title: 'Open File',
@@ -82,7 +82,7 @@ function openWithDialog(path: string, manager: DocumentManager, host?: HTMLEleme
 export
 function createNewDialog(model: FileBrowserModel, manager: DocumentManager, host?: HTMLElement): Promise<Widget> {
   let handler: CreateNewHandler;
-  return manager.services.ready().then(() => {
+  return manager.services.ready.then(() => {
     handler = new CreateNewHandler(model, manager);
     return showDialog({
       title: 'Create New File',

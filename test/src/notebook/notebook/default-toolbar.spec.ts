@@ -80,7 +80,7 @@ function startKernel(context: DocumentRegistry.IContext<INotebookModel>): Promis
     return context.startDefaultKernel();
   }).then(k => {
     kernel = k;
-    return kernel.ready();
+    return kernel.ready;
   }).then(() => {
     return kernel;
   });
@@ -305,7 +305,7 @@ describe('notebook/notebook/default-toolbar', () => {
         let item = createKernelNameItem(panel);
         startKernel(context).then(kernel => {
           console.log('started kernel');
-          return kernel.spec();
+          return kernel.getSpec();
         }).then(spec => {
           let name = spec.display_name;
           expect(item.node.textContent).to.be(name);
@@ -322,7 +322,7 @@ describe('notebook/notebook/default-toolbar', () => {
         let item = createKernelNameItem(panel);
         startKernel(context).then(kernel => {
           console.log('started kernel');
-          return kernel.ready();
+          return kernel.ready;
         }).then(() => {
           panel.context = null;
           expect(item.node.textContent).to.be('No Kernel!');
