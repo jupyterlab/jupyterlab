@@ -211,10 +211,10 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
   ].forEach(command => palette.addItem({ command, category: 'Editor' }));
 
   // Reload any editor widgets whose state has been stored.
-  Promise.all([state.fetchNamespace(NAMESPACE), app.started]).then(([coll]) => {
-      let { values } = coll;
+  Promise.all([state.fetchNamespace(NAMESPACE), app.started])
+    .then(([items]) => {
       let open = 'file-operations:open';
-      values.forEach(args => { app.commands.execute(open, args); });
+      items.forEach(item => { app.commands.execute(open, item.value); });
     });
 
   return tracker;

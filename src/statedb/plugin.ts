@@ -10,7 +10,7 @@ import {
 } from '../application';
 
 import {
-  IStateCollection, IStateDB
+  IStateDB, IStateItem
 } from './index';
 
 
@@ -76,21 +76,22 @@ class StateDB implements IStateDB {
    * console in order to optimistically return any extant data without failing.
    * This promise will always succeed.
    */
-  fetchNamespace(namespace: string): Promise<IStateCollection> {
-    let ids: string[] = [];
-    let values: JSONObject[] = [];
+  fetchNamespace(namespace: string): Promise<IStateItem[]> {
+    let items: IStateItem[] = [];
     for (let i = 0, len = window.localStorage.length; i < len; i++) {
       let key = window.localStorage.key(i);
       if (key.indexOf(`${namespace}:`) === 0) {
         try {
-          ids.push(key);
-          values.push(JSON.parse(window.localStorage.getItem(key)));
+          items.push({
+            id: key,
+            value: JSON.parse(window.localStorage.getItem(key))
+          });
         } catch (error) {
           console.warn(error);
         }
       }
     }
-    return Promise.resolve({ ids, values });
+    return Promise.resolve(items);
   }
 
   /**

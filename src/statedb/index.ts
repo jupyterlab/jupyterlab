@@ -22,16 +22,16 @@ const IStateDB = new Token<IStateDB>('jupyter.services.statedb');
 /**
  */
 export
-interface IStateCollection {
+interface IStateItem {
   /**
-   * The identifier keys of individual data values in the state database.
+   * The identifier key for a state item.
    */
-  ids: string;
+  id: string;
 
   /**
-   * The data values within a namespace.
+   * The data value for a state item.
    */
-  values: JSONObject[];
+  value: JSONObject;
 }
 
 
@@ -80,7 +80,7 @@ interface IStateDB {
    * console in order to optimistically return any extant data without failing.
    * This promise will always succeed.
    */
-  fetchNamespace(namespace: string): Promise<IStateCollection>;
+  fetchNamespace(namespace: string): Promise<IStateItem[]>;
 
   /**
    * Remove a value from the database.

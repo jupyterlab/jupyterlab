@@ -169,13 +169,11 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
   });
 
   // Reload any terminals whose state has been stored.
-  Promise.all([state.fetchNamespace(NAMESPACE), app.started]).then(([coll]) => {
-    let { values } = coll;
-    let create = 'terminal:create-new';
-    values.forEach(args => {
-      app.commands.execute(create, args);
+  Promise.all([state.fetchNamespace(NAMESPACE), app.started])
+    .then(([items]) => {
+      let create = 'terminal:create-new';
+      items.forEach(item => { app.commands.execute(create, item.value); });
     });
-  });
 
   // Add command palette items.
   let category = 'Terminal';

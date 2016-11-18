@@ -205,10 +205,9 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
 
   // Reload any notebooks whose state has been stored.
   Promise.all([state.fetchNamespace(NAMESPACE), app.started, services.ready()])
-    .then(([coll]) => {
-      let { values } = coll;
+    .then(([items]) => {
       let open = 'file-operations:open';
-      values.forEach(args => { app.commands.execute(open, args); });
+      items.forEach(item => { app.commands.execute(open, item.value); });
     });
 
   // Add main menu notebook menu.

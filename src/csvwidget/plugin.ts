@@ -63,9 +63,9 @@ function activateCSVWidget(app: JupyterLab, registry: IDocumentRegistry, state: 
   });
 
   // Reload any CSV widgets whose state has been stored.
-  Promise.all([state.fetchNamespace(NAMESPACE), app.started]).then(([coll]) => {
-    let { values } = coll;
-    let open = 'file-operations:open';
-    values.forEach(args => { app.commands.execute(open, args); });
-  });
+  Promise.all([state.fetchNamespace(NAMESPACE), app.started])
+    .then(([items]) => {
+      let open = 'file-operations:open';
+      items.forEach(item => { app.commands.execute(open, item.value); });
+    });
 }
