@@ -10,10 +10,6 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  Message
-} from 'phosphor/lib/core/messaging';
-
-import {
   CommandRegistry
 } from 'phosphor/lib/ui/commandregistry';
 

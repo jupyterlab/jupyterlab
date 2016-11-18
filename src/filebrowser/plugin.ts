@@ -255,7 +255,7 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: Documen
   commands.addCommand(cmdIds.open, {
     execute: args => {
       let path = args['path'] as string;
-      fbWidget.openPath(path);
+      return fbWidget.openPath(path);
     }
   });
 
