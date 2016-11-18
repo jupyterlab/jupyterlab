@@ -58,7 +58,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     this._model = this._factory.createNew(lang);
     manager.sessions.runningChanged.connect(this._onSessionsChanged, this);
     manager.contents.fileChanged.connect(this._onFileChanged, this);
-    this._readyPromise = manager.ready().then(() => {
+    this._readyPromise = manager.ready.then(() => {
       return this._populatedPromise.promise;
     });
   }
@@ -168,7 +168,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
  /**
   * A promise that is fulfilled when the context is ready.
   */
-  ready(): Promise<void> {
+  get ready(): Promise<void> {
     return this._readyPromise;
   }
 
@@ -178,7 +178,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    * @returns A promise that resolves with the new kernel.
    */
   startDefaultKernel(): Promise<Kernel.IKernel> {
-    return this.ready().then(() => {
+    return this.ready.then(() => {
       let model = this.model;
       let name = findKernel(
         model.defaultKernelName,
