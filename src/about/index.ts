@@ -251,7 +251,7 @@ class AboutWidget extends VDomWidget<AboutModel> {
             h.b(headerText[2])
           ),
           h.p(headerText[3],
-            h.a({href: headerText[4]}, headerText[4]),
+            h.a({href: headerText[4], target: '_blank'}, headerText[4]),
             headerText[5]
           ),
           h.p(headerText[6])
