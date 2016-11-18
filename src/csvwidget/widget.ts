@@ -52,7 +52,7 @@ class CSVWidget extends Widget {
   constructor(options: CSVWidget.IOptions) {
     super();
 
-    let context = options.context;
+    let context = this._context = options.context;
     let layout = this.layout = new PanelLayout();
 
     this.addClass(CSV_CLASS);
@@ -86,6 +86,13 @@ class CSVWidget extends Widget {
     context.model.contentChanged.connect(() => {
       this._table.model.content = context.model.toString();
     }, this);
+  }
+
+  /**
+   * The CSV widget's context.
+   */
+  get context(): DocumentRegistry.IContext<DocumentRegistry.IModel> {
+    return this._context;
   }
 
   /**
@@ -126,6 +133,7 @@ class CSVWidget extends Widget {
     this.node.focus();
   }
 
+  private _context: DocumentRegistry.IContext<DocumentRegistry.IModel> = null;
   private _model: CSVModel = null;
   private _table: CSVTable = null;
   private _toolbar: CSVToolbar = null;
