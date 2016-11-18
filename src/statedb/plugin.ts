@@ -110,7 +110,7 @@ class StateDB implements IStateDB {
    *
    * @param id - The identifier for the data being saved.
    *
-   * @param data - The data being saved.
+   * @param value - The data being saved.
    *
    * @returns A promise that is rejected if saving fails and succeeds otherwise.
    *
@@ -121,9 +121,9 @@ class StateDB implements IStateDB {
    * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
    * using the `fetchNamespace()` method.
    */
-  save(id: string, data: JSONObject): Promise<void> {
+  save(id: string, value: JSONObject): Promise<void> {
     try {
-      let serialized = JSON.stringify(data);
+      let serialized = JSON.stringify(value);
       let length = serialized.length;
       let max = this.maxLength;
       if (length > max) {
