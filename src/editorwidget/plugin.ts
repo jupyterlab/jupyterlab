@@ -34,6 +34,10 @@ import {
 } from '../mainmenu';
 
 import {
+  IStateDB
+} from '../statedb';
+
+import {
   IEditorTracker
 } from './index';
 
@@ -56,6 +60,11 @@ const PORTRAIT_ICON_CLASS = 'jp-MainAreaPortraitIcon';
  * The class name for the text editor icon from the default theme.
  */
 const EDITOR_ICON_CLASS = 'jp-ImageTextEditor';
+
+/**
+ * The state database namespace for editor widgets.
+ */
+const NAMESPACE = 'editorwidgets';
 
 /**
  * The map of command ids used by the editor.
@@ -83,7 +92,7 @@ const tracker = new InstanceTracker<EditorWidget>();
 export
 const editorHandlerProvider: JupyterLabPlugin<IEditorTracker> = {
   id: 'jupyter.services.editor-handler',
-  requires: [IDocumentRegistry, IMainMenu, ICommandPalette],
+  requires: [IDocumentRegistry, IMainMenu, ICommandPalette, IStateDB],
   provides: IEditorTracker,
   activate: activateEditorHandler,
   autoStart: true
@@ -93,7 +102,7 @@ const editorHandlerProvider: JupyterLabPlugin<IEditorTracker> = {
 /**
  * Sets up the editor widget
  */
-function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette): IEditorTracker {
+function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB): IEditorTracker {
   let widgetFactory = new EditorWidgetFactory({
     name: 'Editor',
     fileExtensions: ['*'],
@@ -107,6 +116,17 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
 
   widgetFactory.widgetCreated.connect((sender, widget) => {
     widget.title.icon = `${PORTRAIT_ICON_CLASS} ${EDITOR_ICON_CLASS}`;
+    // Add the file path to the state database.
+    let key = `${NAMESPACE}:${widget.context.path}`;
+    state.save(key, { path: widget.context.path });
+    // Remove the file path from the state database on disposal.
+    widget.disposed.connect(() => { state.remove(key); });
+    // Keep track of path changes in the state database.
+    widget.context.pathChanged.connect((sender, path) => {
+      state.remove(key);
+      key = `${NAMESPACE}:${path}`;
+      state.save(key, { path });
+    });
     tracker.add(widget);
   });
   registry.addWidgetFactory(widgetFactory);
@@ -189,6 +209,13 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
     cmdIds.createConsole,
     cmdIds.runCode,
   ].forEach(command => palette.addItem({ command, category: 'Editor' }));
+
+  // Reload any editor widgets whose state has been stored.
+  Promise.all([state.fetchNamespace(NAMESPACE), app.started])
+    .then(([items]) => {
+      let open = 'file-operations:open';
+      items.forEach(item => { app.commands.execute(open, item.value); });
+    });
 
   return tracker;
 }

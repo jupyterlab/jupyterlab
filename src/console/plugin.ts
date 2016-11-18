@@ -372,14 +372,20 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     tracker.add(panel);
     // Add the console to the state database.
     let key = `${NAMESPACE}:${session.id}`;
-    state.save(key, session.id);
+    state.save(key, { id: session.id });
     // Remove the console from the state database on disposal.
     panel.disposed.connect(() => { state.remove(key); });
   }
 
   // Reload any consoles whose state has been stored.
-  Promise.all([state.fetchNamespace(NAMESPACE), app.started]).then(([ids]) => {
-    ids.forEach(id => { app.commands.execute('console:open', { id }); });
+  Promise.all([state.fetchNamespace(NAMESPACE), app.started])
+    .then(([items]) => {
+      items.forEach(item => {
+        app.commands.execute('console:create', item.value).catch(() => {
+          // Remove console from the state database if session does not exist.
+          state.remove(`${NAMESPACE}:${item.id}`);
+        });
+      });
   });
 
   command = 'console:switch-kernel';

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONValue
+  JSONObject
 } from 'phosphor/lib/algorithm/json';
 
 import {
@@ -20,6 +20,22 @@ const IStateDB = new Token<IStateDB>('jupyter.services.statedb');
 
 
 /**
+ */
+export
+interface IStateItem {
+  /**
+   * The identifier key for a state item.
+   */
+  id: string;
+
+  /**
+   * The data value for a state item.
+   */
+  value: JSONObject;
+}
+
+
+/**
  * The description of a state database.
  */
 export
@@ -32,7 +48,7 @@ interface IStateDB {
   /**
    * Retrieve a saved bundle from the database.
    *
-   * @param id - The identifier used to save retrieve a data bundle.
+   * @param id - The identifier used to retrieve a data bundle.
    *
    * @returns A promise that bears a data payload if available.
    *
@@ -46,7 +62,7 @@ interface IStateDB {
    * The promise returned by this method may be rejected if an error occurs in
    * retrieving the data. Non-existence of an `id` will succeed, however.
    */
-  fetch(id: string): Promise<JSONValue>;
+  fetch(id: string): Promise<JSONObject>;
 
   /**
    * Retrieve all the saved bundles for a namespace.
@@ -64,7 +80,7 @@ interface IStateDB {
    * console in order to optimistically return any extant data without failing.
    * This promise will always succeed.
    */
-  fetchNamespace(namespace: string): Promise<JSONValue[]>;
+  fetchNamespace(namespace: string): Promise<IStateItem[]>;
 
   /**
    * Remove a value from the database.
@@ -80,7 +96,7 @@ interface IStateDB {
    *
    * @param id - The identifier for the data being saved.
    *
-   * @param data - The data being saved.
+   * @param value - The data being saved.
    *
    * @returns A promise that is rejected if saving fails and succeeds otherwise.
    *
@@ -91,5 +107,5 @@ interface IStateDB {
    * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
    * using the `fetchNamespace()` method.
    */
-  save(id: string, data: JSONValue): Promise<void>;
+  save(id: string, value: JSONObject): Promise<void>;
 }

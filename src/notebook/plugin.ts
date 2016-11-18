@@ -192,22 +192,22 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     tracker.add(widget);
     // Add the notebook path to the state database.
     let key = `${NAMESPACE}:${widget.context.path}`;
-    state.save(key, widget.context.path);
+    state.save(key, { path: widget.context.path });
     // Remove the notebook path from the state database on disposal.
     widget.disposed.connect(() => { state.remove(key); });
     // Keep track of path changes in the state database.
     widget.context.pathChanged.connect((sender, path) => {
       state.remove(key);
       key = `${NAMESPACE}:${path}`;
-      state.save(key, path);
+      state.save(key, { path });
     });
   });
 
   // Reload any notebooks whose state has been stored.
-  Promise.all([state.fetchNamespace(NAMESPACE), app.started])
-    .then(([paths]) => {
+  Promise.all([state.fetchNamespace(NAMESPACE), app.started, services.ready])
+    .then(([items]) => {
       let open = 'file-operations:open';
-      paths.forEach(path => { app.commands.execute(open, { path }); });
+      items.forEach(item => { app.commands.execute(open, item.value); });
     });
 
   // Add main menu notebook menu.

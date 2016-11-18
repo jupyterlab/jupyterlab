@@ -46,6 +46,10 @@ import {
 } from '../services';
 
 import {
+  IStateDB
+} from '../statedb';
+
+import {
   FileBrowserModel, FileBrowser, IPathTracker
 } from './';
 
@@ -57,7 +61,9 @@ export
 const fileBrowserProvider: JupyterLabPlugin<IPathTracker> = {
   id: 'jupyter.services.file-browser',
   provides: IPathTracker,
-  requires: [IServiceManager, IDocumentRegistry, IMainMenu, ICommandPalette],
+  requires: [
+    IServiceManager, IDocumentRegistry, IMainMenu, ICommandPalette, IStateDB
+  ],
   activate: activateFileBrowser,
   autoStart: true
 };
@@ -83,11 +89,16 @@ const cmdIds = {
  */
 const tracker = new InstanceTracker<Widget>();
 
+/**
+ * The filebrowser plugin state namespace.
+ */
+const NAMESPACE = 'filebrowser';
+
 
 /**
  * Activate the file browser.
  */
-function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette): IPathTracker {
+function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB): IPathTracker {
   let id = 0;
   let opener: DocumentManager.IWidgetOpener = {
     open: widget => {
@@ -125,6 +136,18 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
     }));
     disposables.add(palette.addItem({ command, category }));
   };
+
+  // Save the state of the file browser in the state database.
+  fbModel.pathChanged.connect((sender, args) => {
+    state.save(`${NAMESPACE}:cwd`, { path: args.newValue });
+  });
+
+  // Restore the state of the file browser on reload.
+  Promise.all([state.fetch(`${NAMESPACE}:cwd`), app.started]).then(([cwd]) => {
+    if (cwd) {
+      fbModel.cd((cwd as any).path);
+    }
+  });
 
   // Sync tracker with currently focused widget.
   app.shell.currentChanged.connect((sender, args) => {
@@ -212,7 +235,6 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
  */
 function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: DocumentManager): void {
   let commands = app.commands;
-  let fbModel = fbWidget.model;
 
   commands.addCommand(cmdIds.save, {
     label: 'Save',
@@ -226,6 +248,7 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: Documen
       }
     }
   });
+
   commands.addCommand(cmdIds.restoreCheckpoint, {
     label: 'Revert to Checkpoint',
     caption: 'Revert contents to previous checkpoint',
@@ -238,6 +261,7 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: Documen
       }
     }
   });
+
   commands.addCommand(cmdIds.saveAs, {
     label: 'Save As...',
     caption: 'Save with new path and create checkpoint',
@@ -250,12 +274,14 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: Documen
       }
     }
   });
+
   commands.addCommand(cmdIds.open, {
     execute: args => {
       let path = args['path'] as string;
-      fbWidget.openPath(path);
+      return fbWidget.openPath(path);
     }
   });
+
   commands.addCommand(cmdIds.close, {
     label: 'Close',
     execute: () => {
@@ -264,15 +290,18 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: Documen
       }
     }
   });
+
   commands.addCommand(cmdIds.closeAllFiles, {
     label: 'Close All',
     execute: () => {
       tracker.forEach(widget => { widget.close(); });
     }
   });
+
   commands.addCommand(cmdIds.showBrowser, {
     execute: () => app.shell.activateLeft(fbWidget.id)
   });
+
   commands.addCommand(cmdIds.hideBrowser, {
     execute: () => {
       if (!fbWidget.isHidden) {
@@ -280,6 +309,7 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: Documen
       }
     }
   });
+
   commands.addCommand(cmdIds.toggleBrowser, {
     execute: () => {
       if (fbWidget.isHidden) {
@@ -324,7 +354,7 @@ function createContextMenu(fbWidget: FileBrowser, openWith: Menu):  Menu {
   let disposables = new DisposableSet();
   let command: string;
 
-  // // Remove all the commands associated with this menu upon disposal.
+  // Remove all the commands associated with this menu upon disposal.
   menu.disposed.connect(() => { disposables.dispose(); });
 
   command = `${prefix}:open`;
