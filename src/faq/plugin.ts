@@ -313,7 +313,7 @@ class FaqWidget extends VDomWidget<FaqModel> {
           ),
           ' and ',
           h.a({className: ANCHOR_CLASS,
-               href: 'http://jupyter.org/jupyterlab/',
+               href: 'https://jupyterlab.github.io/jupyterlab/',
                target: '_blank'},
                'documentation'
           ),
