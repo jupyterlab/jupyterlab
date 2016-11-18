@@ -107,40 +107,32 @@ const FOLDER_ICON_CLASS = 'jp-FolderIcon';
  */
 const LANDING_PATH_CLASS = 'jp-Landing-path';
 
-
+/**
+ * LandingModel keeps track of the path to working directory and has text data,
+ * which the LandingWidget will render.
+ */
 class LandingModel extends VDomModel {
+  // Contains a preview messages.
+  readonly previewMessage: string;
+  // Contains text to `Start a new activity`.
+  readonly headerText: string;
+  // Contains the names of activities and their associated commands.
+  readonly activities: string[][];
+
+  /**
+   * Construct a new landing model.
+   */
   constructor() {
     super();
     let previewMessages = ['super alpha preview', 'very alpha preview', 'extremely alpha preview', 'exceedingly alpha preview', 'alpha alpha preview'];
-    this._previewMessage = previewMessages[(Math.floor(Math.random() * previewMessages.length))];
-    this._headerText = 'Start a new activity';
-    this._activities =
+    this.previewMessage = previewMessages[(Math.floor(Math.random() * previewMessages.length))];
+    this.headerText = 'Start a new activity';
+    this.activities =
     [['Notebook', 'file-operations:new-notebook'],
      ['Code Console', `console:create`],
      ['Terminal', 'terminal:create-new'],
      ['Text Editor', 'file-operations:new-text-file']];
     this._path = 'home';
-  }
-
-  /**
-   * Get the preview message.
-   */
-  get previewMessage(): string {
-    return this._previewMessage;
-  }
-
-  /**
-   * Get the header text.
-   */
-  get headerText(): string {
-    return this._headerText;
-  }
-
-  /**
-   * Get a 2D array containing the name of activities and their associated commands.
-   */
-  get activities() : string[][] {
-    return this._activities;
   }
 
   /**
@@ -158,18 +150,24 @@ class LandingModel extends VDomModel {
     this.stateChanged.emit(void 0);
   }
 
-  private _previewMessage: string;
-  private _headerText: string;
-  private _activities: string[][];
   private _path: string;
 }
 
+/**
+ * A virtual-DOM-based widget for the Landing plugin.
+ */
 class LandingWidget extends VDomWidget<LandingModel> {
+  /**
+   * Construct a new landing widget.
+   */
   constructor(app: JupyterLab) {
     super();
     this._app = app;
   }
 
+  /**
+   * Render the landing plugin to virtual DOM nodes.
+   */
   protected render(): VNode {
     let activitiesList: VNode[] = [];
     let activites = this.model.activities;
