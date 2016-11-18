@@ -110,7 +110,7 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
       promise.then(session => {
         let key = `${NAMESPACE}:${session.name}`;
         term.session = session;
-        state.save(key, session.name);
+        state.save(key, { name: session.name });
         term.disposed.connect(() => { state.remove(key); });
       });
     }
@@ -169,11 +169,13 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
   });
 
   // Reload any terminals whose state has been stored.
-  Promise.all([state.fetchNamespace(NAMESPACE), app.started])
-    .then(([terms]) => {
-      let create = 'terminal:create-new';
-      terms.forEach(name => { app.commands.execute(create, { name }); });
+  Promise.all([state.fetchNamespace(NAMESPACE), app.started]).then(([coll]) => {
+    let { values } = coll;
+    let create = 'terminal:create-new';
+    values.forEach(args => {
+      app.commands.execute(create, args);
     });
+  });
 
   // Add command palette items.
   let category = 'Terminal';
