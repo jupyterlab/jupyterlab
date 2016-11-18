@@ -118,14 +118,14 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
     widget.title.icon = `${PORTRAIT_ICON_CLASS} ${EDITOR_ICON_CLASS}`;
     // Add the file path to the state database.
     let key = `${NAMESPACE}:${widget.context.path}`;
-    state.save(key, widget.context.path);
+    state.save(key, { path: widget.context.path });
     // Remove the file path from the state database on disposal.
     widget.disposed.connect(() => { state.remove(key); });
     // Keep track of path changes in the state database.
     widget.context.pathChanged.connect((sender, path) => {
       state.remove(key);
       key = `${NAMESPACE}:${path}`;
-      state.save(key, path);
+      state.save(key, { path });
     });
     tracker.add(widget);
   });
@@ -211,10 +211,10 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
   ].forEach(command => palette.addItem({ command, category: 'Editor' }));
 
   // Reload any editor widgets whose state has been stored.
-  Promise.all([state.fetchNamespace(NAMESPACE), app.started])
-    .then(([paths]) => {
+  Promise.all([state.fetchNamespace(NAMESPACE), app.started]).then(([coll]) => {
+      let { values } = coll;
       let open = 'file-operations:open';
-      paths.forEach(path => { app.commands.execute(open, { path }); });
+      values.forEach(args => { app.commands.execute(open, args); });
     });
 
   return tracker;
