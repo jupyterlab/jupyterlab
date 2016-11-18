@@ -2,9 +2,6 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-#about-jupyterlab {
-    padding: 2em;
-}
 
 #about {
   position: absolute;
@@ -16,9 +13,11 @@
   scroll-snap-points-y: repeat(100%);
   scroll-snap-type: mandatory;
   scroll-snap-destination: 100% 0%;
+  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  text-align: center;
 }
 
-#about .section {
+#about .jp-About-section {
   position: relative;
   top: 0;
   left: 0;
@@ -26,12 +25,12 @@
   height: 100%;
   display: table;
 }
-#about .sectioncenter {
+#about .jp-About-sectioncenter {
   display: table-cell;
   vertical-align: middle;
 }
 
-#about .container {
+#about .jp-About-container {
   position: relative;
   width: 100%;
   max-width: 880px;
@@ -40,8 +39,8 @@
   box-sizing: border-box;
 }
 
-#about .column,
-#about .columns {
+#about .jp-About-column,
+#about .jp-About-columns {
   width: 100%;
   margin: 0 auto;
   float: none;
@@ -50,7 +49,7 @@
 
 /* For devices larger than 400px */
 @media (min-width: 400px) {
-  #about .container {
+  #about .jp-About-container {
     width: 85%;
     padding: 0;
   }
@@ -58,20 +57,20 @@
 
 /* For devices larger than 550px */
 @media (min-width: 550px) {
-  #about .container {
+  #about .jp-About-container {
     width: 80%;
   }
-  #about .column,
-  #about .columns {
+  #about .jp-About-column,
+  #about .jp-About-columns {
     margin-left: 4%;
   }
-  #about .column:first-child,
-  #about .columns:first-child {
+  #about .jp-About-column:first-child,
+  #about .jp-About-columns:first-child {
     margin-left: 0;
   }
 
 
-  #about .one-half.column {
+  #about .jp-About-one-half.jp-About-column {
     width: 48%;
   }
 }
@@ -83,66 +82,13 @@
   box-sizing: border-box;
 }
 
-#about .row {
+#about .jp-About-row {
   width: 100%;
   display: flex;
   flex-wrap: wrap;
 }
 
-#about .col-1 {
-  width: 8.33%
-}
-
-#about .col-2 {
-  width: 16.66%;
-}
-
-#about .col-3 {
-  width: 25%;
-}
-
-#about .col-4 {
-  width: 33.33%;
-}
-
-#about .col-5 {
-  width: 41.66%;
-}
-
-#about .col-6 {
-  width: 50%;
-}
-
-#about .col-7 {
-  width: 58.33%;
-}
-
-#about .col-8 {
-  width: 66.66%;
-}
-
-#about .col-9 {
-  width: 75%;
-}
-
-#about .col-10 {
-  width: 83.33%;
-}
-
-#about .col-11 {
-  width: 91.66%;
-}
-
-#about .col-12 {
-  width: 100%;
-}
-
-#about {
-  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
-  text-align: center;
-}
-
-#about .header {
+#about .jp-About-header {
   font-size: 26px;
   font-weight: 300;
   color: #333333;
@@ -151,7 +97,7 @@
   margin: 10px 0;
 }
 
-#about .desc-one {
+#about .jp-About-desc-one {
   font-size: 13px;
   color: #555555;
   line-height: 20px;
@@ -159,7 +105,7 @@
   padding-right: 15px;
 }
 
-#about .desc-two {
+#about .jp-About-desc-two {
   font-size: 13px;
   color: #555555;
   padding-left: 50px;
@@ -167,34 +113,28 @@
   margin-top: 0px;
 }
 
-#about .desc-two-header {
+#about .jp-About-desc-two-header {
   color: #333333;
   font-size: 20px;
   margin-bottom: 9px;
   margin-top: 9px;
 }
 
-#about .row img {
+#about .jp-About-row img {
   margin-top: 20px
 }
 
-#about .header.content img {
+#about .jp-About-header.jp-About-content img {
   vertical-align: middle;
   padding-right: 30px;
 }
 
-#about .header.content {
+#about .jp-About-header.jp-About-content {
   vertical-align: middle;
   line-height: 20px;
 }
 
-#about .content-img {
-  padding: 40px 0 35px 0;
-  height: 40vh;
-  max-height: 453px;
-}
-
-#about .content-desc {
+#about .jp-About-content-desc {
   font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
   font-size: 13px;
   max-width: 550px;
@@ -205,32 +145,32 @@
   padding-bottom: 8px;
 }
 
-#about .content-desc ul {
+#about .jp-About-content-desc ul {
   text-align: left;
   margin-left: 92px;
   float: none;
 }
 
-#about .desc-two-header {
+#about .jp-About-desc-two-header {
   padding: 15px 0 10px 0;
 }
 
-#about .desc-one p {
+#about .jp-About-desc-one p {
   max-width: 740px;
   margin: 0 auto;
   float: none;
 }
 
-#about .column .desc-two-header a {
+#about .jp-About-column .jp-About-desc-two-header a {
   color: #555555;
   text-decoration: none;
 }
 
-#about .desc-two-header:hover a{
+#about .jp-About-desc-two-header:hover a{
   color: #e46e2e;
 }
 
-#about .nav-button {
+#about .jp-About-nav-button {
   display: block;
   position: relative;
   margin: auto;
@@ -248,7 +188,7 @@
   transition: all 300ms ease;
 }
 
-#about .nav-button:hover {
+#about .jp-About-nav-button:hover {
   background-position: bottom;
 }
 
@@ -279,7 +219,6 @@
 
 
 /* * * IMAGES * * */
-
 #about .jp-img {
   display: block;
   background-position: center;
