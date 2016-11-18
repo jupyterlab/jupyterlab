@@ -1,5 +1,5 @@
 """
-An example demonstrating a stand-alone "console".
+An example demonstrating a stand-alone "notebook".
 
 Copyright (c) Jupyter Development Team.
 Distributed under the terms of the Modified BSD License.
@@ -47,10 +47,10 @@ class MainPageHandler(tornado.web.RequestHandler):
 
 
 def main(argv):
-    """Start the 'console' example.
+    """Start the 'notebook' example.
 
     - Start the Tornado main event loop for the Jupyter notebook server
-    - Set up the main page event handler for the 'console' example
+    - Set up the main page event handler for the 'notebook' example
 
     """
     nb_command = [sys.executable, '-m', 'notebook', '--no-browser',
