@@ -51,21 +51,21 @@ function activateCSVWidget(app: JupyterLab, registry: IDocumentRegistry, state: 
   factory.widgetCreated.connect((sender, widget) => {
     // Add the CSV path to the state database.
     let key = `${NAMESPACE}:${widget.context.path}`;
-    state.save(key, widget.context.path);
+    state.save(key, { path: widget.context.path });
     // Remove the CSV path from the state database on disposal.
     widget.disposed.connect(() => { state.remove(key); });
     // Keep track of path changes in the state database.
     widget.context.pathChanged.connect((sender, path) => {
       state.remove(key);
       key = `${NAMESPACE}:${path}`;
-      state.save(key, path);
+      state.save(key, { path });
     });
   });
 
   // Reload any CSV widgets whose state has been stored.
-  Promise.all([state.fetchNamespace(NAMESPACE), app.started])
-    .then(([paths]) => {
-      let open = 'file-operations:open';
-      paths.forEach(path => { app.commands.execute(open, { path }); });
-    });
+  Promise.all([state.fetchNamespace(NAMESPACE), app.started]).then(([coll]) => {
+    let { values } = coll;
+    let open = 'file-operations:open';
+    values.forEach(args => { app.commands.execute(open, args); });
+  });
 }
