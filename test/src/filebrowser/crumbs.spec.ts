@@ -59,16 +59,22 @@ describe('filebrowser/model', () => {
   let manager: ServiceManager.IManager;
   let model: FileBrowserModel;
   let crumbs: LogCrumbs;
-  let parent: string;
+  let first: string;
+  let second: string;
+  let third: string;
   let path: string;
 
   before((done) => {
     manager = new ServiceManager();
     let contents = manager.contents;
     contents.newUntitled({ type: 'directory' }).then(cModel => {
-      parent = cModel.path;
+      first = cModel.name;
       return contents.newUntitled({ path: cModel.path, type: 'directory' });
     }).then(cModel => {
+      second = cModel.name;
+      return contents.newUntitled({ path: cModel.path, type: 'directory' });
+    }).then(cModel => {
+      third = cModel.name;
       path = cModel.path;
     }).then(done, done);
   });
@@ -109,36 +115,58 @@ describe('filebrowser/model', () => {
           Widget.attach(crumbs, document.body);
           sendMessage(crumbs, WidgetMessage.UpdateRequest);
           let items = crumbs.node.getElementsByClassName(ITEM_CLASS);
-          expect(items.length).to.be(3);
+          expect(items.length).to.be(4);
           model.pathChanged.connect(() => {
-            expect(model.path).to.be(parent);
+            sendMessage(crumbs, WidgetMessage.UpdateRequest);
+            items = crumbs.node.getElementsByClassName(ITEM_CLASS);
+            expect(items.length).to.be(3);
             done();
           });
-          simulate(items[1], 'click');
+          expect(items[2].textContent).to.be(second);
+          simulate(items[2], 'click');
         });
 
         it('should switch to the home directory', (done) => {
           Widget.attach(crumbs, document.body);
           sendMessage(crumbs, WidgetMessage.UpdateRequest);
           let items = crumbs.node.getElementsByClassName(ITEM_CLASS);
-          expect(items.length).to.be(3);
           model.pathChanged.connect(() => {
+            sendMessage(crumbs, WidgetMessage.UpdateRequest);
+            items = crumbs.node.getElementsByClassName(ITEM_CLASS);
+            expect(items.length).to.be(1);
             expect(model.path).to.be('');
             done();
           });
           simulate(items[0], 'click');
         });
 
+        it('should switch to the grandparent directory', (done) => {
+          Widget.attach(crumbs, document.body);
+          sendMessage(crumbs, WidgetMessage.UpdateRequest);
+          let items = crumbs.node.getElementsByClassName(ITEM_CLASS);
+          model.pathChanged.connect(() => {
+            sendMessage(crumbs, WidgetMessage.UpdateRequest);
+            items = crumbs.node.getElementsByClassName(ITEM_CLASS);
+            expect(items.length).to.be(2);
+            expect(model.path).to.be(first);
+            done();
+          });
+          simulate(items[1], 'click');
+        });
+
         it('should refresh the current directory', (done) => {
           Widget.attach(crumbs, document.body);
           sendMessage(crumbs, WidgetMessage.UpdateRequest);
           let items = crumbs.node.getElementsByClassName(ITEM_CLASS);
-          expect(items.length).to.be(3);
           model.refreshed.connect(() => {
+            sendMessage(crumbs, WidgetMessage.UpdateRequest);
+            items = crumbs.node.getElementsByClassName(ITEM_CLASS);
+            expect(items.length).to.be(4);
             expect(model.path).to.be(path);
             done();
           });
-          simulate(items[2], 'click');
+          expect(items[3].textContent).to.be(third);
+          simulate(items[3], 'click');
         });
 
       });
@@ -182,7 +210,7 @@ describe('filebrowser/model', () => {
           requestAnimationFrame(() => {
             expect(crumbs.methods).to.contain('onUpdateRequest');
             let items = crumbs.node.getElementsByClassName(ITEM_CLASS);
-            expect(items.length).to.be(2);
+            expect(items.length).to.be(3);
             done();
           });
         }).catch(done);
