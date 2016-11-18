@@ -131,22 +131,25 @@
   display: inline-block;
 }
 
+.p-TabBar-WindowTabLabel {
+  margin-top: 4px;
+}
 
 .p-DockPanel-tabBar .p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon {
   margin-left: 4px;
+  padding-top: 8px;
+  background-size: 16px;
+  height: 16px;
+  width: 16px;
+  background-image: url(../default-theme/icons/md/close.svg);
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 
-.p-DockPanel-tabBar .p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon:before {
-  content: '\f00d';  /* close */
-  font-family: FontAwesome;
-}
-
-
-.p-DockPanel-tabBar .p-TabBar-tab.p-mod-closable.jp-mod-dirty > .p-TabBar-tabCloseIcon:before {
-  font-family: FontAwesome;
-  content: '\f111'; /* circle */
-  font-size: 10px;
+.p-DockPanel-tabBar .p-TabBar-tab.p-mod-closable.jp-mod-dirty > .p-TabBar-tabCloseIcon {
+  background-size: 12px;
+  background-image: url(../default-theme/icons/md/circle.svg);
 }
 
 
