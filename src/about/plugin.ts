@@ -9,7 +9,6 @@ import {
   ICommandPalette
 } from '../commandpalette';
 
-// add in other imports here
 import {
   AboutModel, AboutWidget
 } from './';

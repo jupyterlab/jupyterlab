@@ -129,12 +129,33 @@ const FILEBROWSER_IMAGE_CLASS = 'jp-About-fb';
  */
 const NOTEBOOK_IMAGE_CLASS = 'jp-About-nb';
 
+/**
+ * AboutModel holds data which the AboutWidgetwill render.
+ */
 export
 class AboutModel extends VDomModel {
+  // Title of About page.
+  readonly title: string;
+  // Text on the first page that gives a high level overview of JupyterLab.
+  readonly headerText: string[];
+  // Contains the plugin names.
+  readonly pluginHeaders: string[];
+  // Description of the main area and its functionality.
+  readonly mainAreaDesc: string[];
+  // Description of the file browser and its functionality.
+  readonly filebrowserDesc: string[];
+  // Description of the command palette and its functionality.
+  readonly commandPaletteDesc: string[];
+  // Description of the notebook and its functionality.
+  readonly notebookDesc: string[];
+
+  /**
+   * Construct a new about model.
+   */
   constructor() {
     super();
-    this._title = 'Welcome to the JupyterLab Alpha preview';
-    this._headerText = [
+    this.title = 'Welcome to the JupyterLab Alpha preview';
+    this.headerText = [
       'Click on the Launcher tab for the initial JupyterLab screen.',
       'This demo gives an Alpha-level developer preview of the JupyterLab enviromnent. ',
       'It is not ready for general usage yet.',
@@ -143,13 +164,13 @@ class AboutModel extends VDomModel {
       '. Pull requests are welcome!',
       'Here is a brief description of some fo the things you\'ll find in this demo.'
     ];
-    this._pluginHeaders = [
+    this.pluginHeaders = [
       'Main Area',
       'Command Palette',
       'File Browser',
       'Notebook'
     ];
-    this._mainAreaDesc = [
+    this.mainAreaDesc = [
       'Open tabs and drag and drop them to rearrange them.',
       'The main area is divided into panels of tabs. Drag a tab around the area ' +
       'to split the main area in different ways. Drag a tab to the center of a ' +
@@ -158,9 +179,8 @@ class AboutModel extends VDomModel {
       'Resize panels by dragging their borders (be aware that panels and sidebars ' +
       'also have a minimum width). A file that contains changes to be saved has ' +
       'a circle for a close icon.'
-
     ];
-    this._filebrowserDesc = [
+    this.filebrowserDesc = [
       'Navigate and organize your files.',
       'Clicking the "Files" tab, located on the left, will toggle the file browser. ' +
       'Navigate into directories by double-clicking, and use the breadcrumbs at the ' +
@@ -172,7 +192,7 @@ class AboutModel extends VDomModel {
       'Opening an image displays the image. Opening a code file opens a code editor. ' +
       'Opening a notebook opens a very preliminary notebook component.'
     ];
-    this._commandPaletteDesc = [
+    this.commandPaletteDesc = [
       'View list of commands and keyboard shortcuts.',
       'Clicking the "Commands" tab, located on the left, will toggle the command ' +
       'palette. Execute a command by clicking, or navigating with your arrow keys ' +
@@ -187,57 +207,30 @@ class AboutModel extends VDomModel {
       'Save a file',
       'Open a help panel on the right'
     ];
-    this._notebookDesc = [
+    this.notebookDesc = [
       'Dedicate a tab to running a class notebook.',
       'Opening a notebook will open a minimally-featured notebook. ' +
       'Code execution, Markdown rendering, and basic cell toolbar actions are supported. ' +
       'Future versions will add more features from the existing Jupyter notebook.'
     ];
   }
-
-  get title(): string {
-    return this._title;
-  }
-
-  get headerText(): string[] {
-    return this._headerText;
-  }
-
-  get pluginHeaders(): string[] {
-    return this._pluginHeaders;
-  }
-
-  get mainAreaDesc(): string[] {
-    return this._mainAreaDesc;
-  }
-
-  get filebrowserDesc(): string[] {
-    return this._filebrowserDesc;
-  }
-
-  get commandPaletteDesc(): string[] {
-    return this._commandPaletteDesc;
-  }
-
-  get notebookDesc(): string[] {
-    return this._notebookDesc;
-  }
-
-  private _title: string;
-  private _headerText: string[];
-  private _pluginHeaders: string[];
-  private _mainAreaDesc: string[];
-  private _filebrowserDesc: string[];
-  private _commandPaletteDesc: string[];
-  private _notebookDesc: string[];
 }
 
+/**
+ * A virtual-DOM-based widget for the About plugin.
+ */
 export
 class AboutWidget extends VDomWidget<AboutModel> {
+  /**
+   * Construct a new about widget.
+   */
   constructor() {
     super();
   }
 
+  /**
+   * Render the about plugin to virtual DOM nodes.
+   */
   protected render(): VNode {
     let title = this.model.title;
     let headerText = this.model.headerText;
