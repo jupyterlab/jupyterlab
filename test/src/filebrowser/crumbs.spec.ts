@@ -8,11 +8,11 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Message
+  Message, sendMessage
 } from 'phosphor/lib/core/messaging';
 
 import {
-  Widget
+  Widget, WidgetMessage
 } from 'phosphor/lib/ui/widget';
 
 import {
@@ -23,6 +23,9 @@ import {
   BreadCrumbs, FileBrowserModel
 } from '../../../lib/filebrowser';
 
+
+
+const ITEM_CLASS = 'jp-BreadCrumbs-item';
 
 
 class LogCrumbs extends BreadCrumbs {
@@ -55,7 +58,7 @@ describe('filebrowser/model', () => {
 
   let manager: ServiceManager.IManager;
   let model: FileBrowserModel;
-  let crumbs: BreadCrumbs;
+  let crumbs: LogCrumbs;
   let parent: string;
   let path: string;
 
@@ -73,7 +76,7 @@ describe('filebrowser/model', () => {
   beforeEach((done) => {
     model = new FileBrowserModel({ manager });
     model.cd(path).then(() => {
-      crumbs = new BreadCrumbs({ model });
+      crumbs = new LogCrumbs({ model });
     }).then(done, done);
   });
 
@@ -86,8 +89,10 @@ describe('filebrowser/model', () => {
     describe('#constructor()', () => {
 
       it('should create a new BreadCrumbs instance', () => {
-        crumbs = new BreadCrumbs({ model });
-        expect(crumbs).to.be.a(BreadCrumbs);
+        let bread = new BreadCrumbs({ model });
+        expect(bread).to.be.a(BreadCrumbs);
+        let items = crumbs.node.getElementsByClassName(ITEM_CLASS);
+        expect(items.length).to.be(1);
       });
 
       it('should add the jp-BreadCrumbs class', () => {
@@ -100,30 +105,17 @@ describe('filebrowser/model', () => {
 
       context('click', () => {
 
-        it('should switch to the child directory', (done) => {
-          let child = crumbs.node.getElementsByClassName('jp-BreadCrumbs-item')[1];
+        it('should switch to the parent directory', (done) => {
+          Widget.attach(crumbs, document.body);
+          sendMessage(crumbs, WidgetMessage.UpdateRequest);
+          let items = crumbs.node.getElementsByClassName(ITEM_CLASS);
+          expect(items.length).to.be(3);
           model.pathChanged.connect(() => {
             expect(model.path).to.be(parent);
             done();
           });
-          simulate(child, 'click');
+          simulate(items[1], 'click');
         });
-
-      });
-
-      context('p-dragenter', () => {
-
-      });
-
-      context('p-dragleave', () => {
-
-      });
-
-      context('p-dragover', () => {
-
-      });
-
-      context('p-drop', () => {
 
       });
 
@@ -131,13 +123,46 @@ describe('filebrowser/model', () => {
 
     describe('#onAfterAttach()', () => {
 
+      it('should post an update request', (done) => {
+        Widget.attach(crumbs, document.body);
+        expect(crumbs.methods).to.contain('onAfterAttach');
+        requestAnimationFrame(() => {
+          expect(crumbs.methods).to.contain('onUpdateRequest');
+          done();
+        });
+      });
+
+      it('should add event listeners', () => {
+        Widget.attach(crumbs, document.body);
+        simulate(crumbs.node, 'click');
+        expect(crumbs.events).to.contain('click');
+      });
+
     });
 
     describe('#onBeforeDetach()', () => {
 
+      it('should remove event listeners', () => {
+        Widget.attach(crumbs, document.body);
+        Widget.detach(crumbs);
+        simulate(crumbs.node, 'click');
+        expect(crumbs.events).to.not.contain('click');
+      });
+
     });
 
     describe('#onUpdateRequest()', () => {
+
+      it('should be called when the model updates', (done) => {
+        model.cd('..').then(() => {
+          requestAnimationFrame(() => {
+            expect(crumbs.methods).to.contain('onUpdateRequest');
+            let items = crumbs.node.getElementsByClassName(ITEM_CLASS);
+            expect(items.length).to.be(2);
+            done();
+          });
+        }).catch(done);
+      });
 
     });
 

@@ -99,6 +99,7 @@ class BreadCrumbs extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
+    this.update();
     let node = this.node;
     node.addEventListener('click', this);
     node.addEventListener('p-dragenter', this);
