@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONValue
+  JSONObject
 } from 'phosphor/lib/algorithm/json';
 
 import {
@@ -10,7 +10,7 @@ import {
 } from '../application';
 
 import {
-  IStateDB
+  IStateCollection, IStateDB
 } from './index';
 
 
@@ -38,7 +38,7 @@ class StateDB implements IStateDB {
   /**
    * Retrieve a saved bundle from the database.
    *
-   * @param id - The identifier used to save retrieve a data bundle.
+   * @param id - The identifier used to retrieve a data bundle.
    *
    * @returns A promise that bears a data payload if available.
    *
@@ -52,7 +52,7 @@ class StateDB implements IStateDB {
    * The promise returned by this method may be rejected if an error occurs in
    * retrieving the data. Non-existence of an `id` will succeed, however.
    */
-  fetch(id: string): Promise<JSONValue> {
+  fetch(id: string): Promise<JSONObject> {
     try {
       return Promise.resolve(JSON.parse(window.localStorage.getItem(id)));
     } catch (error) {
@@ -76,19 +76,21 @@ class StateDB implements IStateDB {
    * console in order to optimistically return any extant data without failing.
    * This promise will always succeed.
    */
-  fetchNamespace(namespace: string): Promise<JSONValue[]> {
-    let data: JSONValue[] = [];
+  fetchNamespace(namespace: string): Promise<IStateCollection> {
+    let ids: string[] = [];
+    let values: JSONObject[] = [];
     for (let i = 0, len = window.localStorage.length; i < len; i++) {
       let key = window.localStorage.key(i);
       if (key.indexOf(`${namespace}:`) === 0) {
         try {
-          data.push(JSON.parse(window.localStorage.getItem(key)));
+          ids.push(key);
+          values.push(JSON.parse(window.localStorage.getItem(key)));
         } catch (error) {
           console.warn(error);
         }
       }
     }
-    return Promise.resolve(data);
+    return Promise.resolve({ ids, values });
   }
 
   /**
@@ -119,7 +121,7 @@ class StateDB implements IStateDB {
    * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
    * using the `fetchNamespace()` method.
    */
-  save(id: string, data: JSONValue): Promise<void> {
+  save(id: string, data: JSONObject): Promise<void> {
     try {
       let serialized = JSON.stringify(data);
       let length = serialized.length;
