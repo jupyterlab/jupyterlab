@@ -154,6 +154,8 @@ class FileBrowserModel implements IDisposable, IPathTracker {
   cd(newValue = '.'): Promise<void> {
     if (newValue !== '.') {
       newValue = Private.normalizePath(this._model.path, newValue);
+    } else {
+      newValue = this._pendingPath || this._model.path;
     }
     // Collapse requests to the same directory.
     if (newValue === this._pendingPath) {
@@ -162,9 +164,6 @@ class FileBrowserModel implements IDisposable, IPathTracker {
     let oldValue = this.path;
     let options: Contents.IFetchOptions = { content: true };
     this._pendingPath = newValue;
-    if (newValue === '.') {
-      newValue = this.path;
-    }
     if (oldValue !== newValue) {
       this._sessions.clear();
     }
