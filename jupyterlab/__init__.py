@@ -108,6 +108,39 @@ class LabHandler(IPythonHandler):
                         css_files.append('%s/%s/%s' % (
                             EXTENSION_PREFIX, name, fname
                         ))
+        
+        ## --------------------
+        
+        # This is the code that we need to add to Jupyterlab, unless there
+        # is another way to let plugins influence the Python side of JLab.
+        
+        # Load some plugins. As it is now, importing them means registering them
+        # and including them in JLab. But how to determine what modules should
+        # be imported?
+        
+        from .myplugins import mondriaanplugin
+        from .myplugins import chatplugin
+        from .myplugins import condamanagerplugin
+        from .myplugins import fooplugin
+        
+        from flexx import app
+        from .flexx_plugin_manager import get_session
+        
+        # Get assets to load
+        session = get_session(self.application)
+        js_assets, css_assets = session.get_assets_in_order(css_reset=False, load_all=True)
+        # The flexx-init.js needs special care, as it is inlined in Flexx
+        # todo: If we bring back session assets and put the init.js there, this would not be necessary.
+        init_asset = js_assets[0]
+        init_asset._name = '%s/flexx-init.js' % session.id
+        app.assets._assets[init_asset.name] = init_asset
+        # Add Flexx assets
+        for asset in css_assets:
+            css_files.append('/flexx/assets/shared/%s' % asset.name)
+        for asset in js_assets:
+            bundles.append('/flexx/assets/shared/%s' % asset.name)
+        
+        ## --------------------
 
         self.write(self.render_template('lab.html',
             static_prefix=static_prefix,
