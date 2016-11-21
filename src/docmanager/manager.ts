@@ -310,7 +310,11 @@ class DocumentManager implements IDisposable {
   private _widgetFactoryFor(path: string, widgetName: string): DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel> {
     let registry = this._registry;
     if (widgetName === 'default') {
-      widgetName = registry.defaultWidgetFactory(ContentsManager.extname(path)).name;
+      let factory = registry.defaultWidgetFactory(ContentsManager.extname(path));
+      if (!factory) {
+        return;
+      }
+      widgetName = factory.name;
     }
     return registry.getWidgetFactory(widgetName);
   }
