@@ -181,8 +181,18 @@ class FileBrowserModel implements IDisposable, IPathTracker {
       this._onRunningChanged(manager.sessions, manager.sessions.running());
       this.refreshed.emit(void 0);
     }).catch(error => {
-      showErrorMessage('Server Connection Error', error);
       this._pendingPath = null;
+      if (this._showingMessage) {
+        return;
+      }
+      this._showingMessage = true;
+      showErrorMessage('Server Connection Error', error).then(() => {
+        this._showingMessage = false;
+        clearInterval(this._refreshId);
+        this._refreshId = setInterval(() => {
+          this._scheduleUpdate();
+        }, REFRESH_DURATION);
+      });
     });
     return this._pending;
   }
@@ -447,6 +457,7 @@ class FileBrowserModel implements IDisposable, IPathTracker {
   private _refreshId = -1;
   private _blackoutId = -1;
   private _requested = false;
+  private _showingMessage = false;
 }
 
 
