@@ -112,9 +112,9 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     // Handle widget state restoration.
     if (this._restore) {
       let { namespace, state } = this._restore;
-      let id = `${namespace}:${++Private.id}`;
-      Private.idProperty.set(widget, id);
-      state.save(id, this._restore.args(widget));
+      let name = `${namespace}:${this._restore.name(widget)}`;
+      Private.nameProperty.set(widget, name);
+      state.save(name, this._restore.args(widget));
     }
 
     // Handle widget disposal.
@@ -123,7 +123,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
       // If restore data was saved, delete it from the database.
       if (this._restore) {
         let { state } = this._restore;
-        state.remove(Private.idProperty.get(widget));
+        state.remove(Private.nameProperty.get(widget));
       }
       // If this was the last widget being disposed, emit null.
       if (!this._widgets.size) {
@@ -191,11 +191,14 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     }
 
     let { state } = this._restore;
-    let id = Private.idProperty.get(widget);
+    let oldName = Private.nameProperty.get(widget);
+    let newName = this._restore.name(widget);
 
-    if (id) {
-      state.save(id, this._restore.args(widget));
+    if (oldName !== newName) {
+      state.remove(oldName);
+      Private.nameProperty.set(widget, newName);
     }
+    state.save(newName, this._restore.args(widget));
   }
 
   /**
@@ -269,6 +272,11 @@ namespace InstanceTracker {
     args: (widget: T) => JSONObject;
 
     /**
+     * A function that returns a unique persistent name for this instance.
+     */
+    name: (widget: T) => string;
+
+    /**
      * The namespace to occupy in the state database for restoration data.
      */
     namespace: string;
@@ -307,14 +315,8 @@ namespace InstanceTracker {
  */
 namespace Private {
   /**
-   * The ID counter.
-   */
-  export
-  let id = 0;
-
-  /**
    * An attached property for a widget's ID in the state database.
    */
   export
-  const idProperty = new AttachedProperty<Widget, string>({ name: 'id' });
+  const nameProperty = new AttachedProperty<Widget, string>({ name: 'name' });
 }
