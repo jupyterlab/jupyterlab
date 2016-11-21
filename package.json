@@ -21,7 +21,9 @@
     "sanitize-html": "^1.12.0",
     "semver": "^5.3.0",
     "simulate-event": "^1.2.0",
-    "xterm": "^2.0.1"
+    "xterm": "^2.0.1",
+    "monaco-editor-core": "^0.7.0",
+    "monaco-languages": "^0.3.1"
   },
   "devDependencies": {
     "@jupyterlab/extension-builder": "^0.9.0",
@@ -60,7 +62,8 @@
     "typescript": "^2.0.3",
     "url-loader": "^0.5.7",
     "watch": "^0.17.1",
-    "webpack": "^1.12.11"
+    "webpack": "^1.12.11",
+    "copy-webpack-plugin": "^3.0.1"
   },
   "scripts": {
     "build": "npm run build:src",
