@@ -21,6 +21,14 @@ class StateDB implements IStateDB {
   readonly maxLength = 2000;
 
   /**
+   * Clear the entire database.
+   */
+  clear(): Promise<void> {
+    window.localStorage.clear();
+    return Promise.resolve(void 0);
+  }
+
+  /**
    * Retrieve a saved bundle from the database.
    *
    * @param id - The identifier used to retrieve a data bundle.
