@@ -5,7 +5,11 @@
   <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML-full,Safe&amp;delayStartupUntil=configured"></script>
 </head>
 <body>
-  <script id='jupyter-config-data' type="application/json">{ "baseUrl": "{{base_url}}", "wsUrl": "{{ws_url}}" }</script>
+  <script id='jupyter-config-data' type="application/json">{ 
+  "baseUrl": "{{base_url}}",
+  "wsUrl": "{{ws_url}}",
+  "terminalsAvailable": "{{terminals_available}}"
+ }</script>
   <script src="lab/bundle.js" main="index"></script>
 </body>
 </html>

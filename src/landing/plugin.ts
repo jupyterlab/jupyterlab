@@ -21,13 +21,18 @@ import {
   IPathTracker
 } from '../filebrowser';
 
+import {
+  IServiceManager
+} from '../services';
+
+
 /**
  * The landing page extension.
  */
 export
 const landingExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.landing',
-  requires: [IPathTracker, ICommandPalette],
+  requires: [IPathTracker, ICommandPalette, IServiceManager],
   activate: activateLanding,
   autoStart: true
 };
@@ -107,6 +112,7 @@ const FOLDER_ICON_CLASS = 'jp-FolderIcon';
  */
 const LANDING_PATH_CLASS = 'jp-Landing-path';
 
+
 /**
  * LandingModel keeps track of the path to working directory and has text data,
  * which the LandingWidget will render.
@@ -122,7 +128,7 @@ class LandingModel extends VDomModel {
   /**
    * Construct a new landing model.
    */
-  constructor() {
+  constructor(terminalsAvailable = false) {
     super();
     let previewMessages = ['super alpha preview', 'very alpha preview', 'extremely alpha preview', 'exceedingly alpha preview', 'alpha alpha preview'];
     this.previewMessage = previewMessages[(Math.floor(Math.random() * previewMessages.length))];
@@ -130,8 +136,13 @@ class LandingModel extends VDomModel {
     this.activities =
     [['Notebook', 'file-operations:new-notebook'],
      ['Code Console', `console:create`],
-     ['Terminal', 'terminal:create-new'],
      ['Text Editor', 'file-operations:new-text-file']];
+
+    if (terminalsAvailable) {
+      this.activities.push(
+        ['Terminal', 'terminal:create-new']
+      );
+    }
     this._path = 'home';
   }
 
@@ -225,8 +236,8 @@ class LandingWidget extends VDomWidget<LandingModel> {
 }
 
 
-function activateLanding(app: JupyterLab, pathTracker: IPathTracker, palette: ICommandPalette): void {
-  let landingModel = new LandingModel();
+function activateLanding(app: JupyterLab, pathTracker: IPathTracker, palette: ICommandPalette, services: IServiceManager): void {
+  let landingModel = new LandingModel(services.terminals.isAvailable());
   let widget = new LandingWidget(app);
   widget.model = landingModel;
   widget.id = 'landing-jupyterlab';
