@@ -2,15 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ISignal, defineSignal
-} from 'phosphor/lib/core/signaling';
-
-import {
-  Message
-} from 'phosphor/lib/core/messaging';
-
-import {
-  ResizeMessage, Widget
+  ResizeMessage
 } from 'phosphor/lib/ui/widget';
 
 import {
@@ -25,31 +17,57 @@ import {
   MonacoModel
 } from './model';
 
+import {
+    PropertyObserver
+} from '../editorwidget/utils/utils';
+
 /**
  * Monaco code editor.
  */
 export
 class MonacoCodeEditor implements CodeEditor.IEditor {
 
+  // FIXME remove when https://github.com/Microsoft/monaco-editor/issues/103 is resolved
+  autoSizing: boolean = false;
+  minHeight: number = -1;
+
   /**
    * Construct a Monaco editor.
    */
   constructor(host: HTMLElement, options: monaco.editor.IEditorConstructionOptions = {}) {
+    // TODO add setter for _model
     let monacoModel = this._model =  new MonacoModel();
     options.model = monacoModel.model;
     let monacoEditor = this._editor = monaco.editor.create(host, options);
-    monacoEditor.onDidChangeModel(e => this._onDidChangeModel(e));
-    monacoEditor.onDidChangeModelMode(e => this._onDidChangeModelMode(e));
-    monacoEditor.onDidChangeCursorPosition(e => this._onDidChangeCursorPosition(e));
-    monacoEditor.onDidChangeCursorSelection(e => this._onDidChangeCursorSelection(e));
+    this._disposables.push(this.editor.onDidChangeConfiguration(e => this._onDidChangeConfiguration(e)));
+
+    this._modelObserver.connect = (model) => this.connectToEditorModel(model);
+    this._modelObserver.disconnect = (model) => this.disconnectFromEditorModel(model);
+
+    this._modelObserver.property = this.editor.getModel();
+
+    this._disposables.push(monacoEditor.onDidChangeCursorPosition(e => this._onDidChangeCursorPosition(e)));
+    this._disposables.push(monacoEditor.onDidChangeCursorSelection(e => this._onDidChangeCursorSelection(e)));
   }
 
-  protected _onDidChangeModel(event: monaco.editor.IModelChangedEvent) {
-    // TODO
+  protected connectToEditorModel(model: monaco.editor.IModel) {
+    const listener = model.onDidChangeContent(e => this._onDidChangeContent(e));
+    this._modelListeners = [listener];
   }
 
-  protected _onDidChangeModelMode(event: monaco.editor.IModelModeChangedEvent) {
-    // TODO
+  protected disconnectFromEditorModel(model: monaco.editor.IModel) {
+    for (const listener of this._modelListeners) {
+        listener.dispose();
+    }
+    this._modelListeners = [];
+  }
+
+  protected _onDidChangeConfiguration(event: monaco.editor.IConfigurationChangedEvent) {
+    this.autoresize();
+  }
+
+  protected _onDidChangeContent(event: monaco.editor.IModelContentChangedEvent2) {
+    this.autoresize();
   }
 
   protected _onDidChangeCursorPosition(event: monaco.editor.ICursorPositionChangedEvent) {
@@ -74,7 +92,20 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
-    this._editor = null;
+    if (this.isDisposed) {
+        return;
+    }
+    for (const disposable of this._disposables) {
+        disposable.dispose();
+    }
+    this._disposables = null;
+    this._modelObserver.property = null;
+    this._modelObserver = null;
+    this._modelListeners = null;
+    if (this._editor) {
+      this._editor.dispose();
+      this._editor = null;
+    }
     this._isDisposed = true;
   }
 
@@ -111,18 +142,15 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
   /**
    * Repaint editor.
    */
-  refresh(afterShow?: boolean): void {
-    if (afterShow) {
-      this.autoresize();
-    }
-    this._editor.render();
+  refresh(): void {
+    this.autoresize();
   }
 
   /**
    * Set the size of the editor in pixels.
    */
   setSize(width: number, height: number): void {
-    this.onResize(new ResizeMessage(width, height));
+    this.resize(new ResizeMessage(width, height));
   }
 
   /**
@@ -279,18 +307,10 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
   }
 
   /** Editor will be hidden by setting width to 0. On show we need to recalculate again */
-  // protected onAfterShow(msg: Message): void {
-  //     this.autoresize();
-  // }
-
   protected autoresize(): void {
-      if (this._autoSizing) {
+      if (this.autoSizing) {
           this.resize();
       }
-  }
-
-  protected onResize(msg: ResizeMessage): void {
-      this.resize(msg);
   }
 
   protected resize(dimension?: monaco.editor.IDimension): void {
@@ -323,7 +343,7 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
   }
 
   protected getHeight(boxSizing: IBoxSizing): number {
-      if (!this._autoSizing) {
+      if (!this.autoSizing) {
           return this._editor.getDomNode().offsetHeight - boxSizing.verticalSum;
       }
       const configuration = this.editor.getConfiguration();
@@ -342,14 +362,13 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
       return Math.max(defaultHeight, editorHeight)
   }
 
-  private _model: MonacoModel = null;
-  private _handler: CodeEditor.KeydownHandler = null;
-  private _editor: monaco.editor.IStandaloneCodeEditor = null;
-  private _isDisposed = false;
-
-  // FIXME remove when https://github.com/Microsoft/monaco-editor/issues/103 is resolved
-  private _autoSizing: boolean = false;
-  minHeight: number = -1;
+  protected _model: MonacoModel = null;
+  protected _handler: CodeEditor.KeydownHandler = null;
+  protected _editor: monaco.editor.IStandaloneCodeEditor = null;
+  protected _isDisposed = false;
+  protected _modelObserver = new PropertyObserver<monaco.editor.IModel>();
+  protected _modelListeners: monaco.IDisposable[] = [];
+  protected _disposables: monaco.IDisposable[] = [];
 
 }
 

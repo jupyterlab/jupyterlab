@@ -36,11 +36,11 @@ class MonacoModel implements CodeEditor.IModel {
    */
   constructor() {
     let model = this._model = monaco.editor.createModel('');
-    this._selections.changed.connect(this._onSelectionChanged, this);
     model.onDidChangeMode(event => this._onDidChangeMode(event));
   }
 
   protected _onDidChangeMode(event: monaco.editor.IModelModeChangedEvent) {
+    // TODO check and guard
     let oldValue = findLanguageById(event.oldMode.getId()).mimetypes[0];
     let newValue = findLanguageById(event.newMode.getId()).mimetypes[0];
     this.mimeTypeChanged.emit({
@@ -86,6 +86,7 @@ class MonacoModel implements CodeEditor.IModel {
    * A mime type of the model.
    */
   get mimeType(): string {
+    // TODO return default if null
     return findLanguageById(this._model.getModeId()).mimetypes[0];
   }
   set mimeType(newValue: string) {

@@ -57,4 +57,4 @@ export function registerLanguage(language: ILanguage, loadLanguageConfiguration:
         monaco.languages.setMonarchTokensProvider(languageId, module.language);
         monaco.languages.setLanguageConfiguration(languageId, module.conf);
     });
-}
+};
