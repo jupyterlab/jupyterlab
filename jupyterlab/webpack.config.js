@@ -11,7 +11,7 @@ var webpack = require('webpack');
 var path = require('path');
 var CopyWebpackPlugin = require('copy-webpack-plugin');
 
-var monacoEditorPath = 'node_modules/monaco-editor-core/dev/vs'
+var monacoEditorPath = '../node_modules/monaco-editor-core/dev/vs'
 
 
 console.log('Generating bundles...');

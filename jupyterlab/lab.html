@@ -42,6 +42,16 @@ Distributed under the terms of the Modified BSD License.
 
 <body>
 
+<script src="{{static_prefix}}/vs/loader.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript" charset="utf-8">
+  window.require.config({
+    paths: {
+      'vs': "{{static_prefix}}/vs"
+    }
+  });
+  window.require(['vs/editor/editor.main'], function() {})
+</script>
+
 {% block script %}
 <script>
   var loader = jupyter.loader;
