@@ -66,12 +66,12 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     this._restore = options.restore;
     if (this._restore) {
       let { command, namespace, registry, state, when } = this._restore;
-      Promise.all([state.fetchNamespace(namespace), when]).then(([saved]) => {
+      let promises = [state.fetchNamespace(namespace)].concat(when);
+      Promise.all(promises).then(([saved]) => {
         saved.forEach(args => {
-          registry.execute(command, args.value).catch(() => {
-            // If the command fails, delete the state restore data.
-            state.remove(args.id);
-          });
+          // Execute the command and if it fails, delete the state restore data.
+          registry.execute(command, args.value)
+            .catch(() => { state.remove(args.id); });
         });
       });
     }
@@ -286,7 +286,7 @@ namespace InstanceTracker {
     /**
      * The point after which it is safe to restore state.
      */
-    when: Promise<void>;
+    when: Promise<any> | Array<Promise<any>>;
   }
 
   /**
