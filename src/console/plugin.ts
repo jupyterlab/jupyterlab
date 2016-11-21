@@ -383,7 +383,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       items.forEach(item => {
         app.commands.execute('console:create', item.value).catch(() => {
           // Remove console from the state database if session does not exist.
-          state.remove(`${NAMESPACE}:${item.id}`);
+          state.remove(item.id);
         });
       });
   });
