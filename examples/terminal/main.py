@@ -43,6 +43,7 @@ class MainPageHandler(tornado.web.RequestHandler):
     def get(self):
         """Get the main page for the application's interface."""
         return self.render("index.html", static=self.static_url,
+                           terminals_available=sys.platform != 'win32',
                            base_url=self.base_url)
 
 

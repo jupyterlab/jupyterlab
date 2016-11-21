@@ -25,7 +25,8 @@ class MainPageHandler(tornado.web.RequestHandler):
 
     def get(self):
         return self.render("index.html", static=self.static_url,
-                           base_url=self.base_url, ws_url=self.ws_url)
+                           terminals_available=sys.platform != 'win32',
+                           base_url=self.base_url, ws_url=self.ws_url,)
 
 
 def main(argv):
