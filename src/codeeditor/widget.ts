@@ -82,7 +82,7 @@ class CodeEditorWidget extends Widget {
    */
   protected onAfterShow(msg: Message): void {
     if (this._needsRefresh) {
-      this._editor.refresh();
+      this._editor.refresh(true);
       this._needsRefresh = false;
     }
   }

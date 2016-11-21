@@ -251,7 +251,7 @@ namespace CodeEditor {
     /**
      * Repaint editor. 
      */
-    refresh(): void;
+    refresh(afterShow?: boolean): void;
 
     /**
      * Test whether the editor has keyboard focus.
