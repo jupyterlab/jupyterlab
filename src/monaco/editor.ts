@@ -2,8 +2,20 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ISignal, defineSignal
+} from 'phosphor/lib/core/signaling';
 
-} from 'monaco';
+import {
+  Message
+} from 'phosphor/lib/core/messaging';
+
+import {
+  ResizeMessage, Widget
+} from 'phosphor/lib/ui/widget';
+
+import {
+  boxSizing as computeBoxSizing, IBoxSizing
+} from 'phosphor/lib/dom/sizing';
 
 import {
   CodeEditor, IEditorFactory
@@ -23,15 +35,13 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
    * Construct a Monaco editor.
    */
   constructor(host: HTMLElement, options: monaco.editor.IEditorConstructionOptions = {}) {
-    // host.classList.add(EDITOR_CLASS);
     let monacoModel = this._model =  new MonacoModel();
-    // options.theme = (options.theme || DEFAULT_CODEMIRROR_THEME);
     options.model = monacoModel.model;
     let monacoEditor = this._editor = monaco.editor.create(host, options);
     monacoEditor.onDidChangeModel(e => this._onDidChangeModel(e));
     monacoEditor.onDidChangeModelMode(e => this._onDidChangeModelMode(e));
     monacoEditor.onDidChangeCursorPosition(e => this._onDidChangeCursorPosition(e));
-    monacoEditor.onDidChangeCursorSelection(e => this.onDidChangeCursorSelection(e));
+    monacoEditor.onDidChangeCursorSelection(e => this._onDidChangeCursorSelection(e));
   }
 
   protected _onDidChangeModel(event: monaco.editor.IModelChangedEvent) {
@@ -46,7 +56,7 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
     // TODO
   }
 
-  protected onDidChangeCursorSelection(event: monaco.editor.ICursorSelectionChangedEvent) {
+  protected _onDidChangeCursorSelection(event: monaco.editor.ICursorSelectionChangedEvent) {
     // TODO
   }
 
@@ -101,7 +111,10 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
   /**
    * Repaint editor.
    */
-  refresh(): void {
+  refresh(afterShow?: boolean): void {
+    if (afterShow) {
+      this.autoresize();
+    }
     this._editor.render();
   }
 
@@ -109,7 +122,7 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
    * Set the size of the editor in pixels.
    */
   setSize(width: number, height: number): void {
-    // override css here
+    this.onResize(new ResizeMessage(width, height));
   }
 
   /**
@@ -265,10 +278,78 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
     };
   }
 
+  /** Editor will be hidden by setting width to 0. On show we need to recalculate again */
+  // protected onAfterShow(msg: Message): void {
+  //     this.autoresize();
+  // }
+
+  protected autoresize(): void {
+      if (this._autoSizing) {
+          this.resize();
+      }
+  }
+
+  protected onResize(msg: ResizeMessage): void {
+      this.resize(msg);
+  }
+
+  protected resize(dimension?: monaco.editor.IDimension): void {
+      if (this._editor.getDomNode()) {
+          const layoutSize = this.computeLayoutSize(dimension);
+          this.editor.layout(layoutSize);
+      }
+  }
+
+  protected computeLayoutSize(dimension?: monaco.editor.IDimension): monaco.editor.IDimension {
+      if (dimension && dimension.width >= 0 && dimension.height >= 0) {
+          return dimension;
+      }
+
+      const boxSizing = computeBoxSizing(this._editor.getDomNode());
+
+      const width = (!dimension || dimension.width < 0) ?
+          this.getWidth(boxSizing) :
+          dimension.width;
+
+      const height = (!dimension || dimension.height < 0) ?
+          this.getHeight(boxSizing) :
+          dimension.height;
+
+      return { width, height };
+  }
+
+  protected getWidth(boxSizing: IBoxSizing): number {
+      return this._editor.getDomNode().offsetWidth - boxSizing.horizontalSum;
+  }
+
+  protected getHeight(boxSizing: IBoxSizing): number {
+      if (!this._autoSizing) {
+          return this._editor.getDomNode().offsetHeight - boxSizing.verticalSum;
+      }
+      const configuration = this.editor.getConfiguration();
+
+      const lineHeight = configuration.lineHeight;
+      const lineCount = this.editor.getModel().getLineCount();
+      const contentHeight = lineHeight * lineCount;
+
+      const horizontalScrollbarHeight = configuration.layoutInfo.horizontalScrollbarHeight;
+
+      const editorHeight = contentHeight + horizontalScrollbarHeight;
+      if (this.minHeight < 0) {
+          return editorHeight;
+      }
+      const defaultHeight = lineHeight * this.minHeight + horizontalScrollbarHeight;
+      return Math.max(defaultHeight, editorHeight)
+  }
+
   private _model: MonacoModel = null;
   private _handler: CodeEditor.KeydownHandler = null;
   private _editor: monaco.editor.IStandaloneCodeEditor = null;
   private _isDisposed = false;
+
+  // FIXME remove when https://github.com/Microsoft/monaco-editor/issues/103 is resolved
+  private _autoSizing: boolean = false;
+  minHeight: number = -1;
 
 }
 
