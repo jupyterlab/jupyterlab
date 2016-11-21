@@ -72,6 +72,11 @@ const terminalExtension: JupyterLabPlugin<void> = {
 
 
 function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB): void {
+  // Bail if there are no terminals available.
+  if (!services.terminals.isAvailable()) {
+    console.log('Disabling terminals plugin because they are not available on the server');
+    return;
+  }
   let { commands, keymap } = app;
   let newTerminalId = 'terminal:create-new';
   let increaseTerminalFontSize = 'terminal:increase-font';
