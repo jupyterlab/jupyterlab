@@ -1575,6 +1575,20 @@ namespace Private {
           changed = false;
           edit.blur();
           break;
+        case 38:  // Up arrow
+          event.stopPropagation();
+          event.preventDefault();
+          if (edit.selectionStart !== edit.selectionEnd) {
+            edit.selectionStart = edit.selectionEnd = 0;
+          }
+          break;
+        case 40:  // Down arrow
+          event.stopPropagation();
+          event.preventDefault();
+          if (edit.selectionStart !== edit.selectionEnd) {
+            edit.selectionStart = edit.selectionEnd = edit.value.length;
+          }
+          break;
         default:
           break;
         }
