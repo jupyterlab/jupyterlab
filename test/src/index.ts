@@ -31,6 +31,7 @@ import './docregistry/context.spec';
 import './docregistry/default.spec';
 import './docregistry/registry.spec';
 
+import './filebrowser/crumbs.spec';
 import './filebrowser/model.spec';
 
 import './inspector/inspector.spec';
