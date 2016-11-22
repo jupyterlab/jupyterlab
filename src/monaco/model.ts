@@ -34,15 +34,19 @@ class MonacoModel implements CodeEditor.IModel {
   /**
    * Construct a new monaco model.
    */
-  constructor() {
-    let model = this._model = monaco.editor.createModel('');
+  constructor(model?: monaco.editor.IModel) {
+    if (!model) {
+      model = monaco.editor.createModel('');
+    }
+    this._model = model;
     model.onDidChangeMode(event => this._onDidChangeMode(event));
   }
 
   protected _onDidChangeMode(event: monaco.editor.IModelModeChangedEvent) {
-    // TODO check and guard
-    let oldValue = findLanguageById(event.oldMode.getId()).mimetypes[0];
-    let newValue = findLanguageById(event.newMode.getId()).mimetypes[0];
+    let oldModeId = event.oldMode.getId();
+    let newModeId = event.newMode.getId();
+    let oldValue = oldModeId ? findLanguageById(oldModeId).mimetypes[0] : null;
+    let newValue = newModeId ? findLanguageById(newModeId).mimetypes[0] : null;
     this.mimeTypeChanged.emit({
       name: 'mimeType',
       oldValue,
@@ -86,8 +90,12 @@ class MonacoModel implements CodeEditor.IModel {
    * A mime type of the model.
    */
   get mimeType(): string {
-    // TODO return default if null
-    return findLanguageById(this._model.getModeId()).mimetypes[0];
+    let language = findLanguageById(this._model.getModeId());
+    if (!language) {
+      language = findLanguageById('plaintext');
+    }
+    let mimeType = language.mimetypes[0];
+    return mimeType;
   }
   set mimeType(newValue: string) {
     let newLanguage = findLanguageForMimeType(newValue);
@@ -192,10 +200,6 @@ class MonacoModel implements CodeEditor.IModel {
     const monacoUri = monaco.Uri.parse(path);
     const languageId = findLanguageForUri(monacoUri);
     monaco.editor.setModelLanguage(this._model, languageId);
-  }
-
-  private _onSelectionChanged(sender: ObservableVector<CodeEditor.ITextSelection>, change: ObservableVector.IChangedArgs<CodeEditor.ITextSelection>): void {
-    // TODO
   }
 
   private _isDisposed = false;

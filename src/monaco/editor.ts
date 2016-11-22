@@ -21,6 +21,10 @@ import {
     PropertyObserver
 } from '../editorwidget/utils/utils';
 
+import {
+  ObservableVector
+} from '../common/observablevector';
+
 /**
  * Monaco code editor.
  */
@@ -35,7 +39,6 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
    * Construct a Monaco editor.
    */
   constructor(host: HTMLElement, options: monaco.editor.IEditorConstructionOptions = {}) {
-    // TODO add setter for _model
     let monacoModel = this._model =  new MonacoModel();
     options.model = monacoModel.model;
     let monacoEditor = this._editor = monaco.editor.create(host, options);
@@ -43,23 +46,37 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
 
     this._modelObserver.connect = (model) => this.connectToEditorModel(model);
     this._modelObserver.disconnect = (model) => this.disconnectFromEditorModel(model);
+    this._modelObserver.property = monacoModel;
 
-    this._modelObserver.property = this.editor.getModel();
-
+    this._disposables.push(this.editor.onDidChangeModel(e => this._onDidChangeModel(e)));
     this._disposables.push(monacoEditor.onDidChangeCursorPosition(e => this._onDidChangeCursorPosition(e)));
     this._disposables.push(monacoEditor.onDidChangeCursorSelection(e => this._onDidChangeCursorSelection(e)));
   }
 
-  protected connectToEditorModel(model: monaco.editor.IModel) {
-    const listener = model.onDidChangeContent(e => this._onDidChangeContent(e));
-    this._modelListeners = [listener];
+  protected _onDidChangeModel(event: monaco.editor.IModelChangedEvent) {
+    this.setModel(new MonacoModel(this.editor.getModel()));
   }
 
-  protected disconnectFromEditorModel(model: monaco.editor.IModel) {
+  public setModel(newModel: MonacoModel) {
+    this._modelObserver.property = newModel;
+  }
+
+  protected connectToEditorModel(model: MonacoModel) {
+    const listener = model.model.onDidChangeContent(e => this._onDidChangeContent(e));
+    this._modelListeners = [listener];
+    model.selections.changed.connect(this._onSelectionChanged, this);
+  }
+
+  protected disconnectFromEditorModel(model: MonacoModel) {
+    model.selections.changed.disconnect(this._onSelectionChanged, this);
     for (const listener of this._modelListeners) {
         listener.dispose();
     }
     this._modelListeners = [];
+  }
+
+  private _onSelectionChanged(sender: ObservableVector<CodeEditor.ITextSelection>, change: ObservableVector.IChangedArgs<CodeEditor.ITextSelection>): void {
+    // TODO
   }
 
   protected _onDidChangeConfiguration(event: monaco.editor.IConfigurationChangedEvent) {
@@ -359,14 +376,14 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
           return editorHeight;
       }
       const defaultHeight = lineHeight * this.minHeight + horizontalScrollbarHeight;
-      return Math.max(defaultHeight, editorHeight)
+      return Math.max(defaultHeight, editorHeight);
   }
 
   protected _model: MonacoModel = null;
   protected _handler: CodeEditor.KeydownHandler = null;
   protected _editor: monaco.editor.IStandaloneCodeEditor = null;
   protected _isDisposed = false;
-  protected _modelObserver = new PropertyObserver<monaco.editor.IModel>();
+  protected _modelObserver = new PropertyObserver<MonacoModel>();
   protected _modelListeners: monaco.IDisposable[] = [];
   protected _disposables: monaco.IDisposable[] = [];
 
