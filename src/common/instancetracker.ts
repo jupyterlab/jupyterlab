@@ -112,9 +112,13 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     // Handle widget state restoration.
     if (this._restore) {
       let { namespace, state } = this._restore;
-      let name = `${namespace}:${this._restore.name(widget)}`;
-      Private.nameProperty.set(widget, name);
-      state.save(name, this._restore.args(widget));
+      let widgetName = this._restore.name(widget);
+
+      if (widgetName) {
+        let name = `${namespace}:${widgetName}`;
+        Private.nameProperty.set(widget, name);
+        state.save(name, this._restore.args(widget));
+      }
     }
 
     // Handle widget disposal.
@@ -123,7 +127,11 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
       // If restore data was saved, delete it from the database.
       if (this._restore) {
         let { state } = this._restore;
-        state.remove(Private.nameProperty.get(widget));
+        let name = Private.nameProperty.get(widget);
+
+        if (name) {
+          state.remove(name);
+        }
       }
       // If this was the last widget being disposed, emit null.
       if (!this._widgets.size) {
