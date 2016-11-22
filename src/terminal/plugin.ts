@@ -79,7 +79,7 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
     fontSize: 13
   };
 
-  // Create an instance tracker for al terminal widgets.
+  // Create an instance tracker for all terminal widgets.
   const tracker = new InstanceTracker<TerminalWidget>({
     restore: {
       state,

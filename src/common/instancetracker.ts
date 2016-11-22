@@ -202,11 +202,14 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     let oldName = Private.nameProperty.get(widget);
     let newName = this._restore.name(widget);
 
-    if (oldName !== newName) {
+    if (oldName && oldName !== newName) {
       state.remove(oldName);
       Private.nameProperty.set(widget, newName);
     }
-    state.save(newName, this._restore.args(widget));
+
+    if (newName) {
+      state.save(newName, this._restore.args(widget));
+    }
   }
 
   /**
