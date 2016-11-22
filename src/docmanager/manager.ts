@@ -118,33 +118,7 @@ class DocumentManager implements IDisposable {
    * cannot be found.
    */
   open(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
-    let widgetFactory = this._widgetFactoryFor(path, widgetName);
-    if (!widgetFactory) {
-      return;
-    }
-    let factory = this._registry.getModelFactory(widgetFactory.modelName);
-    if (!factory) {
-      return;
-    }
-    // Use an existing context if available.
-    let context = this._findContext(path, factory.name);
-    if (!context) {
-      context = this._createContext(path, factory);
-      // Load the contents from disk.
-      context.revert();
-    }
-    // Handle the kernel for the context.
-    if (kernel && (kernel.id || kernel.name) && widgetFactory.canStartKernel) {
-      context.changeKernel(kernel);
-    } else if (widgetFactory.preferKernel &&
-               //Don't start the default kernel if we pass in a null kernel
-               !(kernel && !kernel.id && !kernel.name) &&
-               !context.kernel) {
-      context.startDefaultKernel();
-    }
-    let widget = this._widgetManager.createWidget(widgetFactory.name, context);
-    this._opener.open(widget);
-    return widget;
+    return this._createOrOpenDocument('open', path, widgetName, kernel);
   }
 
   /**
@@ -163,29 +137,7 @@ class DocumentManager implements IDisposable {
    * cannot be found.
    */
   createNew(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
-    let widgetFactory = this._widgetFactoryFor(path, widgetName);
-    if (!widgetFactory) {
-      return;
-    }
-    let factory = this._registry.getModelFactory(widgetFactory.modelName);
-    if (!factory) {
-      return;
-    }
-    let context = this._createContext(path, factory);
-    // Immediately save the contents to disk.
-    context.save();
-    // Handle the kernel for the context.
-    if (kernel && (kernel.id || kernel.name) && widgetFactory.canStartKernel) {
-      context.changeKernel(kernel);
-    } else if (widgetFactory.preferKernel &&
-               //Don't start the default kernel if we pass in a null kernel
-               !(kernel && !kernel.id && !kernel.name) &&
-               !context.kernel) {
-      context.startDefaultKernel();
-    }
-    let widget = this._widgetManager.createWidget(widgetFactory.name, context);
-    this._opener.open(widget);
-    return widget;
+    return this._createOrOpenDocument('create', path, widgetName, kernel);
   }
 
   /**
@@ -319,6 +271,60 @@ class DocumentManager implements IDisposable {
       widgetName = registry.defaultWidgetFactory(ContentsManager.extname(path)).name;
     }
     return registry.getWidgetFactory(widgetName);
+  }
+
+  /**
+   * Creates a new document, or loads one from disk, depending on the `which` argument.
+   * If `which==='create'`, then it creates a new document. If `which==='open'`,
+   * then it loads the document from disk.
+   *
+   * The two cases differ in how the document context is handled, but the creation
+   * of the widget and launching of the kernel are identical.
+   */
+  private _createOrOpenDocument(which: string, path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
+    let widgetFactory = this._widgetFactoryFor(path, widgetName);
+    if (!widgetFactory) {
+      return;
+    }
+    let factory = this._registry.getModelFactory(widgetFactory.modelName);
+    if (!factory) {
+      return;
+    }
+
+    let context: Context<DocumentRegistry.IModel> = null;
+
+    //Handle the load-from-disk case
+    if(which === 'open') {
+      // Use an existing context if available.
+      context = this._findContext(path, factory.name);
+      if (!context) {
+        context = this._createContext(path, factory);
+        // Load the contents from disk.
+        context.revert();
+      }
+    } else if (which === 'create') {
+      context = this._createContext(path, factory);
+      // Immediately save the contents to disk.
+      context.save();
+    } else {
+      //Should not reach here
+      console.log('Invalid option for _createOrOpenDocument()');
+    }
+
+    // Maybe launch/connect the kernel for the context.
+    if (kernel && (kernel.id || kernel.name) && widgetFactory.canStartKernel) {
+      // If the kernel is valid and the widgetFactory wants one.
+      context.changeKernel(kernel);
+    } else if (widgetFactory.preferKernel &&
+               !(kernel && !kernel.id && !kernel.name) &&
+               !context.kernel) {
+      //If the kernel is not the `None` kernel and the widgetFactory wants one
+      context.startDefaultKernel();
+    }
+
+    let widget = this._widgetManager.createWidget(widgetFactory.name, context);
+    this._opener.open(widget);
+    return widget;
   }
 
   private _serviceManager: ServiceManager.IManager = null;
