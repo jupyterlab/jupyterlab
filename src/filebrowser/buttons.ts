@@ -151,6 +151,27 @@ class FileButtons extends Widget {
   }
 
   /**
+   * Get the create button node.
+   */
+  get createNode(): HTMLButtonElement {
+    return this._buttons.create;
+  }
+
+  /**
+   * Get the upload button node.
+   */
+  get uploadNode(): HTMLButtonElement {
+    return this._buttons.upload;
+  }
+
+  /**
+   * Get the refresh button node.
+   */
+  get refreshNode(): HTMLButtonElement {
+    return this._buttons.refresh;
+  }
+
+  /**
    * Create a file from a creator.
    *
    * @param creatorName - The name of the file creator.
