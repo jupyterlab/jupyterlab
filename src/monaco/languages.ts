@@ -1,6 +1,6 @@
 export const defaultLanguageId = 'plaintext';
 
-export function findMimeTypeForLanguage(languageId: string): string {
+export function findMimeTypeForLanguage(languageId: string | null): string {
   const language = findLanguageById(languageId);
   if (language && language.mimetypes && language.mimetypes.length > 0) {
     return language.mimetypes[0];
@@ -36,7 +36,7 @@ export function findLanguageForExtension(extension: string): string {
   return defaultLanguageId;
 }
 
-export function findLanguageById(id: string): monaco.languages.ILanguageExtensionPoint | null {
+export function findLanguageById(id: string | null): monaco.languages.ILanguageExtensionPoint | null {
   const result = monaco.languages.getLanguages().filter(language => language.id === id)[0];
   return result ? result : null;
 }

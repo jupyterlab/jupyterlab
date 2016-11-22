@@ -10,16 +10,16 @@ import {
 } from 'phosphor/lib/dom/sizing';
 
 import {
+  IChangedArgs
+} from '../common/interfaces';
+
+import {
   CodeEditor, IEditorFactory
 } from '../codeeditor';
 
 import {
   MonacoModel
 } from './model';
-
-import {
-  PropertyObserver
-} from '../editorwidget/utils/utils';
 
 import {
   ObservableVector
@@ -45,16 +45,16 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
    */
   constructor(host: HTMLElement, options?: monaco.editor.IEditorConstructionOptions, services?: monaco.editor.IEditorOverrideServices) {
     this._editor = monaco.editor.create(host, options, services);
-    this._model = new MonacoModel(this._editor.getModel());
-    this._editorListeners.push(this.editor.onDidChangeConfiguration(e => this._onDidChangeConfiguration(e)));
+    this._listeners.push(this.editor.onDidChangeModel(e => this._onDidChangeModel(e)));
+    this._listeners.push(this.editor.onDidChangeConfiguration(e => this._onDidChangeConfiguration(e)));
+    this._listeners.push(this.editor.onDidChangeCursorPosition(e => this._onDidChangeCursorPosition(e)));
+    this._listeners.push(this.editor.onDidChangeCursorSelection(e => this._onDidChangeCursorSelection(e)));
 
-    this._modelObserver.connect = model => this.connectToEditorModel(model);
-    this._modelObserver.disconnect = model => this.disconnectFromEditorModel(model);
-    this._modelObserver.property = this._model;
+    this._model = new MonacoModel();
+    this._model.valueChanged.connect(this._onValueChanged, this);
+    this._model.selections.changed.connect(this._onSelectionChanged, this);
 
-    this._editorListeners.push(this.editor.onDidChangeModel(e => this._onDidChangeModel(e)));
-    this._editorListeners.push(this.editor.onDidChangeCursorPosition(e => this._onDidChangeCursorPosition(e)));
-    this._editorListeners.push(this.editor.onDidChangeCursorSelection(e => this._onDidChangeCursorSelection(e)));
+    this._model.model = this._editor.getModel();
   }
 
   /**
@@ -72,39 +72,16 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
       return;
     }
     this._isDisposed = true;
-    for (const disposable of this._editorListeners) {
-      disposable.dispose();
+    this._model.dispose();
+
+    while (this._listeners.length !== 0)  {
+      this._listeners.pop().dispose();
     }
-    this._editorListeners = null;
-    this._modelObserver.property = null;
-    this._modelObserver = null;
-    this._modelListeners = null;
-    if (this._editor) {
-      this._editor.dispose();
-      this._editor = null;
-    }
+    this._editor.dispose();
   }
 
   protected _onDidChangeModel(event: monaco.editor.IModelChangedEvent) {
-    this.setModel(new MonacoModel(this.editor.getModel()));
-  }
-
-  public setModel(newModel: MonacoModel) {
-    this._modelObserver.property = newModel;
-  }
-
-  protected connectToEditorModel(model: MonacoModel) {
-    const listener = model.model.onDidChangeContent(e => this._onDidChangeContent(e));
-    this._modelListeners = [listener];
-    model.selections.changed.connect(this._onSelectionChanged, this);
-  }
-
-  protected disconnectFromEditorModel(model: MonacoModel) {
-    model.selections.changed.disconnect(this._onSelectionChanged, this);
-    for (const listener of this._modelListeners) {
-      listener.dispose();
-    }
-    this._modelListeners = [];
+    this._model.model = this.editor.getModel();
   }
 
   private _onSelectionChanged(sender: ObservableVector<CodeEditor.ITextSelection>, change: ObservableVector.IChangedArgs<CodeEditor.ITextSelection>): void {
@@ -115,7 +92,7 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
     this.autoresize();
   }
 
-  protected _onDidChangeContent(event: monaco.editor.IModelContentChangedEvent2) {
+  protected _onValueChanged(model: MonacoModel, args: IChangedArgs<string>) {
     this.autoresize();
   }
 
@@ -188,7 +165,7 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
     return this._model;
   }
 
-  get onKeyDown(): CodeEditor.KeydownHandler |  null {
+  get onKeyDown(): CodeEditor.KeydownHandler | null {
     return this._handler;
   }
   set onKeyDown(value: CodeEditor.KeydownHandler) {
@@ -317,13 +294,11 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
     return Math.max(defaultHeight, editorHeight);
   }
 
-  protected _model: MonacoModel | null = null;
-  protected _handler: CodeEditor.KeydownHandler | null = null;
-  protected _editor: monaco.editor.IStandaloneCodeEditor  |  null = null;
   protected _isDisposed = false;
-  protected _modelObserver = new PropertyObserver<MonacoModel>();
-  protected _modelListeners: monaco.IDisposable[] = [];
-  protected _editorListeners: monaco.IDisposable[] = [];
+  protected _model: MonacoModel;
+  protected _listeners: monaco.IDisposable[] = [];
+  protected _editor: monaco.editor.IStandaloneCodeEditor;
+  protected _handler: CodeEditor.KeydownHandler | null = null;
 
 }
 

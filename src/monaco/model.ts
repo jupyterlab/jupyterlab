@@ -22,7 +22,7 @@ import {
 } from '../common/observablevector';
 
 import {
-  findLanguageForMimeType, findMimeTypeForLanguage, findLanguageForPath
+  findLanguageForMimeType, findMimeTypeForLanguage, findLanguageForPath, findLanguageById
 } from './languages';
 
 /**
@@ -41,44 +41,6 @@ export class MonacoModel implements CodeEditor.IModel {
   mimeTypeChanged: ISignal<this, IChangedArgs<string>>;
 
   /**
-   * Construct a new monaco model.
-   */
-  constructor(model: monaco.editor.IModel = monaco.editor.createModel('')) {
-    this._model = model;
-    this._value = this._model.getValue();
-    model.onDidChangeMode(event => this._onDidChangeMode(event));
-    model.onDidChangeContent(event => this._onDidChangeContent(event));
-  }
-
-  protected _onDidChangeMode(event: monaco.editor.IModelModeChangedEvent) {
-    const oldValue = findMimeTypeForLanguage(event.oldMode.getId());
-    const newValue = findMimeTypeForLanguage(event.newMode.getId());
-    if (oldValue !== newValue) {
-      this.mimeTypeChanged.emit({
-        name: 'mimeType',
-        oldValue,
-        newValue
-      });
-    }
-  }
-
-  protected _onDidChangeContent(event: monaco.editor.IModelContentChangedEvent2) {
-    const oldValue = this._value;
-    const newValue = this.value;
-    if (oldValue !== newValue) {
-      this.valueChanged.emit({
-        name: 'value',
-        oldValue,
-        newValue
-      });
-    }
-  }
-
-  get model(): monaco.editor.IModel {
-    return this._model;
-  }
-
-  /**
    * Whether the editor is disposed.
    */
   get isDisposed(): boolean {
@@ -93,9 +55,39 @@ export class MonacoModel implements CodeEditor.IModel {
       return;
     }
     this._isDisposed = true;
-    this._model.dispose();
-    this._model = null;
+    this.disconnectModel();
     clearSignalData(this);
+  }
+
+  get model(): monaco.editor.IModel {
+    if (this._model) {
+      return this._model;
+    }
+    throw new Error('model has not been initialized');
+  }
+
+  set model(model: monaco.editor.IModel) {
+    const oldLanguage = this._model && this.model.getModeId();
+    this.disconnectModel();
+    this._model = model;
+    this.connectModel();
+    this.fireContentChanged();
+    this.fireMimeTypeChanged(oldLanguage, this.model.getModeId());
+  }
+
+  protected disconnectModel(): void {
+    if (this._model) {
+      while (this._listeners.length !== 0) {
+        this._listeners.pop().dispose();
+      }
+      this._model = null;
+    }
+  }
+
+  protected connectModel(): void {
+    const model = this.model;
+    this._listeners.push(model.onDidChangeMode(event => this._onDidChangeMode(event)));
+    this._listeners.push(model.onDidChangeContent(event => this._onDidContentChanged(event)));
   }
 
   /**
@@ -112,7 +104,7 @@ export class MonacoModel implements CodeEditor.IModel {
    * @param uuid - The uuid of an editor.
    */
   getCursorPosition(uuid: string): CodeEditor.IPosition {
-    let cursor = this.findCursorPosition(uuid);
+    const cursor = this.findCursorPosition(uuid);
     if (cursor) {
       return this.getPositionAt(cursor.start);
     }
@@ -127,12 +119,12 @@ export class MonacoModel implements CodeEditor.IModel {
    * @param position - The primary cursor position of an editor.
    */
   setCursorPosition(uuid: string, position: CodeEditor.IPosition): void {
-    let selections = this.selections;
-    let cursor = find(selections, (selection) => { return selection.start === selection.end; });
+    const selections = this.selections;
+    const cursor = find(selections, (selection) => { return selection.start === selection.end; });
     if (cursor) {
       selections.remove(cursor);
     }
-    let offset = this.getOffsetAt(position);
+    const offset = this.getOffsetAt(position);
     selections.pushBack({
       start: offset,
       end: offset,
@@ -141,8 +133,10 @@ export class MonacoModel implements CodeEditor.IModel {
   };
 
   private findCursorPosition(uuid: string): CodeEditor.ITextSelection {
-    let selections = this.selections;
-    let cursor = find(selections, (selection) => { return selection.start === selection.end && selection.uuid === uuid; });
+    const selections = this.selections;
+    const cursor = find(selections, (selection) => {
+      return selection.start === selection.end && selection.uuid === uuid;
+    });
     return cursor;
   }
 
@@ -150,70 +144,70 @@ export class MonacoModel implements CodeEditor.IModel {
    * A mime type of the model.
    */
   get mimeType(): string {
-    return findMimeTypeForLanguage(this._model.getModeId());
+    return findMimeTypeForLanguage(this.model.getModeId());
   }
   set mimeType(newValue: string) {
     const newLanguage = findLanguageForMimeType(newValue);
-    monaco.editor.setModelLanguage(this._model, newLanguage);
+    monaco.editor.setModelLanguage(this.model, newLanguage);
   }
 
   /**
    * The text stored in the model.
    */
   get value(): string {
-    return this._model.getValue();
+    return this.model.getValue();
   }
   set value(newValue: string) {
-    this._model.setValue(newValue);
+    this.model.setValue(newValue);
   }
 
   /**
    * Get the number of lines in the model.
    */
   get lineCount(): number {
-    return this._model.getLineCount();
+    return this.model.getLineCount();
   }
 
   /**
    * Returns the content for the given line number.
    */
   getLine(line: number): string {
-    return this._model.getLineContent(line);
+    return this.model.getLineContent(line);
   }
 
   /**
    * Find an offset for the given position.
    */
   getOffsetAt(position: CodeEditor.IPosition): number {
-    return this._model.getOffsetAt(MonacoModel.toMonacoPosition(position));
+    return this.model.getOffsetAt(MonacoModel.toMonacoPosition(position));
   }
 
   /**
    * Find a position fot the given offset.
    */
   getPositionAt(offset: number): CodeEditor.IPosition {
-    return MonacoModel.toPosition(this._model.getPositionAt(offset));
+    return MonacoModel.toPosition(this.model.getPositionAt(offset));
   }
 
   /**
    * Undo one edit (if any undo events are stored).
    */
   undo(): void {
-    this._model.undo();
+    this.model.undo();
   }
 
   /**
    * Redo one undone edit.
    */
   redo(): void {
-    this._model.redo();
+    this.model.redo();
   }
 
   /**
    * Clear the undo history.
    */
   clearHistory(): void {
-    this._model.setEditableRange(this._model.getEditableRange());
+    this.model.setEditableRange(this.model.getEditableRange());
   }
 
   /**
@@ -221,12 +215,45 @@ export class MonacoModel implements CodeEditor.IModel {
    */
   setMimeTypeFromPath(path: string): void {
     const languageId = findLanguageForPath(path);
-    monaco.editor.setModelLanguage(this._model, languageId);
+    monaco.editor.setModelLanguage(this.model, languageId);
+  }
+
+  protected _onDidChangeMode(event: monaco.editor.IModelModeChangedEvent) {
+    this.fireMimeTypeChanged(event.oldMode.getId(), event.newMode.getId());
+  }
+
+  protected _onDidContentChanged(event: monaco.editor.IModelContentChangedEvent2) {
+    this.fireContentChanged();
+  }
+
+  protected fireMimeTypeChanged(oldLanguage: string | null, newLanguage: string | null) {
+    const oldValue = findMimeTypeForLanguage(oldLanguage);
+    const newValue = findMimeTypeForLanguage(newLanguage);
+    if (oldValue !== newValue) {
+      this.mimeTypeChanged.emit({
+        name: 'mimeType',
+        oldValue,
+        newValue
+      });
+    }
+  }
+
+  protected fireContentChanged() {
+    const oldValue = this._value;
+    const newValue = this.value;
+    if (oldValue !== newValue) {
+      this.valueChanged.emit({
+        name: 'value',
+        oldValue,
+        newValue
+      });
+    }
   }
 
   private _isDisposed = false;
   private _value: string;
-  private _model: monaco.editor.IModel;
+  private _model: monaco.editor.IModel | null;
+  private _listeners: monaco.IDisposable[] = [];
   private _selections = new ObservableVector<CodeEditor.ITextSelection>();
 
 }
