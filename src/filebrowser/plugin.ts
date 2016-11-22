@@ -129,28 +129,28 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
     let disposables = creatorCmds[name] = new DisposableSet();
     let command = Private.commandForName(name);
     disposables.add(commands.addCommand(command, {
-      execute: () => {
-        fbWidget.createFrom(name);
-      },
+      execute: () => fbWidget.createFrom(name),
       label: `New ${name}`
     }));
     disposables.add(palette.addItem({ command, category }));
   };
 
-  // Save the state of the file browser in the state database.
-  fbModel.pathChanged.connect((sender, args) => {
-    state.save(`${NAMESPACE}:cwd`, { path: args.newValue });
-  });
-
   // Restore the state of the file browser on reload.
   let key = `${NAMESPACE}:cwd`;
   Promise.all([state.fetch(key), app.started, manager.ready]).then(([cwd]) => {
-    if (cwd) {
-      let path = cwd['path'] as string;
-      manager.contents.get(path)
-        .then(() => { fbModel.cd(path); })
-        .catch(() => { state.remove(key); });
+    if (!cwd) {
+      return;
     }
+
+    let path = cwd['path'] as string;
+    return manager.contents.get(path)
+      .then(() => { fbModel.cd(path); })
+      .catch(() => { state.remove(key); });
+  }).then(() => {
+    // Save the subsequent state of the file browser in the state database.
+    fbModel.pathChanged.connect((sender, args) => {
+      state.save(`${NAMESPACE}:cwd`, { path: args.newValue });
+    });
   });
 
   // Sync tracker with currently focused widget.
