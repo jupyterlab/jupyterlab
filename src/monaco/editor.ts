@@ -29,7 +29,7 @@ import {
  * Monaco code editor.
  */
 export
-class MonacoCodeEditor implements CodeEditor.IEditor {
+class MonacoCodeEditor extends CodeEditor.AbstractEditor {
 
   // FIXME remove when https://github.com/Microsoft/monaco-editor/issues/103 is resolved
   autoSizing: boolean = false;
@@ -39,6 +39,7 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
    * Construct a Monaco editor.
    */
   constructor(host: HTMLElement, options: monaco.editor.IEditorConstructionOptions = {}) {
+    super();
     let monacoModel = this._model =  new MonacoModel();
     options.model = monacoModel.model;
     let monacoEditor = this._editor = monaco.editor.create(host, options);
@@ -76,7 +77,7 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
   }
 
   private _onSelectionChanged(sender: ObservableVector<CodeEditor.ITextSelection>, change: ObservableVector.IChangedArgs<CodeEditor.ITextSelection>): void {
-    // TODO
+    // TODO 
   }
 
   protected _onDidChangeConfiguration(event: monaco.editor.IConfigurationChangedEvent) {
@@ -123,11 +124,7 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
       this._editor.dispose();
       this._editor = null;
     }
-    this._isDisposed = true;
-  }
-
-  get isDisposed(): boolean {
-    return this._isDisposed;
+    super.dispose();
   }
 
   /**

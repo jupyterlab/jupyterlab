@@ -31,12 +31,13 @@ const DEFAULT_CODEMIRROR_THEME = 'jupyter';
  * CodeMirror editor.
  */
 export
-class CodeMirrorEditor implements CodeEditor.IEditor {
+class CodeMirrorEditor extends CodeEditor.AbstractEditor {
 
   /**
    * Construct a CodeMirror editor.
    */
   constructor(host: HTMLElement, options: CodeMirror.EditorConfiguration = {}) {
+    super();
     host.classList.add(EDITOR_CLASS);
     let codeMirrorModel = this._model =  new CodeMirrorModel();
     options.theme = (options.theme || DEFAULT_CODEMIRROR_THEME);
@@ -63,11 +64,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   dispose(): void {
     this._editor = null;
-    this._isDisposed = true;
-  }
-
-  get isDisposed(): boolean {
-    return this._isDisposed;
+    super.dispose();
   }
 
   /**
@@ -263,7 +260,6 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   private _model: CodeEditor.IModel = null;
   private _handler: CodeEditor.KeydownHandler = null;
   private _editor: CodeMirror.Editor = null;
-  private _isDisposed = false;
 
 }
 

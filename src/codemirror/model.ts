@@ -33,11 +33,12 @@ import {
  * An implementation of the code editor model using code mirror.
  */
 export
-class CodeMirrorModel implements CodeEditor.IModel {
+class CodeMirrorModel extends CodeEditor.AbstractModel {
   /**
    * Construct a new codemirror model.
    */
   constructor() {
+    super();
     let doc = this._doc = new CodeMirror.Doc('');
     this._selections.changed.connect(this._onSelectionChanged, this);
     CodeMirror.on(doc, 'cursorActivity', this._onCursorActivity.bind(this));
@@ -60,21 +61,10 @@ class CodeMirrorModel implements CodeEditor.IModel {
   mimeTypeChanged: ISignal<this, IChangedArgs<string>>;
 
   /**
-   * Whether the model is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
-  /**
    * Dipose of the resources used by the model.
    */
   dispose(): void {
-    if (this._isDisposed) {
-      return;
-    }
-    this._isDisposed = true;
-    clearSignalData(this);
+    super.dispose();
   }
 
   /**
@@ -210,9 +200,7 @@ class CodeMirrorModel implements CodeEditor.IModel {
   }
 
   private _mimetype = '';
-  private _isDisposed = false;
   private _doc: CodeMirror.Doc;
-  private _selections = new ObservableVector<CodeEditor.ITextSelection>();
 }
 
 
