@@ -29,10 +29,6 @@ import {
   ObservableVector
 } from '../common/observablevector';
 
-import {
-  JSONObject
-} from 'phosphor/lib/algorithm/json';
-
 
 /**
  * A namespace for code editors.
@@ -153,9 +149,21 @@ namespace CodeEditor {
     readonly selections: ObservableVector<ITextSelection>;
 
     /**
-     * Returns the primary cursor position.
+     * Returns the primary cursor position of an editor.
+     * 
+     * #### Notes
+     * @param uuid - The uuid of an editor.
      */
-    getCursorPosition(): IPosition;
+    getCursorPosition(uuid: string): IPosition;
+
+    /**
+     * Set the primary cursor position of a editor.
+     * 
+     * #### Notes
+     * @param uuid - The uuid of an editor.
+     * @param position - The primary cursor position of an editor.
+     */
+    setCursorPosition(uuid: string, position: IPosition): void;
 
     /**
      * Returns the content for the given line number.
@@ -193,6 +201,138 @@ namespace CodeEditor {
     setMimeTypeFromPath(path: string): void;
   }
 
+  export
+  abstract class AbstractModel implements IModel {
+    /**
+     * A signal emitted when the value changes.
+     */
+    valueChanged: ISignal<IModel, IChangedArgs<string>>;
+
+    /**
+     * A signal emitted when a property changes.
+     */
+    mimeTypeChanged: ISignal<IModel, IChangedArgs<string>>;
+
+    /**
+     * The text stored in the model.
+     */
+    value: string;  // TODO: this should be an iobservablestring.
+
+    /**
+     * A mime type of the model.
+     */
+    mimeType: string;
+
+    /**
+     * Get the number of lines in the model.
+     */
+    readonly lineCount: number;
+
+    /**
+     * Get the selections for the model.
+     */
+    get selections(): ObservableVector<ITextSelection> {
+      return this._selections;
+    }
+
+    /**
+     * Returns the primary cursor position of an editor.
+     * 
+     * #### Notes
+     * @param uuid - The uuid of an editor.
+     */
+    getCursorPosition(uuid: string): IPosition {
+      let cursor = this.findCursorPosition(uuid);
+      if (cursor) {
+        return this.getPositionAt(cursor.start);
+      }
+      return null;
+    }
+
+    /**
+     * Set the primary cursor position of a editor.
+     * 
+     * #### Notes
+     * @param uuid - The uuid of an editor.
+     * @param position - The primary cursor position of an editor.
+     */
+    setCursorPosition(uuid: string, position: IPosition): void {
+      let selections = this.selections;
+      let cursor = find(selections, (selection) => { return selection.start === selection.end; });
+      if (cursor) {
+        selections.remove(cursor);
+      }
+      let offset = this.getOffsetAt(position);
+      selections.pushBack({
+        start: offset,
+        end: offset,
+        uuid
+      });
+    };
+
+    private findCursorPosition(uuid: string): ITextSelection {
+      let selections = this.selections;
+      let cursor = find(selections, (selection) => { return selection.start === selection.end && selection.uuid === uuid; });
+      return cursor;
+    }
+
+    /**
+     * Returns the content for the given line number.
+     */
+    abstract getLine(line: number): string;
+
+    /**
+     * Find an offset for the given position.
+     */
+    abstract getOffsetAt(position: IPosition): number;
+
+    /**
+     * Find a position for the given offset.
+     */
+    abstract getPositionAt(offset: number): IPosition;
+
+    /**
+     * Undo one edit (if any undo events are stored).
+     */
+    abstract undo(): void;
+
+    /**
+     * Redo one undone edit.
+     */
+    abstract redo(): void;
+
+    /**
+     * Clear the undo history.
+     */
+    abstract clearHistory(): void;
+
+    /**
+     * Update mime type 
+     */
+    abstract setMimeTypeFromPath(path: string): void;
+
+    /**
+     * Whether the editor is disposed.
+     */
+    get isDisposed(): boolean {
+      return this._isDisposed;
+    }
+
+    /**
+     * Dipose of the resources used by the editor.
+     */
+    dispose(): void {
+      if (this._isDisposed) {
+        return;
+      }
+      this._isDisposed = true;
+      clearSignalData(this);
+    }
+
+    protected _isDisposed = false;
+    protected _selections = new ObservableVector<CodeEditor.ITextSelection>();
+  }
+
   /**
    * A keydown handler type.
    */
@@ -200,10 +340,18 @@ namespace CodeEditor {
   type KeydownHandler = (instance: IEditor, event: KeyboardEvent) => boolean;
 
   /**
-   * A widget that provides a code editor.
+   * A code editor.
    */
   export
   interface IEditor extends IDisposable {
+    /**
+     * Id of the editor.
+     * 
+     * #### Notes
+     * This is a ready-only property.
+     */
+    uuid: string;
+
     /**
      * Whether line numbers should be displayed. Defaults to false.
      */
@@ -272,6 +420,132 @@ namespace CodeEditor {
      * Get the window coordinates given a cursor position.
      */
     getCoords(position: IPosition): ICoords;
+
+    /**
+     * Get the primary cursor position.
+     */
+    getCursorPosition(): IPosition;
+
+    /**
+     * Set the primary cursor position.
+     */
+    setCursorPosition(position: IPosition): void;
+  }
+
+  export
+  abstract class AbstractEditor implements IEditor {
+    /**
+     * Id of the editor.
+     * 
+     * #### Notes
+     * This is a ready-only property.
+     */
+    uuid: string;
+
+    /**
+     * Whether line numbers should be displayed. Defaults to false.
+     */
+    lineNumbers: boolean;
+
+    /**
+     * Set to false for horizontal scrolling. Defaults to true.
+     */
+    wordWrap: boolean;
+
+    /**
+     * Whether the editor is read-only.  Defaults to false.
+     */
+    readOnly: boolean;
+
+    /**
+     * The model used by the editor.
+     */
+    readonly model: IModel;
+
+    /**
+     * The height of a line in the editor in pixels.
+     */
+    readonly lineHeight: number;
+
+    /**
+     * The widget of a character in the editor in pixels.
+     */
+    readonly charWidth: number;
+
+    /**
+     * Handle keydown events for the editor.
+     *
+     * #### Notes
+     * Return `true` to prevent the default handling of the event by the
+     * editor.
+     */
+    onKeyDown: KeydownHandler;
+
+    /**
+     * Brings browser focus to this editor text.
+     */
+    abstract focus(): void;
+
+    /**
+     * Repaint editor. 
+     */
+    abstract refresh(afterShow?: boolean): void;
+
+    /**
+     * Test whether the editor has keyboard focus.
+     */
+    abstract hasFocus(): boolean;
+
+    /**
+     * Set the size of the editor in pixels.
+     */
+    abstract setSize(width: number, height: number): void;
+
+    /**
+     * Scroll the given cursor position into view.
+     */
+    abstract scrollIntoView(pos: IPosition, margin?: number): void;
+
+    /**
+     * Get the window coordinates given a cursor position.
+     */
+    abstract getCoords(position: IPosition): ICoords;
+
+    /**
+     * Get the primary cursor position.
+     */
+    getCursorPosition(): IPosition {
+      return this.model.getCursorPosition(this.uuid);
+    };
+
+    /**
+     * Set the primary cursor position.
+     */
+    setCursorPosition(position: IPosition): void {
+      if (this.model) {
+        this.model.setCursorPosition(this.uuid, position);
+      }
+    };
+
+    /**
+     * Whether the editor is disposed.
+     */
+    get isDisposed(): boolean {
+      return this._isDisposed;
+    }
+
+    /**
+     * Dipose of the resources used by the editor.
+     */
+    dispose(): void {
+      if (this._isDisposed) {
+        return;
+      }
+      this._isDisposed = true;
+      clearSignalData(this);
+    }
+
+    protected _isDisposed = false;
   }
 
   /**
@@ -299,7 +573,7 @@ namespace CodeEditor {
    * The default implementation of the code editor model.
    */
   export
-  class Model implements IModel {
+  class Model extends AbstractModel {
     /**
      * A signal emitted when a content of the model changed.
      */
@@ -309,24 +583,6 @@ namespace CodeEditor {
      * A signal emitted when a mimetype changes.
      */
     mimeTypeChanged: ISignal<this, IChangedArgs<string>>;
-
-    /**
-     * Whether the model is disposed.
-     */
-    get isDisposed(): boolean {
-      return this._isDisposed;
-    }
-
-    /**
-     * Dipose of the resources used by the model.
-     */
-    dispose(): void {
-      if (this._isDisposed) {
-        return;
-      }
-      this._isDisposed = true;
-      clearSignalData(this);
-    }
 
     /**
      * A mime type of the model.
@@ -364,25 +620,6 @@ namespace CodeEditor {
         oldValue,
         newValue
       });
-    }
-
-    /**
-     * Get the selections for the model.
-     */
-    get selections(): ObservableVector<ITextSelection> {
-      return this._selections;
-    }
-
-    /**
-     * Returns the primary cursor position.
-     */
-    getCursorPosition(): IPosition {
-      let selections = this.selections;
-      let cursor = find(selections, (selection) => { return selection.start === selection.end; });
-      if (cursor) {
-        return this.getPositionAt(cursor.start);
-      }
-      return null;
     }
 
     /**
@@ -442,8 +679,6 @@ namespace CodeEditor {
 
     private _mimetype = '';
     private _value = '';
-    private _selections = new ObservableVector<ITextSelection>();
-    private _isDisposed = false;
   }
 }
 
@@ -471,6 +706,26 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
     model.selections.changed.connect(this.onModelSelectionsChanged, this);
     model.valueChanged.connect(this.onModelValueChanged, this);
   }
+
+  get uuid(): string {
+    return this.id;
+  }
+
+  /**
+   * Get the primary cursor position.
+   */
+  getCursorPosition(): CodeEditor.IPosition {
+    return this.model.getCursorPosition(this.uuid);
+  };
+
+  /**
+   * Set the primary cursor position.
+   */
+  setCursorPosition(position: CodeEditor.IPosition): void {
+    if (this.model) {
+      this.model.setCursorPosition(this.uuid, position);
+    }
+  };
 
   get lineNumbers(): boolean {
     return false;
