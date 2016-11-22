@@ -89,7 +89,8 @@ class MonacoCodeEditor extends CodeEditor.AbstractEditor {
   }
 
   protected _onDidChangeCursorPosition(event: monaco.editor.ICursorPositionChangedEvent) {
-    // TODO
+    let cursorPosition = this.toPosition(event.position);
+    this.setCursorPosition(cursorPosition);
   }
 
   protected _onDidChangeCursorSelection(event: monaco.editor.ICursorSelectionChangedEvent) {
