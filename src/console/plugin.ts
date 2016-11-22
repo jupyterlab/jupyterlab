@@ -104,11 +104,6 @@ const CONSOLE_REGEX = /^console-(\d)+-[0-9a-f]+$/;
  */
 const NAMESPACE = 'consoles';
 
-/**
- * The console panel instance tracker.
- */
-const tracker = new InstanceTracker<ConsolePanel>();
-
 
 /**
  * The arguments used to create a console.
@@ -129,11 +124,21 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
 
   let { commands, keymap } = app;
   let category = 'Console';
-
-  let menu = new Menu({ commands, keymap });
-  menu.title.label = 'Console';
-
   let command: string;
+  let menu = new Menu({ commands, keymap });
+
+  // Create an instance tracker for all terminal widgets.
+  const tracker = new InstanceTracker<ConsolePanel>({
+    restore: {
+      state,
+      command: 'console:create',
+      args: panel => ({ id: panel.content.session.id }),
+      name: panel => panel.content.session && panel.content.session.id,
+      namespace: 'consoles',
+      when: [app.started, manager.ready],
+      registry: app.commands
+    }
+  });
 
   // Sync tracker and set the source of the code inspector.
   app.shell.currentChanged.connect((sender, args) => {
@@ -144,7 +149,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   });
 
   // Set the main menu title.
-  menu.title.label = 'Console';
+  menu.title.label = category;
 
   command = 'console:create-new';
   commands.addCommand(command, {
@@ -370,23 +375,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     inspector.source = panel.content.inspectionHandler;
     // Add the console panel to the tracker.
     tracker.add(panel);
-    // Add the console to the state database.
-    let key = `${NAMESPACE}:${session.id}`;
-    state.save(key, { id: session.id });
-    // Remove the console from the state database on disposal.
-    panel.disposed.connect(() => { state.remove(key); });
   }
-
-  // Reload any consoles whose state has been stored.
-  Promise.all([state.fetchNamespace(NAMESPACE), app.started])
-    .then(([items]) => {
-      items.forEach(item => {
-        app.commands.execute('console:create', item.value).catch(() => {
-          // Remove console from the state database if session does not exist.
-          state.remove(item.id);
-        });
-      });
-  });
 
   command = 'console:switch-kernel';
   commands.addCommand(command, {
