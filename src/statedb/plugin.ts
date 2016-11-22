@@ -30,17 +30,22 @@ const stateProvider: JupyterLabPlugin<IStateDB> = {
 };
 
 
+/**
+ * Activate the state database.
+ */
 function activateState(): Promise<IStateDB> {
   let state = new StateDB();
   let version = (window as any).jupyter.version;
   let key = 'statedb:version';
   let fetch = state.fetch(key);
   let save = () => state.save(key, { version });
-  let overwrite = () => state.clear().then(save);
+  let reset = () => state.clear().then(save);
   let check = (value: JSONObject) => {
-    if (!value || (value as any).version !== version) {
-      return overwrite();
+    let old = value && (value as any).version;
+    if (!old || old !== version) {
+      console.log(`Upgraded: ${old || 'unknown'} to ${version}. Resetting DB.`);
+      return reset();
     }
   };
-  return fetch.then(check, overwrite).then(() => state);
+  return fetch.then(check, reset).then(() => state);
 }
