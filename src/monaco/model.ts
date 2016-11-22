@@ -6,6 +6,10 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
+  find
+} from 'phosphor/lib/algorithm/searching';
+
+import {
   CodeEditor
 } from '../codeeditor/editor';
 
@@ -18,42 +22,13 @@ import {
 } from '../common/observablevector';
 
 import {
-    findLanguageForMimeType, findLanguageById
+  findLanguageForMimeType, findMimeTypeForLanguage, findLanguageForPath
 } from './languages';
-
 
 /**
  * An implementation of the code editor model using monaco.
  */
-export
-class MonacoModel extends CodeEditor.AbstractModel {
-  /**
-   * Construct a new monaco model.
-   */
-  constructor(model?: monaco.editor.IModel) {
-    super();
-    if (!model) {
-      model = monaco.editor.createModel('');
-    }
-    this._model = model;
-    model.onDidChangeMode(event => this._onDidChangeMode(event));
-  }
-
-  protected _onDidChangeMode(event: monaco.editor.IModelModeChangedEvent) {
-    let oldModeId = event.oldMode.getId();
-    let newModeId = event.newMode.getId();
-    let oldValue = oldModeId ? findLanguageById(oldModeId).mimetypes[0] : null;
-    let newValue = newModeId ? findLanguageById(newModeId).mimetypes[0] : null;
-    this.mimeTypeChanged.emit({
-      name: 'mimeType',
-      oldValue,
-      newValue
-    });
-  }
-
-  get model(): monaco.editor.IModel {
-    return this._model;
-  }
+export class MonacoModel implements CodeEditor.IModel {
 
   /**
    * A signal emitted when a content of the model changed.
@@ -66,25 +41,119 @@ class MonacoModel extends CodeEditor.AbstractModel {
   mimeTypeChanged: ISignal<this, IChangedArgs<string>>;
 
   /**
-   * Dipose of the resources used by the model.
+   * Construct a new monaco model.
+   */
+  constructor(model?: monaco.editor.IModel) {
+    this._model = model ? model : monaco.editor.createModel('');
+    this._value = this._model.getValue();
+    model.onDidChangeMode(event => this._onDidChangeMode(event));
+    model.onDidChangeContent(event => this._onDidChangeContent(event));
+  }
+
+  protected _onDidChangeMode(event: monaco.editor.IModelModeChangedEvent) {
+    const oldValue = findMimeTypeForLanguage(event.oldMode.getId());
+    const newValue = findMimeTypeForLanguage(event.newMode.getId());
+    if (oldValue !== newValue) {
+      this.mimeTypeChanged.emit({
+        name: 'mimeType',
+        oldValue,
+        newValue
+      });
+    }
+  }
+
+  protected _onDidChangeContent(event: monaco.editor.IModelContentChangedEvent2) {
+    const oldValue = this._value;
+    const newValue = this.value;
+    if (oldValue !== newValue) {
+      this.valueChanged.emit({
+        name: 'value',
+        oldValue,
+        newValue
+      });
+    }
+  }
+
+  get model(): monaco.editor.IModel {
+    return this._model;
+  }
+
+  /**
+   * Whether the editor is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dipose of the resources used by the editor.
    */
   dispose(): void {
-    super.dispose();
+    if (this._isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    this._model.dispose();
+    this._model = null;
+    clearSignalData(this);
+  }
+
+  /**
+   * Get the selections for the model.
+   */
+  get selections(): ObservableVector<CodeEditor.ITextSelection> {
+    return this._selections;
+  }
+
+  /**
+   * Returns the primary cursor position of an editor.
+   * 
+   * #### Notes
+   * @param uuid - The uuid of an editor.
+   */
+  getCursorPosition(uuid: string): CodeEditor.IPosition {
+    let cursor = this.findCursorPosition(uuid);
+    if (cursor) {
+      return this.getPositionAt(cursor.start);
+    }
+    return null;
+  }
+
+  /**
+   * Set the primary cursor position of a editor.
+   * 
+   * #### Notes
+   * @param uuid - The uuid of an editor.
+   * @param position - The primary cursor position of an editor.
+   */
+  setCursorPosition(uuid: string, position: CodeEditor.IPosition): void {
+    let selections = this.selections;
+    let cursor = find(selections, (selection) => { return selection.start === selection.end; });
+    if (cursor) {
+      selections.remove(cursor);
+    }
+    let offset = this.getOffsetAt(position);
+    selections.pushBack({
+      start: offset,
+      end: offset,
+      uuid
+    });
+  };
+
+  private findCursorPosition(uuid: string): CodeEditor.ITextSelection {
+    let selections = this.selections;
+    let cursor = find(selections, (selection) => { return selection.start === selection.end && selection.uuid === uuid; });
+    return cursor;
   }
 
   /**
    * A mime type of the model.
    */
   get mimeType(): string {
-    let language = findLanguageById(this._model.getModeId());
-    if (!language) {
-      language = findLanguageById('plaintext');
-    }
-    let mimeType = language.mimetypes[0];
-    return mimeType;
+    return findMimeTypeForLanguage(this._model.getModeId());
   }
   set mimeType(newValue: string) {
-    let newLanguage = findLanguageForMimeType(newValue);
+    const newLanguage = findLanguageForMimeType(newValue);
     monaco.editor.setModelLanguage(this._model, newLanguage);
   }
 
@@ -95,16 +164,7 @@ class MonacoModel extends CodeEditor.AbstractModel {
     return this._model.getValue();
   }
   set value(newValue: string) {
-    let oldValue = this._model.getValue();
-    if (oldValue === newValue) {
-      return;
-    }
     this._model.setValue(newValue);
-    this.valueChanged.emit({
-      name: 'value',
-      oldValue,
-      newValue
-    });
   }
 
   /**
@@ -164,12 +224,16 @@ class MonacoModel extends CodeEditor.AbstractModel {
    * Update mime type from given path.
    */
   setMimeTypeFromPath(path: string): void {
-    // TODO
+    const languageId = findLanguageForPath(path);
+    monaco.editor.setModelLanguage(this._model, languageId);
   }
 
+  private _isDisposed = false;
+  private _value: string;
   private _model: monaco.editor.IModel;
-}
+  private _selections = new ObservableVector<CodeEditor.ITextSelection>();
 
+}
 
 defineSignal(MonacoModel.prototype, 'valueChanged');
 defineSignal(MonacoModel.prototype, 'mimeTypeChanged');
