@@ -2,11 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject
-} from 'phosphor/lib/algorithm/json';
-
-
-import {
   JupyterLab, JupyterLabPlugin
 } from '../application';
 
@@ -38,7 +33,7 @@ const FACTORY = 'Table';
  */
 export
 const csvHandlerExtension: JupyterLabPlugin<void> = {
-  id: 'jupyter.extensions.csvHandler',
+  id: 'jupyter.extensions.csv-handler',
   requires: [IDocumentRegistry, IStateDB],
   activate: activateCSVWidget,
   autoStart: true
