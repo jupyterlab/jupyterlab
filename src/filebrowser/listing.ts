@@ -1152,14 +1152,23 @@ class DirListing extends Widget {
     let nameNode = this.renderer.getNameNode(row);
     let original = item.name;
     this._editNode.value = original;
+    this._selectItem(index, false);
 
     return Private.doRename(nameNode, this._editNode).then(newName => {
       if (newName === original) {
-        return;
+        return original;
       }
       return renameFile(this._model, original, newName).catch(error => {
         utils.showErrorMessage('Rename Error', error);
-        return newName;
+        return original;
+      }).then(value => {
+        // Make sure the new file is available.
+        return this.model.cd('.').then(() => {
+          this._selection = Object.create(null);
+          this._selection[newName] = true;
+          this.update();
+          return value;
+        });
       });
     });
   }
