@@ -143,9 +143,13 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
   });
 
   // Restore the state of the file browser on reload.
-  Promise.all([state.fetch(`${NAMESPACE}:cwd`), app.started]).then(([cwd]) => {
+  let key = `${NAMESPACE}:cwd`;
+  Promise.all([state.fetch(key), app.started, manager.ready]).then(([cwd]) => {
     if (cwd) {
-      fbModel.cd((cwd as any).path);
+      let path = cwd['path'] as string;
+      manager.contents.get(path)
+        .then(() => { fbModel.cd(path); })
+        .catch(() => { state.remove(key); });
     }
   });
 
