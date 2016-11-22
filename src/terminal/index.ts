@@ -84,9 +84,8 @@ class TerminalWidget extends Widget {
     if (!value) {
       return;
     }
-
-    value.ready.then(() => {
-      this._session = value;
+    this._session = value;
+    this._session.ready.then(() => {
       this._session.messageReceived.connect(this._onMessage, this);
       this.title.label = `Terminal ${this._session.name}`;
       this._resizeTerminal(-1, -1);
