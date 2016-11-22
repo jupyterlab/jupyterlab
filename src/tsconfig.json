@@ -11,5 +11,5 @@
     "outDir": "../lib",
     "sourceMap": true
   },
-  "exclude": ["typedoc.d.ts", "console/**/*", "notebook/**/*"]
+  "exclude": ["typedoc.d.ts"]
 }
