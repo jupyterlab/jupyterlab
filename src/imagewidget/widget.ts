@@ -40,9 +40,16 @@ class ImageWidget extends Widget {
     if (context.model.toString()) {
       this.update();
     }
-    context.pathChanged.connect(() => this.update());
-    context.model.contentChanged.connect(() => this.update());
-    context.fileChanged.connect(() => this.update());
+    context.pathChanged.connect(() => { this.update(); });
+    context.model.contentChanged.connect(() => { this.update(); });
+    context.fileChanged.connect(() => { this.update(); });
+  }
+
+  /**
+   * The image widget's context.
+   */
+  get context(): DocumentRegistry.IContext<DocumentRegistry.IModel> {
+    return this._context;
   }
 
   /**
