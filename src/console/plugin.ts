@@ -127,7 +127,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   let command: string;
   let menu = new Menu({ commands, keymap });
 
-  // Create an instance tracker for all terminal widgets.
+  // Create an instance tracker for all console panels.
   const tracker = new InstanceTracker<ConsolePanel>({
     restore: {
       state,
