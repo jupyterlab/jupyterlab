@@ -43,8 +43,8 @@ export class MonacoModel implements CodeEditor.IModel {
   /**
    * Construct a new monaco model.
    */
-  constructor(model?: monaco.editor.IModel) {
-    this._model = model ? model : monaco.editor.createModel('');
+  constructor(model: monaco.editor.IModel = monaco.editor.createModel('')) {
+    this._model = model;
     this._value = this._model.getValue();
     model.onDidChangeMode(event => this._onDidChangeMode(event));
     model.onDidChangeContent(event => this._onDidChangeContent(event));
@@ -185,18 +185,14 @@ export class MonacoModel implements CodeEditor.IModel {
    * Find an offset for the given position.
    */
   getOffsetAt(position: CodeEditor.IPosition): number {
-    return this._model.getOffsetAt({
-      lineNumber: position.line + 1,
-      column: position.column + 1
-    });
+    return this._model.getOffsetAt(MonacoModel.toMonacoPosition(position));
   }
 
   /**
    * Find a position fot the given offset.
    */
   getPositionAt(offset: number): CodeEditor.IPosition {
-    let { column, lineNumber } = this._model.getPositionAt(offset);
-    return { line: lineNumber - 1, column: column - 1 };
+    return MonacoModel.toPosition(this._model.getPositionAt(offset));
   }
 
   /**
@@ -233,6 +229,21 @@ export class MonacoModel implements CodeEditor.IModel {
   private _model: monaco.editor.IModel;
   private _selections = new ObservableVector<CodeEditor.ITextSelection>();
 
+}
+
+export namespace MonacoModel {
+  export function toMonacoPosition(position: CodeEditor.IPosition): monaco.IPosition {
+    return {
+      lineNumber: position.line + 1,
+      column: position.column + 1
+    };
+  }
+  export function toPosition(position: monaco.Position): CodeEditor.IPosition {
+    return {
+      line: position.lineNumber - 1,
+      column: position.column - 1
+    };
+  }
 }
 
 defineSignal(MonacoModel.prototype, 'valueChanged');

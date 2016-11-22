@@ -18,7 +18,7 @@ import {
 } from './model';
 
 import {
-    PropertyObserver
+  PropertyObserver
 } from '../editorwidget/utils/utils';
 
 import {
@@ -29,7 +29,12 @@ import {
  * Monaco code editor.
  */
 export
-class MonacoCodeEditor extends CodeEditor.AbstractEditor {
+class MonacoCodeEditor implements CodeEditor.IEditor {
+  /**
+   * Id of the editor.
+   * FIXME: where one should get it?
+   */
+  uuid: string;
 
   // FIXME remove when https://github.com/Microsoft/monaco-editor/issues/103 is resolved
   autoSizing: boolean = false;
@@ -38,20 +43,46 @@ class MonacoCodeEditor extends CodeEditor.AbstractEditor {
   /**
    * Construct a Monaco editor.
    */
-  constructor(host: HTMLElement, options: monaco.editor.IEditorConstructionOptions = {}) {
-    super();
-    let monacoModel = this._model =  new MonacoModel();
-    options.model = monacoModel.model;
-    let monacoEditor = this._editor = monaco.editor.create(host, options);
-    this._disposables.push(this.editor.onDidChangeConfiguration(e => this._onDidChangeConfiguration(e)));
+  constructor(host: HTMLElement, options?: monaco.editor.IEditorConstructionOptions, services?: monaco.editor.IEditorOverrideServices) {
+    this._editor = monaco.editor.create(host, options, services);
+    this._model = new MonacoModel(this._editor.getModel());
+    this._editorListeners.push(this.editor.onDidChangeConfiguration(e => this._onDidChangeConfiguration(e)));
 
-    this._modelObserver.connect = (model) => this.connectToEditorModel(model);
-    this._modelObserver.disconnect = (model) => this.disconnectFromEditorModel(model);
-    this._modelObserver.property = monacoModel;
+    this._modelObserver.connect = model => this.connectToEditorModel(model);
+    this._modelObserver.disconnect = model => this.disconnectFromEditorModel(model);
+    this._modelObserver.property = this._model;
 
-    this._disposables.push(this.editor.onDidChangeModel(e => this._onDidChangeModel(e)));
-    this._disposables.push(monacoEditor.onDidChangeCursorPosition(e => this._onDidChangeCursorPosition(e)));
-    this._disposables.push(monacoEditor.onDidChangeCursorSelection(e => this._onDidChangeCursorSelection(e)));
+    this._editorListeners.push(this.editor.onDidChangeModel(e => this._onDidChangeModel(e)));
+    this._editorListeners.push(this.editor.onDidChangeCursorPosition(e => this._onDidChangeCursorPosition(e)));
+    this._editorListeners.push(this.editor.onDidChangeCursorSelection(e => this._onDidChangeCursorSelection(e)));
+  }
+
+  /**
+   * Whether the editor is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    for (const disposable of this._editorListeners) {
+      disposable.dispose();
+    }
+    this._editorListeners = null;
+    this._modelObserver.property = null;
+    this._modelObserver = null;
+    this._modelListeners = null;
+    if (this._editor) {
+      this._editor.dispose();
+      this._editor = null;
+    }
   }
 
   protected _onDidChangeModel(event: monaco.editor.IModelChangedEvent) {
@@ -71,7 +102,7 @@ class MonacoCodeEditor extends CodeEditor.AbstractEditor {
   protected disconnectFromEditorModel(model: MonacoModel) {
     model.selections.changed.disconnect(this._onSelectionChanged, this);
     for (const listener of this._modelListeners) {
-        listener.dispose();
+      listener.dispose();
     }
     this._modelListeners = [];
   }
@@ -89,7 +120,7 @@ class MonacoCodeEditor extends CodeEditor.AbstractEditor {
   }
 
   protected _onDidChangeCursorPosition(event: monaco.editor.ICursorPositionChangedEvent) {
-    let cursorPosition = this.toPosition(event.position);
+    const cursorPosition = MonacoModel.toPosition(event.position);
     this.setCursorPosition(cursorPosition);
   }
 
@@ -105,39 +136,6 @@ class MonacoCodeEditor extends CodeEditor.AbstractEditor {
    */
   get editor() {
     return this._editor;
-  }
-
-  /**
-   * Dispose of the resources held by the widget.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-        return;
-    }
-    for (const disposable of this._disposables) {
-        disposable.dispose();
-    }
-    this._disposables = null;
-    this._modelObserver.property = null;
-    this._modelObserver = null;
-    this._modelListeners = null;
-    if (this._editor) {
-      this._editor.dispose();
-      this._editor = null;
-    }
-    super.dispose();
-  }
-
-  /**
-   * A cursor position for this editor.
-   */
-  getPosition(): CodeEditor.IPosition {
-    const cursor = this._editor.getPosition();
-    return this.toPosition(cursor);
-  }
-  setPosition(position: CodeEditor.IPosition) {
-    const monacoPosition = this.toMonacoPosition(position);
-    this._editor.setPosition(monacoPosition);
   }
 
   /**
@@ -172,80 +170,29 @@ class MonacoCodeEditor extends CodeEditor.AbstractEditor {
    * Scroll the given cursor position into view.
    */
   scrollIntoView(pos: CodeEditor.IPosition, margin?: number): void {
-    // set node scroll position here.
+    this.editor.revealPositionInCenter(MonacoModel.toMonacoPosition(pos));
   }
 
   /**
    * Get the window coordinates given a cursor position.
    */
   getCoords(position: CodeEditor.IPosition): CodeEditor.ICoords {
-    // more css measurements required
+    // FIXME: more css measurements required
     return void 0;
   }
 
   /**
    * Returns a model for this editor.
    */
-  get model(): CodeEditor.IModel {
+  get model(): MonacoModel | null {
     return this._model;
   }
 
-  get onKeyDown(): CodeEditor.KeydownHandler {
+  get onKeyDown(): CodeEditor.KeydownHandler |  null {
     return this._handler;
   }
   set onKeyDown(value: CodeEditor.KeydownHandler) {
     this._handler = value;
-  }
-
-  /**
-   * Get the text stored in this model.
-   */
-  getValue(): string {
-    return this._editor.getModel().getValue();
-  }
-
-  /**
-   * Replace the entire text contained in this model.
-   */
-  setValue(value: string) {
-    return this._editor.getModel().setValue(value);
-  }
-
-  /**
-   * Get the number of lines in the model.
-   */
-  getLineCount(): number {
-    return this._editor.getModel().getLineCount();
-  }
-
-  /**
-   * Returns a last line number.
-   */
-  getLastLine(): number {
-    return this._editor.getModel().getLineCount();
-  }
-
-  /**
-   * Returns a content for the given line number.
-   */
-  getLineContent(line: number): string {
-    return this._editor.getModel().getLineContent(line + 1);
-  }
-
-  /**
-   * Find an offset fot the given position.
-   */
-  getOffsetAt(position: CodeEditor.IPosition): number {
-    const monacoPosition = this.toMonacoPosition(position);
-    return this._editor.getModel().getOffsetAt(monacoPosition);
-  }
-
-  /**
-   * Find a position fot the given offset.
-   */
-  getPositionAt(offset: number): CodeEditor.IPosition {
-    const position = this._editor.getModel().getPositionAt(offset);
-    return this.toPosition(position);
   }
 
   /**
@@ -256,18 +203,17 @@ class MonacoCodeEditor extends CodeEditor.AbstractEditor {
   }
   set lineNumbers(value: boolean) {
     this.editor.updateOptions({
-        lineNumbers: value ? 'on' : 'off'
+      lineNumbers: value ? 'on' : 'off'
     });
   }
 
   get lineHeight(): number {
-    // TODO css measurement
-    return -1;
+    return this.editor.getConfiguration().fontInfo.lineHeight;
   }
 
   get charWidth(): number {
     // TODO css measurement
-    return -1;
+    return this.editor.getConfiguration().fontInfo.fontSize;
   }
 
   /**
@@ -278,7 +224,7 @@ class MonacoCodeEditor extends CodeEditor.AbstractEditor {
   }
   set wordWrap(value: boolean) {
     this.editor.updateOptions({
-        wordWrap: value
+      wordWrap: value
     });
   }
 
@@ -291,104 +237,98 @@ class MonacoCodeEditor extends CodeEditor.AbstractEditor {
 
   set readOnly(readOnly: boolean) {
     this.editor.updateOptions({
-        readOnly: readOnly
+      readOnly: readOnly
     });
     this.editor.setSelection({
-        startColumn: 0,
-        startLineNumber: 0,
-        endColumn: 0,
-        endLineNumber: 0
+      startColumn: 0,
+      startLineNumber: 0,
+      endColumn: 0,
+      endLineNumber: 0
     });
   }
 
   /**
-   * Convert a Monaco position to a CodeEditor position.
+   * Get the primary cursor position.
    */
-  protected toPosition(position: monaco.IPosition): CodeEditor.IPosition {
-    return {
-        line: position.lineNumber - 1,
-        column: position.column - 1
-    };
-  }
+  getCursorPosition(): CodeEditor.IPosition {
+    return this.model.getCursorPosition(this.uuid);
+  };
 
   /**
-   * Convert a CodeEditor position to a Monaco position.
+   * Set the primary cursor position.
    */
-  protected toMonacoPosition(position: CodeEditor.IPosition): monaco.IPosition {
-    return {
-        lineNumber: position.line + 1,
-        column: position.column + 1
-    };
-  }
+  setCursorPosition(position: CodeEditor.IPosition): void {
+    this.model.setCursorPosition(this.uuid, position);
+  };
 
   /** Editor will be hidden by setting width to 0. On show we need to recalculate again */
   protected autoresize(): void {
-      if (this.autoSizing) {
-          this.resize();
-      }
+    if (this.autoSizing) {
+      this.resize();
+    }
   }
 
   protected resize(dimension?: monaco.editor.IDimension): void {
-      if (this._editor.getDomNode()) {
-          const layoutSize = this.computeLayoutSize(dimension);
-          this.editor.layout(layoutSize);
-      }
+    if (this._editor.getDomNode()) {
+      const layoutSize = this.computeLayoutSize(dimension);
+      this.editor.layout(layoutSize);
+    }
   }
 
   protected computeLayoutSize(dimension?: monaco.editor.IDimension): monaco.editor.IDimension {
-      if (dimension && dimension.width >= 0 && dimension.height >= 0) {
-          return dimension;
-      }
+    if (dimension && dimension.width >= 0 && dimension.height >= 0) {
+      return dimension;
+    }
 
-      const boxSizing = computeBoxSizing(this._editor.getDomNode());
+    const boxSizing = computeBoxSizing(this._editor.getDomNode());
 
-      const width = (!dimension || dimension.width < 0) ?
-          this.getWidth(boxSizing) :
-          dimension.width;
+    const width = (!dimension || dimension.width < 0) ?
+      this.getWidth(boxSizing) :
+      dimension.width;
 
-      const height = (!dimension || dimension.height < 0) ?
-          this.getHeight(boxSizing) :
-          dimension.height;
+    const height = (!dimension || dimension.height < 0) ?
+      this.getHeight(boxSizing) :
+      dimension.height;
 
-      return { width, height };
+    return { width, height };
   }
 
   protected getWidth(boxSizing: IBoxSizing): number {
-      return this._editor.getDomNode().offsetWidth - boxSizing.horizontalSum;
+    return this._editor.getDomNode().offsetWidth - boxSizing.horizontalSum;
   }
 
   protected getHeight(boxSizing: IBoxSizing): number {
-      if (!this.autoSizing) {
-          return this._editor.getDomNode().offsetHeight - boxSizing.verticalSum;
-      }
-      const configuration = this.editor.getConfiguration();
+    if (!this.autoSizing) {
+      return this._editor.getDomNode().offsetHeight - boxSizing.verticalSum;
+    }
+    const configuration = this.editor.getConfiguration();
 
-      const lineHeight = configuration.lineHeight;
-      const lineCount = this.editor.getModel().getLineCount();
-      const contentHeight = lineHeight * lineCount;
+    const lineHeight = configuration.lineHeight;
+    const lineCount = this.editor.getModel().getLineCount();
+    const contentHeight = lineHeight * lineCount;
 
-      const horizontalScrollbarHeight = configuration.layoutInfo.horizontalScrollbarHeight;
+    const horizontalScrollbarHeight = configuration.layoutInfo.horizontalScrollbarHeight;
 
-      const editorHeight = contentHeight + horizontalScrollbarHeight;
-      if (this.minHeight < 0) {
-          return editorHeight;
-      }
-      const defaultHeight = lineHeight * this.minHeight + horizontalScrollbarHeight;
-      return Math.max(defaultHeight, editorHeight);
+    const editorHeight = contentHeight + horizontalScrollbarHeight;
+    if (this.minHeight < 0) {
+      return editorHeight;
+    }
+    const defaultHeight = lineHeight * this.minHeight + horizontalScrollbarHeight;
+    return Math.max(defaultHeight, editorHeight);
   }
 
-  protected _model: MonacoModel = null;
-  protected _handler: CodeEditor.KeydownHandler = null;
-  protected _editor: monaco.editor.IStandaloneCodeEditor = null;
+  protected _model: MonacoModel | null = null;
+  protected _handler: CodeEditor.KeydownHandler | null = null;
+  protected _editor: monaco.editor.IStandaloneCodeEditor  |  null = null;
   protected _isDisposed = false;
   protected _modelObserver = new PropertyObserver<MonacoModel>();
   protected _modelListeners: monaco.IDisposable[] = [];
-  protected _disposables: monaco.IDisposable[] = [];
+  protected _editorListeners: monaco.IDisposable[] = [];
 
 }
 
 export
-class MonacoCodeEditorFactory implements IEditorFactory {
+  class MonacoCodeEditorFactory implements IEditorFactory {
 
   /**
    * Create a new editor for inline code.
