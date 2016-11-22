@@ -173,7 +173,7 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
    */
   getCursorPosition(): number {
     let editorModel = this.editor.model;
-    let cursorPosition = editorModel.getCursorPosition();
+    let cursorPosition = this.editor.getCursorPosition();
     return editorModel.getOffsetAt(cursorPosition);
   }
 
@@ -230,7 +230,7 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
     let model = this.model;
     let oldValue = valueChange.oldValue;
     let newValue = valueChange.newValue;
-    let cursorPosition = editorModel.getCursorPosition();
+    let cursorPosition = editor.getCursorPosition();
     let position = editorModel.getOffsetAt(cursorPosition);
     let line = cursorPosition.line;
     let ch = cursorPosition.column;
@@ -248,7 +248,7 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
    */
   protected onEditorKeydown(editor: CodeEditor.IEditor, event: KeyboardEvent): boolean {
     let editorModel = editor.model;
-    let cursorPosition = editorModel.getCursorPosition();
+    let cursorPosition = editor.getCursorPosition();
     let line = cursorPosition.line;
     let ch = cursorPosition.column;
 
