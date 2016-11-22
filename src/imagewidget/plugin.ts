@@ -56,7 +56,8 @@ function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palet
   let zoomInImage = 'image-widget:zoom-in';
   let zoomOutImage = 'image-widget:zoom-out';
   let resetZoomImage = 'image-widget:reset-zoom';
-  let image = new ImageWidgetFactory({
+
+  const factory = new ImageWidgetFactory({
     name: FACTORY,
     modelName: 'base64',
     fileExtensions: EXTENSIONS,
@@ -80,9 +81,9 @@ function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palet
     tracker.sync(args.newValue);
   });
 
-  registry.addWidgetFactory(image);
+  registry.addWidgetFactory(factory);
 
-  image.widgetCreated.connect((sender, widget) => {
+  factory.widgetCreated.connect((sender, widget) => {
     // Notify the instance tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => { tracker.save(widget); });
     tracker.add(widget);
