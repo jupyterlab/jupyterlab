@@ -98,7 +98,7 @@ const editorHandlerProvider: JupyterLabPlugin<IEditorTracker> = {
  * Sets up the editor widget
  */
 function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB): IEditorTracker {
-  const widgetFactory = new EditorWidgetFactory({
+  const factory = new EditorWidgetFactory({
     name: FACTORY,
     fileExtensions: ['*'],
     defaultFor: ['*']
@@ -120,13 +120,13 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
     tracker.sync(args.newValue);
   });
 
-  widgetFactory.widgetCreated.connect((sender, widget) => {
+  factory.widgetCreated.connect((sender, widget) => {
     widget.title.icon = `${PORTRAIT_ICON_CLASS} ${EDITOR_ICON_CLASS}`;
     // Notify the instance tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => { tracker.save(widget); });
     tracker.add(widget);
   });
-  registry.addWidgetFactory(widgetFactory);
+  registry.addWidgetFactory(factory);
 
   /**
    * An attached property for the session id associated with an editor widget.
