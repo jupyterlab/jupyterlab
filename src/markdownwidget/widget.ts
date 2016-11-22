@@ -71,6 +71,13 @@ class MarkdownWidget extends Widget {
   }
 
   /**
+   * The markdown widget's context.
+   */
+  get context(): DocumentRegistry.IContext<DocumentRegistry.IModel> {
+    return this._context;
+  }
+
+  /**
    * Dispose of the resources held by the widget.
    */
   dispose(): void {

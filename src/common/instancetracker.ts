@@ -2,16 +2,33 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  JSONObject
+} from 'phosphor/lib/algorithm/json';
+
+import {
   IDisposable
 } from 'phosphor/lib/core/disposable';
+
+import {
+  AttachedProperty
+} from 'phosphor/lib/core/properties';
 
 import {
   clearSignalData, defineSignal, ISignal
 } from 'phosphor/lib/core/signaling';
 
 import {
+  CommandRegistry
+} from 'phosphor/lib/ui/commandregistry';
+
+import {
   Widget
 } from 'phosphor/lib/ui/widget';
+
+import {
+  IStateDB
+} from '../statedb';
+
 
 
 /**
@@ -43,6 +60,24 @@ interface IInstanceTracker<T extends Widget> {
 export
 class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposable {
   /**
+   * Create a new instance tracker.
+   */
+  constructor(options: InstanceTracker.IOptions<T> = {}) {
+    this._restore = options.restore;
+    if (this._restore) {
+      let { command, namespace, registry, state, when } = this._restore;
+      let promises = [state.fetchNamespace(namespace)].concat(when);
+      Promise.all(promises).then(([saved]) => {
+        saved.forEach(args => {
+          // Execute the command and if it fails, delete the state restore data.
+          registry.execute(command, args.value)
+            .catch(() => { state.remove(args.id); });
+        });
+      });
+    }
+  }
+
+  /**
    * A signal emitted when the current widget changes.
    *
    * #### Notes
@@ -73,8 +108,32 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
       return;
     }
     this._widgets.add(widget);
+
+    // Handle widget state restoration.
+    if (this._restore) {
+      let { namespace, state } = this._restore;
+      let widgetName = this._restore.name(widget);
+
+      if (widgetName) {
+        let name = `${namespace}:${widgetName}`;
+        Private.nameProperty.set(widget, name);
+        state.save(name, this._restore.args(widget));
+      }
+    }
+
+    // Handle widget disposal.
     widget.disposed.connect(() => {
       this._widgets.delete(widget);
+      // If restore data was saved, delete it from the database.
+      if (this._restore) {
+        let { state } = this._restore;
+        let name = Private.nameProperty.get(widget);
+
+        if (name) {
+          state.remove(name);
+        }
+      }
+      // If this was the last widget being disposed, emit null.
       if (!this._widgets.size) {
         this._currentWidget = null;
         this.onCurrentChanged();
@@ -132,6 +191,31 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   }
 
   /**
+   * Save the restore data for a given widget.
+   */
+  save(widget: T): void {
+    if (!this._restore || !this.has(widget)) {
+      return;
+    }
+
+    let { namespace, state } = this._restore;
+    let widgetName = this._restore.name(widget);
+    let oldName = Private.nameProperty.get(widget);
+    let newName = widgetName ? `${namespace}:${widgetName}` : null;
+
+    if (oldName && oldName !== newName) {
+      state.remove(oldName);
+    }
+
+    // Set the name property irrespective of whether the new name is null.
+    Private.nameProperty.set(widget, newName);
+
+    if (newName) {
+      state.save(newName, this._restore.args(widget));
+    }
+  }
+
+  /**
    * Syncs the state of the tracker with a widget known to have focus.
    *
    * @param current The currently focused widget.
@@ -145,6 +229,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     if (this.isDisposed) {
       return;
     }
+
     if (current && this._widgets.has(current as any)) {
       // If no state change needs to occur, just bail.
       if (this._currentWidget === current) {
@@ -155,6 +240,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
       this.currentChanged.emit(this._currentWidget);
       return this._currentWidget;
     }
+
     return null;
   }
 
@@ -170,9 +256,81 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   }
 
   private _currentWidget: T = null;
+  private _restore: InstanceTracker.IRestoreOptions<T> = null;
   private _widgets = new Set<T>();
 }
 
 
 // Define the signals for the `InstanceTracker` class.
 defineSignal(InstanceTracker.prototype, 'currentChanged');
+
+
+/**
+ * A namespace for `InstanceTracker` statics.
+ */
+export
+namespace InstanceTracker {
+  /**
+   * The state restoration configuration options.
+   */
+  export
+  interface IRestoreOptions<T extends Widget> {
+    /**
+     * The command to execute when restoring instances.
+     */
+    command: string;
+
+    /**
+     * A function that returns the args needed to restore an instance.
+     */
+    args: (widget: T) => JSONObject;
+
+    /**
+     * A function that returns a unique persistent name for this instance.
+     */
+    name: (widget: T) => string;
+
+    /**
+     * The namespace to occupy in the state database for restoration data.
+     */
+    namespace: string;
+
+    /**
+     * The command registry which holds the restore command.
+     */
+    registry: CommandRegistry;
+
+    /**
+     * The state database instance.
+     */
+    state: IStateDB;
+
+    /**
+     * The point after which it is safe to restore state.
+     */
+    when: Promise<any> | Array<Promise<any>>;
+  }
+
+  /**
+   * The instance tracker constructor options.
+   */
+  export
+  interface IOptions<T extends Widget> {
+    /**
+     * The optional state restoration options.
+     */
+    restore?: IRestoreOptions<T>;
+  }
+}
+
+
+/*
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * An attached property for a widget's ID in the state database.
+   */
+  export
+  const nameProperty = new AttachedProperty<Widget, string>({ name: 'name' });
+}

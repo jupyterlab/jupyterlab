@@ -18,14 +18,13 @@ import {
 } from '../docregistry';
 
 import {
+  IStateDB
+} from '../statedb';
+
+import {
   ImageWidget, ImageWidgetFactory
 } from './widget';
 
-
-/**
- * The image widget instance tracker.
- */
-const tracker = new InstanceTracker<ImageWidget>();
 
 /**
  * The list of file extensions for images.
@@ -33,6 +32,10 @@ const tracker = new InstanceTracker<ImageWidget>();
 const EXTENSIONS = ['.png', '.gif', '.jpeg', '.jpg', '.svg', '.bmp', '.ico',
   '.xbm', '.tiff', '.tif'];
 
+/**
+ * The name of the factory that creates image widgets.
+ */
+const FACTORY = 'Image';
 
 /**
  * The image file handler extension.
@@ -40,7 +43,7 @@ const EXTENSIONS = ['.png', '.gif', '.jpeg', '.jpg', '.svg', '.bmp', '.ico',
 export
 const imageHandlerExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.image-handler',
-  requires: [IDocumentRegistry, ICommandPalette],
+  requires: [IDocumentRegistry, ICommandPalette, IStateDB],
   activate: activateImageWidget,
   autoStart: true
 };
@@ -49,15 +52,28 @@ const imageHandlerExtension: JupyterLabPlugin<void> = {
 /**
  * Activate the image widget extension.
  */
-function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palette: ICommandPalette): void {
+function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palette: ICommandPalette, state: IStateDB): void {
   let zoomInImage = 'image-widget:zoom-in';
   let zoomOutImage = 'image-widget:zoom-out';
   let resetZoomImage = 'image-widget:reset-zoom';
-  let image = new ImageWidgetFactory({
-    name: 'Image',
+
+  const factory = new ImageWidgetFactory({
+    name: FACTORY,
     modelName: 'base64',
     fileExtensions: EXTENSIONS,
     defaultFor: EXTENSIONS
+  });
+
+  const tracker = new InstanceTracker<ImageWidget>({
+    restore: {
+      state,
+      command: 'file-operations:open',
+      args: widget => ({ path: widget.context.path, factory: FACTORY }),
+      name: widget => widget.context.path,
+      namespace: 'images',
+      when: app.started,
+      registry: app.commands
+    }
   });
 
   // Sync tracker with currently focused widget.
@@ -65,26 +81,31 @@ function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palet
     tracker.sync(args.newValue);
   });
 
-  registry.addWidgetFactory(image);
+  registry.addWidgetFactory(factory);
 
-  image.widgetCreated.connect((sender, newWidget) => {
-    tracker.add(newWidget);
+  factory.widgetCreated.connect((sender, widget) => {
+    // Notify the instance tracker if restore data needs to update.
+    widget.context.pathChanged.connect(() => { tracker.save(widget); });
+    tracker.add(widget);
   });
 
   app.commands.addCommand(zoomInImage, {
     execute: zoomIn,
     label: 'Zoom In'
   });
+
   app.commands.addCommand(zoomOutImage, {
     execute: zoomOut,
     label: 'Zoom Out'
   });
+
   app.commands.addCommand(resetZoomImage, {
     execute: resetZoom,
     label: 'Reset Zoom'
   });
 
   let category = 'Image Widget';
+
   [zoomInImage, zoomOutImage, resetZoomImage]
     .forEach(command => palette.addItem({ command, category }));
 

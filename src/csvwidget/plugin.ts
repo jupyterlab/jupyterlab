@@ -6,6 +6,10 @@ import {
 } from '../application';
 
 import {
+  InstanceTracker
+} from '../common/instancetracker';
+
+import {
   IDocumentRegistry
 } from '../docregistry';
 
@@ -14,14 +18,14 @@ import {
 } from '../statedb';
 
 import {
-  CSVWidgetFactory
+  CSVWidget, CSVWidgetFactory
 } from './widget';
 
 
 /**
- * The state database namespace for CSV widgets.
+ * The name of the factory that creates CSV widgets.
  */
-const NAMESPACE = 'csvwidgets';
+const FACTORY = 'Table';
 
 
 /**
@@ -29,7 +33,7 @@ const NAMESPACE = 'csvwidgets';
  */
 export
 const csvHandlerExtension: JupyterLabPlugin<void> = {
-  id: 'jupyter.extensions.csvHandler',
+  id: 'jupyter.extensions.csv-handler',
   requires: [IDocumentRegistry, IStateDB],
   activate: activateCSVWidget,
   autoStart: true
@@ -41,31 +45,27 @@ const csvHandlerExtension: JupyterLabPlugin<void> = {
  */
 function activateCSVWidget(app: JupyterLab, registry: IDocumentRegistry, state: IStateDB): void {
   const factory = new CSVWidgetFactory({
-    name: 'Table',
+    name: FACTORY,
     fileExtensions: ['.csv'],
     defaultFor: ['.csv']
   });
-
-  registry.addWidgetFactory(factory);
-
-  factory.widgetCreated.connect((sender, widget) => {
-    // Add the CSV path to the state database.
-    let key = `${NAMESPACE}:${widget.context.path}`;
-    state.save(key, { path: widget.context.path });
-    // Remove the CSV path from the state database on disposal.
-    widget.disposed.connect(() => { state.remove(key); });
-    // Keep track of path changes in the state database.
-    widget.context.pathChanged.connect((sender, path) => {
-      state.remove(key);
-      key = `${NAMESPACE}:${path}`;
-      state.save(key, { path });
-    });
+  const tracker = new InstanceTracker<CSVWidget>({
+    restore: {
+      state,
+      command: 'file-operations:open',
+      args: widget => ({ path: widget.context.path, factory: FACTORY }),
+      name: widget => widget.context.path,
+      namespace: 'csvwidgets',
+      when: app.started,
+      registry: app.commands
+    }
   });
 
-  // Reload any CSV widgets whose state has been stored.
-  Promise.all([state.fetchNamespace(NAMESPACE), app.started])
-    .then(([items]) => {
-      let open = 'file-operations:open';
-      items.forEach(item => { app.commands.execute(open, item.value); });
-    });
+  registry.addWidgetFactory(factory);
+  factory.widgetCreated.connect((sender, widget) => {
+    // Track the widget.
+    tracker.add(widget);
+    // Notify the instance tracker if restore data needs to update.
+    widget.context.pathChanged.connect(() => { tracker.save(widget); });
+  });
 }

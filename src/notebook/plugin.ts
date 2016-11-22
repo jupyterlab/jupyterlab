@@ -59,16 +59,6 @@ const PORTRAIT_ICON_CLASS = 'jp-MainAreaPortraitIcon';
 const NOTEBOOK_ICON_CLASS = 'jp-ImageNotebook';
 
 /**
- * The notebook plugin state namespace.
- */
-const NAMESPACE = 'notebooks';
-
-/**
- * The notebook instance tracker.
- */
-const tracker = new NotebookTracker();
-
-/**
  * The map of command ids used by the notebook.
  */
 const cmdIds = {
@@ -114,6 +104,11 @@ const cmdIds = {
   markdown6: 'notebook-cells:markdown-header6',
 };
 
+/**
+ * The name of the factory that creates notebooks.
+ */
+const FACTORY = 'Notebook';
+
 
 /**
  * The notebook widget tracker provider.
@@ -142,8 +137,8 @@ const notebookTrackerProvider: JupyterLabPlugin<INotebookTracker> = {
  * Activate the notebook handler extension.
  */
 function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector, renderer: NotebookPanel.IRenderer, state: IStateDB): INotebookTracker {
-  let widgetFactory = new NotebookWidgetFactory({
-    name: 'Notebook',
+  const factory = new NotebookWidgetFactory({
+    name: FACTORY,
     fileExtensions: ['.ipynb'],
     modelName: 'notebook',
     defaultFor: ['.ipynb'],
@@ -152,6 +147,18 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     rendermime,
     clipboard,
     renderer
+  });
+
+  const tracker = new NotebookTracker({
+    restore: {
+      state,
+      command: 'file-operations:open',
+      args: widget => ({ path: widget.context.path, factory: FACTORY }),
+      name: widget => widget.context.path,
+      namespace: 'notebooks',
+      when: [app.started, services.ready],
+      registry: app.commands
+    }
   });
 
   // Sync tracker and set the source of the code inspector.
@@ -163,8 +170,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
   });
 
   registry.addModelFactory(new NotebookModelFactory());
-  registry.addWidgetFactory(widgetFactory);
-
+  registry.addWidgetFactory(factory);
   registry.addFileType({
     name: 'Notebook',
     extension: '.ipynb',
@@ -177,38 +183,22 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     widgetName: 'Notebook'
   });
 
-  addCommands(app, services);
+  addCommands(app, services, tracker);
   populatePalette(palette);
 
   let id = 0; // The ID counter for notebook panels.
 
-  widgetFactory.widgetCreated.connect((sender, widget) => {
+  factory.widgetCreated.connect((sender, widget) => {
     // If the notebook panel does not have an ID, assign it one.
     widget.id = widget.id || `notebook-${++id}`;
     widget.title.icon = `${PORTRAIT_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
     // Immediately set the inspector source to the current notebook.
     inspector.source = widget.content.inspectionHandler;
+    // Notify the instance tracker if restore data needs to update.
+    widget.context.pathChanged.connect(() => { tracker.save(widget); });
     // Add the notebook panel to the tracker.
     tracker.add(widget);
-    // Add the notebook path to the state database.
-    let key = `${NAMESPACE}:${widget.context.path}`;
-    state.save(key, { path: widget.context.path });
-    // Remove the notebook path from the state database on disposal.
-    widget.disposed.connect(() => { state.remove(key); });
-    // Keep track of path changes in the state database.
-    widget.context.pathChanged.connect((sender, path) => {
-      state.remove(key);
-      key = `${NAMESPACE}:${path}`;
-      state.save(key, { path });
-    });
   });
-
-  // Reload any notebooks whose state has been stored.
-  Promise.all([state.fetchNamespace(NAMESPACE), app.started, services.ready])
-    .then(([items]) => {
-      let open = 'file-operations:open';
-      items.forEach(item => { app.commands.execute(open, item.value); });
-    });
 
   // Add main menu notebook menu.
   mainMenu.addMenu(createMenu(app), { rank: 20 });
@@ -219,7 +209,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
 /**
  * Add the notebook commands to the application's command registry.
  */
-function addCommands(app: JupyterLab, services: IServiceManager): void {
+function addCommands(app: JupyterLab, services: IServiceManager, tracker: NotebookTracker): void {
   let commands = app.commands;
 
   commands.addCommand(cmdIds.runAndAdvance, {
