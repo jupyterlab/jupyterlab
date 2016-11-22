@@ -1158,13 +1158,14 @@ class DirListing extends Widget {
       return renameFile(this._model, original, newName).catch(error => {
         utils.showErrorMessage('Rename Error', error);
         return original;
-      }).then(value => {
+      }).then(() => {
         // Make sure the new file is available.
         return this.model.cd('.').then(() => {
-          this._selection = Object.create(null);
-          this._selection[newName] = true;
+          items = this._sortedItems;
+          index = findIndex(items, value => value.name === newName);
+          this._selectItem(index, false);
           this.update();
-          return value;
+          return newName;
         });
       });
     });
