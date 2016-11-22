@@ -24,6 +24,7 @@ import './csvwidget/widget.spec';
 
 import './dialog/dialog.spec';
 
+import './docmanager/manager.spec';
 import './docmanager/savehandler.spec';
 import './docmanager/widgetmanager.spec';
 
