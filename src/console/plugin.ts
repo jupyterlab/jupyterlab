@@ -258,7 +258,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       return manager.ready.then(() => {
         return getKernel(args, name);
       }).then(kernel => {
-        if (!kernel) {
+        if (!kernel || (kernel && !kernel.id && !kernel.name)) {
           return;
         }
         // Start the session.

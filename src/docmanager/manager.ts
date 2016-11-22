@@ -134,9 +134,12 @@ class DocumentManager implements IDisposable {
       context.revert();
     }
     // Handle the kernel for the context.
-    if (kernel && widgetFactory.canStartKernel) {
+    if (kernel && (kernel.id || kernel.name) && widgetFactory.canStartKernel) {
       context.changeKernel(kernel);
-    } else if (widgetFactory.preferKernel && !context.kernel) {
+    } else if (widgetFactory.preferKernel &&
+               //Don't start the default kernel if we pass in a null kernel
+               !(kernel && !kernel.id && !kernel.name) &&
+               !context.kernel) {
       context.startDefaultKernel();
     }
     let widget = this._widgetManager.createWidget(widgetFactory.name, context);
@@ -172,9 +175,12 @@ class DocumentManager implements IDisposable {
     // Immediately save the contents to disk.
     context.save();
     // Handle the kernel for the context.
-    if (kernel && widgetFactory.canStartKernel) {
+    if (kernel && (kernel.id || kernel.name) && widgetFactory.canStartKernel) {
       context.changeKernel(kernel);
-    } else if (widgetFactory.preferKernel && !context.kernel) {
+    } else if (widgetFactory.preferKernel &&
+               //Don't start the default kernel if we pass in a null kernel
+               !(kernel && !kernel.id && !kernel.name) &&
+               !context.kernel) {
       context.startDefaultKernel();
     }
     let widget = this._widgetManager.createWidget(widgetFactory.name, context);
