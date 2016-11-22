@@ -281,7 +281,7 @@ class DocumentManager implements IDisposable {
    * The two cases differ in how the document context is handled, but the creation
    * of the widget and launching of the kernel are identical.
    */
-  private _createOrOpenDocument(which: string, path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
+  private _createOrOpenDocument(which: 'open'|'create', path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
     let widgetFactory = this._widgetFactoryFor(path, widgetName);
     if (!widgetFactory) {
       return;
@@ -306,9 +306,6 @@ class DocumentManager implements IDisposable {
       context = this._createContext(path, factory);
       // Immediately save the contents to disk.
       context.save();
-    } else {
-      //Should not reach here
-      console.log('Invalid option for _createOrOpenDocument()');
     }
 
     // Maybe launch/connect the kernel for the context.
