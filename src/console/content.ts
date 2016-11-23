@@ -61,6 +61,18 @@ import {
   IObservableVector, ObservableVector
 } from '../common/observablevector';
 
+import {
+  CodeCellModel, RawCellModel
+} from '../notebook/cells/model';
+
+import {
+  mimetypeForLanguage
+} from '../notebook/common/mimetype';
+
+import {
+  RenderMime
+} from '../rendermime';
+
 /**
  * The class name added to console widgets.
  */
@@ -701,6 +713,73 @@ namespace ConsoleContent {
      * Get the preferred mimetype given language info.
      */
     getCodeMimetype(info: nbformat.ILanguageInfoMetadata): string;
+  }
+
+  export
+  class Renderer implements IRenderer {
+
+    readonly bannerRenderer: CodeCellWidget.IRenderer;
+    readonly promptRenderer: CodeCellWidget.IRenderer;
+    readonly foreignCellRenderer: CodeCellWidget.IRenderer;
+
+    constructor(options: Renderer.IOptions) {
+      this.bannerRenderer = options.bannerRenderer;
+      this.promptRenderer = options.promptRenderer;
+      this.foreignCellRenderer = options.foreignCellRenderer;
+    }
+
+    /**
+     * Create a new banner widget.
+     */
+    createBanner(): RawCellWidget {
+      let widget = new RawCellWidget({
+        renderer: this.bannerRenderer
+      });
+      widget.model = new RawCellModel();
+      return widget;
+    }
+
+    /**
+     * Create a new prompt widget.
+     */
+    createPrompt(rendermime: RenderMime, context: ConsoleContent): CodeCellWidget {
+      let widget = new CodeCellWidget({
+        rendermime,
+        renderer: this.promptRenderer
+      });
+      widget.model = new CodeCellModel();
+      return widget;
+    }
+
+    /**
+     * Create a new code cell widget for an input from a foreign session.
+     */
+    createForeignCell(rendermime: RenderMime, context: ConsoleContent): CodeCellWidget {
+      let widget = new CodeCellWidget({
+        rendermime,
+        renderer: this.foreignCellRenderer
+      });
+      widget.model = new CodeCellModel();
+      return widget;
+    }
+
+    /**
+     * Get the preferred mimetype given language info.
+     */
+    getCodeMimetype(info: nbformat.ILanguageInfoMetadata): string {
+      return mimetypeForLanguage(info);
+    }
+
+  }
+
+  export
+  namespace Renderer {
+    export
+    interface IOptions {
+      readonly bannerRenderer: CodeCellWidget.IRenderer;
+      readonly promptRenderer: CodeCellWidget.IRenderer;
+      readonly foreignCellRenderer: CodeCellWidget.IRenderer;
+    }
   }
 
   /* tslint:disable */

@@ -6,8 +6,8 @@ import {
 } from '../notebook/panel';
 
 import {
-  MonacoNotebookPanelRenderer
-} from './notebook/panel';
+  defaultNotebookPanelRenderer
+} from './renderers';
 
 import {
   JupyterLabPlugin
@@ -20,5 +20,5 @@ export
 const rendererProvider: JupyterLabPlugin<NotebookPanel.IRenderer> = {
   id: 'jupyter.services.notebook.monaco.renderer',
   provides: NotebookPanel.IRenderer,
-  activate: () => MonacoNotebookPanelRenderer.defaultRenderer
+  activate: () => defaultNotebookPanelRenderer
 };

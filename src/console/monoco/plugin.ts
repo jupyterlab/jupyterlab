@@ -15,11 +15,11 @@ import {
 
 
 /**
- * The provider for a console's code mirror renderer.
+ * The provider for a console's monaco renderer.
  */
 export
-const plugin: JupyterLabPlugin<ConsoleContent.IRenderer> = {
-  id: 'jupyter.services.console.codemirror.renderer',
+const rendererProvider: JupyterLabPlugin<ConsoleContent.IRenderer> = {
+  id: 'jupyter.services.console.monaco.renderer',
   provides: ConsoleContent.IRenderer,
   activate: () => defaultConsoleContentRenderer
 };

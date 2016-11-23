@@ -6,8 +6,8 @@ import {
 } from '../notebook/panel';
 
 import {
-  CodeMirrorNotebookPanelRenderer
-} from './notebook/panel';
+  defaultNotebookPanelRenderer
+} from './renderers';
 
 import {
   JupyterLabPlugin
@@ -20,5 +20,5 @@ export
 const plugin: JupyterLabPlugin<NotebookPanel.IRenderer> = {
   id: 'jupyter.services.notebook.codemirror.renderer',
   provides: NotebookPanel.IRenderer,
-  activate: () => CodeMirrorNotebookPanelRenderer.defaultRenderer
+  activate: () => defaultNotebookPanelRenderer
 };

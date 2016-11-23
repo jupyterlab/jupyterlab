@@ -38,7 +38,11 @@ import {
 } from '../output-area';
 
 import {
-  ICellEditorWidget
+  CodeEditor
+} from '../../codeeditor';
+
+import {
+  ICellEditorWidget, CodeCellEditorWidget
 } from './editor';
 
 import {
@@ -389,17 +393,34 @@ namespace BaseCellWidget {
    * The default implementation of an `IRenderer`.
    */
   export
-  abstract class Renderer implements IRenderer {
+  class Renderer implements IRenderer {
+
+    readonly editorFactory: (host: Widget) => CodeEditor.IEditor;
+
+    constructor(options: Renderer.IOptions) {
+      this.editorFactory = options.editorFactory;
+    }
+
     /**
      * Create a new cell editor for the widget.
      */
-    abstract createCellEditor(): ICellEditorWidget;
+    createCellEditor(): ICellEditorWidget {
+      return new CodeCellEditorWidget(this.editorFactory);
+    }
 
     /**
      * Create a new input area for the widget.
      */
     createInputArea(editor: ICellEditorWidget): InputAreaWidget {
       return new InputAreaWidget(editor);
+    }
+  }
+
+  export
+  namespace Renderer {
+    export
+    interface IOptions {
+      readonly editorFactory: (host: Widget) => CodeEditor.IEditor;
     }
   }
 }
@@ -545,7 +566,7 @@ namespace CodeCellWidget {
    * An options object for initializing a base cell widget.
    */
   export
-  interface IOptions {
+  interface IOptions extends BaseCellWidget.IOptions {
     /**
      * A renderer for creating cell widgets.
      *
@@ -574,7 +595,7 @@ namespace CodeCellWidget {
    * The default implementation of an `IRenderer`.
    */
   export
-  abstract class Renderer extends BaseCellWidget.Renderer implements IRenderer {
+  class Renderer extends BaseCellWidget.Renderer implements IRenderer {
     /**
      * Create an output area widget.
      */

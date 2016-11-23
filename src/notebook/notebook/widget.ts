@@ -70,6 +70,10 @@ import {
 } from '../../rendermime';
 
 import {
+  mimetypeForLanguage
+} from '../common/mimetype';
+
+import {
   ICellModel, BaseCellWidget, MarkdownCellModel,
   CodeCellWidget, MarkdownCellWidget,
   CodeCellModel, RawCellWidget, RawCellModel,
@@ -535,21 +539,52 @@ namespace StaticNotebook {
    * The default implementation of an `IRenderer`.
    */
   export
-  abstract class Renderer implements IRenderer {
+  class Renderer implements IRenderer {
+
+    readonly codeCellRenderer: CodeCellWidget.IRenderer;
+    readonly markdownCellRenderer: BaseCellWidget.IRenderer;
+    readonly rawCellRenderer: BaseCellWidget.IRenderer;
+
+    constructor(options: Renderer.IOptions) {
+      this.codeCellRenderer = options.codeCellRenderer;
+      this.markdownCellRenderer = options.markdownCellRenderer;
+      this.rawCellRenderer = options.rawCellRenderer;
+    }
+
     /**
      * Create a new code cell widget.
      */
-    abstract createCodeCell(model: ICodeCellModel, rendermime: RenderMime): CodeCellWidget;
+    createCodeCell(model: ICodeCellModel, rendermime: RenderMime): CodeCellWidget {
+      const widget = new CodeCellWidget({
+        rendermime,
+        renderer: this.codeCellRenderer
+      });
+      widget.model = model;
+      return widget;
+    }
 
     /**
      * Create a new markdown cell widget.
      */
-    abstract createMarkdownCell(model: IMarkdownCellModel, rendermime: RenderMime): MarkdownCellWidget;
+    createMarkdownCell(model: IMarkdownCellModel, rendermime: RenderMime): MarkdownCellWidget {
+      const widget = new MarkdownCellWidget({
+        rendermime,
+        renderer: this.markdownCellRenderer
+      });
+      widget.model = model;
+      return widget;
+    }
 
     /**
      * Create a new raw cell widget.
      */
-    abstract createRawCell(model: IRawCellModel): RawCellWidget;
+    createRawCell(model: IRawCellModel): RawCellWidget {
+      const widget = new RawCellWidget({
+        renderer: this.rawCellRenderer
+      });
+      widget.model = model;
+      return widget;
+    }
 
     /**
      * Update a cell widget.
@@ -564,10 +599,26 @@ namespace StaticNotebook {
     /**
      * Get the preferred mimetype given language info.
      */
-    abstract getCodeMimetype(info: nbformat.ILanguageInfoMetadata): string;
+    getCodeMimetype(info: nbformat.ILanguageInfoMetadata): string {
+      return mimetypeForLanguage(info);
+    }
+  }
+
+  /** Utilities for a notebook renderer */
+  export
+  namespace Renderer {
+
+    /**
+     * An options for a notebook renderer.
+     */
+    export interface IOptions {
+      readonly codeCellRenderer: CodeCellWidget.IRenderer;
+      readonly markdownCellRenderer: BaseCellWidget.IRenderer;
+      readonly rawCellRenderer: BaseCellWidget.IRenderer;
+    }
+
   }
 }
-
 
 /**
  * A notebook widget that supports interactivity.
@@ -1347,7 +1398,8 @@ namespace Notebook {
    * The default implementation of an `IRenderer`.
    */
   export
-  abstract class Renderer extends StaticNotebook.Renderer { }
+  class Renderer extends StaticNotebook.Renderer {
+  }
 
 }
 

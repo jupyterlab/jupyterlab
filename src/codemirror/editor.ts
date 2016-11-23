@@ -269,7 +269,7 @@ class CodeMirrorEditorFactory implements IEditorFactory {
   /**
    * Create a new editor for inline code.
    */
-  newInlineEditor(host: HTMLElement, option: CodeEditor.IOptions): CodeEditor.IEditor {
+  newInlineEditor(host: HTMLElement, options: CodeEditor.IOptions): CodeEditor.IEditor {
     let editor = new CodeMirrorEditor(host, {
       extraKeys: {
         'Tab': 'indentMore',
@@ -277,8 +277,9 @@ class CodeMirrorEditorFactory implements IEditorFactory {
       },
       indentUnit: 4,
       theme: DEFAULT_CODEMIRROR_THEME,
-      lineNumbers: true,
-      lineWrapping: true,
+      lineNumbers: options.lineNumbers || true,
+      lineWrapping: options.wordWrap || true,
+      readOnly: options.readOnly
     });
     // TODO configure inline editor
     return editor;
@@ -295,8 +296,9 @@ class CodeMirrorEditorFactory implements IEditorFactory {
       },
       indentUnit: 4,
       theme: DEFAULT_CODEMIRROR_THEME,
-      lineNumbers: true,
-      lineWrapping: true,
+      lineNumbers: options.lineNumbers || true,
+      lineWrapping: options.wordWrap || true,
+      readOnly: options.readOnly
     });
     return editor;
   }
