@@ -37,8 +37,8 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
   readonly uuid: string;
 
   // FIXME remove when https://github.com/Microsoft/monaco-editor/issues/103 is resolved
-  autoSizing: boolean = false;
-  minHeight: number = -1;
+  autoSizing: boolean;
+  minHeight: number;
 
   onKeyDown: CodeEditor.KeydownHandler | null = null;
 
@@ -47,6 +47,8 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
    */
   constructor(options: MonacoCodeEditor.IOptions) {
     this.uuid = options.uuid;
+    this.autoSizing = (options.editorOptions && options.editorOptions.autoSizing) || false;
+    this.minHeight = (options.editorOptions && options.editorOptions.minHeight) || -1;
 
     this._editor = monaco.editor.create(options.domElement, options.editorOptions, options.editorServices);
     this._listeners.push(this.editor.onDidChangeModel(e => this._onDidChangeModel(e)));
@@ -309,10 +311,15 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
  */
 export
 namespace MonacoCodeEditor {
+  export
+  interface IEditorConstructionOptions extends monaco.editor.IEditorConstructionOptions {
+    autoSizing?: boolean;
+    minHeight?: number;
+  }
   export interface IOptions {
     uuid: string;
     domElement: HTMLElement;
-    editorOptions?: monaco.editor.IEditorConstructionOptions;
+    editorOptions?: IEditorConstructionOptions;
     editorServices?: monaco.editor.IEditorOverrideServices;
     monacoModel?: MonacoModel;
   }

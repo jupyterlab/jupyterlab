@@ -61,7 +61,7 @@ class MonacoCodeCellWidgetRenderer extends CodeCellWidget.Renderer {
     return widget;
   }
 
-  private _editorConfiguration: monaco.editor.IEditorConstructionOptions = null;
+  private _editorConfiguration: MonacoCodeEditor.IEditorConstructionOptions = null;
   private _editorInitializer: (editor: monaco.editor.IEditor) => void = null;
 }
 
@@ -79,7 +79,7 @@ namespace MonacoCodeCellWidgetRenderer {
     /**
      * A Monaco editor configuration.
      */
-    editorConfiguration?: monaco.editor.IEditorConstructionOptions;
+    editorConfiguration?: MonacoCodeEditor.IEditorConstructionOptions;
 
     /**
      * A code cell widget initializer function.
@@ -91,23 +91,20 @@ namespace MonacoCodeCellWidgetRenderer {
    * A default Monaco configuration for a cell editor.
    */
   export
-  const defaultEditorConfiguration: monaco.editor.IEditorConstructionOptions = {
-      // Default value of the theme is set in the parent constructor,
-      // but could be overridden here
-      // indentUnit: 4,
-      readOnly: false,
-      // extraKeys: {
-      //   'Cmd-Right': 'goLineRight',
-      //   'End': 'goLineRight',
-      //   'Cmd-Left': 'goLineLeft',
-      //   'Tab': 'indentMore',
-      //   'Shift-Tab': 'indentLess',
-      //   'Cmd-Alt-[': 'indentAuto',
-      //   'Ctrl-Alt-[': 'indentAuto',
-      //   'Cmd-/': 'toggleComment',
-      //   'Ctrl-/': 'toggleComment',
-      // }
-    };
+  const defaultEditorConfiguration: MonacoCodeEditor.IEditorConstructionOptions = {
+    autoSizing: false,
+    lineNumbers: 'off',
+    lineNumbersMinChars: 4,
+    lineDecorationsWidth: 5,
+    scrollbar: {
+      horizontal: 'hidden',
+      vertical: 'hidden',
+      horizontalScrollbarSize: 0,
+      handleMouseWheel: false
+    },
+    contextmenu: false,
+    scrollBeyondLastLine: false
+  };
 
   /**
    * A default Monaco renderer for a code cell widget.
