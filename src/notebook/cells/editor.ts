@@ -271,22 +271,26 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
     if (!model && !this._model || model === this._model) {
       return;
     }
-
+    const oldModel = this._model;
     // If the model is being replaced, disconnect the old signal handler.
-    if (this._model) {
-      this._model.stateChanged.disconnect(this.onModelStateChanged, this);
+    if (oldModel) {
+      oldModel.stateChanged.disconnect(this.onModelStateChanged, this);
     }
 
     if (!model) {
       this.editor.model.value = '';
       this._model = null;
-      return;
+    } else {
+      this._model = model;
+      this.editor.model.value = this._model.source || '';
+      this.editor.model.clearHistory();
+      this._model.stateChanged.connect(this.onModelStateChanged, this);
     }
+    this._onCellModelChanged(oldModel, this._model);
+  }
 
-    this._model = model;
-    this.editor.model.value = this._model.source || '';
-    this.editor.model.clearHistory();
-    this._model.stateChanged.connect(this.onModelStateChanged, this);
+  protected _onCellModelChanged(oldModel: ICellModel | null, newModel: ICellModel | null) {
+    // Could be overriden by clients
   }
 
   /**
