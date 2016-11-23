@@ -10,10 +10,10 @@ Provides:
   to JS and CSS assets to add to the page.
 * function register_flexx_jlab_plugin() to register Flexx models or
   widgets as JLab plugins.
-* ModelPlugin and WidgetPlugin classes for plugins to subclass.
 """
 
-from flexx import app, ui
+from flexx import app, event, ui
+from flexx.ui import Widget
 
 
 _plugin_classes = []
@@ -22,11 +22,10 @@ def register_flexx_jlab_plugin(cls):
     """ Call this with a subclass of ModelPlugin or WidgetPlugin to register
     it and load it in Jupyterlab.
     """
-    if not (isinstance(cls, type) and issubclass(cls, app.Model))
+    if not (isinstance(cls, type) and issubclass(cls, app.Model)):
         raise TypeError('register_flexx_jlab_plugin() needs a Model class.')
-    if not issubclass(cls, (ModelPlugin, WidgetPlugin))):
-        raise TypeError('register_flexx_jlab_plugin() needs a ModelPlugin or '
-                        'WidgetPlugin.')
+    if not hasattr(cls.JS, 'jlab_activate'):
+        raise TypeError('JupyterLab plugins need a jlab_activate_method() in JS.')
     _plugin_classes.append(cls)
     return cls  # allows using this function as a decorator
 
@@ -64,20 +63,53 @@ def get_session(tornado_app):
 class JupyterLabPluginWrapper(app.Model):
     """ This model represents the Flexx application that is embedded
     in JupyterLab. It is a thin wrapper that takes care of instantiating
-    the Flexx plugins.
+    and registering the Flexx plugins.
     """
     
     def init(self):
-        # This is really just a silly test to ensure that call_later works
-        app.call_later(0.1, self.init2)
         self._plugins = []  # model instances
+        self.init2()
+        #app.call_later(0.1, self.init2)
     
     def init2(self):
+        # Instantiate plugins
+        plugins = []
         with self:
             for cls in _plugin_classes:
-                self._plugins.append(cls())
+                plugins.append(cls())
         
-        #self.call_js('jlab_attach("%s")' % self.w.id)
+        # Set plugins property, so that we have access to it on the JS side
+        self.plugins = plugins
+    
+    class Both:
+        
+        @event.prop
+        def plugins(self, model_instances):
+            """ The Flexx models that represent the plugins
+            (available in both Python and JS).
+            """
+            return tuple( model_instances)
+    
+    class JS:
+        
+        def init(self):
+            
+            # Register the plugins with Jupyterlab
+            for ob in self.plugins:
+                print('registering Flexx JLAB plugin ', ob.id)
+                
+                func = ob.jlab_activate
+                autoStart = getattr(ob, 'JLAB_AUTOSTART', True)
+                requires = getattr(ob, 'JLAB_REQUIRES', [])
+                requires = [get_token(id) for id in requires]
+                
+                p = dict(id='flexx.' + ob._class_name.lower(),
+                         activate=func, autoStart=autoStart, requires=requires)
+                window.jupyter.lab.registerPlugin(p)
+                if p.autoStart:
+                    # Autostart means activate when JLab starts, but JLab
+                    # is already running so we need to start it ourselves.
+                    window.jupyter.lab.activatePlugin(p.id)
 
 
 def get_token(id):
@@ -100,64 +132,3 @@ def get_token(id):
             return token
     else:
         raise RuntimeError('No service known by id "%s".' % id)
-
-
-# Base classes to subclass to implement a plugin. A mixin would be nice
-# here, but Flexx does not (yet) support multiple inhertance.
-
-class ModelPlugin(app.Model):
-    """ Subclass this to create a JLab plugin without a visual representation.
-    """
-    
-    class JS:
-        
-        JLAB_REQUIRES = []
-        JLAB_AUTOSTART = True
-        
-        def init(self):
-            self._register()
-        
-        def _register(self):
-            print('registering JLAB plugin ', self.id)
-            p = dict(id='flexx.' + self._class_name.lower(),
-                     activate=self.activate,
-                     autoStart=self.JLAB_AUTOSTART,
-                     requires=[get_token(id) for id in self.JLAB_REQUIRES])
-            window.jupyter.lab.registerPlugin(p)
-            if p.autoStart:
-                # Autostart means activate when JLab starts, but JLab
-                # is already running so we need to start it ourselves.
-                window.jupyter.lab.activatePlugin(p.id)
-        
-        def activate(self):
-            raise NotImplementedError()
-
-
-class WidgetPlugin(ui.Widget):
-    """ Subclass this to create a JLab plugin represented by a widget.
-    """
-    
-    class JS:
-        
-        JLAB_REQUIRES = []
-        JLAB_AUTOSTART = True
-        
-        def init(self):
-            self.title = self.title if self.title else 'A Flexx plugin'
-            self._register()
-        
-        def _register(self):
-            print('registering JLAB plugin ', self.id)
-            p = dict(id='flexx.' + self._class_name.lower(),
-                     activate=self.activate,
-                     autoStart=self.JLAB_AUTOSTART,
-                     requires=[get_token(id) for id in self.JLAB_REQUIRES])
-            window.jupyter.lab.registerPlugin(p)
-            if p.autoStart:
-                # Autostart means activate when JLab starts, but JLab
-                # is already running so we need to start it ourselves.
-                window.jupyter.lab.activatePlugin(p.id)
-        
-        def activate(self):
-            raise NotImplementedError()
-    

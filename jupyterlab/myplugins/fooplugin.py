@@ -1,14 +1,17 @@
-from ..flexx_plugin_manager import register_flexx_jlab_plugin, WidgetPlugin
+from ..flexx_plugin_manager import register_flexx_jlab_plugin
 
 from flexx import app, event, ui
 
 
 @register_flexx_jlab_plugin
-class FooPlugin(WidgetPlugin):
+class FooPlugin(ui.Widget):
     """
-    A silly widget that hooks up to the file browser service, and also
-    to the document-registry, except that it does not because Flexx cannot
-    instantiate widgets from JS ...
+    A silly widget that demonstrates hooking up to Jlab services.
+    
+    * Uses the file browser service to keep track of its current dir.
+    * Would like to add an entry to the document-registry, but Flexx cannot
+      instantiate widgets from JS ...
+    
     """
     
     def init(self):
@@ -20,17 +23,18 @@ class FooPlugin(WidgetPlugin):
     
     class JS:
         
-        JLAB_REQUIRES = ['jupyter.services.file-browser', 'jupyter.services.document-registry']
         JLAB_AUTOSTART = True
+        JLAB_REQUIRES = ['jupyter.services.file-browser', 'jupyter.services.document-registry']
         
-        def init(self):
-            super().init()
+        def jlab_activate(self, lab, fb, dr):
             self.title = 'Flexx foo demo'
-        
-        def activate(self, lab, fb, dr):
-            print('activating plugin', self.id)
+            
+            # Add to JLab UI
             lab.shell.addToMainArea(self.phosphor)
+            
+            # Keep track of file-browser's current directory
             fb.pathChanged.connect(self._on_path_changed)
+            self._on_path_changed(fb, {'newValue': fb.path})  # init
             
             # Ahhh, we cannot create a widget factory, as Flexx widgets
             # can only be instantiated from Python. It could work if we could
@@ -39,5 +43,4 @@ class FooPlugin(WidgetPlugin):
             window.dr = dr
         
         def _on_path_changed(self, fb, ev):
-            print('path changed to ', ev.newValue)
-            self.label.text = '&#8962;' + ev.newValue
+            self.label.text = '"' + ev.newValue + '"'
