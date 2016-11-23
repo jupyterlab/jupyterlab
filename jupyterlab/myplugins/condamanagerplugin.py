@@ -1,7 +1,7 @@
 import os
 import sys
 
-from ..flexx_plugin_manager import register_flexx_jlab_plugin, WidgetPlugin
+from ..flexx_plugin_manager import register_flexx_jlab_plugin
 
 from flexx import app, event, ui
 
@@ -9,11 +9,13 @@ from flexx import app, event, ui
 # todo: make this add a menu entry - once we can create a Phosphor Menu
 
 @register_flexx_jlab_plugin
-class CondaManagerPlugin(WidgetPlugin):
+class CondaManagerPlugin(ui.Widget):
     """
     A widget that can display the environments for the current Python
     interpreter, assuming its a conda env. This could be extended to 
     allow installing, updating and removing packages.
+    
+    This example also demonstrates adding a command to the palette.
     """
     
     def init(self):
@@ -68,7 +70,7 @@ class CondaManagerPlugin(WidgetPlugin):
                 item.text = 'working ...'
                 # Do conda command
                 try:
-                    text = self.conda_cmd('conda list -n %s' % env_name)
+                    text = conda_cmd('conda list -n %s' % env_name)
                 except Exception as err:
                     print(err)
                     continue
@@ -87,43 +89,9 @@ class CondaManagerPlugin(WidgetPlugin):
                         ui.TreeItem(title=libinfo[0], text=libinfo[1])
                 item.text = '%i libraries' % len(item.items)
     
-    def conda_cmd(self, command):
-        """ Util method to programatically do a conda command.
-        """
-        # Get command args
-        args = command.split(' ')
-        args = [w for w in args if w]
-        if args[0] != 'conda':
-            raise ValueError('Conda command should start with "conda".')
-        
-        oldargs = sys.argv
-        stderr_write = sys.stderr.write
-        stdout_write = sys.stdout.write
-        lines = []
-        try:
-            sys.stderr.write = lambda x: len(x)
-            sys.stdout.write = lambda x: lines.append(x) or len(x)
-            import conda
-            from conda.cli import main
-            sys.argv = args
-            main()
-        except SystemExit:  # as err:
-            type, err, tb = sys.exc_info(); del tb
-            err = str(err)
-            if len(err) > 4:  # Only print if looks like a message
-                raise RuntimeError(err)
-        except Exception:  # as err:
-            type, err, tb = sys.exc_info(); del tb
-            raise RuntimeError('Error in conda command: ' + str(err))
-        finally:
-            sys.argv = oldargs
-            sys.stderr.write = stderr_write
-            sys.stdout.write = stdout_write
-        
-        return ''.join(lines)
-    
     class JS:
         
+        JLAB_AUTOSTART = True
         JLAB_REQUIRES = ['jupyter.services.main-menu', 'jupyter.services.commandpalette']
         
         @event.emitter
@@ -132,7 +100,7 @@ class CondaManagerPlugin(WidgetPlugin):
             """
             return {}
         
-        def activate(self, lab, menu, commands):
+        def jlab_activate(self, lab, menu, commands):
             window.commands = commands
             lab.shell.addToMainArea(self.phosphor)
             
@@ -148,3 +116,39 @@ class CondaManagerPlugin(WidgetPlugin):
                                        keys=['R'],
                                        # selector='.flx-CondaManagerPlugin'
                                        ))
+
+
+def conda_cmd(command):
+    """ Util method to programatically do a conda command.
+    """
+    # Get command args
+    args = command.split(' ')
+    args = [w for w in args if w]
+    if args[0] != 'conda':
+        raise ValueError('Conda command should start with "conda".')
+    
+    oldargs = sys.argv
+    stderr_write = sys.stderr.write
+    stdout_write = sys.stdout.write
+    lines = []
+    try:
+        sys.stderr.write = lambda x: len(x)
+        sys.stdout.write = lambda x: lines.append(x) or len(x)
+        import conda
+        from conda.cli import main
+        sys.argv = args
+        main()
+    except SystemExit:  # as err:
+        type, err, tb = sys.exc_info(); del tb
+        err = str(err)
+        if len(err) > 4:  # Only print if looks like a message
+            raise RuntimeError(err)
+    except Exception:  # as err:
+        type, err, tb = sys.exc_info(); del tb
+        raise RuntimeError('Error in conda command: ' + str(err))
+    finally:
+        sys.argv = oldargs
+        sys.stderr.write = stderr_write
+        sys.stdout.write = stdout_write
+    
+    return ''.join(lines)
