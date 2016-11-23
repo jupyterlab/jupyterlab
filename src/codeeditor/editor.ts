@@ -350,7 +350,7 @@ namespace CodeEditor {
      * #### Notes
      * This is a ready-only property.
      */
-    uuid: string;
+    readonly uuid: string;
 
     /**
      * Whether line numbers should be displayed. Defaults to false.

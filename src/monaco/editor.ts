@@ -14,7 +14,7 @@ import {
 } from '../common/interfaces';
 
 import {
-  CodeEditor, IEditorFactory
+  CodeEditor
 } from '../codeeditor';
 
 import {
@@ -30,11 +30,11 @@ import {
  */
 export
 class MonacoCodeEditor implements CodeEditor.IEditor {
+
   /**
    * Id of the editor.
-   * FIXME: where one should get it?
    */
-  uuid: string;
+  readonly uuid: string;
 
   // FIXME remove when https://github.com/Microsoft/monaco-editor/issues/103 is resolved
   autoSizing: boolean = false;
@@ -45,18 +45,19 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
   /**
    * Construct a Monaco editor.
    */
-  constructor(host: HTMLElement, options?: monaco.editor.IEditorConstructionOptions, services?: monaco.editor.IEditorOverrideServices) {
-    this._editor = monaco.editor.create(host, options, services);
+  constructor(options: MonacoCodeEditor.IOptions) {
+    this.uuid = options.uuid;
+
+    this._editor = monaco.editor.create(options.domElement, options.editorOptions, options.editorServices);
     this._listeners.push(this.editor.onDidChangeModel(e => this._onDidChangeModel(e)));
     this._listeners.push(this.editor.onDidChangeConfiguration(e => this._onDidChangeConfiguration(e)));
     this._listeners.push(this.editor.onDidChangeCursorPosition(e => this._onDidChangeCursorPosition(e)));
     this._listeners.push(this.editor.onDidChangeCursorSelection(e => this._onDidChangeCursorSelection(e)));
     this._listeners.push(this.editor.onKeyDown(e => this._onKeyDown(e)));
 
-    this._model = new MonacoModel();
+    this._model = options.monacoModel || new MonacoModel();
     this._model.valueChanged.connect(this._onValueChanged, this);
     this._model.selections.changed.connect(this._onSelectionChanged, this);
-
     this._model.model = this._editor.getModel();
   }
 
@@ -77,8 +78,8 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
     this._isDisposed = true;
     this._model.dispose();
 
-    while (this._listeners.length !== 0)  {
-      this._listeners.pop()!.dispose();
+    while (this._listeners.length !== 0) {
+      this._listeners.pop() !.dispose();
     }
     this._editor.dispose();
   }
@@ -109,7 +110,7 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
   }
 
   protected _onKeyDown(event: monaco.IKeyboardEvent) {
-    if (this.onKeyDown) {
+    if (this.onKeyDown)  {
       this.onKeyDown(this, event.browserEvent);
     }
   }
@@ -303,40 +304,16 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
 
 }
 
+/**
+ * A utility functions for Monaco code editor.
+ */
 export
-  class MonacoCodeEditorFactory implements IEditorFactory {
-
-  /**
-   * Create a new editor for inline code.
-   */
-  newInlineEditor(host: HTMLElement, option: CodeEditor.IOptions): CodeEditor.IEditor {
-    let editor = new MonacoCodeEditor(host, {
-      // extraKeys: {
-      //   'Tab': 'indentMore',
-      //   'Shift-Enter': () => { /* no-op */ }
-      // },
-      // indentUnit: 4,
-      // lineNumbers: true,
-      wordWrap: true,
-    });
-    // TODO configure inline editor
-    return editor;
+namespace MonacoCodeEditor {
+  export interface IOptions {
+    uuid: string;
+    domElement: HTMLElement;
+    editorOptions?: monaco.editor.IEditorConstructionOptions;
+    editorServices?: monaco.editor.IEditorOverrideServices;
+    monacoModel?: MonacoModel;
   }
-
-  /**
-   * Create a new editor for a full document.
-   */
-  newDocumentEditor(host: HTMLElement, options: CodeEditor.IOptions): CodeEditor.IEditor {
-    let editor = new MonacoCodeEditor(host, {
-      // extraKeys: {
-      //   'Tab': 'indentMore',
-      //   'Shift-Enter': () => { /* no-op */ }
-      // },
-      // indentUnit: 4,
-      // lineNumbers: true,
-      wordWrap: true,
-    });
-    return editor;
-  }
-
 }

@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  uuid
+} from '@jupyterlab/services/lib/utils';
+
+import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
@@ -47,7 +51,11 @@ class MonacoCodeCellWidgetRenderer extends CodeCellWidget.Renderer {
     let configuration = this._editorConfiguration;
 
     const widget = new CodeCellEditorWidget((host: Widget) => {
-      return new MonacoCodeEditor(host.node, configuration);
+      return new MonacoCodeEditor({
+        uuid: uuid(),
+        domElement: host.node,
+        editorOptions: configuration
+      });
     });
     this._editorInitializer((widget.editor as MonacoCodeEditor).editor);
     return widget;
@@ -83,23 +91,23 @@ namespace MonacoCodeCellWidgetRenderer {
    * A default Monaco configuration for a cell editor.
    */
   export
-  const defaultEditorConfiguration: monaco.editor.IEditorConstructionOptions= {
-    // Default value of the theme is set in the parent constructor,
-    // but could be overridden here
-    // indentUnit: 4,
-    readOnly: false,
-    // extraKeys: {
-    //   'Cmd-Right': 'goLineRight',
-    //   'End': 'goLineRight',
-    //   'Cmd-Left': 'goLineLeft',
-    //   'Tab': 'indentMore',
-    //   'Shift-Tab': 'indentLess',
-    //   'Cmd-Alt-[': 'indentAuto',
-    //   'Ctrl-Alt-[': 'indentAuto',
-    //   'Cmd-/': 'toggleComment',
-    //   'Ctrl-/': 'toggleComment',
-    // }
-  };
+  const defaultEditorConfiguration: monaco.editor.IEditorConstructionOptions = {
+      // Default value of the theme is set in the parent constructor,
+      // but could be overridden here
+      // indentUnit: 4,
+      readOnly: false,
+      // extraKeys: {
+      //   'Cmd-Right': 'goLineRight',
+      //   'End': 'goLineRight',
+      //   'Cmd-Left': 'goLineLeft',
+      //   'Tab': 'indentMore',
+      //   'Shift-Tab': 'indentLess',
+      //   'Cmd-Alt-[': 'indentAuto',
+      //   'Ctrl-Alt-[': 'indentAuto',
+      //   'Cmd-/': 'toggleComment',
+      //   'Ctrl-/': 'toggleComment',
+      // }
+    };
 
   /**
    * A default Monaco renderer for a code cell widget.

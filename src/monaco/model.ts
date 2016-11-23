@@ -22,13 +22,14 @@ import {
 } from '../common/observablevector';
 
 import {
-  findLanguageForMimeType, findMimeTypeForLanguage, findLanguageForPath, findLanguageById
+  findLanguageForMimeType, findMimeTypeForLanguage, findLanguageForPath
 } from './languages';
 
 /**
  * An implementation of the code editor model using monaco.
  */
-export class MonacoModel implements CodeEditor.IModel {
+export
+class MonacoModel implements CodeEditor.IModel {
 
   /**
    * A signal emitted when a content of the model changed.
@@ -132,7 +133,7 @@ export class MonacoModel implements CodeEditor.IModel {
     });
   };
 
-  private findCursorPosition(uuid: string): CodeEditor.ITextSelection {
+  protected findCursorPosition(uuid: string): CodeEditor.ITextSelection {
     const selections = this.selections;
     const cursor = find(selections, (selection) => {
       return selection.start === selection.end && selection.uuid === uuid;
@@ -250,28 +251,31 @@ export class MonacoModel implements CodeEditor.IModel {
     }
   }
 
-  private _isDisposed = false;
-  private _value: string;
-  private _model: monaco.editor.IModel | null;
-  private _listeners: monaco.IDisposable[] = [];
-  private _selections = new ObservableVector<CodeEditor.ITextSelection>();
+  protected _isDisposed = false;
+  protected _value: string;
+  protected _model: monaco.editor.IModel | null;
+  protected _listeners: monaco.IDisposable[] = [];
+  protected _selections = new ObservableVector<CodeEditor.ITextSelection>();
 
 }
 
-export namespace MonacoModel {
-  export function toMonacoPosition(position: CodeEditor.IPosition): monaco.IPosition {
+defineSignal(MonacoModel.prototype, 'valueChanged');
+defineSignal(MonacoModel.prototype, 'mimeTypeChanged');
+
+export
+namespace MonacoModel {
+  export
+  function toMonacoPosition(position: CodeEditor.IPosition): monaco.IPosition {
     return {
       lineNumber: position.line + 1,
       column: position.column + 1
     };
   }
-  export function toPosition(position: monaco.Position): CodeEditor.IPosition {
+  export
+  function toPosition(position: monaco.Position): CodeEditor.IPosition {
     return {
       line: position.lineNumber - 1,
       column: position.column - 1
     };
   }
 }
-
-defineSignal(MonacoModel.prototype, 'valueChanged');
-defineSignal(MonacoModel.prototype, 'mimeTypeChanged');

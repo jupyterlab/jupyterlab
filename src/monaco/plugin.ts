@@ -8,7 +8,7 @@ import {
 
 import {
   MonacoCodeEditorFactory
-} from './editor';
+} from './index';
 
 
 /**
