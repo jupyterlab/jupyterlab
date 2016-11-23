@@ -78,7 +78,7 @@ export class MonacoModel implements CodeEditor.IModel {
   protected disconnectModel(): void {
     if (this._model) {
       while (this._listeners.length !== 0) {
-        this._listeners.pop().dispose();
+        this._listeners.pop()!.dispose();
       }
       this._model = null;
     }

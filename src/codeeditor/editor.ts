@@ -389,7 +389,7 @@ namespace CodeEditor {
      * Return `true` to prevent the default handling of the event by the
      * editor.
      */
-    onKeyDown: KeydownHandler;
+    onKeyDown: KeydownHandler | null;
 
     /**
      * Brings browser focus to this editor text.

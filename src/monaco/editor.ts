@@ -40,6 +40,8 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
   autoSizing: boolean = false;
   minHeight: number = -1;
 
+  onKeyDown: CodeEditor.KeydownHandler | null = null;
+
   /**
    * Construct a Monaco editor.
    */
@@ -49,6 +51,7 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
     this._listeners.push(this.editor.onDidChangeConfiguration(e => this._onDidChangeConfiguration(e)));
     this._listeners.push(this.editor.onDidChangeCursorPosition(e => this._onDidChangeCursorPosition(e)));
     this._listeners.push(this.editor.onDidChangeCursorSelection(e => this._onDidChangeCursorSelection(e)));
+    this._listeners.push(this.editor.onKeyDown(e => this._onKeyDown(e)));
 
     this._model = new MonacoModel();
     this._model.valueChanged.connect(this._onValueChanged, this);
@@ -75,7 +78,7 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
     this._model.dispose();
 
     while (this._listeners.length !== 0)  {
-      this._listeners.pop().dispose();
+      this._listeners.pop()!.dispose();
     }
     this._editor.dispose();
   }
@@ -103,6 +106,12 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
 
   protected _onDidChangeCursorSelection(event: monaco.editor.ICursorSelectionChangedEvent) {
     // TODO
+  }
+
+  protected _onKeyDown(event: monaco.IKeyboardEvent) {
+    if (this.onKeyDown) {
+      this.onKeyDown(this, event.browserEvent);
+    }
   }
 
   /**
@@ -161,15 +170,8 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
   /**
    * Returns a model for this editor.
    */
-  get model(): MonacoModel | null {
+  get model(): MonacoModel {
     return this._model;
-  }
-
-  get onKeyDown(): CodeEditor.KeydownHandler | null {
-    return this._handler;
-  }
-  set onKeyDown(value: CodeEditor.KeydownHandler) {
-    this._handler = value;
   }
 
   /**
@@ -298,7 +300,6 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
   protected _model: MonacoModel;
   protected _listeners: monaco.IDisposable[] = [];
   protected _editor: monaco.editor.IStandaloneCodeEditor;
-  protected _handler: CodeEditor.KeydownHandler | null = null;
 
 }
 
