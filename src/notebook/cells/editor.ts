@@ -264,10 +264,10 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
   /**
    * The cell model used by the editor.
    */
-  get model(): ICellModel {
+  get model(): ICellModel | null {
     return this._model;
   }
-  set model(model: ICellModel) {
+  set model(model: ICellModel | null) {
     if (!model && !this._model || model === this._model) {
       return;
     }
@@ -496,7 +496,7 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
     this.completionRequested.emit(data as ICompletionRequest);
   }
 
-  private _model: ICellModel = null;
+  private _model: ICellModel | null = null;
 }
 
 
