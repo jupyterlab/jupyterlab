@@ -9,7 +9,8 @@
     "moduleResolution": "node",
     "target": "ES5",
     "outDir": "../lib",
-    "sourceMap": true
+    "sourceMap": true,
+    "strictNullChecks": false
   },
   "exclude": ["typedoc.d.ts"]
 }
