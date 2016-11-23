@@ -19,7 +19,7 @@ import {
 
 import {
   CodeCellEditorWidget
-} from './editor';
+} from '../../cells/editor';
 
 
 /**
