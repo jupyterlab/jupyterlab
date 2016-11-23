@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Contents, Kernel
+  Contents
 } from '@jupyterlab/services';
 
 import {
@@ -18,7 +18,7 @@ import {
 } from 'phosphor/lib/collections/vector';
 
 import {
-  Message
+  Message, sendMessage
 } from 'phosphor/lib/core/messaging';
 
 import {
@@ -34,7 +34,7 @@ import {
 } from 'phosphor/lib/dom/query';
 
 import {
-  Widget
+  Widget, WidgetMessage
 } from 'phosphor/lib/ui/widget';
 
 import {
@@ -207,6 +207,7 @@ class DirListing extends Widget {
     });
     this.addClass(DIR_LISTING_CLASS);
     this._model = options.model;
+    this._model.fileChanged.connect(this._onFileChanged, this);
     this._model.refreshed.connect(this._onModelRefreshed, this);
     this._model.pathChanged.connect(this._onPathChanged, this);
     this._editNode = document.createElement('input');
@@ -1069,6 +1070,23 @@ class DirListing extends Widget {
   }
 
   /**
+   * Select an item by name.
+   *
+   * @parem name - The name of the item to select.
+   *
+   * @returns A promise that resolves when the name is selected.
+   */
+  private _selectItemByName(name: string): Promise<void> {
+    // Make sure the file is available.
+    return this.model.cd('.').then(() => {
+      let items = this._sortedItems;
+      let index = findIndex(items, value => value.name === name);
+      this._selectItem(index, false);
+      sendMessage(this, WidgetMessage.UpdateRequest);
+    });
+  }
+
+  /**
    * Handle a multiple select on a file item node.
    */
   private _handleMultiSelect(selected: string[], index: number): void {
@@ -1162,14 +1180,8 @@ class DirListing extends Widget {
         utils.showErrorMessage('Rename Error', error);
         return original;
       }).then(() => {
-        // Make sure the new file is available.
-        return this.model.cd('.').then(() => {
-          items = this._sortedItems;
-          index = findIndex(items, value => value.name === newName);
-          this._selectItem(index, false);
-          this.update();
-          return newName;
-        });
+        this._selectItemByName(newName);
+        return newName;
       });
     });
   }
@@ -1214,6 +1226,19 @@ class DirListing extends Widget {
     this._selection = Object.create(null);
     // Update the sorted items.
     this.sort(this.sortState);
+  }
+
+  /**
+   * Handle a `fileChanged` signal from the model.
+   */
+  private _onFileChanged(sender: FileBrowserModel, args: Contents.IChangedArgs) {
+    if (args.type === 'new') {
+      this._selectItemByName(args.newValue.name).then(() => {
+        if (args.newValue === 'directory') {
+          this._doRename();
+        }
+      });
+    }
   }
 
   private _model: FileBrowserModel = null;
