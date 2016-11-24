@@ -173,7 +173,7 @@ class MonacoModel implements CodeEditor.IModel {
    * Returns the content for the given line number.
    */
   getLine(line: number): string {
-    return this.model.getLineContent(line);
+    return this.model.getLineContent(line + 1);
   }
 
   /**
