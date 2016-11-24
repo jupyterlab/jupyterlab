@@ -152,7 +152,7 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
    * Set the size of the editor in pixels.
    */
   setSize(width: number, height: number): void {
-    this.resize(new ResizeMessage(width, height));
+    this.resize((!width || !height) ? null : { width, height });
   }
 
   /**
@@ -251,40 +251,40 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
   }
 
   protected resize(dimension?: monaco.editor.IDimension): void {
-    if (this.getEditorHost()) {
+    if (this.getHostNode()) {
       const layoutSize = this.computeLayoutSize(dimension);
       this.editor.layout(layoutSize);
     }
   }
 
   protected computeLayoutSize(dimension?: monaco.editor.IDimension): monaco.editor.IDimension {
-    if (dimension && dimension.width && dimension.height && dimension.width >= 0 && dimension.height >= 0) {
+    if (dimension && dimension.width >= 0 && dimension.height >= 0) {
       return dimension;
     }
-    const boxSizing = computeBoxSizing(this.getEditorHost());
+    const boxSizing = computeBoxSizing(this.getHostNode());
 
-    const width = (!dimension || !dimension.width || dimension.width < 0) ?
+    const width = (!dimension || dimension.width < 0) ?
       this.getWidth(boxSizing) :
       dimension.width;
 
-    const height = (!dimension || !dimension.height || dimension.height < 0) ?
+    const height = (!dimension || dimension.height < 0) ?
       this.getHeight(boxSizing) :
       dimension.height;
 
     return { width, height };
   }
 
-  protected getEditorHost(): HTMLElement {
+  protected getHostNode(): HTMLElement {
     return this._editor.getDomNode().parentElement;
   }
 
   protected getWidth(boxSizing: IBoxSizing): number {
-    return this.getEditorHost().offsetWidth - boxSizing.horizontalSum;
+    return this.getHostNode().offsetWidth - boxSizing.horizontalSum;
   }
 
   protected getHeight(boxSizing: IBoxSizing): number {
     if (!this.autoSizing) {
-      return this.getEditorHost().offsetHeight - boxSizing.verticalSum;
+      return this.getHostNode().offsetHeight - boxSizing.verticalSum;
     }
     const configuration = this.editor.getConfiguration();
 
