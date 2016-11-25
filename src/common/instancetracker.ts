@@ -78,18 +78,29 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    */
   constructor(options: InstanceTracker.IOptions<T> = {}) {
     this._restore = options.restore;
-    if (this._restore) {
-      let { command, namespace, registry, state, when } = this._restore;
-      let promises = [state.fetchNamespace(namespace)].concat(when);
-      Promise.all(promises).then(([saved]) => {
-        let promises = saved.map(args => {
-          // Execute the command and if it fails, delete the state restore data.
-          return registry.execute(command, args.value)
-            .catch(() => { state.remove(args.id); });
-        });
-        return Promise.all(promises);
-      }).then(() => { this._restored.resolve(void 0); });
+
+    if (!this._restore) {
+      return;
     }
+
+    let { command, namespace, layout, registry, state, when } = this._restore;
+    let promises = [state.fetchNamespace(namespace)].concat(when);
+
+    // Immediately (synchronously) register the restored promise with the
+    // layout restorer if one is present.
+    if (layout) {
+      layout.await(this._restored.promise);
+    }
+
+    Promise.all(promises).then(([saved]) => {
+      let promises = saved.map(args => {
+        // Execute the command and if it fails, delete the state restore data.
+        return registry.execute(command, args.value)
+          .catch(() => { state.remove(args.id); });
+      });
+      return Promise.all(promises);
+    }).then(() => { this._restored.resolve(void 0); });
+
   }
 
   /**
