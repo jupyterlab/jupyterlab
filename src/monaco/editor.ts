@@ -152,7 +152,8 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
    * Set the size of the editor in pixels.
    */
   setSize(width: number, height: number): void {
-    this.resize((!width || !height) ? null : { width, height });
+    const dimension = width && height ? { width, height } : null;
+    this.resize(dimension);
   }
 
   /**
@@ -246,18 +247,18 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
   /** Editor will be hidden by setting width to 0. On show we need to recalculate again */
   protected autoresize(): void {
     if (this.autoSizing) {
-      this.resize();
+      this.resize(null);
     }
   }
 
-  protected resize(dimension?: monaco.editor.IDimension): void {
+  protected resize(dimension: monaco.editor.IDimension | null): void {
     if (this.getHostNode()) {
       const layoutSize = this.computeLayoutSize(dimension);
       this.editor.layout(layoutSize);
     }
   }
 
-  protected computeLayoutSize(dimension?: monaco.editor.IDimension): monaco.editor.IDimension {
+  protected computeLayoutSize(dimension: monaco.editor.IDimension | null): monaco.editor.IDimension {
     if (dimension && dimension.width >= 0 && dimension.height >= 0) {
       return dimension;
     }
