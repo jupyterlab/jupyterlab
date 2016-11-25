@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  utils
+} from '@jupyterlab/services';
+
+import {
   JSONObject
 } from 'phosphor/lib/algorithm/json';
 
@@ -78,12 +82,13 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
       let { command, namespace, registry, state, when } = this._restore;
       let promises = [state.fetchNamespace(namespace)].concat(when);
       Promise.all(promises).then(([saved]) => {
-        saved.forEach(args => {
+        let promises = saved.map(args => {
           // Execute the command and if it fails, delete the state restore data.
-          registry.execute(command, args.value)
+          return registry.execute(command, args.value)
             .catch(() => { state.remove(args.id); });
         });
-      });
+        return Promise.all(promises);
+      }).then(() => { this._restored.resolve(void 0); });
     }
   }
 
@@ -267,6 +272,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
 
   private _currentWidget: T = null;
   private _restore: InstanceTracker.IRestoreOptions<T> = null;
+  private _restored = new utils.PromiseDelegate<void>();
   private _widgets = new Set<T>();
 }
 
@@ -306,20 +312,20 @@ namespace InstanceTracker {
     namespace: string;
 
     /**
-     * The command registry which holds the restore command.
-     */
-    registry: CommandRegistry;
-
-    /**
      * The layout restorer to use to re-arrange restored tabs.
      *
      * #### Notes
-     * If a layout restorer instance is not supplied, instances will still be
-     * restored, but their layout within JupyterLab will be arbitrary. This may
-     * be acceptable for widgets that have a pre-defined slot whose layout
-     * cannot be modified.
+     * If a layout restorer instance is not supplied, widget instances will
+     * still be restored, but their layout within JupyterLab will be arbitrary.
+     * This may be acceptable for widgets that have a pre-defined slot whose
+     * layout cannot be modified.
      */
-    restorer?: ILayoutRestorer;
+    layout?: ILayoutRestorer;
+
+    /**
+     * The command registry which holds the restore command.
+     */
+    registry: CommandRegistry;
 
     /**
      * The state database instance.
