@@ -112,7 +112,7 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
   }
 
   protected _onKeyDown(event: monaco.IKeyboardEvent) {
-    if (this.onKeyDown)  {
+    if (this.onKeyDown && !this._editor.hasWidgetFocus())  {
       this.onKeyDown(this, event.browserEvent);
     }
   }
