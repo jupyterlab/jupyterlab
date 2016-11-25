@@ -89,7 +89,7 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
   const tracker = new InstanceTracker<TerminalWidget>({
     restore: {
       state, layout,
-      command: 'terminal:create-new',
+      command: newTerminalId,
       args: widget => ({ name: widget.session.name }),
       name: widget => widget.session && widget.session.name,
       namespace: 'terminals',
@@ -115,8 +115,8 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
       } else {
         promise = services.terminals.startNew();
       }
-      promise.then(session => {
-        session.ready.then(() => {
+      return promise.then(session => {
+        return session.ready.then(() => {
           let term = new TerminalWidget(options);
           term.session = session;
           term.title.closable = true;
