@@ -30,6 +30,13 @@ const ILayoutRestorer = new Token<ILayoutRestorer>('jupyter.services.layout-rest
  */
 export
 interface ILayoutRestorer {
+  /**
+   * Wait for the given promise to resolve before restoring layout.
+   *
+   * #### Notes
+   * This function should only be called before the `first` promise passed in
+   * at instantiation has resolved. See the notes for `LayoutRestorer.IOptions`.
+   */
   await(promise: Promise<any>): void;
 }
 
@@ -58,6 +65,13 @@ class LayoutRestorer implements ILayoutRestorer {
       .then(() => { this.restore(); });
   }
 
+  /**
+   * Wait for the given promise to resolve before restoring layout.
+   *
+   * #### Notes
+   * This function should only be called before the `first` promise passed in
+   * at instantiation has resolved. See the notes for `LayoutRestorer.IOptions`.
+   */
   await(promise: Promise<any>): void {
     this._promises.push(promise);
   }
