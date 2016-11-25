@@ -8,8 +8,12 @@ import {
 } from 'phosphor/lib/algorithm/json';
 
 import {
-  DockPanel
-} from 'phosphor/lib/ui/dockpanel';
+  AttachedProperty
+} from 'phosphor/lib/core/properties';
+
+import {
+  defineSignal, ISignal
+} from 'phosphor/lib/core/signaling';
 
 import {
   Widget
@@ -83,12 +87,17 @@ class LayoutRestorer implements ILayoutRestorer {
   }
 
   /**
+   * A signal emitted when a widget should be activated.
+   */
+  readonly activated: ISignal<this, Widget>;
+
+  /**
    * Add a widget to be tracked by the layout restorer.
    */
   add(widget: Widget, name: string): void {
-    console.log(`add ${name}`);
-    this._widgets.set(widget, name);
-    widget.disposed.connect(() => { this._widgets.delete(widget); });
+    Private.nameProperty.set(widget, name);
+    this._widgets.set(name, widget);
+    widget.disposed.connect(() => { this._widgets.delete(name); });
   }
 
   /**
@@ -111,14 +120,21 @@ class LayoutRestorer implements ILayoutRestorer {
    * Save the layout state for the application.
    */
   save(data: LayoutRestorer.IRestorable): Promise<void> {
-    return this._state.save(KEY, this._dehydrate(data));
+    // If there are promises that are unresolved, bail.
+    if (this._promises) {
+      return Promise.resolve(void 0);
+    }
+    let dehydrated = this._dehydrate(data);
+    console.log('actually saving state:', dehydrated);
+    return this._state.save(KEY, dehydrated);
   }
 
   /**
    * Dehydrate the data to save.
    */
   private _dehydrate(data: LayoutRestorer.IRestorable): JSONObject {
-    return {};
+    let name = Private.nameProperty.get(data.currentWidget);
+    return name ? { currentWidget: name } : {};
   }
 
   /**
@@ -130,13 +146,27 @@ class LayoutRestorer implements ILayoutRestorer {
       if (!data) {
         return;
       }
+
+      let name = data['currentWidget'] as string;
+      if (!name) {
+        return;
+      }
+
+      let widget = this._widgets.get(name);
+      if (widget) {
+        this.activated.emit(widget);
+      }
     });
   }
 
   private _promises: Promise<any>[] = [];
   private _state: IStateDB = null;
-  private _widgets = new Map<Widget, string>();
+  private _widgets = new Map<string, Widget>();
 }
+
+
+// Define the signals for the `LayoutRestorer` class.
+defineSignal(LayoutRestorer.prototype, 'activated');
 
 
 /**
@@ -203,11 +233,17 @@ namespace LayoutRestorer {
     /**
      * The current widget that has application focus.
      */
-    current: Widget;
-
-    /**
-     * A dock panel to rehydrate.
-     */
-    dock: DockPanel;
+    currentWidget: Widget;
   }
+}
+
+/*
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * An attached property for a widget's ID in the state database.
+   */
+  export
+  const nameProperty = new AttachedProperty<Widget, string>({ name: 'name' });
 }

@@ -24,7 +24,15 @@ const layoutRestorerProvider: JupyterLabPlugin<ILayoutRestorer> = {
   id: 'jupyter.services.layout-restorer',
   requires: [IStateDB],
   activate: (app: JupyterLab, state: IStateDB) => {
-    return new LayoutRestorer({ first: app.started, state });
+    let layout = new LayoutRestorer({ first: app.started, state });
+    app.shell.currentChanged.connect((sender, args) => {
+      console.log('potentially saving state...');
+      layout.save({ currentWidget: args.newValue });
+    });
+    layout.activated.connect((sender, widget) => {
+      app.shell.activateMain(widget.id);
+    });
+    return layout;
   },
   autoStart: true,
   provides: ILayoutRestorer
