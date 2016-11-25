@@ -21,7 +21,9 @@ const ILayoutRestorer = new Token<ILayoutRestorer>('jupyter.services.layout-rest
  * A static class that restores the layout of the application when it reloads.
  */
 export
-interface ILayoutRestorer {}
+interface ILayoutRestorer {
+  await(promise: Promise<any>): void;
+}
 
 
 /**
@@ -32,4 +34,19 @@ interface ILayoutRestorer {}
  * focused to already exist, it does not rehydrate them.
  */
 export
-class LayoutRestorer implements ILayoutRestorer {}
+class LayoutRestorer implements ILayoutRestorer {
+  constructor(first: Promise<any>) {
+    first.then(() => Promise.all(this._promises))
+      .then(() => { this.restore(); });
+  }
+
+  await(promise: Promise<any>): void {
+    this._promises.push(promise);
+  }
+
+  restore(): void {
+    /* */
+  }
+
+  private _promises: Promise<any>[] = [];
+}

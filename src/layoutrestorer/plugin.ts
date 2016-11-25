@@ -18,6 +18,7 @@ import {
 export
 const layoutRestorerProvider: JupyterLabPlugin<ILayoutRestorer> = {
   id: 'jupyter.services.layout-restorer',
-  activate: (app: JupyterLab) => new LayoutRestorer(),
-  autoStart: true
+  activate: (app: JupyterLab) => new LayoutRestorer(app.started),
+  autoStart: true,
+  provides: ILayoutRestorer
 };
