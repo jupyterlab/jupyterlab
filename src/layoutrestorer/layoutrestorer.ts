@@ -39,6 +39,11 @@ const ILayoutRestorer = new Token<ILayoutRestorer>('jupyter.services.layout-rest
 export
 interface ILayoutRestorer {
   /**
+   * Add a widget to be tracked by the layout restorer.
+   */
+  add(widget: Widget, name: string): void;
+
+  /**
    * Wait for the given promise to resolve before restoring layout.
    *
    * #### Notes
@@ -78,6 +83,15 @@ class LayoutRestorer implements ILayoutRestorer {
   }
 
   /**
+   * Add a widget to be tracked by the layout restorer.
+   */
+  add(widget: Widget, name: string): void {
+    console.log(`add ${name}`);
+    this._widgets.set(widget, name);
+    widget.disposed.connect(() => { this._widgets.delete(widget); });
+  }
+
+  /**
    * Wait for the given promise to resolve before restoring layout.
    *
    * #### Notes
@@ -112,16 +126,16 @@ class LayoutRestorer implements ILayoutRestorer {
    */
   private _restore(): void {
     this._state.fetch(KEY).then(data => {
+      console.log('restore', data);
       if (!data) {
         return;
       }
-
-      console.log('restore', data);
     });
   }
 
   private _promises: Promise<any>[] = [];
   private _state: IStateDB = null;
+  private _widgets = new Map<Widget, string>();
 }
 
 
@@ -166,6 +180,12 @@ namespace LayoutRestorer {
      *
      * 7. After all of the promises that the restorer is awaiting have resolved,
      *    the restorer then proceeds to reconstruct the saved layout.
+     *
+     * Of particular note are steps 5 and 6: since state restoration of plugins
+     * is accomplished by executing commands, the command that is used to
+     * restore the state of each plugin must return a promise that only resolves
+     * when the widget has been created and added to the plugin's instance
+     * tracker.
      */
     first: Promise<any>;
 

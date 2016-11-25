@@ -137,12 +137,13 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
 
     // Handle widget state restoration.
     if (this._restore) {
-      let { namespace, state } = this._restore;
+      let { layout, namespace, state } = this._restore;
       let widgetName = this._restore.name(widget);
 
       if (widgetName) {
         let name = `${namespace}:${widgetName}`;
         Private.nameProperty.set(widget, name);
+        layout.add(widget, name);
         state.save(name, this._restore.args(widget));
       }
     }
