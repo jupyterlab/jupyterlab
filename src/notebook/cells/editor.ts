@@ -136,7 +136,7 @@ interface ICellEditorWidget extends Widget {
   /**
    * The cell model used by the editor.
    */
-  model: ICellModel;
+  model: ICellModel | null;
 
   /**
    * A signal emitted when either the top or bottom edge is requested.
@@ -411,7 +411,9 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
     let coords = editor.getCoords(cursorPosition) as ICoords;
     let chHeight = editor.lineHeight;
     let chWidth = editor.charWidth;
-    model.source = newValue;
+    if (model) {
+      model.source = newValue;
+    }
     this.textChanged.emit({
       line, ch, chHeight, chWidth, coords, position, oldValue, newValue
     });
@@ -450,6 +452,7 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
       }
       return false;
     }
+    return false;
   }
 
   /**
