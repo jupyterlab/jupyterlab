@@ -106,21 +106,11 @@ class CodeEditorWidget extends Widget {
 
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'keydown':
-      this._evtKeydown(event as KeyboardEvent);
-      break;
     case 'focus':
       this._evtFocus(event as FocusEvent);
       break;
     default:
       break;
-    }
-  }
-
-  private _evtKeydown(event: KeyboardEvent): void {
-    let handler = this._editor.onKeyDown;
-    if (handler) {
-      handler(this._editor, event);
     }
   }
 
