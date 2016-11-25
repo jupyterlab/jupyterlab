@@ -59,7 +59,6 @@ class CodeEditorWidget extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
-    this.node.addEventListener('keydown', this);
     this.node.addEventListener('focus', this, true);
     if (!this.isVisible) {
       this._needsRefresh = true;
@@ -73,7 +72,6 @@ class CodeEditorWidget extends Widget {
    * Handle `before_detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    this.node.removeEventListener('keydown', this);
     this.node.removeEventListener('focus', this, true);
   }
 
@@ -82,7 +80,7 @@ class CodeEditorWidget extends Widget {
    */
   protected onAfterShow(msg: Message): void {
     if (this._needsRefresh) {
-      this._editor.refresh(true);
+      this._editor.refresh();
       this._needsRefresh = false;
     }
   }

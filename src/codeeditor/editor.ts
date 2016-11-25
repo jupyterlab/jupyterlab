@@ -404,7 +404,7 @@ namespace CodeEditor {
     /**
      * Repaint editor. 
      */
-    refresh(afterShow?: boolean): void;
+    refresh(): void;
 
     /**
      * Test whether the editor has keyboard focus.
