@@ -26,7 +26,7 @@ import {
  */
 export
 const defaultEditorConfiguration: MonacoCodeEditor.IEditorConstructionOptions = {
-  autoSizing: false,
+  autoSizing: true,
   lineNumbers: 'off',
   lineNumbersMinChars: 4,
   lineDecorationsWidth: 5,
