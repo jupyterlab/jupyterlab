@@ -967,7 +967,6 @@ class DirListing extends Widget {
   private _startDrag(index: number, clientX: number, clientY: number): void {
     let selectedNames = Object.keys(this._selection);
     let source = this._items.at(index);
-    let model = this._model;
     let items = this._sortedItems;
     let item: Contents.IModel = null;
 

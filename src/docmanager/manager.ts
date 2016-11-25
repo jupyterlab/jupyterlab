@@ -341,8 +341,8 @@ class DocumentManager implements IDisposable {
 
     let context: Context<DocumentRegistry.IModel> = null;
 
-    //Handle the load-from-disk case
-    if(which === 'open') {
+    // Handle the load-from-disk case
+    if (which === 'open') {
       // Use an existing context if available.
       context = this._findContext(path, factory.name);
       if (!context) {
@@ -363,7 +363,7 @@ class DocumentManager implements IDisposable {
     } else if (widgetFactory.preferKernel &&
                !(kernel && !kernel.id && !kernel.name) &&
                !context.kernel) {
-      //If the kernel is not the `None` kernel and the widgetFactory wants one
+      // If the kernel is not the `None` kernel and the widgetFactory wants one
       context.startDefaultKernel();
     }
 
