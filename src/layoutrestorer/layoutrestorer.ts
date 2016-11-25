@@ -8,6 +8,14 @@ import {
 } from 'phosphor/lib/algorithm/json';
 
 import {
+  DockPanel
+} from 'phosphor/lib/ui/dockpanel';
+
+import {
+  Widget
+} from 'phosphor/lib/ui/widget';
+
+import {
   Token
 } from 'phosphor/lib/core/token';
 
@@ -61,8 +69,12 @@ class LayoutRestorer implements ILayoutRestorer {
    */
   constructor(options: LayoutRestorer.IOptions) {
     this._state = options.state;
-    options.first.then(() => Promise.all(this._promises))
-      .then(() => { this.restore(); });
+    options.first.then(() => Promise.all(this._promises)).then(() => {
+      // Release the promises held in memory.
+      this._promises = null;
+      // Restore the application state.
+      this._restore();
+    });
   }
 
   /**
@@ -73,15 +85,39 @@ class LayoutRestorer implements ILayoutRestorer {
    * at instantiation has resolved. See the notes for `LayoutRestorer.IOptions`.
    */
   await(promise: Promise<any>): void {
+    if (!this._promises) {
+      console.warn('await can only be called before app has started.');
+      return;
+    }
+
     this._promises.push(promise);
   }
 
-  restore(): void {
-    /* */
+  /**
+   * Save the layout state for the application.
+   */
+  save(data: LayoutRestorer.IRestorable): Promise<void> {
+    return this._state.save(KEY, this._dehydrate(data));
   }
 
-  save(data: JSONObject): Promise<void> {
-    return this._state.save(KEY, data);
+  /**
+   * Dehydrate the data to save.
+   */
+  private _dehydrate(data: LayoutRestorer.IRestorable): JSONObject {
+    return {};
+  }
+
+  /**
+   * Restore the application state.
+   */
+  private _restore(): void {
+    this._state.fetch(KEY).then(data => {
+      if (!data) {
+        return;
+      }
+
+      console.log('restore', data);
+    });
   }
 
   private _promises: Promise<any>[] = [];
@@ -137,5 +173,21 @@ namespace LayoutRestorer {
      * The state database instance.
      */
     state: IStateDB;
+  }
+
+  /**
+   * A restorable user interface.
+   */
+  export
+  interface IRestorable {
+    /**
+     * The current widget that has application focus.
+     */
+    current: Widget;
+
+    /**
+     * A dock panel to rehydrate.
+     */
+    dock: DockPanel;
   }
 }
