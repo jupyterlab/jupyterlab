@@ -8,6 +8,10 @@ import {
 } from '../application';
 
 import {
+  IStateDB
+} from '../statedb';
+
+import {
   ILayoutRestorer, LayoutRestorer
 } from './layoutrestorer';
 
@@ -18,7 +22,9 @@ import {
 export
 const layoutRestorerProvider: JupyterLabPlugin<ILayoutRestorer> = {
   id: 'jupyter.services.layout-restorer',
-  activate: (app: JupyterLab) => new LayoutRestorer(app.started),
+  activate: (app: JupyterLab, state: IStateDB) => {
+    return new LayoutRestorer({ first: app.started, state });
+  },
   autoStart: true,
   provides: ILayoutRestorer
 };
