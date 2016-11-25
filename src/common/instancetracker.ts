@@ -26,6 +26,10 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
+  ILayoutRestorer
+} from '../layoutrestorer';
+
+import {
   IStateDB
 } from '../statedb';
 
@@ -56,6 +60,12 @@ interface IInstanceTracker<T extends Widget> {
  * #### Notes
  * This is meant to be used in conjunction with a `FocusTracker` and will
  * typically be kept in sync with focus tracking events.
+ *
+ * The API surface area of this concrete implementation is substantially larger
+ * than the instance tracker interface it implements. The interface is intended
+ * for export by JupyterLab plugins that create widgets and have clients who may
+ * wish to keep track of newly created widgets. This class, however, can be used
+ * internally by plugins to restore state as well.
  */
 export
 class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposable {
@@ -299,6 +309,17 @@ namespace InstanceTracker {
      * The command registry which holds the restore command.
      */
     registry: CommandRegistry;
+
+    /**
+     * The layout restorer to use to re-arrange restored tabs.
+     *
+     * #### Notes
+     * If a layout restorer instance is not supplied, instances will still be
+     * restored, but their layout within JupyterLab will be arbitrary. This may
+     * be acceptable for widgets that have a pre-defined slot whose layout
+     * cannot be modified.
+     */
+    restorer?: ILayoutRestorer;
 
     /**
      * The state database instance.
