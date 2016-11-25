@@ -6,10 +6,6 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
-  find
-} from 'phosphor/lib/algorithm/searching';
-
-import {
   CodeEditor
 } from '../codeeditor/editor';
 
@@ -40,6 +36,8 @@ class MonacoModel implements CodeEditor.IModel {
    * A signal emitted when a mimetype changes.
    */
   mimeTypeChanged: ISignal<this, IChangedArgs<string>>;
+
+  readonly owners = new ObservableVector<CodeEditor.IModelOwner>();
 
   /**
    * Whether the editor is disposed.
@@ -89,56 +87,6 @@ class MonacoModel implements CodeEditor.IModel {
     const model = this.model;
     this._listeners.push(model.onDidChangeMode(event => this._onDidChangeMode(event)));
     this._listeners.push(model.onDidChangeContent(event => this._onDidContentChanged(event)));
-  }
-
-  /**
-   * Get the selections for the model.
-   */
-  get selections(): ObservableVector<CodeEditor.ITextSelection> {
-    return this._selections;
-  }
-
-  /**
-   * Returns the primary cursor position of an editor.
-   * 
-   * #### Notes
-   * @param uuid - The uuid of an editor.
-   */
-  getCursorPosition(uuid: string): CodeEditor.IPosition {
-    const cursor = this.findCursorPosition(uuid);
-    if (cursor) {
-      return this.getPositionAt(cursor.start);
-    }
-    return null;
-  }
-
-  /**
-   * Set the primary cursor position of a editor.
-   * 
-   * #### Notes
-   * @param uuid - The uuid of an editor.
-   * @param position - The primary cursor position of an editor.
-   */
-  setCursorPosition(uuid: string, position: CodeEditor.IPosition): void {
-    const selections = this.selections;
-    const cursor = find(selections, (selection) => { return selection.start === selection.end; });
-    if (cursor) {
-      selections.remove(cursor);
-    }
-    const offset = this.getOffsetAt(position);
-    selections.pushBack({
-      start: offset,
-      end: offset,
-      uuid
-    });
-  };
-
-  protected findCursorPosition(uuid: string): CodeEditor.ITextSelection {
-    const selections = this.selections;
-    const cursor = find(selections, (selection) => {
-      return selection.start === selection.end && selection.uuid === uuid;
-    });
-    return cursor;
   }
 
   /**
@@ -255,7 +203,6 @@ class MonacoModel implements CodeEditor.IModel {
   protected _value: string;
   protected _model: monaco.editor.IModel | null;
   protected _listeners: monaco.IDisposable[] = [];
-  protected _selections = new ObservableVector<CodeEditor.ITextSelection>();
 
 }
 
@@ -264,6 +211,7 @@ defineSignal(MonacoModel.prototype, 'mimeTypeChanged');
 
 export
 namespace MonacoModel {
+
   export
   function toMonacoPosition(position: CodeEditor.IPosition): monaco.IPosition {
     return {
@@ -271,6 +219,7 @@ namespace MonacoModel {
       column: position.column + 1
     };
   }
+
   export
   function toPosition(position: monaco.Position): CodeEditor.IPosition {
     return {
@@ -278,4 +227,5 @@ namespace MonacoModel {
       column: position.column - 1
     };
   }
+
 }

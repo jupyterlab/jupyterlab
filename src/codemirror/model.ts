@@ -1,12 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as CodeMirror
-  from 'codemirror';
-
-import {
-  find
-} from 'phosphor/lib/algorithm/searching';
+import * as CodeMirror from 'codemirror';
 
 import {
   ISignal, clearSignalData, defineSignal
@@ -33,22 +28,7 @@ import {
  * An implementation of the code editor model using code mirror.
  */
 export
-class CodeMirrorModel extends CodeEditor.AbstractModel {
-  /**
-   * Construct a new codemirror model.
-   */
-  constructor() {
-    super();
-    let doc = this._doc = new CodeMirror.Doc('');
-    this._selections.changed.connect(this._onSelectionChanged, this);
-    CodeMirror.on(doc, 'cursorActivity', this._onCursorActivity.bind(this));
-    CodeMirror.on(doc, 'beforeSelectionChange',
-                  this._onDocSelectionChanged.bind(this));
-  }
-
-  get doc(): CodeMirror.Doc {
-    return this._doc;
-  }
+class CodeMirrorModel implements CodeEditor.IModel {
 
   /**
    * A signal emitted when a content of the model changed.
@@ -60,11 +40,33 @@ class CodeMirrorModel extends CodeEditor.AbstractModel {
    */
   mimeTypeChanged: ISignal<this, IChangedArgs<string>>;
 
+  readonly owners = new ObservableVector<CodeEditor.IModelOwner>();
+
+  /**
+   * Construct a new codemirror model.
+   */
+  constructor() {
+    this._doc = new CodeMirror.Doc('');
+  }
+
+  get doc(): CodeMirror.Doc {
+    return this._doc;
+  }
+
+  get isDisposed() {
+    return this._isDisposed;
+  }
+
   /**
    * Dipose of the resources used by the model.
    */
   dispose(): void {
-    super.dispose();
+    if (this.isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    clearSignalData(this);
+    this.owners.clear();
   }
 
   /**
@@ -103,25 +105,6 @@ class CodeMirrorModel extends CodeEditor.AbstractModel {
       oldValue,
       newValue
     });
-  }
-
-  /**
-   * Get the selections for the model.
-   */
-  get selections(): ObservableVector<CodeEditor.ITextSelection> {
-    return this._selections;
-  }
-
-  /**
-   * Returns the primary cursor position.
-   */
-  getCursorPosition(): CodeEditor.IPosition {
-    let selections = this.selections;
-    let cursor = find(selections, (selection) => { return selection.start === selection.end; });
-    if (cursor) {
-      return this.getPositionAt(cursor.start);
-    }
-    return null;
   }
 
   /**
@@ -187,20 +170,9 @@ class CodeMirrorModel extends CodeEditor.AbstractModel {
     });
   }
 
-  private _onSelectionChanged(sender: ObservableVector<CodeEditor.ITextSelection>, change: ObservableVector.IChangedArgs<CodeEditor.ITextSelection>): void {
-    // TODO
-  }
-
-  private _onCursorActivity(): void {
-    // TODO
-  }
-
-  private _onDocSelectionChanged(): void {
-    // TODO
-  }
-
   private _mimetype = '';
   private _doc: CodeMirror.Doc;
+  protected _isDisposed = false;
 }
 
 

@@ -13,6 +13,10 @@ import {
 } from '../codeeditor';
 
 import {
+  ObservableVector
+} from '../common/observablevector';
+
+import {
   CodeMirrorModel
 } from './model';
 
@@ -31,22 +35,29 @@ const DEFAULT_CODEMIRROR_THEME = 'jupyter';
  * CodeMirror editor.
  */
 export
-class CodeMirrorEditor extends CodeEditor.AbstractEditor {
+class CodeMirrorEditor implements CodeEditor.IEditor {
+
+  readonly uuid: string;
+  // FIXME: implement sync with an editor state or better get rid of it
+  readonly selections = new ObservableVector<CodeEditor.ITextSelection>();
+
+  // FIXME: triggers on editor key down event
+  onKeyDown: CodeEditor.KeydownHandler | null = null;
 
   /**
    * Construct a CodeMirror editor.
    */
   constructor(host: HTMLElement, options: CodeMirror.EditorConfiguration = {}) {
-    super();
     host.classList.add(EDITOR_CLASS);
-    let codeMirrorModel = this._model =  new CodeMirrorModel();
+    this._model =  new CodeMirrorModel();
     options.theme = (options.theme || DEFAULT_CODEMIRROR_THEME);
-    options.value = codeMirrorModel.doc;
+    options.value = this._model.doc;
     this._editor = CodeMirror(host, options);
-    codeMirrorModel.mimeTypeChanged.connect((sender, args) => {
+    this._model.mimeTypeChanged.connect((sender, args) => {
       let mime = args.newValue;
       loadModeByMIME(this._editor, mime);
     });
+    this._model.owners.pushBack(this);
   }
 
   /**
@@ -59,18 +70,25 @@ class CodeMirrorEditor extends CodeEditor.AbstractEditor {
     return this._editor;
   }
 
+  get isDisposed() {
+    return this._isDisposed;
+  }
+
   /**
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
     this._editor = null;
-    super.dispose();
   }
 
   /**
    * A cursor position for this editor.
    */
-  getPosition(): CodeEditor.IPosition {
+  getCursorPosition(): CodeEditor.IPosition {
     const cursor = this._editor.getDoc().getCursor();
     return {
         line: cursor.line,
@@ -78,11 +96,34 @@ class CodeMirrorEditor extends CodeEditor.AbstractEditor {
     };
   }
 
-  setPosition(position: CodeEditor.IPosition) {
+  setCursorPosition(position: CodeEditor.IPosition) {
     this._editor.getDoc().setCursor({
         line: position.line,
         ch: position.column
     });
+  }
+
+  getSelection(): CodeEditor.ITextSelection | null {
+    const selections = this._editor.getDoc().listSelections();
+    if (selections.length === 0) {
+      return null;
+    }
+    const selection = selections[0];
+    return {
+      start: this.model.getOffsetAt(this.toPosition(selection.anchor)),
+      end: this.model.getOffsetAt(this.toPosition(selection.head))
+    };
+  }
+
+  setSelection(selection: CodeEditor.ITextSelection | null) {
+    if (selection) {
+      const anchor = this.toCodeMirrorPosition(this.model.getPositionAt(selection.start));
+      const head = this.toCodeMirrorPosition(this.model.getPositionAt(selection.end));
+      this._editor.getDoc().setSelection(anchor, head);
+    } else {
+      const position = { ch: 0, line: 0 };
+      this._editor.getDoc().setSelection(position, position);
+    }
   }
 
   /**
@@ -133,13 +174,6 @@ class CodeMirrorEditor extends CodeEditor.AbstractEditor {
    */
   get model(): CodeEditor.IModel {
     return this._model;
-  }
-
-  get onKeyDown(): CodeEditor.KeydownHandler {
-    return this._handler;
-  }
-  set onKeyDown(value: CodeEditor.KeydownHandler) {
-    this._handler = value;
   }
 
   /**
@@ -257,9 +291,9 @@ class CodeMirrorEditor extends CodeEditor.AbstractEditor {
     };
   }
 
-  private _model: CodeEditor.IModel = null;
-  private _handler: CodeEditor.KeydownHandler = null;
-  private _editor: CodeMirror.Editor = null;
+  protected _isDisposed = false;
+  protected _model: CodeMirrorModel;
+  protected _editor: CodeMirror.Editor;
 
 }
 

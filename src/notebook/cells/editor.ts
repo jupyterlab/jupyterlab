@@ -357,12 +357,7 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
    * @param position - A new cursor's position.
    */
   setCursorPosition(position: number): void {
-    let editorModel = this.editor.model;
-    editorModel.selections.pushBack({
-      start: position,
-      end: position,
-      uuid: this.id
-    });
+    this.editor.setCursorPosition(this.editor.model.getPositionAt(position));
   }
 
   /**
@@ -445,7 +440,7 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
     }
 
     let lastLine = editorModel.lineCount - 1;
-    let lastCh = editorModel.getLine(editorModel.lineCount - 1).length;
+    let lastCh = editorModel.getLine(lastLine).length;
     if (line === lastLine && ch === lastCh && event.keyCode === DOWN_ARROW) {
       if (!event.shiftKey) {
         this.edgeRequested.emit('bottom');
@@ -463,7 +458,7 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
     let editorModel = editor.model;
 
     // If there is a text selection, no completion requests should be emitted.
-    if (!editorModel.selections.isEmpty) {
+    if (!this.editor.getSelection()) {
       return;
     }
 

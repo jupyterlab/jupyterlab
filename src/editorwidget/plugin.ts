@@ -299,7 +299,7 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
       }
       // Get the selected code from the editor.
       let editorModel = widget.editor.model;
-      let selection = editorModel.selections.front;
+      let selection = widget.editor.getSelection();
       let code = editorModel.value.substring(selection.start, selection.end);
       commands.execute('console:inject', { id, code });
     },

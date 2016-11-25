@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ResizeMessage
-} from 'phosphor/lib/ui/widget';
-
-import {
   boxSizing as computeBoxSizing, IBoxSizing
 } from 'phosphor/lib/dom/sizing';
 
@@ -36,6 +32,9 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
    */
   readonly uuid: string;
 
+  // TODO: implement synchronization with an editor state or better get rid of it
+  readonly selections = new ObservableVector<CodeEditor.ITextSelection>();
+
   // FIXME remove when https://github.com/Microsoft/monaco-editor/issues/103 is resolved
   autoSizing: boolean;
   minHeight: number;
@@ -53,14 +52,12 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
     this._editor = monaco.editor.create(options.domElement, options.editorOptions, options.editorServices);
     this._listeners.push(this.editor.onDidChangeModel(e => this._onDidChangeModel(e)));
     this._listeners.push(this.editor.onDidChangeConfiguration(e => this._onDidChangeConfiguration(e)));
-    this._listeners.push(this.editor.onDidChangeCursorPosition(e => this._onDidChangeCursorPosition(e)));
-    this._listeners.push(this.editor.onDidChangeCursorSelection(e => this._onDidChangeCursorSelection(e)));
     this._listeners.push(this.editor.onKeyDown(e => this._onKeyDown(e)));
 
     this._model = options.monacoModel || new MonacoModel();
     this._model.valueChanged.connect(this._onValueChanged, this);
-    this._model.selections.changed.connect(this._onSelectionChanged, this);
     this._model.model = this._editor.getModel();
+    this._model.owners.pushBack(this);
   }
 
   /**
@@ -90,25 +87,12 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
     this._model.model = this.editor.getModel();
   }
 
-  private _onSelectionChanged(sender: ObservableVector<CodeEditor.ITextSelection>, change: ObservableVector.IChangedArgs<CodeEditor.ITextSelection>): void {
-    // TODO 
-  }
-
   protected _onDidChangeConfiguration(event: monaco.editor.IConfigurationChangedEvent) {
     this.autoresize();
   }
 
   protected _onValueChanged(model: MonacoModel, args: IChangedArgs<string>) {
     this.autoresize();
-  }
-
-  protected _onDidChangeCursorPosition(event: monaco.editor.ICursorPositionChangedEvent) {
-    const cursorPosition = MonacoModel.toPosition(event.position);
-    this.setCursorPosition(cursorPosition);
-  }
-
-  protected _onDidChangeCursorSelection(event: monaco.editor.ICursorSelectionChangedEvent) {
-    // TODO
   }
 
   protected _onKeyDown(event: monaco.IKeyboardEvent) {
@@ -234,15 +218,34 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
    * Get the primary cursor position.
    */
   getCursorPosition(): CodeEditor.IPosition {
-    return this.model.getCursorPosition(this.uuid);
+    return MonacoModel.toPosition(this._editor.getPosition());
   };
 
   /**
    * Set the primary cursor position.
    */
   setCursorPosition(position: CodeEditor.IPosition): void {
-    this.model.setCursorPosition(this.uuid, position);
+    this._editor.setPosition(MonacoModel.toMonacoPosition(position));
   };
+
+  getSelection(): CodeEditor.ITextSelection {
+    const selection = this._editor.getSelection();
+    return {
+      start: this.model.model.getOffsetAt(selection.getStartPosition()),
+      end: this.model.model.getOffsetAt(selection.getEndPosition())
+    };
+  }
+
+  setSelection(selection: CodeEditor.ITextSelection) {
+    const startPosition = this.model.model.getPositionAt(selection.start);
+    const endPosition = this.model.model.getPositionAt(selection.end);
+    this._editor.setSelection({
+      startLineNumber: startPosition.lineNumber,
+      startColumn: startPosition.column,
+      endLineNumber: endPosition.lineNumber,
+      endColumn: endPosition.column
+    });
+  }
 
   /** Editor will be hidden by setting width to 0. On show we need to recalculate again */
   protected autoresize(): void {
