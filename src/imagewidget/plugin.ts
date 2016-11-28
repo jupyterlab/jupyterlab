@@ -18,6 +18,11 @@ import {
 } from '../docregistry';
 
 import {
+  ILayoutRestorer
+} from '../layoutrestorer';
+
+
+import {
   IStateDB
 } from '../statedb';
 
@@ -43,7 +48,7 @@ const FACTORY = 'Image';
 export
 const imageHandlerExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.image-handler',
-  requires: [IDocumentRegistry, ICommandPalette, IStateDB],
+  requires: [IDocumentRegistry, ICommandPalette, IStateDB, ILayoutRestorer],
   activate: activateImageWidget,
   autoStart: true
 };
@@ -52,7 +57,7 @@ const imageHandlerExtension: JupyterLabPlugin<void> = {
 /**
  * Activate the image widget extension.
  */
-function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palette: ICommandPalette, state: IStateDB): void {
+function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palette: ICommandPalette, state: IStateDB, layout: ILayoutRestorer): void {
   let zoomInImage = 'image-widget:zoom-in';
   let zoomOutImage = 'image-widget:zoom-out';
   let resetZoomImage = 'image-widget:reset-zoom';
@@ -66,7 +71,7 @@ function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palet
 
   const tracker = new InstanceTracker<ImageWidget>({
     restore: {
-      state,
+      state, layout,
       command: 'file-operations:open',
       args: widget => ({ path: widget.context.path, factory: FACTORY }),
       name: widget => widget.context.path,
