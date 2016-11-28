@@ -226,6 +226,9 @@ function showDialog(options?: IDialogOptions): Promise<IButtonItem> {
   // NOTE: This code assumes only one dialog is shown at the time:
   okButton.text = options.okText ? options.okText : 'OK';
   options.buttons = options.buttons || [cancelButton, okButton];
+  if (!options.buttons.length) {
+    options.buttons = [okButton];
+  }
   if (!(options.body instanceof Widget)) {
     options.body = createDialogBody(options.body);
   }
