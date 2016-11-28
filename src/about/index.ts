@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Message
+} from 'phosphor/lib/core/messaging';
+
+import {
   h, VNode
 } from 'phosphor/lib/ui/vdom';
 
@@ -9,10 +13,6 @@ import {
   VDomModel, VDomWidget
 } from '../common/vdom';
 
-/**
- * The id name added to the About plugin root DOM node.
- */
-const ABOUT_ID = 'about';
 
 /**
  * The class name added to each page in the About plugin.
@@ -222,10 +222,19 @@ class AboutModel extends VDomModel {
 export
 class AboutWidget extends VDomWidget<AboutModel> {
   /**
-   * Construct a new about widget.
+   * Handle `'activate-request'` messages.
    */
-  constructor() {
-    super();
+  protected onActivateRequest(msg: Message): void {
+    this.node.tabIndex = -1;
+    this.node.focus();
+  }
+
+  /**
+   * Handle `'close-request'` messages.
+   */
+  protected onCloseRequest(msg: Message): void {
+    super.onCloseRequest(msg);
+    this.dispose();
   }
 
   /**
@@ -376,7 +385,7 @@ class AboutWidget extends VDomWidget<AboutModel> {
     );
 
     let domTree =
-    h.div({id: ABOUT_ID},
+    h.div(
       h.div({className: SECTION_CLASS},
         h.div({className: SECTION_CENTER_CLASS},
           h.div({className: CONTAINER_CLASS},

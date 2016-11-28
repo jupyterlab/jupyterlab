@@ -43,7 +43,7 @@ const faqExtension: JupyterLabPlugin<void> = {
 
 
 /**
- * Activate the faq plugin.
+ * Activate the FAQ plugin.
  */
 function activateFAQ(app: JupyterLab, palette: ICommandPalette, linker: ICommandLinker, state: IStateDB, layout: ILayoutRestorer): void {
   const category = 'Help';
@@ -61,12 +61,11 @@ function activateFAQ(app: JupyterLab, palette: ICommandPalette, linker: ICommand
   });
 
   let widget: FaqWidget;
-  let id = 0;
 
   function newWidget(): FaqWidget {
     let widget = new FaqWidget({ linker });
     widget.model = model;
-    widget.id = `faq-${++id}`;
+    widget.id = 'faq';
     widget.title.label = 'FAQ';
     widget.title.closable = true;
     tracker.add(widget);
