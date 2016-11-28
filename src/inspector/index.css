@@ -17,8 +17,9 @@
 | Inspector
 |----------------------------------------------------------------------------*/
 
-.jp-Inspector .p-TabPanel-stackedPanel {
+.jp-Inspector {
   border: none;
+  outline: none;
 }
 
 
