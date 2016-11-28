@@ -30,7 +30,7 @@ import {
 } from '../common/instancetracker';
 
 import {
-  DocumentManager
+  IDocumentManager
 } from '../docmanager';
 
 import {
@@ -62,7 +62,7 @@ const fileBrowserProvider: JupyterLabPlugin<IPathTracker> = {
   id: 'jupyter.services.file-browser',
   provides: IPathTracker,
   requires: [
-    IServiceManager, IDocumentRegistry, IMainMenu, ICommandPalette, IStateDB
+    IServiceManager, IDocumentManager, IDocumentRegistry, IMainMenu, ICommandPalette, IStateDB
   ],
   activate: activateFileBrowser,
   autoStart: true
@@ -85,11 +85,6 @@ const cmdIds = {
 };
 
 /**
- * The widget instance tracker for the file browser plugin.
- */
-const tracker = new InstanceTracker<Widget>();
-
-/**
  * The filebrowser plugin state namespace.
  */
 const NAMESPACE = 'filebrowser';
@@ -98,27 +93,15 @@ const NAMESPACE = 'filebrowser';
 /**
  * Activate the file browser.
  */
-function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB): IPathTracker {
+function activateFileBrowser(app: JupyterLab, manager: IServiceManager, documentManager: IDocumentManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB): IPathTracker {
   let id = 0;
-  let opener: DocumentManager.IWidgetOpener = {
-    open: widget => {
-      if (!widget.id) {
-        widget.id = `document-manager-${++id}`;
-      }
-      if (!widget.isAttached) {
-        app.shell.addToMainArea(widget);
-        tracker.add(widget);
-      }
-      app.shell.activateMain(widget.id);
-    }
-  };
+  
   let { commands, keymap } = app;
-  let docManager = new DocumentManager({ registry, manager, opener });
   let fbModel = new FileBrowserModel({ manager });
   let fbWidget = new FileBrowser({
     commands: commands,
     keymap: keymap,
-    manager: docManager,
+    manager: documentManager,
     model: fbModel
   });
 
@@ -151,11 +134,6 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
     fbModel.pathChanged.connect((sender, args) => {
       state.save(`${NAMESPACE}:cwd`, { path: args.newValue });
     });
-  });
-
-  // Sync tracker with currently focused widget.
-  app.shell.currentChanged.connect((sender, args) => {
-    tracker.sync(args.newValue);
   });
 
   each(registry.creators(), creator => {
@@ -196,7 +174,7 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
     menu.open(event.clientX, event.clientY);
   });
 
-  addCommands(app, fbWidget, docManager);
+  addCommands(app, fbWidget, documentManager);
 
   [
     cmdIds.save,
@@ -237,15 +215,15 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, registry
 /**
  * Add the filebrowser commands to the application's command registry.
  */
-function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: DocumentManager): void {
+function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocumentManager): void {
   let commands = app.commands;
 
   commands.addCommand(cmdIds.save, {
     label: 'Save',
     caption: 'Save and create checkpoint',
     execute: () => {
-      if (tracker.currentWidget) {
-        let context = docManager.contextForWidget(tracker.currentWidget);
+      if (app.shell.currentWidget) {
+        let context = docManager.contextForWidget(app.shell.currentWidget);
         return context.save().then(() => {
           return context.createCheckpoint();
         });
@@ -257,8 +235,8 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: Documen
     label: 'Revert to Checkpoint',
     caption: 'Revert contents to previous checkpoint',
     execute: () => {
-      if (tracker.currentWidget) {
-        let context = docManager.contextForWidget(tracker.currentWidget);
+      if (app.shell.currentWidget) {
+        let context = docManager.contextForWidget(app.shell.currentWidget);
         context.restoreCheckpoint().then(() => {
           context.revert();
         });
@@ -270,8 +248,8 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: Documen
     label: 'Save As...',
     caption: 'Save with new path and create checkpoint',
     execute: () => {
-      if (tracker.currentWidget) {
-        let context = docManager.contextForWidget(tracker.currentWidget);
+      if (app.shell.currentWidget) {
+        let context = docManager.contextForWidget(app.shell.currentWidget);
         return context.saveAs().then(() => {
           return context.createCheckpoint();
         });
@@ -290,8 +268,8 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: Documen
   commands.addCommand(cmdIds.close, {
     label: 'Close',
     execute: () => {
-      if (tracker.currentWidget) {
-        tracker.currentWidget.close();
+      if (app.shell.currentWidget) {
+        app.shell.currentWidget.close();
       }
     }
   });
@@ -299,7 +277,7 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: Documen
   commands.addCommand(cmdIds.closeAllFiles, {
     label: 'Close All',
     execute: () => {
-      tracker.forEach(widget => { widget.close(); });
+      app.shell.closeAll();
     }
   });
 

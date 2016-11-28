@@ -9,6 +9,7 @@ module.exports = [
   require('../lib/console/plugin').consoleTrackerProvider,
   require('../lib/console/codemirror/plugin').rendererProvider,
   require('../lib/csvwidget/plugin').csvHandlerExtension,
+  require('../lib/docmanager/plugin').docManagerProvider,
   require('../lib/docregistry/plugin').docRegistryProvider,
   require('../lib/editorwidget/plugin').editorHandlerProvider,
   require('../lib/faq/plugin').faqExtension,
