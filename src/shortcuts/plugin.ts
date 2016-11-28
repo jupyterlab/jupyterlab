@@ -256,11 +256,6 @@ const SHORTCUTS = [
     keys: ['Ctrl M']
   },
   {
-    command: 'notebook:halt-and-close',
-    selector: '.jp-Notebook',
-    keys: ['Ctrl K']
-  },
-  {
     command: 'console:run',
     selector: '.jp-ConsoleContent-prompt',
     keys: ['Enter']
