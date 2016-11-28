@@ -6,8 +6,12 @@ import {
 } from 'phosphor/lib/algorithm/json';
 
 import {
-  JupyterLabPlugin
+  JupyterLab, JupyterLabPlugin
 } from '../application';
+
+import {
+  ICommandPalette
+} from '../commandpalette';
 
 import {
   IStateDB
@@ -26,16 +30,19 @@ const stateProvider: JupyterLabPlugin<IStateDB> = {
   id: 'jupyter.services.statedb',
   activate: activateState,
   autoStart: true,
-  provides: IStateDB
+  provides: IStateDB,
+  requires: [ICommandPalette]
 };
 
 
 /**
  * Activate the state database.
  */
-function activateState(): Promise<IStateDB> {
+function activateState(app: JupyterLab, palette: ICommandPalette): Promise<IStateDB> {
   let state = new StateDB();
   let version = (window as any).jupyter.version;
+  let command = 'statedb:clear';
+  let category = 'Help';
   let key = 'statedb:version';
   let fetch = state.fetch(key);
   let save = () => state.save(key, { version });
@@ -43,9 +50,17 @@ function activateState(): Promise<IStateDB> {
   let check = (value: JSONObject) => {
     let old = value && (value as any).version;
     if (!old || old !== version) {
-      console.log(`Upgraded: ${old || 'unknown'} to ${version}. Resetting DB.`);
+      console.log(`Upgraded: ${old || 'unknown'} to ${version}; Resetting DB.`);
       return reset();
     }
   };
+
+  app.commands.addCommand(command, {
+    label: 'Clear Application Restore State',
+    execute: () => state.clear()
+  });
+
+  palette.addItem({ command, category });
+
   return fetch.then(check, reset).then(() => state);
 }
