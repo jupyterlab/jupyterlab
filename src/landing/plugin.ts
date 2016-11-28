@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Message
+} from 'phosphor/lib/core/messaging';
+
+import {
   h, VNode
 } from 'phosphor/lib/ui/vdom';
 
@@ -174,6 +178,14 @@ class LandingWidget extends VDomWidget<LandingModel> {
   constructor(app: JupyterLab) {
     super();
     this._app = app;
+  }
+
+  /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this.node.tabIndex = -1;
+    this.node.focus();
   }
 
   /**
