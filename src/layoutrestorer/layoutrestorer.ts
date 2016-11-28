@@ -124,17 +124,14 @@ class LayoutRestorer implements ILayoutRestorer {
     if (this._promises) {
       return Promise.resolve(void 0);
     }
-    let dehydrated = this._dehydrate(data);
-    console.log('actually saving state:', dehydrated);
-    return this._state.save(KEY, dehydrated);
-  }
-
-  /**
-   * Dehydrate the data to save.
-   */
-  private _dehydrate(data: LayoutRestorer.IRestorable): JSONObject {
-    let name = Private.nameProperty.get(data.currentWidget);
-    return name ? { currentWidget: name } : {};
+    let promise: Promise<void>;
+    if (data.currentWidget) {
+      let name = Private.nameProperty.get(data.currentWidget);
+      if (name) {
+        promise = this._state.save(KEY, { currentWidget: name });
+      }
+    }
+    return promise || this._state.remove(KEY);
   }
 
   /**
@@ -142,7 +139,6 @@ class LayoutRestorer implements ILayoutRestorer {
    */
   private _restore(): void {
     this._state.fetch(KEY).then(data => {
-      console.log('restore', data);
       if (!data) {
         return;
       }

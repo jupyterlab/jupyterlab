@@ -95,7 +95,6 @@ const NAMESPACE = 'filebrowser';
  */
 function activateFileBrowser(app: JupyterLab, manager: IServiceManager, documentManager: IDocumentManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB): IPathTracker {
   let id = 0;
-  
   let { commands, keymap } = app;
   let fbModel = new FileBrowserModel({ manager });
   let fbWidget = new FileBrowser({
@@ -248,7 +247,7 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocume
         let context = docManager.contextForWidget(app.shell.currentWidget);
         context.restoreCheckpoint().then(() => {
           context.revert();
-        });        
+        });
       }
     }
   });
@@ -271,7 +270,7 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocume
     execute: args => {
       let path = args['path'] as string;
       let factory = args['factory'] as string || void 0;
-      return fbWidget.openPath(path, factory);
+      tracker.add(fbWidget.openPath(path, factory));
     }
   });
 
