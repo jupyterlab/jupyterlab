@@ -200,6 +200,13 @@ interface IDialogOptions {
    * An additional CSS class to apply to the dialog.
    */
   dialogClass?: string;
+
+  /**
+   * The primary element or button index that should take focus in the dialog.
+   *
+   * The default is the last button.
+   */
+   primary?: HTMLElement | number;
 }
 
 
@@ -287,6 +294,11 @@ class Dialog extends Panel {
     this._buttonNodes.map(buttonNode => {
       footer.node.appendChild(buttonNode);
     });
+    let primary = options.primary || this.lastButtonNode;
+    if (typeof primary === 'number') {
+      primary = this._buttonNodes[primary];
+    }
+    this._primary = primary as HTMLElement;
   }
 
   /**
@@ -340,7 +352,7 @@ class Dialog extends Panel {
     node.addEventListener('click', this, true);
     document.addEventListener('focus', this, true);
     this._original = document.activeElement as HTMLElement;
-    this.lastButtonNode.focus();
+    this._primary.focus();
   }
 
 
@@ -447,6 +459,7 @@ class Dialog extends Panel {
   private _buttons: IButtonItem[];
   private _original: HTMLElement;
   private _first: HTMLElement;
+  private _primary: HTMLElement;
 }
 
 
