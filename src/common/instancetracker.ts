@@ -143,8 +143,10 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
       if (widgetName) {
         let name = `${namespace}:${widgetName}`;
         Private.nameProperty.set(widget, name);
-        layout.add(widget, name);
         state.save(name, this._restore.args(widget));
+        if (layout) {
+          layout.add(widget, name);
+        }
       }
     }
 
