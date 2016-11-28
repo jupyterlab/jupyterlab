@@ -7,7 +7,7 @@ The `jupyterlab/jupyterlab` repository contains two packages:
 
 Th npm package and the Python package are both named `jupyterlab`.
 
-See the [Contributing Guidelines](https://github.com/jupyterlab/jupyterlab/CONTRIBUTING.md) for developer installation instructions.
+See the [Contributing Guidelines](https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md) for developer installation instructions.
 
 
 ## Directories

@@ -24,7 +24,7 @@ To run a particular example, navigate to the example's subdirectory in the
 The filebrowser example provides a stand-alone implementation of a 
 filebrowser. Here's what the filebrowser's user interface looks like:
 
-![filebrowser user interface](./filebrowser_example.png)
+![filebrowser user interface](filebrowser_example.png)
 
 Let's take a closer look at the source code in ``examples/filebrowser``.
 
@@ -33,7 +33,7 @@ Let's take a closer look at the source code in ``examples/filebrowser``.
 The filebrowser in ``examples/filebrowser`` is comprised by a handful of files and
 the ``src`` directory:
 
-![filebrowser source code](./filebrowser_source.png)
+![filebrowser source code](filebrowser_source.png)
 
 The filebrowser example has two key source files:
 

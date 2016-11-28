@@ -1,6 +1,6 @@
 # JupyterLab Extensions
 
-A JupyterLab extension provides additional, optional functionality to JupyterLab's built-in capabilities. An extension is a module that provides one or more [plugins](./plugins.md) to the JupyterLab application. To streamline third-party development of extensions, this library provides a build script for generating third party extension JavaScript bundles.
+A JupyterLab extension provides additional, optional functionality to JupyterLab's built-in capabilities. An extension is a module that provides one or more [plugins](plugins.html) to the JupyterLab application. To streamline third-party development of extensions, this library provides a build script for generating third party extension JavaScript bundles.
 
 For information on creating a lab extension, please see the documentation for
 the [@jupyterlab/extension-builder](https://github.com/jupyterlab/extension-builder).

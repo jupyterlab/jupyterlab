@@ -41,7 +41,7 @@ to declutter the class definition.
 
 The "Private" module namespace is used to group variables and
 functions that are not intended to be exported and may have
-otherwise existed as module-level variables and functions.  
+otherwise existed as module-level variables and functions.
 The use of the namespace also makes it clear when a variable access
 is to an imported name or from the module itself.  Finally,
 the namespace allows the entire section to be collapsed in
@@ -111,7 +111,7 @@ For public API, we have three options: JavaScript `Array`,
 
 Prefer an `Array` for:
 - A return value is the result of a newly allocated array, to avoid the 
-extra allocation of an iterator.  
+extra allocation of an iterator.
 - A signal payload.
 - A public attribute that is inherently static.  Use `.slice()` to
 make sure the internal value cannot be mutated by the consumer.

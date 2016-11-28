@@ -4,7 +4,7 @@ JupyterLab can be extended in two ways via:
 
 - application plugins (top level): Application plugins extend the
   functionality of JupyterLab itself, and we cover them in the
-  [Plugins](./plugins.md) tutorial focuses.
+  [Plugins](plugins.html) tutorial focuses.
 - **document widget extensions (lower level):** Document widget extensions extend
   the functionality of document widgets added to the application, and we cover
   them in this section.
@@ -65,7 +65,7 @@ Intended for create quick launch file creators.
 The default use will be for the "create new" dropdown in the file browser,
 giving list of items that can be created with default options  (e.g. "Python 3 Notebook").
 
-### [Document Models](http://jupyterlab.github.io/jupyterlab/interfaces/_docregistry_interfaces_.idocumentmodel.html)
+### [Document Models](http://jupyterlab.github.io/jupyterlab/interfaces/_docregistry_registry_.documentregistry.imodel.html)
 
 Created by the model factories and passed to widget factories and widget
 extension factories.  Models are the way in which we interact with the data of
@@ -73,7 +73,7 @@ a document.  For a simple text file, we typically only use the
 `to/fromString()` methods.  A more complex document like a Notebook
 contains more points of interaction like the Notebook metadata.
 
-### [Document Contexts](http://jupyterlab.github.io/jupyterlab/interfaces/_docregistry_interfaces_.idocumentcontext.html)
+### [Document Contexts](http://jupyterlab.github.io/jupyterlab/interfaces/_docregistry_registry_.documentregistry.icontext.html)
 
 Created by the Document Manager and passed to widget factories and
 widget extensions.  The context contains the model as one of its properties

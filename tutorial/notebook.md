@@ -2,7 +2,7 @@
 
 ## Background
 
-[JupyterLab Walkthrough June 16, 2016 YouTube video](https://youtu.be/4Qm6oD_Rlw8?t=55m19s)
+[JupyterLab Walkthrough June 16, 2016 YouTube video](https://www.youtube.com/watch?v=4Qm6oD_Rlw8&feature=youtu.be&t=55m19s)
 
 The most complicated plugin included in the **JupyterLab application** is the
 **Notebook plugin**.
@@ -202,8 +202,8 @@ will be referred to as *ipywidgets*. There is no intrinsic relation between
 **phosphor widgets** and *ipython widgets*.
 
 The *ipywidgets* extension registers a factory for a notebook **widget** extension
-using the [Document Registry](http://jupyterlab.github.io/jupyterlab/classes/_docregistry_registry_.documentregistry.html#registermodelfactory).
-The `createNew()` function is called with a NotebookPanel and [DocumentContext](http://jupyterlab.github.io/jupyterlab/interfaces/_docregistry_interfaces_.idocumentcontext.html).
+using the [Document Registry](http://jupyterlab.github.io/jupyterlab/classes/_docregistry_registry_.documentregistry.html).
+The `createNew()` function is called with a NotebookPanel and [DocumentContext](http://jupyterlab.github.io/jupyterlab/interfaces/_docregistry_registry_.documentregistry.icontext.html).
 The plugin then creates a ipywidget manager (which uses the context to
 interact the kernel and kernel's comm manager). The plugin then registers an
 ipywidget renderer with the notebook instance's rendermime (which is specific
