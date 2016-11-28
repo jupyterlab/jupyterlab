@@ -866,10 +866,7 @@ class DirListing extends Widget {
       );
     } else {
       let path = item.path;
-      let widget = this._manager.findWidget(path);
-      if (!widget) {
-        widget = this._manager.open(item.path);
-      }
+      this._manager.openOrReveal(path);
     }
   }
 

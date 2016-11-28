@@ -15,7 +15,6 @@ import {
 } from './';
 
 
-
 /**
  * A service providing an inspector panel.
  */

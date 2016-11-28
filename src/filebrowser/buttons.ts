@@ -151,6 +151,27 @@ class FileButtons extends Widget {
   }
 
   /**
+   * Get the create button node.
+   */
+  get createNode(): HTMLButtonElement {
+    return this._buttons.create;
+  }
+
+  /**
+   * Get the upload button node.
+   */
+  get uploadNode(): HTMLButtonElement {
+    return this._buttons.upload;
+  }
+
+  /**
+   * Get the refresh button node.
+   */
+  get refreshNode(): HTMLButtonElement {
+    return this._buttons.refresh;
+  }
+
+  /**
    * Create a file from a creator.
    *
    * @param creatorName - The name of the file creator.
@@ -173,10 +194,7 @@ class FileButtons extends Widget {
    * @return The widget for the path.
    */
   open(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
-    let widget = this._manager.findWidget(path, widgetName);
-    if (!widget) {
-      widget = this._manager.open(path, widgetName, kernel);
-    }
+    let widget = this._manager.openOrReveal(path, widgetName, kernel);
     return widget;
   }
 

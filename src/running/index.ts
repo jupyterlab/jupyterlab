@@ -135,16 +135,20 @@ class RunningSessions extends Widget {
     this.addClass(RUNNING_CLASS);
 
     // Populate the terminals section.
-    let termNode = findElement(this.node, TERMINALS_CLASS);
-    let termHeader = this._renderer.createTerminalHeaderNode();
-    termHeader.className = SECTION_HEADER_CLASS;
-    termNode.appendChild(termHeader);
-    let termContainer = document.createElement('div');
-    termContainer.className = CONTAINER_CLASS;
-    let termList = document.createElement('ul');
-    termList.className = LIST_CLASS;
-    termContainer.appendChild(termList);
-    termNode.appendChild(termContainer);
+    if (manager.terminals.isAvailable()) {
+      let termNode = findElement(this.node, TERMINALS_CLASS);
+      let termHeader = this._renderer.createTerminalHeaderNode();
+      termHeader.className = SECTION_HEADER_CLASS;
+      termNode.appendChild(termHeader);
+      let termContainer = document.createElement('div');
+      termContainer.className = CONTAINER_CLASS;
+      let termList = document.createElement('ul');
+      termList.className = LIST_CLASS;
+      termContainer.appendChild(termList);
+      termNode.appendChild(termContainer);
+
+      manager.terminals.runningChanged.connect(this._onTerminalsChanged, this);
+    }
 
     // Populate the sessions section.
     let sessionNode = findElement(this.node, SESSIONS_CLASS);
@@ -158,7 +162,6 @@ class RunningSessions extends Widget {
     sessionContainer.appendChild(sessionList);
     sessionNode.appendChild(sessionContainer);
 
-    manager.terminals.runningChanged.connect(this._onTerminalsChanged, this);
     manager.sessions.runningChanged.connect(this._onSessionsChanged, this);
   }
 
@@ -212,9 +215,12 @@ class RunningSessions extends Widget {
     let terminals = this._manager.terminals;
     let sessions = this._manager.sessions;
     clearTimeout(this._refreshId);
-    return terminals.refreshRunning().then(() => {
-      return sessions.refreshRunning();
-    });
+    let promises: Promise<void>[] = [];
+    if (terminals.isAvailable()) {
+      promises.push(terminals.refreshRunning());
+    }
+    promises.push(sessions.refreshRunning());
+    return Promise.all(promises);
   }
 
   /**
@@ -238,7 +244,6 @@ class RunningSessions extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     this.node.addEventListener('click', this);
-    this.refresh();
   }
 
   /**
@@ -315,7 +320,6 @@ class RunningSessions extends Widget {
 
     // Check for a refresh.
     if (hitTest(refresh, clientX, clientY)) {
-      this.refresh();
       return;
     }
 
@@ -326,9 +330,7 @@ class RunningSessions extends Widget {
       let shutdown = renderer.getTerminalShutdown(node);
       let model = this._runningTerminals[index];
       if (hitTest(shutdown, clientX, clientY)) {
-        this._manager.terminals.shutdown(model.name).then(() => {
-          this.refresh();
-        });
+        this._manager.terminals.shutdown(model.name);
         return;
       }
       this.terminalOpenRequested.emit(model);
@@ -341,9 +343,7 @@ class RunningSessions extends Widget {
       let shutdown = renderer.getSessionShutdown(node);
       let model = this._runningSessions[index];
       if (hitTest(shutdown, clientX, clientY)) {
-        this._manager.sessions.shutdown(model.id).then(() => {
-          this.refresh();
-        });
+        this._manager.sessions.shutdown(model.id);
         return;
       }
       this.sessionOpenRequested.emit(model);

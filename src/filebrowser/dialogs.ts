@@ -304,6 +304,9 @@ class CreateFromHandler extends Widget {
     let manager = this._manager;
     let registry = manager.registry;
     let creator = registry.getCreator(this._creatorName);
+    if (!creator) {
+      return Promise.reject(`Creator not registered: ${this._creatorName}`);
+    }
     let { fileType, widgetName, kernelName } = creator;
     let fType = registry.getFileType(fileType);
     let ext = '.txt';

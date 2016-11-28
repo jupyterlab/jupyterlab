@@ -115,12 +115,12 @@ Create a `src/mybutton/plugin.ts` file with the following contents.
 ```typescript
 
 import {
-  Application
-} from 'phosphide/lib/core/application';
+  IDisposable, DisposableDelegate
+} from 'phosphor/lib/core/disposable';
 
 import {
-  IDisposable, DisposableDelegate
-} from 'phosphor-disposable';
+  JupyterLab, JupyterLabPlugin
+} from '../application';
 
 import {
   NotebookActions
@@ -136,24 +136,24 @@ import {
 
 import {
   ToolbarButton
-} from '../notebook/notebook/toolbar';
+} from '../toolbar';
 
 import {
-  IWidgetExtension, IDocumentContext, IDocumentModel, DocumentRegistry
+  DocumentRegistry, IWidgetExtension, IDocumentContext, IDocumentModel, IDocumentRegistry
 } from '../docregistry';
 
 /**
  * The plugin registration information.
  */
 export
-const widgetExtension = {
-  id: 'jupyter.extensions.newButton',
-  requires: [DocumentRegistry],
+const widgetExtension: JupyterLabPlugin<void> = {
+  id: 'jupyter.extensions.new-button',
+  requires: [IDocumentRegistry],
   activate: activateExtension
 };
 
 export
-class ButtonExtension implements IWidgetExtension<NotebookPanel, INotebookModel> {
+class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
   /**
    * Create a new extension object.
    */
@@ -181,7 +181,7 @@ class ButtonExtension implements IWidgetExtension<NotebookPanel, INotebookModel>
 /**
  * Activate the extension.
  */
-function activateExtension(app: Application, registry: DocumentRegistry) {
+function activateExtension(lab: JupyterLab, registry: IDocumentRegistry) {
   registry.addWidgetExtension('Notebook', new ButtonExtension());
 }
 ```

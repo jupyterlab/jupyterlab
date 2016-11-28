@@ -315,8 +315,11 @@ class ConsoleContent extends Widget {
   insertLinebreak(): void {
     let prompt = this.prompt;
     let model = prompt.model;
-    model.source += '\n';
-    prompt.editor.setCursorPosition(model.source.length);
+    // Insert the line break at the cursor position, and move cursor forward.
+    let pos = prompt.editor.getCursorPosition();
+    model.source = model.source.substr(0, pos) + '\n' +
+      model.source.substr(pos);
+    prompt.editor.setCursorPosition(pos + 1);
   }
 
   /**

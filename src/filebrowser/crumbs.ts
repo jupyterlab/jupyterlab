@@ -2,12 +2,28 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IDragEvent
-} from 'phosphor/lib/dom/dragdrop';
+  findIndex
+} from 'phosphor/lib/algorithm/searching';
+
+import {
+  ISequence
+} from 'phosphor/lib/algorithm/sequence';
+
+import {
+  Vector
+} from 'phosphor/lib/collections/vector';
 
 import {
   Message
 } from 'phosphor/lib/core/messaging';
+
+import {
+  IDragEvent
+} from 'phosphor/lib/dom/dragdrop';
+
+import {
+  hitTest
+} from 'phosphor/lib/dom/query';
 
 import {
   Widget
@@ -58,7 +74,7 @@ class BreadCrumbs extends Widget {
     this.addClass(BREADCRUMB_CLASS);
     this._crumbs = Private.createCrumbs();
     this._crumbSeps = Private.createCrumbSeparators();
-    this.node.appendChild(this._crumbs[Private.Crumb.Home]);
+    this.node.appendChild(this._crumbs.at(Private.Crumb.Home));
     this._model.refreshed.connect(this.update, this);
   }
 
@@ -99,6 +115,7 @@ class BreadCrumbs extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
+    this.update();
     let node = this.node;
     node.addEventListener('click', this);
     node.addEventListener('p-dragenter', this);
@@ -141,7 +158,7 @@ class BreadCrumbs extends Widget {
     let node = event.target as HTMLElement;
     while (node && node !== this.node) {
       if (node.classList.contains(BREADCRUMB_ITEM_CLASS)) {
-        let index = this._crumbs.indexOf(node);
+        let index = findIndex(this._crumbs, value => value === node);
         this._model.cd(BREAD_CRUMB_PATHS[index]).catch(error =>
           utils.showErrorMessage('Open Error', error)
         );
@@ -160,10 +177,10 @@ class BreadCrumbs extends Widget {
    */
   private _evtDragEnter(event: IDragEvent): void {
     if (event.mimeData.hasData(utils.CONTENTS_MIME)) {
-      let index = utils.hitTestNodes(this._crumbs, event.clientX, event.clientY);
+      let index = findIndex(this._crumbs, node => hitTest(node, event.clientX, event.clientY));
       if (index !== -1) {
         if (index !== Private.Crumb.Current) {
-          this._crumbs[index].classList.add(utils.DROP_TARGET_CLASS);
+          this._crumbs.at(index).classList.add(utils.DROP_TARGET_CLASS);
           event.preventDefault();
           event.stopPropagation();
         }
@@ -194,9 +211,9 @@ class BreadCrumbs extends Widget {
     if (dropTarget) {
       dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
     }
-    let index = utils.hitTestNodes(this._crumbs, event.clientX, event.clientY);
+    let index = findIndex(this._crumbs, node => hitTest(node, event.clientX, event.clientY));
     if (index !== -1) {
-      this._crumbs[index].classList.add(utils.DROP_TARGET_CLASS);
+      this._crumbs.at(index).classList.add(utils.DROP_TARGET_CLASS);
     }
   }
 
@@ -225,7 +242,7 @@ class BreadCrumbs extends Widget {
     }
 
     // Get the path based on the target node.
-    let index = this._crumbs.indexOf(target);
+    let index = findIndex(this._crumbs, node => node === target);
     if (index === -1) {
       return;
     }
@@ -262,8 +279,8 @@ class BreadCrumbs extends Widget {
   }
 
   private _model: FileBrowserModel = null;
-  private _crumbs: HTMLElement[] = [];
-  private _crumbSeps: HTMLElement[] = [];
+  private _crumbs: ISequence<HTMLElement> = null;
+  private _crumbSeps: ISequence<HTMLElement> = null;
 }
 
 
@@ -306,8 +323,8 @@ namespace Private {
    * Populate the breadcrumb node.
    */
   export
-  function updateCrumbs(breadcrumbs: HTMLElement[], separators: HTMLElement[], path: string) {
-    let node = breadcrumbs[0].parentNode;
+  function updateCrumbs(breadcrumbs: ISequence<HTMLElement>, separators: ISequence<HTMLElement>, path: string) {
+    let node = breadcrumbs.at(0).parentNode;
 
     // Remove all but the home node.
     while (node.firstChild.nextSibling) {
@@ -316,24 +333,24 @@ namespace Private {
 
     let parts = path.split('/');
     if (parts.length > 2) {
-      node.appendChild(separators[0]);
-      node.appendChild(breadcrumbs[Crumb.Ellipsis]);
+      node.appendChild(separators.at(0));
+      node.appendChild(breadcrumbs.at(Crumb.Ellipsis));
       let grandParent = parts.slice(0, parts.length - 2).join('/');
-      breadcrumbs[Crumb.Ellipsis].title = grandParent;
+      breadcrumbs.at(Crumb.Ellipsis).title = grandParent;
     }
 
     if (path) {
       if (parts.length >= 2) {
-        node.appendChild(separators[1]);
-        breadcrumbs[Crumb.Parent].textContent = parts[parts.length - 2];
-        node.appendChild(breadcrumbs[Crumb.Parent]);
+        node.appendChild(separators.at(1));
+        breadcrumbs.at(Crumb.Parent).textContent = parts[parts.length - 2];
+        node.appendChild(breadcrumbs.at(Crumb.Parent));
         let parent = parts.slice(0, parts.length - 1).join('/');
-        breadcrumbs[Crumb.Parent].title = parent;
+        breadcrumbs.at(Crumb.Parent).title = parent;
       }
-      node.appendChild(separators[2]);
-      breadcrumbs[Crumb.Current].textContent = parts[parts.length - 1];
-      node.appendChild(breadcrumbs[Crumb.Current]);
-      breadcrumbs[Crumb.Current].title = path;
+      node.appendChild(separators.at(2));
+      breadcrumbs.at(Crumb.Current).textContent = parts[parts.length - 1];
+      node.appendChild(breadcrumbs.at(Crumb.Current));
+      breadcrumbs.at(Crumb.Current).title = path;
     }
   }
 
@@ -341,7 +358,7 @@ namespace Private {
    * Create the breadcrumb nodes.
    */
   export
-  function createCrumbs(): HTMLElement[] {
+  function createCrumbs(): ISequence<HTMLElement> {
     let home = document.createElement('i');
     home.className = 'fa fa-home ' + BREADCRUMB_ITEM_CLASS;
     let ellipsis = document.createElement('i');
@@ -350,19 +367,19 @@ namespace Private {
     parent.className = BREADCRUMB_ITEM_CLASS;
     let current = document.createElement('span');
     current.className = BREADCRUMB_ITEM_CLASS;
-    return [home, ellipsis, parent, current];
+    return new Vector<HTMLElement>([home, ellipsis, parent, current]);
   }
 
   /**
    * Create the breadcrumb separator nodes.
    */
   export
-  function createCrumbSeparators(): HTMLElement[] {
-    let items: HTMLElement[] = [];
+  function createCrumbSeparators(): ISequence<HTMLElement> {
+    let items = new Vector<HTMLElement>();
     for (let i = 0; i < 3; i++) {
       let item = document.createElement('i');
       item.className = 'fa fa-angle-right';
-      items.push(item);
+      items.pushBack(item);
     }
     return items;
   }
