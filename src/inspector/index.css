@@ -74,7 +74,7 @@
 
 
 .jp-Inspector .p-TabBar-tab:hover:not(.p-mod-current) {
-  background: var(--jp-ui-layout-color1);
+  background: var(--jp-layout-color1);
 }
 
 
