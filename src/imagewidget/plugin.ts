@@ -21,7 +21,6 @@ import {
   ILayoutRestorer
 } from '../layoutrestorer';
 
-
 import {
   IStateDB
 } from '../statedb';
