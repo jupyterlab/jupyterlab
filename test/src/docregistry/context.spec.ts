@@ -41,6 +41,8 @@ describe('docregistry/context', () => {
     afterEach((done) => {
       if (context.kernel) {
         context.kernel.ready.then(() => {
+          return context.changeKernel(null);
+        }).then(() => {
           context.dispose();
         }).then(done, done);
       } else {
