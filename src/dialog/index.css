@@ -31,6 +31,7 @@
   margin-right: auto;
   background: #FAFAFA;
   padding: 24px;
+  padding-bottom: 12px;
   min-width: 300px;
   max-width: 500px;
   min-height: 300px;
@@ -66,9 +67,14 @@
 
 
 .jp-Dialog-footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
   flex: 0 0 auto;
-  float: right;
-  margin-top: 24px;
+  margin-top: 12px;
+  margin-left: -12px;
+  margin-right: -12px;
+  padding: 12px;
 }
 
 
@@ -84,7 +90,6 @@
   border: none;
   text-transform: uppercase;
   line-height: 38px;
-  outline: none;
   padding: 0px 24px;
 }
 
