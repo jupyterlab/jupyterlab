@@ -3,7 +3,7 @@
 
 There are several design patterns that are repeated throughout
 the repository.  This guide is meant to supplement the 
-[TypeScript Style Guide](https://github.com/jupyter/jupyterlab/wiki/TypeScript-Style-Guide).
+[TypeScript Style Guide](https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide).
 
 
 ## TypeScript

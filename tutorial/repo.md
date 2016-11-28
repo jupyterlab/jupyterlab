@@ -1,13 +1,13 @@
 # General Codebase Orientation
 
-The `jupyter/jupyterlab` repository contains two packages:
+The `jupyterlab/jupyterlab` repository contains two packages:
 
 - an npm package indicated by a `package.json` file in the repo's root directory
 - a Python package indicated by a `setup.py` file in the repo's root directory
 
 Th npm package and the Python package are both named `jupyterlab`.
 
-See the [Contributing Guidelines](https://github.com/jupyter/jupyterlab/CONTRIBUTING.md) for developer installation instructions.
+See the [Contributing Guidelines](https://github.com/jupyterlab/jupyterlab/CONTRIBUTING.md) for developer installation instructions.
 
 
 ## Directories
