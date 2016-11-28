@@ -104,6 +104,32 @@ class DocumentManager implements IDisposable {
 
   /**
    * Open a file and return the widget used to view it.
+   * Reveals an already existing editor.
+   *
+   * @param path - The file path to open.
+   *
+   * @param widgetName - The name of the widget factory to use. 'default' will use the default widget.
+   *
+   * @param kernel - An optional kernel name/id to override the default.
+   *
+   * @returns The created widget, or `undefined`.
+   *
+   * #### Notes
+   * This function will return `undefined` if a valid widget factory
+   * cannot be found.
+   */
+  openOrReveal(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
+    let widget = this.findWidget(path, widgetName);
+    if (!widget) {
+      widget = this.open(path, widgetName, kernel);
+    } else {
+      this._opener.open(widget);
+    }
+    return widget;
+  }
+
+  /**
+   * Open a file and return the widget used to view it.
    *
    * @param path - The file path to open.
    *
