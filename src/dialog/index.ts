@@ -76,9 +76,8 @@ const OK_BUTTON_CLASS = 'jp-Dialog-okButton';
 const CANCEL_BUTTON_CLASS = 'jp-Dialog-cancelButton';
 
 /**
-/*
-* The class name added to dialog Warning buttons.
-*/
+ * The class name added to dialog Warning buttons.
+ */
 const WARNING_BUTTON_CLASS = 'jp-Dialog-warningButton';
 
 /**
@@ -143,19 +142,22 @@ const cancelButton: IButtonItem = {
 };
 
 /**
-* A default delete button.
-*/
+ * A default delete button.
+ */
 export
 const deleteButton: IButtonItem = {
   text: 'DELETE',
   className: WARNING_BUTTON_CLASS
-}
+};
 
+/**
+ * A default warn button.
+ */
 export
 const warnButton: IButtonItem = {
   text: 'OK',
   className: WARNING_BUTTON_CLASS
-}
+};
 
 
 /**
@@ -226,6 +228,7 @@ function showDialog(options?: IDialogOptions): Promise<IButtonItem> {
   });
 }
 
+
 /**
  * A dialog panel.
  */
@@ -287,6 +290,13 @@ class Dialog extends Panel {
   }
 
   /**
+   * Get the last button node.
+   */
+  get lastButtonNode(): HTMLButtonElement {
+    return this._buttonNodes[this._buttons.length - 1];
+  }
+
+  /**
    * Handle the DOM events for the directory listing.
    *
    * @param event - The DOM event sent to the widget.
@@ -307,6 +317,12 @@ class Dialog extends Panel {
     case 'click':
       this._evtClick(event as MouseEvent);
       break;
+    case 'focus':
+      if (!this.node.contains(event.target as HTMLElement)) {
+        event.stopPropagation();
+        this.lastButtonNode.focus();
+      }
+      break;
     default:
       break;
     }
@@ -322,9 +338,9 @@ class Dialog extends Panel {
     node.addEventListener('keydown', this, true);
     node.addEventListener('contextmenu', this, true);
     node.addEventListener('click', this, true);
-    // Give focus to the last button.
+    document.addEventListener('focus', this, true);
     this._original = document.activeElement as HTMLElement;
-    this._buttonNodes[this._buttons.length - 1].focus();
+    this.lastButtonNode.focus();
   }
 
 
@@ -338,6 +354,7 @@ class Dialog extends Panel {
     node.removeEventListener('keydown', this, true);
     node.removeEventListener('contextmenu', this, true);
     node.removeEventListener('click', this, true);
+    document.addEventListener('focus', this, true);
     this._original.focus();
   }
 
@@ -376,10 +393,14 @@ class Dialog extends Panel {
       this.resolve(cancelButton);
       break;
     case 9:
-      let last = this._buttonNodes[this._buttons.length - 1];
-      if (document.activeElement === last) {
+      // Handle a tab on the last button.
+      if (document.activeElement === this.lastButtonNode && !event.shiftKey) {
         event.stopPropagation();
-        this.node.focus();
+        event.preventDefault();
+        if (!this._first) {
+          this._findFirst();
+        }
+        this._first.focus();
       }
       break;
     default:
@@ -398,6 +419,21 @@ class Dialog extends Panel {
   }
 
   /**
+   * Find the first focusable item in the dialog.
+   */
+  private _findFirst(): void {
+    let candidateSelectors = [
+      'input',
+      'select',
+      'a[href]',
+      'textarea',
+      'button',
+      '[tabindex]',
+    ].join(',');
+
+    this._first = this.node.querySelectorAll(candidateSelectors)[0] as HTMLElement;
+  }
+  /**
    * The resolution function of the dialog Promise.
    */
   protected resolve: (value: IButtonItem) => void;
@@ -407,9 +443,10 @@ class Dialog extends Panel {
    */
   protected reject: (error: any) => void;
 
-  private _buttonNodes: HTMLElement[];
+  private _buttonNodes: HTMLButtonElement[];
   private _buttons: IButtonItem[];
   private _original: HTMLElement;
+  private _first: HTMLElement;
 }
 
 
@@ -467,8 +504,8 @@ function styleElements(element: HTMLElement): HTMLElement {
 /**
  * Create a node for a button item.
  */
-function createButton(item: IButtonItem): HTMLElement {
-  let button = document.createElement('button');
+function createButton(item: IButtonItem): HTMLButtonElement {
+  let button = document.createElement('button') as HTMLButtonElement;
   button.className = BUTTON_CLASS;
   button.tabIndex = 0;
   if (item.className) {
