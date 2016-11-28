@@ -68,7 +68,7 @@ const cmdIds = {
   restartRunAll: 'notebook:restart-runAll',
   switchKernel: 'notebook:switch-kernel',
   clearAllOutputs: 'notebook:clear-outputs',
-  killAndExit: 'notebook:halt-and-close',
+  closeAndHalt: 'notebook:close-and-halt',
   run: 'notebook-cells:run',
   runAndAdvance: 'notebook-cells:run-and-advance',
   runAndInsert: 'notebook-cells:run-and-insert',
@@ -261,7 +261,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.killAndExit, {
+  commands.addCommand(cmdIds.closeAndHalt, {
     label: 'Close and Halt',
     execute: () => {
       let current = tracker.currentWidget;
@@ -620,7 +620,7 @@ function populatePalette(palette: ICommandPalette): void {
     cmdIds.editMode,
     cmdIds.commandMode,
     cmdIds.switchKernel,
-    cmdIds.killAndExit
+    cmdIds.closeAndHalt
   ].forEach(command => { palette.addItem({ command, category }); });
 
   category = 'Notebook Cell Operations';
@@ -678,7 +678,7 @@ function createMenu(app: JupyterLab): Menu {
   menu.addItem({ command: cmdIds.runAll });
   menu.addItem({ command: cmdIds.restart });
   menu.addItem({ command: cmdIds.switchKernel });
-  menu.addItem({ command: cmdIds.killAndExit });
+  menu.addItem({ command: cmdIds.closeAndHalt });
   menu.addItem({ type: 'separator' });
   menu.addItem({ type: 'submenu', menu: settings });
 
