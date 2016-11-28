@@ -144,10 +144,8 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     this._manager = null;
     this._factory = null;
     if (this._session) {
-      this._session.shutdown().then(() => {
-        this._session.dispose();
-        this._session = null;
-      });
+      this._session.dispose();
+      this._session = null;
     }
   }
 
