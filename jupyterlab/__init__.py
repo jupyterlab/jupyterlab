@@ -141,7 +141,7 @@ class LabHandler(IPythonHandler):
         for asset in js_assets:
             if 'phosphor' not in asset.name.lower():
                 bundles.append('/flexx/assets/shared/%s' % asset.name)
-        
+ 
         ## --------------------
 
         self.write(self.render_template('lab.html',
