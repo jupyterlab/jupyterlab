@@ -14,6 +14,18 @@ import {
 } from '../commandpalette';
 
 import {
+  InstanceTracker
+} from '../common/instancetracker';
+
+import {
+  ILayoutRestorer
+} from '../layoutrestorer';
+
+import {
+  IStateDB
+} from '../statedb';
+
+import {
   FaqModel, FaqWidget
 } from './widget';
 
@@ -24,7 +36,7 @@ import {
 export
 const faqExtension: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.faq',
-  requires: [ICommandPalette, ICommandLinker],
+  requires: [ICommandPalette, ICommandLinker, IStateDB, ILayoutRestorer],
   activate: activateFAQ,
   autoStart: true
 };
@@ -33,25 +45,44 @@ const faqExtension: JupyterLabPlugin<void> = {
 /**
  * Activate the faq plugin.
  */
-function activateFAQ(app: JupyterLab, palette: ICommandPalette, linker: ICommandLinker): void {
-  let faqModel = new FaqModel();
-  let widget = new FaqWidget({ linker });
-  let commandId = 'faq-jupyterlab:show';
-  widget.model = faqModel;
-  widget.id = 'faq-jupyterlab';
-  widget.title.label = 'FAQ';
-  widget.title.closable = true;
-  widget.node.style.overflowY = 'auto';
+function activateFAQ(app: JupyterLab, palette: ICommandPalette, linker: ICommandLinker, state: IStateDB, layout: ILayoutRestorer): void {
+  const category = 'Help';
+  const command = 'faq-jupyterlab:show';
+  const model = new FaqModel();
+  const tracker = new InstanceTracker<FaqWidget>({
+    restore: {
+      state, layout, command,
+      args: widget => null,
+      name: widget => 'faq',
+      namespace: 'faqs',
+      when: app.started,
+      registry: app.commands
+    }
+  });
 
-  app.commands.addCommand(commandId, {
+  let widget: FaqWidget;
+  let id = 0;
+
+  function newWidget(): FaqWidget {
+    let widget = new FaqWidget({ linker });
+    widget.model = model;
+    widget.id = `faq-${++id}`;
+    widget.title.label = 'FAQ';
+    widget.title.closable = true;
+    tracker.add(widget);
+    return widget;
+  }
+
+  app.commands.addCommand(command, {
     label: 'Frequently Asked Questions',
     execute: () => {
-      if (!widget.isAttached) {
+      if (!widget || widget.isDisposed) {
+        widget = newWidget();
         app.shell.addToMainArea(widget);
       }
       app.shell.activateMain(widget.id);
     }
   });
 
-  palette.addItem({ command: commandId, category: 'Help' });
+  palette.addItem({ command, category });
 }

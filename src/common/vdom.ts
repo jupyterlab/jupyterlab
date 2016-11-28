@@ -118,8 +118,8 @@ abstract class VDomWidget<T extends IVDomModel> extends Widget {
     if (this.isDisposed) {
       return;
     }
-    this._model = null;
     super.dispose();
+    this._model = null;
   }
 
   /**

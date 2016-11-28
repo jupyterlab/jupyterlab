@@ -26,7 +26,6 @@ const layoutRestorerProvider: JupyterLabPlugin<ILayoutRestorer> = {
   activate: (app: JupyterLab, state: IStateDB) => {
     let layout = new LayoutRestorer({ first: app.started, state });
     app.shell.currentChanged.connect((sender, args) => {
-      console.log('potentially saving state...');
       layout.save({ currentWidget: args.newValue });
     });
     layout.activated.connect((sender, widget) => {

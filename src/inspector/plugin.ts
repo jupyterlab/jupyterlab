@@ -104,7 +104,7 @@ function activateInspector(app: JupyterLab, palette: ICommandPalette, state: ISt
     restore: {
       state, layout, command,
       args: widget => null,
-      name: widget => 'primary:inspector',
+      name: widget => 'inspector',
       namespace: 'inspectors',
       when: app.started,
       registry: app.commands
