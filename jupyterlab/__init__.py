@@ -136,9 +136,11 @@ class LabHandler(IPythonHandler):
         app.assets._assets[init_asset.name] = init_asset
         # Add Flexx assets
         for asset in css_assets:
-            css_files.append('/flexx/assets/shared/%s' % asset.name)
+            if 'phosphor' not in asset.name.lower():
+                css_files.append('/flexx/assets/shared/%s' % asset.name)
         for asset in js_assets:
-            bundles.append('/flexx/assets/shared/%s' % asset.name)
+            if 'phosphor' not in asset.name.lower():
+                bundles.append('/flexx/assets/shared/%s' % asset.name)
         
         ## --------------------
 

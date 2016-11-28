@@ -101,6 +101,7 @@ class CondaManagerPlugin(ui.Widget):
             return {}
         
         def jlab_activate(self, lab, menu, commands):
+            self.title = 'Conda manager'
             window.commands = commands
             lab.shell.addToMainArea(self.phosphor)
             
