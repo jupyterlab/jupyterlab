@@ -26,6 +26,10 @@ import {
 } from 'phosphor/lib/core/properties';
 
 import {
+  Token
+} from 'phosphor/lib/core/token';
+
+import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
@@ -41,6 +45,20 @@ import {
   DocumentWidgetManager
 } from './widgetmanager';
 
+/* tslint:disable */
+/**
+ * The document registry token.
+ */
+export
+const IDocumentManager = new Token<IDocumentManager>('jupyter.services.document-manager');
+/* tslint:enable */
+
+
+/**
+ * The interface for a document manager.
+ */
+export
+interface IDocumentManager extends DocumentManager {}
 
 /**
  * The document manager.
