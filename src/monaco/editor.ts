@@ -96,9 +96,17 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
   }
 
   protected _onKeyDown(event: monaco.IKeyboardEvent) {
-    if (this.onKeyDown && this._editor.isFocused())  {
+    if (this.onKeyDown && this.isOnKeyDownContext())  {
       this.onKeyDown(this, event.browserEvent);
     }
+  }
+
+  protected isOnKeyDownContext() {
+    return !this.isSuggestWidgetVisible();
+  }
+
+  protected isSuggestWidgetVisible(): boolean {
+    return this.editor._contextKeyService.getContextKeyValue<boolean>('suggestWidgetVisible');
   }
 
   /**
