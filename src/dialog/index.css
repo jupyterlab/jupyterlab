@@ -112,27 +112,29 @@
 }
 
 .jp-Dialog-inputWrapper {
-  padding: 7px;
+  display: flex;
   background: white;
   width: 252px;
   box-sizing: border-box;
   border: var(--jp-border-width) solid var(--jp-border-color1);
   margin-bottom: 8px;
+  padding: 1px;
 }
 
 
 .jp-Dialog-input {
+  flex: 1 1 auto;
+  padding: 7px;
   font-size: 15px;
   color: #676767;
-  width: 100%;
-  outline: none;
   border: none;
 }
 
 
 .jp-Dialog-selectWrapper {
-  padding-top: 6px;
-  padding-bottom: 6px;
+  display: flex;
+  flex-direction: column;
+  padding: 1px;
   background: white;
   width: 252px;
   box-sizing: border-box;
@@ -142,10 +144,10 @@
 
 
 .jp-Dialog-select {
+  flex: 1 1 auto;
+  height: 32px;
   font-size: 15px;
   background: white;
   color: #676767;
-  width: 100%;
-  outline: none;
   border: none;
 }

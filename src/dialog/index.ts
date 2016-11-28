@@ -299,10 +299,13 @@ class Dialog extends Panel {
   handleEvent(event: Event): void {
     switch (event.type) {
     case 'keydown':
-      this.evtKeydown(event as KeyboardEvent);
+      this._evtKeydown(event as KeyboardEvent);
       break;
     case 'contextmenu':
-      this.evtContextMenu(event as MouseEvent);
+      this._evtContextMenu(event as MouseEvent);
+      break;
+    case 'click':
+      this._evtClick(event as MouseEvent);
       break;
     default:
       break;
@@ -318,16 +321,24 @@ class Dialog extends Panel {
     let node = this.node;
     node.addEventListener('keydown', this, true);
     node.addEventListener('contextmenu', this, true);
-    node.addEventListener('click', this);
-    this._buttonNodes.map(buttonNode => {
-      buttonNode.addEventListener('click', this.evtButtonClick.bind(this));
-    });
+    node.addEventListener('click', this, true);
+    // Give focus to the last button.
+    this._original = document.activeElement as HTMLElement;
+    this._buttonNodes[this._buttons.length - 1].focus();
+  }
 
-    // Focus the ok button if given.
-    let index = this._buttons.indexOf(okButton);
-    if (index !== -1) {
-      this._buttonNodes[index].focus();
-    }
+
+  /**
+   * Handle a `'before-detach'` message to the widget.
+   *
+   * @param msg - The `'after-attach'` message
+   */
+  protected onBeforeDetach(msg: Message): void {
+    let node = this.node;
+    node.removeEventListener('keydown', this, true);
+    node.removeEventListener('contextmenu', this, true);
+    node.removeEventListener('click', this, true);
+    this._original.focus();
   }
 
   /**
@@ -335,7 +346,14 @@ class Dialog extends Panel {
    *
    * @param event - The DOM event sent to the widget
    */
-  protected evtButtonClick(event: MouseEvent): void {
+  protected _evtClick(event: MouseEvent): void {
+    let content = this.node.getElementsByClassName(CONTENT_CLASS)[0] as HTMLElement;
+    if (!content.contains(event.target as HTMLElement)) {
+      this.close();
+      this.resolve(cancelButton);
+      event.stopPropagation();
+      return;
+    }
     for (let buttonNode of this._buttonNodes) {
       if (buttonNode.contains(event.target as HTMLElement)) {
         this.close();
@@ -350,11 +368,22 @@ class Dialog extends Panel {
    *
    * @param event - The DOM event sent to the widget
    */
-  protected evtKeydown(event: KeyboardEvent): void {
+  protected _evtKeydown(event: KeyboardEvent): void {
     // Check for escape key
-    if (event.keyCode === 27) {
+    switch (event.keyCode) {
+    case 27:
       this.close();
       this.resolve(cancelButton);
+      break;
+    case 9:
+      let last = this._buttonNodes[this._buttons.length - 1];
+      if (document.activeElement === last) {
+        event.stopPropagation();
+        this.node.focus();
+      }
+      break;
+    default:
+      break;
     }
   }
 
@@ -363,7 +392,7 @@ class Dialog extends Panel {
    *
    * @param event - The DOM event sent to the widget
    */
-  protected evtContextMenu(event: Event): void {
+  protected _evtContextMenu(event: Event): void {
     event.preventDefault();
     event.stopPropagation();
   }
@@ -380,6 +409,7 @@ class Dialog extends Panel {
 
   private _buttonNodes: HTMLElement[];
   private _buttons: IButtonItem[];
+  private _original: HTMLElement;
 }
 
 
@@ -440,7 +470,7 @@ function styleElements(element: HTMLElement): HTMLElement {
 function createButton(item: IButtonItem): HTMLElement {
   let button = document.createElement('button');
   button.className = BUTTON_CLASS;
-  button.tabIndex = -1;
+  button.tabIndex = 0;
   if (item.className) {
     button.classList.add(item.className);
   }
@@ -466,6 +496,7 @@ function wrapInput(input: HTMLInputElement): HTMLElement {
   wrapper.className = INPUT_WRAPPER_CLASS;
   wrapper.appendChild(input);
   input.classList.add(INPUT_CLASS);
+  input.tabIndex = 0;
   return wrapper;
 }
 
@@ -478,5 +509,6 @@ function wrapSelect(select: HTMLSelectElement): HTMLElement {
   wrapper.className = SELECT_WRAPPER_CLASS;
   wrapper.appendChild(select);
   select.classList.add(SELECT_CLASS);
+  select.tabIndex = 0;
   return wrapper;
 }
