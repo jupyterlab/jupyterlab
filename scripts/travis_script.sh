@@ -35,8 +35,8 @@ postcss jupyterlab/build/*.css > /dev/null
 
 # Verify docs build
 pushd tutorial
-conda create -n docs -f environment.yml
-source activate docs
+conda env create -n test_docs -f environment.yml
+source activate test_docs
 make linkcheck
 make html
 source deactivate
