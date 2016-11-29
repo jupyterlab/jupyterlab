@@ -78,7 +78,7 @@ corresponding to the cell models in its cell list.
 
 - Each cell widget contains an [InputAreaWidget](http://jupyterlab.github.io/jupyterlab/classes/_notebook_cells_widget_.inputareawidget.html),
 
-    + which contains a [CellEditorWidget](http://jupyterlab.github.io/jupyterlab/classes/_notebook_cells_editor_.celleditorwidget.html),
+    + which contains a [CellEditorWidget](http://jupyterlab.github.io/jupyterlab/interfaces/_notebook_cells_editor_.icelleditorwidget.html),
 
         - which contains a JavaScript CodeMirror instance.
 
