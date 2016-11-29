@@ -218,11 +218,19 @@ function activateFileBrowser(app: JupyterLab, manager: IServiceManager, document
 function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocumentManager): void {
   let commands = app.commands;
 
+  let isEnabled: () => boolean = () => {
+      if (app.shell.currentWidget && docManager.contextForWidget(app.shell.currentWidget)) {
+        return true;
+      }
+      return false;
+    };
+
   commands.addCommand(cmdIds.save, {
     label: 'Save',
     caption: 'Save and create checkpoint',
+    isEnabled,
     execute: () => {
-      if (app.shell.currentWidget) {
+      if (isEnabled()) {
         let context = docManager.contextForWidget(app.shell.currentWidget);
         return context.save().then(() => {
           return context.createCheckpoint();
@@ -234,12 +242,13 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocume
   commands.addCommand(cmdIds.restoreCheckpoint, {
     label: 'Revert to Checkpoint',
     caption: 'Revert contents to previous checkpoint',
+    isEnabled,
     execute: () => {
-      if (app.shell.currentWidget) {
+      if (isEnabled()) {
         let context = docManager.contextForWidget(app.shell.currentWidget);
         context.restoreCheckpoint().then(() => {
           context.revert();
-        });
+        });        
       }
     }
   });
@@ -247,8 +256,9 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocume
   commands.addCommand(cmdIds.saveAs, {
     label: 'Save As...',
     caption: 'Save with new path and create checkpoint',
+    isEnabled,
     execute: () => {
-      if (app.shell.currentWidget) {
+      if (isEnabled()) {
         let context = docManager.contextForWidget(app.shell.currentWidget);
         return context.saveAs().then(() => {
           return context.createCheckpoint();
