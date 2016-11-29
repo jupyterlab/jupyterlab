@@ -84,14 +84,14 @@ function activateLanding(app: JupyterLab, pathTracker: IPathTracker, palette: IC
   app.commands.addCommand(command, {
     label: 'Show Landing',
     execute: (args) => {
+      let inactive = args && args['inactive'] as boolean;
       if (!widget || widget.isDisposed) {
         widget = newWidget();
-        app.shell.addToMainArea(widget);
+        app.shell.addToMainArea(widget, { mode: 'tab-before' });
       }
-      if (args && args['inactive'] as boolean) {
-        return;
+      if (!inactive) {
+        app.shell.activateMain(widget.id);
       }
-      app.shell.activateMain(widget.id);
     }
   });
 
