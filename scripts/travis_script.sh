@@ -29,11 +29,9 @@ npm run build:examples
 npm run docs
 cp jupyter-plugins-demo.gif docs
 
-# Make sure we have CSS that can be converted with myth
-npm install -g myth
-pushd jupyterlab/build
-myth main.css main.built.css
-popd
+# Make sure we have CSS that can be converted with postcss
+npm install -g postcss-cli
+postcss jupyterlab/build/*.css > /dev/null
 
 # Make sure we can start and kill the lab server
 jupyter lab --no-browser &

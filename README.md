@@ -45,7 +45,7 @@ Earlier browser versions may also work, but come with no guarantees.
 JupyterLab uses CSS Variables for styling, which is one reason for the
 minimum versions listed above.  IE 11+ or Edge 14 do not support
 CSS Variables, and are not directly supported at this time.
-A tool like http://www.myth.io/ can be used to convert the CSS files in the
+A tool like [postcss](http://postcss.org/) can be used to convert the CSS files in the
 `jupyterlab/build` directory manually if desired. 
 
 ----
