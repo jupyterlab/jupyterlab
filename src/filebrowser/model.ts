@@ -33,12 +33,12 @@ import {
 /**
  * The duration of auto-refresh in ms.
  */
-const REFRESH_DURATION = 1000;
+const REFRESH_DURATION = 10000;
 
 /**
  * The enforced time between refreshes in ms.
  */
-const MIN_REFRESH = 100;
+const MIN_REFRESH = 1000;
 
 
 /**
