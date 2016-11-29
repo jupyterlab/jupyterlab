@@ -82,7 +82,12 @@ class EditorWidget extends CodeMirrorWidget {
     let editor = this.editor;
     let model = context.model;
     let doc = editor.getDoc();
-    doc.setValue(model.toString());
+    //Prevent the initial loading from disk from
+    //being in the editor history.
+    context.ready.then( () => {
+      doc.setValue(model.toString());
+      doc.clearHistory();
+    });
     this.title.label = context.path.split('/').pop();
     loadModeByFileName(editor, context.path);
     model.stateChanged.connect((m, args) => {
