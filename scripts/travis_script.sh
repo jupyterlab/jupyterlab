@@ -34,11 +34,13 @@ npm install -g postcss-cli
 postcss jupyterlab/build/*.css > /dev/null
 
 # Verify docs build
-conda create -n docs -f tutorial/environment.yml
+pushd tutorial
+conda create -n docs -f environment.yml
 source activate docs
-make -C tutorial linkcheck
-make -C tutorial html
+make linkcheck
+make html
 source deactivate
+popd
 
 # Make sure we can start and kill the lab server
 jupyter lab --no-browser &
