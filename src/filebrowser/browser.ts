@@ -89,6 +89,7 @@ class FileBrowser extends Widget {
     let model = this._model = options.model;
     let renderer = options.renderer;
 
+    model.connectionFailure.connect(this._onConnectionFailure, this);
     this._crumbs = new BreadCrumbs({ model });
     this._buttons = new FileButtons({
       commands, keymap, manager, model
@@ -155,9 +156,7 @@ class FileBrowser extends Widget {
       if (item.type === 'directory') {
         if (!foundDir) {
           foundDir = true;
-          this._model.cd(item.name).catch(error =>
-            showErrorMessage('Open directory', error)
-          );
+          this._model.cd(item.name);
         }
       } else {
         this.openPath(item.path);
@@ -294,6 +293,19 @@ class FileBrowser extends Widget {
     return this._listing.pathForClick(event);
   }
 
+  /**
+   * Handle a connection lost signal from the model.
+   */
+  private _onConnectionFailure(sender: FileBrowserModel, args: Error): void {
+    if (this._showingError) {
+      return;
+    }
+    this._showingError = true;
+    showErrorMessage('Server Connection Error', args).then(() => {
+      this._showingError = false;
+    });
+  }
+
   private _buttons: FileButtons = null;
   private _commands: CommandRegistry = null;
   private _crumbs: BreadCrumbs = null;
@@ -301,6 +313,7 @@ class FileBrowser extends Widget {
   private _listing: DirListing = null;
   private _manager: DocumentManager = null;
   private _model: FileBrowserModel = null;
+  private _showingError = false;
 }
 
 
