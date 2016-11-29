@@ -6,12 +6,20 @@ import {
 } from 'phosphor/lib/algorithm/json';
 
 import {
-  JupyterLabPlugin
+  JupyterLab, JupyterLabPlugin
 } from '../application';
 
 import {
-  IStateDB, IStateItem
+  ICommandPalette
+} from '../commandpalette';
+
+import {
+  IStateDB
 } from './index';
+
+import {
+  StateDB
+} from './statedb';
 
 
 /**
@@ -20,120 +28,39 @@ import {
 export
 const stateProvider: JupyterLabPlugin<IStateDB> = {
   id: 'jupyter.services.statedb',
-  activate: (): IStateDB => new StateDB(),
+  activate: activateState,
   autoStart: true,
-  provides: IStateDB
+  provides: IStateDB,
+  requires: [ICommandPalette]
 };
 
 
 /**
- * The default concrete implementation of a state database.
+ * Activate the state database.
  */
-class StateDB implements IStateDB {
-  /**
-   * The maximum allowed length of the data after it has been serialized.
-   */
-  readonly maxLength = 2000;
-
-  /**
-   * Retrieve a saved bundle from the database.
-   *
-   * @param id - The identifier used to retrieve a data bundle.
-   *
-   * @returns A promise that bears a data payload if available.
-   *
-   * #### Notes
-   * The `id` values of stored items in the state database are formatted:
-   * `'namespace:identifier'`, which is the same convention that command
-   * identifiers in JupyterLab use as well. While this is not a technical
-   * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
-   * using the `fetchNamespace()` method.
-   *
-   * The promise returned by this method may be rejected if an error occurs in
-   * retrieving the data. Non-existence of an `id` will succeed, however.
-   */
-  fetch(id: string): Promise<JSONObject> {
-    try {
-      return Promise.resolve(JSON.parse(window.localStorage.getItem(id)));
-    } catch (error) {
-      return Promise.reject(error);
+function activateState(app: JupyterLab, palette: ICommandPalette): Promise<IStateDB> {
+  let state = new StateDB();
+  let version = (window as any).jupyter.version;
+  let command = 'statedb:clear';
+  let category = 'Help';
+  let key = 'statedb:version';
+  let fetch = state.fetch(key);
+  let save = () => state.save(key, { version });
+  let reset = () => state.clear().then(save);
+  let check = (value: JSONObject) => {
+    let old = value && (value as any).version;
+    if (!old || old !== version) {
+      console.log(`Upgraded: ${old || 'unknown'} to ${version}; Resetting DB.`);
+      return reset();
     }
-  }
+  };
 
-  /**
-   * Retrieve all the saved bundles for a namespace.
-   *
-   * @param namespace - The namespace to retrieve.
-   *
-   * @returns A promise that bears a collection data payloads for a namespace.
-   *
-   * #### Notes
-   * Namespaces are entirely conventional entities. The `id` values of stored
-   * items in the state database are formatted: `'namespace:identifier'`, which
-   * is the same convention that command identifiers in JupyterLab use as well.
-   *
-   * If there are any errors in retrieving the data, they will be logged to the
-   * console in order to optimistically return any extant data without failing.
-   * This promise will always succeed.
-   */
-  fetchNamespace(namespace: string): Promise<IStateItem[]> {
-    let items: IStateItem[] = [];
-    for (let i = 0, len = window.localStorage.length; i < len; i++) {
-      let key = window.localStorage.key(i);
-      if (key.indexOf(`${namespace}:`) === 0) {
-        try {
-          items.push({
-            id: key,
-            value: JSON.parse(window.localStorage.getItem(key))
-          });
-        } catch (error) {
-          console.warn(error);
-        }
-      }
-    }
-    return Promise.resolve(items);
-  }
+  app.commands.addCommand(command, {
+    label: 'Clear Application Restore State',
+    execute: () => state.clear()
+  });
 
-  /**
-   * Remove a value from the database.
-   *
-   * @param id - The identifier for the data being removed.
-   *
-   * @returns A promise that is rejected if remove fails and succeeds otherwise.
-   */
-  remove(id: string): Promise<void> {
-    window.localStorage.removeItem(id);
-    return Promise.resolve(void 0);
-  }
+  palette.addItem({ command, category });
 
-  /**
-   * Save a value in the database.
-   *
-   * @param id - The identifier for the data being saved.
-   *
-   * @param value - The data being saved.
-   *
-   * @returns A promise that is rejected if saving fails and succeeds otherwise.
-   *
-   * #### Notes
-   * The `id` values of stored items in the state database are formatted:
-   * `'namespace:identifier'`, which is the same convention that command
-   * identifiers in JupyterLab use as well. While this is not a technical
-   * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
-   * using the `fetchNamespace()` method.
-   */
-  save(id: string, value: JSONObject): Promise<void> {
-    try {
-      let serialized = JSON.stringify(value);
-      let length = serialized.length;
-      let max = this.maxLength;
-      if (length > max) {
-        throw new Error(`Serialized data (${length}) exceeds maximum (${max})`);
-      }
-      window.localStorage.setItem(id, serialized);
-      return Promise.resolve(void 0);
-    } catch (error) {
-      return Promise.reject(error);
-    }
-  }
+  return fetch.then(check, reset).then(() => state);
 }

@@ -66,14 +66,17 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
       command: 'console:create'
     },
     {
-      name: 'Terminal',
-      command: 'terminal:create-new'
-    },
-    {
       name: 'Text Editor',
       command: 'file-operations:new-text-file'
     }
   ];
+
+  if (services.terminals.isAvailable()) {
+    defaults.push({
+      name: 'Terminal',
+      command: 'terminal:create-new'
+    });
+  }
 
   // Note: we do not retain a handle on the items added by default, which
   // means we have to way of removing them after the fact.

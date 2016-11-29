@@ -2,7 +2,7 @@
 
 ## Background
 
-[JupyterLab Walkthrough June 16, 2016 YouTube video](https://youtu.be/4Qm6oD_Rlw8?t=55m19s)
+[JupyterLab Walkthrough June 16, 2016 YouTube video](https://www.youtube.com/watch?v=4Qm6oD_Rlw8&feature=youtu.be&t=55m19s)
 
 The most complicated plugin included in the **JupyterLab application** is the
 **Notebook plugin**.
@@ -78,7 +78,7 @@ corresponding to the cell models in its cell list.
 
 - Each cell widget contains an [InputAreaWidget](http://jupyterlab.github.io/jupyterlab/classes/_notebook_cells_widget_.inputareawidget.html),
 
-    + which contains a [CellEditorWidget](http://jupyterlab.github.io/jupyterlab/classes/_notebook_cells_editor_.celleditorwidget.html),
+    + which contains a [CellEditorWidget](http://jupyterlab.github.io/jupyterlab/interfaces/_notebook_cells_editor_.icelleditorwidget.html),
 
         - which contains a JavaScript CodeMirror instance.
 
@@ -115,12 +115,12 @@ Create a `src/mybutton/plugin.ts` file with the following contents.
 ```typescript
 
 import {
-  Application
-} from 'phosphide/lib/core/application';
+  IDisposable, DisposableDelegate
+} from 'phosphor/lib/core/disposable';
 
 import {
-  IDisposable, DisposableDelegate
-} from 'phosphor-disposable';
+  JupyterLab, JupyterLabPlugin
+} from '../application';
 
 import {
   NotebookActions
@@ -136,24 +136,24 @@ import {
 
 import {
   ToolbarButton
-} from '../notebook/notebook/toolbar';
+} from '../toolbar';
 
 import {
-  IWidgetExtension, IDocumentContext, IDocumentModel, DocumentRegistry
+  DocumentRegistry, IWidgetExtension, IDocumentContext, IDocumentModel, IDocumentRegistry
 } from '../docregistry';
 
 /**
  * The plugin registration information.
  */
 export
-const widgetExtension = {
-  id: 'jupyter.extensions.newButton',
-  requires: [DocumentRegistry],
+const widgetExtension: JupyterLabPlugin<void> = {
+  id: 'jupyter.extensions.new-button',
+  requires: [IDocumentRegistry],
   activate: activateExtension
 };
 
 export
-class ButtonExtension implements IWidgetExtension<NotebookPanel, INotebookModel> {
+class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
   /**
    * Create a new extension object.
    */
@@ -181,7 +181,7 @@ class ButtonExtension implements IWidgetExtension<NotebookPanel, INotebookModel>
 /**
  * Activate the extension.
  */
-function activateExtension(app: Application, registry: DocumentRegistry) {
+function activateExtension(lab: JupyterLab, registry: IDocumentRegistry) {
   registry.addWidgetExtension('Notebook', new ButtonExtension());
 }
 ```
@@ -202,8 +202,8 @@ will be referred to as *ipywidgets*. There is no intrinsic relation between
 **phosphor widgets** and *ipython widgets*.
 
 The *ipywidgets* extension registers a factory for a notebook **widget** extension
-using the [Document Registry](http://jupyterlab.github.io/jupyterlab/classes/_docregistry_registry_.documentregistry.html#registermodelfactory).
-The `createNew()` function is called with a NotebookPanel and [DocumentContext](http://jupyterlab.github.io/jupyterlab/interfaces/_docregistry_interfaces_.idocumentcontext.html).
+using the [Document Registry](http://jupyterlab.github.io/jupyterlab/classes/_docregistry_registry_.documentregistry.html).
+The `createNew()` function is called with a NotebookPanel and [DocumentContext](http://jupyterlab.github.io/jupyterlab/interfaces/_docregistry_registry_.documentregistry.icontext.html).
 The plugin then creates a ipywidget manager (which uses the context to
 interact the kernel and kernel's comm manager). The plugin then registers an
 ipywidget renderer with the notebook instance's rendermime (which is specific

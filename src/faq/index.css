@@ -6,6 +6,8 @@
 
 .jp-FAQ {
   font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  outline: none;
+  overflow-y: auto;
 }
 
 #faq-header {

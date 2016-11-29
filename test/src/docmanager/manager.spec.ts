@@ -151,6 +151,16 @@ describe('docmanager/manager', () => {
         }).catch(done);
       });
 
+      it('should not start a kernel if given an invalid one', (done) => {
+        services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
+          let name = services.specs.default;
+          let widget = manager.open(model.path, 'default');
+          let context = manager.contextForWidget(widget);
+          expect(context.kernel).to.be(null);
+          done();
+        }).catch(done);
+      });
+
       it('should return undefined if the factory is not found', (done) => {
         services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
           let widget = manager.open(model.path, 'foo');
@@ -208,6 +218,16 @@ describe('docmanager/manager', () => {
             expect(context.kernel.name).to.be(name);
             done();
           });
+        }).catch(done);
+      });
+
+      it('should not start a kernel if given an invalid one', (done) => {
+        services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
+          let name = services.specs.default;
+          let widget = manager.createNew(model.path, 'default');
+          let context = manager.contextForWidget(widget);
+          expect(context.kernel).to.be(null);
+          done();
         }).catch(done);
       });
 

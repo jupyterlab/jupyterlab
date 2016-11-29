@@ -24,6 +24,7 @@ import './csvwidget/widget.spec';
 
 import './dialog/dialog.spec';
 
+import './docmanager/manager.spec';
 import './docmanager/savehandler.spec';
 import './docmanager/widgetmanager.spec';
 
@@ -31,6 +32,7 @@ import './docregistry/context.spec';
 import './docregistry/default.spec';
 import './docregistry/registry.spec';
 
+import './filebrowser/crumbs.spec';
 import './filebrowser/model.spec';
 
 import './inspector/inspector.spec';

@@ -1,6 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import 'codemirror/addon/edit/matchbrackets.js';
+import 'codemirror/addon/edit/closebrackets.js';
+import 'codemirror/addon/comment/comment.js';
+import 'codemirror/keymap/vim.js';
+
 import {
   AttachedProperty
 } from 'phosphor/lib/core/properties';
@@ -14,6 +19,14 @@ import {
 } from '../application';
 
 import {
+  DEFAULT_CODEMIRROR_THEME
+} from '../codemirror/widget';
+
+import {
+  ICommandPalette
+} from '../commandpalette';
+
+import {
   InstanceTracker
 } from '../common/instancetracker';
 
@@ -22,12 +35,8 @@ import {
 } from '../docregistry';
 
 import {
-  EditorWidgetFactory, EditorWidget
-} from './widget';
-
-import {
-  ICommandPalette
-} from '../commandpalette';
+  ILayoutRestorer
+} from '../layoutrestorer';
 
 import {
   IMainMenu
@@ -38,17 +47,8 @@ import {
 } from '../statedb';
 
 import {
-  IEditorTracker
-} from './index';
-
-import {
-  DEFAULT_CODEMIRROR_THEME
-} from '../codemirror/widget';
-
-import 'codemirror/addon/edit/matchbrackets.js';
-import 'codemirror/addon/edit/closebrackets.js';
-import 'codemirror/addon/comment/comment.js';
-import 'codemirror/keymap/vim.js';
+  IEditorTracker, EditorWidget, EditorWidgetFactory
+} from './widget';
 
 
 /**
@@ -62,9 +62,9 @@ const PORTRAIT_ICON_CLASS = 'jp-MainAreaPortraitIcon';
 const EDITOR_ICON_CLASS = 'jp-ImageTextEditor';
 
 /**
- * The state database namespace for editor widgets.
+ * The name of the factory that creates editor widgets.
  */
-const NAMESPACE = 'editorwidgets';
+const FACTORY = 'Editor';
 
 /**
  * The map of command ids used by the editor.
@@ -80,11 +80,6 @@ const cmdIds = {
   runCode: 'editor:run-code'
 };
 
-/**
- * The editor widget instance tracker.
- */
-const tracker = new InstanceTracker<EditorWidget>();
-
 
 /**
  * The editor handler extension.
@@ -92,7 +87,9 @@ const tracker = new InstanceTracker<EditorWidget>();
 export
 const editorHandlerProvider: JupyterLabPlugin<IEditorTracker> = {
   id: 'jupyter.services.editor-handler',
-  requires: [IDocumentRegistry, IMainMenu, ICommandPalette, IStateDB],
+  requires: [
+    IDocumentRegistry, IMainMenu, ICommandPalette, IStateDB, ILayoutRestorer
+  ],
   provides: IEditorTracker,
   activate: activateEditorHandler,
   autoStart: true
@@ -102,11 +99,22 @@ const editorHandlerProvider: JupyterLabPlugin<IEditorTracker> = {
 /**
  * Sets up the editor widget
  */
-function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB): IEditorTracker {
-  let widgetFactory = new EditorWidgetFactory({
-    name: 'Editor',
+function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB, layout: ILayoutRestorer): IEditorTracker {
+  const factory = new EditorWidgetFactory({
+    name: FACTORY,
     fileExtensions: ['*'],
     defaultFor: ['*']
+  });
+  const tracker = new InstanceTracker<EditorWidget>({
+    restore: {
+      state, layout,
+      command: 'file-operations:open',
+      args: widget => ({ path: widget.context.path, factory: FACTORY }),
+      name: widget => widget.context.path,
+      namespace: 'editor',
+      when: app.started,
+      registry: app.commands
+    }
   });
 
   // Sync tracker with currently focused widget.
@@ -114,22 +122,111 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
     tracker.sync(args.newValue);
   });
 
-  widgetFactory.widgetCreated.connect((sender, widget) => {
+  factory.widgetCreated.connect((sender, widget) => {
     widget.title.icon = `${PORTRAIT_ICON_CLASS} ${EDITOR_ICON_CLASS}`;
-    // Add the file path to the state database.
-    let key = `${NAMESPACE}:${widget.context.path}`;
-    state.save(key, { path: widget.context.path });
-    // Remove the file path from the state database on disposal.
-    widget.disposed.connect(() => { state.remove(key); });
-    // Keep track of path changes in the state database.
-    widget.context.pathChanged.connect((sender, path) => {
-      state.remove(key);
-      key = `${NAMESPACE}:${path}`;
-      state.save(key, { path });
-    });
+    // Notify the instance tracker if restore data needs to update.
+    widget.context.pathChanged.connect(() => { tracker.save(widget); });
     tracker.add(widget);
   });
-  registry.addWidgetFactory(widgetFactory);
+  registry.addWidgetFactory(factory);
+
+  /**
+   * An attached property for the session id associated with an editor widget.
+   */
+  const sessionIdProperty = new AttachedProperty<EditorWidget, string>({
+    name: 'sessionId'
+  });
+
+  /**
+   * Toggle editor line numbers
+   */
+  function toggleLineNums() {
+    if (tracker.currentWidget) {
+      let editor = tracker.currentWidget.editor;
+      editor.setOption('lineNumbers', !editor.getOption('lineNumbers'));
+    }
+  }
+
+  /**
+   * Toggle editor line wrap
+   */
+  function toggleLineWrap() {
+    if (tracker.currentWidget) {
+      let editor = tracker.currentWidget.editor;
+      editor.setOption('lineWrapping', !editor.getOption('lineWrapping'));
+    }
+  }
+
+  /**
+   * Toggle editor matching brackets
+   */
+  function toggleMatchBrackets() {
+    if (tracker.currentWidget) {
+      let editor = tracker.currentWidget.editor;
+      editor.setOption('matchBrackets', !editor.getOption('matchBrackets'));
+    }
+  }
+
+  /**
+   * Toggle the editor's vim mode
+   */
+  function toggleVim() {
+    tracker.forEach(widget => {
+      let keymap = widget.editor.getOption('keyMap') === 'vim' ? 'default'
+        : 'vim';
+      widget.editor.setOption('keyMap', keymap);
+    });
+  }
+
+  /**
+   * Close all currently open text editor files
+   */
+  function closeAllFiles() {
+    tracker.forEach(widget => { widget.close(); });
+  }
+
+  /**
+   * Create a menu for the editor.
+   */
+  function createMenu(app: JupyterLab): Menu {
+    let { commands, keymap } = app;
+    let settings = new Menu({ commands, keymap });
+    let theme = new Menu({ commands, keymap });
+    let menu = new Menu({ commands, keymap });
+
+    menu.title.label = 'Editor';
+    settings.title.label = 'Settings';
+    theme.title.label = 'Theme';
+
+    settings.addItem({ command: cmdIds.lineNumbers });
+    settings.addItem({ command: cmdIds.lineWrap });
+    settings.addItem({ command: cmdIds.matchBrackets });
+    settings.addItem({ command: cmdIds.vimMode });
+
+    commands.addCommand(cmdIds.changeTheme, {
+      label: args => args['theme'] as string,
+      execute: args => {
+        let name: string = args['theme'] as string || DEFAULT_CODEMIRROR_THEME;
+        tracker.forEach(widget => { widget.editor.setOption('theme', name); });
+      }
+    });
+
+    [
+     'jupyter', 'default', 'abcdef', 'base16-dark', 'base16-light',
+     'hopscotch', 'material', 'mbo', 'mdn-like', 'seti', 'the-matrix',
+     'xq-light', 'zenburn'
+    ].forEach(name => theme.addItem({
+      command: 'editor:change-theme',
+      args: { theme: name }
+    }));
+
+    menu.addItem({ command: cmdIds.closeAll });
+    menu.addItem({ type: 'separator' });
+    menu.addItem({ type: 'submenu', menu: settings });
+    menu.addItem({ type: 'submenu', menu: theme });
+
+    return menu;
+  }
 
   mainMenu.addMenu(createMenu(app), {rank: 30});
 
@@ -210,117 +307,5 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
     cmdIds.runCode,
   ].forEach(command => palette.addItem({ command, category: 'Editor' }));
 
-  // Reload any editor widgets whose state has been stored.
-  Promise.all([state.fetchNamespace(NAMESPACE), app.started])
-    .then(([items]) => {
-      let open = 'file-operations:open';
-      items.forEach(item => { app.commands.execute(open, item.value); });
-    });
-
   return tracker;
-}
-
-
-/**
- * An attached property for the session id associated with an editor widget.
- */
-const sessionIdProperty = new AttachedProperty<EditorWidget, string>({ name: 'sessionId' });
-
-
-/**
- * Toggle editor line numbers
- */
-function toggleLineNums() {
-  if (tracker.currentWidget) {
-    let editor = tracker.currentWidget.editor;
-    editor.setOption('lineNumbers', !editor.getOption('lineNumbers'));
-  }
-}
-
-
-/**
- * Toggle editor line wrap
- */
-function toggleLineWrap() {
-  if (tracker.currentWidget) {
-    let editor = tracker.currentWidget.editor;
-    editor.setOption('lineWrapping', !editor.getOption('lineWrapping'));
-  }
-}
-
-
-/**
- * Toggle editor matching brackets
- */
-function toggleMatchBrackets() {
-  if (tracker.currentWidget) {
-    let editor = tracker.currentWidget.editor;
-    editor.setOption('matchBrackets', !editor.getOption('matchBrackets'));
-  }
-}
-
-
-/**
- * Toggle the editor's vim mode
- */
-function toggleVim() {
-  tracker.forEach(widget => {
-    let keymap = widget.editor.getOption('keyMap') === 'vim' ? 'default'
-      : 'vim';
-    widget.editor.setOption('keyMap', keymap);
-  });
-}
-
-
-/**
- * Close all currently open text editor files
- */
-function closeAllFiles() {
-  tracker.forEach(widget => { widget.close(); });
-}
-
-
-/**
- * Create a menu for the editor.
- */
-function createMenu(app: JupyterLab): Menu {
-  let { commands, keymap } = app;
-  let settings = new Menu({ commands, keymap });
-  let theme = new Menu({ commands, keymap });
-  let menu = new Menu({ commands, keymap });
-
-  menu.title.label = 'Editor';
-  settings.title.label = 'Settings';
-  theme.title.label = 'Theme';
-
-  settings.addItem({ command: cmdIds.lineNumbers });
-  settings.addItem({ command: cmdIds.lineWrap });
-  settings.addItem({ command: cmdIds.matchBrackets });
-  settings.addItem({ command: cmdIds.vimMode });
-
-  commands.addCommand(cmdIds.changeTheme, {
-    label: args => {
-      return args['theme'] as string;
-    },
-    execute: args => {
-      let name: string = args['theme'] as string || DEFAULT_CODEMIRROR_THEME;
-      tracker.forEach(widget => { widget.editor.setOption('theme', name); });
-    }
-  });
-
-  [
-   'jupyter', 'default', 'abcdef', 'base16-dark', 'base16-light',
-   'hopscotch', 'material', 'mbo', 'mdn-like', 'seti', 'the-matrix',
-   'xq-light', 'zenburn'
-  ].forEach(name => theme.addItem({
-    command: 'editor:change-theme',
-    args: { theme: name }
-  }));
-
-  menu.addItem({ command: cmdIds.closeAll });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ type: 'submenu', menu: settings });
-  menu.addItem({ type: 'submenu', menu: theme });
-
-  return menu;
 }

@@ -42,6 +42,10 @@ import {
 } from '../inspector';
 
 import {
+  ILayoutRestorer
+} from '../layoutrestorer';
+
+import {
   IMainMenu
 } from '../mainmenu';
 
@@ -77,7 +81,8 @@ const consoleTrackerProvider: JupyterLabPlugin<IConsoleTracker> = {
     ICommandPalette,
     IPathTracker,
     ConsoleContent.IRenderer,
-    IStateDB
+    IStateDB,
+    ILayoutRestorer
   ],
   activate: activateConsole,
   autoStart: true
@@ -99,16 +104,6 @@ const CONSOLE_ICON_CLASS = 'jp-ImageCodeConsole';
  */
 const CONSOLE_REGEX = /^console-(\d)+-[0-9a-f]+$/;
 
-/**
- * The console plugin state namespace.
- */
-const NAMESPACE = 'consoles';
-
-/**
- * The console panel instance tracker.
- */
-const tracker = new InstanceTracker<ConsolePanel>();
-
 
 /**
  * The arguments used to create a console.
@@ -124,16 +119,26 @@ interface ICreateConsoleArgs extends JSONObject {
 /**
  * Activate the console extension.
  */
-function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, renderer: ConsoleContent.IRenderer, state: IStateDB): IConsoleTracker {
+function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, renderer: ConsoleContent.IRenderer, state: IStateDB, layout: ILayoutRestorer): IConsoleTracker {
   let manager = services.sessions;
 
   let { commands, keymap } = app;
   let category = 'Console';
-
-  let menu = new Menu({ commands, keymap });
-  menu.title.label = 'Console';
-
   let command: string;
+  let menu = new Menu({ commands, keymap });
+
+  // Create an instance tracker for all console panels.
+  const tracker = new InstanceTracker<ConsolePanel>({
+    restore: {
+      state, layout,
+      command: 'console:create',
+      args: panel => ({ id: panel.content.session.id }),
+      name: panel => panel.content.session && panel.content.session.id,
+      namespace: 'console',
+      when: [app.started, manager.ready],
+      registry: app.commands
+    }
+  });
 
   // Sync tracker and set the source of the code inspector.
   app.shell.currentChanged.connect((sender, args) => {
@@ -144,7 +149,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   });
 
   // Set the main menu title.
-  menu.title.label = 'Console';
+  menu.title.label = category;
 
   command = 'console:create-new';
   commands.addCommand(command, {
@@ -258,7 +263,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       return manager.ready.then(() => {
         return getKernel(args, name);
       }).then(kernel => {
-        if (!kernel) {
+        if (!kernel || (kernel && !kernel.id && !kernel.name)) {
           return;
         }
         // Start the session.
@@ -370,23 +375,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     inspector.source = panel.content.inspectionHandler;
     // Add the console panel to the tracker.
     tracker.add(panel);
-    // Add the console to the state database.
-    let key = `${NAMESPACE}:${session.id}`;
-    state.save(key, { id: session.id });
-    // Remove the console from the state database on disposal.
-    panel.disposed.connect(() => { state.remove(key); });
   }
-
-  // Reload any consoles whose state has been stored.
-  Promise.all([state.fetchNamespace(NAMESPACE), app.started])
-    .then(([items]) => {
-      items.forEach(item => {
-        app.commands.execute('console:create', item.value).catch(() => {
-          // Remove console from the state database if session does not exist.
-          state.remove(`${NAMESPACE}:${item.id}`);
-        });
-      });
-  });
 
   command = 'console:switch-kernel';
   commands.addCommand(command, {

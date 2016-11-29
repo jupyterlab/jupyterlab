@@ -140,8 +140,10 @@ function selectKernelForContext(context: DocumentRegistry.IContext<DocumentRegis
     };
     return selectKernel(options);
   }).then(kernel => {
-    if (kernel) {
+    if (kernel && (kernel.id || kernel.name)) {
       context.changeKernel(kernel);
+    } else if (kernel && !kernel.id && !kernel.name) {
+      context.changeKernel();
     }
   });
 }
@@ -247,6 +249,12 @@ function populateKernels(node: HTMLSelectElement, options: IPopulateOptions): vo
     let name = specs.default;
     node.appendChild(optionForName(name, displayNames[name]));
   }
+
+  // Add a separator.
+  node.appendChild(createSeparatorOption(maxLength));
+  // Add an option for no kernel
+  node.appendChild(optionForNone());
+
   // Add a separator.
   node.appendChild(createSeparatorOption(maxLength));
   // Add the rest of the kernel names in alphabetical order.
@@ -324,6 +332,15 @@ function optionForName(name: string, displayName: string): HTMLOptionElement {
   return option;
 }
 
+/**
+ * Create an option for no kernel.
+ */
+function optionForNone(): HTMLOptionElement {
+  let option = document.createElement('option');
+  option.text = 'None';
+  option.value = JSON.stringify({id: null, name: null});
+  return option;
+}
 
 /**
  * Create an option element for a session.
