@@ -83,15 +83,12 @@ function activateLanding(app: JupyterLab, pathTracker: IPathTracker, palette: IC
 
   app.commands.addCommand(command, {
     label: 'Show Landing',
-    execute: (args) => {
-      let inactive = args && args['inactive'] as boolean;
+    execute: () => {
       if (!widget || widget.isDisposed) {
         widget = newWidget();
-        app.shell.addToMainArea(widget, { mode: 'tab-before' });
+        app.shell.addToMainArea(widget);
       }
-      if (!inactive) {
-        app.shell.activateMain(widget.id);
-      }
+      app.shell.activateMain(widget.id);
     }
   });
 
@@ -105,11 +102,10 @@ function activateLanding(app: JupyterLab, pathTracker: IPathTracker, palette: IC
 
   palette.addItem({ category, command });
 
-  // If the layout has been restored and the landing widget was not re-opened,
-  // then open it in an inactive state.
+  // Only create a landing page if there are no other tabs open.
   layout.restored.then(() => {
-    if (!widget) {
-      app.commands.execute(command, { inactive: true });
+    if (app.shell.mainAreaIsEmpty) {
+      app.commands.execute(command, void 0);
     }
   });
 }

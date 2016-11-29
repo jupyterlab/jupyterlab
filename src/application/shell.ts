@@ -178,6 +178,34 @@ class ApplicationShell extends Widget {
   }
 
   /**
+   * True if main area is empty.
+   */
+  get mainAreaIsEmpty(): boolean {
+    return this._dockPanel.isEmpty;
+  }
+
+  /**
+   * True if top area is empty.
+   */
+  get topAreaIsEmpty(): boolean {
+    return this._topPanel.widgets.length === 0;
+  }
+
+  /**
+   * True if left area is empty.
+   */
+  get leftAreaIsEmpty(): boolean {
+    return this._leftHandler.stackedPanel.widgets.length === 0;
+  }
+
+  /**
+   * True if right area is empty.
+   */
+  get rightAreaIsEmpty(): boolean {
+    return this._rightHandler.stackedPanel.widgets.length === 0;
+  }
+
+  /**
    * Add a widget to the top content area.
    *
    * #### Notes
@@ -228,12 +256,12 @@ class ApplicationShell extends Widget {
    * #### Notes
    * Widgets must have a unique `id` property, which will be used as the DOM id.
    */
-  addToMainArea(widget: Widget, options: DockPanel.IAddOptions = { mode: 'tab-after' }): void {
+  addToMainArea(widget: Widget): void {
     if (!widget.id) {
       console.error('widgets added to app shell must have unique id property');
       return;
     }
-    this._dockPanel.addWidget(widget, options);
+    this._dockPanel.addWidget(widget, { mode: 'tab-after' });
   }
 
   /**
