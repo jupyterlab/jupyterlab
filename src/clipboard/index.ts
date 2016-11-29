@@ -9,6 +9,7 @@ import {
   Token
 } from 'phosphor/lib/core/token';
 
+
 /* tslint:disable */
 /**
  * The clipboard token.
@@ -49,14 +50,14 @@ function copyToClipboard(text: string): void {
  *
  * @param node - The element on which to generate the event.
  *
- * @param type - The type of event to generate: `'copy'` or `'cut'`.
+ * @param type - The type of event to generate.
  *   `'paste'` events cannot be programmatically generated.
  *
  * #### Notes
  * This can only be called in response to a user input event.
  */
 export
-function generateClipboardEvent(node: HTMLElement, type='copy'): void {
+function generateClipboardEvent(node: HTMLElement, type: 'copy' | 'cut' = 'copy'): void {
   // http://stackoverflow.com/a/5210367
 
   // Identify selected text.
