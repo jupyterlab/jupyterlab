@@ -1,7 +1,9 @@
 name: lab_tutorial
+channels:
+  - conda-forge
 dependencies:
-- python=3.5
+- python=3
+- sphinx>1.4
 - sphinx_rtd_theme
 - pip:
-  - sphinx>1.4
-  - recommonmark
+  - recommonmark==0.4.0
