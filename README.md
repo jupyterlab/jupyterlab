@@ -75,6 +75,8 @@ JupyterLab will open automatically in your browser. You may also access
 JupyterLab by entering the notebook server's URL (`http://localhost:8888`) in
 the browser.
 
+Instructions on how to install the project from the git sources are available in our [contributor documentation](CONTRIBUTING.md).
+
 ----
 
 ## Contributing
