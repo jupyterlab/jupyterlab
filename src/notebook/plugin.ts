@@ -155,7 +155,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
       command: 'file-operations:open',
       args: widget => ({ path: widget.context.path, factory: FACTORY }),
       name: widget => widget.context.path,
-      namespace: 'notebooks',
+      namespace: 'notebook',
       when: [app.started, services.ready],
       registry: app.commands
     }

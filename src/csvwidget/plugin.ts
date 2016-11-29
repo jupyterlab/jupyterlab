@@ -59,7 +59,7 @@ function activateCSVWidget(app: JupyterLab, registry: IDocumentRegistry, state: 
       command: 'file-operations:open',
       args: widget => ({ path: widget.context.path, factory: FACTORY }),
       name: widget => widget.context.path,
-      namespace: 'csvwidgets',
+      namespace: 'csvwidget',
       when: app.started,
       registry: app.commands
     }

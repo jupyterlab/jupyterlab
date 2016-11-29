@@ -46,7 +46,7 @@ function activateAbout(app: JupyterLab, palette: ICommandPalette, state: IStateD
       state, layout, command,
       args: widget => null,
       name: widget => 'about',
-      namespace: 'abouts',
+      namespace: 'about',
       when: app.started,
       registry: app.commands
     }

@@ -134,7 +134,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       command: 'console:create',
       args: panel => ({ id: panel.content.session.id }),
       name: panel => panel.content.session && panel.content.session.id,
-      namespace: 'consoles',
+      namespace: 'console',
       when: [app.started, manager.ready],
       registry: app.commands
     }

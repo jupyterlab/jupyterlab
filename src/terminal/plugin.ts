@@ -92,7 +92,7 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
       command: newTerminalId,
       args: widget => ({ name: widget.session.name }),
       name: widget => widget.session && widget.session.name,
-      namespace: 'terminals',
+      namespace: 'terminal',
       when: app.started,
       registry: app.commands
     }

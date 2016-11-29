@@ -38,7 +38,6 @@ import {
 } from '../statedb';
 
 
-
 /**
  * An object that tracks widget instances.
  */

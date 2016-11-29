@@ -111,7 +111,7 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
       command: 'file-operations:open',
       args: widget => ({ path: widget.context.path, factory: FACTORY }),
       name: widget => widget.context.path,
-      namespace: 'editors',
+      namespace: 'editor',
       when: app.started,
       registry: app.commands
     }

@@ -74,7 +74,7 @@ function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palet
       command: 'file-operations:open',
       args: widget => ({ path: widget.context.path, factory: FACTORY }),
       name: widget => widget.context.path,
-      namespace: 'images',
+      namespace: 'imagewidget',
       when: app.started,
       registry: app.commands
     }

@@ -54,7 +54,7 @@ function activateFAQ(app: JupyterLab, palette: ICommandPalette, linker: ICommand
       state, layout, command,
       args: widget => null,
       name: widget => 'faq',
-      namespace: 'faqs',
+      namespace: 'faq',
       when: app.started,
       registry: app.commands
     }
