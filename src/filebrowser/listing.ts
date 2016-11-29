@@ -457,6 +457,7 @@ class DirListing extends Widget {
     }
     if (index !== -1) {
       this._selectItem(index, keepExisting);
+      scrollIntoViewIfNeeded(this.contentNode, this._items.at(index));
     }
   }
 
@@ -487,6 +488,7 @@ class DirListing extends Widget {
     }
     if (index !== -1) {
       this._selectItem(index, keepExisting);
+      scrollIntoViewIfNeeded(this.contentNode, this._items.at(index));
     }
   }
 
@@ -1079,6 +1081,7 @@ class DirListing extends Widget {
       let index = findIndex(items, value => value.name === name);
       this._selectItem(index, false);
       sendMessage(this, WidgetMessage.UpdateRequest);
+      scrollIntoViewIfNeeded(this.contentNode, this._items.at(index));
     });
   }
 
@@ -1193,7 +1196,6 @@ class DirListing extends Widget {
     }
     let name = items.at(index).name;
     this._selection[name] = true;
-    scrollIntoViewIfNeeded(this.contentNode, this._items.at(index));
     this._isCut = false;
   }
 
