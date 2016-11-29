@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel
-} from '@jupyterlab/services';
-
-import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -83,6 +79,14 @@ class MarkdownWidget extends Widget {
   dispose(): void {
     this._monitor.dispose();
     super.dispose();
+  }
+
+  /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this.node.tabIndex = -1;
+    this.node.focus();
   }
 
   /**
