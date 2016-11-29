@@ -30,7 +30,7 @@ interface IVDomModel extends IDisposable {
   /**
    * A signal emited when any model state changes.
    */
-  stateChanged: ISignal<IVDomModel, void>;
+  readonly stateChanged: ISignal<IVDomModel, void>;
 }
 
 
@@ -42,7 +42,7 @@ class VDomModel implements IVDomModel {
   /**
    * A signal emitted when any model state changes.
    */
-  stateChanged: ISignal<this, void>;
+  readonly stateChanged: ISignal<this, void>;
 
   /**
    * Dispose the model.
@@ -64,6 +64,7 @@ class VDomModel implements IVDomModel {
 
   private _isDisposed = false;
 }
+
 
 // Define the signals for the VDomModel class.
 defineSignal(VDomModel.prototype, 'stateChanged');
@@ -147,6 +148,7 @@ abstract class VDomWidget<T extends IVDomModel> extends Widget {
 
   private _model: T;
 }
+
 
 // Define the signal for the VDomWidget class.
 defineSignal(VDomWidget.prototype, 'modelChanged');
