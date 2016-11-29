@@ -128,7 +128,7 @@ function selectKernel(options: IKernelSelection): Promise<Kernel.IModel> {
  * Change the kernel on a context.
  */
 export
-function selectKernelForContext(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, manager: Session.IManager, host?: HTMLElement): Promise<void> {
+function selectKernelForContext(context: DocumentRegistry.Context, manager: Session.IManager, host?: HTMLElement): Promise<void> {
   return manager.ready.then(() => {
     let options: IKernelSelection = {
       name: context.path.split('/').pop(),

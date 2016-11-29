@@ -189,7 +189,7 @@ class SaveHandler implements IDisposable {
   private _autosaveTimer = -1;
   private _minInterval = -1;
   private _interval = -1;
-  private _context: DocumentRegistry.IContext<DocumentRegistry.IModel> = null;
+  private _context: DocumentRegistry.Context = null;
   private _manager: ServiceManager.IManager = null;
   private _isActive = false;
   private _inDialog = false;
@@ -209,7 +209,7 @@ namespace SaveHandler {
     /**
      * The context asssociated with the file.
      */
-    context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
+    context: DocumentRegistry.Context;
 
     /**
      * The service manager to use for checking last saved.
