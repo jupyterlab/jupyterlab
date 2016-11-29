@@ -4,8 +4,8 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  JSONObject
-} from 'phosphor/lib/algorithm/json';
+  utils
+} from '@jupyterlab/services';
 
 import {
   AttachedProperty
@@ -43,6 +43,11 @@ const ILayoutRestorer = new Token<ILayoutRestorer>('jupyter.services.layout-rest
 export
 interface ILayoutRestorer {
   /**
+   * A promise resolved when the layout restorer is ready to receive signals.
+   */
+  restored: Promise<void>;
+
+  /**
    * Add a widget to be tracked by the layout restorer.
    */
   add(widget: Widget, name: string): void;
@@ -78,18 +83,27 @@ class LayoutRestorer implements ILayoutRestorer {
    */
   constructor(options: LayoutRestorer.IOptions) {
     this._state = options.state;
-    options.first.then(() => Promise.all(this._promises)).then(() => {
-      // Release the promises held in memory.
-      this._promises = null;
-      // Restore the application state.
-      this._restore();
-    });
+    options.first.then(() => Promise.all(this._promises))
+      .then(() => {
+        // Release the promises held in memory.
+        this._promises = null;
+        // Restore the application state.
+        return this._restore();
+      })
+      .then(() => { this._restored.resolve(void 0); });
   }
 
   /**
    * A signal emitted when a widget should be activated.
    */
-  readonly activated: ISignal<this, Widget>;
+  readonly activated: ISignal<this, string>;
+
+  /**
+   * A promise resolved when the layout restorer is ready to receive signals.
+   */
+  get restored(): Promise<void> {
+    return this._restored.promise;
+  }
 
   /**
    * Add a widget to be tracked by the layout restorer.
@@ -137,8 +151,8 @@ class LayoutRestorer implements ILayoutRestorer {
   /**
    * Restore the application state.
    */
-  private _restore(): void {
-    this._state.fetch(KEY).then(data => {
+  private _restore(): Promise<void> {
+    return this._state.fetch(KEY).then(data => {
       if (!data) {
         return;
       }
@@ -150,12 +164,13 @@ class LayoutRestorer implements ILayoutRestorer {
 
       let widget = this._widgets.get(name);
       if (widget) {
-        this.activated.emit(widget);
+        this.activated.emit(widget.id);
       }
     });
   }
 
   private _promises: Promise<any>[] = [];
+  private _restored = new utils.PromiseDelegate<void>();
   private _state: IStateDB = null;
   private _widgets = new Map<string, Widget>();
 }
