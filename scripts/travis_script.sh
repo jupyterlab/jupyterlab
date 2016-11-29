@@ -33,6 +33,13 @@ cp jupyter-plugins-demo.gif docs
 npm install -g postcss-cli
 postcss jupyterlab/build/*.css > /dev/null
 
+# Verify docs build
+conda create -n docs -f tutorial/environment.yml
+source activate docs
+make -C tutorial makelinks
+make -C tutorial html
+source deactivate
+
 # Make sure we can start and kill the lab server
 jupyter lab --no-browser &
 TASK_PID=$!
