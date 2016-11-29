@@ -31,6 +31,10 @@ import {
 } from '../inspector';
 
 import {
+  ILayoutRestorer
+} from '../layoutrestorer';
+
+import {
   IRenderMime
 } from '../rendermime';
 
@@ -126,7 +130,8 @@ const notebookTrackerProvider: JupyterLabPlugin<INotebookTracker> = {
     ICommandPalette,
     IInspector,
     NotebookPanel.IRenderer,
-    IStateDB
+    IStateDB,
+    ILayoutRestorer
   ],
   activate: activateNotebookHandler,
   autoStart: true
@@ -136,7 +141,7 @@ const notebookTrackerProvider: JupyterLabPlugin<INotebookTracker> = {
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector, renderer: NotebookPanel.IRenderer, state: IStateDB): INotebookTracker {
+function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector, renderer: NotebookPanel.IRenderer, state: IStateDB, layout: ILayoutRestorer): INotebookTracker {
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
     fileExtensions: ['.ipynb'],
@@ -151,7 +156,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
 
   const tracker = new NotebookTracker({
     restore: {
-      state,
+      state, layout,
       command: 'file-operations:open',
       args: widget => ({ path: widget.context.path, factory: FACTORY }),
       name: widget => widget.context.path,
