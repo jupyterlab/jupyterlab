@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  utils
+} from '@jupyterlab/services';
+
+import {
   JSONObject
 } from 'phosphor/lib/algorithm/json';
 
@@ -26,9 +30,12 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
+  ILayoutRestorer
+} from '../layoutrestorer';
+
+import {
   IStateDB
 } from '../statedb';
-
 
 
 /**
@@ -56,6 +63,12 @@ interface IInstanceTracker<T extends Widget> {
  * #### Notes
  * This is meant to be used in conjunction with a `FocusTracker` and will
  * typically be kept in sync with focus tracking events.
+ *
+ * The API surface area of this concrete implementation is substantially larger
+ * than the instance tracker interface it implements. The interface is intended
+ * for export by JupyterLab plugins that create widgets and have clients who may
+ * wish to keep track of newly created widgets. This class, however, can be used
+ * internally by plugins to restore state as well.
  */
 export
 class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposable {
@@ -64,17 +77,29 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    */
   constructor(options: InstanceTracker.IOptions<T> = {}) {
     this._restore = options.restore;
-    if (this._restore) {
-      let { command, namespace, registry, state, when } = this._restore;
-      let promises = [state.fetchNamespace(namespace)].concat(when);
-      Promise.all(promises).then(([saved]) => {
-        saved.forEach(args => {
-          // Execute the command and if it fails, delete the state restore data.
-          registry.execute(command, args.value)
-            .catch(() => { state.remove(args.id); });
-        });
-      });
+
+    if (!this._restore) {
+      return;
     }
+
+    let { command, namespace, layout, registry, state, when } = this._restore;
+    let promises = [state.fetchNamespace(namespace)].concat(when);
+
+    // Immediately (synchronously) register the restored promise with the
+    // layout restorer if one is present.
+    if (layout) {
+      layout.await(this._restored.promise);
+    }
+
+    Promise.all(promises).then(([saved]) => {
+      let promises = saved.map(args => {
+        // Execute the command and if it fails, delete the state restore data.
+        return registry.execute(command, args.value)
+          .catch(() => { state.remove(args.id); });
+      });
+      return Promise.all(promises);
+    }).then(() => { this._restored.resolve(void 0); });
+
   }
 
   /**
@@ -111,13 +136,16 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
 
     // Handle widget state restoration.
     if (this._restore) {
-      let { namespace, state } = this._restore;
+      let { layout, namespace, state } = this._restore;
       let widgetName = this._restore.name(widget);
 
       if (widgetName) {
         let name = `${namespace}:${widgetName}`;
         Private.nameProperty.set(widget, name);
         state.save(name, this._restore.args(widget));
+        if (layout) {
+          layout.add(widget, name);
+        }
       }
     }
 
@@ -257,6 +285,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
 
   private _currentWidget: T = null;
   private _restore: InstanceTracker.IRestoreOptions<T> = null;
+  private _restored = new utils.PromiseDelegate<void>();
   private _widgets = new Set<T>();
 }
 
@@ -294,6 +323,17 @@ namespace InstanceTracker {
      * The namespace to occupy in the state database for restoration data.
      */
     namespace: string;
+
+    /**
+     * The layout restorer to use to re-arrange restored tabs.
+     *
+     * #### Notes
+     * If a layout restorer instance is not supplied, widget instances will
+     * still be restored, but their layout within JupyterLab will be arbitrary.
+     * This may be acceptable for widgets that have a pre-defined slot whose
+     * layout cannot be modified.
+     */
+    layout?: ILayoutRestorer;
 
     /**
      * The command registry which holds the restore command.

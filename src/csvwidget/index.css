@@ -11,6 +11,7 @@
 .jp-CSVWidget {
   display: flex;
   flex-direction: column;
+  outline: none;
 }
 
 .jp-CSVWidget-toolbar {

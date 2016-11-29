@@ -40,7 +40,7 @@ const ARGS_ATTR = 'commandlinker-args';
  * The command linker token.
  */
 export
-const ICommandLinker = new Token<ICommandLinker>('jupyter.services.commandlinker');
+const ICommandLinker = new Token<ICommandLinker>('jupyter.services.command-linker');
 /* tslint:enable */
 
 

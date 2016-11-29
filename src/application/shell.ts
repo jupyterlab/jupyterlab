@@ -178,6 +178,34 @@ class ApplicationShell extends Widget {
   }
 
   /**
+   * True if main area is empty.
+   */
+  get mainAreaIsEmpty(): boolean {
+    return this._dockPanel.isEmpty;
+  }
+
+  /**
+   * True if top area is empty.
+   */
+  get topAreaIsEmpty(): boolean {
+    return this._topPanel.widgets.length === 0;
+  }
+
+  /**
+   * True if left area is empty.
+   */
+  get leftAreaIsEmpty(): boolean {
+    return this._leftHandler.stackedPanel.widgets.length === 0;
+  }
+
+  /**
+   * True if right area is empty.
+   */
+  get rightAreaIsEmpty(): boolean {
+    return this._rightHandler.stackedPanel.widgets.length === 0;
+  }
+
+  /**
    * Add a widget to the top content area.
    *
    * #### Notes
