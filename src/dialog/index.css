@@ -33,6 +33,7 @@
   padding: 24px;
   padding-bottom: 12px;
   min-width: 300px;
+  min-height: 150px;
   max-width: 500px;
   max-height: 500px;
   box-sizing: border-box;
