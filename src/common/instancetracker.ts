@@ -174,8 +174,10 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     }
     this._widgets.add(widget);
 
+    let injected = Private.injectedProperty.get(widget);
+
     // Handle widget state restoration.
-    if (this._restore) {
+    if (!injected && this._restore) {
       let { layout, namespace, state } = this._restore;
       let widgetName = this._restore.name(widget);
 
@@ -193,7 +195,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     widget.disposed.connect(() => {
       this._widgets.delete(widget);
       // If restore data was saved, delete it from the database.
-      if (this._restore) {
+      if (!injected && this._restore) {
         let { state } = this._restore;
         let name = Private.nameProperty.get(widget);
 
@@ -267,12 +269,8 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * its widgets into the parent plugin's instance tracker.
    */
   inject(widget: T): void {
-    if (this._widgets.has(widget)) {
-      console.warn(`${widget.id} already exists in the tracker.`);
-      return;
-    }
     Private.injectedProperty.set(widget, true);
-    this._widgets.add(widget);
+    this.add(widget);
   }
 
   /**
