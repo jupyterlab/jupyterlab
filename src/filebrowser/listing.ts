@@ -133,7 +133,7 @@ const MODIFIED_ID_CLASS = 'jp-id-modified';
 /**
  * The class name added to a file type content item.
  */
-const FILE_TYPE_CLASS = 'jp-type-file';
+const FILE_TYPE_CLASS = 'jp-FileIcon';
 
 /**
  * The class name added to a folder type content item.
@@ -1495,6 +1495,7 @@ namespace DirListing {
         icon.classList.add(NOTEBOOK_MATERIAL_ICON_CLASS);
         break;
       default:
+        icon.classList.add(MATERIAL_ICON_CLASS);
         icon.classList.add(FILE_TYPE_CLASS);
         break;
       }
