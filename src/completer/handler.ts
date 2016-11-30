@@ -137,7 +137,7 @@ class CellCompleterHandler implements IDisposable {
     // Update the original request.
     model.original = request;
     // Update the options.
-    model.options = value.matches;
+    model.setOptions(value.matches);
     // Update the cursor.
     model.cursor = { start: value.cursor_start, end: value.cursor_end };
   }

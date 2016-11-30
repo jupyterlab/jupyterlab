@@ -2,16 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  deepEqual, JSONObject
+  IIterator, IterableOrArrayLike, iter, map, toArray
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
+  deepEqual
 } from 'phosphor/lib/algorithm/json';
 
 import {
   StringSearch
 } from 'phosphor/lib/algorithm/searching';
-
-import {
-  IDisposable
-} from 'phosphor/lib/core/disposable';
 
 import {
   clearSignalData, defineSignal, ISignal
@@ -21,182 +21,20 @@ import {
   ICompletionRequest, ITextChange
 } from '../notebook/cells/editor';
 
-
-/**
- * A filtered completion menu matching result.
- */
-interface ICompletionMatch {
-  /**
-   * The raw text of a completion match.
-   */
-  raw: string;
-
-  /**
-   * A score which indicates the strength of the match.
-   *
-   * A lower score is better. Zero is the best possible score.
-   */
-  score: number;
-
-  /**
-   * The highlighted text of a completion match.
-   */
-  text: string;
-}
-
-
-/**
- * An object describing a completion option injection into text.
- */
-export
-interface ICompletionPatch {
-  /**
-   * The patch text.
-   */
-  text: string;
-
-  /**
-   * The position in the text where cursor should be after patch application.
-   */
-  position: number;
-}
-
-
-/**
- * A completer menu item.
- */
-export
-interface ICompleterItem {
-  /**
-   * The highlighted, marked up text of a visible completer item.
-   */
-  text: string;
-
-  /**
-   * The raw text of a visible completer item.
-   */
-  raw: string;
-}
-
-
-/**
- * A cursor span.
- */
-export
-interface ICursorSpan extends JSONObject {
-  /**
-   * The start position of the cursor.
-   */
-  start: number;
-
-  /**
-   * The end position of the cursor.
-   */
-  end: number;
-}
-
-
-/**
- * The data model backing a code completer widget.
- */
-export
-interface ICompleterModel extends IDisposable {
-  /**
-   * A signal emitted when state of the completer menu changes.
-   */
-  stateChanged: ISignal<ICompleterModel, void>;
-
-  /**
-   * The current text change details.
-   */
-  current: ITextChange;
-
-  /**
-   * The cursor details that the API has used to return matching options.
-   */
-  cursor: ICursorSpan;
-
-  /**
-   * A flag that is true when the model value was modified by a subset match.
-   */
-  subsetMatch: boolean;
-
-  /**
-   * The list of visible items in the completer menu.
-   */
-  items: ICompleterItem[];
-
-  /**
-   * The unfiltered list of all available options in a completer menu.
-   */
-  options: string[];
-
-  /**
-   * The original completer request details.
-   */
-  original: ICompletionRequest;
-
-  /**
-   * The query against which items are filtered.
-   */
-  query: string;
-
-  /**
-   * Handle a text change.
-   */
-  handleTextChange(change: ITextChange): void;
-
-  /**
-   * Create a resolved patch between the original state and a patch string.
-   */
-  createPatch(patch: string): ICompletionPatch;
-
-  /**
-   * Reset the state of the model.
-   */
-  reset(): void;
-}
+import {
+  CompleterWidget
+} from './widget';
 
 
 /**
  * An implementation of a completer model.
  */
 export
-class CompleterModel implements ICompleterModel {
+class CompleterModel implements CompleterWidget.IModel {
   /**
    * A signal emitted when state of the completer menu changes.
    */
-  stateChanged: ISignal<ICompleterModel, void>;
-
-  /**
-   * The list of visible items in the completer menu.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get items(): ICompleterItem[] {
-    return this._filter();
-  }
-
-  /**
-   * The unfiltered list of all available options in a completer menu.
-   */
-  get options(): string[] {
-    return this._options;
-  }
-  set options(newValue: string[]) {
-    if (deepEqual(newValue, this._options)) {
-      return;
-    }
-    if (newValue && newValue.length) {
-      this._options = [];
-      this._options.push(...newValue);
-      this._subsetMatch = true;
-    } else {
-      this._options = null;
-    }
-    this.stateChanged.emit(void 0);
-  }
+  readonly stateChanged: ISignal<this, void>;
 
   /**
    * The original completion request details.
@@ -266,10 +104,10 @@ class CompleterModel implements ICompleterModel {
   /**
    * The cursor details that the API has used to return matching options.
    */
-  get cursor(): ICursorSpan {
+  get cursor(): CompleterWidget.ICursorSpan {
     return this._cursor;
   }
-  set cursor(newValue: ICursorSpan) {
+  set cursor(newValue: CompleterWidget.ICursorSpan) {
     // Original request must always be set before a cursor change. If it isn't
     // the model fails silently.
     if (!this.original) {
@@ -319,6 +157,41 @@ class CompleterModel implements ICompleterModel {
   }
 
   /**
+   * The list of visible items in the completer menu.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  items(): IIterator<CompleterWidget.IItem> {
+    return this._filter();
+  }
+
+  /**
+   * The unfiltered list of all available options in a completer menu.
+   */
+  options(): IIterator<string> {
+    return iter(this._options);
+  }
+
+  /**
+   * Set the avilable options in the completer menu.
+   */
+  setOptions(newValue: IterableOrArrayLike<string>) {
+    let values = toArray(newValue);
+    if (deepEqual(values, this._options)) {
+      return;
+    }
+    if (values && values.length) {
+      this._options = [];
+      this._options.push(...values);
+      this._subsetMatch = true;
+    } else {
+      this._options = null;
+    }
+    this.stateChanged.emit(void 0);
+  }
+
+  /**
    * Handle a text change.
    */
   handleTextChange(change: ITextChange): void {
@@ -348,7 +221,7 @@ class CompleterModel implements ICompleterModel {
    *
    * @returns A patched text change or null if original value did not exist.
    */
-  createPatch(patch: string): ICompletionPatch {
+  createPatch(patch: string): CompleterWidget.IPatch {
     let original = this._original;
     let cursor = this._cursor;
 
@@ -377,13 +250,13 @@ class CompleterModel implements ICompleterModel {
   /**
    * Apply the query to the complete options list to return the matching subset.
    */
-  private _filter(): ICompleterItem[] {
+  private _filter(): IIterator<CompleterWidget.IItem> {
     let options = this._options || [];
     let query = this._query;
     if (!query) {
-      return options.map(option => ({ raw: option, text: option }));
+      return map(options, option => ({ raw: option, text: option }));
     }
-    let results: ICompletionMatch[] = [];
+    let results: Private.IMatch[] = [];
     for (let option of options) {
       let match = StringSearch.sumOfSquares(option, query);
       if (match) {
@@ -394,8 +267,9 @@ class CompleterModel implements ICompleterModel {
         });
       }
     }
-    return results.sort(Private.scoreCmp)
-      .map(result => ({ text: result.text, raw: result.raw }));
+    return map(results.sort(Private.scoreCmp), result =>
+      ({ text: result.text, raw: result.raw })
+    );
   }
 
   /**
@@ -411,7 +285,7 @@ class CompleterModel implements ICompleterModel {
   }
 
   private _current: ITextChange = null;
-  private _cursor: ICursorSpan = null;
+  private _cursor: CompleterWidget.ICursorSpan = null;
   private _isDisposed = false;
   private _options: string[] = null;
   private _original: ICompletionRequest = null;
@@ -429,6 +303,29 @@ defineSignal(CompleterModel.prototype, 'stateChanged');
  */
 namespace Private {
   /**
+   * A filtered completion menu matching result.
+   */
+  export
+  interface IMatch {
+    /**
+     * The raw text of a completion match.
+     */
+    raw: string;
+
+    /**
+     * A score which indicates the strength of the match.
+     *
+     * A lower score is better. Zero is the best possible score.
+     */
+    score: number;
+
+    /**
+     * The highlighted text of a completion match.
+     */
+    text: string;
+  }
+
+  /**
    * A sort comparison function for item match scores.
    *
    * #### Notes
@@ -436,7 +333,7 @@ namespace Private {
    * by locale order of the item text.
    */
   export
-  function scoreCmp(a: ICompletionMatch, b: ICompletionMatch): number {
+  function scoreCmp(a: IMatch, b: IMatch): number {
     let delta = a.score - b.score;
     if (delta !== 0) {
       return delta;
