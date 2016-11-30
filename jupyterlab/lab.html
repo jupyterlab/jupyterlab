@@ -51,6 +51,9 @@ Distributed under the terms of the Modified BSD License.
   var lab = jupyter.lab = createLab(loader);
   var plugins = [];
 
+  /**
+   * Get the plugins for an entry point.
+   */
   var getEntryPoint = function (entryPoint) {
     let plugins = loader.require(entryPoint);
     try {

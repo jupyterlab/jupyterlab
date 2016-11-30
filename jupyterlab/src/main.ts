@@ -20,6 +20,13 @@ import '../../lib/default-theme/index.css';
 polyfill();
 
 
+/**
+ * Create an application object.
+ *
+ * @param loader - The module loader for the application.
+ *
+ * @returns A new application object.
+ */
 export
 function createLab(loader: ModuleLoader): JupyterLab {
   return new JupyterLab({
