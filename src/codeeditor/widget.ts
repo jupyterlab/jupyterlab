@@ -92,12 +92,12 @@ class CodeEditorWidget extends Widget {
     if (msg.width < 0 || msg.height < 0) {
       if (this._resizing === -1) {
         this._resizing = setTimeout(() => {
-          this._editor.setSize(null, null);
+          this._editor.setSize(null);
           this._resizing = -1;
         }, 500);
       }
     } else {
-      this._editor.setSize(msg.width, msg.height);
+      this._editor.setSize(msg);
     }
     this._needsRefresh = true;
   }

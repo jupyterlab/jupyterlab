@@ -56,6 +56,22 @@ namespace CodeEditor {
   }
 
   /**
+   * The dimension of an element.
+   */
+  export
+  interface IDimension {
+    /**
+     * The width of an element in pixels.  
+     */
+    width: number;
+
+    /**
+     * The height of an element in pixels.
+     */
+    height: number;
+  }
+
+  /**
    * An interface describing editor state coordinates.
    */
   export
@@ -259,9 +275,12 @@ namespace CodeEditor {
     hasFocus(): boolean;
 
     /**
-     * Set the size of the editor in pixels.
+     * Sets the size of the editor.
+     * 
+     * #### Notes
+     * Sets null if the size is unknown.
      */
-    setSize(width: number, height: number): void;
+    setSize(size: IDimension | null): void;
 
     /**
      * Scroll the given cursor position into view.
@@ -542,7 +561,7 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
   /**
    * Set the size of the editor in pixels.
    */
-  setSize(width: number, height: number): void {
+  setSize(dimension: CodeEditor.IDimension | null): void {
     // override css here
   }
 

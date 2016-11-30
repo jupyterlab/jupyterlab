@@ -117,8 +117,12 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Set the size of the editor in pixels.
    */
-  setSize(width: number, height: number): void {
-    // override css here
+  setSize(dimension: CodeEditor.IDimension | null): void {
+    if (dimension) {
+      this._editor.setSize(dimension.width, dimension.height);
+    } else {
+      this._editor.setSize(null, null);
+    }
   }
 
   /**
