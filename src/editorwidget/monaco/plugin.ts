@@ -1,45 +1,49 @@
 import {
-    Menu
+  Menu
 } from 'phosphor/lib/ui/menu';
 
 import {
-    JupyterLab, JupyterLabPlugin
+  JupyterLab, JupyterLabPlugin
 } from '../../application';
 
 import {
-    InstanceTracker
+  InstanceTracker
 } from '../../common/instancetracker';
 
 import {
-    IDocumentRegistry
+  IDocumentRegistry
 } from '../../docregistry';
 
 import {
-    EditorWidgetFactory, EditorWidget
+  ILayoutRestorer
+} from '../../layoutrestorer';
+
+import {
+  EditorWidgetFactory, EditorWidget
 } from '../../editorwidget/widget';
 
 import {
-    ICommandPalette
+  ICommandPalette
 } from '../../commandpalette';
 
 import {
-    IMainMenu
+  IMainMenu
 } from '../../mainmenu';
 
 import {
-    IStateDB
+  IStateDB
 } from '../../statedb';
 
 import {
-    IEditorTracker
+  IEditorTracker
 } from '../../editorwidget/index';
 
 import {
-    IEditorFactory
+  IEditorFactory
 } from '../../codeeditor';
 
 import {
-    MonacoCodeEditor
+  MonacoCodeEditor
 } from '../../monaco';
 
 /**
@@ -53,125 +57,92 @@ const PORTRAIT_ICON_CLASS = 'jp-MainAreaPortraitIcon';
 const EDITOR_ICON_CLASS = 'jp-ImageTextEditor';
 
 /**
- * The state database namespace for editor widgets.
+ * The name of the factory that creates editor widgets.
  */
-const NAMESPACE = 'editorwidgets';
+const FACTORY = 'Editor';
 
 /**
  * The map of command ids used by the editor.
  */
 const cmdIds = {
-    lineNumbers: 'editor:line-numbers',
-    closeAll: 'editor:close-all',
-    changeTheme: 'editor:change-theme'
+  lineNumbers: 'editor:line-numbers',
+  closeAll: 'editor:close-all',
+  changeTheme: 'editor:change-theme'
 };
 
 export const DEFAULT_THEME = 'default-theme';
 
 export const THEMES = [
-    'vs', 'vs-dark', 'hc-black'
+  'vs', 'vs-dark', 'hc-black'
 ];
-
-/**
- * The editor widget instance tracker.
- */
-const tracker = new InstanceTracker<EditorWidget>();
 
 /**
  * The editor handler extension.
  */
 export const editorHandlerProvider: JupyterLabPlugin<IEditorTracker> = {
-    id: 'ride.services.editor-handler',
-    requires: [IDocumentRegistry, IMainMenu, ICommandPalette, IStateDB, IEditorFactory],
-    provides: IEditorTracker,
-    activate: activateEditorHandler,
-    autoStart: true
+  id: 'jupyter.services.editor-handler',
+  requires: [IDocumentRegistry, IMainMenu, ICommandPalette, IStateDB, ILayoutRestorer, IEditorFactory],
+  provides: IEditorTracker,
+  activate: activateEditorHandler,
+  autoStart: true
 };
 
 /**
  * Sets up the editor widget
  */
-function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB, editorFactory: IEditorFactory): IEditorTracker {
-    let widgetFactory = new EditorWidgetFactory(editorFactory,
-        {
-            name: 'Editor',
-            fileExtensions: ['*'],
-            defaultFor: ['*']
-        });
-
-    // Sync tracker with currently focused widget.
-    app.shell.currentChanged.connect((sender, args) => {
-        tracker.sync(args.newValue);
-    });
-
-    widgetFactory.widgetCreated.connect((sender, widget) => {
-        widget.title.icon = `${PORTRAIT_ICON_CLASS} ${EDITOR_ICON_CLASS}`;
-        // Add the file path to the state database.
-        let key = `${NAMESPACE}:${widget.context.path}`;
-        state.save(key, { path: widget.context.path });
-        // Remove the file path from the state database on disposal.
-        widget.disposed.connect(() => { state.remove(key); });
-        // Keep track of path changes in the state database.
-        widget.context.pathChanged.connect((sender, path) => {
-            state.remove(key);
-            key = `${NAMESPACE}:${path}`;
-            state.save(key, { path });
-        });
-        tracker.add(widget);
-    });
-    registry.addWidgetFactory(widgetFactory);
-
-    mainMenu.addMenu(createMenu(app), { rank: 30 });
-
-    let commands = app.commands;
-
-    commands.addCommand(cmdIds.lineNumbers, {
-        execute: () => { toggleLineNums(); },
-        label: 'Toggle Line Numbers',
-    });
-
-    commands.addCommand(cmdIds.closeAll, {
-        execute: () => { closeAllFiles(); },
-        label: 'Close all files'
-    });
-
-    [
-        cmdIds.lineNumbers,
-        cmdIds.closeAll
-    ].forEach(command => palette.addItem({ command, category: 'Editor' }));
-
-    // Reload any editor widgets whose state has been stored.
-    Promise.all([state.fetchNamespace(NAMESPACE), app.started])
-        .then(([items]) => {
-            let open = 'file-operations:open';
-            items.forEach(item => { app.commands.execute(open, item.value); });
-        });
-
-    return tracker;
-}
-
-
-/**
- * Toggle editor line numbers
- */
-function toggleLineNums() {
-    if (tracker.currentWidget) {
-        const editor = tracker.currentWidget.editor;
-        editor.lineNumbers = !editor.lineNumbers;
+function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB, layout: ILayoutRestorer, editorFactory: IEditorFactory): IEditorTracker {
+  const factory = new EditorWidgetFactory(editorFactory, {
+    name: FACTORY,
+    fileExtensions: ['*'],
+    defaultFor: ['*']
+  });
+  const tracker = new InstanceTracker<EditorWidget>({
+    restore: {
+      state, layout,
+      command: 'file-operations:open',
+      args: widget => ({ path: widget.context.path, factory: FACTORY }),
+      name: widget => widget.context.path,
+      namespace: 'editor',
+      when: app.started,
+      registry: app.commands
     }
-}
+  });
 
-/**
- * Close all currently open text editor files
- */
-function closeAllFiles() {
+  // Sync tracker with currently focused widget.
+  app.shell.currentChanged.connect((sender, args) => {
+    tracker.sync(args.newValue);
+  });
+
+  factory.widgetCreated.connect((sender, widget) => {
+    widget.title.icon = `${PORTRAIT_ICON_CLASS} ${EDITOR_ICON_CLASS}`;
+    // Notify the instance tracker if restore data needs to update.
+    widget.context.pathChanged.connect(() => { tracker.save(widget); });
+    tracker.add(widget);
+  });
+  registry.addWidgetFactory(factory);
+
+
+  /**
+   * Toggle editor line numbers
+   */
+  function toggleLineNums() {
+    if (tracker.currentWidget) {
+      const editor = tracker.currentWidget.editor;
+      editor.lineNumbers = !editor.lineNumbers;
+    }
+  }
+
+  /**
+   * Close all currently open text editor files
+   */
+  function closeAllFiles() {
     tracker.forEach(widget => { widget.close(); });
-}
+  }
 
-/**
- * Create a menu for the editor.
- */
-function createMenu(app: JupyterLab): Menu {
+  /**
+   * Create a menu for the editor.
+   */
+  function createMenu(app: JupyterLab): Menu {
     let { commands, keymap } = app;
     let settings = new Menu({ commands, keymap });
     let themeMenu = new Menu({ commands, keymap });
@@ -184,25 +155,25 @@ function createMenu(app: JupyterLab): Menu {
     settings.addItem({ command: cmdIds.lineNumbers });
 
     commands.addCommand(cmdIds.changeTheme, {
-        label: args => {
-            return args['theme'] as string;
-        },
-        execute: args => {
-            let name: string = args['theme'] as string || DEFAULT_THEME;
-            tracker.forEach(widget => {
-                const editor = widget.editor as MonacoCodeEditor;
-                editor.editor.updateOptions({
-                    theme: name
-                });
-            });
-        }
+      label: args => {
+        return args['theme'] as string;
+      },
+      execute: args => {
+        let name: string = args['theme'] as string || DEFAULT_THEME;
+        tracker.forEach(widget => {
+          const editor = widget.editor as MonacoCodeEditor;
+          editor.editor.updateOptions({
+            theme: name
+          });
+        });
+      }
     });
 
     for (const theme of THEMES) {
-        themeMenu.addItem({
-            command: cmdIds.changeTheme,
-            args: { theme }
-        });
+      themeMenu.addItem({
+        command: cmdIds.changeTheme,
+        args: { theme }
+      });
     }
 
     menu.addItem({ command: cmdIds.closeAll });
@@ -211,4 +182,26 @@ function createMenu(app: JupyterLab): Menu {
     menu.addItem({ type: 'submenu', menu: themeMenu });
 
     return menu;
+  }
+
+  mainMenu.addMenu(createMenu(app), { rank: 30 });
+
+  let commands = app.commands;
+
+  commands.addCommand(cmdIds.lineNumbers, {
+    execute: () => { toggleLineNums(); },
+    label: 'Toggle Line Numbers',
+  });
+
+  commands.addCommand(cmdIds.closeAll, {
+    execute: () => { closeAllFiles(); },
+    label: 'Close all files'
+  });
+
+  [
+    cmdIds.lineNumbers,
+    cmdIds.closeAll
+  ].forEach(command => palette.addItem({ command, category: 'Editor' }));
+
+  return tracker;
 }
