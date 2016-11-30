@@ -267,7 +267,12 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * its widgets into the parent plugin's instance tracker.
    */
   inject(widget: T): void {
-    /* This method has not been implemented yet */
+    if (this._widgets.has(widget)) {
+      console.warn(`${widget.id} already exists in the tracker.`);
+      return;
+    }
+    Private.injectedProperty.set(widget, true);
+    this._widgets.add(widget);
   }
 
   /**
@@ -285,7 +290,8 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * @param widget - The widget being saved.
    */
   save(widget: T): void {
-    if (!this._restore || !this.has(widget)) {
+    let injected = Private.injectedProperty.get(widget);
+    if (!this._restore || !this.has(widget) || injected) {
       return;
     }
 
@@ -436,7 +442,8 @@ namespace Private {
    */
   export
   const injectedProperty = new AttachedProperty<Widget, boolean>({
-    name: 'injected'
+    name: 'injected',
+    value: false
   });
 
   /**
