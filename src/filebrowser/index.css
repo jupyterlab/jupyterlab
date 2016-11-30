@@ -258,12 +258,23 @@
 
 
 .jp-DirListing-item.jp-mod-running .jp-DirListing-itemIcon {
-  color: var(--jp-accent-color1);
+  background-image: url(../default-theme/icons/md/book_running.svg);
 }
 
 
 .jp-DirListing-item.jp-mod-running.jp-mod-selected .jp-DirListing-itemIcon {
   color: var(--jp-accent-color3);
+  background-image: url(../default-theme/icons/md/book_selected.svg);
+}
+
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-OpenFolderIcon {
+  background-image: url(../default-theme/icons/md/directory_selected.svg);
+}
+
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-FileIcon {
+  background-image: url(../default-theme/icons/md/file_selected.svg);
 }
 
 
