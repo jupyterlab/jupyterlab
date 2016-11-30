@@ -196,6 +196,7 @@ class CellCompleterHandler implements IDisposable {
   private _pending = 0;
 }
 
+
 /**
  * A namespace for cell completer handler statics.
  */
