@@ -177,16 +177,16 @@ class CompleterModel implements CompleterWidget.IModel {
    * Set the avilable options in the completer menu.
    */
   setOptions(newValue: IterableOrArrayLike<string>) {
-    let values = toArray(newValue);
+    let values = toArray(newValue || []);
     if (deepEqual(values, this._options)) {
       return;
     }
-    if (values && values.length) {
+    if (values.length) {
       this._options = [];
       this._options.push(...values);
       this._subsetMatch = true;
     } else {
-      this._options = null;
+      this._options = [];
     }
     this.stateChanged.emit(void 0);
   }
@@ -278,7 +278,7 @@ class CompleterModel implements CompleterWidget.IModel {
   private _reset(): void {
     this._current = null;
     this._cursor = null;
-    this._options = null;
+    this._options = [];
     this._original = null;
     this._query = '';
     this._subsetMatch = false;
@@ -287,7 +287,7 @@ class CompleterModel implements CompleterWidget.IModel {
   private _current: ITextChange = null;
   private _cursor: CompleterWidget.ICursorSpan = null;
   private _isDisposed = false;
-  private _options: string[] = null;
+  private _options: string[] = [];
   private _original: ICompletionRequest = null;
   private _query = '';
   private _subsetMatch = false;
