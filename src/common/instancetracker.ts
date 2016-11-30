@@ -46,7 +46,7 @@ interface IInstanceTracker<T extends Widget> {
   /**
    * A signal emitted when a widget is added or removed from the tracker.
    */
-  changed: ISignal<this, 'add' | 'remove'>;
+  readonly changed: ISignal<this, 'add' | 'remove'>;
 
   /**
    * A signal emitted when the current widget changes.
@@ -54,17 +54,17 @@ interface IInstanceTracker<T extends Widget> {
    * #### Notes
    * If the last widget being tracked is disposed, `null` will be emitted.
    */
-  currentChanged: ISignal<this, T>;
+  readonly currentChanged: ISignal<this, T>;
 
   /**
    * The current widget is the most recently focused widget.
    */
-  currentWidget: T;
+  readonly currentWidget: T;
 
   /**
    * The number of widgets held by the tracker.
    */
-  size: number;
+  readonly size: number;
 
   /**
    * Iterate through each widget in the tracker.
