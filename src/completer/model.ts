@@ -23,14 +23,150 @@ import {
 
 
 /**
- * An implementation of a completer model.
+ * A filtered completion menu matching result.
+ */
+interface ICompletionMatch {
+  /**
+   * The raw text of a completion match.
+   */
+  raw: string;
+
+  /**
+   * A score which indicates the strength of the match.
+   *
+   * A lower score is better. Zero is the best possible score.
+   */
+  score: number;
+
+  /**
+   * The highlighted text of a completion match.
+   */
+  text: string;
+}
+
+
+/**
+ * An object describing a completion option injection into text.
  */
 export
-class CompleterModel implements CompleterModel.IModel {
+interface ICompletionPatch {
+  /**
+   * The patch text.
+   */
+  text: string;
+
+  /**
+   * The position in the text where cursor should be after patch application.
+   */
+  position: number;
+}
+
+
+/**
+ * A completer menu item.
+ */
+export
+interface ICompleterItem {
+  /**
+   * The highlighted, marked up text of a visible completer item.
+   */
+  text: string;
+
+  /**
+   * The raw text of a visible completer item.
+   */
+  raw: string;
+}
+
+
+/**
+ * A cursor span.
+ */
+export
+interface ICursorSpan extends JSONObject {
+  /**
+   * The start position of the cursor.
+   */
+  start: number;
+
+  /**
+   * The end position of the cursor.
+   */
+  end: number;
+}
+
+
+/**
+ * The data model backing a code completer widget.
+ */
+export
+interface ICompleterModel extends IDisposable {
   /**
    * A signal emitted when state of the completer menu changes.
    */
-  readonly stateChanged: ISignal<this, void>;
+  stateChanged: ISignal<ICompleterModel, void>;
+
+  /**
+   * The current text change details.
+   */
+  current: ITextChange;
+
+  /**
+   * The cursor details that the API has used to return matching options.
+   */
+  cursor: ICursorSpan;
+
+  /**
+   * A flag that is true when the model value was modified by a subset match.
+   */
+  subsetMatch: boolean;
+
+  /**
+   * The list of visible items in the completer menu.
+   */
+  items: ICompleterItem[];
+
+  /**
+   * The unfiltered list of all available options in a completer menu.
+   */
+  options: string[];
+
+  /**
+   * The original completer request details.
+   */
+  original: ICompletionRequest;
+
+  /**
+   * The query against which items are filtered.
+   */
+  query: string;
+
+  /**
+   * Handle a text change.
+   */
+  handleTextChange(change: ITextChange): void;
+
+  /**
+   * Create a resolved patch between the original state and a patch string.
+   */
+  createPatch(patch: string): ICompletionPatch;
+
+  /**
+   * Reset the state of the model.
+   */
+  reset(): void;
+}
+
+
+/**
+ * An implementation of a completer model.
+ */
+export
+class CompleterModel implements ICompleterModel {
+  /**
+   * A signal emitted when state of the completer menu changes.
+   */
+  stateChanged: ISignal<ICompleterModel, void>;
 
   /**
    * The list of visible items in the completer menu.
@@ -38,7 +174,7 @@ class CompleterModel implements CompleterModel.IModel {
    * #### Notes
    * This is a read-only property.
    */
-  get items(): CompleterModel.IItem[] {
+  get items(): ICompleterItem[] {
     return this._filter();
   }
 
@@ -130,10 +266,10 @@ class CompleterModel implements CompleterModel.IModel {
   /**
    * The cursor details that the API has used to return matching options.
    */
-  get cursor(): CompleterModel.ICursorSpan {
+  get cursor(): ICursorSpan {
     return this._cursor;
   }
-  set cursor(newValue: CompleterModel.ICursorSpan) {
+  set cursor(newValue: ICursorSpan) {
     // Original request must always be set before a cursor change. If it isn't
     // the model fails silently.
     if (!this.original) {
@@ -212,7 +348,7 @@ class CompleterModel implements CompleterModel.IModel {
    *
    * @returns A patched text change or null if original value did not exist.
    */
-  createPatch(patch: string): CompleterModel.IPatch {
+  createPatch(patch: string): ICompletionPatch {
     let original = this._original;
     let cursor = this._cursor;
 
@@ -241,7 +377,7 @@ class CompleterModel implements CompleterModel.IModel {
   /**
    * Apply the query to the complete options list to return the matching subset.
    */
-  private _filter(): CompleterModel.IItem[] {
+  private _filter(): ICompleterItem[] {
     let options = this._options || [];
     let query = this._query;
     if (!query) {
@@ -275,7 +411,7 @@ class CompleterModel implements CompleterModel.IModel {
   }
 
   private _current: ITextChange = null;
-  private _cursor: CompleterModel.ICursorSpan = null;
+  private _cursor: ICursorSpan = null;
   private _isDisposed = false;
   private _options: string[] = null;
   private _original: ICompletionRequest = null;
@@ -283,147 +419,6 @@ class CompleterModel implements CompleterModel.IModel {
   private _subsetMatch = false;
 }
 
-
-/**
- * The namespace for the `CompleterModel` class statics.
- */
-export
-namespace CompleterModel {
-  /**
-   * A filtered completion menu matching result.
-   */
-  interface IMatch {
-    /**
-     * The raw text of a completion match.
-     */
-    raw: string;
-
-    /**
-     * A score which indicates the strength of the match.
-     *
-     * A lower score is better. Zero is the best possible score.
-     */
-    score: number;
-
-    /**
-     * The highlighted text of a completion match.
-     */
-    text: string;
-  }
-
-
-  /**
-   * An object describing a completion option injection into text.
-   */
-  export
-  interface IPatch {
-    /**
-     * The patch text.
-     */
-    text: string;
-
-    /**
-     * The position in the text where cursor should be after patch application.
-     */
-    position: number;
-  }
-
-
-  /**
-   * A completer menu item.
-   */
-  export
-  interface IItem {
-    /**
-     * The highlighted, marked up text of a visible completer item.
-     */
-    text: string;
-
-    /**
-     * The raw text of a visible completer item.
-     */
-    raw: string;
-  }
-
-
-  /**
-   * A cursor span.
-   */
-  export
-  interface ICursorSpan extends JSONObject {
-    /**
-     * The start position of the cursor.
-     */
-    start: number;
-
-    /**
-     * The end position of the cursor.
-     */
-    end: number;
-  }
-
-
-  /**
-   * The data model backing a code completer widget.
-   */
-  export
-  interface IModel extends IDisposable {
-    /**
-     * A signal emitted when state of the completer menu changes.
-     */
-    readonly stateChanged: ISignal<IModel, void>;
-
-    /**
-     * The current text change details.
-     */
-    current: ITextChange;
-
-    /**
-     * The cursor details that the API has used to return matching options.
-     */
-    cursor: ICursorSpan;
-
-    /**
-     * A flag that is true when the model value was modified by a subset match.
-     */
-    subsetMatch: boolean;
-
-    /**
-     * The list of visible items in the completer menu.
-     */
-    items: IItem[];
-
-    /**
-     * The unfiltered list of all available options in a completer menu.
-     */
-    options: string[];
-
-    /**
-     * The original completer request details.
-     */
-    original: ICompletionRequest;
-
-    /**
-     * The query against which items are filtered.
-     */
-    query: string;
-
-    /**
-     * Handle a text change.
-     */
-    handleTextChange(change: ITextChange): void;
-
-    /**
-     * Create a resolved patch between the original state and a patch string.
-     */
-    createPatch(patch: string): IPatch;
-
-    /**
-     * Reset the state of the model.
-     */
-    reset(): void;
-  }
-}
 
 // Define the signals for the `CompleterModel` class.
 defineSignal(CompleterModel.prototype, 'stateChanged');
