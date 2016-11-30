@@ -371,7 +371,7 @@ class AboutWidget extends VDomWidget<AboutModel> {
       )
     );
 
-    return h.div(
+    return h.div({id: 'about' },
       h.div({ className: SECTION_CLASS },
         h.div({ className: SECTION_CENTER_CLASS },
           h.div({ className: CONTAINER_CLASS },
