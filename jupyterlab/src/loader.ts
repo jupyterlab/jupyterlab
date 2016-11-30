@@ -9,6 +9,15 @@ import {
   extractPlugins
 } from '@jupyterlab/extension-builder/lib/extract';
 
+import {
+  Application
+} from 'phosphor/lib/ui/application';
+
+import {
+  Widget
+} from 'phosphor/lib/ui/widget';
+
+
 
 /**
  * A module loader instance.
@@ -27,8 +36,8 @@ const loader = new ModuleLoader();
  *   range of the request.
  */
 export
-function require(path: string): ModuleLoader.IModule {
-  return loader.require.call(loader, mod);
+function requireModule(path: string): any {
+  return loader.require.call(loader, path);
 }
 
 
@@ -42,7 +51,7 @@ function require(path: string): ModuleLoader.IModule {
  */
 export
 function define(path: string, callback: ModuleLoader.DefineCallback): void {
-  loader.define.call(loader, mod, callback);
+  loader.define.call(loader, path, callback);
 }
 
 
@@ -54,8 +63,8 @@ function define(path: string, callback: ModuleLoader.DefineCallback): void {
  * @returns A promise that resolves with the requested bundle.
  */
 export
-function requireBundle(mod: string): Promise<ModuleLoader.IBundle> {
-  return loader.ensureBundle.call(loader, mod);
+function requireBundle(path: string): Promise<void> {
+  return loader.ensureBundle.call(loader, path);
 }
 
 
@@ -63,13 +72,13 @@ function requireBundle(mod: string): Promise<ModuleLoader.IBundle> {
  * Get an entry point given by the user after validating.
  */
 export
-function getEntryPoint(entryPoint: string): JupyterLabPlugin[] {
-  let plugins = require(entryPoint);
+function getEntryPoint(entryPoint: string): Application.IPlugin<Widget, any>[] {
+  let plugins = requireModule(entryPoint);
   try {
     plugins = extractPlugins(plugins);
   } catch (err) {
     console.error(err);
     plugins = [];
   }
-  return plugins as JupyterLabPlugin[];
+  return plugins;
 }

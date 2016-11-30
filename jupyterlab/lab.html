@@ -44,7 +44,7 @@ Distributed under the terms of the Modified BSD License.
 
 {% block script %}
 <script>
-  var lab = window.jupyterlab = jupyter.require("{{ jupyterlab_main }}");
+  var lab = window.jupyterlab = jupyter.requireModule("{{ jupyterlab_main }}").lab;
   var plugins = [];
 
   {% for plugin_entry in plugin_entries %}
