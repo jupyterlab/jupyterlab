@@ -42,6 +42,9 @@
   background-image: url(icons/md/edit.svg);
 }
 
+.jp-EllipsesIcon {
+  background-image: url(icons/md/ellipses.svg);
+}
 
 .jp-FileIcon {
   background-image: url(icons/md/file.svg);
@@ -58,7 +61,6 @@
   min-height: 14px;
   background-size: 14px;
   vertical-align: sub;
-  display: inline-block;
 }
 
 
