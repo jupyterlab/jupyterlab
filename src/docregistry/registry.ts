@@ -108,7 +108,7 @@ class DocumentRegistry {
    * If an extension or global default is already registered, this factory
    * will override the existing default.
    */
-  addWidgetFactory(factory: DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel>): IDisposable {
+  addWidgetFactory(factory: DocumentRegistry.WidgetFactory): IDisposable {
     let name = factory.name.toLowerCase();
     if (this._widgetFactories[name]) {
       console.warn(`Duplicate registered factory ${name}`);
@@ -173,7 +173,7 @@ class DocumentRegistry {
    * the given factory is already registered, a warning will be logged
    * and this will be a no-op.
    */
-  addModelFactory(factory: DocumentRegistry.IModelFactory<DocumentRegistry.IModel>): IDisposable {
+  addModelFactory(factory: DocumentRegistry.ModelFactory): IDisposable {
     let name = factory.name.toLowerCase();
     if (this._modelFactories[name]) {
       console.warn(`Duplicate registered factory ${name}`);
@@ -208,10 +208,10 @@ class DocumentRegistry {
    * If the extension is already registered for the given
    * widget name, a warning will be logged and this will be a no-op.
    */
-  addWidgetExtension(widgetName: string, extension: DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>): IDisposable {
+  addWidgetExtension(widgetName: string, extension: DocumentRegistry.WidgetExtension): IDisposable {
     widgetName = widgetName.toLowerCase();
     if (!(widgetName in this._extenders)) {
-      this._extenders[widgetName] = new Vector<DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>>();
+      this._extenders[widgetName] = new Vector<DocumentRegistry.WidgetExtension>();
     }
     let extenders = this._extenders[widgetName];
     let index = indexOf(extenders, extension);
@@ -310,7 +310,7 @@ class DocumentRegistry {
    * - all other extension-specific factories
    * - all other global factories
    */
-  preferredWidgetFactories(ext: string = '*'): DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel>[] {
+  preferredWidgetFactories(ext: string = '*'): DocumentRegistry.WidgetFactory[] {
     let factories = new Set<string>();
     ext = Private.normalizeExtension(ext);
 
@@ -344,7 +344,7 @@ class DocumentRegistry {
 
     // Construct the return list, checking to make sure the corresponding
     // model factories are registered.
-    let factoryList: DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel>[] = [];
+    let factoryList: DocumentRegistry.WidgetFactory[] = [];
     factories.forEach(name => {
       if (this._widgetFactories[name].modelName in this._modelFactories) {
         factoryList.push(this._widgetFactories[name]);
@@ -364,7 +364,7 @@ class DocumentRegistry {
    * #### Notes
    * This is equivalent to the first value in [[preferredWidgetFactories]].
    */
-  defaultWidgetFactory(ext: string = '*'): DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel> {
+  defaultWidgetFactory(ext: string = '*'): DocumentRegistry.WidgetFactory {
     return this.preferredWidgetFactories(ext)[0];
   }
 
@@ -373,7 +373,7 @@ class DocumentRegistry {
    *
    * @returns A new iterator of widget factories.
    */
-  widgetFactories(): IIterator<DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel>> {
+  widgetFactories(): IIterator<DocumentRegistry.WidgetFactory> {
     return map(Object.keys(this._widgetFactories), name => {
       return this._widgetFactories[name];
     });
@@ -384,7 +384,7 @@ class DocumentRegistry {
    *
    * @returns A new iterator of model factories.
    */
-  modelFactories(): IIterator<DocumentRegistry.IModelFactory<DocumentRegistry.IModel>> {
+  modelFactories(): IIterator<DocumentRegistry.ModelFactory> {
     return map(Object.keys(this._modelFactories), name => {
       return this._modelFactories[name];
     });
@@ -397,10 +397,10 @@ class DocumentRegistry {
    *
    * @returns A new iterator over the widget extensions.
    */
-  widgetExtensions(widgetName: string): IIterator<DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>> {
+  widgetExtensions(widgetName: string): IIterator<DocumentRegistry.WidgetExtension> {
     widgetName = widgetName.toLowerCase();
     if (!(widgetName in this._extenders)) {
-      return empty<DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>>();
+      return empty<DocumentRegistry.WidgetExtension>();
     }
     return this._extenders[widgetName].iter();
   }
@@ -430,7 +430,7 @@ class DocumentRegistry {
    *
    * @returns A widget factory instance.
    */
-  getWidgetFactory(widgetName: string): DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel> {
+  getWidgetFactory(widgetName: string): DocumentRegistry.WidgetFactory {
     return this._widgetFactories[widgetName.toLowerCase()];
   }
 
@@ -441,7 +441,7 @@ class DocumentRegistry {
    *
    * @returns A model factory instance.
    */
-  getModelFactory(name: string): DocumentRegistry.IModelFactory<DocumentRegistry.IModel> {
+  getModelFactory(name: string): DocumentRegistry.ModelFactory {
     return this._modelFactories[name.toLowerCase()];
   }
 
@@ -493,14 +493,14 @@ class DocumentRegistry {
     };
   }
 
-  private _modelFactories: { [key: string]: DocumentRegistry.IModelFactory<DocumentRegistry.IModel> } = Object.create(null);
-  private _widgetFactories: { [key: string]: DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel> } = Object.create(null);
+  private _modelFactories: { [key: string]: DocumentRegistry.ModelFactory } = Object.create(null);
+  private _widgetFactories: { [key: string]: DocumentRegistry.WidgetFactory } = Object.create(null);
   private _defaultWidgetFactory = '';
   private _defaultWidgetFactories: { [key: string]: string } = Object.create(null);
   private _widgetFactoryExtensions: {[key: string]: Vector<string> } = Object.create(null);
   private _fileTypes = new Vector<DocumentRegistry.IFileType>();
   private _creators = new Vector<DocumentRegistry.IFileCreator>();
-  private _extenders: { [key: string] : Vector<DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel>> } = Object.create(null);
+  private _extenders: { [key: string] : Vector<DocumentRegistry.WidgetExtension> } = Object.create(null);
 }
 
 
@@ -719,6 +719,12 @@ namespace DocumentRegistry {
   }
 
   /**
+   * A type alias for a context.
+   */
+  export
+  type Context = IContext<IModel>;
+
+  /**
    * The options used to initialize a widget factory.
    */
   export
@@ -786,6 +792,12 @@ namespace DocumentRegistry {
   }
 
   /**
+   * A type alias for a standard widget factory.
+   */
+  export
+  type WidgetFactory = IWidgetFactory<Widget, IModel>;
+
+  /**
    * An interface for a widget extension.
    */
   export
@@ -796,6 +808,11 @@ namespace DocumentRegistry {
     createNew(widget: T, context: IContext<U>): IDisposable;
   }
 
+  /**
+   * A type alias for a standard widget extension.
+   */
+  export
+  type WidgetExtension = IWidgetExtension<Widget, IModel>;
 
   /**
    * The interface for a model factory.
@@ -831,6 +848,12 @@ namespace DocumentRegistry {
      */
     preferredLanguage(ext: string): string;
   }
+
+  /**
+   * A type alias for a standard model factory.
+   */
+  export
+  type ModelFactory = IModelFactory<IModel>;
 
   /**
    * A kernel preference for a given file path and widget.

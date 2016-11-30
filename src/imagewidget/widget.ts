@@ -27,7 +27,7 @@ class ImageWidget extends Widget {
   /**
    * Construct a new image widget.
    */
-  constructor(context: DocumentRegistry.IContext<DocumentRegistry.IModel>) {
+  constructor(context: DocumentRegistry.Context) {
     super({ node: Private.createNode() });
     this._context = context;
     this.node.tabIndex = -1;
@@ -44,7 +44,7 @@ class ImageWidget extends Widget {
   /**
    * The image widget's context.
    */
-  get context(): DocumentRegistry.IContext<DocumentRegistry.IModel> {
+  get context(): DocumentRegistry.Context {
     return this._context;
   }
 
@@ -98,7 +98,7 @@ class ImageWidget extends Widget {
     this.node.focus();
   }
 
-  private _context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
+  private _context: DocumentRegistry.Context;
   private _scale = 1;
 }
 

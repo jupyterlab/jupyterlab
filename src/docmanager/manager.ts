@@ -218,7 +218,7 @@ class DocumentManager implements IDisposable {
    *
    * @returns The context associated with the widget, or `undefined`.
    */
-  contextForWidget(widget: Widget): DocumentRegistry.IContext<DocumentRegistry.IModel> {
+  contextForWidget(widget: Widget): DocumentRegistry.Context {
     return this._widgetManager.contextForWidget(widget);
   }
 
@@ -261,7 +261,7 @@ class DocumentManager implements IDisposable {
   /**
    * Find a context for a given path and factory name.
    */
-  private _findContext(path: string, factoryName: string): Context<DocumentRegistry.IModel> {
+  private _findContext(path: string, factoryName: string): Private.IContext {
     return find(this._contexts, context => {
       return (context.factoryName === factoryName &&
               context.path === path);
@@ -271,7 +271,7 @@ class DocumentManager implements IDisposable {
   /**
    * Get a context for a given path.
    */
-  private _contextForPath(path: string): Context<DocumentRegistry.IModel> {
+  private _contextForPath(path: string): Private.IContext {
     return find(this._contexts, context => {
       return context.path === path;
     });
@@ -280,7 +280,7 @@ class DocumentManager implements IDisposable {
   /**
    * Create a context from a path and a model factory.
    */
-  private _createContext(path: string, factory: DocumentRegistry.IModelFactory<DocumentRegistry.IModel>): Context<DocumentRegistry.IModel> {
+  private _createContext(path: string, factory: DocumentRegistry.ModelFactory): Private.IContext {
     let adopter = (widget: Widget) => {
       this._widgetManager.adoptWidget(context, widget);
       this._opener.open(widget);
@@ -309,7 +309,7 @@ class DocumentManager implements IDisposable {
   /**
    * Get the model factory for a given widget name.
    */
-  private _widgetFactoryFor(path: string, widgetName: string): DocumentRegistry.IWidgetFactory<Widget, DocumentRegistry.IModel> {
+  private _widgetFactoryFor(path: string, widgetName: string): DocumentRegistry.WidgetFactory {
     let registry = this._registry;
     if (widgetName === 'default') {
       let factory = registry.defaultWidgetFactory(ContentsManager.extname(path));
@@ -339,7 +339,7 @@ class DocumentManager implements IDisposable {
       return;
     }
 
-    let context: Context<DocumentRegistry.IModel> = null;
+    let context: Private.IContext = null;
 
     // Handle the load-from-disk case
     if (which === 'open') {
@@ -375,7 +375,7 @@ class DocumentManager implements IDisposable {
   private _serviceManager: ServiceManager.IManager = null;
   private _widgetManager: DocumentWidgetManager = null;
   private _registry: DocumentRegistry = null;
-  private _contexts: Vector<Context<DocumentRegistry.IModel>> = new Vector<Context<DocumentRegistry.IModel>>();
+  private _contexts: Vector<Private.IContext> = new Vector<Private.IContext>();
   private _opener: DocumentManager.IWidgetOpener = null;
 }
 
@@ -427,7 +427,13 @@ namespace Private {
    * An attached property for a context save handler.
    */
   export
-  const saveHandlerProperty = new AttachedProperty<DocumentRegistry.IContext<DocumentRegistry.IModel>, SaveHandler>({
+  const saveHandlerProperty = new AttachedProperty<DocumentRegistry.Context, SaveHandler>({
     name: 'saveHandler'
   });
+
+  /**
+   * A type alias for a standard context.
+   */
+  export
+  interface IContext extends Context<DocumentRegistry.IModel> {};
 }
