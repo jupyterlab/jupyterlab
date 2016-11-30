@@ -271,7 +271,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
-        current.dispose();
+        current.context.changeKernel(null).then(() => { current.dispose(); });
       }
     }
   });
