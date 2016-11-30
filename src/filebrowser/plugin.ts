@@ -335,7 +335,7 @@ function createContextMenu(fbWidget: FileBrowser, openWith: Menu):  Menu {
   command = `${prefix}:open`;
   disposables.add(commands.addCommand(command, {
     execute: () => { fbWidget.open(); },
-    icon: 'fa fa-folder-open-o',
+    icon: 'jp-MaterialIcon jp-OpenFolderIcon',
     label: 'Open',
     mnemonic: 0
   }));
@@ -348,7 +348,7 @@ function createContextMenu(fbWidget: FileBrowser, openWith: Menu):  Menu {
   command = `${prefix}:rename`;
   disposables.add(commands.addCommand(command, {
     execute: () => fbWidget.rename(),
-    icon: 'fa fa-edit',
+    icon: 'jp-MaterialIcon jp-EditIcon',
     label: 'Rename',
     mnemonic: 0
   }));
@@ -357,7 +357,7 @@ function createContextMenu(fbWidget: FileBrowser, openWith: Menu):  Menu {
   command = `${prefix}:delete`;
   disposables.add(commands.addCommand(command, {
     execute: () => fbWidget.delete(),
-    icon: 'fa fa-remove',
+    icon: 'jp-MaterialIcon jp-CloseIcon',
     label: 'Delete',
     mnemonic: 0
   }));
@@ -366,7 +366,7 @@ function createContextMenu(fbWidget: FileBrowser, openWith: Menu):  Menu {
   command = `${prefix}:duplicate`;
   disposables.add(commands.addCommand(command, {
     execute: () => fbWidget.duplicate(),
-    icon: 'fa fa-copy',
+    icon: 'jp-MaterialIcon jp-CopyIcon',
     label: 'Duplicate'
   }));
   menu.addItem({ command });
@@ -374,7 +374,7 @@ function createContextMenu(fbWidget: FileBrowser, openWith: Menu):  Menu {
   command = `${prefix}:cut`;
   disposables.add(commands.addCommand(command, {
     execute: () => { fbWidget.cut(); },
-    icon: 'fa fa-cut',
+    icon: 'jp-MaterialIcon jp-CutIcon',
     label: 'Cut'
   }));
   menu.addItem({ command });
@@ -382,7 +382,7 @@ function createContextMenu(fbWidget: FileBrowser, openWith: Menu):  Menu {
   command = `${prefix}:copy`;
   disposables.add(commands.addCommand(command, {
     execute: () => { fbWidget.copy(); },
-    icon: 'fa fa-copy',
+    icon: 'jp-MaterialIcon jp-CopyIcon',
     label: 'Copy',
     mnemonic: 0
   }));
@@ -391,7 +391,7 @@ function createContextMenu(fbWidget: FileBrowser, openWith: Menu):  Menu {
   command = `${prefix}:paste`;
   disposables.add(commands.addCommand(command, {
     execute: () => fbWidget.paste(),
-    icon: 'fa fa-paste',
+    icon: 'jp-MaterialIcon jp-PasteIcon',
     label: 'Paste',
     mnemonic: 0
   }));
@@ -400,7 +400,7 @@ function createContextMenu(fbWidget: FileBrowser, openWith: Menu):  Menu {
   command = `${prefix}:download`;
   disposables.add(commands.addCommand(command, {
     execute: () => { fbWidget.download(); },
-    icon: 'fa fa-download',
+    icon: 'jp-MaterialIcon jp-DownloadIcon',
     label: 'Download'
   }));
   menu.addItem({ command });
@@ -408,7 +408,7 @@ function createContextMenu(fbWidget: FileBrowser, openWith: Menu):  Menu {
   command = `${prefix}:shutdown`;
   disposables.add(commands.addCommand(command, {
     execute: () => fbWidget.shutdownKernels(),
-    icon: 'fa fa-stop-circle-o',
+    icon: 'jp-MaterialIcon jp-StopIcon',
     label: 'Shutdown Kernel'
   }));
   menu.addItem({ command });

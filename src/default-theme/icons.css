@@ -10,6 +10,7 @@
   display: inline-block;
   vertical-align: middle;
   background-repeat: no-repeat;
+  background-position: center;
 }
 
 .jp-AddIcon {
@@ -32,9 +33,20 @@
   background-image: url(icons/md/down_caret.svg);
 }
 
+
+.jp-DownloadIcon {
+  background-image: url(icons/md/download.svg);
+}
+
+.jp-EditIcon {
+  background-image: url(icons/md/edit.svg);
+}
+
+
 .jp-FolderIcon {
   background-image: url(icons/md/landingfolder.svg);
 }
+
 
 .jp-HomeIcon {
   background-image: url(icons/md/home.svg);
@@ -45,6 +57,7 @@
   display: inline-block;
 }
 
+
 .jp-JupyterIcon {
   background-image: url(icons/jupyter/jupyter.svg);
   background-size: 16px;
@@ -54,11 +67,13 @@
   padding-right: 0px;
 }
 
+
 .jp-MainAreaLandscapeIcon {
   background-repeat: no-repeat;
   margin-right: 2px;
   width: 22px;
 }
+
 
 .jp-MainAreaPortraitIcon {
   background-position: 0 2px;
@@ -67,29 +82,41 @@
   width: 20px;
 }
 
+
+.jp-NotebookIcon {
+  background-image: url(icons/md/book.svg);
+}
+
+
 .jp-OpenFolderIcon {
   background-image: url(icons/md/directory.svg);
 }
+
 
 .jp-PasteIcon {
   background-image: url(icons/md/paste.svg);
 }
 
+
 .jp-RefreshIcon {
   background-image: url(icons/md/refresh.svg);
 }
+
 
 .jp-RunIcon {
   background-image: url(icons/md/run.svg);
 }
 
+
 .jp-SaveIcon {
   background-image: url(icons/md/save.svg);
 }
 
+
 .jp-StopIcon {
   background-image: url(icons/md/stop.svg);
 }
+
 
 .jp-UploadIcon {
   background-image: url(icons/upload.svg);

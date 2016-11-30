@@ -33,18 +33,6 @@
   background-image: url(images/questionmark.svg);
 }
 
-.jp-MaterialIcon {
-  min-width: 16px;
-  min-height: 16px;
-  background-size: 16px;
-  display: inline-block;
-  vertical-align: middle;
-  background-repeat: no-repeat;
-}
-
-.jp-NotebookIcon {
-  background-image: url(icons/notebook.svg);
-}
 
 .jp-JupyterIcon {
   background-image: url(images/jupyter.svg);
