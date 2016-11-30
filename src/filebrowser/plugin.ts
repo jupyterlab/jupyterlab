@@ -254,7 +254,8 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocume
     execute: args => {
       let path = args['path'] as string;
       let factory = args['factory'] as string || void 0;
-      return fbWidget.openPath(path, factory);
+      return docManager.services.contents.get(path)
+        .then(() => fbWidget.openPath(path, factory));
     }
   });
 
