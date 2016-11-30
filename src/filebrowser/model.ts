@@ -29,10 +29,6 @@ import {
   IPathTracker
 } from './tracker';
 
-import {
-  showErrorMessage
-} from './utils';
-
 
 /**
  * The duration of auto-refresh in ms.
@@ -87,6 +83,11 @@ class FileBrowserModel implements IDisposable, IPathTracker {
    * Get the file path changed signal.
    */
   fileChanged: ISignal<this, Contents.IChangedArgs>;
+
+  /**
+   * A signal emitted when the file browser model loses connection.
+   */
+  connectionFailure: ISignal<this, Error>;
 
   /**
    * Get the current path.
@@ -181,8 +182,8 @@ class FileBrowserModel implements IDisposable, IPathTracker {
       this._onRunningChanged(manager.sessions, manager.sessions.running());
       this.refreshed.emit(void 0);
     }).catch(error => {
-      showErrorMessage('Server Connection Error', error);
       this._pendingPath = null;
+      this.connectionFailure.emit(error);
     });
     return this._pending;
   }
@@ -454,6 +455,8 @@ class FileBrowserModel implements IDisposable, IPathTracker {
 defineSignal(FileBrowserModel.prototype, 'pathChanged');
 defineSignal(FileBrowserModel.prototype, 'refreshed');
 defineSignal(FileBrowserModel.prototype, 'fileChanged');
+defineSignal(FileBrowserModel.prototype, 'connectionFailure');
+
 
 /**
  * The namespace for the `FileBrowserModel` class statics.

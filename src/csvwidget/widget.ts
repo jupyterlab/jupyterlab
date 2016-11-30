@@ -91,7 +91,7 @@ class CSVWidget extends Widget {
   /**
    * The CSV widget's context.
    */
-  get context(): DocumentRegistry.IContext<DocumentRegistry.IModel> {
+  get context(): DocumentRegistry.Context {
     return this._context;
   }
 
@@ -134,7 +134,7 @@ class CSVWidget extends Widget {
     this.node.focus();
   }
 
-  private _context: DocumentRegistry.IContext<DocumentRegistry.IModel> = null;
+  private _context: DocumentRegistry.Context = null;
   private _model: CSVModel = null;
   private _table: CSVTable = null;
   private _toolbar: CSVToolbar = null;
@@ -155,7 +155,7 @@ namespace CSVWidget {
     /**
      * The document context for the CSV being rendered by the widget.
      */
-    context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
+    context: DocumentRegistry.Context;
   }
 }
 
@@ -189,7 +189,7 @@ class CSVWidgetFactory extends ABCWidgetFactory<CSVWidget, DocumentRegistry.IMod
   /**
    * Create a new widget given a context.
    */
-  protected createNewWidget(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): CSVWidget {
+  protected createNewWidget(context: DocumentRegistry.Context): CSVWidget {
     return new CSVWidget({ context });
   }
 }

@@ -66,7 +66,7 @@ class EditorWidget extends CodeMirrorWidget {
   /**
    * Construct a new editor widget.
    */
-  constructor(context: DocumentRegistry.IContext<DocumentRegistry.IModel>) {
+  constructor(context: DocumentRegistry.Context) {
     super({
       extraKeys: {
         'Tab': 'indentMore',
@@ -120,11 +120,11 @@ class EditorWidget extends CodeMirrorWidget {
   /**
    * Get the context for the editor widget.
    */
-  get context(): DocumentRegistry.IContext<DocumentRegistry.IModel> {
+  get context(): DocumentRegistry.Context {
     return this._context;
   }
 
-  private _context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
+  private _context: DocumentRegistry.Context;
 }
 
 
@@ -136,7 +136,7 @@ class EditorWidgetFactory extends ABCWidgetFactory<EditorWidget, DocumentRegistr
   /**
    * Create a new widget given a context.
    */
-  protected createNewWidget(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): EditorWidget {
+  protected createNewWidget(context: DocumentRegistry.Context): EditorWidget {
     return new EditorWidget(context);
   }
 }

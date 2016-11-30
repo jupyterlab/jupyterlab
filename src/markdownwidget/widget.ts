@@ -45,7 +45,7 @@ class MarkdownWidget extends Widget {
   /**
    * Construct a new markdown widget.
    */
-  constructor(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, rendermime: RenderMime) {
+  constructor(context: DocumentRegistry.Context, rendermime: RenderMime) {
     super();
     this.addClass(MD_CLASS);
     this.layout = new PanelLayout();
@@ -69,7 +69,7 @@ class MarkdownWidget extends Widget {
   /**
    * The markdown widget's context.
    */
-  get context(): DocumentRegistry.IContext<DocumentRegistry.IModel> {
+  get context(): DocumentRegistry.Context {
     return this._context;
   }
 
@@ -111,7 +111,7 @@ class MarkdownWidget extends Widget {
     layout.addWidget(widget);
   }
 
-  private _context: DocumentRegistry.IContext<DocumentRegistry.IModel> = null;
+  private _context: DocumentRegistry.Context = null;
   private _monitor: ActivityMonitor<any, any> = null;
   private _rendermime: RenderMime = null;
 }
@@ -133,7 +133,7 @@ class MarkdownWidgetFactory extends ABCWidgetFactory<MarkdownWidget, DocumentReg
   /**
    * Create a new widget given a context.
    */
-  protected createNewWidget(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): MarkdownWidget {
+  protected createNewWidget(context: DocumentRegistry.Context): MarkdownWidget {
     return new MarkdownWidget(context, this._rendermime.clone());
   }
 

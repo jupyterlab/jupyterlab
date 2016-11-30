@@ -19,7 +19,7 @@ import {
 
 class WidgetFactory extends ABCWidgetFactory<Widget, DocumentRegistry.IModel> {
 
-  createNewWidget(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): Widget {
+  createNewWidget(context: DocumentRegistry.Context): Widget {
     return new Widget();
   }
 }
