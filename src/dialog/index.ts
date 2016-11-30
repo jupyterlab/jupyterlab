@@ -206,7 +206,7 @@ interface IDialogOptions {
    *
    * The default is the last button.
    */
-   primary?: HTMLElement | number;
+  primary?: HTMLElement | number;
 }
 
 
@@ -292,7 +292,7 @@ class Dialog extends Panel {
     let child = options.body as Widget;
     child.addClass(BODY_CONTENT_CLASS);
     body.addWidget(child);
-    this._buttons = options.buttons;
+    this._buttons = options.buttons.slice();
     this._buttonNodes = options.buttons.map(createButton);
     this._buttonNodes.map(buttonNode => {
       footer.node.appendChild(buttonNode);
