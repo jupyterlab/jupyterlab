@@ -48,6 +48,10 @@
 }
 
 
+.jp-FileIcon {
+  background-image: url(icons/md/file.svg);
+}
+
 .jp-FolderIcon {
   background-image: url(icons/md/landingfolder.svg);
 }
