@@ -20,6 +20,7 @@ lab.registerPlugins([
   require('jupyterlab/lib/console/plugin').consoleTrackerProvider,
   require('jupyterlab/lib/console/codemirror/plugin').rendererProvider,
   require('jupyterlab/lib/docregistry/plugin').docRegistryProvider,
+  require('jupyterlab/lib/docmanager/plugin').docManagerProvider,
   require('jupyterlab/lib/editorwidget/plugin').editorHandlerProvider,
   require('jupyterlab/lib/faq/plugin').faqExtension,
   require('jupyterlab/lib/filebrowser/plugin').fileBrowserProvider,
