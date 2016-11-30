@@ -55,6 +55,11 @@ const BREADCRUMB_CLASS = 'jp-BreadCrumbs';
 const BREADCRUMB_HOME = 'jp-HomeIcon';
 
 /**
+ * The class named associated to the ellipses icon
+ */
+const BREADCRUMB_ELLIPSES = 'jp-EllipsesIcon';
+
+/**
  * The class name added to the breadcrumb node.
  */
 const BREADCRUMB_ITEM_CLASS = 'jp-BreadCrumbs-item';
@@ -369,8 +374,8 @@ namespace Private {
   function createCrumbs(): ISequence<HTMLElement> {
     let home = document.createElement('span');
     home.className = BREADCRUMB_HOME + ' ' + BREADCRUMB_ITEM_CLASS;
-    let ellipsis = document.createElement('i');
-    ellipsis.className = 'fa fa-ellipsis-h ' + BREADCRUMB_ITEM_CLASS;
+    let ellipsis = document.createElement('span');
+    ellipsis.className = MATERIAL_CLASS + ' ' + BREADCRUMB_ELLIPSES + ' ' + BREADCRUMB_ITEM_CLASS;
     let parent = document.createElement('span');
     parent.className = BREADCRUMB_ITEM_CLASS;
     let current = document.createElement('span');
