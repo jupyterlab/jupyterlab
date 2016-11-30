@@ -66,6 +66,7 @@ function openWithDialog(path: string, manager: DocumentManager, host?: HTMLEleme
     return showDialog({
       title: 'Open File',
       body: handler.node,
+      primary: handler.inputNode,
       okText: 'OPEN'
     });
   }).then(result => {
@@ -88,6 +89,7 @@ function createNewDialog(model: FileBrowserModel, manager: DocumentManager, host
       title: 'Create New File',
       host,
       body: handler.node,
+      primary: handler.inputNode,
       okText: 'CREATE'
     });
   }).then(result => {
@@ -281,6 +283,7 @@ class CreateFromHandler extends Widget {
     return showDialog({
       title: `Create New ${this._creatorName}`,
       body: this.node,
+      primary: this.inputNode,
       okText: 'CREATE'
     }).then(result => {
       if (result.text === 'CREATE') {
@@ -333,7 +336,8 @@ class CreateFromHandler extends Widget {
     }
 
     return model.newUntitled({ ext, type }).then(contents => {
-      this.inputNode.value = contents.name;
+      let value = this.inputNode.value = contents.name;
+      this.inputNode.setSelectionRange(0, value.length - ext.length);
       this._orig = contents;
     });
   }
@@ -389,6 +393,7 @@ class CreateNewHandler extends Widget {
     let name = time.toJSON().slice(0, 10);
     name += '-' + time.getHours() + time.getMinutes() + time.getSeconds();
     this.inputNode.value = name + '.txt';
+    this.inputNode.setSelectionRange(0, name.length);
 
     // Check for name conflicts when the inputNode changes.
     this.inputNode.addEventListener('input', () => {

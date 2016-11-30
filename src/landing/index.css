@@ -5,6 +5,7 @@
 
 
 .jp-Landing {
+  outline: none;
   position: absolute;
   display: flex;
   flex-direction: column;

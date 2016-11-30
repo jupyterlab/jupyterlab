@@ -28,6 +28,7 @@ lab.registerPlugins([
   require('jupyterlab/lib/inspector/plugin').inspectorProvider,
   require('jupyterlab/lib/landing/plugin').landingExtension,
   require('jupyterlab/lib/launcher/plugin').launcherProvider,
+  require('jupyterlab/lib/layoutrestorer/plugin').layoutRestorerProvider,
   require('jupyterlab/lib/main/plugin').mainExtension,
   require('jupyterlab/lib/mainmenu/plugin').mainMenuProvider,
   require('jupyterlab/lib/markdownwidget/plugin').markdownHandlerExtension,

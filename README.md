@@ -36,11 +36,17 @@ jupyter notebook --version
 
 The runtime versions which are currently *known to work*:
 
-- IE 11+
-- Firefox 32+
-- Chrome 38+
+- Firefox 49+
+- Chrome 39+
+- Safari 10+
 
 Earlier browser versions may also work, but come with no guarantees.
+
+JupyterLab uses CSS Variables for styling, which is one reason for the
+minimum versions listed above.  IE 11+ or Edge 14 do not support
+CSS Variables, and are not directly supported at this time.
+A tool like [postcss](http://postcss.org/) can be used to convert the CSS files in the
+`jupyterlab/build` directory manually if desired. 
 
 ----
 
@@ -68,6 +74,8 @@ jupyter lab
 JupyterLab will open automatically in your browser. You may also access
 JupyterLab by entering the notebook server's URL (`http://localhost:8888`) in
 the browser.
+
+Instructions on how to install the project from the git sources are available in our [contributor documentation](CONTRIBUTING.md).
 
 ----
 

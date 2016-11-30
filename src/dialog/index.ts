@@ -76,9 +76,8 @@ const OK_BUTTON_CLASS = 'jp-Dialog-okButton';
 const CANCEL_BUTTON_CLASS = 'jp-Dialog-cancelButton';
 
 /**
-/*
-* The class name added to dialog Warning buttons.
-*/
+ * The class name added to dialog Warning buttons.
+ */
 const WARNING_BUTTON_CLASS = 'jp-Dialog-warningButton';
 
 /**
@@ -143,19 +142,22 @@ const cancelButton: IButtonItem = {
 };
 
 /**
-* A default delete button.
-*/
+ * A default delete button.
+ */
 export
 const deleteButton: IButtonItem = {
   text: 'DELETE',
   className: WARNING_BUTTON_CLASS
-}
+};
 
+/**
+ * A default warn button.
+ */
 export
 const warnButton: IButtonItem = {
   text: 'OK',
   className: WARNING_BUTTON_CLASS
-}
+};
 
 
 /**
@@ -198,6 +200,13 @@ interface IDialogOptions {
    * An additional CSS class to apply to the dialog.
    */
   dialogClass?: string;
+
+  /**
+   * The primary element or button index that should take focus in the dialog.
+   *
+   * The default is the last button.
+   */
+   primary?: HTMLElement | number;
 }
 
 
@@ -217,6 +226,9 @@ function showDialog(options?: IDialogOptions): Promise<IButtonItem> {
   // NOTE: This code assumes only one dialog is shown at the time:
   okButton.text = options.okText ? options.okText : 'OK';
   options.buttons = options.buttons || [cancelButton, okButton];
+  if (!options.buttons.length) {
+    options.buttons = [okButton];
+  }
   if (!(options.body instanceof Widget)) {
     options.body = createDialogBody(options.body);
   }
@@ -225,6 +237,7 @@ function showDialog(options?: IDialogOptions): Promise<IButtonItem> {
     Widget.attach(dialog, host);
   });
 }
+
 
 /**
  * A dialog panel.
@@ -284,6 +297,18 @@ class Dialog extends Panel {
     this._buttonNodes.map(buttonNode => {
       footer.node.appendChild(buttonNode);
     });
+    let primary = options.primary || this.lastButtonNode;
+    if (typeof primary === 'number') {
+      primary = this._buttonNodes[primary];
+    }
+    this._primary = primary as HTMLElement;
+  }
+
+  /**
+   * Get the last button node.
+   */
+  get lastButtonNode(): HTMLButtonElement {
+    return this._buttonNodes[this._buttons.length - 1];
   }
 
   /**
@@ -299,10 +324,19 @@ class Dialog extends Panel {
   handleEvent(event: Event): void {
     switch (event.type) {
     case 'keydown':
-      this.evtKeydown(event as KeyboardEvent);
+      this._evtKeydown(event as KeyboardEvent);
       break;
     case 'contextmenu':
-      this.evtContextMenu(event as MouseEvent);
+      this._evtContextMenu(event as MouseEvent);
+      break;
+    case 'click':
+      this._evtClick(event as MouseEvent);
+      break;
+    case 'focus':
+      if (!this.node.contains(event.target as HTMLElement)) {
+        event.stopPropagation();
+        this.lastButtonNode.focus();
+      }
       break;
     default:
       break;
@@ -318,16 +352,25 @@ class Dialog extends Panel {
     let node = this.node;
     node.addEventListener('keydown', this, true);
     node.addEventListener('contextmenu', this, true);
-    node.addEventListener('click', this);
-    this._buttonNodes.map(buttonNode => {
-      buttonNode.addEventListener('click', this.evtButtonClick.bind(this));
-    });
+    node.addEventListener('click', this, true);
+    document.addEventListener('focus', this, true);
+    this._original = document.activeElement as HTMLElement;
+    this._primary.focus();
+  }
 
-    // Focus the ok button if given.
-    let index = this._buttons.indexOf(okButton);
-    if (index !== -1) {
-      this._buttonNodes[index].focus();
-    }
+
+  /**
+   * Handle a `'before-detach'` message to the widget.
+   *
+   * @param msg - The `'after-attach'` message
+   */
+  protected onBeforeDetach(msg: Message): void {
+    let node = this.node;
+    node.removeEventListener('keydown', this, true);
+    node.removeEventListener('contextmenu', this, true);
+    node.removeEventListener('click', this, true);
+    document.removeEventListener('focus', this, true);
+    this._original.focus();
   }
 
   /**
@@ -335,7 +378,14 @@ class Dialog extends Panel {
    *
    * @param event - The DOM event sent to the widget
    */
-  protected evtButtonClick(event: MouseEvent): void {
+  protected _evtClick(event: MouseEvent): void {
+    let content = this.node.getElementsByClassName(CONTENT_CLASS)[0] as HTMLElement;
+    if (!content.contains(event.target as HTMLElement)) {
+      this.close();
+      this.resolve(cancelButton);
+      event.stopPropagation();
+      return;
+    }
     for (let buttonNode of this._buttonNodes) {
       if (buttonNode.contains(event.target as HTMLElement)) {
         this.close();
@@ -350,11 +400,26 @@ class Dialog extends Panel {
    *
    * @param event - The DOM event sent to the widget
    */
-  protected evtKeydown(event: KeyboardEvent): void {
+  protected _evtKeydown(event: KeyboardEvent): void {
     // Check for escape key
-    if (event.keyCode === 27) {
+    switch (event.keyCode) {
+    case 27:
       this.close();
       this.resolve(cancelButton);
+      break;
+    case 9:
+      // Handle a tab on the last button.
+      if (document.activeElement === this.lastButtonNode && !event.shiftKey) {
+        event.stopPropagation();
+        event.preventDefault();
+        if (!this._first) {
+          this._findFirst();
+        }
+        this._first.focus();
+      }
+      break;
+    default:
+      break;
     }
   }
 
@@ -363,11 +428,26 @@ class Dialog extends Panel {
    *
    * @param event - The DOM event sent to the widget
    */
-  protected evtContextMenu(event: Event): void {
+  protected _evtContextMenu(event: Event): void {
     event.preventDefault();
     event.stopPropagation();
   }
 
+  /**
+   * Find the first focusable item in the dialog.
+   */
+  private _findFirst(): void {
+    let candidateSelectors = [
+      'input',
+      'select',
+      'a[href]',
+      'textarea',
+      'button',
+      '[tabindex]',
+    ].join(',');
+
+    this._first = this.node.querySelectorAll(candidateSelectors)[0] as HTMLElement;
+  }
   /**
    * The resolution function of the dialog Promise.
    */
@@ -378,8 +458,11 @@ class Dialog extends Panel {
    */
   protected reject: (error: any) => void;
 
-  private _buttonNodes: HTMLElement[];
+  private _buttonNodes: HTMLButtonElement[];
   private _buttons: IButtonItem[];
+  private _original: HTMLElement;
+  private _first: HTMLElement;
+  private _primary: HTMLElement;
 }
 
 
@@ -437,10 +520,10 @@ function styleElements(element: HTMLElement): HTMLElement {
 /**
  * Create a node for a button item.
  */
-function createButton(item: IButtonItem): HTMLElement {
-  let button = document.createElement('button');
+function createButton(item: IButtonItem): HTMLButtonElement {
+  let button = document.createElement('button') as HTMLButtonElement;
   button.className = BUTTON_CLASS;
-  button.tabIndex = -1;
+  button.tabIndex = 0;
   if (item.className) {
     button.classList.add(item.className);
   }
@@ -466,6 +549,7 @@ function wrapInput(input: HTMLInputElement): HTMLElement {
   wrapper.className = INPUT_WRAPPER_CLASS;
   wrapper.appendChild(input);
   input.classList.add(INPUT_CLASS);
+  input.tabIndex = 0;
   return wrapper;
 }
 
@@ -478,5 +562,6 @@ function wrapSelect(select: HTMLSelectElement): HTMLElement {
   wrapper.className = SELECT_WRAPPER_CLASS;
   wrapper.appendChild(select);
   select.classList.add(SELECT_CLASS);
+  select.tabIndex = 0;
   return wrapper;
 }

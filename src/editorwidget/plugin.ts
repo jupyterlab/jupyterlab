@@ -1,6 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import 'codemirror/addon/edit/matchbrackets.js';
+import 'codemirror/addon/edit/closebrackets.js';
+import 'codemirror/addon/comment/comment.js';
+import 'codemirror/keymap/vim.js';
+
 import {
   AttachedProperty
 } from 'phosphor/lib/core/properties';
@@ -14,6 +19,14 @@ import {
 } from '../application';
 
 import {
+  DEFAULT_CODEMIRROR_THEME
+} from '../codemirror/widget';
+
+import {
+  ICommandPalette
+} from '../commandpalette';
+
+import {
   InstanceTracker
 } from '../common/instancetracker';
 
@@ -22,12 +35,8 @@ import {
 } from '../docregistry';
 
 import {
-  EditorWidgetFactory, EditorWidget
-} from './widget';
-
-import {
-  ICommandPalette
-} from '../commandpalette';
+  ILayoutRestorer
+} from '../layoutrestorer';
 
 import {
   IMainMenu
@@ -38,17 +47,8 @@ import {
 } from '../statedb';
 
 import {
-  IEditorTracker
-} from './index';
-
-import {
-  DEFAULT_CODEMIRROR_THEME
-} from '../codemirror/widget';
-
-import 'codemirror/addon/edit/matchbrackets.js';
-import 'codemirror/addon/edit/closebrackets.js';
-import 'codemirror/addon/comment/comment.js';
-import 'codemirror/keymap/vim.js';
+  IEditorTracker, EditorWidget, EditorWidgetFactory
+} from './widget';
 
 
 /**
@@ -87,7 +87,9 @@ const cmdIds = {
 export
 const editorHandlerProvider: JupyterLabPlugin<IEditorTracker> = {
   id: 'jupyter.services.editor-handler',
-  requires: [IDocumentRegistry, IMainMenu, ICommandPalette, IStateDB],
+  requires: [
+    IDocumentRegistry, IMainMenu, ICommandPalette, IStateDB, ILayoutRestorer
+  ],
   provides: IEditorTracker,
   activate: activateEditorHandler,
   autoStart: true
@@ -97,7 +99,7 @@ const editorHandlerProvider: JupyterLabPlugin<IEditorTracker> = {
 /**
  * Sets up the editor widget
  */
-function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB): IEditorTracker {
+function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB, layout: ILayoutRestorer): IEditorTracker {
   const factory = new EditorWidgetFactory({
     name: FACTORY,
     fileExtensions: ['*'],
@@ -105,11 +107,11 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
   });
   const tracker = new InstanceTracker<EditorWidget>({
     restore: {
-      state,
+      state, layout,
       command: 'file-operations:open',
       args: widget => ({ path: widget.context.path, factory: FACTORY }),
       name: widget => widget.context.path,
-      namespace: 'editors',
+      namespace: 'editor',
       when: app.started,
       registry: app.commands
     }

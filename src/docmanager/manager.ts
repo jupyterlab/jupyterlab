@@ -26,6 +26,10 @@ import {
 } from 'phosphor/lib/core/properties';
 
 import {
+  Token
+} from 'phosphor/lib/core/token';
+
+import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
@@ -41,6 +45,20 @@ import {
   DocumentWidgetManager
 } from './widgetmanager';
 
+/* tslint:disable */
+/**
+ * The document registry token.
+ */
+export
+const IDocumentManager = new Token<IDocumentManager>('jupyter.services.document-manager');
+/* tslint:enable */
+
+
+/**
+ * The interface for a document manager.
+ */
+export
+interface IDocumentManager extends DocumentManager {}
 
 /**
  * The document manager.
@@ -100,6 +118,32 @@ class DocumentManager implements IDisposable {
     });
     this._contexts.clear();
     this._widgetManager = null;
+  }
+
+  /**
+   * Open a file and return the widget used to view it.
+   * Reveals an already existing editor.
+   *
+   * @param path - The file path to open.
+   *
+   * @param widgetName - The name of the widget factory to use. 'default' will use the default widget.
+   *
+   * @param kernel - An optional kernel name/id to override the default.
+   *
+   * @returns The created widget, or `undefined`.
+   *
+   * #### Notes
+   * This function will return `undefined` if a valid widget factory
+   * cannot be found.
+   */
+  openOrReveal(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
+    let widget = this.findWidget(path, widgetName);
+    if (!widget) {
+      widget = this.open(path, widgetName, kernel);
+    } else {
+      this._opener.open(widget);
+    }
+    return widget;
   }
 
   /**
@@ -297,8 +341,8 @@ class DocumentManager implements IDisposable {
 
     let context: Context<DocumentRegistry.IModel> = null;
 
-    //Handle the load-from-disk case
-    if(which === 'open') {
+    // Handle the load-from-disk case
+    if (which === 'open') {
       // Use an existing context if available.
       context = this._findContext(path, factory.name);
       if (!context) {
@@ -319,7 +363,7 @@ class DocumentManager implements IDisposable {
     } else if (widgetFactory.preferKernel &&
                !(kernel && !kernel.id && !kernel.name) &&
                !context.kernel) {
-      //If the kernel is not the `None` kernel and the widgetFactory wants one
+      // If the kernel is not the `None` kernel and the widgetFactory wants one
       context.startDefaultKernel();
     }
 
