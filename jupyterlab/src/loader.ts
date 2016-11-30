@@ -5,18 +5,6 @@ import {
   ModuleLoader
 } from '@jupyterlab/extension-builder/lib/loader';
 
-import {
-  extractPlugins
-} from '@jupyterlab/extension-builder/lib/extract';
-
-import {
-  Application
-} from 'phosphor/lib/ui/application';
-
-import {
-  Widget
-} from 'phosphor/lib/ui/widget';
-
 
 /**
  * A module loader instance.
@@ -36,20 +24,4 @@ const loader = new ModuleLoader();
 export
 function define(path: string, callback: ModuleLoader.DefineCallback): void {
   loader.define.call(loader, path, callback);
-}
-
-
-/**
- * Get an entry point given by the user after validating.
- */
-export
-function getEntryPoint(modLoader: ModuleLoader, entryPoint: string): Application.IPlugin<Widget, any>[] {
-  let plugins = modLoader.require(entryPoint);
-  try {
-    plugins = extractPlugins(plugins);
-  } catch (err) {
-    console.error(err);
-    plugins = [];
-  }
-  return plugins;
 }

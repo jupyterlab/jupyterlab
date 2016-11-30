@@ -45,16 +45,25 @@ Distributed under the terms of the Modified BSD License.
 {% block script %}
 <script>
   var loader = jupyter.loader;
-  var getEntryPoint = jupyter.getEntryPoint;
   delete jupyter.loader;
-  delete jupyter.getEntryPoint;
 
   var createLab = loader.require("{{ jupyterlab_main }}").createLab;
   var lab = jupyter.lab = createLab(loader);
   var plugins = [];
 
+  var getEntryPoint = function (entryPoint) {
+    let plugins = loader.require(entryPoint);
+    try {
+      plugins = loader.extractPlugins(plugins);
+    } catch (err) {
+      console.error(err);
+      plugins = [];
+    }
+    return plugins;
+  }
+
   {% for plugin_entry in plugin_entries %}
-  plugins = plugins.concat(getEntryPoint(loader, "{{ plugin_entry }}"));
+  plugins = plugins.concat(getEntryPoint("{{ plugin_entry }}"));
   {% endfor %}
 
   lab.registerPlugins(plugins);
