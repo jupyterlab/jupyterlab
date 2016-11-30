@@ -148,7 +148,7 @@
 
 
 .p-DockPanel-tabBar .p-TabBar-tab.p-mod-closable.jp-mod-dirty > .p-TabBar-tabCloseIcon {
-  background-size: 12px;
+  background-size: 10px;
   background-image: url(../default-theme/icons/md/circle.svg);
 }
 
