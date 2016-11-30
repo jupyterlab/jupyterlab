@@ -44,6 +44,11 @@ import {
 export
 interface IInstanceTracker<T extends Widget> {
   /**
+   * A signal emitted when a widget is added or removed from the tracker.
+   */
+  changed: ISignal<this, 'add' | 'remove'>;
+
+  /**
    * A signal emitted when the current widget changes.
    *
    * #### Notes
@@ -134,6 +139,11 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   }
 
   /**
+   * A signal emitted when a widget is added or removed from the tracker.
+   */
+  readonly changed: ISignal<this, 'add' | 'remove'>;
+
+  /**
    * A signal emitted when the current widget changes.
    *
    * #### Notes
@@ -203,13 +213,18 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
           state.remove(name);
         }
       }
-      // If this was the last widget being disposed, emit null.
+      // Emit a changed signal.
+      this.changed.emit('remove');
+      // If this was the last widget, emit null for current widget signal.
       if (!this._widgets.size) {
         this._currentWidget = null;
         this.onCurrentChanged();
         this.currentChanged.emit(null);
       }
     });
+
+    // Emit a changed signal.
+    this.changed.emit('add');
   }
 
   /**
@@ -358,6 +373,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
 
 
 // Define the signals for the `InstanceTracker` class.
+defineSignal(InstanceTracker.prototype, 'changed');
 defineSignal(InstanceTracker.prototype, 'currentChanged');
 
 
