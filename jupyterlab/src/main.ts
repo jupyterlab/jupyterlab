@@ -6,6 +6,10 @@ import {
 } from 'es6-promise';
 
 import {
+  ModuleLoader
+} from '@jupyterlab/extension-builder/lib/loader';
+
+import {
   JupyterLab
 } from '../../lib/application';
 
@@ -15,9 +19,12 @@ import '../../lib/default-theme/index.css';
 
 polyfill();
 
-export
-const lab = new JupyterLab({
-  version: require('../../package.json').version,
-  gitDescription: process.env.GIT_DESCRIPTION
-});
 
+export
+function createLab(loader: ModuleLoader): JupyterLab {
+  return new JupyterLab({
+    loader,
+    version: require('../../package.json').version,
+    gitDescription: process.env.GIT_DESCRIPTION
+  });
+}

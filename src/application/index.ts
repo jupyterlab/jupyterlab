@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ModuleLoader
+} from '@jupyterlab/extension-builder/lib/loader';
+
+import {
   utils
 } from '@jupyterlab/services';
 
@@ -31,8 +35,11 @@ class JupyterLab extends Application<ApplicationShell> {
    */
   constructor(options: JupyterLab.IOptions = {}) {
     super();
-    this._version = options.version || 'unknown';
-    this._gitDescription = options.gitDescription || 'unknown';
+    this._info = {
+      version:  options.version || 'unknown',
+      gitDescription: options.gitDescription || 'unknown'
+    };
+    this._loader = options.loader || null;
   }
 
   /**
@@ -43,17 +50,17 @@ class JupyterLab extends Application<ApplicationShell> {
   }
 
   /**
-   * The version of the application.
+   * The information about the application.
    */
-  get version() {
-    return this._version;
+  get info(): JupyterLab.IInfo {
+    return this._info;
   }
 
   /**
-   * The git description of the application.
+   * The module loader used by the application.
    */
-  get gitDescription(): string {
-    return this._gitDescription;
+  get loader(): ModuleLoader | null {
+    return this._loader;
   }
 
   /**
@@ -78,8 +85,8 @@ class JupyterLab extends Application<ApplicationShell> {
 
   private _startedDelegate = new utils.PromiseDelegate<void>();
   private _startedFlag = false;
-  private _version: string;
-  private _gitDescription: string;
+  private _info: JupyterLab.IInfo;
+  private _loader: ModuleLoader | null;
 }
 
 
@@ -102,5 +109,26 @@ namespace JupyterLab {
      * The git description of the JupyterLab application.
      */
     gitDescription?: string;
+
+    /**
+     * The module loader used by the application.
+     */
+    loader?: ModuleLoader;
+  }
+
+  /**
+   * The information about a JupyterLab application.
+   */
+  export
+  interface IInfo {
+    /**
+     * The version of the JupyterLab application.
+     */
+    readonly version: string;
+
+    /**
+     * The git description of the JupyterLab application.
+     */
+    readonly gitDescription: string;
   }
 }

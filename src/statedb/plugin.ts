@@ -40,7 +40,7 @@ const plugin: JupyterLabPlugin<IStateDB> = {
  */
 function activateState(app: JupyterLab, palette: ICommandPalette): Promise<IStateDB> {
   let state = new StateDB();
-  let version = app.version;
+  let version = app.info.version;
   let command = 'statedb:clear';
   let category = 'Help';
   let key = 'statedb:version';

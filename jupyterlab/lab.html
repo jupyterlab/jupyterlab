@@ -44,11 +44,17 @@ Distributed under the terms of the Modified BSD License.
 
 {% block script %}
 <script>
-  var lab = window.jupyterlab = jupyter.requireModule("{{ jupyterlab_main }}").lab;
+  var loader = jupyter.loader;
+  var getEntryPoint = jupyter.getEntryPoint;
+  delete jupyter.loader;
+  delete jupyter.getEntryPoint;
+
+  var createLab = loader.require("{{ jupyterlab_main }}").createLab;
+  var lab = jupyter.lab = createLab(loader);
   var plugins = [];
 
   {% for plugin_entry in plugin_entries %}
-  plugins = plugins.concat(jupyter.getEntryPoint("{{ plugin_entry }}"));
+  plugins = plugins.concat(getEntryPoint(loader, "{{ plugin_entry }}"));
   {% endfor %}
 
   lab.registerPlugins(plugins);

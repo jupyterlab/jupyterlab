@@ -118,7 +118,7 @@ class CodeMirrorWidget extends Widget {
   protected onResize(msg: ResizeMessage): void {
     if (msg.width < 0 || msg.height < 0) {
       if (this._resizing === -1) {
-        this._resizing = setTimeout(() => {
+        this._resizing = window.setTimeout(() => {
           this._editor.setSize(null, null);
           this._resizing = -1;
         }, 500);
