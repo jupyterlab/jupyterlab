@@ -10,6 +10,7 @@
   display: inline-block;
   vertical-align: middle;
   background-repeat: no-repeat;
+  background-position: center;
 }
 
 
@@ -35,6 +36,15 @@
 
 .jp-DownCaretIcon {
   background-image: url(icons/md/down_caret.svg);
+}
+
+
+.jp-DownloadIcon {
+  background-image: url(icons/md/download.svg);
+}
+
+.jp-EditIcon {
+  background-image: url(icons/md/edit.svg);
 }
 
 
@@ -75,6 +85,10 @@
   background-repeat: no-repeat;
   margin-right: 0;
   width: 20px;
+}
+
+.jp-NotebookIcon {
+  background-image: url(icons/md/book.svg);
 }
 
 
