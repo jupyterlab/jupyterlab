@@ -67,7 +67,7 @@
     "build:examples": "node scripts/buildexamples.js",
     "build:src": "rimraf build && tsc --project src && node scripts/copyfiles.js",
     "build:test": "rimraf test/build && webpack --config test/webpack.conf.js",
-    "build:serverextension": "cd jupyterlab && rimraf build && webpack",
+    "build:serverextension": "cd jupyterlab && rimraf build && tsc --project src && webpack",
     "clean": "rimraf docs && rimraf lib && rimraf test/build && rimraf test/coverage && rimraf jupyterlab/build",
     "clean:examples": "node scripts/cleanexamples.js",
     "clean:slate": "npm run clean && npm run clean:examples && rimraf jupyterlab/node_modules && rimraf node_modules && npm install",
