@@ -27,10 +27,33 @@ type JupyterLabPlugin<T> = Application.IPlugin<JupyterLab, T>;
 export
 class JupyterLab extends Application<ApplicationShell> {
   /**
+   * Construct a new JupyterLab object.
+   */
+  constructor(options: JupyterLab.IOptions = {}) {
+    super();
+    this._version = options.version || 'unknown';
+    this._gitDescription = options.gitDescription || 'unknown';
+  }
+
+  /**
    * A promise that resolves when the JupyterLab application is started.
    */
   get started(): Promise<void> {
     return this._startedDelegate.promise;
+  }
+
+  /**
+   * The version of the application.
+   */
+  get version() {
+    return this._version;
+  }
+
+  /**
+   * The git description of the application.
+   */
+  get gitDescription(): string {
+    return this._gitDescription;
   }
 
   /**
@@ -55,4 +78,29 @@ class JupyterLab extends Application<ApplicationShell> {
 
   private _startedDelegate = new utils.PromiseDelegate<void>();
   private _startedFlag = false;
+  private _version: string;
+  private _gitDescription: string;
+}
+
+
+/**
+ * The namespace for `JupyterLab` class statics.
+ */
+export
+namespace JupyterLab {
+  /**
+   * The options used to initialize a JupyterLab object.
+   */
+  export
+  interface IOptions {
+    /**
+     * The version of the JupyterLab application.
+     */
+    version?: string;
+
+    /**
+     * The git description of the JupyterLab application.
+     */
+    gitDescription?: string;
+  }
 }
