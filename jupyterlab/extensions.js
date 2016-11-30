@@ -3,6 +3,7 @@
 
 module.exports = [
   require('../lib/about/plugin').aboutExtension,
+  require('../lib/application/plugin').mainExtension,
   require('../lib/clipboard/plugin').clipboardProvider,
   require('../lib/commandlinker/plugin').commandLinkerProvider,
   require('../lib/commandpalette/plugin').commandPaletteProvider,
@@ -20,7 +21,6 @@ module.exports = [
   require('../lib/landing/plugin').landingExtension,
   require('../lib/launcher/plugin').launcherProvider,
   require('../lib/layoutrestorer/plugin').layoutRestorerProvider,
-  require('../lib/main/plugin').mainExtension,
   require('../lib/mainmenu/plugin').mainMenuProvider,
   require('../lib/markdownwidget/plugin').markdownHandlerExtension,
   require('../lib/notebook/plugin').notebookTrackerProvider,
