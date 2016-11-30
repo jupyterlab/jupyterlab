@@ -195,6 +195,10 @@ namespace CodeEditor {
 
   /**
    * A keydown handler type.
+   * 
+   * #### Notes
+   * Return `true` to prevent the default handling of the event by the
+   * editor.
    */
   export
   type KeydownHandler = (instance: IEditor, event: KeyboardEvent) => boolean;
@@ -236,12 +240,8 @@ namespace CodeEditor {
 
     /**
      * Handle keydown events for the editor.
-     *
-     * #### Notes
-     * Return `true` to prevent the default handling of the event by the
-     * editor.
      */
-    onKeyDown: KeydownHandler;
+    onKeyDown: KeydownHandler | null;
 
     /**
      * Brings browser focus to this editor text.

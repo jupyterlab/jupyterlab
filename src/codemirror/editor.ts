@@ -38,13 +38,18 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   constructor(host: HTMLElement, options: CodeMirror.EditorConfiguration = {}) {
     host.classList.add(EDITOR_CLASS);
-    let codeMirrorModel = this._model =  new CodeMirrorModel();
+    let codeMirrorModel = this._model = new CodeMirrorModel();
     options.theme = (options.theme || DEFAULT_CODEMIRROR_THEME);
     options.value = codeMirrorModel.doc;
     this._editor = CodeMirror(host, options);
     codeMirrorModel.mimeTypeChanged.connect((sender, args) => {
       let mime = args.newValue;
       loadModeByMIME(this._editor, mime);
+    });
+    CodeMirror.on(this.editor, 'keydown', (instance, evt) => {
+      if (this._handler) {
+        this._handler(this, evt);
+      }
     });
   }
 
@@ -138,10 +143,10 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     return this._model;
   }
 
-  get onKeyDown(): CodeEditor.KeydownHandler {
+  get onKeyDown(): CodeEditor.KeydownHandler | null {
     return this._handler;
   }
-  set onKeyDown(value: CodeEditor.KeydownHandler) {
+  set onKeyDown(value: CodeEditor.KeydownHandler | null) {
     this._handler = value;
   }
 
@@ -261,7 +266,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   private _model: CodeEditor.IModel = null;
-  private _handler: CodeEditor.KeydownHandler = null;
+  private _handler: CodeEditor.KeydownHandler | null = null;
   private _editor: CodeMirror.Editor = null;
   private _isDisposed = false;
 
