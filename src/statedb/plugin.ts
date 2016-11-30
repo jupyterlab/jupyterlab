@@ -48,7 +48,7 @@ function activateState(app: JupyterLab, palette: ICommandPalette): Promise<IStat
   let save = () => state.save(key, { version });
   let reset = () => state.clear().then(save);
   let check = (value: JSONObject) => {
-    let old = value && value[version];
+    let old = value && value['version'];
     if (!old || old !== version) {
       console.log(`Upgraded: ${old || 'unknown'} to ${version}; Resetting DB.`);
       return reset();
