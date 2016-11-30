@@ -154,9 +154,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   command = 'console:create-new';
   commands.addCommand(command, {
     label: 'Start New Console',
-    execute: () => {
-      commands.execute('console:create', { });
-    }
+    execute: () => commands.execute('console:create', { })
   });
   palette.addItem({ command, category });
   menu.addItem({ command });
@@ -222,7 +220,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       if (current) {
         let kernel = current.content.session.kernel;
         if (kernel) {
-          kernel.interrupt();
+          return kernel.interrupt();
         }
       }
     }
@@ -260,9 +258,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       path = `${path}/console-${count}-${utils.uuid()}`;
 
       // Get the kernel model.
-      return manager.ready.then(() => {
-        return getKernel(args, name);
-      }).then(kernel => {
+      return manager.ready.then(() => getKernel(args, name)).then(kernel => {
         if (!kernel || (kernel && !kernel.id && !kernel.name)) {
           return;
         }
