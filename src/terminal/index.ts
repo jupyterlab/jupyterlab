@@ -340,24 +340,24 @@ class TerminalWidget extends Widget {
     // Set the fg and bg colors of the terminal and cursor.
     this._sheet.innerHTML = (`
       #${this.node.id} {
-        background: ${this.background};
-        color: ${this.color};
+        background: ${this._background};
+        color: ${this._color};
       }
       #${this.node.id} .xterm-viewport, #${this.node.id} .xterm-rows {
-        background-color: ${this.background};
-        color: ${this.color};
+        background-color: ${this._background};
+        color: ${this._color};
       }
       #${this.node.id} .terminal.focus .terminal-cursor.blinking {
           animation: ${this.node.id}-blink-cursor 1.2s infinite step-end;
       }
       @keyframes ${this.node.id}-blink-cursor {
           0% {
-              background-color: ${this.color};
-              color: ${this.background};
+              background-color: ${this._color};
+              color: ${this._background};
           }
           50% {
               background-color: transparent;
-              color: ${this.color};
+              color: ${this._color};
           }
       }
     `);
