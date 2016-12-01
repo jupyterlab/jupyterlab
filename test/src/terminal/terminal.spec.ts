@@ -237,7 +237,12 @@ describe('terminal/index', () => {
     describe('#onUpdateRequest()', () => {
 
       it('should set the style of the terminal', () => {
-
+        Widget.attach(widget, document.body);
+        sendMessage(widget, WidgetMessage.UpdateRequest);
+        expect(widget.methods).to.contain('onUpdateRequest');
+        let style = window.getComputedStyle(widget.node);
+        expect(style.backgroundColor).to.be('rgb(0, 0, 0)');
+        expect(style.color).to.be('rgb(255, 255, 255)');
       });
 
     });
