@@ -55,7 +55,7 @@ Distributed under the terms of the Modified BSD License.
    * Get the plugins for an entry point.
    */
   var getEntryPoint = function (entryPoint) {
-    let plugins = loader.require(entryPoint);
+    var plugins = loader.require(entryPoint);
     try {
       plugins = loader.extractPlugins(plugins);
     } catch (err) {
