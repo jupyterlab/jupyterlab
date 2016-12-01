@@ -6,6 +6,10 @@ import {
 } from 'phosphor/lib/core/disposable';
 
 import {
+  find
+} from 'phosphor/lib/algorithm/searching';
+
+import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -24,6 +28,10 @@ import {
 import {
   ObservableVector
 } from '../common/observablevector';
+
+import {
+  JSONObject
+} from 'phosphor/lib/algorithm/json';
 
 
 /**
@@ -145,6 +153,11 @@ namespace CodeEditor {
     readonly selections: ObservableVector<ITextSelection>;
 
     /**
+     * Returns the primary cursor position.
+     */
+    getCursorPosition(): IPosition;
+
+    /**
      * Returns the content for the given line number.
      */
     getLine(line: number): string;
@@ -190,7 +203,7 @@ namespace CodeEditor {
    * A widget that provides a code editor.
    */
   export
-  interface IEditor extends Widget {
+  interface IEditor extends IDisposable {
     /**
      * Whether line numbers should be displayed. Defaults to false.
      */
@@ -234,6 +247,11 @@ namespace CodeEditor {
      * Brings browser focus to this editor text.
      */
     focus(): void;
+
+    /**
+     * Repaint editor. 
+     */
+    refresh(): void;
 
     /**
      * Test whether the editor has keyboard focus.
@@ -353,6 +371,18 @@ namespace CodeEditor {
      */
     get selections(): ObservableVector<ITextSelection> {
       return this._selections;
+    }
+
+    /**
+     * Returns the primary cursor position.
+     */
+    getCursorPosition(): IPosition {
+      let selections = this.selections;
+      let cursor = find(selections, (selection) => { return selection.start === selection.end; });
+      if (cursor) {
+        return this.getPositionAt(cursor.start);
+      }
+      return null;
     }
 
     /**
@@ -503,6 +533,11 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
   hasFocus(): boolean {
     return document.activeElement === this.node;
   }
+
+  /**
+   * Repaint the editor.
+   */
+  refresh(): void { /* no-op */ }
 
   /**
    * Set the size of the editor in pixels.

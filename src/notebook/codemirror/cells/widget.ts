@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Widget
+} from 'phosphor/lib/ui/widget';
+
+import {
   ICellEditorWidget
 } from '../../cells/editor';
 
@@ -10,7 +14,11 @@ import {
 } from '../../cells/widget';
 
 import {
-  CodeMirrorCellEditorWidget
+  CodeMirrorEditor
+} from '../../../codemirror/editor';
+
+import {
+  CodeCellEditorWidget
 } from './editor';
 
 
@@ -36,13 +44,17 @@ class CodeMirrorCodeCellWidgetRenderer extends CodeCellWidget.Renderer {
    * Construct a code cell widget.
    */
   createCellEditor(): ICellEditorWidget {
-    const widget = new CodeMirrorCellEditorWidget(this._editorConfiguration);
-    this._editorInitializer(widget);
+    let configuration = this._editorConfiguration;
+
+    const widget = new CodeCellEditorWidget((host: Widget) => {
+      return new CodeMirrorEditor(host.node, configuration);
+    });
+    this._editorInitializer((widget.editor as CodeMirrorEditor).editor);
     return widget;
   }
 
   private _editorConfiguration: CodeMirror.EditorConfiguration = null;
-  private _editorInitializer: (editor: CodeMirrorCellEditorWidget) => void = null;
+  private _editorInitializer: (editor: CodeMirror.Editor) => void = null;
 }
 
 
@@ -64,7 +76,7 @@ namespace CodeMirrorCodeCellWidgetRenderer {
     /**
      * A code cell widget initializer function.
      */
-    editorInitializer?: (editor: CodeMirrorCellEditorWidget) => void;
+    editorInitializer?: (editor: CodeMirror.Editor) => void;
   }
 
   /**

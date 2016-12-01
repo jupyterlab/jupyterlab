@@ -9,14 +9,6 @@ import {
 } from './';
 
 import {
-  Message
-} from 'phosphor/lib/core/messaging';
-
-import {
-  ResizeMessage, Widget
-} from 'phosphor/lib/ui/widget';
-
-import {
   CodeEditor, IEditorFactory
 } from '../codeeditor';
 
@@ -39,18 +31,17 @@ const DEFAULT_CODEMIRROR_THEME = 'jupyter';
  * CodeMirror editor.
  */
 export
-class CodeMirrorEditor extends Widget implements CodeEditor.IEditor {
+class CodeMirrorEditor implements CodeEditor.IEditor {
 
   /**
    * Construct a CodeMirror editor.
    */
-  constructor(options: CodeMirror.EditorConfiguration = {}) {
-    super();
-    this.addClass(EDITOR_CLASS);
+  constructor(host: HTMLElement, options: CodeMirror.EditorConfiguration = {}) {
+    host.classList.add(EDITOR_CLASS);
     let codeMirrorModel = this._model =  new CodeMirrorModel();
     options.theme = (options.theme || DEFAULT_CODEMIRROR_THEME);
     options.value = codeMirrorModel.doc;
-    this._editor = CodeMirror(this.node, options);
+    this._editor = CodeMirror(host, options);
     codeMirrorModel.mimeTypeChanged.connect((sender, args) => {
       let mime = args.newValue;
       loadModeByMIME(this._editor, mime);
@@ -71,9 +62,12 @@ class CodeMirrorEditor extends Widget implements CodeEditor.IEditor {
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
-    clearTimeout(this._resizing);
     this._editor = null;
-    super.dispose();
+    this._isDisposed = true;
+  }
+
+  get isDisposed(): boolean {
+    return this._isDisposed;
   }
 
   /**
@@ -106,6 +100,13 @@ class CodeMirrorEditor extends Widget implements CodeEditor.IEditor {
    */
   hasFocus(): boolean {
     return this._editor.hasFocus();
+  }
+
+  /**
+   * Repaint editor.
+   */
+  refresh(): void {
+    this._editor.refresh();
   }
 
   /**
@@ -259,91 +260,10 @@ class CodeMirrorEditor extends Widget implements CodeEditor.IEditor {
     };
   }
 
-  private _evtKeydown(event: KeyboardEvent): void {
-    let handler = this._handler;
-    if (handler) {
-      handler(this, event);
-    }
-  }
-
-  /**
-   * Handle `focus` events for the widget.
-   */
-  private _evtFocus(event: FocusEvent): void {
-    if (this._needsRefresh) {
-      this._editor.refresh();
-      this._needsRefresh = false;
-    }
-  }
-
-  handleEvent(event: Event): void {
-    switch (event.type) {
-    case 'keydown':
-      this._evtKeydown(event as KeyboardEvent);
-      break;
-    case 'focus':
-      this._evtFocus(event as FocusEvent);
-      break;
-    default:
-      break;
-    }
-  }
-
-  /**
-   * A message handler invoked on an `'after-attach'` message.
-   */
-  protected onAfterAttach(msg: Message): void {
-    super.onAfterAttach(msg);
-    this.node.addEventListener('keydown', this);
-    this.node.addEventListener('focus', this, true);
-    if (!this.isVisible) {
-      this._needsRefresh = true;
-      return;
-    }
-    this._editor.refresh();
-    this._needsRefresh = false;
-  }
-
-  /**
-   * A message handler invoked on an `'after-show'` message.
-   */
-  protected onAfterShow(msg: Message): void {
-    if (this._needsRefresh) {
-      this._editor.refresh();
-      this._needsRefresh = false;
-    }
-  }
-
-  /**
-   * A message handler invoked on an `'resize'` message.
-   */
-  protected onResize(msg: ResizeMessage): void {
-    if (msg.width < 0 || msg.height < 0) {
-      if (this._resizing === -1) {
-        this._resizing = setTimeout(() => {
-          this._editor.setSize(null, null);
-          this._resizing = -1;
-        }, 500);
-      }
-    } else {
-      this._editor.setSize(msg.width, msg.height);
-    }
-    this._needsRefresh = true;
-  }
-
-  /**
-   * Handle `before_detach` messages for the widget.
-   */
-  protected onBeforeDetach(msg: Message): void {
-    this.node.removeEventListener('keydown', this);
-    this.node.removeEventListener('focus', this, true);
-  }
-
   private _model: CodeEditor.IModel = null;
   private _handler: CodeEditor.KeydownHandler = null;
   private _editor: CodeMirror.Editor = null;
-  private _needsRefresh = true;
-  private _resizing = -1;
+  private _isDisposed = false;
 
 }
 
@@ -353,8 +273,8 @@ class CodeMirrorEditorFactory implements IEditorFactory {
   /**
    * Create a new editor for inline code.
    */
-  newInline(option: CodeEditor.IOptions): CodeEditor.IEditor {
-    let editor = new CodeMirrorEditor({
+  newInlineEditor(host: HTMLElement, option: CodeEditor.IOptions): CodeEditor.IEditor {
+    let editor = new CodeMirrorEditor(host, {
       extraKeys: {
         'Tab': 'indentMore',
         'Shift-Enter': () => { /* no-op */ }
@@ -371,8 +291,8 @@ class CodeMirrorEditorFactory implements IEditorFactory {
   /**
    * Create a new editor for a full document.
    */
-  newDocument(options: CodeEditor.IOptions): CodeEditor.IEditor {
-    let editor = new CodeMirrorEditor({
+  newDocumentEditor(host: HTMLElement, options: CodeEditor.IOptions): CodeEditor.IEditor {
+    let editor = new CodeMirrorEditor(host, {
       extraKeys: {
         'Tab': 'indentMore',
         'Shift-Enter': () => { /* no-op */ }

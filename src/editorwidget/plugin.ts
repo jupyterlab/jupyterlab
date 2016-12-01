@@ -240,7 +240,7 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mai
     return menu;
   }
 
-  mainMenu.addMenu(createMenu(app), {rank: 30});
+  mainMenu.addMenu(createMenu(app), { rank: 30 });
 
   let commands = app.commands;
 

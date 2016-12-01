@@ -6,8 +6,8 @@ import {
 } from 'phosphor/lib/core/messaging';
 
 import {
-  Panel
-} from 'phosphor/lib/ui/panel';
+  ResizeMessage, Widget
+} from 'phosphor/lib/ui/widget';
 
 import {
   CodeEditor
@@ -17,12 +17,11 @@ import {
  * A widget which hosts a code editor.
  */
 export
-class CodeEditorWidget extends Panel {
+class CodeEditorWidget extends Widget {
 
-  constructor(editor: CodeEditor.IEditor) {
+  constructor(editorFactory: (host: Widget) => CodeEditor.IEditor) {
     super();
-    this._editor = editor;
-    this.addWidget(editor);
+    this._editor = editorFactory(this);
   }
 
   /**
@@ -42,6 +41,7 @@ class CodeEditorWidget extends Panel {
     if (this.isDisposed) {
       return;
     }
+    clearTimeout(this._resizing);
     super.dispose();
     this._editor.dispose();
     this._editor = null;
@@ -54,6 +54,88 @@ class CodeEditorWidget extends Panel {
     this._editor.focus();
   }
 
+  /**
+   * A message handler invoked on an `'after-attach'` message.
+   */
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+    this.node.addEventListener('keydown', this);
+    this.node.addEventListener('focus', this, true);
+    if (!this.isVisible) {
+      this._needsRefresh = true;
+      return;
+    }
+    this._editor.refresh();
+    this._needsRefresh = false;
+  }
+
+  /**
+   * Handle `before_detach` messages for the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this.node.removeEventListener('keydown', this);
+    this.node.removeEventListener('focus', this, true);
+  }
+
+  /**
+   * A message handler invoked on an `'after-show'` message.
+   */
+  protected onAfterShow(msg: Message): void {
+    if (this._needsRefresh) {
+      this._editor.refresh();
+      this._needsRefresh = false;
+    }
+  }
+
+  /**
+   * A message handler invoked on an `'resize'` message.
+   */
+  protected onResize(msg: ResizeMessage): void {
+    if (msg.width < 0 || msg.height < 0) {
+      if (this._resizing === -1) {
+        this._resizing = setTimeout(() => {
+          this._editor.setSize(null, null);
+          this._resizing = -1;
+        }, 500);
+      }
+    } else {
+      this._editor.setSize(msg.width, msg.height);
+    }
+    this._needsRefresh = true;
+  }
+
+  handleEvent(event: Event): void {
+    switch (event.type) {
+    case 'keydown':
+      this._evtKeydown(event as KeyboardEvent);
+      break;
+    case 'focus':
+      this._evtFocus(event as FocusEvent);
+      break;
+    default:
+      break;
+    }
+  }
+
+  private _evtKeydown(event: KeyboardEvent): void {
+    let handler = this._editor.onKeyDown;
+    if (handler) {
+      handler(this._editor, event);
+    }
+  }
+
+  /**
+   * Handle `focus` events for the widget.
+   */
+  private _evtFocus(event: FocusEvent): void {
+    if (this._needsRefresh) {
+      this._editor.refresh();
+      this._needsRefresh = false;
+    }
+  }
+
   private _editor: CodeEditor.IEditor = null;
+  private _needsRefresh = true;
+  private _resizing = -1;
 
 }
