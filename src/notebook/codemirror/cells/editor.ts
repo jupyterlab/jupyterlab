@@ -102,21 +102,30 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
       return;
     }
 
-    // If the model is being replaced, disconnect the old signal handler.
-    if (this._model) {
-      this._model.stateChanged.disconnect(this.onModelStateChanged, this);
-    }
-
-    if (!model) {
-      this.editor.model.value = '';
-      this._model = null;
-      return;
-    }
-
+    const oldValue = this._model;
     this._model = model;
-    this.editor.model.value = this._model.source || '';
-    this.editor.model.clearHistory();
-    this._model.stateChanged.connect(this.onModelStateChanged, this);
+    this.onModelChanged(oldValue, model);
+  }
+
+  /**
+   * Handle changes in the model.
+   * 
+   * #### Notes
+   * Subclasses may override this method as needed.
+   */
+  protected onModelChanged(oldValue: ICellModel | null, newValue: ICellModel | null): void {
+    // If the model is being replaced, disconnect the old signal handler.
+    if (oldValue) {
+      oldValue.stateChanged.disconnect(this.onModelStateChanged, this);
+    }
+
+    if (newValue) {
+      this.editor.model.value = newValue.source || '';
+      this.editor.model.clearHistory();
+      newValue.stateChanged.connect(this.onModelStateChanged, this);
+    } else {
+      this.editor.model.value = '';
+    }
   }
 
   /**
