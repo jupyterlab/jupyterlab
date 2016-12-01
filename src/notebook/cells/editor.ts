@@ -125,7 +125,7 @@ interface ICellEditorWidget extends Widget {
   /**
    * The cell model used by the editor.
    */
-  model: ICellModel;
+  model: ICellModel | null;
 
   /**
    * A signal emitted when either the top or bottom edge is requested.

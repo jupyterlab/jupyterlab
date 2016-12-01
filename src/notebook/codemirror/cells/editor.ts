@@ -94,10 +94,10 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
   /**
    * The cell model used by the editor.
    */
-  get model(): ICellModel {
+  get model(): ICellModel | null {
     return this._model;
   }
-  set model(model: ICellModel) {
+  set model(model: ICellModel | null) {
     if (!model && !this._model || model === this._model) {
       return;
     }
@@ -237,7 +237,9 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
     let coords = editor.getCoords(cursorPosition) as ICoords;
     let chHeight = editor.lineHeight;
     let chWidth = editor.charWidth;
-    model.source = newValue;
+    if (model) {
+      model.source = newValue;
+    }
     this.textChanged.emit({
       line, ch, chHeight, chWidth, coords, position, oldValue, newValue
     });
@@ -276,6 +278,7 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
       }
       return false;
     }
+    return false;
   }
 
   /**
@@ -322,7 +325,7 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
     this.completionRequested.emit(data as ICompletionRequest);
   }
 
-  private _model: ICellModel = null;
+  private _model: ICellModel | null = null;
 }
 
 
