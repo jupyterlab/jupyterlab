@@ -30,7 +30,7 @@ import {
  * A service providing an interface to the the launcher.
  */
 export
-const launcherProvider: JupyterLabPlugin<ILauncher> = {
+const plugin: JupyterLabPlugin<ILauncher> = {
   id: 'jupyter.services.launcher',
   requires: [IServiceManager, IPathTracker, ICommandPalette, ICommandLinker],
   provides: ILauncher,

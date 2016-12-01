@@ -17,7 +17,7 @@ import {
  * The provider for a notebook's code mirror renderer.
  */
 export
-const rendererProvider: JupyterLabPlugin<NotebookPanel.IRenderer> = {
+const plugin: JupyterLabPlugin<NotebookPanel.IRenderer> = {
   id: 'jupyter.services.notebook.codemirror.renderer',
   provides: NotebookPanel.IRenderer,
   activate: () => CodeMirrorNotebookPanelRenderer.defaultRenderer

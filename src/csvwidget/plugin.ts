@@ -36,7 +36,7 @@ const FACTORY = 'Table';
  * The table file handler extension.
  */
 export
-const csvHandlerExtension: JupyterLabPlugin<void> = {
+const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.csv-handler',
   requires: [IDocumentRegistry, IStateDB, ILayoutRestorer],
   activate: activateCSVWidget,

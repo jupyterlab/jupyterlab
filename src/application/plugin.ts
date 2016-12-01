@@ -14,16 +14,14 @@ import {
  * The main extension.
  */
 export
-const mainExtension: JupyterLabPlugin<void> = {
+const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.main',
   requires: [ICommandPalette],
   activate: (app: JupyterLab, palette: ICommandPalette) => {
-    let commandId = 'main-jupyterlab:closeAll';
+    let commandId = 'main-jupyterlab:close-all';
     app.commands.addCommand(commandId, {
       label: 'Close All Widgets',
-      execute: () => {
-        app.shell.closeAll();
-      }
+      execute: () => { app.shell.closeAll(); }
     });
 
     palette.addItem({ command: commandId, category: 'Main Area' });

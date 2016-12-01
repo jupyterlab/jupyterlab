@@ -14,10 +14,6 @@ import {
 } from '../docregistry';
 
 import {
-  Widget
-} from 'phosphor/lib/ui/widget';
-
-import {
   JupyterLab
 } from '../application';
 
@@ -28,12 +24,12 @@ import {
 /**
  * The default document manager provider.
  */
-export const docManagerProvider: JupyterLabPlugin<IDocumentManager> = {
+export
+const plugin: JupyterLabPlugin<IDocumentManager> = {
   id: 'jupyter.services.document-manager',
   provides: IDocumentManager,
   requires: [IServiceManager, IDocumentRegistry],
   activate: (app: JupyterLab, manager: IServiceManager, registry: IDocumentRegistry): IDocumentManager => {
-    
     let id = 1;
     let opener: DocumentManager.IWidgetOpener = {
       open: widget => {
@@ -46,13 +42,6 @@ export const docManagerProvider: JupyterLabPlugin<IDocumentManager> = {
         app.shell.activateMain(widget.id);
       }
     };
-
-    let documentManager = new DocumentManager( {
-      registry,
-      manager,
-      opener
-    });
-    
-    return documentManager;
+    return new DocumentManager({ registry, manager, opener });
   }
 };

@@ -119,7 +119,7 @@ const FACTORY = 'Notebook';
  * The notebook widget tracker provider.
  */
 export
-const notebookTrackerProvider: JupyterLabPlugin<INotebookTracker> = {
+const plugin: JupyterLabPlugin<INotebookTracker> = {
   id: 'jupyter.services.notebook-tracker',
   provides: INotebookTracker,
   requires: [
