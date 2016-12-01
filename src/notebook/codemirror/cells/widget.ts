@@ -6,7 +6,7 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  ICellEditorWidget
+  ICellEditorWidget, CodeCellEditorWidget
 } from '../../cells/editor';
 
 import {
@@ -16,10 +16,6 @@ import {
 import {
   CodeMirrorEditor
 } from '../../../codemirror/editor';
-
-import {
-  CodeCellEditorWidget
-} from './editor';
 
 
 /**
@@ -53,8 +49,8 @@ class CodeMirrorCodeCellWidgetRenderer extends CodeCellWidget.Renderer {
     return widget;
   }
 
-  private _editorConfiguration: CodeMirror.EditorConfiguration = null;
-  private _editorInitializer: (editor: CodeMirror.Editor) => void = null;
+  private _editorConfiguration: CodeMirror.EditorConfiguration;
+  private _editorInitializer: (editor: CodeMirror.Editor) => void;
 }
 
 
