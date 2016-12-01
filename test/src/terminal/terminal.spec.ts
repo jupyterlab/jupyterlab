@@ -12,7 +12,7 @@ import {
 } from 'phosphor/lib/core/messaging';
 
 import {
-  ResizeMessage
+  ResizeMessage, WidgetMessage, Widget
 } from 'phosphor/lib/ui/widget';
 
 import {
@@ -87,11 +87,19 @@ describe('terminal/index', () => {
     describe('#session', () => {
 
       it('should get be `null` by default', () => {
-
+        expect(widget.session).to.be(null);
       });
 
-      it('should be settable', () => {
-
+      it('should set the title when ready', (done) => {
+        let session: TerminalSession.ISession;
+        TerminalSession.startNew().then(s => {
+          session = s;
+          widget.session = session;
+          expect(widget.session).to.be(session);
+          return session.ready;
+        }).then(() => {
+          expect(widget.title.label).to.contain(session.name);
+        }).then(done, done);
       });
 
     });
@@ -99,11 +107,12 @@ describe('terminal/index', () => {
     describe('#fontSize', () => {
 
       it('should be 14 by default', () => {
-
+        expect(widget.fontSize).to.be(14);
       });
 
       it('should be settable', () => {
-
+        widget.fontSize = 13;
+        expect(widget.fontSize).to.be(13);
       });
 
     });
@@ -111,11 +120,12 @@ describe('terminal/index', () => {
     describe('#background', () => {
 
       it('should be black by default', () => {
-
+        expect(widget.background).to.be('black');
       });
 
       it('should be settable', () => {
-
+        widget.background = 'white';
+        expect(widget.background).to.be('white');
       });
 
     });
@@ -123,11 +133,12 @@ describe('terminal/index', () => {
     describe('#color', () => {
 
       it('should be white by default', () => {
-
+        expect(widget.color).to.be('white');
       });
 
       it('should be settable', () => {
-
+        widget.color = 'black';
+        expect(widget.color).to.be('black');
       });
 
     });
@@ -135,7 +146,11 @@ describe('terminal/index', () => {
     describe('#dispose()', () => {
 
       it('should dispose of the resources used by the widget', () => {
-
+        expect(widget.isDisposed).to.be(false);
+        widget.dispose();
+        expect(widget.isDisposed).to.be(true);
+        widget.dispose();
+        expect(widget.isDisposed).to.be(true);
       });
 
     });
@@ -143,23 +158,26 @@ describe('terminal/index', () => {
     describe('#processMessage()', () => {
 
       it('should handle fit requests', () => {
-
+        widget.processMessage(WidgetMessage.FitRequest);
+        expect(widget.methods).to.contain('onFitRequest');
       });
 
     });
 
     describe('#onAfterAttach()', () => {
 
-      it('should snap the terminal sizing', () => {
-
+      it('should resize the terminal', () => {
+        Widget.attach(widget, document.body);
       });
 
     });
 
     describe('#onAfterShow()', () => {
 
-      it('should snap the terminal sizing', () => {
-
+      it('should resize the terminal', () => {
+        widget.hide();
+        Widget.attach(widget, document.body);
+        widget.show();
       });
 
     });
