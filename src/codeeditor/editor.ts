@@ -293,7 +293,7 @@ namespace CodeEditor {
    * The options used to initialize an editor.
    */
   export
-  class IOptions {
+  interface IOptions {
     /**
      * Whether line numbers should be displayed. Defaults to false.
      */
@@ -305,9 +305,14 @@ namespace CodeEditor {
     wordWrap?: boolean;
 
     /**
-     * Whether the editor is read-only.  Defaults to false.
+     * Whether the editor is read-only. Defaults to false.
      */
     readOnly?: boolean;
+
+    /**
+     * Other options.
+     */
+    [key: string]: any;
   }
 
   /**
