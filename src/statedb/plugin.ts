@@ -40,8 +40,7 @@ const plugin: JupyterLabPlugin<IStateDB> = {
  */
 function activateState(app: JupyterLab, palette: ICommandPalette): Promise<IStateDB> {
   let state = new StateDB();
-  let jupyter = (window as any).jupyter;
-  let version = jupyter ? jupyter.version : 'unknown';
+  let version = app.info.version;
   let command = 'statedb:clear';
   let category = 'Help';
   let key = 'statedb:version';
@@ -49,7 +48,7 @@ function activateState(app: JupyterLab, palette: ICommandPalette): Promise<IStat
   let save = () => state.save(key, { version });
   let reset = () => state.clear().then(save);
   let check = (value: JSONObject) => {
-    let old = value && (value as any).version;
+    let old = value && value['version'];
     if (!old || old !== version) {
       console.log(`Upgraded: ${old || 'unknown'} to ${version}; Resetting DB.`);
       return reset();
