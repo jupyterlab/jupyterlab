@@ -419,11 +419,29 @@ export namespace NotebookPanel {
    * The default implementation of an `IRenderer`.
    */
   export
-  abstract class Renderer implements IRenderer {
+  class Renderer implements IRenderer {
+
+    /**
+     * The notebook renderer.
+     */
+    readonly notebookRenderer: Notebook.Renderer;
+
+    /**
+     * Creates a new renderer.
+     */
+    constructor(options: Renderer.IOptions) {
+      this.notebookRenderer = options.notebookRenderer;
+    }
+
     /**
      * Create a new content area for the panel.
      */
-    abstract createContent(rendermime: RenderMime): Notebook;
+    createContent(rendermime: RenderMime): Notebook {
+      return new Notebook({
+        rendermime,
+        renderer: this.notebookRenderer
+      });
+    }
 
     /**
      * Create a new toolbar for the panel.
@@ -437,6 +455,23 @@ export namespace NotebookPanel {
      */
     createCompleter(): CompleterWidget {
       return new CompleterWidget({ model: new CompleterModel() });
+    }
+  }
+
+  /**
+   * The namespace for `Renderer`.
+   */
+  export
+  namespace Renderer {
+    /**
+     * An initialization options for a notebook panel renderer.
+     */
+    export
+    interface IOptions {
+      /**
+       * The notebook renderer.
+       */
+      readonly notebookRenderer: Notebook.Renderer;
     }
   }
 
