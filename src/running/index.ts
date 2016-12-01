@@ -214,7 +214,7 @@ class RunningSessions extends Widget {
       promises.push(terminals.refreshRunning());
     }
     promises.push(sessions.refreshRunning());
-    return Promise.all(promises);
+    return Promise.all(promises).then(() => void 0);
   }
 
   /**
