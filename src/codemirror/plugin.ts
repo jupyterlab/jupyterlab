@@ -3,23 +3,28 @@ import {
 } from '../application';
 
 import {
-  IEditorFactory
+  IEditorServices
 } from '../codeeditor';
 
 import {
   CodeMirrorEditorFactory
-} from './editor';
+} from './factory';
+
+import {
+  CodeMirrorMimeTypeService
+} from './mimetype';
 
 
 /**
- * The editor factory.
+ * The editor services.
  */
 export
-const editorFactory: JupyterLabPlugin<IEditorFactory> = {
-  id: IEditorFactory.name,
-  provides: IEditorFactory,
-  activate: (): IEditorFactory => {
-    let factory = new CodeMirrorEditorFactory();
-    return factory;
+const editorExtension: JupyterLabPlugin<IEditorServices> = {
+  id: IEditorServices.name,
+  provides: IEditorServices,
+  activate: (): IEditorServices => {
+    const factory = new CodeMirrorEditorFactory();
+    const mimeTypeService = new CodeMirrorMimeTypeService();
+    return { factory, mimeTypeService };
   }
 };

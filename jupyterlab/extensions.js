@@ -28,5 +28,5 @@ module.exports = [
   require('../lib/services/plugin').servicesProvider,
   require('../lib/shortcuts/plugin').shortcutsExtension,
   require('../lib/terminal/plugin').terminalExtension,
-  require('../lib/codemirror/plugin').editorFactory
+  require('../lib/codemirror/plugin').editorExtension
 ];
