@@ -6,35 +6,37 @@ import {
 } from 'phosphor/lib/core/token';
 
 import {
-  CodeEditor
-} from './editor';
+  IEditorFactory
+} from './factory';
 
-export * from './widget';
+import {
+  IEditorMimeTypeService
+} from './mimetype';
+
 export * from './editor';
+export * from './widget';
+export * from './factory';
 export * from './mimetype';
 
 /* tslint:disable */
 /**
- * The editor factory token.
+ * Code editor services token.
  */
 export
-const IEditorFactory = new Token<IEditorFactory>('jupyter.services.editorfactory');
+const IEditorServices = new Token<IEditorServices>('jupyter.services.editorservices');
 /* tslint:enable */
 
 /**
- * The editor factory interface.
+ * Code editor services.
  */
 export
-interface IEditorFactory {
-
+interface IEditorServices {
   /**
-   * Create a new editor for inline code.
+   * The code editor factory.
    */
-  newInlineEditor(host: HTMLElement, options: CodeEditor.IOptions): CodeEditor.IEditor;
-
+  readonly factory: IEditorFactory;
   /**
-   * Create a new editor for a full document.
+   * The editor mime type service.
    */
-  newDocumentEditor(host: HTMLElement, options: CodeEditor.IOptions): CodeEditor.IEditor;
-
+  readonly mimeTypeService: IEditorMimeTypeService;
 }
