@@ -412,21 +412,6 @@ namespace TerminalWidget {
      * Whether to blink the cursor.  Can only be set at startup.
      */
     cursorBlink?: boolean;
-
-    /**
-     * Whether to show a bell in the terminal.
-     */
-    visualBell?: boolean;
-
-    /**
-     * Whether to focus on a bell event.
-     */
-    popOnBell?: boolean;
-
-    /**
-     * The size of the scrollback buffer in the terminal.
-     */
-    scrollback?: number;
   }
 }
 
