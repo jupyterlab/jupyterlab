@@ -126,17 +126,31 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
-   * Scroll the given cursor position into view.
+   * Reveal the given position in the editor.
    */
-  scrollIntoView(pos: CodeEditor.IPosition, margin?: number): void {
-    // set node scroll position here.
+  revealPosition(position: CodeEditor.IPosition): void {
+    this._editor.scrollIntoView({
+      line: position.line,
+      ch: position.column
+    });
+  }
+
+  /**
+   * Reveal the given selection in the editor.
+   */
+  revealSelection(selection: CodeEditor.ITextSelection): void {
+    const start = this.model.getPositionAt(selection.start);
+    const from = { line: start.line, ch: start.column };
+    const end = this.model.getPositionAt(selection.end);
+    const to = { line: end.line, ch: end.column };
+    this._editor.scrollIntoView({ from, to }, undefined);
   }
 
   /**
    * Get the window coordinates given a cursor position.
    */
   getCoords(position: CodeEditor.IPosition): CodeEditor.ICoords {
-    // more css measurements required
+    // FIXME: more css measurements required
     return void 0;
   }
 

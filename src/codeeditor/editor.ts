@@ -149,6 +149,9 @@ namespace CodeEditor {
 
     /**
      * A mime type of the model.
+     * 
+     * #### Notes
+     * It is never `null`, the default mime type is `text/plain`.
      */
     mimeType: string;
 
@@ -274,9 +277,14 @@ namespace CodeEditor {
     setSize(size: IDimension | null): void;
 
     /**
-     * Scroll the given cursor position into view.
+     * Reveals the given position in the editor.
      */
-    scrollIntoView(pos: IPosition, margin?: number): void;
+    revealPosition(position: IPosition): void;
+
+    /**
+     * Reveals the given selection in the editor.
+     */
+    revealSelection(selection: ITextSelection): void;
 
     /**
      * Get the window coordinates given a cursor position.
@@ -557,7 +565,14 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
   /**
    * Scroll the given cursor position into view.
    */
-  scrollIntoView(pos: CodeEditor.IPosition, margin?: number): void {
+  revealPosition(pos: CodeEditor.IPosition): void {
+    // set node scroll position here.
+  }
+
+  /**
+   * Scroll the given cursor position into view.
+   */
+  revealSelection(selection: CodeEditor.ITextSelection): void {
     // set node scroll position here.
   }
 
