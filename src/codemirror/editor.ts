@@ -47,8 +47,8 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       loadModeByMIME(this._editor, mime);
     });
     CodeMirror.on(this.editor, 'keydown', (instance, evt) => {
-      if (this._handler) {
-        this._handler(this, evt);
+      if (this._handler && this._handler(this, evt)) {
+        evt.preventDefault();
       }
     });
   }
