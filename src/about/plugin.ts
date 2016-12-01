@@ -38,15 +38,15 @@ const plugin: JupyterLabPlugin<void> = {
 
 
 function activateAbout(app: JupyterLab, palette: ICommandPalette, state: IStateDB, layout: ILayoutRestorer): void {
+  const namespace = 'about-jupyterlab';
   const model = new AboutModel();
-  const command = 'about-jupyterlab:show';
+  const command = `${namespace}:show`;
   const category = 'Help';
   const tracker = new InstanceTracker<AboutWidget>({
     restore: {
-      state, layout, command,
+      state, layout, command, namespace,
       args: widget => null,
       name: widget => 'about',
-      namespace: 'about',
       when: app.started,
       registry: app.commands
     }

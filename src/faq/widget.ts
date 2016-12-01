@@ -84,48 +84,72 @@ const ANSWER_CLASS = 'jp-FAQ-answer';
 const ANCHOR_CLASS = 'jp-FAQ-a';
 
 /**
+ * Title of the FAQ plugin.
+ */
+const TITLE = 'Frequently Asked Questions';
+
+/**
+ * Contain subheadings for each section.
+ */
+const SUBHEADINGS = ['THE BASICS', 'FEATURES', 'DEVELOPER'];
+
+/**
+ * Contain questions for `the basics` section.
+ */
+const BASIC_QUESTIONS = [
+  'What is JupyterLab?',
+  'What is a Jupyter Notebook?',
+  'How stable is JupyterLab?',
+  `I'm confused with the interface. How do I navigate around JupyterLab?`
+];
+
+/**
+ * Contain questions for the `features` section.
+ */
+const FEATURES_QUESTIONS = [
+  'How do I add more kernels/languages to JupyterLab?',
+  'How can I share my notebooks?'
+];
+
+/**
+ * Contain questions for the `developer` section.
+ */
+const DEVELOPER_QUESTIONS = [
+  'How do I report a bug?',
+  'I have security concerns about JupyterLab.',
+  'How can I contribute?'
+];
+
+
+/**
  * FaqModel holds data which the FaqWidget will render.
  */
 export
 class FaqModel extends VDomModel {
-  // Title of the FAQ plugin.
-  readonly title: string;
-  // Contain subheadings for each section.
-  readonly subHeadings: string[];
-  // Contain questions for `the basics` section.
-  readonly basicsQuestions: string[];
-  // Contain questions for the `features` section.
-  readonly featuresQuestions: string[];
-  // Contain questions for the `developer` section.
-  readonly developerQuestions: string[];
+  /**
+   * Title of the FAQ plugin.
+   */
+  readonly title = TITLE;
 
   /**
-   * Construct a new faq model.
+   * Contain subheadings for each section.
    */
-  constructor() {
-    super();
-    this.title = 'Frequently Asked Questions';
-    this.subHeadings = [
-      'THE BASICS',
-      'FEATURES',
-      'DEVELOPER'
-    ];
-    this.basicsQuestions = [
-      'What is JupyterLab?',
-      'What is a Jupyter Notebook?',
-      'How stable is JupyterLab?',
-      'I\'m confused with the interface. How do I navigate around JupyterLab?'
-    ];
-    this.featuresQuestions = [
-      'How do I add more kernels/languages to JupyterLab?',
-      'How can I share my notebooks?'
-    ];
-    this.developerQuestions = [
-      'How do I report a bug?',
-      'I have security concerns about JupyterLab.',
-      'How can I contribute?'
-    ];
-  }
+  readonly subheadings = SUBHEADINGS;
+
+  /**
+   * Contain questions for `the basics` section.
+   */
+  readonly basicsQuestions = BASIC_QUESTIONS;
+
+  /**
+   * Contain questions for the `features` section.
+   */
+  readonly featuresQuestions = FEATURES_QUESTIONS;
+
+  /**
+   * Contain questions for the `developer` section.
+   */
+  readonly developerQuestions = DEVELOPER_QUESTIONS;
 }
 
 /**
@@ -146,7 +170,7 @@ class FaqWidget extends VDomWidget<FaqModel> {
    * Render the faq plugin to virtual DOM nodes.
    */
   protected render(): VNode[] {
-    let subHeadings = this.model.subHeadings;
+    let subheadings = this.model.subheadings;
     let basicsQuestions = this.model.basicsQuestions;
     let featuresQuestions = this.model.featuresQuestions;
     let developerQuestions = this.model.developerQuestions;
@@ -165,7 +189,7 @@ class FaqWidget extends VDomWidget<FaqModel> {
     // Create a section element that holds Table of Contents.
     let questionList =
     h.section({ className: CONTENT_CLASS },
-      h.h2({ className: SUBHEADER_CLASS }, subHeadings[0]),
+      h.h2({ className: SUBHEADER_CLASS }, subheadings[0]),
       h.ul({ className: FAQ_LIST_CLASS },
         h.li({ className: QUESTION_CLASS + ' ' + TOC_CLASS },
           h.a({ href: '#basicsQ1' }, basicsQuestions[0])
@@ -180,7 +204,7 @@ class FaqWidget extends VDomWidget<FaqModel> {
           h.a({ href: '#basicsQ4' }, basicsQuestions[3])
         )
       ),
-      h.h2({ className: SUBHEADER_CLASS }, subHeadings[1]),
+      h.h2({ className: SUBHEADER_CLASS }, subheadings[1]),
       h.ul({ className: FAQ_LIST_CLASS },
         h.li({ className: QUESTION_CLASS + ' ' + TOC_CLASS },
           h.a({ href: '#featuresQ1' }, featuresQuestions[0])
@@ -189,7 +213,7 @@ class FaqWidget extends VDomWidget<FaqModel> {
           h.a({ href: '#featuresQ2' }, featuresQuestions[1])
         )
       ),
-      h.h2({ className: SUBHEADER_CLASS }, subHeadings[2]),
+      h.h2({ className: SUBHEADER_CLASS }, subheadings[2]),
       h.ul({ className: FAQ_LIST_CLASS },
         h.li({ className: QUESTION_CLASS + ' ' + TOC_CLASS },
           h.a({ href: '#developerQ1' }, developerQuestions[0])
@@ -206,7 +230,7 @@ class FaqWidget extends VDomWidget<FaqModel> {
     // Create a section element that all other FAQ Content will go under.
     let questionAnswerList =
     h.section({ className: CONTENT_CLASS },
-      h.h2({ className: SUBHEADER_CLASS }, subHeadings[0]),
+      h.h2({ className: SUBHEADER_CLASS }, subheadings[0]),
       // Create list of questions/answers under the Basics section.
       h.ul({ className: FAQ_LIST_CLASS },
         h.li({ className: QUESTION_CLASS, id: 'basicsQ1' }, basicsQuestions[0]),
@@ -242,7 +266,7 @@ class FaqWidget extends VDomWidget<FaqModel> {
           }, 'about-jupyterlab:show', null), 'here')
         )
       ),
-      h.h2({ className: SUBHEADER_CLASS }, subHeadings[1]),
+      h.h2({ className: SUBHEADER_CLASS }, subheadings[1]),
       // Create list of questions/answers under the Features section.
       h.ul({ className: FAQ_LIST_CLASS },
         h.li({
@@ -277,7 +301,7 @@ class FaqWidget extends VDomWidget<FaqModel> {
           ' to render your notebooks online.'
         )
       ),
-      h.h2({ className: SUBHEADER_CLASS }, subHeadings[2]),
+      h.h2({ className: SUBHEADER_CLASS }, subheadings[2]),
       // Create list of questions/answers under the Developer section.
       h.ul({ className: FAQ_LIST_CLASS },
         h.li({
@@ -290,7 +314,7 @@ class FaqWidget extends VDomWidget<FaqModel> {
             className: ANCHOR_CLASS,
             href: 'https://github.com/jupyterlab/jupyterlab/issues',
             target: '_blank'
-          }, 'github repository'),
+          }, 'GitHub repository'),
           '. Please check already opened issues before posting.'
         ),
         h.li({
