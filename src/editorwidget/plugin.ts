@@ -58,7 +58,6 @@ import {
   IEditorServices
 } from '../codeeditor';
 
-
 /**
  * The class name for all main area portrait tab icons.
  */
