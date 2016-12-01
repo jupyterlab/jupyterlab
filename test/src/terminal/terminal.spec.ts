@@ -67,6 +67,13 @@ describe('terminal/index', () => {
   describe('TerminalWidget', () => {
 
     let widget: LogTerminal;
+    let session: TerminalSession.ISession;
+
+    before((done) => {
+      TerminalSession.startNew().then(s => {
+        session = s;
+      }).then(done, done);
+    });
 
     beforeEach(() => {
       widget = new LogTerminal();
@@ -91,13 +98,9 @@ describe('terminal/index', () => {
       });
 
       it('should set the title when ready', (done) => {
-        let session: TerminalSession.ISession;
-        TerminalSession.startNew().then(s => {
-          session = s;
-          widget.session = session;
-          expect(widget.session).to.be(session);
-          return session.ready;
-        }).then(() => {
+        widget.session = session;
+        expect(widget.session).to.be(session);
+        session.ready.then(() => {
           expect(widget.title.label).to.contain(session.name);
         }).then(done, done);
       });
@@ -141,6 +144,18 @@ describe('terminal/index', () => {
         expect(widget.color).to.be('black');
       });
 
+      it('should post an update request', (done) => {
+        widget.session = session;
+        Widget.attach(widget, document.body);
+        requestAnimationFrame(() => {
+          widget.methods = [];
+          widget.color = 'black';
+          requestAnimationFrame(() => {
+            expect(widget.methods).to.contain('onUpdateRequest');
+            done();
+          });
+        });
+      });
     });
 
     describe('#dispose()', () => {
@@ -166,18 +181,38 @@ describe('terminal/index', () => {
 
     describe('#onAfterAttach()', () => {
 
-      it('should resize the terminal', () => {
+      it('should post an update request if visible', (done) => {
+        widget.session = session;
         Widget.attach(widget, document.body);
+        requestAnimationFrame(() => {
+          expect(widget.methods).to.contain('onUpdateRequest');
+          done();
+        });
+      });
+
+      it('should not post an update request if not visible', (done) => {
+        widget.session = session;
+        widget.hide();
+        Widget.attach(widget, document.body);
+        requestAnimationFrame(() => {
+          expect(widget.methods).to.not.contain('onUpdateRequest');
+          done();
+        });
       });
 
     });
 
     describe('#onAfterShow()', () => {
 
-      it('should resize the terminal', () => {
+      it('should post an update request', (done) => {
+        widget.session = session;
         widget.hide();
         Widget.attach(widget, document.body);
         widget.show();
+        requestAnimationFrame(() => {
+          expect(widget.methods).to.contain('onUpdateRequest');
+          done();
+        });
       });
 
     });
