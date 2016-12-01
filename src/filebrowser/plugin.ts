@@ -50,7 +50,7 @@ import {
  * The default file browser provider.
  */
 export
-const fileBrowserProvider: JupyterLabPlugin<IPathTracker> = {
+const plugin: JupyterLabPlugin<IPathTracker> = {
   id: 'jupyter.services.file-browser',
   provides: IPathTracker,
   requires: [

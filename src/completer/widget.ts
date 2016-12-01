@@ -2,6 +2,18 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IIterator, IterableOrArrayLike, toArray
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
+  JSONObject
+} from 'phosphor/lib/algorithm/json';
+
+import {
+  IDisposable
+} from 'phosphor/lib/core/disposable';
+
+import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -18,8 +30,8 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  ICompleterModel, ICompleterItem
-} from './model';
+  ICompletionRequest, ITextChange
+} from '../notebook/cells/editor';
 
 
 /**
@@ -84,7 +96,7 @@ class CompleterWidget extends Widget {
   /**
    * A signal emitted when a selection is made from the completer menu.
    */
-  selected: ISignal<CompleterWidget, string>;
+  readonly selected: ISignal<this, string>;
 
   /**
    * A signal emitted when the completer widget's visibility changes.
@@ -93,18 +105,15 @@ class CompleterWidget extends Widget {
    * This signal is useful when there are multiple floating widgets that may
    * contend with the same space and ought to be mutually exclusive.
    */
-  visibilityChanged: ISignal<CompleterWidget, void>;
+  readonly visibilityChanged: ISignal<this, void>;
 
   /**
    * The model used by the completer widget.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
-  get model(): ICompleterModel {
+  get model(): CompleterWidget.IModel {
     return this._model;
   }
-  set model(model: ICompleterModel) {
+  set model(model: CompleterWidget.IModel) {
     if (!model && !this._model || model === this._model) {
       return;
     }
@@ -233,7 +242,7 @@ class CompleterWidget extends Widget {
       return;
     }
 
-    let items = model.items;
+    let items = toArray(model.items());
 
     // If there are no items, reset and bail.
     if (!items || !items.length) {
@@ -517,7 +526,7 @@ class CompleterWidget extends Widget {
   private _anchor: HTMLElement = null;
   private _anchorPoint = 0;
   private _activeIndex = 0;
-  private _model: ICompleterModel = null;
+  private _model: CompleterWidget.IModel = null;
   private _renderer: CompleterWidget.IRenderer = null;
 }
 
@@ -546,12 +555,128 @@ namespace CompleterWidget {
     /**
      * The model for the completer widget.
      */
-    model?: ICompleterModel;
+    model?: IModel;
 
     /**
      * The renderer for the completer widget nodes.
      */
     renderer?: IRenderer;
+  }
+
+  /**
+   * The data model backing a code completer widget.
+   */
+  export
+  interface IModel extends IDisposable {
+    /**
+     * A signal emitted when state of the completer menu changes.
+     */
+    readonly stateChanged: ISignal<IModel, void>;
+
+    /**
+     * The current text change details.
+     */
+    current: ITextChange;
+
+    /**
+     * The cursor details that the API has used to return matching options.
+     */
+    cursor: ICursorSpan;
+
+    /**
+     * A flag that is true when the model value was modified by a subset match.
+     */
+    subsetMatch: boolean;
+
+    /**
+     * The original completer request details.
+     */
+    original: ICompletionRequest;
+
+    /**
+     * The query against which items are filtered.
+     */
+    query: string;
+
+    /**
+     * Get the of visible items in the completer menu.
+     */
+    items(): IIterator<IItem>;
+
+    /**
+     * Get the unfiltered options in a completer menu.
+     */
+    options(): IIterator<string>;
+
+    /**
+     * Set the avilable options in the completer menu.
+     */
+    setOptions(options: IterableOrArrayLike<string>): void;
+
+    /**
+     * Handle a text change.
+     */
+    handleTextChange(change: ITextChange): void;
+
+    /**
+     * Create a resolved patch between the original state and a patch string.
+     */
+    createPatch(patch: string): IPatch;
+
+    /**
+     * Reset the state of the model.
+     */
+    reset(): void;
+  }
+
+  /**
+   * An object describing a completion option injection into text.
+   */
+  export
+  interface IPatch {
+    /**
+     * The patch text.
+     */
+    text: string;
+
+    /**
+     * The position in the text where cursor should be after patch application.
+     */
+    position: number;
+  }
+
+
+  /**
+   * A completer menu item.
+   */
+  export
+  interface IItem {
+    /**
+     * The highlighted, marked up text of a visible completer item.
+     */
+    text: string;
+
+    /**
+     * The raw text of a visible completer item.
+     */
+    raw: string;
+  }
+
+
+  /**
+   * A cursor span.
+   */
+  export
+  interface ICursorSpan extends JSONObject {
+    /**
+     * The start position of the cursor.
+     */
+    start: number;
+
+    /**
+     * The end position of the cursor.
+     */
+    end: number;
   }
 
   /**
@@ -562,7 +687,7 @@ namespace CompleterWidget {
     /**
      * Create an item node (an `li` element) for a text completer menu.
      */
-    createItemNode(item: ICompleterItem): HTMLLIElement;
+    createItemNode(item: IItem): HTMLLIElement;
   }
 
   /**
@@ -573,7 +698,7 @@ namespace CompleterWidget {
     /**
      * Create an item node for a text completer menu.
      */
-    createItemNode(item: ICompleterItem): HTMLLIElement {
+    createItemNode(item: IItem): HTMLLIElement {
       let li = document.createElement('li');
       let code = document.createElement('code');
 
@@ -585,7 +710,6 @@ namespace CompleterWidget {
       return li;
     }
   }
-
 
   /**
    * The default `IRenderer` instance.

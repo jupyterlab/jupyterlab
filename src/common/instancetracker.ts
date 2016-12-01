@@ -91,6 +91,7 @@ interface IInstanceTracker<T extends Widget> {
   inject(widget: T): void;
 }
 
+
 /**
  * A class that keeps track of widget instances.
  *
@@ -128,7 +129,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     }
 
     Promise.all(promises).then(([saved]) => {
-      let promises = saved.map(args => {
+      promises = saved.map(args => {
         // Execute the command and if it fails, delete the state restore data.
         return registry.execute(command, args.value)
           .catch(() => { state.remove(args.id); });

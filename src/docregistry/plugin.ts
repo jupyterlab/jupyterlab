@@ -14,7 +14,7 @@ import {
  * The default document registry provider.
  */
 export
-const docRegistryProvider: JupyterLabPlugin<IDocumentRegistry> = {
+const plugin: JupyterLabPlugin<IDocumentRegistry> = {
   id: 'jupyter.services.document-registry',
   provides: IDocumentRegistry,
   activate: (): IDocumentRegistry => {
@@ -27,10 +27,7 @@ const docRegistryProvider: JupyterLabPlugin<IDocumentRegistry> = {
       contentType: 'file',
       fileFormat: 'text'
     });
-    registry.addCreator({
-      name: 'Text File',
-      fileType: 'Text',
-    });
+    registry.addCreator({ name: 'Text File', fileType: 'Text', });
     return registry;
   }
 };

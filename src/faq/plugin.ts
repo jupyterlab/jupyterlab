@@ -34,7 +34,7 @@ import {
  * The FAQ page extension.
  */
 export
-const faqExtension: JupyterLabPlugin<void> = {
+const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.faq',
   requires: [ICommandPalette, ICommandLinker, IStateDB, ILayoutRestorer],
   activate: activateFAQ,

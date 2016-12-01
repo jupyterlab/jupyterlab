@@ -38,7 +38,7 @@ import {
  * The landing page extension.
  */
 export
-const landingExtension: JupyterLabPlugin<void> = {
+const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.landing',
   requires: [
     IPathTracker, ICommandPalette, IServiceManager, IStateDB, ILayoutRestorer

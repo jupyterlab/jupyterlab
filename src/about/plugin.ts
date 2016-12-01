@@ -29,7 +29,7 @@ import {
  * The about page extension.
  */
 export
-const aboutExtension: JupyterLabPlugin<void> = {
+const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.about',
   activate: activateAbout,
   autoStart: true,

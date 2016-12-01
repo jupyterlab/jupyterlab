@@ -16,7 +16,7 @@ var notice = childProcess.execSync('git describe', { encoding: 'utf8' });
 
 buildExtension({
   name: 'main',
-  entry: './index',
+  entry: './build/main',
   outputDir: './build',
   config: {
     output: {
@@ -34,7 +34,7 @@ buildExtension({
 
 buildExtension({
   name: 'extensions',
-  entry: './extensions',
+  entry: './build/extensions',
   outputDir: './build',
   config: {
     output: {
@@ -49,7 +49,7 @@ buildExtension({
 
 module.exports = {
   entry: {
-    loader: './loader'
+    loader: './build/loader'
   },
   output: {
     path: __dirname + '/build',

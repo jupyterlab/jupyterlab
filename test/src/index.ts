@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import './application/loader.spec';
+
 import './commandlinker/commandlinker.spec';
 
 import './common/activitymonitor.spec';

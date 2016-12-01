@@ -85,7 +85,7 @@ const cmdIds = {
  * The editor handler extension.
  */
 export
-const editorHandlerProvider: JupyterLabPlugin<IEditorTracker> = {
+const plugin: JupyterLabPlugin<IEditorTracker> = {
   id: 'jupyter.services.editor-handler',
   requires: [
     IDocumentRegistry, IMainMenu, ICommandPalette, IStateDB, ILayoutRestorer

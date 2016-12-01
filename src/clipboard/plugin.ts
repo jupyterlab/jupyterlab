@@ -18,7 +18,7 @@ import {
  * The clipboard provider.
  */
 export
-const clipboardProvider: JupyterLabPlugin<IClipboard> = {
+const plugin: JupyterLabPlugin<IClipboard> = {
   id: 'jupyter.services.clipboard',
   provides: IClipboard,
   activate: (): IClipboard => new MimeData()

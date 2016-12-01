@@ -23,7 +23,7 @@ import {
  * The default rendermime provider.
  */
 export
-const renderMimeProvider: JupyterLabPlugin<IRenderMime> = {
+const plugin: JupyterLabPlugin<IRenderMime> = {
   id: 'jupyter.services.rendermime',
   provides: IRenderMime,
   activate: (): IRenderMime => {
