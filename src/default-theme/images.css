@@ -34,56 +34,6 @@
 }
 
 
-.jp-MaterialIcon {
-  min-width: 16px;
-  min-height: 16px;
-  background-size: 16px;
-  display: inline-block;
-  vertical-align: middle;
-  background-repeat: no-repeat;
-}
-
-
-.jp-AddIcon {
-  background-image: url(icons/add.svg);
-}
-
-
-.jp-UploadIcon {
-  background-image: url(icons/upload.svg);
-}
-
-
-.jp-RefreshIcon {
-  background-image: url(images/refresh.svg);
-}
-
-
-.jp-DownCaretIcon {
-  background-image: url(images/down_caret.svg);
-}
-
-
-.jp-HomeIcon {
-  background-image: url(icons/home.svg);
-  min-width: 14px;
-  min-height: 14px;
-  background-size: 14px;
-  vertical-align: sub;
-  display: inline-block;
-}
-
-
-.jp-OpenFolderIcon {
-  background-image: url(icons/directory.svg);
-}
-
-
-.jp-NotebookIcon {
-  background-image: url(icons/notebook.svg);
-}
-
-
 .jp-JupyterIcon {
   background-image: url(images/jupyter.svg);
   background-size: 16px;
