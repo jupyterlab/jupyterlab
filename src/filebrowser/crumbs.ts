@@ -373,7 +373,7 @@ namespace Private {
   export
   function createCrumbs(): HTMLElement[] {
     let home = document.createElement('span');
-    home.className = BREADCRUMB_HOME + ' ' + BREADCRUMB_ITEM_CLASS;
+    home.className = MATERIAL_CLASS + ' ' + BREADCRUMB_HOME + ' ' + BREADCRUMB_ITEM_CLASS;
     let ellipsis = document.createElement('span');
     ellipsis.className = MATERIAL_CLASS + ' ' + BREADCRUMB_ELLIPSES + ' ' + BREADCRUMB_ITEM_CLASS;
     let parent = document.createElement('span');
