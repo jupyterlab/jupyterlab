@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   ModuleLoader
-} from '../../../lib/application/loader';
+} from '../../../lib/application';
 
 
 describe('ModuleLoader', () => {
