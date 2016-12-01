@@ -6,10 +6,6 @@ import {
 } from 'phosphor/lib/core/disposable';
 
 import {
-  find
-} from 'phosphor/lib/algorithm/searching';
-
-import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -24,10 +20,6 @@ import {
 import {
   IChangedArgs
 } from '../common/interfaces';
-
-import {
-  ObservableVector
-} from '../common/observablevector';
 
 
 /**
@@ -99,22 +91,22 @@ namespace CodeEditor {
   export
   interface ITextSelection {
     /**
-     * The index to the first character in the current selection.
+     * The position of the first character in the current selection.
      *
      * #### Notes
      * If this position is greater than [end] then the selection is considered
      * to be backward.
      */
-    start: number;
+    start: IPosition;
 
     /**
-     * The index to the last character in the current selection.
+     * The position of the last character in the current selection.
      *
      * #### Notes
      * If this position is less than [start] then the selection is considered
      * to be backward.
      */
-    end: number;
+    end: IPosition;
 
     /**
      * The uuid of the text selection owner.
@@ -126,6 +118,206 @@ namespace CodeEditor {
      */
     className?: string;
   }
+
+  /**
+   * An interface to manage selections by selection owners.
+   * 
+   * #### Definitions
+   * - a user code that has an associated uuid is called a selection owner, see `CodeEditor.ISelectionOwner`
+   * - a selection belongs to a selection owner only if it is associated with the owner by an uuid, see `CodeEditor.ITextSelection`
+   * 
+   * #### Read access
+   * - any user code can observe any selection
+   * 
+   * #### Write access
+   * - if a user code is a selection owner then:
+   *   - it can change selections beloging to it
+   *   - but it must not change selections beloging to other selection owners
+   * - otherwise it must not change any selection
+   */
+  export
+  interface ISelections {
+
+    /**
+     * A signal emitted when selections changes.
+     */
+    readonly changed: ISignal<Selections, ISelections.IChangedArgs>;
+
+    /**
+     * The uuids of selection owners.
+     */
+    readonly uuids: string[];
+
+    /**
+     * Returns the primary position of the cursor.
+     */
+    getCursorPosition(uuid: string): IPosition | null;
+
+    /**
+     * Set the primary position of the cursor. This will remove any secondary cursors.
+     */
+    setCursorPosition(uuid: string, position: IPosition | null): void;
+
+    /**
+     * Returns the primary selection.
+     */
+    getSelection(uuid: string): ITextSelection | null;
+
+    /**
+     * Set the primary selection. This will remove any secondary cursors.
+     */
+    setSelection(uuid: string, selection: ITextSelection | null): void;
+
+    /**
+     * Gets the selections for all the cursors in ascending order. 
+     */
+    getSelections(uuid: string): ITextSelection[];
+
+    /**
+     * Sets the selections for all the cursors.
+     * Cursors will be removed or added, as necessary.
+     */
+    setSelections(uuid: string, newSelections: ITextSelection[]): void;
+  }
+
+  /**
+   * A namespace for `ISelections`.
+   */
+  export
+  namespace ISelections {
+    /**
+     * An arguments for the selection changed signal.
+     */
+    export
+    interface IChangedArgs {
+      /**
+       * The uuid of a selection owner.
+       */
+      readonly uuid: string;
+      /**
+       * The old selections.
+       */
+      readonly oldSelections: ITextSelection[];
+      /**
+       * The new selections.
+       */
+      readonly newSelections: ITextSelection[];
+    }
+  }
+
+  /**
+   * Default implementation of `ISelections`.
+   */
+  export
+  class Selections implements ISelections {
+
+    /**
+     * A signal emitted when selections changes.
+     */
+    readonly changed: ISignal<Selections, ISelections.IChangedArgs>;
+
+    /**
+     * Uuids of all selection owners.
+     */
+    get uuids(): string[] {
+      return Object.keys(this._selections);
+    }
+
+    /**
+     * Returns the primary position of the cursor.
+     */
+    getCursorPosition(uuid: string): IPosition | null {
+      const selection = this.getSelection(uuid);
+      return this.toPosition(selection);
+    }
+
+    /**
+     * Set the primary position of the cursor. This will remove any secondary cursors.
+     */
+    setCursorPosition(uuid: string, position: IPosition | null) {
+      const selection = this.toSelection(uuid, position);
+      this.setSelection(uuid, selection);
+    }
+
+    /**
+     * Returns the primary selection.
+     */
+    getSelection(uuid: string): ITextSelection | null {
+      const selections = this.getSelections(uuid);
+      return selections.length > 0 ? selections[0] : null;
+    }
+
+    /**
+     * Set the primary selection. This will remove any secondary cursors.
+     */
+    setSelection(uuid: string, selection: ITextSelection | null) {
+      const selections: ITextSelection[] = [];
+      if (selection) {
+        selections.push(selection);
+      }
+      this.setSelections(uuid, selections);
+    }
+
+    /**
+     * Gets the selections for all the cursors in ascending order. 
+     */
+    getSelections(uuid: string): ITextSelection[] {
+      const selections = this._selections[uuid];
+      return selections ? selections : [];
+    }
+
+    /**
+     * Sets the selections for all the cursors.
+     * Cursors will be removed or added, as necessary.
+     */
+    setSelections(uuid: string, newSelections: ITextSelection[]): void {
+      const oldSelections = this.getSelections(uuid);
+      this.removeSelections(uuid);
+      this.sortSelections(newSelections);
+      this._selections[uuid] = newSelections;
+      this.changed.emit({ uuid, oldSelections, newSelections });
+    }
+
+    /**
+     * Sorts given selections in ascending order.
+     */
+    protected sortSelections(selections: ITextSelection[]) {
+      selections.sort((selection, selection2) => {
+        const result = selection.start.line - selection2.start.line;
+        if (result !== 0) {
+          return result;
+        }
+        return selection.start.column - selection2.start.column;
+      });
+    }
+
+    /**
+     * Converts the given position to a selection.
+     */
+    protected toSelection(uuid: string, position: IPosition | null): ITextSelection | null {
+      return position ? { uuid, start: position, end: position } : null;
+    }
+
+    /**
+     * Converts the given selection to a position.
+     */
+    protected toPosition(selection: ITextSelection | null): IPosition | null {
+      return selection ? selection.start : null;
+    }
+
+    /**
+     * Removes selections by the given uuid.
+     */
+    protected removeSelections(uuid: string) {
+      delete this._selections[uuid];
+    }
+
+    private _selections: {
+      [key: string]: ITextSelection[] | null
+    } = {};
+  }
+
+  defineSignal(Selections.prototype, 'changed');
 
   /**
    * An editor model.
@@ -162,15 +354,8 @@ namespace CodeEditor {
 
     /**
      * The currently selected code.
-     *
-     * @returns A read-only copy of the text selections.
      */
-    readonly selections: ObservableVector<ITextSelection>;
-
-    /**
-     * Returns the primary cursor position.
-     */
-    getCursorPosition(): IPosition;
+    readonly selections: ISelections;
 
     /**
      * Returns the content for the given line number.
@@ -204,6 +389,42 @@ namespace CodeEditor {
   }
 
   /**
+   * A selection owner.
+   */
+  export
+  interface ISelectionOwner {
+    /**
+     * The uuid of this selection owner.
+     */
+    readonly uuid: string;
+    /**
+     * Set the primary position of the cursor. This will remove any secondary cursors.
+     */
+    setCursorPosition(position: IPosition): void;
+    /**
+     * Returns the primary position of the cursor.
+     */
+    getCursorPosition(): IPosition;
+    /**
+     * Set the primary selection. This will remove any secondary cursors.
+     */
+    setSelection(selection: ITextSelection): void;
+    /**
+     * Returns the primary selection.
+     */
+    getSelection(): ITextSelection;
+    /**
+     * Gets the selections for all the cursors.
+     */
+    getSelections(): ITextSelection[];
+    /**
+     * Sets the selections for all the cursors.
+     * Cursors will be removed or added, as necessary.
+     */
+    setSelections(selections: ITextSelection[]): void;
+  }
+
+  /**
    * A keydown handler type.
    * 
    * #### Notes
@@ -217,7 +438,7 @@ namespace CodeEditor {
    * A widget that provides a code editor.
    */
   export
-  interface IEditor extends IDisposable {
+  interface IEditor extends ISelectionOwner, IDisposable {
     /**
      * Whether line numbers should be displayed. Defaults to false.
      */
@@ -333,6 +554,8 @@ namespace CodeEditor {
      */
     mimeTypeChanged: ISignal<this, IChangedArgs<string>>;
 
+    readonly selections = new Selections();
+
     /**
      * Whether the model is disposed.
      */
@@ -390,25 +613,6 @@ namespace CodeEditor {
     }
 
     /**
-     * Get the selections for the model.
-     */
-    get selections(): ObservableVector<ITextSelection> {
-      return this._selections;
-    }
-
-    /**
-     * Returns the primary cursor position.
-     */
-    getCursorPosition(): IPosition {
-      let selections = this.selections;
-      let cursor = find(selections, (selection) => { return selection.start === selection.end; });
-      if (cursor) {
-        return this.getPositionAt(cursor.start);
-      }
-      return null;
-    }
-
-    /**
      * Get the number of lines in the model.
      */
     get lineCount(): number {
@@ -458,7 +662,6 @@ namespace CodeEditor {
 
     private _mimetype = '';
     private _value = '';
-    private _selections = new ObservableVector<ITextSelection>();
     private _isDisposed = false;
   }
 }
@@ -471,6 +674,7 @@ defineSignal(CodeEditor.Model.prototype, 'mimeTypeChanged');
  * An implementation of an editor for an html text area.
  */
 class TextAreaEditor extends Widget implements CodeEditor.IEditor {
+  readonly uuid = '1';
   /**
    * Construct a new text editor.
    */
@@ -480,12 +684,9 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
     let node = this.node as HTMLTextAreaElement;
     node.readOnly = options.readOnly || false;
     node.wrap = options.wordWrap ? 'hard' : 'soft';
-    let selection = model.selections.at(0);
-    if (selection) {
-      node.setSelectionRange(selection.start, selection.end);
-    }
     model.selections.changed.connect(this.onModelSelectionsChanged, this);
     model.valueChanged.connect(this.onModelValueChanged, this);
+    this.updateSelections();
   }
 
   get lineNumbers(): boolean {
@@ -620,12 +821,48 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
     (this.node as HTMLTextAreaElement).value = args.newValue;
   }
 
-  protected onModelSelectionsChanged(sender: ObservableVector<CodeEditor.ITextSelection>, args: ObservableVector.IChangedArgs<CodeEditor.ITextSelection>) {
-    let node = this.node as HTMLTextAreaElement;
-    let selection = sender.at(0);
+  setCursorPosition(position: CodeEditor.IPosition): void {
+    this.setSelection({
+      uuid: this.uuid,
+      start: position,
+      end: position
+    });
+  }
+
+  getCursorPosition(): CodeEditor.IPosition {
+    return this.getSelection().start;
+  }
+
+  setSelection(selection: CodeEditor.ITextSelection | null): void {
+    const node = this.node as HTMLTextAreaElement;
     if (selection) {
-      node.setSelectionRange(selection.start, selection.end);
+      const start = this.model.getOffsetAt(selection.start);
+      const end = this.model.getOffsetAt(selection.end);
+      node.setSelectionRange(start, end);
+    } else {
+      node.setSelectionRange(0, 0);
     }
+  }
+
+  getSelection(): CodeEditor.ITextSelection {
+    const node = this.node as HTMLTextAreaElement;
+    return {
+      uuid: this.uuid,
+      start: this.model.getPositionAt(node.selectionStart),
+      end: this.model.getPositionAt(node.selectionEnd)
+    };
+  }
+
+  getSelections(): CodeEditor.ITextSelection[] {
+    return [this.getSelection()];
+  }
+
+  setSelections(selections: CodeEditor.ITextSelection[]): void {
+    this.setSelection(selections.length > 0 ? selections[0] : null);
+  }
+
+  protected onModelSelectionsChanged(sender: CodeEditor.ISelections, args: CodeEditor.ISelections.IChangedArgs) {
+    // display foreign cursors
   }
 
   private _evtKeydown(event: KeyboardEvent): void {
@@ -636,14 +873,13 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
   }
 
   private _evtMouseUp(event: MouseEvent): void {
-    let node = this.node as HTMLTextAreaElement;
+    this.updateSelections();
+  }
+
+  protected updateSelections() {
     this._changeGuard = true;
-    this._model.selections.clear();
-    this._model.selections.pushBack({
-      start: node.selectionStart,
-      end: node.selectionEnd,
-      uuid: '1'
-    });
+    const selection = this.getSelection();
+    this._model.selections.setSelection(selection.uuid, selection);
     this._changeGuard = false;
   }
 
