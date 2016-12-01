@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLabPlugin
+  JupyterLab, JupyterLabPlugin
 } from '../../application';
 
 import {
@@ -10,8 +10,12 @@ import {
 } from '../content';
 
 import {
-  CodeMirrorConsoleRenderer
-} from './widget';
+  IEditorServices
+} from '../../codeeditor';
+
+import {
+  CodeCellWidget
+} from '../../notebook/cells';
 
 
 /**
@@ -20,6 +24,32 @@ import {
 export
 const plugin: JupyterLabPlugin<ConsoleContent.IRenderer> = {
   id: 'jupyter.services.console.codemirror.renderer',
+  requires: [IEditorServices],
   provides: ConsoleContent.IRenderer,
-  activate: () => CodeMirrorConsoleRenderer.defaultRenderer
+  activate: activateRendererProvider
 };
+
+/**
+ * Activates the renderer provider extension.
+ */
+function activateRendererProvider(app: JupyterLab, editorServices: IEditorServices): ConsoleContent.IRenderer {
+  const bannerRenderer = new CodeCellWidget.Renderer({
+    editorFactory: host => editorServices.factory.newInlineEditor(host.node, {
+      wordWrap: true
+    })
+  });
+  const promptRenderer = new CodeCellWidget.Renderer({
+    editorFactory: host => editorServices.factory.newInlineEditor(host.node, {
+      matchBrackets: false,
+      autoCloseBrackets: false,
+      extraKeys: {
+        Enter: function () { /* no-op */ }
+      }
+    })
+  });
+  const foreignCellRenderer = promptRenderer;
+  const editorMimeTypeService = editorServices.mimeTypeService;
+  return new ConsoleContent.Renderer({
+    bannerRenderer, promptRenderer, foreignCellRenderer, editorMimeTypeService
+  });
+}
