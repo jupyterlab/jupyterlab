@@ -33,6 +33,7 @@
   background-image: url(images/questionmark.svg);
 }
 
+
 .jp-MaterialIcon {
   min-width: 16px;
   min-height: 16px;
@@ -42,21 +43,26 @@
   background-repeat: no-repeat;
 }
 
+
 .jp-AddIcon {
   background-image: url(icons/add.svg);
 }
+
 
 .jp-UploadIcon {
   background-image: url(icons/upload.svg);
 }
 
+
 .jp-RefreshIcon {
   background-image: url(images/refresh.svg);
 }
 
+
 .jp-DownCaretIcon {
   background-image: url(images/down_caret.svg);
 }
+
 
 .jp-HomeIcon {
   background-image: url(icons/home.svg);
@@ -67,13 +73,16 @@
   display: inline-block;
 }
 
+
 .jp-OpenFolderIcon {
   background-image: url(icons/directory.svg);
 }
 
+
 .jp-NotebookIcon {
   background-image: url(icons/notebook.svg);
 }
+
 
 .jp-JupyterIcon {
   background-image: url(images/jupyter.svg);

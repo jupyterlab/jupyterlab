@@ -43,17 +43,21 @@
   background-image: url(icons/md/download.svg);
 }
 
+
 .jp-EditIcon {
   background-image: url(icons/md/edit.svg);
 }
+
 
 .jp-EllipsesIcon {
   background-image: url(icons/md/ellipses.svg);
 }
 
+
 .jp-FileIcon {
   background-image: url(icons/md/file.svg);
 }
+
 
 .jp-FolderIcon {
   background-image: url(icons/md/landingfolder.svg);
@@ -92,6 +96,7 @@
   margin-right: 0;
   width: 20px;
 }
+
 
 .jp-NotebookIcon {
   background-image: url(icons/md/book.svg);
