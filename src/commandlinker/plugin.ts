@@ -16,7 +16,7 @@ import {
  * The default commmand linker provider.
  */
 export
-const commandLinkerProvider: JupyterLabPlugin<ICommandLinker> = {
+const plugin: JupyterLabPlugin<ICommandLinker> = {
   id: 'jupyter.services.command-linker',
   provides: ICommandLinker,
   activate: (app: JupyterLab) => new CommandLinker({ commands: app.commands }),

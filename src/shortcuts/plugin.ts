@@ -297,10 +297,10 @@ const SHORTCUTS = [
  * The default shortcuts extension.
  */
 export
-const shortcutsExtension: JupyterLabPlugin<void> = {
+const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.shortcuts',
   activate: (app: JupyterLab): void => {
-    SHORTCUTS.forEach(shortcut => app.keymap.addBinding(shortcut));
+    SHORTCUTS.forEach(shortcut => { app.keymap.addBinding(shortcut); });
   },
   autoStart: true
 };

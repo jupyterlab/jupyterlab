@@ -31,7 +31,7 @@ import {
  * A service providing an inspector panel.
  */
 export
-const inspectorProvider: JupyterLabPlugin<IInspector> = {
+const plugin: JupyterLabPlugin<IInspector> = {
   id: 'jupyter.services.inspector',
   requires: [ICommandPalette, IStateDB, ILayoutRestorer],
   provides: IInspector,

@@ -45,7 +45,7 @@ const FACTORY = 'Image';
  * The image file handler extension.
  */
 export
-const imageHandlerExtension: JupyterLabPlugin<void> = {
+const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.image-handler',
   requires: [IDocumentRegistry, ICommandPalette, IStateDB, ILayoutRestorer],
   activate: activateImageWidget,

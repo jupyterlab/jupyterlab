@@ -70,7 +70,7 @@ import {
  * The console widget tracker provider.
  */
 export
-const consoleTrackerProvider: JupyterLabPlugin<IConsoleTracker> = {
+const plugin: JupyterLabPlugin<IConsoleTracker> = {
   id: 'jupyter.services.console-tracker',
   provides: IConsoleTracker,
   requires: [

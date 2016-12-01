@@ -18,7 +18,7 @@ import {
  * The provider for a console's code mirror renderer.
  */
 export
-const rendererProvider: JupyterLabPlugin<ConsoleContent.IRenderer> = {
+const plugin: JupyterLabPlugin<ConsoleContent.IRenderer> = {
   id: 'jupyter.services.console.codemirror.renderer',
   provides: ConsoleContent.IRenderer,
   activate: () => CodeMirrorConsoleRenderer.defaultRenderer

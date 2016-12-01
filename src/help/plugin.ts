@@ -99,7 +99,7 @@ const COMMANDS = [
  * The help handler extension.
  */
 export
-const helpHandlerExtension: JupyterLabPlugin<void> = {
+const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.help-handler',
   requires: [IMainMenu, ICommandPalette],
   activate: activateHelpHandler,
