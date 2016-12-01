@@ -26,6 +26,10 @@ import {
 } from '../../common/interfaces';
 
 import {
+  CodeEditor
+} from '../../codeeditor';
+
+import {
   RenderMime
 } from '../../rendermime';
 
@@ -38,7 +42,7 @@ import {
 } from '../output-area';
 
 import {
-  ICellEditorWidget
+  ICellEditorWidget, CodeCellEditorWidget
 } from './editor';
 
 import {
@@ -389,17 +393,49 @@ namespace BaseCellWidget {
    * The default implementation of an `IRenderer`.
    */
   export
-  abstract class Renderer implements IRenderer {
+  class Renderer implements IRenderer {
+
+    /**
+     * A code editor factory.
+     */
+    readonly editorFactory: (host: Widget) => CodeEditor.IEditor;
+
+    /**
+     * Creates a new renderer.
+     */
+    constructor(options: Renderer.IOptions) {
+      this.editorFactory = options.editorFactory;
+    }
+
     /**
      * Create a new cell editor for the widget.
      */
-    abstract createCellEditor(): ICellEditorWidget;
+    createCellEditor(): ICellEditorWidget {
+      return new CodeCellEditorWidget(this.editorFactory);
+    }
 
     /**
      * Create a new input area for the widget.
      */
     createInputArea(editor: ICellEditorWidget): InputAreaWidget {
       return new InputAreaWidget(editor);
+    }
+  }
+
+  /**
+   * The namespace for the `Renderer` class statics.
+   */
+  export
+  namespace Renderer {
+    /**
+     * An options object for initializing a renderer.
+     */
+    export
+    interface IOptions {
+      /**
+       * A code editor factory.
+       */
+      readonly editorFactory: (host: Widget) => CodeEditor.IEditor;
     }
   }
 }
@@ -574,7 +610,7 @@ namespace CodeCellWidget {
    * The default implementation of an `IRenderer`.
    */
   export
-  abstract class Renderer extends BaseCellWidget.Renderer implements IRenderer {
+  class Renderer extends BaseCellWidget.Renderer implements IRenderer {
     /**
      * Create an output area widget.
      */
