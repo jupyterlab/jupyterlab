@@ -29,10 +29,6 @@ import {
   ObservableVector
 } from '../common/observablevector';
 
-import {
-  JSONObject
-} from 'phosphor/lib/algorithm/json';
-
 
 /**
  * A namespace for code editors.
