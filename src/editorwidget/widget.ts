@@ -16,11 +16,7 @@ import {
 } from '../docregistry';
 
 import {
-  CodeEditor
-} from '../codeeditor/editor';
-
-import {
-  IEditorServices
+  CodeEditor, IEditorServices, IEditorMimeTypeService
 } from '../codeeditor';
 
 import {
@@ -66,7 +62,10 @@ class EditorWidget extends CodeEditorWidget {
   /**
    * Construct a new editor widget.
    */
-  constructor(editorFactory: (host: Widget) => CodeEditor.IEditor, context: DocumentRegistry.Context) {
+  constructor(
+    editorFactory: (host: Widget) => CodeEditor.IEditor,
+    context: DocumentRegistry.Context,
+    editorMimeTypeService: IEditorMimeTypeService) {
     super(editorFactory);
     this.addClass(EDITOR_CLASS);
     this._context = context;
@@ -103,9 +102,9 @@ class EditorWidget extends CodeEditorWidget {
     this.editor.model.valueChanged.connect((sender, args) => {
       model.fromString(args.newValue);
     });
-    editor.model.setMimeTypeFromPath(context.path);
+    editor.model.mimeType = editorMimeTypeService.getMimeTypeByFilePath(context.path);
     context.pathChanged.connect((c, path) => {
-      editor.model.setMimeTypeFromPath(path);
+      editor.model.mimeType = editorMimeTypeService.getMimeTypeByFilePath(path);
       this.title.label = path.split('/').pop();
     });
 
@@ -137,14 +136,15 @@ class EditorWidgetFactory extends ABCWidgetFactory<EditorWidget, DocumentRegistr
    * Create a new widget given a context.
    */
   protected createNewWidget(context: DocumentRegistry.Context): EditorWidget {
+    const { factory, mimeTypeService } = this._editorServices;
     return new EditorWidget((host: Widget) => {
-      let editor = this._editorServices.factory.newDocumentEditor(host.node, {
+      let editor = factory.newDocumentEditor(host.node, {
           lineNumbers: true,
           readOnly: false,
           wordWrap: true,
       });
       return editor;
-    }, context);
+    }, context, mimeTypeService);
   }
 
   private _editorServices: IEditorServices;

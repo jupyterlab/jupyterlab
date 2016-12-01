@@ -198,11 +198,6 @@ namespace CodeEditor {
      * Clear the undo history.
      */
     clearHistory(): void;
-
-    /**
-     * Update mime type 
-     */
-    setMimeTypeFromPath(path: string): void;
   }
 
   /**
@@ -452,13 +447,6 @@ namespace CodeEditor {
      * Clear the undo history.
      */
     clearHistory(): void { /* no-op */ }
-
-    /**
-     * Set mime type for given path.
-     */
-    setMimeTypeFromPath(path: string): void {
-      this.mimeType = '';
-    }
 
     private _mimetype = '';
     private _value = '';

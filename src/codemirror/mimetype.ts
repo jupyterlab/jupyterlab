@@ -24,7 +24,7 @@ class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
    * #### Notes
    * If a mime type cannot be found returns the defaul mime type `text/plain`, never `null`.  
    */
-  getMimeTypeForLanguage(info: nbformat.ILanguageInfoMetadata): string {
+  getMimeTypeByLanguage(info: nbformat.ILanguageInfoMetadata): string {
     if (info.codemirror_mode) {
       return findMode(info.codemirror_mode as any).mime;
     }
@@ -47,10 +47,8 @@ class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
    * #### Notes
    * If a mime type cannot be found returns the defaul mime type `text/plain`, never `null`.  
    */
-  getMimeTypeForPath(path: string): string {
-    const index = path.lastIndexOf('.');
-    const extension = index === -1 ? path : path.substring(index);
-    const mode = CodeMirror.findModeByExtension(extension);
+  getMimeTypeByFilePath(path: string): string {
+    const mode = CodeMirror.findModeByFileName(path);
     return mode ? mode.mime : IEditorMimeTypeService.defaultMimeType;
   }
 }

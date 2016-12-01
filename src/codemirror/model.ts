@@ -187,16 +187,6 @@ class CodeMirrorModel implements CodeEditor.IModel {
     this._doc.clearHistory();
   }
 
-  /**
-   * Update mime type from given path.
-   */
-  setMimeTypeFromPath(path: string): void {
-    let mode = CodeMirror.findModeByFileName(path);
-    requireMode(mode).then((modespec) => {
-      this.mimeType = modespec.mime;
-    });
-  }
-
   private _onSelectionChanged(sender: ObservableVector<CodeEditor.ITextSelection>, change: ObservableVector.IChangedArgs<CodeEditor.ITextSelection>): void {
     // TODO
   }

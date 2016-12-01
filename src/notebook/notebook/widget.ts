@@ -619,7 +619,7 @@ namespace StaticNotebook {
      * Get the preferred mimetype given language info.
      */
     getCodeMimetype(info: nbformat.ILanguageInfoMetadata): string {
-      return this.editorMimeTypeService.getMimeTypeForLanguage(info);
+      return this.editorMimeTypeService.getMimeTypeByLanguage(info);
     }
   }
 

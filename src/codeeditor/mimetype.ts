@@ -16,14 +16,14 @@ interface IEditorMimeTypeService {
    * #### Notes
    * If a mime type cannot be found returns the defaul mime type `text/plain`, never `null`.  
    */
-  getMimeTypeForLanguage(info: nbformat.ILanguageInfoMetadata): string;
+  getMimeTypeByLanguage(info: nbformat.ILanguageInfoMetadata): string;
   /**
    * Returns a mime type for the given file path.
    * 
    * #### Notes
    * If a mime type cannot be found returns the defaul mime type `text/plain`, never `null`.
    */
-  getMimeTypeForPath(path: string): string;
+  getMimeTypeByFilePath(filePath: string): string;
 }
 
 /**
