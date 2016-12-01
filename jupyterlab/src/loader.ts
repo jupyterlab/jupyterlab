@@ -3,7 +3,7 @@
 
 import {
   ModuleLoader
-} from '@jupyterlab/extension-builder/lib/loader';
+} from '../../lib/application';
 
 
 /**
