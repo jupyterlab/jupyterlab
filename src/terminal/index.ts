@@ -80,15 +80,14 @@ class TerminalWidget extends Widget {
     if (this._session && !this._session.isDisposed) {
       this._session.messageReceived.disconnect(this._onMessage, this);
     }
-    this._session = null;
+    this._session = value || null;
     if (!value) {
       return;
     }
-    this._session = value;
     this._session.ready.then(() => {
       this._session.messageReceived.connect(this._onMessage, this);
       this.title.label = `Terminal ${this._session.name}`;
-      this._resizeTerminal(-1, -1);
+      this._setSessionSize();
     });
   }
 
@@ -104,8 +103,8 @@ class TerminalWidget extends Widget {
    */
   set fontSize(size: number) {
     this._fontSize = size;
-    this._term.element.style.fontSize = `${size}px`;
-    this._snapTermSizing();
+    this._needsSnap = true;
+    this.update();
   }
 
   /**
@@ -120,6 +119,7 @@ class TerminalWidget extends Widget {
    */
   set background(value: string) {
     this._background = value;
+    this._needsStyle = true;
     this.update();
   }
 
@@ -135,6 +135,7 @@ class TerminalWidget extends Widget {
    */
   set color(value: string) {
     this._color = value;
+    this._needsStyle = true;
     this.update();
   }
 
@@ -176,18 +177,14 @@ class TerminalWidget extends Widget {
    * Set the size of the terminal when attached if dirty.
    */
   protected onAfterAttach(msg: Message): void {
-    if (this._dirty) {
-      this._snapTermSizing();
-    }
+    this.update();
   }
 
   /**
    * Set the size of the terminal when shown if dirty.
    */
   protected onAfterShow(msg: Message): void {
-    if (this._dirty) {
-      this._snapTermSizing();
-    }
+    this.update();
   }
 
   /**
@@ -202,38 +199,28 @@ class TerminalWidget extends Widget {
    * On resize, use the computed row and column sizes to resize the terminal.
    */
   protected onResize(msg: ResizeMessage): void {
-    this._resizeTerminal(msg.width, msg.height);
+    this._offsetWidth = msg.width;
+    this._offsetHeight = msg.height;
+    this._needsResize = true;
+    this.update();
   }
 
   /**
    * A message handler invoked on an `'update-request'` message.
    */
   protected onUpdateRequest(msg: Message): void {
-    // Set the fg and bg colors of the terminal and cursor.
-    const style = (`
-      #${this.node.id} {
-        background: ${this.background};
-        color: ${this.color};
-      }
-      #${this.node.id} .xterm-viewport, #${this.node.id} .xterm-rows {
-        background-color: ${this.background};
-        color: ${this.color};
-      }
-      #${this.node.id} .terminal.focus .terminal-cursor.blinking {
-          animation: ${this.node.id}-blink-cursor 1.2s infinite step-end;
-      }
-      @keyframes ${this.node.id}-blink-cursor {
-          0% {
-              background-color: ${this.color};
-              color: ${this.background};
-          }
-          50% {
-              background-color: transparent;
-              color: ${this.color};
-          }
-      }
-    `);
-    this._sheet.innerHTML = style;
+    if (!this.isVisible) {
+      return;
+    }
+    if (this._needsSnap) {
+      this._snapTermSizing();
+    }
+    if (this._needsResize) {
+      this._resizeTerminal();
+    }
+    if (this._needsStyle) {
+      this._setStyle();
+    }
   }
 
   /**
@@ -292,28 +279,22 @@ class TerminalWidget extends Widget {
    * Use the dummy terminal to measure the row and column sizes.
    */
   private _snapTermSizing(): void {
-    if (!this.isVisible) {
-      this._dirty = true;
-      return;
-    }
+    this._term.element.style.fontSize = `${this.fontSize}px`;
     let node = this._dummyTerm;
     this._term.element.appendChild(node);
     this._rowHeight = node.offsetHeight / DUMMY_ROWS;
     this._colWidth = node.offsetWidth / DUMMY_COLS;
     this._term.element.removeChild(node);
-    this._resizeTerminal(-1, -1);
+    this._needsSnap = false;
+    this._needsResize = true;
   }
 
   /**
-   * Resize the terminal based on the computed geometry.
-   *
-   * The parent offset dimensions should be `-1` if unknown.
+   * Resize the terminal based on computed geometry.
    */
-  private _resizeTerminal(offsetWidth: number, offsetHeight: number) {
-    if (this._rowHeight === -1 || !this.isVisible || !this._session) {
-      this._dirty = true;
-      return;
-    }
+  private _resizeTerminal() {
+    let offsetWidth = this._offsetWidth;
+    let offsetHeight = this._offsetHeight;
     if (offsetWidth < 0) {
       offsetWidth = this.node.offsetWidth;
     }
@@ -326,21 +307,66 @@ class TerminalWidget extends Widget {
     let rows = Math.floor(height / this._rowHeight) - 1;
     let cols = Math.floor(width / this._colWidth) - 1;
     this._term.resize(cols, rows);
-    this._session.send({
-      type: 'set_size',
-      content: [rows, cols, height, width]
-    });
-    this._dirty = false;
-    this.update();
+    this._sessionSize = [rows, cols, height, width];
+    this._setSessionSize();
+    this._needsResize = false;
+  }
+
+  /**
+   * Send the size to the session.
+   */
+  private _setSessionSize(): void {
+    if (this._session) {
+      this._session.send({
+        type: 'set_size',
+        content: this._sessionSize
+      });
+    }
+  }
+
+  /**
+   * Set the stylesheet.
+   */
+  private _setStyle(): void {
+    // Set the fg and bg colors of the terminal and cursor.
+    this._sheet.innerHTML = (`
+      #${this.node.id} {
+        background: ${this.background};
+        color: ${this.color};
+      }
+      #${this.node.id} .xterm-viewport, #${this.node.id} .xterm-rows {
+        background-color: ${this.background};
+        color: ${this.color};
+      }
+      #${this.node.id} .terminal.focus .terminal-cursor.blinking {
+          animation: ${this.node.id}-blink-cursor 1.2s infinite step-end;
+      }
+      @keyframes ${this.node.id}-blink-cursor {
+          0% {
+              background-color: ${this.color};
+              color: ${this.background};
+          }
+          50% {
+              background-color: transparent;
+              color: ${this.color};
+          }
+      }
+    `);
+    this._needsStyle = false;
   }
 
   private _term: Xterm = null;
   private _sheet: HTMLElement = null;
   private _dummyTerm: HTMLElement = null;
   private _fontSize = -1;
-  private _dirty = false;
+  private _needsSnap = true;
+  private _needsResize = true;
+  private _needsStyle = true;
   private _rowHeight = -1;
   private _colWidth = -1;
+  private _offsetWidth = -1;
+  private _offsetHeight = -1;
+  private _sessionSize: number[] = [1, 1, 1, 1];
   private _background = '';
   private _color = '';
   private _box: IBoxSizing = null;
