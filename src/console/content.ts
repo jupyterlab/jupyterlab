@@ -38,7 +38,12 @@ import {
 } from '../inspector';
 
 import {
-  BaseCellWidget, CodeCellWidget, RawCellWidget
+  IEditorMimeTypeService
+} from '../codeeditor';
+
+import {
+  BaseCellWidget, CodeCellWidget, RawCellWidget,
+  CodeCellModel, RawCellModel
 } from '../notebook/cells';
 
 import {
@@ -701,6 +706,111 @@ namespace ConsoleContent {
      * Get the preferred mimetype given language info.
      */
     getCodeMimetype(info: nbformat.ILanguageInfoMetadata): string;
+  }
+
+  /**
+   * Default implementation of `IRenderer`.
+   */
+  export
+  class Renderer implements IRenderer {
+
+    /**
+     * The banner renderer.
+     */
+    readonly bannerRenderer: CodeCellWidget.IRenderer;
+    /**
+     * The prompt renderer.
+     */
+    readonly promptRenderer: CodeCellWidget.IRenderer;
+    /**
+     * The foreign cell renderer.
+     */
+    readonly foreignCellRenderer: CodeCellWidget.IRenderer;
+    /**
+     * The mime type service of a code editor.
+     */
+    readonly editorMimeTypeService: IEditorMimeTypeService;
+
+    /**
+     * Create a new renderer.
+     */
+    constructor(options: Renderer.IOptions) {
+      this.bannerRenderer = options.bannerRenderer;
+      this.promptRenderer = options.promptRenderer;
+      this.foreignCellRenderer = options.foreignCellRenderer;
+    }
+
+    /**
+     * Create a new banner widget.
+     */
+    createBanner(): RawCellWidget {
+      let widget = new RawCellWidget({
+        renderer: this.bannerRenderer
+      });
+      widget.model = new RawCellModel();
+      return widget;
+    }
+
+    /**
+     * Create a new prompt widget.
+     */
+    createPrompt(rendermime: IRenderMime, context: ConsoleContent): CodeCellWidget {
+      let widget = new CodeCellWidget({
+        rendermime,
+        renderer: this.promptRenderer
+      });
+      widget.model = new CodeCellModel();
+      return widget;
+    }
+
+    /**
+     * Create a new code cell widget for an input from a foreign session.
+     */
+    createForeignCell(rendermime: IRenderMime, context: ConsoleContent): CodeCellWidget {
+      let widget = new CodeCellWidget({
+        rendermime,
+        renderer: this.foreignCellRenderer
+      });
+      widget.model = new CodeCellModel();
+      return widget;
+    }
+
+    /**
+     * Get the preferred mimetype given language info.
+     */
+    getCodeMimetype(info: nbformat.ILanguageInfoMetadata): string {
+      return this.editorMimeTypeService.getMimeTypeByLanguage(info);
+    }
+
+  }
+
+  /**
+   * The namespace for `Renderer`.
+   */
+  export
+  namespace Renderer {
+    /**
+     * An initialize options for `Renderer`.
+     */
+    export
+    interface IOptions {
+      /**
+       * The banner renderer.
+       */
+      readonly bannerRenderer: CodeCellWidget.IRenderer;
+      /**
+       * The prompt renderer.
+       */
+      readonly promptRenderer: CodeCellWidget.IRenderer;
+      /**
+       * The foreign cell renderer.
+       */
+      readonly foreignCellRenderer: CodeCellWidget.IRenderer;
+      /**
+       * The mime type service of a code editor.
+       */
+      readonly editorMimeTypeService: IEditorMimeTypeService;
+    }
   }
 
   /* tslint:disable */
