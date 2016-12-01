@@ -21,16 +21,9 @@ interface IEditorMimeTypeService {
    * Returns a mime type for the given file path.
    * 
    * #### Notes
-   * If a mime type cannot be found returns the defaul mime type `text/plain`, never `null`.  
+   * If a mime type cannot be found returns the defaul mime type `text/plain`, never `null`.
    */
   getMimeTypeForPath(path: string): string;
-  /**
-   * Returns a mime type for the given file extension.
-   * 
-   * #### Notes
-   * If a mime type cannot be found returns the defaul mime type `text/plain`, never `null`.  
-   */
-  getMimeTypeForExtension(path: string): string;
 }
 
 /**
