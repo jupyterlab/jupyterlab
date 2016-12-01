@@ -55,7 +55,7 @@ import {
 } from '../codemirror/editor';
 
 import {
-  IEditorFactory
+  IEditorServices
 } from '../codeeditor';
 
 
@@ -97,7 +97,7 @@ const plugin: JupyterLabPlugin<IEditorTracker> = {
   id: 'jupyter.services.editor-handler',
   requires: [
     IDocumentRegistry, IMainMenu, ICommandPalette, IStateDB, ILayoutRestorer,
-    IEditorFactory
+    IEditorServices
   ],
   provides: IEditorTracker,
   activate: activateEditorHandler,
@@ -108,7 +108,7 @@ const plugin: JupyterLabPlugin<IEditorTracker> = {
 /**
  * Sets up the editor widget
  */
-function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB, layout: ILayoutRestorer, editorFactory: IEditorFactory): IEditorTracker {
+function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB, layout: ILayoutRestorer, editorServices: IEditorServices): IEditorTracker {
   const factory = new EditorWidgetFactory({
     name: FACTORY,
     fileExtensions: ['*'],

@@ -20,7 +20,7 @@ import {
 } from '../codeeditor/editor';
 
 import {
-  IEditorFactory
+  IEditorServices
 } from '../codeeditor';
 
 import {
@@ -128,9 +128,9 @@ class EditorWidget extends CodeEditorWidget {
 export
 class EditorWidgetFactory extends ABCWidgetFactory<EditorWidget, DocumentRegistry.IModel> {
 
-  constructor(editorFactory: IEditorFactory, options: DocumentRegistry.IWidgetFactoryOptions) {
+  constructor(editorServices: IEditorServices, options: DocumentRegistry.IWidgetFactoryOptions) {
     super(options);
-    this._editorFactory = editorFactory;
+    this._editorServices = editorServices;
   }
 
   /**
@@ -138,7 +138,7 @@ class EditorWidgetFactory extends ABCWidgetFactory<EditorWidget, DocumentRegistr
    */
   protected createNewWidget(context: DocumentRegistry.Context): EditorWidget {
     return new EditorWidget((host: Widget) => {
-      let editor = this._editorFactory.newDocumentEditor(host.node, {
+      let editor = this._editorServices.factory.newDocumentEditor(host.node, {
           lineNumbers: true,
           readOnly: false,
           wordWrap: true,
@@ -147,5 +147,5 @@ class EditorWidgetFactory extends ABCWidgetFactory<EditorWidget, DocumentRegistr
     }, context);
   }
 
-  private _editorFactory: IEditorFactory = null;
+  private _editorServices: IEditorServices;
 }
