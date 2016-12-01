@@ -9,7 +9,7 @@ import {
 } from './';
 
 import {
-  CodeEditor, IEditorFactory
+  CodeEditor
 } from '../codeeditor';
 
 import {
@@ -273,45 +273,5 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   private _handler: CodeEditor.KeydownHandler | null = null;
   private _editor: CodeMirror.Editor = null;
   private _isDisposed = false;
-
-}
-
-export
-class CodeMirrorEditorFactory implements IEditorFactory {
-
-  /**
-   * Create a new editor for inline code.
-   */
-  newInlineEditor(host: HTMLElement, option: CodeEditor.IOptions): CodeEditor.IEditor {
-    let editor = new CodeMirrorEditor(host, {
-      extraKeys: {
-        'Tab': 'indentMore',
-        'Shift-Enter': () => { /* no-op */ }
-      },
-      indentUnit: 4,
-      theme: DEFAULT_CODEMIRROR_THEME,
-      lineNumbers: true,
-      lineWrapping: true,
-    });
-    // TODO configure inline editor
-    return editor;
-  }
-
-  /**
-   * Create a new editor for a full document.
-   */
-  newDocumentEditor(host: HTMLElement, options: CodeEditor.IOptions): CodeEditor.IEditor {
-    let editor = new CodeMirrorEditor(host, {
-      extraKeys: {
-        'Tab': 'indentMore',
-        'Shift-Enter': () => { /* no-op */ }
-      },
-      indentUnit: 4,
-      theme: DEFAULT_CODEMIRROR_THEME,
-      lineNumbers: true,
-      lineWrapping: true,
-    });
-    return editor;
-  }
 
 }
