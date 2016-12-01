@@ -137,7 +137,7 @@ class CellCompleterHandler implements IDisposable {
     // Update the original request.
     model.original = request;
     // Update the options.
-    model.options = value.matches;
+    model.setOptions(value.matches || []);
     // Update the cursor.
     model.cursor = { start: value.cursor_start, end: value.cursor_end };
   }
@@ -195,6 +195,7 @@ class CellCompleterHandler implements IDisposable {
   private _kernel: Kernel.IKernel = null;
   private _pending = 0;
 }
+
 
 /**
  * A namespace for cell completer handler statics.

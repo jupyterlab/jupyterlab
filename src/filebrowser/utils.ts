@@ -2,14 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Widget
-} from 'phosphor/lib/ui/widget';
-
-import {
   okButton, showDialog
 } from '../dialog';
 
-export * from '../utils';
+export * from '../common/dom';
 
 
 /**

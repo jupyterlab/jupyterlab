@@ -14,6 +14,7 @@ var lab = new JupyterLab();
 
 lab.registerPlugins([
   require('jupyterlab/lib/about/plugin').aboutExtension,
+  require('jupyterlab/lib/application/plugin').mainExtension,
   require('jupyterlab/lib/clipboard/plugin').clipboardProvider,
   require('jupyterlab/lib/commandlinker/plugin').commandLinkerProvider,
   require('jupyterlab/lib/commandpalette/plugin').commandPaletteProvider,
@@ -30,7 +31,6 @@ lab.registerPlugins([
   require('jupyterlab/lib/landing/plugin').landingExtension,
   require('jupyterlab/lib/launcher/plugin').launcherProvider,
   require('jupyterlab/lib/layoutrestorer/plugin').layoutRestorerProvider,
-  require('jupyterlab/lib/main/plugin').mainExtension,
   require('jupyterlab/lib/mainmenu/plugin').mainMenuProvider,
   require('jupyterlab/lib/markdownwidget/plugin').markdownHandlerExtension,
   require('jupyterlab/lib/notebook/plugin').notebookTrackerProvider,

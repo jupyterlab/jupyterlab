@@ -7,10 +7,6 @@ import * as CodeMirror
 import 'codemirror/mode/meta';
 
 import {
-  Kernel
-} from '@jupyterlab/services';
-
-import {
   Token
 } from 'phosphor/lib/core/token';
 
@@ -82,8 +78,7 @@ class EditorWidget extends CodeMirrorWidget {
     let editor = this.editor;
     let model = context.model;
     let doc = editor.getDoc();
-    //Prevent the initial loading from disk from
-    //being in the editor history.
+    // Prevent the initial loading from disk from being in the editor history.
     context.ready.then( () => {
       doc.setValue(model.toString());
       doc.clearHistory();

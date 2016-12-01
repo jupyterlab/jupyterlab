@@ -4,7 +4,11 @@
 import expect = require('expect.js');
 
 import {
-  CompleterModel, ICursorSpan, ICompleterItem, ICompletionPatch
+  toArray
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
+  CompleterModel, CompleterWidget
 } from '../../../lib/completer';
 
 import {
@@ -33,9 +37,9 @@ describe('completer/model', () => {
         let listener = (sender: any, args: void) => { called++; };
         model.stateChanged.connect(listener);
         expect(called).to.be(0);
-        model.options = ['foo'];
+        model.setOptions(['foo']);
         expect(called).to.be(1);
-        model.options = null;
+        model.setOptions([]);
         expect(called).to.be(2);
       });
 
@@ -45,11 +49,11 @@ describe('completer/model', () => {
         let listener = (sender: any, args: void) => { called++; };
         model.stateChanged.connect(listener);
         expect(called).to.be(0);
-        model.options = ['foo'];
-        model.options = ['foo'];
+        model.setOptions(['foo']);
+        model.setOptions(['foo']);
         expect(called).to.be(1);
-        model.options = null;
-        model.options = null;
+        model.setOptions([]);
+        model.setOptions([]);
         expect(called).to.be(2);
       });
 
@@ -104,7 +108,7 @@ describe('completer/model', () => {
         let oldValue = currentValue;
         let newValue = 'foob';
         let coords: ICoords = null;
-        let cursor: ICursorSpan = { start: 0, end: 0 };
+        let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
         let request: ICompletionRequest = {
           ch: 0,
           chHeight: 0,
@@ -141,7 +145,7 @@ describe('completer/model', () => {
         let oldValue = currentValue;
         let newValue = 'foob';
         let coords: ICoords = null;
-        let cursor: ICursorSpan = { start: 0, end: 0 };
+        let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
         let request: ICompletionRequest = {
           ch: 0,
           chHeight: 0,
@@ -175,66 +179,66 @@ describe('completer/model', () => {
 
     });
 
-    describe('#items', () => {
+    describe('#items()', () => {
 
       it('should return an unfiltered list of items if query is blank', () => {
         let model = new CompleterModel();
-        let want: ICompleterItem[] = [
+        let want: CompleterWidget.IItem[] = [
           { raw: 'foo', text: 'foo' },
           { raw: 'bar', text: 'bar' },
           { raw: 'baz', text: 'baz' }
         ];
-        model.options = ['foo', 'bar', 'baz'];
-        expect(model.items).to.eql(want);
+        model.setOptions(['foo', 'bar', 'baz']);
+        expect(toArray(model.items())).to.eql(want);
       });
 
       it('should return a filtered list of items if query is set', () => {
         let model = new CompleterModel();
-        let want: ICompleterItem[] = [
+        let want: CompleterWidget.IItem[] = [
           { raw: 'foo', text: '<mark>f</mark>oo' }
         ];
-        model.options = ['foo', 'bar', 'baz'];
+        model.setOptions(['foo', 'bar', 'baz']);
         model.query = 'f';
-        expect(model.items).to.eql(want);
+        expect(toArray(model.items())).to.eql(want);
       });
 
       it('should order list based on score', () => {
         let model = new CompleterModel();
-        let want: ICompleterItem[] = [
+        let want: CompleterWidget.IItem[] = [
           { raw: 'qux', text: '<mark>qux</mark>' },
           { raw: 'quux', text: '<mark>qu</mark>u<mark>x</mark>' }
         ];
-        model.options = ['foo', 'bar', 'baz', 'quux', 'qux'];
+        model.setOptions(['foo', 'bar', 'baz', 'quux', 'qux']);
         model.query = 'qux';
-        expect(model.items).to.eql(want);
+        expect(toArray(model.items())).to.eql(want);
       });
 
       it('should break ties in score by locale sort', () => {
         let model = new CompleterModel();
-        let want: ICompleterItem[] = [
+        let want: CompleterWidget.IItem[] = [
           { raw: 'quux', text: '<mark>qu</mark>ux' },
           { raw: 'qux', text: '<mark>qu</mark>x' }
         ];
-        model.options = ['foo', 'bar', 'baz', 'qux', 'quux'];
+        model.setOptions(['foo', 'bar', 'baz', 'qux', 'quux']);
         model.query = 'qu';
-        expect(model.items).to.eql(want);
+        expect(toArray(model.items())).to.eql(want);
       });
 
     });
 
-    describe('#options', () => {
+    describe('#options()', () => {
 
-      it('should default to null', () => {
+      it('should default to an empty iterator', () => {
         let model = new CompleterModel();
-        expect(model.options).to.be(null);
+        expect(model.options().next()).to.be(void 0);
       });
 
       it('should return model options', () => {
         let model = new CompleterModel();
         let options = ['foo'];
-        model.options = options;
-        expect(model.options).to.not.equal(options);
-        expect(model.options).to.eql(options);
+        model.setOptions(options);
+        expect(toArray(model.options())).to.not.equal(options);
+        expect(toArray(model.options())).to.eql(options);
       });
 
     });
@@ -276,7 +280,7 @@ describe('completer/model', () => {
         let oldValue = currentValue;
         let newValue = 'foob';
         let coords: ICoords = null;
-        let cursor: ICursorSpan = { start: 0, end: 0 };
+        let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
         let request: ICompletionRequest = {
           ch: 0,
           chHeight: 0,
@@ -308,7 +312,7 @@ describe('completer/model', () => {
         let oldValue = currentValue;
         let newValue = 'foob';
         let coords: ICoords = null;
-        let cursor: ICursorSpan = { start: 0, end: 0 };
+        let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
         let request: ICompletionRequest = {
           ch: 0,
           chHeight: 0,
@@ -340,7 +344,7 @@ describe('completer/model', () => {
         let oldValue = currentValue;
         let newValue = 'fo';
         let coords: ICoords = null;
-        let cursor: ICursorSpan = { start: 0, end: 0 };
+        let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
         let request: ICompletionRequest = {
           ch: 0,
           chHeight: 0,
@@ -363,7 +367,7 @@ describe('completer/model', () => {
         model.current = change;
         expect(model.current).to.be(null);
         expect(model.original).to.be(null);
-        expect(model.options).to.be(null);
+        expect(model.options().next()).to.be(void 0);
       });
 
     });
@@ -377,7 +381,7 @@ describe('completer/model', () => {
 
       it('should not set if original request is nonexistent', () => {
         let model = new CompleterModel();
-        let cursor: ICursorSpan = { start: 0, end: 0 };
+        let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
         let request: ICompletionRequest = {
           ch: 0,
           chHeight: 0,
@@ -411,12 +415,10 @@ describe('completer/model', () => {
 
       it('should dispose of the model resources', () => {
         let model = new CompleterModel();
-        model.options = ['foo'];
+        model.setOptions(['foo']);
         expect(model.isDisposed).to.be(false);
-        expect(model.options).to.be.ok();
         model.dispose();
         expect(model.isDisposed).to.be(true);
-        expect(model.options).to.not.be.ok();
       });
 
       it('should be safe to call multiple times', () => {
@@ -437,7 +439,7 @@ describe('completer/model', () => {
         let oldValue = currentValue;
         let newValue = 'foob';
         let coords: ICoords = null;
-        let cursor: ICursorSpan = { start: 0, end: 0 };
+        let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
         let request: ICompletionRequest = {
           ch: 0,
           chHeight: 0,
@@ -498,8 +500,8 @@ describe('completer/model', () => {
       it('should return a patch value', () => {
         let model = new CompleterModel();
         let patch = 'foobar';
-        let want: ICompletionPatch = { text: patch, position: patch.length };
-        let cursor: ICursorSpan = { start: 0, end: 3 };
+        let want: CompleterWidget.IPatch = { text: patch, position: patch.length };
+        let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 3 };
         let request: ICompletionRequest = {
           ch: 0,
           chHeight: 0,
@@ -523,8 +525,8 @@ describe('completer/model', () => {
         let model = new CompleterModel();
         let currentValue = 'foo\nbar';
         let patch = 'barbaz';
-        let want: ICompletionPatch = { text: 'foo\nbarbaz', position: 10 };
-        let cursor: ICursorSpan = { start: 4, end: 7 };
+        let want: CompleterWidget.IPatch = { text: 'foo\nbarbaz', position: 10 };
+        let cursor: CompleterWidget.ICursorSpan = { start: 4, end: 7 };
         let request: ICompletionRequest = {
           ch: 0,
           chHeight: 0,

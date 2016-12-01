@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  toArray
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   KernelMessage, Kernel
 } from '@jupyterlab/services';
 
@@ -16,7 +20,7 @@ import {
 } from '../../../lib/notebook/cells/editor';
 
 import {
-  CompleterWidget, CellCompleterHandler, CompleterModel, ICompletionPatch
+  CompleterWidget, CellCompleterHandler, CompleterModel
 } from '../../../lib/completer';
 
 import {
@@ -27,7 +31,7 @@ import {
 class TestCompleterModel extends CompleterModel {
   methods: string[] = [];
 
-  createPatch(patch: string): ICompletionPatch {
+  createPatch(patch: string): CompleterWidget.IPatch {
     this.methods.push('createPatch');
     return super.createPatch(patch);
   }
@@ -251,7 +255,7 @@ describe('completer/handler', () => {
         let completer = new CompleterWidget();
         let handler = new TestCompleterHandler({ completer });
         completer.model = new CompleterModel();
-        completer.model.options = ['foo', 'bar', 'baz'];
+        completer.model.setOptions(['foo', 'bar', 'baz']);
         handler.dispose();
         handler.onReply(0, null, null);
         expect(completer.model).to.be.ok();
@@ -261,7 +265,7 @@ describe('completer/handler', () => {
         let completer = new CompleterWidget();
         let handler = new TestCompleterHandler({ completer });
         completer.model = new CompleterModel();
-        completer.model.options = ['foo', 'bar', 'baz'];
+        completer.model.setOptions(['foo', 'bar', 'baz']);
         handler.onReply(2, null, null);
         expect(completer.model).to.be.ok();
       });
@@ -294,10 +298,10 @@ describe('completer/handler', () => {
           }
         };
         completer.model = new CompleterModel();
-        completer.model.options = options;
-        expect(completer.model.options).to.eql(options);
+        completer.model.setOptions(options);
+        expect(toArray(completer.model.options())).to.eql(options);
         handler.onReply(0, request, reply);
-        expect(completer.model.options).to.be(null);
+        expect(toArray(completer.model.options())).to.eql([]);
       });
 
       it('should update model if status is ok', () => {
@@ -328,10 +332,10 @@ describe('completer/handler', () => {
           }
         };
         completer.model = new CompleterModel();
-        completer.model.options = options;
-        expect(completer.model.options).to.eql(options);
+        completer.model.setOptions(options);
+        expect(toArray(completer.model.options())).to.eql(options);
         handler.onReply(0, request, reply);
-        expect(completer.model.options).to.eql(reply.content.matches);
+        expect(toArray(completer.model.options())).to.eql(reply.content.matches);
       });
 
     });
