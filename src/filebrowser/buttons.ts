@@ -410,7 +410,7 @@ namespace Private {
     refreshContent.className = CONTENT_CLASS;
 
     // TODO make these icons configurable.
-    createIcon.className = ICON_CLASS + ' ' + MATERIAL_CLASS + ' ' + MATERIAL_CREATE;
+    createIcon.className = MATERIAL_CLASS + ' ' + ICON_CLASS + ' ' + MATERIAL_CREATE;
     uploadIcon.className = ICON_CLASS + ' ' + MATERIAL_CLASS + ' ' + MATERIAL_UPLOAD;
     refreshIcon.className = ICON_CLASS + ' ' + MATERIAL_CLASS + ' ' + MATERIAL_REFRESH;
     dropdownIcon.className = DROPDOWN_CLASS + ' ' + MATERIAL_CLASS + ' ' + MATERIAL_DOWNCARET;

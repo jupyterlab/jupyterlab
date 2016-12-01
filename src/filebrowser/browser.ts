@@ -49,7 +49,6 @@ import {
   FILE_BROWSER_CLASS, showErrorMessage
 } from './utils';
 
-
 /**
  * The class name added to the filebrowser crumbs node.
  */
