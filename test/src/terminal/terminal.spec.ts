@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Message
+  Message, sendMessage
 } from 'phosphor/lib/core/messaging';
 
 import {
@@ -113,9 +113,13 @@ describe('terminal/index', () => {
         expect(widget.fontSize).to.be(14);
       });
 
-      it('should be settable', () => {
+      it('should trigger an update request', (done) => {
         widget.fontSize = 13;
         expect(widget.fontSize).to.be(13);
+        requestAnimationFrame(() => {
+          expect(widget.methods).to.contain('onUpdateRequest');
+          done();
+        });
       });
 
     });
@@ -126,9 +130,13 @@ describe('terminal/index', () => {
         expect(widget.background).to.be('black');
       });
 
-      it('should be settable', () => {
+      it('should trigger an update request', (done) => {
         widget.background = 'white';
         expect(widget.background).to.be('white');
+        requestAnimationFrame(() => {
+          expect(widget.methods).to.contain('onUpdateRequest');
+          done();
+        });
       });
 
     });
@@ -139,23 +147,15 @@ describe('terminal/index', () => {
         expect(widget.color).to.be('white');
       });
 
-      it('should be settable', () => {
+      it('should trigger an update request', (done) => {
         widget.color = 'black';
         expect(widget.color).to.be('black');
-      });
-
-      it('should post an update request', (done) => {
-        widget.session = session;
-        Widget.attach(widget, document.body);
         requestAnimationFrame(() => {
-          widget.methods = [];
-          widget.color = 'black';
-          requestAnimationFrame(() => {
-            expect(widget.methods).to.contain('onUpdateRequest');
-            done();
-          });
+          expect(widget.methods).to.contain('onUpdateRequest');
+          done();
         });
       });
+
     });
 
     describe('#dispose()', () => {
@@ -181,21 +181,11 @@ describe('terminal/index', () => {
 
     describe('#onAfterAttach()', () => {
 
-      it('should post an update request if visible', (done) => {
+      it('should post an update request', (done) => {
         widget.session = session;
         Widget.attach(widget, document.body);
         requestAnimationFrame(() => {
           expect(widget.methods).to.contain('onUpdateRequest');
-          done();
-        });
-      });
-
-      it('should not post an update request if not visible', (done) => {
-        widget.session = session;
-        widget.hide();
-        Widget.attach(widget, document.body);
-        requestAnimationFrame(() => {
-          expect(widget.methods).to.not.contain('onUpdateRequest');
           done();
         });
       });
@@ -208,10 +198,13 @@ describe('terminal/index', () => {
         widget.session = session;
         widget.hide();
         Widget.attach(widget, document.body);
-        widget.show();
         requestAnimationFrame(() => {
-          expect(widget.methods).to.contain('onUpdateRequest');
-          done();
+          widget.methods = [];
+          widget.show();
+          requestAnimationFrame(() => {
+            expect(widget.methods).to.contain('onUpdateRequest');
+            done();
+          });
         });
       });
 
@@ -220,15 +213,23 @@ describe('terminal/index', () => {
     describe('#onCloseRequest', () => {
 
       it('should dispose of the terminal after closing', () => {
-
+        widget.close();
+        expect(widget.methods).to.contain('onCloseRequest');
+        expect(widget.isDisposed).to.be(true);
       });
 
     });
 
     describe('#onResize()', () => {
 
-      it('should resize the terminal', () => {
-
+      it('should trigger an update request', (done) => {
+        let msg = ResizeMessage.UnknownSize;
+        sendMessage(widget, msg);
+        expect(widget.methods).to.contain('onResize');
+        requestAnimationFrame(() => {
+          expect(widget.methods).to.contain('onUpdateRequest');
+          done();
+        });
       });
 
     });
@@ -244,7 +245,8 @@ describe('terminal/index', () => {
     describe('#onFitRequest', () => {
 
       it('should send a resize request', () => {
-
+        sendMessage(widget, WidgetMessage.FitRequest);
+        expect(widget.methods).to.contain('onResize');
       });
 
     });
@@ -252,7 +254,11 @@ describe('terminal/index', () => {
     describe('#onActivateRequest', () => {
 
       it('should focus the terminal element', () => {
-
+        Widget.attach(widget, document.body);
+        expect(widget.node.contains(document.activeElement)).to.be(false);
+        sendMessage(widget, WidgetMessage.ActivateRequest);
+        expect(widget.methods).to.contain('onActivateRequest');
+        expect(widget.node.contains(document.activeElement)).to.be(true);
       });
 
     });

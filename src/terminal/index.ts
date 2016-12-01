@@ -63,9 +63,9 @@ class TerminalWidget extends Widget {
     this.node.appendChild(this._sheet);
 
     // Initialize settings.
-    this.fontSize = options.fontSize || 14;
-    this.background = options.background || 'black';
-    this.color = options.color || 'white';
+    this._fontSize = options.fontSize || 14;
+    this._background = options.background || 'black';
+    this._color = options.color || 'white';
     this.id = `jp-TerminalWidget-${Private.id++}`;
     this.title.label = 'Terminal';
   }
@@ -102,6 +102,9 @@ class TerminalWidget extends Widget {
    * Set the font size of the terminal in pixels.
    */
   set fontSize(size: number) {
+    if (this._fontSize === size) {
+      return;
+    }
     this._fontSize = size;
     this._needsSnap = true;
     this.update();
@@ -118,6 +121,9 @@ class TerminalWidget extends Widget {
    * Set the background color of the terminal.
    */
   set background(value: string) {
+    if (this._background === value) {
+      return;
+    }
     this._background = value;
     this._needsStyle = true;
     this.update();
@@ -134,6 +140,9 @@ class TerminalWidget extends Widget {
    * Set the text color of the terminal.
    */
   set color(value: string) {
+    if (this._color === value) {
+      return;
+    }
     this._color = value;
     this._needsStyle = true;
     this.update();
