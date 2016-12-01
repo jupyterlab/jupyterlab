@@ -6,11 +6,7 @@ import {
 } from 'es6-promise';
 
 import {
-  ModuleLoader
-} from '@jupyterlab/extension-builder/lib/loader';
-
-import {
-  JupyterLab
+  JupyterLab, ModuleLoader
 } from '../../lib/application';
 
 import 'font-awesome/css/font-awesome.min.css';

@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ModuleLoader
-} from '@jupyterlab/extension-builder/lib/loader';
-
-import {
   utils
 } from '@jupyterlab/services';
 
@@ -14,9 +10,14 @@ import {
 } from 'phosphor/lib/ui/application';
 
 import {
+  ModuleLoader
+} from './loader';
+
+import {
   ApplicationShell
 } from './shell';
 
+export { ModuleLoader } from './loader';
 
 /**
  * The type for all JupyterLab plugins.

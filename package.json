@@ -32,6 +32,7 @@
     "@types/mocha": "^2.2.32",
     "@types/node": "0.0.1",
     "@types/sanitize-html": "^1.13.31",
+    "@types/semver": "^5.3.30",
     "awesome-typescript-loader": "^2.2.4",
     "concurrently": "^2.0.0",
     "css-loader": "^0.23.1",

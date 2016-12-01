@@ -368,7 +368,7 @@ class OutputAreaWidget extends Widget {
       if (this._minHeightTimeout) {
         clearTimeout(this._minHeightTimeout);
       }
-      this._minHeightTimeout = window.setTimeout(() => {
+      this._minHeightTimeout = setTimeout(() => {
         if (this.isDisposed) {
           return;
         }

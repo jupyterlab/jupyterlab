@@ -848,7 +848,7 @@ class DirListing extends Widget {
     event.stopPropagation();
 
     clearTimeout(this._selectTimer);
-    this._noSelectTimer = window.setTimeout(() => {
+    this._noSelectTimer = setTimeout(() => {
       this._noSelectTimer = -1;
     }, RENAME_DURATION);
 
@@ -1053,7 +1053,7 @@ class DirListing extends Widget {
     } else {
       // Handle a rename.
       if (selected.length === 1 && selected[0] === name) {
-        this._selectTimer = window.setTimeout(() => {
+        this._selectTimer = setTimeout(() => {
           if (this._noSelectTimer === -1) {
             this._doRename();
           }
