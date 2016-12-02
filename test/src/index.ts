@@ -66,6 +66,8 @@ import './notebook/output-area/widget.spec';
 
 import './notebook/tracker.spec';
 
+import './terminal/terminal.spec';
+
 import './toolbar/toolbar.spec';
 
 import 'phosphor/styles/base.css';

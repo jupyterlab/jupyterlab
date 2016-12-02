@@ -68,7 +68,7 @@ def run_karma(base_url):
         var node = document.createElement('script');
         node.id = 'jupyter-config-data';
         node.type = 'application/json';
-        node.textContent = '{"baseUrl": "%s"}';
+        node.textContent = '{"baseUrl": "%s", "terminalsAvailable": "True" }';
         document.body.appendChild(node);
         """ % base_url)
 
