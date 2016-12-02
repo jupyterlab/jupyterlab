@@ -70,12 +70,11 @@ class EditorWidget extends CodeEditorWidget {
     let model = context.model;
     let editor = this.editor;
 
-    let doc = editor.getDoc();
 
     // Prevent the initial loading from disk from being in the editor history.
     context.ready.then( () => {
-      doc.setValue(model.toString());
-      doc.clearHistory();
+      editor.model.value = model.toString();
+      editor.model.clearHistory();
     });
 
     editor.model.value = model.toString();

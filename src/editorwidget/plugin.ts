@@ -19,10 +19,6 @@ import {
 } from '../application';
 
 import {
-  DEFAULT_CODEMIRROR_THEME
-} from '../codemirror/widget';
-
-import {
   ICommandPalette
 } from '../commandpalette';
 
@@ -49,10 +45,6 @@ import {
 import {
   IEditorTracker, EditorWidget, EditorWidgetFactory
 } from './widget';
-
-import {
-  CodeMirrorEditor, DEFAULT_CODEMIRROR_THEME
-} from '../codemirror/editor';
 
 import {
   IEditorServices
@@ -108,7 +100,7 @@ const plugin: JupyterLabPlugin<IEditorTracker> = {
  * Sets up the editor widget
  */
 function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB, layout: ILayoutRestorer, editorServices: IEditorServices): IEditorTracker {
-  const factory = new EditorWidgetFactory({
+  const factory = new EditorWidgetFactory(editorServices, {
     name: FACTORY,
     fileExtensions: ['*'],
     defaultFor: ['*']
