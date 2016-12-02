@@ -375,7 +375,7 @@ class TerminalWidget extends Widget {
   private _colWidth = -1;
   private _offsetWidth = -1;
   private _offsetHeight = -1;
-  private _sessionSize: number[] = [1, 1, 1, 1];
+  private _sessionSize: [number, number, number, number] = [1, 1, 1, 1];
   private _background = '';
   private _color = '';
   private _box: IBoxSizing = null;

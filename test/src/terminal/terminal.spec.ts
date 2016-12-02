@@ -93,7 +93,7 @@ describe('terminal/index', () => {
 
     describe('#session', () => {
 
-      it('should get be `null` by default', () => {
+      it('should be `null` by default', () => {
         expect(widget.session).to.be(null);
       });
 
