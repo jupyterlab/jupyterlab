@@ -24,6 +24,10 @@ import {
 } from '../../../../lib/completer';
 
 import {
+  createNotebookPanelRenderer
+} from '../../../../lib/notebook/codemirror';
+
+import {
   INotebookModel
 } from '../../../../lib/notebook/notebook/model';
 
@@ -44,7 +48,7 @@ import {
 } from '../../utils';
 
 import {
-  DEFAULT_CONTENT, createPanelRenderer
+  DEFAULT_CONTENT
 } from '../utils';
 
 
@@ -53,7 +57,7 @@ import {
  */
 const rendermime = defaultRenderMime();
 const clipboard = new MimeData();
-const renderer = createPanelRenderer();
+const renderer = createNotebookPanelRenderer();
 
 
 class LogNotebookPanel extends NotebookPanel {
@@ -118,7 +122,7 @@ describe('notebook/notebook/panel', () => {
 
 
       it('should accept an optional render', () => {
-        let newRenderer = createPanelRenderer();
+        let newRenderer = createNotebookPanelRenderer();
         let panel = new NotebookPanel({
           rendermime, clipboard, renderer: newRenderer
         });
@@ -213,7 +217,7 @@ describe('notebook/notebook/panel', () => {
     describe('#renderer', () => {
 
       it('should be the renderer used by the widget', () => {
-        let r = createPanelRenderer();
+        let r = createNotebookPanelRenderer();
         let panel = new NotebookPanel({ rendermime, clipboard, renderer: r });
         expect(panel.renderer).to.be(r);
       });

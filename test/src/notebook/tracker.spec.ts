@@ -8,6 +8,10 @@ import {
 } from 'phosphor/lib/core/mimedata';
 
 import {
+  createNotebookPanelRenderer
+} from '../../../lib/notebook/codemirror';
+
+import {
   BaseCellWidget
 } from '../../../lib/notebook/cells';
 
@@ -24,7 +28,7 @@ import {
 } from '../utils';
 
 import {
-  createPanelRenderer, DEFAULT_CONTENT
+  DEFAULT_CONTENT
 } from './utils';
 
 
@@ -43,7 +47,7 @@ class TestTracker extends NotebookTracker {
  */
 const rendermime = defaultRenderMime();
 const clipboard = new MimeData();
-const renderer = createPanelRenderer();
+const renderer = createNotebookPanelRenderer();
 
 
 describe('notebook/tracker', () => {

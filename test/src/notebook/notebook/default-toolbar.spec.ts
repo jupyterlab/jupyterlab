@@ -32,6 +32,10 @@ import {
 } from '../../../../lib/notebook/notebook/actions';
 
 import {
+  createNotebookPanelRenderer
+} from '../../../../lib/notebook/codemirror';
+
+import {
  ToolbarItems
 } from '../../../../lib/notebook/notebook/default-toolbar';
 
@@ -59,7 +63,7 @@ import {
 } from '../../utils';
 
 import {
-  DEFAULT_CONTENT, createPanelRenderer
+  DEFAULT_CONTENT
 } from '../utils';
 
 
@@ -98,7 +102,7 @@ describe('notebook/notebook/default-toolbar', () => {
   describe('ToolbarItems', () => {
 
     let panel: NotebookPanel;
-    const renderer = createPanelRenderer();
+    const renderer = createNotebookPanelRenderer();
 
     beforeEach(() => {
       panel = new NotebookPanel({ rendermime, clipboard, renderer });

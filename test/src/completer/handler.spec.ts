@@ -20,12 +20,12 @@ import {
 } from '../../../lib/notebook/cells/editor';
 
 import {
-  CompleterWidget, CellCompleterHandler, CompleterModel
-} from '../../../lib/completer';
+  createBaseCellRenderer
+} from '../../../lib/notebook/codemirror';
 
 import {
-  createBaseCellRenderer
-} from '../notebook/utils';
+  CompleterWidget, CellCompleterHandler, CompleterModel
+} from '../../../lib/completer';
 
 
 const renderer = createBaseCellRenderer();

@@ -29,6 +29,10 @@ import {
 } from '../../../../lib/notebook/cells';
 
 import {
+  createNotebookRenderer
+} from '../../../../lib/notebook/codemirror';
+
+import {
   INotebookModel, NotebookModel
 } from '../../../../lib/notebook/notebook/model';
 
@@ -41,7 +45,7 @@ import {
 } from '../../utils';
 
 import {
-  DEFAULT_CONTENT, createNotebookRenderer
+  DEFAULT_CONTENT
 } from '../utils';
 
 

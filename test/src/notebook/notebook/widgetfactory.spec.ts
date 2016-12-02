@@ -12,6 +12,10 @@ import {
 } from 'phosphor/lib/core/mimedata';
 
 import {
+  createNotebookPanelRenderer
+} from '../../../../lib/notebook/codemirror';
+
+import {
   INotebookModel
 } from '../../../../lib/notebook/notebook/model';
 
@@ -31,14 +35,10 @@ import {
   createNotebookContext, defaultRenderMime
 } from '../../utils';
 
-import {
-  createPanelRenderer
-} from '../utils';
-
 
 const rendermime = defaultRenderMime();
 const clipboard = new MimeData();
-const renderer = createPanelRenderer();
+const renderer = createNotebookPanelRenderer();
 
 
 function createFactory(): NotebookWidgetFactory {

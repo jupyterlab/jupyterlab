@@ -20,6 +20,10 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
+  createRenderer
+} from '../../../lib/console/codemirror';
+
+import {
   ConsoleContent
 } from '../../../lib/console/content';
 
@@ -41,15 +45,11 @@ import {
 
 import {
   createCodeCellRenderer
-} from '../notebook/utils';
+} from '../../../lib/notebook/codemirror';
 
 import {
   defaultRenderMime
 } from '../utils';
-
-import {
-  createRenderer
-} from './utils';
 
 
 class TestContent extends ConsoleContent {
