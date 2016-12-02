@@ -110,17 +110,17 @@ namespace CodeEditor {
   }
 
   /**
-   * A marked range.
+   * A selection style.
    */
   export
-  interface IMarkedRange extends IRange {
+  interface ISelectionStyle {
     /**
-     * A class name added to the range.
+     * A class name added to a selection.
      */
     className?: string;
 
     /**
-     * A display name added to the range.
+     * A display name added to a selection.
      */
     displayName?: string;
   }
@@ -129,11 +129,16 @@ namespace CodeEditor {
    * A text selection.
    */
   export
-  interface ITextSelection extends IMarkedRange {
+  interface ITextSelection extends IRange {
     /**
      * The uuid of the text selection owner.
      */
     uuid: string;
+
+    /**
+     * The style of this selection.
+     */
+    style?: ISelectionStyle;
   }
 
   /**
@@ -166,33 +171,12 @@ namespace CodeEditor {
     readonly uuids: string[];
 
     /**
-     * Returns the primary position of the cursor.
-     */
-    getCursorPosition(uuid: string): IPosition | null;
-
-    /**
-     * Set the primary position of the cursor. This will remove any secondary cursors.
-     */
-    setCursorPosition(uuid: string, position: IPosition | null): void;
-
-    /**
-     * Returns the primary selection.
-     */
-    getSelection(uuid: string): ITextSelection | null;
-
-    /**
-     * Set the primary selection. This will remove any secondary cursors.
-     */
-    setSelection(uuid: string, selection: ITextSelection | null): void;
-
-    /**
      * Gets the selections for all the cursors in ascending order. 
      */
     getSelections(uuid: string): ITextSelection[];
 
     /**
      * Sets the selections for all the cursors.
-     * Cursors will be removed or added, as necessary.
      */
     setSelections(uuid: string, newSelections: ITextSelection[]): void;
   }
@@ -241,41 +225,6 @@ namespace CodeEditor {
     }
 
     /**
-     * Returns the primary position of the cursor.
-     */
-    getCursorPosition(uuid: string): IPosition | null {
-      const selection = this.getSelection(uuid);
-      return this.toPosition(selection);
-    }
-
-    /**
-     * Set the primary position of the cursor. This will remove any secondary cursors.
-     */
-    setCursorPosition(uuid: string, position: IPosition | null) {
-      const selection = this.toSelection(uuid, position);
-      this.setSelection(uuid, selection);
-    }
-
-    /**
-     * Returns the primary selection.
-     */
-    getSelection(uuid: string): ITextSelection | null {
-      const selections = this.getSelections(uuid);
-      return selections.length > 0 ? selections[0] : null;
-    }
-
-    /**
-     * Set the primary selection. This will remove any secondary cursors.
-     */
-    setSelection(uuid: string, selection: ITextSelection | null) {
-      const selections: ITextSelection[] = [];
-      if (selection) {
-        selections.push(selection);
-      }
-      this.setSelections(uuid, selections);
-    }
-
-    /**
      * Gets the selections for all the cursors in ascending order. 
      */
     getSelections(uuid: string): ITextSelection[] {
@@ -285,7 +234,6 @@ namespace CodeEditor {
 
     /**
      * Sets the selections for all the cursors.
-     * Cursors will be removed or added, as necessary.
      */
     setSelections(uuid: string, newSelections: ITextSelection[]): void {
       const oldSelections = this.getSelections(uuid);
@@ -306,20 +254,6 @@ namespace CodeEditor {
         }
         return selection.start.column - selection2.start.column;
       });
-    }
-
-    /**
-     * Converts the given position to a selection.
-     */
-    protected toSelection(uuid: string, position: IPosition | null): ITextSelection | null {
-      return position ? { uuid, start: position, end: position } : null;
-    }
-
-    /**
-     * Converts the given selection to a position.
-     */
-    protected toPosition(selection: ITextSelection | null): IPosition | null {
-      return selection ? selection.start : null;
     }
 
     /**
@@ -894,8 +828,8 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
 
   protected updateSelections() {
     this._changeGuard = true;
-    const selection = this.getSelection();
-    this._model.selections.setSelection(selection.uuid, selection);
+    const selections = this.getSelections();
+    this._model.selections.setSelections(this.uuid, selections);
     this._changeGuard = false;
   }
 
