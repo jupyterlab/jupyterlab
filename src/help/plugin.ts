@@ -6,12 +6,16 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Menu
-} from 'phosphor/lib/ui/menu';
+  installMessageHook, Message
+} from 'phosphor/lib/core/messaging';
 
 import {
-  Widget
+  WidgetMessage
 } from 'phosphor/lib/ui/widget';
+
+import {
+  Menu
+} from 'phosphor/lib/ui/menu';
 
 import {
   JupyterLab, JupyterLabPlugin
@@ -28,6 +32,10 @@ import {
 import {
   IMainMenu
 } from '../mainmenu';
+
+import {
+  IStateDB
+} from '../statedb';
 
 
 /**
@@ -101,7 +109,7 @@ const COMMANDS = [
 export
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.help-handler',
-  requires: [IMainMenu, ICommandPalette],
+  requires: [IMainMenu, ICommandPalette, IStateDB],
   activate: activateHelpHandler,
   autoStart: true
 };
@@ -114,64 +122,45 @@ const plugin: JupyterLabPlugin<void> = {
  *
  * returns A promise that resolves when the extension is activated.
  */
-function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette): Promise<void> {
-  let iframe = new IFrame();
-  iframe.addClass(HELP_CLASS);
-  iframe.title.label = 'Help';
-  iframe.id = 'help-doc';
+function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB): void {
+  const category = 'Help';
+  const namespace = 'help-doc';
+  const key = `${namespace}:show`;
+  const iframe = newIFrame(namespace);
+  const menu = createMenu();
 
-  COMMANDS.forEach(command => app.commands.addCommand(command.id, {
-    label: command.text,
-    execute: () => {
-      Private.attachHelp(app, iframe);
-      Private.showHelp(app, iframe);
-      iframe.loadURL(command.url);
-    }
-  }));
-
-  app.commands.addCommand('help-doc:activate', {
-    execute: () => { Private.showHelp(app, iframe); }
-  });
-  app.commands.addCommand('help-doc:hide', {
-    execute: () => { Private.hideHelp(app, iframe); }
-  });
-  app.commands.addCommand('help-doc:toggle', {
-    execute: () => { Private.toggleHelp(app, iframe); }
-  });
-
-  COMMANDS.forEach(item => palette.addItem({
-    command: item.id,
-    category: 'Help'
-  }));
-
-  let openClassicNotebookId = 'classic-notebook:open';
-  app.commands.addCommand(openClassicNotebookId, {
-    label: 'Open Classic Notebook',
-    execute: () => {
-      window.open(utils.getBaseUrl() + 'tree');
-    }
-  });
-  palette.addItem({ command: openClassicNotebookId, category: 'Help'});
-
-  let menu = Private.createMenu(app);
-  mainMenu.addMenu(menu, {});
-
-  return Promise.resolve(void 0);
-}
-
-
-/**
- * A namespace for help plugin private functions.
- */
-namespace Private {
   /**
-   * Creates a menu for the help plugin.
+   * Create a new IFrame widget.
+   *
+   * #### Notes
+   * Once layout restoration is fully supported, the hidden state of the IFrame
+   * widget will be handled by the layout restorer and not by the message hook
+   * handler in this function.
    */
-  export
-  function createMenu(app: JupyterLab): Menu {
+  function newIFrame(id: string): IFrame {
+    let iframe = new IFrame();
+    iframe.addClass(HELP_CLASS);
+    iframe.title.label = 'Help';
+    iframe.id = id;
+
+    // If the help widget is being hidden, remove its state.
+    installMessageHook(iframe, (iframe: IFrame, msg: Message) => {
+      if (msg === WidgetMessage.BeforeHide) {
+        state.remove(key);
+      }
+      return true;
+    });
+
+    return iframe;
+  }
+
+  /**
+   * Create a menu for the help plugin.
+   */
+  function createMenu(): Menu {
     let { commands, keymap } = app;
     let menu = new Menu({ commands, keymap });
-    menu.title.label = 'Help';
+    menu.title.label = category;
 
     menu.addItem({ command: 'about-jupyterlab:show' });
     menu.addItem({ command: 'faq-jupyterlab:show' });
@@ -187,8 +176,7 @@ namespace Private {
   /**
    * Attach the help iframe widget to the application shell.
    */
-  export
-  function attachHelp(app: JupyterLab, iframe: Widget): void {
+  function attachHelp(): void {
     if (!iframe.isAttached) {
       app.shell.addToRightArea(iframe);
     }
@@ -197,16 +185,15 @@ namespace Private {
   /**
    * Show the help widget.
    */
-  export
-  function showHelp(app: JupyterLab, iframe: Widget): void {
+  function showHelp(): void {
     app.shell.activateRight(iframe.id);
+    state.save(key, { url: iframe.url });
   }
 
   /**
    * Hide the help widget.
    */
-  export
-  function hideHelp(app: JupyterLab, iframe: Widget): void {
+  function hideHelp(): void {
     if (!iframe.isHidden) {
       app.shell.collapseRight();
     }
@@ -215,12 +202,53 @@ namespace Private {
   /**
    * Toggle whether the help widget is shown or hidden.
    */
-  export
-  function toggleHelp(app: JupyterLab, iframe: Widget): void {
+  function toggleHelp(): void {
     if (iframe.isHidden) {
-      showHelp(app, iframe);
+      showHelp();
     } else {
-      hideHelp(app, iframe);
+      hideHelp();
     }
   }
+
+  COMMANDS.forEach(command => app.commands.addCommand(command.id, {
+    label: command.text,
+    execute: () => {
+      attachHelp();
+      iframe.url = command.url;
+      showHelp();
+    }
+  }));
+
+  app.commands.addCommand(`${namespace}:activate`, {
+    execute: () => { showHelp(); }
+  });
+  app.commands.addCommand(`${namespace}:hide`, {
+    execute: () => { hideHelp(); }
+  });
+  app.commands.addCommand(`${namespace}:toggle`, {
+    execute: () => { toggleHelp(); }
+  });
+
+  COMMANDS.forEach(item => palette.addItem({ command: item.id, category }));
+
+  let openClassicNotebookId = 'classic-notebook:open';
+  app.commands.addCommand(openClassicNotebookId, {
+    label: 'Open Classic Notebook',
+    execute: () => { window.open(utils.getBaseUrl() + 'tree'); }
+  });
+  palette.addItem({ command: openClassicNotebookId, category });
+  mainMenu.addMenu(menu, {});
+
+  state.fetch(key).then(args => {
+    if (!args) {
+      state.remove(key);
+      return;
+    }
+    let url = args['url'] as string;
+    let filtered = COMMANDS.filter(command => command.url === url);
+    if (filtered.length) {
+      let command = filtered[0];
+      app.commands.execute(command.id, void 0);
+    }
+  });
 }

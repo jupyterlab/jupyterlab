@@ -18,7 +18,7 @@ const IFRAME_CLASS = 'jp-IFrame';
 export
 class IFrame extends Widget {
   /**
-   * Create a new iframe widget.
+   * Create a new IFrame widget.
    */
   constructor() {
     super({ node: Private.createNode() });
@@ -26,11 +26,12 @@ class IFrame extends Widget {
   }
 
   /**
-   * Load a URL into the iframe.
-   *
-   * @param url - The URL to load into the iframe widget.
+   * The IFrame's URL.
    */
-  loadURL(url: string): void {
+  get url(): string {
+    return this.node.querySelector('iframe').getAttribute('src');
+  }
+  set url(url: string) {
     this.node.querySelector('iframe').setAttribute('src', url);
   }
 }
