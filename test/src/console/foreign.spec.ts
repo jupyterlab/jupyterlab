@@ -16,16 +16,16 @@ import {
 } from 'phosphor/lib/ui/panel';
 
 import {
-  CodeMirrorConsoleRenderer
-} from '../../../lib/console/codemirror/widget';
-
-import {
   ForeignHandler
 } from '../../../lib/console/foreign';
 
 import {
   CodeCellModel, CodeCellWidget
 } from '../../../lib/notebook/cells';
+
+import {
+  createCodeCellRenderer
+} from '../notebook/utils';
 
 import {
   defaultRenderMime
@@ -84,7 +84,7 @@ defineSignal(TestHandler.prototype, 'rejected');
 const rendermime = defaultRenderMime();
 const renderer: ForeignHandler.IRenderer = {
   createCell: () => {
-    let renderer = CodeMirrorConsoleRenderer.defaultCodeCellRenderer;
+    let renderer = createCodeCellRenderer();
     let cell = new CodeCellWidget({ rendermime, renderer });
     cell.model = new CodeCellModel();
     return cell;

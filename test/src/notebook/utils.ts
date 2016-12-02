@@ -10,8 +10,8 @@ import {
 } from '../../../lib/codemirror';
 
 import {
-  CodeCellWidget
-} from '../../../lib/notebook/cells/widget';
+  CodeCellWidget, BaseCellWidget, CodeCellEditorWidget
+} from '../../../lib/notebook/cells';
 
 import {
   NotebookPanel
@@ -28,13 +28,15 @@ export
 const DEFAULT_CONTENT: nbformat.INotebookContent = require('../../../examples/notebook/test.ipynb') as nbformat.INotebookContent;
 
 
+const factory = new CodeMirrorEditorFactory();
+
+
 /**
- * Create a default notebook renderer.
+ * Create a default code cell renderer.
  */
 export
-function createRenderer(): Notebook.Renderer {
-  const factory = new CodeMirrorEditorFactory();
-  const codeCellRenderer = new CodeCellWidget.Renderer({
+function createCodeCellRenderer(): CodeCellWidget.Renderer {
+  return new CodeCellWidget.Renderer({
     editorFactory: host => factory.newInlineEditor(host.node, {
       extra: {
         matchBrackets: true,
@@ -42,12 +44,30 @@ function createRenderer(): Notebook.Renderer {
       }
     })
   });
-  const rawCellRenderer = new CodeCellWidget.Renderer({
+}
+
+
+/**
+ * Create a default base cell renderer.
+ */
+export
+function createBaseCellRenderer(): BaseCellWidget.Renderer {
+  return new BaseCellWidget.Renderer({
     editorFactory: host => factory.newInlineEditor(host.node, {
       wordWrap: true
     })
   });
-  const markdownCellRenderer = rawCellRenderer;
+}
+
+
+/**
+ * Create a default notebook renderer.
+ */
+export
+function createNotebookRenderer(): Notebook.Renderer {
+  const codeCellRenderer = createCodeCellRenderer();
+  const rawCellRenderer = createBaseCellRenderer();
+  const markdownCellRenderer = createBaseCellRenderer();
   const editorMimeTypeService = new CodeMirrorMimeTypeService();
   return new Notebook.Renderer({
     codeCellRenderer, markdownCellRenderer, rawCellRenderer, editorMimeTypeService
@@ -60,6 +80,19 @@ function createRenderer(): Notebook.Renderer {
  */
 export
 function createPanelRenderer(): NotebookPanel.IRenderer {
-  const notebookRenderer = createRenderer();
+  const notebookRenderer = createNotebookRenderer();
   return new NotebookPanel.Renderer({ notebookRenderer });
+}
+
+
+/**
+ * Create a code cell editor widget.
+ */
+export
+function createCellEditor(): CodeCellEditorWidget {
+  return new CodeCellEditorWidget(
+    host => factory.newInlineEditor(host.node, {
+      wordWrap: true
+    })
+  );
 }
