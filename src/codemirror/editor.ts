@@ -60,6 +60,8 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     this._editor = CodeMirror(host, options);
 
     this._model.mimeTypeChanged.connect((model, args) => this._onMimeTypeChanged(model, args));
+    this._model.selections.changed.connect((selections, args) => this._onSelectionsChanged(selections, args));
+
     CodeMirror.on(this.editor, 'keydown', (editor, event) => this._onKeyDown(editor, event));
     CodeMirror.on(this.editor, 'cursorActivity', () => this._onCursorActivity());
   }
@@ -79,6 +81,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       return;
     }
     this._isDisposed = true;
+    // FIXME: dispose selections
     this._editor = null;
   }
 
@@ -187,7 +190,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Reveal the given selection in the editor.
    */
-  revealSelection(selection: CodeEditor.ITextSelection): void {
+  revealSelection(selection: CodeEditor.IRange): void {
     const range = this.toCodeMirrorRange(selection);
     this._editor.scrollIntoView(range);
   }
@@ -226,7 +229,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Set the primary selection. This will remove any secondary cursors.
    */
-  setSelection(selection: CodeEditor.ITextSelection): void {
+  setSelection(selection: CodeEditor.IRange): void {
     const cmSelection = this.toCodeMirrorSelection(selection);
     this._model.doc.setSelection(cmSelection.anchor, cmSelection.head);
   }
@@ -242,7 +245,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Sets the selections for all the cursors.
    * Cursors will be removed or added, as necessary.
    */
-  setSelections(selections: CodeEditor.ITextSelection[]): void {
+  setSelections(selections: CodeEditor.IRange[]): void {
     const cmSelections = selections.map(selection => this.toCodeMirrorSelection(selection));
     this._model.doc.setSelections(cmSelections, 0);
   }
@@ -253,6 +256,43 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   protected _onMimeTypeChanged(model: CodeMirrorModel, args: IChangedArgs<string>): void {
       const mime = args.newValue;
       loadModeByMIME(this._editor, mime);
+  }
+
+  /**
+   * Handles a selections change.
+   */
+  protected _onSelectionsChanged(selections: CodeEditor.ISelections, args: CodeEditor.ISelections.IChangedArgs): void {
+    const uuid = args.uuid;
+    if (uuid !== this.uuid) {
+      this.cleanSelections(uuid);
+      this.markSelections(uuid, args.newSelections);
+    }
+  }
+
+  /**
+   * Clean selections for the given uuid.
+   */
+  protected cleanSelections(uuid: string) {
+    const markers = this.selectionMarkers[uuid];
+    if (markers) {
+      markers.forEach(marker => marker.clear());
+    }
+    delete this.selectionMarkers[uuid];
+  }
+
+  /**
+   * Marks selections.
+   */
+  protected markSelections(uuid: string, selections: CodeEditor.ITextSelection[]) {
+    const markers: CodeMirror.TextMarker[] = [];
+    for (const selection of selections) {
+      const cmSelection = this.toCodeMirrorSelection(selection);
+      this._model.doc.markText(cmSelection.anchor, cmSelection.head, {
+        className: selection.className,
+        title: selection.displayName
+      });
+    }
+    this.selectionMarkers[uuid] = markers;
   }
 
   /**
@@ -286,7 +326,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Converts an editor selection to a code mirror selection.
    */
-  protected toCodeMirrorSelection(selection: CodeEditor.ITextSelection): CodeMirror.Selection {
+  protected toCodeMirrorSelection(selection: CodeEditor.IRange): CodeMirror.Selection {
     return {
       anchor: this.toCodeMirrorPosition(selection.start),
       head: this.toCodeMirrorPosition(selection.end)
@@ -296,10 +336,10 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Converts an editor selection to a code mirror selection.
    */
-  protected toCodeMirrorRange(selection: CodeEditor.ITextSelection): CodeMirror.Range {
+  protected toCodeMirrorRange(range: CodeEditor.IRange): CodeMirror.Range {
     return {
-      from: this.toCodeMirrorPosition(selection.start),
-      to: this.toCodeMirrorPosition(selection.end)
+      from: this.toCodeMirrorPosition(range.start),
+      to: this.toCodeMirrorPosition(range.end)
     };
   }
 
@@ -326,6 +366,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   private _model: CodeMirrorModel;
   private _editor: CodeMirror.Editor;
   private _isDisposed = false;
+  protected selectionMarkers: { [key: string]: CodeMirror.TextMarker[] | undefined } = {};
 
 }
 
