@@ -348,14 +348,14 @@ namespace CodeEditor {
     mimeType: string;
 
     /**
-     * Get the number of lines in the model.
-     */
-    readonly lineCount: number;
-
-    /**
      * The currently selected code.
      */
     readonly selections: ISelections;
+
+    /**
+     * Get the number of lines in the model.
+     */
+    readonly lineCount: number;
 
     /**
      * Returns the content for the given line number.

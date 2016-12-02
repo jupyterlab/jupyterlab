@@ -5,10 +5,6 @@ import * as CodeMirror
   from 'codemirror';
 
 import {
-  find
-} from 'phosphor/lib/algorithm/searching';
-
-import {
   ISignal, clearSignalData, defineSignal
 } from 'phosphor/lib/core/signaling';
 
@@ -17,47 +13,45 @@ import {
 } from '../codeeditor/editor';
 
 import {
-  requireMode
-} from './';
-
-import {
   IChangedArgs
 } from '../common/interfaces';
-
-import {
-  ObservableVector
-} from '../common/observablevector';
 
 
 /**
  * An implementation of the code editor model using code mirror.
  */
 export
-class CodeMirrorModel implements CodeEditor.IModel {
+  class CodeMirrorModel implements CodeEditor.IModel {
+
+  /**
+   * A signal emitted when a content of the model changed.
+   */
+  readonly valueChanged: ISignal<this, IChangedArgs<string>>;
+
+  /**
+   * A signal emitted when a mimetype changes.
+   */
+  readonly mimeTypeChanged: ISignal<this, IChangedArgs<string>>;
+
+  /**
+   * Get the selections for the model.
+   */
+  readonly selections: CodeEditor.ISelections = new CodeEditor.Selections();
+
   /**
    * Construct a new codemirror model.
    */
-  constructor() {
-    let doc = this._doc = new CodeMirror.Doc('');
-    this._selections.changed.connect(this._onSelectionChanged, this);
-    CodeMirror.on(doc, 'cursorActivity', this._onCursorActivity.bind(this));
-    CodeMirror.on(doc, 'beforeSelectionChange',
-                  this._onDocSelectionChanged.bind(this));
+  constructor(doc: CodeMirror.Doc = new CodeMirror.Doc('')) {
+    this._doc = doc;
+    this._value = this.value;
+    CodeMirror.on(this.doc, 'change', (instance, change) => {
+      this._onDocChange(instance, change);
+    });
   }
 
   get doc(): CodeMirror.Doc {
     return this._doc;
   }
-
-  /**
-   * A signal emitted when a content of the model changed.
-   */
-  valueChanged: ISignal<this, IChangedArgs<string>>;
-
-  /**
-   * A signal emitted when a mimetype changes.
-   */
-  mimeTypeChanged: ISignal<this, IChangedArgs<string>>;
 
   /**
    * Whether the model is disposed.
@@ -84,7 +78,7 @@ class CodeMirrorModel implements CodeEditor.IModel {
     return this._mimetype;
   }
   set mimeType(newValue: string) {
-    let oldValue = this._mimetype;
+    const oldValue = this._mimetype;
     if (oldValue === newValue) {
       return;
     }
@@ -102,24 +96,8 @@ class CodeMirrorModel implements CodeEditor.IModel {
   get value(): string {
     return this._doc.getValue();
   }
-  set value(newValue: string) {
-    let oldValue = this._doc.getValue();
-    if (oldValue === newValue) {
-      return;
-    }
-    this._doc.setValue(newValue);
-    this.valueChanged.emit({
-      name: 'value',
-      oldValue,
-      newValue
-    });
-  }
-
-  /**
-   * Get the selections for the model.
-   */
-  get selections(): ObservableVector<CodeEditor.ITextSelection> {
-    return this._selections;
+  set value(value: string) {
+    this._doc.setValue(value);
   }
 
   /**
@@ -150,7 +128,7 @@ class CodeMirrorModel implements CodeEditor.IModel {
    * Find a position fot the given offset.
    */
   getPositionAt(offset: number): CodeEditor.IPosition {
-    let { ch, line } = this._doc.posFromIndex(offset);
+    const { ch, line } = this._doc.posFromIndex(offset);
     return { line, column: ch };
   }
 
@@ -175,22 +153,29 @@ class CodeMirrorModel implements CodeEditor.IModel {
     this._doc.clearHistory();
   }
 
-  private _onSelectionChanged(sender: ObservableVector<CodeEditor.ITextSelection>, change: ObservableVector.IChangedArgs<CodeEditor.ITextSelection>): void {
-    // TODO
-  }
-
-  private _onCursorActivity(): void {
-    // TODO
-  }
-
-  private _onDocSelectionChanged(): void {
-    // TODO
+  /**
+   * Handles document changes.
+   */
+  protected _onDocChange(doc: CodeMirror.Doc, change: CodeMirror.EditorChange) {
+    const oldValue = this._value;
+    const newValue = this.value;
+    if (oldValue !== newValue) {
+      this._value = newValue;
+      this.valueChanged.emit({
+        name: 'value',
+        oldValue,
+        newValue
+      });
+    }
   }
 
   private _mimetype = '';
+  /**
+   * A snapshot of a document value before the change, see `_onDocChange`
+   */
+  private _value: string;
   private _isDisposed = false;
   private _doc: CodeMirror.Doc;
-  private _selections = new ObservableVector<CodeEditor.ITextSelection>();
 }
 
 
