@@ -5,6 +5,10 @@ import * as CodeMirror
   from 'codemirror';
 
 import {
+  IChangedArgs
+} from '../common/interfaces';
+
+import {
   loadModeByMIME
 } from './';
 
@@ -50,18 +54,14 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     host.classList.add(EDITOR_CLASS);
     this.uuid = this.uuid;
     this._model = new CodeMirrorModel();
+
     options.theme = (options.theme || DEFAULT_CODEMIRROR_THEME);
     options.value = this._model.doc;
     this._editor = CodeMirror(host, options);
-    this._model.mimeTypeChanged.connect((sender, args) => {
-      let mime = args.newValue;
-      loadModeByMIME(this._editor, mime);
-    });
-    CodeMirror.on(this.editor, 'keydown', (instance, evt) => {
-      if (this.onKeyDown && this.onKeyDown(this, evt)) {
-        evt.preventDefault();
-      }
-    });
+
+    this._model.mimeTypeChanged.connect((model, args) => this._onMimeTypeChanged(model, args));
+    CodeMirror.on(this.editor, 'keydown', (editor, event) => this._onKeyDown(editor, event));
+    CodeMirror.on(this.editor, 'cursorActivity', () => this._onCursorActivity());
   }
 
   /**
@@ -250,6 +250,31 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
+   * Handles a mime type change.
+   */
+  protected _onMimeTypeChanged(model: CodeMirrorModel, args: IChangedArgs<string>): void {
+      const mime = args.newValue;
+      loadModeByMIME(this._editor, mime);
+  }
+
+  /**
+   * Handles a key down event.
+   */
+  protected _onKeyDown(editor: CodeMirror.Editor, event: KeyboardEvent): void {
+    if (this.onKeyDown && this.onKeyDown(this, event)) {
+      event.preventDefault();
+    }
+  }
+
+  /**
+   * Handles a cursor activity event.
+   */
+  protected _onCursorActivity(): void {
+    const selections = this.getSelections();
+    this.model.selections.setSelections(this.uuid, selections);
+  }
+
+  /**
    * Converts a code mirror selectio to an editor selection.
    */
   protected toSelection(selection: CodeMirror.Selection) {
@@ -316,6 +341,9 @@ namespace CodeMirrorEditor {
    */
   export
   interface IOptions extends CodeMirror.EditorConfiguration {
+    /**
+     * The uuid of an editor.
+     */
     readonly uuid: string;
   }
 }
