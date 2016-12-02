@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import './application/loader.spec';
+import './application/shell.spec';
 
 import './commandlinker/commandlinker.spec';
 

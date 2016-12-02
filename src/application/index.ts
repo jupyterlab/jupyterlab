@@ -18,6 +18,8 @@ import {
 } from './shell';
 
 export { ModuleLoader } from './loader';
+export { ApplicationShell } from './shell';
+
 
 /**
  * The type for all JupyterLab plugins.
