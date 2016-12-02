@@ -210,7 +210,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
-   * Returns the primary position of the cursor.
+   * Returns the primary position of the cursor, never `null`.
    */
   getCursorPosition(): CodeEditor.IPosition {
     const cursor = this._model.doc.getCursor();
@@ -226,35 +226,51 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
-   * Returns the primary selection.
+   * Returns the primary selection, never `null`.
    */
   getSelection(): CodeEditor.ITextSelection {
-    const selection = this._model.doc.listSelections()[0];
-    return this.toSelection(selection);
+    return this.getSelections()[0];
   }
 
   /**
    * Set the primary selection. This will remove any secondary cursors.
    */
   setSelection(selection: CodeEditor.IRange): void {
-    const { anchor, head } = this.toCodeMirrorSelection(selection);
-    this._model.doc.setSelection(anchor, head);
+    this.setSelections([selection]);
   }
 
   /**
-   * Gets the selections for all the cursors.
+   * Gets the selections for all the cursors, never `null` or empty.
    */
   getSelections(): CodeEditor.ITextSelection[] {
-    return this._model.doc.listSelections().map(selection => this.toSelection(selection));
+    const selections = this._model.doc.listSelections();
+    if (selections.length > 0) {
+      return this._model.doc.listSelections().map(selection => this.toSelection(selection));
+    }
+    const cursor = this._model.doc.getCursor();
+    const selection = this.toSelection({ anchor: cursor, head: cursor });
+    return [selection];
   }
 
   /**
-   * Sets the selections for all the cursors.
+   * Sets the selections for all the cursors, should not be empty.
    * Cursors will be removed or added, as necessary.
+   * Passing an empty array resets a cursor position to the start of a document.
    */
   setSelections(selections: CodeEditor.IRange[]): void {
-    const cmSelections = selections.map(selection => this.toCodeMirrorSelection(selection));
+    const cmSelections = this.toCodeMirrorSelections(selections);
     this._model.doc.setSelections(cmSelections, 0);
+  }
+
+  /**
+   * Converts selections to code mirror selections.
+   */
+  protected toCodeMirrorSelections(selections: CodeEditor.IRange[]): CodeMirror.Selection[] {
+    if (selections.length > 0) {
+      return selections.map(selection => this.toCodeMirrorSelection(selection));
+    }
+    const position = { line: 0, ch: 0 };
+    return [{ anchor: position, head: position }];
   }
 
   /**

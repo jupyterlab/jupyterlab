@@ -352,9 +352,8 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
    * Get the current cursor position of the editor.
    */
   getCursorPosition(): number {
-    let editorModel = this.editor.model;
-    let cursorPosition = editorModel.getCursorPosition();
-    return editorModel.getOffsetAt(cursorPosition);
+    const cursorPosition = this.editor.getCursorPosition();
+    return this.editor.model.getOffsetAt(cursorPosition);
   }
 
   /**
@@ -362,13 +361,9 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
    *
    * @param position - A new cursor's position.
    */
-  setCursorPosition(position: number): void {
-    let editorModel = this.editor.model;
-    editorModel.selections.pushBack({
-      start: position,
-      end: position,
-      uuid: this.id
-    });
+  setCursorPosition(offset: number): void {
+    const position = this.editor.model.getPositionAt(offset);
+    this.editor.setCursorPosition(position);
   }
 
   /**
@@ -410,11 +405,11 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
     let model = this.model;
     let oldValue = valueChange.oldValue;
     let newValue = valueChange.newValue;
-    let cursorPosition = editorModel.getCursorPosition();
+    let cursorPosition = editor.getCursorPosition();
     let position = editorModel.getOffsetAt(cursorPosition);
     let line = cursorPosition.line;
     let ch = cursorPosition.column;
-    let coords = editor.getCoords(cursorPosition) as ICoords;
+    let coords = editor.getCoordinate(cursorPosition) as ICoords;
     let chHeight = editor.lineHeight;
     let chWidth = editor.charWidth;
     if (model) {
@@ -430,7 +425,7 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
    */
   protected onEditorKeydown(editor: CodeEditor.IEditor, event: KeyboardEvent): boolean {
     let editorModel = editor.model;
-    let cursorPosition = editorModel.getCursorPosition();
+    let cursorPosition = editor.getCursorPosition();
     let line = cursorPosition.line;
     let ch = cursorPosition.column;
 
@@ -469,7 +464,8 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
     let editorModel = editor.model;
 
     // If there is a text selection, no completion requests should be emitted.
-    if (!editorModel.selections.isEmpty) {
+    const selection = editor.getSelection();
+    if (selection.start === selection.end) {
       return;
     }
 
@@ -477,7 +473,7 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
     let currentLine = currentValue.split('\n')[line];
     let chHeight = editor.lineHeight;
     let chWidth = editor.charWidth;
-    let coords = editor.getCoords({
+    let coords = editor.getCoordinate({
       line: line,
       column: ch
     });

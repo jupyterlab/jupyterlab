@@ -349,7 +349,7 @@ namespace CodeEditor {
      */
     readonly uuid: string;
     /**
-     * Returns the primary position of the cursor.
+     * Returns the primary position of the cursor, never `null`.
      */
     getCursorPosition(): IPosition;
     /**
@@ -357,7 +357,7 @@ namespace CodeEditor {
      */
     setCursorPosition(position: IPosition): void;
     /**
-     * Returns the primary selection.
+     * Returns the primary selection, never `null`.
      */
     getSelection(): IRange;
     /**
@@ -365,12 +365,13 @@ namespace CodeEditor {
      */
     setSelection(selection: IRange): void;
     /**
-     * Gets the selections for all the cursors.
+     * Gets the selections for all the cursors, never `null` or empty.
      */
     getSelections(): IRange[];
     /**
      * Sets the selections for all the cursors.
      * Cursors will be removed or added, as necessary.
+     * Passing an empty array resets a cursor position to the start of a document.
      */
     setSelections(selections: IRange[]): void;
   }
