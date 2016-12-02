@@ -134,16 +134,14 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * The height of a line in the editor in pixels.
    */
   get lineHeight(): number {
-    // TODO css measurement
-    return -1;
+    return this._editor.defaultTextHeight();
   }
 
   /**
    * The widget of a character in the editor in pixels.
    */
   get charWidth(): number {
-    // TODO css measurement
-    return -1;
+    return this._editor.defaultCharWidth();
   }
 
   /**
