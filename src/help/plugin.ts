@@ -6,12 +6,16 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Menu
-} from 'phosphor/lib/ui/menu';
+  installMessageHook, Message
+} from 'phosphor/lib/core/messaging';
 
 import {
-  Widget
+  WidgetMessage
 } from 'phosphor/lib/ui/widget';
+
+import {
+  Menu
+} from 'phosphor/lib/ui/menu';
 
 import {
   JupyterLab, JupyterLabPlugin
@@ -122,18 +126,41 @@ function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICom
   const category = 'Help';
   const namespace = 'help-doc';
   const key = `${namespace}:show`;
-  const iframe = new IFrame();
-  iframe.addClass(HELP_CLASS);
-  iframe.title.label = 'Help';
-  iframe.id = namespace;
+  const iframe = newIFrame(namespace);
+  const menu = createMenu();
 
   /**
-   * Creates a menu for the help plugin.
+   * Create a new IFrame widget.
+   *
+   * #### Notes
+   * Once layout restoration is fully supported, the hidden state of the IFrame
+   * widget will be handled by the layout restorer and not by the message hook
+   * handler in this function.
    */
-  function createMenu(app: JupyterLab): Menu {
+  function newIFrame(id: string): IFrame {
+    let iframe = new IFrame();
+    iframe.addClass(HELP_CLASS);
+    iframe.title.label = 'Help';
+    iframe.id = id;
+
+    // If the help widget is being hidden, remove its state.
+    installMessageHook(iframe, (iframe: IFrame, msg: Message) => {
+      if (msg === WidgetMessage.BeforeHide) {
+        state.remove(key);
+      }
+      return true;
+    });
+
+    return iframe;
+  }
+
+  /**
+   * Create a menu for the help plugin.
+   */
+  function createMenu(): Menu {
     let { commands, keymap } = app;
     let menu = new Menu({ commands, keymap });
-    menu.title.label = 'Help';
+    menu.title.label = category;
 
     menu.addItem({ command: 'about-jupyterlab:show' });
     menu.addItem({ command: 'faq-jupyterlab:show' });
@@ -169,7 +196,6 @@ function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICom
   function hideHelp(): void {
     if (!iframe.isHidden) {
       app.shell.collapseRight();
-      state.remove(key);
     }
   }
 
@@ -193,13 +219,13 @@ function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICom
     }
   }));
 
-  app.commands.addCommand('help-doc:activate', {
+  app.commands.addCommand(`${namespace}:activate`, {
     execute: () => { showHelp(); }
   });
-  app.commands.addCommand('help-doc:hide', {
+  app.commands.addCommand(`${namespace}:hide`, {
     execute: () => { hideHelp(); }
   });
-  app.commands.addCommand('help-doc:toggle', {
+  app.commands.addCommand(`${namespace}:toggle`, {
     execute: () => { toggleHelp(); }
   });
 
@@ -208,16 +234,16 @@ function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICom
   let openClassicNotebookId = 'classic-notebook:open';
   app.commands.addCommand(openClassicNotebookId, {
     label: 'Open Classic Notebook',
-    execute: () => {
-      window.open(utils.getBaseUrl() + 'tree');
-    }
+    execute: () => { window.open(utils.getBaseUrl() + 'tree'); }
   });
   palette.addItem({ command: openClassicNotebookId, category });
-
-  let menu = createMenu(app);
   mainMenu.addMenu(menu, {});
 
   state.fetch(key).then(args => {
+    if (!args) {
+      state.remove(key);
+      return;
+    }
     let url = args['url'] as string;
     let filtered = COMMANDS.filter(command => command.url === url);
     if (filtered.length) {
