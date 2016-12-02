@@ -43,6 +43,11 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   readonly uuid: string;
 
   /**
+   * The selection style of this editor.
+   */
+  readonly selectionStyle?: CodeEditor.ISelectionStyle;
+
+  /**
    * Handle keydown events for the editor.
    */
   onKeyDown: CodeEditor.KeydownHandler | null = null;
@@ -53,6 +58,8 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   constructor(host: HTMLElement, options: CodeMirrorEditor.IOptions) {
     host.classList.add(EDITOR_CLASS);
     this.uuid = this.uuid;
+    this.selectionStyle = this.selectionStyle;
+
     this._model = new CodeMirrorModel();
 
     options.theme = (options.theme || DEFAULT_CODEMIRROR_THEME);
@@ -230,8 +237,8 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Set the primary selection. This will remove any secondary cursors.
    */
   setSelection(selection: CodeEditor.IRange): void {
-    const cmSelection = this.toCodeMirrorSelection(selection);
-    this._model.doc.setSelection(cmSelection.anchor, cmSelection.head);
+    const { anchor, head } = this.toCodeMirrorSelection(selection);
+    this._model.doc.setSelection(anchor, head);
   }
 
   /**
@@ -286,11 +293,9 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   protected markSelections(uuid: string, selections: CodeEditor.ITextSelection[]) {
     const markers: CodeMirror.TextMarker[] = [];
     for (const selection of selections) {
-      const cmSelection = this.toCodeMirrorSelection(selection);
-      this._model.doc.markText(cmSelection.anchor, cmSelection.head, {
-        className: selection.className,
-        title: selection.displayName
-      });
+      const { anchor, head } = this.toCodeMirrorSelection(selection);
+      const markerOptions = this.toTextMarkerOptions(selection);
+      this._model.doc.markText(anchor, head, markerOptions);
     }
     this.selectionMarkers[uuid] = markers;
   }
@@ -315,12 +320,26 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Converts a code mirror selectio to an editor selection.
    */
-  protected toSelection(selection: CodeMirror.Selection) {
+  protected toSelection(selection: CodeMirror.Selection): CodeEditor.ITextSelection {
     return {
       uuid: this.uuid,
       start: this.toPosition(selection.anchor),
-      end: this.toPosition(selection.head)
+      end: this.toPosition(selection.head),
+      style: this.selectionStyle
     };
+  }
+
+  /**
+   * Converts the selection style to a text marker options.
+   */
+  protected toTextMarkerOptions(style: CodeEditor.ISelectionStyle | undefined): CodeMirror.TextMarkerOptions | undefined {
+    if (style) {
+      return {
+        className: style.className,
+        title: style.displayName
+      };
+    }
+    return undefined;
   }
 
   /**
@@ -384,5 +403,9 @@ namespace CodeMirrorEditor {
      * The uuid of an editor.
      */
     readonly uuid: string;
+    /**
+     * A selection style.
+     */
+    readonly selectionStyle?: CodeEditor.ISelectionStyle;
   }
 }
