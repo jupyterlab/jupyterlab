@@ -1,6 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as CodeMirror
+  from 'codemirror';
+
 import {
   nbformat
 } from '@jupyterlab/services';
@@ -20,9 +23,9 @@ export
 class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
   /**
    * Returns a mime type for the given language info.
-   * 
+   *
    * #### Notes
-   * If a mime type cannot be found returns the defaul mime type `text/plain`, never `null`.  
+   * If a mime type cannot be found returns the defaul mime type `text/plain`, never `null`.
    */
   getMimeTypeByLanguage(info: nbformat.ILanguageInfoMetadata): string {
     if (info.codemirror_mode) {
@@ -43,9 +46,9 @@ class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
   }
   /**
    * Returns a mime type for the given file path.
-   * 
+   *
    * #### Notes
-   * If a mime type cannot be found returns the defaul mime type `text/plain`, never `null`.  
+   * If a mime type cannot be found returns the defaul mime type `text/plain`, never `null`.
    */
   getMimeTypeByFilePath(path: string): string {
     const mode = CodeMirror.findModeByFileName(path);

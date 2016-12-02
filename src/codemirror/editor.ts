@@ -38,7 +38,7 @@ export
 class CodeMirrorEditor implements CodeEditor.IEditor {
 
   /**
-   * The uuid of this editor; 
+   * The uuid of this editor;
    */
   readonly uuid: string;
 

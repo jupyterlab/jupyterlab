@@ -5,6 +5,7 @@ module.exports = [
   require('../../lib/about/plugin').plugin,
   require('../../lib/application/plugin').plugin,
   require('../../lib/clipboard/plugin').plugin,
+  require('../../lib/codemirror/plugin').plugin,
   require('../../lib/commandlinker/plugin').plugin,
   require('../../lib/commandpalette/plugin').plugin,
   require('../../lib/console/plugin').plugin,

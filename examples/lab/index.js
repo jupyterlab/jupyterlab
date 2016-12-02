@@ -16,6 +16,7 @@ lab.registerPlugins([
   require('jupyterlab/lib/about/plugin').plugin,
   require('jupyterlab/lib/application/plugin').plugin,
   require('jupyterlab/lib/clipboard/plugin').plugin,
+  require('jupyterlab/lib/codemirror/plugin').plugin,
   require('jupyterlab/lib/commandlinker/plugin').plugin,
   require('jupyterlab/lib/commandpalette/plugin').plugin,
   require('jupyterlab/lib/console/plugin').plugin,

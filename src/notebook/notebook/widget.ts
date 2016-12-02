@@ -568,6 +568,7 @@ namespace StaticNotebook {
       this.codeCellRenderer = options.codeCellRenderer;
       this.markdownCellRenderer = options.markdownCellRenderer;
       this.rawCellRenderer = options.rawCellRenderer;
+      this.editorMimeTypeService = options.editorMimeTypeService;
     }
 
     /**
@@ -623,7 +624,7 @@ namespace StaticNotebook {
     }
   }
 
-  /** 
+  /**
    * The namespace for the `Renderer` class statics.
    */
   export

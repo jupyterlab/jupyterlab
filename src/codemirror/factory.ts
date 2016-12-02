@@ -26,6 +26,7 @@ class CodeMirrorEditorFactory implements IEditorFactory {
     return this.newEditor(host, {
       uuid: utils.uuid(),
       indentUnit: 4,
+      theme: DEFAULT_CODEMIRROR_THEME,
       extraKeys: {
         'Cmd-Right': 'goLineRight',
         'End': 'goLineRight',
@@ -61,9 +62,15 @@ class CodeMirrorEditorFactory implements IEditorFactory {
    * Creates an editor and applies extra options.
    */
   protected newEditor(host: HTMLElement, editorOptions: CodeMirrorEditor.IOptions, options: CodeEditor.IOptions) {
-    editorOptions.readOnly = (options.readOnly !== undefined) ? options.readOnly : false;
-    editorOptions.lineNumbers = (options.lineNumbers !== undefined) ? options.lineNumbers : true;
-    editorOptions.lineWrapping = (options.wordWrap !== undefined) ? options.wordWrap : true;
+    if (options.readOnly !== undefined) {
+      editorOptions.readOnly = options.readOnly;
+    }
+    if (options.lineNumbers !== undefined) {
+      editorOptions.lineNumbers = options.lineNumbers;
+    }
+    if (options.wordWrap !== undefined) {
+      editorOptions.lineWrapping = options.wordWrap;
+    }
     const editor = new CodeMirrorEditor(host, editorOptions);
     const extra = options.extra;
     if (extra) {

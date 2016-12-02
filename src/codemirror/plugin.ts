@@ -15,7 +15,7 @@ import {
  * The editor services.
  */
 export
-const editorExtension: JupyterLabPlugin<IEditorServices> = {
+const plugin: JupyterLabPlugin<IEditorServices> = {
   id: IEditorServices.name,
   provides: IEditorServices,
   activate: (): IEditorServices => {
