@@ -371,7 +371,7 @@ namespace Private {
    * Create the breadcrumb nodes.
    */
   export
-  function createCrumbs(): HTMLElement[] {
+  function createCrumbs(): ISequence<HTMLElement> {
     let home = document.createElement('span');
     home.className = MATERIAL_CLASS + ' ' + BREADCRUMB_HOME + ' ' + BREADCRUMB_ITEM_CLASS;
     let ellipsis = document.createElement('span');
