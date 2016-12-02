@@ -279,27 +279,6 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
   }
 
   /**
-   * Handle changes in the model.
-   * 
-   * #### Notes
-   * Subclasses may override this method as needed.
-   */
-  protected onModelChanged(oldValue: ICellModel | null, newValue: ICellModel | null): void {
-    // If the model is being replaced, disconnect the old signal handler.
-    if (oldValue) {
-      oldValue.stateChanged.disconnect(this.onModelStateChanged, this);
-    }
-
-    if (newValue) {
-      this.editor.model.value = newValue.source || '';
-      this.editor.model.clearHistory();
-      newValue.stateChanged.connect(this.onModelStateChanged, this);
-    } else {
-      this.editor.model.value = '';
-    }
-  }
-
-  /**
    * The line numbers state of the editor.
    */
   get lineNumbers(): boolean {
@@ -380,6 +359,27 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
       column: character
     });
     this.setCursorPosition(position);
+  }
+
+  /**
+   * Handle changes in the model.
+   *
+   * #### Notes
+   * Subclasses may override this method as needed.
+   */
+  protected onModelChanged(oldValue: ICellModel | null, newValue: ICellModel | null): void {
+    // If the model is being replaced, disconnect the old signal handler.
+    if (oldValue) {
+      oldValue.stateChanged.disconnect(this.onModelStateChanged, this);
+    }
+
+    if (newValue) {
+      this.editor.model.value = newValue.source || '';
+      this.editor.model.clearHistory();
+      newValue.stateChanged.connect(this.onModelStateChanged, this);
+    } else {
+      this.editor.model.value = '';
+    }
   }
 
   /**
