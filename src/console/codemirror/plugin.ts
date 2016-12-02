@@ -40,10 +40,12 @@ function activateRendererProvider(app: JupyterLab, editorServices: IEditorServic
   });
   const promptRenderer = new CodeCellWidget.Renderer({
     editorFactory: host => editorServices.factory.newInlineEditor(host.node, {
-      matchBrackets: false,
-      autoCloseBrackets: false,
-      extraKeys: {
-        Enter: function () { /* no-op */ }
+      extra: {
+        matchBrackets: false,
+        autoCloseBrackets: false,
+        extraKeys: {
+          Enter: function () { /* no-op */ }
+        }
       }
     })
   });

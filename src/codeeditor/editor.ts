@@ -485,9 +485,9 @@ namespace CodeEditor {
     readOnly?: boolean;
 
     /**
-     * Other options.
+     * Extra options.
      */
-    [key: string]: any;
+    extra?: { [key: string]: any };
   }
 
   /**

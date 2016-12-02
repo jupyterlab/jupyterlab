@@ -34,8 +34,10 @@ const plugin: JupyterLabPlugin<NotebookPanel.IRenderer> = {
 function activateRendererProvider(app: JupyterLab, editorServices: IEditorServices): NotebookPanel.IRenderer {
   const codeCellRenderer = new CodeCellWidget.Renderer({
     editorFactory: host => editorServices.factory.newInlineEditor(host.node, {
-      matchBrackets: true,
-      autoCloseBrackets: true
+      extra: {
+        matchBrackets: true,
+        autoCloseBrackets: true
+      }
     })
   });
   const rawCellRenderer = new CodeCellWidget.Renderer({
