@@ -14,9 +14,8 @@ import {
 } from '../../codeeditor';
 
 import {
-  CodeCellWidget
-} from '../../notebook/cells';
-
+  createRenderer
+} from '.';
 
 /**
  * The provider for a console's code mirror renderer.
@@ -33,25 +32,5 @@ const plugin: JupyterLabPlugin<ConsoleContent.IRenderer> = {
  * Activates the renderer provider extension.
  */
 function activateRendererProvider(app: JupyterLab, editorServices: IEditorServices): ConsoleContent.IRenderer {
-  const bannerRenderer = new CodeCellWidget.Renderer({
-    editorFactory: host => editorServices.factory.newInlineEditor(host.node, {
-      wordWrap: true
-    })
-  });
-  const promptRenderer = new CodeCellWidget.Renderer({
-    editorFactory: host => editorServices.factory.newInlineEditor(host.node, {
-      extra: {
-        matchBrackets: false,
-        autoCloseBrackets: false,
-        extraKeys: {
-          Enter: function () { /* no-op */ }
-        }
-      }
-    })
-  });
-  const foreignCellRenderer = promptRenderer;
-  const editorMimeTypeService = editorServices.mimeTypeService;
-  return new ConsoleContent.Renderer({
-    bannerRenderer, promptRenderer, foreignCellRenderer, editorMimeTypeService
-  });
+  return createRenderer(editorServices);
 }
