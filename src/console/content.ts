@@ -738,6 +738,7 @@ namespace ConsoleContent {
       this.bannerRenderer = options.bannerRenderer;
       this.promptRenderer = options.promptRenderer;
       this.foreignCellRenderer = options.foreignCellRenderer;
+      this.editorMimeTypeService = options.editorMimeTypeService;
     }
 
     /**
