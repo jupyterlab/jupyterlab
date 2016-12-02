@@ -63,7 +63,7 @@ namespace CodeEditor {
    * An interface describing editor state coordinates.
    */
   export
-  interface ICoords {
+  interface ICoordinate {
     /**
      * The left coordinate value.
      */
@@ -480,14 +480,14 @@ namespace CodeEditor {
     focus(): void;
 
     /**
-     * Repaint editor. 
-     */
-    refresh(): void;
-
-    /**
      * Test whether the editor has keyboard focus.
      */
     hasFocus(): boolean;
+
+    /**
+     * Repaint editor. 
+     */
+    refresh(): void;
 
     /**
      * Sets the size of the editor.
@@ -510,7 +510,7 @@ namespace CodeEditor {
     /**
      * Get the window coordinates given a cursor position.
      */
-    getCoords(position: IPosition): ICoords;
+    getCoordinate(position: IPosition): ICoordinate;
   }
 
   /**
@@ -780,7 +780,7 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
   /**
    * Get the window coordinates given a cursor position.
    */
-  getCoords(position: CodeEditor.IPosition): CodeEditor.ICoords {
+  getCoordinate(position: CodeEditor.IPosition): CodeEditor.ICoordinate {
     // more css measurements required
     return void 0;
   }

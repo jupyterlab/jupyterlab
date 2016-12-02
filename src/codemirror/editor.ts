@@ -39,6 +39,11 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   readonly uuid: string;
 
   /**
+   * Handle keydown events for the editor.
+   */
+  onKeyDown: CodeEditor.KeydownHandler | null = null;
+
+  /**
    * Construct a CodeMirror editor.
    */
   constructor(host: HTMLElement, options: CodeMirrorEditor.IOptions) {
@@ -53,10 +58,28 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       loadModeByMIME(this._editor, mime);
     });
     CodeMirror.on(this.editor, 'keydown', (instance, evt) => {
-      if (this._handler && this._handler(this, evt)) {
+      if (this.onKeyDown && this.onKeyDown(this, evt)) {
         evt.preventDefault();
       }
     });
+  }
+
+  /**
+   * Tests whether the editor is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    this._editor = null;
   }
 
   /**
@@ -65,38 +88,62 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * #### Notes
    * This is a ready-only property.
    */
-  get editor() {
+  get editor(): CodeMirror.Editor {
     return this._editor;
   }
 
   /**
-   * Dispose of the resources held by the widget.
+   * Control the rendering of line numbers.
    */
-  dispose(): void {
-    this._editor = null;
-    this._isDisposed = true;
+  get lineNumbers(): boolean {
+    return this._editor.getOption('lineNumbers');
   }
-
-  get isDisposed(): boolean {
-    return this._isDisposed;
+  set lineNumbers(value: boolean) {
+    this._editor.setOption('lineNumbers', value);
   }
 
   /**
-   * A cursor position for this editor.
+   * Set to false for horizontal scrolling. Defaults to true.
    */
-  getPosition(): CodeEditor.IPosition {
-    const cursor = this._editor.getDoc().getCursor();
-    return {
-        line: cursor.line,
-        column: cursor.ch
-    };
+  get wordWrap(): boolean {
+    return this._editor.getOption('wordWrap');
+  }
+  set wordWrap(value: boolean) {
+    this._editor.setOption('wordWrap', value);
   }
 
-  setPosition(position: CodeEditor.IPosition) {
-    this._editor.getDoc().setCursor({
-        line: position.line,
-        ch: position.column
-    });
+  /**
+   * Should the editor be read only.
+   */
+  get readOnly(): boolean {
+    return this._editor.getOption('readOnly') === 'nocursor';
+  }
+  set readOnly(readOnly: boolean) {
+    let option = readOnly ? 'nocursor' : false;
+    this._editor.setOption('readOnly', option);
+  }
+
+  /**
+   * Returns a model for this editor.
+   */
+  get model(): CodeEditor.IModel {
+    return this._model;
+  }
+
+  /**
+   * The height of a line in the editor in pixels.
+   */
+  get lineHeight(): number {
+    // TODO css measurement
+    return -1;
+  }
+
+  /**
+   * The widget of a character in the editor in pixels.
+   */
+  get charWidth(): number {
+    // TODO css measurement
+    return -1;
   }
 
   /**
@@ -150,118 +197,8 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Get the window coordinates given a cursor position.
    */
-  getCoords(position: CodeEditor.IPosition): CodeEditor.ICoords {
-    // FIXME: more css measurements required
-    return void 0;
-  }
-
-  /**
-   * Returns a model for this editor.
-   */
-  get model(): CodeEditor.IModel {
-    return this._model;
-  }
-
-  get onKeyDown(): CodeEditor.KeydownHandler | null {
-    return this._handler;
-  }
-  set onKeyDown(value: CodeEditor.KeydownHandler | null) {
-    this._handler = value;
-  }
-
-  /**
-   * Get the text stored in this model.
-   */
-  getValue(): string {
-    return this._editor.getDoc().getValue();
-  }
-
-  /**
-   * Replace the entire text contained in this model.
-   */
-  setValue(value: string) {
-    this._editor.getDoc().setValue(value);
-  }
-
-  /**
-   * Get the number of lines in the model.
-   */
-  getLineCount(): number {
-    return this._editor.getDoc().lineCount();
-  }
-
-  /**
-   * Returns a last line number.
-   */
-  getLastLine(): number {
-    return this._editor.getDoc().lastLine();
-  }
-
-  /**
-   * Returns a content for the given line number.
-   */
-  getLineContent(line: number): string {
-    return this._editor.getDoc().getLineHandle(line).text;
-  }
-
-  /**
-   * Find an offset fot the given position.
-   */
-  getOffsetAt(position: CodeEditor.IPosition): number {
-    const codeMirrorPosition = this.toCodeMirrorPosition(position);
-    return this._editor.getDoc().indexFromPos(codeMirrorPosition);
-  }
-
-  /**
-   * Find a position fot the given offset.
-   */
-  getPositionAt(offset: number): CodeEditor.IPosition {
-    const position = this._editor.getDoc().posFromIndex(offset);
-    return this.toPosition(position);
-  }
-
-  /**
-   * Control the rendering of line numbers.
-   */
-  get lineNumbers(): boolean {
-    return this._editor.getOption('lineNumbers');
-  }
-
-  set lineNumbers(value: boolean) {
-    this._editor.setOption('lineNumbers', value);
-  }
-
-  get lineHeight(): number {
-    // TODO css measurement
-    return -1;
-  }
-
-  get charWidth(): number {
-    // TODO css measurement
-    return -1;
-  }
-
-  /**
-   * Set to false for horizontal scrolling. Defaults to true.
-   */
-  get wordWrap(): boolean {
-    return this._editor.getOption('wordWrap');
-  }
-
-  set wordWrap(value: boolean) {
-    this._editor.setOption('wordWrap', value);
-  }
-
-  /**
-   * Should the editor be read only.
-   */
-  get readOnly(): boolean {
-    return this._editor.getOption('readOnly') === 'nocursor';
-  }
-
-  set readOnly(readOnly: boolean) {
-    let option = readOnly ? 'nocursor' : false;
-    this._editor.setOption('readOnly', option);
+  getCoordinate(position: CodeEditor.IPosition): CodeEditor.ICoordinate {
+    return this.editor.charCoords(this.toCodeMirrorPosition(position), 'page');
   }
 
   /**
@@ -364,7 +301,6 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   private _model: CodeMirrorModel;
-  private _handler: CodeEditor.KeydownHandler | null = null;
   private _editor: CodeMirror.Editor;
   private _isDisposed = false;
 
