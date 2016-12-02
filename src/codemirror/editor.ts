@@ -34,15 +34,21 @@ export
 class CodeMirrorEditor implements CodeEditor.IEditor {
 
   /**
+   * The uuid of this editor; 
+   */
+  readonly uuid: string;
+
+  /**
    * Construct a CodeMirror editor.
    */
-  constructor(host: HTMLElement, options: CodeMirror.EditorConfiguration = {}) {
+  constructor(host: HTMLElement, options: CodeMirrorEditor.IOptions) {
     host.classList.add(EDITOR_CLASS);
-    let codeMirrorModel = this._model = new CodeMirrorModel();
+    this.uuid = this.uuid;
+    this._model = new CodeMirrorModel();
     options.theme = (options.theme || DEFAULT_CODEMIRROR_THEME);
-    options.value = codeMirrorModel.doc;
+    options.value = this._model.doc;
     this._editor = CodeMirror(host, options);
-    codeMirrorModel.mimeTypeChanged.connect((sender, args) => {
+    this._model.mimeTypeChanged.connect((sender, args) => {
       let mime = args.newValue;
       loadModeByMIME(this._editor, mime);
     });
@@ -129,21 +135,16 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Reveal the given position in the editor.
    */
   revealPosition(position: CodeEditor.IPosition): void {
-    this._editor.scrollIntoView({
-      line: position.line,
-      ch: position.column
-    });
+    const cmPosition = this.toCodeMirrorPosition(position);
+    this._editor.scrollIntoView(cmPosition);
   }
 
   /**
    * Reveal the given selection in the editor.
    */
   revealSelection(selection: CodeEditor.ITextSelection): void {
-    const start = this.model.getPositionAt(selection.start);
-    const from = { line: start.line, ch: start.column };
-    const end = this.model.getPositionAt(selection.end);
-    const to = { line: end.line, ch: end.column };
-    this._editor.scrollIntoView({ from, to }, undefined);
+    const range = this.toCodeMirrorRange(selection);
+    this._editor.scrollIntoView(range);
   }
 
   /**
@@ -264,6 +265,85 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
+   * Returns the primary position of the cursor.
+   */
+  getCursorPosition(): CodeEditor.IPosition {
+    const cursor = this._model.doc.getCursor();
+    return this.toPosition(cursor);
+  }
+
+  /**
+   * Set the primary position of the cursor. This will remove any secondary cursors.
+   */
+  setCursorPosition(position: CodeEditor.IPosition): void {
+    const cursor = this.toCodeMirrorPosition(position);
+    this._model.doc.setCursor(cursor);
+  }
+
+  /**
+   * Returns the primary selection.
+   */
+  getSelection(): CodeEditor.ITextSelection {
+    const selection = this._model.doc.listSelections()[0];
+    return this.toSelection(selection);
+  }
+
+  /**
+   * Set the primary selection. This will remove any secondary cursors.
+   */
+  setSelection(selection: CodeEditor.ITextSelection): void {
+    const cmSelection = this.toCodeMirrorSelection(selection);
+    this._model.doc.setSelection(cmSelection.anchor, cmSelection.head);
+  }
+
+  /**
+   * Gets the selections for all the cursors.
+   */
+  getSelections(): CodeEditor.ITextSelection[] {
+    return this._model.doc.listSelections().map(selection => this.toSelection(selection));
+  }
+
+  /**
+   * Sets the selections for all the cursors.
+   * Cursors will be removed or added, as necessary.
+   */
+  setSelections(selections: CodeEditor.ITextSelection[]): void {
+    const cmSelections = selections.map(selection => this.toCodeMirrorSelection(selection));
+    this._model.doc.setSelections(cmSelections, 0);
+  }
+
+  /**
+   * Converts a code mirror selectio to an editor selection.
+   */
+  protected toSelection(selection: CodeMirror.Selection) {
+    return {
+      uuid: this.uuid,
+      start: this.toPosition(selection.anchor),
+      end: this.toPosition(selection.head)
+    };
+  }
+
+  /**
+   * Converts an editor selection to a code mirror selection.
+   */
+  protected toCodeMirrorSelection(selection: CodeEditor.ITextSelection): CodeMirror.Selection {
+    return {
+      anchor: this.toCodeMirrorPosition(selection.start),
+      head: this.toCodeMirrorPosition(selection.end)
+    };
+  }
+
+  /**
+   * Converts an editor selection to a code mirror selection.
+   */
+  protected toCodeMirrorRange(selection: CodeEditor.ITextSelection): CodeMirror.Range {
+    return {
+      from: this.toCodeMirrorPosition(selection.start),
+      to: this.toCodeMirrorPosition(selection.end)
+    };
+  }
+
+  /**
    * Convert a code mirror position to an editor position.
    */
   protected toPosition(position: CodeMirror.Position) {
@@ -283,9 +363,23 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     };
   }
 
-  private _model: CodeEditor.IModel = null;
+  private _model: CodeMirrorModel;
   private _handler: CodeEditor.KeydownHandler | null = null;
-  private _editor: CodeMirror.Editor = null;
+  private _editor: CodeMirror.Editor;
   private _isDisposed = false;
 
+}
+
+/**
+ * A namespace for `CodeMirrorEditor`.
+ */
+export
+namespace CodeMirrorEditor {
+  /**
+   * An initialization options for a code mirror editor.
+   */
+  export
+  interface IOptions extends CodeMirror.EditorConfiguration {
+    readonly uuid: string;
+  }
 }

@@ -398,21 +398,21 @@ namespace CodeEditor {
      */
     readonly uuid: string;
     /**
-     * Set the primary position of the cursor. This will remove any secondary cursors.
-     */
-    setCursorPosition(position: IPosition): void;
-    /**
      * Returns the primary position of the cursor.
      */
     getCursorPosition(): IPosition;
     /**
-     * Set the primary selection. This will remove any secondary cursors.
+     * Set the primary position of the cursor. This will remove any secondary cursors.
      */
-    setSelection(selection: ITextSelection): void;
+    setCursorPosition(position: IPosition): void;
     /**
      * Returns the primary selection.
      */
     getSelection(): ITextSelection;
+    /**
+     * Set the primary selection. This will remove any secondary cursors.
+     */
+    setSelection(selection: ITextSelection): void;
     /**
      * Gets the selections for all the cursors.
      */

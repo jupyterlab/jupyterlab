@@ -123,18 +123,6 @@ class CodeMirrorModel implements CodeEditor.IModel {
   }
 
   /**
-   * Returns the primary cursor position.
-   */
-  getCursorPosition(): CodeEditor.IPosition {
-    let selections = this.selections;
-    let cursor = find(selections, (selection) => { return selection.start === selection.end; });
-    if (cursor) {
-      return this.getPositionAt(cursor.start);
-    }
-    return null;
-  }
-
-  /**
    * Get the number of lines in the model.
    */
   get lineCount(): number {
