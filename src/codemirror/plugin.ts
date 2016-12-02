@@ -7,12 +7,8 @@ import {
 } from '../codeeditor';
 
 import {
-  CodeMirrorEditorFactory
-} from './factory';
-
-import {
-  CodeMirrorMimeTypeService
-} from './mimetype';
+  CodeMirrorEditorFactory, CodeMirrorMimeTypeService
+} from '.';
 
 
 /**
