@@ -86,37 +86,54 @@ namespace CodeEditor {
   }
 
   /**
-   * A text selection.
+   * A range.
    */
   export
-  interface ITextSelection {
+  interface IRange {
     /**
-     * The position of the first character in the current selection.
+     * The position of the first character in the current range.
      *
      * #### Notes
-     * If this position is greater than [end] then the selection is considered
+     * If this position is greater than [end] then the range is considered
      * to be backward.
      */
     start: IPosition;
 
     /**
-     * The position of the last character in the current selection.
+     * The position of the last character in the current range.
      *
      * #### Notes
-     * If this position is less than [start] then the selection is considered
+     * If this position is less than [start] then the range is considered
      * to be backward.
      */
     end: IPosition;
+  }
 
+  /**
+   * A marked range.
+   */
+  export
+  interface IMarkedRange extends IRange {
+    /**
+     * A class name added to the range.
+     */
+    className?: string;
+
+    /**
+     * A display name added to the range.
+     */
+    displayName?: string;
+  }
+
+  /**
+   * A text selection.
+   */
+  export
+  interface ITextSelection extends IMarkedRange {
     /**
      * The uuid of the text selection owner.
      */
     uuid: string;
-
-    /**
-     * A class name added to the text selection.
-     */
-    className?: string;
   }
 
   /**
@@ -408,20 +425,20 @@ namespace CodeEditor {
     /**
      * Returns the primary selection.
      */
-    getSelection(): ITextSelection;
+    getSelection(): IRange;
     /**
      * Set the primary selection. This will remove any secondary cursors.
      */
-    setSelection(selection: ITextSelection): void;
+    setSelection(selection: IRange): void;
     /**
      * Gets the selections for all the cursors.
      */
-    getSelections(): ITextSelection[];
+    getSelections(): IRange[];
     /**
      * Sets the selections for all the cursors.
      * Cursors will be removed or added, as necessary.
      */
-    setSelections(selections: ITextSelection[]): void;
+    setSelections(selections: IRange[]): void;
   }
 
   /**
@@ -505,7 +522,7 @@ namespace CodeEditor {
     /**
      * Reveals the given selection in the editor.
      */
-    revealSelection(selection: ITextSelection): void;
+    revealSelection(selection: IRange): void;
 
     /**
      * Get the window coordinates given a cursor position.
@@ -720,10 +737,10 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
     return this._model;
   }
 
-  get onKeyDown(): CodeEditor.KeydownHandler {
+  get onKeyDown(): CodeEditor.KeydownHandler | null {
     return this._handler;
   }
-  set onKeyDown(value: CodeEditor.KeydownHandler) {
+  set onKeyDown(value: CodeEditor.KeydownHandler | null) {
     this._handler = value;
   }
 
@@ -773,7 +790,7 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
   /**
    * Scroll the given cursor position into view.
    */
-  revealSelection(selection: CodeEditor.ITextSelection): void {
+  revealSelection(selection: CodeEditor.IRange): void {
     // set node scroll position here.
   }
 
@@ -823,7 +840,6 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
 
   setCursorPosition(position: CodeEditor.IPosition): void {
     this.setSelection({
-      uuid: this.uuid,
       start: position,
       end: position
     });
@@ -833,7 +849,7 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
     return this.getSelection().start;
   }
 
-  setSelection(selection: CodeEditor.ITextSelection | null): void {
+  setSelection(selection: CodeEditor.IRange | null): void {
     const node = this.node as HTMLTextAreaElement;
     if (selection) {
       const start = this.model.getOffsetAt(selection.start);
@@ -857,7 +873,7 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
     return [this.getSelection()];
   }
 
-  setSelections(selections: CodeEditor.ITextSelection[]): void {
+  setSelections(selections: CodeEditor.IRange[]): void {
     this.setSelection(selections.length > 0 ? selections[0] : null);
   }
 
@@ -891,6 +907,6 @@ class TextAreaEditor extends Widget implements CodeEditor.IEditor {
   }
 
   private _model: CodeEditor.IModel;
-  private _handler: CodeEditor.KeydownHandler = null;
+  private _handler: CodeEditor.KeydownHandler | null = null;
   private _changeGuard = false;
 }
