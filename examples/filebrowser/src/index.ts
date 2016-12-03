@@ -42,6 +42,10 @@ import {
 } from 'jupyterlab/lib/docregistry';
 
 import {
+  CodeMirrorEditorFactory, CodeMirrorMimeTypeService
+} from 'jupyterlab/lib/codemirror';
+
+import {
   EditorWidgetFactory
 } from 'jupyterlab/lib/editorwidget/widget';
 
@@ -87,7 +91,11 @@ function createApp(manager: ServiceManager.IManager): void {
     opener
   });
   let mFactory = new TextModelFactory();
-  let wFactory = new EditorWidgetFactory({
+  let editorServices = {
+    factory: new CodeMirrorEditorFactory(),
+    mimeTypeService: new CodeMirrorMimeTypeService()
+  };
+  let wFactory = new EditorWidgetFactory(editorServices, {
     name: 'Editor',
     modelName: 'text',
     fileExtensions: ['*'],

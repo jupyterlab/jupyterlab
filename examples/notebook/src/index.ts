@@ -35,8 +35,8 @@ import {
 } from 'jupyterlab/lib/notebook';
 
 import {
-  CodeMirrorNotebookPanelRenderer
-} from 'jupyterlab/lib/notebook/codemirror/notebook/panel';
+  createNotebookPanelRenderer
+} from 'jupyterlab/lib/notebook/codemirror';
 
 import {
   DocumentManager
@@ -142,7 +142,7 @@ function createApp(manager: ServiceManager.IManager): void {
   });
   let mFactory = new NotebookModelFactory();
   let clipboard = new MimeData();
-  let renderer = CodeMirrorNotebookPanelRenderer.defaultRenderer;
+  let renderer = createNotebookPanelRenderer();
   let wFactory = new NotebookWidgetFactory({
     name: 'Notebook',
     modelName: 'notebook',
