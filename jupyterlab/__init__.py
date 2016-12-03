@@ -126,28 +126,24 @@ class LabHandler(IPythonHandler):
         from flexx import app
         from .flexx_plugin_manager import get_session
         
-        # Get assets to load
+        # Get session; we need to know its id
         session = get_session(self.application)
-        js_assets, css_assets = session.get_assets_in_order(css_reset=False, load_all=True)
-        # The flexx-init.js needs special care, as it is inlined in Flexx
-        # todo: If we bring back session assets and put the init.js there, this would not be necessary.
-        init_asset = js_assets[0]
-        init_asset._name = '%s/flexx-init.js' % session.id
-        app.assets._assets[init_asset.name] = init_asset
-        # Add Flexx assets
-        for asset in css_assets:
-            if 'phosphor' not in asset.name.lower():
-                css_files.append('/flexx/assets/shared/%s' % asset.name)
-        for asset in js_assets:
-            if 'phosphor' not in asset.name.lower():
-                bundles.append('/flexx/assets/shared/%s' % asset.name)
- 
+        
+        # Add asset to notify the client-side of flexx of the session id
+        # would love to make this easier, e.g. by putting it in jupyter-config-data
+        init_js = 'flexx = {session_id: %r, app_name: %r}' % (session.id, session.app_name)
+        init_url = 'init/%s.js' % session.id
+        app.assets.add_shared_asset(init_url, init_js)
+        bundles.append('flexx/assets/shared/' + init_url)
+        # Add flexx core bundle
+        bundles.append('/flexx/assets/shared/flexx-core.js')
+        
         ## --------------------
 
         self.write(self.render_template('lab.html',
             static_prefix=static_prefix,
             page_title='JupyterLab Alpha Preview',
-            terminals_available=self.settings['terminals_available'],
+            terminals_available=,
             mathjax_url=self.mathjax_url,
             jupyterlab_main=main,
             jupyterlab_css=css_files,

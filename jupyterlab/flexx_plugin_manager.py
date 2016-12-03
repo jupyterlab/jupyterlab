@@ -45,18 +45,15 @@ def get_session(tornado_app):
         # Specify the JLab app
         app.App(JupyterLabPluginWrapper).serve(app_name)
         # Add Flexx' handlers needed to server asset and websocket
-        tornado_app.add_handlers(r".*", [(r"/flexx/ws/(.*)", app.tornadoserver.WSHandler),
-                                         (r"/flexx/(.*)", app.tornadoserver.MainHandler),
+        tornado_app.add_handlers(r".*", [(r"/flexx/ws/(.*)", app._tornadoserver.WSHandler),
+                                         (r"/flexx/(.*)", app._tornadoserver.MainHandler),
                                          ])
     
-    # Create session
+    # Create session, mark phosphor-all lib as available, because Flexx
+    # is able to use JLab's Phosphor.
     session = app.manager.create_session(app_name)
-    
-    # Tell it that we're going to use widgets - to "use" flexx.ui._widget,
-    # to pull in the phosphor-all assets.
-    # todo: we can ditch this when we're using JLab's Phosphor
-    session.register_model_class(ui.Widget)
-    
+    session.present_assets.add('phosphor-all.js')
+    session.present_assets.add('phosphor-all.css')
     return session
 
 
@@ -68,8 +65,8 @@ class JupyterLabPluginWrapper(app.Model):
     
     def init(self):
         self._plugins = []  # model instances
-        self.init2()
-        #app.call_later(0.1, self.init2)
+        #@self.init2()
+        app.call_later(0.1, self.init2)
     
     def init2(self):
         # Instantiate plugins
@@ -79,31 +76,30 @@ class JupyterLabPluginWrapper(app.Model):
                 plugins.append(cls())
         
         # Set plugins property, so that we have access to it on the JS side
-        self.plugins = plugins
+        for p in plugins:
+            self.launch_plugin(p)
     
-    class Both:
-        
-        @event.prop
-        def plugins(self, model_instances):
-            """ The Flexx models that represent the plugins
-            (available in both Python and JS).
-            """
-            return tuple( model_instances)
+    @event.emitter
+    def launch_plugin(self, p):
+        """ Event emitted by the Python side to launch a new plugin.
+        """
+        return {'model': p}
     
     class JS:
         
-        def init(self):
-            
-            # Register the plugins with Jupyterlab
-            for ob in self.plugins:
-                print('registering Flexx JLAB plugin ', ob.id)
+        @event.connect('launch_plugin')
+        def on_launch_plugin(self, *events):
+            for ev in events:
+                model = ev.model
                 
-                func = ob.jlab_activate
-                autoStart = getattr(ob, 'JLAB_AUTOSTART', True)
-                requires = getattr(ob, 'JLAB_REQUIRES', [])
+                print('registering Flexx JLAB plugin ', model.id)
+                
+                func = model.jlab_activate
+                autoStart = getattr(model, 'JLAB_AUTOSTART', True)
+                requires = getattr(model, 'JLAB_REQUIRES', [])
                 requires = [get_token(id) for id in requires]
                 
-                p = dict(id='flexx.' + ob._class_name.lower(),
+                p = dict(id='flexx.' + model._class_name.lower(),
                          activate=func, autoStart=autoStart, requires=requires)
                 window.jupyter.lab.registerPlugin(p)
                 if p.autoStart:
