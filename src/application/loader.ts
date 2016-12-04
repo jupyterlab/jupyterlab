@@ -94,7 +94,7 @@ class ModuleLoader {
   }
 
   /**
-   * Ensure a bundle is loaded on a page.
+   * Ensure a bundle is loaded on the page.
    *
    * @param path - The public path of the bundle (e.g. "lab/jupyter.bundle.js").
    *
