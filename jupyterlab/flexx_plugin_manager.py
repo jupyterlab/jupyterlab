@@ -49,11 +49,11 @@ def get_session(tornado_app):
                                          (r"/flexx/(.*)", app._tornadoserver.MainHandler),
                                          ])
     
-    # Create session, mark phosphor-all lib as available, because Flexx
+    # Create session, tell it to ignore phosphor-all lib, because Flexx
     # is able to use JLab's Phosphor.
     session = app.manager.create_session(app_name)
-    session.present_assets.add('phosphor-all.js')
-    session.present_assets.add('phosphor-all.css')
+    session.assets_to_ignore.add('phosphor-all.js')
+    session.assets_to_ignore.add('phosphor-all.css')
     return session
 
 

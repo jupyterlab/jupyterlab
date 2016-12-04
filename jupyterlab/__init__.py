@@ -143,7 +143,7 @@ class LabHandler(IPythonHandler):
         self.write(self.render_template('lab.html',
             static_prefix=static_prefix,
             page_title='JupyterLab Alpha Preview',
-            terminals_available=,
+            terminals_available=self.settings['terminals_available'],
             mathjax_url=self.mathjax_url,
             jupyterlab_main=main,
             jupyterlab_css=css_files,
