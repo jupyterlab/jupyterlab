@@ -10,7 +10,7 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  maxSatisfying
+  maxSatisfying, satisfies
 } from 'semver';
 
 
@@ -43,7 +43,7 @@ class ModuleLoader {
    * @param callback - The callback function for invoking the module.
    *
    * #### Notes
-   * The callback is called with the module,
+   * This is a no-op if the path is already registered.
    */
   define(path: string, callback: ModuleLoader.DefineCallback): void {
     if (!(path in this._registered)) {
@@ -60,10 +60,16 @@ class ModuleLoader {
    * @returns The exports of the requested module, if registered.  The module
    *   selected is the registered module that maximally satisfies the semver
    *   range of the request.
+   *
+   * #### Notes
+   * Will throw an error if the required path cannot be satisfied.
    */
   require(path: string): any {
     // Check if module is in cache.
     let id = this._findMatch(path);
+    if (!id) {
+      throw new Error(`No matching module found for: "${path}"`);
+    }
     let installed = this._modules;
     if (installed[id]) {
       return installed[id].exports;
@@ -179,7 +185,8 @@ class ModuleLoader {
       }
       if (sources.length === targets.length && sources.every((source, i) => {
         return (source.package === targets[i].package
-          && source.module === targets[i].module);
+          && source.module === targets[i].module
+          && satisfies(targets[i].version, source.version));
       })) {
         matches.push(mod);
         versions.push(targets.map(t => t.version));
