@@ -39,6 +39,11 @@ import {
 
 
 /**
+ * A flag denoting whether the application is loaded over HTTPS.
+ */
+const LAB_IS_SECURE = window.location.protocol === 'https:';
+
+/**
  * The class name added to the help widget.
  */
 const HELP_CLASS = 'jp-Help';
@@ -57,28 +62,28 @@ const COMMANDS = [
   {
     text: 'Numpy Reference',
     id: 'help-doc:numpy-reference',
-    url: '//docs.scipy.org/doc/numpy/reference/'
+    url: 'https://docs.scipy.org/doc/numpy/reference/'
   },
   {
     text: 'Scipy Reference',
     id: 'help-doc:scipy-reference',
-    url: '//docs.scipy.org/doc/scipy/reference/'
+    url: 'https://docs.scipy.org/doc/scipy/reference/'
   },
   {
     text: 'Notebook Tutorial',
     id: 'help-doc:notebook-tutorial',
-    url: '//nbviewer.jupyter.org/github/jupyter/notebook/' +
+    url: 'https://nbviewer.jupyter.org/github/jupyter/notebook/' +
       'blob/master/docs/source/examples/Notebook/Notebook Basics.ipynb'
   },
   {
     text: 'Python Reference',
     id: 'help-doc:python-reference',
-    url: '//docs.python.org/3.5/'
+    url: 'https://docs.python.org/3.5/'
   },
   {
     text: 'IPython Reference',
     id: 'help-doc:ipython-reference',
-    url: '//ipython.org/documentation.html?v=20160707164940'
+    url: 'https://ipython.org/documentation.html?v=20160707164940'
   },
   {
     text: 'Matplotlib Reference',
@@ -98,7 +103,7 @@ const COMMANDS = [
   {
     text: 'Markdown Reference',
     id: 'help-doc:markdown-reference',
-    url: '//help.github.com/articles/getting-started-with-writing-and-formatting-on-github/'
+    url: 'https://help.github.com/articles/getting-started-with-writing-and-formatting-on-github/'
   }
 ];
 
@@ -213,6 +218,11 @@ function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICom
   COMMANDS.forEach(command => app.commands.addCommand(command.id, {
     label: command.text,
     execute: () => {
+      // If help resource will generate a mixed content error, load externally.
+      if (LAB_IS_SECURE && utils.urlParse(command.url).protocol !== 'https:') {
+        window.open(command.url);
+        return;
+      }
       attachHelp();
       iframe.url = command.url;
       showHelp();
