@@ -30,8 +30,8 @@ import {
 } from 'jupyterlab/lib/console';
 
 import {
-  CodeMirrorConsoleRenderer
-} from 'jupyterlab/lib/console/codemirror/widget';
+  createRenderer
+} from 'jupyterlab/lib/console/codemirror';
 
 import {
   RenderMime
@@ -107,7 +107,7 @@ function startApp(session: Session.ISession) {
   }
   let sanitizer = defaultSanitizer;
   let rendermime = new RenderMime({ renderers, order, sanitizer });
-  let renderer = CodeMirrorConsoleRenderer.defaultRenderer;
+  let renderer = createRenderer();
 
   let consolePanel = new ConsolePanel({ session, renderer, rendermime });
   consolePanel.title.label = TITLE;

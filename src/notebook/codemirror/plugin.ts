@@ -3,15 +3,20 @@
 
 import {
   NotebookPanel
-} from '../notebook/panel';
+} from '../notebook';
 
 import {
-  CodeMirrorNotebookPanelRenderer
-} from './notebook/panel';
-
-import {
-  JupyterLabPlugin
+  JupyterLab, JupyterLabPlugin
 } from '../../application';
+
+import {
+  IEditorServices
+} from '../../codeeditor';
+
+import {
+  createNotebookPanelRenderer
+} from '.';
+
 
 /**
  * The provider for a notebook's code mirror renderer.
@@ -19,6 +24,15 @@ import {
 export
 const plugin: JupyterLabPlugin<NotebookPanel.IRenderer> = {
   id: 'jupyter.services.notebook.codemirror.renderer',
+  requires: [IEditorServices],
   provides: NotebookPanel.IRenderer,
-  activate: () => CodeMirrorNotebookPanelRenderer.defaultRenderer
+  activate: activateRendererProvider
 };
+
+/**
+ * Activates the renderer provider extension.
+ */
+function activateRendererProvider(app: JupyterLab, editorServices: IEditorServices): NotebookPanel.IRenderer {
+  return createNotebookPanelRenderer(editorServices);
+}
+

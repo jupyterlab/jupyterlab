@@ -24,6 +24,10 @@ import {
 } from '../../../../lib/completer';
 
 import {
+  createNotebookPanelRenderer
+} from '../../../../lib/notebook/codemirror';
+
+import {
   INotebookModel
 } from '../../../../lib/notebook/notebook/model';
 
@@ -47,17 +51,13 @@ import {
   DEFAULT_CONTENT
 } from '../utils';
 
-import {
-  CodeMirrorNotebookPanelRenderer
-} from '../../../../lib/notebook/codemirror/notebook/panel';
-
 
 /**
  * Default data.
  */
 const rendermime = defaultRenderMime();
 const clipboard = new MimeData();
-const renderer = CodeMirrorNotebookPanelRenderer.defaultRenderer;
+const renderer = createNotebookPanelRenderer();
 
 
 class LogNotebookPanel extends NotebookPanel {
@@ -122,7 +122,7 @@ describe('notebook/notebook/panel', () => {
 
 
       it('should accept an optional render', () => {
-        let newRenderer = new CodeMirrorNotebookPanelRenderer();
+        let newRenderer = createNotebookPanelRenderer();
         let panel = new NotebookPanel({
           rendermime, clipboard, renderer: newRenderer
         });
@@ -217,9 +217,9 @@ describe('notebook/notebook/panel', () => {
     describe('#renderer', () => {
 
       it('should be the renderer used by the widget', () => {
-        let renderer = new CodeMirrorNotebookPanelRenderer();
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        expect(panel.renderer).to.be(renderer);
+        let r = createNotebookPanelRenderer();
+        let panel = new NotebookPanel({ rendermime, clipboard, renderer: r });
+        expect(panel.renderer).to.be(r);
       });
 
     });
@@ -363,8 +363,7 @@ describe('notebook/notebook/panel', () => {
       describe('#createContent()', () => {
 
         it('should create a notebook widget', () => {
-          let r = new CodeMirrorNotebookPanelRenderer();
-          expect(r.createContent(rendermime)).to.be.a(Notebook);
+          expect(renderer.createContent(rendermime)).to.be.a(Notebook);
         });
 
       });
@@ -372,8 +371,7 @@ describe('notebook/notebook/panel', () => {
       describe('#createToolbar()', () => {
 
         it('should create a notebook toolbar', () => {
-          let r = new CodeMirrorNotebookPanelRenderer();
-          expect(r.createToolbar()).to.be.a(Toolbar);
+          expect(renderer.createToolbar()).to.be.a(Toolbar);
         });
 
       });
@@ -381,18 +379,9 @@ describe('notebook/notebook/panel', () => {
       describe('#createCompleter()', () => {
 
         it('should create a completer widget', () => {
-          let r = new CodeMirrorNotebookPanelRenderer();
-          expect(r.createCompleter()).to.be.a(CompleterWidget);
+          expect(renderer.createCompleter()).to.be.a(CompleterWidget);
         });
 
-      });
-
-    });
-
-    describe('.defaultRenderer', () => {
-
-      it('should be an instance of a `Renderer`', () => {
-        expect(CodeMirrorNotebookPanelRenderer.defaultRenderer).to.be.a(NotebookPanel.Renderer);
       });
 
     });

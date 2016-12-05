@@ -17,7 +17,7 @@ import {
 
 import {
   DEFAULT_CODEMIRROR_THEME
-} from '../codemirror/widget';
+} from '../codemirror/editor';
 
 import * as marked
   from 'marked';

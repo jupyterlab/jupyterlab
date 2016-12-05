@@ -1,11 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as CodeMirror
-  from 'codemirror';
-
-import 'codemirror/mode/meta';
-
 import {
   Message
 } from 'phosphor/lib/core/messaging';
@@ -14,42 +9,19 @@ import {
   ResizeMessage, Widget
 } from 'phosphor/lib/ui/widget';
 
+import {
+  CodeEditor
+} from './';
 
 /**
- * The class name added to CodeMirrorWidget instances.
- */
-const EDITOR_CLASS = 'jp-CodeMirrorWidget';
-
-/**
- * The name of the default CodeMirror theme
+ * A widget which hosts a code editor.
  */
 export
-const DEFAULT_CODEMIRROR_THEME = 'jupyter';
+class CodeEditorWidget extends Widget {
 
-
-/**
- * A widget which hosts a CodeMirror editor.
- */
-export
-class CodeMirrorWidget extends Widget {
-
-  /**
-   * Construct a CodeMirror widget.
-   */
-  constructor(options: CodeMirror.EditorConfiguration = {}) {
+  constructor(editorFactory: (host: Widget) => CodeEditor.IEditor) {
     super();
-    this.addClass(EDITOR_CLASS);
-    options.theme = (options.theme || DEFAULT_CODEMIRROR_THEME);
-    this._editor = CodeMirror(this.node, options);
-  }
-
-  /**
-   * Dispose of the resources held by the widget.
-   */
-  dispose(): void {
-    clearTimeout(this._resizing);
-    this._editor = null;
-    super.dispose();
+    this._editor = editorFactory(this);
   }
 
   /**
@@ -58,34 +30,35 @@ class CodeMirrorWidget extends Widget {
    * #### Notes
    * This is a ready-only property.
    */
-   get editor(): CodeMirror.Editor {
-     return this._editor;
-   }
+   get editor(): CodeEditor.IEditor {
+    return this._editor;
+  }
 
   /**
-   * Handle the DOM events for the widget.
-   *
-   * @param event - The DOM event sent to the widget.
-   *
-   * #### Notes
-   * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the notebook panel's node. It should
-   * not be called directly by user code.
+   * Dispose of the resources held by the widget.
    */
-  handleEvent(event: Event): void {
-    switch (event.type) {
-    case 'focus':
-      this._evtFocus(event as FocusEvent);
-      break;
-    default:
-      break;
+  dispose() {
+    if (this.isDisposed) {
+      return;
     }
+    clearTimeout(this._resizing);
+    super.dispose();
+    this._editor.dispose();
+    this._editor = null;
+  }
+
+  /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this._editor.focus();
   }
 
   /**
    * A message handler invoked on an `'after-attach'` message.
    */
   protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
     this.node.addEventListener('focus', this, true);
     if (!this.isVisible) {
       this._needsRefresh = true;
@@ -119,21 +92,24 @@ class CodeMirrorWidget extends Widget {
     if (msg.width < 0 || msg.height < 0) {
       if (this._resizing === -1) {
         this._resizing = setTimeout(() => {
-          this._editor.setSize(null, null);
+          this._editor.setSize(null);
           this._resizing = -1;
         }, 500);
       }
     } else {
-      this._editor.setSize(msg.width, msg.height);
+      this._editor.setSize(msg);
     }
     this._needsRefresh = true;
   }
 
-  /**
-   * Handle `'activate-request'` messages.
-   */
-  protected onActivateRequest(msg: Message): void {
-    this._editor.focus();
+  handleEvent(event: Event): void {
+    switch (event.type) {
+    case 'focus':
+      this._evtFocus(event as FocusEvent);
+      break;
+    default:
+      break;
+    }
   }
 
   /**
@@ -146,7 +122,8 @@ class CodeMirrorWidget extends Widget {
     }
   }
 
-  private _editor: CodeMirror.Editor = null;
+  private _editor: CodeEditor.IEditor = null;
   private _needsRefresh = true;
   private _resizing = -1;
+
 }

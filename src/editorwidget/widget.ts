@@ -1,31 +1,29 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as CodeMirror
-  from 'codemirror';
-
-import 'codemirror/mode/meta';
-
 import {
   Token
 } from 'phosphor/lib/core/token';
-
-import {
-  loadModeByFileName
-} from '../codemirror';
 
 import {
   IInstanceTracker
 } from '../common/instancetracker';
 
 import {
-  CodeMirrorWidget, DEFAULT_CODEMIRROR_THEME
-} from '../codemirror/widget';
-
-import {
   ABCWidgetFactory, DocumentRegistry
 } from '../docregistry';
 
+import {
+  CodeEditor, IEditorServices, IEditorMimeTypeService
+} from '../codeeditor';
+
+import {
+  CodeEditorWidget
+} from '../codeeditor/widget';
+
+import {
+  Widget
+} from 'phosphor/lib/ui/widget';
 
 /**
  * The class name added to a dirty widget.
@@ -50,41 +48,38 @@ interface IEditorTracker extends IInstanceTracker<EditorWidget> {}
  * The editor tracker token.
  */
 export
-const IEditorTracker = new Token<IEditorTracker>('jupyter.services.editor-tracker');
+const IEditorTracker = new Token<EditorWidget>('jupyter.services.editor-tracker');
 /* tslint:enable */
 
 
 /**
- * A document widget for codemirrors.
+ * A document widget for editors.
  */
 export
-class EditorWidget extends CodeMirrorWidget {
+class EditorWidget extends CodeEditorWidget {
   /**
    * Construct a new editor widget.
    */
-  constructor(context: DocumentRegistry.Context) {
-    super({
-      extraKeys: {
-        'Tab': 'indentMore',
-        'Shift-Enter': () => { /* no-op */ }
-      },
-      indentUnit: 4,
-      theme: DEFAULT_CODEMIRROR_THEME,
-      lineNumbers: true,
-      lineWrapping: true,
-    });
+  constructor(
+    editorFactory: (host: Widget) => CodeEditor.IEditor,
+    context: DocumentRegistry.Context,
+    editorMimeTypeService: IEditorMimeTypeService) {
+    super(editorFactory);
     this.addClass(EDITOR_CLASS);
     this._context = context;
-    let editor = this.editor;
     let model = context.model;
-    let doc = editor.getDoc();
+    let editor = this.editor;
+
+
     // Prevent the initial loading from disk from being in the editor history.
     context.ready.then( () => {
-      doc.setValue(model.toString());
-      doc.clearHistory();
+      editor.model.value = model.toString();
+      editor.model.clearHistory();
     });
+
+    editor.model.value = model.toString();
+
     this.title.label = context.path.split('/').pop();
-    loadModeByFileName(editor, context.path);
     model.stateChanged.connect((m, args) => {
       if (args.name === 'dirty') {
         if (args.newValue) {
@@ -94,22 +89,23 @@ class EditorWidget extends CodeMirrorWidget {
         }
       }
     });
-    context.pathChanged.connect((c, path) => {
-      loadModeByFileName(editor, path);
-      this.title.label = path.split('/').pop();
-    });
     model.contentChanged.connect(() => {
-      let old = doc.getValue();
+      let old = editor.model.value;
       let text = model.toString();
       if (old !== text) {
-        doc.setValue(text);
+        editor.model.value = text;
       }
     });
-    CodeMirror.on(doc, 'change', (instance, change) => {
-      if (change.origin !== 'setValue') {
-        model.fromString(instance.getValue());
-      }
+    this.editor.model.valueChanged.connect((sender, args) => {
+      model.fromString(args.newValue);
     });
+    editor.model.mimeType = editorMimeTypeService.getMimeTypeByFilePath(context.path);
+    context.pathChanged.connect((c, path) => {
+      editor.model.mimeType = editorMimeTypeService.getMimeTypeByFilePath(path);
+      this.title.label = path.split('/').pop();
+    });
+
+    // TODO disconnect on deactivation
   }
 
   /**
@@ -119,19 +115,34 @@ class EditorWidget extends CodeMirrorWidget {
     return this._context;
   }
 
-  private _context: DocumentRegistry.Context;
+  protected _context: DocumentRegistry.Context;
 }
-
 
 /**
  * A widget factory for editors.
  */
 export
 class EditorWidgetFactory extends ABCWidgetFactory<EditorWidget, DocumentRegistry.IModel> {
+
+  constructor(editorServices: IEditorServices, options: DocumentRegistry.IWidgetFactoryOptions) {
+    super(options);
+    this._editorServices = editorServices;
+  }
+
   /**
    * Create a new widget given a context.
    */
   protected createNewWidget(context: DocumentRegistry.Context): EditorWidget {
-    return new EditorWidget(context);
+    const { factory, mimeTypeService } = this._editorServices;
+    return new EditorWidget((host: Widget) => {
+      let editor = factory.newDocumentEditor(host.node, {
+          lineNumbers: true,
+          readOnly: false,
+          wordWrap: true,
+      });
+      return editor;
+    }, context, mimeTypeService);
   }
+
+  private _editorServices: IEditorServices;
 }

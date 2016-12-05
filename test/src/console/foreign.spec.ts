@@ -16,8 +16,8 @@ import {
 } from 'phosphor/lib/ui/panel';
 
 import {
-  CodeMirrorConsoleRenderer
-} from '../../../lib/console/codemirror/widget';
+  createCodeCellRenderer
+} from '../../../lib/notebook/codemirror';
 
 import {
   ForeignHandler
@@ -84,7 +84,7 @@ defineSignal(TestHandler.prototype, 'rejected');
 const rendermime = defaultRenderMime();
 const renderer: ForeignHandler.IRenderer = {
   createCell: () => {
-    let renderer = CodeMirrorConsoleRenderer.defaultCodeCellRenderer;
+    let renderer = createCodeCellRenderer();
     let cell = new CodeCellWidget({ rendermime, renderer });
     cell.model = new CodeCellModel();
     return cell;

@@ -20,6 +20,10 @@ import {
 } from '../../../../lib/notebook/cells/widget';
 
 import {
+  createNotebookRenderer
+} from '../../../../lib/notebook/codemirror';
+
+import {
  NotebookModel
 } from '../../../../lib/notebook/notebook/model';
 
@@ -39,10 +43,6 @@ import {
   DEFAULT_CONTENT
 } from '../utils';
 
-import {
-  CodeMirrorNotebookRenderer
-} from '../../../../lib/notebook/codemirror/notebook/widget';
-
 
 const clipboard = new MimeData();
 const ERROR_INPUT = 'a = foo';
@@ -59,7 +59,7 @@ describe('notebook/notebook/actions', () => {
     beforeEach((done) => {
       widget = new Notebook({
         rendermime: defaultRenderMime(),
-        renderer: CodeMirrorNotebookRenderer.defaultRenderer
+        renderer: createNotebookRenderer()
       });
       let model = new NotebookModel();
       model.fromJSON(DEFAULT_CONTENT);

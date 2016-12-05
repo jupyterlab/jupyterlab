@@ -88,8 +88,8 @@ declare module CodeMirror {
     function off(doc: Doc, eventName: 'cursorActivity', handler: (instance: CodeMirror.Editor) => void ): void;
 
     /** Equivalent to the event by the same name as fired on editor instances. */
-    function on(doc: Doc, eventName: 'beforeSelectionChange', handler: (instance: CodeMirror.Editor, selection: { head: Position; anchor: Position; }) => void ): void;
-    function off(doc: Doc, eventName: 'beforeSelectionChange', handler: (instance: CodeMirror.Editor, selection: { head: Position; anchor: Position; }) => void ): void;
+    function on(doc: Doc, eventName: 'beforeSelectionChange', handler: (instance: CodeMirror.Editor, selection: Selection) => void ): void;
+    function off(doc: Doc, eventName: 'beforeSelectionChange', handler: (instance: CodeMirror.Editor, selection: Selection) => void ): void;
 
     /** Will be fired when the line object is deleted. A line object is associated with the start of the line.
     Mostly useful when you need to find out when your gutter markers on a given line are removed. */
@@ -267,11 +267,11 @@ declare module CodeMirror {
 
         /** Scrolls the given element into view. pos is a { line, ch } object, in editor-local coordinates.
         The margin parameter is optional. When given, it indicates the amount of pixels around the given area that should be made visible as well. */
-        scrollIntoView(pos: { line: number, ch: number }, margin?: number): void;
+        scrollIntoView(pos: Position, margin?: number): void;
 
         /** Scrolls the given element into view. pos is a { from, to } object, in editor-local coordinates.
         The margin parameter is optional. When given, it indicates the amount of pixels around the given area that should be made visible as well. */
-        scrollIntoView(pos: { from: CodeMirror.Position, to: CodeMirror.Position }, margin: number): void;
+        scrollIntoView(pos: Range, margin?: number): void;
 
         /** Returns an { left , top , bottom } object containing the coordinates of the cursor position.
         If mode is "local" , they will be relative to the top-left corner of the editable document.
@@ -304,7 +304,7 @@ declare module CodeMirror {
         /** Returns a { from , to } object indicating the start (inclusive) and end (exclusive) of the currently rendered part of the document.
         In big documents, when most content is scrolled out of view, CodeMirror will only render the visible part, and a margin around it.
         See also the viewportChange event. */
-        getViewport(): { from: number; to: number };
+        getViewport(): Range;
 
         /** If your code does something to change the size of the editor element (window resizes are already listened for), or unhides it,
         you should probably follow up by calling this method to ensure CodeMirror is still looking as intended. */
@@ -393,8 +393,8 @@ declare module CodeMirror {
 
         /** This event is fired before the selection is moved. Its handler may modify the resulting selection head and anchor.
         Handlers for this event have the same restriction as "beforeChange" handlers � they should not do anything to directly update the state of the editor. */
-        on(eventName: 'beforeSelectionChange', handler: (instance: CodeMirror.Editor, selection: { head: CodeMirror.Position; anchor: CodeMirror.Position; }) => void ): void;
-        off(eventName: 'beforeSelectionChange', handler: (instance: CodeMirror.Editor, selection: { head: CodeMirror.Position; anchor: CodeMirror.Position; }) => void ): void;
+        on(eventName: 'beforeSelectionChange', handler: (instance: CodeMirror.Editor, selection: CodeMirror.Selection) => void ): void;
+        off(eventName: 'beforeSelectionChange', handler: (instance: CodeMirror.Editor, selection: CodeMirror.Selection) => void ): void;
 
         /** Fires whenever the view port of the editor changes (due to scrolling, editing, or any other factor).
         The from and to arguments give the new start and end of the viewport. */
@@ -525,7 +525,7 @@ declare module CodeMirror {
 
         /** Retrieves a list of all current selections. These will always be sorted, and never overlap (overlapping selections are merged).
         Each object in the array contains anchor and head properties referring to {line, ch} objects. */
-        listSelections(): { anchor: CodeMirror.Position; head: CodeMirror.Position }[];
+        listSelections(): CodeMirror.Selection[];
 
         /** Return true if any text is selected. */
         somethingSelected(): boolean;
@@ -534,7 +534,16 @@ declare module CodeMirror {
         setCursor(pos: CodeMirror.Position): void;
 
         /** Set the selection range.anchor and head should be { line , ch } objects.head defaults to anchor when not given. */
-        setSelection(anchor: CodeMirror.Position, head: CodeMirror.Position): void;
+        setSelection(anchor: CodeMirror.Position, head?: CodeMirror.Position, options?: any): void;
+
+        /**
+         * Sets a new set of selections. There must be at least one selection in the given array.
+         * When primary is a number, it determines which selection is the primary one.
+         * When it is not given, the primary index is taken from the previous selection,
+         * or set to the last range if the previous selection had less ranges than the new one.
+         * Supports the same options as setSelection.
+         */
+        setSelections(ranges: CodeMirror.Selection[], primary?: number, options?: any): void; 
 
         /** Similar to setSelection , but will, if shift is held or the extending flag is set,
         move the head of the selection while leaving the anchor at its current place.
@@ -687,6 +696,22 @@ declare module CodeMirror {
     interface Position {
         ch: number;
         line: number;
+    }
+
+    interface Range {
+      from: Position
+      to: Position
+    }
+
+    interface Selection {
+      /**
+       * the fixed side of the selection
+       */
+      anchor: Position
+      /**
+       * the side of the selection that moves
+       */
+      head: Position
     }
 
     interface EditorConfiguration {
