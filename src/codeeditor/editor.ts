@@ -24,6 +24,11 @@ import {
 
 /**
  * A namespace for code editors.
+ *
+ * #### Notes
+ * - A code editor is a set of common assumptions which hold for all concrete editors.
+ * - Changes in implementations of the code editor should only be caused by changes in concrete editors.
+ * - Common JLab services which are based on the code editor should belong to `IEditorServices`.
  */
 export
 namespace CodeEditor {
