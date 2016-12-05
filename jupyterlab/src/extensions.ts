@@ -10,7 +10,6 @@ module.exports = [
   require('../../lib/commandlinker/plugin').plugin,
   require('../../lib/commandpalette/plugin').plugin,
   require('../../lib/console/plugin').plugin,
-  require('../../lib/console/codemirror/plugin').plugin,
   require('../../lib/csvwidget/plugin').plugin,
   require('../../lib/docmanager/plugin').plugin,
   require('../../lib/docregistry/plugin').plugin,
