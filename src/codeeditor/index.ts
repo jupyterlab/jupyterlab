@@ -18,6 +18,7 @@ export * from './widget';
 export * from './factory';
 export * from './mimetype';
 
+
 /* tslint:disable */
 /**
  * Code editor services token.
@@ -25,6 +26,7 @@ export * from './mimetype';
 export
 const IEditorServices = new Token<IEditorServices>('jupyter.services.editorservices');
 /* tslint:enable */
+
 
 /**
  * Code editor services.
@@ -35,6 +37,7 @@ interface IEditorServices {
    * The code editor factory.
    */
   readonly factory: IEditorFactory;
+
   /**
    * The editor mime type service.
    */

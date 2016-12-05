@@ -29,6 +29,10 @@ import {
   IChangedArgs
 } from '../../common/interfaces';
 
+import {
+  ObservableString
+} from '../../common/observablestring';
+
 
 /**
  * The location of requested edges.
@@ -105,11 +109,6 @@ interface IEditorState extends JSONObject {
  */
 export
 interface ITextChange extends IEditorState {
-  /**
-   * The old value of the editor text.
-   */
-  readonly oldValue: string;
-
   /**
    * The new value of the editor text.
    */
@@ -239,8 +238,8 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
     super(editorFactory);
     this.addClass(CELL_EDITOR_CLASS);
 
-    this.editor.model.valueChanged.connect((editorModel, valueChange) => {
-      this.onEditorModelChange(this.editor, editorModel, valueChange);
+    this.editor.model.value.changed.connect(() => {
+      this.onEditorModelChange();
     });
     this.editor.onKeyDown = (editor, event) => {
       return this.onEditorKeydown(editor, event);
@@ -374,11 +373,11 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
     }
 
     if (newValue) {
-      this.editor.model.value = newValue.source || '';
+      this.editor.model.value.text = newValue.source || '';
       this.editor.model.clearHistory();
       newValue.stateChanged.connect(this.onModelStateChanged, this);
     } else {
-      this.editor.model.value = '';
+      this.editor.model.value.text = '';
     }
   }
 
@@ -389,8 +388,8 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
     switch (args.name) {
     case 'source':
       let editorModel = this.editor.model;
-      if (editorModel.value !== args.newValue) {
-        editorModel.value = args.newValue;
+      if (editorModel.value.text !== args.newValue) {
+        editorModel.value.text = args.newValue;
       }
       break;
     default:
@@ -401,12 +400,12 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
   /**
    * Handle change events from the editor model.
    */
-  protected onEditorModelChange(editor: CodeEditor.IEditor, editorModel: CodeEditor.IModel, valueChange: IChangedArgs<string>): void {
+  protected onEditorModelChange(): void {
+    let editor = this.editor;
     let model = this.model;
-    let oldValue = valueChange.oldValue;
-    let newValue = valueChange.newValue;
+    let newValue = editor.model.value.text;
     let cursorPosition = editor.getCursorPosition();
-    let position = editorModel.getOffsetAt(cursorPosition);
+    let position = editor.model.getOffsetAt(cursorPosition);
     let line = cursorPosition.line;
     let ch = cursorPosition.column;
     let coords = editor.getCoordinate(cursorPosition) as ICoords;
@@ -416,7 +415,7 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
       model.source = newValue;
     }
     this.textChanged.emit({
-      line, ch, chHeight, chWidth, coords, position, oldValue, newValue
+      line, ch, chHeight, chWidth, coords, position, newValue
     });
   }
 
@@ -469,7 +468,7 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
       return;
     }
 
-    let currentValue = editorModel.value;
+    let currentValue = editorModel.value.text;
     let currentLine = currentValue.split('\n')[line];
     let chHeight = editor.lineHeight;
     let chWidth = editor.charWidth;

@@ -181,7 +181,7 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, sta
       const selection = widget.editor.getSelection();
       const start = editorModel.getOffsetAt(selection.start);
       const end = editorModel.getOffsetAt(selection.end);
-      const code = editorModel.value.substring(start, end);
+      const code = editorModel.value.text.substring(start, end);
       commands.execute('console:inject', { id, code });
     },
     label: 'Run Code',

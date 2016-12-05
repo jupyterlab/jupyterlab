@@ -13,12 +13,17 @@ import {
   CodeEditor
 } from './';
 
+
 /**
  * A widget which hosts a code editor.
  */
 export
 class CodeEditorWidget extends Widget {
-
+  /**
+   * Construct a new code editor widget.
+   *
+   * @param editorFactory - The factory used to create a code editor.
+   */
   constructor(editorFactory: (host: Widget) => CodeEditor.IEditor) {
     super();
     this._editor = editorFactory(this);
@@ -26,9 +31,6 @@ class CodeEditorWidget extends Widget {
 
   /**
    * Get the editor wrapped by the widget.
-   *
-   * #### Notes
-   * This is a ready-only property.
    */
    get editor(): CodeEditor.IEditor {
     return this._editor;
@@ -102,6 +104,16 @@ class CodeEditorWidget extends Widget {
     this._needsRefresh = true;
   }
 
+  /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the panel's DOM node. It should
+   * not be called directly by user code.
+   */
   handleEvent(event: Event): void {
     switch (event.type) {
     case 'focus':
@@ -125,5 +137,4 @@ class CodeEditorWidget extends Widget {
   private _editor: CodeEditor.IEditor = null;
   private _needsRefresh = true;
   private _resizing = -1;
-
 }

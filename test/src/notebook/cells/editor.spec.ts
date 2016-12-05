@@ -62,8 +62,8 @@ class LogEditorWidget extends CodeCellEditorWidget {
     this.methods.push('onModelStateChanged');
   }
 
-  protected onEditorModelChange(editor: CodeEditor.IEditor, editorModel: CodeEditor.IModel, valueChange: IChangedArgs<string>): void {
-    super.onEditorModelChange(editor, editorModel, valueChange);
+  protected onEditorModelChange(): void {
+    super.onEditorModelChange();
     this.methods.push('onEditorModelChange');
   }
 
@@ -153,9 +153,8 @@ describe('notebook/cells/editor', () => {
         // method, so for this test, the `replaceRange` method is being used to
         // generate the text change.
         expect(change).to.not.be.ok();
-        widget.editor.model.value = want.newValue;
+        widget.editor.model.value.text = want.newValue;
         expect(change).to.be.ok();
-        expect(change.oldValue).to.equal(want.oldValue);
         expect(change.newValue).to.equal(want.newValue);
       });
 
@@ -175,7 +174,7 @@ describe('notebook/cells/editor', () => {
         widget.completionRequested.connect(listener);
 
         expect(request).to.not.be.ok();
-        widget.editor.model.value = want.currentValue;
+        widget.editor.model.value.text = want.currentValue;
         widget.setCursorPosition(3);
 
         let editor = (widget.editor as any).editor as CodeMirror.Editor;
@@ -204,15 +203,6 @@ describe('notebook/cells/editor', () => {
         widget.model = new CellModel();
         widget.model = model;
         expect(widget.model).to.be(model);
-      });
-
-      it('should empty the code mirror if set to null', () => {
-        let widget = createCellEditor();
-        widget.model = new CellModel();
-        widget.model.source = 'foo';
-        expect(widget.editor.model.value).to.be('foo');
-        widget.model = null;
-        expect(widget.editor.model.value).to.be.empty();
       });
 
     });

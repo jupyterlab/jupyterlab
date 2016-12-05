@@ -5,12 +5,12 @@ import {
   CodeEditor
 } from './editor';
 
+
 /**
  * The editor factory interface.
  */
 export
 interface IEditorFactory {
-
   /**
    * Create a new editor for inline code.
    */
@@ -20,5 +20,4 @@ interface IEditorFactory {
    * Create a new editor for a full document.
    */
   newDocumentEditor(host: HTMLElement, options: CodeEditor.IOptions): CodeEditor.IEditor;
-
 }
