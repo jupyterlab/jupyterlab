@@ -205,15 +205,6 @@ describe('notebook/cells/editor', () => {
         expect(widget.model).to.be(model);
       });
 
-      it('should empty the code mirror if set to null', () => {
-        let widget = createCellEditor();
-        widget.model = new CellModel();
-        widget.model.source = 'foo';
-        expect(widget.editor.model.value).to.be('foo');
-        widget.model = null;
-        expect(widget.editor.model.value).to.be.empty();
-      });
-
     });
 
     describe('#dispose()', () => {
