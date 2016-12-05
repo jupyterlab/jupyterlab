@@ -16,37 +16,44 @@ import {
   IChangedArgs
 } from '../common/interfaces';
 
+import {
+  IObservableString, ObservableString
+} from '../common/observablestring';
+
 
 /**
  * An implementation of the code editor model using code mirror.
  */
 export
 class CodeMirrorModel implements CodeEditor.IModel {
-
-  /**
-   * A signal emitted when a content of the model changed.
-   */
-  readonly valueChanged: ISignal<this, IChangedArgs<string>>;
-
   /**
    * A signal emitted when a mimetype changes.
    */
   readonly mimeTypeChanged: ISignal<this, IChangedArgs<string>>;
 
   /**
-   * Get the selections for the model.
-   */
-  readonly selections: CodeEditor.ISelections = new CodeEditor.Selections();
-
-  /**
    * Construct a new codemirror model.
    */
   constructor(doc: CodeMirror.Doc = new CodeMirror.Doc('')) {
     this._doc = doc;
-    this._value = this.value;
     CodeMirror.on(this.doc, 'change', (instance, change) => {
       this._onDocChange(instance, change);
     });
+    this._value.changed.connect(this._onValueChanged, this);
+  }
+
+  /**
+   * Get the value of the model.
+   */
+  get value(): IObservableString {
+    return this._value;
+  }
+
+  /**
+   * Get the selections for the model.
+   */
+  get selections(): CodeEditor.ISelections {
+    return this._selections;
   }
 
   /**
@@ -71,6 +78,8 @@ class CodeMirrorModel implements CodeEditor.IModel {
       return;
     }
     this._isDisposed = true;
+    this._selections.dispose();
+    this._value.dispose();
     clearSignalData(this);
   }
 
@@ -91,16 +100,6 @@ class CodeMirrorModel implements CodeEditor.IModel {
       oldValue,
       newValue
     });
-  }
-
-  /**
-   * The text stored in the model.
-   */
-  get value(): string {
-    return this._doc.getValue();
-  }
-  set value(value: string) {
-    this._doc.setValue(value);
   }
 
   /**
@@ -157,30 +156,28 @@ class CodeMirrorModel implements CodeEditor.IModel {
   }
 
   /**
+   * Handle value changes.
+   */
+  private _onValueChanged(value: IObservableString, change: ObservableString.IChangedArgs): void {
+    // TODO
+  }
+
+  /**
    * Handles document changes.
    */
   protected _onDocChange(doc: CodeMirror.Doc, change: CodeMirror.EditorChange) {
-    const oldValue = this._value;
-    const newValue = this.value;
-    if (oldValue !== newValue) {
-      this._value = newValue;
-      this.valueChanged.emit({
-        name: 'value',
-        oldValue,
-        newValue
-      });
-    }
+    // TODO
   }
 
   private _mimetype = '';
-  /**
-   * A snapshot of a document value before the change, see `_onDocChange`
-   */
-  private _value: string;
+  private _value = new ObservableString();
   private _isDisposed = false;
   private _doc: CodeMirror.Doc;
+  private _selections = new CodeEditor.Selections();
 }
 
 
-defineSignal(CodeMirrorModel.prototype, 'valueChanged');
+/**
+ * The signals for the `CodeMirrorModel` class.
+ */
 defineSignal(CodeMirrorModel.prototype, 'mimeTypeChanged');

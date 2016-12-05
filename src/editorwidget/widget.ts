@@ -25,6 +25,7 @@ import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
+
 /**
  * The class name added to a dirty widget.
  */
@@ -69,15 +70,15 @@ class EditorWidget extends CodeEditorWidget {
     this._context = context;
     let model = context.model;
     let editor = this.editor;
-
+    let value = editor.model.value;
 
     // Prevent the initial loading from disk from being in the editor history.
     context.ready.then( () => {
-      editor.model.value = model.toString();
+      value.text = model.toString();
       editor.model.clearHistory();
     });
 
-    editor.model.value = model.toString();
+    value.text = model.toString();
 
     this.title.label = context.path.split('/').pop();
     model.stateChanged.connect((m, args) => {
@@ -90,14 +91,14 @@ class EditorWidget extends CodeEditorWidget {
       }
     });
     model.contentChanged.connect(() => {
-      let old = editor.model.value;
+      let old = value.text;
       let text = model.toString();
       if (old !== text) {
-        editor.model.value = text;
+        value.text = text;
       }
     });
-    this.editor.model.valueChanged.connect((sender, args) => {
-      model.fromString(args.newValue);
+    this.editor.model.value.changed.connect((sender, args) => {
+      model.fromString(value.text);
     });
     editor.model.mimeType = editorMimeTypeService.getMimeTypeByFilePath(context.path);
     context.pathChanged.connect((c, path) => {

@@ -14,7 +14,7 @@ import {
 } from '../common/interfaces';
 
 import {
-  ObservableString
+  IObservableString
 } from '../common/observablestring';
 
 /**
@@ -320,7 +320,7 @@ namespace CodeEditor {
     /**
      * The text stored in the model.
      */
-    value: ObservableString;
+    value: IObservableString;
 
     /**
      * A mime type of the model.

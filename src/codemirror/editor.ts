@@ -20,6 +20,7 @@ import {
   CodeMirrorModel
 } from './model';
 
+
 /**
  * The class name added to CodeMirrorWidget instances.
  */
@@ -31,12 +32,12 @@ const EDITOR_CLASS = 'jp-CodeMirrorWidget';
 export
 const DEFAULT_CODEMIRROR_THEME = 'jupyter';
 
+
 /**
  * CodeMirror editor.
  */
 export
 class CodeMirrorEditor implements CodeEditor.IEditor {
-
   /**
    * The uuid of this editor;
    */
@@ -88,8 +89,8 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       return;
     }
     this._isDisposed = true;
-    // FIXME: dispose selections
     this._editor = null;
+    this._model.dispose();
   }
 
   /**
@@ -419,6 +420,7 @@ namespace CodeMirrorEditor {
      * The uuid of an editor.
      */
     readonly uuid: string;
+
     /**
      * A selection style.
      */
