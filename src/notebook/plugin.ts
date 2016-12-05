@@ -14,6 +14,10 @@ import {
 } from '../clipboard';
 
 import {
+  IEditorServices
+} from '../codeeditor';
+
+import {
   ICommandPalette
 } from '../commandpalette';
 
@@ -48,7 +52,7 @@ import {
 
 import {
   INotebookTracker, NotebookModelFactory, NotebookPanel, NotebookTracker,
-  NotebookWidgetFactory, NotebookActions
+  NotebookWidgetFactory, NotebookActions, Notebook
 } from './index';
 
 
@@ -130,7 +134,7 @@ const plugin: JupyterLabPlugin<INotebookTracker> = {
     IMainMenu,
     ICommandPalette,
     IInspector,
-    NotebookPanel.IRenderer,
+    IEditorServices,
     IStateDB,
     ILayoutRestorer
   ],
@@ -142,7 +146,11 @@ const plugin: JupyterLabPlugin<INotebookTracker> = {
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector, renderer: NotebookPanel.IRenderer, state: IStateDB, layout: ILayoutRestorer): INotebookTracker {
+function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector, editorServices: IEditorServices, state: IStateDB, layout: ILayoutRestorer): INotebookTracker {
+
+  const notebookRenderer = new Notebook.Renderer({ editorServices });
+  const renderer = new NotebookPanel.Renderer({ notebookRenderer });
+
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
     fileExtensions: ['.ipynb'],

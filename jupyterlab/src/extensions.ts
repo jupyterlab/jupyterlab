@@ -25,7 +25,6 @@ module.exports = [
   require('../../lib/mainmenu/plugin').plugin,
   require('../../lib/markdownwidget/plugin').plugin,
   require('../../lib/notebook/plugin').plugin,
-  require('../../lib/notebook/codemirror/plugin').plugin,
   require('../../lib/rendermime/plugin').plugin,
   require('../../lib/running/plugin').plugin,
   require('../../lib/services/plugin').plugin,

@@ -474,12 +474,4 @@ export namespace NotebookPanel {
       readonly notebookRenderer: Notebook.Renderer;
     }
   }
-
-  /* tslint:disable */
-  /**
-   * The notebook renderer token.
-   */
-  export
-  const IRenderer = new Token<IRenderer>('jupyter.services.notebook.renderer');
-  /* tslint:enable */
 }
