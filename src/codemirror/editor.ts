@@ -58,7 +58,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   constructor(host: HTMLElement, options: CodeMirrorEditor.IOptions) {
     host.classList.add(EDITOR_CLASS);
     this.uuid = this.uuid;
-    this.selectionStyle = this.selectionStyle;
+    this.selectionStyle = options.selectionStyle;
 
     this._model = new CodeMirrorModel();
 
@@ -245,7 +245,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   getSelections(): CodeEditor.ITextSelection[] {
     const selections = this._model.doc.listSelections();
     if (selections.length > 0) {
-      return this._model.doc.listSelections().map(selection => this.toSelection(selection));
+      return selections.map(selection => this.toSelection(selection));
     }
     const cursor = this._model.doc.getCursor();
     const selection = this.toSelection({ anchor: cursor, head: cursor });
@@ -334,7 +334,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
-   * Converts a code mirror selectio to an editor selection.
+   * Converts a code mirror selection to an editor selection.
    */
   protected toSelection(selection: CodeMirror.Selection): CodeEditor.ITextSelection {
     return {
