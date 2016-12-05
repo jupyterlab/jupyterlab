@@ -89,8 +89,9 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       return;
     }
     this._isDisposed = true;
-    this._editor = null;
     this._model.dispose();
+    this._model = null;
+    this._editor = null;
   }
 
   /**

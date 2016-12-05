@@ -388,8 +388,8 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
     switch (args.name) {
     case 'source':
       let editorModel = this.editor.model;
-      if (editorModel.value !== args.newValue) {
-        editorModel.value = args.newValue;
+      if (editorModel.value.text !== args.newValue) {
+        editorModel.value.text = args.newValue;
       }
       break;
     default:

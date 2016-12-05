@@ -159,20 +159,37 @@ class CodeMirrorModel implements CodeEditor.IModel {
    * Handle value changes.
    */
   private _onValueChanged(value: IObservableString, change: ObservableString.IChangedArgs): void {
-    // TODO
+    if (this._changeGuard) {
+      return;
+    }
+    let doc = this._doc;
+    switch (change.type) {
+    case 'set':
+      doc.setValue(change.value);
+      break;
+    default:
+      let from = doc.posFromIndex(change.start);
+      let to = doc.posFromIndex(change.end);
+      doc.replaceRange(change.value, from, to);
+    }
   }
 
   /**
    * Handles document changes.
    */
   protected _onDocChange(doc: CodeMirror.Doc, change: CodeMirror.EditorChange) {
-    // TODO
+    if (change.origin !== 'setValue') {
+      this._changeGuard = true;
+      this._value.text = doc.getValue();
+      this._changeGuard = false;
+    }
   }
 
   private _mimetype = '';
   private _value = new ObservableString();
   private _isDisposed = false;
   private _doc: CodeMirror.Doc;
+  private _changeGuard = false;
   private _selections = new CodeEditor.Selections();
 }
 

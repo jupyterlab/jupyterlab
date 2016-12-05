@@ -321,7 +321,7 @@ namespace CodeEditor {
     /**
      * The text stored in the model.
      */
-    value: IObservableString;
+    readonly value: IObservableString;
 
     /**
      * A mime type of the model.
