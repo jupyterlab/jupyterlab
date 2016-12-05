@@ -9,8 +9,7 @@ import {
 /**
  * A module loader instance.
  */
-export
-const loader = new ModuleLoader();
+const _loader = new ModuleLoader();
 
 
 /**
@@ -23,5 +22,9 @@ const loader = new ModuleLoader();
  */
 export
 function define(path: string, callback: ModuleLoader.DefineCallback): void {
-  loader.define.call(loader, path, callback);
+  _loader.define.call(_loader, path, callback);
 }
+
+
+export
+const loader = _loader;
