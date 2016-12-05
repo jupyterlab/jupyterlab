@@ -21,7 +21,7 @@ import {
  * An implementation of the code editor model using code mirror.
  */
 export
-  class CodeMirrorModel implements CodeEditor.IModel {
+class CodeMirrorModel implements CodeEditor.IModel {
 
   /**
    * A signal emitted when a content of the model changed.
@@ -49,6 +49,9 @@ export
     });
   }
 
+  /**
+   * An underying CodeMirror document.
+   */
   get doc(): CodeMirror.Doc {
     return this._doc;
   }
