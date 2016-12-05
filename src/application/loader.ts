@@ -17,8 +17,8 @@ import {
 /**
  * A module loader using semver for dynamic resolution of requires.
  *
- * It is meant to be used in conjunction with the JuptyerLabPlugin
- * for WebPack.
+ * It is meant to be used in conjunction with the JupyterLabPlugin
+ * for WebPack from `@jupyterlab/extension-builder`.
  */
 export
 class ModuleLoader {
@@ -29,8 +29,7 @@ class ModuleLoader {
     // Provide the `require.ensure` function used for code
     // splitting in the WebPack bundles.
     // https://webpack.github.io/docs/code-splitting.html
-    (this.require as any).ensure = this.ensureBundle.bind(this);
-    this._boundRequire = this.require.bind(this);
+    this._boundRequire = this.require.bind(this) as any;
     this._boundRequire.ensure = this.ensureBundle.bind(this);
   }
 
@@ -76,8 +75,9 @@ class ModuleLoader {
     }
 
     // Create a new module (and put it into the cache).
-    let mod: Private.IModule = installed[id] = {
+    let mod: ModuleLoader.IModule = installed[id] = {
       exports: {},
+      require: this._boundRequire,
       id,
       loaded: false
     };
@@ -99,13 +99,15 @@ class ModuleLoader {
    * @param path - The public path of the bundle (e.g. "lab/jupyter.bundle.js").
    *
    * @param callback - The callback invoked when the bundle has loaded.
+   *
+   * @returns A promise that resolves when the bundle is loaded.
    */
   ensureBundle(path: string, callback?: ModuleLoader.EnsureCallback): Promise<void> {
     let bundle = this._getBundle(path);
 
     if (bundle.loaded) {
       if (callback) {
-        callback.call(null, this.require);
+        callback.call(null, this._boundRequire);
       }
       return Promise.resolve(void 0);
     }
@@ -228,7 +230,7 @@ class ModuleLoader {
     let promise = new Promise<void>((resolve, reject) => {
       script.onload = () => {
         while (bundle.callbacks.length) {
-          bundle.callbacks.shift().call(null, this.require.bind(this));
+          bundle.callbacks.shift().call(null, this._boundRequire);
         }
         bundle.loaded = true;
         resolve(void 0);
@@ -274,10 +276,10 @@ class ModuleLoader {
 
   private _registered: { [key: string]: ModuleLoader.DefineCallback } = Object.create(null);
   private _parsed: { [key: string]: Private.IPathInfo } = Object.create(null);
-  private _modules: { [key: string]: Private.IModule } = Object.create(null);
+  private _modules: { [key: string]: ModuleLoader.IModule } = Object.create(null);
   private _bundles: { [key: string]: Private.IBundle } = Object.create(null);
   private _matches: { [key: string]: string } = Object.create(null);
-  private _boundRequire: any;
+  private _boundRequire: ModuleLoader.IRequire;
 }
 
 
@@ -287,36 +289,23 @@ class ModuleLoader {
 export
 namespace ModuleLoader {
   /**
-   * The interface for a node require function.
+   * The interface for the require function.
    */
   export
-  interface NodeRequireFunction {
-    (id: string): any;
+  interface IRequire {
+    (path: string): any;
+    ensure(path: string, callback?: EnsureCallback): Promise<void>;
   }
 
   /**
-   * The interface for the node require function.
+   * The interface for a module.
    */
   export
-  interface NodeRequire extends NodeRequireFunction {
-    resolve(id: string): string;
-    cache: any;
-    extensions: any;
-    main: NodeModule | undefined;
-  }
-
-  /**
-   * The interface fore a node require module.
-   */
-  export
-  interface NodeModule {
+  interface IModule {
     exports: any;
-    require: NodeRequireFunction;
+    require: IRequire;
     id: string;
-    filename: string;
     loaded: boolean;
-    parent: NodeModule | null;
-    children: NodeModule[];
   }
 
   /**
@@ -324,13 +313,13 @@ namespace ModuleLoader {
    * and a require function.
    */
   export
-  type DefineCallback = (module: any, exports: any, require: NodeRequire) => void;
+  type DefineCallback = (module: IModule, exports: any, require: IRequire) => void;
 
   /**
    * A callback for an ensure function that takes a require function.
    */
   export
-  type EnsureCallback = (require: NodeRequire) => void;
+  type EnsureCallback = (require: IRequire) => void;
 }
 
 
@@ -338,27 +327,6 @@ namespace ModuleLoader {
  * A namespace for private module data.
  */
 namespace Private {
-  /**
-   * A module record.
-   */
-  export
-  interface IModule {
-    /**
-     * The exports of the module.
-     */
-    exports: any;
-
-    /**
-     * The id of the module.
-     */
-    id: string;
-
-    /**
-     * Whether the module has been loaded.
-     */
-    loaded: boolean;
-  }
-
   /**
    * A bundle record.
    */
