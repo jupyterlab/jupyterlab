@@ -12,7 +12,11 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  CodeEditorWidget
+  simulate
+} from 'simulate-event';
+
+import {
+  CodeEditor, CodeEditorWidget
 } from '../../../lib/codeeditor';
 
 import {
@@ -20,9 +24,31 @@ import {
 } from '../../../lib/codemirror';
 
 
+class LogEditor extends CodeMirrorEditor {
+
+  methods: string[] = [];
+
+  refresh(): void {
+    super.refresh();
+    this.methods.push('refresh');
+  }
+
+  setSize(dims: CodeEditor.IDimension | null): void {
+    super.setSize(dims);
+    this.methods.push('setSize');
+  }
+}
+
+
 class LogWidget extends CodeEditorWidget {
 
   methods: string[] = [];
+  events: string[] = [];
+
+  handleEvent(event: Event): void {
+    super.handleEvent(event);
+    this.events.push(event.type);
+  }
 
   protected onActivateRequest(msg: Message): void {
     super.onActivateRequest(msg);
@@ -55,7 +81,7 @@ describe('CodeEditorWidget', () => {
 
   let widget: LogWidget;
   let editorFactory = (host: Widget) => {
-    return new CodeMirrorEditor(host.node, { uuid: 'foo' });
+    return new LogEditor(host.node, { uuid: 'foo' });
   };
 
   beforeEach(() => {
@@ -94,11 +120,31 @@ describe('CodeEditorWidget', () => {
 
   });
 
+  describe('#handleEvent()', () => {
+
+    context('focus', () => {
+
+      it('should refresh the editor', () => {
+        Widget.attach(widget, document.body);
+        widget.methods = [];
+        widget.editor.focus();
+        widget.node.tabIndex = -1;
+        simulate(widget.node, 'focus');
+        expect(widget.events).to.contain('focus');
+        let editor = widget.editor as LogEditor;
+        expect(editor.methods).to.contain('refresh');
+      });
+
+    });
+
+  });
+
   describe('#onActivateRequest()', () => {
 
     it('should focus the editor', () => {
       Widget.attach(widget, document.body);
       sendMessage(widget, WidgetMessage.ActivateRequest);
+      expect(widget.methods).to.contain('onActivateRequest');
       expect(widget.editor.hasFocus()).to.be(true);
     });
 
@@ -106,24 +152,71 @@ describe('CodeEditorWidget', () => {
 
   describe('#onAfterAttach()', () => {
 
+    it('should add a focus listener', () => {
+      Widget.attach(widget, document.body);
+      expect(widget.methods).to.contain('onAfterAttach');
+      widget.node.tabIndex = -1;
+      simulate(widget.node, 'focus');
+      expect(widget.events).to.contain('focus');
+    });
+
+    it('should refresh the editor', () => {
+      Widget.attach(widget, document.body);
+      let editor = widget.editor as LogEditor;
+      expect(editor.methods).to.contain('refresh');
+    });
+
   });
 
   describe('#onBeforeDetach()', () => {
+
+    it('should remove the focus listener', () => {
+      Widget.attach(widget, document.body);
+      Widget.detach(widget);
+      expect(widget.methods).to.contain('onBeforeDetach');
+      widget.node.tabIndex = -1;
+      simulate(widget.node, 'focus');
+      expect(widget.events).to.not.contain('focus');
+    });
 
   });
 
   describe('#onAfterShow()', () => {
 
+    it('should refresh the editor', () => {
+      widget.hide();
+      Widget.attach(widget, document.body);
+      let editor = widget.editor as LogEditor;
+      expect(editor.methods).to.not.contain('refresh');
+      widget.show();
+      expect(widget.methods).to.contain('onAfterShow');
+      expect(editor.methods).to.contain('refresh');
+    });
+
   });
 
   describe('#onResize()', () => {
 
-  });
+    it('should set the size of the editor', () => {
+      let msg = new ResizeMessage(10, 10);
+      let editor = widget.editor as LogEditor;
+      sendMessage(widget, msg);
+      expect(editor.methods).to.contain('setSize');
+    });
 
-  describe('#handleEvent()', () => {
+    it('should set the size of the editor', () => {
+      let editor = widget.editor as LogEditor;
+      sendMessage(widget, ResizeMessage.UnknownSize);
+      expect(editor.methods).to.contain('setSize');
+    });
 
-    context('focus', () => {
-
+    it('should make a subsequent request wait', () => {
+      let editor = widget.editor as LogEditor;
+      sendMessage(widget, ResizeMessage.UnknownSize);
+      expect(editor.methods).to.contain('setSize');
+      editor.methods = [];
+      sendMessage(widget, ResizeMessage.UnknownSize);
+      expect(editor.methods).to.not.contain('setSize');
     });
 
   });

@@ -93,10 +93,16 @@ class CodeEditorWidget extends Widget {
   protected onResize(msg: ResizeMessage): void {
     if (msg.width < 0 || msg.height < 0) {
       if (this._resizing === -1) {
+        this._editor.setSize(null);
         this._resizing = setTimeout(() => {
-          this._editor.setSize(null);
+          if (this._needsResize) {
+            this._editor.setSize(null);
+            this._needsResize = false;
+          }
           this._resizing = -1;
         }, 500);
+      } else {
+        this._needsResize = true;
       }
     } else {
       this._editor.setSize(msg);
@@ -136,5 +142,6 @@ class CodeEditorWidget extends Widget {
 
   private _editor: CodeEditor.IEditor = null;
   private _needsRefresh = true;
+  private _needsResize = false;
   private _resizing = -1;
 }
