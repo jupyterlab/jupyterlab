@@ -17,6 +17,7 @@ import {
   IObservableString
 } from '../common/observablestring';
 
+
 /**
  * A namespace for code editors.
  *
