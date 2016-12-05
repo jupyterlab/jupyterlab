@@ -247,6 +247,7 @@ namespace CodeEditor {
         return;
       }
       this._selections = {};
+      this._isDisposed = true;
       clearSignalData(this);
     }
 
