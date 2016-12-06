@@ -351,8 +351,6 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     panel.title.caption = Private.caption(captionOptions);
     panel.title.icon = `${LANDSCAPE_ICON_CLASS} ${CONSOLE_ICON_CLASS}`;
     panel.title.closable = true;
-    app.shell.addToMainArea(panel);
-    app.shell.activateMain(panel.id);
     // Update the caption of the tab with the last execution time.
     panel.content.executed.connect((sender, executed) => {
       captionOptions.executed = executed;
@@ -371,6 +369,8 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     inspector.source = panel.content.inspectionHandler;
     // Add the console panel to the tracker.
     tracker.add(panel);
+    app.shell.addToMainArea(panel);
+    app.shell.activateMain(panel.id);
   }
 
   command = 'console:switch-kernel';
