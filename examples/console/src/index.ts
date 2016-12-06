@@ -26,12 +26,12 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  ConsolePanel
-} from 'jupyterlab/lib/console';
+  editorServices
+} from 'jupyterlab/lib/codemirror';
 
 import {
-  createRenderer
-} from 'jupyterlab/lib/console/codemirror';
+  ConsolePanel, ConsoleContent
+} from 'jupyterlab/lib/console';
 
 import {
   RenderMime
@@ -107,7 +107,7 @@ function startApp(session: Session.ISession) {
   }
   let sanitizer = defaultSanitizer;
   let rendermime = new RenderMime({ renderers, order, sanitizer });
-  let renderer = createRenderer();
+  let renderer = new ConsoleContent.Renderer({ editorServices });
 
   let consolePanel = new ConsolePanel({ session, renderer, rendermime });
   consolePanel.title.label = TITLE;

@@ -31,7 +31,7 @@ import {
 } from '../mainmenu';
 
 import {
-  CodeMirrorEditorFactory, CodeMirrorMimeTypeService, CodeMirrorEditor, DEFAULT_CODEMIRROR_THEME
+  editorServices, CodeMirrorEditor, DEFAULT_CODEMIRROR_THEME
 } from '.';
 
 
@@ -39,14 +39,10 @@ import {
  * The editor services.
  */
 export
-const editorServices: JupyterLabPlugin<IEditorServices> = {
+const servicesPlugin: JupyterLabPlugin<IEditorServices> = {
   id: IEditorServices.name,
   provides: IEditorServices,
-  activate: (): IEditorServices => {
-    const factory = new CodeMirrorEditorFactory();
-    const mimeTypeService = new CodeMirrorMimeTypeService();
-    return { factory, mimeTypeService };
-  }
+  activate: (): IEditorServices => editorServices
 };
 
 
@@ -54,7 +50,7 @@ const editorServices: JupyterLabPlugin<IEditorServices> = {
  * The editor commands.
  */
 export
-const editorCommands: JupyterLabPlugin<void> = {
+const commandsPlugin: JupyterLabPlugin<void> = {
   id: 'jupyter.services.editor-commands',
   requires: [IEditorTracker, IMainMenu, ICommandPalette],
   activate: activateEditorCommands,
