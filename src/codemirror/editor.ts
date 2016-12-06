@@ -67,7 +67,9 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     options.value = this._model.doc;
     this._editor = CodeMirror(host, options);
 
-    this._model.mimeTypeChanged.connect((model, args) => this._onMimeTypeChanged(model, args));
+    this._onMimeTypeChanged();
+    // TODO: handle initial selections.
+    this._model.mimeTypeChanged.connect(() => this._onMimeTypeChanged());
     this._model.selections.changed.connect((selections, args) => this._onSelectionsChanged(selections, args));
 
     CodeMirror.on(this.editor, 'keydown', (editor, event) => this._onKeyDown(editor, event));
@@ -278,9 +280,12 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Handles a mime type change.
    */
-  protected _onMimeTypeChanged(model: CodeMirrorModel, args: IChangedArgs<string>): void {
-      const mime = args.newValue;
-      loadModeByMIME(this._editor, mime);
+  protected _onMimeTypeChanged(): void {
+    const mime = this._model.mimeType;
+    loadModeByMIME(this._editor, mime);
+    let isCode = (mime !== 'text/plain') && (mime !== 'text/x-ipythongfm');
+    this.editor.setOption('matchBrackets', isCode);
+    this.editor.setOption('autoCloseBrackets', isCode);
   }
 
   /**
