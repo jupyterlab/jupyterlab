@@ -22,16 +22,16 @@ import {
 } from '../../../../lib/notebook/cells';
 
 import {
-  createBaseCellRenderer, createCodeCellRenderer, createCellEditor
-} from '../../../../lib/notebook/codemirror';
-
-import {
   OutputAreaWidget
 } from '../../../../lib/notebook/output-area';
 
 import {
   defaultRenderMime
 } from '../../utils';
+
+import {
+  createBaseCellRenderer, createCodeCellRenderer, createCellEditor
+} from '../utils';
 
 
 const RENDERED_CLASS = 'jp-mod-rendered';

@@ -32,7 +32,7 @@ import {
 
 import {
   createCellEditor
-} from '../../../../lib/notebook/codemirror';
+} from '../utils';
 
 
 const UP_ARROW = 38;
