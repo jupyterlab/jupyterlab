@@ -19,6 +19,49 @@
 @import url('~codemirror/theme/xq-light.css');
 
 
+.CodeMirror {
+  line-height: var(--jp-code-line-height);
+  font-size: var(--jp-code-font-size);
+  height: auto;
+  /* Changed to auto to autogrow */
+  background: none;
+}
+
+
+.CodeMirror pre {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+
+/* This causes https://github.com/jupyter/jupyterlab/issues/522 */
+/* May not cause it not because we changed it! */
+.CodeMirror-lines {
+  padding: var(--jp-code-padding);
+}
+
+
+.CodeMirror-linenumbers {
+  padding: 0 4px 0 4px;
+}
+
+
+.jp-CodeMirrorWidget-static {
+  margin: var(--jp-code-padding);
+}
+
+
+.jp-CodeMirrorWidget, .jp-CodeMirrorWidget-static {
+  cursor: text;
+}
+
+
+.jp-CodeMirrorWidget.jp-mod-readOnly .CodeMirror-cursor {
+  display: none;
+}
+
+
 /*
   Here is our jupyter theme for CodeMirror syntax highlighting
   This is used in our marked.js syntax highlighting and CodeMirror itself
@@ -34,8 +77,8 @@
 .cm-s-jupyter span.cm-variable     { color: --md-grey-900 }
 .cm-s-jupyter span.cm-variable-2   { color: --md-grey-800 }
 .cm-s-jupyter span.cm-variable-3   { color: --md-grey-700 }
-.cm-s-jupyter span.cm-punctuation  {  }
-.cm-s-jupyter span.cm-property     {  }
+.cm-s-jupyter span.cm-punctuation  { color: #05a; }
+.cm-s-jupyter span.cm-property     { color: #05a; }
 .cm-s-jupyter span.cm-operator     { color: #AA22FF; font-weight: bold; }
 .cm-s-jupyter span.cm-comment      { color: #408080; font-style: italic; }
 .cm-s-jupyter span.cm-string       { color: #BA2121; }
