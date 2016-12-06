@@ -332,6 +332,7 @@ class CreateFromHandler extends Widget {
         { specs, sessions, preferredKernel, preference }
       );
     } else {
+      this.node.removeChild(this.kernelDropdownNode.previousSibling);
       this.node.removeChild(this.kernelDropdownNode);
     }
 
@@ -581,11 +582,20 @@ namespace Private {
   export
   function createOpenWithNode(): HTMLElement {
     let body = document.createElement('div');
-    let name = document.createElement('span');
+    let nameTitle = document.createElement('label');
+    nameTitle.textContent = 'File Name';
+    let name = document.createElement('div');
+    let widgetTitle = document.createElement('label');
+    widgetTitle.textContent = 'Widget Type';
     let widgetDropdown = document.createElement('select');
+    let kernelTitle = document.createElement('label');
+    kernelTitle.textContent = 'Kernel';
     let kernelDropdownNode = document.createElement('select');
+    body.appendChild(nameTitle);
     body.appendChild(name);
+    body.appendChild(widgetTitle);
     body.appendChild(widgetDropdown);
+    body.appendChild(kernelTitle);
     body.appendChild(kernelDropdownNode);
     return body;
   }
@@ -596,13 +606,25 @@ namespace Private {
   export
   function createCreateNewNode(): HTMLElement {
     let body = document.createElement('div');
+    let nameTitle = document.createElement('label');
+    nameTitle.textContent = 'File Name';
     let name = document.createElement('input');
+    let typeTitle = document.createElement('label');
+    typeTitle.textContent = 'File Type';
     let fileTypeDropdown = document.createElement('select');
+    let widgetTitle = document.createElement('label');
+    widgetTitle.textContent = 'Widget Type';
     let widgetDropdown = document.createElement('select');
+    let kernelTitle = document.createElement('label');
+    kernelTitle.textContent = 'Kernel';
     let kernelDropdownNode = document.createElement('select');
+    body.appendChild(nameTitle);
     body.appendChild(name);
+    body.appendChild(typeTitle);
     body.appendChild(fileTypeDropdown);
+    body.appendChild(widgetTitle);
     body.appendChild(widgetDropdown);
+    body.appendChild(kernelTitle);
     body.appendChild(kernelDropdownNode);
     return body;
   }
@@ -613,9 +635,15 @@ namespace Private {
   export
   function createCreateFromNode(): HTMLElement {
     let body = document.createElement('div');
+    let nameTitle = document.createElement('label');
+    nameTitle.textContent = 'File Name';
     let name = document.createElement('input');
+    let kernelTitle = document.createElement('label');
+    kernelTitle.textContent = 'Kernel';
     let kernelDropdownNode = document.createElement('select');
+    body.appendChild(nameTitle);
     body.appendChild(name);
+    body.appendChild(kernelTitle);
     body.appendChild(kernelDropdownNode);
     return body;
   }
