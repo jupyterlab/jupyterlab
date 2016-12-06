@@ -175,7 +175,7 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
    * Repaint editor.
    */
   refresh(): void {
-    setTimeout(() => this.autoresize());
+    this.autoresize();
   }
 
   /**
