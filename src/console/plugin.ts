@@ -74,7 +74,7 @@ import {
  * The console widget tracker provider.
  */
 export
-const plugin: JupyterLabPlugin<IConsoleTracker> = {
+const trackerPlugin: JupyterLabPlugin<IConsoleTracker> = {
   id: 'jupyter.services.console-tracker',
   provides: IConsoleTracker,
   requires: [
@@ -84,12 +84,27 @@ const plugin: JupyterLabPlugin<IConsoleTracker> = {
     IInspector,
     ICommandPalette,
     IPathTracker,
-    IEditorServices,
+    ConsoleContent.IRenderer,
     IStateDB,
     ILayoutRestorer
   ],
   activate: activateConsole,
   autoStart: true
+};
+
+
+/**
+ * The console widget renderer.
+ */
+export
+const rendererPlugin: JupyterLabPlugin<ConsoleContent.IRenderer> = {
+  id: 'jupyter.services.console-renderer',
+  provides: ConsoleContent.IRenderer,
+  requires: [IEditorServices],
+  autoStart: true,
+  activate: (app: JupyterLab, editorServices: IEditorServices) => {
+    return new ConsoleContent.Renderer({ editorServices });
+  }
 };
 
 
@@ -123,14 +138,13 @@ interface ICreateConsoleArgs extends JSONObject {
 /**
  * Activate the console extension.
  */
-function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, editorServices: IEditorServices, state: IStateDB, layout: ILayoutRestorer): IConsoleTracker {
+function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, renderer: ConsoleContent.IRenderer, state: IStateDB, layout: ILayoutRestorer): IConsoleTracker {
   let manager = services.sessions;
 
   let { commands, keymap } = app;
   let category = 'Console';
   let command: string;
   let menu = new Menu({ commands, keymap });
-  let renderer = new ConsoleContent.Renderer({ editorServices });
 
   // Create an instance tracker for all console panels.
   const tracker = new InstanceTracker<ConsolePanel>({
