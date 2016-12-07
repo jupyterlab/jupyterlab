@@ -257,7 +257,8 @@ def uninstall_labextension_python(module,
 
 
 def _set_labextension_state(name, state,
-                           user=True, sys_prefix=False, logger=None):
+                           user=True, sys_prefix=False, logger=None,
+                           python_module=None):
     """Set whether the JupyterLab frontend should use the named labextension
 
     Returns True if the final state is the one requested.
@@ -273,24 +274,31 @@ def _set_labextension_state(name, state,
         Whether to update the sys.prefix, i.e. environment. Will override
         `user`.
     logger : Jupyter logger [optional]
-        Logger instance to use
+        Logger instance to use [optional]
+    python_module: string
+        The name of the python module associated with the extension.
     """
     user = False if sys_prefix else user
     config_dir = os.path.join(
-        _get_config_dir(user=user, sys_prefix=sys_prefix), 'labconfig')
+        _get_config_dir(user=user, sys_prefix=sys_prefix))
     cm = BaseJSONConfigManager(config_dir=config_dir)
     if logger:
         logger.info("{} extension {}...".format(
             "Enabling" if state else "Disabling",
             name
         ))
-    cfg = cm.get("jupyterlab_config")
+    cfg = cm.get("jupyter_notebook_config")
     labextensions = (
         cfg.setdefault("LabApp", {})
         .setdefault("labextensions", {})
     )
 
-    old_enabled = labextensions.get(name, None)
+    old_state = labextensions.get(name, None)
+    if old_state is None:
+        old_state = dict(enabled=False)
+    elif isinstance(old_state, bool):
+        old_state = dict(enabled=old_state)
+    old_enabled = old_state['enabled']
     new_enabled = state if state is not None else not old_enabled
 
     if logger:
@@ -299,12 +307,15 @@ def _set_labextension_state(name, state,
         else:
             logger.info(u"Disabling: %s" % (name))
 
-    labextensions[name] = new_enabled
+    labextensions[name] = dict(
+        enabled=new_enabled,
+        python_module=python_module
+    )
 
     if logger:
         logger.info(u"- Writing config: {}".format(config_dir))
 
-    cm.update("jupyterlab_config", cfg)
+    cm.update("jupyter_notebook_config", cfg)
 
     if new_enabled:
         full_dest = find_labextension(name)
@@ -436,6 +447,7 @@ def disable_labextension_python(module, user=True, sys_prefix=False,
     """
     return _set_labextension_state_python(False, module, user, sys_prefix,
                                          logger=logger)
+
 
 def find_labextension(name):
     """Find a labextension path
@@ -873,7 +885,10 @@ class ListLabExtensionsApp(BaseLabExtensionApp):
             )
             if labextensions:
                 print(u'config dir: {}'.format(config_dir))
-            for name, enabled in sorted(labextensions.items()):
+            for name, config in sorted(labextensions.items()):
+                if isinstance(config, bool):
+                    config = dict(enabled=config)
+                enabled = config['enabled']
                 full_dest = find_labextension(name)
                 print(u'    {} {}: {}'.format(
                               name,

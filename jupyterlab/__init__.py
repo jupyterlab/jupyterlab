@@ -10,7 +10,8 @@ from tornado import web
 from notebook.base.handlers import IPythonHandler, FileFindHandler
 from jinja2 import FileSystemLoader
 from notebook.utils import url_path_join as ujoin
-
+from traitlets.config.manager import BaseJSONConfigManager
+from jupyter_core.paths import jupyter_config_path
 
 try:
     from ._version import __version__
@@ -91,8 +92,23 @@ class LabHandler(IPythonHandler):
             if os.path.isfile(os.path.join(BUILT_FILES, css_file)):
                 css_files.append(ujoin(static_prefix, css_file))
 
+        config = dict(
+            static_prefix=static_prefix,
+            page_title='JupyterLab Alpha Preview',
+            terminals_available=self.settings['terminals_available'],
+            mathjax_url=self.mathjax_url,
+            jupyterlab_main=main,
+            jupyterlab_css=css_files,
+            jupyterlab_bundles=bundles,
+            plugin_entries=entries,
+            mathjax_config='TeX-AMS_HTML-full,Safe',
+            #mathjax_config=self.mathjax_config # for the next release of the notebook
+        )
+
         # Gather the lab extension files and entry points.
-        for name in labextensions:
+        for (name, value) in labextensions.items():
+            if not value['enabled']:
+                continue
             data = get_labextension_manifest_data_by_name(name)
             if data is None:
                 self.log.warn('Could not locate extension: ' + name)
@@ -108,22 +124,20 @@ class LabHandler(IPythonHandler):
                         css_files.append('%s/%s/%s' % (
                             EXTENSION_PREFIX, name, fname
                         ))
+            python_module = value['python_module']
+            from .labextensions import get_labextension_config_python
+            if python_module:
+                try:
+                    value = get_labextension_config_python(python_module)
+                    config.update(value)
+                except Exception as e:
+                    self.log.error(e)
 
-        self.write(self.render_template('lab.html',
-            static_prefix=static_prefix,
-            page_title='JupyterLab Alpha Preview',
-            terminals_available=self.settings['terminals_available'],
-            mathjax_url=self.mathjax_url,
-            jupyterlab_main=main,
-            jupyterlab_css=css_files,
-            jupyterlab_bundles=bundles,
-            plugin_entries=entries,
-            mathjax_config='TeX-AMS_HTML-full,Safe',
-            #mathjax_config=self.mathjax_config # for the next release of the notebook
-        ))
+        self.write(self.render_template('lab.html', **config))
 
     def get_template(self, name):
         return FILE_LOADER.load(self.settings['jinja2_env'], name)
+
 
 #-----------------------------------------------------------------------------
 # URL to handler mappings
@@ -144,7 +158,14 @@ def _jupyter_server_extension_paths():
 
 def load_jupyter_server_extension(nbapp):
     from jupyter_core.paths import jupyter_path
-    from .labapp import get_labextensions
+    from .labapp import LabApp
+
+    if not isinstance(nbapp, LabApp):
+        labapp = LabApp()
+        labapp.load_config_file()
+        labextensions = labapp.labextensions
+    else:
+        labextensions = nbapp.labextensions
 
     base_dir = os.path.realpath(os.path.join(HERE, '..'))
     dev_mode = os.path.exists(os.path.join(base_dir, '.git'))
@@ -152,7 +173,8 @@ def load_jupyter_server_extension(nbapp):
         nbapp.log.info(DEV_NOTE_NPM)
     nbapp.log.info('JupyterLab alpha preview extension loaded from %s' % HERE)
     webapp = nbapp.web_app
-    webapp.labextensions = get_labextensions(parent=nbapp)
+    webapp.labextensions = labextensions
+
     base_url = webapp.settings['base_url']
     webapp.add_handlers(".*$",
         [(ujoin(base_url, h[0]),) + h[1:] for h in default_handlers])

@@ -8,32 +8,12 @@
 import os
 from jupyter_core.paths import jupyter_config_path, jupyter_path
 from notebook.notebookapp import NotebookApp
-from traitlets import List, Unicode, default
+from traitlets import List, Dict, Unicode, default
 from traitlets.config.manager import BaseJSONConfigManager
 
 from .labextensions import find_labextension, validate_labextension_folder
 
 from ._version import __version__
-
-
-def get_labextensions(parent=None):
-    """Get the list of enabled and valid lab extensions"""
-    extensions = []
-    config_dirs = [os.path.join(p, 'labconfig') for p in
-                   jupyter_config_path()]
-    for config_dir in config_dirs:
-        cm = BaseJSONConfigManager(parent=parent, config_dir=config_dir)
-        data = cm.get("jupyterlab_config")
-        labextensions = (
-            data.setdefault("LabApp", {})
-            .setdefault("labextensions", {})
-        )
-        for name, enabled in labextensions.items():
-            if enabled:
-                warnings = validate_labextension_folder(name, find_labextension(name))
-                if not warnings:
-                    extensions.append(name)
-    return extensions
 
 
 class LabApp(NotebookApp):
@@ -57,24 +37,7 @@ class LabApp(NotebookApp):
         help="The default URL to redirect to from `/`"
     )
 
-    extra_labextensions_path = List(Unicode(), config=True,
-        help="""extra paths to look for JupyterLab extensions"""
-    )
-    
-    labextensions = List(Unicode())
-    
-    @default('labextensions')
-    def _labextensions_default(self):
-        return get_labextensions(parent=self)
-
-    @property
-    def labextensions_path(self):
-        """The path to look for JupyterLab extensions"""
-        return self.extra_labextensions_path + jupyter_path('labextensions')
-
-    def init_webapp(self):
-        super(LabApp, self).init_webapp()
-        self.web_app.labextensions = self.labextensions
+    labextensions = Dict({}, config=True, help='foo')
 
 #-----------------------------------------------------------------------------
 # Main entry point
