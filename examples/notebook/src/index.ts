@@ -51,11 +51,6 @@ import {
 } from 'jupyterlab/lib/rendermime';
 
 import {
-  HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
-  JavascriptRenderer, SVGRenderer, MarkdownRenderer
-} from 'jupyterlab/lib/renderers';
-
-import {
   defaultSanitizer
 } from 'jupyterlab/lib/sanitizer';
 
@@ -108,15 +103,7 @@ function createApp(manager: ServiceManager.IManager): void {
     keymap.processKeydownEvent(event);
   }, useCapture);
 
-  const transformers = [
-    new JavascriptRenderer(),
-    new MarkdownRenderer(),
-    new HTMLRenderer(),
-    new ImageRenderer(),
-    new SVGRenderer(),
-    new LatexRenderer(),
-    new TextRenderer()
-  ];
+  const transformers = RenderMime.defaultRenderers();
   let renderers: RenderMime.MimeMap<RenderMime.IRenderer> = {};
   let order: string[] = [];
   for (let t of transformers) {
