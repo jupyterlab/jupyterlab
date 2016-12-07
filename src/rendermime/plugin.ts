@@ -6,11 +6,6 @@ import {
 } from '../application';
 
 import {
-  HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
-  JavascriptRenderer, SVGRenderer, MarkdownRenderer, PDFRenderer
-} from '../renderers';
-
-import {
   defaultSanitizer
 } from '../sanitizer';
 
@@ -28,16 +23,7 @@ const plugin: JupyterLabPlugin<IRenderMime> = {
   provides: IRenderMime,
   activate: (): IRenderMime => {
     let sanitizer = defaultSanitizer;
-    const transformers = [
-      new JavascriptRenderer(),
-      new HTMLRenderer(),
-      new MarkdownRenderer(),
-      new LatexRenderer(),
-      new SVGRenderer(),
-      new ImageRenderer(),
-      new PDFRenderer(),
-      new TextRenderer()
-    ];
+    const transformers = RenderMime.defaultRenderers();
     let renderers: RenderMime.MimeMap<RenderMime.IRenderer> = {};
     let order: string[] = [];
     for (let t of transformers) {
