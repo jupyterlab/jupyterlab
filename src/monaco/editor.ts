@@ -286,7 +286,7 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
    * Returns the primary position of the cursor, never `null`.
    */
   getCursorPosition(): CodeEditor.IPosition {
-    return MonacoModel.toPosition(this._editor.getPosition());
+    return this.toValidPosition(this._editor.getPosition());
   };
 
   /**
@@ -316,14 +316,14 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
   getSelections(): CodeEditor.ITextSelection[] {
     const selections = this._editor.getSelections();
     if (selections.length > 0) {
-      return selections.map(selection => this.toSelection(selection));
+      return selections.map(selection => this.toValidSelection(selection));
     }
     const position = this.getCursorPosition();
     const monacoSelection = this.toMonacoSelection({
       start: position,
       end: position
     });
-    const selection = this.toSelection(monacoSelection);
+    const selection = this.toValidSelection(monacoSelection);
     return [selection];
   }
 
@@ -338,18 +338,29 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
   }
 
   /**
+   * Converts a monaco selection to a valid editor selection.
+   * 
+   * #### Notes
+   * A valid selection belongs to the total model range.
+   */
+  protected toValidSelection(selection: monaco.Range): CodeEditor.ITextSelection {
+    const validSelection = this._editor.getModel().validateRange(selection);
+    return this.toSelection(validSelection);
+  }
+
+  /**
    * Converts a monaco selection to an editor selection.
    */
-  protected toSelection(selection: monaco.ISelection): CodeEditor.ITextSelection {
+  protected toSelection(selection: monaco.Range): CodeEditor.ITextSelection {
     return {
       uuid: this.uuid,
       start: {
-        line: selection.selectionStartLineNumber - 1,
-        column: selection.selectionStartColumn - 1
+        line: selection.startLineNumber - 1,
+        column: selection.startColumn - 1
       },
       end: {
-        line: selection.positionLineNumber - 1,
-        column: selection.positionColumn - 1
+        line: selection.endLineNumber - 1,
+        column: selection.endColumn - 1
       },
       style: this.selectionStyle
     };
@@ -372,6 +383,17 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
     const start = MonacoModel.toMonacoPosition(range.start);
     const end = MonacoModel.toMonacoPosition(range.end);
     return new monaco.Selection(start.lineNumber, start.column, end.lineNumber, end.column);
+  }
+
+  /**
+   * Converts a monaco position to a valida code editor position.
+   * 
+   * #### Notes
+   * A valid position belongs to the total model range.
+   */
+  protected toValidPosition(position: monaco.IPosition): CodeEditor.IPosition {
+    const validPosition = this._editor.getModel().validatePosition(position);
+    return MonacoModel.toPosition(validPosition);
   }
 
   /**
