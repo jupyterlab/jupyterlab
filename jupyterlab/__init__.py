@@ -3,15 +3,18 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-import glob
-import json
 import os
 from tornado import web
 from notebook.base.handlers import IPythonHandler, FileFindHandler
 from jinja2 import FileSystemLoader
 from notebook.utils import url_path_join as ujoin
-from traitlets.config.manager import BaseJSONConfigManager
-from jupyter_core.paths import jupyter_config_path
+from jupyter_core.paths import jupyter_path
+
+from .labapp import LabApp
+from .labextensions import (
+    get_labextension_manifest_data_by_name, get_labextension_config_python,
+    get_labextension_manifest_data_by_folder
+)
 
 try:
     from ._version import __version__
@@ -38,28 +41,6 @@ FILE_LOADER = FileSystemLoader(HERE)
 BUILT_FILES = os.path.join(HERE, 'build')
 PREFIX = '/lab'
 EXTENSION_PREFIX = '/labextension'
-
-
-def get_labextension_manifest_data_by_folder(folder):
-    """Get the manifest data for a given lab extension folder
-    """
-    manifest_files = glob.glob(os.path.join(folder, '*.manifest'))
-    manifests = {}
-    for file in manifest_files:
-        with open(file) as fid:
-            manifest = json.load(fid)
-        manifests[manifest['name']] = manifest
-    return manifests
-
-
-def get_labextension_manifest_data_by_name(name):
-    """Get the manifest data for a given lab extension folder
-    """
-    from .labextensions import _labextension_dirs
-    for exts in _labextension_dirs():
-        full_dest = os.path.join(exts, name)
-        if os.path.exists(full_dest):
-            return get_labextension_manifest_data_by_folder(full_dest)
 
 
 class LabHandler(IPythonHandler):
@@ -106,9 +87,12 @@ class LabHandler(IPythonHandler):
         )
 
         # Gather the lab extension files and entry points.
-        for (name, value) in labextensions.items():
-            if not value['enabled']:
+        # Make sure we only load an extension once for each name.
+        seen = set()
+        for (name, value) in sorted(labextensions.items()):
+            if not value['enabled'] or name in seen:
                 continue
+            seen.add(name)
             data = get_labextension_manifest_data_by_name(name)
             if data is None:
                 self.log.warn('Could not locate extension: ' + name)
@@ -124,8 +108,7 @@ class LabHandler(IPythonHandler):
                         css_files.append('%s/%s/%s' % (
                             EXTENSION_PREFIX, name, fname
                         ))
-            python_module = value['python_module']
-            from .labextensions import get_labextension_config_python
+            python_module = value.get('python_module', None)
             if python_module:
                 try:
                     value = get_labextension_config_python(python_module)
@@ -157,9 +140,6 @@ def _jupyter_server_extension_paths():
 
 
 def load_jupyter_server_extension(nbapp):
-    from jupyter_core.paths import jupyter_path
-    from .labapp import LabApp
-
     if not isinstance(nbapp, LabApp):
         labapp = LabApp()
         labapp.load_config_file()

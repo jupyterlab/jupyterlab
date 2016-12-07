@@ -27,7 +27,9 @@ from jupyterlab.labextensions import (install_labextension, check_labextension,
     install_labextension_python, uninstall_labextension_python,
     enable_labextension_python, disable_labextension_python, _get_config_dir,
     find_labextension, validate_labextension_folder,
-    get_labextension_config_python
+    get_labextension_config_python,
+    get_labextension_manifest_data_by_name,
+    get_labextension_manifest_data_by_folder
 )
 
 from traitlets.config.manager import BaseJSONConfigManager
@@ -226,21 +228,22 @@ class TestInstallLabExtension(TestCase):
             touch(src)
             install_labextension(src, self.name, user=True)
             enable_labextension(self.name)
-        
-        config_dir = os.path.join(_get_config_dir(user=True), 'labconfig')
+
+        config_dir = os.path.join(_get_config_dir(user=True))
         cm = BaseJSONConfigManager(config_dir=config_dir)
-        enabled = cm.get('jupyterlab_config').get('LabApp', {}).get('labextensions', {}).get(self.name, False)
-        assert enabled
-    
+        config = cm.get('jupyter_notebook_config').get('LabApp', {}).get('labextensions', {}).get(self.name, {})
+        assert config['enabled'] == True
+        assert 'python_module' not in config
+
     def test_labextension_disable(self):
         self.test_labextension_enable()
         disable_labextension(self.name)
-        
-        config_dir = os.path.join(_get_config_dir(user=True), 'labconfig')
+
+        config_dir = os.path.join(_get_config_dir(user=True))
         cm = BaseJSONConfigManager(config_dir=config_dir)
-        enabled = cm.get('jupyterlab_config').get('LabApp', {}).get('labextensions', {}).get(self.name, False)
-        assert not enabled
-        
+        config = cm.get('jupyter_notebook_config').get('LabApp', {}).get('labextensions', {}).get(self.name, {})
+        assert not config['enabled']
+        assert 'python_module' not in config
 
     def _mock_extension_spec_meta(self):
         return {
@@ -294,10 +297,11 @@ class TestInstallLabExtension(TestCase):
         install_labextension_python('mockextension', user=True)
         enable_labextension_python('mockextension')
         
-        config_dir = os.path.join(_get_config_dir(user=True), 'labconfig')
+        config_dir = os.path.join(_get_config_dir(user=True))
         cm = BaseJSONConfigManager(config_dir=config_dir)
-        enabled = cm.get('jupyterlab_config').get('LabApp', {}).get('labextensions', {}).get('mockextension', False)
-        assert enabled
+        config = cm.get('jupyter_notebook_config').get('LabApp', {}).get('labextensions', {}).get('mockextension', False)
+        assert config['enabled'] == True
+        assert config['python_module'] == 'mockextension'
         
     def test_labextensionpy_disable(self):
         self._inject_mock_extension()
@@ -305,10 +309,10 @@ class TestInstallLabExtension(TestCase):
         enable_labextension_python('mockextension')
         disable_labextension_python('mockextension', user=True)
         
-        config_dir = os.path.join(_get_config_dir(user=True), 'labconfig')
+        config_dir = os.path.join(_get_config_dir(user=True))
         cm = BaseJSONConfigManager(config_dir=config_dir)
-        enabled = cm.get('jupyterlab_config').get('LabApp', {}).get('labextensions', {}).get('mockextension', False)
-        assert not enabled
+        config = cm.get('jupyter_notebook_config').get('LabApp', {}).get('labextensions', {}).get('mockextension', {})
+        assert not config['enabled']
 
     def test_labextensionpy_validate(self):
         self._inject_mock_extension()
@@ -328,3 +332,32 @@ class TestInstallLabExtension(TestCase):
 
         config = get_labextension_config_python('mockextension')
         assert config['mockextension_foo'] == 1
+
+    def test_get_labextension_manifest_data_by_name(self):
+        self._inject_mock_extension()
+
+        install_labextension_python('mockextension', user=True)
+        enable_labextension_python('mockextension')
+
+        manifest = get_labextension_manifest_data_by_name('mockextension')
+        self.check_manifest(manifest)
+
+    def test_get_labextension_manifest_data_by_folder(self):
+        self._inject_mock_extension()
+
+        path = install_labextension_python('mockextension', user=True)[0]
+        enable_labextension_python('mockextension')
+
+        manifest = get_labextension_manifest_data_by_folder(path)
+        self.check_manifest(manifest)
+
+    def check_manifest(self, manifest):
+        assert 'mockextension' in manifest
+        mod = manifest['mockextension']
+        assert mod['name'] == 'mockextension'
+        assert 'jupyterlab/tests/mockextension/index.js' in mod['entry']
+        filename = 'mockextension.bundle.js'
+        assert mod['files'][0] == filename
+        assert mod['id'] == 0
+        assert len(mod['hash']) == 32
+        assert len(mod['modules']) == 1

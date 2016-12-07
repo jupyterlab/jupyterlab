@@ -37,7 +37,13 @@ class LabApp(NotebookApp):
         help="The default URL to redirect to from `/`"
     )
 
-    labextensions = Dict({}, config=True, help='foo')
+    labextensions = Dict({}, config=True,
+        help=('Dict of Python modules to load as lab extensions.'
+            'Each entry consists of a required `enabled` key used'
+            'to enable or disable the extension, and an optional'
+            '`python_module` key for the associated python module.'
+            'Extensions are loaded in alphabetical order')
+    )
 
 #-----------------------------------------------------------------------------
 # Main entry point
