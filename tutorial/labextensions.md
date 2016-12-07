@@ -43,7 +43,7 @@ Here is an an example of creating a Python package with a labextension.  It assu
 ```
 
 Defining the labextension
-This example shows that the labextension defined in the `__init__.py` file. 
+This example shows that the labextension is defined in the `__init__.py` file. 
 The first function, `_jupyter_labextension_paths` is required to register the 
 lab extension.  The `_jupyter_labextension_config` is for extensions that
 require passing dynamic config data to the JupyterLab frontend.
@@ -69,7 +69,7 @@ def _jupyter_labextension_config():
 
   Example in ES6 JavaScript:
   import { utils } from '@jupyterlab/services';
-  let myVar = utils.getConfigOption('my_fancy_module');
+  let myVar = utils.getConfigOption('my_fancy_module_variable');
   """
   return dict(my_fancy_module_variable=1)
 ```
