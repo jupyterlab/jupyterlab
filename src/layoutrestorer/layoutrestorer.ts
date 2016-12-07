@@ -8,6 +8,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  JSONObject
+} from 'phosphor/lib/algorithm/json';
+
+import {
   AttachedProperty
 } from 'phosphor/lib/core/properties';
 
@@ -76,7 +80,7 @@ namespace ILayoutRestorer {
    * Configuration options for adding a widget to a layout restorer.
    */
   export
-  interface IAddOptions {
+  interface IAddOptions extends JSONObject {
     /**
      * The area in the application shell where a given widget will be restored.
      */

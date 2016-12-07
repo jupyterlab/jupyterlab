@@ -129,9 +129,10 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     }
 
     Promise.all(promises).then(([saved]) => {
-      promises = saved.map(args => {
+      promises = saved.map(item => {
+        let args = (item.value as any).data;
         // Execute the command and if it fails, delete the state restore data.
-        return registry.execute(command, args.value)
+        return registry.execute(command, args)
           .catch(() => { state.remove(args.id); });
       });
       return Promise.all(promises);
@@ -194,8 +195,14 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
 
       if (widgetName) {
         let name = `${namespace}:${widgetName}`;
+        let data = this._restore.args(widget);
+        let metadata = options;
+
         Private.nameProperty.set(widget, name);
-        state.save(name, this._restore.args(widget));
+        Private.metadataProperty.set(widget, metadata);
+
+        state.save(name, { data, metadata });
+
         if (layout) {
           layout.add(widget, name, options);
         }
@@ -322,7 +329,10 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     Private.nameProperty.set(widget, newName);
 
     if (newName) {
-      state.save(newName, this._restore.args(widget));
+      let data = this._restore.args(widget);
+      let metadata = Private.metadataProperty.get(widget);
+
+      state.save(newName, { data, metadata });
     }
   }
 
