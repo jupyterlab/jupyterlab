@@ -28,3 +28,48 @@ notebook interface to load it. You can do that with another command:
 
 There is a corresponding ``disable`` command to stop using an
 extension without uninstalling it.
+
+
+## Example 
+Here is an an example of creating a Python package with a labextension.  It assumes this directory structure:
+
+```
+- setup.py
+- MANIFEST.in
+- my_fancy_module/
+  - __init__.py
+  - static/
+    index.js
+```
+
+Defining the labextension
+This example shows that the labextension defined in the `__init__.py` file. 
+The first function, `_jupyter_labextension_paths` is required to register the 
+lab extension.  The `_jupyter_labextension_config` is for extensions that
+require passing dynamic config data to the JupyterLab frontend.
+
+`my_fancy_module/__init__.py`
+
+```python
+# Jupyter Lab Extension paths
+def _jupyter_labextension_paths():
+    return [dict(
+        name="my_fancy_module",
+        # the path is relative to the `my_fancy_module` directory
+        src="static"
+    )]
+
+
+# Jupyter Lab Extension config data.
+def _jupyter_labextension_config():
+  """Get a dictionary of configuration data to provide to the JupyterLab frontend.
+
+  This is called at each launch of the `/lab` page, and makes data available 
+  through the `getConfigOption` [function](http://jupyterlab.github.io/services/globals.html#getconfigoption).
+
+  Example in ES6 JavaScript:
+  import { utils } from '@jupyterlab/services';
+  let myVar = utils.getConfigOption('my_fancy_module');
+  """
+  return dict(my_fancy_module_variable=1)
+```
