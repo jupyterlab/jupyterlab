@@ -26,7 +26,8 @@ from jupyterlab.labextensions import (install_labextension, check_labextension,
     enable_labextension, disable_labextension,
     install_labextension_python, uninstall_labextension_python,
     enable_labextension_python, disable_labextension_python, _get_config_dir,
-    find_labextension, validate_labextension_folder
+    find_labextension, validate_labextension_folder,
+    get_labextension_config_python
 )
 
 from traitlets.config.manager import BaseJSONConfigManager
@@ -258,6 +259,10 @@ class TestInstallLabExtension(TestCase):
             @staticmethod
             def _jupyter_labextension_paths():
                 return [meta]
+
+            @staticmethod
+            def _jupyter_labextension_config():
+                return dict(mockextension_foo=1)
         
         import sys
         sys.modules['mockextension'] = mock
@@ -314,3 +319,12 @@ class TestInstallLabExtension(TestCase):
         meta = self._mock_extension_spec_meta()
         warnings = validate_labextension_folder(meta['name'], paths[0])
         self.assertEqual([], warnings, warnings)
+
+    def test_labextensionpy_config(self):
+        self._inject_mock_extension()
+
+        install_labextension_python('mockextension', user=True)
+        enable_labextension_python('mockextension')
+
+        config = get_labextension_config_python('mockextension')
+        assert config['mockextension_foo'] == 1

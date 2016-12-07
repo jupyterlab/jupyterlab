@@ -534,6 +534,21 @@ def validate_labextension_folder(name, full_dest, logger=None):
     return warnings
 
 
+def get_labextension_config_python(module):
+    """Get the labextension configuration data associated  with a Python module. 
+
+    Parameters
+    -----------
+    module : str
+    Importable Python module exposing the
+    magic-named `_jupyter_labextension_config` function
+    """
+    m = import_item(module)
+    if not hasattr(m, '_jupyter_labextension_config'):
+        return {}
+    return m._jupyter_labextension_config()
+
+
 #----------------------------------------------------------------------
 # Applications
 #----------------------------------------------------------------------
