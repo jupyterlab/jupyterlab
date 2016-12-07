@@ -6,3 +6,4 @@ export * from './model';
 export * from './editor';
 export * from './factory';
 export * from './mimetype';
+export * from './kernel';
