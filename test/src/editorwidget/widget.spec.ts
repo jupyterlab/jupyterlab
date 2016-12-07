@@ -62,7 +62,8 @@ describe('editorwidget', () => {
       });
 
       it('should update the editor text when the model changes', (done) => {
-        context.save().then(() => {
+        context.save().catch(done);
+        context.ready.then(() => {
           widget.context.model.fromString('foo');
           expect(widget.editor.model.value.text).to.be('foo');
         }).then(done, done);
@@ -87,7 +88,8 @@ describe('editorwidget', () => {
       });
 
       it('should add the dirty class when the model is dirty', (done) => {
-        context.save().then(() => {
+        context.save().catch(done);
+        context.ready.then(() => {
           context.model.fromString('bar');
           expect(widget.title.className).to.contain('jp-mod-dirty');
         }).then(done, done);
