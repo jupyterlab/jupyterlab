@@ -1032,6 +1032,9 @@ class Notebook extends StaticNotebook {
    */
   private _onEdgeRequest(widget: Widget, location: EdgeLocation): void {
     let prev = this.activeCellIndex;
+    // Clear the previous cell focus.
+    this.node.focus();
+
     if (location === 'top') {
       this.activeCellIndex--;
       // Move the cursor to the first position on the last line.
@@ -1046,8 +1049,13 @@ class Notebook extends StaticNotebook {
         this.activeCell.editor.setCursorPosition(0);
       }
     }
+    // Attempt to focus the new cell.
+    this.activeCell.activate();
   }
 
+  /**
+   * Ensure that the notebook has proper focus.
+   */
   private _ensureFocus(): void {
     let activeCell = this.activeCell;
     if (this.mode === 'edit' && activeCell) {
