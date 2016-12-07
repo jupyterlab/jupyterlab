@@ -171,7 +171,10 @@ namespace Private {
     }
   }
 
-  const TRANSFORMERS = RenderMime.defaultRenderers();
+  const TRANSFORMERS = RenderMime.defaultRenderers().concat([
+    new JSONRenderer(),
+    new InjectionRenderer()
+  ]);
 
   let renderers: RenderMime.MimeMap<RenderMime.IRenderer> = {};
   let order: string[] = [];
