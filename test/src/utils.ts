@@ -28,8 +28,7 @@ import {
 } from '../../lib/notebook/notebook/modelfactory';
 
 import {
-  LatexRenderer, PDFRenderer, JavascriptRenderer,
-  SVGRenderer, MarkdownRenderer, TextRenderer, HTMLRenderer, ImageRenderer
+  TextRenderer, HTMLRenderer
 } from '../../lib/renderers';
 
 import {
@@ -172,18 +171,10 @@ namespace Private {
     }
   }
 
-  const TRANSFORMERS = [
-    new JavascriptRenderer(),
+  const TRANSFORMERS = RenderMime.defaultRenderers().concat([
     new JSONRenderer(),
-    new MarkdownRenderer(),
-    new HTMLRenderer(),
-    new PDFRenderer(),
-    new ImageRenderer(),
-    new SVGRenderer(),
-    new LatexRenderer(),
-    new InjectionRenderer(),
-    new TextRenderer()
-  ];
+    new InjectionRenderer()
+  ]);
 
   let renderers: RenderMime.MimeMap<RenderMime.IRenderer> = {};
   let order: string[] = [];
