@@ -70,28 +70,12 @@ class EditorWidget extends CodeEditorWidget {
     this.addClass(EDITOR_CLASS);
     let context = this._context = options.context;
     this._mimeTypeService = options.mimeTypeService;
-
-    let model = context.model;
-    let editor = this.editor;
-    let value = editor.model.value;
-
-    // Prevent the initial loading from disk from being in the editor history.
-    context.ready.then( () => {
-      if (!this.isDisposed) {
-        value.text = model.toString();
-        editor.model.clearHistory();
-      }
-    });
-
-    value.text = model.toString();
-    this.title.label = context.path.split('/').pop();
-    this._handleDirtyState();
+    this.editor.model.value.text = context.model.toString();
     this._onPathChanged();
-
-    model.stateChanged.connect(this._onModelStateChanged, this);
-    model.contentChanged.connect(this._onContentChanged, this);
-    editor.model.value.changed.connect(this._onValueChanged, this);
     context.pathChanged.connect(this._onPathChanged, this);
+    context.ready.then(() => {
+      this._onContextReady();
+    });
   }
 
   /**
@@ -99,6 +83,27 @@ class EditorWidget extends CodeEditorWidget {
    */
   get context(): DocumentRegistry.Context {
     return this._context;
+  }
+
+  /**
+   * Handle actions that should be taken when the context is ready.
+   */
+  private _onContextReady(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    let model = this._context.model;
+    let editor = this.editor;
+    let value = editor.model.value;
+    value.text = model.toString();
+
+    // Prevent the initial loading from disk from being in the editor history.
+    editor.model.clearHistory();
+    this._handleDirtyState();
+
+    model.stateChanged.connect(this._onModelStateChanged, this);
+    model.contentChanged.connect(this._onContentChanged, this);
+    value.changed.connect(this._onValueChanged, this);
   }
 
   /**

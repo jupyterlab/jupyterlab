@@ -16,10 +16,6 @@ import {
 } from '../../../lib/codemirror';
 
 import {
-  IChangedArgs
-} from '../../../lib/common/interfaces';
-
-import {
   Context, DocumentRegistry, TextModelFactory
 } from '../../../lib/docregistry';
 
@@ -65,9 +61,11 @@ describe('editorwidget', () => {
         expect(widget).to.be.an(EditorWidget);
       });
 
-      it('should update the editor text when the model changes', () => {
-        widget.context.model.fromString('foo');
-        expect(widget.editor.model.value.text).to.be('foo');
+      it('should update the editor text when the model changes', (done) => {
+        context.save().then(() => {
+          widget.context.model.fromString('foo');
+          expect(widget.editor.model.value.text).to.be('foo');
+        }).then(done, done);
       });
 
       it('should set the mime type for the path', () => {
@@ -88,9 +86,11 @@ describe('editorwidget', () => {
         expect(widget.title.label).to.be(context.path);
       });
 
-      it('should add the dirty class when the model is dirty', () => {
-        context.model.fromString('bar');
-        expect(widget.title.className).to.contain('jp-mod-dirty');
+      it('should add the dirty class when the model is dirty', (done) => {
+        context.save().then(() => {
+          context.model.fromString('bar');
+          expect(widget.title.className).to.contain('jp-mod-dirty');
+        }).then(done, done);
       });
 
       it('should update the title when the path changes', (done) => {
