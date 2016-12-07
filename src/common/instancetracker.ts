@@ -178,7 +178,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    *
    * @param widget - The widget being added.
    */
-  add(widget: T): void {
+  add(widget: T, options: ILayoutRestorer.IAddOptions = { area: 'main' }): void {
     if (this._widgets.has(widget)) {
       console.warn(`${widget.id} already exists in the tracker.`);
       return;
@@ -197,7 +197,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
         Private.nameProperty.set(widget, name);
         state.save(name, this._restore.args(widget));
         if (layout) {
-          layout.add(widget, name);
+          layout.add(widget, name, options);
         }
       }
     }
@@ -459,6 +459,14 @@ namespace Private {
   const injectedProperty = new AttachedProperty<Widget, boolean>({
     name: 'injected',
     value: false
+  });
+
+  /**
+   * An attached property for a widget's restore metadata in the state database.
+   */
+  export
+  const metadataProperty = new AttachedProperty<Widget, ILayoutRestorer.IAddOptions>({
+    name: 'metadata'
   });
 
   /**

@@ -24,6 +24,10 @@ import {
 } from 'phosphor/lib/core/token';
 
 import {
+  ApplicationShell
+} from '../application/shell';
+
+import {
   IStateDB
 } from '../statedb';
 
@@ -50,7 +54,7 @@ interface ILayoutRestorer {
   /**
    * Add a widget to be tracked by the layout restorer.
    */
-  add(widget: Widget, name: string): void;
+  add(widget: Widget, name: string, options?: ILayoutRestorer.IAddOptions): void;
 
   /**
    * Wait for the given promise to resolve before restoring layout.
@@ -60,6 +64,24 @@ interface ILayoutRestorer {
    * at instantiation has resolved. See the notes for `LayoutRestorer.IOptions`.
    */
   await(promise: Promise<any>): void;
+}
+
+
+/**
+ * A namespace for layout restorers.
+ */
+export
+namespace ILayoutRestorer {
+  /**
+   * Configuration options for adding a widget to a layout restorer.
+   */
+  export
+  interface IAddOptions {
+    /**
+     * The area in the application shell where a given widget will be restored.
+     */
+    area: ApplicationShell.Area;
+  }
 }
 
 
@@ -108,7 +130,7 @@ class LayoutRestorer implements ILayoutRestorer {
   /**
    * Add a widget to be tracked by the layout restorer.
    */
-  add(widget: Widget, name: string): void {
+  add(widget: Widget, name: string, options: ILayoutRestorer.IAddOptions = { area: 'main' }): void {
     Private.nameProperty.set(widget, name);
     this._widgets.set(name, widget);
     widget.disposed.connect(() => { this._widgets.delete(name); });
