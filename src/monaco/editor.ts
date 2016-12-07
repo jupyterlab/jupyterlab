@@ -354,14 +354,8 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
   protected toSelection(selection: monaco.Range): CodeEditor.ITextSelection {
     return {
       uuid: this.uuid,
-      start: {
-        line: selection.startLineNumber - 1,
-        column: selection.startColumn - 1
-      },
-      end: {
-        line: selection.endLineNumber - 1,
-        column: selection.endColumn - 1
-      },
+      start: MonacoModel.toPosition(selection.getStartPosition()),
+      end: MonacoModel.toPosition(selection.getEndPosition()),
       style: this.selectionStyle
     };
   }
