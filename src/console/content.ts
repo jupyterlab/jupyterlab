@@ -839,7 +839,7 @@ namespace Private {
       let cb = (editor: CodeEditor.IEditor, event: KeyboardEvent) => {
         return event.keyCode === 13;  // Enter;
       };
-      widget.editor.onKeyDown = cb;
+      widget.editor.addKeydownHandler(cb);
       return widget;
     }
   }

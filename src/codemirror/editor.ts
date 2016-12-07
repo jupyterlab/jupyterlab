@@ -5,6 +5,18 @@ import * as CodeMirror
   from 'codemirror';
 
 import {
+  findIndex
+} from 'phosphor/lib/algorithm/searching';
+
+import {
+  IDisposable, DisposableDelegate
+} from 'phosphor/lib/core/disposable';
+
+import {
+  Vector
+} from 'phosphor/lib/collections/vector';
+
+import {
   IChangedArgs
 } from '../common/interfaces';
 
@@ -49,11 +61,6 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   readonly selectionStyle?: CodeEditor.ISelectionStyle;
 
   /**
-   * Handle keydown events for the editor.
-   */
-  onKeyDown: CodeEditor.KeydownHandler | null = null;
-
-  /**
    * Construct a CodeMirror editor.
    */
   constructor(host: HTMLElement, options: CodeMirrorEditor.IOptions) {
@@ -72,7 +79,14 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     this._model.mimeTypeChanged.connect(() => this._onMimeTypeChanged());
     this._model.selections.changed.connect((selections, args) => this._onSelectionsChanged(selections, args));
 
-    CodeMirror.on(this.editor, 'keydown', (editor, event) => this._onKeyDown(editor, event));
+    CodeMirror.on(this.editor, 'keydown', (editor, event) => {
+      findIndex(this._keydownHandlers, handler => {
+        if (handler(this, event) === true) {
+          event.preventDefault();
+          return true;
+        }
+      });
+    });
     CodeMirror.on(this.editor, 'cursorActivity', () => this._onCursorActivity());
   }
 
@@ -94,6 +108,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     this._model.dispose();
     this._model = null;
     this._editor = null;
+    this._keydownHandlers.clear();
   }
 
   /**
@@ -177,6 +192,20 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   refresh(): void {
     this._editor.refresh();
+  }
+
+  /**
+   * Add a keydown handler to the editor.
+   *
+   * @param handler - A keydown handler.
+   *
+   * @returns A disposable that can be used to remove the handler.
+   */
+  addKeydownHandler(handler: CodeEditor.KeydownHandler): IDisposable {
+    this._keydownHandlers.pushBack(handler);
+    return new DisposableDelegate(() => {
+      this._keydownHandlers.remove(handler);
+    });
   }
 
   /**
@@ -324,15 +353,6 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
-   * Handles a key down event.
-   */
-  protected _onKeyDown(editor: CodeMirror.Editor, event: KeyboardEvent): void {
-    if (this.onKeyDown && this.onKeyDown(this, event)) {
-      event.preventDefault();
-    }
-  }
-
-  /**
    * Handles a cursor activity event.
    */
   protected _onCursorActivity(): void {
@@ -409,6 +429,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   private _editor: CodeMirror.Editor;
   private _isDisposed = false;
   protected selectionMarkers: { [key: string]: CodeMirror.TextMarker[] | undefined } = {};
+  private _keydownHandlers = new Vector<CodeEditor.KeydownHandler>();
 
 }
 
