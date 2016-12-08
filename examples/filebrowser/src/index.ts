@@ -95,13 +95,16 @@ function createApp(manager: ServiceManager.IManager): void {
     factory: new CodeMirrorEditorFactory(),
     mimeTypeService: new CodeMirrorMimeTypeService()
   };
-  let wFactory = new EditorWidgetFactory(editorServices, {
-    name: 'Editor',
-    modelName: 'text',
-    fileExtensions: ['*'],
-    defaultFor: ['*'],
-    preferKernel: false,
-    canStartKernel: true
+  let wFactory = new EditorWidgetFactory({
+    editorServices,
+    factoryOptions: {
+      name: 'Editor',
+      modelName: 'text',
+      fileExtensions: ['*'],
+      defaultFor: ['*'],
+      preferKernel: false,
+      canStartKernel: true
+    }
   });
   docRegistry.addModelFactory(mFactory);
   docRegistry.addWidgetFactory(wFactory);
