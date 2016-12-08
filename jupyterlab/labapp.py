@@ -161,14 +161,21 @@ class LabApp(NotebookApp):
             'Extensions are loaded in alphabetical order')
     )
 
+    def init_webapp(self):
+        """initialize tornado webapp and httpserver.
+        """
+        super(LabApp, self).init_webapp()
+        self.add_lab_handlers(self.web_app)
+        self.add_labextensions(self.web_app)
+
     def add_labextensions(self, webapp):
         """Get the enabledd and valid lab extensions.
 
-        Returns
+        Notes
         -------
-        out - dict
-            The manifest data for each enabled and active extension,
-            and optionally its associated python_module.
+        Adds a `labextensions` property to the webapp, which is a dict
+        containing manifest data for each enabled and active extension,
+        and optionally its associated python_module.
         """
         out = dict()
         for (name, config) in self.labextensions.items():
@@ -184,12 +191,8 @@ class LabApp(NotebookApp):
             out[name] = data
         webapp.labextensions = out
 
-    def init_webapp(self):
-        super(LabApp, self).init_webapp()
-        self.add_lab_handlers(self.web_app)
-        self.add_labextensions(self.web_app)
-
     def add_lab_handlers(self, webapp):
+        """Add the lab-specific handlers to the tornado app."""
         base_url = webapp.settings['base_url']
         webapp.add_handlers(".*$",
             [(ujoin(base_url, h[0]),) + h[1:] for h in default_handlers])
@@ -207,13 +210,14 @@ class LabApp(NotebookApp):
 
 
 def bootstrap_from_nbapp(nbapp):
-    """Bootstrap the lab app on top of a noteobok app.
+    """Bootstrap the lab app on top of a notebook app.
     """
     labapp = LabApp()
     labapp.load_config_file()
     webapp = nbapp.web_app
     labapp.add_lab_handlers(webapp)
     labapp.add_labextensions(webapp)
+
 
 #-----------------------------------------------------------------------------
 # Main entry point
