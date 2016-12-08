@@ -25,14 +25,13 @@ from jupyterlab import labextensions
 from jupyterlab.labextensions import (install_labextension, check_labextension,
     enable_labextension, disable_labextension,
     install_labextension_python, uninstall_labextension_python,
-    enable_labextension_python, disable_labextension_python, _get_config_dir,
+    enable_labextension_python, disable_labextension_python,
     find_labextension, validate_labextension_folder,
     get_labextension_config_python,
     get_labextension_manifest_data_by_name,
-    get_labextension_manifest_data_by_folder
+    get_labextension_manifest_data_by_folder,
+    _read_config_data
 )
-
-from traitlets.config.manager import BaseJSONConfigManager
 
 
 FILENAME = 'mockextension/mockextension.bundle.js'
@@ -229,9 +228,8 @@ class TestInstallLabExtension(TestCase):
             install_labextension(src, self.name, user=True)
             enable_labextension(self.name)
 
-        config_dir = os.path.join(_get_config_dir(user=True))
-        cm = BaseJSONConfigManager(config_dir=config_dir)
-        config = cm.get('jupyter_notebook_config').get('LabApp', {}).get('labextensions', {}).get(self.name, {})
+        data = _read_config_data(user=True)
+        config = data.get('LabApp', {}).get('labextensions', {}).get(self.name, {})
         assert config['enabled'] == True
         assert 'python_module' not in config
 
@@ -239,9 +237,8 @@ class TestInstallLabExtension(TestCase):
         self.test_labextension_enable()
         disable_labextension(self.name)
 
-        config_dir = os.path.join(_get_config_dir(user=True))
-        cm = BaseJSONConfigManager(config_dir=config_dir)
-        config = cm.get('jupyter_notebook_config').get('LabApp', {}).get('labextensions', {}).get(self.name, {})
+        data = _read_config_data(user=True)
+        config = data.get('LabApp', {}).get('labextensions', {}).get(self.name, {})
         assert not config['enabled']
         assert 'python_module' not in config
 
@@ -297,9 +294,8 @@ class TestInstallLabExtension(TestCase):
         install_labextension_python('mockextension', user=True)
         enable_labextension_python('mockextension')
         
-        config_dir = os.path.join(_get_config_dir(user=True))
-        cm = BaseJSONConfigManager(config_dir=config_dir)
-        config = cm.get('jupyter_notebook_config').get('LabApp', {}).get('labextensions', {}).get('mockextension', False)
+        data = _read_config_data(user=True)
+        config = data.get('LabApp', {}).get('labextensions', {}).get('mockextension', False)
         assert config['enabled'] == True
         assert config['python_module'] == 'mockextension'
         
@@ -309,9 +305,8 @@ class TestInstallLabExtension(TestCase):
         enable_labextension_python('mockextension')
         disable_labextension_python('mockextension', user=True)
         
-        config_dir = os.path.join(_get_config_dir(user=True))
-        cm = BaseJSONConfigManager(config_dir=config_dir)
-        config = cm.get('jupyter_notebook_config').get('LabApp', {}).get('labextensions', {}).get('mockextension', {})
+        data = _read_config_data(user=True)
+        config = data.get('LabApp', {}).get('labextensions', {}).get('mockextension', {})
         assert not config['enabled']
 
     def test_labextensionpy_validate(self):

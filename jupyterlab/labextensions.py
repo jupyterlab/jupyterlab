@@ -895,7 +895,7 @@ class ListLabExtensionsApp(BaseLabExtensionApp):
 
         for config_dir in jupyter_config_path():
             cm = BaseJSONConfigManager(parent=self, config_dir=config_dir)
-            data = cm.get("jupyter_notebook_config")
+            data = cm.get(CONFIG_NAME)
             labextensions = (
                 data.setdefault("LabApp", {})
                 .setdefault("labextensions", {})
@@ -1127,7 +1127,7 @@ def _read_config_data(user=False, sys_prefix=False):
     """
     config_dir = _get_config_dir(user=user, sys_prefix=sys_prefix)
     config_man = BaseJSONConfigManager(config_dir=config_dir)
-    return config_man.get('jupyter_notebook_config')
+    return config_man.get(CONFIG_NAME)
 
 
 def _write_config_data(data, user=False, sys_prefix=False, logger=None):
@@ -1148,7 +1148,7 @@ def _write_config_data(data, user=False, sys_prefix=False, logger=None):
     if logger:
         logger.info(u"- Writing config: {}".format(config_dir))
     config_man = BaseJSONConfigManager(config_dir=config_dir)
-    config_man.update('jupyter_notebook_config', data)
+    config_man.update(CONFIG_NAME, data)
 
 
 if __name__ == '__main__':
