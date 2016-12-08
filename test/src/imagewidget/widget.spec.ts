@@ -12,7 +12,7 @@ import {
 } from 'phosphor/lib/core/messaging';
 
 import {
-  WidgetMessage
+  Widget, WidgetMessage
 } from 'phosphor/lib/ui/widget';
 
 import {
@@ -22,6 +22,10 @@ import {
 import {
   ImageWidget, ImageWidgetFactory
 } from '../../../lib/imagewidget';
+
+import {
+  createFileContext
+} from '../utils';
 
 
 class LogImage extends ImageWidget {
@@ -134,17 +138,52 @@ describe('ImageWidget', () => {
 
   describe('#scale', () => {
 
+    it('should default to 1', () => {
+      expect(widget.scale).to.be(1);
+    });
+
+    it('should be settable', () => {
+      widget.scale = 0.5;
+      expect(widget.scale).to.be(0.5);
+    });
+
   });
 
   describe('#dispose()', () => {
+
+    it('should dispose of the resources used by the widget', () => {
+      expect(widget.isDisposed).to.be(false);
+      widget.dispose();
+      expect(widget.isDisposed).to.be(true);
+      widget.dispose();
+      expect(widget.isDisposed).to.be(true);
+    });
 
   });
 
   describe('#onUpdateRequest()', () => {
 
+    it('should add the image', (done) => {
+      let img: HTMLImageElement = widget.node.querySelector('img');
+      expect(img.src).to.be('');
+      context.ready.then(() => {
+        sendMessage(widget, WidgetMessage.UpdateRequest);
+        expect(widget.methods).to.contain('onUpdateRequest');
+        expect(img.src).to.contain(IMAGE.content);
+        done();
+      }).catch(done);
+    });
+
   });
 
   describe('#onActivateRequest()', () => {
+
+    it('should focus the widget', () => {
+      Widget.attach(widget, document.body);
+      sendMessage(widget, WidgetMessage.ActivateRequest);
+      expect(widget.methods).to.contain('onActivateRequest');
+      expect(widget.node.contains(document.activeElement)).to.be(true);
+    });
 
   });
 
@@ -154,6 +193,17 @@ describe('ImageWidget', () => {
 describe('ImageWidgetFactory', () => {
 
   describe('#createNewWidget', () => {
+
+    it('should create an image widget', () => {
+      let factory = new ImageWidgetFactory({
+        name: 'Image',
+        modelName: 'base64',
+        fileExtensions: ['.png'],
+        defaultFor: ['.png']
+      });
+      let context = createFileContext(IMAGE.path);
+      expect(factory.createNew(context)).to.be.an(ImageWidget);
+    });
 
   });
 

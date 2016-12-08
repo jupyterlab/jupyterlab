@@ -65,7 +65,6 @@ class ImageWidget extends Widget {
     let transform: string;
     transform = `scale(${value})`;
     scaleNode.style.transform = transform;
-    this.update();
   }
 
   /**
@@ -87,7 +86,7 @@ class ImageWidget extends Widget {
     if (this.isDisposed || !context.isReady) {
       return;
     }
-    let cm = this._context.contentsModel;
+    let cm = context.contentsModel;
     let content = context.model.toString();
     let src = `data:${cm.mimetype};${cm.format},${content}`;
     this.node.querySelector('img').setAttribute('src', src);
