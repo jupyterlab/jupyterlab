@@ -11,7 +11,7 @@ import {
 
 import {
   IChangedArgs
-} from '..//common/interfaces';
+} from '../common/interfaces';
 
 import {
   ABCWidgetFactory, DocumentRegistry
