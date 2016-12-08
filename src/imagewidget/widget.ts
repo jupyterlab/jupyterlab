@@ -33,12 +33,14 @@ class ImageWidget extends Widget {
     this.node.tabIndex = -1;
     this.addClass(IMAGE_CLASS);
 
-    if (context.model.toString()) {
+    this._onTitleChanged();
+    context.pathChanged.connect(this._onTitleChanged, this);
+
+    context.ready.then(() => {
       this.update();
-    }
-    context.pathChanged.connect(() => { this.update(); });
-    context.model.contentChanged.connect(() => { this.update(); });
-    context.fileChanged.connect(() => { this.update(); });
+      context.model.contentChanged.connect(this.update, this);
+      context.fileChanged.connect(this.update, this);
+    });
   }
 
   /**
@@ -81,12 +83,12 @@ class ImageWidget extends Widget {
    * Handle `update-request` messages for the widget.
    */
   protected onUpdateRequest(msg: Message): void {
-    this.title.label = this._context.path.split('/').pop();
-    let cm = this._context.contentsModel;
-    if (cm === null) {
+    let context = this._context;
+    if (this.isDisposed || !context.isReady) {
       return;
     }
-    let content = this._context.model.toString();
+    let cm = this._context.contentsModel;
+    let content = context.model.toString();
     let src = `data:${cm.mimetype};${cm.format},${content}`;
     this.node.querySelector('img').setAttribute('src', src);
   }
@@ -96,6 +98,13 @@ class ImageWidget extends Widget {
    */
   protected onActivateRequest(msg: Message): void {
     this.node.focus();
+  }
+
+  /**
+   * Handle a change to the title.
+   */
+  private _onTitleChanged(): void {
+    this.title.label = this._context.path.split('/').pop();
   }
 
   private _context: DocumentRegistry.Context;
