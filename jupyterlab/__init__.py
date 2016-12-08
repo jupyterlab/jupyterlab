@@ -76,7 +76,6 @@ class LabHandler(IPythonHandler):
         config = dict(
             static_prefix=static_prefix,
             page_title='JupyterLab Alpha Preview',
-            terminals_available=self.settings['terminals_available'],
             mathjax_url=self.mathjax_url,
             jupyterlab_main=main,
             jupyterlab_css=css_files,
@@ -84,6 +83,10 @@ class LabHandler(IPythonHandler):
             plugin_entries=entries,
             mathjax_config='TeX-AMS_HTML-full,Safe',
             #mathjax_config=self.mathjax_config # for the next release of the notebook
+        )
+
+        configData = dict(
+            terminalsAvailable=self.settings.get('terminals_available', False),
         )
 
         # Gather the lab extension files and entry points.
@@ -112,10 +115,11 @@ class LabHandler(IPythonHandler):
             if python_module:
                 try:
                     value = get_labextension_config_python(python_module)
-                    config.update(value)
+                    configData.update(value)
                 except Exception as e:
                     self.log.error(e)
 
+        config['jupyterlab_config'] = configData
         self.write(self.render_template('lab.html', **config))
 
     def get_template(self, name):
