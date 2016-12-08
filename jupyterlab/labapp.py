@@ -13,7 +13,7 @@ from jinja2 import FileSystemLoader
 from notebook.utils import url_path_join as ujoin
 from jupyter_core.paths import jupyter_path
 
-from .version import __version__
+from ._version import __version__
 from .labextensions import (
     find_labextension, validate_labextension_folder,
     get_labextension_manifest_data_by_name,
