@@ -40,22 +40,25 @@ class LogImage extends ImageWidget {
 }
 
 
-const IMAGES: Contents.IModel[] = [
-  {
-    path: utils.uuid() + '.png',
-    type: 'file',
-    mimetype: 'image/png',
-    content:  'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
-    format: 'base64'
-  },
-  {
-    path: utils.uuid() + '.gif',
-    type: 'file',
-    mimetype: 'image/gif',
-    content: 'R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=',
-    format: 'base64'
-  }
-];
+/**
+ * The common image model.
+ */
+const IMAGE: Contents.IModel = {
+  path: utils.uuid() + '.png',
+  type: 'file',
+  mimetype: 'image/png',
+  content:  'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+  format: 'base64'
+};
+
+
+/**
+ * The alternate content.
+ */
+const OTHER = ('iVBORw0KGgoAAAANSUhEUgAAAAUA' +
+  'AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO' +
+  '9TXL0Y4OHwAAAABJRU5ErkJggg=='
+);
 
 
 describe('ImageWidget', () => {
@@ -63,22 +66,20 @@ describe('ImageWidget', () => {
   let factory = new Base64ModelFactory();
   let context: DocumentRegistry.Context;
   let manager: ServiceManager.IManager;
-  let widget: ImageWidget;
+  let widget: LogImage;
 
   before((done) => {
     manager = new ServiceManager();
     manager.ready.then(() => {
-      return manager.contents.save(IMAGES[0].path, IMAGES[0]);
-    }).then(() => {
-      return manager.contents.save(IMAGES[1].path, IMAGES[1]);
+      return manager.contents.save(IMAGE.path, IMAGE);
     }).then(() => {
       done();
     }).catch(done);
   });
 
   beforeEach((done) => {
-    context = new Context({ manager, factory, path: IMAGES[0].path });
-    widget = new ImageWidget(context);
+    context = new Context({ manager, factory, path: IMAGE.path });
+    widget = new LogImage(context);
     return context.revert().then(done, done);
   });
 
@@ -93,7 +94,7 @@ describe('ImageWidget', () => {
     });
 
     it('should keep the title in sync with the file name', (done) => {
-      let newPath = utils.uuid() + '.png';
+      let newPath = (IMAGE as any).path = utils.uuid() + '.png';
       expect(widget.title.label).to.be(context.path);
       context.pathChanged.connect(() => {
         expect(widget.title.label).to.be(newPath);
@@ -102,8 +103,23 @@ describe('ImageWidget', () => {
       return manager.contents.rename(context.path, newPath).catch(done);
     });
 
-    it('should handle a change to the content', () => {
+    it('should set the content after the context is ready', (done) => {
+      context.ready.then(() => {
+        sendMessage(widget, WidgetMessage.UpdateRequest);
+        let img = widget.node.querySelector('img') as HTMLImageElement;
+        expect(img.src).to.contain(IMAGE.content);
+        done();
+      }).catch(done);
+    });
 
+    it('should handle a change to the content', (done) => {
+      context.ready.then(() => {
+        context.model.fromString(OTHER);
+        sendMessage(widget, WidgetMessage.UpdateRequest);
+        let img = widget.node.querySelector('img') as HTMLImageElement;
+        expect(img.src).to.contain(OTHER);
+        done();
+      }).catch(done);
     });
 
   });
