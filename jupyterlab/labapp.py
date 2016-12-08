@@ -207,7 +207,7 @@ class LabApp(NotebookApp):
 
 
 def bootstrap_from_nbapp(nbapp):
-    """Bootstrap the lab app on to off a noteobok app.
+    """Bootstrap the lab app on top of a noteobok app.
     """
     labapp = LabApp()
     labapp.load_config_file()
