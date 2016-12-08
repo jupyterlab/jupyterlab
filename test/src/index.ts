@@ -4,6 +4,9 @@
 import './application/loader.spec';
 import './application/shell.spec';
 
+import './codeeditor/editor.spec';
+import './codeeditor/widget.spec';
+
 import './commandlinker/commandlinker.spec';
 
 import './common/activitymonitor.spec';
