@@ -12,10 +12,6 @@ import {
 } from 'phosphor/lib/core/mimedata';
 
 import {
-  createNotebookPanelRenderer
-} from '../../../../lib/notebook/codemirror';
-
-import {
   INotebookModel
 } from '../../../../lib/notebook/notebook/model';
 
@@ -34,6 +30,10 @@ import {
 import {
   createNotebookContext, defaultRenderMime
 } from '../../utils';
+
+import {
+  createNotebookPanelRenderer
+} from '../utils';
 
 
 const rendermime = defaultRenderMime();

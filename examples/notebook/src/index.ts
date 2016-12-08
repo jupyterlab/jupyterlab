@@ -30,13 +30,13 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  NotebookPanel, NotebookWidgetFactory,
+  NotebookPanel, NotebookWidgetFactory, Notebook,
   NotebookModelFactory, NotebookActions
 } from 'jupyterlab/lib/notebook';
 
 import {
-  createNotebookPanelRenderer
-} from 'jupyterlab/lib/notebook/codemirror';
+  editorServices
+} from 'jupyterlab/lib/codemirror';
 
 import {
   DocumentManager
@@ -129,7 +129,9 @@ function createApp(manager: ServiceManager.IManager): void {
   });
   let mFactory = new NotebookModelFactory();
   let clipboard = new MimeData();
-  let renderer = createNotebookPanelRenderer();
+  let notebookRenderer = new Notebook.Renderer({ editorServices });
+  let renderer = new NotebookPanel.Renderer({ notebookRenderer });
+
   let wFactory = new NotebookWidgetFactory({
     name: 'Notebook',
     modelName: 'notebook',

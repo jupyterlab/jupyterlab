@@ -38,7 +38,7 @@ import {
 } from '../inspector';
 
 import {
-  IEditorMimeTypeService
+  IEditorMimeTypeService, IEditorServices, CodeEditor
 } from '../codeeditor';
 
 import {
@@ -713,19 +713,16 @@ namespace ConsoleContent {
    */
   export
   class Renderer implements IRenderer {
-
     /**
      * The banner renderer.
      */
-    readonly bannerRenderer: CodeCellWidget.IRenderer;
+    readonly bannerRenderer: BaseCellWidget.IRenderer;
+
     /**
      * The prompt renderer.
      */
     readonly promptRenderer: CodeCellWidget.IRenderer;
-    /**
-     * The foreign cell renderer.
-     */
-    readonly foreignCellRenderer: CodeCellWidget.IRenderer;
+
     /**
      * The mime type service of a code editor.
      */
@@ -735,10 +732,16 @@ namespace ConsoleContent {
      * Create a new renderer.
      */
     constructor(options: Renderer.IOptions) {
-      this.bannerRenderer = options.bannerRenderer;
-      this.promptRenderer = options.promptRenderer;
-      this.foreignCellRenderer = options.foreignCellRenderer;
-      this.editorMimeTypeService = options.editorMimeTypeService;
+      let factory = options.editorServices.factory;
+      this.bannerRenderer = new BaseCellWidget.Renderer({
+        editorFactory: host => factory.newInlineEditor(host.node, {
+          wordWrap: true
+        })
+      });
+      this.promptRenderer = new Private.PromptRenderer({
+        editorFactory: host => factory.newInlineEditor(host.node, {})
+      });
+      this.editorMimeTypeService = options.editorServices.mimeTypeService;
     }
 
     /**
@@ -770,7 +773,7 @@ namespace ConsoleContent {
     createForeignCell(rendermime: IRenderMime, context: ConsoleContent): CodeCellWidget {
       let widget = new CodeCellWidget({
         rendermime,
-        renderer: this.foreignCellRenderer
+        renderer: this.promptRenderer
       });
       widget.model = new CodeCellModel();
       return widget;
@@ -782,7 +785,6 @@ namespace ConsoleContent {
     getCodeMimetype(info: nbformat.ILanguageInfoMetadata): string {
       return this.editorMimeTypeService.getMimeTypeByLanguage(info);
     }
-
   }
 
   /**
@@ -795,22 +797,7 @@ namespace ConsoleContent {
      */
     export
     interface IOptions {
-      /**
-       * The banner renderer.
-       */
-      readonly bannerRenderer: CodeCellWidget.IRenderer;
-      /**
-       * The prompt renderer.
-       */
-      readonly promptRenderer: CodeCellWidget.IRenderer;
-      /**
-       * The foreign cell renderer.
-       */
-      readonly foreignCellRenderer: CodeCellWidget.IRenderer;
-      /**
-       * The mime type service of a code editor.
-       */
-      readonly editorMimeTypeService: IEditorMimeTypeService;
+      readonly editorServices: IEditorServices;
     }
   }
 
@@ -836,5 +823,24 @@ namespace Private {
   export
   function scrollToBottom(node: HTMLElement): void {
     node.scrollTop = node.scrollHeight - node.clientHeight;
+  }
+
+  /**
+   * A custom renderer for a prompt that suppresses "enter" handling.
+   */
+  export
+  class PromptRenderer extends CodeCellWidget.Renderer {
+    /**
+     * Create a new cell editor for the widget.
+     */
+    createCellEditor(): ICellEditorWidget {
+      let widget = super.createCellEditor();
+      // Suppress the default "Enter" key handling.
+      let cb = (editor: CodeEditor.IEditor, event: KeyboardEvent) => {
+        return event.keyCode === 13;  // Enter;
+      };
+      widget.editor.addKeydownHandler(cb);
+      return widget;
+    }
   }
 }

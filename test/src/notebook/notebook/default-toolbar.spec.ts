@@ -32,10 +32,6 @@ import {
 } from '../../../../lib/notebook/notebook/actions';
 
 import {
-  createNotebookPanelRenderer
-} from '../../../../lib/notebook/codemirror';
-
-import {
  ToolbarItems
 } from '../../../../lib/notebook/notebook/default-toolbar';
 
@@ -63,7 +59,7 @@ import {
 } from '../../utils';
 
 import {
-  DEFAULT_CONTENT
+  DEFAULT_CONTENT, createNotebookPanelRenderer
 } from '../utils';
 
 

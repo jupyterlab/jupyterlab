@@ -8,10 +8,6 @@ import {
 } from 'phosphor/lib/core/mimedata';
 
 import {
-  createNotebookPanelRenderer
-} from '../../../lib/notebook/codemirror';
-
-import {
   BaseCellWidget
 } from '../../../lib/notebook/cells';
 
@@ -28,7 +24,7 @@ import {
 } from '../utils';
 
 import {
-  DEFAULT_CONTENT
+  DEFAULT_CONTENT, createNotebookPanelRenderer
 } from './utils';
 
 

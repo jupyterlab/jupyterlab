@@ -70,7 +70,7 @@ import {
 } from '../../rendermime';
 
 import {
-  IEditorMimeTypeService
+  IEditorMimeTypeService, IEditorServices
 } from '../../codeeditor';
 
 import {
@@ -540,7 +540,6 @@ namespace StaticNotebook {
    */
   export
   class Renderer implements IRenderer {
-
     /**
      * A code cell renderer.
      */
@@ -565,10 +564,17 @@ namespace StaticNotebook {
      * Creates a new renderer.
      */
     constructor(options: Renderer.IOptions) {
-      this.codeCellRenderer = options.codeCellRenderer;
-      this.markdownCellRenderer = options.markdownCellRenderer;
-      this.rawCellRenderer = options.rawCellRenderer;
-      this.editorMimeTypeService = options.editorMimeTypeService;
+      let factory = options.editorServices.factory;
+      this.codeCellRenderer = new CodeCellWidget.Renderer({
+        editorFactory: host => factory.newInlineEditor(host.node, {})
+      });
+      this.markdownCellRenderer = new BaseCellWidget.Renderer({
+        editorFactory: host => factory.newInlineEditor(host.node, {
+          wordWrap: true
+        })
+      });
+      this.rawCellRenderer = this.markdownCellRenderer;
+      this.editorMimeTypeService = options.editorServices.mimeTypeService;
     }
 
     /**
@@ -635,24 +641,9 @@ namespace StaticNotebook {
     export
     interface IOptions {
       /**
-       * A code cell renderer.
+       * The editor services.
        */
-      readonly codeCellRenderer: CodeCellWidget.IRenderer;
-
-      /**
-       * A markdown cell renderer.
-       */
-      readonly markdownCellRenderer: BaseCellWidget.IRenderer;
-
-      /**
-       * A raw cell renderer.
-       */
-      readonly rawCellRenderer: BaseCellWidget.IRenderer;
-
-      /**
-       * A mime type service of a code editor.
-       */
-      readonly editorMimeTypeService: IEditorMimeTypeService;
+      readonly editorServices: IEditorServices;
     }
   }
 }

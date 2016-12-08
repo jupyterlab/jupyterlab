@@ -18,6 +18,10 @@ import {
 } from '../application';
 
 import {
+  IEditorServices
+} from '../codeeditor';
+
+import {
   ICommandPalette
 } from '../commandpalette';
 
@@ -70,7 +74,7 @@ import {
  * The console widget tracker provider.
  */
 export
-const plugin: JupyterLabPlugin<IConsoleTracker> = {
+const trackerPlugin: JupyterLabPlugin<IConsoleTracker> = {
   id: 'jupyter.services.console-tracker',
   provides: IConsoleTracker,
   requires: [
@@ -86,6 +90,21 @@ const plugin: JupyterLabPlugin<IConsoleTracker> = {
   ],
   activate: activateConsole,
   autoStart: true
+};
+
+
+/**
+ * The console widget renderer.
+ */
+export
+const rendererPlugin: JupyterLabPlugin<ConsoleContent.IRenderer> = {
+  id: 'jupyter.services.console-renderer',
+  provides: ConsoleContent.IRenderer,
+  requires: [IEditorServices],
+  autoStart: true,
+  activate: (app: JupyterLab, editorServices: IEditorServices) => {
+    return new ConsoleContent.Renderer({ editorServices });
+  }
 };
 
 

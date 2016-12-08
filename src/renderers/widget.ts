@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-
 import {
   ansi_to_html, escape_for_html
 } from 'ansi_up';

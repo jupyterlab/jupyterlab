@@ -134,6 +134,11 @@ interface ICompletionRequest extends IEditorState {
 export
 interface ICellEditorWidget extends Widget {
   /**
+   * The editor used by the widget.
+   */
+  readonly editor: CodeEditor.IEditor;
+
+  /**
    * The cell model used by the editor.
    */
   model: ICellModel | null;
@@ -241,9 +246,9 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
     this.editor.model.value.changed.connect(() => {
       this.onEditorModelChange();
     });
-    this.editor.onKeyDown = (editor, event) => {
+    this.editor.addKeydownHandler((editor, event) => {
       return this.onEditorKeydown(editor, event);
-    };
+    });
   }
 
   /**

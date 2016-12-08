@@ -16,16 +16,16 @@ import {
 } from 'phosphor/lib/ui/panel';
 
 import {
-  createCodeCellRenderer
-} from '../../../lib/notebook/codemirror';
-
-import {
   ForeignHandler
 } from '../../../lib/console/foreign';
 
 import {
   CodeCellModel, CodeCellWidget
 } from '../../../lib/notebook/cells';
+
+import {
+  createCodeCellRenderer
+} from '../notebook/utils';
 
 import {
   defaultRenderMime

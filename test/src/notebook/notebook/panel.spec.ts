@@ -24,10 +24,6 @@ import {
 } from '../../../../lib/completer';
 
 import {
-  createNotebookPanelRenderer
-} from '../../../../lib/notebook/codemirror';
-
-import {
   INotebookModel
 } from '../../../../lib/notebook/notebook/model';
 
@@ -48,7 +44,7 @@ import {
 } from '../../utils';
 
 import {
-  DEFAULT_CONTENT
+  DEFAULT_CONTENT, createNotebookPanelRenderer
 } from '../utils';
 
 

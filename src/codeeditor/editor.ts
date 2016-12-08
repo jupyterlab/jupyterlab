@@ -489,11 +489,6 @@ namespace CodeEditor {
     readonly charWidth: number;
 
     /**
-     * Handle keydown events for the editor.
-     */
-    onKeyDown: KeydownHandler | null;
-
-    /**
      * Brings browser focus to this editor text.
      */
     focus(): void;
@@ -507,6 +502,15 @@ namespace CodeEditor {
      * Repaint the editor.
      */
     refresh(): void;
+
+    /**
+     * Add a keydown handler to the editor.
+     *
+     * @param handler - A keydown handler.
+     *
+     * @returns A disposable that can be used to remove the handler.
+     */
+    addKeydownHandler(handler: KeydownHandler): IDisposable;
 
     /**
      * Set the size of the editor.
