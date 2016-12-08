@@ -17,12 +17,11 @@ Distributed under the terms of the Modified BSD License.
   {% endblock %}
 
   <script id='jupyter-config-data' type="application/json">{
-  "baseUrl": "{{base_url | urlencode}}",
-  "hubHost": "{{hub_host | urlencode}}",
-  "hubPrefix": "{{hub_prefix | urlencode}}",
-  "wsUrl": "{{ws_url| urlencode}}",
-  "notebookPath": "{{notebook_path | urlencode}}",
-  "terminalsAvailable": "{{terminals_available}}"
+    {% for key, value in jupyterlab_config.items() -%}
+    "{{ key }}": "{{ value }}",
+    {% endfor -%}
+    "baseUrl": "{{base_url | urlencode}}",
+    "wsUrl": "{{ws_url | urlencode}}"
   }</script>
 
   {% block favicon %}<link rel="shortcut icon" type="image/x-icon" href="/static/base/images/favicon.ico">{% endblock %}
