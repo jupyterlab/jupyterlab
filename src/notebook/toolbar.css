@@ -8,30 +8,9 @@
 |----------------------------------------------------------------------------*/
 
 
-:root {
-  --jp-private-notebook-toolbar-height: 24px;
-}
-
-
 /*-----------------------------------------------------------------------------
 | Styles
 |----------------------------------------------------------------------------*/
-
-
-.jp-Notebook-panel .jp-Toolbar {
-  height: calc(var(--jp-private-notebook-toolbar-height) + var(--jp-border-width));
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
-}
-
-.jp-Notebook-panel .jp-Toolbar .jp-Toolbar-item {
-  line-height: 24px;
-}
-
-.jp-Toolbar-item.jp-Kernel-toolbarKernelIndicator {
-  font-family: FontAwesome;
-  text-align: center;
-  display: inline-block;
-}
 
 
 .jp-Notebook-toolbarCellType select {
@@ -48,19 +27,6 @@
   height: 20px;
   margin-top: 2px;
   margin-bottom: 2px;
-}
-
-
-.jp-Toolbar > .jp-Toolbar-item.jp-Kernel-toolbarKernelName {
-  text-align: right;
-  flex-grow: 1;
-  flex-shrink: 1;
-  font-size: var(--jp-ui-font-size1);
-}
-
-
-.jp-Toolbar-item.jp-Kernel-toolbarKernelIndicator {
-  border-right: none;
 }
 
 
@@ -91,24 +57,4 @@
 
 .jp-Notebook-toolbarRun::before {
   content: "\f051";  /* step-forward */
-}
-
-
-.jp-Kernel-toolbarInterrupt::before {
-  content: "\f04d";  /* stop */
-}
-
-
-.jp-Kernel-toolbarRestart::before {
-  content: "\f01e";  /* rotate-right */
-}
-
-
-.jp-Kernel-toolbarKernelIndicator::before {
-  content: "\f10c";  /* circle-o */
-}
-
-
-.jp-Kernel-toolbarKernelIndicator.jp-mod-busy::before {
-  content: "\f111";  /* circle */
 }
