@@ -20,6 +20,10 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
+  CommandRegistry
+} from 'phosphor/lib/ui/commandregistry';
+
+import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
@@ -30,6 +34,10 @@ import {
 import {
   ApplicationShell
 } from '../application/shell';
+
+import {
+  InstanceTracker
+} from '../common/instancetracker';
 
 import {
   IStateDB
@@ -86,6 +94,41 @@ namespace ILayoutRestorer {
      */
     area: ApplicationShell.Area;
   }
+
+  /**
+   * The state restoration configuration options.
+   */
+  export
+  interface IRestoreOptions {
+    /**
+     * The command to execute when restoring instances.
+     */
+    command: string;
+
+    /**
+     * A function that returns the args needed to restore an instance.
+     */
+    args: (widget: Widget) => JSONObject;
+
+    /**
+     * A function that returns a unique persistent name for this instance.
+     */
+    name: (widget: Widget) => string;
+
+    /**
+     * The namespace to occupy in the state database for restoration data.
+     */
+    namespace: string;
+
+    /**
+     * The point after which it is safe to restore state.
+     *
+     * #### Notes
+     * The default value for this promise is the `started` promise of the
+     * JupyterLab application.
+     */
+    when?: Promise<any> | Array<Promise<any>>;
+  }
 }
 
 
@@ -109,7 +152,8 @@ class LayoutRestorer implements ILayoutRestorer {
    */
   constructor(options: LayoutRestorer.IOptions) {
     this._state = options.state;
-    options.first.then(() => Promise.all(this._promises))
+    this._first = options.first;
+    this._first.then(() => Promise.all(this._promises))
       .then(() => {
         // Release the promises held in memory.
         this._promises = null;
@@ -157,6 +201,20 @@ class LayoutRestorer implements ILayoutRestorer {
   }
 
   /**
+   * Restore the widgets of a particular instance tracker.
+   */
+  restore(tracker: InstanceTracker<any>, options: ILayoutRestorer.IRestoreOptions): void {
+    let { args, command, name, namespace, when } = options;
+    tracker.restore({
+      args, command, name, namespace,
+      layout: this,
+      registry: this._registry,
+      state: this._state,
+      when: when || this._first,
+    });
+  }
+
+  /**
    * Save the layout state for the application.
    */
   save(data: LayoutRestorer.IRestorable): Promise<void> {
@@ -195,8 +253,10 @@ class LayoutRestorer implements ILayoutRestorer {
     });
   }
 
+  private _first: Promise<any> = null;
   private _promises: Promise<any>[] = [];
   private _restored = new utils.PromiseDelegate<void>();
+  private _registry: CommandRegistry = null;
   private _state: IStateDB = null;
   private _widgets = new Map<string, Widget>();
 }
