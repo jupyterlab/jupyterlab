@@ -68,16 +68,14 @@ function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palet
     defaultFor: EXTENSIONS
   });
 
-  const tracker = new InstanceTracker<ImageWidget>({
-    restore: {
-      state, layout,
-      command: 'file-operations:open',
-      args: widget => ({ path: widget.context.path, factory: FACTORY }),
-      name: widget => widget.context.path,
-      namespace: 'imagewidget',
-      when: app.started,
-      registry: app.commands
-    }
+  const tracker = new InstanceTracker<ImageWidget>();
+
+  // Handle state restoration.
+  layout.restore(tracker, {
+    namespace: 'imagewidget',
+    command: 'file-operations:open',
+    args: (w: ImageWidget) => ({ path: w.context.path, factory: FACTORY }),
+    name: (w: ImageWidget) => w.context.path
   });
 
   // Sync tracker with currently focused widget.

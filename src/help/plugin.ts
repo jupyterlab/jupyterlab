@@ -145,7 +145,7 @@ function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICom
   function newIFrame(id: string): IFrame {
     let iframe = new IFrame();
     iframe.addClass(HELP_CLASS);
-    iframe.title.label = 'Help';
+    iframe.title.label = category;
     iframe.id = id;
 
     // If the help widget is being hidden, remove its state.
