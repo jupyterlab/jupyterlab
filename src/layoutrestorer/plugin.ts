@@ -24,11 +24,11 @@ const plugin: JupyterLabPlugin<ILayoutRestorer> = {
   id: 'jupyter.services.layout-restorer',
   requires: [IStateDB],
   activate: (app: JupyterLab, state: IStateDB) => {
-    let layout = new LayoutRestorer({ first: app.started, state });
+    let first = app.started;
+    let registry = app.commands;
+    let layout = new LayoutRestorer({ first, registry, state });
     // Activate widgets that have been restored if necessary.
-    layout.activated.connect((sender, id) => {
-      app.shell.activateMain(id);
-    });
+    layout.activated.connect((sender, id) => { app.shell.activateMain(id); });
     // After restoration is complete, listen to the shell for updates.
     layout.restored.then(() => {
       app.shell.currentChanged.connect((sender, args) => {

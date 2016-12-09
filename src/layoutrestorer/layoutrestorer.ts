@@ -69,13 +69,13 @@ interface ILayoutRestorer {
   add(widget: Widget, name: string, options?: ILayoutRestorer.IAddOptions): void;
 
   /**
-   * Wait for the given promise to resolve before restoring layout.
+   * Restore the widgets of a particular instance tracker.
    *
-   * #### Notes
-   * This function should only be called before the `first` promise passed in
-   * at instantiation has resolved. See the notes for `LayoutRestorer.IOptions`.
+   * @param tracker - The instance tracker whose widgets will be restored.
+   *
+   * @param options - The restoration options.
    */
-  await(promise: Promise<any>): void;
+  restore(tracker: InstanceTracker<any>, options: ILayoutRestorer.IRestoreOptions): void;
 }
 
 
@@ -124,8 +124,8 @@ namespace ILayoutRestorer {
      * The point after which it is safe to restore state.
      *
      * #### Notes
-     * The default value for this promise is the `started` promise of the
-     * JupyterLab application.
+     * By definition, this promise or promises will happen after the application
+     * has `started`.
      */
     when?: Promise<any> | Array<Promise<any>>;
   }
@@ -153,14 +153,13 @@ class LayoutRestorer implements ILayoutRestorer {
   constructor(options: LayoutRestorer.IOptions) {
     this._state = options.state;
     this._first = options.first;
-    this._first.then(() => Promise.all(this._promises))
-      .then(() => {
-        // Release the promises held in memory.
-        this._promises = null;
-        // Restore the application state.
-        return this._restore();
-      })
-      .then(() => { this._restored.resolve(void 0); });
+    this._first.then(() => Promise.all(this._promises)).then(() => {
+      // Release the promises held in memory.
+      this._first = null;
+      this._promises = null;
+      // Restore the application state.
+      return this._restore();
+    }).then(() => { this._restored.resolve(void 0); });
   }
 
   /**
@@ -185,33 +184,25 @@ class LayoutRestorer implements ILayoutRestorer {
   }
 
   /**
-   * Wait for the given promise to resolve before restoring layout.
+   * Restore the widgets of a particular instance tracker.
    *
-   * #### Notes
-   * This function should only be called before the `first` promise passed in
-   * at instantiation has resolved. See the notes for `LayoutRestorer.IOptions`.
+   * @param tracker - The instance tracker whose widgets will be restored.
+   *
+   * @param options - The restoration options.
    */
-  await(promise: Promise<any>): void {
+  restore(tracker: InstanceTracker<any>, options: ILayoutRestorer.IRestoreOptions): void {
     if (!this._promises) {
-      console.warn('await can only be called before app has started.');
+      console.warn('restore can only be called before app has started.');
       return;
     }
 
-    this._promises.push(promise);
-  }
-
-  /**
-   * Restore the widgets of a particular instance tracker.
-   */
-  restore(tracker: InstanceTracker<any>, options: ILayoutRestorer.IRestoreOptions): void {
     let { args, command, name, namespace, when } = options;
-    tracker.restore({
-      args, command, name, namespace,
+    this._promises.push(tracker.restore({
+      args, command, name, namespace, when,
       layout: this,
       registry: this._registry,
-      state: this._state,
-      when: when || this._first,
-    });
+      state: this._state
+    }));
   }
 
   /**
@@ -315,6 +306,11 @@ namespace LayoutRestorer {
      * tracker.
      */
     first: Promise<any>;
+
+    /**
+     * The application command registry.f
+     */
+    registry: CommandRegistry;
 
     /**
      * The state database instance.

@@ -267,17 +267,15 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   /**
    * Restore the widgets in this tracker's namespace.
    */
-  restore(options: InstanceTracker.IRestore<T>): Promise<any> {
+  restore(options: InstanceTracker.IRestoreOptions): Promise<any> {
     this._restore = options;
 
     let { command, namespace, registry, state, when } = options;
-    let promises = [state.fetchNamespace(namespace)].concat(when);
+    let promises = [state.fetchNamespace(namespace)];
 
-    // Immediately (synchronously) register the restored promise with the
-    // layout restorer if one is present.
-    // if (layout) {
-    //   layout.await(this._restored.promise);
-    // }
+    if (when) {
+      promises = promises.concat(when);
+    }
 
     return Promise.all(promises).then(([saved]) => {
       return Promise.all(saved.map(item => {
