@@ -100,15 +100,14 @@ function activateInspector(app: JupyterLab, palette: ICommandPalette, state: ISt
   const command = 'inspector:open';
   const label = 'Open Inspector';
   const manager = new InspectorManager();
-  const tracker = new InstanceTracker<Inspector>({
-    restore: {
-      state, layout, command,
-      args: widget => null,
-      name: widget => 'inspector',
-      namespace: 'inspector',
-      when: app.started,
-      registry: app.commands
-    }
+  const tracker = new InstanceTracker<Inspector>();
+
+  // Handle state restoration.
+  layout.restore(tracker, {
+    namespace: 'inspector',
+    command,
+    args: widget => null,
+    name: widget => 'inspector'
   });
 
   function newInspector(): Inspector {
