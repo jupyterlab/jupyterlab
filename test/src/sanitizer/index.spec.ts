@@ -32,8 +32,8 @@ describe('defaultSanitizer', () => {
       expect(defaultSanitizer.sanitize(img)).to.be(img);
     });
 
-    it('should allow span tags', () => {
-      let span = '<span>foo</span>';
+    it('should allow span tags and class attribute', () => {
+      let span = '<span class="foo">bar</span>';
       expect(defaultSanitizer.sanitize(span)).to.be(span);
     });
 
