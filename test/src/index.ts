@@ -43,6 +43,8 @@ import './editorwidget/widget.spec';
 import './filebrowser/crumbs.spec';
 import './filebrowser/model.spec';
 
+import './imagewidget/widget.spec';
+
 import './inspector/inspector.spec';
 
 import './markdownwidget/widget.spec';
