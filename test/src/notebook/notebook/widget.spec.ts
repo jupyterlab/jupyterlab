@@ -915,7 +915,9 @@ describe('notebook/notebook/widget', () => {
           widget.model.cells.pushBack(cell);
           let child = widget.widgets.at(widget.widgets.length - 1) as MarkdownCellWidget;
           expect(child.rendered).to.be(true);
+          expect(widget.mode).to.be('command');
           simulate(child.node, 'dblclick');
+          expect(widget.mode).to.be('edit');
           expect(child.rendered).to.be(false);
         });
 

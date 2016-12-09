@@ -703,25 +703,29 @@ class Notebook extends StaticNotebook {
     return this._mode;
   }
   set mode(newValue: NotebookMode) {
-    // Always post an update request.
-    this.update();
-    if (newValue === this._mode) {
-      return;
-    }
-    let oldValue = this._mode;
-    this._mode = newValue;
-    this.stateChanged.emit({ name: 'mode', oldValue, newValue });
     let activeCell = this.activeCell;
     if (!activeCell) {
+      newValue = 'command';
+    }
+    if (newValue === this._mode) {
+      this._ensureFocus();
       return;
     }
-    // Edit mode deselects all cells.
+    // Post an update request.
+    this.update();
+    let oldValue = this._mode;
+    this._mode = newValue;
+
     if (newValue === 'edit') {
+      // Edit mode deselects all cells.
       each(this.widgets, widget => { this.deselect(widget); });
+      //  Edit mode unrenders an active markdown widget.
       if (activeCell instanceof MarkdownCellWidget) {
         activeCell.rendered = false;
       }
     }
+    this.stateChanged.emit({ name: 'mode', oldValue, newValue });
+    this._ensureFocus();
   }
 
   /**
@@ -737,8 +741,6 @@ class Notebook extends StaticNotebook {
     return this.model.cells.length ? this._activeCellIndex : -1;
   }
   set activeCellIndex(newValue: number) {
-    // Always post an update request.
-    this.update();
     let oldValue = this._activeCellIndex;
     if (!this.model || !this.model.cells.length) {
       newValue = -1;
@@ -749,14 +751,17 @@ class Notebook extends StaticNotebook {
     this._activeCellIndex = newValue;
     let cell = this.widgets.at(newValue);
     if (cell !== this._activeCell) {
+      // Post an update request.
+      this.update();
       this._activeCell = cell;
       this.activeCellChanged.emit(cell);
     }
-    if (newValue === oldValue) {
-      return;
-    }
     if (this.mode === 'edit' && cell instanceof MarkdownCellWidget) {
       cell.rendered = false;
+    }
+    this._ensureFocus();
+    if (newValue === oldValue) {
+      return;
     }
     this.stateChanged.emit({ name: 'activeCellIndex', oldValue, newValue });
   }
@@ -937,7 +942,7 @@ class Notebook extends StaticNotebook {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this._ensureFocus();
+    this._ensureFocus(true);
   }
 
   /**
@@ -945,10 +950,6 @@ class Notebook extends StaticNotebook {
    */
   protected onUpdateRequest(msg: Message): void {
     let activeCell = this.activeCell;
-    // Ensure we have the correct focus.
-    if (this.node.contains(document.activeElement)) {
-      this._ensureFocus();
-    }
 
     // Set the appropriate classes on the cells.
     if (this.mode === 'edit') {
@@ -1023,9 +1024,6 @@ class Notebook extends StaticNotebook {
    */
   private _onEdgeRequest(widget: Widget, location: EdgeLocation): void {
     let prev = this.activeCellIndex;
-    // Clear the previous cell focus.
-    this.node.focus();
-
     if (location === 'top') {
       this.activeCellIndex--;
       // Move the cursor to the first position on the last line.
@@ -1040,20 +1038,16 @@ class Notebook extends StaticNotebook {
         this.activeCell.editor.setCursorPosition(0);
       }
     }
-    // Attempt to focus the new cell.
-    this.activeCell.activate();
   }
 
   /**
    * Ensure that the notebook has proper focus.
    */
-  private _ensureFocus(): void {
+  private _ensureFocus(force=false): void {
     let activeCell = this.activeCell;
-    if (this.mode === 'edit' && activeCell) {
-      activeCell.editor.activate();
-    } else if (!this.node.contains(document.activeElement)) {
-      this.node.focus();
-    } else {
+    if (this.mode === 'edit') {
+      activeCell.editor.editor.focus();
+    } else if (this.node.contains(document.activeElement)) {
       // If an editor currently has focus, focus our node.
       // Otherwise, another input field has focus and should keep it.
       let w = find(this.layout, widget => {
@@ -1062,6 +1056,9 @@ class Notebook extends StaticNotebook {
       if (w) {
         this.node.focus();
       }
+    }
+    if (force && !this.node.contains(document.activeElement)) {
+      this.node.focus();
     }
   }
 
@@ -1351,9 +1348,14 @@ class Notebook extends StaticNotebook {
    * Handle `blur` events for the widget.
    */
   private _evtBlur(event: MouseEvent): void {
-    let target = event.relatedTarget as HTMLElement;
-    if (!this.node.contains(target)) {
+    let relatedTarget = event.relatedTarget as HTMLElement;
+    if (!this.node.contains(relatedTarget)) {
       this.mode = 'command';
+    }
+    // If the root node is not blurring and we are in command mode,
+    // focus ourselves.
+    if (this.mode === 'command' && event.target !== this.node) {
+      this.node.focus();
     }
   }
 
@@ -1370,13 +1372,9 @@ class Notebook extends StaticNotebook {
     if (i === -1) {
       return;
     }
-    let layout = this.layout as PanelLayout;
-    let cell = model.cells.at(i) as MarkdownCellModel;
-    let widget = layout.widgets.at(i) as MarkdownCellWidget;
-    if (cell.type === 'markdown') {
-      widget.rendered = false;
-      widget.activate();
-      return;
+    this.activeCellIndex = i;
+    if (model.cells.at(i).type === 'markdown') {
+      this.mode = 'edit';
     } else if (target.localName === 'img') {
       target.classList.toggle(UNCONFINED_CLASS);
     }

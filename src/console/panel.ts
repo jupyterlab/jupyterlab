@@ -78,7 +78,7 @@ class ConsolePanel extends Panel {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this.content.activate();
+    this.content.prompt.editor.editor.focus();
   }
 
   /**

@@ -388,7 +388,7 @@ class ConsoleContent extends Widget {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    sendMessage(this.prompt.editor, WidgetMessage.ActivateRequest);
+    this.prompt.editor.editor.focus();
     this.update();
   }
 
@@ -423,7 +423,7 @@ class ConsoleContent extends Widget {
     this._completerHandler.activeCell = prompt;
     this._inspectionHandler.activeCell = prompt;
 
-    sendMessage(prompt.editor, WidgetMessage.ActivateRequest);
+    prompt.editor.editor.focus();
     this.update();
   }
 
@@ -479,7 +479,7 @@ class ConsoleContent extends Widget {
    */
   private _evtKeyDown(event: KeyboardEvent): void {
     if (event.keyCode === 13 && !this.prompt.editor.hasFocus()) {
-      this.prompt.editor.activate();
+      this.prompt.editor.editor.focus();
     }
   }
 
