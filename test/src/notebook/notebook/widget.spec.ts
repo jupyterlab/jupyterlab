@@ -681,15 +681,6 @@ describe('notebook/notebook/widget', () => {
         });
       });
 
-      it('should focus the cell if switching to edit mode', () => {
-        let widget = createActiveWidget();
-        Widget.attach(widget, document.body);
-        sendMessage(widget, WidgetMessage.ActivateRequest);
-        widget.mode = 'edit';
-        let cell = widget.widgets.at(widget.activeCellIndex);
-        expect(cell.node.contains(document.activeElement)).to.be(true);
-      });
-
       it('should unrender a markdown cell when switching to edit mode', () => {
         let widget = createActiveWidget();
         Widget.attach(widget, document.body);
