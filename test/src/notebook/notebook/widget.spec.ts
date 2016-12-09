@@ -681,23 +681,7 @@ describe('notebook/notebook/widget', () => {
         });
       });
 
-      it('should focus the cell if switching to edit mode', (done) => {
-        let widget = createActiveWidget();
-        Widget.attach(widget, document.body);
-        sendMessage(widget, WidgetMessage.ActivateRequest);
-        widget.mode = 'edit';
-        let cell = widget.widgets.at(widget.activeCellIndex);
-        // Wait for update-request.
-        requestAnimationFrame(() => {
-          // Notebook activates the editor.
-          requestAnimationFrame(() => {
-            expect(cell.node.contains(document.activeElement)).to.be(true);
-            done();
-          });
-        });
-      });
-
-      it('should unrender a markdown cell when switching to edit mode', (done) => {
+      it('should unrender a markdown cell when switching to edit mode', () => {
         let widget = createActiveWidget();
         Widget.attach(widget, document.body);
         sendMessage(widget, WidgetMessage.ActivateRequest);
@@ -707,10 +691,7 @@ describe('notebook/notebook/widget', () => {
         expect(child.rendered).to.be(true);
         widget.activeCellIndex = widget.widgets.length - 1;
         widget.mode = 'edit';
-        requestAnimationFrame(() => {
-          expect(child.rendered).to.be(false);
-          done();
-        });
+        expect(child.rendered).to.be(false);
       });
 
     });
@@ -915,7 +896,9 @@ describe('notebook/notebook/widget', () => {
           widget.model.cells.pushBack(cell);
           let child = widget.widgets.at(widget.widgets.length - 1) as MarkdownCellWidget;
           expect(child.rendered).to.be(true);
+          expect(widget.mode).to.be('command');
           simulate(child.node, 'dblclick');
+          expect(widget.mode).to.be('edit');
           expect(child.rendered).to.be(false);
         });
 

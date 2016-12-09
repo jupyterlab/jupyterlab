@@ -251,7 +251,7 @@ class BaseCellWidget extends Widget {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this._editor.activate();
+    this._editor.editor.focus();
   }
 
   /**
@@ -659,7 +659,7 @@ class MarkdownCellWidget extends BaseCellWidget {
       return;
     }
     this._rendered = value;
-    this.update();
+    this._handleRendered();
   }
 
   /**
@@ -673,36 +673,51 @@ class MarkdownCellWidget extends BaseCellWidget {
     super.dispose();
   }
 
-  /**
+  /*
    * Handle `update-request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    let model = this.model;
-    if (this.rendered) {
-      let text = model && model.source || DEFAULT_MARKDOWN_TEXT;
-      // Do not re-render if the text has not changed.
-      if (text !== this._prev) {
-        let bundle: RenderMime.MimeMap<string> = { 'text/markdown': text };
-        let trusted = this.trusted;
-        let widget = this._rendermime.render({ bundle, trusted });
-        this._output = widget || new Widget();
-        this._output.addClass(MARKDOWN_OUTPUT_CLASS);
-        this.update();
-      } else {
-        this._output.show();
-      }
-      this._prev = text;
-      this.renderInput(this._output);
-    } else {
-      this.showEditor();
-    }
+    // Make sure we are properly rendered.
+    this._handleRendered();
     super.onUpdateRequest(msg);
+  }
+
+  /**
+   * Handle the rendered state.
+   */
+  private _handleRendered(): void {
+    if (!this._rendered) {
+      this.showEditor();
+    } else {
+      this._updateOutput();
+      this.renderInput(this._output);
+    }
+  }
+
+  /**
+   * Update the output.
+   */
+  private _updateOutput(): void {
+    let model = this.model;
+    let text = model && model.source || DEFAULT_MARKDOWN_TEXT;
+    let trusted = this.trusted;
+    // Do not re-render if the text has not changed and the trusted
+    // has not changed.
+    if (text !== this._prevText || trusted !== this._prevTrusted) {
+      let bundle: RenderMime.MimeMap<string> = { 'text/markdown': text };
+      let widget = this._rendermime.render({ bundle, trusted });
+      this._output = widget || new Widget();
+      this._output.addClass(MARKDOWN_OUTPUT_CLASS);
+    }
+    this._prevText = text;
+    this._prevTrusted = trusted;
   }
 
   private _rendermime: RenderMime = null;
   private _output: Widget = null;
   private _rendered = true;
-  private _prev = '';
+  private _prevText = '';
+  private _prevTrusted = false;
 }
 
 
