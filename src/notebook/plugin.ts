@@ -176,16 +176,15 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     renderer
   });
 
-  const tracker = new NotebookTracker({
-    restore: {
-      state, layout,
-      command: 'file-operations:open',
-      args: widget => ({ path: widget.context.path, factory: FACTORY }),
-      name: widget => widget.context.path,
-      namespace: 'notebook',
-      when: [app.started, services.ready],
-      registry: app.commands
-    }
+  const tracker = new NotebookTracker();
+
+  // Handle state restoration.
+  layout.restore(tracker, {
+    namespace: 'notebook',
+    command: 'file-operations:open',
+    args: (p: NotebookPanel) => ({ path: p.context.path, factory: FACTORY }),
+    name: (p: NotebookPanel) => p.context.path,
+    when: services.ready
   });
 
   // Sync tracker and set the source of the code inspector.
