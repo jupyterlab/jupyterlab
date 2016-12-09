@@ -381,12 +381,6 @@ namespace InstanceTracker {
   interface IRestoreOptions extends ILayoutRestorer.IRestoreOptions {
     /*
      * The layout restorer to use to re-arrange restored tabs.
-     *
-     * #### Notes
-     * If a layout restorer instance is not supplied, widget instances will
-     * still be restored, but their layout within JupyterLab will be arbitrary.
-     * This may be acceptable for widgets that have a pre-defined slot whose
-     * layout cannot be modified.
      */
     layout: ILayoutRestorer;
 

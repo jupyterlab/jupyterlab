@@ -282,22 +282,22 @@ namespace LayoutRestorer {
      *
      * 3. As each load-time plugin initializes (which happens before the lab
      *    application has `started`), it instructs the layout restorer whether
-     *    the restorer ought to `await` its state restoration.
+     *    the restorer ought to `restore` its state.
      *
      * 4. After all the load-time plugins have finished initializing, the lab
      *    application `started` promise will resolve. This is the `first`
      *    promise that the layout restorer waits for. By this point, all of the
      *    plugins that care about layout restoration will have instructed the
-     *    layout restorer to `await` their restoration.
+     *    layout restorer to `restore` their state.
      *
-     * 5. Each plugin will then proceed to restore its state and reinstantiate
-     *    whichever widgets it wants to restore.
+     * 5. The layout restorer will then instruct each plugin's instance tracker
+     *    to restore its state and reinstantiate whichever widgets it wants.
      *
-     * 6. As each plugin finishes restoring, it resolves the promise that it
-     *    instructed the layout restorer to `await` (in step 3).
+     * 6. As each instance finishes restoring, it resolves the promise that was
+     *    made to the layout restorer (in step 5).
      *
      * 7. After all of the promises that the restorer is awaiting have resolved,
-     *    the restorer then proceeds to reconstruct the saved layout.
+     *    the restorer then reconstructs the saved layout.
      *
      * Of particular note are steps 5 and 6: since state restoration of plugins
      * is accomplished by executing commands, the command that is used to
@@ -308,7 +308,7 @@ namespace LayoutRestorer {
     first: Promise<any>;
 
     /**
-     * The application command registry.f
+     * The application command registry.
      */
     registry: CommandRegistry;
 
