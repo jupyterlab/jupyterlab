@@ -2,14 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  utils
-} from '@jupyterlab/services';
-
-import {
-  JSONObject
-} from 'phosphor/lib/algorithm/json';
-
-import {
   IDisposable
 } from 'phosphor/lib/core/disposable';
 
@@ -107,39 +99,6 @@ interface IInstanceTracker<T extends Widget> {
  */
 export
 class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposable {
-  /**
-   * Create a new instance tracker.
-   *
-   * @param options - The instance tracker configuration options.
-   */
-  constructor(options: InstanceTracker.IOptions<T> = {}) {
-    this._restore = options.restore;
-
-    if (!this._restore) {
-      return;
-    }
-
-    let { command, namespace, layout, registry, state, when } = this._restore;
-    let promises = [state.fetchNamespace(namespace)].concat(when);
-
-    // Immediately (synchronously) register the restored promise with the
-    // layout restorer if one is present.
-    if (layout) {
-      layout.await(this._restored.promise);
-    }
-
-    Promise.all(promises).then(([saved]) => {
-      promises = saved.map(item => {
-        let args = (item.value as any).data;
-        // Execute the command and if it fails, delete the state restore data.
-        return registry.execute(command, args)
-          .catch(() => { state.remove(args.id); });
-      });
-      return Promise.all(promises);
-    }).then(() => { this._restored.resolve(void 0); });
-
-  }
-
   /**
    * A signal emitted when a widget is added or removed from the tracker.
    */
@@ -306,6 +265,31 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   }
 
   /**
+   * Restore the widgets in this tracker's namespace.
+   */
+  restore(options: InstanceTracker.IRestore<T>): Promise<any> {
+    this._restore = options;
+
+    let { command, namespace, registry, state, when } = options;
+    let promises = [state.fetchNamespace(namespace)].concat(when);
+
+    // Immediately (synchronously) register the restored promise with the
+    // layout restorer if one is present.
+    // if (layout) {
+    //   layout.await(this._restored.promise);
+    // }
+
+    return Promise.all(promises).then(([saved]) => {
+      return Promise.all(saved.map(item => {
+        let args = (item.value as any).data;
+        // Execute the command and if it fails, delete the state restore data.
+        return registry.execute(command, args)
+          .catch(() => { state.remove(args.id); });
+      }));
+    });
+  }
+
+  /**
    * Save the restore data for a given widget.
    *
    * @param widget - The widget being saved.
@@ -377,8 +361,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   }
 
   private _currentWidget: T = null;
-  private _restore: InstanceTracker.IRestoreOptions<T> = null;
-  private _restored = new utils.PromiseDelegate<void>();
+  private _restore: InstanceTracker.IRestoreOptions = null;
   private _widgets = new Set<T>();
 }
 
@@ -397,28 +380,8 @@ namespace InstanceTracker {
    * The state restoration configuration options.
    */
   export
-  interface IRestoreOptions<T extends Widget> {
-    /**
-     * The command to execute when restoring instances.
-     */
-    command: string;
-
-    /**
-     * A function that returns the args needed to restore an instance.
-     */
-    args: (widget: T) => JSONObject;
-
-    /**
-     * A function that returns a unique persistent name for this instance.
-     */
-    name: (widget: T) => string;
-
-    /**
-     * The namespace to occupy in the state database for restoration data.
-     */
-    namespace: string;
-
-    /**
+  interface IRestoreOptions extends ILayoutRestorer.IRestoreOptions {
+    /*
      * The layout restorer to use to re-arrange restored tabs.
      *
      * #### Notes
@@ -427,7 +390,7 @@ namespace InstanceTracker {
      * This may be acceptable for widgets that have a pre-defined slot whose
      * layout cannot be modified.
      */
-    layout?: ILayoutRestorer;
+    layout: ILayoutRestorer;
 
     /**
      * The command registry which holds the restore command.
@@ -438,22 +401,6 @@ namespace InstanceTracker {
      * The state database instance.
      */
     state: IStateDB;
-
-    /**
-     * The point after which it is safe to restore state.
-     */
-    when: Promise<any> | Array<Promise<any>>;
-  }
-
-  /**
-   * The instance tracker constructor options.
-   */
-  export
-  interface IOptions<T extends Widget> {
-    /**
-     * The optional state restoration options.
-     */
-    restore?: IRestoreOptions<T>;
   }
 }
 
