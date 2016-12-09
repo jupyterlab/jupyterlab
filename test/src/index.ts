@@ -72,6 +72,8 @@ import './notebook/output-area/widget.spec';
 
 import './notebook/tracker.spec';
 
+import './sanitizer/index.spec';
+
 import './terminal/terminal.spec';
 
 import './toolbar/toolbar.spec';
