@@ -60,16 +60,14 @@ const plugin: JupyterLabPlugin<void> = {
       rendermime
     });
 
-    const tracker = new InstanceTracker<MarkdownWidget>({
-      restore: {
-        state, layout,
-        command: 'file-operations:open',
-        args: widget => ({ path: widget.context.path, factory: FACTORY }),
-        name: widget => widget.context.path,
-        namespace: 'rendered-markdown',
-        when: app.started,
-        registry: app.commands
-      }
+    const tracker = new InstanceTracker<MarkdownWidget>();
+
+    // Handle state restoration.
+    layout.restore(tracker, {
+      namespace: 'rendered-markdown',
+      command: 'file-operations:open',
+      args: (w: MarkdownWidget) => ({ path: w.context.path, factory: FACTORY }),
+      name: (w: MarkdownWidget) => w.context.path
     });
 
     let icon = `${PORTRAIT_ICON_CLASS} ${TEXTEDITOR_ICON_CLASS}`;
