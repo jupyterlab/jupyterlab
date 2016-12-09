@@ -53,16 +53,14 @@ function activateCSVWidget(app: JupyterLab, registry: IDocumentRegistry, state: 
     fileExtensions: ['.csv'],
     defaultFor: ['.csv']
   });
-  const tracker = new InstanceTracker<CSVWidget>({
-    restore: {
-      state, layout,
-      command: 'file-operations:open',
-      args: widget => ({ path: widget.context.path, factory: FACTORY }),
-      name: widget => widget.context.path,
-      namespace: 'csvwidget',
-      when: app.started,
-      registry: app.commands
-    }
+  const tracker = new InstanceTracker<CSVWidget>();
+
+  // Handle state restoration.
+  layout.restore(tracker, {
+    namespace: 'csvwidget',
+    command: 'file-operations:open',
+    args: (w: CSVWidget) => ({ path: w.context.path, factory: FACTORY }),
+    name: (w: CSVWidget) => w.context.path
   });
 
   registry.addWidgetFactory(factory);
