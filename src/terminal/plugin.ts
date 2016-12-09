@@ -86,16 +86,14 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
   };
 
   // Create an instance tracker for all terminal widgets.
-  const tracker = new InstanceTracker<TerminalWidget>({
-    restore: {
-      state, layout,
-      command: newTerminalId,
-      args: widget => ({ name: widget.session.name }),
-      name: widget => widget.session && widget.session.name,
-      namespace: 'terminal',
-      when: app.started,
-      registry: app.commands
-    }
+  const tracker = new InstanceTracker<TerminalWidget>();
+
+  // Handle state restoration.
+  layout.restore(tracker, {
+    namespace: 'terminal',
+    command: newTerminalId,
+    args: (w: TerminalWidget) => ({ name: w.session.name }),
+    name: (w: TerminalWidget) => w.session && w.session.name
   });
 
   // Sync tracker with currently focused widget.
