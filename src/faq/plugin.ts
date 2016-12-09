@@ -49,15 +49,14 @@ function activateFAQ(app: JupyterLab, palette: ICommandPalette, linker: ICommand
   const category = 'Help';
   const command = 'faq-jupyterlab:show';
   const model = new FaqModel();
-  const tracker = new InstanceTracker<FaqWidget>({
-    restore: {
-      state, layout, command,
-      args: widget => null,
-      name: widget => 'faq',
-      namespace: 'faq',
-      when: app.started,
-      registry: app.commands
-    }
+  const tracker = new InstanceTracker<FaqWidget>();
+
+  // Handle state restoration.
+  layout.restore(tracker, {
+    namespace: 'faq',
+    command,
+    args: widget => null,
+    name: widget => 'faq'
   });
 
   let widget: FaqWidget;
