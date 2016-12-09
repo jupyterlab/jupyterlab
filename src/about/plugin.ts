@@ -42,14 +42,12 @@ function activateAbout(app: JupyterLab, palette: ICommandPalette, state: IStateD
   const model = new AboutModel();
   const command = `${namespace}:show`;
   const category = 'Help';
-  const tracker = new InstanceTracker<AboutWidget>({
-    restore: {
-      state, layout, command, namespace,
-      args: widget => null,
-      name: widget => 'about',
-      when: app.started,
-      registry: app.commands
-    }
+  const tracker = new InstanceTracker<AboutWidget>();
+
+  layout.restore(tracker, {
+    command, namespace,
+    args: widget => null,
+    name: widget => 'about'
   });
 
   let widget: AboutWidget;
