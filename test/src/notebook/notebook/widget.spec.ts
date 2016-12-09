@@ -681,23 +681,16 @@ describe('notebook/notebook/widget', () => {
         });
       });
 
-      it('should focus the cell if switching to edit mode', (done) => {
+      it('should focus the cell if switching to edit mode', () => {
         let widget = createActiveWidget();
         Widget.attach(widget, document.body);
         sendMessage(widget, WidgetMessage.ActivateRequest);
         widget.mode = 'edit';
         let cell = widget.widgets.at(widget.activeCellIndex);
-        // Wait for update-request.
-        requestAnimationFrame(() => {
-          // Notebook activates the editor.
-          requestAnimationFrame(() => {
-            expect(cell.node.contains(document.activeElement)).to.be(true);
-            done();
-          });
-        });
+        expect(cell.node.contains(document.activeElement)).to.be(true);
       });
 
-      it('should unrender a markdown cell when switching to edit mode', (done) => {
+      it('should unrender a markdown cell when switching to edit mode', () => {
         let widget = createActiveWidget();
         Widget.attach(widget, document.body);
         sendMessage(widget, WidgetMessage.ActivateRequest);
@@ -707,10 +700,7 @@ describe('notebook/notebook/widget', () => {
         expect(child.rendered).to.be(true);
         widget.activeCellIndex = widget.widgets.length - 1;
         widget.mode = 'edit';
-        requestAnimationFrame(() => {
-          expect(child.rendered).to.be(false);
-          done();
-        });
+        expect(child.rendered).to.be(false);
       });
 
     });
