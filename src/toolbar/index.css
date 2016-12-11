@@ -4,6 +4,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+:root {
+  --jp-private-toolbar-height: 24px;
+}
+
 
 .jp-Toolbar {
   color: var(--jp-ui-font-color1);
@@ -12,6 +16,7 @@
   flex-direction: row;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   height: 24px;
+  height: calc(var(--jp-private-toolbar-height) + var(--jp-border-width));
 }
 
 
@@ -41,4 +46,44 @@
 .jp-Toolbar-button:hover {
     background-color: #EEEEEE;
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+
+.jp-Toolbar > .jp-Toolbar-item.jp-Kernel-toolbarKernelName {
+  text-align: right;
+  flex-grow: 1;
+  flex-shrink: 1;
+  font-size: var(--jp-ui-font-size1);
+}
+
+
+.jp-Toolbar-item.jp-Kernel-toolbarKernelIndicator {
+  font-family: FontAwesome;
+  text-align: center;
+  display: inline-block;
+}
+
+
+.jp-Toolbar-item.jp-Kernel-toolbarKernelIndicator {
+  border-right: none;
+}
+
+
+.jp-Kernel-toolbarInterrupt::before {
+  content: "\f04d";  /* stop */
+}
+
+
+.jp-Kernel-toolbarRestart::before {
+  content: "\f01e";  /* rotate-right */
+}
+
+
+.jp-Kernel-toolbarKernelIndicator::before {
+  content: "\f10c";  /* circle-o */
+}
+
+
+.jp-Kernel-toolbarKernelIndicator.jp-mod-busy::before {
+  content: "\f111";  /* circle */
 }

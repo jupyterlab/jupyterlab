@@ -17,12 +17,11 @@ Distributed under the terms of the Modified BSD License.
   {% endblock %}
 
   <script id='jupyter-config-data' type="application/json">{
-  "baseUrl": "{{base_url | urlencode}}",
-  "hubHost": "{{hub_host | urlencode}}",
-  "hubPrefix": "{{hub_prefix | urlencode}}",
-  "wsUrl": "{{ws_url| urlencode}}",
-  "notebookPath": "{{notebook_path | urlencode}}",
-  "terminalsAvailable": "{{terminals_available}}"
+    {% for key, value in jupyterlab_config.items() -%}
+    "{{ key }}": "{{ value }}",
+    {% endfor -%}
+    "baseUrl": "{{base_url | urlencode}}",
+    "wsUrl": "{{ws_url | urlencode}}"
   }</script>
 
   {% block favicon %}<link rel="shortcut icon" type="image/x-icon" href="/static/base/images/favicon.ico">{% endblock %}
@@ -44,11 +43,29 @@ Distributed under the terms of the Modified BSD License.
 
 {% block script %}
 <script>
-  var lab = jupyter.require("{{ jupyterlab_main }}");
+  var loader = jupyter.loader;
+  delete jupyter.loader;
+
+  var createLab = loader.require("{{ jupyterlab_main }}").createLab;
+  var lab = jupyter.lab = createLab(loader);
   var plugins = [];
 
+  /**
+   * Get the plugins for an entry point.
+   */
+  var getEntryPoint = function (entryPoint) {
+    var plugins = loader.require(entryPoint);
+    try {
+      plugins = loader.extractPlugins(plugins);
+    } catch (err) {
+      console.error(err);
+      plugins = [];
+    }
+    return plugins;
+  }
+
   {% for plugin_entry in plugin_entries %}
-  plugins = plugins.concat(jupyter.getEntryPoint("{{ plugin_entry }}"));
+  plugins = plugins.concat(getEntryPoint("{{ plugin_entry }}"));
   {% endfor %}
 
   lab.registerPlugins(plugins);

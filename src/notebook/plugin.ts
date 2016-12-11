@@ -14,6 +14,10 @@ import {
 } from '../clipboard';
 
 import {
+  IEditorServices
+} from '../codeeditor';
+
+import {
   ICommandPalette
 } from '../commandpalette';
 
@@ -31,6 +35,10 @@ import {
 } from '../inspector';
 
 import {
+  ILayoutRestorer
+} from '../layoutrestorer';
+
+import {
   IRenderMime
 } from '../rendermime';
 
@@ -44,7 +52,7 @@ import {
 
 import {
   INotebookTracker, NotebookModelFactory, NotebookPanel, NotebookTracker,
-  NotebookWidgetFactory, NotebookActions
+  NotebookWidgetFactory, NotebookActions, Notebook
 } from './index';
 
 
@@ -68,6 +76,7 @@ const cmdIds = {
   restartRunAll: 'notebook:restart-runAll',
   switchKernel: 'notebook:switch-kernel',
   clearAllOutputs: 'notebook:clear-outputs',
+  closeAndHalt: 'notebook:close-and-halt',
   run: 'notebook-cells:run',
   runAndAdvance: 'notebook-cells:run-and-advance',
   runAndInsert: 'notebook-cells:run-and-insert',
@@ -114,7 +123,7 @@ const FACTORY = 'Notebook';
  * The notebook widget tracker provider.
  */
 export
-const notebookTrackerProvider: JupyterLabPlugin<INotebookTracker> = {
+const trackerPlugin: JupyterLabPlugin<INotebookTracker> = {
   id: 'jupyter.services.notebook-tracker',
   provides: INotebookTracker,
   requires: [
@@ -126,7 +135,8 @@ const notebookTrackerProvider: JupyterLabPlugin<INotebookTracker> = {
     ICommandPalette,
     IInspector,
     NotebookPanel.IRenderer,
-    IStateDB
+    IStateDB,
+    ILayoutRestorer
   ],
   activate: activateNotebookHandler,
   autoStart: true
@@ -134,9 +144,26 @@ const notebookTrackerProvider: JupyterLabPlugin<INotebookTracker> = {
 
 
 /**
+ * The notebook renderer provider.
+ */
+export
+const rendererPlugin: JupyterLabPlugin<NotebookPanel.IRenderer> = {
+  id: 'jupyter.services.notebook-renderer',
+  provides: NotebookPanel.IRenderer,
+  requires: [IEditorServices],
+  autoStart: true,
+  activate: (app: JupyterLab, editorServices: IEditorServices) => {
+    const notebookRenderer = new Notebook.Renderer({ editorServices });
+    return new NotebookPanel.Renderer({ notebookRenderer });
+  }
+};
+
+
+/**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector, renderer: NotebookPanel.IRenderer, state: IStateDB): INotebookTracker {
+function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector, renderer: NotebookPanel.IRenderer, state: IStateDB, layout: ILayoutRestorer): INotebookTracker {
+
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
     fileExtensions: ['.ipynb'],
@@ -151,11 +178,11 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
 
   const tracker = new NotebookTracker({
     restore: {
-      state,
+      state, layout,
       command: 'file-operations:open',
       args: widget => ({ path: widget.context.path, factory: FACTORY }),
       name: widget => widget.context.path,
-      namespace: 'notebooks',
+      namespace: 'notebook',
       when: [app.started, services.ready],
       registry: app.commands
     }
@@ -257,6 +284,15 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
         restartKernel(current.kernel, current.node).then(() => {
           current.activate();
         });
+      }
+    }
+  });
+  commands.addCommand(cmdIds.closeAndHalt, {
+    label: 'Close and Halt',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        current.context.changeKernel(null).then(() => { current.dispose(); });
       }
     }
   });
@@ -609,7 +645,8 @@ function populatePalette(palette: ICommandPalette): void {
     cmdIds.toggleAllLines,
     cmdIds.editMode,
     cmdIds.commandMode,
-    cmdIds.switchKernel
+    cmdIds.switchKernel,
+    cmdIds.closeAndHalt
   ].forEach(command => { palette.addItem({ command, category }); });
 
   category = 'Notebook Cell Operations';
@@ -667,6 +704,7 @@ function createMenu(app: JupyterLab): Menu {
   menu.addItem({ command: cmdIds.runAll });
   menu.addItem({ command: cmdIds.restart });
   menu.addItem({ command: cmdIds.switchKernel });
+  menu.addItem({ command: cmdIds.closeAndHalt });
   menu.addItem({ type: 'separator' });
   menu.addItem({ type: 'submenu', menu: settings });
 

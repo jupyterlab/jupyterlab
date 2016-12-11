@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel
-} from '@jupyterlab/services';
-
-import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -31,24 +27,26 @@ class ImageWidget extends Widget {
   /**
    * Construct a new image widget.
    */
-  constructor(context: DocumentRegistry.IContext<DocumentRegistry.IModel>) {
+  constructor(context: DocumentRegistry.Context) {
     super({ node: Private.createNode() });
     this._context = context;
     this.node.tabIndex = -1;
     this.addClass(IMAGE_CLASS);
 
-    if (context.model.toString()) {
+    this._onTitleChanged();
+    context.pathChanged.connect(this._onTitleChanged, this);
+
+    context.ready.then(() => {
       this.update();
-    }
-    context.pathChanged.connect(() => { this.update(); });
-    context.model.contentChanged.connect(() => { this.update(); });
-    context.fileChanged.connect(() => { this.update(); });
+      context.model.contentChanged.connect(this.update, this);
+      context.fileChanged.connect(this.update, this);
+    });
   }
 
   /**
    * The image widget's context.
    */
-  get context(): DocumentRegistry.IContext<DocumentRegistry.IModel> {
+  get context(): DocumentRegistry.Context {
     return this._context;
   }
 
@@ -67,7 +65,6 @@ class ImageWidget extends Widget {
     let transform: string;
     transform = `scale(${value})`;
     scaleNode.style.transform = transform;
-    this.update();
   }
 
   /**
@@ -85,12 +82,12 @@ class ImageWidget extends Widget {
    * Handle `update-request` messages for the widget.
    */
   protected onUpdateRequest(msg: Message): void {
-    this.title.label = this._context.path.split('/').pop();
-    let cm = this._context.contentsModel;
-    if (cm === null) {
+    let context = this._context;
+    if (this.isDisposed || !context.isReady) {
       return;
     }
-    let content = this._context.model.toString();
+    let cm = context.contentsModel;
+    let content = context.model.toString();
     let src = `data:${cm.mimetype};${cm.format},${content}`;
     this.node.querySelector('img').setAttribute('src', src);
   }
@@ -102,7 +99,14 @@ class ImageWidget extends Widget {
     this.node.focus();
   }
 
-  private _context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
+  /**
+   * Handle a change to the title.
+   */
+  private _onTitleChanged(): void {
+    this.title.label = this._context.path.split('/').pop();
+  }
+
+  private _context: DocumentRegistry.Context;
   private _scale = 1;
 }
 

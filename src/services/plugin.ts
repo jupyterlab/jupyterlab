@@ -18,10 +18,8 @@ import {
  * The default services provider.
  */
 export
-const servicesProvider: JupyterLabPlugin<IServiceManager> = {
+const plugin: JupyterLabPlugin<IServiceManager> = {
   id: 'jupyter.services.services',
   provides: IServiceManager,
-  activate: (): IServiceManager => {
-    return new ServiceManager();
-  }
+  activate: (): IServiceManager => new ServiceManager()
 };

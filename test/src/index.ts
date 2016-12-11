@@ -1,6 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import './application/loader.spec';
+import './application/shell.spec';
+
+import './codeeditor/editor.spec';
+import './codeeditor/widget.spec';
+
 import './commandlinker/commandlinker.spec';
 
 import './common/activitymonitor.spec';
@@ -32,8 +38,12 @@ import './docregistry/context.spec';
 import './docregistry/default.spec';
 import './docregistry/registry.spec';
 
+import './editorwidget/widget.spec';
+
 import './filebrowser/crumbs.spec';
 import './filebrowser/model.spec';
+
+import './imagewidget/widget.spec';
 
 import './inspector/inspector.spec';
 
@@ -63,6 +73,10 @@ import './notebook/output-area/model.spec';
 import './notebook/output-area/widget.spec';
 
 import './notebook/tracker.spec';
+
+import './sanitizer/index.spec';
+
+import './terminal/terminal.spec';
 
 import './toolbar/toolbar.spec';
 

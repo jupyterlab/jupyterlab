@@ -26,6 +26,10 @@ import {
 } from '../../common/interfaces';
 
 import {
+  CodeEditor
+} from '../../codeeditor';
+
+import {
   RenderMime
 } from '../../rendermime';
 
@@ -38,7 +42,7 @@ import {
 } from '../output-area';
 
 import {
-  ICellEditorWidget
+  ICellEditorWidget, CodeCellEditorWidget
 } from './editor';
 
 import {
@@ -247,7 +251,7 @@ class BaseCellWidget extends Widget {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this._editor.activate();
+    this._editor.editor.focus();
   }
 
   /**
@@ -389,17 +393,49 @@ namespace BaseCellWidget {
    * The default implementation of an `IRenderer`.
    */
   export
-  abstract class Renderer implements IRenderer {
+  class Renderer implements IRenderer {
+
+    /**
+     * A code editor factory.
+     */
+    readonly editorFactory: (host: Widget) => CodeEditor.IEditor;
+
+    /**
+     * Creates a new renderer.
+     */
+    constructor(options: Renderer.IOptions) {
+      this.editorFactory = options.editorFactory;
+    }
+
     /**
      * Create a new cell editor for the widget.
      */
-    abstract createCellEditor(): ICellEditorWidget;
+    createCellEditor(): ICellEditorWidget {
+      return new CodeCellEditorWidget(this.editorFactory);
+    }
 
     /**
      * Create a new input area for the widget.
      */
     createInputArea(editor: ICellEditorWidget): InputAreaWidget {
       return new InputAreaWidget(editor);
+    }
+  }
+
+  /**
+   * The namespace for the `Renderer` class statics.
+   */
+  export
+  namespace Renderer {
+    /**
+     * An options object for initializing a renderer.
+     */
+    export
+    interface IOptions {
+      /**
+       * A code editor factory.
+       */
+      readonly editorFactory: (host: Widget) => CodeEditor.IEditor;
     }
   }
 }
@@ -574,7 +610,7 @@ namespace CodeCellWidget {
    * The default implementation of an `IRenderer`.
    */
   export
-  abstract class Renderer extends BaseCellWidget.Renderer implements IRenderer {
+  class Renderer extends BaseCellWidget.Renderer implements IRenderer {
     /**
      * Create an output area widget.
      */
@@ -623,7 +659,7 @@ class MarkdownCellWidget extends BaseCellWidget {
       return;
     }
     this._rendered = value;
-    this.update();
+    this._handleRendered();
   }
 
   /**
@@ -637,36 +673,51 @@ class MarkdownCellWidget extends BaseCellWidget {
     super.dispose();
   }
 
-  /**
+  /*
    * Handle `update-request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    let model = this.model;
-    if (this.rendered) {
-      let text = model && model.source || DEFAULT_MARKDOWN_TEXT;
-      // Do not re-render if the text has not changed.
-      if (text !== this._prev) {
-        let bundle: RenderMime.MimeMap<string> = { 'text/markdown': text };
-        let trusted = this.trusted;
-        let widget = this._rendermime.render({ bundle, trusted });
-        this._output = widget || new Widget();
-        this._output.addClass(MARKDOWN_OUTPUT_CLASS);
-        this.update();
-      } else {
-        this._output.show();
-      }
-      this._prev = text;
-      this.renderInput(this._output);
-    } else {
-      this.showEditor();
-    }
+    // Make sure we are properly rendered.
+    this._handleRendered();
     super.onUpdateRequest(msg);
+  }
+
+  /**
+   * Handle the rendered state.
+   */
+  private _handleRendered(): void {
+    if (!this._rendered) {
+      this.showEditor();
+    } else {
+      this._updateOutput();
+      this.renderInput(this._output);
+    }
+  }
+
+  /**
+   * Update the output.
+   */
+  private _updateOutput(): void {
+    let model = this.model;
+    let text = model && model.source || DEFAULT_MARKDOWN_TEXT;
+    let trusted = this.trusted;
+    // Do not re-render if the text has not changed and the trusted
+    // has not changed.
+    if (text !== this._prevText || trusted !== this._prevTrusted) {
+      let bundle: RenderMime.MimeMap<string> = { 'text/markdown': text };
+      let widget = this._rendermime.render({ bundle, trusted });
+      this._output = widget || new Widget();
+      this._output.addClass(MARKDOWN_OUTPUT_CLASS);
+    }
+    this._prevText = text;
+    this._prevTrusted = trusted;
   }
 
   private _rendermime: RenderMime = null;
   private _output: Widget = null;
   private _rendered = true;
-  private _prev = '';
+  private _prevText = '';
+  private _prevTrusted = false;
 }
 
 

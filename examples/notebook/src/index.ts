@@ -30,13 +30,13 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  NotebookPanel, NotebookWidgetFactory,
+  NotebookPanel, NotebookWidgetFactory, Notebook,
   NotebookModelFactory, NotebookActions
 } from 'jupyterlab/lib/notebook';
 
 import {
-  CodeMirrorNotebookPanelRenderer
-} from 'jupyterlab/lib/notebook/codemirror/notebook/panel';
+  editorServices
+} from 'jupyterlab/lib/codemirror';
 
 import {
   DocumentManager
@@ -49,11 +49,6 @@ import {
 import {
   RenderMime
 } from 'jupyterlab/lib/rendermime';
-
-import {
-  HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
-  JavascriptRenderer, SVGRenderer, MarkdownRenderer
-} from 'jupyterlab/lib/renderers';
 
 import {
   defaultSanitizer
@@ -108,15 +103,7 @@ function createApp(manager: ServiceManager.IManager): void {
     keymap.processKeydownEvent(event);
   }, useCapture);
 
-  const transformers = [
-    new JavascriptRenderer(),
-    new MarkdownRenderer(),
-    new HTMLRenderer(),
-    new ImageRenderer(),
-    new SVGRenderer(),
-    new LatexRenderer(),
-    new TextRenderer()
-  ];
+  const transformers = RenderMime.defaultRenderers();
   let renderers: RenderMime.MimeMap<RenderMime.IRenderer> = {};
   let order: string[] = [];
   for (let t of transformers) {
@@ -142,7 +129,9 @@ function createApp(manager: ServiceManager.IManager): void {
   });
   let mFactory = new NotebookModelFactory();
   let clipboard = new MimeData();
-  let renderer = CodeMirrorNotebookPanelRenderer.defaultRenderer;
+  let notebookRenderer = new Notebook.Renderer({ editorServices });
+  let renderer = new NotebookPanel.Renderer({ notebookRenderer });
+
   let wFactory = new NotebookWidgetFactory({
     name: 'Notebook',
     modelName: 'notebook',

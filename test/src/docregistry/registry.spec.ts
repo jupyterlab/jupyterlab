@@ -26,15 +26,15 @@ import {
 
 class WidgetFactory extends ABCWidgetFactory<Widget, DocumentRegistry.IModel> {
 
-  createNewWidget(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): Widget {
+  createNewWidget(context: DocumentRegistry.Context): Widget {
     return new Widget();
   }
 }
 
 
-class WidgetExtension implements DocumentRegistry.IWidgetExtension<Widget, DocumentRegistry.IModel> {
+class WidgetExtension implements DocumentRegistry.WidgetExtension {
 
-   createNew(widget: Widget, context: DocumentRegistry.IContext<DocumentRegistry.IModel>): IDisposable {
+   createNew(widget: Widget, context: DocumentRegistry.Context): IDisposable {
      return new DisposableDelegate(null);
    }
 }

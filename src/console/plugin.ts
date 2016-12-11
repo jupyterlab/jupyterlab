@@ -18,6 +18,10 @@ import {
 } from '../application';
 
 import {
+  IEditorServices
+} from '../codeeditor';
+
+import {
   ICommandPalette
 } from '../commandpalette';
 
@@ -40,6 +44,10 @@ import {
 import {
   IInspector
 } from '../inspector';
+
+import {
+  ILayoutRestorer
+} from '../layoutrestorer';
 
 import {
   IMainMenu
@@ -66,7 +74,7 @@ import {
  * The console widget tracker provider.
  */
 export
-const consoleTrackerProvider: JupyterLabPlugin<IConsoleTracker> = {
+const trackerPlugin: JupyterLabPlugin<IConsoleTracker> = {
   id: 'jupyter.services.console-tracker',
   provides: IConsoleTracker,
   requires: [
@@ -77,10 +85,26 @@ const consoleTrackerProvider: JupyterLabPlugin<IConsoleTracker> = {
     ICommandPalette,
     IPathTracker,
     ConsoleContent.IRenderer,
-    IStateDB
+    IStateDB,
+    ILayoutRestorer
   ],
   activate: activateConsole,
   autoStart: true
+};
+
+
+/**
+ * The console widget renderer.
+ */
+export
+const rendererPlugin: JupyterLabPlugin<ConsoleContent.IRenderer> = {
+  id: 'jupyter.services.console-renderer',
+  provides: ConsoleContent.IRenderer,
+  requires: [IEditorServices],
+  autoStart: true,
+  activate: (app: JupyterLab, editorServices: IEditorServices) => {
+    return new ConsoleContent.Renderer({ editorServices });
+  }
 };
 
 
@@ -99,11 +123,6 @@ const CONSOLE_ICON_CLASS = 'jp-ImageCodeConsole';
  */
 const CONSOLE_REGEX = /^console-(\d)+-[0-9a-f]+$/;
 
-/**
- * The console plugin state namespace.
- */
-const NAMESPACE = 'consoles';
-
 
 /**
  * The arguments used to create a console.
@@ -119,7 +138,7 @@ interface ICreateConsoleArgs extends JSONObject {
 /**
  * Activate the console extension.
  */
-function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, renderer: ConsoleContent.IRenderer, state: IStateDB): IConsoleTracker {
+function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, renderer: ConsoleContent.IRenderer, state: IStateDB, layout: ILayoutRestorer): IConsoleTracker {
   let manager = services.sessions;
 
   let { commands, keymap } = app;
@@ -130,11 +149,11 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   // Create an instance tracker for all console panels.
   const tracker = new InstanceTracker<ConsolePanel>({
     restore: {
-      state,
+      state, layout,
       command: 'console:create',
       args: panel => ({ id: panel.content.session.id }),
       name: panel => panel.content.session && panel.content.session.id,
-      namespace: 'consoles',
+      namespace: 'console',
       when: [app.started, manager.ready],
       registry: app.commands
     }
@@ -154,9 +173,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   command = 'console:create-new';
   commands.addCommand(command, {
     label: 'Start New Console',
-    execute: () => {
-      commands.execute('console:create', { });
-    }
+    execute: () => commands.execute('console:create', { })
   });
   palette.addItem({ command, category });
   menu.addItem({ command });
@@ -222,7 +239,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       if (current) {
         let kernel = current.content.session.kernel;
         if (kernel) {
-          kernel.interrupt();
+          return kernel.interrupt();
         }
       }
     }
@@ -260,9 +277,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       path = `${path}/console-${count}-${utils.uuid()}`;
 
       // Get the kernel model.
-      return manager.ready.then(() => {
-        return getKernel(args, name);
-      }).then(kernel => {
+      return manager.ready.then(() => getKernel(args, name)).then(kernel => {
         if (!kernel || (kernel && !kernel.id && !kernel.name)) {
           return;
         }
@@ -355,8 +370,6 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     panel.title.caption = Private.caption(captionOptions);
     panel.title.icon = `${LANDSCAPE_ICON_CLASS} ${CONSOLE_ICON_CLASS}`;
     panel.title.closable = true;
-    app.shell.addToMainArea(panel);
-    app.shell.activateMain(panel.id);
     // Update the caption of the tab with the last execution time.
     panel.content.executed.connect((sender, executed) => {
       captionOptions.executed = executed;
@@ -375,6 +388,8 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     inspector.source = panel.content.inspectionHandler;
     // Add the console panel to the tracker.
     tracker.add(panel);
+    app.shell.addToMainArea(panel);
+    app.shell.activateMain(panel.id);
   }
 
   command = 'console:switch-kernel';

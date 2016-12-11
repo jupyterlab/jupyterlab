@@ -71,18 +71,6 @@ const CURRENT_CLASS = 'jp-mod-current';
 
 
 /**
- * The options for adding a widget to a side area of the shell.
- */
-export
-interface ISideAreaOptions {
-  /**
-   * The rank order of the widget among its siblings.
-   */
-  rank?: number;
-}
-
-
-/**
  * The application shell for JupyterLab.
  */
 export
@@ -99,8 +87,8 @@ class ApplicationShell extends Widget {
     let hboxPanel = this._hboxPanel = new BoxPanel();
     let dockPanel = this._dockPanel = new DockPanel();
     let hsplitPanel = this._hsplitPanel = new SplitPanel();
-    let leftHandler = this._leftHandler = new SideBarHandler('left');
-    let rightHandler = this._rightHandler = new SideBarHandler('right');
+    let leftHandler = this._leftHandler = new Private.SideBarHandler('left');
+    let rightHandler = this._rightHandler = new Private.SideBarHandler('right');
     let rootLayout = new BoxLayout();
 
     topPanel.id = 'jp-top-panel';
@@ -169,12 +157,37 @@ class ApplicationShell extends Widget {
 
   /**
    * The current widget in the shell's main area.
-   *
-   * #### Notes
-   * This property is read-only.
    */
   get currentWidget(): Widget {
     return this._dockPanel.currentWidget;
+  }
+
+  /**
+   * True if main area is empty.
+   */
+  get mainAreaIsEmpty(): boolean {
+    return this._dockPanel.isEmpty;
+  }
+
+  /**
+   * True if top area is empty.
+   */
+  get topAreaIsEmpty(): boolean {
+    return this._topPanel.widgets.length === 0;
+  }
+
+  /**
+   * True if left area is empty.
+   */
+  get leftAreaIsEmpty(): boolean {
+    return this._leftHandler.stackedPanel.widgets.length === 0;
+  }
+
+  /**
+   * True if right area is empty.
+   */
+  get rightAreaIsEmpty(): boolean {
+    return this._rightHandler.stackedPanel.widgets.length === 0;
   }
 
   /**
@@ -183,7 +196,7 @@ class ApplicationShell extends Widget {
    * #### Notes
    * Widgets must have a unique `id` property, which will be used as the DOM id.
    */
-  addToTopArea(widget: Widget, options: ISideAreaOptions = {}): void {
+  addToTopArea(widget: Widget, options: ApplicationShell.ISideAreaOptions = {}): void {
     if (!widget.id) {
       console.error('widgets added to app shell must have unique id property');
       return;
@@ -198,7 +211,7 @@ class ApplicationShell extends Widget {
    * #### Notes
    * Widgets must have a unique `id` property, which will be used as the DOM id.
    */
-  addToLeftArea(widget: Widget, options: ISideAreaOptions = {}): void {
+  addToLeftArea(widget: Widget, options: ApplicationShell.ISideAreaOptions = {}): void {
     if (!widget.id) {
       console.error('widgets added to app shell must have unique id property');
       return;
@@ -213,7 +226,7 @@ class ApplicationShell extends Widget {
    * #### Notes
    * Widgets must have a unique `id` property, which will be used as the DOM id.
    */
-  addToRightArea(widget: Widget, options: ISideAreaOptions = {}): void {
+  addToRightArea(widget: Widget, options: ApplicationShell.ISideAreaOptions = {}): void {
     if (!widget.id) {
       console.error('widgets added to app shell must have unique id property');
       return;
@@ -276,7 +289,7 @@ class ApplicationShell extends Widget {
   }
 
   /**
-   * Close all tracked widgets.
+   * Close all widgets in the main area.
    */
   closeAll(): void {
     each(toArray(this._dockPanel.widgets()), widget => { widget.close(); });
@@ -286,8 +299,8 @@ class ApplicationShell extends Widget {
   private _hboxPanel: BoxPanel;
   private _dockPanel: DockPanel;
   private _hsplitPanel: SplitPanel;
-  private _leftHandler: SideBarHandler;
-  private _rightHandler: SideBarHandler;
+  private _leftHandler: Private.SideBarHandler;
+  private _rightHandler: Private.SideBarHandler;
 }
 
 
@@ -296,147 +309,20 @@ defineSignal(ApplicationShell.prototype, 'currentChanged');
 
 
 /**
- * A class which manages a side bar and related stacked panel.
+ * The namespace for `ApplicationShell` class statics.
  */
-class SideBarHandler {
+export
+namespace ApplicationShell {
   /**
-   * Construct a new side bar handler.
+   * The options for adding a widget to a side area of the shell.
    */
-  constructor(side: string) {
-    this._side = side;
-    this._sideBar = new TabBar({
-      insertBehavior: 'none',
-      removeBehavior: 'none',
-      allowDeselect: true
-    });
-    this._stackedPanel = new StackedPanel();
-    this._sideBar.hide();
-    this._stackedPanel.hide();
-    this._sideBar.currentChanged.connect(this._onCurrentChanged, this);
-    this._stackedPanel.widgetRemoved.connect(this._onWidgetRemoved, this);
+  export
+  interface ISideAreaOptions {
+    /**
+     * The rank order of the widget among its siblings.
+     */
+    rank?: number;
   }
-
-  /**
-   * Get the tab bar managed by the handler.
-   */
-  get sideBar(): TabBar {
-    return this._sideBar;
-  }
-
-  /**
-   * Get the stacked panel managed by the handler
-   */
-  get stackedPanel(): StackedPanel {
-    return this._stackedPanel;
-  }
-
-  /**
-   * Activate a widget residing in the side bar by ID.
-   *
-   * @param id - The widget's unique ID.
-   */
-  activate(id: string): void {
-    let widget = this._findWidgetByID(id);
-    if (widget) {
-      this._sideBar.currentTitle = widget.title;
-      widget.activate();
-    }
-  }
-
-  /**
-   * Collapse the sidebar so no items are expanded.
-   */
-  collapse(): void {
-    this._sideBar.currentTitle = null;
-  }
-
-  /**
-   * Add a widget and its title to the stacked panel and side bar.
-   *
-   * If the widget is already added, it will be moved.
-   */
-  addWidget(widget: Widget, rank: number): void {
-    widget.parent = null;
-    widget.hide();
-    let item = { widget, rank };
-    let index = this._findInsertIndex(item);
-    this._items.insert(index, item);
-    this._stackedPanel.insertWidget(index, widget);
-    this._sideBar.insertTab(index, widget.title);
-    this._refreshVisibility();
-  }
-
-  /**
-   * Find the insertion index for a rank item.
-   */
-  private _findInsertIndex(item: Private.IRankItem): number {
-    return upperBound(this._items, item, Private.itemCmp);
-  }
-
-  /**
-   * Find the index of the item with the given widget, or `-1`.
-   */
-  private _findWidgetIndex(widget: Widget): number {
-    return findIndex(this._items, item => item.widget === widget);
-  }
-
-  /**
-   * Find the widget which owns the given title, or `null`.
-   */
-  private _findWidgetByTitle(title: Title): Widget {
-    let item = find(this._items, value => value.widget.title === title);
-    return item ? item.widget : null;
-  }
-
-  /**
-   * Find the widget with the given id, or `null`.
-   */
-  private _findWidgetByID(id: string): Widget {
-    let item = find(this._items, value => value.widget.id === id);
-    return item ? item.widget : null;
-  }
-
-  /**
-   * Refresh the visibility of the side bar and stacked panel.
-   */
-  private _refreshVisibility(): void {
-    this._sideBar.setHidden(this._sideBar.titles.length === 0);
-    this._stackedPanel.setHidden(this._sideBar.currentTitle === null);
-  }
-
-  /**
-   * Handle the `currentChanged` signal from the sidebar.
-   */
-  private _onCurrentChanged(sender: TabBar, args: TabBar.ICurrentChangedArgs): void {
-    let oldWidget = this._findWidgetByTitle(args.previousTitle);
-    let newWidget = this._findWidgetByTitle(args.currentTitle);
-    if (oldWidget) {
-      oldWidget.hide();
-    }
-    if (newWidget) {
-      newWidget.show();
-    }
-    if (newWidget) {
-      document.body.setAttribute(`data-${this._side}Area`, newWidget.id);
-    } else {
-      document.body.removeAttribute(`data-${this._side}Area`);
-    }
-    this._refreshVisibility();
-  }
-
-  /*
-   * Handle the `widgetRemoved` signal from the stacked panel.
-   */
-  private _onWidgetRemoved(sender: StackedPanel, widget: Widget): void {
-    this._items.removeAt(this._findWidgetIndex(widget));
-    this._sideBar.removeTab(widget.title);
-    this._refreshVisibility();
-  }
-
-  private _side: string;
-  private _sideBar: TabBar;
-  private _stackedPanel: StackedPanel;
-  private _items = new Vector<Private.IRankItem>();
 }
 
 
@@ -463,5 +349,150 @@ namespace Private {
   export
   function itemCmp(first: IRankItem, second: IRankItem): number {
     return first.rank - second.rank;
+  }
+
+  /**
+   * A class which manages a side bar and related stacked panel.
+   */
+  export
+  class SideBarHandler {
+    /**
+     * Construct a new side bar handler.
+     */
+    constructor(side: string) {
+      this._side = side;
+      this._sideBar = new TabBar({
+        insertBehavior: 'none',
+        removeBehavior: 'none',
+        allowDeselect: true
+      });
+      this._stackedPanel = new StackedPanel();
+      this._sideBar.hide();
+      this._stackedPanel.hide();
+      this._sideBar.currentChanged.connect(this._onCurrentChanged, this);
+      this._stackedPanel.widgetRemoved.connect(this._onWidgetRemoved, this);
+    }
+
+    /**
+     * Get the tab bar managed by the handler.
+     */
+    get sideBar(): TabBar {
+      return this._sideBar;
+    }
+
+    /**
+     * Get the stacked panel managed by the handler
+     */
+    get stackedPanel(): StackedPanel {
+      return this._stackedPanel;
+    }
+
+    /**
+     * Activate a widget residing in the side bar by ID.
+     *
+     * @param id - The widget's unique ID.
+     */
+    activate(id: string): void {
+      let widget = this._findWidgetByID(id);
+      if (widget) {
+        this._sideBar.currentTitle = widget.title;
+        widget.activate();
+      }
+    }
+
+    /**
+     * Collapse the sidebar so no items are expanded.
+     */
+    collapse(): void {
+      this._sideBar.currentTitle = null;
+    }
+
+    /**
+     * Add a widget and its title to the stacked panel and side bar.
+     *
+     * If the widget is already added, it will be moved.
+     */
+    addWidget(widget: Widget, rank: number): void {
+      widget.parent = null;
+      widget.hide();
+      let item = { widget, rank };
+      let index = this._findInsertIndex(item);
+      this._items.insert(index, item);
+      this._stackedPanel.insertWidget(index, widget);
+      this._sideBar.insertTab(index, widget.title);
+      this._refreshVisibility();
+    }
+
+    /**
+     * Find the insertion index for a rank item.
+     */
+    private _findInsertIndex(item: Private.IRankItem): number {
+      return upperBound(this._items, item, Private.itemCmp);
+    }
+
+    /**
+     * Find the index of the item with the given widget, or `-1`.
+     */
+    private _findWidgetIndex(widget: Widget): number {
+      return findIndex(this._items, item => item.widget === widget);
+    }
+
+    /**
+     * Find the widget which owns the given title, or `null`.
+     */
+    private _findWidgetByTitle(title: Title): Widget {
+      let item = find(this._items, value => value.widget.title === title);
+      return item ? item.widget : null;
+    }
+
+    /**
+     * Find the widget with the given id, or `null`.
+     */
+    private _findWidgetByID(id: string): Widget {
+      let item = find(this._items, value => value.widget.id === id);
+      return item ? item.widget : null;
+    }
+
+    /**
+     * Refresh the visibility of the side bar and stacked panel.
+     */
+    private _refreshVisibility(): void {
+      this._sideBar.setHidden(this._sideBar.titles.length === 0);
+      this._stackedPanel.setHidden(this._sideBar.currentTitle === null);
+    }
+
+    /**
+     * Handle the `currentChanged` signal from the sidebar.
+     */
+    private _onCurrentChanged(sender: TabBar, args: TabBar.ICurrentChangedArgs): void {
+      let oldWidget = this._findWidgetByTitle(args.previousTitle);
+      let newWidget = this._findWidgetByTitle(args.currentTitle);
+      if (oldWidget) {
+        oldWidget.hide();
+      }
+      if (newWidget) {
+        newWidget.show();
+      }
+      if (newWidget) {
+        document.body.setAttribute(`data-${this._side}Area`, newWidget.id);
+      } else {
+        document.body.removeAttribute(`data-${this._side}Area`);
+      }
+      this._refreshVisibility();
+    }
+
+    /*
+     * Handle the `widgetRemoved` signal from the stacked panel.
+     */
+    private _onWidgetRemoved(sender: StackedPanel, widget: Widget): void {
+      this._items.removeAt(this._findWidgetIndex(widget));
+      this._sideBar.removeTab(widget.title);
+      this._refreshVisibility();
+    }
+
+    private _side: string;
+    private _sideBar: TabBar;
+    private _stackedPanel: StackedPanel;
+    private _items = new Vector<Private.IRankItem>();
   }
 }

@@ -23,7 +23,7 @@ import {
 
 import {
   hitTestNodes, findElement
-} from '../utils';
+} from '../common/dom';
 
 
 /**
@@ -168,18 +168,15 @@ class RunningSessions extends Widget {
   /**
    * A signal emitted when a kernel session open is requested.
    */
-  sessionOpenRequested: ISignal<RunningSessions, Session.IModel>;
+  readonly sessionOpenRequested: ISignal<RunningSessions, Session.IModel>;
 
   /**
    * A signal emitted when a terminal session open is requested.
    */
-  terminalOpenRequested: ISignal<RunningSessions, TerminalSession.IModel>;
+  readonly terminalOpenRequested: ISignal<RunningSessions, TerminalSession.IModel>;
 
   /**
    * The renderer used by the running sessions widget.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get renderer(): RunningSessions.IRenderer {
     return this._renderer;
@@ -187,9 +184,6 @@ class RunningSessions extends Widget {
 
   /**
    * Test whether the widget is disposed.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get isDisposed(): boolean {
     return this._manager === null;
@@ -220,7 +214,7 @@ class RunningSessions extends Widget {
       promises.push(terminals.refreshRunning());
     }
     promises.push(sessions.refreshRunning());
-    return Promise.all(promises);
+    return Promise.all(promises).then(() => void 0);
   }
 
   /**

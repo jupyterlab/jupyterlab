@@ -96,7 +96,7 @@ function selectKernel(options: IKernelSelection): Promise<Kernel.IModel> {
 
   // Create the dialog body.
   let body = document.createElement('div');
-  let text = document.createElement('pre');
+  let text = document.createElement('label');
   text.textContent = `Select kernel for\n"${options.name}"`;
   body.appendChild(text);
   if (kernel) {
@@ -128,7 +128,7 @@ function selectKernel(options: IKernelSelection): Promise<Kernel.IModel> {
  * Change the kernel on a context.
  */
 export
-function selectKernelForContext(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, manager: Session.IManager, host?: HTMLElement): Promise<void> {
+function selectKernelForContext(context: DocumentRegistry.Context, manager: Session.IManager, host?: HTMLElement): Promise<void> {
   return manager.ready.then(() => {
     let options: IKernelSelection = {
       name: context.path.split('/').pop(),

@@ -10,6 +10,18 @@ import {
 } from '../commandpalette';
 
 import {
+  InstanceTracker
+} from '../common/instancetracker';
+
+import {
+  ILayoutRestorer
+} from '../layoutrestorer';
+
+import {
+  IStateDB
+} from '../statedb';
+
+import {
   AboutModel, AboutWidget
 } from './';
 
@@ -17,32 +29,51 @@ import {
  * The about page extension.
  */
 export
-const aboutExtension: JupyterLabPlugin<void> = {
+const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.about',
   activate: activateAbout,
   autoStart: true,
-  requires: [ICommandPalette]
+  requires: [ICommandPalette, IStateDB, ILayoutRestorer]
 };
 
 
-function activateAbout(app: JupyterLab, palette: ICommandPalette): void {
-  let model = new AboutModel();
-  let widget = new AboutWidget();
-  widget.model = model;
-  widget.id = 'about-jupyterlab';
-  widget.title.label = 'About';
-  widget.title.closable = true;
-  widget.node.style.overflowY = 'auto';
+function activateAbout(app: JupyterLab, palette: ICommandPalette, state: IStateDB, layout: ILayoutRestorer): void {
+  const namespace = 'about-jupyterlab';
+  const model = new AboutModel();
+  const command = `${namespace}:show`;
+  const category = 'Help';
+  const tracker = new InstanceTracker<AboutWidget>({
+    restore: {
+      state, layout, command, namespace,
+      args: widget => null,
+      name: widget => 'about',
+      when: app.started,
+      registry: app.commands
+    }
+  });
 
-  let command = 'about-jupyterlab:show';
+  let widget: AboutWidget;
+
+  function newWidget(): AboutWidget {
+    let widget = new AboutWidget();
+    widget.model = model;
+    widget.id = 'about';
+    widget.title.label = 'About';
+    widget.title.closable = true;
+    tracker.add(widget);
+    return widget;
+  }
+
   app.commands.addCommand(command, {
     label: 'About JupyterLab',
     execute: () => {
-      if (!widget.isAttached) {
+      if (!widget || widget.isDisposed) {
+        widget = newWidget();
         app.shell.addToMainArea(widget);
       }
       app.shell.activateMain(widget.id);
     }
   });
-  palette.addItem({ command, category: 'Help' });
+
+  palette.addItem({ command, category });
 }

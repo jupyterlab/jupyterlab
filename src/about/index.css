@@ -9,7 +9,8 @@
   left: 0;
   width: 100%;
   height: 100%;
-  overflow: scroll;
+  outline: none;
+  overflow-y: auto;
   scroll-snap-points-y: repeat(100%);
   scroll-snap-type: mandatory;
   scroll-snap-destination: 100% 0%;

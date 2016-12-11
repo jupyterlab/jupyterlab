@@ -66,6 +66,7 @@ function openWithDialog(path: string, manager: DocumentManager, host?: HTMLEleme
     return showDialog({
       title: 'Open File',
       body: handler.node,
+      primary: handler.inputNode,
       okText: 'OPEN'
     });
   }).then(result => {
@@ -88,6 +89,7 @@ function createNewDialog(model: FileBrowserModel, manager: DocumentManager, host
       title: 'Create New File',
       host,
       body: handler.node,
+      primary: handler.inputNode,
       okText: 'CREATE'
     });
   }).then(result => {
@@ -281,6 +283,7 @@ class CreateFromHandler extends Widget {
     return showDialog({
       title: `Create New ${this._creatorName}`,
       body: this.node,
+      primary: this.inputNode,
       okText: 'CREATE'
     }).then(result => {
       if (result.text === 'CREATE') {
@@ -329,11 +332,13 @@ class CreateFromHandler extends Widget {
         { specs, sessions, preferredKernel, preference }
       );
     } else {
+      this.node.removeChild(this.kernelDropdownNode.previousSibling);
       this.node.removeChild(this.kernelDropdownNode);
     }
 
     return model.newUntitled({ ext, type }).then(contents => {
-      this.inputNode.value = contents.name;
+      let value = this.inputNode.value = contents.name;
+      this.inputNode.setSelectionRange(0, value.length - ext.length);
       this._orig = contents;
     });
   }
@@ -389,6 +394,7 @@ class CreateNewHandler extends Widget {
     let name = time.toJSON().slice(0, 10);
     name += '-' + time.getHours() + time.getMinutes() + time.getSeconds();
     this.inputNode.value = name + '.txt';
+    this.inputNode.setSelectionRange(0, name.length);
 
     // Check for name conflicts when the inputNode changes.
     this.inputNode.addEventListener('input', () => {
@@ -576,11 +582,20 @@ namespace Private {
   export
   function createOpenWithNode(): HTMLElement {
     let body = document.createElement('div');
-    let name = document.createElement('span');
+    let nameTitle = document.createElement('label');
+    nameTitle.textContent = 'File Name';
+    let name = document.createElement('div');
+    let widgetTitle = document.createElement('label');
+    widgetTitle.textContent = 'Widget Type';
     let widgetDropdown = document.createElement('select');
+    let kernelTitle = document.createElement('label');
+    kernelTitle.textContent = 'Kernel';
     let kernelDropdownNode = document.createElement('select');
+    body.appendChild(nameTitle);
     body.appendChild(name);
+    body.appendChild(widgetTitle);
     body.appendChild(widgetDropdown);
+    body.appendChild(kernelTitle);
     body.appendChild(kernelDropdownNode);
     return body;
   }
@@ -591,13 +606,25 @@ namespace Private {
   export
   function createCreateNewNode(): HTMLElement {
     let body = document.createElement('div');
+    let nameTitle = document.createElement('label');
+    nameTitle.textContent = 'File Name';
     let name = document.createElement('input');
+    let typeTitle = document.createElement('label');
+    typeTitle.textContent = 'File Type';
     let fileTypeDropdown = document.createElement('select');
+    let widgetTitle = document.createElement('label');
+    widgetTitle.textContent = 'Widget Type';
     let widgetDropdown = document.createElement('select');
+    let kernelTitle = document.createElement('label');
+    kernelTitle.textContent = 'Kernel';
     let kernelDropdownNode = document.createElement('select');
+    body.appendChild(nameTitle);
     body.appendChild(name);
+    body.appendChild(typeTitle);
     body.appendChild(fileTypeDropdown);
+    body.appendChild(widgetTitle);
     body.appendChild(widgetDropdown);
+    body.appendChild(kernelTitle);
     body.appendChild(kernelDropdownNode);
     return body;
   }
@@ -608,9 +635,15 @@ namespace Private {
   export
   function createCreateFromNode(): HTMLElement {
     let body = document.createElement('div');
+    let nameTitle = document.createElement('label');
+    nameTitle.textContent = 'File Name';
     let name = document.createElement('input');
+    let kernelTitle = document.createElement('label');
+    kernelTitle.textContent = 'Kernel';
     let kernelDropdownNode = document.createElement('select');
+    body.appendChild(nameTitle);
     body.appendChild(name);
+    body.appendChild(kernelTitle);
     body.appendChild(kernelDropdownNode);
     return body;
   }

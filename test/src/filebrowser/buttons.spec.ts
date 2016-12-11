@@ -42,7 +42,7 @@ import {
 
 class WidgetFactory extends ABCWidgetFactory<Widget, DocumentRegistry.IModel> {
 
-  protected createNewWidget(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): Widget {
+  protected createNewWidget(context: DocumentRegistry.Context): Widget {
     let widget = new Widget();
     widget.addClass('WidgetFactory');
     return widget;

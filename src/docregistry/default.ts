@@ -7,7 +7,7 @@ import * as CodeMirror
 import 'codemirror/mode/meta';
 
 import {
-  Contents, Kernel
+  Contents
 } from '@jupyterlab/services';
 
 import {
@@ -168,7 +168,7 @@ defineSignal(DocumentModel.prototype, 'stateChanged');
  * An implementation of a model factory for text files.
  */
 export
-class TextModelFactory implements DocumentRegistry.IModelFactory<DocumentRegistry.IModel> {
+class TextModelFactory implements DocumentRegistry.ModelFactory {
   /**
    * The name of the model type.
    *

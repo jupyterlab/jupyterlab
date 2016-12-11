@@ -3,7 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-
 import {
   DisposableDelegate, IDisposable
 } from 'phosphor/lib/core/disposable';
@@ -70,7 +69,7 @@ class Palette implements ICommandPalette {
  * The default commmand palette extension.
  */
 export
-const commandPaletteProvider: JupyterLabPlugin<ICommandPalette> = {
+const plugin: JupyterLabPlugin<ICommandPalette> = {
   id: 'jupyter.services.commandpalette',
   provides: ICommandPalette,
   activate: activateCommandPalette,
@@ -129,7 +128,7 @@ function activateCommandPalette(app: JupyterLab): ICommandPalette {
     label: 'Toggle Command Palette'
   });
 
-  palette.inputNode.placeholder = "SEARCH";
+  palette.inputNode.placeholder = 'SEARCH';
 
   app.shell.addToLeftArea(palette);
 

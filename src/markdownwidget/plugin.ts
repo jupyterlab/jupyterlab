@@ -14,6 +14,10 @@ import {
 } from '../docregistry';
 
 import {
+  ILayoutRestorer
+} from '../layoutrestorer';
+
+import {
   IRenderMime
 } from '../rendermime';
 
@@ -46,10 +50,10 @@ const FACTORY = 'Rendered Markdown';
  * The markdown handler extension.
  */
 export
-const markdownHandlerExtension: JupyterLabPlugin<void> = {
+const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.rendered-markdown',
-  requires: [IDocumentRegistry, IRenderMime, IStateDB],
-  activate: (app: JupyterLab, registry: IDocumentRegistry, rendermime: IRenderMime, state: IStateDB) => {
+  requires: [IDocumentRegistry, IRenderMime, IStateDB, ILayoutRestorer],
+  activate: (app: JupyterLab, registry: IDocumentRegistry, rendermime: IRenderMime, state: IStateDB, layout: ILayoutRestorer) => {
     const factory = new MarkdownWidgetFactory({
       name: FACTORY,
       fileExtensions: ['.md'],
@@ -58,7 +62,7 @@ const markdownHandlerExtension: JupyterLabPlugin<void> = {
 
     const tracker = new InstanceTracker<MarkdownWidget>({
       restore: {
-        state,
+        state, layout,
         command: 'file-operations:open',
         args: widget => ({ path: widget.context.path, factory: FACTORY }),
         name: widget => widget.context.path,

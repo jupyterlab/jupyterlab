@@ -31,15 +31,14 @@ import {
   createNotebookContext, defaultRenderMime
 } from '../../utils';
 
-
 import {
-  CodeMirrorNotebookPanelRenderer
-} from '../../../../lib/notebook/codemirror/notebook/panel';
+  createNotebookPanelRenderer
+} from '../utils';
 
 
 const rendermime = defaultRenderMime();
 const clipboard = new MimeData();
-const renderer = CodeMirrorNotebookPanelRenderer.defaultRenderer;
+const renderer = createNotebookPanelRenderer();
 
 
 function createFactory(): NotebookWidgetFactory {

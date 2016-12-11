@@ -155,13 +155,21 @@ class Inspector extends TabPanel implements IInspector {
     }
 
     // Dispose the inspector child items.
-    Object.keys(this._items).forEach(i => this._items[i].dispose());
+    Object.keys(this._items).forEach(i => { this._items[i].dispose(); });
     this._items = null;
 
     // Disconnect from source.
     this.source = null;
 
     super.dispose();
+  }
+
+  /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this.node.tabIndex = -1;
+    this.node.focus();
   }
 
   /**

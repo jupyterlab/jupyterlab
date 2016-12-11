@@ -11,6 +11,18 @@ import {
 } from '../commandpalette';
 
 import {
+  InstanceTracker
+} from '../common/instancetracker';
+
+import {
+  ILayoutRestorer
+} from '../layoutrestorer';
+
+import {
+  IStateDB
+} from '../statedb';
+
+import {
   IInspector, Inspector
 } from './';
 
@@ -19,9 +31,9 @@ import {
  * A service providing an inspector panel.
  */
 export
-const inspectorProvider: JupyterLabPlugin<IInspector> = {
+const plugin: JupyterLabPlugin<IInspector> = {
   id: 'jupyter.services.inspector',
-  requires: [ICommandPalette],
+  requires: [ICommandPalette, IStateDB, ILayoutRestorer],
   provides: IInspector,
   activate: activateInspector
 };
@@ -83,9 +95,21 @@ class InspectorManager implements IInspector {
 /**
  * Activate the console extension.
  */
-function activateInspector(app: JupyterLab, palette: ICommandPalette): IInspector {
-  let manager = new InspectorManager();
-  let openInspectorCommand = 'inspector:open';
+function activateInspector(app: JupyterLab, palette: ICommandPalette, state: IStateDB, layout: ILayoutRestorer): IInspector {
+  const category = 'Inspector';
+  const command = 'inspector:open';
+  const label = 'Open Inspector';
+  const manager = new InspectorManager();
+  const tracker = new InstanceTracker<Inspector>({
+    restore: {
+      state, layout, command,
+      args: widget => null,
+      name: widget => 'inspector',
+      namespace: 'inspector',
+      when: app.started,
+      registry: app.commands
+    }
+  });
 
   function newInspector(): Inspector {
     let inspector = new Inspector({ items: Private.defaultInspectorItems });
@@ -97,6 +121,7 @@ function activateInspector(app: JupyterLab, palette: ICommandPalette): IInspecto
         manager.inspector = null;
       }
     });
+    tracker.add(inspector);
     return inspector;
   }
 
@@ -110,15 +135,8 @@ function activateInspector(app: JupyterLab, palette: ICommandPalette): IInspecto
     }
   }
 
-  app.commands.addCommand(openInspectorCommand, {
-    execute: openInspector,
-    label: 'Open Inspector'
-  });
-
-  palette.addItem({
-    command: openInspectorCommand,
-    category: 'Inspector'
-  });
+  app.commands.addCommand(command, { execute: openInspector, label });
+  palette.addItem({ command, category });
 
   return manager;
 }

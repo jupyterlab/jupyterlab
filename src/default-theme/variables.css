@@ -20,7 +20,7 @@ be used with `--jp-layout-color1`. The numbers have the following meanings:
 * 3: tertiary, next most important under normal situations
 
 Throughout JupyterLab, we are mostly following principles from Google's
-Material Design when selecting colors. We are not, however, following 
+Material Design when selecting colors. We are not, however, following
 all of MD as it is not optimized for dense, information rich UIs.
 */
 
@@ -28,18 +28,18 @@ all of MD as it is not optimized for dense, information rich UIs.
 :root {
 
   /* Borders
-  
+
   The following variables, specify the visual styling of borders in JupyterLab.
    */
 
   --jp-border-width: 1px;
-  --jp-border-color0: var(--md-grey-700);  
+  --jp-border-color0: var(--md-grey-700);
   --jp-border-color1: var(--md-grey-500);
   --jp-border-color2: var(--md-grey-300);
   --jp-border-color3: var(--md-grey-100);
 
   /* UI Fonts
-  
+
   The UI font CSS variables are used for the typography all of the JupyterLab
   user interface elements that are not directly user generated content.
   */
@@ -59,7 +59,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-ui-font-color1: rgba(0,0,0,0.87);
   --jp-ui-font-color2: rgba(0,0,0,0.54);
   --jp-ui-font-color3: rgba(0,0,0,0.38);
-  
+
   /* Use these against the brand/accent/warn/error colors.
      These will typically go from light to darker, in both a dark and light theme
    */
@@ -70,10 +70,10 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-inverse-ui-font-color3: rgba(255,255,255,0.5);
 
   /* Content Fonts
-  
+
   Content font variables are used for typography of user generated content.
   */
-  
+
   --jp-content-font-size: 13px;
   --jp-content-line-height: 1.5;
   --jp-content-font-color0: black;
@@ -92,12 +92,12 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-code-padding: 5px;
 
   /* Layout
-  
+
   The following are the main layout colors use in JupyterLab. In a light
   theme these would go from light to dark.
   */
 
-  --jp-layout-color0: white;  
+  --jp-layout-color0: white;
   --jp-layout-color1: white;
   --jp-layout-color2: var(--md-grey-200);
   --jp-layout-color3: var(--md-grey-400);

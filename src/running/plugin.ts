@@ -18,7 +18,7 @@ import {
  * The default running sessions extension.
  */
 export
-const runningSessionsExtension: JupyterLabPlugin<void> = {
+const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.running-sessions',
   requires: [IServiceManager],
   activate: activateRunningSessions,

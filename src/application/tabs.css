@@ -70,7 +70,7 @@
 
 /* This is a current tab of a tab bar in the dock panel: each tab bar has 1. */
 .p-DockPanel-tabBar .p-TabBar-tab.p-mod-current {
-  background: var(--jp-layout-color1);
+  background: var(--jp-layout-color0);
   color: var(--jp-ui-font-color0);
   min-height: calc(var(--jp-private-horizontal-tab-height) + 2 * var(--jp-border-width));
   transform: translateY(var(--jp-border-width));
@@ -86,6 +86,17 @@
   height: var(--jp-private-horizontal-tab-active-top-border);
   width: calc(100% + 2*var(--jp-border-width));
   background: var(--jp-brand-color1);
+}
+
+
+/* This is the left tab bar current tab: only 1 exists. */
+.p-TabBar-tab.p-mod-current {
+  background: var(--jp-layout-color0);
+}
+
+
+.p-TabBar-tab.p-mod-current:hover {
+  background: var(--jp-layout-color1);
 }
 
 

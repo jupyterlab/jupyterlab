@@ -6,7 +6,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "ES5",
-    "types": ["mocha", "expect.js", "requirejs"],
+    "types": ["mocha", "expect.js", "node"],
     "outDir": "../build",
     "sourceMap": true
   }

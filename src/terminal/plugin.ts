@@ -22,6 +22,10 @@ import {
 } from '../commandpalette';
 
 import {
+  ILayoutRestorer
+} from '../layoutrestorer';
+
+import {
   IMainMenu
 } from '../mainmenu';
 
@@ -53,15 +57,17 @@ const TERMINAL_ICON_CLASS = 'jp-ImageTerminal';
  * The default terminal extension.
  */
 export
-const terminalExtension: JupyterLabPlugin<void> = {
+const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.terminal',
-  requires: [IServiceManager, IMainMenu, ICommandPalette, IStateDB],
+  requires: [
+    IServiceManager, IMainMenu, ICommandPalette, IStateDB, ILayoutRestorer
+  ],
   activate: activateTerminal,
   autoStart: true
 };
 
 
-function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB): void {
+function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB, layout: ILayoutRestorer): void {
   // Bail if there are no terminals available.
   if (!services.terminals.isAvailable()) {
     console.log('Disabling terminals plugin because they are not available on the server');
@@ -82,11 +88,11 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
   // Create an instance tracker for all terminal widgets.
   const tracker = new InstanceTracker<TerminalWidget>({
     restore: {
-      state,
-      command: 'terminal:create-new',
+      state, layout,
+      command: newTerminalId,
       args: widget => ({ name: widget.session.name }),
       name: widget => widget.session && widget.session.name,
-      namespace: 'terminals',
+      namespace: 'terminal',
       when: app.started,
       registry: app.commands
     }
@@ -109,15 +115,15 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
       } else {
         promise = services.terminals.startNew();
       }
-      promise.then(session => {
-        session.ready.then(() => {
+      return promise.then(session => {
+        return session.ready.then(() => {
           let term = new TerminalWidget(options);
           term.session = session;
           term.title.closable = true;
           term.title.icon = `${LANDSCAPE_ICON_CLASS} ${TERMINAL_ICON_CLASS}`;
+          tracker.add(term);
           app.shell.addToMainArea(term);
           app.shell.activateMain(term.id);
-          tracker.add(term);
         });
       });
     }

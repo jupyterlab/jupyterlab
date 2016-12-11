@@ -6,6 +6,8 @@
 
 from __future__ import print_function
 
+import glob
+import json
 import os
 import shutil
 import sys
@@ -25,9 +27,8 @@ from traitlets.utils.importstring import import_item
 
 from tornado.log import LogFormatter
 
-from . import (
-    get_labextension_manifest_data_by_folder, semver
-)
+from .semver import satisfies
+
 
 # Constants for pretty print extension listing function.
 # Window doesn't support coloring in the commandline
@@ -37,6 +38,8 @@ RED_X = '\033[31mX\033[0m' if os.name != 'nt' else 'X'
 GREEN_ENABLED = '\033[32menabled \033[0m' if os.name != 'nt' else 'enabled '
 RED_DISABLED = '\033[31mdisabled\033[0m' if os.name != 'nt' else 'disabled'
 
+
+CONFIG_NAME = 'jupyter_notebook_config'
 
 #------------------------------------------------------------------------------
 # Public API
@@ -257,7 +260,8 @@ def uninstall_labextension_python(module,
 
 
 def _set_labextension_state(name, state,
-                           user=True, sys_prefix=False, logger=None):
+                           user=True, sys_prefix=False, logger=None,
+                           python_module=None):
     """Set whether the JupyterLab frontend should use the named labextension
 
     Returns True if the final state is the one requested.
@@ -273,24 +277,28 @@ def _set_labextension_state(name, state,
         Whether to update the sys.prefix, i.e. environment. Will override
         `user`.
     logger : Jupyter logger [optional]
-        Logger instance to use
+        Logger instance to use [optional]
+    python_module: string
+        The name of the python module associated with the extension.
     """
     user = False if sys_prefix else user
-    config_dir = os.path.join(
-        _get_config_dir(user=user, sys_prefix=sys_prefix), 'labconfig')
-    cm = BaseJSONConfigManager(config_dir=config_dir)
+    cfg = _read_config_data(user=user, sys_prefix=sys_prefix)
     if logger:
         logger.info("{} extension {}...".format(
             "Enabling" if state else "Disabling",
             name
         ))
-    cfg = cm.get("jupyterlab_config")
     labextensions = (
         cfg.setdefault("LabApp", {})
         .setdefault("labextensions", {})
     )
 
-    old_enabled = labextensions.get(name, None)
+    old_state = labextensions.get(name, None)
+    if old_state is None:
+        old_state = dict(enabled=False)
+    elif isinstance(old_state, bool):
+        old_state = dict(enabled=old_state)
+    old_enabled = old_state['enabled']
     new_enabled = state if state is not None else not old_enabled
 
     if logger:
@@ -299,12 +307,12 @@ def _set_labextension_state(name, state,
         else:
             logger.info(u"Disabling: %s" % (name))
 
-    labextensions[name] = new_enabled
+    labextensions[name] = dict(
+        enabled=new_enabled,
+        python_module=python_module
+    )
 
-    if logger:
-        logger.info(u"- Writing config: {}".format(config_dir))
-
-    cm.update("jupyterlab_config", cfg)
+    _write_config_data(cfg, user=user, sys_prefix=sys_prefix, logger=logger)
 
     if new_enabled:
         full_dest = find_labextension(name)
@@ -339,7 +347,8 @@ def _set_labextension_state_python(state, module, user, sys_prefix,
     return [_set_labextension_state(name=labext["name"],
                                    state=state,
                                    user=user, sys_prefix=sys_prefix,
-                                   logger=logger)
+                                   logger=logger,
+                                   python_module=module)
             for labext in labexts]
 
 
@@ -437,6 +446,7 @@ def disable_labextension_python(module, user=True, sys_prefix=False,
     return _set_labextension_state_python(False, module, user, sys_prefix,
                                          logger=logger)
 
+
 def find_labextension(name):
     """Find a labextension path
 
@@ -499,7 +509,7 @@ def validate_labextension_folder(name, full_dest, logger=None):
             for dep in deps:
                 if dep.startswith('jupyterlab@'):
                     dep = dep.split('/')[0].split('@')[-1]
-                    if not semver.satisfies(__version__, dep, False):
+                    if not satisfies(__version__, dep, False):
                         version_compatible.append('Expects JupyterLab version %s from packaged module %s'%(dep, mod))
                         break
 
@@ -532,6 +542,42 @@ def validate_labextension_folder(name, full_dest, logger=None):
             [logger.warn(warning) for warning in warnings]
 
     return warnings
+
+
+def get_labextension_manifest_data_by_folder(folder):
+    """Get the manifest data for a given lab extension folder
+    """
+    manifest_files = glob.glob(os.path.join(folder, '*.manifest'))
+    manifests = {}
+    for file in manifest_files:
+        with open(file) as fid:
+            manifest = json.load(fid)
+        manifests[manifest['name']] = manifest
+    return manifests
+
+
+def get_labextension_manifest_data_by_name(name):
+    """Get the manifest data for a given lab extension folder
+    """
+    for exts in _labextension_dirs():
+        full_dest = os.path.join(exts, name)
+        if os.path.exists(full_dest):
+            return get_labextension_manifest_data_by_folder(full_dest)
+
+
+def get_labextension_config_python(module):
+    """Get the labextension configuration data associated  with a Python module. 
+
+    Parameters
+    -----------
+    module : str
+    Importable Python module exposing the
+    magic-named `_jupyter_labextension_config` function
+    """
+    m = import_item(module)
+    if not hasattr(m, '_jupyter_labextension_config'):
+        return {}
+    return m._jupyter_labextension_config()
 
 
 #----------------------------------------------------------------------
@@ -845,20 +891,21 @@ class ListLabExtensionsApp(BaseLabExtensionApp):
     
     def list_labextensions(self):
         """List all the labextensions"""
-        config_dirs = [os.path.join(p, 'labconfig') for p in jupyter_config_path()]
-        
         print("Known labextensions:")
-        
-        for config_dir in config_dirs:
+
+        for config_dir in jupyter_config_path():
             cm = BaseJSONConfigManager(parent=self, config_dir=config_dir)
-            data = cm.get("jupyterlab_config")
+            data = cm.get(CONFIG_NAME)
             labextensions = (
                 data.setdefault("LabApp", {})
                 .setdefault("labextensions", {})
             )
             if labextensions:
                 print(u'config dir: {}'.format(config_dir))
-            for name, enabled in sorted(labextensions.items()):
+            for name, config in sorted(labextensions.items()):
+                if isinstance(config, bool):
+                    config = dict(enabled=config)
+                enabled = config['enabled']
                 full_dest = find_labextension(name)
                 print(u'    {} {}: {}'.format(
                               name,
@@ -1080,10 +1127,10 @@ def _read_config_data(user=False, sys_prefix=False):
     """
     config_dir = _get_config_dir(user=user, sys_prefix=sys_prefix)
     config_man = BaseJSONConfigManager(config_dir=config_dir)
-    return config_man.get('jupyterlab_config')
+    return config_man.get(CONFIG_NAME)
 
 
-def _write_config_data(data, user=False, sys_prefix=False):
+def _write_config_data(data, user=False, sys_prefix=False, logger=None):
     """Update the config for the current context
 
     Parameters
@@ -1094,10 +1141,14 @@ def _write_config_data(data, user=False, sys_prefix=False):
         Get the user's .jupyter config directory
     sys_prefix : bool [default: False]
         Get sys.prefix, i.e. ~/.envs/my-env/etc/jupyter
+    logger: logger instance
+        The logger instance.
     """
     config_dir = _get_config_dir(user=user, sys_prefix=sys_prefix)
+    if logger:
+        logger.info(u"- Writing config: {}".format(config_dir))
     config_man = BaseJSONConfigManager(config_dir=config_dir)
-    config_man.update('jupyterlab_config', data)
+    config_man.update(CONFIG_NAME, data)
 
 
 if __name__ == '__main__':

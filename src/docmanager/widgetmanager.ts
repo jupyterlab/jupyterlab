@@ -93,7 +93,7 @@ class DocumentWidgetManager implements IDisposable {
    *
    * @throws If the factory is not registered.
    */
-  createWidget(name: string, context: DocumentRegistry.IContext<DocumentRegistry.IModel>): Widget {
+  createWidget(name: string, context: DocumentRegistry.Context): Widget {
     let factory = this._registry.getWidgetFactory(name);
     if (!factory) {
       throw new Error(`Factory is not registered: ${name}`);
@@ -127,7 +127,7 @@ class DocumentWidgetManager implements IDisposable {
    *
    * @param widget - The widget to adopt.
    */
-  adoptWidget(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, widget: Widget): void {
+  adoptWidget(context: DocumentRegistry.Context, widget: Widget): void {
     let widgets = Private.widgetsProperty.get(context);
     widgets.pushBack(widget);
     installMessageHook(widget, (handler: IMessageHandler, msg: Message) => {
@@ -157,7 +157,7 @@ class DocumentWidgetManager implements IDisposable {
    * This can be used to use an existing widget instead of opening
    * a new widget.
    */
-  findWidget(context: DocumentRegistry.IContext<DocumentRegistry.IModel>, widgetName: string): Widget {
+  findWidget(context: DocumentRegistry.Context, widgetName: string): Widget {
     let widgets = Private.widgetsProperty.get(context);
     return find(widgets, widget => {
       let name = Private.nameProperty.get(widget);
@@ -174,7 +174,7 @@ class DocumentWidgetManager implements IDisposable {
    *
    * @returns The context associated with the widget, or `undefined`.
    */
-  contextForWidget(widget: Widget): DocumentRegistry.IContext<DocumentRegistry.IModel> {
+  contextForWidget(widget: Widget): DocumentRegistry.Context {
     return Private.contextProperty.get(widget);
   }
 
@@ -205,7 +205,7 @@ class DocumentWidgetManager implements IDisposable {
    *
    * @param context - The document context object.
    */
-  closeWidgets(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): void {
+  closeWidgets(context: DocumentRegistry.Context): void {
     let widgets = Private.widgetsProperty.get(context);
     each(widgets, widget => {
       widget.close();
@@ -335,7 +335,7 @@ namespace Private {
    * A private attached property for a widget context.
    */
   export
-  const contextProperty = new AttachedProperty<Widget, DocumentRegistry.IContext<DocumentRegistry.IModel>>({
+  const contextProperty = new AttachedProperty<Widget, DocumentRegistry.Context>({
     name: 'context'
   });
 
@@ -351,7 +351,7 @@ namespace Private {
    * A private attached property for the widgets associated with a context.
    */
   export
-  const widgetsProperty = new AttachedProperty<DocumentRegistry.IContext<DocumentRegistry.IModel>, Vector<Widget>>({
+  const widgetsProperty = new AttachedProperty<DocumentRegistry.Context, Vector<Widget>>({
     name: 'widgets',
     create: () => {
       return new Vector<Widget>();

@@ -26,7 +26,7 @@ class ActivityMonitor<Sender, Args> implements IDisposable {
   /**
    * A signal emitted when activity has ceased.
    */
-  activityStopped: ISignal<ActivityMonitor<Sender, Args>, ActivityMonitor.IArguments<Sender, Args>>;
+  readonly activityStopped: ISignal<this, ActivityMonitor.IArguments<Sender, Args>>;
 
   /**
    * The timeout associated with the monitor, in milliseconds.

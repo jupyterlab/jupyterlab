@@ -54,8 +54,9 @@ interface IObservableString extends IDisposable {
   dispose(): void;
 }
 
+
 /**
- * A concrete implementation of [[IObservableString]] 
+ * A concrete implementation of [[IObservableString]]
  */
 export
 class ObservableString implements IObservableString {
@@ -69,8 +70,7 @@ class ObservableString implements IObservableString {
   /**
    * A signal emitted when the string has changed.
    */
-  changed: ISignal<IObservableString, ObservableString.IChangedArgs>;
-
+  readonly changed: ISignal<IObservableString, ObservableString.IChangedArgs>;
 
   /**
    * Set the value of the string.

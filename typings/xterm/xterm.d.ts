@@ -1,14 +1,14 @@
-// Type definitions for term.js 0.0.7
-// Project: https://github.com/chjj/term.js
+// Type definitions for xterm.js 2.0.1
+// Project: https://github.com/sourcelair/xterm.js/
 // Definitions by: Steven Silvester <https://github.com/blink1073>
+// Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
 
-/**
- * Typing for a term.js terminal object.
- */
-interface Xterm {
+declare class Terminal {
 
-  options: Xterm.IOptions;
+  constructor(options?: Terminal.IOptions);
+
+  options: Terminal.IOptions;
 
   element: HTMLElement;
 
@@ -24,13 +24,14 @@ interface Xterm {
 
   focus(): void;
 
-  setOption(key: 'rows'): number;
-  setOption(key: 'cols'): number;
-  setOption(key: 'cursorBlink'): boolean;
+  getOption(key: string): number | boolean;
+  getOption(key: 'rows'): number;
+  getOption(key: 'cols'): number;
+  getOption(key: 'cursorBlink'): boolean;
 
-  on(event: string, callback: (arg: any) => void): void;
+  on(event: string, callback: (...args: any[]) => void): void;
 
-  off(event: string, callback: (arg: any) => void): void;
+  off(event: string, callback: (...args: any[]) => void): void;
 
   open(parent: HTMLElement): void;
 
@@ -42,6 +43,7 @@ interface Xterm {
 
   scrollDisp(n: number): void;
 
+  setOption(key: string, value: number | boolean): void;
   setOption(key: 'rows', value: number): void;
   setOption(key: 'cols', value: number): void;
   setOption(key: 'cursorBlink', value: boolean): void;
@@ -52,18 +54,9 @@ interface Xterm {
 }
 
 
-interface XtermConstructor {
-  new (options?: Xterm.IOptions): Xterm;
-  (options?: Xterm.IOptions): Xterm;
-}
-
-
-/**
- * A terminal options.
- */
-declare module Xterm {
+declare namespace Terminal {
+  export
   interface IOptions {
-
     cursorBlink?: boolean;
 
     rows?: number;
@@ -73,9 +66,6 @@ declare module Xterm {
 }
 
 
-declare var Xterm: XtermConstructor;
-
-
 declare module 'xterm' {
-  export = Xterm;
+  export = Terminal;
 }

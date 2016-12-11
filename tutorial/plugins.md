@@ -12,7 +12,7 @@ A JupyterLab application is comprised of:
 - A core [Application](https://github.com/phosphorjs/phosphide/blob/master/src/core/application.ts) object
 - Plugins
 
-A full example of an application is contained [here](https://github.com/jupyter/jupyterlab/tree/master/examples/lab).
+A full example of an application is contained [here](https://github.com/jupyterlab/jupyterlab/tree/master/examples/lab).
 Looking at the `index.js` file, you can see the extensions 
 used in the tutorial example.
 
@@ -33,10 +33,10 @@ The default plugins in the JupyterLab application include:
 - [Editor](http://jupyterlab.github.io/jupyterlab/modules/_editorwidget_plugin_.html) - Add a widget factory for displaying editable source files.
 - [Console](http://jupyterlab.github.io/jupyterlab/modules/_console_plugin_.html) - Adds the ability to launch Jupyter Console instances for
 interactive kernel console sessions.
-- [Services](http://jupyterlab.github.io/jupyterlab/modules/_services_plugin_.html#servicesprovider) - An application-specific interface to `@jupyterlab/services`.
-- [RenderMime](http://jupyterlab.github.io/jupyterlab/modules/_rendermime_plugin_.html#rendermimeprovider) - The registry for adding kernel `display_data` renderers.
-- [Document Registry](http://jupyterlab.github.io/jupyterlab/modules/_docregistry_plugin_.html#docregistryprovider) - Used to add functionality around widgets backed by files.
-- [Clipboard](http://jupyterlab.github.io/jupyterlab/modules/_clipboard_plugin_.html#clipboardprovider) - The application-wide clipboard for arbitrary MIME data.
+- [Services](http://jupyterlab.github.io/jupyterlab/modules/_services_plugin_.html#plugin) - An application-specific interface to `@jupyterlab/services`.
+- [RenderMime](http://jupyterlab.github.io/jupyterlab/modules/_rendermime_plugin_.html#plugin) - The registry for adding kernel `display_data` renderers.
+- [Document Registry](http://jupyterlab.github.io/jupyterlab/modules/_docregistry_plugin_.html#plugin) - Used to add functionality around widgets backed by files.
+- [Clipboard](http://jupyterlab.github.io/jupyterlab/modules/_clipboard_plugin_.html#plugin) - The application-wide clipboard for arbitrary MIME data.
 
 ## Application Object
 The JupyterLab [Application](http://phosphorjs.github.io/phosphor/api/classes/_ui_application_.application.html) object is given to each plugin in 

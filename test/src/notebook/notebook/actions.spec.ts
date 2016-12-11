@@ -36,12 +36,8 @@ import {
 } from '../../utils';
 
 import {
-  DEFAULT_CONTENT
+  DEFAULT_CONTENT, createNotebookRenderer
 } from '../utils';
-
-import {
-  CodeMirrorNotebookRenderer
-} from '../../../../lib/notebook/codemirror/notebook/widget';
 
 
 const clipboard = new MimeData();
@@ -59,7 +55,7 @@ describe('notebook/notebook/actions', () => {
     beforeEach((done) => {
       widget = new Notebook({
         rendermime: defaultRenderMime(),
-        renderer: CodeMirrorNotebookRenderer.defaultRenderer
+        renderer: createNotebookRenderer()
       });
       let model = new NotebookModel();
       model.fromJSON(DEFAULT_CONTENT);

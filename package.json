@@ -1,6 +1,6 @@
 {
   "name": "jupyterlab",
-  "version": "0.10.0",
+  "version": "0.11.2",
   "description": "A computational environment for Jupyter.",
   "directories": {
     "lib": "lib/"
@@ -24,14 +24,15 @@
     "xterm": "^2.0.1"
   },
   "devDependencies": {
-    "@jupyterlab/extension-builder": "^0.8.1",
+    "@jupyterlab/extension-builder": "^0.9.0",
     "@types/d3-dsv": "^1.0.29",
     "@types/expect.js": "^0.3.29",
     "@types/marked": "0.0.28",
     "@types/mathjax": "0.0.31",
     "@types/mocha": "^2.2.32",
-    "@types/requirejs": "^2.1.28",
+    "@types/node": "0.0.1",
     "@types/sanitize-html": "^1.13.31",
+    "@types/semver": "^5.3.30",
     "awesome-typescript-loader": "^2.2.4",
     "concurrently": "^2.0.0",
     "css-loader": "^0.23.1",
@@ -56,7 +57,7 @@
     "rimraf": "^2.5.0",
     "style-loader": "^0.13.0",
     "typedoc": "^0.5.0",
-    "typescript": "^2.0.3",
+    "typescript": "~2.0.3",
     "url-loader": "^0.5.7",
     "watch": "^0.17.1",
     "webpack": "^1.12.11"
@@ -67,7 +68,7 @@
     "build:examples": "node scripts/buildexamples.js",
     "build:src": "rimraf build && tsc --project src && node scripts/copyfiles.js",
     "build:test": "rimraf test/build && webpack --config test/webpack.conf.js",
-    "build:serverextension": "cd jupyterlab && rimraf build && webpack",
+    "build:serverextension": "cd jupyterlab && rimraf build && tsc --project src && webpack",
     "clean": "rimraf docs && rimraf lib && rimraf test/build && rimraf test/coverage && rimraf jupyterlab/build",
     "clean:examples": "node scripts/cleanexamples.js",
     "clean:slate": "npm run clean && npm run clean:examples && rimraf jupyterlab/node_modules && rimraf node_modules && npm install",
