@@ -1,6 +1,15 @@
-# Running `npm run build` will create static resources in the static
-# directory of this Python package (and create that directory if necessary).
+"""
+This module represents the flexx_labext labextension, which is used
+to create a new session for each page load, and to provide the page
+with the session id.
 
+Would be nice if somewhere in this extension we could get ahold of the
+tornado application object, so that we can register Flexx' handlers. Then
+we would not need the server extension anymore.
+
+Also we need to jump through hoops to make the extsion work, because
+the extension system is rather oriented for extensions written in Typescript.
+"""
 import os
 
 from flexx import app, event
@@ -9,18 +18,6 @@ from flexx import app, event
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 flexx_app_name = 'jlab'  # must match that of server ext
 
-
-STUB = """
-module.exports = [
-{
-  id: 'flexx_labext',
-  autoStart: true,
-  activate: function(application) {
-    window.meh = "flexx";
-  }
-}
-]
-"""
 
 MANIFEST = """{
 "name": "flexx_labext",
@@ -48,8 +45,6 @@ def _jupyter_labextension_paths():
     with open(os.path.join(THIS_DIR, 'static', 'flexx_labext.MANIFEST'), 'wb') as f:
         f.write(MANIFEST.encode('utf-8'))
     
-    # todo: can I not just point to this single file?
-    
     return [{
         'name': 'flexx_labext',
         'src': 'static',
@@ -71,8 +66,7 @@ def _jupyter_labextension_config():
 
 
 def get_session():
-    """ Given a Tornado app, register Flexx' Tornado handlers and return
-    a Flexx session object to obtain the JS and CSS assets.
+    """ Get session instance for the flexx jlab app.
     """
     
     # The server extension should have create the jlab app, for which
