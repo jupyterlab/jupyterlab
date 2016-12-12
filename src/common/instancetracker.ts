@@ -266,6 +266,16 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
 
   /**
    * Restore the widgets in this tracker's namespace.
+   *
+   * @param options - The configuration options that describe restoration.
+   *
+   * @returns A promise that resolves when restoration has completed.
+   *
+   * #### Notes
+   * This function should almost never be invoked by client code. Its primary
+   * use case is to be invoked by a layout restorer plugin that handles multiple
+   * instance trackers and, when ready, asks them each to restore their
+   * respective widgets.
    */
   restore(options: InstanceTracker.IRestoreOptions<T>): Promise<any> {
     this._restore = options;
