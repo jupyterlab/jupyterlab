@@ -46,8 +46,8 @@ function activateAbout(app: JupyterLab, palette: ICommandPalette, state: IStateD
 
   layout.restore(tracker, {
     command, namespace,
-    args: widget => null,
-    name: widget => 'about'
+    args: () => null,
+    name: () => 'about'
   });
 
   let widget: AboutWidget;

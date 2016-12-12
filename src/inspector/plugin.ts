@@ -106,8 +106,8 @@ function activateInspector(app: JupyterLab, palette: ICommandPalette, state: ISt
   layout.restore(tracker, {
     namespace: 'inspector',
     command,
-    args: widget => null,
-    name: widget => 'inspector'
+    args: () => null,
+    name: () => 'inspector'
   });
 
   function newInspector(): Inspector {

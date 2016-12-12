@@ -63,8 +63,8 @@ function activateLanding(app: JupyterLab, pathTracker: IPathTracker, palette: IC
   layout.restore(tracker, {
     namespace: 'landing',
     command,
-    args: widget => null,
-    name: widget => 'landing'
+    args: () => null,
+    name: () => 'landing'
   });
 
   let widget: LandingWidget;

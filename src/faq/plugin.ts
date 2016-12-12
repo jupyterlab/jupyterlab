@@ -55,8 +55,8 @@ function activateFAQ(app: JupyterLab, palette: ICommandPalette, linker: ICommand
   layout.restore(tracker, {
     namespace: 'faq',
     command,
-    args: widget => null,
-    name: widget => 'faq'
+    args: () => null,
+    name: () => 'faq'
   });
 
   let widget: FaqWidget;
