@@ -1,4 +1,4 @@
-from jupyterlab.flexx_jlab_serverext import register_flexx_jlab_plugin
+from flexx_labext import register_flexx_jlab_plugin
 
 from flexx import app, event, ui
 from flexx.ui.examples.mondriaan import Mondriaan
