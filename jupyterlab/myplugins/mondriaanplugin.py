@@ -1,7 +1,16 @@
-from ..flexx_plugin_manager import register_flexx_jlab_plugin
+from jupyterlab.flexx_jlab_serverext import register_flexx_jlab_plugin
 
 from flexx import app, event, ui
 from flexx.ui.examples.mondriaan import Mondriaan
+
+
+# Make Jupyter know that this is indeed a plugin,
+# even though all we really need is for this to get impored by the server.
+def _jupyter_labextension_paths():
+    return [{
+        'name': __name__,
+        'src': __file__,
+    }]
 
 
 @register_flexx_jlab_plugin

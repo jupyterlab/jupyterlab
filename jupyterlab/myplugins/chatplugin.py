@@ -1,4 +1,4 @@
-from ..flexx_plugin_manager import register_flexx_jlab_plugin
+from flexx_jlab_serverext import register_flexx_jlab_plugin
 
 from flexx import app, event, ui
 from flexx.ui.examples.chatroom import ChatRoom

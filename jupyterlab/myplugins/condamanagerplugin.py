@@ -1,7 +1,7 @@
 import os
 import sys
 
-from ..flexx_plugin_manager import register_flexx_jlab_plugin
+from flexx_jlab_serverext import register_flexx_jlab_plugin
 
 from flexx import app, event, ui
 

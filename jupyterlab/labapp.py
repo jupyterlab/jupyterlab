@@ -72,37 +72,6 @@ class LabHandler(IPythonHandler):
             if os.path.isfile(os.path.join(BUILT_FILES, css_file)):
                 css_files.append(ujoin(static_prefix, css_file))
 
-        ## --------------------
-        
-        # This is the code that we need to add to Jupyterlab, unless there
-        # is another way to let plugins influence the Python side of JLab.
-        
-        # Load some plugins. As it is now, importing them means registering them
-        # and including them in JLab. But how to determine what modules should
-        # be imported?
-        
-        from .myplugins import mondriaanplugin
-        from .myplugins import chatplugin
-        from .myplugins import condamanagerplugin
-        from .myplugins import fooplugin
-        
-        from flexx import app
-        from .flexx_plugin_manager import get_session
-        
-        # Get session; we need to know its id
-        session = get_session(self.application)
-        
-        # Add asset to notify the client-side of flexx of the session id
-        # would love to make this easier, e.g. by putting it in jupyter-config-data
-        init_js = 'flexx = {session_id: %r, app_name: %r}' % (session.id, session.app_name)
-        init_url = 'init/%s.js' % session.id
-        app.assets.add_shared_asset(init_url, init_js)
-        bundles.append('flexx/assets/shared/' + init_url)
-        # Add flexx core bundle
-        bundles.append('/flexx/assets/shared/flexx-core.js')
-        
-        ## --------------------
-        
         config = dict(
             static_prefix=static_prefix,
             page_title='JupyterLab Alpha Preview',
@@ -122,6 +91,8 @@ class LabHandler(IPythonHandler):
         # Gather the lab extension files and entry points.
         for (name, data) in sorted(labextensions.items()):
             for value in data.values():
+                if not isinstance(value, dict):
+                    continue  # e.g. python_module field
                 if value.get('entry', None):
                     entries.append(value['entry'])
                     bundles.append('%s/%s/%s' % (
@@ -130,6 +101,10 @@ class LabHandler(IPythonHandler):
                 for fname in value['files']:
                     if os.path.splitext(fname)[1] == '.css':
                         css_files.append('%s/%s/%s' % (
+                            EXTENSION_PREFIX, name, fname
+                        ))
+                    elif os.path.splitext(fname)[1] == '.js':
+                        bundles.append('%s/%s/%s' % (
                             EXTENSION_PREFIX, name, fname
                         ))
             python_module = data.get('python_module', None)
@@ -208,7 +183,7 @@ class LabApp(NotebookApp):
             if not config['enabled']:
                 continue
             warnings = validate_labextension_folder(name, find_labextension(name))
-            if warnings:
+            if False:#warnings:
                 continue
             data = get_labextension_manifest_data_by_name(name)
             if data is None:
