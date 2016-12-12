@@ -119,7 +119,7 @@ def install_labextension(path, name, overwrite=False, symlink=False,
     sys_prefix : bool [default: False]
         Install into the sys.prefix, i.e. environment
     """
-    
+
     # the actual path to which we eventually installed
     full_dest = None
 
@@ -183,7 +183,6 @@ def install_labextension_python(module, overwrite=False, symlink=False,
     Returns a list of installed/updated directories.
 
     See install_labextension for parameter information."""
-    
     m, labexts = _get_labextension_metadata(module)
     base_path = os.path.split(m.__file__)[0]
 
