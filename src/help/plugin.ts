@@ -57,7 +57,7 @@ const COMMANDS = [
   {
     text: 'Scipy Lecture Notes',
     id: 'help-doc:scipy-lecture-notes',
-    url: 'http://www.scipy-lectures.org/'
+    url: '//www.scipy-lectures.org/'
   },
   {
     text: 'Numpy Reference',
@@ -88,17 +88,17 @@ const COMMANDS = [
   {
     text: 'Matplotlib Reference',
     id: 'help-doc:mathplotlib-reference',
-    url: 'http://matplotlib.org/contents.html?v=20160707164940'
+    url: '//matplotlib.org/contents.html?v=20160707164940'
   },
   {
     text: 'SymPy Reference',
     id: 'help-doc:sympy-reference',
-    url: 'http://docs.sympy.org/latest/index.html?v=20160707164940'
+    url: '//docs.sympy.org/latest/index.html?v=20160707164940'
   },
   {
     text: 'Pandas Reference',
     id: 'help-doc:pandas-reference',
-    url: 'http://pandas.pydata.org/pandas-docs/stable/?v=20160707164940'
+    url: '//pandas.pydata.org/pandas-docs/stable/?v=20160707164940'
   },
   {
     text: 'Markdown Reference',
