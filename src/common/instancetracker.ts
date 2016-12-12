@@ -267,7 +267,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   /**
    * Restore the widgets in this tracker's namespace.
    */
-  restore(options: InstanceTracker.IRestoreOptions): Promise<any> {
+  restore(options: InstanceTracker.IRestoreOptions<T>): Promise<any> {
     this._restore = options;
 
     let { command, namespace, registry, state, when } = options;
@@ -359,7 +359,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   }
 
   private _currentWidget: T = null;
-  private _restore: InstanceTracker.IRestoreOptions = null;
+  private _restore: InstanceTracker.IRestoreOptions<T> = null;
   private _widgets = new Set<T>();
 }
 
@@ -378,7 +378,7 @@ namespace InstanceTracker {
    * The state restoration configuration options.
    */
   export
-  interface IRestoreOptions extends ILayoutRestorer.IRestoreOptions {
+  interface IRestoreOptions<T extends Widget> extends ILayoutRestorer.IRestoreOptions<T> {
     /*
      * The layout restorer to use to re-arrange restored tabs.
      */

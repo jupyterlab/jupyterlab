@@ -153,8 +153,8 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   layout.restore(tracker, {
     namespace: 'console',
     command: 'console:create',
-    args: (p: ConsolePanel) => ({ id: p.content.session.id }),
-    name: (p: ConsolePanel) => p.content.session && p.content.session.id,
+    args: panel => ({ id: panel.content.session.id }),
+    name: panel => panel.content.session && panel.content.session.id,
     when: manager.ready
   });
 

@@ -74,8 +74,8 @@ function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palet
   layout.restore(tracker, {
     namespace: 'imagewidget',
     command: 'file-operations:open',
-    args: (w: ImageWidget) => ({ path: w.context.path, factory: FACTORY }),
-    name: (w: ImageWidget) => w.context.path
+    args: widget => ({ path: widget.context.path, factory: FACTORY }),
+    name: widget => widget.context.path
   });
 
   // Sync tracker with currently focused widget.

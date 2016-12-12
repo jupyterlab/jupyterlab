@@ -59,8 +59,8 @@ function activateCSVWidget(app: JupyterLab, registry: IDocumentRegistry, state: 
   layout.restore(tracker, {
     namespace: 'csvwidget',
     command: 'file-operations:open',
-    args: (w: CSVWidget) => ({ path: w.context.path, factory: FACTORY }),
-    name: (w: CSVWidget) => w.context.path
+    args: widget => ({ path: widget.context.path, factory: FACTORY }),
+    name: widget => widget.context.path
   });
 
   registry.addWidgetFactory(factory);

@@ -92,8 +92,8 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
   layout.restore(tracker, {
     namespace: 'terminal',
     command: newTerminalId,
-    args: (w: TerminalWidget) => ({ name: w.session.name }),
-    name: (w: TerminalWidget) => w.session && w.session.name
+    args: widget => ({ name: widget.session.name }),
+    name: widget => widget.session && widget.session.name
   });
 
   // Sync tracker with currently focused widget.

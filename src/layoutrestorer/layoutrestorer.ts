@@ -75,7 +75,7 @@ interface ILayoutRestorer {
    *
    * @param options - The restoration options.
    */
-  restore(tracker: InstanceTracker<any>, options: ILayoutRestorer.IRestoreOptions): void;
+  restore(tracker: InstanceTracker<any>, options: ILayoutRestorer.IRestoreOptions<any>): void;
 }
 
 
@@ -99,7 +99,7 @@ namespace ILayoutRestorer {
    * The state restoration configuration options.
    */
   export
-  interface IRestoreOptions {
+  interface IRestoreOptions<T extends Widget> {
     /**
      * The command to execute when restoring instances.
      */
@@ -108,12 +108,12 @@ namespace ILayoutRestorer {
     /**
      * A function that returns the args needed to restore an instance.
      */
-    args: (widget: Widget) => JSONObject;
+    args: (widget: T) => JSONObject;
 
     /**
      * A function that returns a unique persistent name for this instance.
      */
-    name: (widget: Widget) => string;
+    name: (widget: T) => string;
 
     /**
      * The namespace to occupy in the state database for restoration data.
@@ -151,11 +151,10 @@ class LayoutRestorer implements ILayoutRestorer {
    * Create a layout restorer.
    */
   constructor(options: LayoutRestorer.IOptions) {
+    this._registry = options.registry;
     this._state = options.state;
-    this._first = options.first;
-    this._first.then(() => Promise.all(this._promises)).then(() => {
+    options.first.then(() => Promise.all(this._promises)).then(() => {
       // Release the promises held in memory.
-      this._first = null;
       this._promises = null;
       // Restore the application state.
       return this._restore();
@@ -190,7 +189,7 @@ class LayoutRestorer implements ILayoutRestorer {
    *
    * @param options - The restoration options.
    */
-  restore(tracker: InstanceTracker<any>, options: ILayoutRestorer.IRestoreOptions): void {
+  restore(tracker: InstanceTracker<any>, options: ILayoutRestorer.IRestoreOptions<any>): void {
     if (!this._promises) {
       console.warn('restore can only be called before app has started.');
       return;
@@ -244,7 +243,6 @@ class LayoutRestorer implements ILayoutRestorer {
     });
   }
 
-  private _first: Promise<any> = null;
   private _promises: Promise<any>[] = [];
   private _restored = new utils.PromiseDelegate<void>();
   private _registry: CommandRegistry = null;

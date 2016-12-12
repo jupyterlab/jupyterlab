@@ -182,8 +182,8 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
   layout.restore(tracker, {
     namespace: 'notebook',
     command: 'file-operations:open',
-    args: (p: NotebookPanel) => ({ path: p.context.path, factory: FACTORY }),
-    name: (p: NotebookPanel) => p.context.path,
+    args: panel => ({ path: panel.context.path, factory: FACTORY }),
+    name: panel => panel.context.path,
     when: services.ready
   });
 

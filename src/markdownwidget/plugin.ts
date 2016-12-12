@@ -66,8 +66,8 @@ const plugin: JupyterLabPlugin<void> = {
     layout.restore(tracker, {
       namespace: 'rendered-markdown',
       command: 'file-operations:open',
-      args: (w: MarkdownWidget) => ({ path: w.context.path, factory: FACTORY }),
-      name: (w: MarkdownWidget) => w.context.path
+      args: widget => ({ path: widget.context.path, factory: FACTORY }),
+      name: widget => widget.context.path
     });
 
     let icon = `${PORTRAIT_ICON_CLASS} ${TEXTEDITOR_ICON_CLASS}`;
