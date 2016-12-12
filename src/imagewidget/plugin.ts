@@ -57,22 +57,17 @@ const plugin: JupyterLabPlugin<void> = {
  * Activate the image widget extension.
  */
 function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palette: ICommandPalette, state: IStateDB, layout: ILayoutRestorer): void {
-  let zoomInImage = 'image-widget:zoom-in';
-  let zoomOutImage = 'image-widget:zoom-out';
-  let resetZoomImage = 'image-widget:reset-zoom';
-
+  const namespace = 'image-widget';
   const factory = new ImageWidgetFactory({
     name: FACTORY,
     modelName: 'base64',
     fileExtensions: EXTENSIONS,
     defaultFor: EXTENSIONS
   });
-
-  const tracker = new InstanceTracker<ImageWidget>();
+  const tracker = new InstanceTracker<ImageWidget>({ namespace });
 
   // Handle state restoration.
   layout.restore(tracker, {
-    namespace: 'imagewidget',
     command: 'file-operations:open',
     args: widget => ({ path: widget.context.path, factory: FACTORY }),
     name: widget => widget.context.path
@@ -90,6 +85,10 @@ function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palet
     widget.context.pathChanged.connect(() => { tracker.save(widget); });
     tracker.add(widget);
   });
+
+  let zoomInImage = `${namespace}:zoom-in`;
+  let zoomOutImage = `${namespace}:zoom-out`;
+  let resetZoomImage = `${namespace}:reset-zoom`;
 
   app.commands.addCommand(zoomInImage, {
     execute: zoomIn,

@@ -73,24 +73,24 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
     console.log('Disabling terminals plugin because they are not available on the server');
     return;
   }
+
+  const namespace = 'terminal';
+  const tracker = new InstanceTracker<TerminalWidget>({ namespace });
+
   let { commands, keymap } = app;
-  let newTerminalId = 'terminal:create-new';
-  let increaseTerminalFontSize = 'terminal:increase-font';
-  let decreaseTerminalFontSize = 'terminal:decrease-font';
-  let toggleTerminalTheme = 'terminal:toggle-theme';
-  let openTerminalId = 'terminal:open';
+  let newTerminalId = `${namespace}:create-new`;
+  let increaseTerminalFontSize = `${namespace}:increase-font`;
+  let decreaseTerminalFontSize = `${namespace}:decrease-font`;
+  let toggleTerminalTheme = `${namespace}:toggle-theme`;
+  let openTerminalId = `${namespace}:open`;
   let options = {
     background: 'black',
     color: 'white',
     fontSize: 13
   };
 
-  // Create an instance tracker for all terminal widgets.
-  const tracker = new InstanceTracker<TerminalWidget>();
-
   // Handle state restoration.
   layout.restore(tracker, {
-    namespace: 'terminal',
     command: newTerminalId,
     args: widget => ({ name: widget.session.name }),
     name: widget => widget.session && widget.session.name

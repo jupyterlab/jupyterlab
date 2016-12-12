@@ -116,11 +116,6 @@ namespace ILayoutRestorer {
     name: (widget: T) => string;
 
     /**
-     * The namespace to occupy in the state database for restoration data.
-     */
-    namespace: string;
-
-    /**
      * The point after which it is safe to restore state.
      *
      * #### Notes
@@ -195,9 +190,9 @@ class LayoutRestorer implements ILayoutRestorer {
       return;
     }
 
-    let { args, command, name, namespace, when } = options;
+    let { args, command, name, when } = options;
     this._promises.push(tracker.restore({
-      args, command, name, namespace, when,
+      args, command, name, when,
       layout: this,
       registry: this._registry,
       state: this._state

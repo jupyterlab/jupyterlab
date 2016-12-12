@@ -57,11 +57,10 @@ function activateLanding(app: JupyterLab, pathTracker: IPathTracker, palette: IC
   const category = 'Help';
   const command = 'jupyterlab-landing:show';
   const model = new LandingModel(services.terminals.isAvailable());
-  const tracker = new InstanceTracker<LandingWidget>();
+  const tracker = new InstanceTracker<LandingWidget>({ namespace: 'landing' });
 
   // Handle state restoration.
   layout.restore(tracker, {
-    namespace: 'landing',
     command,
     args: () => null,
     name: () => 'landing'

@@ -100,6 +100,20 @@ interface IInstanceTracker<T extends Widget> {
 export
 class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposable {
   /**
+   * Create a new instance tracker.
+   *
+   * @param options - The instantiation options for an instance tracker.
+   */
+  constructor(options: InstanceTracker.IOptions) {
+    this.namespace = options.namespace;
+  }
+
+  /**
+   * A namespace for all tracked widgets, (e.g., `notebook`).
+   */
+  readonly namespace: string;
+
+  /**
    * A signal emitted when a widget is added or removed from the tracker.
    */
   readonly changed: ISignal<this, 'add' | 'remove'>;
@@ -149,11 +163,11 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
 
     // Handle widget state restoration.
     if (!injected && this._restore) {
-      let { layout, namespace, state } = this._restore;
+      let { layout, state } = this._restore;
       let widgetName = this._restore.name(widget);
 
       if (widgetName) {
-        let name = `${namespace}:${widgetName}`;
+        let name = `${this.namespace}:${widgetName}`;
         let data = this._restore.args(widget);
         let metadata = options;
 
@@ -280,7 +294,8 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   restore(options: InstanceTracker.IRestoreOptions<T>): Promise<any> {
     this._restore = options;
 
-    let { command, namespace, registry, state, when } = options;
+    let { command, registry, state, when } = options;
+    let namespace = this.namespace;
     let promises = [state.fetchNamespace(namespace)];
 
     if (when) {
@@ -308,10 +323,10 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
       return;
     }
 
-    let { namespace, state } = this._restore;
+    let { state } = this._restore;
     let widgetName = this._restore.name(widget);
     let oldName = Private.nameProperty.get(widget);
-    let newName = widgetName ? `${namespace}:${widgetName}` : null;
+    let newName = widgetName ? `${this.namespace}:${widgetName}` : null;
 
     if (oldName && oldName !== newName) {
       state.remove(oldName);
@@ -384,6 +399,17 @@ defineSignal(InstanceTracker.prototype, 'currentChanged');
  */
 export
 namespace InstanceTracker {
+  /**
+   * The instantiation options for an instance tracker.
+   */
+  export
+  interface IOptions {
+    /**
+     * A namespace for all tracked widgets, (e.g., `notebook`).
+     */
+    namespace: string;
+  }
+
   /**
    * The state restoration configuration options.
    */

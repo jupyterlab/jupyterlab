@@ -147,11 +147,10 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   let menu = new Menu({ commands, keymap });
 
   // Create an instance tracker for all console panels.
-  const tracker = new InstanceTracker<ConsolePanel>();
+  const tracker = new InstanceTracker<ConsolePanel>({ namespace: 'console' });
 
   // Handle state restoration.
   layout.restore(tracker, {
-    namespace: 'console',
     command: 'console:create',
     args: panel => ({ id: panel.content.session.id }),
     name: panel => panel.content.session && panel.content.session.id,

@@ -176,11 +176,10 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     renderer
   });
 
-  const tracker = new NotebookTracker();
+  const tracker = new NotebookTracker({ namespace: 'notebook' });
 
   // Handle state restoration.
   layout.restore(tracker, {
-    namespace: 'notebook',
     command: 'file-operations:open',
     args: panel => ({ path: panel.context.path, factory: FACTORY }),
     name: panel => panel.context.path,

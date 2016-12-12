@@ -59,12 +59,11 @@ const plugin: JupyterLabPlugin<void> = {
       fileExtensions: ['.md'],
       rendermime
     });
-
-    const tracker = new InstanceTracker<MarkdownWidget>();
+    const namespace = 'rendered-markdown';
+    const tracker = new InstanceTracker<MarkdownWidget>({ namespace });
 
     // Handle state restoration.
     layout.restore(tracker, {
-      namespace: 'rendered-markdown',
       command: 'file-operations:open',
       args: widget => ({ path: widget.context.path, factory: FACTORY }),
       name: widget => widget.context.path

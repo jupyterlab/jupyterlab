@@ -87,11 +87,10 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, sta
       defaultFor: ['*']
     }
   });
-  const tracker = new InstanceTracker<EditorWidget>();
+  const tracker = new InstanceTracker<EditorWidget>({ namespace: 'editor' });
 
   // Handle state restoration.
   layout.restore(tracker, {
-    namespace: 'editor',
     command: 'file-operations:open',
     args: widget => ({ path: widget.context.path, factory: FACTORY }),
     name: widget => widget.context.path
