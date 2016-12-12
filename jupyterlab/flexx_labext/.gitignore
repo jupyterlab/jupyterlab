@@ -1,4 +1,6 @@
 *.bundle.*
 lib/
+sstatic/
+MANIFEST
 node_modules/
 *.egg-info/
