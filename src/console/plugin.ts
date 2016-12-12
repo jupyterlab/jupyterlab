@@ -140,10 +140,10 @@ interface ICreateConsoleArgs extends JSONObject {
  */
 function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, renderer: ConsoleContent.IRenderer, state: IStateDB, layout: ILayoutRestorer): IConsoleTracker {
   let manager = services.sessions;
-
   let { commands, keymap } = app;
   let category = 'Console';
   let command: string;
+  let count = 0;
   let menu = new Menu({ commands, keymap });
 
   // Create an instance tracker for all console panels.
@@ -168,6 +168,51 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
 
   // Set the main menu title.
   menu.title.label = category;
+
+  command = 'console:create';
+  commands.addCommand(command, {
+    execute: (args: ICreateConsoleArgs) => {
+      let name = `Console ${++count}`;
+
+      args = args || {};
+
+      // If we get a session, use it.
+      if (args.id) {
+        return manager.ready.then(() => manager.connectTo(args.id))
+          .then(session => {
+            name = session.path.split('/').pop();
+            name = `Console ${name.match(CONSOLE_REGEX)[1]}`;
+            createConsole(session, name);
+            return session.id;
+          });
+      }
+
+      // Find the correct path for the new session.
+      // Use the given path or the cwd.
+      let path = args.path || pathTracker.path;
+      if (ContentsManager.extname(path)) {
+        path = ContentsManager.dirname(path);
+      }
+      path = `${path}/console-${count}-${utils.uuid()}`;
+
+      // Get the kernel model.
+      return manager.ready.then(() => getKernel(args, name)).then(kernel => {
+        if (!kernel || (kernel && !kernel.id && !kernel.name)) {
+          return;
+        }
+        // Start the session.
+        let options: Session.IOptions = {
+          path,
+          kernelName: kernel.name,
+          kernelId: kernel.id
+        };
+        return manager.startNew(options).then(session => {
+          createConsole(session, name);
+          return session.id;
+        });
+      });
+    }
+  });
 
   command = 'console:create-new';
   commands.addCommand(command, {
@@ -245,54 +290,6 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   });
   palette.addItem({ command, category });
   menu.addItem({ command });
-
-  let count = 0;
-
-  command = 'console:create';
-  commands.addCommand(command, {
-    execute: (args: ICreateConsoleArgs) => {
-      args = args || {};
-
-      let name = `Console ${++count}`;
-
-      // If we get a session, use it.
-      if (args.id) {
-        return manager.ready.then(() => {
-          return manager.connectTo(args.id);
-        }).then(session => {
-          name = session.path.split('/').pop();
-          name = `Console ${name.match(CONSOLE_REGEX)[1]}`;
-          createConsole(session, name);
-          return session.id;
-        });
-      }
-
-      // Find the correct path for the new session.
-      // Use the given path or the cwd.
-      let path = args.path || pathTracker.path;
-      if (ContentsManager.extname(path)) {
-        path = ContentsManager.dirname(path);
-      }
-      path = `${path}/console-${count}-${utils.uuid()}`;
-
-      // Get the kernel model.
-      return manager.ready.then(() => getKernel(args, name)).then(kernel => {
-        if (!kernel || (kernel && !kernel.id && !kernel.name)) {
-          return;
-        }
-        // Start the session.
-        let options: Session.IOptions = {
-          path,
-          kernelName: kernel.name,
-          kernelId: kernel.id
-        };
-        return manager.startNew(options).then(session => {
-          createConsole(session, name);
-          return session.id;
-        });
-      });
-    }
-  });
 
   command = 'console:inject';
   commands.addCommand(command, {
