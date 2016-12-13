@@ -61,26 +61,6 @@ class CodeMirrorModel implements CodeEditor.IModel {
   }
 
   /**
-   * Whether the model is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
-  /**
-   * Dipose of the resources used by the model.
-   */
-  dispose(): void {
-    if (this._isDisposed) {
-      return;
-    }
-    this._isDisposed = true;
-    this._selections.dispose();
-    this._value.dispose();
-    clearSignalData(this);
-  }
-
-  /**
    * A mime type of the model.
    */
   get mimeType(): string {
@@ -107,9 +87,29 @@ class CodeMirrorModel implements CodeEditor.IModel {
   }
 
   /**
+   * Whether the model is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dipose of the resources used by the model.
+   */
+  dispose(): void {
+    if (this._isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    this._selections.dispose();
+    this._value.dispose();
+    clearSignalData(this);
+  }
+
+  /**
    * Returns the content for the given line number.
    */
-  getLine(line: number): string {
+  getLine(line: number): string | undefined {
     return this._doc.getLine(line);
   }
 
@@ -153,7 +153,7 @@ class CodeMirrorModel implements CodeEditor.IModel {
   }
 
 
-  private _mimetype = '';
+  private _mimetype = 'text/plain';
   private _value: Private.ObservableDoc;
   private _isDisposed = false;
   private _doc: CodeMirror.Doc;
@@ -287,7 +287,8 @@ namespace Private {
         return;
       }
       let value = doc.getValue();
-      if (!value.length || change.text.length > 1 || change.removed.length > 1) {
+      if (!change.origin || change.origin === 'setValue' ||
+          change.text.length > 1 || change.removed.length > 1) {
         this.changed.emit({
           type: 'set',
           start: 0,
@@ -299,7 +300,7 @@ namespace Private {
       let start = doc.indexFromPos(change.from);
       let end = doc.indexFromPos(change.to);
       let changeType: ObservableString.ChangeType = 'insert';
-      if (change.origin.indexOf('remove') !== -1) {
+      if (change.origin.indexOf('delete') !== -1) {
         changeType = 'remove';
       }
       this.changed.emit({
