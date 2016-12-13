@@ -22,10 +22,6 @@ import {
 } from '../rendermime';
 
 import {
-  IStateDB
-} from '../statedb';
-
-import {
   MarkdownWidget, MarkdownWidgetFactory
 } from './widget';
 
@@ -52,8 +48,8 @@ const FACTORY = 'Rendered Markdown';
 export
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.rendered-markdown',
-  requires: [IDocumentRegistry, IRenderMime, IStateDB, ILayoutRestorer],
-  activate: (app: JupyterLab, registry: IDocumentRegistry, rendermime: IRenderMime, state: IStateDB, layout: ILayoutRestorer) => {
+  requires: [IDocumentRegistry, IRenderMime, ILayoutRestorer],
+  activate: (app: JupyterLab, registry: IDocumentRegistry, rendermime: IRenderMime, layout: ILayoutRestorer) => {
     const factory = new MarkdownWidgetFactory({
       name: FACTORY,
       fileExtensions: ['.md'],

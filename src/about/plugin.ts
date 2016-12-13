@@ -18,10 +18,6 @@ import {
 } from '../layoutrestorer';
 
 import {
-  IStateDB
-} from '../statedb';
-
-import {
   AboutModel, AboutWidget
 } from './';
 
@@ -33,11 +29,11 @@ const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.about',
   activate: activateAbout,
   autoStart: true,
-  requires: [ICommandPalette, IStateDB, ILayoutRestorer]
+  requires: [ICommandPalette, ILayoutRestorer]
 };
 
 
-function activateAbout(app: JupyterLab, palette: ICommandPalette, state: IStateDB, layout: ILayoutRestorer): void {
+function activateAbout(app: JupyterLab, palette: ICommandPalette, layout: ILayoutRestorer): void {
   const namespace = 'about-jupyterlab';
   const model = new AboutModel();
   const command = `${namespace}:show`;

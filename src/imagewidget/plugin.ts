@@ -22,10 +22,6 @@ import {
 } from '../layoutrestorer';
 
 import {
-  IStateDB
-} from '../statedb';
-
-import {
   ImageWidget, ImageWidgetFactory
 } from './widget';
 
@@ -47,7 +43,7 @@ const FACTORY = 'Image';
 export
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.image-handler',
-  requires: [IDocumentRegistry, ICommandPalette, IStateDB, ILayoutRestorer],
+  requires: [IDocumentRegistry, ICommandPalette, ILayoutRestorer],
   activate: activateImageWidget,
   autoStart: true
 };
@@ -56,7 +52,7 @@ const plugin: JupyterLabPlugin<void> = {
 /**
  * Activate the image widget extension.
  */
-function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palette: ICommandPalette, state: IStateDB, layout: ILayoutRestorer): void {
+function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palette: ICommandPalette, layout: ILayoutRestorer): void {
   const namespace = 'image-widget';
   const factory = new ImageWidgetFactory({
     name: FACTORY,

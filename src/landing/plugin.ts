@@ -26,10 +26,6 @@ import {
 } from '../services';
 
 import {
-  IStateDB
-} from '../statedb';
-
-import {
   LandingModel, LandingWidget
 } from './widget';
 
@@ -40,9 +36,7 @@ import {
 export
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.landing',
-  requires: [
-    IPathTracker, ICommandPalette, IServiceManager, IStateDB, ILayoutRestorer
-  ],
+  requires: [IPathTracker, ICommandPalette, IServiceManager, ILayoutRestorer],
   activate: activateLanding,
   autoStart: true
 };
@@ -53,7 +47,7 @@ const plugin: JupyterLabPlugin<void> = {
 const LANDING_CLASS = 'jp-Landing';
 
 
-function activateLanding(app: JupyterLab, pathTracker: IPathTracker, palette: ICommandPalette, services: IServiceManager, state: IStateDB, layout: ILayoutRestorer): void {
+function activateLanding(app: JupyterLab, pathTracker: IPathTracker, palette: ICommandPalette, services: IServiceManager, layout: ILayoutRestorer): void {
   const category = 'Help';
   const command = 'jupyterlab-landing:show';
   const model = new LandingModel(services.terminals.isAvailable());

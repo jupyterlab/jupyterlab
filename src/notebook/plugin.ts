@@ -47,10 +47,6 @@ import {
 } from '../services';
 
 import {
-  IStateDB
-} from '../statedb';
-
-import {
   INotebookTracker, NotebookModelFactory, NotebookPanel, NotebookTracker,
   NotebookWidgetFactory, NotebookActions, Notebook
 } from './index';
@@ -135,7 +131,6 @@ const trackerPlugin: JupyterLabPlugin<INotebookTracker> = {
     ICommandPalette,
     IInspector,
     NotebookPanel.IRenderer,
-    IStateDB,
     ILayoutRestorer
   ],
   activate: activateNotebookHandler,
@@ -162,7 +157,7 @@ const rendererPlugin: JupyterLabPlugin<NotebookPanel.IRenderer> = {
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector, renderer: NotebookPanel.IRenderer, state: IStateDB, layout: ILayoutRestorer): INotebookTracker {
+function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector, renderer: NotebookPanel.IRenderer, layout: ILayoutRestorer): INotebookTracker {
 
   const factory = new NotebookWidgetFactory({
     name: FACTORY,

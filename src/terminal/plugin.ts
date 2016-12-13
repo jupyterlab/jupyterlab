@@ -34,10 +34,6 @@ import {
 } from '../services';
 
 import {
-  IStateDB
-} from '../statedb';
-
-import {
   TerminalWidget
 } from './index';
 
@@ -60,14 +56,14 @@ export
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.terminal',
   requires: [
-    IServiceManager, IMainMenu, ICommandPalette, IStateDB, ILayoutRestorer
+    IServiceManager, IMainMenu, ICommandPalette, ILayoutRestorer
   ],
   activate: activateTerminal,
   autoStart: true
 };
 
 
-function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB, layout: ILayoutRestorer): void {
+function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, layout: ILayoutRestorer): void {
   // Bail if there are no terminals available.
   if (!services.terminals.isAvailable()) {
     console.log('Disabling terminals plugin because they are not available on the server');

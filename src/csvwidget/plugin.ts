@@ -18,10 +18,6 @@ import {
 } from '../layoutrestorer';
 
 import {
-  IStateDB
-} from '../statedb';
-
-import {
   CSVWidget, CSVWidgetFactory
 } from './widget';
 
@@ -38,7 +34,7 @@ const FACTORY = 'Table';
 export
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.csv-handler',
-  requires: [IDocumentRegistry, IStateDB, ILayoutRestorer],
+  requires: [IDocumentRegistry, ILayoutRestorer],
   activate: activateCSVWidget,
   autoStart: true
 };
@@ -47,7 +43,7 @@ const plugin: JupyterLabPlugin<void> = {
 /**
  * Activate the table widget extension.
  */
-function activateCSVWidget(app: JupyterLab, registry: IDocumentRegistry, state: IStateDB, layout: ILayoutRestorer): void {
+function activateCSVWidget(app: JupyterLab, registry: IDocumentRegistry, layout: ILayoutRestorer): void {
   const factory = new CSVWidgetFactory({
     name: FACTORY,
     fileExtensions: ['.csv'],

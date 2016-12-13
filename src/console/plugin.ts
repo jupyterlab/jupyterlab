@@ -62,10 +62,6 @@ import {
 } from '../services';
 
 import {
-  IStateDB
-} from '../statedb';
-
-import {
   IConsoleTracker, ConsolePanel, ConsoleContent
 } from './index';
 
@@ -85,7 +81,6 @@ const trackerPlugin: JupyterLabPlugin<IConsoleTracker> = {
     ICommandPalette,
     IPathTracker,
     ConsoleContent.IRenderer,
-    IStateDB,
     ILayoutRestorer
   ],
   activate: activateConsole,
@@ -138,7 +133,7 @@ interface ICreateConsoleArgs extends JSONObject {
 /**
  * Activate the console extension.
  */
-function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, renderer: ConsoleContent.IRenderer, state: IStateDB, layout: ILayoutRestorer): IConsoleTracker {
+function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, renderer: ConsoleContent.IRenderer, layout: ILayoutRestorer): IConsoleTracker {
   let manager = services.sessions;
   let { commands, keymap } = app;
   let category = 'Console';

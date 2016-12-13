@@ -22,10 +22,6 @@ import {
 } from '../layoutrestorer';
 
 import {
-  IStateDB
-} from '../statedb';
-
-import {
   IEditorTracker, EditorWidget, EditorWidgetFactory
 } from './widget';
 
@@ -66,9 +62,7 @@ const cmdIds = {
 export
 const plugin: JupyterLabPlugin<IEditorTracker> = {
   id: 'jupyter.services.editor-handler',
-  requires: [
-    IDocumentRegistry, IStateDB, ILayoutRestorer, IEditorServices
-  ],
+  requires: [IDocumentRegistry, ILayoutRestorer, IEditorServices],
   provides: IEditorTracker,
   activate: activateEditorHandler,
   autoStart: true
@@ -78,7 +72,7 @@ const plugin: JupyterLabPlugin<IEditorTracker> = {
 /**
  * Sets up the editor widget
  */
-function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, state: IStateDB, layout: ILayoutRestorer, editorServices: IEditorServices): IEditorTracker {
+function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, layout: ILayoutRestorer, editorServices: IEditorServices): IEditorTracker {
   const factory = new EditorWidgetFactory({
     editorServices,
     factoryOptions: {
