@@ -6,6 +6,7 @@ import subprocess
 import sys
 import os
 import re
+import json
 import shutil
 import threading
 import tempfile
@@ -25,7 +26,12 @@ shell = (sys.platform == 'win32')
 
 def start_notebook():
     nb_command = [sys.executable, '-m', 'notebook', root_dir, '--no-browser',
-                  '--NotebookApp.allow_origin="*"']
+                  # FIXME: allow-origin=* only required for notebook < 4.3
+                  '--NotebookApp.allow_origin="*"',
+                  # disable user password:
+                  '--NotebookApp.password=',
+                  # disable token:
+                  '--NotebookApp.token=']
     nb_server = subprocess.Popen(nb_command, shell=shell,
                                  stderr=subprocess.STDOUT,
                                  stdout=subprocess.PIPE)
@@ -37,7 +43,7 @@ def start_notebook():
             continue
         print(line)
         if 'Jupyter Notebook is running at:' in line:
-            base_url = re.search('(http.*?)$', line).groups()[0]
+            base_url = re.search(r'(http[^\?]+)', line).groups()[0]
             break
 
     while 1:
@@ -63,14 +69,16 @@ def start_notebook():
 
 
 def run_karma(base_url):
+    config = dict(baseUrl=base_url,
+                  terminalsAvailable="True")
     with open(os.path.join(HERE, 'build', 'injector.js'), 'w') as fid:
         fid.write("""
         var node = document.createElement('script');
         node.id = 'jupyter-config-data';
         node.type = 'application/json';
-        node.textContent = '{"baseUrl": "%s", "terminalsAvailable": "True" }';
+        node.textContent = '%s';
         document.body.appendChild(node);
-        """ % base_url)
+        """ % json.dumps(config))
 
     cmd = ['karma', 'start'] + sys.argv[1:]
     return subprocess.check_call(cmd, shell=shell, stderr=subprocess.STDOUT)
