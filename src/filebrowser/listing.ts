@@ -133,13 +133,15 @@ const MODIFIED_ID_CLASS = 'jp-id-modified';
 /**
  * The class name added to a file type content item.
  */
-const FILE_TYPE_CLASS = 'jp-type-file';
+const FILE_TYPE_CLASS = 'jp-FileIcon';
 
 /**
  * The class name added to a folder type content item.
  */
 const FOLDER_TYPE_CLASS = 'jp-type-folder';
-
+const FOLDER_MATERIAL_ICON_CLASS = 'jp-OpenFolderIcon';
+const NOTEBOOK_MATERIAL_ICON_CLASS = 'jp-NotebookIcon';
+const MATERIAL_ICON_CLASS = 'jp-MaterialIcon';
 /**
  * The class name added to a notebook type content item.
  */
@@ -1484,15 +1486,16 @@ namespace DirListing {
       let text = utils.findElement(node, ITEM_TEXT_CLASS);
       let modified = utils.findElement(node, ITEM_MODIFIED_CLASS);
 
-      icon.className = ITEM_ICON_CLASS;
+      icon.className = ITEM_ICON_CLASS + ' ' + MATERIAL_ICON_CLASS;
       switch (model.type) {
       case 'directory':
-        icon.classList.add(FOLDER_TYPE_CLASS);
+        icon.classList.add(FOLDER_MATERIAL_ICON_CLASS);
         break;
       case 'notebook':
-        icon.classList.add(NOTEBOOK_TYPE_CLASS);
+        icon.classList.add(NOTEBOOK_MATERIAL_ICON_CLASS);
         break;
       default:
+        icon.classList.add(MATERIAL_ICON_CLASS);
         icon.classList.add(FILE_TYPE_CLASS);
         break;
       }

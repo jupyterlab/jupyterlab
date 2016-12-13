@@ -34,18 +34,23 @@
   font-family: FontAwesome;
   text-align: center;
   display: inline-block;
+  height: 24px;
+  width: 32px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 16px;
 }
 
 
 .jp-Toolbar-button.jp-mod-pressed {
     background-color: #E0E0E0;
-    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5);
+    box-shadow: inset 0 0px 1px rgba(0, 0, 0, 0.5);
 }
 
 
 .jp-Toolbar-button:hover {
     background-color: #EEEEEE;
-    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5);
+    box-shadow: inset 0 0px 1px rgba(0, 0, 0, 0.5);
 }
 
 

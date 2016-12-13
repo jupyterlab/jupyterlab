@@ -43,16 +43,18 @@
 
 
 .p-CommandPalette-wrapper::after {
-  font-family: FontAwesome;
-  content: "\f002"; /* search */
+  content: " ";
   color: white;
   background-color: var(--jp-brand-color1);
-  font-size: var(--jp-ui-icon-font-size);
-  line-height: var(--jp-private-commandpalette-search-height);
   position: absolute;
   right: 12px;
   height: 30px;
+  width: 12px;
   padding: 0px 12px;
+  background-image: url(../default-theme/icons/md/search.svg);
+  background-size: 20px;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .p-CommandPalette-input {
