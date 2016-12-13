@@ -140,12 +140,12 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, sta
 
   commands.addCommand(cmdIds.lineNumbers, {
     execute: () => { toggleLineNums(); },
-    label: 'Toggle Line Numbers',
+    label: 'Toggle Line Numbers'
   });
 
   commands.addCommand(cmdIds.lineWrap, {
     execute: () => { toggleLineWrap(); },
-    label: 'Toggle Line Wrap',
+    label: 'Toggle Line Wrap'
   });
 
   commands.addCommand(cmdIds.createConsole, {
@@ -158,9 +158,8 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, sta
         path: widget.context.path,
         preferredLanguage: widget.context.model.defaultKernelLanguage
       };
-      commands.execute('console:create', options).then(id => {
-        sessionIdProperty.set(widget, id);
-      });
+      return commands.execute('console:create', options)
+        .then(id => { sessionIdProperty.set(widget, id); });
     },
     label: 'Create Console for Editor'
   });
@@ -182,9 +181,9 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, sta
       const start = editorModel.getOffsetAt(selection.start);
       const end = editorModel.getOffsetAt(selection.end);
       const code = editorModel.value.text.substring(start, end);
-      commands.execute('console:inject', { id, code });
+      return commands.execute('console:inject', { id, code });
     },
-    label: 'Run Code',
+    label: 'Run Code'
   });
 
   return tracker;

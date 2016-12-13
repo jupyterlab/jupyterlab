@@ -288,9 +288,9 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocume
   commands.addCommand(cmdIds.toggleBrowser, {
     execute: () => {
       if (fbWidget.isHidden) {
-        commands.execute(cmdIds.showBrowser, void 0);
+        return commands.execute(cmdIds.showBrowser, void 0);
       } else {
-        commands.execute(cmdIds.hideBrowser, void 0);
+        return commands.execute(cmdIds.hideBrowser, void 0);
       }
     }
   });

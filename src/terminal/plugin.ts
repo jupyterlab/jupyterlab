@@ -74,6 +74,7 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
     return;
   }
 
+  const category = 'Terminal';
   const namespace = 'terminal';
   const tracker = new InstanceTracker<TerminalWidget>({ namespace });
 
@@ -174,13 +175,12 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
         app.shell.activateMain(widget.id);
       } else {
         // Otherwise, create a new terminal with a given name.
-        commands.execute(newTerminalId, { name });
+        return commands.execute(newTerminalId, { name });
       }
     }
   });
 
   // Add command palette items.
-  let category = 'Terminal';
   [
     newTerminalId,
     increaseTerminalFontSize,
@@ -190,7 +190,7 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
 
   // Add menu items.
   let menu = new Menu({ commands, keymap });
-  menu.title.label = 'Terminal';
+  menu.title.label = category;
   menu.addItem({ command: newTerminalId });
   menu.addItem({ command: increaseTerminalFontSize });
   menu.addItem({ command: decreaseTerminalFontSize });
