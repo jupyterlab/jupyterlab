@@ -34,7 +34,7 @@ import {
  * The editor services.
  */
 export
-const editorServices: JupyterLabPlugin<IEditorServices> = {
+const servicesPlugin: JupyterLabPlugin<IEditorServices> = {
   id: IEditorServices.name,
   provides: IEditorServices,
   activate: (): IEditorServices => {
@@ -49,7 +49,7 @@ const editorServices: JupyterLabPlugin<IEditorServices> = {
  * The editor commands.
  */
 export
-const editorCommands: JupyterLabPlugin<void> = {
+const commandsPlugin: JupyterLabPlugin<void> = {
   id: 'jupyter.services.editor-commands',
   requires: [IEditorTracker, IMainMenu, ICommandPalette],
   activate: activateEditorCommands,

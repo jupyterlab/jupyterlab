@@ -2,8 +2,24 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IDisposable, DisposableDelegate
+} from 'phosphor/lib/core/disposable';
+
+import {
   boxSizing as computeBoxSizing, IBoxSizing
 } from 'phosphor/lib/dom/sizing';
+
+import {
+  findIndex
+} from 'phosphor/lib/algorithm/searching';
+
+import {
+  Vector
+} from 'phosphor/lib/collections/vector';
+
+import {
+  IObservableString, ObservableString
+} from '../common/observablestring';
 
 import {
   IChangedArgs
@@ -50,11 +66,6 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
   minHeight?: number;
 
   /**
-   * Handle keydown events for the editor.
-   */
-  onKeyDown: CodeEditor.KeydownHandler | null = null;
-
-  /**
    * Construct a Monaco editor.
    */
   constructor(options: MonacoCodeEditor.IOptions) {
@@ -70,7 +81,7 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
     this._listeners.push(this.editor.onKeyDown(e => this._onKeyDown(e)));
 
     this._model = options.monacoModel || new MonacoModel();
-    this._model.valueChanged.connect(this._onValueChanged, this);
+    this._model.value.changed.connect(this._onValueChanged, this);
     this._model.model = this._editor.getModel();
   }
 
@@ -90,6 +101,7 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
     }
     this._isDisposed = true;
     this._model.dispose();
+    this._keydownHandlers.clear();
 
     while (this._listeners.length !== 0) {
       this._listeners.pop() !.dispose();
@@ -114,7 +126,7 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
   /**
    * Handles a value change event.
    */
-  protected _onValueChanged(model: MonacoModel, args: IChangedArgs<string>) {
+  protected _onValueChanged(value: IObservableString, args: ObservableString.IChangedArgs) {
     this.autoresize();
   }
 
@@ -122,8 +134,10 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
    * Handles a key down event.
    */
   protected _onKeyDown(event: monaco.IKeyboardEvent) {
-    if (this.onKeyDown && this.isOnKeyDownContext())  {
-      if (this.onKeyDown(this, event.browserEvent)) {
+    if (!this._keydownHandlers.isEmpty && this.isOnKeyDownContext()) {
+      const browserEvent = event.browserEvent;
+      const index = findIndex(this._keydownHandlers, handler => handler(this, browserEvent));
+      if (index !== -1) {
         event.preventDefault();
       }
     }
@@ -402,7 +416,7 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
   /**
    * Resizes the editor to the given dimension or to the content if the given dimension is `null`.
    */
-  protected resize(dimension: monaco.editor.IDimension | null): void {
+  protected resize(dimension: monaco.editor.IDimension |  null): void {
     const hostNode = this.getHostNode();
     if (hostNode) {
       const layoutSize = this.computeLayoutSize(hostNode, dimension);
@@ -413,7 +427,7 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
   /**
    * Computes a layout site for the given dimensions.
    */
-  protected computeLayoutSize(hostNode: HTMLElement, dimension: monaco.editor.IDimension | null): monaco.editor.IDimension {
+  protected computeLayoutSize(hostNode: HTMLElement, dimension: monaco.editor.IDimension |  null): monaco.editor.IDimension {
     if (dimension && dimension.width >= 0 && dimension.height >= 0) {
       return dimension;
     }
@@ -471,10 +485,25 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
     return Math.max(defaultHeight, editorHeight);
   }
 
+  /**
+   * Add a keydown handler to the editor.
+   *
+   * @param handler - A keydown handler.
+   *
+   * @returns A disposable that can be used to remove the handler.
+   */
+  addKeydownHandler(handler: CodeEditor.KeydownHandler): IDisposable {
+    this._keydownHandlers.pushBack(handler);
+    return new DisposableDelegate(() => {
+      this._keydownHandlers.remove(handler);
+    });
+  }
+
   protected _isDisposed = false;
   protected _model: MonacoModel;
   protected _listeners: monaco.IDisposable[] = [];
   protected _editor: monaco.editor.IStandaloneCodeEditor;
+  protected _keydownHandlers = new Vector<CodeEditor.KeydownHandler>();
 
 }
 
@@ -487,7 +516,7 @@ namespace MonacoCodeEditor {
    * An extension to default monaco editor options.
    */
   export
-  interface IEditorConstructionOptions extends monaco.editor.IEditorConstructionOptions {
+    interface IEditorConstructionOptions extends monaco.editor.IEditorConstructionOptions {
     /**
      * Whether an editor should be auto resized on a content change.
      *
@@ -507,7 +536,7 @@ namespace MonacoCodeEditor {
    * An initialization options for a monaco code editor.
    */
   export
-  interface IOptions {
+    interface IOptions {
     /**
      * The uuid of an editor.
      */

@@ -17,26 +17,40 @@ import {
   findMimeTypeForLanguageId, findLanguageIdForMimeType
 } from './language';
 
+import {
+  IObservableString, ObservableString
+} from '../common/observablestring';
+
 /**
  * An implementation of the code editor model using monaco.
  */
 export
-class MonacoModel implements CodeEditor.IModel {
-
-  /**
-   * A signal emitted when a content of the model changed.
-   */
-  valueChanged: ISignal<this, IChangedArgs<string>>;
-
+  class MonacoModel implements CodeEditor.IModel {
   /**
    * A signal emitted when a mimetype changes.
    */
-  mimeTypeChanged: ISignal<this, IChangedArgs<string>>;
+  readonly mimeTypeChanged: ISignal<this, IChangedArgs<string>>;
+
+  /**
+   * Construct a new model.
+   */
+  constructor() {
+    this._value.changed.connect(this._onValueChanged, this);
+  }
+
+  /**
+   * Get the value of the model.
+   */
+  get value(): IObservableString {
+    return this._value;
+  }
 
   /**
    * Get the selections for the model.
    */
-  readonly selections: CodeEditor.ISelections = new CodeEditor.Selections();
+  get selections(): CodeEditor.ISelections {
+    return this._selections;
+  }
 
   /**
    * Whether the editor is disposed.
@@ -72,14 +86,13 @@ class MonacoModel implements CodeEditor.IModel {
     this.disconnectModel();
     this._model = model;
     this.connectModel();
-    this.fireValueChanged();
     this.fireMimeTypeChanged(oldLanguage, this.model.getModeId());
   }
 
   protected disconnectModel(): void {
     if (this._model) {
       while (this._listeners.length !== 0) {
-        this._listeners.pop()!.dispose();
+        this._listeners.pop() !.dispose();
       }
       this._model = null;
     }
@@ -89,6 +102,7 @@ class MonacoModel implements CodeEditor.IModel {
     const model = this.model;
     this._listeners.push(model.onDidChangeMode(event => this._onDidChangeMode(event)));
     this._listeners.push(model.onDidChangeContent(event => this._onDidContentChanged(event)));
+    this.updateValue();
   }
 
   /**
@@ -100,16 +114,6 @@ class MonacoModel implements CodeEditor.IModel {
   set mimeType(newValue: string) {
     const newLanguage = findLanguageIdForMimeType(newValue);
     monaco.editor.setModelLanguage(this.model, newLanguage);
-  }
-
-  /**
-   * The text stored in the model.
-   */
-  get value(): string {
-    return this.model.getValue();
-  }
-  set value(newValue: string) {
-    this.model.setValue(newValue);
   }
 
   /**
@@ -169,10 +173,44 @@ class MonacoModel implements CodeEditor.IModel {
   }
 
   /**
+   * Handle value changes.
+   */
+  private _onValueChanged(value: IObservableString, change: ObservableString.IChangedArgs): void {
+    if (this._changeGuard) {
+      return;
+    }
+    const model = this.model;
+    switch (change.type) {
+      case 'set':
+        model.setValue(change.value);
+        break;
+      default:
+        const start = model.getPositionAt(change.start);
+        const end = model.getPositionAt(change.end);
+        const range = new monaco.Range(start.lineNumber, start.column, end.lineNumber, end.column);
+        const text = change.value;
+        model.applyEdits([{
+          identifier: null!,
+          range, text,
+          forceMoveMarkers: true
+        }]);
+    }
+  }
+
+  /**
    * Handles a content change event.
    */
   protected _onDidContentChanged(event: monaco.editor.IModelContentChangedEvent2) {
-    this.fireValueChanged();
+    this.updateValue();
+  }
+
+  /**
+   * Update a value with a editor model's value.
+   */
+  protected updateValue(): void {
+    this._changeGuard = true;
+    this._value.text = this.model.getValue();
+    this._changeGuard = false;
   }
 
   /**
@@ -190,26 +228,12 @@ class MonacoModel implements CodeEditor.IModel {
     }
   }
 
-  /**
-   * Emits a value changed event.
-   */
-  protected fireValueChanged() {
-    const oldValue = this._value;
-    const newValue = this.value;
-    if (oldValue !== newValue) {
-      this._value = newValue;
-      this.valueChanged.emit({
-        name: 'value',
-        oldValue,
-        newValue
-      });
-    }
-  }
-
   protected _isDisposed = false;
-  protected _value: string;
-  protected _model: monaco.editor.IModel | null;
+  protected _value = new ObservableString();
+  protected _model: monaco.editor.IModel | null = null;
   protected _listeners: monaco.IDisposable[] = [];
+  protected _changeGuard = false;
+  protected _selections = new CodeEditor.Selections();
 
 }
 
@@ -228,7 +252,7 @@ namespace MonacoModel {
    * Converts a code editor position to a monaco position.
    */
   export
-  function toMonacoPosition(position: CodeEditor.IPosition): monaco.IPosition {
+    function toMonacoPosition(position: CodeEditor.IPosition): monaco.IPosition {
     return {
       lineNumber: position.line + 1,
       column: position.column + 1
@@ -238,7 +262,7 @@ namespace MonacoModel {
    * Converts a monaco position to a code editor position. 
    */
   export
-  function toPosition(position: monaco.Position): CodeEditor.IPosition {
+    function toPosition(position: monaco.Position): CodeEditor.IPosition {
     return {
       line: position.lineNumber - 1,
       column: position.column - 1
