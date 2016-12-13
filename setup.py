@@ -135,7 +135,7 @@ setup_args = {
     'long_description': LONG_DESCRIPTION,
     'License': 'BSD',
     'include_package_data': True,
-    'install_requires': ['notebook>=4.2.0'],
+    'install_requires': ['notebook>=4.2.0,<4.3'],
     'packages': find_packages(),
     'zip_safe': False,
     'package_data': {'jupyterlab': [
