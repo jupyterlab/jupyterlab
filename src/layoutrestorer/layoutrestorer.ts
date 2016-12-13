@@ -137,8 +137,38 @@ const KEY = 'layout-restorer:data';
  * The default implementation of a layout restorer.
  *
  * #### Notes
- * The layout restorer requires all of the tabs that will be rearranged and
- * focused to already exist, it does not rehydrate them.
+ * The lifecycle for state and layout restoration is subtle. The sequence of
+ * events is as follows:
+ *
+ * 1. The layout restorer plugin is instantiated.
+ *
+ * 2. Other plugins that care about state and layout restoration require
+ *    the layout restorer as a dependency.
+ *
+ * 3. As each load-time plugin initializes (which happens before the lab
+ *    application has `started`), it instructs the layout restorer whether
+ *    the restorer ought to `restore` its state.
+ *
+ * 4. After all the load-time plugins have finished initializing, the lab
+ *    application `started` promise will resolve. This is the `first`
+ *    promise that the layout restorer waits for. By this point, all of the
+ *    plugins that care about layout restoration will have instructed the
+ *    layout restorer to `restore` their state.
+ *
+ * 5. The layout restorer will then instruct each plugin's instance tracker
+ *    to restore its state and reinstantiate whichever widgets it wants.
+ *
+ * 6. As each instance finishes restoring, it resolves the promise that was
+ *    made to the layout restorer (in step 5).
+ *
+ * 7. After all of the promises that the restorer is awaiting have resolved,
+ *    the restorer then reconstructs the saved layout.
+ *
+ * Of particular note are steps 5 and 6: since state restoration of plugins
+ * is accomplished by executing commands, the command that is used to
+ * restore the state of each plugin must return a promise that only resolves
+ * when the widget has been created and added to the plugin's instance
+ * tracker.
  */
 export
 class LayoutRestorer implements ILayoutRestorer {
@@ -151,6 +181,9 @@ class LayoutRestorer implements ILayoutRestorer {
     options.first.then(() => Promise.all(this._promises)).then(() => {
       // Release the promises held in memory.
       this._promises = null;
+      // Release the tracker set.
+      this._trackers.clear();
+      this._trackers = null;
       // Restore the application state.
       return this._restore();
     }).then(() => { this._restored.resolve(void 0); });
@@ -186,9 +219,16 @@ class LayoutRestorer implements ILayoutRestorer {
    */
   restore(tracker: InstanceTracker<Widget>, options: ILayoutRestorer.IRestoreOptions<Widget>): void {
     if (!this._promises) {
-      console.warn('restore can only be called before app has started.');
+      console.warn('restore can only be called before app has started');
       return;
     }
+
+    let { namespace } = tracker;
+    if (this._trackers.has(namespace)) {
+      console.warn(`a tracker namespaced ${namespace} was already restored`);
+      return;
+    }
+    this._trackers.add(namespace);
 
     let { args, command, name, when } = options;
     this._promises.push(tracker.restore({
@@ -242,6 +282,7 @@ class LayoutRestorer implements ILayoutRestorer {
   private _restored = new utils.PromiseDelegate<void>();
   private _registry: CommandRegistry = null;
   private _state: IStateDB = null;
+  private _trackers = new Set<string>();
   private _widgets = new Map<string, Widget>();
 }
 
@@ -264,39 +305,7 @@ namespace LayoutRestorer {
      * The initial promise that has to be resolved before layout restoration.
      *
      * #### Notes
-     * The lifecycle for state and layout restoration is subtle. This promise
-     * is intended to equal the JupyterLab application `started` notifier.
-     * The sequence of events is as follows:
-     *
-     * 1. The layout restorer plugin is instantiated.
-     *
-     * 2. Other plugins that care about state and layout restoration require
-     *    the layout restorer as a dependency.
-     *
-     * 3. As each load-time plugin initializes (which happens before the lab
-     *    application has `started`), it instructs the layout restorer whether
-     *    the restorer ought to `restore` its state.
-     *
-     * 4. After all the load-time plugins have finished initializing, the lab
-     *    application `started` promise will resolve. This is the `first`
-     *    promise that the layout restorer waits for. By this point, all of the
-     *    plugins that care about layout restoration will have instructed the
-     *    layout restorer to `restore` their state.
-     *
-     * 5. The layout restorer will then instruct each plugin's instance tracker
-     *    to restore its state and reinstantiate whichever widgets it wants.
-     *
-     * 6. As each instance finishes restoring, it resolves the promise that was
-     *    made to the layout restorer (in step 5).
-     *
-     * 7. After all of the promises that the restorer is awaiting have resolved,
-     *    the restorer then reconstructs the saved layout.
-     *
-     * Of particular note are steps 5 and 6: since state restoration of plugins
-     * is accomplished by executing commands, the command that is used to
-     * restore the state of each plugin must return a promise that only resolves
-     * when the widget has been created and added to the plugin's instance
-     * tracker.
+     * This promise should equal the JupyterLab application `started` notifier.
      */
     first: Promise<any>;
 
