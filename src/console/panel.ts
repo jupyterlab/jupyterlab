@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Token
+} from 'phosphor/lib/core/token';
+
+import {
   Session
 } from '@jupyterlab/services';
 
@@ -39,13 +43,8 @@ class ConsolePanel extends Panel {
   constructor(options: ConsolePanel.IOptions) {
     super();
     this.addClass(PANEL_CLASS);
+    this._content = options.content;
 
-    // Create console content widget.
-    this._content = options.content || new ConsoleContent({
-      session: options.session,
-      rendermime: options.rendermime,
-      renderer: options.renderer
-    });
     this.addWidget(this._content);
   }
 
@@ -104,28 +103,55 @@ namespace ConsolePanel {
   export
   interface IOptions {
     /**
-     * The optional console content instance to display in the console panel.
-     *
-     * #### Notes
-     * If a console content widget is passed in, its MIME renderer and session
-     * must match the values in the console panel options argument or it will
-     * result in undefined behavior.
+     * The console content instance to display in the console panel.
      */
-    content?: ConsoleContent;
-
-    /**
-     * The mime renderer for the console panel.
-     */
-    rendermime: IRenderMime;
-
-    /**
-     * The renderer for a console widget.
-     */
-    renderer: ConsoleContent.IRenderer;
-
-    /**
-     * The session for the console panel.
-     */
-    session: Session.ISession;
+    content: ConsoleContent;
   }
+  /**
+   * The console panel renderer.
+   */
+  export
+  interface IRenderer {
+    /**
+     * Create a new console panel.
+     */
+    createConsole(rendermime: IRenderMime, session: Session.ISession): ConsolePanel;
+  }
+  /**
+   * Default implementation of `IRenderer`.
+   */
+  export
+  class Renderer implements IRenderer {
+
+    /**
+     * The console content renderer.
+     */
+    readonly contentRenderer: ConsoleContent.IRenderer;
+
+    /**
+     * Create a new renderer.
+     */
+    constructor(options: ConsoleContent.Renderer.IOptions) {
+      this.contentRenderer = new ConsoleContent.Renderer(options);
+    }
+
+    /**
+     * Create a new console panel.
+     */
+    createConsole(rendermime: IRenderMime, session: Session.ISession): ConsolePanel {
+      const content = new ConsoleContent({
+        rendermime, session,
+        renderer: this.contentRenderer
+      });
+      return new ConsolePanel({content});
+    }
+
+  }
+  /* tslint:disable */
+  /**
+   * The console renderer token.
+   */
+  export
+  const IRenderer = new Token<IRenderer>('jupyter.services.console.renderer');
+  /* tslint:enable */
 }

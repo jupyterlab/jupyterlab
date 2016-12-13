@@ -66,7 +66,7 @@ import {
 } from '../statedb';
 
 import {
-  IConsoleTracker, ConsolePanel, ConsoleContent
+  IConsoleTracker, ConsolePanel
 } from './index';
 
 
@@ -84,7 +84,7 @@ const trackerPlugin: JupyterLabPlugin<IConsoleTracker> = {
     IInspector,
     ICommandPalette,
     IPathTracker,
-    ConsoleContent.IRenderer,
+    ConsolePanel.IRenderer,
     IStateDB,
     ILayoutRestorer
   ],
@@ -97,13 +97,13 @@ const trackerPlugin: JupyterLabPlugin<IConsoleTracker> = {
  * The console widget renderer.
  */
 export
-const rendererPlugin: JupyterLabPlugin<ConsoleContent.IRenderer> = {
+const rendererPlugin: JupyterLabPlugin<ConsolePanel.IRenderer> = {
   id: 'jupyter.services.console-renderer',
-  provides: ConsoleContent.IRenderer,
+  provides: ConsolePanel.IRenderer,
   requires: [IEditorServices],
   autoStart: true,
   activate: (app: JupyterLab, editorServices: IEditorServices) => {
-    return new ConsoleContent.Renderer({ editorServices });
+    return new ConsolePanel.Renderer({ editorServices });
   }
 };
 
@@ -138,7 +138,7 @@ interface ICreateConsoleArgs extends JSONObject {
 /**
  * Activate the console extension.
  */
-function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, renderer: ConsoleContent.IRenderer, state: IStateDB, layout: ILayoutRestorer): IConsoleTracker {
+function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, renderer: ConsolePanel.IRenderer, state: IStateDB, layout: ILayoutRestorer): IConsoleTracker {
   let manager = services.sessions;
 
   let { commands, keymap } = app;
@@ -353,9 +353,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
    * The manager must be ready before calling this function.
    */
   function createConsole(session: Session.ISession, name: string): void {
-    let panel = new ConsolePanel({
-      session, rendermime: rendermime.clone(), renderer
-    });
+    let panel = renderer.createConsole(rendermime.clone(), session);
     let specs = manager.specs;
     let displayName = specs.kernelspecs[session.kernel.name].display_name;
     let captionOptions: Private.ICaptionOptions = {
