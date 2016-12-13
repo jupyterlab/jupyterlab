@@ -12,6 +12,9 @@ import {
 } from '../../../lib/common/instancetracker';
 
 
+const NAMESPACE = 'instance-tracker-test';
+
+
 class TestTracker<T extends Widget> extends InstanceTracker<T> {
   methods: string[] = [];
 
@@ -29,7 +32,7 @@ describe('common/instancetracker', () => {
     describe('#constructor()', () => {
 
       it('should create an InstanceTracker', () => {
-        let tracker = new InstanceTracker<Widget>();
+        let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
         expect(tracker).to.be.an(InstanceTracker);
       });
 
@@ -38,7 +41,7 @@ describe('common/instancetracker', () => {
     describe('#currentChanged', () => {
 
       it('should emit when the current widget has been updated', () => {
-        let tracker = new InstanceTracker<Widget>();
+        let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
         let widget = new Widget();
         let called = false;
         tracker.currentChanged.connect(() => { called = true; });
@@ -53,12 +56,12 @@ describe('common/instancetracker', () => {
     describe('#currentWidget', () => {
 
       it('should default to null', () => {
-        let tracker = new InstanceTracker<Widget>();
+        let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
         expect(tracker.currentWidget).to.be(null);
       });
 
       it('should be updated by sync if the tracker has the widget', () => {
-        let tracker = new InstanceTracker<Widget>();
+        let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
         let widget = new Widget();
         tracker.add(widget);
         expect(tracker.currentWidget).to.be(null);
@@ -71,7 +74,7 @@ describe('common/instancetracker', () => {
     describe('#isDisposed', () => {
 
       it('should test whether the tracker is disposed', () => {
-        let tracker = new InstanceTracker<Widget>();
+        let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
         expect(tracker.isDisposed).to.be(false);
         tracker.dispose();
         expect(tracker.isDisposed).to.be(true);
@@ -82,7 +85,7 @@ describe('common/instancetracker', () => {
     describe('#add()', () => {
 
       it('should add a widget to the tracker', () => {
-        let tracker = new InstanceTracker<Widget>();
+        let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
         let widget = new Widget();
         expect(tracker.has(widget)).to.be(false);
         tracker.add(widget);
@@ -90,7 +93,7 @@ describe('common/instancetracker', () => {
       });
 
       it('should remove an added widget if it is disposed', () => {
-        let tracker = new InstanceTracker<Widget>();
+        let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
         let widget = new Widget();
         tracker.add(widget);
         expect(tracker.has(widget)).to.be(true);
@@ -103,14 +106,14 @@ describe('common/instancetracker', () => {
     describe('#dispose()', () => {
 
       it('should dispose of the resources used by the tracker', () => {
-        let tracker = new InstanceTracker<Widget>();
+        let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
         expect(tracker.isDisposed).to.be(false);
         tracker.dispose();
         expect(tracker.isDisposed).to.be(true);
       });
 
       it('should be safe to call multiple times', () => {
-        let tracker = new InstanceTracker<Widget>();
+        let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
         expect(tracker.isDisposed).to.be(false);
         tracker.dispose();
         tracker.dispose();
@@ -122,7 +125,7 @@ describe('common/instancetracker', () => {
     describe('#find()', () => {
 
       it('should find a tracked item that matches a filter function', () => {
-        let tracker = new InstanceTracker<Widget>();
+        let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
         let widgetA = new Widget();
         let widgetB = new Widget();
         let widgetC = new Widget();
@@ -136,7 +139,7 @@ describe('common/instancetracker', () => {
       });
 
       it('should return `null` if no item is found', () => {
-        let tracker = new InstanceTracker<Widget>();
+        let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
         let widgetA = new Widget();
         let widgetB = new Widget();
         let widgetC = new Widget();
@@ -154,7 +157,7 @@ describe('common/instancetracker', () => {
     describe('#forEach()', () => {
 
       it('should iterate through all the tracked items', () => {
-        let tracker = new InstanceTracker<Widget>();
+        let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
         let widgetA = new Widget();
         let widgetB = new Widget();
         let widgetC = new Widget();
@@ -174,7 +177,7 @@ describe('common/instancetracker', () => {
     describe('#has()', () => {
 
       it('should return `true` if an item exists in the tracker', () => {
-        let tracker = new InstanceTracker<Widget>();
+        let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
         let widget = new Widget();
         expect(tracker.has(widget)).to.be(false);
         tracker.add(widget);
@@ -186,7 +189,7 @@ describe('common/instancetracker', () => {
     describe('#sync()', () => {
 
       it('should emit a signal when the current widget is updated', () => {
-        let tracker = new InstanceTracker<Widget>();
+        let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
         let widget = new Widget();
         let called = false;
         tracker.currentChanged.connect(() => { called = true; });
@@ -201,7 +204,7 @@ describe('common/instancetracker', () => {
     describe('#onCurrentChanged()', () => {
 
       it('should be called when the current widget is changed', () => {
-        let tracker = new TestTracker<Widget>();
+        let tracker = new TestTracker<Widget>({ namespace: NAMESPACE });
         let widget = new Widget();
         tracker.add(widget);
         tracker.sync(widget);
