@@ -46,5 +46,5 @@ namespace IEditorMimeTypeService {
    * The default mime type.
    */
   export
-  const defaultMimeType = 'text/plain';
+  const defaultMimeType: string = 'text/plain';
 }

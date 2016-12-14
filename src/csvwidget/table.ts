@@ -24,12 +24,12 @@ import {
  * The hard limit on the number of rows to display.
  */
 export
-const DISPLAY_LIMIT = 1000;
+const DISPLAY_LIMIT: number = 1000;
 
 /**
  * The class name added to a csv table widget.
  */
-const CSV_TABLE_CLASS = 'jp-CSVTable';
+const CSV_TABLE_CLASS: string = 'jp-CSVTable';
 
 
 /**

@@ -153,7 +153,7 @@ const FILLED_CIRCLE_CLASS = 'jp-filledCircle';
  * The mimetype used for Jupyter cell data.
  */
 export
-const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
+const JUPYTER_CELL_MIME: string = 'application/vnd.jupyter.cells';
 
 /**
  * The threshold in pixels to start a drag event.
