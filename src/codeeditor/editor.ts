@@ -348,15 +348,20 @@ namespace CodeEditor {
      * @param line - The line of interest.
      *
      * @returns The value of the line.
+     *
+     * #### Notes
+     * Lines are 0-based, and accessing a line out of range returns
+     * `undefined`.
      */
-    getLine(line: number): string;
+    getLine(line: number): string | undefined;
 
     /**
      * Find an offset for the given position.
      *
      * @param position - The position of interest.
      *
-     * @returns The offset at the position.
+     * @returns The offset at the position, clamped to the extent of the
+     * editor contents.
      */
     getOffsetAt(position: IPosition): number;
 
@@ -365,9 +370,10 @@ namespace CodeEditor {
      *
      * @param offset - The offset of interest.
      *
-     * @returns The position at the offset.
+     * @returns The position at the offset, clamped to the extent of the
+     * editor contents.
      */
-    getPositionAt(offset: number): IPosition;
+    getPositionAt(offset: number): IPosition | undefined;
 
     /**
      * Undo one edit (if any undo events are stored).
