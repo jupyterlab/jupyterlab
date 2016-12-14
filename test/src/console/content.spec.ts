@@ -20,10 +20,6 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  CodeMirrorConsoleRenderer
-} from '../../../lib/console/codemirror/widget';
-
-import {
   ConsoleContent
 } from '../../../lib/console/content';
 
@@ -44,8 +40,16 @@ import {
 } from '../../../lib/notebook/cells/editor';
 
 import {
+  createCodeCellRenderer
+} from '../notebook/utils';
+
+import {
   defaultRenderMime
 } from '../utils';
+
+import {
+  createRenderer
+} from './utils';
 
 
 class TestContent extends ConsoleContent {
@@ -116,7 +120,7 @@ class TestHistory extends ConsoleHistory {
 
 defineSignal(TestHistory.prototype, 'ready');
 
-const renderer = CodeMirrorConsoleRenderer.defaultRenderer;
+const renderer = createRenderer();
 const rendermime = defaultRenderMime();
 
 
@@ -230,7 +234,7 @@ describe('console/content', () => {
     describe('#addCell()', () => {
 
       it('should add a code cell to the content widget', () => {
-        let renderer = CodeMirrorConsoleRenderer.defaultCodeCellRenderer;
+        let renderer = createCodeCellRenderer();
         let cell = new CodeCellWidget({ renderer, rendermime });
         Widget.attach(widget, document.body);
         expect(widget.cells.length).to.be(0);

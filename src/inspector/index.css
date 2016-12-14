@@ -88,15 +88,6 @@
   border: none;
 }
 
-
-.jp-InspectorItem .jp-Toolbar {
-    display: flex;
-    flex-direction: row;
-    border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
-    height: 24px;
-}
-
-
 .jp-InspectorItem-content {
   height: calc(100% - 24px); /* Subtract the height of the toolbar. */
   overflow: auto;

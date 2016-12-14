@@ -60,6 +60,8 @@
 
 
 .jp-Dialog-bodyContent {
+  display: flex;
+  flex-direction: column;
   font-size: 15px;
   overflow: auto;
 }
@@ -109,6 +111,13 @@
   background: var(--jp-error-color1);
   color: white;
 }
+
+
+.jp-Dialog-bodyContent > label {
+  padding-top: 4px;
+  padding-bottom: 4px
+}
+
 
 .jp-Dialog-inputWrapper {
   display: flex;

@@ -38,7 +38,12 @@ import {
 } from '../inspector';
 
 import {
-  BaseCellWidget, CodeCellWidget, RawCellWidget
+  IEditorMimeTypeService, IEditorServices, CodeEditor
+} from '../codeeditor';
+
+import {
+  BaseCellWidget, CodeCellWidget, RawCellWidget,
+  CodeCellModel, RawCellModel
 } from '../notebook/cells';
 
 import {
@@ -383,7 +388,7 @@ class ConsoleContent extends Widget {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    sendMessage(this.prompt.editor, WidgetMessage.ActivateRequest);
+    this.prompt.editor.editor.focus();
     this.update();
   }
 
@@ -418,7 +423,7 @@ class ConsoleContent extends Widget {
     this._completerHandler.activeCell = prompt;
     this._inspectionHandler.activeCell = prompt;
 
-    sendMessage(prompt.editor, WidgetMessage.ActivateRequest);
+    prompt.editor.editor.focus();
     this.update();
   }
 
@@ -474,7 +479,7 @@ class ConsoleContent extends Widget {
    */
   private _evtKeyDown(event: KeyboardEvent): void {
     if (event.keyCode === 13 && !this.prompt.editor.hasFocus()) {
-      this.prompt.editor.activate();
+      this.prompt.editor.editor.focus();
     }
   }
 
@@ -703,6 +708,99 @@ namespace ConsoleContent {
     getCodeMimetype(info: nbformat.ILanguageInfoMetadata): string;
   }
 
+  /**
+   * Default implementation of `IRenderer`.
+   */
+  export
+  class Renderer implements IRenderer {
+    /**
+     * The banner renderer.
+     */
+    readonly bannerRenderer: BaseCellWidget.IRenderer;
+
+    /**
+     * The prompt renderer.
+     */
+    readonly promptRenderer: CodeCellWidget.IRenderer;
+
+    /**
+     * The mime type service of a code editor.
+     */
+    readonly editorMimeTypeService: IEditorMimeTypeService;
+
+    /**
+     * Create a new renderer.
+     */
+    constructor(options: Renderer.IOptions) {
+      let factory = options.editorServices.factory;
+      this.bannerRenderer = new BaseCellWidget.Renderer({
+        editorFactory: host => factory.newInlineEditor(host.node, {
+          wordWrap: true
+        })
+      });
+      this.promptRenderer = new Private.PromptRenderer({
+        editorFactory: host => factory.newInlineEditor(host.node, {})
+      });
+      this.editorMimeTypeService = options.editorServices.mimeTypeService;
+    }
+
+    /**
+     * Create a new banner widget.
+     */
+    createBanner(): RawCellWidget {
+      let widget = new RawCellWidget({
+        renderer: this.bannerRenderer
+      });
+      widget.model = new RawCellModel();
+      return widget;
+    }
+
+    /**
+     * Create a new prompt widget.
+     */
+    createPrompt(rendermime: IRenderMime, context: ConsoleContent): CodeCellWidget {
+      let widget = new CodeCellWidget({
+        rendermime,
+        renderer: this.promptRenderer
+      });
+      widget.model = new CodeCellModel();
+      return widget;
+    }
+
+    /**
+     * Create a new code cell widget for an input from a foreign session.
+     */
+    createForeignCell(rendermime: IRenderMime, context: ConsoleContent): CodeCellWidget {
+      let widget = new CodeCellWidget({
+        rendermime,
+        renderer: this.promptRenderer
+      });
+      widget.model = new CodeCellModel();
+      return widget;
+    }
+
+    /**
+     * Get the preferred mimetype given language info.
+     */
+    getCodeMimetype(info: nbformat.ILanguageInfoMetadata): string {
+      return this.editorMimeTypeService.getMimeTypeByLanguage(info);
+    }
+  }
+
+  /**
+   * The namespace for `Renderer`.
+   */
+  export
+  namespace Renderer {
+    /**
+     * An initialize options for `Renderer`.
+     */
+    export
+    interface IOptions {
+      readonly editorServices: IEditorServices;
+    }
+  }
+
   /* tslint:disable */
   /**
    * The console renderer token.
@@ -725,5 +823,24 @@ namespace Private {
   export
   function scrollToBottom(node: HTMLElement): void {
     node.scrollTop = node.scrollHeight - node.clientHeight;
+  }
+
+  /**
+   * A custom renderer for a prompt that suppresses "enter" handling.
+   */
+  export
+  class PromptRenderer extends CodeCellWidget.Renderer {
+    /**
+     * Create a new cell editor for the widget.
+     */
+    createCellEditor(): ICellEditorWidget {
+      let widget = super.createCellEditor();
+      // Suppress the default "Enter" key handling.
+      let cb = (editor: CodeEditor.IEditor, event: KeyboardEvent) => {
+        return event.keyCode === 13;  // Enter;
+      };
+      widget.editor.addKeydownHandler(cb);
+      return widget;
+    }
   }
 }

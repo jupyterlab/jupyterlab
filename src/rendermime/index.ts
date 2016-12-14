@@ -26,6 +26,11 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
+  HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
+  JavascriptRenderer, SVGRenderer, MarkdownRenderer, PDFRenderer
+} from '../renderers';
+
+import {
   ISanitizer
 } from '../sanitizer';
 
@@ -235,6 +240,23 @@ namespace RenderMime {
    */
   export
   type MimeMap<T> = { [mimetype: string]: T };
+
+  /**
+   * Default renderer order
+   */
+  export
+  function defaultRenderers(): IRenderer[] {
+    return [
+      new JavascriptRenderer(),
+      new HTMLRenderer(),
+      new MarkdownRenderer(),
+      new LatexRenderer(),
+      new SVGRenderer(),
+      new ImageRenderer(),
+      new PDFRenderer(),
+      new TextRenderer()
+    ];
+  }
 
   /**
    * The interface for a renderer.

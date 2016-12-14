@@ -70,6 +70,10 @@ import {
 } from '../../rendermime';
 
 import {
+  IEditorMimeTypeService, IEditorServices
+} from '../../codeeditor';
+
+import {
   ICellModel, BaseCellWidget, MarkdownCellModel,
   CodeCellWidget, MarkdownCellWidget,
   CodeCellModel, RawCellWidget, RawCellModel,
@@ -336,7 +340,7 @@ class StaticNotebook extends Widget {
       oldValue.metadataChanged.disconnect(this.onMetadataChanged, this);
       oldValue.contentChanged.disconnect(this.onModelContentChanged, this);
       // TODO: reuse existing cell widgets if possible.
-      for (let i = 0; i < layout.widgets.length; i++) {
+      while (layout.widgets.length) {
         this._removeCell(0);
       }
     }
@@ -535,21 +539,78 @@ namespace StaticNotebook {
    * The default implementation of an `IRenderer`.
    */
   export
-  abstract class Renderer implements IRenderer {
+  class Renderer implements IRenderer {
+    /**
+     * A code cell renderer.
+     */
+    readonly codeCellRenderer: CodeCellWidget.IRenderer;
+
+    /**
+     * A markdown cell renderer.
+     */
+    readonly markdownCellRenderer: BaseCellWidget.IRenderer;
+
+    /**
+     * A raw cell renderer.
+     */
+    readonly rawCellRenderer: BaseCellWidget.IRenderer;
+
+    /**
+     * A mime type service of a code editor.
+     */
+    readonly editorMimeTypeService: IEditorMimeTypeService;
+
+    /**
+     * Creates a new renderer.
+     */
+    constructor(options: Renderer.IOptions) {
+      let factory = options.editorServices.factory;
+      this.codeCellRenderer = new CodeCellWidget.Renderer({
+        editorFactory: host => factory.newInlineEditor(host.node, {})
+      });
+      this.markdownCellRenderer = new BaseCellWidget.Renderer({
+        editorFactory: host => factory.newInlineEditor(host.node, {
+          wordWrap: true
+        })
+      });
+      this.rawCellRenderer = this.markdownCellRenderer;
+      this.editorMimeTypeService = options.editorServices.mimeTypeService;
+    }
+
     /**
      * Create a new code cell widget.
      */
-    abstract createCodeCell(model: ICodeCellModel, rendermime: RenderMime): CodeCellWidget;
+    createCodeCell(model: ICodeCellModel, rendermime: RenderMime): CodeCellWidget {
+      const widget = new CodeCellWidget({
+        rendermime,
+        renderer: this.codeCellRenderer
+      });
+      widget.model = model;
+      return widget;
+    }
 
     /**
      * Create a new markdown cell widget.
      */
-    abstract createMarkdownCell(model: IMarkdownCellModel, rendermime: RenderMime): MarkdownCellWidget;
+    createMarkdownCell(model: IMarkdownCellModel, rendermime: RenderMime): MarkdownCellWidget {
+      const widget = new MarkdownCellWidget({
+        rendermime,
+        renderer: this.markdownCellRenderer
+      });
+      widget.model = model;
+      return widget;
+    }
 
     /**
      * Create a new raw cell widget.
      */
-    abstract createRawCell(model: IRawCellModel): RawCellWidget;
+    createRawCell(model: IRawCellModel): RawCellWidget {
+      const widget = new RawCellWidget({
+        renderer: this.rawCellRenderer
+      });
+      widget.model = model;
+      return widget;
+    }
 
     /**
      * Update a cell widget.
@@ -564,7 +625,26 @@ namespace StaticNotebook {
     /**
      * Get the preferred mimetype given language info.
      */
-    abstract getCodeMimetype(info: nbformat.ILanguageInfoMetadata): string;
+    getCodeMimetype(info: nbformat.ILanguageInfoMetadata): string {
+      return this.editorMimeTypeService.getMimeTypeByLanguage(info);
+    }
+  }
+
+  /**
+   * The namespace for the `Renderer` class statics.
+   */
+  export
+  namespace Renderer {
+    /**
+     * An options object for initializing a notebook renderer.
+     */
+    export
+    interface IOptions {
+      /**
+       * The editor services.
+       */
+      readonly editorServices: IEditorServices;
+    }
   }
 }
 
@@ -623,25 +703,29 @@ class Notebook extends StaticNotebook {
     return this._mode;
   }
   set mode(newValue: NotebookMode) {
-    // Always post an update request.
-    this.update();
-    if (newValue === this._mode) {
-      return;
-    }
-    let oldValue = this._mode;
-    this._mode = newValue;
-    this.stateChanged.emit({ name: 'mode', oldValue, newValue });
     let activeCell = this.activeCell;
     if (!activeCell) {
+      newValue = 'command';
+    }
+    if (newValue === this._mode) {
+      this._ensureFocus();
       return;
     }
-    // Edit mode deselects all cells.
+    // Post an update request.
+    this.update();
+    let oldValue = this._mode;
+    this._mode = newValue;
+
     if (newValue === 'edit') {
+      // Edit mode deselects all cells.
       each(this.widgets, widget => { this.deselect(widget); });
+      //  Edit mode unrenders an active markdown widget.
       if (activeCell instanceof MarkdownCellWidget) {
         activeCell.rendered = false;
       }
     }
+    this.stateChanged.emit({ name: 'mode', oldValue, newValue });
+    this._ensureFocus();
   }
 
   /**
@@ -657,8 +741,6 @@ class Notebook extends StaticNotebook {
     return this.model.cells.length ? this._activeCellIndex : -1;
   }
   set activeCellIndex(newValue: number) {
-    // Always post an update request.
-    this.update();
     let oldValue = this._activeCellIndex;
     if (!this.model || !this.model.cells.length) {
       newValue = -1;
@@ -669,14 +751,17 @@ class Notebook extends StaticNotebook {
     this._activeCellIndex = newValue;
     let cell = this.widgets.at(newValue);
     if (cell !== this._activeCell) {
+      // Post an update request.
+      this.update();
       this._activeCell = cell;
       this.activeCellChanged.emit(cell);
     }
-    if (newValue === oldValue) {
-      return;
-    }
     if (this.mode === 'edit' && cell instanceof MarkdownCellWidget) {
       cell.rendered = false;
+    }
+    this._ensureFocus();
+    if (newValue === oldValue) {
+      return;
     }
     this.stateChanged.emit({ name: 'activeCellIndex', oldValue, newValue });
   }
@@ -857,7 +942,7 @@ class Notebook extends StaticNotebook {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this._ensureFocus();
+    this._ensureFocus(true);
   }
 
   /**
@@ -865,10 +950,6 @@ class Notebook extends StaticNotebook {
    */
   protected onUpdateRequest(msg: Message): void {
     let activeCell = this.activeCell;
-    // Ensure we have the correct focus.
-    if (this.node.contains(document.activeElement)) {
-      this._ensureFocus();
-    }
 
     // Set the appropriate classes on the cells.
     if (this.mode === 'edit') {
@@ -959,13 +1040,14 @@ class Notebook extends StaticNotebook {
     }
   }
 
-  private _ensureFocus(): void {
+  /**
+   * Ensure that the notebook has proper focus.
+   */
+  private _ensureFocus(force=false): void {
     let activeCell = this.activeCell;
-    if (this.mode === 'edit' && activeCell) {
-      activeCell.editor.activate();
-    } else if (!this.node.contains(document.activeElement)) {
-      this.node.focus();
-    } else {
+    if (this.mode === 'edit') {
+      activeCell.editor.editor.focus();
+    } else if (this.node.contains(document.activeElement)) {
       // If an editor currently has focus, focus our node.
       // Otherwise, another input field has focus and should keep it.
       let w = find(this.layout, widget => {
@@ -974,6 +1056,9 @@ class Notebook extends StaticNotebook {
       if (w) {
         this.node.focus();
       }
+    }
+    if (force && !this.node.contains(document.activeElement)) {
+      this.node.focus();
     }
   }
 
@@ -1263,9 +1348,14 @@ class Notebook extends StaticNotebook {
    * Handle `blur` events for the widget.
    */
   private _evtBlur(event: MouseEvent): void {
-    let target = event.relatedTarget as HTMLElement;
-    if (!this.node.contains(target)) {
+    let relatedTarget = event.relatedTarget as HTMLElement;
+    if (!this.node.contains(relatedTarget)) {
       this.mode = 'command';
+    }
+    // If the root node is not blurring and we are in command mode,
+    // focus ourselves.
+    if (this.mode === 'command' && event.target !== this.node) {
+      this.node.focus();
     }
   }
 
@@ -1282,13 +1372,9 @@ class Notebook extends StaticNotebook {
     if (i === -1) {
       return;
     }
-    let layout = this.layout as PanelLayout;
-    let cell = model.cells.at(i) as MarkdownCellModel;
-    let widget = layout.widgets.at(i) as MarkdownCellWidget;
-    if (cell.type === 'markdown') {
-      widget.rendered = false;
-      widget.activate();
-      return;
+    this.activeCellIndex = i;
+    if (model.cells.at(i).type === 'markdown') {
+      this.mode = 'edit';
     } else if (target.localName === 'img') {
       target.classList.toggle(UNCONFINED_CLASS);
     }
@@ -1347,7 +1433,7 @@ namespace Notebook {
    * The default implementation of an `IRenderer`.
    */
   export
-  abstract class Renderer extends StaticNotebook.Renderer { }
+  class Renderer extends StaticNotebook.Renderer { }
 
 }
 

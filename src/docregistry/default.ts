@@ -7,7 +7,7 @@ import * as CodeMirror
 import 'codemirror/mode/meta';
 
 import {
-  Contents, Kernel
+  Contents
 } from '@jupyterlab/services';
 
 import {

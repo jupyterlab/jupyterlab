@@ -12,10 +12,6 @@ import {
 } from '../../../lib/notebook/cells';
 
 import {
-  CodeMirrorNotebookPanelRenderer
-} from '../../../lib/notebook/codemirror/notebook/panel';
-
-import {
   NotebookPanel
 } from '../../../lib/notebook/notebook/panel';
 
@@ -28,7 +24,7 @@ import {
 } from '../utils';
 
 import {
-  DEFAULT_CONTENT
+  DEFAULT_CONTENT, createNotebookPanelRenderer
 } from './utils';
 
 
@@ -47,7 +43,7 @@ class TestTracker extends NotebookTracker {
  */
 const rendermime = defaultRenderMime();
 const clipboard = new MimeData();
-const renderer = CodeMirrorNotebookPanelRenderer.defaultRenderer;
+const renderer = createNotebookPanelRenderer();
 
 
 describe('notebook/tracker', () => {

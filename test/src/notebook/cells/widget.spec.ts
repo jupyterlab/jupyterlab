@@ -18,35 +18,21 @@ import {
 import {
   BaseCellWidget, CellModel, InputAreaWidget, ICellModel,
   CodeCellWidget, CodeCellModel, MarkdownCellWidget,
-  RawCellWidget
+  RawCellWidget, CodeCellEditorWidget
 } from '../../../../lib/notebook/cells';
-
-import {
-  ICellEditorWidget
-} from '../../../../lib/notebook/cells/editor';
-
-import {
-  CodeMirrorCellEditorWidget
-} from '../../../../lib/notebook/codemirror/cells/editor';
-
-import {
-  CodeMirrorCodeCellWidgetRenderer
-} from '../../../../lib/notebook/codemirror/cells/widget';
 
 import {
   OutputAreaWidget
 } from '../../../../lib/notebook/output-area';
 
 import {
-  RenderMime
-} from '../../../../lib/rendermime';
-
-import {
   defaultRenderMime
 } from '../../utils';
 
+import {
+  createBaseCellRenderer, createCodeCellRenderer, createCellEditor
+} from '../utils';
 
-const INPUT_CLASS = 'jp-InputArea';
 
 const RENDERED_CLASS = 'jp-mod-rendered';
 
@@ -60,7 +46,7 @@ class LogBaseCell extends BaseCellWidget {
   methods: string[] = [];
 
   constructor() {
-    super({ renderer: CodeMirrorCodeCellWidgetRenderer.defaultRenderer });
+    super({ renderer: createBaseCellRenderer() });
   }
 
   renderInput(widget: Widget): void {
@@ -142,31 +128,11 @@ class LogMarkdownCell extends MarkdownCellWidget {
 }
 
 
-class LogRenderer extends CodeMirrorCodeCellWidgetRenderer {
-  methods: string[] = [];
-
-  createCellEditor(): ICellEditorWidget {
-    this.methods.push('createCellEditor');
-    return super.createCellEditor();
-  }
-
-  createInputArea(editor: ICellEditorWidget): InputAreaWidget {
-    this.methods.push('createInputArea');
-    return super.createInputArea(editor);
-  }
-
-  createOutputArea(rendermime: RenderMime): OutputAreaWidget {
-    this.methods.push('createOutputArea');
-    return super.createOutputArea(rendermime);
-  }
-}
-
-
 describe('notebook/cells/widget', () => {
 
-  let renderer = new LogRenderer();
-
   describe('BaseCellWidget', () => {
+
+    let renderer = createBaseCellRenderer();
 
     describe('#constructor()', () => {
 
@@ -176,16 +142,9 @@ describe('notebook/cells/widget', () => {
       });
 
       it('should accept a custom renderer', () => {
-        renderer = new LogRenderer();
-
-        expect(renderer.methods).to.not.contain('createCellEditor');
-        expect(renderer.methods).to.not.contain('createInputArea');
-
+        renderer = createBaseCellRenderer();
         let widget = new BaseCellWidget({ renderer });
-
         expect(widget).to.be.a(BaseCellWidget);
-        expect(renderer.methods).to.contain('createCellEditor');
-        expect(renderer.methods).to.contain('createInputArea');
       });
 
     });
@@ -235,7 +194,7 @@ describe('notebook/cells/widget', () => {
 
       it('should be a cell editor widget', () => {
         let widget = new BaseCellWidget({ renderer });
-        expect(widget.editor).to.be.a(CodeMirrorCellEditorWidget);
+        expect(widget.editor).to.be.a(CodeCellEditorWidget);
       });
 
     });
@@ -486,7 +445,7 @@ describe('notebook/cells/widget', () => {
 
         it('should create a cell editor widget', () => {
           let editor = renderer.createCellEditor();
-          expect(editor).to.be.a(CodeMirrorCellEditorWidget);
+          expect(editor).to.be.a(CodeCellEditorWidget);
         });
 
       });
@@ -515,6 +474,8 @@ describe('notebook/cells/widget', () => {
 
   describe('CodeCellWidget', () => {
 
+    let renderer = createCodeCellRenderer();
+
     describe('#constructor()', () => {
 
       it('should create a code cell widget', () => {
@@ -523,19 +484,10 @@ describe('notebook/cells/widget', () => {
       });
 
       it('should accept a custom renderer', () => {
-        renderer = new LogRenderer();
-
-        expect(renderer.methods).to.not.contain('createCellEditor');
-        expect(renderer.methods).to.not.contain('createInputArea');
-        expect(renderer.methods).to.not.contain('createOutputArea');
-
+        renderer = createCodeCellRenderer();
         let widget = new CodeCellWidget({ renderer, rendermime });
         widget.model = new CodeCellModel();
-
         expect(widget).to.be.a(CodeCellWidget);
-        expect(renderer.methods).to.contain('createCellEditor');
-        expect(renderer.methods).to.contain('createInputArea');
-        expect(renderer.methods).to.contain('createOutputArea');
       });
 
     });
@@ -674,6 +626,8 @@ describe('notebook/cells/widget', () => {
 
   describe('MarkdownCellWidget', () => {
 
+    let renderer = createBaseCellRenderer();
+
     describe('#constructor()', () => {
 
       it('should create a markdown cell widget', () => {
@@ -682,16 +636,9 @@ describe('notebook/cells/widget', () => {
       });
 
       it('should accept a custom renderer', () => {
-        renderer = new LogRenderer();
-
-        expect(renderer.methods).to.not.contain('createCellEditor');
-        expect(renderer.methods).to.not.contain('createInputArea');
-
+        renderer = createBaseCellRenderer();
         let widget = new MarkdownCellWidget({ renderer, rendermime });
-
         expect(widget).to.be.a(MarkdownCellWidget);
-        expect(renderer.methods).to.contain('createCellEditor');
-        expect(renderer.methods).to.contain('createInputArea');
       });
 
       it('should set the default mimetype to text/x-ipythongfm', () => {
@@ -773,6 +720,8 @@ describe('notebook/cells/widget', () => {
 
   describe('RawCellWidget', () => {
 
+    let renderer = createBaseCellRenderer();
+
     describe('#constructor()', () => {
 
       it('should create a raw cell widget', () => {
@@ -789,7 +738,7 @@ describe('notebook/cells/widget', () => {
     describe('#constructor()', () => {
 
       it('should create an input area widget', () => {
-        let editor = new CodeMirrorCellEditorWidget(new CellModel());
+        let editor = createCellEditor();
         let widget = new InputAreaWidget(editor);
         expect(widget).to.be.an(InputAreaWidget);
       });
@@ -799,7 +748,7 @@ describe('notebook/cells/widget', () => {
     describe('#setPrompt()', () => {
 
       it('should change the value of the input prompt', () => {
-        let editor = new CodeMirrorCellEditorWidget(new CellModel());
+        let editor = createCellEditor();
         let widget = new InputAreaWidget(editor);
         let prompt = widget.node.querySelector(`.${PROMPT_CLASS}`);
         expect(prompt.textContent).to.be.empty();
@@ -808,7 +757,7 @@ describe('notebook/cells/widget', () => {
       });
 
       it('should treat the string value "null" as special', () => {
-        let editor = new CodeMirrorCellEditorWidget(new CellModel());
+        let editor = createCellEditor();
         let widget = new InputAreaWidget(editor);
         let prompt = widget.node.querySelector(`.${PROMPT_CLASS}`);
         expect(prompt.textContent).to.be.empty();

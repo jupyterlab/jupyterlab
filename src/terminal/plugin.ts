@@ -121,9 +121,9 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
           term.session = session;
           term.title.closable = true;
           term.title.icon = `${LANDSCAPE_ICON_CLASS} ${TERMINAL_ICON_CLASS}`;
+          tracker.add(term);
           app.shell.addToMainArea(term);
           app.shell.activateMain(term.id);
-          tracker.add(term);
         });
       });
     }

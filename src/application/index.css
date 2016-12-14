@@ -30,7 +30,7 @@ body {
 }
 
 
-.p-mod-hidden {
+.p-Widget.p-mod-hidden {
   display: none !important;
 }
 

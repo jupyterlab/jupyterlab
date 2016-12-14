@@ -18,6 +18,10 @@ import {
 } from '../application';
 
 import {
+  IEditorServices
+} from '../codeeditor';
+
+import {
   ICommandPalette
 } from '../commandpalette';
 
@@ -70,7 +74,7 @@ import {
  * The console widget tracker provider.
  */
 export
-const plugin: JupyterLabPlugin<IConsoleTracker> = {
+const trackerPlugin: JupyterLabPlugin<IConsoleTracker> = {
   id: 'jupyter.services.console-tracker',
   provides: IConsoleTracker,
   requires: [
@@ -86,6 +90,21 @@ const plugin: JupyterLabPlugin<IConsoleTracker> = {
   ],
   activate: activateConsole,
   autoStart: true
+};
+
+
+/**
+ * The console widget renderer.
+ */
+export
+const rendererPlugin: JupyterLabPlugin<ConsoleContent.IRenderer> = {
+  id: 'jupyter.services.console-renderer',
+  provides: ConsoleContent.IRenderer,
+  requires: [IEditorServices],
+  autoStart: true,
+  activate: (app: JupyterLab, editorServices: IEditorServices) => {
+    return new ConsoleContent.Renderer({ editorServices });
+  }
 };
 
 
@@ -351,8 +370,6 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     panel.title.caption = Private.caption(captionOptions);
     panel.title.icon = `${LANDSCAPE_ICON_CLASS} ${CONSOLE_ICON_CLASS}`;
     panel.title.closable = true;
-    app.shell.addToMainArea(panel);
-    app.shell.activateMain(panel.id);
     // Update the caption of the tab with the last execution time.
     panel.content.executed.connect((sender, executed) => {
       captionOptions.executed = executed;
@@ -371,6 +388,8 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     inspector.source = panel.content.inspectionHandler;
     // Add the console panel to the tracker.
     tracker.add(panel);
+    app.shell.addToMainArea(panel);
+    app.shell.activateMain(panel.id);
   }
 
   command = 'console:switch-kernel';

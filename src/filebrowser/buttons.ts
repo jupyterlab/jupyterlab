@@ -75,6 +75,31 @@ const ICON_CLASS = 'jp-FileButtons-buttonIcon';
 const CREATE_CLASS = 'jp-id-create';
 
 /**
+ * The class name added to the add button.
+ */
+const MATERIAL_CREATE = 'jp-AddIcon';
+
+/**
+ * The class name added to the upload button.
+ */
+const MATERIAL_UPLOAD = 'jp-UploadIcon';
+
+/**
+ * The class name added to the refresh button.
+ */
+const MATERIAL_REFRESH = 'jp-RefreshIcon';
+
+/**
+ * The class name added to the down caret.
+ */
+const MATERIAL_DOWNCARET = 'jp-DownCaretIcon';
+
+/**
+ * The class name added to a material icon button.
+ */
+const MATERIAL_CLASS = 'jp-MaterialIcon';
+
+/**
  * The class name added to the upload button.
  */
 const UPLOAD_CLASS = 'jp-id-upload';
@@ -385,10 +410,10 @@ namespace Private {
     refreshContent.className = CONTENT_CLASS;
 
     // TODO make these icons configurable.
-    createIcon.className = ICON_CLASS + ' fa fa-plus';
-    uploadIcon.className = ICON_CLASS + ' fa fa-upload';
-    refreshIcon.className = ICON_CLASS + ' fa fa-refresh';
-    dropdownIcon.className = DROPDOWN_CLASS + ' fa fa-caret-down';
+    createIcon.className = ICON_CLASS + ' ' + MATERIAL_CLASS + ' ' + MATERIAL_CREATE;
+    uploadIcon.className = ICON_CLASS + ' ' + MATERIAL_CLASS + ' ' + MATERIAL_UPLOAD;
+    refreshIcon.className = ICON_CLASS + ' ' + MATERIAL_CLASS + ' ' + MATERIAL_REFRESH;
+    dropdownIcon.className = DROPDOWN_CLASS + ' ' + MATERIAL_CLASS + ' ' + MATERIAL_DOWNCARET;
 
     createContent.appendChild(createIcon);
     createContent.appendChild(dropdownIcon);

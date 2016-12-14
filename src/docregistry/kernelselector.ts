@@ -96,7 +96,7 @@ function selectKernel(options: IKernelSelection): Promise<Kernel.IModel> {
 
   // Create the dialog body.
   let body = document.createElement('div');
-  let text = document.createElement('pre');
+  let text = document.createElement('label');
   text.textContent = `Select kernel for\n"${options.name}"`;
   body.appendChild(text);
   if (kernel) {

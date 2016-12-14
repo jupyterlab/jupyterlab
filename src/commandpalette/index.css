@@ -29,7 +29,7 @@
 
 
 .p-CommandPalette-search {
-  padding: 8px;
+  padding: 8px 12px;
   background-color: var(--jp-border-color3);
   border-bottom: 1px solid var(--jp-border-color1);
 }
@@ -43,16 +43,18 @@
 
 
 .p-CommandPalette-wrapper::after {
-  font-family: FontAwesome;
-  content: "\f002"; /* search */
+  content: " ";
   color: white;
   background-color: var(--jp-brand-color1);
-  font-size: var(--jp-ui-icon-font-size);
-  line-height: var(--jp-private-commandpalette-search-height);
   position: absolute;
-  right: 8px;
+  right: 12px;
   height: 30px;
+  width: 12px;
   padding: 0px 12px;
+  background-image: url(../default-theme/icons/md/search.svg);
+  background-size: 20px;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .p-CommandPalette-input {
@@ -91,7 +93,7 @@
 
 
 .p-CommandPalette-header {
-  padding: 12px 0 4px 8px;
+  padding: 12px 0 4px 12px;
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size0);
   font-weight: 600;
@@ -121,7 +123,7 @@
 
 
 .p-CommandPalette-item {
-  padding: 4px 8px;
+  padding: 4px 12px;
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
   font-weight: 500;

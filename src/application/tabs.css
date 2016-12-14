@@ -70,7 +70,7 @@
 
 /* This is a current tab of a tab bar in the dock panel: each tab bar has 1. */
 .p-DockPanel-tabBar .p-TabBar-tab.p-mod-current {
-  background: var(--jp-layout-color1);
+  background: var(--jp-layout-color0);
   color: var(--jp-ui-font-color0);
   min-height: calc(var(--jp-private-horizontal-tab-height) + 2 * var(--jp-border-width));
   transform: translateY(var(--jp-border-width));
@@ -86,6 +86,17 @@
   height: var(--jp-private-horizontal-tab-active-top-border);
   width: calc(100% + 2*var(--jp-border-width));
   background: var(--jp-brand-color1);
+}
+
+
+/* This is the left tab bar current tab: only 1 exists. */
+.p-TabBar-tab.p-mod-current {
+  background: var(--jp-layout-color0);
+}
+
+
+.p-TabBar-tab.p-mod-current:hover {
+  background: var(--jp-layout-color1);
 }
 
 
@@ -131,22 +142,25 @@
   display: inline-block;
 }
 
+.p-TabBar-WindowTabLabel {
+  margin-top: 4px;
+}
 
 .p-DockPanel-tabBar .p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon {
   margin-left: 4px;
+  padding-top: 8px;
+  background-size: 16px;
+  height: 16px;
+  width: 16px;
+  background-image: url(../default-theme/icons/md/close.svg);
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 
-.p-DockPanel-tabBar .p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon:before {
-  content: '\f00d';  /* close */
-  font-family: FontAwesome;
-}
-
-
-.p-DockPanel-tabBar .p-TabBar-tab.p-mod-closable.jp-mod-dirty > .p-TabBar-tabCloseIcon:before {
-  font-family: FontAwesome;
-  content: '\f111'; /* circle */
-  font-size: 10px;
+.p-DockPanel-tabBar .p-TabBar-tab.p-mod-closable.jp-mod-dirty > .p-TabBar-tabCloseIcon {
+  background-size: 10px;
+  background-image: url(../default-theme/icons/md/circle.svg);
 }
 
 

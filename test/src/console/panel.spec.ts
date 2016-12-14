@@ -16,10 +16,6 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  CodeMirrorConsoleRenderer
-} from '../../../lib/console/codemirror/widget';
-
-import {
   ConsoleContent
 } from '../../../lib/console/content';
 
@@ -30,6 +26,10 @@ import {
 import {
   defaultRenderMime
 } from '../utils';
+
+import {
+  createRenderer
+} from './utils';
 
 
 class TestPanel extends ConsolePanel {
@@ -48,7 +48,7 @@ class TestPanel extends ConsolePanel {
 }
 
 
-const renderer = CodeMirrorConsoleRenderer.defaultRenderer;
+const renderer = createRenderer();
 const rendermime = defaultRenderMime();
 
 

@@ -24,8 +24,11 @@ import {
 } from '../../../lib/completer';
 
 import {
-  CodeMirrorCodeCellWidgetRenderer
-} from '../../../lib/notebook/codemirror/cells/widget';
+  createBaseCellRenderer
+} from '../notebook/utils';
+
+
+const renderer = createBaseCellRenderer();
 
 
 class TestCompleterModel extends CompleterModel {
@@ -138,9 +141,7 @@ describe('completer/handler', () => {
         let handler = new CellCompleterHandler({
           completer: new CompleterWidget()
         });
-        let cell = new BaseCellWidget({
-          renderer: CodeMirrorCodeCellWidgetRenderer.defaultRenderer
-        });
+        let cell = new BaseCellWidget({ renderer });
         expect(handler.activeCell).to.be(null);
         handler.activeCell = cell;
         expect(handler.activeCell).to.be.a(BaseCellWidget);
@@ -151,12 +152,8 @@ describe('completer/handler', () => {
         let handler = new CellCompleterHandler({
           completer: new CompleterWidget()
         });
-        let one = new BaseCellWidget({
-          renderer: CodeMirrorCodeCellWidgetRenderer.defaultRenderer
-        });
-        let two = new BaseCellWidget({
-          renderer: CodeMirrorCodeCellWidgetRenderer.defaultRenderer
-        });
+        let one = new BaseCellWidget({ renderer });
+        let two = new BaseCellWidget({ renderer });
         expect(handler.activeCell).to.be(null);
         handler.activeCell = one;
         expect(handler.activeCell).to.be.a(BaseCellWidget);
@@ -356,9 +353,7 @@ describe('completer/handler', () => {
           oldValue: 'fo',
           newValue: 'foo'
         };
-        let cell = new BaseCellWidget({
-          renderer: CodeMirrorCodeCellWidgetRenderer.defaultRenderer
-        });
+        let cell = new BaseCellWidget({ renderer });
 
         handler.activeCell = cell;
         expect(handler.methods).to.not.contain('onTextChanged');
@@ -381,9 +376,7 @@ describe('completer/handler', () => {
           oldValue: 'fo',
           newValue: 'foo'
         };
-        let cell = new BaseCellWidget({
-          renderer: CodeMirrorCodeCellWidgetRenderer.defaultRenderer
-        });
+        let cell = new BaseCellWidget({ renderer });
         let model = completer.model as TestCompleterModel;
 
         handler.activeCell = cell;
@@ -409,9 +402,7 @@ describe('completer/handler', () => {
           position: 0,
           currentValue: 'foo'
         };
-        let cell = new BaseCellWidget({
-          renderer: CodeMirrorCodeCellWidgetRenderer.defaultRenderer
-        });
+        let cell = new BaseCellWidget({ renderer });
 
         handler.activeCell = cell;
         expect(handler.methods).to.not.contain('onCompletionRequested');
@@ -433,9 +424,7 @@ describe('completer/handler', () => {
           position: 0,
           currentValue: 'foo'
         };
-        let cell = new BaseCellWidget({
-          renderer: CodeMirrorCodeCellWidgetRenderer.defaultRenderer
-        });
+        let cell = new BaseCellWidget({ renderer });
 
         handler.kernel = kernel;
         handler.activeCell = cell;
@@ -463,7 +452,6 @@ describe('completer/handler', () => {
         });
         let handler = new TestCompleterHandler({ completer });
         let model = completer.model as TestCompleterModel;
-        let renderer = CodeMirrorCodeCellWidgetRenderer.defaultRenderer;
 
         handler.activeCell = new BaseCellWidget({ renderer });
         expect(model.methods).to.not.contain('createPatch');
@@ -476,7 +464,6 @@ describe('completer/handler', () => {
         let patch = 'foobar';
         let completer = new CompleterWidget({ model });
         let handler = new TestCompleterHandler({ completer });
-        let renderer = CodeMirrorCodeCellWidgetRenderer.defaultRenderer;
         let cell = new BaseCellWidget({ renderer });
         let request: ICompletionRequest = {
           ch: 0,

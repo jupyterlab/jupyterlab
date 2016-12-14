@@ -26,21 +26,16 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  ConsolePanel
-} from 'jupyterlab/lib/console';
+  editorServices
+} from 'jupyterlab/lib/codemirror';
 
 import {
-  CodeMirrorConsoleRenderer
-} from 'jupyterlab/lib/console/codemirror/widget';
+  ConsolePanel, ConsoleContent
+} from 'jupyterlab/lib/console';
 
 import {
   RenderMime
 } from 'jupyterlab/lib/rendermime';
-
-import {
-  HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
-  JavascriptRenderer, SVGRenderer, MarkdownRenderer
-} from 'jupyterlab/lib/renderers';
 
 import {
   defaultSanitizer
@@ -88,15 +83,7 @@ function startApp(session: Session.ISession) {
     keymap.processKeydownEvent(event);
   });
 
-  const transformers = [
-    new JavascriptRenderer(),
-    new MarkdownRenderer(),
-    new HTMLRenderer(),
-    new ImageRenderer(),
-    new SVGRenderer(),
-    new LatexRenderer(),
-    new TextRenderer()
-  ];
+  const transformers = RenderMime.defaultRenderers();
   let renderers: RenderMime.MimeMap<RenderMime.IRenderer> = {};
   let order: string[] = [];
   for (let t of transformers) {
@@ -107,7 +94,7 @@ function startApp(session: Session.ISession) {
   }
   let sanitizer = defaultSanitizer;
   let rendermime = new RenderMime({ renderers, order, sanitizer });
-  let renderer = CodeMirrorConsoleRenderer.defaultRenderer;
+  let renderer = new ConsoleContent.Renderer({ editorServices });
 
   let consolePanel = new ConsolePanel({ session, renderer, rendermime });
   consolePanel.title.label = TITLE;
