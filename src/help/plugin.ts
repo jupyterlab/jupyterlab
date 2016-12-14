@@ -138,17 +138,29 @@ function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICom
 
   /**
    * Create a new IFrame widget.
-   *
-   * #### Notes
-   * Once layout restoration is fully supported, the hidden state of the IFrame
-   * widget will be handled by the layout restorer and not by the message hook
-   * handler in this function.
    */
-  function newIFrame(id: string): IFrame {
+  function newIFrame(url: string): IFrame {
     let iframe = new IFrame();
     iframe.addClass(HELP_CLASS);
     iframe.title.label = category;
-    iframe.id = id;
+    iframe.id = `${namespace}`;
+    iframe.url = url;
+    // Add the iframe to the instance tracker.
+    tracker.add(iframe, { area: 'right' });
+
+    // If the help widget visibility changes, update the tracker.
+    installMessageHook(iframe, (iframe: IFrame, msg: Message) => {
+      switch (msg) {
+        case WidgetMessage.AfterShow:
+        case WidgetMessage.BeforeHide:
+          // Wait until hide has completed.
+          requestAnimationFrame(() => { tracker.save(iframe); });
+          break;
+        default:
+          break;
+      }
+      return true;
+    });
     return iframe;
   }
 
@@ -212,32 +224,19 @@ function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICom
     execute: args => {
       const url = args['url'] as string;
       const isHidden = args['isHidden'] as boolean || false;
+
       // If help resource will generate a mixed content error, load externally.
       if (LAB_IS_SECURE && utils.urlParse(url).protocol !== 'https:') {
         window.open(url);
         return;
       }
-      if (!iframe) {
-        iframe = newIFrame(namespace);
+
+      if (iframe) {
         iframe.url = url;
-
-        // Add the iframe to the instance tracker.
-        tracker.add(iframe, { area: 'right' });
-
-        // If the help widget visibility changes, update the tracker.
-        installMessageHook(iframe, (iframe: IFrame, msg: Message) => {
-          switch (msg) {
-            case WidgetMessage.AfterShow:
-            case WidgetMessage.BeforeHide:
-              requestAnimationFrame(() => { tracker.save(iframe); });
-              break;
-            default:
-              break;
-          }
-          return true;
-        });
+        tracker.save(iframe);
+      } else {
+        iframe = newIFrame(url);
       }
-
       attachHelp();
       if (isHidden) {
         hideHelp();
