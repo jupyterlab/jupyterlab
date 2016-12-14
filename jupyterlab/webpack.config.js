@@ -9,6 +9,9 @@ var childProcess = require('child_process');
 var buildExtension = require('@jupyterlab/extension-builder/lib/builder').buildExtension;
 var webpack = require('webpack');
 
+var path = require('path');
+var CopyWebpackPlugin = require('copy-webpack-plugin');
+var monacoEditorPath = '../node_modules/monaco-editor-core/dev/vs';
 
 console.log('Generating bundles...');
 
@@ -62,5 +65,18 @@ module.exports = {
   },
   debug: true,
   bail: true,
-  devtool: 'source-map'
+  devtool: 'source-map',
+  resolve: {
+    alias: {
+      'vs': path.resolve(monacoEditorPath)
+    }
+  },
+  plugins: [
+    new CopyWebpackPlugin([
+      {
+        from: monacoEditorPath,
+        to: 'vs',
+      }
+    ])
+  ]
 }

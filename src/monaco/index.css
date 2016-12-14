@@ -1,0 +1,23 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/* FIXME when https://github.com/Microsoft/monaco-editor/issues/113#issuecomment-240406949 is fixed */
+.monaco-editor .inputarea { 
+    position: fixed !important; 
+    top: 0 !important; 
+    left: 0 !important; 
+}
+
+.monaco-editor {
+    padding-top : 5.6px;
+    padding-bottom : 5.6px;
+    font-family: monospace !important;
+    font-size: inherit !important;
+}
+
+/* Remove a selected line border */
+.monaco-editor .current-line {
+    border: 0px !important;
+}

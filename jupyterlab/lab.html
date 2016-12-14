@@ -41,35 +41,44 @@ Distributed under the terms of the Modified BSD License.
 
 <body>
 
+<script src="{{static_prefix}}/vs/loader.js" type="text/javascript" charset="utf-8"></script>
+
 {% block script %}
 <script>
-  var loader = jupyter.loader;
-  delete jupyter.loader;
-
-  var createLab = loader.require("{{ jupyterlab_main }}").createLab;
-  var lab = jupyter.lab = createLab(loader);
-  var plugins = [];
-
-  /**
-   * Get the plugins for an entry point.
-   */
-  var getEntryPoint = function (entryPoint) {
-    var plugins = loader.require(entryPoint);
-    try {
-      plugins = loader.extractPlugins(plugins);
-    } catch (err) {
-      console.error(err);
-      plugins = [];
+  window.require.config({
+    paths: {
+      'vs': "{{static_prefix}}/vs"
     }
-    return plugins;
-  }
+  });
+  window.require(['vs/editor/editor.main'], function() {
+    var loader = jupyter.loader;
+    delete jupyter.loader;
 
-  {% for plugin_entry in plugin_entries %}
-  plugins = plugins.concat(getEntryPoint("{{ plugin_entry }}"));
-  {% endfor %}
+    var createLab = loader.require("{{ jupyterlab_main }}").createLab;
+    var lab = jupyter.lab = createLab(loader);
+    var plugins = [];
 
-  lab.registerPlugins(plugins);
-  lab.start();
+    /**
+     * Get the plugins for an entry point.
+     */
+    var getEntryPoint = function (entryPoint) {
+      var plugins = loader.require(entryPoint);
+      try {
+        plugins = loader.extractPlugins(plugins);
+      } catch (err) {
+        console.error(err);
+        plugins = [];
+      }
+      return plugins;
+    }
+
+    {% for plugin_entry in plugin_entries %}
+    plugins = plugins.concat(getEntryPoint("{{ plugin_entry }}"));
+    {% endfor %}
+
+    lab.registerPlugins(plugins);
+    lab.start();
+  });
 </script>
 {% endblock %}
 

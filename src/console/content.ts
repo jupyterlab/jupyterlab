@@ -18,10 +18,6 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
-  Token
-} from 'phosphor/lib/core/token';
-
-import {
   Panel, PanelLayout
 } from 'phosphor/lib/ui/panel';
 
@@ -800,14 +796,6 @@ namespace ConsoleContent {
       readonly editorServices: IEditorServices;
     }
   }
-
-  /* tslint:disable */
-  /**
-   * The console renderer token.
-   */
-  export
-  const IRenderer = new Token<IRenderer>('jupyter.services.console.renderer');
-  /* tslint:enable */
 }
 
 

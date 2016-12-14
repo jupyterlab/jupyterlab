@@ -4,3 +4,5 @@
 /// <reference path="../typings/ansi_up/ansi_up.d.ts"/>
 /// <reference path="../typings/codemirror/codemirror.d.ts"/>
 /// <reference path="../typings/xterm/xterm.d.ts"/>
+/// <reference path='../node_modules/monaco-editor-core/monaco.d.ts'/>
+/// <reference path='../typings/monaco/monaco.d.ts'/>

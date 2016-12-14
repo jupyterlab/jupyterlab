@@ -60,7 +60,8 @@ describe('console/panel', () => {
   beforeEach(done => {
     Session.startNew({ path: utils.uuid() }).then(newSession => {
       session = newSession;
-      panel = new TestPanel({ renderer, rendermime, session });
+      const content = new ConsoleContent({ renderer, rendermime, session });
+      panel = new TestPanel({ content });
       done();
     });
   });
