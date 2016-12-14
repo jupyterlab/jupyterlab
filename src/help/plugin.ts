@@ -10,16 +10,20 @@ import {
 } from 'phosphor/lib/core/messaging';
 
 import {
-  WidgetMessage
-} from 'phosphor/lib/ui/widget';
-
-import {
   Menu
 } from 'phosphor/lib/ui/menu';
 
 import {
+  WidgetMessage
+} from 'phosphor/lib/ui/widget';
+
+import {
   JupyterLab, JupyterLabPlugin
 } from '../application';
+
+import {
+  InstanceTracker
+} from '../common/instancetracker';
 
 import {
   ICommandPalette
@@ -30,12 +34,12 @@ import {
 } from '../iframe';
 
 import {
-  IMainMenu
-} from '../mainmenu';
+  ILayoutRestorer
+} from '../layoutrestorer';
 
 import {
-  IStateDB
-} from '../statedb';
+  IMainMenu
+} from '../mainmenu';
 
 
 /**
@@ -48,62 +52,52 @@ const LAB_IS_SECURE = window.location.protocol === 'https:';
  */
 const HELP_CLASS = 'jp-Help';
 
-
 /**
- * A list of commands to add to the help widget.
+ * A list of help resources.
  */
 
-const COMMANDS = [
+const RESOURCES = [
   {
     text: 'Scipy Lecture Notes',
-    id: 'help-doc:scipy-lecture-notes',
     url: 'http://www.scipy-lectures.org/'
   },
   {
     text: 'Numpy Reference',
-    id: 'help-doc:numpy-reference',
     url: 'https://docs.scipy.org/doc/numpy/reference/'
   },
   {
     text: 'Scipy Reference',
-    id: 'help-doc:scipy-reference',
     url: 'https://docs.scipy.org/doc/scipy/reference/'
   },
   {
     text: 'Notebook Tutorial',
-    id: 'help-doc:notebook-tutorial',
     url: 'https://nbviewer.jupyter.org/github/jupyter/notebook/' +
       'blob/master/docs/source/examples/Notebook/Notebook Basics.ipynb'
   },
   {
     text: 'Python Reference',
-    id: 'help-doc:python-reference',
     url: 'https://docs.python.org/3.5/'
   },
   {
     text: 'IPython Reference',
-    id: 'help-doc:ipython-reference',
     url: 'https://ipython.org/documentation.html?v=20160707164940'
   },
   {
     text: 'Matplotlib Reference',
-    id: 'help-doc:mathplotlib-reference',
     url: 'http://matplotlib.org/contents.html?v=20160707164940'
   },
   {
     text: 'SymPy Reference',
-    id: 'help-doc:sympy-reference',
     url: 'http://docs.sympy.org/latest/index.html?v=20160707164940'
   },
   {
     text: 'Pandas Reference',
-    id: 'help-doc:pandas-reference',
     url: 'http://pandas.pydata.org/pandas-docs/stable/?v=20160707164940'
   },
   {
     text: 'Markdown Reference',
-    id: 'help-doc:markdown-reference',
-    url: 'https://help.github.com/articles/getting-started-with-writing-and-formatting-on-github/'
+    url: 'https://help.github.com/articles/' +
+      'getting-started-with-writing-and-formatting-on-github/'
   }
 ];
 
@@ -114,7 +108,7 @@ const COMMANDS = [
 export
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.help-handler',
-  requires: [IMainMenu, ICommandPalette, IStateDB],
+  requires: [IMainMenu, ICommandPalette, ILayoutRestorer],
   activate: activateHelpHandler,
   autoStart: true
 };
@@ -127,12 +121,20 @@ const plugin: JupyterLabPlugin<void> = {
  *
  * returns A promise that resolves when the extension is activated.
  */
-function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB): void {
+function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, layout: ILayoutRestorer): void {
+  let iframe: IFrame = null;
   const category = 'Help';
   const namespace = 'help-doc';
-  const key = `${namespace}:show`;
-  const iframe = newIFrame(namespace);
+  const command = `${namespace}:open`;
   const menu = createMenu();
+  const tracker = new InstanceTracker<IFrame>({ namespace });
+
+  // Handle state restoration.
+  layout.restore(tracker, {
+    command,
+    args: widget => ({ isHidden: widget.isHidden, url: widget.url }),
+    name: widget => namespace
+  });
 
   /**
    * Create a new IFrame widget.
@@ -147,15 +149,6 @@ function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICom
     iframe.addClass(HELP_CLASS);
     iframe.title.label = category;
     iframe.id = id;
-
-    // If the help widget is being hidden, remove its state.
-    installMessageHook(iframe, (iframe: IFrame, msg: Message) => {
-      if (msg === WidgetMessage.BeforeHide) {
-        state.remove(key);
-      }
-      return true;
-    });
-
     return iframe;
   }
 
@@ -171,7 +164,7 @@ function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICom
     menu.addItem({ command: 'faq-jupyterlab:show' });
     menu.addItem({ command: 'classic-notebook:open' });
 
-    COMMANDS.forEach(item => menu.addItem({ command: item.id }));
+    RESOURCES.forEach(args => { menu.addItem({ args, command }); });
 
     menu.addItem({ command: 'statedb:clear' });
 
@@ -192,7 +185,6 @@ function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICom
    */
   function showHelp(): void {
     app.shell.activateRight(iframe.id);
-    state.save(key, { url: iframe.url });
   }
 
   /**
@@ -215,19 +207,45 @@ function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICom
     }
   }
 
-  COMMANDS.forEach(command => app.commands.addCommand(command.id, {
-    label: command.text,
-    execute: () => {
+  app.commands.addCommand(command, {
+    label: args => args['text'] as string,
+    execute: args => {
+      const url = args['url'] as string;
+      const isHidden = args['isHidden'] as boolean || false;
       // If help resource will generate a mixed content error, load externally.
-      if (LAB_IS_SECURE && utils.urlParse(command.url).protocol !== 'https:') {
-        window.open(command.url);
+      if (LAB_IS_SECURE && utils.urlParse(url).protocol !== 'https:') {
+        window.open(url);
         return;
       }
+      if (!iframe) {
+        iframe = newIFrame(namespace);
+        iframe.url = url;
+
+        // Add the iframe to the instance tracker.
+        tracker.add(iframe, { area: 'right' });
+
+        // If the help widget visibility changes, update the tracker.
+        installMessageHook(iframe, (iframe: IFrame, msg: Message) => {
+          switch (msg) {
+            case WidgetMessage.AfterShow:
+            case WidgetMessage.BeforeHide:
+              requestAnimationFrame(() => { tracker.save(iframe); });
+              break;
+            default:
+              break;
+          }
+          return true;
+        });
+      }
+
       attachHelp();
-      iframe.url = command.url;
-      showHelp();
+      if (isHidden) {
+        hideHelp();
+      } else {
+        showHelp();
+      }
     }
-  }));
+  });
 
   app.commands.addCommand(`${namespace}:activate`, {
     execute: () => { showHelp(); }
@@ -239,7 +257,7 @@ function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICom
     execute: () => { toggleHelp(); }
   });
 
-  COMMANDS.forEach(item => palette.addItem({ command: item.id, category }));
+  RESOURCES.forEach(args => { palette.addItem({ args, command, category }); });
 
   let openClassicNotebookId = 'classic-notebook:open';
   app.commands.addCommand(openClassicNotebookId, {
@@ -248,17 +266,4 @@ function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICom
   });
   palette.addItem({ command: openClassicNotebookId, category });
   mainMenu.addMenu(menu, {});
-
-  state.fetch(key).then(args => {
-    if (!args) {
-      state.remove(key);
-      return;
-    }
-    let url = args['url'] as string;
-    let filtered = COMMANDS.filter(command => command.url === url);
-    if (filtered.length) {
-      let command = filtered[0];
-      app.commands.execute(command.id, void 0);
-    }
-  });
 }

@@ -219,7 +219,7 @@ class LayoutRestorer implements ILayoutRestorer {
    */
   restore(tracker: InstanceTracker<Widget>, options: ILayoutRestorer.IRestoreOptions<Widget>): void {
     if (!this._promises) {
-      console.warn('restore can only be called before app has started');
+      console.warn('restore can only be called before `first` has resolved');
       return;
     }
 
