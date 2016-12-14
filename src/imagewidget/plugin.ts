@@ -40,13 +40,18 @@ const FACTORY = 'Image';
 /**
  * The image file handler extension.
  */
-export
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.image-handler',
   requires: [IDocumentRegistry, ICommandPalette, ILayoutRestorer],
   activate: activateImageWidget,
   autoStart: true
 };
+
+
+/**
+ * Export the plugin as default.
+ */
+export default plugin;
 
 
 /**

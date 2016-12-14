@@ -24,13 +24,18 @@ import {
 /**
  * The about page extension.
  */
-export
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.about',
   activate: activateAbout,
   autoStart: true,
   requires: [ICommandPalette, ILayoutRestorer]
 };
+
+
+/**
+ * Export the plugin as default.
+ */
+export default plugin;
 
 
 function activateAbout(app: JupyterLab, palette: ICommandPalette, layout: ILayoutRestorer): void {

@@ -17,9 +17,14 @@ import {
 /**
  * The clipboard provider.
  */
-export
 const plugin: JupyterLabPlugin<IClipboard> = {
   id: 'jupyter.services.clipboard',
   provides: IClipboard,
   activate: (): IClipboard => new MimeData()
 };
+
+
+/**
+ * Export the plugin as default.
+ */
+export default plugin;

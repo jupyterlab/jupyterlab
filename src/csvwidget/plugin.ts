@@ -31,13 +31,18 @@ const FACTORY = 'Table';
 /**
  * The table file handler extension.
  */
-export
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.csv-handler',
   requires: [IDocumentRegistry, ILayoutRestorer],
   activate: activateCSVWidget,
   autoStart: true
 };
+
+
+/**
+ * Export the plugin as default.
+ */
+export default plugin;
 
 
 /**

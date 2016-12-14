@@ -28,12 +28,17 @@ const JUPYTER_ICON_CLASS = 'jp-JupyterIcon';
 /**
  * A service providing an interface to the main menu.
  */
-export
 const plugin: JupyterLabPlugin<IMainMenu> = {
   id: 'jupyter.services.main-menu',
   provides: IMainMenu,
   activate: activateMainMenu
 };
+
+
+/**
+ * Export the plugin as default.
+ */
+export default plugin;
 
 
 /**

@@ -17,7 +17,6 @@ import {
 /**
  * The default running sessions extension.
  */
-export
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.running-sessions',
   requires: [IServiceManager],
@@ -26,7 +25,15 @@ const plugin: JupyterLabPlugin<void> = {
 };
 
 
+/**
+ * Export the plugin as default.
+ */
+export default plugin;
 
+
+/**
+ * Activate the running plugin.
+ */
 function activateRunningSessions(app: JupyterLab, services: IServiceManager): void {
   let running = new RunningSessions({ manager: services });
   running.id = 'jp-running-sessions';

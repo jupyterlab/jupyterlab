@@ -24,7 +24,6 @@ import {
 /**
  * The default document manager provider.
  */
-export
 const plugin: JupyterLabPlugin<IDocumentManager> = {
   id: 'jupyter.services.document-manager',
   provides: IDocumentManager,
@@ -45,3 +44,10 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
     return new DocumentManager({ registry, manager, opener });
   }
 };
+
+
+/**
+ * Export the plugin as default.
+ */
+export default plugin;
+

@@ -59,6 +59,13 @@ const commandsPlugin: JupyterLabPlugin<void> = {
 
 
 /**
+ * Export the plugins as default.
+ */
+const plugins: JupyterLabPlugin<any>[] = [commandsPlugin, servicesPlugin];
+export default plugins;
+
+
+/**
  * The map of command ids used by the editor.
  */
 const cmdIds = {

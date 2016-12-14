@@ -26,13 +26,18 @@ import {
 /**
  * A service providing an inspector panel.
  */
-export
 const plugin: JupyterLabPlugin<IInspector> = {
   id: 'jupyter.services.inspector',
   requires: [ICommandPalette, ILayoutRestorer],
   provides: IInspector,
   activate: activateInspector
 };
+
+
+/**
+ * Export the plugin as default.
+ */
+export default plugin;
 
 
 /**

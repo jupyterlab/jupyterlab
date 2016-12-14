@@ -25,7 +25,6 @@ import {
 /**
  * The default state database for storing application state.
  */
-export
 const plugin: JupyterLabPlugin<IStateDB> = {
   id: 'jupyter.services.statedb',
   activate: activateState,
@@ -33,6 +32,12 @@ const plugin: JupyterLabPlugin<IStateDB> = {
   provides: IStateDB,
   requires: [ICommandPalette]
 };
+
+
+/**
+ * Export the plugin as default.
+ */
+export default plugin;
 
 
 /**
