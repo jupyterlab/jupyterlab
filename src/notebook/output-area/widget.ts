@@ -413,8 +413,8 @@ class OutputAreaWidget extends Widget {
 
     let start = newValue ? newValue.length : 0;
     // Clear unnecessary child widgets.
-    for (let i = start; i < layout.widgets.length; i++) {
-      this.removeChild(i);
+    while (layout.widgets.length > start) {
+      this.removeChild(start);
     }
     if (!newValue) {
       return;
