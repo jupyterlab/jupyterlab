@@ -177,6 +177,7 @@ class LayoutRestorer implements ILayoutRestorer {
    */
   constructor(options: LayoutRestorer.IOptions) {
     this._registry = options.registry;
+    this._shell = options.shell;
     this._state = options.state;
     options.first.then(() => Promise.all(this._promises)).then(() => {
       // Release the promises held in memory.
@@ -281,6 +282,7 @@ class LayoutRestorer implements ILayoutRestorer {
   private _promises: Promise<any>[] = [];
   private _restored = new utils.PromiseDelegate<void>();
   private _registry: CommandRegistry = null;
+  private _shell: ApplicationShell = null;
   private _state: IStateDB = null;
   private _trackers = new Set<string>();
   private _widgets = new Map<string, Widget>();
@@ -313,6 +315,11 @@ namespace LayoutRestorer {
      * The application command registry.
      */
     registry: CommandRegistry;
+
+    /**
+     * The application shell.
+     */
+    shell: ApplicationShell;
 
     /**
      * The state database instance.
