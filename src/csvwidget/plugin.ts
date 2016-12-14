@@ -18,10 +18,6 @@ import {
 } from '../layoutrestorer';
 
 import {
-  IStateDB
-} from '../statedb';
-
-import {
   CSVWidget, CSVWidgetFactory
 } from './widget';
 
@@ -38,7 +34,7 @@ const FACTORY = 'Table';
 export
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.csv-handler',
-  requires: [IDocumentRegistry, IStateDB, ILayoutRestorer],
+  requires: [IDocumentRegistry, ILayoutRestorer],
   activate: activateCSVWidget,
   autoStart: true
 };
@@ -47,22 +43,19 @@ const plugin: JupyterLabPlugin<void> = {
 /**
  * Activate the table widget extension.
  */
-function activateCSVWidget(app: JupyterLab, registry: IDocumentRegistry, state: IStateDB, layout: ILayoutRestorer): void {
+function activateCSVWidget(app: JupyterLab, registry: IDocumentRegistry, layout: ILayoutRestorer): void {
   const factory = new CSVWidgetFactory({
     name: FACTORY,
     fileExtensions: ['.csv'],
     defaultFor: ['.csv']
   });
-  const tracker = new InstanceTracker<CSVWidget>({
-    restore: {
-      state, layout,
-      command: 'file-operations:open',
-      args: widget => ({ path: widget.context.path, factory: FACTORY }),
-      name: widget => widget.context.path,
-      namespace: 'csvwidget',
-      when: app.started,
-      registry: app.commands
-    }
+  const tracker = new InstanceTracker<CSVWidget>({ namespace: 'csvwidget' });
+
+  // Handle state restoration.
+  layout.restore(tracker, {
+    command: 'file-operations:open',
+    args: widget => ({ path: widget.context.path, factory: FACTORY }),
+    name: widget => widget.context.path
   });
 
   registry.addWidgetFactory(factory);

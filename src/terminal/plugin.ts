@@ -34,10 +34,6 @@ import {
 } from '../services';
 
 import {
-  IStateDB
-} from '../statedb';
-
-import {
   TerminalWidget
 } from './index';
 
@@ -60,42 +56,41 @@ export
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.terminal',
   requires: [
-    IServiceManager, IMainMenu, ICommandPalette, IStateDB, ILayoutRestorer
+    IServiceManager, IMainMenu, ICommandPalette, ILayoutRestorer
   ],
   activate: activateTerminal,
   autoStart: true
 };
 
 
-function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB, layout: ILayoutRestorer): void {
+function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, layout: ILayoutRestorer): void {
   // Bail if there are no terminals available.
   if (!services.terminals.isAvailable()) {
     console.log('Disabling terminals plugin because they are not available on the server');
     return;
   }
+
+  const category = 'Terminal';
+  const namespace = 'terminal';
+  const tracker = new InstanceTracker<TerminalWidget>({ namespace });
+
   let { commands, keymap } = app;
-  let newTerminalId = 'terminal:create-new';
-  let increaseTerminalFontSize = 'terminal:increase-font';
-  let decreaseTerminalFontSize = 'terminal:decrease-font';
-  let toggleTerminalTheme = 'terminal:toggle-theme';
-  let openTerminalId = 'terminal:open';
+  let newTerminalId = `${namespace}:create-new`;
+  let increaseTerminalFontSize = `${namespace}:increase-font`;
+  let decreaseTerminalFontSize = `${namespace}:decrease-font`;
+  let toggleTerminalTheme = `${namespace}:toggle-theme`;
+  let openTerminalId = `${namespace}:open`;
   let options = {
     background: 'black',
     color: 'white',
     fontSize: 13
   };
 
-  // Create an instance tracker for all terminal widgets.
-  const tracker = new InstanceTracker<TerminalWidget>({
-    restore: {
-      state, layout,
-      command: newTerminalId,
-      args: widget => ({ name: widget.session.name }),
-      name: widget => widget.session && widget.session.name,
-      namespace: 'terminal',
-      when: app.started,
-      registry: app.commands
-    }
+  // Handle state restoration.
+  layout.restore(tracker, {
+    command: newTerminalId,
+    args: widget => ({ name: widget.session.name }),
+    name: widget => widget.session && widget.session.name
   });
 
   // Sync tracker with currently focused widget.
@@ -176,13 +171,12 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
         app.shell.activateMain(widget.id);
       } else {
         // Otherwise, create a new terminal with a given name.
-        commands.execute(newTerminalId, { name });
+        return commands.execute(newTerminalId, { name });
       }
     }
   });
 
   // Add command palette items.
-  let category = 'Terminal';
   [
     newTerminalId,
     increaseTerminalFontSize,
@@ -192,7 +186,7 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
 
   // Add menu items.
   let menu = new Menu({ commands, keymap });
-  menu.title.label = 'Terminal';
+  menu.title.label = category;
   menu.addItem({ command: newTerminalId });
   menu.addItem({ command: increaseTerminalFontSize });
   menu.addItem({ command: decreaseTerminalFontSize });

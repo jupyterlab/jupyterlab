@@ -19,10 +19,6 @@ import {
 } from '../layoutrestorer';
 
 import {
-  IStateDB
-} from '../statedb';
-
-import {
   IInspector, Inspector
 } from './';
 
@@ -33,7 +29,7 @@ import {
 export
 const plugin: JupyterLabPlugin<IInspector> = {
   id: 'jupyter.services.inspector',
-  requires: [ICommandPalette, IStateDB, ILayoutRestorer],
+  requires: [ICommandPalette, ILayoutRestorer],
   provides: IInspector,
   activate: activateInspector
 };
@@ -95,20 +91,18 @@ class InspectorManager implements IInspector {
 /**
  * Activate the console extension.
  */
-function activateInspector(app: JupyterLab, palette: ICommandPalette, state: IStateDB, layout: ILayoutRestorer): IInspector {
+function activateInspector(app: JupyterLab, palette: ICommandPalette, layout: ILayoutRestorer): IInspector {
   const category = 'Inspector';
   const command = 'inspector:open';
   const label = 'Open Inspector';
   const manager = new InspectorManager();
-  const tracker = new InstanceTracker<Inspector>({
-    restore: {
-      state, layout, command,
-      args: widget => null,
-      name: widget => 'inspector',
-      namespace: 'inspector',
-      when: app.started,
-      registry: app.commands
-    }
+  const tracker = new InstanceTracker<Inspector>({ namespace: 'inspector' });
+
+  // Handle state restoration.
+  layout.restore(tracker, {
+    command,
+    args: () => null,
+    name: () => 'inspector'
   });
 
   function newInspector(): Inspector {

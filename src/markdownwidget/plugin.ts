@@ -22,10 +22,6 @@ import {
 } from '../rendermime';
 
 import {
-  IStateDB
-} from '../statedb';
-
-import {
   MarkdownWidget, MarkdownWidgetFactory
 } from './widget';
 
@@ -52,24 +48,21 @@ const FACTORY = 'Rendered Markdown';
 export
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.rendered-markdown',
-  requires: [IDocumentRegistry, IRenderMime, IStateDB, ILayoutRestorer],
-  activate: (app: JupyterLab, registry: IDocumentRegistry, rendermime: IRenderMime, state: IStateDB, layout: ILayoutRestorer) => {
+  requires: [IDocumentRegistry, IRenderMime, ILayoutRestorer],
+  activate: (app: JupyterLab, registry: IDocumentRegistry, rendermime: IRenderMime, layout: ILayoutRestorer) => {
     const factory = new MarkdownWidgetFactory({
       name: FACTORY,
       fileExtensions: ['.md'],
       rendermime
     });
+    const namespace = 'rendered-markdown';
+    const tracker = new InstanceTracker<MarkdownWidget>({ namespace });
 
-    const tracker = new InstanceTracker<MarkdownWidget>({
-      restore: {
-        state, layout,
-        command: 'file-operations:open',
-        args: widget => ({ path: widget.context.path, factory: FACTORY }),
-        name: widget => widget.context.path,
-        namespace: 'rendered-markdown',
-        when: app.started,
-        registry: app.commands
-      }
+    // Handle state restoration.
+    layout.restore(tracker, {
+      command: 'file-operations:open',
+      args: widget => ({ path: widget.context.path, factory: FACTORY }),
+      name: widget => widget.context.path
     });
 
     let icon = `${PORTRAIT_ICON_CLASS} ${TEXTEDITOR_ICON_CLASS}`;

@@ -22,10 +22,6 @@ import {
 } from '../layoutrestorer';
 
 import {
-  IStateDB
-} from '../statedb';
-
-import {
   FaqModel, FaqWidget
 } from './widget';
 
@@ -36,7 +32,7 @@ import {
 export
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.faq',
-  requires: [ICommandPalette, ICommandLinker, IStateDB, ILayoutRestorer],
+  requires: [ICommandPalette, ICommandLinker, ILayoutRestorer],
   activate: activateFAQ,
   autoStart: true
 };
@@ -45,19 +41,17 @@ const plugin: JupyterLabPlugin<void> = {
 /**
  * Activate the FAQ plugin.
  */
-function activateFAQ(app: JupyterLab, palette: ICommandPalette, linker: ICommandLinker, state: IStateDB, layout: ILayoutRestorer): void {
+function activateFAQ(app: JupyterLab, palette: ICommandPalette, linker: ICommandLinker, layout: ILayoutRestorer): void {
   const category = 'Help';
   const command = 'faq-jupyterlab:show';
   const model = new FaqModel();
-  const tracker = new InstanceTracker<FaqWidget>({
-    restore: {
-      state, layout, command,
-      args: widget => null,
-      name: widget => 'faq',
-      namespace: 'faq',
-      when: app.started,
-      registry: app.commands
-    }
+  const tracker = new InstanceTracker<FaqWidget>({ namespace: 'faq' });
+
+  // Handle state restoration.
+  layout.restore(tracker, {
+    command,
+    args: () => null,
+    name: () => 'faq'
   });
 
   let widget: FaqWidget;

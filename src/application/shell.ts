@@ -314,6 +314,12 @@ defineSignal(ApplicationShell.prototype, 'currentChanged');
 export
 namespace ApplicationShell {
   /**
+   * The areas of the application shell where widgets can reside.
+   */
+  export
+  type Area = 'main' | 'top' | 'left' | 'right';
+
+  /**
    * The options for adding a widget to a side area of the shell.
    */
   export

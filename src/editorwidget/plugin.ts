@@ -22,10 +22,6 @@ import {
 } from '../layoutrestorer';
 
 import {
-  IStateDB
-} from '../statedb';
-
-import {
   IEditorTracker, EditorWidget, EditorWidgetFactory
 } from './widget';
 
@@ -66,9 +62,7 @@ const cmdIds = {
 export
 const plugin: JupyterLabPlugin<IEditorTracker> = {
   id: 'jupyter.services.editor-handler',
-  requires: [
-    IDocumentRegistry, IStateDB, ILayoutRestorer, IEditorServices
-  ],
+  requires: [IDocumentRegistry, ILayoutRestorer, IEditorServices],
   provides: IEditorTracker,
   activate: activateEditorHandler,
   autoStart: true
@@ -78,7 +72,7 @@ const plugin: JupyterLabPlugin<IEditorTracker> = {
 /**
  * Sets up the editor widget
  */
-function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, state: IStateDB, layout: ILayoutRestorer, editorServices: IEditorServices): IEditorTracker {
+function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, layout: ILayoutRestorer, editorServices: IEditorServices): IEditorTracker {
   const factory = new EditorWidgetFactory({
     editorServices,
     factoryOptions: {
@@ -87,16 +81,13 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, sta
       defaultFor: ['*']
     }
   });
-  const tracker = new InstanceTracker<EditorWidget>({
-    restore: {
-      state, layout,
-      command: 'file-operations:open',
-      args: widget => ({ path: widget.context.path, factory: FACTORY }),
-      name: widget => widget.context.path,
-      namespace: 'editor',
-      when: app.started,
-      registry: app.commands
-    }
+  const tracker = new InstanceTracker<EditorWidget>({ namespace: 'editor' });
+
+  // Handle state restoration.
+  layout.restore(tracker, {
+    command: 'file-operations:open',
+    args: widget => ({ path: widget.context.path, factory: FACTORY }),
+    name: widget => widget.context.path
   });
 
   // Sync tracker with currently focused widget.
@@ -143,12 +134,12 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, sta
 
   commands.addCommand(cmdIds.lineNumbers, {
     execute: () => { toggleLineNums(); },
-    label: 'Toggle Line Numbers',
+    label: 'Toggle Line Numbers'
   });
 
   commands.addCommand(cmdIds.lineWrap, {
     execute: () => { toggleLineWrap(); },
-    label: 'Toggle Line Wrap',
+    label: 'Toggle Line Wrap'
   });
 
   commands.addCommand(cmdIds.createConsole, {
@@ -161,9 +152,8 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, sta
         path: widget.context.path,
         preferredLanguage: widget.context.model.defaultKernelLanguage
       };
-      commands.execute('console:create', options).then(id => {
-        sessionIdProperty.set(widget, id);
-      });
+      return commands.execute('console:create', options)
+        .then(id => { sessionIdProperty.set(widget, id); });
     },
     label: 'Create Console for Editor'
   });
@@ -185,9 +175,9 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, sta
       const start = editorModel.getOffsetAt(selection.start);
       const end = editorModel.getOffsetAt(selection.end);
       const code = editorModel.value.text.substring(start, end);
-      commands.execute('console:inject', { id, code });
+      return commands.execute('console:inject', { id, code });
     },
-    label: 'Run Code',
+    label: 'Run Code'
   });
 
   return tracker;

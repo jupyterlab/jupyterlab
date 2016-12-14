@@ -47,10 +47,6 @@ import {
 } from '../services';
 
 import {
-  IStateDB
-} from '../statedb';
-
-import {
   INotebookTracker, NotebookModelFactory, NotebookPanel, NotebookTracker,
   NotebookWidgetFactory, NotebookActions, Notebook
 } from './index';
@@ -135,7 +131,6 @@ const trackerPlugin: JupyterLabPlugin<INotebookTracker> = {
     ICommandPalette,
     IInspector,
     NotebookPanel.IRenderer,
-    IStateDB,
     ILayoutRestorer
   ],
   activate: activateNotebookHandler,
@@ -162,7 +157,7 @@ const rendererPlugin: JupyterLabPlugin<NotebookPanel.IRenderer> = {
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector, renderer: NotebookPanel.IRenderer, state: IStateDB, layout: ILayoutRestorer): INotebookTracker {
+function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector, renderer: NotebookPanel.IRenderer, layout: ILayoutRestorer): INotebookTracker {
 
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
@@ -176,16 +171,14 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     renderer
   });
 
-  const tracker = new NotebookTracker({
-    restore: {
-      state, layout,
-      command: 'file-operations:open',
-      args: widget => ({ path: widget.context.path, factory: FACTORY }),
-      name: widget => widget.context.path,
-      namespace: 'notebook',
-      when: [app.started, services.ready],
-      registry: app.commands
-    }
+  const tracker = new NotebookTracker({ namespace: 'notebook' });
+
+  // Handle state restoration.
+  layout.restore(tracker, {
+    command: 'file-operations:open',
+    args: panel => ({ path: panel.context.path, factory: FACTORY }),
+    name: panel => panel.context.path,
+    when: services.ready
   });
 
   // Sync tracker and set the source of the code inspector.

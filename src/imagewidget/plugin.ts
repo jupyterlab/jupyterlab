@@ -22,10 +22,6 @@ import {
 } from '../layoutrestorer';
 
 import {
-  IStateDB
-} from '../statedb';
-
-import {
   ImageWidget, ImageWidgetFactory
 } from './widget';
 
@@ -47,7 +43,7 @@ const FACTORY = 'Image';
 export
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.image-handler',
-  requires: [IDocumentRegistry, ICommandPalette, IStateDB, ILayoutRestorer],
+  requires: [IDocumentRegistry, ICommandPalette, ILayoutRestorer],
   activate: activateImageWidget,
   autoStart: true
 };
@@ -56,28 +52,21 @@ const plugin: JupyterLabPlugin<void> = {
 /**
  * Activate the image widget extension.
  */
-function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palette: ICommandPalette, state: IStateDB, layout: ILayoutRestorer): void {
-  let zoomInImage = 'image-widget:zoom-in';
-  let zoomOutImage = 'image-widget:zoom-out';
-  let resetZoomImage = 'image-widget:reset-zoom';
-
+function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palette: ICommandPalette, layout: ILayoutRestorer): void {
+  const namespace = 'image-widget';
   const factory = new ImageWidgetFactory({
     name: FACTORY,
     modelName: 'base64',
     fileExtensions: EXTENSIONS,
     defaultFor: EXTENSIONS
   });
+  const tracker = new InstanceTracker<ImageWidget>({ namespace });
 
-  const tracker = new InstanceTracker<ImageWidget>({
-    restore: {
-      state, layout,
-      command: 'file-operations:open',
-      args: widget => ({ path: widget.context.path, factory: FACTORY }),
-      name: widget => widget.context.path,
-      namespace: 'imagewidget',
-      when: app.started,
-      registry: app.commands
-    }
+  // Handle state restoration.
+  layout.restore(tracker, {
+    command: 'file-operations:open',
+    args: widget => ({ path: widget.context.path, factory: FACTORY }),
+    name: widget => widget.context.path
   });
 
   // Sync tracker with currently focused widget.
@@ -92,6 +81,10 @@ function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palet
     widget.context.pathChanged.connect(() => { tracker.save(widget); });
     tracker.add(widget);
   });
+
+  let zoomInImage = `${namespace}:zoom-in`;
+  let zoomOutImage = `${namespace}:zoom-out`;
+  let resetZoomImage = `${namespace}:reset-zoom`;
 
   app.commands.addCommand(zoomInImage, {
     execute: zoomIn,
