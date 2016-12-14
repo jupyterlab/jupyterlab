@@ -340,7 +340,7 @@ class StaticNotebook extends Widget {
       oldValue.metadataChanged.disconnect(this.onMetadataChanged, this);
       oldValue.contentChanged.disconnect(this.onModelContentChanged, this);
       // TODO: reuse existing cell widgets if possible.
-      for (let i = 0; i < layout.widgets.length; i++) {
+      while (layout.widgets.length) {
         this._removeCell(0);
       }
     }
