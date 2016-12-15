@@ -18,7 +18,7 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import * as Xterm
-  from 'xterm';
+  from 'xterm/lib/xterm';
 
 /**
  * The class name added to a terminal widget.
