@@ -8,6 +8,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  IIterator
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   JSONObject
 } from 'phosphor/lib/algorithm/json';
 
@@ -177,7 +181,6 @@ class LayoutRestorer implements ILayoutRestorer {
    */
   constructor(options: LayoutRestorer.IOptions) {
     this._registry = options.registry;
-    this._shell = options.shell;
     this._state = options.state;
     options.first.then(() => Promise.all(this._promises)).then(() => {
       // Release the promises held in memory.
@@ -282,7 +285,6 @@ class LayoutRestorer implements ILayoutRestorer {
   private _promises: Promise<any>[] = [];
   private _restored = new utils.PromiseDelegate<void>();
   private _registry: CommandRegistry = null;
-  private _shell: ApplicationShell = null;
   private _state: IStateDB = null;
   private _trackers = new Set<string>();
   private _widgets = new Map<string, Widget>();
@@ -317,11 +319,6 @@ namespace LayoutRestorer {
     registry: CommandRegistry;
 
     /**
-     * The application shell.
-     */
-    shell: ApplicationShell;
-
-    /**
      * The state database instance.
      */
     state: IStateDB;
@@ -336,6 +333,37 @@ namespace LayoutRestorer {
      * The current widget that has application focus.
      */
     currentWidget: Widget;
+
+    /**
+     * The left area of the user interface.
+     */
+    leftArea: ISideArea;
+
+    /**
+     * The right area of the user interface.
+     */
+    rightArea: ISideArea;
+  }
+
+  /**
+   * The restorable description of a sidebar in the user interface.
+   */
+  export
+  interface ISideArea {
+    /**
+     * A flag denoting whether the sidebar has been collapsed.
+     */
+    collapsed: boolean;
+
+    /**
+     * The current widget that has side area focus.
+     */
+    currentWidget: Widget;
+
+    /**
+     * The collection of widgets held by the sidebar.
+     */
+    widgets: IIterator<Widget>;
   }
 }
 

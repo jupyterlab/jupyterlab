@@ -26,15 +26,15 @@ const plugin: JupyterLabPlugin<ILayoutRestorer> = {
     const first = app.started;
     const registry = app.commands;
     const shell = app.shell;
-    let layout = new LayoutRestorer({ first, registry, shell, state });
+    let layout = new LayoutRestorer({ first, registry, state });
     // Activate widgets that have been restored if necessary.
     layout.activated.connect((sender, id) => { shell.activateMain(id); });
     // After restoration is complete, listen to the shell for updates.
-    layout.restored.then(() => {
-      shell.currentChanged.connect((sender, args) => {
-        layout.save({ currentWidget: args.newValue });
-      });
-    });
+    // layout.restored.then(() => {
+    //   shell.currentChanged.connect((sender, args) => {
+    //     layout.save({ currentWidget: args.newValue });
+    //   });
+    // });
     return layout;
   },
   autoStart: true,
