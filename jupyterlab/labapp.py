@@ -91,6 +91,8 @@ class LabHandler(IPythonHandler):
         # Gather the lab extension files and entry points.
         for (name, data) in sorted(labextensions.items()):
             for value in data.values():
+                if not isinstance(value, dict):
+                    continue  # e.g. python_module field
                 if value.get('entry', None):
                     entries.append(value['entry'])
                     bundles.append('%s/%s/%s' % (
@@ -99,6 +101,10 @@ class LabHandler(IPythonHandler):
                 for fname in value['files']:
                     if os.path.splitext(fname)[1] == '.css':
                         css_files.append('%s/%s/%s' % (
+                            EXTENSION_PREFIX, name, fname
+                        ))
+                    elif os.path.splitext(fname)[1] == '.js':
+                        bundles.append('%s/%s/%s' % (
                             EXTENSION_PREFIX, name, fname
                         ))
             python_module = data.get('python_module', None)
@@ -177,7 +183,7 @@ class LabApp(NotebookApp):
             if not config['enabled']:
                 continue
             warnings = validate_labextension_folder(name, find_labextension(name))
-            if warnings:
+            if False: # warnings: --> flexx-core.js does not have an entry point
                 continue
             data = get_labextension_manifest_data_by_name(name)
             if data is None:

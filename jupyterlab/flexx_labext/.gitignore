@@ -1,0 +1,6 @@
+*.bundle.*
+lib/
+static/
+MANIFEST
+node_modules/
+*.egg-info/
