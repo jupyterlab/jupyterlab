@@ -54,7 +54,7 @@ describe('notebook/notebook/trust', () => {
       trustNotebook(null).then(() => { done(); });
     });
 
-    it('should bail if all of the cells are trusted', (done) => {
+    it('should show a dialog if all cells are trusted', (done) => {
       let model = new NotebookModel();
       model.fromJSON(DEFAULT_CONTENT);
       for (let i = 0; i < model.cells.length; i++) {
@@ -63,6 +63,7 @@ describe('notebook/notebook/trust', () => {
         cursor.setValue(true);
       }
       trustNotebook(model).then(() => { done(); });
+      acceptDialog();
     });
 
   });
