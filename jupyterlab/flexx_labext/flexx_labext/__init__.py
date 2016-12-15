@@ -10,6 +10,7 @@ we would not need the server extension anymore.
 Also we need to jump through hoops to make the extsion work, because
 the extension system is rather oriented for extensions written in Typescript.
 """
+import errno
 import os
 
 from flexx import app, event
@@ -21,7 +22,11 @@ flexx_app_name = 'jlab'
 
 MANIFEST = """{
 "name": "flexx_labext",
-"files": ["flexx-core.js"]
+"entry": "flexx@1.0/dummy.js",
+"files": ["flexx-core.js"],
+"modules": {
+    "flexx@1.0/dummy.js": []
+}
 }"""
 
 
@@ -40,9 +45,17 @@ def _jupyter_labextension_paths():
     
     # Write flexx bootstap js
     code = app.assets.get_asset('flexx-core.js').to_string()
-    with open(os.path.join(THIS_DIR, 'static', 'flexx-core.js'), 'wb') as f:
+    path = os.path.join(THIS_DIR, 'static')
+    try:
+        os.makedirs(path)
+    except OSError as exc:  # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
+    with open(os.path.join(path, 'flexx-core.js'), 'wb') as f:
         f.write(code.encode('utf-8'))
-    with open(os.path.join(THIS_DIR, 'static', 'flexx_labext.MANIFEST'), 'wb') as f:
+    with open(os.path.join(path, 'flexx_labext.manifest'), 'wb') as f:
         f.write(MANIFEST.encode('utf-8'))
     
     return [{

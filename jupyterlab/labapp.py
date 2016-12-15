@@ -103,10 +103,6 @@ class LabHandler(IPythonHandler):
                         css_files.append('%s/%s/%s' % (
                             EXTENSION_PREFIX, name, fname
                         ))
-                    elif os.path.splitext(fname)[1] == '.js':
-                        bundles.append('%s/%s/%s' % (
-                            EXTENSION_PREFIX, name, fname
-                        ))
             python_module = data.get('python_module', None)
             if python_module:
                 try:
@@ -183,7 +179,7 @@ class LabApp(NotebookApp):
             if not config['enabled']:
                 continue
             warnings = validate_labextension_folder(name, find_labextension(name))
-            if False: # warnings: --> flexx-core.js does not have an entry point
+            if warnings:
                 continue
             data = get_labextension_manifest_data_by_name(name)
             if data is None:
