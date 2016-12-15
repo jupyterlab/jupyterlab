@@ -11,8 +11,7 @@
   "dependencies": {
     "@jupyterlab/services": "^0.34.2",
     "jupyterlab": "file:../..",
-    "phosphor": "^0.7.0",
-    "xterm": "^1.1.3"
+    "phosphor": "^0.7.0"
   },
   "devDependencies": {
     "css-loader": "^0.23.1",

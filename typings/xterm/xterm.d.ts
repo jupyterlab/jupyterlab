@@ -66,6 +66,6 @@ declare namespace Terminal {
 }
 
 
-declare module 'xterm' {
+declare module 'xterm/lib/xterm' {
   export = Terminal;
 }
