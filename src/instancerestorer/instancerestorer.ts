@@ -50,27 +50,27 @@ import {
 
 /* tslint:disable */
 /**
- * The layout restorer token.
+ * The instance restorer token.
  */
 export
-const ILayoutRestorer = new Token<ILayoutRestorer>('jupyter.services.layout-restorer');
+const IInstanceRestorer = new Token<IInstanceRestorer>('jupyter.services.instance-restorer');
 /* tslint:enable */
 
 
 /**
- * A static class that restores the layout of the application when it reloads.
+ * A static class that restores the widgets of the application when it reloads.
  */
 export
-interface ILayoutRestorer {
+interface IInstanceRestorer {
   /**
-   * A promise resolved when the layout restorer is ready to receive signals.
+   * A promise resolved when the instance restorer is ready to receive signals.
    */
   restored: Promise<void>;
 
   /**
-   * Add a widget to be tracked by the layout restorer.
+   * Add a widget to be tracked by the instance restorer.
    */
-  add(widget: Widget, name: string, options?: ILayoutRestorer.IAddOptions): void;
+  add(widget: Widget, name: string, options?: IInstanceRestorer.IAddOptions): void;
 
   /**
    * Restore the widgets of a particular instance tracker.
@@ -79,17 +79,17 @@ interface ILayoutRestorer {
    *
    * @param options - The restoration options.
    */
-  restore(tracker: InstanceTracker<any>, options: ILayoutRestorer.IRestoreOptions<any>): void;
+  restore(tracker: InstanceTracker<any>, options: IInstanceRestorer.IRestoreOptions<any>): void;
 }
 
 
 /**
- * A namespace for layout restorers.
+ * A namespace for instance restorers.
  */
 export
-namespace ILayoutRestorer {
+namespace IInstanceRestorer {
   /**
-   * Configuration options for adding a widget to a layout restorer.
+   * Configuration options for adding a widget to an instance restorer.
    */
   export
   interface IAddOptions extends JSONObject {
@@ -134,39 +134,39 @@ namespace ILayoutRestorer {
 /**
  * The state database key for restorer data.
  */
-const KEY = 'layout-restorer:data';
+const KEY = 'instance-restorer:data';
 
 
 /**
- * The default implementation of a layout restorer.
+ * The default implementation of an instance restorer.
  *
  * #### Notes
- * The lifecycle for state and layout restoration is subtle. The sequence of
- * events is as follows:
+ * The lifecycle for state restoration is subtle. The sequence of events is:
  *
- * 1. The layout restorer plugin is instantiated.
+ * 1. The instance restorer plugin is instantiated.
  *
- * 2. Other plugins that care about state and layout restoration require
- *    the layout restorer as a dependency.
+ * 2. Other plugins that care about state restoration require the instance
+ *    restorer as a dependency.
  *
  * 3. As each load-time plugin initializes (which happens before the lab
- *    application has `started`), it instructs the layout restorer whether
+ *    application has `started`), it instructs the instance restorer whether
  *    the restorer ought to `restore` its state.
  *
  * 4. After all the load-time plugins have finished initializing, the lab
  *    application `started` promise will resolve. This is the `first`
- *    promise that the layout restorer waits for. By this point, all of the
- *    plugins that care about layout restoration will have instructed the
- *    layout restorer to `restore` their state.
+ *    promise that the instance restorer waits for. By this point, all of the
+ *    plugins that care about restoration will have instructed the instance
+ *    restorer to `restore` their state.
  *
- * 5. The layout restorer will then instruct each plugin's instance tracker
+ * 5. The instance restorer will then instruct each plugin's instance tracker
  *    to restore its state and reinstantiate whichever widgets it wants.
  *
  * 6. As each instance finishes restoring, it resolves the promise that was
- *    made to the layout restorer (in step 5).
+ *    made to the instance restorer (in step 5).
  *
  * 7. After all of the promises that the restorer is awaiting have resolved,
- *    the restorer then reconstructs the saved layout.
+ *    the restorer then resolves its `restored` promise allowing the application
+ *    shell to rehydrate its former layout.
  *
  * Of particular note are steps 5 and 6: since state restoration of plugins
  * is accomplished by executing commands, the command that is used to
@@ -175,11 +175,11 @@ const KEY = 'layout-restorer:data';
  * tracker.
  */
 export
-class LayoutRestorer implements ILayoutRestorer {
+class InstanceRestorer implements IInstanceRestorer {
   /**
-   * Create a layout restorer.
+   * Create an instance restorer.
    */
-  constructor(options: LayoutRestorer.IOptions) {
+  constructor(options: InstanceRestorer.IOptions) {
     this._registry = options.registry;
     this._state = options.state;
     options.first.then(() => Promise.all(this._promises)).then(() => {
@@ -199,16 +199,16 @@ class LayoutRestorer implements ILayoutRestorer {
   readonly activated: ISignal<this, string>;
 
   /**
-   * A promise resolved when the layout restorer is ready to receive signals.
+   * A promise resolved when the instance restorer is ready to receive signals.
    */
   get restored(): Promise<void> {
     return this._restored.promise;
   }
 
   /**
-   * Add a widget to be tracked by the layout restorer.
+   * Add a widget to be tracked by the instance restorer.
    */
-  add(widget: Widget, name: string, options: ILayoutRestorer.IAddOptions = { area: 'main' }): void {
+  add(widget: Widget, name: string, options: IInstanceRestorer.IAddOptions = { area: 'main' }): void {
     Private.nameProperty.set(widget, name);
     this._widgets.set(name, widget);
     widget.disposed.connect(() => { this._widgets.delete(name); });
@@ -221,15 +221,15 @@ class LayoutRestorer implements ILayoutRestorer {
    *
    * @param options - The restoration options.
    */
-  restore(tracker: InstanceTracker<Widget>, options: ILayoutRestorer.IRestoreOptions<Widget>): void {
+  restore(tracker: InstanceTracker<Widget>, options: IInstanceRestorer.IRestoreOptions<Widget>): void {
     if (!this._promises) {
-      console.warn('restore can only be called before `first` has resolved');
+      console.warn('restore() can only be called before `first` has resolved.');
       return;
     }
 
     let { namespace } = tracker;
     if (this._trackers.has(namespace)) {
-      console.warn(`a tracker namespaced ${namespace} was already restored`);
+      console.warn(`A tracker namespaced ${namespace} was already restored.`);
       return;
     }
     this._trackers.add(namespace);
@@ -237,8 +237,8 @@ class LayoutRestorer implements ILayoutRestorer {
     let { args, command, name, when } = options;
     this._promises.push(tracker.restore({
       args, command, name, when,
-      layout: this,
       registry: this._registry,
+      restorer: this,
       state: this._state
     }));
   }
@@ -246,9 +246,10 @@ class LayoutRestorer implements ILayoutRestorer {
   /**
    * Save the layout state for the application.
    */
-  save(data: LayoutRestorer.IRestorable): Promise<void> {
+  save(data: InstanceRestorer.ILayout): Promise<void> {
     // If there are promises that are unresolved, bail.
     if (this._promises) {
+      console.warn('save() was called prematurely.');
       return Promise.resolve(void 0);
     }
     let promise: Promise<void>;
@@ -291,22 +292,22 @@ class LayoutRestorer implements ILayoutRestorer {
 }
 
 
-// Define the signals for the `LayoutRestorer` class.
-defineSignal(LayoutRestorer.prototype, 'activated');
+// Define the signals for the `InstanceRestorer` class.
+defineSignal(InstanceRestorer.prototype, 'activated');
 
 
 /**
- * A namespace for `LayoutRestorer` statics.
+ * A namespace for `InstanceRestorer` statics.
  */
 export
-namespace LayoutRestorer {
+namespace InstanceRestorer {
   /**
-   * The configuration options for layout restorer instantiation.
+   * The configuration options for instance restorer instantiation.
    */
   export
   interface IOptions {
     /**
-     * The initial promise that has to be resolved before layout restoration.
+     * The initial promise that has to be resolved before restoration.
      *
      * #### Notes
      * This promise should equal the JupyterLab application `started` notifier.
@@ -325,10 +326,10 @@ namespace LayoutRestorer {
   }
 
   /**
-   * A restorable user interface.
+   * A description of the application's user interface layout.
    */
   export
-  interface IRestorable {
+  interface ILayout {
     /**
      * The current widget that has application focus.
      */

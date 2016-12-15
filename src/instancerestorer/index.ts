@@ -4,5 +4,5 @@
 |----------------------------------------------------------------------------*/
 
 export {
-  ILayoutRestorer
-} from './layoutrestorer';
+  IInstanceRestorer
+} from './instancerestorer';

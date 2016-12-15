@@ -35,7 +35,7 @@ let mods: JupyterLab.IPluginModule[] = [
   require('../../lib/inspector/plugin'),
   require('../../lib/landing/plugin'),
   require('../../lib/launcher/plugin'),
-  require('../../lib/layoutrestorer/plugin'),
+  require('../../lib/instancerestorer/plugin'),
   require('../../lib/mainmenu/plugin'),
   require('../../lib/markdownwidget/plugin'),
   require('../../lib/notebook/plugin'),

@@ -34,8 +34,8 @@ import {
 } from '../iframe';
 
 import {
-  ILayoutRestorer
-} from '../layoutrestorer';
+  IInstanceRestorer
+} from '../instancerestorer';
 
 import {
   IMainMenu
@@ -107,7 +107,7 @@ const RESOURCES = [
  */
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.help-handler',
-  requires: [IMainMenu, ICommandPalette, ILayoutRestorer],
+  requires: [IMainMenu, ICommandPalette, IInstanceRestorer],
   activate: activateHelpHandler,
   autoStart: true
 };
@@ -126,7 +126,7 @@ export default plugin;
  *
  * returns A promise that resolves when the extension is activated.
  */
-function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, layout: ILayoutRestorer): void {
+function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, restorer: IInstanceRestorer): void {
   let iframe: IFrame = null;
   const category = 'Help';
   const namespace = 'help-doc';
@@ -135,7 +135,7 @@ function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICom
   const tracker = new InstanceTracker<IFrame>({ namespace });
 
   // Handle state restoration.
-  layout.restore(tracker, {
+  restorer.restore(tracker, {
     command,
     args: widget => ({ isHidden: widget.isHidden, url: widget.url }),
     name: widget => namespace

@@ -22,8 +22,8 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  ILayoutRestorer
-} from '../layoutrestorer';
+  IInstanceRestorer
+} from '../instancerestorer';
 
 import {
   IStateDB
@@ -72,13 +72,13 @@ interface IInstanceTracker<T extends Widget> {
    *
    * #### Notes
    * Any widgets injected into an instance tracker will not have their state
-   * or layout saved by the tracker. The primary use case for widget injection
-   * is for a plugin that offers a sub-class of an extant plugin to have its
-   * instances share the same commands as the parent plugin (since most relevant
-   * commands will use the `currentWidget` of the parent plugin's instance
-   * tracker). In this situation, the sub-class plugin may well have its own
-   * instance tracker for layout and state restoration in addition to injecting
-   * its widgets into the parent plugin's instance tracker.
+   * saved by the tracker. The primary use case for widget injection is for a
+   * plugin that offers a sub-class of an extant plugin to have its instances
+   * share the same commands as the parent plugin (since most relevant commands
+   * will use the `currentWidget` of the parent plugin's instance tracker). In
+   * this situation, the sub-class plugin may well have its own instance tracker
+   * for layout and state restoration in addition to injecting its widgets into
+   * the parent plugin's instance tracker.
    */
   inject(widget: T): void;
 }
@@ -152,7 +152,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    *
    * @param widget - The widget being added.
    */
-  add(widget: T, options: ILayoutRestorer.IAddOptions = { area: 'main' }): void {
+  add(widget: T, options: IInstanceRestorer.IAddOptions = { area: 'main' }): void {
     if (this._widgets.has(widget)) {
       console.warn(`${widget.id} already exists in the tracker.`);
       return;
@@ -163,7 +163,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
 
     // Handle widget state restoration.
     if (!injected && this._restore) {
-      let { layout, state } = this._restore;
+      let { restorer, state } = this._restore;
       let widgetName = this._restore.name(widget);
 
       if (widgetName) {
@@ -176,8 +176,8 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
 
         state.save(name, { data, metadata });
 
-        if (layout) {
-          layout.add(widget, name, options);
+        if (restorer) {
+          restorer.add(widget, name, options);
         }
       }
     }
@@ -256,13 +256,13 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    *
    * #### Notes
    * Any widgets injected into an instance tracker will not have their state
-   * or layout saved by the tracker. The primary use case for widget injection
-   * is for a plugin that offers a sub-class of an extant plugin to have its
-   * instances share the same commands as the parent plugin (since most relevant
-   * commands will use the `currentWidget` of the parent plugin's instance
-   * tracker). In this situation, the sub-class plugin may well have its own
-   * instance tracker for layout and state restoration in addition to injecting
-   * its widgets into the parent plugin's instance tracker.
+   * saved by the tracker. The primary use case for widget injection is for a
+   * plugin that offers a sub-class of an extant plugin to have its instances
+   * share the same commands as the parent plugin (since most relevant commands
+   * will use the `currentWidget` of the parent plugin's instance tracker). In
+   * this situation, the sub-class plugin may well have its own instance tracker
+   * for layout and state restoration in addition to injecting its widgets into
+   * the parent plugin's instance tracker.
    */
   inject(widget: T): void {
     Private.injectedProperty.set(widget, true);
@@ -287,8 +287,8 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    *
    * #### Notes
    * This function should almost never be invoked by client code. Its primary
-   * use case is to be invoked by a layout restorer plugin that handles multiple
-   * instance trackers and, when ready, asks them each to restore their
+   * use case is to be invoked by an instance restorer plugin that handles
+   * multiple instance trackers and, when ready, asks them each to restore their
    * respective widgets.
    */
   restore(options: InstanceTracker.IRestoreOptions<T>): Promise<any> {
@@ -414,11 +414,11 @@ namespace InstanceTracker {
    * The state restoration configuration options.
    */
   export
-  interface IRestoreOptions<T extends Widget> extends ILayoutRestorer.IRestoreOptions<T> {
+  interface IRestoreOptions<T extends Widget> extends IInstanceRestorer.IRestoreOptions<T> {
     /*
-     * The layout restorer to use to re-arrange restored tabs.
+     * The instance restorer to use to re-arrange restored tabs.
      */
-    layout: ILayoutRestorer;
+    restorer: IInstanceRestorer;
 
     /**
      * The command registry which holds the restore command.
@@ -450,7 +450,7 @@ namespace Private {
    * An attached property for a widget's restore metadata in the state database.
    */
   export
-  const metadataProperty = new AttachedProperty<Widget, ILayoutRestorer.IAddOptions>({
+  const metadataProperty = new AttachedProperty<Widget, IInstanceRestorer.IAddOptions>({
     name: 'metadata'
   });
 

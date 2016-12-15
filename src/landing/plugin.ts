@@ -18,8 +18,8 @@ import {
 } from '../filebrowser';
 
 import {
-  ILayoutRestorer
-} from '../layoutrestorer';
+  IInstanceRestorer
+} from '../instancerestorer';
 
 import {
   IServiceManager
@@ -39,7 +39,7 @@ const LANDING_CLASS = 'jp-Landing';
  */
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.landing',
-  requires: [IPathTracker, ICommandPalette, IServiceManager, ILayoutRestorer],
+  requires: [IPathTracker, ICommandPalette, IServiceManager, IInstanceRestorer],
   activate: activateLanding,
   autoStart: true
 };
@@ -54,14 +54,14 @@ export default plugin;
 /**
  * Activate the landing plugin.
  */
-function activateLanding(app: JupyterLab, pathTracker: IPathTracker, palette: ICommandPalette, services: IServiceManager, layout: ILayoutRestorer): void {
+function activateLanding(app: JupyterLab, pathTracker: IPathTracker, palette: ICommandPalette, services: IServiceManager, restorer: IInstanceRestorer): void {
   const category = 'Help';
   const command = 'jupyterlab-landing:show';
   const model = new LandingModel(services.terminals.isAvailable());
   const tracker = new InstanceTracker<LandingWidget>({ namespace: 'landing' });
 
   // Handle state restoration.
-  layout.restore(tracker, {
+  restorer.restore(tracker, {
     command,
     args: () => null,
     name: () => 'landing'
@@ -102,7 +102,7 @@ function activateLanding(app: JupyterLab, pathTracker: IPathTracker, palette: IC
   palette.addItem({ category, command });
 
   // Only create a landing page if there are no other tabs open.
-  layout.restored.then(() => {
+  restorer.restored.then(() => {
     if (app.shell.mainAreaIsEmpty) {
       app.commands.execute(command, void 0);
     }

@@ -14,8 +14,8 @@ import {
 } from '../common/instancetracker';
 
 import {
-  ILayoutRestorer
-} from '../layoutrestorer';
+  IInstanceRestorer
+} from '../instancerestorer';
 
 import {
   AboutModel, AboutWidget
@@ -28,7 +28,7 @@ const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.about',
   activate: activateAbout,
   autoStart: true,
-  requires: [ICommandPalette, ILayoutRestorer]
+  requires: [ICommandPalette, IInstanceRestorer]
 };
 
 
@@ -38,14 +38,14 @@ const plugin: JupyterLabPlugin<void> = {
 export default plugin;
 
 
-function activateAbout(app: JupyterLab, palette: ICommandPalette, layout: ILayoutRestorer): void {
+function activateAbout(app: JupyterLab, palette: ICommandPalette, restorer: IInstanceRestorer): void {
   const namespace = 'about-jupyterlab';
   const model = new AboutModel();
   const command = `${namespace}:show`;
   const category = 'Help';
   const tracker = new InstanceTracker<AboutWidget>({ namespace });
 
-  layout.restore(tracker, {
+  restorer.restore(tracker, {
     command,
     args: () => null,
     name: () => 'about'
