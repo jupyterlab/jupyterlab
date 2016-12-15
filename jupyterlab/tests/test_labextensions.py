@@ -12,6 +12,7 @@ from os.path import join as pjoin
 from subprocess import check_call
 from traitlets.tests.utils import check_help_all_output
 from unittest import TestCase
+from tornado import web
 
 try:
     from unittest.mock import patch
@@ -28,6 +29,7 @@ from jupyterlab.labextensions import (install_labextension, check_labextension,
     enable_labextension_python, disable_labextension_python,
     find_labextension, validate_labextension_folder,
     get_labextension_config_python,
+    init_labextension_python,
     get_labextension_manifest_data_by_name,
     get_labextension_manifest_data_by_folder,
     _read_config_data
@@ -263,6 +265,10 @@ class TestInstallLabExtension(TestCase):
             @staticmethod
             def _jupyter_labextension_config():
                 return dict(mockextension_foo=1)
+
+            @staticmethod
+            def _jupyter_labextension_init(app):
+                app._was_mocked = True
         
         import sys
         sys.modules['mockextension'] = mock
@@ -327,6 +333,16 @@ class TestInstallLabExtension(TestCase):
 
         config = get_labextension_config_python('mockextension')
         assert config['mockextension_foo'] == 1
+
+    def test_labextensionpy_init(self):
+        self._inject_mock_extension()
+
+        install_labextension_python('mockextension', user=True)
+        enable_labextension_python('mockextension')
+
+        app = web.Application()
+        init_labextension_python('mockextension', app)
+        assert app._was_mocked
 
     def test_get_labextension_manifest_data_by_name(self):
         self._inject_mock_extension()

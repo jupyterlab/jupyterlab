@@ -566,18 +566,33 @@ def get_labextension_manifest_data_by_name(name):
 
 
 def get_labextension_config_python(module):
-    """Get the labextension configuration data associated  with a Python module. 
+    """Get the labextension configuration data associated with a Python module. 
 
     Parameters
     -----------
     module : str
-    Importable Python module exposing the
+    Importable Python module which may expose the
     magic-named `_jupyter_labextension_config` function
     """
     m = import_item(module)
     if not hasattr(m, '_jupyter_labextension_config'):
         return {}
     return m._jupyter_labextension_config()
+
+
+def init_labextension_python(module, webapp):
+    """Initialize a lab extension associated with a Python module.
+
+    Parameters
+    -----------
+    module : str
+    Importable Python module which may expose the
+    magic-named `_jupyter_labextension_init` function
+    """
+    m = import_item(module)
+    if not hasattr(m, '_jupyter_labextension_init'):
+        return {}
+    return m._jupyter_labextension_init(webapp)
 
 
 #----------------------------------------------------------------------

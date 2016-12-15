@@ -72,4 +72,14 @@ def _jupyter_labextension_config():
   let myVar = utils.getConfigOption('my_fancy_module_variable');
   """
   return dict(my_fancy_module_variable=1)
+
+
+# Jupyter Lab Extension initialize.
+def _jupyter_labextension_init(webapp):
+  """Initialize the extension.
+
+  This is called when the application has started, and allows for a Python
+  based lab extension to add handlers to the web app.
+  """
+  print(webapp.settings['base_url'])
 ```
