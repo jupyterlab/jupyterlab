@@ -22,12 +22,24 @@ flexx_app_name = 'jlab'
 
 MANIFEST = """{
 "name": "flexx_labext",
-"entry": "flexx@1.0/dummy.js",
+"entry": "flexx@1.0.0/dummy.js",
 "files": ["flexx-core.js"],
 "modules": {
-    "flexx@1.0/dummy.js": []
+    "flexx@1.0.0/dummy.js": []
 }
 }"""
+
+
+ENTRY = """
+/** START DEFINE BLOCK for flexx@1.0.0/dummy.js **/
+jupyter.define('flexx@1.0.0/dummy.js', function (module) {
+    module.exports = {
+       id: 'flexx-entry',
+       activate: function () { }
+    };
+});
+/** END DEFINE BLOCK for flexx@1.0.0/dummy.js **/
+"""
 
 
 # # These will naturally NOT be in jupyterlab eventually
@@ -44,7 +56,7 @@ def _jupyter_labextension_paths():
     print('inside Flexx _jupyter_labextension_paths')
     
     # Write flexx bootstap js
-    code = app.assets.get_asset('flexx-core.js').to_string()
+    code = ENTRY + app.assets.get_asset('flexx-core.js').to_string()
     path = os.path.join(THIS_DIR, 'static')
     try:
         os.makedirs(path)
