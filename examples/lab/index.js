@@ -11,43 +11,44 @@ require('jupyterlab/lib/default-theme/index.css');
 
 
 var mods = [
-  require('../../lib/about/plugin'),
-  require('../../lib/application/plugin'),
-  require('../../lib/clipboard/plugin'),
-  require('../../lib/codemirror/plugin'),
-  require('../../lib/commandlinker/plugin'),
-  require('../../lib/commandpalette/plugin'),
-  require('../../lib/console/plugin'),
-  require('../../lib/csvwidget/plugin'),
-  require('../../lib/docmanager/plugin'),
-  require('../../lib/docregistry/plugin'),
-  require('../../lib/editorwidget/plugin'),
-  require('../../lib/faq/plugin'),
-  require('../../lib/filebrowser/plugin'),
-  require('../../lib/help/plugin'),
-  require('../../lib/imagewidget/plugin'),
-  require('../../lib/inspector/plugin'),
-  require('../../lib/landing/plugin'),
-  require('../../lib/launcher/plugin'),
-  require('../../lib/layoutrestorer/plugin'),
-  require('../../lib/mainmenu/plugin'),
-  require('../../lib/markdownwidget/plugin'),
-  require('../../lib/notebook/plugin'),
-  require('../../lib/rendermime/plugin'),
-  require('../../lib/running/plugin'),
-  require('../../lib/services/plugin'),
-  require('../../lib/shortcuts/plugin'),
-  require('../../lib/statedb/plugin'),
-  require('../../lib/terminal/plugin')
+  require('jupyterlab/lib/about/plugin'),
+  require('jupyterlab/lib/application/plugin'),
+  require('jupyterlab/lib/clipboard/plugin'),
+  require('jupyterlab/lib/codemirror/plugin'),
+  require('jupyterlab/lib/commandlinker/plugin'),
+  require('jupyterlab/lib/commandpalette/plugin'),
+  require('jupyterlab/lib/console/plugin'),
+  require('jupyterlab/lib/csvwidget/plugin'),
+  require('jupyterlab/lib/docmanager/plugin'),
+  require('jupyterlab/lib/docregistry/plugin'),
+  require('jupyterlab/lib/editorwidget/plugin'),
+  require('jupyterlab/lib/faq/plugin'),
+  require('jupyterlab/lib/filebrowser/plugin'),
+  require('jupyterlab/lib/help/plugin'),
+  require('jupyterlab/lib/imagewidget/plugin'),
+  require('jupyterlab/lib/inspector/plugin'),
+  require('jupyterlab/lib/landing/plugin'),
+  require('jupyterlab/lib/launcher/plugin'),
+  require('jupyterlab/lib/layoutrestorer/plugin'),
+  require('jupyterlab/lib/mainmenu/plugin'),
+  require('jupyterlab/lib/markdownwidget/plugin'),
+  require('jupyterlab/lib/notebook/plugin'),
+  require('jupyterlab/lib/rendermime/plugin'),
+  require('jupyterlab/lib/running/plugin'),
+  require('jupyterlab/lib/services/plugin'),
+  require('jupyterlab/lib/shortcuts/plugin'),
+  require('jupyterlab/lib/statedb/plugin'),
+  require('jupyterlab/lib/terminal/plugin')
 ];
 
 
-var lab = new JupyterLab();
-var plugins = [];
-for (var i = 0; i < mods.length; i++) {
-  var mod = mods[i];
-  plugins = plugins.concat(mod.default);
+window.onload = function() {
+  var plugins = [];
+  for (var i = 0; i < mods.length; i++) {
+    var mod = mods[i];
+    plugins = plugins.concat(mod.default);
+  }
+  var lab = new JupyterLab();
+  lab.registerPlugins(plugins);
+  lab.start();
 }
-lab.registerPlugins(plugins);
-
-window.onload = function() { lab.start(); }
