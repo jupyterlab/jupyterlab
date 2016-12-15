@@ -50,7 +50,7 @@ class LabHandler(IPythonHandler):
         static_prefix = ujoin(self.base_url, PREFIX)
         labextensions = self.application.labextensions
         data = get_labextension_manifest_data_by_folder(BUILT_FILES)
-        if 'main' not in data or 'extensions' not in data:
+        if 'main' not in data:
             msg = ('JupyterLab build artifacts not detected, please see ' + 
                    'CONTRIBUTING.md for build instructions.')
             self.log.error(msg)
@@ -63,12 +63,12 @@ class LabHandler(IPythonHandler):
 
         main = data['main']['entry']
         bundles = [ujoin(static_prefix, name + '.bundle.js') for name in
-                   ['loader', 'main', 'extensions']]
-        entries = [data['extensions']['entry']]
+                   ['loader', 'main']]
+        entries = []
 
         # Only load CSS files if they exist.
         css_files = []
-        for css_file in ['main.css', 'extensions.css']:
+        for css_file in ['main.css']:
             if os.path.isfile(os.path.join(BUILT_FILES, css_file)):
                 css_files.append(ujoin(static_prefix, css_file))
 

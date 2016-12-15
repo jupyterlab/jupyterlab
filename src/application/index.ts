@@ -80,6 +80,19 @@ class JupyterLab extends Application<ApplicationShell> {
   }
 
   /**
+   * Register plugins from a plugin module.
+   */
+  registerPluginModule(mod: JupyterLab.IPluginModule): void {
+    let data = mod.default;
+    if (!Array.isArray(data)) {
+      data = [data];
+    }
+    for (let item of data) {
+      this.registerPlugin(item);
+    }
+  }
+
+  /**
    * Create the application shell for the JupyterLab application.
    */
   protected createShell(): ApplicationShell {
@@ -133,5 +146,17 @@ namespace JupyterLab {
      * The git description of the JupyterLab application.
      */
     readonly gitDescription: string;
+  }
+
+  /**
+   * The interface for a module that exports a plugin or plugins as
+   * the default value.
+   */
+  export
+  interface IPluginModule {
+    /**
+     * The default export.
+     */
+    default: JupyterLabPlugin<any> | JupyterLabPlugin<any>[];
   }
 }
