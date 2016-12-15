@@ -155,6 +155,13 @@ const rendererPlugin: JupyterLabPlugin<NotebookPanel.IRenderer> = {
 
 
 /**
+ * Export the plugins as default.
+ */
+const plugins: JupyterLabPlugin<any>[] = [rendererPlugin, trackerPlugin];
+export default plugins;
+
+
+/**
  * Activate the notebook handler extension.
  */
 function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector, renderer: NotebookPanel.IRenderer, layout: ILayoutRestorer): INotebookTracker {

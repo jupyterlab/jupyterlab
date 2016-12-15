@@ -29,7 +29,6 @@ import {
 /**
  * A service providing an interface to the the launcher.
  */
-export
 const plugin: JupyterLabPlugin<ILauncher> = {
   id: 'jupyter.services.launcher',
   requires: [IServiceManager, IPathTracker, ICommandPalette, ICommandLinker],
@@ -37,6 +36,12 @@ const plugin: JupyterLabPlugin<ILauncher> = {
   activate: activateLauncher,
   autoStart: true
 };
+
+
+/**
+ * Export the plugin as default.
+ */
+export default plugin;
 
 
 /**

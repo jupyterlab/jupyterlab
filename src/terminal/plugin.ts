@@ -52,7 +52,6 @@ const TERMINAL_ICON_CLASS = 'jp-ImageTerminal';
 /**
  * The default terminal extension.
  */
-export
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.terminal',
   requires: [
@@ -63,6 +62,15 @@ const plugin: JupyterLabPlugin<void> = {
 };
 
 
+/**
+ * Export the plugin as default.
+ */
+export default plugin;
+
+
+/**
+ * Activate the terminal plugin.
+ */
 function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, layout: ILayoutRestorer): void {
   // Bail if there are no terminals available.
   if (!services.terminals.isAvailable()) {

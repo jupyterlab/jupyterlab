@@ -105,13 +105,18 @@ const RESOURCES = [
 /**
  * The help handler extension.
  */
-export
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.help-handler',
   requires: [IMainMenu, ICommandPalette, ILayoutRestorer],
   activate: activateHelpHandler,
   autoStart: true
 };
+
+
+/**
+ * Export the plugin as default.
+ */
+export default plugin;
 
 
 /**

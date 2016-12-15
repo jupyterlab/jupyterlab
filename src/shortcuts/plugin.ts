@@ -296,7 +296,6 @@ const SHORTCUTS = [
 /**
  * The default shortcuts extension.
  */
-export
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.shortcuts',
   activate: (app: JupyterLab): void => {
@@ -304,3 +303,9 @@ const plugin: JupyterLabPlugin<void> = {
   },
   autoStart: true
 };
+
+
+/**
+ * Export the plugin as default.
+ */
+export default plugin;

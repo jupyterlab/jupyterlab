@@ -29,13 +29,18 @@ import {
 /**
  * The FAQ page extension.
  */
-export
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.faq',
   requires: [ICommandPalette, ICommandLinker, ILayoutRestorer],
   activate: activateFAQ,
   autoStart: true
 };
+
+
+/**
+ * Export the plugin as default.
+ */
+export default plugin;
 
 
 /**

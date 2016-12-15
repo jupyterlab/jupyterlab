@@ -17,7 +17,6 @@ import {
 /**
  * The default rendermime provider.
  */
-export
 const plugin: JupyterLabPlugin<IRenderMime> = {
   id: 'jupyter.services.rendermime',
   provides: IRenderMime,
@@ -35,3 +34,9 @@ const plugin: JupyterLabPlugin<IRenderMime> = {
     return new RenderMime({ renderers, order, sanitizer });
   }
 };
+
+
+/**
+ * Export the plugin as default.
+ */
+export default plugin;

@@ -45,7 +45,6 @@ const FACTORY = 'Rendered Markdown';
 /**
  * The markdown handler extension.
  */
-export
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.rendered-markdown',
   requires: [IDocumentRegistry, IRenderMime, ILayoutRestorer],
@@ -83,3 +82,10 @@ const plugin: JupyterLabPlugin<void> = {
   },
   autoStart: true
 };
+
+
+/**
+ * Export the plugin as default.
+ */
+export default plugin;
+

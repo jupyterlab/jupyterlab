@@ -16,6 +16,38 @@ import '../../lib/default-theme/index.css';
 polyfill();
 
 
+let mods: JupyterLab.IPluginModule[] = [
+  require('../../lib/about/plugin'),
+  require('../../lib/application/plugin'),
+  require('../../lib/clipboard/plugin'),
+  require('../../lib/codemirror/plugin'),
+  require('../../lib/commandlinker/plugin'),
+  require('../../lib/commandpalette/plugin'),
+  require('../../lib/console/plugin'),
+  require('../../lib/csvwidget/plugin'),
+  require('../../lib/docmanager/plugin'),
+  require('../../lib/docregistry/plugin'),
+  require('../../lib/editorwidget/plugin'),
+  require('../../lib/faq/plugin'),
+  require('../../lib/filebrowser/plugin'),
+  require('../../lib/help/plugin'),
+  require('../../lib/imagewidget/plugin'),
+  require('../../lib/inspector/plugin'),
+  require('../../lib/landing/plugin'),
+  require('../../lib/launcher/plugin'),
+  require('../../lib/layoutrestorer/plugin'),
+  require('../../lib/mainmenu/plugin'),
+  require('../../lib/markdownwidget/plugin'),
+  require('../../lib/notebook/plugin'),
+  require('../../lib/rendermime/plugin'),
+  require('../../lib/running/plugin'),
+  require('../../lib/services/plugin'),
+  require('../../lib/shortcuts/plugin'),
+  require('../../lib/statedb/plugin'),
+  require('../../lib/terminal/plugin')
+];
+
+
 /**
  * Create an application object.
  *
@@ -25,9 +57,11 @@ polyfill();
  */
 export
 function createLab(loader: ModuleLoader): JupyterLab {
-  return new JupyterLab({
+  let lab = new JupyterLab({
     loader,
     version: require('../../package.json').version,
     gitDescription: process.env.GIT_DESCRIPTION
   });
+  lab.registerPluginModules(mods);
+  return lab;
 }

@@ -104,6 +104,13 @@ const rendererPlugin: JupyterLabPlugin<ConsolePanel.IRenderer> = {
 
 
 /**
+ * Export the plugins as the default.
+ */
+const plugins: JupyterLabPlugin<any>[] = [rendererPlugin, trackerPlugin];
+export default plugins;
+
+
+/**
  * The class name for all main area landscape tab icons.
  */
 const LANDSCAPE_ICON_CLASS = 'jp-MainAreaLandscapeIcon';

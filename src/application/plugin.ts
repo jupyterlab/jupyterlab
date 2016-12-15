@@ -13,7 +13,6 @@ import {
 /**
  * The main extension.
  */
-export
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.main',
   requires: [ICommandPalette],
@@ -40,3 +39,9 @@ const plugin: JupyterLabPlugin<void> = {
   },
   autoStart: true
 };
+
+
+/**
+ * Export the plugin as default.
+ */
+export default plugin;

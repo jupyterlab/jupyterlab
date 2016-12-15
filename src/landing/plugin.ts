@@ -29,11 +29,14 @@ import {
   LandingModel, LandingWidget
 } from './widget';
 
+/**
+ * The class name added to the landing plugin.
+ */
+const LANDING_CLASS = 'jp-Landing';
 
 /**
  * The landing page extension.
  */
-export
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.landing',
   requires: [IPathTracker, ICommandPalette, IServiceManager, ILayoutRestorer],
@@ -41,12 +44,16 @@ const plugin: JupyterLabPlugin<void> = {
   autoStart: true
 };
 
+
 /**
- * The class name added to the landing plugin.
+ * Export the plugin as default.
  */
-const LANDING_CLASS = 'jp-Landing';
+export default plugin;
 
 
+/**
+ * Activate the landing plugin.
+ */
 function activateLanding(app: JupyterLab, pathTracker: IPathTracker, palette: ICommandPalette, services: IServiceManager, layout: ILayoutRestorer): void {
   const category = 'Help';
   const command = 'jupyterlab-landing:show';

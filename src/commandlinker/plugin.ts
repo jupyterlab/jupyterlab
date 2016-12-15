@@ -15,10 +15,15 @@ import {
 /**
  * The default commmand linker provider.
  */
-export
 const plugin: JupyterLabPlugin<ICommandLinker> = {
   id: 'jupyter.services.command-linker',
   provides: ICommandLinker,
   activate: (app: JupyterLab) => new CommandLinker({ commands: app.commands }),
   autoStart: true
 };
+
+
+/**
+ * Export the plugin as default.
+ */
+export default plugin;

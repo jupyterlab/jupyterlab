@@ -13,7 +13,6 @@ import {
 /**
  * The default document registry provider.
  */
-export
 const plugin: JupyterLabPlugin<IDocumentRegistry> = {
   id: 'jupyter.services.document-registry',
   provides: IDocumentRegistry,
@@ -31,3 +30,9 @@ const plugin: JupyterLabPlugin<IDocumentRegistry> = {
     return registry;
   }
 };
+
+
+/**
+ * Export the plugin as default.
+ */
+export default plugin;

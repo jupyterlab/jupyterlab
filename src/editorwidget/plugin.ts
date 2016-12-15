@@ -59,7 +59,6 @@ const cmdIds = {
 /**
  * The editor handler extension.
  */
-export
 const plugin: JupyterLabPlugin<IEditorTracker> = {
   id: 'jupyter.services.editor-handler',
   requires: [IDocumentRegistry, ILayoutRestorer, IEditorServices],
@@ -67,6 +66,12 @@ const plugin: JupyterLabPlugin<IEditorTracker> = {
   activate: activateEditorHandler,
   autoStart: true
 };
+
+
+/**
+ * Export the plugin as default.
+ */
+export default plugin;
 
 
 /**

@@ -19,7 +19,6 @@ import {
 /**
  * The default layout restorer provider.
  */
-export
 const plugin: JupyterLabPlugin<ILayoutRestorer> = {
   id: 'jupyter.services.layout-restorer',
   requires: [IStateDB],
@@ -41,3 +40,10 @@ const plugin: JupyterLabPlugin<ILayoutRestorer> = {
   autoStart: true,
   provides: ILayoutRestorer
 };
+
+
+/**
+ * Export the plugin as default.
+ */
+export default plugin;
+
