@@ -30,7 +30,7 @@ import {
 } from 'jupyterlab/lib/codemirror';
 
 import {
-  ConsolePanel, ConsoleContent
+  ConsolePanel
 } from 'jupyterlab/lib/console';
 
 import {
@@ -94,9 +94,8 @@ function startApp(session: Session.ISession) {
   }
   let sanitizer = defaultSanitizer;
   let rendermime = new RenderMime({ renderers, order, sanitizer });
-  let renderer = new ConsoleContent.Renderer({ editorServices });
-
-  let consolePanel = new ConsolePanel({ session, renderer, rendermime });
+  let renderer = new ConsolePanel.Renderer({ editorServices });
+  let consolePanel = renderer.createConsole(rendermime, session);
   consolePanel.title.label = TITLE;
 
   let palette = new CommandPalette({ commands, keymap });
