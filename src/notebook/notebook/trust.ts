@@ -49,7 +49,6 @@ function trustNotebook(model: INotebookModel, host?: HTMLElement): Promise<void>
   return showDialog({
     body: TRUST_MESSAGE,
     title: 'Trust this notebook?',
-    okText: 'TRUST',
     buttons: [cancelButton, warnButton]
   }).then(result => {
     if (result.text === 'OK') {
