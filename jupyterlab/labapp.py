@@ -91,6 +91,8 @@ class LabHandler(IPythonHandler):
         # Gather the lab extension files and entry points.
         for (name, data) in sorted(labextensions.items()):
             for value in data.values():
+                if not isinstance(value, dict):
+                    continue
                 if value.get('entry', None):
                     entries.append(value['entry'])
                     bundles.append('%s/%s/%s' % (
