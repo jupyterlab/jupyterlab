@@ -62,8 +62,6 @@ function createLab(loader: ModuleLoader): JupyterLab {
     version: require('../../package.json').version,
     gitDescription: process.env.GIT_DESCRIPTION
   });
-  for (let mod of mods) {
-    lab.registerPluginModule(mod);
-  }
+  lab.registerPluginModules(mods);
   return lab;
 }

@@ -44,8 +44,6 @@ var mods = [
 
 window.onload = function() {
   var lab = new JupyterLab();
-  for (var i = 0; i < mods.length; i++) {
-    lab.registerPluginModule(mods[i]);
-  }
+  lab.registerPluginModules(mods);
   lab.start();
 }

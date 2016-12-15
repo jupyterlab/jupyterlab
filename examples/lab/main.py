@@ -37,8 +37,6 @@ def main(argv):
                   '--NotebookApp.allow_origin="*"',
                   # disable user password:
                   '--NotebookApp.password=',
-                  # disable token:
-                  '--NotebookApp.token='
               ]
     nb_server = subprocess.Popen(nb_command, stderr=subprocess.STDOUT,
                                  stdout=subprocess.PIPE)
