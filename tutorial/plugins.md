@@ -23,6 +23,8 @@ A plugin adds a core functionality to the application:
 activated.
 - Plugins require and provide [Token](http://phosphorjs.github.io/phosphor/api/classes/_core_token_.token.html) objects, which are used to provide
 a typed value to the plugin's `activate()` method.
+- The module providing plugin(s) must meet the [JupyterLab.IPluginModule](http://jupyterlab.github.io/jupyterlab/interfaces/_application_index_.jupyterlab.ipluginmodule.html) interface, by 
+exporting a plugin object or array of plugin objects as the default export.
 
 The default plugins in the JupyterLab application include:
 - [Terminal](https://github.com/jupyterlab/jupyterlab/tree/master/src/terminal/plugin.ts) - Adds the ability to create command prompt terminals.
