@@ -15,12 +15,14 @@
 An extensible computational environment for Jupyter.
 
 **JupyterLab is a very early developer preview, and is not suitable for
-general usage yet. Features and implementation are subject to change.**
+general usage yet. Features and implementation are subject to change. **
 
 With JupyterLab, you can create a computational environment for Jupyter that
 meets your workflow needs. Here's a quick preview of JupyterLab:
 
 <img src="jupyter-plugins-demo.gif" alt="JupyterLab Demo" style="width: 100%;"/>
+
+We have a [roadmap](https://github.com/jupyter/roadmap/blob/master/jupyterlab.md) of planned development.
 
 ----
 
