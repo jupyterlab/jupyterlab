@@ -291,7 +291,7 @@ describe('notebook/notebook/model', () => {
       it('should get the minor version number of the nbformat', () => {
         let model = new NotebookModel();
         model.fromJSON(DEFAULT_CONTENT);
-        expect(model.nbformatMinor).to.be(DEFAULT_CONTENT.nbformat_minor);
+        expect(model.nbformatMinor).to.be(nbformat.MINOR_VERSION);
       });
 
     });
@@ -397,7 +397,7 @@ describe('notebook/notebook/model', () => {
         model.fromJSON(DEFAULT_CONTENT);
         expect(model.cells.length).to.be(6);
         expect(model.nbformat).to.be(DEFAULT_CONTENT.nbformat);
-        expect(model.nbformatMinor).to.be(DEFAULT_CONTENT.nbformat_minor);
+        expect(model.nbformatMinor).to.be(nbformat.MINOR_VERSION);
       });
 
       it('should set the dirty flag', () => {

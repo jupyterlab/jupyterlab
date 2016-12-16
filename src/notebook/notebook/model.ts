@@ -260,6 +260,8 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       cells.push(cell.toJSON());
     }
     let metadata = utils.copy(this._metadata) as nbformat.INotebookMetadata;
+    // orig_nbformat should not be written to file per spec.
+    delete metadata['orig_nbformat'];
     return {
       metadata,
       nbformat_minor: this._nbformatMinor,
@@ -298,13 +300,16 @@ class NotebookModel extends DocumentModel implements INotebookModel {
 
     let oldValue = 0;
     let newValue = 0;
+    this._nbformatMinor = nbformat.MINOR_VERSION;
+    this._nbformat = nbformat.MAJOR_VERSION;
+
     if (value.nbformat !== this._nbformat) {
       oldValue = this._nbformat;
       this._nbformat = newValue = value.nbformat;
       this.stateChanged.emit({ name: 'nbformat', oldValue, newValue });
     }
-    if (value.nbformat_minor !== this._nbformatMinor) {
-      oldValue = this._nbformat;
+    if (value.nbformat_minor > this._nbformatMinor) {
+      oldValue = this._nbformatMinor;
       this._nbformatMinor = newValue = value.nbformat_minor;
       this.stateChanged.emit({ name: 'nbformatMinor', oldValue, newValue });
     }

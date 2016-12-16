@@ -48,7 +48,7 @@ import {
 
 import {
   INotebookTracker, NotebookModelFactory, NotebookPanel, NotebookTracker,
-  NotebookWidgetFactory, NotebookActions, Notebook
+  NotebookWidgetFactory, NotebookActions, Notebook, trustNotebook
 } from './index';
 
 
@@ -73,6 +73,7 @@ const cmdIds = {
   switchKernel: 'notebook:switch-kernel',
   clearAllOutputs: 'notebook:clear-outputs',
   closeAndHalt: 'notebook:close-and-halt',
+  trust: 'notebook:trust',
   run: 'notebook-cells:run',
   runAndAdvance: 'notebook-cells:run-and-advance',
   runAndInsert: 'notebook-cells:run-and-insert',
@@ -293,6 +294,17 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       let current = tracker.currentWidget;
       if (current) {
         current.context.changeKernel(null).then(() => { current.dispose(); });
+      }
+    }
+  });
+  commands.addCommand(cmdIds.trust, {
+    label: 'Trust Notebook',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        return trustNotebook(current.context.model).then(() => {
+          return current.context.save();
+        });
       }
     }
   });
@@ -646,7 +658,8 @@ function populatePalette(palette: ICommandPalette): void {
     cmdIds.editMode,
     cmdIds.commandMode,
     cmdIds.switchKernel,
-    cmdIds.closeAndHalt
+    cmdIds.closeAndHalt,
+    cmdIds.trust
   ].forEach(command => { palette.addItem({ command, category }); });
 
   category = 'Notebook Cell Operations';
@@ -705,6 +718,7 @@ function createMenu(app: JupyterLab): Menu {
   menu.addItem({ command: cmdIds.restart });
   menu.addItem({ command: cmdIds.switchKernel });
   menu.addItem({ command: cmdIds.closeAndHalt });
+  menu.addItem({ command: cmdIds.trust });
   menu.addItem({ type: 'separator' });
   menu.addItem({ type: 'submenu', menu: settings });
 
