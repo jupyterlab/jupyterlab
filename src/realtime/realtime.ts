@@ -40,10 +40,32 @@ const IRealtime = new Token<IRealtime>('jupyter.services.realtime');
 export
 interface IRealtime {
 
+  /**
+   * Share a realtime model.
+   *
+   * @param model: the model to be shared.
+   *
+   * @returns a promise that is resolved when the model
+   *   has been successfully shared.
+   */
   shareDocument(model: IRealtimeModel): Promise<void>;
 
+  /**
+   * Open a realtime model that has been shared.
+   *
+   * @param model: the model to be shared.
+   *
+   * @returns a promise that is resolved when the model
+   *   has been successfully opened.
+   */
   openSharedDocument(model: IRealtimeModel): Promise<void>;
 
+  /**
+   * The realtime services may require some setup before
+   * it can be used (e.g., loading external APIs, authorization).
+   * This promise is resolved when the services are ready to
+   * be used.
+   */
   ready: Promise<void>;
 }
 
@@ -57,6 +79,12 @@ export
 interface IRealtimeModel {
   /**
    * Register this object as collaborative.
+   *
+   * @param handler: the realtime handler to which the model
+   *   describes itself.
+   *
+   * @returns a promise that is resolved when the model is done
+   * registering itself as collaborative.
    */
   registerCollaborative (handler: IRealtimeHandler): Promise<void>;
 }
@@ -71,14 +99,25 @@ interface IRealtimeModel {
 export
 interface IRealtimeHandler {
   /**
-   * Include a string in the realtime model.
+   * Create a string for the realtime model.
+   *
+   * @param initialValue: the optional initial value of the string.
+   *
+   * @returns a promise of a realtime string.
    */
   createString(initialValue?: string) : Promise<IObservableString>;
 
   /**
-   * Include a string in the realtime model.
+   * Create a vector for the realtime model.
+   *
+   * @param factory: a method that takes a `JSONObject` representing a
+   *   serialized vector entry, and creates an object from that.
+   *
+   * @param initialValue: the optional initial value of the vector.
+   *
+   * @returns a promise of a realtime vector.
    */
-  createVector<T extends ISynchronizable<T> >(factory: (value:JSONObject)=>T, initialValue?: IObservableUndoableVector<T>) : Promise<IObservableUndoableVector<T>>;
+  createVector<T extends ISynchronizable<T> >(factory: (value: JSONObject)=>T, initialValue?: IObservableUndoableVector<T>): Promise<IObservableUndoableVector<T>>;
 }
 
 /**
@@ -89,5 +128,9 @@ interface IRealtimeHandler {
  */
 export
 interface ISynchronizable<T> extends ISerializable {
+  /**
+   * A signal that is emitted when a synchronizable object
+   * requests to be synchronized through the realtime handler.
+   */
   readonly synchronizeRequest: ISignal<T, void>;
 }
