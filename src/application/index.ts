@@ -46,13 +46,6 @@ class JupyterLab extends Application<ApplicationShell> {
   }
 
   /**
-   * A promise that resolves when the JupyterLab application is started.
-   */
-  get started(): Promise<void> {
-    return this._startedDelegate.promise;
-  }
-
-  /**
    * The information about the application.
    */
   get info(): JupyterLab.IInfo {
@@ -67,13 +60,27 @@ class JupyterLab extends Application<ApplicationShell> {
   }
 
   /**
+   * A promise that resolves when the JupyterLab application has restored state.
+   */
+  get restored(): Promise<void> {
+    return this._restoredDelegate.promise;
+  }
+
+  /**
+   * A promise that resolves when the JupyterLab application is started.
+   */
+  get started(): Promise<void> {
+    return this._startedDelegate.promise;
+  }
+
+  /**
    * Start the JupyterLab application.
    */
   start(options: Application.IStartOptions = {}): Promise<void> {
-    if (this._startedFlag) {
+    if (this._isStarted) {
       return Promise.resolve(void 0);
     }
-    this._startedFlag = true;
+    this._isStarted = true;
     return super.start(options).then(() => {
       this._startedDelegate.resolve(void 0);
     });
@@ -89,9 +96,7 @@ class JupyterLab extends Application<ApplicationShell> {
     if (!Array.isArray(data)) {
       data = [data];
     }
-    for (let item of data) {
-      this.registerPlugin(item);
-    }
+    data.forEach(item => { this.registerPlugin(item); });
   }
 
   /**
@@ -100,9 +105,7 @@ class JupyterLab extends Application<ApplicationShell> {
    * @param mods - The plugin modules to register.
    */
   registerPluginModules(mods: JupyterLab.IPluginModule[]): void {
-    for (let mod of mods) {
-      this.registerPluginModule(mod);
-    }
+    mods.forEach(mod => { this.registerPluginModule(mod); });
   }
 
   /**
@@ -112,10 +115,11 @@ class JupyterLab extends Application<ApplicationShell> {
     return new ApplicationShell();
   }
 
-  private _startedDelegate = new utils.PromiseDelegate<void>();
-  private _startedFlag = false;
   private _info: JupyterLab.IInfo;
+  private _isStarted = false;
   private _loader: ModuleLoader | null;
+  private _restoredDelegate = new utils.PromiseDelegate<void>();
+  private _startedDelegate = new utils.PromiseDelegate<void>();
 }
 
 
