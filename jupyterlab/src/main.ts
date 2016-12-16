@@ -47,7 +47,8 @@ const mods: JupyterLab.IPluginModule[] = [
   require('../../lib/shortcuts/plugin'),
   require('../../lib/statedb/plugin'),
   require('../../lib/terminal/plugin'),
-  require('../../lib/tooltip/plugin')
+  require('../../lib/tooltip/plugin'),
+  require('../../lib/realtime/plugin')
 ];
 /* tslint:enable */
 
