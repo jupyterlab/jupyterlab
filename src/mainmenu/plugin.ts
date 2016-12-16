@@ -31,7 +31,19 @@ const JUPYTER_ICON_CLASS = 'jp-JupyterIcon';
 const plugin: JupyterLabPlugin<IMainMenu> = {
   id: 'jupyter.services.main-menu',
   provides: IMainMenu,
-  activate: activateMainMenu
+  activate: (app: JupyterLab): IMainMenu => {
+    let menu = new MainMenu({ keymap: app.keymap });
+    menu.id = 'jp-MainMenu';
+
+    let logo = new Widget();
+    logo.node.className = `${PORTRAIT_ICON_CLASS} ${JUPYTER_ICON_CLASS}`;
+    logo.id = 'jp-MainLogo';
+
+    app.shell.addToTopArea(logo);
+    app.shell.addToTopArea(menu);
+
+    return menu;
+  }
 };
 
 
@@ -39,21 +51,3 @@ const plugin: JupyterLabPlugin<IMainMenu> = {
  * Export the plugin as default.
  */
 export default plugin;
-
-
-/**
- * Activate the main menu extension.
- */
-function activateMainMenu(app: JupyterLab): IMainMenu {
-  let menu = new MainMenu({ keymap: app.keymap });
-  menu.id = 'jp-MainMenu';
-
-  let logo = new Widget();
-  logo.node.className = `${PORTRAIT_ICON_CLASS} ${JUPYTER_ICON_CLASS}`;
-  logo.id = 'jp-MainLogo';
-
-  app.shell.addToTopArea(logo);
-  app.shell.addToTopArea(menu);
-
-  return menu;
-}

@@ -152,7 +152,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    *
    * @param widget - The widget being added.
    */
-  add(widget: T, options: IInstanceRestorer.IAddOptions = { area: 'main' }): void {
+  add(widget: T): void {
     if (this._widgets.has(widget)) {
       console.warn(`${widget.id} already exists in the tracker.`);
       return;
@@ -169,15 +169,12 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
       if (widgetName) {
         let name = `${this.namespace}:${widgetName}`;
         let data = this._restore.args(widget);
-        let metadata = options;
 
         Private.nameProperty.set(widget, name);
-        Private.metadataProperty.set(widget, metadata);
-
-        state.save(name, { data, metadata });
+        state.save(name, { data });
 
         if (restorer) {
-          restorer.add(widget, name, options);
+          restorer.add(widget, name);
         }
       }
     }
@@ -337,9 +334,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
 
     if (newName) {
       let data = this._restore.args(widget);
-      let metadata = Private.metadataProperty.get(widget);
-
-      state.save(newName, { data, metadata });
+      state.save(newName, { data });
     }
   }
 
@@ -444,14 +439,6 @@ namespace Private {
   const injectedProperty = new AttachedProperty<Widget, boolean>({
     name: 'injected',
     value: false
-  });
-
-  /**
-   * An attached property for a widget's restore metadata in the state database.
-   */
-  export
-  const metadataProperty = new AttachedProperty<Widget, IInstanceRestorer.IAddOptions>({
-    name: 'metadata'
   });
 
   /**

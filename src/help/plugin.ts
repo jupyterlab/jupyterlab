@@ -151,7 +151,7 @@ function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICom
     iframe.id = `${namespace}`;
     iframe.url = url;
     // Add the iframe to the instance tracker.
-    tracker.add(iframe, { area: 'right' });
+    tracker.add(iframe);
 
     // If the help widget visibility changes, update the tracker.
     installMessageHook(iframe, (iframe: IFrame, msg: Message) => {

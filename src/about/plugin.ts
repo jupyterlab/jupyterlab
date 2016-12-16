@@ -25,8 +25,8 @@ import {
  * The about page extension.
  */
 const plugin: JupyterLabPlugin<void> = {
+  activate,
   id: 'jupyter.extensions.about',
-  activate: activateAbout,
   autoStart: true,
   requires: [ICommandPalette, IInstanceRestorer]
 };
@@ -38,7 +38,7 @@ const plugin: JupyterLabPlugin<void> = {
 export default plugin;
 
 
-function activateAbout(app: JupyterLab, palette: ICommandPalette, restorer: IInstanceRestorer): void {
+function activate(app: JupyterLab, palette: ICommandPalette, restorer: IInstanceRestorer): void {
   const namespace = 'about-jupyterlab';
   const model = new AboutModel();
   const command = `${namespace}:show`;

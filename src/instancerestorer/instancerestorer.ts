@@ -36,10 +36,6 @@ import {
 } from 'phosphor/lib/core/token';
 
 import {
-  ApplicationShell
-} from '../application/shell';
-
-import {
   InstanceTracker
 } from '../common/instancetracker';
 
@@ -70,7 +66,7 @@ interface IInstanceRestorer {
   /**
    * Add a widget to be tracked by the instance restorer.
    */
-  add(widget: Widget, name: string, options?: IInstanceRestorer.IAddOptions): void;
+  add(widget: Widget, name: string): void;
 
   /**
    * Restore the widgets of a particular instance tracker.
@@ -88,17 +84,6 @@ interface IInstanceRestorer {
  */
 export
 namespace IInstanceRestorer {
-  /**
-   * Configuration options for adding a widget to an instance restorer.
-   */
-  export
-  interface IAddOptions extends JSONObject {
-    /**
-     * The area in the application shell where a given widget will be restored.
-     */
-    area: ApplicationShell.Area;
-  }
-
   /**
    * The state restoration configuration options.
    */
@@ -208,7 +193,7 @@ class InstanceRestorer implements IInstanceRestorer {
   /**
    * Add a widget to be tracked by the instance restorer.
    */
-  add(widget: Widget, name: string, options: IInstanceRestorer.IAddOptions = { area: 'main' }): void {
+  add(widget: Widget, name: string): void {
     Private.nameProperty.set(widget, name);
     this._widgets.set(name, widget);
     widget.disposed.connect(() => { this._widgets.delete(name); });
