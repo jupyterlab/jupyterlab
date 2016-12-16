@@ -30,12 +30,20 @@ import {
   DocumentRegistry
 } from './index';
 
+import {
+  IRealtimeHandler, IRealtimeModel
+} from '../realtime';
+
+import {
+  IObservableString, ObservableString
+} from '../common/observablestring';
+
 
 /**
  * The default implementation of a document model.
  */
 export
-class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeModel  {
+class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeModel, IRealtimeModel  {
   /**
    * Construct a new document model.
    */
@@ -158,11 +166,39 @@ class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeMo
     this.dirty = true;
   }
 
+  /**
+   * Describe the model to an existing RealtimeHandler.
+   * Meant to be subclassed by other DocumentModels.
+   */
+  registerCollaborative( realtimeHandler : IRealtimeHandler ) : Promise<void> {
+    return new Promise<void>((resolve,reject)=>{
+      this._realtime = realtimeHandler;
+
+      //create a new realtime string
+      this._realtime.createString(this._text.text).then((str: IObservableString)=>{
+        let oldStr = this._text;
+        this._text = str;
+        //connect the realtime string to the correct signals
+        this._text.changed.connect(()=>{
+          this._contentChanged.emit(void 0);
+          this.dirty = true;
+        });
+        //get rid of the old string.
+        oldStr.dispose();
+        resolve();
+      }).catch(()=>{
+        console.log("Unable to register document as collaborative");
+      });
+    });
+  }
+
+  private _text: IObservableString = new ObservableString('');
   private _defaultLang = '';
   private _dirty = false;
   private _readOnly = false;
   private _contentChanged = new Signal<this, void>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
+  private _realtime : IRealtimeHandler = null;
 }
 
 

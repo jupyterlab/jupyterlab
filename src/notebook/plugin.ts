@@ -56,8 +56,12 @@ import {
 import {
   CellTools, CommandIDs, ICellTools, INotebookTracker, NotebookActions,
   NotebookModelFactory,  NotebookPanel, NotebookTracker, NotebookWidgetFactory,
-  trustNotebook
+  trustNotebook, Notebook, NotebookModel
 } from './';
+
+import {
+  addRealtimeTracker
+} from '../realtime';
 
 
 /**
@@ -223,6 +227,17 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
   // Add main menu notebook menu.
   mainMenu.addMenu(createMenu(app), { rank: 20 });
 
+  addRealtimeTracker(tracker, (widget: NotebookPanel) => {
+    return widget.context.model as NotebookModel;
+  }, (widget: NotebookPanel)=>{
+    let notebook = widget.notebook;
+    let model = notebook.model;
+    //Trigger a model changed event to hook the widget
+    //up to the new collaborative model cells.
+    notebook.model = null;
+    notebook.model = model;
+    console.log("Realtime: cells reregistered.");
+  });
   return tracker;
 }
 

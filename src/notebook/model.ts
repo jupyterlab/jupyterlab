@@ -34,6 +34,10 @@ import {
   IObservableUndoableVector, ObservableUndoableVector
 } from '../common/undoablevector';
 
+import {
+  IRealtimeHandler, IRealtimeModel
+} from '../realtime';
+
 
 /**
  * The definition of a model object for a notebook widget.
@@ -71,7 +75,7 @@ interface INotebookModel extends DocumentRegistry.IModel {
  * An implementation of a notebook Model.
  */
 export
-class NotebookModel extends DocumentModel implements INotebookModel {
+class NotebookModel extends DocumentModel implements INotebookModel, IRealtimeModel {
   /**
    * Construct a new notebook model.
    */
@@ -81,7 +85,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       options.contentFactory || NotebookModel.defaultContentFactory
     );
     this.contentFactory = factory;
-    this._cells = new ObservableUndoableVector<ICellModel>((cell: nbformat.IBaseCell) => {
+    this._cellFromJSONFactory = (cell: nbformat.IBaseCell) => {
       switch (cell.cell_type) {
         case 'code':
           return factory.createCodeCell({ cell });
@@ -90,7 +94,8 @@ class NotebookModel extends DocumentModel implements INotebookModel {
         default:
           return factory.createRawCell({ cell });
       }
-    });
+    }
+    this._cells = new ObservableUndoableVector<ICellModel>(this._cellFromJSONFactory);
     // Add an initial code cell by default.
     this._cells.pushBack(factory.createCodeCell({}));
     this._cells.changed.connect(this._onCellsChanged, this);
@@ -268,6 +273,26 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   }
 
   /**
+   * Describe the model to an existing RealtimeHandler.
+   * Meant to be subclassed by other DocumentModels.
+   */
+  registerCollaborative( realtimeHandler : IRealtimeHandler ) : Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this._realtimeHandler = realtimeHandler;
+      this._realtimeHandler.createVector<ICellModel>(this._cellFromJSONFactory, this._cells)
+      .then( (vec: IObservableUndoableVector<ICellModel>)=>{
+        let oldVec = this._cells;
+        this._cells = vec;
+        this._cells.changed.connect(this._onCellsChanged, this);
+        oldVec.dispose();
+        resolve();
+      }).catch( ()=> {
+        console.log("Unable to register notebook as collaborative");
+      });
+    });
+  }
+
+  /**
    * Handle a change in the cells list.
    */
   private _onCellsChanged(list: IObservableVector<ICellModel>, change: ObservableVector.IChangedArgs<ICellModel>): void {
@@ -324,6 +349,8 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   private _nbformat = nbformat.MAJOR_VERSION;
   private _nbformatMinor = nbformat.MINOR_VERSION;
   private _metadata = new ObservableJSON();
+  private _realtimeHandler: IRealtimeHandler = null;
+  private _cellFromJSONFactory: (cell: nbformat.IBaseCell) => ICellModel;
 }
 
 

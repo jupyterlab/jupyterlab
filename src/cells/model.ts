@@ -29,12 +29,16 @@ import {
   IOutputAreaModel, OutputAreaModel
 } from '../outputarea';
 
+import {
+  ISynchronizable
+} from '../realtime';
+
 
 /**
  * The definition of a model object for a cell.
  */
 export
-interface ICellModel extends CodeEditor.IModel {
+interface ICellModel extends CodeEditor.IModel, ISynchronizable<ICellModel> {
   /**
    * The type of the cell.
    */
@@ -49,6 +53,11 @@ interface ICellModel extends CodeEditor.IModel {
    * A signal emitted when a model state changes.
    */
   readonly stateChanged: ISignal<ICellModel, IChangedArgs<any>>;
+
+  /**
+   * A signal emitted to synchronize with a realtime handler.
+   */
+  readonly synchronizeRequest: ISignal<ICellModel, void>;
 
   /**
    * Whether the cell is trusted.
@@ -151,6 +160,10 @@ class CellModel extends CodeEditor.Model implements ICellModel {
       this._metadata.set(key, metadata[key]);
     }
     this._metadata.changed.connect(this.onGenericChange, this);
+
+    this.stateChanged.connect( ()=> {
+      this.synchronizeRequest.emit(void 0);
+    });
   }
 
   /**
@@ -167,6 +180,11 @@ class CellModel extends CodeEditor.Model implements ICellModel {
    * A signal emitted when a model state changes.
    */
   readonly stateChanged = new Signal<this, IChangedArgs<any>>(this);
+
+  /**
+   * A signal emitted to synchronize with a realtime handler.
+   */
+  readonly synchronizeRequest = new Signal<this, void>(this);
 
   /**
    * The metadata associated with the cell.

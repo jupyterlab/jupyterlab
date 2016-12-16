@@ -42,6 +42,14 @@ import {
 } from './';
 
 
+import {
+  IRealtimeModel, addRealtimeTracker
+} from '../realtime';
+
+import {
+  DocumentModel
+} from '../docregistry/default';
+
 /**
  * The class name for all main area portrait tab icons.
  */
@@ -194,6 +202,10 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
       return commands.execute(ConsoleCommandIDs.inject, options);
     },
     label: 'Run Code'
+  });
+
+  addRealtimeTracker(tracker, (widget: EditorWidget) => {
+    return widget.context.model as DocumentModel;
   });
 
   return tracker;
