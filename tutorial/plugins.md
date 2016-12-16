@@ -25,18 +25,18 @@ activated.
 a typed value to the plugin's `activate()` method.
 
 The default plugins in the JupyterLab application include:
-- [Terminal](http://jupyterlab.github.io/jupyterlab/modules/_terminal_plugin_.html) - Adds the ability to create command prompt terminals.
-- [Shortcuts](http://jupyterlab.github.io/jupyterlab/modules/_shortcuts_plugin_.html) - Provides the default set of shortcuts for the application.
-- [Images](http://jupyterlab.github.io/jupyterlab/modules/_imagewidget_plugin_.html) - Adds a widget factory for displaying image files.
-- [Help](http://jupyterlab.github.io/jupyterlab/modules/_help_plugin_.html) - Adds a side bar widget for displaying external documentation.
-- [File Browser](http://jupyterlab.github.io/jupyterlab/modules/_filebrowser_plugin_.html) - Creates the file browser and the document manager and the file browser to the side bar.
-- [Editor](http://jupyterlab.github.io/jupyterlab/modules/_editorwidget_plugin_.html) - Add a widget factory for displaying editable source files.
-- [Console](http://jupyterlab.github.io/jupyterlab/modules/_console_plugin_.html) - Adds the ability to launch Jupyter Console instances for
+- [Terminal](https://github.com/jupyterlab/jupyterlab/tree/master/src/terminal/plugin.ts) - Adds the ability to create command prompt terminals.
+- [Shortcuts](https://github.com/jupyterlab/jupyterlab/tree/master/src/shortcuts/plugin.ts) - Provides the default set of shortcuts for the application.
+- [Images](https://github.com/jupyterlab/jupyterlab/tree/master/src/imagewidget/plugin.ts) - Adds a widget factory for displaying image files.
+- [Help](https://github.com/jupyterlab/jupyterlab/tree/master/src/help/plugin.ts) - Adds a side bar widget for displaying external documentation.
+- [File Browser](https://github.com/jupyterlab/jupyterlab/tree/master/src/filebrowser/plugin.ts) - Creates the file browser and the document manager and the file browser to the side bar.
+- [Editor](https://github.com/jupyterlab/jupyterlab/tree/master/src/editorwidget/plugin.ts) - Add a widget factory for displaying editable source files.
+- [Console](https://github.com/jupyterlab/jupyterlab/tree/master/src/console/plugin.ts) - Adds the ability to launch Jupyter Console instances for
 interactive kernel console sessions.
-- [Services](http://jupyterlab.github.io/jupyterlab/modules/_services_plugin_.html#plugin) - An application-specific interface to `@jupyterlab/services`.
-- [RenderMime](http://jupyterlab.github.io/jupyterlab/modules/_rendermime_plugin_.html#plugin) - The registry for adding kernel `display_data` renderers.
-- [Document Registry](http://jupyterlab.github.io/jupyterlab/modules/_docregistry_plugin_.html#plugin) - Used to add functionality around widgets backed by files.
-- [Clipboard](http://jupyterlab.github.io/jupyterlab/modules/_clipboard_plugin_.html#plugin) - The application-wide clipboard for arbitrary MIME data.
+- [Services](https://github.com/jupyterlab/jupyterlab/tree/master/src/services/plugin.ts) - An application-specific interface to `@jupyterlab/services`.
+- [RenderMime](https://github.com/jupyterlab/jupyterlab/tree/master/src/rendermime/plugin.ts) - The registry for adding kernel `display_data` renderers.
+- [Document Registry](https://github.com/jupyterlab/jupyterlab/tree/master/src/docregistry/plugin.ts) - Used to add functionality around widgets backed by files.
+- [Clipboard](https://github.com/jupyterlab/jupyterlab/tree/master/src/clipboard/plugin.ts) - The application-wide clipboard for arbitrary MIME data.
 
 ## Application Object
 The JupyterLab [Application](http://phosphorjs.github.io/phosphor/api/classes/_ui_application_.application.html) object is given to each plugin in 
