@@ -61,9 +61,12 @@ class JupyterLab extends Application<ApplicationShell> {
 
   /**
    * A promise that resolves when the JupyterLab application has restored state.
+   *
+   * #### Notes
+   * This is just a reference to `shell.restored`.
    */
   get restored(): Promise<void> {
-    return this._restoredDelegate.promise;
+    return this.shell.restored;
   }
 
   /**
@@ -118,7 +121,6 @@ class JupyterLab extends Application<ApplicationShell> {
   private _info: JupyterLab.IInfo;
   private _isStarted = false;
   private _loader: ModuleLoader | null;
-  private _restoredDelegate = new utils.PromiseDelegate<void>();
   private _startedDelegate = new utils.PromiseDelegate<void>();
 }
 

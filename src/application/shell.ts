@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  utils
+} from '@jupyterlab/services';
+
+import {
   each, toArray
 } from 'phosphor/lib/algorithm/iteration';
 
@@ -52,6 +56,10 @@ import {
 import {
   Widget
 } from 'phosphor/lib/ui/widget';
+
+import {
+  IInstanceRestorer
+} from '../instancerestorer';
 
 
 /**
@@ -160,6 +168,13 @@ class ApplicationShell extends Widget {
    */
   get currentWidget(): Widget {
     return this._dockPanel.currentWidget;
+  }
+
+  /**
+   * A promise that resolves when the shell has restored state.
+   */
+  get restored(): Promise<void> {
+    return this._restored.promise;
   }
 
   /**
@@ -295,11 +310,20 @@ class ApplicationShell extends Widget {
     each(toArray(this._dockPanel.widgets()), widget => { widget.close(); });
   }
 
+  /**
+   * Restore the layout of the application shell.
+   */
+  restore(restorer: IInstanceRestorer): void {
+    // TODO: implement restoration before resolving the promise.
+    this._restored.resolve(void 0);
+  }
+
   private _topPanel: Panel;
   private _hboxPanel: BoxPanel;
   private _dockPanel: DockPanel;
   private _hsplitPanel: SplitPanel;
   private _leftHandler: Private.SideBarHandler;
+  private _restored = new utils.PromiseDelegate<void>();
   private _rightHandler: Private.SideBarHandler;
 }
 

@@ -102,7 +102,7 @@ function activateLanding(app: JupyterLab, pathTracker: IPathTracker, palette: IC
   palette.addItem({ category, command });
 
   // Only create a landing page if there are no other tabs open.
-  restorer.restored.then(() => {
+  app.restored.then(() => {
     if (app.shell.mainAreaIsEmpty) {
       app.commands.execute(command, void 0);
     }
