@@ -26,8 +26,8 @@ import {
  * The default state database for storing application state.
  */
 const plugin: JupyterLabPlugin<IStateDB> = {
+  activate,
   id: 'jupyter.services.statedb',
-  activate: activateState,
   autoStart: true,
   provides: IStateDB,
   requires: [ICommandPalette]
@@ -43,7 +43,7 @@ export default plugin;
 /**
  * Activate the state database.
  */
-function activateState(app: JupyterLab, palette: ICommandPalette): Promise<IStateDB> {
+function activate(app: JupyterLab, palette: ICommandPalette): Promise<IStateDB> {
   let state = new StateDB();
   let version = app.info.version;
   let command = 'statedb:clear';

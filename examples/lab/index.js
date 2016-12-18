@@ -43,7 +43,7 @@ var mods = [
 
 
 window.onload = function() {
-  var lab = new JupyterLab();
+  var lab = new JupyterLab({ namespace: 'lab-example' });
   lab.registerPluginModules(mods);
   lab.start();
 }

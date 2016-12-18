@@ -411,7 +411,7 @@ namespace InstanceTracker {
   export
   interface IRestoreOptions<T extends Widget> extends IInstanceRestorer.IRestoreOptions<T> {
     /*
-     * The instance restorer to use to re-arrange restored tabs.
+     * The instance restorer to use to recreate restored widgets.
      */
     restorer: IInstanceRestorer;
 

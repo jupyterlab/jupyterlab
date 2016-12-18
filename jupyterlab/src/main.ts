@@ -16,7 +16,8 @@ import '../../lib/default-theme/index.css';
 polyfill();
 
 
-let mods: JupyterLab.IPluginModule[] = [
+/* tslint:disable */
+const mods: JupyterLab.IPluginModule[] = [
   require('../../lib/about/plugin'),
   require('../../lib/application/plugin'),
   require('../../lib/clipboard/plugin'),
@@ -46,6 +47,7 @@ let mods: JupyterLab.IPluginModule[] = [
   require('../../lib/statedb/plugin'),
   require('../../lib/terminal/plugin')
 ];
+/* tslint:enable */
 
 
 /**
@@ -57,10 +59,11 @@ let mods: JupyterLab.IPluginModule[] = [
  */
 export
 function createLab(loader: ModuleLoader): JupyterLab {
-  let lab = new JupyterLab({
+  const lab = new JupyterLab({
     loader,
-    version: require('../../package.json').version,
-    gitDescription: process.env.GIT_DESCRIPTION
+    gitDescription: process.env.GIT_DESCRIPTION,
+    namespace: 'jupyterlab',
+    version: require('../../package.json').version
   });
   lab.registerPluginModules(mods);
   return lab;

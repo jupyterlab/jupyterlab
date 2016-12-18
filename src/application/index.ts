@@ -39,8 +39,9 @@ class JupyterLab extends Application<ApplicationShell> {
   constructor(options: JupyterLab.IOptions = {}) {
     super();
     this._info = {
-      version:  options.version || 'unknown',
-      gitDescription: options.gitDescription || 'unknown'
+      gitDescription: options.gitDescription || 'unknown',
+      namespace: options.namespace || 'jupyterlab',
+      version:  options.version || 'unknown'
     };
     this._loader = options.loader || null;
   }
@@ -136,11 +137,6 @@ namespace JupyterLab {
   export
   interface IOptions {
     /**
-     * The version of the JupyterLab application.
-     */
-    version?: string;
-
-    /**
      * The git description of the JupyterLab application.
      */
     gitDescription?: string;
@@ -149,6 +145,22 @@ namespace JupyterLab {
      * The module loader used by the application.
      */
     loader?: ModuleLoader;
+
+    /**
+     * The namespace/prefix plugins may use to denote their origin.
+     *
+     * #### Notes
+     * This field may be used by persisten storage mechanisms such as state
+     * databases, cookies, session storage, etc.
+     *
+     * If unspecified, the default value is `'jupyterlab'`.
+     */
+    namespace?: string;
+
+    /**
+     * The version of the JupyterLab application.
+     */
+    version?: string;
   }
 
   /**
@@ -157,14 +169,19 @@ namespace JupyterLab {
   export
   interface IInfo {
     /**
-     * The version of the JupyterLab application.
-     */
-    readonly version: string;
-
-    /**
      * The git description of the JupyterLab application.
      */
     readonly gitDescription: string;
+
+    /**
+     * The namespace/prefix plugins may use to denote their origin.
+     */
+    readonly namespace: string;
+
+    /**
+     * The version of the JupyterLab application.
+     */
+    readonly version: string;
   }
 
   /**
