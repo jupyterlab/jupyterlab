@@ -182,7 +182,7 @@ class KernelCompletionProvider implements monaco.languages.CompletionItemProvide
     }
     return kernel.requestInspect({
       code: item.label,
-      cursor_pos: 1,
+      cursor_pos: item.label.length,
       detail_level: 0,
     }).then(result => {
       if (result.content.found) {
