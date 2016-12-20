@@ -14,7 +14,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IRealtime, IRealtimeModel
+  IRealtime, IRealtimeModel, checkTracker
 } from './realtime';
 
 import {
@@ -28,11 +28,10 @@ import {
 
 let trackerSet = new Set<[InstanceTracker<Widget>, (widget: Widget)=>IRealtimeModel, (widget: Widget)=>void]>();
 
-const plugin: JupyterLabPlugin<IRealtime> = {
-  id: 'jupyter.services.realtime',
+const plugin: JupyterLabPlugin<void> = {
+  id: 'jupyter.extensions.realtime-menu',
   requires: [IMainMenu],
-  provides: IRealtime,
-  activate: activateRealtime,
+  activate: activateRealtimeMenu,
   autoStart: true
 };
 
@@ -41,38 +40,36 @@ const cmdIds = {
   openRealtimeFile : 'realtime:open',
 };
 
-function activateRealtime(app: JupyterLab, mainMenu : IMainMenu): IRealtime {
+function activateRealtimeMenu(app: JupyterLab, mainMenu : IMainMenu): void {
+  app.resolveOptionalService(IRealtime).then((realtimeServices)=>{
+    mainMenu.addMenu(createMenu(app), {rank: 60});
+    let commands = app.commands;
 
-  //let realtime = new Realtime();
-  let realtime: IRealtime = null;
-
-  mainMenu.addMenu(createMenu(app), {rank: 60});
-  let commands = app.commands;
-
-  commands.addCommand(cmdIds.shareRealtimeFile, {
-    label: 'Share file',
-    caption: 'Share this file',
-    execute: ()=> {
-      let [widget, model, callback] = getRealtimeModel(app);
-      if (model) {
-        realtime.shareDocument(model)
-        .then( ()=>{callback(widget);} );
+    commands.addCommand(cmdIds.shareRealtimeFile, {
+      label: 'Share file',
+      caption: 'Share this file',
+      execute: ()=> {
+        let [widget, model, callback] = getRealtimeModel(app);
+        if (model) {
+          realtimeServices.shareDocument(model)
+          .then( ()=>{callback(widget);} );
+        }
       }
-    }
-  });
-  commands.addCommand(cmdIds.openRealtimeFile, {
-    label: 'Open shared file',
-    caption: 'Open a file that has been shared with you',
-    execute: ()=> {
-      let [widget, model, callback] = getRealtimeModel(app);
-      if(model) {
-        realtime.openSharedDocument(model)
-        .then( ()=>{callback(widget);} );
+    });
+    commands.addCommand(cmdIds.openRealtimeFile, {
+      label: 'Open shared file',
+      caption: 'Open a file that has been shared with you',
+      execute: ()=> {
+        let [widget, model, callback] = getRealtimeModel(app);
+        if(model) {
+          realtimeServices.openSharedDocument(model)
+          .then( ()=>{callback(widget);} );
+        }
       }
-    }
+    });
+  }).catch( ()=>{
+    console.log("Realtime services not found, so no menu created.");
   });
-
-  return realtime;
 }
 
 
@@ -88,21 +85,11 @@ function createMenu( app: JupyterLab ) : Menu {
 }
 
 function getRealtimeModel( app: JupyterLab): [Widget, IRealtimeModel, (widget: Widget)=>void] {
+  let widget = app.shell.currentWidget;
   let model: IRealtimeModel = null;
   let callback: (widget: Widget)=>void = null;
-  let widget = app.shell.currentWidget;
-  trackerSet.forEach( ([tracker, getModel, cb]) => {
-    if (tracker.has(widget)) {
-      model = getModel(widget);
-      callback = cb;
-    }
-  });
+  [model, callback] = checkTracker(widget);
   return [widget, model, callback];
-}
-
-export
-function addRealtimeTracker( tracker: InstanceTracker<Widget>, getModel : (widget: Widget)=>IRealtimeModel, callback: (widget: Widget)=>void = ()=>{} ): void {
-  trackerSet.add([tracker, getModel, callback]);
 }
 
 /**
