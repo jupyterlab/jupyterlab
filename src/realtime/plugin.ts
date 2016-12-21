@@ -14,7 +14,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IRealtime, IRealtimeModel, checkTracker
+  IRealtime, IRealtimeModel
 } from './realtime';
 
 import {
@@ -25,8 +25,6 @@ import {
   showDialog, okButton
 } from '../common/dialog';
 
-
-let trackerSet = new Set<[InstanceTracker<Widget>, (widget: Widget)=>IRealtimeModel, (widget: Widget)=>void]>();
 
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.realtime-menu',
@@ -49,10 +47,10 @@ function activateRealtimeMenu(app: JupyterLab, mainMenu : IMainMenu): void {
       label: 'Share file',
       caption: 'Share this file',
       execute: ()=> {
-        let [widget, model, callback] = getRealtimeModel(app);
+        let widget = app.shell.currentWidget;
+        let model = realtimeServices.checkTrackers(widget);
         if (model) {
-          realtimeServices.shareDocument(model)
-          .then( ()=>{callback(widget);} );
+          realtimeServices.shareDocument(model);
         }
       }
     });
@@ -60,10 +58,10 @@ function activateRealtimeMenu(app: JupyterLab, mainMenu : IMainMenu): void {
       label: 'Open shared file',
       caption: 'Open a file that has been shared with you',
       execute: ()=> {
-        let [widget, model, callback] = getRealtimeModel(app);
+        let widget = app.shell.currentWidget;
+        let model = realtimeServices.checkTrackers(widget);
         if(model) {
-          realtimeServices.openSharedDocument(model)
-          .then( ()=>{callback(widget);} );
+          realtimeServices.openSharedDocument(model);
         }
       }
     });
@@ -82,14 +80,6 @@ function createMenu( app: JupyterLab ) : Menu {
   menu.addItem( {command: cmdIds.openRealtimeFile});
 
   return menu;
-}
-
-function getRealtimeModel( app: JupyterLab): [Widget, IRealtimeModel, (widget: Widget)=>void] {
-  let widget = app.shell.currentWidget;
-  let model: IRealtimeModel = null;
-  let callback: (widget: Widget)=>void = null;
-  [model, callback] = checkTracker(widget);
-  return [widget, model, callback];
 }
 
 /**

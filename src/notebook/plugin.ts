@@ -60,7 +60,7 @@ import {
 } from './';
 
 import {
-  addRealtimeTracker
+  IRealtime
 } from '../realtime';
 
 
@@ -227,8 +227,11 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
   // Add main menu notebook menu.
   mainMenu.addMenu(createMenu(app), { rank: 20 });
 
-  addRealtimeTracker(tracker, (widget: NotebookPanel) => {
-    return widget.context.model as NotebookModel;
+  //Register this widget tracker with the Realtime services if it exists.
+  app.resolveService(IRealtime).then((realtimeServices: IRealtime)=>{
+    realtimeServices.addTracker(tracker, (widget: NotebookPanel) => {
+      return widget.context.model as NotebookModel;
+    });
   });
 
   return tracker;

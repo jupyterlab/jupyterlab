@@ -74,24 +74,20 @@ interface IRealtime {
    * @param getModel: a function which takes a shareable widget
    *   and returns an object that implements `IRealtimeModel`,
    *   the actual collaborative data model.
-   *
-   * @param callback: an optional callback function which is 
-   *   called with the widget after the `IRealtimeModel` is 
-   *   registered as collaborative.
    */
-  //addRealtimeTracker( tracker: InstanceTracker<Widget>, getModel : (widget: Widget)=>IRealtimeModel, callback: (widget: Widget)=>void = ()=>{} ): void; 
+  addTracker(tracker: InstanceTracker<Widget>, getModel: (widget: Widget)=>IRealtimeModel): void; 
 
   /**
-   * Get a tracker, model, and callback for a widget, for
+   * Get a realtime model for a widget, for
    * use in registering an `IRealtimeModel` associated with
    * the widget as collaborative.
    *
    * @param widget: the widget in question.
    *
-   * @returns [getModel, callback] if `widget` belongs
-   * to one of the trackers, [null, null] otherwise.
+   * @returns an `IRealtimeModel` if `widget` belongs
+   * to one of the realtime trackers, `null` otherwise.
    */
-  //checkTracker( widget: Widget ) : [ (widget: Widget)=>IRealtimeModel, (widget: Widget)=>void];
+  checkTrackers( widget: Widget ): IRealtimeModel;
 
   /**
    * The realtime services may require some setup before
@@ -166,24 +162,4 @@ interface ISynchronizable<T> extends ISerializable {
    * requests to be synchronized through the realtime handler.
    */
   readonly synchronizeRequest: ISignal<T, void>;
-}
-
-let trackerSet = new Set<[InstanceTracker<Widget>, (widget: Widget)=>IRealtimeModel, (widget: Widget)=>void]>();
-
-export
-function addRealtimeTracker( tracker: InstanceTracker<Widget>, getModel: (widget: Widget)=>IRealtimeModel, callback: (widget: Widget)=>void = ()=>{} ): void {
-  trackerSet.add([tracker, getModel, callback]);
-}
-
-export
-function checkTracker( widget: Widget ): [IRealtimeModel, (widget:Widget)=>void] {
-  let model: IRealtimeModel = null;
-  let callback: (widget: Widget)=>void = null;
-  trackerSet.forEach( ([tracker, getModel, cb]) => {
-    if (tracker.has(widget)) {
-      model = getModel(widget);
-      callback = cb;
-    }
-  });
-  return [model,callback];
 }

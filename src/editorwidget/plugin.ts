@@ -43,7 +43,7 @@ import {
 
 
 import {
-  IRealtimeModel, addRealtimeTracker
+  IRealtime
 } from '../realtime';
 
 import {
@@ -204,8 +204,11 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
     label: 'Run Code'
   });
 
-  addRealtimeTracker(tracker, (widget: EditorWidget) => {
-    return widget.context.model as DocumentModel;
+  //Register this widget tracker with the Realtime services if it exists.
+  app.resolveService(IRealtime).then((realtimeServices: IRealtime)=>{
+    realtimeServices.addTracker(tracker, (widget: EditorWidget) => {
+      return widget.context.model as DocumentModel;
+    });
   });
 
   return tracker;
