@@ -168,23 +168,13 @@ class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeMo
 
   /**
    * Describe the model to an existing RealtimeHandler.
-   * Meant to be subclassed by other DocumentModels.
+   * Meant to be overridden by other DocumentModels.
    */
   registerCollaborative( realtimeHandler : IRealtimeHandler ) : Promise<void> {
     return new Promise<void>((resolve,reject)=>{
       this._realtime = realtimeHandler;
-
-      //create a new realtime string
-      this._realtime.createString(this._text.text).then((str: IObservableString)=>{
-        let oldStr = this._text;
-        this._text = str;
-        //connect the realtime string to the correct signals
-        this._text.changed.connect(()=>{
-          this._contentChanged.emit(void 0);
-          this.dirty = true;
-        });
-        //get rid of the old string.
-        oldStr.dispose();
+      //link to the new realtime string
+      this._realtime.linkString(this._text).then(()=>{
         resolve();
       }).catch(()=>{
         console.log("Unable to register document as collaborative");

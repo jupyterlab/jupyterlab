@@ -134,11 +134,11 @@ interface IRealtimeHandler {
   /**
    * Create a string for the realtime model.
    *
-   * @param initialValue: the optional initial value of the string.
+   * @param str: the string to link to a realtime string.
    *
-   * @returns a promise of a realtime string.
+   * @returns a promise when the linking is done.
    */
-  createString(initialValue?: string) : Promise<IObservableString>;
+  linkString(str: IObservableString): Promise<void>;
 
   /**
    * Create a vector for the realtime model.
@@ -150,7 +150,7 @@ interface IRealtimeHandler {
    *
    * @returns a promise of a realtime vector.
    */
-  createVector<T extends ISynchronizable<T> >(factory: (value: JSONObject)=>T, initialValue?: IObservableUndoableVector<T>): Promise<IObservableUndoableVector<T>>;
+  linkVector<T extends ISynchronizable<T>>(vec: IObservableUndoableVector<T>): Promise<void>;
 }
 
 /**
@@ -171,7 +171,7 @@ interface ISynchronizable<T> extends ISerializable {
 let trackerSet = new Set<[InstanceTracker<Widget>, (widget: Widget)=>IRealtimeModel, (widget: Widget)=>void]>();
 
 export
-function addRealtimeTracker( tracker: InstanceTracker<Widget>, getModel : (widget: Widget)=>IRealtimeModel, callback: (widget: Widget)=>void = ()=>{} ): void {
+function addRealtimeTracker( tracker: InstanceTracker<Widget>, getModel: (widget: Widget)=>IRealtimeModel, callback: (widget: Widget)=>void = ()=>{} ): void {
   trackerSet.add([tracker, getModel, callback]);
 }
 

@@ -42,6 +42,12 @@ interface IObservableUndoableVector<T extends ISerializable> extends IObservable
   readonly canUndo: boolean;
 
   /**
+   * A factory function that can construct
+   * objects of type T from JSON.
+   */
+  factory: (value: JSONObject)=>T;
+
+  /**
    * Begin a compound operation.
    *
    * @param isUndoAble - Whether the operation is undoable.
@@ -97,6 +103,13 @@ class ObservableUndoableVector<T extends ISerializable> extends ObservableVector
    */
   get canUndo(): boolean {
     return this._index >= 0;
+  }
+
+  /**
+   * Get the factory object for deserialization.
+   */
+  get factory(): (value: JSONObject)=>T {
+    return this._factory;
   }
 
   /**

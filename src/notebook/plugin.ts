@@ -229,15 +229,8 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
 
   addRealtimeTracker(tracker, (widget: NotebookPanel) => {
     return widget.context.model as NotebookModel;
-  }, (widget: NotebookPanel)=>{
-    let notebook = widget.notebook;
-    let model = notebook.model;
-    //Trigger a model changed event to hook the widget
-    //up to the new collaborative model cells.
-    notebook.model = null;
-    notebook.model = model;
-    console.log("Realtime: cells reregistered.");
   });
+
   return tracker;
 }
 

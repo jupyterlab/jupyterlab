@@ -26,6 +26,16 @@ interface IObservableString extends IDisposable {
   text: string;
 
   /**
+   * Get whether this string can be linked to another.
+   * If so, the functions `link` and `unlink` will perform
+   * that. Otherwise, they are no-op functions.
+   *
+   * @returns `true` if the string may be linked to another,
+   *   `false` otherwise.
+   */
+  readonly isLinkable: boolean;
+
+  /**
    * Insert a substring.
    *
    * @param index - The starting index.
@@ -42,6 +52,19 @@ interface IObservableString extends IDisposable {
    * @param end - The ending index.
    */
   remove(start: number, end: number): void;
+
+  /**
+   * Link the string to another string.
+   * Any changes to either are mirrored in the other.
+   *
+   * @param str: the parent string.
+   */
+  link(str: IObservableString): void;
+
+  /**
+   * Unlink the string from its parent string.
+   */
+  unlink(): void;
 
   /**
    * Set the ObservableString to an empty string.
@@ -75,26 +98,38 @@ class ObservableString implements IObservableString {
   }
 
   /**
+   * Get whether this string can be linked to another.
+   *
+   * @returns `true`.
+   */
+  readonly isLinkable: boolean = true;
+
+  /**
    * Set the value of the string.
    */
   set text( value: string ) {
-    if (value.length === this._text.length && value === this._text) {
-      return;
+    if(!this._parent) {
+      if (value.length === this._text.length && value === this._text) {
+        return;
+      }
+      this._text = value;
+      this._changed.emit({
+        type: 'set',
+        start: 0,
+        end: value.length,
+        value: value
+      });
+    } else {
+      this._parent.text = value;
     }
-    this._text = value;
-    this._changed.emit({
-      type: 'set',
-      start: 0,
-      end: value.length,
-      value: value
-    });
   }
 
   /**
    * Get the value of the string.
    */
   get text(): string {
-    return this._text;
+    if(!this._parent) return this._text;
+    else return this._parent.text;
   }
 
   /**
@@ -105,15 +140,19 @@ class ObservableString implements IObservableString {
    * @param text - The substring to insert.
    */
   insert(index: number, text: string): void {
-    this._text = this._text.slice(0, index) +
-                 text +
-                 this._text.slice(index);
-    this._changed.emit({
-      type: 'insert',
-      start: index,
-      end: index + text.length,
-      value: text
-    });
+    if(!this._parent) {
+      this._text = this._text.slice(0, index) +
+                   text +
+                   this._text.slice(index);
+      this._changed.emit({
+        type: 'insert',
+        start: index,
+        end: index + text.length,
+        value: text
+      });
+    } else {
+      this._parent.insert(index, text);
+    }
   }
 
   /**
@@ -124,16 +163,50 @@ class ObservableString implements IObservableString {
    * @param end - The ending index.
    */
   remove(start: number, end: number): void {
-    let oldValue: string = this._text.slice(start, end);
-    this._text = this._text.slice(0, start) +
-                 this._text.slice(end);
-    this._changed.emit({
-      type: 'remove',
-      start: start,
-      end: end,
-      value: oldValue
-    });
+    if(!this._parent) {
+      let oldValue: string = this._text.slice(start, end);
+      this._text = this._text.slice(0, start) +
+                   this._text.slice(end);
+      this._changed.emit({
+        type: 'remove',
+        start: start,
+        end: end,
+        value: oldValue
+      });
+    } else {
+      this._parent.remove(start, end);
+    }
   }
+
+  /**
+   * Link the string to another string.
+   * Any changes to either are mirrored in the other.
+   *
+   * @param str: the parent string.
+   */
+  link(str: IObservableString): void {
+    //Trigger a changed signal if necessary.
+    if(str.text !== this.text) {
+      this.text = str.text;
+    }
+    this._parent = str;
+    this._text = '';
+    //Forward the parent's signals
+    this._parent.changed.connect(this._forwardSignal, this);
+  }
+
+
+  /**
+   * Unlink the string from its parent string.
+   */
+  unlink(): void {
+    if(this._parent) {
+      this._text = this._parent.text;
+      this._parent.changed.disconnect(this._forwardSignal, this);
+      this._parent = null;
+    }
+  }
+
 
   /**
    * Set the ObservableString to an empty string.
@@ -157,13 +230,20 @@ class ObservableString implements IObservableString {
       return;
     }
     this._isDisposed = true;
+    if(this._parent) {
+      this.unlink();
+    }
     Signal.clearData(this);
     this.clear();
   }
 
+  private _forwardSignal( s: IObservableString, c: ObservableString.IChangedArgs) {
+    this._changed.emit(c);
+  }
   private _text = '';
   private _isDisposed : boolean = false;
   private _changed = new Signal<this, ObservableString.IChangedArgs>(this);
+  private _parent: IObservableString = null;
 }
 
 
