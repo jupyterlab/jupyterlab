@@ -137,6 +137,9 @@ class CellModel extends CodeEditor.Model implements ICellModel {
     super();
     this.value.changed.connect(this.onGenericChange, this);
     let cell = options.cell;
+    this.stateChanged.connect( ()=> {
+      this.synchronizeRequest.emit(void 0);
+    });
     if (!cell) {
       return;
     }
@@ -160,10 +163,6 @@ class CellModel extends CodeEditor.Model implements ICellModel {
       this._metadata.set(key, metadata[key]);
     }
     this._metadata.changed.connect(this.onGenericChange, this);
-
-    this.stateChanged.connect( ()=> {
-      this.synchronizeRequest.emit(void 0);
-    });
   }
 
   /**
