@@ -1104,13 +1104,16 @@ describe('notebook/notebook/actions', () => {
         expect(widget.widgets.at(0).model.source).to.be(source);
       });
 
-      it('should add a new code cell if all cells were cut', () => {
+      it('should add a new code cell if all cells were cut', (done) => {
         for (let i = 0; i < widget.widgets.length; i++) {
           widget.select(widget.widgets.at(i));
         }
         NotebookActions.cut(widget, clipboard);
-        expect(widget.widgets.length).to.be(1);
-        expect(widget.activeCell).to.be.a(CodeCellWidget);
+        requestAnimationFrame(() => {
+          expect(widget.widgets.length).to.be(1);
+          expect(widget.activeCell).to.be.a(CodeCellWidget);
+          done();
+        });
       });
 
     });

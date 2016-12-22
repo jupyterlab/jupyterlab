@@ -178,32 +178,38 @@ namespace NotebookActions {
     }
     let model = widget.model;
     let cells = model.cells;
-    let toDelete: ICellModel[] = [];
-    let index = -1;
+    let toDelete: number[] = [];
     widget.mode = 'command';
 
     // Find the cells to delete.
     each(enumerate(widget.widgets), ([i, child]) => {
-      if (widget.isSelected(child)) {
-        index = i;
-        toDelete.push(cells.at(i));
+      let deletable = child.model.getMetadata('deletable').getValue();
+      if (widget.isSelected(child) && deletable !== false) {
+        toDelete.push(i);
       }
     });
 
-    // Delete the cells as one undo event.
-    cells.beginCompoundOperation();
-    each(toDelete, cell => {
-      cells.remove(cell);
-    });
-    // The model will add a new code cell if there are no
-    // remaining cells.
-    model.cells.endCompoundOperation();
+    // If cells are not deletable, we may not have anything to delete.
+    if (toDelete.length > 0) {
+      // Delete the cells as one undo event.
+      cells.beginCompoundOperation();
+      each(toDelete.reverse(), i => {
+        cells.removeAt(i);
+      });
+      // The model will add a new code cell if there are no
+      // remaining cells.
+      model.cells.endCompoundOperation();
 
-    // Select the cell *after* the last selected.
-    // Note: The activeCellIndex is clamped to the available cells,
-    // so if the last cell is deleted the previous cell will be activated.
-    index -= toDelete.length - 1;
-    widget.activeCellIndex = index;
+      // Select the *first* interior cell not deleted or the cell
+      // *after* the last selected cell.
+      // Note: The activeCellIndex is clamped to the available cells,
+      // so if the last cell is deleted the previous cell will be activated.
+      widget.activeCellIndex = toDelete[0];
+    }
+    
+    // Deselect any remaining, undeletable cells. Do this even if we don't
+    // delete anything so that users are aware *something* happened. 
+    widget.deselectAll();
   }
 
   /**
@@ -609,6 +615,35 @@ namespace NotebookActions {
   }
 
   /**
+   * Copy or cut the selected cell data to a clipboard.
+   *
+   * @param widget - The target notebook widget.
+   *
+   * @param clipboard - The clipboard object.
+   *
+   * @param cut - Whether to copy or cut.
+   */
+   function copyOrCut(widget: Notebook, clipboard: IClipboard, cut: boolean): void {
+     if (!widget.model || !widget.activeCell) {
+       return;
+     }
+     widget.mode = 'command';
+     clipboard.clear();
+     let data: nbformat.IBaseCell[] = [];
+     each(widget.widgets, child => {
+       if (widget.isSelected(child)) {
+         data.push(child.model.toJSON());
+       }
+     });
+     clipboard.setData(JUPYTER_CELL_MIME, data);
+     if (cut) {
+       deleteCells(widget);
+     } else {
+       widget.deselectAll();
+     }
+   }
+
+  /**
    * Copy the selected cell data to a clipboard.
    *
    * @param widget - The target notebook widget.
@@ -617,19 +652,7 @@ namespace NotebookActions {
    */
   export
   function copy(widget: Notebook, clipboard: IClipboard): void {
-    if (!widget.model || !widget.activeCell) {
-      return;
-    }
-    widget.mode = 'command';
-    clipboard.clear();
-    let data: nbformat.IBaseCell[] = [];
-    each(widget.widgets, child => {
-      if (widget.isSelected(child)) {
-        data.push(child.model.toJSON());
-      }
-    });
-    clipboard.setData(JUPYTER_CELL_MIME, data);
-    widget.deselectAll();
+    copyOrCut(widget, clipboard, false);
   }
 
   /**
@@ -645,37 +668,7 @@ namespace NotebookActions {
    */
   export
   function cut(widget: Notebook, clipboard: IClipboard): void {
-    if (!widget.model || !widget.activeCell) {
-      return;
-    }
-    let data: nbformat.IBaseCell[] = [];
-    let model = widget.model;
-    let cells = model.cells;
-    let toDelete: ICellModel[] = [];
-    widget.mode = 'command';
-
-    // Gather the cell data.
-    each(widget.widgets, child => {
-      if (widget.isSelected(child)) {
-        data.push(child.model.toJSON());
-        toDelete.push(child.model);
-      }
-    });
-
-    // Preserve the history as one undo event.
-    model.cells.beginCompoundOperation();
-    each(toDelete, cell => {
-      cells.remove(cell);
-    });
-
-    // If there are no cells, add a code cell.
-    if (!model.cells.length) {
-      let cell = model.factory.createCodeCell();
-      model.cells.pushBack(cell);
-    }
-    model.cells.endCompoundOperation();
-
-    clipboard.setData(JUPYTER_CELL_MIME, data);
+    copyOrCut(widget, clipboard, true);
   }
 
   /**
