@@ -278,7 +278,7 @@ class NotebookModel extends DocumentModel implements INotebookModel, IRealtimeMo
   registerCollaborative( realtimeHandler : IRealtimeHandler ) : Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this._realtimeHandler = realtimeHandler;
-      this._realtimeHandler.linkVector<ICellModel>(this._cells).then(()=>{
+      this._realtimeHandler.linkVector<ICellModel>(this._cells, 'notebook:cells').then(()=>{
         resolve();
       }).catch( ()=> {
         console.log("Unable to register notebook as collaborative");

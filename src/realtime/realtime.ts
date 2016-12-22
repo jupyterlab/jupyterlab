@@ -132,21 +132,28 @@ interface IRealtimeHandler {
    *
    * @param str: the string to link to a realtime string.
    *
+   * @param id: an identifier for this collaborative object
+   *   which is unique to the `IRealtimeHandler`.
+   *   The `IRealtimeModel` describing itself to the handler
+   *   is responsible for avoiding name collisions.
+   *
    * @returns a promise when the linking is done.
    */
-  linkString(str: IObservableString): Promise<void>;
+  linkString(str: IObservableString, id: string): Promise<void>;
 
   /**
    * Create a vector for the realtime model.
    *
-   * @param factory: a method that takes a `JSONObject` representing a
-   *   serialized vector entry, and creates an object from that.
+   * @param vec: the vector to link to a realtime vector.
    *
-   * @param initialValue: the optional initial value of the vector.
+   * @param id: an identifier for this collaborative object
+   *   which is unique to the `IRealtimeHandler`.
+   *   The `IRealtimeModel` describing itself to the handler
+   *   is responsible for avoiding name collisions.
    *
-   * @returns a promise of a realtime vector.
+   * @returns a promise when the linking is done.
    */
-  linkVector<T extends ISynchronizable<T>>(vec: IObservableUndoableVector<T>): Promise<void>;
+  linkVector<T extends ISynchronizable<T>>(vec: IObservableUndoableVector<T>, id: string): Promise<void>;
 }
 
 /**
