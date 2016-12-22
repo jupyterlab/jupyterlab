@@ -113,6 +113,14 @@ interface IObservableVector<T> extends IDisposable {
   readonly isLinkable: boolean;
 
   /**
+   * Get whether this vector can is linked to another.
+   *
+   * @returns `true` if the vector is linked to another,
+   *   `false` otherwise.
+   */
+  readonly isLinked: boolean;
+
+  /**
    * Set the value at the specified index.
    *
    * @param index - The positive integer index of interest.
@@ -351,6 +359,16 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
   readonly isLinkable: boolean = true;
 
   /**
+   * Get whether this vector can is linked to another.
+   *
+   * @returns `true` if the vector is linked to another,
+   *   `false` otherwise.
+   */
+  get isLinked(): boolean {
+    return !!this._parent;
+  }
+
+  /**
    * Test whether the vector has been disposed.
    */
   get isDisposed(): boolean {
@@ -391,7 +409,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    */
   get length(): number {
     //TODO: How to call super.length?
-    if (!this._parent) {
+    if (!this.isLinked) {
       return (this as any)._array.length;
     } else {
       return this._parent.length;
@@ -411,7 +429,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * No changes.
    */
   iter(): IIterator<T> {
-    if(!this._parent) {
+    if(!this.isLinked) {
       return super.iter();
     } else {
       return this._parent.iter();
@@ -435,7 +453,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * An `index` which is non-integral or out of range.
    */
   at(index: number): T {
-    if(!this._parent) {
+    if(!this.isLinked) {
       return super.at(index);
     } else {
       return this._parent.at(index);
@@ -471,7 +489,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * An `index` which is non-integral or out of range.
    */
   set(index: number, value: T): void {
-    if(!this._parent) {
+    if(!this.isLinked) {
       let oldValues = [this.at(index)];
       if (value === undefined) {
         value = null;
@@ -508,7 +526,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * No changes.
    */
   pushBack(value: T): number {
-    if(!this._parent) {
+    if(!this.isLinked) {
       let num = super.pushBack(value);
       // Bail if in the constructor.
       if (!this._changed) {
@@ -540,7 +558,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * Iterators pointing at the removed value are invalidated.
    */
   popBack(): T {
-    if(!this._parent) {
+    if(!this.isLinked) {
       let value = super.popBack();
       this._changed.emit({
         type: 'remove',
@@ -577,7 +595,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * An `index` which is non-integral.
    */
   insert(index: number, value: T): number {
-    if(!this._parent) {
+    if(!this.isLinked) {
       let num = super.insert(index, value);
       this._changed.emit({
         type: 'add',
@@ -607,7 +625,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * Iterators pointing at the removed value and beyond are invalidated.
    */
   remove(value: T): number {
-    if(!this._parent) {
+    if(!this.isLinked) {
       let itemCmp = this._itemCmp;
       let index = ArrayExt.findFirstIndex(toArray(this), item => itemCmp(item, value));
       this.removeAt(index);
@@ -635,7 +653,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * An `index` which is non-integral.
    */
   removeAt(index: number): T {
-    if(!this._parent) {
+    if(!this.isLinked) {
       let value = super.removeAt(index);
       this._changed.emit({
         type: 'remove',
@@ -660,7 +678,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * All current iterators are invalidated.
    */
   clear(): void {
-    if(!this._parent) {
+    if(!this.isLinked) {
       let oldValues = toArray(this);
       super.clear();
       this._changed.emit({
@@ -693,7 +711,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * A `fromIndex` or a `toIndex` which is non-integral.
    */
   move(fromIndex: number, toIndex: number): void {
-    if(!this._parent) {
+    if(!this.isLinked) {
       let value = this.at(fromIndex);
       super.removeAt(fromIndex);
       if (toIndex < fromIndex) {
@@ -728,7 +746,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * No changes.
    */
   pushAll(values: IterableOrArrayLike<T>): number {
-    if(!this._parent) {
+    if(!this.isLinked) {
       let newIndex = this.length;
       let newValues = toArray(values);
       each(newValues, value => { super.pushBack(value); });
@@ -767,7 +785,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * An `index` which is non-integral.
    */
   insertAll(index: number, values: IterableOrArrayLike<T>): number {
-    if(!this._parent) {
+    if(!this.isLinked) {
       let newIndex = index;
       let newValues = toArray(values);
       each(newValues, value => { super.insert(index++, value); });
@@ -803,7 +821,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * A `startIndex` or `endIndex` which is non-integral.
    */
   removeRange(startIndex: number, endIndex: number): number {
-    if(!this._parent) {
+    if(!this.isLinked) {
       let oldValues: T[] = [];
       for (let i = startIndex; i < endIndex; i++) {
         oldValues.push(super.removeAt(startIndex));
