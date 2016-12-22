@@ -189,8 +189,8 @@ namespace NotebookActions {
       }
     });
 
-    // If cells are not deletable, we may not have anything to delete
-    if(toDelete.length > 0){
+    // If cells are not deletable, we may not have anything to delete.
+    if (toDelete.length > 0) {
       // Delete the cells as one undo event.
       cells.beginCompoundOperation();
       each(toDelete.reverse(), i => {
@@ -621,7 +621,7 @@ namespace NotebookActions {
    *
    * @param clipboard - The clipboard object.
    *
-   * @param cut - Whether to copy or cut
+   * @param cut - Whether to copy or cut.
    */
    function copyOrCut(widget: Notebook, clipboard: IClipboard, cut: boolean): void {
      if (!widget.model || !widget.activeCell) {
@@ -636,7 +636,7 @@ namespace NotebookActions {
        }
      });
      clipboard.setData(JUPYTER_CELL_MIME, data);
-     if(cut){
+     if (cut) {
        deleteCells(widget);
      } else {
        widget.deselectAll();
@@ -652,7 +652,7 @@ namespace NotebookActions {
    */
   export
   function copy(widget: Notebook, clipboard: IClipboard): void {
-    copyOrCut(widget,clipboard,false);
+    copyOrCut(widget, clipboard, false);
   }
 
   /**
@@ -668,7 +668,7 @@ namespace NotebookActions {
    */
   export
   function cut(widget: Notebook, clipboard: IClipboard): void {
-    copyOrCut(widget,clipboard,true);
+    copyOrCut(widget, clipboard, true);
   }
 
   /**
