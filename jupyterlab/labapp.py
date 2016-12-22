@@ -178,7 +178,10 @@ class LabApp(NotebookApp):
         for (name, config) in self.labextensions.items():
             if not config['enabled']:
                 continue
-            warnings = validate_labextension_folder(name, find_labextension(name))
+            folder = find_labextension(name)
+            if folder is None:
+                continue
+            warnings = validate_labextension_folder(name, folder)
             if warnings:
                 continue
             data = get_labextension_manifest_data_by_name(name)
