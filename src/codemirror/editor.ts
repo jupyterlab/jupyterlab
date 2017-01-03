@@ -71,19 +71,18 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     let model = this._model = options.model;
 
     options.theme = (options.theme || DEFAULT_CODEMIRROR_THEME);
-    options.value = this._model.doc;
     let editor = this._editor = CodeMirror(host, options);
     let doc = editor.getDoc();
 
-    // Handle initial model values.
+    // Handle initial values for text, mimetype, and selections.
     doc.setValue(model.value.text);
     this._onMimeTypeChanged();
-    // TODO: handle initial selections.
+    this._onCursorActivity();
 
     // Connect to changes.
     model.value.changed.connect(this._onValueChanged, this);
     model.mimeTypeChanged.connect(() => this._onMimeTypeChanged(), this);
-    model.selections.changed.connect((selections, args) => this._onSelectionsChanged(selections, args), this);
+    model.selections.changed.connect(this._onSelectionsChanged, this);
 
     CodeMirror.on(editor, 'keydown', (editor, event) => {
       findIndex(this._keydownHandlers, handler => {
@@ -114,7 +113,6 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       return;
     }
     this._isDisposed = true;
-    this._model.dispose();
     this._model = null;
     this._editor = null;
     this._keydownHandlers.clear();
@@ -308,7 +306,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Returns the primary position of the cursor, never `null`.
    */
   getCursorPosition(): CodeEditor.IPosition {
-    const cursor = this._model.doc.getCursor();
+    const cursor = this._editor.getDoc().getCursor();
     return this.toPosition(cursor);
   }
 
@@ -317,7 +315,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   setCursorPosition(position: CodeEditor.IPosition): void {
     const cursor = this.toCodeMirrorPosition(position);
-    this._model.doc.setCursor(cursor);
+    this._editor.getDoc().setCursor(cursor);
   }
 
   /**
@@ -338,11 +336,11 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Gets the selections for all the cursors, never `null` or empty.
    */
   getSelections(): CodeEditor.ITextSelection[] {
-    const selections = this._model.doc.listSelections();
+    const selections = this._editor.getDoc().listSelections();
     if (selections.length > 0) {
       return selections.map(selection => this.toSelection(selection));
     }
-    const cursor = this._model.doc.getCursor();
+    const cursor = this._editor.getDoc().getCursor();
     const selection = this.toSelection({ anchor: cursor, head: cursor });
     return [selection];
   }
@@ -354,7 +352,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   setSelections(selections: CodeEditor.IRange[]): void {
     const cmSelections = this.toCodeMirrorSelections(selections);
-    this._model.doc.setSelections(cmSelections, 0);
+    this._editor.getDoc().setSelections(cmSelections, 0);
   }
 
   /**
@@ -409,7 +407,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     for (const selection of selections) {
       const { anchor, head } = this.toCodeMirrorSelection(selection);
       const markerOptions = this.toTextMarkerOptions(selection);
-      this._model.doc.markText(anchor, head, markerOptions);
+      this._editor.getDoc().markText(anchor, head, markerOptions);
     }
     this.selectionMarkers[uuid] = markers;
   }
@@ -515,7 +513,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Handles document changes.
    */
-  private _onDocChange(doc: CodeMirror.Doc, change: CodeMirror.EditorChange) {
+  private _onDocChanged(doc: CodeMirror.Doc, change: CodeMirror.EditorChange) {
     if (this._changeGuard) {
       return;
     }
