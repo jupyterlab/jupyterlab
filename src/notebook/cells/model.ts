@@ -22,8 +22,16 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
+  CodeEditor
+} from '../../codeeditor';
+
+import {
   IChangedArgs
 } from '../../common/interfaces';
+
+import {
+  IObservableString, ObservableString
+} from '../../common/observablestring';
 
 import {
   IMetadataCursor, MetadataCursor
@@ -38,7 +46,7 @@ import {
  * The definition of a model object for a cell.
  */
 export
-interface ICellModel extends IDisposable {
+interface ICellModel extends CodeEditor.IModel {
   /**
    * The type of the cell.
    */
@@ -58,11 +66,6 @@ interface ICellModel extends IDisposable {
    * A signal emitted when a model state changes.
    */
   stateChanged: ISignal<ICellModel, IChangedArgs<any>>;
-
-  /**
-   * The input content of the cell.
-   */
-  source: string;
 
   /**
    * Serialize the model to JSON.
@@ -142,18 +145,20 @@ interface IRawCellModel extends ICellModel {
  * An implementation of the cell model.
  */
 export
-class CellModel implements ICellModel {
+class CellModel extends CodeEditor.Model implements ICellModel {
   /**
    * Construct a cell model from optional cell content.
    */
   constructor(cell?: nbformat.IBaseCell) {
+    super();
+    this.value.changed.connect(this._onValueChanged, this);
     if (!cell) {
       return;
     }
     if (Array.isArray(cell.source)) {
-      this.source = (cell.source as string[]).join('\n');
+      this.value.text = (cell.source as string[]).join('\n');
     } else {
-      this.source = cell.source as string;
+      this.value.text = cell.source as string;
     }
     let metadata = utils.copy(cell.metadata);
     if (this.type !== 'raw') {
@@ -169,40 +174,17 @@ class CellModel implements ICellModel {
   /**
    * A signal emitted when the state of the model changes.
    */
-  contentChanged: ISignal<ICellModel, void>;
+  contentChanged: ISignal<this, void>;
 
   /**
    * A signal emitted when a metadata field changes.
    */
-  metadataChanged: ISignal<ICellModel, IChangedArgs<any>>;
+  metadataChanged: ISignal<this, IChangedArgs<any>>;
 
   /**
    * A signal emitted when a model state changes.
    */
-  stateChanged: ISignal<ICellModel, IChangedArgs<any>>;
-
-  /**
-   * The input content of the cell.
-   */
-  get source(): string {
-    return this._source;
-  }
-  set source(newValue: string) {
-    if (this._source === newValue) {
-      return;
-    }
-    let oldValue = this._source;
-    this._source = newValue;
-    this.contentChanged.emit(void 0);
-    this.stateChanged.emit({ name: 'source', oldValue, newValue });
-  }
-
-  /**
-   * Get whether the model is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._metadata === null;
-  }
+  stateChanged: ISignal<this, IChangedArgs<any>>;
 
   /**
    * Dispose of the resources held by the model.
@@ -212,12 +194,12 @@ class CellModel implements ICellModel {
     if (this.isDisposed) {
       return;
     }
-    clearSignalData(this);
     for (let key in this._cursors) {
       this._cursors[key].dispose();
     }
     this._cursors = null;
     this._metadata = null;
+    super.dispose();
   }
 
   /**
@@ -226,7 +208,7 @@ class CellModel implements ICellModel {
   toJSON(): nbformat.ICell {
     return {
       cell_type: this.type,
-      source: this.source,
+      source: this.value.text,
       metadata: utils.copy(this._metadata) as nbformat.IBaseCellMetadata
     } as nbformat.ICell;
   }
@@ -287,9 +269,15 @@ class CellModel implements ICellModel {
    */
   type: nbformat.CellType;
 
+  /**
+   * Handle a change to the observable value.
+   */
+  private _onValueChanged(sender: IObservableString, args: ObservableString.IChangedArgs): void {
+    this.contentChanged.emit(void 0);
+  }
+
   private _metadata: { [key: string]: any } = Object.create(null);
   private _cursors: { [key: string]: MetadataCursor } = Object.create(null);
-  private _source = '';
 }
 
 

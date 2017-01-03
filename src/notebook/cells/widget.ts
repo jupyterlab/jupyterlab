@@ -42,7 +42,7 @@ import {
 } from '../output-area';
 
 import {
-  ICellEditorWidget, CodeCellEditorWidget
+  CellEditorWidget
 } from './editor';
 
 import {
@@ -125,35 +125,20 @@ class BaseCellWidget extends Widget {
     this.addClass(CELL_CLASS);
     this.layout = new PanelLayout();
 
+    let model = this._model = options.model;
     let renderer = options.renderer;
-    this._editor = renderer.createCellEditor();
+    this._editor = renderer.createCellEditor(this._model);
     this._input = renderer.createInputArea(this._editor);
 
     (this.layout as PanelLayout).addWidget(this._input);
-  }
 
-  /**
-   * A signal emitted when the model of the cell changes.
-   */
-  modelChanged: ISignal<BaseCellWidget, void>;
+    // Handle trusted cursor.
+    this._trustedCursor = model.getMetadata('trusted');
+    this._trusted = !!this._trustedCursor.getValue();
 
-  /**
-   * The model used by the widget.
-   */
-  get model(): ICellModel {
-    return this._model;
-  }
-  set model(newValue: ICellModel) {
-    if (!newValue && !this._model || newValue === this._model) {
-      return;
-    }
-
-    let oldValue: ICellModel = this._model;
-    this._model = newValue;
-    // Trigger private, protected, and public updates.
-    this._onModelChanged(oldValue, newValue);
-    this.onModelChanged(oldValue, newValue);
-    this.modelChanged.emit(void 0);
+    // Connect signal handlers.
+    model.metadataChanged.connect(this.onMetadataChanged, this);
+    model.stateChanged.connect(this.onModelStateChanged, this);
   }
 
   /**
@@ -167,27 +152,10 @@ class BaseCellWidget extends Widget {
    * Get the editor widget used by the cell.
    *
    * #### Notes
-   * This is a ready-only property.
+   * This is a read-only property.
    */
-  get editor(): ICellEditorWidget {
+  get editor(): CellEditorWidget {
     return this._editor;
-  }
-
-  /**
-   * The mimetype used by the cell.
-   */
-  get mimetype(): string {
-    return this._mimetype;
-  }
-  set mimetype(value: string) {
-    if (!value) {
-      return;
-    }
-    if (this._mimetype === value) {
-      return;
-    }
-    this._mimetype = value;
-    this.editor.setMimeType(value);
   }
 
   /**
@@ -262,7 +230,7 @@ class BaseCellWidget extends Widget {
       return;
     }
     // Handle read only state.
-    this._editor.setReadOnly(this._readOnly);
+    this._editor.editor.readOnly = this._readOnly;
     this.toggleClass(READONLY_CLASS, this._readOnly);
   }
 
@@ -291,18 +259,6 @@ class BaseCellWidget extends Widget {
   }
 
   /**
-   * Handle a new model.
-   *
-   * #### Notes
-   * This method is called after the model change has been handled
-   * internally and before the `modelChanged` signal is emitted.
-   * The default implementation is a no-op.
-   */
-  protected onModelChanged(oldValue: ICellModel, newValue: ICellModel): void {
-    // no-op
-  }
-
-  /**
    * Render an input instead of the text editor.
    */
   protected renderInput(widget: Widget): void {
@@ -318,31 +274,8 @@ class BaseCellWidget extends Widget {
     this._input.showEditor();
   }
 
-  /**
-   * Handle a model change.
-   */
-  private _onModelChanged(oldValue: ICellModel, newValue: ICellModel): void {
-    // If the model is being replaced, disconnect the old signal handler.
-    if (oldValue) {
-      oldValue.stateChanged.disconnect(this.onModelStateChanged, this);
-      oldValue.metadataChanged.disconnect(this.onMetadataChanged, this);
-    }
-
-    // Reset the editor model and set its mode to be the default MIME type.
-    this._editor.model = this._model;
-    this._editor.setMimeType(this._mimetype);
-
-    // Handle trusted cursor.
-    this._trustedCursor = this._model.getMetadata('trusted');
-    this._trusted = !!this._trustedCursor.getValue();
-
-    // Connect signal handlers.
-    this._model.metadataChanged.connect(this.onMetadataChanged, this);
-    this._model.stateChanged.connect(this.onModelStateChanged, this);
-  }
-
   private _input: InputAreaWidget = null;
-  private _editor: ICellEditorWidget = null;
+  private _editor: CellEditorWidget = null;
   private _model: ICellModel = null;
   private _mimetype = 'text/plain';
   private _readOnly = false;
@@ -366,6 +299,11 @@ namespace BaseCellWidget {
   export
   interface IOptions {
     /**
+     * The model used by the cell.
+     */
+    model: ICellModel;
+
+    /**
      * A renderer for creating cell widgets.
      *
      * The default is a shared renderer instance.
@@ -381,12 +319,12 @@ namespace BaseCellWidget {
     /**
      * Create a new cell editor for the widget.
      */
-    createCellEditor(): ICellEditorWidget;
+    createCellEditor(model: ICellModel): CellEditorWidget;
 
     /**
      * Create a new input area for the widget.
      */
-    createInputArea(editor: ICellEditorWidget): InputAreaWidget;
+    createInputArea(editor: CellEditorWidget): InputAreaWidget;
   }
 
   /**
@@ -398,7 +336,7 @@ namespace BaseCellWidget {
     /**
      * A code editor factory.
      */
-    readonly editorFactory: (host: Widget) => CodeEditor.IEditor;
+    readonly editorFactory: (host: Widget, model: CodeEditor.IModel) => CodeEditor.IEditor;
 
     /**
      * Creates a new renderer.
@@ -410,14 +348,14 @@ namespace BaseCellWidget {
     /**
      * Create a new cell editor for the widget.
      */
-    createCellEditor(): ICellEditorWidget {
-      return new CodeCellEditorWidget(this.editorFactory);
+    createCellEditor(model: CodeEditor.IModel): CellEditorWidget {
+      return new CellEditorWidget({ factory: this.editorFactory, model });
     }
 
     /**
      * Create a new input area for the widget.
      */
-    createInputArea(editor: ICellEditorWidget): InputAreaWidget {
+    createInputArea(editor: CellEditorWidget): InputAreaWidget {
       return new InputAreaWidget(editor);
     }
   }
@@ -479,7 +417,7 @@ class CodeCellWidget extends BaseCellWidget {
    */
   execute(kernel: Kernel.IKernel): Promise<KernelMessage.IExecuteReplyMsg> {
     let model = this.model;
-    let code = model.source;
+    let code = model.value.text;
     if (!code.trim()) {
       model.executionCount = null;
       model.outputs.clear();
@@ -583,6 +521,11 @@ namespace CodeCellWidget {
   export
   interface IOptions {
     /**
+     * The model used by the cell.
+     */
+    model: ICellModel;
+
+    /**
      * A renderer for creating cell widgets.
      *
      * The default is a shared renderer instance.
@@ -639,7 +582,7 @@ class MarkdownCellWidget extends BaseCellWidget {
     super(options);
     this.addClass(MARKDOWN_CELL_CLASS);
     // Insist on the Github-flavored markdown mode.
-    this.mimetype = 'text/x-ipythongfm';
+    this.model.mimeType = 'text/x-ipythongfm';
     this._rendermime = options.rendermime;
   }
 
@@ -699,7 +642,7 @@ class MarkdownCellWidget extends BaseCellWidget {
    */
   private _updateOutput(): void {
     let model = this.model;
-    let text = model && model.source || DEFAULT_MARKDOWN_TEXT;
+    let text = model && model.value.text || DEFAULT_MARKDOWN_TEXT;
     let trusted = this.trusted;
     // Do not re-render if the text has not changed and the trusted
     // has not changed.
@@ -731,6 +674,11 @@ namespace MarkdownCellWidget {
    */
   export
   interface IOptions {
+    /**
+     * The model used by the cell.
+     */
+    model: ICellModel;
+
     /**
      * A renderer for creating cell widgets.
      *
@@ -774,7 +722,7 @@ class InputAreaWidget extends Widget {
   /**
    * Construct an input area widget.
    */
-  constructor(editor: ICellEditorWidget) {
+  constructor(editor: CellEditorWidget) {
     super();
     this.addClass(INPUT_CLASS);
     editor.addClass(EDITOR_CLASS);
@@ -831,6 +779,6 @@ class InputAreaWidget extends Widget {
   }
 
   private _prompt: Widget;
-  private _editor: ICellEditorWidget;
+  private _editor: CellEditorWidget;
   private _rendered: Widget;
 }

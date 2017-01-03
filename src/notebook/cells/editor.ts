@@ -129,83 +129,6 @@ interface ICompletionRequest extends IEditorState {
 
 
 /**
- * A widget for a cell editor.
- */
-export
-interface ICellEditorWidget extends Widget {
-  /**
-   * The editor used by the widget.
-   */
-  readonly editor: CodeEditor.IEditor;
-
-  /**
-   * The cell model used by the editor.
-   */
-  model: ICellModel | null;
-
-  /**
-   * A signal emitted when either the top or bottom edge is requested.
-   */
-  edgeRequested: ISignal<ICellEditorWidget, EdgeLocation>;
-
-  /**
-   * A signal emitted when a text change is completed.
-   */
-  textChanged: ISignal<ICellEditorWidget, ITextChange>;
-
-  /**
-   * A signal emitted when a completion is requested.
-   */
-  completionRequested: ISignal<ICellEditorWidget, ICompletionRequest>;
-
-  /**
-   * The line numbers state of the editor.
-   */
-  lineNumbers: boolean;
-
-  /**
-   * Change the mime type for an editor.
-   */
-  setMimeType(mimeType: string): void;
-
-  /**
-   * Set whether the editor is read only.
-   */
-  setReadOnly(readOnly: boolean): void;
-
-  /**
-   * Test whether the editor has keyboard focus.
-   */
-  hasFocus(): boolean;
-
-  /**
-   * Returns a zero-based last line number.
-   */
-  getLastLine(): number;
-
-  /**
-   * Returns the position of the cursor.
-   */
-  getCursorPosition(): number;
-
-  /**
-   * Set the position of the cursor.
-   *
-   * @param position - A new cursor's position.
-   */
-  setCursorPosition(cursorPosition: number): void;
-
-  /**
-   * Set the position of the cursor.
-   *
-   * @param line - A zero-based line number.
-   *
-   * @param character - A zero-based character number.
-   */
-  setCursor(line: number, character: number): void;
-}
-
-/**
  * The key code for the up arrow key.
  */
 const UP_ARROW = 38;
@@ -225,22 +148,17 @@ const TAB = 9;
  */
 const CELL_EDITOR_CLASS = 'jp-CellEditor';
 
-/**
- * The class name added to read only cell editor widgets.
- */
-const READ_ONLY_CLASS = 'jp-mod-readOnly';
-
 
 /**
  * A code editor widget for a cell editor.
  */
 export
-class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget {
+class CellEditorWidget extends CodeEditorWidget {
   /**
    * Construct a new cell editor widget.
    */
-  constructor(editorFactory: (host: Widget) => CodeEditor.IEditor) {
-    super(editorFactory);
+  constructor(options: CodeEditorWidget.IOptions) {
+    super(options);
     this.addClass(CELL_EDITOR_CLASS);
 
     this.editor.model.value.changed.connect(() => {
@@ -254,171 +172,31 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
   /**
    * A signal emitted when a tab (text) completion is requested.
    */
-  completionRequested: ISignal<ICellEditorWidget, ICompletionRequest>;
+  completionRequested: ISignal<this, ICompletionRequest>;
 
   /**
    * A signal emitted when either the top or bottom edge is requested.
    */
-  edgeRequested: ISignal<ICellEditorWidget, EdgeLocation>;
+  edgeRequested: ISignal<this, EdgeLocation>;
 
   /**
    * A signal emitted when a text change is completed.
    */
-  textChanged: ISignal<ICellEditorWidget, ITextChange>;
-
-  /**
-   * The cell model used by the editor.
-   */
-  get model(): ICellModel | null {
-    return this._model;
-  }
-  set model(model: ICellModel | null) {
-    if (!model && !this._model || model === this._model) {
-      return;
-    }
-
-    const oldValue = this._model;
-    this._model = model;
-    this.onModelChanged(oldValue, model);
-  }
-
-  /**
-   * The line numbers state of the editor.
-   */
-  get lineNumbers(): boolean {
-    return this.editor.lineNumbers;
-  }
-  set lineNumbers(value: boolean) {
-    this.editor.lineNumbers = value;
-  }
-
-  /**
-   * Dispose of the resources held by the editor.
-   */
-  dispose(): void {
-    this._model = null;
-    super.dispose();
-  }
-
-  /**
-   * Change the mode for an editor based on the given mime type.
-   */
-  setMimeType(mimeType: string): void {
-    this.editor.model.mimeType = mimeType;
-  }
-
-  /**
-   * Set whether the editor is read only.
-   */
-  setReadOnly(readOnly: boolean): void {
-    let option = readOnly ? true : false;
-    this.editor.readOnly = option;
-    this.toggleClass(READ_ONLY_CLASS, option);
-  }
-
-  /**
-   * Test whether the editor has keyboard focus.
-   */
-  hasFocus(): boolean {
-    return this.editor.hasFocus();
-  }
-
-  /**
-   * Returns a zero-based last line number.
-   */
-  getLastLine(): number {
-    let editorModel = this.editor.model;
-    return editorModel.lineCount - 1;
-  }
-
-  /**
-   * Get the current cursor position of the editor.
-   */
-  getCursorPosition(): number {
-    const cursorPosition = this.editor.getCursorPosition();
-    return this.editor.model.getOffsetAt(cursorPosition);
-  }
-
-  /**
-   * Set the position of the cursor.
-   *
-   * @param position - A new cursor's position.
-   */
-  setCursorPosition(offset: number): void {
-    const position = this.editor.model.getPositionAt(offset);
-    this.editor.setCursorPosition(position);
-  }
-
-  /**
-   * Set the position of the cursor.
-   *
-   * @param line - A zero-based line number.
-   *
-   * @param character - A zero-based character number.
-   */
-  setCursor(line: number, character: number): void {
-    let editorModel = this.editor.model;
-    let position = editorModel.getOffsetAt({
-      line: line,
-      column: character
-    });
-    this.setCursorPosition(position);
-  }
-
-  /**
-   * Handle changes in the model.
-   *
-   * #### Notes
-   * Subclasses may override this method as needed.
-   */
-  protected onModelChanged(oldValue: ICellModel | null, newValue: ICellModel | null): void {
-    // If the model is being replaced, disconnect the old signal handler.
-    if (oldValue) {
-      oldValue.stateChanged.disconnect(this.onModelStateChanged, this);
-    }
-
-    if (newValue) {
-      this.editor.model.value.text = newValue.source || '';
-      this.editor.model.clearHistory();
-      newValue.stateChanged.connect(this.onModelStateChanged, this);
-    } else {
-      this.editor.model.value.text = '';
-    }
-  }
-
-  /**
-   * Handle changes in the model state.
-   */
-  protected onModelStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
-    switch (args.name) {
-    case 'source':
-      let editorModel = this.editor.model;
-      if (editorModel.value.text !== args.newValue) {
-        editorModel.value.text = args.newValue;
-      }
-      break;
-    default:
-      break;
-    }
-  }
+  textChanged: ISignal<this, ITextChange>;
 
   /**
    * Handle change events from the editor model.
    */
   protected onEditorModelChange(): void {
     let editor = this.editor;
-    let model = this.model;
     let newValue = editor.model.value.text;
     let cursorPosition = editor.getCursorPosition();
-    let position = editor.model.getOffsetAt(cursorPosition);
+    let position = editor.getOffsetAt(cursorPosition);
     let line = cursorPosition.line;
     let ch = cursorPosition.column;
     let coords = editor.getCoordinate(cursorPosition) as ICoords;
     let chHeight = editor.lineHeight;
     let chWidth = editor.charWidth;
-    if (model) {
-      model.source = newValue;
-    }
     this.textChanged.emit({
       line, ch, chHeight, chWidth, coords, position, newValue
     });
@@ -449,8 +227,8 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
         return false;
     }
 
-    let lastLine = editorModel.lineCount - 1;
-    let lastCh = editorModel.getLine(editorModel.lineCount - 1).length;
+    let lastLine = editor.lineCount - 1;
+    let lastCh = editor.getLine(lastLine).length;
     if (line === lastLine && ch === lastCh && event.keyCode === DOWN_ARROW) {
       if (!event.shiftKey) {
         this.edgeRequested.emit('bottom');
@@ -481,7 +259,7 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
       line: line,
       column: ch
     });
-    let position = editorModel.getOffsetAt({
+    let position = editor.getOffsetAt({
       line: line,
       column: ch
     });
@@ -504,12 +282,10 @@ class CodeCellEditorWidget extends CodeEditorWidget implements ICellEditorWidget
     };
     this.completionRequested.emit(data as ICompletionRequest);
   }
-
-  private _model: ICellModel | null = null;
 }
 
 
-// Define the signals for the `CodeCellEditorWidget` class.
-defineSignal(CodeCellEditorWidget.prototype, 'completionRequested');
-defineSignal(CodeCellEditorWidget.prototype, 'edgeRequested');
-defineSignal(CodeCellEditorWidget.prototype, 'textChanged');
+// Define the signals for the `CellEditorWidget` class.
+defineSignal(CellEditorWidget.prototype, 'completionRequested');
+defineSignal(CellEditorWidget.prototype, 'edgeRequested');
+defineSignal(CellEditorWidget.prototype, 'textChanged');
