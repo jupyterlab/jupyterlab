@@ -43,7 +43,7 @@ import {
 } from '../notebook/cells';
 
 import {
-  EdgeLocation, ICellEditorWidget, ITextChange
+  CellEditorWidget
 } from '../notebook/cells/editor';
 
 import {
@@ -138,7 +138,7 @@ class ConsoleContent extends Widget {
     let banner = this._renderer.createBanner();
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
-    banner.model.source = '...';
+    banner.model.value.text = '...';
     this._content.addWidget(banner);
 
     // Set the banner text and the mimetype.
@@ -303,8 +303,8 @@ class ConsoleContent extends Widget {
   inject(code: string): Promise<void> {
     // Create a new cell using the prompt renderer.
     let cell = this._renderer.createPrompt(this._rendermime, this);
-    cell.model.source = code;
-    cell.mimetype = this._mimetype;
+    cell.model.value.text = code;
+    cell.model.mimeType = this._mimetype;
     cell.readOnly = true;
     this.addCell(cell);
     return this._execute(cell);
@@ -316,11 +316,14 @@ class ConsoleContent extends Widget {
   insertLinebreak(): void {
     let prompt = this.prompt;
     let model = prompt.model;
+    let editor = prompt.editor.editor;
     // Insert the line break at the cursor position, and move cursor forward.
-    let pos = prompt.editor.getCursorPosition();
-    model.source = model.source.substr(0, pos) + '\n' +
-      model.source.substr(pos);
-    prompt.editor.setCursorPosition(pos + 1);
+    let pos = editor.getCursorPosition();
+    let offset = editor.getOffsetAt(pos);
+    let text = model.value.text;
+    model.value.text = text.substr(0, offset) + '\n' + text.substr(offset);
+    pos = editor.getPositionAt(offset + 1);
+    editor.setCursorPosition(pos);
   }
 
   /**
@@ -406,7 +409,7 @@ class ConsoleContent extends Widget {
 
     // Create the new prompt.
     prompt = this._renderer.createPrompt(this._rendermime, this);
-    prompt.mimetype = this._mimetype;
+    prompt.model.mimeType = this._mimetype;
     prompt.addClass(PROMPT_CLASS);
     this._input.addWidget(prompt);
 
@@ -426,36 +429,40 @@ class ConsoleContent extends Widget {
   /**
    * Handle an edge requested signal.
    */
-  protected onEdgeRequest(editor: ICellEditorWidget, location: EdgeLocation): Promise<void> {
+  protected onEdgeRequest(widget: CellEditorWidget, location: CellEditorWidget.EdgeLocation): Promise<void> {
     let prompt = this.prompt;
+    let model = prompt.model;
+    let source = prompt.model.value.text;
+    let editor = widget.editor;
+
     if (location === 'top') {
-      return this._history.back(prompt.model.source).then(value => {
+      return this._history.back(source).then(value => {
         if (!value) {
           return;
         }
-        if (prompt.model.source === value) {
+        if (model.value.text === value) {
           return;
         }
         this._setByHistory = true;
-        prompt.model.source = value;
-        prompt.editor.setCursorPosition(0);
+        model.value.text = value;
+        editor.setCursorPosition({ line: 0, column: 0 });
       });
     }
-    return this._history.forward(prompt.model.source).then(value => {
+    return this._history.forward(source).then(value => {
       let text = value || this._history.placeholder;
-      if (prompt.model.source === text) {
+      if (model.value.text === text) {
         return;
       }
       this._setByHistory = true;
-      prompt.model.source = text;
-      prompt.editor.setCursorPosition(text.length);
+      model.value.text = text;
+      editor.setCursorPosition(editor.getPositionAt(text.length));
     });
   }
 
   /**
    * Handle a text change signal from the editor.
    */
-  protected onTextChange(editor: ICellEditorWidget, args: ITextChange): void {
+  protected onTextChange(editor: CellEditorWidget, args: CellEditorWidget.ITextChange): void {
     if (this._setByHistory) {
       this._setByHistory = false;
       return;
@@ -474,8 +481,9 @@ class ConsoleContent extends Widget {
    * Handle the `'keydown'` event for the widget.
    */
   private _evtKeyDown(event: KeyboardEvent): void {
-    if (event.keyCode === 13 && !this.prompt.editor.hasFocus()) {
-      this.prompt.editor.editor.focus();
+    let editor = this.prompt.editor.editor;
+    if (event.keyCode === 13 && !editor.hasFocus()) {
+      editor.focus();
     }
   }
 
@@ -511,7 +519,7 @@ class ConsoleContent extends Widget {
    * Execute the code in the current prompt.
    */
   private _execute(cell: CodeCellWidget): Promise<void> {
-    this._history.push(cell.model.source);
+    this._history.push(cell.model.value.text);
     cell.model.contentChanged.connect(this.update, this);
     let onSuccess = (value: KernelMessage.IExecuteReplyMsg) => {
       this.executed.emit(new Date());
@@ -528,7 +536,7 @@ class ConsoleContent extends Widget {
           if (setNextInput) {
             let text = (setNextInput as any).text;
             // Ignore the `replace` value and always set the next cell.
-            cell.model.source = text;
+            cell.model.value.text = text;
           }
         }
       }
@@ -548,11 +556,11 @@ class ConsoleContent extends Widget {
   private _handleInfo(info: KernelMessage.IInfoReply): void {
     let layout = this._content.layout as PanelLayout;
     let banner = layout.widgets.at(0) as RawCellWidget;
-    banner.model.source = info.banner;
+    banner.model.value.text = info.banner;
     let lang = info.language_info as nbformat.ILanguageInfoMetadata;
     this._mimetype = this._renderer.getCodeMimetype(lang);
     if (this.prompt) {
-      this.prompt.mimetype = this._mimetype;
+      this.prompt.model.mimeType = this._mimetype;
     }
   }
 
@@ -586,7 +594,7 @@ class ConsoleContent extends Widget {
   private _newForeignCell(): CodeCellWidget {
     let cell = this._renderer.createForeignCell(this._rendermime, this);
     cell.readOnly = true;
-    cell.mimetype = this._mimetype;
+    cell.model.mimeType = this._mimetype;
     cell.addClass(FOREIGN_CELL_CLASS);
     return cell;
   }
@@ -605,7 +613,8 @@ class ConsoleContent extends Widget {
    */
   private _shouldExecute(timeout: number): Promise<boolean> {
     let prompt = this.prompt;
-    let code = prompt.model.source + '\n';
+    let model = prompt.model;
+    let code = model.value.text + '\n';
     return new Promise<boolean>((resolve, reject) => {
       let timer = setTimeout(() => { resolve(true); }, timeout);
       this._session.kernel.requestIsComplete({ code }).then(isComplete => {
@@ -614,8 +623,10 @@ class ConsoleContent extends Widget {
           resolve(true);
           return;
         }
-        prompt.model.source = code + isComplete.content.indent;
-        prompt.editor.setCursorPosition(prompt.model.source.length);
+        model.value.text = code + isComplete.content.indent;
+        let editor = prompt.editor.editor;
+        let pos = editor.getPositionAt(model.value.text.length)
+        editor.setCursorPosition(pos);
         resolve(false);
       }).catch(() => { resolve(true); });
     });
@@ -730,12 +741,13 @@ namespace ConsoleContent {
     constructor(options: Renderer.IOptions) {
       let factory = options.editorServices.factory;
       this.bannerRenderer = new BaseCellWidget.Renderer({
-        editorFactory: host => factory.newInlineEditor(host.node, {
+        editorFactory: (host, model) => factory.newInlineEditor(host.node, {
+          model,
           wordWrap: true
         })
       });
       this.promptRenderer = new Private.PromptRenderer({
-        editorFactory: host => factory.newInlineEditor(host.node, {})
+        editorFactory: (host, model) => factory.newInlineEditor(host.node, { model })
       });
       this.editorMimeTypeService = options.editorServices.mimeTypeService;
     }
@@ -745,9 +757,9 @@ namespace ConsoleContent {
      */
     createBanner(): RawCellWidget {
       let widget = new RawCellWidget({
+        model: new RawCellModel(),
         renderer: this.bannerRenderer
       });
-      widget.model = new RawCellModel();
       return widget;
     }
 
@@ -756,10 +768,10 @@ namespace ConsoleContent {
      */
     createPrompt(rendermime: IRenderMime, context: ConsoleContent): CodeCellWidget {
       let widget = new CodeCellWidget({
+        model: new CodeCellModel(),
         rendermime,
         renderer: this.promptRenderer
       });
-      widget.model = new CodeCellModel();
       return widget;
     }
 
@@ -768,10 +780,10 @@ namespace ConsoleContent {
      */
     createForeignCell(rendermime: IRenderMime, context: ConsoleContent): CodeCellWidget {
       let widget = new CodeCellWidget({
+        model: new CodeCellModel(),
         rendermime,
         renderer: this.promptRenderer
       });
-      widget.model = new CodeCellModel();
       return widget;
     }
 
@@ -821,8 +833,8 @@ namespace Private {
     /**
      * Create a new cell editor for the widget.
      */
-    createCellEditor(): ICellEditorWidget {
-      let widget = super.createCellEditor();
+    createCellEditor(model: CodeCellModel): CellEditorWidget {
+      let widget = super.createCellEditor(model);
       // Suppress the default "Enter" key handling.
       let cb = (editor: CodeEditor.IEditor, event: KeyboardEvent) => {
         return event.keyCode === 13;  // Enter;
