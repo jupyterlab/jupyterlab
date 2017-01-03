@@ -26,7 +26,7 @@ import {
 } from '../../common/interfaces';
 
 import {
-  CodeEditor
+  CodeEditor, CodeEditorWidget
 } from '../../codeeditor';
 
 import {
@@ -150,12 +150,16 @@ class BaseCellWidget extends Widget {
 
   /**
    * Get the editor widget used by the cell.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get editor(): CellEditorWidget {
     return this._editor;
+  }
+
+  /**
+   * Get the model used by the cell.
+   */
+  get model(): ICellModel {
+    return this._model;
   }
 
   /**
@@ -334,22 +338,17 @@ namespace BaseCellWidget {
   class Renderer implements IRenderer {
 
     /**
-     * A code editor factory.
-     */
-    readonly editorFactory: (host: Widget, model: CodeEditor.IModel) => CodeEditor.IEditor;
-
-    /**
      * Creates a new renderer.
      */
     constructor(options: Renderer.IOptions) {
-      this.editorFactory = options.editorFactory;
+      this._editorFactory = options.editorFactory;
     }
 
     /**
      * Create a new cell editor for the widget.
      */
     createCellEditor(model: CodeEditor.IModel): CellEditorWidget {
-      return new CellEditorWidget({ factory: this.editorFactory, model });
+      return new CellEditorWidget({ factory: this._editorFactory, model });
     }
 
     /**
@@ -358,6 +357,8 @@ namespace BaseCellWidget {
     createInputArea(editor: CellEditorWidget): InputAreaWidget {
       return new InputAreaWidget(editor);
     }
+
+    private _editorFactory: CodeEditorWidget.Factory;
   }
 
   /**
@@ -373,7 +374,7 @@ namespace BaseCellWidget {
       /**
        * A code editor factory.
        */
-      readonly editorFactory: (host: Widget) => CodeEditor.IEditor;
+      readonly editorFactory: CodeEditorWidget.Factory;
     }
   }
 }

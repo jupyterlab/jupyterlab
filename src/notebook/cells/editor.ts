@@ -35,100 +35,6 @@ import {
 
 
 /**
- * The location of requested edges.
- */
-export type EdgeLocation = 'top' | 'bottom';
-
-
-/**
- * An interface describing editor state coordinates.
- */
-export
-interface ICoords extends JSONObject {
-  /**
-   * The left coordinate value.
-   */
-  readonly left: number;
-
-  /**
-   * The right coordinate value.
-   */
-  readonly right: number;
-
-  /**
-   * The top coordinate value.
-   */
-  readonly top: number;
-
-  /**
-   * The bottom coordinate value.
-   */
-  readonly bottom: number;
-}
-
-
-/**
- * An interface describing the state of the editor in an event.
- */
-export
-interface IEditorState extends JSONObject {
-  /**
-   * The character number of the editor cursor within a line.
-   */
-  readonly ch: number;
-
-  /**
-   * The height of a character in the editor.
-   */
-  readonly chHeight: number;
-
-  /**
-   * The width of a character in the editor.
-   */
-  readonly chWidth: number;
-
-  /**
-   * The line number of the editor cursor.
-   */
-  readonly line: number;
-
-  /**
-   * The coordinate position of the cursor.
-   */
-  readonly coords: ICoords;
-
-  /**
-   * The cursor position of the request, including line breaks.
-   */
-  readonly position: number;
-}
-
-
-/**
- * An interface describing editor text changes.
- */
-export
-interface ITextChange extends IEditorState {
-  /**
-   * The new value of the editor text.
-   */
-  readonly newValue: string;
-}
-
-
-/**
- * An interface describing completion requests.
- */
-export
-interface ICompletionRequest extends IEditorState {
-  /**
-   * The current value of the editor text.
-   */
-  readonly currentValue: string;
-}
-
-
-/**
  * The key code for the up arrow key.
  */
 const UP_ARROW = 38;
@@ -172,17 +78,17 @@ class CellEditorWidget extends CodeEditorWidget {
   /**
    * A signal emitted when a tab (text) completion is requested.
    */
-  completionRequested: ISignal<this, ICompletionRequest>;
+  completionRequested: ISignal<this, CellEditorWidget.ICompletionRequest>;
 
   /**
    * A signal emitted when either the top or bottom edge is requested.
    */
-  edgeRequested: ISignal<this, EdgeLocation>;
+  edgeRequested: ISignal<this, CellEditorWidget.EdgeLocation>;
 
   /**
    * A signal emitted when a text change is completed.
    */
-  textChanged: ISignal<this, ITextChange>;
+  textChanged: ISignal<this, CellEditorWidget.ITextChange>;
 
   /**
    * Handle change events from the editor model.
@@ -194,7 +100,7 @@ class CellEditorWidget extends CodeEditorWidget {
     let position = editor.getOffsetAt(cursorPosition);
     let line = cursorPosition.line;
     let ch = cursorPosition.column;
-    let coords = editor.getCoordinate(cursorPosition) as ICoords;
+    let coords = editor.getCoordinate(cursorPosition);
     let chHeight = editor.lineHeight;
     let chWidth = editor.charWidth;
     this.textChanged.emit({
@@ -280,7 +186,76 @@ class CellEditorWidget extends CodeEditorWidget {
     let data = {
       line, ch, chHeight, chWidth, coords, position, currentValue
     };
-    this.completionRequested.emit(data as ICompletionRequest);
+    this.completionRequested.emit(data as CellEditorWidget.ICompletionRequest);
+  }
+}
+
+/**
+ * The namespace for `CellEditorWidget` statics.
+ */
+export
+namespace CellEditorWidget {
+  /**
+   * The location of requested edges.
+   */
+  export type EdgeLocation = 'top' | 'bottom';
+
+  /**
+   * An interface describing the state of the editor in an event.
+   */
+  export
+  interface IEditorState {
+    /**
+     * The character number of the editor cursor within a line.
+     */
+    readonly ch: number;
+
+    /**
+     * The height of a character in the editor.
+     */
+    readonly chHeight: number;
+
+    /**
+     * The width of a character in the editor.
+     */
+    readonly chWidth: number;
+
+    /**
+     * The line number of the editor cursor.
+     */
+    readonly line: number;
+
+    /**
+     * The coordinate position of the cursor.
+     */
+    readonly coords: CodeEditor.ICoordinate;
+
+    /**
+     * The cursor position of the request, including line breaks.
+     */
+    readonly position: number;
+  }
+
+  /**
+   * An interface describing editor text changes.
+   */
+  export
+  interface ITextChange extends IEditorState {
+    /**
+     * The new value of the editor text.
+     */
+    readonly newValue: string;
+  }
+
+  /**
+   * An interface describing completion requests.
+   */
+  export
+  interface ICompletionRequest extends IEditorState {
+    /**
+     * The current value of the editor text.
+     */
+    readonly currentValue: string;
   }
 }
 

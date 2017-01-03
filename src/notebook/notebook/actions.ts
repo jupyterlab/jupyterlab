@@ -65,8 +65,10 @@ namespace NotebookActions {
     let nbModel = widget.model;
     let index = widget.activeCellIndex;
     let child = widget.widgets.at(index);
-    let position = child.editor.getCursorPosition();
-    let orig = child.model.source;
+    let editor = child.editor.editor;
+    let position = editor.getCursorPosition();
+    let offset = editor.getOffsetAt(position);
+    let orig = child.model.value.text;
 
     // Create new models to preserve history.
     let clone0 = Private.cloneCell(nbModel, child.model);
@@ -74,8 +76,8 @@ namespace NotebookActions {
     if (clone0.type === 'code') {
       (clone0 as CodeCellModel).outputs.clear();
     }
-    clone0.source = orig.slice(0, position);
-    clone1.source = orig.slice(position).replace(/^\s+/g, '');
+    clone0.value.text = orig.slice(0, offset);
+    clone1.value.text = orig.slice(offset).replace(/^\s+/g, '');
 
     // Make the changes while preserving history.
     let cells = nbModel.cells;
@@ -117,7 +119,7 @@ namespace NotebookActions {
     // Get the cells to merge.
     each(enumerate(widget.widgets), ([i, child]) => {
       if (widget.isSelected(child)) {
-        toMerge.push(child.model.source);
+        toMerge.push(child.model.value.text);
         if (i !== index) {
           toDelete.push(child.model);
         }
@@ -132,7 +134,7 @@ namespace NotebookActions {
       }
       // Otherwise merge with the next cell.
       let cellModel = cells.at(index + 1);
-      toMerge.push(cellModel.source);
+      toMerge.push(cellModel.value.text);
       toDelete.push(cellModel);
     }
 
@@ -140,7 +142,7 @@ namespace NotebookActions {
 
     // Create a new cell for the source to preserve history.
     let newModel = Private.cloneCell(model, primary.model);
-    newModel.source = toMerge.join('\n\n');
+    newModel.value.text = toMerge.join('\n\n');
     if (newModel instanceof CodeCellModel) {
       newModel.outputs.clear();
     }
@@ -206,9 +208,9 @@ namespace NotebookActions {
       // so if the last cell is deleted the previous cell will be activated.
       widget.activeCellIndex = toDelete[0];
     }
-    
+
     // Deselect any remaining, undeletable cells. Do this even if we don't
-    // delete anything so that users are aware *something* happened. 
+    // delete anything so that users are aware *something* happened.
     widget.deselectAll();
   }
 
@@ -773,10 +775,10 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
-    let lineNumbers = widget.activeCell.editor.lineNumbers;
+    let lineNumbers = widget.activeCell.editor.editor.lineNumbers;
     each(widget.widgets, child => {
       if (widget.isSelected(child)) {
-        child.editor.lineNumbers = !lineNumbers;
+        child.editor.editor.lineNumbers = !lineNumbers;
       }
     });
   }
@@ -795,9 +797,9 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
-    let lineNumbers = widget.activeCell.editor.lineNumbers;
+    let lineNumbers = widget.activeCell.editor.editor.lineNumbers;
     each(widget.widgets, child => {
-      child.editor.lineNumbers = !lineNumbers;
+      child.editor.editor.lineNumbers = !lineNumbers;
     });
   }
 
@@ -950,13 +952,13 @@ namespace Private {
     let replace = (setNextInput as any).replace;
 
     if (replace) {
-      child.model.source = text;
+      child.model.value.text = text;
       return;
     }
 
     // Create a new code cell and add as the next cell.
     let cell = parent.model.factory.createCodeCell();
-    cell.source = text;
+    cell.value.text = text;
     let cells = parent.model.cells;
     let i = indexOf(cells, child.model);
     if (i === -1) {
@@ -971,7 +973,7 @@ namespace Private {
    */
   export
   function setMarkdownHeader(cell: ICellModel, level: number) {
-    let source = cell.source;
+    let source = cell.value.text;
     let newHeader = Array(level + 1).join('#') + ' ';
     // Remove existing header or leading white space.
     let regex = /^(#+\s*)|^(\s*)/;
@@ -979,6 +981,6 @@ namespace Private {
     if (matches) {
       source = source.slice(matches[0].length);
     }
-    cell.source = newHeader + source;
+    cell.value.text = newHeader + source;
   }
 }
