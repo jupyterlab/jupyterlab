@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  JSONObject
+} from 'phosphor/lib/algorithm/json';
+
+import {
   IDisposable
 } from 'phosphor/lib/core/disposable';
 
@@ -64,7 +68,7 @@ namespace CodeEditor {
    * An interface describing editor state coordinates.
    */
   export
-  interface ICoordinate {
+  interface ICoordinate extends JSONObject {
     /**
      * The left coordinate value.
      */
@@ -159,7 +163,7 @@ namespace CodeEditor {
    * - otherwise it must not change any selection
    */
   export
-  interface ISelections {
+  interface ISelections extends IDisposable {
 
     /**
      * A signal emitted when selections changes.
@@ -219,7 +223,7 @@ namespace CodeEditor {
    * Default implementation of `ISelections`.
    */
   export
-  class Selections implements ISelections, IDisposable {
+  class Selections implements ISelections {
     /**
      * A signal emitted when selections changes.
      */

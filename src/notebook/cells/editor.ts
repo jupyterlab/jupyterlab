@@ -204,7 +204,7 @@ namespace CellEditorWidget {
    * An interface describing the state of the editor in an event.
    */
   export
-  interface IEditorState {
+  interface IEditorState extends JSONObject {
     /**
      * The character number of the editor cursor within a line.
      */

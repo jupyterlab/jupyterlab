@@ -158,7 +158,7 @@ namespace CodeEditorWidget {
     /**
      * A code editor factory.
      */
-    factory: EditorFactory;
+    factory: Factory;
 
     /**
      * The model used to initialize the code editor.
