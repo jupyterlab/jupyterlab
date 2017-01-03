@@ -516,7 +516,7 @@ namespace CodeEditor {
 
 
     /**
-     * Get the number of lines in the model.
+     * Get the number of lines in the eidtor.
      */
     readonly lineCount: number;
 

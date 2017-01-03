@@ -68,18 +68,24 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     this.uuid = this.uuid;
     this.selectionStyle = options.selectionStyle;
 
-    this._model = new CodeMirrorModel();
+    let model = this._model = options.model;
 
     options.theme = (options.theme || DEFAULT_CODEMIRROR_THEME);
     options.value = this._model.doc;
-    this._editor = CodeMirror(host, options);
+    let editor = this._editor = CodeMirror(host, options);
+    let doc = editor.getDoc();
 
+    // Handle initial model values.
+    doc.setValue(model.value.text);
     this._onMimeTypeChanged();
     // TODO: handle initial selections.
-    this._model.mimeTypeChanged.connect(() => this._onMimeTypeChanged());
-    this._model.selections.changed.connect((selections, args) => this._onSelectionsChanged(selections, args));
 
-    CodeMirror.on(this.editor, 'keydown', (editor, event) => {
+    // Connect to changes.
+    model.value.changed.connect(this._onValueChanged, this);
+    model.mimeTypeChanged.connect(() => this._onMimeTypeChanged(), this);
+    model.selections.changed.connect((selections, args) => this._onSelectionsChanged(selections, args), this);
+
+    CodeMirror.on(editor, 'keydown', (editor, event) => {
       findIndex(this._keydownHandlers, handler => {
         if (handler(this, event) === true) {
           event.preventDefault();
@@ -87,7 +93,10 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
         }
       });
     });
-    CodeMirror.on(this.editor, 'cursorActivity', () => this._onCursorActivity());
+    CodeMirror.on(editor, 'cursorActivity', () => this._onCursorActivity());
+    CodeMirror.on(editor.getDoc(), 'change', (instance, change) => {
+      this._onDocChanged(instance, change);
+    });
   }
 
   /**
@@ -119,6 +128,13 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   get editor(): CodeMirror.Editor {
     return this._editor;
+  }
+
+  /**
+   * Get the number of lines in the editor.
+   */
+  get lineCount(): number {
+    return this._editor.getDoc().lineCount();
   }
 
   /**
@@ -171,6 +187,52 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   get charWidth(): number {
     return this._editor.defaultCharWidth();
+  }
+
+  /**
+   * Returns the content for the given line number.
+   */
+  getLine(line: number): string | undefined {
+    return this._editor.getDoc().getLine(line);
+  }
+
+  /**
+   * Find an offset for the given position.
+   */
+  getOffsetAt(position: CodeEditor.IPosition): number {
+    return this._editor.getDoc().indexFromPos({
+      ch: position.column,
+      line: position.line
+    });
+  }
+
+  /**
+   * Find a position fot the given offset.
+   */
+  getPositionAt(offset: number): CodeEditor.IPosition {
+    const { ch, line } = this._editor.getDoc().posFromIndex(offset);
+    return { line, column: ch };
+  }
+
+  /**
+   * Undo one edit (if any undo events are stored).
+   */
+  undo(): void {
+    this._editor.getDoc().undo();
+  }
+
+  /**
+   * Redo one undone edit.
+   */
+  redo(): void {
+    this._editor.getDoc().redo();
+  }
+
+  /**
+   * Clear the undo history.
+   */
+  clearHistory(): void {
+    this._editor.getDoc().clearHistory();
   }
 
   /**
@@ -425,12 +487,62 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     };
   }
 
+  /**
+   * Handle model value changes.
+   */
+  private _onValueChanged(value: IObservableString, args: ObservableString.IChangedArgs): void {
+    this._changeGuard = true;
+    let doc = self._editor.getDoc();
+    switch (args.type) {
+    case 'insert':
+      let pos = doc.posFromIndex(args.start);
+      doc.replaceRange(args.value, pos, pos);
+      break;
+    case 'remove':
+      let from = doc.posFromIndex(args.start);
+      let to = doc.posFromIndex(args.end);
+      doc.replaceRange('', from, to);
+      break;
+    case 'set':
+      doc.setValue(args.value);
+      break;
+    default:
+      break;
+    }
+    this._changeGuard = false;
+  }
+
+  /**
+   * Handles document changes.
+   */
+  private _onDocChange(doc: CodeMirror.Doc, change: CodeMirror.EditorChange) {
+    if (this._changeGuard) {
+      return;
+    }
+    this._changeGuard = true;
+    let text = doc.getValue();
+    let value = this._model.value;
+
+    if (!change.origin || change.origin === 'setValue' ||
+        change.text.length > 1 || change.removed.length > 1) {
+      value.text = text;
+    }
+    let start = doc.indexFromPos(change.from);
+    let end = doc.indexFromPos(change.to);
+    if (change.origin.indexOf('delete') !== -1) {
+      value.remove(start, end);
+    } else {
+      value.insert(start, text);
+    }
+    this._changeGuard = false;
+  }
+
   private _model: CodeMirrorModel;
   private _editor: CodeMirror.Editor;
   private _isDisposed = false;
   protected selectionMarkers: { [key: string]: CodeMirror.TextMarker[] | undefined } = {};
   private _keydownHandlers = new Vector<CodeEditor.KeydownHandler>();
-
+  private _changeGuard = false;
 }
 
 /**
