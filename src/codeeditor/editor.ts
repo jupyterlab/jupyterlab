@@ -14,7 +14,7 @@ import {
 } from '../common/interfaces';
 
 import {
-  IObservableString
+  IObservableString, ObservableString
 } from '../common/observablestring';
 
 
@@ -339,6 +339,79 @@ namespace CodeEditor {
   }
 
   /**
+   * The default implementation of the editor model.
+   */
+  export
+  class Model implements IModel {
+    /**
+     * A signal emitted when a mimetype changes.
+     */
+    readonly mimeTypeChanged: ISignal<this, IChangedArgs<string>>;
+
+    /**
+     * Get the value of the model.
+     */
+    get value(): IObservableString {
+      return this._value;
+    }
+
+    /**
+     * Get the selections for the model.
+     */
+    get selections(): CodeEditor.ISelections {
+      return this._selections;
+    }
+
+    /**
+     * A mime type of the model.
+     */
+    get mimeType(): string {
+      return this._mimetype;
+    }
+    set mimeType(newValue: string) {
+      const oldValue = this._mimetype;
+      if (oldValue === newValue) {
+        return;
+      }
+      this._mimetype = newValue;
+      this.mimeTypeChanged.emit({
+        name: 'mimeType',
+        oldValue,
+        newValue
+      });
+    }
+
+    /**
+     * Whether the model is disposed.
+     */
+    get isDisposed(): boolean {
+      return this._isDisposed;
+    }
+
+    /**
+     * Dipose of the resources used by the model.
+     */
+    dispose(): void {
+      if (this._isDisposed) {
+        return;
+      }
+      this._isDisposed = true;
+      this._selections.dispose();
+      this._value.dispose();
+      clearSignalData(this);
+    }
+
+    private _value: new ObservableString();
+    private _selections: new Selections();
+    private _isDisposed = false;
+  }
+
+  /**
+   * The signals for the `CodeMirrorModel` class.
+   */
+  defineSignal(Model.prototype, 'mimeTypeChanged');
+
+  /**
    * A selection owner.
    */
   export
@@ -558,6 +631,11 @@ namespace CodeEditor {
    */
   export
   interface IOptions {
+    /**
+     * The model used by the editor.
+     */
+    model: IModel;
+
     /**
      * Whether line numbers should be displayed. Defaults to `false`.
      */
