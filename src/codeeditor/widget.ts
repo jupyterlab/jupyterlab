@@ -158,11 +158,17 @@ namespace CodeEditorWidget {
     /**
      * A code editor factory.
      */
-    factory: (host: Widget, model: CodeEditor.IModel) => CodeEditor.IEditor;
+    factory: EditorFactory;
 
     /**
      * The model used to initialize the code editor.
      */
     model: CodeEditor.IModel;
   }
+
+  /**
+   * A factory used to create a code editor for the code editor widget.
+   */
+  export
+  type Factory = (host: Widget, model: CodeEditor.IModel) => CodeEditor.IEditor;
 }
