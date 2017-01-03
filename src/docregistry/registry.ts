@@ -34,6 +34,10 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
+  CodeEditor
+} from '../codeeditor';
+
+import {
   IChangedArgs as IChangedArgsGeneric
 } from '../common/interfaces';
 
@@ -576,6 +580,12 @@ namespace DocumentRegistry {
   }
 
   /**
+   * The interface for a document model that represents code.
+   */
+  export
+  interface ICodeModel extends IModel, CodeEditor.IModel { }
+
+  /**
    * The document context object.
    */
   export
@@ -724,6 +734,13 @@ namespace DocumentRegistry {
   export
   type Context = IContext<IModel>;
 
+
+  /**
+   * A type alias for a code context.
+   */
+  export
+  type CodeContext = IContext<ICodeModel>;
+
   /**
    * The options used to initialize a widget factory.
    */
@@ -854,6 +871,12 @@ namespace DocumentRegistry {
    */
   export
   type ModelFactory = IModelFactory<IModel>;
+
+  /**
+   * A type alias for a code model factory.
+   */
+  export
+  type CodeModelFactory = IModelFactory<ICodeModel>;
 
   /**
    * A kernel preference for a given file path and widget.

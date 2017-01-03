@@ -19,8 +19,16 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
+  CodeEditor
+} from '../codeeditor';
+
+import {
   IChangedArgs
 } from '../common/interfaces';
+
+import {
+  IObservableString, ObservableString
+} from '../common/observablestring';
 
 import {
   DocumentRegistry
@@ -31,30 +39,25 @@ import {
  * The default implementation of a document model.
  */
 export
-class DocumentModel implements DocumentRegistry.IModel {
+class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeModel  {
   /**
    * Construct a new document model.
    */
   constructor(languagePreference?: string) {
+    super();
     this._defaultLang = languagePreference || '';
+    this.value.changed.connect(this._onValueChanged, this);
   }
 
   /**
    * A signal emitted when the document content changes.
    */
-  contentChanged: ISignal<DocumentRegistry.IModel, void>;
+  contentChanged: ISignal<this, void>;
 
   /**
    * A signal emitted when the document state changes.
    */
-  stateChanged: ISignal<DocumentRegistry.IModel, IChangedArgs<any>>;
-
-  /**
-   * Get whether the model factory has been disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
+  stateChanged: ISignal<this, IChangedArgs<any>>;
 
   /**
    * The dirty state of the document.
@@ -107,17 +110,10 @@ class DocumentModel implements DocumentRegistry.IModel {
   }
 
   /**
-   * Dispose of the resources held by the document manager.
-   */
-  dispose(): void {
-    this._isDisposed = true;
-  }
-
-  /**
    * Serialize the model to a string.
    */
   toString(): string {
-    return this._text;
+    return this.value.text;
   }
 
   /**
@@ -127,19 +123,14 @@ class DocumentModel implements DocumentRegistry.IModel {
    * Should emit a [contentChanged] signal.
    */
   fromString(value: string): void {
-    if (this._text === value) {
-      return;
-    }
-    this._text = value;
-    this.contentChanged.emit(void 0);
-    this.dirty = true;
+    this.value.text = value;
   }
 
   /**
    * Serialize the model to JSON.
    */
   toJSON(): any {
-    return JSON.stringify(this._text);
+    return JSON.stringify(this.value.text);
   }
 
   /**
@@ -152,12 +143,19 @@ class DocumentModel implements DocumentRegistry.IModel {
     this.fromString(JSON.parse(value));
   }
 
-  private _text = '';
+  /**
+   * Handle a change to the observable value.
+   */
+  private _onValueChanged(sender: IObservableString, args: ObservableString.IChangedArgs): void {
+    this.contentChanged.emit(void 0);
+    this.dirty = true;
+  }
+
   private _defaultLang = '';
   private _dirty = false;
   private _readOnly = false;
-  private _isDisposed = false;
 }
+
 
 // Define the signals for the `DocumentModel` class.
 defineSignal(DocumentModel.prototype, 'contentChanged');
@@ -168,7 +166,7 @@ defineSignal(DocumentModel.prototype, 'stateChanged');
  * An implementation of a model factory for text files.
  */
 export
-class TextModelFactory implements DocumentRegistry.ModelFactory {
+class TextModelFactory implements DocumentRegistry.CodeModelFactory {
   /**
    * The name of the model type.
    *
@@ -219,7 +217,7 @@ class TextModelFactory implements DocumentRegistry.ModelFactory {
    *
    * @returns A new document model.
    */
-  createNew(languagePreference?: string): DocumentRegistry.IModel {
+  createNew(languagePreference?: string): DocumentRegistry.ICodeModel {
     return new DocumentModel(languagePreference);
   }
 

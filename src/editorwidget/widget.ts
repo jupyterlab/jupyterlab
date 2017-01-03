@@ -98,7 +98,7 @@ class EditorWidget extends CodeEditorWidget {
     value.text = model.toString();
 
     // Prevent the initial loading from disk from being in the editor history.
-    editor.model.clearHistory();
+    editor.clearHistory();
     this._handleDirtyState();
 
     model.stateChanged.connect(this._onModelStateChanged, this);
@@ -183,7 +183,7 @@ namespace EditorWidget {
     /**
      * The document context associated with the editor.
      */
-    context: DocumentRegistry.Context;
+    context: DocumentRegistry.CodeContext;
   }
 }
 
@@ -192,34 +192,34 @@ namespace EditorWidget {
  * A widget factory for editors.
  */
 export
-class EditorWidgetFactory extends ABCWidgetFactory<EditorWidget, DocumentRegistry.IModel> {
+class EditorWidgetFactory extends ABCWidgetFactory<EditorWidget, DocumentRegistry.ICodeModel> {
   /**
    * Construct a new editor widget factory.
    */
   constructor(options: EditorWidgetFactory.IOptions) {
     super(options.factoryOptions);
-    this._mimeTypeService = options.editorServices.mimeTypeService;
-    let factory = options.editorServices.factory;
-    this._factory = (host: Widget) => factory.newDocumentEditor(host.node, {
-      lineNumbers: true,
-      readOnly: false,
-      wordWrap: true
-    });
+    this._services = options.editorServices;
   }
 
   /**
    * Create a new widget given a context.
    */
-  protected createNewWidget(context: DocumentRegistry.Context): EditorWidget {
+  protected createNewWidget(context: DocumentRegistry.CodeContext): EditorWidget {
+    let func = this._services.factory.newDocumentEditor
+    let factory = (host: Widget) => func(host.node, {
+      model: context.model,
+      lineNumbers: true,
+      readOnly: false,
+      wordWrap: true
+    });
     return new EditorWidget({
-      factory: this._factory,
+      factory,
       context,
-      mimeTypeService: this._mimeTypeService
+      mimeTypeService: this._services.mimeTypeService
     });
   }
 
-  private _mimeTypeService: IEditorMimeTypeService;
-  private _factory: (host: Widget) => CodeEditor.IEditor;
+  private _services: IEditorServices;
 }
 
 
