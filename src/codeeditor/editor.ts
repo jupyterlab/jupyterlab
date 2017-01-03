@@ -401,8 +401,9 @@ namespace CodeEditor {
       clearSignalData(this);
     }
 
-    private _value: new ObservableString();
-    private _selections: new Selections();
+    private _value = new ObservableString();
+    private _selections = new Selections();
+    private _mimetype = 'text/plain';
     private _isDisposed = false;
   }
 

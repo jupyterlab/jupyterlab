@@ -26,6 +26,7 @@ class CodeMirrorEditorFactory implements IEditorFactory {
     return this.newEditor(host, {
       uuid: utils.uuid(),
       indentUnit: 4,
+      model: options.model,
       theme: DEFAULT_CODEMIRROR_THEME,
       extraKeys: {
         'Cmd-Right': 'goLineRight',
@@ -47,6 +48,7 @@ class CodeMirrorEditorFactory implements IEditorFactory {
   newDocumentEditor(host: HTMLElement, options: CodeEditor.IOptions): CodeEditor.IEditor {
     return this.newEditor(host, {
       uuid: utils.uuid(),
+      model: options.model,
       extraKeys: {
         'Tab': 'indentMore',
         'Shift-Enter': () => { /* no-op */ }
@@ -61,7 +63,7 @@ class CodeMirrorEditorFactory implements IEditorFactory {
   /**
    * Creates an editor and applies extra options.
    */
-  protected newEditor(host: HTMLElement, editorOptions: CodeMirrorEditor.IOptions, options: CodeEditor.IOptions) {
+  protected newEditor(host: HTMLElement, editorOptions: CodeMirrorEditor.IOptions, options: CodeEditor.IOptions): CodeEditor.IEditor {
     if (options.readOnly !== undefined) {
       editorOptions.readOnly = options.readOnly;
     }

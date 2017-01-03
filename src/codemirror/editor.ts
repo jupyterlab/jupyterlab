@@ -21,16 +21,16 @@ import {
 } from '../common/interfaces';
 
 import {
+  IObservableString, ObservableString
+} from '../common/observablestring';
+
+import {
   loadModeByMIME
 } from './';
 
 import {
   CodeEditor
 } from '../codeeditor';
-
-import {
-  CodeMirrorModel
-} from './model';
 
 
 /**
@@ -490,7 +490,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   private _onValueChanged(value: IObservableString, args: ObservableString.IChangedArgs): void {
     this._changeGuard = true;
-    let doc = self._editor.getDoc();
+    let doc = this._editor.getDoc();
     switch (args.type) {
     case 'insert':
       let pos = doc.posFromIndex(args.start);
@@ -535,7 +535,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     this._changeGuard = false;
   }
 
-  private _model: CodeMirrorModel;
+  private _model: CodeEditor.IModel;
   private _editor: CodeMirror.Editor;
   private _isDisposed = false;
   protected selectionMarkers: { [key: string]: CodeMirror.TextMarker[] | undefined } = {};
@@ -554,13 +554,18 @@ namespace CodeMirrorEditor {
   export
   interface IOptions extends CodeMirror.EditorConfiguration {
     /**
+     * The code editor model.
+     */
+    model: CodeEditor.IModel;
+
+    /**
      * The uuid of an editor.
      */
-    readonly uuid: string;
+    uuid: string;
 
     /**
      * A selection style.
      */
-    readonly selectionStyle?: CodeEditor.ISelectionStyle;
+    selectionStyle?: CodeEditor.ISelectionStyle;
   }
 }
