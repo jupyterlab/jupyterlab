@@ -44,7 +44,7 @@ export default plugin;
  * Activate the state database.
  */
 function activate(app: JupyterLab, palette: ICommandPalette): Promise<IStateDB> {
-  let state = new StateDB();
+  let state = new StateDB({ namespace: app.info.namespace });
   let version = app.info.version;
   let command = 'statedb:clear';
   let category = 'Help';

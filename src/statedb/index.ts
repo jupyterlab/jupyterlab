@@ -46,6 +46,16 @@ interface IStateDB {
   readonly maxLength: number;
 
   /**
+   * The namespace prefix for all state database entries.
+   *
+   * #### Notes
+   * This value should be set at instantiation and will only be used internally
+   * by a state database. That means, for example, that an app could have
+   * multiple, mutually exclusive state databases.
+   */
+  readonly namespace: string;
+
+  /**
    * Retrieve a saved bundle from the database.
    *
    * @param id - The identifier used to retrieve a data bundle.
