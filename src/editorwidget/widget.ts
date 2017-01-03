@@ -66,7 +66,10 @@ class EditorWidget extends CodeEditorWidget {
    * Construct a new editor widget.
    */
   constructor(options: EditorWidget.IOptions) {
-    super(options.factory);
+    super({
+      factory: options.factory,
+      model: options.context.model
+    });
     this.addClass(EDITOR_CLASS);
     let context = this._context = options.context;
     this._mimeTypeService = options.mimeTypeService;
@@ -171,9 +174,9 @@ namespace EditorWidget {
   export
   interface IOptions {
     /**
-     * The editor factory used to create the editor.
+     * A code editor factory.
      */
-    factory: (host: Widget) => CodeEditor.IEditor;
+    factory: (host: Widget, model: CodeEditor.IModel) => CodeEditor.IEditor;
 
     /**
      * The mime type service for the editor.
@@ -206,8 +209,8 @@ class EditorWidgetFactory extends ABCWidgetFactory<EditorWidget, DocumentRegistr
    */
   protected createNewWidget(context: DocumentRegistry.CodeContext): EditorWidget {
     let func = this._services.factory.newDocumentEditor
-    let factory = (host: Widget) => func(host.node, {
-      model: context.model,
+    let factory = (host: Widget, model: CodeEditor.IModel) => func(host.node, {
+      model,
       lineNumbers: true,
       readOnly: false,
       wordWrap: true

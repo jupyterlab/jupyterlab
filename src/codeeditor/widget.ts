@@ -21,18 +21,16 @@ export
 class CodeEditorWidget extends Widget {
   /**
    * Construct a new code editor widget.
-   *
-   * @param editorFactory - The factory used to create a code editor.
    */
-  constructor(editorFactory: (host: Widget) => CodeEditor.IEditor) {
+  constructor(options: CodeEditorWidget.IOptions) {
     super();
-    this._editor = editorFactory(this);
+    this._editor = options.factory(this, options.model);
   }
 
   /**
    * Get the editor wrapped by the widget.
    */
-   get editor(): CodeEditor.IEditor {
+  get editor(): CodeEditor.IEditor {
     return this._editor;
   }
 
@@ -144,4 +142,27 @@ class CodeEditorWidget extends Widget {
   private _needsRefresh = true;
   private _needsResize = false;
   private _resizing = -1;
+}
+
+
+/**
+ * The namespace for the `CodeEditorWidget` statics.
+ */
+export
+namespace CodeEditorWidget {
+  /**
+   * The options used to initialize a code editor widget.
+   */
+  export
+  interface IOptions {
+    /**
+     * A code editor factory.
+     */
+    factory: (host: Widget, model: CodeEditor.IModel) => CodeEditor.IEditor;
+
+    /**
+     * The model used to initialize the code editor.
+     */
+    model: CodeEditor.IModel;
+  }
 }
