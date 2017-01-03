@@ -176,7 +176,7 @@ namespace EditorWidget {
     /**
      * A code editor factory.
      */
-    factory: (host: Widget, model: CodeEditor.IModel) => CodeEditor.IEditor;
+    factory: CodeEditorWidget.Factory;
 
     /**
      * The mime type service for the editor.

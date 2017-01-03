@@ -14,7 +14,7 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
-  ICellEditorWidget, ITextChange
+  CellEditorWidget
 } from '../notebook/cells/editor';
 
 import {
@@ -121,7 +121,7 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
    * #### Notes
    * Update the hints inspector based on a text change.
    */
-  protected onTextChanged(editor: ICellEditorWidget, change: ITextChange): void {
+  protected onTextChanged(editor: CellEditorWidget, change: CellEditorWidget.ITextChange): void {
     let update: Inspector.IInspectorUpdate = {
       content: null,
       type: 'hints'
