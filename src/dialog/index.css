@@ -46,7 +46,7 @@
   flex: 0 0 auto;
   padding-bottom: 12px;
   font-size: 20px;
-  font-weight: 300;
+  font-weight: 400;
   color: #616161;
 }
 
@@ -115,7 +115,10 @@
 
 .jp-Dialog-bodyContent > label {
   padding-top: 4px;
-  padding-bottom: 4px
+  padding-bottom: 4px;
+  line-height: 1.4;
+  font-size: 13px;
+  color: var(--md-grey-700);
 }
 
 
