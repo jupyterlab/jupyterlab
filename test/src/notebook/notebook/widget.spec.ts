@@ -263,7 +263,7 @@ describe('notebook/notebook/widget', () => {
         cursor.setValue({ name: 'python', codemirror_mode: 'python' });
         widget.model = model;
         let child = widget.widgets.at(0);
-        expect(child.mimetype).to.be('text/x-python');
+        expect(child.model.mimeType).to.be('text/x-python');
       });
 
       context('`cells.changed` signal', () => {
@@ -440,7 +440,7 @@ describe('notebook/notebook/widget', () => {
         cursor.setValue({ name: 'python', mimetype: 'text/x-python' });
         expect(widget.methods).to.contain('onMetadataChanged');
         let child = widget.widgets.at(0);
-        expect(child.mimetype).to.be('text/x-python');
+        expect(child.model.mimeType).to.be('text/x-python');
       });
 
     });

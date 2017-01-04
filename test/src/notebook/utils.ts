@@ -14,7 +14,7 @@ import {
 } from '../../../lib/notebook';
 
 import {
-  BaseCellWidget, CodeCellWidget, CodeCellEditorWidget
+  BaseCellWidget, CodeCellWidget, CellEditorWidget, CodeCellModel
 } from '../../../lib/notebook/cells';
 
 
@@ -31,7 +31,8 @@ const DEFAULT_CONTENT: nbformat.INotebookContent = require('../../../examples/no
 export
 function createBaseCellRenderer(): BaseCellWidget.Renderer {
   return new BaseCellWidget.Renderer({
-    editorFactory: host => editorServices.factory.newInlineEditor(host.node, {
+    editorFactory: (host, model) => editorServices.factory.newInlineEditor(host.node, {
+      model,
       wordWrap: true
     })
   });
@@ -44,7 +45,8 @@ function createBaseCellRenderer(): BaseCellWidget.Renderer {
 export
 function createCodeCellRenderer(): CodeCellWidget.Renderer {
   return new CodeCellWidget.Renderer({
-    editorFactory: host => editorServices.factory.newInlineEditor(host.node, {
+    editorFactory: (host, model) => editorServices.factory.newInlineEditor(host.node, {
+      model,
       extra: {
         matchBrackets: true,
         autoCloseBrackets: true
@@ -58,12 +60,14 @@ function createCodeCellRenderer(): CodeCellWidget.Renderer {
  * Create a cell editor widget given a factory.
  */
 export
-function createCellEditor(): CodeCellEditorWidget {
-  return new CodeCellEditorWidget(
-    host => editorServices.factory.newInlineEditor(host.node, {
+function createCellEditor(): CellEditorWidget {
+  return new CellEditorWidget({
+    model: new CodeCellModel(),
+    factory: (host, model) => editorServices.factory.newInlineEditor(host.node, {
+      model,
       wordWrap: true
     })
-  );
+  });
 }
 
 

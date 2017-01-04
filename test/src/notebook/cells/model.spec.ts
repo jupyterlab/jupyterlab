@@ -52,7 +52,7 @@ describe('notebook/cells/model', () => {
         };
         let model = new CellModel(base);
         expect(model).to.be.a(CellModel);
-        expect(model.source).to.equal(base.source);
+        expect(model.value.text).to.equal(base.source);
       });
 
       it('should accept a base cell argument with a multiline source', () => {
@@ -63,7 +63,7 @@ describe('notebook/cells/model', () => {
         };
         let model = new CellModel(base);
         expect(model).to.be.a(CellModel);
-        expect(model.source).to.equal((base.source as string[]).join('\n'));
+        expect(model.value.text).to.equal((base.source as string[]).join('\n'));
       });
 
     });
@@ -75,7 +75,7 @@ describe('notebook/cells/model', () => {
         let called = false;
         model.contentChanged.connect(() => { called = true; });
         expect(called).to.be(false);
-        model.source = 'foo';
+        model.value.text = 'foo';
         expect(called).to.be(true);
       });
 
@@ -91,8 +91,8 @@ describe('notebook/cells/model', () => {
         let value = '';
         model.stateChanged.connect(listener);
         expect(value).to.be.empty();
-        model.source = 'foo';
-        expect(value).to.be(model.source);
+        model.value.text = 'foo';
+        expect(value).to.be(model.value.text);
       });
 
       it('should not signal when model state has not changed', () => {
@@ -100,9 +100,9 @@ describe('notebook/cells/model', () => {
         let called = 0;
         model.stateChanged.connect(() => { called++; });
         expect(called).to.be(0);
-        model.source = 'foo';
+        model.value.text = 'foo';
         expect(called).to.be(1);
-        model.source = 'foo';
+        model.value.text = 'foo';
         expect(called).to.be(1);
       });
 
@@ -139,14 +139,14 @@ describe('notebook/cells/model', () => {
 
       it('should default to an empty string', () => {
         let model = new CellModel();
-        expect(model.source).to.be.empty();
+        expect(model.value.text).to.be.empty();
       });
 
       it('should be settable', () => {
         let model = new CellModel();
-        expect(model.source).to.be.empty();
-        model.source = 'foo';
-        expect(model.source).to.be('foo');
+        expect(model.value.text).to.be.empty();
+        model.value.text = 'foo';
+        expect(model.value.text).to.be('foo');
       });
 
     });
@@ -299,7 +299,7 @@ describe('notebook/cells/model', () => {
         };
         let model = new CodeCellModel(cell);
         expect(model).to.be.a(CodeCellModel);
-        expect(model.source).to.equal(cell.source);
+        expect(model.value.text).to.equal(cell.source);
       });
 
       it('should connect the outputs changes to content change signal', () => {
