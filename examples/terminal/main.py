@@ -25,7 +25,7 @@ class ExampleHandler(IPythonHandler):
         """Get the main page for the application's interface."""
         return self.write(self.render_template("index.html",
             static=self.static_url, base_url=self.base_url,
-            terminals_available=True))
+            terminals_available=self.settings['terminals_available']))
 
     def get_template(self, name):
         loader = FileSystemLoader(os.getcwd())
