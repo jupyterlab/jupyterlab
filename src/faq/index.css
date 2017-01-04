@@ -28,7 +28,7 @@
 
 .jp-FAQ-h1 {
   font-size: 26px;
-  font-weight: 300;
+  font-weight: 400;
   color: #313940;
   margin: 10px 0 0 20px;
 }
@@ -36,9 +36,10 @@
 
 .jp-FAQ-h2 {
   font-size: 14px;
-  font-weight: 300;
+  font-weight: 400;
   color: #9E9E9E;
-  margin: 30px 0 0 0;
+  margin: 28px 0 0 0;
+  margin-bottom: 8px;
 }
 
 
@@ -62,7 +63,7 @@
 
 .jp-FAQ-question {
   list-style-type: none;
-  padding: 16px;
+  padding: 4px 16px;
   margin-left: -16px;
   display: inline-block;
 }
