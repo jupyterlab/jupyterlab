@@ -7,6 +7,8 @@ import './application/shell.spec';
 import './codeeditor/editor.spec';
 import './codeeditor/widget.spec';
 
+import './codemirror/editor.spec';
+
 import './commandlinker/commandlinker.spec';
 
 import './common/activitymonitor.spec';
