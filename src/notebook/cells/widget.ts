@@ -399,6 +399,20 @@ class CodeCellWidget extends BaseCellWidget {
     this.addClass(CODE_CELL_CLASS);
     this._rendermime = options.rendermime;
     this._renderer = options.renderer;
+
+    let renderer = this._renderer;
+
+    if (!this._output) {
+      this._output = renderer.createOutputArea(this._rendermime);
+      (this.layout as PanelLayout).addWidget(this._output);
+    }
+
+    let model = this.model;
+    this._output.model = model.outputs;
+    this._output.trusted = this.trusted;
+    this._collapsedCursor = model.getMetadata('collapsed');
+    this._scrolledCursor = model.getMetadata('scrolled');
+    this.setPrompt(`${model.executionCount || ''}`);
   }
 
   /**
@@ -459,25 +473,6 @@ class CodeCellWidget extends BaseCellWidget {
       this._output.trusted = this.trusted;
     }
     super.onUpdateRequest(msg);
-  }
-
-  /**
-   * Handle the widget receiving a new model.
-   */
-  protected onModelChanged(oldValue: ICellModel, newValue: ICellModel): void {
-    let model = newValue as ICodeCellModel;
-    let renderer = this._renderer;
-
-    if (!this._output) {
-      this._output = renderer.createOutputArea(this._rendermime);
-      (this.layout as PanelLayout).addWidget(this._output);
-    }
-
-    this._output.model = model.outputs;
-    this._output.trusted = this.trusted;
-    this._collapsedCursor = model.getMetadata('collapsed');
-    this._scrolledCursor = model.getMetadata('scrolled');
-    this.setPrompt(`${model.executionCount || ''}`);
   }
 
   /**

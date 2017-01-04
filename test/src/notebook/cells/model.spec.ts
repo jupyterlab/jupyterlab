@@ -84,25 +84,25 @@ describe('notebook/cells/model', () => {
     describe('#stateChanged', () => {
 
       it('should signal when model state has changed', () => {
-        let model = new CellModel();
+        let model = new CodeCellModel();
+        let called = false;
         let listener = (sender: any, args: IChangedArgs<any>) => {
-          value = args.newValue;
+          expect(args.newValue).to.be(1);
+          called = true;
         };
-        let value = '';
         model.stateChanged.connect(listener);
-        expect(value).to.be.empty();
-        model.value.text = 'foo';
-        expect(value).to.be(model.value.text);
+        model.executionCount = 1;
+        expect(called).to.be(true);
       });
 
       it('should not signal when model state has not changed', () => {
-        let model = new CellModel();
+        let model = new CodeCellModel();
         let called = 0;
         model.stateChanged.connect(() => { called++; });
         expect(called).to.be(0);
-        model.value.text = 'foo';
+        model.executionCount = 1;
         expect(called).to.be(1);
-        model.value.text = 'foo';
+        model.executionCount = 1;
         expect(called).to.be(1);
       });
 

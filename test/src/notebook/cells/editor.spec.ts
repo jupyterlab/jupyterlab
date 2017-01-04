@@ -170,17 +170,6 @@ describe('notebook/cells/editor', () => {
 
     });
 
-    describe('#onModelStateChanged()', () => {
-
-      it('should run the model state changes', () => {
-        let widget = new LogEditorWidget();
-        expect(widget.methods).to.not.contain('onModelStateChanged');
-        widget.editor.model.value.text = 'foo';
-        expect(widget.methods).to.contain('onModelStateChanged');
-      });
-
-    });
-
     describe('#onEditorKeydown()', () => {
 
       it('should run when there is a keydown event on the editor', () => {

@@ -69,7 +69,7 @@ class CellEditorWidget extends CodeEditorWidget {
 
     this.editor.model.value.changed.connect(() => {
       this.onEditorModelChange();
-    });
+    }, this);
     this.editor.addKeydownHandler((editor, event) => {
       return this.onEditorKeydown(editor, event);
     });

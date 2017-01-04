@@ -106,7 +106,6 @@ class EditorWidget extends CodeEditorWidget {
 
     model.stateChanged.connect(this._onModelStateChanged, this);
     model.contentChanged.connect(this._onContentChanged, this);
-    value.changed.connect(this._onValueChanged, this);
   }
 
   /**
@@ -139,13 +138,6 @@ class EditorWidget extends CodeEditorWidget {
     if (old !== text) {
       value.text = text;
     }
-  }
-
-  /**
-   * Handle a change in the editor model value.
-   */
-  private _onValueChanged(): void {
-    this._context.model.fromString(this.editor.model.value.text);
   }
 
   /**

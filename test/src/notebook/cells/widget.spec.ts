@@ -91,6 +91,11 @@ class LogCodeCell extends CodeCellWidget {
 
   methods: string[] = [];
 
+  constructor() {
+    super({ model: new CodeCellModel(), renderer: createCodeCellRenderer(),
+            rendermime: defaultRenderMime() });
+  }
+
   protected onUpdateRequest(msg: Message): void {
     super.onAfterAttach(msg);
     this.methods.push('onUpdateRequest');
@@ -99,11 +104,6 @@ class LogCodeCell extends CodeCellWidget {
   protected onMetadataChanged(model: ICellModel, args: any): void {
     super.onMetadataChanged(model, args);
     this.methods.push('onMetadataChanged');
-  }
-
-  protected onModelChanged(oldValue: ICellModel, newValue: ICellModel): void {
-    super.onModelChanged(oldValue, newValue);
-    this.methods.push('onModelChanged');
   }
 
   protected onModelStateChanged(model: ICellModel, args: any): void {
@@ -152,16 +152,24 @@ describe('notebook/cells/widget', () => {
         let model = new CellModel();
         let widget = new BaseCellWidget({ model, renderer });
         expect(widget.model).to.be(model);
-        expect(widget.model).not.to.be(model);
+      });
+
+    });
+
+    describe('#editorWidget', () => {
+
+      it('should be a cell editor widget', () => {
+        let widget = new BaseCellWidget({ model, renderer });
+        expect(widget.editorWidget).to.be.a(CellEditorWidget);
       });
 
     });
 
     describe('#editor', () => {
 
-      it('should be a cell editor widget', () => {
+      it('should be a cell editor', () => {
         let widget = new BaseCellWidget({ model, renderer });
-        expect(widget.editor).to.be.a(CellEditorWidget);
+        expect(widget.editor.uuid).to.be.ok();
       });
 
     });
@@ -215,13 +223,6 @@ describe('notebook/cells/widget', () => {
         let widget = new BaseCellWidget({ model, renderer });
         widget.trusted = true;
         expect(widget.trusted).to.be(true);
-      });
-
-      it('should do nothing if there is no model', () => {
-        let widget = new BaseCellWidget({ model, renderer });
-        expect(widget.trusted).to.be(false);
-        widget.trusted = true;
-        expect(widget.trusted).to.be(false);
       });
 
     });
@@ -325,9 +326,9 @@ describe('notebook/cells/widget', () => {
 
       it('should fire when model state changes', () => {
         let method = 'onModelStateChanged';
-        let widget = new LogBaseCell();
+        let widget = new LogCodeCell();
         expect(widget.methods).to.not.contain(method);
-        widget.model.value.text = 'foo';
+        widget.model.executionCount = 1;
         expect(widget.methods).to.contain(method);
       });
 
@@ -459,21 +460,10 @@ describe('notebook/cells/widget', () => {
     describe('#onUpdateRequest()', () => {
 
       it('should update the widget', () => {
-        let widget = new LogCodeCell({ model, rendermime, renderer });
+        let widget = new LogCodeCell();
         expect(widget.methods).to.not.contain('onUpdateRequest');
         sendMessage(widget, WidgetMessage.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
-      });
-
-    });
-
-    describe('#onModelChanged()', () => {
-
-      it('should fire when the model changes', () => {
-        let method = 'onModelChanged';
-        let widget = new LogCodeCell({ model, rendermime, renderer });
-        expect(widget.methods).to.not.contain(method);
-        expect(widget.methods).to.contain(method);
       });
 
     });
@@ -482,9 +472,9 @@ describe('notebook/cells/widget', () => {
 
       it('should fire when model state changes', () => {
         let method = 'onModelStateChanged';
-        let widget = new LogCodeCell({ model, rendermime, renderer });
+        let widget = new LogCodeCell();
         expect(widget.methods).to.not.contain(method);
-        widget.model.value.text = 'foo';
+        widget.model.executionCount = 1;
         expect(widget.methods).to.contain(method);
       });
 
@@ -494,7 +484,7 @@ describe('notebook/cells/widget', () => {
 
       it('should fire when model metadata changes', () => {
         let method = 'onMetadataChanged';
-        let widget = new LogCodeCell({ model, rendermime, renderer });
+        let widget = new LogCodeCell();
         expect(widget.methods).to.not.contain(method);
         widget.model.metadataChanged.emit({
           name: 'foo',
