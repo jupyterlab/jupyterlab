@@ -628,14 +628,30 @@ namespace CodeEditor {
   }
 
   /**
+   * A factory used to create a code editor.
+   */
+  export
+  type Factory = (options: IOptions) => CodeEditor.IEditor;
+
+  /**
    * The options used to initialize an editor.
    */
   export
   interface IOptions {
     /**
+     * The host widget used by the editor.
+     */
+    host: HTMLElement;
+
+    /**
      * The model used by the editor.
      */
     model: IModel;
+
+    /**
+     * The desired uuid for the editor.
+     */
+    uuid?: string;
 
     /**
      * Whether line numbers should be displayed. Defaults to `false`.
@@ -651,6 +667,11 @@ namespace CodeEditor {
      * Whether the editor is read-only. Defaults to `false`.
      */
     readOnly?: boolean;
+
+   /**
+     * The default selection style for the editor.
+     */
+    selectionStyle?: CodeEditor.ISelectionStyle;
 
     /**
      * Extra options.

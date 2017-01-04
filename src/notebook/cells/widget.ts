@@ -357,7 +357,7 @@ namespace BaseCellWidget {
       return new InputAreaWidget(editor);
     }
 
-    private _editorFactory: CodeEditorWidget.Factory;
+    private _editorFactory: CodeEditor.Factory;
   }
 
   /**
@@ -373,7 +373,7 @@ namespace BaseCellWidget {
       /**
        * A code editor factory.
        */
-      readonly editorFactory: CodeEditorWidget.Factory;
+      readonly editorFactory: CodeEditor.Factory;
     }
   }
 }

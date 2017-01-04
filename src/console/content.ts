@@ -739,15 +739,15 @@ namespace ConsoleContent {
      * Create a new renderer.
      */
     constructor(options: Renderer.IOptions) {
-      let factory = options.editorServices.factory;
+      let factory = options.editorServices.factoryService;
       this.bannerRenderer = new BaseCellWidget.Renderer({
-        editorFactory: (host, model) => factory.newInlineEditor(host.node, {
-          model,
-          wordWrap: true
-        })
+        editorFactory: options => {
+          options.wordWrap = true;
+          return factory.newInlineEditor(options);
+        }
       });
       this.promptRenderer = new Private.PromptRenderer({
-        editorFactory: (host, model) => factory.newInlineEditor(host.node, { model })
+        editorFactory: options => factory.newInlineEditor(options)
       });
       this.editorMimeTypeService = options.editorServices.mimeTypeService;
     }

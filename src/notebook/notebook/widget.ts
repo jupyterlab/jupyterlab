@@ -564,15 +564,15 @@ namespace StaticNotebook {
      * Creates a new renderer.
      */
     constructor(options: Renderer.IOptions) {
-      let factory = options.editorServices.factory;
+      let factory = options.editorServices.factoryService;
       this.codeCellRenderer = new CodeCellWidget.Renderer({
-        editorFactory: (host, model) => factory.newInlineEditor(host.node, { model })
+        editorFactory: options => factory.newInlineEditor(options)
       });
       this.markdownCellRenderer = new BaseCellWidget.Renderer({
-        editorFactory: (host, model) => factory.newInlineEditor(host.node, {
-          wordWrap: true,
-          model
-        })
+        editorFactory: options => {
+          options.wordWrap = true;
+          return factory.newInlineEditor(options);
+        }
       });
       this.rawCellRenderer = this.markdownCellRenderer;
       this.editorMimeTypeService = options.editorServices.mimeTypeService;

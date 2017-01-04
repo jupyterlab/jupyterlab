@@ -5,6 +5,10 @@ import * as CodeMirror
   from 'codemirror';
 
 import {
+  utils
+} from '@jupyterlab/services';
+
+import {
   findIndex
 } from 'phosphor/lib/algorithm/searching';
 
@@ -63,16 +67,25 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Construct a CodeMirror editor.
    */
-  constructor(host: HTMLElement, options: CodeMirrorEditor.IOptions) {
-    host.classList.add(EDITOR_CLASS);
-    this.uuid = this.uuid;
+  constructor(options: CodeEditor.IOptions, config: CodeMirror.EditorConfiguration) {
+    options.host.classList.add(EDITOR_CLASS);
+
+    this.uuid = options.uuid || utils.uuid();
     this.selectionStyle = options.selectionStyle;
 
-    let model = this._model = options.model;
+    Private.updateConfig(options, config);
 
-    options.theme = (options.theme || DEFAULT_CODEMIRROR_THEME);
-    let editor = this._editor = CodeMirror(host, options);
+    let model = this._model = options.model;
+    let editor = this._editor = CodeMirror(options.host, config);
     let doc = editor.getDoc();
+
+    // Handle extra config.
+    const extra = options.extra;
+    if (extra) {
+      for (const option in extra) {
+        editor.setOption(option, extra[option]);
+      }
+    }
 
     // Handle initial values for text, mimetype, and selections.
     doc.setValue(model.value.text);
@@ -543,29 +556,26 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   private _changeGuard = false;
 }
 
+
 /**
- * A namespace for `CodeMirrorEditor`.
+ * The namespace for module private data.
  */
-export
-namespace CodeMirrorEditor {
+namespace Private {
   /**
-   * An initialization options for a code mirror editor.
+   * Handle extra codemirror config from codeeditor options.
    */
   export
-  interface IOptions extends CodeMirror.EditorConfiguration {
-    /**
-     * The code editor model.
-     */
-    model: CodeEditor.IModel;
-
-    /**
-     * The uuid of an editor.
-     */
-    uuid: string;
-
-    /**
-     * A selection style.
-     */
-    selectionStyle?: CodeEditor.ISelectionStyle;
+  function updateConfig(options: CodeEditor.IOptions, config: CodeMirror.EditorConfiguration): void {
+    if (options.readOnly !== undefined) {
+      config.readOnly = options.readOnly;
+    }
+    if (options.lineNumbers !== undefined) {
+      config.lineNumbers = options.lineNumbers;
+    }
+    if (options.wordWrap !== undefined) {
+      config.lineWrapping = options.wordWrap;
+    }
+    config.theme = (config.theme || DEFAULT_CODEMIRROR_THEME);
+    config.indentUnit = config.indentUnit || 4;
   }
 }

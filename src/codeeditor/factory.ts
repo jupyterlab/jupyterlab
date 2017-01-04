@@ -7,17 +7,17 @@ import {
 
 
 /**
- * The editor factory interface.
+ * The editor factory service interface.
  */
 export
-interface IEditorFactory {
+interface IEditorFactoryService {
   /**
    * Create a new editor for inline code.
    */
-  newInlineEditor(host: HTMLElement, options: CodeEditor.IOptions): CodeEditor.IEditor;
+  newInlineEditor(options: CodeEditor.IOptions): CodeEditor.IEditor;
 
   /**
    * Create a new editor for a full document.
    */
-  newDocumentEditor(host: HTMLElement, options: CodeEditor.IOptions): CodeEditor.IEditor;
+  newDocumentEditor(options: CodeEditor.IOptions): CodeEditor.IEditor;
 }

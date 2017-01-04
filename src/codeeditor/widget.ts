@@ -24,7 +24,7 @@ class CodeEditorWidget extends Widget {
    */
   constructor(options: CodeEditorWidget.IOptions) {
     super();
-    this._editor = options.factory(this, options.model);
+    this._editor = options.factory({ host: this.node, model: options.model });
   }
 
   /**
@@ -158,17 +158,11 @@ namespace CodeEditorWidget {
     /**
      * A code editor factory.
      */
-    factory: Factory;
+    factory: CodeEditor.Factory;
 
     /**
      * The model used to initialize the code editor.
      */
     model: CodeEditor.IModel;
   }
-
-  /**
-   * A factory used to create a code editor for the code editor widget.
-   */
-  export
-  type Factory = (host: Widget, model: CodeEditor.IModel) => CodeEditor.IEditor;
 }

@@ -176,7 +176,7 @@ namespace EditorWidget {
     /**
      * A code editor factory.
      */
-    factory: CodeEditorWidget.Factory;
+    factory: CodeEditor.Factory;
 
     /**
      * The mime type service for the editor.
@@ -208,13 +208,13 @@ class EditorWidgetFactory extends ABCWidgetFactory<EditorWidget, DocumentRegistr
    * Create a new widget given a context.
    */
   protected createNewWidget(context: DocumentRegistry.CodeContext): EditorWidget {
-    let func = this._services.factory.newDocumentEditor
-    let factory = (host: Widget, model: CodeEditor.IModel) => func(host.node, {
-      model,
-      lineNumbers: true,
-      readOnly: false,
-      wordWrap: true
-    });
+    let func = this._services.factoryService.newDocumentEditor
+    let factory: CodeEditor.Factory = options => {
+      options.lineNumbers = true;
+      options.readOnly = false;
+      options.wordWrap = true;
+      return func(options);
+    };
     return new EditorWidget({
       factory,
       context,

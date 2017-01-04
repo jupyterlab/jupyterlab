@@ -24,6 +24,6 @@ export * from './mimetype';
  */
 export
 const editorServices: IEditorServices = {
-  factory: new CodeMirrorEditorFactory(),
+  factoryService: new CodeMirrorEditorFactory(),
   mimeTypeService: new CodeMirrorMimeTypeService()
 };
