@@ -85,8 +85,8 @@ const rendermime = defaultRenderMime();
 const renderer: ForeignHandler.IRenderer = {
   createCell: () => {
     let renderer = createCodeCellRenderer();
-    let cell = new CodeCellWidget({ rendermime, renderer });
-    cell.model = new CodeCellModel();
+    let model = new CodeCellModel();
+    let cell = new CodeCellWidget({ model, rendermime, renderer });
     return cell;
   }
 };

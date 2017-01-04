@@ -12,8 +12,8 @@ import {
 } from '../../../lib/completer';
 
 import {
-  ICompletionRequest, ICoords, ITextChange
-} from '../../../lib/notebook/cells/editor';
+  CellEditorWidget
+} from '../../../lib/notebook/cells';
 
 
 describe('completer/model', () => {
@@ -60,7 +60,7 @@ describe('completer/model', () => {
       it('should signal when original request changes', () => {
         let model = new CompleterModel();
         let called = 0;
-        let request: ICompletionRequest = {
+        let request: CellEditorWidget.ICompletionRequest = {
           ch: 0,
           chHeight: 0,
           chWidth: 0,
@@ -81,7 +81,7 @@ describe('completer/model', () => {
       it('should not signal when original request has not changed', () => {
         let model = new CompleterModel();
         let called = 0;
-        let request: ICompletionRequest = {
+        let request: CellEditorWidget.ICompletionRequest = {
           ch: 0,
           chHeight: 0,
           chWidth: 0,
@@ -107,9 +107,9 @@ describe('completer/model', () => {
         let currentValue = 'foo';
         let oldValue = currentValue;
         let newValue = 'foob';
-        let coords: ICoords = null;
+        let coords: CellEditorWidget.ICoordinate = null;
         let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
-        let request: ICompletionRequest = {
+        let request: CellEditorWidget.ICompletionRequest = {
           ch: 0,
           chHeight: 0,
           chWidth: 0,
@@ -118,7 +118,7 @@ describe('completer/model', () => {
           position: 0,
           currentValue: currentValue
         };
-        let change: ITextChange = {
+        let change: CellEditorWidget.ITextChange = {
           ch: 0,
           chHeight: 0,
           chWidth: 0,
@@ -144,9 +144,9 @@ describe('completer/model', () => {
         let currentValue = 'foo';
         let oldValue = currentValue;
         let newValue = 'foob';
-        let coords: ICoords = null;
+        let coords: CellEditorWidget.ICoordinate = null;
         let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
-        let request: ICompletionRequest = {
+        let request: CellEditorWidget.ICompletionRequest = {
           ch: 0,
           chHeight: 0,
           chWidth: 0,
@@ -155,7 +155,7 @@ describe('completer/model', () => {
           position: 0,
           currentValue: currentValue
         };
-        let change: ITextChange = {
+        let change: CellEditorWidget.ITextChange = {
           ch: 0,
           chHeight: 0,
           chWidth: 0,
@@ -252,7 +252,7 @@ describe('completer/model', () => {
 
       it('should return the original request', () => {
         let model = new CompleterModel();
-        let request: ICompletionRequest = {
+        let request: CellEditorWidget.ICompletionRequest = {
           ch: 0,
           chHeight: 0,
           chWidth: 0,
@@ -279,9 +279,9 @@ describe('completer/model', () => {
         let currentValue = 'foo';
         let oldValue = currentValue;
         let newValue = 'foob';
-        let coords: ICoords = null;
+        let coords: CellEditorWidget.ICoordinate = null;
         let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
-        let request: ICompletionRequest = {
+        let request: CellEditorWidget.ICompletionRequest = {
           ch: 0,
           chHeight: 0,
           chWidth: 0,
@@ -290,7 +290,7 @@ describe('completer/model', () => {
           position: 0,
           currentValue: currentValue
         };
-        let change: ITextChange = {
+        let change: CellEditorWidget.ITextChange = {
           ch: 0,
           chHeight: 0,
           chWidth: 0,
@@ -311,9 +311,9 @@ describe('completer/model', () => {
         let currentValue = 'foo';
         let oldValue = currentValue;
         let newValue = 'foob';
-        let coords: ICoords = null;
+        let coords: CellEditorWidget.ICoordinate = null;
         let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
-        let request: ICompletionRequest = {
+        let request: CellEditorWidget.ICompletionRequest = {
           ch: 0,
           chHeight: 0,
           chWidth: 0,
@@ -322,7 +322,7 @@ describe('completer/model', () => {
           position: 0,
           currentValue: currentValue
         };
-        let change: ITextChange = {
+        let change: CellEditorWidget.ITextChange = {
           ch: 0,
           chHeight: 0,
           chWidth: 0,
@@ -343,9 +343,9 @@ describe('completer/model', () => {
         let currentValue = 'foo';
         let oldValue = currentValue;
         let newValue = 'fo';
-        let coords: ICoords = null;
+        let coords: CellEditorWidget.ICoordinate = null;
         let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
-        let request: ICompletionRequest = {
+        let request: CellEditorWidget.ICompletionRequest = {
           ch: 0,
           chHeight: 0,
           chWidth: 0,
@@ -354,7 +354,7 @@ describe('completer/model', () => {
           position: 0,
           currentValue: currentValue
         };
-        let change: ITextChange = {
+        let change: CellEditorWidget.ITextChange = {
           ch: 0,
           chHeight: 0,
           chWidth: 0,
@@ -382,7 +382,7 @@ describe('completer/model', () => {
       it('should not set if original request is nonexistent', () => {
         let model = new CompleterModel();
         let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
-        let request: ICompletionRequest = {
+        let request: CellEditorWidget.ICompletionRequest = {
           ch: 0,
           chHeight: 0,
           chWidth: 0,
@@ -438,9 +438,9 @@ describe('completer/model', () => {
         let currentValue = 'foo';
         let oldValue = currentValue;
         let newValue = 'foob';
-        let coords: ICoords = null;
+        let coords: CellEditorWidget.ICoordinate = null;
         let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
-        let request: ICompletionRequest = {
+        let request: CellEditorWidget.ICompletionRequest = {
           ch: 0,
           chHeight: 0,
           chWidth: 0,
@@ -449,7 +449,7 @@ describe('completer/model', () => {
           position: 0,
           currentValue: currentValue
         };
-        let change: ITextChange = {
+        let change: CellEditorWidget.ITextChange = {
           ch: 4,
           chHeight: 0,
           chWidth: 0,
@@ -469,8 +469,8 @@ describe('completer/model', () => {
         let currentValue = 'foo';
         let oldValue = currentValue;
         let newValue = 'foo ';
-        let coords: ICoords = null;
-        let request: ICompletionRequest = {
+        let coords: CellEditorWidget.ICoordinate = null;
+        let request: CellEditorWidget.ICompletionRequest = {
           ch: 0,
           chHeight: 0,
           chWidth: 0,
@@ -479,7 +479,7 @@ describe('completer/model', () => {
           position: 0,
           currentValue: currentValue
         };
-        let change: ITextChange = {
+        let change: CellEditorWidget.ITextChange = {
           ch: 4,
           chHeight: 0,
           chWidth: 0,
@@ -502,7 +502,7 @@ describe('completer/model', () => {
         let patch = 'foobar';
         let want: CompleterWidget.IPatch = { text: patch, position: patch.length };
         let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 3 };
-        let request: ICompletionRequest = {
+        let request: CellEditorWidget.ICompletionRequest = {
           ch: 0,
           chHeight: 0,
           chWidth: 0,
@@ -527,7 +527,7 @@ describe('completer/model', () => {
         let patch = 'barbaz';
         let want: CompleterWidget.IPatch = { text: 'foo\nbarbaz', position: 10 };
         let cursor: CompleterWidget.ICursorSpan = { start: 4, end: 7 };
-        let request: ICompletionRequest = {
+        let request: CellEditorWidget.ICompletionRequest = {
           ch: 0,
           chHeight: 0,
           chWidth: 0,

@@ -112,7 +112,7 @@ describe('console/panel', () => {
           panel.activate();
           requestAnimationFrame(() => {
             expect(panel.methods).to.contain('onActivateRequest');
-            expect(panel.content.prompt.editor.hasFocus()).to.be(true);
+            expect(panel.content.prompt.editor.editor.hasFocus()).to.be(true);
             done();
           });
         });
