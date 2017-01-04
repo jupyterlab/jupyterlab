@@ -120,6 +120,7 @@ describe('CodeEditor.Model', () => {
     it('should be the observable value of the model', () => {
       let called = false;
       model.value.changed.connect((sender, args) => {
+        console.log('hi', args.value)
         expect(sender).to.be(model.value);
         expect(args.type).to.be('set');
         expect(args.value).to.be('foo');

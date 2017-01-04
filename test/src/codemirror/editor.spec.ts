@@ -19,33 +19,34 @@ describe('CodeMirrorEditor', () => {
 
   let editor: CodeMirrorEditor;
   let host: HTMLElement;
-  let model = new CodeEditor.Model();
+  let model: CodeEditor.IModel;
 
   beforeEach(() => {
-    let host = document.createElement('div');
-    document.appendChild(host);
+    host = document.createElement('div');
+    document.body.appendChild(host);
+    model = new CodeEditor.Model();
     editor = new CodeMirrorEditor({ host, model }, {});
   });
 
   afterEach(() => {
     editor.dispose();
-    document.removeChild(host);
+    document.body.removeChild(host);
   });
 
   describe('#constructor()', () => {
 
     it('should create a CodeMirrorEditor', () => {
-      expect(model).to.be.a(CodeMirrorEditor);
+      expect(editor).to.be.a(CodeMirrorEditor);
     });
 
   });
 
   describe('#isDisposed', () => {
 
-    it('should test whether the model is disposed', () => {
-      expect(model.isDisposed).to.be(false);
-      model.dispose();
-      expect(model.isDisposed).to.be(true);
+    it('should test whether the editor is disposed', () => {
+      expect(editor.isDisposed).to.be(false);
+      editor.dispose();
+      expect(editor.isDisposed).to.be(true);
     });
 
   });
