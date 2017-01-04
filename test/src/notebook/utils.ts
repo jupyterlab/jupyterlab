@@ -31,10 +31,10 @@ const DEFAULT_CONTENT: nbformat.INotebookContent = require('../../../examples/no
 export
 function createBaseCellRenderer(): BaseCellWidget.Renderer {
   return new BaseCellWidget.Renderer({
-    editorFactory: (host, model) => editorServices.factory.newInlineEditor(host.node, {
-      model,
-      wordWrap: true
-    })
+    editorFactory: options => {
+      options.wordWrap = true;
+      return editorServices.factoryService.newInlineEditor(options);
+    }
   });
 };
 
@@ -45,13 +45,13 @@ function createBaseCellRenderer(): BaseCellWidget.Renderer {
 export
 function createCodeCellRenderer(): CodeCellWidget.Renderer {
   return new CodeCellWidget.Renderer({
-    editorFactory: (host, model) => editorServices.factory.newInlineEditor(host.node, {
-      model,
-      extra: {
+    editorFactory: options => {
+      options.extra = {
         matchBrackets: true,
         autoCloseBrackets: true
-      }
-    })
+      };
+      return editorServices.factoryService.newInlineEditor(options);
+    }
   });
 }
 
@@ -63,10 +63,10 @@ export
 function createCellEditor(): CellEditorWidget {
   return new CellEditorWidget({
     model: new CodeCellModel(),
-    factory: (host, model) => editorServices.factory.newInlineEditor(host.node, {
-      model,
-      wordWrap: true
-    })
+    factory: options => {
+      options.wordWrap = true;
+      return editorServices.factoryService.newInlineEditor(options);
+    }
   });
 }
 

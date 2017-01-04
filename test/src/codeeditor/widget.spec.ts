@@ -80,12 +80,14 @@ class LogWidget extends CodeEditorWidget {
 describe('CodeEditorWidget', () => {
 
   let widget: LogWidget;
-  let editorFactory = (host: Widget) => {
-    return new LogEditor(host.node, { uuid: 'foo' });
+  let editorFactory = (options: CodeEditor.IOptions) => {
+    options.uuid = 'foo';
+    return new LogEditor(options, {});
   };
 
   beforeEach(() => {
-    widget = new LogWidget(editorFactory);
+    let model = new CodeEditor.Model();
+    widget = new LogWidget({ factory: editorFactory, model });
   });
 
   afterEach(() => {

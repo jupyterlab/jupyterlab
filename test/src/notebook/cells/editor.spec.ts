@@ -47,8 +47,8 @@ class LogEditorWidget extends CellEditorWidget {
 
   constructor() {
     super({
-      factory: (host, model) => factory.newInlineEditor(host.node, { model }),
-      model
+      factory: options => factory.newInlineEditor(options),
+      model: new CellModel()
     });
   }
 
