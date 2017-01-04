@@ -92,7 +92,7 @@ function createApp(manager: ServiceManager.IManager): void {
   });
   let mFactory = new TextModelFactory();
   let editorServices = {
-    factory: new CodeMirrorEditorFactory(),
+    factoryService: new CodeMirrorEditorFactory(),
     mimeTypeService: new CodeMirrorMimeTypeService()
   };
   let wFactory = new EditorWidgetFactory({
