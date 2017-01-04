@@ -235,7 +235,7 @@ describe('notebook/cells/widget', () => {
         requestAnimationFrame(() => {
           expect(widget.methods).to.contain('onActivateRequest');
           requestAnimationFrame(() => {
-            expect(widget.editor.editor.hasFocus()).to.be(true);
+            expect(widget.editor.hasFocus()).to.be(true);
             widget.dispose();
             done();
           });

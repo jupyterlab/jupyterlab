@@ -358,7 +358,7 @@ describe('completer/handler', () => {
 
         handler.activeCell = cell;
         expect(handler.methods).to.not.contain('onTextChanged');
-        cell.editor.textChanged.emit(change);
+        cell.editorWidget.textChanged.emit(change);
         expect(handler.methods).to.contain('onTextChanged');
       });
 
@@ -382,7 +382,7 @@ describe('completer/handler', () => {
 
         handler.activeCell = cell;
         expect(model.methods).to.not.contain('handleTextChange');
-        cell.editor.textChanged.emit(change);
+        cell.editorWidget.textChanged.emit(change);
         expect(model.methods).to.contain('handleTextChange');
       });
 
@@ -407,7 +407,7 @@ describe('completer/handler', () => {
 
         handler.activeCell = cell;
         expect(handler.methods).to.not.contain('onCompletionRequested');
-        cell.editor.completionRequested.emit(request);
+        cell.editorWidget.completionRequested.emit(request);
         expect(handler.methods).to.contain('onCompletionRequested');
       });
 
@@ -430,7 +430,7 @@ describe('completer/handler', () => {
         handler.kernel = kernel;
         handler.activeCell = cell;
         expect(handler.methods).to.not.contain('makeRequest');
-        cell.editor.completionRequested.emit(request);
+        cell.editorWidget.completionRequested.emit(request);
         expect(handler.methods).to.contain('makeRequest');
       });
 

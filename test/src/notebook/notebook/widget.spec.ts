@@ -918,14 +918,14 @@ describe('notebook/notebook/widget', () => {
 
         it('should change to edit mode if a child cell takes focus', () => {
           let child = widget.widgets.at(0);
-          simulate(child.editor.node, 'focus');
+          simulate(child.editorWidget.node, 'focus');
           expect(widget.events).to.contain('focus');
           expect(widget.mode).to.be('edit');
         });
 
         it('should change to command mode if the widget takes focus', () => {
           let child = widget.widgets.at(0);
-          simulate(child.editor.node, 'focus');
+          simulate(child.editorWidget.node, 'focus');
           expect(widget.events).to.contain('focus');
           expect(widget.mode).to.be('edit');
           widget.events = [];
@@ -1117,7 +1117,7 @@ describe('notebook/notebook/widget', () => {
           widget.model.fromJSON(DEFAULT_CONTENT);
           widget.activeCellIndex = 1;
           let child = widget.widgets.at(widget.activeCellIndex);
-          child.editor.edgeRequested.emit('top');
+          child.editorWidget.edgeRequested.emit('top');
           expect(widget.activeCellIndex).to.be(0);
         });
 
@@ -1125,7 +1125,7 @@ describe('notebook/notebook/widget', () => {
           let widget = createActiveWidget();
           widget.model.fromJSON(DEFAULT_CONTENT);
           let child = widget.widgets.at(widget.activeCellIndex);
-          child.editor.edgeRequested.emit('bottom');
+          child.editorWidget.edgeRequested.emit('bottom');
           expect(widget.activeCellIndex).to.be(1);
         });
 

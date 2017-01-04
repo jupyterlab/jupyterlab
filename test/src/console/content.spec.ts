@@ -384,7 +384,7 @@ describe('console/content', () => {
           widget.activate();
           requestAnimationFrame(() => {
             expect(widget.methods).to.contain('onActivateRequest');
-            expect(widget.prompt.editor.editor.hasFocus()).to.be(true);
+            expect(widget.prompt.editor.hasFocus()).to.be(true);
             done();
           });
         });
@@ -428,7 +428,7 @@ describe('console/content', () => {
             local.execute(force).then(() => {
               expect(local.prompt.model.value.text).to.not.be(code);
               expect(local.methods).to.not.contain('onEdgeRequest');
-              local.prompt.editor.edgeRequested.emit('top');
+              local.prompt.editorWidget.edgeRequested.emit('top');
             }).catch(done);
           });
         });
@@ -451,7 +451,7 @@ describe('console/content', () => {
         };
         Widget.attach(widget, document.body);
         expect(widget.methods).to.not.contain('onTextChange');
-        widget.prompt.editor.textChanged.emit(change);
+        widget.prompt.editorWidget.textChanged.emit(change);
         expect(widget.methods).to.contain('onTextChange');
       });
 
