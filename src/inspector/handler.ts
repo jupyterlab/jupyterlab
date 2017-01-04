@@ -70,14 +70,14 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
     }
 
     if (this._activeCell && !this._activeCell.isDisposed) {
-      const editor = this._activeCell.editor;
+      const editor = this._activeCell.editorWidget;
       editor.textChanged.disconnect(this.onTextChanged, this);
     }
     this._activeCell = newValue;
     if (this._activeCell) {
       // Clear ephemeral inspectors in preparation for a new editor.
       this.ephemeralCleared.emit(void 0);
-      const editor = this._activeCell.editor;
+      const editor = this._activeCell.editorWidget;
       editor.textChanged.connect(this.onTextChanged, this);
     }
   }

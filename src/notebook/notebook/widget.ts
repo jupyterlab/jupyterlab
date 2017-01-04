@@ -986,7 +986,7 @@ class Notebook extends StaticNotebook {
    * Handle a cell being inserted.
    */
   protected onCellInserted(index: number, cell: BaseCellWidget): void {
-    cell.editor.edgeRequested.connect(this._onEdgeRequest, this);
+    cell.editorWidget.edgeRequested.connect(this._onEdgeRequest, this);
     // Trigger an update of the active cell.
     this.activeCellIndex = this.activeCellIndex;
   }
@@ -1029,7 +1029,7 @@ class Notebook extends StaticNotebook {
       this.activeCellIndex--;
       // Move the cursor to the first position on the last line.
       if (this.activeCellIndex < prev) {
-        let editor = this.activeCell.editor.editor;
+        let editor = this.activeCell.editor;
         let lastLine = editor.lineCount - 1;
         editor.setCursorPosition({ line: lastLine, column: 0 });
       }
@@ -1037,7 +1037,7 @@ class Notebook extends StaticNotebook {
       this.activeCellIndex++;
       // Move the cursor to the first character.
       if (this.activeCellIndex > prev) {
-        let editor = this.activeCell.editor.editor;
+        let editor = this.activeCell.editor;
         editor.setCursorPosition({ line: 0, column: 0 });
       }
     }
@@ -1049,12 +1049,12 @@ class Notebook extends StaticNotebook {
   private _ensureFocus(force=false): void {
     let activeCell = this.activeCell;
     if (this.mode === 'edit') {
-      activeCell.editor.editor.focus();
+      activeCell.editor.focus();
     } else if (this.node.contains(document.activeElement)) {
       // If an editor currently has focus, focus our node.
       // Otherwise, another input field has focus and should keep it.
       let w = find(this.layout, widget => {
-        return (widget as BaseCellWidget).editor.editor.hasFocus();
+        return (widget as BaseCellWidget).editor.hasFocus();
       });
       if (w) {
         this.node.focus();
@@ -1098,7 +1098,7 @@ class Notebook extends StaticNotebook {
     if (i !== -1) {
       let widget = this.widgets.at(i);
       // Event is on a cell but not in its editor, switch to command mode.
-      if (!widget.editor.node.contains(target)) {
+      if (!widget.editorWidget.node.contains(target)) {
         this.mode = 'command';
         shouldDrag = widget.promptNode.contains(target);
       }
@@ -1333,12 +1333,12 @@ class Notebook extends StaticNotebook {
     if (i !== -1) {
       let widget = this.widgets.at(i);
       // If the editor itself does not have focus, ensure command mode.
-      if (!widget.editor.node.contains(target)) {
+      if (!widget.editorWidget.node.contains(target)) {
         this.mode = 'command';
       }
       this.activeCellIndex = i;
       // If the editor has focus, ensure edit mode.
-      if (widget.editor.node.contains(target)) {
+      if (widget.editorWidget.node.contains(target)) {
         this.mode = 'edit';
       }
     } else {

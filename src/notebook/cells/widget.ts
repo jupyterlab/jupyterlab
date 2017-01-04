@@ -151,8 +151,15 @@ class BaseCellWidget extends Widget {
   /**
    * Get the editor widget used by the cell.
    */
-  get editor(): CellEditorWidget {
+  get editorWidget(): CellEditorWidget {
     return this._editor;
+  }
+
+  /**
+   * Get the editor used by the cell.
+   */
+  get editor(): CodeEditor.IEditor {
+    return this._editor.editor;
   }
 
   /**

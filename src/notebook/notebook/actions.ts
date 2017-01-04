@@ -65,7 +65,7 @@ namespace NotebookActions {
     let nbModel = widget.model;
     let index = widget.activeCellIndex;
     let child = widget.widgets.at(index);
-    let editor = child.editor.editor;
+    let editor = child.editor;
     let position = editor.getCursorPosition();
     let offset = editor.getOffsetAt(position);
     let orig = child.model.value.text;
@@ -775,10 +775,10 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
-    let lineNumbers = widget.activeCell.editor.editor.lineNumbers;
+    let lineNumbers = widget.activeCell.editor.lineNumbers;
     each(widget.widgets, child => {
       if (widget.isSelected(child)) {
-        child.editor.editor.lineNumbers = !lineNumbers;
+        child.editor.lineNumbers = !lineNumbers;
       }
     });
   }
@@ -797,9 +797,9 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
-    let lineNumbers = widget.activeCell.editor.editor.lineNumbers;
+    let lineNumbers = widget.activeCell.editor.lineNumbers;
     each(widget.widgets, child => {
-      child.editor.editor.lineNumbers = !lineNumbers;
+      child.editor.lineNumbers = !lineNumbers;
     });
   }
 

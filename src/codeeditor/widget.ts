@@ -35,6 +35,13 @@ class CodeEditorWidget extends Widget {
   }
 
   /**
+   * Get the model used by the widget.
+   */
+  get model(): CodeEditor.IModel {
+    return this._editor.model;
+  }
+
+  /**
    * Dispose of the resources held by the widget.
    */
   dispose() {

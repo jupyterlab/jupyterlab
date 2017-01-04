@@ -59,13 +59,13 @@ class CellCompleterHandler implements IDisposable {
     }
 
     if (this._activeCell && !this._activeCell.isDisposed) {
-      const editor = this._activeCell.editor;
+      const editor = this._activeCell.editorWidget;
       editor.textChanged.disconnect(this.onTextChanged, this);
       editor.completionRequested.disconnect(this.onCompletionRequested, this);
     }
     this._activeCell = newValue;
     if (this._activeCell) {
-      const editor = this._activeCell.editor as CellEditorWidget;
+      const editor = this._activeCell.editorWidget;
       editor.textChanged.connect(this.onTextChanged, this);
       editor.completionRequested.connect(this.onCompletionRequested, this);
     }
@@ -187,7 +187,7 @@ class CellCompleterHandler implements IDisposable {
     }
     let cell = this._activeCell;
     cell.model.value.text = patch.text;
-    let editor = cell.editor.editor;
+    let editor = cell.editor;
     editor.setCursorPosition(editor.getPositionAt(patch.position));
   }
 

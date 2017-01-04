@@ -316,7 +316,7 @@ class ConsoleContent extends Widget {
   insertLinebreak(): void {
     let prompt = this.prompt;
     let model = prompt.model;
-    let editor = prompt.editor.editor;
+    let editor = prompt.editor;
     // Insert the line break at the cursor position, and move cursor forward.
     let pos = editor.getCursorPosition();
     let offset = editor.getOffsetAt(pos);
@@ -387,7 +387,7 @@ class ConsoleContent extends Widget {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this.prompt.editor.editor.focus();
+    this.prompt.editor.focus();
     this.update();
   }
 
@@ -414,7 +414,7 @@ class ConsoleContent extends Widget {
     this._input.addWidget(prompt);
 
     // Hook up history handling.
-    let editor = prompt.editor;
+    let editor = prompt.editorWidget;
     editor.edgeRequested.connect(this.onEdgeRequest, this);
     editor.textChanged.connect(this.onTextChange, this);
 
@@ -422,7 +422,7 @@ class ConsoleContent extends Widget {
     this._completerHandler.activeCell = prompt;
     this._inspectionHandler.activeCell = prompt;
 
-    prompt.editor.editor.focus();
+    prompt.editor.focus();
     this.update();
   }
 
@@ -481,7 +481,7 @@ class ConsoleContent extends Widget {
    * Handle the `'keydown'` event for the widget.
    */
   private _evtKeyDown(event: KeyboardEvent): void {
-    let editor = this.prompt.editor.editor;
+    let editor = this.prompt.editor;
     if (event.keyCode === 13 && !editor.hasFocus()) {
       editor.focus();
     }
@@ -624,7 +624,7 @@ class ConsoleContent extends Widget {
           return;
         }
         model.value.text = code + isComplete.content.indent;
-        let editor = prompt.editor.editor;
+        let editor = prompt.editor;
         let pos = editor.getPositionAt(model.value.text.length)
         editor.setCursorPosition(pos);
         resolve(false);
