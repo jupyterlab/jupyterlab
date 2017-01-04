@@ -157,6 +157,10 @@ namespace CodeEditorWidget {
   interface IOptions {
     /**
      * A code editor factory.
+     *
+     * #### Notes
+     * The widget needs a factory and a model instead of a `CodeEditor.IEditor`
+     * object because it needs to provide its own node as the host.
      */
     factory: CodeEditor.Factory;
 
