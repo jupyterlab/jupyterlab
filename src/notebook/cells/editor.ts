@@ -100,7 +100,7 @@ class CellEditorWidget extends CodeEditorWidget {
     let position = editor.getOffsetAt(cursorPosition);
     let line = cursorPosition.line;
     let ch = cursorPosition.column;
-    let coords = editor.getCoordinate(cursorPosition);
+    let coords = editor.getCoordinate(cursorPosition) as CellEditorWidget.ICoordinate;
     let chHeight = editor.lineHeight;
     let chWidth = editor.charWidth;
     this.textChanged.emit({
@@ -201,6 +201,11 @@ namespace CellEditorWidget {
   export type EdgeLocation = 'top' | 'bottom';
 
   /**
+   * An interface describing editor state coordinates.
+   */
+  export interface ICoordinate extends CodeEditor.ICoordinate, JSONObject { }
+
+  /**
    * An interface describing the state of the editor in an event.
    */
   export
@@ -228,7 +233,7 @@ namespace CellEditorWidget {
     /**
      * The coordinate position of the cursor.
      */
-    readonly coords: CodeEditor.ICoordinate;
+    readonly coords: ICoordinate;
 
     /**
      * The cursor position of the request, including line breaks.
