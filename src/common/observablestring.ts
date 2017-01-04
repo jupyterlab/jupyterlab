@@ -152,8 +152,8 @@ class ObservableString implements IObservableString {
       return;
     }
     this._isDisposed = true;
-    this.clear();
     clearSignalData(this);
+    this.clear();
   }
 
   private _text = '';

@@ -396,9 +396,9 @@ namespace CodeEditor {
         return;
       }
       this._isDisposed = true;
+      clearSignalData(this);
       this._selections.dispose();
       this._value.dispose();
-      clearSignalData(this);
     }
 
     private _value = new ObservableString();

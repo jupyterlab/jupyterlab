@@ -17,6 +17,10 @@ import {
 } from 'phosphor/lib/core/disposable';
 
 import {
+  clearSignalData
+} from 'phosphor/lib/core/signaling';
+
+import {
   Vector
 } from 'phosphor/lib/collections/vector';
 
@@ -129,23 +133,28 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     this._model = null;
     this._editor = null;
     this._keydownHandlers.clear();
+    clearSignalData(this);
   }
 
   /**
    * Get the editor wrapped by the widget.
-   *
-   * #### Notes
-   * This is a ready-only property.
    */
   get editor(): CodeMirror.Editor {
     return this._editor;
   }
 
   /**
+   * Get the codemirror doc wrapped by the widget.
+   */
+  get doc(): CodeMirror.Doc {
+    return this._editor.getDoc();
+  }
+
+  /**
    * Get the number of lines in the editor.
    */
   get lineCount(): number {
-    return this._editor.getDoc().lineCount();
+    return this.doc.lineCount();
   }
 
   /**
@@ -204,14 +213,14 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Returns the content for the given line number.
    */
   getLine(line: number): string | undefined {
-    return this._editor.getDoc().getLine(line);
+    return this.doc.getLine(line);
   }
 
   /**
    * Find an offset for the given position.
    */
   getOffsetAt(position: CodeEditor.IPosition): number {
-    return this._editor.getDoc().indexFromPos({
+    return this.doc.indexFromPos({
       ch: position.column,
       line: position.line
     });
@@ -221,7 +230,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Find a position fot the given offset.
    */
   getPositionAt(offset: number): CodeEditor.IPosition {
-    const { ch, line } = this._editor.getDoc().posFromIndex(offset);
+    const { ch, line } = this.doc.posFromIndex(offset);
     return { line, column: ch };
   }
 
@@ -229,21 +238,21 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Undo one edit (if any undo events are stored).
    */
   undo(): void {
-    this._editor.getDoc().undo();
+    this.doc.undo();
   }
 
   /**
    * Redo one undone edit.
    */
   redo(): void {
-    this._editor.getDoc().redo();
+    this.doc.redo();
   }
 
   /**
    * Clear the undo history.
    */
   clearHistory(): void {
-    this._editor.getDoc().clearHistory();
+    this.doc.clearHistory();
   }
 
   /**
@@ -319,7 +328,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Returns the primary position of the cursor, never `null`.
    */
   getCursorPosition(): CodeEditor.IPosition {
-    const cursor = this._editor.getDoc().getCursor();
+    const cursor = this.doc.getCursor();
     return this.toPosition(cursor);
   }
 
@@ -328,7 +337,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   setCursorPosition(position: CodeEditor.IPosition): void {
     const cursor = this.toCodeMirrorPosition(position);
-    this._editor.getDoc().setCursor(cursor);
+    this.doc.setCursor(cursor);
   }
 
   /**
@@ -349,11 +358,11 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Gets the selections for all the cursors, never `null` or empty.
    */
   getSelections(): CodeEditor.ITextSelection[] {
-    const selections = this._editor.getDoc().listSelections();
+    const selections = this.doc.listSelections();
     if (selections.length > 0) {
       return selections.map(selection => this.toSelection(selection));
     }
-    const cursor = this._editor.getDoc().getCursor();
+    const cursor = this.doc.getCursor();
     const selection = this.toSelection({ anchor: cursor, head: cursor });
     return [selection];
   }
@@ -365,7 +374,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   setSelections(selections: CodeEditor.IRange[]): void {
     const cmSelections = this.toCodeMirrorSelections(selections);
-    this._editor.getDoc().setSelections(cmSelections, 0);
+    this.doc.setSelections(cmSelections, 0);
   }
 
   /**
@@ -420,7 +429,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     for (const selection of selections) {
       const { anchor, head } = this.toCodeMirrorSelection(selection);
       const markerOptions = this.toTextMarkerOptions(selection);
-      this._editor.getDoc().markText(anchor, head, markerOptions);
+      this.doc.markText(anchor, head, markerOptions);
     }
     this.selectionMarkers[uuid] = markers;
   }
@@ -502,8 +511,11 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Handle model value changes.
    */
   private _onValueChanged(value: IObservableString, args: ObservableString.IChangedArgs): void {
+    if (this._changeGuard) {
+      return;
+    }
     this._changeGuard = true;
-    let doc = this._editor.getDoc();
+    let doc = this.doc;
     switch (args.type) {
     case 'insert':
       let pos = doc.posFromIndex(args.start);
@@ -531,20 +543,19 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       return;
     }
     this._changeGuard = true;
-    let text = doc.getValue();
-    let value = this._model.value;
 
-    if (!change.origin || change.origin === 'setValue' ||
-        change.text.length > 1 || change.removed.length > 1) {
-      value.text = text;
-    }
+    let value = this._model.value;
     let start = doc.indexFromPos(change.from);
-    let end = doc.indexFromPos(change.to);
-    if (change.origin.indexOf('delete') !== -1) {
-      value.remove(start, end);
-    } else {
-      value.insert(start, text);
+    let inserted = change.text.join('\n');
+    let removed = change.removed.join('\n');
+
+    if (removed) {
+      value.remove(start, start + removed.length);
     }
+    if (inserted) {
+      value.insert(start, inserted);
+    }
+
     this._changeGuard = false;
   }
 
