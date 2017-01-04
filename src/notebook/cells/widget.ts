@@ -281,7 +281,6 @@ class BaseCellWidget extends Widget {
   private _input: InputAreaWidget = null;
   private _editor: CellEditorWidget = null;
   private _model: ICellModel = null;
-  private _mimetype = 'text/plain';
   private _readOnly = false;
   private _trustedCursor: IMetadataCursor = null;
   private _trusted = false;
@@ -398,7 +397,7 @@ class CodeCellWidget extends BaseCellWidget {
   /**
    * The model used by the widget.
    */
-  model: ICodeCellModel;
+  readonly model: ICodeCellModel;
 
   /**
    * Dispose of the resources used by the widget.
@@ -524,7 +523,7 @@ namespace CodeCellWidget {
     /**
      * The model used by the cell.
      */
-    model: ICellModel;
+    model: ICodeCellModel;
 
     /**
      * A renderer for creating cell widgets.
@@ -590,7 +589,7 @@ class MarkdownCellWidget extends BaseCellWidget {
   /**
    * The model used by the widget.
    */
-  model: IMarkdownCellModel;
+  readonly model: IMarkdownCellModel;
 
   /**
    * Whether the cell is rendered.
@@ -678,7 +677,7 @@ namespace MarkdownCellWidget {
     /**
      * The model used by the cell.
      */
-    model: ICellModel;
+    model: IMarkdownCellModel;
 
     /**
      * A renderer for creating cell widgets.
@@ -711,7 +710,32 @@ class RawCellWidget extends BaseCellWidget {
   /**
    * The model used by the widget.
    */
-  model: IRawCellModel;
+  readonly model: IRawCellModel;
+}
+
+
+/**
+ * The namespace for the `RawCellWidget` class statics.
+ */
+export
+namespace RawCellWidget {
+  /**
+   * An options object for initializing a base cell widget.
+   */
+  export
+  interface IOptions {
+    /**
+     * The model used by the cell.
+     */
+    model: IRawCellModel;
+
+    /**
+     * A renderer for creating cell widgets.
+     *
+     * The default is a shared renderer instance.
+     */
+    renderer: BaseCellWidget.IRenderer;
+  }
 }
 
 
