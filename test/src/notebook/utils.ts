@@ -14,7 +14,7 @@ import {
 } from '../../../lib/notebook';
 
 import {
-  BaseCellWidget, CodeCellWidget, CodeCellEditorWidget
+  BaseCellWidget, CodeCellWidget, CellEditorWidget, CodeCellModel
 } from '../../../lib/notebook/cells';
 
 
@@ -31,9 +31,10 @@ const DEFAULT_CONTENT: nbformat.INotebookContent = require('../../../examples/no
 export
 function createBaseCellRenderer(): BaseCellWidget.Renderer {
   return new BaseCellWidget.Renderer({
-    editorFactory: host => editorServices.factory.newInlineEditor(host.node, {
-      wordWrap: true
-    })
+    editorFactory: options => {
+      options.wordWrap = true;
+      return editorServices.factoryService.newInlineEditor(options);
+    }
   });
 };
 
@@ -44,12 +45,13 @@ function createBaseCellRenderer(): BaseCellWidget.Renderer {
 export
 function createCodeCellRenderer(): CodeCellWidget.Renderer {
   return new CodeCellWidget.Renderer({
-    editorFactory: host => editorServices.factory.newInlineEditor(host.node, {
-      extra: {
+    editorFactory: options => {
+      options.extra = {
         matchBrackets: true,
         autoCloseBrackets: true
-      }
-    })
+      };
+      return editorServices.factoryService.newInlineEditor(options);
+    }
   });
 }
 
@@ -58,12 +60,14 @@ function createCodeCellRenderer(): CodeCellWidget.Renderer {
  * Create a cell editor widget given a factory.
  */
 export
-function createCellEditor(): CodeCellEditorWidget {
-  return new CodeCellEditorWidget(
-    host => editorServices.factory.newInlineEditor(host.node, {
-      wordWrap: true
-    })
-  );
+function createCellEditor(): CellEditorWidget {
+  return new CellEditorWidget({
+    model: new CodeCellModel(),
+    factory: options => {
+      options.wordWrap = true;
+      return editorServices.factoryService.newInlineEditor(options);
+    }
+  });
 }
 
 

@@ -14,7 +14,7 @@ import {
 } from '../common/interfaces';
 
 import {
-  IObservableString
+  IObservableString, ObservableString
 } from '../common/observablestring';
 
 
@@ -159,7 +159,7 @@ namespace CodeEditor {
    * - otherwise it must not change any selection
    */
   export
-  interface ISelections {
+  interface ISelections extends IDisposable {
 
     /**
      * A signal emitted when selections changes.
@@ -219,7 +219,7 @@ namespace CodeEditor {
    * Default implementation of `ISelections`.
    */
   export
-  class Selections implements ISelections, IDisposable {
+  class Selections implements ISelections {
     /**
      * A signal emitted when selections changes.
      */
@@ -336,60 +336,81 @@ namespace CodeEditor {
      * The currently selected code.
      */
     readonly selections: ISelections;
-
-    /**
-     * Get the number of lines in the model.
-     */
-    readonly lineCount: number;
-
-    /**
-     * Returns the content for the given line number.
-     *
-     * @param line - The line of interest.
-     *
-     * @returns The value of the line.
-     *
-     * #### Notes
-     * Lines are 0-based, and accessing a line out of range returns
-     * `undefined`.
-     */
-    getLine(line: number): string | undefined;
-
-    /**
-     * Find an offset for the given position.
-     *
-     * @param position - The position of interest.
-     *
-     * @returns The offset at the position, clamped to the extent of the
-     * editor contents.
-     */
-    getOffsetAt(position: IPosition): number;
-
-    /**
-     * Find a position for the given offset.
-     *
-     * @param offset - The offset of interest.
-     *
-     * @returns The position at the offset, clamped to the extent of the
-     * editor contents.
-     */
-    getPositionAt(offset: number): IPosition | undefined;
-
-    /**
-     * Undo one edit (if any undo events are stored).
-     */
-    undo(): void;
-
-    /**
-     * Redo one undone edit.
-     */
-    redo(): void;
-
-    /**
-     * Clear the undo history.
-     */
-    clearHistory(): void;
   }
+
+  /**
+   * The default implementation of the editor model.
+   */
+  export
+  class Model implements IModel {
+    /**
+     * A signal emitted when a mimetype changes.
+     */
+    readonly mimeTypeChanged: ISignal<this, IChangedArgs<string>>;
+
+    /**
+     * Get the value of the model.
+     */
+    get value(): IObservableString {
+      return this._value;
+    }
+
+    /**
+     * Get the selections for the model.
+     */
+    get selections(): CodeEditor.ISelections {
+      return this._selections;
+    }
+
+    /**
+     * A mime type of the model.
+     */
+    get mimeType(): string {
+      return this._mimetype;
+    }
+    set mimeType(newValue: string) {
+      const oldValue = this._mimetype;
+      if (oldValue === newValue) {
+        return;
+      }
+      this._mimetype = newValue;
+      this.mimeTypeChanged.emit({
+        name: 'mimeType',
+        oldValue,
+        newValue
+      });
+    }
+
+    /**
+     * Whether the model is disposed.
+     */
+    get isDisposed(): boolean {
+      return this._isDisposed;
+    }
+
+    /**
+     * Dipose of the resources used by the model.
+     */
+    dispose(): void {
+      if (this._isDisposed) {
+        return;
+      }
+      this._isDisposed = true;
+      clearSignalData(this);
+      this._selections.dispose();
+      this._value.dispose();
+    }
+
+    private _value = new ObservableString();
+    private _selections = new Selections();
+    private _mimetype = 'text/plain';
+    private _isDisposed = false;
+  }
+
+  /**
+   * The signals for the `CodeMirrorModel` class.
+   */
+  defineSignal(Model.prototype, 'mimeTypeChanged');
 
   /**
    * A selection owner.
@@ -494,6 +515,60 @@ namespace CodeEditor {
      */
     readonly charWidth: number;
 
+
+    /**
+     * Get the number of lines in the eidtor.
+     */
+    readonly lineCount: number;
+
+    /**
+     * Returns the content for the given line number.
+     *
+     * @param line - The line of interest.
+     *
+     * @returns The value of the line.
+     *
+     * #### Notes
+     * Lines are 0-based, and accessing a line out of range returns
+     * `undefined`.
+     */
+    getLine(line: number): string | undefined;
+
+    /**
+     * Find an offset for the given position.
+     *
+     * @param position - The position of interest.
+     *
+     * @returns The offset at the position, clamped to the extent of the
+     * editor contents.
+     */
+    getOffsetAt(position: IPosition): number;
+
+    /**
+     * Find a position for the given offset.
+     *
+     * @param offset - The offset of interest.
+     *
+     * @returns The position at the offset, clamped to the extent of the
+     * editor contents.
+     */
+    getPositionAt(offset: number): IPosition | undefined;
+
+    /**
+     * Undo one edit (if any undo events are stored).
+     */
+    undo(): void;
+
+    /**
+     * Redo one undone edit.
+     */
+    redo(): void;
+
+    /**
+     * Clear the undo history.
+     */
+    clearHistory(): void;
+
     /**
      * Brings browser focus to this editor text.
      */
@@ -553,10 +628,31 @@ namespace CodeEditor {
   }
 
   /**
+   * A factory used to create a code editor.
+   */
+  export
+  type Factory = (options: IOptions) => CodeEditor.IEditor;
+
+  /**
    * The options used to initialize an editor.
    */
   export
   interface IOptions {
+    /**
+     * The host widget used by the editor.
+     */
+    host: HTMLElement;
+
+    /**
+     * The model used by the editor.
+     */
+    model: IModel;
+
+    /**
+     * The desired uuid for the editor.
+     */
+    uuid?: string;
+
     /**
      * Whether line numbers should be displayed. Defaults to `false`.
      */
@@ -571,6 +667,11 @@ namespace CodeEditor {
      * Whether the editor is read-only. Defaults to `false`.
      */
     readOnly?: boolean;
+
+   /**
+     * The default selection style for the editor.
+     */
+    selectionStyle?: CodeEditor.ISelectionStyle;
 
     /**
      * Extra options.

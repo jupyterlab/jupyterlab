@@ -64,7 +64,7 @@ class ObservableString implements IObservableString {
    * Construct a new observable string.
    */
   constructor(initialText: string = '') {
-    this.text = initialText;
+    this._text = initialText;
   }
 
   /**
@@ -76,6 +76,9 @@ class ObservableString implements IObservableString {
    * Set the value of the string.
    */
   set text( value: string ) {
+    if (value.length === this._text.length && value === this._text) {
+      return;
+    }
     this._text = value;
     this.changed.emit({
       type: 'set',
@@ -152,8 +155,8 @@ class ObservableString implements IObservableString {
       return;
     }
     this._isDisposed = true;
-    this.clear();
     clearSignalData(this);
+    this.clear();
   }
 
   private _text = '';

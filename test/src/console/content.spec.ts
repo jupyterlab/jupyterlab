@@ -32,12 +32,8 @@ import {
 } from '../../../lib/inspector';
 
 import {
-  CodeCellWidget
+  CodeCellWidget, CodeCellModel, CellEditorWidget
 } from '../../../lib/notebook/cells';
-
-import {
-  EdgeLocation, ICellEditorWidget, ITextChange
-} from '../../../lib/notebook/cells/editor';
 
 import {
   createCodeCellRenderer
@@ -81,14 +77,14 @@ class TestContent extends ConsoleContent {
     this.methods.push('onAfterAttach');
   }
 
-  protected onEdgeRequest(editor: ICellEditorWidget, location: EdgeLocation): Promise<void> {
+  protected onEdgeRequest(editor: CellEditorWidget, location: CellEditorWidget.EdgeLocation): Promise<void> {
     return super.onEdgeRequest(editor, location).then(() => {
       this.methods.push('onEdgeRequest');
       this.edgeRequested.emit(void 0);
     });
   }
 
-  protected onTextChange(editor: ICellEditorWidget, args: ITextChange): void {
+  protected onTextChange(editor: CellEditorWidget, args: CellEditorWidget.ITextChange): void {
     super.onTextChange(editor, args);
     this.methods.push('onTextChange');
   }
@@ -235,7 +231,8 @@ describe('console/content', () => {
 
       it('should add a code cell to the content widget', () => {
         let renderer = createCodeCellRenderer();
-        let cell = new CodeCellWidget({ renderer, rendermime });
+        let model = new CodeCellModel();
+        let cell = new CodeCellWidget({ model, renderer, rendermime });
         Widget.attach(widget, document.body);
         expect(widget.cells.length).to.be(0);
         widget.addCell(cell);
@@ -296,7 +293,7 @@ describe('console/content', () => {
         let force = false;
         let timeout = 9000;
         Widget.attach(widget, document.body);
-        widget.prompt.model.source = 'for x in range(5):';
+        widget.prompt.model.value.text = 'for x in range(5):';
         expect(widget.content.widgets.length).to.be(1);
         widget.execute(force, timeout).then(() => {
           expect(widget.content.widgets.length).to.be(1);
@@ -326,9 +323,9 @@ describe('console/content', () => {
         Widget.attach(widget, document.body);
 
         let model = widget.prompt.model;
-        expect(model.source).to.be.empty();
+        expect(model.value.text).to.be.empty();
         widget.insertLinebreak();
-        expect(model.source).to.be('\n');
+        expect(model.value.text).to.be('\n');
       });
 
     });
@@ -337,7 +334,7 @@ describe('console/content', () => {
 
       it('should serialize the contents of a console', () => {
         Widget.attach(widget, document.body);
-        widget.prompt.model.source = 'foo';
+        widget.prompt.model.value.text = 'foo';
 
         let serialized = widget.serialize();
         expect(serialized).to.have.length(2);
@@ -420,18 +417,18 @@ describe('console/content', () => {
           local.edgeRequested.connect(() => {
             expect(local.methods).to.contain('onEdgeRequest');
             requestAnimationFrame(() => {
-              expect(local.prompt.model.source).to.be(code);
+              expect(local.prompt.model.value.text).to.be(code);
               local.dispose();
               done();
             });
           });
           Widget.attach(local, document.body);
           requestAnimationFrame(() => {
-            local.prompt.model.source = code;
+            local.prompt.model.value.text = code;
             local.execute(force).then(() => {
-              expect(local.prompt.model.source).to.not.be(code);
+              expect(local.prompt.model.value.text).to.not.be(code);
               expect(local.methods).to.not.contain('onEdgeRequest');
-              local.prompt.editor.edgeRequested.emit('top');
+              local.prompt.editorWidget.edgeRequested.emit('top');
             }).catch(done);
           });
         });
@@ -442,7 +439,7 @@ describe('console/content', () => {
     describe('#onTextChange()', () => {
 
       it('should be called upon an editor text change', () => {
-        let change: ITextChange = {
+        let change: CellEditorWidget.ITextChange = {
           ch: 0,
           chHeight: 0,
           chWidth: 0,
@@ -454,7 +451,7 @@ describe('console/content', () => {
         };
         Widget.attach(widget, document.body);
         expect(widget.methods).to.not.contain('onTextChange');
-        widget.prompt.editor.textChanged.emit(change);
+        widget.prompt.editorWidget.textChanged.emit(change);
         expect(widget.methods).to.contain('onTextChange');
       });
 

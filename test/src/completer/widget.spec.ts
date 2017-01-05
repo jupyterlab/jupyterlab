@@ -16,8 +16,8 @@ import {
 } from 'simulate-event';
 
 import {
-  ICompletionRequest, ICoords
-} from '../../../lib/notebook/cells/editor';
+  CellEditorWidget
+} from '../../../lib/notebook/cells';
 
 import {
   CompleterWidget, CompleterModel
@@ -550,8 +550,8 @@ describe('completer/widget', () => {
           let anchor = document.createElement('div');
           let content = new Widget();
           let model = new CompleterModel();
-          let coords: ICoords = { left: 0, right: 0, top: 100, bottom: 120 };
-          let request: ICompletionRequest = {
+          let coords: CellEditorWidget.ICoordinate = { left: 0, right: 0, top: 100, bottom: 120 };
+          let request: CellEditorWidget.ICompletionRequest = {
             ch: 0,
             chHeight: 0,
             chWidth: 0,
@@ -605,7 +605,7 @@ describe('completer/widget', () => {
       it('should emit a selection if there is only one match', () => {
         let anchor = new Widget();
         let model = new CompleterModel();
-        let request: ICompletionRequest = {
+        let request: CellEditorWidget.ICompletionRequest = {
           ch: 0,
           chHeight: 0,
           chWidth: 0,
@@ -642,7 +642,7 @@ describe('completer/widget', () => {
       it('should un-hide widget if multiple options are available', () => {
         let anchor = new Widget();
         let model = new CompleterModel();
-        let request: ICompletionRequest = {
+        let request: CellEditorWidget.ICompletionRequest = {
           ch: 0,
           chHeight: 0,
           chWidth: 0,

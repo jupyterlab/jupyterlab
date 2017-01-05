@@ -14,7 +14,6 @@ import {
 } from './mimetype';
 
 export * from './mode';
-export * from './model';
 export * from './editor';
 export * from './factory';
 export * from './mimetype';
@@ -25,6 +24,6 @@ export * from './mimetype';
  */
 export
 const editorServices: IEditorServices = {
-  factory: new CodeMirrorEditorFactory(),
+  factoryService: new CodeMirrorEditorFactory(),
   mimeTypeService: new CodeMirrorMimeTypeService()
 };

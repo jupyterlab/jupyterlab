@@ -66,7 +66,10 @@ class EditorWidget extends CodeEditorWidget {
    * Construct a new editor widget.
    */
   constructor(options: EditorWidget.IOptions) {
-    super(options.factory);
+    super({
+      factory: options.factory,
+      model: options.context.model
+    });
     this.addClass(EDITOR_CLASS);
     let context = this._context = options.context;
     this._mimeTypeService = options.mimeTypeService;
@@ -98,12 +101,11 @@ class EditorWidget extends CodeEditorWidget {
     value.text = model.toString();
 
     // Prevent the initial loading from disk from being in the editor history.
-    editor.model.clearHistory();
+    editor.clearHistory();
     this._handleDirtyState();
 
     model.stateChanged.connect(this._onModelStateChanged, this);
     model.contentChanged.connect(this._onContentChanged, this);
-    value.changed.connect(this._onValueChanged, this);
   }
 
   /**
@@ -139,13 +141,6 @@ class EditorWidget extends CodeEditorWidget {
   }
 
   /**
-   * Handle a change in the editor model value.
-   */
-  private _onValueChanged(): void {
-    this._context.model.fromString(this.editor.model.value.text);
-  }
-
-  /**
    * Handle a change to the path.
    */
   private _onPathChanged(): void {
@@ -171,9 +166,9 @@ namespace EditorWidget {
   export
   interface IOptions {
     /**
-     * The editor factory used to create the editor.
+     * A code editor factory.
      */
-    factory: (host: Widget) => CodeEditor.IEditor;
+    factory: CodeEditor.Factory;
 
     /**
      * The mime type service for the editor.
@@ -183,7 +178,7 @@ namespace EditorWidget {
     /**
      * The document context associated with the editor.
      */
-    context: DocumentRegistry.Context;
+    context: DocumentRegistry.CodeContext;
   }
 }
 
@@ -192,34 +187,34 @@ namespace EditorWidget {
  * A widget factory for editors.
  */
 export
-class EditorWidgetFactory extends ABCWidgetFactory<EditorWidget, DocumentRegistry.IModel> {
+class EditorWidgetFactory extends ABCWidgetFactory<EditorWidget, DocumentRegistry.ICodeModel> {
   /**
    * Construct a new editor widget factory.
    */
   constructor(options: EditorWidgetFactory.IOptions) {
     super(options.factoryOptions);
-    this._mimeTypeService = options.editorServices.mimeTypeService;
-    let factory = options.editorServices.factory;
-    this._factory = (host: Widget) => factory.newDocumentEditor(host.node, {
-      lineNumbers: true,
-      readOnly: false,
-      wordWrap: true
-    });
+    this._services = options.editorServices;
   }
 
   /**
    * Create a new widget given a context.
    */
-  protected createNewWidget(context: DocumentRegistry.Context): EditorWidget {
+  protected createNewWidget(context: DocumentRegistry.CodeContext): EditorWidget {
+    let func = this._services.factoryService.newDocumentEditor
+    let factory: CodeEditor.Factory = options => {
+      options.lineNumbers = true;
+      options.readOnly = false;
+      options.wordWrap = true;
+      return func(options);
+    };
     return new EditorWidget({
-      factory: this._factory,
+      factory,
       context,
-      mimeTypeService: this._mimeTypeService
+      mimeTypeService: this._services.mimeTypeService
     });
   }
 
-  private _mimeTypeService: IEditorMimeTypeService;
-  private _factory: (host: Widget) => CodeEditor.IEditor;
+  private _services: IEditorServices;
 }
 
 

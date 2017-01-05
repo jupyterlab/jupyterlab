@@ -30,7 +30,7 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  ICompletionRequest, ITextChange
+  CellEditorWidget
 } from '../notebook/cells/editor';
 
 
@@ -576,7 +576,7 @@ namespace CompleterWidget {
     /**
      * The current text change details.
      */
-    current: ITextChange;
+    current: CellEditorWidget.ITextChange;
 
     /**
      * The cursor details that the API has used to return matching options.
@@ -591,7 +591,7 @@ namespace CompleterWidget {
     /**
      * The original completer request details.
      */
-    original: ICompletionRequest;
+    original: CellEditorWidget.ICompletionRequest;
 
     /**
      * The query against which items are filtered.
@@ -616,7 +616,7 @@ namespace CompleterWidget {
     /**
      * Handle a text change.
      */
-    handleTextChange(change: ITextChange): void;
+    handleTextChange(change: CellEditorWidget.ITextChange): void;
 
     /**
      * Create a resolved patch between the original state and a patch string.

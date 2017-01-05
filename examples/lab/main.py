@@ -2,101 +2,43 @@
 Copyright (c) Jupyter Development Team.
 Distributed under the terms of the Modified BSD License.
 """
-import re
-import subprocess
-import sys
-import threading
 
-import tornado.web
-
-# Install the pyzmq ioloop. This has to be done before anything else from
-# tornado is imported.
-from zmq.eventloop import ioloop
-ioloop.install()
-
-PORT = 8765
+import os
+from jinja2 import FileSystemLoader
+from notebook.base.handlers import IPythonHandler, FileFindHandler
+from notebook.notebookapp import NotebookApp
+from traitlets import Unicode
 
 
-class MainPageHandler(tornado.web.RequestHandler):
-
-    def initialize(self, base_url, ws_url):
-        self.base_url = base_url
-        self.ws_url = ws_url
+class ExampleHandler(IPythonHandler):
+    """Handle requests between the main app page and notebook server."""
 
     def get(self):
-        return self.render("index.html", static=self.static_url,
-                           terminals_available=sys.platform != 'win32',
-                           base_url=self.base_url, ws_url=self.ws_url,)
+        """Get the main page for the application's interface."""
+        return self.write(self.render_template("index.html",
+            static=self.static_url, base_url=self.base_url,
+            terminals_available=self.settings['terminals_available']))
+
+    def get_template(self, name):
+        loader = FileSystemLoader(os.getcwd())
+        return loader.load(self.settings['jinja2_env'], name)
 
 
-def main(argv):
-    # Start a notebook server with cross-origin access.
-    nb_command = [sys.executable, '-m', 'notebook', '--no-browser',
-                  '--debug',
-                  # FIXME: allow-origin=* only required for notebook < 4.3
-                  '--NotebookApp.allow_origin="*"',
-                  # disable user password:
-                  '--NotebookApp.password=',
-              ]
-    nb_server = subprocess.Popen(nb_command, stderr=subprocess.STDOUT,
-                                 stdout=subprocess.PIPE)
+class ExampleApp(NotebookApp):
 
-    # wait for notebook server to start up
-    while 1:
-        line = nb_server.stdout.readline().decode('utf-8').strip()
-        if not line:
-            continue
-        print(line)
-        if 'Jupyter Notebook is running at:' in line:
-            base_url = re.search('(http.*?)$', line).groups()[0]
-            ws_url = base_url.replace('http', 'ws')
-            break
+    default_url = Unicode('/example')
 
-    while 1:
-        line = nb_server.stdout.readline().decode('utf-8').strip()
-        if not line:
-            continue
-        print(line)
-        if 'Control-C' in line:
-            break
+    def init_webapp(self):
+        """initialize tornado webapp and httpserver.
+        """
+        super(ExampleApp, self).init_webapp()
+        default_handlers = [
+            (r'/example/?', ExampleHandler),
+            (r"/example/(.*)", FileFindHandler,
+                {'path': 'build'}),
+        ]
+        self.web_app.add_handlers(".*$", default_handlers)
 
-    def print_thread():
-        while 1:
-            line = nb_server.stdout.readline().decode('utf-8').strip()
-            if not line:
-                continue
-            print(line)
-
-    thread = threading.Thread(target=print_thread)
-    thread.setDaemon(True)
-    thread.start()
-
-    handlers = [
-        (r"/", MainPageHandler, {'base_url': base_url, 'ws_url': ws_url}),
-        (r'/lab/(.*)', tornado.web.StaticFileHandler, {'path': 'build/'}),
-    ]
-
-    app = tornado.web.Application(handlers, static_path='build',
-                                  template_path='.',
-                                  compiled_template_cache=False)
-
-    app.listen(PORT, 'localhost')
-
-    if sys.platform.startswith('win'):
-        # add no-op to wake every 5s
-        # to handle signals that may be ignored by the inner loop
-        pc = ioloop.PeriodicCallback(lambda: None, 5000)
-        pc.start()
-
-    loop = ioloop.IOLoop.current()
-    print('Browse to http://localhost:%s' % PORT)
-    try:
-        loop.start()
-    except KeyboardInterrupt:
-        print(" Shutting down on SIGINT")
-    finally:
-        nb_server.kill()
-        loop.close()
 
 if __name__ == '__main__':
-    main(sys.argv)
+    ExampleApp.launch_instance()

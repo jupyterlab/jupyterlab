@@ -18,7 +18,8 @@ import {
 import {
   BaseCellWidget, CellModel, InputAreaWidget, ICellModel,
   CodeCellWidget, CodeCellModel, MarkdownCellWidget,
-  RawCellWidget, CodeCellEditorWidget
+  RawCellWidget, CellEditorWidget, RawCellModel,
+  MarkdownCellModel
 } from '../../../../lib/notebook/cells';
 
 import {
@@ -46,7 +47,7 @@ class LogBaseCell extends BaseCellWidget {
   methods: string[] = [];
 
   constructor() {
-    super({ renderer: createBaseCellRenderer() });
+    super({ model: new CellModel(), renderer: createBaseCellRenderer() });
   }
 
   renderInput(widget: Widget): void {
@@ -79,11 +80,6 @@ class LogBaseCell extends BaseCellWidget {
     this.methods.push('onMetadataChanged');
   }
 
-  protected onModelChanged(oldValue: ICellModel, newValue: ICellModel): void {
-    super.onModelChanged(oldValue, newValue);
-    this.methods.push('onModelChanged');
-  }
-
   protected onModelStateChanged(model: ICellModel, args: any): void {
     super.onModelStateChanged(model, args);
     this.methods.push('onModelStateChanged');
@@ -95,6 +91,11 @@ class LogCodeCell extends CodeCellWidget {
 
   methods: string[] = [];
 
+  constructor() {
+    super({ model: new CodeCellModel(), renderer: createCodeCellRenderer(),
+            rendermime: defaultRenderMime() });
+  }
+
   protected onUpdateRequest(msg: Message): void {
     super.onAfterAttach(msg);
     this.methods.push('onUpdateRequest');
@@ -103,11 +104,6 @@ class LogCodeCell extends CodeCellWidget {
   protected onMetadataChanged(model: ICellModel, args: any): void {
     super.onMetadataChanged(model, args);
     this.methods.push('onMetadataChanged');
-  }
-
-  protected onModelChanged(oldValue: ICellModel, newValue: ICellModel): void {
-    super.onModelChanged(oldValue, newValue);
-    this.methods.push('onModelChanged');
   }
 
   protected onModelStateChanged(model: ICellModel, args: any): void {
@@ -133,17 +129,18 @@ describe('notebook/cells/widget', () => {
   describe('BaseCellWidget', () => {
 
     let renderer = createBaseCellRenderer();
+    let model = new CellModel();
 
     describe('#constructor()', () => {
 
       it('should create a base cell widget', () => {
-        let widget = new BaseCellWidget({ renderer });
+        let widget = new BaseCellWidget({ model, renderer });
         expect(widget).to.be.a(BaseCellWidget);
       });
 
       it('should accept a custom renderer', () => {
         renderer = createBaseCellRenderer();
-        let widget = new BaseCellWidget({ renderer });
+        let widget = new BaseCellWidget({ model, renderer });
         expect(widget).to.be.a(BaseCellWidget);
       });
 
@@ -151,85 +148,28 @@ describe('notebook/cells/widget', () => {
 
     describe('#model', () => {
 
-      it('should be settable', () => {
+      it('should be the model used by the widget', () => {
         let model = new CellModel();
-        let widget = new BaseCellWidget({ renderer });
-        expect(widget.model).to.be(null);
-        widget.model = model;
+        let widget = new BaseCellWidget({ model, renderer });
         expect(widget.model).to.be(model);
-        widget.model = new CellModel();
-        expect(widget.model).not.to.be(model);
       });
 
     });
 
-    describe('#modelChanged', () => {
+    describe('#editorWidget', () => {
 
-      it('should emit a signal when the model changes', () => {
-        let widget = new BaseCellWidget({ renderer });
-        let called = false;
-        widget.modelChanged.connect(() => { called = true; });
-        expect(called).to.be(false);
-        widget.model = new CellModel();
-        expect(called).to.be(true);
-      });
-
-      it('should not emit a signal when the model has not changed', () => {
-        let widget = new BaseCellWidget({
-          renderer
-        });
-        let model = new CellModel();
-        let called = 0;
-        widget.modelChanged.connect(() => { called++; });
-        expect(called).to.be(0);
-        widget.model = model;
-        expect(called).to.be(1);
-        widget.model = model;
-        expect(called).to.be(1);
+      it('should be a cell editor widget', () => {
+        let widget = new BaseCellWidget({ model, renderer });
+        expect(widget.editorWidget).to.be.a(CellEditorWidget);
       });
 
     });
 
     describe('#editor', () => {
 
-      it('should be a cell editor widget', () => {
-        let widget = new BaseCellWidget({ renderer });
-        expect(widget.editor).to.be.a(CodeCellEditorWidget);
-      });
-
-    });
-
-    describe('#mimetype', () => {
-
-      it('should be a string', () => {
-        let widget = new BaseCellWidget({ renderer });
-        expect(typeof widget.mimetype).to.be('string');
-      });
-
-      it('should default to text/plain', () => {
-        let widget = new BaseCellWidget({ renderer });
-        expect(widget.mimetype).to.be('text/plain');
-      });
-
-      it('should supporting being set to other types', () => {
-        let widget = new BaseCellWidget({ renderer });
-        widget.mimetype = 'test/test';
-        expect(widget.mimetype).to.be('test/test');
-      });
-
-      it('should be safe to set multiple times', () => {
-        let widget = new BaseCellWidget({ renderer });
-        widget.mimetype = 'test/test';
-        widget.mimetype = 'test/test';
-        expect(widget.mimetype).to.be('test/test');
-      });
-
-      it('should not allow being set to empty or null strings', () => {
-        let widget = new BaseCellWidget({ renderer });
-        widget.mimetype = null;
-        expect(widget.mimetype).to.be('text/plain');
-        widget.mimetype = '';
-        expect(widget.mimetype).to.be('text/plain');
+      it('should be a cell editor', () => {
+        let widget = new BaseCellWidget({ model, renderer });
+        expect(widget.editor.uuid).to.be.ok();
       });
 
     });
@@ -237,17 +177,18 @@ describe('notebook/cells/widget', () => {
     describe('#readOnly', () => {
 
       it('should be a boolean', () => {
-        let widget = new BaseCellWidget({ renderer });
+        let widget = new BaseCellWidget({ model, renderer });
         expect(typeof widget.readOnly).to.be('boolean');
       });
 
       it('should default to false', () => {
-        let widget = new BaseCellWidget({ renderer });
+        let widget = new BaseCellWidget({ model, renderer });
         expect(widget.readOnly).to.be(false);
       });
 
       it('should be settable', () => {
         let widget = new BaseCellWidget({
+          model,
           renderer
         });
         widget.readOnly = true;
@@ -269,27 +210,19 @@ describe('notebook/cells/widget', () => {
     describe('#trusted', () => {
 
       it('should be a boolean', () => {
-        let widget = new BaseCellWidget({ renderer });
+        let widget = new BaseCellWidget({ model, renderer });
         expect(typeof widget.trusted).to.be('boolean');
       });
 
       it('should default to false', () => {
-        let widget = new BaseCellWidget({ renderer });
+        let widget = new BaseCellWidget({ model, renderer });
         expect(widget.trusted).to.be(false);
       });
 
       it('should be settable', () => {
-        let widget = new BaseCellWidget({ renderer });
-        widget.model = new CellModel();
+        let widget = new BaseCellWidget({ model, renderer });
         widget.trusted = true;
         expect(widget.trusted).to.be(true);
-      });
-
-      it('should do nothing if there is no model', () => {
-        let widget = new BaseCellWidget({ renderer });
-        expect(widget.trusted).to.be(false);
-        widget.trusted = true;
-        expect(widget.trusted).to.be(false);
       });
 
     });
@@ -315,7 +248,7 @@ describe('notebook/cells/widget', () => {
     describe('#setPrompt()', () => {
 
       it('should not throw an error (full test in input area)', () => {
-        let widget = new BaseCellWidget({ renderer });
+        let widget = new BaseCellWidget({ model, renderer });
         expect(() => { widget.setPrompt(void 0); }).to.not.throwError();
         expect(() => { widget.setPrompt(null); }).to.not.throwError();
         expect(() => { widget.setPrompt(''); }).to.not.throwError();
@@ -352,13 +285,13 @@ describe('notebook/cells/widget', () => {
     describe('#dispose()', () => {
 
       it('should dispose of the resources held by the widget', () => {
-        let widget = new BaseCellWidget({ renderer });
+        let widget = new BaseCellWidget({ model, renderer });
         widget.dispose();
         expect(widget.isDisposed).to.be(true);
       });
 
       it('should be safe to call multiple times', () => {
-        let widget = new BaseCellWidget({ renderer });
+        let widget = new BaseCellWidget({ model, renderer });
         widget.dispose();
         widget.dispose();
         expect(widget.isDisposed).to.be(true);
@@ -393,10 +326,9 @@ describe('notebook/cells/widget', () => {
 
       it('should fire when model state changes', () => {
         let method = 'onModelStateChanged';
-        let widget = new LogBaseCell();
-        widget.model = new CellModel();
+        let widget = new LogCodeCell();
         expect(widget.methods).to.not.contain(method);
-        widget.model.source = 'foo';
+        widget.model.executionCount = 1;
         expect(widget.methods).to.contain(method);
       });
 
@@ -407,25 +339,12 @@ describe('notebook/cells/widget', () => {
       it('should fire when model metadata changes', () => {
         let method = 'onMetadataChanged';
         let widget = new LogBaseCell();
-        widget.model = new CellModel();
         expect(widget.methods).to.not.contain(method);
         widget.model.metadataChanged.emit({
           name: 'foo',
           oldValue: 'bar',
           newValue: 'baz'
         });
-        expect(widget.methods).to.contain(method);
-      });
-
-    });
-
-    describe('#onModelChanged()', () => {
-
-      it('should fire when the model changes', () => {
-        let method = 'onModelChanged';
-        let widget = new LogBaseCell();
-        expect(widget.methods).to.not.contain(method);
-        widget.model = new CellModel();
         expect(widget.methods).to.contain(method);
       });
 
@@ -444,8 +363,8 @@ describe('notebook/cells/widget', () => {
       describe('#createCellEditor()', () => {
 
         it('should create a cell editor widget', () => {
-          let editor = renderer.createCellEditor();
-          expect(editor).to.be.a(CodeCellEditorWidget);
+          let editor = renderer.createCellEditor(model);
+          expect(editor).to.be.a(CellEditorWidget);
         });
 
       });
@@ -453,7 +372,7 @@ describe('notebook/cells/widget', () => {
       describe('#createInputArea()', () => {
 
         it('should create an input area widget', () => {
-          let editor = renderer.createCellEditor();
+          let editor = renderer.createCellEditor(model);
           let input = renderer.createInputArea(editor);
           expect(input).to.be.an(InputAreaWidget);
         });
@@ -475,18 +394,18 @@ describe('notebook/cells/widget', () => {
   describe('CodeCellWidget', () => {
 
     let renderer = createCodeCellRenderer();
+    let model = new CodeCellModel();
 
     describe('#constructor()', () => {
 
       it('should create a code cell widget', () => {
-        let widget = new CodeCellWidget({ rendermime, renderer });
+        let widget = new CodeCellWidget({ model, rendermime, renderer });
         expect(widget).to.be.a(CodeCellWidget);
       });
 
       it('should accept a custom renderer', () => {
         renderer = createCodeCellRenderer();
-        let widget = new CodeCellWidget({ renderer, rendermime });
-        widget.model = new CodeCellModel();
+        let widget = new CodeCellWidget({ model, renderer, rendermime });
         expect(widget).to.be.a(CodeCellWidget);
       });
 
@@ -495,13 +414,13 @@ describe('notebook/cells/widget', () => {
     describe('#dispose()', () => {
 
       it('should dispose of the resources held by the widget', () => {
-        let widget = new CodeCellWidget({ rendermime, renderer });
+        let widget = new CodeCellWidget({ model, rendermime, renderer });
         widget.dispose();
         expect(widget.isDisposed).to.be(true);
       });
 
       it('should be safe to call multiple times', () => {
-        let widget = new CodeCellWidget({ rendermime, renderer });
+        let widget = new CodeCellWidget({ model, rendermime, renderer });
         widget.dispose();
         widget.dispose();
         expect(widget.isDisposed).to.be(true);
@@ -512,9 +431,8 @@ describe('notebook/cells/widget', () => {
     describe('#execute()', () => {
 
       it('should fulfill a promise if there is no code to execute', (done) => {
-        let widget = new CodeCellWidget({ rendermime, renderer });
+        let widget = new CodeCellWidget({ model, rendermime, renderer });
         Kernel.startNew().then(kernel => {
-          widget.model = new CodeCellModel();
           return widget.execute(kernel).then(() => {
             kernel.shutdown();
             done();
@@ -523,10 +441,9 @@ describe('notebook/cells/widget', () => {
       });
 
       it('should fulfill a promise if there is code to execute', (done) => {
-        let widget = new CodeCellWidget({ rendermime, renderer });
+        let widget = new CodeCellWidget({ model, rendermime, renderer });
         Kernel.startNew().then(kernel => {
-          widget.model = new CodeCellModel();
-          widget.model.source = 'foo';
+          widget.model.value.text = 'foo';
 
           let originalCount = (widget.model).executionCount;
           return widget.execute(kernel).then(() => {
@@ -543,22 +460,10 @@ describe('notebook/cells/widget', () => {
     describe('#onUpdateRequest()', () => {
 
       it('should update the widget', () => {
-        let widget = new LogCodeCell({ rendermime, renderer });
+        let widget = new LogCodeCell();
         expect(widget.methods).to.not.contain('onUpdateRequest');
         sendMessage(widget, WidgetMessage.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
-      });
-
-    });
-
-    describe('#onModelChanged()', () => {
-
-      it('should fire when the model changes', () => {
-        let method = 'onModelChanged';
-        let widget = new LogCodeCell({ rendermime, renderer });
-        expect(widget.methods).to.not.contain(method);
-        widget.model = new CodeCellModel();
-        expect(widget.methods).to.contain(method);
       });
 
     });
@@ -567,10 +472,9 @@ describe('notebook/cells/widget', () => {
 
       it('should fire when model state changes', () => {
         let method = 'onModelStateChanged';
-        let widget = new LogCodeCell({ rendermime, renderer });
-        widget.model = new CodeCellModel();
+        let widget = new LogCodeCell();
         expect(widget.methods).to.not.contain(method);
-        widget.model.source = 'foo';
+        widget.model.executionCount = 1;
         expect(widget.methods).to.contain(method);
       });
 
@@ -580,8 +484,7 @@ describe('notebook/cells/widget', () => {
 
       it('should fire when model metadata changes', () => {
         let method = 'onMetadataChanged';
-        let widget = new LogCodeCell({ rendermime, renderer });
-        widget.model = new CodeCellModel();
+        let widget = new LogCodeCell();
         expect(widget.methods).to.not.contain(method);
         widget.model.metadataChanged.emit({
           name: 'foo',
@@ -627,23 +530,23 @@ describe('notebook/cells/widget', () => {
   describe('MarkdownCellWidget', () => {
 
     let renderer = createBaseCellRenderer();
+    let model = new MarkdownCellModel();
 
     describe('#constructor()', () => {
 
       it('should create a markdown cell widget', () => {
-        let widget = new MarkdownCellWidget({ rendermime, renderer });
+        let widget = new MarkdownCellWidget({ model, rendermime, renderer });
         expect(widget).to.be.a(MarkdownCellWidget);
       });
 
       it('should accept a custom renderer', () => {
-        renderer = createBaseCellRenderer();
-        let widget = new MarkdownCellWidget({ renderer, rendermime });
+        let widget = new MarkdownCellWidget({ model, rendermime, renderer });
         expect(widget).to.be.a(MarkdownCellWidget);
       });
 
       it('should set the default mimetype to text/x-ipythongfm', () => {
-        let widget = new MarkdownCellWidget({ rendermime, renderer });
-        expect(widget.mimetype).to.be('text/x-ipythongfm');
+        let widget = new MarkdownCellWidget({ model, rendermime, renderer });
+        expect(widget.model.mimeType).to.be('text/x-ipythongfm');
       });
 
     });
@@ -651,7 +554,7 @@ describe('notebook/cells/widget', () => {
     describe('#rendered', () => {
 
       it('should default to true', (done) => {
-        let widget = new MarkdownCellWidget({ rendermime, renderer });
+        let widget = new MarkdownCellWidget({ model, rendermime, renderer });
         Widget.attach(widget, document.body);
         expect(widget.rendered).to.be(true);
         requestAnimationFrame(() => {
@@ -662,7 +565,7 @@ describe('notebook/cells/widget', () => {
       });
 
       it('should unrender the widget', (done) => {
-        let widget = new MarkdownCellWidget({ rendermime, renderer });
+        let widget = new MarkdownCellWidget({ model, rendermime, renderer });
         Widget.attach(widget, document.body);
         widget.rendered = false;
         requestAnimationFrame(() => {
@@ -673,7 +576,7 @@ describe('notebook/cells/widget', () => {
       });
 
       it('should ignore being set to the same value', (done) => {
-        let widget = new LogMarkdownCell({ rendermime, renderer });
+        let widget = new LogMarkdownCell({ model, rendermime, renderer });
         Widget.attach(widget, document.body);
         widget.rendered = false;
         widget.rendered = false;
@@ -691,13 +594,13 @@ describe('notebook/cells/widget', () => {
     describe('#dispose()', () => {
 
       it('should dispose of the resources held by the widget', () => {
-        let widget = new MarkdownCellWidget({ rendermime, renderer });
+        let widget = new MarkdownCellWidget({ model, rendermime, renderer });
         widget.dispose();
         expect(widget.isDisposed).to.be(true);
       });
 
       it('should be safe to call multiple times', () => {
-        let widget = new MarkdownCellWidget({ rendermime, renderer });
+        let widget = new MarkdownCellWidget({ model, rendermime, renderer });
         widget.dispose();
         widget.dispose();
         expect(widget.isDisposed).to.be(true);
@@ -708,7 +611,7 @@ describe('notebook/cells/widget', () => {
     describe('#onUpdateRequest()', () => {
 
       it('should update the widget', () => {
-        let widget = new LogMarkdownCell({ rendermime, renderer });
+        let widget = new LogMarkdownCell({ model, rendermime, renderer });
         expect(widget.methods).to.not.contain('onUpdateRequest');
         sendMessage(widget, WidgetMessage.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
@@ -725,7 +628,8 @@ describe('notebook/cells/widget', () => {
     describe('#constructor()', () => {
 
       it('should create a raw cell widget', () => {
-        let widget = new RawCellWidget({ renderer });
+        let model = new RawCellModel();
+        let widget = new RawCellWidget({ model, renderer });
         expect(widget).to.be.a(RawCellWidget);
       });
 

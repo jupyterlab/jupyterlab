@@ -82,22 +82,24 @@ describe('notebook/notebook/actions', () => {
       it('should split the active cell into two cells', () => {
         let cell = widget.activeCell;
         let source = 'thisisasamplestringwithnospaces';
-        cell.model.source = source;
+        cell.model.value.text = source;
         let index = widget.activeCellIndex;
-        cell.editor.setCursorPosition(10);
+        let editor = cell.editor;
+        editor.setCursorPosition(editor.getPositionAt(10));
         NotebookActions.splitCell(widget);
         let cells = widget.model.cells;
-        let newSource = cells.at(index).source + cells.at(index + 1).source;
+        let newSource = cells.at(index).value.text + cells.at(index + 1).value.text;
         expect(newSource).to.be(source);
       });
 
       it('should remove leading white space in the second cell', () => {
         let cell = widget.activeCell;
         let source = 'this\n\n   is a test';
-        cell.model.source = source;
-        cell.editor.setCursorPosition(4);
+        cell.model.value.text = source;
+        let editor = cell.editor;
+        editor.setCursorPosition(editor.getPositionAt(4));
         NotebookActions.splitCell(widget);
-        expect(widget.activeCell.model.source).to.be('is a test');
+        expect(widget.activeCell.model.value.text).to.be('is a test');
       });
 
       it('should clear the existing selection', () => {
@@ -127,11 +129,11 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should create two empty cells if there is no content', () => {
-        widget.activeCell.model.source = '';
+        widget.activeCell.model.value.text = '';
         NotebookActions.splitCell(widget);
-        expect(widget.activeCell.model.source).to.be('');
+        expect(widget.activeCell.model.value.text).to.be('');
         let prev = widget.widgets.at(0);
-        expect(prev.model.source).to.be('');
+        expect(prev.model.value.text).to.be('');
       });
 
       it('should be a no-op if there is no model', () => {
@@ -149,13 +151,13 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should be undo-able', () => {
-        let source = widget.activeCell.model.source;
+        let source = widget.activeCell.model.value.text;
         let count = widget.widgets.length;
         NotebookActions.splitCell(widget);
         NotebookActions.undo(widget);
         expect(widget.widgets.length).to.be(count);
         let cell = widget.widgets.at(0);
-        expect(cell.model.source).to.be(source);
+        expect(cell.model.value.text).to.be(source);
       });
 
     });
@@ -163,17 +165,17 @@ describe('notebook/notebook/actions', () => {
     describe('#mergeCells', () => {
 
       it('should merge the selected cells', () => {
-        let source = widget.activeCell.model.source + '\n\n';
+        let source = widget.activeCell.model.value.text + '\n\n';
         let next = widget.widgets.at(1);
         widget.select(next);
-        source += next.model.source + '\n\n';
+        source += next.model.value.text + '\n\n';
         next = widget.widgets.at(2);
         widget.select(next);
-        source += next.model.source;
+        source += next.model.value.text;
         let count = widget.widgets.length;
         NotebookActions.mergeCells(widget);
         expect(widget.widgets.length).to.be(count - 2);
-        expect(widget.activeCell.model.source).to.be(source);
+        expect(widget.activeCell.model.value.text).to.be(source);
       });
 
       it('should be a no-op if there is no model', () => {
@@ -183,11 +185,11 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should select the next cell if there is only one cell selected', () => {
-        let source = widget.activeCell.model.source + '\n\n';
+        let source = widget.activeCell.model.value.text + '\n\n';
         let next = widget.widgets.at(1);
-        source += next.model.source;
+        source += next.model.value.text;
         NotebookActions.mergeCells(widget);
-        expect(widget.activeCell.model.source).to.be(source);
+        expect(widget.activeCell.model.value.text).to.be(source);
       });
 
       it('should clear the outputs of a code cell', () => {
@@ -206,13 +208,13 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should be undo-able', () => {
-        let source = widget.activeCell.model.source;
+        let source = widget.activeCell.model.value.text;
         let count = widget.widgets.length;
         NotebookActions.mergeCells(widget);
         NotebookActions.undo(widget);
         expect(widget.widgets.length).to.be(count);
         let cell = widget.widgets.at(0);
-        expect(cell.model.source).to.be(source);
+        expect(cell.model.value.text).to.be(source);
       });
 
       it('should unrender a markdown cell', () => {
@@ -286,13 +288,13 @@ describe('notebook/notebook/actions', () => {
       it('should be undo-able', () => {
         let next = widget.widgets.at(1);
         widget.select(next);
-        let source = widget.activeCell.model.source;
+        let source = widget.activeCell.model.value.text;
         let count = widget.widgets.length;
         NotebookActions.deleteCells(widget);
         NotebookActions.undo(widget);
         expect(widget.widgets.length).to.be(count);
         let cell = widget.widgets.at(0);
-        expect(cell.model.source).to.be(source);
+        expect(cell.model.value.text).to.be(source);
       });
 
     });
@@ -343,7 +345,7 @@ describe('notebook/notebook/actions', () => {
 
       it('should be the new active cell', () => {
         NotebookActions.insertAbove(widget);
-        expect(widget.activeCell.model.source).to.be('');
+        expect(widget.activeCell.model.value.text).to.be('');
       });
 
     });
@@ -394,7 +396,7 @@ describe('notebook/notebook/actions', () => {
 
       it('should be the new active cell', () => {
         NotebookActions.insertBelow(widget);
-        expect(widget.activeCell.model.source).to.be('');
+        expect(widget.activeCell.model.value.text).to.be('');
       });
 
     });
@@ -479,7 +481,7 @@ describe('notebook/notebook/actions', () => {
       it('should activate the last selected cell', (done) => {
         let other = widget.widgets.at(2);
         widget.select(other);
-        other.model.source = 'a = 1';
+        other.model.value.text = 'a = 1';
         NotebookActions.run(widget, kernel).then(result => {
           expect(result).to.be(true);
           expect(widget.activeCell).to.be(other);
@@ -517,7 +519,7 @@ describe('notebook/notebook/actions', () => {
 
       it('should stop executing code cells on an error', (done) => {
         let cell = widget.model.factory.createCodeCell();
-        cell.source = ERROR_INPUT;
+        cell.value.text = ERROR_INPUT;
         widget.model.cells.insert(2, cell);
         widget.select(widget.widgets.at(2));
         cell = widget.model.factory.createCodeCell();
@@ -536,7 +538,7 @@ describe('notebook/notebook/actions', () => {
         let child = widget.widgets.at(widget.widgets.length - 1) as MarkdownCellWidget;
         child.rendered = false;
         widget.select(child);
-        widget.activeCell.model.source = ERROR_INPUT;
+        widget.activeCell.model.value.text = ERROR_INPUT;
         NotebookActions.run(widget, kernel).then(result => {
           expect(result).to.be(false);
           expect(child.rendered).to.be(true);
@@ -622,7 +624,7 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should stop executing code cells on an error', (done) => {
-        widget.activeCell.model.source = ERROR_INPUT;
+        widget.activeCell.model.value.text = ERROR_INPUT;
         let cell = widget.model.factory.createCodeCell();
         widget.model.cells.pushBack(cell);
         widget.select(widget.widgets.at(widget.widgets.length - 1));
@@ -634,7 +636,7 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should render all markdown cells on an error', (done) => {
-        widget.activeCell.model.source = ERROR_INPUT;
+        widget.activeCell.model.value.text = ERROR_INPUT;
         let cell = widget.widgets.at(1) as MarkdownCellWidget;
         cell.rendered = false;
         widget.select(cell);
@@ -685,7 +687,7 @@ describe('notebook/notebook/actions', () => {
       it('should insert a new code cell in edit mode after the last selected cell', (done) => {
         let next = widget.widgets.at(2);
         widget.select(next);
-        next.model.source = 'a = 1';
+        next.model.value.text = 'a = 1';
         let count = widget.widgets.length;
         NotebookActions.runAndInsert(widget, kernel).then(result => {
           expect(result).to.be(true);
@@ -699,7 +701,7 @@ describe('notebook/notebook/actions', () => {
       it('should allow an undo of the cell insert', (done) => {
         let next = widget.widgets.at(2);
         widget.select(next);
-        next.model.source = 'a = 1';
+        next.model.value.text = 'a = 1';
         let count = widget.widgets.length;
         NotebookActions.runAndInsert(widget, kernel).then(result => {
           expect(result).to.be(true);
@@ -710,7 +712,7 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should stop executing code cells on an error', (done) => {
-        widget.activeCell.model.source = ERROR_INPUT;
+        widget.activeCell.model.value.text = ERROR_INPUT;
         let cell = widget.model.factory.createCodeCell();
         widget.model.cells.pushBack(cell);
         widget.select(widget.widgets.at(widget.widgets.length - 1));
@@ -722,7 +724,7 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should render all markdown cells on an error', (done) => {
-        widget.activeCell.model.source = ERROR_INPUT;
+        widget.activeCell.model.value.text = ERROR_INPUT;
         let cell = widget.widgets.at(1) as MarkdownCellWidget;
         cell.rendered = false;
         widget.select(cell);
@@ -740,7 +742,7 @@ describe('notebook/notebook/actions', () => {
 
       beforeEach(() => {
         // Make sure all cells have valid code.
-        widget.widgets.at(2).model.source = 'a = 1';
+        widget.widgets.at(2).model.value.text = 'a = 1';
       });
 
       it('should run all of the cells in the notebok', (done) => {
@@ -791,7 +793,7 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should stop executing code cells on an error', (done) => {
-        widget.activeCell.model.source = ERROR_INPUT;
+        widget.activeCell.model.value.text = ERROR_INPUT;
         let cell = widget.model.factory.createCodeCell();
         widget.model.cells.pushBack(cell);
         NotebookActions.runAll(widget, kernel).then(result => {
@@ -803,7 +805,7 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should render all markdown cells on an error', (done) => {
-        widget.activeCell.model.source = ERROR_INPUT;
+        widget.activeCell.model.value.text = ERROR_INPUT;
         let cell = widget.widgets.at(1) as MarkdownCellWidget;
         cell.rendered = false;
         NotebookActions.runAll(widget, kernel).then(result => {
@@ -1008,11 +1010,11 @@ describe('notebook/notebook/actions', () => {
 
       it('should be undo-able', () => {
         widget.activeCellIndex++;
-        let source = widget.activeCell.model.source;
+        let source = widget.activeCell.model.value.text;
         NotebookActions.moveUp(widget);
-        expect(widget.model.cells.at(0).source).to.be(source);
+        expect(widget.model.cells.at(0).value.text).to.be(source);
         NotebookActions.undo(widget);
-        expect(widget.model.cells.at(1).source).to.be(source);
+        expect(widget.model.cells.at(1).value.text).to.be(source);
       });
 
     });
@@ -1041,11 +1043,11 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should be undo-able', () => {
-        let source = widget.activeCell.model.source;
+        let source = widget.activeCell.model.value.text;
         NotebookActions.moveDown(widget);
-        expect(widget.model.cells.at(1).source).to.be(source);
+        expect(widget.model.cells.at(1).value.text).to.be(source);
         NotebookActions.undo(widget);
-        expect(widget.model.cells.at(0).source).to.be(source);
+        expect(widget.model.cells.at(0).value.text).to.be(source);
       });
 
     });
@@ -1098,10 +1100,10 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should be undo-able', () => {
-        let source = widget.activeCell.model.source;
+        let source = widget.activeCell.model.value.text;
         NotebookActions.cut(widget, clipboard);
         NotebookActions.undo(widget);
-        expect(widget.widgets.at(0).model.source).to.be(source);
+        expect(widget.widgets.at(0).model.value.text).to.be(source);
       });
 
       it('should add a new code cell if all cells were cut', (done) => {
@@ -1121,7 +1123,7 @@ describe('notebook/notebook/actions', () => {
     describe('#paste()', () => {
 
       it('should paste cells from a clipboard', () => {
-        let source = widget.activeCell.model.source;
+        let source = widget.activeCell.model.value.text;
         let next = widget.widgets.at(1);
         widget.select(next);
         let count = widget.widgets.length;
@@ -1129,7 +1131,7 @@ describe('notebook/notebook/actions', () => {
         widget.activeCellIndex = 1;
         NotebookActions.paste(widget, clipboard);
         expect(widget.widgets.length).to.be(count);
-        expect(widget.widgets.at(2).model.source).to.be(source);
+        expect(widget.widgets.at(2).model.value.text).to.be(source);
         expect(widget.activeCellIndex).to.be(3);
       });
 
@@ -1376,8 +1378,8 @@ describe('notebook/notebook/actions', () => {
         let next = widget.widgets.at(1);
         widget.select(next);
         NotebookActions.setMarkdownHeader(widget, 2);
-        expect(widget.activeCell.model.source.slice(0, 3)).to.be('## ');
-        expect(next.model.source.slice(0, 3)).to.be('## ');
+        expect(widget.activeCell.model.value.text.slice(0, 3)).to.be('## ');
+        expect(next.model.value.text.slice(0, 3)).to.be('## ');
       });
 
       it('should convert the cells to markdown type', () => {
@@ -1387,9 +1389,9 @@ describe('notebook/notebook/actions', () => {
 
       it('should be clamped between 1 and 6', () => {
         NotebookActions.setMarkdownHeader(widget, -1);
-        expect(widget.activeCell.model.source.slice(0, 2)).to.be('# ');
+        expect(widget.activeCell.model.value.text.slice(0, 2)).to.be('# ');
         NotebookActions.setMarkdownHeader(widget, 10);
-        expect(widget.activeCell.model.source.slice(0, 7)).to.be('###### ');
+        expect(widget.activeCell.model.value.text.slice(0, 7)).to.be('###### ');
       });
 
       it('should be a no-op if there is no model', () => {
@@ -1399,15 +1401,15 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should replace an existing header', () => {
-        widget.activeCell.model.source = '# foo';
+        widget.activeCell.model.value.text = '# foo';
         NotebookActions.setMarkdownHeader(widget, 2);
-        expect(widget.activeCell.model.source).to.be('## foo');
+        expect(widget.activeCell.model.value.text).to.be('## foo');
       });
 
       it('should replace leading white space', () => {
-        widget.activeCell.model.source = '      foo';
+        widget.activeCell.model.value.text = '      foo';
         NotebookActions.setMarkdownHeader(widget, 2);
-        expect(widget.activeCell.model.source).to.be('## foo');
+        expect(widget.activeCell.model.value.text).to.be('## foo');
       });
 
       it('should unrender the cells', () => {

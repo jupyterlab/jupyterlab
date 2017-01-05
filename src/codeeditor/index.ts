@@ -6,7 +6,7 @@ import {
 } from 'phosphor/lib/core/token';
 
 import {
-  IEditorFactory
+  IEditorFactoryService
 } from './factory';
 
 import {
@@ -36,7 +36,7 @@ interface IEditorServices {
   /**
    * The code editor factory.
    */
-  readonly factory: IEditorFactory;
+  readonly factoryService: IEditorFactoryService;
 
   /**
    * The editor mime type service.

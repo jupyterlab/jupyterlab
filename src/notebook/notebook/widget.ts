@@ -81,7 +81,7 @@ import {
 } from '../cells';
 
 import {
-  EdgeLocation
+  CellEditorWidget
 } from '../cells/editor';
 
 import {
@@ -450,7 +450,7 @@ class StaticNotebook extends Widget {
     let layout = this.layout as PanelLayout;
     let child = layout.widgets.at(index) as BaseCellWidget;
     if (child instanceof CodeCellWidget) {
-      child.mimetype = this._mimetype;
+      child.model.mimeType = this._mimetype;
     }
     this._renderer.updateCell(child);
   }
@@ -564,14 +564,15 @@ namespace StaticNotebook {
      * Creates a new renderer.
      */
     constructor(options: Renderer.IOptions) {
-      let factory = options.editorServices.factory;
+      let factory = options.editorServices.factoryService;
       this.codeCellRenderer = new CodeCellWidget.Renderer({
-        editorFactory: host => factory.newInlineEditor(host.node, {})
+        editorFactory: options => factory.newInlineEditor(options)
       });
       this.markdownCellRenderer = new BaseCellWidget.Renderer({
-        editorFactory: host => factory.newInlineEditor(host.node, {
-          wordWrap: true
-        })
+        editorFactory: options => {
+          options.wordWrap = true;
+          return factory.newInlineEditor(options);
+        }
       });
       this.rawCellRenderer = this.markdownCellRenderer;
       this.editorMimeTypeService = options.editorServices.mimeTypeService;
@@ -582,10 +583,10 @@ namespace StaticNotebook {
      */
     createCodeCell(model: ICodeCellModel, rendermime: RenderMime): CodeCellWidget {
       const widget = new CodeCellWidget({
+        model,
         rendermime,
         renderer: this.codeCellRenderer
       });
-      widget.model = model;
       return widget;
     }
 
@@ -594,10 +595,10 @@ namespace StaticNotebook {
      */
     createMarkdownCell(model: IMarkdownCellModel, rendermime: RenderMime): MarkdownCellWidget {
       const widget = new MarkdownCellWidget({
+        model,
         rendermime,
         renderer: this.markdownCellRenderer
       });
-      widget.model = model;
       return widget;
     }
 
@@ -606,9 +607,9 @@ namespace StaticNotebook {
      */
     createRawCell(model: IRawCellModel): RawCellWidget {
       const widget = new RawCellWidget({
+        model,
         renderer: this.rawCellRenderer
       });
-      widget.model = model;
       return widget;
     }
 
@@ -985,7 +986,7 @@ class Notebook extends StaticNotebook {
    * Handle a cell being inserted.
    */
   protected onCellInserted(index: number, cell: BaseCellWidget): void {
-    cell.editor.edgeRequested.connect(this._onEdgeRequest, this);
+    cell.editorWidget.edgeRequested.connect(this._onEdgeRequest, this);
     // Trigger an update of the active cell.
     this.activeCellIndex = this.activeCellIndex;
   }
@@ -1022,20 +1023,22 @@ class Notebook extends StaticNotebook {
   /**
    * Handle edge request signals from cells.
    */
-  private _onEdgeRequest(widget: Widget, location: EdgeLocation): void {
+  private _onEdgeRequest(widget: Widget, location: CellEditorWidget.EdgeLocation): void {
     let prev = this.activeCellIndex;
     if (location === 'top') {
       this.activeCellIndex--;
       // Move the cursor to the first position on the last line.
       if (this.activeCellIndex < prev) {
-        let lastLine = this.activeCell.editor.getLastLine();
-        this.activeCell.editor.setCursor(lastLine, 0);
+        let editor = this.activeCell.editor;
+        let lastLine = editor.lineCount - 1;
+        editor.setCursorPosition({ line: lastLine, column: 0 });
       }
     } else {
       this.activeCellIndex++;
       // Move the cursor to the first character.
       if (this.activeCellIndex > prev) {
-        this.activeCell.editor.setCursorPosition(0);
+        let editor = this.activeCell.editor;
+        editor.setCursorPosition({ line: 0, column: 0 });
       }
     }
   }
@@ -1046,7 +1049,7 @@ class Notebook extends StaticNotebook {
   private _ensureFocus(force=false): void {
     let activeCell = this.activeCell;
     if (this.mode === 'edit') {
-      activeCell.editor.editor.focus();
+      activeCell.editor.focus();
     } else if (this.node.contains(document.activeElement)) {
       // If an editor currently has focus, focus our node.
       // Otherwise, another input field has focus and should keep it.
@@ -1095,7 +1098,7 @@ class Notebook extends StaticNotebook {
     if (i !== -1) {
       let widget = this.widgets.at(i);
       // Event is on a cell but not in its editor, switch to command mode.
-      if (!widget.editor.node.contains(target)) {
+      if (!widget.editorWidget.node.contains(target)) {
         this.mode = 'command';
         shouldDrag = widget.promptNode.contains(target);
       }
@@ -1330,12 +1333,12 @@ class Notebook extends StaticNotebook {
     if (i !== -1) {
       let widget = this.widgets.at(i);
       // If the editor itself does not have focus, ensure command mode.
-      if (!widget.editor.node.contains(target)) {
+      if (!widget.editorWidget.node.contains(target)) {
         this.mode = 'command';
       }
       this.activeCellIndex = i;
       // If the editor has focus, ensure edit mode.
-      if (widget.editor.node.contains(target)) {
+      if (widget.editorWidget.node.contains(target)) {
         this.mode = 'edit';
       }
     } else {

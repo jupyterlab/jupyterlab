@@ -26,10 +26,10 @@ import {
 
 describe('editorwidget', () => {
 
-  let factory = new CodeMirrorEditorFactory();
+  let factoryService = new CodeMirrorEditorFactory();
   let modelFactory = new TextModelFactory();
   let mimeTypeService = new CodeMirrorMimeTypeService();
-  let context: DocumentRegistry.Context;
+  let context: DocumentRegistry.CodeContext;
   let manager: ServiceManager.IManager;
 
   before((done) => {
@@ -45,7 +45,7 @@ describe('editorwidget', () => {
       let path = utils.uuid() + '.py';
       context = new Context({ manager, factory: modelFactory, path });
       widget = new EditorWidget({
-        factory: (host: Widget) => factory.newDocumentEditor(host.node, {}),
+        factory: options => factoryService.newDocumentEditor(options),
         mimeTypeService,
         context
       });
@@ -122,7 +122,7 @@ describe('editorwidget', () => {
 
     let widgetFactory = new EditorWidgetFactory({
       editorServices: {
-        factory,
+        factoryService,
         mimeTypeService
       },
       factoryOptions: {

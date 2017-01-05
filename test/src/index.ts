@@ -7,7 +7,7 @@ import './application/shell.spec';
 import './codeeditor/editor.spec';
 import './codeeditor/widget.spec';
 
-import './codemirror/model.spec';
+import './codemirror/editor.spec';
 
 import './commandlinker/commandlinker.spec';
 

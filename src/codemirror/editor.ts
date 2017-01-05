@@ -5,12 +5,20 @@ import * as CodeMirror
   from 'codemirror';
 
 import {
+  utils
+} from '@jupyterlab/services';
+
+import {
   findIndex
 } from 'phosphor/lib/algorithm/searching';
 
 import {
   IDisposable, DisposableDelegate
 } from 'phosphor/lib/core/disposable';
+
+import {
+  clearSignalData
+} from 'phosphor/lib/core/signaling';
 
 import {
   Vector
@@ -21,16 +29,16 @@ import {
 } from '../common/interfaces';
 
 import {
+  IObservableString, ObservableString
+} from '../common/observablestring';
+
+import {
   loadModeByMIME
 } from './';
 
 import {
   CodeEditor
 } from '../codeeditor';
-
-import {
-  CodeMirrorModel
-} from './model';
 
 
 /**
@@ -63,23 +71,37 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Construct a CodeMirror editor.
    */
-  constructor(host: HTMLElement, options: CodeMirrorEditor.IOptions) {
-    host.classList.add(EDITOR_CLASS);
-    this.uuid = this.uuid;
+  constructor(options: CodeEditor.IOptions, config: CodeMirror.EditorConfiguration) {
+    options.host.classList.add(EDITOR_CLASS);
+
+    this.uuid = options.uuid || utils.uuid();
     this.selectionStyle = options.selectionStyle;
 
-    this._model = new CodeMirrorModel();
+    Private.updateConfig(options, config);
 
-    options.theme = (options.theme || DEFAULT_CODEMIRROR_THEME);
-    options.value = this._model.doc;
-    this._editor = CodeMirror(host, options);
+    let model = this._model = options.model;
+    let editor = this._editor = CodeMirror(options.host, config);
+    let doc = editor.getDoc();
 
+    // Handle extra config.
+    const extra = options.extra;
+    if (extra) {
+      for (const option in extra) {
+        editor.setOption(option, extra[option]);
+      }
+    }
+
+    // Handle initial values for text, mimetype, and selections.
+    doc.setValue(model.value.text);
     this._onMimeTypeChanged();
-    // TODO: handle initial selections.
-    this._model.mimeTypeChanged.connect(() => this._onMimeTypeChanged());
-    this._model.selections.changed.connect((selections, args) => this._onSelectionsChanged(selections, args));
+    this._onCursorActivity();
 
-    CodeMirror.on(this.editor, 'keydown', (editor, event) => {
+    // Connect to changes.
+    model.value.changed.connect(this._onValueChanged, this);
+    model.mimeTypeChanged.connect(() => this._onMimeTypeChanged(), this);
+    model.selections.changed.connect(this._onSelectionsChanged, this);
+
+    CodeMirror.on(editor, 'keydown', (editor, event) => {
       findIndex(this._keydownHandlers, handler => {
         if (handler(this, event) === true) {
           event.preventDefault();
@@ -87,7 +109,10 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
         }
       });
     });
-    CodeMirror.on(this.editor, 'cursorActivity', () => this._onCursorActivity());
+    CodeMirror.on(editor, 'cursorActivity', () => this._onCursorActivity());
+    CodeMirror.on(editor.getDoc(), 'change', (instance, change) => {
+      this._onDocChanged(instance, change);
+    });
   }
 
   /**
@@ -105,20 +130,31 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       return;
     }
     this._isDisposed = true;
-    this._model.dispose();
     this._model = null;
     this._editor = null;
     this._keydownHandlers.clear();
+    clearSignalData(this);
   }
 
   /**
    * Get the editor wrapped by the widget.
-   *
-   * #### Notes
-   * This is a ready-only property.
    */
   get editor(): CodeMirror.Editor {
     return this._editor;
+  }
+
+  /**
+   * Get the codemirror doc wrapped by the widget.
+   */
+  get doc(): CodeMirror.Doc {
+    return this._editor.getDoc();
+  }
+
+  /**
+   * Get the number of lines in the editor.
+   */
+  get lineCount(): number {
+    return this.doc.lineCount();
   }
 
   /**
@@ -171,6 +207,52 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   get charWidth(): number {
     return this._editor.defaultCharWidth();
+  }
+
+  /**
+   * Returns the content for the given line number.
+   */
+  getLine(line: number): string | undefined {
+    return this.doc.getLine(line);
+  }
+
+  /**
+   * Find an offset for the given position.
+   */
+  getOffsetAt(position: CodeEditor.IPosition): number {
+    return this.doc.indexFromPos({
+      ch: position.column,
+      line: position.line
+    });
+  }
+
+  /**
+   * Find a position fot the given offset.
+   */
+  getPositionAt(offset: number): CodeEditor.IPosition {
+    const { ch, line } = this.doc.posFromIndex(offset);
+    return { line, column: ch };
+  }
+
+  /**
+   * Undo one edit (if any undo events are stored).
+   */
+  undo(): void {
+    this.doc.undo();
+  }
+
+  /**
+   * Redo one undone edit.
+   */
+  redo(): void {
+    this.doc.redo();
+  }
+
+  /**
+   * Clear the undo history.
+   */
+  clearHistory(): void {
+    this.doc.clearHistory();
   }
 
   /**
@@ -246,7 +328,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Returns the primary position of the cursor, never `null`.
    */
   getCursorPosition(): CodeEditor.IPosition {
-    const cursor = this._model.doc.getCursor();
+    const cursor = this.doc.getCursor();
     return this.toPosition(cursor);
   }
 
@@ -255,7 +337,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   setCursorPosition(position: CodeEditor.IPosition): void {
     const cursor = this.toCodeMirrorPosition(position);
-    this._model.doc.setCursor(cursor);
+    this.doc.setCursor(cursor);
   }
 
   /**
@@ -276,11 +358,11 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Gets the selections for all the cursors, never `null` or empty.
    */
   getSelections(): CodeEditor.ITextSelection[] {
-    const selections = this._model.doc.listSelections();
+    const selections = this.doc.listSelections();
     if (selections.length > 0) {
       return selections.map(selection => this.toSelection(selection));
     }
-    const cursor = this._model.doc.getCursor();
+    const cursor = this.doc.getCursor();
     const selection = this.toSelection({ anchor: cursor, head: cursor });
     return [selection];
   }
@@ -292,7 +374,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   setSelections(selections: CodeEditor.IRange[]): void {
     const cmSelections = this.toCodeMirrorSelections(selections);
-    this._model.doc.setSelections(cmSelections, 0);
+    this.doc.setSelections(cmSelections, 0);
   }
 
   /**
@@ -347,7 +429,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     for (const selection of selections) {
       const { anchor, head } = this.toCodeMirrorSelection(selection);
       const markerOptions = this.toTextMarkerOptions(selection);
-      this._model.doc.markText(anchor, head, markerOptions);
+      this.doc.markText(anchor, head, markerOptions);
     }
     this.selectionMarkers[uuid] = markers;
   }
@@ -425,32 +507,86 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     };
   }
 
-  private _model: CodeMirrorModel;
+  /**
+   * Handle model value changes.
+   */
+  private _onValueChanged(value: IObservableString, args: ObservableString.IChangedArgs): void {
+    if (this._changeGuard) {
+      return;
+    }
+    this._changeGuard = true;
+    let doc = this.doc;
+    switch (args.type) {
+    case 'insert':
+      let pos = doc.posFromIndex(args.start);
+      doc.replaceRange(args.value, pos, pos);
+      break;
+    case 'remove':
+      let from = doc.posFromIndex(args.start);
+      let to = doc.posFromIndex(args.end);
+      doc.replaceRange('', from, to);
+      break;
+    case 'set':
+      doc.setValue(args.value);
+      break;
+    default:
+      break;
+    }
+    this._changeGuard = false;
+  }
+
+  /**
+   * Handles document changes.
+   */
+  private _onDocChanged(doc: CodeMirror.Doc, change: CodeMirror.EditorChange) {
+    if (this._changeGuard) {
+      return;
+    }
+    this._changeGuard = true;
+
+    let value = this._model.value;
+    let start = doc.indexFromPos(change.from);
+    let inserted = change.text.join('\n');
+    let removed = change.removed.join('\n');
+
+    if (removed) {
+      value.remove(start, start + removed.length);
+    }
+    if (inserted) {
+      value.insert(start, inserted);
+    }
+
+    this._changeGuard = false;
+  }
+
+  private _model: CodeEditor.IModel;
   private _editor: CodeMirror.Editor;
   private _isDisposed = false;
   protected selectionMarkers: { [key: string]: CodeMirror.TextMarker[] | undefined } = {};
   private _keydownHandlers = new Vector<CodeEditor.KeydownHandler>();
-
+  private _changeGuard = false;
 }
 
+
 /**
- * A namespace for `CodeMirrorEditor`.
+ * The namespace for module private data.
  */
-export
-namespace CodeMirrorEditor {
+namespace Private {
   /**
-   * An initialization options for a code mirror editor.
+   * Handle extra codemirror config from codeeditor options.
    */
   export
-  interface IOptions extends CodeMirror.EditorConfiguration {
-    /**
-     * The uuid of an editor.
-     */
-    readonly uuid: string;
-
-    /**
-     * A selection style.
-     */
-    readonly selectionStyle?: CodeEditor.ISelectionStyle;
+  function updateConfig(options: CodeEditor.IOptions, config: CodeMirror.EditorConfiguration): void {
+    if (options.readOnly !== undefined) {
+      config.readOnly = options.readOnly;
+    }
+    if (options.lineNumbers !== undefined) {
+      config.lineNumbers = options.lineNumbers;
+    }
+    if (options.wordWrap !== undefined) {
+      config.lineWrapping = options.wordWrap;
+    }
+    config.theme = (config.theme || DEFAULT_CODEMIRROR_THEME);
+    config.indentUnit = config.indentUnit || 4;
   }
 }

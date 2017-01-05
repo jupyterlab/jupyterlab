@@ -18,7 +18,7 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
-  ICompletionRequest, ITextChange
+  CellEditorWidget
 } from '../notebook/cells/editor';
 
 import {
@@ -39,10 +39,10 @@ class CompleterModel implements CompleterWidget.IModel {
   /**
    * The original completion request details.
    */
-  get original(): ICompletionRequest {
+  get original(): CellEditorWidget.ICompletionRequest {
     return this._original;
   }
-  set original(newValue: ICompletionRequest) {
+  set original(newValue: CellEditorWidget.ICompletionRequest) {
     if (deepEqual(newValue, this._original)) {
       return;
     }
@@ -54,10 +54,10 @@ class CompleterModel implements CompleterWidget.IModel {
   /**
    * The current text change details.
    */
-  get current(): ITextChange {
+  get current(): CellEditorWidget.ITextChange {
     return this._current;
   }
-  set current(newValue: ITextChange) {
+  set current(newValue: CellEditorWidget.ITextChange) {
     if (deepEqual(newValue, this._current)) {
       return;
     }
@@ -194,7 +194,7 @@ class CompleterModel implements CompleterWidget.IModel {
   /**
    * Handle a text change.
    */
-  handleTextChange(change: ITextChange): void {
+  handleTextChange(change: CellEditorWidget.ITextChange): void {
     // When the completer detects a common subset prefix for all options,
     // it updates the model and sets the model source to that value, but this
     // text change should be ignored.
@@ -284,11 +284,11 @@ class CompleterModel implements CompleterWidget.IModel {
     this._subsetMatch = false;
   }
 
-  private _current: ITextChange = null;
+  private _current: CellEditorWidget.ITextChange = null;
   private _cursor: CompleterWidget.ICursorSpan = null;
   private _isDisposed = false;
   private _options: string[] = [];
-  private _original: ICompletionRequest = null;
+  private _original: CellEditorWidget.ICompletionRequest = null;
   private _query = '';
   private _subsetMatch = false;
 }
