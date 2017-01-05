@@ -294,6 +294,9 @@ class ApplicationShell extends Widget {
    */
   collapseLeft(): void {
     this._leftHandler.collapse();
+    if (this._isRestored) {
+      // Save the collapse status.
+    }
   }
 
   /**
@@ -301,6 +304,9 @@ class ApplicationShell extends Widget {
    */
   collapseRight(): void {
     this._rightHandler.collapse();
+    if (this._isRestored) {
+      // Save the collapse status.
+    }
   }
 
   /**
@@ -313,18 +319,24 @@ class ApplicationShell extends Widget {
   /**
    * Restore the layout of the application shell.
    */
-  restore(restorer: IInstanceRestorer): void {
-    // TODO: implement restoration before resolving the promise.
+  restore(restorer: IInstanceRestorer, layout: IInstanceRestorer.ILayout): void {
+    if (this._isRestored) {
+      return;
+    }
+    this._restorer = restorer;
+    this._isRestored = true;
     this._restored.resolve(void 0);
   }
 
-  private _topPanel: Panel;
-  private _hboxPanel: BoxPanel;
   private _dockPanel: DockPanel;
+  private _isRestored = false;
+  private _hboxPanel: BoxPanel;
   private _hsplitPanel: SplitPanel;
   private _leftHandler: Private.SideBarHandler;
   private _restored = new utils.PromiseDelegate<void>();
+  private _restorer: IInstanceRestorer = null;
   private _rightHandler: Private.SideBarHandler;
+  private _topPanel: Panel;
 }
 
 

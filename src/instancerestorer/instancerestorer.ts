@@ -85,6 +85,48 @@ interface IInstanceRestorer {
 export
 namespace IInstanceRestorer {
   /**
+   * A description of the application's user interface layout.
+   */
+  export
+  interface ILayout {
+    /**
+     * The current widget that has application focus.
+     */
+    currentWidget: Widget;
+
+    /**
+     * The left area of the user interface.
+     */
+    leftArea: ISideArea;
+
+    /**
+     * The right area of the user interface.
+     */
+    rightArea: ISideArea;
+  }
+
+  /**
+   * The restorable description of a sidebar in the user interface.
+   */
+  export
+  interface ISideArea {
+    /**
+     * A flag denoting whether the sidebar has been collapsed.
+     */
+    collapsed: boolean;
+
+    /**
+     * The current widget that has side area focus.
+     */
+    currentWidget: Widget;
+
+    /**
+     * The collection of widgets held by the sidebar.
+     */
+    widgets: IIterator<Widget>;
+  }
+
+  /**
    * The state restoration configuration options.
    */
   export
@@ -200,6 +242,13 @@ class InstanceRestorer implements IInstanceRestorer {
   }
 
   /**
+   * Fetch the layout state for the application.
+   */
+  fetch(): Promise<IInstanceRestorer.ILayout> {
+    return Promise.resolve(null);
+  }
+
+  /**
    * Restore the widgets of a particular instance tracker.
    *
    * @param tracker - The instance tracker whose widgets will be restored.
@@ -231,7 +280,7 @@ class InstanceRestorer implements IInstanceRestorer {
   /**
    * Save the layout state for the application.
    */
-  save(data: InstanceRestorer.ILayout): Promise<void> {
+  save(data: IInstanceRestorer.ILayout): Promise<void> {
     // If there are promises that are unresolved, bail.
     if (this._promises) {
       console.warn('save() was called prematurely.');
@@ -308,48 +357,6 @@ namespace InstanceRestorer {
      * The state database instance.
      */
     state: IStateDB;
-  }
-
-  /**
-   * A description of the application's user interface layout.
-   */
-  export
-  interface ILayout {
-    /**
-     * The current widget that has application focus.
-     */
-    currentWidget: Widget;
-
-    /**
-     * The left area of the user interface.
-     */
-    leftArea: ISideArea;
-
-    /**
-     * The right area of the user interface.
-     */
-    rightArea: ISideArea;
-  }
-
-  /**
-   * The restorable description of a sidebar in the user interface.
-   */
-  export
-  interface ISideArea {
-    /**
-     * A flag denoting whether the sidebar has been collapsed.
-     */
-    collapsed: boolean;
-
-    /**
-     * The current widget that has side area focus.
-     */
-    currentWidget: Widget;
-
-    /**
-     * The collection of widgets held by the sidebar.
-     */
-    widgets: IIterator<Widget>;
   }
 }
 
