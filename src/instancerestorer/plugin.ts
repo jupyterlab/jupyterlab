@@ -27,12 +27,10 @@ const plugin: JupyterLabPlugin<IInstanceRestorer> = {
     const registry = app.commands;
     const shell = app.shell;
     let restorer = new InstanceRestorer({ first, registry, state });
+    // Use the restorer as the application shell's layout database.
+    shell.setLayoutDB(restorer);
     // Activate widgets that have been restored if necessary.
     restorer.activated.connect((sender, id) => { shell.activateMain(id); });
-    // After instance restoration is complete, ask app shell to restore layout.
-    Promise.all([restorer.fetch(), restorer.restored]).then(([layout]) => {
-      app.shell.restore(restorer, layout);
-    });
     return restorer;
   },
   autoStart: true,

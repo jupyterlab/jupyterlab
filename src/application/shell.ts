@@ -317,24 +317,38 @@ class ApplicationShell extends Widget {
   }
 
   /**
-   * Restore the layout of the application shell.
+   * Set the layout data store for the application shell.
    */
-  restore(restorer: IInstanceRestorer, layout: IInstanceRestorer.ILayout): void {
-    if (this._isRestored) {
-      return;
+  setLayoutDB(database: IInstanceRestorer.ILayoutDB): void {
+    if (this._database) {
+      throw new Error('cannot reset layout database');
     }
-    this._restorer = restorer;
-    this._isRestored = true;
-    this._restored.resolve(void 0);
+    this._database = database;
+    this._database.fetch().then(saved => {
+      if (!saved) {
+        return;
+      }
+
+      let { currentWidget, leftArea, rightArea } = saved;
+      if (currentWidget) {
+        this.activateMain(currentWidget.id);
+      }
+      if (leftArea) {
+        // TODO: handle left area
+      }
+      if (rightArea) {
+        // TODO: handle right area
+      }
+    });
   }
 
+  private _database: IInstanceRestorer.ILayoutDB = null;
   private _dockPanel: DockPanel;
   private _isRestored = false;
   private _hboxPanel: BoxPanel;
   private _hsplitPanel: SplitPanel;
   private _leftHandler: Private.SideBarHandler;
   private _restored = new utils.PromiseDelegate<void>();
-  private _restorer: IInstanceRestorer = null;
   private _rightHandler: Private.SideBarHandler;
   private _topPanel: Panel;
 }

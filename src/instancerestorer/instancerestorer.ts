@@ -8,10 +8,6 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  IIterator
-} from 'phosphor/lib/algorithm/iteration';
-
-import {
   JSONObject
 } from 'phosphor/lib/algorithm/json';
 
@@ -85,6 +81,26 @@ interface IInstanceRestorer {
 export
 namespace IInstanceRestorer {
   /**
+   * An application layout data store.
+   */
+  export
+  interface ILayoutDB {
+    /**
+     * Fetch the layout state for the application.
+     *
+     * #### Notes
+     * Fetching the layout relies on all widget restoration to be complete, so
+     * calls to `fetch` are guaranteed to return after restoration is complete.
+     */
+    fetch(): Promise<IInstanceRestorer.ILayout>;
+
+    /**
+     * Save the layout state for the application.
+     */
+    save(data: IInstanceRestorer.ILayout): Promise<void>;
+  }
+
+  /**
    * A description of the application's user interface layout.
    */
   export
@@ -92,7 +108,7 @@ namespace IInstanceRestorer {
     /**
      * The current widget that has application focus.
      */
-    currentWidget: Widget;
+    currentWidget: Widget | null;
 
     /**
      * The left area of the user interface.
@@ -118,12 +134,12 @@ namespace IInstanceRestorer {
     /**
      * The current widget that has side area focus.
      */
-    currentWidget: Widget;
+    currentWidget: Widget | null;
 
     /**
      * The collection of widgets held by the sidebar.
      */
-    widgets: IIterator<Widget>;
+    widgets: Array<Widget> | null;
   }
 
   /**
@@ -215,8 +231,6 @@ class InstanceRestorer implements IInstanceRestorer {
       // Release the tracker set.
       this._trackers.clear();
       this._trackers = null;
-      // Restore the application state.
-      return this._restore();
     }).then(() => { this._restored.resolve(void 0); });
   }
 
@@ -243,9 +257,39 @@ class InstanceRestorer implements IInstanceRestorer {
 
   /**
    * Fetch the layout state for the application.
+   *
+   * #### Notes
+   * Fetching the layout relies on all widget restoration to be complete, so
+   * calls to `fetch` are guaranteed to return after restoration is complete.
    */
   fetch(): Promise<IInstanceRestorer.ILayout> {
-    return Promise.resolve(null);
+    let layout = this._state.fetch(KEY);
+    return Promise.all([layout, this.restored]).then(([data]) => {
+      let rehydrated: IInstanceRestorer.ILayout = {
+        currentWidget: null,
+        leftArea: { collapsed: true, currentWidget: null, widgets: null },
+        rightArea: { collapsed: true, currentWidget: null, widgets: null }
+      };
+
+      if (!data) {
+        return rehydrated;
+      }
+
+      let { current, left, right } = data as InstanceRestorer.IDehydratedLayout;
+
+      // Rehydrate main area.
+      if (current && this._widgets.has(current)) {
+        rehydrated.currentWidget = this._widgets.get(current);
+      }
+
+      // Rehydrate left area.
+      rehydrated.leftArea = this._rehydrateSideArea(left);
+
+      // Rehydrate right area.
+      rehydrated.rightArea = this._rehydrateSideArea(right);
+
+      return rehydrated;
+    });
   }
 
   /**
@@ -286,35 +330,59 @@ class InstanceRestorer implements IInstanceRestorer {
       console.warn('save() was called prematurely.');
       return Promise.resolve(void 0);
     }
-    let promise: Promise<void>;
+
+    let dehydrated: InstanceRestorer.IDehydratedLayout = {};
+    let current: string;
+
+    // Dehydrate main area.
     if (data.currentWidget) {
-      let name = Private.nameProperty.get(data.currentWidget);
-      if (name) {
-        promise = this._state.save(KEY, { currentWidget: name });
+      current = Private.nameProperty.get(data.currentWidget);
+      if (current) {
+        dehydrated.current = current;
       }
     }
-    return promise || this._state.remove(KEY);
+
+    // Dehydrate left area.
+    dehydrated.left = this._dehydrateSideArea(data.leftArea);
+
+    // Dehydrate right area.
+    dehydrated.right = this._dehydrateSideArea(data.rightArea);
+
+    return this._state.save(KEY, dehydrated);
   }
 
-  /**
-   * Restore the application state.
-   */
-  private _restore(): Promise<void> {
-    return this._state.fetch(KEY).then(data => {
-      if (!data) {
-        return;
+  private _dehydrateSideArea(area: IInstanceRestorer.ISideArea): InstanceRestorer.ISideArea {
+    let dehydrated: InstanceRestorer.ISideArea = { collapsed: area.collapsed };
+    if (area.currentWidget) {
+      let current = Private.nameProperty.get(area.currentWidget);
+      if (current) {
+        dehydrated.current = current;
       }
+    }
+    return dehydrated;
+  }
 
-      let name = data['currentWidget'] as string;
-      if (!name) {
-        return;
-      }
-
-      let widget = this._widgets.get(name);
-      if (widget) {
-        this.activated.emit(widget.id);
-      }
-    });
+  private _rehydrateSideArea(area: InstanceRestorer.ISideArea): IInstanceRestorer.ISideArea {
+    let rehydrated: IInstanceRestorer.ISideArea = {
+      collapsed: true,
+      currentWidget: null,
+      widgets: null
+    };
+    let widgets = this._widgets;
+    if (!area) {
+      return rehydrated;
+    }
+    if (area.hasOwnProperty('collapsed')) {
+      rehydrated.collapsed = !!area.collapsed;
+    }
+    if (area.current && widgets.has(area.current)) {
+      rehydrated.currentWidget = widgets.get(area.current);
+    }
+    if (Array.isArray(area.widgets)) {
+      rehydrated.widgets = area.widgets
+        .map(name => widgets.has(name) ? widgets.get(name) : null)
+        .filter(widget => !!widget);
+    }
   }
 
   private _promises: Promise<any>[] = [];
@@ -357,6 +425,48 @@ namespace InstanceRestorer {
      * The state database instance.
      */
     state: IStateDB;
+  }
+
+  /**
+   * The dehydrated state of the application layout.
+   */
+  export
+  interface IDehydratedLayout extends JSONObject {
+    /**
+     * The current widget that has application focus.
+     */
+    current?: string | null;
+
+    /**
+     * The left area of the user interface.
+     */
+    left?: ISideArea | null;
+
+    /**
+     * The right area of the user interface.
+     */
+    right?: ISideArea | null;
+  }
+
+  /**
+   * The restorable description of a sidebar in the user interface.
+   */
+  export
+  interface ISideArea extends JSONObject {
+    /**
+     * A flag denoting whether the sidebar has been collapsed.
+     */
+    collapsed?: boolean | null;
+
+    /**
+     * The current widget that has side area focus.
+     */
+    current?: string | null;
+
+    /**
+     * The collection of widgets held by the sidebar.
+     */
+    widgets?: Array<string> | null;
   }
 }
 
