@@ -209,7 +209,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
     realtimeServices.addTracker(tracker, (widget: EditorWidget) => {
       return widget.context.model as DocumentModel;
     });
-  });
+  }).catch( ()=>{/*no-op*/} );
 
   return tracker;
 }

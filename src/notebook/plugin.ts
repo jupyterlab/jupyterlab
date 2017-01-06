@@ -232,7 +232,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     realtimeServices.addTracker(tracker, (widget: NotebookPanel) => {
       return widget.context.model as NotebookModel;
     });
-  });
+  }).catch( ()=> {/*no-op*/} );
 
   return tracker;
 }
