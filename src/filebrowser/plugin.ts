@@ -30,6 +30,10 @@ import {
 } from '../docregistry';
 
 import {
+  IInstanceRestorer
+} from '../instancerestorer';
+
+import {
   IMainMenu
 } from '../mainmenu';
 
@@ -58,9 +62,10 @@ const plugin: JupyterLabPlugin<IPathTracker> = {
     IDocumentRegistry,
     IMainMenu,
     ICommandPalette,
+    IInstanceRestorer,
     IStateDB
   ],
-  activate: activateFileBrowser,
+  activate: activate,
   autoStart: true
 };
 
@@ -77,9 +82,9 @@ export default plugin;
 const cmdIds = {
   save: 'file-operations:save',
   restoreCheckpoint: 'file-operations:restore-checkpoint',
-  saveAs: 'file-operations:saveAs',
+  saveAs: 'file-operations:save-as',
   close: 'file-operations:close',
-  closeAllFiles: 'file-operations:closeAllFiles',
+  closeAllFiles: 'file-operations:close-all-files',
   open: 'file-operations:open',
   showBrowser: 'file-browser:activate',
   hideBrowser: 'file-browser:hide',
@@ -95,15 +100,19 @@ const NAMESPACE = 'filebrowser';
 /**
  * Activate the file browser.
  */
-function activateFileBrowser(app: JupyterLab, manager: IServiceManager, documentManager: IDocumentManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB): IPathTracker {
-  let { commands, keymap } = app;
+function activate(app: JupyterLab, manager: IServiceManager, documentManager: IDocumentManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, restorer: IInstanceRestorer, state: IStateDB): IPathTracker {
+  const { commands, keymap } = app;
   let fbModel = new FileBrowserModel({ manager });
   let fbWidget = new FileBrowser({
-    commands: commands,
-    keymap: keymap,
+    commands, keymap,
     manager: documentManager,
     model: fbModel
   });
+
+  // Let the application restorer track the file browser for restoration of
+  // application state (e.g. setting the file browser as the current side bar
+  // widget).
+  restorer.add(fbWidget, NAMESPACE);
 
   let category = 'File Operations';
   let creatorCmds: { [key: string]: DisposableSet } = Object.create(null);
