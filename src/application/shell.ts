@@ -342,6 +342,26 @@ class ApplicationShell extends Widget {
     });
   }
 
+  private _save(): void {
+    if (!this._database) {
+      return;
+    }
+    let data: IInstanceRestorer.ILayout = {
+      currentWidget: this._dockPanel.currentWidget,
+      leftArea: {
+        collapsed: true,
+        currentWidget: null,
+        widgets: null
+      },
+      rightArea: {
+        collapsed: true,
+        currentWidget: null,
+        widgets: null
+      }
+    };
+    this._database.save(data);
+  }
+
   private _database: IInstanceRestorer.ILayoutDB = null;
   private _dockPanel: DockPanel;
   private _isRestored = false;
@@ -383,10 +403,10 @@ namespace ApplicationShell {
 
 
 namespace Private {
-  export
   /**
    * An object which holds a widget and its sort rank.
    */
+  export
   interface IRankItem {
     /**
      * The widget for the item.
