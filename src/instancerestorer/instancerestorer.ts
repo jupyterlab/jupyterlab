@@ -429,6 +429,13 @@ namespace InstanceRestorer {
 
   /**
    * The dehydrated state of the application layout.
+   *
+   * #### Notes
+   * This format is JSON serializable and only used internally by the instance
+   * restorer to read and write to the state database. It is meant to be a data
+   * structure that the instance restorer can translate into an
+   * `IInstanceTracker.ILayout` data structure for consumption by the
+   * application shell.
    */
   export
   interface IDehydratedLayout extends JSONObject {

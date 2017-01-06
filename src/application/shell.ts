@@ -218,6 +218,7 @@ class ApplicationShell extends Widget {
     }
     // Temporary: widgets are added to the panel in order of insertion.
     this._topPanel.addWidget(widget);
+    this._save();
   }
 
   /**
@@ -233,6 +234,7 @@ class ApplicationShell extends Widget {
     }
     let rank = 'rank' in options ? options.rank : 100;
     this._leftHandler.addWidget(widget, rank);
+    this._save();
   }
 
   /**
@@ -248,6 +250,7 @@ class ApplicationShell extends Widget {
     }
     let rank = 'rank' in options ? options.rank : 100;
     this._rightHandler.addWidget(widget, rank);
+    this._save();
   }
 
   /**
@@ -262,6 +265,7 @@ class ApplicationShell extends Widget {
       return;
     }
     this._dockPanel.addWidget(widget, { mode: 'tab-after' });
+    this._save();
   }
 
   /**
@@ -269,6 +273,7 @@ class ApplicationShell extends Widget {
    */
   activateLeft(id: string): void {
     this._leftHandler.activate(id);
+    this._save();
   }
 
   /**
@@ -276,6 +281,7 @@ class ApplicationShell extends Widget {
    */
   activateRight(id: string): void {
     this._rightHandler.activate(id);
+    this._save();
   }
 
   /**
@@ -287,6 +293,7 @@ class ApplicationShell extends Widget {
     if (widget) {
       dock.activateWidget(widget);
     }
+    this._save();
   }
 
   /**
@@ -294,9 +301,7 @@ class ApplicationShell extends Widget {
    */
   collapseLeft(): void {
     this._leftHandler.collapse();
-    if (this._isRestored) {
-      // Save the collapse status.
-    }
+    this._save();
   }
 
   /**
@@ -304,9 +309,7 @@ class ApplicationShell extends Widget {
    */
   collapseRight(): void {
     this._rightHandler.collapse();
-    if (this._isRestored) {
-      // Save the collapse status.
-    }
+    this._save();
   }
 
   /**
@@ -314,6 +317,7 @@ class ApplicationShell extends Widget {
    */
   closeAll(): void {
     each(toArray(this._dockPanel.widgets()), widget => { widget.close(); });
+    this._save();
   }
 
   /**
@@ -329,37 +333,39 @@ class ApplicationShell extends Widget {
         return;
       }
 
+      // Rehydrate the application.
       let { currentWidget, leftArea, rightArea } = saved;
       if (currentWidget) {
         this.activateMain(currentWidget.id);
       }
       if (leftArea) {
-        // TODO: handle left area
+        this._leftHandler.rehydrate(leftArea);
       }
       if (rightArea) {
-        // TODO: handle right area
+        this._rightHandler.rehydrate(rightArea);
       }
+      this._save();
+      this._isRestored = true;
+      this._restored.resolve(void 0);
     });
+    // Catch current changed events on the side handlers.
+    this._leftHandler.sideBar.currentChanged.connect(() => { this._save(); });
+    this._rightHandler.sideBar.currentChanged.connect(() => { this._save(); });
   }
 
-  private _save(): void {
-    if (!this._database) {
+  /**
+   * Save the dehydrated state of the application shell.
+   */
+  private _save(): Promise<void> {
+    if (!this._database || !this._isRestored) {
       return;
     }
     let data: IInstanceRestorer.ILayout = {
       currentWidget: this._dockPanel.currentWidget,
-      leftArea: {
-        collapsed: true,
-        currentWidget: null,
-        widgets: null
-      },
-      rightArea: {
-        collapsed: true,
-        currentWidget: null,
-        widgets: null
-      }
+      leftArea: this._leftHandler.dehydrate(),
+      rightArea: this._rightHandler.dehydrate()
     };
-    this._database.save(data);
+    return this._database.save(data);
   }
 
   private _database: IInstanceRestorer.ILayoutDB = null;
@@ -497,6 +503,27 @@ namespace Private {
       this._stackedPanel.insertWidget(index, widget);
       this._sideBar.insertTab(index, widget.title);
       this._refreshVisibility();
+    }
+
+    /**
+     * Dehydrate the side bar data.
+     */
+    dehydrate(): IInstanceRestorer.ISideArea {
+      let collapsed = this._sideBar.currentTitle === null;
+      let widgets = toArray(this._stackedPanel.widgets);
+      let currentWidget = widgets[this._sideBar.currentIndex];
+      return { collapsed, currentWidget, widgets };
+    }
+
+    /**
+     * Rehydrate the side bar.
+     */
+    rehydrate(data: IInstanceRestorer.ISideArea): void {
+      if (data.currentWidget) {
+        this.activate(data.currentWidget.id);
+      } else if (data.collapsed) {
+        this.collapse();
+      }
     }
 
     /**
