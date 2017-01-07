@@ -79,4 +79,8 @@ if __name__ == '__main__':
     # Reserve the command line arguments for karma.
     ARGS = sys.argv[1:]
     sys.argv = sys.argv[:1]
-    TestApp.launch_instance()
+
+    try:
+        TestApp.launch_instance()
+    except KeyboardInterrupt:
+        sys.exit(1)
