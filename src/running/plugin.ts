@@ -6,6 +6,10 @@ import {
 } from '../application';
 
 import {
+  IInstanceRestorer
+} from '../instancerestorer';
+
+import {
   IServiceManager
 } from '../services';
 
@@ -19,8 +23,8 @@ import {
  */
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.running-sessions',
-  requires: [IServiceManager],
-  activate: activateRunningSessions,
+  requires: [IServiceManager, IInstanceRestorer],
+  activate: activate,
   autoStart: true
 };
 
@@ -34,10 +38,15 @@ export default plugin;
 /**
  * Activate the running plugin.
  */
-function activateRunningSessions(app: JupyterLab, services: IServiceManager): void {
+function activate(app: JupyterLab, services: IServiceManager, restorer: IInstanceRestorer): void {
   let running = new RunningSessions({ manager: services });
   running.id = 'jp-running-sessions';
   running.title.label = 'Running';
+
+  // Let the application restorer track the running panel for restoration of
+  // application state (e.g. setting the running panel as the current side bar
+  // widget).
+  restorer.add(running, 'running-sessions');
 
   running.sessionOpenRequested.connect((sender, model) => {
     let path = model.notebook.path;

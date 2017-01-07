@@ -263,6 +263,8 @@ function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICom
 
   RESOURCES.forEach(args => { palette.addItem({ args, command, category }); });
 
+  palette.addItem({ command: 'statedb:clear', category });
+
   let openClassicNotebookId = 'classic-notebook:open';
   app.commands.addCommand(openClassicNotebookId, {
     label: 'Open Classic Notebook',
