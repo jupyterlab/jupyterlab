@@ -111,6 +111,17 @@ namespace IInstanceRestorer {
     readonly currentWidget: Widget | null;
 
     /**
+     * Indicates whether fetched session restore data was actually retrieved
+     * from the state database or whether it is a fresh blank slate.
+     *
+     * #### Notes
+     * This attribute is only relevant when the layout data is retrieved via a
+     * `fetch` call. If it is set when being passed into `save`, it will be
+     * ignored.
+     */
+    readonly fresh?: boolean;
+
+    /**
      * The left area of the user interface.
      */
     readonly leftArea: ISideArea;
@@ -193,7 +204,7 @@ const KEY = 'instance-restorer:data';
  *
  * 3. As each load-time plugin initializes (which happens before the lab
  *    application has `started`), it instructs the instance restorer whether
- *    the restorer ought to `restore` its state.
+ *    the restorer ought to `restore` its state by passing in its tracker.
  *
  * 4. After all the load-time plugins have finished initializing, the lab
  *    application `started` promise will resolve. This is the `first`
@@ -268,12 +279,16 @@ class InstanceRestorer implements IInstanceRestorer {
       if (!data) {
         return {
           currentWidget: null,
+          fresh: true,
           leftArea: { collapsed: true, currentWidget: null, widgets: null },
           rightArea: { collapsed: true, currentWidget: null, widgets: null }
         };
       }
 
       let { current, left, right } = data as InstanceRestorer.IDehydratedLayout;
+
+      // If any data exists, then this is not a fresh session.
+      const fresh = false;
 
       // Rehydrate main area.
       const currentWidget = current && this._widgets.has(current) ?
@@ -285,7 +300,7 @@ class InstanceRestorer implements IInstanceRestorer {
       // Rehydrate right area.
       const rightArea = this._rehydrateSideArea(right);
 
-      return { currentWidget, leftArea, rightArea };
+      return { currentWidget, fresh, leftArea, rightArea };
     });
   }
 

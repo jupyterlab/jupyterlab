@@ -10,6 +10,10 @@ import {
 } from 'phosphor/lib/ui/application';
 
 import {
+  IInstanceRestorer
+} from '../instancerestorer';
+
+import {
   ModuleLoader
 } from './loader';
 
@@ -61,12 +65,12 @@ class JupyterLab extends Application<ApplicationShell> {
   }
 
   /**
-   * A promise that resolves when the JupyterLab application has restored state.
+   * Promise that resolves when state is restored, returning layout description.
    *
    * #### Notes
    * This is just a reference to `shell.restored`.
    */
-  get restored(): Promise<void> {
+  get restored(): Promise<IInstanceRestorer.ILayout> {
     return this.shell.restored;
   }
 

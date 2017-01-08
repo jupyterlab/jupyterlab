@@ -194,7 +194,13 @@ function activate(app: JupyterLab, manager: IServiceManager, documentManager: ID
   fbWidget.title.label = 'Files';
   fbWidget.id = 'file-browser';
   app.shell.addToLeftArea(fbWidget, { rank: 40 });
-  app.commands.execute(cmdIds.showBrowser, void 0);
+
+  // If the layout is a fresh session without saved data, open file browser.
+  app.restored.then(layout => {
+    if (layout.fresh) {
+      app.commands.execute(cmdIds.showBrowser, void 0);
+    }
+  });
 
   // Handle fileCreator items as they are added.
   registry.changed.connect((sender, args) => {
