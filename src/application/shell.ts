@@ -171,9 +171,9 @@ class ApplicationShell extends Widget {
   }
 
   /**
-   * A promise that resolves when the shell has restored state.
+   * Promise that resolves when state is restored, returning layout description.
    */
-  get restored(): Promise<void> {
+  get restored(): Promise<IInstanceRestorer.ILayout> {
     return this._restored.promise;
   }
 
@@ -344,9 +344,8 @@ class ApplicationShell extends Widget {
       if (rightArea) {
         this._rightHandler.rehydrate(rightArea);
       }
-      this._save();
       this._isRestored = true;
-      this._restored.resolve(void 0);
+      return this._save().then(() => { this._restored.resolve(saved); });
     });
     // Catch current changed events on the side handlers.
     this._leftHandler.sideBar.currentChanged.connect(() => { this._save(); });
@@ -374,7 +373,7 @@ class ApplicationShell extends Widget {
   private _hboxPanel: BoxPanel;
   private _hsplitPanel: SplitPanel;
   private _leftHandler: Private.SideBarHandler;
-  private _restored = new utils.PromiseDelegate<void>();
+  private _restored = new utils.PromiseDelegate<IInstanceRestorer.ILayout>();
   private _rightHandler: Private.SideBarHandler;
   private _topPanel: Panel;
 }

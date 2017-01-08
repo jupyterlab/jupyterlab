@@ -108,17 +108,17 @@ namespace IInstanceRestorer {
     /**
      * The current widget that has application focus.
      */
-    currentWidget: Widget | null;
+    readonly currentWidget: Widget | null;
 
     /**
      * The left area of the user interface.
      */
-    leftArea: ISideArea;
+    readonly leftArea: ISideArea;
 
     /**
      * The right area of the user interface.
      */
-    rightArea: ISideArea;
+    readonly rightArea: ISideArea;
   }
 
   /**
@@ -129,17 +129,17 @@ namespace IInstanceRestorer {
     /**
      * A flag denoting whether the sidebar has been collapsed.
      */
-    collapsed: boolean;
+    readonly collapsed: boolean;
 
     /**
      * The current widget that has side area focus.
      */
-    currentWidget: Widget | null;
+    readonly currentWidget: Widget | null;
 
     /**
      * The collection of widgets held by the sidebar.
      */
-    widgets: Array<Widget> | null;
+    readonly widgets: Array<Widget> | null;
   }
 
   /**
@@ -265,30 +265,27 @@ class InstanceRestorer implements IInstanceRestorer {
   fetch(): Promise<IInstanceRestorer.ILayout> {
     let layout = this._state.fetch(KEY);
     return Promise.all([layout, this.restored]).then(([data]) => {
-      let rehydrated: IInstanceRestorer.ILayout = {
-        currentWidget: null,
-        leftArea: { collapsed: true, currentWidget: null, widgets: null },
-        rightArea: { collapsed: true, currentWidget: null, widgets: null }
-      };
-
       if (!data) {
-        return rehydrated;
+        return {
+          currentWidget: null,
+          leftArea: { collapsed: true, currentWidget: null, widgets: null },
+          rightArea: { collapsed: true, currentWidget: null, widgets: null }
+        };
       }
 
       let { current, left, right } = data as InstanceRestorer.IDehydratedLayout;
 
       // Rehydrate main area.
-      if (current && this._widgets.has(current)) {
-        rehydrated.currentWidget = this._widgets.get(current);
-      }
+      const currentWidget = current && this._widgets.has(current) ?
+        this._widgets.get(current) : null;
 
       // Rehydrate left area.
-      rehydrated.leftArea = this._rehydrateSideArea(left);
+      const leftArea = this._rehydrateSideArea(left);
 
       // Rehydrate right area.
-      rehydrated.rightArea = this._rehydrateSideArea(right);
+      const rightArea = this._rehydrateSideArea(right);
 
-      return rehydrated;
+      return { currentWidget, leftArea, rightArea };
     });
   }
 
@@ -363,26 +360,18 @@ class InstanceRestorer implements IInstanceRestorer {
   }
 
   private _rehydrateSideArea(area: InstanceRestorer.ISideArea): IInstanceRestorer.ISideArea {
-    let rehydrated: IInstanceRestorer.ISideArea = {
-      collapsed: true,
-      currentWidget: null,
-      widgets: null
-    };
-    let widgets = this._widgets;
     if (!area) {
-      return rehydrated;
+      return { collapsed: true, currentWidget: null, widgets: null };
     }
-    if (area.hasOwnProperty('collapsed')) {
-      rehydrated.collapsed = !!area.collapsed;
-    }
-    if (area.current && widgets.has(area.current)) {
-      rehydrated.currentWidget = widgets.get(area.current);
-    }
-    if (Array.isArray(area.widgets)) {
-      rehydrated.widgets = area.widgets
-        .map(name => widgets.has(name) ? widgets.get(name) : null)
-        .filter(widget => !!widget);
-    }
+    let internal = this._widgets;
+    const collapsed = area.hasOwnProperty('collapsed') ? !!area.collapsed
+      : false;
+    const currentWidget = area.current && internal.has(area.current) ?
+      internal.get(area.current) : null;
+    const widgets = !Array.isArray(area.widgets) ? null
+      : area.widgets.map(name => internal.has(name) ? internal.get(name) : null)
+          .filter(widget => !!widget);
+    return { collapsed, currentWidget, widgets };
   }
 
   private _promises: Promise<any>[] = [];
