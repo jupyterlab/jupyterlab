@@ -236,7 +236,8 @@ class InstanceRestorer implements IInstanceRestorer {
   constructor(options: InstanceRestorer.IOptions) {
     this._registry = options.registry;
     this._state = options.state;
-    options.first.then(() => Promise.all(this._promises)).then(() => {
+    this._first = options.first;
+    this._first.then(() => Promise.all(this._promises)).then(() => {
       // Release the promises held in memory.
       this._promises = null;
       // Release the tracker set.
@@ -325,6 +326,13 @@ class InstanceRestorer implements IInstanceRestorer {
     this._trackers.add(namespace);
 
     let { args, command, name, when } = options;
+    let first = this._first;
+
+    // Guarantee that the application has started before any tracker restores by
+    // making sure its `when` argument includes the `first` promise.
+    when = when ? (Array.isArray(when) ? when.concat(first) : [when, first])
+      : first;
+
     this._promises.push(tracker.restore({
       args, command, name, when,
       registry: this._registry,
@@ -389,6 +397,7 @@ class InstanceRestorer implements IInstanceRestorer {
     return { collapsed, currentWidget, widgets };
   }
 
+  private _first: Promise<any> = null;
   private _promises: Promise<any>[] = [];
   private _restored = new utils.PromiseDelegate<void>();
   private _registry: CommandRegistry = null;
