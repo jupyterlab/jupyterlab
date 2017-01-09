@@ -21,7 +21,6 @@ if [[ $GROUP == unit ]]; then
 
     # Run the python tests
     npm run build:serverextension
-    python setup.py build
     pushd jupyterlab
     nosetests
     popd
