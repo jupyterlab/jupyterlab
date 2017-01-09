@@ -18,8 +18,8 @@ import {
 } from '../docregistry';
 
 import {
-  ILayoutRestorer
-} from '../layoutrestorer';
+  IInstanceRestorer
+} from '../instancerestorer';
 
 import {
   ImageWidget, ImageWidgetFactory
@@ -41,9 +41,9 @@ const FACTORY = 'Image';
  * The image file handler extension.
  */
 const plugin: JupyterLabPlugin<void> = {
+  activate,
   id: 'jupyter.extensions.image-handler',
-  requires: [IDocumentRegistry, ICommandPalette, ILayoutRestorer],
-  activate: activateImageWidget,
+  requires: [IDocumentRegistry, ICommandPalette, IInstanceRestorer],
   autoStart: true
 };
 
@@ -57,7 +57,7 @@ export default plugin;
 /**
  * Activate the image widget extension.
  */
-function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palette: ICommandPalette, layout: ILayoutRestorer): void {
+function activate(app: JupyterLab, registry: IDocumentRegistry, palette: ICommandPalette, restorer: IInstanceRestorer): void {
   const namespace = 'image-widget';
   const factory = new ImageWidgetFactory({
     name: FACTORY,
@@ -68,7 +68,7 @@ function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palet
   const tracker = new InstanceTracker<ImageWidget>({ namespace });
 
   // Handle state restoration.
-  layout.restore(tracker, {
+  restorer.restore(tracker, {
     command: 'file-operations:open',
     args: widget => ({ path: widget.context.path, factory: FACTORY }),
     name: widget => widget.context.path

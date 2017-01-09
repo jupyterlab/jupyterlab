@@ -10,10 +10,6 @@ import {
 } from '../application';
 
 import {
-  ICommandPalette
-} from '../commandpalette';
-
-import {
   IStateDB
 } from './index';
 
@@ -26,11 +22,10 @@ import {
  * The default state database for storing application state.
  */
 const plugin: JupyterLabPlugin<IStateDB> = {
+  activate,
   id: 'jupyter.services.statedb',
-  activate: activateState,
   autoStart: true,
-  provides: IStateDB,
-  requires: [ICommandPalette]
+  provides: IStateDB
 };
 
 
@@ -43,11 +38,10 @@ export default plugin;
 /**
  * Activate the state database.
  */
-function activateState(app: JupyterLab, palette: ICommandPalette): Promise<IStateDB> {
-  let state = new StateDB();
+function activate(app: JupyterLab): Promise<IStateDB> {
+  let state = new StateDB({ namespace: app.info.namespace });
   let version = app.info.version;
   let command = 'statedb:clear';
-  let category = 'Help';
   let key = 'statedb:version';
   let fetch = state.fetch(key);
   let save = () => state.save(key, { version });
@@ -64,8 +58,6 @@ function activateState(app: JupyterLab, palette: ICommandPalette): Promise<IStat
     label: 'Clear Application Restore State',
     execute: () => state.clear()
   });
-
-  palette.addItem({ command, category });
 
   return fetch.then(check, reset).then(() => state);
 }

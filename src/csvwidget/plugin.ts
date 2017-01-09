@@ -14,8 +14,8 @@ import {
 } from '../docregistry';
 
 import {
-  ILayoutRestorer
-} from '../layoutrestorer';
+  IInstanceRestorer
+} from '../instancerestorer';
 
 import {
   CSVWidget, CSVWidgetFactory
@@ -32,9 +32,9 @@ const FACTORY = 'Table';
  * The table file handler extension.
  */
 const plugin: JupyterLabPlugin<void> = {
+  activate,
   id: 'jupyter.extensions.csv-handler',
-  requires: [IDocumentRegistry, ILayoutRestorer],
-  activate: activateCSVWidget,
+  requires: [IDocumentRegistry, IInstanceRestorer],
   autoStart: true
 };
 
@@ -48,7 +48,7 @@ export default plugin;
 /**
  * Activate the table widget extension.
  */
-function activateCSVWidget(app: JupyterLab, registry: IDocumentRegistry, layout: ILayoutRestorer): void {
+function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInstanceRestorer): void {
   const factory = new CSVWidgetFactory({
     name: FACTORY,
     fileExtensions: ['.csv'],
@@ -57,7 +57,7 @@ function activateCSVWidget(app: JupyterLab, registry: IDocumentRegistry, layout:
   const tracker = new InstanceTracker<CSVWidget>({ namespace: 'csvwidget' });
 
   // Handle state restoration.
-  layout.restore(tracker, {
+  restorer.restore(tracker, {
     command: 'file-operations:open',
     args: widget => ({ path: widget.context.path, factory: FACTORY }),
     name: widget => widget.context.path

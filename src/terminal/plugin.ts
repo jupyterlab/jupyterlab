@@ -22,8 +22,8 @@ import {
 } from '../commandpalette';
 
 import {
-  ILayoutRestorer
-} from '../layoutrestorer';
+  IInstanceRestorer
+} from '../instancerestorer';
 
 import {
   IMainMenu
@@ -53,11 +53,11 @@ const TERMINAL_ICON_CLASS = 'jp-ImageTerminal';
  * The default terminal extension.
  */
 const plugin: JupyterLabPlugin<void> = {
+  activate,
   id: 'jupyter.extensions.terminal',
   requires: [
-    IServiceManager, IMainMenu, ICommandPalette, ILayoutRestorer
+    IServiceManager, IMainMenu, ICommandPalette, IInstanceRestorer
   ],
-  activate: activateTerminal,
   autoStart: true
 };
 
@@ -71,7 +71,7 @@ export default plugin;
 /**
  * Activate the terminal plugin.
  */
-function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, layout: ILayoutRestorer): void {
+function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, restorer: IInstanceRestorer): void {
   // Bail if there are no terminals available.
   if (!services.terminals.isAvailable()) {
     console.log('Disabling terminals plugin because they are not available on the server');
@@ -95,7 +95,7 @@ function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: 
   };
 
   // Handle state restoration.
-  layout.restore(tracker, {
+  restorer.restore(tracker, {
     command: newTerminalId,
     args: widget => ({ name: widget.session.name }),
     name: widget => widget.session && widget.session.name

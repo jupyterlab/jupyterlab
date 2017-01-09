@@ -34,8 +34,8 @@ import {
 } from '../iframe';
 
 import {
-  ILayoutRestorer
-} from '../layoutrestorer';
+  IInstanceRestorer
+} from '../instancerestorer';
 
 import {
   IMainMenu
@@ -106,9 +106,9 @@ const RESOURCES = [
  * The help handler extension.
  */
 const plugin: JupyterLabPlugin<void> = {
+  activate,
   id: 'jupyter.extensions.help-handler',
-  requires: [IMainMenu, ICommandPalette, ILayoutRestorer],
-  activate: activateHelpHandler,
+  requires: [IMainMenu, ICommandPalette, IInstanceRestorer],
   autoStart: true
 };
 
@@ -126,7 +126,7 @@ export default plugin;
  *
  * returns A promise that resolves when the extension is activated.
  */
-function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, layout: ILayoutRestorer): void {
+function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, restorer: IInstanceRestorer): void {
   let iframe: IFrame = null;
   const category = 'Help';
   const namespace = 'help-doc';
@@ -135,7 +135,7 @@ function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICom
   const tracker = new InstanceTracker<IFrame>({ namespace });
 
   // Handle state restoration.
-  layout.restore(tracker, {
+  restorer.restore(tracker, {
     command,
     args: widget => ({ isHidden: widget.isHidden, url: widget.url }),
     name: widget => namespace
@@ -151,7 +151,7 @@ function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICom
     iframe.id = `${namespace}`;
     iframe.url = url;
     // Add the iframe to the instance tracker.
-    tracker.add(iframe, { area: 'right' });
+    tracker.add(iframe);
 
     // If the help widget visibility changes, update the tracker.
     installMessageHook(iframe, (iframe: IFrame, msg: Message) => {
@@ -262,6 +262,8 @@ function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICom
   });
 
   RESOURCES.forEach(args => { palette.addItem({ args, command, category }); });
+
+  palette.addItem({ command: 'statedb:clear', category });
 
   let openClassicNotebookId = 'classic-notebook:open';
   app.commands.addCommand(openClassicNotebookId, {

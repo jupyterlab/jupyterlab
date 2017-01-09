@@ -46,8 +46,8 @@ import {
 } from '../inspector';
 
 import {
-  ILayoutRestorer
-} from '../layoutrestorer';
+  IInstanceRestorer
+} from '../instancerestorer';
 
 import {
   IMainMenu
@@ -81,7 +81,7 @@ const trackerPlugin: JupyterLabPlugin<IConsoleTracker> = {
     ICommandPalette,
     IPathTracker,
     ConsolePanel.IRenderer,
-    ILayoutRestorer
+    IInstanceRestorer
   ],
   activate: activateConsole,
   autoStart: true
@@ -140,7 +140,7 @@ interface ICreateConsoleArgs extends JSONObject {
 /**
  * Activate the console extension.
  */
-function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, renderer: ConsolePanel.IRenderer, layout: ILayoutRestorer): IConsoleTracker {
+function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, renderer: ConsolePanel.IRenderer, restorer: IInstanceRestorer): IConsoleTracker {
   let manager = services.sessions;
   let { commands, keymap } = app;
   let category = 'Console';
@@ -152,7 +152,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   const tracker = new InstanceTracker<ConsolePanel>({ namespace: 'console' });
 
   // Handle state restoration.
-  layout.restore(tracker, {
+  restorer.restore(tracker, {
     command: 'console:create',
     args: panel => ({ id: panel.content.session.id }),
     name: panel => panel.content.session && panel.content.session.id,

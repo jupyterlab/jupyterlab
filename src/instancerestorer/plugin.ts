@@ -12,33 +12,29 @@ import {
 } from '../statedb';
 
 import {
-  ILayoutRestorer, LayoutRestorer
-} from './layoutrestorer';
+  IInstanceRestorer, InstanceRestorer
+} from './instancerestorer';
 
 
 /**
- * The default layout restorer provider.
+ * The default instance restorer provider.
  */
-const plugin: JupyterLabPlugin<ILayoutRestorer> = {
-  id: 'jupyter.services.layout-restorer',
+const plugin: JupyterLabPlugin<IInstanceRestorer> = {
+  id: 'jupyter.services.instance-restorer',
   requires: [IStateDB],
   activate: (app: JupyterLab, state: IStateDB) => {
     const first = app.started;
     const registry = app.commands;
     const shell = app.shell;
-    let layout = new LayoutRestorer({ first, registry, shell, state });
+    let restorer = new InstanceRestorer({ first, registry, state });
+    // Use the restorer as the application shell's layout database.
+    shell.setLayoutDB(restorer);
     // Activate widgets that have been restored if necessary.
-    layout.activated.connect((sender, id) => { shell.activateMain(id); });
-    // After restoration is complete, listen to the shell for updates.
-    layout.restored.then(() => {
-      shell.currentChanged.connect((sender, args) => {
-        layout.save({ currentWidget: args.newValue });
-      });
-    });
-    return layout;
+    restorer.activated.connect((sender, id) => { shell.activateMain(id); });
+    return restorer;
   },
   autoStart: true,
-  provides: ILayoutRestorer
+  provides: IInstanceRestorer
 };
 
 

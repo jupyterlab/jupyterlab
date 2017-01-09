@@ -29,7 +29,7 @@ var mods = [
   require('jupyterlab/lib/inspector/plugin'),
   require('jupyterlab/lib/landing/plugin'),
   require('jupyterlab/lib/launcher/plugin'),
-  require('jupyterlab/lib/layoutrestorer/plugin'),
+  require('jupyterlab/lib/instancerestorer/plugin'),
   require('jupyterlab/lib/mainmenu/plugin'),
   require('jupyterlab/lib/markdownwidget/plugin'),
   require('jupyterlab/lib/notebook/plugin'),
@@ -43,7 +43,7 @@ var mods = [
 
 
 window.onload = function() {
-  var lab = new JupyterLab();
+  var lab = new JupyterLab({ namespace: 'lab-example' });
   lab.registerPluginModules(mods);
   lab.start();
 }

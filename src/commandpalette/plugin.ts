@@ -16,6 +16,10 @@ import {
 } from '../application';
 
 import {
+  IInstanceRestorer
+} from '../instancerestorer';
+
+import {
   ICommandPalette, IPaletteItem
 } from './';
 
@@ -69,9 +73,10 @@ class Palette implements ICommandPalette {
  * The default commmand palette extension.
  */
 const plugin: JupyterLabPlugin<ICommandPalette> = {
+  activate,
   id: 'jupyter.services.commandpalette',
   provides: ICommandPalette,
-  activate: activateCommandPalette,
+  requires: [IInstanceRestorer],
   autoStart: true
 };
 
@@ -85,9 +90,14 @@ export default plugin;
 /**
  * Activate the command palette.
  */
-function activateCommandPalette(app: JupyterLab): ICommandPalette {
+function activate(app: JupyterLab, restorer: IInstanceRestorer): ICommandPalette {
   const { commands, keymap } = app;
   const palette = new CommandPalette({ commands, keymap });
+
+  // Let the application restorer track the command palette for restoration of
+  // application state (e.g. setting the command palette as the current side bar
+  // widget).
+  restorer.add(palette, 'command-palette');
 
   palette.id = 'command-palette';
   palette.title.label = 'Commands';

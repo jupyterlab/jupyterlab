@@ -10,6 +10,10 @@ import {
 } from 'phosphor/lib/ui/application';
 
 import {
+  IInstanceRestorer
+} from '../instancerestorer';
+
+import {
   ModuleLoader
 } from './loader';
 
@@ -39,17 +43,11 @@ class JupyterLab extends Application<ApplicationShell> {
   constructor(options: JupyterLab.IOptions = {}) {
     super();
     this._info = {
-      version:  options.version || 'unknown',
-      gitDescription: options.gitDescription || 'unknown'
+      gitDescription: options.gitDescription || 'unknown',
+      namespace: options.namespace || 'jupyterlab',
+      version:  options.version || 'unknown'
     };
     this._loader = options.loader || null;
-  }
-
-  /**
-   * A promise that resolves when the JupyterLab application is started.
-   */
-  get started(): Promise<void> {
-    return this._startedDelegate.promise;
   }
 
   /**
@@ -67,13 +65,30 @@ class JupyterLab extends Application<ApplicationShell> {
   }
 
   /**
+   * Promise that resolves when state is restored, returning layout description.
+   *
+   * #### Notes
+   * This is just a reference to `shell.restored`.
+   */
+  get restored(): Promise<IInstanceRestorer.ILayout> {
+    return this.shell.restored;
+  }
+
+  /**
+   * A promise that resolves when the JupyterLab application is started.
+   */
+  get started(): Promise<void> {
+    return this._startedDelegate.promise;
+  }
+
+  /**
    * Start the JupyterLab application.
    */
   start(options: Application.IStartOptions = {}): Promise<void> {
-    if (this._startedFlag) {
+    if (this._isStarted) {
       return Promise.resolve(void 0);
     }
-    this._startedFlag = true;
+    this._isStarted = true;
     return super.start(options).then(() => {
       this._startedDelegate.resolve(void 0);
     });
@@ -89,9 +104,7 @@ class JupyterLab extends Application<ApplicationShell> {
     if (!Array.isArray(data)) {
       data = [data];
     }
-    for (let item of data) {
-      this.registerPlugin(item);
-    }
+    data.forEach(item => { this.registerPlugin(item); });
   }
 
   /**
@@ -100,9 +113,7 @@ class JupyterLab extends Application<ApplicationShell> {
    * @param mods - The plugin modules to register.
    */
   registerPluginModules(mods: JupyterLab.IPluginModule[]): void {
-    for (let mod of mods) {
-      this.registerPluginModule(mod);
-    }
+    mods.forEach(mod => { this.registerPluginModule(mod); });
   }
 
   /**
@@ -112,10 +123,10 @@ class JupyterLab extends Application<ApplicationShell> {
     return new ApplicationShell();
   }
 
-  private _startedDelegate = new utils.PromiseDelegate<void>();
-  private _startedFlag = false;
   private _info: JupyterLab.IInfo;
+  private _isStarted = false;
   private _loader: ModuleLoader | null;
+  private _startedDelegate = new utils.PromiseDelegate<void>();
 }
 
 
@@ -130,11 +141,6 @@ namespace JupyterLab {
   export
   interface IOptions {
     /**
-     * The version of the JupyterLab application.
-     */
-    version?: string;
-
-    /**
      * The git description of the JupyterLab application.
      */
     gitDescription?: string;
@@ -143,6 +149,22 @@ namespace JupyterLab {
      * The module loader used by the application.
      */
     loader?: ModuleLoader;
+
+    /**
+     * The namespace/prefix plugins may use to denote their origin.
+     *
+     * #### Notes
+     * This field may be used by persistent storage mechanisms such as state
+     * databases, cookies, session storage, etc.
+     *
+     * If unspecified, the default value is `'jupyterlab'`.
+     */
+    namespace?: string;
+
+    /**
+     * The version of the JupyterLab application.
+     */
+    version?: string;
   }
 
   /**
@@ -151,14 +173,19 @@ namespace JupyterLab {
   export
   interface IInfo {
     /**
-     * The version of the JupyterLab application.
-     */
-    readonly version: string;
-
-    /**
      * The git description of the JupyterLab application.
      */
     readonly gitDescription: string;
+
+    /**
+     * The namespace/prefix plugins may use to denote their origin.
+     */
+    readonly namespace: string;
+
+    /**
+     * The version of the JupyterLab application.
+     */
+    readonly version: string;
   }
 
   /**

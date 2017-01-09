@@ -14,6 +14,10 @@ import {
 } from '../commandpalette';
 
 import {
+  IInstanceRestorer
+} from '../instancerestorer';
+
+import {
   IPathTracker
 } from '../filebrowser';
 
@@ -30,10 +34,10 @@ import {
  * A service providing an interface to the the launcher.
  */
 const plugin: JupyterLabPlugin<ILauncher> = {
+  activate,
   id: 'jupyter.services.launcher',
-  requires: [IServiceManager, IPathTracker, ICommandPalette, ICommandLinker],
+  requires: [IServiceManager, IPathTracker, ICommandPalette, ICommandLinker, IInstanceRestorer],
   provides: ILauncher,
-  activate: activateLauncher,
   autoStart: true
 };
 
@@ -47,7 +51,7 @@ export default plugin;
 /**
  * Activate the launcher.
  */
-function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracker: IPathTracker, palette: ICommandPalette, linker: ICommandLinker): ILauncher {
+function activate(app: JupyterLab, services: IServiceManager, pathTracker: IPathTracker, palette: ICommandPalette, linker: ICommandLinker, restorer: IInstanceRestorer): ILauncher {
   let model = new LauncherModel();
 
   // Set launcher path and track the path as it changes.
@@ -59,6 +63,11 @@ function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracke
   widget.model = model;
   widget.id = 'launcher';
   widget.title.label = 'Launcher';
+
+  // Let the application restorer track the launcher for restoration of
+  // application state (e.g. setting the launcher as the current side bar
+  // widget).
+  restorer.add(widget, 'launcher');
 
   // Hardcoded defaults.
   let defaults: ILauncherItem[] = [

@@ -18,8 +18,8 @@ import {
 } from '../docregistry';
 
 import {
-  ILayoutRestorer
-} from '../layoutrestorer';
+  IInstanceRestorer
+} from '../instancerestorer';
 
 import {
   IEditorTracker, EditorWidget, EditorWidgetFactory
@@ -60,10 +60,10 @@ const cmdIds = {
  * The editor handler extension.
  */
 const plugin: JupyterLabPlugin<IEditorTracker> = {
+  activate,
   id: 'jupyter.services.editor-handler',
-  requires: [IDocumentRegistry, ILayoutRestorer, IEditorServices],
+  requires: [IDocumentRegistry, IInstanceRestorer, IEditorServices],
   provides: IEditorTracker,
-  activate: activateEditorHandler,
   autoStart: true
 };
 
@@ -77,7 +77,7 @@ export default plugin;
 /**
  * Sets up the editor widget
  */
-function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, layout: ILayoutRestorer, editorServices: IEditorServices): IEditorTracker {
+function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInstanceRestorer, editorServices: IEditorServices): IEditorTracker {
   const factory = new EditorWidgetFactory({
     editorServices,
     factoryOptions: {
@@ -89,7 +89,7 @@ function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, lay
   const tracker = new InstanceTracker<EditorWidget>({ namespace: 'editor' });
 
   // Handle state restoration.
-  layout.restore(tracker, {
+  restorer.restore(tracker, {
     command: 'file-operations:open',
     args: widget => ({ path: widget.context.path, factory: FACTORY }),
     name: widget => widget.context.path

@@ -35,8 +35,8 @@ import {
 } from '../inspector';
 
 import {
-  ILayoutRestorer
-} from '../layoutrestorer';
+  IInstanceRestorer
+} from '../instancerestorer';
 
 import {
   IRenderMime
@@ -132,7 +132,7 @@ const trackerPlugin: JupyterLabPlugin<INotebookTracker> = {
     ICommandPalette,
     IInspector,
     NotebookPanel.IRenderer,
-    ILayoutRestorer
+    IInstanceRestorer
   ],
   activate: activateNotebookHandler,
   autoStart: true
@@ -165,7 +165,7 @@ export default plugins;
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector, renderer: NotebookPanel.IRenderer, layout: ILayoutRestorer): INotebookTracker {
+function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector, renderer: NotebookPanel.IRenderer, restorer: IInstanceRestorer): INotebookTracker {
 
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
@@ -182,7 +182,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
   const tracker = new NotebookTracker({ namespace: 'notebook' });
 
   // Handle state restoration.
-  layout.restore(tracker, {
+  restorer.restore(tracker, {
     command: 'file-operations:open',
     args: panel => ({ path: panel.context.path, factory: FACTORY }),
     name: panel => panel.context.path,

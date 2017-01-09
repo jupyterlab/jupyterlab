@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  utils
+} from '@jupyterlab/services';
+
+import {
   each, toArray
 } from 'phosphor/lib/algorithm/iteration';
 
@@ -52,6 +56,10 @@ import {
 import {
   Widget
 } from 'phosphor/lib/ui/widget';
+
+import {
+  IInstanceRestorer
+} from '../instancerestorer';
 
 
 /**
@@ -163,6 +171,13 @@ class ApplicationShell extends Widget {
   }
 
   /**
+   * Promise that resolves when state is restored, returning layout description.
+   */
+  get restored(): Promise<IInstanceRestorer.ILayout> {
+    return this._restored.promise;
+  }
+
+  /**
    * True if main area is empty.
    */
   get mainAreaIsEmpty(): boolean {
@@ -203,6 +218,7 @@ class ApplicationShell extends Widget {
     }
     // Temporary: widgets are added to the panel in order of insertion.
     this._topPanel.addWidget(widget);
+    this._save();
   }
 
   /**
@@ -218,6 +234,7 @@ class ApplicationShell extends Widget {
     }
     let rank = 'rank' in options ? options.rank : 100;
     this._leftHandler.addWidget(widget, rank);
+    this._save();
   }
 
   /**
@@ -233,6 +250,7 @@ class ApplicationShell extends Widget {
     }
     let rank = 'rank' in options ? options.rank : 100;
     this._rightHandler.addWidget(widget, rank);
+    this._save();
   }
 
   /**
@@ -247,6 +265,7 @@ class ApplicationShell extends Widget {
       return;
     }
     this._dockPanel.addWidget(widget, { mode: 'tab-after' });
+    this._save();
   }
 
   /**
@@ -279,6 +298,7 @@ class ApplicationShell extends Widget {
    */
   collapseLeft(): void {
     this._leftHandler.collapse();
+    this._save();
   }
 
   /**
@@ -286,6 +306,7 @@ class ApplicationShell extends Widget {
    */
   collapseRight(): void {
     this._rightHandler.collapse();
+    this._save();
   }
 
   /**
@@ -293,14 +314,67 @@ class ApplicationShell extends Widget {
    */
   closeAll(): void {
     each(toArray(this._dockPanel.widgets()), widget => { widget.close(); });
+    this._save();
   }
 
-  private _topPanel: Panel;
-  private _hboxPanel: BoxPanel;
+  /**
+   * Set the layout data store for the application shell.
+   */
+  setLayoutDB(database: IInstanceRestorer.ILayoutDB): void {
+    if (this._database) {
+      throw new Error('cannot reset layout database');
+    }
+    this._database = database;
+    this._database.fetch().then(saved => {
+      if (!saved) {
+        return;
+      }
+
+      // Rehydrate the application.
+      let { currentWidget, leftArea, rightArea } = saved;
+      if (leftArea) {
+        this._leftHandler.rehydrate(leftArea);
+      }
+      if (rightArea) {
+        this._rightHandler.rehydrate(rightArea);
+      }
+      if (currentWidget) {
+        this.activateMain(currentWidget.id);
+      }
+      this._isRestored = true;
+      return this._save().then(() => { this._restored.resolve(saved); });
+    });
+    // Catch current changed events on the side handlers.
+    this._dockPanel.currentChanged.connect(() => { this._save(); });
+    this._leftHandler.sideBar.currentChanged.connect(() => { this._save(); });
+    this._rightHandler.sideBar.currentChanged.connect(() => { this._save(); });
+  }
+
+  /**
+   * Save the dehydrated state of the application shell.
+   */
+  private _save(): Promise<void> {
+    if (!this._database || !this._isRestored) {
+      return;
+    }
+
+    let data: IInstanceRestorer.ILayout = {
+      currentWidget: this._dockPanel.currentWidget,
+      leftArea: this._leftHandler.dehydrate(),
+      rightArea: this._rightHandler.dehydrate()
+    };
+    return this._database.save(data);
+  }
+
+  private _database: IInstanceRestorer.ILayoutDB = null;
   private _dockPanel: DockPanel;
+  private _isRestored = false;
+  private _hboxPanel: BoxPanel;
   private _hsplitPanel: SplitPanel;
   private _leftHandler: Private.SideBarHandler;
+  private _restored = new utils.PromiseDelegate<IInstanceRestorer.ILayout>();
   private _rightHandler: Private.SideBarHandler;
+  private _topPanel: Panel;
 }
 
 
@@ -333,10 +407,10 @@ namespace ApplicationShell {
 
 
 namespace Private {
-  export
   /**
    * An object which holds a widget and its sort rank.
    */
+  export
   interface IRankItem {
     /**
      * The widget for the item.
@@ -427,6 +501,27 @@ namespace Private {
       this._stackedPanel.insertWidget(index, widget);
       this._sideBar.insertTab(index, widget.title);
       this._refreshVisibility();
+    }
+
+    /**
+     * Dehydrate the side bar data.
+     */
+    dehydrate(): IInstanceRestorer.ISideArea {
+      let collapsed = this._sideBar.currentTitle === null;
+      let widgets = toArray(this._stackedPanel.widgets);
+      let currentWidget = widgets[this._sideBar.currentIndex];
+      return { collapsed, currentWidget, widgets };
+    }
+
+    /**
+     * Rehydrate the side bar.
+     */
+    rehydrate(data: IInstanceRestorer.ISideArea): void {
+      if (data.currentWidget) {
+        this.activate(data.currentWidget.id);
+      } else if (data.collapsed) {
+        this.collapse();
+      }
     }
 
     /**
