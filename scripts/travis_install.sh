@@ -16,3 +16,8 @@ conda install -c conda-forge notebook
 
 # create jupyter base dir (needed for config retreival)
 mkdir ~/.jupyter
+
+
+# Install and enable the server extension
+pip install -e -v .
+jupyter serverextension enable --py jupyterlab

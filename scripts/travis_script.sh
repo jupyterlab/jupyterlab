@@ -9,10 +9,6 @@ sh -e /etc/init.d/xvfb start || true
 
 export PATH="$HOME/miniconda/bin:$PATH"
 
-# Install and enable the server extension
-pip install -v .
-jupyter serverextension enable --py jupyterlab
-
 npm run clean
 npm run build
 
