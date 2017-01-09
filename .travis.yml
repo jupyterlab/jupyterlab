@@ -12,8 +12,8 @@ cache:
     - examples/terminal/node_modules
 env:
   matrix:
-    - GROUP=base
-    - GROUP=misc
+    - GROUP=tests
+    - GROUP=coverage_and_docs
     - GROUP=examples
   global:
   - GH_REF: github.com/jupyterlab/jupyterlab.git
