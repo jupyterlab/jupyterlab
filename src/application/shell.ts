@@ -273,7 +273,6 @@ class ApplicationShell extends Widget {
    */
   activateLeft(id: string): void {
     this._leftHandler.activate(id);
-    this._save();
   }
 
   /**
@@ -281,7 +280,6 @@ class ApplicationShell extends Widget {
    */
   activateRight(id: string): void {
     this._rightHandler.activate(id);
-    this._save();
   }
 
   /**
@@ -293,7 +291,6 @@ class ApplicationShell extends Widget {
     if (widget) {
       dock.activateWidget(widget);
     }
-    this._save();
   }
 
   /**
@@ -335,19 +332,20 @@ class ApplicationShell extends Widget {
 
       // Rehydrate the application.
       let { currentWidget, leftArea, rightArea } = saved;
-      if (currentWidget) {
-        this.activateMain(currentWidget.id);
-      }
       if (leftArea) {
         this._leftHandler.rehydrate(leftArea);
       }
       if (rightArea) {
         this._rightHandler.rehydrate(rightArea);
       }
+      if (currentWidget) {
+        this.activateMain(currentWidget.id);
+      }
       this._isRestored = true;
       return this._save().then(() => { this._restored.resolve(saved); });
     });
     // Catch current changed events on the side handlers.
+    this._dockPanel.currentChanged.connect(() => { this._save(); });
     this._leftHandler.sideBar.currentChanged.connect(() => { this._save(); });
     this._rightHandler.sideBar.currentChanged.connect(() => { this._save(); });
   }
@@ -359,6 +357,7 @@ class ApplicationShell extends Widget {
     if (!this._database || !this._isRestored) {
       return;
     }
+
     let data: IInstanceRestorer.ILayout = {
       currentWidget: this._dockPanel.currentWidget,
       leftArea: this._leftHandler.dehydrate(),
