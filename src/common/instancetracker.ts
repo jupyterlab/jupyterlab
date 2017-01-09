@@ -304,7 +304,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
         let args = (item.value as any).data;
         // Execute the command and if it fails, delete the state restore data.
         return registry.execute(command, args)
-          .catch(() => { state.remove(`${namespace}:${args.id}`); });
+          .catch(() => { state.remove(item.id); });
       }));
     });
   }
