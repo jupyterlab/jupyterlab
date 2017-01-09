@@ -11,15 +11,22 @@ export PATH="$HOME/miniconda/bin:$PATH"
 
 if [[ $GROUP == base ]]; then
 
+    # Test against a clean npm build
     npm run clean
     npm run build:all
-
     npm test
 
     # Run the python tests
     pushd jupyterlab
     nosetests
     popd
+
+fi
+
+
+if [[ $GROUP == misc ]]; then
+    # Run the coverage check.
+    npm run test:coverage
 
     # Make sure we have CSS that can be converted with postcss
     npm install -g postcss-cli
@@ -46,11 +53,6 @@ if [[ $GROUP == base ]]; then
     make html
     source deactivate
     popd
-fi
-
-
-if [[ $GROUP == coverage ]]; then
-    npm run test:coverage
 fi
 
 

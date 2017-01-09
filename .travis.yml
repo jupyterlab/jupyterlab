@@ -13,7 +13,7 @@ cache:
 env:
   matrix:
     - GROUP=base
-    - GROUP=coverage
+    - GROUP=misc
     - GROUP=examples
   global:
   - GH_REF: github.com/jupyterlab/jupyterlab.git
