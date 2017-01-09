@@ -47,6 +47,8 @@ def run_task(func, args=(), kwds={}):
 def run_karma(base_url, token, terminalsAvailable):
     config = dict(baseUrl=base_url, token=token,
                   terminalsAvailable=terminalsAvailable)
+    print('Notebook config:')
+    print(json.dumps(config))
     with open(os.path.join(HERE, 'build', 'injector.js'), 'w') as fid:
         fid.write("""
         var node = document.createElement('script');
@@ -57,6 +59,7 @@ def run_karma(base_url, token, terminalsAvailable):
         """ % json.dumps(config))
 
     cmd = ['karma', 'start'] + ARGS
+    print('Running karma as: %s' % ' '.join(cmd))
     shell = os.name == 'nt'
     return subprocess.check_call(cmd, shell=shell)
 
