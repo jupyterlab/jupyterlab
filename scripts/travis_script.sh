@@ -21,25 +21,6 @@ if [[ $GROUP == unit ]]; then
     nosetests
     popd
 
-fi
-
-
-if [[ $GROUP == coverage ]]; then
-    npm run test:coverage
-fi
-
-
-if [[ $GROUP == examples ]]; then
-
-    npm run build:examples
-    npm run docs
-    cp jupyter-plugins-demo.gif docs
-
-fi
-
-
-if [[ $GROUP == misc ]]; then
-
     # Make sure we have CSS that can be converted with postcss
     npm install -g postcss-cli
     postcss jupyterlab/build/*.css > /dev/null
@@ -52,6 +33,23 @@ if [[ $GROUP == misc ]]; then
     sleep 5
     kill $TASK_PID
     wait $TASK_PID
+fi
+
+
+if [[ $GROUP == coverage ]]; then
+    npm run test:coverage
+fi
+
+
+if [[ $GROUP == examples ]]; then
+    npm run build:examples
+fi
+
+
+if [[ $GROUP == docs ]]; then
+    # Build the docs
+    npm run docs
+    cp jupyter-plugins-demo.gif docs
 
     # Verify docs build
     pushd tutorial
