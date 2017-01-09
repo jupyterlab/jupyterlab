@@ -672,10 +672,5 @@ namespace CodeEditor {
      * The default selection style for the editor.
      */
     selectionStyle?: CodeEditor.ISelectionStyle;
-
-    /**
-     * Extra options.
-     */
-    extra?: { [key: string]: any };
   }
 }

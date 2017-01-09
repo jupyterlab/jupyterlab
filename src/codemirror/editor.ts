@@ -83,14 +83,6 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     let editor = this._editor = CodeMirror(options.host, config);
     let doc = editor.getDoc();
 
-    // Handle extra config.
-    const extra = options.extra;
-    if (extra) {
-      for (const option in extra) {
-        editor.setOption(option, extra[option]);
-      }
-    }
-
     // Handle initial values for text, mimetype, and selections.
     doc.setValue(model.value.text);
     this._onMimeTypeChanged();
