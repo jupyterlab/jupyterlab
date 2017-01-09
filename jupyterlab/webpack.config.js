@@ -12,7 +12,12 @@ var webpack = require('webpack');
 
 console.log('Generating bundles...');
 
-var notice = childProcess.execSync('git describe', { encoding: 'utf8' });
+try {
+  var notice = childProcess.execSync('git describe', { encoding: 'utf8' });
+} catch {
+  var notice = 'unknown';
+}
+
 
 buildExtension({
   name: 'main',
