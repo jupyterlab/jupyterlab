@@ -14,7 +14,7 @@ console.log('Generating bundles...');
 
 try {
   var notice = childProcess.execSync('git describe', { encoding: 'utf8' });
-} catch {
+} catch (e) {
   var notice = 'unknown';
 }
 
