@@ -3,7 +3,7 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-if [[ $TRAVIS_PULL_REQUEST == false && $TRAVIS_BRANCH == "master" && $GROUP == "doc" ]]
+if [[ $TRAVIS_PULL_REQUEST == false && $TRAVIS_BRANCH == "master" && $GROUP == "base" ]]
 then
     echo "-- pushing docs --"
 
@@ -18,5 +18,5 @@ then
     git push --force --quiet "https://${GHTOKEN}@${GH_REF}" master:gh-pages > /dev/null 2>&1
     ) && echo "-- pushed docs --"
 else
-    echo "-- will only push docs from master branch docs build --"
+    echo "-- will only push docs from master branch base build --"
 fi

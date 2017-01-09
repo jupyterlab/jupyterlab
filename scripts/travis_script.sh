@@ -33,21 +33,7 @@ if [[ $GROUP == base ]]; then
     sleep 5
     kill $TASK_PID
     wait $TASK_PID
-fi
 
-
-if [[ $GROUP == coverage ]]; then
-    npm run test:coverage
-fi
-
-
-if [[ $GROUP == examples ]]; then
-    # Make sure the examples build
-    npm run build:examples
-fi
-
-
-if [[ $GROUP == docs ]]; then
     # Build the docs
     npm run docs
     cp jupyter-plugins-demo.gif docs
@@ -60,5 +46,15 @@ if [[ $GROUP == docs ]]; then
     make html
     source deactivate
     popd
+fi
 
+
+if [[ $GROUP == coverage ]]; then
+    npm run test:coverage
+fi
+
+
+if [[ $GROUP == examples ]]; then
+    # Make sure the examples build
+    npm run build:examples
 fi
