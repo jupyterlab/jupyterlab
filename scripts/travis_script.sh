@@ -17,7 +17,7 @@ npm run clean
 npm run build
 
 if [[ $GROUP == unit ]]; then
-    npm run test:chrome
+    npm test
 
     # Run the python tests
     npm run build:serverextension
