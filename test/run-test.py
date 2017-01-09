@@ -46,7 +46,7 @@ def run_task(func, args=(), kwds={}):
 
 def run_karma(base_url, token, terminalsAvailable):
     config = dict(baseUrl=base_url, token=token,
-                  terminalsAvailable=terminalsAvailable)
+                  terminalsAvailable=str(terminalsAvailable))
 
     print('\n\nNotebook config:')
     print(json.dumps(config))
