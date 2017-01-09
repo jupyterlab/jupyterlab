@@ -29,24 +29,20 @@ if [[ $GROUP == coverage ]]; then
 fi
 
 
-if [[ $GROUP == misc ]]; then
+if [[ $GROUP == examples ]]; then
 
     npm run build:examples
     npm run docs
     cp jupyter-plugins-demo.gif docs
 
+fi
+
+
+if [[ $GROUP == misc ]]; then
+
     # Make sure we have CSS that can be converted with postcss
     npm install -g postcss-cli
     postcss jupyterlab/build/*.css > /dev/null
-
-    # Verify docs build
-    pushd tutorial
-    conda env create -n test_docs -f environment.yml
-    source activate test_docs
-    make linkcheck
-    make html
-    source deactivate
-    popd
 
     # Make sure we can start and kill the lab server
     jupyter lab --no-browser &
@@ -56,5 +52,14 @@ if [[ $GROUP == misc ]]; then
     sleep 5
     kill $TASK_PID
     wait $TASK_PID
+
+    # Verify docs build
+    pushd tutorial
+    conda env create -n test_docs -f environment.yml
+    source activate test_docs
+    make linkcheck
+    make html
+    source deactivate
+    popd
 
 fi
