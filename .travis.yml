@@ -14,7 +14,7 @@ env:
   matrix:
     - GROUP=unit
     - GROUP=coverage
-    - GROUP=examples
+    - GROUP=misc
     - GROUP=docs
   global:
   - GH_REF: github.com/jupyterlab/jupyterlab.git
