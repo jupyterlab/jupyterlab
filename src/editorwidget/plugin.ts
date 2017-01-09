@@ -63,7 +63,7 @@ const plugin: JupyterLabPlugin<IEditorTracker> = {
   id: 'jupyter.services.editor-handler',
   requires: [IDocumentRegistry, IInstanceRestorer, IEditorServices],
   provides: IEditorTracker,
-  activate: activateEditorHandler,
+  activate: activate,
   autoStart: true
 };
 
@@ -77,7 +77,7 @@ export default plugin;
 /**
  * Sets up the editor widget
  */
-function activateEditorHandler(app: JupyterLab, registry: IDocumentRegistry, restorer: IInstanceRestorer, editorServices: IEditorServices): IEditorTracker {
+function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInstanceRestorer, editorServices: IEditorServices): IEditorTracker {
   const factory = new EditorWidgetFactory({
     editorServices,
     factoryOptions: {

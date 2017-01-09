@@ -154,7 +154,7 @@ namespace JupyterLab {
      * The namespace/prefix plugins may use to denote their origin.
      *
      * #### Notes
-     * This field may be used by persisten storage mechanisms such as state
+     * This field may be used by persistent storage mechanisms such as state
      * databases, cookies, session storage, etc.
      *
      * If unspecified, the default value is `'jupyterlab'`.

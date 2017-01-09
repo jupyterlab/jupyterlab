@@ -40,7 +40,7 @@ const LANDING_CLASS = 'jp-Landing';
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.landing',
   requires: [IPathTracker, ICommandPalette, IServiceManager, IInstanceRestorer],
-  activate: activateLanding,
+  activate: activate,
   autoStart: true
 };
 
@@ -54,7 +54,7 @@ export default plugin;
 /**
  * Activate the landing plugin.
  */
-function activateLanding(app: JupyterLab, pathTracker: IPathTracker, palette: ICommandPalette, services: IServiceManager, restorer: IInstanceRestorer): void {
+function activate(app: JupyterLab, pathTracker: IPathTracker, palette: ICommandPalette, services: IServiceManager, restorer: IInstanceRestorer): void {
   const category = 'Help';
   const command = 'jupyterlab-landing:show';
   const model = new LandingModel(services.terminals.isAvailable());

@@ -37,7 +37,7 @@ const plugin: JupyterLabPlugin<ILauncher> = {
   id: 'jupyter.services.launcher',
   requires: [IServiceManager, IPathTracker, ICommandPalette, ICommandLinker, IInstanceRestorer],
   provides: ILauncher,
-  activate: activateLauncher,
+  activate: activate,
   autoStart: true
 };
 
@@ -51,7 +51,7 @@ export default plugin;
 /**
  * Activate the launcher.
  */
-function activateLauncher(app: JupyterLab, services: IServiceManager, pathTracker: IPathTracker, palette: ICommandPalette, linker: ICommandLinker, restorer: IInstanceRestorer): ILauncher {
+function activate(app: JupyterLab, services: IServiceManager, pathTracker: IPathTracker, palette: ICommandPalette, linker: ICommandLinker, restorer: IInstanceRestorer): ILauncher {
   let model = new LauncherModel();
 
   // Set launcher path and track the path as it changes.

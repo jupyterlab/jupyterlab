@@ -32,7 +32,7 @@ import {
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.faq',
   requires: [ICommandPalette, ICommandLinker, IInstanceRestorer],
-  activate: activateFAQ,
+  activate: activate,
   autoStart: true
 };
 
@@ -46,7 +46,7 @@ export default plugin;
 /**
  * Activate the FAQ plugin.
  */
-function activateFAQ(app: JupyterLab, palette: ICommandPalette, linker: ICommandLinker, restorer: IInstanceRestorer): void {
+function activate(app: JupyterLab, palette: ICommandPalette, linker: ICommandLinker, restorer: IInstanceRestorer): void {
   const category = 'Help';
   const command = 'faq-jupyterlab:show';
   const model = new FaqModel();

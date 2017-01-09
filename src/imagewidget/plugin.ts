@@ -43,7 +43,7 @@ const FACTORY = 'Image';
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.image-handler',
   requires: [IDocumentRegistry, ICommandPalette, IInstanceRestorer],
-  activate: activateImageWidget,
+  activate: activate,
   autoStart: true
 };
 
@@ -57,7 +57,7 @@ export default plugin;
 /**
  * Activate the image widget extension.
  */
-function activateImageWidget(app: JupyterLab, registry: IDocumentRegistry, palette: ICommandPalette, restorer: IInstanceRestorer): void {
+function activate(app: JupyterLab, registry: IDocumentRegistry, palette: ICommandPalette, restorer: IInstanceRestorer): void {
   const namespace = 'image-widget';
   const factory = new ImageWidgetFactory({
     name: FACTORY,

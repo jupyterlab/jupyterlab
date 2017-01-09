@@ -57,7 +57,7 @@ const plugin: JupyterLabPlugin<void> = {
   requires: [
     IServiceManager, IMainMenu, ICommandPalette, IInstanceRestorer
   ],
-  activate: activateTerminal,
+  activate: activate,
   autoStart: true
 };
 
@@ -71,7 +71,7 @@ export default plugin;
 /**
  * Activate the terminal plugin.
  */
-function activateTerminal(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, restorer: IInstanceRestorer): void {
+function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, restorer: IInstanceRestorer): void {
   // Bail if there are no terminals available.
   if (!services.terminals.isAvailable()) {
     console.log('Disabling terminals plugin because they are not available on the server');

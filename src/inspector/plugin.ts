@@ -30,7 +30,7 @@ const plugin: JupyterLabPlugin<IInspector> = {
   id: 'jupyter.services.inspector',
   requires: [ICommandPalette, IInstanceRestorer],
   provides: IInspector,
-  activate: activateInspector
+  activate: activate
 };
 
 
@@ -96,7 +96,7 @@ class InspectorManager implements IInspector {
 /**
  * Activate the console extension.
  */
-function activateInspector(app: JupyterLab, palette: ICommandPalette, restorer: IInstanceRestorer): IInspector {
+function activate(app: JupyterLab, palette: ICommandPalette, restorer: IInstanceRestorer): IInspector {
   const category = 'Inspector';
   const command = 'inspector:open';
   const label = 'Open Inspector';

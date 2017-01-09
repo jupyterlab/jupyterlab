@@ -108,7 +108,7 @@ const RESOURCES = [
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.help-handler',
   requires: [IMainMenu, ICommandPalette, IInstanceRestorer],
-  activate: activateHelpHandler,
+  activate: activate,
   autoStart: true
 };
 
@@ -126,7 +126,7 @@ export default plugin;
  *
  * returns A promise that resolves when the extension is activated.
  */
-function activateHelpHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, restorer: IInstanceRestorer): void {
+function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, restorer: IInstanceRestorer): void {
   let iframe: IFrame = null;
   const category = 'Help';
   const namespace = 'help-doc';
