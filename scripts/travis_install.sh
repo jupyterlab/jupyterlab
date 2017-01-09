@@ -12,6 +12,7 @@ conda config --set always_yes yes --set changeps1 no
 conda update -q conda
 conda info -a
 conda install jupyter nose
+conda install -c conda-forge notebook
 
 # create jupyter base dir (needed for config retreival)
 mkdir ~/.jupyter
