@@ -9,7 +9,7 @@ sh -e /etc/init.d/xvfb start || true
 
 export PATH="$HOME/miniconda/bin:$PATH"
 
-if [[ $GROUP == unit ]]; then
+if [[ $GROUP == base ]]; then
 
     npm run clean
     npm run build:all
@@ -20,17 +20,6 @@ if [[ $GROUP == unit ]]; then
     pushd jupyterlab
     nosetests
     popd
-fi
-
-
-if [[ $GROUP == coverage ]]; then
-    npm run test:coverage
-fi
-
-
-if [[ $GROUP == misc ]]; then
-    # Make sure the examples build
-    npm run build:examples
 
     # Make sure we have CSS that can be converted with postcss
     npm install -g postcss-cli
@@ -44,6 +33,17 @@ if [[ $GROUP == misc ]]; then
     sleep 5
     kill $TASK_PID
     wait $TASK_PID
+fi
+
+
+if [[ $GROUP == coverage ]]; then
+    npm run test:coverage
+fi
+
+
+if [[ $GROUP == examples ]]; then
+    # Make sure the examples build
+    npm run build:examples
 fi
 
 
