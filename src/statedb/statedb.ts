@@ -97,7 +97,7 @@ class StateDB implements IStateDB {
    */
   fetchNamespace(namespace: string): Promise<IStateItem[]> {
     const prefix = `${this.namespace}:${namespace}:`;
-    const regex = new RegExp(`^${prefix}\:`);
+    const regex = new RegExp(`^${this.namespace}\:`);
     let items: IStateItem[] = [];
     for (let i = 0, len = window.localStorage.length; i < len; i++) {
       let key = window.localStorage.key(i);
