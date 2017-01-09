@@ -22,9 +22,9 @@ import {
  * The default running sessions extension.
  */
 const plugin: JupyterLabPlugin<void> = {
+  activate,
   id: 'jupyter.extensions.running-sessions',
   requires: [IServiceManager, IInstanceRestorer],
-  activate: activate,
   autoStart: true
 };
 

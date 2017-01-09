@@ -53,11 +53,11 @@ const TERMINAL_ICON_CLASS = 'jp-ImageTerminal';
  * The default terminal extension.
  */
 const plugin: JupyterLabPlugin<void> = {
+  activate,
   id: 'jupyter.extensions.terminal',
   requires: [
     IServiceManager, IMainMenu, ICommandPalette, IInstanceRestorer
   ],
-  activate: activate,
   autoStart: true
 };
 

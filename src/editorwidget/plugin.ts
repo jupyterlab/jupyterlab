@@ -60,10 +60,10 @@ const cmdIds = {
  * The editor handler extension.
  */
 const plugin: JupyterLabPlugin<IEditorTracker> = {
+  activate,
   id: 'jupyter.services.editor-handler',
   requires: [IDocumentRegistry, IInstanceRestorer, IEditorServices],
   provides: IEditorTracker,
-  activate: activate,
   autoStart: true
 };
 

@@ -73,9 +73,9 @@ class Palette implements ICommandPalette {
  * The default commmand palette extension.
  */
 const plugin: JupyterLabPlugin<ICommandPalette> = {
+  activate,
   id: 'jupyter.services.commandpalette',
   provides: ICommandPalette,
-  activate: activate,
   requires: [IInstanceRestorer],
   autoStart: true
 };

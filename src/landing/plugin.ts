@@ -38,9 +38,9 @@ const LANDING_CLASS = 'jp-Landing';
  * The landing page extension.
  */
 const plugin: JupyterLabPlugin<void> = {
+  activate,
   id: 'jupyter.extensions.landing',
   requires: [IPathTracker, ICommandPalette, IServiceManager, IInstanceRestorer],
-  activate: activate,
   autoStart: true
 };
 

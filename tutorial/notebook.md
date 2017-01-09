@@ -147,9 +147,9 @@ import {
  */
 export
 const widgetExtension: JupyterLabPlugin<void> = {
+  activate,
   id: 'jupyter.extensions.new-button',
-  requires: [IDocumentRegistry],
-  activate: activateExtension
+  requires: [IDocumentRegistry]
 };
 
 export
@@ -181,7 +181,7 @@ class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel
 /**
  * Activate the extension.
  */
-function activateExtension(lab: JupyterLab, registry: IDocumentRegistry) {
+function activate(lab: JupyterLab, registry: IDocumentRegistry) {
   registry.addWidgetExtension('Notebook', new ButtonExtension());
 }
 ```

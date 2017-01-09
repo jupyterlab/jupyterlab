@@ -106,9 +106,9 @@ const RESOURCES = [
  * The help handler extension.
  */
 const plugin: JupyterLabPlugin<void> = {
+  activate,
   id: 'jupyter.extensions.help-handler',
   requires: [IMainMenu, ICommandPalette, IInstanceRestorer],
-  activate: activate,
   autoStart: true
 };
 

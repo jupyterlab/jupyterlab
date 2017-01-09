@@ -34,10 +34,10 @@ import {
  * A service providing an interface to the the launcher.
  */
 const plugin: JupyterLabPlugin<ILauncher> = {
+  activate,
   id: 'jupyter.services.launcher',
   requires: [IServiceManager, IPathTracker, ICommandPalette, ICommandLinker, IInstanceRestorer],
   provides: ILauncher,
-  activate: activate,
   autoStart: true
 };
 

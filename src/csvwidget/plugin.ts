@@ -32,9 +32,9 @@ const FACTORY = 'Table';
  * The table file handler extension.
  */
 const plugin: JupyterLabPlugin<void> = {
+  activate,
   id: 'jupyter.extensions.csv-handler',
   requires: [IDocumentRegistry, IInstanceRestorer],
-  activate: activate,
   autoStart: true
 };
 

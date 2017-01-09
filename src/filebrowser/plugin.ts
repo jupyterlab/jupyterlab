@@ -54,6 +54,7 @@ import {
  * The default file browser provider.
  */
 const plugin: JupyterLabPlugin<IPathTracker> = {
+  activate,
   id: 'jupyter.services.file-browser',
   provides: IPathTracker,
   requires: [
@@ -65,7 +66,6 @@ const plugin: JupyterLabPlugin<IPathTracker> = {
     IInstanceRestorer,
     IStateDB
   ],
-  activate: activate,
   autoStart: true
 };
 

@@ -27,10 +27,10 @@ import {
  * A service providing an inspector panel.
  */
 const plugin: JupyterLabPlugin<IInspector> = {
+  activate,
   id: 'jupyter.services.inspector',
   requires: [ICommandPalette, IInstanceRestorer],
-  provides: IInspector,
-  activate: activate
+  provides: IInspector
 };
 
 

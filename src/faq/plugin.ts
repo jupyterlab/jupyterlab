@@ -30,9 +30,9 @@ import {
  * The FAQ page extension.
  */
 const plugin: JupyterLabPlugin<void> = {
+  activate,
   id: 'jupyter.extensions.faq',
   requires: [ICommandPalette, ICommandLinker, IInstanceRestorer],
-  activate: activate,
   autoStart: true
 };
 
