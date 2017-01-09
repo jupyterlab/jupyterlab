@@ -44,7 +44,7 @@ class StateDB implements IStateDB {
    */
   clear(): Promise<void> {
     const prefix = `${this.namespace}:`;
-    for (let i = 0, len = window.localStorage.length; i < len; i++) {
+    for (let i = window.localStorage.length - 1; i > -1; i--) {
       let key = window.localStorage.key(i);
       if (key.indexOf(prefix) === 0) {
         window.localStorage.removeItem(key);
