@@ -46,10 +46,6 @@ export
 function createCodeCellRenderer(): CodeCellWidget.Renderer {
   return new CodeCellWidget.Renderer({
     editorFactory: options => {
-      options.extra = {
-        matchBrackets: true,
-        autoCloseBrackets: true
-      };
       return editorServices.factoryService.newInlineEditor(options);
     }
   });
