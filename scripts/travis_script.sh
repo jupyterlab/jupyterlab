@@ -15,38 +15,51 @@ jupyter serverextension enable --py jupyterlab
 
 npm run clean
 npm run build
-npm test
-npm run test:coverage
+
+if [[ $GROUP == unit ]]; then
+    npm run test:chrome
+
+    # Run the python tests
+    npm run build:serverextension
+    python setup.py build
+    pushd jupyterlab
+    nosetests
+    popd
+
+fi
 
 
-# Run the python tests
-npm run build:serverextension
-python setup.py build
-pushd jupyterlab
-nosetests
-popd
-npm run build:examples
-npm run docs
-cp jupyter-plugins-demo.gif docs
+if [[ $GROUP == coverage ]]; then
+    npm run test:coverage
+fi
 
-# Make sure we have CSS that can be converted with postcss
-npm install -g postcss-cli
-postcss jupyterlab/build/*.css > /dev/null
 
-# Verify docs build
-pushd tutorial
-conda env create -n test_docs -f environment.yml
-source activate test_docs
-make linkcheck
-make html
-source deactivate
-popd
+if [[ $GROUP == misc ]]; then
 
-# Make sure we can start and kill the lab server
-jupyter lab --no-browser &
-TASK_PID=$!
-# Make sure the task is running
-ps -p $TASK_PID || exit 1
-sleep 5
-kill $TASK_PID
-wait $TASK_PID
+    npm run build:examples
+    npm run docs
+    cp jupyter-plugins-demo.gif docs
+
+    # Make sure we have CSS that can be converted with postcss
+    npm install -g postcss-cli
+    postcss jupyterlab/build/*.css > /dev/null
+
+    # Verify docs build
+    pushd tutorial
+    conda env create -n test_docs -f environment.yml
+    source activate test_docs
+    make linkcheck
+    make html
+    source deactivate
+    popd
+
+    # Make sure we can start and kill the lab server
+    jupyter lab --no-browser &
+    TASK_PID=$!
+    # Make sure the task is running
+    ps -p $TASK_PID || exit 1
+    sleep 5
+    kill $TASK_PID
+    wait $TASK_PID
+
+fi
