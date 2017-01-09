@@ -5,7 +5,8 @@ module.exports = function (config) {
     reporters: ['mocha'],
     client: {
       mocha: {
-        timeout : 10000 // 10 seconds - upped from 2 seconds
+        timeout : 10000, // 10 seconds - upped from 2 seconds
+        retries: 3 // Allow for slow server on CI.
       }
     },
     files: [

@@ -1,76 +1,56 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-import argparse
+from __future__ import print_function, absolute_import
+
+import atexit
+import json
+import os
 import subprocess
 import sys
-import os
-import re
-import json
 import shutil
-import threading
 import tempfile
+from multiprocessing.pool import ThreadPool
 
-
-# Set up the file structure
-root_dir = tempfile.mkdtemp(prefix='mock_contents')
-os.mkdir(os.path.join(root_dir, 'src'))
-with open(os.path.join(root_dir, 'src', 'temp.txt'), 'w') as fid:
-    fid.write('hello')
+from tornado import ioloop
+from notebook.notebookapp import NotebookApp
+from traitlets import Bool, Unicode
 
 
 HERE = os.path.dirname(__file__)
 
-shell = (sys.platform == 'win32')
+
+def create_notebook_dir():
+    """Create a temporary directory with some file structure."""
+    root_dir = tempfile.mkdtemp(prefix='mock_contents')
+    os.mkdir(os.path.join(root_dir, 'src'))
+    with open(os.path.join(root_dir, 'src', 'temp.txt'), 'w') as fid:
+        fid.write('hello')
+    atexit.register(lambda: shutil.rmtree(root_dir, True))
+    return root_dir
 
 
-def start_notebook():
-    nb_command = [sys.executable, '-m', 'notebook', root_dir, '--no-browser',
-                  # FIXME: allow-origin=* only required for notebook < 4.3
-                  '--NotebookApp.allow_origin="*"',
-                  # disable user password:
-                  '--NotebookApp.password=',
-                  # disable token:
-                  '--NotebookApp.token=']
-    nb_server = subprocess.Popen(nb_command, shell=shell,
-                                 stderr=subprocess.STDOUT,
-                                 stdout=subprocess.PIPE)
+def run_task(func, args=(), kwds={}):
+    """Run a task in a thread and exit with the return code."""
+    loop = ioloop.IOLoop.instance()
+    worker = ThreadPool(1)
 
-    # wait for notebook server to start up
-    while 1:
-        line = nb_server.stdout.readline().decode('utf-8').strip()
-        if not line:
-            continue
-        print(line)
-        if 'Jupyter Notebook is running at:' in line:
-            base_url = re.search(r'(http[^\?]+)', line).groups()[0]
-            break
+    def callback(result):
+        loop.add_callback(lambda: sys.exit(result))
 
-    while 1:
-        line = nb_server.stdout.readline().decode('utf-8').strip()
-        if not line:
-            continue
-        print(line)
-        if 'Control-C' in line:
-            break
+    def start():
+        worker.apply_async(func, args, kwds, callback)
 
-    def print_thread():
-        while 1:
-            line = nb_server.stdout.readline().decode('utf-8').strip()
-            if not line:
-                continue
-            print(line)
-
-    thread = threading.Thread(target=print_thread)
-    thread.setDaemon(True)
-    thread.start()
-
-    return nb_server, base_url
+    loop.call_later(1, start)
 
 
-def run_karma(base_url):
-    config = dict(baseUrl=base_url,
-                  terminalsAvailable="True")
+def run_karma(base_url, token, terminalsAvailable):
+    config = dict(baseUrl=base_url, token=token,
+                  terminalsAvailable=str(terminalsAvailable))
+
+    print('\n\nNotebook config:')
+    print(json.dumps(config))
+
     with open(os.path.join(HERE, 'build', 'injector.js'), 'w') as fid:
         fid.write("""
         var node = document.createElement('script');
@@ -80,20 +60,33 @@ def run_karma(base_url):
         document.body.appendChild(node);
         """ % json.dumps(config))
 
-    cmd = ['karma', 'start'] + sys.argv[1:]
-    return subprocess.check_call(cmd, shell=shell, stderr=subprocess.STDOUT)
+    cmd = ['karma', 'start'] + ARGS
+    print('\n\nRunning karma as: %s\n\n' % ' '.join(cmd))
+
+    shell = os.name == 'nt'
+    return subprocess.check_call(cmd, shell=shell)
+
+
+class TestApp(NotebookApp):
+    """A notebook app that runs a karma test."""
+
+    open_browser = Bool(False)
+    notebook_dir = Unicode(create_notebook_dir())
+    allow_origin = Unicode('*')
+
+    def start(self):
+        terminals_available = self.web_app.settings['terminals_available']
+        run_task(run_karma,
+            args=(self.connection_url, self.token, terminals_available))
+        super(TestApp, self).start()
 
 
 if __name__ == '__main__':
-
-    nb_server, base_url = start_notebook()
+    # Reserve the command line arguments for karma.
+    ARGS = sys.argv[1:]
+    sys.argv = sys.argv[:1]
 
     try:
-        resp = run_karma(base_url)
-    except (subprocess.CalledProcessError, KeyboardInterrupt):
-        resp = 1
-    finally:
-        nb_server.kill()
-
-    shutil.rmtree(root_dir, True)
-    sys.exit(resp)
+        TestApp.launch_instance()
+    except KeyboardInterrupt:
+        sys.exit(1)
