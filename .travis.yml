@@ -2,6 +2,14 @@ language: node_js
 node_js:
 - '5'
 sudo: false
+cache:
+  directories:
+    - node_modules
+    - examples/console/node_modules
+    - examples/filebrowser/node_modules
+    - examples/lab/node_modules
+    - examples/notebook/node_modules
+    - examples/terminal/node_modules
 env:
   matrix:
   - GROUP=
