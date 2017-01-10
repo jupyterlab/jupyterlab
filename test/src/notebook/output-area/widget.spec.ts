@@ -69,14 +69,6 @@ class CustomOutputWidget extends OutputWidget {
   setOutput(value: Widget): void {
     super.setOutput(value);
   }
-
-  getBundle(output: nbformat.IOutput): nbformat.IMimeBundle {
-    return super.getBundle(output);
-  }
-
-  convertBundle(bundle: nbformat.IMimeBundle): RenderMime.MimeMap<string> {
-    return super.convertBundle(bundle);
-  }
 }
 
 
@@ -443,10 +435,9 @@ describe('notebook/output-area/widget', () => {
     describe('#getBundle()', () => {
 
       it('should handle all bundle types', () => {
-        let widget = new CustomOutputWidget({ rendermime });
         for (let i = 0; i < DEFAULT_OUTPUTS.length; i++) {
           let output = DEFAULT_OUTPUTS[i];
-          let bundle = widget.getBundle(output);
+          let bundle = OutputWidget.getBundle(output);
           expect(Object.keys(bundle).length).to.not.be(0);
         }
       });
@@ -459,8 +450,7 @@ describe('notebook/output-area/widget', () => {
         let bundle: nbformat.IMimeBundle = {
           'text/plain': 'foo'
         };
-        let widget = new CustomOutputWidget({ rendermime });
-        let map = widget.convertBundle(bundle);
+        let map = OutputWidget.convertBundle(bundle);
         expect(map).to.eql(bundle);
       });
 
@@ -468,8 +458,7 @@ describe('notebook/output-area/widget', () => {
         let bundle: nbformat.IMimeBundle = {
           'text/plain': ['foo', 'bar']
         };
-        let widget = new CustomOutputWidget({ rendermime });
-        let map = widget.convertBundle(bundle);
+        let map = OutputWidget.convertBundle(bundle);
         expect(map).to.eql({ 'text/plain': 'foo\nbar' });
       });
 

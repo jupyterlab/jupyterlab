@@ -731,8 +731,8 @@ class OutputWidget extends Widget {
     }
     // Extract the data from the output and sanitize if necessary.
     let rendermime = this._rendermime;
-    let bundle = this.getBundle(output as nbformat.IOutput);
-    let data = this.convertBundle(bundle);
+    let bundle = OutputWidget.getBundle(output as nbformat.IOutput);
+    let data = OutputWidget.convertBundle(bundle);
     // Clear the content.
     this.clear();
 
