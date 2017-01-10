@@ -71,7 +71,7 @@
 
 .jp-FAQ-question > a {
   font-size: 20px;
-  color: #616161;
+  color: var(--jp-ui-font-color0);
   font-weight: 400;
   line-height: 150%;
   list-style-type: none;
@@ -115,7 +115,7 @@ li > jp-FAQ-answer {
 
 
 .jp-FAQ-title {
-  color: #616161;
+  color: var(--jp-ui-font-color0);
   display: block;
 }
 
