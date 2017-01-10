@@ -12,7 +12,7 @@ A JupyterLab application is comprised of:
 - A core [Application](https://github.com/phosphorjs/phosphide/blob/master/src/core/application.ts) object
 - Plugins
 
-A full example of an application is contained [here](https://github.com/jupyterlab/jupyterlab/blob/master/examples/lab).
+A full example of an application is contained [here](https://github.com/jupyterlab/jupyterlab/tree/master/examples/lab).
 Looking at the `index.js` file, you can see the extensions 
 used in the tutorial example.
 
