@@ -63,8 +63,11 @@ def run_karma(base_url, token, terminalsAvailable):
     cmd = ['karma', 'start'] + ARGS
     print('\n\nRunning karma as: %s\n\n' % ' '.join(cmd))
 
+    # Note: `subprocess.check_call` stalls if the test fails.
     shell = os.name == 'nt'
-    return subprocess.check_call(cmd, shell=shell)
+    p = subprocess.Popen(cmd, shell=shell)
+    p.communicate()
+    return p.returncode
 
 
 class TestApp(NotebookApp):
