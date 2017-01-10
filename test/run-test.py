@@ -38,6 +38,7 @@ def run_command(cmd):
 
 
 def get_command(nbapp):
+    """Get the command to run."""
     terminalsAvailable = nbapp.web_app.settings['terminals_available']
     config = dict(baseUrl=nbapp.connection_url, token=nbapp.token,
                   terminalsAvailable=str(terminalsAvailable))
@@ -65,8 +66,8 @@ class TestApp(NotebookApp):
     allow_origin = Unicode('*')
 
     def start(self):
-        cmd = get_command(self)
-        IOLoop.current().add_callback(run_command, cmd)
+        # Run the command after the ioloop starts.
+        IOLoop.current().add_callback(run_command, get_command(self))
         super(TestApp, self).start()
 
 
