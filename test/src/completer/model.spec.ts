@@ -329,6 +329,7 @@ describe('completer/model', () => {
         let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
         let request = makeState(currentValue);
         let change = makeState(newValue);
+        (change as any).column = 4;
         model.original = request;
         model.cursor = cursor;
         expect(model.current).to.be(null);
@@ -342,6 +343,7 @@ describe('completer/model', () => {
         let newValue = 'foo ';
         let request = makeState(currentValue);
         let change = makeState(newValue);
+        (change as any).column = 4;
         model.original = request;
         expect(model.original).to.be.ok();
         model.handleTextChange(change);

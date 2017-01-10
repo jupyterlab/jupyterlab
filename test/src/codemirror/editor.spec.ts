@@ -127,13 +127,13 @@ describe('CodeMirrorEditor', () => {
 
   });
 
-  describe('#onEditorKeydown()', () => {
+  describe('#onKeydown()', () => {
 
     it('should run when there is a keydown event on the editor', () => {
       let event = generate('keydown', { keyCode: UP_ARROW });
-      expect(editor.methods).to.not.contain('onEditorKeydown');
+      expect(editor.methods).to.not.contain('onKeydown');
       editor.editor.triggerOnKeyDown(event);
-      expect(editor.methods).to.contain('onEditorKeydown');
+      expect(editor.methods).to.contain('onKeydown');
     });
 
   });

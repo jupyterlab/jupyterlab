@@ -215,6 +215,7 @@ describe('completer/handler', () => {
         let handler = new TestCompleterHandler({
           completer: new CompleterWidget()
         });
+        handler.activeCell = createCellWidget();
         let request = {
           column: 0,
           line: 0
@@ -225,9 +226,22 @@ describe('completer/handler', () => {
         });
       });
 
-      // TODO: This test needs to be updated to use a python kernel.
-      it('should resolve if handler has a kernel', () => {
-        console.warn('This test needs to be updated to use a python kernel.');
+      it('should reject if handler has no active cell', (done) => {
+        let handler = new TestCompleterHandler({
+          completer: new CompleterWidget()
+        });
+        handler.kernel = kernel;
+        let request = {
+          column: 0,
+          line: 0
+        };
+        handler.makeRequest(request).catch((reason: Error) => {
+          expect(reason).to.be.an(Error);
+          done();
+        });
+      });
+
+      it('should resolve if handler has a kernel and an active cell', (done) => {
         let handler = new TestCompleterHandler({
           completer: new CompleterWidget()
         });
@@ -236,7 +250,10 @@ describe('completer/handler', () => {
           line: 0
         };
         handler.kernel = kernel;
-        expect(handler.makeRequest(request)).to.be.a(Promise);
+        handler.activeCell = createCellWidget();
+        handler.activeCell.model.value.text = 'a=1';
+
+        handler.makeRequest(request).then(() => { done(); }).catch(done);
       });
 
     });
@@ -415,7 +432,7 @@ describe('completer/handler', () => {
         let handler = new TestCompleterHandler({ completer });
         let model = completer.model as TestCompleterModel;
 
-        handler.activeCell = createCellWidget()
+        handler.activeCell = createCellWidget();
         expect(model.methods).to.not.contain('createPatch');
         completer.selected.emit('foo');
         expect(model.methods).to.contain('createPatch');

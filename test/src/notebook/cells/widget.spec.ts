@@ -367,7 +367,7 @@ describe('notebook/cells/widget', () => {
 
         it('should create a code editor widget', () => {
           let editor = renderer.createCellEditor(model);
-          expect(editor).to.be.a(CodeCellModel);
+          expect(editor).to.be.a(CodeCellWidget;
         });
 
       });
