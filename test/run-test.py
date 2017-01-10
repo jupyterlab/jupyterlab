@@ -6,13 +6,12 @@ from __future__ import print_function, absolute_import
 import atexit
 import json
 import os
-import subprocess
 import sys
 import shutil
 import tempfile
-from multiprocessing.pool import ThreadPool
 
-from tornado import ioloop
+from tornado.ioloop import IOLoop
+from tornado.process import Subprocess
 from notebook.notebookapp import NotebookApp
 from traitlets import Bool, Unicode
 
@@ -30,22 +29,17 @@ def create_notebook_dir():
     return root_dir
 
 
-def run_task(func, args=(), kwds={}):
+def run_command(cmd):
     """Run a task in a thread and exit with the return code."""
-    loop = ioloop.IOLoop.instance()
-    worker = ThreadPool(1)
-
-    def callback(result):
-        loop.add_callback(lambda: sys.exit(result))
-
-    def start():
-        worker.apply_async(func, args, kwds, callback)
-
-    loop.call_later(1, start)
+    shell = os.name == 'nt'
+    p = Subprocess(cmd, shell=shell)
+    print('\n\nRunning command: "%s"\n\n' % ' '.join(cmd))
+    p.set_exit_callback(sys.exit)
 
 
-def run_karma(base_url, token, terminalsAvailable):
-    config = dict(baseUrl=base_url, token=token,
+def get_command(nbapp):
+    terminalsAvailable = nbapp.web_app.settings['terminals_available']
+    config = dict(baseUrl=nbapp.connection_url, token=nbapp.token,
                   terminalsAvailable=str(terminalsAvailable))
 
     print('\n\nNotebook config:')
@@ -60,14 +54,7 @@ def run_karma(base_url, token, terminalsAvailable):
         document.body.appendChild(node);
         """ % json.dumps(config))
 
-    cmd = ['karma', 'start'] + ARGS
-    print('\n\nRunning karma as: %s\n\n' % ' '.join(cmd))
-
-    # Note: `subprocess.check_call` stalls if the test fails.
-    shell = os.name == 'nt'
-    p = subprocess.Popen(cmd, shell=shell)
-    p.communicate()
-    return p.returncode
+    return ['karma', 'start'] + ARGS
 
 
 class TestApp(NotebookApp):
@@ -78,9 +65,8 @@ class TestApp(NotebookApp):
     allow_origin = Unicode('*')
 
     def start(self):
-        terminals_available = self.web_app.settings['terminals_available']
-        run_task(run_karma,
-            args=(self.connection_url, self.token, terminals_available))
+        cmd = get_command(self)
+        IOLoop.current().add_callback(run_command, cmd)
         super(TestApp, self).start()
 
 
