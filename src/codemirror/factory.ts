@@ -6,7 +6,7 @@ import {
 } from '../codeeditor';
 
 import {
-  CodeMirrorEditor, DEFAULT_CODEMIRROR_THEME
+  CodeMirrorEditor
 } from './editor';
 
 
