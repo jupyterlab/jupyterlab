@@ -98,6 +98,11 @@ const MARKDOWN_OUTPUT_CLASS = 'jp-MarkdownOutput';
 const RAW_CELL_CLASS = 'jp-RawCell';
 
 /**
+ * The class name added to cell editor widget nodes.
+ */
+const CELL_EDITOR_CLASS = 'jp-CellEditor';
+
+/**
  * The class name added to a rendered input area.
  */
 const RENDERED_CLASS = 'jp-mod-rendered';
@@ -124,6 +129,8 @@ class BaseCellWidget extends Widget {
     let model = this._model = options.model;
     let renderer = options.renderer;
     this._editor = renderer.createCellEditor(this._model);
+    this._editor.addClass(CELL_EDITOR_CLASS);
+
     this._input = renderer.createInputArea(this._editor);
 
     (this.layout as PanelLayout).addWidget(this._input);
