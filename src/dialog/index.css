@@ -47,7 +47,7 @@
   padding-bottom: 12px;
   font-size: 20px;
   font-weight: 400;
-  color: #616161;
+  color: var(--jp-ui-font-color0);
 }
 
 
@@ -125,6 +125,7 @@
 .jp-Dialog-inputWrapper {
   display: flex;
   background: white;
+  height: 28px;
   width: 252px;
   box-sizing: border-box;
   border: var(--jp-border-width) solid var(--jp-border-color1);
@@ -137,7 +138,7 @@
   flex: 1 1 auto;
   padding: 7px;
   font-size: 15px;
-  color: #676767;
+  color: var(--jp-ui-font-color0);
   border: none;
 }
 
@@ -147,6 +148,7 @@
   flex-direction: column;
   padding: 1px;
   background: white;
+  height: 28px;
   width: 252px;
   box-sizing: border-box;
   border: var(--jp-border-width) solid var(--jp-border-color1);
@@ -159,6 +161,6 @@
   height: 32px;
   font-size: 15px;
   background: white;
-  color: #676767;
+  color: var(--jp-ui-font-color0);
   border: none;
 }
