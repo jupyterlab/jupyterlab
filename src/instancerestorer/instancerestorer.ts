@@ -193,7 +193,9 @@ const KEY = 'instance-restorer:data';
  * #### Notes
  * The lifecycle for state restoration is subtle. The sequence of events is:
  *
- * 1. The instance restorer plugin is instantiated.
+ * 1. The instance restorer plugin is instantiated. It installs itself as the
+ *    layout database that the application shell can use to `fetch` and `save`
+ *    layout restoration data.
  *
  * 2. Other plugins that care about state restoration require the instance
  *    restorer as a dependency.
