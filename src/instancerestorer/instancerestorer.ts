@@ -16,10 +16,6 @@ import {
 } from 'phosphor/lib/core/properties';
 
 import {
-  defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
-
-import {
   CommandRegistry
 } from 'phosphor/lib/ui/commandregistry';
 
@@ -247,11 +243,6 @@ class InstanceRestorer implements IInstanceRestorer {
   }
 
   /**
-   * A signal emitted when a widget should be activated.
-   */
-  readonly activated: ISignal<this, string>;
-
-  /**
    * A promise resolved when the instance restorer is ready to receive signals.
    */
   get restored(): Promise<void> {
@@ -405,10 +396,6 @@ class InstanceRestorer implements IInstanceRestorer {
   private _trackers = new Set<string>();
   private _widgets = new Map<string, Widget>();
 }
-
-
-// Define the signals for the `InstanceRestorer` class.
-defineSignal(InstanceRestorer.prototype, 'activated');
 
 
 /**
