@@ -651,7 +651,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
 }
 
 
-// Define the signals for the `CellEditorWidget` class.
+// Define the signals for the `CodeMirrorEditor` class.
 defineSignal(CodeMirrorEditor.prototype, 'completionRequested');
 defineSignal(CodeMirrorEditor.prototype, 'edgeRequested');
 
