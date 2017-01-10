@@ -16,10 +16,13 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
+  CodeEditorWidget
+} from '../../../../lib/codeeditor';
+
+import {
   BaseCellWidget, CellModel, InputAreaWidget, ICellModel,
   CodeCellWidget, CodeCellModel, MarkdownCellWidget,
-  RawCellWidget, CellEditorWidget, RawCellModel,
-  MarkdownCellModel
+  RawCellWidget, RawCellModel, MarkdownCellModel
 } from '../../../../lib/notebook/cells';
 
 import {
@@ -158,9 +161,9 @@ describe('notebook/cells/widget', () => {
 
     describe('#editorWidget', () => {
 
-      it('should be a cell editor widget', () => {
+      it('should be a code editor widget', () => {
         let widget = new BaseCellWidget({ model, renderer });
-        expect(widget.editorWidget).to.be.a(CellEditorWidget);
+        expect(widget.editorWidget).to.be.a(CodeEditorWidget);
       });
 
     });
@@ -362,9 +365,9 @@ describe('notebook/cells/widget', () => {
 
       describe('#createCellEditor()', () => {
 
-        it('should create a cell editor widget', () => {
+        it('should create a code editor widget', () => {
           let editor = renderer.createCellEditor(model);
-          expect(editor).to.be.a(CellEditorWidget);
+          expect(editor).to.be.a(CodeEditorWidget);
         });
 
       });

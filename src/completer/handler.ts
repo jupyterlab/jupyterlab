@@ -10,8 +10,8 @@ import {
 } from 'phosphor/lib/core/disposable';
 
 import {
-  CellEditorWidget
-} from '../notebook/cells/editor';
+  CodeEditor
+} from '../codeeditor';
 
 import {
   BaseCellWidget
@@ -59,14 +59,14 @@ class CellCompleterHandler implements IDisposable {
     }
 
     if (this._activeCell && !this._activeCell.isDisposed) {
-      const editor = this._activeCell.editorWidget;
-      editor.textChanged.disconnect(this.onTextChanged, this);
+      const editor = this._activeCell.editor;
+      editor.model.value.changed.disconnect(this.onTextChanged, this);
       editor.completionRequested.disconnect(this.onCompletionRequested, this);
     }
     this._activeCell = newValue;
     if (this._activeCell) {
-      const editor = this._activeCell.editorWidget;
-      editor.textChanged.connect(this.onTextChanged, this);
+      const editor = this._activeCell.editor;
+      editor.model.value.changed.connect(this.onTextChanged, this);
       editor.completionRequested.connect(this.onCompletionRequested, this);
     }
   }
@@ -96,16 +96,25 @@ class CellCompleterHandler implements IDisposable {
   /**
    * Make a complete request using the kernel.
    */
-  protected makeRequest(request: CellEditorWidget.ICompletionRequest): Promise<void> {
+  protected makeRequest(position: CodeEditor.IPosition): Promise<void> {
     if (!this._kernel) {
       return Promise.reject(new Error('no kernel for completion request'));
     }
 
+    let cell = this.activeCell;
+    if (!cell) {
+      return Promise.reject(new Error('No active cell'));
+    }
+
+    let offset = cell.editor.getOffsetAt(position);
+
     let content: KernelMessage.ICompleteRequest = {
-      code: request.currentValue,
-      cursor_pos: request.position
+      code: cell.model.value.text,
+      cursor_pos: offset
     };
     let pending = ++this._pending;
+
+    let request = this.getState(position);
 
     return this._kernel.requestComplete(content).then(msg => {
       this.onReply(pending, request, msg);
@@ -113,9 +122,25 @@ class CellCompleterHandler implements IDisposable {
   }
 
   /**
+   * Get the state of the text editor at the given position.
+   */
+  protected getState(position: CodeEditor.IPosition): CompleterWidget.ITextState {
+    let editor = this.activeCell.editor;
+    let coords = editor.getCoordinate(position) as CompleterWidget.ICoordinate;
+    return {
+      text: editor.getLine(position.line),
+      lineHeight: editor.lineHeight,
+      charWidth: editor.charWidth,
+      coords,
+      line: position.line,
+      column: position.column
+    }
+  }
+
+  /**
    * Receive a completion reply from the kernel.
    */
-  protected onReply(pending: number, request: CellEditorWidget.ICompletionRequest, msg: KernelMessage.ICompleteReplyMsg): void {
+  protected onReply(pending: number, request: CompleterWidget.ITextState, msg: KernelMessage.ICompleteReplyMsg): void {
     // If we have been disposed, bail.
     if (this.isDisposed) {
       return;
@@ -145,21 +170,24 @@ class CellCompleterHandler implements IDisposable {
   /**
    * Handle a text changed signal from an editor.
    */
-  protected onTextChanged(editor: CellEditorWidget, change: CellEditorWidget.ITextChange): void {
+  protected onTextChanged(): void {
     if (!this._completer.model) {
       return;
     }
-    this._completer.model.handleTextChange(change);
+    let editor = this.activeCell.editor;
+    let position = editor.getCursorPosition();
+    let request = this.getState(position);
+    this._completer.model.handleTextChange(request);
   }
 
   /**
    * Handle a completion requested signal from an editor.
    */
-  protected onCompletionRequested(editor: CellEditorWidget, request: CellEditorWidget.ICompletionRequest): void {
+  protected onCompletionRequested(editor: CodeEditor.IEditor, position: CodeEditor.IPosition): void {
     if (!this._kernel || !this._completer.model) {
       return;
     }
-    this.makeRequest(request);
+    this.makeRequest(position);
   }
 
 

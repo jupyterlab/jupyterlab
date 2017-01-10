@@ -12,7 +12,11 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  BaseCellWidget, CellModel, CellEditorWidget
+  CodeEditor
+} from '../../../lib/codeeditor';
+
+import {
+  BaseCellWidget, CellModel
 } from '../../../lib/notebook/cells';
 
 import {
@@ -35,7 +39,7 @@ class TestCompleterModel extends CompleterModel {
     return super.createPatch(patch);
   }
 
-  handleTextChange(change: CellEditorWidget.ITextChange): void {
+  handleTextChange(change: CompleterWidget.ITextState): void {
     this.methods.push('handleTextChange');
     super.handleTextChange(change);
   }
@@ -45,24 +49,24 @@ class TestCompleterModel extends CompleterModel {
 class TestCompleterHandler extends CellCompleterHandler {
   methods: string[] = [];
 
-  makeRequest(request: CellEditorWidget.ICompletionRequest): Promise<void> {
+  makeRequest(request: CodeEditor.IPosition): Promise<void> {
     let promise = super.makeRequest(request);
     this.methods.push('makeRequest');
     return promise;
   }
 
-  onReply(pending: number, request: CellEditorWidget.ICompletionRequest, msg: KernelMessage.ICompleteReplyMsg): void {
+  onReply(pending: number, request: CompleterWidget.ITextState, msg: KernelMessage.ICompleteReplyMsg): void {
     super.onReply(pending, request, msg);
     this.methods.push('onReply');
   }
 
-  onTextChanged(editor: CellEditorWidget, change: CellEditorWidget.ITextChange): void {
-    super.onTextChanged(editor, change);
+  onTextChanged(): void {
+    super.onTextChanged();
     this.methods.push('onTextChanged');
   }
 
-  onCompletionRequested(editor: CellEditorWidget, request: CellEditorWidget.ICompletionRequest): void {
-    super.onCompletionRequested(editor, request);
+  onCompletionRequested(editor: CodeEditor.IEditor, position: CodeEditor.IPosition): void {
+    super.onCompletionRequested(editor, position);
     this.methods.push('onCompletionRequested');
   }
 
@@ -211,14 +215,10 @@ describe('completer/handler', () => {
         let handler = new TestCompleterHandler({
           completer: new CompleterWidget()
         });
-        let request: CellEditorWidget.ICompletionRequest = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          coords: null,
-          position: 0,
-          currentValue: 'foo'
+        handler.activeCell = createCellWidget();
+        let request = {
+          column: 0,
+          line: 0
         };
         handler.makeRequest(request).catch((reason: Error) => {
           expect(reason).to.be.an(Error);
@@ -226,23 +226,34 @@ describe('completer/handler', () => {
         });
       });
 
-      // TODO: This test needs to be updated to use a python kernel.
-      it('should resolve if handler has a kernel', () => {
-        console.warn('This test needs to be updated to use a python kernel.');
+      it('should reject if handler has no active cell', (done) => {
         let handler = new TestCompleterHandler({
           completer: new CompleterWidget()
         });
-        let request: CellEditorWidget.ICompletionRequest = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          coords: null,
-          position: 0,
-          currentValue: 'foo'
+        handler.kernel = kernel;
+        let request = {
+          column: 0,
+          line: 0
+        };
+        handler.makeRequest(request).catch((reason: Error) => {
+          expect(reason).to.be.an(Error);
+          done();
+        });
+      });
+
+      it('should resolve if handler has a kernel and an active cell', (done) => {
+        let handler = new TestCompleterHandler({
+          completer: new CompleterWidget()
+        });
+        let request = {
+          column: 0,
+          line: 0
         };
         handler.kernel = kernel;
-        expect(handler.makeRequest(request)).to.be.a(Promise);
+        handler.activeCell = createCellWidget();
+        handler.activeCell.model.value.text = 'a=1';
+
+        handler.makeRequest(request).then(() => { done(); }).catch(done);
       });
 
     });
@@ -272,14 +283,13 @@ describe('completer/handler', () => {
         let completer = new CompleterWidget();
         let handler = new TestCompleterHandler({ completer });
         let options = ['a', 'b', 'c'];
-        let request: CellEditorWidget.ICompletionRequest = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
+        let request: CompleterWidget.ITextState = {
+          column: 0,
+          lineHeight: 0,
+          charWidth: 0,
           line: 0,
           coords: null,
-          position: 0,
-          currentValue: 'f'
+          text: 'f'
         };
         let reply: KernelMessage.ICompleteReplyMsg = {
           header: null,
@@ -306,14 +316,13 @@ describe('completer/handler', () => {
         let completer = new CompleterWidget();
         let handler = new TestCompleterHandler({ completer });
         let options = ['a', 'b', 'c'];
-        let request: CellEditorWidget.ICompletionRequest = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
+        let request: CompleterWidget.ITextState = {
+          column: 0,
+          lineHeight: 0,
+          charWidth: 0,
           line: 0,
           coords: null,
-          position: 0,
-          currentValue: 'f'
+          text: 'f'
         };
         let reply: KernelMessage.ICompleteReplyMsg = {
           header: null,
@@ -344,21 +353,10 @@ describe('completer/handler', () => {
         let handler = new TestCompleterHandler({
           completer: new CompleterWidget()
         });
-        let change: CellEditorWidget.ITextChange = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          position: 0,
-          coords: null,
-          oldValue: 'fo',
-          newValue: 'foo'
-        };
         let cell = createCellWidget();
-
         handler.activeCell = cell;
         expect(handler.methods).to.not.contain('onTextChanged');
-        cell.editorWidget.textChanged.emit(change);
+        cell.editor.model.value.text = 'foo';
         expect(handler.methods).to.contain('onTextChanged');
       });
 
@@ -367,22 +365,12 @@ describe('completer/handler', () => {
           model: new TestCompleterModel()
         });
         let handler = new TestCompleterHandler({ completer });
-        let change: CellEditorWidget.ITextChange = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          position: 0,
-          coords: null,
-          oldValue: 'fo',
-          newValue: 'foo'
-        };
         let cell = createCellWidget();
         let model = completer.model as TestCompleterModel;
 
         handler.activeCell = cell;
         expect(model.methods).to.not.contain('handleTextChange');
-        cell.editorWidget.textChanged.emit(change);
+        cell.editor.model.value.text = 'foo';
         expect(model.methods).to.contain('handleTextChange');
       });
 
@@ -394,20 +382,15 @@ describe('completer/handler', () => {
         let handler = new TestCompleterHandler({
           completer: new CompleterWidget()
         });
-        let request: CellEditorWidget.ICompletionRequest = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          coords: null,
-          position: 0,
-          currentValue: 'foo'
+        let request: CodeEditor.IPosition = {
+          column: 0,
+          line: 0
         };
         let cell = createCellWidget();
 
         handler.activeCell = cell;
         expect(handler.methods).to.not.contain('onCompletionRequested');
-        cell.editorWidget.completionRequested.emit(request);
+        cell.editor.completionRequested.emit(request);
         expect(handler.methods).to.contain('onCompletionRequested');
       });
 
@@ -416,21 +399,16 @@ describe('completer/handler', () => {
           model: new TestCompleterModel()
         });
         let handler = new TestCompleterHandler({ completer });
-        let request: CellEditorWidget.ICompletionRequest = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          coords: null,
-          position: 0,
-          currentValue: 'foo'
+        let request: CodeEditor.IPosition = {
+          column: 0,
+          line: 0
         };
         let cell = createCellWidget();
 
         handler.kernel = kernel;
         handler.activeCell = cell;
         expect(handler.methods).to.not.contain('makeRequest');
-        cell.editorWidget.completionRequested.emit(request);
+        cell.editor.completionRequested.emit(request);
         expect(handler.methods).to.contain('makeRequest');
       });
 
@@ -454,7 +432,7 @@ describe('completer/handler', () => {
         let handler = new TestCompleterHandler({ completer });
         let model = completer.model as TestCompleterModel;
 
-        handler.activeCell = createCellWidget()
+        handler.activeCell = createCellWidget();
         expect(model.methods).to.not.contain('createPatch');
         completer.selected.emit('foo');
         expect(model.methods).to.contain('createPatch');
@@ -466,18 +444,17 @@ describe('completer/handler', () => {
         let completer = new CompleterWidget({ model });
         let handler = new TestCompleterHandler({ completer });
         let cell = createCellWidget();
-        let request: CellEditorWidget.ICompletionRequest = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
+        let request: CompleterWidget.ITextState = {
+          column: 0,
           line: 0,
+          lineHeight: 0,
+          charWidth: 0,
           coords: null,
-          position: 0,
-          currentValue: 'foo'
+          text: 'foo'
         };
 
         handler.activeCell = cell;
-        handler.activeCell.model.value.text = request.currentValue;
+        handler.activeCell.model.value.text = 'foo';
         model.original = request;
         model.cursor = { start: 0, end: 3 };
         completer.selected.emit(patch);

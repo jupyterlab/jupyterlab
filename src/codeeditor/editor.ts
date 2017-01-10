@@ -481,10 +481,25 @@ namespace CodeEditor {
   type KeydownHandler = (instance: IEditor, event: KeyboardEvent) => boolean;
 
   /**
+   * The location of requested edges.
+   */
+  export type EdgeLocation = 'top' | 'bottom';
+
+  /**
    * A widget that provides a code editor.
    */
   export
   interface IEditor extends ISelectionOwner, IDisposable {
+    /**
+     * A signal emitted when a text completion is requested.
+     */
+    readonly completionRequested: ISignal<IEditor, IPosition>;
+
+    /**
+     * A signal emitted when either the top or bottom edge is requested.
+     */
+    readonly edgeRequested: ISignal<IEditor, EdgeLocation>;
+
     /**
      * Whether line numbers should be displayed. Defaults to false.
      */

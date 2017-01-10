@@ -42,10 +42,6 @@ import {
 } from '../output-area';
 
 import {
-  CellEditorWidget
-} from './editor';
-
-import {
   ICellModel, ICodeCellModel,
   IMarkdownCellModel, IRawCellModel
 } from './model';
@@ -102,6 +98,11 @@ const MARKDOWN_OUTPUT_CLASS = 'jp-MarkdownOutput';
 const RAW_CELL_CLASS = 'jp-RawCell';
 
 /**
+ * The class name added to cell editor widget nodes.
+ */
+const CELL_EDITOR_CLASS = 'jp-CellEditor';
+
+/**
  * The class name added to a rendered input area.
  */
 const RENDERED_CLASS = 'jp-mod-rendered';
@@ -128,6 +129,8 @@ class BaseCellWidget extends Widget {
     let model = this._model = options.model;
     let renderer = options.renderer;
     this._editor = renderer.createCellEditor(this._model);
+    this._editor.addClass(CELL_EDITOR_CLASS);
+
     this._input = renderer.createInputArea(this._editor);
 
     (this.layout as PanelLayout).addWidget(this._input);
@@ -151,7 +154,7 @@ class BaseCellWidget extends Widget {
   /**
    * Get the editor widget used by the cell.
    */
-  get editorWidget(): CellEditorWidget {
+  get editorWidget(): CodeEditorWidget {
     return this._editor;
   }
 
@@ -286,7 +289,7 @@ class BaseCellWidget extends Widget {
   }
 
   private _input: InputAreaWidget = null;
-  private _editor: CellEditorWidget = null;
+  private _editor: CodeEditorWidget = null;
   private _model: ICellModel = null;
   private _readOnly = false;
   private _trustedCursor: IMetadataCursor = null;
@@ -329,12 +332,12 @@ namespace BaseCellWidget {
     /**
      * Create a new cell editor for the widget.
      */
-    createCellEditor(model: ICellModel): CellEditorWidget;
+    createCellEditor(model: ICellModel): CodeEditorWidget;
 
     /**
      * Create a new input area for the widget.
      */
-    createInputArea(editor: CellEditorWidget): InputAreaWidget;
+    createInputArea(editor: CodeEditorWidget): InputAreaWidget;
   }
 
   /**
@@ -353,14 +356,14 @@ namespace BaseCellWidget {
     /**
      * Create a new cell editor for the widget.
      */
-    createCellEditor(model: CodeEditor.IModel): CellEditorWidget {
-      return new CellEditorWidget({ factory: this._editorFactory, model });
+    createCellEditor(model: CodeEditor.IModel): CodeEditorWidget {
+      return new CodeEditorWidget({ factory: this._editorFactory, model });
     }
 
     /**
      * Create a new input area for the widget.
      */
-    createInputArea(editor: CellEditorWidget): InputAreaWidget {
+    createInputArea(editor: CodeEditorWidget): InputAreaWidget {
       return new InputAreaWidget(editor);
     }
 
@@ -749,7 +752,7 @@ class InputAreaWidget extends Widget {
   /**
    * Construct an input area widget.
    */
-  constructor(editor: CellEditorWidget) {
+  constructor(editor: CodeEditorWidget) {
     super();
     this.addClass(INPUT_CLASS);
     editor.addClass(EDITOR_CLASS);
@@ -806,6 +809,6 @@ class InputAreaWidget extends Widget {
   }
 
   private _prompt: Widget;
-  private _editor: CellEditorWidget;
+  private _editor: CodeEditorWidget;
   private _rendered: Widget;
 }

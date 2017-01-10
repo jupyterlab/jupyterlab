@@ -70,7 +70,7 @@ import {
 } from '../../rendermime';
 
 import {
-  IEditorMimeTypeService, IEditorServices
+  IEditorMimeTypeService, IEditorServices, CodeEditor
 } from '../../codeeditor';
 
 import {
@@ -79,10 +79,6 @@ import {
   CodeCellModel, RawCellWidget, RawCellModel,
   ICodeCellModel, IMarkdownCellModel, IRawCellModel
 } from '../cells';
-
-import {
-  CellEditorWidget
-} from '../cells/editor';
 
 import {
   INotebookModel
@@ -986,7 +982,7 @@ class Notebook extends StaticNotebook {
    * Handle a cell being inserted.
    */
   protected onCellInserted(index: number, cell: BaseCellWidget): void {
-    cell.editorWidget.edgeRequested.connect(this._onEdgeRequest, this);
+    cell.editor.edgeRequested.connect(this._onEdgeRequest, this);
     // Trigger an update of the active cell.
     this.activeCellIndex = this.activeCellIndex;
   }
@@ -1023,7 +1019,7 @@ class Notebook extends StaticNotebook {
   /**
    * Handle edge request signals from cells.
    */
-  private _onEdgeRequest(widget: Widget, location: CellEditorWidget.EdgeLocation): void {
+  private _onEdgeRequest(editor: CodeEditor.IEditor, location: CodeEditor.EdgeLocation): void {
     let prev = this.activeCellIndex;
     if (location === 'top') {
       this.activeCellIndex--;

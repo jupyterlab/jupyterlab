@@ -34,17 +34,13 @@ import {
 } from '../inspector';
 
 import {
-  IEditorMimeTypeService, IEditorServices, CodeEditor
+  IEditorMimeTypeService, IEditorServices, CodeEditor, CodeEditorWidget
 } from '../codeeditor';
 
 import {
   BaseCellWidget, CodeCellWidget, RawCellWidget,
   CodeCellModel, RawCellModel
 } from '../notebook/cells';
-
-import {
-  CellEditorWidget
-} from '../notebook/cells/editor';
 
 import {
   IRenderMime
@@ -414,9 +410,9 @@ class ConsoleContent extends Widget {
     this._input.addWidget(prompt);
 
     // Hook up history handling.
-    let editor = prompt.editorWidget;
+    let editor = prompt.editor;
     editor.edgeRequested.connect(this.onEdgeRequest, this);
-    editor.textChanged.connect(this.onTextChange, this);
+    editor.model.value.changed.connect(this.onTextChange, this);
 
     // Associate the new prompt with the completer and inspection handlers.
     this._completerHandler.activeCell = prompt;
@@ -429,11 +425,10 @@ class ConsoleContent extends Widget {
   /**
    * Handle an edge requested signal.
    */
-  protected onEdgeRequest(widget: CellEditorWidget, location: CellEditorWidget.EdgeLocation): Promise<void> {
+  protected onEdgeRequest(editor: CodeEditor.IEditor, location: CodeEditor.EdgeLocation): Promise<void> {
     let prompt = this.prompt;
     let model = prompt.model;
     let source = prompt.model.value.text;
-    let editor = widget.editor;
 
     if (location === 'top') {
       return this._history.back(source).then(value => {
@@ -462,7 +457,7 @@ class ConsoleContent extends Widget {
   /**
    * Handle a text change signal from the editor.
    */
-  protected onTextChange(editor: CellEditorWidget, args: CellEditorWidget.ITextChange): void {
+  protected onTextChange(): void {
     if (this._setByHistory) {
       this._setByHistory = false;
       return;
@@ -746,7 +741,7 @@ namespace ConsoleContent {
           return factory.newInlineEditor(options);
         }
       });
-      this.promptRenderer = new Private.PromptRenderer({
+      this.promptRenderer = new CodeCellWidget.Renderer ({
         editorFactory: options => factory.newInlineEditor(options)
       });
       this.editorMimeTypeService = options.editorServices.mimeTypeService;
@@ -772,6 +767,11 @@ namespace ConsoleContent {
         rendermime,
         renderer: this.promptRenderer
       });
+      // Suppress the default "Enter" key handling.
+      let cb = (editor: CodeEditor.IEditor, event: KeyboardEvent) => {
+        return event.keyCode === 13;  // Enter;
+      };
+      widget.editor.addKeydownHandler(cb);
       return widget;
     }
 
@@ -823,24 +823,5 @@ namespace Private {
   export
   function scrollToBottom(node: HTMLElement): void {
     node.scrollTop = node.scrollHeight - node.clientHeight;
-  }
-
-  /**
-   * A custom renderer for a prompt that suppresses "enter" handling.
-   */
-  export
-  class PromptRenderer extends CodeCellWidget.Renderer {
-    /**
-     * Create a new cell editor for the widget.
-     */
-    createCellEditor(model: CodeCellModel): CellEditorWidget {
-      let widget = super.createCellEditor(model);
-      // Suppress the default "Enter" key handling.
-      let cb = (editor: CodeEditor.IEditor, event: KeyboardEvent) => {
-        return event.keyCode === 13;  // Enter;
-      };
-      widget.editor.addKeydownHandler(cb);
-      return widget;
-    }
   }
 }

@@ -10,11 +10,15 @@ import {
 } from '../../../lib/codemirror';
 
 import {
+  CodeEditorWidget
+} from '../../../lib/codeeditor';
+
+import {
   NotebookPanel, Notebook
 } from '../../../lib/notebook';
 
 import {
-  BaseCellWidget, CodeCellWidget, CellEditorWidget, CodeCellModel
+  BaseCellWidget, CodeCellWidget, CodeCellModel
 } from '../../../lib/notebook/cells';
 
 
@@ -56,8 +60,8 @@ function createCodeCellRenderer(): CodeCellWidget.Renderer {
  * Create a cell editor widget given a factory.
  */
 export
-function createCellEditor(): CellEditorWidget {
-  return new CellEditorWidget({
+function createCellEditor(): CodeEditorWidget {
+  return new CodeEditorWidget({
     model: new CodeCellModel(),
     factory: options => {
       options.wordWrap = true;

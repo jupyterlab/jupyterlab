@@ -6,14 +6,22 @@ import expect = require('expect.js');
 import {
   toArray
 } from 'phosphor/lib/algorithm/iteration';
-
+//
 import {
   CompleterModel, CompleterWidget
 } from '../../../lib/completer';
 
-import {
-  CellEditorWidget
-} from '../../../lib/notebook/cells';
+
+function makeState(text: string): CompleterWidget.ITextState {
+  return {
+    column: 0,
+    lineHeight: 0,
+    charWidth: 0,
+    line: 0,
+    coords: { left: 0, right: 0, top: 0, bottom: 0 },
+    text
+  };
+}
 
 
 describe('completer/model', () => {
@@ -60,19 +68,10 @@ describe('completer/model', () => {
       it('should signal when original request changes', () => {
         let model = new CompleterModel();
         let called = 0;
-        let request: CellEditorWidget.ICompletionRequest = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          coords: null,
-          position: 0,
-          currentValue: 'foo'
-        };
         let listener = (sender: any, args: void) => { called++; };
         model.stateChanged.connect(listener);
         expect(called).to.be(0);
-        model.original = request;
+        model.original = makeState('foo');
         expect(called).to.be(1);
         model.original = null;
         expect(called).to.be(2);
@@ -81,20 +80,11 @@ describe('completer/model', () => {
       it('should not signal when original request has not changed', () => {
         let model = new CompleterModel();
         let called = 0;
-        let request: CellEditorWidget.ICompletionRequest = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          coords: null,
-          position: 0,
-          currentValue: 'foo'
-        };
         let listener = (sender: any, args: void) => { called++; };
         model.stateChanged.connect(listener);
         expect(called).to.be(0);
-        model.original = request;
-        model.original = request;
+        model.original = makeState('foo');
+        model.original = makeState('foo');
         expect(called).to.be(1);
         model.original = null;
         model.original = null;
@@ -105,27 +95,10 @@ describe('completer/model', () => {
         let model = new CompleterModel();
         let called = 0;
         let currentValue = 'foo';
-        let oldValue = currentValue;
         let newValue = 'foob';
-        let coords: CellEditorWidget.ICoordinate = null;
         let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
-        let request: CellEditorWidget.ICompletionRequest = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          coords: coords,
-          position: 0,
-          currentValue: currentValue
-        };
-        let change: CellEditorWidget.ITextChange = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          position: 0,
-          coords, oldValue, newValue
-        };
+        let request = makeState(currentValue);
+        let change = makeState(newValue);
         let listener = (sender: any, args: void) => { called++; };
         model.stateChanged.connect(listener);
         expect(called).to.be(0);
@@ -142,27 +115,10 @@ describe('completer/model', () => {
         let model = new CompleterModel();
         let called = 0;
         let currentValue = 'foo';
-        let oldValue = currentValue;
         let newValue = 'foob';
-        let coords: CellEditorWidget.ICoordinate = null;
         let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
-        let request: CellEditorWidget.ICompletionRequest = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          coords: coords,
-          position: 0,
-          currentValue: currentValue
-        };
-        let change: CellEditorWidget.ITextChange = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          position: 0,
-          coords, oldValue, newValue
-        };
+        let request = makeState(currentValue);
+        let change = makeState(newValue);
         let listener = (sender: any, args: void) => { called++; };
         model.stateChanged.connect(listener);
         expect(called).to.be(0);
@@ -252,15 +208,7 @@ describe('completer/model', () => {
 
       it('should return the original request', () => {
         let model = new CompleterModel();
-        let request: CellEditorWidget.ICompletionRequest = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          coords: null,
-          position: 0,
-          currentValue: 'foo'
-        };
+        let request = makeState('foo');
         model.original = request;
         expect(model.original).to.equal(request);
       });
@@ -277,27 +225,10 @@ describe('completer/model', () => {
       it('should not set if original request is nonexistent', () => {
         let model = new CompleterModel();
         let currentValue = 'foo';
-        let oldValue = currentValue;
         let newValue = 'foob';
-        let coords: CellEditorWidget.ICoordinate = null;
         let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
-        let request: CellEditorWidget.ICompletionRequest = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          coords: coords,
-          position: 0,
-          currentValue: currentValue
-        };
-        let change: CellEditorWidget.ITextChange = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          position: 0,
-          coords, oldValue, newValue
-        };
+        let request = makeState(currentValue);
+        let change = makeState(newValue);
         model.current = change;
         expect(model.current).to.be(null);
         model.original = request;
@@ -309,27 +240,10 @@ describe('completer/model', () => {
       it('should not set if cursor is nonexistent', () => {
         let model = new CompleterModel();
         let currentValue = 'foo';
-        let oldValue = currentValue;
         let newValue = 'foob';
-        let coords: CellEditorWidget.ICoordinate = null;
         let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
-        let request: CellEditorWidget.ICompletionRequest = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          coords: coords,
-          position: 0,
-          currentValue: currentValue
-        };
-        let change: CellEditorWidget.ITextChange = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          position: 0,
-          coords, oldValue, newValue
-        };
+        let request = makeState(currentValue);
+        let change = makeState(newValue);
         model.original = request;
         model.current = change;
         expect(model.current).to.be(null);
@@ -341,27 +255,10 @@ describe('completer/model', () => {
       it('should reset model if change is shorter than original', () => {
         let model = new CompleterModel();
         let currentValue = 'foo';
-        let oldValue = currentValue;
         let newValue = 'fo';
-        let coords: CellEditorWidget.ICoordinate = null;
         let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
-        let request: CellEditorWidget.ICompletionRequest = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          coords: coords,
-          position: 0,
-          currentValue: currentValue
-        };
-        let change: CellEditorWidget.ITextChange = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          position: 0,
-          coords, oldValue, newValue
-        };
+        let request = makeState(currentValue);
+        let change = makeState(newValue);
         model.original = request;
         model.cursor = cursor;
         model.current = change;
@@ -382,15 +279,7 @@ describe('completer/model', () => {
       it('should not set if original request is nonexistent', () => {
         let model = new CompleterModel();
         let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
-        let request: CellEditorWidget.ICompletionRequest = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          coords: null,
-          position: 0,
-          currentValue: 'foo'
-        };
+        let request = makeState('foo');
         model.cursor = cursor;
         expect(model.cursor).to.be(null);
         model.original = request;
@@ -436,27 +325,11 @@ describe('completer/model', () => {
       it('should set current change value', () => {
         let model = new CompleterModel();
         let currentValue = 'foo';
-        let oldValue = currentValue;
         let newValue = 'foob';
-        let coords: CellEditorWidget.ICoordinate = null;
         let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
-        let request: CellEditorWidget.ICompletionRequest = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          coords: coords,
-          position: 0,
-          currentValue: currentValue
-        };
-        let change: CellEditorWidget.ITextChange = {
-          ch: 4,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          position: 4,
-          coords, oldValue, newValue
-        };
+        let request = makeState(currentValue);
+        let change = makeState(newValue);
+        (change as any).column = 4;
         model.original = request;
         model.cursor = cursor;
         expect(model.current).to.be(null);
@@ -467,26 +340,10 @@ describe('completer/model', () => {
       it('should reset model if last character of change is whitespace', () => {
         let model = new CompleterModel();
         let currentValue = 'foo';
-        let oldValue = currentValue;
         let newValue = 'foo ';
-        let coords: CellEditorWidget.ICoordinate = null;
-        let request: CellEditorWidget.ICompletionRequest = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          coords: coords,
-          position: 0,
-          currentValue: currentValue
-        };
-        let change: CellEditorWidget.ITextChange = {
-          ch: 4,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          position: 0,
-          coords, oldValue, newValue
-        };
+        let request = makeState(currentValue);
+        let change = makeState(newValue);
+        (change as any).column = 4;
         model.original = request;
         expect(model.original).to.be.ok();
         model.handleTextChange(change);
@@ -502,16 +359,7 @@ describe('completer/model', () => {
         let patch = 'foobar';
         let want: CompleterWidget.IPatch = { text: patch, position: patch.length };
         let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 3 };
-        let request: CellEditorWidget.ICompletionRequest = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          coords: null,
-          position: 0,
-          currentValue: 'foo'
-        };
-        model.original = request;
+        model.original = makeState('foo');
         model.cursor = cursor;
         expect(model.createPatch(patch)).to.eql(want);
       });
@@ -527,16 +375,7 @@ describe('completer/model', () => {
         let patch = 'barbaz';
         let want: CompleterWidget.IPatch = { text: 'foo\nbarbaz', position: 10 };
         let cursor: CompleterWidget.ICursorSpan = { start: 4, end: 7 };
-        let request: CellEditorWidget.ICompletionRequest = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          coords: null,
-          position: 0,
-          currentValue: currentValue
-        };
-        model.original = request;
+        model.original = makeState(currentValue);
         model.cursor = cursor;
         expect(model.createPatch(patch)).to.eql(want);
       });

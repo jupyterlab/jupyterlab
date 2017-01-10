@@ -20,6 +20,10 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
+  CodeEditor
+} from '../../../lib/codeeditor';
+
+import {
   ConsoleContent
 } from '../../../lib/console/content';
 
@@ -32,7 +36,7 @@ import {
 } from '../../../lib/inspector';
 
 import {
-  CodeCellWidget, CodeCellModel, CellEditorWidget
+  CodeCellWidget, CodeCellModel
 } from '../../../lib/notebook/cells';
 
 import {
@@ -77,15 +81,15 @@ class TestContent extends ConsoleContent {
     this.methods.push('onAfterAttach');
   }
 
-  protected onEdgeRequest(editor: CellEditorWidget, location: CellEditorWidget.EdgeLocation): Promise<void> {
+  protected onEdgeRequest(editor: CodeEditor.IEditor, location: CodeEditor.EdgeLocation): Promise<void> {
     return super.onEdgeRequest(editor, location).then(() => {
       this.methods.push('onEdgeRequest');
       this.edgeRequested.emit(void 0);
     });
   }
 
-  protected onTextChange(editor: CellEditorWidget, args: CellEditorWidget.ITextChange): void {
-    super.onTextChange(editor, args);
+  protected onTextChange(): void {
+    super.onTextChange();
     this.methods.push('onTextChange');
   }
 
@@ -428,7 +432,7 @@ describe('console/content', () => {
             local.execute(force).then(() => {
               expect(local.prompt.model.value.text).to.not.be(code);
               expect(local.methods).to.not.contain('onEdgeRequest');
-              local.prompt.editorWidget.edgeRequested.emit('top');
+              local.prompt.editor.edgeRequested.emit('top');
             }).catch(done);
           });
         });
@@ -439,19 +443,9 @@ describe('console/content', () => {
     describe('#onTextChange()', () => {
 
       it('should be called upon an editor text change', () => {
-        let change: CellEditorWidget.ITextChange = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          position: 0,
-          coords: null,
-          oldValue: 'fo',
-          newValue: 'foo'
-        };
         Widget.attach(widget, document.body);
         expect(widget.methods).to.not.contain('onTextChange');
-        widget.prompt.editorWidget.textChanged.emit(change);
+        widget.prompt.model.value.text = 'foo';
         expect(widget.methods).to.contain('onTextChange');
       });
 

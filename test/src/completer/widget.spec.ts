@@ -16,10 +16,6 @@ import {
 } from 'simulate-event';
 
 import {
-  CellEditorWidget
-} from '../../../lib/notebook/cells';
-
-import {
   CompleterWidget, CompleterModel
 } from '../../../lib/completer';
 
@@ -550,15 +546,14 @@ describe('completer/widget', () => {
           let anchor = document.createElement('div');
           let content = new Widget();
           let model = new CompleterModel();
-          let coords: CellEditorWidget.ICoordinate = { left: 0, right: 0, top: 100, bottom: 120 };
-          let request: CellEditorWidget.ICompletionRequest = {
-            ch: 0,
-            chHeight: 0,
-            chWidth: 0,
+          let coords: CompleterWidget.ICoordinate = { left: 0, right: 0, top: 100, bottom: 120 };
+          let request: CompleterWidget.ITextState = {
+            column: 0,
+            lineHeight: 0,
+            charWidth: 0,
             line: 0,
-            coords: coords,
-            position: 0,
-            currentValue: 'f'
+            coords,
+            text: 'f'
           };
 
           content.node.style.height = '5000px';
@@ -605,15 +600,16 @@ describe('completer/widget', () => {
       it('should emit a selection if there is only one match', () => {
         let anchor = new Widget();
         let model = new CompleterModel();
-        let request: CellEditorWidget.ICompletionRequest = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
-          line: 0,
-          coords: null,
-          position: 0,
-          currentValue: 'f'
-        };
+        let coords: CompleterWidget.ICoordinate = { left: 0, right: 0, top: 100, bottom: 120 };
+        let request: CompleterWidget.ITextState = {
+            column: 0,
+            lineHeight: 0,
+            charWidth: 0,
+            line: 0,
+            coords,
+            text: 'f'
+          };
+
         let value = '';
         let options: CompleterWidget.IOptions = { model, anchor: anchor.node };
         let listener = (sender: any, selected: string) => { value = selected; };
@@ -642,15 +638,16 @@ describe('completer/widget', () => {
       it('should un-hide widget if multiple options are available', () => {
         let anchor = new Widget();
         let model = new CompleterModel();
-        let request: CellEditorWidget.ICompletionRequest = {
-          ch: 0,
-          chHeight: 0,
-          chWidth: 0,
+        let coords: CompleterWidget.ICoordinate = { left: 0, right: 0, top: 100, bottom: 120 };
+        let request: CompleterWidget.ITextState = {
+          column: 0,
+          lineHeight: 0,
+          charWidth: 0,
           line: 0,
-          coords: null,
-          position: 0,
-          currentValue: 'f'
+          coords,
+          text: 'f'
         };
+
         let options: CompleterWidget.IOptions = { model, anchor: anchor.node };
 
         Widget.attach(anchor, document.body);

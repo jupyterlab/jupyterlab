@@ -14,8 +14,8 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
-  CellEditorWidget
-} from '../notebook/cells/editor';
+  CodeEditor
+} from '../codeeditor';
 
 import {
   BaseCellWidget
@@ -70,15 +70,15 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
     }
 
     if (this._activeCell && !this._activeCell.isDisposed) {
-      const editor = this._activeCell.editorWidget;
-      editor.textChanged.disconnect(this.onTextChanged, this);
+      const editor = this._activeCell.editor;
+      editor.model.value.changed.disconnect(this.onTextChanged, this);
     }
     this._activeCell = newValue;
     if (this._activeCell) {
       // Clear ephemeral inspectors in preparation for a new editor.
       this.ephemeralCleared.emit(void 0);
-      const editor = this._activeCell.editorWidget;
-      editor.textChanged.connect(this.onTextChanged, this);
+      const editor = this._activeCell.editor;
+      editor.model.value.changed.connect(this.onTextChanged, this);
     }
   }
 
@@ -121,21 +121,26 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
    * #### Notes
    * Update the hints inspector based on a text change.
    */
-  protected onTextChanged(editor: CellEditorWidget, change: CellEditorWidget.ITextChange): void {
+  protected onTextChanged(): void {
     let update: Inspector.IInspectorUpdate = {
       content: null,
       type: 'hints'
     };
 
+    let editor = this.activeCell.editor;
+    let code = editor.model.value.text;
+    let position = editor.getCursorPosition();
+    let offset = editor.getOffsetAt(position)
+
     // Clear hints if the new text value is empty or kernel is unavailable.
-    if (!change.newValue || !this._kernel) {
+    if (!code || !this._kernel) {
       this.inspected.emit(update);
       return;
     }
 
     let contents: KernelMessage.IInspectRequest = {
-      code: change.newValue,
-      cursor_pos: change.position,
+      code,
+      cursor_pos: offset,
       detail_level: 0
     };
     let pending = ++this._pending;

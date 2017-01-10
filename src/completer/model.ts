@@ -18,10 +18,6 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
-  CellEditorWidget
-} from '../notebook/cells/editor';
-
-import {
   CompleterWidget
 } from './widget';
 
@@ -39,10 +35,10 @@ class CompleterModel implements CompleterWidget.IModel {
   /**
    * The original completion request details.
    */
-  get original(): CellEditorWidget.ICompletionRequest {
+  get original(): CompleterWidget.ITextState {
     return this._original;
   }
-  set original(newValue: CellEditorWidget.ICompletionRequest) {
+  set original(newValue: CompleterWidget.ITextState) {
     if (deepEqual(newValue, this._original)) {
       return;
     }
@@ -54,10 +50,10 @@ class CompleterModel implements CompleterWidget.IModel {
   /**
    * The current text change details.
    */
-  get current(): CellEditorWidget.ITextChange {
+  get current(): CompleterWidget.ITextState {
     return this._current;
   }
-  set current(newValue: CellEditorWidget.ITextChange) {
+  set current(newValue: CompleterWidget.ITextState) {
     if (deepEqual(newValue, this._current)) {
       return;
     }
@@ -80,8 +76,8 @@ class CompleterModel implements CompleterWidget.IModel {
     }
     let original = this._original;
     let current = this._current;
-    let originalLine = original.currentValue.split('\n')[original.line];
-    let currentLine = current.newValue.split('\n')[current.line];
+    let originalLine = original.text;
+    let currentLine = current.text;
 
     // If the text change means that the original start point has been preceded,
     // then the completion is no longer valid and should be reset.
@@ -92,9 +88,9 @@ class CompleterModel implements CompleterWidget.IModel {
 
     let { start, end } = this._cursor;
     // Clip the front of the current line.
-    let query = current.newValue.substring(start);
+    let query = currentLine.substring(start);
     // Clip the back of the current line.
-    let ending = original.currentValue.substring(end);
+    let ending = originalLine.substring(end);
     query = query.substring(0, query.lastIndexOf(ending));
     this._query = query;
     this.stateChanged.emit(void 0);
@@ -194,19 +190,20 @@ class CompleterModel implements CompleterWidget.IModel {
   /**
    * Handle a text change.
    */
-  handleTextChange(change: CellEditorWidget.ITextChange): void {
+  handleTextChange(request: CompleterWidget.ITextState): void {
     // When the completer detects a common subset prefix for all options,
     // it updates the model and sets the model source to that value, but this
     // text change should be ignored.
     if (this.subsetMatch) {
       return;
     }
-    let line = change.newValue.split('\n')[change.line];
+    let { text, column } = request;
+
     // If last character entered is not whitespace, update completion.
-    if (line[change.ch - 1] && line[change.ch - 1].match(/\S/)) {
+    if (text[column - 1] && text[column - 1].match(/\S/)) {
       // If there is currently a completion
       if (this.original) {
-        this.current = change;
+        this.current = request;
       }
     } else {
       // If final character is whitespace, reset completion.
@@ -230,7 +227,7 @@ class CompleterModel implements CompleterWidget.IModel {
     }
 
     let { start, end } = cursor;
-    let value = original.currentValue;
+    let value = original.text;
     let prefix = value.substring(0, start);
     let suffix = value.substring(end);
     let text = prefix + patch + suffix;
@@ -284,11 +281,11 @@ class CompleterModel implements CompleterWidget.IModel {
     this._subsetMatch = false;
   }
 
-  private _current: CellEditorWidget.ITextChange = null;
+  private _current: CompleterWidget.ITextState = null;
   private _cursor: CompleterWidget.ICursorSpan = null;
   private _isDisposed = false;
   private _options: string[] = [];
-  private _original: CellEditorWidget.ICompletionRequest = null;
+  private _original: CompleterWidget.ITextState = null;
   private _query = '';
   private _subsetMatch = false;
 }
