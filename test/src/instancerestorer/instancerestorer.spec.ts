@@ -12,7 +12,11 @@ import {
 } from 'phosphor/lib/ui/commandregistry';
 
 import {
-  InstanceRestorer
+  Widget
+} from 'phosphor/lib/ui/widget';
+
+import {
+  IInstanceRestorer, InstanceRestorer
 } from '../../../lib/instancerestorer/instancerestorer';
 
 import {
@@ -60,6 +64,33 @@ describe('instancerestorer/instancerestorer', () => {
         });
         restorer.restored.then(() => { done(); }).catch(done);
         ready.resolve(void 0);
+      });
+
+    });
+
+    describe('#add()', () => {
+
+      it('should add a widget to be tracked by the restorer', done => {
+        let ready = new utils.PromiseDelegate<void>();
+        let restorer = new InstanceRestorer({
+          first: ready.promise,
+          registry: new CommandRegistry(),
+          state: new StateDB({ namespace: NAMESPACE })
+        });
+        let currentWidget = new Widget();
+        let dehydrated: IInstanceRestorer.ILayout = {
+          currentWidget,
+          leftArea: { collapsed: true, currentWidget: null, widgets: null },
+          rightArea: { collapsed: true, currentWidget: null, widgets: null }
+        };
+        restorer.add(currentWidget, 'test-one');
+        ready.resolve(void 0);
+        restorer.restored.then(() => restorer.save(dehydrated))
+          .then(() => restorer.fetch())
+          .then(layout => {
+            expect(layout.currentWidget).to.be(currentWidget);
+            done();
+          }).catch(done);
       });
 
     });
