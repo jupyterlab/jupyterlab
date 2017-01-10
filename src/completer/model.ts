@@ -18,10 +18,6 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
-  CodeEditor
-} from '../codeeditor';
-
-import {
   CompleterWidget
 } from './widget';
 

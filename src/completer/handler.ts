@@ -103,7 +103,7 @@ class CellCompleterHandler implements IDisposable {
 
     let cell = this.activeCell;
     if (!cell) {
-      return Promise.reject('No active cell');
+      return Promise.reject(new Error('No active cell'));
     }
 
     let offset = cell.editor.getOffsetAt(position);
