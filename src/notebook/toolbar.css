@@ -18,8 +18,8 @@
 }
 
 
-.jp-Notebook-toolbarCellType .jp-Notebook-toolbarCellTypeDropdown {
-  border: var(--jp-border-width) solid var(--jp-border-color1);
+.jp-Notebook-toolbarCellType select.jp-Notebook-toolbarCellTypeDropdown {
+  border: var(--jp-border-width) solid var(--jp-border-color4);
   border-radius: 0;
   outline: none;
   width: 100%;
