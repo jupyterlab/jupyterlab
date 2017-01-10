@@ -183,10 +183,21 @@ class RenderMime {
 
   /**
    * Remove a renderer by mimetype.
+   *
+   * @param mimetype - The mimetype of the renderer.
    */
   removeRenderer(mimetype: string): void {
     delete this._renderers[mimetype];
     this._order.remove(mimetype);
+  }
+
+  /**
+   * Get a renderer by mimetype.
+   *
+   * @param mimetype - The mimetype of the renderer.
+   */
+  getRenderer(mimetype: string): RenderMime.IRenderer {
+    return this._renderers[mimetype];
   }
 
   private _renderers: RenderMime.MimeMap<RenderMime.IRenderer> = Object.create(null);
