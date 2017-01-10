@@ -17,7 +17,7 @@ import {
 } from 'phosphor/lib/core/disposable';
 
 import {
-  clearSignalData
+  clearSignalData, defineSignal, ISignal
 } from 'phosphor/lib/core/signaling';
 
 import {
@@ -52,6 +52,21 @@ const EDITOR_CLASS = 'jp-CodeMirrorWidget';
 export
 const DEFAULT_CODEMIRROR_THEME: string = 'jupyter';
 
+/**
+ * The key code for the up arrow key.
+ */
+const UP_ARROW = 38;
+
+/**
+ * The key code for the down arrow key.
+ */
+const DOWN_ARROW = 40;
+
+/**
+ * The key code for the tab key.
+ */
+const TAB = 9;
+
 
 /**
  * CodeMirror editor.
@@ -67,6 +82,16 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * The selection style of this editor.
    */
   readonly selectionStyle?: CodeEditor.ISelectionStyle;
+
+  /**
+   * A signal emitted when a text completion is requested.
+   */
+  readonly completionRequested: ISignal<this, CodeEditor.IPosition>;
+
+  /**
+   * A signal emitted when either the top or bottom edge is requested.
+   */
+  readonly edgeRequested: ISignal<this, CodeEditor.EdgeLocation>;
 
   /**
    * Construct a CodeMirror editor.
@@ -94,12 +119,15 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     model.selections.changed.connect(this._onSelectionsChanged, this);
 
     CodeMirror.on(editor, 'keydown', (editor, event) => {
-      findIndex(this._keydownHandlers, handler => {
+      let index = findIndex(this._keydownHandlers, handler => {
         if (handler(this, event) === true) {
           event.preventDefault();
           return true;
         }
       });
+      if (index == -1) {
+        this.onKeydown(event);
+      }
     });
     CodeMirror.on(editor, 'cursorActivity', () => this._onCursorActivity());
     CodeMirror.on(editor.getDoc(), 'change', (instance, change) => {
@@ -381,6 +409,69 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
+   * Handle keydown events from the editor.
+   */
+  protected onKeydown(event: KeyboardEvent): boolean {
+    let position = this.getCursorPosition();
+    let { line, column } = position;
+
+    if (event.keyCode === TAB) {
+      // If the tab is modified, ignore it.
+      if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
+        return false;
+      }
+      this.onTabEvent(event, position);
+      return false;
+    }
+
+    if (line === 0 && column === 0 && event.keyCode === UP_ARROW) {
+      if (!event.shiftKey) {
+        this.edgeRequested.emit('top');
+      }
+      return false;
+    }
+
+    let lastLine = this.lineCount - 1;
+    let lastCh = this.getLine(lastLine).length;
+    if (line === lastLine && column === lastCh
+        && event.keyCode === DOWN_ARROW) {
+      if (!event.shiftKey) {
+        this.edgeRequested.emit('bottom');
+      }
+      return false;
+    }
+    return false;
+  }
+
+  /**
+   * Handle a tab key press.
+   */
+  protected onTabEvent(event: KeyboardEvent, position: CodeEditor.IPosition): void {
+    // If there is a text selection, no completion requests should be emitted.
+    const selection = this.getSelection();
+    if (selection.start === selection.end) {
+      return;
+    }
+
+    let currentLine = this.getLine(position.line);
+
+    // A completion request signal should only be emitted if the current
+    // character or a preceding character is not whitespace.
+    //
+    // Otherwise, the default tab action of creating a tab character should be
+    // allowed to propagate.
+    if (!currentLine.substring(0, position.column).match(/\S/)) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+
+    this.completionRequested.emit(position);
+  }
+
+  /**
    * Handles a mime type change.
    */
   protected _onMimeTypeChanged(): void {
@@ -558,6 +649,11 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   private _keydownHandlers = new Vector<CodeEditor.KeydownHandler>();
   private _changeGuard = false;
 }
+
+
+// Define the signals for the `CellEditorWidget` class.
+defineSignal(CodeMirrorEditor.prototype, 'completionRequested');
+defineSignal(CodeMirrorEditor.prototype, 'edgeRequested');
 
 
 /**

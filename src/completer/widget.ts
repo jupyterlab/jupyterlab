@@ -30,8 +30,8 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  CellEditorWidget
-} from '../notebook/cells/editor';
+  CodeEditor
+} from '../codeeditor';
 
 
 /**
@@ -455,7 +455,7 @@ class CompleterWidget extends Widget {
     node.classList.remove(OUTOFVIEW_CLASS);
 
     // Always use the original coordinates to calculate completer position.
-    let { coords, chWidth, chHeight } = model.original;
+    let { coords, charWidth, lineHeight } = model.original;
     let style = window.getComputedStyle(node);
     let innerHeight = window.innerHeight;
     let scrollDelta = this._anchorPoint - this._anchor.scrollTop;
@@ -482,7 +482,7 @@ class CompleterWidget extends Widget {
 
     // Make sure the completer ought to be visible.
     let withinBounds = maxHeight > minHeight &&
-                       spaceBelow >= chHeight &&
+                       spaceBelow >= lineHeight &&
                        spaceAbove >= anchorRect.top;
     if (!withinBounds) {
       node.classList.add(OUTOFVIEW_CLASS);
@@ -499,7 +499,7 @@ class CompleterWidget extends Widget {
     node.style.top = `${Math.floor(top)}px`;
 
     // Move completer to the start of the blob being completed.
-    left -= chWidth * (end - start);
+    left -= charWidth * (end - start);
     node.style.left = `${Math.ceil(left)}px`;
     node.style.width = 'auto';
 
@@ -564,6 +564,48 @@ namespace CompleterWidget {
   }
 
   /**
+   * An interface describing editor state coordinates.
+   */
+  export interface ICoordinate extends CodeEditor.ICoordinate, JSONObject { }
+
+
+  /**
+   * An interface for a completion request.
+   */
+  export
+  interface ITextState extends JSONObject {
+    /**
+     * The current line of text.
+     */
+    readonly text: string;
+
+    /**
+     * The height of a character in the editor.
+     */
+    readonly lineHeight: number;
+
+    /**
+     * The width of a character in the editor.
+     */
+    readonly charWidth: number;
+
+    /**
+     * The line number of the editor cursor.
+     */
+    readonly line: number;
+
+    /**
+     * The character number of the editor cursor within a line.
+     */
+    readonly column: number;
+
+    /**
+     * The coordinate position of the cursor.
+     */
+    readonly coords: ICoordinate;
+  }
+
+  /**
    * The data model backing a code completer widget.
    */
   export
@@ -574,9 +616,9 @@ namespace CompleterWidget {
     readonly stateChanged: ISignal<IModel, void>;
 
     /**
-     * The current text change details.
+     * The current text state details.
      */
-    current: CellEditorWidget.ITextChange;
+    current: ITextState;
 
     /**
      * The cursor details that the API has used to return matching options.
@@ -591,7 +633,7 @@ namespace CompleterWidget {
     /**
      * The original completer request details.
      */
-    original: CellEditorWidget.ICompletionRequest;
+    original: ITextState;
 
     /**
      * The query against which items are filtered.
@@ -614,9 +656,9 @@ namespace CompleterWidget {
     setOptions(options: IterableOrArrayLike<string>): void;
 
     /**
-     * Handle a text change.
+     * Handle a completion request.
      */
-    handleTextChange(change: CellEditorWidget.ITextChange): void;
+    handleTextChange(change: CompleterWidget.ITextState): void;
 
     /**
      * Create a resolved patch between the original state and a patch string.
