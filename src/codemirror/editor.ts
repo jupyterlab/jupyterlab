@@ -47,6 +47,11 @@ import {
 const EDITOR_CLASS = 'jp-CodeMirrorWidget';
 
 /**
+ * The class name added to read only cell editor widgets.
+ */
+const READ_ONLY_CLASS = 'jp-mod-readOnly';
+
+/**
  * The name of the default CodeMirror theme
  */
 export
@@ -97,7 +102,8 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Construct a CodeMirror editor.
    */
   constructor(options: CodeEditor.IOptions, config: CodeMirror.EditorConfiguration) {
-    options.host.classList.add(EDITOR_CLASS);
+    let host = this._host = options.host;
+    host.classList.add(EDITOR_CLASS);
 
     this.uuid = options.uuid || utils.uuid();
     this.selectionStyle = options.selectionStyle;
@@ -105,7 +111,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     Private.updateConfig(options, config);
 
     let model = this._model = options.model;
-    let editor = this._editor = CodeMirror(options.host, config);
+    let editor = this._editor = CodeMirror(host, config);
     let doc = editor.getDoc();
 
     // Handle initial values for text, mimetype, and selections.
@@ -125,7 +131,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
           return true;
         }
       });
-      if (index == -1) {
+      if (index === -1) {
         this.onKeydown(event);
       }
     });
@@ -201,11 +207,15 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Should the editor be read only.
    */
   get readOnly(): boolean {
-    return this._editor.getOption('readOnly') === 'nocursor';
+    return this._editor.getOption('readOnly') !== false;
   }
   set readOnly(readOnly: boolean) {
-    let option = readOnly ? 'nocursor' : false;
-    this._editor.setOption('readOnly', option);
+    this._editor.setOption('readOnly', readOnly);
+    if (readOnly) {
+      this._host.classList.add(READ_ONLY_CLASS);
+    } else {
+      this._host.classList.remove(READ_ONLY_CLASS);
+    }
   }
 
   /**
@@ -648,6 +658,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   protected selectionMarkers: { [key: string]: CodeMirror.TextMarker[] | undefined } = {};
   private _keydownHandlers = new Vector<CodeEditor.KeydownHandler>();
   private _changeGuard = false;
+  private _host: HTMLElement;
 }
 
 
