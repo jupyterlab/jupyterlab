@@ -37,7 +37,7 @@
 .jp-FAQ-h2 {
   font-size: 14px;
   font-weight: 400;
-  color: #9E9E9E;
+  color: var(--md-grey-500);
   margin: 28px 0 0 0;
   margin-bottom: 8px;
 }
@@ -56,7 +56,7 @@
 
 @keyframes highlight {
     0%   {background-color: transparent;}
-    50%  {background-color: #E3F2FD;}
+    50%  {background-color: var(--md-blue-100);}
     100% {background-color: transparent;}
 }
 
@@ -71,7 +71,7 @@
 
 .jp-FAQ-question > a {
   font-size: 20px;
-  color: #616161;
+  color: var(--jp-ui-font-color0);
   font-weight: 400;
   line-height: 150%;
   list-style-type: none;
@@ -82,16 +82,16 @@
 
 
 .jp-FAQ-question > a:hover {
-  color: #42A5F5;
+  color: var(--md-blue-500);
 }
 
 
 .jp-FAQ-answer{
   font-size: 15px;
   font-weight: 200;
-  color: #9E9E9E;
+  color: var(--md-grey-500);
   line-height: 160%;
-  border-left: 2px solid #9E9E9E;
+  border-left: 2px solid var(--md-grey-500);
   padding-left: 25px;
   list-style-type: none;
   margin: 15px 0 15px 20px;
@@ -104,18 +104,18 @@
 
 
 .jp-FAQ-toc:focus{
-  color: #42A5F5;
+  color: var(--md-blue-500);
 }
 
 
 li > jp-FAQ-answer {
-  color: #4A90E2;
+  color: var(--md-grey-500);
   text-decoration: none;
 }
 
 
 .jp-FAQ-title {
-  color: #616161;
+  color: var(--jp-ui-font-color0);
   display: block;
 }
 
