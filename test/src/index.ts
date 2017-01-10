@@ -56,7 +56,6 @@ import './renderers/latex.spec';
 
 import './rendermime/rendermime.spec';
 
-import './notebook/cells/editor.spec';
 import './notebook/cells/model.spec';
 import './notebook/cells/widget.spec';
 

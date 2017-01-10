@@ -1117,7 +1117,7 @@ describe('notebook/notebook/widget', () => {
           widget.model.fromJSON(DEFAULT_CONTENT);
           widget.activeCellIndex = 1;
           let child = widget.widgets.at(widget.activeCellIndex);
-          child.editorWidget.edgeRequested.emit('top');
+          child.editor.edgeRequested.emit('top');
           expect(widget.activeCellIndex).to.be(0);
         });
 
@@ -1125,7 +1125,7 @@ describe('notebook/notebook/widget', () => {
           let widget = createActiveWidget();
           widget.model.fromJSON(DEFAULT_CONTENT);
           let child = widget.widgets.at(widget.activeCellIndex);
-          child.editorWidget.edgeRequested.emit('bottom');
+          child.editor.edgeRequested.emit('bottom');
           expect(widget.activeCellIndex).to.be(1);
         });
 
