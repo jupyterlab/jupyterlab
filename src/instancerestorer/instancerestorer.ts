@@ -377,6 +377,11 @@ class InstanceRestorer implements IInstanceRestorer {
         dehydrated.current = current;
       }
     }
+    if (area.widgets) {
+      dehydrated.widgets = area.widgets
+        .map(widget => Private.nameProperty.get(area.currentWidget))
+        .filter(name => !!name);
+    }
     return dehydrated;
   }
 
