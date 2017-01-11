@@ -1,7 +1,7 @@
 var path = require('path');
 
 module.exports = {
-  entry: './test/src/index.ts',
+  entry: './test/build/index.js',
   output: {
     path: __dirname + "/build",
     filename: "coverage.js",
