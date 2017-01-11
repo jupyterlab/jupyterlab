@@ -76,7 +76,7 @@
     "prepublish": "npm run build",
     "test": "npm run test:firefox",
     "test:chrome": "npm run build:test && cd test && python run-test.py --browsers=Chrome karma.conf.js",
-    "test:coverage": "webpack --config test/webpack-cov.conf.js && cd test && python run-test.py karma-cov.conf.js",
+    "test:coverage": "tsc --project test/src && webpack --config test/webpack-cov.conf.js && cd test && python run-test.py karma-cov.conf.js",
     "test:debug": "npm run build:test && cd test && python run-test.py  --browsers=Chrome --singleRun=false --debug=true karma.conf.js",
     "test:firefox": "npm run build:test && cd test && python run-test.py --browsers=Firefox karma.conf.js",
     "test:ie": "npm run build:test && cd test && python run-test.py  --browsers=IE karma.conf.js",
