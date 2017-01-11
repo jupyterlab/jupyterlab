@@ -68,7 +68,7 @@ class TestApp(NotebookApp):
     allow_origin = Unicode('*')
 
     def start(self):
-        # Compat with older notebook versions.
+        # Cannot run against Notebook 4.3.0 due to auth incompatibilities.
         if self.version == '4.3.0':
             msg = ('Cannot run unit tests against Notebook 4.3.0.  '
                    'Please upgrade to Notebook 4.3.1+')
