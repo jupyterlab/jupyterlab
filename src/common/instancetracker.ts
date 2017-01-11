@@ -18,6 +18,10 @@ import {
 } from 'phosphor/lib/ui/commandregistry';
 
 import {
+  FocusTracker
+} from 'phosphor/lib/ui/focustracker';
+
+import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
@@ -35,11 +39,6 @@ import {
  */
 export
 interface IInstanceTracker<T extends Widget> {
-  /**
-   * A signal emitted when a widget is added or removed from the tracker.
-   */
-  readonly changed: ISignal<this, 'add' | 'remove'>;
-
   /**
    * A signal emitted when the current widget changes.
    *
@@ -88,9 +87,6 @@ interface IInstanceTracker<T extends Widget> {
  * A class that keeps track of widget instances.
  *
  * #### Notes
- * This is meant to be used in conjunction with a `FocusTracker` and will
- * typically be kept in sync with focus tracking events.
- *
  * The API surface area of this concrete implementation is substantially larger
  * than the instance tracker interface it implements. The interface is intended
  * for export by JupyterLab plugins that create widgets and have clients who may
@@ -106,6 +102,10 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    */
   constructor(options: InstanceTracker.IOptions) {
     this.namespace = options.namespace;
+    this._tracker.currentChanged.connect((sender, args) => {
+      this.onCurrentChanged();
+      this.currentChanged.emit(this.currentWidget);
+    });
   }
 
   /**
@@ -114,15 +114,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   readonly namespace: string;
 
   /**
-   * A signal emitted when a widget is added or removed from the tracker.
-   */
-  readonly changed: ISignal<this, 'add' | 'remove'>;
-
-  /**
    * A signal emitted when the current widget changes.
-   *
-   * #### Notes
-   * If the last widget being tracked is disposed, `null` will be emitted.
    */
   readonly currentChanged: ISignal<this, T>;
 
@@ -130,7 +122,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * The current widget is the most recently focused widget.
    */
   get currentWidget(): T {
-    return this._currentWidget;
+    return this._tracker.currentWidget;
   }
 
   /**
@@ -159,6 +151,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
       return Promise.reject(warning);
     }
     this._widgets.add(widget);
+    this._tracker.add(widget);
 
     let injected = Private.injectedProperty.get(widget);
     let promise: Promise<void>;
@@ -193,18 +186,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
           state.remove(name);
         }
       }
-      // Emit a changed signal.
-      this.changed.emit('remove');
-      // If this was the last widget, emit null for current widget signal.
-      if (!this._widgets.size) {
-        this._currentWidget = null;
-        this.onCurrentChanged();
-        this.currentChanged.emit(null);
-      }
     });
-
-    // Emit a changed signal.
-    this.changed.emit('add');
 
     return promise || Promise.resolve(void 0);
   }
@@ -217,7 +199,6 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
       return;
     }
     clearSignalData(this);
-    this._currentWidget = null;
     this._widgets.clear();
     this._widgets = null;
   }
@@ -343,35 +324,6 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   }
 
   /**
-   * Syncs the state of the tracker with a widget known to have focus.
-   *
-   * @param current The currently focused widget.
-   *
-   * @returns The current widget or `null` if there is none.
-   *
-   * #### Notes
-   * Syncing acts as a gate returning a widget only if it is the current widget.
-   */
-  sync(current: Widget): T {
-    if (this.isDisposed) {
-      return;
-    }
-
-    if (current && this._widgets.has(current as any)) {
-      // If no state change needs to occur, just bail.
-      if (this._currentWidget === current) {
-        return this._currentWidget;
-      }
-      this._currentWidget = current as T;
-      this.onCurrentChanged();
-      this.currentChanged.emit(this._currentWidget);
-      return this._currentWidget;
-    }
-
-    return null;
-  }
-
-  /**
    * Handle the current change event.
    *
    * #### Notes
@@ -382,14 +334,13 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     /* This is a no-op. */
   }
 
-  private _currentWidget: T = null;
   private _restore: InstanceTracker.IRestoreOptions<T> = null;
+  private _tracker = new FocusTracker<T>();
   private _widgets = new Set<T>();
 }
 
 
 // Define the signals for the `InstanceTracker` class.
-defineSignal(InstanceTracker.prototype, 'changed');
 defineSignal(InstanceTracker.prototype, 'currentChanged');
 
 
