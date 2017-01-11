@@ -226,7 +226,7 @@ describe('rendermime/index', () => {
 
       it('should return undefined for missing mimetype', () => {
         let r = defaultRenderMime();
-        expect(r.getRenderer('foo/bar')).to.be(undefined);
+        expect(r.getRenderer('hello/world')).to.be(undefined);
       });
 
     });
