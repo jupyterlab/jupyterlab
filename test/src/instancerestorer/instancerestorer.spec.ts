@@ -95,6 +95,51 @@ describe('instancerestorer/instancerestorer', () => {
 
     });
 
+    describe('#fetch()', () => {
+
+      it('should always return a value', done => {
+        let restorer = new InstanceRestorer({
+          first: Promise.resolve(void 0),
+          registry: new CommandRegistry(),
+          state: new StateDB({ namespace: NAMESPACE })
+        });
+        restorer.fetch().then(layout => {
+          expect(layout).to.be.ok();
+          done();
+        }).catch(done);
+      });
+
+      it('should fetch saved data', done => {
+        let ready = new utils.PromiseDelegate<void>();
+        let restorer = new InstanceRestorer({
+          first: ready.promise,
+          registry: new CommandRegistry(),
+          state: new StateDB({ namespace: NAMESPACE })
+        });
+        let currentWidget = new Widget();
+        // The `fresh` attribute is only here to check against the return value.
+        let dehydrated: IInstanceRestorer.ILayout = {
+          currentWidget: null,
+          fresh: false,
+          leftArea: {
+            currentWidget,
+            collapsed: true,
+            widgets: [currentWidget]
+          },
+          rightArea: { collapsed: true, currentWidget: null, widgets: null }
+        };
+        restorer.add(currentWidget, 'test-one');
+        ready.resolve(void 0);
+        restorer.restored.then(() => restorer.save(dehydrated))
+          .then(() => restorer.fetch())
+          .then(layout => {
+            expect(layout).to.eql(dehydrated);
+            done();
+          }).catch(done);
+      });
+
+    });
+
   });
 
 });
