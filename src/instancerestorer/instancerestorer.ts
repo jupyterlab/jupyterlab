@@ -346,8 +346,9 @@ class InstanceRestorer implements IInstanceRestorer {
   save(data: IInstanceRestorer.ILayout): Promise<void> {
     // If there are promises that are unresolved, bail.
     if (this._promises) {
-      console.warn('save() was called prematurely.');
-      return Promise.resolve(void 0);
+      let warning = 'save() was called prematurely.';
+      console.warn(warning);
+      return Promise.reject(warning);
     }
 
     let dehydrated: InstanceRestorer.IDehydratedLayout = {};
