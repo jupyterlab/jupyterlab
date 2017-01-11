@@ -11,7 +11,7 @@ for (var i = 0; i < dirs.length; i++) {
   console.log('\n********');
   console.log('Building: ' + dirs[i] + '...');
   process.chdir('examples/' + dirs[i]);
-  childProcess.execSync('npm run update', { stdio: [0, 1, 2] });
+  childProcess.execSync('rimraf node_modules/jupyterlab && npm install --cache-min 9999999', { stdio: [0, 1, 2] });
   process.chdir('../..');
 }
 console.log('\n********\nDone building examples!');
