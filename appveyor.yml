@@ -1,0 +1,45 @@
+# Do not build feature branch with open Pull Requests
+skip_branch_with_pr: true
+
+# scripts that are called at very beginning, before repo cloning
+init:
+  - ps: (new-object net.webclient).DownloadFile('https://github.com/git-for-windows/git/releases/download/v2.11.0.windows.1/Git-2.11.0-64-bit.exe', 'C:\\git-setup.exe')
+  - cmd: START /WAIT C:\\git-setup.exe /VERYSILENT
+
+# environment variables
+environment:
+  nodejs_version: "6.9"
+  matrix:
+    - PYTHON: "C:\\Python35-x64"
+      PYTHON_VERSION: "3.5.x"
+      PYTHON_MAJOR: 3
+      PYTHON_ARCH: "64"
+    - PYTHON: "C:\\Python27"
+      PYTHON_VERSION: "2.7.x"
+      PYTHON_MAJOR: 2
+      PYTHON_ARCH: "32"
+
+# build cache to preserve files/folders between builds
+cache:
+  - node_modules # NPM packages
+
+# scripts that run after cloning repository
+install:
+  # Install node:
+  - ps: Install-Product node $env:nodejs_version
+  # Ensure python scripts are from right version:
+  - 'SET "PATH=%PYTHON%\\Scripts;%PATH%"'
+  # Install our package:
+  - 'pip install --upgrade -e ".[test]"'
+
+build: off
+
+# scripts to run before tests
+before_test:
+  - git config --global user.email appveyor@fake.com
+  - git config --global user.name "AppVeyor CI"
+
+
+# to run your custom scripts instead of automatic tests
+test_script:
+  - 'py.test'
