@@ -292,7 +292,6 @@ class StaticNotebook extends Widget {
     switch (args.name) {
     case 'language_info':
       this._updateMimetype();
-      this._updateCells();
       break;
     default:
       break;
@@ -406,7 +405,7 @@ class StaticNotebook extends Widget {
     widget.addClass(NB_CELL_CLASS);
     let layout = this.layout as PanelLayout;
     layout.insertWidget(index, widget);
-    this._updateCell(index);
+    widget.model.mimeType = this._mimetype;
     this.onCellInserted(index, widget);
   }
 
@@ -431,33 +430,15 @@ class StaticNotebook extends Widget {
   }
 
   /**
-   * Update the cell widgets.
-   */
-  private _updateCells(): void {
-    each(enumerate(this.widgets), ([i, widget]) => {
-      this._updateCell(i);
-    });
-  }
-
-  /**
-   * Update a cell widget.
-   */
-  private _updateCell(index: number): void {
-    let layout = this.layout as PanelLayout;
-    let child = layout.widgets.at(index) as BaseCellWidget;
-    if (child instanceof CodeCellWidget) {
-      child.model.mimeType = this._mimetype;
-    }
-    this._renderer.updateCell(child);
-  }
-
-  /**
    * Update the mimetype of the notebook.
    */
   private _updateMimetype(): void {
     let cursor = this._model.getMetadata('language_info');
     let info = cursor.getValue() as nbformat.ILanguageInfoMetadata;
     this._mimetype = this._renderer.getCodeMimetype(info);
+    each(this.widgets, widget => {
+      widget.model.mimeType = this._mimetype;
+    });
   }
 
   private _mimetype = 'text/plain';
@@ -493,18 +474,21 @@ namespace StaticNotebook {
     languagePreference?: string;
 
     /**
-     * A renderer for a notebook.
-     *
-     * The default is a shared renderer instance.
+     * A factory for creating cells.
      */
-    renderer: IRenderer;
+    cellFactory: ICellFactory;
+
+    /**
+     * The service used to look up mime types.
+     */
+    mimeTypeService: IEditorMimeTypeService;
   }
 
   /**
    * A factory for creating code cell widgets.
    */
   export
-  interface IRenderer {
+  interface ICellFactory {
     /**
      * Create a new code cell widget.
      */
@@ -519,128 +503,88 @@ namespace StaticNotebook {
      * Create a new raw cell widget.
      */
     createRawCell(model: IRawCellModel): RawCellWidget;
-
-    /**
-     * Update a cell widget.
-     */
-    updateCell(cell: BaseCellWidget): void;
-
-    /**
-     * Get the preferred mimetype given language info.
-     */
-    getCodeMimetype(info: nbformat.ILanguageInfoMetadata): string;
   }
 
   /**
-   * The default implementation of an `IRenderer`.
+   * The default implementation of an `IFactory`.
    */
   export
-  class Renderer implements IRenderer {
-    /**
-     * A code cell renderer.
-     */
-    readonly codeCellRenderer: CodeCellWidget.IRenderer;
-
-    /**
-     * A markdown cell renderer.
-     */
-    readonly markdownCellRenderer: BaseCellWidget.IRenderer;
-
-    /**
-     * A raw cell renderer.
-     */
-    readonly rawCellRenderer: BaseCellWidget.IRenderer;
-
-    /**
-     * A mime type service of a code editor.
-     */
-    readonly editorMimeTypeService: IEditorMimeTypeService;
-
+  class CellFactory implements ICellFactory {
     /**
      * Creates a new renderer.
      */
-    constructor(options: Renderer.IOptions) {
-      let factory = options.editorServices.factoryService;
-      this.codeCellRenderer = new CodeCellWidget.Renderer({
-        editorFactory: options => factory.newInlineEditor(options)
-      });
-      this.markdownCellRenderer = new BaseCellWidget.Renderer({
-        editorFactory: options => {
-          options.wordWrap = true;
-          return factory.newInlineEditor(options);
-        }
-      });
-      this.rawCellRenderer = this.markdownCellRenderer;
-      this.editorMimeTypeService = options.editorServices.mimeTypeService;
+    constructor(options: CodeCellWidget.IOptions) {
+      this._editorFactory = options.editorFactory;
+      this._inputAreaFactory = options.inputAreaFactory;
+      this._outputAreaFactory = options.outputAreaFactory;
     }
 
     /**
      * Create a new code cell widget.
      */
     createCodeCell(model: ICodeCellModel, rendermime: RenderMime): CodeCellWidget {
-      const widget = new CodeCellWidget({
+      return new CodeCellWidget({
         model,
         rendermime,
-        renderer: this.codeCellRenderer
+        editorFactory: this._editorFactory,
+        inputAreaFactory: this._inputAreaFactory,
+        outputAreaFactory: this._outputAreaFactory
       });
-      return widget;
     }
 
     /**
      * Create a new markdown cell widget.
      */
     createMarkdownCell(model: IMarkdownCellModel, rendermime: RenderMime): MarkdownCellWidget {
-      const widget = new MarkdownCellWidget({
+      return new MarkdownCellWidget({
         model,
         rendermime,
-        renderer: this.markdownCellRenderer
+        editorFactory: this._editorFactory,
+        inputAreaFactory: this._inputAreaFactory
       });
-      return widget;
     }
 
     /**
      * Create a new raw cell widget.
      */
     createRawCell(model: IRawCellModel): RawCellWidget {
-      const widget = new RawCellWidget({
+      return new RawCellWidget({
         model,
-        renderer: this.rawCellRenderer
+        rendermime,
+        editorFactory: this._editorFactory,
+        inputAreaFactory: this._inputAreaFactory
       });
-      return widget;
     }
 
-    /**
-     * Update a cell widget.
-     *
-     * #### Notes
-     * The base implementation is a no-op.
-     */
-    updateCell(cell: BaseCellWidget): void {
-      // This is a no-op.
-    }
-
-    /**
-     * Get the preferred mimetype given language info.
-     */
-    getCodeMimetype(info: nbformat.ILanguageInfoMetadata): string {
-      return this.editorMimeTypeService.getMimeTypeByLanguage(info);
-    }
+    private _editorFactory: CodeEditor.Factory = null;
+    private _inputAreaFactory: BaseCellWidget.InputAreaFactory | null = null;
+    private _outputAreaFactory: BaseCellWidget.OutputAreaFactory | null = null;
   }
 
   /**
    * The namespace for the `Renderer` class statics.
    */
   export
-  namespace Renderer {
+  namespace CellFactory {
     /**
      * An options object for initializing a notebook renderer.
      */
     export
     interface IOptions {
       /**
-       * The editor services.
+       * The editor factory.
        */
-      readonly editorServices: IEditorServices;
+      editorFactory: CodeEditor.Factory;
+
+      /**
+       * A factory for input areas.
+       */
+      inputAreaFactory?: InputAreaFactory;
+
+      /**
+       * A factory for output areas.
+       */
+      outputAreaFactory?: OutputAreaFactory;
     }
   }
 }
