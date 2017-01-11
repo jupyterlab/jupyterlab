@@ -129,7 +129,12 @@ class NPM(Command):
         if not has_npm:
             log.error("`npm` unavailable. If you're running this command using sudo, make sure `npm` is available to sudo")
         log.info("Installing build dependencies with npm. This may take a while...")
-        run(['npm', 'run', 'clean'], cwd=here)
+        # This command will fail if `rimraf` is not yet installed 
+        # in node_modules.
+        try:
+            run(['npm', 'run', 'clean'], cwd=here)
+        except Exception:
+            pass
         run(['npm', 'install'], cwd=here)
         run(['npm', 'run', 'build:serverextension'], cwd=here)
 
