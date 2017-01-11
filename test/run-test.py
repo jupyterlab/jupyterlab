@@ -40,7 +40,9 @@ def run_command(cmd):
 def get_command(nbapp):
     """Get the command to run."""
     terminalsAvailable = nbapp.web_app.settings['terminals_available']
-    config = dict(baseUrl=nbapp.connection_url, token=nbapp.token,
+    # Compatibility with Notebook 4.2.
+    token = getattr(nbapp, 'token', '')
+    config = dict(baseUrl=nbapp.connection_url, token=token,
                   terminalsAvailable=str(terminalsAvailable))
 
     print('\n\nNotebook config:')
@@ -66,6 +68,13 @@ class TestApp(NotebookApp):
     allow_origin = Unicode('*')
 
     def start(self):
+        # Cannot run against Notebook 4.3.0 due to auth incompatibilities.
+        if self.version == '4.3.0':
+            msg = ('Cannot run unit tests against Notebook 4.3.0.  '
+                   'Please upgrade to Notebook 4.3.1+')
+            self.log.error(msg)
+            sys.exit(1)
+
         # Run the command after the ioloop starts.
         IOLoop.current().add_callback(run_command, get_command(self))
         super(TestApp, self).start()
