@@ -152,14 +152,16 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    *
    * @param widget - The widget being added.
    */
-  add(widget: T): void {
+  add(widget: T): Promise<void> {
     if (this._widgets.has(widget)) {
-      console.warn(`${widget.id} already exists in the tracker.`);
-      return;
+      let warning = `${widget.id} already exists in the tracker.`;
+      console.warn(warning);
+      return Promise.reject(warning);
     }
     this._widgets.add(widget);
 
     let injected = Private.injectedProperty.get(widget);
+    let promise: Promise<void>;
 
     // Handle widget state restoration.
     if (!injected && this._restore) {
@@ -171,7 +173,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
         let data = this._restore.args(widget);
 
         Private.nameProperty.set(widget, name);
-        state.save(name, { data });
+        promise = state.save(name, { data });
 
         if (restorer) {
           restorer.add(widget, name);
@@ -203,6 +205,8 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
 
     // Emit a changed signal.
     this.changed.emit('add');
+
+    return promise || Promise.resolve(void 0);
   }
 
   /**

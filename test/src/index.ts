@@ -49,6 +49,8 @@ import './imagewidget/widget.spec';
 
 import './inspector/inspector.spec';
 
+import './instancerestorer/instancerestorer.spec';
+
 import './markdownwidget/widget.spec';
 
 import './renderers/renderers.spec';

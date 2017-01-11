@@ -13,7 +13,7 @@ A JupyterLab application is comprised of:
 - Plugins
 
 A full example of an application is contained [here](https://github.com/jupyterlab/jupyterlab/tree/master/examples/lab).
-Looking at the `index.js` file, you can see the extensions 
+Looking at the `index.js` file, you can see the extensions
 used in the tutorial example.
 
 ## [Plugins](http://phosphorjs.github.io/phosphor/api/interfaces/_ui_application_.application.iplugin.html)
@@ -23,7 +23,7 @@ A plugin adds a core functionality to the application:
 activated.
 - Plugins require and provide [Token](http://phosphorjs.github.io/phosphor/api/classes/_core_token_.token.html) objects, which are used to provide
 a typed value to the plugin's `activate()` method.
-- The module providing plugin(s) must meet the [JupyterLab.IPluginModule](http://jupyterlab.github.io/jupyterlab/interfaces/_application_index_.jupyterlab.ipluginmodule.html) interface, by 
+- The module providing plugin(s) must meet the [JupyterLab.IPluginModule](http://jupyterlab.github.io/jupyterlab/interfaces/_application_index_.jupyterlab.ipluginmodule.html) interface, by
 exporting a plugin object or array of plugin objects as the default export.
 
 The default plugins in the JupyterLab application include:
@@ -39,16 +39,17 @@ interactive kernel console sessions.
 - [RenderMime](https://github.com/jupyterlab/jupyterlab/blob/master/src/rendermime/plugin.ts) - The registry for adding kernel `display_data` renderers.
 - [Document Registry](https://github.com/jupyterlab/jupyterlab/blob/master/src/docregistry/plugin.ts) - Used to add functionality around widgets backed by files.
 - [Clipboard](https://github.com/jupyterlab/jupyterlab/blob/master/src/clipboard/plugin.ts) - The application-wide clipboard for arbitrary MIME data.
+- [Instance Restorer](https://github.com/jupyterlab/jupyterlab/blob/master/src/instancerestorer/instancerestorer.ts) - The application-wide instance restorer, which takes care of the application state restoration lifecycle.
 
 ## Application Object
-The JupyterLab [Application](http://phosphorjs.github.io/phosphor/api/classes/_ui_application_.application.html) object is given to each plugin in 
+The JupyterLab [Application](http://phosphorjs.github.io/phosphor/api/classes/_ui_application_.application.html) object is given to each plugin in
 its `activate()` function.  The Application object has a:
-- [commands](http://phosphorjs.github.io/phosphor/api/classes/_ui_application_.application.html#commands) - used to add and execute commands in the application. 
+- [commands](http://phosphorjs.github.io/phosphor/api/classes/_ui_application_.application.html#commands) - used to add and execute commands in the application.
 - [keymap](http://phosphorjs.github.io/phosphor/api/classes/_ui_application_.application.html#keymap) - used to add keyboard shortcuts to the application.
 - [shell](http://phosphorjs.github.io/phosphor/api/classes/_ui_application_.application.html#shell) - a JupyterLab shell instance.
 
 ## JupyterLab Shell
-The JupyterLab [shell](http://jupyterlab.github.io/jupyterlab/classes/_application_shell_.applicationshell.html) is used to add and interact with content in the 
+The JupyterLab [shell](http://jupyterlab.github.io/jupyterlab/classes/_application_shell_.applicationshell.html) is used to add and interact with content in the
 application.  The application consists of:
 
 - A top area for things like top level menus and toolbars
@@ -57,14 +58,14 @@ application.  The application consists of:
 - A bottom area for things like status bars
 
 ## Phosphor
-The Phosphor library is used as the underlying architecture of JupyterLab and provides 
+The Phosphor library is used as the underlying architecture of JupyterLab and provides
 many of the low level primitives and widget structure used in the application.
 Phosphor provides a rich set of widgets for developing desktop-like applications
-in the browser, as well as patterns and objects for writing clean, 
-well-abstracted code.  The widgets in the application are primarily **Phosphor 
+in the browser, as well as patterns and objects for writing clean,
+well-abstracted code.  The widgets in the application are primarily **Phosphor
 widgets**, and Phosphor concepts, like message passing and signals, are used
 throughout.  **Phosphor messages** are a *many-to-one* interaction that allows
-information like resize events to flow through the widget hierarchy in 
+information like resize events to flow through the widget hierarchy in
 the application.  **Phosphor signals** are a *one-to-many* interaction that allow
 listeners to react to changes in an observed object.
 

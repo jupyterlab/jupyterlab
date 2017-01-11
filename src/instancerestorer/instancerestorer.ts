@@ -16,10 +16,6 @@ import {
 } from 'phosphor/lib/core/properties';
 
 import {
-  defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
-
-import {
   CommandRegistry
 } from 'phosphor/lib/ui/commandregistry';
 
@@ -197,7 +193,9 @@ const KEY = 'instance-restorer:data';
  * #### Notes
  * The lifecycle for state restoration is subtle. The sequence of events is:
  *
- * 1. The instance restorer plugin is instantiated.
+ * 1. The instance restorer plugin is instantiated. It installs itself as the
+ *    layout database that the application shell can use to `fetch` and `save`
+ *    layout restoration data.
  *
  * 2. Other plugins that care about state restoration require the instance
  *    restorer as a dependency.
@@ -205,6 +203,11 @@ const KEY = 'instance-restorer:data';
  * 3. As each load-time plugin initializes (which happens before the lab
  *    application has `started`), it instructs the instance restorer whether
  *    the restorer ought to `restore` its state by passing in its tracker.
+ *    Alternatively, a plugin that does not require its own instance tracker
+ *    (because perhaps it only creates a single widget, like a command palette),
+ *    can simply `add` its widget along with a persistent unique name to the
+ *    instance restorer so that its layout state can be restored when the lab
+ *    application restores.
  *
  * 4. After all the load-time plugins have finished initializing, the lab
  *    application `started` promise will resolve. This is the `first`
@@ -213,20 +216,20 @@ const KEY = 'instance-restorer:data';
  *    restorer to `restore` their state.
  *
  * 5. The instance restorer will then instruct each plugin's instance tracker
- *    to restore its state and reinstantiate whichever widgets it wants.
+ *    to restore its state and reinstantiate whichever widgets it wants. The
+ *    tracker returns a promise to the instance restorer that resolves when it
+ *    has completed restoring the tracked widgets it cares about.
  *
  * 6. As each instance finishes restoring, it resolves the promise that was
- *    made to the instance restorer (in step 5).
- *
- * 7. After all of the promises that the restorer is awaiting have resolved,
- *    the restorer then resolves its `restored` promise allowing the application
- *    shell to rehydrate its former layout.
+ *    made to the instance restorer (in step 5). After all of the promises that
+ *    the restorer is awaiting have resolved, the restorer then resolves its
+ *    `restored` promise allowing the application shell to rehydrate its saved
+ *    layout.
  *
  * Of particular note are steps 5 and 6: since state restoration of plugins
- * is accomplished by executing commands, the command that is used to
- * restore the state of each plugin must return a promise that only resolves
- * when the widget has been created and added to the plugin's instance
- * tracker.
+ * is accomplished by executing commands, the command that is used to restore
+ * the state of each plugin must return a promise that only resolves when the
+ * widget has been created and added to the plugin's instance tracker.
  */
 export
 class InstanceRestorer implements IInstanceRestorer {
@@ -245,11 +248,6 @@ class InstanceRestorer implements IInstanceRestorer {
       this._trackers = null;
     }).then(() => { this._restored.resolve(void 0); });
   }
-
-  /**
-   * A signal emitted when a widget should be activated.
-   */
-  readonly activated: ISignal<this, string>;
 
   /**
    * A promise resolved when the instance restorer is ready to receive signals.
@@ -312,33 +310,34 @@ class InstanceRestorer implements IInstanceRestorer {
    *
    * @param options - The restoration options.
    */
-  restore(tracker: InstanceTracker<Widget>, options: IInstanceRestorer.IRestoreOptions<Widget>): void {
+  restore(tracker: InstanceTracker<Widget>, options: IInstanceRestorer.IRestoreOptions<Widget>): Promise<any> {
     if (!this._promises) {
-      console.warn('restore() can only be called before `first` has resolved.');
-      return;
+      let warning = 'restore() can only be called before `first` has resolved.';
+      console.warn(warning);
+      return Promise.reject(warning);
     }
 
     let { namespace } = tracker;
     if (this._trackers.has(namespace)) {
-      console.warn(`A tracker namespaced ${namespace} was already restored.`);
-      return;
+      let warning = `A tracker namespaced ${namespace} was already restored.`;
+      console.warn(warning);
+      return Promise.reject(warning);
     }
     this._trackers.add(namespace);
 
     let { args, command, name, when } = options;
     let first = this._first;
 
-    // Guarantee that the application has started before any tracker restores by
-    // making sure its `when` argument includes the `first` promise.
-    when = when ? (Array.isArray(when) ? when.concat(first) : [when, first])
-      : first;
-
-    this._promises.push(tracker.restore({
-      args, command, name, when,
+    let promise = tracker.restore({
+      args, command, name,
       registry: this._registry,
       restorer: this,
-      state: this._state
-    }));
+      state: this._state,
+      when: when ? [first].concat(when) : first
+    });
+
+    this._promises.push(promise);
+    return promise;
   }
 
   /**
@@ -347,8 +346,9 @@ class InstanceRestorer implements IInstanceRestorer {
   save(data: IInstanceRestorer.ILayout): Promise<void> {
     // If there are promises that are unresolved, bail.
     if (this._promises) {
-      console.warn('save() was called prematurely.');
-      return Promise.resolve(void 0);
+      let warning = 'save() was called prematurely.';
+      console.warn(warning);
+      return Promise.reject(warning);
     }
 
     let dehydrated: InstanceRestorer.IDehydratedLayout = {};
@@ -379,6 +379,11 @@ class InstanceRestorer implements IInstanceRestorer {
         dehydrated.current = current;
       }
     }
+    if (area.widgets) {
+      dehydrated.widgets = area.widgets
+        .map(widget => Private.nameProperty.get(area.currentWidget))
+        .filter(name => !!name);
+    }
     return dehydrated;
   }
 
@@ -405,10 +410,6 @@ class InstanceRestorer implements IInstanceRestorer {
   private _trackers = new Set<string>();
   private _widgets = new Map<string, Widget>();
 }
-
-
-// Define the signals for the `InstanceRestorer` class.
-defineSignal(InstanceRestorer.prototype, 'activated');
 
 
 /**
