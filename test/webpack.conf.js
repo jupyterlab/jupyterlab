@@ -17,11 +17,6 @@ module.exports = {
       { test: /\.html$/, loader: 'file-loader?name=[name].[ext]' },
       { test: /\.ipynb$/, loader: 'json-loader' },
       { test: /\.json$/, loader: 'json-loader' },
-      { test: /\.tsx?$/, loader: 'ts-loader' }
     ]
-  },
-  resolve: {
-    // Add '.ts' as resolvable extensions.
-    extensions: ['', '.webpack.js', '.web.js', '.js', '.ts']
   }
 }
