@@ -20,6 +20,10 @@ import {
 } from '../../../lib/instancerestorer/instancerestorer';
 
 import {
+  InstanceTracker
+} from '../../../lib/common/instancetracker';
+
+import {
   StateDB
 } from '../../../lib/statedb/statedb';
 
@@ -136,6 +140,38 @@ describe('instancerestorer/instancerestorer', () => {
             expect(layout).to.eql(dehydrated);
             done();
           }).catch(done);
+      });
+
+    });
+
+    describe('#restore()', () => {
+
+      it('should restore the widgets in a tracker', done => {
+        let tracker = new InstanceTracker<Widget>({ namespace: 'foo-widget' });
+        let registry = new CommandRegistry();
+        let state = new StateDB({ namespace: NAMESPACE });
+        let ready = new utils.PromiseDelegate<void>();
+        let restorer = new InstanceRestorer({
+          first: ready.promise, registry, state
+        });
+        let called = false;
+        let key = `${tracker.namespace}:${tracker.namespace}`;
+
+        registry.addCommand(tracker.namespace, {
+          execute: () => { called = true; }
+        });
+        state.save(key, { data: null }).then(() => {
+          return restorer.restore(tracker, {
+            args: () => null,
+            name: () => tracker.namespace,
+            command: tracker.namespace
+          });
+        }).catch(done);
+        ready.resolve(void 0);
+        restorer.restored.then(() => { expect(called).to.be(true); })
+          .then(() => state.remove(key))
+          .then(() => { done(); })
+          .catch(done);
       });
 
     });
