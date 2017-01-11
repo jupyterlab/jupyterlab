@@ -8,6 +8,10 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
+  simulate
+} from 'simulate-event';
+
+import {
   InstanceTracker
 } from '../../../lib/common/instancetracker';
 
@@ -42,13 +46,15 @@ describe('common/instancetracker', () => {
 
       it('should emit when the current widget has been updated', () => {
         let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
-        let widget = new Widget();
+        let widget = new Widget({ node: document.createElement('input') });
         let called = false;
         tracker.currentChanged.connect(() => { called = true; });
         tracker.add(widget);
+        Widget.attach(widget, document.body);
         expect(called).to.be(false);
-        tracker.sync(widget);
+        simulate(widget.node, 'focus');
         expect(called).to.be(true);
+        Widget.detach(widget);
       });
 
     });
@@ -60,13 +66,15 @@ describe('common/instancetracker', () => {
         expect(tracker.currentWidget).to.be(null);
       });
 
-      it('should be updated by sync if the tracker has the widget', () => {
+      it('should be updated if when the widget is focused', () => {
         let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
-        let widget = new Widget();
+        let widget = new Widget({ node: document.createElement('input') });
         tracker.add(widget);
+        Widget.attach(widget, document.body);
         expect(tracker.currentWidget).to.be(null);
-        tracker.sync(widget);
+        simulate(widget.node, 'focus');
         expect(tracker.currentWidget).to.be(widget);
+        Widget.detach(widget);
       });
 
     });
@@ -186,29 +194,17 @@ describe('common/instancetracker', () => {
 
     });
 
-    describe('#sync()', () => {
-
-      it('should emit a signal when the current widget is updated', () => {
-        let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
-        let widget = new Widget();
-        let called = false;
-        tracker.currentChanged.connect(() => { called = true; });
-        tracker.add(widget);
-        expect(called).to.be(false);
-        tracker.sync(widget);
-        expect(called).to.be(true);
-      });
-
-    });
-
     describe('#onCurrentChanged()', () => {
 
       it('should be called when the current widget is changed', () => {
         let tracker = new TestTracker<Widget>({ namespace: NAMESPACE });
         let widget = new Widget();
         tracker.add(widget);
-        tracker.sync(widget);
+        expect(tracker.methods).to.not.contain('onCurrentChanged');
+        Widget.attach(widget, document.body);
+        simulate(widget.node, 'focus');
         expect(tracker.methods).to.contain('onCurrentChanged');
+        Widget.detach(widget);
       });
 
     });
