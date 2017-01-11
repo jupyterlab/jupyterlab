@@ -208,7 +208,8 @@ class TestInstallLabExtension(TestCase):
         assert check_labextension([f], user=True)
         assert not check_labextension([f, pjoin('dne', f)], user=True)
 
-    @pytest.mark.skipif(os.name == 'nt')
+    @pytest.mark.skipif(os.name == 'nt',
+                        reason="Symlinks are not supported on win32")
     def test_install_symlink(self):
         with TemporaryDirectory() as d:
             f = u'ƒ.js'
