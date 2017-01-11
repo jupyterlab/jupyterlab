@@ -162,7 +162,8 @@ export
    * Clear the undo history.
    */
   clearHistory(): void {
-    this.model.setEditableRange(this.model.getEditableRange());
+    // Reset the model state by setting the same value again
+    this.model.setValueFromRawText(this.model.toRawText());
   }
 
   /**
