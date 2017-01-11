@@ -17,13 +17,7 @@ module.exports = {
       { test: /\.html$/, loader: 'file-loader?name=[name].[ext]' },
       { test: /\.ipynb$/, loader: 'json-loader' },
       { test: /\.json$/, loader: 'json-loader' },
-      {
-        test: /\.ts$/,
-        loader: 'awesome-typescript-loader',
-        query: {
-          tsconfig: './test/src/tsconfig.json'
-        }
-      }
+      { test: /\.tsx?$/, loader: 'ts-loader' }
     ]
   },
   resolve: {
