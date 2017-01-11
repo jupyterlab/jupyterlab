@@ -25,6 +25,10 @@ import {
   IObservableVector, ObservableVector
 } from '../../common/observablevector';
 
+import {
+  RenderMime
+} from '../../rendermime';
+
 
 /**
  * An model that maintains a list of output data.
@@ -297,6 +301,60 @@ namespace OutputAreaModel {
    */
   export
   type Output = nbformat.IOutput | IInputRequest;
+
+  /**
+   * Get the mime bundle for an output.
+   *
+   * @params output - A kernel output message payload.
+   *
+   * @returns - A mime bundle for the payload.
+   */
+  export
+  function getBundle(output: nbformat.IOutput): nbformat.IMimeBundle {
+    let bundle: nbformat.IMimeBundle;
+    switch (output.output_type) {
+    case 'execute_result':
+      bundle = (output as nbformat.IExecuteResult).data;
+      break;
+    case 'display_data':
+      bundle = (output as nbformat.IDisplayData).data;
+      break;
+    case 'stream':
+      let text = (output as nbformat.IStream).text;
+      bundle = {
+        'application/vnd.jupyter.console-text': text
+      };
+      break;
+    case 'error':
+      let out: nbformat.IError = output as nbformat.IError;
+      let traceback = out.traceback.join('\n');
+      bundle = {
+        'application/vnd.jupyter.console-text': traceback ||
+          `${out.ename}: ${out.evalue}`
+      };
+      break;
+    default:
+      break;
+    }
+    return bundle || {};
+  }
+
+  /**
+   * Convert a mime bundle to a mime map.
+   */
+  export
+  function convertBundle(bundle: nbformat.IMimeBundle): RenderMime.MimeMap<string> {
+    let map: RenderMime.MimeMap<string> = Object.create(null);
+    for (let mimeType in bundle) {
+      let value = bundle[mimeType];
+      if (Array.isArray(value)) {
+        map[mimeType] = (value as string[]).join('\n');
+      } else {
+        map[mimeType] = value as string;
+      }
+    }
+    return map;
+  }
 }
 
 

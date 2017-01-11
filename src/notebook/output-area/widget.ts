@@ -731,8 +731,8 @@ class OutputWidget extends Widget {
     }
     // Extract the data from the output and sanitize if necessary.
     let rendermime = this._rendermime;
-    let bundle = this.getBundle(output as nbformat.IOutput);
-    let data = this.convertBundle(bundle);
+    let bundle = OutputAreaModel.getBundle(output as nbformat.IOutput);
+    let data = OutputAreaModel.convertBundle(bundle);
     // Clear the content.
     this.clear();
 
@@ -797,58 +797,6 @@ class OutputWidget extends Widget {
     } else {
       layout.addWidget(this._placeholder);
     }
-  }
-
-  /**
-   * Get the mime bundle for an output.
-   *
-   * @params output - A kernel output message payload.
-   *
-   * @returns - A mime bundle for the payload.
-   */
-  protected getBundle(output: nbformat.IOutput): nbformat.IMimeBundle {
-    let bundle: nbformat.IMimeBundle;
-    switch (output.output_type) {
-    case 'execute_result':
-      bundle = (output as nbformat.IExecuteResult).data;
-      break;
-    case 'display_data':
-      bundle = (output as nbformat.IDisplayData).data;
-      break;
-    case 'stream':
-      let text = (output as nbformat.IStream).text;
-      bundle = {
-        'application/vnd.jupyter.console-text': text
-      };
-      break;
-    case 'error':
-      let out: nbformat.IError = output as nbformat.IError;
-      let traceback = out.traceback.join('\n');
-      bundle = {
-        'application/vnd.jupyter.console-text': traceback ||
-          `${out.ename}: ${out.evalue}`
-      };
-      break;
-    default:
-      break;
-    }
-    return bundle || {};
-  }
-
-  /**
-   * Convert a mime bundle to a mime map.
-   */
-  protected convertBundle(bundle: nbformat.IMimeBundle): RenderMime.MimeMap<string> {
-    let map: RenderMime.MimeMap<string> = Object.create(null);
-    for (let mimeType in bundle) {
-      let value = bundle[mimeType];
-      if (Array.isArray(value)) {
-        map[mimeType] = (value as string[]).join('\n');
-      } else {
-        map[mimeType] = value as string;
-      }
-    }
-    return map;
   }
 
   private _rendermime: RenderMime = null;

@@ -290,6 +290,38 @@ describe('notebook/output-area/model', () => {
 
     });
 
+    describe('#getBundle()', () => {
+
+      it('should handle all bundle types', () => {
+        for (let i = 0; i < DEFAULT_OUTPUTS.length; i++) {
+          let output = DEFAULT_OUTPUTS[i];
+          let bundle = OutputAreaModel.getBundle(output);
+          expect(Object.keys(bundle).length).to.not.be(0);
+        }
+      });
+
+    });
+
+    describe('#convertBundle()', () => {
+
+      it('should handle bundles with strings', () => {
+        let bundle: nbformat.IMimeBundle = {
+          'text/plain': 'foo'
+        };
+        let map = OutputAreaModel.convertBundle(bundle);
+        expect(map).to.eql(bundle);
+      });
+
+      it('should handle bundles with string arrays', () => {
+        let bundle: nbformat.IMimeBundle = {
+          'text/plain': ['foo', 'bar']
+        };
+        let map = OutputAreaModel.convertBundle(bundle);
+        expect(map).to.eql({ 'text/plain': 'foo\nbar' });
+      });
+
+    });
+
   });
 
 });

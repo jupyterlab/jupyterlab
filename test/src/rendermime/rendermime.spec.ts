@@ -217,6 +217,20 @@ describe('rendermime/index', () => {
 
     });
 
+    describe('#getRenderer()', () => {
+
+      it('should get a renderer by mimetype', () => {
+        let r = defaultRenderMime();
+        expect(r.getRenderer('text/plain')).to.be.a(TextRenderer);
+      });
+
+      it('should return undefined for missing mimetype', () => {
+        let r = defaultRenderMime();
+        expect(r.getRenderer('hello/world')).to.be(undefined);
+      });
+
+    });
+
     describe('#mimetypes()', () => {
 
       it('should get the ordered list of mimetypes', () => {
