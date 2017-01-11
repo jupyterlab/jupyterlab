@@ -18,7 +18,7 @@ if [[ $GROUP == tests ]]; then
 
     # Run the python tests
     pushd jupyterlab
-    nosetests
+    py.test
     popd
 
     # Make sure we have CSS that can be converted with postcss

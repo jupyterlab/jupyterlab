@@ -11,7 +11,7 @@ hash -r
 conda config --set always_yes yes --set changeps1 no
 conda update -q conda
 conda info -a
-conda install jupyter nose
+conda install jupyter pytest
 conda install -c conda-forge notebook
 
 # create jupyter base dir (needed for config retreival)
