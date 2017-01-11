@@ -8,6 +8,14 @@ import {
 } from 'phosphor/lib/core/mimedata';
 
 import {
+  Widget
+} from 'phosphor/lib/ui/widget';
+
+import {
+  simulate
+} from 'simulate-event';
+
+import {
   BaseCellWidget
 } from '../../../lib/notebook/cells';
 
@@ -73,7 +81,6 @@ describe('notebook/tracker', () => {
         let tracker = new NotebookTracker({ namespace: NAMESPACE });
         let panel = new NotebookPanel({ rendermime, clipboard, renderer});
         tracker.add(panel);
-        tracker.sync(panel);
         expect(tracker.activeCell).to.be(null);
       });
 
@@ -81,9 +88,11 @@ describe('notebook/tracker', () => {
         let tracker = new NotebookTracker({ namespace: NAMESPACE });
         let panel = new NotebookPanel({ rendermime, clipboard, renderer});
         tracker.add(panel);
-        tracker.sync(panel);
         panel.context = createNotebookContext();
         panel.content.model.fromJSON(DEFAULT_CONTENT);
+        expect(tracker.activeCell).to.be(null);
+        Widget.attach(panel, document.body);
+        simulate(panel.node, 'focus');
         expect(tracker.activeCell).to.be.a(BaseCellWidget);
         panel.dispose();
       });
@@ -99,9 +108,10 @@ describe('notebook/tracker', () => {
         tracker.activeCellChanged.connect(() => { count++; });
         panel.context = createNotebookContext();
         panel.content.model.fromJSON(DEFAULT_CONTENT);
-        expect(count).to.be(0);
         tracker.add(panel);
-        tracker.sync(panel);
+        expect(count).to.be(0);
+        Widget.attach(panel, document.body);
+        simulate(panel.node, 'focus');
         expect(count).to.be(1);
         panel.content.activeCellIndex = 1;
         expect(count).to.be(2);
@@ -116,9 +126,11 @@ describe('notebook/tracker', () => {
         let tracker = new TestTracker({ namespace: NAMESPACE });
         let panel = new NotebookPanel({ rendermime, clipboard, renderer});
         tracker.add(panel);
-        tracker.sync(panel);
         panel.context = createNotebookContext();
         panel.content.model.fromJSON(DEFAULT_CONTENT);
+        expect(tracker.methods).to.not.contain('onCurrentChanged');
+        Widget.attach(panel, document.body);
+        simulate(panel.node, 'focus');
         expect(tracker.methods).to.contain('onCurrentChanged');
         panel.dispose();
       });
