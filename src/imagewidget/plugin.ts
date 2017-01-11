@@ -74,11 +74,6 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, palette: IComman
     name: widget => widget.context.path
   });
 
-  // Sync tracker with currently focused widget.
-  app.shell.currentChanged.connect((sender, args) => {
-    tracker.sync(args.newValue);
-  });
-
   registry.addWidgetFactory(factory);
 
   factory.widgetCreated.connect((sender, widget) => {

@@ -101,11 +101,6 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
     name: widget => widget.session && widget.session.name
   });
 
-  // Sync tracker with currently focused widget.
-  app.shell.currentChanged.connect((sender, args) => {
-    tracker.sync(args.newValue);
-  });
-
   // Add terminal commands.
   commands.addCommand(newTerminalId, {
     label: 'New Terminal',
