@@ -310,33 +310,34 @@ class InstanceRestorer implements IInstanceRestorer {
    *
    * @param options - The restoration options.
    */
-  restore(tracker: InstanceTracker<Widget>, options: IInstanceRestorer.IRestoreOptions<Widget>): void {
+  restore(tracker: InstanceTracker<Widget>, options: IInstanceRestorer.IRestoreOptions<Widget>): Promise<any> {
     if (!this._promises) {
-      console.warn('restore() can only be called before `first` has resolved.');
-      return;
+      let warning = 'restore() can only be called before `first` has resolved.';
+      console.warn(warning);
+      return Promise.reject(warning);
     }
 
     let { namespace } = tracker;
     if (this._trackers.has(namespace)) {
-      console.warn(`A tracker namespaced ${namespace} was already restored.`);
-      return;
+      let warning = `A tracker namespaced ${namespace} was already restored.`;
+      console.warn(warning);
+      return Promise.reject(warning);
     }
     this._trackers.add(namespace);
 
     let { args, command, name, when } = options;
     let first = this._first;
 
-    // Guarantee that the application has started before any tracker restores by
-    // making sure its `when` argument includes the `first` promise.
-    when = when ? (Array.isArray(when) ? when.concat(first) : [when, first])
-      : first;
-
-    this._promises.push(tracker.restore({
-      args, command, name, when,
+    let promise = tracker.restore({
+      args, command, name,
       registry: this._registry,
       restorer: this,
-      state: this._state
-    }));
+      state: this._state,
+      when: when ? [first].concat(when) : first
+    });
+
+    this._promises.push(promise);
+    return promise;
   }
 
   /**
