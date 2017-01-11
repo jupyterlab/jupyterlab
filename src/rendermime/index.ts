@@ -195,6 +195,8 @@ class RenderMime {
    * Get a renderer by mimetype.
    *
    * @param mimetype - The mimetype of the renderer.
+   *
+   * @returns The renderer for the given mimetype, or undefined if the mimetype is unknown.
    */
   getRenderer(mimetype: string): RenderMime.IRenderer {
     return this._renderers[mimetype];
