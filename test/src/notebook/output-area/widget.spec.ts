@@ -4,10 +4,6 @@
 import expect = require('expect.js');
 
 import {
-  nbformat
-} from '@jupyterlab/services';
-
-import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -18,10 +14,6 @@ import {
 import {
   OutputAreaModel, OutputAreaWidget, OutputWidget
 } from '../../../../lib/notebook/output-area';
-
-import {
-  RenderMime
-} from '../../../../lib/rendermime';
 
 import {
   defaultRenderMime
@@ -428,38 +420,6 @@ describe('notebook/output-area/widget', () => {
         let widget = new CustomOutputWidget({ rendermime });
         widget.setOutput(null);
         expect(widget.output).to.be.a(Widget);
-      });
-
-    });
-
-    describe('#getBundle()', () => {
-
-      it('should handle all bundle types', () => {
-        for (let i = 0; i < DEFAULT_OUTPUTS.length; i++) {
-          let output = DEFAULT_OUTPUTS[i];
-          let bundle = OutputWidget.getBundle(output);
-          expect(Object.keys(bundle).length).to.not.be(0);
-        }
-      });
-
-    });
-
-    describe('#convertBundle()', () => {
-
-      it('should handle bundles with strings', () => {
-        let bundle: nbformat.IMimeBundle = {
-          'text/plain': 'foo'
-        };
-        let map = OutputWidget.convertBundle(bundle);
-        expect(map).to.eql(bundle);
-      });
-
-      it('should handle bundles with string arrays', () => {
-        let bundle: nbformat.IMimeBundle = {
-          'text/plain': ['foo', 'bar']
-        };
-        let map = OutputWidget.convertBundle(bundle);
-        expect(map).to.eql({ 'text/plain': 'foo\nbar' });
       });
 
     });
