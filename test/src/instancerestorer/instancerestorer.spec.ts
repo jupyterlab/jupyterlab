@@ -176,6 +176,55 @@ describe('instancerestorer/instancerestorer', () => {
 
     });
 
+    describe('#save()', () => {
+
+      it('should not run before `first` promise', done => {
+        let restorer = new InstanceRestorer({
+          first: new Promise(() => { /* no op */ }),
+          registry: new CommandRegistry(),
+          state: new StateDB({ namespace: NAMESPACE })
+        });
+        let dehydrated: IInstanceRestorer.ILayout = {
+          currentWidget: null,
+          leftArea: { currentWidget: null, collapsed: true, widgets: null },
+          rightArea: { collapsed: true, currentWidget: null, widgets: null }
+        };
+        restorer.save(dehydrated)
+          .then(() => { done('save() ran before `first` promise resolved.'); })
+          .catch(() => { done(); });
+      });
+
+      it('should save data', done => {
+        let ready = new utils.PromiseDelegate<void>();
+        let restorer = new InstanceRestorer({
+          first: ready.promise,
+          registry: new CommandRegistry(),
+          state: new StateDB({ namespace: NAMESPACE })
+        });
+        let currentWidget = new Widget();
+        // The `fresh` attribute is only here to check against the return value.
+        let dehydrated: IInstanceRestorer.ILayout = {
+          currentWidget: null,
+          fresh: false,
+          leftArea: {
+            currentWidget,
+            collapsed: true,
+            widgets: [currentWidget]
+          },
+          rightArea: { collapsed: true, currentWidget: null, widgets: null }
+        };
+        restorer.add(currentWidget, 'test-one');
+        ready.resolve(void 0);
+        restorer.restored.then(() => restorer.save(dehydrated))
+          .then(() => restorer.fetch())
+          .then(layout => {
+            expect(layout).to.eql(dehydrated);
+            done();
+          }).catch(done);
+      });
+
+    });
+
   });
 
 });
