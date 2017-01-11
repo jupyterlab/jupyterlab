@@ -17,9 +17,7 @@ if [[ $GROUP == tests ]]; then
     npm test
 
     # Run the python tests
-    pushd jupyterlab
-    nosetests
-    popd
+    py.test
 
     # Make sure we have CSS that can be converted with postcss
     npm install -g postcss-cli

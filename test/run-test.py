@@ -86,6 +86,6 @@ if __name__ == '__main__':
     sys.argv = sys.argv[:1]
 
     try:
-        TestApp.launch_instance()
+        nbapp = TestApp.launch_instance()
     except KeyboardInterrupt:
-        sys.exit(1)
+        nbapp.stop()

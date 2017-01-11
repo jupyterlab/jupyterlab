@@ -1,0 +1,34 @@
+# Do not build feature branch with open Pull Requests
+skip_branch_with_pr: true
+
+# environment variables
+environment:
+  nodejs_version: "6.9"
+  matrix:
+    - PYTHON: "C:\\Python35-x64"
+      PYTHON_VERSION: "3.5.x"
+      PYTHON_MAJOR: 3
+      PYTHON_ARCH: "64"
+    - PYTHON: "C:\\Python27"
+      PYTHON_VERSION: "2.7.x"
+      PYTHON_MAJOR: 2
+      PYTHON_ARCH: "32"
+
+# build cache to preserve files/folders between builds
+cache:
+  - node_modules # NPM packages
+
+# scripts that run after cloning repository
+install:
+  # Install node:
+  - ps: Install-Product node $env:nodejs_version
+  # Ensure python scripts are from right version:
+  - 'SET "PATH=%PYTHON%\\Scripts;%PATH%"'
+  # Install our package:
+  - 'pip install --upgrade -e ".[test]"'
+
+build: off
+
+# to run your custom scripts instead of automatic tests
+test_script:
+  - 'py.test'

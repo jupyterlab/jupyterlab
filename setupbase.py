@@ -1,3 +1,13 @@
+# encoding: utf-8
+"""
+This module defines the things that are used in setup.py for building JupyterLab
+This includes:
+    * Functions for finding things like packages, package data, etc.
+    * A function for checking dependencies.
+"""
+
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
 
 import os
 import pipes
@@ -5,6 +15,7 @@ import sys
 
 from distutils import log
 from distutils.cmd import Command
+from setuptools.command.bdist_egg import bdist_egg
 from subprocess import check_call
 
 
@@ -42,6 +53,19 @@ def find_packages():
             continue
         packages.append(package)
     return packages
+
+
+#---------------------------------------------------------------------------
+# Find package data
+#---------------------------------------------------------------------------
+
+def find_package_data():
+    """
+    Find package_data.
+    """
+    return {
+        'jupyterlab': ['build/*', 'lab.html']
+    }
 
 
 def js_prerelease(command, strict=False):
@@ -105,6 +129,12 @@ class NPM(Command):
         if not has_npm:
             log.error("`npm` unavailable. If you're running this command using sudo, make sure `npm` is available to sudo")
         log.info("Installing build dependencies with npm. This may take a while...")
+        # This command will fail if `rimraf` is not yet installed 
+        # in node_modules.
+        try:
+            run(['npm', 'run', 'clean'], cwd=here)
+        except Exception:
+            pass
         run(['npm', 'install'], cwd=here)
         run(['npm', 'run', 'build:serverextension'], cwd=here)
 
@@ -117,3 +147,12 @@ class NPM(Command):
 
         # update package data in case this created new files
         update_package_data(self.distribution)
+
+
+class bdist_egg_disabled(bdist_egg):
+    """Disabled version of bdist_egg
+    Prevents setup.py install performing setuptools' default easy_install,
+    which it should never ever do.
+    """
+    def run(self):
+        sys.exit("Aborting implicit building of eggs. Use `pip install .` to install from source.")

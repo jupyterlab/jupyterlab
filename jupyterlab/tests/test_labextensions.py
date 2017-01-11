@@ -18,7 +18,7 @@ try:
 except ImportError:
     from mock import patch # py2
 
-import ipython_genutils.testing.decorators as dec
+import pytest
 from ipython_genutils import py3compat
 from ipython_genutils.tempdir import TemporaryDirectory
 from jupyterlab import labextensions
@@ -208,7 +208,8 @@ class TestInstallLabExtension(TestCase):
         assert check_labextension([f], user=True)
         assert not check_labextension([f, pjoin('dne', f)], user=True)
 
-    @dec.skip_win32
+    @pytest.mark.skipif(os.name == 'nt',
+                        reason="Symlinks are not supported on win32")
     def test_install_symlink(self):
         with TemporaryDirectory() as d:
             f = u'ƒ.js'
