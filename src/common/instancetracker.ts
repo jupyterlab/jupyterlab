@@ -323,9 +323,9 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   /**
    * Handle the current change signal from the internal focus tracker.
    */
-  private _onCurrentChanged(): void {
+  private _onCurrentChanged(sender: any, args: FocusTracker.ICurrentChangedArgs<T>): void {
     this.onCurrentChanged();
-    this.currentChanged.emit(this.currentWidget);
+    this.currentChanged.emit(args.newValue);
   }
 
   /**
