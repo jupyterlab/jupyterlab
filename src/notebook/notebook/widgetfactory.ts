@@ -2,12 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel
-} from '@jupyterlab/services';
-
-import {
   MimeData as IClipboard
 } from 'phosphor/lib/core/mimedata';
+
+import {
+  IEditorMimeTypeService
+} from '../../codeeditor';
 
 import {
   ABCWidgetFactory, DocumentRegistry
@@ -42,10 +42,30 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
    */
   constructor(options: NotebookWidgetFactory.IOptions) {
     super(options);
-    this._rendermime = options.rendermime;
-    this._clipboard = options.clipboard;
-    this._renderer = options.renderer;
+    this.rendermime = options.rendermime;
+    this.clipboard = options.clipboard;
+    this.contentFactory = options.contentFactory;
   }
+
+  /*
+   * The rendermime instance.
+   */
+  readonly rendermime: RenderMime;
+
+  /**
+   * The content factory used by the widget factory.
+   */
+  readonly contentFactory: NotebookPanel.IContentFactory;
+
+  /**
+   * A clipboard instance.
+   */
+  readonly clipboard: IClipboard;
+
+  /**
+   * The service used to look up mime types.
+   */
+  readonly mimeTypeService: IEditorMimeTypeService;
 
   /**
    * Dispose of the resources used by the factory.
@@ -54,8 +74,6 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
     if (this.isDisposed) {
       return;
     }
-    this._rendermime = null;
-    this._clipboard = null;
     super.dispose();
   }
 
@@ -67,20 +85,16 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
    * the default toolbar items using `ToolbarItems.populateDefaults`.
    */
   protected createNewWidget(context: DocumentRegistry.IContext<INotebookModel>): NotebookPanel {
-    let rendermime = this._rendermime.clone();
+    let rendermime = this.rendermime.clone();
     let panel = new NotebookPanel({
       rendermime,
-      clipboard: this._clipboard,
-      renderer: this._renderer
+      clipboard: this.clipboard,
+      contentFactory: this.contentFactory
     });
     panel.context = context;
     ToolbarItems.populateDefaults(panel);
     return panel;
   }
-
-  private _rendermime: RenderMime = null;
-  private _clipboard: IClipboard = null;
-  private _renderer: NotebookPanel.IRenderer = null;
 }
 
 
@@ -105,8 +119,8 @@ namespace NotebookWidgetFactory {
     clipboard: IClipboard;
 
     /**
-     * A notebook panel renderer.
+     * A notebook panel content factory.
      */
-    renderer: NotebookPanel.IRenderer;
+    contentFactory: NotebookPanel.IContentFactory;
   }
 }

@@ -70,7 +70,7 @@ import {
 } from '../../rendermime';
 
 import {
-  IEditorMimeTypeService, IEditorServices, CodeEditor
+  IEditorMimeTypeService, CodeEditor
 } from '../../codeeditor';
 
 import {
@@ -180,15 +180,16 @@ class StaticNotebook extends Widget {
   constructor(options: StaticNotebook.IOptions) {
     super();
     this.addClass(NB_CLASS);
-    this._rendermime = options.rendermime;
+    this.rendermime = options.rendermime;
     this.layout = new Private.NotebookPanelLayout();
-    this._renderer = options.renderer;
+    this.contentFactory = options.contentFactory;
+    this._mimetypeService = options.mimeTypeService;
   }
 
   /**
    * A signal emitted when the model of the notebook changes.
    */
-  modelChanged: ISignal<this, void>;
+  readonly modelChanged: ISignal<this, void>;
 
   /**
    * A signal emitted when the model content changes.
@@ -196,7 +197,17 @@ class StaticNotebook extends Widget {
    * #### Notes
    * This is a convenience signal that follows the current model.
    */
-  modelContentChanged: ISignal<this, void>;
+  readonly modelContentChanged: ISignal<this, void>;
+
+  /**
+   * The cell factory used by the widget.
+   */
+  readonly contentFactory: StaticNotebook.IContentFactory;
+
+  /**
+   * The Rendermime instance used by the widget.
+   */
+  readonly rendermime: RenderMime;
 
   /**
    * The model for the widget.
@@ -215,20 +226,6 @@ class StaticNotebook extends Widget {
     this._onModelChanged(oldValue, newValue);
     this.onModelChanged(oldValue, newValue);
     this.modelChanged.emit(void 0);
-  }
-
-  /**
-   * Get the rendermime instance used by the widget.
-   */
-  get rendermime(): RenderMime {
-    return this._rendermime;
-  }
-
-  /**
-   * Get the renderer used by the widget.
-   */
-  get renderer(): StaticNotebook.IRenderer {
-    return this._renderer;
   }
 
   /**
@@ -254,8 +251,6 @@ class StaticNotebook extends Widget {
       return;
     }
     this._model = null;
-    this._rendermime = null;
-    this._renderer = null;
     super.dispose();
   }
 
@@ -392,15 +387,17 @@ class StaticNotebook extends Widget {
    */
   private _insertCell(index: number, cell: ICellModel): void {
     let widget: BaseCellWidget;
+    let factory = this.contentFactory;
+    let rendermime = this.rendermime;
     switch (cell.type) {
     case 'code':
-      widget = this._renderer.createCodeCell(cell as CodeCellModel, this._rendermime);
+      widget = factory.createCodeCell(cell as CodeCellModel, rendermime);
       break;
     case 'markdown':
-      widget = this._renderer.createMarkdownCell(cell as MarkdownCellModel, this._rendermime);
+      widget = factory.createMarkdownCell(cell as MarkdownCellModel, rendermime);
       break;
     default:
-      widget = this._renderer.createRawCell(cell as RawCellModel);
+      widget = factory.createRawCell(cell as RawCellModel);
     }
     widget.addClass(NB_CELL_CLASS);
     let layout = this.layout as PanelLayout;
@@ -435,7 +432,7 @@ class StaticNotebook extends Widget {
   private _updateMimetype(): void {
     let cursor = this._model.getMetadata('language_info');
     let info = cursor.getValue() as nbformat.ILanguageInfoMetadata;
-    this._mimetype = this._renderer.getCodeMimetype(info);
+    this._mimetype = this._mimetypeService.getMimeTypeByLanguage(info);
     each(this.widgets, widget => {
       widget.model.mimeType = this._mimetype;
     });
@@ -443,8 +440,7 @@ class StaticNotebook extends Widget {
 
   private _mimetype = 'text/plain';
   private _model: INotebookModel = null;
-  private _rendermime: RenderMime = null;
-  private _renderer: StaticNotebook.IRenderer = null;
+  private _mimetypeService: IEditorMimeTypeService;
 }
 
 
@@ -474,9 +470,9 @@ namespace StaticNotebook {
     languagePreference?: string;
 
     /**
-     * A factory for creating cells.
+     * A factory for creating content.
      */
-    cellFactory: ICellFactory;
+    contentFactory: IContentFactory;
 
     /**
      * The service used to look up mime types.
@@ -485,10 +481,10 @@ namespace StaticNotebook {
   }
 
   /**
-   * A factory for creating code cell widgets.
+   * A factory for creating notebook content.
    */
   export
-  interface ICellFactory {
+  interface IContentFactory {
     /**
      * Create a new code cell widget.
      */
@@ -506,18 +502,45 @@ namespace StaticNotebook {
   }
 
   /**
-   * The default implementation of an `IFactory`.
+   * The default implementation of an `IContentFactory`.
    */
   export
-  class CellFactory implements ICellFactory {
+  class ContentFactory implements IContentFactory {
     /**
      * Creates a new renderer.
      */
-    constructor(options: CodeCellWidget.IOptions) {
-      this._editorFactory = options.editorFactory;
-      this._inputAreaFactory = options.inputAreaFactory;
-      this._outputAreaFactory = options.outputAreaFactory;
+    constructor(options: ContentFactory.IOptions) {
+      let editorFactory = this.editorFactory = options.editorFactory;
+      this.codeContentFactory = (options.codeContentFactory ||
+        new CodeCellWidget.ContentFactory({ editorFactory })
+      );
+      this.markdownContentFactory = (options.markdownContentFactory ||
+        new BaseCellWidget.ContentFactory({ editorFactory })
+      );
+      this.rawContentFactory = (options.rawContentFactory ||
+        new BaseCellWidget.ContentFactory({ editorFactory })
+      );
     }
+
+    /**
+     * The editor factory.
+     */
+    readonly editorFactory: CodeEditor.Factory;
+
+    /**
+     * The code cell factory.
+     */
+    readonly codeContentFactory: CodeCellWidget.IContentFactory;
+
+    /**
+     * The markdown cell factory.
+     */
+    readonly markdownContentFactory: BaseCellWidget.IContentFactory;
+
+    /**
+     * The raw cell factory.
+     */
+    readonly rawContentFactory: BaseCellWidget.IContentFactory;
 
     /**
      * Create a new code cell widget.
@@ -526,9 +549,7 @@ namespace StaticNotebook {
       return new CodeCellWidget({
         model,
         rendermime,
-        editorFactory: this._editorFactory,
-        inputAreaFactory: this._inputAreaFactory,
-        outputAreaFactory: this._outputAreaFactory
+        contentFactory: this.codeContentFactory
       });
     }
 
@@ -539,8 +560,7 @@ namespace StaticNotebook {
       return new MarkdownCellWidget({
         model,
         rendermime,
-        editorFactory: this._editorFactory,
-        inputAreaFactory: this._inputAreaFactory
+        contentFactory: this.markdownContentFactory
       });
     }
 
@@ -550,22 +570,16 @@ namespace StaticNotebook {
     createRawCell(model: IRawCellModel): RawCellWidget {
       return new RawCellWidget({
         model,
-        rendermime,
-        editorFactory: this._editorFactory,
-        inputAreaFactory: this._inputAreaFactory
+        contentFactory: this.rawContentFactory
       });
     }
-
-    private _editorFactory: CodeEditor.Factory = null;
-    private _inputAreaFactory: BaseCellWidget.InputAreaFactory | null = null;
-    private _outputAreaFactory: BaseCellWidget.OutputAreaFactory | null = null;
   }
 
   /**
    * The namespace for the `Renderer` class statics.
    */
   export
-  namespace CellFactory {
+  namespace ContentFactory {
     /**
      * An options object for initializing a notebook renderer.
      */
@@ -577,14 +591,19 @@ namespace StaticNotebook {
       editorFactory: CodeEditor.Factory;
 
       /**
-       * A factory for input areas.
+       * A factory for code cells.
        */
-      inputAreaFactory?: InputAreaFactory;
+      codeContentFactory?: CodeCellWidget.IContentFactory;
 
       /**
-       * A factory for output areas.
+       * A factory for markdown cells.
        */
-      outputAreaFactory?: OutputAreaFactory;
+      markdownContentFactory?: BaseCellWidget.IContentFactory;
+
+      /**
+       * A factory for raw cells.
+       */
+      rawContentFactory?: BaseCellWidget.IContentFactory;
     }
   }
 }
@@ -618,17 +637,17 @@ class Notebook extends StaticNotebook {
    * This can be due to the active index changing or the
    * cell at the active index changing.
    */
-  activeCellChanged: ISignal<this, BaseCellWidget>;
+  readonly activeCellChanged: ISignal<this, BaseCellWidget>;
 
   /**
    * A signal emitted when the state of the notebook changes.
    */
-  stateChanged: ISignal<this, IChangedArgs<any>>;
+  readonly stateChanged: ISignal<this, IChangedArgs<any>>;
 
   /**
    * A signal emitted when the selection state of the notebook changes.
    */
-  selectionChanged: ISignal<this, void>;
+  readonly selectionChanged: ISignal<this, void>;
 
   /**
    * Get the inspection handler used by the console.
@@ -1373,10 +1392,16 @@ namespace Notebook {
   interface IOptions extends StaticNotebook.IOptions { }
 
   /**
-   * The default implementation of an `IRenderer`.
+   * The cell factory for the notebook
    */
   export
-  class Renderer extends StaticNotebook.Renderer { }
+  interface IContentFactory extends StaticNotebook.IContentFactory { }
+
+  /**
+   * The default implementation of an `IFactory`.
+   */
+  export
+  class ContentFactory extends StaticNotebook.ContentFactory { }
 
 }
 

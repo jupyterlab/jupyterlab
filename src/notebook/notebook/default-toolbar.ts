@@ -102,7 +102,7 @@ namespace ToolbarItems {
   function createInsertButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
       className: TOOLBAR_INSERT_CLASS,
-      onClick: () => { NotebookActions.insertBelow(panel.content); },
+      onClick: () => { NotebookActions.insertBelow(panel.notebook); },
       tooltip: 'Insert a cell below'
     });
   }
@@ -115,7 +115,7 @@ namespace ToolbarItems {
     return new ToolbarButton({
       className: TOOLBAR_CUT_CLASS,
       onClick: () => {
-        NotebookActions.cut(panel.content, panel.clipboard);
+        NotebookActions.cut(panel.notebook, panel.clipboard);
       },
       tooltip: 'Cut the selected cell(s)'
     });
@@ -129,7 +129,7 @@ namespace ToolbarItems {
     return new ToolbarButton({
       className: TOOLBAR_COPY_CLASS,
       onClick: () => {
-        NotebookActions.copy(panel.content, panel.clipboard);
+        NotebookActions.copy(panel.notebook, panel.clipboard);
       },
       tooltip: 'Copy the selected cell(s)'
     });
@@ -143,7 +143,7 @@ namespace ToolbarItems {
     return new ToolbarButton({
       className: TOOLBAR_PASTE_CLASS,
       onClick: () => {
-        NotebookActions.paste(panel.content, panel.clipboard);
+        NotebookActions.paste(panel.notebook, panel.clipboard);
       },
       tooltip: 'Paste cell(s) from the clipboard'
     });
@@ -157,7 +157,7 @@ namespace ToolbarItems {
     return new ToolbarButton({
       className: TOOLBAR_RUN_CLASS,
       onClick: () => {
-        NotebookActions.runAndAdvance(panel.content, panel.kernel);
+        NotebookActions.runAndAdvance(panel.notebook, panel.kernel);
       },
       tooltip: 'Run the selected cell(s) and advance'
     });
@@ -176,7 +176,7 @@ namespace ToolbarItems {
    */
   export
   function createCellTypeItem(panel: NotebookPanel): Widget {
-    return new CellTypeSwitcher(panel.content);
+    return new CellTypeSwitcher(panel.notebook);
   }
 
   /**
