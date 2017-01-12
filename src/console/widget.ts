@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  KernelMessage, Session, nbformat
+  Kernel, KernelMessage, Session, nbformat
 } from '@jupyterlab/services';
 
 import {
@@ -144,6 +144,8 @@ class Console extends Widget {
     this._history = factory.createConsoleHistory({
       kernel: this.session.kernel
     }, this);
+
+    this.session.kernelChanged.connect(this._onKernelChanged, this);
   }
 
   /**
@@ -343,8 +345,6 @@ class Console extends Widget {
     if (!this.prompt) {
       this.newPrompt();
     }
-    // Listen for kernel change events.
-    this._addSessionListeners();
   }
 
   /**
@@ -465,26 +465,13 @@ class Console extends Widget {
   }
 
   /**
-   * Handle kernel change events on the session.
-   */
-  private _addSessionListeners(): void {
-    if (this._listening) {
-      return;
-    }
-    this._listening = this.session.kernelChanged.connect((sender, kernel) => {
-      this.clear();
-      this.newPrompt();
-      this._initialize();
-      this._history.kernel = kernel;
-      this._foreignHandler.kernel = kernel;
-    });
-  }
-
-  /**
    * Initialize the banner and mimetype.
    */
   private _initialize(): void {
     let kernel = this.session.kernel;
+    if (!kernel) {
+      return;
+    }
     kernel.ready.then(() => {
       this._handleInfo(kernel.info);
     });
@@ -596,13 +583,25 @@ class Console extends Widget {
     return event.keyCode === 13;
   }
 
+  /**
+   * Handle a change to the kernel.
+   */
+  private _onKernelChanged(sender: Session.ISession, kernel: Kernel.IKernel): void {
+    this.clear();
+    this._initialize();
+    this._history.kernel = kernel;
+    this._foreignHandler.kernel = kernel;
+    if (this.isAttached) {
+      this.newPrompt();
+    }
+  }
+
   private _mimeTypeService: IEditorMimeTypeService;
   private _cells: IObservableVector<BaseCellWidget> = null;
   private _content: Panel = null;
   private _foreignHandler: ForeignHandler =  null;
   private _history: IConsoleHistory = null;
   private _input: Panel = null;
-  private _listening = false;
   private _mimetype = 'text/x-ipython';
   private _setByHistory = false;
 }

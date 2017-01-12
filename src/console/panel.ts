@@ -6,7 +6,7 @@ import {
 } from 'phosphor/lib/core/token';
 
 import {
-  Session
+  Session, Kernel
 } from '@jupyterlab/services';
 
 import {
@@ -93,8 +93,8 @@ class ConsolePanel extends Panel {
       kernel: options.session.kernel
     });
 
+    // Connect to change events.
     this.console.promptCreated.connect(this._onPromptCreated, this);
-
     options.session.kernelChanged.connect(this._onKernelChanged, this);
   }
 
@@ -158,8 +158,7 @@ class ConsolePanel extends Panel {
   /**
    * Handle a change to the kernel.
    */
-  private _onKernelChanged(): void {
-    let kernel = this.console.session.kernel;
+  private _onKernelChanged(sender: Session.ISession, kernel: Kernel.IKernel): void {
     this._completerHandler.kernel = kernel;
     this.inspectionHandler.kernel = kernel;
   }
