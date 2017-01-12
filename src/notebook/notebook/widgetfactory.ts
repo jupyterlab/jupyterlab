@@ -45,6 +45,7 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
     this.rendermime = options.rendermime;
     this.clipboard = options.clipboard;
     this.contentFactory = options.contentFactory;
+    this.mimeTypeService = options.mimeTypeService;
   }
 
   /*
@@ -123,5 +124,10 @@ namespace NotebookWidgetFactory {
      * A notebook panel content factory.
      */
     contentFactory: NotebookPanel.IContentFactory;
+
+    /**
+     * The service used to look up mime types.
+     */
+    mimeTypeService: IEditorMimeTypeService;
   }
 }

@@ -132,6 +132,7 @@ const trackerPlugin: JupyterLabPlugin<INotebookTracker> = {
     ICommandPalette,
     IInspector,
     NotebookPanel.IContentFactory,
+    IEditorServices,
     IInstanceRestorer
   ],
   activate: activateNotebookHandler,
@@ -168,7 +169,7 @@ export default plugins;
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector, contentFactory: NotebookPanel.IContentFactory, restorer: IInstanceRestorer): INotebookTracker {
+function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector, contentFactory: NotebookPanel.IContentFactory, editorServices: IEditorServices, restorer: IInstanceRestorer): INotebookTracker {
 
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
@@ -179,7 +180,8 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     canStartKernel: true,
     rendermime,
     clipboard,
-    contentFactory
+    contentFactory,
+    mimeTypeService: editorServices.mimeTypeService
   });
 
   const tracker = new NotebookTracker({ namespace: 'notebook' });
