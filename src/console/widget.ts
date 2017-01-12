@@ -10,7 +10,7 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  Message, sendMessage
+  Message
 } from 'phosphor/lib/core/messaging';
 
 import {
@@ -22,11 +22,11 @@ import {
 } from 'phosphor/lib/ui/panel';
 
 import {
-  Widget, WidgetMessage
+  Widget
 } from 'phosphor/lib/ui/widget';
 
 import {
-  CellCompleterHandler, CompleterModel, CompleterWidget
+  CellCompleterHandler, CompleterWidget
 } from '../completer';
 
 import {
@@ -34,7 +34,7 @@ import {
 } from '../inspector';
 
 import {
-  IEditorMimeTypeService, IEditorServices, CodeEditor, CodeEditorWidget
+  IEditorMimeTypeService, CodeEditor
 } from '../codeeditor';
 
 import {
@@ -61,32 +61,32 @@ import {
 /**
  * The class name added to console widgets.
  */
-const CONSOLE_CLASS = 'jp-ConsoleContent';
+const CONSOLE_CLASS = 'jp-Console';
 
 /**
  * The class name added to the console banner.
  */
-const BANNER_CLASS = 'jp-ConsoleContent-banner';
+const BANNER_CLASS = 'jp-Console-banner';
 
 /**
  * The class name of a cell whose input originated from a foreign session.
  */
-const FOREIGN_CELL_CLASS = 'jp-ConsoleContent-foreignCell';
+const FOREIGN_CELL_CLASS = 'jp-Console-foreignCell';
 
 /**
  * The class name of the active prompt
  */
-const PROMPT_CLASS = 'jp-ConsoleContent-prompt';
+const PROMPT_CLASS = 'jp-Console-prompt';
 
 /**
  * The class name of the panel that holds cell content.
  */
-const CONTENT_CLASS = 'jp-ConsoleContent-content';
+const CONTENT_CLASS = 'jp-Console-content';
 
 /**
  * The class name of the panel that holds prompts.
  */
-const INPUT_CLASS = 'jp-ConsoleContent-input';
+const INPUT_CLASS = 'jp-Console-input';
 
 /**
  * The timeout in ms for execution requests to the kernel.
@@ -95,18 +95,18 @@ const EXECUTION_TIMEOUT = 250;
 
 
 /**
- * A widget containing a Jupyter console's content.
+ * A widget containing a Jupyter console.
  *
  * #### Notes
- * The ConsoleContent class is intended to be used within a ConsolePanel
+ * The Console class is intended to be used within a ConsolePanel
  * instance. Under most circumstances, it is not instantiated by user code.
  */
 export
-class ConsoleContent extends Widget {
+class Console extends Widget {
   /**
-   * Construct a console content widget.
+   * Construct a console widget.
    */
-  constructor(options: ConsoleContent.IOptions) {
+  constructor(options: Console.IOptions) {
     super();
     this.addClass(CONSOLE_CLASS);
 
@@ -115,12 +115,10 @@ class ConsoleContent extends Widget {
     this._cells = new ObservableVector<BaseCellWidget>();
     this._content = new Panel();
     this._input = new Panel();
-    this._renderer = options.renderer;
-    this._rendermime = options.rendermime;
-    this._session = options.session;
-    this._history = options.history || new ConsoleHistory({
-      kernel: this._session.kernel
-    });
+    let factory = this.contentFactory = options.contentFactory;
+    this.rendermime = options.rendermime;
+    this.session = options.session;
+    this._mimeTypeService = options.mimeTypeService;
 
     // Add top-level CSS classes.
     this._content.addClass(CONTENT_CLASS);
@@ -131,31 +129,78 @@ class ConsoleContent extends Widget {
     layout.addWidget(this._input);
 
     // Create the banner.
-    let banner = this._renderer.createBanner();
+    let model = new RawCellModel();
+    model.value.text = '...';
+    let banner = factory.createBanner({
+      model,
+      contentFactory: factory.rawContentFactory
+    }, this);
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
-    banner.model.value.text = '...';
     this._content.addWidget(banner);
 
     // Set the banner text and the mimetype.
     this._initialize();
 
     // Set up the inspection handler.
-    this._inspectionHandler = new InspectionHandler({
-      kernel: this._session.kernel,
-      rendermime: this._rendermime
-    });
+    this.inspectionHandler = factory.createInspectionHandler({
+      kernel: this.session.kernel,
+      rendermime: this.rendermime
+    }, this);
 
     // Set up the foreign iopub handler.
-    this._foreignHandler = new ForeignHandler({
-      kernel: this._session.kernel,
+    this._foreignHandler = factory.createForeignHandler({
+      kernel: this.session.kernel,
       parent: this,
-      renderer: { createCell: () => this._newForeignCell() }
-    });
+      cellFactory: () => this._createForeignCell(),
+    }, this);
+
+    this._history = factory.createConsoleHistory({
+      kernel: this.session.kernel
+    }, this);
 
     // Instantiate the completer.
-    this._newCompleter(options.completer);
+    this._completer = factory.createCompleter({}, this);
+
+    // Set the completer widget's anchor node to peg its position.
+    this._completer.anchor = this.node;
+
+    // Because a completer widget may be passed in, check if it is attached.
+    if (!this._completer.isAttached) {
+      Widget.attach(this._completer, document.body);
+    }
+
+    // Instantiate the completer handler.
+    this._completerHandler = factory.createCompleterHandler({
+      completer: this._completer,
+      kernel: this.session.kernel
+    }, this);
   }
+
+  /**
+   * A signal emitted when the console executes its prompt.
+   */
+  readonly executed: ISignal<this, Date>;
+
+  /**
+   * The content factory used by the console.
+   */
+  readonly contentFactory: Console.IContentFactory;
+
+  /**
+   * The rendermime instance used by the console.
+   */
+  readonly rendermime: IRenderMime;
+
+  /**
+   * The inspection handler used by the console.
+   */
+  readonly inspectionHandler: InspectionHandler;
+
+  /**
+   * The session used by the console.
+   */
+  readonly session: Session.ISession;
 
   /**
    * The list of content cells in the console.
@@ -168,37 +213,11 @@ class ConsoleContent extends Widget {
   }
 
   /*
-   * The console content panel that holds the banner and executed cells.
-   */
-  get content(): Panel {
-    return this._content;
-  }
-
-  /**
-   * A signal emitted when the console executes its prompt.
-   */
-  readonly executed: ISignal<this, Date>;
-
-  /**
-   * Get the inspection handler used by the console.
-   */
-  get inspectionHandler(): InspectionHandler {
-    return this._inspectionHandler;
-  }
-
-  /*
    * The console input prompt.
    */
   get prompt(): CodeCellWidget | null {
     let inputLayout = (this._input.layout as PanelLayout);
     return inputLayout.widgets.at(0) as CodeCellWidget || null;
-  }
-
-  /**
-   * Get the session used by the console.
-   */
-  get session(): Session.ISession {
-    return this._session;
   }
 
   /**
@@ -246,9 +265,7 @@ class ConsoleContent extends Widget {
     this._foreignHandler = null;
     this._history.dispose();
     this._history = null;
-    this._inspectionHandler.dispose();
-    this._inspectionHandler = null;
-    this._session = null;
+    this.inspectionHandler.dispose();
     this._cells.clear();
     this._cells = null;
   }
@@ -266,7 +283,7 @@ class ConsoleContent extends Widget {
   execute(force = false, timeout = EXECUTION_TIMEOUT): Promise<void> {
     this._completer.reset();
 
-    if (this._session.status === 'dead') {
+    if (this.session.status === 'dead') {
       return Promise.resolve(void 0);
     }
 
@@ -297,11 +314,8 @@ class ConsoleContent extends Widget {
    * @returns A promise that indicates when the injected cell's execution ends.
    */
   inject(code: string): Promise<void> {
-    // Create a new cell using the prompt renderer.
-    let cell = this._renderer.createPrompt(this._rendermime, this);
+    let cell = this._createForeignCell();
     cell.model.value.text = code;
-    cell.model.mimeType = this._mimetype;
-    cell.readOnly = true;
     this.addCell(cell);
     return this._execute(cell);
   }
@@ -404,7 +418,12 @@ class ConsoleContent extends Widget {
     }
 
     // Create the new prompt.
-    prompt = this._renderer.createPrompt(this._rendermime, this);
+    let factory = this.contentFactory;
+    let contentFactory = factory.codeContentFactory;
+    let model = new CodeCellModel();
+    let rendermime = this.rendermime;
+    let options = { model, rendermime, contentFactory };
+    prompt = factory.createPrompt(options, this);
     prompt.model.mimeType = this._mimetype;
     prompt.addClass(PROMPT_CLASS);
     this._input.addWidget(prompt);
@@ -416,7 +435,7 @@ class ConsoleContent extends Widget {
 
     // Associate the new prompt with the completer and inspection handlers.
     this._completerHandler.activeCell = prompt;
-    this._inspectionHandler.activeCell = prompt;
+    this.inspectionHandler.activeCell = prompt;
 
     prompt.editor.focus();
     this.update();
@@ -489,14 +508,14 @@ class ConsoleContent extends Widget {
     if (this._listening) {
       return;
     }
-    this._listening = this._session.kernelChanged.connect((sender, kernel) => {
+    this._listening = this.session.kernelChanged.connect((sender, kernel) => {
       this.clear();
       this.newPrompt();
       this._initialize();
       this._history.kernel = kernel;
       this._completerHandler.kernel = kernel;
       this._foreignHandler.kernel = kernel;
-      this._inspectionHandler.kernel = kernel;
+      this.inspectionHandler.kernel = kernel;
     });
   }
 
@@ -504,7 +523,7 @@ class ConsoleContent extends Widget {
    * Initialize the banner and mimetype.
    */
   private _initialize(): void {
-    let kernel = this._session.kernel;
+    let kernel = this.session.kernel;
     kernel.ready.then(() => {
       this._handleInfo(kernel.info);
     });
@@ -542,7 +561,7 @@ class ConsoleContent extends Widget {
       cell.model.contentChanged.disconnect(this.update, this);
       this.update();
     };
-    return cell.execute(this._session.kernel).then(onSuccess, onFailure);
+    return cell.execute(this.session.kernel).then(onSuccess, onFailure);
   }
 
   /**
@@ -553,41 +572,22 @@ class ConsoleContent extends Widget {
     let banner = layout.widgets.at(0) as RawCellWidget;
     banner.model.value.text = info.banner;
     let lang = info.language_info as nbformat.ILanguageInfoMetadata;
-    this._mimetype = this._renderer.getCodeMimetype(lang);
+    this._mimetype = this._mimeTypeService.getMimeTypeByLanguage(lang);
     if (this.prompt) {
       this.prompt.model.mimeType = this._mimetype;
     }
   }
 
   /**
-   * Create a new completer widget if necessary and initialize it.
-   */
-  private _newCompleter(completer: CompleterWidget): void {
-    // Instantiate completer widget.
-    this._completer = completer || new CompleterWidget({
-      model: new CompleterModel()
-    });
-
-    // Set the completer widget's anchor node to peg its position.
-    this._completer.anchor = this.node;
-
-    // Because a completer widget may be passed in, check if it is attached.
-    if (!this._completer.isAttached) {
-      Widget.attach(this._completer, document.body);
-    }
-
-    // Set up the completer handler.
-    this._completerHandler = new CellCompleterHandler({
-      completer: this._completer,
-      kernel: this._session.kernel
-    });
-  }
-
-  /**
    * Create a new foreign cell.
    */
-  private _newForeignCell(): CodeCellWidget {
-    let cell = this._renderer.createForeignCell(this._rendermime, this);
+  private _createForeignCell(): CodeCellWidget {
+    let factory = this.contentFactory;
+    let contentFactory = factory.codeContentFactory;
+    let model = new CodeCellModel();
+    let rendermime = this.rendermime;
+    let options = { model, rendermime, contentFactory };
+    let cell = factory.createForeignCell(options, this);
     cell.readOnly = true;
     cell.model.mimeType = this._mimetype;
     cell.addClass(FOREIGN_CELL_CLASS);
@@ -612,7 +612,7 @@ class ConsoleContent extends Widget {
     let code = model.value.text + '\n';
     return new Promise<boolean>((resolve, reject) => {
       let timer = setTimeout(() => { resolve(true); }, timeout);
-      this._session.kernel.requestIsComplete({ code }).then(isComplete => {
+      this.session.kernel.requestIsComplete({ code }).then(isComplete => {
         clearTimeout(timer);
         if (isComplete.content.status !== 'incomplete') {
           resolve(true);
@@ -620,13 +620,14 @@ class ConsoleContent extends Widget {
         }
         model.value.text = code + isComplete.content.indent;
         let editor = prompt.editor;
-        let pos = editor.getPositionAt(model.value.text.length)
+        let pos = editor.getPositionAt(model.value.text.length);
         editor.setCursorPosition(pos);
         resolve(false);
       }).catch(() => { resolve(true); });
     });
   }
 
+  private _mimeTypeService: IEditorMimeTypeService;
   private _cells: IObservableVector<BaseCellWidget> = null;
   private _completer: CompleterWidget = null;
   private _completerHandler: CellCompleterHandler = null;
@@ -634,139 +635,179 @@ class ConsoleContent extends Widget {
   private _foreignHandler: ForeignHandler =  null;
   private _history: IConsoleHistory = null;
   private _input: Panel = null;
-  private _inspectionHandler: InspectionHandler = null;
   private _listening = false;
   private _mimetype = 'text/x-ipython';
-  private _renderer: ConsoleContent.IRenderer = null;
-  private _rendermime: IRenderMime = null;
-  private _session: Session.ISession = null;
   private _setByHistory = false;
 }
 
 
-// Define the signals for the `ConsoleContent` class.
-defineSignal(ConsoleContent.prototype, 'executed');
+// Define the signals for the `Console` class.
+defineSignal(Console.prototype, 'executed');
 
 
 /**
- * A namespace for ConsoleContent statics.
+ * A namespace for Console statics.
  */
 export
-namespace ConsoleContent {
+namespace Console {
   /**
-   * The initialization options for a console content widget.
+   * The initialization options for a console widget.
    */
   export
   interface IOptions {
     /**
-     * The completer widget for a console content widget.
+     * The content factory for a console widget.
      */
-    completer?: CompleterWidget;
+    contentFactory: IContentFactory;
 
     /**
-     * The history manager for a console content widget.
-     */
-    history?: IConsoleHistory;
-
-    /**
-     * The renderer for a console content widget.
-     */
-    renderer: IRenderer;
-
-    /**
-     * The mime renderer for the console content widget.
+     * The mime renderer for the console widget.
      */
     rendermime: IRenderMime;
 
     /**
-     * The session for the console content widget.
+     * The session for the console widget.
      */
     session: Session.ISession;
+
+    /**
+     * The service used to look up mime types.
+     */
+    mimeTypeService: IEditorMimeTypeService;
   }
 
   /**
-   * A renderer for completer widget nodes.
+   * A content factory for console children.
    */
   export
-  interface IRenderer {
+  interface IContentFactory {
+    /**
+     * The raw cell content factory.
+     */
+    readonly rawContentFactory: BaseCellWidget.IContentFactory;
+
+    /**
+     * The code cell content factory.
+     */
+    readonly codeContentFactory: CodeCellWidget.IContentFactory;
+
+    /**
+     * The inspection handler for a console widget.
+     */
+    createInspectionHandler(options: InspectionHandler.IOptions, parent: Console): InspectionHandler;
+
+    /**
+     * The completer widget for a console widget.
+     */
+    createCompleter(options: CompleterWidget.IOptions, parent: Console): CompleterWidget;
+
+    /**
+     * The completer handler for a console widget.
+     */
+   createCompleterHandler(options: CellCompleterHandler.IOptions, parent: Console): CellCompleterHandler;
+
+    /**
+     * The history manager for a console widget.
+     */
+    createConsoleHistory(options: ConsoleHistory.IOptions, parent: Console): IConsoleHistory;
+
+    /**
+     * The foreign handler for a console widget.
+     */
+    createForeignHandler(options: ForeignHandler.IOptions, parent: Console):
+    ForeignHandler;
+
     /**
      * Create a new banner widget.
      */
-    createBanner(): RawCellWidget;
+    createBanner(options: RawCellWidget.IOptions, parent: Console): RawCellWidget;
 
     /**
      * Create a new prompt widget.
      */
-    createPrompt(rendermime: IRenderMime, context: ConsoleContent): CodeCellWidget;
+    createPrompt(options: CodeCellWidget.IOptions, parent: Console): CodeCellWidget;
 
     /**
      * Create a code cell whose input originated from a foreign session.
      */
-    createForeignCell(rendermine: IRenderMime, context: ConsoleContent): CodeCellWidget;
-
-    /**
-     * Get the preferred mimetype given language info.
-     */
-    getCodeMimetype(info: nbformat.ILanguageInfoMetadata): string;
+    createForeignCell(options: CodeCellWidget.IOptions, parent: Console): CodeCellWidget;
   }
 
   /**
-   * Default implementation of `IRenderer`.
+   * Default implementation of `IContentFactory`.
    */
   export
-  class Renderer implements IRenderer {
+  class ContentFactory implements IContentFactory {
     /**
-     * The banner renderer.
+     * Create a new content factory.
      */
-    readonly bannerRenderer: BaseCellWidget.IRenderer;
-
-    /**
-     * The prompt renderer.
-     */
-    readonly promptRenderer: CodeCellWidget.IRenderer;
-
-    /**
-     * The mime type service of a code editor.
-     */
-    readonly editorMimeTypeService: IEditorMimeTypeService;
-
-    /**
-     * Create a new renderer.
-     */
-    constructor(options: Renderer.IOptions) {
-      let factory = options.editorServices.factoryService;
-      this.bannerRenderer = new BaseCellWidget.Renderer({
-        editorFactory: options => {
-          options.wordWrap = true;
-          return factory.newInlineEditor(options);
-        }
-      });
-      this.promptRenderer = new CodeCellWidget.Renderer ({
-        editorFactory: options => factory.newInlineEditor(options)
-      });
-      this.editorMimeTypeService = options.editorServices.mimeTypeService;
+    constructor(options: ContentFactory.IOptions) {
+      let editorFactory = options.editorFactory;
+      this.rawContentFactory = (options.rawContentFactory ||
+        new BaseCellWidget.ContentFactory({ editorFactory })
+      );
+      this.codeContentFactory = (options.codeContentFactory ||
+        new CodeCellWidget.ContentFactory({ editorFactory })
+      );
     }
 
     /**
+     * The raw cell content factory.
+     */
+    readonly rawContentFactory: BaseCellWidget.IContentFactory;
+
+    /**
+     * The code cell content factory.
+     */
+    readonly codeContentFactory: CodeCellWidget.IContentFactory;
+
+    /**
+     * The inspection handler for a console widget.
+     */
+    createInspectionHandler(options: InspectionHandler.IOptions, parent: Console): InspectionHandler {
+      return new InspectionHandler(options);
+    }
+
+    /**
+     * The completer widget for a console widget.
+     */
+    createCompleter(options: CompleterWidget.IOptions, parent: Console): CompleterWidget {
+      return new CompleterWidget(options);
+    }
+
+    /**
+     * The completer handler for a console widget.
+     */
+   createCompleterHandler(options: CellCompleterHandler.IOptions, parent: Console): CellCompleterHandler {
+      return new CellCompleterHandler(options);
+   }
+
+    /**
+     * The history manager for a console widget.
+     */
+    createConsoleHistory(options: ConsoleHistory.IOptions, parent: Console): IConsoleHistory {
+      return new ConsoleHistory(options);
+    }
+
+    /**
+     * The foreign handler for a console widget.
+     */
+    createForeignHandler(options: ForeignHandler.IOptions, parent: Console):
+    ForeignHandler {
+      return new ForeignHandler(options);
+    }
+    /**
      * Create a new banner widget.
      */
-    createBanner(): RawCellWidget {
-      let widget = new RawCellWidget({
-        model: new RawCellModel(),
-        renderer: this.bannerRenderer
-      });
-      return widget;
+    createBanner(options: RawCellWidget.IOptions, parent: Console): RawCellWidget {
+      return new RawCellWidget(options);
     }
 
     /**
      * Create a new prompt widget.
      */
-    createPrompt(rendermime: IRenderMime, context: ConsoleContent): CodeCellWidget {
-      let widget = new CodeCellWidget({
-        model: new CodeCellModel(),
-        rendermime,
-        renderer: this.promptRenderer
-      });
+    createPrompt(options: CodeCellWidget.IOptions, parent: Console): CodeCellWidget {
+      let widget = new CodeCellWidget(options);
       // Suppress the default "Enter" key handling.
       let cb = (editor: CodeEditor.IEditor, event: KeyboardEvent) => {
         return event.keyCode === 13;  // Enter;
@@ -778,34 +819,35 @@ namespace ConsoleContent {
     /**
      * Create a new code cell widget for an input from a foreign session.
      */
-    createForeignCell(rendermime: IRenderMime, context: ConsoleContent): CodeCellWidget {
-      let widget = new CodeCellWidget({
-        model: new CodeCellModel(),
-        rendermime,
-        renderer: this.promptRenderer
-      });
-      return widget;
-    }
-
-    /**
-     * Get the preferred mimetype given language info.
-     */
-    getCodeMimetype(info: nbformat.ILanguageInfoMetadata): string {
-      return this.editorMimeTypeService.getMimeTypeByLanguage(info);
+    createForeignCell(options: CodeCellWidget.IOptions, parent: Console): CodeCellWidget {
+      return new CodeCellWidget(options);
     }
   }
 
   /**
-   * The namespace for `Renderer`.
+   * The namespace for `ContentFactory` class statics.
    */
   export
-  namespace Renderer {
+  namespace ContentFactory {
     /**
-     * An initialize options for `Renderer`.
+     * An initialize options for `ContentFactory`.
      */
     export
     interface IOptions {
-      readonly editorServices: IEditorServices;
+      /**
+       * The editor factory.
+       */
+      editorFactory: CodeEditor.Factory;
+
+      /**
+       * A factory for code cells.
+       */
+      codeContentFactory?: CodeCellWidget.IContentFactory;
+
+      /**
+       * A factory for raw cells.
+       */
+      rawContentFactory?: BaseCellWidget.IContentFactory;
     }
   }
 }

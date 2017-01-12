@@ -93,8 +93,13 @@ class NotebookPanel extends Widget {
     let factory = this.contentFactory = options.contentFactory;
 
     this.layout = new PanelLayout();
-    let rendermime = this.rendermime;
-    this.notebook = factory.createNotebook(rendermime);
+    let nbOptions = {
+      rendermime: this.rendermime,
+      languagePreference: options.languagePreference,
+      contentFactory: factory.notebookContentFactory,
+      mimeTypeService: options.mimeTypeService
+    };
+    this.notebook = factory.createNotebook(nbOptions);
     let toolbar = factory.createToolbar();
 
     let layout = this.layout as PanelLayout;
@@ -375,9 +380,19 @@ export namespace NotebookPanel {
     clipboard: IClipboard;
 
     /**
+     * The language preference for the model.
+     */
+    languagePreference?: string;
+
+    /**
      * The content factory for the panel.
      */
     contentFactory: IContentFactory;
+
+    /**
+     * The mimeType service.
+     */
+    readonly mimeTypeService: IEditorMimeTypeService;
   }
 
   /**
@@ -386,9 +401,14 @@ export namespace NotebookPanel {
   export
   interface IContentFactory {
     /**
+     * The notebook content factory.
+     */
+    readonly notebookContentFactory: Notebook.IContentFactory;
+
+    /**
      * Create a new content area for the panel.
      */
-    createNotebook(rendermime: RenderMime): Notebook;
+    createNotebook(options: Notebook.IOptions): Notebook;
 
     /**
      * Create a new toolbar for the panel.
@@ -398,7 +418,7 @@ export namespace NotebookPanel {
     /**
      * Create a new completer widget for the panel.
      */
-    createCompleter(): CompleterWidget;
+    createCompleter(options?: CompleterWidget.IOptions): CompleterWidget;
   }
 
   /**
@@ -407,16 +427,6 @@ export namespace NotebookPanel {
   export
   class ContentFactory implements IContentFactory {
     /**
-     * The notebook content factory.
-     */
-    readonly notebookContentFactory: Notebook.IContentFactory;
-
-    /**
-     * The mimeType service.
-     */
-    readonly mimeTypeService: IEditorMimeTypeService;
-
-    /**
      * Creates a new renderer.
      */
     constructor(options: ContentFactory.IOptions) {
@@ -424,14 +434,15 @@ export namespace NotebookPanel {
     }
 
     /**
+     * The notebook content factory.
+     */
+    readonly notebookContentFactory: Notebook.IContentFactory;
+
+    /**
      * Create a new content area for the panel.
      */
-    createNotebook(rendermime: RenderMime): Notebook {
-      return new Notebook({
-        rendermime,
-        contentFactory: this.notebookContentFactory,
-        mimeTypeService: this.mimeTypeService
-      });
+    createNotebook(options: Notebook.IOptions): Notebook {
+      return new Notebook(options);
     }
 
     /**
@@ -444,8 +455,8 @@ export namespace NotebookPanel {
     /**
      * Create a new completer widget.
      */
-    createCompleter(): CompleterWidget {
-      return new CompleterWidget({ model: new CompleterModel() });
+    createCompleter(options: CompleterWidget.IOptions = {}): CompleterWidget {
+      return new CompleterWidget(options);
     }
   }
 
@@ -463,11 +474,6 @@ export namespace NotebookPanel {
        * The notebook content factory.
        */
       readonly notebookContentFactory: Notebook.IContentFactory;
-
-      /**
-       * The mimeType service.
-       */
-      readonly mimeTypeService: IEditorMimeTypeService;
     }
   }
 
@@ -476,6 +482,6 @@ export namespace NotebookPanel {
    * The notebook renderer token.
    */
   export
-  const IContentFactory = new Token<IContentFactory>('jupyter.services.notebook.factory');
+  const IContentFactory = new Token<IContentFactory>('jupyter.services.notebook.content-factory');
   /* tslint:enable */
 }

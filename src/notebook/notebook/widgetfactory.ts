@@ -89,7 +89,8 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
     let panel = new NotebookPanel({
       rendermime,
       clipboard: this.clipboard,
-      contentFactory: this.contentFactory
+      contentFactory: this.contentFactory,
+      mimeTypeService: this.mimeTypeService
     });
     panel.context = context;
     ToolbarItems.populateDefaults(panel);

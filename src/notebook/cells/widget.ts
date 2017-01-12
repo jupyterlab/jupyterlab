@@ -125,10 +125,12 @@ class BaseCellWidget extends Widget {
     let model = this._model = options.model;
 
     let factory = options.contentFactory;
-    this._editor = factory.createCellEditor(model);
-    this._editor.addClass(CELL_EDITOR_CLASS);
+    let editorOptions = { model, factory: factory.editorFactory };
 
-    this._input = factory.createInputArea(this._editor);
+    let editor =this._editor = factory.createCellEditor(editorOptions, this);
+    editor.addClass(CELL_EDITOR_CLASS);
+
+    this._input = factory.createInputArea({ editor }, this);
     (this.layout as PanelLayout).addWidget(this._input);
 
     // Handle trusted cursor.
@@ -327,14 +329,13 @@ namespace BaseCellWidget {
     /**
      * Create a new cell editor for the widget.
      */
-    createCellEditor(model: ICellModel): CodeEditorWidget;
+    createCellEditor(options: CodeEditorWidget.IOptions, parent: BaseCellWidget): CodeEditorWidget;
 
     /**
      * Create a new input area for the widget.
      */
-    createInputArea(editor: CodeEditorWidget): InputAreaWidget;
+    createInputArea(options: InputAreaWidget.IOptions, parent: BaseCellWidget): InputAreaWidget;
   }
-
 
   /**
    * The default implementation of an `IContentFactory`.
@@ -356,19 +357,15 @@ namespace BaseCellWidget {
     /**
      * Create a new cell editor for the widget.
      */
-    createCellEditor(model: CodeEditor.IModel): CodeEditorWidget {
-      return new CodeEditorWidget({
-        factory: this.editorFactory,
-        model,
-        wordWrap: true
-      });
+    createCellEditor(options: CodeEditorWidget.IOptions, parent: BaseCellWidget): CodeEditorWidget {
+      return new CodeEditorWidget(options);
     }
 
     /**
      * Create a new input area for the widget.
      */
-    createInputArea(editor: CodeEditorWidget): InputAreaWidget {
-      return new InputAreaWidget(editor);
+    createInputArea(options: InputAreaWidget.IOptions, parent: BaseCellWidget): InputAreaWidget {
+      return new InputAreaWidget(options);
     }
   }
 
@@ -402,10 +399,10 @@ class CodeCellWidget extends BaseCellWidget {
   constructor(options: CodeCellWidget.IOptions) {
     super(options);
     this.addClass(CODE_CELL_CLASS);
-    this._rendermime = options.rendermime;
+    let rendermime = this._rendermime = options.rendermime;
 
     let factory = options.contentFactory;
-    this._output = factory.createOutputArea(this._rendermime);
+    this._output = factory.createOutputArea({ rendermime }, this);
     (this.layout as PanelLayout).addWidget(this._output);
 
     let model = this.model;
@@ -546,7 +543,7 @@ namespace CodeCellWidget {
     /**
      * Create a new output area for the widget.
      */
-    createOutputArea(rendermime: RenderMime): OutputAreaWidget;
+    createOutputArea(options: OutputAreaWidget.IOptions, parent: BaseCellWidget): OutputAreaWidget;
   }
 
   /**
@@ -555,17 +552,10 @@ namespace CodeCellWidget {
   export
   class ContentFactory extends BaseCellWidget.ContentFactory implements IContentFactory {
     /**
-     * Create a new cell editor for the widget.
-     */
-    createCellEditor(model: CodeEditor.IModel): CodeEditorWidget {
-      return new CodeEditorWidget({ factory: this.editorFactory, model });
-    }
-
-    /**
      * Create an output area widget.
      */
-    createOutputArea(rendermime: RenderMime): OutputAreaWidget {
-      return new OutputAreaWidget({ rendermime });
+    createOutputArea(options: OutputAreaWidget.IOptions, parent: BaseCellWidget): OutputAreaWidget {
+      return new OutputAreaWidget(options);
     }
   }
 }
@@ -751,12 +741,12 @@ class InputAreaWidget extends Widget {
   /**
    * Construct an input area widget.
    */
-  constructor(editor: CodeEditorWidget) {
+  constructor(options: InputAreaWidget.IOptions) {
     super();
     this.addClass(INPUT_CLASS);
+    let editor = this._editor = options.editor;
     editor.addClass(EDITOR_CLASS);
     this.layout = new PanelLayout();
-    this._editor = editor;
     let prompt = this._prompt = new Widget();
     prompt.addClass(PROMPT_CLASS);
     let layout = this.layout as PanelLayout;
@@ -810,4 +800,22 @@ class InputAreaWidget extends Widget {
   private _prompt: Widget;
   private _editor: CodeEditorWidget;
   private _rendered: Widget;
+}
+
+
+/**
+ * The namespace for `InputAreaWidget` statics.
+ */
+export
+namespace InputAreaWidget {
+  /**
+   * The options used to create an `InputAreaWidget`.
+   */
+  export
+  interface IOptions {
+    /**
+     * The editor widget contained by the input area.
+     */
+    editor: CodeEditorWidget;
+  }
 }

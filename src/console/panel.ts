@@ -18,12 +18,16 @@ import {
 } from 'phosphor/lib/ui/panel';
 
 import {
+  IEditorMimeTypeService
+} from '../codeeditor';
+
+import {
   IRenderMime
 } from '../rendermime';
 
 import {
-  ConsoleContent
-} from './content';
+  Console
+} from './widget';
 
 
 /**
@@ -43,20 +47,18 @@ class ConsolePanel extends Panel {
   constructor(options: ConsolePanel.IOptions) {
     super();
     this.addClass(PANEL_CLASS);
-    this._content = options.content;
-
-    this.addWidget(this._content);
+    let factory = options.contentFactory;
+    let { rendermime, session, mimeTypeService } = options;
+    let contentFactory = factory.consoleContentFactory;
+    let consoleOpts = { rendermime, session, mimeTypeService, contentFactory };
+    this.console = factory.createConsole(consoleOpts);
+    this.addWidget(this.console);
   }
 
   /**
    * The console widget used by the panel.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
-  get content(): ConsoleContent {
-    return this._content;
-  }
+  readonly console: Console;
 
   /**
    * Dispose of the resources held by the widget.
@@ -77,7 +79,7 @@ class ConsolePanel extends Panel {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this.content.prompt.editor.focus();
+    this.console.prompt.editor.focus();
   }
 
   /**
@@ -88,7 +90,7 @@ class ConsolePanel extends Panel {
     this.dispose();
   }
 
-  private _content: ConsoleContent = null;
+  private _content: Console = null;
 }
 
 
@@ -103,55 +105,90 @@ namespace ConsolePanel {
   export
   interface IOptions {
     /**
-     * The console content instance to display in the console panel.
+     * The rendermime instance used by the panel.
      */
-    content: ConsoleContent;
+    rendermime: IRenderMime;
+
+    /**
+     * The content factory for the panel.
+     */
+    contentFactory: IContentFactory;
+
+    /**
+     * The session for the console widget.
+     */
+    session: Session.ISession;
+
+    /**
+     * The service used to look up mime types.
+     */
+    mimeTypeService: IEditorMimeTypeService;
   }
+
   /**
    * The console panel renderer.
    */
   export
-  interface IRenderer {
+  interface IContentFactory {
+    /**
+     * The console content factory.
+     */
+    readonly consoleContentFactory: Console.IContentFactory;
+
     /**
      * Create a new console panel.
      */
-    createConsole(rendermime: IRenderMime, session: Session.ISession): ConsolePanel;
+    createConsole(options: Console.IOptions): Console;
   }
+
   /**
-   * Default implementation of `IRenderer`.
+   * Default implementation of `IContentFactory`.
    */
   export
-  class Renderer implements IRenderer {
-
+  class ContentFactory implements IContentFactory {
     /**
-     * The console content renderer.
+     * Create a new content factory.
      */
-    readonly contentRenderer: ConsoleContent.IRenderer;
-
-    /**
-     * Create a new renderer.
-     */
-    constructor(options: ConsoleContent.Renderer.IOptions) {
-      this.contentRenderer = new ConsoleContent.Renderer(options);
+    constructor(options: ContentFactory.IOptions) {
+      this.consoleContentFactory = options.consoleContentFactory;
     }
+
+    /**
+     * The console content factory.
+     */
+    readonly consoleContentFactory: Console.IContentFactory;
 
     /**
      * Create a new console panel.
      */
-    createConsole(rendermime: IRenderMime, session: Session.ISession): ConsolePanel {
-      const content = new ConsoleContent({
-        rendermime, session,
-        renderer: this.contentRenderer
-      });
-      return new ConsolePanel({content});
+    createConsole(options: Console.IOptions): Console {
+      return new Console(options);
     }
 
   }
+
+  /**
+   * The namespace for `ContentFactory`.
+   */
+  export
+  namespace ContentFactory {
+    /**
+     * An initialization options for a console panel factory.
+     */
+    export
+    interface IOptions {
+      /**
+       * The notebook content factory.
+       */
+      consoleContentFactory: Console.IContentFactory;
+    }
+  }
+
   /* tslint:disable */
   /**
    * The console renderer token.
    */
   export
-  const IRenderer = new Token<IRenderer>('jupyter.services.console.renderer');
+  const IContentFactory = new Token<IContentFactory>('jupyter.services.console.content-factory');
   /* tslint:enable */
 }

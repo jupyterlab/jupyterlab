@@ -143,7 +143,7 @@ const trackerPlugin: JupyterLabPlugin<INotebookTracker> = {
  * The notebook cell factory provider.
  */
 export
-const rendererPlugin: JupyterLabPlugin<NotebookPanel.IContentFactory> = {
+const contentFactoryPlugin: JupyterLabPlugin<NotebookPanel.IContentFactory> = {
   id: 'jupyter.services.notebook-renderer',
   provides: NotebookPanel.IContentFactory,
   requires: [IEditorServices],
@@ -152,8 +152,7 @@ const rendererPlugin: JupyterLabPlugin<NotebookPanel.IContentFactory> = {
     let editorFactory = editorServices.factoryService.newInlineEditor;
     const nbFactory = new Notebook.ContentFactory({ editorFactory });
     return new NotebookPanel.ContentFactory({
-      notebookContentFactory: nbFactory,
-      mimeTypeService: editorServices.mimeTypeService
+      notebookContentFactory: nbFactory
     });
   }
 };
@@ -162,7 +161,7 @@ const rendererPlugin: JupyterLabPlugin<NotebookPanel.IContentFactory> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [rendererPlugin, trackerPlugin];
+const plugins: JupyterLabPlugin<any>[] = [contentFactoryPlugin, trackerPlugin];
 export default plugins;
 
 
