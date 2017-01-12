@@ -189,9 +189,8 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     when: services.ready
   });
 
-  // Sync tracker and set the source of the code inspector.
-  app.shell.currentChanged.connect((sender, args) => {
-    let widget = tracker.sync(args.newValue);
+  // Set the source of the code inspector.
+  tracker.currentChanged.connect((sender, widget) => {
     if (widget) {
       inspector.source = widget.content.inspectionHandler;
     }

@@ -141,4 +141,4 @@ class NotebookTracker extends InstanceTracker<NotebookPanel> implements INoteboo
 }
 
 // Define the signals for the `NotebookTracker` class.
-defineSignal(InstanceTracker.prototype, 'activeCellChanged');
+defineSignal(NotebookTracker.prototype, 'activeCellChanged');

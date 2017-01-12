@@ -56,19 +56,13 @@ const plugin: JupyterLabPlugin<void> = {
     });
     const namespace = 'rendered-markdown';
     const tracker = new InstanceTracker<MarkdownWidget>({ namespace });
+    let icon = `${PORTRAIT_ICON_CLASS} ${TEXTEDITOR_ICON_CLASS}`;
 
     // Handle state restoration.
     restorer.restore(tracker, {
       command: 'file-operations:open',
       args: widget => ({ path: widget.context.path, factory: FACTORY }),
       name: widget => widget.context.path
-    });
-
-    let icon = `${PORTRAIT_ICON_CLASS} ${TEXTEDITOR_ICON_CLASS}`;
-
-    // Sync tracker with currently focused widget.
-    app.shell.currentChanged.connect((sender, args) => {
-      tracker.sync(args.newValue);
     });
 
     factory.widgetCreated.connect((sender, widget) => {

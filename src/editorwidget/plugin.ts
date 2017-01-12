@@ -95,11 +95,6 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
     name: widget => widget.context.path
   });
 
-  // Sync tracker with currently focused widget.
-  app.shell.currentChanged.connect((sender, args) => {
-    tracker.sync(args.newValue);
-  });
-
   factory.widgetCreated.connect((sender, widget) => {
     widget.title.icon = `${PORTRAIT_ICON_CLASS} ${EDITOR_ICON_CLASS}`;
     // Notify the instance tracker if restore data needs to update.
