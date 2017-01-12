@@ -45,24 +45,27 @@ export
 interface IRealtime {
 
   /**
-   * Share a realtime model.
+   * Share a realtime model with a collaborator.
    *
-   * @param model: the model to be shared.
+   * @param model: The model to be shared.
    *
    * @returns a promise that is resolved when the model
    *   has been successfully shared.
    */
-  shareDocument(model: IRealtimeModel): Promise<void>;
+  addCollaborator(model: IRealtimeModel): Promise<void>;
 
   /**
-   * Open a realtime model that has been shared.
+   * Share a model through the realtime services.
    *
-   * @param model: the model to be shared.
+   * @param model: The model to be shared.
+   *
+   * @param uid: Optional unique identifier for the model,
+   *   which can be used to identify it across different clients.
    *
    * @returns a promise that is resolved when the model
    *   has been successfully opened.
    */
-  openSharedDocument(model: IRealtimeModel): Promise<void>;
+  shareModel(model: IRealtimeModel, uid?: string): Promise<void>;
 
   /**
    * Register a realtime collaborative object with the
@@ -116,6 +119,13 @@ interface IRealtimeModel {
    * registering itself as collaborative.
    */
   registerCollaborative (handler: IRealtimeHandler): Promise<void>;
+
+  /**
+   * The realtime handler associated with this realtime model.
+   * Should only be non-null after registerCollaborative() has
+   * successfully resolved.
+   */
+  readonly realtimeHandler: IRealtimeHandler;
 }
 
 

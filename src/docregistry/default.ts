@@ -118,6 +118,13 @@ class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeMo
   }
 
   /**
+   * The realtime handler associated with the document.
+   */
+  get realtimeHandler(): IRealtimeHandler {
+    return this._realtime;
+  }
+
+  /**
    * Serialize the model to a string.
    */
   toString(): string {
