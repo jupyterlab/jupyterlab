@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  DisposableDelegate
-} from 'phosphor/lib/core/disposable';
-
-import {
   defineSignal, ISignal
 } from 'phosphor/lib/core/signaling';
 
@@ -18,7 +14,7 @@ import {
 } from '../common/instancetracker';
 
 import {
-  NotebookPanel
+  NotebookPanel, Notebook
 } from './';
 
 import {
@@ -84,18 +80,25 @@ class NotebookTracker extends InstanceTracker<NotebookPanel> implements INoteboo
   activeCellChanged: ISignal<this, BaseCellWidget>;
 
   /**
+   * Add a new notebook panel to the tracker.
+   *
+   * @param panel - The notebook panel being added.
+   */
+  add(panel: NotebookPanel): Promise<void> {
+    const promise = super.add(panel);
+    panel.content.activeCellChanged.connect(this._onActiveCellChanged, this);
+    return promise;
+  }
+
+  /**
    * Dispose of the resources held by the tracker.
    */
   dispose(): void {
     if (this.isDisposed) {
       return;
     }
-    if (this._handler) {
-      this._handler.dispose();
-      this._handler = null;
-    }
-    this._activeCell = null;
     super.dispose();
+    this._activeCell = null;
   }
 
   /**
@@ -109,35 +112,24 @@ class NotebookTracker extends InstanceTracker<NotebookPanel> implements INoteboo
     }
     this._activeCell = activeCell;
 
-    if (this._handler) {
-      this._handler.dispose();
-    }
-
     let widget = this.currentWidget;
     if (!widget) {
       return;
     }
 
-    // Create a signal handler for cell changes.
-    let changeHandler = (sender: any, cell: BaseCellWidget) => {
-      this.activeCellChanged.emit(cell || null);
-    };
-
-    // Connect the signal handler to the current notebook panel.
-    widget.content.activeCellChanged.connect(changeHandler);
-    this._handler = new DisposableDelegate(() => {
-      // Only disconnect if the widget still exists.
-      if (!widget.isDisposed) {
-        widget.content.activeCellChanged.disconnect(changeHandler);
-      }
-    });
-
     // Since the notebook has changed, immediately signal an active cell change.
     this.activeCellChanged.emit(widget.content.activeCell || null);
   }
 
-  private _activeCell: BaseCellWidget = null;
-  private _handler: DisposableDelegate = null;
+  private _onActiveCellChanged(sender: Notebook, cell: BaseCellWidget): void {
+    // Check if the active cell change happened for the current notebook.
+    if (this.currentWidget && this.currentWidget.content === sender) {
+      this._activeCell = cell || null;
+      this.activeCellChanged.emit(this._activeCell);
+    }
+  }
+
+  private _activeCell: BaseCellWidget | null = null;
 }
 
 // Define the signals for the `NotebookTracker` class.
