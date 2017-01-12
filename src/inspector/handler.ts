@@ -14,10 +14,6 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
-  CodeEditor
-} from '../codeeditor';
-
-import {
   BaseCellWidget
 } from '../notebook/cells/widget';
 

@@ -26,14 +26,6 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  CellCompleterHandler, CompleterWidget
-} from '../completer';
-
-import {
-  InspectionHandler
-} from '../inspector';
-
-import {
   IEditorMimeTypeService, CodeEditor
 } from '../codeeditor';
 
@@ -142,12 +134,6 @@ class Console extends Widget {
     // Set the banner text and the mimetype.
     this._initialize();
 
-    // Set up the inspection handler.
-    this.inspectionHandler = factory.createInspectionHandler({
-      kernel: this.session.kernel,
-      rendermime: this.rendermime
-    }, this);
-
     // Set up the foreign iopub handler.
     this._foreignHandler = factory.createForeignHandler({
       kernel: this.session.kernel,
@@ -158,29 +144,17 @@ class Console extends Widget {
     this._history = factory.createConsoleHistory({
       kernel: this.session.kernel
     }, this);
-
-    // Instantiate the completer.
-    this._completer = factory.createCompleter({}, this);
-
-    // Set the completer widget's anchor node to peg its position.
-    this._completer.anchor = this.node;
-
-    // Because a completer widget may be passed in, check if it is attached.
-    if (!this._completer.isAttached) {
-      Widget.attach(this._completer, document.body);
-    }
-
-    // Instantiate the completer handler.
-    this._completerHandler = factory.createCompleterHandler({
-      completer: this._completer,
-      kernel: this.session.kernel
-    }, this);
   }
 
   /**
-   * A signal emitted when the console executes its prompt.
+   * A signal emitted when the console finished executing its prompt.
    */
   readonly executed: ISignal<this, Date>;
+
+  /**
+   * A signal emitted when a new prompt is created.
+   */
+  readonly promptCreated: ISignal<this, CodeCellWidget>;
 
   /**
    * The content factory used by the console.
@@ -191,11 +165,6 @@ class Console extends Widget {
    * The rendermime instance used by the console.
    */
   readonly rendermime: IRenderMime;
-
-  /**
-   * The inspection handler used by the console.
-   */
-  readonly inspectionHandler: InspectionHandler;
 
   /**
    * The session used by the console.
@@ -257,15 +226,10 @@ class Console extends Widget {
       return;
     }
     super.dispose();
-    this._completerHandler.dispose();
-    this._completerHandler = null;
-    this._completer.dispose();
-    this._completer = null;
     this._foreignHandler.dispose();
     this._foreignHandler = null;
     this._history.dispose();
     this._history = null;
-    this.inspectionHandler.dispose();
     this._cells.clear();
     this._cells = null;
   }
@@ -281,8 +245,6 @@ class Console extends Widget {
    * incomplete before attempting submission anyway. The default value is `250`.
    */
   execute(force = false, timeout = EXECUTION_TIMEOUT): Promise<void> {
-    this._completer.reset();
-
     if (this.session.status === 'dead') {
       return Promise.resolve(void 0);
     }
@@ -436,12 +398,10 @@ class Console extends Widget {
     editor.edgeRequested.connect(this.onEdgeRequest, this);
     editor.model.value.changed.connect(this.onTextChange, this);
 
-    // Associate the new prompt with the completer and inspection handlers.
-    this._completerHandler.activeCell = prompt;
-    this.inspectionHandler.activeCell = prompt;
-
     prompt.editor.focus();
     this.update();
+
+    this.promptCreated.emit(prompt);
   }
 
   /**
@@ -516,9 +476,7 @@ class Console extends Widget {
       this.newPrompt();
       this._initialize();
       this._history.kernel = kernel;
-      this._completerHandler.kernel = kernel;
       this._foreignHandler.kernel = kernel;
-      this.inspectionHandler.kernel = kernel;
     });
   }
 
@@ -640,8 +598,6 @@ class Console extends Widget {
 
   private _mimeTypeService: IEditorMimeTypeService;
   private _cells: IObservableVector<BaseCellWidget> = null;
-  private _completer: CompleterWidget = null;
-  private _completerHandler: CellCompleterHandler = null;
   private _content: Panel = null;
   private _foreignHandler: ForeignHandler =  null;
   private _history: IConsoleHistory = null;
@@ -654,6 +610,7 @@ class Console extends Widget {
 
 // Define the signals for the `Console` class.
 defineSignal(Console.prototype, 'executed');
+defineSignal(Console.prototype, 'promptCreated');
 
 
 /**
@@ -701,21 +658,6 @@ namespace Console {
      * The code cell content factory.
      */
     readonly codeContentFactory: CodeCellWidget.IContentFactory;
-
-    /**
-     * The inspection handler for a console widget.
-     */
-    createInspectionHandler(options: InspectionHandler.IOptions, parent: Console): InspectionHandler;
-
-    /**
-     * The completer widget for a console widget.
-     */
-    createCompleter(options: CompleterWidget.IOptions, parent: Console): CompleterWidget;
-
-    /**
-     * The completer handler for a console widget.
-     */
-   createCompleterHandler(options: CellCompleterHandler.IOptions, parent: Console): CellCompleterHandler;
 
     /**
      * The history manager for a console widget.
@@ -771,27 +713,6 @@ namespace Console {
      * The code cell content factory.
      */
     readonly codeContentFactory: CodeCellWidget.IContentFactory;
-
-    /**
-     * The inspection handler for a console widget.
-     */
-    createInspectionHandler(options: InspectionHandler.IOptions, parent: Console): InspectionHandler {
-      return new InspectionHandler(options);
-    }
-
-    /**
-     * The completer widget for a console widget.
-     */
-    createCompleter(options: CompleterWidget.IOptions, parent: Console): CompleterWidget {
-      return new CompleterWidget(options);
-    }
-
-    /**
-     * The completer handler for a console widget.
-     */
-   createCompleterHandler(options: CellCompleterHandler.IOptions, parent: Console): CellCompleterHandler {
-      return new CellCompleterHandler(options);
-   }
 
     /**
      * The history manager for a console widget.

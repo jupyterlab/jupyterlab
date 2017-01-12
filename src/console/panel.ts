@@ -18,8 +18,24 @@ import {
 } from 'phosphor/lib/ui/panel';
 
 import {
+  Widget
+} from 'phosphor/lib/ui/widget';
+
+import {
   IEditorMimeTypeService
 } from '../codeeditor';
+
+import {
+  CellCompleterHandler, CompleterWidget
+} from '../completer';
+
+import {
+  InspectionHandler
+} from '../inspector';
+
+import {
+  CodeCellWidget
+} from '../notebook/cells';
 
 import {
   IRenderMime
@@ -53,12 +69,44 @@ class ConsolePanel extends Panel {
     let consoleOpts = { rendermime, session, mimeTypeService, contentFactory };
     this.console = factory.createConsole(consoleOpts);
     this.addWidget(this.console);
+
+    // Set up the inspection handler.
+    this.inspectionHandler = factory.createInspectionHandler({
+      kernel: options.session.kernel,
+      rendermime: this.console.rendermime
+    });
+
+    // Instantiate the completer.
+    this._completer = factory.createCompleter({});
+
+    // Set the completer widget's anchor node to peg its position.
+    this._completer.anchor = this.node;
+
+    // Because a completer widget may be passed in, check if it is attached.
+    if (!this._completer.isAttached) {
+      Widget.attach(this._completer, document.body);
+    }
+
+    // Instantiate the completer handler.
+    this._completerHandler = factory.createCompleterHandler({
+      completer: this._completer,
+      kernel: options.session.kernel
+    });
+
+    this.console.promptCreated.connect(this._onPromptCreated, this);
+
+    options.session.kernelChanged.connect(this._onKernelChanged, this);
   }
 
   /**
    * The console widget used by the panel.
    */
   readonly console: Console;
+
+  /**
+   * The inspection handler used by the console.
+   */
+  readonly inspectionHandler: InspectionHandler;
 
   /**
    * Dispose of the resources held by the widget.
@@ -71,6 +119,12 @@ class ConsolePanel extends Panel {
     // Dispose console widget.
     this._content.dispose();
     this._content = null;
+
+    this._completerHandler.dispose();
+    this._completerHandler = null;
+    this._completer.dispose();
+    this._completer = null;
+    this.inspectionHandler.dispose();
 
     super.dispose();
   }
@@ -90,7 +144,30 @@ class ConsolePanel extends Panel {
     this.dispose();
   }
 
+  /**
+   * Handle the creation of a new prompt.
+   */
+  private _onPromptCreated(sender: Console, prompt: CodeCellWidget): void {
+    this._completer.reset();
+
+    // Associate the new prompt with the completer and inspection handlers.
+    this._completerHandler.activeCell = prompt;
+    this.inspectionHandler.activeCell = prompt;
+  }
+
+  /**
+   * Handle a change to the kernel.
+   */
+  private _onKernelChanged(): void {
+    let kernel = this.console.session.kernel;
+    this._completerHandler.kernel = kernel;
+    this.inspectionHandler.kernel = kernel;
+  }
+
   private _content: Console = null;
+  private _completer: CompleterWidget = null;
+  private _completerHandler: CellCompleterHandler = null;
+
 }
 
 
@@ -139,6 +216,21 @@ namespace ConsolePanel {
      * Create a new console panel.
      */
     createConsole(options: Console.IOptions): Console;
+
+    /**
+     * The inspection handler for a console widget.
+     */
+    createInspectionHandler(options: InspectionHandler.IOptions): InspectionHandler;
+
+    /**
+     * The completer widget for a console widget.
+     */
+    createCompleter(options: CompleterWidget.IOptions): CompleterWidget;
+
+    /**
+     * The completer handler for a console widget.
+     */
+    createCompleterHandler(options: CellCompleterHandler.IOptions): CellCompleterHandler;
   }
 
   /**
@@ -165,6 +257,26 @@ namespace ConsolePanel {
       return new Console(options);
     }
 
+    /**
+     * The inspection handler for a console widget.
+     */
+    createInspectionHandler(options: InspectionHandler.IOptions): InspectionHandler {
+      return new InspectionHandler(options);
+    }
+
+    /**
+     * The completer widget for a console widget.
+     */
+    createCompleter(options: CompleterWidget.IOptions): CompleterWidget {
+      return new CompleterWidget(options);
+    }
+
+    /**
+     * The completer handler for a console widget.
+     */
+   createCompleterHandler(options: CellCompleterHandler.IOptions): CellCompleterHandler {
+      return new CellCompleterHandler(options);
+   }
   }
 
   /**

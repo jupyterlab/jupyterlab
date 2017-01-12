@@ -165,7 +165,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   // Set the source of the code inspector.
   tracker.currentChanged.connect((sender, widget) => {
     if (widget) {
-      inspector.source = widget.console.inspectionHandler;
+      inspector.source = widget.inspectionHandler;
     }
   });
 
@@ -388,7 +388,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       panel.title.caption = Private.caption(captionOptions);
     });
     // Immediately set the inspector source to the current console.
-    inspector.source = panel.console.inspectionHandler;
+    inspector.source = panel.inspectionHandler;
     // Add the console panel to the tracker.
     tracker.add(panel);
     app.shell.addToMainArea(panel);
