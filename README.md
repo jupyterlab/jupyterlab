@@ -7,7 +7,7 @@
 
 # [JupyterLab](http://jupyterlab.github.io/jupyterlab/)
 
-[![Build Status](https://travis-ci.org/jupyterlab/jupyterlab.svg?branch=master)](https://travis-ci.org/jupyter/jupyterlab)
+[![Build Status](https://travis-ci.org/jupyterlab/jupyterlab.svg?branch=master)](https://travis-ci.org/jupyterlab/jupyterlab)
 [![Binder](http://mybinder.org/badge.svg)](http://mybinder.org/repo/jupyterlab/jupyterlab/lab)
 [![Documentation Status](https://readthedocs.org/projects/jupyterlab-tutorial/badge/?version=latest)](https://jupyterlab-tutorial.readthedocs.io/en/latest/?badge=latest)
 [![Google Group](https://img.shields.io/badge/-Google%20Group-lightgrey.svg)](https://groups.google.com/forum/#!forum/jupyter)
@@ -48,7 +48,7 @@ JupyterLab uses CSS Variables for styling, which is one reason for the
 minimum versions listed above.  IE 11+ or Edge 14 do not support
 CSS Variables, and are not directly supported at this time.
 A tool like [postcss](http://postcss.org/) can be used to convert the CSS files in the
-`jupyterlab/build` directory manually if desired. 
+`jupyterlab/build` directory manually if desired.
 
 ----
 
