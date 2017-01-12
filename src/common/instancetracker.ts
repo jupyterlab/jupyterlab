@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  each
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   IDisposable
 } from 'phosphor/lib/core/disposable';
 
@@ -105,7 +109,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     this._tracker.currentChanged.connect((sender, args) => {
       this.onCurrentChanged();
       this.currentChanged.emit(this.currentWidget);
-    });
+    }, this);
   }
 
   /**
@@ -129,14 +133,14 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * Test whether the tracker is disposed.
    */
   get isDisposed(): boolean {
-    return this._widgets === null;
+    return this._isDisposed;
   }
 
   /**
    * The number of widgets held by the tracker.
    */
   get size(): number {
-    return this._widgets.size;
+    return this._tracker.widgets.length;
   }
 
   /**
@@ -145,12 +149,11 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * @param widget - The widget being added.
    */
   add(widget: T): Promise<void> {
-    if (this._widgets.has(widget)) {
+    if (this._tracker.has(widget)) {
       let warning = `${widget.id} already exists in the tracker.`;
       console.warn(warning);
       return Promise.reject(warning);
     }
-    this._widgets.add(widget);
     this._tracker.add(widget);
 
     let injected = Private.injectedProperty.get(widget);
@@ -176,7 +179,6 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
 
     // Handle widget disposal.
     widget.disposed.connect(() => {
-      this._widgets.delete(widget);
       // If restore data was saved, delete it from the database.
       if (!injected && this._restore) {
         let { state } = this._restore;
@@ -198,9 +200,8 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     if (this.isDisposed) {
       return;
     }
+    this._isDisposed = true;
     clearSignalData(this);
-    this._widgets.clear();
-    this._widgets = null;
   }
 
   /**
@@ -210,7 +211,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    */
   find(fn: (widget: T) => boolean): T {
     let result: T = null;
-    this._widgets.forEach(widget => {
+    each(this._tracker.widgets, widget => {
       // If a result has already been found, short circuit.
       if (result) {
         return;
@@ -228,7 +229,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * @param fn - The function to call on each widget.
    */
   forEach(fn: (widget: T) => void): void {
-    this._widgets.forEach(widget => { fn(widget); });
+    each(this._tracker.widgets, widget => { fn(widget); });
   }
 
   /**
@@ -257,7 +258,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * @param widget - The widget whose existence is being checked.
    */
   has(widget: Widget): boolean {
-    return this._widgets.has(widget as any);
+    return this._tracker.has(widget as any);
   }
 
   /**
@@ -334,6 +335,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     /* This is a no-op. */
   }
 
+  private _isDisposed = false;
   private _restore: InstanceTracker.IRestoreOptions<T> = null;
   private _tracker = new FocusTracker<T>();
   private _widgets = new Set<T>();
