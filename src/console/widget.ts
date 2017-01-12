@@ -220,6 +220,13 @@ class Console extends Widget {
   }
 
   /**
+   * Test whether the widget is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._foreignHandler === null;
+  }
+
+  /**
    * Dispose of the resources held by the widget.
    */
   dispose() {
@@ -227,13 +234,13 @@ class Console extends Widget {
     if (this.isDisposed) {
       return;
     }
-    super.dispose();
     this._foreignHandler.dispose();
     this._foreignHandler = null;
     this._history.dispose();
     this._history = null;
     this._cells.clear();
     this._cells = null;
+    super.dispose();
   }
 
   /**
@@ -262,6 +269,9 @@ class Console extends Widget {
 
     // Check whether we should execute.
     return this._shouldExecute(timeout).then(should => {
+      if (this.isDisposed) {
+        return;
+      }
       if (should) {
         // Create a new prompt before kernel execution to allow typeahead.
         this.newPrompt();
@@ -414,7 +424,7 @@ class Console extends Widget {
 
     if (location === 'top') {
       return this._history.back(source).then(value => {
-        if (!value) {
+        if (this.isDisposed || !value) {
           return;
         }
         if (model.value.text === value) {
@@ -426,6 +436,9 @@ class Console extends Widget {
       });
     }
     return this._history.forward(source).then(value => {
+      if (this.isDisposed) {
+        return;
+      }
       let text = value || this._history.placeholder;
       if (model.value.text === text) {
         return;
@@ -473,6 +486,9 @@ class Console extends Widget {
       return;
     }
     kernel.ready.then(() => {
+      if (this.isDisposed) {
+        return;
+      }
       this._handleInfo(kernel.info);
     });
   }
@@ -484,6 +500,9 @@ class Console extends Widget {
     this._history.push(cell.model.value.text);
     cell.model.contentChanged.connect(this.update, this);
     let onSuccess = (value: KernelMessage.IExecuteReplyMsg) => {
+      if (this.isDisposed) {
+        return;
+      }
       this.executed.emit(new Date());
       if (!value) {
         return;
@@ -506,6 +525,9 @@ class Console extends Widget {
       this.update();
     };
     let onFailure = () => {
+      if (this.isDisposed) {
+        return;
+      }
       cell.model.contentChanged.disconnect(this.update, this);
       this.update();
     };
@@ -562,6 +584,9 @@ class Console extends Widget {
       let timer = setTimeout(() => { resolve(true); }, timeout);
       this.session.kernel.requestIsComplete({ code }).then(isComplete => {
         clearTimeout(timer);
+        if (this.isDisposed) {
+          resolve(false);
+        }
         if (isComplete.content.status !== 'incomplete') {
           resolve(true);
           return;
