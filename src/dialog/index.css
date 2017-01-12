@@ -45,7 +45,7 @@
 .jp-Dialog-header {
   flex: 0 0 auto;
   padding-bottom: 12px;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 400;
   color: var(--jp-ui-font-color0);
 }
@@ -90,8 +90,9 @@
   font-size: 13px;
   border: none;
   text-transform: uppercase;
-  line-height: 38px;
-  padding: 0px 24px;
+  line-height: 28px;
+  padding: 0px 12px;
+  letter-spacing: .4px;
 }
 
 
