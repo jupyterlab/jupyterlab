@@ -428,8 +428,11 @@ class Console extends Widget {
     prompt.addClass(PROMPT_CLASS);
     this._input.addWidget(prompt);
 
-    // Hook up history handling.
+    // Suppress the default "Enter" key handling.
     let editor = prompt.editor;
+    editor.addKeydownHandler(this._onEditorKeydown);
+
+    // Hook up history handling.
     editor.edgeRequested.connect(this.onEdgeRequest, this);
     editor.model.value.changed.connect(this.onTextChange, this);
 
@@ -627,6 +630,14 @@ class Console extends Widget {
     });
   }
 
+  /**
+   * Handle a keydown event on an editor.
+   */
+  private _onEditorKeydown(editor: CodeEditor.IEditor, event: KeyboardEvent) {
+    // Suppres "Enter" events.
+    return event.keyCode === 13;
+  }
+
   private _mimeTypeService: IEditorMimeTypeService;
   private _cells: IObservableVector<BaseCellWidget> = null;
   private _completer: CompleterWidget = null;
@@ -807,13 +818,7 @@ namespace Console {
      * Create a new prompt widget.
      */
     createPrompt(options: CodeCellWidget.IOptions, parent: Console): CodeCellWidget {
-      let widget = new CodeCellWidget(options);
-      // Suppress the default "Enter" key handling.
-      let cb = (editor: CodeEditor.IEditor, event: KeyboardEvent) => {
-        return event.keyCode === 13;  // Enter;
-      };
-      widget.editor.addKeydownHandler(cb);
-      return widget;
+      return new CodeCellWidget(options);
     }
 
     /**
