@@ -106,10 +106,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    */
   constructor(options: InstanceTracker.IOptions) {
     this.namespace = options.namespace;
-    this._tracker.currentChanged.connect((sender, args) => {
-      this.onCurrentChanged();
-      this.currentChanged.emit(this.currentWidget);
-    }, this);
+    this._tracker.currentChanged.connect(this._onCurrentChanged, this);
   }
 
   /**
@@ -164,6 +161,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
       let { restorer, state } = this._restore;
       let widgetName = this._restore.name(widget);
 
+      widget.disposed.connect(this._onWidgetDisposed, this);
       if (widgetName) {
         let name = `${this.namespace}:${widgetName}`;
         let data = this._restore.args(widget);
@@ -176,19 +174,6 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
         }
       }
     }
-
-    // Handle widget disposal.
-    widget.disposed.connect(() => {
-      // If restore data was saved, delete it from the database.
-      if (!injected && this._restore) {
-        let { state } = this._restore;
-        let name = Private.nameProperty.get(widget);
-
-        if (name) {
-          state.remove(name);
-        }
-      }
-    });
 
     return promise || Promise.resolve(void 0);
   }
@@ -335,10 +320,34 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     /* This is a no-op. */
   }
 
+  /**
+   * Handle the current change signal from the internal focus tracker.
+   */
+  private _onCurrentChanged(sender: any, args: FocusTracker.ICurrentChangedArgs<T>): void {
+    this.onCurrentChanged();
+    this.currentChanged.emit(this.currentWidget);
+  }
+
+  /**
+   * Clean up after disposed widgets.
+   */
+  private _onWidgetDisposed(widget: T): void {
+    let injected = Private.injectedProperty.get(widget);
+    if (injected || !this._restore) {
+      return;
+    }
+    // If restore data was saved, delete it from the database.
+    let { state } = this._restore;
+    let name = Private.nameProperty.get(widget);
+
+    if (name) {
+      state.remove(name);
+    }
+  }
+
   private _isDisposed = false;
   private _restore: InstanceTracker.IRestoreOptions<T> = null;
   private _tracker = new FocusTracker<T>();
-  private _widgets = new Set<T>();
 }
 
 
