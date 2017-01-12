@@ -408,7 +408,7 @@ namespace CodeEditor {
   }
 
   /**
-   * The signals for the `CodeMirrorModel` class.
+   * The signals for the `Model` class.
    */
   defineSignal(Model.prototype, 'mimeTypeChanged');
 
