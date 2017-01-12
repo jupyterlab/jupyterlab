@@ -167,4 +167,6 @@
   background: var(--jp-warn-color1);
   border-radius: 1px;
   cursor: pointer;
+  letter-spacing: .8px;
+  font-weight: 600;
 }
