@@ -62,10 +62,6 @@ import {
 } from '../../common/observablevector';
 
 import {
-  InspectionHandler
-} from '../../inspector';
-
-import {
   RenderMime
 } from '../../rendermime';
 
@@ -74,10 +70,9 @@ import {
 } from '../../codeeditor';
 
 import {
-  ICellModel, BaseCellWidget, MarkdownCellModel,
+  ICellModel, BaseCellWidget, IMarkdownCellModel,
   CodeCellWidget, MarkdownCellWidget,
-  CodeCellModel, RawCellWidget, RawCellModel,
-  ICodeCellModel, IMarkdownCellModel, IRawCellModel
+  ICodeCellModel, RawCellWidget, IRawCellModel,
 } from '../cells';
 
 import {
@@ -389,13 +384,13 @@ class StaticNotebook extends Widget {
     let widget: BaseCellWidget;
     switch (cell.type) {
     case 'code':
-      widget = this._createCodeCell(cell as CodeCellModel);
+      widget = this._createCodeCell(cell as ICodeCellModel);
       break;
     case 'markdown':
-      widget = this._createMarkdownCell(cell as MarkdownCellModel);
+      widget = this._createMarkdownCell(cell as IMarkdownCellModel);
       break;
     default:
-      widget = this._createRawCell(cell as RawCellModel);
+      widget = this._createRawCell(cell as IRawCellModel);
     }
     cell.mimeType = this._mimetype;
     widget.addClass(NB_CELL_CLASS);
@@ -407,7 +402,7 @@ class StaticNotebook extends Widget {
   /**
    * Create a code cell widget from a code cell model.
    */
-  private _createCodeCell(model: CodeCellModel): CodeCellWidget {
+  private _createCodeCell(model: ICodeCellModel): CodeCellWidget {
     let contentFactory = this.contentFactory.codeContentFactory;
     let rendermime = this.rendermime;
     let options = { model, rendermime, contentFactory };
@@ -417,7 +412,7 @@ class StaticNotebook extends Widget {
   /**
    * Create a markdown cell widget from a markdown cell model.
    */
-  private _createMarkdownCell(model: MarkdownCellModel): MarkdownCellWidget {
+  private _createMarkdownCell(model: IMarkdownCellModel): MarkdownCellWidget {
     let contentFactory = this.contentFactory.markdownContentFactory;
     let rendermime = this.rendermime;
     let options = { model, rendermime, contentFactory };
@@ -427,7 +422,7 @@ class StaticNotebook extends Widget {
   /**
    * Create a raw cell widget from a raw cell model.
    */
-  private _createRawCell(model: RawCellModel): RawCellWidget {
+  private _createRawCell(model: IRawCellModel): RawCellWidget {
     let contentFactory = this.contentFactory.rawContentFactory;
     let options = { model, contentFactory };
     return this.contentFactory.createRawCell(options, this);
@@ -646,13 +641,6 @@ class Notebook extends StaticNotebook {
   constructor(options: StaticNotebook.IOptions) {
     super(options);
     this.node.tabIndex = -1;  // Allow the widget to take focus.
-    // Set up the inspection handler.
-    this._inspectionHandler = new InspectionHandler({
-      rendermime: this.rendermime
-    });
-    this.activeCellChanged.connect((s, cell) => {
-      this._inspectionHandler.activeCell = cell;
-    });
     this._scrollHandler = new DragScrollHandler({ node: this.node });
   }
 
@@ -674,13 +662,6 @@ class Notebook extends StaticNotebook {
    * A signal emitted when the selection state of the notebook changes.
    */
   readonly selectionChanged: ISignal<this, void>;
-
-  /**
-   * Get the inspection handler used by the console.
-   */
-  get inspectionHandler(): InspectionHandler {
-    return this._inspectionHandler;
-  }
 
   /**
    * The interactivity mode of the notebook.
@@ -767,8 +748,6 @@ class Notebook extends StaticNotebook {
       return;
     }
     this._activeCell = null;
-    this._inspectionHandler.dispose();
-    this._inspectionHandler = null;
     super.dispose();
   }
 
@@ -1392,7 +1371,6 @@ class Notebook extends StaticNotebook {
 
   private _activeCellIndex = -1;
   private _activeCell: BaseCellWidget = null;
-  private _inspectionHandler: InspectionHandler = null;
   private _mode: NotebookMode = 'command';
   private _drag: Drag = null;
   private _dragData: { pressX: number, pressY: number, index: number } = null;

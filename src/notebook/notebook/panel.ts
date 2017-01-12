@@ -42,12 +42,20 @@ import {
 } from '../../docregistry';
 
 import {
+  InspectionHandler
+} from '../../inspector';
+
+import {
   RenderMime
 } from '../../rendermime';
 
 import {
-  CompleterWidget, CompleterModel, CellCompleterHandler
+  CompleterWidget, CellCompleterHandler
 } from '../../completer';
+
+import {
+  BaseCellWidget
+} from '../cells';
 
 import {
   INotebookModel
@@ -100,25 +108,34 @@ class NotebookPanel extends Widget {
       mimeTypeService: options.mimeTypeService
     };
     this.notebook = factory.createNotebook(nbOptions);
+    this.notebook.activeCellChanged.connect(this._onActiveCellChanged, this);
     let toolbar = factory.createToolbar();
 
     let layout = this.layout as PanelLayout;
     layout.addWidget(toolbar);
     layout.addWidget(this.notebook);
 
-    this._completer = factory.createCompleter();
-    // The completer widget's anchor node is the node whose scrollTop is
-    // pegged to the completer widget's position.
-    this._completer.anchor = this.notebook.node;
-    Widget.attach(this._completer, document.body);
-
-    // Set up the completer handler.
-    this._completerHandler = new CellCompleterHandler({
-      completer: this._completer
+    // Set up the inspection handler.
+    this.inspectionHandler = factory.createInspectionHandler({
+      kernel: this.context.kernel,
+      rendermime: this.rendermime
     });
-    this._completerHandler.activeCell = this.notebook.activeCell;
-    this.notebook.activeCellChanged.connect((s, cell) => {
-      this._completerHandler.activeCell = cell;
+
+    // Instantiate the completer.
+    this._completer = factory.createCompleter({});
+
+    // Set the completer widget's anchor node to peg its position.
+    this._completer.anchor = this.node;
+
+    // Because a completer widget may be passed in, check if it is attached.
+    if (!this._completer.isAttached) {
+      Widget.attach(this._completer, document.body);
+    }
+
+    // Instantiate the completer handler.
+    this._completerHandler = factory.createCompleterHandler({
+      completer: this._completer,
+      kernel: this.context.kernel
     });
   }
 
@@ -156,6 +173,11 @@ class NotebookPanel extends Widget {
    * The notebook used by the widget.
    */
   readonly notebook: Notebook;
+
+  /**
+   * The inspection handler used by the widget.
+   */
+  readonly inspectionHandler: InspectionHandler;
 
   /**
    * Get the toolbar used by the widget.
@@ -215,6 +237,7 @@ class NotebookPanel extends Widget {
     this._completerHandler = null;
     this._completer.dispose();
     this._completer = null;
+    this.inspectionHandler.dispose();
     super.dispose();
   }
 
@@ -299,7 +322,7 @@ class NotebookPanel extends Widget {
    */
   private _onKernelChanged(context: DocumentRegistry.IContext<INotebookModel>, kernel: Kernel.IKernel): void {
     this._completerHandler.kernel = kernel;
-    this.notebook.inspectionHandler.kernel = kernel;
+    this.inspectionHandler.kernel = kernel;
     this.kernelChanged.emit(kernel);
     if (!this.model || !kernel) {
       return;
@@ -346,6 +369,13 @@ class NotebookPanel extends Widget {
     } else {
       this.title.className = this.title.className.replace(DIRTY_CLASS, '');
     }
+  }
+
+  /**
+   * Handle a change to the active cell.
+   */
+  private _onActiveCellChanged(sender: Notebook, widget: BaseCellWidget) {
+    this.inspectionHandler.activeCell = widget;
   }
 
   private _completer: CompleterWidget = null;
@@ -416,9 +446,19 @@ export namespace NotebookPanel {
     createToolbar(): Toolbar<Widget>;
 
     /**
-     * Create a new completer widget for the panel.
+     * The inspection handler for a console widget.
      */
-    createCompleter(options?: CompleterWidget.IOptions): CompleterWidget;
+    createInspectionHandler(options: InspectionHandler.IOptions): InspectionHandler;
+
+    /**
+     * The completer widget for a console widget.
+     */
+    createCompleter(options: CompleterWidget.IOptions): CompleterWidget;
+
+    /**
+     * The completer handler for a console widget.
+     */
+   createCompleterHandler(options: CellCompleterHandler.IOptions): CellCompleterHandler;
   }
 
   /**
@@ -453,11 +493,25 @@ export namespace NotebookPanel {
     }
 
     /**
-     * Create a new completer widget.
+     * The inspection handler for a console widget.
      */
-    createCompleter(options: CompleterWidget.IOptions = {}): CompleterWidget {
+    createInspectionHandler(options: InspectionHandler.IOptions): InspectionHandler {
+      return new InspectionHandler(options);
+    }
+
+    /**
+     * The completer widget for a console widget.
+     */
+    createCompleter(options: CompleterWidget.IOptions): CompleterWidget {
       return new CompleterWidget(options);
     }
+
+    /**
+     * The completer handler for a console widget.
+     */
+   createCompleterHandler(options: CellCompleterHandler.IOptions): CellCompleterHandler {
+      return new CellCompleterHandler(options);
+   }
   }
 
   /**

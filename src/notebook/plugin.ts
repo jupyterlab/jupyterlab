@@ -197,7 +197,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
   // Set the source of the code inspector.
   tracker.currentChanged.connect((sender, widget) => {
     if (widget) {
-      inspector.source = widget.notebook.inspectionHandler;
+      inspector.source = widget.inspectionHandler;
     }
   });
 
@@ -225,7 +225,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     widget.id = widget.id || `notebook-${++id}`;
     widget.title.icon = `${PORTRAIT_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
     // Immediately set the inspector source to the current notebook.
-    inspector.source = widget.notebook.inspectionHandler;
+    inspector.source = widget.inspectionHandler;
     // Notify the instance tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => { tracker.save(widget); });
     // Add the notebook panel to the tracker.

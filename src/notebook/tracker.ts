@@ -86,7 +86,7 @@ class NotebookTracker extends InstanceTracker<NotebookPanel> implements INoteboo
    */
   add(panel: NotebookPanel): Promise<void> {
     const promise = super.add(panel);
-    panel.content.activeCellChanged.connect(this._onActiveCellChanged, this);
+    panel.notebook.activeCellChanged.connect(this._onActiveCellChanged, this);
     return promise;
   }
 
@@ -123,7 +123,7 @@ class NotebookTracker extends InstanceTracker<NotebookPanel> implements INoteboo
 
   private _onActiveCellChanged(sender: Notebook, cell: BaseCellWidget): void {
     // Check if the active cell change happened for the current notebook.
-    if (this.currentWidget && this.currentWidget.content === sender) {
+    if (this.currentWidget && this.currentWidget.notebook === sender) {
       this._activeCell = cell || null;
       this.activeCellChanged.emit(this._activeCell);
     }
