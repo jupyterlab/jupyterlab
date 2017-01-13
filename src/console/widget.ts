@@ -139,11 +139,11 @@ class Console extends Widget {
       kernel: this.session.kernel,
       parent: this,
       cellFactory: () => this._createForeignCell(),
-    }, this);
+    });
 
     this._history = factory.createConsoleHistory({
       kernel: this.session.kernel
-    }, this);
+    });
 
     this.session.kernelChanged.connect(this._onKernelChanged, this);
   }
@@ -354,6 +354,9 @@ class Console extends Widget {
     // Create a prompt if necessary.
     if (!this.prompt) {
       this.newPrompt();
+    } else {
+      this.prompt.editor.focus();
+      this.update();
     }
   }
 
@@ -408,9 +411,10 @@ class Console extends Widget {
     editor.edgeRequested.connect(this.onEdgeRequest, this);
     editor.model.value.changed.connect(this.onTextChange, this);
 
-    prompt.editor.focus();
-    this.update();
-
+    if (this.isAttached) {
+      prompt.editor.focus();
+      this.update();
+    }
     this.promptCreated.emit(prompt);
   }
 
@@ -616,9 +620,7 @@ class Console extends Widget {
     this._initialize();
     this._history.kernel = kernel;
     this._foreignHandler.kernel = kernel;
-    if (this.isAttached) {
-      this.newPrompt();
-    }
+    this.newPrompt();
   }
 
   private _mimeTypeService: IEditorMimeTypeService;
@@ -686,12 +688,12 @@ namespace Console {
     /**
      * The history manager for a console widget.
      */
-    createConsoleHistory(options: ConsoleHistory.IOptions, parent: Console): IConsoleHistory;
+    createConsoleHistory(options: ConsoleHistory.IOptions): IConsoleHistory;
 
     /**
      * The foreign handler for a console widget.
      */
-    createForeignHandler(options: ForeignHandler.IOptions, parent: Console):
+    createForeignHandler(options: ForeignHandler.IOptions):
     ForeignHandler;
 
     /**
@@ -741,14 +743,14 @@ namespace Console {
     /**
      * The history manager for a console widget.
      */
-    createConsoleHistory(options: ConsoleHistory.IOptions, parent: Console): IConsoleHistory {
+    createConsoleHistory(options: ConsoleHistory.IOptions): IConsoleHistory {
       return new ConsoleHistory(options);
     }
 
     /**
      * The foreign handler for a console widget.
      */
-    createForeignHandler(options: ForeignHandler.IOptions, parent: Console):
+    createForeignHandler(options: ForeignHandler.IOptions):
     ForeignHandler {
       return new ForeignHandler(options);
     }

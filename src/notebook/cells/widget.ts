@@ -127,10 +127,10 @@ class BaseCellWidget extends Widget {
     let factory = options.contentFactory;
     let editorOptions = { model, factory: factory.editorFactory };
 
-    let editor =this._editor = factory.createCellEditor(editorOptions, this);
+    let editor =this._editor = factory.createCellEditor(editorOptions);
     editor.addClass(CELL_EDITOR_CLASS);
 
-    this._input = factory.createInputArea({ editor }, this);
+    this._input = factory.createInputArea({ editor });
     (this.layout as PanelLayout).addWidget(this._input);
 
     // Handle trusted cursor.
@@ -329,12 +329,12 @@ namespace BaseCellWidget {
     /**
      * Create a new cell editor for the widget.
      */
-    createCellEditor(options: CodeEditorWidget.IOptions, parent: BaseCellWidget): CodeEditorWidget;
+    createCellEditor(options: CodeEditorWidget.IOptions): CodeEditorWidget;
 
     /**
      * Create a new input area for the widget.
      */
-    createInputArea(options: InputAreaWidget.IOptions, parent: BaseCellWidget): InputAreaWidget;
+    createInputArea(options: InputAreaWidget.IOptions): InputAreaWidget;
   }
 
   /**
@@ -357,14 +357,14 @@ namespace BaseCellWidget {
     /**
      * Create a new cell editor for the widget.
      */
-    createCellEditor(options: CodeEditorWidget.IOptions, parent: BaseCellWidget): CodeEditorWidget {
+    createCellEditor(options: CodeEditorWidget.IOptions): CodeEditorWidget {
       return new CodeEditorWidget(options);
     }
 
     /**
      * Create a new input area for the widget.
      */
-    createInputArea(options: InputAreaWidget.IOptions, parent: BaseCellWidget): InputAreaWidget {
+    createInputArea(options: InputAreaWidget.IOptions): InputAreaWidget {
       return new InputAreaWidget(options);
     }
   }
@@ -402,7 +402,7 @@ class CodeCellWidget extends BaseCellWidget {
     let rendermime = this._rendermime = options.rendermime;
 
     let factory = options.contentFactory;
-    this._output = factory.createOutputArea({ rendermime }, this);
+    this._output = factory.createOutputArea({ rendermime });
     (this.layout as PanelLayout).addWidget(this._output);
 
     let model = this.model;
@@ -543,7 +543,7 @@ namespace CodeCellWidget {
     /**
      * Create a new output area for the widget.
      */
-    createOutputArea(options: OutputAreaWidget.IOptions, parent: BaseCellWidget): OutputAreaWidget;
+    createOutputArea(options: OutputAreaWidget.IOptions): OutputAreaWidget;
   }
 
   /**
@@ -554,7 +554,7 @@ namespace CodeCellWidget {
     /**
      * Create an output area widget.
      */
-    createOutputArea(options: OutputAreaWidget.IOptions, parent: BaseCellWidget): OutputAreaWidget {
+    createOutputArea(options: OutputAreaWidget.IOptions): OutputAreaWidget {
       return new OutputAreaWidget(options);
     }
   }
