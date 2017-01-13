@@ -71,9 +71,9 @@ function createCodeCellFactory(): CodeCellWidget.IContentFactory {
  * Create a cell editor widget.
  */
 export
-function createCellEditor(): CodeEditorWidget {
+function createCellEditor(model?: CodeCellModel): CodeEditorWidget {
   return new CodeEditorWidget({
-    model: new CodeCellModel(),
+    model: model || new CodeCellModel(),
     factory: editorFactory
   });
 }

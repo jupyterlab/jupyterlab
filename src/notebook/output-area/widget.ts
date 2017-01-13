@@ -163,7 +163,7 @@ class OutputAreaWidget extends Widget {
     super();
     this.addClass(OUTPUT_AREA_CLASS);
     this._rendermime = options.rendermime;
-    this._renderer = options.renderer || OutputAreaWidget.defaultRenderer;
+    this._renderer = options.renderer || OutputAreaWidget.defaultContentFactory;
     this.layout = new PanelLayout();
   }
 
@@ -472,18 +472,18 @@ namespace OutputAreaWidget {
     rendermime: RenderMime;
 
     /**
-     * The output widget renderer.
+     * The output widget content factory.
      *
-     * Defaults to a shared `IRenderer` instance.
+     * Defaults to a shared `IContentFactory` instance.
      */
-     renderer?: IRenderer;
+     contentFactory?: IContentFactory;
   }
 
   /**
-   * An output widget renderer.
+   * An output widget content factory.
    */
   export
-  interface IRenderer {
+  interface IContentFactory {
     /**
      * Create an output widget.
      *
@@ -494,10 +494,10 @@ namespace OutputAreaWidget {
   }
 
   /**
-   * The default implementation of `IRenderer`.
+   * The default implementation of `IContentFactory`.
    */
   export
-  class Renderer implements IRenderer {
+  class ContentFactory implements IContentFactory {
     /**
      * Create an output widget.
      *
@@ -510,11 +510,12 @@ namespace OutputAreaWidget {
   }
 
   /**
-   * The default `Renderer` instance.
+   * The default `ContentFactory` instance.
    */
   export
-  const defaultRenderer = new Renderer();
+  const defaultContentFactory = new ContentFactory();
 }
+
 
 /**
  * The gutter on the left side of the OutputWidget
