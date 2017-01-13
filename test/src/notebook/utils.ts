@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  MimeData
+} from 'phosphor/lib/core/mimedata';
+
+import {
   editorServices
 } from '../../../lib/codemirror';
 
@@ -21,6 +25,9 @@ import {
   BaseCellWidget, CodeCellWidget, CodeCellModel
 } from '../../../lib/notebook/cells';
 
+import {
+  defaultRenderMime
+} from '../utils';
 
 /**
  * The default notebook content.
@@ -29,62 +36,90 @@ export
 const DEFAULT_CONTENT: nbformat.INotebookContent = require('../../../examples/notebook/test.ipynb') as nbformat.INotebookContent;
 
 
+export
+const editorFactory = editorServices.factoryService.newInlineEditor;
+
+export
+const mimeTypeService = editorServices.mimeTypeService;
+
+export
+const rendermime = defaultRenderMime();
+
+export
+const clipboard = new MimeData();
+
+
 /**
- * Create a base cell renderer.
+ * Create a base cell content factory.
  */
 export
-function createBaseCellRenderer(): BaseCellWidget.Renderer {
-  return new BaseCellWidget.Renderer({
-    editorFactory: options => {
-      options.wordWrap = true;
-      return editorServices.factoryService.newInlineEditor(options);
-    }
-  });
+function createBaseCellFactory(): BaseCellWidget.IContentFactory {
+  return new BaseCellWidget.ContentFactory({ editorFactory });
 };
 
 
 /**
- * Create a new code cell renderer.
+ * Create a new code cell content factory.
  */
 export
-function createCodeCellRenderer(): CodeCellWidget.Renderer {
-  return new CodeCellWidget.Renderer({
-    editorFactory: options => {
-      return editorServices.factoryService.newInlineEditor(options);
-    }
-  });
+function createCodeCellFactory(): CodeCellWidget.IContentFactory {
+  return new CodeCellWidget.ContentFactory({ editorFactory });
 }
 
 
 /**
- * Create a cell editor widget given a factory.
+ * Create a cell editor widget.
  */
 export
 function createCellEditor(): CodeEditorWidget {
   return new CodeEditorWidget({
     model: new CodeCellModel(),
-    factory: options => {
-      options.wordWrap = true;
-      return editorServices.factoryService.newInlineEditor(options);
-    }
+    factory: editorFactory
   });
 }
 
 
 /**
- * Create a default notebook renderer.
+ * Create a default notebook content factory.
  */
 export
-function createNotebookRenderer(): Notebook.Renderer {
-  return new Notebook.Renderer({ editorServices });
+function createNotebookFactory(): Notebook.IContentFactory {
+  return new Notebook.ContentFactory({ editorFactory });
 }
 
 
 /**
- * Create a default notebook panel renderer.
+ * Create a default notebook panel content factory.
  */
 export
-function createNotebookPanelRenderer(): NotebookPanel.Renderer {
-  const notebookRenderer = createNotebookRenderer();
-  return new NotebookPanel.Renderer({ notebookRenderer });
+function createNotebookPanelFactory(): NotebookPanel.IContentFactory {
+  const notebookContentFactory = createNotebookFactory();
+  return new NotebookPanel.ContentFactory({ notebookContentFactory });
+}
+
+
+/**
+ * Create a notebook widget.
+ */
+export
+function createNotebook(): Notebook {
+  return new Notebook({
+    rendermime,
+    contentFactory: createNotebookFactory(),
+    mimeTypeService
+  });
+}
+
+
+/**
+ * Create a notebook panel widget.
+ */
+export
+function createNotebookPanel(): NotebookPanel {
+  return new NotebookPanel({
+    rendermime,
+    contentFactory: createNotebookPanelFactory(),
+    mimeTypeService,
+    clipboard
+  });
 }

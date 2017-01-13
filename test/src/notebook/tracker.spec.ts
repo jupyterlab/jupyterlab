@@ -4,10 +4,6 @@
 import expect = require('expect.js');
 
 import {
-  MimeData
-} from 'phosphor/lib/core/mimedata';
-
-import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
@@ -20,19 +16,15 @@ import {
 } from '../../../lib/notebook/cells';
 
 import {
-  NotebookPanel
-} from '../../../lib/notebook/notebook/panel';
-
-import {
   NotebookTracker
 } from '../../../lib/notebook/tracker';
 
 import {
-  createNotebookContext, defaultRenderMime
+  createNotebookContext
 } from '../utils';
 
 import {
-  DEFAULT_CONTENT, createNotebookPanelRenderer
+  DEFAULT_CONTENT, createNotebookPanel
 } from './utils';
 
 
@@ -47,14 +39,6 @@ class TestTracker extends NotebookTracker {
     this.methods.push('onCurrentChanged');
   }
 }
-
-
-/**
- * Default notebook panel data.
- */
-const rendermime = defaultRenderMime();
-const clipboard = new MimeData();
-const renderer = createNotebookPanelRenderer();
 
 
 describe('notebook/tracker', () => {
@@ -79,17 +63,17 @@ describe('notebook/tracker', () => {
 
       it('should be `null` if a tracked notebook has no active cell', () => {
         let tracker = new NotebookTracker({ namespace: NAMESPACE });
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer});
+        let panel = createNotebookPanel();
         tracker.add(panel);
         expect(tracker.activeCell).to.be(null);
       });
 
       it('should be the active cell if a tracked notebook has one', () => {
         let tracker = new NotebookTracker({ namespace: NAMESPACE });
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer});
+        let panel = createNotebookPanel();
         tracker.add(panel);
         panel.context = createNotebookContext();
-        panel.content.model.fromJSON(DEFAULT_CONTENT);
+        panel.notebook.model.fromJSON(DEFAULT_CONTENT);
         expect(tracker.activeCell).to.be(null);
         Widget.attach(panel, document.body);
         simulate(panel.node, 'focus');
@@ -103,17 +87,17 @@ describe('notebook/tracker', () => {
 
       it('should emit a signal when the active cell changes', () => {
         let tracker = new NotebookTracker({ namespace: NAMESPACE });
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
+        let panel = createNotebookPanel();
         let count = 0;
         tracker.activeCellChanged.connect(() => { count++; });
         panel.context = createNotebookContext();
-        panel.content.model.fromJSON(DEFAULT_CONTENT);
+        panel.notebook.model.fromJSON(DEFAULT_CONTENT);
         tracker.add(panel);
         expect(count).to.be(0);
         Widget.attach(panel, document.body);
         simulate(panel.node, 'focus');
         expect(count).to.be(1);
-        panel.content.activeCellIndex = 1;
+        panel.notebook.activeCellIndex = 1;
         expect(count).to.be(2);
         panel.dispose();
       });
@@ -124,10 +108,10 @@ describe('notebook/tracker', () => {
 
       it('should be called when the active cell changes', () => {
         let tracker = new TestTracker({ namespace: NAMESPACE });
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer});
+        let panel = createNotebookPanel();
         tracker.add(panel);
         panel.context = createNotebookContext();
-        panel.content.model.fromJSON(DEFAULT_CONTENT);
+        panel.notebook.model.fromJSON(DEFAULT_CONTENT);
         expect(tracker.methods).to.not.contain('onCurrentChanged');
         Widget.attach(panel, document.body);
         simulate(panel.node, 'focus');

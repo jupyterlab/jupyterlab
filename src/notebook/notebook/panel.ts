@@ -422,7 +422,7 @@ export namespace NotebookPanel {
     /**
      * The mimeType service.
      */
-    readonly mimeTypeService: IEditorMimeTypeService;
+    mimeTypeService: IEditorMimeTypeService;
   }
 
   /**

@@ -8,10 +8,6 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  MimeData
-} from 'phosphor/lib/core/mimedata';
-
-import {
   INotebookModel
 } from '../../../../lib/notebook/notebook/model';
 
@@ -28,17 +24,15 @@ import {
 } from '../../../../lib/docregistry/context';
 
 import {
-  createNotebookContext, defaultRenderMime
+  createNotebookContext
 } from '../../utils';
 
 import {
-  createNotebookPanelRenderer
+  createNotebookPanelFactory, clipboard, rendermime, mimeTypeService
 } from '../utils';
 
 
-const rendermime = defaultRenderMime();
-const clipboard = new MimeData();
-const renderer = createNotebookPanelRenderer();
+const contentFactory = createNotebookPanelFactory();
 
 
 function createFactory(): NotebookWidgetFactory {
@@ -47,7 +41,8 @@ function createFactory(): NotebookWidgetFactory {
     fileExtensions: ['.ipynb'],
     rendermime,
     clipboard,
-    renderer
+    contentFactory,
+    mimeTypeService
   });
 }
 
