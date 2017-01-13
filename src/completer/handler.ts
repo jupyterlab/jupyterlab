@@ -134,7 +134,7 @@ class CellCompleterHandler implements IDisposable {
       coords,
       line: position.line,
       column: position.column
-    }
+    };
   }
 
   /**

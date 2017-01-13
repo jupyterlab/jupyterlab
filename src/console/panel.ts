@@ -26,7 +26,7 @@ import {
 } from '../codeeditor';
 
 import {
-  CellCompleterHandler, CompleterWidget
+  CellCompleterHandler, CompleterModel, CompleterWidget
 } from '../completer';
 
 import {
@@ -77,7 +77,7 @@ class ConsolePanel extends Panel {
     });
 
     // Instantiate the completer.
-    this._completer = factory.createCompleter({});
+    this._completer = factory.createCompleter({ model: new CompleterModel() });
 
     // Set the completer widget's anchor node to peg its position.
     this._completer.anchor = this.node;
@@ -109,23 +109,26 @@ class ConsolePanel extends Panel {
   readonly inspectionHandler: InspectionHandler;
 
   /**
+   * Test whether the widget is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._completer == null;
+  }
+
+  /**
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
     if (this.isDisposed) {
       return;
     }
-
-    // Dispose console widget.
-    this._content.dispose();
-    this._content = null;
-
+    let completer = this._completer;
+    this._completer = null;
+    completer.dispose();
+    this.console.dispose();
     this._completerHandler.dispose();
     this._completerHandler = null;
-    this._completer.dispose();
-    this._completer = null;
     this.inspectionHandler.dispose();
-
     super.dispose();
   }
 
@@ -163,7 +166,6 @@ class ConsolePanel extends Panel {
     this.inspectionHandler.kernel = kernel;
   }
 
-  private _content: CodeConsole = null;
   private _completer: CompleterWidget = null;
   private _completerHandler: CellCompleterHandler = null;
 

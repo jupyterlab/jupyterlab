@@ -50,7 +50,7 @@ import {
 } from '../../rendermime';
 
 import {
-  CompleterWidget, CellCompleterHandler
+  CompleterModel, CompleterWidget, CellCompleterHandler
 } from '../../completer';
 
 import {
@@ -117,15 +117,14 @@ class NotebookPanel extends Widget {
 
     // Set up the inspection handler.
     this.inspectionHandler = factory.createInspectionHandler({
-      kernel: this.context.kernel,
       rendermime: this.rendermime
     });
 
     // Instantiate the completer.
-    this._completer = factory.createCompleter({});
+    this._completer = factory.createCompleter({ model: new CompleterModel() });
 
     // Set the completer widget's anchor node to peg its position.
-    this._completer.anchor = this.node;
+    this._completer.anchor = this.notebook.node;
 
     // Because a completer widget may be passed in, check if it is attached.
     if (!this._completer.isAttached) {
@@ -134,9 +133,9 @@ class NotebookPanel extends Widget {
 
     // Instantiate the completer handler.
     this._completerHandler = factory.createCompleterHandler({
-      completer: this._completer,
-      kernel: this.context.kernel
+      completer: this._completer
     });
+    this._completerHandler.activeCell = this.notebook.activeCell;
   }
 
   /**
@@ -376,6 +375,7 @@ class NotebookPanel extends Widget {
    */
   private _onActiveCellChanged(sender: Notebook, widget: BaseCellWidget) {
     this.inspectionHandler.activeCell = widget;
+    this._completerHandler.activeCell = widget;
   }
 
   private _completer: CompleterWidget = null;

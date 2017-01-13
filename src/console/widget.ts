@@ -613,7 +613,7 @@ class CodeConsole extends Widget {
    * Handle a keydown event on an editor.
    */
   private _onEditorKeydown(editor: CodeEditor.IEditor, event: KeyboardEvent) {
-    // Suppres "Enter" events.
+    // Suppress "Enter" events.
     return event.keyCode === 13;
   }
 
