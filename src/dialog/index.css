@@ -90,8 +90,8 @@
   font-size: var(--jp-ui-font-size1);
   border: none;
   text-transform: uppercase;
-  line-height: 28px;
-  padding: 0px 12px;
+  line-height: 32px;
+  padding: 0px 16px;
   letter-spacing: .4px;
 }
 
