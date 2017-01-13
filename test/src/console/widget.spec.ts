@@ -24,8 +24,8 @@ import {
 } from '../../../lib/codeeditor';
 
 import {
-  ConsoleContent
-} from '../../../lib/console/content';
+  CodeConsole
+} from '../../../lib/console';
 
 import {
   ConsoleHistory
@@ -52,7 +52,7 @@ import {
 } from './utils';
 
 
-class TestContent extends ConsoleContent {
+class TestContent extends CodeConsole {
 
   readonly edgeRequested: ISignal<this, void>;
 
@@ -126,7 +126,7 @@ const rendermime = defaultRenderMime();
 
 describe('console/content', () => {
 
-  describe('ConsoleContent', () => {
+  describe('CodeConsole', () => {
 
     let session: Session.ISession;
     let widget: TestContent;
@@ -151,8 +151,8 @@ describe('console/content', () => {
 
       it('should create a new console content widget', () => {
         Widget.attach(widget, document.body);
-        expect(widget).to.be.a(ConsoleContent);
-        expect(widget.node.classList).to.contain('jp-ConsoleContent');
+        expect(widget).to.be.a(CodeConsole);
+        expect(widget.node.classList).to.contain('jp-CodeConsole');
       });
 
     });

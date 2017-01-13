@@ -16,12 +16,8 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  ConsoleContent
-} from '../../../lib/console/content';
-
-import {
-  ConsolePanel
-} from '../../../lib/console/panel';
+  CodeConsole, ConsolePanel
+} from '../../../lib/console';
 
 import {
   defaultRenderMime
@@ -60,7 +56,7 @@ describe('console/panel', () => {
   beforeEach(done => {
     Session.startNew({ path: utils.uuid() }).then(newSession => {
       session = newSession;
-      const content = new ConsoleContent({ renderer, rendermime, session });
+      const content = new CodeConsole({ renderer, rendermime, session });
       panel = new TestPanel({ content });
       done();
     });
@@ -88,7 +84,7 @@ describe('console/panel', () => {
     describe('#content', () => {
 
       it('should be a console content widget created at instantiation', () => {
-        expect(panel.content).to.be.a(ConsoleContent);
+        expect(panel.content).to.be.a(CodeConsole);
       });
 
     });
