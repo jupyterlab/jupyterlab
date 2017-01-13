@@ -20,11 +20,11 @@ import {
 } from '../../../lib/console';
 
 import {
-  defaultRenderMime
-} from '../utils';
+  InspectionHandler
+} from '../../../lib/inspector';
 
 import {
-  createRenderer
+  createConsolePanelFactory, rendermime, mimeTypeService
 } from './utils';
 
 
@@ -44,8 +44,7 @@ class TestPanel extends ConsolePanel {
 }
 
 
-const renderer = createRenderer();
-const rendermime = defaultRenderMime();
+const contentFactory = createConsolePanelFactory();
 
 
 describe('console/panel', () => {
@@ -56,8 +55,8 @@ describe('console/panel', () => {
   beforeEach(done => {
     Session.startNew({ path: utils.uuid() }).then(newSession => {
       session = newSession;
-      const content = new CodeConsole({ renderer, rendermime, session });
-      panel = new TestPanel({ content });
+      panel = new TestPanel({ contentFactory, rendermime, session,
+                              mimeTypeService });
       done();
     });
   });
@@ -81,10 +80,19 @@ describe('console/panel', () => {
 
     });
 
-    describe('#content', () => {
+    describe('#console', () => {
 
-      it('should be a console content widget created at instantiation', () => {
-        expect(panel.content).to.be.a(CodeConsole);
+      it('should be a code console widget created at instantiation', () => {
+        expect(panel.console).to.be.a(CodeConsole);
+      });
+
+    });
+
+    describe('#inspectionHandler', () => {
+
+      it('should exist after instantiation', () => {
+        Widget.attach(panel, document.body);
+        expect(panel.inspectionHandler).to.be.an(InspectionHandler);
       });
 
     });
@@ -92,9 +100,9 @@ describe('console/panel', () => {
     describe('#dispose()', () => {
 
       it('should dispose of the resources held by the panel', () => {
-        expect(panel.content).to.be.ok();
+        expect(panel.console).to.be.ok();
         panel.dispose();
-        expect(panel.content).to.not.be.ok();
+        expect(panel.console).to.not.be.ok();
       });
 
     });
@@ -108,7 +116,7 @@ describe('console/panel', () => {
           panel.activate();
           requestAnimationFrame(() => {
             expect(panel.methods).to.contain('onActivateRequest');
-            expect(panel.content.prompt.editor.hasFocus()).to.be(true);
+            expect(panel.console.prompt.editor.hasFocus()).to.be(true);
             done();
           });
         });

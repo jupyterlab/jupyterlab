@@ -24,11 +24,11 @@ import {
 } from '../../../lib/completer';
 
 import {
-  createBaseCellRenderer
+  createBaseCellFactory
 } from '../notebook/utils';
 
 
-const renderer = createBaseCellRenderer();
+const contentFactory = createBaseCellFactory();
 
 
 class TestCompleterModel extends CompleterModel {
@@ -80,7 +80,7 @@ const kernelPromise = Kernel.startNew();
 
 
 function createCellWidget(): BaseCellWidget {
-  return new BaseCellWidget({ model: new CellModel(), renderer });
+  return new BaseCellWidget({ model: new CellModel(), contentFactory });
 }
 
 

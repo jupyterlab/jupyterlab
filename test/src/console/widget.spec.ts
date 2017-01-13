@@ -32,23 +32,15 @@ import {
 } from '../../../lib/console/history';
 
 import {
-  InspectionHandler
-} from '../../../lib/inspector';
-
-import {
   CodeCellWidget, CodeCellModel
 } from '../../../lib/notebook/cells';
 
 import {
-  createCodeCellRenderer
+  createCodeCellFactory
 } from '../notebook/utils';
 
 import {
-  defaultRenderMime
-} from '../utils';
-
-import {
-  createRenderer
+  createConsoleFactory, rendermime, mimeTypeService
 } from './utils';
 
 
@@ -120,11 +112,10 @@ class TestHistory extends ConsoleHistory {
 
 defineSignal(TestHistory.prototype, 'ready');
 
-const renderer = createRenderer();
-const rendermime = defaultRenderMime();
+const contentFactory = createConsoleFactory();
 
 
-describe('console/content', () => {
+describe('console/widget', () => {
 
   describe('CodeConsole', () => {
 
@@ -134,7 +125,8 @@ describe('console/content', () => {
     beforeEach(done => {
       Session.startNew({ path: utils.uuid() }).then(newSession => {
         session = newSession;
-        widget = new TestContent({ renderer, rendermime, session });
+        widget = new TestContent({ contentFactory, rendermime, session,
+                                   mimeTypeService });
         done();
       });
     });
@@ -191,15 +183,6 @@ describe('console/content', () => {
 
     });
 
-    describe('#inspectionHandler', () => {
-
-      it('should exist after instantiation', () => {
-        Widget.attach(widget, document.body);
-        expect(widget.inspectionHandler).to.be.an(InspectionHandler);
-      });
-
-    });
-
     describe('#prompt', () => {
 
       it('should be a code cell widget', () => {
@@ -234,9 +217,9 @@ describe('console/content', () => {
     describe('#addCell()', () => {
 
       it('should add a code cell to the content widget', () => {
-        let renderer = createCodeCellRenderer();
+        let contentFactory = createCodeCellFactory();
         let model = new CodeCellModel();
-        let cell = new CodeCellWidget({ model, renderer, rendermime });
+        let cell = new CodeCellWidget({ model, contentFactory, rendermime });
         Widget.attach(widget, document.body);
         expect(widget.cells.length).to.be(0);
         widget.addCell(cell);
@@ -251,10 +234,10 @@ describe('console/content', () => {
         let force = true;
         Widget.attach(widget, document.body);
         widget.execute(force).then(() => {
-          expect(widget.content.widgets.length).to.be.greaterThan(1);
+          expect(widget.cells.length).to.be.greaterThan(1);
           expect(widget.cells.length).to.be(1);
           widget.clear();
-          expect(widget.content.widgets.length).to.be(1);
+          expect(widget.cells.length).to.be(1);
           expect(widget.cells.length).to.be(0);
           done();
         }).catch(done);
@@ -286,9 +269,9 @@ describe('console/content', () => {
       it('should execute contents of the prompt if forced', done => {
         let force = true;
         Widget.attach(widget, document.body);
-        expect(widget.content.widgets.length).to.be(1);
+        expect(widget.cells.length).to.be(1);
         widget.execute(force).then(() => {
-          expect(widget.content.widgets.length).to.be.greaterThan(1);
+          expect(widget.cells.length).to.be.greaterThan(1);
           done();
         }).catch(done);
       });
@@ -298,9 +281,9 @@ describe('console/content', () => {
         let timeout = 9000;
         Widget.attach(widget, document.body);
         widget.prompt.model.value.text = 'for x in range(5):';
-        expect(widget.content.widgets.length).to.be(1);
+        expect(widget.cells.length).to.be(1);
         widget.execute(force, timeout).then(() => {
-          expect(widget.content.widgets.length).to.be(1);
+          expect(widget.cells.length).to.be(1);
           done();
         }).catch(done);
       });
@@ -312,9 +295,9 @@ describe('console/content', () => {
       it('should add a code cell and execute it', done => {
         let code = 'print("#inject()")';
         Widget.attach(widget, document.body);
-        expect(widget.content.widgets.length).to.be(1);
+        expect(widget.cells.length).to.be(1);
         widget.inject(code).then(() => {
-          expect(widget.content.widgets.length).to.be.greaterThan(1);
+          expect(widget.cells.length).to.be.greaterThan(1);
           done();
         }).catch(done);
       });
@@ -416,7 +399,7 @@ describe('console/content', () => {
         let force = true;
         history.ready.connect(() => {
           let local = new TestContent({
-            history, renderer, rendermime, session
+            contentFactory, rendermime, session, mimeTypeService
           });
           local.edgeRequested.connect(() => {
             expect(local.methods).to.contain('onEdgeRequest');
