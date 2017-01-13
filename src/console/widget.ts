@@ -123,7 +123,7 @@ class Console extends Widget {
     // Create the banner.
     let model = new RawCellModel();
     model.value.text = '...';
-    let banner = factory.createBanner({
+    let banner = this.banner = factory.createBanner({
       model,
       contentFactory: factory.rawContentFactory
     }, this);
@@ -172,6 +172,11 @@ class Console extends Widget {
    * The session used by the console.
    */
   readonly session: Session.ISession;
+
+  /**
+   * The console banner widget.
+   */
+  readonly banner: RawCellWidget;
 
   /**
    * The list of content cells in the console.
