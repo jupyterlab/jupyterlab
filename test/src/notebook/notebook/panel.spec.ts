@@ -16,8 +16,12 @@ import {
 } from '../../../../lib/docregistry';
 
 import {
-  CompleterWidget
+  CompleterWidget, CellCompleterHandler
 } from '../../../../lib/completer';
+
+import {
+  InspectionHandler
+} from '../../../../lib/inspector';
 
 import {
   INotebookModel
@@ -351,7 +355,7 @@ describe('notebook/notebook/panel', () => {
 
     });
 
-    describe('.contentFactory', () => {
+    describe('#contentFactory', () => {
 
       describe('#createNotebook()', () => {
 
@@ -378,7 +382,8 @@ describe('notebook/notebook/panel', () => {
       describe('#createInspectionHandler()', () => {
 
         it('should create an inspection handler', () => {
-          throw new Error('not implemented');
+          let inspector = contentFactory.createInspectionHandler({ rendermime });
+          expect(inspector).to.be.an(InspectionHandler);
         });
 
       });
@@ -395,7 +400,9 @@ describe('notebook/notebook/panel', () => {
       describe('#createCompleterHandler()', () => {
 
         it('should create a completer handler', () => {
-          throw new Error('not implemented');
+          let options = { completer:  new CompleterWidget({}) };
+          let handler = contentFactory.createCompleterHandler(options);
+          expect(handler).to.be.a(CellCompleterHandler);
         });
 
       });

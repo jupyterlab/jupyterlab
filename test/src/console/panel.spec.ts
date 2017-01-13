@@ -16,6 +16,10 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
+  CellCompleterHandler, CompleterWidget
+} from '../../../lib/completer';
+
+import {
   CodeConsole, ConsolePanel
 } from '../../../lib/console';
 
@@ -24,7 +28,8 @@ import {
 } from '../../../lib/inspector';
 
 import {
-  createConsolePanelFactory, rendermime, mimeTypeService
+  createConsolePanelFactory, rendermime, mimeTypeService,
+  createConsoleFactory
 } from './utils';
 
 
@@ -138,6 +143,53 @@ describe('console/panel', () => {
             done();
           });
         });
+      });
+
+    });
+
+    describe('#contentFactory', () => {
+
+      describe('#createConsole()', () => {
+
+        it('should create a notebook widget', () => {
+          let consoleContentFactory = createConsoleFactory();
+          let options = {
+            contentFactory: consoleContentFactory,
+            rendermime,
+            mimeTypeService,
+            session
+          };
+          expect(contentFactory.createConsole(options)).to.be.a(CodeConsole);
+        });
+
+      });
+
+      describe('#createInspectionHandler()', () => {
+
+        it('should create an inspection handler', () => {
+          let inspector = contentFactory.createInspectionHandler({ rendermime });
+          expect(inspector).to.be.an(InspectionHandler);
+        });
+
+      });
+
+
+      describe('#createCompleter()', () => {
+
+        it('should create a completer widget', () => {
+          expect(contentFactory.createCompleter({})).to.be.a(CompleterWidget);
+        });
+
+      });
+
+      describe('#createCompleterHandler()', () => {
+
+        it('should create a completer handler', () => {
+          let options = { completer:  new CompleterWidget({}) };
+          let handler = contentFactory.createCompleterHandler(options);
+          expect(handler).to.be.a(CellCompleterHandler);
+        });
+
       });
 
     });
