@@ -12,10 +12,6 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  MimeData
-} from 'phosphor/lib/core/mimedata';
-
-import {
   CodeCellWidget, MarkdownCellWidget, RawCellWidget
 } from '../../../../lib/notebook/cells/widget';
 
@@ -32,15 +28,11 @@ import {
 } from '../../../../lib/notebook/notebook/widget';
 
 import {
-  defaultRenderMime
-} from '../../utils';
-
-import {
-  DEFAULT_CONTENT, createNotebookRenderer
+  DEFAULT_CONTENT, createNotebookFactory, clipboard, rendermime,
+  mimeTypeService
 } from '../utils';
 
 
-const clipboard = new MimeData();
 const ERROR_INPUT = 'a = foo';
 const kernelPromise = Kernel.startNew();
 
@@ -54,8 +46,9 @@ describe('notebook/notebook/actions', () => {
 
     beforeEach((done) => {
       widget = new Notebook({
-        rendermime: defaultRenderMime(),
-        renderer: createNotebookRenderer()
+        rendermime,
+        contentFactory: createNotebookFactory(),
+        mimeTypeService
       });
       let model = new NotebookModel();
       model.fromJSON(DEFAULT_CONTENT);
