@@ -53,32 +53,32 @@ import {
 /**
  * The class name added to console widgets.
  */
-const CONSOLE_CLASS = 'jp-Console';
+const CONSOLE_CLASS = 'jp-CodeConsole';
 
 /**
  * The class name added to the console banner.
  */
-const BANNER_CLASS = 'jp-Console-banner';
+const BANNER_CLASS = 'jp-CodeConsole-banner';
 
 /**
  * The class name of a cell whose input originated from a foreign session.
  */
-const FOREIGN_CELL_CLASS = 'jp-Console-foreignCell';
+const FOREIGN_CELL_CLASS = 'jp-CodeConsole-foreignCell';
 
 /**
  * The class name of the active prompt
  */
-const PROMPT_CLASS = 'jp-Console-prompt';
+const PROMPT_CLASS = 'jp-CodeConsole-prompt';
 
 /**
  * The class name of the panel that holds cell content.
  */
-const CONTENT_CLASS = 'jp-Console-content';
+const CONTENT_CLASS = 'jp-CodeConsole-content';
 
 /**
  * The class name of the panel that holds prompts.
  */
-const INPUT_CLASS = 'jp-Console-input';
+const INPUT_CLASS = 'jp-CodeConsole-input';
 
 /**
  * The timeout in ms for execution requests to the kernel.
@@ -90,15 +90,15 @@ const EXECUTION_TIMEOUT = 250;
  * A widget containing a Jupyter console.
  *
  * #### Notes
- * The Console class is intended to be used within a ConsolePanel
+ * The CodeConsole class is intended to be used within a ConsolePanel
  * instance. Under most circumstances, it is not instantiated by user code.
  */
 export
-class Console extends Widget {
+class CodeConsole extends Widget {
   /**
    * Construct a console widget.
    */
-  constructor(options: Console.IOptions) {
+  constructor(options: CodeConsole.IOptions) {
     super();
     this.addClass(CONSOLE_CLASS);
 
@@ -161,7 +161,7 @@ class Console extends Widget {
   /**
    * The content factory used by the console.
    */
-  readonly contentFactory: Console.IContentFactory;
+  readonly contentFactory: CodeConsole.IContentFactory;
 
   /**
    * The rendermime instance used by the console.
@@ -639,16 +639,16 @@ class Console extends Widget {
 }
 
 
-// Define the signals for the `Console` class.
-defineSignal(Console.prototype, 'executed');
-defineSignal(Console.prototype, 'promptCreated');
+// Define the signals for the `CodeConsole` class.
+defineSignal(CodeConsole.prototype, 'executed');
+defineSignal(CodeConsole.prototype, 'promptCreated');
 
 
 /**
- * A namespace for Console statics.
+ * A namespace for CodeConsole statics.
  */
 export
-namespace Console {
+namespace CodeConsole {
   /**
    * The initialization options for a console widget.
    */
@@ -704,17 +704,17 @@ namespace Console {
     /**
      * Create a new banner widget.
      */
-    createBanner(options: RawCellWidget.IOptions, parent: Console): RawCellWidget;
+    createBanner(options: RawCellWidget.IOptions, parent: CodeConsole): RawCellWidget;
 
     /**
      * Create a new prompt widget.
      */
-    createPrompt(options: CodeCellWidget.IOptions, parent: Console): CodeCellWidget;
+    createPrompt(options: CodeCellWidget.IOptions, parent: CodeConsole): CodeCellWidget;
 
     /**
      * Create a code cell whose input originated from a foreign session.
      */
-    createForeignCell(options: CodeCellWidget.IOptions, parent: Console): CodeCellWidget;
+    createForeignCell(options: CodeCellWidget.IOptions, parent: CodeConsole): CodeCellWidget;
   }
 
   /**
@@ -762,21 +762,21 @@ namespace Console {
     /**
      * Create a new banner widget.
      */
-    createBanner(options: RawCellWidget.IOptions, parent: Console): RawCellWidget {
+    createBanner(options: RawCellWidget.IOptions, parent: CodeConsole): RawCellWidget {
       return new RawCellWidget(options);
     }
 
     /**
      * Create a new prompt widget.
      */
-    createPrompt(options: CodeCellWidget.IOptions, parent: Console): CodeCellWidget {
+    createPrompt(options: CodeCellWidget.IOptions, parent: CodeConsole): CodeCellWidget {
       return new CodeCellWidget(options);
     }
 
     /**
      * Create a new code cell widget for an input from a foreign session.
      */
-    createForeignCell(options: CodeCellWidget.IOptions, parent: Console): CodeCellWidget {
+    createForeignCell(options: CodeCellWidget.IOptions, parent: CodeConsole): CodeCellWidget {
       return new CodeCellWidget(options);
     }
   }

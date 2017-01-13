@@ -42,7 +42,7 @@ import {
 } from '../rendermime';
 
 import {
-  Console
+  CodeConsole
 } from './widget';
 
 
@@ -101,7 +101,7 @@ class ConsolePanel extends Panel {
   /**
    * The console widget used by the panel.
    */
-  readonly console: Console;
+  readonly console: CodeConsole;
 
   /**
    * The inspection handler used by the console.
@@ -147,7 +147,7 @@ class ConsolePanel extends Panel {
   /**
    * Handle the creation of a new prompt.
    */
-  private _onPromptCreated(sender: Console, prompt: CodeCellWidget): void {
+  private _onPromptCreated(sender: CodeConsole, prompt: CodeCellWidget): void {
     this._completer.reset();
 
     // Associate the new prompt with the completer and inspection handlers.
@@ -163,7 +163,7 @@ class ConsolePanel extends Panel {
     this.inspectionHandler.kernel = kernel;
   }
 
-  private _content: Console = null;
+  private _content: CodeConsole = null;
   private _completer: CompleterWidget = null;
   private _completerHandler: CellCompleterHandler = null;
 
@@ -209,12 +209,12 @@ namespace ConsolePanel {
     /**
      * The console content factory.
      */
-    readonly consoleContentFactory: Console.IContentFactory;
+    readonly consoleContentFactory: CodeConsole.IContentFactory;
 
     /**
      * Create a new console panel.
      */
-    createConsole(options: Console.IOptions): Console;
+    createConsole(options: CodeConsole.IOptions): CodeConsole;
 
     /**
      * The inspection handler for a console widget.
@@ -247,13 +247,13 @@ namespace ConsolePanel {
     /**
      * The console content factory.
      */
-    readonly consoleContentFactory: Console.IContentFactory;
+    readonly consoleContentFactory: CodeConsole.IContentFactory;
 
     /**
      * Create a new console panel.
      */
-    createConsole(options: Console.IOptions): Console {
-      return new Console(options);
+    createConsole(options: CodeConsole.IOptions): CodeConsole {
+      return new CodeConsole(options);
     }
 
     /**
@@ -291,7 +291,7 @@ namespace ConsolePanel {
       /**
        * The notebook content factory.
        */
-      consoleContentFactory: Console.IContentFactory;
+      consoleContentFactory: CodeConsole.IContentFactory;
     }
   }
 

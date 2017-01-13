@@ -62,7 +62,7 @@ import {
 } from '../services';
 
 import {
-  IConsoleTracker, ConsolePanel, Console
+  IConsoleTracker, ConsolePanel, CodeConsole
 } from './index';
 
 
@@ -100,7 +100,7 @@ const contentFactoryPlugin: JupyterLabPlugin<ConsolePanel.IContentFactory> = {
   autoStart: true,
   activate: (app: JupyterLab, editorServices: IEditorServices) => {
     let editorFactory = editorServices.factoryService.newInlineEditor;
-    let consoleContentFactory = new Console.ContentFactory({ editorFactory });
+    let consoleContentFactory = new CodeConsole.ContentFactory({ editorFactory });
     return new ConsolePanel.ContentFactory({ consoleContentFactory });
   }
 };
@@ -146,7 +146,7 @@ interface ICreateConsoleArgs extends JSONObject {
 function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: IInstanceRestorer): IConsoleTracker {
   let manager = services.sessions;
   let { commands, keymap } = app;
-  let category = 'Console';
+  let category = 'CodeConsole';
   let command: string;
   let count = 0;
   let menu = new Menu({ commands, keymap });
@@ -175,7 +175,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   command = 'console:create';
   commands.addCommand(command, {
     execute: (args: ICreateConsoleArgs) => {
-      let name = `Console ${++count}`;
+      let name = `CodeConsole ${++count}`;
 
       args = args || {};
 
@@ -184,7 +184,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
         return manager.ready.then(() => manager.connectTo(args.id))
           .then(session => {
             name = session.path.split('/').pop();
-            name = `Console ${name.match(CONSOLE_REGEX)[1]}`;
+            name = `CodeConsole ${name.match(CONSOLE_REGEX)[1]}`;
             createConsole(session, name);
             return session.id;
           });
@@ -219,7 +219,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
 
   command = 'console:create-new';
   commands.addCommand(command, {
-    label: 'Start New Console',
+    label: 'Start New CodeConsole',
     execute: () => commands.execute('console:create', { })
   });
   palette.addItem({ command, category });
