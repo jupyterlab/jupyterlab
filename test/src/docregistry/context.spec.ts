@@ -388,8 +388,12 @@ describe('docregistry/context', () => {
     describe('#resolveUrl()', () => {
 
       it('should resolve a relative url to a correct server path', () => {
-        let path = context.resolveUrl('./foo');
-        expect(path).to.be(manager.contents.getDownloadUrl('foo'));
+        let resolveUrlPromise = context.resolveUrl('./foo');
+        let getDownloadUrlPromise = manager.contents.getDownloadUrl('foo');
+        Promise.all([resolveUrlPromise, getDownloadUrlPromise])
+        .then((values)=>{
+          expect(values[0]).to.be(values[1]);
+        });
       });
 
       it('should ignore urls that have a protocol', () => {

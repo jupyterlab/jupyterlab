@@ -373,7 +373,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   /**
    * Resolve a relative url to a correct server path.
    */
-  resolveUrl(url: string): string {
+  resolveUrl(url: string): Promise<string> {
     // Ignore urls that have a protocol.
     if (utils.urlParse(url).protocol || url.indexOf('//') === 0) {
       return url;

@@ -235,11 +235,12 @@ class FileBrowserModel implements IDisposable, IPathTracker {
    * @param - path - The path of the file to be downloaded.
    */
   download(path: string): void {
-    let url = this._manager.contents.getDownloadUrl(path);
-    let element = document.createElement('a');
-    element.setAttribute('href', url);
-    element.setAttribute('download', '');
-    element.click();
+    this._manager.contents.getDownloadUrl(path).then((url)=>{;
+      let element = document.createElement('a');
+      element.setAttribute('href', url);
+      element.setAttribute('download', '');
+      element.click();
+    });
   }
 
   /**
