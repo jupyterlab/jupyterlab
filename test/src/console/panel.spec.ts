@@ -147,14 +147,32 @@ describe('console/panel', () => {
 
     });
 
-    describe('#contentFactory', () => {
+    describe('.ContentFactory', () => {
+
+      describe('#constructor', () => {
+
+        it('should create a new code console factory', () => {
+          let factory = new ConsolePanel.ContentFactory({
+            consoleContentFactory: createConsoleFactory()
+          });
+          expect(factory).to.be.a(ConsolePanel.ContentFactory);
+        });
+
+      });
+
+      describe('#consoleContentFactory', () => {
+
+        it('should be the console content factory used by the panel factory', () => {
+          expect(contentFactory.consoleContentFactory).to.be.a(CodeConsole.ContentFactory);
+        });
+
+      });
 
       describe('#createConsole()', () => {
 
         it('should create a notebook widget', () => {
-          let consoleContentFactory = createConsoleFactory();
           let options = {
-            contentFactory: consoleContentFactory,
+            contentFactory: contentFactory.consoleContentFactory,
             rendermime,
             mimeTypeService,
             session
@@ -193,6 +211,7 @@ describe('console/panel', () => {
       });
 
     });
+
 
   });
 
