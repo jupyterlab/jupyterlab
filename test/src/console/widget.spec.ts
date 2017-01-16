@@ -246,11 +246,10 @@ describe('console/widget', () => {
         let force = true;
         Widget.attach(widget, document.body);
         widget.execute(force).then(() => {
-          expect(widget.cells.length).to.be.greaterThan(1);
-          expect(widget.cells.length).to.be(1);
+          expect(widget.cells.length).to.be.greaterThan(0);
           widget.clear();
-          expect(widget.cells.length).to.be(1);
           expect(widget.cells.length).to.be(0);
+          expect(widget.prompt.model.value.text).to.be('');
           done();
         }).catch(done);
       });
@@ -281,9 +280,9 @@ describe('console/widget', () => {
       it('should execute contents of the prompt if forced', done => {
         let force = true;
         Widget.attach(widget, document.body);
-        expect(widget.cells.length).to.be(1);
+        expect(widget.cells.length).to.be(0);
         widget.execute(force).then(() => {
-          expect(widget.cells.length).to.be.greaterThan(1);
+          expect(widget.cells.length).to.be.greaterThan(0);
           done();
         }).catch(done);
       });
@@ -293,9 +292,9 @@ describe('console/widget', () => {
         let timeout = 9000;
         Widget.attach(widget, document.body);
         widget.prompt.model.value.text = 'for x in range(5):';
-        expect(widget.cells.length).to.be(1);
+        expect(widget.cells.length).to.be(0);
         widget.execute(force, timeout).then(() => {
-          expect(widget.cells.length).to.be(1);
+          expect(widget.cells.length).to.be(0);
           done();
         }).catch(done);
       });
@@ -307,9 +306,9 @@ describe('console/widget', () => {
       it('should add a code cell and execute it', done => {
         let code = 'print("#inject()")';
         Widget.attach(widget, document.body);
-        expect(widget.cells.length).to.be(1);
+        expect(widget.cells.length).to.be(0);
         widget.inject(code).then(() => {
-          expect(widget.cells.length).to.be.greaterThan(1);
+          expect(widget.cells.length).to.be.greaterThan(0);
           done();
         }).catch(done);
       });
