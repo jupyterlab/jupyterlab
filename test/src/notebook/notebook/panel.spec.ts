@@ -53,6 +53,7 @@ import {
  * Default data.
  */
 const contentFactory = createNotebookPanelFactory();
+const notebookContentFactory = createNotebookFactory();
 const options = { rendermime, clipboard, mimeTypeService, contentFactory };
 
 
@@ -355,14 +356,30 @@ describe('notebook/notebook/panel', () => {
 
     });
 
-    describe('#contentFactory', () => {
+    describe('.ContentFactory', () => {
+
+      describe('#constructor', () => {
+
+        it('should create a new ContentFactory', () => {
+          let factory = new NotebookPanel.ContentFactory({ notebookContentFactory });
+          expect(factory).to.be.a(NotebookPanel.ContentFactory);
+        });
+
+      });
+
+      describe('#notebookContentFactory', () => {
+
+        it('should be the content factory for notebook widgets', () => {
+          expect(contentFactory.notebookContentFactory).to.be.a(Notebook.ContentFactory);
+        });
+
+      });
 
       describe('#createNotebook()', () => {
 
         it('should create a notebook widget', () => {
-          let notebookContentFactory = createNotebookFactory();
           let options = {
-            contentFactory: notebookContentFactory,
+            contentFactory: contentFactory.notebookContentFactory,
             rendermime,
             mimeTypeService
           };
