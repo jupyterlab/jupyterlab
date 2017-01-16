@@ -86,10 +86,10 @@ describe('notebook/output-area/widget', () => {
         expect(widget).to.be.an(OutputAreaWidget);
       });
 
-      it('should take an optional renderer', () => {
-        let renderer = Object.create(OutputAreaWidget.defaultRenderer);
-        let widget = new OutputAreaWidget({ rendermime, renderer });
-        expect(widget.renderer).to.be(renderer);
+      it('should take an optional contentFactory', () => {
+        let contentFactory = Object.create(OutputAreaWidget.defaultContentFactory);
+        let widget = new OutputAreaWidget({ rendermime, contentFactory });
+        expect(widget.contentFactory).to.be(contentFactory);
       });
 
       it('should add the `jp-OutputArea` class', () => {
@@ -174,12 +174,12 @@ describe('notebook/output-area/widget', () => {
 
     });
 
-    describe('#renderer', () => {
+    describe('#contentFactory', () => {
 
-      it('should be the renderer used by the widget', () => {
-        let renderer = new OutputAreaWidget.Renderer();
-        let widget = new OutputAreaWidget({ rendermime, renderer });
-        expect(widget.renderer).to.be(renderer);
+      it('should be the contentFactory used by the widget', () => {
+        let contentFactory = new OutputAreaWidget.ContentFactory();
+        let widget = new OutputAreaWidget({ rendermime, contentFactory });
+        expect(widget.contentFactory).to.be(contentFactory);
       });
 
     });
@@ -254,7 +254,7 @@ describe('notebook/output-area/widget', () => {
         widget.dispose();
         expect(widget.model).to.be(null);
         expect(widget.rendermime).to.be(null);
-        expect(widget.renderer).to.be(null);
+        expect(widget.contentFactory).to.be(null);
       });
 
       it('should be safe to call more than once', () => {
@@ -316,13 +316,13 @@ describe('notebook/output-area/widget', () => {
 
     });
 
-    describe('.Renderer', () => {
+    describe('.contentFactory', () => {
 
       describe('#createOutput()', () => {
 
         it('should create a on output widget', () => {
-          let renderer = new OutputAreaWidget.Renderer();
-          let widget = renderer.createOutput({ rendermime });
+          let contentFactory = new OutputAreaWidget.ContentFactory();
+          let widget = contentFactory.createOutput({ rendermime });
           expect(widget).to.be.an(OutputWidget);
         });
 
@@ -330,10 +330,10 @@ describe('notebook/output-area/widget', () => {
 
     });
 
-    describe('.defaultRenderer', () => {
+    describe('.defaultContentFactory', () => {
 
-      it('should be a `Renderer` instance', () => {
-        expect(OutputAreaWidget.defaultRenderer).to.be.an(OutputAreaWidget.Renderer);
+      it('should be a `contentFactory` instance', () => {
+        expect(OutputAreaWidget.defaultContentFactory).to.be.an(OutputAreaWidget.ContentFactory);
       });
 
     });
