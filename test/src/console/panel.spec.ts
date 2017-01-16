@@ -105,9 +105,10 @@ describe('console/panel', () => {
     describe('#dispose()', () => {
 
       it('should dispose of the resources held by the panel', () => {
-        expect(panel.console).to.be.ok();
         panel.dispose();
-        expect(panel.console).to.not.be.ok();
+        expect(panel.isDisposed).to.be(true);
+        panel.dispose();
+        expect(panel.isDisposed).to.be(true);
       });
 
     });

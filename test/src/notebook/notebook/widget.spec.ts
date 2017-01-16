@@ -328,7 +328,7 @@ describe('notebook/notebook/widget', () => {
 
       it('should be the cell widget contentFactory used by the widget', () => {
         let widget = new StaticNotebook(options);
-        expect(widget.contentFactory).to.be(StaticNotebook.ContentFactory);
+        expect(widget.contentFactory).to.be.a(StaticNotebook.ContentFactory);
       });
 
     });
@@ -378,11 +378,8 @@ describe('notebook/notebook/widget', () => {
 
       it('should dispose of the resources held by the widget', () => {
         let widget = createWidget();
-        let model = widget.model;
         widget.dispose();
-        expect(widget.model).to.be(null);
-        expect(model.isDisposed).to.be(false);
-        expect(widget.rendermime).to.be(null);
+        expect(widget.isDisposed).to.be(true);
       });
 
       it('should be safe to call multiple times', () => {

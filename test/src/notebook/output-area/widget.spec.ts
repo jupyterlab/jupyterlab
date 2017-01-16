@@ -252,9 +252,7 @@ describe('notebook/output-area/widget', () => {
       it('should dispose of the resources held by the widget', () => {
         let widget = createWidget();
         widget.dispose();
-        expect(widget.model).to.be(null);
-        expect(widget.rendermime).to.be(null);
-        expect(widget.contentFactory).to.be(null);
+        expect(widget.isDisposed).to.be(true);
       });
 
       it('should be safe to call more than once', () => {
