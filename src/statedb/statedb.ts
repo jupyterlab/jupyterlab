@@ -44,8 +44,9 @@ class StateDB implements IStateDB {
    */
   clear(): Promise<void> {
     const prefix = `${this.namespace}:`;
-    while (window.localStorage.length) {
-      let key = window.localStorage.key(window.localStorage.length - 1);
+    let i = window.localStorage.length;
+    while (i) {
+      let key = window.localStorage.key(--i);
       if (key.indexOf(prefix) === 0) {
         window.localStorage.removeItem(key);
       }
@@ -99,8 +100,9 @@ class StateDB implements IStateDB {
     const prefix = `${this.namespace}:${namespace}:`;
     const regex = new RegExp(`^${this.namespace}\:`);
     let items: IStateItem[] = [];
-    while (window.localStorage.length) {
-      let key = window.localStorage.key(window.localStorage.length - 1);
+    let i = window.localStorage.length;
+    while (i) {
+      let key = window.localStorage.key(--i);
       if (key.indexOf(prefix) === 0) {
         try {
           items.push({

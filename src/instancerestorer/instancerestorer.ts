@@ -273,7 +273,6 @@ class InstanceRestorer implements IInstanceRestorer {
    * calls to `fetch` are guaranteed to return after restoration is complete.
    */
   fetch(): Promise<IInstanceRestorer.ILayout> {
-    (window as any).restorer = this;
     const blank: IInstanceRestorer.ILayout = {
       currentWidget: null,
       fresh: true,
