@@ -99,8 +99,8 @@ class StateDB implements IStateDB {
     const prefix = `${this.namespace}:${namespace}:`;
     const regex = new RegExp(`^${this.namespace}\:`);
     let items: IStateItem[] = [];
-    for (let i = 0, len = window.localStorage.length; i < len; i++) {
-      let key = window.localStorage.key(i);
+    while (window.localStorage.length) {
+      let key = window.localStorage.key(window.localStorage.length - 1);
       if (key.indexOf(prefix) === 0) {
         try {
           items.push({
@@ -109,6 +109,7 @@ class StateDB implements IStateDB {
           });
         } catch (error) {
           console.warn(error);
+          window.localStorage.removeItem(key);
         }
       }
     }
