@@ -376,7 +376,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   resolveUrl(url: string): Promise<string> {
     // Ignore urls that have a protocol.
     if (utils.urlParse(url).protocol || url.indexOf('//') === 0) {
-      return url;
+      return Promise.resolve(url);
     }
     let cwd = ContentsManager.dirname(this._path);
     let path = ContentsManager.getAbsolutePath(url, cwd);
