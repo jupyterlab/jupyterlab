@@ -348,12 +348,30 @@ describe('notebook/cells/widget', () => {
 
     });
 
-    describe('.contentFactory', () => {
+    describe('#contentFactory', () => {
 
-      describe('#constructor()', () => {
+      it('should be a contentFactory', () => {
+        expect(contentFactory).to.be.a(BaseCellWidget.ContentFactory);
+      });
 
-        it('should create a contentFactory', () => {
-          expect(contentFactory).to.be.a(BaseCellWidget.ContentFactory);
+    });
+
+    describe('.ContentFactory', () => {
+
+      describe('#constructor', () => {
+
+        it('should create a ContentFactory', () => {
+          let factory = new BaseCellWidget.ContentFactory({ editorFactory });
+          expect(factory).to.be.a(BaseCellWidget.ContentFactory);
+        });
+
+      });
+
+      describe('#editorFactory', () => {
+
+        it('should be the editor factory used by the content factory', () => {
+          let factory = new BaseCellWidget.ContentFactory({ editorFactory });
+          expect(factory.editorFactory).to.be(editorFactory);
         });
 
       });
@@ -361,8 +379,11 @@ describe('notebook/cells/widget', () => {
       describe('#createCellEditor()', () => {
 
         it('should create a code editor widget', () => {
-          let factory = editorFactory;
-          let editor = contentFactory.createCellEditor({ model, factory });
+          let factory = new BaseCellWidget.ContentFactory({ editorFactory });
+          let editor = factory.createCellEditor({
+            model,
+            factory: editorFactory
+          });
           expect(editor).to.be.a(CodeEditorWidget);
         });
 
@@ -371,18 +392,12 @@ describe('notebook/cells/widget', () => {
       describe('#createInputArea()', () => {
 
         it('should create an input area widget', () => {
-          let factory = editorFactory;
-          let editor = contentFactory.createCellEditor({ model, factory });
+          let factory = new BaseCellWidget.ContentFactory({ editorFactory });
+          let editor = factory.createCellEditor({
+            model,
+            factory: editorFactory });
           let input = contentFactory.createInputArea({ editor });
           expect(input).to.be.an(InputAreaWidget);
-        });
-
-      });
-
-      describe('#defaultRenderer', () => {
-
-        it('should be a ContentFactory', () => {
-          expect(contentFactory).to.be.a(BaseCellWidget.ContentFactory);
         });
 
       });
@@ -496,12 +511,22 @@ describe('notebook/cells/widget', () => {
 
     });
 
-    describe('.contentFactory', () => {
+    describe('#contentFactory', () => {
 
-      describe('#constructor()', () => {
+      it('should be a ContentFactory', () => {
+        expect(contentFactory).to.be.a(CodeCellWidget.ContentFactory);
+      });
+
+    });
+
+    describe('.ContentFactory', () => {
+
+      describe('#constructor', () => {
 
         it('should create a ContentFactory', () => {
-          expect(contentFactory).to.be.a(CodeCellWidget.ContentFactory);
+          let factory = new CodeCellWidget.ContentFactory({ editorFactory });
+          expect(factory).to.be.a(CodeCellWidget.ContentFactory);
+          expect(factory).to.be.a(BaseCellWidget.ContentFactory);
         });
 
       });
@@ -509,16 +534,9 @@ describe('notebook/cells/widget', () => {
       describe('#createOutputArea()', () => {
 
         it('should create an output area widget', () => {
-          let output = contentFactory.createOutputArea({ rendermime });
+          let factory = new CodeCellWidget.ContentFactory({ editorFactory });
+          let output = factory.createOutputArea({ rendermime });
           expect(output).to.be.an(OutputAreaWidget);
-        });
-
-      });
-
-      describe('#defaultRenderer', () => {
-
-        it('should be a contentFactory', () => {
-          expect(contentFactory).to.be.a(CodeCellWidget.ContentFactory);
         });
 
       });
