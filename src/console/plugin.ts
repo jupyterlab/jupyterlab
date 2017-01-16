@@ -146,7 +146,7 @@ interface ICreateConsoleArgs extends JSONObject {
 function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: IInstanceRestorer): IConsoleTracker {
   let manager = services.sessions;
   let { commands, keymap } = app;
-  let category = 'CodeConsole';
+  let category = 'Console';
   let command: string;
   let count = 0;
   let menu = new Menu({ commands, keymap });
