@@ -32,7 +32,11 @@ import {
 } from '../../../lib/console/history';
 
 import {
-  CodeCellWidget, CodeCellModel
+  ForeignHandler
+} from '../../../lib/console/foreign';
+
+import {
+  BaseCellWidget, CodeCellWidget, CodeCellModel, RawCellModel, RawCellWidget
 } from '../../../lib/notebook/cells';
 
 import {
@@ -40,11 +44,11 @@ import {
 } from '../notebook/utils';
 
 import {
-  createConsoleFactory, rendermime, mimeTypeService
+  createConsoleFactory, rendermime, mimeTypeService, editorFactory
 } from './utils';
 
 
-class TestContent extends CodeConsole {
+class TestConsole extends CodeConsole {
 
   readonly edgeRequested: ISignal<this, void>;
 
@@ -92,7 +96,7 @@ class TestContent extends CodeConsole {
 }
 
 
-defineSignal(TestContent.prototype, 'edgeRequested');
+defineSignal(TestConsole.prototype, 'edgeRequested');
 
 
 class TestHistory extends ConsoleHistory {
@@ -120,12 +124,12 @@ describe('console/widget', () => {
   describe('CodeConsole', () => {
 
     let session: Session.ISession;
-    let widget: TestContent;
+    let widget: TestConsole;
 
     beforeEach(done => {
       Session.startNew({ path: utils.uuid() }).then(newSession => {
         session = newSession;
-        widget = new TestContent({ contentFactory, rendermime, session,
+        widget = new TestConsole({ contentFactory, rendermime, session,
                                    mimeTypeService });
         done();
       });
@@ -210,6 +214,14 @@ describe('console/widget', () => {
 
       it('should return the session passed in at instantiation', () => {
         expect(widget.session).to.be(session);
+      });
+
+    });
+
+    describe('#contentFactory', () => {
+
+      it('should be the content factory used by the widget', () => {
+        expect(widget.contentFactory).to.be.a(CodeConsole.ContentFactory);
       });
 
     });
@@ -398,7 +410,7 @@ describe('console/widget', () => {
         let code = 'print("#onEdgeRequest()")';
         let force = true;
         history.ready.connect(() => {
-          let local = new TestContent({
+          let local = new TestConsole({
             contentFactory, rendermime, session, mimeTypeService
           });
           local.edgeRequested.connect(() => {
@@ -443,6 +455,107 @@ describe('console/widget', () => {
           expect(widget.methods).to.contain('onUpdateRequest');
           done();
         });
+      });
+
+    });
+
+    describe('.ContentFactory', () => {
+
+      describe('#constructor', () => {
+
+        it('should create a new ContentFactory', () => {
+          let factory = new CodeConsole.ContentFactory({ editorFactory });
+          expect(factory).to.be.a(CodeConsole.ContentFactory);
+        });
+
+      });
+
+      describe('#rawContentFactory', () => {
+
+        it('should be the raw cell ContentFactory used by the factory', () => {
+          expect(contentFactory.rawContentFactory).to.be.a(BaseCellWidget.ContentFactory);
+        });
+
+      });
+
+      describe('#codeContentFactory', () => {
+
+        it('should be the code cell ContentFactory used by the factory', () => {
+          expect(contentFactory.codeContentFactory).to.be.a(CodeCellWidget.ContentFactory);
+        });
+
+      });
+
+      describe('#createConsoleHistory', () => {
+
+        it('should create a ConsoleHistory', () => {
+          let history = contentFactory.createConsoleHistory({});
+          expect(history).to.be.a(ConsoleHistory);
+        });
+
+      });
+
+      describe('#createForeignHandler', () => {
+
+        it('should create a ForeignHandler', () => {
+          let cellFactory = () => {
+            let model = new CodeCellModel();
+            let rendermime = widget.rendermime;
+            let factory = contentFactory.codeContentFactory;
+            let options: CodeCellWidget.IOptions = {
+              model, rendermime, contentFactory: factory
+            };
+            return contentFactory.createForeignCell(options, widget);
+          };
+          let handler = contentFactory.createForeignHandler({
+            kernel: null,
+            parent: widget,
+            cellFactory
+          });
+          expect(handler).to.be.a(ForeignHandler);
+        });
+
+      });
+
+      describe('#createBanner', () => {
+
+        it('should create a banner cell', () => {
+          let model = new RawCellModel();
+          let banner = contentFactory.createBanner({
+            model,
+            contentFactory: contentFactory.rawContentFactory
+          }, widget);
+          expect(banner).to.be.a(RawCellWidget);
+        });
+
+      });
+
+      describe('#createPrompt', () => {
+
+        it('should create a prompt cell', () => {
+          let model = new CodeCellModel();
+          let prompt = contentFactory.createPrompt({
+            rendermime: widget.rendermime,
+            model,
+            contentFactory: contentFactory.codeContentFactory
+          }, widget);
+          expect(prompt).to.be.a(CodeCellWidget);
+        });
+
+      });
+
+      describe('#createForeignCell', () => {
+
+        it('should create a foreign cell', () => {
+          let model = new CodeCellModel();
+          let prompt = contentFactory.createForeignCell({
+            rendermime: widget.rendermime,
+            model,
+            contentFactory: contentFactory.codeContentFactory
+          }, widget);
+          expect(prompt).to.be.a(CodeCellWidget);
+        });
+
       });
 
     });
