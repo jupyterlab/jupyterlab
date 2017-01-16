@@ -273,15 +273,18 @@ class InstanceRestorer implements IInstanceRestorer {
    * calls to `fetch` are guaranteed to return after restoration is complete.
    */
   fetch(): Promise<IInstanceRestorer.ILayout> {
+    (window as any).restorer = this;
+    const blank: IInstanceRestorer.ILayout = {
+      currentWidget: null,
+      fresh: true,
+      leftArea: { collapsed: true, currentWidget: null, widgets: null },
+      rightArea: { collapsed: true, currentWidget: null, widgets: null }
+    };
     let layout = this._state.fetch(KEY);
+
     return Promise.all([layout, this.restored]).then(([data]) => {
       if (!data) {
-        return {
-          currentWidget: null,
-          fresh: true,
-          leftArea: { collapsed: true, currentWidget: null, widgets: null },
-          rightArea: { collapsed: true, currentWidget: null, widgets: null }
-        };
+        return blank;
       }
 
       let { current, left, right } = data as InstanceRestorer.IDehydratedLayout;
@@ -289,9 +292,9 @@ class InstanceRestorer implements IInstanceRestorer {
       // If any data exists, then this is not a fresh session.
       const fresh = false;
 
-      // Rehydrate main area.
-      const currentWidget = current && this._widgets.has(current) ?
-        this._widgets.get(current) : null;
+      // Rehydrate main area. Coerce type of `current` in case of bad data.
+      const currentWidget = current && this._widgets.has(`${current}`) ?
+        this._widgets.get(`${current}`) : null;
 
       // Rehydrate left area.
       const leftArea = this._rehydrateSideArea(left);
@@ -300,7 +303,7 @@ class InstanceRestorer implements IInstanceRestorer {
       const rightArea = this._rehydrateSideArea(right);
 
       return { currentWidget, fresh, leftArea, rightArea };
-    });
+    }).catch(() => blank); // Let fetch fail gracefully; return blank slate.
   }
 
   /**
@@ -371,6 +374,9 @@ class InstanceRestorer implements IInstanceRestorer {
     return this._state.save(KEY, dehydrated);
   }
 
+  /**
+   * Dehydrate a side area into a serialized description object.
+   */
   private _dehydrateSideArea(area: IInstanceRestorer.ISideArea): InstanceRestorer.ISideArea {
     let dehydrated: InstanceRestorer.ISideArea = { collapsed: area.collapsed };
     if (area.currentWidget) {
@@ -387,6 +393,13 @@ class InstanceRestorer implements IInstanceRestorer {
     return dehydrated;
   }
 
+  /**
+   * Reydrate a serialized side area description object.
+   *
+   * #### Notes
+   * This function consumes data that can become corrupted, so it uses type
+   * coercion to guarantee the dehydrated object is safely processed.
+   */
   private _rehydrateSideArea(area: InstanceRestorer.ISideArea): IInstanceRestorer.ISideArea {
     if (!area) {
       return { collapsed: true, currentWidget: null, widgets: null };
@@ -394,10 +407,11 @@ class InstanceRestorer implements IInstanceRestorer {
     let internal = this._widgets;
     const collapsed = area.hasOwnProperty('collapsed') ? !!area.collapsed
       : false;
-    const currentWidget = area.current && internal.has(area.current) ?
-      internal.get(area.current) : null;
+    const currentWidget = area.current && internal.has(`${area.current}`) ?
+      internal.get(`${area.current}`) : null;
     const widgets = !Array.isArray(area.widgets) ? null
-      : area.widgets.map(name => internal.has(name) ? internal.get(name) : null)
+      : area.widgets
+          .map(name => internal.has(`${name}`) ? internal.get(`${name}`) : null)
           .filter(widget => !!widget);
     return { collapsed, currentWidget, widgets };
   }
