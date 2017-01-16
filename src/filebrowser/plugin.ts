@@ -128,21 +128,22 @@ function activate(app: JupyterLab, manager: IServiceManager, documentManager: ID
 
   // Restore the state of the file browser on reload.
   let key = `${NAMESPACE}:cwd`;
-  Promise.all([state.fetch(key), app.started, manager.ready]).then(([cwd]) => {
-    if (!cwd) {
-      return;
-    }
-
-    let path = cwd['path'] as string;
-    return manager.contents.get(path)
-      .then(() => { fbModel.cd(path); })
-      .catch(() => { state.remove(key); });
-  }).then(() => {
+  let connect = () => {
     // Save the subsequent state of the file browser in the state database.
     fbModel.pathChanged.connect((sender, args) => {
       state.save(`${NAMESPACE}:cwd`, { path: args.newValue });
     });
-  });
+  };
+  Promise.all([state.fetch(key), app.started, manager.ready]).then(([cwd]) => {
+    if (!cwd) {
+      return;
+    }
+    let path = cwd['path'] as string;
+    return manager.contents.get(path)
+      .then(() => { fbModel.cd(path); })
+      .catch(() => { state.remove(key); });
+  }).then(connect)
+    .catch(() => { state.remove(key).then(connect); });
 
   each(registry.creators(), creator => { addCreator(creator.name); });
 
