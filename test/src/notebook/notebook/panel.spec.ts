@@ -16,7 +16,7 @@ import {
 } from '../../../../lib/docregistry';
 
 import {
-  CompleterWidget, CellCompleterHandler
+  CompleterWidget, CompletionHandler
 } from '../../../../lib/completer';
 
 import {
@@ -45,7 +45,7 @@ import {
 
 import {
   DEFAULT_CONTENT, createNotebookPanelFactory, rendermime, clipboard,
-  mimeTypeService, createNotebookFactory, editorFactory
+  mimeTypeService, editorFactory
 } from '../utils';
 
 
@@ -418,7 +418,7 @@ describe('notebook/notebook/panel', () => {
         it('should create a completer handler', () => {
           let options = { completer:  new CompleterWidget({}) };
           let handler = contentFactory.createCompleterHandler(options);
-          expect(handler).to.be.a(CellCompleterHandler);
+          expect(handler).to.be.a(CompletionHandler);
         });
 
       });
