@@ -19,4 +19,17 @@ describe('StateDB', () => {
 
   });
 
+  describe('#maxLength', () => {
+
+    it('should enforce the maximum length of a stored item', done => {
+      let db = new StateDB({ namespace: 'test' });
+      let key = 'test-key';
+      let data = { a: (new Array<string>(db.maxLength)).join('A') };
+      db.save(key, data)
+        .then(() => { done('maxLength promise should have rejected'); })
+        .catch(() => { done(); });
+    });
+
+  });
+
 });
