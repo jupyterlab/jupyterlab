@@ -42,4 +42,45 @@ describe('StateDB', () => {
 
   });
 
+  describe('#clear()', () => {
+
+    it('should empty the items in a state database', done => {
+      let { localStorage } = window;
+      localStorage.clear();
+
+      let namespace = 'test-namespace';
+      let db = new StateDB({ namespace });
+
+      expect(localStorage.length).to.be(0);
+      db.save('foo', { bar: null })
+        .then(() => { expect(localStorage.length).greaterThan(0); })
+        .then(() => db.clear())
+        .then(() => { expect(localStorage.length).to.be(0); })
+        .then(done)
+        .catch(done);
+    });
+
+    it('should only clear its own namespace', done => {
+      let { localStorage } = window;
+      localStorage.clear();
+
+      let n1 = 'test-namespace-1';
+      let n2 = 'test-namespace-3';
+      let db1 = new StateDB({ namespace: n1 });
+      let db2 = new StateDB({ namespace: n2 });
+
+      expect(localStorage.length).to.be(0);
+      db1.save('foo', { bar: null })
+        .then(() => db2.save('baz', { qux: null }))
+        .then(() => { expect(localStorage.length).greaterThan(0); })
+        .then(() => db1.clear())
+        .then(() => { expect(localStorage.length).greaterThan(0); })
+        .then(() => db2.clear())
+        .then(() => { expect(localStorage.length).to.be(0); })
+        .then(done)
+        .catch(done);
+    });
+
+  });
+
 });
