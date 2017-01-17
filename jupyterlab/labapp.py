@@ -87,6 +87,7 @@ class LabHandler(IPythonHandler):
         configData = dict(
             terminalsAvailable=self.settings.get('terminals_available', False),
         )
+        extension_prefix = ujoin(self.base_url, EXTENSION_PREFIX)
 
         # Gather the lab extension files and entry points.
         for (name, data) in sorted(labextensions.items()):
@@ -96,12 +97,12 @@ class LabHandler(IPythonHandler):
                 if value.get('entry', None):
                     entries.append(value['entry'])
                     bundles.append('%s/%s/%s' % (
-                        EXTENSION_PREFIX, name, value['files'][0]
+                        extension_prefix, name, value['files'][0]
                     ))
                 for fname in value['files']:
                     if os.path.splitext(fname)[1] == '.css':
                         css_files.append('%s/%s/%s' % (
-                            EXTENSION_PREFIX, name, fname
+                            extension_prefix, name, fname
                         ))
             python_module = data.get('python_module', None)
             if python_module:
@@ -196,8 +197,9 @@ class LabApp(NotebookApp):
         base_url = webapp.settings['base_url']
         webapp.add_handlers(".*$",
             [(ujoin(base_url, h[0]),) + h[1:] for h in default_handlers])
+        extension_prefix = ujoin(base_url, EXTENSION_PREFIX)
         labextension_handler = (
-            r"%s/(.*)" % EXTENSION_PREFIX, FileFindHandler, {
+            r"%s/(.*)" % extension_prefix, FileFindHandler, {
                 'path': jupyter_path('labextensions'),
                 'no_cache_paths': ['/'],  # don't cache anything in labbextensions
             }
