@@ -18,10 +18,6 @@ import {
 } from 'phosphor/lib/ui/panel';
 
 import {
-  Widget
-} from 'phosphor/lib/ui/widget';
-
-import {
   IEditorMimeTypeService, CodeEditor
 } from '../codeeditor';
 
