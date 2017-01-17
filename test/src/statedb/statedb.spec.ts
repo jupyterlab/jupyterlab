@@ -103,6 +103,20 @@ describe('StateDB', () => {
         .catch(done);
     });
 
+    it('should resolve a nonexistent key fetch with null', done => {
+      let { localStorage } = window;
+      localStorage.clear();
+
+      let db = new StateDB({ namespace: 'test-namespace' });
+      let key = 'foo:bar';
+
+      expect(localStorage.length).to.be(0);
+      db.fetch(key)
+        .then(fetched => { expect(fetched).to.be(null); })
+        .then(done)
+        .catch(done);
+    });
+
   });
 
   describe('#fetchNamespace()', () => {
@@ -146,6 +160,49 @@ describe('StateDB', () => {
           expect(sorted[2].id).to.be(keys[5]);
         })
         .then(() => db.clear())
+        .then(done)
+        .catch(done);
+    });
+
+  });
+
+  describe('#remove()', () => {
+
+    it('should remove a stored key', done => {
+      let { localStorage } = window;
+      localStorage.clear();
+
+      let db = new StateDB({ namespace: 'test-namespace' });
+      let key = 'foo:bar';
+      let value = { baz: 'qux' };
+
+      expect(localStorage.length).to.be(0);
+      db.save(key, value)
+        .then(() => { expect(localStorage).to.have.length(1); })
+        .then(() => db.remove(key))
+        .then(() => { expect(localStorage).to.be.empty(); })
+        .then(done)
+        .catch(done);
+    });
+
+  });
+
+  describe('#save()', () => {
+
+    it('should save a key and a value', done => {
+      let { localStorage } = window;
+      localStorage.clear();
+
+      let db = new StateDB({ namespace: 'test-namespace' });
+      let key = 'foo:bar';
+      let value = { baz: 'qux' };
+
+      expect(localStorage.length).to.be(0);
+      db.save(key, value)
+        .then(() => db.fetch(key))
+        .then(fetched => { expect(fetched).to.eql(value); })
+        .then(() => db.remove(key))
+        .then(() => { expect(localStorage).to.be.empty(); })
         .then(done)
         .catch(done);
     });
