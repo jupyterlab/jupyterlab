@@ -73,7 +73,7 @@
     "clean:slate": "npm run clean && npm run clean:examples && rimraf jupyterlab/node_modules && rimraf node_modules && npm install",
     "docs": "typedoc --mode modules --module commonjs --excludeNotExported --target es5 --moduleResolution node --out docs/ src",
     "postinstall": "node scripts/dedupe.js",
-    "prepublish": "npm run build",
+    "preversion": "npm run clean && npm run build",
     "test": "npm run test:firefox",
     "test:chrome": "npm run build:test && cd test && python run-test.py --browsers=Chrome karma.conf.js",
     "test:coverage": "tsc --project test/src && webpack --config test/webpack-cov.conf.js && cd test && python run-test.py karma-cov.conf.js",
