@@ -30,7 +30,7 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  IEditorMimeTypeService
+  IEditorMimeTypeService, CodeEditor
 } from '../../codeeditor';
 
 import {
@@ -54,8 +54,12 @@ import {
 } from '../../completer';
 
 import {
-  BaseCellWidget
+  BaseCellWidget, CodeCellWidget
 } from '../cells';
+
+import {
+  OutputAreaWidget
+} from '../output-area';
 
 import {
   INotebookModel
@@ -431,7 +435,12 @@ export namespace NotebookPanel {
   export
   interface IContentFactory {
     /**
-     * The notebook content factory.
+     * The editor factory.
+     */
+    readonly editorFactory: CodeEditor.Factory;
+
+    /**
+     * The factory for notebook cell widget content.
      */
     readonly notebookContentFactory: Notebook.IContentFactory;
 
@@ -470,11 +479,25 @@ export namespace NotebookPanel {
      * Creates a new renderer.
      */
     constructor(options: ContentFactory.IOptions) {
-      this.notebookContentFactory = options.notebookContentFactory;
+      this.editorFactory = options.editorFactory;
+      this.notebookContentFactory = (options.notebookContentFactory ||
+        new Notebook.ContentFactory({
+          editorFactory: this.editorFactory,
+          outputAreaContentFactory: options.outputAreaContentFactory,
+          codeCellContentFactory: options.codeCellContentFactory,
+          rawCellContentFactory: options.rawCellContentFactory,
+          markdownCellContentFactory: options.markdownCellContentFactory
+        })
+      );
     }
 
     /**
-     * The notebook content factory.
+     * The editor factory.
+     */
+    readonly editorFactory: CodeEditor.Factory;
+
+    /**
+     * The factory for notebook cell widget content.
      */
     readonly notebookContentFactory: Notebook.IContentFactory;
 
@@ -520,14 +543,41 @@ export namespace NotebookPanel {
   export
   namespace ContentFactory {
     /**
-     * An initialization options for a notebook panel factory.
+     * An initialization options for a notebook panel content factory.
      */
     export
     interface IOptions {
       /**
-       * The notebook content factory.
+       * The editor factory.
        */
-      readonly notebookContentFactory: Notebook.IContentFactory;
+      editorFactory: CodeEditor.Factory;
+
+      /**
+       * The factory for output area content.
+       */
+      outputAreaContentFactory?: OutputAreaWidget.IContentFactory;
+
+      /**
+       * The factory for code cell widget content.  If given, this will
+       * take precedence over the `outputAreaContentFactory`.
+       */
+      codeCellContentFactory?: CodeCellWidget.IContentFactory;
+
+      /**
+       * The factory for raw cell widget content.
+       */
+      rawCellContentFactory?: BaseCellWidget.IContentFactory;
+
+      /**
+       * The factory for markdown cell widget content.
+       */
+      markdownCellContentFactory?: BaseCellWidget.IContentFactory;
+
+      /**
+       * The factory for notebook cell widget content. If given, this will
+       * take precedence over the the cell and output area factories.
+       */
+      notebookContentFactory?: Notebook.IContentFactory;
     }
   }
 

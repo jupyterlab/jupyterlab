@@ -22,7 +22,7 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  IEditorMimeTypeService
+  IEditorMimeTypeService, CodeEditor
 } from '../codeeditor';
 
 import {
@@ -34,8 +34,12 @@ import {
 } from '../inspector';
 
 import {
-  CodeCellWidget
+  BaseCellWidget, CodeCellWidget
 } from '../notebook/cells';
+
+import {
+  OutputAreaWidget
+} from '../notebook/output-area';
 
 import {
   IRenderMime
@@ -209,7 +213,12 @@ namespace ConsolePanel {
   export
   interface IContentFactory {
     /**
-     * The console content factory.
+     * The editor factory used by the content factory.
+     */
+    readonly editorFactory: CodeEditor.Factory;
+
+    /**
+     * The factory for code console content.
      */
     readonly consoleContentFactory: CodeConsole.IContentFactory;
 
@@ -243,11 +252,24 @@ namespace ConsolePanel {
      * Create a new content factory.
      */
     constructor(options: ContentFactory.IOptions) {
-      this.consoleContentFactory = options.consoleContentFactory;
+      this.editorFactory = options.editorFactory;
+      this.consoleContentFactory = (options.consoleContentFactory ||
+        new CodeConsole.ContentFactory({
+          editorFactory: this.editorFactory,
+          outputAreaContentFactory: options.outputAreaContentFactory,
+          codeCellContentFactory: options.codeCellContentFactory,
+          rawCellContentFactory: options.rawCellContentFactory
+        })
+      );
     }
 
     /**
-     * The console content factory.
+     * The editor factory used by the content factory.
+     */
+    readonly editorFactory: CodeEditor.Factory;
+
+    /**
+     * The factory for code console content.
      */
     readonly consoleContentFactory: CodeConsole.IContentFactory;
 
@@ -291,9 +313,32 @@ namespace ConsolePanel {
     export
     interface IOptions {
       /**
-       * The notebook content factory.
+       * The editor factory.  This will be used to create a
+       * consoleContentFactory if none is given.
        */
-      consoleContentFactory: CodeConsole.IContentFactory;
+      editorFactory: CodeEditor.Factory;
+
+      /**
+       * The factory for output area content.
+       */
+      outputAreaContentFactory?: OutputAreaWidget.IContentFactory;
+
+      /**
+       * The factory for code cell widget content.  If given, this will
+       * take precedence over the `outputAreaContentFactory`.
+       */
+      codeCellContentFactory?: CodeCellWidget.IContentFactory;
+
+      /**
+       * The factory for raw cell widget content.
+       */
+      rawCellContentFactory?: BaseCellWidget.IContentFactory;
+
+      /**
+       * The factory for console wiget content.  If given, this will
+       * take precedence over the output area and cell factories.
+       */
+      consoleContentFactory?: CodeConsole.IContentFactory;
     }
   }
 

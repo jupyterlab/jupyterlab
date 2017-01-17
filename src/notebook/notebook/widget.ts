@@ -76,6 +76,10 @@ import {
 } from '../cells';
 
 import {
+  OutputAreaWidget
+} from '../output-area';
+
+import {
   INotebookModel
 } from './model';
 
@@ -177,7 +181,6 @@ class StaticNotebook extends Widget {
     this.addClass(NB_CLASS);
     this.rendermime = options.rendermime;
     this.layout = new Private.NotebookPanelLayout();
-    this.contentFactory = options.contentFactory;
     this._mimetypeService = options.mimeTypeService;
   }
 
@@ -403,29 +406,32 @@ class StaticNotebook extends Widget {
    * Create a code cell widget from a code cell model.
    */
   private _createCodeCell(model: ICodeCellModel): CodeCellWidget {
-    let contentFactory = this.contentFactory.codeContentFactory;
+    let factory = this.contentFactory;
+    let contentFactory = factory.codeCellContentFactory;
     let rendermime = this.rendermime;
     let options = { model, rendermime, contentFactory };
-    return this.contentFactory.createCodeCell(options, this);
+    return factory.createCodeCell(options, this);
   }
 
   /**
    * Create a markdown cell widget from a markdown cell model.
    */
   private _createMarkdownCell(model: IMarkdownCellModel): MarkdownCellWidget {
-    let contentFactory = this.contentFactory.markdownContentFactory;
+    let factory = this.contentFactory;
+    let contentFactory = factory.markdownCellContentFactory;
     let rendermime = this.rendermime;
     let options = { model, rendermime, contentFactory };
-    return this.contentFactory.createMarkdownCell(options, this);
+    return factory.createMarkdownCell(options, this);
   }
 
   /**
    * Create a raw cell widget from a raw cell model.
    */
   private _createRawCell(model: IRawCellModel): RawCellWidget {
-    let contentFactory = this.contentFactory.rawContentFactory;
+    let factory = this.contentFactory;
+    let contentFactory = factory.rawCellContentFactory;
     let options = { model, contentFactory };
-    return this.contentFactory.createRawCell(options, this);
+    return factory.createRawCell(options, this);
   }
 
   /**
@@ -508,19 +514,24 @@ namespace StaticNotebook {
   export
   interface IContentFactory {
     /**
-     * The code cell factory.
+     * The editor factory.
      */
-    readonly codeContentFactory: CodeCellWidget.IContentFactory;
+    readonly editorFactory: CodeEditor.Factory;
 
     /**
-     * The markdown cell content factory.
+     * The factory for code cell widget content.
      */
-    readonly markdownContentFactory: BaseCellWidget.IContentFactory;
+    readonly codeCellContentFactory?: CodeCellWidget.IContentFactory;
 
     /**
-     * The raw cell content factory.
+     * The factory for raw cell widget content.
      */
-    readonly rawContentFactory: BaseCellWidget.IContentFactory;
+    readonly rawCellContentFactory?: BaseCellWidget.IContentFactory;
+
+    /**
+     * The factory for markdown cell widget content.
+     */
+    readonly markdownCellContentFactory?: BaseCellWidget.IContentFactory;
 
     /**
      * Create a new code cell widget.
@@ -548,31 +559,42 @@ namespace StaticNotebook {
      */
     constructor(options: ContentFactory.IOptions) {
       let editorFactory = options.editorFactory;
-      this.codeContentFactory = (options.codeContentFactory ||
-        new CodeCellWidget.ContentFactory({ editorFactory })
+      let outputAreaContentFactory = (options.outputAreaContentFactory ||
+        OutputAreaWidget.defaultContentFactory
       );
-      this.markdownContentFactory = (options.markdownContentFactory ||
-        new BaseCellWidget.ContentFactory({ editorFactory })
+      this.codeCellContentFactory = (options.codeCellContentFactory ||
+        new CodeCellWidget.ContentFactory({
+          editorFactory,
+          outputAreaContentFactory
+        })
       );
-      this.rawContentFactory = (options.rawContentFactory ||
-        new BaseCellWidget.ContentFactory({ editorFactory })
+      this.rawCellContentFactory = (options.rawCellContentFactory ||
+        new RawCellWidget.ContentFactory({ editorFactory })
+      );
+      this.markdownCellContentFactory = (options.markdownCellContentFactory ||
+        new MarkdownCellWidget.ContentFactory({ editorFactory })
       );
     }
 
     /**
-     * The code cell factory.
+     * The editor factory.
      */
-    readonly codeContentFactory: CodeCellWidget.IContentFactory;
+    readonly editorFactory: CodeEditor.Factory;
 
     /**
-     * The markdown cell content factory.
+     * The factory for code cell widget content.
      */
-    readonly markdownContentFactory: BaseCellWidget.IContentFactory;
+    readonly codeCellContentFactory: CodeCellWidget.IContentFactory;
 
     /**
-     * The raw cell content factory.
+     * The factory for raw cell widget content.
      */
-    readonly rawContentFactory: BaseCellWidget.IContentFactory;
+    readonly rawCellContentFactory: BaseCellWidget.IContentFactory;
+
+    /**
+     * The factory for markdown cell widget content.
+     */
+    readonly markdownCellContentFactory: BaseCellWidget.IContentFactory;
 
     /**
      * Create a new code cell widget.
@@ -612,19 +634,25 @@ namespace StaticNotebook {
       editorFactory: CodeEditor.Factory;
 
       /**
-       * A factory for code cells.
+       * The factory for output area content.
        */
-      codeContentFactory?: CodeCellWidget.IContentFactory;
+      outputAreaContentFactory?: OutputAreaWidget.IContentFactory;
 
       /**
-       * A factory for markdown cells.
+       * The factory for code cell widget content.  If given, this will
+       * take precedence over the `outputAreaContentFactory`.
        */
-      markdownContentFactory?: BaseCellWidget.IContentFactory;
+      codeCellContentFactory?: CodeCellWidget.IContentFactory;
 
       /**
-       * A factory for raw cells.
+       * The factory for raw cell widget content.
        */
-      rawContentFactory?: BaseCellWidget.IContentFactory;
+      rawCellContentFactory?: BaseCellWidget.IContentFactory;
+
+      /**
+       * The factory for markdown cell widget content.
+       */
+      markdownCellContentFactory?: BaseCellWidget.IContentFactory;
     }
   }
 }

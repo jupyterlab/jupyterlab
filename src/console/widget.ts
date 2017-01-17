@@ -35,6 +35,10 @@ import {
 } from '../notebook/cells';
 
 import {
+  OutputAreaWidget
+} from '../notebook/output-area';
+
+import {
   IRenderMime
 } from '../rendermime';
 
@@ -125,7 +129,7 @@ class CodeConsole extends Widget {
     model.value.text = '...';
     let banner = this.banner = factory.createBanner({
       model,
-      contentFactory: factory.rawContentFactory
+      contentFactory: factory.rawCellContentFactory
     }, this);
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
@@ -399,7 +403,7 @@ class CodeConsole extends Widget {
 
     // Create the new prompt.
     let factory = this.contentFactory;
-    let contentFactory = factory.codeContentFactory;
+    let contentFactory = factory.codeCellContentFactory;
     let model = new CodeCellModel();
     let rendermime = this.rendermime;
     let options = { model, rendermime, contentFactory };
@@ -562,7 +566,7 @@ class CodeConsole extends Widget {
    */
   private _createForeignCell(): CodeCellWidget {
     let factory = this.contentFactory;
-    let contentFactory = factory.codeContentFactory;
+    let contentFactory = factory.codeCellContentFactory;
     let model = new CodeCellModel();
     let rendermime = this.rendermime;
     let options = { model, rendermime, contentFactory };
@@ -681,14 +685,19 @@ namespace CodeConsole {
   export
   interface IContentFactory {
     /**
-     * The raw cell content factory.
+     * The editor factory.
      */
-    readonly rawContentFactory: BaseCellWidget.IContentFactory;
+    readonly editorFactory: CodeEditor.Factory;
 
     /**
-     * The code cell content factory.
+     * The factory for code cell widget content.
      */
-    readonly codeContentFactory: CodeCellWidget.IContentFactory;
+    readonly codeCellContentFactory: CodeCellWidget.IContentFactory;
+
+    /**
+     * The factory for raw cell widget content.
+     */
+    readonly rawCellContentFactory: BaseCellWidget.IContentFactory;
 
     /**
      * The history manager for a console widget.
@@ -727,23 +736,34 @@ namespace CodeConsole {
      */
     constructor(options: ContentFactory.IOptions) {
       let editorFactory = options.editorFactory;
-      this.rawContentFactory = (options.rawContentFactory ||
-        new BaseCellWidget.ContentFactory({ editorFactory })
+      let outputAreaContentFactory = (options.outputAreaContentFactory ||
+        OutputAreaWidget.defaultContentFactory
       );
-      this.codeContentFactory = (options.codeContentFactory ||
-        new CodeCellWidget.ContentFactory({ editorFactory })
+      this.codeCellContentFactory = (options.codeCellContentFactory ||
+        new CodeCellWidget.ContentFactory({
+          editorFactory,
+          outputAreaContentFactory
+        })
+      );
+      this.rawCellContentFactory = (options.rawCellContentFactory ||
+        new RawCellWidget.ContentFactory({ editorFactory })
       );
     }
 
     /**
-     * The raw cell content factory.
+     * The editor factory.
      */
-    readonly rawContentFactory: BaseCellWidget.IContentFactory;
+    readonly editorFactory: CodeEditor.Factory;
 
     /**
-     * The code cell content factory.
+     * The factory for code cell widget content.
      */
-    readonly codeContentFactory: CodeCellWidget.IContentFactory;
+    readonly codeCellContentFactory: CodeCellWidget.IContentFactory;
+
+    /**
+     * The factory for raw cell widget content.
+     */
+    readonly rawCellContentFactory: BaseCellWidget.IContentFactory;
 
     /**
      * The history manager for a console widget.
@@ -797,14 +817,20 @@ namespace CodeConsole {
       editorFactory: CodeEditor.Factory;
 
       /**
-       * A factory for code cells.
+       * The factory for output area content.
        */
-      codeContentFactory?: CodeCellWidget.IContentFactory;
+      outputAreaContentFactory?: OutputAreaWidget.IContentFactory;
 
       /**
-       * A factory for raw cells.
+       * The factory for code cell widget content.  If given, this will
+       * take precedence over the `outputAreaContentFactory`.
        */
-      rawContentFactory?: BaseCellWidget.IContentFactory;
+      codeCellContentFactory?: CodeCellWidget.IContentFactory;
+
+      /**
+       * The factory for raw cell widget content.
+       */
+      rawCellContentFactory?: BaseCellWidget.IContentFactory;
     }
   }
 }

@@ -370,7 +370,7 @@ namespace BaseCellWidget {
   }
 
   /**
-   * The namespace for the `Renderer` class statics.
+   * The namespace for the `ContentFactory` class statics.
    */
   export
   namespace ContentFactory {
@@ -402,7 +402,10 @@ class CodeCellWidget extends BaseCellWidget {
     let rendermime = this._rendermime = options.rendermime;
 
     let factory = options.contentFactory;
-    this._output = factory.createOutputArea({ rendermime });
+    this._output = factory.createOutputArea({
+      rendermime,
+      contentFactory: factory.outputAreaContentFactory
+    });
     (this.layout as PanelLayout).addWidget(this._output);
 
     let model = this.model;
@@ -541,6 +544,11 @@ namespace CodeCellWidget {
   export
   interface IContentFactory extends BaseCellWidget.IContentFactory {
     /**
+     * The factory for output area content.
+     */
+    readonly outputAreaContentFactory: OutputAreaWidget.IContentFactory;
+
+    /**
      * Create a new output area for the widget.
      */
     createOutputArea(options: OutputAreaWidget.IOptions): OutputAreaWidget;
@@ -552,10 +560,47 @@ namespace CodeCellWidget {
   export
   class ContentFactory extends BaseCellWidget.ContentFactory implements IContentFactory {
     /**
+     * Construct a new code cell content factory
+     */
+    constructor(options: ContentFactory.IOptions) {
+      super(options);
+      this.outputAreaContentFactory = (options.outputAreaContentFactory ||
+        OutputAreaWidget.defaultContentFactory
+      );
+    }
+
+    /**
+     * The factory for output area content.
+     */
+    readonly outputAreaContentFactory: OutputAreaWidget.IContentFactory;
+
+    /**
      * Create an output area widget.
      */
     createOutputArea(options: OutputAreaWidget.IOptions): OutputAreaWidget {
       return new OutputAreaWidget(options);
+    }
+  }
+
+  /**
+   * The namespace for the `ContentFactory` class statics.
+   */
+  export
+  namespace ContentFactory {
+    /**
+     * An options object for initializing a renderer.
+     */
+    export
+    interface IOptions {
+      /**
+       * A code editor factory.
+       */
+      editorFactory: CodeEditor.Factory;
+
+      /**
+       * The factory to use for output area widget content.
+       */
+      outputAreaContentFactory?: OutputAreaWidget.IContentFactory;
     }
   }
 }

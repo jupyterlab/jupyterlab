@@ -151,10 +151,7 @@ const contentFactoryPlugin: JupyterLabPlugin<NotebookPanel.IContentFactory> = {
   autoStart: true,
   activate: (app: JupyterLab, editorServices: IEditorServices) => {
     let editorFactory = editorServices.factoryService.newInlineEditor;
-    const nbFactory = new Notebook.ContentFactory({ editorFactory });
-    return new NotebookPanel.ContentFactory({
-      notebookContentFactory: nbFactory
-    });
+    return new NotebookPanel.ContentFactory({ editorFactory });
   }
 };
 
