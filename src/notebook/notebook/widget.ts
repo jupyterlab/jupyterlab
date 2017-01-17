@@ -1303,6 +1303,9 @@ class Notebook extends StaticNotebook {
     document.removeEventListener('mousemove', this, true);
     document.removeEventListener('mouseup', this, true);
     this._drag.start(clientX, clientY).then(action => {
+      if (this.isDisposed) {
+        return;
+      }
       this._drag = null;
       each(toremove, widget => { widget.removeClass(DROP_SOURCE_CLASS); });
       if (action === 'none') {

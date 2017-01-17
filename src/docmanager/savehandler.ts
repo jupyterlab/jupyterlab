@@ -133,7 +133,7 @@ class SaveHandler implements IDisposable {
     // Make sure the file has not changed on disk.
     let promise = this._manager.contents.get(context.path);
     promise.then(model => {
-      if (context.contentsModel &&
+      if (!this.isDisposed && context.contentsModel &&
           model.last_modified !== context.contentsModel.last_modified) {
         return this._timeConflict(model.last_modified);
       }
@@ -163,6 +163,9 @@ class SaveHandler implements IDisposable {
       title: 'File Changed', body, okText: 'OVERWRITE',
       buttons: [cancelButton, { text: 'REVERT' }, okButton]
     }).then(result => {
+      if (this.isDisposed) {
+        return;
+      }
       this._inDialog = false;
       if (result.text === 'OVERWRITE') {
         return this._finishSave();
@@ -178,6 +181,9 @@ class SaveHandler implements IDisposable {
   private _finishSave(): Promise<void> {
     let start = new Date().getTime();
     return this._context.save().then(() => {
+      if (this.isDisposed) {
+        return;
+      }
       let duration = new Date().getTime() - start;
       // New save interval: higher of 10x save duration or min interval.
       this._interval = Math.max(10 * duration, this._minInterval);

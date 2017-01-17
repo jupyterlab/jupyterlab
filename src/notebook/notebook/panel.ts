@@ -303,6 +303,9 @@ class NotebookPanel extends Widget {
     // Clear the cells when the context is initially populated.
     if (!newValue.isReady) {
       newValue.ready.then(() => {
+        if (this.isDisposed) {
+          return;
+        }
         let model = newValue.model;
         // Clear the undo state of the cells.
         if (model) {
@@ -347,6 +350,9 @@ class NotebookPanel extends Widget {
    */
   private _updateSpec(kernel: Kernel.IKernel): void {
     kernel.getSpec().then(spec => {
+      if (this.isDisposed) {
+        return;
+      }
       let specCursor = this.model.getMetadata('kernelspec');
       specCursor.setValue({
         name: kernel.name,

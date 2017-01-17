@@ -117,6 +117,9 @@ class CellCompleterHandler implements IDisposable {
     let request = this.getState(position);
 
     return this._kernel.requestComplete(content).then(msg => {
+      if (this.isDisposed) {
+        return;
+      }
       this.onReply(pending, request, msg);
     });
   }

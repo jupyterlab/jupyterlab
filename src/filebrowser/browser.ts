@@ -197,7 +197,9 @@ class FileBrowser extends Widget {
   createNew(options: Contents.ICreateOptions): Promise<Widget> {
     let model = this.model;
     return model.newUntitled(options).then(contents => {
-      return this._buttons.createNew(contents.path);
+      if (!this.isDisposed) {
+        return this._buttons.createNew(contents.path);
+      }
     });
   }
 

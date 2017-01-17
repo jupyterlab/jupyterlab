@@ -170,6 +170,9 @@ class FileBrowserModel implements IDisposable, IPathTracker {
     }
     let manager = this._manager;
     this._pending = manager.contents.get(newValue, options).then(contents => {
+      if (this.isDisposed) {
+        return;
+      }
       this._handleContents(contents);
       this._pendingPath = null;
       if (oldValue !== newValue) {
@@ -297,6 +300,9 @@ class FileBrowserModel implements IDisposable, IPathTracker {
       let msg = `"${file.name}" already exists`;
       throw new Error(msg);
     }, () => {
+      if (this.isDisposed) {
+        return;
+      }
       return this._upload(file);
     });
   }

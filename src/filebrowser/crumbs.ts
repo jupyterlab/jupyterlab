@@ -260,6 +260,7 @@ class BreadCrumbs extends Widget {
       return;
     }
     let path = BREAD_CRUMB_PATHS[index];
+    let model = this._model;
 
     // Move all of the items.
     let promises: Promise<any>[] = [];
@@ -277,9 +278,11 @@ class BreadCrumbs extends Widget {
             okText: 'OVERWRITE'
           };
           return showDialog(options).then(button => {
-            if (button.text === 'OVERWRITE') {
-              return this._model.deleteFile(newPath).then(() => {
-                return this._model.rename(name, newPath);
+            if (!model.isDisposed && button.text === 'OVERWRITE') {
+              return model.deleteFile(newPath).then(() => {
+                if (!model.isDisposed) {
+                  return this._model.rename(name, newPath);
+                }
               });
             }
           });

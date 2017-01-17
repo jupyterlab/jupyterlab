@@ -88,7 +88,9 @@ namespace ToolbarItems {
       className: TOOLBAR_SAVE_CLASS,
       onClick: () => {
         panel.context.save().then(() => {
-          return panel.context.createCheckpoint();
+          if (!panel.isDisposed) {
+            return panel.context.createCheckpoint();
+          }
         });
       },
       tooltip: 'Save the notebook contents and create checkpoint'
