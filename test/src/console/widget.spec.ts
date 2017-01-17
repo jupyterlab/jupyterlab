@@ -409,14 +409,14 @@ describe('console/widget', () => {
         let force = true;
         let callback = () => {
           widget.edgeRequested.connect(() => {
-            expect(local.methods).to.contain('onEdgeRequest');
+            expect(widget.methods).to.contain('onEdgeRequest');
             requestAnimationFrame(() => {
               expect(widget.prompt.model.value.text).to.be(code);
-              widget._history.ready.disconnect(callback);
+              (widget as any)._history.ready.disconnect(callback);
               done();
             });
           });
-          Widget.attach(local, document.body);
+          Widget.attach(widget, document.body);
           requestAnimationFrame(() => {
             widget.prompt.model.value.text = code;
             widget.execute(force).then(() => {
@@ -426,7 +426,7 @@ describe('console/widget', () => {
             }).catch(done);
           });
         };
-        widget._history.ready.connect(callback);
+        (widget as any)._history.ready.connect(callback);
       });
 
     });
