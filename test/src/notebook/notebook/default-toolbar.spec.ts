@@ -201,7 +201,6 @@ describe('notebook/notebook/default-toolbar', () => {
     describe('#createRunButton()', () => {
 
       it('should run and advance when clicked', (done) => {
-        console.log('\n\n***createRunButton');
         let button = ToolbarItems.createRunButton(panel);
         let widget = panel.notebook;
         let next = widget.widgets.at(1) as MarkdownCellWidget;
@@ -210,13 +209,9 @@ describe('notebook/notebook/default-toolbar', () => {
         cell.model.outputs.clear();
         next.rendered = false;
         Widget.attach(button, document.body);
-        console.log('\n\n***starting Kernel');
         startKernel(panel.context).then(kernel => {
-          console.log('\n\n***kernel started');
           kernel.statusChanged.connect((sender, status) => {
-            console.log('\n\n***status changed', status);
             if (status === 'idle' && cell.model.outputs.length > 0) {
-              console.log('\n\n***isrendered', next.rendered);
               expect(next.rendered).to.be(true);
               button.dispose();
               done();

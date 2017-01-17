@@ -516,11 +516,7 @@ class CodeConsole extends Widget {
       if (this.isDisposed) {
         return;
       }
-      this.executed.emit(new Date());
-      if (!value) {
-        return;
-      }
-      if (value.content.status === 'ok') {
+      if (value && value.content.status === 'ok') {
         let content = value.content as KernelMessage.IExecuteOkReply;
         // Use deprecated payloads for backwards compatibility.
         if (content.payload && content.payload.length) {
@@ -536,6 +532,7 @@ class CodeConsole extends Widget {
       }
       cell.model.contentChanged.disconnect(this.update, this);
       this.update();
+      this.executed.emit(new Date());
     };
     let onFailure = () => {
       if (this.isDisposed) {
