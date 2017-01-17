@@ -12,10 +12,6 @@ import {
 } from 'phosphor/lib/core/messaging';
 
 import {
-  clearSignalData, ISignal
-} from 'phosphor/lib/core/signaling';
-
-import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
@@ -46,17 +42,7 @@ import {
 
 class TestConsole extends CodeConsole {
 
-  readonly edgeRequested: ISignal<this, void>;
-
   methods: string[] = [];
-
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    super.dispose();
-    clearSignalData(this);
-  }
 
   protected newPrompt(): void {
     super.newPrompt();
@@ -71,11 +57,6 @@ class TestConsole extends CodeConsole {
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     this.methods.push('onAfterAttach');
-  }
-
-  protected onTextChange(): void {
-    super.onTextChange();
-    this.methods.push('onTextChange');
   }
 
   protected onUpdateRequest(msg: Message): void {
@@ -367,17 +348,6 @@ describe('console/widget', () => {
         Widget.attach(widget, document.body);
         expect(widget.methods).to.contain('onAfterAttach');
         expect(widget.prompt).to.be.ok();
-      });
-
-    });
-
-    describe('#onTextChange()', () => {
-
-      it('should be called upon an editor text change', () => {
-        Widget.attach(widget, document.body);
-        expect(widget.methods).to.not.contain('onTextChange');
-        widget.prompt.model.value.text = 'foo';
-        expect(widget.methods).to.contain('onTextChange');
       });
 
     });
