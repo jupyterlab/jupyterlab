@@ -162,8 +162,10 @@ class OutputAreaWidget extends Widget {
   constructor(options: OutputAreaWidget.IOptions) {
     super();
     this.addClass(OUTPUT_AREA_CLASS);
-    this._rendermime = options.rendermime;
-    this._renderer = options.renderer || OutputAreaWidget.defaultRenderer;
+    this.rendermime = options.rendermime;
+    this.contentFactory = (
+      options.contentFactory || OutputAreaWidget.defaultContentFactory
+    );
     this.layout = new PanelLayout();
   }
 
@@ -171,9 +173,9 @@ class OutputAreaWidget extends Widget {
    * Create a mirrored output widget.
    */
   mirror(): OutputAreaWidget {
-    let rendermime = this._rendermime;
-    let renderer = this._renderer;
-    let widget = new OutputAreaWidget({ rendermime, renderer });
+    let rendermime = this.rendermime;
+    let contentFactory = this.contentFactory;
+    let widget = new OutputAreaWidget({ rendermime, contentFactory });
     widget.model = this._model;
     widget.trusted = this._trusted;
     widget.title.label = 'Mirrored Output';
@@ -185,12 +187,22 @@ class OutputAreaWidget extends Widget {
   /**
    * A signal emitted when the widget's model changes.
    */
-  modelChanged: ISignal<this, void>;
+  readonly modelChanged: ISignal<this, void>;
 
   /**
    * A signal emitted when the widget's model is disposed.
    */
-  modelDisposed: ISignal<this, void>;
+  readonly modelDisposed: ISignal<this, void>;
+
+  /**
+   * Te rendermime instance used by the widget.
+   */
+  readonly rendermime: RenderMime;
+
+  /**
+   * The content factory used by the widget.
+   */
+  readonly contentFactory: OutputAreaWidget.IContentFactory;
 
   /**
    * A read-only sequence of the widgets in the output area.
@@ -215,20 +227,6 @@ class OutputAreaWidget extends Widget {
     this._onModelChanged(oldValue, newValue);
     this.onModelChanged(oldValue, newValue);
     this.modelChanged.emit(void 0);
-  }
-
-  /**
-   * Get the rendermime instance used by the widget.
-   */
-  get rendermime(): RenderMime {
-    return this._rendermime;
-  }
-
-  /**
-   * Get the renderer used by the widget.
-   */
-  get renderer(): OutputAreaWidget.IRenderer {
-    return this._renderer;
   }
 
   /**
@@ -286,8 +284,6 @@ class OutputAreaWidget extends Widget {
       return;
     }
     this._model = null;
-    this._rendermime = null;
-    this._renderer = null;
     super.dispose();
   }
 
@@ -311,7 +307,8 @@ class OutputAreaWidget extends Widget {
    * Add a child to the layout.
    */
   protected addChild(): void {
-    let widget = this._renderer.createOutput({ rendermime: this.rendermime });
+    let rendermime = this.rendermime;
+    let widget = this.contentFactory.createOutput({ rendermime });
     let layout = this.layout as PanelLayout;
     layout.addWidget(widget);
     this.updateChild(layout.widgets.length - 1);
@@ -450,8 +447,6 @@ class OutputAreaWidget extends Widget {
   private _collapsed = false;
   private _minHeightTimeout: number = null;
   private _model: OutputAreaModel = null;
-  private _rendermime: RenderMime = null;
-  private _renderer: OutputAreaWidget.IRenderer = null;
   private _injecting = false;
 }
 
@@ -472,18 +467,18 @@ namespace OutputAreaWidget {
     rendermime: RenderMime;
 
     /**
-     * The output widget renderer.
+     * The output widget content factory.
      *
-     * Defaults to a shared `IRenderer` instance.
+     * Defaults to a shared `IContentFactory` instance.
      */
-     renderer?: IRenderer;
+     contentFactory: IContentFactory;
   }
 
   /**
-   * An output widget renderer.
+   * An output widget content factory.
    */
   export
-  interface IRenderer {
+  interface IContentFactory {
     /**
      * Create an output widget.
      *
@@ -494,10 +489,10 @@ namespace OutputAreaWidget {
   }
 
   /**
-   * The default implementation of `IRenderer`.
+   * The default implementation of `IContentFactory`.
    */
   export
-  class Renderer implements IRenderer {
+  class ContentFactory implements IContentFactory {
     /**
      * Create an output widget.
      *
@@ -510,11 +505,12 @@ namespace OutputAreaWidget {
   }
 
   /**
-   * The default `Renderer` instance.
+   * The default `ContentFactory` instance.
    */
   export
-  const defaultRenderer = new Renderer();
+  const defaultContentFactory = new ContentFactory();
 }
+
 
 /**
  * The gutter on the left side of the OutputWidget

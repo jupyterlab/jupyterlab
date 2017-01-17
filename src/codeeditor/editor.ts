@@ -684,8 +684,8 @@ namespace CodeEditor {
     readOnly?: boolean;
 
    /**
-     * The default selection style for the editor.
-     */
+    * The default selection style for the editor.
+    */
     selectionStyle?: CodeEditor.ISelectionStyle;
   }
 }

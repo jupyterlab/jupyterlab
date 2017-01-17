@@ -30,6 +30,10 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
+  IEditorMimeTypeService, CodeEditor
+} from '../../codeeditor';
+
+import {
   IChangedArgs
 } from '../../common/interfaces';
 
@@ -38,12 +42,24 @@ import {
 } from '../../docregistry';
 
 import {
+  InspectionHandler
+} from '../../inspector';
+
+import {
   RenderMime
 } from '../../rendermime';
 
 import {
-  CompleterWidget, CompleterModel, CellCompleterHandler
+  CompleterModel, CompleterWidget, CellCompleterHandler
 } from '../../completer';
+
+import {
+  BaseCellWidget, CodeCellWidget
+} from '../cells';
+
+import {
+  OutputAreaWidget
+} from '../output-area';
 
 import {
   INotebookModel
@@ -84,62 +100,89 @@ class NotebookPanel extends Widget {
   constructor(options: NotebookPanel.IOptions) {
     super();
     this.addClass(NB_PANEL);
-    this._rendermime = options.rendermime;
-    this._clipboard = options.clipboard;
-    this._renderer = options.renderer;
+    this.rendermime = options.rendermime;
+    this.clipboard = options.clipboard;
+    let factory = this.contentFactory = options.contentFactory;
 
     this.layout = new PanelLayout();
-    let rendermime = this._rendermime;
-    this._content = this._renderer.createContent(rendermime);
-    let toolbar = this._renderer.createToolbar();
+    let nbOptions = {
+      rendermime: this.rendermime,
+      languagePreference: options.languagePreference,
+      contentFactory: factory.notebookContentFactory,
+      mimeTypeService: options.mimeTypeService
+    };
+    this.notebook = factory.createNotebook(nbOptions);
+    this.notebook.activeCellChanged.connect(this._onActiveCellChanged, this);
+    let toolbar = factory.createToolbar();
 
     let layout = this.layout as PanelLayout;
     layout.addWidget(toolbar);
-    layout.addWidget(this._content);
+    layout.addWidget(this.notebook);
 
-    this._completer = this._renderer.createCompleter();
-    // The completer widget's anchor node is the node whose scrollTop is
-    // pegged to the completer widget's position.
-    this._completer.anchor = this._content.node;
+    // Set up the inspection handler.
+    this.inspectionHandler = factory.createInspectionHandler({
+      rendermime: this.rendermime
+    });
+
+    // Instantiate the completer.
+    this._completer = factory.createCompleter({ model: new CompleterModel() });
+
+    // Set the completer widget's anchor node to peg its position.
+    this._completer.anchor = this.notebook.node;
     Widget.attach(this._completer, document.body);
 
-    // Set up the completer handler.
-    this._completerHandler = new CellCompleterHandler({
+    // Instantiate the completer handler.
+    this._completerHandler = factory.createCompleterHandler({
       completer: this._completer
     });
-    this._completerHandler.activeCell = this._content.activeCell;
-    this._content.activeCellChanged.connect((s, cell) => {
-      this._completerHandler.activeCell = cell;
-    });
+    this._completerHandler.activeCell = this.notebook.activeCell;
   }
 
   /**
    * A signal emitted when the panel has been activated.
    */
-  activated: ISignal<this, void>;
+  readonly activated: ISignal<this, void>;
 
   /**
    * A signal emitted when the panel context changes.
    */
-  contextChanged: ISignal<this, void>;
+  readonly contextChanged: ISignal<this, void>;
 
   /**
    * A signal emitted when the kernel used by the panel changes.
    */
-  kernelChanged: ISignal<this, Kernel.IKernel>;
+  readonly kernelChanged: ISignal<this, Kernel.IKernel>;
+
+  /**
+   * The factory used by the widget.
+   */
+  readonly contentFactory: NotebookPanel.IContentFactory;
+
+  /**
+   * The Rendermime instance used by the widget.
+   */
+  readonly rendermime: RenderMime;
+
+  /**
+   * The clipboard instance used by the widget.
+   */
+  readonly clipboard: IClipboard;
+
+  /**
+   * The notebook used by the widget.
+   */
+  readonly notebook: Notebook;
+
+  /**
+   * The inspection handler used by the widget.
+   */
+  readonly inspectionHandler: InspectionHandler;
 
   /**
    * Get the toolbar used by the widget.
    */
   get toolbar(): Toolbar<Widget> {
     return (this.layout as PanelLayout).widgets.at(0) as Toolbar<Widget>;
-  }
-
-  /**
-   * Get the content area used by the widget.
-   */
-  get content(): Notebook {
-    return this._content;
   }
 
   /**
@@ -150,31 +193,10 @@ class NotebookPanel extends Widget {
   }
 
   /**
-   * Get the rendermime instance used by the widget.
-   */
-  get rendermime(): RenderMime {
-    return this._rendermime;
-  }
-
-  /**
-   * Get the renderer used by the widget.
-   */
-  get renderer(): NotebookPanel.IRenderer {
-    return this._renderer;
-  }
-
-  /**
-   * Get the clipboard instance used by the widget.
-   */
-  get clipboard(): IClipboard {
-    return this._clipboard;
-  }
-
-  /**
    * The model for the widget.
    */
   get model(): INotebookModel {
-    return this._content ? this._content.model : null;
+    return this.notebook ? this.notebook.model : null;
   }
 
   /**
@@ -194,7 +216,7 @@ class NotebookPanel extends Widget {
     }
     let oldValue = this._context;
     this._context = newValue;
-    this._rendermime.resolver = newValue;
+    this.rendermime.resolver = newValue;
     // Trigger private, protected, and public changes.
     this._onContextChanged(oldValue, newValue);
     this.onContextChanged(oldValue, newValue);
@@ -209,15 +231,12 @@ class NotebookPanel extends Widget {
       return;
     }
     this._context = null;
-    this._content.dispose();
-    this._content = null;
-    this._rendermime = null;
-    this._clipboard = null;
+    this.notebook.dispose();
     this._completerHandler.dispose();
     this._completerHandler = null;
     this._completer.dispose();
     this._completer = null;
-    this._renderer = null;
+    this.inspectionHandler.dispose();
     super.dispose();
   }
 
@@ -225,7 +244,7 @@ class NotebookPanel extends Widget {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this.content.activate();
+    this.notebook.activate();
     this.activated.emit(void 0);
   }
 
@@ -277,7 +296,7 @@ class NotebookPanel extends Widget {
     if (context.kernel !== oldKernel) {
       this._onKernelChanged(this._context, this._context.kernel);
     }
-    this._content.model = newValue.model;
+    this.notebook.model = newValue.model;
     this._handleDirtyState();
     newValue.model.stateChanged.connect(this.onModelStateChanged, this);
 
@@ -302,7 +321,7 @@ class NotebookPanel extends Widget {
    */
   private _onKernelChanged(context: DocumentRegistry.IContext<INotebookModel>, kernel: Kernel.IKernel): void {
     this._completerHandler.kernel = kernel;
-    this.content.inspectionHandler.kernel = kernel;
+    this.inspectionHandler.kernel = kernel;
     this.kernelChanged.emit(kernel);
     if (!this.model || !kernel) {
       return;
@@ -351,13 +370,17 @@ class NotebookPanel extends Widget {
     }
   }
 
-  private _clipboard: IClipboard = null;
+  /**
+   * Handle a change to the active cell.
+   */
+  private _onActiveCellChanged(sender: Notebook, widget: BaseCellWidget) {
+    this.inspectionHandler.activeCell = widget;
+    this._completerHandler.activeCell = widget;
+  }
+
   private _completer: CompleterWidget = null;
   private _completerHandler: CellCompleterHandler = null;
-  private _content: Notebook = null;
   private _context: DocumentRegistry.IContext<INotebookModel> = null;
-  private _renderer: NotebookPanel.IRenderer = null;
-  private _rendermime: RenderMime = null;
 }
 
 
@@ -387,22 +410,40 @@ export namespace NotebookPanel {
     clipboard: IClipboard;
 
     /**
-     * The content renderer for the panel.
-     *
-     * The default is a shared `IRenderer` instance.
+     * The language preference for the model.
      */
-    renderer: IRenderer;
+    languagePreference?: string;
+
+    /**
+     * The content factory for the panel.
+     */
+    contentFactory: IContentFactory;
+
+    /**
+     * The mimeType service.
+     */
+    mimeTypeService: IEditorMimeTypeService;
   }
 
   /**
-   * A renderer interface for NotebookPanels.
+   * A content factory interface for NotebookPanel.
    */
   export
-  interface IRenderer {
+  interface IContentFactory {
+    /**
+     * The editor factory.
+     */
+    readonly editorFactory: CodeEditor.Factory;
+
+    /**
+     * The factory for notebook cell widget content.
+     */
+    readonly notebookContentFactory: Notebook.IContentFactory;
+
     /**
      * Create a new content area for the panel.
      */
-    createContent(rendermime: RenderMime): Notebook;
+    createNotebook(options: Notebook.IOptions): Notebook;
 
     /**
      * Create a new toolbar for the panel.
@@ -410,37 +451,57 @@ export namespace NotebookPanel {
     createToolbar(): Toolbar<Widget>;
 
     /**
-     * Create a new completer widget for the panel.
+     * The inspection handler for a console widget.
      */
-    createCompleter(): CompleterWidget;
+    createInspectionHandler(options: InspectionHandler.IOptions): InspectionHandler;
+
+    /**
+     * The completer widget for a console widget.
+     */
+    createCompleter(options: CompleterWidget.IOptions): CompleterWidget;
+
+    /**
+     * The completer handler for a console widget.
+     */
+   createCompleterHandler(options: CellCompleterHandler.IOptions): CellCompleterHandler;
   }
 
   /**
-   * The default implementation of an `IRenderer`.
+   * The default implementation of an `IContentFactory`.
    */
   export
-  class Renderer implements IRenderer {
-
-    /**
-     * The notebook renderer.
-     */
-    readonly notebookRenderer: Notebook.Renderer;
-
+  class ContentFactory implements IContentFactory {
     /**
      * Creates a new renderer.
      */
-    constructor(options: Renderer.IOptions) {
-      this.notebookRenderer = options.notebookRenderer;
+    constructor(options: ContentFactory.IOptions) {
+      this.editorFactory = options.editorFactory;
+      this.notebookContentFactory = (options.notebookContentFactory ||
+        new Notebook.ContentFactory({
+          editorFactory: this.editorFactory,
+          outputAreaContentFactory: options.outputAreaContentFactory,
+          codeCellContentFactory: options.codeCellContentFactory,
+          rawCellContentFactory: options.rawCellContentFactory,
+          markdownCellContentFactory: options.markdownCellContentFactory
+        })
+      );
     }
+
+    /**
+     * The editor factory.
+     */
+    readonly editorFactory: CodeEditor.Factory;
+
+    /**
+     * The factory for notebook cell widget content.
+     */
+    readonly notebookContentFactory: Notebook.IContentFactory;
 
     /**
      * Create a new content area for the panel.
      */
-    createContent(rendermime: RenderMime): Notebook {
-      return new Notebook({
-        rendermime,
-        renderer: this.notebookRenderer
-      });
+    createNotebook(options: Notebook.IOptions): Notebook {
+      return new Notebook(options);
     }
 
     /**
@@ -451,27 +512,68 @@ export namespace NotebookPanel {
     }
 
     /**
-     * Create a new completer widget.
+     * The inspection handler for a console widget.
      */
-    createCompleter(): CompleterWidget {
-      return new CompleterWidget({ model: new CompleterModel() });
+    createInspectionHandler(options: InspectionHandler.IOptions): InspectionHandler {
+      return new InspectionHandler(options);
     }
+
+    /**
+     * The completer widget for a console widget.
+     */
+    createCompleter(options: CompleterWidget.IOptions): CompleterWidget {
+      return new CompleterWidget(options);
+    }
+
+    /**
+     * The completer handler for a console widget.
+     */
+   createCompleterHandler(options: CellCompleterHandler.IOptions): CellCompleterHandler {
+      return new CellCompleterHandler(options);
+   }
   }
 
   /**
-   * The namespace for `Renderer`.
+   * The namespace for `ContentFactory`.
    */
   export
-  namespace Renderer {
+  namespace ContentFactory {
     /**
-     * An initialization options for a notebook panel renderer.
+     * An initialization options for a notebook panel content factory.
      */
     export
     interface IOptions {
       /**
-       * The notebook renderer.
+       * The editor factory.
        */
-      readonly notebookRenderer: Notebook.Renderer;
+      editorFactory: CodeEditor.Factory;
+
+      /**
+       * The factory for output area content.
+       */
+      outputAreaContentFactory?: OutputAreaWidget.IContentFactory;
+
+      /**
+       * The factory for code cell widget content.  If given, this will
+       * take precedence over the `outputAreaContentFactory`.
+       */
+      codeCellContentFactory?: CodeCellWidget.IContentFactory;
+
+      /**
+       * The factory for raw cell widget content.
+       */
+      rawCellContentFactory?: BaseCellWidget.IContentFactory;
+
+      /**
+       * The factory for markdown cell widget content.
+       */
+      markdownCellContentFactory?: BaseCellWidget.IContentFactory;
+
+      /**
+       * The factory for notebook cell widget content. If given, this will
+       * take precedence over the the cell and output area factories.
+       */
+      notebookContentFactory?: Notebook.IContentFactory;
     }
   }
 
@@ -480,6 +582,6 @@ export namespace NotebookPanel {
    * The notebook renderer token.
    */
   export
-  const IRenderer = new Token<IRenderer>('jupyter.services.notebook.renderer');
+  const IContentFactory = new Token<IContentFactory>('jupyter.services.notebook.content-factory');
   /* tslint:enable */
 }

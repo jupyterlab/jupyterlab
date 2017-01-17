@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  KernelMessage, Session, utils
+  Session, utils
 } from '@jupyterlab/services';
 
 import {
@@ -12,7 +12,7 @@ import {
 } from 'phosphor/lib/core/messaging';
 
 import {
-  clearSignalData, defineSignal, ISignal
+  clearSignalData, ISignal
 } from 'phosphor/lib/core/signaling';
 
 import {
@@ -20,39 +20,31 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  CodeEditor
-} from '../../../lib/codeeditor';
-
-import {
-  ConsoleContent
-} from '../../../lib/console/content';
+  CodeConsole
+} from '../../../lib/console';
 
 import {
   ConsoleHistory
 } from '../../../lib/console/history';
 
 import {
-  InspectionHandler
-} from '../../../lib/inspector';
+  ForeignHandler
+} from '../../../lib/console/foreign';
 
 import {
-  CodeCellWidget, CodeCellModel
+  BaseCellWidget, CodeCellWidget, CodeCellModel, RawCellModel, RawCellWidget
 } from '../../../lib/notebook/cells';
 
 import {
-  createCodeCellRenderer
+  createCodeCellFactory
 } from '../notebook/utils';
 
 import {
-  defaultRenderMime
-} from '../utils';
-
-import {
-  createRenderer
+  createConsoleFactory, rendermime, mimeTypeService, editorFactory
 } from './utils';
 
 
-class TestContent extends ConsoleContent {
+class TestConsole extends CodeConsole {
 
   readonly edgeRequested: ISignal<this, void>;
 
@@ -81,13 +73,6 @@ class TestContent extends ConsoleContent {
     this.methods.push('onAfterAttach');
   }
 
-  protected onEdgeRequest(editor: CodeEditor.IEditor, location: CodeEditor.EdgeLocation): Promise<void> {
-    return super.onEdgeRequest(editor, location).then(() => {
-      this.methods.push('onEdgeRequest');
-      this.edgeRequested.emit(void 0);
-    });
-  }
-
   protected onTextChange(): void {
     super.onTextChange();
     this.methods.push('onTextChange');
@@ -100,41 +85,21 @@ class TestContent extends ConsoleContent {
 }
 
 
-defineSignal(TestContent.prototype, 'edgeRequested');
+const contentFactory = createConsoleFactory();
 
 
-class TestHistory extends ConsoleHistory {
-  readonly ready: ISignal<this, void>;
+describe('console/widget', () => {
 
-  dispose(): void {
-    super.dispose();
-    clearSignalData(this);
-  }
-
-  protected onHistory(value: KernelMessage.IHistoryReplyMsg): void {
-    super.onHistory(value);
-    this.ready.emit(void 0);
-  }
-}
-
-
-defineSignal(TestHistory.prototype, 'ready');
-
-const renderer = createRenderer();
-const rendermime = defaultRenderMime();
-
-
-describe('console/content', () => {
-
-  describe('ConsoleContent', () => {
+  describe('CodeConsole', () => {
 
     let session: Session.ISession;
-    let widget: TestContent;
+    let widget: TestConsole;
 
     beforeEach(done => {
       Session.startNew({ path: utils.uuid() }).then(newSession => {
         session = newSession;
-        widget = new TestContent({ renderer, rendermime, session });
+        widget = new TestConsole({ contentFactory, rendermime, session,
+                                   mimeTypeService });
         done();
       });
     });
@@ -151,8 +116,8 @@ describe('console/content', () => {
 
       it('should create a new console content widget', () => {
         Widget.attach(widget, document.body);
-        expect(widget).to.be.a(ConsoleContent);
-        expect(widget.node.classList).to.contain('jp-ConsoleContent');
+        expect(widget).to.be.a(CodeConsole);
+        expect(widget.node.classList).to.contain('jp-CodeConsole');
       });
 
     });
@@ -191,15 +156,6 @@ describe('console/content', () => {
 
     });
 
-    describe('#inspectionHandler', () => {
-
-      it('should exist after instantiation', () => {
-        Widget.attach(widget, document.body);
-        expect(widget.inspectionHandler).to.be.an(InspectionHandler);
-      });
-
-    });
-
     describe('#prompt', () => {
 
       it('should be a code cell widget', () => {
@@ -231,12 +187,20 @@ describe('console/content', () => {
 
     });
 
+    describe('#contentFactory', () => {
+
+      it('should be the content factory used by the widget', () => {
+        expect(widget.contentFactory).to.be.a(CodeConsole.ContentFactory);
+      });
+
+    });
+
     describe('#addCell()', () => {
 
       it('should add a code cell to the content widget', () => {
-        let renderer = createCodeCellRenderer();
+        let contentFactory = createCodeCellFactory();
         let model = new CodeCellModel();
-        let cell = new CodeCellWidget({ model, renderer, rendermime });
+        let cell = new CodeCellWidget({ model, contentFactory, rendermime });
         Widget.attach(widget, document.body);
         expect(widget.cells.length).to.be(0);
         widget.addCell(cell);
@@ -251,11 +215,10 @@ describe('console/content', () => {
         let force = true;
         Widget.attach(widget, document.body);
         widget.execute(force).then(() => {
-          expect(widget.content.widgets.length).to.be.greaterThan(1);
-          expect(widget.cells.length).to.be(1);
+          expect(widget.cells.length).to.be.greaterThan(0);
           widget.clear();
-          expect(widget.content.widgets.length).to.be(1);
           expect(widget.cells.length).to.be(0);
+          expect(widget.prompt.model.value.text).to.be('');
           done();
         }).catch(done);
       });
@@ -286,9 +249,9 @@ describe('console/content', () => {
       it('should execute contents of the prompt if forced', done => {
         let force = true;
         Widget.attach(widget, document.body);
-        expect(widget.content.widgets.length).to.be(1);
+        expect(widget.cells.length).to.be(0);
         widget.execute(force).then(() => {
-          expect(widget.content.widgets.length).to.be.greaterThan(1);
+          expect(widget.cells.length).to.be.greaterThan(0);
           done();
         }).catch(done);
       });
@@ -298,9 +261,9 @@ describe('console/content', () => {
         let timeout = 9000;
         Widget.attach(widget, document.body);
         widget.prompt.model.value.text = 'for x in range(5):';
-        expect(widget.content.widgets.length).to.be(1);
+        expect(widget.cells.length).to.be(0);
         widget.execute(force, timeout).then(() => {
-          expect(widget.content.widgets.length).to.be(1);
+          expect(widget.cells.length).to.be(0);
           done();
         }).catch(done);
       });
@@ -312,9 +275,9 @@ describe('console/content', () => {
       it('should add a code cell and execute it', done => {
         let code = 'print("#inject()")';
         Widget.attach(widget, document.body);
-        expect(widget.content.widgets.length).to.be(1);
+        expect(widget.cells.length).to.be(0);
         widget.inject(code).then(() => {
-          expect(widget.content.widgets.length).to.be.greaterThan(1);
+          expect(widget.cells.length).to.be.greaterThan(0);
           done();
         }).catch(done);
       });
@@ -408,38 +371,6 @@ describe('console/content', () => {
 
     });
 
-    describe('#onEdgeRequest()', () => {
-
-      it('should be called upon an editor edge request', done => {
-        let history = new TestHistory({ kernel: session.kernel });
-        let code = 'print("#onEdgeRequest()")';
-        let force = true;
-        history.ready.connect(() => {
-          let local = new TestContent({
-            history, renderer, rendermime, session
-          });
-          local.edgeRequested.connect(() => {
-            expect(local.methods).to.contain('onEdgeRequest');
-            requestAnimationFrame(() => {
-              expect(local.prompt.model.value.text).to.be(code);
-              local.dispose();
-              done();
-            });
-          });
-          Widget.attach(local, document.body);
-          requestAnimationFrame(() => {
-            local.prompt.model.value.text = code;
-            local.execute(force).then(() => {
-              expect(local.prompt.model.value.text).to.not.be(code);
-              expect(local.methods).to.not.contain('onEdgeRequest');
-              local.prompt.editor.edgeRequested.emit('top');
-            }).catch(done);
-          });
-        });
-      });
-
-    });
-
     describe('#onTextChange()', () => {
 
       it('should be called upon an editor text change', () => {
@@ -460,6 +391,107 @@ describe('console/content', () => {
           expect(widget.methods).to.contain('onUpdateRequest');
           done();
         });
+      });
+
+    });
+
+    describe('.ContentFactory', () => {
+
+      describe('#constructor', () => {
+
+        it('should create a new ContentFactory', () => {
+          let factory = new CodeConsole.ContentFactory({ editorFactory });
+          expect(factory).to.be.a(CodeConsole.ContentFactory);
+        });
+
+      });
+
+      describe('#rawCellContentFactory', () => {
+
+        it('should be the raw cell ContentFactory used by the factory', () => {
+          expect(contentFactory.rawCellContentFactory).to.be.a(BaseCellWidget.ContentFactory);
+        });
+
+      });
+
+      describe('#codeCellContentFactory', () => {
+
+        it('should be the code cell ContentFactory used by the factory', () => {
+          expect(contentFactory.codeCellContentFactory).to.be.a(CodeCellWidget.ContentFactory);
+        });
+
+      });
+
+      describe('#createConsoleHistory', () => {
+
+        it('should create a ConsoleHistory', () => {
+          let history = contentFactory.createConsoleHistory({});
+          expect(history).to.be.a(ConsoleHistory);
+        });
+
+      });
+
+      describe('#createForeignHandler', () => {
+
+        it('should create a ForeignHandler', () => {
+          let cellFactory = () => {
+            let model = new CodeCellModel();
+            let rendermime = widget.rendermime;
+            let factory = contentFactory.codeCellContentFactory;
+            let options: CodeCellWidget.IOptions = {
+              model, rendermime, contentFactory: factory
+            };
+            return contentFactory.createForeignCell(options, widget);
+          };
+          let handler = contentFactory.createForeignHandler({
+            kernel: null,
+            parent: widget,
+            cellFactory
+          });
+          expect(handler).to.be.a(ForeignHandler);
+        });
+
+      });
+
+      describe('#createBanner', () => {
+
+        it('should create a banner cell', () => {
+          let model = new RawCellModel();
+          let banner = contentFactory.createBanner({
+            model,
+            contentFactory: contentFactory.rawCellContentFactory
+          }, widget);
+          expect(banner).to.be.a(RawCellWidget);
+        });
+
+      });
+
+      describe('#createPrompt', () => {
+
+        it('should create a prompt cell', () => {
+          let model = new CodeCellModel();
+          let prompt = contentFactory.createPrompt({
+            rendermime: widget.rendermime,
+            model,
+            contentFactory: contentFactory.codeCellContentFactory
+          }, widget);
+          expect(prompt).to.be.a(CodeCellWidget);
+        });
+
+      });
+
+      describe('#createForeignCell', () => {
+
+        it('should create a foreign cell', () => {
+          let model = new CodeCellModel();
+          let prompt = contentFactory.createForeignCell({
+            rendermime: widget.rendermime,
+            model,
+            contentFactory: contentFactory.codeCellContentFactory
+          }, widget);
+          expect(prompt).to.be.a(CodeCellWidget);
+        });
+
       });
 
     });

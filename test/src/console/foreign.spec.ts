@@ -24,7 +24,7 @@ import {
 } from '../../../lib/notebook/cells';
 
 import {
-  createCodeCellRenderer
+  createCodeCellFactory
 } from '../notebook/utils';
 
 import {
@@ -82,13 +82,12 @@ defineSignal(TestHandler.prototype, 'rejected');
 
 
 const rendermime = defaultRenderMime();
-const renderer: ForeignHandler.IRenderer = {
-  createCell: () => {
-    let renderer = createCodeCellRenderer();
-    let model = new CodeCellModel();
-    let cell = new CodeCellWidget({ model, rendermime, renderer });
-    return cell;
-  }
+
+function cellFactory(): CodeCellWidget {
+  let contentFactory = createCodeCellFactory();
+  let model = new CodeCellModel();
+  let cell = new CodeCellWidget({ model, rendermime, contentFactory });
+  return cell;
 };
 const relevantTypes = [
   'execute_input',
@@ -110,7 +109,8 @@ describe('console/foreign', () => {
     describe('#constructor()', () => {
 
       it('should create a new foreign handler', () => {
-        let handler = new TestHandler({ kernel: null, parent: null, renderer });
+        let handler = new TestHandler({ kernel: null, parent: null,
+                                        cellFactory });
         expect(handler).to.be.a(ForeignHandler);
       });
 
@@ -129,7 +129,7 @@ describe('console/foreign', () => {
         Promise.all(sessions).then(([one, two]) => {
           local = one;
           foreign = two;
-          handler = new TestHandler({ kernel: local.kernel, parent, renderer });
+          handler = new TestHandler({ kernel: local.kernel, parent, cellFactory });
           done();
         }).catch(done);
       });
@@ -165,7 +165,7 @@ describe('console/foreign', () => {
     describe('#isDisposed', () => {
 
       it('should indicate whether the handler is disposed', () => {
-        let handler = new TestHandler({ kernel: null, parent: null, renderer });
+        let handler = new TestHandler({ kernel: null, parent: null, cellFactory });
         expect(handler.isDisposed).to.be(false);
         handler.dispose();
         expect(handler.isDisposed).to.be(true);
@@ -176,12 +176,12 @@ describe('console/foreign', () => {
     describe('#kernel', () => {
 
       it('should be set upon instantiation', () => {
-        let handler = new TestHandler({ kernel: null, parent: null, renderer });
+        let handler = new TestHandler({ kernel: null, parent: null, cellFactory });
         expect(handler.kernel).to.be(null);
       });
 
       it('should be resettable', done => {
-        let handler = new TestHandler({ kernel: null, parent: null, renderer });
+        let handler = new TestHandler({ kernel: null, parent: null, cellFactory });
         Session.startNew({ path: utils.uuid() }).then(session => {
           expect(handler.kernel).to.be(null);
           handler.kernel = session.kernel;
@@ -198,7 +198,7 @@ describe('console/foreign', () => {
 
       it('should be set upon instantiation', () => {
         let parent = new TestParent();
-        let handler = new TestHandler({ kernel: null, parent, renderer });
+        let handler = new TestHandler({ kernel: null, parent, cellFactory });
         expect(handler.parent).to.be(parent);
       });
 
@@ -207,14 +207,14 @@ describe('console/foreign', () => {
     describe('#dispose()', () => {
 
       it('should dispose the resources held by the handler', () => {
-        let handler = new TestHandler({ kernel: null, parent: null, renderer });
+        let handler = new TestHandler({ kernel: null, parent: null, cellFactory });
         expect(handler.isDisposed).to.be(false);
         handler.dispose();
         expect(handler.isDisposed).to.be(true);
       });
 
       it('should be safe to call multiple times', () => {
-        let handler = new TestHandler({ kernel: null, parent: null, renderer });
+        let handler = new TestHandler({ kernel: null, parent: null, cellFactory });
         expect(handler.isDisposed).to.be(false);
         handler.dispose();
         handler.dispose();
@@ -236,7 +236,7 @@ describe('console/foreign', () => {
         Promise.all(sessions).then(([one, two]) => {
           local = one;
           foreign = two;
-          handler = new TestHandler({ kernel: local.kernel, parent, renderer });
+          handler = new TestHandler({ kernel: local.kernel, parent, cellFactory });
           done();
         }).catch(done);
       });

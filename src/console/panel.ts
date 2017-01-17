@@ -6,7 +6,7 @@ import {
 } from 'phosphor/lib/core/token';
 
 import {
-  Session
+  Session, Kernel
 } from '@jupyterlab/services';
 
 import {
@@ -18,12 +18,36 @@ import {
 } from 'phosphor/lib/ui/panel';
 
 import {
+  Widget
+} from 'phosphor/lib/ui/widget';
+
+import {
+  IEditorMimeTypeService, CodeEditor
+} from '../codeeditor';
+
+import {
+  CellCompleterHandler, CompleterModel, CompleterWidget
+} from '../completer';
+
+import {
+  InspectionHandler
+} from '../inspector';
+
+import {
+  BaseCellWidget, CodeCellWidget
+} from '../notebook/cells';
+
+import {
+  OutputAreaWidget
+} from '../notebook/output-area';
+
+import {
   IRenderMime
 } from '../rendermime';
 
 import {
-  ConsoleContent
-} from './content';
+  CodeConsole
+} from './widget';
 
 
 /**
@@ -43,19 +67,52 @@ class ConsolePanel extends Panel {
   constructor(options: ConsolePanel.IOptions) {
     super();
     this.addClass(PANEL_CLASS);
-    this._content = options.content;
+    let factory = options.contentFactory;
+    let { rendermime, session, mimeTypeService } = options;
+    let contentFactory = factory.consoleContentFactory;
+    let consoleOpts = { rendermime, session, mimeTypeService, contentFactory };
+    this.console = factory.createConsole(consoleOpts);
+    this.addWidget(this.console);
 
-    this.addWidget(this._content);
+    // Set up the inspection handler.
+    this.inspectionHandler = factory.createInspectionHandler({
+      kernel: options.session.kernel,
+      rendermime: this.console.rendermime
+    });
+
+    // Instantiate the completer.
+    this._completer = factory.createCompleter({ model: new CompleterModel() });
+
+    // Set the completer widget's anchor node to peg its position.
+    this._completer.anchor = this.node;
+    Widget.attach(this._completer, document.body);
+
+    // Instantiate the completer handler.
+    this._completerHandler = factory.createCompleterHandler({
+      completer: this._completer,
+      kernel: options.session.kernel
+    });
+
+    // Connect to change events.
+    this.console.promptCreated.connect(this._onPromptCreated, this);
+    options.session.kernelChanged.connect(this._onKernelChanged, this);
   }
 
   /**
    * The console widget used by the panel.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
-  get content(): ConsoleContent {
-    return this._content;
+  readonly console: CodeConsole;
+
+  /**
+   * The inspection handler used by the console.
+   */
+  readonly inspectionHandler: InspectionHandler;
+
+  /**
+   * Test whether the widget is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._completer == null;
   }
 
   /**
@@ -65,11 +122,13 @@ class ConsolePanel extends Panel {
     if (this.isDisposed) {
       return;
     }
-
-    // Dispose console widget.
-    this._content.dispose();
-    this._content = null;
-
+    let completer = this._completer;
+    this._completer = null;
+    completer.dispose();
+    this.console.dispose();
+    this._completerHandler.dispose();
+    this._completerHandler = null;
+    this.inspectionHandler.dispose();
     super.dispose();
   }
 
@@ -77,7 +136,7 @@ class ConsolePanel extends Panel {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this.content.prompt.editor.focus();
+    this.console.prompt.editor.focus();
   }
 
   /**
@@ -88,7 +147,28 @@ class ConsolePanel extends Panel {
     this.dispose();
   }
 
-  private _content: ConsoleContent = null;
+  /**
+   * Handle the creation of a new prompt.
+   */
+  private _onPromptCreated(sender: CodeConsole, prompt: CodeCellWidget): void {
+    this._completer.reset();
+
+    // Associate the new prompt with the completer and inspection handlers.
+    this._completerHandler.activeCell = prompt;
+    this.inspectionHandler.activeCell = prompt;
+  }
+
+  /**
+   * Handle a change to the kernel.
+   */
+  private _onKernelChanged(sender: Session.ISession, kernel: Kernel.IKernel): void {
+    this._completerHandler.kernel = kernel;
+    this.inspectionHandler.kernel = kernel;
+  }
+
+  private _completer: CompleterWidget = null;
+  private _completerHandler: CellCompleterHandler = null;
+
 }
 
 
@@ -103,55 +183,166 @@ namespace ConsolePanel {
   export
   interface IOptions {
     /**
-     * The console content instance to display in the console panel.
+     * The rendermime instance used by the panel.
      */
-    content: ConsoleContent;
+    rendermime: IRenderMime;
+
+    /**
+     * The content factory for the panel.
+     */
+    contentFactory: IContentFactory;
+
+    /**
+     * The session for the console widget.
+     */
+    session: Session.ISession;
+
+    /**
+     * The service used to look up mime types.
+     */
+    mimeTypeService: IEditorMimeTypeService;
   }
+
   /**
    * The console panel renderer.
    */
   export
-  interface IRenderer {
+  interface IContentFactory {
+    /**
+     * The editor factory used by the content factory.
+     */
+    readonly editorFactory: CodeEditor.Factory;
+
+    /**
+     * The factory for code console content.
+     */
+    readonly consoleContentFactory: CodeConsole.IContentFactory;
+
     /**
      * Create a new console panel.
      */
-    createConsole(rendermime: IRenderMime, session: Session.ISession): ConsolePanel;
+    createConsole(options: CodeConsole.IOptions): CodeConsole;
+
+    /**
+     * The inspection handler for a console widget.
+     */
+    createInspectionHandler(options: InspectionHandler.IOptions): InspectionHandler;
+
+    /**
+     * The completer widget for a console widget.
+     */
+    createCompleter(options: CompleterWidget.IOptions): CompleterWidget;
+
+    /**
+     * The completer handler for a console widget.
+     */
+    createCompleterHandler(options: CellCompleterHandler.IOptions): CellCompleterHandler;
   }
+
   /**
-   * Default implementation of `IRenderer`.
+   * Default implementation of `IContentFactory`.
    */
   export
-  class Renderer implements IRenderer {
-
+  class ContentFactory implements IContentFactory {
     /**
-     * The console content renderer.
+     * Create a new content factory.
      */
-    readonly contentRenderer: ConsoleContent.IRenderer;
-
-    /**
-     * Create a new renderer.
-     */
-    constructor(options: ConsoleContent.Renderer.IOptions) {
-      this.contentRenderer = new ConsoleContent.Renderer(options);
+    constructor(options: ContentFactory.IOptions) {
+      this.editorFactory = options.editorFactory;
+      this.consoleContentFactory = (options.consoleContentFactory ||
+        new CodeConsole.ContentFactory({
+          editorFactory: this.editorFactory,
+          outputAreaContentFactory: options.outputAreaContentFactory,
+          codeCellContentFactory: options.codeCellContentFactory,
+          rawCellContentFactory: options.rawCellContentFactory
+        })
+      );
     }
+
+    /**
+     * The editor factory used by the content factory.
+     */
+    readonly editorFactory: CodeEditor.Factory;
+
+    /**
+     * The factory for code console content.
+     */
+    readonly consoleContentFactory: CodeConsole.IContentFactory;
 
     /**
      * Create a new console panel.
      */
-    createConsole(rendermime: IRenderMime, session: Session.ISession): ConsolePanel {
-      const content = new ConsoleContent({
-        rendermime, session,
-        renderer: this.contentRenderer
-      });
-      return new ConsolePanel({content});
+    createConsole(options: CodeConsole.IOptions): CodeConsole {
+      return new CodeConsole(options);
     }
 
+    /**
+     * The inspection handler for a console widget.
+     */
+    createInspectionHandler(options: InspectionHandler.IOptions): InspectionHandler {
+      return new InspectionHandler(options);
+    }
+
+    /**
+     * The completer widget for a console widget.
+     */
+    createCompleter(options: CompleterWidget.IOptions): CompleterWidget {
+      return new CompleterWidget(options);
+    }
+
+    /**
+     * The completer handler for a console widget.
+     */
+   createCompleterHandler(options: CellCompleterHandler.IOptions): CellCompleterHandler {
+      return new CellCompleterHandler(options);
+   }
   }
+
+  /**
+   * The namespace for `ContentFactory`.
+   */
+  export
+  namespace ContentFactory {
+    /**
+     * An initialization options for a console panel factory.
+     */
+    export
+    interface IOptions {
+      /**
+       * The editor factory.  This will be used to create a
+       * consoleContentFactory if none is given.
+       */
+      editorFactory: CodeEditor.Factory;
+
+      /**
+       * The factory for output area content.
+       */
+      outputAreaContentFactory?: OutputAreaWidget.IContentFactory;
+
+      /**
+       * The factory for code cell widget content.  If given, this will
+       * take precedence over the `outputAreaContentFactory`.
+       */
+      codeCellContentFactory?: CodeCellWidget.IContentFactory;
+
+      /**
+       * The factory for raw cell widget content.
+       */
+      rawCellContentFactory?: BaseCellWidget.IContentFactory;
+
+      /**
+       * The factory for console widget content.  If given, this will
+       * take precedence over the output area and cell factories.
+       */
+      consoleContentFactory?: CodeConsole.IContentFactory;
+    }
+  }
+
   /* tslint:disable */
   /**
    * The console renderer token.
    */
   export
-  const IRenderer = new Token<IRenderer>('jupyter.services.console.renderer');
+  const IContentFactory = new Token<IContentFactory>('jupyter.services.console.content-factory');
   /* tslint:enable */
 }

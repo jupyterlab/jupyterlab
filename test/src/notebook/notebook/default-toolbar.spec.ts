@@ -12,10 +12,6 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  MimeData
-} from 'phosphor/lib/core/mimedata';
-
-import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
@@ -55,19 +51,13 @@ import {
 } from '../../../../lib/toolbar/kernel';
 
 import {
-  createNotebookContext, defaultRenderMime
+  createNotebookContext
 } from '../../utils';
 
 import {
-  DEFAULT_CONTENT, createNotebookPanelRenderer
+  DEFAULT_CONTENT, createNotebookPanelFactory, rendermime, clipboard,
+  mimeTypeService
 } from '../utils';
-
-
-/**
- * Default data.
- */
-const rendermime = defaultRenderMime();
-const clipboard = new MimeData();
 
 
 function startKernel(context: DocumentRegistry.IContext<INotebookModel>): Promise<Kernel.IKernel> {
@@ -98,10 +88,11 @@ describe('notebook/notebook/default-toolbar', () => {
   describe('ToolbarItems', () => {
 
     let panel: NotebookPanel;
-    const renderer = createNotebookPanelRenderer();
+    const contentFactory = createNotebookPanelFactory();
 
     beforeEach(() => {
-      panel = new NotebookPanel({ rendermime, clipboard, renderer });
+      panel = new NotebookPanel({ rendermime, clipboard, contentFactory,
+                                  mimeTypeService });
       context.model.fromJSON(DEFAULT_CONTENT);
       panel.context = context;
     });
@@ -135,8 +126,8 @@ describe('notebook/notebook/default-toolbar', () => {
         let button = ToolbarItems.createInsertButton(panel);
         Widget.attach(button, document.body);
         button.node.click();
-        expect(panel.content.activeCellIndex).to.be(1);
-        expect(panel.content.activeCell).to.be.a(CodeCellWidget);
+        expect(panel.notebook.activeCellIndex).to.be(1);
+        expect(panel.notebook.activeCell).to.be.a(CodeCellWidget);
         button.dispose();
       });
 
@@ -151,10 +142,10 @@ describe('notebook/notebook/default-toolbar', () => {
 
       it('should cut when clicked', () => {
         let button = ToolbarItems.createCutButton(panel);
-        let count = panel.content.widgets.length;
+        let count = panel.notebook.widgets.length;
         Widget.attach(button, document.body);
         button.node.click();
-        expect(panel.content.widgets.length).to.be(count - 1);
+        expect(panel.notebook.widgets.length).to.be(count - 1);
         expect(clipboard.hasData(JUPYTER_CELL_MIME)).to.be(true);
         button.dispose();
       });
@@ -170,10 +161,10 @@ describe('notebook/notebook/default-toolbar', () => {
 
       it('should copy when clicked', () => {
         let button = ToolbarItems.createCopyButton(panel);
-        let count = panel.content.widgets.length;
+        let count = panel.notebook.widgets.length;
         Widget.attach(button, document.body);
         button.node.click();
-        expect(panel.content.widgets.length).to.be(count);
+        expect(panel.notebook.widgets.length).to.be(count);
         expect(clipboard.hasData(JUPYTER_CELL_MIME)).to.be(true);
         button.dispose();
       });
@@ -189,12 +180,12 @@ describe('notebook/notebook/default-toolbar', () => {
 
       it('should paste when clicked', (done) => {
         let button = ToolbarItems.createPasteButton(panel);
-        let count = panel.content.widgets.length;
+        let count = panel.notebook.widgets.length;
         Widget.attach(button, document.body);
-        NotebookActions.copy(panel.content, clipboard);
+        NotebookActions.copy(panel.notebook, clipboard);
         button.node.click();
         requestAnimationFrame(() => {
-          expect(panel.content.widgets.length).to.be(count + 1);
+          expect(panel.notebook.widgets.length).to.be(count + 1);
           button.dispose();
           done();
         });
@@ -211,7 +202,7 @@ describe('notebook/notebook/default-toolbar', () => {
 
       it('should run and advance when clicked', (done) => {
         let button = ToolbarItems.createRunButton(panel);
-        let widget = panel.content;
+        let widget = panel.notebook;
         let next = widget.widgets.at(1) as MarkdownCellWidget;
         widget.select(next);
         let cell = widget.activeCell as CodeCellWidget;
@@ -261,7 +252,7 @@ describe('notebook/notebook/default-toolbar', () => {
         let item = ToolbarItems.createCellTypeItem(panel);
         let node = item.node.getElementsByTagName('select')[0] as HTMLSelectElement;
         expect(node.value).to.be('code');
-        panel.content.activeCellIndex++;
+        panel.notebook.activeCellIndex++;
         expect(node.value).to.be('markdown');
       });
 
@@ -269,7 +260,7 @@ describe('notebook/notebook/default-toolbar', () => {
         let item = ToolbarItems.createCellTypeItem(panel);
         let node = item.node.getElementsByTagName('select')[0] as HTMLSelectElement;
         expect(node.value).to.be('code');
-        panel.content.select(panel.content.widgets.at(1));
+        panel.notebook.select(panel.notebook.widgets.at(1));
         expect(node.value).to.be('-');
       });
 
@@ -279,7 +270,7 @@ describe('notebook/notebook/default-toolbar', () => {
         expect(node.value).to.be('code');
         let cell = panel.model.factory.createCodeCell();
         panel.model.cells.insert(1, cell);
-        panel.content.select(panel.content.widgets.at(1));
+        panel.notebook.select(panel.notebook.widgets.at(1));
         expect(node.value).to.be('code');
       });
 
@@ -288,7 +279,7 @@ describe('notebook/notebook/default-toolbar', () => {
         context.model.fromJSON(DEFAULT_CONTENT);
         context.startDefaultKernel();
         panel.context = null;
-        panel.content.activeCellIndex++;
+        panel.notebook.activeCellIndex++;
         let node = item.node.getElementsByTagName('select')[0];
         expect((node as HTMLSelectElement).value).to.be('markdown');
       });

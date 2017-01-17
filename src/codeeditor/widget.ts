@@ -24,7 +24,14 @@ class CodeEditorWidget extends Widget {
    */
   constructor(options: CodeEditorWidget.IOptions) {
     super();
-    this._editor = options.factory({ host: this.node, model: options.model });
+    this._editor = options.factory({
+      host: this.node,
+      model: options.model,
+      uuid: options.uuid,
+      wordWrap: options.wordWrap,
+      readOnly: options.readOnly,
+      selectionStyle: options.selectionStyle
+    });
   }
 
   /**
@@ -175,5 +182,30 @@ namespace CodeEditorWidget {
      * The model used to initialize the code editor.
      */
     model: CodeEditor.IModel;
+
+    /**
+     * The desired uuid for the editor.
+     */
+    uuid?: string;
+
+    /**
+     * Whether line numbers should be displayed. Defaults to `false`.
+     */
+    lineNumbers?: boolean;
+
+    /**
+     * Set to false for horizontal scrolling. Defaults to `true`.
+     */
+    wordWrap?: boolean;
+
+    /**
+     * Whether the editor is read-only. Defaults to `false`.
+     */
+    readOnly?: boolean;
+
+   /**
+    * The default selection style for the editor.
+    */
+    selectionStyle?: CodeEditor.ISelectionStyle;
   }
 }

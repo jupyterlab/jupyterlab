@@ -16,19 +16,19 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  ConsoleContent
-} from '../../../lib/console/content';
+  CellCompleterHandler, CompleterWidget
+} from '../../../lib/completer';
 
 import {
-  ConsolePanel
-} from '../../../lib/console/panel';
+  CodeConsole, ConsolePanel
+} from '../../../lib/console';
 
 import {
-  defaultRenderMime
-} from '../utils';
+  InspectionHandler
+} from '../../../lib/inspector';
 
 import {
-  createRenderer
+  createConsolePanelFactory, rendermime, mimeTypeService, editorFactory
 } from './utils';
 
 
@@ -48,8 +48,7 @@ class TestPanel extends ConsolePanel {
 }
 
 
-const renderer = createRenderer();
-const rendermime = defaultRenderMime();
+const contentFactory = createConsolePanelFactory();
 
 
 describe('console/panel', () => {
@@ -60,8 +59,8 @@ describe('console/panel', () => {
   beforeEach(done => {
     Session.startNew({ path: utils.uuid() }).then(newSession => {
       session = newSession;
-      const content = new ConsoleContent({ renderer, rendermime, session });
-      panel = new TestPanel({ content });
+      panel = new TestPanel({ contentFactory, rendermime, session,
+                              mimeTypeService });
       done();
     });
   });
@@ -85,10 +84,19 @@ describe('console/panel', () => {
 
     });
 
-    describe('#content', () => {
+    describe('#console', () => {
 
-      it('should be a console content widget created at instantiation', () => {
-        expect(panel.content).to.be.a(ConsoleContent);
+      it('should be a code console widget created at instantiation', () => {
+        expect(panel.console).to.be.a(CodeConsole);
+      });
+
+    });
+
+    describe('#inspectionHandler', () => {
+
+      it('should exist after instantiation', () => {
+        Widget.attach(panel, document.body);
+        expect(panel.inspectionHandler).to.be.an(InspectionHandler);
       });
 
     });
@@ -96,9 +104,10 @@ describe('console/panel', () => {
     describe('#dispose()', () => {
 
       it('should dispose of the resources held by the panel', () => {
-        expect(panel.content).to.be.ok();
         panel.dispose();
-        expect(panel.content).to.not.be.ok();
+        expect(panel.isDisposed).to.be(true);
+        panel.dispose();
+        expect(panel.isDisposed).to.be(true);
       });
 
     });
@@ -112,7 +121,7 @@ describe('console/panel', () => {
           panel.activate();
           requestAnimationFrame(() => {
             expect(panel.methods).to.contain('onActivateRequest');
-            expect(panel.content.prompt.editor.hasFocus()).to.be(true);
+            expect(panel.console.prompt.editor.hasFocus()).to.be(true);
             done();
           });
         });
@@ -137,6 +146,70 @@ describe('console/panel', () => {
       });
 
     });
+
+    describe('.ContentFactory', () => {
+
+      describe('#constructor', () => {
+
+        it('should create a new code console factory', () => {
+          let factory = new ConsolePanel.ContentFactory({ editorFactory });
+          expect(factory).to.be.a(ConsolePanel.ContentFactory);
+        });
+
+      });
+
+      describe('#consoleContentFactory', () => {
+
+        it('should be the console content factory used by the panel factory', () => {
+          expect(contentFactory.consoleContentFactory).to.be.a(CodeConsole.ContentFactory);
+        });
+
+      });
+
+      describe('#createConsole()', () => {
+
+        it('should create a notebook widget', () => {
+          let options = {
+            contentFactory: contentFactory.consoleContentFactory,
+            rendermime,
+            mimeTypeService,
+            session
+          };
+          expect(contentFactory.createConsole(options)).to.be.a(CodeConsole);
+        });
+
+      });
+
+      describe('#createInspectionHandler()', () => {
+
+        it('should create an inspection handler', () => {
+          let inspector = contentFactory.createInspectionHandler({ rendermime });
+          expect(inspector).to.be.an(InspectionHandler);
+        });
+
+      });
+
+
+      describe('#createCompleter()', () => {
+
+        it('should create a completer widget', () => {
+          expect(contentFactory.createCompleter({})).to.be.a(CompleterWidget);
+        });
+
+      });
+
+      describe('#createCompleterHandler()', () => {
+
+        it('should create a completer handler', () => {
+          let options = { completer:  new CompleterWidget({}) };
+          let handler = contentFactory.createCompleterHandler(options);
+          expect(handler).to.be.a(CellCompleterHandler);
+        });
+
+      });
+
+    });
+
 
   });
 

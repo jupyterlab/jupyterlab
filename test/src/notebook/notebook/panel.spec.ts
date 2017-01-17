@@ -8,10 +8,6 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  MimeData
-} from 'phosphor/lib/core/mimedata';
-
-import {
   IChangedArgs
 } from '../../../../lib/common/interfaces';
 
@@ -20,8 +16,12 @@ import {
 } from '../../../../lib/docregistry';
 
 import {
-  CompleterWidget
+  CompleterWidget, CellCompleterHandler
 } from '../../../../lib/completer';
+
+import {
+  InspectionHandler
+} from '../../../../lib/inspector';
 
 import {
   INotebookModel
@@ -40,20 +40,20 @@ import {
 } from '../../../../lib/notebook/notebook/widget';
 
 import {
-  createNotebookContext, defaultRenderMime
+  createNotebookContext
 } from '../../utils';
 
 import {
-  DEFAULT_CONTENT, createNotebookPanelRenderer
+  DEFAULT_CONTENT, createNotebookPanelFactory, rendermime, clipboard,
+  mimeTypeService, createNotebookFactory, editorFactory
 } from '../utils';
 
 
 /**
  * Default data.
  */
-const rendermime = defaultRenderMime();
-const clipboard = new MimeData();
-const renderer = createNotebookPanelRenderer();
+const contentFactory = createNotebookPanelFactory();
+const options = { rendermime, clipboard, mimeTypeService, contentFactory };
 
 
 class LogNotebookPanel extends NotebookPanel {
@@ -78,7 +78,7 @@ class LogNotebookPanel extends NotebookPanel {
 
 
 function createPanel(context: Context<INotebookModel>): LogNotebookPanel {
-  let panel = new LogNotebookPanel({ rendermime, clipboard, renderer });
+  let panel = new LogNotebookPanel(options);
   context.model.fromJSON(DEFAULT_CONTENT);
   panel.context = context;
   return panel;
@@ -112,17 +112,17 @@ describe('notebook/notebook/panel', () => {
     describe('#constructor()', () => {
 
       it('should create a notebook panel', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer});
+        let panel = new NotebookPanel(options);
         expect(panel).to.be.a(NotebookPanel);
       });
 
 
-      it('should accept an optional render', () => {
-        let newRenderer = createNotebookPanelRenderer();
+      it('should accept an optional content factory', () => {
+        let newFactory = createNotebookPanelFactory();
         let panel = new NotebookPanel({
-          rendermime, clipboard, renderer: newRenderer
+          mimeTypeService, rendermime, clipboard, contentFactory: newFactory
         });
-        expect(panel.renderer).to.be(newRenderer);
+        expect(panel.contentFactory).to.be(newFactory);
       });
 
     });
@@ -130,7 +130,7 @@ describe('notebook/notebook/panel', () => {
     describe('#contextChanged', () => {
 
       it('should be emitted when the context on the panel changes', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
+        let panel = new NotebookPanel(options);
         let called = false;
         panel.contextChanged.connect((sender, args) => {
           expect(sender).to.be(panel);
@@ -142,7 +142,7 @@ describe('notebook/notebook/panel', () => {
       });
 
       it('should not be emitted if the context does not change', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
+        let panel = new NotebookPanel(options);
         let called = false;
         panel.context = context;
         panel.contextChanged.connect(() => { called = true; });
@@ -171,7 +171,7 @@ describe('notebook/notebook/panel', () => {
     describe('#toolbar', () => {
 
       it('should be the toolbar used by the widget', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
+        let panel = new NotebookPanel(options);
         expect(panel.toolbar).to.be.a(Toolbar);
       });
 
@@ -180,8 +180,8 @@ describe('notebook/notebook/panel', () => {
     describe('#content', () => {
 
       it('should be the content area used by the widget', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
-        expect(panel.content).to.be.a(Notebook);
+        let panel = new NotebookPanel(options);
+        expect(panel.notebook).to.be.a(Notebook);
       });
 
     });
@@ -204,18 +204,19 @@ describe('notebook/notebook/panel', () => {
     describe('#rendermime', () => {
 
       it('should be the rendermime instance used by the widget', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
+        let panel = new NotebookPanel(options);
         expect(panel.rendermime).to.be(rendermime);
       });
 
     });
 
-    describe('#renderer', () => {
+    describe('#contentFactory', () => {
 
-      it('should be the renderer used by the widget', () => {
-        let r = createNotebookPanelRenderer();
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer: r });
-        expect(panel.renderer).to.be(r);
+      it('should be the contentFactory used by the widget', () => {
+        let r = createNotebookPanelFactory();
+        let panel = new NotebookPanel({
+          mimeTypeService, rendermime, clipboard, contentFactory: r });
+        expect(panel.contentFactory).to.be(r);
       });
 
     });
@@ -223,7 +224,7 @@ describe('notebook/notebook/panel', () => {
     describe('#clipboard', () => {
 
       it('should be the clipboard instance used by the widget', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
+        let panel = new NotebookPanel(options);
         expect(panel.clipboard).to.be(clipboard);
       });
 
@@ -232,11 +233,11 @@ describe('notebook/notebook/panel', () => {
     describe('#model', () => {
 
       it('should be the model for the widget', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
+        let panel = new NotebookPanel(options);
         expect(panel.model).to.be(null);
         panel.context = context;
         expect(panel.model).to.be(context.model);
-        expect(panel.content.model).to.be(context.model);
+        expect(panel.notebook.model).to.be(context.model);
       });
 
     });
@@ -244,18 +245,18 @@ describe('notebook/notebook/panel', () => {
     describe('#context', () => {
 
       it('should get the document context for the widget', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
+        let panel = new NotebookPanel(options);
         expect(panel.context).to.be(null);
       });
 
       it('should set the document context for the widget', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
+        let panel = new NotebookPanel(options);
         panel.context = context;
         expect(panel.context).to.be(context);
       });
 
       it('should emit the `contextChanged` signal', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
+        let panel = new NotebookPanel(options);
         let called = false;
         panel.contextChanged.connect(() => { called = true; });
         panel.context = context;
@@ -264,7 +265,7 @@ describe('notebook/notebook/panel', () => {
 
 
       it('should initialize the model state', (done) => {
-        let panel = new LogNotebookPanel({ rendermime, clipboard, renderer });
+        let panel = new LogNotebookPanel(options);
         let model = context.model;
         model.fromJSON(DEFAULT_CONTENT);
         expect(model.cells.canUndo).to.be(true);
@@ -281,14 +282,14 @@ describe('notebook/notebook/panel', () => {
     describe('#dispose()', () => {
 
       it('should dispose of the resources used by the widget', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
+        let panel = new NotebookPanel(options);
         panel.context = context;
         panel.dispose();
         expect(panel.isDisposed).to.be(true);
       });
 
       it('should be safe to call more than once', () => {
-        let panel = new NotebookPanel({ rendermime, clipboard, renderer });
+        let panel = new NotebookPanel(options);
         panel.dispose();
         panel.dispose();
         expect(panel.isDisposed).to.be(true);
@@ -299,7 +300,7 @@ describe('notebook/notebook/panel', () => {
     describe('#onContextChanged()', () => {
 
       it('should be called when the context changes', () => {
-        let panel = new LogNotebookPanel({ rendermime, clipboard, renderer });
+        let panel = new LogNotebookPanel(options);
         panel.methods = [];
         panel.context = context;
         expect(panel.methods).to.contain('onContextChanged');
@@ -341,7 +342,7 @@ describe('notebook/notebook/panel', () => {
       });
 
       it('should be called when the context changes', () => {
-        let panel = new LogNotebookPanel({ rendermime, clipboard, renderer });
+        let panel = new LogNotebookPanel(options);
         panel.methods = [];
         panel.context = context;
         expect(panel.methods).to.contain('onPathChanged');
@@ -354,12 +355,34 @@ describe('notebook/notebook/panel', () => {
 
     });
 
-    describe('.Renderer', () => {
+    describe('.ContentFactory', () => {
 
-      describe('#createContent()', () => {
+      describe('#constructor', () => {
+
+        it('should create a new ContentFactory', () => {
+          let factory = new NotebookPanel.ContentFactory({ editorFactory });
+          expect(factory).to.be.a(NotebookPanel.ContentFactory);
+        });
+
+      });
+
+      describe('#notebookContentFactory', () => {
+
+        it('should be the content factory for notebook widgets', () => {
+          expect(contentFactory.notebookContentFactory).to.be.a(Notebook.ContentFactory);
+        });
+
+      });
+
+      describe('#createNotebook()', () => {
 
         it('should create a notebook widget', () => {
-          expect(renderer.createContent(rendermime)).to.be.a(Notebook);
+          let options = {
+            contentFactory: contentFactory.notebookContentFactory,
+            rendermime,
+            mimeTypeService
+          };
+          expect(contentFactory.createNotebook(options)).to.be.a(Notebook);
         });
 
       });
@@ -367,15 +390,35 @@ describe('notebook/notebook/panel', () => {
       describe('#createToolbar()', () => {
 
         it('should create a notebook toolbar', () => {
-          expect(renderer.createToolbar()).to.be.a(Toolbar);
+          expect(contentFactory.createToolbar()).to.be.a(Toolbar);
         });
 
       });
 
+      describe('#createInspectionHandler()', () => {
+
+        it('should create an inspection handler', () => {
+          let inspector = contentFactory.createInspectionHandler({ rendermime });
+          expect(inspector).to.be.an(InspectionHandler);
+        });
+
+      });
+
+
       describe('#createCompleter()', () => {
 
         it('should create a completer widget', () => {
-          expect(renderer.createCompleter()).to.be.a(CompleterWidget);
+          expect(contentFactory.createCompleter({})).to.be.a(CompleterWidget);
+        });
+
+      });
+
+      describe('#createCompleterHandler()', () => {
+
+        it('should create a completer handler', () => {
+          let options = { completer:  new CompleterWidget({}) };
+          let handler = contentFactory.createCompleterHandler(options);
+          expect(handler).to.be.a(CellCompleterHandler);
         });
 
       });

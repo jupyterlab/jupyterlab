@@ -129,8 +129,8 @@ function createApp(manager: ServiceManager.IManager): void {
   });
   let mFactory = new NotebookModelFactory();
   let clipboard = new MimeData();
-  let notebookRenderer = new Notebook.Renderer({ editorServices });
-  let renderer = new NotebookPanel.Renderer({ notebookRenderer });
+  let editorFactory = editorServices.factoryService.newInlineEditor;
+  let contentFactory = new NotebookPanel.ContentFactory({ editorFactory });
 
   let wFactory = new NotebookWidgetFactory({
     name: 'Notebook',
@@ -139,7 +139,8 @@ function createApp(manager: ServiceManager.IManager): void {
     defaultFor: ['.ipynb'],
     preferKernel: true,
     canStartKernel: true,
-    rendermime, clipboard, renderer
+    rendermime, clipboard, contentFactory,
+    mimeTypeService: editorServices.mimeTypeService
   });
   docRegistry.addModelFactory(mFactory);
   docRegistry.addWidgetFactory(wFactory);
@@ -182,48 +183,48 @@ function createApp(manager: ServiceManager.IManager): void {
   commands.addCommand(cmdIds.runAndAdvance, {
     label: 'Run and Advance',
     execute: () => {
-      NotebookActions.runAndAdvance(nbWidget.content, nbWidget.context.kernel);
+      NotebookActions.runAndAdvance(nbWidget.notebook, nbWidget.context.kernel);
     }
   });
   commands.addCommand(cmdIds.editMode, {
     label: 'Edit Mode',
-    execute: () => { nbWidget.content.mode = 'edit'; }
+    execute: () => { nbWidget.notebook.mode = 'edit'; }
   });
   commands.addCommand(cmdIds.commandMode, {
     label: 'Command Mode',
-    execute: () => { nbWidget.content.mode = 'command'; }
+    execute: () => { nbWidget.notebook.mode = 'command'; }
   });
   commands.addCommand(cmdIds.selectBelow, {
     label: 'Select Below',
-    execute: () => NotebookActions.selectBelow(nbWidget.content)
+    execute: () => NotebookActions.selectBelow(nbWidget.notebook)
   });
   commands.addCommand(cmdIds.selectAbove, {
     label: 'Select Above',
-    execute: () => NotebookActions.selectAbove(nbWidget.content)
+    execute: () => NotebookActions.selectAbove(nbWidget.notebook)
   });
   commands.addCommand(cmdIds.extendAbove, {
     label: 'Extend Above',
-    execute: () => NotebookActions.extendSelectionAbove(nbWidget.content)
+    execute: () => NotebookActions.extendSelectionAbove(nbWidget.notebook)
   });
   commands.addCommand(cmdIds.extendBelow, {
     label: 'Extend Below',
-    execute: () => NotebookActions.extendSelectionBelow(nbWidget.content)
+    execute: () => NotebookActions.extendSelectionBelow(nbWidget.notebook)
   });
   commands.addCommand(cmdIds.merge, {
     label: 'Merge Cells',
-    execute: () => NotebookActions.mergeCells(nbWidget.content)
+    execute: () => NotebookActions.mergeCells(nbWidget.notebook)
   });
   commands.addCommand(cmdIds.split, {
     label: 'Split Cell',
-    execute: () => NotebookActions.splitCell(nbWidget.content)
+    execute: () => NotebookActions.splitCell(nbWidget.notebook)
   });
   commands.addCommand(cmdIds.undo, {
     label: 'Undo',
-    execute: () => NotebookActions.undo(nbWidget.content)
+    execute: () => NotebookActions.undo(nbWidget.notebook)
   });
   commands.addCommand(cmdIds.redo, {
     label: 'Redo',
-    execute: () => NotebookActions.redo(nbWidget.content)
+    execute: () => NotebookActions.redo(nbWidget.notebook)
   });
 
   let category = 'Notebook Operations';

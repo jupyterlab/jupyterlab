@@ -86,7 +86,7 @@ class CompleterWidget extends Widget {
     super({ node: document.createElement('ul') });
     this._renderer = options.renderer || CompleterWidget.defaultRenderer;
     this.anchor = options.anchor || null;
-    this.model = options.model || null;
+    this.model = options.model;
     this.addClass(COMPLETER_CLASS);
 
     // Completer widgets are hidden until they are populated.

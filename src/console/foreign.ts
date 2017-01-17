@@ -25,7 +25,7 @@ class ForeignHandler implements IDisposable {
    */
   constructor(options: ForeignHandler.IOptions) {
     this.kernel = options.kernel;
-    this._renderer = options.renderer.createCell;
+    this._factory = options.cellFactory;
     this._parent = options.parent;
   }
 
@@ -149,7 +149,7 @@ class ForeignHandler implements IDisposable {
    * Create a new code cell for an input originated from a foreign session.
    */
   private _newCell(parentMsgId: string): CodeCellWidget {
-    let cell = this._renderer();
+    let cell = this._factory();
     this._cells.set(parentMsgId, cell);
     this._parent.addCell(cell);
     return cell;
@@ -160,7 +160,7 @@ class ForeignHandler implements IDisposable {
   private _isDisposed = false;
   private _kernel: Kernel.IKernel = null;
   private _parent: ForeignHandler.IReceiver = null;
-  private _renderer: () => CodeCellWidget = null;
+  private _factory: () => CodeCellWidget = null;
 }
 
 
@@ -185,20 +185,9 @@ namespace ForeignHandler {
     parent: IReceiver;
 
     /**
-     * The renderer for creating cells to inject into the parent.
+     * The cell factory for foreign handlers.
      */
-    renderer: IRenderer;
-  }
-
-  /**
-   * A renderer for foreign handlers.
-   */
-  export
-  interface IRenderer {
-    /**
-     * Create a code cell.
-     */
-    createCell: () => CodeCellWidget;
+    cellFactory: () => CodeCellWidget;
   }
 
   /**

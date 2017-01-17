@@ -257,22 +257,22 @@ const SHORTCUTS = [
   },
   {
     command: 'console:run',
-    selector: '.jp-ConsoleContent-prompt',
+    selector: '.jp-CodeConsole-prompt',
     keys: ['Enter']
   },
   {
     command: 'console:run-forced',
-    selector: '.jp-ConsoleContent-prompt',
+    selector: '.jp-CodeConsole-prompt',
     keys: ['Shift Enter']
   },
   {
     command: 'console:linebreak',
-    selector: '.jp-ConsoleContent-prompt',
+    selector: '.jp-CodeConsole-prompt',
     keys: ['Ctrl Enter']
   },
   {
     command: 'console:toggle-inspectors',
-    selector: '.jp-ConsoleContent-promptt',
+    selector: '.jp-CodeConsole-promptt',
     keys: ['Accel I']
   },
   {
