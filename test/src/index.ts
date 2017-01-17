@@ -79,6 +79,8 @@ import './notebook/tracker.spec';
 
 import './sanitizer/index.spec';
 
+import './statedb/statedb.spec';
+
 import './terminal/terminal.spec';
 
 import './toolbar/toolbar.spec';
