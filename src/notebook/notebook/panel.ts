@@ -50,7 +50,7 @@ import {
 } from '../../rendermime';
 
 import {
-  CompleterModel, CompleterWidget, CellCompleterHandler
+  CompleterModel, CompleterWidget, CompletionHandler
 } from '../../completer';
 
 import {
@@ -124,6 +124,7 @@ class NotebookPanel extends Widget {
       rendermime: this.rendermime
     });
 
+
     // Instantiate the completer.
     this._completer = factory.createCompleter({ model: new CompleterModel() });
 
@@ -135,7 +136,12 @@ class NotebookPanel extends Widget {
     this._completerHandler = factory.createCompleterHandler({
       completer: this._completer
     });
-    this._completerHandler.activeCell = this.notebook.activeCell;
+
+    let activeCell = this.notebook.activeCell;
+    if (activeCell) {
+      this.inspectionHandler.editor = activeCell.editor;
+      this._completerHandler.editor = activeCell.editor;
+    }
   }
 
   /**
@@ -374,12 +380,12 @@ class NotebookPanel extends Widget {
    * Handle a change to the active cell.
    */
   private _onActiveCellChanged(sender: Notebook, widget: BaseCellWidget) {
-    this.inspectionHandler.activeCell = widget;
-    this._completerHandler.activeCell = widget;
+    this.inspectionHandler.editor = widget.editor;
+    this._completerHandler.editor = widget.editor;
   }
 
   private _completer: CompleterWidget = null;
-  private _completerHandler: CellCompleterHandler = null;
+  private _completerHandler: CompletionHandler = null;
   private _context: DocumentRegistry.IContext<INotebookModel> = null;
 }
 
@@ -463,7 +469,7 @@ export namespace NotebookPanel {
     /**
      * The completer handler for a console widget.
      */
-   createCompleterHandler(options: CellCompleterHandler.IOptions): CellCompleterHandler;
+   createCompleterHandler(options: CompletionHandler.IOptions): CompletionHandler;
   }
 
   /**
@@ -528,8 +534,8 @@ export namespace NotebookPanel {
     /**
      * The completer handler for a console widget.
      */
-   createCompleterHandler(options: CellCompleterHandler.IOptions): CellCompleterHandler {
-      return new CellCompleterHandler(options);
+   createCompleterHandler(options: CompletionHandler.IOptions): CompletionHandler {
+      return new CompletionHandler(options);
    }
   }
 

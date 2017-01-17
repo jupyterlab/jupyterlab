@@ -14,8 +14,8 @@ import {
 } from 'phosphor/lib/core/signaling';
 
 import {
-  BaseCellWidget
-} from '../notebook/cells/widget';
+  CodeEditor
+} from '../codeeditor';
 
 import {
   RenderMime
@@ -55,25 +55,23 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
   readonly inspected: ISignal<InspectionHandler, Inspector.IInspectorUpdate>;
 
   /**
-   * The cell widget used by the inspection handler.
+   * The editor widget used by the inspection handler.
    */
-  get activeCell(): BaseCellWidget {
-    return this._activeCell;
+  get editor(): CodeEditor.IEditor {
+    return this._editor;
   }
-  set activeCell(newValue: BaseCellWidget) {
-    if (newValue === this._activeCell) {
+  set editor(newValue: CodeEditor.IEditor) {
+    if (newValue === this._editor) {
       return;
     }
 
-    if (this._activeCell && !this._activeCell.isDisposed) {
-      const editor = this._activeCell.editor;
-      editor.model.value.changed.disconnect(this.onTextChanged, this);
+    if (this._editor && !this._editor.isDisposed) {
+      this._editor.model.value.changed.disconnect(this.onTextChanged, this);
     }
-    this._activeCell = newValue;
-    if (this._activeCell) {
+    let editor = this._editor = newValue;
+    if (editor) {
       // Clear ephemeral inspectors in preparation for a new editor.
       this.ephemeralCleared.emit(void 0);
-      const editor = this._activeCell.editor;
       editor.model.value.changed.connect(this.onTextChanged, this);
     }
   }
@@ -106,7 +104,7 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
       return;
     }
     this._isDisposed = true;
-    this._activeCell = null;
+    this._editor = null;
     this.disposed.emit(void 0);
     clearSignalData(this);
   }
@@ -123,10 +121,10 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
       type: 'hints'
     };
 
-    let editor = this.activeCell.editor;
+    let editor = this.editor;
     let code = editor.model.value.text;
     let position = editor.getCursorPosition();
-    let offset = editor.getOffsetAt(position)
+    let offset = editor.getOffsetAt(position);
 
     // Clear hints if the new text value is empty or kernel is unavailable.
     if (!code || !this._kernel) {
@@ -170,7 +168,7 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
     });
   }
 
-  private _activeCell: BaseCellWidget = null;
+  private _editor: CodeEditor.IEditor = null;
   private _isDisposed = false;
   private _kernel: Kernel.IKernel = null;
   private _pending = 0;
