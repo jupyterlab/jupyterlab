@@ -21,11 +21,12 @@ initializing the widget.  The use of this interface allows options
 to be later added while preserving backward compatibility.
 
 
-## Renderer Option
+## ContentFactory Option
 
-A common option for a widget is a `IRenderer`, which is used to customize the 
-rendering of content in the widget.  If not given, a `defaultRenderer` instance
-is typically used.  In this way, widgets can be customized
+A common option for a widget is a `IContentFactory`, which is used to 
+customize the child content in the widget.  
+If not given, a `defaultRenderer` instance is used if no arguments are 
+required.  In this way, widgets can be customized
 without subclassing them, and widgets can support customization
 of their nested content.
 
@@ -139,3 +140,10 @@ Dispatching events from the `handleEvent` method makes it easier to trace, log,
 and debug event handling. For more information about the `handleEvent` method,
 see the [EventListener](https://developer.mozilla.org/en-US/docs/Web/API/EventListener)
 API.
+
+
+## Promises
+We use Promises for asynchronous function calls, and a shim
+for browsers that do not support them.  When handling a resolved or 
+rejected Promise, make sure to check for the current state (typically
+by checking an `.isDisposed` property) before proceeding.
