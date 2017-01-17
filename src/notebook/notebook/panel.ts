@@ -129,6 +129,7 @@ class NotebookPanel extends Widget {
 
     // Set the completer widget's anchor node to peg its position.
     this._completer.anchor = this.notebook.node;
+    Widget.attach(this._completer, document.body);
 
     // Instantiate the completer handler.
     this._completerHandler = factory.createCompleterHandler({

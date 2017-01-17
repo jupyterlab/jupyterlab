@@ -18,6 +18,10 @@ import {
 } from 'phosphor/lib/ui/panel';
 
 import {
+  Widget
+} from 'phosphor/lib/ui/widget';
+
+import {
   IEditorMimeTypeService, CodeEditor
 } from '../codeeditor';
 
@@ -81,6 +85,7 @@ class ConsolePanel extends Panel {
 
     // Set the completer widget's anchor node to peg its position.
     this._completer.anchor = this.node;
+    Widget.attach(this._completer, document.body);
 
     // Instantiate the completer handler.
     this._completerHandler = factory.createCompleterHandler({
