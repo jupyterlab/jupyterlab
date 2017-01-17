@@ -405,31 +405,28 @@ describe('console/widget', () => {
     describe('#onEdgeRequest()', () => {
 
       it('should be called upon an editor edge request', done => {
-        let history = new TestHistory({ kernel: session.kernel });
         let code = 'print("#onEdgeRequest()")';
         let force = true;
-        history.ready.connect(() => {
-          let local = new TestConsole({
-            contentFactory, rendermime, session, mimeTypeService
-          });
-          local.edgeRequested.connect(() => {
+        let callback = () => {
+          widget.edgeRequested.connect(() => {
             expect(local.methods).to.contain('onEdgeRequest');
             requestAnimationFrame(() => {
-              expect(local.prompt.model.value.text).to.be(code);
-              local.dispose();
+              expect(widget.prompt.model.value.text).to.be(code);
+              widget._history.ready.disconnect(callback);
               done();
             });
           });
           Widget.attach(local, document.body);
           requestAnimationFrame(() => {
-            local.prompt.model.value.text = code;
-            local.execute(force).then(() => {
-              expect(local.prompt.model.value.text).to.not.be(code);
-              expect(local.methods).to.not.contain('onEdgeRequest');
-              local.prompt.editor.edgeRequested.emit('top');
+            widget.prompt.model.value.text = code;
+            widget.execute(force).then(() => {
+              expect(widget.prompt.model.value.text).to.not.be(code);
+              expect(widget.methods).to.not.contain('onEdgeRequest');
+              widget.prompt.editor.edgeRequested.emit('top');
             }).catch(done);
           });
-        });
+        };
+        widget._history.ready.connect(callback);
       });
 
     });
