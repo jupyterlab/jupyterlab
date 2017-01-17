@@ -86,11 +86,6 @@ class ConsolePanel extends Panel {
     // Set the completer widget's anchor node to peg its position.
     this._completer.anchor = this.node;
 
-    // Because a completer widget may be passed in, check if it is attached.
-    if (!this._completer.isAttached) {
-      Widget.attach(this._completer, document.body);
-    }
-
     // Instantiate the completer handler.
     this._completerHandler = factory.createCompleterHandler({
       completer: this._completer,
@@ -335,7 +330,7 @@ namespace ConsolePanel {
       rawCellContentFactory?: BaseCellWidget.IContentFactory;
 
       /**
-       * The factory for console wiget content.  If given, this will
+       * The factory for console widget content.  If given, this will
        * take precedence over the output area and cell factories.
        */
       consoleContentFactory?: CodeConsole.IContentFactory;
