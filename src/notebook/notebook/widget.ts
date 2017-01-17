@@ -181,6 +181,7 @@ class StaticNotebook extends Widget {
     this.addClass(NB_CLASS);
     this.rendermime = options.rendermime;
     this.layout = new Private.NotebookPanelLayout();
+    this.contentFactory = options.contentFactory;
     this._mimetypeService = options.mimeTypeService;
   }
 
