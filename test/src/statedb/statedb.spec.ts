@@ -32,4 +32,14 @@ describe('StateDB', () => {
 
   });
 
+  describe('#namespace', () => {
+
+    it('should be the read-only internal namespace', () => {
+      let namespace = 'test-namespace';
+      let db = new StateDB({ namespace });
+      expect(db.namespace).to.be(namespace);
+    });
+
+  });
+
 });
