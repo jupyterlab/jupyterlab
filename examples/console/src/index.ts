@@ -94,8 +94,14 @@ function startApp(session: Session.ISession) {
   }
   let sanitizer = defaultSanitizer;
   let rendermime = new RenderMime({ renderers, order, sanitizer });
-  let renderer = new ConsolePanel.Renderer({ editorServices });
-  let consolePanel = renderer.createConsole(rendermime, session);
+  let editorFactory = editorServices.factoryService.newInlineEditor;
+  let contentFactory = new ConsolePanel.ContentFactory({ editorFactory });
+  let consolePanel = new ConsolePanel({
+    rendermime,
+    session,
+    contentFactory,
+    mimeTypeService: editorServices.mimeTypeService
+  });
   consolePanel.title.label = TITLE;
 
   let palette = new CommandPalette({ commands, keymap });
@@ -119,14 +125,14 @@ function startApp(session: Session.ISession) {
   command = 'console:clear';
   commands.addCommand(command, {
     label: 'Clear',
-    execute: () => { consolePanel.content.clear(); }
+    execute: () => { consolePanel.console.clear(); }
   });
   palette.addItem({ command, category });
 
   command = 'console:execute';
   commands.addCommand(command, {
     label: 'Execute Prompt',
-    execute: () => { consolePanel.content.execute(); }
+    execute: () => { consolePanel.console.execute(); }
   });
   palette.addItem({ command, category });
   keymap.addBinding({ command,  selector,  keys: ['Enter'] });
@@ -134,7 +140,7 @@ function startApp(session: Session.ISession) {
   command = 'console:execute-forced';
   commands.addCommand(command, {
     label: 'Execute Cell (forced)',
-    execute: () => { consolePanel.content.execute(true); }
+    execute: () => { consolePanel.console.execute(true); }
   });
   palette.addItem({ command, category });
   keymap.addBinding({ command,  selector,  keys: ['Shift Enter'] });
@@ -142,7 +148,7 @@ function startApp(session: Session.ISession) {
   command = 'console:linebreak';
   commands.addCommand(command, {
     label: 'Insert Line Break',
-    execute: () => { consolePanel.content.insertLinebreak(); }
+    execute: () => { consolePanel.console.insertLinebreak(); }
   });
   palette.addItem({ command, category });
   keymap.addBinding({ command,  selector,  keys: ['Ctrl Enter'] });
