@@ -535,7 +535,10 @@ describe('notebook/cells/widget', () => {
 
         it('should create an output area widget', () => {
           let factory = new CodeCellWidget.ContentFactory({ editorFactory });
-          let output = factory.createOutputArea({ rendermime });
+          let output = factory.createOutputArea({
+            rendermime,
+            contentFactory: OutputAreaWidget.defaultContentFactory
+          });
           expect(output).to.be.an(OutputAreaWidget);
         });
 

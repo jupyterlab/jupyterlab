@@ -45,7 +45,7 @@ import {
 
 import {
   DEFAULT_CONTENT, createNotebookPanelFactory, rendermime, clipboard,
-  mimeTypeService, createNotebookFactory
+  mimeTypeService, createNotebookFactory, editorFactory
 } from '../utils';
 
 
@@ -53,7 +53,6 @@ import {
  * Default data.
  */
 const contentFactory = createNotebookPanelFactory();
-const notebookContentFactory = createNotebookFactory();
 const options = { rendermime, clipboard, mimeTypeService, contentFactory };
 
 
@@ -361,7 +360,7 @@ describe('notebook/notebook/panel', () => {
       describe('#constructor', () => {
 
         it('should create a new ContentFactory', () => {
-          let factory = new NotebookPanel.ContentFactory({ notebookContentFactory });
+          let factory = new NotebookPanel.ContentFactory({ editorFactory });
           expect(factory).to.be.a(NotebookPanel.ContentFactory);
         });
 

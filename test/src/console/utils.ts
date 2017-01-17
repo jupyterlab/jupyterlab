@@ -38,6 +38,5 @@ function createConsoleFactory(): CodeConsole.IContentFactory {
  */
 export
 function createConsolePanelFactory(): ConsolePanel.IContentFactory {
-  const consoleContentFactory = createConsoleFactory();
-  return new ConsolePanel.ContentFactory({ consoleContentFactory });
+  return new ConsolePanel.ContentFactory({ editorFactory });
 }

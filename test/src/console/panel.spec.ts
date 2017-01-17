@@ -28,8 +28,7 @@ import {
 } from '../../../lib/inspector';
 
 import {
-  createConsolePanelFactory, rendermime, mimeTypeService,
-  createConsoleFactory
+  createConsolePanelFactory, rendermime, mimeTypeService, editorFactory
 } from './utils';
 
 
@@ -153,9 +152,7 @@ describe('console/panel', () => {
       describe('#constructor', () => {
 
         it('should create a new code console factory', () => {
-          let factory = new ConsolePanel.ContentFactory({
-            consoleContentFactory: createConsoleFactory()
-          });
+          let factory = new ConsolePanel.ContentFactory({ editorFactory });
           expect(factory).to.be.a(ConsolePanel.ContentFactory);
         });
 

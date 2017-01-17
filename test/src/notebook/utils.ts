@@ -93,8 +93,7 @@ function createNotebookFactory(): Notebook.IContentFactory {
  */
 export
 function createNotebookPanelFactory(): NotebookPanel.IContentFactory {
-  const notebookContentFactory = createNotebookFactory();
-  return new NotebookPanel.ContentFactory({ notebookContentFactory });
+  return new NotebookPanel.ContentFactory({ editorFactory });
 }
 
 

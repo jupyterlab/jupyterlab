@@ -469,18 +469,18 @@ describe('console/widget', () => {
 
       });
 
-      describe('#rawContentFactory', () => {
+      describe('#rawCellContentFactory', () => {
 
         it('should be the raw cell ContentFactory used by the factory', () => {
-          expect(contentFactory.rawContentFactory).to.be.a(BaseCellWidget.ContentFactory);
+          expect(contentFactory.rawCellContentFactory).to.be.a(BaseCellWidget.ContentFactory);
         });
 
       });
 
-      describe('#codeContentFactory', () => {
+      describe('#codeCellContentFactory', () => {
 
         it('should be the code cell ContentFactory used by the factory', () => {
-          expect(contentFactory.codeContentFactory).to.be.a(CodeCellWidget.ContentFactory);
+          expect(contentFactory.codeCellContentFactory).to.be.a(CodeCellWidget.ContentFactory);
         });
 
       });
@@ -500,7 +500,7 @@ describe('console/widget', () => {
           let cellFactory = () => {
             let model = new CodeCellModel();
             let rendermime = widget.rendermime;
-            let factory = contentFactory.codeContentFactory;
+            let factory = contentFactory.codeCellContentFactory;
             let options: CodeCellWidget.IOptions = {
               model, rendermime, contentFactory: factory
             };
@@ -522,7 +522,7 @@ describe('console/widget', () => {
           let model = new RawCellModel();
           let banner = contentFactory.createBanner({
             model,
-            contentFactory: contentFactory.rawContentFactory
+            contentFactory: contentFactory.rawCellContentFactory
           }, widget);
           expect(banner).to.be.a(RawCellWidget);
         });
@@ -536,7 +536,7 @@ describe('console/widget', () => {
           let prompt = contentFactory.createPrompt({
             rendermime: widget.rendermime,
             model,
-            contentFactory: contentFactory.codeContentFactory
+            contentFactory: contentFactory.codeCellContentFactory
           }, widget);
           expect(prompt).to.be.a(CodeCellWidget);
         });
@@ -550,7 +550,7 @@ describe('console/widget', () => {
           let prompt = contentFactory.createForeignCell({
             rendermime: widget.rendermime,
             model,
-            contentFactory: contentFactory.codeContentFactory
+            contentFactory: contentFactory.codeCellContentFactory
           }, widget);
           expect(prompt).to.be.a(CodeCellWidget);
         });
