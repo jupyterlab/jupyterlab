@@ -216,7 +216,7 @@ describe('notebook/notebook/default-toolbar', () => {
           kernel.statusChanged.connect((sender, status) => {
             console.log('\n\n***status changed', status);
             if (status === 'idle' && cell.model.outputs.length > 0) {
-              console.log('\n\n***isrendered', next.rendered)
+              console.log('\n\n***isrendered', next.rendered);
               expect(next.rendered).to.be(true);
               button.dispose();
               done();
