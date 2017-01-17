@@ -101,7 +101,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Construct a CodeMirror editor.
    */
-  constructor(options: CodeEditor.IOptions, config: CodeMirror.EditorConfiguration) {
+  constructor(options: CodeEditor.IOptions, config: CodeMirror.EditorConfiguration={}) {
     let host = this._host = options.host;
     host.classList.add(EDITOR_CLASS);
 
