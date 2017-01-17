@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  KernelMessage, Session, utils
+  Session, utils
 } from '@jupyterlab/services';
 
 import {
@@ -12,16 +12,12 @@ import {
 } from 'phosphor/lib/core/messaging';
 
 import {
-  clearSignalData, defineSignal, ISignal
+  clearSignalData, ISignal
 } from 'phosphor/lib/core/signaling';
 
 import {
   Widget
 } from 'phosphor/lib/ui/widget';
-
-import {
-  CodeEditor
-} from '../../../lib/codeeditor';
 
 import {
   CodeConsole
@@ -77,13 +73,6 @@ class TestConsole extends CodeConsole {
     this.methods.push('onAfterAttach');
   }
 
-  protected onEdgeRequest(editor: CodeEditor.IEditor, location: CodeEditor.EdgeLocation): Promise<void> {
-    return super.onEdgeRequest(editor, location).then(() => {
-      this.methods.push('onEdgeRequest');
-      this.edgeRequested.emit(void 0);
-    });
-  }
-
   protected onTextChange(): void {
     super.onTextChange();
     this.methods.push('onTextChange');
@@ -95,8 +84,6 @@ class TestConsole extends CodeConsole {
   }
 }
 
-
-defineSignal(TestConsole.prototype, 'edgeRequested');
 
 const contentFactory = createConsoleFactory();
 
@@ -380,33 +367,6 @@ describe('console/widget', () => {
         Widget.attach(widget, document.body);
         expect(widget.methods).to.contain('onAfterAttach');
         expect(widget.prompt).to.be.ok();
-      });
-
-    });
-
-    describe('#onEdgeRequest()', () => {
-
-      it('should be called upon an editor edge request', done => {
-        let code = 'print("#onEdgeRequest()")';
-        let force = true;
-        (widget as any)._history.kernel = null;
-        widget.edgeRequested.connect(() => {
-          expect(widget.methods).to.contain('onEdgeRequest');
-          requestAnimationFrame(() => {
-            expect(widget.prompt.model.value.text).to.be(code);
-            (widget as any)._history.kernel = widget.session.kernel;
-            done();
-          });
-        });
-        Widget.attach(widget, document.body);
-        requestAnimationFrame(() => {
-          widget.prompt.model.value.text = code;
-          widget.execute(force).then(() => {
-            expect(widget.prompt.model.value.text).to.not.be(code);
-            expect(widget.methods).to.not.contain('onEdgeRequest');
-            widget.prompt.editor.edgeRequested.emit('top');
-          }).catch(done);
-        });
       });
 
     });
