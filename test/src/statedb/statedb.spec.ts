@@ -48,14 +48,15 @@ describe('StateDB', () => {
       let { localStorage } = window;
       localStorage.clear();
 
-      let namespace = 'test-namespace';
-      let db = new StateDB({ namespace });
+      let db = new StateDB({ namespace: 'test-namespace' });
+      let key = 'foo:bar';
+      let value = { qux: 'quux' };
 
       expect(localStorage.length).to.be(0);
-      db.save('foo', { bar: null })
-        .then(() => { expect(localStorage.length).greaterThan(0); })
+      db.save(key, value)
+        .then(() => { expect(localStorage).to.have.length(1); })
         .then(() => db.clear())
-        .then(() => { expect(localStorage.length).to.be(0); })
+        .then(() => { expect(localStorage).to.be.empty(); })
         .then(done)
         .catch(done);
     });
@@ -64,19 +65,87 @@ describe('StateDB', () => {
       let { localStorage } = window;
       localStorage.clear();
 
-      let n1 = 'test-namespace-1';
-      let n2 = 'test-namespace-3';
-      let db1 = new StateDB({ namespace: n1 });
-      let db2 = new StateDB({ namespace: n2 });
+      let db1 = new StateDB({ namespace: 'test-namespace-1' });
+      let db2 = new StateDB({ namespace: 'test-namespace-2' });
 
       expect(localStorage.length).to.be(0);
       db1.save('foo', { bar: null })
+        .then(() => { expect(localStorage).to.have.length(1); })
         .then(() => db2.save('baz', { qux: null }))
-        .then(() => { expect(localStorage.length).greaterThan(0); })
+        .then(() => { expect(localStorage).to.have.length(2); })
         .then(() => db1.clear())
-        .then(() => { expect(localStorage.length).greaterThan(0); })
+        .then(() => { expect(localStorage).to.have.length(1); })
         .then(() => db2.clear())
-        .then(() => { expect(localStorage.length).to.be(0); })
+        .then(() => { expect(localStorage).to.be.empty(); })
+        .then(done)
+        .catch(done);
+    });
+
+  });
+
+  describe('#fetch()', () => {
+
+    it('should fetch a stored key', done => {
+      let { localStorage } = window;
+      localStorage.clear();
+
+      let db = new StateDB({ namespace: 'test-namespace' });
+      let key = 'foo:bar';
+      let value = { baz: 'qux' };
+
+      expect(localStorage.length).to.be(0);
+      db.save(key, value)
+        .then(() => { expect(localStorage).to.have.length(1); })
+        .then(() => db.fetch(key))
+        .then(fetched => { expect(fetched).to.eql(value); })
+        .then(() => db.clear())
+        .then(done)
+        .catch(done);
+    });
+
+  });
+
+  describe('#fetchNamespace()', () => {
+
+    it('should fetch a stored namespace', done => {
+      let { localStorage } = window;
+      localStorage.clear();
+
+      let db = new StateDB({ namespace: 'test-namespace' });
+      let keys = [
+        'foo:bar',
+        'foo:baz',
+        'foo:qux',
+        'abc:def',
+        'abc:ghi',
+        'abc:jkl'
+      ];
+
+      expect(localStorage.length).to.be(0);
+      let promises = keys.map(key => db.save(key, { value: key }));
+      Promise.all(promises)
+        .then(() => { expect(localStorage).to.have.length(keys.length); })
+        .then(() => db.fetchNamespace('foo'))
+        .then(fetched => {
+          expect(fetched.length).to.be(3);
+
+          let sorted = fetched.sort((a, b) => a.id.localeCompare(b.id));
+
+          expect(sorted[0].id).to.be(keys[0]);
+          expect(sorted[1].id).to.be(keys[1]);
+          expect(sorted[2].id).to.be(keys[2]);
+        })
+        .then(() => db.fetchNamespace('abc'))
+        .then(fetched => {
+          expect(fetched.length).to.be(3);
+
+          let sorted = fetched.sort((a, b) => a.id.localeCompare(b.id));
+
+          expect(sorted[0].id).to.be(keys[3]);
+          expect(sorted[1].id).to.be(keys[4]);
+          expect(sorted[2].id).to.be(keys[5]);
+        })
+        .then(() => db.clear())
         .then(done)
         .catch(done);
     });
