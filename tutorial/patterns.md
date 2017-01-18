@@ -74,7 +74,11 @@ the sender as the first argument, and contain a single second argument
 with the payload.  Signals should generally not be used to trigger the 
 "default" behavior for an action, but to allow others to trigger additional
 behavior.  If a "default" behavior is intended to be provided by another
-object, then a callback should be provided by that object.
+object, then a callback should be provided by that object.  Wherever possible
+as signal connection should be made with the pattern 
+`.connect(this._onFoo, this)`.  Providing the `this` context allows the
+connection to be properly cleared by `clearSignalData(this)`.  Using a
+private method avoids allocating a closure for each connection.
 
 
 ## Models
