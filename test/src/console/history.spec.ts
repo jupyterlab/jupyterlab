@@ -8,6 +8,14 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  CodeEditor
+} from '../../../lib/codeeditor';
+
+import {
+  CodeMirrorEditor
+} from '../../../lib/codemirror';
+
+import {
   ConsoleHistory
 } from '../../../lib/console/history';
 
@@ -31,8 +39,21 @@ const mockHistory: KernelMessage.IHistoryReplyMsg = {
 
 class TestHistory extends ConsoleHistory {
 
+  methods: string[] = [];
+
+  onEdgeRequest(editor: CodeEditor.IEditor, location: CodeEditor.EdgeLocation): void {
+    this.methods.push('onEdgeRequest');
+    super.onEdgeRequest(editor, location);
+  }
+
   onHistory(value: KernelMessage.IHistoryReplyMsg): void {
     super.onHistory(value);
+    this.methods.push('onHistory');
+  }
+
+  onTextChange(): void {
+    super.onTextChange();
+    this.methods.push('onTextChange');
   }
 }
 
@@ -184,6 +205,41 @@ describe('console/history', () => {
           expect(result).to.be(item);
           done();
         });
+      });
+
+    });
+
+    describe('#onTextChange()', () => {
+
+      it('should be called upon an editor text change', () => {
+        let history = new TestHistory();
+        expect(history.methods).to.not.contain('onTextChange');
+        let model = new CodeEditor.Model();
+        let host = document.createElement('div');
+        let editor = new CodeMirrorEditor({ model, host }, {});
+        history.editor = editor;
+        model.value.text = 'foo';
+        expect(history.methods).to.contain('onTextChange');
+      });
+
+    });
+
+    describe('#onEdgeRequest()', () => {
+
+      it('should be called upon an editor edge request', (done) => {
+        let history = new TestHistory();
+        expect(history.methods).to.not.contain('onEdgeRequest');
+        let host = document.createElement('div');
+        let model = new CodeEditor.Model();
+        let editor = new CodeMirrorEditor({ model, host }, {});
+        history.editor = editor;
+        history.push('foo');
+        editor.model.value.changed.connect(() => {
+          expect(editor.model.value.text).to.be('foo');
+          done();
+        });
+        editor.edgeRequested.emit('top');
+        expect(history.methods).to.contain('onEdgeRequest');
       });
 
     });

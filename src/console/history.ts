@@ -17,6 +17,10 @@ import {
   clearSignalData
 } from 'phosphor/lib/core/signaling';
 
+import {
+  CodeEditor
+} from '../codeeditor';
+
 
 /**
  * The definition of a console history manager object.
@@ -27,6 +31,11 @@ interface IConsoleHistory extends IDisposable {
    * The current kernel supplying navigation history.
    */
   kernel: Kernel.IKernel;
+
+  /**
+   * The current editor used by the history widget.
+   */
+  editor: CodeEditor.IEditor;
 
   /**
    * The placeholder text that a history session began with.
@@ -117,6 +126,28 @@ class ConsoleHistory implements IConsoleHistory {
     this._kernel.requestHistory(Private.initialRequest).then(v => {
       this.onHistory(v);
     });
+  }
+
+  /**
+   * The current editor used by the history manager.
+   */
+  get editor(): CodeEditor.IEditor {
+    return this._editor;
+  }
+  set editor(value: CodeEditor.IEditor) {
+    if (this._editor === value) {
+      return;
+    }
+
+    let editor = this._editor;
+    if (editor) {
+      editor.edgeRequested.disconnect(this.onEdgeRequest, this);
+      editor.model.value.changed.disconnect(this.onTextChange, this);
+    }
+
+    editor = this._editor = value;
+    editor.edgeRequested.connect(this.onEdgeRequest, this);
+    editor.model.value.changed.connect(this.onTextChange, this);
   }
 
   /**
@@ -227,11 +258,59 @@ class ConsoleHistory implements IConsoleHistory {
     this._cursor = this._history.length;
   }
 
+  /**
+   * Handle a text change signal from the editor.
+   */
+  protected onTextChange(): void {
+    if (this._setByHistory) {
+      this._setByHistory = false;
+      return;
+    }
+    this.reset();
+  }
+
+  /**
+   * Handle an edge requested signal.
+   */
+  protected onEdgeRequest(editor: CodeEditor.IEditor, location: CodeEditor.EdgeLocation): void {
+    let model = this._editor.model;
+    let source = model.value.text;
+
+    if (location === 'top') {
+      this.back(source).then(value => {
+        if (this.isDisposed || !value) {
+          return;
+        }
+        if (model.value.text === value) {
+          return;
+        }
+        this._setByHistory = true;
+        model.value.text = value;
+        editor.setCursorPosition({ line: 0, column: 0 });
+      });
+    } else {
+      this.forward(source).then(value => {
+        if (this.isDisposed) {
+          return;
+        }
+        let text = value || this.placeholder;
+        if (model.value.text === text) {
+          return;
+        }
+        this._setByHistory = true;
+        model.value.text = text;
+        editor.setCursorPosition(editor.getPositionAt(text.length));
+      });
+    }
+  }
+
   private _cursor = 0;
   private _hasSession = false;
   private _history: Vector<string> = null;
   private _kernel: Kernel.IKernel = null;
   private _placeholder: string = '';
+  private _setByHistory = false;
+  private _editor: CodeEditor.IEditor = null;
 }
 
 

@@ -416,61 +416,13 @@ class CodeConsole extends Widget {
     let editor = prompt.editor;
     editor.addKeydownHandler(this._onEditorKeydown);
 
-    // Hook up history handling.
-    editor.edgeRequested.connect(this.onEdgeRequest, this);
-    editor.model.value.changed.connect(this.onTextChange, this);
+    this._history.editor = editor;
 
     if (this.isAttached) {
       prompt.editor.focus();
       this.update();
     }
     this.promptCreated.emit(prompt);
-  }
-
-  /**
-   * Handle an edge requested signal.
-   */
-  protected onEdgeRequest(editor: CodeEditor.IEditor, location: CodeEditor.EdgeLocation): Promise<void> {
-    let prompt = this.prompt;
-    let model = prompt.model;
-    let source = prompt.model.value.text;
-
-    if (location === 'top') {
-      return this._history.back(source).then(value => {
-        if (this.isDisposed || !value) {
-          return;
-        }
-        if (model.value.text === value) {
-          return;
-        }
-        this._setByHistory = true;
-        model.value.text = value;
-        editor.setCursorPosition({ line: 0, column: 0 });
-      });
-    }
-    return this._history.forward(source).then(value => {
-      if (this.isDisposed) {
-        return;
-      }
-      let text = value || this._history.placeholder;
-      if (model.value.text === text) {
-        return;
-      }
-      this._setByHistory = true;
-      model.value.text = text;
-      editor.setCursorPosition(editor.getPositionAt(text.length));
-    });
-  }
-
-  /**
-   * Handle a text change signal from the editor.
-   */
-  protected onTextChange(): void {
-    if (this._setByHistory) {
-      this._setByHistory = false;
-      return;
-    }
-    this._history.reset();
   }
 
   /**
@@ -636,7 +588,6 @@ class CodeConsole extends Widget {
   private _history: IConsoleHistory = null;
   private _input: Panel = null;
   private _mimetype = 'text/x-ipython';
-  private _setByHistory = false;
 }
 
 
