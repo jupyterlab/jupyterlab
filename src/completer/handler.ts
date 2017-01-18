@@ -14,23 +14,19 @@ import {
 } from '../codeeditor';
 
 import {
-  BaseCellWidget
-} from '../notebook/cells/widget';
-
-import {
   CompleterWidget
 } from './widget';
 
 
 /**
- * A completer handler for cell widgets.
+ * A completion handler for editors.
  */
 export
-class CellCompleterHandler implements IDisposable {
+class CompletionHandler implements IDisposable {
   /**
-   * Construct a new completer handler for a widget.
+   * Construct a new completion handler for a widget.
    */
-  constructor(options: CellCompleterHandler.IOptions) {
+  constructor(options: CompletionHandler.IOptions) {
     this._completer = options.completer;
     this._completer.selected.connect(this.onCompletionSelected, this);
     this._completer.visibilityChanged.connect(this.onVisibilityChanged, this);
@@ -38,7 +34,7 @@ class CellCompleterHandler implements IDisposable {
   }
 
   /**
-   * The kernel used by the completer handler.
+   * The kernel used by the completion handler.
    */
   get kernel(): Kernel.IKernel {
     return this._kernel;
@@ -48,31 +44,31 @@ class CellCompleterHandler implements IDisposable {
   }
 
   /**
-   * The cell widget used by the completer handler.
+   * The editor used by the completion handler.
    */
-  get activeCell(): BaseCellWidget {
-    return this._activeCell;
+  get editor(): CodeEditor.IEditor {
+    return this._editor;
   }
-  set activeCell(newValue: BaseCellWidget) {
-    if (newValue === this._activeCell) {
+  set editor(newValue: CodeEditor.IEditor) {
+    if (newValue === this._editor) {
       return;
     }
 
-    if (this._activeCell && !this._activeCell.isDisposed) {
-      const editor = this._activeCell.editor;
+    let editor = this._editor;
+    if (editor && !editor.isDisposed) {
       editor.model.value.changed.disconnect(this.onTextChanged, this);
       editor.completionRequested.disconnect(this.onCompletionRequested, this);
     }
-    this._activeCell = newValue;
-    if (this._activeCell) {
-      const editor = this._activeCell.editor;
+
+    editor = this._editor = newValue;
+    if (editor) {
       editor.model.value.changed.connect(this.onTextChanged, this);
       editor.completionRequested.connect(this.onCompletionRequested, this);
     }
   }
 
   /**
-   * Get whether the completer handler is disposed.
+   * Get whether the completion handler is disposed.
    *
    * #### Notes
    * This is a read-only property.
@@ -90,7 +86,7 @@ class CellCompleterHandler implements IDisposable {
     }
     this._completer = null;
     this._kernel = null;
-    this._activeCell = null;
+    this._editor = null;
   }
 
   /**
@@ -101,15 +97,15 @@ class CellCompleterHandler implements IDisposable {
       return Promise.reject(new Error('no kernel for completion request'));
     }
 
-    let cell = this.activeCell;
-    if (!cell) {
-      return Promise.reject(new Error('No active cell'));
+    let editor = this.editor;
+    if (!editor) {
+      return Promise.reject(new Error('No active editor'));
     }
 
-    let offset = cell.editor.getOffsetAt(position);
+    let offset = editor.getOffsetAt(position);
 
     let content: KernelMessage.ICompleteRequest = {
-      code: cell.model.value.text,
+      code: editor.model.value.text,
       cursor_pos: offset
     };
     let pending = ++this._pending;
@@ -128,7 +124,7 @@ class CellCompleterHandler implements IDisposable {
    * Get the state of the text editor at the given position.
    */
   protected getState(position: CodeEditor.IPosition): CompleterWidget.ITextState {
-    let editor = this.activeCell.editor;
+    let editor = this.editor;
     let coords = editor.getCoordinate(position) as CompleterWidget.ICoordinate;
     return {
       text: editor.getLine(position.line),
@@ -177,7 +173,7 @@ class CellCompleterHandler implements IDisposable {
     if (!this._completer.model) {
       return;
     }
-    let editor = this.activeCell.editor;
+    let editor = this.editor;
     let position = editor.getCursorPosition();
     let request = this.getState(position);
     this._completer.model.handleTextChange(request);
@@ -195,12 +191,12 @@ class CellCompleterHandler implements IDisposable {
 
 
   /**
-   * Handle a visiblity change signal from a completer widget.
+   * Handle a visiblity change signal from a completion widget.
    */
-  protected onVisibilityChanged(completer: CompleterWidget): void {
-    if (completer.isDisposed || completer.isHidden) {
-      if (this._activeCell) {
-        this._activeCell.activate();
+  protected onVisibilityChanged(completion: CompleterWidget): void {
+    if (completion.isDisposed || completion.isHidden) {
+      if (this._editor) {
+        this._editor.focus();
       }
     }
   }
@@ -209,20 +205,19 @@ class CellCompleterHandler implements IDisposable {
    * Handle a completion selected signal from the completion widget.
    */
   protected onCompletionSelected(widget: CompleterWidget, value: string): void {
-    if (!this._activeCell || !this._completer.model) {
+    if (!this._editor || !this._completer.model) {
       return;
     }
     let patch = this._completer.model.createPatch(value);
     if (!patch) {
       return;
     }
-    let cell = this._activeCell;
-    cell.model.value.text = patch.text;
-    let editor = cell.editor;
+    let editor = this._editor;
+    editor.model.value.text = patch.text;
     editor.setCursorPosition(editor.getPositionAt(patch.position));
   }
 
-  private _activeCell: BaseCellWidget = null;
+  private _editor: CodeEditor.IEditor = null;
   private _completer: CompleterWidget = null;
   private _kernel: Kernel.IKernel = null;
   private _pending = 0;
@@ -230,22 +225,22 @@ class CellCompleterHandler implements IDisposable {
 
 
 /**
- * A namespace for cell completer handler statics.
+ * A namespace for cell completion handler statics.
  */
 export
-namespace CellCompleterHandler {
+namespace CompletionHandler {
   /**
-   * The instantiation options for cell completer handlers.
+   * The instantiation options for cell completion handlers.
    */
   export
   interface IOptions {
     /**
-     * The completer widget the handler will connect to.
+     * The completion widget the handler will connect to.
      */
     completer: CompleterWidget;
 
     /**
-     * The kernel for the completer handler.
+     * The kernel for the completion handler.
      */
     kernel?: Kernel.IKernel;
   }

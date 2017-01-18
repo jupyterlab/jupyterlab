@@ -26,7 +26,7 @@ import {
 } from '../codeeditor';
 
 import {
-  CellCompleterHandler, CompleterModel, CompleterWidget
+  CompletionHandler, CompleterModel, CompleterWidget
 } from '../completer';
 
 import {
@@ -154,8 +154,8 @@ class ConsolePanel extends Panel {
     this._completer.reset();
 
     // Associate the new prompt with the completer and inspection handlers.
-    this._completerHandler.activeCell = prompt;
-    this.inspectionHandler.activeCell = prompt;
+    this._completerHandler.editor = prompt.editor;
+    this.inspectionHandler.editor = prompt.editor;
   }
 
   /**
@@ -167,7 +167,7 @@ class ConsolePanel extends Panel {
   }
 
   private _completer: CompleterWidget = null;
-  private _completerHandler: CellCompleterHandler = null;
+  private _completerHandler: CompletionHandler = null;
 
 }
 
@@ -236,7 +236,7 @@ namespace ConsolePanel {
     /**
      * The completer handler for a console widget.
      */
-    createCompleterHandler(options: CellCompleterHandler.IOptions): CellCompleterHandler;
+    createCompleterHandler(options: CompletionHandler.IOptions): CompletionHandler;
   }
 
   /**
@@ -293,8 +293,8 @@ namespace ConsolePanel {
     /**
      * The completer handler for a console widget.
      */
-   createCompleterHandler(options: CellCompleterHandler.IOptions): CellCompleterHandler {
-      return new CellCompleterHandler(options);
+   createCompleterHandler(options: CompletionHandler.IOptions): CompletionHandler {
+      return new CompletionHandler(options);
    }
   }
 

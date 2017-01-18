@@ -16,7 +16,7 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  CellCompleterHandler, CompleterWidget
+  CompletionHandler, CompleterWidget
 } from '../../../lib/completer';
 
 import {
@@ -203,7 +203,7 @@ describe('console/panel', () => {
         it('should create a completer handler', () => {
           let options = { completer:  new CompleterWidget({}) };
           let handler = contentFactory.createCompleterHandler(options);
-          expect(handler).to.be.a(CellCompleterHandler);
+          expect(handler).to.be.a(CompletionHandler);
         });
 
       });
