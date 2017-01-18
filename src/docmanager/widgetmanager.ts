@@ -246,6 +246,9 @@ class DocumentWidgetManager implements IDisposable {
       return;
     }
     context.listCheckpoints().then(checkpoints => {
+      if (widget.isDisposed) {
+        return;
+      }
       let last = checkpoints[checkpoints.length - 1];
       let checkpoint = last ? dateTime(last.last_modified) : 'None';
       widget.title.caption = (
@@ -267,6 +270,9 @@ class DocumentWidgetManager implements IDisposable {
   protected onClose(widget: Widget): Promise<boolean> {
     // Handle dirty state.
     return this._maybeClose(widget).then(result => {
+      if (widget.isDisposed) {
+        return true;
+      }
       if (result) {
         this._closeGuard = true;
         widget.close();

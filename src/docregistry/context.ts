@@ -177,6 +177,9 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    */
   startDefaultKernel(): Promise<Kernel.IKernel> {
     return this.ready.then(() => {
+      if (this.isDisposed) {
+        return;
+      }
       let model = this.model;
       let name = findKernel(
         model.defaultKernelName,
@@ -209,6 +212,9 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         this._session = null;
         return session.shutdown().then(() => {
           session.dispose();
+          if (this.isDisposed) {
+            return;
+          }
           this.kernelChanged.emit(null);
           return void 0;
         });
@@ -242,6 +248,9 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
 
     let promise = this._manager.contents.save(path, options);
     return promise.then(value => {
+      if (this.isDisposed) {
+        return;
+      }
       model.dirty = false;
       this._updateContentsModel(value);
 
@@ -262,7 +271,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    */
   saveAs(): Promise<void> {
     return Private.getSavePath(this._path).then(newPath => {
-      if (!newPath) {
+      if (this.isDisposed || !newPath) {
         return;
       }
       this._path = newPath;
@@ -274,6 +283,9 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
           kernelName: session.kernel.name
         };
         return this._startSession(options).then(() => {
+          if (this.isDisposed) {
+            return;
+          }
           return this.save();
         });
       }
@@ -293,6 +305,9 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     let path = this._path;
     let model = this._model;
     return this._manager.contents.get(path, opts).then(contents => {
+      if (this.isDisposed) {
+        return;
+      }
       if (contents.format === 'json') {
         model.fromJSON(contents.content);
       } else {
@@ -336,7 +351,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       return contents.restoreCheckpoint(path, checkpointId);
     }
     return this.listCheckpoints().then(checkpoints => {
-      if (!checkpoints.length) {
+      if (this.isDisposed || !checkpoints.length) {
         return;
       }
       checkpointId = checkpoints[checkpoints.length - 1].id;
@@ -398,6 +413,9 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    */
   private _startSession(options: Session.IOptions): Promise<Kernel.IKernel> {
     return this._manager.sessions.startNew(options).then(session => {
+      if (this.isDisposed) {
+        return;
+      }
       if (this._session) {
         this._session.dispose();
       }
@@ -470,10 +488,13 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     this._isPopulated = true;
     // Add a checkpoint if none exists.
     return this.listCheckpoints().then(checkpoints => {
-      if (!checkpoints) {
+      if (!this.isDisposed && !checkpoints) {
         return this.createCheckpoint();
       }
     }).then(() => {
+      if (this.isDisposed) {
+        return;
+      }
       this._isReady = true;
       this._populatedPromise.resolve(void 0);
     });

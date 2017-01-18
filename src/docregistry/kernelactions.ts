@@ -32,7 +32,7 @@ function restartKernel(kernel: Kernel.IKernel, host?: HTMLElement): Promise<bool
     body: 'Do you want to restart the current kernel? All variables will be lost.',
     buttons: [cancelButton, warnButton]
   }).then(result => {
-    if (result.text === 'OK') {
+    if (!kernel.isDisposed && result.text === 'OK') {
       return kernel.restart().then(() => { return true; });
     } else {
       return false;

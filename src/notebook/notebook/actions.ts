@@ -400,6 +400,9 @@ namespace NotebookActions {
       promises.push(Private.runCell(widget, child, kernel));
     });
     return Promise.all(promises).then(results => {
+      if (widget.isDisposed) {
+        return false;
+      }
       // Post an update request.
       widget.update();
       for (let result of results) {
@@ -914,6 +917,9 @@ namespace Private {
     case 'code':
       if (kernel) {
         return (child as CodeCellWidget).execute(kernel).then(reply => {
+          if (child.isDisposed) {
+            return false;
+          }
           if (reply && reply.content.status === 'ok') {
             let content = reply.content as KernelMessage.IExecuteOkReply;
             if (content.payload && content.payload.length) {

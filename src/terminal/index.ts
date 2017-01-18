@@ -85,6 +85,9 @@ class TerminalWidget extends Widget {
       return;
     }
     this._session.ready.then(() => {
+      if (this.isDisposed) {
+        return;
+      }
       this._session.messageReceived.connect(this._onMessage, this);
       this.title.label = `Terminal ${this._session.name}`;
       this._setSessionSize();

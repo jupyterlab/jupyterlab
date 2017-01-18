@@ -376,7 +376,7 @@ class DirListing extends Widget {
         okText: 'DELETE',
         buttons: [cancelButton, deleteButton]
       }).then(result => {
-        if (result.text === 'DELETE') {
+        if (!this.isDisposed && result.text === 'DELETE') {
           return this._delete(names);
         }
       });
@@ -1079,6 +1079,9 @@ class DirListing extends Widget {
   private _selectItemByName(name: string): Promise<void> {
     // Make sure the file is available.
     return this.model.cd('.').then(() => {
+      if (this.isDisposed) {
+        return;
+      }
       let items = this._sortedItems;
       let index = findIndex(items, value => value.name === name);
       this._selectItem(index, false);
@@ -1177,10 +1180,16 @@ class DirListing extends Widget {
       if (newName === original) {
         return original;
       }
+      if (this.isDisposed) {
+        return;
+      }
       return renameFile(this._model, original, newName).catch(error => {
         utils.showErrorMessage('Rename Error', error);
         return original;
       }).then(() => {
+        if (this.isDisposed) {
+          return;
+        }
         this._selectItemByName(newName);
         return newName;
       });
@@ -1234,7 +1243,7 @@ class DirListing extends Widget {
   private _onFileChanged(sender: FileBrowserModel, args: Contents.IChangedArgs) {
     if (args.type === 'new') {
       this._selectItemByName(args.newValue.name).then(() => {
-        if (args.newValue === 'directory') {
+        if (!this.isDisposed && args.newValue === 'directory') {
           this._doRename();
         }
       });

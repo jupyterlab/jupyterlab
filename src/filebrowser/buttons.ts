@@ -515,7 +515,7 @@ namespace Private {
       body: `"${file.name}" already exists, overwrite?`
     };
     return showDialog(options).then(button => {
-      if (button.text !== 'Ok') {
+      if (widget.isDisposed || button.text !== 'Ok') {
         return;
       }
       return widget.model.upload(file, true);
