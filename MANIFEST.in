@@ -1,4 +1,11 @@
 recursive-include jupyterlab/build *
+
 include jupyterlab/lab.html
 include package.json
+include LICENSE
+include CONTRIBUTING.md
+include README.md
+include package.json
+include setupbase.py
+
 prune jupyterlab/tests
