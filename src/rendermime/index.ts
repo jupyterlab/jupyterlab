@@ -359,6 +359,6 @@ namespace RenderMime {
     /**
      * Resolve a url to a correct server path.
      */
-    resolveUrl(url: string): string;
+    resolveUrl(url: string): Promise<string>;
   }
 }

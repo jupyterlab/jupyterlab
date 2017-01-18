@@ -711,8 +711,10 @@ namespace DocumentRegistry {
 
     /**
      * Resolve a url to a correct server path.
+     *
+     * @returns a promise which resolves with the resolved url.
      */
-    resolveUrl(url: string): string;
+    resolveUrl(url: string): Promise<string>;
 
     /**
      * Add a sibling widget to the document manager.
