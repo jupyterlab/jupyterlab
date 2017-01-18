@@ -468,7 +468,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
       return;
     }
     this._isDisposed = true;
-    if(this._parent) {
+    if(this.isLinked) {
       this.unlink();
     }
     Signal.clearData(this);
