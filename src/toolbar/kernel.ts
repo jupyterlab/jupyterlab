@@ -105,29 +105,38 @@ function createRestartButton(kernelOwner: IKernelOwner, host?: HTMLElement): Too
  */
 export
 function createKernelNameItem(kernelOwner: IKernelOwner): Widget {
-  let widget = new Widget();
-  widget.addClass(TOOLBAR_KERNEL_CLASS);
-  updateKernelNameItem(widget, kernelOwner.kernel);
-  kernelOwner.kernelChanged.connect(() => {
-    updateKernelNameItem(widget, kernelOwner.kernel);
-  });
-  return widget;
+  return new KernelName(kernelOwner);
 }
 
 
 /**
- * Update the text of the kernel name item.
+ * A kernel name widget.
  */
-function updateKernelNameItem(widget: Widget, kernel: Kernel.IKernel): void {
-  widget.node.textContent = 'No Kernel!';
-  if (!kernel) {
-    return;
+class KernelName extends Widget {
+  /**
+   * Construct a new kernel name widget.
+   */
+  constructor(kernelOwner: IKernelOwner) {
+    super();
+    this.addClass(TOOLBAR_KERNEL_CLASS);
+    this._onKernelChanged(kernelOwner, kernelOwner.kernel);
+    kernelOwner.kernelChanged.connect(this._onKernelChanged, this);
   }
-  kernel.getSpec().then(spec => {
-    if (!widget.isDisposed) {
-      widget.node.textContent = spec.display_name;
+
+  /**
+   * Update the text of the kernel name item.
+   */
+  _onKernelChanged(sender: IKernelOwner, kernel: Kernel.IKernel): void {
+    this.node.textContent = 'No Kernel!';
+    if (!kernel) {
+      return;
     }
-  });
+    kernel.getSpec().then(spec => {
+      if (!this.isDisposed) {
+        this.node.textContent = spec.display_name;
+      }
+    });
+  }
 }
 
 
@@ -156,22 +165,25 @@ class KernelIndicator extends Widget {
   constructor(kernelOwner: IKernelOwner) {
     super();
     this.addClass(TOOLBAR_INDICATOR_CLASS);
-    if (kernelOwner.kernel) {
-      this._handleStatus(kernelOwner.kernel, kernelOwner.kernel.status);
-      kernelOwner.kernel.statusChanged.connect(this._handleStatus, this);
-    } else {
-      this.addClass(TOOLBAR_BUSY_CLASS);
-      this.node.title = 'No Kernel!';
+    this._onKernelChanged(kernelOwner, kernelOwner.kernel);
+    kernelOwner.kernelChanged.connect(this._onKernelChanged, this);
+  }
+
+  /**
+   * Handle a change in kernel.
+   */
+  private _onKernelChanged(sender: IKernelOwner, kernel: Kernel.IKernel): void {
+    if (this._kernel) {
+      this._kernel.statusChanged.disconnect(this._handleStatus, this);
     }
-    kernelOwner.kernelChanged.connect((c, kernel) => {
-      if (kernel) {
-        this._handleStatus(kernel, kernel.status);
-        kernel.statusChanged.connect(this._handleStatus, this);
-      } else {
-        this.node.title = 'No Kernel!';
-        this.addClass(TOOLBAR_BUSY_CLASS);
-      }
-    });
+    this._kernel = kernel;
+    if (kernel) {
+      this._handleStatus(kernel, kernel.status);
+      kernel.statusChanged.connect(this._handleStatus, this);
+    } else {
+      this.node.title = 'No Kernel!';
+      this.addClass(TOOLBAR_BUSY_CLASS);
+    }
   }
 
   /**
@@ -185,4 +197,6 @@ class KernelIndicator extends Widget {
     let title = 'Kernel ' + status[0].toUpperCase() + status.slice(1);
     this.node.title = title;
   }
+
+  private _kernel: Kernel.IKernel = null;
 }

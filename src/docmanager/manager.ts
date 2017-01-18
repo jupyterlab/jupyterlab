@@ -299,11 +299,16 @@ class DocumentManager implements IDisposable {
     context.ready.then(() => {
       handler.start();
     });
-    context.disposed.connect(() => {
-      this._contexts.remove(context);
-    });
+    context.disposed.connect(this._onContextDisposed, this);
     this._contexts.pushBack(context);
     return context;
+  }
+
+  /**
+   * Handle a context disposal.
+   */
+  private _onContextDisposed(context: Private.IContext): void {
+    this._contexts.remove(context);
   }
 
   /**

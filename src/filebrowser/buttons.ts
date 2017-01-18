@@ -133,10 +133,10 @@ class FileButtons extends Widget {
     this.addClass(FILE_BUTTONS_CLASS);
     this._model = options.model;
 
-    this._buttons.create.onmousedown = this._onCreateButtonPressed;
-    this._buttons.upload.onclick = this._onUploadButtonClicked;
-    this._buttons.refresh.onclick = this._onRefreshButtonClicked;
-    this._input.onchange = this._onInputChanged;
+    this._buttons.create.onmousedown = this._onCreateButtonPressed.bind(this);
+    this._buttons.upload.onclick = this._onUploadButtonClicked.bind(this);
+    this._buttons.refresh.onclick = this._onRefreshButtonClicked.bind(this);
+    this._input.onchange = this._onInputChanged.bind(this);
 
     let node = this.node;
     node.appendChild(this._buttons.create);
@@ -241,7 +241,7 @@ class FileButtons extends Widget {
   /**
    * The 'mousedown' handler for the create button.
    */
-  private _onCreateButtonPressed = (event: MouseEvent) => {
+  private _onCreateButtonPressed(event: MouseEvent) {
     // Do nothing if nothing if it's not a left press.
     if (event.button !== 0) {
       return;
@@ -265,49 +265,58 @@ class FileButtons extends Widget {
     // Setup the `aboutToClose` signal handler. The menu is disposed on an
     // animation frame to allow a mouse press event which closed the
     // menu to run its course. This keeps the button from re-opening.
-    dropdown.aboutToClose.connect(() => {
-      requestAnimationFrame(() => { dropdown.dispose(); });
-    });
+    dropdown.aboutToClose.connect(this._onDropDownAboutToClose, this);
 
     // Setup the `disposed` signal handler. This restores the button
     // to the non-active state and allows a new menu to be opened.
-    dropdown.disposed.connect(() => {
-      button.classList.remove(ACTIVE_CLASS);
-    });
+    dropdown.disposed.connect(this._onDropDownDisposed, this);
 
     // Popup the menu aligned with the bottom of the create button.
     dropdown.open(rect.left, rect.bottom, { forceX: false, forceY: false });
   };
 
+  /**
+   * Handle a dropdwon about to close.
+   */
+  private _onDropDownAboutToClose(sender: Menu): void {
+    requestAnimationFrame(() => { sender.dispose(); });
+  }
+
+  /**
+   * Handle a dropdown disposal.
+   */
+  private _onDropDownDisposed(sender: Menu): void {
+    this._buttons.create.classList.remove(ACTIVE_CLASS);
+  }
 
   /**
    * The 'click' handler for the upload button.
    */
-  private _onUploadButtonClicked = (event: MouseEvent) => {
+  private _onUploadButtonClicked(event: MouseEvent) {
     if (event.button !== 0) {
       return;
     }
     this._input.click();
-  };
+  }
 
   /**
    * The 'click' handler for the refresh button.
    */
-  private _onRefreshButtonClicked = (event: MouseEvent) => {
+  private _onRefreshButtonClicked(event: MouseEvent) {
     if (event.button !== 0) {
       return;
     }
     // Force a refresh of the current directory.
     this._model.cd('.');
-  };
+  }
 
   /**
    * The 'change' handler for the input field.
    */
-  private _onInputChanged = () => {
+  private _onInputChanged(): void {
     let files = Array.prototype.slice.call(this._input.files);
     Private.uploadFiles(this, files as File[]);
-  };
+  }
 
   private _buttons = Private.createButtons();
   private _commands: CommandRegistry = null;

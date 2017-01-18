@@ -54,16 +54,14 @@ class MarkdownWidget extends Widget {
     rendermime.resolver = context;
     this._context = context;
 
-    context.pathChanged.connect((c, path) => {
-      this.title.label = path.split('/').pop();
-    });
+    context.pathChanged.connect(this._onPathChanged, this);
 
     // Throttle the rendering rate of the widget.
     this._monitor = new ActivityMonitor({
       signal: context.model.contentChanged,
       timeout: RENDER_TIMEOUT
     });
-    this._monitor.activityStopped.connect(() => { this.update(); });
+    this._monitor.activityStopped.connect(this.update, this);
   }
 
   /**
@@ -109,6 +107,13 @@ class MarkdownWidget extends Widget {
       layout.widgets.at(0).dispose();
     }
     layout.addWidget(widget);
+  }
+
+  /**
+   * Handle a path change.
+   */
+  private _onPathChanged(): void {
+    this.title.label = this._context.path.split('/').pop();
   }
 
   private _context: DocumentRegistry.Context = null;

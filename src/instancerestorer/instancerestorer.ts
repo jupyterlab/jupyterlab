@@ -262,7 +262,7 @@ class InstanceRestorer implements IInstanceRestorer {
   add(widget: Widget, name: string): void {
     Private.nameProperty.set(widget, name);
     this._widgets.set(name, widget);
-    widget.disposed.connect(() => { this._widgets.delete(name); });
+    widget.disposed.connect(this._onWidgetDisposed, this);
   }
 
   /**
@@ -413,6 +413,14 @@ class InstanceRestorer implements IInstanceRestorer {
           .map(name => internal.has(`${name}`) ? internal.get(`${name}`) : null)
           .filter(widget => !!widget);
     return { collapsed, currentWidget, widgets };
+  }
+
+  /**
+   * Handle a widget disposal.
+   */
+  private _onWidgetDisposed(widget: Widget): void {
+    let name = Private.nameProperty.get(widget);
+    this._widgets.delete(name);
   }
 
   private _first: Promise<any> = null;

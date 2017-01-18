@@ -106,13 +106,11 @@ class DocumentWidgetManager implements IDisposable {
     each(this._registry.widgetExtensions(name), extender => {
       disposables.add(extender.createNew(widget, context));
     });
-    widget.disposed.connect(() => {
-      disposables.dispose();
-    });
+    Private.disposablesProperty.set(widget, disposables);
+    widget.disposed.connect(this._onWidgetDisposed, this);
+
     this.adoptWidget(context, widget);
-    context.fileChanged.connect(() => {
-      this.setCaption(widget);
-    });
+    context.fileChanged.connect(this._onFileChanged, this);
     context.ready.then(() => {
       this.setCaption(widget);
     });
@@ -135,14 +133,7 @@ class DocumentWidgetManager implements IDisposable {
     });
     widget.addClass(DOCUMENT_CLASS);
     widget.title.closable = true;
-    widget.disposed.connect(() => {
-      // Remove the widget.
-      widgets.remove(widget);
-      // Dispose of the context if this is the last widget using it.
-      if (!widgets.length) {
-        context.dispose();
-      }
-    });
+    widget.disposed.connect(this._widgetDisposed, this);
     Private.contextProperty.set(widget, context);
   }
 
@@ -304,6 +295,36 @@ class DocumentWidgetManager implements IDisposable {
     });
   }
 
+  /**
+   * Handle the disposal of a widget.
+   */
+  private _widgetDisposed(widget: Widget): void {
+    let context = Private.contextProperty.get(widget);
+    let widgets = Private.widgetsProperty.get(context);
+     // Remove the widget.
+    widgets.remove(widget);
+    // Dispose of the context if this is the last widget using it.
+    if (!widgets.length) {
+      context.dispose();
+    }
+  }
+
+  /**
+   * Handle the disposal of a widget.
+   */
+  private _onWidgetDisposed(widget: Widget): void {
+    let disposables = Private.disposablesProperty.get(widget);
+    disposables.dispose();
+  }
+
+  /**
+   * Handle a file changed signal for a context.
+   */
+  private _onFileChanged(context: DocumentRegistry.Context): void {
+    let widgets = Private.widgetsProperty.get(context);
+    each(widgets, widget => { this.setCaption(widget); });
+  }
+
   private _closeGuard = false;
   private _registry: DocumentRegistry = null;
 }
@@ -356,5 +377,13 @@ namespace Private {
     create: () => {
       return new Vector<Widget>();
     }
+  });
+
+  /**
+   * A private attached property for a widget's disposables.
+   */
+  export
+  const disposablesProperty = new AttachedProperty<Widget, DisposableSet>({
+    name: 'disposables'
   });
 }
