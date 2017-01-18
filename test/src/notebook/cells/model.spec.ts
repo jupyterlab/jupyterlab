@@ -40,7 +40,7 @@ describe('notebook/cells/model', () => {
     describe('#constructor()', () => {
 
       it('should create a cell model', () => {
-        let model = new CellModel();
+        let model = new CellModel({});
         expect(model).to.be.a(CellModel);
       });
 
@@ -71,7 +71,7 @@ describe('notebook/cells/model', () => {
     describe('#contentChanged', () => {
 
       it('should signal when model content has changed', () => {
-        let model = new CellModel();
+        let model = new CellModel({});
         let called = false;
         model.contentChanged.connect(() => { called = true; });
         expect(called).to.be(false);
@@ -84,7 +84,7 @@ describe('notebook/cells/model', () => {
     describe('#stateChanged', () => {
 
       it('should signal when model state has changed', () => {
-        let model = new CodeCellModel();
+        let model = new CodeCellModel({});
         let called = false;
         let listener = (sender: any, args: IChangedArgs<any>) => {
           expect(args.newValue).to.be(1);
@@ -96,7 +96,7 @@ describe('notebook/cells/model', () => {
       });
 
       it('should not signal when model state has not changed', () => {
-        let model = new CodeCellModel();
+        let model = new CodeCellModel({});
         let called = 0;
         model.stateChanged.connect(() => { called++; });
         expect(called).to.be(0);
@@ -111,7 +111,7 @@ describe('notebook/cells/model', () => {
     describe('#metadataChanged', () => {
 
       it('should signal when model metadata has changed', () => {
-        let model = new TestModel();
+        let model = new TestModel({});
         let listener = (sender: any, args: IChangedArgs<any>) => {
           value = args.newValue;
         };
@@ -123,7 +123,7 @@ describe('notebook/cells/model', () => {
       });
 
       it('should not signal when model metadata has not changed', () => {
-        let model = new TestModel();
+        let model = new TestModel({});
         let called = 0;
         model.metadataChanged.connect(() => { called++; });
         expect(called).to.be(0);
@@ -138,12 +138,12 @@ describe('notebook/cells/model', () => {
     describe('#source', () => {
 
       it('should default to an empty string', () => {
-        let model = new CellModel();
+        let model = new CellModel({});
         expect(model.value.text).to.be.empty();
       });
 
       it('should be settable', () => {
-        let model = new CellModel();
+        let model = new CellModel({});
         expect(model.value.text).to.be.empty();
         model.value.text = 'foo';
         expect(model.value.text).to.be('foo');
@@ -154,12 +154,12 @@ describe('notebook/cells/model', () => {
     describe('#isDisposed', () => {
 
       it('should be false by default', () => {
-        let model = new CellModel();
+        let model = new CellModel({});
         expect(model.isDisposed).to.be(false);
       });
 
       it('should be true after model is disposed', () => {
-        let model = new CellModel();
+        let model = new CellModel({});
         model.dispose();
         expect(model.isDisposed).to.be(true);
       });
@@ -169,7 +169,7 @@ describe('notebook/cells/model', () => {
     describe('#dispose()', () => {
 
       it('should dispose of the resources held by the model', () => {
-        let model = new TestModel();
+        let model = new TestModel({});
 
         model.setCursorData('foo', 'bar');
         expect(model.getMetadata('foo').getValue()).to.be('bar');
@@ -179,7 +179,7 @@ describe('notebook/cells/model', () => {
       });
 
       it('should be safe to call multiple times', () => {
-        let model = new CellModel();
+        let model = new CellModel({});
         model.dispose();
         model.dispose();
         expect(model.isDisposed).to.be(true);
@@ -217,7 +217,7 @@ describe('notebook/cells/model', () => {
     describe('#getMetadata()', () => {
 
       it('should get a metadata cursor for the cell', () => {
-        let model = new CellModel();
+        let model = new CellModel({});
         let c1 = model.getMetadata('foo');
 
         expect(c1.getValue()).to.be(void 0);
@@ -237,7 +237,7 @@ describe('notebook/cells/model', () => {
     describe('#listMetadata()', () => {
 
       it('should get a list of user metadata keys', () => {
-        let model = new CellModel();
+        let model = new CellModel({});
         let cursor = model.getMetadata('foo');
         expect(toArray(model.listMetadata())).to.be.empty();
         cursor.setValue(1);
@@ -253,7 +253,7 @@ describe('notebook/cells/model', () => {
     describe('#type', () => {
 
       it('should be set with type "raw"', () => {
-        let model = new RawCellModel();
+        let model = new RawCellModel({});
         expect(model.type).to.be('raw');
       });
 
@@ -266,7 +266,7 @@ describe('notebook/cells/model', () => {
     describe('#type', () => {
 
       it('should be set with type "markdown"', () => {
-        let model = new MarkdownCellModel();
+        let model = new MarkdownCellModel({});
         expect(model.type).to.be('markdown');
       });
 
@@ -279,7 +279,7 @@ describe('notebook/cells/model', () => {
     describe('#constructor()', () => {
 
       it('should create a code cell model', () => {
-        let model = new CodeCellModel();
+        let model = new CodeCellModel({});
         expect(model).to.be.a(CodeCellModel);
       });
 
@@ -308,7 +308,7 @@ describe('notebook/cells/model', () => {
           data: { 'text/plain': 'foo' },
           metadata: {}
         } as nbformat.IDisplayData;
-        let model = new CodeCellModel();
+        let model = new CodeCellModel({});
         let called = false;
         model.contentChanged.connect(() => { called = true; });
         expect(called).to.be(false);
@@ -321,7 +321,7 @@ describe('notebook/cells/model', () => {
     describe('#type', () => {
 
       it('should be set with type "code"', () => {
-        let model = new CodeCellModel();
+        let model = new CodeCellModel({});
         expect(model.type).to.be('code');
       });
 
@@ -342,14 +342,14 @@ describe('notebook/cells/model', () => {
       });
 
       it('should be settable', () => {
-        let model = new CodeCellModel();
+        let model = new CodeCellModel({});
         expect(model.executionCount).to.be(null);
         model.executionCount = 1;
         expect(model.executionCount).to.be(1);
       });
 
       it('should emit a state change signal when set', () => {
-        let model = new CodeCellModel();
+        let model = new CodeCellModel({});
         let called = false;
         model.stateChanged.connect(() => { called = true; });
         expect(model.executionCount).to.be(null);
@@ -360,7 +360,7 @@ describe('notebook/cells/model', () => {
       });
 
       it('should not signal when state has not changed', () => {
-        let model = new CodeCellModel();
+        let model = new CodeCellModel({});
         let called = 0;
         model.stateChanged.connect(() => { called++; });
         expect(model.executionCount).to.be(null);
@@ -376,7 +376,7 @@ describe('notebook/cells/model', () => {
     describe('#outputs', () => {
 
       it('should be an output area model', () => {
-        let model = new CodeCellModel();
+        let model = new CodeCellModel({});
         expect(model.outputs).to.be.an(OutputAreaModel);
       });
 
@@ -385,7 +385,7 @@ describe('notebook/cells/model', () => {
     describe('#dispose()', () => {
 
       it('should dispose of the resources held by the model', () => {
-        let model = new CodeCellModel();
+        let model = new CodeCellModel({});
         expect(model.outputs).to.be.an(OutputAreaModel);
         model.dispose();
         expect(model.isDisposed).to.be(true);
@@ -393,7 +393,7 @@ describe('notebook/cells/model', () => {
       });
 
       it('should be safe to call multiple times', () => {
-        let model = new CodeCellModel();
+        let model = new CodeCellModel({});
         model.dispose();
         model.dispose();
         expect(model.isDisposed).to.be(true);

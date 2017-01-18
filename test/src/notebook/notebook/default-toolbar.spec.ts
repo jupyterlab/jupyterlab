@@ -268,7 +268,7 @@ describe('notebook/notebook/default-toolbar', () => {
         let item = ToolbarItems.createCellTypeItem(panel);
         let node = item.node.getElementsByTagName('select')[0] as HTMLSelectElement;
         expect(node.value).to.be('code');
-        let cell = panel.model.factory.createCodeCell();
+        let cell = panel.model.contentFactory.createCodeCell({});
         panel.model.cells.insert(1, cell);
         panel.notebook.select(panel.notebook.widgets.at(1));
         expect(node.value).to.be('code');

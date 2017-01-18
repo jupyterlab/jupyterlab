@@ -134,7 +134,7 @@ namespace Private {
   const textFactory = new TextModelFactory();
 
   export
-  const notebookFactory = new NotebookModelFactory();
+  const notebookFactory = new NotebookModelFactory({});
 
 
   class JSONRenderer extends HTMLRenderer {

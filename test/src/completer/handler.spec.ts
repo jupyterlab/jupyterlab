@@ -81,6 +81,11 @@ class TestCompletionHandler extends CompletionHandler {
 const kernelPromise = Kernel.startNew();
 
 
+function createCellWidget(): BaseCellWidget {
+  return new BaseCellWidget({ model: new CellModel({}), contentFactory });
+}
+
+
 describe('completer/handler', () => {
 
   let kernel: Kernel.IKernel;

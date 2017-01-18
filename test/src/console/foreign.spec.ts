@@ -85,7 +85,7 @@ const rendermime = defaultRenderMime();
 
 function cellFactory(): CodeCellWidget {
   let contentFactory = createCodeCellFactory();
-  let model = new CodeCellModel();
+  let model = new CodeCellModel({});
   let cell = new CodeCellWidget({ model, rendermime, contentFactory });
   return cell;
 };
