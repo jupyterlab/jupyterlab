@@ -109,25 +109,20 @@ class ConsolePanel extends Panel {
   readonly inspectionHandler: InspectionHandler;
 
   /**
-   * Test whether the widget is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._completer == null;
-  }
-
-  /**
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
-    if (this.isDisposed) {
+    if (this._completer === null) {
       return;
     }
     let completer = this._completer;
+    let completerHandler = this._completerHandler;
     this._completer = null;
-    completer.dispose();
-    this.console.dispose();
-    this._completerHandler.dispose();
     this._completerHandler = null;
+    completer.dispose();
+    completerHandler.dispose();
+
+    this.console.dispose();
     this.inspectionHandler.dispose();
     super.dispose();
   }

@@ -48,7 +48,7 @@ import {
 
 import {
   INotebookTracker, NotebookModelFactory, NotebookPanel, NotebookTracker,
-  NotebookWidgetFactory, NotebookActions, Notebook, trustNotebook
+  NotebookWidgetFactory, NotebookActions, trustNotebook
 } from './index';
 
 

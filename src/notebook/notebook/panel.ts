@@ -386,8 +386,9 @@ class NotebookPanel extends Widget {
    * Handle a change to the active cell.
    */
   private _onActiveCellChanged(sender: Notebook, widget: BaseCellWidget) {
-    this.inspectionHandler.editor = widget.editor;
-    this._completerHandler.editor = widget.editor;
+    let editor = widget ? widget.editor : null;
+    this.inspectionHandler.editor = editor;
+    this._completerHandler.editor = editor;
   }
 
   private _completer: CompleterWidget = null;

@@ -62,7 +62,7 @@ import {
 } from '../services';
 
 import {
-  IConsoleTracker, ConsolePanel, CodeConsole
+  IConsoleTracker, ConsolePanel
 } from './index';
 
 
@@ -174,7 +174,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   command = 'console:create';
   commands.addCommand(command, {
     execute: (args: ICreateConsoleArgs) => {
-      let name = `CodeConsole ${++count}`;
+      let name = `Console ${++count}`;
 
       args = args || {};
 
@@ -183,7 +183,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
         return manager.ready.then(() => manager.connectTo(args.id))
           .then(session => {
             name = session.path.split('/').pop();
-            name = `CodeConsole ${name.match(CONSOLE_REGEX)[1]}`;
+            name = `Console ${name.match(CONSOLE_REGEX)[1]}`;
             createConsole(session, name);
             return session.id;
           });
@@ -218,7 +218,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
 
   command = 'console:create-new';
   commands.addCommand(command, {
-    label: 'Start New CodeConsole',
+    label: 'Start New Console',
     execute: () => commands.execute('console:create', { })
   });
   palette.addItem({ command, category });
