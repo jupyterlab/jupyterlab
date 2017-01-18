@@ -421,15 +421,8 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       }
       this._session = session;
       this.kernelChanged.emit(session.kernel);
-      session.pathChanged.connect((s, path) => {
-        if (path !== this._path) {
-          this._path = path;
-          this.pathChanged.emit(path);
-        }
-      });
-      session.kernelChanged.connect((s, kernel) => {
-        this.kernelChanged.emit(kernel);
-      });
+      session.pathChanged.connect(this._onSessionPathChanged, this);
+      session.kernelChanged.connect(this._onKernelChanged, this);
       return session.kernel;
     }).catch(err => {
       let response = JSON.parse(err.xhr.response);
@@ -442,6 +435,24 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       });
       return Promise.reject(err);
     });
+  }
+
+  /**
+   * Handle a change to a session path.
+   */
+  private _onSessionPathChanged(sender: Session.ISession) {
+    let path = sender.path;
+    if (path !== this._path) {
+      this._path = path;
+      this.pathChanged.emit(path);
+    }
+  }
+
+  /**
+   * Handle a change to the kernel.
+   */
+  private _onKernelChanged(sender: Session.ISession): void {
+    this.kernelChanged.emit(sender.kernel);
   }
 
   /**

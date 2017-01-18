@@ -332,9 +332,7 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
         this._outputs.add(output);
       }
     }
-    this._outputs.changed.connect(() => {
-      this.contentChanged.emit(void 0);
-    });
+    this._outputs.changed.connect(this._onOutputsChanged, this);
   }
 
   /**
@@ -394,6 +392,13 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
       }
     }
     return cell;
+  }
+
+  /**
+   * Handle the outputs changing.
+   */
+  private _onOutputsChanged(): void {
+    this.contentChanged.emit(void 0);
   }
 
   private _outputs: OutputAreaModel = null;

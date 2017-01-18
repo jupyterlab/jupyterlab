@@ -213,7 +213,7 @@ class CellTypeSwitcher extends Widget {
     super({ node: createCellTypeSwitcherNode() });
     this.addClass(TOOLBAR_CELLTYPE_CLASS);
 
-    let select = this.node.firstChild as HTMLSelectElement;
+    let select = this._select = this.node.firstChild as HTMLSelectElement;
     this._wildCard = document.createElement('option');
     this._wildCard.value = '-';
     this._wildCard.textContent = '-';
@@ -229,26 +229,26 @@ class CellTypeSwitcher extends Widget {
       }
     });
 
+    this._notebook = widget;
+
     // Set the initial value.
     if (widget.model) {
-      this._updateValue(widget, select);
+      this._updateValue();
     }
 
     // Follow the type of the active cell.
-    widget.activeCellChanged.connect((sender, cell) => {
-      this._updateValue(widget, select);
-    });
+    widget.activeCellChanged.connect(this._updateValue, this);
 
     // Follow a change in the selection.
-    widget.selectionChanged.connect(() => {
-      this._updateValue(widget, select);
-    });
+    widget.selectionChanged.connect(this._updateValue, this);
   }
 
   /**
    * Update the value of the dropdown from the widget state.
    */
-  private _updateValue(widget: Notebook, select: HTMLSelectElement): void {
+  private _updateValue(): void {
+    let widget = this._notebook;
+    let select = this._select;
     if (!widget.activeCell) {
       return;
     }
@@ -273,6 +273,8 @@ class CellTypeSwitcher extends Widget {
 
   private _changeGuard = false;
   private _wildCard: HTMLOptionElement = null;
+  private _select: HTMLSelectElement = null;
+  private _notebook: Notebook = null;
 }
 
 

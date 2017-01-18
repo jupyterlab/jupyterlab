@@ -146,16 +146,7 @@ class ApplicationShell extends Widget {
 
     this.layout = rootLayout;
 
-    this._dockPanel.currentChanged.connect((sender, args) => {
-      if (args.newValue) {
-        args.newValue.title.className += ` ${CURRENT_CLASS}`;
-      }
-      if (args.oldValue) {
-        let title = args.oldValue.title;
-        title.className = title.className.replace(CURRENT_CLASS, '');
-      }
-      this.currentChanged.emit(args);
-    });
+    this._dockPanel.currentChanged.connect(this._onCurrentChanged, this);
   }
 
   /**
@@ -345,9 +336,9 @@ class ApplicationShell extends Widget {
       return this._save().then(() => { this._restored.resolve(saved); });
     });
     // Catch current changed events on the side handlers.
-    this._dockPanel.currentChanged.connect(() => { this._save(); });
-    this._leftHandler.sideBar.currentChanged.connect(() => { this._save(); });
-    this._rightHandler.sideBar.currentChanged.connect(() => { this._save(); });
+    this._dockPanel.currentChanged.connect(this._save, this);
+    this._leftHandler.sideBar.currentChanged.connect(this._save, this);
+    this._rightHandler.sideBar.currentChanged.connect(this._save, this);
   }
 
   /**
@@ -364,6 +355,20 @@ class ApplicationShell extends Widget {
       rightArea: this._rightHandler.dehydrate()
     };
     return this._database.save(data);
+  }
+
+  /**
+   * Handle a change to the dock area current widget.
+   */
+  private _onCurrentChanged(sender: DockPanel, args: DockPanel.ICurrentChangedArgs): void {
+    if (args.newValue) {
+      args.newValue.title.className += ` ${CURRENT_CLASS}`;
+    }
+    if (args.oldValue) {
+      let title = args.oldValue.title;
+      title.className = title.className.replace(CURRENT_CLASS, '');
+    }
+    this.currentChanged.emit(args);
   }
 
   private _database: IInstanceRestorer.ILayoutDB = null;

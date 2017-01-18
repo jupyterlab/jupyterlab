@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  find, indexOf, upperBound
+  findIndex, indexOf, upperBound
 } from 'phosphor/lib/algorithm/searching';
 
 import {
@@ -73,13 +73,21 @@ class MainMenu extends MenuBar implements IMainMenu {
     let index = upperBound(this._items, rankItem, Private.itemCmp);
 
     // Upon disposal, remove the menu and its rank reference.
-    menu.disposed.connect(() => {
-      this.removeMenu(menu);
-      this._items.remove(rankItem);
-    });
+    menu.disposed.connect(this._onMenuDisposed, this);
 
     this._items.insert(index, rankItem);
     this.insertMenu(index, menu);
+  }
+
+  /**
+   * Handle the disposal of a menu.
+   */
+  private _onMenuDisposed(menu: Menu): void {
+    this.removeMenu(menu);
+    let index = findIndex(this._items, item => item.menu === menu);
+    if (index !== -1) {
+      this._items.removeAt(index);
+    }
   }
 
   private _items = new Vector<Private.IRankItem>();
