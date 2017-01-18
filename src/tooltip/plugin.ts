@@ -26,6 +26,9 @@ const plugin: JupyterLabPlugin<void> = {
 export default plugin;
 
 
+/**
+ * Activate the tooltip.
+ */
 function activate(app: JupyterLab): void {
   console.log('initialized tooltip plugin', TooltipWidget);
 }

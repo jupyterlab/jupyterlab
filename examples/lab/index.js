@@ -38,7 +38,8 @@ var mods = [
   require('jupyterlab/lib/services/plugin'),
   require('jupyterlab/lib/shortcuts/plugin'),
   require('jupyterlab/lib/statedb/plugin'),
-  require('jupyterlab/lib/terminal/plugin')
+  require('jupyterlab/lib/terminal/plugin'),
+  require('jupyterlab/lib/tooltip/plugin')
 ];
 
 
