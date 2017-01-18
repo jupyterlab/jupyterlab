@@ -122,6 +122,7 @@ class ConsolePanel extends Panel {
     if (this.isDisposed) {
       return;
     }
+    super.dispose();
     let completer = this._completer;
     this._completer = null;
     completer.dispose();
@@ -129,7 +130,6 @@ class ConsolePanel extends Panel {
     this._completerHandler.dispose();
     this._completerHandler = null;
     this.inspectionHandler.dispose();
-    super.dispose();
   }
 
   /**
