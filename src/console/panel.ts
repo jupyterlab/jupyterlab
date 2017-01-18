@@ -112,7 +112,7 @@ class ConsolePanel extends Panel {
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
-    if (this._completer == null) {
+    if (this._completer === null) {
       return;
     }
     this._completer.dispose();
