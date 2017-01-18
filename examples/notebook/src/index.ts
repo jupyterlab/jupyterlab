@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  NotebookPanel, NotebookWidgetFactory, Notebook,
+  NotebookPanel, NotebookWidgetFactory,
   NotebookModelFactory, NotebookActions
 } from 'jupyterlab/lib/notebook';
 
@@ -127,7 +127,7 @@ function createApp(manager: ServiceManager.IManager): void {
     manager,
     opener
   });
-  let mFactory = new NotebookModelFactory();
+  let mFactory = new NotebookModelFactory({});
   let clipboard = new MimeData();
   let editorFactory = editorServices.factoryService.newInlineEditor;
   let contentFactory = new NotebookPanel.ContentFactory({ editorFactory });
