@@ -50,7 +50,7 @@ import {
 } from '../../rendermime';
 
 import {
-  OutputAreaModel
+  IOutputAreaModel, OutputAreaModel
 } from './model';
 
 
@@ -214,10 +214,10 @@ class OutputAreaWidget extends Widget {
   /**
    * The model for the widget.
    */
-  get model(): OutputAreaModel {
+  get model(): IOutputAreaModel {
     return this._model;
   }
-  set model(newValue: OutputAreaModel) {
+  set model(newValue: IOutputAreaModel) {
     if (!newValue && !this._model || newValue === this._model) {
       return;
     }
@@ -347,7 +347,7 @@ class OutputAreaWidget extends Widget {
   /**
    * Follow changes on the model state.
    */
-  protected onModelStateChanged(sender: OutputAreaModel, args: ObservableVector.IChangedArgs<nbformat.IOutput>) {
+  protected onModelStateChanged(sender: IOutputAreaModel, args: ObservableVector.IChangedArgs<nbformat.IOutput>) {
     switch (args.type) {
     case 'add':
       // Children are always added at the end.
@@ -394,14 +394,14 @@ class OutputAreaWidget extends Widget {
    * internally and before the `modelChanged` signal is emitted.
    * The default implementation is a no-op.
    */
-  protected onModelChanged(oldValue: OutputAreaModel, newValue: OutputAreaModel): void {
+  protected onModelChanged(oldValue: IOutputAreaModel, newValue: IOutputAreaModel): void {
     // no-op
   }
 
   /**
    * Handle a change to the model.
    */
-  private _onModelChanged(oldValue: OutputAreaModel, newValue: OutputAreaModel): void {
+  private _onModelChanged(oldValue: IOutputAreaModel, newValue: IOutputAreaModel): void {
     let layout = this.layout as PanelLayout;
     if (oldValue) {
       oldValue.changed.disconnect(this.onModelStateChanged, this);
@@ -433,7 +433,7 @@ class OutputAreaWidget extends Widget {
   /**
    * Handle a model disposal.
    */
-  protected onModelDisposed(oldValue: OutputAreaModel, newValue: OutputAreaModel): void {
+  protected onModelDisposed(oldValue: IOutputAreaModel, newValue: IOutputAreaModel): void {
     // no-op
   }
 
@@ -446,7 +446,7 @@ class OutputAreaWidget extends Widget {
   private _fixedHeight = false;
   private _collapsed = false;
   private _minHeightTimeout: number = null;
-  private _model: OutputAreaModel = null;
+  private _model: IOutputAreaModel = null;
   private _injecting = false;
 }
 

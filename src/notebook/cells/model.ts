@@ -34,7 +34,7 @@ import {
 } from '../common/metadata';
 
 import {
-  OutputAreaModel
+  IOutputAreaModel, OutputAreaModel
 } from '../output-area';
 
 
@@ -109,7 +109,7 @@ interface ICodeCellModel extends ICellModel {
   /**
    * The cell outputs.
    */
-  outputs: OutputAreaModel;
+  outputs: IOutputAreaModel;
 }
 
 
@@ -379,7 +379,7 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
   /**
    * The cell outputs.
    */
-  get outputs(): OutputAreaModel {
+  get outputs(): IOutputAreaModel {
     return this._outputs;
   }
 
@@ -419,7 +419,7 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
     this.contentChanged.emit(void 0);
   }
 
-  private _outputs: OutputAreaModel = null;
+  private _outputs: IOutputAreaModel = null;
   private _executionCount: nbformat.ExecutionCount = null;
 }
 
@@ -452,7 +452,7 @@ namespace CodeCellModel {
     /**
      * Create an output area.
      */
-    createOutputArea(): OutputAreaModel;
+    createOutputArea(): IOutputAreaModel;
   }
 
   /**
@@ -463,7 +463,7 @@ namespace CodeCellModel {
     /**
      * Create an output area.
      */
-    createOutputArea(): OutputAreaModel {
+    createOutputArea(): IOutputAreaModel {
       return new OutputAreaModel();
     }
   }

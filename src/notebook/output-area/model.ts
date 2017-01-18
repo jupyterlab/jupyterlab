@@ -69,7 +69,7 @@ interface IOutputAreaModel extends IDisposable {
    *
    * @param wait Delay clearing the output until the next message is added.
    */
-  clear(wait: boolean = false): void;
+  clear(wait?: boolean): void;
 
   /**
    * Add a mime type to an output data bundle.
