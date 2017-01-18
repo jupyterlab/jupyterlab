@@ -115,12 +115,11 @@ class ConsolePanel extends Panel {
     if (this._completer == null) {
       return;
     }
-    let completer = this._completer;
+    this._completer.dispose();
     this._completer = null;
-    completer.dispose();
-    this.console.dispose();
     this._completerHandler.dispose();
     this._completerHandler = null;
+    this.console.dispose();
     this.inspectionHandler.dispose();
     super.dispose();
   }
