@@ -137,9 +137,17 @@ class CellModel extends CodeEditor.Model implements ICellModel {
     super();
     this.value.changed.connect(this.onGenericChange, this);
     let cell = options.cell;
+
     this.stateChanged.connect( ()=> {
       this.synchronizeRequest.emit(void 0);
     });
+    this.contentChanged.connect( ()=> {
+      this.synchronizeRequest.emit(void 0);
+    });
+    this.metadataChanged.connect( ()=> {
+      this.synchronizeRequest.emit(void 0);
+    });
+
     if (!cell) {
       return;
     }
