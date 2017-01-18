@@ -198,7 +198,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     }
   });
 
-  registry.addModelFactory(new NotebookModelFactory());
+  registry.addModelFactory(new NotebookModelFactory({}));
   registry.addWidgetFactory(factory);
   registry.addFileType({
     name: 'Notebook',

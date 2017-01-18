@@ -10,6 +10,10 @@ import {
 } from '../../docregistry';
 
 import {
+  CodeCellModel
+} from '../cells';
+
+import {
   INotebookModel, NotebookModel
 } from './model';
 
@@ -19,6 +23,21 @@ import {
  */
 export
 class NotebookModelFactory implements DocumentRegistry.IModelFactory<INotebookModel> {
+  /**
+   * Construct a new notebook model factory.
+   */
+  constructor(options: NotebookModelFactory.IOptions) {
+    let outputAreaFactory = options.outputAreaFactory;
+    this.contentFactory = (options.contentFactory ||
+      new NotebookModel.ContentFactory({ outputAreaFactory })
+    );
+  }
+
+  /**
+   * The content model factory used by the NotebookModelFactory.
+   */
+  readonly contentFactory: NotebookModel.IContentFactory;
+
   /**
    * The name of the model.
    */
@@ -62,7 +81,8 @@ class NotebookModelFactory implements DocumentRegistry.IModelFactory<INotebookMo
    * @returns A new document model.
    */
   createNew(languagePreference?: string): INotebookModel {
-    return new NotebookModel({ languagePreference });
+    let contentFactory = this.contentFactory;
+    return new NotebookModel({ languagePreference, contentFactory });
   }
 
   /**
@@ -73,4 +93,28 @@ class NotebookModelFactory implements DocumentRegistry.IModelFactory<INotebookMo
   }
 
   private _disposed = false;
+}
+
+
+/**
+ * The namespace for notebook model factory statics.
+ */
+export
+namespace NotebookModelFactory {
+  /**
+   * The options used to initialize a NotebookModelFactory.
+   */
+  export
+  interface IOptions {
+    /**
+     * The factory for output area models.
+     */
+    outputAreaFactory?: CodeCellModel.IOutputAreaFactory;
+
+    /**
+     * The content factory used by the NotebookModelFactory.  If
+     * given, it will supercede the `outputAreaFactory`.
+     */
+    contentFactory?: NotebookModel.IContentFactory;
+  }
 }

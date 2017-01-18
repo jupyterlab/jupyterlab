@@ -70,7 +70,10 @@ class ConsolePanel extends Panel {
     let factory = options.contentFactory;
     let { rendermime, session, mimeTypeService } = options;
     let contentFactory = factory.consoleContentFactory;
-    let consoleOpts = { rendermime, session, mimeTypeService, contentFactory };
+    let modelFactory = options.modelFactory;
+    let consoleOpts = {
+      rendermime, session, mimeTypeService, contentFactory, modelFactory
+    };
     this.console = factory.createConsole(consoleOpts);
     this.addWidget(this.console);
 
@@ -191,6 +194,11 @@ namespace ConsolePanel {
      * The session for the console widget.
      */
     session: Session.ISession;
+
+    /**
+     * The model factory for the console widget.
+     */
+    modelFactory?: CodeConsole.IModelFactory;
 
     /**
      * The service used to look up mime types.

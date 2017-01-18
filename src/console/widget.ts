@@ -31,7 +31,8 @@ import {
 
 import {
   BaseCellWidget, CodeCellWidget, RawCellWidget,
-  CodeCellModel, RawCellModel
+  ICodeCellModel, IRawCellModel, CellModel,
+  RawCellModel, CodeCellModel
 } from '../notebook/cells';
 
 import {
@@ -111,7 +112,11 @@ class CodeConsole extends Widget {
     this._cells = new ObservableVector<BaseCellWidget>();
     this._content = new Panel();
     this._input = new Panel();
+
     let factory = this.contentFactory = options.contentFactory;
+    let modelFactory = this.modelFactory = (
+      options.modelFactory || CodeConsole.defaultModelFactory
+    );
     this.rendermime = options.rendermime;
     this.session = options.session;
     this._mimeTypeService = options.mimeTypeService;
@@ -125,7 +130,7 @@ class CodeConsole extends Widget {
     layout.addWidget(this._input);
 
     // Create the banner.
-    let model = new RawCellModel();
+    let model = modelFactory.createRawCell({});
     model.value.text = '...';
     let banner = this.banner = factory.createBanner({
       model,
@@ -166,6 +171,11 @@ class CodeConsole extends Widget {
    * The content factory used by the console.
    */
   readonly contentFactory: CodeConsole.IContentFactory;
+
+  /**
+   * The model factory for the console widget.
+   */
+  readonly modelFactory: CodeConsole.IModelFactory;
 
   /**
    * The rendermime instance used by the console.
@@ -403,10 +413,7 @@ class CodeConsole extends Widget {
 
     // Create the new prompt.
     let factory = this.contentFactory;
-    let contentFactory = factory.codeCellContentFactory;
-    let model = new CodeCellModel();
-    let rendermime = this.rendermime;
-    let options = { model, rendermime, contentFactory };
+    let options = this._createCodeCellOptions();
     prompt = factory.createPrompt(options, this);
     prompt.model.mimeType = this._mimetype;
     prompt.addClass(PROMPT_CLASS);
@@ -515,15 +522,25 @@ class CodeConsole extends Widget {
    */
   private _createForeignCell(): CodeCellWidget {
     let factory = this.contentFactory;
-    let contentFactory = factory.codeCellContentFactory;
-    let model = new CodeCellModel();
-    let rendermime = this.rendermime;
-    let options = { model, rendermime, contentFactory };
+    let options = this._createCodeCellOptions();
     let cell = factory.createForeignCell(options, this);
     cell.readOnly = true;
     cell.model.mimeType = this._mimetype;
     cell.addClass(FOREIGN_CELL_CLASS);
     return cell;
+  }
+
+  /**
+   * Create the options used to initialize a code cell widget.
+   */
+  private _createCodeCellOptions(): CodeCellWidget.IOptions {
+    let factory = this.contentFactory;
+    let contentFactory = factory.codeCellContentFactory;
+    let modelFactory = this.modelFactory;
+    let outputAreaFactory = modelFactory.outputAreaFactory;
+    let model = modelFactory.createCodeCell({ outputAreaFactory });
+    let rendermime = this.rendermime;
+    return { model, rendermime, contentFactory };
   }
 
   /**
@@ -607,9 +624,14 @@ namespace CodeConsole {
   export
   interface IOptions {
     /**
-     * The content factory for a console widget.
+     * The content factory for the console widget.
      */
     contentFactory: IContentFactory;
+
+    /**
+     * The model factory for the console widget.
+     */
+    modelFactory?: IModelFactory;
 
     /**
      * The mime renderer for the console widget.
@@ -781,6 +803,97 @@ namespace CodeConsole {
       rawCellContentFactory?: BaseCellWidget.IContentFactory;
     }
   }
+
+  /**
+   * A model factory for a console widget.
+   */
+  export
+  interface IModelFactory {
+   /**
+    * The factory for output area models.
+    */
+    readonly outputAreaFactory: CodeCellModel.IOutputAreaFactory;
+
+    /**
+     * Create a new code cell.
+     *
+     * @param options - The options used to create the cell.
+     *
+     * @returns A new code cell. If a source cell is provided, the
+     *   new cell will be intialized with the data from the source.
+     */
+    createCodeCell(options: CodeCellModel.IOptions): ICodeCellModel;
+    /**
+     * Create a new raw cell.
+     *
+     * @param options - The options used to create the cell.
+     *
+     * @returns A new raw cell. If a source cell is provided, the
+     *   new cell will be intialized with the data from the source.
+     */
+    createRawCell(options: CellModel.IOptions): IRawCellModel;
+  }
+
+  /**
+   * The default implementation of an `IModelFactory`.
+   */
+  export
+  class ModelFactory {
+    /**
+     * Create a new cell model factory.
+     */
+    constructor(options: IModelFactoryOptions) {
+      this.outputAreaFactory = (options.outputAreaFactory ||
+        CodeCellModel.defaultOutputAreaFactory
+      );
+    }
+
+    /**
+     * The factory for output area models.
+     */
+    readonly outputAreaFactory: CodeCellModel.IOutputAreaFactory;
+
+    /**
+     * Create a new code cell.
+     *
+     * @param source - The data to use for the original source data.
+     *
+     * @returns A new code cell. If a source cell is provided, the
+     *   new cell will be intialized with the data from the source.
+     */
+    createCodeCell(options: CodeCellModel.IOptions): ICodeCellModel {
+      return new CodeCellModel(options);
+    }
+
+    /**
+     * Create a new raw cell.
+     *
+     * @param source - The data to use for the original source data.
+     *
+     * @returns A new raw cell. If a source cell is provided, the
+     *   new cell will be intialized with the data from the source.
+     */
+    createRawCell(options: CellModel.IOptions): IRawCellModel {
+     return new RawCellModel(options);
+    }
+  }
+
+  /**
+   * The options used to initialize a `ModelFactory`.
+   */
+  export
+  interface IModelFactoryOptions {
+    /**
+     * The factory for output area models.
+     */
+    outputAreaFactory?: CodeCellModel.IOutputAreaFactory;
+  }
+
+  /**
+   * The default `ModelFactory` instance.
+   */
+  export
+  const defaultModelFactory = new ModelFactory({});
 }
 
 

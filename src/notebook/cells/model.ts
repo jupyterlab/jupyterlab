@@ -14,11 +14,7 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  IDisposable
-} from 'phosphor/lib/core/disposable';
-
-import {
-  clearSignalData, defineSignal, ISignal
+  defineSignal, ISignal
 } from 'phosphor/lib/core/signaling';
 
 import {
@@ -149,9 +145,10 @@ class CellModel extends CodeEditor.Model implements ICellModel {
   /**
    * Construct a cell model from optional cell content.
    */
-  constructor(cell?: nbformat.IBaseCell) {
+  constructor(options: CellModel.IOptions) {
     super();
     this.value.changed.connect(this._onValueChanged, this);
+    let cell = options.cell;
     if (!cell) {
       return;
     }
@@ -281,6 +278,23 @@ class CellModel extends CodeEditor.Model implements ICellModel {
 }
 
 
+/**
+ * The namespace for `CellModel` statics.
+ */
+export
+namespace CellModel {
+  /**
+   * The options used to initialize a `CellModel`.
+   */
+  export interface IOptions {
+    /**
+     * The source cell data.
+     */
+    cell?: nbformat.IBaseCell;
+  }
+}
+
+
 // Define the signals for the `CellModel` class.
 defineSignal(CellModel.prototype, 'contentChanged');
 defineSignal(CellModel.prototype, 'metadataChanged');
@@ -323,9 +337,13 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
   /**
    * Construct a new code cell with optional original cell content.
    */
-  constructor(cell?: nbformat.ICell) {
-    super(cell);
-    this._outputs = new OutputAreaModel();
+  constructor(options: CodeCellModel.IOptions) {
+    super(options);
+    let factory = (options.outputAreaFactory ||
+      CodeCellModel.defaultOutputAreaFactory
+    );
+    this._outputs = factory.createOutputArea();
+    let cell = options.cell as nbformat.ICodeCell;
     if (cell && cell.cell_type === 'code') {
       this.executionCount = cell.execution_count;
       for (let output of cell.outputs) {
@@ -403,4 +421,56 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
 
   private _outputs: OutputAreaModel = null;
   private _executionCount: nbformat.ExecutionCount = null;
+}
+
+
+/**
+ * The namespace for `CodeCellModel` statics.
+ */
+export
+namespace CodeCellModel {
+  /**
+   * The options used to initialize a `CodeCellModel`.
+   */
+  export interface IOptions {
+    /**
+     * The source cell data.
+     */
+    cell?: nbformat.IBaseCell;
+
+    /**
+     * The factory for output area model creation.
+     */
+    outputAreaFactory?: IOutputAreaFactory;
+  }
+
+  /**
+   * A factory for creating cell models.
+   */
+  export
+  interface IOutputAreaFactory {
+    /**
+     * Create an output area.
+     */
+    createOutputArea(): OutputAreaModel;
+  }
+
+  /**
+   * The default implementation of an `IOutpuAreaFactory`.
+   */
+  export
+  class OutputAreaFactory {
+    /**
+     * Create an output area.
+     */
+    createOutputArea(): OutputAreaModel {
+      return new OutputAreaModel();
+    }
+  }
+
+  /**
+   * The shared `OutputAreaFactory` instance.
+   */
+  export
+  const defaultOutputAreaFactory = new OutputAreaFactory();
 }

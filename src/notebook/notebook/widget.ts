@@ -1249,22 +1249,24 @@ class Notebook extends StaticNotebook {
     }
     let model = this.model;
     let values = event.mimeData.getData(JUPYTER_CELL_MIME);
+    let factory = model.contentFactory;
+    let outputAreaFactory = factory.outputAreaFactory;
 
     // Insert the copies of the original cells.
-    each(values, (value: nbformat.ICell) => {
-      let cell: ICellModel;
-      switch (value.cell_type) {
+    each(values, (cell: nbformat.ICell) => {
+      let value: ICellModel;
+      switch (cell.cell_type) {
       case 'code':
-        cell = model.factory.createCodeCell(value);
+        value = factory.createCodeCell({ cell, outputAreaFactory });
         break;
       case 'markdown':
-        cell = model.factory.createMarkdownCell(value);
+        value = factory.createMarkdownCell({ cell });
         break;
       default:
-        cell = model.factory.createRawCell(value);
+        value = factory.createRawCell({ cell });
         break;
       }
-      model.cells.insert(index, cell);
+      model.cells.insert(index, value);
     });
     // Activate the last cell.
     this.activeCellIndex = index + values.length - 1;
