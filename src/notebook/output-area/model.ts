@@ -31,10 +31,74 @@ import {
 
 
 /**
+ * A model that maintains a list of output data.
+ */
+export
+interface IOutputAreaModel extends IDisposable {
+  /**
+   * A signal emitted when the model changes.
+   */
+  readonly changed: ISignal<IOutputAreaModel, ObservableVector.IChangedArgs<OutputAreaModel.Output>>;
+
+  /**
+   * A signal emitted when the model is disposed.
+   */
+  readonly disposed: ISignal<IOutputAreaModel, void>;
+
+  /**
+   * The length of the items in the model.
+   */
+  readonly length: number;
+
+  /**
+   * Get an item at the specified index.
+   */
+  get(index: number): OutputAreaModel.Output;
+
+  /**
+   * Add an output, which may be combined with previous output.
+   *
+   * #### Notes
+   * The output bundle is copied.
+   * Contiguous stream outputs of the same `name` are combined.
+   */
+  add(output: OutputAreaModel.Output): number;
+
+  /**
+   * Clear all of the output.
+   *
+   * @param wait Delay clearing the output until the next message is added.
+   */
+  clear(wait: boolean = false): void;
+
+  /**
+   * Add a mime type to an output data bundle.
+   *
+   * @param output - The output to augment.
+   *
+   * @param mimetype - The mimetype to add.
+   *
+   * @param value - The value to add.
+   *
+   * #### Notes
+   * The output must be contained in the model, or an error will be thrown.
+   * Only non-existent types can be added.
+   * Types are validated before being added.
+   */
+  addMimeData(output: nbformat.IDisplayData | nbformat.IExecuteResult, mimetype: string, value: string | JSONObject): void;
+
+  /**
+   * Execute code on a kernel and send outputs to the model.
+   */
+  execute(code: string, kernel: Kernel.IKernel): Promise<KernelMessage.IExecuteReplyMsg>;
+}
+
+
+/**
  * An model that maintains a list of output data.
  */
 export
-class OutputAreaModel implements IDisposable {
+class OutputAreaModel implements IOutputAreaModel {
   /**
    * Construct a new observable outputs instance.
    */
@@ -46,12 +110,12 @@ class OutputAreaModel implements IDisposable {
   /**
    * A signal emitted when the model changes.
    */
-  changed: ISignal<OutputAreaModel, ObservableVector.IChangedArgs<OutputAreaModel.Output>>;
+  readonly changed: ISignal<this, ObservableVector.IChangedArgs<OutputAreaModel.Output>>;
 
   /**
    * A signal emitted when the model is disposed.
    */
-  disposed: ISignal<OutputAreaModel, void>;
+  readonly disposed: ISignal<this, void>;
 
   /**
    * Get the length of the items in the model.
@@ -74,9 +138,10 @@ class OutputAreaModel implements IDisposable {
     if (this.isDisposed) {
       return;
     }
-    this.disposed.emit(void 0);
-    this.list.clear();
+    let list = this.list;
     this.list = null;
+    list.clear();
+    this.disposed.emit(void 0);
     clearSignalData(this);
   }
 
