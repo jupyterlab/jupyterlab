@@ -340,16 +340,17 @@ namespace NotebookActions {
         return;
       }
       if (child.model.type !== value) {
+        let cell: nbformat.IBaseCell = child.model.toJSON();
         let newCell: ICellModel;
         switch (value) {
         case 'code':
-          newCell = model.contentFactory.createCodeCell(child.model.toJSON());
+          newCell = model.contentFactory.createCodeCell({ cell });
           break;
         case 'markdown':
-          newCell = model.contentFactory.createMarkdownCell(child.model.toJSON());
+          newCell = model.contentFactory.createMarkdownCell({ cell });
           break;
         default:
-          newCell = model.contentFactory.createRawCell(child.model.toJSON());
+          newCell = model.contentFactory.createRawCell({ cell });
         }
         cells.set(i, newCell);
       }
@@ -702,16 +703,16 @@ namespace NotebookActions {
     let newCells: ICellModel[] = [];
     widget.mode = 'command';
 
-    each(values, value => {
-      switch (value.cell_type) {
+    each(values, cell => {
+      switch (cell.cell_type) {
       case 'code':
-        newCells.push(model.contentFactory.createCodeCell(value));
+        newCells.push(model.contentFactory.createCodeCell({ cell }));
         break;
       case 'markdown':
-        newCells.push(model.contentFactory.createMarkdownCell(value));
+        newCells.push(model.contentFactory.createMarkdownCell({ cell }));
         break;
       default:
-        newCells.push(model.contentFactory.createRawCell(value));
+        newCells.push(model.contentFactory.createRawCell({ cell }));
         break;
       }
     });

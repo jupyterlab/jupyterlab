@@ -107,11 +107,10 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       options.contentFactory || NotebookModel.defaultContentFactory
     );
     this.contentFactory = factory;
-    let outputAreaFactory = factory.outputAreaFactory;
     this._cells = new ObservableUndoableVector<ICellModel>((cell: nbformat.IBaseCell) => {
       switch (cell.cell_type) {
         case 'code':
-          return factory.createCodeCell({ cell, outputAreaFactory });
+          return factory.createCodeCell({ cell });
         case 'markdown':
           return factory.createMarkdownCell({ cell });
         default:
@@ -119,7 +118,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       }
     });
     // Add an initial code cell by default.
-    this._cells.pushBack(this._createCodeCell());
+    this._cells.pushBack(factory.createCodeCell({}));
     this._cells.changed.connect(this._onCellsChanged, this);
     if (options.languagePreference) {
       this._metadata['language_info'] = { name: options.languagePreference };
@@ -243,16 +242,17 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    */
   fromJSON(value: nbformat.INotebookContent): void {
     let cells: ICellModel[] = [];
-    for (let data of value.cells) {
-      switch (data.cell_type) {
+    let factory = this.contentFactory;
+    for (let cell of value.cells) {
+      switch (cell.cell_type) {
       case 'code':
-        cells.push(new CodeCellModel(data));
+        cells.push(factory.createCodeCell({ cell }));
         break;
       case 'markdown':
-        cells.push(new MarkdownCellModel(data));
+        cells.push(factory.createMarkdownCell({ cell }));
         break;
       case 'raw':
-        cells.push(new RawCellModel(data));
+        cells.push(factory.createRawCell({ cell }));
         break;
       default:
         continue;
@@ -372,13 +372,14 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     default:
       return;
     }
+    let factory = this.contentFactory;
     // Add code cell if there are no cells remaining.
     if (!this._cells.length) {
       // Add the cell in a new context to avoid triggering another
       // cell changed event during the handling of this signal.
       requestAnimationFrame(() => {
         if (!this.isDisposed && !this._cells.length) {
-          this._cells.pushBack(this._createCodeCell());
+          this._cells.pushBack(factory.createCodeCell({}));
         }
       });
     }
@@ -392,15 +393,6 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   private _onCellChanged(cell: ICellModel, change: any): void {
     this.dirty = true;
     this.contentChanged.emit(void 0);
-  }
-
-  /**
-   * Create an empty code cell.
-   */
-  private _createCodeCell(): ICodeCellModel {
-    let factory = this.contentFactory;
-    let outputAreaFactory = factory.outputAreaFactory;
-    return factory.createCodeCell({ outputAreaFactory });
   }
 
   private _cells: IObservableUndoableVector<ICellModel> = null;
@@ -505,8 +497,13 @@ namespace NotebookModel {
      *
      * @returns A new code cell. If a source cell is provided, the
      *   new cell will be intialized with the data from the source.
+     *   If the outputAreaFactory is not provided, the instance
+     *   level version will be used.
      */
     createCodeCell(options: CodeCellModel.IOptions): ICodeCellModel {
+      if (options.outputAreaFactory) {
+        options.outputAreaFactory = this.outputAreaFactory;
+      }
       return new CodeCellModel(options);
     }
 
