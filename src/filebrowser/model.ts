@@ -237,7 +237,7 @@ class FileBrowserModel implements IDisposable, IPathTracker {
         }
       });
       if (count === 1) {
-        return this._manager.sessions.shutdown(session.id).then(() => {
+        return this.shutdown(session.id).then(() => {
           return this._manager.contents.delete(path);
         });
       }
