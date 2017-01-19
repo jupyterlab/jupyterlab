@@ -10,6 +10,10 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
+  findIndex
+} from 'phosphor/lib/algorithm/searching';
+
+import {
   Vector
 } from 'phosphor/lib/collections/vector';
 
@@ -213,10 +217,31 @@ class FileBrowserModel implements IDisposable, IPathTracker {
    * @param: path - The path to the file to be deleted.
    *
    * @returns A promise which resolves when the file is deleted.
+   *
+   * #### Notes
+   * If there is a running session associated with the file and no other
+   * sessions are using the kernel, the session will be shut down.
    */
   deleteFile(path: string): Promise<void> {
     let normalizePath = Private.normalizePath;
     path = normalizePath(this._model.path, path);
+    let index = findIndex(this._sessions, session => {
+      return session.notebook.path === path;
+    });
+    if (index !== 1) {
+      let count = 0;
+      let session = this._sessions.at(index);
+      each(this._sessions, value => {
+        if (session.kernel.id === value.kernel.id) {
+          count++;
+        }
+      });
+      if (count === 1) {
+        return this._manager.sessions.shutdown(session.id).then(() => {
+          return this._manager.contents.delete(path);
+        });
+      }
+    }
     return this._manager.contents.delete(path);
   }
 
