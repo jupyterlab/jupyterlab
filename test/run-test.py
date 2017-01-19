@@ -55,8 +55,9 @@ def create_notebook_dir():
 
 @gen.coroutine
 def run(cmd):
-    """Start the task."""
-    """Run a task in a thread and exit with the return code."""
+    """Run the cmd and exit with the return code"""
+    yield gen.moment  # sync up with the ioloop
+
     shell = os.name == 'nt'
     proc = Popen(cmd, shell=shell)
     print('\n\nRunning command: "%s"\n\n' % ' '.join(cmd))
@@ -71,10 +72,11 @@ def run(cmd):
 
 
 @gen.coroutine
-def exit(returncode):
+def exit(code):
     """Safely stop the app and then exit with the given code."""
+    yield gen.moment   # sync up with the ioloop
     IOLoop.current().stop()
-    sys.exit(returncode)
+    sys.exit(code)
 
 
 class TestApp(NotebookApp):
@@ -96,7 +98,8 @@ def main():
         sys.exit(1)
 
     app.initialize([])  # reserve sys.argv for the command
-    run(get_command(app))
+    cmd = get_command(app)
+    run(cmd)
 
     try:
         app.start()
