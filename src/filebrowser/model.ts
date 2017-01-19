@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  IterableOrArrayLike, IIterator, each
+  IterableOrArrayLike, IIterator, each, toArray
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
@@ -225,13 +225,14 @@ class FileBrowserModel implements IDisposable, IPathTracker {
   deleteFile(path: string): Promise<void> {
     let normalizePath = Private.normalizePath;
     path = normalizePath(this._model.path, path);
-    let index = findIndex(this._sessions, session => {
+    let sessions = toArray(this._sessions);
+    let index = findIndex(sessions, session => {
       return session.notebook.path === path;
     });
     if (index !== 1) {
       let count = 0;
-      let session = this._sessions.at(index);
-      each(this._sessions, value => {
+      let session = sessions.at(index);
+      each(sessions, value => {
         if (session.kernel.id === value.kernel.id) {
           count++;
         }
