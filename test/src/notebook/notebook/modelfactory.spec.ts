@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  CodeCellModel
+} from '../../../../lib/notebook/cells/model';
+
+import {
   NotebookModel
 } from '../../../../lib/notebook/notebook/model';
 
@@ -11,10 +15,29 @@ import {
   NotebookModelFactory
 } from '../../../../lib/notebook/notebook/modelfactory';
 
+import {
+  OutputAreaModel
+} from '../../../../lib/notebook/output-area';
+
 
 describe('notebook/notebook/modelfactory', () => {
 
-  describe('NotebookModel', () => {
+  describe('NotebookModelFactory', () => {
+
+    describe('#constructor', () => {
+
+      it('should create a new notebook model factory', () => {
+        let factory = new NotebookModelFactory({});
+        expect(factory).to.be.a(NotebookModelFactory);
+      });
+
+      it('should accept an output area factory', () => {
+        let outputAreaFactory = new CodeCellModel.OutputAreaFactory();
+        let factory = new NotebookModelFactory({ outputAreaFactory });
+        expect(factory);
+      });
+
+    });
 
     describe('#name', () => {
 

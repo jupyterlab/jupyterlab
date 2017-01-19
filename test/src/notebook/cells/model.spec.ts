@@ -45,25 +45,25 @@ describe('notebook/cells/model', () => {
       });
 
       it('should accept a base cell argument', () => {
-        let base: nbformat.IBaseCell = {
+        let cell: nbformat.IBaseCell = {
           cell_type: 'raw',
           source: 'foo',
           metadata: { trusted: false }
         };
-        let model = new CellModel(base);
+        let model = new CellModel({ cell });
         expect(model).to.be.a(CellModel);
-        expect(model.value.text).to.equal(base.source);
+        expect(model.value.text).to.equal(cell.source);
       });
 
       it('should accept a base cell argument with a multiline source', () => {
-        let base: nbformat.IBaseCell = {
+        let cell: nbformat.IBaseCell = {
           cell_type: 'raw',
           source: ['foo', 'bar', 'baz'],
           metadata: { trusted: false }
         };
-        let model = new CellModel(base);
+        let model = new CellModel({ cell });
         expect(model).to.be.a(CellModel);
-        expect(model.value.text).to.equal((base.source as string[]).join('\n'));
+        expect(model.value.text).to.equal((cell.source as string[]).join('\n'));
       });
 
     });
@@ -190,26 +190,26 @@ describe('notebook/cells/model', () => {
     describe('#toJSON()', () => {
 
       it('should return a base cell encapsulation of the model value', () => {
-        let base: nbformat.IBaseCell = {
+        let cell: nbformat.IBaseCell = {
           cell_type: 'raw',
           source: 'foo',
           metadata: { trusted: false }
         };
-        let model = new TestModel(base);
-        expect(model.toJSON()).to.not.equal(base);
-        expect(model.toJSON()).to.eql(base);
+        let model = new TestModel({ cell });
+        expect(model.toJSON()).to.not.equal(cell);
+        expect(model.toJSON()).to.eql(cell);
       });
 
       it('should always return a string source', () => {
-        let base: nbformat.IBaseCell = {
+        let cell: nbformat.IBaseCell = {
           cell_type: 'raw',
           source: ['foo', 'bar', 'baz'],
           metadata: { trusted: false }
         };
-        let model = new TestModel(base);
-        base.source = (base.source as string[]).join('\n');
-        expect(model.toJSON()).to.not.equal(base);
-        expect(model.toJSON()).to.eql(base);
+        let model = new TestModel({ cell });
+        cell.source = (cell.source as string[]).join('\n');
+        expect(model.toJSON()).to.not.equal(cell);
+        expect(model.toJSON()).to.eql(cell);
       });
 
     });
@@ -297,7 +297,7 @@ describe('notebook/cells/model', () => {
           source: 'foo',
           metadata: { trusted: false }
         };
-        let model = new CodeCellModel(cell);
+        let model = new CodeCellModel({ cell });
         expect(model).to.be.a(CodeCellModel);
         expect(model.value.text).to.equal(cell.source);
       });
@@ -337,7 +337,7 @@ describe('notebook/cells/model', () => {
           source: 'foo',
           metadata: { trusted: false }
         };
-        let model = new CodeCellModel(cell);
+        let model = new CodeCellModel({ cell });
         expect(model.executionCount).to.be(1);
       });
 
@@ -420,12 +420,42 @@ describe('notebook/cells/model', () => {
           source: 'foo',
           metadata: { trusted: false }
         };
-        let model = new CodeCellModel(cell);
+        let model = new CodeCellModel({ cell });
         let serialized = model.toJSON();
         expect(serialized).to.not.equal(cell);
         expect(serialized).to.eql(cell);
         let output = serialized.outputs[0] as any;
         expect(output.data['application/json']['bar']).to.be(1);
+      });
+
+    });
+
+    describe('.ContentFactory', () => {
+
+      describe('#constructor()', () => {
+
+        it('should create a new output area factory', () => {
+          let factory = new CodeCellModel.ContentFactory();
+          expect(factory).to.be.a(CodeCellModel.ContentFactory);
+        });
+
+      });
+
+      describe('#createOutputArea()', () => {
+
+        it('should create an output area model', () => {
+          let factory = new CodeCellModel.ContentFactory();
+          expect(factory.createOutputArea()).to.be.an(OutputAreaModel);
+        });
+
+      });
+
+    });
+
+    describe('.defaultContentFactory', () => {
+
+      it('should be an ContentFactory', () => {
+        expect(CodeCellModel.defaultContentFactory).to.be.a(CodeCellModel.ContentFactory);
       });
 
     });
