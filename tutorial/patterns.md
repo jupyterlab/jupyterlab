@@ -62,7 +62,9 @@ last in the `dispose()` method if there is a parent class.
 Make sure any signal connections are cleared in either the local or parent 
 `dispose()` method.  Use a sentinel value to guard against reentry, typically 
 by checking if an internal value is null, and then immediately setting the 
-value to null.
+value to null.  A subclass should never override the `isDisposed` getter,
+because it short-circuits the parent class getter.  The object should not
+be considered disposed until the base class `dispose()` method is called.
 
 
 ## Messages
