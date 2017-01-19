@@ -74,11 +74,11 @@ class SaveHandler implements IDisposable {
    * Dispose of the resources used by the save handler.
    */
   dispose(): void {
-    if (this.isDisposed) {
+    if (this._context === null) {
       return;
     }
-    clearTimeout(this._autosaveTimer);
     this._context = null;
+    clearTimeout(this._autosaveTimer);
     clearSignalData(this);
   }
 

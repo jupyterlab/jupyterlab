@@ -45,6 +45,13 @@ class VDomModel implements IVDomModel {
   readonly stateChanged: ISignal<this, void>;
 
   /**
+   * Test whether the model is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
    * Dispose the model.
    */
   dispose(): void {
@@ -53,13 +60,6 @@ class VDomModel implements IVDomModel {
     }
     this._isDisposed = true;
     clearSignalData(this);
-  }
-
-  /**
-   * Test whether the model is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
   }
 
   private _isDisposed = false;
@@ -106,21 +106,11 @@ abstract class VDomWidget<T extends IVDomModel> extends Widget {
   }
 
   /**
-   * Test whether the widget is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._model === null;
-  }
-
-  /**
    * Dispose this widget.
    */
   dispose() {
-    if (this.isDisposed) {
-      return;
-    }
-    super.dispose();
     this._model = null;
+    super.dispose();
   }
 
   /**

@@ -94,11 +94,8 @@ class NotebookTracker extends InstanceTracker<NotebookPanel> implements INoteboo
    * Dispose of the resources held by the tracker.
    */
   dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    super.dispose();
     this._activeCell = null;
+    super.dispose();
   }
 
   /**

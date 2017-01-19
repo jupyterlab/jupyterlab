@@ -279,10 +279,6 @@ class OutputAreaWidget extends Widget {
    * Dispose of the resources held by the widget.
    */
   dispose() {
-    // Do nothing if already disposed.
-    if (this.isDisposed) {
-      return;
-    }
     this._model = null;
     super.dispose();
   }
@@ -636,10 +632,6 @@ class OutputGutter extends Widget {
    * Dispose of the resources held by the widget.
    */
   dispose() {
-    // Do nothing if already disposed.
-    if (this.isDisposed) {
-      return;
-    }
     this._dragData = null;
     this._drag = null;
     super.dispose();

@@ -94,24 +94,23 @@ class CSVWidget extends Widget {
    * Dispose of the resources used by the widget.
    */
   dispose(): void {
-    if (this.isDisposed) {
+    if (this._model === null) {
       return;
     }
-
-    super.dispose();
-    disconnectReceiver(this);
-
-    this._model.dispose();
+    let model = this._model;
+    let table = this._table;
+    let toolbar = this._toolbar;
+    let warning = this._warning;
     this._model = null;
-
-    this._table.dispose();
     this._table = null;
-
-    this._toolbar.dispose();
     this._toolbar = null;
-
-    this._warning.dispose();
     this._warning = null;
+
+    model.dispose();
+    table.dispose();
+    toolbar.dispose();
+    warning.dispose();
+    super.dispose();
   }
 
   /**

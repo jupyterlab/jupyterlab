@@ -42,7 +42,7 @@ import {
  * An object that tracks widget instances.
  */
 export
-interface IInstanceTracker<T extends Widget> {
+interface IInstanceTracker<T extends Widget> extends IDisposable {
   /**
    * A signal emitted when the current widget changes.
    *
@@ -127,13 +127,6 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   }
 
   /**
-   * Test whether the tracker is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
-  /**
    * The number of widgets held by the tracker.
    */
   get size(): number {
@@ -179,14 +172,23 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   }
 
   /**
+   * Test whether the tracker is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._tracker === null;
+  }
+
+  /**
    * Dispose of the resources held by the tracker.
    */
   dispose(): void {
-    if (this.isDisposed) {
+    if (this._tracker === null) {
       return;
     }
-    this._isDisposed = true;
+    let tracker = this._tracker;
+    this._tracker = null;
     clearSignalData(this);
+    tracker.dispose();
   }
 
   /**
@@ -345,7 +347,6 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     }
   }
 
-  private _isDisposed = false;
   private _restore: InstanceTracker.IRestoreOptions<T> = null;
   private _tracker = new FocusTracker<T>();
 }

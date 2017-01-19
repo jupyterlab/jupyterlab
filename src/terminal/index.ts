@@ -155,9 +155,6 @@ class TerminalWidget extends Widget {
    * Dispose of the resources held by the terminal widget.
    */
   dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
     this._session = null;
     this._sheet = null;
     this._term = null;

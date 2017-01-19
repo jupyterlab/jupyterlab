@@ -239,26 +239,24 @@ class CodeConsole extends Widget {
   }
 
   /**
-   * Test whether the widget is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._foreignHandler === null;
-  }
-
-  /**
    * Dispose of the resources held by the widget.
    */
   dispose() {
     // Do nothing if already disposed.
-    if (this.isDisposed) {
+    if (this._foreignHandler === null) {
       return;
     }
-    this._foreignHandler.dispose();
+    let foreignHandler = this._foreignHandler;
+    let history = this._history;
+    let cells = this._cells;
     this._foreignHandler = null;
-    this._history.dispose();
     this._history = null;
-    this._cells.clear();
     this._cells = null;
+
+    foreignHandler.dispose();
+    history.dispose();
+    cells.clear();
+
     super.dispose();
   }
 

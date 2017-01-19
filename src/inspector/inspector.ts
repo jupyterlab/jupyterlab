@@ -150,16 +150,15 @@ class Inspector extends TabPanel implements IInspector {
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
-    if (this.isDisposed) {
+    if (this._items == null) {
       return;
     }
+    let items = this._items;
+    this._items = null;
+    this.source = null;
 
     // Dispose the inspector child items.
-    Object.keys(this._items).forEach(i => { this._items[i].dispose(); });
-    this._items = null;
-
-    // Disconnect from source.
-    this.source = null;
+    Object.keys(items).forEach(i => { items[i].dispose(); });
 
     super.dispose();
   }
@@ -406,21 +405,16 @@ class InspectorItem extends Panel {
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
-    if (this.isDisposed) {
+    if (this._toolbar === null) {
       return;
     }
+    let toolbar = this._toolbar;
+    let history = this._history;
+    this._toolbar = null;
+    this._history = null;
 
-    clearSignalData(this);
-
-    if (this._history) {
-      this._history.forEach(widget => widget.dispose());
-      this._history = null;
-    }
-
-    if (this._toolbar) {
-      this._toolbar.dispose();
-    }
-
+    history.forEach(widget => widget.dispose());
+    toolbar.dispose();
     super.dispose();
   }
 

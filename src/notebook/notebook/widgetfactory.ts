@@ -69,16 +69,6 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
   readonly mimeTypeService: IEditorMimeTypeService;
 
   /**
-   * Dispose of the resources used by the factory.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    super.dispose();
-  }
-
-  /**
    * Create a new widget.
    *
    * #### Notes

@@ -67,17 +67,6 @@ class CSVToolbar extends Widget {
   }
 
   /**
-   * Dispose of the resources held by the toolbar.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    super.dispose();
-    clearSignalData(this);
-  }
-
-  /**
    * Handle the DOM events for the widget.
    *
    * @param event - The DOM event sent to the widget.

@@ -99,13 +99,6 @@ class ConsoleHistory implements IConsoleHistory {
   }
 
   /**
-   * Get whether the console history manager is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._history === null;
-  }
-
-  /**
    * The current kernel supplying navigation history.
    */
   get kernel(): Kernel.IKernel {
@@ -158,14 +151,21 @@ class ConsoleHistory implements IConsoleHistory {
   }
 
   /**
+   * Get whether the console history manager is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._history === null;
+  }
+
+  /**
    * Dispose of the resources held by the console history manager.
    */
   dispose(): void {
-    if (this.isDisposed) {
+    if (this._history == null) {
       return;
     }
-    clearSignalData(this);
     this._history = null;
+    clearSignalData(this);
   }
 
   /**

@@ -767,7 +767,7 @@ class Notebook extends StaticNotebook {
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
-    if (this.isDisposed) {
+    if (this._activeCell === null) {
       return;
     }
     this._activeCell = null;

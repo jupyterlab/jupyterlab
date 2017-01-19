@@ -145,19 +145,18 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Tests whether the editor is disposed.
    */
   get isDisposed(): boolean {
-    return this._isDisposed;
+    return this._editor === null;
   }
 
   /**
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
-    if (this.isDisposed) {
+    if (this._editor === null) {
       return;
     }
-    this._isDisposed = true;
-    this._model = null;
     this._editor = null;
+    this._model = null;
     this._keydownHandlers.clear();
     clearSignalData(this);
   }
@@ -654,7 +653,6 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
 
   private _model: CodeEditor.IModel;
   private _editor: CodeMirror.Editor;
-  private _isDisposed = false;
   protected selectionMarkers: { [key: string]: CodeMirror.TextMarker[] | undefined } = {};
   private _keydownHandlers = new Vector<CodeEditor.KeydownHandler>();
   private _changeGuard = false;
