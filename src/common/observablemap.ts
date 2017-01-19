@@ -21,6 +21,17 @@ interface IObservableMap<T> extends IDisposable {
   readonly changed: ISignal<this, ObservableMap.IChangedArgs<T>>;
 
   /**
+   * Get whether this map can be linked to another.
+   * If so, the functions `link` and `unlink` will perform
+   * that. Otherwise, they are no-op functions.
+   *
+   * @returns `true` if the map may be linked to another,
+   *   `false` otherwise.
+   */
+  readonly isLinkable: boolean;
+
+
+  /**
    * The number of key-value pairs in the map.
    */
   readonly size: number;
@@ -88,6 +99,19 @@ interface IObservableMap<T> extends IDisposable {
    * Dispose of the resources held by the map.
    */
   dispose(): void;
+
+  /**
+   * Link the map to another map.
+   * Any changes to either are mirrored in the other.
+   *
+   * @param map: the parent map.
+   */
+  link(map: IObservableMap<T>): void;
+
+  /**
+   * Unlink the map from its parent map.
+   */
+  unlink(): void;
 }
 
 
@@ -107,6 +131,15 @@ class ObservableMap<T> implements IObservableMap<T> {
       }
     }
   }
+
+  /**
+   * Get whether this map can be linked to another.
+   * If so, the functions `link` and `unlink` will perform
+   * that. Otherwise, they are no-op functions.
+   *
+   * @returns `true`. 
+   */
+  readonly isLinkable: boolean = true;
 
   /**
    * A signal emitted when the map has changed.
@@ -254,6 +287,23 @@ class ObservableMap<T> implements IObservableMap<T> {
     Signal.clearData(this);
     this._map.clear();
     this._map = null;
+  }
+
+  /**
+   * Link the map to another map.
+   * Any changes to either are mirrored in the other.
+   *
+   * @param map: the parent map.
+   */
+  link(map: IObservableMap<T>): void {
+    //not implemented
+  }
+
+  /**
+   * Unlink the map from its parent map.
+   */
+  unlink(): void {
+    //not implemented
   }
 
   private _map: Map<string, T> = new Map<string, T>();

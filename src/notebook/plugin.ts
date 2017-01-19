@@ -228,7 +228,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
   mainMenu.addMenu(createMenu(app), { rank: 20 });
 
   //Register this widget tracker with the Realtime services if it exists.
-  app.resolveService(IRealtime).then((realtimeServices: IRealtime)=>{
+  app.resolveOptionalService(IRealtime).then((realtimeServices: IRealtime)=>{
     realtimeServices.addTracker(tracker, (widget: NotebookPanel) => {
       return widget.context.model as NotebookModel;
     });

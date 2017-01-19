@@ -205,7 +205,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
   });
 
   //Register this widget tracker with the Realtime services if it exists.
-  app.resolveService(IRealtime).then((realtimeServices: IRealtime)=>{
+  app.resolveOptionalService(IRealtime).then((realtimeServices: IRealtime)=>{
     realtimeServices.addTracker(tracker, (widget: EditorWidget) => {
       return widget.context.model as DocumentModel;
     });

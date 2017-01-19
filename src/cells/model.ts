@@ -144,9 +144,6 @@ class CellModel extends CodeEditor.Model implements ICellModel {
     this.contentChanged.connect( ()=> {
       this.synchronizeRequest.emit(void 0);
     });
-    this.metadataChanged.connect( ()=> {
-      this.synchronizeRequest.emit(void 0);
-    });
 
     if (!cell) {
       return;

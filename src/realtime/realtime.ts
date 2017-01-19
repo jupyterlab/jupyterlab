@@ -6,6 +6,10 @@ import {
 } from '@phosphor/signaling';
 
 import {
+  IDisposable
+} from '@phosphor/disposable';
+
+import {
   Token
 } from '@phosphor/application';
 
@@ -24,6 +28,14 @@ import {
 import {
   IObservableString
 } from '../common/observablestring';
+
+import {
+  IObservableVector
+} from '../common/observablevector';
+
+import {
+  IObservableMap
+} from '../common/observablemap';
 
 import {
   IObservableUndoableVector, ISerializable
@@ -136,7 +148,14 @@ interface IRealtimeModel {
  * There should be one realtime handler per realtime model.
  */
 export
-interface IRealtimeHandler {
+interface IRealtimeHandler extends IDisposable {
+
+  /**
+   * A map of the currently active collaborators
+   * for the handler, including the local user.
+   */
+  readonly collaborators: IObservableMap<ICollaborator>;
+
   /**
    * Create a string for the realtime model.
    *
@@ -179,4 +198,43 @@ interface ISynchronizable<T> extends ISerializable {
    * requests to be synchronized through the realtime handler.
    */
   readonly synchronizeRequest: ISignal<T, void>;
+}
+
+/**
+ * Interface for an object representing a single collaborator
+ * on a realtime model.
+ */
+export
+interface ICollaborator {
+  /**
+   * A user id for the collaborator.
+   * This might not be unique, if the user has more than
+   * one editing session at a time.
+   */
+  readonly userId: string;
+
+  /**
+   * A session id, which should be unique to a
+   * particular view on a collaborative model.
+   */
+  readonly sessionId: string;
+
+  /**
+   * A human-readable display name for a collaborator.
+   */
+  readonly displayName: string;
+
+  /**
+   * A color to be used to identify the collaborator in
+   * UI elements.
+   */
+  readonly color: string;
+
+  /**
+   * A representation of the position of the collaborator
+   * in the collaborative document. This can include, but
+   * is not limited to, the cursor position. Different
+   * widgets are responsible for setting/reading this value.
+   */
+  position: JSONObject;
 }
