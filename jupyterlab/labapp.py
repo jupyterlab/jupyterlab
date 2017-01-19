@@ -215,7 +215,7 @@ def bootstrap_from_nbapp(nbapp):
     """Bootstrap the lab app on top of a notebook app.
     """
     labapp = LabApp()
-    labapp.load_config_file()
+    labapp.initialize()
     webapp = nbapp.web_app
     labapp.add_lab_handlers(webapp)
     labapp.add_labextensions(webapp)
