@@ -334,10 +334,8 @@ class FileBrowserModel implements IDisposable, IPathTracker {
    */
   protected stopIfNeeded(path: string): Promise<void> {
     let sessions = toArray(this._sessions);
-    let index = findIndex(sessions, session => {
-      return session.notebook.path === path;
-    });
-    if (index !== 1) {
+    let index = findIndex(sessions, value => value.notebook.path === path);
+    if (index !== -1) {
       let count = 0;
       let model = sessions[index];
       each(sessions, value => {
