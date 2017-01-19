@@ -339,15 +339,15 @@ class FileBrowserModel implements IDisposable, IPathTracker {
     });
     if (index !== 1) {
       let count = 0;
-      let session = sessions[index];
+      let model = sessions[index];
       each(sessions, value => {
-        if (session.kernel.id === value.kernel.id) {
+        if (model.kernel.id === value.kernel.id) {
           count++;
         }
       });
       if (count === 1) {
         // Try to delete the session, but succeed either way.
-        return this.shutdown(session.id).catch(() => { /* no-op */ });
+        return this.shutdown(model.id).catch(() => { /* no-op */ });
       }
     }
     return Promise.resolve(void 0);
