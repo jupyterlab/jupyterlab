@@ -132,7 +132,7 @@ const NOTEBOOK_IMAGE_CLASS = 'jp-About-nb';
 /**
  * Title of About page.
  */
-const TITLE = 'Welcome to the JupyterLab Alpha preview';
+const TITLE = 'Welcome to the JupyterLab alpha preview';
 
 /**
  * Text on the first page that gives a high level overview of JupyterLab.
@@ -225,9 +225,22 @@ const NOTEBOOK_DESC = [
 export
 class AboutModel extends VDomModel {
   /**
+   * Create an about model.
+   */
+  constructor(options: AboutModel.IOptions) {
+    super();
+    this.version = options.version;
+  }
+
+  /**
    * Title of About page.
    */
   readonly title = TITLE;
+
+  /**
+   * The current JupyterLab version.
+   */
+  readonly version: string;
 
   /**
    * Text on the first page that gives a high level overview of JupyterLab.
@@ -260,6 +273,25 @@ class AboutModel extends VDomModel {
   readonly notebookDesc = NOTEBOOK_DESC;
 }
 
+
+/**
+ * A namespace for `AboutModel` statics.
+ */
+export
+namespace AboutModel {
+  /**
+   * Instantiation options for an about model.
+   */
+  export
+  interface IOptions {
+    /**
+     * The lab application version.
+     */
+    version: string;
+  }
+}
+
+
 /**
  * A virtual-DOM-based widget for the About plugin.
  */
@@ -286,6 +318,7 @@ class AboutWidget extends VDomWidget<AboutModel> {
    */
   protected render(): VNode {
     let title = this.model.title;
+    let version = `v${this.model.version}`;
     let headerText = this.model.headerText;
     let pluginHeaders = this.model.pluginHeaders;
     let mainAreaDesc = this.model.mainAreaDesc;
@@ -296,7 +329,10 @@ class AboutWidget extends VDomWidget<AboutModel> {
     let headerRow = h.div({ className: ROW_CLASS },
       h.div({ className: COLUMN_CLASS },
         h.span({ className: IMAGE_CLASS + ' ' + LOGO_CLASS }),
-        h.p({ className: HEADER_CLASS }, title),
+        h.p({ className: HEADER_CLASS },
+          title,
+          h.span(' (', h.code(version), ')')
+        ),
         h.div({ className: DESC_ONE_CLASS },
           h.p(headerText[0]),
           h.p(headerText[1], ' ', h.strong(headerText[2])),
