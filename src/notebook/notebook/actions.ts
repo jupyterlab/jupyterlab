@@ -18,7 +18,7 @@ import {
 } from 'phosphor/lib/core/mimedata';
 
 import {
-  ICellModel, CodeCellModel,
+  ICellModel, ICodeCellModel,
   CodeCellWidget, BaseCellWidget, MarkdownCellWidget
 } from '../cells';
 
@@ -74,7 +74,7 @@ namespace NotebookActions {
     let clone0 = Private.cloneCell(nbModel, child.model);
     let clone1 = Private.cloneCell(nbModel, child.model);
     if (clone0.type === 'code') {
-      (clone0 as CodeCellModel).outputs.clear();
+      (clone0 as ICodeCellModel).outputs.clear();
     }
     clone0.value.text = orig.slice(0, offset);
     clone1.value.text = orig.slice(offset).replace(/^\s+/g, '');
@@ -143,8 +143,8 @@ namespace NotebookActions {
     // Create a new cell for the source to preserve history.
     let newModel = Private.cloneCell(model, primary.model);
     newModel.value.text = toMerge.join('\n\n');
-    if (newModel instanceof CodeCellModel) {
-      newModel.outputs.clear();
+    if (newModel.type === 'code') {
+      (newModel as ICodeCellModel).outputs.clear();
     }
 
     // Make the changes while preserving history.
@@ -230,8 +230,9 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
-    let cell = widget.model.factory.createCodeCell();
-    widget.model.cells.insert(widget.activeCellIndex, cell);
+    let model = widget.model;
+    let cell = model.contentFactory.createCodeCell({ });
+    model.cells.insert(widget.activeCellIndex, cell);
     widget.deselectAll();
   }
 
@@ -251,8 +252,9 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
-    let cell = widget.model.factory.createCodeCell();
-    widget.model.cells.insert(widget.activeCellIndex + 1, cell);
+    let model = widget.model;
+    let cell = model.contentFactory.createCodeCell({});
+    model.cells.insert(widget.activeCellIndex + 1, cell);
     widget.activeCellIndex++;
     widget.deselectAll();
   }
@@ -340,16 +342,17 @@ namespace NotebookActions {
         return;
       }
       if (child.model.type !== value) {
+        let cell: nbformat.IBaseCell = child.model.toJSON();
         let newCell: ICellModel;
         switch (value) {
         case 'code':
-          newCell = model.factory.createCodeCell(child.model.toJSON());
+          newCell = model.contentFactory.createCodeCell({ cell });
           break;
         case 'markdown':
-          newCell = model.factory.createMarkdownCell(child.model.toJSON());
+          newCell = model.contentFactory.createMarkdownCell({ cell });
           break;
         default:
-          newCell = model.factory.createRawCell(child.model.toJSON());
+          newCell = model.contentFactory.createRawCell({ cell });
         }
         cells.set(i, newCell);
       }
@@ -437,7 +440,7 @@ namespace NotebookActions {
     let promise = run(widget, kernel);
     let model = widget.model;
     if (widget.activeCellIndex === widget.widgets.length - 1) {
-      let cell = model.factory.createCodeCell();
+      let cell = model.contentFactory.createCodeCell({});
       model.cells.pushBack(cell);
       widget.activeCellIndex++;
       widget.mode = 'edit';
@@ -470,7 +473,7 @@ namespace NotebookActions {
     }
     let promise = run(widget, kernel);
     let model = widget.model;
-    let cell = model.factory.createCodeCell();
+    let cell = model.contentFactory.createCodeCell({});
     model.cells.insert(widget.activeCellIndex + 1, cell);
     widget.activeCellIndex++;
     widget.scrollToActiveCell();
@@ -702,16 +705,16 @@ namespace NotebookActions {
     let newCells: ICellModel[] = [];
     widget.mode = 'command';
 
-    each(values, value => {
-      switch (value.cell_type) {
+    each(values, cell => {
+      switch (cell.cell_type) {
       case 'code':
-        newCells.push(model.factory.createCodeCell(value));
+        newCells.push(model.contentFactory.createCodeCell({ cell }));
         break;
       case 'markdown':
-        newCells.push(model.factory.createMarkdownCell(value));
+        newCells.push(model.contentFactory.createMarkdownCell({ cell }));
         break;
       default:
-        newCells.push(model.factory.createRawCell(value));
+        newCells.push(model.contentFactory.createRawCell({ cell }));
         break;
       }
     });
@@ -821,7 +824,7 @@ namespace NotebookActions {
     }
     let cells = widget.model.cells;
     let i = 0;
-    each(cells, (cell: CodeCellModel) => {
+    each(cells, (cell: ICodeCellModel) => {
       let child = widget.widgets.at(i);
       if (widget.isSelected(child) && cell.type === 'code') {
         cell.outputs.clear();
@@ -844,7 +847,7 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
-    each(widget.model.cells, (cell: CodeCellModel) => {
+    each(widget.model.cells, (cell: ICodeCellModel) => {
       if (cell.type === 'code') {
         cell.outputs.clear();
         cell.executionCount = null;
@@ -896,11 +899,11 @@ namespace Private {
   function cloneCell(model: INotebookModel, cell: ICellModel): ICellModel {
     switch (cell.type) {
     case 'code':
-      return model.factory.createCodeCell(cell.toJSON());
+      return model.contentFactory.createCodeCell(cell.toJSON());
     case 'markdown':
-      return model.factory.createMarkdownCell(cell.toJSON());
+      return model.contentFactory.createMarkdownCell(cell.toJSON());
     default:
-      return model.factory.createRawCell(cell.toJSON());
+      return model.contentFactory.createRawCell(cell.toJSON());
     }
   }
 
@@ -929,7 +932,7 @@ namespace Private {
           return reply ? reply.content.status === 'ok' : true;
         });
       }
-      (child.model as CodeCellModel).executionCount = null;
+      (child.model as ICodeCellModel).executionCount = null;
       break;
     default:
       break;
@@ -963,7 +966,7 @@ namespace Private {
     }
 
     // Create a new code cell and add as the next cell.
-    let cell = parent.model.factory.createCodeCell();
+    let cell = parent.model.contentFactory.createCodeCell({});
     cell.value.text = text;
     let cells = parent.model.cells;
     let i = indexOf(cells, child.model);

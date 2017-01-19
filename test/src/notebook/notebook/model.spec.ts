@@ -53,9 +53,9 @@ describe('notebook/notebook/model', () => {
       });
 
       it('should accept an optional factory', () => {
-        let factory = new NotebookModel.Factory();
-        let model = new NotebookModel({ factory });
-        expect(model.factory).to.be(factory);
+        let contentFactory = new NotebookModel.ContentFactory({});
+        let model = new NotebookModel({ contentFactory });
+        expect(model.contentFactory).to.be(contentFactory);
       });
 
     });
@@ -99,7 +99,7 @@ describe('notebook/notebook/model', () => {
 
       it('should be reset when loading from disk', () => {
         let model = new NotebookModel();
-        let cell = model.factory.createCodeCell();
+        let cell = model.contentFactory.createCodeCell({});
         model.cells.pushBack(cell);
         model.fromJSON(DEFAULT_CONTENT);
         expect(indexOf(model.cells, cell)).to.be(-1);
@@ -108,7 +108,7 @@ describe('notebook/notebook/model', () => {
 
       it('should allow undoing a change', () => {
         let model = new NotebookModel();
-        let cell = model.factory.createCodeCell();
+        let cell = model.contentFactory.createCodeCell({});
         cell.value.text = 'foo';
         model.cells.pushBack(cell);
         model.fromJSON(DEFAULT_CONTENT);
@@ -122,7 +122,7 @@ describe('notebook/notebook/model', () => {
 
         it('should emit a `contentChanged` signal', () => {
           let model = new NotebookModel();
-          let cell = model.factory.createCodeCell();
+          let cell = model.contentFactory.createCodeCell({});
           let called = false;
           model.contentChanged.connect(() => { called = true; });
           model.cells.pushBack(cell);
@@ -131,14 +131,14 @@ describe('notebook/notebook/model', () => {
 
         it('should set the dirty flag', () => {
           let model = new NotebookModel();
-          let cell = model.factory.createCodeCell();
+          let cell = model.contentFactory.createCodeCell({});
           model.cells.pushBack(cell);
           expect(model.dirty).to.be(true);
         });
 
         it('should dispose of old cells', () => {
           let model = new NotebookModel();
-          let cell = model.factory.createCodeCell();
+          let cell = model.contentFactory.createCodeCell({});
           model.cells.pushBack(cell);
           model.cells.clear();
           expect(cell.isDisposed).to.be(true);
@@ -160,14 +160,14 @@ describe('notebook/notebook/model', () => {
 
         it('should be called when a cell content changes', () => {
           let model = new NotebookModel();
-          let cell = model.factory.createCodeCell();
+          let cell = model.contentFactory.createCodeCell({});
           model.cells.pushBack(cell);
           cell.value.text = 'foo';
         });
 
         it('should emit the `contentChanged` signal', () => {
           let model = new NotebookModel();
-          let cell = model.factory.createCodeCell();
+          let cell = model.contentFactory.createCodeCell({});
           model.cells.pushBack(cell);
           let called = false;
           model.contentChanged.connect(() => { called = true; });
@@ -178,7 +178,7 @@ describe('notebook/notebook/model', () => {
 
         it('should set the dirty flag', () => {
           let model = new NotebookModel();
-          let cell = model.factory.createCodeCell();
+          let cell = model.contentFactory.createCodeCell({});
           model.cells.pushBack(cell);
           model.dirty = false;
           cell.value.text = 'foo';
@@ -189,89 +189,11 @@ describe('notebook/notebook/model', () => {
 
     });
 
-    describe('#factory', () => {
+    describe('#contentFactory', () => {
 
       it('should be the cell model factory used by the model', () => {
         let model = new NotebookModel();
-        expect(model.factory).to.be(NotebookModel.defaultFactory);
-      });
-
-      context('createCodeCell()', () => {
-
-        it('should create a new code cell', () => {
-          let model = new NotebookModel();
-          let cell = model.factory.createCodeCell();
-          expect(cell.type).to.be('code');
-        });
-
-        it('should clone an existing code cell', () => {
-          let model = new NotebookModel();
-          let cell = model.factory.createCodeCell();
-          cell.value.text = 'foo';
-          let newCell = model.factory.createCodeCell(cell.toJSON());
-          expect(newCell.value.text).to.be('foo');
-        });
-
-        it('should clone an existing raw cell', () => {
-          let model = new NotebookModel();
-          let cell = model.factory.createRawCell();
-          cell.value.text = 'foo';
-          let newCell = model.factory.createCodeCell(cell.toJSON());
-          expect(newCell.value.text).to.be('foo');
-        });
-
-      });
-
-      context('createRawCell()', () => {
-
-        it('should create a new raw cell', () => {
-          let model = new NotebookModel();
-          let cell = model.factory.createRawCell();
-          expect(cell.type).to.be('raw');
-        });
-
-        it('should clone an existing raw cell', () => {
-          let model = new NotebookModel();
-          let cell = model.factory.createRawCell();
-          cell.value.text = 'foo';
-          let newCell = model.factory.createRawCell(cell.toJSON());
-          expect(newCell.value.text).to.be('foo');
-        });
-
-        it('should clone an existing code cell', () => {
-          let model = new NotebookModel();
-          let cell = model.factory.createCodeCell();
-          cell.value.text = 'foo';
-          let newCell = model.factory.createRawCell(cell.toJSON());
-          expect(newCell.value.text).to.be('foo');
-        });
-
-      });
-
-      describe('createMarkdownCell()', () => {
-
-        it('should create a new markdown cell', () => {
-          let model = new NotebookModel();
-          let cell = model.factory.createMarkdownCell();
-          expect(cell.type).to.be('markdown');
-        });
-
-        it('should clone an existing markdown cell', () => {
-          let model = new NotebookModel();
-          let cell = model.factory.createMarkdownCell();
-          cell.value.text = 'foo';
-          let newCell = model.factory.createMarkdownCell(cell.toJSON());
-          expect(newCell.value.text).to.be('foo');
-        });
-
-        it('should clone an existing raw cell', () => {
-          let model = new NotebookModel();
-          let cell = model.factory.createRawCell();
-          cell.value.text = 'foo';
-          let newCell = model.factory.createMarkdownCell(cell.toJSON());
-          expect(newCell.value.text).to.be('foo');
-        });
-
+        expect(model.contentFactory).to.be(NotebookModel.defaultContentFactory);
       });
 
     });
@@ -468,6 +390,109 @@ describe('notebook/notebook/model', () => {
         cursor.setValue(1);
         keys.push('foo');
         expect(toArray(model.listMetadata())).to.eql(keys);
+      });
+
+    });
+
+    describe('.ContentFactory', () => {
+
+      let factory = new NotebookModel.ContentFactory({});
+
+      context('#codeCellContentFactory', () => {
+
+        it('should be a code cell content factory', () => {
+          expect(factory.codeCellContentFactory).to.be(CodeCellModel.defaultContentFactory);
+        });
+
+        it('should be settable in the constructor', () => {
+          let codeCellContentFactory = new CodeCellModel.ContentFactory();
+          factory = new NotebookModel.ContentFactory({ codeCellContentFactory });
+          expect(factory.codeCellContentFactory).to.be(codeCellContentFactory);
+        });
+
+      });
+
+      context('#createCodeCell()', () => {
+
+        it('should create a new code cell', () => {
+          let cell = factory.createCodeCell({});
+          expect(cell.type).to.be('code');
+        });
+
+        it('should clone an existing code cell', () => {
+          let orig = factory.createCodeCell({});
+          orig.value.text = 'foo';
+          let cell = orig.toJSON();
+          let newCell = factory.createCodeCell({ cell });
+          expect(newCell.value.text).to.be('foo');
+        });
+
+        it('should clone an existing raw cell', () => {
+          let orig = factory.createRawCell({});
+          orig.value.text = 'foo';
+          let cell = orig.toJSON();
+          let newCell = factory.createCodeCell({ cell });
+          expect(newCell.value.text).to.be('foo');
+        });
+
+      });
+
+      context('#createRawCell()', () => {
+
+        it('should create a new raw cell', () => {
+          let cell = factory.createRawCell({});
+          expect(cell.type).to.be('raw');
+        });
+
+        it('should clone an existing raw cell', () => {
+          let orig = factory.createRawCell({});
+          orig.value.text = 'foo';
+          let cell = orig.toJSON();
+          let newCell = factory.createRawCell({ cell });
+          expect(newCell.value.text).to.be('foo');
+        });
+
+        it('should clone an existing code cell', () => {
+          let orig = factory.createCodeCell({});
+          orig.value.text = 'foo';
+          let cell = orig.toJSON();
+          let newCell = factory.createRawCell({ cell });
+          expect(newCell.value.text).to.be('foo');
+        });
+
+      });
+
+      describe('#createMarkdownCell()', () => {
+
+        it('should create a new markdown cell', () => {
+          let cell = factory.createMarkdownCell({});
+          expect(cell.type).to.be('markdown');
+        });
+
+        it('should clone an existing markdown cell', () => {
+          let orig = factory.createMarkdownCell({});
+          orig.value.text = 'foo';
+          let cell = orig.toJSON();
+          let newCell = factory.createMarkdownCell({ cell });
+          expect(newCell.value.text).to.be('foo');
+        });
+
+        it('should clone an existing raw cell', () => {
+          let orig = factory.createRawCell({});
+          orig.value.text = 'foo';
+          let cell = orig.toJSON();
+          let newCell = factory.createMarkdownCell({ cell });
+          expect(newCell.value.text).to.be('foo');
+        });
+
+      });
+
+    });
+
+    describe('.defaultContentFactory', () => {
+
+      it('should be a ContentFactory', () => {
+        expect(NotebookModel.defaultContentFactory).to.be.a(NotebookModel.ContentFactory);
       });
 
     });

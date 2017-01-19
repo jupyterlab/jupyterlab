@@ -31,7 +31,7 @@ import {
 
 import {
   ICellModel, ICodeCellModel, IRawCellModel, IMarkdownCellModel,
-  CodeCellModel, RawCellModel, MarkdownCellModel
+  CodeCellModel, RawCellModel, MarkdownCellModel, CellModel
 } from '../cells/model';
 
 import {
@@ -65,7 +65,7 @@ interface INotebookModel extends DocumentRegistry.IModel {
   /**
    * The cell model factory for the notebook.
    */
-  readonly factory: ICellModelFactory;
+  readonly contentFactory: NotebookModel.IContentFactory;
 
   /**
    * The major version number of the nbformat.
@@ -94,43 +94,6 @@ interface INotebookModel extends DocumentRegistry.IModel {
 
 
 /**
- * A factory for creating cell models.
- */
-export
-interface ICellModelFactory {
-  /**
-   * Create a new code cell.
-   *
-   * @param source - The data to use for the original source data.
-   *
-   * @returns A new code cell. If a source cell is provided, the
-   *   new cell will be intialized with the data from the source.
-   */
-  createCodeCell(source?: nbformat.IBaseCell): ICodeCellModel;
-
-  /**
-   * Create a new markdown cell.
-   *
-   * @param source - The data to use for the original source data.
-   *
-   * @returns A new markdown cell. If a source cell is provided, the
-   *   new cell will be intialized with the data from the source.
-   */
-  createMarkdownCell(source?: nbformat.IBaseCell): IMarkdownCellModel;
-
-  /**
-   * Create a new raw cell.
-   *
-   * @param source - The data to use for the original source data.
-   *
-   * @returns A new raw cell. If a source cell is provided, the
-   *   new cell will be intialized with the data from the source.
-   */
-  createRawCell(source?: nbformat.IBaseCell): IRawCellModel;
-}
-
-
-/**
  * An implementation of a notebook Model.
  */
 export
@@ -140,19 +103,22 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    */
   constructor(options: NotebookModel.IOptions = {}) {
     super(options.languagePreference);
-    this._factory = options.factory || NotebookModel.defaultFactory;
-    this._cells = new ObservableUndoableVector<ICellModel>((data: nbformat.IBaseCell) => {
-      switch (data.cell_type) {
+    let factory = (
+      options.contentFactory || NotebookModel.defaultContentFactory
+    );
+    this.contentFactory = factory;
+    this._cells = new ObservableUndoableVector<ICellModel>((cell: nbformat.IBaseCell) => {
+      switch (cell.cell_type) {
         case 'code':
-          return this._factory.createCodeCell(data);
+          return factory.createCodeCell({ cell });
         case 'markdown':
-          return this._factory.createMarkdownCell(data);
+          return factory.createMarkdownCell({ cell });
         default:
-          return this._factory.createRawCell(data);
+          return factory.createRawCell({ cell });
       }
     });
     // Add an initial code cell by default.
-    this._cells.pushBack(this._factory.createCodeCell());
+    this._cells.pushBack(factory.createCodeCell({}));
     this._cells.changed.connect(this._onCellsChanged, this);
     if (options.languagePreference) {
       this._metadata['language_info'] = { name: options.languagePreference };
@@ -162,20 +128,18 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   /**
    * A signal emitted when a metadata field changes.
    */
-  metadataChanged: ISignal<this, IChangedArgs<JSONValue>>;
+  readonly metadataChanged: ISignal<this, IChangedArgs<JSONValue>>;
+
+  /**
+   * The cell model factory for the notebook.
+   */
+  readonly contentFactory: NotebookModel.IContentFactory;
 
   /**
    * Get the observable list of notebook cells.
    */
   get cells(): IObservableUndoableVector<ICellModel> {
     return this._cells;
-  }
-
-  /**
-   * The cell model factory for the notebook.
-   */
-  get factory(): ICellModelFactory {
-    return this._factory;
   }
 
   /**
@@ -278,16 +242,17 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    */
   fromJSON(value: nbformat.INotebookContent): void {
     let cells: ICellModel[] = [];
-    for (let data of value.cells) {
-      switch (data.cell_type) {
+    let factory = this.contentFactory;
+    for (let cell of value.cells) {
+      switch (cell.cell_type) {
       case 'code':
-        cells.push(new CodeCellModel(data));
+        cells.push(factory.createCodeCell({ cell }));
         break;
       case 'markdown':
-        cells.push(new MarkdownCellModel(data));
+        cells.push(factory.createMarkdownCell({ cell }));
         break;
       case 'raw':
-        cells.push(new RawCellModel(data));
+        cells.push(factory.createRawCell({ cell }));
         break;
       default:
         continue;
@@ -407,13 +372,14 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     default:
       return;
     }
+    let factory = this.contentFactory;
     // Add code cell if there are no cells remaining.
     if (!this._cells.length) {
       // Add the cell in a new context to avoid triggering another
       // cell changed event during the handling of this signal.
       requestAnimationFrame(() => {
         if (!this.isDisposed && !this._cells.length) {
-          this._cells.pushBack(this._factory.createCodeCell());
+          this._cells.pushBack(factory.createCodeCell({}));
         }
       });
     }
@@ -430,7 +396,6 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   }
 
   private _cells: IObservableUndoableVector<ICellModel> = null;
-  private _factory: ICellModelFactory = null;
   private _metadata: { [key: string]: any } = Private.createMetadata();
   private _cursors: { [key: string]: MetadataCursor } = Object.create(null);
   private _nbformat = nbformat.MAJOR_VERSION;
@@ -462,14 +427,69 @@ namespace NotebookModel {
      *
      * The default is a shared factory instance.
      */
-    factory?: ICellModelFactory;
+    contentFactory?: IContentFactory;
   }
 
   /**
-   * The default implementation of an `ICellModelFactory`.
+   * A factory for creating notebook model content.
    */
   export
-  class Factory {
+  interface IContentFactory {
+    /**
+     * The factory for output area models.
+     */
+    readonly codeCellContentFactory: CodeCellModel.IContentFactory;
+
+    /**
+     * Create a new code cell.
+     *
+     * @param options - The options used to create the cell.
+     *
+     * @returns A new code cell. If a source cell is provided, the
+     *   new cell will be intialized with the data from the source.
+     */
+    createCodeCell(options: CodeCellModel.IOptions): ICodeCellModel;
+
+    /**
+     * Create a new markdown cell.
+     *
+     * @param options - The options used to create the cell.
+     *
+     * @returns A new markdown cell. If a source cell is provided, the
+     *   new cell will be intialized with the data from the source.
+     */
+    createMarkdownCell(options: CellModel.IOptions): IMarkdownCellModel;
+
+    /**
+     * Create a new raw cell.
+     *
+     * @param options - The options used to create the cell.
+     *
+     * @returns A new raw cell. If a source cell is provided, the
+     *   new cell will be intialized with the data from the source.
+     */
+    createRawCell(options: CellModel.IOptions): IRawCellModel;
+  }
+
+  /**
+   * The default implementation of an `IContentFactory`.
+   */
+  export
+  class ContentFactory {
+    /**
+     * Create a new cell model factory.
+     */
+    constructor(options: IContentFactoryOptions) {
+      this.codeCellContentFactory = (options.codeCellContentFactory ||
+        CodeCellModel.defaultContentFactory
+      );
+    }
+
+    /**
+     * The factory for code cell content.
+     */
+    readonly codeCellContentFactory: CodeCellModel.IContentFactory;
+
     /**
      * Create a new code cell.
      *
@@ -477,9 +497,14 @@ namespace NotebookModel {
      *
      * @returns A new code cell. If a source cell is provided, the
      *   new cell will be intialized with the data from the source.
+     *   If the contentFactory is not provided, the instance
+     *   `codeCellContentFactory` will be used.
      */
-    createCodeCell(source?: nbformat.ICell): ICodeCellModel {
-      return new CodeCellModel(source);
+    createCodeCell(options: CodeCellModel.IOptions): ICodeCellModel {
+      if (options.contentFactory) {
+        options.contentFactory = this.codeCellContentFactory;
+      }
+      return new CodeCellModel(options);
     }
 
     /**
@@ -490,8 +515,8 @@ namespace NotebookModel {
      * @returns A new markdown cell. If a source cell is provided, the
      *   new cell will be intialized with the data from the source.
      */
-    createMarkdownCell(source?: nbformat.IBaseCell): IMarkdownCellModel {
-      return new MarkdownCellModel(source);
+    createMarkdownCell(options: CellModel.IOptions): IMarkdownCellModel {
+      return new MarkdownCellModel(options);
     }
 
     /**
@@ -502,16 +527,27 @@ namespace NotebookModel {
      * @returns A new raw cell. If a source cell is provided, the
      *   new cell will be intialized with the data from the source.
      */
-    createRawCell(source?: nbformat.IBaseCell): IRawCellModel {
-     return new RawCellModel(source);
+    createRawCell(options: CellModel.IOptions): IRawCellModel {
+     return new RawCellModel(options);
     }
   }
 
   /**
-   * The default `Factory` instance.
+   * The options used to initialize a `ContentFactory`.
    */
   export
-  const defaultFactory = new Factory();
+  interface IContentFactoryOptions {
+    /**
+     * The factory for code cell model content.
+     */
+    codeCellContentFactory?: CodeCellModel.IContentFactory;
+  }
+
+  /**
+   * The default `ContentFactory` instance.
+   */
+  export
+  const defaultContentFactory = new ContentFactory({});
 }
 
 

@@ -45,7 +45,7 @@ class LogBaseCell extends BaseCellWidget {
   methods: string[] = [];
 
   constructor() {
-    super({ model: new CellModel(), contentFactory: createBaseCellFactory() });
+    super({ model: new CellModel({}), contentFactory: createBaseCellFactory() });
   }
 
   renderInput(widget: Widget): void {
@@ -90,7 +90,7 @@ class LogCodeCell extends CodeCellWidget {
   methods: string[] = [];
 
   constructor() {
-    super({ model: new CodeCellModel(), contentFactory: createCodeCellFactory(),
+    super({ model: new CodeCellModel({}), contentFactory: createCodeCellFactory(),
             rendermime });
   }
 
@@ -127,7 +127,7 @@ describe('notebook/cells/widget', () => {
   describe('BaseCellWidget', () => {
 
     let contentFactory = createBaseCellFactory();
-    let model = new CellModel();
+    let model = new CellModel({});
 
     describe('#constructor()', () => {
 
@@ -147,7 +147,7 @@ describe('notebook/cells/widget', () => {
     describe('#model', () => {
 
       it('should be the model used by the widget', () => {
-        let model = new CellModel();
+        let model = new CellModel({});
         let widget = new BaseCellWidget({ model, contentFactory });
         expect(widget.model).to.be(model);
       });
@@ -409,7 +409,7 @@ describe('notebook/cells/widget', () => {
   describe('CodeCellWidget', () => {
 
     let contentFactory = createCodeCellFactory();
-    let model = new CodeCellModel();
+    let model = new CodeCellModel({});
 
     describe('#constructor()', () => {
 
@@ -551,7 +551,7 @@ describe('notebook/cells/widget', () => {
   describe('MarkdownCellWidget', () => {
 
     let contentFactory = createBaseCellFactory();
-    let model = new MarkdownCellModel();
+    let model = new MarkdownCellModel({});
 
     describe('#constructor()', () => {
 
@@ -649,7 +649,7 @@ describe('notebook/cells/widget', () => {
     describe('#constructor()', () => {
 
       it('should create a raw cell widget', () => {
-        let model = new RawCellModel();
+        let model = new RawCellModel({});
         let widget = new RawCellWidget({ model, contentFactory });
         expect(widget).to.be.a(RawCellWidget);
       });

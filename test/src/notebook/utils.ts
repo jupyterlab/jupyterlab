@@ -73,7 +73,7 @@ function createCodeCellFactory(): CodeCellWidget.IContentFactory {
 export
 function createCellEditor(model?: CodeCellModel): CodeEditorWidget {
   return new CodeEditorWidget({
-    model: model || new CodeCellModel(),
+    model: model || new CodeCellModel({}),
     factory: editorFactory
   });
 }

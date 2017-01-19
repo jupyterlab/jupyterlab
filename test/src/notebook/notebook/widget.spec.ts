@@ -191,7 +191,7 @@ describe('notebook/notebook/widget', () => {
         widget.model = new NotebookModel();
         let called = false;
         widget.modelContentChanged.connect(() => { called = true; });
-        let cell = widget.model.factory.createCodeCell();
+        let cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.pushBack(cell);
         expect(called).to.be(true);
       });
@@ -292,7 +292,7 @@ describe('notebook/notebook/widget', () => {
         });
 
         it('should handle an add', () => {
-          let cell = widget.model.factory.createCodeCell();
+          let cell = widget.model.contentFactory.createCodeCell({});
           widget.model.cells.pushBack(cell);
           expect(widget.widgets.length).to.be(7);
           let child = widget.widgets.at(0);
@@ -306,7 +306,8 @@ describe('notebook/notebook/widget', () => {
         });
 
         it('should handle a clear', () => {
-          let cell = widget.model.factory.createCodeCell();
+          let cell = widget.model.contentFactory.createCodeCell({});
+          widget.model.cells.pushBack(cell);
           widget.model.cells.clear();
           expect(widget.widgets.length).to.be(0);
         });
@@ -506,12 +507,12 @@ describe('notebook/notebook/widget', () => {
 
       });
 
-      describe('#createCodeCell()', () => {
+      describe('#createCodeCell({})', () => {
 
         it('should create a `CodeCellWidget`', () => {
           let factory = new StaticNotebook.ContentFactory({ editorFactory });
           let contentFactory = factory.codeCellContentFactory;
-          let model = new CodeCellModel();
+          let model = new CodeCellModel({});
           let codeOptions = { model, rendermime, contentFactory };
           let parent = new StaticNotebook(options);
           let widget = factory.createCodeCell(codeOptions, parent);
@@ -520,12 +521,12 @@ describe('notebook/notebook/widget', () => {
 
       });
 
-      describe('#createMarkdownCell()', () => {
+      describe('#createMarkdownCell({})', () => {
 
         it('should create a `MarkdownCellWidget`', () => {
           let factory = new StaticNotebook.ContentFactory({ editorFactory });
           let contentFactory = factory.markdownCellContentFactory;
-          let model = new MarkdownCellModel();
+          let model = new MarkdownCellModel({});
           let mdOptions = { model, rendermime, contentFactory };
           let parent = new StaticNotebook(options);
           let widget = factory.createMarkdownCell(mdOptions, parent);
@@ -539,7 +540,7 @@ describe('notebook/notebook/widget', () => {
         it('should create a `RawCellWidget`', () => {
           let factory = new StaticNotebook.ContentFactory({ editorFactory });
           let contentFactory = factory.rawCellContentFactory;
-          let model = new RawCellModel();
+          let model = new RawCellModel({});
           let rawOptions = { model, contentFactory };
           let parent = new StaticNotebook(options);
           let widget = factory.createRawCell(rawOptions, parent);
@@ -696,7 +697,7 @@ describe('notebook/notebook/widget', () => {
         let widget = createActiveWidget();
         Widget.attach(widget, document.body);
         sendMessage(widget, WidgetMessage.ActivateRequest);
-        let cell = widget.model.factory.createMarkdownCell();
+        let cell = widget.model.contentFactory.createMarkdownCell({});
         widget.model.cells.pushBack(cell);
         let child = widget.widgets.at(widget.widgets.length - 1) as MarkdownCellWidget;
         expect(child.rendered).to.be(true);
@@ -888,7 +889,7 @@ describe('notebook/notebook/widget', () => {
         });
 
         it('should preserve "command" mode if in a markdown cell', () => {
-          let cell = widget.model.factory.createMarkdownCell();
+          let cell = widget.model.contentFactory.createMarkdownCell({});
           widget.model.cells.pushBack(cell);
           let count = widget.widgets.length;
           let child = widget.widgets.at(count - 1) as MarkdownCellWidget;
@@ -903,7 +904,7 @@ describe('notebook/notebook/widget', () => {
       context('dblclick', () => {
 
         it('should unrender a markdown cell', () => {
-          let cell = widget.model.factory.createMarkdownCell();
+          let cell = widget.model.contentFactory.createMarkdownCell({});
           widget.model.cells.pushBack(cell);
           let child = widget.widgets.at(widget.widgets.length - 1) as MarkdownCellWidget;
           expect(child.rendered).to.be(true);
@@ -914,7 +915,7 @@ describe('notebook/notebook/widget', () => {
         });
 
         it('should be a no-op if the model is read only', () => {
-          let cell = widget.model.factory.createMarkdownCell();
+          let cell = widget.model.contentFactory.createMarkdownCell({});
           widget.model.cells.pushBack(cell);
           widget.model.readOnly = true;
           let child = widget.widgets.at(widget.widgets.length - 1) as MarkdownCellWidget;

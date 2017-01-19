@@ -70,7 +70,7 @@ describe('notebook/notebook/actions', () => {
       kernel.shutdown();
     });
 
-    describe('#splitCell()', () => {
+    describe('#splitCell({})', () => {
 
       it('should split the active cell into two cells', () => {
         let cell = widget.activeCell;
@@ -511,11 +511,11 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should stop executing code cells on an error', (done) => {
-        let cell = widget.model.factory.createCodeCell();
+        let cell = widget.model.contentFactory.createCodeCell({});
         cell.value.text = ERROR_INPUT;
         widget.model.cells.insert(2, cell);
         widget.select(widget.widgets.at(2));
-        cell = widget.model.factory.createCodeCell();
+        cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.pushBack(cell);
         widget.select(widget.widgets.at(widget.widgets.length - 1));
         NotebookActions.run(widget, kernel).then(result => {
@@ -526,7 +526,7 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should render all markdown cells on an error', () => {
-        let cell = widget.model.factory.createMarkdownCell();
+        let cell = widget.model.contentFactory.createMarkdownCell({});
         widget.model.cells.pushBack(cell);
         let child = widget.widgets.at(widget.widgets.length - 1) as MarkdownCellWidget;
         child.rendered = false;
@@ -618,7 +618,7 @@ describe('notebook/notebook/actions', () => {
 
       it('should stop executing code cells on an error', (done) => {
         widget.activeCell.model.value.text = ERROR_INPUT;
-        let cell = widget.model.factory.createCodeCell();
+        let cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.pushBack(cell);
         widget.select(widget.widgets.at(widget.widgets.length - 1));
         NotebookActions.runAndAdvance(widget, kernel).then(result => {
@@ -706,7 +706,7 @@ describe('notebook/notebook/actions', () => {
 
       it('should stop executing code cells on an error', (done) => {
         widget.activeCell.model.value.text = ERROR_INPUT;
-        let cell = widget.model.factory.createCodeCell();
+        let cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.pushBack(cell);
         widget.select(widget.widgets.at(widget.widgets.length - 1));
         NotebookActions.runAndInsert(widget, kernel).then(result => {
@@ -787,7 +787,7 @@ describe('notebook/notebook/actions', () => {
 
       it('should stop executing code cells on an error', (done) => {
         widget.activeCell.model.value.text = ERROR_INPUT;
-        let cell = widget.model.factory.createCodeCell();
+        let cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.pushBack(cell);
         NotebookActions.runAll(widget, kernel).then(result => {
           expect(result).to.be(false);

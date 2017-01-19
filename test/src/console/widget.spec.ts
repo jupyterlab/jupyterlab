@@ -180,7 +180,7 @@ describe('console/widget', () => {
 
       it('should add a code cell to the content widget', () => {
         let contentFactory = createCodeCellFactory();
-        let model = new CodeCellModel();
+        let model = new CodeCellModel({});
         let cell = new CodeCellWidget({ model, contentFactory, rendermime });
         Widget.attach(widget, document.body);
         expect(widget.cells.length).to.be(0);
@@ -405,7 +405,7 @@ describe('console/widget', () => {
 
         it('should create a ForeignHandler', () => {
           let cellFactory = () => {
-            let model = new CodeCellModel();
+            let model = new CodeCellModel({});
             let rendermime = widget.rendermime;
             let factory = contentFactory.codeCellContentFactory;
             let options: CodeCellWidget.IOptions = {
@@ -426,7 +426,7 @@ describe('console/widget', () => {
       describe('#createBanner', () => {
 
         it('should create a banner cell', () => {
-          let model = new RawCellModel();
+          let model = new RawCellModel({});
           let banner = contentFactory.createBanner({
             model,
             contentFactory: contentFactory.rawCellContentFactory
@@ -439,7 +439,7 @@ describe('console/widget', () => {
       describe('#createPrompt', () => {
 
         it('should create a prompt cell', () => {
-          let model = new CodeCellModel();
+          let model = new CodeCellModel({});
           let prompt = contentFactory.createPrompt({
             rendermime: widget.rendermime,
             model,
@@ -453,7 +453,7 @@ describe('console/widget', () => {
       describe('#createForeignCell', () => {
 
         it('should create a foreign cell', () => {
-          let model = new CodeCellModel();
+          let model = new CodeCellModel({});
           let prompt = contentFactory.createForeignCell({
             rendermime: widget.rendermime,
             model,
@@ -462,6 +462,60 @@ describe('console/widget', () => {
           expect(prompt).to.be.a(CodeCellWidget);
         });
 
+      });
+
+    });
+
+    describe('.ModelFactory', () => {
+
+      describe('#constructor()', () => {
+
+        it('should create a new model factory', () => {
+          let factory = new CodeConsole.ModelFactory({});
+          expect(factory).to.be.a(CodeConsole.ModelFactory);
+        });
+
+        it('should accept a codeCellContentFactory', () => {
+          let codeCellContentFactory = new CodeCellModel.ContentFactory();
+          let factory = new CodeConsole.ModelFactory({ codeCellContentFactory });
+          expect(factory.codeCellContentFactory).to.be(codeCellContentFactory);
+        });
+
+      });
+
+      describe('#codeCellContentFactory', () => {
+
+        it('should be the code cell content factory used by the factory', () => {
+          let factory = new CodeConsole.ModelFactory({});
+          expect(factory.codeCellContentFactory).to.be(CodeCellModel.defaultContentFactory);
+        });
+
+      });
+
+      describe('#createCodeCell()', () => {
+
+        it('should create a code cell', () => {
+          let factory = new CodeConsole.ModelFactory({});
+          expect(factory.createCodeCell({})).to.be.a(CodeCellModel);
+        });
+
+      });
+
+      describe('#createRawCell()', () => {
+
+        it('should create a raw cell model', () => {
+          let factory = new CodeConsole.ModelFactory({});
+          expect(factory.createRawCell({})).to.be.a(RawCellModel);
+        });
+
+      });
+
+    });
+
+    describe('.defaultModelFactory', () => {
+
+      it('should be a ModelFactory', () => {
+        expect(CodeConsole.defaultModelFactory).to.be.a(CodeConsole.ModelFactory);
       });
 
     });
