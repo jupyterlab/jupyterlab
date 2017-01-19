@@ -491,7 +491,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     let isCode = (mime !== 'text/plain') && (mime !== 'text/x-ipythongfm');
     editor.setOption('matchBrackets', isCode);
     editor.setOption('autoCloseBrackets', isCode);
-    let extraKeys = editor.getOption('extraKeys');
+    let extraKeys = editor.getOption('extraKeys') || {};
     if (isCode) {
       extraKeys['Backspace'] = 'delSpaceToPrevTabStop';
     } else {
