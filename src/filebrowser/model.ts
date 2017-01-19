@@ -6,8 +6,12 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  IterableOrArrayLike, IIterator, each
+  IterableOrArrayLike, IIterator, each, toArray
 } from 'phosphor/lib/algorithm/iteration';
+
+import {
+  findIndex
+} from 'phosphor/lib/algorithm/searching';
 
 import {
   Vector
@@ -213,11 +217,17 @@ class FileBrowserModel implements IDisposable, IPathTracker {
    * @param: path - The path to the file to be deleted.
    *
    * @returns A promise which resolves when the file is deleted.
+   *
+   * #### Notes
+   * If there is a running session associated with the file and no other
+   * sessions are using the kernel, the session will be shut down.
    */
   deleteFile(path: string): Promise<void> {
     let normalizePath = Private.normalizePath;
     path = normalizePath(this._model.path, path);
-    return this._manager.contents.delete(path);
+    return this.stopIfNeeded(path).then(() => {
+      return this._manager.contents.delete(path);
+    });
   }
 
   /**
@@ -316,6 +326,29 @@ class FileBrowserModel implements IDisposable, IPathTracker {
    */
   shutdown(id: string): Promise<void> {
     return this._manager.sessions.shutdown(id);
+  }
+
+  /**
+   * Find a session associated with a path and stop it is the only
+   * session using that kernel.
+   */
+  protected stopIfNeeded(path: string): Promise<void> {
+    let sessions = toArray(this._sessions);
+    let index = findIndex(sessions, value => value.notebook.path === path);
+    if (index !== -1) {
+      let count = 0;
+      let model = sessions[index];
+      each(sessions, value => {
+        if (model.kernel.id === value.kernel.id) {
+          count++;
+        }
+      });
+      if (count === 1) {
+        // Try to delete the session, but succeed either way.
+        return this.shutdown(model.id).catch(() => { /* no-op */ });
+      }
+    }
+    return Promise.resolve(void 0);
   }
 
   /**
