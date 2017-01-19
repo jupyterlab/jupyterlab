@@ -22,7 +22,7 @@ import {
 } from 'phosphor/lib/core/disposable';
 
 import {
-  ISignal, defineSignal
+  ISignal, clearSignalData, defineSignal
 } from 'phosphor/lib/core/signaling';
 
 import {

@@ -191,7 +191,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       cell.dispose();
     }
     cells.dispose();
-    for (let key in this.cursors) {
+    for (let key in cursors) {
       cursors[key].dispose();
     }
     super.dispose();

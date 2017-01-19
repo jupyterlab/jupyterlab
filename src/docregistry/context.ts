@@ -125,6 +125,13 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   }
 
   /**
+   * Test whether the context is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._model === null;
+  }
+
+  /**
    * Dispose of the resources held by the context.
    */
   dispose(): void {
@@ -143,7 +150,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       session.dispose();
     }
     this.disposed.emit(void 0);
-    super.dispose();
+    clearSignalData(this);
   }
 
   /**
