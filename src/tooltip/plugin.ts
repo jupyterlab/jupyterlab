@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Kernel
+} from '@jupyterlab/services';
+
+import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
@@ -58,23 +62,26 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
   registry.addCommand(launch, {
     execute: args => {
       let notebook = args['notebook'] as boolean;
-      let editor: CodeEditor.IEditor | null = null;
+      let editor: CodeEditor.IEditor = null;
+      let kernel: Kernel.IKernel = null;
       if (notebook) {
         let widget = notebooks.currentWidget;
         if (widget) {
           editor = widget.notebook.activeCell.editor;
+          kernel = widget.kernel;
         }
       } else {
         let widget = consoles.currentWidget;
         if (widget) {
           editor = widget.console.prompt.editor;
+          kernel = widget.console.session.kernel;
         }
       }
       if (tooltip) {
         tooltip.dispose();
       }
       if (editor) {
-        tooltip = new TooltipWidget({ editor });
+        tooltip = new TooltipWidget({ editor, kernel });
         tooltip.id = `tooltip-${++id}`;
         Widget.attach(tooltip, document.body);
         tooltip.activate();

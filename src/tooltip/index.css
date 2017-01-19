@@ -5,4 +5,8 @@
 
 .jp-Tooltip {
   background: var(--jp-info-color0);
+  border: 1px solid red;
+  min-width: 200px;
+  min-height: 200px;
+  z-index: 10001;
 }
