@@ -53,43 +53,28 @@ def create_notebook_dir():
     return root_dir
 
 
-class TaskRunner(object):
-    """Run a task using the notebook app and exit with the return code.
-    """
+@gen.coroutine
+def run(cmd):
+    """Start the task."""
+    """Run a task in a thread and exit with the return code."""
+    shell = os.name == 'nt'
+    proc = Popen(cmd, shell=shell)
+    print('\n\nRunning command: "%s"\n\n' % ' '.join(cmd))
 
-    def __init__(self, nbapp):
-        self.nbapp = nbapp
+    # Poll the process once per second until finished.
+    while 1:
+        yield gen.sleep(1)
+        if proc.poll() is not None:
+            break
 
-    def start(self, cmd):
-        """Start the task."""
-        # Run the command after the ioloop starts.
-        self._command = cmd
-        IOLoop.current().add_callback(self._run_command)
+    exit(proc.returncode)
 
-    def exit(self, returncode):
-        """Safely stop the app and then exit with the given code."""
-        self._return_code = returncode
-        self.nbapp.io_loop.add_callback(self._exit)
 
-    @gen.coroutine
-    def _run_command(self):
-        """Run a task in a thread and exit with the return code."""
-        cmd = self._command
-        shell = os.name == 'nt'
-        proc = Popen(cmd, shell=shell)
-        print('\n\nRunning command: "%s"\n\n' % ' '.join(cmd))
-
-        # Poll the process once per second until finished.
-        while 1:
-            yield gen.sleep(1)
-            if proc.poll() is not None:
-                break
-
-        self.exit(proc.returncode)
-
-    def _exit(self):
-        self.nbapp.io_loop.stop()
-        sys.exit(self._return_code)
+@gen.coroutine
+def exit(returncode):
+    """Safely stop the app and then exit with the given code."""
+    IOLoop.current().stop()
+    sys.exit(returncode)
 
 
 class TestApp(NotebookApp):
@@ -111,13 +96,12 @@ def main():
         sys.exit(1)
 
     app.initialize([])  # reserve sys.argv for the command
-    task = TaskRunner(app)
-    task.start(get_command(app))
+    run(get_command(app))
 
     try:
         app.start()
     except KeyboardInterrupt:
-        task.exit(1)
+        exit(1)
 
 
 if __name__ == '__main__':
