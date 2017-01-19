@@ -176,7 +176,7 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
 }
 
 
-// Define the signals for the `FileBrowserModel` class.
+// Define the signals for the `InspectionHandler` class.
 defineSignal(InspectionHandler.prototype, 'ephemeralCleared');
 defineSignal(InspectionHandler.prototype, 'disposed');
 defineSignal(InspectionHandler.prototype, 'inspected');
