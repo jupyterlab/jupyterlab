@@ -47,12 +47,15 @@ export default plugin;
  * Activate the tooltip.
  */
 function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebookTracker): void {
-  const command = 'tooltip:launch';
+  const launch = 'tooltip:launch';
+  const remove = 'tooltip:remove';
   const keymap = app.keymap;
   const registry = app.commands;
+  let tooltip: TooltipWidget = null;
   let id = 0;
 
-  registry.addCommand(command, {
+  // Add tooltip launch command.
+  registry.addCommand(launch, {
     execute: args => {
       let notebook = args['notebook'] as boolean;
       let editor: CodeEditor.IEditor | null = null;
@@ -67,8 +70,11 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
           editor = widget.console.prompt.editor;
         }
       }
+      if (tooltip) {
+        tooltip.dispose();
+      }
       if (editor) {
-        let tooltip = new TooltipWidget({ editor });
+        tooltip = new TooltipWidget({ editor });
         tooltip.id = `tooltip-${++id}`;
         Widget.attach(tooltip, document.body);
         tooltip.activate();
@@ -76,17 +82,36 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
       }
     }
   });
+
+  // Add tooltip remove command.
+  registry.addCommand(remove, {
+    execute: () => {
+      if (tooltip) {
+        tooltip.dispose();
+      }
+    }
+  });
+
+  // Add notebook tooltip key binding.
   keymap.addBinding({
-    command,
     args: { notebook: true },
+    command: launch,
     keys: ['Shift Tab'],
     selector: '.jp-Notebook'
   });
+
+  // Add console tooltip key binding.
   keymap.addBinding({
-    command,
     args: { notebook: false },
+    command: launch,
     keys: ['Shift Tab'],
     selector: '.jp-ConsolePanel'
   });
-  console.log('initialized tooltip plugin', consoles, notebooks);
+
+  // Add tooltip removal key binding.
+  keymap.addBinding({
+    command: remove,
+    keys: ['Escape'],
+    selector: '.jp-Tooltip'
+  });
 }
