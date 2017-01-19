@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel
-} from '@jupyterlab/services';
-
-import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -14,8 +10,8 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  CodeEditor
-} from '../codeeditor';
+  TooltipModel
+} from './model';
 
 
 /**
@@ -34,26 +30,19 @@ class TooltipWidget extends Widget {
    */
   constructor(options: TooltipWidget.IOptions) {
     super();
-    this.editor = options.editor;
-    this.kernel = options.kernel;
+    this.model = options.model;
     this.addClass(TOOLTIP_CLASS);
   }
 
   /**
-   * The editor referent of the tooltip widget.
+   * The tooltip widget's data model.
    */
-  readonly editor: CodeEditor.IEditor;
-
-  /**
-   * The kernel for the tooltip widget.
-   */
-  readonly kernel: Kernel.IKernel;
+  readonly model: TooltipModel;
 
   /**
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    console.log('activate-request');
     this.node.tabIndex = -1;
     this.node.focus();
   }
@@ -62,14 +51,13 @@ class TooltipWidget extends Widget {
    * Handle `'after-attach'` messages.
    */
   protected onAfterAttach(msg: Message): void {
-    console.log('after-attach');
+    this.model.fetch();
   }
 
   /**
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    console.log('update-request');
     super.onUpdateRequest(msg);
   }
 }
@@ -85,13 +73,8 @@ namespace TooltipWidget {
   export
   interface IOptions {
     /**
-     * The editor referent of the tooltip widget.
+     * The data model for the tooltip widget.
      */
-    editor: CodeEditor.IEditor;
-
-    /**
-     * The kernel for the tooltip widget.
-     */
-    kernel: Kernel.IKernel;
+    model: TooltipModel;
   }
 }

@@ -26,8 +26,16 @@ import {
 } from '../notebook';
 
 import {
+  IRenderMime
+} from '../rendermime';
+
+import {
+  TooltipModel
+} from './model';
+
+import {
   TooltipWidget
-} from './index';
+} from './widget';
 
 
 /**
@@ -56,6 +64,7 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
   const keymap = app.keymap;
   const registry = app.commands;
   let tooltip: TooltipWidget = null;
+  let model: TooltipModel = null;
   let id = 0;
 
   // Add tooltip launch command.
@@ -64,28 +73,41 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
       let notebook = args['notebook'] as boolean;
       let editor: CodeEditor.IEditor = null;
       let kernel: Kernel.IKernel = null;
+      let rendermime: IRenderMime = null;
+      let extant = !!tooltip;
+      let ready = false;
+
       if (notebook) {
         let widget = notebooks.currentWidget;
         if (widget) {
           editor = widget.notebook.activeCell.editor;
           kernel = widget.kernel;
+          rendermime = widget.rendermime;
+          ready = !!editor && !!kernel && !!rendermime;
         }
       } else {
         let widget = consoles.currentWidget;
         if (widget) {
           editor = widget.console.prompt.editor;
           kernel = widget.console.session.kernel;
+          rendermime = widget.console.rendermime;
+          ready = !!editor && !!kernel && !!rendermime;
         }
       }
-      if (tooltip) {
+
+      // Dispose extant tooltip and model.
+      if (extant) {
         tooltip.dispose();
+        model.dispose();
       }
-      if (editor) {
-        tooltip = new TooltipWidget({ editor, kernel });
+
+      // If all components necessary for rendering exist, create a tooltip.
+      if (ready) {
+        model = new TooltipModel({ editor, kernel, rendermime });
+        tooltip = new TooltipWidget({ model });
         tooltip.id = `tooltip-${++id}`;
         Widget.attach(tooltip, document.body);
         tooltip.activate();
-        console.log('add tooltip for ' + (notebook ? 'notebook' : 'console'));
       }
     }
   });
