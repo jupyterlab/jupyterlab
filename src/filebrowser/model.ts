@@ -225,25 +225,9 @@ class FileBrowserModel implements IDisposable, IPathTracker {
   deleteFile(path: string): Promise<void> {
     let normalizePath = Private.normalizePath;
     path = normalizePath(this._model.path, path);
-    let sessions = toArray(this._sessions);
-    let index = findIndex(sessions, session => {
-      return session.notebook.path === path;
+    return this.stopIfNeeded(path).then(() => {
+      return this._manager.contents.delete(path);
     });
-    if (index !== 1) {
-      let count = 0;
-      let session = sessions.at(index);
-      each(sessions, value => {
-        if (session.kernel.id === value.kernel.id) {
-          count++;
-        }
-      });
-      if (count === 1) {
-        return this.shutdown(session.id).then(() => {
-          return this._manager.contents.delete(path);
-        });
-      }
-    }
-    return this._manager.contents.delete(path);
   }
 
   /**
@@ -342,6 +326,31 @@ class FileBrowserModel implements IDisposable, IPathTracker {
    */
   shutdown(id: string): Promise<void> {
     return this._manager.sessions.shutdown(id);
+  }
+
+  /**
+   * Find a session associated with a path and stop it is the only
+   * session using that kernel.
+   */
+  protected stopIfNeeded(path: string): Promise<void> {
+    let sessions = toArray(this._sessions);
+    let index = findIndex(sessions, session => {
+      return session.notebook.path === path;
+    });
+    if (index !== 1) {
+      let count = 0;
+      let session = sessions.at(index);
+      each(sessions, value => {
+        if (session.kernel.id === value.kernel.id) {
+          count++;
+        }
+      });
+      if (count === 1) {
+        // Try to delete the session, but succeed either way.
+        return this.shutdown(session.id).catch(() => { /* no-op */ });
+      }
+    }
+    return Promise.resolve(void 0);
   }
 
   /**
