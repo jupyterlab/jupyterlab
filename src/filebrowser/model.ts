@@ -339,7 +339,7 @@ class FileBrowserModel implements IDisposable, IPathTracker {
     });
     if (index !== 1) {
       let count = 0;
-      let session = sessions.at(index);
+      let session = sessions[index];
       each(sessions, value => {
         if (session.kernel.id === value.kernel.id) {
           count++;
