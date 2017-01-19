@@ -2,7 +2,7 @@ name: lab_tutorial
 channels:
   - conda-forge
 dependencies:
-- python=3
+- python==3.5
 - sphinx>1.4
 - sphinx_rtd_theme
 - pip:
