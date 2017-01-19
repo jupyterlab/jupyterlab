@@ -486,10 +486,18 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   protected _onMimeTypeChanged(): void {
     const mime = this._model.mimeType;
-    loadModeByMIME(this._editor, mime);
+    let editor = this._editor;
+    loadModeByMIME(editor, mime);
     let isCode = (mime !== 'text/plain') && (mime !== 'text/x-ipythongfm');
-    this.editor.setOption('matchBrackets', isCode);
-    this.editor.setOption('autoCloseBrackets', isCode);
+    editor.setOption('matchBrackets', isCode);
+    editor.setOption('autoCloseBrackets', isCode);
+    let extraKeys = editor.getOption('extraKeys');
+    if (isCode) {
+      extraKeys['Backspace'] = 'delSpaceToPrevTabStop';
+    } else {
+      delete extraKeys['Backspace'];
+    }
+    editor.setOption('extraKeys', extraKeys);
   }
 
   /**
@@ -668,6 +676,37 @@ defineSignal(CodeMirrorEditor.prototype, 'edgeRequested');
 
 
 /**
+ * Add a CodeMirror command to delete until previous non blanking space
+ * character or first multiple of 4 tabstop.
+ */
+CodeMirror.commands['delSpaceToPrevTabStop'] = (cm: CodeMirror.Editor) => {
+  let doc = cm.getDoc();
+  let from = doc.getCursor('from');
+  let to = doc.getCursor('to');
+  let sel = !Private.posEq(from, to);
+  if (sel) {
+    let ranges = doc.listSelections();
+    for (let i = ranges.length - 1; i >= 0; i--) {
+      let head = ranges[i].head;
+      let anchor = ranges[i].anchor;
+      doc.replaceRange('', CodeMirror.Pos(head.line, head.ch), CodeMirror.Pos(anchor.line, anchor.ch));
+    }
+    return;
+  }
+  let cur = doc.getCursor();
+  let tabsize = cm.getOption('tabSize');
+  let chToPrevTabStop = cur.ch - (Math.ceil(cur.ch / tabsize) - 1) * tabsize;
+  from = {ch: cur.ch - chToPrevTabStop, line: cur.line};
+  let select = doc.getRange(from, cur);
+  if (select.match(/^\ +$/) !== null) {
+    doc.replaceRange('', from, cur);
+  } else {
+    CodeMirror.commands['delCharBefore'](cm);
+  }
+};
+
+
+/**
  * The namespace for module private data.
  */
 namespace Private {
@@ -688,4 +727,12 @@ namespace Private {
     config.theme = (config.theme || DEFAULT_CODEMIRROR_THEME);
     config.indentUnit = config.indentUnit || 4;
   }
+
+  /**
+   * Test whether two CodeMirror positions are equal.
+   */
+  export
+  function posEq(a: CodeMirror.Position, b: CodeMirror.Position): boolean {
+    return a.line === b.line && a.ch === b.ch;
+  };
 }
