@@ -73,19 +73,20 @@ class ForeignHandler implements IDisposable {
    * Test whether the handler is disposed.
    */
   get isDisposed(): boolean {
-    return this._kernel === null;
+    return this._cells === null;
   }
 
   /**
    * Dispose the resources held by the handler.
    */
   dispose(): void {
-    if (this._kernel == null) {
+    if (this._cells === null) {
       return;
     }
-    this._kernel = null;
-    this._cells.clear();
+    let cells = this._cells;
     this._cells = null;
+    this._kernel = null;
+    cells.clear();
   }
 
   /**

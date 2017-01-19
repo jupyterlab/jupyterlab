@@ -233,14 +233,14 @@ class NotebookPanel extends Widget {
    * Dispose of the resources used by the widget.
    */
   dispose(): void {
-    if (this._context === null) {
+    if (this._completer === null) {
       return;
     }
-    let completerHandler = this._completerHandler;
     let completer = this._completer;
+    let completerHandler = this._completerHandler;
+    this._completer = null;
     this._context = null;
     this._completerHandler = null;
-    this._completer = null;
 
     this.notebook.dispose();
     completerHandler.dispose();
