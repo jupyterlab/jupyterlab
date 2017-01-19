@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Widget
+} from 'phosphor/lib/ui/widget';
+
+import {
   JupyterLab, JupyterLabPlugin
 } from '../application';
 
@@ -46,6 +50,8 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
   const command = 'tooltip:launch';
   const keymap = app.keymap;
   const registry = app.commands;
+  let id = 0;
+
   registry.addCommand(command, {
     execute: args => {
       let notebook = args['notebook'] as boolean;
@@ -62,8 +68,11 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
         }
       }
       if (editor) {
-        let tooltip = new TooltipWidget();
-        console.log('add tooltip for editor', editor, tooltip);
+        let tooltip = new TooltipWidget({ editor });
+        tooltip.id = `tooltip-${++id}`;
+        Widget.attach(tooltip, document.body);
+        tooltip.activate();
+        console.log('add tooltip for ' + (notebook ? 'notebook' : 'console'));
       }
     }
   });
