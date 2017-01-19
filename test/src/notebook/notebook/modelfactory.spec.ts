@@ -15,10 +15,6 @@ import {
   NotebookModelFactory
 } from '../../../../lib/notebook/notebook/modelfactory';
 
-import {
-  OutputAreaModel
-} from '../../../../lib/notebook/output-area';
-
 
 describe('notebook/notebook/modelfactory', () => {
 
@@ -31,10 +27,25 @@ describe('notebook/notebook/modelfactory', () => {
         expect(factory).to.be.a(NotebookModelFactory);
       });
 
-      it('should accept an output area factory', () => {
-        let outputAreaFactory = new CodeCellModel.OutputAreaFactory();
-        let factory = new NotebookModelFactory({ outputAreaFactory });
-        expect(factory);
+      it('should accept a code cell content factory', () => {
+        let codeCellContentFactory = new CodeCellModel.ContentFactory();
+        let factory = new NotebookModelFactory({ codeCellContentFactory });
+        expect(factory.contentFactory.codeCellContentFactory).to.be(codeCellContentFactory);
+      });
+
+      it('should accept a notebook model content factory', () => {
+        let contentFactory = new NotebookModel.ContentFactory({});
+        let factory = new NotebookModelFactory({ contentFactory });
+        expect(factory.contentFactory).to.be(contentFactory);
+      });
+
+    });
+
+    describe('#contentFactory', () => {
+
+      it('should be the content factory used by the model factory', () => {
+        let factory = new NotebookModelFactory({});
+        expect(factory.contentFactory).to.be.a(NotebookModel.ContentFactory);
       });
 
     });

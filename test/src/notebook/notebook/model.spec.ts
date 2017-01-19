@@ -400,14 +400,14 @@ describe('notebook/notebook/model', () => {
 
       context('#codeCellContentFactory', () => {
 
-        it('should be an output area factory', () => {
-          expect(factory.outputAreaFactory).to.be(CodeCellModel.defaultOutputAreaFactory);
+        it('should be a code cell content factory', () => {
+          expect(factory.codeCellContentFactory).to.be(CodeCellModel.defaultContentFactory);
         });
 
         it('should be settable in the constructor', () => {
-          let outputAreaFactory = new CodeCellModel.OutputAreaFactory();
-          factory = new NotebookModel.ContentFactory({ outputAreaFactory });
-          expect(factory.outputAreaFactory).to.be(outputAreaFactory);
+          let codeCellContentFactory = new CodeCellModel.ContentFactory();
+          factory = new NotebookModel.ContentFactory({ codeCellContentFactory });
+          expect(factory.codeCellContentFactory).to.be(codeCellContentFactory);
         });
 
       });

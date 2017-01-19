@@ -466,6 +466,60 @@ describe('console/widget', () => {
 
     });
 
+    describe('.ModelFactory', () => {
+
+      describe('#constructor()', () => {
+
+        it('should create a new model factory', () => {
+          let factory = new CodeConsole.ModelFactory({});
+          expect(factory).to.be.a(CodeConsole.ModelFactory);
+        });
+
+        it('should accept a codeCellContentFactory', () => {
+          let codeCellContentFactory = new CodeCellModel.ContentFactory();
+          let factory = new CodeConsole.ModelFactory({ codeCellContentFactory });
+          expect(factory.codeCellContentFactory).to.be(codeCellContentFactory);
+        });
+
+      });
+
+      describe('#codeCellContentFactory', () => {
+
+        it('should be the code cell content factory used by the factory', () => {
+          let factory = new CodeConsole.ModelFactory({});
+          expect(factory.codeCellContentFactory).to.be(CodeCellModel.defaultContentFactory);
+        });
+
+      });
+
+      describe('#createCodeCell()', () => {
+
+        it('should create a code cell', () => {
+          let factory = new CodeConsole.ModelFactory({});
+          expect(factory.createCodeCell({})).to.be.a(CodeCellModel);
+        });
+
+      });
+
+      describe('#createRawCell()', () => {
+
+        it('should create a raw cell model', () => {
+          let factory = new CodeConsole.ModelFactory({});
+          expect(factory.createRawCell({})).to.be.a(RawCellModel);
+        });
+
+      });
+
+    });
+
+    describe('.defaultModelFactory', () => {
+
+      it('should be a ModelFactory', () => {
+        expect(CodeConsole.defaultModelFactory).to.be.a(CodeConsole.ModelFactory);
+      });
+
+    });
+
   });
 
 });
