@@ -558,7 +558,7 @@ namespace StaticNotebook {
     /**
      * Creates a new renderer.
      */
-    constructor(options: ContentFactory.IOptions) {
+    constructor(options: IContentFactoryOptions) {
       let editorFactory = options.editorFactory;
       let outputAreaContentFactory = (options.outputAreaContentFactory ||
         OutputAreaWidget.defaultContentFactory
@@ -620,41 +620,35 @@ namespace StaticNotebook {
   }
 
   /**
-   * The namespace for the `ContentFactory` class statics.
+   * An options object for initializing a notebook content factory.
    */
   export
-  namespace ContentFactory {
+  interface IContentFactoryOptions {
     /**
-     * An options object for initializing a notebook renderer.
+     * The editor factory.
      */
-    export
-    interface IOptions {
-      /**
-       * The editor factory.
-       */
-      editorFactory: CodeEditor.Factory;
+    editorFactory: CodeEditor.Factory;
 
-      /**
-       * The factory for output area content.
-       */
-      outputAreaContentFactory?: OutputAreaWidget.IContentFactory;
+    /**
+     * The factory for output area content.
+     */
+    outputAreaContentFactory?: OutputAreaWidget.IContentFactory;
 
-      /**
-       * The factory for code cell widget content.  If given, this will
-       * take precedence over the `outputAreaContentFactory`.
-       */
-      codeCellContentFactory?: CodeCellWidget.IContentFactory;
+    /**
+     * The factory for code cell widget content.  If given, this will
+     * take precedence over the `outputAreaContentFactory`.
+     */
+    codeCellContentFactory?: CodeCellWidget.IContentFactory;
 
-      /**
-       * The factory for raw cell widget content.
-       */
-      rawCellContentFactory?: BaseCellWidget.IContentFactory;
+    /**
+     * The factory for raw cell widget content.
+     */
+    rawCellContentFactory?: BaseCellWidget.IContentFactory;
 
-      /**
-       * The factory for markdown cell widget content.
-       */
-      markdownCellContentFactory?: BaseCellWidget.IContentFactory;
-    }
+    /**
+     * The factory for markdown cell widget content.
+     */
+    markdownCellContentFactory?: BaseCellWidget.IContentFactory;
   }
 }
 
@@ -1250,14 +1244,13 @@ class Notebook extends StaticNotebook {
     let model = this.model;
     let values = event.mimeData.getData(JUPYTER_CELL_MIME);
     let factory = model.contentFactory;
-    let outputAreaFactory = factory.outputAreaFactory;
 
     // Insert the copies of the original cells.
     each(values, (cell: nbformat.ICell) => {
       let value: ICellModel;
       switch (cell.cell_type) {
       case 'code':
-        value = factory.createCodeCell({ cell, outputAreaFactory });
+        value = factory.createCodeCell({ cell });
         break;
       case 'markdown':
         value = factory.createMarkdownCell({ cell });

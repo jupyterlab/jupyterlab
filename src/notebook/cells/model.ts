@@ -339,8 +339,8 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
    */
   constructor(options: CodeCellModel.IOptions) {
     super(options);
-    let factory = (options.outputAreaFactory ||
-      CodeCellModel.defaultOutputAreaFactory
+    let factory = (options.contentFactory ||
+      CodeCellModel.defaultContentFactory
     );
     this._outputs = factory.createOutputArea();
     let cell = options.cell as nbformat.ICodeCell;
@@ -441,14 +441,14 @@ namespace CodeCellModel {
     /**
      * The factory for output area model creation.
      */
-    outputAreaFactory?: IOutputAreaFactory;
+    contentFactory?: IContentFactory;
   }
 
   /**
-   * A factory for creating cell models.
+   * A factory for creating code cell model content.
    */
   export
-  interface IOutputAreaFactory {
+  interface IContentFactory {
     /**
      * Create an output area.
      */
@@ -456,10 +456,10 @@ namespace CodeCellModel {
   }
 
   /**
-   * The default implementation of an `IOutpuAreaFactory`.
+   * The default implementation of an `IContentFactory`.
    */
   export
-  class OutputAreaFactory {
+  class ContentFactory {
     /**
      * Create an output area.
      */
@@ -469,8 +469,8 @@ namespace CodeCellModel {
   }
 
   /**
-   * The shared `OutputAreaFactory` instance.
+   * The shared `ConetntFactory` instance.
    */
   export
-  const defaultOutputAreaFactory = new OutputAreaFactory();
+  const defaultContentFactory = new ContentFactory();
 }

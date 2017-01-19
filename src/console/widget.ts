@@ -537,8 +537,7 @@ class CodeConsole extends Widget {
     let factory = this.contentFactory;
     let contentFactory = factory.codeCellContentFactory;
     let modelFactory = this.modelFactory;
-    let outputAreaFactory = modelFactory.outputAreaFactory;
-    let model = modelFactory.createCodeCell({ outputAreaFactory });
+    let model = modelFactory.createCodeCell({ });
     let rendermime = this.rendermime;
     return { model, rendermime, contentFactory };
   }
@@ -704,7 +703,7 @@ namespace CodeConsole {
     /**
      * Create a new content factory.
      */
-    constructor(options: ContentFactory.IOptions) {
+    constructor(options: IContentFactoryOptions) {
       let editorFactory = options.editorFactory;
       let outputAreaContentFactory = (options.outputAreaContentFactory ||
         OutputAreaWidget.defaultContentFactory
@@ -770,38 +769,31 @@ namespace CodeConsole {
       return new CodeCellWidget(options);
     }
   }
-
   /**
-   * The namespace for `ContentFactory` class statics.
+   * An initialize options for `ContentFactory`.
    */
   export
-  namespace ContentFactory {
+  interface IContentFactoryOptions {
     /**
-     * An initialize options for `ContentFactory`.
+     * The editor factory.
      */
-    export
-    interface IOptions {
-      /**
-       * The editor factory.
-       */
-      editorFactory: CodeEditor.Factory;
+    editorFactory: CodeEditor.Factory;
 
-      /**
-       * The factory for output area content.
-       */
-      outputAreaContentFactory?: OutputAreaWidget.IContentFactory;
+    /**
+     * The factory for output area content.
+     */
+    outputAreaContentFactory?: OutputAreaWidget.IContentFactory;
 
-      /**
-       * The factory for code cell widget content.  If given, this will
-       * take precedence over the `outputAreaContentFactory`.
-       */
-      codeCellContentFactory?: CodeCellWidget.IContentFactory;
+    /**
+     * The factory for code cell widget content.  If given, this will
+     * take precedence over the `outputAreaContentFactory`.
+     */
+    codeCellContentFactory?: CodeCellWidget.IContentFactory;
 
-      /**
-       * The factory for raw cell widget content.
-       */
-      rawCellContentFactory?: BaseCellWidget.IContentFactory;
-    }
+    /**
+     * The factory for raw cell widget content.
+     */
+    rawCellContentFactory?: BaseCellWidget.IContentFactory;
   }
 
   /**
@@ -810,9 +802,9 @@ namespace CodeConsole {
   export
   interface IModelFactory {
    /**
-    * The factory for output area models.
+    * The factory for code cell content.
     */
-    readonly outputAreaFactory: CodeCellModel.IOutputAreaFactory;
+    readonly codeCellContentFactory: CodeCellModel.IContentFactory;
 
     /**
      * Create a new code cell.
@@ -823,6 +815,7 @@ namespace CodeConsole {
      *   new cell will be intialized with the data from the source.
      */
     createCodeCell(options: CodeCellModel.IOptions): ICodeCellModel;
+
     /**
      * Create a new raw cell.
      *
@@ -843,15 +836,15 @@ namespace CodeConsole {
      * Create a new cell model factory.
      */
     constructor(options: IModelFactoryOptions) {
-      this.outputAreaFactory = (options.outputAreaFactory ||
-        CodeCellModel.defaultOutputAreaFactory
+      this.codeCellContentFactory = (options.codeCellContentFactory ||
+        CodeCellModel.defaultContentFactory
       );
     }
 
     /**
      * The factory for output area models.
      */
-    readonly outputAreaFactory: CodeCellModel.IOutputAreaFactory;
+    readonly codeCellContentFactory: CodeCellModel.IContentFactory;
 
     /**
      * Create a new code cell.
@@ -860,8 +853,13 @@ namespace CodeConsole {
      *
      * @returns A new code cell. If a source cell is provided, the
      *   new cell will be intialized with the data from the source.
+     *   If the contentFactory is not provided, the instance
+     *   `codeCellContentFactory` will be used.
      */
     createCodeCell(options: CodeCellModel.IOptions): ICodeCellModel {
+      if (options.contentFactory) {
+        options.contentFactory = this.codeCellContentFactory;
+      }
       return new CodeCellModel(options);
     }
 
@@ -886,7 +884,7 @@ namespace CodeConsole {
     /**
      * The factory for output area models.
      */
-    outputAreaFactory?: CodeCellModel.IOutputAreaFactory;
+    codeCellContentFactory?: CodeCellModel.IContentFactory;
   }
 
   /**

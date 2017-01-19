@@ -230,8 +230,9 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
-    let cell = Private.createCodeCell(widget.model);
-    widget.model.cells.insert(widget.activeCellIndex, cell);
+    let model = widget.model;
+    let cell = model.contentFactory.createCodeCell({ });
+    model.cells.insert(widget.activeCellIndex, cell);
     widget.deselectAll();
   }
 
@@ -251,8 +252,9 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
-    let cell = Private.createCodeCell(widget.model);
-    widget.model.cells.insert(widget.activeCellIndex + 1, cell);
+    let model = widget.model;
+    let cell = model.contentFactory.createCodeCell({});
+    model.cells.insert(widget.activeCellIndex + 1, cell);
     widget.activeCellIndex++;
     widget.deselectAll();
   }
@@ -438,7 +440,7 @@ namespace NotebookActions {
     let promise = run(widget, kernel);
     let model = widget.model;
     if (widget.activeCellIndex === widget.widgets.length - 1) {
-      let cell = Private.createCodeCell(model);
+      let cell = model.contentFactory.createCodeCell({});
       model.cells.pushBack(cell);
       widget.activeCellIndex++;
       widget.mode = 'edit';
@@ -471,7 +473,7 @@ namespace NotebookActions {
     }
     let promise = run(widget, kernel);
     let model = widget.model;
-    let cell = Private.createCodeCell(model);
+    let cell = model.contentFactory.createCodeCell({});
     model.cells.insert(widget.activeCellIndex + 1, cell);
     widget.activeCellIndex++;
     widget.scrollToActiveCell();
@@ -939,16 +941,6 @@ namespace Private {
   }
 
   /**
-   * Create an empty code cell for a notebook model.
-   */
-  export
-  function createCodeCell(model: INotebookModel): ICodeCellModel {
-    let factory = model.contentFactory;
-    let outputAreaFactory = factory.outputAreaFactory;
-    return factory.createCodeCell({ outputAreaFactory });
-  }
-
-  /**
    * Handle payloads from an execute reply.
    *
    * #### Notes
@@ -974,7 +966,7 @@ namespace Private {
     }
 
     // Create a new code cell and add as the next cell.
-    let cell = createCodeCell(parent.model);
+    let cell = parent.model.contentFactory.createCodeCell({});
     cell.value.text = text;
     let cells = parent.model.cells;
     let i = indexOf(cells, child.model);

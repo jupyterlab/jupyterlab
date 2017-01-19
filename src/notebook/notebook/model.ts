@@ -438,7 +438,7 @@ namespace NotebookModel {
     /**
      * The factory for output area models.
      */
-    readonly outputAreaFactory: CodeCellModel.IOutputAreaFactory;
+    readonly codeCellContentFactory: CodeCellModel.IContentFactory;
 
     /**
      * Create a new code cell.
@@ -480,15 +480,15 @@ namespace NotebookModel {
      * Create a new cell model factory.
      */
     constructor(options: IContentFactoryOptions) {
-      this.outputAreaFactory = (options.outputAreaFactory ||
-        CodeCellModel.defaultOutputAreaFactory
+      this.codeCellContentFactory = (options.codeCellContentFactory ||
+        CodeCellModel.defaultContentFactory
       );
     }
 
     /**
-     * The factory for output area models.
+     * The factory for code cell content.
      */
-    readonly outputAreaFactory: CodeCellModel.IOutputAreaFactory;
+    readonly codeCellContentFactory: CodeCellModel.IContentFactory;
 
     /**
      * Create a new code cell.
@@ -497,12 +497,12 @@ namespace NotebookModel {
      *
      * @returns A new code cell. If a source cell is provided, the
      *   new cell will be intialized with the data from the source.
-     *   If the outputAreaFactory is not provided, the instance
-     *   level version will be used.
+     *   If the contentFactory is not provided, the instance
+     *   `codeCellContentFactory` will be used.
      */
     createCodeCell(options: CodeCellModel.IOptions): ICodeCellModel {
-      if (options.outputAreaFactory) {
-        options.outputAreaFactory = this.outputAreaFactory;
+      if (options.contentFactory) {
+        options.contentFactory = this.codeCellContentFactory;
       }
       return new CodeCellModel(options);
     }
@@ -538,9 +538,9 @@ namespace NotebookModel {
   export
   interface IContentFactoryOptions {
     /**
-     * The factory for output area models.
+     * The factory for code cell model content.
      */
-    outputAreaFactory?: CodeCellModel.IOutputAreaFactory;
+    codeCellContentFactory?: CodeCellModel.IContentFactory;
   }
 
   /**

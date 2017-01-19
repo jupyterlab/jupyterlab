@@ -27,9 +27,9 @@ class NotebookModelFactory implements DocumentRegistry.IModelFactory<INotebookMo
    * Construct a new notebook model factory.
    */
   constructor(options: NotebookModelFactory.IOptions) {
-    let outputAreaFactory = options.outputAreaFactory;
+    let codeCellContentFactory = options.codeCellContentFactory;
     this.contentFactory = (options.contentFactory ||
-      new NotebookModel.ContentFactory({ outputAreaFactory })
+      new NotebookModel.ContentFactory({ codeCellContentFactory })
     );
   }
 
@@ -107,13 +107,13 @@ namespace NotebookModelFactory {
   export
   interface IOptions {
     /**
-     * The factory for output area models.
+     * The factory for code cell content.
      */
-    outputAreaFactory?: CodeCellModel.IOutputAreaFactory;
+    codeCellContentFactory?: CodeCellModel.IContentFactory;
 
     /**
      * The content factory used by the NotebookModelFactory.  If
-     * given, it will supercede the `outputAreaFactory`.
+     * given, it will supercede the `codeCellContentFactory`.
      */
     contentFactory?: NotebookModel.IContentFactory;
   }
