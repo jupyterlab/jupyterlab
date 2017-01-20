@@ -40,13 +40,6 @@ class ForeignHandler implements IDisposable {
   }
 
   /**
-   * Test whether the handler is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
-  /**
    * The kernel used by the foreign handler.
    */
   get kernel(): Kernel.IKernel {
@@ -77,16 +70,23 @@ class ForeignHandler implements IDisposable {
   }
 
   /**
+   * Test whether the handler is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._cells === null;
+  }
+
+  /**
    * Dispose the resources held by the handler.
    */
   dispose(): void {
-    if (this.isDisposed) {
+    if (this._cells === null) {
       return;
     }
-    this._isDisposed = true;
-    this.kernel = null;
-    this._cells.clear();
+    let cells = this._cells;
     this._cells = null;
+    this._kernel = null;
+    cells.clear();
   }
 
   /**
@@ -157,7 +157,6 @@ class ForeignHandler implements IDisposable {
 
   private _cells = new Map<string, CodeCellWidget>();
   private _enabled = true;
-  private _isDisposed = false;
   private _kernel: Kernel.IKernel = null;
   private _parent: ForeignHandler.IReceiver = null;
   private _factory: () => CodeCellWidget = null;

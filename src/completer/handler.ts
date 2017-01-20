@@ -81,9 +81,6 @@ class CompletionHandler implements IDisposable {
    * Dispose of the resources used by the handler.
    */
   dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
     this._completer = null;
     this._kernel = null;
     this._editor = null;

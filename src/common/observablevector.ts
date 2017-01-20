@@ -296,12 +296,12 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * Dispose of the resources held by the vector.
    */
   dispose(): void {
-    if (this.isDisposed) {
+    if (this._isDisposed) {
       return;
     }
     this._isDisposed = true;
-    this.clear();
     clearSignalData(this);
+    this.clear();
   }
 
   /**

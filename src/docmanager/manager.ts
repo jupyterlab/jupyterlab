@@ -26,6 +26,10 @@ import {
 } from 'phosphor/lib/core/properties';
 
 import {
+  clearSignalData
+} from 'phosphor/lib/core/signaling';
+
+import {
   Token
 } from 'phosphor/lib/core/token';
 
@@ -109,15 +113,16 @@ class DocumentManager implements IDisposable {
    * Dispose of the resources held by the document manager.
    */
   dispose(): void {
-    if (this.isDisposed) {
+    if (this._serviceManager === null) {
       return;
     }
     this._serviceManager = null;
+    this._widgetManager = null;
+    clearSignalData(this);
     each(this._contexts, context => {
       context.dispose();
     });
     this._contexts.clear();
-    this._widgetManager = null;
   }
 
   /**

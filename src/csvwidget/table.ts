@@ -4,7 +4,7 @@
 import * as dsv from 'd3-dsv';
 
 import {
-  clearSignalData, defineSignal, ISignal
+  defineSignal, ISignal
 } from 'phosphor/lib/core/signaling';
 
 import {
@@ -78,17 +78,6 @@ class CSVModel extends VDomModel {
     }
     this._delimiter = delimiter;
     this.stateChanged.emit(void 0);
-  }
-
-  /**
-   * Dispose this model.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    super.dispose();
-    clearSignalData(this);
   }
 
   /**

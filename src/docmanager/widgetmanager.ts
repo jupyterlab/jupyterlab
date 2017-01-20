@@ -75,11 +75,11 @@ class DocumentWidgetManager implements IDisposable {
    * Dispose of the resources used by the widget manager.
    */
   dispose(): void {
-    if (this.isDisposed) {
+    if (this._registry == null) {
       return;
     }
-    disconnectReceiver(this);
     this._registry = null;
+    disconnectReceiver(this);
   }
 
   /**

@@ -144,12 +144,11 @@ class CompleterModel implements CompleterWidget.IModel {
    */
   dispose(): void {
     // Do nothing if already disposed.
-    if (this.isDisposed) {
+    if (this._isDisposed) {
       return;
     }
     this._isDisposed = true;
     clearSignalData(this);
-    this._reset();
   }
 
   /**

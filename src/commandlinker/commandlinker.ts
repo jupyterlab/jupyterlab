@@ -48,7 +48,7 @@ const ICommandLinker = new Token<ICommandLinker>('jupyter.services.command-linke
  * A helper class to generate clickables that execute commands.
  */
 export
-interface ICommandLinker {
+interface ICommandLinker extends IDisposable {
   /**
    * Connect a command/argument pair to a given node so that when it is clicked,
    * the command will execute.
@@ -111,7 +111,7 @@ interface ICommandLinker {
  * execute registered commands with pre-populated arguments.
  */
 export
-class CommandLinker implements ICommandLinker, IDisposable {
+class CommandLinker implements ICommandLinker {
   /**
    * Instantiate a new command linker.
    */
@@ -124,7 +124,18 @@ class CommandLinker implements ICommandLinker, IDisposable {
    * Test whether the linker is disposed.
    */
   get isDisposed(): boolean {
-    return this._isDisposed;
+    return this._commands === null;
+  }
+
+  /**
+   * Dispose of the resources held by the linker.
+   */
+  dispose(): void {
+    if (this._commands === null) {
+      return;
+    }
+    this._commands = null;
+    document.body.removeEventListener('click', this);
   }
 
   /**
@@ -173,18 +184,6 @@ class CommandLinker implements ICommandLinker, IDisposable {
     node.removeAttribute(`data-${COMMAND_ATTR}`);
     node.removeAttribute(`data-${ARGS_ATTR}`);
     return node;
-  }
-
-  /**
-   * Dispose of the resources held by the linker.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    this._isDisposed = true;
-    this._commands = null;
-    document.body.removeEventListener('click', this);
   }
 
   /**
@@ -256,7 +255,6 @@ class CommandLinker implements ICommandLinker, IDisposable {
   }
 
   private _commands: CommandRegistry = null;
-  private _isDisposed = false;
 }
 
 

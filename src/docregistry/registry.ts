@@ -22,7 +22,7 @@ import {
 } from 'phosphor/lib/core/disposable';
 
 import {
-  ISignal, defineSignal
+  ISignal, clearSignalData, defineSignal
 } from 'phosphor/lib/core/signaling';
 
 import {
@@ -62,7 +62,7 @@ interface IDocumentRegistry extends DocumentRegistry {}
  * The document registry.
  */
 export
-class DocumentRegistry {
+class DocumentRegistry implements IDisposable {
   /**
    * A signal emitted when the registry has changed.
    */
@@ -79,22 +79,29 @@ class DocumentRegistry {
    * Dispose of the resources held by the document registery.
    */
   dispose(): void {
-    if (this.isDisposed) {
+    if (this._widgetFactories === null) {
       return;
     }
-    for (let modelName in this._modelFactories) {
-      this._modelFactories[modelName].dispose();
-    }
-    this._modelFactories = null;
-    for (let widgetName in this._widgetFactories) {
-      this._widgetFactories[widgetName].dispose();
-    }
+    let widgetFactories = this._widgetFactories;
+    let modelFactories = this._modelFactories;
+    let extenders = this._extenders;
     this._widgetFactories = null;
+    this._modelFactories = null;
+    this._extenders = null;
+
+    for (let modelName in modelFactories) {
+      modelFactories[modelName].dispose();
+    }
+    for (let widgetName in widgetFactories) {
+      widgetFactories[widgetName].dispose();
+    }
+    for (let widgetName in extenders) {
+      extenders[widgetName].clear();
+    }
+
     this._fileTypes.clear();
     this._creators.clear();
-    for (let widgetName in this._extenders) {
-      this._extenders[widgetName].clear();
-    }
+    clearSignalData(this);
   }
 
   /**

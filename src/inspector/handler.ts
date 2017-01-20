@@ -93,18 +93,19 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
    * This is a read-only property.
    */
   get isDisposed(): boolean {
-    return this._isDisposed;
+    return this._editor === null;
   }
 
   /**
    * Dispose of the resources used by the handler.
    */
   dispose(): void {
-    if (this.isDisposed) {
+    if (this._editor === null) {
       return;
     }
-    this._isDisposed = true;
     this._editor = null;
+    this._kernel = null;
+    this._rendermime = null;
     this.disposed.emit(void 0);
     clearSignalData(this);
   }
@@ -169,7 +170,6 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
   }
 
   private _editor: CodeEditor.IEditor = null;
-  private _isDisposed = false;
   private _kernel: Kernel.IKernel = null;
   private _pending = 0;
   private _rendermime: RenderMime = null;

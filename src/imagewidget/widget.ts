@@ -71,9 +71,6 @@ class ImageWidget extends Widget {
    * Dispose of the resources used by the widget.
    */
   dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
     this._context = null;
     super.dispose();
   }

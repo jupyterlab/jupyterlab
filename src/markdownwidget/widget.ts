@@ -75,6 +75,9 @@ class MarkdownWidget extends Widget {
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
     this._monitor.dispose();
     super.dispose();
   }

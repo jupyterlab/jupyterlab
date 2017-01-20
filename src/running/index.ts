@@ -183,23 +183,14 @@ class RunningSessions extends Widget {
   }
 
   /**
-   * Test whether the widget is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._manager === null;
-  }
-
-  /**
    * Dispose of the resources used by the widget.
    */
   dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
     this._manager = null;
     this._runningSessions = null;
     this._runningTerminals = null;
     this._renderer = null;
+    super.dispose();
   }
 
   /**

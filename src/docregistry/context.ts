@@ -125,28 +125,32 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   }
 
   /**
-   * Test whether the context has been disposed (read-only).
+   * Test whether the context is disposed.
    */
   get isDisposed(): boolean {
-    return this._manager === null;
+    return this._model === null;
   }
 
   /**
    * Dispose of the resources held by the context.
    */
   dispose(): void {
-    if (this.isDisposed) {
+    if (this._model == null) {
       return;
+    }
+    let model = this._model;
+    let session = this._session;
+    this._model = null;
+    this._session = null;
+    this._manager = null;
+    this._factory = null;
+
+    model.dispose();
+    if (session) {
+      session.dispose();
     }
     this.disposed.emit(void 0);
     clearSignalData(this);
-    this._model.dispose();
-    this._manager = null;
-    this._factory = null;
-    if (this._session) {
-      this._session.dispose();
-      this._session = null;
-    }
   }
 
   /**

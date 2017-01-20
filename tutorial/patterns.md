@@ -56,7 +56,15 @@ pattern is used to ensure resources are freed and can be claimed by the
 Garbage Collector when no longer needed.  It should always be safe to
 `dispose()` of an object more than once.  Typically the object that
 creates another object is responsible for calling the dispose method
-of that object unless explicitly stated otherwise.
+of that object unless explicitly stated otherwise.  
+To mirror the pattern  of construction, `super.dispose()` should be called 
+last in the `dispose()` method if there is a parent class. 
+Make sure any signal connections are cleared in either the local or parent 
+`dispose()` method.  Use a sentinel value to guard against reentry, typically 
+by checking if an internal value is null, and then immediately setting the 
+value to null.  A subclass should never override the `isDisposed` getter,
+because it short-circuits the parent class getter.  The object should not
+be considered disposed until the base class `dispose()` method is called.
 
 
 ## Messages

@@ -177,23 +177,23 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    */
   dispose(): void {
     // Do nothing if already disposed.
-    if (this.isDisposed) {
+    if (this._cells === null) {
       return;
     }
     let cells = this._cells;
-    cells.dispose();
-    clearSignalData(this);
+    let cursors = this._cursors;
+    this._cells = null;
+    this._cursors = null;
+    this._metadata = null;
+
     for (let i = 0; i < cells.length; i++) {
       let cell = cells.at(i);
       cell.dispose();
     }
-    cells.clear();
-    this._cells = null;
-    for (let key in this._cursors) {
-      this._cursors[key].dispose();
+    cells.dispose();
+    for (let key in cursors) {
+      cursors[key].dispose();
     }
-    this._cursors = null;
-    this._metadata = null;
     super.dispose();
   }
 

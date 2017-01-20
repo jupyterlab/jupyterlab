@@ -104,20 +104,9 @@ class ObservableUndoableVector<T extends ISerializable> extends ObservableVector
   }
 
   /**
-   * Test whether the vector is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._factory === null;
-  }
-
-  /**
    * Dispose of the resources held by the model.
    */
   dispose(): void {
-    // Do nothing if already disposed.
-    if (this.isDisposed) {
-      return;
-    }
     this._factory = null;
     this._stack = null;
     super.dispose();

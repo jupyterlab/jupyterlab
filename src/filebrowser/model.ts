@@ -101,13 +101,6 @@ class FileBrowserModel implements IDisposable, IPathTracker {
   }
 
   /**
-   * Get whether the model is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._model === null;
-  }
-
-  /**
    * Get the kernel spec models.
    */
   get specs(): Kernel.ISpecModels | null {
@@ -115,19 +108,25 @@ class FileBrowserModel implements IDisposable, IPathTracker {
   }
 
   /**
+   * Get whether the model is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._model === null;
+  }
+  /**
    * Dispose of the resources held by the model.
    */
   dispose(): void {
-    if (this.isDisposed) {
+    if (this._model === null) {
       return;
     }
+    this._model = null;
+    this._manager = null;
     clearTimeout(this._timeoutId);
     clearInterval(this._refreshId);
     clearTimeout(this._blackoutId);
-    this._model = null;
     this._sessions.clear();
     this._items.clear();
-    this._manager = null;
     clearSignalData(this);
   }
 
