@@ -26,7 +26,7 @@ import {
 } from '../docmanager';
 
 import {
-  IDocumentRegistry
+  IDocumentRegistry, DocumentRegistry
 } from '../docregistry';
 
 import {
@@ -152,7 +152,7 @@ function activate(app: JupyterLab, manager: IServiceManager, documentManager: ID
   node.addEventListener('contextmenu', (event: MouseEvent) => {
     event.preventDefault();
     let path = fbWidget.pathForClick(event) || '';
-    let ext = '.' + path.split('.').pop();
+    let ext = DocumentRegistry.extname(path);
     let factories = registry.preferredWidgetFactories(ext);
     let widgetNames = toArray(map(factories, factory => factory.name));
     let prefix = `file-browser-contextmenu-${++Private.id}`;

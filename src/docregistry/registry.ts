@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Contents, Kernel
+  Contents, ContentsManager, Kernel
 } from '@jupyterlab/services';
 
 import {
@@ -751,7 +751,8 @@ namespace DocumentRegistry {
      *
      * #### Notes
      * Use "*" to denote all files. Specific file extensions must be preceded
-     * with '.', like '.png', '.txt', etc.
+     * with '.', like '.png', '.txt', etc.  They may themselves contain a
+     * period (e.g. .table.json).
      */
     readonly fileExtensions: string[];
 
@@ -910,7 +911,8 @@ namespace DocumentRegistry {
     readonly name: string;
 
     /**
-     * The extension of the file type (e.g. `".txt"`).
+     * The extension of the file type (e.g. `".txt"`).  Can be a compound
+     * extension (e.g. `".table.json:`).
      */
     readonly extension: string;
 
@@ -980,6 +982,21 @@ namespace DocumentRegistry {
      * Whether the item was added or removed.
      */
     readonly change: 'added' | 'removed';
+  }
+
+  /**
+   * Get the extension name of a path.
+   *
+   * @param file - string.
+   *
+   * #### Notes
+   * Dotted filenames (e.g. `".table.json"` are allowed.
+   */
+  export
+  function extname(path: string): string {
+    let parts = ContentsManager.basename(path).split('.');
+    parts.shift();
+    return '.' + parts.join('.');
   }
 }
 

@@ -43,8 +43,8 @@ class WidgetExtension implements DocumentRegistry.WidgetExtension {
 function createFactory() {
   return new WidgetFactory({
     name: utils.uuid(),
-    fileExtensions: ['.txt'],
-    defaultFor: ['.txt']
+    fileExtensions: ['.txt', '.foo.bar'],
+    defaultFor: ['.txt', '.foo.bar']
   });
 }
 
@@ -130,7 +130,7 @@ describe('docregistry/registry', () => {
         registry.addWidgetFactory(createFactory());
         let factory = createFactory();
         registry.addWidgetFactory(factory);
-        expect(registry.defaultWidgetFactory('.txt')).to.be(factory);
+        expect(registry.defaultWidgetFactory('.foo.bar')).to.be(factory);
       });
 
       it('should be removed from the registry when disposed', () => {
@@ -275,7 +275,7 @@ describe('docregistry/registry', () => {
           defaultFor: ['*']
         });
         registry.addWidgetFactory(gFactory);
-        let factories = registry.preferredWidgetFactories('.txt');
+        let factories = registry.preferredWidgetFactories('.foo.bar');
         expect(toArray(factories)).to.eql([factory, gFactory]);
       });
 
@@ -336,7 +336,7 @@ describe('docregistry/registry', () => {
           defaultFor: ['.md']
         });
         registry.addWidgetFactory(mdFactory);
-        expect(registry.defaultWidgetFactory('.txt')).to.be(factory);
+        expect(registry.defaultWidgetFactory('.foo.bar')).to.be(factory);
         expect(registry.defaultWidgetFactory('.md')).to.be(mdFactory);
         expect(registry.defaultWidgetFactory()).to.be(gFactory);
       });
@@ -349,13 +349,16 @@ describe('docregistry/registry', () => {
         expect(toArray(registry.fileTypes()).length).to.be(0);
         let fileTypes = [
           { name: 'notebook', extension: '.ipynb' },
-          { name: 'python', extension: '.py' }
+          { name: 'python', extension: '.py' },
+          { name: 'table', extension: '.table.json' }
         ];
         registry.addFileType(fileTypes[0]);
         registry.addFileType(fileTypes[1]);
+        registry.addFileType(fileTypes[2]);
         let values = registry.fileTypes();
         expect(values.next()).to.be(fileTypes[0]);
         expect(values.next()).to.be(fileTypes[1]);
+        expect(values.next()).to.be(fileTypes[2]);
       });
 
     });

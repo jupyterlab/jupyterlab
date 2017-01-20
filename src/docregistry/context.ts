@@ -53,7 +53,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     this._factory = options.factory;
     this._opener = options.opener;
     this._path = options.path;
-    let ext = ContentsManager.extname(this._path);
+    let ext = DocumentRegistry.extname(this._path);
     let lang = this._factory.preferredLanguage(ext);
     this._model = this._factory.createNew(lang);
     manager.sessions.runningChanged.connect(this._onSessionsChanged, this);
