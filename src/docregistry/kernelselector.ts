@@ -96,15 +96,20 @@ function selectKernel(options: IKernelSelection): Promise<Kernel.IModel> {
 
   // Create the dialog body.
   let body = document.createElement('div');
-  let text = document.createElement('label');
-  text.textContent = `Select kernel for\n"${options.name}"`;
-  body.appendChild(text);
+  let text = `Select kernel for: "${options.name}"`;
+  body.appendChild(document.createTextNode(text));
+  body.appendChild(document.createElement('br'));
+
   if (kernel) {
     let displayName = specs.kernelspecs[kernel.name].display_name;
-    text.textContent += `\nCurrent: ${displayName}`;
-    text.title = `Kernel Name: ${displayName}\n` +
-    `Kernel Id: ${kernel.id}`;
+    let current = document.createElement('span');
+    current.textContent = `Current: "${displayName}"`;
+    current.title = `Kernel Name: ${displayName}\n` +
+       `Kernel Id: ${kernel.id}`;
+    body.appendChild(current);
+    body.appendChild(document.createElement('br'));
   }
+
   let selector = document.createElement('select');
   body.appendChild(selector);
 
@@ -233,6 +238,9 @@ function populateKernels(node: HTMLSelectElement, options: IPopulateOptions): vo
   }
 
   // Handle a preferred kernel language in order of display name.
+  let preferred = document.createElement('optgroup');
+  preferred.label = 'Start Preferred Kernel';
+
   if (preferredLanguage && specs) {
     for (let name in specs.kernelspecs) {
       if (languages[name] === preferredLanguage) {
@@ -241,22 +249,24 @@ function populateKernels(node: HTMLSelectElement, options: IPopulateOptions): vo
     }
     names.sort((a, b) => displayNames[a].localeCompare(displayNames[b]));
     for (let name of names) {
-      node.appendChild(optionForName(name, displayNames[name]));
+      preferred.appendChild(optionForName(name, displayNames[name]));
     }
   }
   // Use the default kernel if no preferred language or none were found.
   if (!names.length) {
     let name = specs.default;
-    node.appendChild(optionForName(name, displayNames[name]));
+    preferred.appendChild(optionForName(name, displayNames[name]));
+  }
+  if (preferred.firstChild) {
+    node.appendChild(preferred);
   }
 
-  // Add a separator.
-  node.appendChild(createSeparatorOption(maxLength));
   // Add an option for no kernel
   node.appendChild(optionForNone());
 
-  // Add a separator.
-  node.appendChild(createSeparatorOption(maxLength));
+  let other = document.createElement('optgroup');
+  other.label = 'Start Other Kernel';
+
   // Add the rest of the kernel names in alphabetical order.
   let otherNames: string[] = [];
   for (let name in specs.kernelspecs) {
@@ -267,11 +277,11 @@ function populateKernels(node: HTMLSelectElement, options: IPopulateOptions): vo
   }
   otherNames.sort((a, b) => displayNames[a].localeCompare(displayNames[b]));
   for (let name of otherNames) {
-    node.appendChild(optionForName(name, displayNames[name]));
+    other.appendChild(optionForName(name, displayNames[name]));
   }
   // Add a separator option if there were any other names.
   if (otherNames.length) {
-    node.appendChild(createSeparatorOption(maxLength));
+    node.appendChild(other);
   }
 
   // Add the sessions using the preferred language first.
@@ -288,38 +298,37 @@ function populateKernels(node: HTMLSelectElement, options: IPopulateOptions): vo
     }
   });
 
-  if (matchingSessions) {
+  let matching = document.createElement('optgroup');
+  matching.label = 'Use Kernel from Preferred Session';
+  node.appendChild(matching);
+
+  if (matchingSessions.length) {
     matchingSessions.sort((a, b) => {
       return a.notebook.path.localeCompare(b.notebook.path);
     });
+
     each(matchingSessions, session => {
       let name = displayNames[session.kernel.name];
-      node.appendChild(optionForSession(session, name, maxLength));
+      matching.appendChild(optionForSession(session, name, maxLength));
     });
-    node.appendChild(createSeparatorOption(maxLength));
+
   }
 
-  if (otherSessions) {
+  let otherSessionsNode = document.createElement('optgroup');
+  otherSessionsNode.label = 'Use Kernel from Other Session';
+  node.appendChild(otherSessionsNode);
+
+  if (otherSessions.length) {
     otherSessions.sort((a, b) => {
       return a.notebook.path.localeCompare(b.notebook.path);
     });
+
     each(otherSessions, session => {
       let name = displayNames[session.kernel.name] || session.kernel.name;
-      node.appendChild(optionForSession(session, name, maxLength));
+      otherSessionsNode.appendChild(optionForSession(session, name, maxLength));
     });
   }
   node.selectedIndex = 0;
-}
-
-
-/**
- * Create a separator option.
- */
-function createSeparatorOption(length: number): HTMLOptionElement {
-  let option = document.createElement('option');
-  option.disabled = true;
-  option.text = Array(length).join('─');
-  return option;
 }
 
 /**
@@ -335,11 +344,14 @@ function optionForName(name: string, displayName: string): HTMLOptionElement {
 /**
  * Create an option for no kernel.
  */
-function optionForNone(): HTMLOptionElement {
+function optionForNone(): HTMLOptGroupElement {
+  let group = document.createElement('optgroup');
+  group.label = 'Use No Kernel';
   let option = document.createElement('option');
-  option.text = 'None';
+  option.text = 'No Kernel';
   option.value = JSON.stringify({id: null, name: null});
-  return option;
+  group.appendChild(option);
+  return group;
 }
 
 /**
