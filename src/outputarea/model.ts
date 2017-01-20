@@ -114,8 +114,8 @@ class OutputAreaModel implements IOutputAreaModel {
       return;
     }
     this._isDisposed = true;
-    this.list.dispose();
     Signal.clearData(this);
+    this.list.dispose();
   }
 
   /**
