@@ -64,7 +64,6 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
   const keymap = app.keymap;
   const registry = app.commands;
   let tooltip: TooltipWidget = null;
-  let model: TooltipModel = null;
   let id = 0;
 
   // Add tooltip launch command.
@@ -75,7 +74,6 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
       let kernel: Kernel.IKernel = null;
       let rendermime: IRenderMime = null;
       let extant = !!tooltip;
-      let ready = false;
 
       if (notebook) {
         let widget = notebooks.currentWidget;
@@ -83,7 +81,6 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
           editor = widget.notebook.activeCell.editor;
           kernel = widget.kernel;
           rendermime = widget.rendermime;
-          ready = !!editor && !!kernel && !!rendermime;
         }
       } else {
         let widget = consoles.currentWidget;
@@ -91,20 +88,22 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
           editor = widget.console.prompt.editor;
           kernel = widget.console.session.kernel;
           rendermime = widget.console.rendermime;
-          ready = !!editor && !!kernel && !!rendermime;
         }
       }
 
       // Dispose extant tooltip and model.
       if (extant) {
+        tooltip.model.dispose();
         tooltip.dispose();
-        model.dispose();
+        tooltip = null;
       }
 
       // If all components necessary for rendering exist, create a tooltip.
+      let ready = !!editor && !!kernel && !!rendermime;
       if (ready) {
-        model = new TooltipModel({ editor, kernel, rendermime });
-        tooltip = new TooltipWidget({ model });
+        tooltip = new TooltipWidget({
+          model: new TooltipModel({ editor, kernel, rendermime })
+        });
         tooltip.id = `tooltip-${++id}`;
         Widget.attach(tooltip, document.body);
         tooltip.activate();
@@ -116,7 +115,9 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
   registry.addCommand(remove, {
     execute: () => {
       if (tooltip) {
+        tooltip.model.dispose();
         tooltip.dispose();
+        tooltip = null;
       }
     }
   });
