@@ -141,7 +141,7 @@ class OpenWithHandler extends Widget {
     this._manager = manager;
 
     this.inputNode.textContent = path;
-    this._ext = path.split('.').pop();
+    this._ext = DocumentRegistry.extname(path);
 
     this.populateFactories();
     this.widgetDropdown.onchange = this.widgetChanged.bind(this);
@@ -454,7 +454,7 @@ class CreateNewHandler extends Widget {
    * Get the current extension for the file.
    */
   get ext(): string {
-    return this.inputNode.value.split('.').pop();
+    return DocumentRegistry.extname(this.inputNode.value);
   }
 
   /**
