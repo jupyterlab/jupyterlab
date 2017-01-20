@@ -34,6 +34,10 @@ declare module CodeMirror {
         [key: string]: any;
     }
 
+    var commands: {
+      [key: string]: any;
+    }
+
     interface modeinfo {
       ext: string[];
       mime: string;
@@ -543,7 +547,7 @@ declare module CodeMirror {
          * or set to the last range if the previous selection had less ranges than the new one.
          * Supports the same options as setSelection.
          */
-        setSelections(ranges: CodeMirror.Selection[], primary?: number, options?: any): void; 
+        setSelections(ranges: CodeMirror.Selection[], primary?: number, options?: any): void;
 
         /** Similar to setSelection , but will, if shift is held or the extending flag is set,
         move the head of the selection while leaving the anchor at its current place.
