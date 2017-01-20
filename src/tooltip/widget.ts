@@ -6,6 +6,10 @@ import {
 } from 'phosphor/lib/core/messaging';
 
 import {
+  PanelLayout
+} from 'phosphor/lib/ui/panel';
+
+import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
@@ -30,8 +34,22 @@ class TooltipWidget extends Widget {
    */
   constructor(options: TooltipWidget.IOptions) {
     super();
+    this.layout = new PanelLayout();
     this.model = options.model;
+    this.model.contentChanged.connect(this._onContentChanged, this);
     this.addClass(TOOLTIP_CLASS);
+  }
+
+  /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose(): void {
+    if (this._content === null) {
+      return;
+    }
+    this._content.dispose();
+    this._content = null;
+    super.dispose();
   }
 
   /**
@@ -58,8 +76,25 @@ class TooltipWidget extends Widget {
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
+    let layout = this.layout as PanelLayout;
+    if (this._content) {
+      layout.addWidget(this._content);
+    }
     super.onUpdateRequest(msg);
   }
+
+  /**
+   * Handle model content changes.
+   */
+  private _onContentChanged(): void {
+    if (this._content) {
+      this._content.dispose();
+    }
+    this._content = this.model.content;
+    this.update();
+  }
+
+  private _content: Widget = null;
 }
 
 /**
