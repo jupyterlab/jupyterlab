@@ -178,7 +178,9 @@ class NotebookModel extends DocumentModel implements INotebookModel, IRealtimeMo
       cell.dispose();
     }
     cells.dispose();
-    this._realtimeHandler.dispose();
+    if(this._realtimeHandler) {
+      this._realtimeHandler.dispose();
+    }
     super.dispose();
   }
 

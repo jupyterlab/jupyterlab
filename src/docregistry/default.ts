@@ -193,7 +193,9 @@ class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeMo
    * Dispose of the resources held by the model.
    */
   dispose(): void {
-    this._realtime.dispose();
+    if(this._realtime) {
+      this._realtime.dispose();
+    }
     super.dispose();
   }
 
