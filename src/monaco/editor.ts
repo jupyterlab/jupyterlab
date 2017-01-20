@@ -121,6 +121,9 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
    */
   protected _onDidChangeConfiguration(event: monaco.editor.IConfigurationChangedEvent) {
     this.autoresize();
+    if (this.readOnly) {
+      this.hideContentWidgets();
+    }
   }
 
   /**
@@ -281,7 +284,6 @@ class MonacoCodeEditor implements CodeEditor.IEditor {
     this.editor.updateOptions({
       readOnly: readOnly
     });
-    this.hideContentWidgets();
   }
 
   /**

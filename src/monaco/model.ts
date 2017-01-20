@@ -25,7 +25,7 @@ import {
  * An implementation of the code editor model using monaco.
  */
 export
-  class MonacoModel implements CodeEditor.IModel {
+class MonacoModel implements CodeEditor.IModel {
   /**
    * A signal emitted when a mimetype changes.
    */
@@ -100,7 +100,7 @@ export
 
   protected connectModel(): void {
     const model = this.model;
-    this._listeners.push(model.onDidChangeMode(event => this._onDidChangeMode(event)));
+    this._listeners.push(model.onDidChangeLanguage(event => this._onDidChangeLanguage(event)));
     this._listeners.push(model.onDidChangeContent(event => this._onDidContentChanged(event)));
     this.updateValue();
   }
@@ -163,14 +163,14 @@ export
    */
   clearHistory(): void {
     // Reset the model state by setting the same value again
-    this.model.setValueFromRawText(this.model.toRawText());
+    this.model.setValue(this.model.getValue());
   }
 
   /**
-   * Handles a model change event.
+   * Handles a model language change event.
    */
-  protected _onDidChangeMode(event: monaco.editor.IModelModeChangedEvent) {
-    this.fireMimeTypeChanged(event.oldMode.getId(), event.newMode.getId());
+  protected _onDidChangeLanguage(event: monaco.editor.IModelLanguageChangedEvent) {
+    this.fireMimeTypeChanged(event.oldLanguage, event.newLanguage);
   }
 
   /**
