@@ -41,18 +41,47 @@ namespace HoverBox {
    */
   export
   interface IOptions {
+    /**
+     * The referent anchor for the hover box.
+     */
     anchor: HTMLElement;
+
+    /**
+     * The initial point along the anchor's scroll axis when scrolling began.
+     */
     anchorPoint: number;
+
+    /**
+     * The character width of the referent editor.
+     */
     charWidth: number;
+
+    /**
+     * The cursor coordinates of the referent editor.
+     */
     coords: CodeEditor.ICoordinate;
+
+    /**
+     * The cursor definition of the referent editor.
+     */
     cursor: { start: number; end: number; };
+
+    /**
+     * The line height of the referent editor.
+     */
     lineHeight: number;
+
+    /**
+     * The hover box node.
+     */
     node: HTMLElement;
   }
 
 
   /**
    * Set the visible dimensions of a hovering box anchored to a scrollable node.
+   *
+   * @param options - The hover box geometry calculation options.
    */
   export
   function setGeometry(options: IOptions): void {
