@@ -157,6 +157,20 @@ interface IRealtimeHandler extends IDisposable {
   readonly collaborators: IObservableMap<ICollaborator>;
 
   /**
+   * Create a vector for the realtime model.
+   *
+   * @param map: the map to link to a realtime map.
+   *
+   * @param id: an identifier for this collaborative object
+   *   which is unique to the `IRealtimeHandler`.
+   *   The `IRealtimeModel` describing itself to the handler
+   *   is responsible for avoiding name collisions.
+   *
+   * @returns a promise when the linking is done.
+   */
+  linkMap<T>(vec: IObservableMap<T>, id: string): Promise<void>;
+
+  /**
    * Create a string for the realtime model.
    *
    * @param str: the string to link to a realtime string.

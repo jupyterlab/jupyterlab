@@ -181,7 +181,11 @@ class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeMo
     return new Promise<void>((resolve,reject)=>{
       this._realtime = realtimeHandler;
       //link to the new realtime string
-      this._realtime.linkString(this.value, 'textdoc:text').then(()=>{
+      let stringPromise =
+        this._realtime.linkString(this.value, 'textdoc:text');
+      let cursorPromise =
+        this._realtime.linkMap(this.selections, 'textdoc:cursors');
+      Promise.all([stringPromise, cursorPromise]).then(()=>{
         resolve();
       }).catch(()=>{
         console.log("Unable to register document as collaborative");

@@ -156,10 +156,21 @@ class ObservableMap<T> implements IObservableMap<T> {
   }
 
   /**
+   * Whether this map is linked to another.
+   */
+  get isLinked(): boolean {
+    return this._parent !== null;
+  }
+
+  /**
    * The number of key-value pairs in the map.
    */
   get size(): number {
-    return this._map.size;
+    if(this.isLinked) {
+      return this._parent.keys().length;
+    } else {
+      return this._map.size;
+    }
   }
 
   /**
@@ -178,23 +189,27 @@ class ObservableMap<T> implements IObservableMap<T> {
    * This is a no-op if the value does not change.
    */
   set(key: string, value: T): T {
-    let oldVal = this._map.get(key);
-    if (value === undefined) {
-      throw Error('Cannot set an undefined value, use remove');
+    if(this.isLinked) {
+      return this._parent.set(key, value);
+    } else {
+      let oldVal = this._map.get(key);
+      if (value === undefined) {
+        throw Error('Cannot set an undefined value, use remove');
+      }
+      // Bail if the value does not change.
+      let itemCmp = this._itemCmp;
+      if (itemCmp(oldVal, value)) {
+        return;
+      }
+      this._map.set(key, value);
+      this._changed.emit({
+        type: oldVal ? 'change' : 'add',
+        key: key,
+        oldValue: oldVal,
+        newValue: value
+      });
+      return oldVal;
     }
-    // Bail if the value does not change.
-    let itemCmp = this._itemCmp;
-    if (oldVal !== undefined && itemCmp(oldVal, value)) {
-      return;
-    }
-    this._map.set(key, value);
-    this._changed.emit({
-      type: oldVal ? 'change' : 'add',
-      key: key,
-      oldValue: oldVal,
-      newValue: value
-    });
-    return oldVal;
   }
 
   /**
@@ -205,7 +220,11 @@ class ObservableMap<T> implements IObservableMap<T> {
    * @returns the value for that key.
    */
   get(key: string): T {
-    return this._map.get(key);
+    if(this.isLinked) {
+      return this._parent.get(key);
+    } else {
+      return this._map.get(key);
+    }
   }
 
   /**
@@ -216,7 +235,11 @@ class ObservableMap<T> implements IObservableMap<T> {
    * @returns `true` if the map has the key, `false` otherwise.
    */
   has(key: string): boolean {
-    return this._map.has(key);
+    if(this.isLinked) {
+      return this._parent.has(key);
+    } else {
+      return this._map.has(key);
+    }
   }
 
   /**
@@ -225,11 +248,15 @@ class ObservableMap<T> implements IObservableMap<T> {
    * @returns - a list of keys.
    */
   keys(): string[] {
-    let keyList: string[] = [];
-    this._map.forEach((v: T, k: string) => {
-      keyList.push(k);
-    });
-    return keyList;
+    if(this.isLinked) {
+      return this._parent.keys();
+    } else {
+      let keyList: string[] = [];
+      this._map.forEach((v: T, k: string) => {
+        keyList.push(k);
+      });
+      return keyList;
+    }
   }
 
 
@@ -239,11 +266,15 @@ class ObservableMap<T> implements IObservableMap<T> {
    * @returns - a list of values.
    */
   values(): T[] {
-    let valList: T[] = [];
-    this._map.forEach((v: T, k: string) => {
-      valList.push(v);
-    });
-    return valList;
+    if(this.isLinked) {
+      return this._parent.values();
+    } else {
+      let valList: T[] = [];
+      this._map.forEach((v: T, k: string) => {
+        valList.push(v);
+      });
+      return valList;
+    }
   }
 
   /**
@@ -255,25 +286,76 @@ class ObservableMap<T> implements IObservableMap<T> {
    *   or undefined if that does not exist.
    */
   delete(key: string): T {
-    let oldVal = this._map.get(key);
-    this._map.delete(key);
-    this._changed.emit({
-      type: 'remove',
-      key: key,
-      oldValue: oldVal,
-      newValue: undefined
-    });
-    return oldVal;
+    if(this.isLinked) {
+      return this._parent.delete(key);
+    } else {
+      let oldVal = this._map.get(key);
+      this._map.delete(key);
+      this._changed.emit({
+        type: 'remove',
+        key: key,
+        oldValue: oldVal,
+        newValue: undefined
+      });
+      return oldVal;
+    }
   }
+
+  /**
+   * Link the map to another map.
+   * Any changes to either are mirrored in the other.
+   *
+   * @param map: the parent map.
+   */
+  link(map: IObservableMap<T>): void {
+    let keyList = map.keys();
+    let oldKeyList = this.keys();
+
+    //Remove values not in the parent map
+    for(let i = 0; i<oldKeyList.length; i++) {
+      if(!map.has(oldKeyList[i])) {
+        this.delete(oldKeyList[i]);
+      }
+    }
+    //Insert new key-value pairs as necessary
+    for(let i=0; i<keyList.length; i++) {
+      let key = keyList[i];
+      if(this._map.get(key) !== map.get(key)) {
+        this.set(key, map.get(key));
+      }
+    }
+    //Now that we have mirrored the two maps,
+    //clear the local one and forward the signals
+    this._map.clear();
+    this._parent = map;
+    this._parent.changed.connect(this._forwardSignal, this);
+  }
+
+  /**
+   * Unlink the map from its parent map.
+   */
+  unlink(): void {
+    //Recreate the map locally
+    let keyList = this._parent.keys();
+    for(let i=0; i < keyList.length; i++) {
+      this._map.set(keyList[i], this._parent.get(keyList[i]));
+    }
+    this._parent = null;
+  }
+
 
   /**
    * Set the ObservableMap to an empty map.
    */
   clear(): void {
-    // Delete one by one to emit the correct signals.
-    let keyList = this.keys();
-    for (let i = 0; i < keyList.length; i++) {
-      this.delete(keyList[i]);
+    if(this.isLinked) {
+      this._parent.clear();
+    } else {
+      // Delete one by one to emit the correct signals.
+      let keyList = this.keys();
+      for(let i=0; i<keyList.length; i++) {
+        this.delete(keyList[i]);
+      }
     }
   }
 
@@ -285,27 +367,22 @@ class ObservableMap<T> implements IObservableMap<T> {
       return;
     }
     Signal.clearData(this);
+    if(this.isLinked) {
+      this.unlink();
+    }
     this._map.clear();
     this._map = null;
   }
 
   /**
-   * Link the map to another map.
-   * Any changes to either are mirrored in the other.
-   *
-   * @param map: the parent map.
+   * Catch a signal from the parent vector and pass it on.
    */
-  link(map: IObservableMap<T>): void {
-    //not implemented
+  private _forwardSignal(s: IObservableMap<T>,
+                         c: ObservableMap.IChangedArgs<T>) {
+    this._changed.emit(c);
   }
 
-  /**
-   * Unlink the map from its parent map.
-   */
-  unlink(): void {
-    //not implemented
-  }
-
+  private _parent: IObservableMap<T> = null;
   private _map: Map<string, T> = new Map<string, T>();
   private _itemCmp: (first: T, second: T) => boolean;
   private _changed = new Signal<this, ObservableMap.IChangedArgs<T>>(this);
