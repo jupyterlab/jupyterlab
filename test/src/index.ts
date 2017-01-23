@@ -15,10 +15,12 @@ import './codemirror/editor.spec';
 import './commandlinker/commandlinker.spec';
 
 import './common/activitymonitor.spec';
+import './common/dialog.spec';
 import './common/instancetracker.spec';
 import './common/observablestring.spec';
 import './common/observablevector.spec';
 import './common/undoablevector.spec';
+import './common/sanitizer.spec';
 import './common/vdom.spec';
 
 import './completer/handler.spec';
@@ -33,8 +35,6 @@ import './console/widget.spec';
 import './csvwidget/table.spec';
 import './csvwidget/toolbar.spec';
 import './csvwidget/widget.spec';
-
-import './dialog/dialog.spec';
 
 import './docmanager/manager.spec';
 import './docmanager/savehandler.spec';
@@ -74,8 +74,6 @@ import './notebook/tracker.spec';
 
 import './outputarea/model.spec';
 import './outputarea/widget.spec';
-
-import './sanitizer/index.spec';
 
 import './statedb/statedb.spec';
 

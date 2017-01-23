@@ -16,6 +16,10 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
+  defaultSanitizer
+} from '../../lib/common/sanitizer';
+
+import {
   TextModelFactory, DocumentRegistry, Context
 } from '../../lib/docregistry';
 
@@ -34,10 +38,6 @@ import {
 import {
   RenderMime
 } from '../../lib/rendermime';
-
-import {
-  defaultSanitizer
-} from '../../lib/sanitizer';
 
 
 /**
