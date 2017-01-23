@@ -324,10 +324,18 @@ class DocumentRegistry implements IDisposable {
   preferredWidgetFactories(ext: string = '*'): DocumentRegistry.WidgetFactory[] {
     let factories = new Set<string>();
     ext = Private.normalizeExtension(ext);
+    let last = '.' + ext.split('.').pop();
 
     // Start with the extension-specific default factory.
     if (ext.length > 1) {
       if (ext in this._defaultWidgetFactories) {
+        factories.add(this._defaultWidgetFactories[ext]);
+      }
+    }
+
+    // Handle multi-part extension default factories.
+    if (last !== ext) {
+      if (last in this._defaultWidgetFactories) {
         factories.add(this._defaultWidgetFactories[ext]);
       }
     }
@@ -341,6 +349,15 @@ class DocumentRegistry implements IDisposable {
     if (ext.length > 1) {
       if (ext in this._widgetFactoryExtensions) {
         each(this._widgetFactoryExtensions[ext], n => {
+          factories.add(n);
+        });
+      }
+    }
+
+    // Handle multi-part extension-specific factories.
+    if (last !== ext) {
+      if (last in this._widgetFactoryExtensions) {
+        each(this._widgetFactoryExtensions[last], n => {
           factories.add(n);
         });
       }
