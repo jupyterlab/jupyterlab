@@ -9,11 +9,7 @@
     "watch": "watch \"npm run update && npm run build\" ../../src src --wait 10"
   },
   "dependencies": {
-<<<<<<< HEAD
-    "@jupyterlab/services": "^0.35.0",
-=======
     "@jupyterlab/services": "^0.36.0",
->>>>>>> d2b6526... Upgrade services
     "jupyterlab": "file:../..",
     "phosphor": "^0.7.0"
   },
