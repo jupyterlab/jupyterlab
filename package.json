@@ -7,7 +7,11 @@
   },
   "typings": "lib/index.d.ts",
   "dependencies": {
+<<<<<<< HEAD
     "@jupyterlab/services": "^0.35.0",
+=======
+    "@jupyterlab/services": "^0.36.0",
+>>>>>>> d2b6526... Upgrade services
     "ansi_up": "^1.3.0",
     "backbone": "^1.2.0",
     "codemirror": "^5.20.2",
