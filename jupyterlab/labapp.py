@@ -159,10 +159,10 @@ class LabApp(NotebookApp):
             'Extensions are loaded in alphabetical order')
     )
 
-    def init_web_app(self):
-        """initialize tornado web_app and httpserver.
+    def init_webapp(self):
+        """initialize tornado webapp and httpserver.
         """
-        super(LabApp, self).init_web_app()
+        super(LabApp, self).init_webapp()
         self.add_lab_handlers()
         self.add_labextensions()
 
