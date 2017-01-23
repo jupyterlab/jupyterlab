@@ -204,7 +204,7 @@ class CompletionHandler implements IDisposable {
   protected onCompletionSelected(widget: CompleterWidget, value: string): void {
     let model = this._completer.model;
     let editor = this._editor;
-    if (!this._editor || !model) {
+    if (!editor || !model) {
       return;
     }
     let patch = model.createPatch(value);
