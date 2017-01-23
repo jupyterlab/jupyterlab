@@ -444,11 +444,11 @@ describe('completer/handler', () => {
         };
 
         handler.editor = editor;
-        handler.editor.model.value.text = 'foo';
+        handler.editor.model.value.text = 'foo\nbaz';
         model.original = request;
         model.cursor = { start: 0, end: 3 };
         completer.selected.emit(patch);
-        expect(handler.editor.model.value.text).to.equal(patch);
+        expect(handler.editor.model.value.text).to.equal('foobar\nbaz');
       });
 
     });

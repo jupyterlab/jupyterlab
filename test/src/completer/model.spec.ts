@@ -357,7 +357,11 @@ describe('completer/model', () => {
       it('should return a patch value', () => {
         let model = new CompleterModel();
         let patch = 'foobar';
-        let want: CompleterWidget.IPatch = { text: patch, position: patch.length };
+        let want: CompleterWidget.IPatch = {
+          text: patch,
+          start: 0,
+          end: patch.length
+        };
         let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 3 };
         model.original = makeState('foo');
         model.cursor = cursor;
@@ -373,7 +377,12 @@ describe('completer/model', () => {
         let model = new CompleterModel();
         let currentValue = 'foo\nbar';
         let patch = 'barbaz';
-        let want: CompleterWidget.IPatch = { text: 'foo\nbarbaz', position: 10 };
+        let wantText = 'foo\nbarbaz';
+        let want: CompleterWidget.IPatch = {
+          text: wantText,
+          start: 10,
+          end: wantText.length
+        };
         let cursor: CompleterWidget.ICursorSpan = { start: 4, end: 7 };
         model.original = makeState(currentValue);
         model.cursor = cursor;
