@@ -7,7 +7,7 @@ import {
 
 import {
   defaultSanitizer
-} from '../sanitizer';
+} from '../common/sanitizer';
 
 import {
   IRenderMime, RenderMime

@@ -26,13 +26,13 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
+  ISanitizer
+} from '../common/sanitizer';
+
+import {
   HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
   JavascriptRenderer, SVGRenderer, MarkdownRenderer, PDFRenderer
 } from '../renderers';
-
-import {
-  ISanitizer
-} from '../sanitizer';
 
 
 /* tslint:disable */

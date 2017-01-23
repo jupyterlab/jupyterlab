@@ -22,16 +22,16 @@ import {
 } from '../application';
 
 import {
+  IFrame
+} from '../common/iframe';
+
+import {
   InstanceTracker
 } from '../common/instancetracker';
 
 import {
   ICommandPalette
 } from '../commandpalette';
-
-import {
-  IFrame
-} from '../iframe';
 
 import {
   IInstanceRestorer

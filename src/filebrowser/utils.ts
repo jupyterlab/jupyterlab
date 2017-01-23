@@ -3,7 +3,7 @@
 
 import {
   okButton, showDialog
-} from '../dialog';
+} from '../common/dialog';
 
 export * from '../common/dom';
 

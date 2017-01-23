@@ -39,7 +39,7 @@ import {
 
 import {
   showDialog, cancelButton, warnButton
-} from '../dialog';
+} from '../common/dialog';
 
 import {
   DocumentRegistry

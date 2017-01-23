@@ -26,12 +26,12 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  findKernel
-} from '../docregistry';
+  showDialog, okButton
+} from '../common/dialog';
 
 import {
-  showDialog, okButton
-} from '../dialog';
+  findKernel
+} from '../docregistry';
 
 import {
   DocumentRegistry

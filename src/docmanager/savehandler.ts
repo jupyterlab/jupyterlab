@@ -15,7 +15,7 @@ import {
 
 import {
 okButton, cancelButton, showDialog
-} from '../dialog';
+} from '../common/dialog';
 
 import {
   DocumentRegistry
