@@ -506,7 +506,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     selections.forEach(selection => {
       const { anchor, head } = this._toCodeMirrorSelection(selection);
       const markerOptions = this._toTextMarkerOptions(selection);
-      this.doc.markText(anchor, head, markerOptions);
+      markers.push(this.doc.markText(anchor, head, markerOptions));
     });
     this.selectionMarkers[uuid] = markers;
   }
@@ -548,9 +548,17 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Converts an editor selection to a code mirror selection.
    */
   private _toCodeMirrorSelection(selection: CodeEditor.IRange): CodeMirror.Selection {
+    //Selections only appear to render correctly if the anchor
+    //is before the head in the document. That is, reverse selections
+    //do not appear as intended.
+    let forward: boolean = (selection.start.line < selection.end.line) ||
+                           (selection.start.line === selection.end.line &&
+                            selection.start.column <= selection.end.column);
+    let anchor = forward ? selection.start : selection.end;
+    let head = forward ? selection.end : selection.start;
     return {
-      anchor: this._toCodeMirrorPosition(selection.start),
-      head: this._toCodeMirrorPosition(selection.end)
+      anchor: this._toCodeMirrorPosition(anchor),
+      head: this._toCodeMirrorPosition(head)
     };
   }
 
