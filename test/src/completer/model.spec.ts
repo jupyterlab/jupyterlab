@@ -360,7 +360,7 @@ describe('completer/model', () => {
         let want: CompleterWidget.IPatch = {
           text: patch,
           start: 0,
-          end: patch.length
+          end: 3
         };
         let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 3 };
         model.original = makeState('foo');
@@ -377,13 +377,15 @@ describe('completer/model', () => {
         let model = new CompleterModel();
         let currentValue = 'foo\nbar';
         let patch = 'barbaz';
-        let wantText = 'foo\nbarbaz';
+        let wantText = 'barbaz';
+        let start = 10;
+        let end = wantText.length;
         let want: CompleterWidget.IPatch = {
           text: wantText,
-          start: 10,
-          end: wantText.length
+          start,
+          end
         };
-        let cursor: CompleterWidget.ICursorSpan = { start: 4, end: 7 };
+        let cursor: CompleterWidget.ICursorSpan = { start, end };
         model.original = makeState(currentValue);
         model.cursor = cursor;
         expect(model.createPatch(patch)).to.eql(want);
