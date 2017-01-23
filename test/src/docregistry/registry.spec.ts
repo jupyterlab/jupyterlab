@@ -332,6 +332,8 @@ describe('docregistry/registry', () => {
         registry.addWidgetFactory(jFactory);
         let factories = registry.preferredWidgetFactories('.table.json');
         expect(toArray(factories)).to.eql([tFactory, jFactory]);
+        factories = registry.preferredWidgetFactories('.json');
+        expect(toArray(factories)).to.eql([jFactory]);
       });
 
     });
