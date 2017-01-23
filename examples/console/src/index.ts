@@ -30,16 +30,16 @@ import {
 } from 'jupyterlab/lib/codemirror';
 
 import {
+  defaultSanitizer
+} from 'jupyterlab/lib/common/sanitizer';
+
+import {
   ConsolePanel
 } from 'jupyterlab/lib/console';
 
 import {
   RenderMime
 } from 'jupyterlab/lib/rendermime';
-
-import {
-  defaultSanitizer
-} from 'jupyterlab/lib/sanitizer';
 
 import 'jupyterlab/lib/default-theme/index.css';
 import '../index.css';

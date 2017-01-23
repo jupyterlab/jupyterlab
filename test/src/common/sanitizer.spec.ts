@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   defaultSanitizer
-} from '../../../lib/sanitizer';
+} from '../../../lib/common/sanitizer';
 
 
 describe('defaultSanitizer', () => {

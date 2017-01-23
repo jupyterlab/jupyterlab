@@ -3,7 +3,7 @@
 
 import {
   showDialog, okButton, cancelButton, warnButton
-} from '../dialog';
+} from '../common/dialog';
 
 import {
   INotebookModel

@@ -11,7 +11,7 @@ import {
 
 import {
   showDialog
-} from '../dialog';
+} from '../common/dialog';
 
 import {
   DocumentRegistry

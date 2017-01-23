@@ -17,7 +17,7 @@ import {
 
 import {
   showDialog, okButton
-} from '../../../lib/dialog';
+} from '../../../lib/common/dialog';
 
 import {
   acceptDialog, dismissDialog

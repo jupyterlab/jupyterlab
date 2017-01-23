@@ -18,15 +18,15 @@
 @import '../cells/index.css';
 @import '../codemirror/index.css';
 @import '../commandpalette/index.css';
+@import '../common/dialog.css';
+@import '../common/iframe.css';
 @import '../completer/index.css';
 @import '../console/index.css';
 @import '../csvwidget/index.css';
-@import '../dialog/index.css';
 @import '../editorwidget/index.css';
 @import '../faq/index.css';
 @import '../filebrowser/index.css';
 @import '../help/index.css';
-@import '../iframe/index.css';
 @import '../imagewidget/index.css';
 @import '../inspector/index.css';
 @import '../landing/index.css';

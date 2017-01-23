@@ -43,7 +43,7 @@ import {
 
 import {
   showDialog, cancelButton, deleteButton
-} from '../dialog';
+} from '../common/dialog';
 
 import {
   DocumentManager
