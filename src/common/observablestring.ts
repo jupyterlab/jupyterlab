@@ -201,7 +201,9 @@ class ObservableString implements IObservableString {
    */
   unlink(): void {
     if(this._parent) {
-      this._text = this._parent.text;
+      if(!this._parent.isDisposed) {
+        this._text = this._parent.text;
+      }
       this._parent.changed.disconnect(this._forwardSignal, this);
       this._parent = null;
     }

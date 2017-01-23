@@ -879,8 +879,10 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    */
   unlink(): void {
     if(this._parent) {
-      //reconstruct the local array without sending signals
-      each(this._parent, (value: T)=>{ super.pushBack(value); });
+      if(!this._parent.isDisposed) {
+        //reconstruct the local array without sending signals
+        each(this._parent, (value: T)=>{ super.pushBack(value); });
+      }
       this._parent.changed.disconnect(this._forwardSignal, this);
       this._parent = null;
     }

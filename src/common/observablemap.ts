@@ -335,12 +335,17 @@ class ObservableMap<T> implements IObservableMap<T> {
    * Unlink the map from its parent map.
    */
   unlink(): void {
-    //Recreate the map locally
-    let keyList = this._parent.keys();
-    for(let i=0; i < keyList.length; i++) {
-      this._map.set(keyList[i], this._parent.get(keyList[i]));
+    if(this.isLinked) {
+      if(!this._parent.isDisposed) {
+        //Recreate the map locally
+        let keyList = this._parent.keys();
+        for(let i=0; i < keyList.length; i++) {
+          this._map.set(keyList[i], this._parent.get(keyList[i]));
+        }
+      }
+      this._parent.changed.disconnect(this._forwardSignal, this);
+      this._parent = null;
     }
-    this._parent = null;
   }
 
 
@@ -370,6 +375,7 @@ class ObservableMap<T> implements IObservableMap<T> {
     if(this.isLinked) {
       this.unlink();
     }
+    clearSignalData(this);
     this._map.clear();
     this._map = null;
   }
