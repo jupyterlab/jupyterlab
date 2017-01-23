@@ -30,6 +30,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  showDialog, okButton
+} from 'jupyterlab/lib/common/dialog';
+
+import {
   FileBrowser, FileBrowserModel
 } from 'jupyterlab/lib/filebrowser';
 
@@ -48,10 +52,6 @@ import {
 import {
   EditorWidgetFactory
 } from 'jupyterlab/lib/editorwidget/widget';
-
-import {
-  showDialog, okButton
-} from 'jupyterlab/lib/dialog';
 
 import 'jupyterlab/lib/default-theme/index.css';
 import '../index.css';
