@@ -214,11 +214,11 @@ class CompleterModel implements CompleterWidget.IModel {
   /**
    * Create a resolved patch between the original state and a patch string.
    *
-   * @param patch - The patch string to apply to the original value.
+   * @param text - The patch string to apply to the original value.
    *
    * @returns A patched text change or null if original value did not exist.
    */
-  createPatch(patch: string): CompleterWidget.IPatch {
+  createPatch(text: string): CompleterWidget.IPatch {
     let original = this._original;
     let cursor = this._cursor;
 
@@ -227,13 +227,7 @@ class CompleterModel implements CompleterWidget.IModel {
     }
 
     let { start, end } = cursor;
-    let value = original.text;
-    let prefix = value.substring(0, start);
-    let suffix = value.substring(end);
-    let text = prefix + patch + suffix;
-    let position = (prefix + patch).length;
-
-    return { position, text };
+    return { start, end, text };
   }
 
   /**
