@@ -13,7 +13,7 @@ import {
 
 import {
   OutputAreaModel, OutputAreaWidget, OutputWidget
-} from '../../../lib/output-area';
+} from '../../../lib/outputarea';
 
 import {
   defaultRenderMime

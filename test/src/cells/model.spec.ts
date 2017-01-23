@@ -21,7 +21,7 @@ import {
 
 import {
   OutputAreaModel
-} from '../../../lib/output-area';
+} from '../../../lib/outputarea';
 
 
 class TestModel extends CellModel {

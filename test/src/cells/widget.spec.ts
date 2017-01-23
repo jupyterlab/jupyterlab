@@ -27,7 +27,7 @@ import {
 
 import {
   OutputAreaWidget
-} from '../../../lib/output-area';
+} from '../../../lib/outputarea';
 
 import {
   createBaseCellFactory, createCodeCellFactory, createCellEditor, rendermime,

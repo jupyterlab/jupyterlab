@@ -74,8 +74,8 @@ import './notebook/notebook/widgetfactory.spec';
 
 import './notebook/tracker.spec';
 
-import './output-area/model.spec';
-import './output-area/widget.spec';
+import './outputarea/model.spec';
+import './outputarea/widget.spec';
 
 import './sanitizer/index.spec';
 
