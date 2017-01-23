@@ -23,7 +23,7 @@ import {
 
 import {
   BaseCellWidget, CodeCellWidget, CodeCellModel
-} from '../../../lib/notebook/cells';
+} from '../../../lib/cells';
 
 import {
   defaultRenderMime

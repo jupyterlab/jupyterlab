@@ -17,22 +17,22 @@ import {
 
 import {
   CodeEditorWidget
-} from '../../../../lib/codeeditor';
+} from '../../../lib/codeeditor';
 
 import {
   BaseCellWidget, CellModel, InputAreaWidget, ICellModel,
   CodeCellWidget, CodeCellModel, MarkdownCellWidget,
   RawCellWidget, RawCellModel, MarkdownCellModel
-} from '../../../../lib/notebook/cells';
+} from '../../../lib/cells';
 
 import {
   OutputAreaWidget
-} from '../../../../lib/notebook/output-area';
+} from '../../../lib/outputarea';
 
 import {
   createBaseCellFactory, createCodeCellFactory, createCellEditor, rendermime,
   editorFactory
-} from '../utils';
+} from '../notebook/utils';
 
 
 const RENDERED_CLASS = 'jp-mod-rendered';
@@ -606,6 +606,7 @@ describe('notebook/cells/widget', () => {
             return method === 'onUpdateRequest';
           });
           expect(updates).to.have.length(1);
+          widget.dispose();
           done();
         });
       });

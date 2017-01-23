@@ -11,7 +11,7 @@ import {
 
 import {
   CodeCellModel
-} from '../cells';
+} from '../../cells';
 
 import {
   INotebookModel, NotebookModel

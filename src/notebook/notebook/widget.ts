@@ -73,11 +73,11 @@ import {
   ICellModel, BaseCellWidget, IMarkdownCellModel,
   CodeCellWidget, MarkdownCellWidget,
   ICodeCellModel, RawCellWidget, IRawCellModel,
-} from '../cells';
+} from '../../cells';
 
 import {
   OutputAreaWidget
-} from '../output-area';
+} from '../../outputarea';
 
 import {
   INotebookModel

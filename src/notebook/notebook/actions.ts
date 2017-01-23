@@ -20,7 +20,7 @@ import {
 import {
   ICellModel, ICodeCellModel,
   CodeCellWidget, BaseCellWidget, MarkdownCellWidget
-} from '../cells';
+} from '../../cells';
 
 import {
   INotebookModel

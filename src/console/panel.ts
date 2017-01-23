@@ -35,11 +35,11 @@ import {
 
 import {
   BaseCellWidget, CodeCellWidget
-} from '../notebook/cells';
+} from '../cells';
 
 import {
   OutputAreaWidget
-} from '../notebook/output-area';
+} from '../outputarea';
 
 import {
   IRenderMime

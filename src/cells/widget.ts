@@ -19,23 +19,23 @@ import {
 
 import {
   IChangedArgs
-} from '../../common/interfaces';
+} from '../common/interfaces';
 
 import {
   CodeEditor, CodeEditorWidget
-} from '../../codeeditor';
+} from '../codeeditor';
 
 import {
   RenderMime
-} from '../../rendermime';
+} from '../rendermime';
 
 import {
   IMetadataCursor
-} from '../common/metadata';
+} from '../notebook/common/metadata';
 
 import {
   OutputAreaWidget
-} from '../output-area';
+} from '../outputarea';
 
 import {
   ICellModel, ICodeCellModel,

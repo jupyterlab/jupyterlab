@@ -13,15 +13,15 @@ import {
 
 import {
   IChangedArgs
-} from '../../../../lib/common/interfaces';
+} from '../../../lib/common/interfaces';
 
 import {
   CellModel, RawCellModel, MarkdownCellModel, CodeCellModel
-} from '../../../../lib/notebook/cells';
+} from '../../../lib/cells';
 
 import {
   OutputAreaModel
-} from '../../../../lib/notebook/output-area';
+} from '../../../lib/outputarea';
 
 
 class TestModel extends CellModel {

@@ -19,23 +19,23 @@ import {
 
 import {
   CodeEditor
-} from '../../codeeditor';
+} from '../codeeditor';
 
 import {
   IChangedArgs
-} from '../../common/interfaces';
+} from '../common/interfaces';
 
 import {
   IObservableString, ObservableString
-} from '../../common/observablestring';
+} from '../common/observablestring';
 
 import {
   IMetadataCursor, MetadataCursor
-} from '../common/metadata';
+} from '../notebook/common/metadata';
 
 import {
   IOutputAreaModel, OutputAreaModel
-} from '../output-area';
+} from '../outputarea';
 
 
 /**

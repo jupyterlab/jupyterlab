@@ -22,7 +22,7 @@ import {
 import {
   CodeCellModel, CodeCellWidget, MarkdownCellModel, MarkdownCellWidget,
   RawCellModel, RawCellWidget, BaseCellWidget
-} from '../../../../lib/notebook/cells';
+} from '../../../../lib/cells';
 
 import {
   INotebookModel, NotebookModel

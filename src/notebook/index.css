@@ -10,13 +10,6 @@
 
 :root {
   --jp-private-notebook-padding: 10px;
-  --jp-private-notebook-cell-editor-background: #f7f7f7;
-  --jp-private-notebook-cell-editor-border: #cfcfcf;
-  --jp-private-notebook-cell-prompt-width: 90px;
-  --jp-private-notebook-cell-inprompt-color: #303F9F;
-  --jp-private-notebook-cell-outprompt-color: #D84315;
-  --jp-private-notebook-cell-font-family: 'Helvetica';
-  --jp-private-notebook-cell-prompt-letter-spacing: 2px;
 }
 
 
@@ -25,7 +18,5 @@
 |----------------------------------------------------------------------------*/
 
 
-@import './cells/index.css';
 @import './notebook/index.css';
-@import './output-area/index.css';
 @import './toolbar.css';
