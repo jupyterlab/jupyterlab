@@ -4,6 +4,9 @@
 import './application/loader.spec';
 import './application/shell.spec';
 
+import './cells/model.spec';
+import './cells/widget.spec';
+
 import './codeeditor/editor.spec';
 import './codeeditor/widget.spec';
 
@@ -58,9 +61,6 @@ import './renderers/latex.spec';
 
 import './rendermime/rendermime.spec';
 
-import './notebook/cells/model.spec';
-import './notebook/cells/widget.spec';
-
 import './notebook/common/undo.spec';
 
 import './notebook/notebook/actions.spec';
@@ -72,10 +72,10 @@ import './notebook/notebook/trust.spec';
 import './notebook/notebook/widget.spec';
 import './notebook/notebook/widgetfactory.spec';
 
-import './notebook/output-area/model.spec';
-import './notebook/output-area/widget.spec';
-
 import './notebook/tracker.spec';
+
+import './output-area/model.spec';
+import './output-area/widget.spec';
 
 import './sanitizer/index.spec';
 

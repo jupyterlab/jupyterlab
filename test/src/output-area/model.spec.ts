@@ -13,7 +13,7 @@ import {
 
 import {
   OutputAreaModel
-} from '../../../../lib/notebook/output-area/model';
+} from '../../../lib/output-area/model';
 
 
 /**

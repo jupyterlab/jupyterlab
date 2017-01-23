@@ -13,11 +13,11 @@ import {
 
 import {
   OutputAreaModel, OutputAreaWidget, OutputWidget
-} from '../../../../lib/notebook/output-area';
+} from '../../../lib/output-area';
 
 import {
   defaultRenderMime
-} from '../../utils';
+} from '../utils';
 
 import {
   DEFAULT_OUTPUTS

@@ -21,7 +21,7 @@ import {
 
 import {
   CodeCellModel, CodeCellWidget
-} from '../../../lib/notebook/cells';
+} from '../../../lib/cells';
 
 import {
   createCodeCellFactory

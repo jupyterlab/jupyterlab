@@ -13,7 +13,7 @@ import {
 
 import {
   CodeCellWidget, MarkdownCellWidget, RawCellWidget
-} from '../../../../lib/notebook/cells/widget';
+} from '../../../../lib/cells/widget';
 
 import {
  NotebookModel

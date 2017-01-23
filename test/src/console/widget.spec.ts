@@ -29,7 +29,7 @@ import {
 
 import {
   BaseCellWidget, CodeCellWidget, CodeCellModel, RawCellModel, RawCellWidget
-} from '../../../lib/notebook/cells';
+} from '../../../lib/cells';
 
 import {
   createCodeCellFactory

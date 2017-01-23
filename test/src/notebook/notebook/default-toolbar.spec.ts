@@ -21,7 +21,7 @@ import {
 
 import {
  CodeCellWidget, MarkdownCellWidget
-} from '../../../../lib/notebook/cells/widget';
+} from '../../../../lib/cells/widget';
 
 import {
   NotebookActions
