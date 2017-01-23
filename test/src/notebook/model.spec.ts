@@ -17,15 +17,15 @@ import {
 
 import {
   CodeCellModel
-} from '../../../../lib/cells/model';
+} from '../../../lib/cells/model';
 
 import {
   NotebookModel
-} from '../../../../lib/notebook/notebook/model';
+} from '../../../lib/notebook/model';
 
 import {
   DEFAULT_CONTENT
-} from '../utils';
+} from './utils';
 
 
 describe('notebook/notebook/model', () => {

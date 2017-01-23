@@ -21,11 +21,11 @@ import {
 
 import {
   INotebookModel
-} from '../../lib/notebook/notebook/model';
+} from '../../lib/notebook/model';
 
 import {
   NotebookModelFactory
-} from '../../lib/notebook/notebook/modelfactory';
+} from '../../lib/notebook/modelfactory';
 
 import {
   TextRenderer, HTMLRenderer

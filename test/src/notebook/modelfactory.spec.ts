@@ -5,15 +5,15 @@ import expect = require('expect.js');
 
 import {
   CodeCellModel
-} from '../../../../lib/cells/model';
+} from '../../../lib/cells/model';
 
 import {
   NotebookModel
-} from '../../../../lib/notebook/notebook/model';
+} from '../../../lib/notebook/model';
 
 import {
   NotebookModelFactory
-} from '../../../../lib/notebook/notebook/modelfactory';
+} from '../../../lib/notebook/modelfactory';
 
 
 describe('notebook/notebook/modelfactory', () => {

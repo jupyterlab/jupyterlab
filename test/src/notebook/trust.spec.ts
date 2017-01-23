@@ -5,19 +5,19 @@ import expect = require('expect.js');
 
 import {
  NotebookModel
-} from '../../../../lib/notebook/notebook/model';
+} from '../../../lib/notebook/model';
 
 import {
   trustNotebook
-} from '../../../../lib/notebook/notebook/trust';
+} from '../../../lib/notebook/trust';
 
 import {
   acceptDialog, dismissDialog
-} from '../../utils';
+} from '../utils';
 
 import {
   DEFAULT_CONTENT
-} from '../utils';
+} from './utils';
 
 
 describe('notebook/notebook/trust', () => {
