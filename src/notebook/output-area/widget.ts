@@ -467,7 +467,7 @@ namespace OutputAreaWidget {
      *
      * Defaults to a shared `IContentFactory` instance.
      */
-     contentFactory: IContentFactory;
+     contentFactory?: IContentFactory;
   }
 
   /**
