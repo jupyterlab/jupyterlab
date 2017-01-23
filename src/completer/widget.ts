@@ -682,9 +682,14 @@ namespace CompleterWidget {
     text: string;
 
     /**
-     * The position in the text where cursor should be after patch application.
+     * The start position of the patch in the buffer.
      */
-    position: number;
+    start: number;
+
+    /**
+     * The end position of the patch in the buffer.
+     */
+    end: number;
   }
 
 
