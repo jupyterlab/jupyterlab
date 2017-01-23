@@ -163,15 +163,15 @@ class LabApp(NotebookApp):
         """initialize tornado webapp and httpserver.
         """
         super(LabApp, self).init_webapp()
-        self.add_lab_handlers(self.web_app)
-        self.add_labextensions(self.web_app)
+        self.add_lab_handlers()
+        self.add_labextensions()
 
-    def add_labextensions(self, webapp):
+    def add_labextensions(self):
         """Get the enabledd and valid lab extensions.
 
         Notes
         -------
-        Adds a `labextensions` property to the webapp, which is a dict
+        Adds a `labextensions` property to the web_app, which is a dict
         containing manifest data for each enabled and active extension,
         and optionally its associated python_module.
         """
@@ -190,12 +190,13 @@ class LabApp(NotebookApp):
                 continue
             data['python_module'] = config.get('python_module', None)
             out[name] = data
-        webapp.labextensions = out
+        self.web_app.labextensions = out
 
-    def add_lab_handlers(self, webapp):
+    def add_lab_handlers(self):
         """Add the lab-specific handlers to the tornado app."""
-        base_url = webapp.settings['base_url']
-        webapp.add_handlers(".*$",
+        web_app = self.web_app
+        base_url = web_app.settings['base_url']
+        web_app.add_handlers(".*$",
             [(ujoin(base_url, h[0]),) + h[1:] for h in default_handlers])
         extension_prefix = ujoin(base_url, EXTENSION_PREFIX)
         labextension_handler = (
@@ -204,7 +205,7 @@ class LabApp(NotebookApp):
                 'no_cache_paths': ['/'],  # don't cache anything in labbextensions
             }
         )
-        webapp.add_handlers(".*$", [labextension_handler])
+        web_app.add_handlers(".*$", [labextension_handler])
         base_dir = os.path.realpath(os.path.join(HERE, '..'))
         dev_mode = os.path.exists(os.path.join(base_dir, '.git'))
         if dev_mode:
@@ -215,10 +216,13 @@ def bootstrap_from_nbapp(nbapp):
     """Bootstrap the lab app on top of a notebook app.
     """
     labapp = LabApp()
-    labapp.initialize()
-    webapp = nbapp.web_app
-    labapp.add_lab_handlers(webapp)
-    labapp.add_labextensions(webapp)
+    # Load the config file
+    labapp.config_file_name = nbapp.config_file_name
+    labapp.load_config_file()
+    labapp.log = nbapp.log
+    LabApp.web_app = nbapp.web_app
+    labapp.add_lab_handlers()
+    labapp.add_labextensions()
 
 
 #-----------------------------------------------------------------------------
