@@ -33,11 +33,11 @@ import {
   BaseCellWidget, CodeCellWidget, RawCellWidget,
   ICodeCellModel, IRawCellModel, CellModel,
   RawCellModel, CodeCellModel
-} from '../notebook/cells';
+} from '../cells';
 
 import {
   OutputAreaWidget
-} from '../notebook/output-area';
+} from '../output-area';
 
 import {
   IRenderMime

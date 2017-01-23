@@ -55,11 +55,11 @@ import {
 
 import {
   BaseCellWidget, CodeCellWidget
-} from '../cells';
+} from '../../cells';
 
 import {
   OutputAreaWidget
-} from '../output-area';
+} from '../../output-area';
 
 import {
   INotebookModel

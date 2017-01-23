@@ -23,11 +23,11 @@ import {
 
 import {
   IObservableVector, ObservableVector
-} from '../../common/observablevector';
+} from '../common/observablevector';
 
 import {
   RenderMime
-} from '../../rendermime';
+} from '../rendermime';
 
 
 /**

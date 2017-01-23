@@ -11,7 +11,7 @@ import {
 
 import {
   BaseCellWidget, CodeCellWidget
-} from '../notebook/cells';
+} from '../cells';
 
 
 /**

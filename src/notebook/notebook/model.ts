@@ -18,7 +18,7 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  clearSignalData, defineSignal, ISignal
+  defineSignal, ISignal
 } from 'phosphor/lib/core/signaling';
 
 import {
@@ -32,7 +32,7 @@ import {
 import {
   ICellModel, ICodeCellModel, IRawCellModel, IMarkdownCellModel,
   CodeCellModel, RawCellModel, MarkdownCellModel, CellModel
-} from '../cells/model';
+} from '../../cells/model';
 
 import {
   IChangedArgs

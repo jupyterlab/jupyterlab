@@ -43,11 +43,11 @@ import {
 
 import {
   ObservableVector
-} from '../../common/observablevector';
+} from '../common/observablevector';
 
 import {
   RenderMime
-} from '../../rendermime';
+} from '../rendermime';
 
 import {
   IOutputAreaModel, OutputAreaModel

@@ -19,7 +19,7 @@ import {
 
 import {
   BaseCellWidget
-} from './cells';
+} from '../cells';
 
 
 /**
