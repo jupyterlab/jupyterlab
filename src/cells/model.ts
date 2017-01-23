@@ -35,7 +35,7 @@ import {
 
 import {
   IOutputAreaModel, OutputAreaModel
-} from '../output-area';
+} from '../outputarea';
 
 
 /**

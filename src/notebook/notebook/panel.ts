@@ -59,7 +59,7 @@ import {
 
 import {
   OutputAreaWidget
-} from '../../output-area';
+} from '../../outputarea';
 
 import {
   INotebookModel
