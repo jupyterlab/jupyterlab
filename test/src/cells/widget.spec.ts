@@ -606,6 +606,7 @@ describe('notebook/cells/widget', () => {
             return method === 'onUpdateRequest';
           });
           expect(updates).to.have.length(1);
+          widget.dispose();
           done();
         });
       });
