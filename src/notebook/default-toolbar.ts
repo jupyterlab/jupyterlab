@@ -19,14 +19,14 @@ import {
 
 import {
   ToolbarButton
-} from '../../toolbar';
+} from '../toolbar';
 
 import {
   createInterruptButton,
   createRestartButton,
   createKernelNameItem,
   createKernelStatusItem
-} from '../../toolbar/kernel';
+} from '../toolbar/kernel';
 
 import {
   Notebook

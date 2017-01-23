@@ -23,20 +23,20 @@ import {
 
 import {
   IObservableVector, ObservableVector
-} from '../../common/observablevector';
+} from '../common/observablevector';
 
 import {
   DocumentModel, DocumentRegistry
-} from '../../docregistry';
+} from '../docregistry';
 
 import {
   ICellModel, ICodeCellModel, IRawCellModel, IMarkdownCellModel,
   CodeCellModel, RawCellModel, MarkdownCellModel, CellModel
-} from '../../cells/model';
+} from '../cells/model';
 
 import {
   IChangedArgs
-} from '../../common/interfaces';
+} from '../common/interfaces';
 
 import {
   IMetadataCursor, MetadataCursor
@@ -44,7 +44,7 @@ import {
 
 import {
   IObservableUndoableVector, ObservableUndoableVector
-} from '../common/undo';
+} from '../common/undoablevector';
 
 
 /**

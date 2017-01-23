@@ -7,11 +7,11 @@ import {
 
 import {
   DocumentRegistry
-} from '../../docregistry';
+} from '../docregistry';
 
 import {
   CodeCellModel
-} from '../../cells';
+} from '../cells';
 
 import {
   INotebookModel, NotebookModel

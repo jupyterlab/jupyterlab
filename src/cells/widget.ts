@@ -31,7 +31,7 @@ import {
 
 import {
   IMetadataCursor
-} from '../notebook/common/metadata';
+} from '../common/metadata';
 
 import {
   OutputAreaWidget

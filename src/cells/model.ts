@@ -31,7 +31,7 @@ import {
 
 import {
   IMetadataCursor, MetadataCursor
-} from '../notebook/common/metadata';
+} from '../common/metadata';
 
 import {
   IOutputAreaModel, OutputAreaModel

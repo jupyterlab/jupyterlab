@@ -7,15 +7,15 @@ import {
 
 import {
   IEditorMimeTypeService
-} from '../../codeeditor';
+} from '../codeeditor';
 
 import {
   ABCWidgetFactory, DocumentRegistry
-} from '../../docregistry';
+} from '../docregistry';
 
 import {
   RenderMime
-} from '../../rendermime';
+} from '../rendermime';
 
 import {
   ToolbarItems

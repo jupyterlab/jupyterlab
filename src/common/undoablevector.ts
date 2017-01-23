@@ -10,12 +10,8 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  Vector
-} from 'phosphor/lib/collections/vector';
-
-import {
   IObservableVector, ObservableVector
-} from '../../common/observablevector';
+} from './observablevector';
 
 
 /**
