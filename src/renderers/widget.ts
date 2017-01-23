@@ -163,7 +163,7 @@ class RenderedHTML extends RenderedHTMLCommon {
    * A message handler invoked on an `'after-attach'` message.
    */
   onAfterAttach(msg: Message): void {
-    this._urlResolved.then( ()=>{typeset(this.node);} );
+    this._urlResolved.then( () => { typeset(this.node); });
   }
 
   private _urlResolved: Promise<void> = null;
@@ -199,7 +199,7 @@ class RenderedMarkdown extends RenderedHTMLCommon {
       this.fit();
       this._rendered = true;
       if (this.isAttached) {
-        this._urlResolved.then( ()=>{typeset(this.node);} );
+        this._urlResolved.then(() => { typeset(this.node); });
       }
     });
   }
@@ -333,7 +333,7 @@ function resolveUrls(node: HTMLElement, resolver: RenderMime.IResolver): Promise
     let img = imgs[i];
     let source = img.getAttribute('src');
     if (source) {
-      return resolver.resolveUrl(source).then((url)=>{
+      return resolver.resolveUrl(source).then(url => {
         img.src = url;
         return void 0;
       });
@@ -344,7 +344,7 @@ function resolveUrls(node: HTMLElement, resolver: RenderMime.IResolver): Promise
     let anchor = anchors[i];
     let href = anchor.getAttribute('href');
     if (href) {
-      return resolver.resolveUrl(href).then((url)=>{
+      return resolver.resolveUrl(href).then(url => {
         anchor.href = url;
         return void 0;
       });

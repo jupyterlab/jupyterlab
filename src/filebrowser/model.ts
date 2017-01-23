@@ -238,7 +238,7 @@ class FileBrowserModel implements IDisposable, IPathTracker {
    *   downloading.
    */
   download(path: string): Promise<void> {
-    return this._manager.contents.getDownloadUrl(path).then((url)=>{;
+    return this._manager.contents.getDownloadUrl(path).then(url => {
       let element = document.createElement('a');
       element.setAttribute('href', url);
       element.setAttribute('download', '');
