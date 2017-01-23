@@ -13,7 +13,7 @@ import {
 
 import {
   BaseCellWidget
-} from '../../../lib/notebook/cells';
+} from '../../../lib/cells';
 
 import {
   NotebookTracker

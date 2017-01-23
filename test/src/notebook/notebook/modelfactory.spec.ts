@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   CodeCellModel
-} from '../../../../lib/notebook/cells/model';
+} from '../../../../lib/cells/model';
 
 import {
   NotebookModel
