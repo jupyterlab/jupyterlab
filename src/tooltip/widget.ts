@@ -44,11 +44,10 @@ class TooltipWidget extends Widget {
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
-    if (this._content === null) {
-      return;
+    if (this._content) {
+      this._content.dispose();
+      this._content = null;
     }
-    this._content.dispose();
-    this._content = null;
     super.dispose();
   }
 
@@ -94,7 +93,7 @@ class TooltipWidget extends Widget {
     this.update();
   }
 
-  private _content: Widget = null;
+  private _content: Widget | null = null;
 }
 
 /**
