@@ -18,12 +18,16 @@ import {
 } from '../codeeditor';
 
 import {
-  IConsoleTracker
+  ConsolePanel, IConsoleTracker
 } from '../console';
 
 import {
-  INotebookTracker
+  INotebookTracker, NotebookPanel
 } from '../notebook';
+
+import {
+  BaseCellWidget
+} from '../notebook/cells';
 
 import {
   IRenderMime
@@ -37,6 +41,11 @@ import {
   TooltipWidget
 } from './widget';
 
+
+/**
+ * The class added to cells that have spawned a tooltip.
+ */
+const PARENT_CLASS = 'jp-Tooltip-parent';
 
 /**
  * The tooltip extension.
@@ -70,24 +79,28 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
   registry.addCommand(launch, {
     execute: args => {
       let notebook = args['notebook'] as boolean;
-      let editor: CodeEditor.IEditor = null;
-      let kernel: Kernel.IKernel = null;
-      let rendermime: IRenderMime = null;
+      let cell: BaseCellWidget | null = null;
+      let editor: CodeEditor.IEditor | null = null;
+      let kernel: Kernel.IKernel | null = null;
+      let rendermime: IRenderMime | null = null;
       let extant = !!tooltip;
+      let parent: NotebookPanel | ConsolePanel | null = null;
 
       if (notebook) {
-        let widget = notebooks.currentWidget;
-        if (widget) {
-          editor = widget.notebook.activeCell.editor;
-          kernel = widget.kernel;
-          rendermime = widget.rendermime;
+        parent = notebooks.currentWidget;
+        if (parent) {
+          cell = parent.notebook.activeCell;
+          editor = cell.editor;
+          kernel = parent.kernel;
+          rendermime = parent.rendermime;
         }
       } else {
-        let widget = consoles.currentWidget;
-        if (widget) {
-          editor = widget.console.prompt.editor;
-          kernel = widget.console.session.kernel;
-          rendermime = widget.console.rendermime;
+        parent = consoles.currentWidget;
+        if (parent) {
+          cell = parent.console.prompt;
+          editor = cell.editor;
+          kernel = parent.console.session.kernel;
+          rendermime = parent.console.rendermime;
         }
       }
 
@@ -104,9 +117,11 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
         tooltip = new TooltipWidget({
           model: new TooltipModel({ editor, kernel, rendermime })
         });
+        cell.addClass(PARENT_CLASS);
         tooltip.id = `tooltip-${++id}`;
         Widget.attach(tooltip, document.body);
-        tooltip.activate();
+        // Make sure the parent notebook/console still has the focus.
+        parent.activate();
       }
     }
   });
@@ -115,6 +130,10 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
   registry.addCommand(remove, {
     execute: () => {
       if (tooltip) {
+        let parent = document.querySelector(`.${PARENT_CLASS}`);
+        if (parent) {
+          parent.classList.remove(PARENT_CLASS);
+        }
         tooltip.model.dispose();
         tooltip.dispose();
         tooltip = null;
@@ -142,6 +161,6 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
   keymap.addBinding({
     command: remove,
     keys: ['Escape'],
-    selector: '.jp-Tooltip'
+    selector: `.jp-Cell.${PARENT_CLASS}, .jp-Tooltip`
   });
 }
