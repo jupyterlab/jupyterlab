@@ -393,10 +393,13 @@ class DirListing extends Widget {
     let promises: Promise<Contents.IModel>[] = [];
     for (let item of this._getSelectedItems()) {
       if (item.type !== 'directory') {
-        promises.push(this._model.copy(item.path, this._model.path));
+        promises.push(this._model.copy(item.name, '.'));
       }
     }
     return Promise.all(promises).catch(error => {
+      if (error.throwError) {
+        error.message = error.throwError;
+      }
       utils.showErrorMessage('Duplicate file', error);
     });
   }
