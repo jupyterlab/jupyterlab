@@ -18,6 +18,7 @@ import './common/activitymonitor.spec';
 import './common/instancetracker.spec';
 import './common/observablestring.spec';
 import './common/observablevector.spec';
+import './common/undoablevector.spec';
 import './common/vdom.spec';
 
 import './completer/handler.spec';
@@ -61,17 +62,14 @@ import './renderers/latex.spec';
 
 import './rendermime/rendermime.spec';
 
-import './notebook/common/undo.spec';
-
-import './notebook/notebook/actions.spec';
-import './notebook/notebook/default-toolbar.spec';
-import './notebook/notebook/model.spec';
-import './notebook/notebook/modelfactory.spec';
-import './notebook/notebook/panel.spec';
-import './notebook/notebook/trust.spec';
-import './notebook/notebook/widget.spec';
-import './notebook/notebook/widgetfactory.spec';
-
+import './notebook/actions.spec';
+import './notebook/default-toolbar.spec';
+import './notebook/model.spec';
+import './notebook/modelfactory.spec';
+import './notebook/panel.spec';
+import './notebook/trust.spec';
+import './notebook/widget.spec';
+import './notebook/widgetfactory.spec';
 import './notebook/tracker.spec';
 
 import './outputarea/model.spec';

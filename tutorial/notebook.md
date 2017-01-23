@@ -19,7 +19,7 @@ files.
 The **[NotebookModel](http://jupyterlab.github.io/jupyterlab/classes/_notebook_notebook_model_.notebookmodel.html)**
 contains an observable list of cells.
 
-A **[cell model](http://jupyterlab.github.io/jupyterlab/modules/_notebook_cells_model_.html)**
+A **[cell model](http://jupyterlab.github.io/jupyterlab/modules/_cells_model_.html)**
 can be:
 
 - a code cell
@@ -73,19 +73,19 @@ the next cell, merge or split cells at the cursor, delete selected cells, etc.
 
 #### Widget hierarchy
 
-A Notebook widget contains a list of [cell widgets](http://jupyterlab.github.io/jupyterlab/modules/_notebook_cells_widget_.html),
+A Notebook widget contains a list of [cell widgets](http://jupyterlab.github.io/jupyterlab/modules/_cells_widget_.html),
 corresponding to the cell models in its cell list.
 
-- Each cell widget contains an [InputAreaWidget](http://jupyterlab.github.io/jupyterlab/classes/_notebook_cells_widget_.inputareawidget.html),
+- Each cell widget contains an [InputAreaWidget](http://jupyterlab.github.io/jupyterlab/classes/_cells_widget_.inputareawidget.html),
 
     + which contains n [CodeEditorWidget](http://jupyterlab.github.io/jupyterlab/classes/_codeeditor_widget_.codeeditorwidget.html),
 
         - which contains a JavaScript CodeMirror instance.
 
-A [CodeCellWidget](http://jupyterlab.github.io/jupyterlab/classes/_notebook_cells_widget_.codecellwidget.html)
-also contains an [OutputAreaWidget](http://jupyterlab.github.io/jupyterlab/classes/_notebook_output_area_widget_.outputareawidget.html).
+A [CodeCellWidget](http://jupyterlab.github.io/jupyterlab/classes/_cells_widget_.codecellwidget.html)
+also contains an [OutputAreaWidget](http://jupyterlab.github.io/jupyterlab/classes/_outputarea_widget_.outputareawidget.html).
 An OutputAreaWidget is responsible for rendering the outputs in the
-[OutputAreaModel](http://jupyterlab.github.io/jupyterlab/classes/_notebook_output_area_model_.outputareamodel.html)
+[OutputAreaModel](http://jupyterlab.github.io/jupyterlab/classes/_outputarea_model_.outputareamodel.html)
 list. An OutputAreaWidget uses a
 notebook-specific [RenderMime](http://jupyterlab.github.io/jupyterlab/classes/_rendermime_index_.rendermime.html)
 object to render `display_data` output messages.

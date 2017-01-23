@@ -17,47 +17,47 @@ import {
 
 import {
   Context, DocumentRegistry
-} from '../../../../lib/docregistry';
+} from '../../../lib/docregistry';
 
 import {
  CodeCellWidget, MarkdownCellWidget
-} from '../../../../lib/cells/widget';
+} from '../../../lib/cells/widget';
 
 import {
   NotebookActions
-} from '../../../../lib/notebook/notebook/actions';
+} from '../../../lib/notebook/actions';
 
 import {
  ToolbarItems
-} from '../../../../lib/notebook/notebook/default-toolbar';
+} from '../../../lib/notebook/default-toolbar';
 
 import {
  INotebookModel
-} from '../../../../lib/notebook/notebook/model';
+} from '../../../lib/notebook/model';
 
 import {
   JUPYTER_CELL_MIME
-} from '../../../../lib/notebook/notebook/widget';
+} from '../../../lib/notebook/widget';
 
 import {
  NotebookPanel
-} from '../../../../lib/notebook/notebook/panel';
+} from '../../../lib/notebook/panel';
 
 import {
  createInterruptButton,
  createKernelNameItem,
  createKernelStatusItem,
  createRestartButton
-} from '../../../../lib/toolbar/kernel';
+} from '../../../lib/toolbar/kernel';
 
 import {
   createNotebookContext
-} from '../../utils';
+} from '../utils';
 
 import {
   DEFAULT_CONTENT, createNotebookPanelFactory, rendermime, clipboard,
   mimeTypeService
-} from '../utils';
+} from './utils';
 
 
 function startKernel(context: DocumentRegistry.IContext<INotebookModel>): Promise<Kernel.IKernel> {

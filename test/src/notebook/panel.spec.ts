@@ -9,44 +9,44 @@ import {
 
 import {
   IChangedArgs
-} from '../../../../lib/common/interfaces';
+} from '../../../lib/common/interfaces';
 
 import {
   DocumentRegistry, Context
-} from '../../../../lib/docregistry';
+} from '../../../lib/docregistry';
 
 import {
   CompleterWidget, CompletionHandler
-} from '../../../../lib/completer';
+} from '../../../lib/completer';
 
 import {
   InspectionHandler
-} from '../../../../lib/inspector';
+} from '../../../lib/inspector';
 
 import {
   INotebookModel
-} from '../../../../lib/notebook/notebook/model';
+} from '../../../lib/notebook/model';
 
 import {
   NotebookPanel
-} from '../../../../lib/notebook/notebook/panel';
-
-import {
-  Toolbar
-} from '../../../../lib/toolbar';
+} from '../../../lib/notebook/panel';
 
 import {
   Notebook
-} from '../../../../lib/notebook/notebook/widget';
+} from '../../../lib/notebook/widget';
+
+import {
+  Toolbar
+} from '../../../lib/toolbar';
 
 import {
   createNotebookContext
-} from '../../utils';
+} from '../utils';
 
 import {
   DEFAULT_CONTENT, createNotebookPanelFactory, rendermime, clipboard,
   mimeTypeService, editorFactory
-} from '../utils';
+} from './utils';
 
 
 /**

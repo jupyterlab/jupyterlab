@@ -51,33 +51,33 @@ import {
 
 import {
   IChangedArgs
-} from '../../common/interfaces';
+} from '../common/interfaces';
 
 import {
   DragScrollHandler
-} from '../../common/dragscroll';
+} from '../common/dragscroll';
 
 import {
   IObservableVector, ObservableVector
-} from '../../common/observablevector';
+} from '../common/observablevector';
 
 import {
   RenderMime
-} from '../../rendermime';
+} from '../rendermime';
 
 import {
   IEditorMimeTypeService, CodeEditor
-} from '../../codeeditor';
+} from '../codeeditor';
 
 import {
   ICellModel, BaseCellWidget, IMarkdownCellModel,
   CodeCellWidget, MarkdownCellWidget,
   ICodeCellModel, RawCellWidget, IRawCellModel,
-} from '../../cells';
+} from '../cells';
 
 import {
   OutputAreaWidget
-} from '../../outputarea';
+} from '../outputarea';
 
 import {
   INotebookModel

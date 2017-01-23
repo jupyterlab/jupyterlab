@@ -9,27 +9,27 @@ import {
 
 import {
   INotebookModel
-} from '../../../../lib/notebook/notebook/model';
+} from '../../../lib/notebook/model';
 
 import {
   NotebookPanel
-} from '../../../../lib/notebook/notebook/panel';
+} from '../../../lib/notebook/panel';
 
 import {
   NotebookWidgetFactory
-} from '../../../../lib/notebook/notebook/widgetfactory';
+} from '../../../lib/notebook/widgetfactory';
 
 import {
   Context
-} from '../../../../lib/docregistry/context';
+} from '../../../lib/docregistry/context';
 
 import {
   createNotebookContext
-} from '../../utils';
+} from '../utils';
 
 import {
   createNotebookPanelFactory, clipboard, rendermime, mimeTypeService
-} from '../utils';
+} from './utils';
 
 
 const contentFactory = createNotebookPanelFactory();

@@ -17,6 +17,105 @@
 | Imports
 |----------------------------------------------------------------------------*/
 
-
-@import './notebook/index.css';
 @import './toolbar.css';
+
+
+
+/*-----------------------------------------------------------------------------
+| Notebook
+|----------------------------------------------------------------------------*/
+
+
+.jp-Notebook {
+  padding-left: var(--jp-private-notebook-padding);
+  padding-right: var(--jp-private-notebook-padding);
+  padding-top: var(--jp-private-notebook-padding);
+  padding-bottom: calc(4*var(--jp-private-notebook-padding));
+  min-width: 50px;
+  min-height: 50px;
+  outline: none;
+  overflow: auto;
+  background: var(--jp-layout-color1);
+}
+
+
+.jp-Notebook-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+
+.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected{
+  border-color: #ABABAB;
+  border-left-width: var(--jp-border-width);
+  background: linear-gradient(to right, #42A5F5 -40px, #42A5F5 5px, transparent 5px, transparent 100%);
+}
+
+
+.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-multiSelected.jp-mod-active {
+  background: linear-gradient(to right, #42A5F5 -40px, #42A5F5 7px, #E3F2FD 7px, #E3F2FD 100%);
+}
+
+
+.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-selected {
+  background: #E3F2FD;
+}
+
+
+.jp-Notebook.jp-mod-editMode .jp-Notebook-cell.jp-mod-active {
+  border-color: #66BB6A;
+  border-left-width: var(--jp-border-width);
+  background: linear-gradient(to right, #66BB6A -40px, #66BB6A 5px, transparent 5px, transparent 100%);
+}
+
+
+.jp-NotebookContainer-widget {
+  flex: 0 0 auto;
+}
+
+
+.jp-Notebook {
+  flex: 1 1 auto;
+}
+
+
+.jp-Notebook-cell.jp-mod-dropSource {
+  opacity: 0.5;
+}
+
+
+.jp-Notebook-cell.jp-mod-dropTarget, 
+.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected.jp-mod-dropTarget {
+  border-top-color: #42A5F5;
+}
+
+
+.jp-Notebook-cell .jp-Cell-prompt {
+  cursor: move;
+}
+
+.jp-dragImage {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border: 1px solid #ABABAB;
+  background: linear-gradient(to right, #42A5F5 -40px, #42A5F5 5px, white 5px, white 100%);
+}
+
+
+.jp-dragImage .jp-filledCircle {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    border-radius: 50%;
+
+    width: 30px;
+    height: 30px;
+
+    background: #66BB6A;
+    border: 1px solid #ABABAB;
+    color: white;
+    text-align: center;
+    line-height: 30px;
+}

@@ -30,44 +30,44 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
+  BaseCellWidget, CodeCellWidget
+} from '../cells';
+
+import {
   IEditorMimeTypeService, CodeEditor
-} from '../../codeeditor';
-
-import {
-  IChangedArgs
-} from '../../common/interfaces';
-
-import {
-  DocumentRegistry
-} from '../../docregistry';
-
-import {
-  InspectionHandler
-} from '../../inspector';
-
-import {
-  RenderMime
-} from '../../rendermime';
+} from '../codeeditor';
 
 import {
   CompleterModel, CompleterWidget, CompletionHandler
-} from '../../completer';
+} from '../completer';
 
 import {
-  BaseCellWidget, CodeCellWidget
-} from '../../cells';
+  IChangedArgs
+} from '../common/interfaces';
+
+import {
+  DocumentRegistry
+} from '../docregistry';
+
+import {
+  InspectionHandler
+} from '../inspector';
 
 import {
   OutputAreaWidget
-} from '../../outputarea';
+} from '../outputarea';
+
+import {
+  RenderMime
+} from '../rendermime';
+
+import {
+  Toolbar
+} from '../toolbar';
 
 import {
   INotebookModel
 } from './model';
-
-import {
-  Toolbar
-} from '../../toolbar';
 
 import {
   Notebook

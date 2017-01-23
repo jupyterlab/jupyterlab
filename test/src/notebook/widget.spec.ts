@@ -12,30 +12,30 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  IChangedArgs
-} from '../../../../lib/common/interfaces';
-
-import {
   simulate
 } from 'simulate-event';
 
 import {
+  IChangedArgs
+} from '../../../lib/common/interfaces';
+
+import {
   CodeCellModel, CodeCellWidget, MarkdownCellModel, MarkdownCellWidget,
   RawCellModel, RawCellWidget, BaseCellWidget
-} from '../../../../lib/cells';
+} from '../../../lib/cells';
 
 import {
   INotebookModel, NotebookModel
-} from '../../../../lib/notebook/notebook/model';
+} from '../../../lib/notebook/model';
 
 import {
   Notebook, StaticNotebook
-} from '../../../../lib/notebook/notebook/widget';
+} from '../../../lib/notebook/widget';
 
 import {
   DEFAULT_CONTENT, createNotebookFactory, rendermime, mimeTypeService,
   editorFactory
-} from '../utils';
+} from './utils';
 
 
 const contentFactory = createNotebookFactory();

@@ -13,24 +13,24 @@ import {
 
 import {
   CodeCellWidget, MarkdownCellWidget, RawCellWidget
-} from '../../../../lib/cells/widget';
+} from '../../../lib/cells/widget';
 
 import {
  NotebookModel
-} from '../../../../lib/notebook/notebook/model';
+} from '../../../lib/notebook/model';
 
 import {
   NotebookActions
-} from '../../../../lib/notebook/notebook/actions';
+} from '../../../lib/notebook/actions';
 
 import {
   Notebook, JUPYTER_CELL_MIME
-} from '../../../../lib/notebook/notebook/widget';
+} from '../../../lib/notebook/widget';
 
 import {
   DEFAULT_CONTENT, createNotebookFactory, clipboard, rendermime,
   mimeTypeService
-} from '../utils';
+} from './utils';
 
 
 const ERROR_INPUT = 'a = foo';
