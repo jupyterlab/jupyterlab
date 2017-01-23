@@ -375,7 +375,7 @@ class ObservableMap<T> implements IObservableMap<T> {
   }
 
   /**
-   * Catch a signal from the parent vector and pass it on.
+   * Catch a signal from the parent map and pass it on.
    */
   private _forwardSignal(s: IObservableMap<T>,
                          c: ObservableMap.IChangedArgs<T>) {

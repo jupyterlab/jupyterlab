@@ -157,7 +157,7 @@ interface IRealtimeHandler extends IDisposable {
   readonly collaborators: IObservableMap<ICollaborator>;
 
   /**
-   * Create a vector for the realtime model.
+   * Create a map for the realtime model.
    *
    * @param map: the map to link to a realtime map.
    *

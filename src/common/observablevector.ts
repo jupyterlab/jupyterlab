@@ -846,7 +846,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * Link the vector to another vector.
    * Any changes to either are mirrored in the other.
    *
-   * @param vec: the parent string.
+   * @param vec: the parent vector.
    */
   link(vec: IObservableVector<T>): void {
     //First, recreate the parent vector locally to trigger the 
