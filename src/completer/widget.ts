@@ -33,6 +33,10 @@ import {
   CodeEditor
 } from '../codeeditor';
 
+import {
+  HoverBox
+} from '../common/hoverbox';
+
 
 /**
  * The class name added to completer menu widgets.
@@ -48,11 +52,6 @@ const ITEM_CLASS = 'jp-Completer-item';
  * The class name added to an active completer menu item.
  */
 const ACTIVE_CLASS = 'jp-mod-active';
-
-/**
- * The class name added to a completer widget that is scrolled out of view.
- */
-const OUTOFVIEW_CLASS = 'jp-mod-outofview';
 
 /**
  * The minimum height of a completer widget.
@@ -435,7 +434,6 @@ class CompleterWidget extends Widget {
    * Set the visible dimensions of the widget.
    */
   private _setGeometry(): void {
-    let node = this.node;
     let model = this._model;
 
     // This is an overly defensive test: `cursor` will always exist if
@@ -445,69 +443,16 @@ class CompleterWidget extends Widget {
       return;
     }
 
-    // Clear any previously set max-height.
-    node.style.maxHeight = '';
-
-    // Clear any programmatically set margin-top.
-    node.style.marginTop = '';
-
-    // Make sure the node is visible.
-    node.classList.remove(OUTOFVIEW_CLASS);
-
-    // Always use the original coordinates to calculate completer position.
+    let node = this.node;
     let { coords, charWidth, lineHeight } = model.original;
-    let style = window.getComputedStyle(node);
-    let innerHeight = window.innerHeight;
-    let scrollDelta = this._anchorPoint - this._anchor.scrollTop;
-    let spaceAbove = coords.top + scrollDelta;
-    let spaceBelow = innerHeight - coords.bottom - scrollDelta;
-    let marginTop = parseInt(style.marginTop, 10) || 0;
-    let maxHeight = parseInt(style.maxHeight, 10) || MAX_HEIGHT;
-    let minHeight = parseInt(style.minHeight, 10) || MIN_HEIGHT;
-    let anchorRect = this._anchor.getBoundingClientRect();
-    let top: number;
 
-    // If the whole completer fits below or if there is more space below, then
-    // rendering the completer below the text being typed is privileged so that
-    // the code above is not obscured.
-    let renderBelow = spaceBelow >= maxHeight || spaceBelow >= spaceAbove;
-    if (renderBelow) {
-      maxHeight = Math.min(spaceBelow - marginTop, maxHeight);
-    } else {
-      maxHeight = Math.min(spaceAbove, maxHeight);
-      // If the completer renders above the text, its top margin is irrelevant.
-      node.style.marginTop = '0px';
-    }
-    node.style.maxHeight = `${maxHeight}px`;
-
-    // Make sure the completer ought to be visible.
-    let withinBounds = maxHeight > minHeight &&
-                       spaceBelow >= lineHeight &&
-                       spaceAbove >= anchorRect.top;
-    if (!withinBounds) {
-      node.classList.add(OUTOFVIEW_CLASS);
-      return;
-    }
-
-    let borderLeftWidth = style.borderLeftWidth;
-    let left = coords.left + (parseInt(borderLeftWidth, 10) || 0);
-    let { start, end } = this._model.cursor;
-    let nodeRect = node.getBoundingClientRect();
-
-    // Position the completer vertically.
-    top = renderBelow ? innerHeight - spaceBelow : spaceAbove - nodeRect.height;
-    node.style.top = `${Math.floor(top)}px`;
-
-    // Move completer to the start of the blob being completed.
-    left -= charWidth * (end - start);
-    node.style.left = `${Math.ceil(left)}px`;
-    node.style.width = 'auto';
-
-    // Expand the menu width by the scrollbar size, if present.
-    if (node.scrollHeight >= maxHeight) {
-      node.style.width = `${2 * node.offsetWidth - node.clientWidth}px`;
-      node.scrollTop = 0;
-    }
+    // Calculate the geometry of the completer.
+    HoverBox.setGeometry({
+      charWidth, coords, lineHeight, node,
+      anchor: this._anchor,
+      anchorPoint: this._anchorPoint,
+      cursor: this._model.cursor
+    });
   }
 
   /**

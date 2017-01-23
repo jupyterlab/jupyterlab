@@ -26,11 +26,6 @@
 }
 
 
-.jp-Completer.jp-mod-outofview {
-  display: none;
-}
-
-
 .jp-Completer-item {
   margin: 0;
   min-width: 150px;
