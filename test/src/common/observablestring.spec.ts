@@ -170,6 +170,66 @@ describe('common/ObservableString', () => {
 
     });
 
-  });
+    describe('#link()', ()=>{
+      it('should not be linked upon creation', ()=> {
+        let value = new ObservableString();
+        expect(value.isLinked).to.be(false);
+      });
+      it('should take the parent value when linked', ()=> {
+        let childStr = new ObservableString('child');
+        let parentStr = new ObservableString('parent');
+        childStr.link(parentStr);
+        expect(childStr.isLinked).to.be(true);
+        expect(parentStr.isLinked).to.be(false);
+        expect(childStr.text).to.be('parent');
+        expect(parentStr.text).to.be('parent');
+      });
+      it('should forward signals from the parent', ()=> {
+        let childStr = new ObservableString('child');
+        let parentStr = new ObservableString('parent');
+        childStr.link(parentStr);
+        let called = false;
+        childStr.changed.connect( (s,c)=> {
+          expect(s).to.be(childStr);
+          expect(c.type).to.be('set');
+          expect(c.start).to.be(0);
+          expect(c.end).to.be(14);
+          expect(c.value).to.be('still a parent');
+          called = true;
+        });
+        parentStr.text = 'still a parent';
+        expect(called).to.be(true);
+      });
+    });
 
+    describe('#unlink()', ()=>{
+      it('should keep its value when unlinked', ()=> {
+        let childStr = new ObservableString('child');
+        let parentStr = new ObservableString('parent');
+        childStr.link(parentStr);
+        childStr.unlink();
+        expect(childStr.text).to.be('parent');
+      });
+      it('should no longer get its value from the parent', ()=> {
+        let childStr = new ObservableString('child');
+        let parentStr = new ObservableString('parent');
+        childStr.link(parentStr);
+        childStr.unlink();
+        parentStr.text = 'still a parent';
+        expect(childStr.text).to.be('parent');
+      });
+      it('should no longer forward signals from the parent', ()=> {
+        let childStr = new ObservableString('child');
+        let parentStr = new ObservableString('parent');
+        let called = false;
+        childStr.link(parentStr);
+        childStr.changed.connect( ()=>{
+          called = true;
+        });
+        childStr.unlink();
+        parentStr.text = 'still a parent';
+        expect(called).to.be(false);
+      });
+    });
+  });
 });
