@@ -420,7 +420,7 @@ namespace CodeEditor {
     /**
      * The uuid of this selection owner.
      */
-    readonly uuid: string;
+    uuid: string;
 
     /**
      * Returns the primary position of the cursor, never `null`.

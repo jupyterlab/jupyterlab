@@ -79,8 +79,8 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     let host = this._host = options.host;
     host.classList.add(EDITOR_CLASS);
 
-    this.uuid = options.uuid || utils.uuid();
-    this.selectionStyle = options.selectionStyle;
+    this._uuid = options.uuid || utils.uuid();
+    this._selectionStyle = options.selectionStyle || {};
 
     Private.updateConfig(options, config);
 
@@ -129,7 +129,12 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * The uuid of this editor;
    */
-  readonly uuid: string;
+  get uuid(): string {
+    return this._uuid;
+  }
+  set uuid(value: string) {
+    this._uuid = value;
+  }
 
   /**
    * The selection style of this editor.
@@ -176,10 +181,10 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Set to false for horizontal scrolling. Defaults to true.
    */
   get wordWrap(): boolean {
-    return this._editor.getOption('wordWrap');
+    return this._editor.getOption('lineWrapping');
   }
   set wordWrap(value: boolean) {
-    this._editor.setOption('wordWrap', value);
+    this._editor.setOption('lineWrapping', value);
   }
 
   /**
@@ -665,6 +670,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   private _keydownHandlers = new Vector<CodeEditor.KeydownHandler>();
   private _changeGuard = false;
   private _selectionStyle: CodeEditor.ISelectionStyle;
+  private _uuid = '';
   private _host: HTMLElement;
 }
 
@@ -688,13 +694,6 @@ defineSignal(CodeMirrorEditor.prototype, 'edgeRequested');
 
 
 /**
- * Add a CodeMirror command to delete until previous non blanking space
- * character or first multiple of 4 tabstop.
- */
-CodeMirror.commands['delSpaceToPrevTabStop'] = Private.delSpaceToPrevTabStop;
-
-
-/**
  * The namespace for module private data.
  */
 namespace Private {
@@ -705,12 +704,18 @@ namespace Private {
   function updateConfig(options: CodeEditor.IOptions, config: CodeMirror.EditorConfiguration): void {
     if (options.readOnly !== undefined) {
       config.readOnly = options.readOnly;
+    } else {
+      config.readOnly = false;
     }
     if (options.lineNumbers !== undefined) {
       config.lineNumbers = options.lineNumbers;
+    } else {
+      config.lineNumbers = false;
     }
     if (options.wordWrap !== undefined) {
       config.lineWrapping = options.wordWrap;
+    } else {
+      config.lineWrapping = true;
     }
     config.theme = (config.theme || CodeMirrorEditor.DEFAULT_THEME);
     config.indentUnit = config.indentUnit || 4;
@@ -754,3 +759,11 @@ namespace Private {
     return a.line === b.line && a.ch === b.ch;
   };
 }
+
+
+/**
+ * Add a CodeMirror command to delete until previous non blanking space
+ * character or first multiple of 4 tabstop.
+ */
+CodeMirror.commands['delSpaceToPrevTabStop'] = Private.delSpaceToPrevTabStop;
+
