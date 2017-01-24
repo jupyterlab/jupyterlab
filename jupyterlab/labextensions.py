@@ -39,7 +39,7 @@ GREEN_ENABLED = '\033[32menabled \033[0m' if os.name != 'nt' else 'enabled '
 RED_DISABLED = '\033[31mdisabled\033[0m' if os.name != 'nt' else 'disabled'
 
 
-CONFIG_NAME = 'jupyter_notebook_config'
+CONFIG_NAME = 'jupyterlab_config'
 
 #------------------------------------------------------------------------------
 # Public API
