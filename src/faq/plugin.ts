@@ -22,8 +22,8 @@ import {
 } from '../instancerestorer';
 
 import {
-  FaqModel, FaqWidget
-} from './widget';
+  FaqModel, FaqWidget, cmdIds
+} from './';
 
 
 /**
@@ -48,7 +48,7 @@ export default plugin;
  */
 function activate(app: JupyterLab, palette: ICommandPalette, linker: ICommandLinker, restorer: IInstanceRestorer): void {
   const category = 'Help';
-  const command = 'faq-jupyterlab:show';
+  const command = cmdIds.show;
   const model = new FaqModel();
   const tracker = new InstanceTracker<FaqWidget>({ namespace: 'faq' });
 

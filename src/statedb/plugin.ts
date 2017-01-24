@@ -14,8 +14,8 @@ import {
 } from './index';
 
 import {
-  StateDB
-} from './statedb';
+  StateDB, cmdIds
+} from './';
 
 
 /**
@@ -41,7 +41,7 @@ export default plugin;
 function activate(app: JupyterLab): Promise<IStateDB> {
   let state = new StateDB({ namespace: app.info.namespace });
   let version = app.info.version;
-  let command = 'statedb:clear';
+  let command = cmdIds.clear;
   let key = 'statedb:version';
   let fetch = state.fetch(key);
   let save = () => state.save(key, { version });

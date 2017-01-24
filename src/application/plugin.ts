@@ -2,8 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin
-} from '../application';
+  JupyterLab, JupyterLabPlugin, cmdIds
+} from './';
 
 import {
   ICommandPalette
@@ -17,7 +17,7 @@ const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.main',
   requires: [ICommandPalette],
   activate: (app: JupyterLab, palette: ICommandPalette) => {
-    let commandId = 'main-jupyterlab:close-all';
+    let commandId = cmdIds.closeAll;
     app.commands.addCommand(commandId, {
       label: 'Close All Widgets',
       execute: () => { app.shell.closeAll(); }

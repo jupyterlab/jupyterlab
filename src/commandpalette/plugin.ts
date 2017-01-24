@@ -20,7 +20,7 @@ import {
 } from '../instancerestorer';
 
 import {
-  ICommandPalette, IPaletteItem
+  ICommandPalette, IPaletteItem, cmdIds
 } from './';
 
 
@@ -130,15 +130,15 @@ function activate(app: JupyterLab, restorer: IInstanceRestorer): ICommandPalette
     }
   }
 
-  app.commands.addCommand('command-palette:activate', {
+  app.commands.addCommand(cmdIds.activate, {
     execute: activatePalette,
     label: 'Activate Command Palette'
   });
-  app.commands.addCommand('command-palette:hide', {
+  app.commands.addCommand(cmdIds.hide, {
     execute: hidePalette,
     label: 'Hide Command Palette'
   });
-  app.commands.addCommand('command-palette:toggle', {
+  app.commands.addCommand(cmdIds.toggle, {
     execute: togglePalette,
     label: 'Toggle Command Palette'
   });

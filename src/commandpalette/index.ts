@@ -16,6 +16,17 @@ import {
 } from 'phosphor/lib/ui/commandpalette';
 
 
+/**
+ * The map of command ids used by the commandpalette plugin.
+ */
+export
+const cmdIds = {
+  activate: 'command-palette:activate',
+  hide: 'command-palette:hide',
+  toggle: 'command-palette:toggle'
+};
+
+
 /* tslint:disable */
 /**
  * The command palette token.
