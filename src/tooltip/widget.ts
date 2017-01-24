@@ -23,6 +23,11 @@ import {
  */
 const TOOLTIP_CLASS = 'jp-Tooltip';
 
+/**
+ * The class added to widgets that have spawned a tooltip and anchor it.
+ */
+const ANCHOR_CLASS = 'jp-Tooltip-anchor';
+
 
 /**
  * A tooltip widget.
@@ -35,21 +40,29 @@ class TooltipWidget extends Widget {
   constructor(options: TooltipWidget.IOptions) {
     super();
     this.layout = new PanelLayout();
+    this.anchor = options.anchor;
     this.model = options.model;
     this.model.contentChanged.connect(this._onContentChanged, this);
     this.addClass(TOOLTIP_CLASS);
+    this.anchor.addClass(ANCHOR_CLASS);
   }
 
   /**
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
+    this.anchor.removeClass(ANCHOR_CLASS);
     if (this._content) {
       this._content.dispose();
       this._content = null;
     }
     super.dispose();
   }
+
+  /**
+   * The anchor widget that the tooltip widget tracks.
+   */
+  readonly anchor: Widget;
 
   /**
    * The tooltip widget's data model.
@@ -106,6 +119,11 @@ namespace TooltipWidget {
    */
   export
   interface IOptions {
+    /**
+     * The anchor widget that the tooltip widget tracks.
+     */
+    anchor: Widget;
+
     /**
      * The data model for the tooltip widget.
      */

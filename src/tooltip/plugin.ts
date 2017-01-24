@@ -43,11 +43,6 @@ import {
 
 
 /**
- * The class added to cells that have spawned a tooltip.
- */
-const PARENT_CLASS = 'jp-Tooltip-parent';
-
-/**
  * The tooltip extension.
  */
 const plugin: JupyterLabPlugin<void> = {
@@ -83,8 +78,11 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
       let editor: CodeEditor.IEditor | null = null;
       let kernel: Kernel.IKernel | null = null;
       let rendermime: IRenderMime | null = null;
-      let extant = !!tooltip;
       let parent: NotebookPanel | ConsolePanel | null = null;
+
+      if (tooltip) {
+        return app.commands.execute(remove, void 0);
+      }
 
       if (notebook) {
         parent = notebooks.currentWidget;
@@ -104,20 +102,13 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
         }
       }
 
-      // Dispose extant tooltip and model.
-      if (extant) {
-        tooltip.model.dispose();
-        tooltip.dispose();
-        tooltip = null;
-      }
-
       // If all components necessary for rendering exist, create a tooltip.
       let ready = !!editor && !!kernel && !!rendermime;
       if (ready) {
         tooltip = new TooltipWidget({
+          anchor: cell,
           model: new TooltipModel({ editor, kernel, rendermime })
         });
-        cell.addClass(PARENT_CLASS);
         tooltip.id = `tooltip-${++id}`;
         Widget.attach(tooltip, document.body);
         // Make sure the parent notebook/console still has the focus.
@@ -130,10 +121,6 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
   registry.addCommand(remove, {
     execute: () => {
       if (tooltip) {
-        let parent = document.querySelector(`.${PARENT_CLASS}`);
-        if (parent) {
-          parent.classList.remove(PARENT_CLASS);
-        }
         tooltip.model.dispose();
         tooltip.dispose();
         tooltip = null;
@@ -161,6 +148,6 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
   keymap.addBinding({
     command: remove,
     keys: ['Escape'],
-    selector: `.jp-Cell.${PARENT_CLASS}, .jp-Tooltip`
+    selector: `.jp-Cell.jp-Tooltip-anchor, .jp-Tooltip`
   });
 }
