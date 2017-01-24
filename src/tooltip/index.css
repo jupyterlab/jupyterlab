@@ -4,9 +4,14 @@
 |----------------------------------------------------------------------------*/
 
 .jp-Tooltip {
-  background: var(--jp-info-color0);
-  border: 1px solid red;
-  min-width: 200px;
-  min-height: 200px;
+  background: var(--jp-info-color3);
+  border: var(--jp-border-width) solid var(--jp-accent-color3);
+  font-size: var(--jp-ui-font-size0);
+  max-width: 500px;
   z-index: 10001;
+}
+
+
+.jp-Tooltip .p-Widget.jp-RenderedText {
+  overflow: auto;
 }
