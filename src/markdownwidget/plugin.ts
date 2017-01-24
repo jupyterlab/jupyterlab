@@ -14,6 +14,10 @@ import {
 } from '../docregistry';
 
 import {
+  cmdIds as filebrowserCmdIds
+} from '../filebrowser';
+
+import {
   IInstanceRestorer
 } from '../instancerestorer';
 
@@ -60,7 +64,7 @@ const plugin: JupyterLabPlugin<void> = {
 
     // Handle state restoration.
     restorer.restore(tracker, {
-      command: 'file-operations:open',
+      command: filebrowserCmdIds.open,
       args: widget => ({ path: widget.context.path, factory: FACTORY }),
       name: widget => widget.context.path
     });

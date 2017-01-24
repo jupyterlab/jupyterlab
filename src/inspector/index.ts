@@ -3,3 +3,12 @@
 
 export * from './handler';
 export * from './inspector';
+
+
+/**
+ * The map of command ids used by the inspector plugin.
+ */
+export
+const cmdIds = {
+  open: 'inspector:open'
+};

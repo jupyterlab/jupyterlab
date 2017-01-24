@@ -14,6 +14,14 @@ import {
 } from '../commandpalette';
 
 import {
+  cmdIds as consoleCmdIds
+} from '../console';
+
+import {
+  cmdIds as filebrowserCmdIds
+} from '../filebrowser';
+
+import {
   IInstanceRestorer
 } from '../instancerestorer';
 
@@ -26,7 +34,11 @@ import {
 } from '../services';
 
 import {
-  ILauncher, ILauncherItem, LauncherModel, LauncherWidget
+  cmdIds as terminalCmdIds
+} from '../terminal';
+
+import {
+  ILauncher, ILauncherItem, LauncherModel, LauncherWidget, cmdIds
 } from './';
 
 
@@ -73,22 +85,22 @@ function activate(app: JupyterLab, services: IServiceManager, pathTracker: IPath
   let defaults: ILauncherItem[] = [
     {
       name: 'Notebook',
-      command: 'file-operations:new-notebook'
+      command: filebrowserCmdIds.newNotebook
     },
     {
       name: 'Code Console',
-      command: 'console:create'
+      command: consoleCmdIds.create
     },
     {
       name: 'Text Editor',
-      command: 'file-operations:new-text-file'
+      command: filebrowserCmdIds.newTextFile
     }
   ];
 
   if (services.terminals.isAvailable()) {
     defaults.push({
       name: 'Terminal',
-      command: 'terminal:create-new'
+      command: terminalCmdIds.createNew
     });
   }
 
@@ -96,7 +108,7 @@ function activate(app: JupyterLab, services: IServiceManager, pathTracker: IPath
   // means we have to way of removing them after the fact.
   defaults.forEach(options => { model.add(options); });
 
-  app.commands.addCommand('launcher:show', {
+  app.commands.addCommand(cmdIds.show, {
     label: 'Show Launcher',
     execute: () => {
       if (!widget.isAttached) {
@@ -105,7 +117,7 @@ function activate(app: JupyterLab, services: IServiceManager, pathTracker: IPath
       app.shell.activateLeft(widget.id);
     }
   });
-  palette.addItem({ command: 'launcher:show', category: 'Help' });
+  palette.addItem({ command: cmdIds.show, category: 'Help' });
 
   app.shell.addToLeftArea(widget);
 

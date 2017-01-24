@@ -34,8 +34,8 @@ import {
 } from '../services';
 
 import {
-  TerminalWidget
-} from './index';
+  TerminalWidget, cmdIds
+} from './';
 
 
 /**
@@ -83,11 +83,6 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
   const tracker = new InstanceTracker<TerminalWidget>({ namespace });
 
   let { commands, keymap } = app;
-  let newTerminalId = `${namespace}:create-new`;
-  let increaseTerminalFontSize = `${namespace}:increase-font`;
-  let decreaseTerminalFontSize = `${namespace}:decrease-font`;
-  let toggleTerminalTheme = `${namespace}:toggle-theme`;
-  let openTerminalId = `${namespace}:open`;
   let options = {
     background: 'black',
     color: 'white',
@@ -96,13 +91,13 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command: newTerminalId,
+    command: cmdIds.createNew,
     args: widget => ({ name: widget.session.name }),
     name: widget => widget.session && widget.session.name
   });
 
   // Add terminal commands.
-  commands.addCommand(newTerminalId, {
+  commands.addCommand(cmdIds.createNew, {
     label: 'New Terminal',
     caption: 'Start a new terminal session',
     execute: args => {
@@ -127,7 +122,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
     }
   });
 
-  commands.addCommand(increaseTerminalFontSize, {
+  commands.addCommand(cmdIds.increaseFont, {
     label: 'Increase Terminal Font Size',
     execute: () => {
       if (options.fontSize < 72) {
@@ -137,7 +132,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
     }
   });
 
-  commands.addCommand(decreaseTerminalFontSize, {
+  commands.addCommand(cmdIds.decreaseFont, {
     label: 'Decrease Terminal Font Size',
     execute: () => {
       if (options.fontSize > 9) {
@@ -147,7 +142,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
     }
   });
 
-  commands.addCommand(toggleTerminalTheme, {
+  commands.addCommand(cmdIds.toggleTheme, {
     label: 'Toggle Terminal Theme',
     caption: 'Switch Terminal Background and Font Colors',
     execute: () => {
@@ -165,7 +160,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
     }
   });
 
-  commands.addCommand(openTerminalId, {
+  commands.addCommand(cmdIds.open, {
     execute: args => {
       let name = args['name'] as string;
       // Check for a running terminal with the given name.
@@ -174,26 +169,19 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
         app.shell.activateMain(widget.id);
       } else {
         // Otherwise, create a new terminal with a given name.
-        return commands.execute(newTerminalId, { name });
+        return commands.execute(cmdIds.createNew, { name });
       }
     }
   });
 
-  // Add command palette items.
-  [
-    newTerminalId,
-    increaseTerminalFontSize,
-    decreaseTerminalFontSize,
-    toggleTerminalTheme
-  ].forEach(command => palette.addItem({ command, category }));
-
-  // Add menu items.
+  // Add command palette and menu items.
   let menu = new Menu({ commands, keymap });
   menu.title.label = category;
-  menu.addItem({ command: newTerminalId });
-  menu.addItem({ command: increaseTerminalFontSize });
-  menu.addItem({ command: decreaseTerminalFontSize });
-  menu.addItem({ command: toggleTerminalTheme });
-
+  [cmdIds.createNew, cmdIds.increaseFont, cmdIds.decreaseFont,
+   cmdIds.toggleTheme
+  ].forEach(command => {
+    palette.addItem({ command, category });
+    menu.addItem({ command });
+  });
   mainMenu.addMenu(menu, {rank: 40});
 }

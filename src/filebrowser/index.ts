@@ -20,6 +20,8 @@ const cmdIds = {
   close: 'file-operations:close',
   closeAllFiles: 'file-operations:close-all-files',
   open: 'file-operations:open',
+  newTextFile: 'file-operations:new-text-file',
+  newNotebook: 'file-operations:new-notebook-file',
   showBrowser: 'file-browser:activate',
   hideBrowser: 'file-browser:hide',
   toggleBrowser: 'file-browser:toggle'

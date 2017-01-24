@@ -26,8 +26,8 @@ import {
 } from '../services';
 
 import {
-  LandingModel, LandingWidget
-} from './widget';
+  LandingModel, LandingWidget, cmdIds
+} from './';
 
 /**
  * The class name added to the landing plugin.
@@ -56,7 +56,7 @@ export default plugin;
  */
 function activate(app: JupyterLab, pathTracker: IPathTracker, palette: ICommandPalette, services: IServiceManager, restorer: IInstanceRestorer): void {
   const category = 'Help';
-  const command = 'jupyterlab-landing:show';
+  const command = cmdIds.show;
   const model = new LandingModel(services.terminals.isAvailable());
   const tracker = new InstanceTracker<LandingWidget>({ namespace: 'landing' });
 
