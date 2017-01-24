@@ -119,9 +119,29 @@ describe('CodeMirrorEditor', () => {
 
   describe('#uuid', () => {
 
+    it('should be the unique id of the editor', () => {
+      expect(editor.uuid).to.be.ok();
+      let uuid = 'foo';
+      editor = new LogEditorWidget({ model, host, uuid });
+      expect(editor.uuid).to.be('foo');
+    });
+
   });
 
   describe('#selectionStyle', () => {
+
+    it('should be the selection style of the editor', () => {
+      expect(editor.selectionStyle).to.be({});
+    });
+
+    it('should be settable', () => {
+      let style = {
+        className: 'foo',
+        displayName: 'bar'
+      };
+      editor.selectionStyle = style;
+      expect(editor.selectionStyle).to.eql(style);
+    });
 
   });
 
