@@ -225,7 +225,8 @@ def bootstrap_from_nbapp(nbapp):
     labapp.config_dir = nbapp.config_dir
     labapp.log = nbapp.log
     labapp.web_app = nbapp.web_app
-    cli_config = nbapp.cli_config.get('LabApp', {})
+    cli_config = nbapp.cli_config.get('NotebookApp', {})
+    cli_config.update = nbapp.cli_config.get('LabApp', {})
 
     # Handle config.
     labapp.update_config(cli_config)
