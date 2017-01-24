@@ -15,7 +15,7 @@ import {
 } from '../codemirror';
 
 import {
-  DEFAULT_CODEMIRROR_THEME
+  CodeMirrorEditor
 } from '../codemirror/editor';
 
 import * as marked
@@ -91,7 +91,7 @@ marked.setOptions({
   sanitize: false,
   tables: true,
   // breaks: true; We can't use GFM breaks as it causes problems with HTML tables
-  langPrefix: `cm-s-${DEFAULT_CODEMIRROR_THEME} language-`,
+  langPrefix: `cm-s-${CodeMirrorEditor.DEFAULT_THEME} language-`,
   highlight: (code, lang, callback) => {
     if (!lang) {
         // no language, no highlight

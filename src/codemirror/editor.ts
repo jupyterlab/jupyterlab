@@ -52,12 +52,6 @@ const EDITOR_CLASS = 'jp-CodeMirrorWidget';
 const READ_ONLY_CLASS = 'jp-mod-readOnly';
 
 /**
- * The name of the default CodeMirror theme
- */
-export
-const DEFAULT_CODEMIRROR_THEME: string = 'jupyter';
-
-/**
  * The key code for the up arrow key.
  */
 const UP_ARROW = 38;
@@ -669,6 +663,19 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
 }
 
 
+/**
+ * The namespace for `CodeMirrorEditor` statics.
+ */
+export
+namespace CodeMirrorEditor {
+  /**
+   * The name of the default CodeMirror theme
+   */
+  export
+  const DEFAULT_THEME: string = 'jupyter';
+}
+
+
 // Define the signals for the `CodeMirrorEditor` class.
 defineSignal(CodeMirrorEditor.prototype, 'completionRequested');
 defineSignal(CodeMirrorEditor.prototype, 'edgeRequested');
@@ -699,7 +706,7 @@ namespace Private {
     if (options.wordWrap !== undefined) {
       config.lineWrapping = options.wordWrap;
     }
-    config.theme = (config.theme || DEFAULT_CODEMIRROR_THEME);
+    config.theme = (config.theme || CodeMirrorEditor.DEFAULT_THEME);
     config.indentUnit = config.indentUnit || 4;
   }
 
