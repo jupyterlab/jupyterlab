@@ -147,46 +147,114 @@ describe('CodeMirrorEditor', () => {
 
   describe('#editor', () => {
 
+    it('should be the codemirror editor wrapped by the editor', () => {
+      let cm = editor.editor;
+      expect(cm.getDoc()).to.be(editor.doc);
+    });
+
   });
 
   describe('#doc', () => {
+
+    it('should be the codemirror doc wrapped by the editor', () => {
+      let doc = editor.doc;
+      expect(doc.getEditor()).to.be(editor.editor);
+    });
 
   });
 
   describe('#lineCount', () => {
 
+    it('should get the number of lines in the editor', () => {
+      expect(editor.lineCount).to.be(1);
+      editor.model.value.text = 'foo\nbar\nbaz';
+      expect(editor.lineCount).to.be(3);
+    });
+
   });
 
   describe('#lineNumbers', () => {
+
+    it('should get whether line numbers should be shown', () => {
+      expect(editor.lineNumbers).to.be(false);
+    });
+
+    it('should set whether line numbers should be shown', () => {
+      editor.lineNumbers = true;
+      expect(editor.lineNumbers).to.be(true);
+    });
 
   });
 
   describe('#wordWrap', () => {
 
+    it('should get whether horizontally scrolling should be used', () => {
+      expect(editor.wordWrap).to.be(true);
+    });
+
+    it('should set whether horizontally scrolling should be used', () => {
+      editor.wordWrap = false;
+      expect(editor.wordWrap).to.be(false);
+    });
+
   });
 
   describe('#readOnly', () => {
+
+    it('should get whether the editor is readonly', () => {
+      expect(editor.readOnly).to.be(false);
+    });
+
+    it('should set whether the editor is readonly', () => {
+      editor.readOnly = true;
+      expect(editor.readOnly).to.be(true);
+    });
 
   });
 
   describe('#model', () => {
 
+    it('should get the model used by the editor', () => {
+      expect(editor.model).to.be(model);
+    });
+
   });
 
   describe('#lineHeight', () => {
+
+    it('should get the text height of a line in the editor', () => {
+      expect(editor.lineHeight).to.be.above(0);
+    });
 
   });
 
   describe('#charWidth', () => {
 
+    it('should get the character width in the editor', () => {
+      expect(editor.charWidth).to.be.above(0);
+    });
+
   });
 
   describe('#isDisposed', () => {
+
+    it('should test whether the editor is disposed', () => {
+      expect(editor.isDisposed).to.be(false);
+      editor.dispose();
+      expect(editor.isDisposed).to.be(true);
+    });
 
   });
 
   describe('#dispose()', () => {
 
+    it('should dispose of the resources used by the editor', () => {
+      expect(editor.isDisposed).to.be(false);
+      editor.dispose();
+      expect(editor.isDisposed).to.be(true);
+      editor.dispose();
+      expect(editor.isDisposed).to.be(true);
+    });
   });
 
   describe('#getLine()', () => {
