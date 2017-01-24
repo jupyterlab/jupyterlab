@@ -70,16 +70,6 @@ describe('CodeMirrorEditor', () => {
 
   });
 
-  describe('#isDisposed', () => {
-
-    it('should test whether the editor is disposed', () => {
-      expect(editor.isDisposed).to.be(false);
-      editor.dispose();
-      expect(editor.isDisposed).to.be(true);
-    });
-
-  });
-
   describe('#edgeRequested', () => {
 
     it('should emit a signal when the top edge is requested', () => {
@@ -127,25 +117,55 @@ describe('CodeMirrorEditor', () => {
 
   });
 
-  describe('#onKeydown()', () => {
-
-    it('should run when there is a keydown event on the editor', () => {
-      let event = generate('keydown', { keyCode: UP_ARROW });
-      expect(editor.methods).to.not.contain('onKeydown');
-      editor.editor.triggerOnKeyDown(event);
-      expect(editor.methods).to.contain('onKeydown');
-    });
+  describe('#uuid', () => {
 
   });
 
-  describe('#onTabEvent()', () => {
+  describe('#selectionStyle', () => {
 
-    it('should run when there is a tab keydown event on the editor', () => {
-      let event = generate('keydown', { keyCode: TAB });
-      expect(editor.methods).to.not.contain('onTabEvent');
-      editor.editor.triggerOnKeyDown(event);
-      expect(editor.methods).to.contain('onTabEvent');
-    });
+  });
+
+  describe('#editor', () => {
+
+  });
+
+  describe('#doc', () => {
+
+  });
+
+  describe('#lineCount', () => {
+
+  });
+
+  describe('#lineNumbers', () => {
+
+  });
+
+  describe('#wordWrap', () => {
+
+  });
+
+  describe('#readOnly', () => {
+
+  });
+
+  describe('#model', () => {
+
+  });
+
+  describe('#lineHeight', () => {
+
+  });
+
+  describe('#charWidth', () => {
+
+  });
+
+  describe('#isDisposed', () => {
+
+  });
+
+  describe('#dispose()', () => {
 
   });
 
@@ -219,6 +239,84 @@ describe('CodeMirrorEditor', () => {
       editor.clearHistory();
       editor.undo();
       expect(model.value.text).to.be('foo');
+    });
+
+  });
+
+  describe('#focus()', () => {
+
+  });
+
+  describe('#hasFocus()', () => {
+
+  });
+
+  describe('#refresh()', () => {
+
+  });
+
+  describe('#addKeydownHandler()', () => {
+
+  });
+
+  describe('#setSize()', () => {
+
+  });
+
+  describe('#revealPosition()', () => {
+
+  });
+
+  describe('#revealSelection()', () => {
+
+  });
+
+  describe('#getCoordinate()', () => {
+
+  });
+
+  describe('#getCursorPosition()', () => {
+
+  });
+
+  describe('#setCursorPosition()', () => {
+
+  });
+
+  describe('#getSelection()', () => {
+
+  });
+
+  describe('#setSelection()', () => {
+
+  });
+
+  describe('#getSelections()', () => {
+
+  });
+
+  describe('#setSelections()', () => {
+
+  });
+
+  describe('#onKeydown()', () => {
+
+    it('should run when there is a keydown event on the editor', () => {
+      let event = generate('keydown', { keyCode: UP_ARROW });
+      expect(editor.methods).to.not.contain('onKeydown');
+      editor.editor.triggerOnKeyDown(event);
+      expect(editor.methods).to.contain('onKeydown');
+    });
+
+  });
+
+  describe('#onTabEvent()', () => {
+
+    it('should run when there is a tab keydown event on the editor', () => {
+      let event = generate('keydown', { keyCode: TAB });
+      expect(editor.methods).to.not.contain('onTabEvent');
+      editor.editor.triggerOnKeyDown(event);
+      expect(editor.methods).to.contain('onTabEvent');
     });
 
   });
