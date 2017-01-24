@@ -16,20 +16,6 @@ const HOVERBOX_CLASS = 'jp-HoverBox';
  */
 const OUTOFVIEW_CLASS = 'jp-mod-outofview';
 
-/**
- * The minimum height of a hover box.
- */
-const MIN_HEIGHT = 20;
-
-/**
- * The maximum height of a hover box.
- *
- * #### Notes
- * This value is only used if a CSS max-height attribute is not set for the
- * hover box. It is a fallback value.
- */
-const MAX_HEIGHT = 200;
-
 
 /**
  * A namespace for `HoverBox` members.
@@ -72,6 +58,20 @@ namespace HoverBox {
     lineHeight: number;
 
     /**
+     * The maximum height of a hover box.
+     *
+     * #### Notes
+     * This value is only used if a CSS max-height attribute is not set for the
+     * hover box. It is a fallback value.
+     */
+    maxHeight: number;
+
+    /**
+     * The minimum height of a hover box.
+     */
+    minHeight: number;
+
+    /**
      * The hover box node.
      */
     node: HTMLElement;
@@ -108,8 +108,8 @@ namespace HoverBox {
     let spaceAbove = coords.top + scrollDelta;
     let spaceBelow = innerHeight - coords.bottom - scrollDelta;
     let marginTop = parseInt(style.marginTop, 10) || 0;
-    let maxHeight = parseInt(style.maxHeight, 10) || MAX_HEIGHT;
-    let minHeight = parseInt(style.minHeight, 10) || MIN_HEIGHT;
+    let maxHeight = parseInt(style.maxHeight, 10) || options.maxHeight;
+    let minHeight = parseInt(style.minHeight, 10) || options.minHeight;
     let anchorRect = anchor.getBoundingClientRect();
     let top: number;
 
@@ -144,7 +144,7 @@ namespace HoverBox {
     top = renderBelow ? innerHeight - spaceBelow : spaceAbove - nodeRect.height;
     node.style.top = `${Math.floor(top)}px`;
 
-    // Move box to the start of the blob being completed.
+    // Move box to the start of the blob of text in the referent editor.
     left -= charWidth * (end - start);
     node.style.left = `${Math.ceil(left)}px`;
     node.style.width = 'auto';

@@ -60,10 +60,6 @@ const MIN_HEIGHT = 20;
 
 /**
  * The maximum height of a completer widget.
- *
- * #### Notes
- * This value is only used if a CSS max-height attribute is not set for the
- * completer. It is a fallback value.
  */
 const MAX_HEIGHT = 200;
 
@@ -451,7 +447,9 @@ class CompleterWidget extends Widget {
       charWidth, coords, lineHeight, node,
       anchor: this._anchor,
       anchorPoint: this._anchorPoint,
-      cursor: this._model.cursor
+      cursor: this._model.cursor,
+      maxHeight: MAX_HEIGHT,
+      minHeight: MIN_HEIGHT
     });
   }
 

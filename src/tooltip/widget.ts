@@ -14,6 +14,10 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
+  HoverBox
+} from '../common/hoverbox';
+
+import {
   TooltipModel
 } from './model';
 
@@ -27,6 +31,16 @@ const TOOLTIP_CLASS = 'jp-Tooltip';
  * The class added to widgets that have spawned a tooltip and anchor it.
  */
 const ANCHOR_CLASS = 'jp-Tooltip-anchor';
+
+/**
+ * The minimum height of a tooltip widget.
+ */
+const MIN_HEIGHT = 20;
+
+/**
+ * The maximum height of a tooltip widget.
+ */
+const MAX_HEIGHT = 250;
 
 
 /**
@@ -82,6 +96,7 @@ class TooltipWidget extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     this.model.fetch();
+    this.update();
   }
 
   /**
@@ -92,6 +107,7 @@ class TooltipWidget extends Widget {
     if (this._content) {
       layout.addWidget(this._content);
     }
+    this._setGeometry();
     super.onUpdateRequest(msg);
   }
 
@@ -104,6 +120,26 @@ class TooltipWidget extends Widget {
     }
     this._content = this.model.content;
     this.update();
+  }
+
+  /**
+   * Set the geometry of the tooltip widget.
+   */
+  private _setGeometry():  void {
+    let node = this.node;
+    let editor = this.model.editor;
+    let { charWidth, lineHeight } = editor;
+    let coords = editor.getCoordinate(editor.getCursorPosition());
+
+    // Calculate the geometry of the completer.
+    HoverBox.setGeometry({
+      charWidth, coords, lineHeight, node,
+      anchor: this.anchor.node,
+      anchorPoint: this.anchor.node.scrollTop,
+      cursor: { start: 0, end: 0 },
+      maxHeight: MAX_HEIGHT,
+      minHeight: MIN_HEIGHT
+    });
   }
 
   private _content: Widget | null = null;
