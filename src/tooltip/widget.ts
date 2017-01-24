@@ -42,6 +42,10 @@ const MIN_HEIGHT = 20;
  */
 const MAX_HEIGHT = 250;
 
+/**
+ * A flag to indicate that event handlers are caught in the capture phase.
+ */
+const USE_CAPTURE = true;
 
 /**
  * A tooltip widget.
@@ -62,6 +66,16 @@ class TooltipWidget extends Widget {
   }
 
   /**
+   * The anchor widget that the tooltip widget tracks.
+   */
+  readonly anchor: Widget;
+
+  /**
+   * The tooltip widget's data model.
+   */
+  readonly model: TooltipModel;
+
+  /**
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
@@ -74,14 +88,27 @@ class TooltipWidget extends Widget {
   }
 
   /**
-   * The anchor widget that the tooltip widget tracks.
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the dock panel's node. It should
+   * not be called directly by user code.
    */
-  readonly anchor: Widget;
-
-  /**
-   * The tooltip widget's data model.
-   */
-  readonly model: TooltipModel;
+  handleEvent(event: Event): void {
+    if (this.isHidden || this.isDisposed) {
+      return;
+    }
+    switch (event.type) {
+    case 'scroll':
+      this._evtScroll(event as MouseEvent);
+      break;
+    default:
+      break;
+    }
+  }
 
   /**
    * Handle `'activate-request'` messages.
@@ -95,20 +122,30 @@ class TooltipWidget extends Widget {
    * Handle `'after-attach'` messages.
    */
   protected onAfterAttach(msg: Message): void {
+    this.anchor.node.addEventListener('scroll', this, USE_CAPTURE);
     this.model.fetch();
-    this.update();
+  }
+
+  /**
+   * Handle `before_detach` messages for the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this.anchor.node.removeEventListener('scroll', this, USE_CAPTURE);
   }
 
   /**
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    let layout = this.layout as PanelLayout;
-    if (this._content) {
-      layout.addWidget(this._content);
-    }
     this._setGeometry();
     super.onUpdateRequest(msg);
+  }
+
+  /**
+   * Handle scroll events for the widget
+   */
+  private _evtScroll(event: MouseEvent) {
+    this.update();
   }
 
   /**
@@ -119,6 +156,9 @@ class TooltipWidget extends Widget {
       this._content.dispose();
     }
     this._content = this.model.content;
+    if (this._content) {
+      (this.layout as PanelLayout).addWidget(this._content);
+    }
     this.update();
   }
 
