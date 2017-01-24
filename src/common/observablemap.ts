@@ -375,7 +375,6 @@ class ObservableMap<T> implements IObservableMap<T> {
     if(this.isLinked) {
       this.unlink();
     }
-    clearSignalData(this);
     this._map.clear();
     this._map = null;
   }

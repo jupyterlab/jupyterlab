@@ -44,7 +44,7 @@ import {
 
 import {
   IRealtime
-} from '../realtime';
+} from '../common/realtime';
 
 import {
   DocumentModel

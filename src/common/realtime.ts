@@ -23,23 +23,23 @@ import {
 
 import {
   InstanceTracker
-} from '../common/instancetracker';
+} from './instancetracker';
 
 import {
   IObservableString
-} from '../common/observablestring';
+} from './observablestring';
 
 import {
   IObservableVector
-} from '../common/observablevector';
+} from './observablevector';
 
 import {
   IObservableMap
-} from '../common/observablemap';
+} from './observablemap';
 
 import {
   IObservableUndoableVector, ISerializable
-} from '../common/undoablevector';
+} from './undoablevector';
 
 /* tslint:disable */
 /**
