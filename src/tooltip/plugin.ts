@@ -74,7 +74,7 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
   registry.addCommand(launch, {
     execute: args => {
       let notebook = args['notebook'] as boolean;
-      let cell: BaseCellWidget | null = null;
+      let anchor: Widget | null = null;
       let editor: CodeEditor.IEditor | null = null;
       let kernel: Kernel.IKernel | null = null;
       let rendermime: IRenderMime | null = null;
@@ -87,16 +87,16 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
       if (notebook) {
         parent = notebooks.currentWidget;
         if (parent) {
-          cell = parent.notebook.activeCell;
-          editor = cell.editor;
+          anchor = parent.notebook;
+          editor = parent.notebook.activeCell.editor;
           kernel = parent.kernel;
           rendermime = parent.rendermime;
         }
       } else {
         parent = consoles.currentWidget;
         if (parent) {
-          cell = parent.console.prompt;
-          editor = cell.editor;
+          anchor = parent.console;
+          editor = parent.console.prompt.editor;
           kernel = parent.console.session.kernel;
           rendermime = parent.console.rendermime;
         }
@@ -106,7 +106,7 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
       let ready = !!editor && !!kernel && !!rendermime;
       if (ready) {
         tooltip = new TooltipWidget({
-          anchor: cell,
+          anchor,
           model: new TooltipModel({ editor, kernel, rendermime })
         });
         tooltip.id = `tooltip-${++id}`;
