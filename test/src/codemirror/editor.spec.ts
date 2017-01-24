@@ -357,6 +357,7 @@ describe('CodeMirrorEditor', () => {
 
     it('should repaint the editor', () => {
       editor.refresh();
+      expect(editor).to.be.ok();
     });
 
   });
@@ -385,13 +386,36 @@ describe('CodeMirrorEditor', () => {
 
   describe('#setSize()', () => {
 
+    it('should set the size of the editor in pixels', () => {
+      editor.setSize({ width: 100, height: 100 });
+      editor.setSize(null);
+      expect(editor).to.be.ok();
+    });
+
   });
 
   describe('#revealPosition()', () => {
 
+    it('should reveal the given position in the editor', () => {
+      let array = new Array(100);
+      model.value.text = array.join('foo\n');
+      editor.revealPosition({ line: 50, column: 0 });
+      expect(editor).to.be.ok();
+    });
+
   });
 
   describe('#revealSelection()', () => {
+
+    it('should reveal the given selection in the editor', () => {
+      let array = new Array(100);
+      model.value.text = array.join('foo\n');
+      let start = { line: 50, column: 0 };
+      let end = { line: 52, column: 0 };
+      editor.setSelection({ start, end });
+      editor.revealSelection(editor.getSelection());
+      expect(editor).to.be.ok();
+    });
 
   });
 
