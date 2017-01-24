@@ -142,7 +142,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
-   * Get the editor wrapped by the widget.
+   * Get the codemirror editor wrapped by the editor.
    */
   get editor(): CodeMirror.Editor {
     return this._editor;
