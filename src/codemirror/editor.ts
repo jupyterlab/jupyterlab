@@ -73,26 +73,6 @@ const TAB = 9;
 export
 class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
-   * The uuid of this editor;
-   */
-  readonly uuid: string;
-
-  /**
-   * The selection style of this editor.
-   */
-  readonly selectionStyle?: CodeEditor.ISelectionStyle;
-
-  /**
-   * A signal emitted when a text completion is requested.
-   */
-  readonly completionRequested: ISignal<this, CodeEditor.IPosition>;
-
-  /**
-   * A signal emitted when either the top or bottom edge is requested.
-   */
-  readonly edgeRequested: ISignal<this, CodeEditor.EdgeLocation>;
-
-  /**
    * Construct a CodeMirror editor.
    */
   constructor(options: CodeEditor.IOptions, config: CodeMirror.EditorConfiguration={}) {
@@ -137,24 +117,24 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
-   * Tests whether the editor is disposed.
+   * A signal emitted when a text completion is requested.
    */
-  get isDisposed(): boolean {
-    return this._editor === null;
-  }
+  readonly completionRequested: ISignal<this, CodeEditor.IPosition>;
 
   /**
-   * Dispose of the resources held by the widget.
+   * A signal emitted when either the top or bottom edge is requested.
    */
-  dispose(): void {
-    if (this._editor === null) {
-      return;
-    }
-    this._editor = null;
-    this._model = null;
-    this._keydownHandlers.clear();
-    clearSignalData(this);
-  }
+  readonly edgeRequested: ISignal<this, CodeEditor.EdgeLocation>;
+
+  /**
+   * The uuid of this editor;
+   */
+  readonly uuid: string;
+
+  /**
+   * The selection style of this editor.
+   */
+  readonly selectionStyle: CodeEditor.ISelectionStyle;
 
   /**
    * Get the editor wrapped by the widget.
@@ -231,6 +211,26 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   get charWidth(): number {
     return this._editor.defaultCharWidth();
+  }
+
+  /**
+   * Tests whether the editor is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._editor === null;
+  }
+
+  /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose(): void {
+    if (this._editor === null) {
+      return;
+    }
+    this._editor = null;
+    this._model = null;
+    this._keydownHandlers.clear();
+    clearSignalData(this);
   }
 
   /**
