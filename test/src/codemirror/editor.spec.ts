@@ -26,6 +26,8 @@ const DOWN_ARROW = 40;
 
 const TAB = 9;
 
+const ENTER = 13;
+
 
 class LogEditorWidget extends CodeMirrorEditor {
 
@@ -131,7 +133,7 @@ describe('CodeMirrorEditor', () => {
   describe('#selectionStyle', () => {
 
     it('should be the selection style of the editor', () => {
-      expect(editor.selectionStyle).to.be({});
+      expect(editor.selectionStyle).to.eql({});
     });
 
     it('should be settable', () => {
@@ -333,17 +335,51 @@ describe('CodeMirrorEditor', () => {
 
   describe('#focus()', () => {
 
+    it('should give focus to the editor', () => {
+      expect(host.contains(document.activeElement)).to.be(false);
+      editor.focus();
+      expect(host.contains(document.activeElement)).to.be(true);
+    });
+
   });
 
   describe('#hasFocus()', () => {
+
+    it('should test whether the editor has focus', () => {
+      expect(editor.hasFocus()).to.be(false);
+      editor.focus();
+      expect(editor.hasFocus()).to.be(true);
+    });
 
   });
 
   describe('#refresh()', () => {
 
+    it('should repaint the editor', () => {
+      editor.refresh();
+    });
+
   });
 
   describe('#addKeydownHandler()', () => {
+
+    it('should add a keydown handler to the editor', () => {
+      let called = 0;
+      let handler = () => {
+        called++;
+        return true;
+      };
+      let disposable = editor.addKeydownHandler(handler);
+      let evt = generate('keydown', { keyCode: ENTER });
+      editor.editor.triggerOnKeyDown(evt);
+      expect(called).to.be(1);
+      disposable.dispose();
+      expect(disposable.isDisposed).to.be(true);
+
+      evt = generate('keydown', { keyCode: ENTER });
+      editor.editor.triggerOnKeyDown(evt);
+      expect(called).to.be(1);
+    });
 
   });
 
