@@ -155,7 +155,7 @@ class RenderedHTML extends RenderedHTMLCommon {
     }
     appendHtml(this.node, source);
     if (options.resolver) {
-      resolveUrls(this.node, options.resolver);
+      this._urlResolved = resolveUrls(this.node, options.resolver);
     }
   }
 
@@ -163,8 +163,10 @@ class RenderedHTML extends RenderedHTMLCommon {
    * A message handler invoked on an `'after-attach'` message.
    */
   onAfterAttach(msg: Message): void {
-    typeset(this.node);
+    this._urlResolved.then( () => { typeset(this.node); });
   }
+
+  private _urlResolved: Promise<void> = null;
 }
 
 
@@ -192,12 +194,12 @@ class RenderedMarkdown extends RenderedHTMLCommon {
       }
       appendHtml(this.node, content);
       if (options.resolver) {
-        resolveUrls(this.node, options.resolver);
+        this._urlResolved = resolveUrls(this.node, options.resolver);
       }
       this.fit();
       this._rendered = true;
       if (this.isAttached) {
-        typeset(this.node);
+        this._urlResolved.then(() => { typeset(this.node); });
       }
     });
   }
@@ -212,6 +214,7 @@ class RenderedMarkdown extends RenderedHTMLCommon {
   }
 
   private _rendered = false;
+  private _urlResolved : Promise<void> = null;
 }
 
 
@@ -290,10 +293,12 @@ class RenderedSVG extends Widget {
       throw new Error('SVGRender: Error: Failed to create <svg> element');
     }
     if (options.resolver) {
-      resolveUrls(this.node, options.resolver);
+      this._urlResolved = resolveUrls(this.node, options.resolver);
     }
     this.addClass(SVG_CLASS);
   }
+
+  private _urlResolved: Promise<void> = null;
 }
 
 
@@ -318,15 +323,20 @@ class RenderedPDF extends Widget {
  * @param node - The head html element.
  *
  * @param resolver - A url resolver.
+ *
+ * @returns a promise fulfilled when the relative urls have been resolved.
  */
 export
-function resolveUrls(node: HTMLElement, resolver: RenderMime.IResolver): void {
+function resolveUrls(node: HTMLElement, resolver: RenderMime.IResolver): Promise<void> {
   let imgs = node.getElementsByTagName('img');
   for (let i = 0; i < imgs.length; i++) {
     let img = imgs[i];
     let source = img.getAttribute('src');
     if (source) {
-      img.src = resolver.resolveUrl(source);
+      return resolver.resolveUrl(source).then(url => {
+        img.src = url;
+        return void 0;
+      });
     }
   }
   let anchors = node.getElementsByTagName('a');
@@ -334,7 +344,10 @@ function resolveUrls(node: HTMLElement, resolver: RenderMime.IResolver): void {
     let anchor = anchors[i];
     let href = anchor.getAttribute('href');
     if (href) {
-      anchor.href = resolver.resolveUrl(href);
+      return resolver.resolveUrl(href).then(url => {
+        anchor.href = url;
+        return void 0;
+      });
     }
   }
 }

@@ -387,14 +387,21 @@ describe('docregistry/context', () => {
 
     describe('#resolveUrl()', () => {
 
-      it('should resolve a relative url to a correct server path', () => {
-        let path = context.resolveUrl('./foo');
-        expect(path).to.be(manager.contents.getDownloadUrl('foo'));
+      it('should resolve a relative url to a correct server path', (done) => {
+        let resolveUrlPromise = context.resolveUrl('./foo');
+        let getDownloadUrlPromise = manager.contents.getDownloadUrl('foo');
+        Promise.all([resolveUrlPromise, getDownloadUrlPromise])
+        .then((values)=>{
+          expect(values[0]).to.be(values[1]);
+          done();
+        }).catch(done);
       });
 
-      it('should ignore urls that have a protocol', () => {
-        let path = context.resolveUrl('http://foo');
-        expect(path).to.be('http://foo');
+      it('should ignore urls that have a protocol', (done) => {
+        context.resolveUrl('http://foo').then((path)=>{
+          expect(path).to.be('http://foo');
+          done();
+        }).catch(done);
       });
 
     });
