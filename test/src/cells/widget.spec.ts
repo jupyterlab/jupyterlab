@@ -122,7 +122,7 @@ class LogMarkdownCell extends MarkdownCellWidget {
 }
 
 
-describe('notebook/cells/widget', () => {
+describe('cells/widget', () => {
 
   describe('BaseCellWidget', () => {
 

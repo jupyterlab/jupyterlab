@@ -14,6 +14,10 @@ import {
 } from '../application';
 
 import {
+  BaseCellWidget
+} from '../cells';
+
+import {
   CodeEditor
 } from '../codeeditor';
 
@@ -24,10 +28,6 @@ import {
 import {
   INotebookTracker, NotebookPanel
 } from '../notebook';
-
-import {
-  BaseCellWidget
-} from '../notebook/cells';
 
 import {
   IRenderMime
