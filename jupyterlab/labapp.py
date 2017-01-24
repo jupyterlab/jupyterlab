@@ -18,7 +18,8 @@ from .labextensions import (
     find_labextension, validate_labextension_folder,
     get_labextension_manifest_data_by_name,
     get_labextension_manifest_data_by_folder,
-    get_labextension_config_python
+    get_labextension_config_python,
+    init_labextension_python
 )
 
 #-----------------------------------------------------------------------------
@@ -189,7 +190,10 @@ class LabApp(NotebookApp):
             data = get_labextension_manifest_data_by_name(name)
             if data is None:
                 continue
-            data['python_module'] = config.get('python_module', None)
+            python_module = config.get('python_module', None)
+            if python_module is not None:
+                init_labextension_python(python_module, webapp)
+            config['python_module'] = python_module
             out[name] = data
         self.web_app.labextensions = out
 
