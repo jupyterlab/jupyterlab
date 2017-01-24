@@ -51,6 +51,7 @@ describe('CodeMirrorEditor', () => {
   let editor: LogEditorWidget;
   let host: HTMLElement;
   let model: CodeEditor.IModel;
+  const TEXT = new Array(100).join('foo bar baz\n');
 
   beforeEach(() => {
     host = document.createElement('div');
@@ -397,8 +398,7 @@ describe('CodeMirrorEditor', () => {
   describe('#revealPosition()', () => {
 
     it('should reveal the given position in the editor', () => {
-      let array = new Array(100);
-      model.value.text = array.join('foo\n');
+      model.value.text = TEXT;
       editor.revealPosition({ line: 50, column: 0 });
       expect(editor).to.be.ok();
     });
@@ -408,8 +408,7 @@ describe('CodeMirrorEditor', () => {
   describe('#revealSelection()', () => {
 
     it('should reveal the given selection in the editor', () => {
-      let array = new Array(100);
-      model.value.text = array.join('foo\n');
+      model.value.text = TEXT;
       let start = { line: 50, column: 0 };
       let end = { line: 52, column: 0 };
       editor.setSelection({ start, end });
@@ -421,29 +420,123 @@ describe('CodeMirrorEditor', () => {
 
   describe('#getCoordinate()', () => {
 
+    it('should get the window coordinates given a cursor position', () => {
+      let coord = editor.getCoordinate({ line: 10, column: 1 });
+      expect(coord.left).to.be.above(0);
+    });
+
   });
 
   describe('#getCursorPosition()', () => {
+
+    it('should get the primary position of the cursor', () => {
+      let pos = editor.getCursorPosition();
+      expect(pos.line).to.be(0);
+      expect(pos.column).to.be(0);
+      model.value.text = TEXT;
+      editor.setCursorPosition({ line: 12, column: 3 });
+      pos = editor.getCursorPosition();
+      expect(pos.line).to.be(12);
+      expect(pos.column).to.be(3);
+    });
 
   });
 
   describe('#setCursorPosition()', () => {
 
+    it('should set the primary position of the cursor', () => {
+      model.value.text = TEXT;
+      editor.setCursorPosition({ line: 12, column: 3 });
+      let pos = editor.getCursorPosition();
+      expect(pos.line).to.be(12);
+      expect(pos.column).to.be(3);
+    });
+
   });
 
   describe('#getSelection()', () => {
+
+    it('should get the primary selection of the editor', () => {
+      let selection = editor.getSelection();
+      expect(selection.start.line).to.be(0);
+      expect(selection.end.line).to.be(0);
+    });
 
   });
 
   describe('#setSelection()', () => {
 
+    it('should set the primary selection of the editor', () => {
+      model.value.text = TEXT;
+      let start = { line: 50, column: 0 };
+      let end = { line: 52, column: 0 };
+      editor.setSelection({ start, end });
+      expect(editor.getSelection().start).to.eql(start);
+      expect(editor.getSelection().end).to.eql(end);
+    });
+
+    it('should remove any secondary cursors', () => {
+      model.value.text = TEXT;
+      let range0 = {
+        start: { line: 50, column: 0 },
+        end: { line: 52, column: 0 }
+      };
+      let range1 = {
+        start: { line: 53, column: 0 },
+        end: { line: 54, column: 0 }
+      };
+      editor.setSelections([range0, range1]);
+      editor.setSelection(range1);
+      expect(editor.getSelections().length).to.be(1);
+    });
+
   });
 
   describe('#getSelections()', () => {
 
+    it('should get the selections for all the cursors', () => {
+      model.value.text = TEXT;
+      let range0 = {
+        start: { line: 50, column: 0 },
+        end: { line: 52, column: 0 }
+      };
+      let range1 = {
+        start: { line: 53, column: 0 },
+        end: { line: 54, column: 0 }
+      };
+      editor.setSelections([range0, range1]);
+      let selections = editor.getSelections();
+      expect(selections[0].start.line).to.be(50);
+      expect(selections[1].end.line).to.be(54);
+    });
+
   });
 
   describe('#setSelections()', () => {
+
+    it('should set the selections for all the cursors', () => {
+      model.value.text = TEXT;
+      let range0 = {
+        start: { line: 50, column: 0 },
+        end: { line: 52, column: 0 }
+      };
+      let range1 = {
+        start: { line: 53, column: 0 },
+        end: { line: 54, column: 0 }
+      };
+      editor.setSelections([range0, range1]);
+      let selections = editor.getSelections();
+      expect(selections[0].start.line).to.be(50);
+      expect(selections[1].end.line).to.be(54);
+    });
+
+    it('should set a default selection for an empty array', () => {
+      model.value.text = TEXT;
+      editor.setSelections([]);
+      let selection = editor.getSelection();
+      expect(selection.start.line).to.be(0);
+      expect(selection.end.line).to.be(0);
+    });
 
   });
 
