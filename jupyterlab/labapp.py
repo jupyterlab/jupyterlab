@@ -132,6 +132,7 @@ default_handlers = [
 
 class LabApp(NotebookApp):
     version = __version__
+    name = 'jupyterlab'
 
     description = """
         JupyterLab - An extensible computational environment for Jupyter.
@@ -215,12 +216,23 @@ class LabApp(NotebookApp):
 def bootstrap_from_nbapp(nbapp):
     """Bootstrap the lab app on top of a notebook app.
     """
+    if isinstance(nbapp, LabApp):
+        return
+
     labapp = LabApp()
-    # Load the config file
-    labapp.config_file_name = nbapp.config_file_name
-    labapp.load_config_file()
+
+    # Get data from the nbapp.
+    labapp.config_dir = nbapp.config_dir
     labapp.log = nbapp.log
-    LabApp.web_app = nbapp.web_app
+    labapp.web_app = nbapp.web_app
+    cli_config = nbapp.cli_config.get('LabApp', {})
+
+    # Handle config.
+    labapp.update_config(cli_config)
+    labapp.load_config_file()
+    # Enforce cli override.
+    labapp.update_config(cli_config)
+
     labapp.add_lab_handlers()
     labapp.add_labextensions()
 
