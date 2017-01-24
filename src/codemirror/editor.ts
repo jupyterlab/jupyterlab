@@ -134,7 +134,12 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * The selection style of this editor.
    */
-  readonly selectionStyle: CodeEditor.ISelectionStyle;
+  get selectionStyle(): CodeEditor.ISelectionStyle {
+    return this._selectionStyle;
+  }
+  set selectionStyle(value: CodeEditor.ISelectionStyle) {
+    this._selectionStyle = value;
+  }
 
   /**
    * Get the editor wrapped by the widget.
@@ -659,6 +664,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   protected selectionMarkers: { [key: string]: CodeMirror.TextMarker[] | undefined } = {};
   private _keydownHandlers = new Vector<CodeEditor.KeydownHandler>();
   private _changeGuard = false;
+  private _selectionStyle: CodeEditor.ISelectionStyle;
   private _host: HTMLElement;
 }
 

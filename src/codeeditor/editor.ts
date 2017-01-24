@@ -500,6 +500,11 @@ namespace CodeEditor {
      */
     readonly edgeRequested: ISignal<IEditor, EdgeLocation>;
 
+   /**
+    * The default selection style for the editor.
+    */
+    selectionStyle: CodeEditor.ISelectionStyle;
+
     /**
      * Whether line numbers should be displayed. Defaults to false.
      */
