@@ -13,11 +13,12 @@ export * from './statedb';
 
 
 /**
- * The map of command ids used by the console plugin.
+ * The command IDs used by the state database plugin.
  */
 export
-const cmdIds = {
-  clear: 'statedb:clear'
+namespace CommandIDs {
+  export
+  const clear = 'statedb:clear';
 };
 
 

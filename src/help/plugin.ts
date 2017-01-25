@@ -50,7 +50,7 @@ import {
 } from '../mainmenu';
 
 import {
-  cmdIds as statedbCmdIds
+  CommandIDs as StateDBCommandIDs
 } from '../statedb';
 
 import {
@@ -203,7 +203,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     menu.addItem({ type: 'separator' });
     RESOURCES.forEach(args => { menu.addItem({ args, command }); });
     menu.addItem({ type: 'separator' });
-    menu.addItem({ command: statedbCmdIds.clear });
+    menu.addItem({ command: StateDBCommandIDs.clear });
 
     return menu;
   }
@@ -283,7 +283,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
 
   RESOURCES.forEach(args => { palette.addItem({ args, command, category }); });
 
-  palette.addItem({ command: statedbCmdIds.clear, category });
+  palette.addItem({ command: StateDBCommandIDs.clear, category });
 
   app.commands.addCommand(CommandIDs.launchClassic, {
     label: 'Launch Classic Notebook',
