@@ -26,12 +26,11 @@ import {
 } from '../mainmenu';
 
 import {
-  IDocumentRegistry,
-  restartKernel, selectKernelForContext
+  IDocumentRegistry, restartKernel, selectKernelForContext
 } from '../docregistry';
 
 import {
-  cmdIds as filebrowserCmdIds
+  CommandIDs as FileBrowserCommandIDs
 } from '../filebrowser';
 
 import {
@@ -141,7 +140,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command: filebrowserCmdIds.open,
+    command: FileBrowserCommandIDs.open,
     args: panel => ({ path: panel.context.path, factory: FACTORY }),
     name: panel => panel.context.path,
     when: services.ready

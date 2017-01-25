@@ -18,7 +18,7 @@ import {
 } from '../console';
 
 import {
-  cmdIds as filebrowserCmdIds
+  CommandIDs as FileBrowserCommandIDs
 } from '../filebrowser';
 
 import {
@@ -48,7 +48,13 @@ import {
 const plugin: JupyterLabPlugin<ILauncher> = {
   activate,
   id: 'jupyter.services.launcher',
-  requires: [IServiceManager, IPathTracker, ICommandPalette, ICommandLinker, IInstanceRestorer],
+  requires: [
+    IServiceManager,
+    IPathTracker,
+    ICommandPalette,
+    ICommandLinker,
+    IInstanceRestorer
+  ],
   provides: ILauncher,
   autoStart: true
 };
@@ -85,7 +91,7 @@ function activate(app: JupyterLab, services: IServiceManager, pathTracker: IPath
   let defaults: ILauncherItem[] = [
     {
       name: 'Notebook',
-      command: filebrowserCmdIds.newNotebook
+      command: FileBrowserCommandIDs.newNotebook
     },
     {
       name: 'Code Console',
@@ -93,7 +99,7 @@ function activate(app: JupyterLab, services: IServiceManager, pathTracker: IPath
     },
     {
       name: 'Text Editor',
-      command: filebrowserCmdIds.newTextFile
+      command: FileBrowserCommandIDs.newTextFile
     }
   ];
 

@@ -14,7 +14,7 @@ import {
 } from '../instancerestorer';
 
 import {
-  cmdIds as filebrowserCmdIds
+  CommandIDs as FileBrowserCommandIDs
 } from '../filebrowser';
 
 import {
@@ -66,13 +66,15 @@ function activate(app: JupyterLab, services: IServiceManager, restorer: IInstanc
     if (CONSOLE_REGEX.test(name)) {
       app.commands.execute(ConsoleCommandIDs.open, { id: model.id });
     } else {
-      app.commands.execute(filebrowserCmdIds.open, { path });
+      app.commands.execute(FileBrowserCommandIDs.open, { path });
     }
 
   });
+
   running.terminalOpenRequested.connect((sender, model) => {
     app.commands.execute(terminalCmdIds.open, { name: model.name });
   });
+
   // Rank has been chosen somewhat arbitrarily to give priority to the running
   // sessions widget in the sidebar.
   app.shell.addToLeftArea(running, { rank: 50 });
