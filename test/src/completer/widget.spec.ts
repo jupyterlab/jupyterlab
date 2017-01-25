@@ -8,6 +8,10 @@ import {
 } from 'phosphor/lib/core/messaging';
 
 import {
+  Panel
+} from 'phosphor/lib/ui/panel';
+
+import {
   Widget, WidgetMessage
 } from 'phosphor/lib/ui/widget';
 
@@ -81,7 +85,7 @@ describe('completer/widget', () => {
 
       it('should accept options with a renderer', () => {
         let options: CompleterWidget.IOptions = {
-          anchor: document.createElement('div'),
+          anchor: new Widget(),
           model: new CompleterModel(),
           renderer: new CustomRenderer()
         };
@@ -103,8 +107,8 @@ describe('completer/widget', () => {
       it('should emit a signal when an item is selected', () => {
         let anchor = new Widget();
         let options: CompleterWidget.IOptions = {
-          model: new CompleterModel(),
-          anchor: anchor.node
+          anchor,
+          model: new CompleterModel()
         };
         let value = '';
         let listener = (sender: any, selected: string) => { value = selected; };
@@ -130,8 +134,8 @@ describe('completer/widget', () => {
       it('should emit a signal when completer visibility changes', () => {
         let anchor = new Widget();
         let options: CompleterWidget.IOptions = {
-          model: new CompleterModel(),
-          anchor: anchor.node
+          anchor,
+          model: new CompleterModel()
         };
         let called = false;
         let listener = () => { called = true; };
@@ -193,16 +197,16 @@ describe('completer/widget', () => {
       it('should be settable', () => {
         let widget = new CompleterWidget();
         expect(widget.anchor).to.be(null);
-        widget.anchor = new Widget().node;
-        expect(widget.anchor).to.be.a(Node);
+        widget.anchor = new Widget();
+        expect(widget.anchor).to.be.a(Widget);
       });
 
       it('should be safe to reset', () => {
         let anchor = new Widget();
-        let widget = new CompleterWidget({ anchor: (new Widget()).node });
-        expect(widget.anchor).not.to.be(anchor.node);
-        widget.anchor = anchor.node;
-        expect(widget.anchor).to.be(anchor.node);
+        let widget = new CompleterWidget({ anchor: new Widget() });
+        expect(widget.anchor).not.to.be(anchor);
+        widget.anchor = anchor;
+        expect(widget.anchor).to.be(anchor);
       });
 
     });
@@ -229,9 +233,7 @@ describe('completer/widget', () => {
       it('should reset the completer widget', () => {
         let anchor = new Widget();
         let model = new CompleterModel();
-        let options: CompleterWidget.IOptions = {
-          model, anchor: anchor.node
-        };
+        let options: CompleterWidget.IOptions = { anchor, model };
         model.setOptions(['foo', 'bar']);
         Widget.attach(anchor, document.body);
 
@@ -265,7 +267,7 @@ describe('completer/widget', () => {
 
       it('should handle anchor element scroll events', () => {
         let anchor = new Widget();
-        let widget = new LogWidget({ anchor: anchor.node });
+        let widget = new LogWidget({ anchor });
         Widget.attach(widget, document.body);
         simulate(anchor.node, 'scroll');
         expect(widget.events).to.contain('scroll');
@@ -277,9 +279,7 @@ describe('completer/widget', () => {
         it('should reset if keydown is outside anchor', () => {
           let anchor = new Widget();
           let model = new CompleterModel();
-          let options: CompleterWidget.IOptions = {
-            model, anchor: anchor.node
-          };
+          let options: CompleterWidget.IOptions = { anchor, model };
           model.setOptions(['foo', 'bar']);
           Widget.attach(anchor, document.body);
 
@@ -300,9 +300,7 @@ describe('completer/widget', () => {
         it('should trigger a selected signal on enter key', () => {
           let anchor = new Widget();
           let model = new CompleterModel();
-          let options: CompleterWidget.IOptions = {
-            model, anchor: anchor.node
-          };
+          let options: CompleterWidget.IOptions = { anchor, model };
           let value = '';
           let listener = (sender: any, selected: string) => {
             value = selected;
@@ -325,9 +323,7 @@ describe('completer/widget', () => {
         it('should select the item below and cycle back on down', () => {
           let anchor = new Widget();
           let model = new CompleterModel();
-          let options: CompleterWidget.IOptions = {
-            model, anchor: anchor.node
-          };
+          let options: CompleterWidget.IOptions = { anchor, model };
           model.setOptions(['foo', 'bar', 'baz']);
           Widget.attach(anchor, document.body);
 
@@ -362,9 +358,7 @@ describe('completer/widget', () => {
         it('should select the item above and cycle back on up', () => {
           let anchor = new Widget();
           let model = new CompleterModel();
-          let options: CompleterWidget.IOptions = {
-            model, anchor: anchor.node
-          };
+          let options: CompleterWidget.IOptions = { anchor, model };
           model.setOptions(['foo', 'bar', 'baz']);
           Widget.attach(anchor, document.body);
 
@@ -397,9 +391,7 @@ describe('completer/widget', () => {
         it('should mark common subset on start and select on tab', (done) => {
           let anchor = new Widget();
           let model = new CompleterModel();
-          let options: CompleterWidget.IOptions = {
-            model, anchor: anchor.node
-          };
+          let options: CompleterWidget.IOptions = { anchor, model };
           let value = '';
           let listener = (sender: any, selected: string) => {
             value = selected;
@@ -436,9 +428,7 @@ describe('completer/widget', () => {
         it('should trigger a selected signal on mouse down', () => {
           let anchor = new Widget();
           let model = new CompleterModel();
-          let options: CompleterWidget.IOptions = {
-            model, anchor: anchor.node
-          };
+          let options: CompleterWidget.IOptions = { anchor, model };
           let value = '';
           let listener = (sender: any, selected: string) => {
             value = selected;
@@ -465,9 +455,7 @@ describe('completer/widget', () => {
         it('should ignore nonstandard mouse clicks (e.g., right click)', () => {
           let anchor = new Widget();
           let model = new CompleterModel();
-          let options: CompleterWidget.IOptions = {
-            model, anchor: anchor.node
-          };
+          let options: CompleterWidget.IOptions = { anchor, model };
           let value = '';
           let listener = (sender: any, selected: string) => {
             value = selected;
@@ -490,9 +478,7 @@ describe('completer/widget', () => {
         it('should ignore a mouse down that misses an item', () => {
           let anchor = new Widget();
           let model = new CompleterModel();
-          let options: CompleterWidget.IOptions = {
-            model, anchor: anchor.node
-          };
+          let options: CompleterWidget.IOptions = { anchor, model };
           let value = '';
           let listener = (sender: any, selected: string) => {
             value = selected;
@@ -515,9 +501,7 @@ describe('completer/widget', () => {
         it('should hide widget if mouse down misses it', () => {
           let anchor = new Widget();
           let model = new CompleterModel();
-          let options: CompleterWidget.IOptions = {
-            model, anchor: anchor.node
-          };
+          let options: CompleterWidget.IOptions = { anchor, model };
           let value = '';
           let listener = (sender: any, selected: string) => {
             value = selected;
@@ -543,7 +527,7 @@ describe('completer/widget', () => {
       context('scroll', () => {
 
         it('should position itself according to the anchor', (done) => {
-          let anchor = document.createElement('div');
+          let anchor = new Panel();
           let content = new Widget();
           let model = new CompleterModel();
           let coords: CompleterWidget.ICoordinate = { left: 0, right: 0, top: 100, bottom: 120 };
@@ -561,16 +545,16 @@ describe('completer/widget', () => {
           content.node.style.overflow = 'auto';
           content.node.style.background = 'yellow';
 
-          anchor.style.background = 'red';
-          anchor.style.height = '2000px';
-          anchor.style.width = '500px';
-          anchor.style.maxHeight = '500px';
-          anchor.style.overflow = 'hidden';
+          anchor.node.style.background = 'red';
+          anchor.node.style.height = '2000px';
+          anchor.node.style.width = '500px';
+          anchor.node.style.maxHeight = '500px';
+          anchor.node.style.overflow = 'hidden';
 
-          document.body.appendChild(anchor);
-          Widget.attach(content, anchor);
+          Widget.attach(anchor, document.body);
+          anchor.addWidget(content);
 
-          anchor.scrollTop = 100;
+          anchor.node.scrollTop = 100;
           model.original = request;
           model.cursor = { start: 0, end: 0 };
           model.setOptions('ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''));
@@ -579,14 +563,14 @@ describe('completer/widget', () => {
           Widget.attach(widget, document.body);
           sendMessage(widget, WidgetMessage.UpdateRequest);
 
-          simulate(anchor, 'scroll');
+          simulate(anchor.node, 'scroll');
 
           requestAnimationFrame(() => {
             let top = parseInt(window.getComputedStyle(widget.node).top, 10);
             expect(top).to.be(coords.bottom);
             widget.dispose();
             content.dispose();
-            document.body.removeChild(anchor);
+            anchor.dispose();
             done();
           });
         });
@@ -611,7 +595,7 @@ describe('completer/widget', () => {
           };
 
         let value = '';
-        let options: CompleterWidget.IOptions = { model, anchor: anchor.node };
+        let options: CompleterWidget.IOptions = { anchor, model };
         let listener = (sender: any, selected: string) => { value = selected; };
 
         Widget.attach(anchor, document.body);
@@ -648,7 +632,7 @@ describe('completer/widget', () => {
           text: 'f'
         };
 
-        let options: CompleterWidget.IOptions = { model, anchor: anchor.node };
+        let options: CompleterWidget.IOptions = { anchor, model };
 
         Widget.attach(anchor, document.body);
         model.original = request;
