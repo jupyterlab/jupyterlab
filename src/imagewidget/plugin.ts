@@ -26,7 +26,7 @@ import {
 } from '../instancerestorer';
 
 import {
-  ImageWidget, ImageWidgetFactory, cmdIds
+  CommandIDs, ImageWidget, ImageWidgetFactory
 } from './';
 
 
@@ -86,24 +86,24 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, palette: IComman
     tracker.add(widget);
   });
 
-  app.commands.addCommand(cmdIds.zoomIn, {
+  app.commands.addCommand(CommandIDs.zoomIn, {
     execute: zoomIn,
     label: 'Zoom In'
   });
 
-  app.commands.addCommand(cmdIds.zoomOut, {
+  app.commands.addCommand(CommandIDs.zoomOut, {
     execute: zoomOut,
     label: 'Zoom Out'
   });
 
-  app.commands.addCommand(cmdIds.resetZoom, {
+  app.commands.addCommand(CommandIDs.resetZoom, {
     execute: resetZoom,
     label: 'Reset Zoom'
   });
 
   let category = 'Image Widget';
 
-  [cmdIds.zoomIn, cmdIds.zoomOut, cmdIds.resetZoom]
+  [CommandIDs.zoomIn, CommandIDs.zoomOut, CommandIDs.resetZoom]
     .forEach(command => palette.addItem({ command, category }));
 
   function zoomIn(): void {
