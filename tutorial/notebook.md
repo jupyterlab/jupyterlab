@@ -7,7 +7,7 @@
 The most complicated plugin included in the **JupyterLab application** is the
 **Notebook plugin**.
 
-The [NotebookWidgetFactory](http://jupyterlab.github.io/jupyterlab/classes/_notebook_notebook_widgetfactory_.notebookwidgetfactory.html) constructs a new [NotebookPanel](http://jupyterlab.github.io/jupyterlab/classes/_notebook_notebook_panel_.notebookpanel.html) from a model and populates the toolbar with default widgets.
+The [NotebookWidgetFactory](http://jupyterlab.github.io/jupyterlab/classes/_notebook_widgetfactory_.notebookwidgetfactory.html) constructs a new [NotebookPanel](http://jupyterlab.github.io/jupyterlab/classes/_notebook_panel_.notebookpanel.html) from a model and populates the toolbar with default widgets.
 
 ## Structure of the Notebook plugin
 
@@ -16,10 +16,10 @@ files.
 
 ### Model
 
-The **[NotebookModel](http://jupyterlab.github.io/jupyterlab/classes/_notebook_notebook_model_.notebookmodel.html)**
+The **[NotebookModel](http://jupyterlab.github.io/jupyterlab/classes/_notebook_model_.notebookmodel.html)**
 contains an observable list of cells.
 
-A **[cell model](http://jupyterlab.github.io/jupyterlab/modules/_notebook_cells_model_.html)**
+A **[cell model](http://jupyterlab.github.io/jupyterlab/modules/_cells_model_.html)**
 can be:
 
 - a code cell
@@ -51,7 +51,7 @@ new NotebookPanel from the model. The NotebookPanel widget is added to
 the DockPanel. The **NotebookPanel** contains:
 
 - a [Toolbar](http://jupyterlab.github.io/jupyterlab/modules/_toolbar_index_.html)
-- a [Notebook widget](http://jupyterlab.github.io/jupyterlab/classes/_notebook_notebook_widget_.notebook.html).
+- a [Notebook widget](http://jupyterlab.github.io/jupyterlab/classes/_notebook_widget_.notebook.html).
 
 The NotebookPanel also adds completion logic.
 
@@ -67,25 +67,25 @@ cell list.
 #### Higher level actions using NotebookActions
 
 Higher-level actions are contained in the
-[NotebookActions](http://jupyterlab.github.io/jupyterlab/modules/_notebook_notebook_actions_.notebookactions.html) namespace,
+[NotebookActions](http://jupyterlab.github.io/jupyterlab/modules/_notebook_actions_.notebookactions.html) namespace,
 which has functions, when given a notebook widget, to run a cell and select
 the next cell, merge or split cells at the cursor, delete selected cells, etc.
 
 #### Widget hierarchy
 
-A Notebook widget contains a list of [cell widgets](http://jupyterlab.github.io/jupyterlab/modules/_notebook_cells_widget_.html),
+A Notebook widget contains a list of [cell widgets](http://jupyterlab.github.io/jupyterlab/modules/_cells_widget_.html),
 corresponding to the cell models in its cell list.
 
-- Each cell widget contains an [InputAreaWidget](http://jupyterlab.github.io/jupyterlab/classes/_notebook_cells_widget_.inputareawidget.html),
+- Each cell widget contains an [InputAreaWidget](http://jupyterlab.github.io/jupyterlab/classes/_cells_widget_.inputareawidget.html),
 
     + which contains n [CodeEditorWidget](http://jupyterlab.github.io/jupyterlab/classes/_codeeditor_widget_.codeeditorwidget.html),
 
         - which contains a JavaScript CodeMirror instance.
 
-A [CodeCellWidget](http://jupyterlab.github.io/jupyterlab/classes/_notebook_cells_widget_.codecellwidget.html)
-also contains an [OutputAreaWidget](http://jupyterlab.github.io/jupyterlab/classes/_notebook_output_area_widget_.outputareawidget.html).
+A [CodeCellWidget](http://jupyterlab.github.io/jupyterlab/classes/_cells_widget_.codecellwidget.html)
+also contains an [OutputAreaWidget](http://jupyterlab.github.io/jupyterlab/classes/_outputarea_widget_.outputareawidget.html).
 An OutputAreaWidget is responsible for rendering the outputs in the
-[OutputAreaModel](http://jupyterlab.github.io/jupyterlab/classes/_notebook_output_area_model_.outputareamodel.html)
+[OutputAreaModel](http://jupyterlab.github.io/jupyterlab/classes/_outputarea_model_.outputareamodel.html)
 list. An OutputAreaWidget uses a
 notebook-specific [RenderMime](http://jupyterlab.github.io/jupyterlab/classes/_rendermime_index_.rendermime.html)
 object to render `display_data` output messages.
