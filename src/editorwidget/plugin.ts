@@ -34,7 +34,7 @@ import {
 } from '../instancerestorer';
 
 import {
-  IEditorTracker, EditorWidget, EditorWidgetFactory, cmdIds
+  IEditorTracker, EditorWidget, EditorWidgetFactory, CommandIDs
 } from './';
 
 
@@ -130,17 +130,17 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
 
   let commands = app.commands;
 
-  commands.addCommand(cmdIds.lineNumbers, {
+  commands.addCommand(CommandIDs.lineNumbers, {
     execute: () => { toggleLineNums(); },
     label: 'Toggle Line Numbers'
   });
 
-  commands.addCommand(cmdIds.lineWrap, {
+  commands.addCommand(CommandIDs.lineWrap, {
     execute: () => { toggleLineWrap(); },
     label: 'Toggle Line Wrap'
   });
 
-  commands.addCommand(cmdIds.createConsole, {
+  commands.addCommand(CommandIDs.createConsole, {
     execute: () => {
       let widget = tracker.currentWidget;
       if (!widget) {
@@ -156,7 +156,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
     label: 'Create Console for Editor'
   });
 
-  commands.addCommand(cmdIds.runCode, {
+  commands.addCommand(CommandIDs.runCode, {
     execute: () => {
       let widget = tracker.currentWidget;
       if (!widget) {
