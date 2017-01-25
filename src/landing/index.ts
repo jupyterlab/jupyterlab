@@ -5,9 +5,10 @@ export * from './widget';
 
 
 /**
- * The map of command ids used by the landing plugin.
+ * The command IDs used by the landing plugin.
  */
 export
-const cmdIds = {
-  open: 'landing-jupyterlab:open',
+namespace CommandIDs {
+  export
+  const open = 'landing-jupyterlab:open';
 };

@@ -26,7 +26,7 @@ import {
 } from '../services';
 
 import {
-  LandingModel, LandingWidget, cmdIds
+  CommandIDs, LandingModel, LandingWidget
 } from './';
 
 /**
@@ -56,7 +56,7 @@ export default plugin;
  */
 function activate(app: JupyterLab, pathTracker: IPathTracker, palette: ICommandPalette, services: IServiceManager, restorer: IInstanceRestorer): void {
   const category = 'Help';
-  const command = cmdIds.open;
+  const command = CommandIDs.open;
   const model = new LandingModel(services.terminals.isAvailable());
   const tracker = new InstanceTracker<LandingWidget>({ namespace: 'landing' });
 
