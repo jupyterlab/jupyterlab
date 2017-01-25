@@ -50,8 +50,8 @@ import {
 } from '../services';
 
 import {
-  INotebookTracker, NotebookModelFactory, NotebookPanel, NotebookTracker,
-  NotebookWidgetFactory, NotebookActions, cmdIds, trustNotebook
+  CommandIDs, INotebookTracker, NotebookActions, NotebookModelFactory,
+  NotebookPanel, NotebookTracker, NotebookWidgetFactory, trustNotebook
 } from './';
 
 
@@ -196,7 +196,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
 function addCommands(app: JupyterLab, services: IServiceManager, tracker: NotebookTracker): void {
   let commands = app.commands;
 
-  commands.addCommand(cmdIds.runAndAdvance, {
+  commands.addCommand(CommandIDs.runAndAdvance, {
     label: 'Run Cell(s) and Advance',
     execute: () => {
       let current = tracker.currentWidget;
@@ -206,7 +206,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.run, {
+  commands.addCommand(CommandIDs.run, {
     label: 'Run Cell(s)',
     execute: () => {
       let current = tracker.currentWidget;
@@ -215,7 +215,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.runAndInsert, {
+  commands.addCommand(CommandIDs.runAndInsert, {
     label: 'Run Cell(s) and Insert',
     execute: () => {
       let current = tracker.currentWidget;
@@ -224,7 +224,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.runAll, {
+  commands.addCommand(CommandIDs.runAll, {
     label: 'Run All Cells',
     execute: () => {
       let current = tracker.currentWidget;
@@ -233,7 +233,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.restart, {
+  commands.addCommand(CommandIDs.restart, {
     label: 'Restart Kernel',
     execute: () => {
       let current = tracker.currentWidget;
@@ -244,7 +244,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.closeAndHalt, {
+  commands.addCommand(CommandIDs.closeAndHalt, {
     label: 'Close and Halt',
     execute: () => {
       let current = tracker.currentWidget;
@@ -253,7 +253,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.trust, {
+  commands.addCommand(CommandIDs.trust, {
     label: 'Trust Notebook',
     execute: () => {
       let current = tracker.currentWidget;
@@ -264,7 +264,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.restartClear, {
+  commands.addCommand(CommandIDs.restartClear, {
     label: 'Restart Kernel & Clear Outputs',
     execute: () => {
       let current = tracker.currentWidget;
@@ -279,7 +279,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.restartRunAll, {
+  commands.addCommand(CommandIDs.restartRunAll, {
     label: 'Restart Kernel & Run All',
     execute: () => {
       let current = tracker.currentWidget;
@@ -292,7 +292,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.clearAllOutputs, {
+  commands.addCommand(CommandIDs.clearAllOutputs, {
     label: 'Clear All Outputs',
     execute: () => {
       let current = tracker.currentWidget;
@@ -301,7 +301,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.clearOutputs, {
+  commands.addCommand(CommandIDs.clearOutputs, {
     label: 'Clear Output(s)',
     execute: () => {
       let current = tracker.currentWidget;
@@ -310,7 +310,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.interrupt, {
+  commands.addCommand(CommandIDs.interrupt, {
     label: 'Interrupt Kernel',
     execute: () => {
       let current = tracker.currentWidget;
@@ -322,7 +322,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.toCode, {
+  commands.addCommand(CommandIDs.toCode, {
     label: 'Convert to Code',
     execute: () => {
       let current = tracker.currentWidget;
@@ -331,7 +331,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.toMarkdown, {
+  commands.addCommand(CommandIDs.toMarkdown, {
     label: 'Convert to Markdown',
     execute: () => {
       let current = tracker.currentWidget;
@@ -340,7 +340,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.toRaw, {
+  commands.addCommand(CommandIDs.toRaw, {
     label: 'Convert to Raw',
     execute: () => {
       let current = tracker.currentWidget;
@@ -349,7 +349,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.cut, {
+  commands.addCommand(CommandIDs.cut, {
     label: 'Cut Cell(s)',
     execute: () => {
       let current = tracker.currentWidget;
@@ -358,7 +358,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.copy, {
+  commands.addCommand(CommandIDs.copy, {
     label: 'Copy Cell(s)',
     execute: () => {
       let current = tracker.currentWidget;
@@ -367,7 +367,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.paste, {
+  commands.addCommand(CommandIDs.paste, {
     label: 'Paste Cell(s)',
     execute: () => {
       let current = tracker.currentWidget;
@@ -376,7 +376,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.deleteCell, {
+  commands.addCommand(CommandIDs.deleteCell, {
     label: 'Delete Cell(s)',
     execute: () => {
       let current = tracker.currentWidget;
@@ -385,7 +385,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.split, {
+  commands.addCommand(CommandIDs.split, {
     label: 'Split Cell',
     execute: () => {
       let current = tracker.currentWidget;
@@ -394,7 +394,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.merge, {
+  commands.addCommand(CommandIDs.merge, {
     label: 'Merge Selected Cell(s)',
     execute: () => {
       let current = tracker.currentWidget;
@@ -403,7 +403,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.insertAbove, {
+  commands.addCommand(CommandIDs.insertAbove, {
     label: 'Insert Cell Above',
     execute: () => {
       let current = tracker.currentWidget;
@@ -412,7 +412,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.insertBelow, {
+  commands.addCommand(CommandIDs.insertBelow, {
     label: 'Insert Cell Below',
     execute: () => {
       let current = tracker.currentWidget;
@@ -421,7 +421,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.selectAbove, {
+  commands.addCommand(CommandIDs.selectAbove, {
     label: 'Select Cell Above',
     execute: () => {
       let current = tracker.currentWidget;
@@ -430,7 +430,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.selectBelow, {
+  commands.addCommand(CommandIDs.selectBelow, {
     label: 'Select Cell Below',
     execute: () => {
       let current = tracker.currentWidget;
@@ -439,7 +439,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.extendAbove, {
+  commands.addCommand(CommandIDs.extendAbove, {
     label: 'Extend Selection Above',
     execute: () => {
       let current = tracker.currentWidget;
@@ -448,7 +448,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.extendBelow, {
+  commands.addCommand(CommandIDs.extendBelow, {
     label: 'Extend Selection Below',
     execute: () => {
       let current = tracker.currentWidget;
@@ -457,7 +457,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.moveUp, {
+  commands.addCommand(CommandIDs.moveUp, {
     label: 'Move Cell(s) Up',
     execute: () => {
       let current = tracker.currentWidget;
@@ -466,7 +466,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.moveDown, {
+  commands.addCommand(CommandIDs.moveDown, {
     label: 'Move Cell(s) Down',
     execute: () => {
       let current = tracker.currentWidget;
@@ -475,7 +475,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.toggleLines, {
+  commands.addCommand(CommandIDs.toggleLines, {
     label: 'Toggle Line Numbers',
     execute: () => {
       let current = tracker.currentWidget;
@@ -484,7 +484,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.toggleAllLines, {
+  commands.addCommand(CommandIDs.toggleAllLines, {
     label: 'Toggle All Line Numbers',
     execute: () => {
       let current = tracker.currentWidget;
@@ -493,7 +493,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.commandMode, {
+  commands.addCommand(CommandIDs.commandMode, {
     label: 'To Command Mode',
     execute: () => {
       let current = tracker.currentWidget;
@@ -502,7 +502,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.editMode, {
+  commands.addCommand(CommandIDs.editMode, {
     label: 'To Edit Mode',
     execute: () => {
       let current = tracker.currentWidget;
@@ -511,7 +511,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.undo, {
+  commands.addCommand(CommandIDs.undo, {
     label: 'Undo Cell Operation',
     execute: () => {
       let current = tracker.currentWidget;
@@ -520,7 +520,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.redo, {
+  commands.addCommand(CommandIDs.redo, {
     label: 'Redo Cell Operation',
     execute: () => {
       let current = tracker.currentWidget;
@@ -529,7 +529,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.switchKernel, {
+  commands.addCommand(CommandIDs.switchKernel, {
     label: 'Switch Kernel',
     execute: () => {
       let current = tracker.currentWidget;
@@ -542,7 +542,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.markdown1, {
+  commands.addCommand(CommandIDs.markdown1, {
     label: 'Markdown Header 1',
     execute: () => {
       let current = tracker.currentWidget;
@@ -551,7 +551,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.markdown2, {
+  commands.addCommand(CommandIDs.markdown2, {
     label: 'Markdown Header 2',
     execute: () => {
       let current = tracker.currentWidget;
@@ -560,7 +560,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.markdown3, {
+  commands.addCommand(CommandIDs.markdown3, {
     label: 'Markdown Header 3',
     execute: () => {
       let current = tracker.currentWidget;
@@ -569,7 +569,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.markdown4, {
+  commands.addCommand(CommandIDs.markdown4, {
     label: 'Markdown Header 4',
     execute: () => {
       let current = tracker.currentWidget;
@@ -578,7 +578,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.markdown5, {
+  commands.addCommand(CommandIDs.markdown5, {
     label: 'Markdown Header 5',
     execute: () => {
       let current = tracker.currentWidget;
@@ -587,7 +587,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(cmdIds.markdown6, {
+  commands.addCommand(CommandIDs.markdown6, {
     label: 'Markdown Header 6',
     execute: () => {
       let current = tracker.currentWidget;
@@ -604,52 +604,52 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
 function populatePalette(palette: ICommandPalette): void {
   let category = 'Notebook Operations';
   [
-    cmdIds.interrupt,
-    cmdIds.restart,
-    cmdIds.restartClear,
-    cmdIds.restartRunAll,
-    cmdIds.runAll,
-    cmdIds.clearAllOutputs,
-    cmdIds.toggleAllLines,
-    cmdIds.editMode,
-    cmdIds.commandMode,
-    cmdIds.switchKernel,
-    cmdIds.closeAndHalt,
-    cmdIds.trust
+    CommandIDs.interrupt,
+    CommandIDs.restart,
+    CommandIDs.restartClear,
+    CommandIDs.restartRunAll,
+    CommandIDs.runAll,
+    CommandIDs.clearAllOutputs,
+    CommandIDs.toggleAllLines,
+    CommandIDs.editMode,
+    CommandIDs.commandMode,
+    CommandIDs.switchKernel,
+    CommandIDs.closeAndHalt,
+    CommandIDs.trust
   ].forEach(command => { palette.addItem({ command, category }); });
 
   category = 'Notebook Cell Operations';
   [
-    cmdIds.run,
-    cmdIds.runAndAdvance,
-    cmdIds.runAndInsert,
-    cmdIds.clearOutputs,
-    cmdIds.toCode,
-    cmdIds.toMarkdown,
-    cmdIds.toRaw,
-    cmdIds.cut,
-    cmdIds.copy,
-    cmdIds.paste,
-    cmdIds.deleteCell,
-    cmdIds.split,
-    cmdIds.merge,
-    cmdIds.insertAbove,
-    cmdIds.insertBelow,
-    cmdIds.selectAbove,
-    cmdIds.selectBelow,
-    cmdIds.extendAbove,
-    cmdIds.extendBelow,
-    cmdIds.moveDown,
-    cmdIds.moveUp,
-    cmdIds.toggleLines,
-    cmdIds.undo,
-    cmdIds.redo,
-    cmdIds.markdown1,
-    cmdIds.markdown2,
-    cmdIds.markdown3,
-    cmdIds.markdown4,
-    cmdIds.markdown5,
-    cmdIds.markdown6
+    CommandIDs.run,
+    CommandIDs.runAndAdvance,
+    CommandIDs.runAndInsert,
+    CommandIDs.clearOutputs,
+    CommandIDs.toCode,
+    CommandIDs.toMarkdown,
+    CommandIDs.toRaw,
+    CommandIDs.cut,
+    CommandIDs.copy,
+    CommandIDs.paste,
+    CommandIDs.deleteCell,
+    CommandIDs.split,
+    CommandIDs.merge,
+    CommandIDs.insertAbove,
+    CommandIDs.insertBelow,
+    CommandIDs.selectAbove,
+    CommandIDs.selectBelow,
+    CommandIDs.extendAbove,
+    CommandIDs.extendBelow,
+    CommandIDs.moveDown,
+    CommandIDs.moveUp,
+    CommandIDs.toggleLines,
+    CommandIDs.undo,
+    CommandIDs.redo,
+    CommandIDs.markdown1,
+    CommandIDs.markdown2,
+    CommandIDs.markdown3,
+    CommandIDs.markdown4,
+    CommandIDs.markdown5,
+    CommandIDs.markdown6
   ].forEach(command => { palette.addItem({ command, category }); });
 }
 
@@ -663,18 +663,18 @@ function createMenu(app: JupyterLab): Menu {
 
   menu.title.label = 'Notebook';
   settings.title.label = 'Settings';
-  settings.addItem({ command: cmdIds.toggleAllLines });
+  settings.addItem({ command: CommandIDs.toggleAllLines });
 
-  menu.addItem({ command: cmdIds.undo });
-  menu.addItem({ command: cmdIds.redo });
-  menu.addItem({ command: cmdIds.split });
-  menu.addItem({ command: cmdIds.deleteCell });
-  menu.addItem({ command: cmdIds.clearAllOutputs });
-  menu.addItem({ command: cmdIds.runAll });
-  menu.addItem({ command: cmdIds.restart });
-  menu.addItem({ command: cmdIds.switchKernel });
-  menu.addItem({ command: cmdIds.closeAndHalt });
-  menu.addItem({ command: cmdIds.trust });
+  menu.addItem({ command: CommandIDs.undo });
+  menu.addItem({ command: CommandIDs.redo });
+  menu.addItem({ command: CommandIDs.split });
+  menu.addItem({ command: CommandIDs.deleteCell });
+  menu.addItem({ command: CommandIDs.clearAllOutputs });
+  menu.addItem({ command: CommandIDs.runAll });
+  menu.addItem({ command: CommandIDs.restart });
+  menu.addItem({ command: CommandIDs.switchKernel });
+  menu.addItem({ command: CommandIDs.closeAndHalt });
+  menu.addItem({ command: CommandIDs.trust });
   menu.addItem({ type: 'separator' });
   menu.addItem({ type: 'submenu', menu: settings });
 
