@@ -26,11 +26,12 @@ export { ApplicationShell } from './shell';
 
 
 /**
- * The map of command ids used by the application plugin.
+ * The command IDs used by the application plugin.
  */
 export
-const cmdIds = {
-  closeAll: 'main-jupyterlab:close-all'
+namespace CommandIDs {
+  export
+  const closeAll = 'main-jupyterlab:close-all';
 };
 
 

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin, cmdIds
+  JupyterLab, JupyterLabPlugin, CommandIDs
 } from './';
 
 import {
@@ -17,13 +17,13 @@ const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.main',
   requires: [ICommandPalette],
   activate: (app: JupyterLab, palette: ICommandPalette) => {
-    let commandId = cmdIds.closeAll;
-    app.commands.addCommand(commandId, {
+    let command = CommandIDs.closeAll;
+    app.commands.addCommand(command, {
       label: 'Close All Widgets',
       execute: () => { app.shell.closeAll(); }
     });
 
-    palette.addItem({ command: commandId, category: 'Main Area' });
+    palette.addItem({ command, category: 'Main Area' });
 
     const message = 'Are you sure you want to exit JupyterLab?\n' +
                     'Any unsaved changes will be lost.';
