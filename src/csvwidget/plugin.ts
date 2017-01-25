@@ -14,6 +14,10 @@ import {
 } from '../docregistry';
 
 import {
+  cmdIds as fileBrowserCmdIds
+} from '../filebrowser';
+
+import {
   IInstanceRestorer
 } from '../instancerestorer';
 
@@ -58,7 +62,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command: 'file-operations:open',
+    command: fileBrowserCmdIds.open,
     args: widget => ({ path: widget.context.path, factory: FACTORY }),
     name: widget => widget.context.path
   });

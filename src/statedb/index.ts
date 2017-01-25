@@ -9,6 +9,17 @@ import {
   Token
 } from 'phosphor/lib/core/token';
 
+export * from './statedb';
+
+
+/**
+ * The map of command ids used by the console plugin.
+ */
+export
+const cmdIds = {
+  clear: 'statedb:clear'
+};
+
 
 /* tslint:disable */
 /**

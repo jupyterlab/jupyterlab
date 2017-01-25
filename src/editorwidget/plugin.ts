@@ -10,24 +10,33 @@ import {
 } from '../application';
 
 import {
+  IEditorServices
+} from '../codeeditor';
+
+import {
   InstanceTracker
 } from '../common/instancetracker';
+
+import {
+  cmdIds as consoleCmdIds
+} from '../console';
 
 import {
   IDocumentRegistry
 } from '../docregistry';
 
 import {
+  cmdIds as fileBrowserCmdIds
+} from '../filebrowser';
+
+import {
   IInstanceRestorer
 } from '../instancerestorer';
 
 import {
-  IEditorTracker, EditorWidget, EditorWidgetFactory
-} from './widget';
+  IEditorTracker, EditorWidget, EditorWidgetFactory, cmdIds
+} from './';
 
-import {
-  IEditorServices
-} from '../codeeditor';
 
 /**
  * The class name for all main area portrait tab icons.
@@ -43,17 +52,6 @@ const EDITOR_ICON_CLASS = 'jp-ImageTextEditor';
  * The name of the factory that creates editor widgets.
  */
 const FACTORY = 'Editor';
-
-
-/**
- * The map of command ids used by the editor.
- */
-const cmdIds = {
-  lineNumbers: 'editor:line-numbers',
-  lineWrap: 'editor:line-wrap',
-  createConsole: 'editor:create-console',
-  runCode: 'editor:run-code'
-};
 
 
 /**
@@ -90,7 +88,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command: 'file-operations:open',
+    command: fileBrowserCmdIds.open,
     args: widget => ({ path: widget.context.path, factory: FACTORY }),
     name: widget => widget.context.path
   });
@@ -152,7 +150,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
         path: widget.context.path,
         preferredLanguage: widget.context.model.defaultKernelLanguage
       };
-      return commands.execute('console:create', options)
+      return commands.execute(consoleCmdIds.create, options)
         .then(id => { sessionIdProperty.set(widget, id); });
     },
     label: 'Create Console for Editor'
@@ -175,7 +173,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
       const start = editor.getOffsetAt(selection.start);
       const end = editor.getOffsetAt(selection.end);
       const code = editor.model.value.text.substring(start, end);
-      return commands.execute('console:inject', { id, code });
+      return commands.execute(consoleCmdIds.inject, { id, code });
     },
     label: 'Run Code'
   });

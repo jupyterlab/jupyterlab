@@ -5,11 +5,9 @@ export * from './widget';
 
 
 /**
- * The map of command ids used by the imagewidget plugin.
+ * The map of command ids used by the landing plugin.
  */
 export
 const cmdIds = {
-  zoomIn: 'imagewidget:zoom-in',
-  zoomOut: 'imagewidget:zoom-out',
-  resetZoom: 'imagewidget:reset-zoom'
+  show: 'landing-jupyterlab:show',
 };

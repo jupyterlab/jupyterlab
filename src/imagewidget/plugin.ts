@@ -18,12 +18,16 @@ import {
 } from '../docregistry';
 
 import {
+  cmdIds as filebrowserCmdIds
+} from '../filebrowser';
+
+import {
   IInstanceRestorer
 } from '../instancerestorer';
 
 import {
-  ImageWidget, ImageWidgetFactory
-} from './widget';
+  ImageWidget, ImageWidgetFactory, cmdIds
+} from './';
 
 
 /**
@@ -69,7 +73,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, palette: IComman
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command: 'file-operations:open',
+    command: filebrowserCmdIds.open,
     args: widget => ({ path: widget.context.path, factory: FACTORY }),
     name: widget => widget.context.path
   });
@@ -82,28 +86,24 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, palette: IComman
     tracker.add(widget);
   });
 
-  let zoomInImage = `${namespace}:zoom-in`;
-  let zoomOutImage = `${namespace}:zoom-out`;
-  let resetZoomImage = `${namespace}:reset-zoom`;
-
-  app.commands.addCommand(zoomInImage, {
+  app.commands.addCommand(cmdIds.zoomIn, {
     execute: zoomIn,
     label: 'Zoom In'
   });
 
-  app.commands.addCommand(zoomOutImage, {
+  app.commands.addCommand(cmdIds.zoomOut, {
     execute: zoomOut,
     label: 'Zoom Out'
   });
 
-  app.commands.addCommand(resetZoomImage, {
+  app.commands.addCommand(cmdIds.resetZoom, {
     execute: resetZoom,
     label: 'Reset Zoom'
   });
 
   let category = 'Image Widget';
 
-  [zoomInImage, zoomOutImage, resetZoomImage]
+  [cmdIds.zoomIn, cmdIds.zoomOut, cmdIds.resetZoom]
     .forEach(command => palette.addItem({ command, category }));
 
   function zoomIn(): void {

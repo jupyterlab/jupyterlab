@@ -6,16 +6,28 @@ import {
 } from '../application';
 
 import {
+  cmdIds as consoleCmdIds
+} from '../console';
+
+import {
   IInstanceRestorer
 } from '../instancerestorer';
+
+import {
+  cmdIds as filebrowserCmdIds
+} from '../filebrowser';
 
 import {
   IServiceManager
 } from '../services';
 
 import {
+  cmdIds as terminalCmdIds
+} from '../terminal';
+
+import {
   RunningSessions, CONSOLE_REGEX
-} from './index';
+} from './';
 
 
 /**
@@ -52,14 +64,14 @@ function activate(app: JupyterLab, services: IServiceManager, restorer: IInstanc
     let path = model.notebook.path;
     let name = path.split('/').pop();
     if (CONSOLE_REGEX.test(name)) {
-      app.commands.execute('console:open', { id: model.id });
+      app.commands.execute(consoleCmdIds.open, { id: model.id });
     } else {
-      app.commands.execute('file-operations:open', { path });
+      app.commands.execute(filebrowserCmdIds.open, { path });
     }
 
   });
   running.terminalOpenRequested.connect((sender, model) => {
-    app.commands.execute('terminal:open', { name: model.name });
+    app.commands.execute(terminalCmdIds.open, { name: model.name });
   });
   // Rank has been chosen somewhat arbitrarily to give priority to the running
   // sessions widget in the sidebar.

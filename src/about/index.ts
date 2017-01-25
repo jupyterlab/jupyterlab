@@ -219,6 +219,16 @@ const NOTEBOOK_DESC = [
    Future versions will add more features from the existing Jupyter notebook.`
 ];
 
+
+/**
+ * The map of command ids used by the about plugin.
+ */
+export
+const cmdIds = {
+  show: 'about-jupyterlab:show'
+};
+
+
 /**
  * AboutModel holds data which the AboutWidgetwill render.
  */

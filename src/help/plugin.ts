@@ -18,6 +18,10 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
+  cmdIds as aboutCmdIds
+} from '../about';
+
+import {
   JupyterLab, JupyterLabPlugin
 } from '../application';
 
@@ -34,12 +38,24 @@ import {
 } from '../commandpalette';
 
 import {
+  cmdIds as faqCmdIds
+} from '../faq';
+
+import {
   IInstanceRestorer
 } from '../instancerestorer';
 
 import {
   IMainMenu
 } from '../mainmenu';
+
+import {
+  cmdIds as statedbCmdIds
+} from '../statedb';
+
+import {
+  cmdIds
+} from './';
 
 
 /**
@@ -130,7 +146,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   let iframe: IFrame = null;
   const category = 'Help';
   const namespace = 'help-doc';
-  const command = `${namespace}:open`;
+  const command = cmdIds.open;
   const menu = createMenu();
   const tracker = new InstanceTracker<IFrame>({ namespace });
 
@@ -177,13 +193,13 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     let menu = new Menu({ commands, keymap });
     menu.title.label = category;
 
-    menu.addItem({ command: 'about-jupyterlab:show' });
-    menu.addItem({ command: 'faq-jupyterlab:show' });
-    menu.addItem({ command: 'classic-notebook:open' });
+    menu.addItem({ command: aboutCmdIds.show });
+    menu.addItem({ command: faqCmdIds.show });
+    menu.addItem({ command: cmdIds.openClassic });
 
     RESOURCES.forEach(args => { menu.addItem({ args, command }); });
 
-    menu.addItem({ command: 'statedb:clear' });
+    menu.addItem({ command: statedbCmdIds.clear });
 
     return menu;
   }
@@ -251,21 +267,21 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     }
   });
 
-  app.commands.addCommand(`${namespace}:activate`, {
+  app.commands.addCommand(cmdIds.show, {
     execute: () => { showHelp(); }
   });
-  app.commands.addCommand(`${namespace}:hide`, {
+  app.commands.addCommand(cmdIds.hide, {
     execute: () => { hideHelp(); }
   });
-  app.commands.addCommand(`${namespace}:toggle`, {
+  app.commands.addCommand(cmdIds.toggle, {
     execute: () => { toggleHelp(); }
   });
 
   RESOURCES.forEach(args => { palette.addItem({ args, command, category }); });
 
-  palette.addItem({ command: 'statedb:clear', category });
+  palette.addItem({ command: statedbCmdIds.clear, category });
 
-  let openClassicNotebookId = 'classic-notebook:open';
+  let openClassicNotebookId = cmdIds.openClassic;
   app.commands.addCommand(openClassicNotebookId, {
     label: 'Open Classic Notebook',
     execute: () => { window.open(utils.getBaseUrl() + 'tree'); }

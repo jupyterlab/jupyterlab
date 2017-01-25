@@ -19,7 +19,7 @@ import {
 } from '../instancerestorer';
 
 import {
-  IInspector, Inspector
+  IInspector, Inspector, cmdIds
 } from './';
 
 
@@ -98,7 +98,7 @@ class InspectorManager implements IInspector {
  */
 function activate(app: JupyterLab, palette: ICommandPalette, restorer: IInstanceRestorer): IInspector {
   const category = 'Inspector';
-  const command = 'inspector:open';
+  const command = cmdIds.open;
   const label = 'Open Inspector';
   const manager = new InspectorManager();
   const tracker = new InstanceTracker<Inspector>({ namespace: 'inspector' });

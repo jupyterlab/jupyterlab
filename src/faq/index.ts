@@ -5,11 +5,9 @@ export * from './widget';
 
 
 /**
- * The map of command ids used by the imagewidget plugin.
+ * The map of command ids used by the faq plugin.
  */
 export
 const cmdIds = {
-  zoomIn: 'imagewidget:zoom-in',
-  zoomOut: 'imagewidget:zoom-out',
-  resetZoom: 'imagewidget:reset-zoom'
+  show: 'faq-jupyterlab:show',
 };

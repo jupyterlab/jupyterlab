@@ -18,7 +18,7 @@ import {
 } from '../instancerestorer';
 
 import {
-  AboutModel, AboutWidget
+  AboutModel, AboutWidget, cmdIds
 } from './';
 
 /**
@@ -41,7 +41,7 @@ export default plugin;
 function activate(app: JupyterLab, palette: ICommandPalette, restorer: IInstanceRestorer): void {
   const namespace = 'about-jupyterlab';
   const model = new AboutModel({ version: app.info.version });
-  const command = `${namespace}:show`;
+  const command = cmdIds.show;
   const category = 'Help';
   const tracker = new InstanceTracker<AboutWidget>({ namespace });
 

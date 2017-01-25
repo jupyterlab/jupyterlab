@@ -34,6 +34,17 @@ import {
 } from '../common/vdom';
 
 
+
+/**
+ * The map of command ids used by the landing plugin.
+ */
+export
+const cmdIds = {
+  show: 'launcher-jupyterlab:show',
+};
+
+
+
 /* tslint:disable */
 /**
  * The launcher token.

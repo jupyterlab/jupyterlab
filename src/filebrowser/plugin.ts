@@ -46,7 +46,7 @@ import {
 } from '../statedb';
 
 import {
-  FileBrowserModel, FileBrowser, IPathTracker
+  FileBrowserModel, FileBrowser, IPathTracker, cmdIds
 } from './';
 
 
@@ -74,22 +74,6 @@ const plugin: JupyterLabPlugin<IPathTracker> = {
  * Export the plugin as default.
  */
 export default plugin;
-
-
-/**
- * The map of command ids used by the file browser.
- */
-const cmdIds = {
-  save: 'file-operations:save',
-  restoreCheckpoint: 'file-operations:restore-checkpoint',
-  saveAs: 'file-operations:save-as',
-  close: 'file-operations:close',
-  closeAllFiles: 'file-operations:close-all-files',
-  open: 'file-operations:open',
-  showBrowser: 'file-browser:activate',
-  hideBrowser: 'file-browser:hide',
-  toggleBrowser: 'file-browser:toggle'
-};
 
 /**
  * The filebrowser plugin state namespace.
