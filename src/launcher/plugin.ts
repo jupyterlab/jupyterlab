@@ -38,7 +38,7 @@ import {
 } from '../terminal';
 
 import {
-  ILauncher, ILauncherItem, LauncherModel, LauncherWidget, cmdIds
+  CommandIDs, ILauncher, ILauncherItem, LauncherModel, LauncherWidget
 } from './';
 
 
@@ -114,7 +114,7 @@ function activate(app: JupyterLab, services: IServiceManager, pathTracker: IPath
   // means we have to way of removing them after the fact.
   defaults.forEach(options => { model.add(options); });
 
-  app.commands.addCommand(cmdIds.show, {
+  app.commands.addCommand(CommandIDs.show, {
     label: 'Show Launcher',
     execute: () => {
       if (!widget.isAttached) {
@@ -123,7 +123,7 @@ function activate(app: JupyterLab, services: IServiceManager, pathTracker: IPath
       app.shell.activateLeft(widget.id);
     }
   });
-  palette.addItem({ command: cmdIds.show, category: 'Help' });
+  palette.addItem({ command: CommandIDs.show, category: 'Help' });
 
   app.shell.addToLeftArea(widget);
 
