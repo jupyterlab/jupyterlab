@@ -336,6 +336,19 @@ describe('docregistry/registry', () => {
         expect(toArray(factories)).to.eql([jFactory]);
       });
 
+      it('should handle just a multi-part extension', () => {
+        registry.addModelFactory(new TextModelFactory());
+        let factory = new WidgetFactory({
+          name: 'table',
+          fileExtensions: ['.table.json'],
+        });
+        registry.addWidgetFactory(factory);
+        let factories = registry.preferredWidgetFactories('.table.json');
+        expect(toArray(factories)).to.eql([factory]);
+        factories = registry.preferredWidgetFactories('.json');
+        expect(toArray(factories)).to.eql([]);
+      });
+
     });
 
     describe('#defaultWidgetFactory()', () => {

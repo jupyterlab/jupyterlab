@@ -336,7 +336,7 @@ class DocumentRegistry implements IDisposable {
     // Handle multi-part extension default factories.
     if (last !== ext) {
       if (last in this._defaultWidgetFactories) {
-        factories.add(this._defaultWidgetFactories[ext]);
+        factories.add(this._defaultWidgetFactories[last]);
       }
     }
 
