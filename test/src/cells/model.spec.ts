@@ -33,7 +33,7 @@ class TestModel extends CellModel {
 }
 
 
-describe('notebook/cells/model', () => {
+describe('cells/model', () => {
 
   describe('CellModel', () => {
 

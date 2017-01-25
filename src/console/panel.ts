@@ -86,8 +86,8 @@ class ConsolePanel extends Panel {
     // Instantiate the completer.
     this._completer = factory.createCompleter({ model: new CompleterModel() });
 
-    // Set the completer widget's anchor node to peg its position.
-    this._completer.anchor = this.node;
+    // Set the completer widget's anchor widget to peg its position.
+    this._completer.anchor = this.console;
     Widget.attach(this._completer, document.body);
 
     // Instantiate the completer handler.

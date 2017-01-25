@@ -13,6 +13,10 @@
 @import '../application/index.css';
 
 
+/* Commonly shared functions */
+@import '../common/hoverbox.css';
+
+
 /* Individual plugins */
 @import '../about/index.css';
 @import '../cells/index.css';
@@ -38,6 +42,8 @@
 @import '../running/index.css';
 @import '../terminal/index.css';
 @import '../toolbar/index.css';
+@import '../tooltip/index.css';
+
 
 /* Theme images */
 @import './images.css';

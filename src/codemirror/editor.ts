@@ -367,7 +367,10 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
-   * Set the primary position of the cursor. This will remove any secondary cursors.
+   * Set the primary position of the cursor.
+   *
+   * #### Notes
+   * This will remove any secondary cursors.
    */
   setCursorPosition(position: CodeEditor.IPosition): void {
     const cursor = this._toCodeMirrorPosition(position);
