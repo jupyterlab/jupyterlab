@@ -38,7 +38,7 @@ import {
 } from '../commandpalette';
 
 import {
-  cmdIds as faqCmdIds
+  CommandIDs as FAQCommandIDs
 } from '../faq';
 
 import {
@@ -198,7 +198,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     menu.title.label = category;
 
     menu.addItem({ command: AboutCommandIDs.open });
-    menu.addItem({ command: faqCmdIds.open });
+    menu.addItem({ command: FAQCommandIDs.open });
     menu.addItem({ command: cmdIds.launchClassic });
     menu.addItem({ type: 'separator' });
     RESOURCES.forEach(args => { menu.addItem({ args, command }); });

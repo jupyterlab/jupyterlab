@@ -5,9 +5,10 @@ export * from './widget';
 
 
 /**
- * The map of command ids used by the faq plugin.
+ * The command IDs used by the FAQ plugin.
  */
 export
-const cmdIds = {
-  open: 'faq-jupyterlab:open',
+namespace CommandIDs {
+  export
+  const open = 'faq-jupyterlab:open';
 };
