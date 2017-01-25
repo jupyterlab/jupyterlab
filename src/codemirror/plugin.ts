@@ -66,16 +66,30 @@ export default plugins;
 
 
 /**
- * The map of command ids used by the editor.
+ * The command IDs used by the editor plugin.
  */
-const cmdIds = {
-  lineNumbers: 'editor:line-numbers',
-  lineWrap: 'editor:line-wrap',
-  matchBrackets: 'editor:match-brackets',
-  vimMode: 'editor:vim-mode',
-  changeTheme: 'editor:change-theme',
-  createConsole: 'editor:create-console',
-  runCode: 'editor:run-code'
+export
+namespace CommandIDs {
+  export
+  const lineNumbers = 'editor:line-numbers';
+
+  export
+  const lineWrap = 'editor:line-wrap';
+
+  export
+  const matchBrackets = 'editor:match-brackets';
+
+  export
+  const vimMode = 'editor:vim-mode';
+
+  export
+  const changeTheme = 'editor:change-theme';
+
+  export
+  const createConsole = 'editor:create-console';
+
+  export
+  const runCode = 'editor:run-code';
 };
 
 
@@ -124,15 +138,15 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     settings.title.label = 'Settings';
     theme.title.label = 'Theme';
 
-    settings.addItem({ command: cmdIds.lineNumbers });
-    settings.addItem({ command: cmdIds.lineWrap });
-    settings.addItem({ command: cmdIds.matchBrackets });
-    settings.addItem({ command: cmdIds.vimMode });
+    settings.addItem({ command: CommandIDs.lineNumbers });
+    settings.addItem({ command: CommandIDs.lineWrap });
+    settings.addItem({ command: CommandIDs.matchBrackets });
+    settings.addItem({ command: CommandIDs.vimMode });
 
-    commands.addCommand(cmdIds.changeTheme, {
+    commands.addCommand(CommandIDs.changeTheme, {
       label: args => args['theme'] as string,
       execute: args => {
-        let name: string = args['theme'] as string || CodeMirrorEditor.DEFAULT_THEME;
+        let name = args['theme'] as string || CodeMirrorEditor.DEFAULT_THEME;
         tracker.forEach(widget => {
           if (widget.editor instanceof CodeMirrorEditor) {
             let cm = widget.editor.editor;
@@ -160,23 +174,23 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
 
   mainMenu.addMenu(createMenu(), { rank: 30 });
 
-  commands.addCommand(cmdIds.matchBrackets, {
+  commands.addCommand(CommandIDs.matchBrackets, {
     execute: () => { toggleMatchBrackets(); },
     label: 'Toggle Match Brackets',
   });
 
-  commands.addCommand(cmdIds.vimMode, {
+  commands.addCommand(CommandIDs.vimMode, {
     execute: () => { toggleVim(); },
     label: 'Toggle Vim Mode'
   });
 
   [
-    cmdIds.lineNumbers,
-    cmdIds.lineWrap,
-    cmdIds.matchBrackets,
-    cmdIds.vimMode,
-    cmdIds.createConsole,
-    cmdIds.runCode,
+    CommandIDs.lineNumbers,
+    CommandIDs.lineWrap,
+    CommandIDs.matchBrackets,
+    CommandIDs.vimMode,
+    CommandIDs.createConsole,
+    CommandIDs.runCode
   ].forEach(command => palette.addItem({ command, category: 'Editor' }));
 
 }
