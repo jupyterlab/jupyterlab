@@ -58,21 +58,21 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
   const keymap = app.keymap;
   const registry = app.commands;
   let tooltip: TooltipWidget = null;
-  let id = 0;
 
   // Add tooltip launch command.
   registry.addCommand(cmdIds.launch, {
     execute: args => {
-      let notebook = args['notebook'] as boolean;
+      // If a tooltip is open, remove it and return.
+      if (tooltip) {
+        return app.commands.execute(cmdIds.remove, void 0);
+      }
+
+      const notebook = args['notebook'] as boolean;
       let anchor: Widget | null = null;
       let editor: CodeEditor.IEditor | null = null;
       let kernel: Kernel.IKernel | null = null;
       let rendermime: IRenderMime | null = null;
       let parent: NotebookPanel | ConsolePanel | null = null;
-
-      if (tooltip) {
-        return app.commands.execute(cmdIds.remove, void 0);
-      }
 
       if (notebook) {
         parent = notebooks.currentWidget;
@@ -94,16 +94,16 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
 
       // If all components necessary for rendering exist, create a tooltip.
       let ready = !!editor && !!kernel && !!rendermime;
-      if (ready) {
-        tooltip = new TooltipWidget({
-          anchor,
-          model: new TooltipModel({ editor, kernel, rendermime })
-        });
-        tooltip.id = `tooltip-${++id}`;
-        Widget.attach(tooltip, document.body);
-        // Make sure the parent notebook/console still has the focus.
-        parent.activate();
+
+      if (!ready) {
+        return;
       }
+
+      const model = new TooltipModel({ editor, kernel, rendermime });
+      tooltip = new TooltipWidget({ anchor, model });
+      Widget.attach(tooltip, document.body);
+      // Make sure the parent notebook/console still has the focus.
+      parent.activate();
     }
   });
 
@@ -135,9 +135,9 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
   });
 
   // Add tooltip removal key bindings.
+  const command = cmdIds.remove;
+  const keys = ['Escape'];
   let selector: string;
-  let command = cmdIds.remove;
-  let keys = ['Escape'];
 
   selector = '.jp-Notebook.jp-Tooltip-anchor';
   keymap.addBinding({ command, keys, selector });
