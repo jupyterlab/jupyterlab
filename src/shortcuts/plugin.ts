@@ -289,6 +289,28 @@ const SHORTCUTS = [
     command: 'image-widget:reset-zoom',
     selector: '.jp-ImageWidget',
     keys: ['0']
+  },
+  {
+    command: 'tooltip:launch',
+    selector: '.jp-Notebook',
+    keys: ['Shift Tab'],
+    args: { notebook: true }
+  },
+  {
+    command: 'tooltip:launch',
+    selector: '.jp-ConsolePanel',
+    keys: ['Shift Tab'],
+    args: { notebook: false }
+  },
+  {
+    command: 'tooltip:remove',
+    selector: '.jp-Notebook.jp-Tooltip-anchor',
+    keys: ['Escape']
+  },
+  {
+    command: 'tooltip:remove',
+    selector: '.jp-CodeConsole.jp-Tooltip-anchor',
+    keys: ['Escape']
   }
 ];
 

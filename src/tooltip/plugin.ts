@@ -55,7 +55,6 @@ export default plugin;
  * Activate the tooltip.
  */
 function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebookTracker): void {
-  const keymap = app.keymap;
   const registry = app.commands;
   let tooltip: TooltipWidget = null;
 
@@ -100,8 +99,10 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
       }
 
       const model = new TooltipModel({ editor, kernel, rendermime });
+
       tooltip = new TooltipWidget({ anchor, model });
       Widget.attach(tooltip, document.body);
+
       // Make sure the parent notebook/console still has the focus.
       parent.activate();
     }
@@ -110,38 +111,13 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
   // Add tooltip remove command.
   registry.addCommand(cmdIds.remove, {
     execute: () => {
-      if (tooltip) {
-        tooltip.model.dispose();
-        tooltip.dispose();
-        tooltip = null;
+      if (!tooltip) {
+        return;
       }
+
+      tooltip.model.dispose();
+      tooltip.dispose();
+      tooltip = null;
     }
   });
-
-  // Add notebook tooltip key binding.
-  keymap.addBinding({
-    args: { notebook: true },
-    command: cmdIds.launch,
-    keys: ['Shift Tab'],
-    selector: '.jp-Notebook'
-  });
-
-  // Add console tooltip key binding.
-  keymap.addBinding({
-    args: { notebook: false },
-    command: cmdIds.launch,
-    keys: ['Shift Tab'],
-    selector: '.jp-ConsolePanel'
-  });
-
-  // Add tooltip removal key bindings.
-  const command = cmdIds.remove;
-  const keys = ['Escape'];
-  let selector: string;
-
-  selector = '.jp-Notebook.jp-Tooltip-anchor';
-  keymap.addBinding({ command, keys, selector });
-
-  selector = '.jp-CodeConsole.jp-Tooltip-anchor';
-  keymap.addBinding({ command, keys, selector });
 }
