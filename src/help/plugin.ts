@@ -18,7 +18,7 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  cmdIds as aboutCmdIds
+  CommandIDs as AboutCommandIDs
 } from '../about';
 
 import {
@@ -197,7 +197,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     let menu = new Menu({ commands, keymap });
     menu.title.label = category;
 
-    menu.addItem({ command: aboutCmdIds.open });
+    menu.addItem({ command: AboutCommandIDs.open });
     menu.addItem({ command: faqCmdIds.open });
     menu.addItem({ command: cmdIds.launchClassic });
     menu.addItem({ type: 'separator' });

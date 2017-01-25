@@ -221,12 +221,13 @@ const NOTEBOOK_DESC = [
 
 
 /**
- * The map of command ids used by the about plugin.
+ * The command IDs used by the about plugin.
  */
 export
-const cmdIds = {
-  open: 'about-jupyterlab:open'
-};
+namespace CommandIDs {
+  export
+  const open = 'about-jupyterlab:open';
+}
 
 
 /**
