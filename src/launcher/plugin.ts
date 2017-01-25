@@ -14,7 +14,7 @@ import {
 } from '../commandpalette';
 
 import {
-  cmdIds as consoleCmdIds
+  CommandIDs as ConsoleCommandIDs
 } from '../console';
 
 import {
@@ -89,7 +89,7 @@ function activate(app: JupyterLab, services: IServiceManager, pathTracker: IPath
     },
     {
       name: 'Code Console',
-      command: consoleCmdIds.create
+      command: ConsoleCommandIDs.create
     },
     {
       name: 'Text Editor',

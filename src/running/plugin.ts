@@ -6,7 +6,7 @@ import {
 } from '../application';
 
 import {
-  cmdIds as consoleCmdIds
+  CommandIDs as ConsoleCommandIDs
 } from '../console';
 
 import {
@@ -64,7 +64,7 @@ function activate(app: JupyterLab, services: IServiceManager, restorer: IInstanc
     let path = model.notebook.path;
     let name = path.split('/').pop();
     if (CONSOLE_REGEX.test(name)) {
-      app.commands.execute(consoleCmdIds.open, { id: model.id });
+      app.commands.execute(ConsoleCommandIDs.open, { id: model.id });
     } else {
       app.commands.execute(filebrowserCmdIds.open, { path });
     }

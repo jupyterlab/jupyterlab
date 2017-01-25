@@ -18,7 +18,7 @@ import {
 } from '../common/instancetracker';
 
 import {
-  cmdIds as consoleCmdIds
+  CommandIDs as ConsoleCommandIDs
 } from '../console';
 
 import {
@@ -150,7 +150,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
         path: widget.context.path,
         preferredLanguage: widget.context.model.defaultKernelLanguage
       };
-      return commands.execute(consoleCmdIds.create, options)
+      return commands.execute(ConsoleCommandIDs.create, options)
         .then(id => { sessionIdProperty.set(widget, id); });
     },
     label: 'Create Console for Editor'
@@ -173,7 +173,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
       const start = editor.getOffsetAt(selection.start);
       const end = editor.getOffsetAt(selection.end);
       const code = editor.model.value.text.substring(start, end);
-      return commands.execute(consoleCmdIds.inject, { id, code });
+      return commands.execute(ConsoleCommandIDs.inject, { id, code });
     },
     label: 'Run Code'
   });
