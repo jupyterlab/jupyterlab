@@ -426,6 +426,68 @@ describe('common/ObservableVector', () => {
 
     });
 
-  });
+    describe('#link()', ()=>{
+      it('should not be linked upon creation', ()=> {
+        let value = new ObservableVector();
+        expect(value.isLinked).to.be(false);
+      });
+      it('should take the parent value when linked', ()=> {
+        let childVec = new ObservableVector<number>([1, 2, 3]);
+        let parentVec = new ObservableVector<number>([4, 5, 6]);
+        childVec.link(parentVec);
+        expect(childVec.isLinked).to.be(true);
+        expect(parentVec.isLinked).to.be(false);
+        expect(toArray(childVec)).to.eql([4, 5, 6]);
+        expect(toArray(parentVec)).to.eql([4, 5, 6]);
+      });
+      it('should forward signals from the parent', ()=> {
+        let childVec = new ObservableVector<number>([1, 2, 3]);
+        let parentVec = new ObservableVector<number>([4, 5, 6]);
+        childVec.link(parentVec);
+        let called = false;
+        childVec.changed.connect( (s,c)=> {
+          expect(s).to.be(childVec);
+          expect(c.type).to.be('add');
+          expect(c.newIndex).to.be(1);
+          expect(c.oldIndex).to.be(-1);
+          expect(c.oldValues.length).to.be(0);
+          expect(c.newValues[0]).to.be(4);
+          called = true;
+        });
+        parentVec.insert(1,4);
+        expect(toArray(childVec)).to.eql([4, 4, 5, 6]);
+        expect(called).to.be(true);
+      });
+    });
 
+    describe('#unlink()', ()=>{
+      it('should keep its value when unlinked', ()=> {
+        let childVec = new ObservableVector<number>([1, 2, 3]);
+        let parentVec = new ObservableVector<number>([4, 5, 6]);
+        childVec.link(parentVec);
+        childVec.unlink();
+        expect(toArray(childVec)).to.eql([4, 5, 6]);
+      });
+      it('should no longer get its value from the parent', ()=> {
+        let childVec = new ObservableVector<number>([1, 2, 3]);
+        let parentVec = new ObservableVector<number>([4, 5, 6]);
+        childVec.link(parentVec);
+        childVec.unlink();
+        parentVec.insert(1,4);
+        expect(toArray(childVec)).to.eql([4, 5, 6]);
+      });
+      it('should no longer forward signals from the parent', ()=> {
+        let childVec = new ObservableVector<number>([1, 2, 3]);
+        let parentVec = new ObservableVector<number>([4, 5, 6]);
+        let called = false;
+        childVec.link(parentVec);
+        childVec.changed.connect( ()=>{
+          called = true;
+        });
+        childVec.unlink();
+        parentVec.insert(1,4);
+        expect(called).to.be(false);
+      });
+    });
+  });
 });
