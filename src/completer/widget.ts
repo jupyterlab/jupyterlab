@@ -122,29 +122,29 @@ class CompleterWidget extends Widget {
   }
 
   /**
-   * The semantic parent of the completer widget, its anchor element. An
-   * event listener will peg the position of the completer widget to the
-   * anchor element's scroll position. Other event listeners will guarantee
-   * the completer widget behaves like a child of the reference element even
-   * if it does not appear as a descendant in the DOM.
+   * The semantic parent of the completer widget, its anchor widget.
+   *
+   * #### Notes
+   * An event listener will peg the position of the completer widget to the
+   * anchor's scroll position.
    */
-  get anchor(): HTMLElement {
+  get anchor(): Widget {
     return this._anchor;
   }
-  set anchor(element: HTMLElement) {
-    if (this._anchor === element) {
+  set anchor(widget: Widget) {
+    if (this._anchor === widget) {
       return;
     }
     // Clean up scroll listener if anchor is being replaced.
     if (this._anchor) {
-      this._anchor.removeEventListener('scroll', this, USE_CAPTURE);
+      this._anchor.node.removeEventListener('scroll', this, USE_CAPTURE);
     }
 
-    this._anchor = element;
+    this._anchor = widget;
 
     // Add scroll listener to anchor element.
     if (this._anchor) {
-      this._anchor.addEventListener('scroll', this, USE_CAPTURE);
+      this._anchor.node.addEventListener('scroll', this, USE_CAPTURE);
     }
   }
 
@@ -214,7 +214,7 @@ class CompleterWidget extends Widget {
     document.removeEventListener('mousedown', this, USE_CAPTURE);
 
     if (this._anchor) {
-      this._anchor.removeEventListener('scroll', this, USE_CAPTURE);
+      this._anchor.node.removeEventListener('scroll', this, USE_CAPTURE);
     }
   }
 
@@ -275,7 +275,7 @@ class CompleterWidget extends Widget {
       this.show();
       this.visibilityChanged.emit(void 0);
     }
-    this._anchorPoint = anchor.scrollTop;
+    this._anchorPoint = anchor.node.scrollTop;
     this._setGeometry();
 
     // If this is the first time the current completer session has loaded,
@@ -313,7 +313,7 @@ class CompleterWidget extends Widget {
     }
     let target = event.target as HTMLElement;
     while (target !== document.documentElement) {
-      if (target === this._anchor) {
+      if (target === this._anchor.node) {
         switch (event.keyCode) {
           case 9:  // Tab key
             event.preventDefault();
@@ -445,7 +445,7 @@ class CompleterWidget extends Widget {
     // Calculate the geometry of the completer.
     HoverBox.setGeometry({
       charWidth, coords, lineHeight, node,
-      anchor: this._anchor,
+      anchor: this._anchor.node,
       anchorPoint: this._anchorPoint,
       cursor: this._model.cursor,
       maxHeight: MAX_HEIGHT,
@@ -466,11 +466,11 @@ class CompleterWidget extends Widget {
     this.reset();
   }
 
-  private _anchor: HTMLElement = null;
+  private _anchor: Widget | null = null;
   private _anchorPoint = 0;
   private _activeIndex = 0;
-  private _model: CompleterWidget.IModel = null;
-  private _renderer: CompleterWidget.IRenderer = null;
+  private _model: CompleterWidget.IModel | null = null;
+  private _renderer: CompleterWidget.IRenderer | null = null;
 }
 
 
@@ -487,13 +487,13 @@ namespace CompleterWidget {
   export
   interface IOptions {
     /**
-     * The semantic parent of the completer widget, its anchor element. An
-     * event listener will peg the position of the completer widget to the
-     * anchor element's scroll position. Other event listeners will guarantee
-     * the completer widget behaves like a child of the reference element even
-     * if it does not appear as a descendant in the DOM.
+     * The semantic parent of the completer widget, its anchor widget.
+     *
+     * #### Notes
+     * An event listener will peg the position of the completer widget to the
+     * anchor's scroll position.
      */
-    anchor?: HTMLElement;
+    anchor?: Widget;
 
     /**
      * The model for the completer widget.
