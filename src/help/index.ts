@@ -12,5 +12,5 @@ const cmdIds = {
   show: 'help-jupyterlab:show',
   hide: 'help-jupyterlab:hide',
   toggle: 'help-jupyterlab:toggle',
-  openClassic: 'classic-notebook:open'
+  launchClassic: 'classic-notebook:launchClassic'
 };

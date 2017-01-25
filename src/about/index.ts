@@ -225,7 +225,7 @@ const NOTEBOOK_DESC = [
  */
 export
 const cmdIds = {
-  show: 'about-jupyterlab:show'
+  open: 'about-jupyterlab:open'
 };
 
 

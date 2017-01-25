@@ -9,5 +9,5 @@ export * from './widget';
  */
 export
 const cmdIds = {
-  show: 'landing-jupyterlab:show',
+  open: 'landing-jupyterlab:open',
 };
