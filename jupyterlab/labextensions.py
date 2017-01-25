@@ -41,6 +41,7 @@ RED_DISABLED = '\033[31mdisabled\033[0m' if os.name != 'nt' else 'disabled'
 
 
 CONFIG_NAME = 'jupyterlab_config'
+APP_NAME = 'LabConfig'
 
 #------------------------------------------------------------------------------
 # Public API
@@ -290,7 +291,7 @@ def _set_labextension_state(name, state,
             name
         ))
     labextensions = (
-        cfg.setdefault("LabConfig", {})
+        cfg.setdefault(APP_NAME, {})
         .setdefault("labextensions", {})
     )
 
@@ -911,7 +912,7 @@ class ListLabExtensionsApp(BaseLabExtensionApp):
             cm = BaseJSONConfigManager(parent=self, config_dir=config_dir)
             data = cm.get(CONFIG_NAME)
             labextensions = (
-                data.setdefault("LabConfig", {})
+                data.setdefault(APP_NAME, {})
                 .setdefault("labextensions", {})
             )
             if labextensions:

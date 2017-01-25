@@ -30,7 +30,7 @@ from jupyterlab.labextensions import (install_labextension, check_labextension,
     get_labextension_config_python,
     get_labextension_manifest_data_by_name,
     get_labextension_manifest_data_by_folder,
-    _read_config_data
+    _read_config_data, APP_NAME
 )
 
 
@@ -230,7 +230,7 @@ class TestInstallLabExtension(TestCase):
             enable_labextension(self.name)
 
         data = _read_config_data(user=True)
-        config = data.get('LabApp', {}).get('labextensions', {}).get(self.name, {})
+        config = data.get(APP_NAME, {}).get('labextensions', {}).get(self.name, {})
         assert config['enabled'] == True
         assert 'python_module' not in config
 
@@ -239,7 +239,7 @@ class TestInstallLabExtension(TestCase):
         disable_labextension(self.name)
 
         data = _read_config_data(user=True)
-        config = data.get('LabApp', {}).get('labextensions', {}).get(self.name, {})
+        config = data.get(APP_NAME, {}).get('labextensions', {}).get(self.name, {})
         assert not config['enabled']
         assert 'python_module' not in config
 
@@ -296,7 +296,7 @@ class TestInstallLabExtension(TestCase):
         enable_labextension_python('mockextension')
         
         data = _read_config_data(user=True)
-        config = data.get('LabApp', {}).get('labextensions', {}).get('mockextension', False)
+        config = data.get(APP_NAME, {}).get('labextensions', {}).get('mockextension', False)
         assert config['enabled'] == True
         assert config['python_module'] == 'mockextension'
         
@@ -307,7 +307,7 @@ class TestInstallLabExtension(TestCase):
         disable_labextension_python('mockextension', user=True)
         
         data = _read_config_data(user=True)
-        config = data.get('LabApp', {}).get('labextensions', {}).get('mockextension', {})
+        config = data.get(APP_NAME, {}).get('labextensions', {}).get('mockextension', {})
         assert not config['enabled']
 
     def test_labextensionpy_validate(self):
