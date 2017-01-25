@@ -7,7 +7,7 @@ import os
 from tornado import web
 
 from notebook.notebookapp import NotebookApp
-from traitlets import Dict, Unicode
+from traitlets import Unicode
 from notebook.base.handlers import IPythonHandler, FileFindHandler
 from jinja2 import FileSystemLoader
 from notebook.utils import url_path_join as ujoin
@@ -18,7 +18,7 @@ from .labextensions import (
     find_labextension, validate_labextension_folder,
     get_labextension_manifest_data_by_name,
     get_labextension_manifest_data_by_folder,
-    get_labextension_config_python
+    get_labextension_config_python, LabConfig
 )
 
 #-----------------------------------------------------------------------------
@@ -130,9 +130,58 @@ default_handlers = [
 ]
 
 
+def load_jupyter_server_extension(nbapp):
+    """Load the JupyterLab server extension.
+    """
+    # Print messages.
+    nbapp.log.info('JupyterLab alpha preview extension loaded from %s' % HERE)
+    base_dir = os.path.realpath(os.path.join(HERE, '..'))
+    dev_mode = os.path.exists(os.path.join(base_dir, '.git'))
+    if dev_mode:
+        nbapp.log.info(DEV_NOTE_NPM)
+
+    # Get the appropriate lab config.
+    config_app = LabConfig()
+    config_app.config_dir = nbapp.config_dir
+    config_app.load_config_file()
+
+    web_app = nbapp.web_app
+
+    # Add the lab extensions to the web app.
+    out = dict()
+    for (name, ext_config) in config_app.labextensions.items():
+        if not ext_config['enabled']:
+            continue
+        folder = find_labextension(name)
+        if folder is None:
+            continue
+        warnings = validate_labextension_folder(name, folder)
+        if warnings:
+            continue
+        data = get_labextension_manifest_data_by_name(name)
+        if data is None:
+            continue
+        data['python_module'] = ext_config.get('python_module', None)
+        out[name] = data
+
+    web_app.labextensions = out
+
+    # Add the handlers to the web app
+    base_url = web_app.settings['base_url']
+    web_app.add_handlers(".*$",
+        [(ujoin(base_url, h[0]),) + h[1:] for h in default_handlers])
+    extension_prefix = ujoin(base_url, EXTENSION_PREFIX)
+    labextension_handler = (
+        r"%s/(.*)" % extension_prefix, FileFindHandler, {
+            'path': jupyter_path('labextensions'),
+            'no_cache_paths': ['/'],  # don't cache anything in labbextensions
+        }
+    )
+    web_app.add_handlers(".*$", [labextension_handler])
+
+
 class LabApp(NotebookApp):
     version = __version__
-    name = 'jupyterlab'
 
     description = """
         JupyterLab - An extensible computational environment for Jupyter.
@@ -149,96 +198,7 @@ class LabApp(NotebookApp):
     subcommands = dict()
 
     default_url = Unicode('/lab', config=True,
-        help="The default URL to redirect to from `/`"
-    )
-
-    labextensions = Dict({}, config=True,
-        help=('Dict of Python modules to load as lab extensions.'
-            'Each entry consists of a required `enabled` key used'
-            'to enable or disable the extension, and an optional'
-            '`python_module` key for the associated python module.'
-            'Extensions are loaded in alphabetical order')
-    )
-
-    def init_webapp(self):
-        """initialize tornado webapp and httpserver.
-        """
-        super(LabApp, self).init_webapp()
-        self.add_lab_handlers()
-        self.add_labextensions()
-
-    def add_labextensions(self):
-        """Get the enabledd and valid lab extensions.
-
-        Notes
-        -------
-        Adds a `labextensions` property to the web_app, which is a dict
-        containing manifest data for each enabled and active extension,
-        and optionally its associated python_module.
-        """
-        out = dict()
-        for (name, config) in self.labextensions.items():
-            if not config['enabled']:
-                continue
-            folder = find_labextension(name)
-            if folder is None:
-                continue
-            warnings = validate_labextension_folder(name, folder)
-            if warnings:
-                continue
-            data = get_labextension_manifest_data_by_name(name)
-            if data is None:
-                continue
-            data['python_module'] = config.get('python_module', None)
-            out[name] = data
-        self.web_app.labextensions = out
-
-    def add_lab_handlers(self):
-        """Add the lab-specific handlers to the tornado app."""
-        web_app = self.web_app
-        base_url = web_app.settings['base_url']
-        web_app.add_handlers(".*$",
-            [(ujoin(base_url, h[0]),) + h[1:] for h in default_handlers])
-        extension_prefix = ujoin(base_url, EXTENSION_PREFIX)
-        labextension_handler = (
-            r"%s/(.*)" % extension_prefix, FileFindHandler, {
-                'path': jupyter_path('labextensions'),
-                'no_cache_paths': ['/'],  # don't cache anything in labbextensions
-            }
-        )
-        web_app.add_handlers(".*$", [labextension_handler])
-        base_dir = os.path.realpath(os.path.join(HERE, '..'))
-        dev_mode = os.path.exists(os.path.join(base_dir, '.git'))
-        if dev_mode:
-            self.log.info(DEV_NOTE_NPM)
-
-
-def bootstrap_from_nbapp(nbapp):
-    """Bootstrap the lab app on top of a notebook app.
-    """
-    if isinstance(nbapp, LabApp):
-        return
-
-    labapp = LabApp()
-
-    # Get data from the nbapp.
-    labapp.config_dir = nbapp.config_dir
-    labapp.log = nbapp.log
-    labapp.web_app = nbapp.web_app
-
-    cli_config = nbapp.cli_config.get('NotebookApp', {})
-    cli_config.update(nbapp.cli_config.get('LabApp', {}))
-
-    # Handle config.
-    for (key, value) in cli_config.items():
-        setattr(labapp, key, value)
-    labapp.load_config_file()
-    # Enforce cli override.
-    for (key, value) in cli_config.items():
-        setattr(labapp, key, value)
-
-    labapp.add_lab_handlers()
-    labapp.add_labextensions()
+        help="The default URL to redirect to from `/`")
 
 
 #-----------------------------------------------------------------------------

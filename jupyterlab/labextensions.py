@@ -22,6 +22,7 @@ from ipython_genutils.path import ensure_dir_exists
 from ipython_genutils.py3compat import string_types, cast_unicode_py2
 from ._version import __version__
 
+from traitlets import Dict
 from traitlets.config.manager import BaseJSONConfigManager
 from traitlets.utils.importstring import import_item
 
@@ -289,7 +290,7 @@ def _set_labextension_state(name, state,
             name
         ))
     labextensions = (
-        cfg.setdefault("LabApp", {})
+        cfg.setdefault("LabConfig", {})
         .setdefault("labextensions", {})
     )
 
@@ -653,6 +654,19 @@ aliases = {
     "labextensions" : "InstallLabExtensionApp.labextensions_dir",
 }
 
+
+class LabConfig(JupyterApp):
+    name = 'jupyterlab'
+
+    labextensions = Dict({}, config=True,
+        help=('Dict of Python modules to load as lab extensions.'
+            'Each entry consists of a required `enabled` key used'
+            'to enable or disable the extension, and an optional'
+            '`python_module` key for the associated python module.'
+            'Extensions are loaded in alphabetical order')
+    )
+
+
 class InstallLabExtensionApp(BaseLabExtensionApp):
     """Entry point for installing JupyterLab extensions"""
     description = """Install JupyterLab extensions
@@ -897,7 +911,7 @@ class ListLabExtensionsApp(BaseLabExtensionApp):
             cm = BaseJSONConfigManager(parent=self, config_dir=config_dir)
             data = cm.get(CONFIG_NAME)
             labextensions = (
-                data.setdefault("LabApp", {})
+                data.setdefault("LabConfig", {})
                 .setdefault("labextensions", {})
             )
             if labextensions:
