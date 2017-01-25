@@ -48,7 +48,7 @@ export default plugin;
  */
 function activate(app: JupyterLab, palette: ICommandPalette, linker: ICommandLinker, restorer: IInstanceRestorer): void {
   const category = 'Help';
-  const command = cmdIds.show;
+  const command = cmdIds.open;
   const model = new FaqModel();
   const tracker = new InstanceTracker<FaqWidget>({ namespace: 'faq' });
 
@@ -72,7 +72,7 @@ function activate(app: JupyterLab, palette: ICommandPalette, linker: ICommandLin
   }
 
   app.commands.addCommand(command, {
-    label: 'Frequently Asked Questions',
+    label: 'Open FAQ',
     execute: () => {
       if (!widget || widget.isDisposed) {
         widget = newWidget();

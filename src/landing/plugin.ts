@@ -56,7 +56,7 @@ export default plugin;
  */
 function activate(app: JupyterLab, pathTracker: IPathTracker, palette: ICommandPalette, services: IServiceManager, restorer: IInstanceRestorer): void {
   const category = 'Help';
-  const command = cmdIds.show;
+  const command = cmdIds.open;
   const model = new LandingModel(services.terminals.isAvailable());
   const tracker = new InstanceTracker<LandingWidget>({ namespace: 'landing' });
 
@@ -73,7 +73,7 @@ function activate(app: JupyterLab, pathTracker: IPathTracker, palette: ICommandP
     let widget = new LandingWidget(app);
     widget.model = model;
     widget.id = 'landing-jupyterlab';
-    widget.title.label = 'Launcher';
+    widget.title.label = 'Landing';
     widget.title.closable = true;
     widget.addClass(LANDING_CLASS);
     tracker.add(widget);
@@ -81,7 +81,7 @@ function activate(app: JupyterLab, pathTracker: IPathTracker, palette: ICommandP
   }
 
   app.commands.addCommand(command, {
-    label: 'Show Landing',
+    label: 'Open Landing',
     execute: () => {
       if (!widget || widget.isDisposed) {
         widget = newWidget();

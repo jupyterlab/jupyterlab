@@ -117,6 +117,10 @@ const RESOURCES = [
   }
 ];
 
+RESOURCES.sort((a: any, b: any) => {
+  return a.text.localeCompare(b.text);
+});
+
 
 /**
  * The help handler extension.
@@ -193,12 +197,12 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     let menu = new Menu({ commands, keymap });
     menu.title.label = category;
 
-    menu.addItem({ command: aboutCmdIds.show });
-    menu.addItem({ command: faqCmdIds.show });
-    menu.addItem({ command: cmdIds.openClassic });
-
+    menu.addItem({ command: aboutCmdIds.open });
+    menu.addItem({ command: faqCmdIds.open });
+    menu.addItem({ command: cmdIds.launchClassic });
+    menu.addItem({ type: 'separator' });
     RESOURCES.forEach(args => { menu.addItem({ args, command }); });
-
+    menu.addItem({ type: 'separator' });
     menu.addItem({ command: statedbCmdIds.clear });
 
     return menu;
@@ -281,11 +285,10 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
 
   palette.addItem({ command: statedbCmdIds.clear, category });
 
-  let openClassicNotebookId = cmdIds.openClassic;
-  app.commands.addCommand(openClassicNotebookId, {
-    label: 'Open Classic Notebook',
+  app.commands.addCommand(cmdIds.launchClassic, {
+    label: 'Launch Classic Notebook',
     execute: () => { window.open(utils.getBaseUrl() + 'tree'); }
   });
-  palette.addItem({ command: openClassicNotebookId, category });
+  palette.addItem({ command: cmdIds.launchClassic, category });
   mainMenu.addMenu(menu, {});
 }
