@@ -14,10 +14,6 @@ import {
 } from '../application';
 
 import {
-  BaseCellWidget
-} from '../cells';
-
-import {
   CodeEditor
 } from '../codeeditor';
 
@@ -34,12 +30,8 @@ import {
 } from '../rendermime';
 
 import {
-  TooltipModel
-} from './model';
-
-import {
-  TooltipWidget
-} from './widget';
+  cmdIds, TooltipModel, TooltipWidget
+} from './';
 
 
 /**
@@ -63,15 +55,13 @@ export default plugin;
  * Activate the tooltip.
  */
 function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebookTracker): void {
-  const launch = 'tooltip:launch';
-  const remove = 'tooltip:remove';
   const keymap = app.keymap;
   const registry = app.commands;
   let tooltip: TooltipWidget = null;
   let id = 0;
 
   // Add tooltip launch command.
-  registry.addCommand(launch, {
+  registry.addCommand(cmdIds.launch, {
     execute: args => {
       let notebook = args['notebook'] as boolean;
       let anchor: Widget | null = null;
@@ -81,7 +71,7 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
       let parent: NotebookPanel | ConsolePanel | null = null;
 
       if (tooltip) {
-        return app.commands.execute(remove, void 0);
+        return app.commands.execute(cmdIds.remove, void 0);
       }
 
       if (notebook) {
@@ -118,7 +108,7 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
   });
 
   // Add tooltip remove command.
-  registry.addCommand(remove, {
+  registry.addCommand(cmdIds.remove, {
     execute: () => {
       if (tooltip) {
         tooltip.model.dispose();
@@ -131,7 +121,7 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
   // Add notebook tooltip key binding.
   keymap.addBinding({
     args: { notebook: true },
-    command: launch,
+    command: cmdIds.launch,
     keys: ['Shift Tab'],
     selector: '.jp-Notebook'
   });
@@ -139,15 +129,19 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
   // Add console tooltip key binding.
   keymap.addBinding({
     args: { notebook: false },
-    command: launch,
+    command: cmdIds.launch,
     keys: ['Shift Tab'],
     selector: '.jp-ConsolePanel'
   });
 
-  // Add tooltip removal key binding.
-  keymap.addBinding({
-    command: remove,
-    keys: ['Escape'],
-    selector: `.jp-Cell.jp-Tooltip-anchor, .jp-Tooltip`
-  });
+  // Add tooltip removal key bindings.
+  let selector: string;
+  let command = cmdIds.remove;
+  let keys = ['Escape'];
+
+  selector = '.jp-Notebook.jp-Tooltip-anchor';
+  keymap.addBinding({ command, keys, selector });
+
+  selector = '.jp-CodeConsole.jp-Tooltip-anchor';
+  keymap.addBinding({ command, keys, selector });
 }
