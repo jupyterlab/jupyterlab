@@ -31,7 +31,7 @@ import {
 } from '../mainmenu';
 
 import {
-  editorServices, CodeMirrorEditor, DEFAULT_CODEMIRROR_THEME
+  editorServices, CodeMirrorEditor
 } from '.';
 
 
@@ -132,7 +132,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     commands.addCommand(cmdIds.changeTheme, {
       label: args => args['theme'] as string,
       execute: args => {
-        let name: string = args['theme'] as string || DEFAULT_CODEMIRROR_THEME;
+        let name: string = args['theme'] as string || CodeMirrorEditor.DEFAULT_THEME;
         tracker.forEach(widget => {
           if (widget.editor instanceof CodeMirrorEditor) {
             let cm = widget.editor.editor;

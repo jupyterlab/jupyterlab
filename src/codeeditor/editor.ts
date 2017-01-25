@@ -420,7 +420,7 @@ namespace CodeEditor {
     /**
      * The uuid of this selection owner.
      */
-    readonly uuid: string;
+    uuid: string;
 
     /**
      * Returns the primary position of the cursor, never `null`.
@@ -499,6 +499,11 @@ namespace CodeEditor {
      * A signal emitted when either the top or bottom edge is requested.
      */
     readonly edgeRequested: ISignal<IEditor, EdgeLocation>;
+
+   /**
+    * The default selection style for the editor.
+    */
+    selectionStyle: CodeEditor.ISelectionStyle;
 
     /**
      * Whether line numbers should be displayed. Defaults to false.

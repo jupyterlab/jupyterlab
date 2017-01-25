@@ -25,6 +25,10 @@ import {
 } from 'phosphor/lib/collections/vector';
 
 import {
+  CodeEditor
+} from '../codeeditor';
+
+import {
   IChangedArgs
 } from '../common/interfaces';
 
@@ -36,10 +40,6 @@ import {
   loadModeByMIME
 } from './';
 
-import {
-  CodeEditor
-} from '../codeeditor';
-
 
 /**
  * The class name added to CodeMirrorWidget instances.
@@ -50,12 +50,6 @@ const EDITOR_CLASS = 'jp-CodeMirrorWidget';
  * The class name added to read only cell editor widgets.
  */
 const READ_ONLY_CLASS = 'jp-mod-readOnly';
-
-/**
- * The name of the default CodeMirror theme
- */
-export
-const DEFAULT_CODEMIRROR_THEME: string = 'jupyter';
 
 /**
  * The key code for the up arrow key.
@@ -79,34 +73,14 @@ const TAB = 9;
 export
 class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
-   * The uuid of this editor;
-   */
-  readonly uuid: string;
-
-  /**
-   * The selection style of this editor.
-   */
-  readonly selectionStyle?: CodeEditor.ISelectionStyle;
-
-  /**
-   * A signal emitted when a text completion is requested.
-   */
-  readonly completionRequested: ISignal<this, CodeEditor.IPosition>;
-
-  /**
-   * A signal emitted when either the top or bottom edge is requested.
-   */
-  readonly edgeRequested: ISignal<this, CodeEditor.EdgeLocation>;
-
-  /**
    * Construct a CodeMirror editor.
    */
   constructor(options: CodeEditor.IOptions, config: CodeMirror.EditorConfiguration={}) {
     let host = this._host = options.host;
     host.classList.add(EDITOR_CLASS);
 
-    this.uuid = options.uuid || utils.uuid();
-    this.selectionStyle = options.selectionStyle;
+    this._uuid = options.uuid || utils.uuid();
+    this._selectionStyle = options.selectionStyle || {};
 
     Private.updateConfig(options, config);
 
@@ -125,6 +99,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     model.selections.changed.connect(this._onSelectionsChanged, this);
 
     CodeMirror.on(editor, 'keydown', (editor, event) => {
+      this.onKeydown(event);
       let index = findIndex(this._keydownHandlers, handler => {
         if (handler(this, event) === true) {
           event.preventDefault();
@@ -142,27 +117,37 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
-   * Tests whether the editor is disposed.
+   * A signal emitted when a text completion is requested.
    */
-  get isDisposed(): boolean {
-    return this._editor === null;
+  readonly completionRequested: ISignal<this, CodeEditor.IPosition>;
+
+  /**
+   * A signal emitted when either the top or bottom edge is requested.
+   */
+  readonly edgeRequested: ISignal<this, CodeEditor.EdgeLocation>;
+
+  /**
+   * The uuid of this editor;
+   */
+  get uuid(): string {
+    return this._uuid;
+  }
+  set uuid(value: string) {
+    this._uuid = value;
   }
 
   /**
-   * Dispose of the resources held by the widget.
+   * The selection style of this editor.
    */
-  dispose(): void {
-    if (this._editor === null) {
-      return;
-    }
-    this._editor = null;
-    this._model = null;
-    this._keydownHandlers.clear();
-    clearSignalData(this);
+  get selectionStyle(): CodeEditor.ISelectionStyle {
+    return this._selectionStyle;
+  }
+  set selectionStyle(value: CodeEditor.ISelectionStyle) {
+    this._selectionStyle = value;
   }
 
   /**
-   * Get the editor wrapped by the widget.
+   * Get the codemirror editor wrapped by the editor.
    */
   get editor(): CodeMirror.Editor {
     return this._editor;
@@ -196,10 +181,10 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Set to false for horizontal scrolling. Defaults to true.
    */
   get wordWrap(): boolean {
-    return this._editor.getOption('wordWrap');
+    return this._editor.getOption('lineWrapping');
   }
   set wordWrap(value: boolean) {
-    this._editor.setOption('wordWrap', value);
+    this._editor.setOption('lineWrapping', value);
   }
 
   /**
@@ -236,6 +221,26 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   get charWidth(): number {
     return this._editor.defaultCharWidth();
+  }
+
+  /**
+   * Tests whether the editor is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._editor === null;
+  }
+
+  /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose(): void {
+    if (this._editor === null) {
+      return;
+    }
+    this._editor = null;
+    this._model = null;
+    this._keydownHandlers.clear();
+    clearSignalData(this);
   }
 
   /**
@@ -334,7 +339,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Reveal the given position in the editor.
    */
   revealPosition(position: CodeEditor.IPosition): void {
-    const cmPosition = this.toCodeMirrorPosition(position);
+    const cmPosition = this._toCodeMirrorPosition(position);
     this._editor.scrollIntoView(cmPosition);
   }
 
@@ -342,7 +347,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Reveal the given selection in the editor.
    */
   revealSelection(selection: CodeEditor.IRange): void {
-    const range = this.toCodeMirrorRange(selection);
+    const range = this._toCodeMirrorRange(selection);
     this._editor.scrollIntoView(range);
   }
 
@@ -350,7 +355,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Get the window coordinates given a cursor position.
    */
   getCoordinate(position: CodeEditor.IPosition): CodeEditor.ICoordinate {
-    return this.editor.charCoords(this.toCodeMirrorPosition(position), 'page');
+    return this.editor.charCoords(this._toCodeMirrorPosition(position), 'page');
   }
 
   /**
@@ -358,14 +363,14 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   getCursorPosition(): CodeEditor.IPosition {
     const cursor = this.doc.getCursor();
-    return this.toPosition(cursor);
+    return this._toPosition(cursor);
   }
 
   /**
    * Set the primary position of the cursor. This will remove any secondary cursors.
    */
   setCursorPosition(position: CodeEditor.IPosition): void {
-    const cursor = this.toCodeMirrorPosition(position);
+    const cursor = this._toCodeMirrorPosition(position);
     this.doc.setCursor(cursor);
   }
 
@@ -389,10 +394,10 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   getSelections(): CodeEditor.ITextSelection[] {
     const selections = this.doc.listSelections();
     if (selections.length > 0) {
-      return selections.map(selection => this.toSelection(selection));
+      return selections.map(selection => this._toSelection(selection));
     }
     const cursor = this.doc.getCursor();
-    const selection = this.toSelection({ anchor: cursor, head: cursor });
+    const selection = this._toSelection({ anchor: cursor, head: cursor });
     return [selection];
   }
 
@@ -402,19 +407,8 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Passing an empty array resets a cursor position to the start of a document.
    */
   setSelections(selections: CodeEditor.IRange[]): void {
-    const cmSelections = this.toCodeMirrorSelections(selections);
+    const cmSelections = this._toCodeMirrorSelections(selections);
     this.doc.setSelections(cmSelections, 0);
-  }
-
-  /**
-   * Converts selections to code mirror selections.
-   */
-  protected toCodeMirrorSelections(selections: CodeEditor.IRange[]): CodeMirror.Selection[] {
-    if (selections.length > 0) {
-      return selections.map(selection => this.toCodeMirrorSelection(selection));
-    }
-    const position = { line: 0, ch: 0 };
-    return [{ anchor: position, head: position }];
   }
 
   /**
@@ -481,9 +475,20 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
+   * Converts selections to code mirror selections.
+   */
+  private _toCodeMirrorSelections(selections: CodeEditor.IRange[]): CodeMirror.Selection[] {
+    if (selections.length > 0) {
+      return selections.map(selection => this._toCodeMirrorSelection(selection));
+    }
+    const position = { line: 0, ch: 0 };
+    return [{ anchor: position, head: position }];
+  }
+
+  /**
    * Handles a mime type change.
    */
-  protected _onMimeTypeChanged(): void {
+  private _onMimeTypeChanged(): void {
     const mime = this._model.mimeType;
     let editor = this._editor;
     loadModeByMIME(editor, mime);
@@ -502,18 +507,18 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Handles a selections change.
    */
-  protected _onSelectionsChanged(selections: CodeEditor.ISelections, args: CodeEditor.ISelections.IChangedArgs): void {
+  private _onSelectionsChanged(selections: CodeEditor.ISelections, args: CodeEditor.ISelections.IChangedArgs): void {
     const uuid = args.uuid;
     if (uuid !== this.uuid) {
-      this.cleanSelections(uuid);
-      this.markSelections(uuid, args.newSelections);
+      this._cleanSelections(uuid);
+      this._markSelections(uuid, args.newSelections);
     }
   }
 
   /**
    * Clean selections for the given uuid.
    */
-  protected cleanSelections(uuid: string) {
+  private _cleanSelections(uuid: string) {
     const markers = this.selectionMarkers[uuid];
     if (markers) {
       markers.forEach(marker => marker.clear());
@@ -524,11 +529,11 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Marks selections.
    */
-  protected markSelections(uuid: string, selections: CodeEditor.ITextSelection[]) {
+  private _markSelections(uuid: string, selections: CodeEditor.ITextSelection[]) {
     const markers: CodeMirror.TextMarker[] = [];
     for (const selection of selections) {
-      const { anchor, head } = this.toCodeMirrorSelection(selection);
-      const markerOptions = this.toTextMarkerOptions(selection);
+      const { anchor, head } = this._toCodeMirrorSelection(selection);
+      const markerOptions = this._toTextMarkerOptions(selection);
       this.doc.markText(anchor, head, markerOptions);
     }
     this.selectionMarkers[uuid] = markers;
@@ -537,7 +542,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Handles a cursor activity event.
    */
-  protected _onCursorActivity(): void {
+  private _onCursorActivity(): void {
     const selections = this.getSelections();
     this.model.selections.setSelections(this.uuid, selections);
   }
@@ -545,11 +550,11 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Converts a code mirror selection to an editor selection.
    */
-  protected toSelection(selection: CodeMirror.Selection): CodeEditor.ITextSelection {
+  private _toSelection(selection: CodeMirror.Selection): CodeEditor.ITextSelection {
     return {
       uuid: this.uuid,
-      start: this.toPosition(selection.anchor),
-      end: this.toPosition(selection.head),
+      start: this._toPosition(selection.anchor),
+      end: this._toPosition(selection.head),
       style: this.selectionStyle
     };
   }
@@ -557,7 +562,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Converts the selection style to a text marker options.
    */
-  protected toTextMarkerOptions(style: CodeEditor.ISelectionStyle | undefined): CodeMirror.TextMarkerOptions | undefined {
+  private _toTextMarkerOptions(style: CodeEditor.ISelectionStyle | undefined): CodeMirror.TextMarkerOptions | undefined {
     if (style) {
       return {
         className: style.className,
@@ -570,27 +575,27 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Converts an editor selection to a code mirror selection.
    */
-  protected toCodeMirrorSelection(selection: CodeEditor.IRange): CodeMirror.Selection {
+  private _toCodeMirrorSelection(selection: CodeEditor.IRange): CodeMirror.Selection {
     return {
-      anchor: this.toCodeMirrorPosition(selection.start),
-      head: this.toCodeMirrorPosition(selection.end)
+      anchor: this._toCodeMirrorPosition(selection.start),
+      head: this._toCodeMirrorPosition(selection.end)
     };
   }
 
   /**
    * Converts an editor selection to a code mirror selection.
    */
-  protected toCodeMirrorRange(range: CodeEditor.IRange): CodeMirror.Range {
+  private _toCodeMirrorRange(range: CodeEditor.IRange): CodeMirror.Range {
     return {
-      from: this.toCodeMirrorPosition(range.start),
-      to: this.toCodeMirrorPosition(range.end)
+      from: this._toCodeMirrorPosition(range.start),
+      to: this._toCodeMirrorPosition(range.end)
     };
   }
 
   /**
    * Convert a code mirror position to an editor position.
    */
-  protected toPosition(position: CodeMirror.Position) {
+  private _toPosition(position: CodeMirror.Position) {
     return {
       line: position.line,
       column: position.ch
@@ -600,7 +605,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Convert an editor position to a code mirror position.
    */
-  protected toCodeMirrorPosition(position: CodeEditor.IPosition) {
+  private _toCodeMirrorPosition(position: CodeEditor.IPosition) {
     return {
       line: position.line,
       ch: position.column
@@ -664,44 +669,28 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   protected selectionMarkers: { [key: string]: CodeMirror.TextMarker[] | undefined } = {};
   private _keydownHandlers = new Vector<CodeEditor.KeydownHandler>();
   private _changeGuard = false;
+  private _selectionStyle: CodeEditor.ISelectionStyle;
+  private _uuid = '';
   private _host: HTMLElement;
+}
+
+
+/**
+ * The namespace for `CodeMirrorEditor` statics.
+ */
+export
+namespace CodeMirrorEditor {
+  /**
+   * The name of the default CodeMirror theme
+   */
+  export
+  const DEFAULT_THEME: string = 'jupyter';
 }
 
 
 // Define the signals for the `CodeMirrorEditor` class.
 defineSignal(CodeMirrorEditor.prototype, 'completionRequested');
 defineSignal(CodeMirrorEditor.prototype, 'edgeRequested');
-
-
-/**
- * Add a CodeMirror command to delete until previous non blanking space
- * character or first multiple of 4 tabstop.
- */
-CodeMirror.commands['delSpaceToPrevTabStop'] = (cm: CodeMirror.Editor) => {
-  let doc = cm.getDoc();
-  let from = doc.getCursor('from');
-  let to = doc.getCursor('to');
-  let sel = !Private.posEq(from, to);
-  if (sel) {
-    let ranges = doc.listSelections();
-    for (let i = ranges.length - 1; i >= 0; i--) {
-      let head = ranges[i].head;
-      let anchor = ranges[i].anchor;
-      doc.replaceRange('', CodeMirror.Pos(head.line, head.ch), CodeMirror.Pos(anchor.line, anchor.ch));
-    }
-    return;
-  }
-  let cur = doc.getCursor();
-  let tabsize = cm.getOption('tabSize');
-  let chToPrevTabStop = cur.ch - (Math.ceil(cur.ch / tabsize) - 1) * tabsize;
-  from = {ch: cur.ch - chToPrevTabStop, line: cur.line};
-  let select = doc.getRange(from, cur);
-  if (select.match(/^\ +$/) !== null) {
-    doc.replaceRange('', from, cur);
-  } else {
-    CodeMirror.commands['delCharBefore'](cm);
-  }
-};
 
 
 /**
@@ -715,16 +704,52 @@ namespace Private {
   function updateConfig(options: CodeEditor.IOptions, config: CodeMirror.EditorConfiguration): void {
     if (options.readOnly !== undefined) {
       config.readOnly = options.readOnly;
+    } else {
+      config.readOnly = false;
     }
     if (options.lineNumbers !== undefined) {
       config.lineNumbers = options.lineNumbers;
+    } else {
+      config.lineNumbers = false;
     }
     if (options.wordWrap !== undefined) {
       config.lineWrapping = options.wordWrap;
+    } else {
+      config.lineWrapping = true;
     }
-    config.theme = (config.theme || DEFAULT_CODEMIRROR_THEME);
+    config.theme = (config.theme || CodeMirrorEditor.DEFAULT_THEME);
     config.indentUnit = config.indentUnit || 4;
   }
+
+  /**
+   * Delete spaces to the previous tab stob in a codemirror editor.
+   */
+  export
+  function delSpaceToPrevTabStop(cm: CodeMirror.Editor): void {
+    let doc = cm.getDoc();
+    let from = doc.getCursor('from');
+    let to = doc.getCursor('to');
+    let sel = !posEq(from, to);
+    if (sel) {
+      let ranges = doc.listSelections();
+      for (let i = ranges.length - 1; i >= 0; i--) {
+        let head = ranges[i].head;
+        let anchor = ranges[i].anchor;
+        doc.replaceRange('', CodeMirror.Pos(head.line, head.ch), CodeMirror.Pos(anchor.line, anchor.ch));
+      }
+      return;
+    }
+    let cur = doc.getCursor();
+    let tabsize = cm.getOption('tabSize');
+    let chToPrevTabStop = cur.ch - (Math.ceil(cur.ch / tabsize) - 1) * tabsize;
+    from = {ch: cur.ch - chToPrevTabStop, line: cur.line};
+    let select = doc.getRange(from, cur);
+    if (select.match(/^\ +$/) !== null) {
+      doc.replaceRange('', from, cur);
+    } else {
+      CodeMirror.commands['delCharBefore'](cm);
+    }
+  };
 
   /**
    * Test whether two CodeMirror positions are equal.
@@ -734,3 +759,11 @@ namespace Private {
     return a.line === b.line && a.ch === b.ch;
   };
 }
+
+
+/**
+ * Add a CodeMirror command to delete until previous non blanking space
+ * character or first multiple of 4 tabstop.
+ */
+CodeMirror.commands['delSpaceToPrevTabStop'] = Private.delSpaceToPrevTabStop;
+
