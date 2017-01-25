@@ -54,7 +54,7 @@ import {
 } from '../statedb';
 
 import {
-  cmdIds
+  CommandIDs
 } from './';
 
 
@@ -150,7 +150,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   let iframe: IFrame = null;
   const category = 'Help';
   const namespace = 'help-doc';
-  const command = cmdIds.open;
+  const command = CommandIDs.open;
   const menu = createMenu();
   const tracker = new InstanceTracker<IFrame>({ namespace });
 
@@ -199,7 +199,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
 
     menu.addItem({ command: AboutCommandIDs.open });
     menu.addItem({ command: FAQCommandIDs.open });
-    menu.addItem({ command: cmdIds.launchClassic });
+    menu.addItem({ command: CommandIDs.launchClassic });
     menu.addItem({ type: 'separator' });
     RESOURCES.forEach(args => { menu.addItem({ args, command }); });
     menu.addItem({ type: 'separator' });
@@ -271,13 +271,13 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     }
   });
 
-  app.commands.addCommand(cmdIds.show, {
+  app.commands.addCommand(CommandIDs.show, {
     execute: () => { showHelp(); }
   });
-  app.commands.addCommand(cmdIds.hide, {
+  app.commands.addCommand(CommandIDs.hide, {
     execute: () => { hideHelp(); }
   });
-  app.commands.addCommand(cmdIds.toggle, {
+  app.commands.addCommand(CommandIDs.toggle, {
     execute: () => { toggleHelp(); }
   });
 
@@ -285,10 +285,10 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
 
   palette.addItem({ command: statedbCmdIds.clear, category });
 
-  app.commands.addCommand(cmdIds.launchClassic, {
+  app.commands.addCommand(CommandIDs.launchClassic, {
     label: 'Launch Classic Notebook',
     execute: () => { window.open(utils.getBaseUrl() + 'tree'); }
   });
-  palette.addItem({ command: cmdIds.launchClassic, category });
+  palette.addItem({ command: CommandIDs.launchClassic, category });
   mainMenu.addMenu(menu, {});
 }

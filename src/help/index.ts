@@ -3,14 +3,25 @@
 
 
 /**
- * The map of command ids used by the help plugin.
+ * The command IDs used by the help plugin.
  */
 export
-const cmdIds = {
-  open: 'help-jupyterlab:open',
-  activate: 'help-jupyterlab:activate',
-  show: 'help-jupyterlab:show',
-  hide: 'help-jupyterlab:hide',
-  toggle: 'help-jupyterlab:toggle',
-  launchClassic: 'classic-notebook:launchClassic'
+namespace CommandIDs {
+  export
+  const open = 'help-jupyterlab:open';
+
+  export
+  const activate = 'help-jupyterlab:activate';
+
+  export
+  const show = 'help-jupyterlab:show';
+
+  export
+  const hide = 'help-jupyterlab:hide';
+
+  export
+  const toggle = 'help-jupyterlab:toggle';
+
+  export
+  const launchClassic = 'classic-notebook:launchClassic';
 };
