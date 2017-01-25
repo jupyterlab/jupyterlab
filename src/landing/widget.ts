@@ -19,6 +19,11 @@ import {
 
 
 /**
+ * The class name added to the landing scroll wrapper.
+ */
+const LANDING_WRAPPER_CLASS = 'jp-Landing-wrapper';
+
+/**
  * The class name added to the dialog.
  */
 const LANDING_DIALOG_CLASS = 'jp-Landing-dialog';
@@ -238,7 +243,7 @@ class LandingWidget extends VDomWidget<LandingModel> {
         )
       )
     );
-    return dialog;
+    return h.div({ className: LANDING_WRAPPER_CLASS }, dialog);
   }
 
   private _app: JupyterLab;

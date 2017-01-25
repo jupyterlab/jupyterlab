@@ -7,16 +7,22 @@
 .jp-Landing {
   outline: none;
   position: absolute;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   top: 0px;
   left: 0px;
   margin: 0;
   padding: 0;
+  overflow: auto;
+}
+
+
+
+.jp-Landing-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 20px;
   width: 100%;
-  height: 100%;
 }
 
 
