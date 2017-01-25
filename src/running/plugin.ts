@@ -22,7 +22,7 @@ import {
 } from '../services';
 
 import {
-  cmdIds as terminalCmdIds
+  CommandIDs as TerminalCommandIDs
 } from '../terminal';
 
 import {
@@ -72,7 +72,7 @@ function activate(app: JupyterLab, services: IServiceManager, restorer: IInstanc
   });
 
   running.terminalOpenRequested.connect((sender, model) => {
-    app.commands.execute(terminalCmdIds.open, { name: model.name });
+    app.commands.execute(TerminalCommandIDs.open, { name: model.name });
   });
 
   // Rank has been chosen somewhat arbitrarily to give priority to the running

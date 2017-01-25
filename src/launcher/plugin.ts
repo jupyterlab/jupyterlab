@@ -34,7 +34,7 @@ import {
 } from '../services';
 
 import {
-  cmdIds as terminalCmdIds
+  CommandIDs as TerminalCommandIDs
 } from '../terminal';
 
 import {
@@ -106,7 +106,7 @@ function activate(app: JupyterLab, services: IServiceManager, pathTracker: IPath
   if (services.terminals.isAvailable()) {
     defaults.push({
       name: 'Terminal',
-      command: terminalCmdIds.createNew
+      command: TerminalCommandIDs.createNew
     });
   }
 
