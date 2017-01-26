@@ -6,9 +6,10 @@ export * from './inspector';
 
 
 /**
- * The map of command ids used by the inspector plugin.
+ * The command IDs used by the inspector plugin.
  */
 export
-const cmdIds = {
-  open: 'inspector:open'
+namespace CommandIDs {
+  export
+  const open = 'inspector:open';
 };

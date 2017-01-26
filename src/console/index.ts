@@ -15,19 +15,36 @@ export * from './widget';
 
 
 /**
- * The map of command ids used by the console plugin.
+ * The command IDs used by the console plugin.
  */
 export
-const cmdIds = {
-  create: 'console:create',
-  clear: 'console:clear',
-  run: 'console:run',
-  runForced: 'console:run-forced',
-  linebreak: 'console:linebreak',
-  interrupt: 'console:interrupt-kernel',
-  open: 'console:open',
-  inject: 'console:inject',
-  switchKernel: 'console:switch-kernel'
+namespace CommandIDs {
+  export
+  const create = 'console:create';
+
+  export
+  const clear = 'console:clear';
+
+  export
+  const run = 'console:run';
+
+  export
+  const runForced = 'console:run-forced';
+
+  export
+  const linebreak = 'console:linebreak';
+
+  export
+  const interrupt = 'console:interrupt-kernel';
+
+  export
+  const open = 'console:open';
+
+  export
+  const inject = 'console:inject';
+
+  export
+  const switchKernel = 'console:switch-kernel';
 };
 
 

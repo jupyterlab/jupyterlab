@@ -5,11 +5,16 @@ export * from './widget';
 
 
 /**
- * The map of command ids used by the imagewidget plugin.
+ * The command IDs used by the image widget plugin.
  */
 export
-const cmdIds = {
-  zoomIn: 'imagewidget:zoom-in',
-  zoomOut: 'imagewidget:zoom-out',
-  resetZoom: 'imagewidget:reset-zoom'
+namespace CommandIDs {
+  export
+  const zoomIn = 'imagewidget:zoom-in';
+
+  export
+  const zoomOut = 'imagewidget:zoom-out';
+
+  export
+  const resetZoom = 'imagewidget:reset-zoom';
 };

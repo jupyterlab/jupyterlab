@@ -14,7 +14,7 @@ import {
 } from '../docregistry';
 
 import {
-  cmdIds as filebrowserCmdIds
+  CommandIDs as FileBrowserCommandIDs
 } from '../filebrowser';
 
 import {
@@ -50,9 +50,17 @@ const FACTORY = 'Rendered Markdown';
  * The markdown handler extension.
  */
 const plugin: JupyterLabPlugin<void> = {
+  activate,
   id: 'jupyter.extensions.rendered-markdown',
   requires: [IDocumentRegistry, IRenderMime, IInstanceRestorer],
-  activate: (app: JupyterLab, registry: IDocumentRegistry, rendermime: IRenderMime, restorer: IInstanceRestorer) => {
+  autoStart: true
+};
+
+
+/**
+ * Activate the markdown plugin.
+ */
+function activate(app: JupyterLab, registry: IDocumentRegistry, rendermime: IRenderMime, restorer: IInstanceRestorer) {
     const factory = new MarkdownWidgetFactory({
       name: FACTORY,
       fileExtensions: ['.md'],
@@ -64,7 +72,7 @@ const plugin: JupyterLabPlugin<void> = {
 
     // Handle state restoration.
     restorer.restore(tracker, {
-      command: filebrowserCmdIds.open,
+      command: FileBrowserCommandIDs.open,
       args: widget => ({ path: widget.context.path, factory: FACTORY }),
       name: widget => widget.context.path
     });
@@ -77,13 +85,10 @@ const plugin: JupyterLabPlugin<void> = {
     });
 
     registry.addWidgetFactory(factory);
-  },
-  autoStart: true
-};
+  }
 
 
 /**
  * Export the plugin as default.
  */
 export default plugin;
-

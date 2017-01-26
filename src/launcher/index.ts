@@ -36,11 +36,12 @@ import {
 
 
 /**
- * The map of command ids used by the landing plugin.
+ * The command IDs used by the launcher plugin.
  */
 export
-const cmdIds = {
-  show: 'launcher-jupyterlab:show',
+namespace CommandIDs {
+  export
+  const show = 'launcher-jupyterlab:show';
 };
 
 

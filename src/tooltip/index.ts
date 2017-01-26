@@ -6,10 +6,13 @@ export * from './widget';
 
 
 /**
- * The command ids used by the tooltip plugin.
+ * The command IDs used by the tooltip plugin.
  */
 export
-const cmdIds = {
-  launch: 'tooltip:launch',
-  remove: 'tooltip:remove'
+namespace CommandIDs {
+  export
+  const launch = 'tooltip:launch';
+
+  export
+  const remove = 'tooltip:remove';
 };

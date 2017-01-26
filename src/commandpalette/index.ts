@@ -17,13 +17,18 @@ import {
 
 
 /**
- * The map of command ids used by the commandpalette plugin.
+ * The command IDs used by the command palette plugin.
  */
 export
-const cmdIds = {
-  activate: 'command-palette:activate',
-  hide: 'command-palette:hide',
-  toggle: 'command-palette:toggle'
+namespace CommandIDs {
+  export
+  const activate = 'command-palette:activate';
+
+  export
+  const hide = 'command-palette:hide';
+
+  export
+  const toggle = 'command-palette:toggle';
 };
 
 

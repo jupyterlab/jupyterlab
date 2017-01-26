@@ -34,7 +34,7 @@ import {
 } from '../services';
 
 import {
-  TerminalWidget, cmdIds
+  CommandIDs, TerminalWidget
 } from './';
 
 
@@ -91,13 +91,13 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command: cmdIds.createNew,
+    command: CommandIDs.createNew,
     args: widget => ({ name: widget.session.name }),
     name: widget => widget.session && widget.session.name
   });
 
   // Add terminal commands.
-  commands.addCommand(cmdIds.createNew, {
+  commands.addCommand(CommandIDs.createNew, {
     label: 'New Terminal',
     caption: 'Start a new terminal session',
     execute: args => {
@@ -122,7 +122,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
     }
   });
 
-  commands.addCommand(cmdIds.increaseFont, {
+  commands.addCommand(CommandIDs.increaseFont, {
     label: 'Increase Terminal Font Size',
     execute: () => {
       if (options.fontSize < 72) {
@@ -132,7 +132,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
     }
   });
 
-  commands.addCommand(cmdIds.decreaseFont, {
+  commands.addCommand(CommandIDs.decreaseFont, {
     label: 'Decrease Terminal Font Size',
     execute: () => {
       if (options.fontSize > 9) {
@@ -142,7 +142,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
     }
   });
 
-  commands.addCommand(cmdIds.toggleTheme, {
+  commands.addCommand(CommandIDs.toggleTheme, {
     label: 'Toggle Terminal Theme',
     caption: 'Switch Terminal Background and Font Colors',
     execute: () => {
@@ -160,7 +160,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
     }
   });
 
-  commands.addCommand(cmdIds.open, {
+  commands.addCommand(CommandIDs.open, {
     execute: args => {
       let name = args['name'] as string;
       // Check for a running terminal with the given name.
@@ -169,7 +169,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
         app.shell.activateMain(widget.id);
       } else {
         // Otherwise, create a new terminal with a given name.
-        return commands.execute(cmdIds.createNew, { name });
+        return commands.execute(CommandIDs.createNew, { name });
       }
     }
   });
@@ -177,8 +177,11 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
   // Add command palette and menu items.
   let menu = new Menu({ commands, keymap });
   menu.title.label = category;
-  [cmdIds.createNew, cmdIds.increaseFont, cmdIds.decreaseFont,
-   cmdIds.toggleTheme
+  [
+    CommandIDs.createNew,
+    CommandIDs.increaseFont,
+    CommandIDs.decreaseFont,
+    CommandIDs.toggleTheme
   ].forEach(command => {
     palette.addItem({ command, category });
     menu.addItem({ command });

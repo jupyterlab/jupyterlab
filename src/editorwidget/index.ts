@@ -5,12 +5,19 @@ export * from './widget';
 
 
 /**
- * The map of command ids used by the editor plugin.
+ * The command IDs used by the editor plugin.
  */
 export
-const cmdIds = {
-  lineNumbers: 'editor:line-numbers',
-  lineWrap: 'editor:line-wrap',
-  createConsole: 'editor:create-console',
-  runCode: 'editor:run-code'
+namespace CommandIDs {
+  export
+  const lineNumbers = 'editor:line-numbers';
+
+  export
+  const lineWrap = 'editor:line-wrap';
+
+  export
+  const createConsole = 'editor:create-console';
+
+  export
+  const runCode = 'editor:run-code';
 };

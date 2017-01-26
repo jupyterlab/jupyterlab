@@ -18,7 +18,7 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  cmdIds as aboutCmdIds
+  CommandIDs as AboutCommandIDs
 } from '../about';
 
 import {
@@ -38,7 +38,7 @@ import {
 } from '../commandpalette';
 
 import {
-  cmdIds as faqCmdIds
+  CommandIDs as FAQCommandIDs
 } from '../faq';
 
 import {
@@ -50,11 +50,11 @@ import {
 } from '../mainmenu';
 
 import {
-  cmdIds as statedbCmdIds
+  CommandIDs as StateDBCommandIDs
 } from '../statedb';
 
 import {
-  cmdIds
+  CommandIDs
 } from './';
 
 
@@ -150,7 +150,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   let iframe: IFrame = null;
   const category = 'Help';
   const namespace = 'help-doc';
-  const command = cmdIds.open;
+  const command = CommandIDs.open;
   const menu = createMenu();
   const tracker = new InstanceTracker<IFrame>({ namespace });
 
@@ -197,13 +197,13 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     let menu = new Menu({ commands, keymap });
     menu.title.label = category;
 
-    menu.addItem({ command: aboutCmdIds.open });
-    menu.addItem({ command: faqCmdIds.open });
-    menu.addItem({ command: cmdIds.launchClassic });
+    menu.addItem({ command: AboutCommandIDs.open });
+    menu.addItem({ command: FAQCommandIDs.open });
+    menu.addItem({ command: CommandIDs.launchClassic });
     menu.addItem({ type: 'separator' });
     RESOURCES.forEach(args => { menu.addItem({ args, command }); });
     menu.addItem({ type: 'separator' });
-    menu.addItem({ command: statedbCmdIds.clear });
+    menu.addItem({ command: StateDBCommandIDs.clear });
 
     return menu;
   }
@@ -271,24 +271,24 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     }
   });
 
-  app.commands.addCommand(cmdIds.show, {
+  app.commands.addCommand(CommandIDs.show, {
     execute: () => { showHelp(); }
   });
-  app.commands.addCommand(cmdIds.hide, {
+  app.commands.addCommand(CommandIDs.hide, {
     execute: () => { hideHelp(); }
   });
-  app.commands.addCommand(cmdIds.toggle, {
+  app.commands.addCommand(CommandIDs.toggle, {
     execute: () => { toggleHelp(); }
   });
 
   RESOURCES.forEach(args => { palette.addItem({ args, command, category }); });
 
-  palette.addItem({ command: statedbCmdIds.clear, category });
+  palette.addItem({ command: StateDBCommandIDs.clear, category });
 
-  app.commands.addCommand(cmdIds.launchClassic, {
+  app.commands.addCommand(CommandIDs.launchClassic, {
     label: 'Launch Classic Notebook',
     execute: () => { window.open(utils.getBaseUrl() + 'tree'); }
   });
-  palette.addItem({ command: cmdIds.launchClassic, category });
+  palette.addItem({ command: CommandIDs.launchClassic, category });
   mainMenu.addMenu(menu, {});
 }

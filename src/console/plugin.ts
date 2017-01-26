@@ -62,7 +62,7 @@ import {
 } from '../services';
 
 import {
-  IConsoleTracker, ICreateConsoleArgs, ConsolePanel, cmdIds
+  IConsoleTracker, ICreateConsoleArgs, ConsolePanel, CommandIDs
 } from './index';
 
 
@@ -144,7 +144,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command: cmdIds.create,
+    command: CommandIDs.create,
     args: panel => ({ id: panel.console.session.id }),
     name: panel => panel.console.session && panel.console.session.id,
     when: manager.ready
@@ -160,7 +160,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   // Set the main menu title.
   menu.title.label = category;
 
-  command = cmdIds.create;
+  command = CommandIDs.create;
   commands.addCommand(command, {
     label: 'Start New Console',
     execute: (args?: ICreateConsoleArgs) => {
@@ -208,7 +208,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   palette.addItem({ command, category });
   menu.addItem({ command });
 
-  command = cmdIds.clear;
+  command = CommandIDs.clear;
   commands.addCommand(command, {
     label: 'Clear Cells',
     execute: () => {
@@ -221,7 +221,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   palette.addItem({ command, category });
   menu.addItem({ command });
 
-  command = cmdIds.run;
+  command = CommandIDs.run;
   commands.addCommand(command, {
     label: 'Run Cell',
     execute: () => {
@@ -235,7 +235,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   menu.addItem({ command });
 
 
-  command = cmdIds.runForced;
+  command = CommandIDs.runForced;
   commands.addCommand(command, {
     label: 'Run Cell (forced)',
     execute: () => {
@@ -248,7 +248,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   palette.addItem({ command, category });
   menu.addItem({ command });
 
-  command = cmdIds.linebreak;
+  command = CommandIDs.linebreak;
   commands.addCommand(command, {
     label: 'Insert Line Break',
     execute: () => {
@@ -261,7 +261,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   palette.addItem({ command, category });
   menu.addItem({ command });
 
-  command = cmdIds.interrupt;
+  command = CommandIDs.interrupt;
   commands.addCommand(command, {
     label: 'Interrupt Kernel',
     execute: () => {
@@ -277,7 +277,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   palette.addItem({ command, category });
   menu.addItem({ command });
 
-  command = cmdIds.inject;
+  command = CommandIDs.inject;
   commands.addCommand(command, {
     execute: (args: JSONObject) => {
       let id = args['id'];
@@ -290,7 +290,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     }
   });
 
-  command = cmdIds.open;
+  command = CommandIDs.open;
   commands.addCommand(command, {
     execute: (args: JSONObject) => {
       let id = args['id'];
@@ -302,7 +302,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       if (widget) {
         app.shell.activateMain(widget.id);
       } else {
-        app.commands.execute(cmdIds.create, { id });
+        app.commands.execute(CommandIDs.create, { id });
       }
     }
   });
@@ -378,7 +378,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     app.shell.activateMain(panel.id);
   }
 
-  command = cmdIds.switchKernel;
+  command = CommandIDs.switchKernel;
   commands.addCommand(command, {
     label: 'Switch Kernel',
     execute: () => {

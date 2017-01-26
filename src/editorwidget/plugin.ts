@@ -18,7 +18,7 @@ import {
 } from '../common/instancetracker';
 
 import {
-  cmdIds as consoleCmdIds
+  CommandIDs as ConsoleCommandIDs
 } from '../console';
 
 import {
@@ -26,7 +26,7 @@ import {
 } from '../docregistry';
 
 import {
-  cmdIds as fileBrowserCmdIds
+  CommandIDs as FileBrowserCommandIDs
 } from '../filebrowser';
 
 import {
@@ -34,7 +34,7 @@ import {
 } from '../instancerestorer';
 
 import {
-  IEditorTracker, EditorWidget, EditorWidgetFactory, cmdIds
+  IEditorTracker, EditorWidget, EditorWidgetFactory, CommandIDs
 } from './';
 
 
@@ -88,7 +88,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command: fileBrowserCmdIds.open,
+    command: FileBrowserCommandIDs.open,
     args: widget => ({ path: widget.context.path, factory: FACTORY }),
     name: widget => widget.context.path
   });
@@ -130,17 +130,17 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
 
   let commands = app.commands;
 
-  commands.addCommand(cmdIds.lineNumbers, {
+  commands.addCommand(CommandIDs.lineNumbers, {
     execute: () => { toggleLineNums(); },
     label: 'Toggle Line Numbers'
   });
 
-  commands.addCommand(cmdIds.lineWrap, {
+  commands.addCommand(CommandIDs.lineWrap, {
     execute: () => { toggleLineWrap(); },
     label: 'Toggle Line Wrap'
   });
 
-  commands.addCommand(cmdIds.createConsole, {
+  commands.addCommand(CommandIDs.createConsole, {
     execute: () => {
       let widget = tracker.currentWidget;
       if (!widget) {
@@ -150,13 +150,13 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
         path: widget.context.path,
         preferredLanguage: widget.context.model.defaultKernelLanguage
       };
-      return commands.execute(consoleCmdIds.create, options)
+      return commands.execute(ConsoleCommandIDs.create, options)
         .then(id => { sessionIdProperty.set(widget, id); });
     },
     label: 'Create Console for Editor'
   });
 
-  commands.addCommand(cmdIds.runCode, {
+  commands.addCommand(CommandIDs.runCode, {
     execute: () => {
       let widget = tracker.currentWidget;
       if (!widget) {
@@ -173,7 +173,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
       const start = editor.getOffsetAt(selection.start);
       const end = editor.getOffsetAt(selection.end);
       const code = editor.model.value.text.substring(start, end);
-      return commands.execute(consoleCmdIds.inject, { id, code });
+      return commands.execute(ConsoleCommandIDs.inject, { id, code });
     },
     label: 'Run Code'
   });

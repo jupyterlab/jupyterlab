@@ -10,19 +10,40 @@ export * from './tracker';
 
 
 /**
- * The map of command ids used by the filebrowser plugin.
+ * The command IDs used by the file browser plugin.
  */
 export
-const cmdIds = {
-  save: 'file-operations:save',
-  restoreCheckpoint: 'file-operations:restore-checkpoint',
-  saveAs: 'file-operations:save-as',
-  close: 'file-operations:close',
-  closeAllFiles: 'file-operations:close-all-files',
-  open: 'file-operations:open',
-  newTextFile: 'file-operations:new-text-file',
-  newNotebook: 'file-operations:new-notebook-file',
-  showBrowser: 'file-browser:activate',
-  hideBrowser: 'file-browser:hide',
-  toggleBrowser: 'file-browser:toggle'
+namespace CommandIDs {
+  export
+  const save = 'file-operations:save';
+
+  export
+  const restoreCheckpoint = 'file-operations:restore-checkpoint';
+
+  export
+  const saveAs = 'file-operations:save-as';
+
+  export
+  const close = 'file-operations:close';
+
+  export
+  const closeAllFiles = 'file-operations:close-all-files';
+
+  export
+  const open = 'file-operations:open';
+
+  export
+  const newTextFile = 'file-operations:new-text-file';
+
+  export
+  const newNotebook = 'file-operations:new-notebook-file';
+
+  export
+  const showBrowser = 'file-browser:activate';
+
+  export
+  const hideBrowser = 'file-browser:hide';
+
+  export
+  const toggleBrowser = 'file-browser:toggle';
 };

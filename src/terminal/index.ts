@@ -5,13 +5,22 @@ export * from './widget';
 
 
 /**
- * The map of command ids used by the terminal plugin.
+ * The command IDs used by the terminal plugin.
  */
 export
-const cmdIds = {
-  createNew: 'terminal:create-new',
-  open: 'terminal:open',
-  increaseFont: 'terminal:increase-font',
-  decreaseFont: 'terminal:decrease-font',
-  toggleTheme: 'terminal:toggle-theme'
+namespace CommandIDs {
+  export
+  const createNew = 'terminal:create-new';
+
+  export
+  const open = 'terminal:open';
+
+  export
+  const increaseFont = 'terminal:increase-font';
+
+  export
+  const decreaseFont = 'terminal:decrease-font';
+
+  export
+  const toggleTheme = 'terminal:toggle-theme';
 };

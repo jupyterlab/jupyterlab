@@ -6,7 +6,7 @@ import {
 } from '../application';
 
 import {
-  cmdIds as consoleCmdIds
+  CommandIDs as ConsoleCommandIDs
 } from '../console';
 
 import {
@@ -14,7 +14,7 @@ import {
 } from '../instancerestorer';
 
 import {
-  cmdIds as filebrowserCmdIds
+  CommandIDs as FileBrowserCommandIDs
 } from '../filebrowser';
 
 import {
@@ -22,7 +22,7 @@ import {
 } from '../services';
 
 import {
-  cmdIds as terminalCmdIds
+  CommandIDs as TerminalCommandIDs
 } from '../terminal';
 
 import {
@@ -64,15 +64,17 @@ function activate(app: JupyterLab, services: IServiceManager, restorer: IInstanc
     let path = model.notebook.path;
     let name = path.split('/').pop();
     if (CONSOLE_REGEX.test(name)) {
-      app.commands.execute(consoleCmdIds.open, { id: model.id });
+      app.commands.execute(ConsoleCommandIDs.open, { id: model.id });
     } else {
-      app.commands.execute(filebrowserCmdIds.open, { path });
+      app.commands.execute(FileBrowserCommandIDs.open, { path });
     }
 
   });
+
   running.terminalOpenRequested.connect((sender, model) => {
-    app.commands.execute(terminalCmdIds.open, { name: model.name });
+    app.commands.execute(TerminalCommandIDs.open, { name: model.name });
   });
+
   // Rank has been chosen somewhat arbitrarily to give priority to the running
   // sessions widget in the sidebar.
   app.shell.addToLeftArea(running, { rank: 50 });

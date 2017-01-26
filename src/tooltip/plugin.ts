@@ -30,7 +30,7 @@ import {
 } from '../rendermime';
 
 import {
-  cmdIds, TooltipModel, TooltipWidget
+  CommandIDs, TooltipModel, TooltipWidget
 } from './';
 
 
@@ -59,11 +59,11 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
   let tooltip: TooltipWidget = null;
 
   // Add tooltip launch command.
-  registry.addCommand(cmdIds.launch, {
+  registry.addCommand(CommandIDs.launch, {
     execute: args => {
       // If a tooltip is open, remove it and return.
       if (tooltip) {
-        return app.commands.execute(cmdIds.remove, void 0);
+        return app.commands.execute(CommandIDs.remove, void 0);
       }
 
       const notebook = args['notebook'] as boolean;
@@ -109,7 +109,7 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
   });
 
   // Add tooltip remove command.
-  registry.addCommand(cmdIds.remove, {
+  registry.addCommand(CommandIDs.remove, {
     execute: () => {
       if (!tooltip) {
         return;

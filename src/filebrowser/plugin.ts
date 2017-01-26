@@ -46,7 +46,7 @@ import {
 } from '../statedb';
 
 import {
-  FileBrowserModel, FileBrowser, IPathTracker, cmdIds
+  CommandIDs, FileBrowserModel, FileBrowser, IPathTracker
 } from './';
 
 
@@ -166,11 +166,11 @@ function activate(app: JupyterLab, manager: IServiceManager, documentManager: ID
   addCommands(app, fbWidget, documentManager);
 
   [
-    cmdIds.save,
-    cmdIds.restoreCheckpoint,
-    cmdIds.saveAs,
-    cmdIds.close,
-    cmdIds.closeAllFiles,
+    CommandIDs.save,
+    CommandIDs.restoreCheckpoint,
+    CommandIDs.saveAs,
+    CommandIDs.close,
+    CommandIDs.closeAllFiles
   ].forEach(command => { palette.addItem({ command, category }); });
 
   let menu = createMenu(app, Object.keys(creatorCmds));
@@ -183,7 +183,7 @@ function activate(app: JupyterLab, manager: IServiceManager, documentManager: ID
   // If the layout is a fresh session without saved data, open file browser.
   app.restored.then(layout => {
     if (layout.fresh) {
-      app.commands.execute(cmdIds.showBrowser, void 0);
+      app.commands.execute(CommandIDs.showBrowser, void 0);
     }
   });
 
@@ -217,7 +217,7 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocume
     return !!(currentWidget && docManager.contextForWidget(currentWidget));
   };
 
-  commands.addCommand(cmdIds.save, {
+  commands.addCommand(CommandIDs.save, {
     label: 'Save',
     caption: 'Save and create checkpoint',
     isEnabled,
@@ -229,7 +229,7 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocume
     }
   });
 
-  commands.addCommand(cmdIds.restoreCheckpoint, {
+  commands.addCommand(CommandIDs.restoreCheckpoint, {
     label: 'Revert to Checkpoint',
     caption: 'Revert contents to previous checkpoint',
     isEnabled,
@@ -241,7 +241,7 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocume
     }
   });
 
-  commands.addCommand(cmdIds.saveAs, {
+  commands.addCommand(CommandIDs.saveAs, {
     label: 'Save As...',
     caption: 'Save with new path and create checkpoint',
     isEnabled,
@@ -255,7 +255,7 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocume
     }
   });
 
-  commands.addCommand(cmdIds.open, {
+  commands.addCommand(CommandIDs.open, {
     execute: args => {
       let path = args['path'] as string;
       let factory = args['factory'] as string || void 0;
@@ -264,7 +264,7 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocume
     }
   });
 
-  commands.addCommand(cmdIds.close, {
+  commands.addCommand(CommandIDs.close, {
     label: 'Close',
     execute: () => {
       if (app.shell.currentWidget) {
@@ -273,16 +273,16 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocume
     }
   });
 
-  commands.addCommand(cmdIds.closeAllFiles, {
+  commands.addCommand(CommandIDs.closeAllFiles, {
     label: 'Close All',
     execute: () => { app.shell.closeAll(); }
   });
 
-  commands.addCommand(cmdIds.showBrowser, {
+  commands.addCommand(CommandIDs.showBrowser, {
     execute: () => { app.shell.activateLeft(fbWidget.id); }
   });
 
-  commands.addCommand(cmdIds.hideBrowser, {
+  commands.addCommand(CommandIDs.hideBrowser, {
     execute: () => {
       if (!fbWidget.isHidden) {
         app.shell.collapseLeft();
@@ -290,12 +290,12 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocume
     }
   });
 
-  commands.addCommand(cmdIds.toggleBrowser, {
+  commands.addCommand(CommandIDs.toggleBrowser, {
     execute: () => {
       if (fbWidget.isHidden) {
-        return commands.execute(cmdIds.showBrowser, void 0);
+        return commands.execute(CommandIDs.showBrowser, void 0);
       } else {
-        return commands.execute(cmdIds.hideBrowser, void 0);
+        return commands.execute(CommandIDs.hideBrowser, void 0);
       }
     }
   });
@@ -313,11 +313,11 @@ function createMenu(app: JupyterLab, creatorCmds: string[]): Menu {
     menu.addItem({ command: Private.commandForName(name) });
   });
   [
-    cmdIds.save,
-    cmdIds.restoreCheckpoint,
-    cmdIds.saveAs,
-    cmdIds.close,
-    cmdIds.closeAllFiles,
+    CommandIDs.save,
+    CommandIDs.restoreCheckpoint,
+    CommandIDs.saveAs,
+    CommandIDs.close,
+    CommandIDs.closeAllFiles
   ].forEach(command => { menu.addItem({ command }); });
 
   return menu;
@@ -326,6 +326,10 @@ function createMenu(app: JupyterLab, creatorCmds: string[]): Menu {
 
 /**
  * Create a context menu for the file browser listing.
+ *
+ * #### Notes
+ * This function generates temporary commands with an incremented name. These
+ * commands are disposed when the menu itself is disposed.
  */
 function createContextMenu(fbWidget: FileBrowser, openWith: Menu):  Menu {
   let { commands, keymap } = fbWidget;

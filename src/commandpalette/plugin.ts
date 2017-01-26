@@ -20,7 +20,7 @@ import {
 } from '../instancerestorer';
 
 import {
-  ICommandPalette, IPaletteItem, cmdIds
+  CommandIDs, ICommandPalette, IPaletteItem
 } from './';
 
 
@@ -102,44 +102,27 @@ function activate(app: JupyterLab, restorer: IInstanceRestorer): ICommandPalette
   palette.id = 'command-palette';
   palette.title.label = 'Commands';
 
-  /**
-   * Activate the command palette within the app shell (used as a command).
-   */
-  function activatePalette(): void {
-    app.shell.activateLeft(palette.id);
-    palette.activate();
-  }
-
-  /**
-   * Hide the command palette within the app shell (used as a command).
-   */
-  function hidePalette(): void {
-    if (!palette.isHidden) {
-      app.shell.collapseLeft();
-    }
-  }
-
-  /**
-   * Toggle the command palette within the app shell (used as a command).
-   */
-  function togglePalette(): void {
-    if (palette.isHidden) {
-      activatePalette();
-    } else {
-      hidePalette();
-    }
-  }
-
-  app.commands.addCommand(cmdIds.activate, {
-    execute: activatePalette,
+  app.commands.addCommand(CommandIDs.activate, {
+    execute: () => { app.shell.activateLeft(palette.id); },
     label: 'Activate Command Palette'
   });
-  app.commands.addCommand(cmdIds.hide, {
-    execute: hidePalette,
+
+  app.commands.addCommand(CommandIDs.hide, {
+    execute: () => {
+      if (!palette.isHidden) {
+        app.shell.collapseLeft();
+      }
+    },
     label: 'Hide Command Palette'
   });
-  app.commands.addCommand(cmdIds.toggle, {
-    execute: togglePalette,
+
+  app.commands.addCommand(CommandIDs.toggle, {
+    execute: () => {
+      if (palette.isHidden) {
+        return app.commands.execute(CommandIDs.activate, void 0);
+      }
+      return app.commands.execute(CommandIDs.hide, void 0);
+    },
     label: 'Toggle Command Palette'
   });
 

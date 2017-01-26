@@ -14,11 +14,11 @@ import {
 } from '../commandpalette';
 
 import {
-  cmdIds as consoleCmdIds
+  CommandIDs as ConsoleCommandIDs
 } from '../console';
 
 import {
-  cmdIds as filebrowserCmdIds
+  CommandIDs as FileBrowserCommandIDs
 } from '../filebrowser';
 
 import {
@@ -34,11 +34,11 @@ import {
 } from '../services';
 
 import {
-  cmdIds as terminalCmdIds
+  CommandIDs as TerminalCommandIDs
 } from '../terminal';
 
 import {
-  ILauncher, ILauncherItem, LauncherModel, LauncherWidget, cmdIds
+  CommandIDs, ILauncher, ILauncherItem, LauncherModel, LauncherWidget
 } from './';
 
 
@@ -48,7 +48,13 @@ import {
 const plugin: JupyterLabPlugin<ILauncher> = {
   activate,
   id: 'jupyter.services.launcher',
-  requires: [IServiceManager, IPathTracker, ICommandPalette, ICommandLinker, IInstanceRestorer],
+  requires: [
+    IServiceManager,
+    IPathTracker,
+    ICommandPalette,
+    ICommandLinker,
+    IInstanceRestorer
+  ],
   provides: ILauncher,
   autoStart: true
 };
@@ -85,22 +91,22 @@ function activate(app: JupyterLab, services: IServiceManager, pathTracker: IPath
   let defaults: ILauncherItem[] = [
     {
       name: 'Notebook',
-      command: filebrowserCmdIds.newNotebook
+      command: FileBrowserCommandIDs.newNotebook
     },
     {
       name: 'Code Console',
-      command: consoleCmdIds.create
+      command: ConsoleCommandIDs.create
     },
     {
       name: 'Text Editor',
-      command: filebrowserCmdIds.newTextFile
+      command: FileBrowserCommandIDs.newTextFile
     }
   ];
 
   if (services.terminals.isAvailable()) {
     defaults.push({
       name: 'Terminal',
-      command: terminalCmdIds.createNew
+      command: TerminalCommandIDs.createNew
     });
   }
 
@@ -108,7 +114,7 @@ function activate(app: JupyterLab, services: IServiceManager, pathTracker: IPath
   // means we have to way of removing them after the fact.
   defaults.forEach(options => { model.add(options); });
 
-  app.commands.addCommand(cmdIds.show, {
+  app.commands.addCommand(CommandIDs.show, {
     label: 'Show Launcher',
     execute: () => {
       if (!widget.isAttached) {
@@ -117,7 +123,7 @@ function activate(app: JupyterLab, services: IServiceManager, pathTracker: IPath
       app.shell.activateLeft(widget.id);
     }
   });
-  palette.addItem({ command: cmdIds.show, category: 'Help' });
+  palette.addItem({ command: CommandIDs.show, category: 'Help' });
 
   app.shell.addToLeftArea(widget);
 
