@@ -45,10 +45,13 @@ EXTENSION_PREFIX = '/labextension'
 class LabHandler(IPythonHandler):
     """Render the Jupyter Lab View."""
 
+    def initialize(self, labextensions):
+        self.labextensions = labextensions
+
     @web.authenticated
     def get(self):
         static_prefix = ujoin(self.base_url, PREFIX)
-        labextensions = self.application.labextensions
+        labextensions = self.labextensions
         data = get_labextension_manifest_data_by_folder(BUILT_FILES)
         if 'main' not in data:
             msg = ('JupyterLab build artifacts not detected, please see ' + 
@@ -119,16 +122,6 @@ class LabHandler(IPythonHandler):
         return FILE_LOADER.load(self.settings['jinja2_env'], name)
 
 
-#-----------------------------------------------------------------------------
-# URL to handler mappings
-#-----------------------------------------------------------------------------
-
-default_handlers = [
-    (PREFIX + r'/?', LabHandler),
-    (PREFIX + r"/(.*)", FileFindHandler,
-        {'path': BUILT_FILES}),
-]
-
 
 def load_jupyter_server_extension(nbapp):
     """Load the JupyterLab server extension.
@@ -161,9 +154,14 @@ def load_jupyter_server_extension(nbapp):
         data['python_module'] = ext_config.get('python_module', None)
         out[name] = data
 
-    web_app.labextensions = out
-
     # Add the handlers to the web app
+    default_handlers = [
+        (PREFIX + r'/?', LabHandler, {
+            'labextensions': out
+        }),
+        (PREFIX + r"/(.*)", FileFindHandler,
+            {'path': BUILT_FILES}),
+    ]
     base_url = web_app.settings['base_url']
     web_app.add_handlers(".*$",
         [(ujoin(base_url, h[0]),) + h[1:] for h in default_handlers])
