@@ -143,7 +143,7 @@ const HEADER_TEXT = [
   'It is not ready for general usage yet.',
   'We are developing JupyterLab at ',
   'https://github.com/jupyterlab/jupyterlab',
-  '. Pull requests are welcome!',
+  '. Pull requests and feedback are welcome!',
   `Here is a brief description of some of the things you'll find in this demo.`
 ];
 
