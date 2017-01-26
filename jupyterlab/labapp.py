@@ -45,8 +45,9 @@ EXTENSION_PREFIX = '/labextension'
 class LabHandler(IPythonHandler):
     """Render the Jupyter Lab View."""
 
-    def initialize(self, labextensions):
+    def initialize(self, labextensions, extension_prefix):
         self.labextensions = labextensions
+        self.extension_prefix = extension_prefix
 
     @web.authenticated
     def get(self):
@@ -75,6 +76,33 @@ class LabHandler(IPythonHandler):
             if os.path.isfile(os.path.join(BUILT_FILES, css_file)):
                 css_files.append(ujoin(static_prefix, css_file))
 
+        configData = dict(
+            terminalsAvailable=self.settings.get('terminals_available', False),
+        )
+
+        # Gather the lab extension files and entry points.
+        for (name, data) in sorted(labextensions.items()):
+            for value in data.values():
+                if not isinstance(value, dict):
+                    continue
+                if value.get('entry', None):
+                    entries.append(value['entry'])
+                    bundles.append('%s/%s/%s' % (
+                        self.extension_prefix, name, value['files'][0]
+                    ))
+                for fname in value['files']:
+                    if os.path.splitext(fname)[1] == '.css':
+                        css_files.append('%s/%s/%s' % (
+                            self.extension_prefix, name, fname
+                        ))
+            python_module = data.get('python_module', None)
+            if python_module:
+                try:
+                    value = get_labextension_config_python(python_module)
+                    configData.update(value)
+                except Exception as e:
+                    self.log.error(e)
+
         config = dict(
             static_prefix=static_prefix,
             page_title='JupyterLab Alpha Preview',
@@ -86,35 +114,6 @@ class LabHandler(IPythonHandler):
             mathjax_config='TeX-AMS_HTML-full,Safe',
             #mathjax_config=self.mathjax_config # for the next release of the notebook
         )
-
-        configData = dict(
-            terminalsAvailable=self.settings.get('terminals_available', False),
-        )
-        extension_prefix = ujoin(self.base_url, EXTENSION_PREFIX)
-
-        # Gather the lab extension files and entry points.
-        for (name, data) in sorted(labextensions.items()):
-            for value in data.values():
-                if not isinstance(value, dict):
-                    continue
-                if value.get('entry', None):
-                    entries.append(value['entry'])
-                    bundles.append('%s/%s/%s' % (
-                        extension_prefix, name, value['files'][0]
-                    ))
-                for fname in value['files']:
-                    if os.path.splitext(fname)[1] == '.css':
-                        css_files.append('%s/%s/%s' % (
-                            extension_prefix, name, fname
-                        ))
-            python_module = data.get('python_module', None)
-            if python_module:
-                try:
-                    value = get_labextension_config_python(python_module)
-                    configData.update(value)
-                except Exception as e:
-                    self.log.error(e)
-
         config['jupyterlab_config'] = configData
         self.write(self.render_template('lab.html', **config))
 
@@ -122,23 +121,9 @@ class LabHandler(IPythonHandler):
         return FILE_LOADER.load(self.settings['jinja2_env'], name)
 
 
-
-def load_jupyter_server_extension(nbapp):
-    """Load the JupyterLab server extension.
-    """
-    # Print messages.
-    nbapp.log.info('JupyterLab alpha preview extension loaded from %s' % HERE)
-    base_dir = os.path.realpath(os.path.join(HERE, '..'))
-    dev_mode = os.path.exists(os.path.join(base_dir, '.git'))
-    if dev_mode:
-        nbapp.log.info(DEV_NOTE_NPM)
-
-    # Get the appropriate lab config.
-    lab_config = nbapp.config.get(CONFIG_SECTION, {})
-    web_app = nbapp.web_app
-
-    # Add the lab extensions to the web app.
-    out = dict()
+def get_extensions(lab_config):
+    """Get the valid extensions from lab config."""
+    extensions = dict()
     for (name, ext_config) in lab_config.labextensions.items():
         if not ext_config['enabled']:
             continue
@@ -152,20 +137,25 @@ def load_jupyter_server_extension(nbapp):
         if data is None:
             continue
         data['python_module'] = ext_config.get('python_module', None)
-        out[name] = data
+        extensions[name] = data
+    return extensions
 
-    # Add the handlers to the web app
+
+def add_handlers(web_app, labextensions):
+    """Add the appropriate handlers to the web app.
+    """
+    base_url = web_app.settings['base_url']
+    extension_prefix = ujoin(base_url, EXTENSION_PREFIX)
     default_handlers = [
         (PREFIX + r'/?', LabHandler, {
-            'labextensions': out
+            'labextensions': labextensions,
+            'extension_prefix': extension_prefix
         }),
         (PREFIX + r"/(.*)", FileFindHandler,
             {'path': BUILT_FILES}),
     ]
-    base_url = web_app.settings['base_url']
     web_app.add_handlers(".*$",
         [(ujoin(base_url, h[0]),) + h[1:] for h in default_handlers])
-    extension_prefix = ujoin(base_url, EXTENSION_PREFIX)
     labextension_handler = (
         r"%s/(.*)" % extension_prefix, FileFindHandler, {
             'path': jupyter_path('labextensions'),
@@ -173,6 +163,21 @@ def load_jupyter_server_extension(nbapp):
         }
     )
     web_app.add_handlers(".*$", [labextension_handler])
+
+
+def load_jupyter_server_extension(nbapp):
+    """Load the JupyterLab server extension.
+    """
+    # Print messages.
+    nbapp.log.info('JupyterLab alpha preview extension loaded from %s' % HERE)
+    base_dir = os.path.realpath(os.path.join(HERE, '..'))
+    dev_mode = os.path.exists(os.path.join(base_dir, '.git'))
+    if dev_mode:
+        nbapp.log.info(DEV_NOTE_NPM)
+
+    lab_config = nbapp.config.get(CONFIG_SECTION, {})
+    extensions = get_extensions(lab_config)
+    add_handlers(nbapp.web_app, extensions)
 
 
 class LabApp(NotebookApp):
