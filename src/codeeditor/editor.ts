@@ -21,6 +21,10 @@ import {
   IObservableMap, ObservableMap
 } from '../common/observablemap';
 
+import {
+  IRealtimeHandler, IRealtimeModel
+} from '../common/realtime';
+
 
 /**
  * A namespace for code editors.
@@ -172,7 +176,7 @@ namespace CodeEditor {
    * An editor model.
    */
   export
-  interface IModel extends IDisposable {
+  interface IModel extends IDisposable, IRealtimeModel {
     /**
      * A signal emitted when a property changes.
      */
@@ -195,6 +199,17 @@ namespace CodeEditor {
      * The currently selected code.
      */
     readonly selections: IObservableMap<ITextSelection[]>;
+
+    /**
+     * The realtime handler for the editor model.
+     * If there is no realtime for this model it is null.
+     */
+    readonly realtimeHandler: IRealtimeHandler;
+
+    /**
+     * Describe the editor model to an existing RealtimeHandler.
+     */
+    registerCollaborative( realtimeHandler : IRealtimeHandler ): Promise<void>;
   }
 
   /**
@@ -259,6 +274,14 @@ namespace CodeEditor {
     }
 
     /**
+     * The realtime handler associated with the document.
+     */
+    get realtimeHandler(): IRealtimeHandler {
+      return this._realtime;
+    }
+
+
+    /**
      * Dipose of the resources used by the model.
      */
     dispose(): void {
@@ -267,8 +290,39 @@ namespace CodeEditor {
       }
       this._isDisposed = true;
       Signal.clearData(this);
+      if(this._realtime) {
+        this._realtime.dispose();
+      }
       this._selections.dispose();
       this._value.dispose();
+    }
+
+    /**
+     * Describe the model to an existing RealtimeHandler.
+     */
+    registerCollaborative( realtimeHandler : IRealtimeHandler ) : Promise<void> {
+      return new Promise<void>((resolve,reject)=>{
+        this._realtime = realtimeHandler;
+        //link to the new realtime string
+        let stringPromise =
+          this._realtime.linkString(this.value, 'codeeditor:text');
+        let cursorPromise =
+          this._realtime.linkMap(this.selections, 'codeeditor:cursors');
+        this._realtime.collaborators.changed.connect((collaborators, change)=>{
+          //if there are selections corresponding to non-collaborators,
+          //they are stale and should be removed.
+          for(let key of this.selections.keys()) {
+            if(!collaborators.has(key)) {
+              this.selections.delete(key);
+            }
+          }
+        });
+        Promise.all([stringPromise, cursorPromise]).then(()=>{
+          resolve();
+        }).catch(()=>{
+          console.log("Unable to register document as collaborative");
+        });
+      });
     }
 
     private _value: ObservableString;
@@ -276,6 +330,7 @@ namespace CodeEditor {
     private _mimetype: string;
     private _isDisposed = false;
     private _mimeTypeChanged = new Signal<this, IChangedArgs<string>>(this);
+    private _realtime : IRealtimeHandler = null;
   }
 
   /**
