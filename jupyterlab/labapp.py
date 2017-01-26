@@ -130,7 +130,8 @@ class LabHandler(IPythonHandler):
 def get_extensions(lab_config):
     """Get the valid extensions from lab config."""
     extensions = dict()
-    for (name, ext_config) in lab_config.labextensions.items():
+    labextensions = lab_config.get('labextensions', {})
+    for (name, ext_config) in labextensions.items():
         if not ext_config['enabled']:
             continue
         folder = find_labextension(name)
@@ -204,6 +205,22 @@ class LabApp(NotebookApp):
     default_url = Unicode('/lab', config=True,
         help="The default URL to redirect to from `/`")
 
+    def init_server_extensions(self):
+        """Load any extensions specified by config.
+
+        Import the module, then call the load_jupyter_server_extension function,
+        if one exists.
+
+        If the JupyterLab server extension is not enabled, it will
+        be manually loaded with a warning.
+
+        The extension API is experimental, and may change in future releases.
+        """
+        super(LabApp, self).init_server_extensions()
+        msg = 'JupyterLab server extension not enabled, manually loading...'
+        if not self.nbserver_extensions.get('jupyterlab', False):
+            self.log.warn(msg)
+            load_jupyter_server_extension(self)
 
 #-----------------------------------------------------------------------------
 # Main entry point
