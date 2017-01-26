@@ -5,6 +5,42 @@ import {
   JupyterLab, JupyterLabPlugin
 } from '../application';
 
+import {
+  CommandIDs as CommandPaletteCommandIDs
+} from '../commandpalette';
+
+import {
+  CommandIDs as ConsoleCommandIDs
+} from '../console';
+
+import {
+  CommandIDs as EditorWidgetCommandIDs
+} from '../editorwidget';
+
+import {
+  CommandIDs as FileBrowserCommandIDs
+} from '../filebrowser';
+
+import {
+  CommandIDs as HelpCommandIDs
+} from '../help';
+
+import {
+  CommandIDs as ImageWidgetCommandIDs
+} from '../imagewidget';
+
+import {
+  CommandIDs as InspectorCommandIDs
+} from '../inspector';
+
+import {
+  CommandIDs as NotebookCommandIDs
+} from '../notebook';
+
+import {
+  CommandIDs as TooltipCommandIDs
+} from '../tooltip';
+
 
 /**
  * The list of default application shortcuts.
@@ -31,284 +67,284 @@ import {
  */
 const SHORTCUTS = [
   {
-    command: 'command-palette:activate',
+    command: CommandPaletteCommandIDs.activate,
     selector: 'body',
     keys: ['Accel Shift P']
   },
   {
-    command: 'editor:run-code',
+    command: ConsoleCommandIDs.run,
+    selector: '.jp-CodeConsole-prompt',
+    keys: ['Enter']
+  },
+  {
+    command: ConsoleCommandIDs.runForced,
+    selector: '.jp-CodeConsole-prompt',
+    keys: ['Shift Enter']
+  },
+  {
+    command: ConsoleCommandIDs.linebreak,
+    selector: '.jp-CodeConsole-prompt',
+    keys: ['Ctrl Enter']
+  },
+  {
+    command: EditorWidgetCommandIDs.runCode,
     selector: '.jp-EditorWidget',
     keys: ['Shift Enter']
   },
   {
-    command: 'file-browser:toggle',
+    command: FileBrowserCommandIDs.toggleBrowser,
     selector: 'body',
     keys: ['Accel Shift F']
   },
   {
-    command: 'file-operations:new-text-file',
+    command: FileBrowserCommandIDs.newTextFile,
     selector: 'body',
     keys: ['Ctrl O']
   },
   {
-    command: 'file-operations:new-notebook',
+    command: FileBrowserCommandIDs.newNotebook,
     selector: 'body',
     keys: ['Ctrl Shift N']
   },
   {
-    command: 'file-operations:save',
+    command: FileBrowserCommandIDs.save,
     selector: '.jp-Document',
     keys: ['Accel S']
   },
   {
-    command: 'file-operations:close',
+    command: FileBrowserCommandIDs.close,
     selector: '.jp-Document',
     keys: ['Ctrl Q']
   },
   {
-    command: 'file-operations:close-all',
+    command: FileBrowserCommandIDs.closeAllFiles,
     selector: '.jp-Document',
     keys: ['Ctrl Shift Q']
   },
   {
-    command: 'help-doc:toggle',
+    command: HelpCommandIDs.toggle,
     selector: 'body',
     keys: ['Accel Shift H']
   },
   {
-    command: 'notebook-cells:run-and-advance',
-    selector: '.jp-Notebook',
-    keys: ['Shift Enter']
-  },
-  {
-    command: 'notebook-cells:run-and-insert',
-    selector: '.jp-Notebook',
-    keys: ['Alt Enter']
-  },
-  {
-    command: 'notebook-cells:run',
-    selector: '.jp-Notebook',
-    keys: ['Ctrl Enter']
-  },
-  {
-    command: 'notebook:interrupt-kernel',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['I', 'I']
-  },
-  {
-    command: 'notebook:restart-kernel',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['0', '0']
-  },
-  {
-    command: 'notebook-cells:to-code',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['Y']
-  },
-  {
-    command: 'notebook-cells:to-markdown',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['M']
-  },
-  {
-    command: 'notebook-cells:to-raw',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['R']
-  },
-  {
-    command: 'notebook-cells:delete',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['D', 'D'],
-  },
-  {
-    command: 'notebook-cells:split',
-    selector: '.jp-Notebook.jp-mod-editMode',
-    keys: ['Ctrl Shift -'],
-  },
-  {
-    command: 'notebook-cells:merge',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['Shift M'],
-  },
-  {
-    command: 'notebook-cells:select-above',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['ArrowUp'],
-  },
-  {
-    command: 'notebook-cells:select-above',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['K'],
-  },
-  {
-    command: 'notebook-cells:select-below',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['ArrowDown'],
-  },
-  {
-    command: 'notebook-cells:select-below',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['J'],
-  },
-  {
-    command: 'notebook-cells:extend-above',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['Shift ArrowUp'],
-  },
-  {
-    command: 'notebook-cells:extend-above',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['Shift K'],
-  },
-  {
-    command: 'notebook-cells:extend-below',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['Shift ArrowDown'],
-  },
-  {
-    command: 'notebook-cells:extend-below',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['Shift J'],
-  },
-  {
-    command: 'notebook-cells:undo',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['Z'],
-  },
-  {
-    command: 'notebook-cells:redo',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['Shift Z'],
-  },
-  {
-    command: 'notebook-cells:cut',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['X']
-  },
-  {
-    command: 'notebook-cells:copy',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['C']
-  },
-  {
-    command: 'notebook-cells:paste',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['V']
-  },
-  {
-    command: 'notebook-cells:insert-above',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['A']
-  },
-  {
-    command: 'notebook-cells:insert-below',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['B']
-  },
-  {
-    command: 'notebook-cells:toggle-line-numbers',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['L']
-  },
-  {
-    command: 'notebook-cells:markdown-header1',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['1']
-  },
-  {
-    command: 'notebook-cells:markdown-header2',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['2']
-  },
-  {
-    command: 'notebook-cells:markdown-header3',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['3']
-  },
-  {
-    command: 'notebook-cells:markdown-header4',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['4']
-  },
-  {
-    command: 'notebook-cells:markdown-header5',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['5']
-  },
-  {
-    command: 'notebook-cells:markdown-header6',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['6']
-  },
-  {
-    command: 'notebook:edit-mode',
-    selector: '.jp-Notebook.jp-mod-commandMode',
-    keys: ['Enter']
-  },
-  {
-    command: 'notebook:command-mode',
-    selector: '.jp-Notebook.jp-mod-editMode',
-    keys: ['Escape']
-  },
-  {
-    command: 'notebook:command-mode',
-    selector: '.jp-Notebook.jp-mod-editMode',
-    keys: ['Ctrl M']
-  },
-  {
-    command: 'console:run',
-    selector: '.jp-CodeConsole-prompt',
-    keys: ['Enter']
-  },
-  {
-    command: 'console:run-forced',
-    selector: '.jp-CodeConsole-prompt',
-    keys: ['Shift Enter']
-  },
-  {
-    command: 'console:linebreak',
-    selector: '.jp-CodeConsole-prompt',
-    keys: ['Ctrl Enter']
-  },
-  {
-    command: 'console:toggle-inspectors',
-    selector: '.jp-CodeConsole-promptt',
-    keys: ['Accel I']
-  },
-  {
-    command: 'image-widget:zoom-in',
+    command: ImageWidgetCommandIDs.zoomIn,
     selector: '.jp-ImageWidget',
     keys: ['=']
   },
   {
-    command: 'image-widget:zoom-out',
+    command: ImageWidgetCommandIDs.zoomOut,
     selector: '.jp-ImageWidget',
     keys: ['-']
   },
   {
-    command: 'image-widget:reset-zoom',
+    command: ImageWidgetCommandIDs.resetZoom,
     selector: '.jp-ImageWidget',
     keys: ['0']
   },
   {
-    command: 'tooltip:launch',
+    command: InspectorCommandIDs.open,
+    selector: '.jp-CodeConsole-prompt',
+    keys: ['Accel I']
+  },
+  {
+    command: NotebookCommandIDs.runAndAdvance,
+    selector: '.jp-Notebook',
+    keys: ['Shift Enter']
+  },
+  {
+    command: NotebookCommandIDs.runAndInsert,
+    selector: '.jp-Notebook',
+    keys: ['Alt Enter']
+  },
+  {
+    command: NotebookCommandIDs.run,
+    selector: '.jp-Notebook',
+    keys: ['Ctrl Enter']
+  },
+  {
+    command: NotebookCommandIDs.interrupt,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['I', 'I']
+  },
+  {
+    command: NotebookCommandIDs.restart,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['0', '0']
+  },
+  {
+    command: NotebookCommandIDs.toCode,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['Y']
+  },
+  {
+    command: NotebookCommandIDs.toMarkdown,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['M']
+  },
+  {
+    command: NotebookCommandIDs.toRaw,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['R']
+  },
+  {
+    command: NotebookCommandIDs.deleteCell,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['D', 'D'],
+  },
+  {
+    command: NotebookCommandIDs.split,
+    selector: '.jp-Notebook.jp-mod-editMode',
+    keys: ['Ctrl Shift -'],
+  },
+  {
+    command: NotebookCommandIDs.merge,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['Shift M'],
+  },
+  {
+    command: NotebookCommandIDs.selectAbove,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['ArrowUp'],
+  },
+  {
+    command: NotebookCommandIDs.selectAbove,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['K'],
+  },
+  {
+    command: NotebookCommandIDs.selectBelow,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['ArrowDown'],
+  },
+  {
+    command: NotebookCommandIDs.selectBelow,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['J'],
+  },
+  {
+    command: NotebookCommandIDs.extendAbove,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['Shift ArrowUp'],
+  },
+  {
+    command: NotebookCommandIDs.extendAbove,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['Shift K'],
+  },
+  {
+    command: NotebookCommandIDs.extendBelow,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['Shift ArrowDown'],
+  },
+  {
+    command: NotebookCommandIDs.extendBelow,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['Shift J'],
+  },
+  {
+    command: NotebookCommandIDs.undo,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['Z'],
+  },
+  {
+    command: NotebookCommandIDs.redo,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['Shift Z'],
+  },
+  {
+    command: NotebookCommandIDs.cut,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['X']
+  },
+  {
+    command: NotebookCommandIDs.copy,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['C']
+  },
+  {
+    command: NotebookCommandIDs.paste,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['V']
+  },
+  {
+    command: NotebookCommandIDs.insertAbove,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['A']
+  },
+  {
+    command: NotebookCommandIDs.insertBelow,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['B']
+  },
+  {
+    command: NotebookCommandIDs.toggleLines,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['L']
+  },
+  {
+    command: NotebookCommandIDs.markdown1,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['1']
+  },
+  {
+    command: NotebookCommandIDs.markdown2,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['2']
+  },
+  {
+    command: NotebookCommandIDs.markdown3,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['3']
+  },
+  {
+    command: NotebookCommandIDs.markdown4,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['4']
+  },
+  {
+    command: NotebookCommandIDs.markdown5,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['5']
+  },
+  {
+    command: NotebookCommandIDs.markdown6,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['6']
+  },
+  {
+    command: NotebookCommandIDs.editMode,
+    selector: '.jp-Notebook.jp-mod-commandMode',
+    keys: ['Enter']
+  },
+  {
+    command: NotebookCommandIDs.commandMode,
+    selector: '.jp-Notebook.jp-mod-editMode',
+    keys: ['Escape']
+  },
+  {
+    command: NotebookCommandIDs.commandMode,
+    selector: '.jp-Notebook.jp-mod-editMode',
+    keys: ['Ctrl M']
+  },
+  {
+    command: TooltipCommandIDs.launch,
     selector: '.jp-Notebook',
     keys: ['Shift Tab'],
     args: { notebook: true }
   },
   {
-    command: 'tooltip:launch',
+    command: TooltipCommandIDs.launch,
     selector: '.jp-ConsolePanel',
     keys: ['Shift Tab'],
     args: { notebook: false }
   },
   {
-    command: 'tooltip:remove',
+    command: TooltipCommandIDs.remove,
     selector: '.jp-Notebook.jp-Tooltip-anchor',
     keys: ['Escape']
   },
   {
-    command: 'tooltip:remove',
+    command: TooltipCommandIDs.remove,
     selector: '.jp-CodeConsole.jp-Tooltip-anchor',
     keys: ['Escape']
   }
