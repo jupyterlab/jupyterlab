@@ -243,6 +243,12 @@ margin-top = 14, 14, 14, 14, 8, 8
 }
 
 
+.jp-RenderedMarkdown.jp-RenderedHTMLCommon td,
+.jp-RenderedMarkdown.jp-RenderedHTMLCommon th {
+  max-width: none;
+}
+
+
 .jp-RenderedHTMLCommon th {
   font-weight: bold;
 }
