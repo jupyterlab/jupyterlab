@@ -101,7 +101,7 @@ const SELECT_WRAPPER_CLASS = 'jp-Dialog-selectWrapper';
 const SELECT_CLASS = 'jp-Dialog-select';
 
 /**
- * The class name added to focused input wrappers.
+ * The class name added to focused input and select wrappers.
  */
 const FOCUS_CLASS = 'jp-mod-focused';
 
