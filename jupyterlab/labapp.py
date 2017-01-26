@@ -18,7 +18,7 @@ from .labextensions import (
     find_labextension, validate_labextension_folder,
     get_labextension_manifest_data_by_name,
     get_labextension_manifest_data_by_folder,
-    get_labextension_config_python, LabConfig
+    get_labextension_config_python, CONFIG_SECTION
 )
 
 #-----------------------------------------------------------------------------
@@ -141,15 +141,12 @@ def load_jupyter_server_extension(nbapp):
         nbapp.log.info(DEV_NOTE_NPM)
 
     # Get the appropriate lab config.
-    config_app = LabConfig()
-    config_app.config_dir = nbapp.config_dir
-    config_app.load_config_file()
-
+    lab_config = nbapp.config.get(CONFIG_SECTION, {})
     web_app = nbapp.web_app
 
     # Add the lab extensions to the web app.
     out = dict()
-    for (name, ext_config) in config_app.labextensions.items():
+    for (name, ext_config) in lab_config.labextensions.items():
         if not ext_config['enabled']:
             continue
         folder = find_labextension(name)

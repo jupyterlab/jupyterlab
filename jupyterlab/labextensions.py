@@ -22,7 +22,6 @@ from ipython_genutils.path import ensure_dir_exists
 from ipython_genutils.py3compat import string_types, cast_unicode_py2
 from ._version import __version__
 
-from traitlets import Dict
 from traitlets.config.manager import BaseJSONConfigManager
 from traitlets.utils.importstring import import_item
 
@@ -40,8 +39,8 @@ GREEN_ENABLED = '\033[32menabled \033[0m' if os.name != 'nt' else 'enabled '
 RED_DISABLED = '\033[31mdisabled\033[0m' if os.name != 'nt' else 'disabled'
 
 
-CONFIG_NAME = 'jupyterlab_config'
-APP_NAME = 'LabConfig'
+CONFIG_NAME = 'jupyter_notebook_config'
+CONFIG_SECTION = 'LabConfig'
 
 #------------------------------------------------------------------------------
 # Public API
@@ -291,7 +290,7 @@ def _set_labextension_state(name, state,
             name
         ))
     labextensions = (
-        cfg.setdefault(APP_NAME, {})
+        cfg.setdefault(CONFIG_SECTION, {})
         .setdefault("labextensions", {})
     )
 
@@ -656,18 +655,6 @@ aliases = {
 }
 
 
-class LabConfig(JupyterApp):
-    name = 'jupyterlab'
-
-    labextensions = Dict({}, config=True,
-        help=('Dict of Python modules to load as lab extensions.'
-            'Each entry consists of a required `enabled` key used'
-            'to enable or disable the extension, and an optional'
-            '`python_module` key for the associated python module.'
-            'Extensions are loaded in alphabetical order')
-    )
-
-
 class InstallLabExtensionApp(BaseLabExtensionApp):
     """Entry point for installing JupyterLab extensions"""
     description = """Install JupyterLab extensions
@@ -912,7 +899,7 @@ class ListLabExtensionsApp(BaseLabExtensionApp):
             cm = BaseJSONConfigManager(parent=self, config_dir=config_dir)
             data = cm.get(CONFIG_NAME)
             labextensions = (
-                data.setdefault(APP_NAME, {})
+                data.setdefault(CONFIG_SECTION, {})
                 .setdefault("labextensions", {})
             )
             if labextensions:
