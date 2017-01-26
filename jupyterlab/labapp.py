@@ -130,7 +130,8 @@ class LabHandler(IPythonHandler):
 def get_extensions(lab_config):
     """Get the valid extensions from lab config."""
     extensions = dict()
-    for (name, ext_config) in lab_config.labextensions.items():
+    labextensions = lab_config.get('labextensions', {})
+    for (name, ext_config) in labextensions.items():
         if not ext_config['enabled']:
             continue
         folder = find_labextension(name)
