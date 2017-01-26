@@ -102,6 +102,10 @@ class TooltipWidget extends Widget {
       return;
     }
     switch (event.type) {
+    case 'keydown':
+    case 'mousedown':
+      this._dismiss(event);
+      break;
     case 'scroll':
       this._evtScroll(event as MouseEvent);
       break;
@@ -122,6 +126,8 @@ class TooltipWidget extends Widget {
    * Handle `'after-attach'` messages.
    */
   protected onAfterAttach(msg: Message): void {
+    document.addEventListener('keydown', this, USE_CAPTURE);
+    document.addEventListener('mousedown', this, USE_CAPTURE);
     this.anchor.node.addEventListener('scroll', this, USE_CAPTURE);
     this.model.fetch();
   }
@@ -130,6 +136,8 @@ class TooltipWidget extends Widget {
    * Handle `before_detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
+    document.removeEventListener('keydown', this, USE_CAPTURE);
+    document.removeEventListener('mousedown', this, USE_CAPTURE);
     this.anchor.node.removeEventListener('scroll', this, USE_CAPTURE);
   }
 
@@ -139,6 +147,20 @@ class TooltipWidget extends Widget {
   protected onUpdateRequest(msg: Message): void {
     this._setGeometry();
     super.onUpdateRequest(msg);
+  }
+
+  /**
+   * Dismiss the tooltip if necessary.
+   */
+  private _dismiss(event: Event): void {
+    let target = event.target as HTMLElement;
+    while (target && target.parentElement) {
+      if (target === this.node) {
+        return;
+      }
+      target = target.parentElement;
+    }
+    this.dispose();
   }
 
   /**

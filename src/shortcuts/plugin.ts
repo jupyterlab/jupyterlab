@@ -337,16 +337,6 @@ const SHORTCUTS = [
     selector: '.jp-ConsolePanel',
     keys: ['Shift Tab'],
     args: { notebook: false }
-  },
-  {
-    command: TooltipCommandIDs.remove,
-    selector: '.jp-Notebook.jp-Tooltip-anchor',
-    keys: ['Escape']
-  },
-  {
-    command: TooltipCommandIDs.remove,
-    selector: '.jp-CodeConsole.jp-Tooltip-anchor',
-    keys: ['Escape']
   }
 ];
 

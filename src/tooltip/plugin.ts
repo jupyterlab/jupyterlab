@@ -61,17 +61,19 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
   // Add tooltip launch command.
   registry.addCommand(CommandIDs.launch, {
     execute: args => {
-      // If a tooltip is open, remove it and return.
-      if (tooltip) {
-        return app.commands.execute(CommandIDs.remove, void 0);
-      }
-
       const notebook = args['notebook'] as boolean;
       let anchor: Widget | null = null;
       let editor: CodeEditor.IEditor | null = null;
       let kernel: Kernel.IKernel | null = null;
       let rendermime: IRenderMime | null = null;
       let parent: NotebookPanel | ConsolePanel | null = null;
+
+      // If a tooltip is open, remove it.
+      if (tooltip) {
+        tooltip.model.dispose();
+        tooltip.dispose();
+        tooltip = null;
+      }
 
       if (notebook) {
         parent = notebooks.currentWidget;
@@ -108,16 +110,4 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
     }
   });
 
-  // Add tooltip remove command.
-  registry.addCommand(CommandIDs.remove, {
-    execute: () => {
-      if (!tooltip) {
-        return;
-      }
-
-      tooltip.model.dispose();
-      tooltip.dispose();
-      tooltip = null;
-    }
-  });
 }
