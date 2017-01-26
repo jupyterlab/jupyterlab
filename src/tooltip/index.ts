@@ -12,7 +12,4 @@ export
 namespace CommandIDs {
   export
   const launch = 'tooltip:launch';
-
-  export
-  const remove = 'tooltip:remove';
 };
