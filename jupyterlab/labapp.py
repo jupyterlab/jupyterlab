@@ -205,6 +205,22 @@ class LabApp(NotebookApp):
     default_url = Unicode('/lab', config=True,
         help="The default URL to redirect to from `/`")
 
+    def init_server_extensions(self):
+        """Load any extensions specified by config.
+
+        Import the module, then call the load_jupyter_server_extension function,
+        if one exists.
+
+        If the JupyterLab server extension is not enabled, it will
+        be manually loaded with a warning.
+
+        The extension API is experimental, and may change in future releases.
+        """
+        super(LabApp, self).init_server_extensions()
+        msg = 'JupyterLab server extension not enabled, manually loading...'
+        if not self.nbserver_extensions.get('jupyterlab', False):
+            self.log.warn(msg)
+            load_jupyter_server_extension(self)
 
 #-----------------------------------------------------------------------------
 # Main entry point
