@@ -185,6 +185,15 @@ class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeMo
         this._realtime.linkString(this.value, 'textdoc:text');
       let cursorPromise =
         this._realtime.linkMap(this.selections, 'textdoc:cursors');
+      this._realtime.collaborators.changed.connect((collaborators, change)=>{
+        //if there are selections corresponding to non-collaborators,
+        //they are stale and should be removed.
+        for(let key of this.selections.keys()) {
+          if(!collaborators.has(key)) {
+            this.selections.delete(key);
+          }
+        }
+      });
       Promise.all([stringPromise, cursorPromise]).then(()=>{
         resolve();
       }).catch(()=>{

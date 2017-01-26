@@ -483,7 +483,9 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     const uuid = args.key;
     if (uuid !== this.uuid) {
       this._cleanSelections(uuid);
-      this._markSelections(uuid, args.newValue);
+      if(args.type !== 'remove') {
+        this._markSelections(uuid, args.newValue);
+      }
     }
   }
 
@@ -505,8 +507,11 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     const markers: CodeMirror.TextMarker[] = [];
     selections.forEach(selection => {
       const { anchor, head } = this._toCodeMirrorSelection(selection);
-      const markerOptions = this._toTextMarkerOptions(selection);
+      const markerOptions = this._toTextMarkerOptions(selection.style);
       markers.push(this.doc.markText(anchor, head, markerOptions));
+      let caret = this._getCaret(selection.uuid);
+      markers.push(this.doc.setBookmark(
+        this._toCodeMirrorPosition(selection.end), {widget: caret}));
     });
     this.selectionMarkers[uuid] = markers;
   }
@@ -538,7 +543,8 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     if (style) {
       return {
         className: style.className,
-        title: style.displayName
+        title: style.displayName,
+        css: style.css
       };
     }
     return undefined;
@@ -616,6 +622,30 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     this._changeGuard = false;
   }
 
+  private _getCaret(uuid: string) {
+    let caret: HTMLElement = document.createElement('span');
+    caret.className = 'CodeMirror-cursor';
+    let color: string = '';
+    if((this.model as any).realtimeHandler) {
+      let collaborator: any =
+        (this.model as any).realtimeHandler.collaborators.get(uuid);
+      color = collaborator ? collaborator.color || '' : '';
+      let me: any =
+        (this.model as any).realtimeHandler.collaborators.get((this.model as any).realtimeHandler.localCollaborator);
+      let myColor: string = me ? me.color || '' : '';
+
+      if(myColor) {
+        let r: number = parseInt(myColor.slice(1,3), 16);
+        let g: number  = parseInt(myColor.slice(3,5), 16);
+        let b: number  = parseInt(myColor.slice(5,7), 16);
+        this.selectionStyle = { css: `background-color: rgba( ${r}, ${g}, ${b}, 0.1)`};
+      }
+    }
+    caret.style.borderLeft=`2px ${color} solid`;
+    caret.appendChild(document.createTextNode('\u00a0'));
+    return caret;
+  }
+
   private _model: CodeEditor.IModel;
   private _editor: CodeMirror.Editor;
   protected selectionMarkers: { [key: string]: CodeMirror.TextMarker[] | undefined } = {};
@@ -627,8 +657,8 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
 
 
 /**
- * The namespace for `CodeMirrorEditor` statics.
- */
+* The namespace for `CodeMirrorEditor` statics.
+*/
 export
 namespace CodeMirrorEditor {
   /**

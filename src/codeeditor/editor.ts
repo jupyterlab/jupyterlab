@@ -128,6 +128,11 @@ namespace CodeEditor {
      * A display name added to a selection.
      */
     displayName?: string;
+
+    /**
+     * A CSS string to apply to the selection.
+     */
+    css?: string;
   }
 
   /**
