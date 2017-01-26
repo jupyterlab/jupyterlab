@@ -121,6 +121,14 @@ interface IRealtime {
  */
 export
 interface IRealtimeModel {
+
+  /**
+   * The realtime handler associated with this realtime model.
+   * Should only be non-null after registerCollaborative() has
+   * successfully resolved.
+   */
+  readonly realtimeHandler: IRealtimeHandler;
+
   /**
    * Register this object as collaborative.
    *
@@ -131,13 +139,6 @@ interface IRealtimeModel {
    * registering itself as collaborative.
    */
   registerCollaborative (handler: IRealtimeHandler): Promise<void>;
-
-  /**
-   * The realtime handler associated with this realtime model.
-   * Should only be non-null after registerCollaborative() has
-   * successfully resolved.
-   */
-  readonly realtimeHandler: IRealtimeHandler;
 }
 
 
@@ -155,6 +156,17 @@ interface IRealtimeHandler extends IDisposable {
    * for the handler, including the local user.
    */
   readonly collaborators: IObservableMap<ICollaborator>;
+
+  /**
+   * The local collaborator.
+   */
+  readonly localCollaborator: ICollaborator;
+
+  /**
+   * A promise resolved when the handler is ready to
+   * be used.
+   */
+  readonly ready: Promise<void>;
 
   /**
    * Create a map for the realtime model.
