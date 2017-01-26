@@ -376,7 +376,7 @@ class Dialog extends Panel {
     node.removeEventListener('contextmenu', this, true);
     node.removeEventListener('click', this, true);
     document.removeEventListener('focus', this, true);
-    document.addEventListener('blur', this, true);
+    document.removeEventListener('blur', this, true);
     this._original.focus();
   }
 
