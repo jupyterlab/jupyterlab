@@ -39,7 +39,8 @@ GREEN_ENABLED = '\033[32menabled \033[0m' if os.name != 'nt' else 'enabled '
 RED_DISABLED = '\033[31mdisabled\033[0m' if os.name != 'nt' else 'disabled'
 
 
-CONFIG_NAME = 'jupyterlab_config'
+CONFIG_NAME = 'jupyter_notebook_config'
+CONFIG_SECTION = 'LabConfig'
 
 #------------------------------------------------------------------------------
 # Public API
@@ -289,7 +290,7 @@ def _set_labextension_state(name, state,
             name
         ))
     labextensions = (
-        cfg.setdefault("LabApp", {})
+        cfg.setdefault(CONFIG_SECTION, {})
         .setdefault("labextensions", {})
     )
 
@@ -653,6 +654,7 @@ aliases = {
     "labextensions" : "InstallLabExtensionApp.labextensions_dir",
 }
 
+
 class InstallLabExtensionApp(BaseLabExtensionApp):
     """Entry point for installing JupyterLab extensions"""
     description = """Install JupyterLab extensions
@@ -897,7 +899,7 @@ class ListLabExtensionsApp(BaseLabExtensionApp):
             cm = BaseJSONConfigManager(parent=self, config_dir=config_dir)
             data = cm.get(CONFIG_NAME)
             labextensions = (
-                data.setdefault("LabApp", {})
+                data.setdefault(CONFIG_SECTION, {})
                 .setdefault("labextensions", {})
             )
             if labextensions:

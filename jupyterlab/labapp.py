@@ -7,7 +7,7 @@ import os
 from tornado import web
 
 from notebook.notebookapp import NotebookApp
-from traitlets import Dict, Unicode
+from traitlets import Unicode
 from notebook.base.handlers import IPythonHandler, FileFindHandler
 from jinja2 import FileSystemLoader
 from notebook.utils import url_path_join as ujoin
@@ -18,7 +18,7 @@ from .labextensions import (
     find_labextension, validate_labextension_folder,
     get_labextension_manifest_data_by_name,
     get_labextension_manifest_data_by_folder,
-    get_labextension_config_python
+    get_labextension_config_python, CONFIG_SECTION
 )
 
 #-----------------------------------------------------------------------------
@@ -45,23 +45,32 @@ EXTENSION_PREFIX = '/labextension'
 class LabHandler(IPythonHandler):
     """Render the Jupyter Lab View."""
 
+    def initialize(self, labextensions, extension_prefix):
+        self.labextensions = labextensions
+        self.extension_prefix = extension_prefix
+
     @web.authenticated
     def get(self):
-        static_prefix = ujoin(self.base_url, PREFIX)
-        labextensions = self.application.labextensions
-        data = get_labextension_manifest_data_by_folder(BUILT_FILES)
-        if 'main' not in data:
-            msg = ('JupyterLab build artifacts not detected, please see ' + 
+        manifest = get_labextension_manifest_data_by_folder(BUILT_FILES)
+        if 'main' not in manifest:
+            msg = ('JupyterLab build artifacts not detected, please see ' +
                    'CONTRIBUTING.md for build instructions.')
             self.log.error(msg)
-            self.write(self.render_template('error.html', 
-                       status_code=500, 
+            self.write(self.render_template('error.html',
+                       status_code=500,
                        status_message='JupyterLab Error',
                        page_title='JupyterLab Error',
                        message=msg))
             return
 
-        main = data['main']['entry']
+        config = self._get_lab_config(manifest)
+        self.write(self.render_template('lab.html', **config))
+
+    def _get_lab_config(self, manifest):
+        """Get the config data for the page template."""
+        static_prefix = ujoin(self.base_url, PREFIX)
+        labextensions = self.labextensions
+        main = manifest['main']['entry']
         bundles = [ujoin(static_prefix, name + '.bundle.js') for name in
                    ['loader', 'main']]
         entries = []
@@ -72,22 +81,9 @@ class LabHandler(IPythonHandler):
             if os.path.isfile(os.path.join(BUILT_FILES, css_file)):
                 css_files.append(ujoin(static_prefix, css_file))
 
-        config = dict(
-            static_prefix=static_prefix,
-            page_title='JupyterLab Alpha Preview',
-            mathjax_url=self.mathjax_url,
-            jupyterlab_main=main,
-            jupyterlab_css=css_files,
-            jupyterlab_bundles=bundles,
-            plugin_entries=entries,
-            mathjax_config='TeX-AMS_HTML-full,Safe',
-            #mathjax_config=self.mathjax_config # for the next release of the notebook
-        )
-
         configData = dict(
             terminalsAvailable=self.settings.get('terminals_available', False),
         )
-        extension_prefix = ujoin(self.base_url, EXTENSION_PREFIX)
 
         # Gather the lab extension files and entry points.
         for (name, data) in sorted(labextensions.items()):
@@ -97,12 +93,12 @@ class LabHandler(IPythonHandler):
                 if value.get('entry', None):
                     entries.append(value['entry'])
                     bundles.append('%s/%s/%s' % (
-                        extension_prefix, name, value['files'][0]
+                        self.extension_prefix, name, value['files'][0]
                     ))
                 for fname in value['files']:
                     if os.path.splitext(fname)[1] == '.css':
                         css_files.append('%s/%s/%s' % (
-                            extension_prefix, name, fname
+                            self.extension_prefix, name, fname
                         ))
             python_module = data.get('python_module', None)
             if python_module:
@@ -112,27 +108,84 @@ class LabHandler(IPythonHandler):
                 except Exception as e:
                     self.log.error(e)
 
+        mathjax_config = self.settings.get('mathjax_config',
+                                           'TeX-AMS_HTML-full,Safe')
+        config = dict(
+            static_prefix=static_prefix,
+            page_title='JupyterLab Alpha Preview',
+            mathjax_url=self.mathjax_url,
+            mathjax_config=mathjax_config,
+            jupyterlab_main=main,
+            jupyterlab_css=css_files,
+            jupyterlab_bundles=bundles,
+            plugin_entries=entries,
+        )
         config['jupyterlab_config'] = configData
-        self.write(self.render_template('lab.html', **config))
+        return config
 
     def get_template(self, name):
         return FILE_LOADER.load(self.settings['jinja2_env'], name)
 
 
-#-----------------------------------------------------------------------------
-# URL to handler mappings
-#-----------------------------------------------------------------------------
+def get_extensions(lab_config):
+    """Get the valid extensions from lab config."""
+    extensions = dict()
+    for (name, ext_config) in lab_config.labextensions.items():
+        if not ext_config['enabled']:
+            continue
+        folder = find_labextension(name)
+        if folder is None:
+            continue
+        warnings = validate_labextension_folder(name, folder)
+        if warnings:
+            continue
+        data = get_labextension_manifest_data_by_name(name)
+        if data is None:
+            continue
+        data['python_module'] = ext_config.get('python_module', None)
+        extensions[name] = data
+    return extensions
 
-default_handlers = [
-    (PREFIX + r'/?', LabHandler),
-    (PREFIX + r"/(.*)", FileFindHandler,
-        {'path': BUILT_FILES}),
-]
+
+def add_handlers(web_app, labextensions):
+    """Add the appropriate handlers to the web app.
+    """
+    base_url = web_app.settings['base_url']
+    prefix = ujoin(base_url, PREFIX)
+    extension_prefix = ujoin(base_url, EXTENSION_PREFIX)
+    handlers = [
+        (prefix + r'/?', LabHandler, {
+            'labextensions': labextensions,
+            'extension_prefix': extension_prefix
+        }),
+        (prefix + r"/(.*)", FileFindHandler, {
+            'path': BUILT_FILES
+        }),
+        (extension_prefix + r"/(.*)", FileFindHandler, {
+            'path': jupyter_path('labextensions'),
+            'no_cache_paths': ['/'],  # don't cache anything in labextensions
+        })
+    ]
+    web_app.add_handlers(".*$", handlers)
+
+
+def load_jupyter_server_extension(nbapp):
+    """Load the JupyterLab server extension.
+    """
+    # Print messages.
+    nbapp.log.info('JupyterLab alpha preview extension loaded from %s' % HERE)
+    base_dir = os.path.realpath(os.path.join(HERE, '..'))
+    dev_mode = os.path.exists(os.path.join(base_dir, '.git'))
+    if dev_mode:
+        nbapp.log.info(DEV_NOTE_NPM)
+
+    lab_config = nbapp.config.get(CONFIG_SECTION, {})
+    extensions = get_extensions(lab_config)
+    add_handlers(nbapp.web_app, extensions)
 
 
 class LabApp(NotebookApp):
     version = __version__
-    name = 'jupyterlab'
 
     description = """
         JupyterLab - An extensible computational environment for Jupyter.
@@ -149,96 +202,7 @@ class LabApp(NotebookApp):
     subcommands = dict()
 
     default_url = Unicode('/lab', config=True,
-        help="The default URL to redirect to from `/`"
-    )
-
-    labextensions = Dict({}, config=True,
-        help=('Dict of Python modules to load as lab extensions.'
-            'Each entry consists of a required `enabled` key used'
-            'to enable or disable the extension, and an optional'
-            '`python_module` key for the associated python module.'
-            'Extensions are loaded in alphabetical order')
-    )
-
-    def init_webapp(self):
-        """initialize tornado webapp and httpserver.
-        """
-        super(LabApp, self).init_webapp()
-        self.add_lab_handlers()
-        self.add_labextensions()
-
-    def add_labextensions(self):
-        """Get the enabledd and valid lab extensions.
-
-        Notes
-        -------
-        Adds a `labextensions` property to the web_app, which is a dict
-        containing manifest data for each enabled and active extension,
-        and optionally its associated python_module.
-        """
-        out = dict()
-        for (name, config) in self.labextensions.items():
-            if not config['enabled']:
-                continue
-            folder = find_labextension(name)
-            if folder is None:
-                continue
-            warnings = validate_labextension_folder(name, folder)
-            if warnings:
-                continue
-            data = get_labextension_manifest_data_by_name(name)
-            if data is None:
-                continue
-            data['python_module'] = config.get('python_module', None)
-            out[name] = data
-        self.web_app.labextensions = out
-
-    def add_lab_handlers(self):
-        """Add the lab-specific handlers to the tornado app."""
-        web_app = self.web_app
-        base_url = web_app.settings['base_url']
-        web_app.add_handlers(".*$",
-            [(ujoin(base_url, h[0]),) + h[1:] for h in default_handlers])
-        extension_prefix = ujoin(base_url, EXTENSION_PREFIX)
-        labextension_handler = (
-            r"%s/(.*)" % extension_prefix, FileFindHandler, {
-                'path': jupyter_path('labextensions'),
-                'no_cache_paths': ['/'],  # don't cache anything in labbextensions
-            }
-        )
-        web_app.add_handlers(".*$", [labextension_handler])
-        base_dir = os.path.realpath(os.path.join(HERE, '..'))
-        dev_mode = os.path.exists(os.path.join(base_dir, '.git'))
-        if dev_mode:
-            self.log.info(DEV_NOTE_NPM)
-
-
-def bootstrap_from_nbapp(nbapp):
-    """Bootstrap the lab app on top of a notebook app.
-    """
-    if isinstance(nbapp, LabApp):
-        return
-
-    labapp = LabApp()
-
-    # Get data from the nbapp.
-    labapp.config_dir = nbapp.config_dir
-    labapp.log = nbapp.log
-    labapp.web_app = nbapp.web_app
-
-    cli_config = nbapp.cli_config.get('NotebookApp', {})
-    cli_config.update(nbapp.cli_config.get('LabApp', {}))
-
-    # Handle config.
-    for (key, value) in cli_config.items():
-        setattr(labapp, key, value)
-    labapp.load_config_file()
-    # Enforce cli override.
-    for (key, value) in cli_config.items():
-        setattr(labapp, key, value)
-
-    labapp.add_lab_handlers()
-    labapp.add_labextensions()
+        help="The default URL to redirect to from `/`")
 
 
 #-----------------------------------------------------------------------------
