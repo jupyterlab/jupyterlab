@@ -141,6 +141,7 @@
   font-size: var(--jp-ui-font-size2);
   color: var(--jp-ui-font-color0);
   border: none;
+  outline: none;
 }
 
 
@@ -157,6 +158,12 @@
 }
 
 
+.jp-Dialog-selectWrapper.jp-mod-focused,
+.jp-Dialog-inputWrapper.jp-mod-focused {
+  border: 2px solid var(--md-light-blue-200);
+}
+
+
 .jp-Dialog-select {
   flex: 1 1 auto;
   height: 32px;
@@ -164,4 +171,5 @@
   background: white;
   color: var(--jp-ui-font-color0);
   border: none;
+  outline: none;
 }
