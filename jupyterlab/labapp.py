@@ -151,24 +151,22 @@ def add_handlers(web_app, labextensions):
     """Add the appropriate handlers to the web app.
     """
     base_url = web_app.settings['base_url']
+    prefix = ujoin(base_url, PREFIX)
     extension_prefix = ujoin(base_url, EXTENSION_PREFIX)
-    default_handlers = [
-        (PREFIX + r'/?', LabHandler, {
+    handlers = [
+        (prefix + r'/?', LabHandler, {
             'labextensions': labextensions,
             'extension_prefix': extension_prefix
         }),
-        (PREFIX + r"/(.*)", FileFindHandler,
-            {'path': BUILT_FILES}),
-    ]
-    web_app.add_handlers(".*$",
-        [(ujoin(base_url, h[0]),) + h[1:] for h in default_handlers])
-    labextension_handler = (
-        r"%s/(.*)" % extension_prefix, FileFindHandler, {
+        (prefix + r"/(.*)", FileFindHandler, {
+            'path': BUILT_FILES
+        }),
+        (extension_prefix + r"/(.*)", FileFindHandler, {
             'path': jupyter_path('labextensions'),
-            'no_cache_paths': ['/'],  # don't cache anything in labbextensions
-        }
-    )
-    web_app.add_handlers(".*$", [labextension_handler])
+            'no_cache_paths': ['/'],  # don't cache anything in labextensions
+        })
+    ]
+    web_app.add_handlers(".*$", handlers)
 
 
 def load_jupyter_server_extension(nbapp):
