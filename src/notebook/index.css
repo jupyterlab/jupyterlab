@@ -90,6 +90,10 @@
   cursor: move;
 }
 
+.jp-Notebook-cell .jp-OutputArea {
+  max-height: 1000px;
+}
+
 .jp-dragImage {
   position: absolute;
   width: 50px;
