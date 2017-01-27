@@ -427,9 +427,9 @@ namespace RenderMime {
     /**
      * Create a new url resolver for a console.
      */
-    constructor(session: Session.ISession, contents: Contents.IManager) {
-      this._session = session;
-      this._contents = contents;
+    constructor(options: IUrlResolverOptions) {
+      this._session = options.session;
+      this._contents = options.contents;
     }
 
     /**
@@ -459,5 +459,21 @@ namespace RenderMime {
 
     private _session: Session.ISession;
     private _contents: Contents.IManager;
+  }
+
+  /**
+   * The options used to create a UrlResolver.
+   */
+  export
+  interface IUrlResolverOptions {
+    /**
+     * The session used by the resolver.
+     */
+    session: Session.ISession;
+
+    /**
+     * The contents manager used by the resolver.
+     */
+    contents: Contents.IManager;
   }
 }

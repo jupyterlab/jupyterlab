@@ -342,7 +342,10 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       mimeTypeService: editorServices.mimeTypeService
     };
     let panel = new ConsolePanel(options);
-    let resolver = new RenderMime.UrlResolver(session, services.contents);
+    let resolver = new RenderMime.UrlResolver({
+      session,
+      contents: services.contents
+    });
     panel.console.rendermime.resolver = resolver;
 
     let specs = manager.specs;
