@@ -30,6 +30,10 @@ import {
 } from '../common/sanitizer';
 
 import {
+  ICommandLinker
+} from '../commandlinker';
+
+import {
   HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
   JavascriptRenderer, SVGRenderer, MarkdownRenderer, PDFRenderer
 } from '../renderers';
@@ -79,6 +83,7 @@ class RenderMime {
     this._order = new Vector(options.order);
     this._sanitizer = options.sanitizer;
     this._resolver = options.resolver || null;
+    this._linker = options.commandLinker || null;
   }
 
   /**
@@ -125,7 +130,8 @@ class RenderMime {
       source: bundle[mimetype],
       injector,
       resolver: this._resolver,
-      sanitizer: trusted ? null : this._sanitizer
+      sanitizer: trusted ? null : this._sanitizer,
+      commandLinker: this._linker
     };
     return this._renderers[mimetype].render(rendererOptions);
   }
@@ -160,7 +166,8 @@ class RenderMime {
     return new RenderMime({
       renderers: this._renderers,
       order: this._order.iter(),
-      sanitizer: this._sanitizer
+      sanitizer: this._sanitizer,
+      commandLinker: this._linker
     });
   }
 
@@ -206,6 +213,7 @@ class RenderMime {
   private _order: Vector<string>;
   private _sanitizer: ISanitizer = null;
   private _resolver: RenderMime.IResolver;
+  private _linker: ICommandLinker;
 }
 
 
@@ -240,6 +248,11 @@ namespace RenderMime {
      * The default is `null`.
      */
     resolver?: IResolver;
+
+    /**
+     * The optional command linker object.
+     */
+    commandLinker?: ICommandLinker;
   }
 
   /**
@@ -362,6 +375,11 @@ namespace RenderMime {
      * If given, should be used to sanitize raw html.
      */
     sanitizer?: ISanitizer;
+
+    /**
+     * An optional command linker.
+     */
+    commandLinker: ICommandLinker;
   }
 
   /**

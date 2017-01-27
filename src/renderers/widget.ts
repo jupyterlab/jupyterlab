@@ -11,12 +11,24 @@ import * as CodeMirror
 import 'codemirror/addon/runmode/runmode';
 
 import {
+  utils
+} from '@jupyterlab/services';
+
+import {
   requireMode
 } from '../codemirror';
 
 import {
   CodeMirrorEditor
 } from '../codemirror/editor';
+
+import {
+  ICommandLinker
+} from '../commandlinker';
+
+import {
+  CommandIDs
+} from '../filebrowser';
 
 import * as marked
   from 'marked';
@@ -155,7 +167,8 @@ class RenderedHTML extends RenderedHTMLCommon {
     }
     appendHtml(this.node, source);
     if (options.resolver) {
-      this._urlResolved = resolveUrls(this.node, options.resolver);
+      this._urlResolved = resolveUrls(this.node, options.resolver,
+                                      options.commandLinker);
     }
   }
 
@@ -194,7 +207,8 @@ class RenderedMarkdown extends RenderedHTMLCommon {
       }
       appendHtml(this.node, content);
       if (options.resolver) {
-        this._urlResolved = resolveUrls(this.node, options.resolver);
+        this._urlResolved = resolveUrls(this.node, options.resolver,
+                                        options.commandLinker);
       }
       this.fit();
       this._rendered = true;
@@ -293,7 +307,8 @@ class RenderedSVG extends Widget {
       throw new Error('SVGRender: Error: Failed to create <svg> element');
     }
     if (options.resolver) {
-      this._urlResolved = resolveUrls(this.node, options.resolver);
+      this._urlResolved = resolveUrls(this.node, options.resolver,
+                                      options.commandLinker);
     }
     this.addClass(SVG_CLASS);
   }
@@ -324,10 +339,13 @@ class RenderedPDF extends Widget {
  *
  * @param resolver - A url resolver.
  *
+ * @param linker - A command linker.
+ *
  * @returns a promise fulfilled when the relative urls have been resolved.
  */
 export
-function resolveUrls(node: HTMLElement, resolver: RenderMime.IResolver): Promise<void> {
+function resolveUrls(node: HTMLElement, resolver: RenderMime.IResolver,
+                     linker: ICommandLinker | null): Promise<void> {
   let imgs = node.getElementsByTagName('img');
   for (let i = 0; i < imgs.length; i++) {
     let img = imgs[i];
@@ -346,6 +364,11 @@ function resolveUrls(node: HTMLElement, resolver: RenderMime.IResolver): Promise
     if (href) {
       return resolver.resolveUrl(href).then(url => {
         anchor.href = url;
+        if (linker && !utils.urlParse(url).protocol) {
+          linker.connectNode(anchor, CommandIDs.open, {
+            path: url
+          });
+        }
         return void 0;
       });
     }

@@ -380,7 +380,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     }
     let cwd = ContentsManager.dirname(this._path);
     let path = ContentsManager.getAbsolutePath(url, cwd);
-    return this._manager.contents.getDownloadUrl(path);
+    return Promise.resolve(path);
   }
 
   /**
