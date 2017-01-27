@@ -355,6 +355,7 @@ function handleUrls(node: HTMLElement, resolver: RenderMime.IResolver, pathHandl
  */
 function handleImage(img: HTMLImageElement, resolver: RenderMime.IResolver): Promise<void> {
   let source = img.getAttribute('src');
+  img.src = '';
   return resolver.resolveUrl(source).then(path => {
     return resolver.getDownloadUrl(path);
   }).then(url => {
