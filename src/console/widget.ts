@@ -647,7 +647,7 @@ namespace CodeConsole {
   }
 
   /**
-   * Create a url resolver for a console.
+   * A rendermime url resolver for a console.
    */
   export
   class UrlResolver implements RenderMime.IResolver {
