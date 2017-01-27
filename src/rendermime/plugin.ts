@@ -10,10 +10,6 @@ import {
 } from '../application';
 
 import {
-  IFrame
-} from '../common/iframe';
-
-import {
   defaultSanitizer
 } from '../common/sanitizer';
 
