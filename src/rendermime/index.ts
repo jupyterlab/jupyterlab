@@ -256,7 +256,7 @@ namespace RenderMime {
     resolver?: IResolver;
 
     /**
-     * An optional path handler
+     * An optional path handler.
      */
     pathHandler?: IPathHandler;
   }
