@@ -346,23 +346,25 @@ class RenderedPDF extends Widget {
 export
 function resolveUrls(node: HTMLElement, resolver: RenderMime.IResolver,
                      linker: ICommandLinker | null): Promise<void> {
+  let promises: Promise<void>[] = [];
   let imgs = node.getElementsByTagName('img');
   for (let i = 0; i < imgs.length; i++) {
     let img = imgs[i];
     let source = img.getAttribute('src');
     if (source) {
-      return resolver.resolveUrl(source).then(url => {
+      promises.push(resolver.resolveUrl(source).then(url => {
         img.src = url;
         return void 0;
-      });
+      }));
     }
   }
   let anchors = node.getElementsByTagName('a');
   for (let i = 0; i < anchors.length; i++) {
     let anchor = anchors[i];
     let href = anchor.getAttribute('href');
+    anchor.target = '_blank';
     if (href) {
-      return resolver.resolveUrl(href).then(url => {
+      promises.push(resolver.resolveUrl(href).then(url => {
         anchor.href = url;
         if (linker && !utils.urlParse(url).protocol) {
           linker.connectNode(anchor, CommandIDs.open, {
@@ -370,9 +372,10 @@ function resolveUrls(node: HTMLElement, resolver: RenderMime.IResolver,
           });
         }
         return void 0;
-      });
+      }));
     }
   }
+  return Promise.all(promises).then(() => { return void 0; });
 }
 
 
