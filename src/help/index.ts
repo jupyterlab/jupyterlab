@@ -14,6 +14,9 @@ namespace CommandIDs {
   const activate = 'help-jupyterlab:activate';
 
   export
+  const close = 'help-jupyterlab:close';
+
+  export
   const show = 'help-jupyterlab:show';
 
   export
