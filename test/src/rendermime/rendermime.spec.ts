@@ -24,19 +24,59 @@ import {
 } from '../../../lib/rendermime';
 
 import {
-  defaultRenderMime
+  defaultRenderMime, createFileContext
 } from '../utils';
 
 
+const RESOLVER: RenderMime.IResolver = createFileContext();
+
+
 describe('rendermime/index', () => {
+
+  let r: RenderMime;
+
+  beforeEach(() => {
+    r = defaultRenderMime();
+  });
 
   describe('RenderMime', () => {
 
     describe('#constructor()', () => {
 
-      it('should accept a mapping and a default order', () => {
-        let r = defaultRenderMime();
+      it('should create a new rendermime instance', () => {
         expect(r instanceof RenderMime).to.be(true);
+      });
+
+    });
+
+    describe('#resolver', () => {
+
+      it('should be the resolver used by the rendermime', () => {
+        expect(r.resolver).to.be(null);
+        r.resolver = RESOLVER;
+        expect(r.resolver).to.be(RESOLVER);
+      });
+
+    });
+
+    describe('#pathHandler', () => {
+
+      it('should be the path handler used by the rendermime', () => {
+        expect(r.pathHandler).to.be(null);
+        let handler = {
+          handlePath: () => { /* no-op */ }
+        };
+        r.pathHandler = handler;
+        expect(r.pathHandler).to.be(handler);
+      });
+
+    });
+
+    describe('#mimeTypes()', () => {
+
+      it('should get an iterator over the ordered list of mimetypes', () => {
+        let mimetypes = r.mimetypes();
+        expect(toArray(mimetypes).length).to.be.above(0);
       });
 
     });
@@ -44,13 +84,11 @@ describe('rendermime/index', () => {
     describe('#render()', () => {
 
       it('should render a mimebundle', () => {
-        let r = defaultRenderMime();
         let w = r.render({ bundle: { 'text/plain': 'foo' } });
         expect(w instanceof Widget).to.be(true);
       });
 
       it('should return `undefined` for an unregistered mime type', () => {
-        let r = defaultRenderMime();
         let value = r.render({ bundle: { 'text/fizz': 'buzz' } });
         expect(value).to.be(void 0);
       });
@@ -60,7 +98,6 @@ describe('rendermime/index', () => {
           'text/plain': 'foo',
           'text/html': '<h1>foo</h1>'
         };
-        let r = defaultRenderMime();
         let w = r.render({ bundle, trusted: true });
         let el = w.node.firstChild as HTMLElement;
         expect(el.localName).to.be('h1');
@@ -72,7 +109,6 @@ describe('rendermime/index', () => {
           'text/javascript': 'window.x = 1',
           'image/png': 'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
         };
-        let r = defaultRenderMime();
         let w = r.render({ bundle, trusted: false });
         let el = w.node.firstChild as HTMLElement;
         expect(el.localName).to.be('img');
@@ -83,7 +119,6 @@ describe('rendermime/index', () => {
           'text/plain': 'foo',
           'text/html': '<h1>foo</h1>'
         };
-        let r = defaultRenderMime();
         let w = r.render({ bundle, trusted: false });
         let el = w.node.firstChild as HTMLElement;
         expect(el.localName).to.be('h1');
@@ -93,7 +128,6 @@ describe('rendermime/index', () => {
         let bundle: RenderMime.MimeMap<string> = {
           'text/html': '<h1>foo <script>window.x=1></scrip></h1>'
         };
-        let r = defaultRenderMime();
         let widget = r.render({ bundle });
         expect(widget.node.innerHTML).to.be('<h1>foo </h1>');
       });
@@ -102,7 +136,6 @@ describe('rendermime/index', () => {
         let bundle: RenderMime.MimeMap<JSONObject> = {
           'application/json': { 'foo': 1 }
         };
-        let r = defaultRenderMime();
         let widget = r.render({ bundle });
         expect(widget.node.textContent).to.be('{\n  "foo": 1\n}');
       });
@@ -121,9 +154,41 @@ describe('rendermime/index', () => {
         let bundle: RenderMime.MimeMap<string> = {
           'foo/bar': '1'
         };
-        let r = defaultRenderMime();
         r.render({ bundle, injector });
         expect(called).to.be(2);
+      });
+
+      it('should send a url resolver', (done) => {
+        let bundle: RenderMime.MimeMap<string> = {
+          'text/html': '<img src="./foo">foo</img>'
+        };
+        let called = false;
+        r.resolver = {
+          resolveUrl: (path: string) => {
+            called = true;
+            return Promise.resolve(path);
+          },
+          getDownloadUrl: (path: string) => {
+            expect(called).to.be(true);
+            done();
+            return Promise.resolve(path);
+          }
+        };
+        r.render({ bundle, trusted: true });
+      });
+
+      it('should send a path handler', (done) => {
+        let bundle: RenderMime.MimeMap<string> = {
+          'text/html': '<a href="./foo/bar.txt">foo</a>'
+        };
+        r.resolver = RESOLVER;
+        r.pathHandler = {
+          handlePath: (node: HTMLElement, path: string) => {
+            expect(path).to.be('foo/bar.txt');
+            done();
+          }
+        };
+        r.render({ bundle, trusted: true });
       });
 
     });
@@ -135,12 +200,10 @@ describe('rendermime/index', () => {
           'text/plain': 'foo',
           'text/html': '<h1>foo</h1>'
         };
-        let r = defaultRenderMime();
         expect(r.preferredMimetype(bundle)).to.be('text/html');
       });
 
       it('should return `undefined` if there are no registered mimetypes', () => {
-        let r = defaultRenderMime();
         expect(r.preferredMimetype({ 'text/fizz': 'buzz' })).to.be(void 0);
       });
 
@@ -150,7 +213,6 @@ describe('rendermime/index', () => {
           'text/javascript': 'window.x = 1',
           'image/png': 'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
         };
-        let r = defaultRenderMime();
         expect(r.preferredMimetype(bundle)).to.be('image/png');
       });
 
@@ -159,7 +221,6 @@ describe('rendermime/index', () => {
           'text/plain': 'foo',
           'text/html': '<h1>foo</h1>'
         };
-        let r = defaultRenderMime();
         expect(r.preferredMimetype(bundle)).to.be('text/html');
       });
     });
@@ -167,7 +228,6 @@ describe('rendermime/index', () => {
     describe('#clone()', () => {
 
       it('should clone the rendermime instance with shallow copies of data', () => {
-        let r = defaultRenderMime();
         let c = r.clone();
         expect(toArray(c.mimetypes())).to.eql(toArray(r.mimetypes()));
         let t = new TextRenderer();
@@ -180,7 +240,6 @@ describe('rendermime/index', () => {
     describe('#addRenderer()', () => {
 
       it('should add a renderer by mimetype', () => {
-        let r = defaultRenderMime();
         let t = new TextRenderer();
         r.addRenderer('text/foo', t);
         let index = toArray(r.mimetypes()).indexOf('text/foo');
@@ -188,7 +247,6 @@ describe('rendermime/index', () => {
       });
 
       it('should take an optional order index', () => {
-        let r = defaultRenderMime();
         let t = new TextRenderer();
         let len = toArray(r.mimetypes()).length;
         r.addRenderer('text/foo', t, 0);
@@ -202,7 +260,6 @@ describe('rendermime/index', () => {
     describe('#removeRenderer()', () => {
 
       it('should remove a renderer by mimetype', () => {
-        let r = defaultRenderMime();
         r.removeRenderer('text/html');
         let bundle: RenderMime.MimeMap<string> = {
           'text/html': '<h1>foo</h1>'
@@ -211,7 +268,6 @@ describe('rendermime/index', () => {
       });
 
       it('should be a no-op if the mimetype is not registered', () => {
-        let r = defaultRenderMime();
         r.removeRenderer('text/foo');
       });
 
@@ -220,12 +276,10 @@ describe('rendermime/index', () => {
     describe('#getRenderer()', () => {
 
       it('should get a renderer by mimetype', () => {
-        let r = defaultRenderMime();
         expect(r.getRenderer('text/plain')).to.be.a(TextRenderer);
       });
 
       it('should return undefined for missing mimetype', () => {
-        let r = defaultRenderMime();
         expect(r.getRenderer('hello/world')).to.be(undefined);
       });
 
@@ -234,7 +288,6 @@ describe('rendermime/index', () => {
     describe('#mimetypes()', () => {
 
       it('should get the ordered list of mimetypes', () => {
-        let r = defaultRenderMime();
         expect(toArray(r.mimetypes()).indexOf('text/html')).to.not.be(-1);
       });
 
