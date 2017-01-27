@@ -62,7 +62,8 @@ import {
 } from '../services';
 
 import {
-  IConsoleTracker, ICreateConsoleArgs, ConsolePanel, CommandIDs
+  IConsoleTracker, ICreateConsoleArgs, ConsolePanel, CommandIDs,
+  CodeConsole
 } from './index';
 
 
@@ -342,6 +343,8 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       mimeTypeService: editorServices.mimeTypeService
     };
     let panel = new ConsolePanel(options);
+    Private.addResolver(panel.console, services);
+
     let specs = manager.specs;
     let displayName = specs.kernelspecs[session.kernel.name].display_name;
     let captionOptions: Private.ICaptionOptions = {
@@ -474,5 +477,31 @@ namespace Private {
       caption += `\nLast Execution: ${dateTime(executed.toISOString())}`;
     }
     return caption;
+  }
+
+  /**
+   * Add a url resolver to a console.
+   */
+  export
+  function addResolver(console: CodeConsole, services: IServiceManager): void {
+    console.rendermime.resolver = {
+      resolveUrl: (url: string) => {
+        // Ignore urls that have a protocol.
+        if (utils.urlParse(url).protocol || url.indexOf('//') === 0) {
+          return Promise.resolve(url);
+        }
+        let path = console.session.path;
+        let cwd = ContentsManager.dirname(path);
+        path = ContentsManager.getAbsolutePath(url, cwd);
+        return Promise.resolve(path);
+      },
+      getDownloadUrl: (path: string) => {
+        // Ignore urls that have a protocol.
+        if (utils.urlParse(path).protocol || path.indexOf('//') === 0) {
+          return Promise.resolve(path);
+        }
+        return services.contents.getDownloadUrl(path);
+      }
+    };
   }
 }
