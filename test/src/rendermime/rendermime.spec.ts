@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  Contents, ServiceManager, Session
+} from '@jupyterlab/services';
+
+import {
   toArray
 } from 'phosphor/lib/algorithm/iteration';
 
@@ -293,6 +297,80 @@ describe('rendermime/index', () => {
 
     });
 
+    describe('.UrlResolver', () => {
+      let resolver: RenderMime.UrlResolver;
+      let contents: Contents.IManager;
+      let session: Session.ISession;
+
+      before((done) => {
+        const manager = new ServiceManager();
+        contents = manager.contents;
+        manager.ready.then(() => {
+          return manager.sessions.startNew({ path: './urlresolver' });
+        }).then(s => {
+          session = s;
+          resolver = new RenderMime.UrlResolver({
+            session,
+            contents: manager.contents
+          });
+        }).then(done, done);
+      });
+
+      after((done) => {
+        session.kernel.ready.then(() => {
+          return session.shutdown();
+        }).then(done, done);
+      });
+
+      context('#constructor', () => {
+
+        it('should create a UrlResolver instance', () => {
+          expect(resolver).to.be.a(RenderMime.UrlResolver);
+        });
+
+      });
+
+      context('#resolveUrl()', () => {
+
+        it('should resolve a relative url', (done) => {
+          resolver.resolveUrl('./foo').then(path => {
+            expect(path).to.be('foo');
+          }).then(done, done);
+        });
+
+        it('should ignore urls that have a protocol', (done) => {
+          resolver.resolveUrl('http://foo').then(path => {
+            expect(path).to.be('http://foo');
+            done();
+          }).catch(done);
+        });
+
+      });
+
+      context('#getDownloadUrl()', () => {
+
+        it('should resolve an absolute server url to a download url', (done) => {
+          let contextPromise = resolver.getDownloadUrl('foo');
+          let contentsPromise = contents.getDownloadUrl('foo');
+          Promise.all([contextPromise, contentsPromise])
+          .then(values => {
+            expect(values[0]).to.be(values[1]);
+            done();
+          }).catch(done);
+        });
+
+        it('should ignore urls that have a protocol', (done) => {
+          resolver.getDownloadUrl('http://foo').then(path => {
+            expect(path).to.be('http://foo');
+            done();
+          }).catch(done);
+        });
+
+      });
+
+    });
+
   });
+
 
 });
