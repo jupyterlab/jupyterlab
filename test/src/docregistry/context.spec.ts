@@ -388,17 +388,34 @@ describe('docregistry/context', () => {
     describe('#resolveUrl()', () => {
 
       it('should resolve a relative url to a correct server path', (done) => {
-        let resolveUrlPromise = context.resolveUrl('./foo');
-        let getDownloadUrlPromise = manager.contents.getDownloadUrl('foo');
-        Promise.all([resolveUrlPromise, getDownloadUrlPromise])
-        .then((values)=>{
+        context.resolveUrl('./foo').then(path => {
+          expect(path).to.be('foo');
+        }).then(done, done);
+      });
+
+      it('should ignore urls that have a protocol', (done) => {
+        context.resolveUrl('http://foo').then(path => {
+          expect(path).to.be('http://foo');
+          done();
+        }).catch(done);
+      });
+
+    });
+
+    describe('#getDownloadUrl()', () => {
+
+      it('should resolve an absolute server url to a download url', (done) => {
+        let contextPromise = context.getDownloadUrl('foo');
+        let contentsPromise = manager.contents.getDownloadUrl('foo');
+        Promise.all([contextPromise, contentsPromise])
+        .then(values => {
           expect(values[0]).to.be(values[1]);
           done();
         }).catch(done);
       });
 
       it('should ignore urls that have a protocol', (done) => {
-        context.resolveUrl('http://foo').then((path)=>{
+        context.getDownloadUrl('http://foo').then(path => {
           expect(path).to.be('http://foo');
           done();
         }).catch(done);

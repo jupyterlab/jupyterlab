@@ -734,11 +734,14 @@ namespace DocumentRegistry {
     listCheckpoints(): Promise<Contents.ICheckpointModel[]>;
 
     /**
-     * Resolve a url to a correct server path.
-     *
-     * @returns a promise which resolves with the resolved url.
+     * Resolve a relative url to a correct server path.
      */
     resolveUrl(url: string): Promise<string>;
+
+    /**
+     * Get the download url of a given absolute server path.
+     */
+    getDownloadUrl(path: string): Promise<string>;
 
     /**
      * Add a sibling widget to the document manager.

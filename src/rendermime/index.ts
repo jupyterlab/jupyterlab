@@ -79,6 +79,7 @@ class RenderMime {
     this._order = new Vector(options.order);
     this._sanitizer = options.sanitizer;
     this._resolver = options.resolver || null;
+    this._handler = options.pathHandler || null;
   }
 
   /**
@@ -89,6 +90,16 @@ class RenderMime {
   }
   set resolver(value: RenderMime.IResolver) {
     this._resolver = value;
+  }
+
+  /**
+   * The object used to handle path opening links.
+   */
+  get pathHandler(): RenderMime.IPathHandler {
+    return this._handler;
+  }
+  set pathHandler(value: RenderMime.IPathHandler) {
+    this._handler = value;
   }
 
   /**
@@ -125,7 +136,8 @@ class RenderMime {
       source: bundle[mimetype],
       injector,
       resolver: this._resolver,
-      sanitizer: trusted ? null : this._sanitizer
+      sanitizer: trusted ? null : this._sanitizer,
+      pathHandler: this._handler
     };
     return this._renderers[mimetype].render(rendererOptions);
   }
@@ -160,7 +172,8 @@ class RenderMime {
     return new RenderMime({
       renderers: this._renderers,
       order: this._order.iter(),
-      sanitizer: this._sanitizer
+      sanitizer: this._sanitizer,
+      pathHandler: this._handler
     });
   }
 
@@ -205,7 +218,8 @@ class RenderMime {
   private _renderers: RenderMime.MimeMap<RenderMime.IRenderer> = Object.create(null);
   private _order: Vector<string>;
   private _sanitizer: ISanitizer = null;
-  private _resolver: RenderMime.IResolver;
+  private _resolver: RenderMime.IResolver | null;
+  private _handler: RenderMime.IPathHandler | null;
 }
 
 
@@ -240,6 +254,11 @@ namespace RenderMime {
      * The default is `null`.
      */
     resolver?: IResolver;
+
+    /**
+     * An optional path handler.
+     */
+    pathHandler?: IPathHandler;
   }
 
   /**
@@ -362,6 +381,22 @@ namespace RenderMime {
      * If given, should be used to sanitize raw html.
      */
     sanitizer?: ISanitizer;
+
+    /**
+     * An optional path handler.
+     */
+    pathHandler?: IPathHandler;
+  }
+
+  /**
+   * An object that handles path open on click for a node.
+   */
+  export
+  interface IPathHandler {
+    /**
+     * Add the path open handler to the node.
+     */
+    handlePath(node: HTMLElement, path: string): void;
   }
 
   /**
@@ -370,8 +405,13 @@ namespace RenderMime {
   export
   interface IResolver {
     /**
-     * Resolve a url to a correct server path.
+     * Resolve a relative url to a correct server path.
      */
     resolveUrl(url: string): Promise<string>;
+
+    /**
+     * Get the download url of a given absolute server path.
+     */
+    getDownloadUrl(path: string): Promise<string>;
   }
 }
