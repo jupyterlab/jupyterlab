@@ -136,7 +136,7 @@ class CompleterWidget extends Widget {
       return;
     }
     // Clean up scroll listener if anchor is being replaced.
-    if (this._anchor) {
+    if (this._anchor && !this._anchor.isDisposed) {
       this._anchor.node.removeEventListener('scroll', this, USE_CAPTURE);
     }
 
@@ -213,7 +213,7 @@ class CompleterWidget extends Widget {
     document.removeEventListener('keydown', this, USE_CAPTURE);
     document.removeEventListener('mousedown', this, USE_CAPTURE);
 
-    if (this._anchor) {
+    if (this._anchor && !this._anchor.isDisposed) {
       this._anchor.node.removeEventListener('scroll', this, USE_CAPTURE);
     }
   }
