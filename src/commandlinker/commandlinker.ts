@@ -98,6 +98,8 @@ interface ICommandLinker extends IDisposable {
    *
    * @param args - The arguments with which to invoke the command.
    *
+   * @returns The same attributes that were passed in.
+   *
    * #### Notes
    * The attributes instance that is returned is identical to the attributes
    * instance that was passed in, i.e., this method mutates the original.
@@ -217,6 +219,8 @@ class CommandLinker implements ICommandLinker {
    * @param command - The command ID to execute upon click.
    *
    * @param args - The arguments with which to invoke the command.
+   *
+   * @returns The same attributes that were passed in.
    *
    * #### Notes
    * The attributes instance that is returned is identical to the attributes
