@@ -388,7 +388,7 @@ describe('docregistry/context', () => {
     describe('#resolveUrl()', () => {
 
       it('should resolve a relative url to a correct server path', (done) => {
-        context.resolve('./foo').then(path => {
+        context.resolveUrl('./foo').then(path => {
           expect(path).to.be('foo');
         }).then(done, done);
       });
