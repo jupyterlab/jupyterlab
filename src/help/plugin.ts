@@ -6,16 +6,8 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  installMessageHook, Message
-} from 'phosphor/lib/core/messaging';
-
-import {
   Menu
 } from 'phosphor/lib/ui/menu';
-
-import {
-  WidgetMessage
-} from 'phosphor/lib/ui/widget';
 
 import {
   CommandIDs as AboutCommandIDs
@@ -170,22 +162,6 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     iframe.title.label = category;
     iframe.id = `${namespace}`;
     iframe.url = url;
-    // Add the iframe to the instance tracker.
-    tracker.add(iframe);
-
-    // If the help widget visibility changes, update the tracker.
-    installMessageHook(iframe, (iframe: IFrame, msg: Message) => {
-      switch (msg) {
-        case WidgetMessage.AfterShow:
-        case WidgetMessage.BeforeHide:
-          // Wait until hide has completed.
-          requestAnimationFrame(() => { tracker.save(iframe); });
-          break;
-        default:
-          break;
-      }
-      return true;
-    });
     return iframe;
   }
 
@@ -203,24 +179,19 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     menu.addItem({ type: 'separator' });
     RESOURCES.forEach(args => { menu.addItem({ args, command }); });
     menu.addItem({ type: 'separator' });
+    menu.addItem({ command: CommandIDs.close });
     menu.addItem({ command: StateDBCommandIDs.clear });
 
     return menu;
   }
 
   /**
-   * Attach the help iframe widget to the application shell.
-   */
-  function attachHelp(): void {
-    if (!iframe.isAttached) {
-      app.shell.addToRightArea(iframe);
-    }
-  }
-
-  /**
    * Show the help widget.
    */
   function showHelp(): void {
+    if (!iframe) {
+      return;
+    }
     app.shell.activateRight(iframe.id);
   }
 
@@ -228,19 +199,8 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
    * Hide the help widget.
    */
   function hideHelp(): void {
-    if (!iframe.isHidden) {
+    if (iframe && !iframe.isHidden) {
       app.shell.collapseRight();
-    }
-  }
-
-  /**
-   * Toggle whether the help widget is shown or hidden.
-   */
-  function toggleHelp(): void {
-    if (iframe.isHidden) {
-      showHelp();
-    } else {
-      hideHelp();
     }
   }
 
@@ -258,11 +218,17 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
 
       if (iframe) {
         iframe.url = url;
-        tracker.save(iframe);
       } else {
         iframe = newIFrame(url);
+        tracker.add(iframe);
       }
-      attachHelp();
+
+      tracker.save(iframe);
+
+      if (!iframe.isAttached) {
+        app.shell.addToRightArea(iframe);
+      }
+
       if (isHidden) {
         hideHelp();
       } else {
@@ -271,24 +237,41 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     }
   });
 
-  app.commands.addCommand(CommandIDs.show, {
-    execute: () => { showHelp(); }
+  app.commands.addCommand(CommandIDs.close, {
+    label: 'Close Help',
+    execute: () => {
+      if (iframe) {
+        iframe.dispose();
+        iframe = null;
+      }
+    }
   });
-  app.commands.addCommand(CommandIDs.hide, {
-    execute: () => { hideHelp(); }
-  });
+
   app.commands.addCommand(CommandIDs.toggle, {
-    execute: () => { toggleHelp(); }
+    execute: () => {
+      if (!iframe) {
+        return;
+      }
+      if (iframe.isHidden) {
+        showHelp();
+      } else {
+        hideHelp();
+      }
+    }
   });
-
-  RESOURCES.forEach(args => { palette.addItem({ args, command, category }); });
-
-  palette.addItem({ command: StateDBCommandIDs.clear, category });
 
   app.commands.addCommand(CommandIDs.launchClassic, {
     label: 'Launch Classic Notebook',
     execute: () => { window.open(utils.getBaseUrl() + 'tree'); }
   });
+
+  app.commands.addCommand(CommandIDs.show, { execute: showHelp });
+  app.commands.addCommand(CommandIDs.hide, { execute: hideHelp });
+
+  RESOURCES.forEach(args => { palette.addItem({ args, command, category }); });
+  palette.addItem({ command: CommandIDs.close, category });
+  palette.addItem({ command: StateDBCommandIDs.clear, category });
   palette.addItem({ command: CommandIDs.launchClassic, category });
+
   mainMenu.addMenu(menu, {});
 }
