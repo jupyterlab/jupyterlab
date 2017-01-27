@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel, KernelMessage, Session, nbformat
+  Contents, ContentsManager, Kernel, KernelMessage, Session, nbformat, utils
 } from '@jupyterlab/services';
 
 import {
@@ -40,7 +40,7 @@ import {
 } from '../outputarea';
 
 import {
-  IRenderMime
+  IRenderMime, RenderMime
 } from '../rendermime';
 
 import {
@@ -644,6 +644,48 @@ namespace CodeConsole {
      * The service used to look up mime types.
      */
     mimeTypeService: IEditorMimeTypeService;
+  }
+
+  /**
+   * Add a url resolver to a console.
+   */
+  export
+  class UrlResolver implements RenderMime.IResolver {
+    /**
+     * Create a new url resolver for a console.
+     */
+    constructor(console: CodeConsole, contents: Contents.IManager) {
+      this._console = console;
+      this._contents = contents;
+    }
+
+    /**
+     * Resolve a relative url to a correct server path.
+     */
+    resolveUrl(url: string): Promise<string> {
+      // Ignore urls that have a protocol.
+      if (utils.urlParse(url).protocol || url.indexOf('//') === 0) {
+        return Promise.resolve(url);
+      }
+      let path = this._console.session.path;
+      let cwd = ContentsManager.dirname(path);
+      path = ContentsManager.getAbsolutePath(url, cwd);
+      return Promise.resolve(path);
+    }
+
+    /**
+     * Get the download url of a given absolute server path.
+     */
+    getDownloadUrl(path: string): Promise<string> {
+      // Ignore urls that have a protocol.
+      if (utils.urlParse(path).protocol || path.indexOf('//') === 0) {
+        return Promise.resolve(path);
+      }
+      return this._contents.getDownloadUrl(path);
+    }
+
+    private _console: CodeConsole;
+    private _contents: Contents.IManager;
   }
 
   /**
