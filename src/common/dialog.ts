@@ -100,6 +100,11 @@ const SELECT_WRAPPER_CLASS = 'jp-Dialog-selectWrapper';
  */
 const SELECT_CLASS = 'jp-Dialog-select';
 
+/**
+ * The class name added to focused input and select wrappers.
+ */
+const FOCUS_CLASS = 'jp-mod-focused';
+
 
 /**
  * A button applied to a dialog.
@@ -333,10 +338,10 @@ class Dialog extends Panel {
       this._evtClick(event as MouseEvent);
       break;
     case 'focus':
-      if (!this.node.contains(event.target as HTMLElement)) {
-        event.stopPropagation();
-        this.lastButtonNode.focus();
-      }
+      this._evtFocus(event as FocusEvent);
+      break;
+    case 'blur':
+      this._evtBlur(event as FocusEvent);
       break;
     default:
       break;
@@ -354,6 +359,7 @@ class Dialog extends Panel {
     node.addEventListener('contextmenu', this, true);
     node.addEventListener('click', this, true);
     document.addEventListener('focus', this, true);
+    document.addEventListener('blur', this, true);
     this._original = document.activeElement as HTMLElement;
     this._primary.focus();
   }
@@ -370,6 +376,7 @@ class Dialog extends Panel {
     node.removeEventListener('contextmenu', this, true);
     node.removeEventListener('click', this, true);
     document.removeEventListener('focus', this, true);
+    document.removeEventListener('blur', this, true);
     this._original.focus();
   }
 
@@ -420,6 +427,41 @@ class Dialog extends Panel {
       break;
     default:
       break;
+    }
+  }
+
+  /**
+   * Handle the `'focus'` event for the widget.
+   *
+   * @param event - The DOM event sent to the widget
+   */
+  protected _evtFocus(event: FocusEvent): void {
+    let target = event.target as HTMLElement;
+    if (!this.node.contains(target as HTMLElement)) {
+      event.stopPropagation();
+      this.lastButtonNode.focus();
+    } else {
+      // Add the focus modifier class to input and select wrappers.
+      if (target.classList.contains(INPUT_CLASS) ||
+          target.classList.contains(SELECT_CLASS)) {
+        let parent = target.parentElement as HTMLElement;
+        parent.classList.add(FOCUS_CLASS);
+      }
+    }
+  }
+
+  /**
+   * Handle the `'blur'` event for the widget.
+   *
+   * @param event - The DOM event sent to the widget
+   */
+  protected _evtBlur(event: FocusEvent): void {
+    let target = event.target as HTMLElement;
+    // Remove the focus modifier class to input and select wrappers.
+    if (target.classList.contains(INPUT_CLASS) ||
+        target.classList.contains(SELECT_CLASS)) {
+      let parent = target.parentElement as HTMLElement;
+      parent.classList.remove(FOCUS_CLASS);
     }
   }
 
