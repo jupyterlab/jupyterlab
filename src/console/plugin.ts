@@ -54,7 +54,7 @@ import {
 } from '../mainmenu';
 
 import {
-  IRenderMime
+  IRenderMime, RenderMime
 } from '../rendermime';
 
 import {
@@ -62,8 +62,7 @@ import {
 } from '../services';
 
 import {
-  IConsoleTracker, ICreateConsoleArgs, ConsolePanel, CommandIDs,
-  CodeConsole
+  IConsoleTracker, ICreateConsoleArgs, ConsolePanel, CommandIDs
 } from './index';
 
 
@@ -343,7 +342,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       mimeTypeService: editorServices.mimeTypeService
     };
     let panel = new ConsolePanel(options);
-    let resolver = new CodeConsole.UrlResolver(panel.console, services.contents);
+    let resolver = new RenderMime.UrlResolver(session, services.contents);
     panel.console.rendermime.resolver = resolver;
 
     let specs = manager.specs;

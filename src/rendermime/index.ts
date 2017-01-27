@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Contents, ContentsManager, Session, utils
+} from '@jupyterlab/services';
+
+import {
   IIterable, IterableOrArrayLike
 } from 'phosphor/lib/algorithm/iteration';
 
@@ -413,5 +417,47 @@ namespace RenderMime {
      * Get the download url of a given absolute server path.
      */
     getDownloadUrl(path: string): Promise<string>;
+  }
+
+  /**
+   * A default resolver that uses a session and a contents manager.
+   */
+  export
+  class UrlResolver implements IResolver {
+    /**
+     * Create a new url resolver for a console.
+     */
+    constructor(session: Session.ISession, contents: Contents.IManager) {
+      this._session = session;
+      this._contents = contents;
+    }
+
+    /**
+     * Resolve a relative url to a correct server path.
+     */
+    resolveUrl(url: string): Promise<string> {
+      // Ignore urls that have a protocol.
+      if (utils.urlParse(url).protocol || url.indexOf('//') === 0) {
+        return Promise.resolve(url);
+      }
+      let path = this._session.path;
+      let cwd = ContentsManager.dirname(path);
+      path = ContentsManager.getAbsolutePath(url, cwd);
+      return Promise.resolve(path);
+    }
+
+    /**
+     * Get the download url of a given absolute server path.
+     */
+    getDownloadUrl(path: string): Promise<string> {
+      // Ignore urls that have a protocol.
+      if (utils.urlParse(path).protocol || path.indexOf('//') === 0) {
+        return Promise.resolve(path);
+      }
+      return this._contents.getDownloadUrl(path);
+    }
+
+    private _session: Session.ISession;
+    private _contents: Contents.IManager;
   }
 }
