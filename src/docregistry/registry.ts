@@ -736,9 +736,14 @@ namespace DocumentRegistry {
     /**
      * Resolve a url to a correct server path.
      *
+     * @param url - The source url.
+     *
+     * @param local - Whether to to return the local path versus
+     *   a download path.
+     *
      * @returns a promise which resolves with the resolved url.
      */
-    resolveUrl(url: string): Promise<string>;
+    resolveUrl(url: string, local: boolean): Promise<string>;
 
     /**
      * Add a sibling widget to the document manager.

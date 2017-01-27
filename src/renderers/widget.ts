@@ -352,7 +352,7 @@ function resolveUrls(node: HTMLElement, resolver: RenderMime.IResolver,
     let img = imgs[i];
     let source = img.getAttribute('src');
     if (source) {
-      promises.push(resolver.resolveUrl(source).then(url => {
+      promises.push(resolver.resolveUrl(source, false).then(url => {
         img.src = url;
         return void 0;
       }));
@@ -364,9 +364,10 @@ function resolveUrls(node: HTMLElement, resolver: RenderMime.IResolver,
     let href = anchor.getAttribute('href');
     anchor.target = '_blank';
     if (href) {
-      promises.push(resolver.resolveUrl(href).then(url => {
+      let local = linker && !utils.urlParse(href).protocol;
+      promises.push(resolver.resolveUrl(href, local).then(url => {
         anchor.href = url;
-        if (linker && !utils.urlParse(url).protocol) {
+        if (local) {
           linker.connectNode(anchor, CommandIDs.open, {
             path: url
           });
