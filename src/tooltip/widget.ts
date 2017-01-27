@@ -153,12 +153,8 @@ class TooltipWidget extends Widget {
    * Dismiss the tooltip if necessary.
    */
   private _dismiss(event: Event): void {
-    let target = event.target as HTMLElement;
-    while (target && target.parentElement) {
-      if (target === this.node) {
-        return;
-      }
-      target = target.parentElement;
+    if (this.node.contains(event.target as HTMLElement)) {
+      return;
     }
     this.dispose();
   }
