@@ -311,48 +311,45 @@ class CompleterWidget extends Widget {
     if (this.isHidden || !this._anchor) {
       return;
     }
-    let target = event.target as HTMLElement;
-    while (target !== document.documentElement) {
-      if (target === this._anchor.node) {
-        switch (event.keyCode) {
-          case 9:  // Tab key
-            event.preventDefault();
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-            this._model.subsetMatch = true;
-            let populated = this._populateSubset();
-            this.model.subsetMatch = false;
-            if (populated) {
-              return;
-            }
-            this._selectActive();
-            return;
-          case 13: // Enter key
-            event.preventDefault();
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-            this._selectActive();
-            return;
-          case 27: // Esc key
-            event.preventDefault();
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-            this.reset();
-            return;
-          case 38: // Up arrow key
-          case 40: // Down arrow key
-            event.preventDefault();
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-            this._cycle(event.keyCode === 38 ? 'up' : 'down');
-            return;
-          default:
-            return;
-        }
-      }
-      target = target.parentElement;
+    if (!this._anchor.node.contains(event.target as HTMLElement)) {
+      this.reset();
+      return;
     }
-    this.reset();
+    switch (event.keyCode) {
+      case 9:  // Tab key
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        this._model.subsetMatch = true;
+        let populated = this._populateSubset();
+        this.model.subsetMatch = false;
+        if (populated) {
+          return;
+        }
+        this._selectActive();
+        return;
+      case 13: // Enter key
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        this._selectActive();
+        return;
+      case 27: // Esc key
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        this.reset();
+        return;
+      case 38: // Up arrow key
+      case 40: // Down arrow key
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        this._cycle(event.keyCode === 38 ? 'up' : 'down');
+        return;
+      default:
+        return;
+    }
   }
 
   /**
