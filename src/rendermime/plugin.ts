@@ -2,8 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  utils
+} from '@jupyterlab/services';
+
+import {
   JupyterLabPlugin, JupyterLab
 } from '../application';
+
+import {
+  IFrame
+} from '../common/iframe';
 
 import {
   defaultSanitizer
@@ -12,6 +20,10 @@ import {
 import {
   ICommandLinker
 } from '../commandlinker';
+
+import {
+  CommandIDs
+} from '../filebrowser';
 
 import {
   IRenderMime, RenderMime
@@ -35,8 +47,6 @@ const plugin: JupyterLabPlugin<IRenderMime> = {
  */
 export default plugin;
 
-
-
 /**
  * Activate the rendermine plugin.
  */
@@ -51,10 +61,17 @@ function activate(app: JupyterLab, linker: ICommandLinker): IRenderMime {
       order.push(m);
     }
   }
+  let pathHandler = {
+    handlePath: (node: HTMLElement, path: string) => {
+      if (!utils.urlParse(path).protocol && path.indexOf('//') !== 0) {
+        linker.connectNode(node, CommandIDs.open, { path });
+      }
+    }
+  };
   return new RenderMime({
     renderers,
     order,
     sanitizer,
-    commandLinker: linker
+    pathHandler
   });
 };

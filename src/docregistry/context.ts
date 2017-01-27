@@ -373,14 +373,22 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   /**
    * Resolve a relative url to a correct server path.
    */
-  resolveUrl(url: string, local: boolean): Promise<string> {
+  resolveUrl(url: string): Promise<string> {
     // Ignore urls that have a protocol.
     if (utils.urlParse(url).protocol || url.indexOf('//') === 0) {
       return Promise.resolve(url);
     }
     let cwd = ContentsManager.dirname(this._path);
     let path = ContentsManager.getAbsolutePath(url, cwd);
-    if (local) {
+    return Promise.resolve(path);
+  }
+
+  /**
+   * Get the download url of a given absolute server path.
+   */
+  getDownloadUrl(path: string): Promise<string> {
+    // Ignore urls that have a protocol.
+    if (utils.urlParse(path).protocol || path.indexOf('//') === 0) {
       return Promise.resolve(path);
     }
     return this._manager.contents.getDownloadUrl(path);

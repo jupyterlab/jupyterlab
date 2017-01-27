@@ -22,14 +22,6 @@ import {
   CodeMirrorEditor
 } from '../codemirror/editor';
 
-import {
-  ICommandLinker
-} from '../commandlinker';
-
-import {
-  CommandIDs
-} from '../filebrowser';
-
 import * as marked
   from 'marked';
 
@@ -167,8 +159,8 @@ class RenderedHTML extends RenderedHTMLCommon {
     }
     appendHtml(this.node, source);
     if (options.resolver) {
-      this._urlResolved = resolveUrls(this.node, options.resolver,
-                                      options.commandLinker);
+      this._urlResolved = handleUrls(this.node, options.resolver,
+                                      options.pathHandler);
     }
   }
 
@@ -207,8 +199,8 @@ class RenderedMarkdown extends RenderedHTMLCommon {
       }
       appendHtml(this.node, content);
       if (options.resolver) {
-        this._urlResolved = resolveUrls(this.node, options.resolver,
-                                        options.commandLinker);
+        this._urlResolved = handleUrls(this.node, options.resolver,
+                                        options.pathHandler);
       }
       this.fit();
       this._rendered = true;
@@ -307,8 +299,8 @@ class RenderedSVG extends Widget {
       throw new Error('SVGRender: Error: Failed to create <svg> element');
     }
     if (options.resolver) {
-      this._urlResolved = resolveUrls(this.node, options.resolver,
-                                      options.commandLinker);
+      this._urlResolved = handleUrls(this.node, options.resolver,
+                                      options.pathHandler);
     }
     this.addClass(SVG_CLASS);
   }
@@ -339,44 +331,51 @@ class RenderedPDF extends Widget {
  *
  * @param resolver - A url resolver.
  *
- * @param linker - A command linker.
+ * @param pathHandler - An optional url path handler.
  *
  * @returns a promise fulfilled when the relative urls have been resolved.
  */
 export
-function resolveUrls(node: HTMLElement, resolver: RenderMime.IResolver,
-                     linker: ICommandLinker | null): Promise<void> {
+function handleUrls(node: HTMLElement, resolver: RenderMime.IResolver, pathHandler: RenderMime.IPathHandler | null): Promise<void> {
   let promises: Promise<void>[] = [];
   let imgs = node.getElementsByTagName('img');
   for (let i = 0; i < imgs.length; i++) {
-    let img = imgs[i];
-    let source = img.getAttribute('src');
-    if (source) {
-      promises.push(resolver.resolveUrl(source, false).then(url => {
-        img.src = url;
-        return void 0;
-      }));
-    }
+    promises.push(handleImage(imgs[i], resolver));
   }
   let anchors = node.getElementsByTagName('a');
   for (let i = 0; i < anchors.length; i++) {
-    let anchor = anchors[i];
-    let href = anchor.getAttribute('href');
-    anchor.target = '_blank';
-    if (href) {
-      let local = linker && !utils.urlParse(href).protocol;
-      promises.push(resolver.resolveUrl(href, local).then(url => {
-        anchor.href = url;
-        if (local) {
-          linker.connectNode(anchor, CommandIDs.open, {
-            path: url
-          });
-        }
-        return void 0;
-      }));
-    }
+    promises.push(handleAnchor(anchors[i], resolver, pathHandler));
   }
   return Promise.all(promises).then(() => { return void 0; });
+}
+
+
+/**
+ * Handle an image node.
+ */
+function handleImage(img: HTMLImageElement, resolver: RenderMime.IResolver): Promise<void> {
+  let source = img.getAttribute('src');
+  return resolver.resolveUrl(source).then(path => {
+    return resolver.getDownloadUrl(path);
+  }).then(url => {
+    img.src = url;
+  });
+}
+
+/**
+ * Handle an anchor node.
+ */
+function handleAnchor(anchor: HTMLAnchorElement, resolver: RenderMime.IResolver, pathHandler: RenderMime.IPathHandler): Promise<void> {
+  anchor.target = '_blank';
+  let href = anchor.getAttribute('href');
+  return resolver.resolveUrl(href).then(path => {
+    if (pathHandler) {
+      pathHandler.handlePath(anchor, path);
+    }
+    return resolver.getDownloadUrl(path);
+  }).then(url => {
+    anchor.href = url;
+  });
 }
 
 

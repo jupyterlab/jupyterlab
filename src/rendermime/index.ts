@@ -30,10 +30,6 @@ import {
 } from '../common/sanitizer';
 
 import {
-  ICommandLinker
-} from '../commandlinker';
-
-import {
   HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
   JavascriptRenderer, SVGRenderer, MarkdownRenderer, PDFRenderer
 } from '../renderers';
@@ -83,7 +79,7 @@ class RenderMime {
     this._order = new Vector(options.order);
     this._sanitizer = options.sanitizer;
     this._resolver = options.resolver || null;
-    this._linker = options.commandLinker || null;
+    this._handler = options.pathHandler || null;
   }
 
   /**
@@ -94,6 +90,16 @@ class RenderMime {
   }
   set resolver(value: RenderMime.IResolver) {
     this._resolver = value;
+  }
+
+  /**
+   * The object used to handle path opening links.
+   */
+  get pathHandler(): RenderMime.IPathHandler {
+    return this._handler;
+  }
+  set pathHandler(value: RenderMime.IPathHandler) {
+    this._handler = value;
   }
 
   /**
@@ -131,7 +137,7 @@ class RenderMime {
       injector,
       resolver: this._resolver,
       sanitizer: trusted ? null : this._sanitizer,
-      commandLinker: this._linker
+      pathHandler: this._handler
     };
     return this._renderers[mimetype].render(rendererOptions);
   }
@@ -167,7 +173,7 @@ class RenderMime {
       renderers: this._renderers,
       order: this._order.iter(),
       sanitizer: this._sanitizer,
-      commandLinker: this._linker
+      pathHandler: this._handler
     });
   }
 
@@ -212,8 +218,8 @@ class RenderMime {
   private _renderers: RenderMime.MimeMap<RenderMime.IRenderer> = Object.create(null);
   private _order: Vector<string>;
   private _sanitizer: ISanitizer = null;
-  private _resolver: RenderMime.IResolver;
-  private _linker: ICommandLinker;
+  private _resolver: RenderMime.IResolver | null;
+  private _handler: RenderMime.IPathHandler | null;
 }
 
 
@@ -250,9 +256,9 @@ namespace RenderMime {
     resolver?: IResolver;
 
     /**
-     * The optional command linker object.
+     * An optional path handler
      */
-    commandLinker?: ICommandLinker;
+    pathHandler?: IPathHandler;
   }
 
   /**
@@ -377,9 +383,20 @@ namespace RenderMime {
     sanitizer?: ISanitizer;
 
     /**
-     * An optional command linker.
+     * An optional path handler.
      */
-    commandLinker: ICommandLinker;
+    pathHandler?: IPathHandler;
+  }
+
+  /**
+   * An object that handles path open on click for a node.
+   */
+  export
+  interface IPathHandler {
+    /**
+     * Add the path open handler to the node.
+     */
+    handlePath(node: HTMLElement, path: string): void;
   }
 
   /**
@@ -388,15 +405,13 @@ namespace RenderMime {
   export
   interface IResolver {
     /**
-     * Resolve a url to a correct server path.
-     *
-     * @param url - The source url.
-     *
-     * @param local - Whether to to return the local path versus
-     *   a download path.
-     *
-     * @returns a promise which resolves with the resolved url.
+     * Resolve a relative url to a correct server path.
      */
-    resolveUrl(url: string, local: boolean): Promise<string>;
+    resolveUrl(url: string): Promise<string>;
+
+    /**
+     * Get the download url of a given absolute server path.
+     */
+    getDownloadUrl(path: string): Promise<string>;
   }
 }
