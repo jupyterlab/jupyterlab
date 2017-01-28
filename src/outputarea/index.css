@@ -4,9 +4,14 @@
 |----------------------------------------------------------------------------*/
 
 /*-----------------------------------------------------------------------------
-| Copyright (c) Jupyter Development Team.
-| Distributed under the terms of the Modified BSD License.
+| Variables
 |----------------------------------------------------------------------------*/
+
+
+:root {
+  --jp-private-outputarea-prompt-color: #D84315;
+  --jp-private-outputarea-prompt-width: 90px;
+}
 
 
 /*-----------------------------------------------------------------------------
@@ -14,12 +19,9 @@
 | OutputArea has a list of Outputs
 |----------------------------------------------------------------------------*/
 
-
 .jp-OutputArea {
-  max-height: 1000px;
   overflow-y: auto;
 }
-
 
 /*-----------------------------------------------------------------------------
 | Individual Output(s) and their prompts
@@ -63,7 +65,7 @@
 
 
 .jp-Output-prompt {
-  color: var(--jp-private-notebook-cell-outprompt-color);
+  color: var(--jp-private-outputarea-prompt-color);
   font-family: monospace;
   text-align: right;
   vertical-align: middle;
@@ -71,7 +73,7 @@
   font-size: var(--jp-code-font-size);
   line-height: var(--jp-code-line-height);
   border: var(--jp-border-width) solid transparent;
-  flex: 0 0 var(--jp-private-notebook-cell-prompt-width);
+  flex: 0 0 var(--jp-private-outputarea-prompt-width);
   box-sizing: border-box;
 }
 
