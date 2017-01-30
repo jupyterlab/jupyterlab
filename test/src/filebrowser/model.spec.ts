@@ -187,6 +187,14 @@ describe('filebrowser/model', () => {
 
     });
 
+    describe('#refresh()', () => {
+
+      it('should refresh the contents', (done) => {
+        model.refresh().then(done, done);
+      });
+
+    });
+
     describe('#cd()', () => {
 
       it('should change directory', (done) => {
