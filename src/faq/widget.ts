@@ -10,7 +10,7 @@ import {
 } from 'phosphor/lib/ui/vdom';
 
 import {
-  CommandIDs as AboutCommandIds
+  CommandIDs as AboutCommandIDs
 } from '../about';
 
 import {
@@ -267,7 +267,7 @@ class FaqWidget extends VDomWidget<FaqModel> {
           'Check out the JupyterLab tour ',
           h.a(this._linker.populateVNodeAttrs({
             className: ANCHOR_CLASS
-          }, AboutCommandIds.open, null), 'here')
+          }, AboutCommandIDs.open, null), 'here')
         )
       ),
       h.h2({ className: SUBHEADER_CLASS }, subheadings[1]),
