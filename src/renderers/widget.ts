@@ -346,6 +346,10 @@ function handleUrls(node: HTMLElement, resolver: RenderMime.IResolver, pathHandl
   for (let i = 0; i < anchors.length; i++) {
     promises.push(handleAnchor(anchors[i], resolver, pathHandler));
   }
+  let iframes = node.getElementsByTagName('iframe');
+  for (let i = 0; i < iframes.length; i++) {
+    promises.push(handleIFrame(iframes[i], resolver));
+  }
   return Promise.all(promises).then(() => { return void 0; });
 }
 
@@ -362,6 +366,21 @@ function handleImage(img: HTMLImageElement, resolver: RenderMime.IResolver): Pro
     img.src = url;
   });
 }
+
+
+/**
+ * Handle an iframe node.
+ */
+function handleIFrame(frame: HTMLIFrameElement, resolver: RenderMime.IResolver): Promise<void> {
+  let source = frame.getAttribute('src');
+  frame.src = '';
+  return resolver.resolveUrl(source).then(path => {
+    return resolver.getDownloadUrl(path);
+  }).then(url => {
+    frame.src = url;
+  });
+}
+
 
 /**
  * Handle an anchor node.
