@@ -40,7 +40,7 @@ import {
 } from '../outputarea';
 
 import {
-  IRenderMime
+  IRenderMime, RenderMime
 } from '../rendermime';
 
 import {

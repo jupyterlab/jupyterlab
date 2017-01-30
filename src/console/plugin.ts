@@ -54,7 +54,7 @@ import {
 } from '../mainmenu';
 
 import {
-  IRenderMime
+  IRenderMime, RenderMime
 } from '../rendermime';
 
 import {
@@ -342,6 +342,12 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       mimeTypeService: editorServices.mimeTypeService
     };
     let panel = new ConsolePanel(options);
+    let resolver = new RenderMime.UrlResolver({
+      session,
+      contents: services.contents
+    });
+    panel.console.rendermime.resolver = resolver;
+
     let specs = manager.specs;
     let displayName = specs.kernelspecs[session.kernel.name].display_name;
     let captionOptions: Private.ICaptionOptions = {
