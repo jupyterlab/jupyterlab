@@ -397,6 +397,9 @@ function handleAnchor(anchor: HTMLAnchorElement, resolver: RenderMime.IResolver,
  */
 function handleLink(node: HTMLLinkElement, resolver: RenderMime.IResolver): Promise<void> {
   let href = node.getAttribute('href');
+  if (!href) {
+    return Promise.resolve(void 0);
+  }
   node.href = '';
   return resolver.resolveUrl(href).then(path => {
     return resolver.getDownloadUrl(path);
