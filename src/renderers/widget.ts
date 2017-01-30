@@ -352,6 +352,10 @@ function handleUrls(node: HTMLElement, resolver: RenderMime.IResolver, pathHandl
   for (let i = 0; i < anchors.length; i++) {
     promises.push(handleAnchor(anchors[i], resolver, pathHandler));
   }
+  let links = node.getElementsByTagName('link');
+  for (let i = 0; i < links.length; i++) {
+    promises.push(handleLink(links[i], resolver));
+  }
   return Promise.all(promises).then(() => { return void 0; });
 }
 
@@ -361,6 +365,9 @@ function handleUrls(node: HTMLElement, resolver: RenderMime.IResolver, pathHandl
  */
 function handleSource(node: HTMLImageElement, resolver: RenderMime.IResolver): Promise<void> {
   let source = node.getAttribute('src');
+  if (!source) {
+    return Promise.resolve(void 0);
+  }
   node.src = '';
   return resolver.resolveUrl(source).then(path => {
     return resolver.getDownloadUrl(path);
@@ -383,6 +390,20 @@ function handleAnchor(anchor: HTMLAnchorElement, resolver: RenderMime.IResolver,
     return resolver.getDownloadUrl(path);
   }).then(url => {
     anchor.href = url;
+  });
+}
+
+
+/**
+ * Handle a link node.
+ */
+function handleLink(node: HTMLLinkElement, resolver: RenderMime.IResolver): Promise<void> {
+  let href = node.getAttribute('href');
+  node.href = '';
+  return resolver.resolveUrl(href).then(path => {
+    return resolver.getDownloadUrl(path);
+  }).then(url => {
+    node.href = url;
   });
 }
 
