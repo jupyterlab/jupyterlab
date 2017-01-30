@@ -50,8 +50,9 @@ import {
 } from '../common/dialog';
 
 import {
-  CommandIDs, INotebookTracker, NotebookActions, NotebookModelFactory,
-  NotebookPanel, NotebookTracker, NotebookWidgetFactory, trustNotebook
+  CellTools, CommandIDs, INotebookTracker, NotebookActions,
+  NotebookModelFactory,  NotebookPanel, NotebookTracker, NotebookWidgetFactory,
+  trustNotebook
 } from './';
 
 
@@ -109,12 +110,37 @@ const contentFactoryPlugin: JupyterLabPlugin<NotebookPanel.IContentFactory> = {
   }
 };
 
+/**
+ * The about page extension.
+ */
+const cellToolsPlugin: JupyterLabPlugin<void> = {
+  activate: activateCellTools,
+  id: 'jupyter.extensions.cell-tools',
+  autoStart: true,
+  requires: [IInstanceRestorer, INotebookTracker]
+};
+
 
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [contentFactoryPlugin, trackerPlugin];
+const plugins: JupyterLabPlugin<any>[] = [contentFactoryPlugin, trackerPlugin, cellToolsPlugin];
 export default plugins;
+
+
+/**
+ * Activate the cell tools extension.
+ */
+function activateCellTools(app: JupyterLab, restorer: IInstanceRestorer, tracker: INotebookTracker): void {
+  const namespace = 'cell-tools';
+
+  const widget = new CellTools({ tracker });
+  widget.title.label = 'Cell Tools';
+  widget.id = 'cell-tools';
+
+  restorer.add(widget, namespace);
+  app.shell.addToLeftArea(widget);
+}
 
 
 /**
