@@ -515,7 +515,7 @@ namespace CompleterWidget {
   export
   interface ITextState extends JSONObject {
     /**
-     * The current line of text.
+     * The current value of the editor.
      */
     readonly text: string;
 
@@ -617,19 +617,14 @@ namespace CompleterWidget {
   export
   interface IPatch {
     /**
-     * The patch text.
+     * The patched text.
      */
     text: string;
 
     /**
-     * The start position of the patch in the buffer.
+     * The offset of the cursor.
      */
-    start: number;
-
-    /**
-     * The end position of the patch in the buffer.
-     */
-    end: number;
+    offset: number;
   }
 
 
