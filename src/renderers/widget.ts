@@ -325,7 +325,7 @@ class RenderedPDF extends Widget {
 
 
 /**
- * Resolve the relative urls in the image and anchor tags of a node tree.
+ * Resolve the relative urls in element `src` and `href` attributes.
  *
  * @param node - The head html element.
  *
@@ -338,30 +338,39 @@ class RenderedPDF extends Widget {
 export
 function handleUrls(node: HTMLElement, resolver: RenderMime.IResolver, pathHandler: RenderMime.IPathHandler | null): Promise<void> {
   let promises: Promise<void>[] = [];
-  let imgs = node.getElementsByTagName('img');
-  for (let i = 0; i < imgs.length; i++) {
-    promises.push(handleImage(imgs[i], resolver));
+  // Handle HTML Elements with src attributes.
+  let nodes = node.querySelectorAll('*[src]');
+  for (let i = 0; i < nodes.length; i++) {
+    promises.push(handleAttr(nodes[i] as HTMLElement, 'src', resolver));
   }
   let anchors = node.getElementsByTagName('a');
   for (let i = 0; i < anchors.length; i++) {
     promises.push(handleAnchor(anchors[i], resolver, pathHandler));
+  }
+  let links = node.getElementsByTagName('link');
+  for (let i = 0; i < links.length; i++) {
+    promises.push(handleAttr(links[i], 'href', resolver));
   }
   return Promise.all(promises).then(() => { return void 0; });
 }
 
 
 /**
- * Handle an image node.
+ * Handle a node with a `src` or `href` attribute.
  */
-function handleImage(img: HTMLImageElement, resolver: RenderMime.IResolver): Promise<void> {
-  let source = img.getAttribute('src');
-  img.src = '';
+function handleAttr(node: HTMLElement, name: 'src' | 'href', resolver: RenderMime.IResolver): Promise<void> {
+  let source = node.getAttribute(name);
+  if (!source) {
+    return Promise.resolve(void 0);
+  }
+  node.setAttribute(name, '');
   return resolver.resolveUrl(source).then(path => {
     return resolver.getDownloadUrl(path);
   }).then(url => {
-    img.src = url;
+    node.setAttribute(name, url);
   });
 }
+
 
 /**
  * Handle an anchor node.
@@ -369,6 +378,9 @@ function handleImage(img: HTMLImageElement, resolver: RenderMime.IResolver): Pro
 function handleAnchor(anchor: HTMLAnchorElement, resolver: RenderMime.IResolver, pathHandler: RenderMime.IPathHandler): Promise<void> {
   anchor.target = '_blank';
   let href = anchor.getAttribute('href');
+  if (!href) {
+    return Promise.resolve(void 0);
+  }
   return resolver.resolveUrl(href).then(path => {
     if (pathHandler) {
       pathHandler.handlePath(anchor, path);
