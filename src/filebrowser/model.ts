@@ -149,6 +149,13 @@ class FileBrowserModel implements IDisposable, IPathTracker {
   }
 
   /**
+   * Force a refresh of the directory contents.
+   */
+  refresh(): Promise<void> {
+    return this.cd('.');
+  }
+
+  /**
    * Change directory.
    *
    * @param path - The path to the file or directory.
@@ -461,7 +468,7 @@ class FileBrowserModel implements IDisposable, IPathTracker {
       return;
     }
     this._timeoutId = setTimeout(() => {
-      this.cd('.');
+      this.refresh();
       if (this._requested && this._blackoutId !== -1) {
         this._requested = false;
         clearTimeout(this._blackoutId);

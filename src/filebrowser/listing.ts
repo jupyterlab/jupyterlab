@@ -1083,7 +1083,7 @@ class DirListing extends Widget {
    */
   private _selectItemByName(name: string): Promise<void> {
     // Make sure the file is available.
-    return this.model.cd('.').then(() => {
+    return this.model.refresh().then(() => {
       if (this.isDisposed) {
         return;
       }

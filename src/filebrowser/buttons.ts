@@ -307,7 +307,7 @@ class FileButtons extends Widget {
       return;
     }
     // Force a refresh of the current directory.
-    this._model.cd('.');
+    this._model.refresh();
   }
 
   /**
