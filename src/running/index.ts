@@ -250,6 +250,9 @@ class RunningSessions extends Widget {
     let renderer = this._renderer;
     let specs = this._manager.specs;
 
+    // Create a dummy div if terminals are not available.
+    termList = termList || document.createElement('div');
+
     // Remove any excess item nodes.
     while (termList.children.length > this._runningTerminals.length) {
       termList.removeChild(termList.firstChild);
