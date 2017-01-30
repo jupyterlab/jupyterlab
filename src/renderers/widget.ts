@@ -383,6 +383,9 @@ function handleSource(node: HTMLImageElement, resolver: RenderMime.IResolver): P
 function handleAnchor(anchor: HTMLAnchorElement, resolver: RenderMime.IResolver, pathHandler: RenderMime.IPathHandler): Promise<void> {
   anchor.target = '_blank';
   let href = anchor.getAttribute('href');
+  if (!href) {
+    return Promise.resolve(void 0);
+  }
   return resolver.resolveUrl(href).then(path => {
     if (pathHandler) {
       pathHandler.handlePath(anchor, path);
