@@ -338,46 +338,34 @@ class RenderedPDF extends Widget {
 export
 function handleUrls(node: HTMLElement, resolver: RenderMime.IResolver, pathHandler: RenderMime.IPathHandler | null): Promise<void> {
   let promises: Promise<void>[] = [];
-  let imgs = node.getElementsByTagName('img');
-  for (let i = 0; i < imgs.length; i++) {
-    promises.push(handleImage(imgs[i], resolver));
+  // Handle HTML Elements with src attributes.
+  // http://www.w3schools.com/tags/att_src.asp
+  let sources = ['audio', 'embed', 'iframe', 'img', 'input', 'script',
+                 'source', 'track', 'video'];
+  for (let source of sources) {
+    let nodes = node.getElementsByTagName(source);
+    for (let i = 0; i < nodes.length; i++) {
+      promises.push(handleSource(nodes[i] as HTMLImageElement, resolver));
+    }
   }
   let anchors = node.getElementsByTagName('a');
   for (let i = 0; i < anchors.length; i++) {
     promises.push(handleAnchor(anchors[i], resolver, pathHandler));
-  }
-  let iframes = node.getElementsByTagName('iframe');
-  for (let i = 0; i < iframes.length; i++) {
-    promises.push(handleIFrame(iframes[i], resolver));
   }
   return Promise.all(promises).then(() => { return void 0; });
 }
 
 
 /**
- * Handle an image node.
+ * Handle a node with a `src` attribute.
  */
-function handleImage(img: HTMLImageElement, resolver: RenderMime.IResolver): Promise<void> {
-  let source = img.getAttribute('src');
-  img.src = '';
+function handleSource(node: HTMLImageElement, resolver: RenderMime.IResolver): Promise<void> {
+  let source = node.getAttribute('src');
+  node.src = '';
   return resolver.resolveUrl(source).then(path => {
     return resolver.getDownloadUrl(path);
   }).then(url => {
-    img.src = url;
-  });
-}
-
-
-/**
- * Handle an iframe node.
- */
-function handleIFrame(frame: HTMLIFrameElement, resolver: RenderMime.IResolver): Promise<void> {
-  let source = frame.getAttribute('src');
-  frame.src = '';
-  return resolver.resolveUrl(source).then(path => {
-    return resolver.getDownloadUrl(path);
-  }).then(url => {
-    frame.src = url;
+    node.src = url;
   });
 }
 
