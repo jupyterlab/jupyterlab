@@ -339,9 +339,7 @@ export
 function handleUrls(node: HTMLElement, resolver: RenderMime.IResolver, pathHandler: RenderMime.IPathHandler | null): Promise<void> {
   let promises: Promise<void>[] = [];
   // Handle HTML Elements with src attributes.
-  // http://www.w3schools.com/tags/att_src.asp
-  let sources = ['audio', 'embed', 'iframe', 'img', 'input', 'script',
-                 'source', 'track', 'video'];
+  let sources = node.querySelectorAll('*[src]');
   for (let source of sources) {
     let nodes = node.getElementsByTagName(source);
     for (let i = 0; i < nodes.length; i++) {
