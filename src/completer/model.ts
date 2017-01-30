@@ -226,12 +226,13 @@ class CompleterModel implements CompleterWidget.IModel {
     }
 
     let { start, end } = cursor;
-    let line = original.text;
-    let prefix = line.substring(0, start);
+    let current = this._current;
 
-    // Calculate end point by adding any characters that may have been entered
-    // by user input since the original launch of the completer.
-    end = (prefix + text).length;
+    if (current) {
+      // Calculate end point by adding any characters that may have been entered
+      // by user input since the original launch of the completer.
+      end += current.text.length - original.text.length;
+    }
 
     return { start, end, text };
   }
