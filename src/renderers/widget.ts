@@ -325,7 +325,7 @@ class RenderedPDF extends Widget {
 
 
 /**
- * Resolve the relative urls in the image and anchor tags of a node tree.
+ * Resolve the relative urls in element `src` and `href` attributes.
  *
  * @param node - The head html element.
  *
