@@ -339,12 +339,9 @@ export
 function handleUrls(node: HTMLElement, resolver: RenderMime.IResolver, pathHandler: RenderMime.IPathHandler | null): Promise<void> {
   let promises: Promise<void>[] = [];
   // Handle HTML Elements with src attributes.
-  let sources = node.querySelectorAll('*[src]');
-  for (let source of sources) {
-    let nodes = node.getElementsByTagName(source);
-    for (let i = 0; i < nodes.length; i++) {
-      promises.push(handleSource(nodes[i] as HTMLImageElement, resolver));
-    }
+  let nodes = node.querySelectorAll('*[src]');
+  for (let i = 0; i < nodes.length; i++) {
+    promises.push(handleSource(nodes[i] as HTMLImageElement, resolver));
   }
   let anchors = node.getElementsByTagName('a');
   for (let i = 0; i < anchors.length; i++) {
