@@ -465,6 +465,7 @@ class FileBrowserModel implements IDisposable, IPathTracker {
       if (this._requested && this._blackoutId !== -1) {
         this._requested = false;
         clearTimeout(this._blackoutId);
+        this._blackoutId = -1;
         this._timeoutId = setTimeout(() => {
           this._scheduleUpdate();
         }, MIN_REFRESH);
