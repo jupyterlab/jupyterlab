@@ -99,7 +99,6 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     model.selections.changed.connect(this._onSelectionsChanged, this);
 
     CodeMirror.on(editor, 'keydown', (editor, event) => {
-      this.onKeydown(event);
       let index = findIndex(this._keydownHandlers, handler => {
         if (handler(this, event) === true) {
           event.preventDefault();
