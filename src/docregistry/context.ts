@@ -455,8 +455,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   /**
    * Handle a change to a session path.
    */
-  private _onSessionPathChanged(sender: Session.ISession) {
-    let path = sender.path;
+  private _onSessionPathChanged(sender: Session.ISession, path: string) {
     if (path !== this._path) {
       this._path = path;
       this.pathChanged.emit(path);
