@@ -341,7 +341,7 @@ function handleUrls(node: HTMLElement, resolver: RenderMime.IResolver, pathHandl
   // Handle HTML Elements with src attributes.
   let nodes = node.querySelectorAll('*[src]');
   for (let i = 0; i < nodes.length; i++) {
-    promises.push(handleSource(nodes[i] as HTMLImageElement, resolver));
+    promises.push(handleAttr(nodes[i] as HTMLElement, 'src', resolver));
   }
   let anchors = node.getElementsByTagName('a');
   for (let i = 0; i < anchors.length; i++) {
@@ -349,25 +349,25 @@ function handleUrls(node: HTMLElement, resolver: RenderMime.IResolver, pathHandl
   }
   let links = node.getElementsByTagName('link');
   for (let i = 0; i < links.length; i++) {
-    promises.push(handleLink(links[i], resolver));
+    promises.push(handleAttr(links[i], 'href', resolver));
   }
   return Promise.all(promises).then(() => { return void 0; });
 }
 
 
 /**
- * Handle a node with a `src` attribute.
+ * Handle a node with a `src` or `href` attribute.
  */
-function handleSource(node: HTMLImageElement, resolver: RenderMime.IResolver): Promise<void> {
-  let source = node.getAttribute('src');
+function handleAttr(node: HTMLElement, name: 'src' | 'href', resolver: RenderMime.IResolver): Promise<void> {
+  let source = node.getAttribute(name);
   if (!source) {
     return Promise.resolve(void 0);
   }
-  node.src = '';
+  node.setAttribute(name, '');
   return resolver.resolveUrl(source).then(path => {
     return resolver.getDownloadUrl(path);
   }).then(url => {
-    node.src = url;
+    node.setAttribute(name, url);
   });
 }
 
@@ -388,23 +388,6 @@ function handleAnchor(anchor: HTMLAnchorElement, resolver: RenderMime.IResolver,
     return resolver.getDownloadUrl(path);
   }).then(url => {
     anchor.href = url;
-  });
-}
-
-
-/**
- * Handle a link node.
- */
-function handleLink(node: HTMLLinkElement, resolver: RenderMime.IResolver): Promise<void> {
-  let href = node.getAttribute('href');
-  if (!href) {
-    return Promise.resolve(void 0);
-  }
-  node.href = '';
-  return resolver.resolveUrl(href).then(path => {
-    return resolver.getDownloadUrl(path);
-  }).then(url => {
-    node.href = url;
   });
 }
 
