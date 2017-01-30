@@ -415,11 +415,12 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       return;
     }
     if (change.oldValue.path === this._path) {
-      let path = this._path = change.newValue.path;
       if (this._session) {
-        this._session.rename(path);
+        this._session.rename(change.newValue.path);
+      } else {
+        this._path = change.newValue.path;
+        this.pathChanged.emit(this._path);
       }
-      this.pathChanged.emit(path);
     }
   }
 
