@@ -6,6 +6,10 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
+  JSONObject, JSONValue
+} from 'phosphor/lib/algorithm/json';
+
+import {
   findIndex, upperBound
 } from 'phosphor/lib/algorithm/searching';
 
@@ -34,12 +38,16 @@ import {
 } from 'phosphor/lib/ui/vdom';
 
 import {
-  BaseCellWidget
+  BaseCellWidget, ICellModel
 } from '../cells';
 
 import {
   CodeEditor, CodeEditorWidget
 } from '../codeeditor';
+
+import {
+  IChangedArgs
+} from '../common/interfaces';
 
 import {
   INotebookTracker
@@ -65,6 +73,11 @@ const ACTIVE_CELL_CLASS = 'jp-ActiveCellTool';
  * The class name added to a MetadataEditor instance.
  */
 const METADATA_CLASS = 'jp-MetaDataEditor';
+
+/**
+ * The class name added to the slide type editor.
+ */
+const SLIDETYPE_CLASS = 'jp-SlideType';
 
 /**
  * The class name added to a separator widget.
@@ -103,6 +116,8 @@ class CellTools extends Widget implements ICellTools {
     this._tracker = options.tracker;
     this._tracker.activeCellChanged.connect(this._onActiveCellChanged, this);
     this._tracker.selectionChanged.connect(this._onSelectionChanged, this);
+    this._onActiveCellChanged();
+    this._onSelectionChanged();
   }
 
   /**
@@ -114,6 +129,11 @@ class CellTools extends Widget implements ICellTools {
    * A signal emitted when the selection state changes.
    */
   readonly selectionChanged: ISignal<this, void>;
+
+  /**
+   * A signal emitted when a metadata field changes on the active cell.
+   */
+  readonly metadataChanged: ISignal<this, IChangedArgs<JSONValue>>;
 
   /**
    * The active cell widget.
@@ -184,7 +204,15 @@ class CellTools extends Widget implements ICellTools {
    * Handle a change to the active cell.
    */
   private _onActiveCellChanged(): void {
-    this.activeCellChanged.emit(this._tracker.activeCell);
+    if (this._prevActive) {
+      this._prevActive.metadataChanged.disconnect(this._onMetadataChanged, this);
+    }
+    let activeCell = this._tracker.activeCell;
+    this._prevActive = activeCell ? activeCell.model : null;
+    if (activeCell) {
+      activeCell.model.metadataChanged.connect(this._onMetadataChanged, this);
+    }
+    this.activeCellChanged.emit(activeCell);
   }
 
   /**
@@ -194,8 +222,16 @@ class CellTools extends Widget implements ICellTools {
     this.selectionChanged.emit(void 0);
   }
 
+  /**
+   * Handle a change in the metadata.
+   */
+  private _onMetadataChanged(sender: ICellModel, args: IChangedArgs<JSONValue>): void {
+    this.metadataChanged.emit(args);
+  }
+
   private _items = new Vector<Private.IRankItem>();
   private _tracker: INotebookTracker;
+  private _prevActive: ICellModel | null;
 }
 
 
@@ -232,6 +268,17 @@ namespace CellTools {
   }
 
   /**
+   * The options used to create a cell tool.
+   */
+  export
+  interface IToolOptions {
+    /**
+     * The cell tools object.
+     */
+    celltools: ICellTools;
+  }
+
+  /**
    * A cell tool displaying the active cell contents.
    */
   export
@@ -239,7 +286,7 @@ namespace CellTools {
     /**
      * Construct a new active cell tool.
      */
-    constructor(options: ActiveCellTool.IOptions) {
+    constructor(options: IToolOptions) {
       super();
       this.addClass(ACTIVE_CELL_CLASS);
       this.addClass('jp-InputArea');
@@ -281,23 +328,6 @@ namespace CellTools {
   }
 
   /**
-   * The namespace for `ActiveCellTool` class statics.
-   */
-  export
-  namespace ActiveCellTool {
-    /**
-     * The options used to create an active cell tool.
-     */
-    export
-    interface IOptions {
-      /**
-       * The cell tools object.
-       */
-      celltools: ICellTools;
-    }
-  }
-
-  /**
    * A raw metadata editor.
    */
   export
@@ -305,9 +335,9 @@ namespace CellTools {
     /**
      * Construct a new raw metadata tool.
      */
-    constructor(options: ActiveCellTool.IOptions) {
+    constructor(options: IToolOptions) {
       let vnode = h.div({ className: METADATA_CLASS },
-                    h.p({}, 'Cell Metadata'),
+                    h.label({}, 'Cell Metadata'),
                     h.textarea()
                   );
       super({ node: realize(vnode) });
@@ -328,31 +358,56 @@ namespace CellTools {
      */
     private _onActiveCellChanged(): void {
       let activeCell = this._celltools.activeCell;
-      if (!activeCell) {
-        // TODO: Use dummy content.
-        return;
+      let content: JSONObject = {};
+      if (activeCell) {
+        each(activeCell.model.listMetadata(), key => {
+          // Do not show the trusted metadata.
+          if (key === 'trusted') {
+            return;
+          }
+          content[key] = activeCell.model.getMetadata(key).getValue();
+        });
       }
-      this.textarea.textContent = activeCell.model.value.text;
+      this.textarea.textContent = JSON.stringify(content);
     }
 
     private _celltools: ICellTools;
   }
 
   /**
-   * The namespace for `ActiveCellTool` class statics.
+   * A slidetype selector.
    */
   export
-  namespace MetadataEditor {
+  class SlideType extends Widget {
+
     /**
-     * The options used to create a metadata editor.
+     * Construct a new active cell tool.
      */
-    export
-    interface IOptions {
-      /**
-       * The cell tools object.
-       */
-      celltools: ICellTools;
+    constructor(options: IToolOptions) {
+      super();
+      this.addClass(SLIDETYPE_CLASS);
+      this.layout = new PanelLayout();
+      this._celltools = options.celltools;
+      this._celltools.activeCellChanged.connect(this._onActiveCellChanged, this);
+      this._celltools.metadataChanged.connect(this._onMetadataChanged, this);
+      this._onActiveCellChanged();
     }
+
+    /**
+     * Handle a change to the active cell.
+     */
+    private _onActiveCellChanged(): void {
+
+    }
+
+    /**
+     * Handle a change in the metadata.
+     */
+    private _onMetadataChanged(sender: ICellTools, args: IChangedArgs<JSONValue>): void {
+
+    }
+
+    private _celltools: ICellTools;
   }
 
 }
@@ -362,7 +417,7 @@ namespace CellTools {
 // Define the signals for the `CellTools` class.
 defineSignal(CellTools.prototype, 'activeCellChanged');
 defineSignal(CellTools.prototype, 'selectionChanged');
-
+defineSignal(CellTools.prototype, 'metadataChanged');
 
 
 /**
