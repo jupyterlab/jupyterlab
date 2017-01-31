@@ -76,8 +76,8 @@ class CompleterModel implements CompleterWidget.IModel {
     }
     let original = this._original;
     let current = this._current;
-    let originalLine = original.text;
-    let currentLine = current.text;
+    let originalLine = original.text.split('\n')[original.line];
+    let currentLine = current.text.split('\n')[current.line];
 
     // If the text change means that the original start point has been preceded,
     // then the completion is no longer valid and should be reset.
@@ -88,9 +88,9 @@ class CompleterModel implements CompleterWidget.IModel {
 
     let { start, end } = this._cursor;
     // Clip the front of the current line.
-    let query = currentLine.substring(start);
-    // Clip the back of the current line.
-    let ending = originalLine.substring(end);
+    let query = current.text.substring(start);
+    // Clip the back of the current line by calculating the end of the original.
+    let ending = original.text.substring(end);
     query = query.substring(0, query.lastIndexOf(ending));
     this._query = query;
     this.stateChanged.emit(void 0);
@@ -200,7 +200,7 @@ class CompleterModel implements CompleterWidget.IModel {
 
     // If last character entered is not whitespace, update completion.
     if (text[column - 1] && text[column - 1].match(/\S/)) {
-      // If there is currently a completion
+      // If there is currently an active completion, update the current state.
       if (this.original) {
         this.current = request;
       }
@@ -213,11 +213,11 @@ class CompleterModel implements CompleterWidget.IModel {
   /**
    * Create a resolved patch between the original state and a patch string.
    *
-   * @param text - The patch string to apply to the original value.
+   * @param patch - The patch string to apply to the original value.
    *
    * @returns A patched text change or null if original value did not exist.
    */
-  createPatch(text: string): CompleterWidget.IPatch {
+  createPatch(patch: string): CompleterWidget.IPatch {
     let original = this._original;
     let cursor = this._cursor;
 
@@ -225,16 +225,10 @@ class CompleterModel implements CompleterWidget.IModel {
       return null;
     }
 
-    let { start, end } = cursor;
-    let current = this._current;
+    let prefix = original.text.substring(0, cursor.start);
+    let suffix = original.text.substring(cursor.end);
 
-    if (current) {
-      // Calculate end point by adding any characters that may have been entered
-      // by user input since the original launch of the completer.
-      end += current.text.length - original.text.length;
-    }
-
-    return { start, end, text };
+    return { offset: (prefix + patch).length, text: prefix + patch + suffix };
   }
 
   /**

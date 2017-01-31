@@ -124,7 +124,7 @@ class CompletionHandler implements IDisposable {
     let editor = this.editor;
     let coords = editor.getCoordinate(position) as CompleterWidget.ICoordinate;
     return {
-      text: editor.getLine(position.line),
+      text: editor.model.value.text,
       lineHeight: editor.lineHeight,
       charWidth: editor.charWidth,
       coords,
@@ -207,21 +207,17 @@ class CompletionHandler implements IDisposable {
     if (!editor || !model) {
       return;
     }
+
     let patch = model.createPatch(value);
     if (!patch) {
       return;
     }
-    if (!model.cursor || !model.original) {
-      return;
-    }
-    let { start, end, text } = patch;
-    editor.model.value.remove(start, end);
-    editor.model.value.insert(start, text);
-    let pos = editor.getPositionAt(start);
-    editor.setCursorPosition({
-      line: pos.line,
-      column: pos.column + text.length
-    });
+
+    let { offset, text } = patch;
+    editor.model.value.text = text;
+
+    let position = editor.getPositionAt(offset);
+    editor.setCursorPosition(position);
   }
 
   private _editor: CodeEditor.IEditor = null;
