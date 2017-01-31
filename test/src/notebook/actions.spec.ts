@@ -459,16 +459,14 @@ describe('notebook/notebook/actions', () => {
           expect(result).to.be(true);
           expect(cell.model.outputs.length).to.be.above(0);
           expect(next.rendered).to.be(true);
-          done();
-        }).catch(done);
+        }).then(done, done);
       });
 
       it('should be a no-op if there is no model', (done) => {
         widget.model = null;
         NotebookActions.run(widget, kernel).then(result => {
           expect(result).to.be(false);
-          done();
-        });
+        }).then(done, done);
       });
 
       it('should activate the last selected cell', (done) => {
@@ -478,8 +476,7 @@ describe('notebook/notebook/actions', () => {
         NotebookActions.run(widget, kernel).then(result => {
           expect(result).to.be(true);
           expect(widget.activeCell).to.be(other);
-          done();
-        }).catch(done);
+        }).then(done, done);
       });
 
       it('should clear the selection', (done) => {
@@ -488,8 +485,7 @@ describe('notebook/notebook/actions', () => {
         NotebookActions.run(widget, kernel).then(result => {
           expect(result).to.be(true);
           expect(widget.isSelected(widget.widgets.at(0))).to.be(false);
-          done();
-        });
+        }).then(done, done);
       });
 
       it('should change to command mode', (done) => {
@@ -497,8 +493,7 @@ describe('notebook/notebook/actions', () => {
         NotebookActions.run(widget, kernel).then(result => {
           expect(result).to.be(true);
           expect(widget.mode).to.be('command');
-          done();
-        });
+        }).then(done, done);
       });
 
       it('should handle no kernel', (done) => {
@@ -506,8 +501,7 @@ describe('notebook/notebook/actions', () => {
           expect(result).to.be(true);
           let cell = widget.activeCell as CodeCellWidget;
           expect(cell.model.executionCount).to.be(null);
-          done();
-        });
+        }).then(done, done);
       });
 
       it('should stop executing code cells on an error', (done) => {
@@ -521,11 +515,10 @@ describe('notebook/notebook/actions', () => {
         NotebookActions.run(widget, kernel).then(result => {
           expect(result).to.be(false);
           expect(cell.executionCount).to.be(null);
-          done();
-        });
+        }).then(done, done);
       });
 
-      it('should render all markdown cells on an error', () => {
+      it('should render all markdown cells on an error', (done) => {
         let cell = widget.model.contentFactory.createMarkdownCell({});
         widget.model.cells.pushBack(cell);
         let child = widget.widgets.at(widget.widgets.length - 1) as MarkdownCellWidget;
@@ -535,7 +528,7 @@ describe('notebook/notebook/actions', () => {
         NotebookActions.run(widget, kernel).then(result => {
           expect(result).to.be(false);
           expect(child.rendered).to.be(true);
-        });
+        }).then(done, done);
       });
 
     });
@@ -552,16 +545,14 @@ describe('notebook/notebook/actions', () => {
           expect(result).to.be(true);
           expect(cell.model.outputs.length).to.be.above(0);
           expect(next.rendered).to.be(true);
-          done();
-        });
+        }).then(done, done);
       });
 
       it('should be a no-op if there is no model', (done) => {
         widget.model = null;
         NotebookActions.runAndAdvance(widget, kernel).then(result => {
           expect(result).to.be(false);
-          done();
-        });
+        }).then(done, done);
       });
 
       it('should clear the existing selection', (done) => {
@@ -570,8 +561,7 @@ describe('notebook/notebook/actions', () => {
         NotebookActions.runAndAdvance(widget, kernel).then(result => {
           expect(result).to.be(false);
           expect(widget.isSelected(widget.widgets.at(0))).to.be(false);
-          done();
-        });
+        }).then(done, done);
       });
 
       it('should change to command mode', (done) => {
@@ -579,8 +569,7 @@ describe('notebook/notebook/actions', () => {
         NotebookActions.runAndAdvance(widget, kernel).then(result => {
           expect(result).to.be(true);
           expect(widget.mode).to.be('command');
-          done();
-        });
+        }).then(done, done);
       });
 
       it('should activate the cell after the last selected cell', (done) => {
@@ -589,8 +578,7 @@ describe('notebook/notebook/actions', () => {
         NotebookActions.runAndAdvance(widget, kernel).then(result => {
           expect(result).to.be(true);
           expect(widget.activeCellIndex).to.be(4);
-          done();
-        });
+        }).then(done, done);
       });
 
       it('should create a new code cell in edit mode if necessary', (done) => {
@@ -601,8 +589,7 @@ describe('notebook/notebook/actions', () => {
           expect(widget.widgets.length).to.be(count + 1);
           expect(widget.activeCell).to.be.a(CodeCellWidget);
           expect(widget.mode).to.be('edit');
-          done();
-        });
+        }).then(done, done);
       });
 
       it('should allow an undo of the new cell', (done) => {
@@ -612,8 +599,7 @@ describe('notebook/notebook/actions', () => {
           expect(result).to.be(true);
           NotebookActions.undo(widget);
           expect(widget.widgets.length).to.be(count);
-          done();
-        });
+        }).then(done, done);
       });
 
       it('should stop executing code cells on an error', (done) => {
@@ -624,8 +610,7 @@ describe('notebook/notebook/actions', () => {
         NotebookActions.runAndAdvance(widget, kernel).then(result => {
           expect(result).to.be(false);
           expect(cell.executionCount).to.be(null);
-          done();
-        });
+        }).then(done, done);
       });
 
       it('should render all markdown cells on an error', (done) => {
@@ -637,8 +622,7 @@ describe('notebook/notebook/actions', () => {
           expect(result).to.be(false);
           expect(cell.rendered).to.be(true);
           expect(widget.activeCellIndex).to.be(2);
-          done();
-        });
+        }).then(done, done);
       });
 
     });
@@ -655,16 +639,14 @@ describe('notebook/notebook/actions', () => {
           expect(result).to.be(true);
           expect(cell.model.outputs.length).to.be.above(0);
           expect(next.rendered).to.be(true);
-          done();
-        });
+        }).then(done, done);
       });
 
       it('should be a no-op if there is no model', (done) => {
         widget.model = null;
         NotebookActions.runAndInsert(widget, kernel).then(result => {
           expect(result).to.be(false);
-          done();
-        });
+        }).then(done, done);
       });
 
       it('should clear the existing selection', (done) => {
@@ -673,8 +655,7 @@ describe('notebook/notebook/actions', () => {
         NotebookActions.runAndInsert(widget, kernel).then(result => {
           expect(result).to.be(true);
           expect(widget.isSelected(widget.widgets.at(0))).to.be(false);
-          done();
-        });
+        }).then(done, done);
       });
 
       it('should insert a new code cell in edit mode after the last selected cell', (done) => {
@@ -687,8 +668,7 @@ describe('notebook/notebook/actions', () => {
           expect(widget.activeCell).to.be.a(CodeCellWidget);
           expect(widget.mode).to.be('edit');
           expect(widget.widgets.length).to.be(count + 1);
-          done();
-        });
+        }).then(done, done);
       });
 
       it('should allow an undo of the cell insert', (done) => {
@@ -700,8 +680,7 @@ describe('notebook/notebook/actions', () => {
           expect(result).to.be(true);
           NotebookActions.undo(widget);
           expect(widget.widgets.length).to.be(count);
-          done();
-        });
+        }).then(done, done);
       });
 
       it('should stop executing code cells on an error', (done) => {
@@ -712,8 +691,7 @@ describe('notebook/notebook/actions', () => {
         NotebookActions.runAndInsert(widget, kernel).then(result => {
           expect(result).to.be(false);
           expect(cell.executionCount).to.be(null);
-          done();
-        });
+        }).then(done, done);
       });
 
       it('should render all markdown cells on an error', (done) => {
@@ -725,8 +703,7 @@ describe('notebook/notebook/actions', () => {
           expect(result).to.be(false);
           expect(cell.rendered).to.be(true);
           expect(widget.activeCellIndex).to.be(2);
-          done();
-        });
+        }).then(done, done);
       });
 
     });
@@ -747,16 +724,14 @@ describe('notebook/notebook/actions', () => {
           expect(result).to.be(true);
           expect(cell.model.outputs.length).to.be.above(0);
           expect(next.rendered).to.be(true);
-          done();
-        });
+        }).then(done, done);
       });
 
       it('should be a no-op if there is no model', (done) => {
         widget.model = null;
         NotebookActions.runAll(widget, kernel).then(result => {
           expect(result).to.be(false);
-          done();
-        });
+        }).then(done, done);
       });
 
       it('should change to command mode', (done) => {
@@ -764,8 +739,7 @@ describe('notebook/notebook/actions', () => {
         NotebookActions.runAll(widget, kernel).then(result => {
           expect(result).to.be(true);
           expect(widget.mode).to.be('command');
-          done();
-        });
+        }).then(done, done);
       });
 
       it('should clear the existing selection', (done) => {
@@ -774,15 +748,13 @@ describe('notebook/notebook/actions', () => {
         NotebookActions.runAll(widget, kernel).then(result => {
           expect(result).to.be(true);
           expect(widget.isSelected(widget.widgets.at(2))).to.be(false);
-          done();
-        });
+        }).then(done, done);
       });
 
       it('should activate the last cell', (done) => {
         NotebookActions.runAll(widget, kernel).then(result => {
           expect(widget.activeCellIndex).to.be(widget.widgets.length - 1);
-          done();
-        });
+        }).then(done, done);
       });
 
       it('should stop executing code cells on an error', (done) => {
@@ -793,8 +765,7 @@ describe('notebook/notebook/actions', () => {
           expect(result).to.be(false);
           expect(cell.executionCount).to.be(null);
           expect(widget.activeCellIndex).to.be(widget.widgets.length - 1);
-          done();
-        });
+        }).then(done, done);
       });
 
       it('should render all markdown cells on an error', (done) => {
@@ -804,8 +775,7 @@ describe('notebook/notebook/actions', () => {
         NotebookActions.runAll(widget, kernel).then(result => {
           expect(result).to.be(false);
           expect(cell.rendered).to.be(true);
-          done();
-        });
+        }).then(done, done);
       });
 
     });
@@ -1257,7 +1227,7 @@ describe('notebook/notebook/actions', () => {
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.toggleLineNumbers(widget);
-        expect(widget.activeCellIndex).to.be(-1)
+        expect(widget.activeCellIndex).to.be(-1);
       });
 
     });
