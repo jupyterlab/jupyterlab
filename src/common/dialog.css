@@ -172,6 +172,7 @@
   background: white;
   color: var(--jp-ui-font-color0);
   border: none;
+  border-radius: 0px;
   outline: none;
   -webkit-appearance: none;
   padding-left: 8px;
