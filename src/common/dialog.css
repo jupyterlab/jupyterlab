@@ -173,4 +173,10 @@
   color: var(--jp-ui-font-color0);
   border: none;
   outline: none;
+  -webkit-appearance: none;
+  padding-left: 8px;
+  background-image: url('../default-theme/images/down_caret.svg');
+  background-repeat: no-repeat;
+  background-position: 224px 50%;
+  background-size: 20px;
 }
