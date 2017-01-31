@@ -77,7 +77,7 @@
   background-image: url(icons/jupyter/jupyter.svg);
   background-size: 16px;
   margin: 2px;
-  margin-left: 10px;
+  margin-left: 8px;
   margin-right: 0px;
   padding-right: 0px;
 }
@@ -93,7 +93,7 @@
 .jp-MainAreaPortraitIcon {
   background-position: 0 2px;
   background-repeat: no-repeat;
-  margin-right: 0;
+  margin-right: 2px;
   width: 20px;
 }
 
