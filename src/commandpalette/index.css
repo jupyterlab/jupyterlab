@@ -29,7 +29,7 @@
 
 
 .p-CommandPalette-search {
-  padding: 8px 12px;
+  padding: 8px;
   background-color: var(--jp-border-color3);
   border-bottom: 1px solid var(--jp-border-color1);
 }
@@ -47,8 +47,9 @@
   color: white;
   background-color: var(--jp-brand-color1);
   position: absolute;
-  right: 12px;
-  height: 30px;
+  top: 8px;
+  right: 8px;
+  height: 32px;
   width: 12px;
   padding: 0px 12px;
   background-image: url(../default-theme/icons/md/search.svg);
