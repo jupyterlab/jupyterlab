@@ -83,7 +83,7 @@ class RenderMime {
     this._order = new Vector(options.order);
     this._sanitizer = options.sanitizer;
     this._resolver = options.resolver || null;
-    this._handler = options.pathHandler || null;
+    this._handler = options.linkHandler || null;
   }
 
   /**
@@ -99,10 +99,10 @@ class RenderMime {
   /**
    * The object used to handle path opening links.
    */
-  get pathHandler(): RenderMime.IPathHandler {
+  get linkHandler(): RenderMime.ILinkHandler {
     return this._handler;
   }
-  set pathHandler(value: RenderMime.IPathHandler) {
+  set linkHandler(value: RenderMime.ILinkHandler) {
     this._handler = value;
   }
 
@@ -141,7 +141,7 @@ class RenderMime {
       injector,
       resolver: this._resolver,
       sanitizer: trusted ? null : this._sanitizer,
-      pathHandler: this._handler
+      linkHandler: this._handler
     };
     return this._renderers[mimetype].render(rendererOptions);
   }
@@ -177,7 +177,7 @@ class RenderMime {
       renderers: this._renderers,
       order: this._order.iter(),
       sanitizer: this._sanitizer,
-      pathHandler: this._handler
+      linkHandler: this._handler
     });
   }
 
@@ -223,7 +223,7 @@ class RenderMime {
   private _order: Vector<string>;
   private _sanitizer: ISanitizer = null;
   private _resolver: RenderMime.IResolver | null;
-  private _handler: RenderMime.IPathHandler | null;
+  private _handler: RenderMime.ILinkHandler | null;
 }
 
 
@@ -262,7 +262,7 @@ namespace RenderMime {
     /**
      * An optional path handler.
      */
-    pathHandler?: IPathHandler;
+    linkHandler?: ILinkHandler;
   }
 
   /**
@@ -387,20 +387,20 @@ namespace RenderMime {
     sanitizer?: ISanitizer;
 
     /**
-     * An optional path handler.
+     * An optional link handler.
      */
-    pathHandler?: IPathHandler;
+    linkHandler?: ILinkHandler;
   }
 
   /**
-   * An object that handles path open on click for a node.
+   * An object that handles links on a node.
    */
   export
-  interface IPathHandler {
+  interface ILinkHandler {
     /**
-     * Add the path open handler to the node.
+     * Add the link handler to the node.
      */
-    handlePath(node: HTMLElement, path: string): void;
+    handleLink(node: HTMLElement, url: string): void;
   }
 
   /**

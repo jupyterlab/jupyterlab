@@ -160,7 +160,7 @@ class RenderedHTML extends RenderedHTMLCommon {
     appendHtml(this.node, source);
     if (options.resolver) {
       this._urlResolved = handleUrls(this.node, options.resolver,
-                                      options.pathHandler);
+                                      options.linkHandler);
     }
   }
 
@@ -200,7 +200,7 @@ class RenderedMarkdown extends RenderedHTMLCommon {
       appendHtml(this.node, content);
       if (options.resolver) {
         this._urlResolved = handleUrls(this.node, options.resolver,
-                                        options.pathHandler);
+                                        options.linkHandler);
       }
       this.fit();
       this._rendered = true;
@@ -300,7 +300,7 @@ class RenderedSVG extends Widget {
     }
     if (options.resolver) {
       this._urlResolved = handleUrls(this.node, options.resolver,
-                                      options.pathHandler);
+                                      options.linkHandler);
     }
     this.addClass(SVG_CLASS);
   }
@@ -331,12 +331,12 @@ class RenderedPDF extends Widget {
  *
  * @param resolver - A url resolver.
  *
- * @param pathHandler - An optional url path handler.
+ * @param linkHandler - An optional url path handler.
  *
  * @returns a promise fulfilled when the relative urls have been resolved.
  */
 export
-function handleUrls(node: HTMLElement, resolver: RenderMime.IResolver, pathHandler: RenderMime.IPathHandler | null): Promise<void> {
+function handleUrls(node: HTMLElement, resolver: RenderMime.IResolver, linkHandler: RenderMime.ILinkHandler | null): Promise<void> {
   let promises: Promise<void>[] = [];
   // Handle HTML Elements with src attributes.
   let nodes = node.querySelectorAll('*[src]');
@@ -345,7 +345,7 @@ function handleUrls(node: HTMLElement, resolver: RenderMime.IResolver, pathHandl
   }
   let anchors = node.getElementsByTagName('a');
   for (let i = 0; i < anchors.length; i++) {
-    promises.push(handleAnchor(anchors[i], resolver, pathHandler));
+    promises.push(handleAnchor(anchors[i], resolver, linkHandler));
   }
   let links = node.getElementsByTagName('link');
   for (let i = 0; i < links.length; i++) {
@@ -375,15 +375,15 @@ function handleAttr(node: HTMLElement, name: 'src' | 'href', resolver: RenderMim
 /**
  * Handle an anchor node.
  */
-function handleAnchor(anchor: HTMLAnchorElement, resolver: RenderMime.IResolver, pathHandler: RenderMime.IPathHandler): Promise<void> {
+function handleAnchor(anchor: HTMLAnchorElement, resolver: RenderMime.IResolver, linkHandler: RenderMime.ILinkHandler): Promise<void> {
   anchor.target = '_blank';
   let href = anchor.getAttribute('href');
   if (!href) {
     return Promise.resolve(void 0);
   }
   return resolver.resolveUrl(href).then(path => {
-    if (pathHandler) {
-      pathHandler.handlePath(anchor, path);
+    if (linkHandler) {
+      linkHandler.handleLink(anchor, path);
     }
     return resolver.getDownloadUrl(path);
   }).then(url => {

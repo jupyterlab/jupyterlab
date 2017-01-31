@@ -57,8 +57,8 @@ function activate(app: JupyterLab, linker: ICommandLinker): IRenderMime {
       order.push(m);
     }
   }
-  let pathHandler = {
-    handlePath: (node: HTMLElement, path: string) => {
+  let linkHandler = {
+    handleLink: (node: HTMLElement, path: string) => {
       if (!utils.urlParse(path).protocol && path.indexOf('//') !== 0) {
         linker.connectNode(node, CommandIDs.open, { path });
       }
@@ -68,6 +68,6 @@ function activate(app: JupyterLab, linker: ICommandLinker): IRenderMime {
     renderers,
     order,
     sanitizer,
-    pathHandler
+    linkHandler
   });
 };

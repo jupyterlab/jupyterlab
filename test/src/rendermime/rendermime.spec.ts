@@ -63,15 +63,15 @@ describe('rendermime/index', () => {
 
     });
 
-    describe('#pathHandler', () => {
+    describe('#linkHandler', () => {
 
-      it('should be the path handler used by the rendermime', () => {
-        expect(r.pathHandler).to.be(null);
+      it('should be the link handler used by the rendermime', () => {
+        expect(r.linkHandler).to.be(null);
         let handler = {
-          handlePath: () => { /* no-op */ }
+          handleLink: () => { /* no-op */ }
         };
-        r.pathHandler = handler;
-        expect(r.pathHandler).to.be(handler);
+        r.linkHandler = handler;
+        expect(r.linkHandler).to.be(handler);
       });
 
     });
@@ -181,14 +181,14 @@ describe('rendermime/index', () => {
         r.render({ bundle, trusted: true });
       });
 
-      it('should send a path handler', (done) => {
+      it('should send a link handler', (done) => {
         let bundle: RenderMime.MimeMap<string> = {
           'text/html': '<a href="./foo/bar.txt">foo</a>'
         };
         r.resolver = RESOLVER;
-        r.pathHandler = {
-          handlePath: (node: HTMLElement, path: string) => {
-            expect(path).to.be('foo/bar.txt');
+        r.linkHandler = {
+          handleLink: (node: HTMLElement, url: string) => {
+            expect(url).to.be('foo/bar.txt');
             done();
           }
         };
