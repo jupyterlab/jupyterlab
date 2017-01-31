@@ -437,7 +437,7 @@ describe('completer/handler', () => {
         let text = 'eggs\nfoo # comment\nbaz';
         let want = 'eggs\nfoobar # comment\nbaz';
         let request: CompleterWidget.ITextState = {
-          column: 2,
+          column: 5,
           line: 1,
           lineHeight: 0,
           charWidth: 0,

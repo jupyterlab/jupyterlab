@@ -6,7 +6,7 @@ import expect = require('expect.js');
 import {
   toArray
 } from 'phosphor/lib/algorithm/iteration';
-//
+
 import {
   CompleterModel, CompleterWidget
 } from '../../../lib/completer';
@@ -359,8 +359,7 @@ describe('completer/model', () => {
         let patch = 'foobar';
         let want: CompleterWidget.IPatch = {
           text: patch,
-          start: 0,
-          end: 3
+          offset: patch.length
         };
         let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 3 };
         model.original = makeState('foo');
@@ -377,13 +376,11 @@ describe('completer/model', () => {
         let model = new CompleterModel();
         let currentValue = 'foo\nbar';
         let patch = 'barbaz';
-        let wantText = 'barbaz';
-        let start = 10;
-        let end = wantText.length;
+        let start = currentValue.length;
+        let end = currentValue.length;
         let want: CompleterWidget.IPatch = {
-          text: wantText,
-          start,
-          end
+          text: currentValue + patch,
+          offset: currentValue.length + patch.length
         };
         let cursor: CompleterWidget.ICursorSpan = { start, end };
         model.original = makeState(currentValue);
