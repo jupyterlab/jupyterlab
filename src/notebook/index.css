@@ -158,5 +158,7 @@
 }
 
 .jp-CellTools-separator {
-  
+  margin-top: 6px;
+  margin-bottom: 12px;
+  border-top: 1px dotted gray;
 }

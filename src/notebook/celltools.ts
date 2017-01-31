@@ -30,6 +30,10 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
+  h, realize
+} from 'phosphor/lib/ui/vdom';
+
+import {
   BaseCellWidget
 } from '../cells';
 
@@ -56,6 +60,11 @@ const CHILD_CLASS = 'jp-CellTools-child';
  * The class name added to a CellTools active cell.
  */
 const ACTIVE_CELL_CLASS = 'jp-ActiveCellTool';
+
+/**
+ * The class name added to a MetadataEditor instance.
+ */
+const METADATA_CLASS = 'jp-MetaDataEditor';
 
 /**
  * The class name added to a separator widget.
@@ -148,7 +157,7 @@ class CellTools extends Widget implements ICellTools {
     let layout = this.layout as PanelLayout;
     if (this._items.length > 1) {
       let separator = new Widget();
-      widget.addClass(SEPARATOR_CLASS);
+      separator.addClass(SEPARATOR_CLASS);
       layout.insertWidget(index * 2 - 1, separator);
     }
     layout.insertWidget(index * 2, widget);
@@ -271,7 +280,6 @@ namespace CellTools {
     private _celltools: ICellTools;
   }
 
-
   /**
    * The namespace for `ActiveCellTool` class statics.
    */
@@ -288,6 +296,65 @@ namespace CellTools {
       celltools: ICellTools;
     }
   }
+
+  /**
+   * A raw metadata editor.
+   */
+  export
+  class MetadataEditor extends Widget {
+    /**
+     * Construct a new raw metadata tool.
+     */
+    constructor(options: ActiveCellTool.IOptions) {
+      let vnode = h.div({ className: METADATA_CLASS },
+                    h.p({}, 'Cell Metadata'),
+                    h.textarea()
+                  );
+      super({ node: realize(vnode) });
+      this._celltools = options.celltools;
+      this._celltools.activeCellChanged.connect(this._onActiveCellChanged, this);
+      this._onActiveCellChanged();
+    }
+
+    /**
+     * Get the text area used by the metadata editor.
+     */
+    get textarea(): HTMLTextAreaElement {
+      return this.node.getElementsByTagName('textarea')[0];
+    }
+
+    /**
+     * Handle a change to the active cell.
+     */
+    private _onActiveCellChanged(): void {
+      let activeCell = this._celltools.activeCell;
+      if (!activeCell) {
+        // TODO: Use dummy content.
+        return;
+      }
+      this.textarea.textContent = activeCell.model.value.text;
+    }
+
+    private _celltools: ICellTools;
+  }
+
+  /**
+   * The namespace for `ActiveCellTool` class statics.
+   */
+  export
+  namespace MetadataEditor {
+    /**
+     * The options used to create a metadata editor.
+     */
+    export
+    interface IOptions {
+      /**
+       * The cell tools object.
+       */
+      celltools: ICellTools;
+    }
+  }
+
 }
 
 
