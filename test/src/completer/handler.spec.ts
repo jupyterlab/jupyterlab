@@ -434,21 +434,23 @@ describe('completer/handler', () => {
         let completer = new CompleterWidget({ model });
         let handler = new TestCompletionHandler({ completer });
         let editor = createEditorWidget().editor;
+        let text = 'eggs\nfoo # comment\nbaz';
+        let want = 'eggs\nfoobar # comment\nbaz';
         let request: CompleterWidget.ITextState = {
-          column: 0,
+          column: 2,
           line: 1,
           lineHeight: 0,
           charWidth: 0,
           coords: null,
-          text: 'foo'
+          text
         };
 
         handler.editor = editor;
-        handler.editor.model.value.text = 'eggs\nfoo\nbaz';
+        handler.editor.model.value.text = text;
         model.original = request;
         model.cursor = { start: 5, end: 8 };
         completer.selected.emit(patch);
-        expect(handler.editor.model.value.text).to.equal('eggs\nfoobar\nbaz');
+        expect(handler.editor.model.value.text).to.equal(want);
       });
 
     });
