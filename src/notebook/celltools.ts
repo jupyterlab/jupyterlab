@@ -34,8 +34,33 @@ import {
 } from '../cells';
 
 import {
+  CodeEditor, CodeEditorWidget
+} from '../codeeditor';
+
+import {
   INotebookTracker
 } from './';
+
+
+/**
+ * The class name added to a CellTools instance.
+ */
+const CELLTOOLS_CLASS = 'jp-CellTools';
+
+/**
+ * The class name added to a CellTools child.
+ */
+const CHILD_CLASS = 'jp-CellTools-child';
+
+/**
+ * The class name added to a CellTools active cell.
+ */
+const ACTIVE_CELL_CLASS = 'jp-ActiveCellTool';
+
+/**
+ * The class name added to a separator widget.
+ */
+const SEPARATOR_CLASS = 'jp-CellTools-separator';
 
 
 /* tslint:disable */
@@ -64,8 +89,9 @@ class CellTools extends Widget implements ICellTools {
    */
   constructor(options: CellTools.IOptions) {
     super();
-    this._tracker = options.tracker;
+    this.addClass(CELLTOOLS_CLASS);
     this.layout = new PanelLayout();
+    this._tracker = options.tracker;
     this._tracker.activeCellChanged.connect(this._onActiveCellChanged, this);
     this._tracker.selectionChanged.connect(this._onSelectionChanged, this);
   }
@@ -113,12 +139,19 @@ class CellTools extends Widget implements ICellTools {
     let rankItem = { widget, rank };
     let index = upperBound(this._items, rankItem, Private.itemCmp);
 
+    widget.addClass(CHILD_CLASS);
+
     // Upon disposal, remove the widget and its rank reference.
     widget.disposed.connect(this._onWidgetDisposed, this);
 
     this._items.insert(index, rankItem);
     let layout = this.layout as PanelLayout;
-    layout.insertWidget(index, widget);
+    if (this._items.length > 1) {
+      let separator = new Widget();
+      widget.addClass(SEPARATOR_CLASS);
+      layout.insertWidget(index * 2 - 1, separator);
+    }
+    layout.insertWidget(index * 2, widget);
   }
 
   /**
@@ -128,6 +161,13 @@ class CellTools extends Widget implements ICellTools {
     let index = findIndex(this._items, item => item.widget === widget);
     if (index !== -1) {
       this._items.removeAt(index);
+    }
+    let layout = this.layout as PanelLayout;
+    // Remove the separator.
+    if (index === 0 && layout.widgets.length) {
+      layout.widgets.at(0).dispose;
+    } else {
+      layout.widgets.at(index * 2 - 1).dispose();
     }
   }
 
@@ -180,6 +220,73 @@ namespace CellTools {
      * The rank order of the widget among its siblings.
      */
     rank?: number;
+  }
+
+  /**
+   * A cell tool displaying the active cell contents.
+   */
+  export
+  class ActiveCellTool extends Widget {
+    /**
+     * Construct a new active cell tool.
+     */
+    constructor(options: ActiveCellTool.IOptions) {
+      super();
+      this.addClass(ACTIVE_CELL_CLASS);
+      this.addClass('jp-InputArea');
+      this.layout = new PanelLayout();
+      this._celltools = options.celltools;
+      this._celltools.activeCellChanged.connect(this._onActiveCellChanged, this);
+      this._onActiveCellChanged();
+    }
+
+    /**
+     * Handle a change to the active cell.
+     */
+    private _onActiveCellChanged(): void {
+      let activeCell = this._celltools.activeCell;
+      let layout = this.layout as PanelLayout;
+      let count = layout.widgets.length;
+      for (let i = 0; i < count; i++) {
+        layout.widgets.at(0).dispose();
+      }
+      if (!activeCell) {
+        // TODO: Use dummy content.
+        return;
+      }
+      let promptNode = activeCell.promptNode.cloneNode(true) as HTMLElement;
+      let prompt = new Widget({ node: promptNode });
+      let factory = activeCell.contentFactory.editorFactory;
+      let model = new CodeEditor.Model();
+      model.value.text = activeCell.model.value.text.split('\n')[0];
+      model.mimeType = activeCell.model.mimeType;
+      let editorWidget = new CodeEditorWidget({ model, factory });
+      editorWidget.addClass('jp-CellEditor');
+      editorWidget.addClass('.jp-InputArea-editor');
+      editorWidget.editor.readOnly = true;
+      layout.addWidget(prompt);
+      layout.addWidget(editorWidget);
+    }
+
+    private _celltools: ICellTools;
+  }
+
+
+  /**
+   * The namespace for `ActiveCellTool` class statics.
+   */
+  export
+  namespace ActiveCellTool {
+    /**
+     * The options used to create an active cell tool.
+     */
+    export
+    interface IOptions {
+      /**
+       * The cell tools object.
+       */
+      celltools: ICellTools;
+    }
   }
 }
 

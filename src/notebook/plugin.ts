@@ -138,6 +138,9 @@ function activateCellTools(app: JupyterLab, restorer: IInstanceRestorer, tracker
   widget.title.label = 'Cell Tools';
   widget.id = 'cell-tools';
 
+  const activeCellTool = new CellTools.ActiveCellTool({ celltools: widget });
+  widget.addItem({ widget: activeCellTool, rank: 1 });
+
   restorer.add(widget, namespace);
   app.shell.addToLeftArea(widget);
 }

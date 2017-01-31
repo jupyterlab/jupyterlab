@@ -10,7 +10,7 @@ import {
 } from 'phosphor/lib/core/messaging';
 
 import {
-  PanelLayout
+  Panel, PanelLayout
 } from 'phosphor/lib/ui/panel';
 
 import {
@@ -124,10 +124,10 @@ class BaseCellWidget extends Widget {
 
     let model = this._model = options.model;
 
-    let factory = options.contentFactory;
+    let factory = this.contentFactory = options.contentFactory;
     let editorOptions = { model, factory: factory.editorFactory };
 
-    let editor =this._editor = factory.createCellEditor(editorOptions);
+    let editor = this._editor = factory.createCellEditor(editorOptions);
     editor.addClass(CELL_EDITOR_CLASS);
 
     this._input = factory.createInputArea({ editor });
@@ -141,6 +141,11 @@ class BaseCellWidget extends Widget {
     model.metadataChanged.connect(this.onMetadataChanged, this);
     model.stateChanged.connect(this.onModelStateChanged, this);
   }
+
+  /**
+   * The content factory used by the widget.
+   */
+  readonly contentFactory: BaseCellWidget.IContentFactory;
 
   /**
    * Get the prompt node used by the cell.
@@ -420,6 +425,11 @@ class CodeCellWidget extends BaseCellWidget {
    * The model used by the widget.
    */
   readonly model: ICodeCellModel;
+
+  /**
+   * The content factory used by the widget.
+   */
+  readonly contentFactory: CodeCellWidget.IContentFactory;
 
   /**
    * Dispose of the resources used by the widget.

@@ -126,3 +126,37 @@
     text-align: center;
     line-height: var(--jp-private-notebook-dragImage-circleRadius);
 }
+
+
+.jp-CellTools {
+  display: flex;
+  flex-direction: column;
+  min-width: 300px;
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  font-size: var(--jp-ui-font-size1);
+}
+
+
+.jp-CellTools-child {
+  flex: 0 1 auto;
+  display: flex;
+  flex-direction: row;
+}
+
+
+.jp-ActiveCellTool {
+  padding: var(--jp-private-notebook-padding);
+}
+
+.jp-ActiveCellTool .jp-Cell-prompt {
+  flex: 0 0 auto;
+}
+
+.jp-ActiveCellTool .jp-CellEditor {
+  flex: 1 1 auto;
+}
+
+.jp-CellTools-separator {
+  
+}
