@@ -216,14 +216,27 @@ namespace CodeEditor {
    * The default implementation of the editor model.
    */
   export
-  class Model implements IModel {
+  class Model extends ObservableMap<any> implements IModel {
     /**
      * Construct a new Model.
      */
     constructor(options?: Model.IOptions) {
+      super();
       options = options || {};
       this._value = new ObservableString(options.value);
       this._mimetype = options.mimeType || 'text/plain';
+      this.set('mimeType', this._mimetype);
+      this.set('value', this._value);
+      this.set('selections', this._selections);
+      this.changed.connect((s, change)=>{
+        if(change.key === 'mimeType') {
+          this._mimeTypeChanged.emit({
+            name: 'mimeType',
+            oldValue: change.oldValue,
+            newValue: change.oldValue
+          });
+        }
+      });
     }
 
     /**
@@ -237,33 +250,28 @@ namespace CodeEditor {
      * Get the value of the model.
      */
     get value(): IObservableString {
-      return this._value;
+      return this.get("value");
     }
 
     /**
      * Get the selections for the model.
      */
     get selections(): IObservableMap<ITextSelection[]> {
-      return this._selections;
+      return this.get("selections");
     }
 
     /**
      * A mime type of the model.
      */
     get mimeType(): string {
-      return this._mimetype;
+      return this.get("mimeType");
     }
     set mimeType(newValue: string) {
-      const oldValue = this._mimetype;
+      const oldValue = this.get("mimeType");
       if (oldValue === newValue) {
         return;
       }
-      this._mimetype = newValue;
-      this._mimeTypeChanged.emit({
-        name: 'mimeType',
-        oldValue,
-        newValue
-      });
+      this.set("mimeType", newValue);
     }
 
     /**
@@ -295,6 +303,7 @@ namespace CodeEditor {
       }
       this._selections.dispose();
       this._value.dispose();
+      super.dispose();
     }
 
     /**
@@ -303,11 +312,8 @@ namespace CodeEditor {
     registerCollaborative( realtimeHandler : IRealtimeHandler ) : Promise<void> {
       return new Promise<void>((resolve,reject)=>{
         this._realtime = realtimeHandler;
-        //link to the new realtime string
-        let stringPromise =
-          this._realtime.linkString(this.value, 'codeeditor:text');
-        let cursorPromise =
-          this._realtime.linkMap(this.selections, 'codeeditor:cursors');
+        let mapPromise =
+          this._realtime.linkMap(this, 'codeeditor');
         this._realtime.collaborators.changed.connect((collaborators, change)=>{
           //if there are selections corresponding to non-collaborators,
           //they are stale and should be removed.
@@ -317,7 +323,7 @@ namespace CodeEditor {
             }
           }
         });
-        Promise.all([stringPromise, cursorPromise]).then(()=>{
+        mapPromise.then(()=>{
           resolve();
         }).catch(()=>{
           console.log("Unable to register document as collaborative");
@@ -326,8 +332,8 @@ namespace CodeEditor {
     }
 
     private _value: ObservableString;
-    private _selections = new ObservableMap<ITextSelection[]>();
     private _mimetype: string;
+    private _selections = new ObservableMap<ITextSelection[]>();
     private _isDisposed = false;
     private _mimeTypeChanged = new Signal<this, IChangedArgs<string>>(this);
     private _realtime : IRealtimeHandler = null;

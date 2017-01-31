@@ -180,7 +180,7 @@ interface IRealtimeHandler extends IDisposable {
    *
    * @returns a promise when the linking is done.
    */
-  linkMap<T>(vec: IObservableMap<T>, id: string): Promise<void>;
+  linkMap<T>(vec: IObservableMap<T>, id: string, parent?: IObservableMap<any>): Promise<void>;
 
   /**
    * Create a string for the realtime model.
@@ -194,7 +194,7 @@ interface IRealtimeHandler extends IDisposable {
    *
    * @returns a promise when the linking is done.
    */
-  linkString(str: IObservableString, id: string): Promise<void>;
+  linkString(str: IObservableString, id: string, parent?: IObservableMap<any>): Promise<void>;
 
   /**
    * Create a vector for the realtime model.
@@ -208,7 +208,7 @@ interface IRealtimeHandler extends IDisposable {
    *
    * @returns a promise when the linking is done.
    */
-  linkVector<T extends ISynchronizable<T>>(vec: IObservableUndoableVector<T>, id: string): Promise<void>;
+  linkVector<T extends ISynchronizable<T>>(vec: IObservableUndoableVector<T>, id: string, parent?: IObservableMap<any>): Promise<void>;
 }
 
 /**
