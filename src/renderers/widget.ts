@@ -331,12 +331,12 @@ class RenderedPDF extends Widget {
  *
  * @param resolver - A url resolver.
  *
- * @param linkHandler - An optional url path handler.
+ * @param linkHandler - An optional link handler for nodes.
  *
  * @returns a promise fulfilled when the relative urls have been resolved.
  */
 export
-function handleUrls(node: HTMLElement, resolver: RenderMime.IResolver, linkHandler: RenderMime.ILinkHandler | null): Promise<void> {
+function handleUrls(node: HTMLElement, resolver: RenderMime.IResolver, linkHandler?: RenderMime.ILinkHandler): Promise<void> {
   let promises: Promise<void>[] = [];
   // Handle HTML Elements with src attributes.
   let nodes = node.querySelectorAll('*[src]');
@@ -345,7 +345,7 @@ function handleUrls(node: HTMLElement, resolver: RenderMime.IResolver, linkHandl
   }
   let anchors = node.getElementsByTagName('a');
   for (let i = 0; i < anchors.length; i++) {
-    promises.push(handleAnchor(anchors[i], resolver, linkHandler));
+    promises.push(handleAnchor(anchors[i], resolver, linkHandler || null));
   }
   let links = node.getElementsByTagName('link');
   for (let i = 0; i < links.length; i++) {
@@ -375,7 +375,7 @@ function handleAttr(node: HTMLElement, name: 'src' | 'href', resolver: RenderMim
 /**
  * Handle an anchor node.
  */
-function handleAnchor(anchor: HTMLAnchorElement, resolver: RenderMime.IResolver, linkHandler: RenderMime.ILinkHandler): Promise<void> {
+function handleAnchor(anchor: HTMLAnchorElement, resolver: RenderMime.IResolver, linkHandler: RenderMime.ILinkHandler | null): Promise<void> {
   anchor.target = '_blank';
   let href = anchor.getAttribute('href');
   if (!href) {
