@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  nbformat
+} from '@jupyterlab/services';
+
+import {
   each
 } from 'phosphor/lib/algorithm/iteration';
 
@@ -290,23 +294,18 @@ namespace CellTools {
      * The cell tools object.
      */
     celltools: ICellTools;
-
-    /**
-     * The node used by the tool.
-     */
-    node?: HTMLElement;
   }
 
   /**
-   * A cell tool.
+   * The base cell tool, meant to be subclassed.
    */
   export
-  class CellTool extends Widget {
+  class BaseCellTool extends Widget {
     /**
      * Construct a new cell tool.
      */
-    constructor(options: IToolOptions) {
-      super({ node: options.node });
+    constructor(options: IToolOptions, node: HTMLElement = null) {
+      super({ node });
       this.celltools = options.celltools;
       this.celltools.activeCellChanged.connect(this.onActiveCellChanged, this);
       this.celltools.selectionChanged.connect(this.onSelectionChanged, this);
@@ -354,7 +353,7 @@ namespace CellTools {
    * A cell tool displaying the active cell contents.
    */
   export
-  class ActiveCellTool extends CellTool {
+  class ActiveCellTool extends BaseCellTool {
     /**
      * Construct a new active cell tool.
      */
@@ -398,7 +397,7 @@ namespace CellTools {
    * A raw metadata editor.
    */
   export
-  class MetadataEditor extends CellTool {
+  class MetadataEditor extends BaseCellTool {
     /**
      * Construct a new raw metadata tool.
      */
@@ -407,8 +406,7 @@ namespace CellTools {
                     h.label({}, 'Cell Metadata'),
                     h.textarea()
                   );
-      options.node = realize(vnode);
-      super(options);
+      super(options, realize(vnode));
     }
 
     /**
@@ -443,41 +441,23 @@ namespace CellTools {
     }
   }
 
-
   /**
-   * A metadata tool that provides a selection for a given key.
+   * A cell tool that provides a selection for a given metadata key.
    */
   export
-  class KeySelector extends CellTool {
+  class KeySelector extends BaseCellTool {
     /**
      * Construct a new KeySelector.
      */
     constructor(options: IKeySelectorOptions) {
-      let name = options.key;
-      let title = (
-        options.title || name[0].toLocaleUpperCase() + name.slice(1)
-      );
-      let optionNodes: VNode[] = [];
-      for (let label in options.optionsMap) {
-        let value = JSON.stringify(options.optionsMap[label]);
-        optionNodes.push(h.option({ label, value }));
-      }
-      options.node = realize(
-        h.div({}, h.label(title),
-              h.div({ className: SELECT_WRAPPER_CLASS },
-                h.select({}, optionNodes)))
-      );
-      super(options);
+      super(options, Private.createSelector(options));
       this.addClass(KEYSELECTOR_CLASS);
-      this.key = name;
-      this._changeGuard = false;
-      this._validCellTypes = (
-        options.validCellTypes || ['raw', 'code', 'markdown']
-      );
+      this.key = options.key;
+      this._validCellTypes = options.validCellTypes || [];
     }
 
     /**
-     * The key used by the selector.
+     * The metadata key used by the selector.
      */
     readonly key: string;
 
@@ -559,7 +539,8 @@ namespace CellTools {
         return;
       }
       let cellType = activeCell.model.type;
-      if (this._validCellTypes.indexOf(cellType) === -1) {
+      if (this._validCellTypes.length &&
+          this._validCellTypes.indexOf(cellType) === -1) {
         select.disabled = true;
         return;
       }
@@ -583,7 +564,7 @@ namespace CellTools {
       }
     }
 
-    private _changeGuard: boolean;
+    private _changeGuard = true;
     private _validCellTypes: string[];
   }
 
@@ -614,14 +595,9 @@ namespace CellTools {
     title?: string;
 
     /**
-     * The optional valid cell types.
+     * The optional valid cell types - defaults to all valid types.
      */
-    validCellTypes?: string[];
-
-    /**
-     * The node used by the tool.
-     */
-    node?: HTMLElement;
+    validCellTypes?: nbformat.CellType[];
   }
 
   /**
@@ -650,7 +626,7 @@ namespace CellTools {
    */
   export
   function createNBConvertSelector(options: IToolOptions): KeySelector {
-    let selectorOptions = {
+    let selectorOptions: IKeySelectorOptions = {
       celltools: options.celltools,
       key: 'raw_mimetype',
       title: 'Raw NBConvert Format',
@@ -703,5 +679,28 @@ namespace Private {
   export
   function itemCmp(first: IRankItem, second: IRankItem): number {
     return first.rank - second.rank;
+  }
+
+  /**
+   * Create the node for a KeySelector.
+   */
+  export
+  function createSelector(options: CellTools.IKeySelectorOptions): HTMLElement {
+    let name = options.key;
+    let title = (
+      options.title || name[0].toLocaleUpperCase() + name.slice(1)
+    );
+    let optionNodes: VNode[] = [];
+    for (let label in options.optionsMap) {
+      let value = JSON.stringify(options.optionsMap[label]);
+      optionNodes.push(h.option({ label, value }));
+    }
+    return realize(
+      h.div({},
+        h.label(title),
+        h.div({ className: SELECT_WRAPPER_CLASS },
+          h.select({},
+            optionNodes)))
+    );
   }
 }
