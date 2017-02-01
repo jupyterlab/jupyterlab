@@ -430,7 +430,7 @@ namespace CellTools {
           content[key] = activeCell.model.getMetadata(key).getValue();
         });
       }
-      this.textarea.value = JSON.stringify(content);
+      this.textarea.value = JSON.stringify(content, null, 2);
     }
 
     /**
