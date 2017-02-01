@@ -111,7 +111,7 @@ const contentFactoryPlugin: JupyterLabPlugin<NotebookPanel.IContentFactory> = {
 };
 
 /**
- * The about page extension.
+ * The cell tools extension.
  */
 const cellToolsPlugin: JupyterLabPlugin<void> = {
   activate: activateCellTools,
