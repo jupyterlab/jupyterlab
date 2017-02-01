@@ -164,8 +164,47 @@
 }
 
 
-.jp-MetaDataEditor {
+.jp-MetadataEditor {
   flex-direction: column;
   padding-left: 10px;
   padding-right: 10px;
+}
+
+
+.jp-KeySelector {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+
+.jp-KeySelector label {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  line-height: 1.4;
+}
+
+
+.jp-KeySelector select {
+  flex: 1 1 auto;
+  height: 32px;
+  border: none;
+  outline: none;
+}
+
+
+.jp-KeySelector-selectWrapper{
+  display: flex;
+  flex-direction: column;
+  padding: 1px;
+  background: white;
+  height: 28px;
+  width: 252px;
+  box-sizing: border-box;
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  margin-bottom: 12px;
+}
+
+
+.jp-KeySelector-selectWrapper.jp-mod-focused {
+  border: 2px solid var(--md-light-blue-200);
 }

@@ -14,6 +14,10 @@ import {
 } from 'phosphor/lib/algorithm/searching';
 
 import {
+  Message
+} from 'phosphor/lib/core/messaging';
+
+import {
   defineSignal, ISignal
 } from 'phosphor/lib/core/signaling';
 
@@ -34,7 +38,7 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  h, realize
+  h, realize, VNode
 } from 'phosphor/lib/ui/vdom';
 
 import {
@@ -72,12 +76,22 @@ const ACTIVE_CELL_CLASS = 'jp-ActiveCellTool';
 /**
  * The class name added to a MetadataEditor instance.
  */
-const METADATA_CLASS = 'jp-MetaDataEditor';
+const METADATA_CLASS = 'jp-MetadataEditor';
 
 /**
- * The class name added to the slide type editor.
+ * The class name added to a KeySelector instance.
  */
-const SLIDETYPE_CLASS = 'jp-SlideType';
+const KEYSELECTOR_CLASS = 'jp-KeySelector';
+
+/**
+ * The class name added to a select wrapper.
+ */
+const SELECT_WRAPPER_CLASS = 'jp-KeySelector-selectWrapper';
+
+/**
+ * The class name added to a wrapper that has focus.
+ */
+const FOCUS_CLASS = 'jp-mod-focused';
 
 /**
  * The class name added to a separator widget.
@@ -276,31 +290,86 @@ namespace CellTools {
      * The cell tools object.
      */
     celltools: ICellTools;
+
+    /**
+     * The node used by the tool.
+     */
+    node?: HTMLElement;
+  }
+
+  /**
+   * A cell tool.
+   */
+  export
+  class CellTool extends Widget {
+    /**
+     * Construct a new cell tool.
+     */
+    constructor(options: IToolOptions) {
+      super({ node: options.node });
+      this.celltools = options.celltools;
+      this.celltools.activeCellChanged.connect(this.onActiveCellChanged, this);
+      this.celltools.selectionChanged.connect(this.onSelectionChanged, this);
+      this.celltools.metadataChanged.connect(this.onMetadataChanged, this);
+    }
+
+    /**
+     * The cell tools object.
+     */
+    readonly celltools: ICellTools;
+
+    /**
+     * Handle an after-attach message.
+     */
+    protected onAfterAttach(message: Message): void {
+      this.onActiveCellChanged(this.celltools, this.celltools.activeCell);
+    }
+
+    /**
+     * Handle a change to the active cell.
+     *
+     * #### Notes
+     * The default implemenatation is a no-op.
+     */
+    protected onActiveCellChanged(sender: ICellTools, args: BaseCellWidget): void { /* no-op */ }
+
+    /**
+     * Handle a change to the selection.
+     *
+     * #### Notes
+     * The default implementation is a no-op.
+     */
+    protected onSelectionChanged(sender: ICellTools): void { /* no-op */ }
+
+    /**
+     * Handle a change to the metadata of the active cell.
+     *
+     * #### Notes
+     * The default implementation is a no-op.
+     */
+     protected onMetadataChanged(sender: ICellTools, args: IChangedArgs<JSONValue>) { /* no-op */ }
   }
 
   /**
    * A cell tool displaying the active cell contents.
    */
   export
-  class ActiveCellTool extends Widget {
+  class ActiveCellTool extends CellTool {
     /**
      * Construct a new active cell tool.
      */
     constructor(options: IToolOptions) {
-      super();
+      super(options);
       this.addClass(ACTIVE_CELL_CLASS);
       this.addClass('jp-InputArea');
       this.layout = new PanelLayout();
-      this._celltools = options.celltools;
-      this._celltools.activeCellChanged.connect(this._onActiveCellChanged, this);
-      this._onActiveCellChanged();
     }
 
     /**
      * Handle a change to the active cell.
      */
-    private _onActiveCellChanged(): void {
-      let activeCell = this._celltools.activeCell;
+    protected onActiveCellChanged(): void {
+      let activeCell = this.celltools.activeCell;
       let layout = this.layout as PanelLayout;
       let count = layout.widgets.length;
       for (let i = 0; i < count; i++) {
@@ -323,15 +392,13 @@ namespace CellTools {
       layout.addWidget(prompt);
       layout.addWidget(editorWidget);
     }
-
-    private _celltools: ICellTools;
   }
 
   /**
    * A raw metadata editor.
    */
   export
-  class MetadataEditor extends Widget {
+  class MetadataEditor extends CellTool {
     /**
      * Construct a new raw metadata tool.
      */
@@ -340,10 +407,8 @@ namespace CellTools {
                     h.label({}, 'Cell Metadata'),
                     h.textarea()
                   );
-      super({ node: realize(vnode) });
-      this._celltools = options.celltools;
-      this._celltools.activeCellChanged.connect(this._onActiveCellChanged, this);
-      this._onActiveCellChanged();
+      options.node = realize(vnode);
+      super(options);
     }
 
     /**
@@ -356,8 +421,7 @@ namespace CellTools {
     /**
      * Handle a change to the active cell.
      */
-    private _onActiveCellChanged(): void {
-      let activeCell = this._celltools.activeCell;
+    protected onActiveCellChanged(sender: ICellTools, activeCell: BaseCellWidget): void {
       let content: JSONObject = {};
       if (activeCell) {
         each(activeCell.model.listMetadata(), key => {
@@ -368,46 +432,239 @@ namespace CellTools {
           content[key] = activeCell.model.getMetadata(key).getValue();
         });
       }
-      this.textarea.textContent = JSON.stringify(content);
+      this.textarea.value = JSON.stringify(content);
     }
 
-    private _celltools: ICellTools;
+    /**
+     * Handle a change to the metadata of the active cell.
+     */
+    protected onMetadataChanged(sender: ICellTools, args: IChangedArgs<JSONValue>) {
+      this.onActiveCellChanged(sender, sender.activeCell);
+    }
   }
 
+
   /**
-   * A slidetype selector.
+   * A metadata tool that provides a selection for a given key.
    */
   export
-  class SlideType extends Widget {
+  class KeySelector extends CellTool {
+    /**
+     * Construct a new KeySelector.
+     */
+    constructor(options: IKeySelectorOptions) {
+      let name = options.key;
+      let title = (
+        options.title || name[0].toLocaleUpperCase() + name.slice(1)
+      );
+      let optionNodes: VNode[] = [];
+      for (let label in options.optionsMap) {
+        let value = JSON.stringify(options.optionsMap[label]);
+        optionNodes.push(h.option({ label, value }));
+      }
+      options.node = realize(
+        h.div({}, h.label(title),
+              h.div({ className: SELECT_WRAPPER_CLASS },
+                h.select({}, optionNodes)))
+      );
+      super(options);
+      this.addClass(KEYSELECTOR_CLASS);
+      this.key = name;
+      this._changeGuard = false;
+      this._validCellTypes = (
+        options.validCellTypes || ['raw', 'code', 'markdown']
+      );
+    }
 
     /**
-     * Construct a new active cell tool.
+     * The key used by the selector.
      */
-    constructor(options: IToolOptions) {
-      super();
-      this.addClass(SLIDETYPE_CLASS);
-      this.layout = new PanelLayout();
-      this._celltools = options.celltools;
-      this._celltools.activeCellChanged.connect(this._onActiveCellChanged, this);
-      this._celltools.metadataChanged.connect(this._onMetadataChanged, this);
-      this._onActiveCellChanged();
+    readonly key: string;
+
+    /**
+     * The select node for the widget.
+     */
+    get selectNode(): HTMLSelectElement {
+      return this.node.getElementsByTagName('select')[0] as HTMLSelectElement;
+    }
+
+    /**
+     * Handle the DOM events for the widget.
+     *
+     * @param event - The DOM event sent to the widget.
+     *
+     * #### Notes
+     * This method implements the DOM `EventListener` interface and is
+     * called in response to events on the notebook panel's node. It should
+     * not be called directly by user code.
+     */
+    handleEvent(event: Event): void {
+      let wrapper = this.node.getElementsByClassName(SELECT_WRAPPER_CLASS)[0];
+      switch (event.type) {
+        case 'change':
+          this.onValueChanged();
+          break;
+        case 'focus':
+          wrapper.classList.add(FOCUS_CLASS);
+          break;
+        case 'blur':
+          wrapper.classList.remove(FOCUS_CLASS);
+          break;
+        default:
+          break;
+      }
+    }
+
+    /**
+     * Handle `after-attach` messages for the widget.
+     */
+    protected onAfterAttach(message: Message): void {
+      super.onAfterAttach(message);
+      this.selectNode.addEventListener('change', this);
+      this.selectNode.addEventListener('focus', this);
+      this.selectNode.addEventListener('blur', this);
+    }
+
+    /**
+     * Handle `before_detach` messages for the widget.
+     */
+    protected onBeforeDetach(msg: Message): void {
+      this.selectNode.removeEventListener('change', this);
+      this.selectNode.removeEventListener('focus', this);
+      this.selectNode.removeEventListener('blur', this);
+    }
+
+    /**
+     * Handle a change to the value.
+     */
+    protected onValueChanged(): void {
+      let activeCell = this.celltools.activeCell;
+      if (!activeCell || this._changeGuard) {
+        return;
+      }
+      this._changeGuard = true;
+      let select = this.selectNode;
+      let cursor = activeCell.model.getMetadata(this.key);
+      cursor.setValue(JSON.parse(select.value));
+      this._changeGuard = false;
     }
 
     /**
      * Handle a change to the active cell.
      */
-    private _onActiveCellChanged(): void {
-
+    protected onActiveCellChanged(sender: ICellTools, activeCell: BaseCellWidget): void {
+      let select = this.selectNode;
+      if (!activeCell) {
+        select.disabled = true;
+        return;
+      }
+      let cellType = activeCell.model.type;
+      if (this._validCellTypes.indexOf(cellType) === -1) {
+        select.disabled = true;
+        return;
+      }
+      select.disabled = false;
+      let cursor = activeCell.model.getMetadata(this.key);
+      select.value = JSON.stringify(cursor.getValue());
     }
 
     /**
-     * Handle a change in the metadata.
+     * Handle a change to the metadata of the active cell.
      */
-    private _onMetadataChanged(sender: ICellTools, args: IChangedArgs<JSONValue>): void {
-
+    protected onMetadataChanged(sender: ICellTools, args: IChangedArgs<JSONValue>) {
+      if (this._changeGuard) {
+        return;
+      }
+      let select = this.selectNode;
+      if (args.name === this.key) {
+        this._changeGuard = true;
+        select.value = JSON.stringify(args.newValue);
+        this._changeGuard = false;
+      }
     }
 
-    private _celltools: ICellTools;
+    private _changeGuard: boolean;
+    private _validCellTypes: string[];
+  }
+
+
+  /**
+   * The options used to initialize a keyselector.
+   */
+  export
+  interface IKeySelectorOptions {
+    /**
+     * The cell tools object.
+     */
+    celltools: ICellTools;
+
+    /**
+     * The metadata key of interest.
+     */
+    key: string;
+
+    /**
+     * The map of options to values.
+     */
+    optionsMap: { [key: string]: JSONValue };
+
+    /**
+     * The optional title of the selector - defaults to capitalized `key`.
+     */
+    title?: string;
+
+    /**
+     * The optional valid cell types.
+     */
+    validCellTypes?: string[];
+
+    /**
+     * The node used by the tool.
+     */
+    node?: HTMLElement;
+  }
+
+  /**
+   * Create a slideshow selector.
+   */
+  export
+  function createSlideShowSelector(options: IToolOptions): KeySelector {
+    let selectorOptions = {
+      celltools: options.celltools,
+      key: 'slideshow',
+      title: 'Slide Type',
+      optionsMap: {
+        '-': '-',
+        'Slide': 'slide',
+        'Sub-Slide': 'subslide',
+        'Fragment': 'fragment',
+        'Skip': 'skip',
+        'Notes': 'notes'
+      }
+    };
+    return new KeySelector(selectorOptions);
+  }
+
+  /**
+   * Create an nbcovert selector.
+   */
+  export
+  function createNBConvertSelector(options: IToolOptions): KeySelector {
+    let selectorOptions = {
+      celltools: options.celltools,
+      key: 'raw_mimetype',
+      title: 'Raw NBConvert Format',
+      optionsMap: {
+        'None': '-',
+        'LaTeX': 'text/latex',
+        'reST': 'text/restructuredtext',
+        'HTML': 'text/html',
+        'Markdown': 'text/markdown',
+        'Python': 'text/x-python'
+      },
+      validCellTypes: ['raw']
+    };
+    return new KeySelector(selectorOptions);
   }
 
 }

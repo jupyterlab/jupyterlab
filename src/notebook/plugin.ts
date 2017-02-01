@@ -135,20 +135,26 @@ export default plugins;
 function activateCellTools(app: JupyterLab, restorer: IInstanceRestorer, tracker: INotebookTracker): Promise<ICellTools> {
   const namespace = 'cell-tools';
 
-  const widget = new CellTools({ tracker });
-  widget.title.label = 'Cell Tools';
-  widget.id = 'cell-tools';
+  const celltools = new CellTools({ tracker });
+  celltools.title.label = 'Cell Tools';
+  celltools.id = 'cell-tools';
 
-  const activeCellTool = new CellTools.ActiveCellTool({ celltools: widget });
-  widget.addItem({ widget: activeCellTool, rank: 1 });
+  const activeCellTool = new CellTools.ActiveCellTool({ celltools });
+  celltools.addItem({ widget: activeCellTool, rank: 1 });
 
-  const metadataEditor = new CellTools.MetadataEditor({ celltools: widget });
-  widget.addItem({ widget: metadataEditor, rank: 2 });
+  const metadataEditor = new CellTools.MetadataEditor({ celltools });
+  celltools.addItem({ widget: metadataEditor, rank: 2 });
 
-  restorer.add(widget, namespace);
-  app.shell.addToLeftArea(widget);
+  const slideShow = CellTools.createSlideShowSelector({ celltools });
+  celltools.addItem({ widget: slideShow, rank: 3 });
 
-  return Promise.resolve(widget);
+  const nbConvert = CellTools.createNBConvertSelector({ celltools });
+  celltools.addItem({ widget: nbConvert, rank: 4 });
+
+  restorer.add(celltools, namespace);
+  app.shell.addToLeftArea(celltools);
+
+  return Promise.resolve(celltools);
 }
 
 
