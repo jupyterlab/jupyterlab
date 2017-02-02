@@ -4,8 +4,12 @@
 import expect = require('expect.js');
 
 import {
-  SplitPanel
-} from 'phosphor/lib/ui/splitpanel';
+  JSONValue
+} from 'phosphor/lib/algorithm/json';
+
+import {
+  Message
+} from 'phosphor/lib/core/messaging';
 
 import {
   TabPanel
@@ -20,12 +24,46 @@ import {
 } from 'simulate-event';
 
 import {
- CellTools, NotebookPanel, NotebookTracker
+  IChangedArgs
+} from '../../../lib/common/interfaces';
+
+import {
+  BaseCellWidget
+} from '../../../lib/cells';
+
+import {
+ ICellTools, CellTools, NotebookPanel, NotebookTracker
 } from '../../../lib/notebook';
 
 import {
   createNotebookPanel, populateNotebook
 } from './utils';
+
+
+class LogCellTool extends CellTools.BaseCellTool {
+
+  methods: string[] = [];
+
+  protected onAfterAttach(message: Message): void {
+    super.onAfterAttach(message);
+    this.methods.push('onAfterAttach');
+  }
+
+  protected onActiveCellChanged(sender: ICellTools, args: BaseCellWidget): void {
+    super.onActiveCellChanged(sender, args);
+    this.methods.push('onActiveCellChanged');
+  }
+
+  protected onSelectionChanged(sender: ICellTools): void {
+    super.onSelectionChanged(sender);
+    this.methods.push('onSelectionChanged');
+  }
+
+  protected onMetadataChanged(sender: ICellTools, args: IChangedArgs<JSONValue>): void {
+    super.onMetadataChanged(sender, args);
+    this.methods.push('onMetadataChanged');
+  }
+}
 
 
 describe('notebook/celltools', () => {
@@ -177,6 +215,125 @@ describe('notebook/celltools', () => {
         widget.dispose();
       });
 
+    });
+
+  });
+
+  describe('CellTools.BaseCellTool', () => {
+
+    describe('#constructor', () => {
+
+      it('should create a new base tool', () => {
+        let tool = new CellTools.BaseCellTool({ celltools });
+        expect(tool).to.be.a(CellTools.BaseCellTool);
+      });
+
+    });
+
+    describe('#celltools', () => {
+
+      it('should be the celltools object used by the tool', () => {
+        let tool = new CellTools.BaseCellTool({ celltools });
+        expect(tool.celltools).to.be(celltools);
+      });
+
+    });
+
+    describe('#onAfterAttach()', () => {
+
+      it('should call onActiveCellChanged', () => {
+        let tool = new LogCellTool({ celltools });
+        expect(tool.methods).to.not.contain('onAfterAttach');
+        expect(tool.methods).to.not.contain('onActiveCellChanged');
+        Widget.attach(tool, document.body);
+        expect(tool.methods).to.contain('onAfterAttach');
+        expect(tool.methods).to.contain('onActiveCellChanged');
+      });
+
+    });
+
+    describe('#onActiveCellChanged()', () => {
+
+      it('should be called when the active cell changes', () => {
+        let tool = new LogCellTool({ celltools });
+        celltools.addItem({ widget: tool });
+        tool.methods = [];
+        simulate(panel0.node, 'focus');
+        expect(tool.methods).to.contain('onActiveCellChanged');
+      });
+
+    });
+
+    describe('#onSelectionChanged()', () => {
+
+      it('should be called when the selection changes', () => {
+        let tool = new LogCellTool({ celltools });
+        celltools.addItem({ widget: tool });
+        simulate(panel0.node, 'focus');
+        tool.methods = [];
+        panel0.notebook.select(panel0.notebook.widgets.at(1));
+        expect(tool.methods).to.contain('onSelectionChanged');
+      });
+
+    });
+
+    describe('#onMetadataChanged()', () => {
+
+      it('should be called when the metadata changes', () => {
+        let tool = new LogCellTool({ celltools });
+        celltools.addItem({ widget: tool });
+        simulate(panel0.node, 'focus');
+        tool.methods = [];
+        let cursor = celltools.activeCell.model.getMetadata('foo');
+        cursor.setValue(1);
+        expect(tool.methods).to.contain('onMetadataChanged');
+      });
+
+    });
+
+  });
+
+  describe('CellTools.ActiveCellTool', () => {
+
+    it('should create a new active cell tool', () => {
+      let tool = new CellTools.ActiveCellTool({ celltools });
+      celltools.addItem({ widget: tool });
+      expect(tool).to.be.a(CellTools.ActiveCellTool);
+    });
+
+    it('should handle a change to the active cell', () => {
+      let tool = new CellTools.ActiveCellTool({ celltools });
+      celltools.addItem({ widget: tool });
+      simulate(panel0.node, 'focus');
+      expect(tool.node.querySelector('.jp-CellEditor')).to.be.ok();
+      expect(tool.node.querySelector('.jp-InputArea-editor')).to.be.ok();
+    });
+
+  });
+
+  describe('CellTools.MetadataEditor', () => {
+
+    it('should create a new metadata editor tool', () => {
+      let tool = new CellTools.MetadataEditor({ celltools });
+      expect(tool).to.be.a(CellTools.MetadataEditor);
+    });
+
+    it('should handle a change to the active cell', () => {
+      let tool = new CellTools.MetadataEditor({ celltools });
+      let textarea = tool.textarea;
+      expect(textarea.value).to.be('');
+      simulate(panel0.node, 'focus');
+      expect(textarea.value).to.be.ok();
+    });
+
+    it('should handle a change to the metadata', () => {
+      let tool = new CellTools.MetadataEditor({ celltools });
+      let textarea = tool.textarea;
+      simulate(panel0.node, 'focus');
+      let previous = textarea.value;
+      let cursor = celltools.activeCell.model.getMetadata('foo');
+      cursor.setValue(1);
+      expect(textarea.value).to.not.be(previous);
     });
 
   });

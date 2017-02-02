@@ -346,7 +346,7 @@ namespace CellTools {
      * #### Notes
      * The default implementation is a no-op.
      */
-     protected onMetadataChanged(sender: ICellTools, args: IChangedArgs<JSONValue>) { /* no-op */ }
+     protected onMetadataChanged(sender: ICellTools, args: IChangedArgs<JSONValue>): void { /* no-op */ }
   }
 
   /**
@@ -375,7 +375,10 @@ namespace CellTools {
         layout.widgets.at(0).dispose();
       }
       if (!activeCell) {
-        // TODO: Use dummy content.
+        let cell = new Widget();
+        cell.addClass('jp-CellEditor');
+        cell.addClass('jp-InputArea-editor');
+        layout.addWidget(cell);
         return;
       }
       let promptNode = activeCell.promptNode.cloneNode(true) as HTMLElement;
@@ -386,7 +389,7 @@ namespace CellTools {
       model.mimeType = activeCell.model.mimeType;
       let editorWidget = new CodeEditorWidget({ model, factory });
       editorWidget.addClass('jp-CellEditor');
-      editorWidget.addClass('.jp-InputArea-editor');
+      editorWidget.addClass('jp-InputArea-editor');
       editorWidget.editor.readOnly = true;
       layout.addWidget(prompt);
       layout.addWidget(editorWidget);
