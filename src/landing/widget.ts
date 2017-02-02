@@ -10,12 +10,28 @@ import {
 } from 'phosphor/lib/ui/vdom';
 
 import {
+  CommandIDs as AboutCommandIDs
+} from '../about';
+
+import {
   JupyterLab
 } from '../application';
 
 import {
   VDomModel, VDomWidget
 } from '../common/vdom';
+
+import {
+  CommandIDs as ConsoleCommandIDs
+} from '../console';
+
+import {
+  CommandIDs as FileBrowserCommandIDs
+} from '../filebrowser';
+
+import {
+  CommandIDs as TerminalCommandIDs
+} from '../terminal';
 
 
 /**
@@ -136,13 +152,13 @@ class LandingModel extends VDomModel {
     ];
     this.headerText = 'Start a new activity';
     this.activities =
-    [['Notebook', 'file-operations:new-notebook'],
-     ['Code Console', `console:create`],
-     ['Text Editor', 'file-operations:new-text-file']];
+    [['Notebook', FileBrowserCommandIDs.newNotebook],
+     ['Code Console', ConsoleCommandIDs.create],
+     ['Text Editor', FileBrowserCommandIDs.newTextFile]];
 
     if (terminalsAvailable) {
       this.activities.push(
-        ['Terminal', 'terminal:create-new']
+        ['Terminal', TerminalCommandIDs.createNew]
       );
     }
     this._path = 'home';
@@ -223,7 +239,7 @@ class LandingWidget extends VDomWidget<LandingModel> {
     let tour =
     h.span({className: TOUR_ICON_CLASS,
       onclick: () => {
-        this._app.commands.execute('about-jupyterlab:show', void 0);
+        this._app.commands.execute(AboutCommandIDs.open, void 0);
       }}
     );
     let header = h.span({
