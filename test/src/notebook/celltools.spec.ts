@@ -101,6 +101,84 @@ describe('notebook/celltools', () => {
 
     });
 
+    describe('#selectionChanged', () => {
+
+      it('should be emitted when the selection changes', () => {
+        let called = false;
+        simulate(panel0.node, 'focus');
+        celltools.selectionChanged.connect((sender) => {
+          expect(sender).to.be(celltools);
+          called = true;
+        });
+        panel0.notebook.select(panel0.notebook.widgets.at(1));
+        expect(called).to.be(true);
+      });
+
+    });
+
+    describe('#metadataChanged', () => {
+
+      it('should be emitted when the metadata changes', () => {
+        let called = false;
+        simulate(panel0.node, 'focus');
+        celltools.metadataChanged.connect((sender, args) => {
+          expect(sender).to.be(celltools);
+          expect(args.name).to.be('foo');
+          expect(args.oldValue).to.be(void 0);
+          expect(args.newValue).to.be(1);
+          called = true;
+        });
+        let cursor = celltools.activeCell.model.getMetadata('foo');
+        cursor.setValue(1);
+        expect(called).to.be(true);
+      });
+
+    });
+
+    describe('#activeCell', () => {
+
+      it('should be the active cell', () => {
+        expect(celltools.activeCell).to.be(null);
+        simulate(panel0.node, 'focus');
+        expect(celltools.activeCell).to.be(panel0.notebook.activeCell);
+        tabpanel.currentIndex = 1;
+        simulate(panel1.node, 'focus');
+        expect(celltools.activeCell).to.be(panel1.notebook.activeCell);
+      });
+
+    });
+
+    describe('#selectedCells', () => {
+
+      it('should be the currently selected cells', () => {
+        expect(celltools.selectedCells.length).to.be(0);
+        simulate(panel0.node, 'focus');
+        expect(celltools.selectedCells).to.eql([panel0.notebook.activeCell]);
+        tabpanel.currentIndex = 1;
+        simulate(panel1.node, 'focus');
+        expect(celltools.selectedCells).to.eql([panel1.notebook.activeCell]);
+        panel1.notebook.select(panel1.notebook.widgets.at(1));
+        expect(celltools.selectedCells.length).to.be(2);
+      });
+
+    });
+
+    describe('#addItem()', () => {
+
+      it('should add a cell tool item', () => {
+        let widget = new Widget();
+        celltools.addItem({ widget });
+        widget.dispose();
+      });
+
+      it('should accept a rank', () => {
+        let widget = new Widget();
+        celltools.addItem({ widget, rank: 100 });
+        widget.dispose();
+      });
+
+    });
+
   });
 
 });
