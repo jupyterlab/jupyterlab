@@ -36,7 +36,7 @@ namespace CommandIDs {
   const newTextFile = 'file-operations:new-text-file';
 
   export
-  const newNotebook = 'file-operations:new-notebook-file';
+  const newNotebook = 'file-operations:new-notebook';
 
   export
   const showBrowser = 'file-browser:activate';
