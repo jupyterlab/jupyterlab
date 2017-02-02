@@ -31,7 +31,6 @@ import {
 describe('notebook/celltools', () => {
 
   let celltools: CellTools;
-  let splitpanel: SplitPanel;
   let tabpanel: TabPanel;
   let tracker: NotebookTracker;
   let panel0: NotebookPanel;
@@ -49,10 +48,9 @@ describe('notebook/celltools', () => {
     tabpanel = new TabPanel();
     tabpanel.addWidget(panel0);
     tabpanel.addWidget(panel1);
-    splitpanel = new SplitPanel();
-    splitpanel.addWidget(celltools);
-    splitpanel.addWidget(tabpanel);
-    Widget.attach(splitpanel, document.body);
+    tabpanel.addWidget(celltools);
+    tabpanel.node.style.height = '800px';
+    Widget.attach(tabpanel, document.body);
     tabpanel.currentIndex = 0;
     // Wait for posted messages.
     requestAnimationFrame(() => {
@@ -61,7 +59,6 @@ describe('notebook/celltools', () => {
   });
 
   afterEach(() => {
-    splitpanel.dispose();
     tabpanel.dispose();
     celltools.dispose();
   });
@@ -81,7 +78,7 @@ describe('notebook/celltools', () => {
       it('should be emitted when the active cell changes', () => {
         let called = false;
         celltools.activeCellChanged.connect((sender, cell) => {
-          expect(sender).to.be(tracker);
+          expect(sender).to.be(celltools);
           expect(panel0.node.contains(cell.node)).to.be(true);
           called = true;
         });
@@ -93,7 +90,7 @@ describe('notebook/celltools', () => {
         let called = false;
         simulate(panel0.node, 'focus');
         celltools.activeCellChanged.connect((sender, cell) => {
-          expect(sender).to.be(tracker);
+          expect(sender).to.be(celltools);
           expect(panel1.node.contains(cell.node)).to.be(true);
           called = true;
         });
