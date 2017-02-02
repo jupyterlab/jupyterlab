@@ -18,7 +18,7 @@ import {
 } from '../../../lib/codeeditor';
 
 import {
-  NotebookPanel, Notebook
+  NotebookPanel, Notebook, NotebookModel
 } from '../../../lib/notebook';
 
 import {
@@ -121,4 +121,15 @@ function createNotebookPanel(): NotebookPanel {
     mimeTypeService,
     clipboard
   });
+}
+
+
+/**
+ * Populate a notebook with default content.
+ */
+export
+function populateNotebook(notebook: Notebook): void {
+  let model = new NotebookModel();
+  model.fromJSON(DEFAULT_CONTENT);
+  notebook.model = model;
 }
