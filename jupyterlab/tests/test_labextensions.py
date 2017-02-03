@@ -9,24 +9,23 @@ import os
 import sys
 from io import StringIO
 from os.path import join as pjoin
-from subprocess import check_call
+from subprocess import check_call, PIPE
 from traitlets.tests.utils import check_help_all_output
 from unittest import TestCase
 
 try:
     from unittest.mock import patch
 except ImportError:
-    from mock import patch # py2
+    from mock import patch  # py2
 
 import pytest
 from ipython_genutils import py3compat
 from ipython_genutils.tempdir import TemporaryDirectory
 from jupyter_core import paths
-from notebook.notebookapp import NotebookApp
 
 from jupyterlab import labextensions
-from jupyterlab.labapp import get_labconfig
-from jupyterlab.labextensions import (install_labextension, check_labextension,
+from jupyterlab.labextensions import (
+    install_labextension, check_labextension,
     enable_labextension, disable_labextension,
     install_labextension_python, uninstall_labextension_python,
     enable_labextension_python, disable_labextension_python,
@@ -69,7 +68,7 @@ def build_extension():
     shell = (sys.platform == 'win32')
     cwd = os.path.dirname(os.path.abspath(__file__))
     cmd = 'node build_extension.js'
-    check_call(cmd.split(), shell=shell, cwd=cwd)
+    check_call(cmd.split(), shell=shell, cwd=cwd, stdout=PIPE)
 
 
 class TestInstallLabExtension(TestCase):
@@ -368,30 +367,6 @@ class TestInstallLabExtension(TestCase):
 
         manifest = get_labextension_manifest_data_by_folder(path)
         self.check_manifest(manifest)
-
-    def test_merge_config(self):
-        pass
-        # enabled at sys level
-        # self._inject_mock_extension('mockext_sys')
-        # # enabled at sys, disabled at user
-        # self._inject_mock_extension('mockext_both')
-        # # enabled at user
-        # self._inject_mock_extension('mockext_user')
-        # # enabled at Python
-        # self._inject_mock_extension('mockext_py')
-
-        # enable_labextension_python('mockext_sys', user=False)
-        # enable_labextension_python('mockext_user', user=True)
-        # enable_labextension_python('mockext_both', user=False)
-        # disable_labextension_python('mockext_both', user=True)
-
-        # app = NotebookApp()
-        # config = get_labconfig(app).get('labextensions')
-
-        # assert config['mock_user']['enabled']
-        # assert config['mock_sys']['enabled']
-        # assert config['mock_py']['enabled']
-        # assert not config['mock_both']['enabled']
 
     def check_manifest(self, manifest):
         assert 'mockextension' in manifest
