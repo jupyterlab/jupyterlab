@@ -19,9 +19,24 @@ import {
 } from '../instancerestorer';
 
 import {
+import {
+  InspectorManager
+} from './manager';
+
+import {
   CommandIDs, IInspector, Inspector
 } from './';
 
+
+/**
+ * The inspector manager instance.
+ */
+const manager = new InspectorManager();
+
+/**
+ * The inspector instance tracker.
+ */
+const tracker = new InstanceTracker<Inspector>({ namespace: 'inspector' });
 
 /**
  * A service providing an inspector panel.
@@ -41,55 +56,8 @@ export default plugin;
 
 
 /**
- * A class that manages inspector widget instances and offers persistent
- * `IInspector` instance that other plugins can communicate with.
  */
-class InspectorManager implements IInspector {
-  /**
-   * The current inspector widget.
-   */
-  get inspector(): Inspector {
-    return this._inspector;
-  }
-  set inspector(inspector: Inspector) {
-    if (this._inspector === inspector) {
-      return;
     }
-    this._inspector = inspector;
-    // If an inspector was added and it has no source
-    if (inspector && !inspector.source) {
-      inspector.source = this._source;
-    }
-  }
-
-  /**
-   * The source of events the inspector panel listens for.
-   */
-  get source(): Inspector.IInspectable {
-    return this._source;
-  }
-  set source(source: Inspector.IInspectable) {
-    if (this._source !== source) {
-      if (this._source) {
-        this._source.disposed.disconnect(this._onSourceDisposed, this);
-      }
-      this._source = source;
-      this._source.disposed.connect(this._onSourceDisposed, this);
-    }
-    if (this._inspector && !this._inspector.isDisposed) {
-      this._inspector.source = this._source;
-    }
-  }
-
-  /**
-   * Handle the source disposed signal.
-   */
-  private _onSourceDisposed() {
-    this._source = null;
-  }
-
-  private _inspector: Inspector = null;
-  private _source: Inspector.IInspectable = null;
 }
 
 
@@ -100,8 +68,6 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: IInstance
   const category = 'Inspector';
   const command = CommandIDs.open;
   const label = 'Open Inspector';
-  const manager = new InspectorManager();
-  const tracker = new InstanceTracker<Inspector>({ namespace: 'inspector' });
 
   // Handle state restoration.
   restorer.restore(tracker, {
