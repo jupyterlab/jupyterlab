@@ -41,7 +41,7 @@ EXTENSION_PREFIX = '/labextension'
 
 
 class LabHandler(IPythonHandler):
-    """Render the Jupyter Lab View."""
+    """Render the JupyterLab View."""
 
     def initialize(self, labextensions, extension_prefix):
         self.labextensions = labextensions
