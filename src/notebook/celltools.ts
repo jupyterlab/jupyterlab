@@ -18,12 +18,8 @@ import {
 } from 'phosphor/lib/algorithm/searching';
 
 import {
-  Message
+  ConflatableMessage, Message, sendMessage
 } from 'phosphor/lib/core/messaging';
-
-import {
-  defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
 
 import {
   Vector
@@ -139,21 +135,6 @@ class CellTools extends Widget implements ICellTools {
   }
 
   /**
-   * A signal emitted when the current active cell changes.
-   */
-  readonly activeCellChanged: ISignal<this, BaseCellWidget>;
-
-  /**
-   * A signal emitted when the selection state changes.
-   */
-  readonly selectionChanged: ISignal<this, void>;
-
-  /**
-   * A signal emitted when a metadata field changes on the active cell.
-   */
-  readonly metadataChanged: ISignal<this, IChangedArgs<JSONValue>>;
-
-  /**
    * The active cell widget.
    */
   get activeCell(): BaseCellWidget | null {
@@ -230,21 +211,26 @@ class CellTools extends Widget implements ICellTools {
     if (activeCell) {
       activeCell.model.metadataChanged.connect(this._onMetadataChanged, this);
     }
-    this.activeCellChanged.emit(activeCell);
+    each(this, widget => {
+      sendMessage(widget, CellTools.ActiveCellChanged);
+    });
   }
 
   /**
    * Handle a change in the selection.
    */
   private _onSelectionChanged(): void {
-    this.selectionChanged.emit(void 0);
+    each(this, widget => {
+      sendMessage(widget, CellTools.SelectionChanged);
+    });
   }
 
   /**
    * Handle a change in the metadata.
    */
   private _onMetadataChanged(sender: ICellModel, args: IChangedArgs<JSONValue>): void {
-    this.metadataChanged.emit(args);
+    let message = new CellTools.MetadataMessage(args);
+    each(this, widget => { sendMessage(widget, message); });
   }
 
   private _items = new Vector<Private.IRankItem>();
@@ -275,9 +261,9 @@ namespace CellTools {
   export
   interface IAddOptions {
     /**
-     * The widget to add to the cell tools area.
+     * The tool to add to the cell tools area.
      */
-    widget: Widget;
+    tool: CellTool;
 
     /**
      * The rank order of the widget among its siblings.
@@ -286,14 +272,42 @@ namespace CellTools {
   }
 
   /**
+   * A singleton conflatable `'activecell-changed'` message.
+   */
+  export
+  const ActiveCellChanged = new ConflatableMessage('activecell-changed');
+
+  /**
+   * A singleton conflatable `'selection-changed'` message.
+   */
+  export
+  const SelectionCellChanged = new ConflatableMessage('selection-changed');
+
+  /**
+   * A metadata changed message.
+   */
+  export
+  class MetadataMessage {
+    /**
+     * Create a new metadata changed message.
+     */
+    constructor(args: IChangedArgs<JSONValue>) {
+      super('metadata-changed');
+      this.args = args;
+    }
+
+    /**
+     * The arguments of the metadata change.
+     */
+    readonly args: IChangedArgs<JSONValue>;
+  }
+
+  /**
    * The options used to create a cell tool.
    */
   export
   interface IToolOptions {
-    /**
-     * The cell tools object.
-     */
-    celltools: ICellTools;
+
   }
 
   /**
@@ -302,26 +316,37 @@ namespace CellTools {
   export
   class BaseCellTool extends Widget {
     /**
-     * Construct a new cell tool.
-     */
-    constructor(options: IToolOptions, node: HTMLElement = null) {
-      super({ node });
-      this.celltools = options.celltools;
-      this.celltools.activeCellChanged.connect(this.onActiveCellChanged, this);
-      this.celltools.selectionChanged.connect(this.onSelectionChanged, this);
-      this.celltools.metadataChanged.connect(this.onMetadataChanged, this);
-    }
-
-    /**
      * The cell tools object.
      */
-    readonly celltools: ICellTools;
+    readonly parent: ICellTools;
+
+    /**
+     * Process a message sent to the widget.
+     *
+     * @param msg - The message sent to the widget.
+     */
+    processMessage(msg: Message): void {
+      super.processMessage(msg);
+      switch (msg.type) {
+      case 'activecell-changed':
+        this.onActiveCellChanged();
+        break;
+      case 'selection-changed':
+        this.onSelectionChanged();
+        break;
+      case 'metadata-changed':
+        this.onMetadataChanged(msg as MetadataMessage);
+        break;
+      default:
+        break;
+      }
+    }
 
     /**
      * Handle an after-attach message.
      */
     protected onAfterAttach(message: Message): void {
-      this.onActiveCellChanged(this.celltools, this.celltools.activeCell);
+      this.onActiveCellChanged();
     }
 
     /**
@@ -330,7 +355,7 @@ namespace CellTools {
      * #### Notes
      * The default implemenatation is a no-op.
      */
-    protected onActiveCellChanged(sender: ICellTools, args: BaseCellWidget): void { /* no-op */ }
+    protected onActiveCellChanged(): void { /* no-op */ }
 
     /**
      * Handle a change to the selection.
@@ -338,7 +363,7 @@ namespace CellTools {
      * #### Notes
      * The default implementation is a no-op.
      */
-    protected onSelectionChanged(sender: ICellTools): void { /* no-op */ }
+    protected onSelectionChanged(): void { /* no-op */ }
 
     /**
      * Handle a change to the metadata of the active cell.
@@ -346,7 +371,7 @@ namespace CellTools {
      * #### Notes
      * The default implementation is a no-op.
      */
-     protected onMetadataChanged(sender: ICellTools, args: IChangedArgs<JSONValue>): void { /* no-op */ }
+     protected onMetadataChanged(msg: MetadataMessage): void { /* no-op */ }
   }
 
   /**
@@ -358,7 +383,7 @@ namespace CellTools {
      * Construct a new active cell tool.
      */
     constructor(options: IToolOptions) {
-      super(options);
+      super();
       this.addClass(ACTIVE_CELL_CLASS);
       this.addClass('jp-InputArea');
       this.layout = new PanelLayout();
@@ -368,7 +393,7 @@ namespace CellTools {
      * Handle a change to the active cell.
      */
     protected onActiveCellChanged(): void {
-      let activeCell = this.celltools.activeCell;
+      let activeCell = this.parent.activeCell;
       let layout = this.layout as PanelLayout;
       let count = layout.widgets.length;
       for (let i = 0; i < count; i++) {
@@ -409,7 +434,7 @@ namespace CellTools {
                     h.label({}, 'Cell Metadata'),
                     h.textarea()
                   );
-      super(options, realize(vnode));
+      super({ node: realize(vnode) });
     }
 
     /**
@@ -422,8 +447,9 @@ namespace CellTools {
     /**
      * Handle a change to the active cell.
      */
-    protected onActiveCellChanged(sender: ICellTools, activeCell: BaseCellWidget): void {
+    protected onActiveCellChanged(): void {
       let content: JSONObject = {};
+      let activeCell = this.parent.activeCell;
       if (activeCell) {
         each(activeCell.model.listMetadata(), key => {
           // Do not show the trusted metadata.
@@ -439,8 +465,8 @@ namespace CellTools {
     /**
      * Handle a change to the metadata of the active cell.
      */
-    protected onMetadataChanged(sender: ICellTools, args: IChangedArgs<JSONValue>) {
-      this.onActiveCellChanged(sender, sender.activeCell);
+    protected onMetadataChanged() {
+      this.onActiveCellChanged();
     }
   }
 
@@ -453,7 +479,7 @@ namespace CellTools {
      * Construct a new KeySelector.
      */
     constructor(options: IKeySelectorOptions) {
-      super(options, Private.createSelector(options));
+      super({ node: Private.createSelector(options) });
       this.addClass(KEYSELECTOR_CLASS);
       this.key = options.key;
       this._validCellTypes = options.validCellTypes || [];
@@ -521,7 +547,7 @@ namespace CellTools {
      * Handle a change to the value.
      */
     protected onValueChanged(): void {
-      let activeCell = this.celltools.activeCell;
+      let activeCell = this.parent.activeCell;
       if (!activeCell || this._changeGuard) {
         return;
       }
@@ -535,8 +561,9 @@ namespace CellTools {
     /**
      * Handle a change to the active cell.
      */
-    protected onActiveCellChanged(sender: ICellTools, activeCell: BaseCellWidget): void {
+    protected onActiveCellChanged(): void {
       let select = this.selectNode;
+      let activeCell = this.parent.activeCell;
       if (!activeCell) {
         select.disabled = true;
         select.value = '';
@@ -556,14 +583,14 @@ namespace CellTools {
     /**
      * Handle a change to the metadata of the active cell.
      */
-    protected onMetadataChanged(sender: ICellTools, args: IChangedArgs<JSONValue>) {
+    protected onMetadataChanged(msg: CellTools.MetadataMessage) {
       if (this._changeGuard) {
         return;
       }
       let select = this.selectNode;
-      if (args.name === this.key) {
+      if (msg.args.name === this.key) {
         this._changeGuard = true;
-        select.value = JSON.stringify(args.newValue);
+        select.value = JSON.stringify(msg.args.newValue);
         this._changeGuard = false;
       }
     }
@@ -578,11 +605,6 @@ namespace CellTools {
    */
   export
   interface IKeySelectorOptions {
-    /**
-     * The cell tools object.
-     */
-    celltools: ICellTools;
-
     /**
      * The metadata key of interest.
      */
@@ -650,13 +672,6 @@ namespace CellTools {
 }
 
 
-
-// Define the signals for the `CellTools` class.
-defineSignal(CellTools.prototype, 'activeCellChanged');
-defineSignal(CellTools.prototype, 'selectionChanged');
-defineSignal(CellTools.prototype, 'metadataChanged');
-
-
 /**
  * A namespace for private data.
  */
@@ -669,7 +684,7 @@ namespace Private {
     /**
      * The widget for the item.
      */
-    widget: Widget;
+    tool: CellTool;
 
     /**
      * The sort rank of the menu.
