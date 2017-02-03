@@ -119,7 +119,7 @@ interface ICellTools extends CellTools {};
  * A widget that provides cell metadata tools.
  */
 export
-class CellTools extends Widget implements ICellTools {
+class CellTools extends Widget {
   /**
    * Construct a new CellTools object.
    */
@@ -162,16 +162,17 @@ class CellTools extends Widget implements ICellTools {
    * Add a cell tool item.
    */
   addItem(options: CellTools.IAddOptions): void {
-    let widget = options.widget;
+    let tool = options.tool;
     let rank = 'rank' in options ? options.rank : 100;
-    let rankItem = { widget, rank };
+    let rankItem = { tool, rank };
     let index = upperBound(this._items, rankItem, Private.itemCmp);
 
-    widget.addClass(CHILD_CLASS);
+    tool.addClass(CHILD_CLASS);
 
     // Upon disposal, remove the widget and its rank reference.
-    widget.disposed.connect(this._onWidgetDisposed, this);
+    tool.disposed.connect(this._onWidgetDisposed, this);
 
+    // Add the item and optionally a separator.
     this._items.insert(index, rankItem);
     let layout = this.layout as PanelLayout;
     if (this._items.length > 1) {
@@ -179,14 +180,17 @@ class CellTools extends Widget implements ICellTools {
       separator.addClass(SEPARATOR_CLASS);
       layout.insertWidget(index * 2 - 1, separator);
     }
-    layout.insertWidget(index * 2, widget);
+    layout.insertWidget(index * 2, tool);
+
+    // Trigger the tool to update its active cell.
+    sendMessage(tool, CellTools.ActiveCellChanged);
   }
 
   /**
    * Handle the disposal of an item.
    */
   private _onWidgetDisposed(widget: Widget): void {
-    let index = findIndex(this._items, item => item.widget === widget);
+    let index = findIndex(this._items, item => item.tool === widget);
     if (index !== -1) {
       this._items.removeAt(index);
     }
@@ -211,7 +215,7 @@ class CellTools extends Widget implements ICellTools {
     if (activeCell) {
       activeCell.model.metadataChanged.connect(this._onMetadataChanged, this);
     }
-    each(this, widget => {
+    each(this.children(), widget => {
       sendMessage(widget, CellTools.ActiveCellChanged);
     });
   }
@@ -220,7 +224,7 @@ class CellTools extends Widget implements ICellTools {
    * Handle a change in the selection.
    */
   private _onSelectionChanged(): void {
-    each(this, widget => {
+    each(this.children(), widget => {
       sendMessage(widget, CellTools.SelectionChanged);
     });
   }
@@ -230,7 +234,7 @@ class CellTools extends Widget implements ICellTools {
    */
   private _onMetadataChanged(sender: ICellModel, args: IChangedArgs<JSONValue>): void {
     let message = new CellTools.MetadataMessage(args);
-    each(this, widget => { sendMessage(widget, message); });
+    each(this.children(), widget => { sendMessage(widget, message); });
   }
 
   private _items = new Vector<Private.IRankItem>();
@@ -263,7 +267,7 @@ namespace CellTools {
     /**
      * The tool to add to the cell tools area.
      */
-    tool: CellTool;
+    tool: Tool;
 
     /**
      * The rank order of the widget among its siblings.
@@ -281,13 +285,13 @@ namespace CellTools {
    * A singleton conflatable `'selection-changed'` message.
    */
   export
-  const SelectionCellChanged = new ConflatableMessage('selection-changed');
+  const SelectionChanged = new ConflatableMessage('selection-changed');
 
   /**
    * A metadata changed message.
    */
   export
-  class MetadataMessage {
+  class MetadataMessage extends Message {
     /**
      * Create a new metadata changed message.
      */
@@ -314,7 +318,7 @@ namespace CellTools {
    * The base cell tool, meant to be subclassed.
    */
   export
-  class BaseCellTool extends Widget {
+  class Tool extends Widget {
     /**
      * The cell tools object.
      */
@@ -340,13 +344,6 @@ namespace CellTools {
       default:
         break;
       }
-    }
-
-    /**
-     * Handle an after-attach message.
-     */
-    protected onAfterAttach(message: Message): void {
-      this.onActiveCellChanged();
     }
 
     /**
@@ -378,7 +375,7 @@ namespace CellTools {
    * A cell tool displaying the active cell contents.
    */
   export
-  class ActiveCellTool extends BaseCellTool {
+  class ActiveCellTool extends Tool {
     /**
      * Construct a new active cell tool.
      */
@@ -425,7 +422,7 @@ namespace CellTools {
    * A raw metadata editor.
    */
   export
-  class MetadataEditor extends BaseCellTool {
+  class MetadataEditor extends Tool {
     /**
      * Construct a new raw metadata tool.
      */
@@ -474,7 +471,7 @@ namespace CellTools {
    * A cell tool that provides a selection for a given metadata key.
    */
   export
-  class KeySelector extends BaseCellTool {
+  class KeySelector extends Tool {
     /**
      * Construct a new KeySelector.
      */
@@ -528,7 +525,6 @@ namespace CellTools {
      * Handle `after-attach` messages for the widget.
      */
     protected onAfterAttach(message: Message): void {
-      super.onAfterAttach(message);
       this.selectNode.addEventListener('change', this);
       this.selectNode.addEventListener('focus', this);
       this.selectNode.addEventListener('blur', this);
@@ -632,7 +628,6 @@ namespace CellTools {
   export
   function createSlideShowSelector(options: IToolOptions): KeySelector {
     let selectorOptions = {
-      celltools: options.celltools,
       key: 'slideshow',
       title: 'Slide Type',
       optionsMap: {
@@ -653,7 +648,6 @@ namespace CellTools {
   export
   function createNBConvertSelector(options: IToolOptions): KeySelector {
     let selectorOptions: IKeySelectorOptions = {
-      celltools: options.celltools,
       key: 'raw_mimetype',
       title: 'Raw NBConvert Format',
       optionsMap: {
@@ -684,7 +678,7 @@ namespace Private {
     /**
      * The widget for the item.
      */
-    tool: CellTool;
+    tool: CellTools.Tool;
 
     /**
      * The sort rank of the menu.

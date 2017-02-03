@@ -139,17 +139,17 @@ function activateCellTools(app: JupyterLab, restorer: IInstanceRestorer, tracker
   celltools.title.label = 'Cell Tools';
   celltools.id = 'cell-tools';
 
-  const activeCellTool = new CellTools.ActiveCellTool({ celltools });
-  celltools.addItem({ widget: activeCellTool, rank: 1 });
+  const activeCellTool = new CellTools.ActiveCellTool({});
+  celltools.addItem({ tool: activeCellTool, rank: 1 });
 
-  const metadataEditor = new CellTools.MetadataEditor({ celltools });
-  celltools.addItem({ widget: metadataEditor, rank: 2 });
+  const metadataEditor = new CellTools.MetadataEditor({});
+  celltools.addItem({ tool: metadataEditor, rank: 2 });
 
-  const slideShow = CellTools.createSlideShowSelector({ celltools });
-  celltools.addItem({ widget: slideShow, rank: 3 });
+  const slideShow = CellTools.createSlideShowSelector({});
+  celltools.addItem({ tool: slideShow, rank: 3 });
 
-  const nbConvert = CellTools.createNBConvertSelector({ celltools });
-  celltools.addItem({ widget: nbConvert, rank: 4 });
+  const nbConvert = CellTools.createNBConvertSelector({});
+  celltools.addItem({ tool: nbConvert, rank: 4 });
 
   restorer.add(celltools, namespace);
   app.shell.addToLeftArea(celltools);
