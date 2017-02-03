@@ -32,7 +32,7 @@ import {
 } from '../../../lib/cells';
 
 import {
- ICellTools, CellTools, NotebookPanel, NotebookTracker
+ ICellTools, CellTools, NotebookPanel, NotebookTracker, NotebookActions
 } from '../../../lib/notebook';
 
 import {
@@ -57,6 +57,43 @@ class LogCellTool extends CellTools.BaseCellTool {
   protected onSelectionChanged(sender: ICellTools): void {
     super.onSelectionChanged(sender);
     this.methods.push('onSelectionChanged');
+  }
+
+  protected onMetadataChanged(sender: ICellTools, args: IChangedArgs<JSONValue>): void {
+    super.onMetadataChanged(sender, args);
+    this.methods.push('onMetadataChanged');
+  }
+}
+
+
+class LogKeySelector extends CellTools.KeySelector {
+
+  events: string[] = [];
+  methods: string[] = [];
+
+  handleEvent(event: Event): void {
+    super.handleEvent(event);
+    this.events.push(event.type);
+  }
+
+  protected onAfterAttach(message: Message): void {
+    super.onAfterAttach(message);
+    this.methods.push('onAfterAttach');
+  }
+
+  protected onBeforeDetach(message: Message): void {
+    super.onBeforeDetach(message);
+    this.methods.push('onBeforeDetach');
+  }
+
+  protected onValueChanged(): void {
+    super.onValueChanged();
+    this.methods.push('onValueChanged');
+  }
+
+  protected onActiveCellChanged(sender: ICellTools, args: BaseCellWidget): void {
+    super.onActiveCellChanged(sender, args);
+    this.methods.push('onActiveCellChanged');
   }
 
   protected onMetadataChanged(sender: ICellTools, args: IChangedArgs<JSONValue>): void {
@@ -334,6 +371,222 @@ describe('notebook/celltools', () => {
       let cursor = celltools.activeCell.model.getMetadata('foo');
       cursor.setValue(1);
       expect(textarea.value).to.not.be(previous);
+    });
+
+  });
+
+  describe('CellTools.KeySelector', () => {
+
+    let tool: LogKeySelector;
+
+    beforeEach(() => {
+      tool = new LogKeySelector({
+        celltools,
+        key: 'foo',
+        optionsMap: {
+          'bar': 1,
+          'baz': [1, 2, 'a']
+        }
+      });
+      celltools.addItem({ widget: tool });
+      simulate(panel0.node, 'focus');
+      tabpanel.currentIndex = 2;
+    });
+
+    afterEach(() => {
+      tool.dispose();
+    });
+
+    describe('#constructor()', () => {
+
+      it('should create a new key selector', () => {
+        expect(tool).to.be.a(CellTools.KeySelector);
+      });
+
+    });
+
+    describe('#key', () => {
+
+      it('should be the key used by the selector', () => {
+        expect(tool.key).to.be('foo');
+      });
+
+    });
+
+    describe('#selectNode', () => {
+
+      it('should be the select node', () => {
+        expect(tool.selectNode.localName).to.be('select');
+      });
+
+    });
+
+    describe('#handleEvent()', () => {
+
+      context('change', () => {
+
+        it('should update the metadata', () => {
+          let select = tool.selectNode;
+          simulate(select, 'focus');
+          select.selectedIndex = 1;
+          simulate(select, 'change');
+          expect(tool.events).to.contain('change');
+          let cursor = celltools.activeCell.model.getMetadata('foo');
+          expect(cursor.getValue()).to.eql([1, 2, 'a']);
+        });
+
+      });
+
+      context('focus', () => {
+
+        it('should add the focused class to the wrapper node', () => {
+          let select = tool.selectNode;
+          simulate(select, 'focus');
+          let selector = '.jp-KeySelector-selectWrapper.jp-mod-focused';
+          expect(tool.node.querySelector(selector)).to.be.ok();
+        });
+
+      });
+
+      context('blur', () => {
+
+        it('should remove the focused class from the wrapper node', () => {
+          let select = tool.selectNode;
+          simulate(select, 'focus');
+          simulate(select, 'blur');
+          let selector = '.jp-KeySelector-selectWrapper.jp-mod-focused';
+          expect(tool.node.querySelector(selector)).to.not.be.ok();
+        });
+
+      });
+
+    });
+
+    describe('#onAfterAttach()', () => {
+
+      it('should add event listeners', () => {
+        let select = tool.selectNode;
+        expect(tool.methods).to.contain('onAfterAttach');
+        simulate(select, 'focus');
+        simulate(select, 'blur');
+        select.selectedIndex = 0;
+        simulate(select, 'change');
+        expect(tool.events).to.eql(['focus', 'blur', 'change']);
+      });
+
+    });
+
+    describe('#onBeforeDetach()', () => {
+
+      it('should remove event listeners', () => {
+        let select = tool.selectNode;
+        tool.parent = null;
+        expect(tool.methods).to.contain('onBeforeDetach');
+        simulate(select, 'focus');
+        simulate(select, 'blur');
+        simulate(select, 'change');
+        expect(tool.events).to.eql([]);
+      });
+
+    });
+
+    describe('#onValueChanged()', () => {
+
+      it('should update the metadata', () => {
+        let select = tool.selectNode;
+        simulate(select, 'focus');
+        select.selectedIndex = 1;
+        simulate(select, 'change');
+        expect(tool.methods).to.contain('onValueChanged');
+        let cursor = celltools.activeCell.model.getMetadata('foo');
+        expect(cursor.getValue()).to.eql([1, 2, 'a']);
+      });
+
+    });
+
+    describe('#onActiveCellChanged()', () => {
+
+      it('should update the select value', () => {
+        let cell = panel0.notebook.widgets.at(1);
+        let cursor = cell.model.getMetadata('foo');
+        cursor.setValue(1);
+        panel0.notebook.activeCellIndex = 1;
+        expect(tool.methods).to.contain('onActiveCellChanged');
+        expect(tool.selectNode.value).to.be('1');
+      });
+
+    });
+
+    describe('#onMetadataChanged()', () => {
+
+      it('should update the select value', () => {
+        let cursor = celltools.activeCell.model.getMetadata('foo');
+        cursor.setValue(1);
+        expect(tool.methods).to.contain('onMetadataChanged');
+        expect(tool.selectNode.value).to.be('1');
+      });
+
+    });
+
+  });
+
+  describe('CellTools.createSlideShowSelector()', () => {
+
+    it('should create a slide show selector', () => {
+      let tool = CellTools.createSlideShowSelector({ celltools });
+      celltools.addItem({ widget: tool });
+      simulate(panel0.node, 'focus');
+      tabpanel.currentIndex = 2;
+      expect(tool).to.be.a(CellTools.KeySelector);
+      expect(tool.key).to.be('slideshow');
+      let select = tool.selectNode;
+      expect(select.value).to.be('');
+      let cursor = celltools.activeCell.model.getMetadata('slideshow');
+      expect(cursor.getValue()).to.be(void 0);
+      simulate(select, 'focus');
+      tool.selectNode.selectedIndex = 1;
+      simulate(select, 'change');
+      expect(cursor.getValue()).to.be('slide');
+    });
+
+  });
+
+  describe('CellTools.createNBConvertSelector()', () => {
+
+    it('should create a raw mimetype selector', () => {
+      let tool = CellTools.createNBConvertSelector({ celltools });
+      celltools.addItem({ widget: tool });
+      simulate(panel0.node, 'focus');
+      NotebookActions.changeCellType(panel0.notebook, 'raw');
+      tabpanel.currentIndex = 2;
+      expect(tool).to.be.a(CellTools.KeySelector);
+      expect(tool.key).to.be('raw_mimetype');
+      let select = tool.selectNode;
+      expect(select.value).to.be('');
+      let cursor = celltools.activeCell.model.getMetadata('raw_mimetype');
+      expect(cursor.getValue()).to.be(void 0);
+      simulate(select, 'focus');
+      tool.selectNode.selectedIndex = 2;
+      simulate(select, 'change');
+      expect(cursor.getValue()).to.be('text/restructuredtext');
+    });
+
+    it('should have no effect on a code cell', () => {
+      let tool = CellTools.createNBConvertSelector({ celltools });
+      celltools.addItem({ widget: tool });
+      simulate(panel0.node, 'focus');
+      tabpanel.currentIndex = 2;
+      expect(tool).to.be.a(CellTools.KeySelector);
+      expect(tool.key).to.be('raw_mimetype');
+      let select = tool.selectNode;
+      expect(select.disabled).to.be(true);
+      expect(select.value).to.be('');
+      let cursor = celltools.activeCell.model.getMetadata('raw_mimetype');
+      expect(cursor.getValue()).to.be(void 0);
+      simulate(select, 'focus');
+      tool.selectNode.selectedIndex = 2;
+      simulate(select, 'change');
+      expect(cursor.getValue()).to.be(void 0);
     });
 
   });

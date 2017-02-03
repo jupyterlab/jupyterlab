@@ -213,7 +213,7 @@ class CellTools extends Widget implements ICellTools {
     // Remove the separator.
     if (index === 0 && layout.widgets.length) {
       layout.widgets.at(0).dispose;
-    } else {
+    } else if (layout.widgets.length) {
       layout.widgets.at(index * 2 - 1).dispose();
     }
   }
@@ -539,6 +539,7 @@ namespace CellTools {
       let select = this.selectNode;
       if (!activeCell) {
         select.disabled = true;
+        select.value = '';
         return;
       }
       let cellType = activeCell.model.type;
@@ -567,7 +568,7 @@ namespace CellTools {
       }
     }
 
-    private _changeGuard = true;
+    private _changeGuard = false;
     private _validCellTypes: string[];
   }
 
