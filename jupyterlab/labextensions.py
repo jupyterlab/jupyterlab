@@ -15,7 +15,7 @@ import tarfile
 from os.path import join as pjoin, normpath
 
 from jupyter_core.paths import (
-    jupyter_data_dir, jupyter_config_dir, jupyter_config_path,
+    jupyter_data_dir, jupyter_config_dir, jupyter_config_path, jupyter_path,
     SYSTEM_JUPYTER_PATH, ENV_JUPYTER_PATH, ENV_CONFIG_PATH, SYSTEM_CONFIG_PATH
 )
 from ipython_genutils.path import ensure_dir_exists
@@ -38,9 +38,7 @@ RED_X = '\033[31mX\033[0m' if os.name != 'nt' else 'X'
 GREEN_ENABLED = '\033[32menabled \033[0m' if os.name != 'nt' else 'enabled '
 RED_DISABLED = '\033[31mdisabled\033[0m' if os.name != 'nt' else 'disabled'
 
-
-CONFIG_NAME = 'jupyter_notebook_config'
-CONFIG_SECTION = 'LabConfig'
+CONFIG_DIR = 'labconfig'
 
 #------------------------------------------------------------------------------
 # Public API
@@ -125,6 +123,7 @@ def install_labextension(path, name, overwrite=False, symlink=False,
     full_dest = None
 
     labext = _get_labextension_dir(user=user, sys_prefix=sys_prefix, prefix=prefix, labextensions_dir=labextensions_dir)
+    print('labext_dir', labext)
     # make sure labextensions dir exists
     ensure_dir_exists(labext)
     
@@ -283,18 +282,15 @@ def _set_labextension_state(name, state,
         The name of the python module associated with the extension.
     """
     user = False if sys_prefix else user
-    cfg = _read_config_data(user=user, sys_prefix=sys_prefix)
+    extensions = _read_config_data('labextensions', user=user,
+                                   sys_prefix=sys_prefix)
     if logger:
         logger.info("{} extension {}...".format(
             "Enabling" if state else "Disabling",
             name
         ))
-    labextensions = (
-        cfg.setdefault(CONFIG_SECTION, {})
-        .setdefault("labextensions", {})
-    )
 
-    old_state = labextensions.get(name, None)
+    old_state = extensions.get(name, None)
     if old_state is None:
         old_state = dict(enabled=False)
     elif isinstance(old_state, bool):
@@ -308,12 +304,13 @@ def _set_labextension_state(name, state,
         else:
             logger.info(u"Disabling: %s" % (name))
 
-    labextensions[name] = dict(
+    extensions[name] = dict(
         enabled=new_enabled,
         python_module=python_module
     )
 
-    _write_config_data(cfg, user=user, sys_prefix=sys_prefix, logger=logger)
+    _write_config_data('labextensions', extensions, user=user,
+                       sys_prefix=sys_prefix, logger=logger)
 
     if new_enabled:
         full_dest = find_labextension(name)
@@ -461,7 +458,7 @@ def find_labextension(name):
     name : str
         The name of the extension.
     """
-    for exts in _labextension_dirs():
+    for exts in jupyter_path('labextensions'):
         full_dest = os.path.join(exts, name)
         if os.path.exists(full_dest):
             return full_dest
@@ -560,7 +557,7 @@ def get_labextension_manifest_data_by_folder(folder):
 def get_labextension_manifest_data_by_name(name):
     """Get the manifest data for a given lab extension folder
     """
-    for exts in _labextension_dirs():
+    for exts in jupyter_path('labextensions'):
         full_dest = os.path.join(exts, name)
         if os.path.exists(full_dest):
             return get_labextension_manifest_data_by_folder(full_dest)
@@ -896,12 +893,9 @@ class ListLabExtensionsApp(BaseLabExtensionApp):
         print("Known labextensions:")
 
         for config_dir in jupyter_config_path():
+            config_dir = os.path.join(config_dir, CONFIG_DIR)
             cm = BaseJSONConfigManager(parent=self, config_dir=config_dir)
-            data = cm.get(CONFIG_NAME)
-            labextensions = (
-                data.setdefault(CONFIG_SECTION, {})
-                .setdefault("labextensions", {})
-            )
+            labextensions = cm.get('labextensions')
             if labextensions:
                 print(u'config dir: {}'.format(config_dir))
             for name, config in sorted(labextensions.items()):
@@ -1002,6 +996,7 @@ def _maybe_copy(src, dest, logger=None):
     logger : Jupyter logger [optional]
         Logger instance to use
     """
+    print("Maybe Copying: %s -> %s" % (src, dest))
     if _should_copy(src, dest, logger=logger):
         if logger:
             logger.info("Copying: %s -> %s" % (src, dest))
@@ -1055,18 +1050,6 @@ def _get_labextension_dir(user=False, sys_prefix=False, prefix=None, labextensio
     return labext
 
 
-def _labextension_dirs():
-    """The possible locations of labextensions.
-
-    Returns a list of known base extension locations
-    """
-    return [
-        pjoin(jupyter_data_dir(), u'labextensions'),
-        pjoin(ENV_JUPYTER_PATH[0], u'labextensions'),
-        pjoin(SYSTEM_JUPYTER_PATH[0], 'labextensions')
-    ]
-
-
 def _get_config_dir(user=False, sys_prefix=False):
     """Get the location of config files for the current context
 
@@ -1089,7 +1072,7 @@ def _get_config_dir(user=False, sys_prefix=False):
         labext = ENV_CONFIG_PATH[0]
     else:
         labext = SYSTEM_CONFIG_PATH[0]
-    return labext
+    return os.path.join(labext, CONFIG_DIR)
 
 
 def _get_labextension_metadata(module):
@@ -1114,29 +1097,31 @@ def _get_labextension_metadata(module):
     return m, labexts
 
 
-def _read_config_data(user=False, sys_prefix=False):
+def _read_config_data(section, user=False, sys_prefix=False):
     """Get the config for the current context
 
     Returns the string to the enviornment
 
     Parameters
     ----------
-
+    section: string
+        The section of config to read.
     user : bool [default: False]
         Get the user's .jupyter config directory
     sys_prefix : bool [default: False]
         Get sys.prefix, i.e. ~/.envs/my-env/etc/jupyter
     """
     config_dir = _get_config_dir(user=user, sys_prefix=sys_prefix)
-    config_man = BaseJSONConfigManager(config_dir=config_dir)
-    return config_man.get(CONFIG_NAME)
+    return BaseJSONConfigManager(config_dir=config_dir).get(section)
 
 
-def _write_config_data(data, user=False, sys_prefix=False, logger=None):
+def _write_config_data(section, data, user=False, sys_prefix=False, logger=None):
     """Update the config for the current context
 
     Parameters
     ----------
+    section: string
+        The section of data to update.
     data : object
         An object which can be accepted by ConfigManager.update
     user : bool [default: False]
@@ -1150,7 +1135,7 @@ def _write_config_data(data, user=False, sys_prefix=False, logger=None):
     if logger:
         logger.info(u"- Writing config: {}".format(config_dir))
     config_man = BaseJSONConfigManager(config_dir=config_dir)
-    config_man.update(CONFIG_NAME, data)
+    config_man.update(section, data)
 
 
 if __name__ == '__main__':

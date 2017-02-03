@@ -11,14 +11,15 @@ from traitlets import Unicode
 from notebook.base.handlers import IPythonHandler, FileFindHandler
 from jinja2 import FileSystemLoader
 from notebook.utils import url_path_join as ujoin
-from jupyter_core.paths import jupyter_path
+from notebook.services.config import ConfigManager
+from jupyter_core.paths import jupyter_path, jupyter_config_path
 
 from ._version import __version__
 from .labextensions import (
     find_labextension, validate_labextension_folder,
     get_labextension_manifest_data_by_name,
     get_labextension_manifest_data_by_folder,
-    get_labextension_config_python, CONFIG_SECTION
+    get_labextension_config_python, CONFIG_DIR
 )
 
 #-----------------------------------------------------------------------------
@@ -127,10 +128,24 @@ class LabHandler(IPythonHandler):
         return FILE_LOADER.load(self.settings['jinja2_env'], name)
 
 
+def get_labconfig(nbapp):
+    """Get the merged lab configuration."""
+    # Load server extensions with ConfigManager.
+    # This enables merging on keys, which we want for extension enabling.
+    # Regular config loading only merges at the class level,
+    # so each level (user > env > system) clobbers the previous.
+    config_path = jupyter_config_path()
+    if nbapp.config_dir not in config_path:
+        # add nbapp's config_dir to the front, if set manually
+        config_path.insert(0, nbapp.config_dir)
+    config_path = [os.path.join(p, CONFIG_DIR) for p in config_path]
+    return ConfigManager(read_config_path=config_path)
+
+
 def get_extensions(lab_config):
     """Get the valid extensions from lab config."""
     extensions = dict()
-    labextensions = lab_config.get('labextensions', {})
+    labextensions = lab_config.get('labextensions')
     for (name, ext_config) in labextensions.items():
         if not ext_config['enabled']:
             continue
@@ -180,8 +195,8 @@ def load_jupyter_server_extension(nbapp):
     if dev_mode:
         nbapp.log.info(DEV_NOTE_NPM)
 
-    lab_config = nbapp.config.get(CONFIG_SECTION, {})
-    extensions = get_extensions(lab_config)
+    config = get_labconfig(nbapp)
+    extensions = get_extensions(config)
     add_handlers(nbapp.web_app, extensions)
 
 
