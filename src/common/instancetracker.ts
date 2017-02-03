@@ -69,6 +69,13 @@ interface IInstanceTracker<T extends Widget> extends IDisposable {
   forEach(fn: (widget: T) => void): void;
 
   /**
+   * Check if this tracker has the specified widget.
+   *
+   * @param widget - The widget whose existence is being checked.
+   */
+  has(widget: Widget): boolean;
+
+  /**
    * Inject a foreign widget into the instance tracker.
    *
    * @param widget - The widget to inject into the tracker.
