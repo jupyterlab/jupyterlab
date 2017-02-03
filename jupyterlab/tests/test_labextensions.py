@@ -196,14 +196,9 @@ class TestInstallLabExtension(TestCase):
         self.assertEqual(path, pjoin(self.data_dir, u'labextensions', self.name))
 
     def test_find_labextension_system(self):
-        with TemporaryDirectory() as td:
-            with patch.object(labextensions, 'SYSTEM_JUPYTER_PATH', [td]):
-                self.system_labext = pjoin(td, u'labextensions')
-                print(self.src, self.name)
-                install_labextension(self.src, self.name, user=False)
-                print(os.listdir(self.src))
-                path = find_labextension(self.name)
-                self.assertEqual(path, pjoin(self.system_labext, self.name))
+        install_labextension(self.src, self.name, user=False)
+        path = find_labextension(self.name)
+        self.assertEqual(path, pjoin(self.system_labext, self.name))
 
     def test_labextension_find_bad(self):
         path = find_labextension("this-doesn't-exist")

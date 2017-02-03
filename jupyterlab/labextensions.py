@@ -123,7 +123,7 @@ def install_labextension(path, name, overwrite=False, symlink=False,
     full_dest = None
 
     labext = _get_labextension_dir(user=user, sys_prefix=sys_prefix, prefix=prefix, labextensions_dir=labextensions_dir)
-    print('labext_dir', labext)
+
     # make sure labextensions dir exists
     ensure_dir_exists(labext)
     
@@ -891,13 +891,14 @@ class ListLabExtensionsApp(BaseLabExtensionApp):
     def list_labextensions(self):
         """List all the labextensions"""
         print("Known labextensions:")
-
+        seen = False
         for config_dir in jupyter_config_path():
             config_dir = os.path.join(config_dir, CONFIG_DIR)
             cm = BaseJSONConfigManager(parent=self, config_dir=config_dir)
             labextensions = cm.get('labextensions')
             if labextensions:
                 print(u'config dir: {}'.format(config_dir))
+                seen = True
             for name, config in sorted(labextensions.items()):
                 if isinstance(config, bool):
                     config = dict(enabled=config)
@@ -910,6 +911,8 @@ class ListLabExtensionsApp(BaseLabExtensionApp):
                               ))
                 if full_dest is not None:
                     validate_labextension_folder(name, full_dest, self.log)
+        if not seen:
+            print('....None found!')
 
     def start(self):
         """Perform the App's functions as configured"""
@@ -996,7 +999,6 @@ def _maybe_copy(src, dest, logger=None):
     logger : Jupyter logger [optional]
         Logger instance to use
     """
-    print("Maybe Copying: %s -> %s" % (src, dest))
     if _should_copy(src, dest, logger=logger):
         if logger:
             logger.info("Copying: %s -> %s" % (src, dest))
