@@ -6,7 +6,7 @@ import {
 } from 'phosphor/lib/core/messaging';
 
 import {
-  clearSignalData, ISignal
+  ISignal
 } from 'phosphor/lib/core/signaling';
 
 import {
