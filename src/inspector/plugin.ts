@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  AttachedProperty
+} from 'phosphor/lib/core/properties';
+
+import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
@@ -18,7 +22,7 @@ import {
 } from '../common/instancetracker';
 
 import {
-  IConsoleTracker, ConsolePanel
+  IConsoleTracker
 } from '../console';
 
 import {
@@ -93,6 +97,9 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: IInstance
   const category = 'Inspector';
   const command = CommandIDs.open;
   const label = 'Open Inspector';
+  const handlers = new AttachedProperty<Widget, InspectionHandler>({
+    name: 'handler'
+  });
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -103,13 +110,15 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: IInstance
 
   // Keep track of console and notebook instances and set inspector source.
   app.shell.currentChanged.connect((sender, args) => {
-    if (!args.newValue) {
+    let widget = args.newValue;
+    if (!widget) {
       return;
     }
-    if (notebooks.has(args.newValue)) {
-      let widget = args.newValue as NotebookPanel;
-      // TODO: set the source of the inspection manager.
-      manager.source = null;
+    if (consoles.has(widget) || notebooks.has(widget)) {
+      let source = handlers.get(widget);
+      if (source) {
+        manager.source = source;
+      }
     }
   });
 
@@ -119,12 +128,35 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: IInstance
     const kernel = session.kernel;
     const rendermime = parent.console.rendermime;
     const handler = new InspectionHandler({ kernel, parent, rendermime });
+    // Associate the handler to the widget.
+    handlers.set(parent, handler);
+    // Set the initial editor.
+    handler.editor = parent.console.prompt.editor;
     // Listen for prompt creation.
     parent.console.promptCreated.connect((sender, prompt) => {
       handler.editor = prompt.editor;
     });
     // Listen for kernel changes.
     session.kernelChanged.connect((sender, kernel) => {
+      handler.kernel = kernel;
+    });
+  });
+
+  // Create a handler for each notebook that is created.
+  notebooks.widgetAdded.connect((sender, parent) => {
+    const kernel = parent.kernel;
+    const rendermime = parent.rendermime;
+    const handler = new InspectionHandler({ kernel, parent, rendermime });
+    // Associate the handler to the widget.
+    handlers.set(parent, handler);
+    // Set the initial editor.
+    handler.editor = parent.notebook.activeCell.editor;
+    // Listen for active cell changes.
+    parent.notebook.activeCellChanged.connect((sender, cell) => {
+      handler.editor = cell.editor;
+    });
+    // Listen for kernel changes.
+    parent.kernelChanged.connect((sender, kernel) => {
       handler.kernel = kernel;
     });
   });
