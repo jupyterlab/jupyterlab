@@ -158,7 +158,7 @@ class Inspector extends TabPanel implements IInspector {
     this.source = null;
 
     // Dispose the inspector child items.
-    Object.keys(items).forEach(i => { items[i].dispose(); });
+    Object.keys(items || {}).forEach(i => { items[i].dispose(); });
 
     super.dispose();
   }
