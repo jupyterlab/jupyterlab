@@ -62,6 +62,15 @@ interface IInstanceTracker<T extends Widget> extends IDisposable {
   readonly size: number;
 
   /**
+   * A signal emitted when a widget is added.
+   *
+   * #### Notes
+   * This signal will only fire when a widget is added to the tracker. It will
+   * not fire if a widget is injected into the tracker.
+   */
+  readonly widgetAdded: ISignal<this, T>;
+
+  /**
    * Iterate through each widget in the tracker.
    *
    * @param fn - The function to call on each widget.
@@ -127,6 +136,15 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   readonly currentChanged: ISignal<this, T>;
 
   /**
+   * A signal emitted when a widget is added.
+   *
+   * #### Notes
+   * This signal will only fire when a widget is added to the tracker. It will
+   * not fire if a widget is injected into the tracker.
+   */
+  readonly widgetAdded: ISignal<this, T>;
+
+  /**
    * The current widget is the most recently focused widget.
    */
   get currentWidget(): T {
@@ -154,10 +172,14 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     this._tracker.add(widget);
 
     let injected = Private.injectedProperty.get(widget);
-    let promise: Promise<void>;
+    let promise: Promise<void> = Promise.resolve(void 0);
+
+    if (injected) {
+      return promise;
+    }
 
     // Handle widget state restoration.
-    if (!injected && this._restore) {
+    if (this._restore) {
       let { restorer, state } = this._restore;
       let widgetName = this._restore.name(widget);
 
@@ -175,7 +197,10 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
       }
     }
 
-    return promise || Promise.resolve(void 0);
+    // Emit the widget added signal.
+    this.widgetAdded.emit(widget);
+
+    return promise;
   }
 
   /**
@@ -361,6 +386,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
 
 // Define the signals for the `InstanceTracker` class.
 defineSignal(InstanceTracker.prototype, 'currentChanged');
+defineSignal(InstanceTracker.prototype, 'widgetAdded');
 
 
 /**
