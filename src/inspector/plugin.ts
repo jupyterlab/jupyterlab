@@ -108,7 +108,8 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: IInstance
     }
     if (notebooks.has(args.newValue)) {
       let widget = args.newValue as NotebookPanel;
-      manager.source = widget.inspectionHandler;
+      // TODO: set the source of the inspection manager.
+      manager.source = null;
     }
   });
 
@@ -118,6 +119,10 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: IInstance
     const kernel = session.kernel;
     const rendermime = parent.console.rendermime;
     const handler = new InspectionHandler({ kernel, parent, rendermime });
+    // Listen for prompt creation.
+    parent.console.promptCreated.connect((sender, prompt) => {
+      handler.editor = prompt.editor;
+    });
     // Listen for kernel changes.
     session.kernelChanged.connect((sender, kernel) => {
       handler.kernel = kernel;

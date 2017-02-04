@@ -50,10 +50,6 @@ import {
 } from '../docregistry';
 
 import {
-  InspectionHandler
-} from '../inspector';
-
-import {
   OutputAreaWidget
 } from '../outputarea';
 
@@ -119,12 +115,6 @@ class NotebookPanel extends Widget {
     layout.addWidget(toolbar);
     layout.addWidget(this.notebook);
 
-    // Set up the inspection handler.
-    this.inspectionHandler = factory.createInspectionHandler({
-      rendermime: this.rendermime
-    });
-
-
     // Instantiate the completer.
     this._completer = factory.createCompleter({ model: new CompleterModel() });
 
@@ -139,7 +129,6 @@ class NotebookPanel extends Widget {
 
     let activeCell = this.notebook.activeCell;
     if (activeCell) {
-      this.inspectionHandler.editor = activeCell.editor;
       this._completerHandler.editor = activeCell.editor;
     }
   }
@@ -178,11 +167,6 @@ class NotebookPanel extends Widget {
    * The notebook used by the widget.
    */
   readonly notebook: Notebook;
-
-  /**
-   * The inspection handler used by the widget.
-   */
-  readonly inspectionHandler: InspectionHandler;
 
   /**
    * Get the toolbar used by the widget.
@@ -245,7 +229,6 @@ class NotebookPanel extends Widget {
     this.notebook.dispose();
     completerHandler.dispose();
     completer.dispose();
-    this.inspectionHandler.dispose();
     super.dispose();
   }
 
@@ -333,7 +316,6 @@ class NotebookPanel extends Widget {
    */
   private _onKernelChanged(context: DocumentRegistry.IContext<INotebookModel>, kernel: Kernel.IKernel): void {
     this._completerHandler.kernel = kernel;
-    this.inspectionHandler.kernel = kernel;
     this.kernelChanged.emit(kernel);
     if (!this.model || !kernel) {
       return;
@@ -390,7 +372,6 @@ class NotebookPanel extends Widget {
    */
   private _onActiveCellChanged(sender: Notebook, widget: BaseCellWidget) {
     let editor = widget ? widget.editor : null;
-    this.inspectionHandler.editor = editor;
     this._completerHandler.editor = editor;
   }
 
@@ -467,11 +448,6 @@ export namespace NotebookPanel {
     createToolbar(): Toolbar<Widget>;
 
     /**
-     * The inspection handler for a console widget.
-     */
-    createInspectionHandler(options: InspectionHandler.IOptions): InspectionHandler;
-
-    /**
      * The completer widget for a console widget.
      */
     createCompleter(options: CompleterWidget.IOptions): CompleterWidget;
@@ -525,13 +501,6 @@ export namespace NotebookPanel {
      */
     createToolbar(): Toolbar<Widget> {
       return new Toolbar();
-    }
-
-    /**
-     * The inspection handler for a console widget.
-     */
-    createInspectionHandler(options: InspectionHandler.IOptions): InspectionHandler {
-      return new InspectionHandler(options);
     }
 
     /**
