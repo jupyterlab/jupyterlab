@@ -9,20 +9,23 @@ import os
 import sys
 from io import StringIO
 from os.path import join as pjoin
-from subprocess import check_call
+from subprocess import check_call, PIPE
 from traitlets.tests.utils import check_help_all_output
 from unittest import TestCase
 
 try:
     from unittest.mock import patch
 except ImportError:
-    from mock import patch # py2
+    from mock import patch  # py2
 
 import pytest
 from ipython_genutils import py3compat
 from ipython_genutils.tempdir import TemporaryDirectory
+from jupyter_core import paths
+
 from jupyterlab import labextensions
-from jupyterlab.labextensions import (install_labextension, check_labextension,
+from jupyterlab.labextensions import (
+    install_labextension, check_labextension,
     enable_labextension, disable_labextension,
     install_labextension_python, uninstall_labextension_python,
     enable_labextension_python, disable_labextension_python,
@@ -30,7 +33,7 @@ from jupyterlab.labextensions import (install_labextension, check_labextension,
     get_labextension_config_python,
     get_labextension_manifest_data_by_name,
     get_labextension_manifest_data_by_folder,
-    _read_config_data, CONFIG_SECTION
+    _read_config_data, CONFIG_DIR
 )
 
 
@@ -65,7 +68,7 @@ def build_extension():
     shell = (sys.platform == 'win32')
     cwd = os.path.dirname(os.path.abspath(__file__))
     cmd = 'node build_extension.js'
-    check_call(cmd.split(), shell=shell, cwd=cwd)
+    check_call(cmd.split(), shell=shell, cwd=cwd, stdout=PIPE)
 
 
 class TestInstallLabExtension(TestCase):
@@ -84,6 +87,7 @@ class TestInstallLabExtension(TestCase):
         # Any TemporaryDirectory objects appended to this list will be cleaned
         # up at the end of the test run.
         self.tempdirs = []
+        self._mock_extensions = []
 
         @self.addCleanup
         def cleanup_tempdirs():
@@ -108,25 +112,44 @@ class TestInstallLabExtension(TestCase):
         self.data_dir = os.path.join(self.test_dir, 'data')
         self.config_dir = os.path.join(self.test_dir, 'config')
         self.system_data_dir = os.path.join(self.test_dir, 'system_data')
+        self.system_config_dir = os.path.join(self.test_dir, 'system_config')
         self.system_path = [self.system_data_dir]
+        self.system_config_path = [self.system_config_dir]
+
         self.system_labext = os.path.join(self.system_data_dir, 'labextensions')
 
-        # Patch out os.environ so that tests are isolated from the real OS
-        # environment.
-        self.patch_env = patch.dict('os.environ', {
+        self.patches = []
+        p = patch.dict('os.environ', {
             'JUPYTER_CONFIG_DIR': self.config_dir,
             'JUPYTER_DATA_DIR': self.data_dir,
         })
-        self.patch_env.start()
-        self.addCleanup(self.patch_env.stop)
+        self.patches.append(p)
+        for mod in (paths, labextensions):
+            p = patch.object(mod,
+                'SYSTEM_JUPYTER_PATH', self.system_path)
+            self.patches.append(p)
+            p = patch.object(mod,
+                'ENV_JUPYTER_PATH', [])
+            self.patches.append(p)
+        for mod in (paths, labextensions):
+            p = patch.object(mod,
+                'SYSTEM_CONFIG_PATH', self.system_config_path)
+            self.patches.append(p)
+            p = patch.object(mod,
+                'ENV_CONFIG_PATH', [])
+            self.patches.append(p)
+        for p in self.patches:
+            p.start()
+            self.addCleanup(p.stop)
 
-        # Patch out the system path os that we consistently use our own
-        # temporary directory instead.
-        self.patch_system_path = patch.object(
-            labextensions, 'SYSTEM_JUPYTER_PATH', self.system_path
-        )
-        self.patch_system_path.start()
-        self.addCleanup(self.patch_system_path.stop)
+        # verify our patches
+        self.assertEqual(paths.jupyter_config_path(), [self.config_dir] + self.system_config_path)
+        self.assertEqual(labextensions._get_config_dir(user=False), os.path.join(self.system_config_dir, CONFIG_DIR))
+        self.assertEqual(paths.jupyter_path(), [self.data_dir] + self.system_path)
+
+    def tearDown(self):
+        for modulename in self._mock_extensions:
+            sys.modules.pop(modulename)
 
     def assert_dir_exists(self, path):
         if not os.path.exists(path):
@@ -172,12 +195,9 @@ class TestInstallLabExtension(TestCase):
         self.assertEqual(path, pjoin(self.data_dir, u'labextensions', self.name))
 
     def test_find_labextension_system(self):
-        with TemporaryDirectory() as td:
-            with patch.object(labextensions, 'SYSTEM_JUPYTER_PATH', [td]):
-                self.system_labext = pjoin(td, u'labextensions')
-                install_labextension(self.src, self.name, user=False)
-                path = find_labextension(self.name)
-                self.assertEqual(path, pjoin(self.system_labext, self.name))
+        install_labextension(self.src, self.name, user=False)
+        path = find_labextension(self.name)
+        self.assertEqual(path, pjoin(self.system_labext, self.name))
 
     def test_labextension_find_bad(self):
         path = find_labextension("this-doesn't-exist")
@@ -229,30 +249,30 @@ class TestInstallLabExtension(TestCase):
             install_labextension(src, self.name, user=True)
             enable_labextension(self.name)
 
-        data = _read_config_data(user=True)
-        config = data.get(CONFIG_SECTION, {}).get('labextensions', {}).get(self.name, {})
-        assert config['enabled'] == True
+        data = _read_config_data('labextensions', user=True)
+        config = data.get(self.name, {})
+        assert config['enabled']
         assert 'python_module' not in config
 
     def test_labextension_disable(self):
         self.test_labextension_enable()
         disable_labextension(self.name)
 
-        data = _read_config_data(user=True)
-        config = data.get(CONFIG_SECTION, {}).get('labextensions', {}).get(self.name, {})
+        data = _read_config_data('labextensions', user=True)
+        config = data.get(self.name, {})
         assert not config['enabled']
         assert 'python_module' not in config
 
-    def _mock_extension_spec_meta(self):
+    def _mock_extension_spec_meta(self, name):
         return {
-            'name': 'mockextension',
-            'src': 'mockextension/build',
+            'name': name,
+            'src': '%s/build' % name,
         }
 
-    def _inject_mock_extension(self):
+    def _inject_mock_extension(self, name='mockextension'):
         outer_file = __file__
 
-        meta = self._mock_extension_spec_meta()
+        meta = self._mock_extension_spec_meta(name)
 
         class mock():
             __file__ = outer_file
@@ -266,7 +286,8 @@ class TestInstallLabExtension(TestCase):
                 return dict(mockextension_foo=1)
         
         import sys
-        sys.modules['mockextension'] = mock
+        sys.modules[name] = mock
+        self._mock_extensions.append(name)
         
     def test_labextensionpy_files(self):
         self._inject_mock_extension()
@@ -295,8 +316,8 @@ class TestInstallLabExtension(TestCase):
         install_labextension_python('mockextension', user=True)
         enable_labextension_python('mockextension')
         
-        data = _read_config_data(user=True)
-        config = data.get(CONFIG_SECTION, {}).get('labextensions', {}).get('mockextension', False)
+        data = _read_config_data('labextensions', user=True)
+        config = data.get('mockextension', False)
         assert config['enabled'] == True
         assert config['python_module'] == 'mockextension'
         
@@ -306,8 +327,8 @@ class TestInstallLabExtension(TestCase):
         enable_labextension_python('mockextension')
         disable_labextension_python('mockextension', user=True)
         
-        data = _read_config_data(user=True)
-        config = data.get(CONFIG_SECTION, {}).get('labextensions', {}).get('mockextension', {})
+        data = _read_config_data('labextensions', user=True)
+        config = data.get('mockextension', {})
         assert not config['enabled']
 
     def test_labextensionpy_validate(self):
@@ -316,7 +337,7 @@ class TestInstallLabExtension(TestCase):
         paths = install_labextension_python('mockextension', user=True)
         enable_labextension_python('mockextension')
 
-        meta = self._mock_extension_spec_meta()
+        meta = self._mock_extension_spec_meta('mockextension')
         warnings = validate_labextension_folder(meta['name'], paths[0])
         self.assertEqual([], warnings, warnings)
 
