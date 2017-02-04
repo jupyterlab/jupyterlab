@@ -37,6 +37,7 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
   constructor(options: InspectionHandler.IOptions) {
     this._kernel = options.kernel || null;
     this._rendermime = options.rendermime;
+    options.parent.disposed.connect(this.dispose, this);
   }
 
   /**
@@ -117,15 +118,11 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
    * Update the hints inspector based on a text change.
    */
   protected onTextChanged(): void {
-    let update: Inspector.IInspectorUpdate = {
-      content: null,
-      type: 'hints'
-    };
-
     let editor = this.editor;
     let code = editor.model.value.text;
     let position = editor.getCursorPosition();
     let offset = editor.getOffsetAt(position);
+    let update: Inspector.IInspectorUpdate = { content: null, type: 'hints' };
 
     // Clear hints if the new text value is empty or kernel is unavailable.
     if (!code || !this._kernel) {
@@ -177,8 +174,8 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
 
 
 // Define the signals for the `InspectionHandler` class.
-defineSignal(InspectionHandler.prototype, 'ephemeralCleared');
 defineSignal(InspectionHandler.prototype, 'disposed');
+defineSignal(InspectionHandler.prototype, 'ephemeralCleared');
 defineSignal(InspectionHandler.prototype, 'inspected');
 
 
@@ -198,8 +195,24 @@ namespace InspectionHandler {
     kernel?: Kernel.IKernel;
 
     /**
+     * The disposable parent of the inspector.
+     */
+    parent: IDisposedEmitter;
+
+    /**
      * The mime renderer for the inspection handler.
      */
     rendermime: RenderMime;
+  }
+
+  /**
+   * A disposable object that emits a `disposed` signal.
+   */
+  export
+  interface IDisposedEmitter extends IDisposable {
+    /**
+     * A signal emitted when the object is disposed.
+     */
+    readonly disposed: ISignal<any, any>;
   }
 }
