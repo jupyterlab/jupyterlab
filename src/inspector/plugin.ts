@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Widget
+} from 'phosphor/lib/ui/widget';
+
+import {
   JupyterLab, JupyterLabPlugin
 } from '../application';
 
@@ -30,7 +34,7 @@ import {
 } from './manager';
 
 import {
-  CommandIDs, IInspector, Inspector
+  CommandIDs, IInspector, Inspector, InspectionHandler
 } from './';
 
 
@@ -102,10 +106,22 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: IInstance
     if (!args.newValue) {
       return;
     }
-    if (consoles.has(args.newValue) || notebooks.has(args.newValue)) {
-      let widget = args.newValue as ConsolePanel | NotebookPanel;
+    if (notebooks.has(args.newValue)) {
+      let widget = args.newValue as NotebookPanel;
       manager.source = widget.inspectionHandler;
     }
+  });
+
+  // Create a handler for each console that is created.
+  consoles.widgetAdded.connect((sender, parent) => {
+    const session = parent.console.session;
+    const kernel = session.kernel;
+    const rendermime = parent.console.rendermime;
+    const handler = new InspectionHandler({ kernel, parent, rendermime });
+    // Listen for kernel changes.
+    session.kernelChanged.connect((sender, kernel) => {
+      handler.kernel = kernel;
+    });
   });
 
   // Add command to registry and palette.
