@@ -131,10 +131,11 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: IInstance
     // Associate the handler to the widget.
     handlers.set(parent, handler);
     // Set the initial editor.
-    handler.editor = parent.console.prompt.editor;
+    let cell = parent.console.prompt;
+    handler.editor = cell && cell.editor;
     // Listen for prompt creation.
-    parent.console.promptCreated.connect((sender, prompt) => {
-      handler.editor = prompt.editor;
+    parent.console.promptCreated.connect((sender, cell) => {
+      handler.editor = cell && cell.editor;
     });
     // Listen for kernel changes.
     session.kernelChanged.connect((sender, kernel) => {
@@ -150,10 +151,11 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: IInstance
     // Associate the handler to the widget.
     handlers.set(parent, handler);
     // Set the initial editor.
-    handler.editor = parent.notebook.activeCell.editor;
+    let cell = parent.notebook.activeCell;
+    handler.editor = cell && cell.editor;
     // Listen for active cell changes.
     parent.notebook.activeCellChanged.connect((sender, cell) => {
-      handler.editor = cell.editor;
+      handler.editor = cell && cell.editor;
     });
     // Listen for kernel changes.
     parent.kernelChanged.connect((sender, kernel) => {
