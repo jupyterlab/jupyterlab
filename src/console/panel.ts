@@ -58,12 +58,12 @@ const PANEL_CLASS = 'jp-ConsolePanel';
 /*
  * The width, below which, this panel will get the jp-width-tiny CSS class
 */
-const TINY_WIDTH = 300;
+const TINY_WIDTH = 400;
 
 /*
  * The width, below which, this panel will get the jp-width-small CSS class
 */
-const SMALL_WIDTH = 500;
+const SMALL_WIDTH = 600;
 
 /**
  * A panel which contains a console and the ability to add other children.

@@ -11,6 +11,8 @@
 :root {
   --jp-private-outputarea-prompt-color: #D84315;
   --jp-private-outputarea-prompt-width: 90px;
+  --jp-private-outputarea-prompt-width-small: 70px;
+  --jp-private-outputarea-prompt-width-tiny: 30px;
 }
 
 
@@ -77,6 +79,26 @@
   box-sizing: border-box;
 }
 
+.jp-width-small .jp-Output-prompt {
+  flex-basis: var(--jp-private-outputarea-prompt-width-small);
+}
+
+.jp-width-small .jp-Output-promptType {
+  display: none;
+}
+
+.jp-width-tiny .jp-Output-prompt {
+  flex-basis: var(--jp-private-outputarea-prompt-width-tiny);
+  width: var(--jp-private-outputarea-prompt-width-tiny);
+}
+
+.jp-width-tiny .jp-Output-promptCounter {
+  display: none;
+}
+
+.jp-width-tiny .jp-Output-promptType {
+  display: none;
+}
 
 .jp-Output-prompt:hover {
   background: var(--md-grey-100);
