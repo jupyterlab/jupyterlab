@@ -90,7 +90,6 @@ export class SizeWatcher {
     let hasTiny = widget.hasClass(tinyClass);
     let hasSmall = widget.hasClass(smallClass);
 
-    console.log(size, this.tinySize, this.smallSize);
     if (size > this.smallSize) {
       if (hasSmall) {
         widget.removeClass(smallClass);
