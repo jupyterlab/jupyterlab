@@ -30,10 +30,6 @@ import {
 } from '../completer';
 
 import {
-  InspectionHandler
-} from '../inspector';
-
-import {
   BaseCellWidget, CodeCellWidget
 } from '../cells';
 
@@ -77,12 +73,6 @@ class ConsolePanel extends Panel {
     this.console = factory.createConsole(consoleOpts);
     this.addWidget(this.console);
 
-    // Set up the inspection handler.
-    this.inspectionHandler = factory.createInspectionHandler({
-      kernel: options.session.kernel,
-      rendermime: this.console.rendermime
-    });
-
     // Instantiate the completer.
     this._completer = factory.createCompleter({ model: new CompleterModel() });
 
@@ -107,11 +97,6 @@ class ConsolePanel extends Panel {
   readonly console: CodeConsole;
 
   /**
-   * The inspection handler used by the console.
-   */
-  readonly inspectionHandler: InspectionHandler;
-
-  /**
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
@@ -126,7 +111,6 @@ class ConsolePanel extends Panel {
     completerHandler.dispose();
 
     this.console.dispose();
-    this.inspectionHandler.dispose();
     super.dispose();
   }
 
@@ -151,9 +135,8 @@ class ConsolePanel extends Panel {
   private _onPromptCreated(sender: CodeConsole, prompt: CodeCellWidget): void {
     this._completer.reset();
 
-    // Associate the new prompt with the completer and inspection handlers.
+    // Associate the new prompt with the completer.
     this._completerHandler.editor = prompt.editor;
-    this.inspectionHandler.editor = prompt.editor;
   }
 
   /**
@@ -161,7 +144,6 @@ class ConsolePanel extends Panel {
    */
   private _onKernelChanged(sender: Session.ISession, kernel: Kernel.IKernel): void {
     this._completerHandler.kernel = kernel;
-    this.inspectionHandler.kernel = kernel;
   }
 
   private _completer: CompleterWidget = null;
@@ -227,11 +209,6 @@ namespace ConsolePanel {
     createConsole(options: CodeConsole.IOptions): CodeConsole;
 
     /**
-     * The inspection handler for a console widget.
-     */
-    createInspectionHandler(options: InspectionHandler.IOptions): InspectionHandler;
-
-    /**
      * The completer widget for a console widget.
      */
     createCompleter(options: CompleterWidget.IOptions): CompleterWidget;
@@ -277,13 +254,6 @@ namespace ConsolePanel {
      */
     createConsole(options: CodeConsole.IOptions): CodeConsole {
       return new CodeConsole(options);
-    }
-
-    /**
-     * The inspection handler for a console widget.
-     */
-    createInspectionHandler(options: InspectionHandler.IOptions): InspectionHandler {
-      return new InspectionHandler(options);
     }
 
     /**

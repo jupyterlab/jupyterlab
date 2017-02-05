@@ -92,15 +92,6 @@ describe('console/panel', () => {
 
     });
 
-    describe('#inspectionHandler', () => {
-
-      it('should exist after instantiation', () => {
-        Widget.attach(panel, document.body);
-        expect(panel.inspectionHandler).to.be.an(InspectionHandler);
-      });
-
-    });
-
     describe('#dispose()', () => {
 
       it('should dispose of the resources held by the panel', () => {
@@ -179,16 +170,6 @@ describe('console/panel', () => {
         });
 
       });
-
-      describe('#createInspectionHandler()', () => {
-
-        it('should create an inspection handler', () => {
-          let inspector = contentFactory.createInspectionHandler({ rendermime });
-          expect(inspector).to.be.an(InspectionHandler);
-        });
-
-      });
-
 
       describe('#createCompleter()', () => {
 

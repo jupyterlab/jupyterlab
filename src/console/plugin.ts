@@ -42,10 +42,6 @@ import {
 } from '../filebrowser';
 
 import {
-  IInspector
-} from '../inspector';
-
-import {
   IInstanceRestorer
 } from '../instancerestorer';
 
@@ -77,7 +73,6 @@ const trackerPlugin: JupyterLabPlugin<IConsoleTracker> = {
     IServiceManager,
     IRenderMime,
     IMainMenu,
-    IInspector,
     ICommandPalette,
     IPathTracker,
     ConsolePanel.IContentFactory,
@@ -131,7 +126,7 @@ const CONSOLE_REGEX = /^console-(\d)+-[0-9a-f]+$/;
 /**
  * Activate the console extension.
  */
-function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, inspector: IInspector, palette: ICommandPalette, pathTracker: IPathTracker, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: IInstanceRestorer): IConsoleTracker {
+function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, palette: ICommandPalette, pathTracker: IPathTracker, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: IInstanceRestorer): IConsoleTracker {
   let manager = services.sessions;
   let { commands, keymap } = app;
   let category = 'Console';
@@ -148,13 +143,6 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     args: panel => ({ id: panel.console.session.id }),
     name: panel => panel.console.session && panel.console.session.id,
     when: manager.ready
-  });
-
-  // Set the source of the code inspector.
-  tracker.currentChanged.connect((sender, widget) => {
-    if (widget) {
-      inspector.source = widget.inspectionHandler;
-    }
   });
 
   // Set the main menu title.
@@ -376,8 +364,6 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       captionOptions.executed = null;
       panel.title.caption = Private.caption(captionOptions);
     });
-    // Immediately set the inspector source to the current console.
-    inspector.source = panel.inspectionHandler;
     // Add the console panel to the tracker.
     tracker.add(panel);
     app.shell.addToMainArea(panel);

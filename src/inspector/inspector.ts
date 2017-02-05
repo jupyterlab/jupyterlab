@@ -6,7 +6,7 @@ import {
 } from 'phosphor/lib/core/messaging';
 
 import {
-  clearSignalData, ISignal
+  ISignal
 } from 'phosphor/lib/core/signaling';
 
 import {
@@ -158,7 +158,9 @@ class Inspector extends TabPanel implements IInspector {
     this.source = null;
 
     // Dispose the inspector child items.
-    Object.keys(items).forEach(i => { items[i].dispose(); });
+    if (items) {
+      Object.keys(items).forEach(i => { items[i].dispose(); });
+    }
 
     super.dispose();
   }
@@ -413,7 +415,9 @@ class InspectorItem extends Panel {
     this._toolbar = null;
     this._history = null;
 
-    history.forEach(widget => widget.dispose());
+    if (history) {
+      history.forEach(widget => widget.dispose());
+    }
     toolbar.dispose();
     super.dispose();
   }

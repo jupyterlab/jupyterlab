@@ -34,10 +34,6 @@ import {
 } from '../filebrowser';
 
 import {
-  IInspector
-} from '../inspector';
-
-import {
   IInstanceRestorer
 } from '../instancerestorer';
 
@@ -85,7 +81,6 @@ const trackerPlugin: JupyterLabPlugin<INotebookTracker> = {
     IClipboard,
     IMainMenu,
     ICommandPalette,
-    IInspector,
     NotebookPanel.IContentFactory,
     IEditorServices,
     IInstanceRestorer
@@ -121,7 +116,7 @@ export default plugins;
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, inspector: IInspector, contentFactory: NotebookPanel.IContentFactory, editorServices: IEditorServices, restorer: IInstanceRestorer): INotebookTracker {
+function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: NotebookPanel.IContentFactory, editorServices: IEditorServices, restorer: IInstanceRestorer): INotebookTracker {
 
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
@@ -144,13 +139,6 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     args: panel => ({ path: panel.context.path, factory: FACTORY }),
     name: panel => panel.context.path,
     when: services.ready
-  });
-
-  // Set the source of the code inspector.
-  tracker.currentChanged.connect((sender, widget) => {
-    if (widget) {
-      inspector.source = widget.inspectionHandler;
-    }
   });
 
   registry.addModelFactory(new NotebookModelFactory({}));
@@ -176,8 +164,6 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     // If the notebook panel does not have an ID, assign it one.
     widget.id = widget.id || `notebook-${++id}`;
     widget.title.icon = `${PORTRAIT_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
-    // Immediately set the inspector source to the current notebook.
-    inspector.source = widget.inspectionHandler;
     // Notify the instance tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => { tracker.save(widget); });
     // Add the notebook panel to the tracker.

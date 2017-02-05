@@ -59,6 +59,37 @@ describe('common/instancetracker', () => {
 
     });
 
+    describe('#widgetAdded', () => {
+
+      it('should emit when a widget has been added', done => {
+        let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
+        let widget = new Widget();
+        tracker.widgetAdded.connect((sender, added) => {
+          expect(added).to.be(widget);
+          done();
+        });
+        tracker.add(widget);
+      });
+
+      it('should not emit when a widget has been injected', done => {
+        let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
+        let one = new Widget();
+        let two = new Widget({ node: document.createElement('input') });
+        let total = 0;
+        tracker.widgetAdded.connect(() => { total++; });
+        tracker.currentChanged.connect(() => {
+          expect(total).to.be(1);
+          done();
+        });
+        tracker.add(one);
+        tracker.inject(two);
+        Widget.attach(two, document.body);
+        simulate(two.node, 'focus');
+        Widget.detach(two);
+      });
+
+    });
+
     describe('#currentWidget', () => {
 
       it('should default to null', () => {

@@ -395,16 +395,6 @@ describe('notebook/notebook/panel', () => {
 
       });
 
-      describe('#createInspectionHandler()', () => {
-
-        it('should create an inspection handler', () => {
-          let inspector = contentFactory.createInspectionHandler({ rendermime });
-          expect(inspector).to.be.an(InspectionHandler);
-        });
-
-      });
-
-
       describe('#createCompleter()', () => {
 
         it('should create a completer widget', () => {
