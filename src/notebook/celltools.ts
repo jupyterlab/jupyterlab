@@ -10,7 +10,7 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  JSONObject, JSONValue
+  JSONValue
 } from 'phosphor/lib/algorithm/json';
 
 import {
@@ -52,6 +52,10 @@ import {
 import {
   IChangedArgs
 } from '../common/interfaces';
+
+import {
+  MetadataCursor
+} from '../common/metadata';
 
 import {
   INotebookTracker
@@ -213,7 +217,7 @@ class CellTools extends Widget {
    * Handle a change in the metadata.
    */
   private _onMetadataChanged(sender: ICellModel, args: IChangedArgs<JSONValue>): void {
-    let message = new CellTools.MetadataMessage(args);
+    let message = new MetadataCursor.ChangeMessage(args);
     each(this.children(), widget => {
       sendMessage(widget, message);
     });
@@ -270,25 +274,6 @@ namespace CellTools {
   const SelectionMessage = new ConflatableMessage('selection-changed');
 
   /**
-   * A metadata changed message.
-   */
-  export
-  class MetadataMessage extends Message {
-    /**
-     * Create a new metadata changed message.
-     */
-    constructor(args: IChangedArgs<JSONValue>) {
-      super('metadata-changed');
-      this.args = args;
-    }
-
-    /**
-     * The arguments of the metadata change.
-     */
-    readonly args: IChangedArgs<JSONValue>;
-  }
-
-  /**
    * The base cell tool, meant to be subclassed.
    */
   export
@@ -313,7 +298,7 @@ namespace CellTools {
         this.onSelectionChanged(msg);
         break;
       case 'metadata-changed':
-        this.onMetadataChanged(msg as MetadataMessage);
+        this.onMetadataChanged(msg as MetadataCursor.ChangeMessage);
         break;
       default:
         break;
@@ -342,7 +327,7 @@ namespace CellTools {
      * #### Notes
      * The default implementation is a no-op.
      */
-     protected onMetadataChanged(msg: MetadataMessage): void { /* no-op */ }
+     protected onMetadataChanged(msg: MetadataCursor.ChangeMessage): void { /* no-op */ }
   }
 
   /**
@@ -401,46 +386,27 @@ namespace CellTools {
      * Construct a new raw metadata tool.
      */
     constructor() {
-      let vnode = h.div({ className: METADATA_CLASS },
-                    h.label({}, 'Cell Metadata'),
-                    h.textarea()
-                  );
-      super({ node: realize(vnode) });
-    }
-
-    /**
-     * Get the text area used by the metadata editor.
-     */
-    get textarea(): HTMLTextAreaElement {
-      return this.node.getElementsByTagName('textarea')[0];
+      super();
+      let layout = this.layout = new PanelLayout();
+      layout.addWidget(this._editor);
     }
 
     /**
      * Handle a change to the active cell.
      */
     protected onActiveCellChanged(msg: Message): void {
-      let activeCell = this.parent.activeCell;
-      if (activeCell) {
-        let content: JSONObject = {};
-        each(activeCell.model.listMetadata(), key => {
-          // Do not show the trusted metadata.
-          if (key === 'trusted') {
-            return;
-          }
-          content[key] = activeCell.model.getMetadata(key).getValue();
-        });
-        this.textarea.value = JSON.stringify(content, null, 2);
-      } else {
-        this.textarea.value = 'No active cell!';
-      }
+      let cell = this.parent.activeCell;
+      this._editor.owner = cell ? cell.model : null;
     }
 
     /**
      * Handle a change to the metadata of the active cell.
      */
-    protected onMetadataChanged(msg: CellTools.MetadataMessage) {
-      this.onActiveCellChanged(CellTools.ActiveCellMessage);
+    protected onMetadataChanged(msg: MetadataCursor.ChangeMessage) {
+      sendMessage(this._editor, msg);
     }
+
+    private _editor: MetadataCursor.Editor = new MetadataCursor.Editor();
   }
 
   /**
@@ -452,7 +418,7 @@ namespace CellTools {
      * Construct a new KeySelector.
      */
     constructor(options: IKeySelectorOptions) {
-      super({ node: Private.createSelector(options) });
+      super({ node: Private.createSelectorNode(options) });
       this.addClass(KEYSELECTOR_CLASS);
       this.key = options.key;
       this._validCellTypes = options.validCellTypes || [];
@@ -501,18 +467,20 @@ namespace CellTools {
      * Handle `after-attach` messages for the widget.
      */
     protected onAfterAttach(msg: Message): void {
-      this.selectNode.addEventListener('change', this);
-      this.selectNode.addEventListener('focus', this);
-      this.selectNode.addEventListener('blur', this);
+      let node = this.selectNode;
+      node.addEventListener('change', this);
+      node.addEventListener('focus', this);
+      node.addEventListener('blur', this);
     }
 
     /**
      * Handle `before_detach` messages for the widget.
      */
     protected onBeforeDetach(msg: Message): void {
-      this.selectNode.removeEventListener('change', this);
-      this.selectNode.removeEventListener('focus', this);
-      this.selectNode.removeEventListener('blur', this);
+      let node = this.selectNode;
+      node.removeEventListener('change', this);
+      node.removeEventListener('focus', this);
+      node.removeEventListener('blur', this);
     }
 
     /**
@@ -540,7 +508,7 @@ namespace CellTools {
     /**
      * Handle a change to the metadata of the active cell.
      */
-    protected onMetadataChanged(msg: CellTools.MetadataMessage) {
+    protected onMetadataChanged(msg: MetadataCursor.ChangeMessage) {
       if (this._changeGuard) {
         return;
       }
@@ -673,7 +641,7 @@ namespace Private {
    * Create the node for a KeySelector.
    */
   export
-  function createSelector(options: CellTools.IKeySelectorOptions): HTMLElement {
+  function createSelectorNode(options: CellTools.IKeySelectorOptions): HTMLElement {
     let name = options.key;
     let title = (
       options.title || name[0].toLocaleUpperCase() + name.slice(1)
