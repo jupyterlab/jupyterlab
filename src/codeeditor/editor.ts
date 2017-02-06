@@ -325,8 +325,8 @@ namespace CodeEditor {
         });
         mapPromise.then(()=>{
           resolve();
-        }).catch(()=>{
-          console.log("Unable to register document as collaborative");
+        //}).catch(()=>{
+        //  console.log("Unable to register document as collaborative");
         });
       });
     }

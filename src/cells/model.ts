@@ -51,11 +51,6 @@ interface ICellModel extends CodeEditor.IModel {
   readonly stateChanged: ISignal<ICellModel, IChangedArgs<any>>;
 
   /**
-   * A signal emitted to synchronize with a realtime handler.
-   */
-  readonly synchronizeRequest: ISignal<ICellModel, void>;
-
-  /**
    * Whether the cell is trusted.
    */
   trusted: boolean;
@@ -134,13 +129,6 @@ class CellModel extends CodeEditor.Model implements ICellModel {
     this.value.changed.connect(this.onGenericChange, this);
     let cell = options.cell;
 
-    this.stateChanged.connect( ()=> {
-      this.synchronizeRequest.emit(void 0);
-    });
-    this.contentChanged.connect( ()=> {
-      this.synchronizeRequest.emit(void 0);
-    });
-
     if (!cell) {
       return;
     }
@@ -180,11 +168,6 @@ class CellModel extends CodeEditor.Model implements ICellModel {
    * A signal emitted when a model state changes.
    */
   readonly stateChanged = new Signal<this, IChangedArgs<any>>(this);
-
-  /**
-   * A signal emitted to synchronize with a realtime handler.
-   */
-  readonly synchronizeRequest = new Signal<this, void>(this);
 
   /**
    * The metadata associated with the cell.
