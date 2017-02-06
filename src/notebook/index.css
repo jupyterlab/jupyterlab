@@ -149,18 +149,22 @@
   padding: var(--jp-private-notebook-padding);
 }
 
+
 .jp-ActiveCellTool .jp-Cell-prompt {
   flex: 0 0 auto;
 }
+
 
 .jp-ActiveCellTool .jp-CellEditor {
   flex: 1 1 auto;
 }
 
-.jp-CellTools-separator {
+
+.jp-CellTools-tool:not(:first-child) {
   margin-top: 6px;
   margin-bottom: 12px;
   border-top: 1px dotted gray;
+  padding-top: 6px;
 }
 
 
@@ -172,8 +176,8 @@
 
 
 .jp-KeySelector {
-  margin-left: 10px;
-  margin-right: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 
@@ -192,7 +196,7 @@
 }
 
 
-.jp-KeySelector-selectWrapper{
+.jp-KeySelector-selectWrapper {
   display: flex;
   flex-direction: column;
   padding: 1px;

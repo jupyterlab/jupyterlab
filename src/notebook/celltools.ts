@@ -34,7 +34,7 @@ import {
 } from 'phosphor/lib/ui/panel';
 
 import {
-  Widget
+  ChildMessage, Widget
 } from 'phosphor/lib/ui/widget';
 
 import {
@@ -64,9 +64,9 @@ import {
 const CELLTOOLS_CLASS = 'jp-CellTools';
 
 /**
- * The class name added to a CellTools child.
+ * The class name added to a CellTools tool.
  */
-const CHILD_CLASS = 'jp-CellTools-child';
+const CHILD_CLASS = 'jp-CellTools-tool';
 
 /**
  * The class name added to a CellTools active cell.
@@ -92,11 +92,6 @@ const SELECT_WRAPPER_CLASS = 'jp-KeySelector-selectWrapper';
  * The class name added to a wrapper that has focus.
  */
 const FOCUS_CLASS = 'jp-mod-focused';
-
-/**
- * The class name added to a separator widget.
- */
-const SEPARATOR_CLASS = 'jp-CellTools-separator';
 
 
 /* tslint:disable */
@@ -169,37 +164,22 @@ class CellTools extends Widget {
 
     tool.addClass(CHILD_CLASS);
 
-    // Upon disposal, remove the widget and its rank reference.
-    tool.disposed.connect(this._onWidgetDisposed, this);
-
-    // Add the item and optionally a separator.
+    // Add the tool.
     this._items.insert(index, rankItem);
     let layout = this.layout as PanelLayout;
-    if (this._items.length > 1) {
-      let separator = new Widget();
-      separator.addClass(SEPARATOR_CLASS);
-      layout.insertWidget(index * 2 - 1, separator);
-    }
-    layout.insertWidget(index * 2, tool);
+    layout.insertWidget(index, tool);
 
     // Trigger the tool to update its active cell.
     sendMessage(tool, CellTools.ActiveCellMessage);
   }
 
   /**
-   * Handle the disposal of an item.
+   * Handle the removal of a child
    */
-  private _onWidgetDisposed(widget: Widget): void {
-    let index = findIndex(this._items, item => item.tool === widget);
+  protected onChildRemoved(message: ChildMessage): void {
+    let index = findIndex(this._items, item => item.tool === message.child);
     if (index !== -1) {
       this._items.removeAt(index);
-    }
-    let layout = this.layout as PanelLayout;
-    // Remove the separator.
-    if (index === 0 && layout.widgets.length) {
-      layout.widgets.at(0).dispose;
-    } else if (layout.widgets.length) {
-      layout.widgets.at(index * 2 - 1).dispose();
     }
   }
 
