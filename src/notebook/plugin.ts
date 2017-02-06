@@ -711,12 +711,22 @@ function createMenu(app: JupyterLab): Menu {
 
   menu.addItem({ command: CommandIDs.undo });
   menu.addItem({ command: CommandIDs.redo });
-  menu.addItem({ command: CommandIDs.split });
+  menu.addItem({ type: 'separator' });
+  menu.addItem({ command: CommandIDs.cut });
+  menu.addItem({ command: CommandIDs.copy });
+  menu.addItem({ command: CommandIDs.paste });
   menu.addItem({ command: CommandIDs.deleteCell });
+  menu.addItem({ type: 'separator' });
+  menu.addItem({ command: CommandIDs.split });
+  menu.addItem({ command: CommandIDs.merge });
+  menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.clearAllOutputs });
+  menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.runAll });
+  menu.addItem({ command: CommandIDs.interrupt });
   menu.addItem({ command: CommandIDs.restart });
   menu.addItem({ command: CommandIDs.switchKernel });
+  menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.closeAndShutdown });
   menu.addItem({ command: CommandIDs.trust });
   menu.addItem({ type: 'separator' });

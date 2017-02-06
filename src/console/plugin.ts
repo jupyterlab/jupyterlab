@@ -194,7 +194,6 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     }
   });
   palette.addItem({ command, category });
-  menu.addItem({ command });
 
   command = CommandIDs.clear;
   commands.addCommand(command, {
@@ -207,7 +206,6 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     }
   });
   palette.addItem({ command, category });
-  menu.addItem({ command });
 
   command = CommandIDs.run;
   commands.addCommand(command, {
@@ -220,8 +218,6 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     }
   });
   palette.addItem({ command, category });
-  menu.addItem({ command });
-
 
   command = CommandIDs.runForced;
   commands.addCommand(command, {
@@ -234,7 +230,6 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     }
   });
   palette.addItem({ command, category });
-  menu.addItem({ command });
 
   command = CommandIDs.linebreak;
   commands.addCommand(command, {
@@ -247,7 +242,6 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     }
   });
   palette.addItem({ command, category });
-  menu.addItem({ command });
 
   command = CommandIDs.interrupt;
   commands.addCommand(command, {
@@ -263,7 +257,32 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     }
   });
   palette.addItem({ command, category });
-  menu.addItem({ command });
+
+  command = CommandIDs.restart;
+  commands.addCommand(command, {
+    label: 'Restart Kernel',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        let kernel = current.console.session.kernel;
+        if (kernel) {
+          return kernel.restart();
+        }
+      }
+    }
+  });
+  palette.addItem({ command, category });
+
+  command = CommandIDs.closeAndHalt;
+  commands.addCommand(command, {
+    label: 'Close and Halt',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        console.log('Close and Halt for Consoles not implemented.')
+      }
+    }
+  });
 
   command = CommandIDs.inject;
   commands.addCommand(command, {
@@ -404,7 +423,18 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     }
   });
   palette.addItem({ command, category });
-  menu.addItem({ command });
+
+  menu.addItem({ command: CommandIDs.run });
+  menu.addItem({ command: CommandIDs.runForced });
+  menu.addItem({ command: CommandIDs.linebreak });
+  menu.addItem({ type: 'separator' });
+  menu.addItem({ command: CommandIDs.clear });
+  menu.addItem({ type: 'separator' });
+  menu.addItem({ command: CommandIDs.interrupt });
+  menu.addItem({ command: CommandIDs.restart });
+  menu.addItem({ command: CommandIDs.switchKernel });
+  menu.addItem({ type: 'separator' });
+  menu.addItem({ command: CommandIDs.closeAndHalt });
 
   mainMenu.addMenu(menu, {rank: 50});
   return tracker;
