@@ -195,14 +195,14 @@
 .jp-MetadataEditor-confirmButton::before {
   content: '\f00c'; /* check */
   float: right;
-  margin-right: 4px;
+  margin-right: 20px;
 }
 
 
 .jp-MetadataEditor-cancelButton::before {
   content: '\f00d'; /* cancel */
   float: right;
-  margin-right: 20px;
+  margin-right: 4px;
 }
 
 

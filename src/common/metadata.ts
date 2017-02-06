@@ -14,7 +14,7 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  JSONObject, JSONValue
+  JSONObject, JSONValue, deepEqual
 } from 'phosphor/lib/algorithm/json';
 
 import {
@@ -281,6 +281,7 @@ namespace MetadataCursor {
           } else if (target === this.confirmButtonNode) {
             if (!this.hasClass(ERROR_CLASS)) {
               this._mergeContent();
+              this._setValue();
             }
           }
           break;
@@ -326,12 +327,26 @@ namespace MetadataCursor {
      * Merge the user content.
      */
     private _mergeContent(): void {
-      let current = this._getContent();
+      let current = this._getContent() as JSONObject;
       let old = this._originalValue;
-      let user = JSON.parse(this.textareaNode.value);
-      console.log('current', current);
-      console.log('old', old);
-      console.log('user', user);
+      let user = JSON.parse(this.textareaNode.value) as JSONObject;
+      let owner = this.owner;
+      // If it is in user and has changed from old, set in current.
+      for (let key in user) {
+        if (!deepEqual(user[key], old[key])) {
+          current[key] = user[key];
+        }
+      }
+      // If it was in old and is not in user, remove from current.
+      for (let key in old) {
+        if (!(key in user)) {
+          delete current[key];
+        }
+      }
+      // Set the values.
+      for (let key in current) {
+        owner.getMetadata(key).setValue(current[key]);
+      }
     }
 
     /**
