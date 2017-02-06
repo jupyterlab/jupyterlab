@@ -142,14 +142,14 @@ function activateCellTools(app: JupyterLab, restorer: IInstanceRestorer, tracker
   const activeCellTool = new CellTools.ActiveCellTool();
   celltools.addItem({ tool: activeCellTool, rank: 1 });
 
-  const metadataEditor = new CellTools.MetadataEditor();
-  celltools.addItem({ tool: metadataEditor, rank: 2 });
-
   const slideShow = CellTools.createSlideShowSelector();
-  celltools.addItem({ tool: slideShow, rank: 3 });
+  celltools.addItem({ tool: slideShow, rank: 2 });
 
   const nbConvert = CellTools.createNBConvertSelector();
-  celltools.addItem({ tool: nbConvert, rank: 4 });
+  celltools.addItem({ tool: nbConvert, rank: 3 });
+
+  const metadataEditor = new CellTools.MetadataEditor();
+  celltools.addItem({ tool: metadataEditor, rank: 4 });
 
   restorer.add(celltools, namespace);
   app.shell.addToLeftArea(celltools);
