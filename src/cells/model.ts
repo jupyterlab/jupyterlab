@@ -29,16 +29,12 @@ import {
   IOutputAreaModel, OutputAreaModel
 } from '../outputarea';
 
-import {
-  ISynchronizable
-} from '../common/realtime';
-
 
 /**
  * The definition of a model object for a cell.
  */
 export
-interface ICellModel extends CodeEditor.IModel, ISynchronizable<ICellModel> {
+interface ICellModel extends CodeEditor.IModel {
   /**
    * The type of the cell.
    */

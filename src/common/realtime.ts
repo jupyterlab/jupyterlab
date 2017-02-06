@@ -38,7 +38,7 @@ import {
 } from './observablemap';
 
 import {
-  IObservableUndoableVector, ISerializable
+  ISerializable
 } from './undoablevector';
 
 /* tslint:disable */
@@ -180,7 +180,7 @@ interface IRealtimeHandler extends IDisposable {
    *
    * @returns a promise when the linking is done.
    */
-  linkMap<T>(vec: IObservableMap<T>, id: string, parent?: IObservableMap<any>): Promise<void>;
+  linkMap(vec: IObservableMap<Synchronizable>, id: string): Promise<void>;
 
   /**
    * Create a string for the realtime model.
@@ -194,7 +194,7 @@ interface IRealtimeHandler extends IDisposable {
    *
    * @returns a promise when the linking is done.
    */
-  linkString(str: IObservableString, id: string, parent?: IObservableMap<any>): Promise<void>;
+  linkString(str: IObservableString, id: string): Promise<void>;
 
   /**
    * Create a vector for the realtime model.
@@ -208,23 +208,14 @@ interface IRealtimeHandler extends IDisposable {
    *
    * @returns a promise when the linking is done.
    */
-  linkVector<T extends ISynchronizable<T>>(vec: IObservableUndoableVector<T>, id: string, parent?: IObservableMap<any>): Promise<void>;
+  linkVector(vec: IObservableVector<Synchronizable>, id: string): Promise<void>;
 }
 
 /**
- * Interface for an object which is both able to be serialized,
- * as well as able to signal a request for synchronization
- * through an IRealtimeHandler. This request may be every time
- * the object changes, or it may be batched in some way.
+ * A type which is able to be synchronized between collaborators
  */
 export
-interface ISynchronizable<T> extends ISerializable {
-  /**
-   * A signal that is emitted when a synchronizable object
-   * requests to be synchronized through the realtime handler.
-   */
-  readonly synchronizeRequest: ISignal<T, void>;
-}
+type Synchronizable = JSONObject | ISerializable | IObservableMap<any> | IObservableVector<any> | IObservableString;
 
 /**
  * Interface for an object representing a single collaborator

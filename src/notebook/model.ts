@@ -85,7 +85,10 @@ class NotebookModel extends DocumentModel implements INotebookModel, IRealtimeMo
       options.contentFactory || NotebookModel.defaultContentFactory
     );
     this.contentFactory = factory;
-    this._cells = new ObservableUndoableVector<ICellModel>((cell: nbformat.IBaseCell) => {
+    this._cells = new ObservableUndoableVector<ICellModel>((cell?: nbformat.IBaseCell) => {
+      if(!cell) {
+        return factory.createRawCell({});
+      }
       switch (cell.cell_type) {
         case 'code':
           return factory.createCodeCell({ cell });
@@ -288,7 +291,7 @@ class NotebookModel extends DocumentModel implements INotebookModel, IRealtimeMo
   registerCollaborative( realtimeHandler : IRealtimeHandler ) : Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this._realtimeHandler = realtimeHandler;
-      this._realtimeHandler.linkVector<ICellModel>(this._cells, 'notebook:cells').then(()=>{
+      this._realtimeHandler.linkVector(this._cells, 'notebook:cells').then(()=>{
         resolve();
       }).catch( ()=> {
         console.log("Unable to register notebook as collaborative");
