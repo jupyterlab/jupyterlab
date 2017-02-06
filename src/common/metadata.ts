@@ -35,6 +35,26 @@ import {
  */
 const METADATA_CLASS = 'jp-MetadataEditor';
 
+/**
+ * The class name added when the Metadata editor contains invalid JSON.
+ */
+const ERROR_CLASS = 'jp-mod-error';
+
+/**
+ * The class name added to the button area.
+ */
+const BUTTON_AREA = 'jp-MetadataEditor-buttons';
+
+/**
+ * The class name added to the cancel button.
+ */
+const CANCEL_BUTTON = 'jp-MetadataEditor-cancelButton';
+
+/**
+ * The class name added to the cancel button.
+ */
+const CONFIRM_BUTTON = 'jp-MetadataEditor-confirmButton';
+
 
 /**
  * A class used to interact with user level metadata.
@@ -176,13 +196,28 @@ namespace MetadataCursor {
      */
     constructor() {
       super({ node: Private.createMetadataNode() });
+      this.addClass(METADATA_CLASS);
     }
 
     /**
      * Get the text area used by the metadata editor.
      */
-    get textarea(): HTMLTextAreaElement {
+    get textareaNode(): HTMLTextAreaElement {
       return this.node.getElementsByTagName('textarea')[0];
+    }
+
+    /**
+     * Get the cancel button used by the metadata editor.
+     */
+    get cancelButtonNode(): HTMLElement {
+      return this.node.getElementsByClassName(CANCEL_BUTTON)[0] as HTMLElement;
+    }
+
+    /**
+     * Get the confirm button used by the metadata editor.
+     */
+    get confirmButtonNode(): HTMLElement {
+      return this.node.getElementsByClassName(CONFIRM_BUTTON)[0] as HTMLElement;
     }
 
     /**
@@ -193,7 +228,7 @@ namespace MetadataCursor {
     }
     set owner(value: IOwner | null) {
       this._owner = value;
-      this._handleOwner();
+      this._setValue();
     }
 
     /**
@@ -226,13 +261,27 @@ namespace MetadataCursor {
       switch (event.type) {
         case 'input':
           this._inputDirty = true;
-          break;
-        case 'focus':
+          try {
+            JSON.parse(this.textareaNode.value);
+            this.removeClass(ERROR_CLASS);
+          } catch (err) {
+            this.addClass(ERROR_CLASS);
+          }
           break;
         case 'blur':
           // Update the metadata if necessary.
           if (!this._inputDirty && this._dataDirty) {
-            this._handleOwner();
+            this._setValue();
+          }
+          break;
+        case 'click':
+          let target = event.target as HTMLElement;
+          if (target === this.cancelButtonNode) {
+            this._setValue();
+          } else if (target === this.confirmButtonNode) {
+            if (!this.hasClass(ERROR_CLASS)) {
+              this._mergeContent();
+            }
           }
           break;
         default:
@@ -244,57 +293,88 @@ namespace MetadataCursor {
      * Handle `after-attach` messages for the widget.
      */
     protected onAfterAttach(msg: Message): void {
-      let node = this.textarea;
+      let node = this.textareaNode;
       node.addEventListener('input', this);
-      node.addEventListener('focus', this);
       node.addEventListener('blur', this);
+      this.cancelButtonNode.addEventListener('click', this);
+      this.confirmButtonNode.addEventListener('click', this);
     }
 
     /**
      * Handle `before_detach` messages for the widget.
      */
     protected onBeforeDetach(msg: Message): void {
-      let node = this.textarea;
+      let node = this.textareaNode;
       node.removeEventListener('input', this);
-      node.removeEventListener('focus', this);
       node.removeEventListener('blur', this);
+      this.cancelButtonNode.removeEventListener('click', this);
+      this.confirmButtonNode.removeEventListener('click', this);
     }
 
     /**
      * Handle a change to the metadata of the active cell.
      */
     protected onMetadataChanged(msg: ChangeMessage) {
-      if (document.activeElement === this.textarea) {
+      if (this._inputDirty || document.activeElement === this.textareaNode) {
         this._dataDirty = true;
+        return;
       }
-      this._handleOwner();
+      this._setValue();
     }
 
     /**
-     * Handle the owner contents.
+     * Merge the user content.
      */
-    private _handleOwner(): void {
+    private _mergeContent(): void {
+      let current = this._getContent();
+      let old = this._originalValue;
+      let user = JSON.parse(this.textareaNode.value);
+      console.log('current', current);
+      console.log('old', old);
+      console.log('user', user);
+    }
+
+    /**
+     * Get the metadata from the owner.
+     */
+    private _getContent(): JSONObject | undefined {
+      let owner = this.owner;
+      if (!owner) {
+        return void 0;
+      }
+      let content: JSONObject = {};
+      each(owner.listMetadata(), key => {
+        // Do not show the trusted metadata.
+        if (key === 'trusted') {
+          return;
+        }
+        content[key] = owner.getMetadata(key).getValue();
+      });
+      return content;
+    }
+
+    /**
+     * Set the value given the owner contents.
+     */
+    private _setValue(): void {
       this._dataDirty = false;
       this._inputDirty = false;
-      let owner = this.owner;
-      if (owner) {
-        let content: JSONObject = {};
-        each(owner.listMetadata(), key => {
-          // Do not show the trusted metadata.
-          if (key === 'trusted') {
-            return;
-          }
-          content[key] = owner.getMetadata(key).getValue();
-        });
-        this.textarea.value = JSON.stringify(content, null, 2);
+      let textarea = this.textareaNode;
+      let content = this._getContent();
+      if (content === void 0) {
+        textarea.value = 'No data!';
+        this._originalValue = {};
       } else {
-        this.textarea.value = 'No active cell!';
+        let value = JSON.stringify(content, null, 2);
+        textarea.value = value;
+        this._originalValue = content;
       }
     }
 
     private _dataDirty = false;
     private _inputDirty = false;
     private _owner: IOwner | null;
+    private _originalValue: JSONObject;
   }
 }
 
@@ -310,6 +390,9 @@ namespace Private {
   function createMetadataNode(): HTMLElement {
     let vnode = h.div({ className: METADATA_CLASS },
                 h.label({}, 'Cell Metadata'),
+                h.div({ className: BUTTON_AREA },
+                  h.span({ className: CANCEL_BUTTON }),
+                  h.span({ className: CONFIRM_BUTTON })),
                 h.textarea()
               );
     return realize(vnode);

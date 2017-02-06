@@ -172,6 +172,37 @@
   flex-direction: column;
   padding-left: 10px;
   padding-right: 10px;
+  display: flex;
+}
+
+.jp-MetadataEditor textarea {
+  min-height: 100px;
+}
+
+
+.jp-MetadataEditor.jp-mod-error textarea {
+  border-color: red;
+  outline-color: red;
+}
+
+
+.jp-MetadataEditor-buttons {
+  font-family: FontAwesome;
+  flex: 1 0 auto;
+}
+
+
+.jp-MetadataEditor-confirmButton::before {
+  content: '\f00c'; /* check */
+  float: right;
+  margin-right: 4px;
+}
+
+
+.jp-MetadataEditor-cancelButton::before {
+  content: '\f00d'; /* cancel */
+  float: right;
+  margin-right: 20px;
 }
 
 
