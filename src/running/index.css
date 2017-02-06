@@ -5,6 +5,8 @@
 :root {
   --jp-private-running-button-height: 28px;
   --jp-private-running-button-width: 48px;
+  --jp-private-running-item-height: 24px;
+  --jp-prinate-running-shutdown-button-height: 20px;
 }
 
 /*-----------------------------------------------------------------------------
@@ -18,7 +20,7 @@
   min-width: 300px;
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color1);
-  font-size: var(--jp-ui-font-size1);
+  font-size: var(--jp-ui-font-size0);
 }
 
 
@@ -26,14 +28,6 @@
   flex: 0 0 auto;
   display: flex;
   flex-direction: row;
-}
-
-
-.jp-RunningSessions-headerTitle {
-  flex: 1 1 auto;
-  padding: 6px;
-  font-size: 12px;
-  vertical-align: middle;
 }
 
 
@@ -73,7 +67,6 @@
   flex: 0 0 auto;
   margin: 4px 0px;
   padding: 4px 12px;
-  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
@@ -99,10 +92,9 @@
 .jp-RunningSessions-item {
   display: flex;
   flex-direction: row;
-  padding: 2px;
-  font-size: 13px;
-  font-weight: 500;
   color: var(--jp-ui-font-color1);
+  height: var(--jp-private-running-item-height);
+  line-height: var(--jp-private-running-item-height);
 }
 
 
@@ -144,29 +136,19 @@
 
 .jp-RunningSessions-itemLabel {
   flex: 1 1 auto;
-  padding: 1px;
   margin-right: 4px;
   text-overflow: ellipsis;
   overflow: hidden;
   direction: rtl;
 }
 
-
-.jp-RunningSessions-itemKernelName {
-  flex: 0 0 auto;
-  padding: 1px;
-  margin-right: 7px;
-}
-
-
 .jp-RunningSessions-itemShutdown {
   flex: 0 0 auto;
-  padding: 1px 4px;
-  margin-right: 8px;
+  padding: 0px 4px;
+  margin: 2px 8px 2px 0px;
   color: var(--jp-inverse-ui-font-color0);
   background: var(--jp-warn-color1);
-  border-radius: 1px;
   cursor: pointer;
-  letter-spacing: .8px;
-  font-weight: 600;
+  height: var(--jp-prinate-running-shutdown-button-height);
+  line-height: var(--jp-prinate-running-shutdown-button-height);
 }
