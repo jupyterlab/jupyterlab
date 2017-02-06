@@ -183,7 +183,7 @@ class CellTools extends Widget {
     layout.insertWidget(index * 2, tool);
 
     // Trigger the tool to update its active cell.
-    sendMessage(tool, CellTools.ActiveCellChanged);
+    sendMessage(tool, CellTools.ActiveCellMessage);
   }
 
   /**
@@ -216,7 +216,7 @@ class CellTools extends Widget {
       activeCell.model.metadataChanged.connect(this._onMetadataChanged, this);
     }
     each(this.children(), widget => {
-      sendMessage(widget, CellTools.ActiveCellChanged);
+      sendMessage(widget, CellTools.ActiveCellMessage);
     });
   }
 
@@ -225,7 +225,7 @@ class CellTools extends Widget {
    */
   private _onSelectionChanged(): void {
     each(this.children(), widget => {
-      sendMessage(widget, CellTools.SelectionChanged);
+      sendMessage(widget, CellTools.SelectionMessage);
     });
   }
 
@@ -279,13 +279,13 @@ namespace CellTools {
    * A singleton conflatable `'activecell-changed'` message.
    */
   export
-  const ActiveCellChanged = new ConflatableMessage('activecell-changed');
+  const ActiveCellMessage = new ConflatableMessage('activecell-changed');
 
   /**
    * A singleton conflatable `'selection-changed'` message.
    */
   export
-  const SelectionChanged = new ConflatableMessage('selection-changed');
+  const SelectionMessage = new ConflatableMessage('selection-changed');
 
   /**
    * A metadata changed message.
@@ -307,14 +307,6 @@ namespace CellTools {
   }
 
   /**
-   * The options used to create a cell tool.
-   */
-  export
-  interface IToolOptions {
-
-  }
-
-  /**
    * The base cell tool, meant to be subclassed.
    */
   export
@@ -333,10 +325,10 @@ namespace CellTools {
       super.processMessage(msg);
       switch (msg.type) {
       case 'activecell-changed':
-        this.onActiveCellChanged();
+        this.onActiveCellChanged(msg);
         break;
       case 'selection-changed':
-        this.onSelectionChanged();
+        this.onSelectionChanged(msg);
         break;
       case 'metadata-changed':
         this.onMetadataChanged(msg as MetadataMessage);
@@ -352,7 +344,7 @@ namespace CellTools {
      * #### Notes
      * The default implemenatation is a no-op.
      */
-    protected onActiveCellChanged(): void { /* no-op */ }
+    protected onActiveCellChanged(message: Message): void { /* no-op */ }
 
     /**
      * Handle a change to the selection.
@@ -360,7 +352,7 @@ namespace CellTools {
      * #### Notes
      * The default implementation is a no-op.
      */
-    protected onSelectionChanged(): void { /* no-op */ }
+    protected onSelectionChanged(message: Message): void { /* no-op */ }
 
     /**
      * Handle a change to the metadata of the active cell.
@@ -368,7 +360,7 @@ namespace CellTools {
      * #### Notes
      * The default implementation is a no-op.
      */
-     protected onMetadataChanged(msg: MetadataMessage): void { /* no-op */ }
+     protected onMetadataChanged(message: MetadataMessage): void { /* no-op */ }
   }
 
   /**
@@ -379,7 +371,7 @@ namespace CellTools {
     /**
      * Construct a new active cell tool.
      */
-    constructor(options: IToolOptions) {
+    constructor() {
       super();
       this.addClass(ACTIVE_CELL_CLASS);
       this.addClass('jp-InputArea');
@@ -426,7 +418,7 @@ namespace CellTools {
     /**
      * Construct a new raw metadata tool.
      */
-    constructor(options: IToolOptions) {
+    constructor() {
       let vnode = h.div({ className: METADATA_CLASS },
                     h.label({}, 'Cell Metadata'),
                     h.textarea()
@@ -444,10 +436,10 @@ namespace CellTools {
     /**
      * Handle a change to the active cell.
      */
-    protected onActiveCellChanged(): void {
-      let content: JSONObject = {};
+    protected onActiveCellChanged(message: Message): void {
       let activeCell = this.parent.activeCell;
       if (activeCell) {
+        let content: JSONObject = {};
         each(activeCell.model.listMetadata(), key => {
           // Do not show the trusted metadata.
           if (key === 'trusted') {
@@ -455,15 +447,17 @@ namespace CellTools {
           }
           content[key] = activeCell.model.getMetadata(key).getValue();
         });
+        this.textarea.value = JSON.stringify(content, null, 2);
+      } else {
+        this.textarea.value = 'No active cell!';
       }
-      this.textarea.value = JSON.stringify(content, null, 2);
     }
 
     /**
      * Handle a change to the metadata of the active cell.
      */
-    protected onMetadataChanged() {
-      this.onActiveCellChanged();
+    protected onMetadataChanged(message: CellTools.MetadataMessage) {
+      this.onActiveCellChanged(CellTools.ActiveCellMessage);
     }
   }
 
@@ -540,24 +534,9 @@ namespace CellTools {
     }
 
     /**
-     * Handle a change to the value.
-     */
-    protected onValueChanged(): void {
-      let activeCell = this.parent.activeCell;
-      if (!activeCell || this._changeGuard) {
-        return;
-      }
-      this._changeGuard = true;
-      let select = this.selectNode;
-      let cursor = activeCell.model.getMetadata(this.key);
-      cursor.setValue(JSON.parse(select.value));
-      this._changeGuard = false;
-    }
-
-    /**
      * Handle a change to the active cell.
      */
-    protected onActiveCellChanged(): void {
+    protected onActiveCellChanged(message: Message): void {
       let select = this.selectNode;
       let activeCell = this.parent.activeCell;
       if (!activeCell) {
@@ -579,16 +558,31 @@ namespace CellTools {
     /**
      * Handle a change to the metadata of the active cell.
      */
-    protected onMetadataChanged(msg: CellTools.MetadataMessage) {
+    protected onMetadataChanged(message: CellTools.MetadataMessage) {
       if (this._changeGuard) {
         return;
       }
       let select = this.selectNode;
-      if (msg.args.name === this.key) {
+      if (message.args.name === this.key) {
         this._changeGuard = true;
-        select.value = JSON.stringify(msg.args.newValue);
+        select.value = JSON.stringify(message.args.newValue);
         this._changeGuard = false;
       }
+    }
+
+    /**
+     * Handle a change to the value.
+     */
+    protected onValueChanged(): void {
+      let activeCell = this.parent.activeCell;
+      if (!activeCell || this._changeGuard) {
+        return;
+      }
+      this._changeGuard = true;
+      let select = this.selectNode;
+      let cursor = activeCell.model.getMetadata(this.key);
+      cursor.setValue(JSON.parse(select.value));
+      this._changeGuard = false;
     }
 
     private _changeGuard = false;
@@ -626,8 +620,8 @@ namespace CellTools {
    * Create a slideshow selector.
    */
   export
-  function createSlideShowSelector(options: IToolOptions): KeySelector {
-    let selectorOptions = {
+  function createSlideShowSelector(): KeySelector {
+    let options = {
       key: 'slideshow',
       title: 'Slide Type',
       optionsMap: {
@@ -639,15 +633,15 @@ namespace CellTools {
         'Notes': 'notes'
       }
     };
-    return new KeySelector(selectorOptions);
+    return new KeySelector(options);
   }
 
   /**
    * Create an nbcovert selector.
    */
   export
-  function createNBConvertSelector(options: IToolOptions): KeySelector {
-    let selectorOptions: IKeySelectorOptions = {
+  function createNBConvertSelector(): KeySelector {
+    return new KeySelector({
       key: 'raw_mimetype',
       title: 'Raw NBConvert Format',
       optionsMap: {
@@ -659,8 +653,7 @@ namespace CellTools {
         'Python': 'text/x-python'
       },
       validCellTypes: ['raw']
-    };
-    return new KeySelector(selectorOptions);
+    });
   }
 
 }
