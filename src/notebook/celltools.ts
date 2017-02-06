@@ -176,8 +176,8 @@ class CellTools extends Widget {
   /**
    * Handle the removal of a child
    */
-  protected onChildRemoved(message: ChildMessage): void {
-    let index = findIndex(this._items, item => item.tool === message.child);
+  protected onChildRemoved(msg: ChildMessage): void {
+    let index = findIndex(this._items, item => item.tool === msg.child);
     if (index !== -1) {
       this._items.removeAt(index);
     }
@@ -214,7 +214,9 @@ class CellTools extends Widget {
    */
   private _onMetadataChanged(sender: ICellModel, args: IChangedArgs<JSONValue>): void {
     let message = new CellTools.MetadataMessage(args);
-    each(this.children(), widget => { sendMessage(widget, message); });
+    each(this.children(), widget => {
+      sendMessage(widget, message);
+    });
   }
 
   private _items = new Vector<Private.IRankItem>();
@@ -324,7 +326,7 @@ namespace CellTools {
      * #### Notes
      * The default implemenatation is a no-op.
      */
-    protected onActiveCellChanged(message: Message): void { /* no-op */ }
+    protected onActiveCellChanged(msg: Message): void { /* no-op */ }
 
     /**
      * Handle a change to the selection.
@@ -332,7 +334,7 @@ namespace CellTools {
      * #### Notes
      * The default implementation is a no-op.
      */
-    protected onSelectionChanged(message: Message): void { /* no-op */ }
+    protected onSelectionChanged(msg: Message): void { /* no-op */ }
 
     /**
      * Handle a change to the metadata of the active cell.
@@ -340,7 +342,7 @@ namespace CellTools {
      * #### Notes
      * The default implementation is a no-op.
      */
-     protected onMetadataChanged(message: MetadataMessage): void { /* no-op */ }
+     protected onMetadataChanged(msg: MetadataMessage): void { /* no-op */ }
   }
 
   /**
@@ -416,7 +418,7 @@ namespace CellTools {
     /**
      * Handle a change to the active cell.
      */
-    protected onActiveCellChanged(message: Message): void {
+    protected onActiveCellChanged(msg: Message): void {
       let activeCell = this.parent.activeCell;
       if (activeCell) {
         let content: JSONObject = {};
@@ -436,7 +438,7 @@ namespace CellTools {
     /**
      * Handle a change to the metadata of the active cell.
      */
-    protected onMetadataChanged(message: CellTools.MetadataMessage) {
+    protected onMetadataChanged(msg: CellTools.MetadataMessage) {
       this.onActiveCellChanged(CellTools.ActiveCellMessage);
     }
   }
@@ -498,7 +500,7 @@ namespace CellTools {
     /**
      * Handle `after-attach` messages for the widget.
      */
-    protected onAfterAttach(message: Message): void {
+    protected onAfterAttach(msg: Message): void {
       this.selectNode.addEventListener('change', this);
       this.selectNode.addEventListener('focus', this);
       this.selectNode.addEventListener('blur', this);
@@ -516,7 +518,7 @@ namespace CellTools {
     /**
      * Handle a change to the active cell.
      */
-    protected onActiveCellChanged(message: Message): void {
+    protected onActiveCellChanged(msg: Message): void {
       let select = this.selectNode;
       let activeCell = this.parent.activeCell;
       if (!activeCell) {
@@ -538,14 +540,14 @@ namespace CellTools {
     /**
      * Handle a change to the metadata of the active cell.
      */
-    protected onMetadataChanged(message: CellTools.MetadataMessage) {
+    protected onMetadataChanged(msg: CellTools.MetadataMessage) {
       if (this._changeGuard) {
         return;
       }
       let select = this.selectNode;
-      if (message.args.name === this.key) {
+      if (msg.args.name === this.key) {
         this._changeGuard = true;
-        select.value = JSON.stringify(message.args.newValue);
+        select.value = JSON.stringify(msg.args.newValue);
         this._changeGuard = false;
       }
     }

@@ -4,10 +4,6 @@
 import expect = require('expect.js');
 
 import {
-  JSONValue
-} from 'phosphor/lib/algorithm/json';
-
-import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -24,15 +20,7 @@ import {
 } from 'simulate-event';
 
 import {
-  IChangedArgs
-} from '../../../lib/common/interfaces';
-
-import {
-  BaseCellWidget
-} from '../../../lib/cells';
-
-import {
- ICellTools, CellTools, NotebookPanel, NotebookTracker, NotebookActions
+  CellTools, NotebookPanel, NotebookTracker, NotebookActions
 } from '../../../lib/notebook';
 
 import {
@@ -44,18 +32,18 @@ class LogTool extends CellTools.Tool {
 
   methods: string[] = [];
 
-  protected onActiveCellChanged(message: Message): void {
-    super.onActiveCellChanged(message);
+  protected onActiveCellChanged(msg: Message): void {
+    super.onActiveCellChanged(msg);
     this.methods.push('onActiveCellChanged');
   }
 
-  protected onSelectionChanged(message: Message): void {
-    super.onSelectionChanged(message);
+  protected onSelectionChanged(msg: Message): void {
+    super.onSelectionChanged(msg);
     this.methods.push('onSelectionChanged');
   }
 
   protected onMetadataChanged(message: CellTools.MetadataMessage): void {
-    super.onMetadataChanged(message);
+    super.onMetadataChanged(msg);
     this.methods.push('onMetadataChanged');
   }
 }

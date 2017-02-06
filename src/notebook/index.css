@@ -138,7 +138,7 @@
 }
 
 
-.jp-CellTools-child {
+.jp-CellTools-tool {
   flex: 0 1 auto;
   display: flex;
   flex-direction: row;
