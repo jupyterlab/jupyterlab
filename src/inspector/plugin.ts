@@ -121,20 +121,27 @@ const consolePlugin: JupyterLabPlugin<void> = {
       const session = parent.console.session;
       const kernel = session.kernel;
       const rendermime = parent.console.rendermime;
-      const handler = new InspectionHandler({ kernel, parent, rendermime });
+      const handler = new InspectionHandler({ kernel, rendermime });
+
       // Associate the handler to the widget.
       Private.handlers.set(parent, handler);
+
       // Set the initial editor.
       let cell = parent.console.prompt;
       handler.editor = cell && cell.editor;
+
       // Listen for prompt creation.
       parent.console.promptCreated.connect((sender, cell) => {
         handler.editor = cell && cell.editor;
       });
+
       // Listen for kernel changes.
       session.kernelChanged.connect((sender, kernel) => {
         handler.kernel = kernel;
       });
+
+      // Listen for parent disposal.
+      parent.disposed.connect(() => { handler.dispose(); });
     });
     // Keep track of console instances and set inspector source.
     app.shell.currentChanged.connect((sender, args) => {

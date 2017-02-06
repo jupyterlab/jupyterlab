@@ -37,7 +37,6 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
   constructor(options: InspectionHandler.IOptions) {
     this._kernel = options.kernel || null;
     this._rendermime = options.rendermime;
-    options.parent.disposed.connect(this.dispose, this);
   }
 
   /**
@@ -195,24 +194,8 @@ namespace InspectionHandler {
     kernel?: Kernel.IKernel;
 
     /**
-     * The disposable parent of the inspector.
-     */
-    parent: IDisposedEmitter;
-
-    /**
      * The mime renderer for the inspection handler.
      */
     rendermime: RenderMime;
-  }
-
-  /**
-   * A disposable object that emits a `disposed` signal.
-   */
-  export
-  interface IDisposedEmitter extends IDisposable {
-    /**
-     * A signal emitted when the object is disposed.
-     */
-    readonly disposed: ISignal<any, any>;
   }
 }
