@@ -30,7 +30,7 @@ import {
 } from '../instancerestorer';
 
 import {
-  INotebookTracker, NotebookPanel
+  INotebookTracker
 } from '../notebook';
 
 import {
@@ -114,7 +114,6 @@ const service: JupyterLabPlugin<IInspector> = {
 const consolePlugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.console-inspector',
   requires: [IConsoleTracker],
-  provides: IInspector,
   autoStart: true,
   activate: (app: JupyterLab, consoles: IConsoleTracker): void => {
     // Create a handler for each console that is created.
@@ -157,7 +156,6 @@ const consolePlugin: JupyterLabPlugin<void> = {
 const notebookPlugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.notebook-inspector',
   requires: [INotebookTracker],
-  provides: IInspector,
   autoStart: true,
   activate: (app: JupyterLab, notebooks: INotebookTracker): void => {
     // Create a handler for each notebook that is created.
