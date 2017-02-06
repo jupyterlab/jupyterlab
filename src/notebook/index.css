@@ -14,7 +14,9 @@
   --jp-private-notebook-dragImage-height: 39px;
   --jp-private-notebook-dragImage-circleRadius: 20px;
   --jp-private-notebook-selected-color: var(--md-blue-400);
+  --jp-private-notebook-multiselected-color: var(--md-blue-50);
   --jp-private-notebook-active-color: var(--md-green-400);
+  --jp-private-notebook-cell-border-color: #ABABAB;
 }
 
 /*-----------------------------------------------------------------------------
@@ -34,7 +36,7 @@
   padding-left: var(--jp-private-notebook-padding);
   padding-right: var(--jp-private-notebook-padding);
   padding-top: var(--jp-private-notebook-padding);
-  padding-bottom: calc(4*var(--jp-private-notebook-padding));
+  padding-bottom: calc( 4 * var(--jp-private-notebook-padding) );
   min-width: 50px;
   min-height: 50px;
   outline: none;
@@ -51,24 +53,24 @@
 
 
 .jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected{
-  border-color: #ABABAB;
+  border-color: var(--jp-private-notebook-cell-border-color);
   border-left-width: var(--jp-border-width);
   background: linear-gradient(to right, var(--jp-private-notebook-selected-color) -40px, var(--jp-private-notebook-selected-color) 5px, transparent 5px, transparent 100%);
 }
 
 
 .jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-multiSelected.jp-mod-active {
-  background: linear-gradient(to right, var(--jp-private-notebook-selected-color) -40px, var(--jp-private-notebook-selected-color) 5px, #E3F2FD 5px, #E3F2FD 100%);
+  background: linear-gradient(to right, var(--jp-private-notebook-selected-color) -40px, var(--jp-private-notebook-selected-color) 5px, var(--jp-private-notebook-multiselected-color) 5px, var(--jp-private-notebook-multiselected-color) 100%);
 }
 
 
 .jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-selected {
-  background: #E3F2FD;
+  background: var(--jp-private-notebook-multiselected-color);
 }
 
 
 .jp-Notebook.jp-mod-editMode .jp-Notebook-cell.jp-mod-active {
-  border-color: #66BB6A;
+  border-color: var(--jp-private-notebook-active-color);
   border-left-width: var(--jp-border-width);
   background: linear-gradient(to right, var(--jp-private-notebook-active-color) -40px, var(--jp-private-notebook-active-color) 5px, transparent 5px, transparent 100%);
 }
@@ -94,15 +96,17 @@
   cursor: move;
 }
 
+
 .jp-Notebook-cell .jp-OutputArea {
   max-height: 1000px;
 }
+
 
 .jp-dragImage {
   position: absolute;
   width: var(--jp-private-notebook-dragImage-width);
   height: var(--jp-private-notebook-dragImage-height);
-  border: 1px solid #ABABAB;
+  border: var(--jp-border-width) solid var(--jp-private-notebook-cell-border-color);
   border-left: none;
   background: linear-gradient(to right, var(--jp-private-notebook-selected-color) -40px, var(--jp-private-notebook-selected-color) 5px, white 5px, white 100%);
 }
@@ -118,7 +122,6 @@
     height: var(--jp-private-notebook-dragImage-circleRadius);
 
     background: var(--jp-accent-color1);
-    /*border: 1px solid #ABABAB;*/
     color: white;
     text-align: center;
     line-height: var(--jp-private-notebook-dragImage-circleRadius);
