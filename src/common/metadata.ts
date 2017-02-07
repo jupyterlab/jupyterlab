@@ -6,6 +6,10 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
+  IDisposable
+} from 'phosphor/lib/core/disposable';
+
+import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -126,7 +130,7 @@ namespace Metadata {
      */
     getValue(): JSONValue {
       let read = this._read;
-      return read();
+      return read(this._name);
     }
 
     /**
@@ -134,12 +138,12 @@ namespace Metadata {
      */
     setValue(value: JSONValue): void {
       let write = this._write;
-      write(value);
+      write(this._name, value);
     }
 
     private _name = '';
-    private _read: () => JSONValue = null;
-    private _write: (value: JSONValue) => void = null;
+    private _read: (name: string) => JSONValue = null;
+    private _write: (name: string, value: JSONValue) => void = null;
   }
 
   /**
@@ -155,12 +159,12 @@ namespace Metadata {
     /**
      * The function used to read metadata.
      */
-    read: () => JSONValue;
+    read: (name: string) => JSONValue;
 
     /**
      * The function used to write metadata.
      */
-    write: (value: JSONValue) => void;
+    write: (name: string, value: JSONValue) => void;
   }
 
   /**

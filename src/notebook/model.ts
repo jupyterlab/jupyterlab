@@ -312,14 +312,14 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     if (name in this._cursors) {
       return this._cursors[name];
     }
+    if (!this._reader) {
+      this._reader = this._readCursorData.bind(this);
+      this._writer = this._setCursorData.bind(this);
+    }
     let cursor = new Metadata.Cursor({
       name,
-      read: () => {
-        return this._metadata[name];
-      },
-      write: (value: string) => {
-        this._setCursorData(name, value);
-      }
+      read: this._reader,
+      write: this._writer
     });
     this._cursors[name] = cursor;
     return cursor;
@@ -344,6 +344,13 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     this.dirty = true;
     this.contentChanged.emit(void 0);
     this.metadataChanged.emit({ name, oldValue, newValue });
+  }
+
+  /**
+   * Read the metadata of a given name.
+   */
+  private _readCursorData(name: string): JSONValue {
+    return this._metadata[name];
   }
 
   /**
@@ -400,6 +407,8 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   private _cursors: { [key: string]: Metadata.Cursor } = Object.create(null);
   private _nbformat = nbformat.MAJOR_VERSION;
   private _nbformatMinor = nbformat.MINOR_VERSION;
+  private _reader: (name: string) => JSONValue;
+  private _writer: (name: string, value: JSONValue) => void;
 }
 
 
