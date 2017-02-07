@@ -113,7 +113,7 @@ const contentFactoryPlugin: JupyterLabPlugin<NotebookPanel.IContentFactory> = {
 /**
  * The cell tools extension.
  */
-const cellToolsPlugin: JupyterLabPlugin<void> = {
+const cellToolsPlugin: JupyterLabPlugin<ICellTools> = {
   activate: activateCellTools,
   provides: ICellTools,
   id: 'jupyter.extensions.cell-tools',
