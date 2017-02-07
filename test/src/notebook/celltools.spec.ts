@@ -272,7 +272,7 @@ describe('notebook/celltools', () => {
       let tool = new CellTools.MetadataEditorTool();
       celltools.addItem({ tool });
       let textarea = tool.editor.textareaNode;
-      expect(textarea.value).to.be('No active cell!');
+      expect(textarea.value).to.be('No data!');
       simulate(panel0.node, 'focus');
       expect(JSON.stringify(textarea.value)).to.be.ok();
     });
