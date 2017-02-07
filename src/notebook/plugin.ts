@@ -50,7 +50,7 @@ import {
 } from '../common/dialog';
 
 import {
-  CellTools, CommandIDs, INotebookTracker, NotebookActions,
+  CellTools, CommandIDs, ICellTools, INotebookTracker, NotebookActions,
   NotebookModelFactory,  NotebookPanel, NotebookTracker, NotebookWidgetFactory,
   trustNotebook
 } from './';
