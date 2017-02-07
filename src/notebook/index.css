@@ -199,50 +199,8 @@
 }
 
 
-.jp-MetadataEditor {
-  flex-direction: column;
-  padding-left: 10px;
-  padding-right: 10px;
-  display: flex;
-  width: 100%;
-}
-
-
 .jp-MetadataEditor.jp-mod-collapsed {
   display: none;
-}
-
-
-.jp-MetadataEditor textarea {
-  min-height: 100px;
-}
-
-
-.jp-MetadataEditor.jp-mod-error textarea {
-  border-color: red;
-  outline-color: red;
-}
-
-
-.jp-MetadataEditor-buttons {
-  font-family: FontAwesome;
-  flex: 1 0 auto;
-  min-height: 13px;
-  padding-bottom: 6px;
-}
-
-
-.jp-MetadataEditor-commitButton::before {
-  content: '\f0c7'; /* save */
-  float: right;
-  margin-right: 20px;
-}
-
-
-.jp-MetadataEditor-revertButton::before {
-  content: '\f0e2'; /* undo */
-  float: right;
-  margin-right: 4px;
 }
 
 
