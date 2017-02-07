@@ -65,7 +65,7 @@ namespace Metadata {
    * A class used to interact with user level metadata.
    */
   export
-  interface ICursor {
+  interface ICursor extends IDisposable {
     /**
      * The metadata namespace.
      */
@@ -101,6 +101,13 @@ namespace Metadata {
      */
     get name(): string {
       return this._name;
+    }
+
+    /**
+     * Test whether the cursor is disposed.
+     */
+    get isDisposed(): boolean {
+      return this._read == null;
     }
 
     /**
