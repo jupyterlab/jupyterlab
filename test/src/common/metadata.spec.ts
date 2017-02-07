@@ -300,6 +300,22 @@ describe('common/metadata', () => {
           expect(editor.events).to.contain('input');
         });
 
+        it('should add the error flag if invalid JSON', () => {
+
+        });
+
+        it('should show the commit button if the value has changed', () => {
+
+        });
+
+        it('should not show the commit button if the value is invalid', () => {
+
+        });
+
+        it('should show the revert button if the value has changed', () => {
+
+        });
+
       });
 
       context('blur', () => {
@@ -308,6 +324,14 @@ describe('common/metadata', () => {
           editor.textareaNode.focus();
           simulate(editor.textareaNode, 'blur');
           expect(editor.events).to.contain('blur');
+        });
+
+        it('should revert to current data if there was no change', () => {
+
+        });
+
+        it('should not revert to current data if there was a change', () => {
+
         });
 
       });
@@ -319,9 +343,37 @@ describe('common/metadata', () => {
           expect(editor.events).to.contain('click');
         });
 
+        it('should revert the current data', () => {
+
+        });
+
         it('should handle click events on the commit button', () => {
           simulate(editor.commitButtonNode, 'click');
           expect(editor.events).to.contain('click');
+        });
+
+        it('should bail if it is not valid JSON', () => {
+
+        });
+
+        it('should override a key that was set programmatically', () => {
+
+        });
+
+        it('should allow a programmatic key to update', () => {
+
+        });
+
+        it('should allow a key to be added by the user', () => {
+
+        });
+
+        it('should allow a key to be removed by the user', () => {
+
+        })
+
+        it('should allow a key to be removed programmatically that was not set by the user', () => {
+
         });
 
       });
