@@ -455,7 +455,7 @@ namespace Metadata {
 
     private _dataDirty = false;
     private _inputDirty = false;
-    private _owner: IOwner | null;
+    private _owner: IOwner | null = null;
     private _originalValue: JSONObject;
   }
 }
@@ -477,7 +477,7 @@ namespace Private {
         h.div({ className: BUTTON_AREA_CLASS },
           h.span({ className: REVERT_CLASS, title: cancelTitle }),
           h.span({ className: COMMIT_CLASS, title: confirmTitle })),
-        h.textarea())
+        h.textarea({}))
     );
   }
 }

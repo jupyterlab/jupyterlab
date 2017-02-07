@@ -8,7 +8,7 @@ import {
 } from 'phosphor/lib/algorithm/json';
 
 import {
-  Message
+  Message, sendMessage
 } from 'phosphor/lib/core/messaging';
 
 import {
@@ -22,6 +22,38 @@ import {
 import {
   Metadata
 } from '../../../lib/common/metadata';
+
+import {
+  RawCellModel
+} from '../../../lib/cells';
+
+
+class LogEditor extends Metadata.Editor {
+
+  methods: string[] = [];
+
+  events: string[] = [];
+
+  handleEvent(event: Event): void {
+    super.handleEvent(event);
+    this.events.push(event.type);
+  }
+
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+    this.methods.push('onAfterAttach');
+  }
+
+  protected onBeforeDetach(msg: Message): void {
+    super.onBeforeDetach(msg);
+    this.methods.push('onBeforeDetach');
+  }
+
+  protected onMetadataChanged(msg: Metadata.ChangeMessage) {
+    super.onMetadataChanged(msg);
+    this.methods.push('onMetadataChanged');
+  }
+}
 
 
 describe('common/metadata', () => {
@@ -137,31 +169,121 @@ describe('common/metadata', () => {
 
   describe('Metadata.Editor', () => {
 
+    let editor: LogEditor;
+
+    beforeEach(() => {
+      editor = new LogEditor();
+    });
+
+    afterEach(() => {
+      editor.dispose();
+    });
+
     describe('#constructor', () => {
+
+      it('should create a new metadata editor', () => {
+        let newEditor = new Metadata.Editor();
+        expect(newEditor).to.be.a(Metadata.Editor);
+      });
 
     });
 
-    describe('#textAreaNode', () => {
+    describe('#textareaNode', () => {
+
+      it('should be the text area used by the editor', () => {
+        expect(editor.textareaNode.localName).to.be('textarea');
+      });
 
     });
 
     describe('#revertButtonNode', () => {
 
+      it('should be the revert button node used by the editor', () => {
+        expect(editor.revertButtonNode.classList).to.contain('jp-MetadataEditor-revertButton');
+      });
+
     });
 
     describe('#commitButtonNode', () => {
+
+      it('should be the commit button node used by the editor', () => {
+        expect(editor.commitButtonNode.classList).to.contain('jp-MetadataEditor-commitButton');
+      });
 
     });
 
     describe('#owner', () => {
 
+      it('should be the owner of the metadata', () => {
+        expect(editor.owner).to.be(null);
+      });
+
+      it('should be settable', () => {
+        let model = new RawCellModel({});
+        editor.owner = model;
+        expect(editor.owner).to.be(model);
+      });
+
+      it('should update the text area value', () => {
+        let node = editor.textareaNode;
+        expect(node.value).to.be('');
+        let model = new RawCellModel({});
+        editor.owner = model;
+        expect(node.value).to.be('{}');
+      });
+
     });
 
     describe('#isDirty', () => {
 
+      it('should test whether the editor value is dirty', () => {
+        expect(editor.isDirty).to.be(false);
+        let node = editor.textareaNode;
+        Widget.attach(editor, document.body);
+        node.value = 'a';
+        simulate(node, 'input');
+        expect(editor.isDirty).to.be(true);
+      });
+
+      it('should be dirty if the value changes while focused', () => {
+        editor.owner = new RawCellModel({});
+        Widget.attach(editor, document.body);
+        editor.textareaNode.focus();
+        expect(editor.isDirty).to.be(false);
+        let message = new Metadata.ChangeMessage({
+          name: 'foo',
+          oldValue: 1,
+          newValue: 2
+        });
+        sendMessage(editor, message);
+        expect(editor.isDirty).to.be(true);
+      });
+
+      it('should not be set if not focused', () => {
+        Widget.attach(editor, document.body);
+        expect(editor.isDirty).to.be(false);
+        let message = new Metadata.ChangeMessage({
+          name: 'foo',
+          oldValue: 1,
+          newValue: 2
+        });
+        sendMessage(editor, message);
+        expect(editor.isDirty).to.be(false);
+      });
+
     });
 
     describe('#processMessage()', () => {
+
+      it('should handle metadata changed messages', () => {
+        let message = new Metadata.ChangeMessage({
+          name: 'foo',
+          oldValue: 1,
+          newValue: 2
+        });
+        editor.processMessage(message);
+        expect(editor.methods).to.contain('onMetadataChanged');
+      });
 
     });
 
