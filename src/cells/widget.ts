@@ -30,7 +30,7 @@ import {
 } from '../rendermime';
 
 import {
-  IMetadataCursor
+  Metadata
 } from '../common/metadata';
 
 import {
@@ -124,10 +124,10 @@ class BaseCellWidget extends Widget {
 
     let model = this._model = options.model;
 
-    let factory = options.contentFactory;
+    let factory = this.contentFactory = options.contentFactory;
     let editorOptions = { model, factory: factory.editorFactory };
 
-    let editor =this._editor = factory.createCellEditor(editorOptions);
+    let editor = this._editor = factory.createCellEditor(editorOptions);
     editor.addClass(CELL_EDITOR_CLASS);
 
     this._input = factory.createInputArea({ editor });
@@ -141,6 +141,11 @@ class BaseCellWidget extends Widget {
     model.metadataChanged.connect(this.onMetadataChanged, this);
     model.stateChanged.connect(this.onModelStateChanged, this);
   }
+
+  /**
+   * The content factory used by the widget.
+   */
+  readonly contentFactory: BaseCellWidget.IContentFactory;
 
   /**
    * Get the prompt node used by the cell.
@@ -290,7 +295,7 @@ class BaseCellWidget extends Widget {
   private _editor: CodeEditorWidget = null;
   private _model: ICellModel = null;
   private _readOnly = false;
-  private _trustedCursor: IMetadataCursor = null;
+  private _trustedCursor: Metadata.ICursor = null;
   private _trusted = false;
 }
 
@@ -422,6 +427,11 @@ class CodeCellWidget extends BaseCellWidget {
   readonly model: ICodeCellModel;
 
   /**
+   * The content factory used by the widget.
+   */
+  readonly contentFactory: CodeCellWidget.IContentFactory;
+
+  /**
    * Dispose of the resources used by the widget.
    */
   dispose(): void {
@@ -507,8 +517,8 @@ class CodeCellWidget extends BaseCellWidget {
 
   private _rendermime: RenderMime = null;
   private _output: OutputAreaWidget = null;
-  private _collapsedCursor: IMetadataCursor = null;
-  private _scrolledCursor: IMetadataCursor = null;
+  private _collapsedCursor: Metadata.ICursor = null;
+  private _scrolledCursor: Metadata.ICursor = null;
 }
 
 

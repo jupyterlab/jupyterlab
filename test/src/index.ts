@@ -63,6 +63,7 @@ import './renderers/latex.spec';
 import './rendermime/rendermime.spec';
 
 import './notebook/actions.spec';
+import './notebook/celltools.spec';
 import './notebook/default-toolbar.spec';
 import './notebook/model.spec';
 import './notebook/modelfactory.spec';

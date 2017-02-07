@@ -50,8 +50,9 @@ import {
 } from '../common/dialog';
 
 import {
-  CommandIDs, INotebookTracker, NotebookActions, NotebookModelFactory,
-  NotebookPanel, NotebookTracker, NotebookWidgetFactory, trustNotebook
+  CellTools, CommandIDs, ICellTools, INotebookTracker, NotebookActions,
+  NotebookModelFactory,  NotebookPanel, NotebookTracker, NotebookWidgetFactory,
+  trustNotebook
 } from './';
 
 
@@ -109,12 +110,52 @@ const contentFactoryPlugin: JupyterLabPlugin<NotebookPanel.IContentFactory> = {
   }
 };
 
+/**
+ * The cell tools extension.
+ */
+const cellToolsPlugin: JupyterLabPlugin<ICellTools> = {
+  activate: activateCellTools,
+  provides: ICellTools,
+  id: 'jupyter.extensions.cell-tools',
+  autoStart: true,
+  requires: [IInstanceRestorer, INotebookTracker]
+};
+
 
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [contentFactoryPlugin, trackerPlugin];
+const plugins: JupyterLabPlugin<any>[] = [contentFactoryPlugin, trackerPlugin, cellToolsPlugin];
 export default plugins;
+
+
+/**
+ * Activate the cell tools extension.
+ */
+function activateCellTools(app: JupyterLab, restorer: IInstanceRestorer, tracker: INotebookTracker): Promise<ICellTools> {
+  const namespace = 'cell-tools';
+
+  const celltools = new CellTools({ tracker });
+  celltools.title.label = 'Cell Tools';
+  celltools.id = 'cell-tools';
+
+  const activeCellTool = new CellTools.ActiveCellTool();
+  celltools.addItem({ tool: activeCellTool, rank: 1 });
+
+  const slideShow = CellTools.createSlideShowSelector();
+  celltools.addItem({ tool: slideShow, rank: 2 });
+
+  const nbConvert = CellTools.createNBConvertSelector();
+  celltools.addItem({ tool: nbConvert, rank: 3 });
+
+  const metadataEditor = new CellTools.MetadataEditorTool();
+  celltools.addItem({ tool: metadataEditor, rank: 4 });
+
+  restorer.add(celltools, namespace);
+  app.shell.addToLeftArea(celltools);
+
+  return Promise.resolve(celltools);
+}
 
 
 /**

@@ -24,6 +24,7 @@
 @import '../commandpalette/index.css';
 @import '../common/dialog.css';
 @import '../common/iframe.css';
+@import '../common/metadata.css';
 @import '../completer/index.css';
 @import '../console/index.css';
 @import '../csvwidget/index.css';

@@ -33,7 +33,7 @@ interface INotebookTracker extends IInstanceTracker<NotebookPanel> {
    * #### Notes
    * If there is no cell with the focus, then this value is `null`.
    */
-  activeCell: BaseCellWidget;
+  readonly activeCell: BaseCellWidget;
 
   /**
    * A signal emitted when the current active cell changes.
@@ -41,7 +41,12 @@ interface INotebookTracker extends IInstanceTracker<NotebookPanel> {
    * #### Notes
    * If there is no cell with the focus, then `null` will be emitted.
    */
-  activeCellChanged: ISignal<this, BaseCellWidget>;
+  readonly activeCellChanged: ISignal<this, BaseCellWidget>;
+
+  /**
+   * A signal emitted when the selection state changes.
+   */
+  readonly selectionChanged: ISignal<this, void>;
 }
 
 
@@ -77,7 +82,12 @@ class NotebookTracker extends InstanceTracker<NotebookPanel> implements INoteboo
    * #### Notes
    * If there is no cell with the focus, then `null` will be emitted.
    */
-  activeCellChanged: ISignal<this, BaseCellWidget>;
+  readonly activeCellChanged: ISignal<this, BaseCellWidget>;
+
+  /**
+   * A signal emitted when the selection state changes.
+   */
+  readonly selectionChanged: ISignal<this, void>;
 
   /**
    * Add a new notebook panel to the tracker.
@@ -87,6 +97,7 @@ class NotebookTracker extends InstanceTracker<NotebookPanel> implements INoteboo
   add(panel: NotebookPanel): Promise<void> {
     const promise = super.add(panel);
     panel.notebook.activeCellChanged.connect(this._onActiveCellChanged, this);
+    panel.notebook.selectionChanged.connect(this._onSelectionChanged, this);
     return promise;
   }
 
@@ -126,8 +137,16 @@ class NotebookTracker extends InstanceTracker<NotebookPanel> implements INoteboo
     }
   }
 
+  private _onSelectionChanged(sender: Notebook): void {
+    // Check if the selection change happened for the current notebook.
+    if (this.currentWidget && this.currentWidget.notebook === sender) {
+      this.selectionChanged.emit(void 0);
+    }
+  }
+
   private _activeCell: BaseCellWidget | null = null;
 }
 
 // Define the signals for the `NotebookTracker` class.
 defineSignal(NotebookTracker.prototype, 'activeCellChanged');
+defineSignal(NotebookTracker.prototype, 'selectionChanged');
