@@ -6,7 +6,7 @@
   --jp-private-running-button-height: 28px;
   --jp-private-running-button-width: 48px;
   --jp-private-running-item-height: 24px;
-  --jp-prinate-running-shutdown-button-height: 20px;
+  --jp-private-running-shutdown-button-height: 20px;
 }
 
 /*-----------------------------------------------------------------------------
@@ -149,6 +149,6 @@
   color: var(--jp-inverse-ui-font-color0);
   background: var(--jp-warn-color1);
   cursor: pointer;
-  height: var(--jp-prinate-running-shutdown-button-height);
-  line-height: var(--jp-prinate-running-shutdown-button-height);
+  height: var(--jp-private-running-shutdown-button-height);
+  line-height: var(--jp-private-running-shutdown-button-height);
 }
