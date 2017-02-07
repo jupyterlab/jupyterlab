@@ -346,6 +346,18 @@ namespace CellTools {
     }
 
     /**
+     * Dispose of the resources used by the tool.
+     */
+    dispose() {
+      if (this._model === null) {
+        return;
+      }
+      this._model.dispose();
+      this._model = null;
+      super.dispose();
+    }
+
+    /**
      * Handle a change to the active cell.
      */
     protected onActiveCellChanged(): void {
@@ -355,19 +367,27 @@ namespace CellTools {
       for (let i = 0; i < count; i++) {
         layout.widgets.at(0).dispose();
       }
+      if (this._cellModel) {
+        this._cellModel.value.changed.disconnect(this._onValueChanged, this);
+      }
       if (!activeCell) {
         let cell = new Widget();
         cell.addClass('jp-CellEditor');
         cell.addClass('jp-InputArea-editor');
         layout.addWidget(cell);
+        this._cellModel = null;
         return;
       }
       let promptNode = activeCell.promptNode.cloneNode(true) as HTMLElement;
       let prompt = new Widget({ node: promptNode });
       let factory = activeCell.contentFactory.editorFactory;
-      let model = new CodeEditor.Model();
-      model.value.text = activeCell.model.value.text.split('\n')[0];
-      model.mimeType = activeCell.model.mimeType;
+
+      let cellModel = this._cellModel = activeCell.model;
+      cellModel.value.changed.connect(this._onValueChanged, this);
+      this._model.value.text = cellModel.value.text.split('\n')[0];
+      this._model.mimeType = cellModel.mimeType;
+
+      let model = this._model;
       let editorWidget = new CodeEditorWidget({ model, factory });
       editorWidget.addClass('jp-CellEditor');
       editorWidget.addClass('jp-InputArea-editor');
@@ -375,6 +395,16 @@ namespace CellTools {
       layout.addWidget(prompt);
       layout.addWidget(editorWidget);
     }
+
+    /**
+     * Handle a change to the current editor value.
+     */
+    private _onValueChanged(): void {
+      this._model.value.text = this._cellModel.value.text.split('\n')[0];
+    }
+
+    private _model = new CodeEditor.Model();
+    private _cellModel: CodeEditor.IModel;
   }
 
   /**
