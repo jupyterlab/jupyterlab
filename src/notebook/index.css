@@ -168,6 +168,37 @@
 }
 
 
+.jp-MetadataEditorTool {
+  flex-direction: column;
+}
+
+
+.jp-MetadataEditorTool-header {
+  flex: 1 0 auto;
+  padding: 10px;
+}
+
+.jp-MetadataEditorTool-header label {
+  flex: 0 0 auto;
+}
+
+
+.jp-MetadataEditorTool-toggleButton {
+  padding-left: 6px;
+  font-family: FontAwesome;
+}
+
+
+.jp-MetadataEditorTool-toggleButton::before {
+  content: '\f0d8'; /* caret-up */
+}
+
+
+.jp-MetadataEditorTool-toggleButton.jp-mod-collapsed::before {
+  content: '\f0d7'; /* caret-down */
+}
+
+
 .jp-MetadataEditor {
   flex-direction: column;
   padding-left: 10px;
@@ -175,6 +206,12 @@
   display: flex;
   width: 100%;
 }
+
+
+.jp-MetadataEditor.jp-mod-collapsed {
+  display: none;
+}
+
 
 .jp-MetadataEditor textarea {
   min-height: 100px;
@@ -190,18 +227,20 @@
 .jp-MetadataEditor-buttons {
   font-family: FontAwesome;
   flex: 1 0 auto;
+  min-height: 13px;
+  padding-bottom: 6px;
 }
 
 
-.jp-MetadataEditor-confirmButton::before {
-  content: '\f00c'; /* check */
+.jp-MetadataEditor-commitButton::before {
+  content: '\f0c7'; /* save */
   float: right;
   margin-right: 20px;
 }
 
 
-.jp-MetadataEditor-cancelButton::before {
-  content: '\f00d'; /* cancel */
+.jp-MetadataEditor-revertButton::before {
+  content: '\f0e2'; /* undo */
   float: right;
   margin-right: 4px;
 }

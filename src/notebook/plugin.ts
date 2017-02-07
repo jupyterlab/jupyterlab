@@ -148,7 +148,7 @@ function activateCellTools(app: JupyterLab, restorer: IInstanceRestorer, tracker
   const nbConvert = CellTools.createNBConvertSelector();
   celltools.addItem({ tool: nbConvert, rank: 3 });
 
-  const metadataEditor = new CellTools.MetadataEditor();
+  const metadataEditor = new CellTools.MetadataEditorTool();
   celltools.addItem({ tool: metadataEditor, rank: 4 });
 
   restorer.add(celltools, namespace);

@@ -43,17 +43,17 @@ const ERROR_CLASS = 'jp-mod-error';
 /**
  * The class name added to the button area.
  */
-const BUTTON_AREA = 'jp-MetadataEditor-buttons';
+const BUTTON_AREA_CLASS = 'jp-MetadataEditor-buttons';
 
 /**
- * The class name added to the cancel button.
+ * The class name added to the revert button.
  */
-const CANCEL_BUTTON = 'jp-MetadataEditor-cancelButton';
+const REVERT_CLASS = 'jp-MetadataEditor-revertButton';
 
 /**
- * The class name added to the cancel button.
+ * The class name added to the commit button.
  */
-const CONFIRM_BUTTON = 'jp-MetadataEditor-confirmButton';
+const COMMIT_CLASS = 'jp-MetadataEditor-commitButton';
 
 
 /**
@@ -207,17 +207,17 @@ namespace MetadataCursor {
     }
 
     /**
-     * Get the cancel button used by the metadata editor.
+     * Get the revert button used by the metadata editor.
      */
-    get cancelButtonNode(): HTMLElement {
-      return this.node.getElementsByClassName(CANCEL_BUTTON)[0] as HTMLElement;
+    get revertButtonNode(): HTMLElement {
+      return this.node.getElementsByClassName(REVERT_CLASS)[0] as HTMLElement;
     }
 
     /**
-     * Get the confirm button used by the metadata editor.
+     * Get the commit button used by the metadata editor.
      */
-    get confirmButtonNode(): HTMLElement {
-      return this.node.getElementsByClassName(CONFIRM_BUTTON)[0] as HTMLElement;
+    get commitButtonNode(): HTMLElement {
+      return this.node.getElementsByClassName(COMMIT_CLASS)[0] as HTMLElement;
     }
 
     /**
@@ -229,6 +229,13 @@ namespace MetadataCursor {
     set owner(value: IOwner | null) {
       this._owner = value;
       this._setValue();
+    }
+
+    /**
+     * Get whether the editor is dirty.
+     */
+    get isDirty(): boolean {
+      return this._dataDirty || this._inputDirty;
     }
 
     /**
@@ -280,8 +287,8 @@ namespace MetadataCursor {
       let node = this.textareaNode;
       node.addEventListener('input', this);
       node.addEventListener('blur', this);
-      this.cancelButtonNode.addEventListener('click', this);
-      this.confirmButtonNode.addEventListener('click', this);
+      this.revertButtonNode.addEventListener('click', this);
+      this.commitButtonNode.addEventListener('click', this);
     }
 
     /**
@@ -291,8 +298,8 @@ namespace MetadataCursor {
       let node = this.textareaNode;
       node.removeEventListener('input', this);
       node.removeEventListener('blur', this);
-      this.cancelButtonNode.removeEventListener('click', this);
-      this.confirmButtonNode.removeEventListener('click', this);
+      this.revertButtonNode.removeEventListener('click', this);
+      this.commitButtonNode.removeEventListener('click', this);
     }
 
     /**
@@ -320,8 +327,8 @@ namespace MetadataCursor {
         this._inputDirty = true;
         valid = false;
       }
-      this.cancelButtonNode.hidden = !this._inputDirty;
-      this.confirmButtonNode.hidden = !valid || !this._inputDirty;
+      this.revertButtonNode.hidden = !this._inputDirty;
+      this.commitButtonNode.hidden = !valid || !this._inputDirty;
     }
 
     /**
@@ -339,9 +346,9 @@ namespace MetadataCursor {
      */
     private _evtClick(event: MouseEvent): void {
       let target = event.target as HTMLElement;
-      if (target === this.cancelButtonNode) {
+      if (target === this.revertButtonNode) {
         this._setValue();
-      } else if (target === this.confirmButtonNode) {
+      } else if (target === this.commitButtonNode) {
         if (!this.hasClass(ERROR_CLASS)) {
           this._mergeContent();
           this._setValue();
@@ -400,8 +407,8 @@ namespace MetadataCursor {
     private _setValue(): void {
       this._dataDirty = false;
       this._inputDirty = false;
-      this.cancelButtonNode.hidden = true;
-      this.confirmButtonNode.hidden = true;
+      this.revertButtonNode.hidden = true;
+      this.commitButtonNode.hidden = true;
       this.removeClass(ERROR_CLASS);
       let textarea = this.textareaNode;
       let content = this._getContent();
@@ -432,13 +439,14 @@ namespace Private {
    */
   export
   function createMetadataNode(): HTMLElement {
-    let vnode = h.div({ className: METADATA_CLASS },
-                h.label({}, 'Cell Metadata'),
-                h.div({ className: BUTTON_AREA },
-                  h.span({ className: CANCEL_BUTTON }),
-                  h.span({ className: CONFIRM_BUTTON })),
-                h.textarea()
-              );
-    return realize(vnode);
+    let cancelTitle = 'Revert changes to Metadata';
+    let confirmTitle = 'Commit changes to Metadata';
+    return realize(
+      h.div({ className: METADATA_CLASS },
+        h.div({ className: BUTTON_AREA_CLASS },
+          h.span({ className: REVERT_CLASS, title: cancelTitle }),
+          h.span({ className: COMMIT_CLASS, title: confirmTitle })),
+        h.textarea())
+    );
   }
 }
