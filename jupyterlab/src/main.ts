@@ -24,6 +24,7 @@ const mods: JupyterLab.IPluginModule[] = [
   require('../../lib/codemirror/plugin'),
   require('../../lib/commandlinker/plugin'),
   require('../../lib/commandpalette/plugin'),
+  require('../../lib/completer/plugin'),
   require('../../lib/console/plugin'),
   require('../../lib/csvwidget/plugin'),
   require('../../lib/docmanager/plugin'),

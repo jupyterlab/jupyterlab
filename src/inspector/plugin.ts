@@ -169,20 +169,27 @@ const notebookPlugin: JupyterLabPlugin<void> = {
     notebooks.widgetAdded.connect((sender, parent) => {
       const kernel = parent.kernel;
       const rendermime = parent.rendermime;
-      const handler = new InspectionHandler({ kernel, parent, rendermime });
+      const handler = new InspectionHandler({ kernel, rendermime });
+
       // Associate the handler to the widget.
       Private.handlers.set(parent, handler);
+
       // Set the initial editor.
       let cell = parent.notebook.activeCell;
       handler.editor = cell && cell.editor;
+
       // Listen for active cell changes.
       parent.notebook.activeCellChanged.connect((sender, cell) => {
         handler.editor = cell && cell.editor;
       });
+
       // Listen for kernel changes.
       parent.kernelChanged.connect((sender, kernel) => {
         handler.kernel = kernel;
       });
+
+      // Listen for parent disposal.
+      parent.disposed.connect(() => { handler.dispose(); });
     });
     // Keep track of notebook instances and set inspector source.
     app.shell.currentChanged.connect((sender, args) => {
