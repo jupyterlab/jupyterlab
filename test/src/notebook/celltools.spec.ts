@@ -20,6 +20,10 @@ import {
 } from 'simulate-event';
 
 import {
+  Metadata
+} from '../../../lib/common/metadata';
+
+import {
   CellTools, NotebookPanel, NotebookTracker, NotebookActions
 } from '../../../lib/notebook';
 
@@ -42,7 +46,7 @@ class LogTool extends CellTools.Tool {
     this.methods.push('onSelectionChanged');
   }
 
-  protected onMetadataChanged(message: CellTools.MetadataMessage): void {
+  protected onMetadataChanged(msg: Metadata.ChangeMessage): void {
     super.onMetadataChanged(msg);
     this.methods.push('onMetadataChanged');
   }
@@ -74,7 +78,7 @@ class LogKeySelector extends CellTools.KeySelector {
     this.methods.push('onActiveCellChanged');
   }
 
-  protected onMetadataChanged(message: CellTools.MetadataMessage): void {
+  protected onMetadataChanged(message: Metadata.ChangeMessage): void {
     super.onMetadataChanged(message);
     this.methods.push('onMetadataChanged');
   }
@@ -257,26 +261,26 @@ describe('notebook/celltools', () => {
 
   });
 
-  describe('CellTools.MetadataEditor', () => {
+  describe('CellTools.MetadataEditorTool', () => {
 
     it('should create a new metadata editor tool', () => {
-      let tool = new CellTools.MetadataEditor();
-      expect(tool).to.be.a(CellTools.MetadataEditor);
+      let tool = new CellTools.MetadataEditorTool();
+      expect(tool).to.be.a(CellTools.MetadataEditorTool);
     });
 
     it('should handle a change to the active cell', () => {
-      let tool = new CellTools.MetadataEditor();
+      let tool = new CellTools.MetadataEditorTool();
       celltools.addItem({ tool });
-      let textarea = tool.textarea;
+      let textarea = tool.editor.textareaNode;
       expect(textarea.value).to.be('No active cell!');
       simulate(panel0.node, 'focus');
       expect(JSON.stringify(textarea.value)).to.be.ok();
     });
 
     it('should handle a change to the metadata', () => {
-      let tool = new CellTools.MetadataEditor();
+      let tool = new CellTools.MetadataEditorTool();
       celltools.addItem({ tool });
-      let textarea = tool.textarea;
+      let textarea = tool.editor.textareaNode;
       simulate(panel0.node, 'focus');
       let previous = textarea.value;
       let cursor = celltools.activeCell.model.getMetadata('foo');

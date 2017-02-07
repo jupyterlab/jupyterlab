@@ -445,11 +445,17 @@ namespace CellTools {
       let layout = this.layout = new PanelLayout();
       let header = Private.createMetadataHeader();
       layout.addWidget(header);
-      layout.addWidget(this._editor);
+      this.editor = new Metadata.Editor();
+      layout.addWidget(this.editor);
       header.addClass(COLLAPSED_CLASS);
-      this._editor.addClass(COLLAPSED_CLASS);
+      this.editor.addClass(COLLAPSED_CLASS);
       this.toggleNode.classList.add(COLLAPSED_CLASS);
     }
+
+    /**
+     * The editor used by the tool.
+     */
+    readonly editor: Metadata.Editor;
 
     /**
      * Get the toggle node used by the editor.
@@ -476,7 +482,7 @@ namespace CellTools {
         widget.toggleClass(COLLAPSED_CLASS);
       });
       let toggleNode = this.toggleNode;
-      if (this._editor.hasClass(COLLAPSED_CLASS)) {
+      if (this.editor.hasClass(COLLAPSED_CLASS)) {
         toggleNode.classList.add(COLLAPSED_CLASS);
       } else {
         toggleNode.classList.remove(COLLAPSED_CLASS);
@@ -502,17 +508,15 @@ namespace CellTools {
      */
     protected onActiveCellChanged(msg: Message): void {
       let cell = this.parent.activeCell;
-      this._editor.owner = cell ? cell.model : null;
+      this.editor.owner = cell ? cell.model : null;
     }
 
     /**
      * Handle a change to the metadata of the active cell.
      */
     protected onMetadataChanged(msg: Metadata.ChangeMessage) {
-      sendMessage(this._editor, msg);
+      sendMessage(this.editor, msg);
     }
-
-    private _editor: Metadata.Editor = new Metadata.Editor();
   }
 
   /**
