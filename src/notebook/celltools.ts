@@ -384,6 +384,7 @@ namespace CellTools {
       }
       if (this._cellModel) {
         this._cellModel.value.changed.disconnect(this._onValueChanged, this);
+        this._cellModel.mimeTypeChanged.disconnect(this._onMimeTypeChanged, this);
       }
       if (!activeCell) {
         let cell = new Widget();
@@ -399,6 +400,7 @@ namespace CellTools {
 
       let cellModel = this._cellModel = activeCell.model;
       cellModel.value.changed.connect(this._onValueChanged, this);
+      cellModel.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
       this._model.value.text = cellModel.value.text.split('\n')[0];
       this._model.mimeType = cellModel.mimeType;
 
@@ -416,6 +418,13 @@ namespace CellTools {
      */
     private _onValueChanged(): void {
       this._model.value.text = this._cellModel.value.text.split('\n')[0];
+    }
+
+    /**
+     * Handle a change to the current editor mimetype.
+     */
+    private _onMimeTypeChanged(): void {
+      this._model.mimeType = this._cellModel.mimeType;
     }
 
     private _model = new CodeEditor.Model();
