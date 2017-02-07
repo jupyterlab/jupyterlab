@@ -46,6 +46,10 @@ import {
 } from '../services';
 
 import {
+  showDialog, okButton, cancelButton, warnButton
+} from '../common/dialog';
+
+import {
   CommandIDs, INotebookTracker, NotebookActions, NotebookModelFactory,
   NotebookPanel, NotebookTracker, NotebookWidgetFactory, trustNotebook
 } from './';
@@ -236,9 +240,19 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       let current = tracker.currentWidget;
       if (current) {
         app.shell.activateMain(current.id);
-        if (confirm('Are you sure you want to close the notebook?')) {
-          current.context.changeKernel(null).then(() => { current.dispose(); });
-        }
+        let fileName = current.title.label;
+        showDialog({
+            title: 'Shutdown the notebook?',
+            body: `Are you sure you want to close "${fileName}"?`,
+            buttons: [cancelButton, okButton]
+          }).then(result => {
+            if (result.text === 'OK') {
+              current.context.changeKernel(null).then(() => { current.dispose(); });
+            }
+            else {
+              return false;
+            }
+        });
       }
     }
   });
