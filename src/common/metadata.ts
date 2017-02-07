@@ -192,6 +192,12 @@ namespace Metadata {
   }
 
   /**
+   * The change args type.
+   */
+  export
+  type ChangedArgs = IChangedArgs<JSONValue>;
+
+  /**
    * A metadata changed message.
    */
   export
@@ -199,7 +205,7 @@ namespace Metadata {
     /**
      * Create a new metadata changed message.
      */
-    constructor(args: IChangedArgs<JSONValue>) {
+    constructor(args: ChangedArgs) {
       super('metadata-changed');
       this.args = args;
     }
@@ -207,7 +213,7 @@ namespace Metadata {
     /**
      * The arguments of the metadata change.
      */
-    readonly args: IChangedArgs<JSONValue>;
+    readonly args: ChangedArgs;
   }
 
   /**
