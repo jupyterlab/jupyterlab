@@ -235,7 +235,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
-        current.show();
+        app.shell.activateMain(current.id);
         if (confirm('Are you sure you want to close the notebook?')) {
           current.context.changeKernel(null).then(() => { current.dispose(); });
         }
