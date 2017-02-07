@@ -38,10 +38,6 @@ import {
 } from '../codeeditor';
 
 import {
-  CompleterModel, CompleterWidget, CompletionHandler
-} from '../completer';
-
-import {
   IChangedArgs
 } from '../common/interfaces';
 
@@ -98,39 +94,20 @@ class NotebookPanel extends Widget {
     this.addClass(NB_PANEL);
     this.rendermime = options.rendermime;
     this.clipboard = options.clipboard;
-    let factory = this.contentFactory = options.contentFactory;
 
-    this.layout = new PanelLayout();
+    let layout = this.layout = new PanelLayout();
+    let factory = this.contentFactory = options.contentFactory;
     let nbOptions = {
       rendermime: this.rendermime,
       languagePreference: options.languagePreference,
       contentFactory: factory.notebookContentFactory,
       mimeTypeService: options.mimeTypeService
     };
-    this.notebook = factory.createNotebook(nbOptions);
-    this.notebook.activeCellChanged.connect(this._onActiveCellChanged, this);
     let toolbar = factory.createToolbar();
 
-    let layout = this.layout as PanelLayout;
+    this.notebook = factory.createNotebook(nbOptions);
     layout.addWidget(toolbar);
     layout.addWidget(this.notebook);
-
-    // Instantiate the completer.
-    this._completer = factory.createCompleter({ model: new CompleterModel() });
-
-    // Set the completer widget's anchor widget to peg its position.
-    this._completer.anchor = this.notebook;
-    Widget.attach(this._completer, document.body);
-
-    // Instantiate the completer handler.
-    this._completerHandler = factory.createCompleterHandler({
-      completer: this._completer
-    });
-
-    let activeCell = this.notebook.activeCell;
-    if (activeCell) {
-      this._completerHandler.editor = activeCell.editor;
-    }
   }
 
   /**
@@ -217,18 +194,8 @@ class NotebookPanel extends Widget {
    * Dispose of the resources used by the widget.
    */
   dispose(): void {
-    if (this._completer === null) {
-      return;
-    }
-    let completer = this._completer;
-    let completerHandler = this._completerHandler;
-    this._completer = null;
     this._context = null;
-    this._completerHandler = null;
-
     this.notebook.dispose();
-    completerHandler.dispose();
-    completer.dispose();
     super.dispose();
   }
 
@@ -315,7 +282,6 @@ class NotebookPanel extends Widget {
    * Handle a change in the kernel by updating the document metadata.
    */
   private _onKernelChanged(context: DocumentRegistry.IContext<INotebookModel>, kernel: Kernel.IKernel): void {
-    this._completerHandler.kernel = kernel;
     this.kernelChanged.emit(kernel);
     if (!this.model || !kernel) {
       return;
@@ -367,16 +333,6 @@ class NotebookPanel extends Widget {
     }
   }
 
-  /**
-   * Handle a change to the active cell.
-   */
-  private _onActiveCellChanged(sender: Notebook, widget: BaseCellWidget) {
-    let editor = widget ? widget.editor : null;
-    this._completerHandler.editor = editor;
-  }
-
-  private _completer: CompleterWidget = null;
-  private _completerHandler: CompletionHandler = null;
   private _context: DocumentRegistry.IContext<INotebookModel> = null;
 }
 
@@ -446,16 +402,6 @@ export namespace NotebookPanel {
      * Create a new toolbar for the panel.
      */
     createToolbar(): Toolbar<Widget>;
-
-    /**
-     * The completer widget for a console widget.
-     */
-    createCompleter(options: CompleterWidget.IOptions): CompleterWidget;
-
-    /**
-     * The completer handler for a console widget.
-     */
-   createCompleterHandler(options: CompletionHandler.IOptions): CompletionHandler;
   }
 
   /**
@@ -502,20 +448,6 @@ export namespace NotebookPanel {
     createToolbar(): Toolbar<Widget> {
       return new Toolbar();
     }
-
-    /**
-     * The completer widget for a console widget.
-     */
-    createCompleter(options: CompleterWidget.IOptions): CompleterWidget {
-      return new CompleterWidget(options);
-    }
-
-    /**
-     * The completer handler for a console widget.
-     */
-   createCompleterHandler(options: CompletionHandler.IOptions): CompletionHandler {
-      return new CompletionHandler(options);
-   }
   }
 
   /**
