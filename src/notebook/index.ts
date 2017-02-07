@@ -36,7 +36,7 @@ namespace CommandIDs {
   const clearAllOutputs = 'notebook:clear-outputs';
 
   export
-  const closeAndHalt = 'notebook:close-and-halt';
+  const closeAndShutdown = 'notebook:close-and-shutdown';
 
   export
   const trust = 'notebook:trust';
