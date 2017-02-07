@@ -448,6 +448,7 @@ describe('notebook/celltools', () => {
 
     it('should create a slide show selector', () => {
       let tool = CellTools.createSlideShowSelector();
+      tool.selectNode.selectedIndex = -1;
       celltools.addItem({ tool });
       simulate(panel0.node, 'focus');
       tabpanel.currentIndex = 2;
@@ -469,6 +470,7 @@ describe('notebook/celltools', () => {
 
     it('should create a raw mimetype selector', () => {
       let tool = CellTools.createNBConvertSelector();
+      tool.selectNode.selectedIndex = -1;
       celltools.addItem({ tool });
       simulate(panel0.node, 'focus');
       NotebookActions.changeCellType(panel0.notebook, 'raw');
@@ -487,6 +489,7 @@ describe('notebook/celltools', () => {
 
     it('should have no effect on a code cell', () => {
       let tool = CellTools.createNBConvertSelector();
+      tool.selectNode.selectedIndex = -1;
       celltools.addItem({ tool });
       simulate(panel0.node, 'focus');
       tabpanel.currentIndex = 2;
