@@ -102,12 +102,6 @@ function selectKernel(options: IKernelSelection): Promise<Kernel.IModel> {
 
   if (kernel) {
     let displayName = specs.kernelspecs[kernel.name].display_name;
-    let current = document.createElement('span');
-    current.textContent = `Current: "${displayName}"`;
-    current.title = `Kernel Name: ${displayName}\n` +
-       `Kernel Id: ${kernel.id}`;
-    body.appendChild(current);
-    body.appendChild(document.createElement('br'));
   }
 
   let selector = document.createElement('select');
