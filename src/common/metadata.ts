@@ -260,30 +260,13 @@ namespace MetadataCursor {
     handleEvent(event: Event): void {
       switch (event.type) {
         case 'input':
-          this._inputDirty = true;
-          try {
-            JSON.parse(this.textareaNode.value);
-            this.removeClass(ERROR_CLASS);
-          } catch (err) {
-            this.addClass(ERROR_CLASS);
-          }
+          this._evtInput(event);
           break;
         case 'blur':
-          // Update the metadata if necessary.
-          if (!this._inputDirty && this._dataDirty) {
-            this._setValue();
-          }
+          this._evtBlur(event as FocusEvent);
           break;
         case 'click':
-          let target = event.target as HTMLElement;
-          if (target === this.cancelButtonNode) {
-            this._setValue();
-          } else if (target === this.confirmButtonNode) {
-            if (!this.hasClass(ERROR_CLASS)) {
-              this._mergeContent();
-              this._setValue();
-            }
-          }
+          this._evtClick(event as MouseEvent);
           break;
         default:
           break;
@@ -321,6 +304,47 @@ namespace MetadataCursor {
         return;
       }
       this._setValue();
+    }
+
+    /**
+     * Handle input events for the text area.
+     */
+    private _evtInput(event: Event): void {
+      try {
+        let value = JSON.parse(this.textareaNode.value);
+        this.removeClass(ERROR_CLASS);
+        this._inputDirty = !deepEqual(value, this._originalValue);
+      } catch (err) {
+        this.addClass(ERROR_CLASS);
+        this._inputDirty = true;
+      }
+      this.cancelButtonNode.hidden = !this._inputDirty;
+      this.confirmButtonNode.hidden = !this._inputDirty;
+    }
+
+    /**
+     * Handle blur events for the text area.
+     */
+    private _evtBlur(event: FocusEvent): void {
+      // Update the metadata if necessary.
+      if (!this._inputDirty && this._dataDirty) {
+        this._setValue();
+      }
+    }
+
+    /**
+     * Handle click events for the buttons.
+     */
+    private _evtClick(event: MouseEvent): void {
+      let target = event.target as HTMLElement;
+      if (target === this.cancelButtonNode) {
+        this._setValue();
+      } else if (target === this.confirmButtonNode) {
+        if (!this.hasClass(ERROR_CLASS)) {
+          this._mergeContent();
+          this._setValue();
+        }
+      }
     }
 
     /**
@@ -374,6 +398,9 @@ namespace MetadataCursor {
     private _setValue(): void {
       this._dataDirty = false;
       this._inputDirty = false;
+      this.cancelButtonNode.hidden = true;
+      this.confirmButtonNode.hidden = true;
+      this.removeClass(ERROR_CLASS);
       let textarea = this.textareaNode;
       let content = this._getContent();
       if (content === void 0) {

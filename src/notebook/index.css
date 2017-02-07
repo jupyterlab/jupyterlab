@@ -173,6 +173,7 @@
   padding-left: 10px;
   padding-right: 10px;
   display: flex;
+  width: 100%;
 }
 
 .jp-MetadataEditor textarea {
