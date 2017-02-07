@@ -372,6 +372,7 @@ namespace Metadata {
       for (let key in old) {
         if (!(key in user)) {
           delete current[key];
+          owner.getMetadata(key).setValue(void 0);
         }
       }
       // Set the values.
