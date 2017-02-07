@@ -60,6 +60,10 @@ class CompletionHandler implements IDisposable {
       editor.completionRequested.disconnect(this.onCompletionRequested, this);
     }
 
+    // Reset completer state.
+    this._completer.reset();
+
+    // Update the editor.
     editor = this._editor = newValue;
     if (editor) {
       editor.model.value.changed.connect(this.onTextChanged, this);

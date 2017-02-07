@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Widget
+} from 'phosphor/lib/ui/widget';
+
+import {
   JupyterLab, JupyterLabPlugin
 } from '../application';
 
@@ -48,6 +52,9 @@ const consolePlugin: JupyterLabPlugin<void> = {
         handler.kernel = kernel;
       });
 
+      // Attach the completer widget.
+      Widget.attach(completer, document.body);
+
       // Listen for parent disposal.
       parent.disposed.connect(() => {
         model.dispose();
@@ -86,6 +93,9 @@ const notebookPlugin: JupyterLabPlugin<void> = {
       parent.kernelChanged.connect((sender, kernel) => {
         handler.kernel = kernel;
       });
+
+      // Attach the completer widget.
+      Widget.attach(completer, document.body);
 
       // Listen for parent disposal.
       parent.disposed.connect(() => {
