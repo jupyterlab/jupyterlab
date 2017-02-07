@@ -57,92 +57,90 @@ const COMMIT_CLASS = 'jp-MetadataEditor-commitButton';
 
 
 /**
- * A class used to interact with user level metadata.
+ * The namespace for Metadata related data.
  */
 export
-interface IMetadataCursor {
+namespace Metadata {
   /**
-   * The metadata namespace.
+   * A class used to interact with user level metadata.
    */
-  readonly name: string;
+  export
+  interface ICursor {
+    /**
+     * The metadata namespace.
+     */
+    readonly name: string;
 
-  /**
-   * Get the value of the metadata.
-   */
-  getValue(): JSONValue;
+    /**
+     * Get the value of the metadata.
+     */
+    getValue(): JSONValue;
 
-  /**
-   * Set the value of the metdata.
-   */
-  setValue(value: JSONValue): void;
-}
-
-
-/**
- * An implementation of a metadata cursor.
- */
-export
-class MetadataCursor implements IMetadataCursor {
-  /**
-   * Construct a new metadata cursor.
-   *
-   * @param name - The metadata namespace key.
-   *
-   * @param read - The read callback.
-   *
-   * @param write - The write callback.
-   */
-  constructor(name: string, read: () => any, write: (value: JSONValue) => void) {
-    this._name = name;
-    this._read = read;
-    this._write = write;
+    /**
+     * Set the value of the metdata.
+     */
+    setValue(value: JSONValue): void;
   }
 
   /**
-   * Get the namespace key of the metadata.
+   * An implementation of a metadata cursor.
    */
-  get name(): string {
-    return this._name;
+  export
+  class Cursor implements ICursor {
+    /**
+     * Construct a new metadata cursor.
+     *
+     * @param name - The metadata namespace key.
+     *
+     * @param read - The read callback.
+     *
+     * @param write - The write callback.
+     */
+    constructor(name: string, read: () => any, write: (value: JSONValue) => void) {
+      this._name = name;
+      this._read = read;
+      this._write = write;
+    }
+
+    /**
+     * Get the namespace key of the metadata.
+     */
+    get name(): string {
+      return this._name;
+    }
+
+    /**
+     * Dispose of the resources used by the cursor.
+     *
+     * #### Notes
+     * This is not meant to be called by user code.
+     */
+    dispose(): void {
+      this._read = null;
+      this._write = null;
+    }
+
+    /**
+     * Get the value of the namespace data.
+     */
+    getValue(): JSONValue {
+      let read = this._read;
+      return read();
+    }
+
+    /**
+     * Set the value of the namespace data.
+     */
+    setValue(value: JSONValue): void {
+      let write = this._write;
+      write(value);
+    }
+
+    private _name = '';
+    private _read: () => JSONValue = null;
+    private _write: (value: JSONValue) => void = null;
   }
 
-  /**
-   * Dispose of the resources used by the cursor.
-   *
-   * #### Notes
-   * This is not meant to be called by user code.
-   */
-  dispose(): void {
-    this._read = null;
-    this._write = null;
-  }
-
-  /**
-   * Get the value of the namespace data.
-   */
-  getValue(): JSONValue {
-    let read = this._read;
-    return read();
-  }
-
-  /**
-   * Set the value of the namespace data.
-   */
-  setValue(value: JSONValue): void {
-    let write = this._write;
-    write(value);
-  }
-
-  private _name = '';
-  private _read: () => JSONValue = null;
-  private _write: (value: JSONValue) => void = null;
-}
-
-
-/**
- * The namespace for `MetadataCursor` statics.
- */
-export
-namespace MetadataCursor {
   /**
    * A class which supplies metadata.
    */
@@ -156,7 +154,7 @@ namespace MetadataCursor {
      * on the model.  This method is used to interact with a namespaced
      * set of metadata on the object.
      */
-    getMetadata(name: string): IMetadataCursor;
+    getMetadata(name: string): ICursor;
 
     /**
      * List the metadata namespace keys for the object.

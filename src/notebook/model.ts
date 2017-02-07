@@ -39,7 +39,7 @@ import {
 } from '../common/interfaces';
 
 import {
-  IMetadataCursor, MetadataCursor
+  Metadata
 } from '../common/metadata';
 
 import {
@@ -84,7 +84,7 @@ interface INotebookModel extends DocumentRegistry.IModel {
    * This method is used to interact with a namespaced
    * set of metadata on the notebook.
    */
-  getMetadata(namespace: string): IMetadataCursor;
+  getMetadata(namespace: string): Metadata.ICursor;
 
   /**
    * List the metadata namespace keys for the notebook.
@@ -308,11 +308,11 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    * on the model.  This method is used to interact with a namespaced
    * set of metadata on the notebook.
    */
-  getMetadata(name: string): IMetadataCursor {
+  getMetadata(name: string): Metadata.ICursor {
     if (name in this._cursors) {
       return this._cursors[name];
     }
-    let cursor = new MetadataCursor(
+    let cursor = new Metadata.Cursor(
       name,
       () => {
         return this._metadata[name];
@@ -397,7 +397,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
 
   private _cells: IObservableUndoableVector<ICellModel> = null;
   private _metadata: { [key: string]: any } = Private.createMetadata();
-  private _cursors: { [key: string]: MetadataCursor } = Object.create(null);
+  private _cursors: { [key: string]: Metadata.Cursor } = Object.create(null);
   private _nbformat = nbformat.MAJOR_VERSION;
   private _nbformatMinor = nbformat.MINOR_VERSION;
 }

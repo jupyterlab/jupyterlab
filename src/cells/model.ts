@@ -30,7 +30,7 @@ import {
 } from '../common/observablestring';
 
 import {
-  IMetadataCursor, MetadataCursor
+  Metadata
 } from '../common/metadata';
 
 import {
@@ -76,7 +76,7 @@ interface ICellModel extends CodeEditor.IModel {
    * on the model.  This method is used to interact with a namespaced
    * set of metadata on the cell.
    */
-  getMetadata(name: string): IMetadataCursor;
+  getMetadata(name: string): Metadata.ICursor;
 
   /**
    * List the metadata namespace keys for the notebook.
@@ -218,14 +218,14 @@ class CellModel extends CodeEditor.Model implements ICellModel {
    * on the model.  This method is used to interact with a namespaced
    * set of metadata on the cell.
    */
-  getMetadata(name: string): IMetadataCursor {
+  getMetadata(name: string): Metadata.ICursor {
     if (this.isDisposed) {
       return null;
     }
     if (name in this._cursors) {
       return this._cursors[name];
     }
-    let cursor = new MetadataCursor(
+    let cursor = new Metadata.Cursor(
       name,
       () => {
         return this._metadata[name];
@@ -274,7 +274,7 @@ class CellModel extends CodeEditor.Model implements ICellModel {
   }
 
   private _metadata: { [key: string]: any } = Object.create(null);
-  private _cursors: { [key: string]: MetadataCursor } = Object.create(null);
+  private _cursors: { [key: string]: Metadata.Cursor } = Object.create(null);
 }
 
 

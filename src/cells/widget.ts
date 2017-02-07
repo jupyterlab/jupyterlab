@@ -10,7 +10,7 @@ import {
 } from 'phosphor/lib/core/messaging';
 
 import {
-  Panel, PanelLayout
+  PanelLayout
 } from 'phosphor/lib/ui/panel';
 
 import {
@@ -30,7 +30,7 @@ import {
 } from '../rendermime';
 
 import {
-  IMetadataCursor
+  Metadata
 } from '../common/metadata';
 
 import {
@@ -295,7 +295,7 @@ class BaseCellWidget extends Widget {
   private _editor: CodeEditorWidget = null;
   private _model: ICellModel = null;
   private _readOnly = false;
-  private _trustedCursor: IMetadataCursor = null;
+  private _trustedCursor: Metadata.ICursor = null;
   private _trusted = false;
 }
 
@@ -517,8 +517,8 @@ class CodeCellWidget extends BaseCellWidget {
 
   private _rendermime: RenderMime = null;
   private _output: OutputAreaWidget = null;
-  private _collapsedCursor: IMetadataCursor = null;
-  private _scrolledCursor: IMetadataCursor = null;
+  private _collapsedCursor: Metadata.ICursor = null;
+  private _scrolledCursor: Metadata.ICursor = null;
 }
 
 

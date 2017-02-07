@@ -54,7 +54,7 @@ import {
 } from '../common/interfaces';
 
 import {
-  MetadataCursor
+  Metadata
 } from '../common/metadata';
 
 import {
@@ -232,7 +232,7 @@ class CellTools extends Widget {
    * Handle a change in the metadata.
    */
   private _onMetadataChanged(sender: ICellModel, args: IChangedArgs<JSONValue>): void {
-    let message = new MetadataCursor.ChangeMessage(args);
+    let message = new Metadata.ChangeMessage(args);
     each(this.children(), widget => {
       sendMessage(widget, message);
     });
@@ -313,7 +313,7 @@ namespace CellTools {
         this.onSelectionChanged(msg);
         break;
       case 'metadata-changed':
-        this.onMetadataChanged(msg as MetadataCursor.ChangeMessage);
+        this.onMetadataChanged(msg as Metadata.ChangeMessage);
         break;
       default:
         break;
@@ -342,7 +342,7 @@ namespace CellTools {
      * #### Notes
      * The default implementation is a no-op.
      */
-     protected onMetadataChanged(msg: MetadataCursor.ChangeMessage): void { /* no-op */ }
+     protected onMetadataChanged(msg: Metadata.ChangeMessage): void { /* no-op */ }
   }
 
   /**
@@ -508,11 +508,11 @@ namespace CellTools {
     /**
      * Handle a change to the metadata of the active cell.
      */
-    protected onMetadataChanged(msg: MetadataCursor.ChangeMessage) {
+    protected onMetadataChanged(msg: Metadata.ChangeMessage) {
       sendMessage(this._editor, msg);
     }
 
-    private _editor: MetadataCursor.Editor = new MetadataCursor.Editor();
+    private _editor: Metadata.Editor = new Metadata.Editor();
   }
 
   /**
@@ -614,7 +614,7 @@ namespace CellTools {
     /**
      * Handle a change to the metadata of the active cell.
      */
-    protected onMetadataChanged(msg: MetadataCursor.ChangeMessage) {
+    protected onMetadataChanged(msg: Metadata.ChangeMessage) {
       if (this._changeGuard) {
         return;
       }
