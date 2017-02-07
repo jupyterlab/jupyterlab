@@ -310,6 +310,7 @@ namespace MetadataCursor {
      * Handle input events for the text area.
      */
     private _evtInput(event: Event): void {
+      let valid = true;
       try {
         let value = JSON.parse(this.textareaNode.value);
         this.removeClass(ERROR_CLASS);
@@ -317,9 +318,10 @@ namespace MetadataCursor {
       } catch (err) {
         this.addClass(ERROR_CLASS);
         this._inputDirty = true;
+        valid = false;
       }
       this.cancelButtonNode.hidden = !this._inputDirty;
-      this.confirmButtonNode.hidden = !this._inputDirty;
+      this.confirmButtonNode.hidden = !valid || !this._inputDirty;
     }
 
     /**
