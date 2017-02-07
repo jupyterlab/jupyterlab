@@ -89,17 +89,11 @@ namespace Metadata {
   class Cursor implements ICursor {
     /**
      * Construct a new metadata cursor.
-     *
-     * @param name - The metadata namespace key.
-     *
-     * @param read - The read callback.
-     *
-     * @param write - The write callback.
      */
-    constructor(name: string, read: () => any, write: (value: JSONValue) => void) {
-      this._name = name;
-      this._read = read;
-      this._write = write;
+    constructor(options: ICursorOptions) {
+      this._name = options.name;
+      this._read = options.read;
+      this._write = options.write;
     }
 
     /**
@@ -139,6 +133,27 @@ namespace Metadata {
     private _name = '';
     private _read: () => JSONValue = null;
     private _write: (value: JSONValue) => void = null;
+  }
+
+  /**
+   * The options used to create a cursor.
+   */
+  export
+  interface ICursorOptions {
+    /**
+     * The cursor key name.
+     */
+    name: string;
+
+    /**
+     * The function used to read metadata.
+     */
+    read: () => JSONValue;
+
+    /**
+     * The function used to write metadata.
+     */
+    write: (value: JSONValue) => void;
   }
 
   /**

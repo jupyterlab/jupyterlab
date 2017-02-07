@@ -225,15 +225,15 @@ class CellModel extends CodeEditor.Model implements ICellModel {
     if (name in this._cursors) {
       return this._cursors[name];
     }
-    let cursor = new Metadata.Cursor(
+    let cursor = new Metadata.Cursor({
       name,
-      () => {
+      read: () => {
         return this._metadata[name];
       },
-      (value: string) => {
+      write: (value: string) => {
         this.setCursorData(name, value);
       }
-    );
+    });
     this._cursors[name] = cursor;
     return cursor;
   }
