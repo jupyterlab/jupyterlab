@@ -46,6 +46,10 @@ import {
 } from '../services';
 
 import {
+  showDialog, cancelButton, warnButton
+} from '../common/dialog';
+
+import {
   CommandIDs, INotebookTracker, NotebookActions, NotebookModelFactory,
   NotebookPanel, NotebookTracker, NotebookWidgetFactory, trustNotebook
 } from './';
@@ -230,12 +234,25 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
     }
   });
-  commands.addCommand(CommandIDs.closeAndHalt, {
-    label: 'Close and Halt',
+  commands.addCommand(CommandIDs.closeAndShutdown, {
+    label: 'Close and Shutdown',
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
-        current.context.changeKernel(null).then(() => { current.dispose(); });
+        app.shell.activateMain(current.id);
+        let fileName = current.title.label;
+        showDialog({
+            title: 'Shutdown the notebook?',
+            body: `Are you sure you want to close "${fileName}"?`,
+            buttons: [cancelButton, warnButton]
+          }).then(result => {
+            if (result.text === 'OK') {
+              current.context.changeKernel(null).then(() => { current.dispose(); });
+            }
+            else {
+              return false;
+            }
+        });
       }
     }
   });
@@ -600,7 +617,7 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.editMode,
     CommandIDs.commandMode,
     CommandIDs.switchKernel,
-    CommandIDs.closeAndHalt,
+    CommandIDs.closeAndShutdown,
     CommandIDs.trust
   ].forEach(command => { palette.addItem({ command, category }); });
 
@@ -659,7 +676,7 @@ function createMenu(app: JupyterLab): Menu {
   menu.addItem({ command: CommandIDs.runAll });
   menu.addItem({ command: CommandIDs.restart });
   menu.addItem({ command: CommandIDs.switchKernel });
-  menu.addItem({ command: CommandIDs.closeAndHalt });
+  menu.addItem({ command: CommandIDs.closeAndShutdown });
   menu.addItem({ command: CommandIDs.trust });
   menu.addItem({ type: 'separator' });
   menu.addItem({ type: 'submenu', menu: settings });
