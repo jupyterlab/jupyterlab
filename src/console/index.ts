@@ -41,7 +41,7 @@ namespace CommandIDs {
   const restart = 'console:restart-kernel';
 
   export
-  const closeAndHalt = 'console:close-and-halt';
+  const closeAndShutdown = 'console:close-and-shutdown';
 
   export
   const open = 'console:open';

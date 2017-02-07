@@ -273,13 +273,13 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   });
   palette.addItem({ command, category });
 
-  command = CommandIDs.closeAndHalt;
+  command = CommandIDs.closeAndShutdown;
   commands.addCommand(command, {
-    label: 'Close and Halt',
+    label: 'Close and Shutdown',
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
-        console.log('Close and Halt for Consoles not implemented.')
+        console.log('Close and Shutdown for Consoles not implemented.')
       }
     }
   });
@@ -434,7 +434,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   menu.addItem({ command: CommandIDs.restart });
   menu.addItem({ command: CommandIDs.switchKernel });
   menu.addItem({ type: 'separator' });
-  menu.addItem({ command: CommandIDs.closeAndHalt });
+  menu.addItem({ command: CommandIDs.closeAndShutdown });
 
   mainMenu.addMenu(menu, {rank: 50});
   return tracker;
