@@ -317,6 +317,8 @@ namespace Metadata {
       let node = this.textareaNode;
       node.addEventListener('input', this);
       node.addEventListener('blur', this);
+      this.revertButtonNode.hidden = true;
+      this.commitButtonNode.hidden = true;
       this.revertButtonNode.addEventListener('click', this);
       this.commitButtonNode.addEventListener('click', this);
     }
@@ -379,7 +381,7 @@ namespace Metadata {
       if (target === this.revertButtonNode) {
         this._setValue();
       } else if (target === this.commitButtonNode) {
-        if (!this.hasClass(ERROR_CLASS)) {
+        if (!this.commitButtonNode.hidden && !this.hasClass(ERROR_CLASS)) {
           this._mergeContent();
           this._setValue();
         }

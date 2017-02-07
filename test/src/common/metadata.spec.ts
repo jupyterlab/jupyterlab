@@ -289,15 +289,40 @@ describe('common/metadata', () => {
 
     describe('#handleEvent()', () => {
 
+      beforeEach(() => {
+        Widget.attach(editor, document.body);
+      });
+
       context('input', () => {
+
+        it('should handle input events to the text area node', () => {
+          simulate(editor.textareaNode, 'input');
+          expect(editor.events).to.contain('input');
+        });
 
       });
 
       context('blur', () => {
 
+        it('should handle blur events on the text area node', () => {
+          editor.textareaNode.focus();
+          simulate(editor.textareaNode, 'blur');
+          expect(editor.events).to.contain('blur');
+        });
+
       });
 
       context('click', () => {
+
+        it('should handle click events on the revert button', () => {
+          simulate(editor.revertButtonNode, 'click');
+          expect(editor.events).to.contain('click');
+        });
+
+        it('should handle click events on the commit button', () => {
+          simulate(editor.commitButtonNode, 'click');
+          expect(editor.events).to.contain('click');
+        });
 
       });
 
@@ -305,13 +330,85 @@ describe('common/metadata', () => {
 
     describe('#onAfterAttach()', () => {
 
+      it('should add event listeners', () => {
+        Widget.attach(editor, document.body);
+        expect(editor.methods).to.contain('onAfterAttach');
+        simulate(editor.textareaNode, 'input');
+        editor.textareaNode.focus();
+        simulate(editor.textareaNode, 'blur');
+        simulate(editor.revertButtonNode, 'click');
+        simulate(editor.commitButtonNode, 'click');
+        expect(editor.events).to.eql(['input', 'blur', 'click', 'click']);
+      });
+
     });
 
     describe('#onBeforeDetach()', () => {
 
+      it('should remove event listeners', () => {
+        Widget.attach(editor, document.body);
+        Widget.detach(editor);
+        expect(editor.methods).to.contain('onBeforeDetach');
+        simulate(editor.textareaNode, 'input');
+        editor.textareaNode.focus();
+        simulate(editor.textareaNode, 'blur');
+        simulate(editor.revertButtonNode, 'click');
+        simulate(editor.commitButtonNode, 'click');
+        expect(editor.events).to.eql([]);
+      });
+
     });
 
     describe('#onMetadataChanged', () => {
+
+      it('should update the value', () => {
+        let message = new Metadata.ChangeMessage({
+          name: 'foo',
+          oldValue: 1,
+          newValue: 2
+        });
+        editor.processMessage(message);
+        expect(editor.methods).to.contain('onMetadataChanged');
+        expect(editor.textareaNode.value).to.be('No data!');
+      });
+
+      it('should bail if the input is dirty', () => {
+        Widget.attach(editor, document.body);
+        let model = new RawCellModel({});
+        editor.owner = model;
+        let node = editor.textareaNode;
+        node.value = 'ha';
+        simulate(node, 'input');
+        let cursor = model.getMetadata('foo');
+        cursor.setValue(2);
+        let message = new Metadata.ChangeMessage({
+          name: 'foo',
+          oldValue: 1,
+          newValue: 2
+        });
+        editor.processMessage(message);
+        expect(editor.methods).to.contain('onMetadataChanged');
+        expect(node.value).to.be('ha');
+      });
+
+      it('should bail if the input is focused', () => {
+        Widget.attach(editor, document.body);
+        let node = editor.textareaNode;
+        node.value = '{}';
+        node.focus();
+        let model = new RawCellModel({});
+        editor.owner = model;
+        let cursor = model.getMetadata('foo');
+        cursor.setValue(2);
+        let message = new Metadata.ChangeMessage({
+          name: 'foo',
+          oldValue: 1,
+          newValue: 2
+        });
+        editor.processMessage(message);
+        expect(editor.methods).to.contain('onMetadataChanged');
+        expect(node.value).to.be('{}');
+      });
 
     });
 
