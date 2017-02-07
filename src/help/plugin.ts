@@ -139,6 +139,7 @@ export default plugin;
  * returns A promise that resolves when the extension is activated.
  */
 function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, restorer: IInstanceRestorer): void {
+  let counter = 0;
   const category = 'Help';
   const namespace = 'help-doc';
   const command = CommandIDs.open;
@@ -149,7 +150,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   restorer.restore(tracker, {
     command,
     args: widget => ({ url: widget.url }),
-    name: widget => widget.id
+    name: widget => widget.url
   });
 
   /**
@@ -160,7 +161,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     iframe.addClass(HELP_CLASS);
     iframe.title.label = text;
     iframe.title.closable = true;
-    iframe.id = `${namespace}-`+text;
+    iframe.id = `${namespace}-${++counter}`;
     iframe.url = url;
     tracker.add(iframe);
     return iframe;
