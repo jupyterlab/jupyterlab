@@ -11,3 +11,8 @@
   overflow: auto;
   z-index: 10001;
 }
+
+
+.jp-Tooltip > .jp-RenderedText {
+    overflow: auto;
+}
