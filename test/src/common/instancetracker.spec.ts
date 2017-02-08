@@ -52,6 +52,7 @@ describe('common/instancetracker', () => {
         tracker.add(widget);
         Widget.attach(widget, document.body);
         expect(called).to.be(false);
+        widget.node.focus();
         simulate(widget.node, 'focus');
         expect(called).to.be(true);
         Widget.detach(widget);
@@ -84,6 +85,7 @@ describe('common/instancetracker', () => {
         tracker.add(one);
         tracker.inject(two);
         Widget.attach(two, document.body);
+        two.node.focus();
         simulate(two.node, 'focus');
         Widget.detach(two);
       });
@@ -103,6 +105,7 @@ describe('common/instancetracker', () => {
         tracker.add(widget);
         Widget.attach(widget, document.body);
         expect(tracker.currentWidget).to.be(null);
+        widget.node.focus();
         simulate(widget.node, 'focus');
         expect(tracker.currentWidget).to.be(widget);
         Widget.detach(widget);
@@ -233,6 +236,7 @@ describe('common/instancetracker', () => {
         tracker.add(widget);
         expect(tracker.methods).to.not.contain('onCurrentChanged');
         Widget.attach(widget, document.body);
+        widget.node.focus();
         simulate(widget.node, 'focus');
         expect(tracker.methods).to.contain('onCurrentChanged');
         Widget.detach(widget);
