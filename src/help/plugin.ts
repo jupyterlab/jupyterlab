@@ -148,8 +148,8 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command,
-    args: widget => ({ url: widget.url }),
+    command, 
+    args: widget => ({ url: widget.url, text: widget.title.label }),
     name: widget => widget.url
   });
 
