@@ -346,7 +346,7 @@ namespace RenderMime {
     /**
      * A callback that can be used to add a mimetype to the original bundle.
      */
-    injector?: (mimetype: string, value: string | JSONObject) => void;
+    injector?: IInjector;
 
     /**
      * Whether the mime bundle is trusted (the default is False).
@@ -372,7 +372,7 @@ namespace RenderMime {
     /**
      * A callback that can be used to add a mimetype to the original bundle.
      */
-    injector?: (mimetype: string, value: string | JSONObject) => void;
+    injector?: IInjector;
 
     /**
      * An optional url resolver.
@@ -390,6 +390,25 @@ namespace RenderMime {
      * An optional link handler.
      */
     linkHandler?: ILinkHandler;
+  }
+
+  /**
+   * An object that handles injecting mime types into a mime bundle.
+   */
+  export
+  interface IInjector {
+    /**
+     * Test if the bundle has the given mimeType.
+     */
+    has(mimeType: string): boolean;
+
+    /**
+     * Inject a value into the mime bundle.
+     *
+     * #### Notes
+     * This will be a no-op if the bundle alread has the given mimeType.
+     */
+    add(mimeType: string, value: string | JSONObject): void;
   }
 
   /**

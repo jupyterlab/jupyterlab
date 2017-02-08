@@ -325,15 +325,20 @@ class OutputAreaWidget extends Widget {
     let layout = this.layout as PanelLayout;
     let widget = layout.widgets.at(index) as OutputWidget;
     let output = this._model.get(index);
-    let injector: (mimetype: string, value: string | JSONObject) => void;
+    let injector: RenderMime.IInjector;
     if (output.output_type === 'display_data' ||
         output.output_type === 'execute_result') {
-      injector = (mimetype: string, value: string | JSONObject) => {
-        this._injecting = true;
-        this._model.addMimeData(
-          output as nbformat.IDisplayData, mimetype, value
-        );
-        this._injecting = false;
+      injector = {
+        add: (mimeType: string, value: string | JSONObject) => {
+          this._injecting = true;
+          this._model.addMimeData(
+            output as nbformat.IDisplayData, mimeType, value
+          );
+          this._injecting = false;
+        },
+        has: (mimeType: string) => {
+          return mimeType in (output as nbformat.IDisplayData).data;
+        }
       };
     }
     let trusted = this._trusted;
@@ -815,7 +820,7 @@ namespace OutputWidget {
     /**
      * A callback that can be used to add a mimetype to the original bundle.
      */
-    injector?: (mimetype: string, value: string) => void;
+    injector?: RenderMime.IInjector;
    }
 
 }

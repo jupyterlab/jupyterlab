@@ -146,13 +146,18 @@ describe('rendermime/index', () => {
 
       it('should accept an injector', () => {
         let called = 0;
-        let injector = (mimetype: string, value: string | JSONObject) => {
-          if (mimetype === 'text/plain') {
-            expect(value as string).to.be('foo');
-            called++;
-          } else if (mimetype === 'application/json') {
-            expect((value as JSONObject)['foo']).to.be(1);
-            called++;
+        let injector = {
+          add: (mimetype: string, value: string | JSONObject) => {
+            if (mimetype === 'text/plain') {
+              expect(value as string).to.be('foo');
+              called++;
+            } else if (mimetype === 'application/json') {
+              expect((value as JSONObject)['foo']).to.be(1);
+              called++;
+            }
+          },
+          has: (mimeType: string) => {
+            return true;
           }
         };
         let bundle: RenderMime.MimeMap<string> = {
