@@ -10,7 +10,6 @@ module.exports = {
   bail: true,
   devtool: 'source-map',
   module: {
-    noParse: [/xterm\.js/],  // Xterm ships a UMD module
     loaders: [
       { test: /\.css$/, loader: 'style-loader!css-loader' },
       { test: /\.md$/, loader: 'raw-loader'},
