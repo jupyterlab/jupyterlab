@@ -252,7 +252,6 @@ class CellModel extends CodeEditor.Model implements ICellModel {
    * Set the cursor data for a given field.
    */
   protected setCursorData(name: string, newValue: any): void {
-    debugger;
     let oldValue = this._metadata[name];
     if (deepEqual(oldValue, newValue)) {
       return;
