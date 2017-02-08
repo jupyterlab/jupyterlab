@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  Message
+} from 'phosphor/lib/core/messaging';
+
+import {
   Menu
 } from 'phosphor/lib/ui/menu';
 
@@ -130,6 +134,22 @@ const plugin: JupyterLabPlugin<void> = {
  */
 export default plugin;
 
+/*
+  * An IFrame the disposes itself when closed.
+  * 
+  * This is needed to clear the state restoration db when IFrames are closed. 
+ */
+class ClosableIFrame extends IFrame {
+
+  /**
+   * Dispose of the IFrame when closing.
+   */
+  protected onCloseRequest(msg: Message): void {
+    super.onCloseRequest(msg);
+    this.dispose();
+  }
+}
+
 
 /**
  * Activate the help handler extension.
@@ -144,7 +164,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   const namespace = 'help-doc';
   const command = CommandIDs.open;
   const menu = createMenu();
-  const tracker = new InstanceTracker<IFrame>({ namespace });
+  const tracker = new InstanceTracker<ClosableIFrame>({ namespace });
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -154,10 +174,10 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   });
 
   /**
-   * Create a new IFrame widget.
+   * Create a new ClosableIFrame widget.
    */
-  function newIFrame(url: string, text: string): IFrame {
-    let iframe = new IFrame();
+  function newClosableIFrame(url: string, text: string): ClosableIFrame {
+    let iframe = new ClosableIFrame();
     iframe.addClass(HELP_CLASS);
     iframe.title.label = text;
     iframe.title.closable = true;
@@ -198,7 +218,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
         return;
       }
 
-      let iframe = newIFrame(url, text);
+      let iframe = newClosableIFrame(url, text);
       app.shell.addToMainArea(iframe);
       app.shell.activateMain(iframe.id);
     }
