@@ -50,7 +50,7 @@
   min-width: 35px;
   margin-left: calc(-1*var(--jp-border-width));
   line-height: var(--jp-private-horizontal-tab-height);
-  padding: 0px 10px;
+  padding: 0px 8px;
   background: var(--jp-layout-color2);
   border: var(--jp-border-width) solid var(--jp-border-color1);
   border-bottom: none;
@@ -142,6 +142,11 @@
   display: inline-block;
 }
 
+
+.p-DockPanel-tabBar .p-TabBar-tabIcon {
+  width: 14px;
+  margin-top: 2px;
+}
 .p-TabBar-WindowTabLabel {
   margin-top: 4px;
 }
