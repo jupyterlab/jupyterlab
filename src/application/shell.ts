@@ -10,7 +10,7 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  contains, find, findIndex, upperBound
+  contains, find, indexOf, findIndex, upperBound
 } from 'phosphor/lib/algorithm/searching';
 
 import {
@@ -342,7 +342,17 @@ class ApplicationShell extends Widget {
           if (ci > 0) {
             tabBar.currentIndex -= 1;
             tabBar.currentTitle.owner.activate();
-          }
+          } 
+          // else if (ci === 0) {
+          //   let prevBar = null;
+          //   each(this._dockPanel.tabBars(), (bar) => {
+          //     if (bar.title === title && (prevBar === null)) {
+          //       prevVar = bar;
+          //       this._dockPanel.tab
+          //     }
+          //     prevBar = bar;
+          //   });
+          // }
         }
       }
     }
