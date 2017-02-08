@@ -164,8 +164,8 @@ namespace Private {
      */
     render(options: RenderMime.IRendererOptions<string>): Widget {
       if (options.injector) {
-        options.injector('text/plain', 'foo');
-        options.injector('application/json', { 'foo': 1 } );
+        options.injector.add('text/plain', 'foo');
+        options.injector.add('application/json', { 'foo': 1 } );
       }
       return super.render(options);
     }
