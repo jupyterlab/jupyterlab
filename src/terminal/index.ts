@@ -16,6 +16,9 @@ namespace CommandIDs {
   const open = 'terminal:open';
 
   export
+  const refresh = 'terminal:refresh';
+
+  export
   const increaseFont = 'terminal:increase-font';
 
   export
