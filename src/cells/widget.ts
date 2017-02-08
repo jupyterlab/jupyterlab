@@ -633,8 +633,6 @@ class MarkdownCellWidget extends BaseCellWidget {
   constructor(options: MarkdownCellWidget.IOptions) {
     super(options);
     this.addClass(MARKDOWN_CELL_CLASS);
-    // Insist on the Github-flavored markdown mode.
-    this.model.mimeType = 'text/x-ipythongfm';
     this._rendermime = options.rendermime;
     this.editor.wordWrap = true;
   }
