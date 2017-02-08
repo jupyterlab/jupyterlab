@@ -406,7 +406,7 @@ namespace RenderMime {
      * Inject a value into the mime bundle.
      *
      * #### Notes
-     * This will be a no-op if the bundle alread has the given mimeType.
+     * This will be a no-op if the bundle already has the given mimeType.
      */
     add(mimeType: string, value: string | JSONObject): void;
   }
