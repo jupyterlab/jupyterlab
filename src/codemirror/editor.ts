@@ -76,7 +76,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Construct a CodeMirror editor.
    */
   constructor(options: CodeEditor.IOptions, config: CodeMirror.EditorConfiguration={}) {
-    let host = this._host = options.host;
+    let host = this.host = options.host;
     host.classList.add(EDITOR_CLASS);
 
     this._uuid = options.uuid || utils.uuid();
@@ -116,14 +116,14 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
-   * A signal emitted when a text completion is requested.
-   */
-  readonly completionRequested: ISignal<this, CodeEditor.IPosition>;
-
-  /**
    * A signal emitted when either the top or bottom edge is requested.
    */
   readonly edgeRequested: ISignal<this, CodeEditor.EdgeLocation>;
+
+  /**
+   * The DOM node that hosts the editor.
+   */
+  readonly host: HTMLElement;
 
   /**
    * The uuid of this editor;
@@ -472,8 +472,6 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     event.preventDefault();
     event.stopPropagation();
     event.stopImmediatePropagation();
-
-    this.completionRequested.emit(position);
   }
 
   /**
@@ -691,7 +689,6 @@ namespace CodeMirrorEditor {
 
 
 // Define the signals for the `CodeMirrorEditor` class.
-defineSignal(CodeMirrorEditor.prototype, 'completionRequested');
 defineSignal(CodeMirrorEditor.prototype, 'edgeRequested');
 
 

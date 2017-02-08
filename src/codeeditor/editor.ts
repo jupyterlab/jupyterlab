@@ -491,11 +491,6 @@ namespace CodeEditor {
   export
   interface IEditor extends ISelectionOwner, IDisposable {
     /**
-     * A signal emitted when a text completion is requested.
-     */
-    readonly completionRequested: ISignal<IEditor, IPosition>;
-
-    /**
      * A signal emitted when either the top or bottom edge is requested.
      */
     readonly edgeRequested: ISignal<IEditor, EdgeLocation>;
@@ -519,6 +514,11 @@ namespace CodeEditor {
      * Whether the editor is read-only.  Defaults to false.
      */
     readOnly: boolean;
+
+    /**
+     * The DOM node that hosts the editor.
+     */
+    readonly host: HTMLElement;
 
     /**
      * The model used by the editor.

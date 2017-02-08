@@ -3,9 +3,6 @@
 
 import expect = require('expect.js');
 
-import * as CodeMirror
-  from 'codemirror';
-
 import {
   generate
 } from 'simulate-event';
@@ -93,29 +90,6 @@ describe('CodeMirrorEditor', () => {
       expect(edge).to.be(null);
       editor.editor.triggerOnKeyDown(event);
       expect(edge).to.be('bottom');
-    });
-
-  });
-
-  describe('#completionRequested', () => {
-
-    it('should emit a signal when the user requests a tab completion', () => {
-      let want = { line: 0, column: 3 };
-      let request: CodeEditor.IPosition = null;
-      let listener = (sender: any, args: CodeEditor.IPosition) => {
-        request = args;
-      };
-      let event = generate('keydown', { keyCode: TAB });
-      editor.completionRequested.connect(listener);
-
-      expect(request).to.not.be.ok();
-      editor.model.value.text = 'foo';
-      editor.setCursorPosition(editor.getPositionAt(3));
-
-      editor.editor.triggerOnKeyDown(event);
-      expect(request).to.be.ok();
-      expect(request.column).to.equal(want.column);
-      expect(request.line).to.equal(want.line);
     });
 
   });

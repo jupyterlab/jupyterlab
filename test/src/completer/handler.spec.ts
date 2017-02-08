@@ -67,11 +67,6 @@ class TestCompletionHandler extends CompletionHandler {
     this.methods.push('onTextChanged');
   }
 
-  onCompletionRequested(editor: CodeEditor.IEditor, position: CodeEditor.IPosition): void {
-    super.onCompletionRequested(editor, position);
-    this.methods.push('onCompletionRequested');
-  }
-
   onCompletionSelected(widget: CompleterWidget, value: string): void {
     super.onCompletionSelected(widget, value);
     this.methods.push('onCompletionSelected');
@@ -365,41 +360,6 @@ describe('completer/handler', () => {
         expect(model.methods).to.not.contain('handleTextChange');
         handler.editor.model.value.text = 'foo';
         expect(model.methods).to.contain('handleTextChange');
-      });
-
-    });
-
-    describe('#onCompletionRequested()', () => {
-
-      it('should fire when the active editor emits a request', () => {
-        let handler = new TestCompletionHandler({
-          completer: new CompleterWidget()
-        });
-        let request: CodeEditor.IPosition = {
-          column: 0,
-          line: 0
-        };
-
-        handler.editor = createEditorWidget().editor;
-        expect(handler.methods).to.not.contain('onCompletionRequested');
-        handler.editor.completionRequested.emit(request);
-        expect(handler.methods).to.contain('onCompletionRequested');
-      });
-
-      it('should make a kernel request if kernel and model exist', () => {
-        let completer = new CompleterWidget({
-          model: new TestCompleterModel()
-        });
-        let handler = new TestCompletionHandler({ completer });
-        let request: CodeEditor.IPosition = {
-          column: 0,
-          line: 0
-        };
-        handler.kernel = kernel;
-        handler.editor = createEditorWidget().editor;
-        expect(handler.methods).to.not.contain('makeRequest');
-        handler.editor.completionRequested.emit(request);
-        expect(handler.methods).to.contain('makeRequest');
       });
 
     });

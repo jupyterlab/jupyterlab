@@ -57,7 +57,6 @@ class CompletionHandler implements IDisposable {
     let editor = this._editor;
     if (editor && !editor.isDisposed) {
       editor.model.value.changed.disconnect(this.onTextChanged, this);
-      editor.completionRequested.disconnect(this.onCompletionRequested, this);
     }
 
     // Reset completer state.
@@ -67,7 +66,6 @@ class CompletionHandler implements IDisposable {
     editor = this._editor = newValue;
     if (editor) {
       editor.model.value.changed.connect(this.onTextChanged, this);
-      editor.completionRequested.connect(this.onCompletionRequested, this);
     }
   }
 
@@ -179,17 +177,6 @@ class CompletionHandler implements IDisposable {
     let request = this.getState(position);
     this._completer.model.handleTextChange(request);
   }
-
-  /**
-   * Handle a completion requested signal from an editor.
-   */
-  protected onCompletionRequested(editor: CodeEditor.IEditor, position: CodeEditor.IPosition): void {
-    if (!this._kernel || !this._completer.model) {
-      return;
-    }
-    this.makeRequest(position);
-  }
-
 
   /**
    * Handle a visiblity change signal from a completion widget.
