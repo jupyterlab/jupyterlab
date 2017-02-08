@@ -104,6 +104,7 @@
     "lib/**/*.js.map",
     "lib/**/*.svg",
     "lib/**/*.gif",
+    "src/**/**.ts",
     "scripts/dedupe.js"
   ],
   "author": "Project Jupyter",
