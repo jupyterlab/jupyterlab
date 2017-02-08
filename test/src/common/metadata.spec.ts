@@ -56,6 +56,31 @@ class LogEditor extends Metadata.Editor {
 }
 
 
+/**
+ * Set a programmatic on a metdata editor.
+ */
+function setValue(editor: Metadata.Editor, name: string, value: JSONValue): void {
+  let cursor = editor.owner.getMetadata(name);
+  cursor.setValue(value);
+  let message = new Metadata.ChangeMessage({
+    name: name,
+    oldValue: void 0,
+    newValue: value
+  });
+  editor.processMessage(message);
+}
+
+/**
+ * Set an input value on a metadata editor.
+ */
+function setInput(editor: Metadata.Editor, value: string): void {
+  let node = editor.textareaNode;
+  node.focus();
+  node.value = value;
+  simulate(node, 'input');
+}
+
+
 describe('common/metadata', () => {
 
   describe('Metadata.Cursor', () => {
@@ -301,19 +326,31 @@ describe('common/metadata', () => {
         });
 
         it('should add the error flag if invalid JSON', () => {
-
+          let node = editor.textareaNode;
+          node.value = 'foo';
+          simulate(node, 'input');
+          expect(editor.hasClass('jp-mod-error')).to.be(true);
         });
 
         it('should show the commit button if the value has changed', () => {
-
+          let node = editor.textareaNode;
+          node.value = '{"foo": 1}';
+          simulate(node, 'input');
+          expect(editor.commitButtonNode.hidden).to.be(false);
         });
 
         it('should not show the commit button if the value is invalid', () => {
-
+          let node = editor.textareaNode;
+          node.value = 'foo';
+          simulate(node, 'input');
+          expect(editor.commitButtonNode.hidden).to.be(true);
         });
 
         it('should show the revert button if the value has changed', () => {
-
+          let node = editor.textareaNode;
+          node.value = 'foo';
+          simulate(node, 'input');
+          expect(editor.revertButtonNode.hidden).to.be(false);
         });
 
       });
@@ -327,11 +364,25 @@ describe('common/metadata', () => {
         });
 
         it('should revert to current data if there was no change', () => {
-
+          let node = editor.textareaNode;
+          editor.owner = new RawCellModel({});
+          node.focus();
+          setValue(editor, 'foo', 1);
+          expect(node.value).to.be('{}');
+          simulate(node, 'blur');
+          expect(node.value).to.be('{\n  "foo": 1\n}');
         });
 
         it('should not revert to current data if there was a change', () => {
-
+          let node = editor.textareaNode;
+          editor.owner = new RawCellModel({});
+          setInput(editor, 'foo');
+          setValue(editor, 'foo', 1);
+          expect(node.value).to.be('foo');
+          simulate(node, 'blur');
+          expect(node.value).to.be('foo');
+          expect(editor.commitButtonNode.hidden).to.be(true);
+          expect(editor.revertButtonNode.hidden).to.be(false);
         });
 
       });
@@ -344,7 +395,20 @@ describe('common/metadata', () => {
         });
 
         it('should revert the current data', () => {
+          let node = editor.textareaNode;
+          editor.owner = new RawCellModel({});
+          setInput(editor, 'foo');
+          simulate(editor.revertButtonNode, 'click');
+          expect(node.value).to.be('{}');
+        });
 
+        it('should handle programmatic changes', () => {
+          let node = editor.textareaNode;
+          editor.owner = new RawCellModel({});
+          setInput(editor, 'foo');
+          setValue(editor, 'foo', 1);
+          simulate(editor.revertButtonNode, 'click');
+          expect(node.value).to.be('{\n  "foo": 1\n}');
         });
 
         it('should handle click events on the commit button', () => {
@@ -353,27 +417,77 @@ describe('common/metadata', () => {
         });
 
         it('should bail if it is not valid JSON', () => {
-
+          let node = editor.textareaNode;
+          editor.owner = new RawCellModel({});
+          setInput(editor, 'foo');
+          setValue(editor, 'foo', 1);
+          simulate(editor.commitButtonNode, 'click');
+          expect(node.value).to.be('foo');
         });
 
         it('should override a key that was set programmatically', () => {
-
+          let node = editor.textareaNode;
+          editor.owner = new RawCellModel({});
+          setInput(editor, '{"foo": 2}');
+          setValue(editor, 'foo', 1);
+          simulate(editor.commitButtonNode, 'click');
+          expect(node.value).to.be('{\n  "foo": 2\n}');
         });
 
         it('should allow a programmatic key to update', () => {
-
+          let node = editor.textareaNode;
+          editor.owner = new RawCellModel({});
+          setValue(editor, 'foo', 1);
+          setValue(editor, 'bar', 1);
+          setInput(editor, '{"foo":1, "bar": 2}');
+          setValue(editor, 'foo', 2);
+          simulate(editor.commitButtonNode, 'click');
+          expect(node.value).to.be('{\n  "foo": 2,\n  "bar": 2\n}');
         });
 
         it('should allow a key to be added by the user', () => {
-
+          let node = editor.textareaNode;
+          editor.owner = new RawCellModel({});
+          setValue(editor, 'foo', 1);
+          setValue(editor, 'bar', 1);
+          setInput(editor, '{"foo":1, "bar": 2, "baz": 3}');
+          setValue(editor, 'foo', 2);
+          simulate(editor.commitButtonNode, 'click');
+          let value = '{\n  "foo": 2,\n  "bar": 2,\n  "baz": 3\n}';
+          expect(node.value).to.be(value);
         });
 
         it('should allow a key to be removed by the user', () => {
-
-        })
+          let node = editor.textareaNode;
+          editor.owner = new RawCellModel({});
+          setValue(editor, 'foo', 1);
+          setValue(editor, 'bar', 1);
+          node.focus();
+          node.value = '{"foo": 1}';
+          simulate(editor.commitButtonNode, 'click');
+          expect(node.value).to.be('{"foo": 1}');
+        });
 
         it('should allow a key to be removed programmatically that was not set by the user', () => {
+          let node = editor.textareaNode;
+          editor.owner = new RawCellModel({});
+          setValue(editor, 'foo', 1);
+          setValue(editor, 'bar', 1);
+          setInput(editor, '{"foo": 1, "bar": 3}');
+          setValue(editor, 'foo', void 0);
+          simulate(editor.commitButtonNode, 'click');
+          expect(node.value).to.be('{\n  "bar": 3\n}');
+        });
 
+        it('should keep a key that was removed programmatically that was changed by the user', () => {
+          let node = editor.textareaNode;
+          editor.owner = new RawCellModel({});
+          setValue(editor, 'foo', 1);
+          setValue(editor, 'bar', 1);
+          setInput(editor, '{"foo": 2, "bar": 3}');
+          setValue(editor, 'foo', void 0);
+          simulate(editor.commitButtonNode, 'click');
+          expect(node.value).to.be('{\n  "foo": 2,\n  "bar": 3\n}');
         });
 
       });
