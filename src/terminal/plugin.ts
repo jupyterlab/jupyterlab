@@ -131,7 +131,9 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
         return;
       }
       app.shell.activateMain(current.id);
-
+      return current.refresh().then(() => {
+        current.activate();
+      });
     }
   });
 
@@ -192,6 +194,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
   menu.title.label = category;
   [
     CommandIDs.createNew,
+    CommandIDs.refresh,
     CommandIDs.increaseFont,
     CommandIDs.decreaseFont,
     CommandIDs.toggleTheme
