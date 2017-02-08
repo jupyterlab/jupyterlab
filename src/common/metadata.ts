@@ -6,6 +6,10 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
+  IDisposable
+} from 'phosphor/lib/core/disposable';
+
+import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -65,7 +69,7 @@ namespace Metadata {
    * A class used to interact with user level metadata.
    */
   export
-  interface ICursor {
+  interface ICursor extends IDisposable {
     /**
      * The metadata namespace.
      */
@@ -89,17 +93,11 @@ namespace Metadata {
   class Cursor implements ICursor {
     /**
      * Construct a new metadata cursor.
-     *
-     * @param name - The metadata namespace key.
-     *
-     * @param read - The read callback.
-     *
-     * @param write - The write callback.
      */
-    constructor(name: string, read: () => any, write: (value: JSONValue) => void) {
-      this._name = name;
-      this._read = read;
-      this._write = write;
+    constructor(options: ICursorOptions) {
+      this._name = options.name;
+      this._read = options.read;
+      this._write = options.write;
     }
 
     /**
@@ -107,6 +105,13 @@ namespace Metadata {
      */
     get name(): string {
       return this._name;
+    }
+
+    /**
+     * Test whether the cursor is disposed.
+     */
+    get isDisposed(): boolean {
+      return this._read == null;
     }
 
     /**
@@ -125,7 +130,7 @@ namespace Metadata {
      */
     getValue(): JSONValue {
       let read = this._read;
-      return read();
+      return read(this._name);
     }
 
     /**
@@ -133,12 +138,33 @@ namespace Metadata {
      */
     setValue(value: JSONValue): void {
       let write = this._write;
-      write(value);
+      write(this._name, value);
     }
 
     private _name = '';
-    private _read: () => JSONValue = null;
-    private _write: (value: JSONValue) => void = null;
+    private _read: (name: string) => JSONValue = null;
+    private _write: (name: string, value: JSONValue) => void = null;
+  }
+
+  /**
+   * The options used to create a cursor.
+   */
+  export
+  interface ICursorOptions {
+    /**
+     * The cursor key name.
+     */
+    name: string;
+
+    /**
+     * The function used to read metadata.
+     */
+    read: (name: string) => JSONValue;
+
+    /**
+     * The function used to write metadata.
+     */
+    write: (name: string, value: JSONValue) => void;
   }
 
   /**
@@ -166,6 +192,12 @@ namespace Metadata {
   }
 
   /**
+   * The change args type.
+   */
+  export
+  type ChangedArgs = IChangedArgs<JSONValue>;
+
+  /**
    * A metadata changed message.
    */
   export
@@ -173,7 +205,7 @@ namespace Metadata {
     /**
      * Create a new metadata changed message.
      */
-    constructor(args: IChangedArgs<JSONValue>) {
+    constructor(args: ChangedArgs) {
       super('metadata-changed');
       this.args = args;
     }
@@ -181,7 +213,7 @@ namespace Metadata {
     /**
      * The arguments of the metadata change.
      */
-    readonly args: IChangedArgs<JSONValue>;
+    readonly args: ChangedArgs;
   }
 
   /**
@@ -285,6 +317,8 @@ namespace Metadata {
       let node = this.textareaNode;
       node.addEventListener('input', this);
       node.addEventListener('blur', this);
+      this.revertButtonNode.hidden = true;
+      this.commitButtonNode.hidden = true;
       this.revertButtonNode.addEventListener('click', this);
       this.commitButtonNode.addEventListener('click', this);
     }
@@ -347,7 +381,7 @@ namespace Metadata {
       if (target === this.revertButtonNode) {
         this._setValue();
       } else if (target === this.commitButtonNode) {
-        if (!this.hasClass(ERROR_CLASS)) {
+        if (!this.commitButtonNode.hidden && !this.hasClass(ERROR_CLASS)) {
           this._mergeContent();
           this._setValue();
         }
@@ -423,7 +457,7 @@ namespace Metadata {
 
     private _dataDirty = false;
     private _inputDirty = false;
-    private _owner: IOwner | null;
+    private _owner: IOwner | null = null;
     private _originalValue: JSONObject;
   }
 }
@@ -445,7 +479,7 @@ namespace Private {
         h.div({ className: BUTTON_AREA_CLASS },
           h.span({ className: REVERT_CLASS, title: cancelTitle }),
           h.span({ className: COMMIT_CLASS, title: confirmTitle })),
-        h.textarea())
+        h.textarea({}))
     );
   }
 }

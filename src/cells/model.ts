@@ -225,15 +225,15 @@ class CellModel extends CodeEditor.Model implements ICellModel {
     if (name in this._cursors) {
       return this._cursors[name];
     }
-    let cursor = new Metadata.Cursor(
+    if (!this._reader) {
+      this._reader = this._readCursorData.bind(this);
+      this._writer = this.setCursorData.bind(this);
+    }
+    let cursor = new Metadata.Cursor({
       name,
-      () => {
-        return this._metadata[name];
-      },
-      (value: string) => {
-        this.setCursorData(name, value);
-      }
-    );
+      read: this._reader,
+      write: this._writer
+    });
     this._cursors[name] = cursor;
     return cursor;
   }
@@ -252,6 +252,7 @@ class CellModel extends CodeEditor.Model implements ICellModel {
    * Set the cursor data for a given field.
    */
   protected setCursorData(name: string, newValue: any): void {
+    debugger;
     let oldValue = this._metadata[name];
     if (deepEqual(oldValue, newValue)) {
       return;
@@ -273,8 +274,17 @@ class CellModel extends CodeEditor.Model implements ICellModel {
     this.contentChanged.emit(void 0);
   }
 
+  /**
+   * Read the metadata of a given name.
+   */
+  private _readCursorData(name: string): JSONValue {
+    return this._metadata[name];
+  }
+
   private _metadata: { [key: string]: any } = Object.create(null);
   private _cursors: { [key: string]: Metadata.Cursor } = Object.create(null);
+  private _reader: (name: string) => JSONValue;
+  private _writer: (name: string, value: JSONValue) => void;
 }
 
 
