@@ -38,6 +38,12 @@ namespace CommandIDs {
   const interrupt = 'console:interrupt-kernel';
 
   export
+  const restart = 'console:restart-kernel';
+
+  export
+  const closeAndShutdown = 'console:close-and-shutdown';
+
+  export
   const open = 'console:open';
 
   export
