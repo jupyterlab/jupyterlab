@@ -164,6 +164,19 @@ class TerminalWidget extends Widget {
   }
 
   /**
+   * Refresh the terminal session.
+   */
+  refresh(): Promise<void> {
+    if (!this._session) {
+      return Promise.reject(void 0);
+    }
+    return this._session.reconnect().then(() => {
+      let rows = this._sessionSize[0];
+      this._term.refresh(0, rows - 1);
+    });
+  }
+
+  /**
    * Process a message sent to the widget.
    *
    * @param msg - The message sent to the widget.

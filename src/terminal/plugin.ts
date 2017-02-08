@@ -122,6 +122,21 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
     }
   });
 
+  commands.addCommand(CommandIDs.refresh, {
+    label: 'Refresh Terminal',
+    caption: 'Refresh the current terminal session',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (!current) {
+        return;
+      }
+      app.shell.activateMain(current.id);
+      return current.refresh().then(() => {
+        current.activate();
+      });
+    }
+  });
+
   commands.addCommand(CommandIDs.increaseFont, {
     label: 'Increase Terminal Font Size',
     execute: () => {
@@ -179,6 +194,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
   menu.title.label = category;
   [
     CommandIDs.createNew,
+    CommandIDs.refresh,
     CommandIDs.increaseFont,
     CommandIDs.decreaseFont,
     CommandIDs.toggleTheme
