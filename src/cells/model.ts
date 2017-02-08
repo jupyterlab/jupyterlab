@@ -128,6 +128,7 @@ class CellModel extends CodeEditor.Model implements ICellModel {
     super();
     this.value.changed.connect(this.onGenericChange, this);
     let cell = options.cell;
+    this.set('cell_type', this.type);
 
     if (!cell) {
       return;
@@ -234,6 +235,7 @@ class CellModel extends CodeEditor.Model implements ICellModel {
    * Handle a change to the observable value.
    */
   protected onGenericChange(): void {
+    this.set('outputs', this.get('outputs'));
     this.contentChanged.emit(void 0);
   }
 
@@ -313,14 +315,15 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
     let cell = options.cell as nbformat.ICodeCell;
     let outputs: nbformat.IOutput[] = [];
     if (cell && cell.cell_type === 'code') {
-      this.executionCount = cell.execution_count;
+      this.set('executionCount', cell.execution_count);
       outputs = cell.outputs;
     }
-    this._outputs = factory.createOutputArea({
+    let outputArea = factory.createOutputArea({
       trusted,
       values: outputs
     });
-    this._outputs.stateChanged.connect(this.onGenericChange, this);
+    outputArea.stateChanged.connect(this.onGenericChange, this);
+    this.set('outputs', outputArea);
   }
 
   /**
@@ -334,14 +337,14 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
    * The execution count of the cell.
    */
   get executionCount(): nbformat.ExecutionCount {
-    return this._executionCount || null;
+    return this.get('executionCount') || null;
   }
   set executionCount(newValue: nbformat.ExecutionCount) {
-    if (newValue === this._executionCount) {
+    if (newValue === this.get('executionCount')) {
       return;
     }
     let oldValue = this.executionCount;
-    this._executionCount = newValue || null;
+    this.set('executionCount', newValue || null);
     this.contentChanged.emit(void 0);
     this.stateChanged.emit({ name: 'executionCount', oldValue, newValue });
   }
@@ -350,7 +353,7 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
    * The cell outputs.
    */
   get outputs(): IOutputAreaModel {
-    return this._outputs;
+    return this.get('outputs');
   }
 
   /**
@@ -360,8 +363,8 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
     if (this.isDisposed) {
       return;
     }
-    this._outputs.dispose();
-    this._outputs = null;
+    this.get('outputs').dispose();
+    this.delete('outputs');
     super.dispose();
   }
 
@@ -370,8 +373,8 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
    */
   toJSON(): nbformat.ICodeCell {
     let cell = super.toJSON() as nbformat.ICodeCell;
-    cell.execution_count = this.executionCount || null;
-    cell.outputs = this.outputs.toJSON();
+    cell.execution_count = this.get('executionCount') || null;
+    cell.outputs = this.get('outputs').toJSON();
     return cell;
   }
 
@@ -381,11 +384,8 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
    * The default implementation is a no-op.
    */
   onTrustedChanged(value: boolean): void {
-    this._outputs.trusted = value;
+    (this.get('outputs') as any).trusted = value;
   }
-
-  private _outputs: IOutputAreaModel = null;
-  private _executionCount: nbformat.ExecutionCount = null;
 }
 
 

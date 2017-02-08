@@ -17,6 +17,10 @@ import {
   Vector
 } from './vector';
 
+import {
+  IObservableMap
+} from './observablemap';
+
 
 /**
  * A vector which can be observed for changes.
@@ -334,11 +338,12 @@ interface IObservableVector<T> extends IDisposable {
 export
 class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
   /**
-   * Construct a new observable map.
+   * Construct a new observable vector.
    */
   constructor(options: ObservableVector.IOptions<T> = {}) {
     super(options.values || []);
     this._itemCmp = options.itemCmp || Private.itemCmp;
+    this._fromMapFactory = options.fromMapFactory;
   }
 
   /**
@@ -900,6 +905,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
   private _itemCmp: (first: T, second: T) => boolean;
   private _changed = new Signal<this, ObservableVector.IChangedArgs<T>>(this);
   private _parent: IObservableVector<T> = null;
+  private _fromMapFactory: (value: IObservableMap<any>)=>T;
 }
 
 
@@ -924,6 +930,8 @@ namespace ObservableVector {
      * If not given, strict `===` equality will be used.
      */
     itemCmp?: (first: T, second: T) => boolean;
+
+    fromMapFactory?: (value: IObservableMap<any>)=>T;
   }
 
   /**

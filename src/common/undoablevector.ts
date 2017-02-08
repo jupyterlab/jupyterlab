@@ -13,6 +13,9 @@ import {
   IObservableVector, ObservableVector
 } from './observablevector';
 
+import {
+  IObservableMap
+} from './observablemap';
 
 /**
  * An object which can be serialized to JSON.
@@ -85,8 +88,8 @@ class ObservableUndoableVector<T extends ISerializable> extends ObservableVector
   /**
    * Construct a new undoable observable vector.
    */
-  constructor(factory: (value: JSONObject) => T) {
-    super();
+  constructor(factory: (value: JSONObject) => T, fromMapFactory?: (value: IObservableMap<any>)=>T) {
+    super(fromMapFactory);
     this._factory = factory;
     this.changed.connect(this._onVectorChanged, this);
   }
