@@ -26,6 +26,5 @@ module.exports = {
       { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=image/svg+xml' },
       { test: /\.js.map$/, loader: 'file-loader' },
     ],
-    noParse: [/xterm\.js/]  // Xterm ships a UMD module
   }
 }
