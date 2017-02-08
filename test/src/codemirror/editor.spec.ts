@@ -16,12 +16,9 @@ import {
 } from '../../../lib/codemirror';
 
 
-
 const UP_ARROW = 38;
 
 const DOWN_ARROW = 40;
-
-const TAB = 9;
 
 const ENTER = 13;
 
@@ -34,11 +31,6 @@ class LogEditorWidget extends CodeMirrorEditor {
     let value = super.onKeydown(event);
     this.methods.push('onKeydown');
     return value;
-  }
-
-  protected onTabEvent(event: KeyboardEvent, position: CodeEditor.IPosition): void {
-    super.onTabEvent(event, position);
-    this.methods.push('onTabEvent');
   }
 }
 
@@ -521,17 +513,6 @@ describe('CodeMirrorEditor', () => {
       expect(editor.methods).to.not.contain('onKeydown');
       editor.editor.triggerOnKeyDown(event);
       expect(editor.methods).to.contain('onKeydown');
-    });
-
-  });
-
-  describe('#onTabEvent()', () => {
-
-    it('should run when there is a tab keydown event on the editor', () => {
-      let event = generate('keydown', { keyCode: TAB });
-      expect(editor.methods).to.not.contain('onTabEvent');
-      editor.editor.triggerOnKeyDown(event);
-      expect(editor.methods).to.contain('onTabEvent');
     });
 
   });

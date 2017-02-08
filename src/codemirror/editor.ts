@@ -61,11 +61,6 @@ const UP_ARROW = 38;
  */
 const DOWN_ARROW = 40;
 
-/**
- * The key code for the tab key.
- */
-const TAB = 9;
-
 
 /**
  * CodeMirror editor.
@@ -420,15 +415,6 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     let position = this.getCursorPosition();
     let { line, column } = position;
 
-    if (event.keyCode === TAB) {
-      // If the tab is modified, ignore it.
-      if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
-        return false;
-      }
-      this.onTabEvent(event, position);
-      return false;
-    }
-
     if (line === 0 && column === 0 && event.keyCode === UP_ARROW) {
       if (!event.shiftKey) {
         this.edgeRequested.emit('top');
@@ -446,32 +432,6 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       return false;
     }
     return false;
-  }
-
-  /**
-   * Handle a tab key press.
-   */
-  protected onTabEvent(event: KeyboardEvent, position: CodeEditor.IPosition): void {
-    // If there is a text selection, no completion requests should be emitted.
-    const selection = this.getSelection();
-    if (selection.start === selection.end) {
-      return;
-    }
-
-    let currentLine = this.getLine(position.line);
-
-    // A completion request signal should only be emitted if the current
-    // character or a preceding character is not whitespace.
-    //
-    // Otherwise, the default tab action of creating a tab character should be
-    // allowed to propagate.
-    if (!currentLine.substring(0, position.column).match(/\S/)) {
-      return;
-    }
-
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
   }
 
   /**
