@@ -170,6 +170,15 @@ describe('terminal/index', () => {
 
     });
 
+    describe('#refresh()', () => {
+
+      it('should refresh the widget', (done) => {
+        widget.session = session;
+        widget.refresh().then(done, done);
+      });
+
+    });
+
     describe('#processMessage()', () => {
 
       it('should handle fit requests', () => {
