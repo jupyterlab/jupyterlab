@@ -27,9 +27,6 @@ buildExtension({
     output: {
       publicPath: 'lab/',
     },
-    module: {
-      noParse: [/xterm\.js/]   // Xterm ships a UMD module
-    },
     plugins: [
       new webpack.DefinePlugin({
         'process.env': {
