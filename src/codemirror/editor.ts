@@ -195,9 +195,9 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   set readOnly(readOnly: boolean) {
     this._editor.setOption('readOnly', readOnly);
     if (readOnly) {
-      this._host.classList.add(READ_ONLY_CLASS);
+      this.host.classList.add(READ_ONLY_CLASS);
     } else {
-      this._host.classList.remove(READ_ONLY_CLASS);
+      this.host.classList.remove(READ_ONLY_CLASS);
     }
   }
 
@@ -521,7 +521,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   private _cleanSelections(uuid: string) {
     const markers = this.selectionMarkers[uuid];
     if (markers) {
-      markers.forEach(marker => marker.clear());
+      markers.forEach(marker => { marker.clear(); });
     }
     delete this.selectionMarkers[uuid];
   }
@@ -531,11 +531,11 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   private _markSelections(uuid: string, selections: CodeEditor.ITextSelection[]) {
     const markers: CodeMirror.TextMarker[] = [];
-    for (const selection of selections) {
+    selections.forEach(selection => {
       const { anchor, head } = this._toCodeMirrorSelection(selection);
       const markerOptions = this._toTextMarkerOptions(selection);
       this.doc.markText(anchor, head, markerOptions);
-    }
+    });
     this.selectionMarkers[uuid] = markers;
   }
 
@@ -671,7 +671,6 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   private _changeGuard = false;
   private _selectionStyle: CodeEditor.ISelectionStyle;
   private _uuid = '';
-  private _host: HTMLElement;
 }
 
 
