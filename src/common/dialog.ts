@@ -425,6 +425,10 @@ class Dialog extends Panel {
         this._first.focus();
       }
       break;
+    case 13:
+      this.close();
+      this.resolve(this._buttons[this._buttons.length - 1]);
+      break;
     default:
       break;
     }
