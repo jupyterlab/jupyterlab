@@ -10,12 +10,23 @@ import {
 } from 'phosphor/lib/core/disposable';
 
 import {
+  Message, sendMessage
+} from 'phosphor/lib/core/messaging';
+
+import {
   CodeEditor
 } from '../codeeditor';
 
 import {
   CompleterWidget
 } from './widget';
+
+
+/**
+ * A class added to editors that can host a completer.
+ */
+export
+const COMPLETABLE_CLASS = 'jp-mod-completable';
 
 
 /**
@@ -31,16 +42,7 @@ class CompletionHandler implements IDisposable {
     this._completer.selected.connect(this.onCompletionSelected, this);
     this._completer.visibilityChanged.connect(this.onVisibilityChanged, this);
     this._kernel = options.kernel || null;
-  }
-
-  /**
-   * The kernel used by the completion handler.
-   */
-  get kernel(): Kernel.IKernel {
-    return this._kernel;
-  }
-  set kernel(value: Kernel.IKernel) {
-    this._kernel = value;
+    this._interrupt = options.interrupt || null;
   }
 
   /**
@@ -56,6 +58,7 @@ class CompletionHandler implements IDisposable {
 
     let editor = this._editor;
     if (editor && !editor.isDisposed) {
+      editor.host.classList.remove(COMPLETABLE_CLASS);
       editor.model.value.changed.disconnect(this.onTextChanged, this);
     }
 
@@ -69,14 +72,29 @@ class CompletionHandler implements IDisposable {
     }
   }
 
+
   /**
    * Get whether the completion handler is disposed.
-   *
-   * #### Notes
-   * This is a read-only property.
    */
   get isDisposed(): boolean {
     return this._completer === null;
+  }
+
+  /**
+   * The interrupt keydown handler used to short circuit the invocation keydown.
+   */
+  get interrupter(): IDisposable {
+    return this._interrupter;
+  }
+
+  /**
+   * The kernel used by the completion handler.
+   */
+  get kernel(): Kernel.IKernel {
+    return this._kernel;
+  }
+  set kernel(value: Kernel.IKernel) {
+    this._kernel = value;
   }
 
   /**
@@ -86,6 +104,42 @@ class CompletionHandler implements IDisposable {
     this._completer = null;
     this._kernel = null;
     this._editor = null;
+  }
+
+  /**
+   * Invoke the handler and launch a completer.
+   */
+  invoke(): void {
+    sendMessage(this, CompletionHandler.Msg.InvokeRequest);
+  }
+
+  /**
+   * Process a message sent to the completion handler.
+   */
+  processMessage(msg: Message): void {
+    switch (msg.type) {
+    case CompletionHandler.Msg.InvokeRequest.type:
+      this.onInvokeRequest(msg);
+      break;
+    default:
+      break;
+    }
+  }
+
+  /**
+   * Get the state of the text editor at the given position.
+   */
+  protected getState(position: CodeEditor.IPosition): CompleterWidget.ITextState {
+    let editor = this.editor;
+    let coords = editor.getCoordinate(position) as CompleterWidget.ICoordinate;
+    return {
+      text: editor.model.value.text,
+      lineHeight: editor.lineHeight,
+      charWidth: editor.charWidth,
+      coords,
+      line: position.line,
+      column: position.column
+    };
   }
 
   /**
@@ -120,19 +174,15 @@ class CompletionHandler implements IDisposable {
   }
 
   /**
-   * Get the state of the text editor at the given position.
+   * Handle `invoke-request` messages.
    */
-  protected getState(position: CodeEditor.IPosition): CompleterWidget.ITextState {
-    let editor = this.editor;
-    let coords = editor.getCoordinate(position) as CompleterWidget.ICoordinate;
-    return {
-      text: editor.model.value.text,
-      lineHeight: editor.lineHeight,
-      charWidth: editor.charWidth,
-      coords,
-      line: position.line,
-      column: position.column
-    };
+  protected onInvokeRequest(msg: Message): void {
+    if (!this._kernel || !this._completer.model) {
+      return;
+    }
+
+    let editor = this._editor;
+    this.makeRequest(editor.getCursorPosition());
   }
 
   /**
@@ -172,9 +222,38 @@ class CompletionHandler implements IDisposable {
     if (!this._completer.model) {
       return;
     }
-    let editor = this.editor;
-    let position = editor.getCursorPosition();
-    let request = this.getState(position);
+
+    const editor = this.editor;
+    const host = editor.host;
+
+    // Set the host to a blank slate.
+    host.classList.remove(COMPLETABLE_CLASS);
+
+    // If there is a text selection, no completion is allowed.
+    const { start, end } = editor.getSelection();
+    if (start.column !== end.column || start.line !== end.line) {
+      return;
+    }
+
+    // Allow completion if the current or a preceding char is not whitespace.
+    const position = editor.getCursorPosition();
+    const currentLine = editor.getLine(position.line);
+    if (!currentLine.substring(0, position.column).match(/\S/)) {
+      return;
+    }
+
+    const request = this.getState(position);
+
+    host.classList.add(COMPLETABLE_CLASS);
+
+    if (this._interrupter) {
+      this._interrupter.dispose();
+    }
+
+    if (this._interrupt) {
+      this._interrupter = editor.addKeydownHandler(this._interrupt);
+    }
+
     this._completer.model.handleTextChange(request);
   }
 
@@ -211,10 +290,12 @@ class CompletionHandler implements IDisposable {
     editor.setCursorPosition(position);
   }
 
-  private _editor: CodeEditor.IEditor = null;
-  private _completer: CompleterWidget = null;
-  private _kernel: Kernel.IKernel = null;
+  private _editor: CodeEditor.IEditor | null = null;
+  private _completer: CompleterWidget | null = null;
+  private _interrupter: IDisposable | null = null;
+  private _kernel: Kernel.IKernel | null = null;
   private _pending = 0;
+  private _interrupt: CodeEditor.KeydownHandler | null = null;
 }
 
 
@@ -237,5 +318,24 @@ namespace CompletionHandler {
      * The kernel for the completion handler.
      */
     kernel?: Kernel.IKernel;
+
+    /**
+     * A keydown handler that can short circuit a key event to the editor.
+     */
+    interrupt?: CodeEditor.KeydownHandler;
+  }
+
+  /**
+   * A namespace for completion handler messages.
+   */
+  export
+  namespace Msg {
+    /* tslint:disable */
+    /**
+     * A singleton `'invoke-request'` message.
+     */
+    export
+    const InvokeRequest = new Message('invoke-request');
+    /* tslint:enable */
   }
 }
