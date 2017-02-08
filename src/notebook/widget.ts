@@ -389,6 +389,7 @@ class StaticNotebook extends Widget {
     switch (cell.type) {
     case 'code':
       widget = this._createCodeCell(cell as ICodeCellModel);
+      widget.model.mimeType = this._mimetype;
       break;
     case 'markdown':
       widget = this._createMarkdownCell(cell as IMarkdownCellModel);
@@ -396,7 +397,6 @@ class StaticNotebook extends Widget {
     default:
       widget = this._createRawCell(cell as IRawCellModel);
     }
-    cell.mimeType = this._mimetype;
     widget.addClass(NB_CELL_CLASS);
     let layout = this.layout as PanelLayout;
     layout.insertWidget(index, widget);
@@ -463,7 +463,9 @@ class StaticNotebook extends Widget {
     let info = cursor.getValue() as nbformat.ILanguageInfoMetadata;
     this._mimetype = this._mimetypeService.getMimeTypeByLanguage(info);
     each(this.widgets, widget => {
-      widget.model.mimeType = this._mimetype;
+      if (widget.model.type === 'code') {
+        widget.model.mimeType = this._mimetype;
+      }
     });
   }
 

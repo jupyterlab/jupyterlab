@@ -321,6 +321,15 @@ class RawCellModel extends CellModel {
 export
 class MarkdownCellModel extends CellModel {
   /**
+   * Construct a markdown cell model from optional cell content.
+   */
+  constructor(options: CellModel.IOptions) {
+    super(options);
+    // Use the Github-flavored markdown mode.
+    this.mimeType = 'text/x-ipythongfm';
+  }
+
+  /**
    * The type of the cell.
    */
   get type(): 'markdown' {
