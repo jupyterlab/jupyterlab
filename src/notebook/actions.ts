@@ -115,6 +115,7 @@ namespace NotebookActions {
     let cells = model.cells;
     let primary = widget.activeCell;
     let index = widget.activeCellIndex;
+    let offset = 0;
 
     // Get the cells to merge.
     each(enumerate(widget.widgets), ([i, child]) => {
@@ -122,6 +123,9 @@ namespace NotebookActions {
         toMerge.push(child.model.value.text);
         if (i !== index) {
           toDelete.push(child.model);
+          if (i < index) {
+            offset += 1;
+          }
         }
       }
     });
@@ -161,6 +165,8 @@ namespace NotebookActions {
       let cell = widget.activeCell as MarkdownCellWidget;
       cell.rendered = false;
     }
+
+    widget.activeCellIndex -= offset;
   }
 
   /**
