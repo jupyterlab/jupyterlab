@@ -21,3 +21,5 @@ __pycache__
 .idea/
 
 jupyterlab/_version.py
+test/coverage
+docs
