@@ -289,8 +289,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
           }).then(result => {
             if (result.text === 'OK') {
               current.context.changeKernel(null).then(() => { current.dispose(); });
-            }
-            else {
+            } else {
               return false;
             }
         });
