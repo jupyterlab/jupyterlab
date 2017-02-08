@@ -30,6 +30,10 @@ import {
 } from '../common/dates';
 
 import {
+  showDialog, cancelButton, warnButton
+} from '../common/dialog';
+
+import {
   InstanceTracker
 } from '../common/instancetracker';
 
@@ -278,9 +282,23 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     label: 'Close and Shutdown',
     execute: () => {
       let current = tracker.currentWidget;
-      if (current) {
-        console.log('Close and Shutdown for Consoles not implemented.')
+      if (!current) {
+        return;
       }
+      app.shell.activateMain(current.id);
+      showDialog({
+        title: 'Shutdown the console?',
+        body: `Are you sure you want to close "${current.title.label}"?`,
+        buttons: [cancelButton, warnButton]
+      }).then(result => {
+        if (result.text === 'OK') {
+          current.console.session.shutdown().then(() => {
+            current.dispose();
+          });
+        } else {
+          return false;
+        }
+    });
     }
   });
 
