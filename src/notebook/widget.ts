@@ -1113,6 +1113,7 @@ class Notebook extends StaticNotebook {
       this._dragData = { pressX: event.clientX, pressY: event.clientY, index: i};
       document.addEventListener('mouseup', this, true);
       document.addEventListener('mousemove', this, true);
+      event.preventDefault();
     }
   }
 
