@@ -10,7 +10,7 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  find, findIndex, upperBound
+  contains, find, findIndex, upperBound
 } from 'phosphor/lib/algorithm/searching';
 
 import {
@@ -306,6 +306,46 @@ class ApplicationShell extends Widget {
   closeAll(): void {
     each(toArray(this._dockPanel.widgets()), widget => { widget.close(); });
     this._save();
+  }
+
+  /*
+   * Activate the next tab in the panel of the currently active tab.
+  */
+  activateNextTab(): void {
+    let current = this._dockPanel.currentWidget;
+    if (current) {
+      let title = current.title;
+      let tabBar = find(this._dockPanel.tabBars(), bar => contains(bar.titles, title));
+      if (tabBar) {
+        let ci = tabBar.currentIndex;
+        if (ci !== -1) {
+          if (ci < (tabBar.titles.length-1)) {
+            tabBar.currentIndex += 1;
+            tabBar.currentTitle.owner.activate();
+          }
+        }
+      }
+    }
+  }
+
+  /*
+   * Activate the previous tab in the panel of the currently active tab.
+  */
+  activatePreviousTab(): void {
+    let current = this._dockPanel.currentWidget;
+    if (current) {
+      let title = current.title;
+      let tabBar = find(this._dockPanel.tabBars(), bar => contains(bar.titles, title));
+      if (tabBar) {
+        let ci = tabBar.currentIndex;
+        if (ci !== -1) {
+          if (ci > 0) {
+            tabBar.currentIndex -= 1;
+            tabBar.currentTitle.owner.activate();
+          }
+        }
+      }
+    }
   }
 
   /**
