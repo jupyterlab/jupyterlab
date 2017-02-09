@@ -394,7 +394,7 @@ class ApplicationShell extends Widget {
     if (current) {
       let title = current.title;
       let tabBar = find(this._dockPanel.tabBars(), bar => contains(bar.titles, title));
-      return tabBar
+      return tabBar;
     }
     return void 0;
   }
@@ -554,6 +554,7 @@ namespace Private {
       this._sideBar.hide();
       this._stackedPanel.hide();
       this._sideBar.currentChanged.connect(this._onCurrentChanged, this);
+      this._sideBar.tabActivateRequested.connect(this._onTabActivateRequested, this);
       this._stackedPanel.widgetRemoved.connect(this._onWidgetRemoved, this);
     }
 
@@ -677,7 +678,6 @@ namespace Private {
       }
       if (newWidget) {
         newWidget.show();
-        newWidget.activate();
       }
       if (newWidget) {
         document.body.setAttribute(`data-${this._side}Area`, newWidget.id);
@@ -685,6 +685,13 @@ namespace Private {
         document.body.removeAttribute(`data-${this._side}Area`);
       }
       this._refreshVisibility();
+    }
+
+    /**
+     * Handle a `tabActivateRequest` signal from the sidebar.
+     */
+    private _onTabActivateRequested(sender: TabBar, args: TabBar.ITabActivateRequestedArgs): void {
+      args.title.owner.activate();
     }
 
     /*
