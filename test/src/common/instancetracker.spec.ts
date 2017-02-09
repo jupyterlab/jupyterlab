@@ -46,13 +46,13 @@ describe('common/instancetracker', () => {
 
       it('should emit when the current widget has been updated', () => {
         let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
-        let widget = new Widget({ node: document.createElement('input') });
+        let widget = new Widget();
+        widget.node.tabIndex = -1;
         let called = false;
         tracker.currentChanged.connect(() => { called = true; });
-        tracker.add(widget);
         Widget.attach(widget, document.body);
-        expect(called).to.be(false);
-        simulate(widget.node, 'focus');
+        widget.node.focus();
+        tracker.add(widget);
         expect(called).to.be(true);
         Widget.detach(widget);
       });
@@ -74,7 +74,8 @@ describe('common/instancetracker', () => {
       it('should not emit when a widget has been injected', done => {
         let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
         let one = new Widget();
-        let two = new Widget({ node: document.createElement('input') });
+        let two = new Widget();
+        two.node.tabIndex = -1;
         let total = 0;
         tracker.widgetAdded.connect(() => { total++; });
         tracker.currentChanged.connect(() => {
@@ -99,7 +100,8 @@ describe('common/instancetracker', () => {
 
       it('should be updated if when the widget is focused', () => {
         let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
-        let widget = new Widget({ node: document.createElement('input') });
+        let widget = new Widget();
+        widget.node.tabIndex = -1;
         tracker.add(widget);
         Widget.attach(widget, document.body);
         expect(tracker.currentWidget).to.be(null);
@@ -230,6 +232,7 @@ describe('common/instancetracker', () => {
       it('should be called when the current widget is changed', () => {
         let tracker = new TestTracker<Widget>({ namespace: NAMESPACE });
         let widget = new Widget();
+        widget.node.tabIndex = -1;
         tracker.add(widget);
         expect(tracker.methods).to.not.contain('onCurrentChanged');
         Widget.attach(widget, document.body);
