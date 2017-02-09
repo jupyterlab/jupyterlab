@@ -140,6 +140,7 @@
   text-overflow: ellipsis;
   overflow: hidden;
   direction: rtl;
+  white-space: nowrap;
 }
 
 .jp-RunningSessions-itemShutdown {
