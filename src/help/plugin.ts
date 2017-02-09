@@ -145,7 +145,6 @@ class ClosableIFrame extends IFrame {
    * Dispose of the IFrame when closing.
    */
   protected onCloseRequest(msg: Message): void {
-    super.onCloseRequest(msg);
     this.dispose();
   }
 }
