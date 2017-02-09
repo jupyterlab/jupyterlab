@@ -85,7 +85,7 @@ function initNotebookHandler(panel: NotebookPanel, handler: CompletionHandler) {
 
 
 /**
- * An extension that registers consoles for code completion.
+ * An extension that registers code completion commands.
  */
 const core: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.completer',
