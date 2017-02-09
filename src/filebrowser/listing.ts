@@ -136,12 +136,18 @@ const MODIFIED_ID_CLASS = 'jp-id-modified';
 const FILE_TYPE_CLASS = 'jp-FileIcon';
 
 /**
- * The class name added to a folder type content item.
+ * The class name added to a material icon content item.
  */
 const FOLDER_TYPE_CLASS = 'jp-type-folder';
 const FOLDER_MATERIAL_ICON_CLASS = 'jp-OpenFolderIcon';
 const NOTEBOOK_MATERIAL_ICON_CLASS = 'jp-NotebookIcon';
 const MATERIAL_ICON_CLASS = 'jp-MaterialIcon';
+
+/**
+ * The class name added to drag state icons to add space between the icon and the file name
+ */
+const DRAG_ICON_CLASS = 'jp-DragIcon';
+
 /**
  * The class name added to a notebook type content item.
  */
@@ -987,7 +993,7 @@ class DirListing extends Widget {
     }
 
     // Create the drag image.
-    let dragImage = this.renderer.createDragImage(source, selectedNames.length);
+    let dragImage = this.renderer.createDragImage(source, selectedNames.length, item);
 
     // Set up the drag event.
     this._drag = new Drag({
@@ -1381,7 +1387,7 @@ namespace DirListing {
      *
      * @returns An element to use as the drag image.
      */
-    createDragImage(node: HTMLElement, count: number): HTMLElement;
+    createDragImage(node: HTMLElement, count: number, model: Contents.IModel): HTMLElement;
   }
 
   /**
@@ -1550,15 +1556,27 @@ namespace DirListing {
      *
      * @returns An element to use as the drag image.
      */
-    createDragImage(node: HTMLElement, count: number): HTMLElement {
+    createDragImage(node: HTMLElement, count: number, model: Contents.IModel): HTMLElement {
       let dragImage = node.cloneNode(true) as HTMLElement;
       let modified = utils.findElement(dragImage, ITEM_MODIFIED_CLASS);
+      var iconNode = utils.findElement(dragImage, ITEM_ICON_CLASS);
       dragImage.removeChild(modified as HTMLElement);
+      if (model) {
+        switch (model.type) {
+          case 'directory':
+            iconNode.className = MATERIAL_ICON_CLASS + ' ' + FOLDER_MATERIAL_ICON_CLASS + ' ' + DRAG_ICON_CLASS;
+            break;
+          case 'notebook':
+            iconNode.className = MATERIAL_ICON_CLASS + ' ' + NOTEBOOK_MATERIAL_ICON_CLASS + ' ' + DRAG_ICON_CLASS;
+            break;
+          default:
+            iconNode.className = MATERIAL_ICON_CLASS + ' ' + FILE_TYPE_CLASS + ' ' + DRAG_ICON_CLASS;
+            break;
+        }
+      }
       if (count > 1) {
         let nameNode = utils.findElement(dragImage, ITEM_TEXT_CLASS);
-        nameNode.textContent = '(' + count + ')';
-        let iconNode = utils.findElement(dragImage, ITEM_ICON_CLASS);
-        iconNode.className = `${ITEM_ICON_CLASS} ${FILE_TYPE_CLASS}`;
+        nameNode.textContent = count + ' Items';
       }
       return dragImage;
     }

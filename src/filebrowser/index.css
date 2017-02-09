@@ -205,7 +205,7 @@
 
 
 .jp-DirListing-item.jp-mod-dropTarget {
-  background: #FEDBC4;
+  background: var(--jp-brand-color3);
 }
 
 
@@ -280,9 +280,13 @@
 
 .jp-DirListing-item.p-mod-drag-image,
 .jp-DirListing-item.jp-mod-selected.p-mod-drag-image {
+  font-size: var(--jp-ui-font-size1);
+  padding-left: 4px;
+  margin-left: 4px;
+  width: 160px;
   background-color: #FFFFFF;
-  box-shadow: 5px 5px 10px rgba(46,46,46,0.5);
-  border-radius: 3px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+  border-radius: 0px;
   color: var(--jp-ui-font-color1);
   transform: translateX(-40%) translateY(-58%);
 }

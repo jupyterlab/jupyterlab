@@ -44,6 +44,11 @@
 }
 
 
+.jp-DragIcon {
+  margin-right: 4px;
+}
+
+
 .jp-EditIcon {
   background-image: url(icons/md/edit.svg);
 }
