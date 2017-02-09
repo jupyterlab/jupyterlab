@@ -61,7 +61,7 @@ function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebo
   // Add tooltip launch command.
   registry.addCommand(CommandIDs.launch, {
     execute: args => {
-      const notebook = args['notebook'] as boolean;
+      const notebook = !!(args && args['notebook']);
       let anchor: Widget | null = null;
       let editor: CodeEditor.IEditor | null = null;
       let kernel: Kernel.IKernel | null = null;

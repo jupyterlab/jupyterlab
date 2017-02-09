@@ -11,14 +11,8 @@ export * from './widget';
 export
 namespace CommandIDs {
   export
-  const consoleAttach = 'completer:console-attach';
+  const attach = 'completer:attach';
 
   export
-  const consoleInvoke = 'completer:console-invoke';
-
-  export
-  const notebookAttach = 'completer:notebook-attach';
-
-  export
-  const notebookInvoke = 'completer:notebook-invoke';
+  const invoke = 'completer:invoke';
 }

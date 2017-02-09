@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Kernel, Session
+} from '@jupyterlab/services';
+
+import {
   AttachedProperty
 } from 'phosphor/lib/core/properties';
 
@@ -18,11 +22,11 @@ import {
 } from '../application';
 
 import {
-  IConsoleTracker
+  ConsolePanel, IConsoleTracker
 } from '../console';
 
 import {
-  INotebookTracker
+  INotebookTracker, NotebookPanel
 } from '../notebook';
 
 import {
@@ -50,56 +54,79 @@ const shortcut = 'Tab';
 /**
  * An extension that registers consoles for code completion.
  */
-const consolePlugin: JupyterLabPlugin<void> = {
-  id: 'jupyter.extensions.console-completer',
-  requires: [IConsoleTracker],
+const core: JupyterLabPlugin<void> = {
+  id: 'jupyter.extensions.completer',
+  requires: [IConsoleTracker, INotebookTracker],
   autoStart: true,
-  activate: (app: JupyterLab, consoles: IConsoleTracker): void => {
+  activate: (app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebookTracker): void => {
     const { layout } = app.keymap;
     const interrupt = (instance: any, event: KeyboardEvent): boolean => {
       return Keymap.keystrokeForKeydownEvent(event, layout) === shortcut;
     };
 
-    // Create a handler for each console that is created.
-    consoles.widgetAdded.connect((sender, parent) => {
-      app.commands.execute(CommandIDs.consoleAttach, { id: parent.id });
-    });
-
-    app.commands.addCommand(CommandIDs.consoleAttach, {
+    app.commands.addCommand(CommandIDs.attach, {
       execute: args => {
+        const notebook = !!(args && args['notebook']);
         const id = args && (args['id'] as string);
         if (!id) {
           return;
         }
 
-        const parent = consoles.getWidgetById(id);
-        if (!parent) {
-          return;
+        let parent: NotebookPanel | ConsolePanel | null = null;
+        let kernel: Kernel.IKernel | null = null;
+        let anchor: Widget;
+
+        if (notebook) {
+          parent = notebooks.getWidgetById(id);
+          if (!parent) {
+            return;
+          }
+          kernel = parent.kernel;
+          anchor = parent.notebook;
+        } else {
+          parent = consoles.getWidgetById(id);
+          if (!parent) {
+            return;
+          }
+          kernel = parent.console.session.kernel;
+          anchor = parent.console;
         }
 
-        const session = parent.console.session;
-        const kernel = session.kernel;
         const model = new CompleterModel();
-        const anchor = parent.console;
         const completer = new CompleterWidget({ anchor, model });
         const handler = new CompletionHandler({ completer, interrupt, kernel });
 
         // Associate the handler with the parent widget.
         Private.handlers.set(parent, handler);
 
-        // Set the initial editor.
-        let cell = parent.console.prompt;
-        handler.editor = cell && cell.editor;
-
-        // Listen for prompt creation.
-        parent.console.promptCreated.connect((sender, cell) => {
+        if (notebook) {
+          // Set the initial editor.
+          let cell = (parent as NotebookPanel).notebook.activeCell;
           handler.editor = cell && cell.editor;
-        });
-
-        // Listen for kernel changes.
-        session.kernelChanged.connect((sender, kernel) => {
-          handler.kernel = kernel;
-        });
+          // Listen for active cell changes.
+          let signal = (parent as NotebookPanel).notebook.activeCellChanged;
+          signal.connect((sender, cell) => {
+            handler.editor = cell && cell.editor;
+          });
+          // Listen for kernel changes.
+          (parent as NotebookPanel).kernelChanged.connect((sender, kernel) => {
+            handler.kernel = kernel;
+          });
+        } else {
+          // Set the initial editor.
+          let cell = (parent as ConsolePanel).console.prompt;
+          handler.editor = cell && cell.editor;
+          // Listen for prompt creation.
+          let signal = (parent as ConsolePanel).console.promptCreated;
+          signal.connect((sender, cell) => {
+            handler.editor = cell && cell.editor;
+          });
+          // Listen for kernel changes.
+          let session = (parent as ConsolePanel).console.session;
+          session.kernelChanged.connect((sender, kernel) => {
+            handler.kernel = kernel;
+          });
+        }
 
         // Attach the completer widget.
         Widget.attach(completer, document.body);
@@ -113,9 +140,12 @@ const consolePlugin: JupyterLabPlugin<void> = {
       }
     });
 
-    app.commands.addCommand(CommandIDs.consoleInvoke, {
-      execute: () => {
-        const widget = consoles.currentWidget;
+    app.commands.addCommand(CommandIDs.invoke, {
+      execute: args => {
+        const notebook = !!(args && args['notebook']);
+        const widget = notebook ? notebooks.currentWidget
+          : consoles.currentWidget;
+
         if (!widget) {
           return;
         }
@@ -132,9 +162,28 @@ const consolePlugin: JupyterLabPlugin<void> = {
         handler.invoke();
       }
     });
+  }
+};
 
+
+/**
+ * An extension that registers consoles for code completion.
+ */
+const consolePlugin: JupyterLabPlugin<void> = {
+  id: 'jupyter.extensions.console-completer',
+  requires: [IConsoleTracker],
+  autoStart: true,
+  activate: (app: JupyterLab, consoles: IConsoleTracker): void => {
+    // Create a handler for each console that is created.
+    consoles.widgetAdded.connect((sender, parent) => {
+      const args = { id: parent.id, notebook: false };
+      app.commands.execute(CommandIDs.attach, args);
+    });
+
+    // Add console completer invocation key binding.
     app.keymap.addBinding({
-      command: CommandIDs.consoleInvoke,
+      command: CommandIDs.invoke,
+      args: { notebook: false },
       keys: [shortcut],
       selector: `.jp-ConsolePanel .${COMPLETABLE_CLASS}`
     });
@@ -149,85 +198,16 @@ const notebookPlugin: JupyterLabPlugin<void> = {
   requires: [INotebookTracker],
   autoStart: true,
   activate: (app: JupyterLab, notebooks: INotebookTracker): void => {
-    const { layout } = app.keymap;
-    const interrupt = (instance: any, event: KeyboardEvent): boolean => {
-      return Keymap.keystrokeForKeydownEvent(event, layout) === shortcut;
-    };
-
     // Create a handler for each notebook that is created.
     notebooks.widgetAdded.connect((sender, parent) => {
-      app.commands.execute(CommandIDs.notebookAttach, { id: parent.id });
+      const args = { id: parent.id, notebook: true };
+      app.commands.execute(CommandIDs.attach, args);
     });
 
-    app.commands.addCommand(CommandIDs.notebookAttach, {
-      execute: args => {
-        const id = args && (args['id'] as string);
-        if (!id) {
-          return;
-        }
-
-        const parent = notebooks.getWidgetById(id);
-        if (!parent) {
-          return;
-        }
-
-        const kernel = parent.kernel;
-        const model = new CompleterModel();
-        const anchor = parent.notebook;
-        const completer = new CompleterWidget({ anchor, model });
-        const handler = new CompletionHandler({ completer, interrupt, kernel });
-
-        // Associate the handler with the parent widget.
-        Private.handlers.set(parent, handler);
-
-        // Set the initial editor.
-        let cell = parent.notebook.activeCell;
-        handler.editor = cell && cell.editor;
-
-        // Listen for active cell changes.
-        parent.notebook.activeCellChanged.connect((sender, cell) => {
-          handler.editor = cell && cell.editor;
-        });
-
-        // Listen for kernel changes.
-        parent.kernelChanged.connect((sender, kernel) => {
-          handler.kernel = kernel;
-        });
-
-        // Attach the completer widget.
-        Widget.attach(completer, document.body);
-
-        // Listen for parent disposal.
-        parent.disposed.connect(() => {
-          model.dispose();
-          completer.dispose();
-          handler.dispose();
-        });
-      }
-    });
-
-    app.commands.addCommand(CommandIDs.notebookInvoke, {
-      execute: () => {
-        const widget = notebooks.currentWidget;
-        if (!widget) {
-          return;
-        }
-
-        const handler = Private.handlers.get(widget);
-        if (!handler) {
-          return;
-        }
-
-        if (handler.interrupter) {
-          handler.interrupter.dispose();
-        }
-
-        handler.invoke();
-      }
-    });
-
+    // Add notebook completer invocation key binding.
     app.keymap.addBinding({
-      command: CommandIDs.notebookInvoke,
+      command: CommandIDs.invoke,
+      args: { notebook: true },
       keys: [shortcut],
       selector: `.jp-Notebook .${COMPLETABLE_CLASS}`
     });
@@ -237,7 +217,7 @@ const notebookPlugin: JupyterLabPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [consolePlugin, notebookPlugin];
+const plugins: JupyterLabPlugin<any>[] = [core, consolePlugin, notebookPlugin];
 export default plugins;
 
 
