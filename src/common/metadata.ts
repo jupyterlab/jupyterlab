@@ -30,6 +30,10 @@ import {
 } from 'phosphor/lib/ui/vdom';
 
 import {
+  CodeEditor
+} from '../codeeditor';
+
+import {
   IChangedArgs
 } from '../common/interfaces';
 
@@ -43,6 +47,11 @@ const METADATA_CLASS = 'jp-MetadataEditor';
  * The class name added when the Metadata editor contains invalid JSON.
  */
 const ERROR_CLASS = 'jp-mod-error';
+
+/**
+ * The class name added to the editor host node.
+ */
+const HOST_CLASS = 'jp-MetadataEditor-host';
 
 /**
  * The class name added to the button area.
@@ -224,17 +233,21 @@ namespace Metadata {
     /**
      * Construct a new metadata editor.
      */
-    constructor() {
+    constructor(options: Editor.IOptions) {
       super({ node: Private.createMetadataNode() });
       this.addClass(METADATA_CLASS);
+      let host = this.node.getElementsByClassName(HOST_CLASS)[0] as HTMLElement;
+      let model = new CodeEditor.Model();
+      model.value.text = 'No data!';
+      model.mimeType = 'application/json';
+      model.value.changed.connect(this._onValueChanged, this);
+      this.editor = options.editorFactory({ host, model });
     }
 
     /**
-     * Get the text area used by the metadata editor.
+     * The code editor used by the editor.
      */
-    get textareaNode(): HTMLTextAreaElement {
-      return this.node.getElementsByTagName('textarea')[0];
-    }
+    readonly editor: CodeEditor.IEditor;
 
     /**
      * Get the revert button used by the metadata editor.
@@ -296,9 +309,6 @@ namespace Metadata {
      */
     handleEvent(event: Event): void {
       switch (event.type) {
-        case 'input':
-          this._evtInput(event);
-          break;
         case 'blur':
           this._evtBlur(event as FocusEvent);
           break;
@@ -314,9 +324,8 @@ namespace Metadata {
      * Handle `after-attach` messages for the widget.
      */
     protected onAfterAttach(msg: Message): void {
-      let node = this.textareaNode;
-      node.addEventListener('input', this);
-      node.addEventListener('blur', this);
+      let node = this.node.getElementsByClassName(HOST_CLASS)[0] as HTMLElement;
+      node.addEventListener('blur', this, true);
       this.revertButtonNode.hidden = true;
       this.commitButtonNode.hidden = true;
       this.revertButtonNode.addEventListener('click', this);
@@ -327,9 +336,8 @@ namespace Metadata {
      * Handle `before_detach` messages for the widget.
      */
     protected onBeforeDetach(msg: Message): void {
-      let node = this.textareaNode;
-      node.removeEventListener('input', this);
-      node.removeEventListener('blur', this);
+      let node = this.node.getElementsByClassName(HOST_CLASS)[0] as HTMLElement;
+      node.removeEventListener('blur', this, true);
       this.revertButtonNode.removeEventListener('click', this);
       this.commitButtonNode.removeEventListener('click', this);
     }
@@ -338,7 +346,7 @@ namespace Metadata {
      * Handle a change to the metadata of the active cell.
      */
     protected onMetadataChanged(msg: ChangeMessage) {
-      if (this._inputDirty || document.activeElement === this.textareaNode) {
+      if (this._inputDirty || this.editor.hasFocus()) {
         this._dataDirty = true;
         return;
       }
@@ -346,12 +354,15 @@ namespace Metadata {
     }
 
     /**
-     * Handle input events for the text area.
+     * Handle change events.
      */
-    private _evtInput(event: Event): void {
+    private _onValueChanged(): void {
+      if (this._changeGuard) {
+        return;
+      }
       let valid = true;
       try {
-        let value = JSON.parse(this.textareaNode.value);
+        let value = JSON.parse(this.editor.model.value.text);
         this.removeClass(ERROR_CLASS);
         this._inputDirty = !deepEqual(value, this._originalValue);
       } catch (err) {
@@ -392,9 +403,10 @@ namespace Metadata {
      * Merge the user content.
      */
     private _mergeContent(): void {
+      let model = this.editor.model;
       let current = this._getContent() as JSONObject;
       let old = this._originalValue;
-      let user = JSON.parse(this.textareaNode.value) as JSONObject;
+      let user = JSON.parse(model.value.text) as JSONObject;
       let owner = this.owner;
       // If it is in user and has changed from old, set in current.
       for (let key in user) {
@@ -443,22 +455,42 @@ namespace Metadata {
       this.revertButtonNode.hidden = true;
       this.commitButtonNode.hidden = true;
       this.removeClass(ERROR_CLASS);
-      let textarea = this.textareaNode;
+      let model = this.editor.model;
       let content = this._getContent();
+      this._changeGuard = true;
       if (content === void 0) {
-        textarea.value = 'No data!';
+        model.value.text = 'No data!';
         this._originalValue = {};
       } else {
         let value = JSON.stringify(content, null, 2);
-        textarea.value = value;
+        model.value.text = value;
         this._originalValue = content;
       }
+      this._changeGuard = false;
     }
 
     private _dataDirty = false;
     private _inputDirty = false;
     private _owner: IOwner | null = null;
     private _originalValue: JSONObject;
+    private _changeGuard = false;
+  }
+
+  /**
+   * The namespace for `Editor` static data.
+   */
+  export
+  namespace Editor {
+    /**
+     * The options used to initialize a metadata editor.
+     */
+    export
+    interface IOptions {
+      /**
+       * The editor factory used by the tool.
+       */
+      editorFactory: CodeEditor.Factory;
+    }
   }
 }
 
@@ -479,7 +511,7 @@ namespace Private {
         h.div({ className: BUTTON_AREA_CLASS },
           h.span({ className: REVERT_CLASS, title: cancelTitle }),
           h.span({ className: COMMIT_CLASS, title: confirmTitle })),
-        h.textarea({}))
+        h.div({ className: HOST_CLASS }))
     );
   }
 }

@@ -439,13 +439,14 @@ namespace CellTools {
     /**
      * Construct a new raw metadata tool.
      */
-    constructor() {
+    constructor(options: MetadataEditorTool.IOptions) {
       super();
+      let editorFactory = options.editorFactory;
       this.addClass(EDITOR_CLASS);
       let layout = this.layout = new PanelLayout();
       let header = Private.createMetadataHeader();
       layout.addWidget(header);
-      this.editor = new Metadata.Editor();
+      this.editor = new Metadata.Editor({ editorFactory });
       layout.addWidget(this.editor);
       header.addClass(COLLAPSED_CLASS);
       this.editor.addClass(COLLAPSED_CLASS);
@@ -520,6 +521,23 @@ namespace CellTools {
   }
 
   /**
+   * The namespace for `MetadataEditorTool` static data.
+   */
+  export
+  namespace MetadataEditorTool {
+    /**
+     * The options used to initialize a metadata editor tool.
+     */
+    export
+    interface IOptions {
+      /**
+       * The editor factory used by the tool.
+       */
+      editorFactory: CodeEditor.Factory;
+    }
+  }
+
+  /**
    * A cell tool that provides a selection for a given metadata key.
    */
   export
@@ -527,7 +545,7 @@ namespace CellTools {
     /**
      * Construct a new KeySelector.
      */
-    constructor(options: IKeySelectorOptions) {
+    constructor(options: KeySelector.IOptions) {
       super({ node: Private.createSelectorNode(options) });
       this.addClass(KEYSELECTOR_CLASS);
       this.key = options.key;
@@ -649,31 +667,36 @@ namespace CellTools {
     private _validCellTypes: string[];
   }
 
-
   /**
-   * The options used to initialize a keyselector.
+   * The namespace for `KeySelector` static data.
    */
   export
-  interface IKeySelectorOptions {
+  namespace KeySelector {
     /**
-     * The metadata key of interest.
+     * The options used to initialize a keyselector.
      */
-    key: string;
+    export
+    interface IOptions {
+      /**
+       * The metadata key of interest.
+       */
+      key: string;
 
-    /**
-     * The map of options to values.
-     */
-    optionsMap: { [key: string]: JSONValue };
+      /**
+       * The map of options to values.
+       */
+      optionsMap: { [key: string]: JSONValue };
 
-    /**
-     * The optional title of the selector - defaults to capitalized `key`.
-     */
-    title?: string;
+      /**
+       * The optional title of the selector - defaults to capitalized `key`.
+       */
+      title?: string;
 
-    /**
-     * The optional valid cell types - defaults to all valid types.
-     */
-    validCellTypes?: nbformat.CellType[];
+      /**
+       * The optional valid cell types - defaults to all valid types.
+       */
+      validCellTypes?: nbformat.CellType[];
+    }
   }
 
   /**
@@ -751,7 +774,7 @@ namespace Private {
    * Create the node for a KeySelector.
    */
   export
-  function createSelectorNode(options: CellTools.IKeySelectorOptions): HTMLElement {
+  function createSelectorNode(options: CellTools.KeySelector.IOptions): HTMLElement {
     let name = options.key;
     let title = (
       options.title || name[0].toLocaleUpperCase() + name.slice(1)
