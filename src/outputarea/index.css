@@ -46,7 +46,7 @@
 
 
 .jp-Output-stdinInput {
-  font-family: monospace;
+  font-family: var(--jp-code-font-family);
   font-size: inherit;
   color: inherit;
   width: auto;
@@ -66,7 +66,7 @@
 
 .jp-Output-prompt {
   color: var(--jp-private-outputarea-prompt-color);
-  font-family: monospace;
+  font-family: var(--jp-code-font-family);
   text-align: right;
   vertical-align: middle;
   padding: var(--jp-code-padding);

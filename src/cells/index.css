@@ -16,7 +16,7 @@
   --jp-private-cell-prompt-width: 90px;
   --jp-private-cell-inprompt-color: #303F9F;
   --jp-private-cell-outprompt-color: #D84315;
-  --jp-private-cell-font-family: 'Helvetica';
+  --jp-private-cell-font-family: var(--jp-ui-font-family);
   --jp-private-cell-prompt-letter-spacing: 2px;
 }
 

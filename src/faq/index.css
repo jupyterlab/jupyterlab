@@ -5,7 +5,7 @@
 
 
 .jp-FAQ {
-  font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  font-family: var(--jp-ui-font-family);
   outline: none;
   overflow-y: auto;
 }
