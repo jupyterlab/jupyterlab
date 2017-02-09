@@ -309,19 +309,21 @@ class ApplicationShell extends Widget {
   }
 
   /*
-   * Activate the next tab in the panel of the currently active tab.
+   * Activate the next Tab in the active TabBar.
   */
   activateNextTab(): void {
-    let current = this._dockPanel.currentWidget;
+    let current = this._currentTabBar();
     if (current) {
-      let title = current.title;
-      let tabBar = find(this._dockPanel.tabBars(), bar => contains(bar.titles, title));
-      if (tabBar) {
-        let ci = tabBar.currentIndex;
-        if (ci !== -1) {
-          if (ci < (tabBar.titles.length-1)) {
-            tabBar.currentIndex += 1;
-            tabBar.currentTitle.owner.activate();
+      let ci = current.currentIndex;
+      if (ci !== -1) {
+        if (ci < (current.titles.length-1)) {
+          current.currentIndex += 1;
+          current.currentTitle.owner.activate();
+        } else if (ci === (current.titles.length-1)) {
+          let nextBar = this._nextTabBar();
+          if (nextBar) {
+            nextBar.currentIndex = 0;
+            nextBar.currentTitle.owner.activate();
           }
         }
       }
@@ -329,30 +331,23 @@ class ApplicationShell extends Widget {
   }
 
   /*
-   * Activate the previous tab in the panel of the currently active tab.
+   * Activate the previous Tab in the active TabBar.
   */
   activatePreviousTab(): void {
-    let current = this._dockPanel.currentWidget;
+    let current = this._currentTabBar();
     if (current) {
-      let title = current.title;
-      let tabBar = find(this._dockPanel.tabBars(), bar => contains(bar.titles, title));
-      if (tabBar) {
-        let ci = tabBar.currentIndex;
-        if (ci !== -1) {
-          if (ci > 0) {
-            tabBar.currentIndex -= 1;
-            tabBar.currentTitle.owner.activate();
-          } 
-          // else if (ci === 0) {
-          //   let prevBar = null;
-          //   each(this._dockPanel.tabBars(), (bar) => {
-          //     if (bar.title === title && (prevBar === null)) {
-          //       prevVar = bar;
-          //       this._dockPanel.tab
-          //     }
-          //     prevBar = bar;
-          //   });
-          // }
+      let ci = current.currentIndex;
+      if (ci !== -1) {
+        if (ci > 0) {
+          current.currentIndex -= 1;
+          current.currentTitle.owner.activate();
+        } else if (ci === 0) {
+          let prevBar = this._previousTabBar();
+          if (prevBar) {
+            let len = prevBar.titles.length;
+            prevBar.currentIndex = len-1;
+            prevBar.currentTitle.owner.activate();
+          }
         }
       }
     }
@@ -390,6 +385,60 @@ class ApplicationShell extends Widget {
     this._leftHandler.sideBar.currentChanged.connect(this._save, this);
     this._rightHandler.sideBar.currentChanged.connect(this._save, this);
   }
+
+  /*
+   * Return the TabBar that has the currently active Widget or undefined.
+   */
+  private _currentTabBar(): TabBar {
+    let current = this._dockPanel.currentWidget;
+    if (current) {
+      let title = current.title;
+      let tabBar = find(this._dockPanel.tabBars(), bar => contains(bar.titles, title));
+      return tabBar
+    }
+    return void 0;
+  }
+
+  /*
+   * Return the TabBar previous to the current TabBar (see above) or undefined.
+   */
+  private _previousTabBar(): TabBar {
+    let current = this._currentTabBar();
+    if (current) {
+      let bars = toArray<TabBar>(this._dockPanel.tabBars());
+      let len = bars.length;
+      let ci = bars.indexOf(current);
+      let prevBar: TabBar = null;
+      if (ci > 0) {
+        prevBar = bars[ci-1];
+      } else if (ci === 0) {
+        prevBar = bars[len-1];
+      }
+      return prevBar;
+    }
+    return void 0;
+  }
+
+  /*
+   * Return the TabBar next to the current TabBar (see above) or undefined.
+   */
+  private _nextTabBar(): TabBar {
+    let current = this._currentTabBar();
+    if (current) {
+      let bars = toArray<TabBar>(this._dockPanel.tabBars());
+      let len = bars.length;
+      let ci = bars.indexOf(current);
+      let nextBar: TabBar = null;
+      if (ci < (len-1)) {
+        nextBar = bars[ci+1];
+      } else if (ci === (len-1)) {
+        nextBar = bars[0];
+      }
+      return nextBar;
+    }
+    return void 0;
+  }
+
 
   /**
    * Save the dehydrated state of the application shell.
