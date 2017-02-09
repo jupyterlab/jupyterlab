@@ -1559,18 +1559,18 @@ namespace DirListing {
     createDragImage(node: HTMLElement, count: number, model: Contents.IModel): HTMLElement {
       let dragImage = node.cloneNode(true) as HTMLElement;
       let modified = utils.findElement(dragImage, ITEM_MODIFIED_CLASS);
-      var iconNode = utils.findElement(dragImage, ITEM_ICON_CLASS);
+      let iconNode = utils.findElement(dragImage, ITEM_ICON_CLASS);
       dragImage.removeChild(modified as HTMLElement);
       if (model) {
         switch (model.type) {
           case 'directory':
-            iconNode.className = MATERIAL_ICON_CLASS + ' ' + FOLDER_MATERIAL_ICON_CLASS + ' ' + DRAG_ICON_CLASS;
+            iconNode.className = `${MATERIAL_ICON_CLASS} ${FOLDER_MATERIAL_ICON_CLASS} ${DRAG_ICON_CLASS}`;
             break;
           case 'notebook':
-            iconNode.className = MATERIAL_ICON_CLASS + ' ' + NOTEBOOK_MATERIAL_ICON_CLASS + ' ' + DRAG_ICON_CLASS;
+            iconNode.className = `${MATERIAL_ICON_CLASS} ${NOTEBOOK_MATERIAL_ICON_CLASS} ${DRAG_ICON_CLASS}`;
             break;
           default:
-            iconNode.className = MATERIAL_ICON_CLASS + ' ' + FILE_TYPE_CLASS + ' ' + DRAG_ICON_CLASS;
+            iconNode.className = `${MATERIAL_ICON_CLASS} ${FILE_TYPE_CLASS} ${DRAG_ICON_CLASS}`;
             break;
         }
       }
