@@ -85,14 +85,14 @@ describe('notebook/notebook/actions', () => {
         expect(newSource).to.be(source);
       });
 
-      it('should remove leading white space in the second cell', () => {
+      it('should preserve leading white space in the second cell', () => {
         let cell = widget.activeCell;
         let source = 'this\n\n   is a test';
         cell.model.value.text = source;
         let editor = cell.editor;
         editor.setCursorPosition(editor.getPositionAt(4));
         NotebookActions.splitCell(widget);
-        expect(widget.activeCell.model.value.text).to.be('is a test');
+        expect(widget.activeCell.model.value.text).to.be('   is a test');
       });
 
       it('should clear the existing selection', () => {
