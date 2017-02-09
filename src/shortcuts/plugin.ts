@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin
+  JupyterLab, JupyterLabPlugin, CommandIDs as ApplicationCommandIDs
 } from '../application';
 
 import {
@@ -70,6 +70,16 @@ const SHORTCUTS = [
     command: CommandPaletteCommandIDs.activate,
     selector: 'body',
     keys: ['Accel Shift P']
+  },
+  {
+    command: ApplicationCommandIDs.activateNextTab,
+    selector: 'body',
+    keys: ['Accel ArrowRight']
+  },
+  {
+    command: ApplicationCommandIDs.activatePreviousTab,
+    selector: 'body',
+    keys: ['Accel ArrowLeft']
   },
   {
     command: ConsoleCommandIDs.run,

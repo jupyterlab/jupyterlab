@@ -32,6 +32,12 @@ export
 namespace CommandIDs {
   export
   const closeAll = 'main-jupyterlab:close-all';
+
+  export
+  const activateNextTab = 'main-jupyterlab:activate-next-tab';
+
+  export
+  const activatePreviousTab = 'main-jupyterlab:activate-previous-tab';
 };
 
 
