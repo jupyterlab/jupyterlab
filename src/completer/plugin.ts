@@ -33,6 +33,16 @@ import {
 
 /**
  * The keyboard shortcut used to invoke a completer.
+ *
+ * #### Notes
+ * The limitation of only supporting a single character completer invocation
+ * shortcut stems from the fact that the current application-level APIs only
+ * support adding shortcuts that are processed in the bubble phase of keydown
+ * events.
+ * Therefore, TODO: after upgrading to phosphor 1.0
+ * - remove the `interrupt` function in the invoke commands
+ * - switch the invoke commands to be processed in the capture phase
+ * - remove the `shortcut` const and allow arbitrary shortcuts
  */
 const shortcut = 'Tab';
 
