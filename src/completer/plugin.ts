@@ -2,6 +2,14 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  AttachedProperty
+} from 'phosphor/lib/core/properties';
+
+import {
+  Keymap
+} from 'phosphor/lib/ui/keymap';
+
+import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
@@ -18,8 +26,15 @@ import {
 } from '../notebook';
 
 import {
+  CommandIDs, COMPLETABLE_CLASS,
   CompleterModel, CompleterWidget, CompletionHandler
 } from './';
+
+
+/**
+ * The keyboard shortcut used to invoke a completer.
+ */
+const shortcut = 'Tab';
 
 
 /**
@@ -30,13 +45,21 @@ const consolePlugin: JupyterLabPlugin<void> = {
   requires: [IConsoleTracker],
   autoStart: true,
   activate: (app: JupyterLab, consoles: IConsoleTracker): void => {
+    const { layout } = app.keymap;
+    const interrupt = (instance: any, event: KeyboardEvent): boolean => {
+      return Keymap.keystrokeForKeydownEvent(event, layout) === shortcut;
+    };
+
     // Create a handler for each console that is created.
     consoles.widgetAdded.connect((sender, parent) => {
       const session = parent.console.session;
       const kernel = session.kernel;
       const model = new CompleterModel();
       const completer = new CompleterWidget({ anchor: parent.console, model });
-      const handler = new CompletionHandler({ completer, kernel });
+      const handler = new CompletionHandler({ completer, interrupt, kernel });
+
+      // Associate the handler with the parent widget.
+      Private.handlers.set(parent, handler);
 
       // Set the initial editor.
       let cell = parent.console.prompt;
@@ -62,6 +85,24 @@ const consolePlugin: JupyterLabPlugin<void> = {
         handler.dispose();
       });
     });
+
+    app.commands.addCommand(CommandIDs.invokeConsole, {
+      execute: () => {
+        const handler = Private.handlers.get(consoles.currentWidget);
+        if (!handler) {
+          return;
+        }
+        if (handler.interrupter) {
+          handler.interrupter.dispose();
+        }
+        handler.invoke();
+      }
+    });
+    app.keymap.addBinding({
+      command: CommandIDs.invokeConsole,
+      keys: [shortcut],
+      selector: `.jp-ConsolePanel .${COMPLETABLE_CLASS}`
+    });
   }
 };
 
@@ -73,12 +114,20 @@ const notebookPlugin: JupyterLabPlugin<void> = {
   requires: [INotebookTracker],
   autoStart: true,
   activate: (app: JupyterLab, notebooks: INotebookTracker): void => {
+    const { layout } = app.keymap;
+    const interrupt = (instance: any, event: KeyboardEvent): boolean => {
+      return Keymap.keystrokeForKeydownEvent(event, layout) === shortcut;
+    };
+
     // Create a handler for each notebook that is created.
     notebooks.widgetAdded.connect((sender, parent) => {
       const kernel = parent.kernel;
       const model = new CompleterModel();
       const completer = new CompleterWidget({ anchor: parent.notebook, model });
-      const handler = new CompletionHandler({ completer, kernel });
+      const handler = new CompletionHandler({ completer, interrupt, kernel });
+
+      // Associate the handler with the parent widget.
+      Private.handlers.set(parent, handler);
 
       // Set the initial editor.
       let cell = parent.notebook.activeCell;
@@ -104,6 +153,24 @@ const notebookPlugin: JupyterLabPlugin<void> = {
         handler.dispose();
       });
     });
+
+    app.commands.addCommand(CommandIDs.invokeNotebook, {
+      execute: () => {
+        const handler = Private.handlers.get(notebooks.currentWidget);
+        if (!handler) {
+          return;
+        }
+        if (handler.interrupter) {
+          handler.interrupter.dispose();
+        }
+        handler.invoke();
+      }
+    });
+    app.keymap.addBinding({
+      command: CommandIDs.invokeNotebook,
+      keys: [shortcut],
+      selector: `.jp-Notebook .${COMPLETABLE_CLASS}`
+    });
   }
 };
 
@@ -112,3 +179,17 @@ const notebookPlugin: JupyterLabPlugin<void> = {
  */
 const plugins: JupyterLabPlugin<any>[] = [consolePlugin, notebookPlugin];
 export default plugins;
+
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * A property that associates completion handlers with their referent widgets.
+   */
+  export
+  const handlers = new AttachedProperty<Widget, CompletionHandler>({
+    name: 'handler'
+  });
+}
