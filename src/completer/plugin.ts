@@ -57,7 +57,7 @@ const consolePlugin: JupyterLabPlugin<void> = {
 
     app.commands.addCommand(CommandIDs.consoleAttach, {
       execute: args => {
-        const id = args['id'] as string;
+        const id = args && (args['id'] as string);
         if (!id) {
           return;
         }
@@ -105,13 +105,20 @@ const consolePlugin: JupyterLabPlugin<void> = {
 
     app.commands.addCommand(CommandIDs.consoleInvoke, {
       execute: () => {
-        const handler = Private.handlers.get(consoles.currentWidget);
+        const widget = consoles.currentWidget;
+        if (!widget) {
+          return;
+        }
+
+        const handler = Private.handlers.get(widget);
         if (!handler) {
           return;
         }
+
         if (handler.interrupter) {
           handler.interrupter.dispose();
         }
+
         handler.invoke();
       }
     });
@@ -144,7 +151,7 @@ const notebookPlugin: JupyterLabPlugin<void> = {
 
     app.commands.addCommand(CommandIDs.notebookAttach, {
       execute: args => {
-        const id = args['id'] as string;
+        const id = args && (args['id'] as string);
         if (!id) {
           return;
         }
@@ -191,13 +198,20 @@ const notebookPlugin: JupyterLabPlugin<void> = {
 
     app.commands.addCommand(CommandIDs.notebookInvoke, {
       execute: () => {
-        const handler = Private.handlers.get(notebooks.currentWidget);
+        const widget = notebooks.currentWidget;
+        if (!widget) {
+          return;
+        }
+
+        const handler = Private.handlers.get(widget);
         if (!handler) {
           return;
         }
+
         if (handler.interrupter) {
           handler.interrupter.dispose();
         }
+
         handler.invoke();
       }
     });
