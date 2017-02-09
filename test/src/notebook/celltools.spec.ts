@@ -20,6 +20,10 @@ import {
 } from 'simulate-event';
 
 import {
+  CodeMirrorEditorFactory
+} from '../../../lib/codemirror';
+
+import {
   Metadata
 } from '../../../lib/common/metadata';
 
@@ -263,29 +267,31 @@ describe('notebook/celltools', () => {
 
   describe('CellTools.MetadataEditorTool', () => {
 
+    const editorFactory = new CodeMirrorEditorFactory().newInlineEditor;
+
     it('should create a new metadata editor tool', () => {
-      let tool = new CellTools.MetadataEditorTool();
+      let tool = new CellTools.MetadataEditorTool({ editorFactory });
       expect(tool).to.be.a(CellTools.MetadataEditorTool);
     });
 
     it('should handle a change to the active cell', () => {
-      let tool = new CellTools.MetadataEditorTool();
+      let tool = new CellTools.MetadataEditorTool({ editorFactory });
       celltools.addItem({ tool });
-      let textarea = tool.editor.textareaNode;
-      expect(textarea.value).to.be('No data!');
+      let model = tool.editor.model;
+      expect(model.value.text).to.be('No data!');
       simulate(panel0.node, 'focus');
-      expect(JSON.stringify(textarea.value)).to.be.ok();
+      expect(JSON.stringify(model.value.text)).to.ok();
     });
 
     it('should handle a change to the metadata', () => {
-      let tool = new CellTools.MetadataEditorTool();
+      let tool = new CellTools.MetadataEditorTool({ editorFactory });
       celltools.addItem({ tool });
-      let textarea = tool.editor.textareaNode;
       simulate(panel0.node, 'focus');
-      let previous = textarea.value;
+      let model = tool.editor.model;
+      let previous = model.value.text;
       let cursor = celltools.activeCell.model.getMetadata('foo');
       cursor.setValue(1);
-      expect(textarea.value).to.not.be(previous);
+      expect(model.value.text).to.not.be(previous);
     });
 
   });
