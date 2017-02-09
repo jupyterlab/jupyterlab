@@ -76,8 +76,8 @@ namespace NotebookActions {
     if (clone0.type === 'code') {
       (clone0 as ICodeCellModel).outputs.clear();
     }
-    clone0.value.text = orig.slice(0, offset);
-    clone1.value.text = orig.slice(offset).replace(/^\s+/g, '');
+    clone0.value.text = orig.slice(0, offset).replace(/^\n+/, '').replace(/\n+$/, '');
+    clone1.value.text = orig.slice(offset).replace(/^\n+/, '').replace(/\n+$/, '');
 
     // Make the changes while preserving history.
     let cells = nbModel.cells;
