@@ -92,7 +92,6 @@
   display: flex;
   flex-direction: row;
   color: var(--jp-content-font-color1);
-  padding: var(--jp-code-padding)
 }
 
 
