@@ -253,7 +253,7 @@ describe('common/metadata', () => {
 
       it('should update the text area value', () => {
         let model = editor.editor.model;
-        expect(model.value.text).to.be('');
+        expect(model.value.text).to.be('No data!');
         editor.owner = new RawCellModel({});
         expect(model.value.text).to.be('{}');
       });
@@ -343,9 +343,9 @@ describe('common/metadata', () => {
 
       context('blur', () => {
 
-        it('should handle blur events on the text area node', () => {
+        it('should handle blur events on the host node', () => {
           editor.editor.focus();
-          simulate(document.body, 'focus');
+          simulate(editor.editorHostNode, 'blur');
           expect(editor.events).to.contain('blur');
         });
 
@@ -355,7 +355,7 @@ describe('common/metadata', () => {
           setValue(editor, 'foo', 1);
           let model = editor.editor.model;
           expect(model.value.text).to.be('{}');
-          simulate(document.body, 'focus');
+          simulate(editor.editorHostNode, 'blur');
           expect(model.value.text).to.be('{\n  "foo": 1\n}');
         });
 
@@ -365,7 +365,7 @@ describe('common/metadata', () => {
           setValue(editor, 'foo', 1);
           let model = editor.editor.model;
           expect(model.value.text).to.be('foo');
-          simulate(document.body, 'focus');
+          simulate(editor.editorHostNode, 'blur');
           expect(model.value.text).to.be('foo');
           expect(editor.commitButtonNode.hidden).to.be(true);
           expect(editor.revertButtonNode.hidden).to.be(false);
@@ -444,7 +444,7 @@ describe('common/metadata', () => {
           setValue(editor, 'bar', 1);
           setInput(editor, '{"foo": 1}');
           simulate(editor.commitButtonNode, 'click');
-          expect(editor.model.value.text).to.be('{"foo": 1}');
+          expect(editor.model.value.text).to.be('{\n  "foo": 1\n}');
         });
 
         it('should allow a key to be removed programmatically that was not set by the user', () => {
@@ -478,7 +478,7 @@ describe('common/metadata', () => {
         Widget.attach(editor, document.body);
         expect(editor.methods).to.contain('onAfterAttach');
         editor.editor.focus();
-        simulate(document.body, 'focus');
+        simulate(editor.editorHostNode, 'blur');
         simulate(editor.revertButtonNode, 'click');
         simulate(editor.commitButtonNode, 'click');
         expect(editor.events).to.eql(['blur', 'click', 'click']);
@@ -493,7 +493,7 @@ describe('common/metadata', () => {
         Widget.detach(editor);
         expect(editor.methods).to.contain('onBeforeDetach');
         editor.editor.focus();
-        simulate(document.body, 'focus');
+        simulate(editor.editorHostNode, 'blur');
         simulate(editor.revertButtonNode, 'click');
         simulate(editor.commitButtonNode, 'click');
         expect(editor.events).to.eql([]);
@@ -543,6 +543,7 @@ describe('common/metadata', () => {
           oldValue: 1,
           newValue: 2
         });
+        editor.editor.focus();
         editor.processMessage(message);
         expect(editor.methods).to.contain('onMetadataChanged');
         expect(editor.model.value.text).to.be('{}');
