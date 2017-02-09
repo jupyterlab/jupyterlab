@@ -102,7 +102,7 @@ describe('common/instancetracker', () => {
       it('should be updated if when the widget is focused', () => {
         let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
         let widget = new Widget();
-        widget.tabIndex = -1;
+        widget.node.tabIndex = -1;
         tracker.add(widget);
         Widget.attach(widget, document.body);
         expect(tracker.currentWidget).to.be(null);
