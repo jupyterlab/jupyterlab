@@ -71,6 +71,13 @@ interface IInstanceTracker<T extends Widget> extends IDisposable {
   readonly widgetAdded: ISignal<this, T>;
 
   /**
+   * Get a widget with a specified ID that is held by the tracker.
+   *
+   * @param - id The ID string of the widget.
+   */
+  getWidgetById(id: string): T | null;
+
+  /**
    * Iterate through each widget in the tracker.
    *
    * @param fn - The function to call on each widget.
@@ -221,6 +228,25 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     this._tracker = null;
     clearSignalData(this);
     tracker.dispose();
+  }
+
+  /**
+   * Get a widget with a specified ID that is held by the tracker.
+   *
+   * @param - id The ID string of the widget.
+   */
+  getWidgetById(id: string): T | null {
+    let result: T = null;
+    each(this._tracker.widgets, widget => {
+      // If a result has already been found, short circuit.
+      if (result) {
+        return;
+      }
+      if (widget.id === id) {
+        result = widget;
+      }
+    });
+    return result;
   }
 
   /**
