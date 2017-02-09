@@ -20,6 +20,10 @@ import {
 } from 'simulate-event';
 
 import {
+  CodeMirrorEditorFactory
+} from '../../../lib/codemirror';
+
+import {
   Metadata
 } from '../../../lib/common/metadata';
 
@@ -74,10 +78,7 @@ function setValue(editor: Metadata.Editor, name: string, value: JSONValue): void
  * Set an input value on a metadata editor.
  */
 function setInput(editor: Metadata.Editor, value: string): void {
-  let node = editor.textareaNode;
-  node.focus();
-  node.value = value;
-  simulate(node, 'input');
+  editor.editor.model.value.text = value;
 }
 
 
@@ -195,9 +196,10 @@ describe('common/metadata', () => {
   describe('Metadata.Editor', () => {
 
     let editor: LogEditor;
+    const editorFactory = new CodeMirrorEditorFactory().newInlineEditor;
 
     beforeEach(() => {
-      editor = new LogEditor();
+      editor = new LogEditor({ editorFactory });
     });
 
     afterEach(() => {
@@ -207,16 +209,16 @@ describe('common/metadata', () => {
     describe('#constructor', () => {
 
       it('should create a new metadata editor', () => {
-        let newEditor = new Metadata.Editor();
+        let newEditor = new Metadata.Editor({ editorFactory });
         expect(newEditor).to.be.a(Metadata.Editor);
       });
 
     });
 
-    describe('#textareaNode', () => {
+    describe('#editorHostNode', () => {
 
-      it('should be the text area used by the editor', () => {
-        expect(editor.textareaNode.localName).to.be('textarea');
+      it('should be the editor host node used by the editor', () => {
+        expect(editor.editorHostNode.classList).to.contain('jp-MetadataEditor-host');
       });
 
     });
@@ -250,11 +252,10 @@ describe('common/metadata', () => {
       });
 
       it('should update the text area value', () => {
-        let node = editor.textareaNode;
-        expect(node.value).to.be('');
-        let model = new RawCellModel({});
-        editor.owner = model;
-        expect(node.value).to.be('{}');
+        let model = editor.editor.model;
+        expect(model.value.text).to.be('No data!');
+        editor.owner = new RawCellModel({});
+        expect(model.value.text).to.be('{}');
       });
 
     });
@@ -263,17 +264,15 @@ describe('common/metadata', () => {
 
       it('should test whether the editor value is dirty', () => {
         expect(editor.isDirty).to.be(false);
-        let node = editor.textareaNode;
         Widget.attach(editor, document.body);
-        node.value = 'a';
-        simulate(node, 'input');
+        editor.editor.model.value.text = 'a';
         expect(editor.isDirty).to.be(true);
       });
 
       it('should be dirty if the value changes while focused', () => {
         editor.owner = new RawCellModel({});
         Widget.attach(editor, document.body);
-        editor.textareaNode.focus();
+        editor.editor.focus();
         expect(editor.isDirty).to.be(false);
         let message = new Metadata.ChangeMessage({
           name: 'foo',
@@ -312,75 +311,62 @@ describe('common/metadata', () => {
 
     });
 
+    context('model.value.changed', () => {
+
+      it('should add the error flag if invalid JSON', () => {
+        setInput(editor, 'foo');
+        expect(editor.hasClass('jp-mod-error')).to.be(true);
+      });
+
+      it('should show the commit button if the value has changed', () => {
+        setInput(editor, '{"foo": 1}');
+        expect(editor.commitButtonNode.hidden).to.be(false);
+      });
+
+      it('should not show the commit button if the value is invalid', () => {
+        setInput(editor, 'foo');
+        expect(editor.commitButtonNode.hidden).to.be(true);
+      });
+
+      it('should show the revert button if the value has changed', () => {
+        setInput(editor, 'foo');
+        expect(editor.revertButtonNode.hidden).to.be(false);
+      });
+
+    });
+
     describe('#handleEvent()', () => {
 
       beforeEach(() => {
         Widget.attach(editor, document.body);
       });
 
-      context('input', () => {
-
-        it('should handle input events to the text area node', () => {
-          simulate(editor.textareaNode, 'input');
-          expect(editor.events).to.contain('input');
-        });
-
-        it('should add the error flag if invalid JSON', () => {
-          let node = editor.textareaNode;
-          node.value = 'foo';
-          simulate(node, 'input');
-          expect(editor.hasClass('jp-mod-error')).to.be(true);
-        });
-
-        it('should show the commit button if the value has changed', () => {
-          let node = editor.textareaNode;
-          node.value = '{"foo": 1}';
-          simulate(node, 'input');
-          expect(editor.commitButtonNode.hidden).to.be(false);
-        });
-
-        it('should not show the commit button if the value is invalid', () => {
-          let node = editor.textareaNode;
-          node.value = 'foo';
-          simulate(node, 'input');
-          expect(editor.commitButtonNode.hidden).to.be(true);
-        });
-
-        it('should show the revert button if the value has changed', () => {
-          let node = editor.textareaNode;
-          node.value = 'foo';
-          simulate(node, 'input');
-          expect(editor.revertButtonNode.hidden).to.be(false);
-        });
-
-      });
-
       context('blur', () => {
 
-        it('should handle blur events on the text area node', () => {
-          editor.textareaNode.focus();
-          simulate(editor.textareaNode, 'blur');
+        it('should handle blur events on the host node', () => {
+          editor.editor.focus();
+          simulate(editor.editorHostNode, 'blur');
           expect(editor.events).to.contain('blur');
         });
 
         it('should revert to current data if there was no change', () => {
-          let node = editor.textareaNode;
           editor.owner = new RawCellModel({});
-          node.focus();
+          editor.editor.focus();
           setValue(editor, 'foo', 1);
-          expect(node.value).to.be('{}');
-          simulate(node, 'blur');
-          expect(node.value).to.be('{\n  "foo": 1\n}');
+          let model = editor.editor.model;
+          expect(model.value.text).to.be('{}');
+          simulate(editor.editorHostNode, 'blur');
+          expect(model.value.text).to.be('{\n  "foo": 1\n}');
         });
 
         it('should not revert to current data if there was a change', () => {
-          let node = editor.textareaNode;
           editor.owner = new RawCellModel({});
           setInput(editor, 'foo');
           setValue(editor, 'foo', 1);
-          expect(node.value).to.be('foo');
-          simulate(node, 'blur');
-          expect(node.value).to.be('foo');
+          let model = editor.editor.model;
+          expect(model.value.text).to.be('foo');
+          simulate(editor.editorHostNode, 'blur');
+          expect(model.value.text).to.be('foo');
           expect(editor.commitButtonNode.hidden).to.be(true);
           expect(editor.revertButtonNode.hidden).to.be(false);
         });
@@ -395,20 +381,18 @@ describe('common/metadata', () => {
         });
 
         it('should revert the current data', () => {
-          let node = editor.textareaNode;
           editor.owner = new RawCellModel({});
           setInput(editor, 'foo');
           simulate(editor.revertButtonNode, 'click');
-          expect(node.value).to.be('{}');
+          expect(editor.model.value.text).to.be('{}');
         });
 
         it('should handle programmatic changes', () => {
-          let node = editor.textareaNode;
           editor.owner = new RawCellModel({});
           setInput(editor, 'foo');
           setValue(editor, 'foo', 1);
           simulate(editor.revertButtonNode, 'click');
-          expect(node.value).to.be('{\n  "foo": 1\n}');
+          expect(editor.model.value.text).to.be('{\n  "foo": 1\n}');
         });
 
         it('should handle click events on the commit button', () => {
@@ -417,36 +401,33 @@ describe('common/metadata', () => {
         });
 
         it('should bail if it is not valid JSON', () => {
-          let node = editor.textareaNode;
           editor.owner = new RawCellModel({});
           setInput(editor, 'foo');
           setValue(editor, 'foo', 1);
           simulate(editor.commitButtonNode, 'click');
-          expect(node.value).to.be('foo');
+          expect(editor.model.value.text).to.be('foo');
         });
 
         it('should override a key that was set programmatically', () => {
-          let node = editor.textareaNode;
           editor.owner = new RawCellModel({});
           setInput(editor, '{"foo": 2}');
           setValue(editor, 'foo', 1);
           simulate(editor.commitButtonNode, 'click');
-          expect(node.value).to.be('{\n  "foo": 2\n}');
+          expect(editor.model.value.text).to.be('{\n  "foo": 2\n}');
         });
 
         it('should allow a programmatic key to update', () => {
-          let node = editor.textareaNode;
           editor.owner = new RawCellModel({});
           setValue(editor, 'foo', 1);
           setValue(editor, 'bar', 1);
           setInput(editor, '{"foo":1, "bar": 2}');
           setValue(editor, 'foo', 2);
           simulate(editor.commitButtonNode, 'click');
-          expect(node.value).to.be('{\n  "foo": 2,\n  "bar": 2\n}');
+          let expected = '{\n  "foo": 2,\n  "bar": 2\n}';
+          expect(editor.model.value.text).to.be(expected);
         });
 
         it('should allow a key to be added by the user', () => {
-          let node = editor.textareaNode;
           editor.owner = new RawCellModel({});
           setValue(editor, 'foo', 1);
           setValue(editor, 'bar', 1);
@@ -454,40 +435,37 @@ describe('common/metadata', () => {
           setValue(editor, 'foo', 2);
           simulate(editor.commitButtonNode, 'click');
           let value = '{\n  "foo": 2,\n  "bar": 2,\n  "baz": 3\n}';
-          expect(node.value).to.be(value);
+          expect(editor.model.value.text).to.be(value);
         });
 
         it('should allow a key to be removed by the user', () => {
-          let node = editor.textareaNode;
           editor.owner = new RawCellModel({});
           setValue(editor, 'foo', 1);
           setValue(editor, 'bar', 1);
-          node.focus();
-          node.value = '{"foo": 1}';
+          setInput(editor, '{"foo": 1}');
           simulate(editor.commitButtonNode, 'click');
-          expect(node.value).to.be('{"foo": 1}');
+          expect(editor.model.value.text).to.be('{\n  "foo": 1\n}');
         });
 
         it('should allow a key to be removed programmatically that was not set by the user', () => {
-          let node = editor.textareaNode;
           editor.owner = new RawCellModel({});
           setValue(editor, 'foo', 1);
           setValue(editor, 'bar', 1);
           setInput(editor, '{"foo": 1, "bar": 3}');
           setValue(editor, 'foo', void 0);
           simulate(editor.commitButtonNode, 'click');
-          expect(node.value).to.be('{\n  "bar": 3\n}');
+          expect(editor.model.value.text).to.be('{\n  "bar": 3\n}');
         });
 
         it('should keep a key that was removed programmatically that was changed by the user', () => {
-          let node = editor.textareaNode;
           editor.owner = new RawCellModel({});
           setValue(editor, 'foo', 1);
           setValue(editor, 'bar', 1);
           setInput(editor, '{"foo": 2, "bar": 3}');
           setValue(editor, 'foo', void 0);
           simulate(editor.commitButtonNode, 'click');
-          expect(node.value).to.be('{\n  "foo": 2,\n  "bar": 3\n}');
+          let expected = '{\n  "foo": 2,\n  "bar": 3\n}';
+          expect(editor.model.value.text).to.be(expected);
         });
 
       });
@@ -499,12 +477,11 @@ describe('common/metadata', () => {
       it('should add event listeners', () => {
         Widget.attach(editor, document.body);
         expect(editor.methods).to.contain('onAfterAttach');
-        simulate(editor.textareaNode, 'input');
-        editor.textareaNode.focus();
-        simulate(editor.textareaNode, 'blur');
+        editor.editor.focus();
+        simulate(editor.editorHostNode, 'blur');
         simulate(editor.revertButtonNode, 'click');
         simulate(editor.commitButtonNode, 'click');
-        expect(editor.events).to.eql(['input', 'blur', 'click', 'click']);
+        expect(editor.events).to.eql(['blur', 'click', 'click']);
       });
 
     });
@@ -515,9 +492,8 @@ describe('common/metadata', () => {
         Widget.attach(editor, document.body);
         Widget.detach(editor);
         expect(editor.methods).to.contain('onBeforeDetach');
-        simulate(editor.textareaNode, 'input');
-        editor.textareaNode.focus();
-        simulate(editor.textareaNode, 'blur');
+        editor.editor.focus();
+        simulate(editor.editorHostNode, 'blur');
         simulate(editor.revertButtonNode, 'click');
         simulate(editor.commitButtonNode, 'click');
         expect(editor.events).to.eql([]);
@@ -535,16 +511,14 @@ describe('common/metadata', () => {
         });
         editor.processMessage(message);
         expect(editor.methods).to.contain('onMetadataChanged');
-        expect(editor.textareaNode.value).to.be('No data!');
+        expect(editor.model.value.text).to.be('No data!');
       });
 
       it('should bail if the input is dirty', () => {
         Widget.attach(editor, document.body);
         let model = new RawCellModel({});
         editor.owner = model;
-        let node = editor.textareaNode;
-        node.value = 'ha';
-        simulate(node, 'input');
+        setInput(editor, 'ha');
         let cursor = model.getMetadata('foo');
         cursor.setValue(2);
         let message = new Metadata.ChangeMessage({
@@ -554,14 +528,12 @@ describe('common/metadata', () => {
         });
         editor.processMessage(message);
         expect(editor.methods).to.contain('onMetadataChanged');
-        expect(node.value).to.be('ha');
+        expect(editor.model.value.text).to.be('ha');
       });
 
       it('should bail if the input is focused', () => {
         Widget.attach(editor, document.body);
-        let node = editor.textareaNode;
-        node.value = '{}';
-        node.focus();
+        setInput(editor, '{}');
         let model = new RawCellModel({});
         editor.owner = model;
         let cursor = model.getMetadata('foo');
@@ -571,9 +543,10 @@ describe('common/metadata', () => {
           oldValue: 1,
           newValue: 2
         });
+        editor.editor.focus();
         editor.processMessage(message);
         expect(editor.methods).to.contain('onMetadataChanged');
-        expect(node.value).to.be('{}');
+        expect(editor.model.value.text).to.be('{}');
       });
 
     });

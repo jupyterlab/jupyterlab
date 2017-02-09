@@ -118,7 +118,7 @@ const cellToolsPlugin: JupyterLabPlugin<ICellTools> = {
   provides: ICellTools,
   id: 'jupyter.extensions.cell-tools',
   autoStart: true,
-  requires: [IInstanceRestorer, INotebookTracker]
+  requires: [IInstanceRestorer, INotebookTracker, IEditorServices]
 };
 
 
@@ -132,7 +132,7 @@ export default plugins;
 /**
  * Activate the cell tools extension.
  */
-function activateCellTools(app: JupyterLab, restorer: IInstanceRestorer, tracker: INotebookTracker): Promise<ICellTools> {
+function activateCellTools(app: JupyterLab, restorer: IInstanceRestorer, tracker: INotebookTracker, editorServices: IEditorServices): Promise<ICellTools> {
   const namespace = 'cell-tools';
 
   const celltools = new CellTools({ tracker });
@@ -148,7 +148,8 @@ function activateCellTools(app: JupyterLab, restorer: IInstanceRestorer, tracker
   const nbConvert = CellTools.createNBConvertSelector();
   celltools.addItem({ tool: nbConvert, rank: 3 });
 
-  const metadataEditor = new CellTools.MetadataEditorTool();
+  const editorFactory = editorServices.factoryService.newInlineEditor;
+  const metadataEditor = new CellTools.MetadataEditorTool({ editorFactory });
   celltools.addItem({ tool: metadataEditor, rank: 4 });
 
   restorer.add(celltools, namespace);

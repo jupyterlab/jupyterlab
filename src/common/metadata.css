@@ -5,6 +5,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+
 .jp-MetadataEditor {
   padding-left: 10px;
   padding-right: 10px;
@@ -14,12 +15,16 @@
 }
 
 
-.jp-MetadataEditor textarea {
-  min-height: 100px;
+.jp-MetadataEditor-host {
+  flex: 1 1 auto;
+  border: var(--jp-border-width) solid #cfcfcf;
+  border-radius: 0px;
+  background: #f7f7f7;
+  min-height: 50px;
 }
 
 
-.jp-MetadataEditor.jp-mod-error textarea {
+.jp-MetadataEditor.jp-mod-error .jp-MetadataEditor-host {
   border-color: red;
   outline-color: red;
 }
