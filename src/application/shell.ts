@@ -677,6 +677,7 @@ namespace Private {
       }
       if (newWidget) {
         newWidget.show();
+        newWidget.activate();
       }
       if (newWidget) {
         document.body.setAttribute(`data-${this._side}Area`, newWidget.id);
