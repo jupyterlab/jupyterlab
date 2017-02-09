@@ -316,10 +316,10 @@ class ApplicationShell extends Widget {
     if (current) {
       let ci = current.currentIndex;
       if (ci !== -1) {
-        if (ci < (current.titles.length-1)) {
+        if (ci < current.titles.length-1) {
           current.currentIndex += 1;
           current.currentTitle.owner.activate();
-        } else if (ci === (current.titles.length-1)) {
+        } else if (ci === current.titles.length-1) {
           let nextBar = this._nextTabBar();
           if (nextBar) {
             nextBar.currentIndex = 0;
@@ -405,7 +405,7 @@ class ApplicationShell extends Widget {
   private _previousTabBar(): TabBar {
     let current = this._currentTabBar();
     if (current) {
-      let bars = toArray<TabBar>(this._dockPanel.tabBars());
+      let bars = toArray(this._dockPanel.tabBars());
       let len = bars.length;
       let ci = bars.indexOf(current);
       let prevBar: TabBar = null;
@@ -425,13 +425,13 @@ class ApplicationShell extends Widget {
   private _nextTabBar(): TabBar {
     let current = this._currentTabBar();
     if (current) {
-      let bars = toArray<TabBar>(this._dockPanel.tabBars());
+      let bars = toArray(this._dockPanel.tabBars());
       let len = bars.length;
       let ci = bars.indexOf(current);
       let nextBar: TabBar = null;
       if (ci < (len-1)) {
         nextBar = bars[ci+1];
-      } else if (ci === (len-1)) {
+      } else if (ci === len-1) {
         nextBar = bars[0];
       }
       return nextBar;
