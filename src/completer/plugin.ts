@@ -52,6 +52,39 @@ const shortcut = 'Tab';
 
 
 /**
+ * Initialize a parent console panel's completion handler.
+ */
+function initConsoleHandler(panel: ConsolePanel, handler: CompletionHandler) {
+  // Set the initial editor.
+  let cell = panel.console.prompt;
+  handler.editor = cell && cell.editor;
+  // Listen for prompt creation.
+  panel.console.promptCreated.connect((sender, cell) => {
+    handler.editor = cell && cell.editor;
+  });
+  // Listen for kernel changes.
+  panel.console.session.kernelChanged.connect((sender, kernel) => {
+    handler.kernel = kernel;
+  });
+}
+
+/**
+ * Initialize a parent notebook panel's completion handler.
+ */
+function initNotebookHandler(panel: NotebookPanel, handler: CompletionHandler) {
+  // Set the initial editor.
+  let cell = panel.notebook.activeCell;
+  handler.editor = cell && cell.editor;
+  // Listen for active cell changes.
+  panel.notebook.activeCellChanged.connect((sender, cell) => {
+    handler.editor = cell && cell.editor;
+  });
+  // Listen for kernel changes.
+  panel.kernelChanged.connect((sender, kernel) => { handler.kernel = kernel; });
+}
+
+
+/**
  * An extension that registers consoles for code completion.
  */
 const core: JupyterLabPlugin<void> = {
@@ -72,24 +105,20 @@ const core: JupyterLabPlugin<void> = {
           return;
         }
 
-        let parent: NotebookPanel | ConsolePanel | null = null;
         let kernel: Kernel.IKernel | null = null;
         let anchor: Widget;
+        let parent = notebook ? notebooks.getWidgetById(id)
+          : consoles.getWidgetById(id);
+        if (!parent) {
+          return;
+        }
 
         if (notebook) {
-          parent = notebooks.getWidgetById(id);
-          if (!parent) {
-            return;
-          }
-          kernel = parent.kernel;
-          anchor = parent.notebook;
+          kernel = (parent as NotebookPanel).kernel;
+          anchor = (parent as NotebookPanel).notebook;
         } else {
-          parent = consoles.getWidgetById(id);
-          if (!parent) {
-            return;
-          }
-          kernel = parent.console.session.kernel;
-          anchor = parent.console;
+          kernel = (parent as ConsolePanel).console.session.kernel;
+          anchor = (parent as ConsolePanel).console;
         }
 
         const model = new CompleterModel();
@@ -100,32 +129,9 @@ const core: JupyterLabPlugin<void> = {
         Private.handlers.set(parent, handler);
 
         if (notebook) {
-          // Set the initial editor.
-          let cell = (parent as NotebookPanel).notebook.activeCell;
-          handler.editor = cell && cell.editor;
-          // Listen for active cell changes.
-          let signal = (parent as NotebookPanel).notebook.activeCellChanged;
-          signal.connect((sender, cell) => {
-            handler.editor = cell && cell.editor;
-          });
-          // Listen for kernel changes.
-          (parent as NotebookPanel).kernelChanged.connect((sender, kernel) => {
-            handler.kernel = kernel;
-          });
+          initNotebookHandler(parent as NotebookPanel, handler);
         } else {
-          // Set the initial editor.
-          let cell = (parent as ConsolePanel).console.prompt;
-          handler.editor = cell && cell.editor;
-          // Listen for prompt creation.
-          let signal = (parent as ConsolePanel).console.promptCreated;
-          signal.connect((sender, cell) => {
-            handler.editor = cell && cell.editor;
-          });
-          // Listen for kernel changes.
-          let session = (parent as ConsolePanel).console.session;
-          session.kernelChanged.connect((sender, kernel) => {
-            handler.kernel = kernel;
-          });
+          initConsoleHandler(parent as ConsolePanel, handler);
         }
 
         // Attach the completer widget.
@@ -145,7 +151,6 @@ const core: JupyterLabPlugin<void> = {
         const notebook = !!(args && args['notebook']);
         const widget = notebook ? notebooks.currentWidget
           : consoles.currentWidget;
-
         if (!widget) {
           return;
         }
@@ -158,7 +163,6 @@ const core: JupyterLabPlugin<void> = {
         if (handler.interrupter) {
           handler.interrupter.dispose();
         }
-
         handler.invoke();
       }
     });
