@@ -236,11 +236,12 @@ namespace Metadata {
     constructor(options: Editor.IOptions) {
       super({ node: Private.createMetadataNode() });
       this.addClass(METADATA_CLASS);
-      let host = this.node.getElementsByClassName(HOST_CLASS)[0] as HTMLElement;
+      let host = this.editorHostNode;
       let model = new CodeEditor.Model();
       model.value.text = 'No data!';
       model.mimeType = 'application/json';
       model.value.changed.connect(this._onValueChanged, this);
+      this.model = model;
       this.editor = options.editorFactory({ host, model });
     }
 
@@ -248,6 +249,18 @@ namespace Metadata {
      * The code editor used by the editor.
      */
     readonly editor: CodeEditor.IEditor;
+
+    /**
+     * The code editor model used by the editor.
+     */
+    readonly model: CodeEditor.IModel;
+
+    /**
+     * Get the editor host node used by the metadata editor.
+     */
+    get editorHostNode(): HTMLElement {
+      return this.node.getElementsByClassName(HOST_CLASS)[0] as HTMLElement;
+    }
 
     /**
      * Get the revert button used by the metadata editor.
@@ -324,7 +337,7 @@ namespace Metadata {
      * Handle `after-attach` messages for the widget.
      */
     protected onAfterAttach(msg: Message): void {
-      let node = this.node.getElementsByClassName(HOST_CLASS)[0] as HTMLElement;
+      let node = this.editorHostNode;
       node.addEventListener('blur', this, true);
       this.revertButtonNode.hidden = true;
       this.commitButtonNode.hidden = true;
@@ -336,7 +349,7 @@ namespace Metadata {
      * Handle `before_detach` messages for the widget.
      */
     protected onBeforeDetach(msg: Message): void {
-      let node = this.node.getElementsByClassName(HOST_CLASS)[0] as HTMLElement;
+      let node = this.editorHostNode;
       node.removeEventListener('blur', this, true);
       this.revertButtonNode.removeEventListener('click', this);
       this.commitButtonNode.removeEventListener('click', this);
