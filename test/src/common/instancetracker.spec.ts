@@ -50,10 +50,9 @@ describe('common/instancetracker', () => {
         widget.node.tabIndex = -1;
         let called = false;
         tracker.currentChanged.connect(() => { called = true; });
-        tracker.add(widget);
         Widget.attach(widget, document.body);
-        expect(called).to.be(false);
-        simulate(widget.node, 'focus');
+        widget.node.focus();
+        tracker.add(widget);
         expect(called).to.be(true);
         Widget.detach(widget);
       });
