@@ -146,9 +146,11 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-cell-prompt-width: 90px;
   --jp-cell-prompt-font-family: var(--jp-ui-font-family);
   --jp-cell-prompt-letter-spacing: 3px;
-  --jp-cell-prompt-opacity: 0.5;
-  --jp-cell-inprompt-font-color: var(--md-blue-900);
-  --jp-cell-outprompt-font-color: var(--md-orange-900);
+  --jp-cell-prompt-opacity: 1.0;
+  /* This is MD Blue 900 with a different s+l */
+  --jp-cell-inprompt-font-color: hsl(216, 30%, 60%);
+  /* This is MD Orange 900 with a different s+l */
+  --jp-cell-outprompt-font-color: hsl(21, 30%, 60%);
   --jp-cell-padding: 5px;
 
   /* Notebook specific styles */
