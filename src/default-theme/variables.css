@@ -93,7 +93,6 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-code-padding: 5px;
   --jp-code-font-family: monospace;
 
-  --jp-notebook-scroll-padding: 100px;
 
   /* Layout
 
@@ -139,5 +138,9 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-info-color1: var(--md-cyan-500);
   --jp-info-color2: var(--md-cyan-300);
   --jp-info-color3: var(--md-cyan-100);
+
+  /* Notebook specific styles */
+
+  --jp-notebook-scroll-padding: 100px;
 
 }
