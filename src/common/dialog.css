@@ -138,7 +138,8 @@
 
 .jp-Dialog-input {
   flex: 1 1 auto;
-  padding: 7px;
+  padding-left: 7px;
+  padding-right: 7px;
   font-size: var(--jp-ui-font-size2);
   color: var(--jp-ui-font-color0);
   border: none;
@@ -176,6 +177,7 @@
   border-radius: 0px;
   outline: none;
   -webkit-appearance: none;
+  -moz-appearance: none;
   padding-left: 8px;
   background-image: url('../default-theme/images/down_caret.svg');
   background-repeat: no-repeat;
