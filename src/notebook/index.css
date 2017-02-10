@@ -34,16 +34,23 @@
 
 
 .jp-Notebook {
-  padding-left: var(--jp-private-notebook-padding);
-  padding-right: var(--jp-private-notebook-padding);
-  padding-top: var(--jp-private-notebook-padding);
-  padding-bottom: calc( 4 * var(--jp-private-notebook-padding) );
+  padding: var(--jp-private-notebook-padding);
   min-width: 50px;
   min-height: 50px;
   outline: none;
   overflow: auto;
   background: var(--jp-layout-color1);
 }
+
+
+.jp-Notebook::after {
+  content: ' ';
+  width: 100%;
+  min-height: 100px;
+  position: absolute;
+  transition: height .2s ease;
+}
+
 
 
 .jp-Notebook-panel {
