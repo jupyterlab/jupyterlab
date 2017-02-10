@@ -9,6 +9,7 @@
 
 
 :root {
+  --jp-notebook-scrollPadding: 100px;
   --jp-private-notebook-padding: 10px;
   --jp-private-notebook-dragImage-width: 90px;
   --jp-private-notebook-dragImage-height: 39px;
@@ -46,7 +47,7 @@
 .jp-Notebook::after {
   content: ' ';
   width: 100%;
-  min-height: 100px;
+  min-height: var(--jp-notebook-scrollPadding);
   position: absolute;
   transition: height .2s ease;
 }
