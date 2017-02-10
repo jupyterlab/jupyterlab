@@ -803,7 +803,7 @@ namespace Private {
   function createMetadataHeader(): Widget {
     let node = realize(
       h.div({ className: EDITOR_TITLE_CLASS },
-        h.label({}, 'Cell Metadata'),
+        h.label({}, 'Edit Metadata'),
         h.span({ className: TOGGLE_CLASS }))
     );
     return new Widget({ node });
