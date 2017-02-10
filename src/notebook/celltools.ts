@@ -488,6 +488,7 @@ namespace CellTools {
       } else {
         toggleNode.classList.remove(COLLAPSED_CLASS);
       }
+      this.editor.editor.refresh();
     }
 
     /**
@@ -495,6 +496,8 @@ namespace CellTools {
      */
     protected onAfterAttach(msg: Message): void {
       this.toggleNode.addEventListener('click', this);
+      let cell = this.parent.activeCell;
+      this.editor.owner = cell ? cell.model : null;
     }
 
     /**
@@ -800,7 +803,7 @@ namespace Private {
   function createMetadataHeader(): Widget {
     let node = realize(
       h.div({ className: EDITOR_TITLE_CLASS },
-        h.label({}, 'Cell Metadata'),
+        h.label({}, 'Edit Metadata'),
         h.span({ className: TOGGLE_CLASS }))
     );
     return new Widget({ node });

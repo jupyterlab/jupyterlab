@@ -359,6 +359,9 @@ namespace Metadata {
      * Handle a change to the metadata of the active cell.
      */
     protected onMetadataChanged(msg: ChangeMessage) {
+      if (this._changeGuard) {
+        return;
+      }
       if (this._inputDirty || this.editor.hasFocus()) {
         this._dataDirty = true;
         return;
@@ -370,14 +373,13 @@ namespace Metadata {
      * Handle change events.
      */
     private _onValueChanged(): void {
-      if (this._changeGuard) {
-        return;
-      }
       let valid = true;
       try {
         let value = JSON.parse(this.editor.model.value.text);
         this.removeClass(ERROR_CLASS);
-        this._inputDirty = !deepEqual(value, this._originalValue);
+        this._inputDirty = (
+          !this._changeGuard && !deepEqual(value, this._originalValue)
+        );
       } catch (err) {
         this.addClass(ERROR_CLASS);
         this._inputDirty = true;
@@ -406,7 +408,9 @@ namespace Metadata {
         this._setValue();
       } else if (target === this.commitButtonNode) {
         if (!this.commitButtonNode.hidden && !this.hasClass(ERROR_CLASS)) {
+          this._changeGuard = true;
           this._mergeContent();
+          this._changeGuard = false;
           this._setValue();
         }
       }
@@ -479,7 +483,10 @@ namespace Metadata {
         model.value.text = value;
         this._originalValue = content;
       }
+      this.editor.refresh();
       this._changeGuard = false;
+      this.commitButtonNode.hidden = true;
+      this.revertButtonNode.hidden = true;
     }
 
     private _dataDirty = false;
