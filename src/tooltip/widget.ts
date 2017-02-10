@@ -33,6 +33,11 @@ const TOOLTIP_CLASS = 'jp-Tooltip';
 const ANCHOR_CLASS = 'jp-Tooltip-anchor';
 
 /**
+ * The class name added to hidden elements.
+ */
+const HIDDEN_CLASS = 'p-mod-hidden';
+
+/**
  * The minimum height of a tooltip widget.
  */
 const MIN_HEIGHT = 20;
@@ -62,6 +67,7 @@ class TooltipWidget extends Widget {
     this.model = options.model;
     this.model.contentChanged.connect(this._onContentChanged, this);
     this.addClass(TOOLTIP_CLASS);
+    this.addClass(HIDDEN_CLASS);
     this.anchor.addClass(ANCHOR_CLASS);
   }
 
@@ -176,6 +182,7 @@ class TooltipWidget extends Widget {
     this._content = this.model.content;
     if (this._content) {
       (this.layout as PanelLayout).addWidget(this._content);
+      this.removeClass(HIDDEN_CLASS);
     }
     this.update();
   }
