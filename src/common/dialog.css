@@ -179,6 +179,6 @@
   padding-left: 8px;
   background-image: url('../default-theme/images/down_caret.svg');
   background-repeat: no-repeat;
-  background-position: 224px 50%;
+  background-position: right center;
   background-size: 20px;
 }

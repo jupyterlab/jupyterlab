@@ -221,8 +221,19 @@
 .jp-KeySelector select {
   flex: 1 1 auto;
   height: 32px;
+  font-size: var(--jp-ui-font-size1);
+  background: white;
+  color: var(--jp-ui-font-color0);
   border: none;
+  border-radius: 0px;
   outline: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-left: 8px;
+  background-image: url('../default-theme/images/down_caret.svg');
+  background-repeat: no-repeat;
+  background-position: right center;
+  background-size: 20px;
 }
 
 
