@@ -163,6 +163,7 @@ namespace NotebookActions {
     }
 
     widget.activeCellIndex -= offset;
+    widget.activate();
   }
 
   /**
@@ -214,6 +215,8 @@ namespace NotebookActions {
     // Deselect any remaining, undeletable cells. Do this even if we don't
     // delete anything so that users are aware *something* happened.
     widget.deselectAll();
+
+    widget.activate();
   }
 
   /**
@@ -236,6 +239,7 @@ namespace NotebookActions {
     let cell = model.contentFactory.createCodeCell({ });
     model.cells.insert(widget.activeCellIndex, cell);
     widget.deselectAll();
+    widget.activate();
   }
 
   /**
@@ -259,6 +263,7 @@ namespace NotebookActions {
     model.cells.insert(widget.activeCellIndex + 1, cell);
     widget.activeCellIndex++;
     widget.deselectAll();
+    widget.activate();
   }
 
   /**
@@ -287,6 +292,7 @@ namespace NotebookActions {
       }
     }
     cells.endCompoundOperation();
+    widget.activate();
   }
 
   /**
@@ -315,6 +321,7 @@ namespace NotebookActions {
       }
     }
     cells.endCompoundOperation();
+    widget.activate();
   }
 
   /**
@@ -366,6 +373,7 @@ namespace NotebookActions {
     });
     cells.endCompoundOperation();
     widget.deselectAll();
+    widget.activate();
   }
 
   /**
@@ -399,6 +407,7 @@ namespace NotebookActions {
     });
     widget.activeCellIndex = lastIndex;
     widget.deselectAll();
+    widget.activate();
 
     let promises: Promise<boolean>[] = [];
     each(selected, child => {
@@ -450,6 +459,7 @@ namespace NotebookActions {
       widget.activeCellIndex++;
     }
     widget.scrollToActiveCell();
+    widget.activate();
 
     return promise;
   }
@@ -651,6 +661,7 @@ namespace NotebookActions {
      } else {
        widget.deselectAll();
      }
+     widget.activate();
    }
 
   /**
@@ -731,6 +742,7 @@ namespace NotebookActions {
 
     widget.activeCellIndex += newCells.length;
     widget.deselectAll();
+    widget.activate();
   }
 
   /**
@@ -749,6 +761,7 @@ namespace NotebookActions {
     widget.mode = 'command';
     widget.model.cells.undo();
     widget.deselectAll();
+    widget.activate();
   }
 
   /**
@@ -767,6 +780,7 @@ namespace NotebookActions {
     widget.mode = 'command';
     widget.model.cells.redo();
     widget.deselectAll();
+    widget.activate();
   }
 
   /**
