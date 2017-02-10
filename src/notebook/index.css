@@ -17,6 +17,7 @@
   --jp-private-notebook-multiselected-color: var(--md-blue-50);
   --jp-private-notebook-active-color: var(--md-green-400);
   --jp-private-notebook-cell-border-color: #ABABAB;
+  --jp-private-notebook-left-border-width: 5px;
 }
 
 /*-----------------------------------------------------------------------------
@@ -52,33 +53,25 @@
 }
 
 
+.jp-Notebook .jp-Cell.jp-Notebook-cell {
+  overflow: visible
+}
+
+
 .jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected {
   border-color: var(--jp-private-notebook-cell-border-color);
-  /*border-left-width: var(--jp-border-width);*/
-  /*background: linear-gradient(to right, var(--jp-private-notebook-selected-color) -40px, var(--jp-private-notebook-selected-color) 5px, transparent 5px, transparent 100%);*/
 }
 
 
 .jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected:before {
   position: absolute;
   display: block;
-  z-index: 20;
-  top: -1px;
-  left: -1px;
-  width: 5px;
-  height: calc( 100% + 2px );
-  content: ' ';
+  top: calc( -1 * var(--jp-border-width) );
+  left: calc( -1 * var(--jp-border-width) );
+  width: var(--jp-private-notebook-left-border-width);
+  height: calc( 100% + calc( 2 * var(--jp-border-width) ) );
+  content: '';
   background: var(--jp-private-notebook-selected-color);
-}
-
-.jp-Cell {
-  z-index: 10;
-  position: relative;
-}
-
-
-.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-multiSelected.jp-mod-active {
-  /*background: linear-gradient(to right, var(--jp-private-notebook-selected-color) -40px, var(--jp-private-notebook-selected-color) 5px, var(--jp-private-notebook-multiselected-color) 5px, var(--jp-private-notebook-multiselected-color) 100%);*/
 }
 
 
@@ -87,10 +80,26 @@
 }
 
 
+.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected:not(.jp-mod-multiSelected) {
+  background: transparent;
+}
+
+
+
 .jp-Notebook.jp-mod-editMode .jp-Notebook-cell.jp-mod-active {
   border-color: var(--jp-private-notebook-active-color);
-  /*border-left-width: var(--jp-border-width);*/
-  /*background: linear-gradient(to right, var(--jp-private-notebook-active-color) -40px, var(--jp-private-notebook-active-color) 5px, transparent 5px, transparent 100%);*/
+}
+
+
+.jp-Notebook.jp-mod-editMode .jp-Notebook-cell.jp-mod-active:before {
+  position: absolute;
+  display: block;
+  top: calc( -1 * var(--jp-border-width) );
+  left: calc( -1 * var(--jp-border-width) );
+  width: var(--jp-private-notebook-left-border-width);
+  height: calc( 100% + calc( 2 * var(--jp-border-width) ) );
+  content: '';
+  background: var(--jp-private-notebook-active-color);
 }
 
 
@@ -125,8 +134,20 @@
   width: var(--jp-private-notebook-dragImage-width);
   height: var(--jp-private-notebook-dragImage-height);
   border: var(--jp-border-width) solid var(--jp-private-notebook-cell-border-color);
-  /*border-left: none;*/
-  /*background: linear-gradient(to right, var(--jp-private-notebook-selected-color) -40px, var(--jp-private-notebook-selected-color) 5px, white 5px, white 100%);*/
+  background: var(--jp-layout-color1);
+  overflow: visible;
+}
+
+
+.jp-dragImage:before {
+  position: absolute;
+  display: block;
+  top: calc( -1 * var(--jp-border-width) );
+  left: calc( -1 * var(--jp-border-width) );
+  width: var(--jp-private-notebook-left-border-width);
+  height: calc( 100% + calc( 2 * var(--jp-border-width) ) );
+  content: '';
+  background: var(--jp-private-notebook-selected-color);
 }
 
 
