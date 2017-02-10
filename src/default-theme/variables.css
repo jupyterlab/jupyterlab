@@ -93,6 +93,8 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-code-padding: 5px;
   --jp-code-font-family: monospace;
 
+  --jp-notebook-scrollPadding: 100px;
+
   /* Layout
 
   The following are the main layout colors use in JupyterLab. In a light
