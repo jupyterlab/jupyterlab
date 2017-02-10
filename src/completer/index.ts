@@ -29,20 +29,23 @@ export * from './widget';
 export
 namespace CommandIDs {
   export
-  const attach = 'completer:attach';
+  const invoke = 'completer:invoke';
 
   export
-  const invoke = 'completer:invoke';
+  const invokeConsole = 'completer:invoke-console';
+
+  export
+  const invokeNotebook = 'completer:invoke-notebook';
 }
 
 
 
 /* tslint:disable */
 /**
- * The clipboard token.
+ * The completion manager token.
  */
 export
-const ICompleter = new Token<ICompleter>('jupyter.services.completer');
+const ICompletionManager = new Token<ICompletionManager>('jupyter.services.completer');
 /* tslint:enable */
 
 
@@ -50,13 +53,13 @@ const ICompleter = new Token<ICompleter>('jupyter.services.completer');
  * A manager to register completers with parent widgets.
  */
 export
-interface ICompleter {
+interface ICompletionManager {
   /**
    * Register a completable object with the completion manager.
    *
    * @returns A completable object whose attributes can be updated as necessary.
    */
-  register(completable: ICompleter.ICompletable): ICompleter.ICompletableAttributes;
+  register(completable: ICompletionManager.ICompletable): ICompletionManager.ICompletableAttributes;
 }
 
 
@@ -64,7 +67,7 @@ interface ICompleter {
  * A namespace for `ICompletionManager` interface specifications.
  */
 export
-namespace ICompleter {
+namespace ICompletionManager {
   /**
    * The attributes of a completable object that can change and sync at runtime.
    */
