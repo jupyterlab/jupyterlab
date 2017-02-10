@@ -35,6 +35,8 @@
 
 
 .jp-Notebook {
+  display: flex;
+  flex-direction: column;
   padding: var(--jp-private-notebook-padding);
   min-width: 50px;
   min-height: 50px;
@@ -48,8 +50,6 @@
   content: ' ';
   width: 100%;
   min-height: var(--jp-notebook-scrollPadding);
-  position: absolute;
-  transition: height .2s ease;
 }
 
 
