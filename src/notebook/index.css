@@ -46,7 +46,7 @@
 .jp-Notebook::after {
   display: block;
   content: '';
-  min-height: var(--jp-notebook-scrollPadding);
+  min-height: var(--jp-notebook-scroll-padding);
 }
 
 
