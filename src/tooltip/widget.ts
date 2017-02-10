@@ -109,6 +109,8 @@ class TooltipWidget extends Widget {
     }
     switch (event.type) {
     case 'keydown':
+      this._evtKeydown(event as KeyboardEvent);
+      break;
     case 'mousedown':
       this._dismiss(event);
       break;
@@ -153,6 +155,21 @@ class TooltipWidget extends Widget {
   protected onUpdateRequest(msg: Message): void {
     this._setGeometry();
     super.onUpdateRequest(msg);
+  }
+
+  /**
+   * Handle a keydown event.
+   */
+  private _evtKeydown(event: KeyboardEvent): void {
+    // Dismiss on enter, escape, or close parens.
+    if ([13, 27, 48].indexOf(event.keyCode) !== -1) {
+      this._dismiss(event);
+      // Prevent enter from getting to the editor.
+      if (event.keyCode === 13) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }
   }
 
   /**
