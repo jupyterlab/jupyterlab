@@ -233,6 +233,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         let content = current.notebook;
         NotebookActions.runAndAdvance(content, current.context.kernel);
       }
@@ -243,6 +244,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.run(current.notebook, current.context.kernel);
       }
     }
@@ -252,6 +254,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.runAndInsert(current.notebook, current.context.kernel);
       }
     }
@@ -261,6 +264,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.runAll(current.notebook, current.context.kernel);
       }
     }
@@ -270,6 +274,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         restartKernel(current.kernel, current.node).then(() => {
           current.activate();
         });
@@ -302,6 +307,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         return trustNotebook(current.context.model).then(() => {
           return current.context.save();
         });
@@ -313,6 +319,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         let promise = restartKernel(current.kernel, current.node);
         promise.then(result => {
           current.activate();
@@ -328,6 +335,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         let promise = restartKernel(current.kernel, current.node);
         promise.then(result => {
           current.activate();
@@ -341,6 +349,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.clearAllOutputs(current.notebook);
       }
     }
@@ -350,6 +359,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.clearOutputs(current.notebook);
       }
     }
@@ -359,6 +369,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         let kernel = current.context.kernel;
         if (kernel) {
           kernel.interrupt();
@@ -371,6 +382,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.changeCellType(current.notebook, 'code');
       }
     }
@@ -380,6 +392,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.changeCellType(current.notebook, 'markdown');
       }
     }
@@ -389,6 +402,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.changeCellType(current.notebook, 'raw');
       }
     }
@@ -398,6 +412,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.cut(current.notebook, current.clipboard);
       }
     }
@@ -407,6 +422,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.copy(current.notebook, current.clipboard);
       }
     }
@@ -416,6 +432,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.paste(current.notebook, current.clipboard);
       }
     }
@@ -425,6 +442,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.deleteCells(current.notebook);
       }
     }
@@ -434,6 +452,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.splitCell(current.notebook);
       }
     }
@@ -443,6 +462,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.mergeCells(current.notebook);
       }
     }
@@ -452,6 +472,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.insertAbove(current.notebook);
       }
     }
@@ -461,6 +482,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.insertBelow(current.notebook);
       }
     }
@@ -470,6 +492,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.selectAbove(current.notebook);
       }
     }
@@ -479,6 +502,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.selectBelow(current.notebook);
       }
     }
@@ -488,6 +512,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.extendSelectionAbove(current.notebook);
       }
     }
@@ -497,6 +522,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.extendSelectionBelow(current.notebook);
       }
     }
@@ -506,6 +532,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.moveUp(current.notebook);
       }
     }
@@ -515,6 +542,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.moveDown(current.notebook);
       }
     }
@@ -524,6 +552,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.toggleLineNumbers(current.notebook);
       }
     }
@@ -533,6 +562,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.toggleAllLineNumbers(current.notebook);
       }
     }
@@ -542,6 +572,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         current.notebook.mode = 'command';
       }
     }
@@ -551,6 +582,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         current.notebook.mode = 'edit';
       }
     }
@@ -560,6 +592,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.undo(current.notebook);
       }
     }
@@ -569,6 +602,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.redo(current.notebook);
       }
     }
@@ -578,6 +612,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         let context = current.context;
         let node = current.node;
         selectKernelForContext(context, services.sessions, node).then(() => {
@@ -591,6 +626,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.setMarkdownHeader(current.notebook, 1);
       }
     }
@@ -600,6 +636,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.setMarkdownHeader(current.notebook, 2);
       }
     }
@@ -609,6 +646,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.setMarkdownHeader(current.notebook, 3);
       }
     }
@@ -618,6 +656,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.setMarkdownHeader(current.notebook, 4);
       }
     }
@@ -627,6 +666,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.setMarkdownHeader(current.notebook, 5);
       }
     }
@@ -636,6 +676,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         NotebookActions.setMarkdownHeader(current.notebook, 6);
       }
     }

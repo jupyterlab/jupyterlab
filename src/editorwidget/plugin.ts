@@ -147,6 +147,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
       if (!widget) {
         return;
       }
+      app.shell.activateMain(widget.id);
       let options: any = {
         path: widget.context.path,
         preferredLanguage: widget.context.model.defaultKernelLanguage
@@ -163,6 +164,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
       if (!widget) {
         return;
       }
+      app.shell.activateMain(widget.id);
       // Get the session id.
       let id = sessionIdProperty.get(widget);
       if (!id) {

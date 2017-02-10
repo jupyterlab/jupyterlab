@@ -205,6 +205,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         current.console.clear();
       }
     }
@@ -217,6 +218,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         current.console.execute();
       }
     }
@@ -229,6 +231,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         current.console.execute(true);
       }
     }
@@ -241,6 +244,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         current.console.insertLinebreak();
       }
     }
@@ -253,6 +257,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         let kernel = current.console.session.kernel;
         if (kernel) {
           return kernel.interrupt();
@@ -268,6 +273,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     execute: () => {
       let current = tracker.currentWidget;
       if (current) {
+        app.shell.activateMain(current.id);
         let kernel = current.console.session.kernel;
         if (kernel) {
           return kernel.restart();
@@ -415,6 +421,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       if (!current) {
         return;
       }
+      app.shell.activateMain(current.id);
       let widget = current.console;
       let session = widget.session;
       let lang = '';
