@@ -14,6 +14,7 @@
   --jp-private-notebook-dragImage-circleRadius: 20px;
   --jp-private-notebook-selected-color: var(--md-blue-400);
   --jp-private-notebook-multiselected-color: var(--md-blue-50);
+  --jp-private-notebook-left-border-width: 5px;
   --jp-private-notebook-active-color: var(--md-green-400);
 }
 
