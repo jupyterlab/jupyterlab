@@ -139,8 +139,22 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-info-color2: var(--md-cyan-300);
   --jp-info-color3: var(--md-cyan-100);
 
+  /* Cell specific styles */
+
+  --jp-cell-editor-background: #f7f7f7;
+  --jp-cell-editor-border-color: #cfcfcf;
+  --jp-cell-prompt-width: 90px;
+  --jp-cell-prompt-font-family: var(--jp-ui-font-family);
+  --jp-cell-prompt-letter-spacing: 3px;
+  --jp-cell-prompt-opacity: 0.5;
+  --jp-cell-inprompt-font-color: var(--md-blue-900);
+  --jp-cell-outprompt-font-color: var(--md-orange-900);
+  --jp-cell-padding: 5px;
+
   /* Notebook specific styles */
 
+  --jp-notebook-padding: 10px;
+  --jp-notebook-cell-border-color: #ababab;
   --jp-notebook-scroll-padding: 100px;
 
   /* The caret used for select dropdown styling. */

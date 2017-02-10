@@ -9,15 +9,12 @@
 
 
 :root {
-  --jp-private-notebook-padding: 10px;
-  --jp-private-notebook-dragImage-width: 90px;
+  --jp-private-notebook-dragImage-width: var(--jp-cell-prompt-width);
   --jp-private-notebook-dragImage-height: 39px;
   --jp-private-notebook-dragImage-circleRadius: 20px;
   --jp-private-notebook-selected-color: var(--md-blue-400);
   --jp-private-notebook-multiselected-color: var(--md-blue-50);
   --jp-private-notebook-active-color: var(--md-green-400);
-  --jp-private-notebook-cell-border-color: #ABABAB;
-  --jp-private-notebook-left-border-width: 5px;
 }
 
 /*-----------------------------------------------------------------------------
@@ -34,7 +31,10 @@
 
 
 .jp-Notebook {
-  padding: var(--jp-private-notebook-padding);
+  padding-left: var(--jp-notebook-padding);
+  padding-right: var(--jp-notebook-padding);
+  padding-top: var(--jp-notebook-padding);
+  padding-bottom: calc( 4 * var(--jp-notebook-padding) );
   min-width: 50px;
   min-height: 50px;
   outline: none;
@@ -57,13 +57,14 @@
 }
 
 
+
 .jp-Notebook .jp-Cell.jp-Notebook-cell {
   overflow: visible
 }
 
 
 .jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected {
-  border-color: var(--jp-private-notebook-cell-border-color);
+  border-color: var(--jp-notebook-cell-border-color);
 }
 
 
@@ -137,7 +138,7 @@
   position: absolute;
   width: var(--jp-private-notebook-dragImage-width);
   height: var(--jp-private-notebook-dragImage-height);
-  border: var(--jp-border-width) solid var(--jp-private-notebook-cell-border-color);
+  border: var(--jp-border-width) solid var(--jp-notebook-cell-border-color);
   background: var(--jp-layout-color1);
   overflow: visible;
 }
