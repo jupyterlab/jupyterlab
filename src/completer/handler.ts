@@ -219,7 +219,8 @@ class CompletionHandler implements IDisposable {
    * Handle a text changed signal from an editor.
    */
   protected onTextChanged(): void {
-    if (!this._completer.model) {
+    const model = this._completer.model;
+    if (!model) {
       return;
     }
 
@@ -239,6 +240,7 @@ class CompletionHandler implements IDisposable {
     const position = editor.getCursorPosition();
     const currentLine = editor.getLine(position.line);
     if (!currentLine.substring(0, position.column).match(/\S/)) {
+      model.reset();
       return;
     }
 
