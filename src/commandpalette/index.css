@@ -169,6 +169,6 @@
     width: 100px;
     display: block;
     font-size: var(--jp-ui-font-size2);
-    font-family: sans-serif;
+    font-family: var(--jp-ui-font-family);
     font-weight: lighter;
 }

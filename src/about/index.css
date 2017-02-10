@@ -14,7 +14,7 @@
   scroll-snap-points-y: repeat(100%);
   scroll-snap-type: mandatory;
   scroll-snap-destination: 100% 0%;
-  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  font-family: var(--jp-ui-font-family);
   text-align: center;
 }
 
@@ -136,7 +136,7 @@
 }
 
 #about .jp-About-content-desc {
-  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  font-family: var(--jp-code-font-family);
   font-size: 13px;
   max-width: 550px;
   margin: 0 auto;

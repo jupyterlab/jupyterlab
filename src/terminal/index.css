@@ -15,7 +15,7 @@
 
 
 .jp-TerminalWidget-body {
-  font-family: monospace;
+  font-family: var(--jp-code-font-family);
   outline: none;
   user-select: text;
   -webkit-user-select: text;
@@ -23,7 +23,7 @@
 
 
 .terminal {
-  font-family: monospace;
+  font-family: var(--jp-code-font-family);
 }
 
 
