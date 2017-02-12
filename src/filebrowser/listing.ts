@@ -825,6 +825,38 @@ class DirListing extends Widget {
    */
   private _evtKeydown(event: KeyboardEvent): void {
     switch (event.keyCode) {
+    case 13: // Enter
+    // Do nothing if any modifier keys are pressed.
+    if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (IS_MAC) {
+      this._doRename();
+    } else {
+
+    let selected = Object.keys(this._selection);
+    let name = selected[0];
+    let items = this._sortedItems;
+    let i = findIndex(items, value => value.name === name);
+    if (i === -1) {
+      return;
+    }
+
+    let model = this._model;
+    let item = this._sortedItems.at(i);
+    if (item.type === 'directory') {
+      model.cd(item.name).catch(error =>
+        showErrorMessage('Open directory', error)
+      );
+    } else {
+      let path = item.path;
+      this._manager.openOrReveal(path);
+    }
+   }
+   break;
     case 38: // Up arrow
       this.selectPrevious(event.shiftKey);
       event.stopPropagation();
