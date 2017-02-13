@@ -11,10 +11,6 @@ import * as CodeMirror
 import 'codemirror/addon/runmode/runmode';
 
 import {
-  utils
-} from '@jupyterlab/services';
-
-import {
   requireMode
 } from '../codemirror';
 
@@ -135,7 +131,7 @@ marked.setOptions({
 export
 class RenderedHTMLCommon extends Widget {
   /* Construct a new rendered HTML common widget.*/
-  constructor(options: RenderMime.IRendererOptions<string>) {
+  constructor(options: RenderMime.IRenderOptions) {
     super();
     this.addClass(HTML_COMMON_CLASS);
   }
@@ -150,17 +146,17 @@ class RenderedHTML extends RenderedHTMLCommon {
   /**
    * Construct a new html widget.
    */
-  constructor(options: RenderMime.IRendererOptions<string>) {
+  constructor(options: RenderMime.IRenderOptions) {
     super(options);
     this.addClass(HTML_CLASS);
-    let source = options.source;
-    if (options.sanitizer) {
+    let source = Private.getSource(options);
+    if (!options.bundle.trusted) {
       source = options.sanitizer.sanitize(source);
     }
-    appendHtml(this.node, source);
+    Private.appendHtml(this.node, source);
     if (options.resolver) {
-      this._urlResolved = handleUrls(this.node, options.resolver,
-                                      options.linkHandler);
+      this._urlResolved = Private.handleUrls(this.node, options.resolver,
+                                             options.linkHandler);
     }
   }
 
@@ -183,10 +179,11 @@ class RenderedMarkdown extends RenderedHTMLCommon {
   /**
    * Construct a new markdown widget.
    */
-  constructor(options: RenderMime.IRendererOptions<string>) {
+  constructor(options: RenderMime.IRenderOptions) {
     super(options);
     this.addClass(MARKDOWN_CLASS);
-    let parts = removeMath(options.source);
+    let source = Private.getSource(options);
+    let parts = removeMath(source);
     // Add the markdown content asynchronously.
     marked(parts['text'], (err: any, content: string) => {
       if (err) {
@@ -194,13 +191,13 @@ class RenderedMarkdown extends RenderedHTMLCommon {
         return;
       }
       content = replaceMath(content, parts['math']);
-      if (options.sanitizer) {
+      if (!options.bundle.trusted) {
         content = options.sanitizer.sanitize(content);
       }
-      appendHtml(this.node, content);
+      Private.appendHtml(this.node, content);
       if (options.resolver) {
-        this._urlResolved = handleUrls(this.node, options.resolver,
-                                        options.linkHandler);
+        this._urlResolved = Private.handleUrls(this.node, options.resolver,
+                                               options.linkHandler);
       }
       this.fit();
       this._rendered = true;
@@ -232,9 +229,10 @@ class RenderedLatex extends Widget {
   /**
    * Construct a new latex widget.
    */
-  constructor(options: RenderMime.IRendererOptions<string>) {
+  constructor(options: RenderMime.IRenderOptions) {
     super();
-    this.node.textContent = options.source;
+    let source = Private.getSource(options);
+    this.node.textContent = source;
     this.addClass(LATEX_CLASS);
   }
 
@@ -247,25 +245,37 @@ class RenderedLatex extends Widget {
 }
 
 
+/**
+ * A widget for displaying rendered images.
+ */
 export
 class RenderedImage extends Widget {
-
-  constructor(options: RenderMime.IRendererOptions<string>) {
+  /**
+   * Construct a new rendered image widget.
+   */
+  constructor(options: RenderMime.IRenderOptions) {
     super();
     let img = document.createElement('img');
-    img.src = `data:${options.mimetype};base64,${options.source}`;
+    let source = Private.getSource(options);
+    img.src = `data:${options.mimeType};base64,${source}`;
     this.node.appendChild(img);
     this.addClass(IMAGE_CLASS);
   }
 }
 
 
+/**
+ * A widget for displaying rendered text.
+ */
 export
 class RenderedText extends Widget {
-
-  constructor(options: RenderMime.IRendererOptions<string>) {
+  /**
+   * Construct a new rendered text widget.
+   */
+  constructor(options: RenderMime.IRenderOptions) {
     super();
-    let data = escape_for_html(options.source as string);
+    let source = Private.getSource(options);
+    let data = escape_for_html(source);
     let pre = document.createElement('pre');
     pre.innerHTML = ansi_to_html(data);
     this.node.appendChild(pre);
@@ -274,33 +284,45 @@ class RenderedText extends Widget {
 }
 
 
+/**
+ * A widget for displaying rendered JavaScript.
+ */
 export
-class RenderedJavascript extends Widget {
-
-  constructor(options: RenderMime.IRendererOptions<string>) {
+class RenderedJavaScript extends Widget {
+  /**
+   * Construct a new rendered JavaScript widget.
+   */
+  constructor(options: RenderMime.IRenderOptions) {
     super();
     let s = document.createElement('script');
-    s.type = options.mimetype;
-    s.textContent = options.source;
+    s.type = options.mimeType;
+    let source = Private.getSource(options);
+    s.textContent = source;
     this.node.appendChild(s);
     this.addClass(JAVASCRIPT_CLASS);
   }
 }
 
 
+/**
+ * A widget for displaying rendered SVG content.
+ */
 export
 class RenderedSVG extends Widget {
-
-  constructor(options: RenderMime.IRendererOptions<string>) {
+  /**
+   * Construct a new rendered SVG widget.
+   */
+  constructor(options: RenderMime.IRenderOptions) {
     super();
-    this.node.innerHTML = options.source;
+    let source = Private.getSource(options);
+    this.node.innerHTML = source;
     let svgElement = this.node.getElementsByTagName('svg')[0];
     if (!svgElement) {
       throw new Error('SVGRender: Error: Failed to create <svg> element');
     }
     if (options.resolver) {
-      this._urlResolved = handleUrls(this.node, options.resolver,
-                                      options.linkHandler);
+      this._urlResolved = Private.handleUrls(this.node, options.resolver,
+                                             options.linkHandler);
     }
     this.addClass(SVG_CLASS);
   }
@@ -309,15 +331,21 @@ class RenderedSVG extends Widget {
 }
 
 
+/**
+ * A widget for displaying rendered PDF content.
+ */
 export
 class RenderedPDF extends Widget {
-
-  constructor(options: RenderMime.IRendererOptions<string>) {
+  /**
+   * Construct a new rendered PDF widget.
+   */
+  constructor(options: RenderMime.IRenderOptions) {
     super();
+    let source = Private.getSource(options);
     let a = document.createElement('a');
     a.target = '_blank';
     a.textContent = 'View PDF';
-    a.href = 'data:application/pdf;base64,' + options.source;
+    a.href = `data:application/pdf;base64,${source}`;
     this.node.appendChild(a);
     this.addClass(PDF_CLASS);
   }
@@ -325,83 +353,94 @@ class RenderedPDF extends Widget {
 
 
 /**
- * Resolve the relative urls in element `src` and `href` attributes.
- *
- * @param node - The head html element.
- *
- * @param resolver - A url resolver.
- *
- * @param linkHandler - An optional link handler for nodes.
- *
- * @returns a promise fulfilled when the relative urls have been resolved.
+ * The namespace for module private data.
  */
-export
-function handleUrls(node: HTMLElement, resolver: RenderMime.IResolver, linkHandler?: RenderMime.ILinkHandler): Promise<void> {
-  let promises: Promise<void>[] = [];
-  // Handle HTML Elements with src attributes.
-  let nodes = node.querySelectorAll('*[src]');
-  for (let i = 0; i < nodes.length; i++) {
-    promises.push(handleAttr(nodes[i] as HTMLElement, 'src', resolver));
+namespace Private {
+  /**
+   * Extract the source text from render options.
+   */
+  export
+  function getSource(options: RenderMime.IRenderOptions): string {
+    return String(options.bundle.get(options.mimeType));
   }
-  let anchors = node.getElementsByTagName('a');
-  for (let i = 0; i < anchors.length; i++) {
-    promises.push(handleAnchor(anchors[i], resolver, linkHandler || null));
-  }
-  let links = node.getElementsByTagName('link');
-  for (let i = 0; i < links.length; i++) {
-    promises.push(handleAttr(links[i], 'href', resolver));
-  }
-  return Promise.all(promises).then(() => { return void 0; });
-}
 
-
-/**
- * Handle a node with a `src` or `href` attribute.
- */
-function handleAttr(node: HTMLElement, name: 'src' | 'href', resolver: RenderMime.IResolver): Promise<void> {
-  let source = node.getAttribute(name);
-  if (!source) {
-    return Promise.resolve(void 0);
-  }
-  node.setAttribute(name, '');
-  return resolver.resolveUrl(source).then(path => {
-    return resolver.getDownloadUrl(path);
-  }).then(url => {
-    node.setAttribute(name, url);
-  });
-}
-
-
-/**
- * Handle an anchor node.
- */
-function handleAnchor(anchor: HTMLAnchorElement, resolver: RenderMime.IResolver, linkHandler: RenderMime.ILinkHandler | null): Promise<void> {
-  anchor.target = '_blank';
-  let href = anchor.getAttribute('href');
-  if (!href) {
-    return Promise.resolve(void 0);
-  }
-  return resolver.resolveUrl(href).then(path => {
-    if (linkHandler) {
-      linkHandler.handleLink(anchor, path);
+  /**
+   * Append trusted html to a node.
+   */
+  export
+  function appendHtml(node: HTMLElement, html: string): void {
+    try {
+      let range = document.createRange();
+      node.appendChild(range.createContextualFragment(html));
+    } catch (error) {
+      console.warn('Environment does not support Range ' +
+                   'createContextualFragment, falling back on innerHTML');
+      node.innerHTML = html;
     }
-    return resolver.getDownloadUrl(path);
-  }).then(url => {
-    anchor.href = url;
-  });
-}
+  }
 
+  /**
+   * Resolve the relative urls in element `src` and `href` attributes.
+   *
+   * @param node - The head html element.
+   *
+   * @param resolver - A url resolver.
+   *
+   * @param linkHandler - An optional link handler for nodes.
+   *
+   * @returns a promise fulfilled when the relative urls have been resolved.
+   */
+  export
+  function handleUrls(node: HTMLElement, resolver: RenderMime.IResolver, linkHandler?: RenderMime.ILinkHandler): Promise<void> {
+    let promises: Promise<void>[] = [];
+    // Handle HTML Elements with src attributes.
+    let nodes = node.querySelectorAll('*[src]');
+    for (let i = 0; i < nodes.length; i++) {
+      promises.push(handleAttr(nodes[i] as HTMLElement, 'src', resolver));
+    }
+    let anchors = node.getElementsByTagName('a');
+    for (let i = 0; i < anchors.length; i++) {
+      promises.push(handleAnchor(anchors[i], resolver, linkHandler || null));
+    }
+    let links = node.getElementsByTagName('link');
+    for (let i = 0; i < links.length; i++) {
+      promises.push(handleAttr(links[i], 'href', resolver));
+    }
+    return Promise.all(promises).then(() => { return void 0; });
+  }
 
-/**
- * Append trusted html to a node.
- */
-function appendHtml(node: HTMLElement, html: string): void {
-  try {
-    let range = document.createRange();
-    node.appendChild(range.createContextualFragment(html));
-  } catch (error) {
-    console.warn('Environment does not support Range ' +
-                 'createContextualFragment, falling back on innerHTML');
-    node.innerHTML = html;
+  /**
+   * Handle a node with a `src` or `href` attribute.
+   */
+  function handleAttr(node: HTMLElement, name: 'src' | 'href', resolver: RenderMime.IResolver): Promise<void> {
+    let source = node.getAttribute(name);
+    if (!source) {
+      return Promise.resolve(void 0);
+    }
+    node.setAttribute(name, '');
+    return resolver.resolveUrl(source).then(path => {
+      return resolver.getDownloadUrl(path);
+    }).then(url => {
+      node.setAttribute(name, url);
+    });
+  }
+
+  /**
+   * Handle an anchor node.
+   */
+  function handleAnchor(anchor: HTMLAnchorElement, resolver: RenderMime.IResolver, linkHandler: RenderMime.ILinkHandler | null): Promise<void> {
+    anchor.target = '_blank';
+    let href = anchor.getAttribute('href');
+    if (!href) {
+      return Promise.resolve(void 0);
+    }
+    return resolver.resolveUrl(href).then(path => {
+      if (linkHandler) {
+        linkHandler.handleLink(anchor, path);
+      }
+      return resolver.getDownloadUrl(path);
+    }).then(url => {
+      anchor.href = url;
+    });
   }
 }

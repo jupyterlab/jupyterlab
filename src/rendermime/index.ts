@@ -39,7 +39,7 @@ import {
 
 import {
   HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
-  JavascriptRenderer, SVGRenderer, MarkdownRenderer, PDFRenderer
+  JavaScriptRenderer, SVGRenderer, MarkdownRenderer, PDFRenderer
 } from '../renderers';
 
 
@@ -305,7 +305,7 @@ namespace RenderMime {
   export
   function defaultRenderers(): IRenderer[] {
     return [
-      new JavascriptRenderer(),
+      new JavaScriptRenderer(),
       new HTMLRenderer(),
       new MarkdownRenderer(),
       new LatexRenderer(),

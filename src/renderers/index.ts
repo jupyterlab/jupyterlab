@@ -11,7 +11,7 @@ import {
 
 import {
   RenderedHTML, RenderedMarkdown, RenderedText, RenderedImage,
-  RenderedJavascript, RenderedSVG, RenderedPDF, RenderedLatex
+  RenderedJavaScript, RenderedSVG, RenderedPDF, RenderedLatex
 } from './widget';
 
 
@@ -28,8 +28,8 @@ class HTMLRenderer implements RenderMime.IRenderer {
   /**
    * Whether the renderer can render given the render options.
    */
-  canRender(options: IRenderOptions): boolean {
-    return this.mimeTypes.indexOf(mimeType) !== -1;
+  canRender(options: RenderMime.IRenderOptions): boolean {
+    return this.mimeTypes.indexOf(options.mimeType) !== -1;
   }
 
   /**
@@ -54,8 +54,8 @@ class ImageRenderer implements RenderMime.IRenderer {
   /**
    * Whether the renderer can render given the render options.
    */
-  canRender(options: IRenderOptions): boolean {
-    return this.mimeTypes.indexOf(mimeType) !== -1;
+  canRender(options: RenderMime.IRenderOptions): boolean {
+    return this.mimeTypes.indexOf(options.mimeType) !== -1;
   }
 
   /**
@@ -80,8 +80,8 @@ class TextRenderer implements RenderMime.IRenderer {
   /**
    * Whether the renderer can render given the render options.
    */
-  canRender(options: IRenderOptions): boolean {
-    return this.mimeTypes.indexOf(mimeType) !== -1;
+  canRender(options: RenderMime.IRenderOptions): boolean {
+    return this.mimeTypes.indexOf(options.mimeType) !== -1;
   }
 
   /**
@@ -97,7 +97,7 @@ class TextRenderer implements RenderMime.IRenderer {
  * A renderer for raw `<script>` data.
  */
 export
-class JavascriptRenderer implements RenderMime.IRenderer {
+class JavaScriptRenderer implements RenderMime.IRenderer {
   /**
    * The mimeTypes this renderer accepts.
    */
@@ -106,15 +106,18 @@ class JavascriptRenderer implements RenderMime.IRenderer {
   /**
    * Whether the renderer can render given the render options.
    */
-  canRender(options: IRenderOptions): boolean {
-    return options.trusted && this.mimeTypes.indexOf(mimeType) !== -1;
+  canRender(options: RenderMime.IRenderOptions): boolean {
+    return (
+      options.bundle.trusted &&
+      this.mimeTypes.indexOf(options.mimeType) !== -1
+    );
   }
 
   /**
    * Render the transformed mime bundle.
    */
   render(options: RenderMime.IRenderOptions): Widget {
-    return new RenderedJavascript(options);
+    return new RenderedJavaScript(options);
   }
 }
 
@@ -132,8 +135,11 @@ class SVGRenderer implements RenderMime.IRenderer {
   /**
    * Whether the renderer can render given the render options.
    */
-  canRender(options: IRenderOptions): boolean {
-    return options.trusted && this.mimeTypes.indexOf(mimeType) !== -1;
+  canRender(options: RenderMime.IRenderOptions): boolean {
+    return (
+      options.bundle.trusted &&
+      this.mimeTypes.indexOf(options.mimeType) !== -1
+    );
   }
 
   /**
@@ -158,8 +164,11 @@ class PDFRenderer implements RenderMime.IRenderer {
   /**
    * Whether the renderer can render given the render options.
    */
-  canRender(options: IRenderOptions): boolean {
-    return options.trusted && this.mimeTypes.indexOf(mimeType) !== -1;
+  canRender(options: RenderMime.IRenderOptions): boolean {
+    return (
+      options.bundle.trusted &&
+      this.mimeTypes.indexOf(options.mimeType) !== -1
+    );
   }
 
   /**
@@ -184,8 +193,8 @@ class LatexRenderer implements RenderMime.IRenderer  {
   /**
    * Whether the renderer can render given the render options.
    */
-  canRender(options: IRenderOptions): boolean {
-    return this.mimeTypes.indexOf(mimeType) !== -1;
+  canRender(options: RenderMime.IRenderOptions): boolean {
+    return this.mimeTypes.indexOf(options.mimeType) !== -1;
   }
 
   /**
@@ -210,8 +219,8 @@ class MarkdownRenderer implements RenderMime.IRenderer {
   /**
    * Whether the renderer can render given the render options.
    */
-  canRender(options: IRenderOptions): boolean {
-    return this.mimeTypes.indexOf(mimeType) !== -1;
+  canRender(options: RenderMime.IRenderOptions): boolean {
+    return this.mimeTypes.indexOf(options.mimeType) !== -1;
   }
 
   /**
