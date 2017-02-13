@@ -157,10 +157,10 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
         return;
       }
 
-      let bundle = value.data as RenderMime.MimeMap<string>;
+      let data = value.data;
       let trusted = true;
-      let widget = this._rendermime.render({ bundle, trusted });
-      update.content = widget;
+      let bundle = new RenderMime.MimeBundle({ data, trusted });
+      update.content =  this._rendermime.render(bundle);
       this.inspected.emit(update);
     });
   }
