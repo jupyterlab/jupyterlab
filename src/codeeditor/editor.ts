@@ -17,6 +17,10 @@ import {
   IObservableString, ObservableString
 } from '../common/observablestring';
 
+import {
+  IObservableMap, ObservableMap
+} from '../common/observablemap';
+
 
 /**
  * A namespace for code editors.
@@ -158,156 +162,6 @@ namespace CodeEditor {
    *   - but it must not change selections beloging to other selection owners
    * - otherwise it must not change any selection
    */
-  export
-  interface ISelections extends IDisposable {
-
-    /**
-     * A signal emitted when selections changes.
-     */
-    readonly changed: ISignal<Selections, ISelections.IChangedArgs>;
-
-    /**
-     * The uuids of selection owners.
-     */
-    readonly uuids: string[];
-
-    /**
-     * Gets the selections for all the cursors in ascending order.
-     *
-     * @param uuid - The id of the selection owner.
-     *
-     * @returns A new array of text selections.
-     */
-    getSelections(uuid: string): ITextSelection[];
-
-    /**
-     * Sets the selections for all the cursors.
-     *
-     * @param uuid - The id of the selection owner.
-     *
-     * @param newSelections - The replacement text selections.
-     */
-    setSelections(uuid: string, newSelections: ITextSelection[]): void;
-  }
-
-  /**
-   * A namespace for `ISelections`.
-   */
-  export
-  namespace ISelections {
-    /**
-     * An arguments for the selection changed signal.
-     */
-    export
-    interface IChangedArgs {
-      /**
-       * The uuid of a selection owner.
-       */
-      readonly uuid: string;
-      /**
-       * The old selections.
-       */
-      readonly oldSelections: ITextSelection[];
-      /**
-       * The new selections.
-       */
-      readonly newSelections: ITextSelection[];
-    }
-  }
-
-  /**
-   * Default implementation of `ISelections`.
-   */
-  export
-  class Selections implements ISelections {
-    /**
-     * A signal emitted when selections changes.
-     */
-    readonly changed: ISignal<Selections, ISelections.IChangedArgs>;
-
-    /**
-     * Uuids of all selection owners.
-     */
-    get uuids(): string[] {
-      return Object.keys(this._selections);
-    }
-
-    /**
-     * Test whether the selections are disposed.
-     */
-    get isDisposed(): boolean {
-      return this._isDisposed;
-    }
-
-    /**
-     * Dispose of the resources used by the selections.
-     */
-    dispose(): void {
-      if (this.isDisposed) {
-        return;
-      }
-      this._selections = {};
-      this._isDisposed = true;
-      clearSignalData(this);
-    }
-
-    /**
-     * Gets the selections for all the cursors in ascending order.
-     *
-     * @param uuid - The id of the selection owner.
-     *
-     * @returns A new array of text selections.
-     */
-    getSelections(uuid: string): ITextSelection[] {
-      const selections = this._selections[uuid];
-      return selections ? selections : [];
-    }
-
-    /**
-     * Sets the selections for all the cursors.
-     *
-     * @param uuid - The id of the selection owner.
-     *
-     * @param newSelections - The replacement text selections.
-     */
-    setSelections(uuid: string, newSelections: ITextSelection[]): void {
-      const oldSelections = this.getSelections(uuid);
-      this.removeSelections(uuid);
-      this.sortSelections(newSelections);
-      this._selections[uuid] = newSelections;
-      this.changed.emit({ uuid, oldSelections, newSelections });
-    }
-
-    /**
-     * Sorts given selections in ascending order.
-     */
-    protected sortSelections(selections: ITextSelection[]) {
-      selections.sort((selection, selection2) => {
-        const result = selection.start.line - selection2.start.line;
-        if (result !== 0) {
-          return result;
-        }
-        return selection.start.column - selection2.start.column;
-      });
-    }
-
-    /**
-     * Removes selections by the given uuid.
-     */
-    protected removeSelections(uuid: string) {
-      delete this._selections[uuid];
-    }
-
-    private _isDisposed = false;
-    private _selections: {
-      [key: string]: ITextSelection[] | null
-    } = {};
-  }
-
-  /**
-   * Define the signals for the `Selections` class.
-   */
-  defineSignal(Selections.prototype, 'changed');
 
   /**
    * An editor model.
@@ -335,7 +189,7 @@ namespace CodeEditor {
     /**
      * The currently selected code.
      */
-    readonly selections: ISelections;
+    readonly selections: IObservableMap<ITextSelection[]>;
   }
 
   /**
@@ -358,7 +212,7 @@ namespace CodeEditor {
     /**
      * Get the selections for the model.
      */
-    get selections(): CodeEditor.ISelections {
+    get selections(): IObservableMap<ITextSelection[]> {
       return this._selections;
     }
 
@@ -402,7 +256,7 @@ namespace CodeEditor {
     }
 
     private _value = new ObservableString();
-    private _selections = new Selections();
+    private _selections = new ObservableMap<ITextSelection[]>();
     private _mimetype = 'text/plain';
     private _isDisposed = false;
   }

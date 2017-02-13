@@ -37,6 +37,10 @@ import {
 } from '../common/observablestring';
 
 import {
+  IObservableMap, ObservableMap
+} from '../common/observablemap';
+
+import {
   loadModeByMIME
 } from './';
 
@@ -509,11 +513,11 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Handles a selections change.
    */
-  private _onSelectionsChanged(selections: CodeEditor.ISelections, args: CodeEditor.ISelections.IChangedArgs): void {
-    const uuid = args.uuid;
+  private _onSelectionsChanged(selections: IObservableMap<CodeEditor.ITextSelection[]>, args: ObservableMap.IChangedArgs<CodeEditor.ITextSelection[]>): void {
+    const uuid = args.key;
     if (uuid !== this.uuid) {
       this._cleanSelections(uuid);
-      this._markSelections(uuid, args.newSelections);
+      this._markSelections(uuid, args.newValue);
     }
   }
 
@@ -546,7 +550,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   private _onCursorActivity(): void {
     const selections = this.getSelections();
-    this.model.selections.setSelections(this.uuid, selections);
+    this.model.selections.set(this.uuid, selections);
   }
 
   /**
