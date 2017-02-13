@@ -6,12 +6,16 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  each
+  each, iter, toArray
 } from '@phosphor/algorithm';
 
 import {
   IObservableVector, ObservableVector
 } from '../common/observablevector';
+
+import {
+  IObservableMap
+} from '../common/observablemap';
 
 import {
   DocumentModel, DocumentRegistry
@@ -85,7 +89,7 @@ class NotebookModel extends DocumentModel implements INotebookModel, IRealtimeMo
       options.contentFactory || NotebookModel.defaultContentFactory
     );
     this.contentFactory = factory;
-    this._cells = new ObservableUndoableVector<ICellModel>((cell?: nbformat.IBaseCell) => {
+    let fromJSONFactory = (cell: nbformat.IBaseCell): ICellModel=>{
       switch (cell.cell_type) {
         case 'code':
           return factory.createCodeCell({ cell });
@@ -94,7 +98,21 @@ class NotebookModel extends DocumentModel implements INotebookModel, IRealtimeMo
         default:
           return factory.createRawCell({ cell });
       }
-    });
+    };
+    let fromMapFactory = (map: IObservableMap<any>): ICellModel=>{
+      let cell: any = {
+        cell_type: map.get('cell_type'),
+        source: (map.get('value') as any).text,
+        outputs: (toArray(map.get('outputs') as any)),
+        execution_count: map.get('executionCount'),
+        metadata: {},
+      }
+      return fromJSONFactory(cell);
+    };
+    this._cells = new ObservableUndoableVector<ICellModel>(
+      fromJSONFactory, fromMapFactory);
+
+
     // Add an initial code cell by default.
     this._cells.pushBack(factory.createCodeCell({}));
     this._cells.changed.connect(this._onCellsChanged, this);

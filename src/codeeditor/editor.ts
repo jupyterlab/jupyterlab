@@ -303,7 +303,7 @@ namespace CodeEditor {
       }
       this._selections.dispose();
       this._value.dispose();
-      super.dispose();
+      //super.dispose();
     }
 
     /**

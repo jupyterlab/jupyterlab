@@ -14,6 +14,10 @@ import {
 } from '@phosphor/signaling';
 
 import {
+  IIterator, iter
+} from '@phosphor/algorithm';
+
+import {
   CodeEditor
 } from '../codeeditor';
 
@@ -24,6 +28,14 @@ import {
 import {
   IObservableJSON, ObservableJSON
 } from '../common/observablejson';
+
+import {
+  IObservableString, ObservableString
+} from '../common/observablestring';
+
+import {
+  IObservableVector
+} from '../common/observablevector';
 
 import {
   IOutputAreaModel, OutputAreaModel
@@ -235,7 +247,7 @@ class CellModel extends CodeEditor.Model implements ICellModel {
    * Handle a change to the observable value.
    */
   protected onGenericChange(): void {
-    this.set('outputs', this.get('outputs'));
+    //this.set('outputs', this.get('outputs'));
     this.contentChanged.emit(void 0);
   }
 
@@ -324,6 +336,14 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
     });
     outputArea.stateChanged.connect(this.onGenericChange, this);
     this.set('outputs', outputArea);
+
+    this._fromVecFactory = (vec: IObservableVector<any>)=>{
+      let outputs = factory.createOutputArea({});
+      for(let i=0; i<outputs.length;i++) {
+        outputs.add(vec.at(i));
+      }
+      return outputs;
+    };
   }
 
   /**
@@ -363,6 +383,7 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
     if (this.isDisposed) {
       return;
     }
+    Signal.clearData(this);
     this.get('outputs').dispose();
     this.delete('outputs');
     super.dispose();
@@ -386,6 +407,8 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
   onTrustedChanged(value: boolean): void {
     (this.get('outputs') as any).trusted = value;
   }
+
+  private _fromVecFactory: (vec: IObservableVector<any>)=> IOutputAreaModel = null;
 }
 
 
