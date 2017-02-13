@@ -119,6 +119,12 @@
 }
 
 
+.jp-MirroredOutputArea .jp-Output {
+  width: 100%;
+  height: 100%;
+}
+
+
 /*-----------------------------------------------------------------------------
 | Output-executeResult is added to any Output-result for the display of the object
 | returned by a cell
