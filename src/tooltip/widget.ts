@@ -79,7 +79,9 @@ class TooltipWidget extends Widget {
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
-    this.anchor.removeClass(ANCHOR_CLASS);
+    if (this.anchor && !this.anchor.isDisposed) {
+      this.anchor.removeClass(ANCHOR_CLASS);
+    }
     if (this._content) {
       this._content.dispose();
       this._content = null;
