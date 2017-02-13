@@ -30,6 +30,10 @@ interface IObservableMap<T> extends IDisposable {
    */
   readonly isLinkable: boolean;
 
+  /**
+   * Whether this map is linked to another.
+   */
+  readonly isLinked: boolean;
 
   /**
    * The number of key-value pairs in the map.
