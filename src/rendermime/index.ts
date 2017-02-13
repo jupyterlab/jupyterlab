@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Contents, ContentsManager, Session, utils
+  Contents, ContentsManager, Session, nbformat, utils
 } from '@jupyterlab/services';
 
 import {
@@ -10,7 +10,7 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  JSONValue
+  JSONObject, JSONValue
 } from 'phosphor/lib/algorithm/json';
 
 import {
@@ -30,7 +30,7 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  IObservableMap
+  IObservableMap, ObservableMap
 } from '../common/observablemap';
 
 import {
@@ -300,6 +300,98 @@ namespace RenderMime {
   }
 
   /**
+   * The default mime bundle implementation.
+   */
+  export
+  class MimeBundle extends ObservableMap<JSONValue> implements IMimeBundle {
+    /**
+     * Construct a new mime bundle.
+     */
+    constructor(options: IMimeBundleOptions) {
+      super();
+      this.trusted = options.trusted;
+      let data = options.data;
+      let metadata: JSONObject = options.metadata || Object.create(null);
+      for (let key in data) {
+        this.set(key, data[key]);
+      }
+      for (let key in metadata) {
+        this._metadata.set(key, metadata[key]);
+      }
+    }
+
+    /**
+     * Whether the bundle is trusted.
+     */
+    readonly trusted: boolean;
+
+    /**
+     * Dispose of the resources used by the mime bundle.
+     */
+    dispose(): void {
+      this._metadata.dispose();
+      super.dispose();
+    }
+
+    /**
+     * The metadata associated with the bundle.
+     */
+    get metadata(): IObservableMap<JSONValue> {
+      return this._metadata;
+    }
+
+    private _metadata = new ObservableMap<JSONValue>();
+  }
+
+  /**
+   * The options used to create a mime bundle.
+   */
+  export
+  interface IMimeBundleOptions {
+    /**
+     * The raw mime data.
+     */
+    data: JSONObject;
+
+    /**
+     * Whether the output is trusted.
+     */
+    trusted: boolean;
+
+    /**
+     * The raw metadata, if applicable.
+     */
+    metadata?: JSONObject;
+  }
+
+  /**
+   * Get the data for an output.
+   *
+   * @params output - A kernel output message payload.
+   *
+   * @returns - The data for the payload.
+   */
+  export
+  function getData(output: nbformat.IOutput): JSONObject {
+    return Private.getData(output);
+  }
+
+  /**
+   * Get the metadata from an output message.
+   */
+  export
+  function getMetadata(output: nbformat.IOutput): JSONObject {
+    switch (output.output_type) {
+    case 'execute_result':
+    case 'display_data':
+      return (output as nbformat.IDisplayData).metadata;
+    default:
+      break;
+    }
+    return Object.create(null);
+  }
+
+  /**
    * Default renderer order
    */
   export
@@ -457,3 +549,58 @@ namespace RenderMime {
     contents: Contents.IManager;
   }
 }
+
+
+/**
+ * The namespace for module private data.
+ */
+ namespace Private {
+  /**
+   * Get the data from a notebook output.
+   */
+  export
+  function getData(output: nbformat.IOutput): JSONObject {
+    let bundle: nbformat.IMimeBundle;
+    switch (output.output_type) {
+    case 'execute_result':
+      bundle = (output as nbformat.IExecuteResult).data;
+      break;
+    case 'display_data':
+      bundle = (output as nbformat.IDisplayData).data;
+      break;
+    case 'stream':
+      let text = (output as nbformat.IStream).text;
+      bundle = {
+        'application/vnd.jupyter.console-text': text
+      };
+      break;
+    case 'error':
+      let out: nbformat.IError = output as nbformat.IError;
+      let traceback = out.traceback.join('\n');
+      bundle = {
+        'application/vnd.jupyter.console-text': traceback ||
+          `${out.ename}: ${out.evalue}`
+      };
+      break;
+    default:
+      break;
+    }
+    return convertBundle(bundle || {});
+  }
+
+  /**
+   * Convert a mime bundle to mime data.
+   */
+  function convertBundle(bundle: nbformat.IMimeBundle): JSONObject {
+    let map: JSONObject = Object.create(null);
+    for (let mimeType in bundle) {
+      let value = bundle[mimeType];
+      if (Array.isArray(value)) {
+        map[mimeType] = (value as string[]).join('\n');
+      } else {
+        map[mimeType] = value as string;
+      }
+    }
+    return map;
+  }
+ }
