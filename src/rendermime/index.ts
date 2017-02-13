@@ -34,7 +34,7 @@ import {
 } from '../common/observablemap';
 
 import {
-  ISanitizer
+  ISanitizer, defaultSanitizer
 } from '../common/sanitizer';
 
 import {
@@ -85,7 +85,7 @@ class RenderMime {
       this._renderers[mime] = options.renderers[mime];
     }
     this._order = new Vector(options.order);
-    this._sanitizer = options.sanitizer;
+    this._sanitizer = options.sanitizer || defaultSanitizer;
     this._resolver = options.resolver || null;
     this._handler = options.linkHandler || null;
   }
@@ -133,18 +133,16 @@ class RenderMime {
    * trusted (see [[preferredmimeType]]), and then pass a sanitizer to the
    * renderer if the output should be sanitized.
    */
-  render(options: RenderMime.IRenderOptions): Widget {
-    let { trusted, bundle, injector } = options;
-    let mimeType = this.preferredmimeType(bundle, trusted);
+  render(bundle: RenderMime.IMimeBundle): Widget {
+    let mimeType = this.preferredMimeType(bundle);
     if (!mimeType) {
       return void 0;
     }
     let rendererOptions = {
       mimeType,
-      source: bundle[mimeType],
-      injector,
+      bundle,
       resolver: this._resolver,
-      sanitizer: trusted ? null : this._sanitizer,
+      sanitizer: this._sanitizer,
       linkHandler: this._handler
     };
     return this._renderers[mimeType].render(rendererOptions);
@@ -163,10 +161,12 @@ class RenderMime {
    * (see [[RenderMime.IRenderer.isSanitizable]]).
    */
   preferredMimeType(bundle: RenderMime.IMimeBundle): string {
-    return find(this._order, m => {
-      if (m in bundle) {
-        let renderer = this._renderers[m];
-        if (trusted || renderer.isSafe(m) || renderer.isSanitizable(m)) {
+    let sanitizer = this._sanitizer;
+    return find(this._order, mimeType => {
+      if (mimeType in bundle.keys()) {
+        let options = { mimeType, bundle, sanitizer };
+        let renderer = this._renderers[mimeType];
+        if (renderer.canRender(options)) {
           return true;
         }
       }
@@ -225,7 +225,7 @@ class RenderMime {
 
   private _renderers: RenderMime.MimeMap<RenderMime.IRenderer> = Object.create(null);
   private _order: Vector<string>;
-  private _sanitizer: ISanitizer = null;
+  private _sanitizer: ISanitizer;
   private _resolver: RenderMime.IResolver | null;
   private _handler: RenderMime.ILinkHandler | null;
 }
@@ -252,9 +252,11 @@ namespace RenderMime {
     order: IterableOrArrayLike<string>;
 
     /**
-     * The sanitizer used to sanitize html inputs.
+     * The sanitizer used to sanitize untrusted html inputs.
+     *
+     * If not given, a default sanitizer will be used.
      */
-    sanitizer: ISanitizer;
+    sanitizer?: ISanitizer;
 
     /**
      * The initial resolver object.
@@ -325,13 +327,11 @@ namespace RenderMime {
     readonly mimeTypes: string[];
 
     /**
-     * Whether the renderer can render the given mimeType in the bundle.
+     * Whether the renderer can render given the render options.
      *
-     * @param mimeType - The deisred mimeType to render.
-     *
-     * @param bundle - The mime bundle to render.
+     * @param options - The options that would be used to render the bundle.
      */
-    canRender(mimeType: string, bundle: IMimeBundle): boolean;
+    canRender(options: IRenderOptions): boolean;
 
     /**
      * Render the transformed mime bundle.
@@ -357,16 +357,14 @@ namespace RenderMime {
     bundle: IMimeBundle;
 
     /**
+     * The html sanitizer.
+     */
+    sanitizer: ISanitizer;
+
+    /**
      * An optional url resolver.
      */
     resolver?: IResolver;
-
-    /**
-     * An optional html sanitizer.
-     *
-     * If given, should be used to sanitize raw html.
-     */
-    sanitizer?: ISanitizer;
 
     /**
      * An optional link handler.

@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-
 import {
   Widget
 } from 'phosphor/lib/ui/widget';
@@ -22,28 +21,21 @@ import {
 export
 class HTMLRenderer implements RenderMime.IRenderer {
   /**
-   * The mimetypes this renderer accepts.
+   * The mimeTypes this renderer accepts.
    */
-  mimetypes = ['text/html'];
+  mimeTypes = ['text/html'];
 
   /**
-   * Whether the input can safely sanitized for a given mimetype.
+   * Whether the renderer can render given the render options.
    */
-  isSanitizable(mimetype: string): boolean {
-    return this.mimetypes.indexOf(mimetype) !== -1;
-  }
-
-  /**
-   * Whether the input is safe without sanitization.
-   */
-  isSafe(mimetype: string): boolean {
-    return false;
+  canRender(options: IRenderOptions): boolean {
+    return this.mimeTypes.indexOf(mimeType) !== -1;
   }
 
   /**
    * Render the transformed mime bundle.
    */
-  render(options: RenderMime.IRendererOptions<string>): Widget {
+  render(options: RenderMime.IRenderOptions): Widget {
     return new RenderedHTML(options);
   }
 }
@@ -55,28 +47,21 @@ class HTMLRenderer implements RenderMime.IRenderer {
 export
 class ImageRenderer implements RenderMime.IRenderer {
   /**
-   * The mimetypes this renderer accepts.
+   * The mimeTypes this renderer accepts.
    */
-  mimetypes = ['image/png', 'image/jpeg', 'image/gif'];
+  mimeTypes = ['image/png', 'image/jpeg', 'image/gif'];
 
   /**
-   * Whether the input can safely sanitized for a given mimetype.
+   * Whether the renderer can render given the render options.
    */
-  isSanitizable(mimetype: string): boolean {
-    return false;
-  }
-
-  /**
-   * Whether the input is safe without sanitization.
-   */
-  isSafe(mimetype: string): boolean {
-    return this.mimetypes.indexOf(mimetype) !== -1;
+  canRender(options: IRenderOptions): boolean {
+    return this.mimeTypes.indexOf(mimeType) !== -1;
   }
 
   /**
    * Render the transformed mime bundle.
    */
-  render(options: RenderMime.IRendererOptions<string>): Widget {
+  render(options: RenderMime.IRenderOptions): Widget {
     return new RenderedImage(options);
   }
 }
@@ -88,28 +73,21 @@ class ImageRenderer implements RenderMime.IRenderer {
 export
 class TextRenderer implements RenderMime.IRenderer {
   /**
-   * The mimetypes this renderer accepts.
+   * The mimeTypes this renderer accepts.
    */
-  mimetypes = ['text/plain', 'application/vnd.jupyter.console-text'];
+  mimeTypes = ['text/plain', 'application/vnd.jupyter.console-text'];
 
   /**
-   * Whether the input can safely sanitized for a given mimetype.
+   * Whether the renderer can render given the render options.
    */
-  isSanitizable(mimetype: string): boolean {
-    return false;
-  }
-
-  /**
-   * Whether the input is safe without sanitization.
-   */
-  isSafe(mimetype: string): boolean {
-    return this.mimetypes.indexOf(mimetype) !== -1;
+  canRender(options: IRenderOptions): boolean {
+    return this.mimeTypes.indexOf(mimeType) !== -1;
   }
 
   /**
    * Render the transformed mime bundle.
    */
-  render(options: RenderMime.IRendererOptions<string>): Widget {
+  render(options: RenderMime.IRenderOptions): Widget {
     return new RenderedText(options);
   }
 }
@@ -121,28 +99,21 @@ class TextRenderer implements RenderMime.IRenderer {
 export
 class JavascriptRenderer implements RenderMime.IRenderer {
   /**
-   * The mimetypes this renderer accepts.
+   * The mimeTypes this renderer accepts.
    */
-  mimetypes = ['text/javascript', 'application/javascript'];
+  mimeTypes = ['text/javascript', 'application/javascript'];
 
   /**
-   * Whether the input can safely sanitized for a given mimetype.
+   * Whether the renderer can render given the render options.
    */
-  isSanitizable(mimetype: string): boolean {
-    return false;
-  }
-
-  /**
-   * Whether the input is safe without sanitization.
-   */
-  isSafe(mimetype: string): boolean {
-    return false;
+  canRender(options: IRenderOptions): boolean {
+    return options.trusted && this.mimeTypes.indexOf(mimeType) !== -1;
   }
 
   /**
    * Render the transformed mime bundle.
    */
-  render(options: RenderMime.IRendererOptions<string>): Widget {
+  render(options: RenderMime.IRenderOptions): Widget {
     return new RenderedJavascript(options);
   }
 }
@@ -154,28 +125,21 @@ class JavascriptRenderer implements RenderMime.IRenderer {
 export
 class SVGRenderer implements RenderMime.IRenderer {
   /**
-   * The mimetypes this renderer accepts.
+   * The mimeTypes this renderer accepts.
    */
-  mimetypes = ['image/svg+xml'];
+  mimeTypes = ['image/svg+xml'];
 
   /**
-   * Whether the input can safely sanitized for a given mimetype.
+   * Whether the renderer can render given the render options.
    */
-  isSanitizable(mimetype: string): boolean {
-    return false;
-  }
-
-  /**
-   * Whether the input is safe without sanitization.
-   */
-  isSafe(mimetype: string): boolean {
-    return false;
+  canRender(options: IRenderOptions): boolean {
+    return options.trusted && this.mimeTypes.indexOf(mimeType) !== -1;
   }
 
   /**
    * Render the transformed mime bundle.
    */
-  render(options: RenderMime.IRendererOptions<string>): Widget {
+  render(options: RenderMime.IRenderOptions): Widget {
     return new RenderedSVG(options);
   }
 }
@@ -187,28 +151,21 @@ class SVGRenderer implements RenderMime.IRenderer {
 export
 class PDFRenderer implements RenderMime.IRenderer {
   /**
-   * The mimetypes this renderer accepts.
+   * The mimeTypes this renderer accepts.
    */
-  mimetypes = ['application/pdf'];
+  mimeTypes = ['application/pdf'];
 
   /**
-   * Whether the input can safely sanitized for a given mimetype.
+   * Whether the renderer can render given the render options.
    */
-  isSanitizable(mimetype: string): boolean {
-    return false;
-  }
-
-  /**
-   * Whether the input is safe without sanitization.
-   */
-  isSafe(mimetype: string): boolean {
-    return false;
+  canRender(options: IRenderOptions): boolean {
+    return options.trusted && this.mimeTypes.indexOf(mimeType) !== -1;
   }
 
   /**
    * Render the transformed mime bundle.
    */
-  render(options: RenderMime.IRendererOptions<string>): Widget {
+  render(options: RenderMime.IRenderOptions): Widget {
     return new RenderedPDF(options);
   }
 }
@@ -220,28 +177,21 @@ class PDFRenderer implements RenderMime.IRenderer {
 export
 class LatexRenderer implements RenderMime.IRenderer  {
   /**
-   * The mimetypes this renderer accepts.
+   * The mimeTypes this renderer accepts.
    */
-  mimetypes = ['text/latex'];
+  mimeTypes = ['text/latex'];
 
   /**
-   * Whether the input can safely sanitized for a given mimetype.
+   * Whether the renderer can render given the render options.
    */
-  isSanitizable(mimetype: string): boolean {
-    return false;
+  canRender(options: IRenderOptions): boolean {
+    return this.mimeTypes.indexOf(mimeType) !== -1;
   }
 
   /**
-   * Whether the input is safe without sanitization.
+   * Render the transformed mime bundle.
    */
-  isSafe(mimetype: string): boolean {
-    return this.mimetypes.indexOf(mimetype) !== -1;
-  }
-
-  /**
-   * Render the mime bundle.
-   */
-  render(options: RenderMime.IRendererOptions<string>): Widget {
+  render(options: RenderMime.IRenderOptions): Widget {
     return new RenderedLatex(options);
   }
 }
@@ -253,28 +203,21 @@ class LatexRenderer implements RenderMime.IRenderer  {
 export
 class MarkdownRenderer implements RenderMime.IRenderer {
   /**
-   * The mimetypes this renderer accepts.
+   * The mimeTypes this renderer accepts.
    */
-  mimetypes = ['text/markdown'];
+  mimeTypes = ['text/markdown'];
 
   /**
-   * Whether the input can safely sanitized for a given mimetype.
+   * Whether the renderer can render given the render options.
    */
-  isSanitizable(mimetype: string): boolean {
-    return this.mimetypes.indexOf(mimetype) !== -1;
+  canRender(options: IRenderOptions): boolean {
+    return this.mimeTypes.indexOf(mimeType) !== -1;
   }
 
   /**
-   * Whether the input is safe without sanitization.
+   * Render the transformed mime bundle.
    */
-  isSafe(mimetype: string): boolean {
-    return false;
-  }
-
-  /**
-   * Render the mime bundle.
-   */
-  render(options: RenderMime.IRendererOptions<string>): Widget {
+  render(options: RenderMime.IRenderOptions): Widget {
     return new RenderedMarkdown(options);
   }
 }

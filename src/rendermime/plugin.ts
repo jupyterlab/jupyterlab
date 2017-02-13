@@ -52,7 +52,7 @@ function activate(app: JupyterLab, linker: ICommandLinker): IRenderMime {
   let renderers: RenderMime.MimeMap<RenderMime.IRenderer> = {};
   let order: string[] = [];
   for (let t of transformers) {
-    for (let m of t.mimetypes) {
+    for (let m of t.mimeTypes) {
       renderers[m] = t;
       order.push(m);
     }
