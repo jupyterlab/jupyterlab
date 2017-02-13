@@ -30,84 +30,107 @@ import {
 } from '../rendermime';
 
 import {
-  CommandIDs, TooltipModel, TooltipWidget
+  CommandIDs, ITooltipManager, TooltipModel, TooltipWidget
 } from './';
 
 
 /**
- * The tooltip extension.
+ * The main tooltip service.
  */
-const plugin: JupyterLabPlugin<void> = {
-  activate,
+const service: JupyterLabPlugin<ITooltipManager> = {
   id: 'jupyter.extensions.tooltip',
   autoStart: true,
-  requires: [IConsoleTracker, INotebookTracker]
+  provides: ITooltipManager,
+  activate: (app: JupyterLab): ITooltipManager => {
+    let tooltip: TooltipWidget | null = null;
+    return {
+      invoke(options: ITooltipManager.IOptions): void {
+        const { anchor, editor, kernel, rendermime  } = options;
+        const model = new TooltipModel({ editor, kernel, rendermime });
+
+        if (tooltip) {
+          tooltip.model.dispose();
+          tooltip.dispose();
+          tooltip = null;
+        }
+        tooltip = new TooltipWidget({ anchor, model });
+        Widget.attach(tooltip, document.body);
+      }
+    };
+  }
 };
 
 
 /**
- * Export the plugin as default.
+ * The console tooltip plugin.
  */
-export default plugin;
+const consolePlugin: JupyterLabPlugin<void> = {
+  id: 'jupyter.extensions.tooltip',
+  autoStart: true,
+  requires: [ITooltipManager, IConsoleTracker],
+  activate: (app: JupyterLab, manager: ITooltipManager, consoles: IConsoleTracker): void => {
+    // Add tooltip launch command.
+    app.commands.addCommand(CommandIDs.launchConsole, {
+      execute: () => {
+        const parent = consoles.currentWidget;
+
+        if (!parent) {
+          return;
+        }
+
+        const anchor = parent.console;
+        const editor = parent.console.prompt.editor;
+        const kernel = parent.console.session.kernel;
+        const rendermime = parent.console.rendermime;
+
+        // If all components necessary for rendering exist, create a tooltip.
+        if (!!editor && !!kernel && !!rendermime) {
+          manager.invoke({ anchor, editor, kernel, rendermime });
+        }
+      }
+    });
+
+  }
+};
 
 
 /**
- * Activate the tooltip.
+ * The notebook tooltip plugin.
  */
-function activate(app: JupyterLab, consoles: IConsoleTracker, notebooks: INotebookTracker): void {
-  const registry = app.commands;
-  let tooltip: TooltipWidget = null;
+const notebookPlugin: JupyterLabPlugin<void> = {
+  id: 'jupyter.extensions.tooltip',
+  autoStart: true,
+  requires: [ITooltipManager, INotebookTracker],
+  activate: (app: JupyterLab, manager: ITooltipManager, notebooks: INotebookTracker): void => {
+    // Add tooltip launch command.
+    app.commands.addCommand(CommandIDs.launchNotebook, {
+      execute: () => {
+        const parent = notebooks.currentWidget;
 
-  // Add tooltip launch command.
-  registry.addCommand(CommandIDs.launch, {
-    execute: args => {
-      const notebook = !!(args && args['notebook']);
-      let anchor: Widget | null = null;
-      let editor: CodeEditor.IEditor | null = null;
-      let kernel: Kernel.IKernel | null = null;
-      let rendermime: IRenderMime | null = null;
-      let parent: NotebookPanel | ConsolePanel | null = null;
-
-      // If a tooltip is open, remove it.
-      if (tooltip) {
-        tooltip.model.dispose();
-        tooltip.dispose();
-        tooltip = null;
-      }
-
-      if (notebook) {
-        parent = notebooks.currentWidget;
-        if (parent) {
-          anchor = parent.notebook;
-          editor = parent.notebook.activeCell.editor;
-          kernel = parent.kernel;
-          rendermime = parent.rendermime;
+        if (!parent) {
+          return;
         }
-      } else {
-        parent = consoles.currentWidget;
-        if (parent) {
-          anchor = parent.console;
-          editor = parent.console.prompt.editor;
-          kernel = parent.console.session.kernel;
-          rendermime = parent.console.rendermime;
+
+        const anchor = parent.notebook;
+        const editor = parent.notebook.activeCell.editor;
+        const kernel = parent.kernel;
+        const rendermime = parent.rendermime;
+
+        // If all components necessary for rendering exist, create a tooltip.
+        if (!!editor && !!kernel && !!rendermime) {
+          manager.invoke({ anchor, editor, kernel, rendermime });
         }
       }
+    });
 
-      // If all components necessary for rendering exist, create a tooltip.
-      let ready = !!editor && !!kernel && !!rendermime;
+  }
+};
 
-      if (!ready) {
-        return;
-      }
 
-      const model = new TooltipModel({ editor, kernel, rendermime });
-
-      tooltip = new TooltipWidget({ anchor, model });
-      Widget.attach(tooltip, document.body);
-
-      // Make sure the parent notebook/console still has the focus.
-      parent.activate();
-    }
-  });
-
-}
+/**
+ * Export the plugins as default.
+ */
+const plugins: JupyterLabPlugin<any>[] = [
+  service, consolePlugin, notebookPlugin
+];
+export default plugins;

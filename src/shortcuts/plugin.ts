@@ -337,16 +337,14 @@ const SHORTCUTS = [
     keys: ['Ctrl M']
   },
   {
-    command: TooltipCommandIDs.launch,
+    command: TooltipCommandIDs.launchNotebook,
     selector: '.jp-Notebook',
-    keys: ['Shift Tab'],
-    args: { notebook: true }
+    keys: ['Shift Tab']
   },
   {
-    command: TooltipCommandIDs.launch,
+    command: TooltipCommandIDs.launchConsole,
     selector: '.jp-ConsolePanel',
-    keys: ['Shift Tab'],
-    args: { notebook: false }
+    keys: ['Shift Tab']
   }
 ];
 
