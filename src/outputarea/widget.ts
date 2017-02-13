@@ -325,24 +325,11 @@ class OutputAreaWidget extends Widget {
     let layout = this.layout as PanelLayout;
     let widget = layout.widgets.at(index) as OutputWidget;
     let output = this._model.get(index);
-    let injector: RenderMime.IInjector;
-    if (output.output_type === 'display_data' ||
-        output.output_type === 'execute_result') {
-      injector = {
-        add: (mimeType: string, value: string | JSONObject) => {
-          this._injecting = true;
-          this._model.addMimeData(
-            output as nbformat.IDisplayData, mimeType, value
-          );
-          this._injecting = false;
-        },
-        has: (mimeType: string) => {
-          return mimeType in (output as nbformat.IDisplayData).data;
-        }
-      };
+    if (output.output_type === 'input_request') {
+      widget.renderInput(output as OutputAreaModel.IInputRequest);
+      return;
     }
-    let trusted = this._trusted;
-    widget.render({ output, trusted, injector });
+    widget.renderOutput(output, this._trusted);
   }
 
   /**
@@ -709,35 +696,29 @@ class OutputWidget extends Widget {
   }
 
   /**
-   * Render an output.
-   *
-   * @param options - The options used to render the output.
+   * Render an input.
    */
-  render(options: OutputWidget.IRenderOptions): void {
-    let { output, trusted, injector } = options;
+  renderInput(value: OutputAreaModel.IInputRequest): void {
+    this.clear();
+    let child = new InputWidget(value);
+    this.setOutput(child);
+  }
 
-    // Handle an input request.
-    if (output.output_type === 'input_request') {
-      let child = new InputWidget(output as OutputAreaModel.IInputRequest);
-      this.setOutput(child);
-      return;
-    }
-    // Extract the data from the output and sanitize if necessary.
-    let rendermime = this._rendermime;
-    let bundle = OutputAreaModel.getBundle(output as nbformat.IOutput);
-    let data = OutputAreaModel.convertBundle(bundle);
+  /**
+   * Render an output.
+   */
+  renderOutput(output: nbformat.IOutput, trusted: boolean): void {
+    let data = RenderMime.getData(output);
+    let metadata = RenderMime.getMetadata(output);
+    let bundle = new RenderMime.MimeBundle({ data, metadata, trusted });
+
     // Clear the content.
     this.clear();
 
-    // Bail if no data to display.
-    if (!data) {
-      console.warn('Did not find renderer for output mimebundle.');
-      return;
-    }
-
     // Create the output result area.
-    let child = rendermime.render({ bundle: data, trusted, injector });
+    let child = this._rendermime.render(bundle);
     if (!child) {
+      console.warn('Did not find renderer for output mimebundle.');
       return;
     }
     this.setOutput(child);
@@ -796,34 +777,6 @@ class OutputWidget extends Widget {
   private _placeholder: Widget = null;
 }
 
-
-/**
- * The namespace for `OutputWidget` statics.
- */
-export
-namespace OutputWidget {
-  /**
-   * The options for rendering the output.
-   */
-   export
-   interface IRenderOptions {
-    /**
-     * The kernel output message payload.
-     */
-    output: OutputAreaModel.Output;
-
-    /**
-     * Whether the output is trusted.
-     */
-    trusted: boolean;
-
-    /**
-     * A callback that can be used to add a mimetype to the original bundle.
-     */
-    injector?: RenderMime.IInjector;
-   }
-
-}
 
 /**
  * A widget that handles stdin requests from the kernel.

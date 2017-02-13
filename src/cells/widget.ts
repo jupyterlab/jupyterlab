@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  JSONObject
+} from 'phosphor/lib/algorithm/json';
+
+import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -698,8 +702,9 @@ class MarkdownCellWidget extends BaseCellWidget {
     // Do not re-render if the text has not changed and the trusted
     // has not changed.
     if (text !== this._prevText || trusted !== this._prevTrusted) {
-      let bundle: RenderMime.MimeMap<string> = { 'text/markdown': text };
-      let widget = this._rendermime.render({ bundle, trusted });
+      let data: JSONObject = { 'text/markdown': text };
+      let bundle = new RenderMime.MimeBundle({ data, trusted });
+      let widget = this._rendermime.render(bundle);
       this._output = widget || new Widget();
       this._output.addClass(MARKDOWN_OUTPUT_CLASS);
     }
