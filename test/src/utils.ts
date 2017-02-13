@@ -146,8 +146,9 @@ namespace Private {
     /**
      * Render the transformed mime bundle.
      */
-    render(options: RenderMime.IRendererOptions<string>): Widget {
-      options.source = json2html(options.source);
+    render(options: RenderMime.IRenderOptions): Widget {
+      let source = String(options.bundle.get(options.mimeType));
+      options.bundle.set(options.mimeType, json2html(source));
       return super.render(options);
     }
   }
@@ -157,16 +158,14 @@ namespace Private {
     /**
      * The mimetypes this renderer accepts.
      */
-    mimetypes = ['foo/bar'];
+    mimeTypes = ['foo/bar'];
 
     /**
      * Render the transformed mime bundle.
      */
-    render(options: RenderMime.IRendererOptions<string>): Widget {
-      if (options.injector) {
-        options.injector.add('text/plain', 'foo');
-        options.injector.add('application/json', { 'foo': 1 } );
-      }
+    render(options: RenderMime.IRenderOptions): Widget {
+      options.bundle.set('text/plain', 'foo');
+      options.bundle.set('application/json', { 'foo': 1 } );
       return super.render(options);
     }
   }
@@ -179,7 +178,7 @@ namespace Private {
   let renderers: RenderMime.MimeMap<RenderMime.IRenderer> = {};
   let order: string[] = [];
   for (let t of TRANSFORMERS) {
-    for (let m of t.mimetypes) {
+    for (let m of t.mimeTypes) {
       renderers[m] = t;
       order.push(m);
     }
