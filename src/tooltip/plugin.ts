@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel
-} from '@jupyterlab/services';
-
-import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
@@ -14,20 +10,12 @@ import {
 } from '../application';
 
 import {
-  CodeEditor
-} from '../codeeditor';
-
-import {
-  ConsolePanel, IConsoleTracker
+  IConsoleTracker
 } from '../console';
 
 import {
-  INotebookTracker, NotebookPanel
+  INotebookTracker
 } from '../notebook';
-
-import {
-  IRenderMime
-} from '../rendermime';
 
 import {
   CommandIDs, ITooltipManager, TooltipModel, TooltipWidget
@@ -38,7 +26,7 @@ import {
  * The main tooltip service.
  */
 const service: JupyterLabPlugin<ITooltipManager> = {
-  id: 'jupyter.extensions.tooltip',
+  id: 'jupyter.services.tooltip',
   autoStart: true,
   provides: ITooltipManager,
   activate: (app: JupyterLab): ITooltipManager => {
@@ -65,7 +53,7 @@ const service: JupyterLabPlugin<ITooltipManager> = {
  * The console tooltip plugin.
  */
 const consolePlugin: JupyterLabPlugin<void> = {
-  id: 'jupyter.extensions.tooltip',
+  id: 'jupyter.extensions.tooltip-console',
   autoStart: true,
   requires: [ITooltipManager, IConsoleTracker],
   activate: (app: JupyterLab, manager: ITooltipManager, consoles: IConsoleTracker): void => {
@@ -98,7 +86,7 @@ const consolePlugin: JupyterLabPlugin<void> = {
  * The notebook tooltip plugin.
  */
 const notebookPlugin: JupyterLabPlugin<void> = {
-  id: 'jupyter.extensions.tooltip',
+  id: 'jupyter.extensions.tooltip-notebook',
   autoStart: true,
   requires: [ITooltipManager, INotebookTracker],
   activate: (app: JupyterLab, manager: ITooltipManager, notebooks: INotebookTracker): void => {
