@@ -23,6 +23,14 @@ describe('CodeEditor.Model', () => {
 
     it('should create a CodeEditor Model', () => {
       expect(model).to.be.a(CodeEditor.Model);
+      expect(model.value.text).to.equal('');
+    });
+
+    it('should create a CodeEditor Model with an initial value', () => {
+      let other = new CodeEditor.Model('Initial text here');
+      expect(other).to.be.a(CodeEditor.Model);
+      expect(other.value.text).to.equal('Initial text here');
+      other.dispose();
     });
 
   });
