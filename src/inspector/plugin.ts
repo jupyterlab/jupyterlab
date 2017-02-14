@@ -113,9 +113,7 @@ const consolePlugin: JupyterLabPlugin<void> = {
   autoStart: true,
   activate: (app: JupyterLab, manager: IInspector, consoles: IConsoleTracker): void => {
     // Maintain association of new consoles with their respective handlers.
-    const handlers = new AttachedProperty<Widget, InspectionHandler>({
-      name: 'handler'
-    });
+    const handlers: { [id: string]: InspectionHandler } = {};
 
     // Create a handler for each console that is created.
     consoles.widgetAdded.connect((sender, parent) => {
@@ -125,7 +123,7 @@ const consolePlugin: JupyterLabPlugin<void> = {
       const handler = new InspectionHandler({ kernel, rendermime });
 
       // Associate the handler to the widget.
-      handlers.set(parent, handler);
+      handlers[parent.id] = handler;
 
       // Set the initial editor.
       let cell = parent.console.prompt;
@@ -142,7 +140,10 @@ const consolePlugin: JupyterLabPlugin<void> = {
       });
 
       // Listen for parent disposal.
-      parent.disposed.connect(() => { handler.dispose(); });
+      parent.disposed.connect(() => {
+        delete handlers[parent.id];
+        handler.dispose();
+      });
     });
 
     // Keep track of console instances and set inspector source.
@@ -151,7 +152,7 @@ const consolePlugin: JupyterLabPlugin<void> = {
       if (!widget || !consoles.has(widget)) {
         return;
       }
-      let source = handlers.get(widget);
+      let source = handlers[widget.id];
       if (source) {
         manager.source = source;
       }
@@ -168,9 +169,7 @@ const notebookPlugin: JupyterLabPlugin<void> = {
   autoStart: true,
   activate: (app: JupyterLab, manager: IInspector, notebooks: INotebookTracker): void => {
     // Maintain association of new notebooks with their respective handlers.
-    const handlers = new AttachedProperty<Widget, InspectionHandler>({
-      name: 'handler'
-    });
+    const handlers: { [id: string]: InspectionHandler } = {};
 
     // Create a handler for each notebook that is created.
     notebooks.widgetAdded.connect((sender, parent) => {
@@ -179,7 +178,7 @@ const notebookPlugin: JupyterLabPlugin<void> = {
       const handler = new InspectionHandler({ kernel, rendermime });
 
       // Associate the handler to the widget.
-      handlers.set(parent, handler);
+      handlers[parent.id] = handler;
 
       // Set the initial editor.
       let cell = parent.notebook.activeCell;
@@ -196,7 +195,10 @@ const notebookPlugin: JupyterLabPlugin<void> = {
       });
 
       // Listen for parent disposal.
-      parent.disposed.connect(() => { handler.dispose(); });
+      parent.disposed.connect(() => {
+        delete handlers[parent.id];
+        handler.dispose();
+      });
     });
 
     // Keep track of notebook instances and set inspector source.
@@ -205,7 +207,7 @@ const notebookPlugin: JupyterLabPlugin<void> = {
       if (!widget || !notebooks.has(widget)) {
         return;
       }
-      let source = handlers.get(widget);
+      let source = handlers[widget.id];
       if (source) {
         manager.source = source;
       }

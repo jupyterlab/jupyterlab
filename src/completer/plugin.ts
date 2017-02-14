@@ -64,7 +64,7 @@ const service: JupyterLabPlugin<ICompletionManager> = {
           return;
         }
 
-        const handler =handlers[id];
+        const handler = handlers[id];
         if (!handler) {
           return;
         }
@@ -119,19 +119,19 @@ const consolePlugin: JupyterLabPlugin<void> = {
     // Create a handler for each console that is created.
     consoles.widgetAdded.connect((sender, panel) => {
       const anchor = panel.console;
-      const cell = panel.console.prompt;
+      const cell = anchor.prompt;
       const editor = cell && cell.editor;
-      const kernel = panel.console.session.kernel;
+      const kernel = anchor.session.kernel;
       const parent = panel;
       const handler = manager.register({ anchor, editor, kernel, parent });
 
       // Listen for prompt creation.
-      panel.console.promptCreated.connect((sender, cell) => {
+      anchor.promptCreated.connect((sender, cell) => {
         handler.editor = cell && cell.editor;
       });
 
       // Listen for kernel changes.
-      panel.console.session.kernelChanged.connect((sender, kernel) => {
+      anchor.session.kernelChanged.connect((sender, kernel) => {
         handler.kernel = kernel;
       });
     });
@@ -140,6 +140,9 @@ const consolePlugin: JupyterLabPlugin<void> = {
     app.commands.addCommand(CommandIDs.invokeConsole, {
       execute: () => {
         const id = consoles.currentWidget && consoles.currentWidget.id;
+        if (!id) {
+          return;
+        }
         return app.commands.execute(CommandIDs.invoke, { id });
       }
     });

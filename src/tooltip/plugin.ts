@@ -81,9 +81,9 @@ const consolePlugin: JupyterLabPlugin<void> = {
         }
 
         const anchor = parent.console;
-        const editor = parent.console.prompt.editor;
-        const kernel = parent.console.session.kernel;
-        const rendermime = parent.console.rendermime;
+        const editor = anchor.prompt.editor;
+        const kernel = anchor.session.kernel;
+        const rendermime = anchor.rendermime;
 
         // If all components necessary for rendering exist, create a tooltip.
         if (!!editor && !!kernel && !!rendermime) {
@@ -114,7 +114,7 @@ const notebookPlugin: JupyterLabPlugin<void> = {
         }
 
         const anchor = parent.notebook;
-        const editor = parent.notebook.activeCell.editor;
+        const editor = anchor.activeCell.editor;
         const kernel = parent.kernel;
         const rendermime = parent.rendermime;
 
