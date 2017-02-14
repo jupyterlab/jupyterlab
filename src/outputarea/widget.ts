@@ -2,16 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel, nbformat
+  Kernel, KernelMessage, nbformat
 } from '@jupyterlab/services';
-
-import {
-  each
-} from 'phosphor/lib/algorithm/iteration';
-
-import {
-  JSONObject
-} from 'phosphor/lib/algorithm/json';
 
 import {
   ISequence
@@ -24,10 +16,6 @@ import {
 import {
   MimeData
 } from 'phosphor/lib/core/mimedata';
-
-import {
-  defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
 
 import {
   Drag
@@ -50,7 +38,7 @@ import {
 } from '../rendermime';
 
 import {
-  IOutputAreaModel, OutputAreaModel
+  IOutputAreaModel, OutputAreaModel, OutputModel
 } from './model';
 
 
@@ -161,7 +149,7 @@ class OutputAreaWidget extends Widget {
    */
   constructor(options: OutputAreaWidget.IOptions) {
     super();
-    this.model = options.model;
+    let model = this.model = options.model;
     this.addClass(OUTPUT_AREA_CLASS);
     this.rendermime = options.rendermime;
     this.contentFactory = (
@@ -239,7 +227,6 @@ class OutputAreaWidget extends Widget {
    * Dispose of the resources held by the widget.
    */
   dispose() {
-    this._model = null;
     super.dispose();
   }
 
@@ -380,7 +367,7 @@ class OutputAreaWidget extends Widget {
   /**
    * Add an output to the layout.
    */
-  protected addOutput(model: OutputAreaModel.IModel): void {
+  protected addOutput(model: OutputModel.IModel): void {
     let rendermime = this.rendermime;
     let widget = this.contentFactory.createOutput({ rendermime, model });
     let layout = this.layout as PanelLayout;
@@ -390,11 +377,11 @@ class OutputAreaWidget extends Widget {
   /**
    * Update an output in place.
    */
-  protected setOutput(index: number, model: OutputAreaModel.IModel): void {
+  protected setOutput(index: number, model: OutputModel.IModel): void {
     let layout = this.layout as PanelLayout;
     let widgets = this.widgets;
     // Skip any input widgets to find the correct index.
-    for (i = 0; i < index; i++) {
+    for (let i = 0; i < index; i++) {
       if (widgets.at(i) instanceof InputWidget) {
         index++;
       }
@@ -408,18 +395,18 @@ class OutputAreaWidget extends Widget {
   /**
    * Follow changes on the model state.
    */
-  protected onModelChanged(sender: IOutputAreaModel, args: ObservableVector.IChangedArgs<OutputAreaModel.IOutput>) {
+  protected onModelChanged(sender: IOutputAreaModel, args: ObservableVector.IChangedArgs<OutputModel.IModel>) {
     switch (args.type) {
     case 'add':
       // Children are always added at the end.
-      this.addOutput(args.newValue);
+      this.addOutput(args.newValues[0]);
       break;
     case 'remove':
       // Only clear is supported by the model.
       this.clear();
       break;
     case 'set':
-      this.updateOutput(args.newIndex, args.newValue);
+      this.setOutput(args.newIndex, args.newValues[0]);
       break;
     default:
       break;
@@ -676,51 +663,42 @@ class OutputWidget extends Widget {
   }
 
   /**
-   * Dispose of the resources held by the widget.
-   */
-  dispose(): void {
-    this._rendermime = null;
-    this._placeholder = null;
-    super.dispose();
-  }
-
-  /**
    * Render an output.
    */
-  protected createChild(options: OutputWidget.IOptions): void {
+  protected createChild(options: OutputWidget.IOptions): Widget {
     let widget = options.rendermime.render(options.model);
 
     // Create the output result area.
     if (!widget) {
       console.warn('Did not find renderer for output mimebundle.');
       return new Widget();
-      return;
     }
 
     // Add classes and output prompt as necessary.
-    let output = model.toJSON();
-    switch (output.type) {
+    let model = options.model;
+    switch (model.output_type) {
     case 'execute_result':
-      child.addClass(EXECUTE_CLASS);
-      let count = (output as nbformat.IExecuteResult).execution_count;
+      widget.addClass(EXECUTE_CLASS);
+      let count = model.execution_count;
       this.prompt.node.textContent = `Out[${count === null ? ' ' : count}]:`;
       break;
     case 'display_data':
-      child.addClass(DISPLAY_CLASS);
+      widget.addClass(DISPLAY_CLASS);
       break;
     case 'stream':
-      if ((output as nbformat.IStream).name === 'stdout') {
-        child.addClass(STDOUT_CLASS);
+      if (model.name === 'stdout') {
+        widget.addClass(STDOUT_CLASS);
       } else {
-        child.addClass(STDERR_CLASS);
+        widget.addClass(STDERR_CLASS);
       }
       break;
     case 'error':
-      child.addClass(ERROR_CLASS);
+      widget.addClass(ERROR_CLASS);
       break;
     default:
       break;
     }
+    return widget;
   }
 }
 
@@ -743,7 +721,7 @@ namespace OutputWidget {
     /**
      * The model to render.
      */
-    model: OutputAreaModel.IOutput;
+    model: OutputModel.IModel;
   }
 }
 
@@ -852,12 +830,6 @@ namespace InputWidget {
     kernel: Kernel.IKernel;
   }
 }
-
-
-
-// Define the signals for the `OutputAreaWidget` class.
-defineSignal(OutputAreaWidget.prototype, 'modelChanged');
-defineSignal(OutputAreaWidget.prototype, 'modelDisposed');
 
 
 /**

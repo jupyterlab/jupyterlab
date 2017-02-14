@@ -38,7 +38,7 @@ interface IOutputAreaModel extends IDisposable {
   /**
    * A signal emitted when the model changes.
    */
-  readonly changed: ISignal<IOutputAreaModel, ObservableVector.IChangedArgs<OutputAreaModel.IOutput>>;
+  readonly changed: ISignal<IOutputAreaModel, ObservableVector.IChangedArgs<OutputModel.IModel>>;
 
   /**
    * A signal emitted when a value in one of the outputs changes.
@@ -63,7 +63,7 @@ interface IOutputAreaModel extends IDisposable {
   /**
    * Get an item at the specified index.
    */
-  get(index: number): OutputAreaModel.IOutput;
+  get(index: number): OutputModel.IModel;
 
   /**
    * Add an output, which may be combined with previous output.
@@ -98,19 +98,19 @@ class OutputAreaModel implements IOutputAreaModel {
    */
   constructor(options: OutputAreaModel.IOptions) {
     this._trusted = options.trusted;
-    this.list = new ObservableVector<OutputAreaModel.Output>();
+    this.list = new ObservableVector<OutputModel.IModel>();
     this.list.changed.connect(this._onListChanged, this);
   }
 
   /**
    * A signal emitted when the model changes.
    */
-  readonly changed: ISignal<this, ObservableVector.IChangedArgs<OutputAreaModel.Output>>;
+  readonly changed: ISignal<this, ObservableVector.IChangedArgs<OutputModel.IModel>>;
 
   /**
    * A signal emitted when a value in one of the outputs changes.
    */
-  readonly itemChanged: ISignal<IOutputAreaModel, void>;
+  readonly itemChanged: ISignal<this, void>;
 
   /**
    * A signal emitted when the model is disposed.
@@ -175,7 +175,7 @@ class OutputAreaModel implements IOutputAreaModel {
   /**
    * Get an item at the specified index.
    */
-  get(index: number): OutputAreaModel.IOutput {
+  get(index: number): OutputModel.IModel {
     return this.list.at(index);
   }
 
@@ -248,13 +248,27 @@ class OutputAreaModel implements IOutputAreaModel {
   }
 
   protected clearNext = false;
-  protected list: IObservableVector<OutputAreaModel.Output> = null;
+  protected list: IObservableVector<OutputModel.IModel> = null;
 
   /**
    * Create an output item and hook up its signals.
    */
-  private _createItem(options: OutputAreaModel.IOutputOptions): OutputAreaModel.Output {
-    let item = new OutputAreaModel.Output(options);
+  private _createItem(options: OutputModel.IOptions): OutputModel.IModel {
+    let item: OutputModel.IModel;
+    switch (options.output.output_type) {
+    case 'execute_result':
+      item = new OutputModel.ExecuteResult(options);
+      break;
+    case 'stream':
+      item = new OutputModel.Stream(options);
+      break;
+    case 'error':
+      item = new OutputModel.Error(options);
+      break;
+    default:
+      item = new OutputModel.DisplayData(options);
+      break;
+    }
     item.changed.connect(this._onItemChanged);
     item.metadata.changed.connect(this._onItemChanged);
     return item;
@@ -263,7 +277,7 @@ class OutputAreaModel implements IOutputAreaModel {
   /**
    * Handle a change to the list.
    */
-  private _onListChanged(sender: IObservableVector<OutputAreaModel.IOutput>, args: ObservableVector.IChangedArgs<OutputAreaModel.Output>) {
+  private _onListChanged(sender: IObservableVector<OutputModel.IModel>, args: ObservableVector.IChangedArgs<OutputModel.IModel>) {
     this.changed.emit(args);
   }
 
@@ -295,16 +309,45 @@ namespace OutputAreaModel {
      */
     trusted: boolean;
   }
+}
+
+
+// Define the signals for the `OutputAreaModel` class.
+defineSignal(OutputAreaModel.prototype, 'changed');
+defineSignal(OutputAreaModel.prototype, 'itemChanged');
+defineSignal(OutputAreaModel.prototype, 'disposed');
+
+
+/**
+ * The namespace for output model data.
+ */
+export
+namespace OutputModel {
+  /**
+   * The options used to create an output model.
+   */
+  export
+  interface IOptions {
+    /**
+     * The original output.
+     */
+    output: nbformat.IOutput;
+
+    /**
+     * Whether the output is trusted.
+     */
+    trusted: boolean;
+  }
 
   /**
    * The interface for an element of the output area.
    */
   export
-  interface IOutput extends RenderMime.IMimeModel {
+  interface IBaseOutput extends RenderMime.IMimeModel {
     /**
      * The output type.
      */
-    readonly type: nbformat.OutputType;
+    readonly output_type: nbformat.OutputType;
 
     /**
      * Serialize the model to JSON.
@@ -313,17 +356,92 @@ namespace OutputAreaModel {
   }
 
   /**
+   * The interface for a display data result.
+   */
+  export
+  interface IDisplayData extends IBaseOutput {
+    /**
+     * The output type.
+     */
+    output_type: 'display_data';
+  }
+
+  /**
+   * The interface for an execute result.
+   */
+  export
+  interface IExecuteResult extends IBaseOutput {
+    /**
+     * The output type.
+     */
+    output_type: 'execute_result';
+
+    /**
+     * The execution count of the output.
+     */
+    readonly execution_count: nbformat.ExecutionCount;
+  }
+
+  /**
+   * The interface for a stream.
+   */
+  export
+  interface IStream extends IBaseOutput {
+    /**
+     * The output type.
+     */
+    output_type: 'stream';
+
+    /**
+     * The name of the stream.
+     */
+    readonly name: 'stdout' | 'stderr';
+  }
+
+  /**
+   * The interface for an error.
+   */
+  export
+  interface IError extends IBaseOutput {
+    /**
+     * Type of cell output.
+     */
+    output_type: 'error';
+
+    /**
+     * The name of the error.
+     */
+    readonly ename: string;
+
+    /**
+     * The value, or message, of the error.
+     */
+    readonly evalue: string;
+
+    /**
+     * The error's traceback.
+     */
+    readonly traceback: string[];
+  }
+
+  /**
+   * The type for an output.
+   */
+  export
+  type IModel = IDisplayData | IExecuteResult | IStream | IError;
+
+  /**
    * The default implementation of an output model.
    */
   export
-  class Output extends RenderMime.MimeModel implements IOutput {
+  class OutputModel extends RenderMime.MimeModel implements IBaseOutput {
     /**
-     * Construct a new IOutput.
+     * Construct a new IModel.
      */
-    constructor(options: IOutputOptions) {
+    constructor(options: IOptions) {
       super(Private.getBundleOptions(options));
-      let output = this._output = options.output;
-      this.type = output.output_type;
+      let output = this.raw = options.output;
+      this.output_type = output.output_type;
       // Remove redundant data.
       switch (output.output_type) {
       case 'display_data':
@@ -342,13 +460,13 @@ namespace OutputAreaModel {
     /**
      * The output type.
      */
-    readonly type: nbformat.OutputType;
+    readonly output_type: nbformat.OutputType;
 
     /**
      * Serialize the model to JSON.
      */
     toJSON(): nbformat.IOutput {
-      let output = JSON.parse(JSON.stringify(this._output)) as nbformat.IOutput;
+      let output = JSON.parse(JSON.stringify(this.raw)) as nbformat.IOutput;
       switch (output.output_type) {
       case 'display_data':
       case 'execute_result':
@@ -368,42 +486,98 @@ namespace OutputAreaModel {
       return output;
     }
 
-    private _output: nbformat.IOutput;
+    protected raw: nbformat.IOutput;
   }
 
   /**
-   * The options used to create an IOutput.
+   * An output for display data.
    */
   export
-  interface IOutputOptions {
+  class DisplayData extends OutputModel implements IDisplayData {
     /**
-     * The original output.
+     * Type of cell output.
      */
-    output: nbformat.IOutput;
+    output_type: 'display_data';
+  }
+
+  /**
+   * An output for execute result data.
+   */
+  export
+  class ExecuteResult extends OutputModel implements IExecuteResult {
+    /**
+     * The output type.
+     */
+    output_type: 'execute_result';
 
     /**
-     * Whether the output is trusted.
+     * The execution count of the output.
      */
-    trusted: boolean;
+    get execution_count(): nbformat.ExecutionCount {
+      return (this.raw as nbformat.IExecuteResult).execution_count;
+    }
+  }
+
+  /**
+   * An output for stream data.
+   */
+  export
+  class Stream extends OutputModel implements IStream {
+    /**
+     * The output type.
+     */
+    output_type: 'stream';
+
+    /**
+     * The name of the stream.
+     */
+    get name(): 'stdout' | 'stderr' {
+      return (this.raw as nbformat.IStream).name;
+    }
+  }
+
+  /**
+   * An output for error data.
+   */
+  export
+  class Error extends OutputModel implements IError {
+    /**
+     * Type of cell output.
+     */
+    output_type: 'error';
+
+    /**
+     * The name of the error.
+     */
+    get ename(): string {
+      return (this.raw as nbformat.IError).ename;
+    }
+
+    /**
+     * The value, or message, of the error.
+     */
+    get evalue(): string {
+      return (this.raw as nbformat.IError).evalue;
+    }
+
+    /**
+     * The error's traceback.
+     */
+    get traceback(): string[] {
+      return (this.raw as nbformat.IError).traceback;
+    }
   }
 }
-
-
-// Define the signals for the `OutputAreaModel` class.
-defineSignal(OutputAreaModel.prototype, 'changed');
-defineSignal(OutputAreaModel.prototype, 'itemChanged');
-defineSignal(OutputAreaModel.prototype, 'disposed');
-
 
 /**
  * The namespace for module private data.
  */
 namespace Private {
   /**
-   * Get the bundle options given IOutputOptions.
+   * Get the bundle options given output model options.
    */
   export
-  function getBundleOptions(options: OutputAreaModel.IOutputOptions): RenderMime.IMimeModelOptions {
+  function getBundleOptions(options: OutputModel.IOptions): RenderMime.IMimeModelOptions {
     let data = RenderMime.getData(options.output);
     let metadata = RenderMime.getMetadata(options.output);
     let trusted = options.trusted;

@@ -34,6 +34,10 @@ import {
 } from '../rendermime';
 
 import {
+  IObservableMap, ObservableMap
+} from '../common/observable';
+
+import {
   Metadata
 } from '../common/metadata';
 
@@ -369,7 +373,7 @@ class CodeCellWidget extends BaseCellWidget {
     });
     (this.layout as PanelLayout).addWidget(this._output);
     this.setPrompt(`${model.executionCount || ''}`);
-    model.stateChange.connect(this.onModelStateChanged, this);
+    model.stateChanged.connect(this.onStateChanged, this);
     model.metadata.changed.connect(this.onMetadataChanged, this);
   }
 
@@ -439,7 +443,7 @@ class CodeCellWidget extends BaseCellWidget {
   /**
    * Handle changes in the model.
    */
-  protected onModelStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
+  protected onStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
     switch (args.name) {
     case 'executionCount':
       this.setPrompt(`${(model as ICodeCellModel).executionCount}`);
@@ -447,13 +451,12 @@ class CodeCellWidget extends BaseCellWidget {
     default:
       break;
     }
-    super.onModelStateChanged(model, args);
   }
 
   /**
    * Handle changes in the metadata.
    */
-  protected onMetadataChanged(model: IObservableMap<JSONValue>, args: ObservableMapt.IChangedArgs<JSONValue>): void {
+  protected onMetadataChanged(model: IObservableMap<JSONValue>, args: ObservableMap.IChangedArgs<JSONValue>): void {
     switch (args.key) {
     case 'collapsed':
     case 'scrolled':
@@ -462,7 +465,6 @@ class CodeCellWidget extends BaseCellWidget {
     default:
       break;
     }
-    super.onMetadataChanged(model, args);
   }
 
   private _rendermime: RenderMime = null;
