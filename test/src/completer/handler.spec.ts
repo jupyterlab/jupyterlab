@@ -358,7 +358,11 @@ describe('completer/handler', () => {
 
         handler.editor = editor;
         expect(model.methods).to.not.contain('handleTextChange');
-        handler.editor.model.value.text = 'foo';
+        editor.model.value.text = 'bar';
+        editor.setCursorPosition({ line: 0, column: 2 });
+        // This signal is emitted (again) because the cursor position that
+        // a natural user would create need to be recreated here.
+        editor.model.value.changed.emit(void 0);
         expect(model.methods).to.contain('handleTextChange');
       });
 
