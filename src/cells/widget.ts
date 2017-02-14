@@ -136,14 +136,6 @@ class BaseCellWidget extends Widget {
 
     this._input = factory.createInputArea({ editor });
     (this.layout as PanelLayout).addWidget(this._input);
-
-    // Handle trusted cursor.
-    this._trustedCursor = model.getMetadata('trusted');
-    this._trusted = !!this._trustedCursor.getValue();
-
-    // Connect signal handlers.
-    model.metadataChanged.connect(this.onMetadataChanged, this);
-    model.stateChanged.connect(this.onModelStateChanged, this);
   }
 
   /**
@@ -194,20 +186,6 @@ class BaseCellWidget extends Widget {
   }
 
   /**
-   * The trusted state of the cell.
-   */
-  get trusted(): boolean {
-    return this._trusted;
-  }
-  set trusted(value: boolean) {
-    if (!this._model) {
-      return;
-    }
-    this._trustedCursor.setValue(value);
-    this._trusted = value;
-  }
-
-  /**
    * Set the prompt for the widget.
    */
   setPrompt(value: string): void {
@@ -225,7 +203,6 @@ class BaseCellWidget extends Widget {
     this._model = null;
     this._input = null;
     this._editor = null;
-    this._trustedCursor = null;
     super.dispose();
   }
 
@@ -256,30 +233,6 @@ class BaseCellWidget extends Widget {
   }
 
   /**
-   * Handle changes in the model.
-   *
-   * #### Notes
-   * Subclasses may reimplement this method as needed.
-   */
-  protected onModelStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
-    // no-op
-  }
-
-  /**
-   * Handle changes in the model.
-   */
-  protected onMetadataChanged(model: ICellModel, args: IChangedArgs<any>): void {
-    switch (args.name) {
-      case 'trusted':
-        this._trusted = !!this._trustedCursor.getValue();
-        this.update();
-        break;
-      default:
-        break;
-    }
-  }
-
-  /**
    * Render an input instead of the text editor.
    */
   protected renderInput(widget: Widget): void {
@@ -299,8 +252,6 @@ class BaseCellWidget extends Widget {
   private _editor: CodeEditorWidget = null;
   private _model: ICellModel = null;
   private _readOnly = false;
-  private _trustedCursor: Metadata.ICursor = null;
-  private _trusted = false;
 }
 
 
@@ -409,20 +360,17 @@ class CodeCellWidget extends BaseCellWidget {
     super(options);
     this.addClass(CODE_CELL_CLASS);
     let rendermime = this._rendermime = options.rendermime;
-
     let factory = options.contentFactory;
+    let model = this.model;
     this._output = factory.createOutputArea({
+      model: model.outputs,
       rendermime,
       contentFactory: factory.outputAreaContentFactory
     });
     (this.layout as PanelLayout).addWidget(this._output);
-
-    let model = this.model;
-    this._output.model = model.outputs;
-    this._output.trusted = this.trusted;
-    this._collapsedCursor = model.getMetadata('collapsed');
-    this._scrolledCursor = model.getMetadata('scrolled');
     this.setPrompt(`${model.executionCount || ''}`);
+    model.stateChange.connect(this.onModelStateChanged, this);
+    model.metadata.changed.connect(this.onMetadataChanged, this);
   }
 
   /**
@@ -461,7 +409,7 @@ class CodeCellWidget extends BaseCellWidget {
     }
     model.executionCount = null;
     this.setPrompt('*');
-    this.trusted = true;
+    this.model.trusted = true;
     return this._output.execute(code, kernel).then(reply => {
       let status = reply.content.status;
       if (status === 'abort') {
@@ -484,7 +432,6 @@ class CodeCellWidget extends BaseCellWidget {
     }
     if (this._output) {
       // TODO: handle scrolled state.
-      this._output.trusted = this.trusted;
     }
     super.onUpdateRequest(msg);
   }
@@ -506,8 +453,8 @@ class CodeCellWidget extends BaseCellWidget {
   /**
    * Handle changes in the metadata.
    */
-  protected onMetadataChanged(model: ICellModel, args: IChangedArgs<any>): void {
-    switch (args.name) {
+  protected onMetadataChanged(model: IObservableMap<JSONValue>, args: ObservableMapt.IChangedArgs<JSONValue>): void {
+    switch (args.key) {
     case 'collapsed':
     case 'scrolled':
       this.update();
@@ -697,7 +644,7 @@ class MarkdownCellWidget extends BaseCellWidget {
   private _updateOutput(): void {
     let model = this.model;
     let text = model && model.value.text || DEFAULT_MARKDOWN_TEXT;
-    let trusted = this.trusted;
+    let trusted = this.model.trusted;
     // Do not re-render if the text has not changed and the trusted
     // has not changed.
     if (text !== this._prevText || trusted !== this._prevTrusted) {
