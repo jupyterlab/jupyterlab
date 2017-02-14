@@ -62,6 +62,7 @@ class TooltipWidget extends Widget {
     this.model = options.model;
     this.model.contentChanged.connect(this._onContentChanged, this);
     this.addClass(TOOLTIP_CLASS);
+    this.hide();
     this.anchor.addClass(ANCHOR_CLASS);
   }
 
@@ -103,6 +104,8 @@ class TooltipWidget extends Widget {
     }
     switch (event.type) {
     case 'keydown':
+      this._evtKeydown(event as KeyboardEvent);
+      break;
     case 'mousedown':
       this._dismiss(event);
       break;
@@ -150,6 +153,21 @@ class TooltipWidget extends Widget {
   }
 
   /**
+   * Handle a keydown event.
+   */
+  private _evtKeydown(event: KeyboardEvent): void {
+    // Dismiss on enter, escape, or close parens.
+    if ([13, 27, 48].indexOf(event.keyCode) !== -1) {
+      this._dismiss(event);
+      // Prevent enter from getting to the editor.
+      if (event.keyCode === 13) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }
+  }
+
+  /**
    * Dismiss the tooltip if necessary.
    */
   private _dismiss(event: Event): void {
@@ -176,6 +194,7 @@ class TooltipWidget extends Widget {
     this._content = this.model.content;
     if (this._content) {
       (this.layout as PanelLayout).addWidget(this._content);
+      this.show();
     }
     this.update();
   }
