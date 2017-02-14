@@ -343,7 +343,7 @@ namespace OutputModel {
    * The interface for an element of the output area.
    */
   export
-  interface IBaseOutput extends RenderMime.IMimeModel {
+  interface IBaseModel extends RenderMime.IMimeModel {
     /**
      * The output type.
      */
@@ -359,7 +359,7 @@ namespace OutputModel {
    * The interface for a display data result.
    */
   export
-  interface IDisplayData extends IBaseOutput {
+  interface IDisplayData extends IBaseModel {
     /**
      * The output type.
      */
@@ -370,7 +370,7 @@ namespace OutputModel {
    * The interface for an execute result.
    */
   export
-  interface IExecuteResult extends IBaseOutput {
+  interface IExecuteResult extends IBaseModel {
     /**
      * The output type.
      */
@@ -386,7 +386,7 @@ namespace OutputModel {
    * The interface for a stream.
    */
   export
-  interface IStream extends IBaseOutput {
+  interface IStream extends IBaseModel {
     /**
      * The output type.
      */
@@ -402,7 +402,7 @@ namespace OutputModel {
    * The interface for an error.
    */
   export
-  interface IError extends IBaseOutput {
+  interface IError extends IBaseModel {
     /**
      * Type of cell output.
      */
@@ -434,7 +434,7 @@ namespace OutputModel {
    * The default implementation of an output model.
    */
   export
-  class OutputModel extends RenderMime.MimeModel implements IBaseOutput {
+  class OutputModel extends RenderMime.MimeModel implements IBaseModel {
     /**
      * Construct a new IModel.
      */
