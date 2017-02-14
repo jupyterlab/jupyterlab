@@ -68,7 +68,7 @@ interface IOutputAreaModel extends IDisposable {
   /**
    * Clear all of the output.
    *
-   * @param wait Delay clearing the output until the next message is added.
+   * @param wait - Delay clearing the output until the next message is added.
    */
   clear(wait?: boolean): void;
 

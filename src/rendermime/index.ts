@@ -398,6 +398,14 @@ namespace RenderMime {
   }
 
   /**
+   * Convert a mime bundle to mime data.
+   */
+  export
+  function convertBundle(bundle: nbformat.IMimeBundle): JSONObject {
+    return Private.convertBundle(bundle);
+  }
+
+  /**
    * Default renderer order
    */
   export
