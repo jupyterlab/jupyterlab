@@ -6,7 +6,7 @@ import {
 } from 'phosphor/lib/core/token';
 
 import {
-  Session, Kernel
+  Session
 } from '@jupyterlab/services';
 
 import {
@@ -18,16 +18,8 @@ import {
 } from 'phosphor/lib/ui/panel';
 
 import {
-  Widget
-} from 'phosphor/lib/ui/widget';
-
-import {
   IEditorMimeTypeService, CodeEditor
 } from '../codeeditor';
-
-import {
-  CompletionHandler, CompleterModel, CompleterWidget
-} from '../completer';
 
 import {
   BaseCellWidget, CodeCellWidget
@@ -72,23 +64,6 @@ class ConsolePanel extends Panel {
     };
     this.console = factory.createConsole(consoleOpts);
     this.addWidget(this.console);
-
-    // Instantiate the completer.
-    this._completer = factory.createCompleter({ model: new CompleterModel() });
-
-    // Set the completer widget's anchor widget to peg its position.
-    this._completer.anchor = this.console;
-    Widget.attach(this._completer, document.body);
-
-    // Instantiate the completer handler.
-    this._completerHandler = factory.createCompleterHandler({
-      completer: this._completer,
-      kernel: options.session.kernel
-    });
-
-    // Connect to change events.
-    this.console.promptCreated.connect(this._onPromptCreated, this);
-    options.session.kernelChanged.connect(this._onKernelChanged, this);
   }
 
   /**
@@ -100,16 +75,6 @@ class ConsolePanel extends Panel {
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
-    if (this._completer === null) {
-      return;
-    }
-    let completer = this._completer;
-    let completerHandler = this._completerHandler;
-    this._completer = null;
-    this._completerHandler = null;
-    completer.dispose();
-    completerHandler.dispose();
-
     this.console.dispose();
     super.dispose();
   }
@@ -128,27 +93,6 @@ class ConsolePanel extends Panel {
     super.onCloseRequest(msg);
     this.dispose();
   }
-
-  /**
-   * Handle the creation of a new prompt.
-   */
-  private _onPromptCreated(sender: CodeConsole, prompt: CodeCellWidget): void {
-    this._completer.reset();
-
-    // Associate the new prompt with the completer.
-    this._completerHandler.editor = prompt.editor;
-  }
-
-  /**
-   * Handle a change to the kernel.
-   */
-  private _onKernelChanged(sender: Session.ISession, kernel: Kernel.IKernel): void {
-    this._completerHandler.kernel = kernel;
-  }
-
-  private _completer: CompleterWidget = null;
-  private _completerHandler: CompletionHandler = null;
-
 }
 
 
@@ -207,16 +151,6 @@ namespace ConsolePanel {
      * Create a new console panel.
      */
     createConsole(options: CodeConsole.IOptions): CodeConsole;
-
-    /**
-     * The completer widget for a console widget.
-     */
-    createCompleter(options: CompleterWidget.IOptions): CompleterWidget;
-
-    /**
-     * The completer handler for a console widget.
-     */
-    createCompleterHandler(options: CompletionHandler.IOptions): CompletionHandler;
   }
 
   /**
@@ -255,20 +189,6 @@ namespace ConsolePanel {
     createConsole(options: CodeConsole.IOptions): CodeConsole {
       return new CodeConsole(options);
     }
-
-    /**
-     * The completer widget for a console widget.
-     */
-    createCompleter(options: CompleterWidget.IOptions): CompleterWidget {
-      return new CompleterWidget(options);
-    }
-
-    /**
-     * The completer handler for a console widget.
-     */
-   createCompleterHandler(options: CompletionHandler.IOptions): CompletionHandler {
-      return new CompletionHandler(options);
-   }
   }
 
   /**

@@ -14,12 +14,16 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
+  CodeEditor
+} from '../codeeditor';
+
+import {
   HoverBox
 } from '../common/hoverbox';
 
 import {
-  TooltipModel
-} from './model';
+  IRenderMime, RenderMime
+} from '../rendermime';
 
 
 /**
@@ -57,12 +61,22 @@ class TooltipWidget extends Widget {
    */
   constructor(options: TooltipWidget.IOptions) {
     super();
+
     this.layout = new PanelLayout();
     this.anchor = options.anchor;
-    this.model = options.model;
-    this.model.contentChanged.connect(this._onContentChanged, this);
+
     this.addClass(TOOLTIP_CLASS);
     this.anchor.addClass(ANCHOR_CLASS);
+
+    this._editor = options.editor;
+    this._rendermime = options.rendermime;
+    this._content = this._rendermime.render({
+      bundle: options.bundle,
+      trusted: true
+    });
+    if (this._content) {
+      (this.layout as PanelLayout).addWidget(this._content);
+    }
   }
 
   /**
@@ -71,15 +85,12 @@ class TooltipWidget extends Widget {
   readonly anchor: Widget;
 
   /**
-   * The tooltip widget's data model.
-   */
-  readonly model: TooltipModel;
-
-  /**
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
-    this.anchor.removeClass(ANCHOR_CLASS);
+    if (this.anchor && !this.anchor.isDisposed) {
+      this.anchor.removeClass(ANCHOR_CLASS);
+    }
     if (this._content) {
       this._content.dispose();
       this._content = null;
@@ -129,7 +140,7 @@ class TooltipWidget extends Widget {
     document.addEventListener('keydown', this, USE_CAPTURE);
     document.addEventListener('mousedown', this, USE_CAPTURE);
     this.anchor.node.addEventListener('scroll', this, USE_CAPTURE);
-    this.model.fetch();
+    this.update();
   }
 
   /**
@@ -167,25 +178,11 @@ class TooltipWidget extends Widget {
   }
 
   /**
-   * Handle model content changes.
-   */
-  private _onContentChanged(): void {
-    if (this._content) {
-      this._content.dispose();
-    }
-    this._content = this.model.content;
-    if (this._content) {
-      (this.layout as PanelLayout).addWidget(this._content);
-    }
-    this.update();
-  }
-
-  /**
    * Set the geometry of the tooltip widget.
    */
   private _setGeometry():  void {
     let node = this.node;
-    let editor = this.model.editor;
+    let editor = this._editor;
     let { charWidth, lineHeight } = editor;
     let coords = editor.getCoordinate(editor.getCursorPosition());
 
@@ -201,6 +198,8 @@ class TooltipWidget extends Widget {
   }
 
   private _content: Widget | null = null;
+  private _editor: CodeEditor.IEditor;
+  private _rendermime: IRenderMime;
 }
 
 /**
@@ -219,8 +218,18 @@ namespace TooltipWidget {
     anchor: Widget;
 
     /**
-     * The data model for the tooltip widget.
+     * The data that populates the tooltip widget.
      */
-    model: TooltipModel;
+    bundle: RenderMime.MimeMap<string>;
+
+    /**
+     * The editor referent of the tooltip model.
+     */
+    editor: CodeEditor.IEditor;
+
+    /**
+     * The rendermime instance used by the tooltip model.
+     */
+    rendermime: IRenderMime;
   }
 }

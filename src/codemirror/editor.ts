@@ -65,11 +65,6 @@ const UP_ARROW = 38;
  */
 const DOWN_ARROW = 40;
 
-/**
- * The key code for the tab key.
- */
-const TAB = 9;
-
 
 /**
  * CodeMirror editor.
@@ -80,7 +75,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Construct a CodeMirror editor.
    */
   constructor(options: CodeEditor.IOptions, config: CodeMirror.EditorConfiguration={}) {
-    let host = this._host = options.host;
+    let host = this.host = options.host;
     host.classList.add(EDITOR_CLASS);
 
     this._uuid = options.uuid || utils.uuid();
@@ -120,14 +115,14 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
-   * A signal emitted when a text completion is requested.
-   */
-  readonly completionRequested: ISignal<this, CodeEditor.IPosition>;
-
-  /**
    * A signal emitted when either the top or bottom edge is requested.
    */
   readonly edgeRequested: ISignal<this, CodeEditor.EdgeLocation>;
+
+  /**
+   * The DOM node that hosts the editor.
+   */
+  readonly host: HTMLElement;
 
   /**
    * The uuid of this editor;
@@ -199,9 +194,9 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   set readOnly(readOnly: boolean) {
     this._editor.setOption('readOnly', readOnly);
     if (readOnly) {
-      this._host.classList.add(READ_ONLY_CLASS);
+      this.host.classList.add(READ_ONLY_CLASS);
     } else {
-      this._host.classList.remove(READ_ONLY_CLASS);
+      this.host.classList.remove(READ_ONLY_CLASS);
     }
   }
 
@@ -424,15 +419,6 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     let position = this.getCursorPosition();
     let { line, column } = position;
 
-    if (event.keyCode === TAB) {
-      // If the tab is modified, ignore it.
-      if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
-        return false;
-      }
-      this.onTabEvent(event, position);
-      return false;
-    }
-
     if (line === 0 && column === 0 && event.keyCode === UP_ARROW) {
       if (!event.shiftKey) {
         this.edgeRequested.emit('top');
@@ -450,34 +436,6 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       return false;
     }
     return false;
-  }
-
-  /**
-   * Handle a tab key press.
-   */
-  protected onTabEvent(event: KeyboardEvent, position: CodeEditor.IPosition): void {
-    // If there is a text selection, no completion requests should be emitted.
-    const selection = this.getSelection();
-    if (selection.start === selection.end) {
-      return;
-    }
-
-    let currentLine = this.getLine(position.line);
-
-    // A completion request signal should only be emitted if the current
-    // character or a preceding character is not whitespace.
-    //
-    // Otherwise, the default tab action of creating a tab character should be
-    // allowed to propagate.
-    if (!currentLine.substring(0, position.column).match(/\S/)) {
-      return;
-    }
-
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-
-    this.completionRequested.emit(position);
   }
 
   /**
@@ -527,7 +485,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   private _cleanSelections(uuid: string) {
     const markers = this.selectionMarkers[uuid];
     if (markers) {
-      markers.forEach(marker => marker.clear());
+      markers.forEach(marker => { marker.clear(); });
     }
     delete this.selectionMarkers[uuid];
   }
@@ -537,11 +495,11 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   private _markSelections(uuid: string, selections: CodeEditor.ITextSelection[]) {
     const markers: CodeMirror.TextMarker[] = [];
-    for (const selection of selections) {
+    selections.forEach(selection => {
       const { anchor, head } = this._toCodeMirrorSelection(selection);
       const markerOptions = this._toTextMarkerOptions(selection);
       this.doc.markText(anchor, head, markerOptions);
-    }
+    });
     this.selectionMarkers[uuid] = markers;
   }
 
@@ -677,7 +635,6 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   private _changeGuard = false;
   private _selectionStyle: CodeEditor.ISelectionStyle;
   private _uuid = '';
-  private _host: HTMLElement;
 }
 
 
@@ -695,7 +652,6 @@ namespace CodeMirrorEditor {
 
 
 // Define the signals for the `CodeMirrorEditor` class.
-defineSignal(CodeMirrorEditor.prototype, 'completionRequested');
 defineSignal(CodeMirrorEditor.prototype, 'edgeRequested');
 
 

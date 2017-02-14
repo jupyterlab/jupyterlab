@@ -16,14 +16,6 @@ import {
 } from '../../../lib/docregistry';
 
 import {
-  CompleterWidget, CompletionHandler
-} from '../../../lib/completer';
-
-import {
-  InspectionHandler
-} from '../../../lib/inspector';
-
-import {
   INotebookModel
 } from '../../../lib/notebook/model';
 
@@ -391,24 +383,6 @@ describe('notebook/notebook/panel', () => {
 
         it('should create a notebook toolbar', () => {
           expect(contentFactory.createToolbar()).to.be.a(Toolbar);
-        });
-
-      });
-
-      describe('#createCompleter()', () => {
-
-        it('should create a completer widget', () => {
-          expect(contentFactory.createCompleter({})).to.be.a(CompleterWidget);
-        });
-
-      });
-
-      describe('#createCompleterHandler()', () => {
-
-        it('should create a completer handler', () => {
-          let options = { completer:  new CompleterWidget({}) };
-          let handler = contentFactory.createCompleterHandler(options);
-          expect(handler).to.be.a(CompletionHandler);
         });
 
       });
