@@ -702,7 +702,7 @@ class MarkdownCellWidget extends BaseCellWidget {
     // has not changed.
     if (text !== this._prevText || trusted !== this._prevTrusted) {
       let data: JSONObject = { 'text/markdown': text };
-      let bundle = new RenderMime.MimeBundle({ data, trusted });
+      let bundle = new RenderMime.MimeModel({ data, trusted });
       let widget = this._rendermime.render(bundle);
       this._output = widget || new Widget();
       this._output.addClass(MARKDOWN_OUTPUT_CLASS);

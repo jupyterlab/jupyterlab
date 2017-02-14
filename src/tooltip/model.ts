@@ -154,8 +154,8 @@ class TooltipModel implements IDisposable {
       // Set the content to a rendered widget.
       let data = value.data;
       let trusted = true;
-      let bundle = new RenderMime.MimeBundle({ data, trusted });
-      this._content = this.rendermime.render(bundle);
+      let model = new RenderMime.MimeModel({ data, trusted });
+      this._content = this.rendermime.render(model);
 
       // Notify listeners of content change.
       this.contentChanged.emit(void 0);

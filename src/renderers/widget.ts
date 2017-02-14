@@ -150,7 +150,7 @@ class RenderedHTML extends RenderedHTMLCommon {
     super(options);
     this.addClass(HTML_CLASS);
     let source = Private.getSource(options);
-    if (!options.bundle.trusted) {
+    if (!options.model.trusted) {
       source = options.sanitizer.sanitize(source);
     }
     Private.appendHtml(this.node, source);
@@ -191,7 +191,7 @@ class RenderedMarkdown extends RenderedHTMLCommon {
         return;
       }
       content = replaceMath(content, parts['math']);
-      if (!options.bundle.trusted) {
+      if (!options.model.trusted) {
         content = options.sanitizer.sanitize(content);
       }
       Private.appendHtml(this.node, content);
@@ -361,7 +361,7 @@ namespace Private {
    */
   export
   function getSource(options: RenderMime.IRenderOptions): string {
-    return String(options.bundle.get(options.mimeType));
+    return String(options.model.get(options.mimeType));
   }
 
   /**

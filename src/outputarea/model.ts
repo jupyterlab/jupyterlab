@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  each, toArray
+  each, map, toArray
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
@@ -24,6 +24,10 @@ import {
 import {
   IObservableVector, ObservableVector
 } from '../common/observablevector';
+
+import {
+  RenderMime
+} from '../rendermime';
 
 
 /**
@@ -92,7 +96,8 @@ class OutputAreaModel implements IOutputAreaModel {
   /**
    * Construct a new observable outputs instance.
    */
-  constructor() {
+  constructor(options: OutputAreaModel.IOptions) {
+    this._trusted = options.trusted;
     this.list = new ObservableVector<OutputAreaModel.Output>();
     this.list.changed.connect(this._onListChanged, this);
   }
@@ -137,12 +142,12 @@ class OutputAreaModel implements IOutputAreaModel {
       return;
     }
     let trusted = this._trusted = value;
-    for (let i = 0; i < this.list.length, i++) {
+    for (let i = 0; i < this.list.length; i++) {
       let item = this.list.at(i);
       let output = item.toJSON();
       item.dispose();
       item = this._createItem({ output, trusted });
-      this.set(i, item);
+      this.list.set(i, item);
     }
   }
 
@@ -198,24 +203,26 @@ class OutputAreaModel implements IOutputAreaModel {
       // In order to get a list change event, we add the previous
       // text to the current item and replace the previous item.
       // This also replaces the metadata of the last item.
-      this._lastStream += output.text;
-      output.text = this._lastStream;
       let item = this._createItem({ output, trusted });
+      this._lastStream += item.get(RenderMime.CONSOLE_MIMETYPE);
+      item.set(RenderMime.CONSOLE_MIMETYPE, this._lastStream);
       let index = this.length - 1;
       this.list.set(index, item);
       return index;
     }
 
+    // Create the new item.
+    let item = this._createItem({ output, trusted });
+
     // Update the stream information.
-    if (item.output_type === 'stream') {
-      this._lastStream = output.text;
+    if (output.output_type === 'stream') {
+      this._lastStream = item.get(RenderMime.CONSOLE_MIMETYPE) as string;
       this._lastName = output.name;
     } else {
       this._lastStream = '';
     }
 
-    // Create the new item and add it to our list.
-    let item = this._createItem({ output, trusted });
+    // Add the item to our list and return the new length.
     return this.list.pushBack(item);
   }
 
@@ -229,7 +236,7 @@ class OutputAreaModel implements IOutputAreaModel {
       this.clearNext = true;
       return;
     }
-    each(this.list => item => { item.dispose(); });
+    each(this.list, item => { item.dispose(); });
     this.list.clear();
   }
 
@@ -237,7 +244,7 @@ class OutputAreaModel implements IOutputAreaModel {
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.IOutput[] {
-    return toArray(each(this.list, output => output.toJSON() ));
+    return toArray(map(this.list, output => output.toJSON() ));
   }
 
   protected clearNext = false;
@@ -246,7 +253,7 @@ class OutputAreaModel implements IOutputAreaModel {
   /**
    * Create an output item and hook up its signals.
    */
-  private _createItem(options: OutputAreaModel.IOutputOptions): OutputAreaModel.IOutput {
+  private _createItem(options: OutputAreaModel.IOutputOptions): OutputAreaModel.Output {
     let item = new OutputAreaModel.Output(options);
     item.changed.connect(this._onItemChanged);
     item.metadata.changed.connect(this._onItemChanged);
@@ -260,9 +267,16 @@ class OutputAreaModel implements IOutputAreaModel {
     this.changed.emit(args);
   }
 
+  /**
+   * Handle a change to an item.
+   */
+  private _onItemChanged(): void {
+    this.itemChanged.emit(void 0);
+  }
+
   private _lastStream: string;
   private _lastName: 'stdout' | 'stderr';
-  private _trusted;
+  private _trusted = false;
 }
 
 
@@ -271,6 +285,17 @@ class OutputAreaModel implements IOutputAreaModel {
  */
 export
 namespace OutputAreaModel {
+  /**
+   * The options used to create an output area model.
+   */
+  export
+  interface IOptions {
+    /**
+     * Whether the model is trusted.
+     */
+    trusted: boolean;
+  }
+
   /**
    * The interface for an element of the output area.
    */
@@ -306,7 +331,7 @@ namespace OutputAreaModel {
         output.data = Object.create(null);
         output.metadata = Object.create(null);
         break;
-      case 'text':
+      case 'stream':
         output.text = '';
         break;
       default:
@@ -327,15 +352,15 @@ namespace OutputAreaModel {
       switch (output.output_type) {
       case 'display_data':
       case 'execute_result':
-        for (key in self.keys()) {
-          output.data[key] = self.get(key);
+        for (let key in this.keys()) {
+          output.data[key] = this.get(key) as nbformat.MultilineString | JSONObject;
         }
-        for (key in self.metadata.keys) {
-          output.metadata[key] = self.metadata.get(key);
+        for (let key in this.metadata.keys()) {
+          output.metadata[key] = this.metadata.get(key);
         }
         break;
       case 'stream':
-        output.text = self.get(RenderMime.CONSOLE_MIMETYPE);
+        output.text = this.get(RenderMime.CONSOLE_MIMETYPE) as string;
         break;
       default:
         break;
@@ -355,11 +380,6 @@ namespace OutputAreaModel {
      * The original output.
      */
     output: nbformat.IOutput;
-
-    /**
-     * The parsed mime bundle.
-     */
-    data: JSONObject;
 
     /**
      * Whether the output is trusted.
@@ -383,10 +403,10 @@ namespace Private {
    * Get the bundle options given IOutputOptions.
    */
   export
-  function getBundleOptions(options: OutputAreaModel.IOptions): RenderMime.IMimeModelOPtions {
+  function getBundleOptions(options: OutputAreaModel.IOutputOptions): RenderMime.IMimeModelOptions {
     let data = RenderMime.getData(options.output);
     let metadata = RenderMime.getMetadata(options.output);
-    let trusted = data.trusted;
+    let trusted = options.trusted;
     return { data, trusted, metadata };
   }
 }

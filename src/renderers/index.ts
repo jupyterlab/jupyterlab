@@ -108,7 +108,7 @@ class JavaScriptRenderer implements RenderMime.IRenderer {
    */
   canRender(options: RenderMime.IRenderOptions): boolean {
     return (
-      options.bundle.trusted &&
+      options.model.trusted &&
       this.mimeTypes.indexOf(options.mimeType) !== -1
     );
   }
@@ -137,7 +137,7 @@ class SVGRenderer implements RenderMime.IRenderer {
    */
   canRender(options: RenderMime.IRenderOptions): boolean {
     return (
-      options.bundle.trusted &&
+      options.model.trusted &&
       this.mimeTypes.indexOf(options.mimeType) !== -1
     );
   }
@@ -166,7 +166,7 @@ class PDFRenderer implements RenderMime.IRenderer {
    */
   canRender(options: RenderMime.IRenderOptions): boolean {
     return (
-      options.bundle.trusted &&
+      options.model.trusted &&
       this.mimeTypes.indexOf(options.mimeType) !== -1
     );
   }

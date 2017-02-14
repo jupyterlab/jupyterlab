@@ -122,25 +122,22 @@ class RenderMime {
   }
 
   /**
-   * Render a mimebundle.
+   * Render a mime model.
    *
-   * @param bundle - the mimebundle to render.
-   *
-   * @param trusted - whether the bundle is trusted.
+   * @param model - the mime model to render.
    *
    * #### Notes
-   * We select the preferred mimeType in bundle based on whether the output is
-   * trusted (see [[preferredmimeType]]), and then pass a sanitizer to the
-   * renderer if the output should be sanitized.
+   * Renders the model using the preferred mime type.  See
+   * [[preferredMimeType]].
    */
-  render(bundle: RenderMime.IMimeModel): Widget {
-    let mimeType = this.preferredMimeType(bundle);
+  render(model: RenderMime.IMimeModel): Widget {
+    let mimeType = this.preferredMimeType(model);
     if (!mimeType) {
       return void 0;
     }
     let rendererOptions = {
       mimeType,
-      bundle,
+      model,
       resolver: this._resolver,
       sanitizer: this._sanitizer,
       linkHandler: this._handler
@@ -149,22 +146,19 @@ class RenderMime {
   }
 
   /**
-   * Find the preferred mimeType in a mimebundle.
+   * Find the preferred mimeType for a model.
    *
-   * @param bundle - the mimebundle giving available mimeType content.
-   *
-   * @param trusted - whether the bundle is trusted.
+   * @param model - the mime model of interest.
    *
    * #### Notes
-   * For untrusted bundles, only select mimeTypes that can be rendered
-   * "safely"  (see [[RenderMime.IRenderer.isSafe]]) or can  be "sanitized"
-   * (see [[RenderMime.IRenderer.isSanitizable]]).
+   * The mimeTypes in the model are checked in preference order
+   * until a renderer returns `true` for `.canRender`.
    */
-  preferredMimeType(bundle: RenderMime.IMimeModel): string {
+  preferredMimeType(model: RenderMime.IMimeModel): string {
     let sanitizer = this._sanitizer;
     return find(this._order, mimeType => {
-      if (mimeType in bundle.keys()) {
-        let options = { mimeType, bundle, sanitizer };
+      if (mimeType in model.keys()) {
+        let options = { mimeType, model, sanitizer };
         let renderer = this._renderers[mimeType];
         if (renderer.canRender(options)) {
           return true;
@@ -290,17 +284,17 @@ namespace RenderMime {
   const CONSOLE_MIMETYPE: string = 'application/vnd.jupyter.console-text';
 
   /**
-   * An observable bundle of mime data.
+   * An observable model for mime data.
    */
   export
   interface IMimeModel extends IObservableMap<JSONValue> {
     /**
-     * Whether the bundle is trusted.
+     * Whether the model is trusted.
      */
     readonly trusted: boolean;
 
     /**
-     * The metadata associated with the bundle.
+     * The metadata associated with the model.
      */
     readonly metadata: IObservableMap<JSONValue>;
   }
@@ -311,7 +305,7 @@ namespace RenderMime {
   export
   class MimeModel extends ObservableMap<JSONValue> implements IMimeModel {
     /**
-     * Construct a new mime bundle.
+     * Construct a new mime model.
      */
     constructor(options: IMimeModelOptions) {
       super();
@@ -327,12 +321,12 @@ namespace RenderMime {
     }
 
     /**
-     * Whether the bundle is trusted.
+     * Whether the model is trusted.
      */
     readonly trusted: boolean;
 
     /**
-     * Dispose of the resources used by the mime bundle.
+     * Dispose of the resources used by the mime model.
      */
     dispose(): void {
       this._metadata.dispose();
@@ -340,7 +334,7 @@ namespace RenderMime {
     }
 
     /**
-     * The metadata associated with the bundle.
+     * The metadata associated with the model.
      */
     get metadata(): IObservableMap<JSONValue> {
       return this._metadata;
@@ -350,7 +344,7 @@ namespace RenderMime {
   }
 
   /**
-   * The options used to create a mime bundle.
+   * The options used to create a mime model.
    */
   export
   interface IMimeModelOptions {
@@ -427,14 +421,14 @@ namespace RenderMime {
     /**
      * Whether the renderer can render given the render options.
      *
-     * @param options - The options that would be used to render the bundle.
+     * @param options - The options that would be used to render the data.
      */
     canRender(options: IRenderOptions): boolean;
 
     /**
-     * Render the transformed mime bundle.
+     * Render the transformed mime diata.
      *
-     * @param options - The options used to render the bundle.
+     * @param options - The options used to render the data.
      */
     render(options: IRenderOptions): Widget;
   }
@@ -450,9 +444,9 @@ namespace RenderMime {
     mimeType: string;
 
     /**
-     * The source data bundle.
+     * The mime data model.
      */
-    bundle: IMimeModel;
+    model: IMimeModel;
 
     /**
      * The html sanitizer.
@@ -566,7 +560,7 @@ namespace RenderMime {
    */
   export
   function getData(output: nbformat.IOutput): JSONObject {
-    let bundle: nbformat.IMimeModel;
+    let bundle: nbformat.IMimeBundle;
     switch (output.output_type) {
     case 'execute_result':
       bundle = (output as nbformat.IExecuteResult).data;
@@ -594,7 +588,7 @@ namespace RenderMime {
   /**
    * Convert a mime bundle to mime data.
    */
-  function convertBundle(bundle: nbformat.IMimeModel): JSONObject {
+  function convertBundle(bundle: nbformat.IMimeBundle): JSONObject {
     let map: JSONObject = Object.create(null);
     for (let mimeType in bundle) {
       let value = bundle[mimeType];
