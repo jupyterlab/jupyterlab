@@ -191,7 +191,7 @@ namespace NotebookActions {
 
     // Find the cells to delete.
     each(enumerate(widget.widgets), ([i, child]) => {
-      let deletable = child.model.getMetadata('deletable').getValue();
+      let deletable = child.model.metadata.get('deletable');
       if (widget.isSelected(child) && deletable !== false) {
         toDelete.push(i);
       }

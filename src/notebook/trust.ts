@@ -36,7 +36,7 @@ function trustNotebook(model: INotebookModel, host?: HTMLElement): Promise<void>
   let trusted = true;
   for (let i = 0; i < cells.length; i++) {
     let cell = cells.at(i);
-    if (!cell.getMetadata('trusted').getValue()) {
+    if (!cell.trusted) {
       trusted = false;
     }
   }
@@ -54,7 +54,7 @@ function trustNotebook(model: INotebookModel, host?: HTMLElement): Promise<void>
     if (result.text === 'OK') {
       for (let i = 0; i < cells.length; i++) {
         let cell = cells.at(i);
-        cell.getMetadata('trusted').setValue(true);
+        cell.trusted = true;
       }
     }
   });

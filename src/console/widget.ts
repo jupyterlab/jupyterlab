@@ -276,7 +276,7 @@ class CodeConsole extends Widget {
     }
 
     let prompt = this.prompt;
-    prompt.trusted = true;
+    prompt.model.trusted = true;
 
     if (force) {
       // Create a new prompt before kernel execution to allow typeahead.

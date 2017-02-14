@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  JSONObject
+  JSONObject, JSONValue
 } from 'phosphor/lib/algorithm/json';
 
 import {
@@ -35,7 +35,7 @@ import {
 
 import {
   IObservableMap, ObservableMap
-} from '../common/observable';
+} from '../common/observablemap';
 
 import {
   Metadata

@@ -404,7 +404,7 @@ namespace CodeCellModel {
     /**
      * Create an output area.
      */
-    createOutputArea(): IOutputAreaModel;
+    createOutputArea(options: OutputAreaModel.IOptions): IOutputAreaModel;
   }
 
   /**

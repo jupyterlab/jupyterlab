@@ -10,16 +10,8 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  deepEqual, JSONValue
+  JSONValue
 } from 'phosphor/lib/algorithm/json';
-
-import {
-  IIterator, iter
-} from 'phosphor/lib/algorithm/iteration';
-
-import {
-  defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
 
 import {
   IObservableVector, ObservableVector
@@ -39,8 +31,8 @@ import {
 } from '../common/interfaces';
 
 import {
-  Metadata
-} from '../common/metadata';
+  IObservableMap, ObservableMap
+} from '../common/observablemap';
 
 import {
   IObservableUndoableVector, ObservableUndoableVector
@@ -52,11 +44,6 @@ import {
  */
 export
 interface INotebookModel extends DocumentRegistry.IModel {
-  /**
-   * A signal emitted when a metadata field changes.
-   */
-  metadataChanged: ISignal<DocumentRegistry.IModel, IChangedArgs<JSONValue>>;
-
   /**
    * The list of cells in the notebook.
    */
@@ -78,18 +65,9 @@ interface INotebookModel extends DocumentRegistry.IModel {
   readonly nbformatMinor: number;
 
   /**
-   * Get a metadata cursor for the notebook.
-   *
-   * #### Notes
-   * This method is used to interact with a namespaced
-   * set of metadata on the notebook.
+   * The metadata associated with the notebook.
    */
-  getMetadata(namespace: string): Metadata.ICursor;
-
-  /**
-   * List the metadata namespace keys for the notebook.
-   */
-  listMetadata(): IIterator<string>;
+  readonly metadata: IObservableMap<JSONValue>;
 }
 
 
@@ -121,14 +99,10 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     this._cells.pushBack(factory.createCodeCell({}));
     this._cells.changed.connect(this._onCellsChanged, this);
     if (options.languagePreference) {
-      this._metadata['language_info'] = { name: options.languagePreference };
+      let name = options.languagePreference;
+      this._metadata.set('language_info', { name });
     }
   }
-
-  /**
-   * A signal emitted when a metadata field changes.
-   */
-  readonly metadataChanged: ISignal<this, IChangedArgs<JSONValue>>;
 
   /**
    * The cell model factory for the notebook.
@@ -181,10 +155,8 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       return;
     }
     let cells = this._cells;
-    let cursors = this._cursors;
     this._cells = null;
-    this._cursors = null;
-    this._metadata = null;
+    this._metadata.dispose();
 
     for (let i = 0; i < cells.length; i++) {
       let cell = cells.at(i);
@@ -301,59 +273,6 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   }
 
   /**
-   * Get a metadata cursor for the notebook.
-   *
-   * #### Notes
-   * Metadata associated with the nbformat spec are set directly
-   * on the model.  This method is used to interact with a namespaced
-   * set of metadata on the notebook.
-   */
-  getMetadata(name: string): Metadata.ICursor {
-    if (name in this._cursors) {
-      return this._cursors[name];
-    }
-    if (!this._reader) {
-      this._reader = this._readCursorData.bind(this);
-      this._writer = this._setCursorData.bind(this);
-    }
-    let cursor = new Metadata.Cursor({
-      name,
-      read: this._reader,
-      write: this._writer
-    });
-    this._cursors[name] = cursor;
-    return cursor;
-  }
-
-  /**
-   * List the metadata namespace keys for the notebook.
-   */
-  listMetadata(): IIterator<string> {
-    return iter(Object.keys(this._metadata));
-  }
-
-  /**
-   * Set the cursor data for a given field.
-   */
-  private _setCursorData(name: string, newValue: any): void {
-    let oldValue = this._metadata[name];
-    if (deepEqual(oldValue, newValue)) {
-      return;
-    }
-    this._metadata[name] = newValue;
-    this.dirty = true;
-    this.contentChanged.emit(void 0);
-    this.metadataChanged.emit({ name, oldValue, newValue });
-  }
-
-  /**
-   * Read the metadata of a given name.
-   */
-  private _readCursorData(name: string): JSONValue {
-    return this._metadata[name];
-  }
-
-  /**
    * Handle a change in the cells list.
    */
   private _onCellsChanged(list: IObservableVector<ICellModel>, change: ObservableVector.IChangedArgs<ICellModel>): void {
@@ -403,17 +322,10 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   }
 
   private _cells: IObservableUndoableVector<ICellModel> = null;
-  private _metadata: { [key: string]: any } = Private.createMetadata();
-  private _cursors: { [key: string]: Metadata.Cursor } = Object.create(null);
   private _nbformat = nbformat.MAJOR_VERSION;
   private _nbformatMinor = nbformat.MINOR_VERSION;
-  private _reader: (name: string) => JSONValue;
-  private _writer: (name: string, value: JSONValue) => void;
+  private _metadata = new ObservableMap<JSONValue>();
 }
-
-
-// Define the signals for the `NotebookModel` class.
-defineSignal(NotebookModel.prototype, 'metadataChanged');
 
 
 /**
