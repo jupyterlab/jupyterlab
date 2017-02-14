@@ -117,7 +117,7 @@
 }
 
 
-.jp-Notebook-cell.jp-mod-dropTarget, 
+.jp-Notebook-cell.jp-mod-dropTarget,
 .jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected.jp-mod-dropTarget {
   border-top-color: var(--jp-private-notebook-selected-color);
 }
@@ -181,20 +181,15 @@
 }
 
 
-.jp-CellTools-tool {
-  flex: 0 1 auto;
-  display: flex;
-  flex-direction: row;
-}
-
-
 .jp-ActiveCellTool {
-  padding: var(--jp-private-notebook-padding);
+  padding: 12px;
+  padding-bottom: 4px;
 }
 
 
 .jp-ActiveCellTool .jp-Cell-prompt {
   flex: 0 0 auto;
+  padding-left: 0px;
 }
 
 
@@ -204,10 +199,10 @@
 
 
 .jp-CellTools-tool:not(:first-child) {
-  margin-top: 6px;
-  margin-bottom: 12px;
-  border-top: 1px dotted gray;
-  padding-top: 6px;
+  margin-top: 8px;
+  margin-bottom: 4px;
+  border-top: 1px solid var(--md-grey-300);
+  padding-top: 12px;
 }
 
 
@@ -249,14 +244,12 @@
 
 
 .jp-KeySelector {
-  padding-left: 10px;
-  padding-right: 10px;
+  padding-left: 12px;
+  padding-right: 12px;
 }
 
 
 .jp-KeySelector label {
-  padding-top: 4px;
-  padding-bottom: 4px;
   line-height: 1.4;
 }
 
@@ -286,13 +279,14 @@
   padding: 1px;
   background: white;
   height: 28px;
-  width: 252px;
   box-sizing: border-box;
   border: var(--jp-border-width) solid var(--jp-border-color1);
-  margin-bottom: 12px;
+  margin-top: 8px;
+  margin-bottom: 4px;
 }
 
 
 .jp-KeySelector-selectWrapper.jp-mod-focused {
-  border: 2px solid var(--md-light-blue-200);
+  border: var(--jp-border-width) solid var(--md-blue-500);
+  box-shadow: inset 0 0 4px var(--md-blue-300);
 }
