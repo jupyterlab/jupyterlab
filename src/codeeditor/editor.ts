@@ -198,6 +198,13 @@ namespace CodeEditor {
   export
   class Model implements IModel {
     /**
+     * Construct a new Model
+     */
+    constructor(value?: string) {
+      this._value = new ObservableString(value);
+    }
+
+    /**
      * A signal emitted when a mimetype changes.
      */
     readonly mimeTypeChanged: ISignal<this, IChangedArgs<string>>;
@@ -255,7 +262,7 @@ namespace CodeEditor {
       this._value.dispose();
     }
 
-    private _value = new ObservableString();
+    private _value: ObservableString;
     private _selections = new ObservableMap<ITextSelection[]>();
     private _mimetype = 'text/plain';
     private _isDisposed = false;
