@@ -283,6 +283,72 @@ class OutputAreaWidget extends Widget {
     super.dispose();
   }
 
+
+  /**
+   * Execute code on a kernel and send outputs to the model.
+   */
+  execute(code: string, kernel: Kernel.IKernel): Promise<KernelMessage.IExecuteReplyMsg> {
+    // Override the default for `stop_on_error`.
+    let content: KernelMessage.IExecuteRequest = {
+      code,
+      stop_on_error: true
+    };
+    let model = this._model;
+    model.clear();
+    return new Promise<KernelMessage.IExecuteReplyMsg>((resolve, reject) => {
+      let future = kernel.requestExecute(content);
+      // Handle published messages.
+      future.onIOPub = (msg: KernelMessage.IIOPubMessage) => {
+        let msgType = msg.header.msg_type;
+        switch (msgType) {
+        case 'execute_result':
+        case 'display_data':
+        case 'stream':
+        case 'error':
+          let output = msg.content as nbformat.IOutput;
+          output.output_type = msgType as nbformat.OutputType;
+          model.add(output);
+          break;
+        case 'clear_output':
+          let wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
+          model.clear(wait);
+          break;
+        default:
+          break;
+        }
+      };
+      // Handle the execute reply.
+      future.onReply = (msg: KernelMessage.IExecuteReplyMsg) => {
+        resolve(msg);
+        // API responses that contain a pager are special cased and their type
+        // is overriden from 'execute_reply' to 'display_data' in order to
+        // render output.
+        let content = msg.content as KernelMessage.IExecuteOkReply;
+        let payload = content && content.payload;
+        if (!payload || !payload.length) {
+          return;
+        }
+        let pages = payload.filter(i => (i as any).source === 'page');
+        if (!pages.length) {
+          return;
+        }
+        let page = JSON.parse(JSON.stringify(pages[0]));
+        let output: nbformat.IOutput = {
+          output_type: 'display_data',
+          data: (page as any).data as nbformat.IMimeBundle,
+          metadata: {}
+        };
+        model.add(output);
+      };
+      // Handle stdin.
+      future.onStdin = (msg: KernelMessage.IStdinMessage) => {
+        if (KernelMessage.isInputRequestMsg(msg)) {
+          this.handleInput(msg, kernel);
+        }
+      };
+    });
+  }
+
   /**
    * Handle `update-request` messages.
    */

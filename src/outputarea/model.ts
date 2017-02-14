@@ -2,16 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel, KernelMessage, nbformat
+  nbformat
 } from '@jupyterlab/services';
-
-import {
-  JSONObject
-} from 'phosphor/lib/algorithm/json';
-
-import {
-  indexOf
-} from 'phosphor/lib/algorithm/searching';
 
 import {
   IDisposable
@@ -25,10 +17,6 @@ import {
   IObservableVector, ObservableVector
 } from '../common/observablevector';
 
-import {
-  RenderMime
-} from '../rendermime';
-
 
 /**
  * A model that maintains a list of output data.
@@ -38,7 +26,15 @@ interface IOutputAreaModel extends IDisposable {
   /**
    * A signal emitted when the model changes.
    */
-  readonly changed: ISignal<IOutputAreaModel, ObservableVector.IChangedArgs<OutputAreaModel.Output>>;
+  readonly changed: ISignal<IOutputAreaModel, ObservableVector.IChangedArgs<OutputAreaModel.IOutput>>;
+
+  /**
+   * A signal emitted when a value in one of the outputs changes.
+   *
+   * #### Notes
+   * The payload is the index of the item that changed.
+   */
+  readonly itemChanged: ISignal<IOutputAreaModel, number>;
 
   /**
    * A signal emitted when the model is disposed.
@@ -51,9 +47,14 @@ interface IOutputAreaModel extends IDisposable {
   readonly length: number;
 
   /**
+   * Whether the output area is trusted.
+   */
+  trusted: boolean;
+
+  /**
    * Get an item at the specified index.
    */
-  get(index: number): OutputAreaModel.Output;
+  get(index: number): OutputAreaModel.IOutput;
 
   /**
    * Add an output, which may be combined with previous output.
@@ -62,7 +63,7 @@ interface IOutputAreaModel extends IDisposable {
    * The output bundle is copied.
    * Contiguous stream outputs of the same `name` are combined.
    */
-  add(output: OutputAreaModel.Output): number;
+  add(output: nbformat.IOutput): number;
 
   /**
    * Clear all of the output.
@@ -72,25 +73,9 @@ interface IOutputAreaModel extends IDisposable {
   clear(wait?: boolean): void;
 
   /**
-   * Add a mime type to an output data bundle.
-   *
-   * @param output - The output to augment.
-   *
-   * @param mimetype - The mimetype to add.
-   *
-   * @param value - The value to add.
-   *
-   * #### Notes
-   * The output must be contained in the model, or an error will be thrown.
-   * Only non-existent types can be added.
-   * Types are validated before being added.
+   * Serialize the model to JSON.
    */
-  addMimeData(output: nbformat.IDisplayData | nbformat.IExecuteResult, mimetype: string, value: string | JSONObject): void;
-
-  /**
-   * Execute code on a kernel and send outputs to the model.
-   */
-  execute(code: string, kernel: Kernel.IKernel): Promise<KernelMessage.IExecuteReplyMsg>;
+  toJSON(): nbformat.IOutput;
 }
 
 
@@ -111,6 +96,14 @@ class OutputAreaModel implements IOutputAreaModel {
    * A signal emitted when the model changes.
    */
   readonly changed: ISignal<this, ObservableVector.IChangedArgs<OutputAreaModel.Output>>;
+
+  /**
+   * A signal emitted when a value in one of the outputs changes.
+   *
+   * #### Notes
+   * The payload is the index of the item that changed.
+   */
+  readonly itemChanged: ISignal<IOutputAreaModel, number>;
 
   /**
    * A signal emitted when the model is disposed.
@@ -219,111 +212,13 @@ class OutputAreaModel implements IOutputAreaModel {
     this.list.clear();
   }
 
-  /**
-   * Add a mime type to an output data bundle.
-   *
-   * @param output - The output to augment.
-   *
-   * @param mimetype - The mimetype to add.
-   *
-   * @param value - The value to add.
-   *
-   * #### Notes
-   * The output must be contained in the model, or an error will be thrown.
-   * Only non-existent types can be added.
-   * Types are validated before being added.
-   */
-  addMimeData(output: nbformat.IDisplayData | nbformat.IExecuteResult, mimetype: string, value: string | JSONObject): void {
-    let index = indexOf(this.list, output);
-    if (index === -1) {
-      throw new Error(`Cannot add data to non-tracked bundle`);
-    }
-    if (mimetype in output.data) {
-      console.warn(`Cannot add existing key '${mimetype}' to bundle`);
-      return;
-    }
-    if (nbformat.validateMimeValue(mimetype, value)) {
-      output.data[mimetype] = value;
-    } else {
-      console.warn(`Refusing to add invalid mime value of type ${mimetype} to output`);
-    }
-  }
-
-  /**
-   * Execute code on a kernel and send outputs to the model.
-   */
-  execute(code: string, kernel: Kernel.IKernel): Promise<KernelMessage.IExecuteReplyMsg> {
-    // Override the default for `stop_on_error`.
-    let content: KernelMessage.IExecuteRequest = {
-      code,
-      stop_on_error: true
-    };
-    this.clear();
-    return new Promise<KernelMessage.IExecuteReplyMsg>((resolve, reject) => {
-      let future = kernel.requestExecute(content);
-      // Handle published messages.
-      future.onIOPub = (msg: KernelMessage.IIOPubMessage) => {
-        let msgType = msg.header.msg_type;
-        switch (msgType) {
-        case 'execute_result':
-        case 'display_data':
-        case 'stream':
-        case 'error':
-          let model = msg.content as nbformat.IOutput;
-          model.output_type = msgType as nbformat.OutputType;
-          this.add(model);
-          break;
-        case 'clear_output':
-          this.clear((msg as KernelMessage.IClearOutputMsg).content.wait);
-          break;
-        default:
-          break;
-        }
-      };
-      // Handle the execute reply.
-      future.onReply = (msg: KernelMessage.IExecuteReplyMsg) => {
-        resolve(msg);
-        // API responses that contain a pager are special cased and their type
-        // is overriden from 'execute_reply' to 'display_data' in order to
-        // render output.
-        let content = msg.content as KernelMessage.IExecuteOkReply;
-        let payload = content && content.payload;
-        if (!payload || !payload.length) {
-          return;
-        }
-        let pages = payload.filter(i => (i as any).source === 'page');
-        if (!pages.length) {
-          return;
-        }
-        let page = JSON.parse(JSON.stringify(pages[0]));
-        let model: nbformat.IOutput = {
-          output_type: 'display_data',
-          data: (page as any).data as nbformat.IMimeBundle,
-          metadata: {}
-        };
-        this.add(model);
-      };
-      // Handle stdin.
-      future.onStdin = (msg: KernelMessage.IStdinMessage) => {
-        if (KernelMessage.isInputRequestMsg(msg)) {
-          this.add({
-            output_type: 'input_request',
-            prompt: msg.content.prompt,
-            password: msg.content.password,
-            kernel
-          });
-        }
-      };
-    });
-  }
-
   protected clearNext = false;
   protected list: IObservableVector<OutputAreaModel.Output> = null;
 
   /**
    * Handle a change to the list.
    */
-  private _onListChanged(sender: IObservableVector<OutputAreaModel.Output>, args: ObservableVector.IChangedArgs<OutputAreaModel.Output>) {
+  private _onListChanged(sender: IObservableVector<OutputAreaModel.IOutput>, args: ObservableVector.IChangedArgs<OutputAreaModel.Output>) {
     this.changed.emit(args);
   }
 }
@@ -334,32 +229,6 @@ class OutputAreaModel implements IOutputAreaModel {
  */
 export
 namespace OutputAreaModel {
-  /**
-   * Output for an input request from the kernel.
-   */
-  export
-  interface IInputRequest {
-    /**
-     * Type of cell output.
-     */
-    output_type: 'input_request';
-
-    /**
-     * The text to show at the prompt.
-     */
-    prompt: string;
-
-    /**
-     * Whether the request is for a password.
-     * If so, the frontend shouldn't echo input.
-     */
-    password: boolean;
-
-    /**
-     * The kernel that made the request, used to send an input response.
-     */
-    kernel: Kernel.IKernel;
-  }
 
   /**
    * A valid output area item.
