@@ -133,7 +133,7 @@ class RenderMime {
    * trusted (see [[preferredmimeType]]), and then pass a sanitizer to the
    * renderer if the output should be sanitized.
    */
-  render(bundle: RenderMime.IMimeBundle): Widget {
+  render(bundle: RenderMime.IMimeModel): Widget {
     let mimeType = this.preferredMimeType(bundle);
     if (!mimeType) {
       return void 0;
@@ -160,7 +160,7 @@ class RenderMime {
    * "safely"  (see [[RenderMime.IRenderer.isSafe]]) or can  be "sanitized"
    * (see [[RenderMime.IRenderer.isSanitizable]]).
    */
-  preferredMimeType(bundle: RenderMime.IMimeBundle): string {
+  preferredMimeType(bundle: RenderMime.IMimeModel): string {
     let sanitizer = this._sanitizer;
     return find(this._order, mimeType => {
       if (mimeType in bundle.keys()) {
@@ -293,7 +293,7 @@ namespace RenderMime {
    * An observable bundle of mime data.
    */
   export
-  interface IMimeBundle extends IObservableMap<JSONValue> {
+  interface IMimeModel extends IObservableMap<JSONValue> {
     /**
      * Whether the bundle is trusted.
      */
@@ -306,14 +306,14 @@ namespace RenderMime {
   }
 
   /**
-   * The default mime bundle implementation.
+   * The default mime model implementation.
    */
   export
-  class MimeBundle extends ObservableMap<JSONValue> implements IMimeBundle {
+  class MimeModel extends ObservableMap<JSONValue> implements IMimeModel {
     /**
      * Construct a new mime bundle.
      */
-    constructor(options: IMimeBundleOptions) {
+    constructor(options: IMimeModelOptions) {
       super();
       this.trusted = options.trusted;
       let data = options.data;
@@ -353,7 +353,7 @@ namespace RenderMime {
    * The options used to create a mime bundle.
    */
   export
-  interface IMimeBundleOptions {
+  interface IMimeModelOptions {
     /**
      * The raw mime data.
      */
@@ -395,14 +395,6 @@ namespace RenderMime {
       break;
     }
     return Object.create(null);
-  }
-
-  /**
-   * Convert a mime bundle to mime data.
-   */
-  export
-  function convertBundle(bundle: nbformat.IMimeBundle): JSONObject {
-    return Private.convertBundle(bundle);
   }
 
   /**
@@ -460,7 +452,7 @@ namespace RenderMime {
     /**
      * The source data bundle.
      */
-    bundle: IMimeBundle;
+    bundle: IMimeModel;
 
     /**
      * The html sanitizer.
@@ -574,7 +566,7 @@ namespace RenderMime {
    */
   export
   function getData(output: nbformat.IOutput): JSONObject {
-    let bundle: nbformat.IMimeBundle;
+    let bundle: nbformat.IMimeModel;
     switch (output.output_type) {
     case 'execute_result':
       bundle = (output as nbformat.IExecuteResult).data;
@@ -602,7 +594,7 @@ namespace RenderMime {
   /**
    * Convert a mime bundle to mime data.
    */
-  function convertBundle(bundle: nbformat.IMimeBundle): JSONObject {
+  function convertBundle(bundle: nbformat.IMimeModel): JSONObject {
     let map: JSONObject = Object.create(null);
     for (let mimeType in bundle) {
       let value = bundle[mimeType];

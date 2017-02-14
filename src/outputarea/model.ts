@@ -275,7 +275,7 @@ namespace OutputAreaModel {
    * The interface for an element of the output area.
    */
   export
-  interface IOutput extends RenderMime.IMimeBundle {
+  interface IOutput extends RenderMime.IMimeModel {
     /**
      * The output type.
      */
@@ -291,7 +291,7 @@ namespace OutputAreaModel {
    * The default implementation of an output model.
    */
   export
-  class Output extends RenderMime.MimeBundle implements IOutput {
+  class Output extends RenderMime.MimeModel implements IOutput {
     /**
      * Construct a new IOutput.
      */
@@ -383,7 +383,7 @@ namespace Private {
    * Get the bundle options given IOutputOptions.
    */
   export
-  function getBundleOptions(options: OutputAreaModel.IOptions): RenderMime.IMimeBundleOPtions {
+  function getBundleOptions(options: OutputAreaModel.IOptions): RenderMime.IMimeModelOPtions {
     let data = RenderMime.getData(options.output);
     let metadata = RenderMime.getMetadata(options.output);
     let trusted = data.trusted;
