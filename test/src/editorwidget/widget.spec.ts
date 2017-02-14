@@ -8,10 +8,6 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Widget
-} from 'phosphor/lib/ui/widget';
-
-import {
   CodeMirrorEditorFactory, CodeMirrorMimeTypeService
 } from '../../../lib/codemirror';
 

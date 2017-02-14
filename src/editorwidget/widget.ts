@@ -25,10 +25,6 @@ import {
   CodeEditorWidget
 } from '../codeeditor/widget';
 
-import {
-  Widget
-} from 'phosphor/lib/ui/widget';
-
 
 /**
  * The class name added to a dirty widget.
@@ -200,7 +196,8 @@ class EditorWidgetFactory extends ABCWidgetFactory<EditorWidget, DocumentRegistr
    * Create a new widget given a context.
    */
   protected createNewWidget(context: DocumentRegistry.CodeContext): EditorWidget {
-    let func = this._services.factoryService.newDocumentEditor
+    let func = this._services.factoryService.newDocumentEditor.bind(
+      this._services.factoryService);
     let factory: CodeEditor.Factory = options => {
       options.lineNumbers = true;
       options.readOnly = false;
