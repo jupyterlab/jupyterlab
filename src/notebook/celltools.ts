@@ -58,6 +58,10 @@ import {
 } from '../common/metadata';
 
 import {
+  IObservableMap, ObservableMap
+} from '../common/observablemap';
+
+import {
   INotebookTracker
 } from './';
 
@@ -207,12 +211,12 @@ class CellTools extends Widget {
    */
   private _onActiveCellChanged(): void {
     if (this._prevActive) {
-      this._prevActive.metadataChanged.disconnect(this._onMetadataChanged, this);
+      this._prevActive.metadata.changed.disconnect(this._onMetadataChanged, this);
     }
     let activeCell = this._tracker.activeCell;
     this._prevActive = activeCell ? activeCell.model : null;
     if (activeCell) {
-      activeCell.model.metadataChanged.connect(this._onMetadataChanged, this);
+      activeCell.model.metadata.changed.connect(this._onMetadataChanged, this);
     }
     each(this.children(), widget => {
       sendMessage(widget, CellTools.ActiveCellMessage);
@@ -231,7 +235,7 @@ class CellTools extends Widget {
   /**
    * Handle a change in the metadata.
    */
-  private _onMetadataChanged(sender: ICellModel, args: IChangedArgs<JSONValue>): void {
+  private _onMetadataChanged(sender: IObservableMap<JSONValue>, args: ObservableMap.IChangedArgs<JSONValue>): void {
     let message = new Metadata.ChangeMessage(args);
     each(this.children(), widget => {
       sendMessage(widget, message);
@@ -497,7 +501,7 @@ namespace CellTools {
     protected onAfterAttach(msg: Message): void {
       this.toggleNode.addEventListener('click', this);
       let cell = this.parent.activeCell;
-      this.editor.owner = cell ? cell.model : null;
+      this.editor.source = cell ? cell.model.metadata : null;
     }
 
     /**
@@ -512,14 +516,7 @@ namespace CellTools {
      */
     protected onActiveCellChanged(msg: Message): void {
       let cell = this.parent.activeCell;
-      this.editor.owner = cell ? cell.model : null;
-    }
-
-    /**
-     * Handle a change to the metadata of the active cell.
-     */
-    protected onMetadataChanged(msg: Metadata.ChangeMessage) {
-      sendMessage(this.editor, msg);
+      this.editor.source = cell ? cell.model.metadata : null;
     }
   }
 
@@ -632,8 +629,8 @@ namespace CellTools {
         return;
       }
       select.disabled = false;
-      let cursor = activeCell.model.getMetadata(this.key);
-      select.value = JSON.stringify(cursor.getValue());
+      let source = activeCell.model.metadata;
+      select.value = JSON.stringify(source.get(this.key));
     }
 
     /**
@@ -644,7 +641,7 @@ namespace CellTools {
         return;
       }
       let select = this.selectNode;
-      if (msg.args.name === this.key) {
+      if (msg.args.key === this.key) {
         this._changeGuard = true;
         select.value = JSON.stringify(msg.args.newValue);
         this._changeGuard = false;
@@ -661,8 +658,8 @@ namespace CellTools {
       }
       this._changeGuard = true;
       let select = this.selectNode;
-      let cursor = activeCell.model.getMetadata(this.key);
-      cursor.setValue(JSON.parse(select.value));
+      let source = activeCell.model.metadata;
+      source.set(this.key, JSON.parse(select.value));
       this._changeGuard = false;
     }
 

@@ -34,8 +34,8 @@ import {
 } from '../codeeditor';
 
 import {
-  IChangedArgs
-} from '../common/interfaces';
+  IObservableMap, ObservableMap
+} from '../common/observablemap';
 
 
 /**
@@ -75,138 +75,6 @@ const COMMIT_CLASS = 'jp-MetadataEditor-commitButton';
 export
 namespace Metadata {
   /**
-   * A class used to interact with user level metadata.
-   */
-  export
-  interface ICursor extends IDisposable {
-    /**
-     * The metadata namespace.
-     */
-    readonly name: string;
-
-    /**
-     * Get the value of the metadata.
-     */
-    getValue(): JSONValue;
-
-    /**
-     * Set the value of the metdata.
-     */
-    setValue(value: JSONValue): void;
-  }
-
-  /**
-   * An implementation of a metadata cursor.
-   */
-  export
-  class Cursor implements ICursor {
-    /**
-     * Construct a new metadata cursor.
-     */
-    constructor(options: ICursorOptions) {
-      this._name = options.name;
-      this._read = options.read;
-      this._write = options.write;
-    }
-
-    /**
-     * Get the namespace key of the metadata.
-     */
-    get name(): string {
-      return this._name;
-    }
-
-    /**
-     * Test whether the cursor is disposed.
-     */
-    get isDisposed(): boolean {
-      return this._read == null;
-    }
-
-    /**
-     * Dispose of the resources used by the cursor.
-     *
-     * #### Notes
-     * This is not meant to be called by user code.
-     */
-    dispose(): void {
-      this._read = null;
-      this._write = null;
-    }
-
-    /**
-     * Get the value of the namespace data.
-     */
-    getValue(): JSONValue {
-      let read = this._read;
-      return read(this._name);
-    }
-
-    /**
-     * Set the value of the namespace data.
-     */
-    setValue(value: JSONValue): void {
-      let write = this._write;
-      write(this._name, value);
-    }
-
-    private _name = '';
-    private _read: (name: string) => JSONValue = null;
-    private _write: (name: string, value: JSONValue) => void = null;
-  }
-
-  /**
-   * The options used to create a cursor.
-   */
-  export
-  interface ICursorOptions {
-    /**
-     * The cursor key name.
-     */
-    name: string;
-
-    /**
-     * The function used to read metadata.
-     */
-    read: (name: string) => JSONValue;
-
-    /**
-     * The function used to write metadata.
-     */
-    write: (name: string, value: JSONValue) => void;
-  }
-
-  /**
-   * A class which supplies metadata.
-   */
-  export
-  interface IOwner {
-    /**
-     * Get a metadata cursor for the object.
-     *
-     * #### Notes
-     * Metadata associated with the nbformat spec are set directly
-     * on the model.  This method is used to interact with a namespaced
-     * set of metadata on the object.
-     */
-    getMetadata(name: string): ICursor;
-
-    /**
-     * List the metadata namespace keys for the object.
-     *
-     * #### Notes
-     * Metadata associated with the nbformat are not included.
-     */
-    listMetadata(): IIterator<string>;
-  }
-
-  /**
-   * The change args type.
-   */
-  export
-  type ChangedArgs = IChangedArgs<JSONValue>;
-
-  /**
    * A metadata changed message.
    */
   export
@@ -214,7 +82,7 @@ namespace Metadata {
     /**
      * Create a new metadata changed message.
      */
-    constructor(args: ChangedArgs) {
+    constructor(args: ObservableMap.IChangedArgs<JSONValue>) {
       super('metadata-changed');
       this.args = args;
     }
@@ -222,7 +90,7 @@ namespace Metadata {
     /**
      * The arguments of the metadata change.
      */
-    readonly args: ChangedArgs;
+    readonly args: ObservableMap.IChangedArgs<JSONValue>;
   }
 
   /**
@@ -277,13 +145,20 @@ namespace Metadata {
     }
 
     /**
-     * The metadata owner.
+     * The metadata source.
      */
-    get owner(): IOwner | null {
-      return this._owner;
+    get source(): IObservableMap<JSONValue> | null {
+      return this._source;
     }
-    set owner(value: IOwner | null) {
-      this._owner = value;
+    set source(value: IObservableMap<JSONValue> | null) {
+      if (this._source === value) {
+        return;
+      }
+      if (this._source) {
+        this._source.changed.disconnect(this._onMetadataChanged, this);
+      }
+      this._source = value;
+      value.changed.connect(this._onMetadataChanged, this);
       this._setValue();
     }
 
@@ -292,22 +167,6 @@ namespace Metadata {
      */
     get isDirty(): boolean {
       return this._dataDirty || this._inputDirty;
-    }
-
-    /**
-     * Process a message sent to the widget.
-     *
-     * @param msg - The message sent to the widget.
-     */
-    processMessage(msg: Message): void {
-      super.processMessage(msg);
-      switch (msg.type) {
-      case 'metadata-changed':
-        this.onMetadataChanged(msg as ChangeMessage);
-        break;
-      default:
-        break;
-      }
     }
 
     /**
@@ -356,9 +215,9 @@ namespace Metadata {
     }
 
     /**
-     * Handle a change to the metadata of the active cell.
+     * Handle a change to the metadata of the source.
      */
-    protected onMetadataChanged(msg: ChangeMessage) {
+    private _onMetadataChanged(sender: IObservableMap<JSONValue>, args: ObservableMap.IChangedArgs<JSONValue>) {
       if (this._changeGuard) {
         return;
       }
@@ -424,7 +283,7 @@ namespace Metadata {
       let current = this._getContent() as JSONObject;
       let old = this._originalValue;
       let user = JSON.parse(model.value.text) as JSONObject;
-      let owner = this.owner;
+      let source = this.source;
       // If it is in user and has changed from old, set in current.
       for (let key in user) {
         if (!deepEqual(user[key], old[key])) {
@@ -435,12 +294,12 @@ namespace Metadata {
       for (let key in old) {
         if (!(key in user)) {
           delete current[key];
-          owner.getMetadata(key).setValue(void 0);
+          source.delete(key);
         }
       }
       // Set the values.
       for (let key in current) {
-        owner.getMetadata(key).setValue(current[key]);
+        source.set(key, current[key]);
       }
     }
 
@@ -448,18 +307,14 @@ namespace Metadata {
      * Get the metadata from the owner.
      */
     private _getContent(): JSONObject | undefined {
-      let owner = this.owner;
-      if (!owner) {
+      let source = this._source;
+      if (!source) {
         return void 0;
       }
       let content: JSONObject = {};
-      each(owner.listMetadata(), key => {
-        // Do not show the trusted metadata.
-        if (key === 'trusted') {
-          return;
-        }
-        content[key] = owner.getMetadata(key).getValue();
-      });
+      for (let key in source.keys()) {
+        content[key] = source.get(key);
+      }
       return content;
     }
 
@@ -491,7 +346,7 @@ namespace Metadata {
 
     private _dataDirty = false;
     private _inputDirty = false;
-    private _owner: IOwner | null = null;
+    private _source: IObservableMap<JSONValue> | null = null;
     private _originalValue: JSONObject;
     private _changeGuard = false;
   }

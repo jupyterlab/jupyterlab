@@ -38,10 +38,6 @@ import {
 } from '../common/observablemap';
 
 import {
-  Metadata
-} from '../common/metadata';
-
-import {
   OutputAreaWidget
 } from '../outputarea';
 
@@ -394,8 +390,6 @@ class CodeCellWidget extends BaseCellWidget {
     if (this.isDisposed) {
       return;
     }
-    this._collapsedCursor = null;
-    this._scrolledCursor = null;
     this._output = null;
     super.dispose();
   }
@@ -430,10 +424,8 @@ class CodeCellWidget extends BaseCellWidget {
    * Handle `update-request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    if (this._collapsedCursor) {
-      let value = this._collapsedCursor.getValue() as boolean;
-      this.toggleClass(COLLAPSED_CLASS, value);
-    }
+    let value = this.model.metadata.get('collapsed') as boolean;
+    this.toggleClass(COLLAPSED_CLASS, value);
     if (this._output) {
       // TODO: handle scrolled state.
     }
@@ -469,8 +461,6 @@ class CodeCellWidget extends BaseCellWidget {
 
   private _rendermime: RenderMime = null;
   private _output: OutputAreaWidget = null;
-  private _collapsedCursor: Metadata.ICursor = null;
-  private _scrolledCursor: Metadata.ICursor = null;
 }
 
 
