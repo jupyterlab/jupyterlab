@@ -102,12 +102,20 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       let name = options.languagePreference;
       this._metadata.set('language_info', { name });
     }
+    this._metadata.changed.connect(this._onGenericChange, this);
   }
 
   /**
    * The cell model factory for the notebook.
    */
   readonly contentFactory: NotebookModel.IContentFactory;
+
+  /**
+   * The metadata associated with the notebook.
+   */
+  get metadata(): IObservableMap<JSONValue> {
+    return this._metadata;
+  }
 
   /**
    * Get the observable list of notebook cells.
@@ -134,7 +142,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    * The default kernel name of the document.
    */
   get defaultKernelName(): string {
-    let spec = this._metadata['kernelspec'];
+    let spec = this._metadata.get('kernelspec') as nbformat.IKernelspecMetadata;
     return spec ? spec.name : '';
   }
 
@@ -142,7 +150,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    * The default kernel language of the document.
    */
   get defaultKernelLanguage(): string {
-    let info = this._metadata['language_info'];
+    let info = this._metadata.get('language_info') as nbformat.ILanguageInfoMetadata;
     return info ? info.name : '';
   }
 
@@ -157,15 +165,11 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     let cells = this._cells;
     this._cells = null;
     this._metadata.dispose();
-
     for (let i = 0; i < cells.length; i++) {
       let cell = cells.at(i);
       cell.dispose();
     }
     cells.dispose();
-    for (let key in cursors) {
-      cursors[key].dispose();
-    }
     super.dispose();
   }
 
@@ -195,7 +199,10 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       let cell = this.cells.at(i);
       cells.push(cell.toJSON());
     }
-    let metadata = utils.copy(this._metadata) as nbformat.INotebookMetadata;
+    let metadata = Object.create(null) as nbformat.INotebookMetadata;
+    for (let key in this.metadata.keys()) {
+      metadata[key] = JSON.parse(JSON.stringify(this.metadata.get(key)));
+    }
     // orig_nbformat should not be written to file per spec.
     delete metadata['orig_nbformat'];
     return {
@@ -251,23 +258,10 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       this.stateChanged.emit({ name: 'nbformatMinor', oldValue, newValue });
     }
     // Update the metadata.
+    this._metadata.clear();
     let metadata = value.metadata;
-    let builtins = ['kernelspec', 'language_info', 'orig_nbformat'];
-    for (let key in this._metadata) {
-      if (builtins.indexOf(key) !== -1) {
-        continue;
-      }
-      if (!(key in metadata)) {
-        this._setCursorData(key, null);
-        delete this._metadata[key];
-        if (this._cursors[key]) {
-          this._cursors[key].dispose();
-          delete this._cursors[key];
-        }
-      }
-    }
     for (let key in metadata) {
-      this._setCursorData(key, (metadata as any)[key]);
+      this._metadata.set(key, metadata[key]);
     }
     this.dirty = true;
   }
@@ -279,7 +273,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     switch (change.type) {
     case 'add':
       each(change.newValues, cell => {
-        cell.contentChanged.connect(this._onCellChanged, this);
+        cell.contentChanged.connect(this._onGenericChange, this);
       });
       break;
     case 'remove':
@@ -289,7 +283,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       break;
     case 'set':
       each(change.newValues, cell => {
-        cell.contentChanged.connect(this._onCellChanged, this);
+        cell.contentChanged.connect(this._onGenericChange, this);
       });
       each(change.oldValues, cell => {
         cell.dispose();
@@ -314,9 +308,9 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   }
 
   /**
-   * Handle a change to a cell state.
+   * Handle a generic state change.
    */
-  private _onCellChanged(cell: ICellModel, change: any): void {
+  private _onGenericChange(): void {
     this.dirty = true;
     this.contentChanged.emit(void 0);
   }

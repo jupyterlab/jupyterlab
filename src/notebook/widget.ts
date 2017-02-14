@@ -10,6 +10,10 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
+  JSONValue
+} from 'phosphor/lib/algorithm/json';
+
+import {
   find, findIndex, indexOf
 } from 'phosphor/lib/algorithm/searching';
 
@@ -50,12 +54,26 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  IChangedArgs
-} from '../common/interfaces';
+  ICellModel, BaseCellWidget, IMarkdownCellModel,
+  CodeCellWidget, MarkdownCellWidget,
+  ICodeCellModel, RawCellWidget, IRawCellModel,
+} from '../cells';
+
+import {
+  IEditorMimeTypeService, CodeEditor
+} from '../codeeditor';
 
 import {
   DragScrollHandler
 } from '../common/dragscroll';
+
+import {
+  IChangedArgs
+} from '../common/interfaces';
+
+import {
+  IObservableMap, ObservableMap
+} from '../common/observablemap';
 
 import {
   IObservableVector, ObservableVector
@@ -64,16 +82,6 @@ import {
 import {
   RenderMime
 } from '../rendermime';
-
-import {
-  IEditorMimeTypeService, CodeEditor
-} from '../codeeditor';
-
-import {
-  ICellModel, BaseCellWidget, IMarkdownCellModel,
-  CodeCellWidget, MarkdownCellWidget,
-  ICodeCellModel, RawCellWidget, IRawCellModel,
-} from '../cells';
 
 import {
   OutputAreaWidget
@@ -282,8 +290,8 @@ class StaticNotebook extends Widget {
    * The default implementation updates the mimetypes of the code cells
    * when the `language_info` metadata changes.
    */
-  protected onMetadataChanged(model: INotebookModel, args: IChangedArgs<any>): void {
-    switch (args.name) {
+  protected onMetadataChanged(sender: IObservableMap<JSONValue>, args: ObservableMap.IChangedArgs<JSONValue>): void {
+    switch (args.key) {
     case 'language_info':
       this._updateMimetype();
       break;
@@ -326,7 +334,7 @@ class StaticNotebook extends Widget {
     let layout = this.layout as PanelLayout;
     if (oldValue) {
       oldValue.cells.changed.disconnect(this._onCellsChanged, this);
-      oldValue.metadataChanged.disconnect(this.onMetadataChanged, this);
+      oldValue.metadata.changed.disconnect(this.onMetadataChanged, this);
       oldValue.contentChanged.disconnect(this.onModelContentChanged, this);
       // TODO: reuse existing cell widgets if possible.
       while (layout.widgets.length) {
@@ -344,7 +352,7 @@ class StaticNotebook extends Widget {
     });
     cells.changed.connect(this._onCellsChanged, this);
     newValue.contentChanged.connect(this.onModelContentChanged, this);
-    newValue.metadataChanged.connect(this.onMetadataChanged, this);
+    newValue.metadata.changed.connect(this.onMetadataChanged, this);
   }
 
   /**
@@ -459,8 +467,7 @@ class StaticNotebook extends Widget {
    * Update the mimetype of the notebook.
    */
   private _updateMimetype(): void {
-    let cursor = this._model.getMetadata('language_info');
-    let info = cursor.getValue() as nbformat.ILanguageInfoMetadata;
+    let info = this._model.metadata.get('language_info') as nbformat.ILanguageInfoMetadata;
     this._mimetype = this._mimetypeService.getMimeTypeByLanguage(info);
     each(this.widgets, widget => {
       if (widget.model.type === 'code') {
