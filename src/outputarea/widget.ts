@@ -139,6 +139,10 @@ const COLLAPSED_CLASS = 'jp-mod-collapsed';
  */
 const PROMPT_CLASS = 'jp-Output-prompt';
 
+const PROMPT_TYPE_CLASS = 'jp-Output-promptType';
+const PROMPT_COUNTER_CLASS = 'jp-Output-promptCounter';
+
+
 /**
  * The class name added to output area results.
  */
@@ -747,7 +751,15 @@ class OutputWidget extends Widget {
     case 'execute_result':
       child.addClass(EXECUTE_CLASS);
       let count = (output as nbformat.IExecuteResult).execution_count;
-      this.prompt.node.textContent = `Out[${count === null ? ' ' : count}]:`;
+      let promptType = document.createElement("span");
+      promptType.textContent = "Out";
+      promptType.classList.add(PROMPT_TYPE_CLASS);
+      let promptCounter = document.createElement("span");
+      promptCounter.textContent = `[${count === null ? ' ' : count}]:`;
+      promptCounter.classList.add(PROMPT_COUNTER_CLASS);
+      this.prompt.node.innerHTML = '';
+      this.prompt.node.appendChild(promptType);
+      this.prompt.node.appendChild(promptCounter);
       break;
     case 'display_data':
       child.addClass(DISPLAY_CLASS);

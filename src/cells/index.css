@@ -14,6 +14,8 @@
   --jp-private-cell-editor-background: #f7f7f7;
   --jp-private-cell-editor-border: #cfcfcf;
   --jp-private-cell-prompt-width: 90px;
+  --jp-private-cell-prompt-width-small: 70px;
+  --jp-private-cell-prompt-width-tiny: 30px;
   --jp-private-cell-inprompt-color: #303F9F;
   --jp-private-cell-outprompt-color: #D84315;
   --jp-private-cell-font-family: var(--jp-ui-font-family);
@@ -48,6 +50,27 @@
   line-height: var(--jp-code-line-height);
   font-size: var(--jp-code-font-size);
   border: var(--jp-border-width) solid transparent;
+}
+
+.jp-width-small .jp-Cell-prompt {
+  flex-basis: var(--jp-private-cell-prompt-width-small);
+}
+
+.jp-width-small .jp-Cell-promptType {
+  display: none;
+}
+
+.jp-width-tiny .jp-Cell-prompt {
+  flex-basis: var(--jp-private-cell-prompt-width-tiny);
+  width: var(--jp-private-cell-prompt-width-tiny);
+}
+
+.jp-width-tiny .jp-Cell-promptCounter {
+  display: none;
+}
+
+.jp-width-tiny .jp-Cell-promptType {
+  display: none;
 }
 
 

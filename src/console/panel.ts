@@ -18,8 +18,12 @@ import {
 } from 'phosphor/lib/ui/panel';
 
 import {
-  Widget
+  Widget, ResizeMessage
 } from 'phosphor/lib/ui/widget';
+
+import {
+  SizeWatcher
+} from '../common/sizewatcher'
 
 import {
   IEditorMimeTypeService, CodeEditor
@@ -51,6 +55,15 @@ import {
  */
 const PANEL_CLASS = 'jp-ConsolePanel';
 
+/*
+ * The width, below which, this panel will get the jp-width-tiny CSS class
+*/
+const TINY_WIDTH = 400;
+
+/*
+ * The width, below which, this panel will get the jp-width-small CSS class
+*/
+const SMALL_WIDTH = 600;
 
 /**
  * A panel which contains a console and the ability to add other children.
@@ -72,6 +85,11 @@ class ConsolePanel extends Panel {
     };
     this.console = factory.createConsole(consoleOpts);
     this.addWidget(this.console);
+
+    // Instantiate the SizeWatcher for adding/removing CSS classes based on with.
+    this._widthWatcher = new SizeWatcher(
+      { direction: "width", tinySize: TINY_WIDTH, smallSize: SMALL_WIDTH}
+    );
 
     // Instantiate the completer.
     this._completer = factory.createCompleter({ model: new CompleterModel() });
@@ -114,6 +132,17 @@ class ConsolePanel extends Panel {
     super.dispose();
   }
 
+  /*
+   * Handle the ResizeMessage, adding/removing size based CSS classes.
+   */
+  protected onResize(msg: ResizeMessage): void {
+    super.onResize(msg);
+    let width = msg.width;
+    if (this.parent.isVisible) {
+      this._widthWatcher.update(width, this);
+    }
+  }
+
   /**
    * Handle `'activate-request'` messages.
    */
@@ -148,7 +177,7 @@ class ConsolePanel extends Panel {
 
   private _completer: CompleterWidget = null;
   private _completerHandler: CompletionHandler = null;
-
+  private _widthWatcher: SizeWatcher = null;
 }
 
 

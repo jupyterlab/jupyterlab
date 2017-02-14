@@ -26,7 +26,7 @@ import {
 } from 'phosphor/lib/ui/panel';
 
 import {
-  Widget
+  Widget, ResizeMessage
 } from 'phosphor/lib/ui/widget';
 
 import {
@@ -44,6 +44,10 @@ import {
 import {
   IChangedArgs
 } from '../common/interfaces';
+
+import {
+  SizeWatcher
+} from '../common/sizewatcher'
 
 import {
   DocumentRegistry
@@ -80,6 +84,15 @@ const NB_PANEL = 'jp-Notebook-panel';
  */
 const DIRTY_CLASS = 'jp-mod-dirty';
 
+/*
+ * The width, below which, this panel will get the jp-width-tiny CSS class
+*/
+const TINY_WIDTH = 400;
+
+/*
+ * The width, below which, this panel will get the jp-width-small CSS class
+*/
+const SMALL_WIDTH = 600;
 
 /**
  * A widget that hosts a notebook toolbar and content area.
@@ -110,6 +123,11 @@ class NotebookPanel extends Widget {
     this.notebook = factory.createNotebook(nbOptions);
     this.notebook.activeCellChanged.connect(this._onActiveCellChanged, this);
     let toolbar = factory.createToolbar();
+
+    // Instantiate the SizeWatcher for adding/removing CSS classes based on with.
+    this._widthWatcher = new SizeWatcher(
+      { direction: "width", tinySize: TINY_WIDTH, smallSize: SMALL_WIDTH}
+    );
 
     let layout = this.layout as PanelLayout;
     layout.addWidget(toolbar);
@@ -238,6 +256,17 @@ class NotebookPanel extends Widget {
   protected onActivateRequest(msg: Message): void {
     this.notebook.activate();
     this.activated.emit(void 0);
+  }
+
+  /*
+   * Handle the ResizeMessage, adding/removing size based CSS classes.
+   */
+  protected onResize(msg: ResizeMessage): void {
+    super.onResize(msg);
+    let width = msg.width;
+    if (this.parent.isVisible) {
+      this._widthWatcher.update(width, this);
+    }
   }
 
   /**
@@ -378,6 +407,7 @@ class NotebookPanel extends Widget {
   private _completer: CompleterWidget = null;
   private _completerHandler: CompletionHandler = null;
   private _context: DocumentRegistry.IContext<INotebookModel> = null;
+  private _widthWatcher: SizeWatcher = null;
 }
 
 

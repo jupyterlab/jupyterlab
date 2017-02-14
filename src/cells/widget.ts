@@ -53,6 +53,9 @@ const CELL_CLASS = 'jp-Cell';
  */
 const PROMPT_CLASS = 'jp-Cell-prompt';
 
+const PROMPT_TYPE_CLASS = 'jp-Cell-promptType';
+const PROMPT_COUNTER_CLASS = 'jp-Cell-promptCounter';
+
 /**
  * The class name added to input area widgets.
  */
@@ -846,8 +849,15 @@ class InputAreaWidget extends Widget {
     if (value === 'null') {
       value = ' ';
     }
-    let text = `In [${value || ' '}]:`;
-    this._prompt.node.textContent = text;
+    let promptType = document.createElement("span");
+    promptType.textContent = "In ";
+    promptType.classList.add(PROMPT_TYPE_CLASS);
+    let promptCounter = document.createElement("span");
+    promptCounter.textContent = `[${value || ' '}]:`;
+    promptCounter.classList.add(PROMPT_COUNTER_CLASS);
+    this._prompt.node.innerHTML = '';
+    this._prompt.node.appendChild(promptType);
+    this._prompt.node.appendChild(promptCounter);
   }
 
   private _prompt: Widget;
