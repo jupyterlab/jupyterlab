@@ -41,6 +41,10 @@ import {
   IOutputAreaModel, OutputAreaModel
 } from '../outputarea';
 
+import {
+  IRealtimeConverter, Synchronizable
+} from '../common/realtime';
+
 
 /**
  * The definition of a model object for a cell.
@@ -324,6 +328,7 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
       CodeCellModel.defaultContentFactory
     );
     let trusted = this.trusted;
+    this._converter = new CodeCellModel.RealtimeOutputAreaConverter(factory);
     let cell = options.cell as nbformat.ICodeCell;
     let outputs: nbformat.IOutput[] = [];
     if (cell && cell.cell_type === 'code') {
@@ -336,14 +341,6 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
     });
     outputArea.stateChanged.connect(this.onGenericChange, this);
     this.set('outputs', outputArea);
-
-    this._fromVecFactory = (vec: IObservableVector<any>)=>{
-      let outputs = factory.createOutputArea({});
-      for(let i=0; i<outputs.length;i++) {
-        outputs.add(vec.at(i));
-      }
-      return outputs;
-    };
   }
 
   /**
@@ -408,7 +405,7 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
     (this.get('outputs') as any).trusted = value;
   }
 
-  private _fromVecFactory: (vec: IObservableVector<any>)=> IOutputAreaModel = null;
+  private _converter: IRealtimeConverter<IOutputAreaModel> = null;
 }
 
 
@@ -455,6 +452,28 @@ namespace CodeCellModel {
       return new OutputAreaModel(options);
     }
   }
+
+  export
+  class RealtimeOutputAreaConverter implements IRealtimeConverter<IOutputAreaModel> {
+    constructor(factory: IContentFactory) {
+      this._factory = factory;
+    }
+
+    from(value: Synchronizable): IOutputAreaModel {
+      let vec = value as any as IObservableVector<nbformat.IOutput>;
+      let outputs = this._factory.createOutputArea({});
+      for(let i=0; i<outputs.length;i++) {
+        outputs.add(vec.at(i));
+      }
+      return outputs;
+    }
+
+    to(value: IOutputAreaModel): Synchronizable {
+      return value as any as Synchronizable;
+    }
+    private _factory: IContentFactory = null;
+  }
+
 
   /**
    * The shared `ConetntFactory` instance.

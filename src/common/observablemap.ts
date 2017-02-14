@@ -9,6 +9,10 @@ import {
   ISignal, Signal
 } from '@phosphor/signaling';
 
+import {
+  IRealtimeConverter, Synchronizable
+} from './realtime';
+
 
 /**
  * A map which can be observed for changes.
@@ -129,6 +133,7 @@ class ObservableMap<T> implements IObservableMap<T> {
    */
   constructor(options: ObservableMap.IOptions<T> = {}) {
     this._itemCmp = options.itemCmp || Private.itemCmp;
+    this._converters = options.converters;
     if (options.values) {
       for (let key in options.values) {
         this._map.set(key, options.values[key]);
@@ -395,6 +400,7 @@ class ObservableMap<T> implements IObservableMap<T> {
   private _map: Map<string, T> = new Map<string, T>();
   private _itemCmp: (first: T, second: T) => boolean;
   private _changed = new Signal<this, ObservableMap.IChangedArgs<T>>(this);
+  private _converters: Map<string, IRealtimeConverter<T>> = null;
 }
 
 
@@ -419,6 +425,8 @@ namespace ObservableMap {
      * If not given, strict `===` equality will be used.
      */
     itemCmp?: (first: T, second: T) => boolean;
+
+    converters?: Map<string, IRealtimeConverter<T>>;
   }
 
   /**

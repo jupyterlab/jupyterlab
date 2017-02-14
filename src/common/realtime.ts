@@ -180,7 +180,7 @@ interface IRealtimeHandler extends IDisposable {
    *
    * @returns a promise when the linking is done.
    */
-  linkMap(vec: IObservableMap<Synchronizable>, id: string): Promise<void>;
+  linkMap<T>(vec: IObservableMap<T>, id: string): Promise<void>;
 
   /**
    * Create a string for the realtime model.
@@ -208,14 +208,21 @@ interface IRealtimeHandler extends IDisposable {
    *
    * @returns a promise when the linking is done.
    */
-  linkVector(vec: IObservableVector<Synchronizable>, id: string): Promise<void>;
+  linkVector<T>(vec: IObservableVector<T>, id: string): Promise<void>;
 }
 
 /**
  * A type which is able to be synchronized between collaborators
  */
 export
-type Synchronizable = JSONObject | ISerializable | IObservableMap<any> | IObservableVector<any> | IObservableString;
+type Synchronizable = JSONObject | IObservableMap<any> | IObservableVector<any> | IObservableString;
+
+export
+interface IRealtimeConverter<T> {
+  from(value: Synchronizable): T;
+
+  to(value: T): Synchronizable;
+}
 
 /**
  * Interface for an object representing a single collaborator
@@ -246,12 +253,4 @@ interface ICollaborator {
    * UI elements.
    */
   readonly color: string;
-
-  /**
-   * A representation of the position of the collaborator
-   * in the collaborative document. This can include, but
-   * is not limited to, the cursor position. Different
-   * widgets are responsible for setting/reading this value.
-   */
-  position: JSONObject;
 }

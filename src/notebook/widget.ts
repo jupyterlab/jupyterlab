@@ -397,6 +397,11 @@ class StaticNotebook extends Widget {
     default:
       widget = this._createRawCell(cell as IRawCellModel);
     }
+    if((this.model as any).realtimeHandler) {
+      widget.editor.uuid =
+        (this.model as any).realtimeHandler.localCollaborator.sessionId;
+    }
+    cell.mimeType = this._mimetype;
     widget.addClass(NB_CELL_CLASS);
     let layout = this.layout as PanelLayout;
     layout.insertWidget(index, widget);

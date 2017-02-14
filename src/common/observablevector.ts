@@ -21,6 +21,10 @@ import {
   IObservableMap
 } from './observablemap';
 
+import {
+  Synchronizable, IRealtimeConverter
+} from './realtime';
+
 
 /**
  * A vector which can be observed for changes.
@@ -343,7 +347,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
   constructor(options: ObservableVector.IOptions<T> = {}) {
     super(options.values || []);
     this._itemCmp = options.itemCmp || Private.itemCmp;
-    this._fromMapFactory = options.fromMapFactory;
+    this._converter = options.converter;
   }
 
   /**
@@ -905,7 +909,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
   private _itemCmp: (first: T, second: T) => boolean;
   private _changed = new Signal<this, ObservableVector.IChangedArgs<T>>(this);
   private _parent: IObservableVector<T> = null;
-  private _fromMapFactory: (value: IObservableMap<any>)=>T;
+  private _converter: IRealtimeConverter<T> = null;
 }
 
 
@@ -931,7 +935,7 @@ namespace ObservableVector {
      */
     itemCmp?: (first: T, second: T) => boolean;
 
-    fromMapFactory?: (value: IObservableMap<any>)=>T;
+    converter?: IRealtimeConverter<T>;
   }
 
   /**

@@ -39,7 +39,8 @@ import {
 } from '../common/undoablevector';
 
 import {
-  IRealtimeHandler, IRealtimeModel
+  IRealtimeHandler, IRealtimeModel, Synchronizable,
+  IRealtimeConverter
 } from '../common/realtime';
 
 
@@ -99,18 +100,9 @@ class NotebookModel extends DocumentModel implements INotebookModel, IRealtimeMo
           return factory.createRawCell({ cell });
       }
     };
-    let fromMapFactory = (map: IObservableMap<any>): ICellModel=>{
-      let cell: any = {
-        cell_type: map.get('cell_type'),
-        source: (map.get('value') as any).text,
-        outputs: (toArray(map.get('outputs') as any)),
-        execution_count: map.get('executionCount'),
-        metadata: {},
-      }
-      return fromJSONFactory(cell);
-    };
+    let realtimeConverter = new NotebookModel.RealtimeCellConverter(factory);
     this._cells = new ObservableUndoableVector<ICellModel>(
-      fromJSONFactory, fromMapFactory);
+      fromJSONFactory, realtimeConverter);
 
 
     // Add an initial code cell by default.
@@ -516,4 +508,36 @@ namespace NotebookModel {
    */
   export
   const defaultContentFactory = new ContentFactory({});
+
+  export
+  class RealtimeCellConverter implements IRealtimeConverter<ICellModel> {
+    constructor(contentFactory: IContentFactory) {
+      this._factory = contentFactory;
+    }
+
+    to(value: ICellModel): Synchronizable {
+      return value as any as Synchronizable;
+    }
+
+    from(value: Synchronizable): ICellModel {
+      let map: any = value as IObservableMap<any>;
+      let cell: any = {
+        cell_type: map.get('cell_type'),
+        source: (map.get('value') as any).text,
+        outputs: (toArray(map.get('outputs') as any)),
+        execution_count: map.get('executionCount'),
+        metadata: {},
+      }
+      switch (cell.cell_type) {
+        case 'code':
+          return this._factory.createCodeCell({ cell });
+        case 'markdown':
+          return this._factory.createMarkdownCell({ cell });
+        default:
+          return this._factory.createRawCell({ cell });
+      }
+    }
+
+    private _factory: IContentFactory = null;
+  }
 }
