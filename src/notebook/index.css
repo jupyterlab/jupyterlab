@@ -181,9 +181,16 @@
 }
 
 
+.jp-CellTools .jp-MetadataEditor-host {
+  background-color: white;
+  border-color: var(--jp-border-color1);
+}
+
+
 .jp-ActiveCellTool {
   padding: 12px;
-  padding-bottom: 4px;
+  border-bottom: 1px solid var(--jp-border-color1);
+  background-color: var(--jp-border-color3);
 }
 
 
@@ -195,14 +202,13 @@
 
 .jp-ActiveCellTool .jp-CellEditor {
   flex: 1 1 auto;
+  background-color: white;
+  border-color: var(--jp-border-color1);
 }
 
 
 .jp-CellTools-tool:not(:first-child) {
-  margin-top: 8px;
-  margin-bottom: 4px;
   border-top: 1px solid var(--md-grey-300);
-  padding-top: 12px;
 }
 
 
@@ -244,8 +250,7 @@
 
 
 .jp-KeySelector {
-  padding-left: 12px;
-  padding-right: 12px;
+  padding: 12px;
 }
 
 
