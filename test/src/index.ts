@@ -11,6 +11,7 @@ import './codeeditor/editor.spec';
 import './codeeditor/widget.spec';
 
 import './codemirror/editor.spec';
+import './codemirror/factory.spec';
 
 import './commandlinker/commandlinker.spec';
 
