@@ -16,16 +16,8 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  CompletionHandler, CompleterWidget
-} from '../../../lib/completer';
-
-import {
   CodeConsole, ConsolePanel
 } from '../../../lib/console';
-
-import {
-  InspectionHandler
-} from '../../../lib/inspector';
 
 import {
   createConsolePanelFactory, rendermime, mimeTypeService, editorFactory
@@ -167,24 +159,6 @@ describe('console/panel', () => {
             session
           };
           expect(contentFactory.createConsole(options)).to.be.a(CodeConsole);
-        });
-
-      });
-
-      describe('#createCompleter()', () => {
-
-        it('should create a completer widget', () => {
-          expect(contentFactory.createCompleter({})).to.be.a(CompleterWidget);
-        });
-
-      });
-
-      describe('#createCompleterHandler()', () => {
-
-        it('should create a completer handler', () => {
-          let options = { completer:  new CompleterWidget({}) };
-          let handler = contentFactory.createCompleterHandler(options);
-          expect(handler).to.be.a(CompletionHandler);
         });
 
       });
