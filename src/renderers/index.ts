@@ -75,7 +75,7 @@ class TextRenderer implements RenderMime.IRenderer {
   /**
    * The mimeTypes this renderer accepts.
    */
-  mimeTypes = ['text/plain', 'application/vnd.jupyter.console-text'];
+  mimeTypes = ['text/plain', RenderMime.CONSOLE_MIMETYPE];
 
   /**
    * Whether the renderer can render given the render options.

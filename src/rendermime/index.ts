@@ -284,6 +284,12 @@ namespace RenderMime {
   type MimeMap<T> = { [mimetype: string]: T };
 
   /**
+   * The mimeType for Jupyter console text.
+   */
+  export
+  const CONSOLE_MIMETYPE: string = 'application/vnd.jupyter.console-text';
+
+  /**
    * An observable bundle of mime data.
    */
   export
@@ -570,17 +576,14 @@ namespace RenderMime {
       break;
     case 'stream':
       let text = (output as nbformat.IStream).text;
-      bundle = {
-        'application/vnd.jupyter.console-text': text
-      };
+      bundle[RenderMime.CONSOLE_MIMETYPE] = text;
       break;
     case 'error':
       let out: nbformat.IError = output as nbformat.IError;
       let traceback = out.traceback.join('\n');
-      bundle = {
-        'application/vnd.jupyter.console-text': traceback ||
-          `${out.ename}: ${out.evalue}`
-      };
+      bundle[RenderMime.CONSOLE_MIMETYPE] = (
+        traceback || `${out.ename}: ${out.evalue}`
+      );
       break;
     default:
       break;
