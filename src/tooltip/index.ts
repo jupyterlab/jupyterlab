@@ -22,7 +22,6 @@ import {
 } from '../rendermime';
 
 
-export * from './model';
 export * from './widget';
 
 

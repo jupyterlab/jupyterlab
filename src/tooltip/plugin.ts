@@ -34,15 +34,11 @@ const service: JupyterLabPlugin<ITooltipManager> = {
     return {
       invoke(options: ITooltipManager.IOptions): void {
         const { anchor, editor, kernel, rendermime  } = options;
-        const model = new TooltipModel({ editor, kernel, rendermime });
 
         if (tooltip) {
-          tooltip.model.dispose();
           tooltip.dispose();
           tooltip = null;
         }
-        tooltip = new TooltipWidget({ anchor, model });
-        Widget.attach(tooltip, document.body);
       }
     };
   }
