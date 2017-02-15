@@ -524,9 +524,11 @@ namespace NotebookModel {
       let cell: any = {
         cell_type: map.get('cell_type'),
         source: (map.get('value') as any).text,
-        outputs: (toArray(map.get('outputs') as any)),
-        execution_count: map.get('executionCount'),
-        metadata: {},
+        metadata: map.get('metadata') || {}
+      }
+      if(cell.cell_type === 'code') {
+        cell.outputs = toArray(map.get('outputs'));
+        cell.execution_count = map.get('executionCount') || null;
       }
       switch (cell.cell_type) {
         case 'code':
