@@ -70,10 +70,11 @@ class TooltipWidget extends Widget {
 
     this._editor = options.editor;
     this._rendermime = options.rendermime;
-    this._content = this._rendermime.render({
-      bundle: options.bundle,
+    let model = new RenderMime.MimeModel({
+      data: options.bundle,
       trusted: true
     });
+    this._content = this._rendermime.render(model);
     if (this._content) {
       (this.layout as PanelLayout).addWidget(this._content);
     }
