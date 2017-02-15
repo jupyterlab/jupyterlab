@@ -36,11 +36,11 @@ import {
 } from '../cells';
 
 import {
-  OutputAreaWidget
+  OutputArea
 } from '../outputarea';
 
 import {
-  IRenderMime, RenderMime
+  IRenderMime
 } from '../rendermime';
 
 import {
@@ -704,7 +704,7 @@ namespace CodeConsole {
     constructor(options: IContentFactoryOptions) {
       let editorFactory = options.editorFactory;
       let outputAreaContentFactory = (options.outputAreaContentFactory ||
-        OutputAreaWidget.defaultContentFactory
+        OutputArea.defaultContentFactory
       );
       this.codeCellContentFactory = (options.codeCellContentFactory ||
         new CodeCellWidget.ContentFactory({
@@ -780,7 +780,7 @@ namespace CodeConsole {
     /**
      * The factory for output area content.
      */
-    outputAreaContentFactory?: OutputAreaWidget.IContentFactory;
+    outputAreaContentFactory?: OutputArea.IContentFactory;
 
     /**
      * The factory for code cell widget content.  If given, this will

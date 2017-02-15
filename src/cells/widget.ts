@@ -38,7 +38,7 @@ import {
 } from '../common/observablemap';
 
 import {
-  OutputAreaWidget
+  OutputArea
 } from '../outputarea';
 
 import {
@@ -460,7 +460,7 @@ class CodeCellWidget extends BaseCellWidget {
   }
 
   private _rendermime: RenderMime = null;
-  private _output: OutputAreaWidget = null;
+  private _output: OutputArea = null;
 }
 
 
@@ -498,12 +498,12 @@ namespace CodeCellWidget {
     /**
      * The factory for output area content.
      */
-    readonly outputAreaContentFactory: OutputAreaWidget.IContentFactory;
+    readonly outputAreaContentFactory: OutputArea.IContentFactory;
 
     /**
      * Create a new output area for the widget.
      */
-    createOutputArea(options: OutputAreaWidget.IOptions): OutputAreaWidget;
+    createOutputArea(options: OutputArea.IOptions): OutputArea;
   }
 
   /**
@@ -517,20 +517,20 @@ namespace CodeCellWidget {
     constructor(options: ContentFactory.IOptions) {
       super(options);
       this.outputAreaContentFactory = (options.outputAreaContentFactory ||
-        OutputAreaWidget.defaultContentFactory
+        OutputArea.defaultContentFactory
       );
     }
 
     /**
      * The factory for output area content.
      */
-    readonly outputAreaContentFactory: OutputAreaWidget.IContentFactory;
+    readonly outputAreaContentFactory: OutputArea.IContentFactory;
 
     /**
      * Create an output area widget.
      */
-    createOutputArea(options: OutputAreaWidget.IOptions): OutputAreaWidget {
-      return new OutputAreaWidget(options);
+    createOutputArea(options: OutputArea.IOptions): OutputArea {
+      return new OutputArea(options);
     }
   }
 
@@ -552,7 +552,7 @@ namespace CodeCellWidget {
       /**
        * The factory to use for output area widget content.
        */
-      outputAreaContentFactory?: OutputAreaWidget.IContentFactory;
+      outputAreaContentFactory?: OutputArea.IContentFactory;
     }
   }
 }

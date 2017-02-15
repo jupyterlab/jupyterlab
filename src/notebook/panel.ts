@@ -46,7 +46,7 @@ import {
 } from '../docregistry';
 
 import {
-  OutputAreaWidget
+  OutputArea
 } from '../outputarea';
 
 import {
@@ -466,7 +466,7 @@ export namespace NotebookPanel {
       /**
        * The factory for output area content.
        */
-      outputAreaContentFactory?: OutputAreaWidget.IContentFactory;
+      outputAreaContentFactory?: OutputArea.IContentFactory;
 
       /**
        * The factory for code cell widget content.  If given, this will
