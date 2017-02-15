@@ -516,7 +516,7 @@ namespace NotebookModel {
     }
 
     to(value: ICellModel): Synchronizable {
-      return value as any as Synchronizable;
+      return (value as any).synchronizedItems;
     }
 
     from(value: Synchronizable): ICellModel {

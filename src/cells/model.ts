@@ -14,10 +14,6 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  IIterator, iter
-} from '@phosphor/algorithm';
-
-import {
   CodeEditor
 } from '../codeeditor';
 
@@ -144,7 +140,7 @@ class CellModel extends CodeEditor.Model implements ICellModel {
     super();
     this.value.changed.connect(this.onGenericChange, this);
     let cell = options.cell;
-    this.set('cell_type', this.type);
+    this.synchronizedItems.set('cell_type', this.type);
 
     if (!cell) {
       return;
@@ -328,11 +324,10 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
       CodeCellModel.defaultContentFactory
     );
     let trusted = this.trusted;
-    this._converter = new CodeCellModel.RealtimeOutputAreaConverter(factory);
     let cell = options.cell as nbformat.ICodeCell;
     let outputs: nbformat.IOutput[] = [];
     if (cell && cell.cell_type === 'code') {
-      this.set('executionCount', cell.execution_count);
+      this.synchronizedItems.set('executionCount', cell.execution_count);
       outputs = cell.outputs;
     }
     let outputArea = factory.createOutputArea({
@@ -340,7 +335,8 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
       values: outputs
     });
     outputArea.stateChanged.connect(this.onGenericChange, this);
-    this.set('outputs', outputArea);
+    this.synchronizedItems.set('outputs', outputArea);
+    this.synchronizedItems.converters.set('outputs', new CodeCellModel.RealtimeOutputAreaConverter(factory));
   }
 
   /**
@@ -354,14 +350,14 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
    * The execution count of the cell.
    */
   get executionCount(): nbformat.ExecutionCount {
-    return this.get('executionCount') || null;
+    return this.synchronizedItems.get('executionCount') || null;
   }
   set executionCount(newValue: nbformat.ExecutionCount) {
-    if (newValue === this.get('executionCount')) {
+    if (newValue === this.synchronizedItems.get('executionCount')) {
       return;
     }
     let oldValue = this.executionCount;
-    this.set('executionCount', newValue || null);
+    this.synchronizedItems.set('executionCount', newValue || null);
     this.contentChanged.emit(void 0);
     this.stateChanged.emit({ name: 'executionCount', oldValue, newValue });
   }
@@ -370,7 +366,7 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
    * The cell outputs.
    */
   get outputs(): IOutputAreaModel {
-    return this.get('outputs');
+    return this.synchronizedItems.get('outputs');
   }
 
   /**
@@ -381,8 +377,8 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
       return;
     }
     Signal.clearData(this);
-    this.get('outputs').dispose();
-    this.delete('outputs');
+    this.synchronizedItems.get('outputs').dispose();
+    this.synchronizedItems.delete('outputs');
     super.dispose();
   }
 
@@ -391,8 +387,8 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
    */
   toJSON(): nbformat.ICodeCell {
     let cell = super.toJSON() as nbformat.ICodeCell;
-    cell.execution_count = this.get('executionCount') || null;
-    cell.outputs = this.get('outputs').toJSON();
+    cell.execution_count = this.synchronizedItems.get('executionCount') || null;
+    cell.outputs = this.synchronizedItems.get('outputs').toJSON();
     return cell;
   }
 
@@ -405,7 +401,6 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
     (this.get('outputs') as any).trusted = value;
   }
 
-  private _converter: IRealtimeConverter<IOutputAreaModel> = null;
 }
 
 
@@ -469,7 +464,7 @@ namespace CodeCellModel {
     }
 
     to(value: IOutputAreaModel): Synchronizable {
-      return value as any as Synchronizable;
+      return (value as any).list;
     }
     private _factory: IContentFactory = null;
   }

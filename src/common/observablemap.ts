@@ -45,6 +45,11 @@ interface IObservableMap<T> extends IDisposable {
   readonly size: number;
 
   /**
+   * Converters for realtime synchronization.
+   */
+  readonly converters: Map<string, IRealtimeConverter<T>>;
+
+  /**
    * Set a key-value pair in the map
    *
    * @param key - The key to set.
@@ -133,7 +138,7 @@ class ObservableMap<T> implements IObservableMap<T> {
    */
   constructor(options: ObservableMap.IOptions<T> = {}) {
     this._itemCmp = options.itemCmp || Private.itemCmp;
-    this._converters = options.converters;
+    this._converters = options.converters || new Map<string, IRealtimeConverter<T>>();
     if (options.values) {
       for (let key in options.values) {
         this._map.set(key, options.values[key]);
@@ -180,6 +185,10 @@ class ObservableMap<T> implements IObservableMap<T> {
     } else {
       return this._map.size;
     }
+  }
+
+  get converters(): Map<string, IRealtimeConverter<T>> {
+    return this._converters;
   }
 
   /**

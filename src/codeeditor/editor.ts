@@ -225,10 +225,10 @@ namespace CodeEditor {
       options = options || {};
       this._value = new ObservableString(options.value);
       this._mimetype = options.mimeType || 'text/plain';
-      this.set('mimeType', this._mimetype);
-      this.set('value', this._value);
-      this.set('selections', this._selections);
-      this.changed.connect((s, change)=>{
+      this.synchronizedItems.set('mimeType', this._mimetype);
+      this.synchronizedItems.set('value', this._value);
+      this.synchronizedItems.set('selections', this._selections);
+      this.synchronizedItems.changed.connect((s, change)=>{
         if(change.key === 'mimeType') {
           this._mimeTypeChanged.emit({
             name: 'mimeType',
@@ -250,28 +250,28 @@ namespace CodeEditor {
      * Get the value of the model.
      */
     get value(): IObservableString {
-      return this.get("value");
+      return this.synchronizedItems.get("value");
     }
 
     /**
      * Get the selections for the model.
      */
     get selections(): IObservableMap<ITextSelection[]> {
-      return this.get("selections");
+      return this.synchronizedItems.get("selections");
     }
 
     /**
      * A mime type of the model.
      */
     get mimeType(): string {
-      return this.get("mimeType");
+      return this.synchronizedItems.get("mimeType");
     }
     set mimeType(newValue: string) {
-      const oldValue = this.get("mimeType");
+      const oldValue = this.synchronizedItems.get("mimeType");
       if (oldValue === newValue) {
         return;
       }
-      this.set("mimeType", newValue);
+      this.synchronizedItems.set("mimeType", newValue);
     }
 
     /**
@@ -313,7 +313,7 @@ namespace CodeEditor {
       return new Promise<void>((resolve,reject)=>{
         this._realtime = realtimeHandler;
         let mapPromise =
-          this._realtime.linkMap(this, 'codeeditor');
+          this._realtime.linkMap(this.synchronizedItems, 'codeeditor');
         this._realtime.collaborators.changed.connect((collaborators, change)=>{
           //if there are selections corresponding to non-collaborators,
           //they are stale and should be removed.
@@ -330,6 +330,8 @@ namespace CodeEditor {
         });
       });
     }
+
+    protected synchronizedItems = new ObservableMap<any>();
 
     private _value: ObservableString;
     private _mimetype: string;

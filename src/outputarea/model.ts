@@ -233,13 +233,11 @@ class OutputAreaModel implements IOutputAreaModel {
     return item;
   }
 
-  /**
-   * Handle a change to the list.
-   */
   private _onListChanged(sender: IObservableVector<IOutputModel>, args: ObservableVector.IChangedArgs<IOutputModel>) {
     this._changed.emit(args);
     this._stateChanged.emit(void 0);
   }
+
 
   /**
    * Handle a change to an item.
