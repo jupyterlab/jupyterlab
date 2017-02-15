@@ -20,7 +20,7 @@ export
 class CodeMirrorEditorFactory implements IEditorFactoryService {
 
   /**
-   * Construct an IEditorFactoryService for CodeMirrorEditors
+   * Construct an IEditorFactoryService for CodeMirrorEditors.
    */
   constructor(codeMirrorOptions?: CodeMirror.EditorConfiguration) {
     this.inlineCodeMirrorOptions = {
@@ -73,7 +73,7 @@ class CodeMirrorEditorFactory implements IEditorFactoryService {
 
 
 namespace Private {
-  // Replace with Object.assign when available
+  // Replace with Object.assign when available.
   export
   function assign<T>(target: T, ...configs: any[]): T {
     for (const source of configs) {

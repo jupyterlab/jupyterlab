@@ -198,10 +198,12 @@ namespace CodeEditor {
   export
   class Model implements IModel {
     /**
-     * Construct a new Model
+     * Construct a new Model.
      */
-    constructor(value?: string) {
-      this._value = new ObservableString(value);
+    constructor(options?: Model.IOptions) {
+      options = options || {};
+      this._value = new ObservableString(options.value);
+      this._mimetype = options.mimeType || 'text/plain';
     }
 
     /**
@@ -264,7 +266,7 @@ namespace CodeEditor {
 
     private _value: ObservableString;
     private _selections = new ObservableMap<ITextSelection[]>();
-    private _mimetype = 'text/plain';
+    private _mimetype: string;
     private _isDisposed = false;
   }
 
@@ -553,5 +555,21 @@ namespace CodeEditor {
     * The default selection style for the editor.
     */
     selectionStyle?: CodeEditor.ISelectionStyle;
+  }
+
+  export
+  namespace Model {
+    export
+    interface IOptions {
+      /**
+       * The initial value of the model.
+       */
+      value?: string;
+
+      /**
+       * The mimetype of the model.
+       */
+      mimeType?: string;
+    }
   }
 }

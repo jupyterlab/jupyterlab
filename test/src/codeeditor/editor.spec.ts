@@ -27,9 +27,17 @@ describe('CodeEditor.Model', () => {
     });
 
     it('should create a CodeEditor Model with an initial value', () => {
-      let other = new CodeEditor.Model('Initial text here');
+      let other = new CodeEditor.Model({value: 'Initial text here'});
       expect(other).to.be.a(CodeEditor.Model);
       expect(other.value.text).to.equal('Initial text here');
+      other.dispose();
+    });
+
+    it('should create a CodeEditor Model with an initial mimetype', () => {
+      let other = new CodeEditor.Model({value: 'import this', mimeType: 'text/x-python'});
+      expect(other).to.be.a(CodeEditor.Model);
+      expect(other.mimeType).to.equal('text/x-python');
+      expect(other.value.text).to.equal('import this');
       other.dispose();
     });
 
