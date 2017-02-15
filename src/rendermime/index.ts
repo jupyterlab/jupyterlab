@@ -42,6 +42,10 @@ import {
   JavaScriptRenderer, SVGRenderer, MarkdownRenderer, PDFRenderer
 } from '../renderers';
 
+import {
+  RenderedText
+} from '../renderers/widget';
+
 
 /* tslint:disable */
 /**
@@ -133,7 +137,7 @@ class RenderMime {
   render(model: RenderMime.IMimeModel): Widget {
     let mimeType = this.preferredMimeType(model);
     if (!mimeType) {
-      return void 0;
+      return this._handleError(model);
     }
     let rendererOptions = {
       mimeType,
@@ -215,6 +219,23 @@ class RenderMime {
    */
   getRenderer(mimeType: string): RenderMime.IRenderer {
     return this._renderers[mimeType];
+  }
+
+  /**
+   * Return a widget for an error.
+   */
+  private _handleError(model: RenderMime.IMimeModel): Widget {
+   let errModel = new RenderMime.MimeModel({
+      data: {
+        'application/vnd.jupyter.stderr': 'Unable to render data'
+      }
+   });
+   let options = {
+      mimeType: 'application/vnd.jupyter.stderr',
+      model: errModel,
+      sanitizer: this._sanitizer,
+    };
+   return new RenderedText(options);
   }
 
   private _renderers: RenderMime.MimeMap<RenderMime.IRenderer> = Object.create(null);
@@ -560,29 +581,29 @@ namespace RenderMime {
    */
   export
   function getData(output: nbformat.IOutput): JSONObject {
-    let bundle: nbformat.IMimeBundle;
+    let bundle: nbformat.IMimeBundle = {};
     switch (output.output_type) {
     case 'execute_result':
-      bundle = (output as nbformat.IExecuteResult).data;
-      break;
     case 'display_data':
-      bundle = (output as nbformat.IDisplayData).data;
+      bundle = output.data;
       break;
     case 'stream':
-      let text = (output as nbformat.IStream).text;
-      bundle[RenderMime.CONSOLE_MIMETYPE] = text;
+      if (output.name === 'stderr') {
+        bundle['application/vnd.jupyter.stderr'] = output.text;
+      } else {
+        bundle['application/vnd.jupyter.stdout'] = output.text;
+      }
       break;
     case 'error':
-      let out: nbformat.IError = output as nbformat.IError;
-      let traceback = out.traceback.join('\n');
-      bundle[RenderMime.CONSOLE_MIMETYPE] = (
-        traceback || `${out.ename}: ${out.evalue}`
+      let traceback = output.traceback.join('\n');
+      bundle['application/vnd.jupyter.stderr'] = (
+        traceback || `${output.ename}: ${output.evalue}`
       );
       break;
     default:
       break;
     }
-    return convertBundle(bundle || {});
+    return convertBundle(bundle);
   }
 
   /**

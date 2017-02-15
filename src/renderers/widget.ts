@@ -69,6 +69,11 @@ const IMAGE_CLASS = 'jp-RenderedImage';
  */
 const TEXT_CLASS = 'jp-RenderedText';
 
+/**
+ * The class name added to an error output.
+ */
+const ERROR_CLASS = 'jp-mod-error';
+
 /*
  * The class name added to rendered javascript.
  */
@@ -280,6 +285,9 @@ class RenderedText extends Widget {
     pre.innerHTML = ansi_to_html(data);
     this.node.appendChild(pre);
     this.addClass(TEXT_CLASS);
+    if (options.mimeType === 'application/vnd.jupyter.stderr') {
+      this.addClass(ERROR_CLASS);
+    }
   }
 }
 

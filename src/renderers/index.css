@@ -3,6 +3,32 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+.jp-RenderedText {
+  text-align: left;
+  padding-top: var(--jp-code-padding);
+  padding-left: var(--jp-code-padding);
+  font-size: var(--jp-code-font-size);
+  line-height: var(--jp-code-line-height);
+}
+
+
+.jp-RenderedText pre,
+.jp-RenderedHTMLCommon pre {
+  border: none;
+  margin: 0px;
+  padding: 0px;
+  overflow-x: auto;
+  overflow-y: auto;
+  word-break: break-all;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+
+.jp-RenderedText.jp-mod-error {
+  background: #fdd;
+}
+
 
 .jp-RenderedLatex {
   color: var(--jp-content-font-color1);
@@ -25,6 +51,17 @@
 
 .jp-RenderedHTMLCommon em {
   font-style: italic;
+}
+
+
+.jp-RenderedHTMLCommon img.jp-mod-unconfined {
+  max-width: none;
+}
+
+
+.jp-RenderedHTMLCommon img {
+  max-width: 100%;
+  height: auto;
 }
 
 

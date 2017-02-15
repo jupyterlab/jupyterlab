@@ -14,7 +14,6 @@ import {
   RenderedJavaScript, RenderedSVG, RenderedPDF, RenderedLatex
 } from './widget';
 
-
 /**
  * A renderer for raw html.
  */
@@ -75,7 +74,8 @@ class TextRenderer implements RenderMime.IRenderer {
   /**
    * The mimeTypes this renderer accepts.
    */
-  mimeTypes = ['text/plain', RenderMime.CONSOLE_MIMETYPE];
+  mimeTypes = ['text/plain', 'application/vnd.jupyter.stdout',
+               'application/vnd.jupyter.stderr'];
 
   /**
    * Whether the renderer can render given the render options.

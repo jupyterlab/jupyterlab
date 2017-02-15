@@ -83,31 +83,6 @@ const OUTPUT_CLASS = 'jp-OutputAreaWidget-output';
 const STDIN_CLASS = 'jp-OutputAreaWidget-stdin';
 
 /**
- * The class name added to an execute result.
- */
-const EXECUTE_CLASS = 'jp-OutputWidget-executeResult';
-
-/**
- * The class name added to display data.
- */
-const DISPLAY_CLASS = 'jp-OutputWidget-displayData';
-
-/**
- * The class name added to stdout data.
- */
-const STDOUT_CLASS = 'jp-OutputWidget-stdout';
-
-/**
- * The class name added to stderr data.
- */
-const STDERR_CLASS = 'jp-OutputWidget-stderr';
-
-/**
- * The class name added to error data.
- */
-const ERROR_CLASS = 'jp-OutputWidget-error';
-
-/**
  * The class name added to stdin data prompt nodes.
  */
 const STDIN_PROMPT_CLASS = 'jp-StdinWidget-prompt';
@@ -377,16 +352,21 @@ class OutputAreaWidget extends Widget {
    * Insert an output to the layout.
    */
   private _insertOutput(index: number, model: OutputModel.IModel): void {
-    let rendermime = this.rendermime;
-    let factory = this.contentFactory;
     let panel = new Panel();
-    let gutter = factory.createGutter();
-    gutter.addClass(GUTTER_CLASS);
-    let result = factory.createOutput({ rendermime, model, gutter });
-    result.addClass(OUTPUT_CLASS);
-    panel.addWidget(result);
     panel.addClass(CHILD_CLASS);
     panel.addClass(OUTPUT_CLASS);
+
+    let gutter = this.contentFactory.createGutter();
+    gutter.addClass(GUTTER_CLASS);
+    panel.addWidget(gutter);
+    if (model.output_type === 'execute_result') {
+      let count = model.execution_count;
+      gutter.text = `Out[${count === null ? ' ' : count}]:`;
+    }
+
+    let output = this._createOutput(model);
+    panel.addWidget(output);
+
     let layout = this.layout as PanelLayout;
     layout.insertWidget(index, panel);
   }
@@ -405,6 +385,21 @@ class OutputAreaWidget extends Widget {
     }
     layout.widgets.at(index).dispose();
     this._insertOutput(index, model);
+  }
+
+  /**
+   * Create an output.
+   */
+  private _createOutput(model: OutputModel.IModel): Widget {
+    let widget = this.rendermime.render(model);
+
+    // Create the output result area.
+    if (!widget) {
+      widget = new Widget();
+      return new Widget();
+    }
+    widget.addClass(CHILD_CLASS);
+    widget.addClass(OUTPUT_CLASS);
   }
 
   /**
@@ -474,27 +469,6 @@ namespace OutputAreaWidget {
   }
 
   /**
-   * The options to create an output widget.
-   */
-  export
-  interface IOutputOptions {
-    /**
-     * The rendered output widget.
-     */
-    rendermime: RenderMime;
-
-    /**
-     * The model to render.
-     */
-    model: OutputModel.IModel;
-
-    /**
-     * The prompt widget.
-     */
-    gutter: IGutterWidget;
-  }
-
-  /**
    * The options to create a stdin widget.
    */
   export
@@ -527,11 +501,6 @@ namespace OutputAreaWidget {
     createGutter(): IGutterWidget;
 
     /**
-     * Create an output widget.
-     */
-    createOutput(options: IOutputOptions): Widget;
-
-    /**
      * Create an stdin widget.
      */
     createStdin(options: IStdinOptions): Widget;
@@ -547,46 +516,6 @@ namespace OutputAreaWidget {
      */
     createGutter(): IGutterWidget {
       return new GutterWidget();
-    }
-
-    /**
-     * Create an output widget.
-     */
-    createOutput(options: IOutputOptions): Widget {
-      let widget = options.rendermime.render(options.model);
-
-      // Create the output result area.
-      if (!widget) {
-        console.warn('Did not find renderer for output mimebundle.');
-        return new Widget();
-      }
-
-      // Add classes and output prompt as necessary.
-      let model = options.model;
-      switch (model.output_type) {
-      case 'execute_result':
-        widget.addClass(EXECUTE_CLASS);
-        let count = model.execution_count;
-        let gutter = options.gutter;
-        gutter.text = `Out[${count === null ? ' ' : count}]:`;
-        break;
-      case 'display_data':
-        widget.addClass(DISPLAY_CLASS);
-        break;
-      case 'stream':
-        if (model.name === 'stdout') {
-          widget.addClass(STDOUT_CLASS);
-        } else {
-          widget.addClass(STDERR_CLASS);
-        }
-        break;
-      case 'error':
-        widget.addClass(ERROR_CLASS);
-        break;
-      default:
-        break;
-      }
-      return widget;
     }
 
     /**
