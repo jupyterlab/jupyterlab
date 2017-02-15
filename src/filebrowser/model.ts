@@ -63,7 +63,7 @@ class FileBrowserModel implements IDisposable, IPathTracker {
     this._manager.contents.fileChanged.connect(this._onFileChanged, this);
     this._manager.sessions.runningChanged.connect(this._onRunningChanged, this);
     this._scheduleUpdate();
-    this._refreshId = setInterval(() => {
+    this._refreshId = window.setInterval(() => {
       this._scheduleUpdate();
     }, REFRESH_DURATION);
   }
@@ -467,17 +467,17 @@ class FileBrowserModel implements IDisposable, IPathTracker {
       this._requested = true;
       return;
     }
-    this._timeoutId = setTimeout(() => {
+    this._timeoutId = window.setTimeout(() => {
       this.refresh();
       if (this._requested && this._blackoutId !== -1) {
         this._requested = false;
         clearTimeout(this._blackoutId);
         this._blackoutId = -1;
-        this._timeoutId = setTimeout(() => {
+        this._timeoutId = window.setTimeout(() => {
           this._scheduleUpdate();
         }, MIN_REFRESH);
       } else {
-        this._blackoutId = setTimeout(() => {
+        this._blackoutId = window.setTimeout(() => {
           this._blackoutId = -1;
           if (this._requested) {
             this._scheduleUpdate();

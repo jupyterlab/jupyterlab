@@ -106,7 +106,7 @@ class CodeEditorWidget extends Widget {
     if (msg.width < 0 || msg.height < 0) {
       if (this._resizing === -1) {
         this._editor.setSize(null);
-        this._resizing = setTimeout(() => {
+        this._resizing = window.setTimeout(() => {
           if (this._needsResize) {
             this._editor.setSize(null);
             this._needsResize = false;

@@ -67,7 +67,7 @@ class DragScrollHandler {
        this._isScrolling = true;
        this._scrollAmount = 0;
        // Update at 60fps.
-       this._scrollInterval = setInterval(() => {
+       this._scrollInterval = window.setInterval(() => {
           if (this._scrollAmount === 0) {
             return;
           }
