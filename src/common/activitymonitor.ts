@@ -66,7 +66,7 @@ class ActivityMonitor<Sender, Args> implements IDisposable {
     clearTimeout(this._timer);
     this._sender = sender;
     this._args = args;
-    this._timer = setTimeout(() => {
+    this._timer = window.setTimeout(() => {
       this.activityStopped.emit({
         sender: this._sender,
         args: this._args
