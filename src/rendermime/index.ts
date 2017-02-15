@@ -413,6 +413,106 @@ namespace RenderMime {
   }
 
   /**
+   * The interface for an output model.
+   */
+  export
+  interface IOutputModel extends RenderMime.IMimeModel {
+    /**
+     * The output type.
+     */
+    readonly output_type: nbformat.OutputType;
+
+    /**
+     * The execution count of the model.
+     */
+    readonly execution_count: nbformat.ExecutionCount;
+
+    /**
+     * Serialize the model to JSON.
+     */
+    toJSON(): nbformat.IOutput;
+  }
+
+  /**
+   * The options used to create a notebook output model.
+   */
+  export
+  interface IOutputModelOptions {
+    /**
+     * The original output.
+     */
+    output: nbformat.IOutput;
+
+    /**
+     * Whether the output is trusted.
+     */
+    trusted: boolean;
+  }
+
+  /**
+   * The default implementation of a notebook output model.
+   */
+  export
+  class OutputModel extends MimeModel implements IOutputModel {
+    /**
+     * Construct a new output model.
+     */
+    constructor(options: OutputAreaWidget.IOutputModelOptions) {
+      super(Private.getBundleOptions(options));
+      let output = this._raw = options.output;
+      this.output_type = output.output_type;
+      // Remove redundant data.
+      switch (output.output_type) {
+      case 'display_data':
+      case 'execute_result':
+        output.data = Object.create(null);
+        output.metadata = Object.create(null);
+        break;
+      default:
+        break;
+      }
+      if (output.output_type === 'execute_result') {
+        this.execution_count = output.execution_count;
+      } else {
+        this.execution_count = null;
+      }
+    }
+
+    /**
+     * The output type.
+     */
+    readonly output_type: nbformat.OutputType;
+
+    /**
+     * The execution count.
+     */
+    readonly execution_count: nbformat.ExecutionCount;
+
+    /**
+     * Serialize the model to JSON.
+     */
+    toJSON(): nbformat.IOutput {
+      let output = JSON.parse(JSON.stringify(this._raw)) as nbformat.IOutput;
+      switch (output.output_type) {
+      case 'display_data':
+      case 'execute_result':
+        for (let key in this.keys()) {
+          output.data[key] = this.get(key) as nbformat.MultilineString | JSONObject;
+        }
+        for (let key in this.metadata.keys()) {
+          output.metadata[key] = this.metadata.get(key);
+        }
+        break;
+      default:
+        break;
+      }
+      return output;
+    }
+
+    private _raw: nbformat.IOutput;
+  }
+
+  /**
    * Default renderer order
    */
   export
@@ -604,6 +704,17 @@ namespace RenderMime {
       break;
     }
     return convertBundle(bundle);
+  }
+
+  /**
+   * Get the bundle options given output model options.
+   */
+  export
+  function getBundleOptions(options: RenderMime.IOutputModelOptions): RenderMime.IMimeModelOptions {
+    let data = getData(options.output);
+    let metadata = getMetadata(options.output);
+    let trusted = options.trusted;
+    return { data, trusted, metadata };
   }
 
   /**

@@ -37,10 +37,6 @@ import {
   RenderMime
 } from '../rendermime';
 
-import {
-  IOutputAreaModel, OutputModel
-} from './model';
-
 
 /**
  * The threshold in pixels to start a drag event.
@@ -151,7 +147,7 @@ class OutputAreaWidget extends Widget {
   /**
    * The model used by the widget.
    */
-  readonly model: IOutputAreaModel;
+  readonly model: OutputAreaWidget.IModel;
 
   /**
    * Te rendermime instance used by the widget.
@@ -405,7 +401,7 @@ class OutputAreaWidget extends Widget {
   /**
    * Follow changes on the model state.
    */
-  private _onModelChanged(sender: IOutputAreaModel, args: ObservableVector.IChangedArgs<OutputModel.IModel>) {
+  private _onModelChanged(sender: OutputAreaWidget.IModel, args: ObservableVector.IChangedArgs<OutputAreaWidget.IOutputModel>) {
     switch (args.type) {
     case 'add':
       // Children are always added at the end.
@@ -445,9 +441,9 @@ namespace OutputAreaWidget {
     rendermime: RenderMime;
 
     /**
-     * The output area model used by the widget.
+     * The model used by the widget.
      */
-    model: IOutputAreaModel;
+    model: IModel;
 
     /**
      * The output widget content factory.
@@ -455,6 +451,94 @@ namespace OutputAreaWidget {
      * Defaults to a shared `IContentFactory` instance.
      */
     contentFactory?: IContentFactory;
+  }
+
+  /**
+   * The model for an output area.
+   */
+  export
+  interface IModel extends IDisposable {
+    /**
+     * A signal emitted when the model changes.
+     */
+    readonly changed: ISignal<IModel, ObservableVector.IChangedArgs<IOutputModel>>;
+
+    /**
+     * A signal emitted when a value in one of the outputs changes.
+     */
+    readonly itemChanged: ISignal<IModel, void>;
+
+    /**
+     * A signal emitted when the model is disposed.
+     */
+    readonly disposed: ISignal<IModel, void>;
+
+    /**
+     * The length of the items in the model.
+     */
+    readonly length: number;
+
+    /**
+     * Whether the output area is trusted.
+     */
+    trusted: boolean;
+
+    /**
+     * Get an item at the specified index.
+     */
+    get(index: number): IOutputModel;
+
+    /**
+     * Add an output, which may be combined with previous output.
+     *
+     * #### Notes
+     * The output bundle is copied.
+     * Contiguous stream outputs of the same `name` are combined.
+     */
+    add(output: nbformat.IOutput): number;
+
+    /**
+     * Clear all of the output.
+     *
+     * @param wait - Delay clearing the output until the next message is added.
+     */
+    clear(wait?: boolean): void;
+
+    /**
+     * Serialize the model to JSON.
+     */
+    toJSON(): nbformat.IOutput[];
+  }
+
+  /**
+   * The options used to create a output area model.
+   */
+  export
+  interface IModelOptions {
+    /**
+     * Whether the output is trusted.
+     */
+    trusted: boolean;
+
+    /**
+     * The output model factory to use.
+     *
+     * If not given, a default factory will be used.
+     */
+    modelFactory?: IOutputModelFactory;
+  }
+
+  /**
+   * The interface for an output model factory.
+   */
+  export
+  interface IOutputModelFactory {
+    /**
+     * Create an output model.
+     */
+    createOutputModel(options: RenderMime.IOutputModelOptions): RenderMime.IOutputModel {
+      return new RenderMime.OutputModel(options);
+    }
   }
 
   /**
