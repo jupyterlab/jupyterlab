@@ -309,7 +309,7 @@ namespace RenderMime {
      */
     constructor(options: IMimeModelOptions) {
       super();
-      this.trusted = options.trusted;
+      this.trusted = !!options.trusted;
       let data = options.data;
       let metadata: JSONObject = options.metadata || Object.create(null);
       for (let key in data) {
@@ -354,9 +354,9 @@ namespace RenderMime {
     data: JSONObject;
 
     /**
-     * Whether the output is trusted.
+     * Whether the output is trusted.  The default is false.
      */
-    trusted: boolean;
+    trusted?: boolean;
 
     /**
      * The raw metadata, if applicable.
