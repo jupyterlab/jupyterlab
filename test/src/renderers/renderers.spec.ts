@@ -28,7 +28,7 @@ import {
 const EXPECTED_MD = `<h1>Title first level</h1>\n<h2>Title second Level</h2>\n<h3>Title third level</h3>\n<h4>h4</h4>\n<h5>h5</h5>\n<h6>h6</h6>\n<h1>h1</h1>\n<h2>h2</h2>\n<h3>h3</h3>\n<h4>h4</h4>\n<h5>h6</h5>\n<p>This is just a sample paragraph\nYou can look at different level of nested unorderd list ljbakjn arsvlasc asc asc awsc asc ascd ascd ascd asdc asc</p>\n<ul>\n<li>level 1<ul>\n<li>level 2</li>\n<li>level 2</li>\n<li>level 2<ul>\n<li>level 3</li>\n<li>level 3<ul>\n<li>level 4<ul>\n<li>level 5<ul>\n<li>level 6</li>\n</ul>\n</li>\n</ul>\n</li>\n</ul>\n</li>\n</ul>\n</li>\n<li>level 2</li>\n</ul>\n</li>\n<li>level 1</li>\n<li>level 1</li>\n<li>level 1\nOrdered list</li>\n<li>level 1<ol>\n<li>level 1</li>\n<li>level 1<ol>\n<li>level 1</li>\n<li>level 1</li>\n<li>level 1<ol>\n<li>level 1</li>\n<li>level 1<ol>\n<li>level 1</li>\n<li>level 1</li>\n<li>level 1</li>\n</ol>\n</li>\n</ol>\n</li>\n</ol>\n</li>\n</ol>\n</li>\n<li>level 1</li>\n<li>level 1\nsome Horizontal line</li>\n</ul>\n<hr>\n<h2>and another one</h2>\n<p>Colons can be used to align columns.</p>\n<table>\n<thead>\n<tr>\n<th>Tables</th>\n<th>Are</th>\n<th>Cool</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>col 3 is</td>\n<td>right-aligned</td>\n<td>1600</td>\n</tr>\n<tr>\n<td>col 2 is</td>\n<td>centered</td>\n<td>12</td>\n</tr>\n<tr>\n<td>zebra stripes</td>\n<td>are neat</td>\n<td>1</td>\n</tr>\n</tbody>\n</table>\n<p>There must be at least 3 dashes separating each header cell.\nThe outer pipes (|) are optional, and you don\'t need to make the\nraw Markdown line up prettily. You can also use inline Markdown.</p>\n`;
 
 
-function runCanRander(renderer: RenderMime.IRenderer, trusted: boolean): boolean {
+function runCanRunder(renderer: RenderMime.IRenderer, trusted: boolean): boolean {
   let canRender = true;
   let data: RenderMime.MimeMap<JSONValue> = Object.create(null);
   for (let mimeType in renderer.mimeTypes) {
@@ -74,8 +74,8 @@ describe('renderers', () => {
 
       it('should be able to render trusted and untrusted text data', () => {
         let r = new TextRenderer();
-        expect(runCanRander(r, true)).to.be(true);
-        expect(runCanRander(r, false)).to.be(true);
+        expect(runCanRunder(r, true)).to.be(true);
+        expect(runCanRunder(r, false)).to.be(true);
       });
 
     });
@@ -127,8 +127,8 @@ describe('renderers', () => {
 
       it('should be able to render trusted and untrusted latex data', () => {
         let r = new LatexRenderer();
-        expect(runCanRander(r, true)).to.be(true);
-        expect(runCanRander(r, false)).to.be(true);
+        expect(runCanRunder(r, true)).to.be(true);
+        expect(runCanRunder(r, false)).to.be(true);
       });
 
     });
@@ -163,8 +163,8 @@ describe('renderers', () => {
 
       it('should be able to render trusted pdf data', () => {
         let r = new PDFRenderer();
-        expect(runCanRander(r, true)).to.be(true);
-        expect(runCanRander(r, false)).to.be(false);
+        expect(runCanRunder(r, true)).to.be(true);
+        expect(runCanRunder(r, false)).to.be(false);
       });
 
     });
@@ -203,8 +203,8 @@ describe('renderers', () => {
 
       it('should be able to render trusted JavaScript data', () => {
         let r = new JavaScriptRenderer();
-        expect(runCanRander(r, true)).to.be(true);
-        expect(runCanRander(r, false)).to.be(false);
+        expect(runCanRunder(r, true)).to.be(true);
+        expect(runCanRunder(r, false)).to.be(false);
       });
 
     });
@@ -249,8 +249,8 @@ describe('renderers', () => {
 
       it('should be able to render trusted SVG data', () => {
         let r = new SVGRenderer();
-        expect(runCanRander(r, true)).to.be(true);
-        expect(runCanRander(r, false)).to.be(false);
+        expect(runCanRunder(r, true)).to.be(true);
+        expect(runCanRunder(r, false)).to.be(false);
       });
 
     });
@@ -286,8 +286,8 @@ describe('renderers', () => {
 
       it('should be able to render trusted and untrusted markdown data', () => {
         let r = new MarkdownRenderer();
-        expect(runCanRander(r, true)).to.be(true);
-        expect(runCanRander(r, false)).to.be(true);
+        expect(runCanRunder(r, true)).to.be(true);
+        expect(runCanRunder(r, false)).to.be(true);
       });
 
     });
@@ -347,8 +347,8 @@ describe('renderers', () => {
 
       it('should be able to render trusted and untrusted html data', () => {
         let r = new HTMLRenderer();
-        expect(runCanRander(r, true)).to.be(true);
-        expect(runCanRander(r, false)).to.be(true);
+        expect(runCanRunder(r, true)).to.be(true);
+        expect(runCanRunder(r, false)).to.be(true);
       });
 
     });
@@ -404,8 +404,8 @@ describe('renderers', () => {
 
       it('should be able to render trusted and untrusted image data', () => {
         let r = new ImageRenderer();
-        expect(runCanRander(r, true)).to.be(true);
-        expect(runCanRander(r, false)).to.be(true);
+        expect(runCanRunder(r, true)).to.be(true);
+        expect(runCanRunder(r, false)).to.be(true);
       });
 
     });

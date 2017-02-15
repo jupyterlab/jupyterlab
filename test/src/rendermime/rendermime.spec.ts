@@ -12,7 +12,7 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  JSONObject, JSONValue
+  JSONValue
 } from 'phosphor/lib/algorithm/json';
 
 import {

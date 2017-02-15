@@ -8,7 +8,7 @@ import {
 } from 'phosphor/lib/core/messaging';
 
 import {
-  ChildMessage, Widget
+  Widget
 } from 'phosphor/lib/ui/widget';
 
 import {
@@ -29,7 +29,8 @@ import {
  */
 const rendermime = defaultRenderMime();
 const contentFactory = OutputAreaWidget.defaultContentFactory;
-const OPTIONS = { rendermime, contentFactory };
+const model = new OutputAreaModel({ trusted: true });
+const OPTIONS = { rendermime, contentFactory, model };
 
 
 class LogOutputAreaWidget extends OutputAreaWidget {
@@ -39,29 +40,6 @@ class LogOutputAreaWidget extends OutputAreaWidget {
   protected onUpdateRequest(msg: Message): void {
     super.onUpdateRequest(msg);
     this.methods.push('onUpdateRequest');
-  }
-
-  protected onChildAdded(msg: ChildMessage): void {
-    super.onChildAdded(msg);
-    this.methods.push('onChildAdded');
-  }
-
-  protected onChildRemoved(msg: ChildMessage): void {
-    super.onChildRemoved(msg);
-    this.methods.push('onChildRemoved');
-  }
-
-  protected onModelChanged(oldValue: OutputAreaModel, newValue: OutputAreaModel): void {
-    super.onModelChanged(oldValue, newValue);
-    this.methods.push('onModelChanged');
-  }
-}
-
-
-class CustomOutputWidget extends OutputWidget {
-
-  setOutput(value: Widget): void {
-    super.setOutput(value);
   }
 }
 
