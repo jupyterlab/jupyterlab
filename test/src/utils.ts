@@ -147,8 +147,8 @@ namespace Private {
      * Render the transformed mime bundle.
      */
     render(options: RenderMime.IRenderOptions): Widget {
-      let source = String(options.bundle.get(options.mimeType));
-      options.bundle.set(options.mimeType, json2html(source));
+      let source = String(options.model.get(options.mimeType));
+      options.model.set(options.mimeType, json2html(source));
       return super.render(options);
     }
   }
@@ -158,14 +158,13 @@ namespace Private {
     /**
      * The mimetypes this renderer accepts.
      */
-    mimeTypes = ['foo/bar'];
+    mimeTypes = ['test/injector'];
 
     /**
-     * Render the transformed mime bundle.
+     * Render the transformed mime model.
      */
     render(options: RenderMime.IRenderOptions): Widget {
-      options.bundle.set('text/plain', 'foo');
-      options.bundle.set('application/json', { 'foo': 1 } );
+      options.model.set('application/json', { 'foo': 1 } );
       return super.render(options);
     }
   }
