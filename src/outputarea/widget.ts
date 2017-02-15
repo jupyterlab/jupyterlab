@@ -55,7 +55,7 @@ const FACTORY_MIME = 'application/vnd.phosphor.widget-factory';
 /**
  * The class name added to an output area widget.
  */
-const OUTPUT_AREA_CLASS = 'jp-OutputArea';
+const OUTPUT_AREA_CLASS = 'jp-OutputAreaWidget';
 
 /**
  * The class name added to a "mirrored" output area widget created by a drag.
@@ -65,62 +65,62 @@ const MIRRORED_OUTPUT_AREA_CLASS = 'jp-MirroredOutputArea';
 /**
  * The class name added to an child widget.
  */
-const CHILD_CLASS = 'jp-OutputArea-child';
+const CHILD_CLASS = 'jp-OutputAreaWidget-child';
 
 /**
  * The class name added to output area gutters.
  */
-const GUTTER_CLASS = 'jp-Output-gutter';
+const GUTTER_CLASS = 'jp-OutputAreaWidget-gutter';
 
 /**
- * The class name added to output area results.
+ * The class name added to output area outputs.
  */
-const OUTPUT_CLASS = 'jp-OutputArea-output';
+const OUTPUT_CLASS = 'jp-OutputAreaWidget-output';
 
 /**
  * The class name added to stdin data.
  */
-const STDIN_CLASS = 'jp-OutputArea-stdin';
+const STDIN_CLASS = 'jp-OutputAreaWidget-stdin';
 
 /**
  * The class name added to an execute result.
  */
-const EXECUTE_CLASS = 'jp-Output-executeResult';
+const EXECUTE_CLASS = 'jp-OutputWidget-executeResult';
 
 /**
  * The class name added to display data.
  */
-const DISPLAY_CLASS = 'jp-Output-displayData';
+const DISPLAY_CLASS = 'jp-OutputWidget-displayData';
 
 /**
  * The class name added to stdout data.
  */
-const STDOUT_CLASS = 'jp-Output-stdout';
+const STDOUT_CLASS = 'jp-OutputWidget-stdout';
 
 /**
  * The class name added to stderr data.
  */
-const STDERR_CLASS = 'jp-Output-stderr';
+const STDERR_CLASS = 'jp-OutputWidget-stderr';
 
 /**
  * The class name added to error data.
  */
-const ERROR_CLASS = 'jp-Output-error';
+const ERROR_CLASS = 'jp-OutputWidget-error';
 
 /**
  * The class name added to stdin data prompt nodes.
  */
-const STDIN_GUTTER_CLASS = 'jp-Stdin-stdinPrompt';
+const STDIN_PROMPT_CLASS = 'jp-StdinWidget-prompt';
 
 /**
  * The class name added to stdin data input nodes.
  */
-const STDIN_INPUT_CLASS = 'jp-Stdin-stdinInput';
+const STDIN_INPUT_CLASS = 'jp-StdinWidget-input';
 
 /**
  * The class name added to stdin rendered text nodes.
  */
-const STDIN_RENDERED_CLASS = 'jp-Stdin-stdinRendered';
+const STDIN_RENDERED_CLASS = 'jp-StdinWidget-rendered';
 
 /**
  * The class name added to fixed height output areas.
@@ -143,17 +143,17 @@ const COLLAPSED_CLASS = 'jp-mod-collapsed';
  * signal.
  */
 export
-class OutputArea extends Widget {
+class OutputAreaWidget extends Widget {
   /**
    * Construct an output area widget.
    */
-  constructor(options: OutputArea.IOptions) {
+  constructor(options: OutputAreaWidget.IOptions) {
     super();
     let model = this.model = options.model;
     this.addClass(OUTPUT_AREA_CLASS);
     this.rendermime = options.rendermime;
     this.contentFactory = (
-      options.contentFactory || OutputArea.defaultContentFactory
+      options.contentFactory || OutputAreaWidget.defaultContentFactory
     );
     this.layout = new PanelLayout();
     model.changed.connect(this._onModelChanged, this);
@@ -162,11 +162,11 @@ class OutputArea extends Widget {
   /**
    * Create a mirrored output widget.
    */
-  mirror(): OutputArea {
+  mirror(): OutputAreaWidget {
     let rendermime = this.rendermime;
     let contentFactory = this.contentFactory;
     let model = this.model;
-    let widget = new OutputArea({ model, rendermime, contentFactory });
+    let widget = new OutputAreaWidget({ model, rendermime, contentFactory });
     widget.title.label = 'Mirrored Output';
     widget.title.closable = true;
     widget.addClass(MIRRORED_OUTPUT_AREA_CLASS);
@@ -186,7 +186,7 @@ class OutputArea extends Widget {
   /**
    * The content factory used by the widget.
    */
-  readonly contentFactory: OutputArea.IContentFactory;
+  readonly contentFactory: OutputAreaWidget.IContentFactory;
 
   /**
    * A read-only sequence of the widgets in the output area.
@@ -435,12 +435,12 @@ class OutputArea extends Widget {
 
 
 /**
- * A namespace for OutputArea statics.
+ * A namespace for OutputAreaWidget statics.
  */
 export
-namespace OutputArea {
+namespace OutputAreaWidget {
   /**
-   * The options to pass to an `OutputArea`.
+   * The options to pass to an `OutputAreaWidget`.
    */
   export
   interface IOptions {
@@ -466,7 +466,7 @@ namespace OutputArea {
    * The interface for a gutter widget.
    */
   export
-  interface IGutter extends Widget {
+  interface IGutterWidget extends Widget {
     /**
      * The text for the widget.
      */
@@ -491,7 +491,7 @@ namespace OutputArea {
     /**
      * The prompt widget.
      */
-    gutter: IGutter;
+    gutter: IGutterWidget;
   }
 
   /**
@@ -524,7 +524,7 @@ namespace OutputArea {
      * Create a gutter for an output or input.
      *
      */
-    createGutter(): IGutter;
+    createGutter(): IGutterWidget;
 
     /**
      * Create an output widget.
@@ -545,8 +545,8 @@ namespace OutputArea {
     /**
      * Create the gutter for the widget.
      */
-    createGutter(): IGutter {
-      return new Gutter();
+    createGutter(): IGutterWidget {
+      return new GutterWidget();
     }
 
     /**
@@ -593,7 +593,7 @@ namespace OutputArea {
      * Create an stdin widget.
      */
     createStdin(options: IStdinOptions): Widget {
-      return new Stdin(options);
+      return new StdinWidget(options);
     }
   }
 
@@ -607,7 +607,7 @@ namespace OutputArea {
    * The default stdin widget.
    */
   export
-  class Stdin extends Widget {
+  class StdinWidget extends Widget {
     /**
      * Construct a new input widget.
      */
@@ -683,7 +683,7 @@ namespace OutputArea {
    * The default output gutter.
    */
   export
-  class Gutter extends Widget {
+  class GutterWidget extends Widget {
     /**
      * The text for the widget.
      */
@@ -797,7 +797,7 @@ namespace OutputArea {
       });
 
       this._drag.mimeData.setData(FACTORY_MIME, () => {
-        let outputArea = this.parent.parent as OutputArea;
+        let outputArea = this.parent.parent as OutputAreaWidget;
         return outputArea.mirror();
       });
 
@@ -834,7 +834,7 @@ namespace Private {
   function createInputWidgetNode(): HTMLElement {
     let node = document.createElement('div');
     let prompt = document.createElement('span');
-    prompt.className = STDIN_GUTTER_CLASS;
+    prompt.className = STDIN_PROMPT_CLASS;
     let input = document.createElement('input');
     input.className = STDIN_INPUT_CLASS;
     node.appendChild(prompt);

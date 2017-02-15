@@ -84,7 +84,7 @@ import {
 } from '../rendermime';
 
 import {
-  OutputArea
+  OutputAreaWidget
 } from '../outputarea';
 
 import {
@@ -570,7 +570,7 @@ namespace StaticNotebook {
     constructor(options: IContentFactoryOptions) {
       let editorFactory = options.editorFactory;
       let outputAreaContentFactory = (options.outputAreaContentFactory ||
-        OutputArea.defaultContentFactory
+        OutputAreaWidget.defaultContentFactory
       );
       this.codeCellContentFactory = (options.codeCellContentFactory ||
         new CodeCellWidget.ContentFactory({
@@ -641,7 +641,7 @@ namespace StaticNotebook {
     /**
      * The factory for output area content.
      */
-    outputAreaContentFactory?: OutputArea.IContentFactory;
+    outputAreaContentFactory?: OutputAreaWidget.IContentFactory;
 
     /**
      * The factory for code cell widget content.  If given, this will

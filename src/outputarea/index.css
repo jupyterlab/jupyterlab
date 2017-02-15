@@ -15,37 +15,37 @@
 
 
 /*-----------------------------------------------------------------------------
-| Main OutputArea
-| OutputArea has a list of Outputs
+| Main OutputAreaWidget
+| OutputAreaWidget has a list of Outputs
 |----------------------------------------------------------------------------*/
 
-.jp-OutputArea {
+.jp-OutputAreaWidget {
   overflow-y: auto;
 }
 
 /*-----------------------------------------------------------------------------
-| Individual Output(s) and their prompts
-| Output[
-|   Output-prompt, Output-result
+| Individual OutputWidget(s) and their prompts
+| OutputWidget[
+|   OutputWidget-prompt, OutputWidget-result
 | ]
 |----------------------------------------------------------------------------*/
 
 
-.jp-Output-stdin {
+.jp-OutputAreaWidget-stdin {
   line-height: var(--jp-code-line-height);
   padding-top: var(--jp-code-padding);
   display: flex;
 }
 
 
-.jp-Output-stdinPrompt {
+.jp-StdinWidget-prompt {
   padding-right: var(--jp-code-padding);
   vertical-align: baseline;
   flex: 0 0 auto;
 }
 
 
-.jp-Output-stdinInput {
+.jp-StdinWidget-input {
   font-family: var(--jp-code-font-family);
   font-size: inherit;
   color: inherit;
@@ -59,12 +59,12 @@
 }
 
 
-.jp-Output-stdinInput:focus {
+.jp-StdinWidget-input:focus {
     box-shadow: none;
 }
 
 
-.jp-Output-prompt {
+.jp-OutputAreaWidget-gutter {
   color: var(--jp-private-outputarea-prompt-color);
   font-family: var(--jp-code-font-family);
   text-align: right;
@@ -78,33 +78,24 @@
 }
 
 
-.jp-Output-prompt:hover {
+.jp-OutputAreaWidget-gutter:hover {
   background: var(--md-grey-100);
 }
 
 
-.jp-Output:first-child {
+.jp-OutputWidget:first-child {
   margin-top: 5px;
 }
 
 
-.jp-Output {
+.jp-OutputWidget {
   display: flex;
   flex-direction: row;
   color: var(--jp-content-font-color1);
-}
-
-
-
-.jp-Output-result {
   user-select: text;
   -moz-user-select: text;
   -webkit-user-select: text;
   -ms-user-select: text;
-}
-
-
-.p-Widget.jp-Output-result {
   overflow: auto;
   flex-grow: 1;
 }
@@ -114,24 +105,24 @@
  *  - nested output areas (e.g. in the case of output widgets)
  *  - mirrored output areas
  */
-.jp-Output .jp-Output .jp-Output-prompt, .jp-MirroredOutputArea .jp-Output-prompt {
+.jp-OutputWidget .jp-OutputWidget .jp-OutputWidget-prompt, .jp-MirroredOutputArea .jp-OutputWidget-prompt {
   display: none;
 }
 
 
-.jp-MirroredOutputArea .jp-Output {
+.jp-MirroredOutputArea .jp-OutputWidget {
   width: 100%;
   height: 100%;
 }
 
 
 /*-----------------------------------------------------------------------------
-| Output-executeResult is added to any Output-result for the display of the object
+| OutputWidget-executeResult is added to any OutputWidget-result for the display of the object
 | returned by a cell
 |----------------------------------------------------------------------------*/
 
 
-.jp-Output-executeResult {
+.jp-OutputWidget-executeResult {
   margin-left: 0px;
   flex: 1 1 auto;
 }
@@ -143,7 +134,7 @@
 
 /* text */
 
-.jp-Output-result pre {
+.jp-OutputWidget pre {
   border: none;
   margin: 0px;
   padding: 0px;
@@ -155,13 +146,13 @@
 }
 
 
-.jp-Output-executeResult.jp-RenderedText {
+.jp-OutputWidget-executeResult.jp-RenderedText {
   padding-top: var(--jp-code-padding);
   text-align: left;
 }
 
 
-.jp-Output-result.jp-RenderedText {
+.jp-OutputWidget.jp-RenderedText {
   text-align: left;
   padding-left: var(--jp-code-padding);
   font-size: var(--jp-code-font-size);
@@ -169,7 +160,7 @@
 }
 
 
-.jp-Output-result.jp-Output-stderr {
+.jp-OutputWidget.jp-OutputWidget-stderr {
   background: #fdd;
 }
 
@@ -181,7 +172,7 @@ img.jp-mod-unconfined {
 }
 
 
-.jp-Output-result img {
+.jp-OutputWidget img {
   max-width: 100%;
   height: auto;
 }
@@ -189,13 +180,13 @@ img.jp-mod-unconfined {
 
 /* html */
 
-.jp-Output-executeResult.jp-RenderedHTMLCommon {
+.jp-OutputWidget-executeResult.jp-RenderedHTMLCommon {
   padding-top: 0px;
 }
 
 /* tables */
 
-.jp-Output-result.jp-RenderedHTMLCommon table {
+.jp-OutputWidget.jp-RenderedHTMLCommon table {
   margin-left: 0;
   margin-right: 0;
 }
