@@ -179,7 +179,7 @@ describe('common/instancetracker', () => {
         expect(tracker.find(widget => widget.id === 'B')).to.be(widgetB);
       });
 
-      it('should return `null` if no item is found', () => {
+      it('should return a void if no item is found', () => {
         let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
         let widgetA = new Widget();
         let widgetB = new Widget();
@@ -190,7 +190,7 @@ describe('common/instancetracker', () => {
         tracker.add(widgetA);
         tracker.add(widgetB);
         tracker.add(widgetC);
-        expect(tracker.find(widget => widget.id === 'D')).to.be(null);
+        expect(tracker.find(widget => widget.id === 'D')).to.not.be.ok();
       });
 
     });
@@ -223,6 +223,27 @@ describe('common/instancetracker', () => {
         expect(tracker.has(widget)).to.be(false);
         tracker.add(widget);
         expect(tracker.has(widget)).to.be(true);
+      });
+
+    });
+
+    describe('#inject()', () => {
+
+      it('should inject a widget into the tracker', () => {
+        let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
+        let widget = new Widget();
+        expect(tracker.has(widget)).to.be(false);
+        tracker.inject(widget);
+        expect(tracker.has(widget)).to.be(true);
+      });
+
+      it('should remove an injected widget if it is disposed', () => {
+        let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
+        let widget = new Widget();
+        tracker.inject(widget);
+        expect(tracker.has(widget)).to.be(true);
+        widget.dispose();
+        expect(tracker.has(widget)).to.be(false);
       });
 
     });
