@@ -75,7 +75,7 @@ interface IObservableMap<T> extends IDisposable {
    * @param key - the key to remove.
    *
    * @returns the value of the given key,
-   *   or undefined if that does not exist. 
+   *   or undefined if that does not exist.
    */
   delete(key: string): T;
 
@@ -90,12 +90,12 @@ interface IObservableMap<T> extends IDisposable {
   dispose(): void;
 }
 
+
 /**
  * A concrete implementation of IObservbleMap<T>.
  */
 export
 class ObservableMap<T> implements IObservableMap<T> {
-
   /**
    * A signal emitted when the map has changed.
    */
@@ -116,6 +116,13 @@ class ObservableMap<T> implements IObservableMap<T> {
   }
 
   /**
+   * Set the comparison function to use for equality checking.
+   */
+  setItemCmp(fn: (first: T, second: T) => boolean): void {
+    this._itemCmp = fn;
+  }
+
+  /**
    * Set a key-value pair in the map
    *
    * @param key - The key to set.
@@ -124,9 +131,17 @@ class ObservableMap<T> implements IObservableMap<T> {
    *
    * @returns the old value for the key, or undefined
    *   if that did not exist.
+   *
+   * #### Notes
+   * This is a no-op if the value does not change.
    */
   set(key: string, value: T): T {
     let oldVal = this._map.get(key);
+    // Bail if the value does not change.
+    let itemCmp = this._itemCmp;
+    if (itemCmp(oldVal, value)) {
+      return;
+    }
     this._map.set(key, value);
     this.changed.emit({
       type: oldVal ? 'change' : 'add',
@@ -166,7 +181,7 @@ class ObservableMap<T> implements IObservableMap<T> {
    */
   keys(): string[] {
     let keyList: string[] = [];
-    this._map.forEach((v: T, k: string)=>{
+    this._map.forEach((v: T, k: string) => {
       keyList.push(k);
     });
     return keyList;
@@ -180,7 +195,7 @@ class ObservableMap<T> implements IObservableMap<T> {
    */
   values(): T[] {
     let valList: T[] = [];
-    this._map.forEach((v: T, k: string)=>{
+    this._map.forEach((v: T, k: string) => {
       valList.push(v);
     });
     return valList;
@@ -210,9 +225,9 @@ class ObservableMap<T> implements IObservableMap<T> {
    * Set the ObservableMap to an empty map.
    */
   clear(): void {
-    //delete one by one to emit the correct signals.
+    // Delete one by one to emit the correct signals.
     let keyList = this.keys();
-    for(let i=0; i<keyList.length; i++) {
+    for (let i = 0; i < keyList.length; i++) {
       this.delete(keyList[i]);
     }
   }
@@ -221,15 +236,18 @@ class ObservableMap<T> implements IObservableMap<T> {
    * Dispose of the resources held by the map.
    */
   dispose(): void {
-    if(this._map === null) {
+    if (this._map === null) {
       return;
     }
+    clearSignalData(this);
     this._map.clear();
     this._map = null;
   }
 
   private _map: Map<string, T> = new Map<string, T>();
+  private _itemCmp: (first: T, second: T) => boolean = Private.itemCmp;
 }
+
 
 /**
  * The namespace for `ObservableMap` class statics.
@@ -283,5 +301,20 @@ namespace ObservableMap {
   }
 }
 
+
 // Define the signals for the `ObservableMap` class.
 defineSignal(ObservableMap.prototype, 'changed');
+
+
+/**
+ * The namespace for module private data.
+ */
+namespace Private {
+  /**
+   * The default strict equality item cmp.
+   */
+  export
+  function itemCmp(first: any, second: any): boolean {
+    return first === second;
+  }
+}
