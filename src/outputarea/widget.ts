@@ -135,6 +135,10 @@ class OutputAreaWidget extends Widget {
       options.contentFactory || OutputAreaWidget.defaultContentFactory
     );
     this.layout = new PanelLayout();
+    for (let i = 0; i < model.length; i++) {
+      let output = model.get(i);
+      this._insertOutput(i, output);
+    }
     model.changed.connect(this._onModelChanged, this);
   }
 
