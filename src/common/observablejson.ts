@@ -209,10 +209,10 @@ class ObservableJSONWidget extends Widget {
       return;
     }
     if (this._source) {
-      this._source.changed.disconnect(this._onMetadataChanged, this);
+      this._source.changed.disconnect(this._onSourceChanged, this);
     }
     this._source = value;
-    value.changed.connect(this._onMetadataChanged, this);
+    value.changed.connect(this._onSourceChanged, this);
     this._setValue();
   }
 
@@ -271,7 +271,7 @@ class ObservableJSONWidget extends Widget {
   /**
    * Handle a change to the metadata of the source.
    */
-  private _onMetadataChanged(sender: IObservableJSON, args: IObservableJSON.IChangedArgs) {
+  private _onSourceChanged(sender: IObservableJSON, args: IObservableJSON.IChangedArgs) {
     if (this._changeGuard) {
       return;
     }

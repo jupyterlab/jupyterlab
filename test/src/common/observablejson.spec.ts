@@ -24,15 +24,11 @@ import {
 } from '../../../lib/codemirror';
 
 import {
-  Metadata
-} from '../../../lib/common/metadata';
-
-import {
-  ObservableMap
-} from '../../../lib/common/observablemap';
+  IObservableJSON, ObservableJSON, ObservableJSONWidget
+} from '../../../lib/common/observablejson';
 
 
-class LogEditor extends Metadata.Editor {
+class LogEditor extends ObservableJSONWidget {
 
   methods: string[] = [];
 
@@ -55,20 +51,20 @@ class LogEditor extends Metadata.Editor {
 }
 
 
-describe('common/metadata', () => {
+describe('common/observablejson', () => {
 
-  describe('Metadata.ChangeMessage', () => {
+  describe('ObservableJSON.ChangeMessage', () => {
 
     describe('#constructor()', () => {
 
       it('should create a new message', () => {
-        let message = new Metadata.ChangeMessage({
+        let message = new ObservableJSON.ChangeMessage({
           key: 'foo',
           type: 'add',
           oldValue: 1,
           newValue: 2
         });
-        expect(message).to.be.a(Metadata.ChangeMessage);
+        expect(message).to.be.a(ObservableJSON.ChangeMessage);
       });
 
     });
@@ -76,13 +72,13 @@ describe('common/metadata', () => {
     describe('#args', () => {
 
       it('should be the args of the message', () => {
-        let args: Metadata.ChangedArgs = {
+        let args: IObservableJSON.ChangedArgs = {
           key: 'foo',
           type: 'add',
           oldValue: 'ho',
           newValue: 'hi'
         };
-        let message = new Metadata.ChangeMessage(args);
+        let message = new ObservableJSON.ChangeMessage(args);
         expect(message.args).to.be(args);
       });
 
@@ -90,13 +86,13 @@ describe('common/metadata', () => {
 
   });
 
-  describe('Metadata.Editor', () => {
+  describe('ObservableJSONWidget', () => {
 
-    let editor: LogEditor;
+    let editor: ObservableJSONWidget;
     const editorFactory = new CodeMirrorEditorFactory().newInlineEditor;
 
     beforeEach(() => {
-      editor = new LogEditor({ editorFactory });
+      editor = new ObservableJSONWidget({ editorFactory });
     });
 
     afterEach(() => {
@@ -106,8 +102,8 @@ describe('common/metadata', () => {
     describe('#constructor', () => {
 
       it('should create a new metadata editor', () => {
-        let newEditor = new Metadata.Editor({ editorFactory });
-        expect(newEditor).to.be.a(Metadata.Editor);
+        let newEditor = new ObservableJSONWidget({ editorFactory });
+        expect(newEditor).to.be.a(ObservableJSONWidget);
       });
 
     });
@@ -375,7 +371,7 @@ describe('common/metadata', () => {
 
     });
 
-    describe('#onMetadataChanged', () => {
+    context('#source.changed', () => {
 
       it('should update the value', () => {
         editor.source = new ObservableMap<JSONValue>();
