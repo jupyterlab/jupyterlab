@@ -260,6 +260,47 @@ describe('notebook/output-area/widget', () => {
 
     });
 
+
+    describe('#execute()', () => {
+
+      let kernel: Kernel.IKernel;
+
+      beforeEach((done) => {
+        Kernel.startNew().then(k => {
+          kernel = k;
+          return kernel.ready;
+        }).then(() => {
+          done();
+        }).catch(done);
+      });
+
+      it('should execute code on a kernel and send outputs to the model', (done) => {
+        let model = new OutputAreaModel();
+        expect(model.length).to.be(0);
+        model.execute('print("hello")', kernel).then(reply => {
+          expect(reply.content.execution_count).to.be(1);
+          expect(reply.content.status).to.be('ok');
+          expect(model.length).to.be(1);
+          kernel.shutdown();
+          done();
+        }).catch(done);
+      });
+
+      it('should clear existing outputs', (done) => {
+        let model = new OutputAreaModel();
+        for (let output of DEFAULT_OUTPUTS) {
+          model.add(output);
+        }
+        return model.execute('print("hello")', kernel).then(reply => {
+          expect(reply.content.execution_count).to.be(1);
+          expect(model.length).to.be(1);
+          kernel.shutdown();
+          done();
+        }).catch(done);
+      });
+
+    });
+
     describe('#onUpdateRequest()', () => {
 
       it('should set the appropriate classes on the widget', (done) => {

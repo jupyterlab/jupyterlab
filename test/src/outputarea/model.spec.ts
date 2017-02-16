@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  Kernel, nbformat
+  nbformat
 } from '@jupyterlab/services';
 
 import {
@@ -12,68 +12,43 @@ import {
 } from 'phosphor/lib/algorithm/json';
 
 import {
+  OutputModel
+} from '../../../lib/rendermime';
+
+import {
   OutputAreaModel
 } from '../../../lib/outputarea/model';
 
-
-/**
- * The default outputs used for testing.
- */
-export
-const DEFAULT_OUTPUTS: nbformat.IOutput[] = [
-  {
-   name: 'stdout',
-   output_type: 'stream',
-   text: [
-    'hello world\n',
-    '0\n',
-    '1\n',
-    '2\n'
-   ]
-  },
-  {
-   name: 'stderr',
-   output_type: 'stream',
-   text: [
-    'output to stderr\n'
-   ]
-  },
-  {
-   name: 'stderr',
-   output_type: 'stream',
-   text: [
-    'output to stderr2\n'
-   ]
-  },
-  {
-    output_type: 'execute_result',
-    execution_count: 1,
-    data: { 'text/plain': 'foo' },
-    metadata: {}
-  },
-  {
-   output_type: 'display_data',
-   data: { 'text/plain': 'hello, world' },
-   metadata: {}
-  },
-  {
-    output_type: 'error',
-    ename: 'foo',
-    evalue: 'bar',
-    traceback: ['fizz', 'buzz']
-  }
-];
+import {
+  DEFAULT_OUTPUTS
+} from '../utils';
 
 
-describe('notebook/output-area/model', () => {
+describe('outputarea/model', () => {
+
+  let model: OutputAreaModel;
+
+  beforeEach(() => {
+    model = new OutputAreaModel();
+  });
+
+  afterEach(() => {
+    model.dispose();
+  });
 
   describe('OutputAreaModel', () => {
 
     describe('#constructor()', () => {
 
       it('should create an output area model', () => {
-        let model = new OutputAreaModel();
         expect(model).to.be.an(OutputAreaModel);
+      });
+
+      it('should accept options', () => {
+        let contentFactory = new OutputAreaModel.ContentFactory();
+        model = new OutputAreaModel({ contentFactory, trusted: true});
+        expect(model.contentFactory).to.be(contentFactory);
+        expect(model.trusted).to.be(true);
       });
 
     });
@@ -81,7 +56,6 @@ describe('notebook/output-area/model', () => {
     describe('#changed', () => {
 
       it('should be emitted when the model changes', () => {
-        let model = new OutputAreaModel();
         let called = false;
         model.changed.connect((sender, args) => {
           expect(sender).to.be(model);
@@ -89,10 +63,25 @@ describe('notebook/output-area/model', () => {
           expect(args.oldIndex).to.be(-1);
           expect(args.newIndex).to.be(0);
           expect(args.oldValues.length).to.be(0);
-          expect(deepEqual(args.newValues[0] as nbformat.IOutput, DEFAULT_OUTPUTS[0]));
           called = true;
         });
         model.add(DEFAULT_OUTPUTS[0]);
+        expect(called).to.be(true);
+      });
+    });
+
+    describe('#itemChanged', () => {
+
+      it('should be emitted when an item changes', () => {
+        let called = false;
+        model.add(DEFAULT_OUTPUTS[0]);
+        model.itemChanged.connect((sender, args) => {
+          expect(sender).to.be(model);
+          expect(args).to.be(void 0);
+          called = true;
+        });
+        let output = model.get(0);
+        output.set('foo', 1);
         expect(called).to.be(true);
       });
 
@@ -101,7 +90,6 @@ describe('notebook/output-area/model', () => {
     describe('#length', () => {
 
       it('should get the length of the items in the model', () => {
-        let model = new OutputAreaModel();
         expect(model.length).to.be(0);
         model.add(DEFAULT_OUTPUTS[0]);
         expect(model.length).to.be(1);
@@ -109,10 +97,36 @@ describe('notebook/output-area/model', () => {
 
     });
 
+    describe('#trusted', () => {
+
+      it('should be the trusted state of the model', () => {
+        expect(model.trusted).to.be(false);
+      });
+
+      it('should cause all of the cells to `set`', () => {
+        let called = 0;
+        model.add(DEFAULT_OUTPUTS[0]);
+        model.add(DEFAULT_OUTPUTS[1]);
+        model.changed.connect(() => {
+          called++;
+        });
+        model.trusted = true;
+        expect(called).to.be(2);
+      });
+
+    });
+
+    describe('#contentFactory', () => {
+
+      it('should be the content factory used by the model', () => {
+        expect(model.contentFactory).to.be(OutputAreaModel.defaultContentFactory);
+      });
+
+    });
+
     describe('#isDisposed', () => {
 
       it('should test whether the model is disposed', () => {
-        let model = new OutputAreaModel();
         expect(model.isDisposed).to.be(false);
         model.dispose();
         expect(model.isDisposed).to.be(true);
@@ -123,7 +137,6 @@ describe('notebook/output-area/model', () => {
     describe('#dispose()', () => {
 
       it('should dispose of the resources used by the model', () => {
-        let model = new OutputAreaModel();
         model.add(DEFAULT_OUTPUTS[0]);
         model.dispose();
         expect(model.isDisposed).to.be(true);
@@ -131,7 +144,6 @@ describe('notebook/output-area/model', () => {
       });
 
       it('should be safe to call more than once', () => {
-        let model = new OutputAreaModel();
         model.dispose();
         model.dispose();
         expect(model.isDisposed).to.be(true);
@@ -142,15 +154,12 @@ describe('notebook/output-area/model', () => {
     describe('#get()', () => {
 
       it('should get the item at the specified index', () => {
-        let model = new OutputAreaModel();
         model.add(DEFAULT_OUTPUTS[0]);
         let output = model.get(0);
-        expect(output).to.not.be(DEFAULT_OUTPUTS[0]);
-        expect(output.output_type).to.be(DEFAULT_OUTPUTS[0].output_type);
+        expect(output.type).to.be(DEFAULT_OUTPUTS[0].output_type);
       });
 
       it('should return `undefined` if out of range', () => {
-        let model = new OutputAreaModel();
         model.add(DEFAULT_OUTPUTS[0]);
         expect(model.get(1)).to.be(void 0);
       });
@@ -160,13 +169,11 @@ describe('notebook/output-area/model', () => {
     describe('#add()', () => {
 
       it('should add an output', () => {
-        let model = new OutputAreaModel();
         model.add(DEFAULT_OUTPUTS[0]);
         expect(model.length).to.be(1);
       });
 
       it('should consolidate consecutive stream outputs of the same kind', () => {
-        let model = new OutputAreaModel();
         model.add(DEFAULT_OUTPUTS[0]);
         model.add(DEFAULT_OUTPUTS[1]);
         expect(model.length).to.be(2);
@@ -179,7 +186,6 @@ describe('notebook/output-area/model', () => {
     describe('#clear()', () => {
 
       it('should clear all of the output', () => {
-        let model = new OutputAreaModel();
         for (let output of DEFAULT_OUTPUTS) {
           model.add(output);
         }
@@ -188,7 +194,6 @@ describe('notebook/output-area/model', () => {
       });
 
       it('should wait for next add if requested', () => {
-        let model = new OutputAreaModel();
         model.add(DEFAULT_OUTPUTS[0]);
         model.clear(true);
         expect(model.length).to.be(1);
@@ -197,129 +202,37 @@ describe('notebook/output-area/model', () => {
       });
     });
 
-    describe('#execute()', () => {
+    describe('#toJSON()', () => {
 
-      let kernel: Kernel.IKernel;
-
-      beforeEach((done) => {
-        Kernel.startNew().then(k => {
-          kernel = k;
-          return kernel.ready;
-        }).then(() => {
-          done();
-        }).catch(done);
-      });
-
-      it('should execute code on a kernel and send outputs to the model', (done) => {
-        let model = new OutputAreaModel();
-        expect(model.length).to.be(0);
-        model.execute('print("hello")', kernel).then(reply => {
-          expect(reply.content.execution_count).to.be(1);
-          expect(reply.content.status).to.be('ok');
-          expect(model.length).to.be(1);
-          kernel.shutdown();
-          done();
-        }).catch(done);
-      });
-
-      it('should clear existing outputs', (done) => {
-        let model = new OutputAreaModel();
+      it('should serialize the model to JSON', () => {
         for (let output of DEFAULT_OUTPUTS) {
           model.add(output);
         }
-        return model.execute('print("hello")', kernel).then(reply => {
-          expect(reply.content.execution_count).to.be(1);
-          expect(model.length).to.be(1);
-          kernel.shutdown();
-          done();
-        }).catch(done);
+        expect(model.toJSON()).to.eql(DEFAULT_OUTPUTS);
       });
 
     });
 
-    describe('#addMimeData', () => {
+  });
 
-      it('should add a mime type to an output data bundle', () => {
-        let model = new OutputAreaModel();
-        model.add({
-         output_type: 'display_data',
-         data: { 'text/plain': 'hello, world' },
-         metadata: {}
-        });
-        let output = model.get(0) as nbformat.IDisplayData;
-        model.addMimeData(output, 'application/json', { 'foo': 1 });
-        output = model.get(0) as nbformat.IDisplayData;
-        expect((output.data['application/json'] as any)['foo']).to.be(1);
-      });
+  describe('.ContentFactory', () => {
 
-      it('should refuse to add to an output not contained in the model', () => {
-        let model = new OutputAreaModel();
-        let output: nbformat.IDisplayData = {
-         output_type: 'display_data',
-         data: { },
-         metadata: {}
-        };
-        expect(() => { model.addMimeData(output, 'text/plain', 'foo'); }).to.throwError();
-      });
+    describe('#createOutputModel()', () => {
 
-      it('should refuse to add an existing mime type', () => {
-        let model = new OutputAreaModel();
-        model.add({
-         output_type: 'display_data',
-         data: { 'text/plain': 'hello, world' },
-         metadata: {}
-        });
-        let output = model.get(0) as nbformat.IDisplayData;
-        model.addMimeData(output, 'text/plain', 'foo');
-        output = model.get(0) as nbformat.IDisplayData;
-        expect(output.data['text/plain']).to.be('hello, world');
-      });
-
-      it('should refuse to add an invalid mime type/value pair', () => {
-        let model = new OutputAreaModel();
-        model.add({
-         output_type: 'display_data',
-         data: { 'text/plain': 'hello, world' },
-         metadata: {}
-        });
-        let output = model.get(0) as nbformat.IDisplayData;
-        model.addMimeData(output, 'application/json', 'foo');
-        output = model.get(0) as nbformat.IDisplayData;
-        expect(output.data['application/json']).to.be(void 0);
+      it('should create an output model', () => {
+        let factory = new OutputAreaModel.ContentFactory();
+        let model = factory.createOutputModel({ output: DEFAULT_OUTPUTS[0] });
+        expect(model).to.be.an(OutputModel);
       });
 
     });
 
-    describe('#getBundle()', () => {
+  });
 
-      it('should handle all bundle types', () => {
-        for (let i = 0; i < DEFAULT_OUTPUTS.length; i++) {
-          let output = DEFAULT_OUTPUTS[i];
-          let bundle = OutputAreaModel.getBundle(output);
-          expect(Object.keys(bundle).length).to.not.be(0);
-        }
-      });
+  describe('.defaultContentFactory', () => {
 
-    });
-
-    describe('#convertBundle()', () => {
-
-      it('should handle bundles with strings', () => {
-        let bundle: nbformat.IMimeBundle = {
-          'text/plain': 'foo'
-        };
-        let map = OutputAreaModel.convertBundle(bundle);
-        expect(map).to.eql(bundle);
-      });
-
-      it('should handle bundles with string arrays', () => {
-        let bundle: nbformat.IMimeBundle = {
-          'text/plain': ['foo', 'bar']
-        };
-        let map = OutputAreaModel.convertBundle(bundle);
-        expect(map).to.eql({ 'text/plain': 'foo\nbar' });
-      });
-
+    it('should be an instance of ContentFactory', () => {
+      expect(OutputAreaModel.defaultContentFactory).to.be.an(OutputAreaModel.ContentFactory);
     });
 
   });

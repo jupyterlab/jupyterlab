@@ -62,6 +62,7 @@ import './renderers/renderers.spec';
 import './renderers/latex.spec';
 
 import './rendermime/rendermime.spec';
+import './rendermime/output.spec';
 
 import './notebook/actions.spec';
 import './notebook/celltools.spec';
