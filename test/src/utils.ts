@@ -147,8 +147,8 @@ namespace Private {
      * Render the transformed mime bundle.
      */
     render(options: RenderMime.IRenderOptions): Widget {
-      let source = String(options.model.get(options.mimeType));
-      options.model.set(options.mimeType, json2html(source));
+      let source = String(options.model.data.get(options.mimeType));
+      options.model.data.set(options.mimeType, json2html(source));
       return super.render(options);
     }
   }
@@ -164,7 +164,7 @@ namespace Private {
      * Render the transformed mime model.
      */
     render(options: RenderMime.IRenderOptions): Widget {
-      options.model.set('application/json', { 'foo': 1 } );
+      options.model.data.set('application/json', { 'foo': 1 } );
       return super.render(options);
     }
   }
