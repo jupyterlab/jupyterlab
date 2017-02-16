@@ -18,7 +18,7 @@ import {
 } from '../codeeditor';
 
 import {
-  RenderMime
+  MimeModel
 } from '../rendermime';
 
 import {
@@ -159,7 +159,7 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
 
       let data = value.data;
       let trusted = true;
-      let model = new RenderMime.MimeModel({ data, trusted });
+      let model = new MimeModel({ data, trusted });
       update.content =  this._rendermime.render(model);
       this.inspected.emit(update);
     });

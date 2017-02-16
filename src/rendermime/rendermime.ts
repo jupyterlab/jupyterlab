@@ -18,6 +18,14 @@ import {
 } from 'phosphor/lib/algorithm/searching';
 
 import {
+  IDisposable
+} from 'phosphor/lib/core/disposable';
+
+import {
+  ISignal
+} from 'phosphor/lib/core/signaling';
+
+import {
   Vector
 } from 'phosphor/lib/collections/vector';
 
@@ -41,6 +49,10 @@ import {
 import {
   RenderedText
 } from '../renderers/widget';
+
+import {
+  MimeModel
+} from './mimemodel';
 
 
 /**
@@ -141,7 +153,7 @@ class RenderMime {
   preferredMimeType(model: RenderMime.IMimeModel): string {
     let sanitizer = this._sanitizer;
     return find(this._order, mimeType => {
-      if (mimeType in model.keys()) {
+      if (mimeType in model.data.keys()) {
         let options = { mimeType, model, sanitizer };
         let renderer = this._renderers[mimeType];
         if (renderer.canRender(options)) {
@@ -205,7 +217,7 @@ class RenderMime {
    * Return a widget for an error.
    */
   private _handleError(model: RenderMime.IMimeModel): Widget {
-   let errModel = new RenderMime.MimeModel({
+   let errModel = new MimeModel({
       data: {
         'application/vnd.jupyter.stderr': 'Unable to render data'
       }
@@ -280,7 +292,7 @@ namespace RenderMime {
     /**
      * A signal emitted when the state of the model changes.
      */
-    readonly stateChanged: ISignal<IOutputModel, void>;
+    readonly stateChanged: ISignal<IMimeModel, void>;
 
     /**
      * Whether the model is trusted.

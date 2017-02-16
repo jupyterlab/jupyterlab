@@ -22,7 +22,7 @@ import {
 } from '../codeeditor';
 
 import {
-  IRenderMime, RenderMime
+  IRenderMime, MimeModel
 } from '../rendermime';
 
 
@@ -154,7 +154,7 @@ class TooltipModel implements IDisposable {
       // Set the content to a rendered widget.
       let data = value.data;
       let trusted = true;
-      let model = new RenderMime.MimeModel({ data, trusted });
+      let model = new MimeModel({ data, trusted });
       this._content = this.rendermime.render(model);
 
       // Notify listeners of content change.

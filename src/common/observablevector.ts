@@ -641,6 +641,24 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
 export
 namespace ObservableVector {
   /**
+   * The options used to initialize an observable map.
+   */
+  export
+  interface IOptions<T> {
+    /**
+     * An optional intial set of values.
+     */
+    values?: T[];
+
+    /**
+     * The item comparison function for change detection on `set`.
+     *
+     * If not given, strict `===` equality will be used.
+     */
+    itemCmp?: (first: T, second: T) => boolean;
+  }
+
+  /**
    * The change types which occur on an observable vector.
    */
   export

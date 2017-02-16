@@ -73,7 +73,7 @@ class OutputModel extends MimeModel implements IOutputModel {
    */
   constructor(options: IOutputModel.IOptions) {
     super(Private.getBundleOptions(options));
-    let output = this._raw = options.output;
+    let output = this._raw = options.value;
     this.type = output.output_type;
     // Remove redundant data.
     switch (output.output_type) {
@@ -110,12 +110,8 @@ class OutputModel extends MimeModel implements IOutputModel {
     switch (output.output_type) {
     case 'display_data':
     case 'execute_result':
-      for (let key in this.keys()) {
-        output.data[key] = this.get(key) as nbformat.MultilineString | JSONObject;
-      }
-      for (let key in this.metadata.keys()) {
-        output.metadata[key] = this.metadata.get(key);
-      }
+      output.data = this.data.toJSON() as nbformat.IMimeBundle;
+      output.metadata = this.metadata.toJSON() as nbformat.IMimeBundle;
       break;
     default:
       break;
@@ -199,9 +195,9 @@ namespace OutputModel {
    * Get the bundle options given output model options.
    */
   export
-  function getBundleOptions(options: IOutputModel.IOptions): RenderMime.IMimeModelOptions {
-    let data = OutputModel.getData(options.output);
-    let metadata = OutputModel.getMetadata(options.output);
+  function getBundleOptions(options: IOutputModel.IOptions): MimeModel.IOptions {
+    let data = OutputModel.getData(options.value);
+    let metadata = OutputModel.getMetadata(options.value);
     let trusted = !!options.trusted;
     return { data, trusted, metadata };
   }

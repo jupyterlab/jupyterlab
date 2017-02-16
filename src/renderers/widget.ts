@@ -369,7 +369,7 @@ namespace Private {
    */
   export
   function getSource(options: RenderMime.IRenderOptions): string {
-    return String(options.model.get(options.mimeType));
+    return String(options.model.data.get(options.mimeType));
   }
 
   /**

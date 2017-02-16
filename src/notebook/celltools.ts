@@ -236,7 +236,7 @@ class CellTools extends Widget {
    * Handle a change in the metadata.
    */
   private _onMetadataChanged(sender: IObservableMap<JSONValue>, args: ObservableMap.IChangedArgs<JSONValue>): void {
-    let message = new Metadata.ChangeMessage(args);
+    let message = new ChangeMessage(args);
     each(this.children(), widget => {
       sendMessage(widget, message);
     });
@@ -342,7 +342,7 @@ namespace CellTools {
         this.onSelectionChanged(msg);
         break;
       case 'metadata-changed':
-        this.onMetadataChanged(msg as Metadata.ChangeMessage);
+        this.onMetadataChanged(msg as ChangeMessage);
         break;
       default:
         break;
@@ -371,7 +371,7 @@ namespace CellTools {
      * #### Notes
      * The default implementation is a no-op.
      */
-     protected onMetadataChanged(msg: Metadata.ChangeMessage): void { /* no-op */ }
+     protected onMetadataChanged(msg: ChangeMessage): void { /* no-op */ }
   }
 
   /**

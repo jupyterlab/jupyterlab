@@ -772,16 +772,12 @@ interface IOutputAreaModel extends IDisposable {
   /**
    * A signal emitted when the model state changes.
    */
+  readonly stateChanged: ISignal<IOutputAreaModel, void>;
 
   /**
    * A signal emitted when the model changes.
    */
   readonly changed: ISignal<IOutputAreaModel, ObservableVector.IChangedArgs<IOutputModel>>;
-
-  /**
-   * A signal emitted when a value in one of the outputs changes.
-   */
-  readonly itemChanged: ISignal<IOutputAreaModel, void>;
 
   /**
    * The length of the items in the model.

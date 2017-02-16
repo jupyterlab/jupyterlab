@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONValue
-} from 'phosphor/lib/algorithm/json';
-
-import {
   IDisposable
 } from 'phosphor/lib/core/disposable';
 
@@ -332,26 +328,6 @@ namespace ObservableMap {
 // Define the signals for the `ObservableMap` class.
 defineSignal(ObservableMap.prototype, 'changed');
 
-
-/**
- * An observable JSON value.
- */
-export
-interface IObservableJSON extends IObservableMap<JSONValue> {
-  /**
-   * Serialize the model to JSON.
-   */
-  toJSON(): JSONValue;
-}
-
-
-/**
- * A concrete Observable map for JSON data.
- */
-export
-class ObservableJSON {
-
-}
 
 /**
  * The namespace for module private data.

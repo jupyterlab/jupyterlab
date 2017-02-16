@@ -6,6 +6,22 @@ import {
 } from 'phosphor/lib/algorithm/json';
 
 import {
+  Message
+} from 'phosphor/lib/core/messaging';
+
+import {
+  Widget
+} from 'phosphor/lib/ui/widget';
+
+import {
+  h, realize
+} from 'phosphor/lib/ui/vdom';
+
+import {
+  CodeEditor
+} from '../codeeditor';
+
+import {
   IObservableMap, ObservableMap
 } from './observablemap';
 
@@ -54,6 +70,19 @@ interface IObservableJSON extends IObservableMap<JSONValue> {
 
 
 /**
+ * The namespace for IObservableJSON related interfaces.
+ */
+export
+namespace IObservableJSON {
+  /**
+   * A type alias for observable JSON changed args.
+   */
+  export
+  type IChangedArgs = ObservableMap.IChangedArgs<JSONValue>;
+}
+
+
+/**
  * A concrete Observable map for JSON data.
  */
 export
@@ -61,7 +90,7 @@ class ObservableJSON extends ObservableMap<JSONValue> {
   /**
    * Construct a new observable JSON object.
    */
-  constructor(options: IObservableJSON.IOptions) {
+  constructor(options: ObservableJSON.IOptions) {
     super({
       itemCmp: deepEqual,
       values: options.values

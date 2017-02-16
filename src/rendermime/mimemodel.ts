@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject
+  JSONObject, JSONValue
 } from 'phosphor/lib/algorithm/json';
 
 import {
@@ -57,7 +57,7 @@ class MimeModel implements RenderMime.IMimeModel {
   /**
    * Test whether the model is disposed.
    */
-  isDisposed(): boolean {
+  get isDisposed(): boolean {
     return this.data.isDisposed;
   }
 
@@ -73,11 +73,11 @@ class MimeModel implements RenderMime.IMimeModel {
   /**
    * Serialize the model as JSON data.
    */
-  toJSON(): JSONValue {
+  toJSON(): JSONObject {
     return {
       trusted: this.trusted,
       data: this.data.toJSON(),
-      metadata: this.metadata.toJSON();
+      metadata: this.metadata.toJSON()
     };
   }
 

@@ -22,7 +22,7 @@ import {
 } from '../common/hoverbox';
 
 import {
-  IRenderMime, RenderMime
+  IRenderMime, MimeModel, RenderMime
 } from '../rendermime';
 
 
@@ -70,7 +70,7 @@ class TooltipWidget extends Widget {
 
     this._editor = options.editor;
     this._rendermime = options.rendermime;
-    let model = new RenderMime.MimeModel({
+    let model = new MimeModel({
       data: options.bundle,
       trusted: true
     });
