@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Keymap
-} from 'phosphor/lib/ui/keymap';
-
-import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
@@ -22,25 +18,9 @@ import {
 } from '../notebook';
 
 import {
-  CommandIDs, COMPLETABLE_CLASS,
-  CompleterModel, CompleterWidget, CompletionHandler, ICompletionManager
+  CommandIDs, CompleterModel, CompleterWidget, CompletionHandler,
+  ICompletionManager
 } from './';
-
-
-/**
- * The keyboard shortcut used to invoke a completer.
- *
- * #### Notes
- * The limitation of only supporting a single character completer invocation
- * shortcut stems from the fact that the current application-level APIs only
- * support adding shortcuts that are processed in the bubble phase of keydown
- * events.
- * Therefore, TODO: after upgrading to phosphor 1.0
- * - remove the `interrupt` function in the invoke commands
- * - switch the invoke commands to be processed in the capture phase
- * - remove the `shortcut` const and allow arbitrary shortcuts
- */
-const shortcut = 'Tab';
 
 
 /**
@@ -51,11 +31,7 @@ const service: JupyterLabPlugin<ICompletionManager> = {
   autoStart: true,
   provides: ICompletionManager,
   activate: (app: JupyterLab): ICompletionManager => {
-    const { layout } = app.keymap;
     const handlers: { [id: string]: CompletionHandler } = {};
-    const interrupt = (instance: any, event: KeyboardEvent): boolean => {
-      return Keymap.keystrokeForKeydownEvent(event, layout) === shortcut;
-    };
 
     app.commands.addCommand(CommandIDs.invoke, {
       execute: args => {
@@ -65,14 +41,9 @@ const service: JupyterLabPlugin<ICompletionManager> = {
         }
 
         const handler = handlers[id];
-        if (!handler) {
-          return;
+        if (handler) {
+          handler.invoke();
         }
-
-        if (handler.interrupter) {
-          handler.interrupter.dispose();
-        }
-        handler.invoke();
       }
     });
 
@@ -81,7 +52,7 @@ const service: JupyterLabPlugin<ICompletionManager> = {
         const { anchor, editor, kernel, parent } = completable;
         const model = new CompleterModel();
         const completer = new CompleterWidget({ anchor, model });
-        const handler = new CompletionHandler({ completer, interrupt, kernel });
+        const handler = new CompletionHandler({ completer, kernel });
         const id = parent.id;
 
         // Associate the handler with the parent widget.
@@ -146,13 +117,6 @@ const consolePlugin: JupyterLabPlugin<void> = {
         return app.commands.execute(CommandIDs.invoke, { id });
       }
     });
-
-    // Add console completer invocation key binding.
-    app.keymap.addBinding({
-      command: CommandIDs.invokeConsole,
-      keys: [shortcut],
-      selector: `.jp-ConsolePanel .${COMPLETABLE_CLASS}`
-    });
   }
 };
 
@@ -190,13 +154,6 @@ const notebookPlugin: JupyterLabPlugin<void> = {
         const id = notebooks.currentWidget && notebooks.currentWidget.id;
         return app.commands.execute(CommandIDs.invoke, { id });
       }
-    });
-
-    // Add notebook completer invocation key binding.
-    app.keymap.addBinding({
-      command: CommandIDs.invokeNotebook,
-      keys: [shortcut],
-      selector: `.jp-Notebook .${COMPLETABLE_CLASS}`
     });
   }
 };
