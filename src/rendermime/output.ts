@@ -22,12 +22,12 @@ interface IOutputModel extends RenderMime.IMimeModel {
   /**
    * The output type.
    */
-  readonly output_type: nbformat.OutputType;
+  readonly type: nbformat.OutputType;
 
   /**
    * The execution count of the model.
    */
-  readonly execution_count: nbformat.ExecutionCount;
+  readonly executionCount: nbformat.ExecutionCount;
 
   /**
    * Serialize the model to JSON.
@@ -70,7 +70,7 @@ class OutputModel extends RenderMime.MimeModel implements IOutputModel {
   constructor(options: IOutputModel.IOptions) {
     super(Private.getBundleOptions(options));
     let output = this._raw = options.output;
-    this.output_type = output.output_type;
+    this.type = output.output_type;
     // Remove redundant data.
     switch (output.output_type) {
     case 'display_data':
@@ -82,21 +82,21 @@ class OutputModel extends RenderMime.MimeModel implements IOutputModel {
       break;
     }
     if (output.output_type === 'execute_result') {
-      this.execution_count = output.execution_count;
+      this.executionCount = output.execution_count;
     } else {
-      this.execution_count = null;
+      this.executionCount = null;
     }
   }
 
   /**
    * The output type.
    */
-  readonly output_type: nbformat.OutputType;
+  readonly type: nbformat.OutputType;
 
   /**
    * The execution count.
    */
-  readonly execution_count: nbformat.ExecutionCount;
+  readonly executionCount: nbformat.ExecutionCount;
 
   /**
    * Serialize the model to JSON.

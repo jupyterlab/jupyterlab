@@ -365,7 +365,7 @@ class OutputAreaWidget extends Widget {
     panel.addClass(OUTPUT_CLASS);
 
     let gutter = this.contentFactory.createGutter();
-    gutter.execution_count = model.execution_count;
+    gutter.executionCount = model.executionCount;
     gutter.addClass(GUTTER_CLASS);
     panel.addWidget(gutter);
 
@@ -470,7 +470,7 @@ namespace OutputAreaWidget {
     /**
      * The execution count for the widget.
      */
-    execution_count: nbformat.ExecutionCount;
+    executionCount: nbformat.ExecutionCount;
   }
 
   /**
@@ -621,10 +621,10 @@ namespace OutputAreaWidget {
     /**
      * The execution count for the widget.
      */
-    get execution_count(): nbformat.ExecutionCount {
+    get executionCount(): nbformat.ExecutionCount {
       return this._executionCount;
     }
-    set execution_count(value: nbformat.ExecutionCount) {
+    set executionCount(value: nbformat.ExecutionCount) {
       this._executionCount = value;
       if (value === null) {
         this.node.textContent = '';
