@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject, JSONValue
+  deepEqual, JSONObject, JSONValue
 } from 'phosphor/lib/algorithm/json';
 
 import {
@@ -59,6 +59,16 @@ interface IObservableJSON extends IObservableMap<JSONValue> {
 export
 class ObservableJSON extends ObservableMap<JSONValue> {
   /**
+   * Construct a new observable JSON object.
+   */
+  constructor(options: IObservableJSON.IOptions) {
+    super({
+      itemCmp: deepEqual,
+      values: options.values
+    });
+  }
+
+  /**
    * Serialize the model to JSON.
    */
   toJSON(): JSONObject {
@@ -67,6 +77,24 @@ class ObservableJSON extends ObservableMap<JSONValue> {
       out[key] = this.get(key);
     }
     return out;
+  }
+}
+
+
+/**
+ * The namespace for ObservableJSON static data.
+ */
+export
+namespace ObservableJSON {
+  /**
+   * The options use to initialize an observable JSON object.
+   */
+  export
+  interface IOptions {
+    /**
+     * The optional intitial value for the object.
+     */
+    values?: JSONObject;
   }
 }
 
