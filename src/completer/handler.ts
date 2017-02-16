@@ -42,7 +42,6 @@ class CompletionHandler implements IDisposable {
     this._completer.selected.connect(this.onCompletionSelected, this);
     this._completer.visibilityChanged.connect(this.onVisibilityChanged, this);
     this._kernel = options.kernel || null;
-    this._interrupt = options.interrupt || null;
   }
 
   /**
@@ -78,13 +77,6 @@ class CompletionHandler implements IDisposable {
    */
   get isDisposed(): boolean {
     return this._completer === null;
-  }
-
-  /**
-   * The interrupt keydown handler used to short circuit the invocation keydown.
-   */
-  get interrupter(): IDisposable {
-    return this._interrupter;
   }
 
   /**
@@ -248,14 +240,6 @@ class CompletionHandler implements IDisposable {
 
     host.classList.add(COMPLETABLE_CLASS);
 
-    if (this._interrupter) {
-      this._interrupter.dispose();
-    }
-
-    if (this._interrupt) {
-      this._interrupter = editor.addKeydownHandler(this._interrupt);
-    }
-
     this._completer.model.handleTextChange(request);
   }
 
@@ -294,10 +278,8 @@ class CompletionHandler implements IDisposable {
 
   private _editor: CodeEditor.IEditor | null = null;
   private _completer: CompleterWidget | null = null;
-  private _interrupter: IDisposable | null = null;
   private _kernel: Kernel.IKernel | null = null;
   private _pending = 0;
-  private _interrupt: CodeEditor.KeydownHandler | null = null;
 }
 
 
@@ -320,11 +302,6 @@ namespace CompletionHandler {
      * The kernel for the completion handler.
      */
     kernel?: Kernel.IKernel;
-
-    /**
-     * A keydown handler that can short circuit a key event to the editor.
-     */
-    interrupt?: CodeEditor.KeydownHandler;
   }
 
   /**
