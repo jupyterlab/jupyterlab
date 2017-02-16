@@ -28,14 +28,14 @@ const plugin: JupyterLabPlugin<void> = {
     command = CommandIDs.activateNextTab;
     app.commands.addCommand(command, {
       label: 'Activate Next Tab',
-      execute: () => { app.shell.activateNextTab() }
+      execute: () => { app.shell.activateNextTab(); }
     });
     palette.addItem({ command, category: 'Main Area' });
 
     command = CommandIDs.activatePreviousTab;
     app.commands.addCommand(command, {
       label: 'Activate Previous Tab',
-      execute: () => { app.shell.activatePreviousTab() }
+      execute: () => { app.shell.activatePreviousTab(); }
     });
     palette.addItem({ command, category: 'Main Area' });
 
