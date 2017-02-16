@@ -10,6 +10,10 @@ import {
 } from '../commandpalette';
 
 import {
+  CommandIDs as CompleterCommandIDs, COMPLETABLE_CLASS
+} from '../completer';
+
+import {
   CommandIDs as ConsoleCommandIDs
 } from '../console';
 
@@ -67,11 +71,6 @@ import {
  */
 const SHORTCUTS = [
   {
-    command: CommandPaletteCommandIDs.activate,
-    selector: 'body',
-    keys: ['Accel Shift P']
-  },
-  {
     command: ApplicationCommandIDs.activateNextTab,
     selector: 'body',
     keys: ['Accel ArrowRight']
@@ -80,6 +79,21 @@ const SHORTCUTS = [
     command: ApplicationCommandIDs.activatePreviousTab,
     selector: 'body',
     keys: ['Accel ArrowLeft']
+  },
+  {
+    command: CommandPaletteCommandIDs.activate,
+    selector: 'body',
+    keys: ['Accel Shift P']
+  },
+  {
+    command: CompleterCommandIDs.invokeConsole,
+    selector: `.jp-ConsolePanel .${COMPLETABLE_CLASS}`,
+    keys: ['Tab']
+  },
+  {
+    command: CompleterCommandIDs.invokeNotebook,
+    selector: `.jp-Notebook .${COMPLETABLE_CLASS}`,
+    keys: ['Tab']
   },
   {
     command: ConsoleCommandIDs.run,
