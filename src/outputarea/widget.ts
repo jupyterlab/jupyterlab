@@ -770,6 +770,10 @@ namespace OutputAreaWidget {
 export
 interface IOutputAreaModel extends IDisposable {
   /**
+   * A signal emitted when the model state changes.
+   */
+
+  /**
    * A signal emitted when the model changes.
    */
   readonly changed: ISignal<IOutputAreaModel, ObservableVector.IChangedArgs<IOutputModel>>;
@@ -814,6 +818,11 @@ interface IOutputAreaModel extends IDisposable {
    * @param wait - Delay clearing the output until the next message is added.
    */
   clear(wait?: boolean): void;
+
+  /**
+   * Deserialize the model from JSON.
+   */
+  fromJSON(value: nbformat.IOutput): void;
 
   /**
    * Serialize the model to JSON.

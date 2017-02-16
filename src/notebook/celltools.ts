@@ -54,8 +54,8 @@ import {
 } from '../common/interfaces';
 
 import {
-  Metadata
-} from '../common/metadata';
+  ObservableJSONWidget
+} from '../common/observablejson';
 
 import {
   IObservableMap, ObservableMap
@@ -293,6 +293,31 @@ namespace CellTools {
   const SelectionMessage = new ConflatableMessage('selection-changed');
 
   /**
+   * A type alias for metadata changed args.
+   */
+  export
+  type MetadataChangedArgs = ObservableMap.IChangedArgs<JSONValue>;
+
+  /**
+   * A metadata changed message.
+   */
+  export
+  class ChangeMessage extends Message {
+    /**
+     * Create a new metadata changed message.
+     */
+    constructor(args: MetadataChangedArgs) {
+      super('metadata-changed');
+      this.args = args;
+    }
+
+    /**
+     * The arguments of the metadata change.
+     */
+    readonly args: MetadataChangedArgs;
+  }
+
+  /**
    * The base cell tool, meant to be subclassed.
    */
   export
@@ -450,7 +475,7 @@ namespace CellTools {
       let layout = this.layout = new PanelLayout();
       let header = Private.createMetadataHeader();
       layout.addWidget(header);
-      this.editor = new Metadata.Editor({ editorFactory });
+      this.editor = new ObservableJSONWidget({ editorFactory });
       layout.addWidget(this.editor);
       header.addClass(COLLAPSED_CLASS);
       this.editor.addClass(COLLAPSED_CLASS);
@@ -460,7 +485,7 @@ namespace CellTools {
     /**
      * The editor used by the tool.
      */
-    readonly editor: Metadata.Editor;
+    readonly editor: ObservableJSONWidget;
 
     /**
      * Get the toggle node used by the editor.
