@@ -339,15 +339,19 @@ class OutputAreaWidget extends Widget {
     let factory = this.contentFactory;
     let prompt = msg.content.prompt;
     let password = msg.content.password;
+
     let panel = new Panel();
+    panel.addClass(CHILD_CLASS);
+    panel.addClass(STDIN_CLASS);
+
     let gutter = factory.createGutter();
     gutter.addClass(GUTTER_CLASS);
     panel.addWidget(gutter);
+
     let input = factory.createStdin({ prompt, password, kernel });
     input.addClass(STDIN_CLASS);
     panel.addWidget(input);
-    panel.addClass(CHILD_CLASS);
-    panel.addClass(STDIN_CLASS);
+
     let layout = this.layout as PanelLayout;
     layout.addWidget(panel);
   }
@@ -361,12 +365,9 @@ class OutputAreaWidget extends Widget {
     panel.addClass(OUTPUT_CLASS);
 
     let gutter = this.contentFactory.createGutter();
+    gutter.execution_count = model.execution_count;
     gutter.addClass(GUTTER_CLASS);
     panel.addWidget(gutter);
-    if (model.output_type === 'execute_result') {
-      let count = model.execution_count;
-      gutter.text = `Out[${count === null ? ' ' : count}]:`;
-    }
 
     let output = this._createOutput(model);
     panel.addWidget(output);
@@ -467,9 +468,9 @@ namespace OutputAreaWidget {
   export
   interface IGutterWidget extends Widget {
     /**
-     * The text for the widget.
+     * The execution count for the widget.
      */
-    text: string;
+    execution_count: nbformat.ExecutionCount;
   }
 
   /**
@@ -618,13 +619,18 @@ namespace OutputAreaWidget {
   export
   class GutterWidget extends Widget {
     /**
-     * The text for the widget.
+     * The execution count for the widget.
      */
-    get text(): string {
-      return this.node.textContent;
+    get execution_count(): nbformat.ExecutionCount {
+      return this._executionCount;
     }
-    set text(value: string) {
-      this.node.textContent = value;
+    set execution_count(value: nbformat.ExecutionCount) {
+      this._executionCount = value;
+      if (value === null) {
+        this.node.textContent = '';
+      } else {
+         this.node.textContent = `Out[${value}]:`;
+      }
     }
 
     /**
@@ -753,6 +759,7 @@ namespace OutputAreaWidget {
 
     private _drag: Drag = null;
     private _dragData: { pressX: number, pressY: number } = null;
+    private _executionCount: nbformat.ExecutionCount = null;
   }
 }
 
