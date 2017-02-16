@@ -82,7 +82,7 @@ namespace Metadata {
     /**
      * Create a new metadata changed message.
      */
-    constructor(args: ObservableMap.IChangedArgs<JSONValue>) {
+    constructor(args: ChangedArgs) {
       super('metadata-changed');
       this.args = args;
     }
@@ -90,8 +90,20 @@ namespace Metadata {
     /**
      * The arguments of the metadata change.
      */
-    readonly args: ObservableMap.IChangedArgs<JSONValue>;
+    readonly args: ChangedArgs;
   }
+
+  /**
+   * A type alias for changed args.
+   */
+  export
+  type ChangedArgs = ObservableMap.IChangedArgs<JSONValue>;
+
+  /**
+   * A type alias for an obserble JSON value.
+   */
+  export
+  type ObservableJSON = IObservableMap<JSONValue>;
 
   /**
    * A widget that supports the editing of metadata.
@@ -147,10 +159,10 @@ namespace Metadata {
     /**
      * The metadata source.
      */
-    get source(): IObservableMap<JSONValue> | null {
+    get source(): ObservableJSON | null {
       return this._source;
     }
-    set source(value: IObservableMap<JSONValue> | null) {
+    set source(value: ObservableJSON | null) {
       if (this._source === value) {
         return;
       }
@@ -217,7 +229,7 @@ namespace Metadata {
     /**
      * Handle a change to the metadata of the source.
      */
-    private _onMetadataChanged(sender: IObservableMap<JSONValue>, args: ObservableMap.IChangedArgs<JSONValue>) {
+    private _onMetadataChanged(sender: ObservableJSON, args: ChangedArgs) {
       if (this._changeGuard) {
         return;
       }
@@ -346,7 +358,7 @@ namespace Metadata {
 
     private _dataDirty = false;
     private _inputDirty = false;
-    private _source: IObservableMap<JSONValue> | null = null;
+    private _source: ObservableJSON | null = null;
     private _originalValue: JSONObject;
     private _changeGuard = false;
   }
