@@ -833,6 +833,11 @@ namespace IOutputAreaModel {
   export
   interface IOptions {
     /**
+     * The initial values for the model.
+     */
+    values?: nbformat.IOutput[];
+
+    /**
      * Whether the output is trusted.  The default is false.
      */
     trusted?: boolean;

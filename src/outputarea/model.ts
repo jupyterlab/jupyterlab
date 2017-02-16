@@ -39,7 +39,9 @@ class OutputAreaModel implements IOutputAreaModel {
     this.contentFactory = (options.contentFactory ||
       OutputAreaModel.defaultContentFactory
     );
-    this.list = new ObservableVector<IOutputModel>();
+    this.list = new ObservableVector<IOutputModel>({
+      values: options.values
+    });
     this.list.changed.connect(this._onListChanged, this);
   }
 
