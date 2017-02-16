@@ -131,6 +131,9 @@ class CellModel extends CodeEditor.Model implements ICellModel {
     if (!cell) {
       return;
     }
+    this._trusted = !!cell.metadata['trusted'];
+    delete cell.metadata['trusted'];
+
     if (Array.isArray(cell.source)) {
       this.value.text = (cell.source as string[]).join('\n');
     } else {
@@ -176,18 +179,19 @@ class CellModel extends CodeEditor.Model implements ICellModel {
    * Get the trusted state of the model.
    */
   get trusted(): boolean {
-    return !!this.metadata.get('trusted');
+    return this._trusted;
   }
 
   /**
    * Set the trusted state of the model.
    */
   set trusted(newValue: boolean) {
-    let oldValue = this.metadata.get('trusted');
-    if (oldValue === newValue) {
+    if (this._trusted === newValue) {
       return;
     }
-    this.metadata.set('trusted', newValue);
+    let oldValue = this._trusted;
+    this._trusted = newValue;
+    this.onTrustedChanged(newValue);
     this.stateChanged.emit({ name: 'trusted', oldValue, newValue });
   }
 
@@ -216,12 +220,20 @@ class CellModel extends CodeEditor.Model implements ICellModel {
   }
 
   /**
+   * Handle a change to the trusted state.
+   *
+   * The default implementation is a no-op.
+   */
+  onTrustedChanged(value: boolean): void { /* no-op */}
+
+  /**
    * Handle a change to the observable value.
    */
   protected onGenericChange(): void {
     this.contentChanged.emit(void 0);
   }
 
+  private _trusted = false;
   private _metadata = new ObservableJSON();
 }
 
@@ -310,7 +322,6 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
       values: outputs
     });
     this._outputs.stateChanged.connect(this.onGenericChange, this);
-    this.metadata.changed.connect(this._onMetadataChanged, this);
   }
 
   /**
@@ -366,10 +377,12 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
   }
 
   /**
-   * Handle the metadata changing.
+   * Handle a change to the trusted state.
+   *
+   * The default implementation is a no-op.
    */
-  private _onMetadataChanged(sender: IObservableJSON, args: IObservableJSON.IChangedArgs): void {
-    this._outputs.trusted = !!args.newValue;
+  onTrustedChanged(value: boolean): void {
+    this._outputs.trusted = value;
   }
 
   private _outputs: IOutputAreaModel = null;
