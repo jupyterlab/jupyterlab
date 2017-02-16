@@ -54,11 +54,6 @@ class OutputAreaModel implements IOutputAreaModel {
   readonly itemChanged: ISignal<this, void>;
 
   /**
-   * A signal emitted when the model is disposed.
-   */
-  readonly disposed: ISignal<this, void>;
-
-  /**
    * Get the length of the items in the model.
    */
   get length(): number {
@@ -113,8 +108,7 @@ class OutputAreaModel implements IOutputAreaModel {
     }
     let list = this.list;
     this.list = null;
-    list.clear();
-    this.disposed.emit(void 0);
+    list.dispose();
     clearSignalData(this);
   }
 
@@ -256,4 +250,3 @@ namespace OutputAreaModel {
 // Define the signals for the `OutputAreaModel` class.
 defineSignal(OutputAreaModel.prototype, 'changed');
 defineSignal(OutputAreaModel.prototype, 'itemChanged');
-defineSignal(OutputAreaModel.prototype, 'disposed');

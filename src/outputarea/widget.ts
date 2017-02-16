@@ -780,11 +780,6 @@ interface IOutputAreaModel extends IDisposable {
   readonly itemChanged: ISignal<IOutputAreaModel, void>;
 
   /**
-   * A signal emitted when the model is disposed.
-   */
-  readonly disposed: ISignal<IOutputAreaModel, void>;
-
-  /**
    * The length of the items in the model.
    */
   readonly length: number;
