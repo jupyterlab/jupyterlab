@@ -238,8 +238,8 @@ describe('notebook/celltools', () => {
         celltools.addItem({ tool });
         simulate(panel0.node, 'focus');
         tool.methods = [];
-        let cursor = celltools.activeCell.model.getMetadata('foo');
-        cursor.setValue(1);
+        let metadata = celltools.activeCell.model.metadata;
+        metadata.set('foo', 1);
         expect(tool.methods).to.contain('onMetadataChanged');
       });
 
@@ -289,8 +289,8 @@ describe('notebook/celltools', () => {
       simulate(panel0.node, 'focus');
       let model = tool.editor.model;
       let previous = model.value.text;
-      let cursor = celltools.activeCell.model.getMetadata('foo');
-      cursor.setValue(1);
+      let metadata = celltools.activeCell.model.metadata;
+      metadata.set('foo', 1);
       expect(model.value.text).to.not.be(previous);
     });
 
@@ -351,8 +351,8 @@ describe('notebook/celltools', () => {
           select.selectedIndex = 1;
           simulate(select, 'change');
           expect(tool.events).to.contain('change');
-          let cursor = celltools.activeCell.model.getMetadata('foo');
-          expect(cursor.getValue()).to.eql([1, 2, 'a']);
+          let metadata = celltools.activeCell.model.metadata;
+          expect(metadata.get('foo')).to.eql([1, 2, 'a']);
         });
 
       });
@@ -418,8 +418,8 @@ describe('notebook/celltools', () => {
         select.selectedIndex = 1;
         simulate(select, 'change');
         expect(tool.methods).to.contain('onValueChanged');
-        let cursor = celltools.activeCell.model.getMetadata('foo');
-        expect(cursor.getValue()).to.eql([1, 2, 'a']);
+        let metadata = celltools.activeCell.model.metadata;
+        expect(metadata.get('foo')).to.eql([1, 2, 'a']);
       });
 
     });
@@ -427,9 +427,8 @@ describe('notebook/celltools', () => {
     describe('#onActiveCellChanged()', () => {
 
       it('should update the select value', () => {
-        let cell = panel0.notebook.widgets.at(1);
-        let cursor = cell.model.getMetadata('foo');
-        cursor.setValue(1);
+        let metadata = celltools.activeCell.model.metadata;
+        metadata.set('foo', 1);
         panel0.notebook.activeCellIndex = 1;
         expect(tool.methods).to.contain('onActiveCellChanged');
         expect(tool.selectNode.value).to.be('1');
@@ -440,8 +439,8 @@ describe('notebook/celltools', () => {
     describe('#onMetadataChanged()', () => {
 
       it('should update the select value', () => {
-        let cursor = celltools.activeCell.model.getMetadata('foo');
-        cursor.setValue(1);
+        let metadata = celltools.activeCell.model.metadata;
+        metadata.set('foo', 1);
         expect(tool.methods).to.contain('onMetadataChanged');
         expect(tool.selectNode.value).to.be('1');
       });
@@ -462,12 +461,12 @@ describe('notebook/celltools', () => {
       expect(tool.key).to.be('slideshow');
       let select = tool.selectNode;
       expect(select.value).to.be('');
-      let cursor = celltools.activeCell.model.getMetadata('slideshow');
-      expect(cursor.getValue()).to.be(void 0);
+      let metadata = celltools.activeCell.model.metadata;
+      expect(metadata.get('slideshow')).to.be(void 0);
       simulate(select, 'focus');
       tool.selectNode.selectedIndex = 1;
       simulate(select, 'change');
-      expect(cursor.getValue()).to.be('slide');
+      expect(metadata.get('slideshow')).to.be('slide');
     });
 
   });
@@ -485,12 +484,13 @@ describe('notebook/celltools', () => {
       expect(tool.key).to.be('raw_mimetype');
       let select = tool.selectNode;
       expect(select.value).to.be('');
-      let cursor = celltools.activeCell.model.getMetadata('raw_mimetype');
-      expect(cursor.getValue()).to.be(void 0);
+
+      let metadata = celltools.activeCell.model.metadata;
+      expect(metadata.get('raw_mimetype')).to.be(void 0);
       simulate(select, 'focus');
       tool.selectNode.selectedIndex = 2;
       simulate(select, 'change');
-      expect(cursor.getValue()).to.be('text/restructuredtext');
+      expect(metadata.get('raw_mimetype')).to.be('text/restructuredtext');
     });
 
     it('should have no effect on a code cell', () => {
@@ -504,12 +504,13 @@ describe('notebook/celltools', () => {
       let select = tool.selectNode;
       expect(select.disabled).to.be(true);
       expect(select.value).to.be('');
-      let cursor = celltools.activeCell.model.getMetadata('raw_mimetype');
-      expect(cursor.getValue()).to.be(void 0);
+
+      let metadata = celltools.activeCell.model.metadata;
+      expect(metadata.get('raw_mimetype')).to.be(void 0);
       simulate(select, 'focus');
       tool.selectNode.selectedIndex = 2;
       simulate(select, 'change');
-      expect(cursor.getValue()).to.be(void 0);
+      expect(metadata.get('raw_mimetype')).to.be(void 0);
     });
 
   });
