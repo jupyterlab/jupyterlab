@@ -10,7 +10,7 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  JSONObject, JSONValue
+  deepEqual, JSONObject, JSONValue
 } from 'phosphor/lib/algorithm/json';
 
 import {
@@ -309,7 +309,7 @@ namespace RenderMime {
      * Construct a new mime model.
      */
     constructor(options: IMimeModelOptions) {
-      super();
+      super({ itemCmp: deepEqual });
       this.trusted = !!options.trusted;
       let data = options.data;
       let metadata: JSONObject = options.metadata || Object.create(null);
@@ -341,7 +341,7 @@ namespace RenderMime {
       return this._metadata;
     }
 
-    private _metadata = new ObservableMap<JSONValue>();
+    private _metadata = new ObservableMap<JSONValue>({ itemCmp: deepEqual });
   }
 
   /**

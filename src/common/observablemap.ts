@@ -97,6 +97,13 @@ interface IObservableMap<T> extends IDisposable {
 export
 class ObservableMap<T> implements IObservableMap<T> {
   /**
+   * Construct a new observable map.
+   */
+  constructor(options: ObservableMap.IOptions<T> = {}) {
+    this._itemCmp = options.itemCmp || Private.itemCmp;
+  }
+
+  /**
    * A signal emitted when the map has changed.
    */
   changed: ISignal<IObservableMap<T>, ObservableMap.IChangedArgs<T>>;
@@ -113,13 +120,6 @@ class ObservableMap<T> implements IObservableMap<T> {
    */
   get size(): number {
     return this._map.size;
-  }
-
-  /**
-   * Set the comparison function to use for equality checking.
-   */
-  setItemCmp(fn: (first: T, second: T) => boolean): void {
-    this._itemCmp = fn;
   }
 
   /**
@@ -245,7 +245,7 @@ class ObservableMap<T> implements IObservableMap<T> {
   }
 
   private _map: Map<string, T> = new Map<string, T>();
-  private _itemCmp: (first: T, second: T) => boolean = Private.itemCmp;
+  private _itemCmp: (first: T, second: T) => boolean;
 }
 
 
@@ -254,6 +254,19 @@ class ObservableMap<T> implements IObservableMap<T> {
  */
 export
 namespace ObservableMap {
+  /**
+   * The options used to initialize an observable map.
+   */
+  export
+  interface IOptions<T> {
+    /**
+     * The item comparison function for change detection on `set`.
+     *
+     * If not given, strict `===` equality will be used.
+     */
+    itemCmp?: (first: T, second: T) => boolean;
+  }
+
   /**
    * The change types which occur on an observable map.
    */
