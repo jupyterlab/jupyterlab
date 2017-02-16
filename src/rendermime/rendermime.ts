@@ -309,16 +309,12 @@ namespace RenderMime {
      * Construct a new mime model.
      */
     constructor(options: IMimeModelOptions) {
-      super({ itemCmp: deepEqual });
+      super({ itemCmp: deepEqual, values: options.data });
       this.trusted = !!options.trusted;
-      let data = options.data;
-      let metadata: JSONObject = options.metadata || Object.create(null);
-      for (let key in data) {
-        this.set(key, data[key]);
-      }
-      for (let key in metadata) {
-        this._metadata.set(key, metadata[key]);
-      }
+      this._metadata = new ObservableMap({
+        itemCmp: deepEqual,
+        values: options.metadata
+      });
     }
 
     /**
@@ -341,7 +337,7 @@ namespace RenderMime {
       return this._metadata;
     }
 
-    private _metadata = new ObservableMap<JSONValue>({ itemCmp: deepEqual });
+    private _metadata: ObservableMap<JSONValue>;
   }
 
   /**

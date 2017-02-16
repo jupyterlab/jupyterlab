@@ -101,6 +101,11 @@ class ObservableMap<T> implements IObservableMap<T> {
    */
   constructor(options: ObservableMap.IOptions<T> = {}) {
     this._itemCmp = options.itemCmp || Private.itemCmp;
+    if (options.values) {
+      for (let key in options.values) {
+        this._map.set(key, options.values[key]);
+      }
+    }
   }
 
   /**
@@ -259,6 +264,11 @@ namespace ObservableMap {
    */
   export
   interface IOptions<T> {
+    /**
+     * An optional intial set of values.
+     */
+    values?: { [key: string]: T };
+
     /**
      * The item comparison function for change detection on `set`.
      *
