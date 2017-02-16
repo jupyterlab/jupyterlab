@@ -18,8 +18,8 @@ import {
 } from '../notebook';
 
 import {
-  CommandIDs,
-  CompleterModel, CompleterWidget, CompletionHandler, ICompletionManager
+  CommandIDs, CompleterModel, CompleterWidget, CompletionHandler,
+  ICompletionManager
 } from './';
 
 

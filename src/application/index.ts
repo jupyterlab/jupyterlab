@@ -134,18 +134,14 @@ class JupyterLab extends Application<ApplicationShell> {
 
   /**
    * Add the application-wide listeners.
+   *
+   * #### Notes
+   * TODO: This method can be removed when phosphor 1.0 is deployed.
    */
   protected addEventListeners(): void {
     // Listen for keydown events in the capture phase.
     document.addEventListener('keydown', this, true);
     window.addEventListener('resize', this);
-  }
-
-  /**
-   * Handle global `keydown` events.
-   */
-  protected evtKeydown(event: KeyboardEvent): void {
-    this.keymap.processKeydownEvent(event);
   }
 
   /**
