@@ -4,14 +4,6 @@
 import expect = require('expect.js');
 
 import {
-  nbformat
-} from '@jupyterlab/services';
-
-import {
-  deepEqual
-} from 'phosphor/lib/algorithm/json';
-
-import {
   OutputModel
 } from '../../../lib/rendermime';
 
@@ -46,7 +38,11 @@ describe('outputarea/model', () => {
 
       it('should accept options', () => {
         let contentFactory = new OutputAreaModel.ContentFactory();
-        model = new OutputAreaModel({ contentFactory, trusted: true});
+        model = new OutputAreaModel({
+          values: DEFAULT_OUTPUTS,
+          contentFactory,
+          trusted: true
+        });
         expect(model.contentFactory).to.be(contentFactory);
         expect(model.trusted).to.be(true);
       });
