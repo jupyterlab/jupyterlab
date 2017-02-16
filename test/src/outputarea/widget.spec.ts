@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  Kernel
+} from '@jupyterlab/services';
+
+import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -40,7 +44,7 @@ class LogOutputAreaWidget extends OutputAreaWidget {
 
 describe('outputarea/widget', () => {
 
-  let widget: OutputAreaWidget;
+  let widget: LogOutputAreaWidget;
 
   beforeEach(() => {
     widget = new LogOutputAreaWidget({ rendermime, model });
@@ -57,7 +61,7 @@ describe('outputarea/widget', () => {
 
       it('should take an optional contentFactory', () => {
         let contentFactory = Object.create(OutputAreaWidget.defaultContentFactory);
-        widget = new OutputAreaWidget({ rendermime, contentFactory, model });
+        let widget = new OutputAreaWidget({ rendermime, contentFactory, model });
         expect(widget.contentFactory).to.be(contentFactory);
       });
 
@@ -156,6 +160,13 @@ describe('outputarea/widget', () => {
 
     describe('#clear()', () => {
 
+      it('should clear all of the widgets', () => {
+        widget.model.fromJSON(DEFAULT_OUTPUTS);
+        expect(widget.widgets.length).to.be.ok();
+        widget.clear();
+        expect(widget.widgets.length).to.be(0);
+      });
+
     });
 
     describe('#execute()', () => {
@@ -172,9 +183,7 @@ describe('outputarea/widget', () => {
       });
 
       it('should execute code on a kernel and send outputs to the model', (done) => {
-        let model = new OutputAreaModel();
-        expect(model.length).to.be(0);
-        model.execute('print("hello")', kernel).then(reply => {
+        widget.execute('print("hello")', kernel).then(reply => {
           expect(reply.content.execution_count).to.be(1);
           expect(reply.content.status).to.be('ok');
           expect(model.length).to.be(1);
@@ -184,11 +193,8 @@ describe('outputarea/widget', () => {
       });
 
       it('should clear existing outputs', (done) => {
-        let model = new OutputAreaModel();
-        for (let output of DEFAULT_OUTPUTS) {
-          model.add(output);
-        }
-        return model.execute('print("hello")', kernel).then(reply => {
+        widget.model.fromJSON(DEFAULT_OUTPUTS);
+        return widget.execute('print("hello")', kernel).then(reply => {
           expect(reply.content.execution_count).to.be(1);
           expect(model.length).to.be(1);
           kernel.shutdown();
@@ -215,12 +221,28 @@ describe('outputarea/widget', () => {
 
     describe('.contentFactory', () => {
 
-      describe('#createOutput()', () => {
+      describe('#createGutter()', () => {
 
-        it('should create a on output widget', () => {
-          let contentFactory = new OutputAreaWidget.ContentFactory();
-          let widget = contentFactory.createOutput(OPTIONS);
-          expect(widget).to.be.an(OutputWidget);
+        it('should create a gutter widget', () => {
+          let factory = new OutputAreaWidget.ContentFactory();
+          expect(factory.createGutter().executionCount).to.be(null);
+        });
+
+      });
+
+      describe('#createStdin()', () => {
+
+        it('should create a stdin widget', (done) => {
+          Kernel.startNew().then(kernel => {
+            let factory = new OutputAreaWidget.ContentFactory();
+            let options = {
+              prompt: 'hello',
+              password: false,
+              kernel
+            };
+            expect(factory.createStdin(options)).to.be.a(Widget);
+            kernel.dispose();
+          }).then(done, done);
         });
 
       });
