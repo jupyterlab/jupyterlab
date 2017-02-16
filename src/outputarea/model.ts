@@ -34,8 +34,8 @@ class OutputAreaModel implements IOutputAreaModel {
   /**
    * Construct a new observable outputs instance.
    */
-  constructor(options: IOutputAreaModel.IOptions) {
-    this._trusted = options.trusted;
+  constructor(options: IOutputAreaModel.IOptions = {}) {
+    this._trusted = !!options.trusted;
     this.contentFactory = (options.contentFactory ||
       OutputAreaModel.defaultContentFactory
     );

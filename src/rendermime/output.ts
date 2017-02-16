@@ -52,9 +52,9 @@ namespace IOutputModel {
     output: nbformat.IOutput;
 
     /**
-     * Whether the output is trusted.
+     * Whether the output is trusted.  The default is false.
      */
-    trusted: boolean;
+    trusted?: boolean;
   }
 }
 
@@ -198,7 +198,7 @@ namespace OutputModel {
   function getBundleOptions(options: IOutputModel.IOptions): RenderMime.IMimeModelOptions {
     let data = OutputModel.getData(options.output);
     let metadata = OutputModel.getMetadata(options.output);
-    let trusted = options.trusted;
+    let trusted = !!options.trusted;
     return { data, trusted, metadata };
   }
 

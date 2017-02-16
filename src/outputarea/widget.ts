@@ -838,9 +838,9 @@ namespace IOutputAreaModel {
   export
   interface IOptions {
     /**
-     * Whether the output is trusted.
+     * Whether the output is trusted.  The default is false.
      */
-    trusted: boolean;
+    trusted?: boolean;
 
     /**
      * The output content factory used by the model.
