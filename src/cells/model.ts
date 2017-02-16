@@ -56,6 +56,11 @@ interface ICellModel extends CodeEditor.IModel {
   trusted: boolean;
 
   /**
+   * Cell attachments.
+   */
+  readonly attachments: IObservableMap<JSONValue>;
+
+  /**
    * The metadata associated with the cell.
    */
   readonly metadata: IObservableMap<JSONValue>;

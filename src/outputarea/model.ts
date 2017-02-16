@@ -39,9 +39,12 @@ class OutputAreaModel implements IOutputAreaModel {
     this.contentFactory = (options.contentFactory ||
       OutputAreaModel.defaultContentFactory
     );
-    this.list = new ObservableVector<IOutputModel>({
-      values: options.values
-    });
+    this.list = new ObservableVector<IOutputModel>();
+    if (options.values) {
+      for (let value in values) {
+        this._add(value);
+      }
+    }
     this.list.changed.connect(this._onListChanged, this);
   }
 
@@ -49,11 +52,6 @@ class OutputAreaModel implements IOutputAreaModel {
    * A signal emitted when the model changes.
    */
   readonly changed: ISignal<this, ObservableVector.IChangedArgs<IOutputModel>>;
-
-  /**
-   * A signal emitted when a value in one of the outputs changes.
-   */
-  readonly itemChanged: ISignal<this, void>;
 
   /**
    * Get the length of the items in the model.
@@ -135,6 +133,47 @@ class OutputAreaModel implements IOutputAreaModel {
       this.clearNext = false;
     }
 
+    return this._add(output);
+  }
+
+  /**
+   * Clear all of the output.
+   *
+   * @param wait Delay clearing the output until the next message is added.
+   */
+  clear(wait: boolean = false): void {
+    if (wait) {
+      this.clearNext = true;
+      return;
+    }
+    each(this.list, item => { item.dispose(); });
+    this.list.clear();
+  }
+
+  /**
+   * Deserialize the model from JSON.
+   *
+   * #### Notes
+   * This will clear any existing data.
+   */
+  fromJSON(value: nbformat.IOutput) {
+    this.clear();
+    for (let item of value) {
+      this._add(item);
+    }
+  }
+
+  /**
+   * Serialize the model to JSON.
+   */
+  toJSON(): nbformat.IOutput[] {
+    return toArray(map(this.list, output => output.toJSON() ));
+  }
+
+  /**
+   * Add an item to the list.
+   */
+  private _add(output: nbformat.IOutput): number {
     // Make a copy of the output bundle.
     output = JSON.parse(JSON.stringify(output)) as nbformat.IOutput;
     let trusted = this._trusted;
@@ -168,27 +207,6 @@ class OutputAreaModel implements IOutputAreaModel {
     return this.list.pushBack(item);
   }
 
-  /**
-   * Clear all of the output.
-   *
-   * @param wait Delay clearing the output until the next message is added.
-   */
-  clear(wait: boolean = false): void {
-    if (wait) {
-      this.clearNext = true;
-      return;
-    }
-    each(this.list, item => { item.dispose(); });
-    this.list.clear();
-  }
-
-  /**
-   * Serialize the model to JSON.
-   */
-  toJSON(): nbformat.IOutput[] {
-    return toArray(map(this.list, output => output.toJSON() ));
-  }
-
   protected clearNext = false;
   protected list: IObservableVector<IOutputModel> = null;
 
@@ -198,8 +216,7 @@ class OutputAreaModel implements IOutputAreaModel {
   private _createItem(options: IOutputModel.IOptions): IOutputModel {
     let factory = this.contentFactory;
     let item = factory.createOutputModel(options);
-    item.changed.connect(this._onItemChanged);
-    item.metadata.changed.connect(this._onItemChanged);
+    item.stateChanged.connect(this._onGenericChange, this);
     return item;
   }
 
@@ -208,13 +225,14 @@ class OutputAreaModel implements IOutputAreaModel {
    */
   private _onListChanged(sender: IObservableVector<IOutputModel>, args: ObservableVector.IChangedArgs<IOutputModel>) {
     this.changed.emit(args);
+    this.stateChanged.emit(void 0);
   }
 
   /**
    * Handle a change to an item.
    */
-  private _onItemChanged(): void {
-    this.itemChanged.emit(void 0);
+  private _onGenericChange(): void {
+    this.stateChanged.emit(void 0);
   }
 
   private _lastStream: string;
