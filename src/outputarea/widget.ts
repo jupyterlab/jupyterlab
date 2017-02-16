@@ -10,6 +10,14 @@ import {
 } from 'phosphor/lib/algorithm/sequence';
 
 import {
+  IDisposable
+} from 'phosphor/lib/core/disposable';
+
+import {
+  ISignal
+} from 'phosphor/lib/core/signaling';
+
+import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -34,7 +42,7 @@ import {
 } from '../common/observablevector';
 
 import {
-  RenderMime
+  IOutputModel, RenderMime
 } from '../rendermime';
 
 
@@ -147,7 +155,7 @@ class OutputAreaWidget extends Widget {
   /**
    * The model used by the widget.
    */
-  readonly model: OutputAreaWidget.IModel;
+  readonly model: IOutputAreaModel;
 
   /**
    * Te rendermime instance used by the widget.
@@ -347,7 +355,7 @@ class OutputAreaWidget extends Widget {
   /**
    * Insert an output to the layout.
    */
-  private _insertOutput(index: number, model: OutputModel.IModel): void {
+  private _insertOutput(index: number, model: IOutputModel): void {
     let panel = new Panel();
     panel.addClass(CHILD_CLASS);
     panel.addClass(OUTPUT_CLASS);
@@ -370,7 +378,7 @@ class OutputAreaWidget extends Widget {
   /**
    * Update an output in place.
    */
-  private _setOutput(index: number, model: OutputModel.IModel): void {
+  private _setOutput(index: number, model: IOutputModel): void {
     let layout = this.layout as PanelLayout;
     let widgets = this.widgets;
     // Skip any stdin widgets to find the correct index.
@@ -386,7 +394,7 @@ class OutputAreaWidget extends Widget {
   /**
    * Create an output.
    */
-  private _createOutput(model: OutputModel.IModel): Widget {
+  private _createOutput(model: IOutputModel): Widget {
     let widget = this.rendermime.render(model);
 
     // Create the output result area.
@@ -401,7 +409,7 @@ class OutputAreaWidget extends Widget {
   /**
    * Follow changes on the model state.
    */
-  private _onModelChanged(sender: OutputAreaWidget.IModel, args: ObservableVector.IChangedArgs<OutputAreaWidget.IOutputModel>) {
+  private _onModelChanged(sender: IOutputAreaModel, args: ObservableVector.IChangedArgs<IOutputModel>) {
     switch (args.type) {
     case 'add':
       // Children are always added at the end.
@@ -443,7 +451,7 @@ namespace OutputAreaWidget {
     /**
      * The model used by the widget.
      */
-    model: IModel;
+    model: IOutputAreaModel;
 
     /**
      * The output widget content factory.
@@ -451,94 +459,6 @@ namespace OutputAreaWidget {
      * Defaults to a shared `IContentFactory` instance.
      */
     contentFactory?: IContentFactory;
-  }
-
-  /**
-   * The model for an output area.
-   */
-  export
-  interface IModel extends IDisposable {
-    /**
-     * A signal emitted when the model changes.
-     */
-    readonly changed: ISignal<IModel, ObservableVector.IChangedArgs<IOutputModel>>;
-
-    /**
-     * A signal emitted when a value in one of the outputs changes.
-     */
-    readonly itemChanged: ISignal<IModel, void>;
-
-    /**
-     * A signal emitted when the model is disposed.
-     */
-    readonly disposed: ISignal<IModel, void>;
-
-    /**
-     * The length of the items in the model.
-     */
-    readonly length: number;
-
-    /**
-     * Whether the output area is trusted.
-     */
-    trusted: boolean;
-
-    /**
-     * Get an item at the specified index.
-     */
-    get(index: number): IOutputModel;
-
-    /**
-     * Add an output, which may be combined with previous output.
-     *
-     * #### Notes
-     * The output bundle is copied.
-     * Contiguous stream outputs of the same `name` are combined.
-     */
-    add(output: nbformat.IOutput): number;
-
-    /**
-     * Clear all of the output.
-     *
-     * @param wait - Delay clearing the output until the next message is added.
-     */
-    clear(wait?: boolean): void;
-
-    /**
-     * Serialize the model to JSON.
-     */
-    toJSON(): nbformat.IOutput[];
-  }
-
-  /**
-   * The options used to create a output area model.
-   */
-  export
-  interface IModelOptions {
-    /**
-     * Whether the output is trusted.
-     */
-    trusted: boolean;
-
-    /**
-     * The output model factory to use.
-     *
-     * If not given, a default factory will be used.
-     */
-    modelFactory?: IOutputModelFactory;
-  }
-
-  /**
-   * The interface for an output model factory.
-   */
-  export
-  interface IOutputModelFactory {
-    /**
-     * Create an output model.
-     */
-    createOutputModel(options: RenderMime.IOutputModelOptions): RenderMime.IOutputModel {
-      return new RenderMime.OutputModel(options);
-    }
   }
 
   /**
@@ -835,6 +755,106 @@ namespace OutputAreaWidget {
     private _dragData: { pressX: number, pressY: number } = null;
   }
 }
+
+
+/**
+ * The model for an output area.
+ */
+export
+interface IOutputAreaModel extends IDisposable {
+  /**
+   * A signal emitted when the model changes.
+   */
+  readonly changed: ISignal<IOutputAreaModel, ObservableVector.IChangedArgs<IOutputModel>>;
+
+  /**
+   * A signal emitted when a value in one of the outputs changes.
+   */
+  readonly itemChanged: ISignal<IOutputAreaModel, void>;
+
+  /**
+   * A signal emitted when the model is disposed.
+   */
+  readonly disposed: ISignal<IOutputAreaModel, void>;
+
+  /**
+   * The length of the items in the model.
+   */
+  readonly length: number;
+
+  /**
+   * Whether the output area is trusted.
+   */
+  trusted: boolean;
+
+  /**
+   * The output content factory used by the model.
+   */
+  readonly contentFactory: IOutputAreaModel.IContentFactory;
+
+  /**
+   * Get an item at the specified index.
+   */
+  get(index: number): IOutputModel;
+
+  /**
+   * Add an output, which may be combined with previous output.
+   *
+   * #### Notes
+   * The output bundle is copied.
+   * Contiguous stream outputs of the same `name` are combined.
+   */
+  add(output: nbformat.IOutput): number;
+
+  /**
+   * Clear all of the output.
+   *
+   * @param wait - Delay clearing the output until the next message is added.
+   */
+  clear(wait?: boolean): void;
+
+  /**
+   * Serialize the model to JSON.
+   */
+  toJSON(): nbformat.IOutput[];
+}
+
+
+/**
+ * The namespace for IOutputAreaModel interfaces.
+ */
+export
+namespace IOutputAreaModel {
+  /**
+   * The options used to create a output area model.
+   */
+  export
+  interface IOptions {
+    /**
+     * Whether the output is trusted.
+     */
+    trusted: boolean;
+
+    /**
+     * The output content factory used by the model.
+     *
+     * If not given, a default factory will be used.
+     */
+    contentFactory?: IContentFactory;
+  }
+
+  /**
+   * The interface for an output content factory.
+   */
+  export
+  interface IContentFactory {
+    /**
+     * Create an output model.
+     */
+    createOutputModel(options: IOutputModel.IOptions): IOutputModel;
+  }
+}
+
 
 /**
  * A namespace for private data.

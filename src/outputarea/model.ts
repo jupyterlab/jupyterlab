@@ -10,14 +10,6 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  JSONObject
-} from 'phosphor/lib/algorithm/json';
-
-import {
-  IDisposable
-} from 'phosphor/lib/core/disposable';
-
-import {
   clearSignalData, defineSignal, ISignal
 } from 'phosphor/lib/core/signaling';
 
@@ -26,35 +18,35 @@ import {
 } from '../common/observablevector';
 
 import {
-  RenderMime
+  IOutputModel, OutputModel, RenderMime
 } from '../rendermime';
 
 import {
-  OutputAreaWidget
+  IOutputAreaModel
 } from './widget';
 
 
 /**
- * An model that maintains a list of output data.
+ * The default implementation of the IOutputAreaModel.
  */
 export
-class OutputAreaModel implements OutputAreaWidget.IModel {
+class OutputAreaModel implements IOutputAreaModel {
   /**
    * Construct a new observable outputs instance.
    */
-  constructor(options: OutputAreaWidget.IModelOptions) {
+  constructor(options: IOutputAreaModel.IOptions) {
     this._trusted = options.trusted;
-    this.factory = (options.factory ||
+    this.contentFactory = (options.contentFactory ||
       OutputAreaModel.defaultContentFactory
     );
-    this.list = new ObservableVector<RenderMime.IOutputModel>();
+    this.list = new ObservableVector<IOutputModel>();
     this.list.changed.connect(this._onListChanged, this);
   }
 
   /**
    * A signal emitted when the model changes.
    */
-  readonly changed: ISignal<this, ObservableVector.IChangedArgs<RenderMime.IOutputModel>>;
+  readonly changed: ISignal<this, ObservableVector.IChangedArgs<IOutputModel>>;
 
   /**
    * A signal emitted when a value in one of the outputs changes.
@@ -101,6 +93,11 @@ class OutputAreaModel implements OutputAreaWidget.IModel {
   }
 
   /**
+   * The output content factory used by the model.
+   */
+  readonly contentFactory: IOutputAreaModel.IContentFactory;
+
+  /**
    * Test whether the model is disposed.
    */
   get isDisposed(): boolean {
@@ -124,7 +121,7 @@ class OutputAreaModel implements OutputAreaWidget.IModel {
   /**
    * Get an item at the specified index.
    */
-  get(index: number): RenderMime.IOutputModel {
+  get(index: number): IOutputModel {
     return this.list.at(index);
   }
 
@@ -197,13 +194,14 @@ class OutputAreaModel implements OutputAreaWidget.IModel {
   }
 
   protected clearNext = false;
-  protected list: IObservableVector<RenderMime.IOutputModel> = null;
+  protected list: IObservableVector<IOutputModel> = null;
 
   /**
    * Create an output item and hook up its signals.
    */
-  private _createItem(options: RenderMime.IOutputModelOptions): OutputAreaWidget.IOutputModel {
-    let item = new RenderMime.OutputAreaModel({ options });
+  private _createItem(options: IOutputModel.IOptions): IOutputModel {
+    let factory = this.contentFactory;
+    let item = factory.createOutputModel(options);
     item.changed.connect(this._onItemChanged);
     item.metadata.changed.connect(this._onItemChanged);
     return item;
@@ -212,7 +210,7 @@ class OutputAreaModel implements OutputAreaWidget.IModel {
   /**
    * Handle a change to the list.
    */
-  private _onListChanged(sender: IObservableVector<OutputAreaWidget.IOutputModel>, args: ObservableVector.IChangedArgs<OutputAreaWidget.IOutputModel>) {
+  private _onListChanged(sender: IObservableVector<IOutputModel>, args: ObservableVector.IChangedArgs<IOutputModel>) {
     this.changed.emit(args);
   }
 
@@ -238,14 +236,20 @@ namespace OutputAreaModel {
    * The default implementation of a `IModelOutputFactory`.
    */
   export
-  class OutputModelFactory implements OutputAreaWidget.IOutputModelFactory {
+  class ContentFactory implements IOutputAreaModel.IContentFactory {
     /**
      * Create an output model.
      */
-    createOutputModel(options: RenderMime.IOutputModelOptions): RenderMime.IOutputModel {
-      return new RenderMime.OutputModel(options);
+    createOutputModel(options: IOutputModel.IOptions): IOutputModel {
+      return new OutputModel(options);
     }
   }
+
+  /**
+   * The default output model factory.
+   */
+  export
+  const defaultContentFactory = new ContentFactory();
 }
 
 

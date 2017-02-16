@@ -26,7 +26,7 @@ import {
 } from '../common/observablemap';
 
 import {
-  OutputAreaWidget
+  IOutputAreaModel, OutputAreaModel
 } from '../outputarea';
 
 
@@ -404,7 +404,7 @@ namespace CodeCellModel {
     /**
      * Create an output area.
      */
-    createOutputArea(options: OutputAreaWidget.IModelOptions): OutputAreaWidget.IModel;
+    createOutputArea(options: IOutputAreaModel.IOptions): IOutputAreaModel;
   }
 
   /**
@@ -415,7 +415,7 @@ namespace CodeCellModel {
     /**
      * Create an output area.
      */
-    createOutputArea(options: OutputAreaModel.IModelOptions): OutputAreaWidget.IModel {
+    createOutputArea(options: IOutputAreaModel.IOptions): IOutputAreaModel {
       return new OutputAreaModel(options);
     }
   }
