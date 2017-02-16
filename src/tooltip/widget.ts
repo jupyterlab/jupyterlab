@@ -114,8 +114,20 @@ class TooltipWidget extends Widget {
     }
     switch (event.type) {
     case 'keydown':
+      if (this.node.contains(event.target as HTMLElement)) {
+        if ((event as KeyboardEvent).keyCode === 27) { // Escape key
+          this.dispose();
+        }
+        return;
+      }
+      this.dispose();
+      break;
     case 'mousedown':
-      this._dismiss(event);
+      if (this.node.contains(event.target as HTMLElement)) {
+        this.activate();
+        return;
+      }
+      this.dispose();
       break;
     case 'scroll':
       this._evtScroll(event as MouseEvent);
@@ -158,16 +170,6 @@ class TooltipWidget extends Widget {
   protected onUpdateRequest(msg: Message): void {
     this._setGeometry();
     super.onUpdateRequest(msg);
-  }
-
-  /**
-   * Dismiss the tooltip if necessary.
-   */
-  private _dismiss(event: Event): void {
-    if (this.node.contains(event.target as HTMLElement)) {
-      return;
-    }
-    this.dispose();
   }
 
   /**
