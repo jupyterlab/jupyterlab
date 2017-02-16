@@ -133,6 +133,22 @@ class JupyterLab extends Application<ApplicationShell> {
   }
 
   /**
+   * Add the application-wide listeners.
+   */
+  protected addEventListeners(): void {
+    // Listen for keydown events in the capture phase.
+    document.addEventListener('keydown', this, true);
+    window.addEventListener('resize', this);
+  }
+
+  /**
+   * Handle global `keydown` events.
+   */
+  protected evtKeydown(event: KeyboardEvent): void {
+    this.keymap.processKeydownEvent(event);
+  }
+
+  /**
    * Create the application shell for the JupyterLab application.
    */
   protected createShell(): ApplicationShell {
