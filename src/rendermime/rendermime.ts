@@ -10,7 +10,7 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  deepEqual, JSONObject, JSONValue
+  JSONObject
 } from 'phosphor/lib/algorithm/json';
 
 import {
@@ -26,8 +26,8 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  IObservableMap, ObservableMap
-} from '../common/observablemap';
+  IObservableJSON
+} from '../common/observablejson';
 
 import {
   ISanitizer, defaultSanitizer
@@ -267,58 +267,20 @@ namespace RenderMime {
   }
 
   /**
-   * Valid rendered object type.
-   */
-  export
-  type RenderedObject = HTMLElement | Widget;
-
-  /**
    * A map of mimetypes to types.
    */
   export
   type MimeMap<T> = { [mimetype: string]: T };
 
   /**
-   * The mimeType for Jupyter console text.
-   */
-  export
-  const CONSOLE_MIMETYPE: string = 'application/vnd.jupyter.console-text';
-
-  /**
    * An observable model for mime data.
    */
   export
-  interface IMimeModel extends IObservableMap<JSONValue> {
+  interface IMimeModel extends IDisposable {
     /**
-     * Whether the model is trusted.
+     * A signal emitted when the state of the model changes.
      */
-    readonly trusted: boolean;
-
-    /**
-     * The metadata associated with the model.
-     */
-    readonly metadata: IObservableMap<JSONValue>;
-  }
-
-  /**
-   * The default mime model implementation.
-   */
-  export
-  class MimeModel extends ObservableMap<JSONValue> implements IMimeModel {
-    /**
-     * Construct a new mime model.
-     */
-    constructor(options: IMimeModelOptions = {}) {
-      super({
-        itemCmp: deepEqual,
-        values: options.data || {}
-      });
-      this.trusted = !!options.trusted;
-      this._metadata = new ObservableMap({
-        itemCmp: deepEqual,
-        values: options.metadata || {}
-      });
-    }
+    readonly stateChanged: ISignal<IOutputModel, void>;
 
     /**
      * Whether the model is trusted.
@@ -326,42 +288,19 @@ namespace RenderMime {
     readonly trusted: boolean;
 
     /**
-     * Dispose of the resources used by the mime model.
+     * The data associated with the model.
      */
-    dispose(): void {
-      this._metadata.dispose();
-      super.dispose();
-    }
+    readonly data: IObservableJSON;
 
     /**
      * The metadata associated with the model.
      */
-    get metadata(): IObservableMap<JSONValue> {
-      return this._metadata;
-    }
-
-    private _metadata: ObservableMap<JSONValue>;
-  }
-
-  /**
-   * The options used to create a mime model.
-   */
-  export
-  interface IMimeModelOptions {
-    /**
-     * The initial mime data.
-     */
-    data?: JSONObject;
+    readonly metadata: IObservableJSON;
 
     /**
-     * Whether the output is trusted.  The default is false.
+     * Serialize the model as JSON data.
      */
-    trusted?: boolean;
-
-    /**
-     * The initial metadata.
-     */
-    metadata?: JSONObject;
+    toJSON(): JSONObject;
   }
 
   /**

@@ -10,6 +10,10 @@ import {
 } from 'phosphor/lib/algorithm/json';
 
 import {
+  MimeModel
+} from './mimemodel';
+
+import {
   RenderMime
 } from './rendermime';
 
@@ -47,9 +51,9 @@ namespace IOutputModel {
   export
   interface IOptions {
     /**
-     * The original output.
+     * The raw output value.
      */
-    output: nbformat.IOutput;
+    value: nbformat.IOutput;
 
     /**
      * Whether the output is trusted.  The default is false.
@@ -63,7 +67,7 @@ namespace IOutputModel {
  * The default implementation of a notebook output model.
  */
 export
-class OutputModel extends RenderMime.MimeModel implements IOutputModel {
+class OutputModel extends MimeModel implements IOutputModel {
   /**
    * Construct a new output model.
    */
