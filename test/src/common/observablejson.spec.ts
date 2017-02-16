@@ -4,10 +4,6 @@
 import expect = require('expect.js');
 
 import {
-  JSONValue
-} from 'phosphor/lib/algorithm/json';
-
-import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -72,7 +68,7 @@ describe('common/observablejson', () => {
     describe('#args', () => {
 
       it('should be the args of the message', () => {
-        let args: IObservableJSON.ChangedArgs = {
+        let args: IObservableJSON.IChangedArgs = {
           key: 'foo',
           type: 'add',
           oldValue: 'ho',
@@ -88,11 +84,11 @@ describe('common/observablejson', () => {
 
   describe('ObservableJSONWidget', () => {
 
-    let editor: ObservableJSONWidget;
+    let editor: LogEditor;
     const editorFactory = new CodeMirrorEditorFactory().newInlineEditor;
 
     beforeEach(() => {
-      editor = new ObservableJSONWidget({ editorFactory });
+      editor = new LogEditor({ editorFactory });
     });
 
     afterEach(() => {
@@ -139,7 +135,7 @@ describe('common/observablejson', () => {
       });
 
       it('should be settable', () => {
-        let source = new ObservableMap<JSONValue>();
+        let source = new ObservableJSON();
         editor.source = source;
         expect(editor.source).to.be(source);
       });
@@ -147,7 +143,7 @@ describe('common/observablejson', () => {
       it('should update the text area value', () => {
         let model = editor.model;
         expect(model.value.text).to.be('No data!');
-        editor.source = new ObservableMap<JSONValue>();
+        editor.source = new ObservableJSON();
         expect(model.value.text).to.be('{}');
       });
 
@@ -163,7 +159,7 @@ describe('common/observablejson', () => {
       });
 
       it('should be dirty if the value changes while focused', () => {
-        editor.source = new ObservableMap<JSONValue>();
+        editor.source = new ObservableJSON();
         Widget.attach(editor, document.body);
         editor.editor.focus();
         expect(editor.isDirty).to.be(false);
@@ -172,7 +168,7 @@ describe('common/observablejson', () => {
       });
 
       it('should not be set if not focused', () => {
-        editor.source = new ObservableMap<JSONValue>();
+        editor.source = new ObservableJSON();
         Widget.attach(editor, document.body);
         expect(editor.isDirty).to.be(false);
         editor.source.set('foo', 1);
@@ -220,7 +216,7 @@ describe('common/observablejson', () => {
         });
 
         it('should revert to current data if there was no change', () => {
-          editor.source = new ObservableMap<JSONValue>();
+          editor.source = new ObservableJSON();
           editor.editor.focus();
           editor.source.set('foo', 1);
           let model = editor.model;
@@ -230,7 +226,7 @@ describe('common/observablejson', () => {
         });
 
         it('should not revert to current data if there was a change', () => {
-          editor.source = new ObservableMap<JSONValue>();
+          editor.source = new ObservableJSON();
           editor.model.value.text = 'foo';
           editor.source.set('foo', 1);
           let model = editor.model;
@@ -251,14 +247,14 @@ describe('common/observablejson', () => {
         });
 
         it('should revert the current data', () => {
-          editor.source = new ObservableMap<JSONValue>();
+          editor.source = new ObservableJSON();
           editor.model.value.text = 'foo';
           simulate(editor.revertButtonNode, 'click');
           expect(editor.model.value.text).to.be('{}');
         });
 
         it('should handle programmatic changes', () => {
-          editor.source = new ObservableMap<JSONValue>();
+          editor.source = new ObservableJSON();
           editor.model.value.text = 'foo';
           editor.source.set('foo', 1);
           simulate(editor.revertButtonNode, 'click');
@@ -271,7 +267,7 @@ describe('common/observablejson', () => {
         });
 
         it('should bail if it is not valid JSON', () => {
-          editor.source = new ObservableMap<JSONValue>();
+          editor.source = new ObservableJSON();
           editor.model.value.text = 'foo';
           editor.source.set('foo', 1);
           simulate(editor.commitButtonNode, 'click');
@@ -279,7 +275,7 @@ describe('common/observablejson', () => {
         });
 
         it('should override a key that was set programmatically', () => {
-          editor.source = new ObservableMap<JSONValue>();
+          editor.source = new ObservableJSON();
           editor.model.value.text = '{"foo": 2}';
           editor.source.set('foo', 1);
           simulate(editor.commitButtonNode, 'click');
@@ -287,7 +283,7 @@ describe('common/observablejson', () => {
         });
 
         it('should allow a programmatic key to update', () => {
-          editor.source = new ObservableMap<JSONValue>();
+          editor.source = new ObservableJSON();
           editor.source.set('foo', 1);
           editor.source.set('bar', 1);
           editor.model.value.text = '{"foo":1, "bar": 2}';
@@ -298,7 +294,7 @@ describe('common/observablejson', () => {
         });
 
         it('should allow a key to be added by the user', () => {
-          editor.source = new ObservableMap<JSONValue>();
+          editor.source = new ObservableJSON();
           editor.source.set('foo', 1);
           editor.source.set('bar', 1);
           editor.model.value.text = '{"foo":1, "bar": 2, "baz": 3}';
@@ -309,7 +305,7 @@ describe('common/observablejson', () => {
         });
 
         it('should allow a key to be removed by the user', () => {
-          editor.source = new ObservableMap<JSONValue>();
+          editor.source = new ObservableJSON();
           editor.source.set('foo', 1);
           editor.source.set('bar', 1);
           editor.model.value.text = '{"foo": 1}';
@@ -318,7 +314,7 @@ describe('common/observablejson', () => {
         });
 
         it('should allow a key to be removed programmatically that was not set by the user', () => {
-          editor.source = new ObservableMap<JSONValue>();
+          editor.source = new ObservableJSON();
           editor.source.set('foo', 1);
           editor.source.set('bar', 1);
           editor.model.value.text = '{"foo": 1, "bar": 3}';
@@ -328,7 +324,7 @@ describe('common/observablejson', () => {
         });
 
         it('should keep a key that was removed programmatically that was changed by the user', () => {
-          editor.source = new ObservableMap<JSONValue>();
+          editor.source = new ObservableJSON();
           editor.source.set('foo', 1);
           editor.source.set('bar', 1);
           editor.model.value.text = '{"foo": 2, "bar": 3}';
@@ -374,28 +370,25 @@ describe('common/observablejson', () => {
     context('#source.changed', () => {
 
       it('should update the value', () => {
-        editor.source = new ObservableMap<JSONValue>();
+        editor.source = new ObservableJSON();
         editor.source.set('foo', 1);
-        expect(editor.methods).to.contain('onMetadataChanged');
         expect(editor.model.value.text).to.be('No data!');
       });
 
       it('should bail if the input is dirty', () => {
         Widget.attach(editor, document.body);
-        editor.source = new ObservableMap<JSONValue>();
+        editor.source = new ObservableJSON();
         editor.model.value.text = 'ha';
         editor.source.set('foo', 2);
-        expect(editor.methods).to.contain('onMetadataChanged');
         expect(editor.model.value.text).to.be('ha');
       });
 
       it('should bail if the input is focused', () => {
         Widget.attach(editor, document.body);
         editor.model.value.text = '{}';
-        editor.source = new ObservableMap<JSONValue>();
+        editor.source = new ObservableJSON();
         editor.editor.focus();
         editor.source.set('foo', 2);
-        expect(editor.methods).to.contain('onMetadataChanged');
         expect(editor.model.value.text).to.be('{}');
       });
 

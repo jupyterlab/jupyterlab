@@ -21,7 +21,7 @@ import {
 } from '../../../lib/renderers';
 
 import {
-  RenderMime
+  MimeModel, RenderMime
 } from '../../../lib/rendermime';
 
 
@@ -35,7 +35,7 @@ function runCanRunder(renderer: RenderMime.IRenderer, trusted: boolean): boolean
     data[mimeType] = 'test';
   }
   data['fizz/buzz'] = 'test';
-  let model = new RenderMime.MimeModel({ data, trusted });
+  let model = new MimeModel({ data, trusted });
 
   for (let mimeType in renderer.mimeTypes) {
     let options = { model, mimeType, sanitizer };
@@ -50,7 +50,7 @@ function runCanRunder(renderer: RenderMime.IRenderer, trusted: boolean): boolean
 
 
 function createModel(data: RenderMime.MimeMap<JSONValue>, trusted=false): RenderMime.IMimeModel {
-  return new RenderMime.MimeModel({ data, trusted });
+  return new MimeModel({ data, trusted });
 }
 
 const sanitizer = defaultSanitizer;

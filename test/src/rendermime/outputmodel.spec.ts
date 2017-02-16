@@ -43,10 +43,10 @@ describe('rendermime/output', () => {
     describe('#constructor()', () => {
 
       it('should create a new output model', () => {
-        let output = DEFAULT_EXECUTE;
-        let model = new OutputModel({ output });
+        let value = DEFAULT_EXECUTE;
+        let model = new OutputModel({ value });
         expect(model).to.be.an(OutputModel);
-        model = new OutputModel({ output, trusted: true });
+        model = new OutputModel({ value, trusted: true });
         expect(model).to.be.an(OutputModel);
       });
 
@@ -55,9 +55,9 @@ describe('rendermime/output', () => {
     describe('#type', () => {
 
       it('should be the output type', () => {
-        let model = new OutputModel({ output: DEFAULT_EXECUTE });
+        let model = new OutputModel({ value: DEFAULT_EXECUTE });
         expect(model.type).to.be(DEFAULT_EXECUTE.output_type);
-        model = new OutputModel({ output: DEFAULT_STREAM });
+        model = new OutputModel({ value: DEFAULT_STREAM });
         expect(model.type).to.be(DEFAULT_STREAM.output_type);
       });
 
@@ -66,12 +66,12 @@ describe('rendermime/output', () => {
     describe('#executionCount', () => {
 
       it('should be the execution count of an execution result', () => {
-        let model = new OutputModel({ output: DEFAULT_EXECUTE });
+        let model = new OutputModel({ value: DEFAULT_EXECUTE });
         expect(model.executionCount).to.be(1);
       });
 
       it('should be null for non-execution results', () => {
-        let model = new OutputModel({ output: DEFAULT_STREAM });
+        let model = new OutputModel({ value: DEFAULT_STREAM });
         expect(model.executionCount).to.be(null);
       });
 
@@ -80,9 +80,9 @@ describe('rendermime/output', () => {
     describe('#toJSON()', () => {
 
       it('should yield the original value', () => {
-        let model = new OutputModel({ output: DEFAULT_STREAM });
+        let model = new OutputModel({ value: DEFAULT_STREAM });
         expect(model.toJSON()).to.eql(DEFAULT_STREAM);
-        model = new OutputModel({ output: DEFAULT_EXECUTE });
+        model = new OutputModel({ value: DEFAULT_EXECUTE });
         expect(model.toJSON()).to.eql(DEFAULT_EXECUTE);
       });
 

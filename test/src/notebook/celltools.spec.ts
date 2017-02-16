@@ -24,8 +24,8 @@ import {
 } from '../../../lib/codemirror';
 
 import {
-  Metadata
-} from '../../../lib/common/metadata';
+  ObservableJSON
+} from '../../../lib/common/observablejson';
 
 import {
   CellTools, NotebookPanel, NotebookTracker, NotebookActions
@@ -50,7 +50,7 @@ class LogTool extends CellTools.Tool {
     this.methods.push('onSelectionChanged');
   }
 
-  protected onMetadataChanged(msg: Metadata.ChangeMessage): void {
+  protected onMetadataChanged(msg: ObservableJSON.ChangeMessage): void {
     super.onMetadataChanged(msg);
     this.methods.push('onMetadataChanged');
   }
@@ -82,7 +82,7 @@ class LogKeySelector extends CellTools.KeySelector {
     this.methods.push('onActiveCellChanged');
   }
 
-  protected onMetadataChanged(message: Metadata.ChangeMessage): void {
+  protected onMetadataChanged(message: ObservableJSON.ChangeMessage): void {
     super.onMetadataChanged(message);
     this.methods.push('onMetadataChanged');
   }
