@@ -8,7 +8,7 @@ import {
 } from 'phosphor/lib/algorithm/json';
 
 import {
-  Message, sendMessage
+  Message
 } from 'phosphor/lib/core/messaging';
 
 import {
@@ -28,8 +28,8 @@ import {
 } from '../../../lib/common/metadata';
 
 import {
-  RawCellModel
-} from '../../../lib/cells';
+  ObservableMap
+} from '../../../lib/common/observablemap';
 
 
 class LogEditor extends Metadata.Editor {
@@ -52,115 +52,10 @@ class LogEditor extends Metadata.Editor {
     super.onBeforeDetach(msg);
     this.methods.push('onBeforeDetach');
   }
-
-  protected onMetadataChanged(msg: Metadata.ChangeMessage) {
-    super.onMetadataChanged(msg);
-    this.methods.push('onMetadataChanged');
-  }
-}
-
-
-/**
- * Set a programmatic on a metdata editor.
- */
-function setValue(editor: Metadata.Editor, name: string, value: JSONValue): void {
-  let cursor = editor.owner.getMetadata(name);
-  cursor.setValue(value);
-  let message = new Metadata.ChangeMessage({
-    name: name,
-    oldValue: void 0,
-    newValue: value
-  });
-  editor.processMessage(message);
-}
-
-/**
- * Set an input value on a metadata editor.
- */
-function setInput(editor: Metadata.Editor, value: string): void {
-  editor.editor.model.value.text = value;
 }
 
 
 describe('common/metadata', () => {
-
-  describe('Metadata.Cursor', () => {
-
-    let cursor: Metadata.ICursor;
-    let value: JSONValue;
-
-    beforeEach(() => {
-      value = 'hi';
-      cursor = new Metadata.Cursor({
-        name: 'foo',
-        read: name => {
-          return value;
-        },
-        write: (name, newValue) => {
-          value = newValue;
-        }
-      });
-    });
-
-    afterEach(() => {
-      cursor.dispose();
-    });
-
-    describe('#constructor', () => {
-
-      it('should create a metadata cursor', () => {
-        expect(cursor).to.be.a(Metadata.Cursor);
-      });
-
-    });
-
-    describe('#name', () => {
-
-      it('should be the name of the metadata key', () => {
-        expect(cursor.name).to.be('foo');
-      });
-
-    });
-
-    describe('#isDisposed', () => {
-
-      it('should test whether the cursor is disposed', () => {
-        expect(cursor.isDisposed).to.be(false);
-        cursor.dispose();
-        expect(cursor.isDisposed).to.be(true);
-      });
-
-    });
-
-    describe('#dispose()', () => {
-
-      it('should dispose of the resources used by the cursor', () => {
-        cursor.dispose();
-        expect(cursor.isDisposed).to.be(true);
-        cursor.dispose();
-        expect(cursor.isDisposed).to.be(true);
-      });
-
-    });
-
-    describe('#getValue()', () => {
-
-      it('should get the value of the cursor data', () => {
-        expect(cursor.getValue()).to.be('hi');
-      });
-
-    });
-
-    describe('#setValue()', () => {
-
-      it('should set the value of the cursor data', () => {
-        cursor.setValue(1);
-        expect(cursor.getValue()).to.be(1);
-      });
-
-    });
-
-  });
 
   describe('Metadata.ChangeMessage', () => {
 
@@ -168,7 +63,8 @@ describe('common/metadata', () => {
 
       it('should create a new message', () => {
         let message = new Metadata.ChangeMessage({
-          name: 'foo',
+          key: 'foo',
+          type: 'add',
           oldValue: 1,
           newValue: 2
         });
@@ -181,8 +77,9 @@ describe('common/metadata', () => {
 
       it('should be the args of the message', () => {
         let args: Metadata.ChangedArgs = {
-          name: 'foo',
-          oldValue: void 0,
+          key: 'foo',
+          type: 'add',
+          oldValue: 'ho',
           newValue: 'hi'
         };
         let message = new Metadata.ChangeMessage(args);
@@ -239,22 +136,22 @@ describe('common/metadata', () => {
 
     });
 
-    describe('#owner', () => {
+    describe('#source', () => {
 
-      it('should be the owner of the metadata', () => {
-        expect(editor.owner).to.be(null);
+      it('should be the source of the metadata', () => {
+        expect(editor.source).to.be(null);
       });
 
       it('should be settable', () => {
-        let model = new RawCellModel({});
-        editor.owner = model;
-        expect(editor.owner).to.be(model);
+        let source = new ObservableMap<JSONValue>();
+        editor.source = source;
+        expect(editor.source).to.be(source);
       });
 
       it('should update the text area value', () => {
-        let model = editor.editor.model;
+        let model = editor.model;
         expect(model.value.text).to.be('No data!');
-        editor.owner = new RawCellModel({});
+        editor.source = new ObservableMap<JSONValue>();
         expect(model.value.text).to.be('{}');
       });
 
@@ -265,48 +162,25 @@ describe('common/metadata', () => {
       it('should test whether the editor value is dirty', () => {
         expect(editor.isDirty).to.be(false);
         Widget.attach(editor, document.body);
-        editor.editor.model.value.text = 'a';
+        editor.model.value.text = 'a';
         expect(editor.isDirty).to.be(true);
       });
 
       it('should be dirty if the value changes while focused', () => {
-        editor.owner = new RawCellModel({});
+        editor.source = new ObservableMap<JSONValue>();
         Widget.attach(editor, document.body);
         editor.editor.focus();
         expect(editor.isDirty).to.be(false);
-        let message = new Metadata.ChangeMessage({
-          name: 'foo',
-          oldValue: 1,
-          newValue: 2
-        });
-        sendMessage(editor, message);
+        editor.source.set('foo', 1);
         expect(editor.isDirty).to.be(true);
       });
 
       it('should not be set if not focused', () => {
+        editor.source = new ObservableMap<JSONValue>();
         Widget.attach(editor, document.body);
         expect(editor.isDirty).to.be(false);
-        let message = new Metadata.ChangeMessage({
-          name: 'foo',
-          oldValue: 1,
-          newValue: 2
-        });
-        sendMessage(editor, message);
+        editor.source.set('foo', 1);
         expect(editor.isDirty).to.be(false);
-      });
-
-    });
-
-    describe('#processMessage()', () => {
-
-      it('should handle metadata changed messages', () => {
-        let message = new Metadata.ChangeMessage({
-          name: 'foo',
-          oldValue: 1,
-          newValue: 2
-        });
-        editor.processMessage(message);
-        expect(editor.methods).to.contain('onMetadataChanged');
       });
 
     });
@@ -314,22 +188,22 @@ describe('common/metadata', () => {
     context('model.value.changed', () => {
 
       it('should add the error flag if invalid JSON', () => {
-        setInput(editor, 'foo');
+        editor.model.value.text = 'foo';
         expect(editor.hasClass('jp-mod-error')).to.be(true);
       });
 
       it('should show the commit button if the value has changed', () => {
-        setInput(editor, '{"foo": 1}');
+        editor.model.value.text = '{"foo": 1}';
         expect(editor.commitButtonNode.hidden).to.be(false);
       });
 
       it('should not show the commit button if the value is invalid', () => {
-        setInput(editor, 'foo');
+        editor.model.value.text = 'foo';
         expect(editor.commitButtonNode.hidden).to.be(true);
       });
 
       it('should show the revert button if the value has changed', () => {
-        setInput(editor, 'foo');
+        editor.model.value.text = 'foo';
         expect(editor.revertButtonNode.hidden).to.be(false);
       });
 
@@ -350,20 +224,20 @@ describe('common/metadata', () => {
         });
 
         it('should revert to current data if there was no change', () => {
-          editor.owner = new RawCellModel({});
+          editor.source = new ObservableMap<JSONValue>();
           editor.editor.focus();
-          setValue(editor, 'foo', 1);
-          let model = editor.editor.model;
+          editor.source.set('foo', 1);
+          let model = editor.model;
           expect(model.value.text).to.be('{}');
           simulate(editor.editorHostNode, 'blur');
           expect(model.value.text).to.be('{\n  "foo": 1\n}');
         });
 
         it('should not revert to current data if there was a change', () => {
-          editor.owner = new RawCellModel({});
-          setInput(editor, 'foo');
-          setValue(editor, 'foo', 1);
-          let model = editor.editor.model;
+          editor.source = new ObservableMap<JSONValue>();
+          editor.model.value.text = 'foo';
+          editor.source.set('foo', 1);
+          let model = editor.model;
           expect(model.value.text).to.be('foo');
           simulate(editor.editorHostNode, 'blur');
           expect(model.value.text).to.be('foo');
@@ -381,16 +255,16 @@ describe('common/metadata', () => {
         });
 
         it('should revert the current data', () => {
-          editor.owner = new RawCellModel({});
-          setInput(editor, 'foo');
+          editor.source = new ObservableMap<JSONValue>();
+          editor.model.value.text = 'foo';
           simulate(editor.revertButtonNode, 'click');
           expect(editor.model.value.text).to.be('{}');
         });
 
         it('should handle programmatic changes', () => {
-          editor.owner = new RawCellModel({});
-          setInput(editor, 'foo');
-          setValue(editor, 'foo', 1);
+          editor.source = new ObservableMap<JSONValue>();
+          editor.model.value.text = 'foo';
+          editor.source.set('foo', 1);
           simulate(editor.revertButtonNode, 'click');
           expect(editor.model.value.text).to.be('{\n  "foo": 1\n}');
         });
@@ -401,68 +275,68 @@ describe('common/metadata', () => {
         });
 
         it('should bail if it is not valid JSON', () => {
-          editor.owner = new RawCellModel({});
-          setInput(editor, 'foo');
-          setValue(editor, 'foo', 1);
+          editor.source = new ObservableMap<JSONValue>();
+          editor.model.value.text = 'foo';
+          editor.source.set('foo', 1);
           simulate(editor.commitButtonNode, 'click');
           expect(editor.model.value.text).to.be('foo');
         });
 
         it('should override a key that was set programmatically', () => {
-          editor.owner = new RawCellModel({});
-          setInput(editor, '{"foo": 2}');
-          setValue(editor, 'foo', 1);
+          editor.source = new ObservableMap<JSONValue>();
+          editor.model.value.text = '{"foo": 2}';
+          editor.source.set('foo', 1);
           simulate(editor.commitButtonNode, 'click');
           expect(editor.model.value.text).to.be('{\n  "foo": 2\n}');
         });
 
         it('should allow a programmatic key to update', () => {
-          editor.owner = new RawCellModel({});
-          setValue(editor, 'foo', 1);
-          setValue(editor, 'bar', 1);
-          setInput(editor, '{"foo":1, "bar": 2}');
-          setValue(editor, 'foo', 2);
+          editor.source = new ObservableMap<JSONValue>();
+          editor.source.set('foo', 1);
+          editor.source.set('bar', 1);
+          editor.model.value.text = '{"foo":1, "bar": 2}';
+          editor.source.set('foo', 2);
           simulate(editor.commitButtonNode, 'click');
           let expected = '{\n  "foo": 2,\n  "bar": 2\n}';
           expect(editor.model.value.text).to.be(expected);
         });
 
         it('should allow a key to be added by the user', () => {
-          editor.owner = new RawCellModel({});
-          setValue(editor, 'foo', 1);
-          setValue(editor, 'bar', 1);
-          setInput(editor, '{"foo":1, "bar": 2, "baz": 3}');
-          setValue(editor, 'foo', 2);
+          editor.source = new ObservableMap<JSONValue>();
+          editor.source.set('foo', 1);
+          editor.source.set('bar', 1);
+          editor.model.value.text = '{"foo":1, "bar": 2, "baz": 3}';
+          editor.source.set('foo', 2);
           simulate(editor.commitButtonNode, 'click');
           let value = '{\n  "foo": 2,\n  "bar": 2,\n  "baz": 3\n}';
           expect(editor.model.value.text).to.be(value);
         });
 
         it('should allow a key to be removed by the user', () => {
-          editor.owner = new RawCellModel({});
-          setValue(editor, 'foo', 1);
-          setValue(editor, 'bar', 1);
-          setInput(editor, '{"foo": 1}');
+          editor.source = new ObservableMap<JSONValue>();
+          editor.source.set('foo', 1);
+          editor.source.set('bar', 1);
+          editor.model.value.text = '{"foo": 1}';
           simulate(editor.commitButtonNode, 'click');
           expect(editor.model.value.text).to.be('{\n  "foo": 1\n}');
         });
 
         it('should allow a key to be removed programmatically that was not set by the user', () => {
-          editor.owner = new RawCellModel({});
-          setValue(editor, 'foo', 1);
-          setValue(editor, 'bar', 1);
-          setInput(editor, '{"foo": 1, "bar": 3}');
-          setValue(editor, 'foo', void 0);
+          editor.source = new ObservableMap<JSONValue>();
+          editor.source.set('foo', 1);
+          editor.source.set('bar', 1);
+          editor.model.value.text = '{"foo": 1, "bar": 3}';
+          editor.source.set('foo', void 0);
           simulate(editor.commitButtonNode, 'click');
           expect(editor.model.value.text).to.be('{\n  "bar": 3\n}');
         });
 
         it('should keep a key that was removed programmatically that was changed by the user', () => {
-          editor.owner = new RawCellModel({});
-          setValue(editor, 'foo', 1);
-          setValue(editor, 'bar', 1);
-          setInput(editor, '{"foo": 2, "bar": 3}');
-          setValue(editor, 'foo', void 0);
+          editor.source = new ObservableMap<JSONValue>();
+          editor.source.set('foo', 1);
+          editor.source.set('bar', 1);
+          editor.model.value.text = '{"foo": 2, "bar": 3}';
+          editor.source.set('foo', void 0);
           simulate(editor.commitButtonNode, 'click');
           let expected = '{\n  "foo": 2,\n  "bar": 3\n}';
           expect(editor.model.value.text).to.be(expected);
@@ -504,47 +378,27 @@ describe('common/metadata', () => {
     describe('#onMetadataChanged', () => {
 
       it('should update the value', () => {
-        let message = new Metadata.ChangeMessage({
-          name: 'foo',
-          oldValue: 1,
-          newValue: 2
-        });
-        editor.processMessage(message);
+        editor.source = new ObservableMap<JSONValue>();
+        editor.source.set('foo', 1);
         expect(editor.methods).to.contain('onMetadataChanged');
         expect(editor.model.value.text).to.be('No data!');
       });
 
       it('should bail if the input is dirty', () => {
         Widget.attach(editor, document.body);
-        let model = new RawCellModel({});
-        editor.owner = model;
-        setInput(editor, 'ha');
-        let cursor = model.getMetadata('foo');
-        cursor.setValue(2);
-        let message = new Metadata.ChangeMessage({
-          name: 'foo',
-          oldValue: 1,
-          newValue: 2
-        });
-        editor.processMessage(message);
+        editor.source = new ObservableMap<JSONValue>();
+        editor.model.value.text = 'ha';
+        editor.source.set('foo', 2);
         expect(editor.methods).to.contain('onMetadataChanged');
         expect(editor.model.value.text).to.be('ha');
       });
 
       it('should bail if the input is focused', () => {
         Widget.attach(editor, document.body);
-        setInput(editor, '{}');
-        let model = new RawCellModel({});
-        editor.owner = model;
-        let cursor = model.getMetadata('foo');
-        cursor.setValue(2);
-        let message = new Metadata.ChangeMessage({
-          name: 'foo',
-          oldValue: 1,
-          newValue: 2
-        });
+        editor.model.value.text = '{}';
+        editor.source = new ObservableMap<JSONValue>();
         editor.editor.focus();
-        editor.processMessage(message);
+        editor.source.set('foo', 2);
         expect(editor.methods).to.contain('onMetadataChanged');
         expect(editor.model.value.text).to.be('{}');
       });
