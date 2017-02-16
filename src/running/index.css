@@ -135,6 +135,7 @@
 
 
 .jp-RunningSessions-itemLabel {
+  font-size: var(--jp-ui-font-size1);
   flex: 1 1 auto;
   margin-right: 4px;
   text-overflow: ellipsis;
@@ -144,6 +145,7 @@
 }
 
 .jp-RunningSessions-itemShutdown {
+  letter-spacing: .8px;
   flex: 0 0 auto;
   padding: 0px 4px;
   margin: 2px 8px 2px 0px;
