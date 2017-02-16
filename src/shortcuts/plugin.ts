@@ -187,32 +187,32 @@ const SHORTCUTS = [
   },
   {
     command: NotebookCommandIDs.interrupt,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['I', 'I']
   },
   {
     command: NotebookCommandIDs.restart,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['0', '0']
   },
   {
     command: NotebookCommandIDs.toCode,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['Y']
   },
   {
     command: NotebookCommandIDs.toMarkdown,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['M']
   },
   {
     command: NotebookCommandIDs.toRaw,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['R']
   },
   {
     command: NotebookCommandIDs.deleteCell,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['D', 'D'],
   },
   {
@@ -222,122 +222,122 @@ const SHORTCUTS = [
   },
   {
     command: NotebookCommandIDs.merge,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['Shift M'],
   },
   {
     command: NotebookCommandIDs.selectAbove,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['ArrowUp'],
   },
   {
     command: NotebookCommandIDs.selectAbove,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['K'],
   },
   {
     command: NotebookCommandIDs.selectBelow,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['ArrowDown'],
   },
   {
     command: NotebookCommandIDs.selectBelow,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['J'],
   },
   {
     command: NotebookCommandIDs.extendAbove,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['Shift ArrowUp'],
   },
   {
     command: NotebookCommandIDs.extendAbove,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['Shift K'],
   },
   {
     command: NotebookCommandIDs.extendBelow,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['Shift ArrowDown'],
   },
   {
     command: NotebookCommandIDs.extendBelow,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['Shift J'],
   },
   {
     command: NotebookCommandIDs.undo,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['Z'],
   },
   {
     command: NotebookCommandIDs.redo,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['Shift Z'],
   },
   {
     command: NotebookCommandIDs.cut,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['X']
   },
   {
     command: NotebookCommandIDs.copy,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['C']
   },
   {
     command: NotebookCommandIDs.paste,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['V']
   },
   {
     command: NotebookCommandIDs.insertAbove,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['A']
   },
   {
     command: NotebookCommandIDs.insertBelow,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['B']
   },
   {
     command: NotebookCommandIDs.toggleLines,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['L']
   },
   {
     command: NotebookCommandIDs.markdown1,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['1']
   },
   {
     command: NotebookCommandIDs.markdown2,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['2']
   },
   {
     command: NotebookCommandIDs.markdown3,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['3']
   },
   {
     command: NotebookCommandIDs.markdown4,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['4']
   },
   {
     command: NotebookCommandIDs.markdown5,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['5']
   },
   {
     command: NotebookCommandIDs.markdown6,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['6']
   },
   {
     command: NotebookCommandIDs.editMode,
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['Enter']
   },
   {
