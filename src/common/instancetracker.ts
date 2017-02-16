@@ -6,6 +6,10 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
+  find
+} from 'phosphor/lib/algorithm/searching';
+
+import {
   IDisposable
 } from 'phosphor/lib/core/disposable';
 
@@ -227,19 +231,12 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * Find the first widget in the tracker that satisfies a filter function.
    *
    * @param - fn The filter function to call on each widget.
+   *
+   * #### Notes
+   * If no widget is found, the value returned is `undefined`.
    */
   find(fn: (widget: T) => boolean): T {
-    let result: T = null;
-    each(this._tracker.widgets, widget => {
-      // If a result has already been found, short circuit.
-      if (result) {
-        return;
-      }
-      if (fn(widget)) {
-        result = widget;
-      }
-    });
-    return result;
+    return find(this._tracker.widgets, fn);
   }
 
   /**
