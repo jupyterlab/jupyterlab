@@ -66,18 +66,18 @@ describe('outputarea/model', () => {
       });
     });
 
-    describe('#itemChanged', () => {
+    describe('#stateChanged', () => {
 
       it('should be emitted when an item changes', () => {
         let called = false;
         model.add(DEFAULT_OUTPUTS[0]);
-        model.itemChanged.connect((sender, args) => {
+        model.stateChanged.connect((sender, args) => {
           expect(sender).to.be(model);
           expect(args).to.be(void 0);
           called = true;
         });
         let output = model.get(0);
-        output.set('foo', 1);
+        output.data.set('foo', 1);
         expect(called).to.be(true);
       });
 
@@ -196,14 +196,24 @@ describe('outputarea/model', () => {
         model.add(DEFAULT_OUTPUTS[1]);
         expect(model.length).to.be(1);
       });
+
+    });
+
+    describe('#fromJSON()', () => {
+
+      it('should deserialize the model from JSON', () => {
+        model.clear();
+        model.fromJSON(DEFAULT_OUTPUTS);
+        expect(model.toJSON()).to.eql(DEFAULT_OUTPUTS);
+      });
+
     });
 
     describe('#toJSON()', () => {
 
       it('should serialize the model to JSON', () => {
-        for (let output of DEFAULT_OUTPUTS) {
-          model.add(output);
-        }
+        expect(model.toJSON()).to.eql([]);
+        model.fromJSON(DEFAULT_OUTPUTS);
         expect(model.toJSON()).to.eql(DEFAULT_OUTPUTS);
       });
 
@@ -217,7 +227,7 @@ describe('outputarea/model', () => {
 
       it('should create an output model', () => {
         let factory = new OutputAreaModel.ContentFactory();
-        let model = factory.createOutputModel({ output: DEFAULT_OUTPUTS[0] });
+        let model = factory.createOutputModel({ value: DEFAULT_OUTPUTS[0] });
         expect(model).to.be.an(OutputModel);
       });
 
