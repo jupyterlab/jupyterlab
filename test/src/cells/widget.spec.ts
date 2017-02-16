@@ -20,13 +20,13 @@ import {
 } from '../../../lib/codeeditor';
 
 import {
-  BaseCellWidget, CellModel, InputAreaWidget, ICellModel,
+  BaseCellWidget, CellModel, InputAreaWidget,
   CodeCellWidget, CodeCellModel, MarkdownCellWidget,
   RawCellWidget, RawCellModel, MarkdownCellModel
 } from '../../../lib/cells';
 
 import {
-  OutputAreaWidget
+  OutputAreaModel, OutputAreaWidget
 } from '../../../lib/outputarea';
 
 import {
@@ -72,16 +72,6 @@ class LogBaseCell extends BaseCellWidget {
     super.onUpdateRequest(msg);
     this.methods.push('onUpdateRequest');
   }
-
-  protected onMetadataChanged(model: ICellModel, args: any): void {
-    super.onMetadataChanged(model, args);
-    this.methods.push('onMetadataChanged');
-  }
-
-  protected onModelStateChanged(model: ICellModel, args: any): void {
-    super.onModelStateChanged(model, args);
-    this.methods.push('onModelStateChanged');
-  }
 }
 
 
@@ -90,7 +80,8 @@ class LogCodeCell extends CodeCellWidget {
   methods: string[] = [];
 
   constructor() {
-    super({ model: new CodeCellModel({}), contentFactory: createCodeCellFactory(),
+    super({ model: new CodeCellModel({}),
+            contentFactory: createCodeCellFactory(),
             rendermime });
   }
 
@@ -99,14 +90,9 @@ class LogCodeCell extends CodeCellWidget {
     this.methods.push('onUpdateRequest');
   }
 
-  protected onMetadataChanged(model: ICellModel, args: any): void {
+  protected onMetadataChanged(model: any, args: any): void {
     super.onMetadataChanged(model, args);
     this.methods.push('onMetadataChanged');
-  }
-
-  protected onModelStateChanged(model: ICellModel, args: any): void {
-    super.onModelStateChanged(model, args);
-    this.methods.push('onModelStateChanged');
   }
 }
 
@@ -201,26 +187,6 @@ describe('cells/widget', () => {
           expect(widget.methods).to.eql(['onUpdateRequest']);
           done();
         });
-      });
-
-    });
-
-    describe('#trusted', () => {
-
-      it('should be a boolean', () => {
-        let widget = new BaseCellWidget({ model, contentFactory });
-        expect(typeof widget.trusted).to.be('boolean');
-      });
-
-      it('should default to false', () => {
-        let widget = new BaseCellWidget({ model, contentFactory });
-        expect(widget.trusted).to.be(false);
-      });
-
-      it('should be settable', () => {
-        let widget = new BaseCellWidget({ model, contentFactory });
-        widget.trusted = true;
-        expect(widget.trusted).to.be(true);
       });
 
     });
@@ -338,11 +304,7 @@ describe('cells/widget', () => {
         let method = 'onMetadataChanged';
         let widget = new LogBaseCell();
         expect(widget.methods).to.not.contain(method);
-        widget.model.metadataChanged.emit({
-          name: 'foo',
-          oldValue: 'bar',
-          newValue: 'baz'
-        });
+        widget.model.metadata.set('foo', 'bar');
         expect(widget.methods).to.contain(method);
       });
 
@@ -501,11 +463,7 @@ describe('cells/widget', () => {
         let method = 'onMetadataChanged';
         let widget = new LogCodeCell();
         expect(widget.methods).to.not.contain(method);
-        widget.model.metadataChanged.emit({
-          name: 'foo',
-          oldValue: 'bar',
-          newValue: 'baz'
-        });
+        widget.model.metadata.set('foo', 1);
         expect(widget.methods).to.contain(method);
       });
 
@@ -535,7 +493,9 @@ describe('cells/widget', () => {
 
         it('should create an output area widget', () => {
           let factory = new CodeCellWidget.ContentFactory({ editorFactory });
+          let model = new OutputAreaModel();
           let output = factory.createOutputArea({
+            model,
             rendermime,
             contentFactory: OutputAreaWidget.defaultContentFactory
           });
