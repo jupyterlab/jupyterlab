@@ -308,12 +308,15 @@ namespace RenderMime {
     /**
      * Construct a new mime model.
      */
-    constructor(options: IMimeModelOptions) {
-      super({ itemCmp: deepEqual, values: options.data });
+    constructor(options: IMimeModelOptions = {}) {
+      super({
+        itemCmp: deepEqual,
+        values: options.data || {}
+      });
       this.trusted = !!options.trusted;
       this._metadata = new ObservableMap({
         itemCmp: deepEqual,
-        values: options.metadata
+        values: options.metadata || {}
       });
     }
 
@@ -346,9 +349,9 @@ namespace RenderMime {
   export
   interface IMimeModelOptions {
     /**
-     * The raw mime data.
+     * The initial mime data.
      */
-    data: JSONObject;
+    data?: JSONObject;
 
     /**
      * Whether the output is trusted.  The default is false.
@@ -356,7 +359,7 @@ namespace RenderMime {
     trusted?: boolean;
 
     /**
-     * The raw metadata, if applicable.
+     * The initial metadata.
      */
     metadata?: JSONObject;
   }
