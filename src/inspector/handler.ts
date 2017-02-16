@@ -18,7 +18,7 @@ import {
 } from '../codeeditor';
 
 import {
-  MimeModel
+  MimeModel, RenderMime
 } from '../rendermime';
 
 import {

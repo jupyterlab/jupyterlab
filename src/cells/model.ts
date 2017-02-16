@@ -22,8 +22,8 @@ import {
 } from '../common/interfaces';
 
 import {
-  IObservableMap, ObservableMap
-} from '../common/observablemap';
+  IObservableJSON, ObservableJSON
+} from '../common/observablejson';
 
 import {
   IOutputAreaModel, OutputAreaModel
@@ -58,7 +58,7 @@ interface ICellModel extends CodeEditor.IModel {
   /**
    * The metadata associated with the cell.
    */
-  readonly metadata: IObservableMap<JSONValue>;
+  readonly metadata: IObservableJSON;
 
   /**
    * Serialize the model to JSON.
@@ -168,7 +168,7 @@ class CellModel extends CodeEditor.Model implements ICellModel {
   /**
    * The metadata associated with the cell.
    */
-  get metadata(): IObservableMap<JSONValue> {
+  get metadata(): IObservableJSON {
     return this._metadata;
   }
 
@@ -222,7 +222,7 @@ class CellModel extends CodeEditor.Model implements ICellModel {
     this.contentChanged.emit(void 0);
   }
 
-  private _metadata = new ObservableMap<JSONValue>();
+  private _metadata = new ObservableJSON();
 }
 
 
@@ -299,16 +299,17 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
       CodeCellModel.defaultContentFactory
     );
     let trusted = this.trusted;
-    this._outputs = factory.createOutputArea({ trusted });
     let cell = options.cell as nbformat.ICodeCell;
+    let outputs: nbformat.IOutput[] = [];
     if (cell && cell.cell_type === 'code') {
       this.executionCount = cell.execution_count;
-      for (let output of cell.outputs) {
-        this._outputs.add(output);
-      }
+      outputs = cell.outputs;
     }
-    this._outputs.changed.connect(this.onGenericChange, this);
-    this._outputs.itemChanged.connect(this.onGenericChange, this);
+    this._outputs = factory.createOutputArea({
+      trusted,
+      values: outputs
+    });
+    this._outputs.stateChanged.connect(this.onGenericChange, this);
     this.metadata.changed.connect(this._onMetadataChanged, this);
   }
 
@@ -367,7 +368,7 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
   /**
    * Handle the metadata changing.
    */
-  private _onMetadataChanged(sender: ObservableMap<JSONValue>, args: ObservableMap.IChangedArgs<JSONValue>): void {
+  private _onMetadataChanged(sender: IObservableJSON, args: IObservableJSON.IChangedArgs): void {
     this._outputs.trusted = !!args.newValue;
   }
 

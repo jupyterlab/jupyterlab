@@ -41,12 +41,15 @@ class OutputAreaModel implements IOutputAreaModel {
     );
     this.list = new ObservableVector<IOutputModel>();
     if (options.values) {
-      for (let value in values) {
-        this._add(value);
-      }
+      each(options.values, value => { this._add(value); });
     }
     this.list.changed.connect(this._onListChanged, this);
   }
+
+  /**
+   * A signal emitted when the model state changes.
+   */
+  readonly stateChanged: ISignal<IOutputAreaModel, void>;
 
   /**
    * A signal emitted when the model changes.
@@ -80,9 +83,9 @@ class OutputAreaModel implements IOutputAreaModel {
     let trusted = this._trusted = value;
     for (let i = 0; i < this.list.length; i++) {
       let item = this.list.at(i);
-      let output = item.toJSON();
+      let value = item.toJSON();
       item.dispose();
-      item = this._createItem({ output, trusted });
+      item = this._createItem({ value, trusted });
       this.list.set(i, item);
     }
   }
@@ -156,11 +159,9 @@ class OutputAreaModel implements IOutputAreaModel {
    * #### Notes
    * This will clear any existing data.
    */
-  fromJSON(value: nbformat.IOutput) {
+  fromJSON(values: nbformat.IOutput[]) {
     this.clear();
-    for (let item of value) {
-      this._add(item);
-    }
+    each(values, value => { this._add(value); });
   }
 
   /**
@@ -173,32 +174,39 @@ class OutputAreaModel implements IOutputAreaModel {
   /**
    * Add an item to the list.
    */
-  private _add(output: nbformat.IOutput): number {
+  private _add(value: nbformat.IOutput): number {
     // Make a copy of the output bundle.
-    output = JSON.parse(JSON.stringify(output)) as nbformat.IOutput;
+    value = JSON.parse(JSON.stringify(value)) as nbformat.IOutput;
     let trusted = this._trusted;
 
+    // Normalize stream data.
+    if (value.output_type === 'stream') {
+      if (Array.isArray(value.text)) {
+        value.text = (value.text as string[]).join('\n');
+      }
+    }
+
     // Consolidate outputs if they are stream outputs of the same kind.
-    if (output.output_type === 'stream' && this._lastStream &&
-        output.name === this._lastName) {
+    if (value.output_type === 'stream' && this._lastStream &&
+        value.name === this._lastName) {
       // In order to get a list change event, we add the previous
       // text to the current item and replace the previous item.
       // This also replaces the metadata of the last item.
-      let item = this._createItem({ output, trusted });
-      this._lastStream += item.get(RenderMime.CONSOLE_MIMETYPE);
-      item.set(RenderMime.CONSOLE_MIMETYPE, this._lastStream);
+      this._lastStream += value.text as string;
+      value.text = this._lastStream;
+      let item = this._createItem({ value, trusted });
       let index = this.length - 1;
       this.list.set(index, item);
       return index;
     }
 
     // Create the new item.
-    let item = this._createItem({ output, trusted });
+    let item = this._createItem({ value, trusted });
 
     // Update the stream information.
-    if (output.output_type === 'stream') {
-      this._lastStream = item.get(RenderMime.CONSOLE_MIMETYPE) as string;
-      this._lastName = output.name;
+    if (value.output_type === 'stream') {
+      this._lastStream = value.text as string;
+      this._lastName = value.name;
     } else {
       this._lastStream = '';
     }
@@ -268,5 +276,5 @@ namespace OutputAreaModel {
 
 
 // Define the signals for the `OutputAreaModel` class.
+defineSignal(OutputAreaModel.prototype, 'stateChanged');
 defineSignal(OutputAreaModel.prototype, 'changed');
-defineSignal(OutputAreaModel.prototype, 'itemChanged');

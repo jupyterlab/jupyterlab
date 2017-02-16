@@ -817,8 +817,11 @@ interface IOutputAreaModel extends IDisposable {
 
   /**
    * Deserialize the model from JSON.
+   *
+   * #### Notes
+   * This will clear any existing data.
    */
-  fromJSON(value: nbformat.IOutput): void;
+  fromJSON(values: nbformat.IOutput[]): void;
 
   /**
    * Serialize the model to JSON.

@@ -54,7 +54,7 @@ import {
 } from '../common/interfaces';
 
 import {
-  ObservableJSONWidget
+  ObservableJSON, ObservableJSONWidget
 } from '../common/observablejson';
 
 import {
@@ -236,7 +236,7 @@ class CellTools extends Widget {
    * Handle a change in the metadata.
    */
   private _onMetadataChanged(sender: IObservableMap<JSONValue>, args: ObservableMap.IChangedArgs<JSONValue>): void {
-    let message = new ChangeMessage(args);
+    let message = new ObservableJSON.ChangeMessage(args);
     each(this.children(), widget => {
       sendMessage(widget, message);
     });
@@ -293,31 +293,6 @@ namespace CellTools {
   const SelectionMessage = new ConflatableMessage('selection-changed');
 
   /**
-   * A type alias for metadata changed args.
-   */
-  export
-  type MetadataChangedArgs = ObservableMap.IChangedArgs<JSONValue>;
-
-  /**
-   * A metadata changed message.
-   */
-  export
-  class ChangeMessage extends Message {
-    /**
-     * Create a new metadata changed message.
-     */
-    constructor(args: MetadataChangedArgs) {
-      super('metadata-changed');
-      this.args = args;
-    }
-
-    /**
-     * The arguments of the metadata change.
-     */
-    readonly args: MetadataChangedArgs;
-  }
-
-  /**
    * The base cell tool, meant to be subclassed.
    */
   export
@@ -341,8 +316,8 @@ namespace CellTools {
       case 'selection-changed':
         this.onSelectionChanged(msg);
         break;
-      case 'metadata-changed':
-        this.onMetadataChanged(msg as ChangeMessage);
+      case 'jsonvalue-changed':
+        this.onMetadataChanged(msg as ObservableJSON.ChangeMessage);
         break;
       default:
         break;
@@ -371,7 +346,7 @@ namespace CellTools {
      * #### Notes
      * The default implementation is a no-op.
      */
-     protected onMetadataChanged(msg: ChangeMessage): void { /* no-op */ }
+     protected onMetadataChanged(msg: ObservableJSON.ChangeMessage): void { /* no-op */ }
   }
 
   /**
@@ -661,7 +636,7 @@ namespace CellTools {
     /**
      * Handle a change to the metadata of the active cell.
      */
-    protected onMetadataChanged(msg: Metadata.ChangeMessage) {
+    protected onMetadataChanged(msg: ObservableJSON.ChangeMessage) {
       if (this._changeGuard) {
         return;
       }

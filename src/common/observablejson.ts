@@ -90,7 +90,7 @@ class ObservableJSON extends ObservableMap<JSONValue> {
   /**
    * Construct a new observable JSON object.
    */
-  constructor(options: ObservableJSON.IOptions) {
+  constructor(options: ObservableJSON.IOptions = {}) {
     super({
       itemCmp: deepEqual,
       values: options.values
@@ -124,6 +124,25 @@ namespace ObservableJSON {
      * The optional intitial value for the object.
      */
     values?: JSONObject;
+  }
+
+  /**
+   * An observable JSON change message.
+   */
+  export
+  class ChangeMessage extends Message {
+    /**
+     * Create a new metadata changed message.
+     */
+    constructor(args: IObservableJSON.IChangedArgs) {
+      super('jsonvalue-changed');
+      this.args = args;
+    }
+
+    /**
+     * The arguments of the change.
+     */
+    readonly args: IObservableJSON.IChangedArgs;
   }
 }
 

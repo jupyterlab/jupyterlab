@@ -31,8 +31,8 @@ import {
 } from '../common/interfaces';
 
 import {
-  IObservableMap, ObservableMap
-} from '../common/observablemap';
+  IObservableJSON, ObservableJSON
+} from '../common/observablejson';
 
 import {
   IObservableUndoableVector, ObservableUndoableVector
@@ -67,7 +67,7 @@ interface INotebookModel extends DocumentRegistry.IModel {
   /**
    * The metadata associated with the notebook.
    */
-  readonly metadata: IObservableMap<JSONValue>;
+  readonly metadata: IObservableJSON;
 }
 
 
@@ -113,7 +113,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   /**
    * The metadata associated with the notebook.
    */
-  get metadata(): IObservableMap<JSONValue> {
+  get metadata(): IObservableJSON {
     return this._metadata;
   }
 
@@ -318,7 +318,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   private _cells: IObservableUndoableVector<ICellModel> = null;
   private _nbformat = nbformat.MAJOR_VERSION;
   private _nbformatMinor = nbformat.MINOR_VERSION;
-  private _metadata = new ObservableMap<JSONValue>();
+  private _metadata = new ObservableJSON();
 }
 
 
