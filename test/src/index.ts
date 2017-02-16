@@ -20,6 +20,7 @@ import './common/dialog.spec';
 import './common/instancetracker.spec';
 import './common/observablestring.spec';
 import './common/observablevector.spec';
+import './common/observablemap.spec';
 import './common/metadata.spec';
 import './common/undoablevector.spec';
 import './common/sanitizer.spec';
