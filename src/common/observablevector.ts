@@ -129,6 +129,11 @@ interface IObservableVector<T> extends IDisposable {
   readonly isLinked: boolean;
 
   /**
+   * Converter for realtime synchronization.
+   */
+  readonly converter: IRealtimeConverter<T>;
+
+  /**
    * Set the value at the specified index.
    *
    * @param index - The positive integer index of interest.
@@ -382,6 +387,13 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    */
   get isDisposed(): boolean {
     return this._isDisposed;
+  }
+
+  /**
+   * Get the converter for realtime synchronization.
+   */
+  get converter(): IRealtimeConverter<T> {
+    return this._converter;
   }
 
   /**

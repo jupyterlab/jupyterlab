@@ -187,6 +187,9 @@ class ObservableMap<T> implements IObservableMap<T> {
     }
   }
 
+  /**
+   * Get the converter for realtime synchronization.
+   */
   get converters(): Map<string, IRealtimeConverter<T>> {
     return this._converters;
   }
