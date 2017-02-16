@@ -41,8 +41,7 @@ describe('notebook/notebook/model', () => {
 
       it('should accept an optional language preference', () => {
         let model = new NotebookModel({ languagePreference: 'python' });
-        let cursor = model.getMetadata('language_info');
-        let lang = cursor.getValue() as nbformat.ILanguageInfoMetadata;
+        let lang = model.metadata.get('language_info') as nbformat.ILanguageInfoMetadata;
         expect(lang.name).to.be('python');
       });
 
@@ -65,25 +64,23 @@ describe('notebook/notebook/model', () => {
       it('should be emitted when a metadata field changes', () => {
         let model = new NotebookModel();
         let called = false;
-        model.metadataChanged.connect((sender, args) => {
-          expect(sender).to.be(model);
-          expect(args.name).to.be('foo');
+        model.metadata.changed.connect((sender, args) => {
+          expect(sender).to.be(model.metadata);
+          expect(args.key).to.be('foo');
           expect(args.oldValue).to.be(void 0);
           expect(args.newValue).to.be(1);
           called = true;
         });
-        let foo = model.getMetadata('foo');
-        foo.setValue(1);
+        model.metadata.set('foo', 1);
         expect(called).to.be(true);
       });
 
       it('should not be emitted when the value does not change', () => {
         let model = new NotebookModel();
         let called = false;
-        let foo = model.getMetadata('foo');
-        foo.setValue(1);
-        model.metadataChanged.connect(() => { called = true; });
-        foo.setValue(1);
+        model.metadata.set('foo', 1);
+        model.metadata.changed.connect(() => { called = true; });
+        model.metadata.set('foo', 1);
         expect(called).to.be(false);
       });
 
@@ -171,8 +168,7 @@ describe('notebook/notebook/model', () => {
           model.cells.pushBack(cell);
           let called = false;
           model.contentChanged.connect(() => { called = true; });
-          let cursor = cell.getMetadata('foo');
-          cursor.setValue('bar');
+          model.metadata.set('foo', 'bar');
           expect(called).to.be(true);
         });
 
@@ -331,65 +327,44 @@ describe('notebook/notebook/model', () => {
 
     });
 
-    describe('#getMetadata()', () => {
-
-      it('should get a metadata cursor for the notebook', () => {
-        let model = new NotebookModel();
-        let cursor = model.getMetadata('foo');
-        expect(cursor.getValue()).to.be(void 0);
-      });
-
-      it('should get the value for all cursors', () => {
-        let model = new NotebookModel();
-        let cursor0 = model.getMetadata('foo');
-        let cursor1 = model.getMetadata('foo');
-        cursor0.setValue(1);
-        expect(cursor1.getValue()).to.be(1);
-      });
+    describe('#metadata', () => {
 
       it('should set the dirty flag', () => {
         let model = new NotebookModel();
-        let cursor = model.getMetadata('foo');
-        cursor.setValue('bar');
+        expect(model.dirty).to.be(false);
+        model.metadata.set('foo', 'bar');
         expect(model.dirty).to.be(true);
       });
 
       it('should emit the `contentChanged` signal', () => {
         let model = new NotebookModel();
-        let cursor = model.getMetadata('foo');
         let called = false;
         model.contentChanged.connect(() => { called = true; });
-        cursor.setValue('bar');
+        model.metadata.set('foo', 'bar');
         expect(called).to.be(true);
       });
 
       it('should emit the `metadataChanged` signal', () => {
         let model = new NotebookModel();
-        let cursor = model.getMetadata('foo');
         let called = false;
-        model.metadataChanged.connect((sender, args) => {
-          expect(sender).to.be(model);
-          expect(args.name).to.be('foo');
+        model.metadata.changed.connect((sender, args) => {
+          expect(sender).to.be(model.metadata);
+          expect(args.key).to.be('foo');
           expect(args.oldValue).to.be(void 0);
           expect(args.newValue).to.be('bar');
           called = true;
         });
-        cursor.setValue('bar');
+        model.metadata.set('foo', 'bar');
         expect(called).to.be(true);
       });
-    });
-
-    describe('#listMetadata()', () => {
 
       it('should list the metadata namespace keys for the notebook', () => {
         let model = new NotebookModel();
         let keys = ['kernelspec', 'language_info', 'orig_nbformat'];
-        expect(toArray(model.listMetadata())).to.eql(keys);
-        let cursor = model.getMetadata('foo');
-        expect(toArray(model.listMetadata())).to.eql(keys);
-        cursor.setValue(1);
+        expect(toArray(model.metadata.keys())).to.eql(keys);
+        model.metadata.set('foo', 'bar');
         keys.push('foo');
-        expect(toArray(model.listMetadata())).to.eql(keys);
+        expect(toArray(model.metadata.keys())).to.eql(keys);
       });
 
     });
