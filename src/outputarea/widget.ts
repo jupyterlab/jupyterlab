@@ -148,7 +148,7 @@ class OutputAreaWidget extends Widget {
   }
 
   /**
-   * Create a mirrored output widget.
+   * Create a mirrored output area widget.
    */
   mirror(): OutputAreaWidget {
     let rendermime = this.rendermime;
@@ -212,48 +212,13 @@ class OutputAreaWidget extends Widget {
   }
 
   /**
-   * Dispose of the resources held by the widget.
-   */
-  dispose() {
-    super.dispose();
-  }
-
-  /**
-   * Clear the widget inputs and outputs.
-   */
-  clear(): void {
-    // Bail if there is no work to do.
-    if (!this.widgets.length) {
-      return;
-    }
-
-    // Remove all of our widgets.
-    for (let i = 0; i < this.widgets.length; i++) {
-      this.widgets.at(0).dispose();
-    }
-
-    // When an output area is cleared and then quickly replaced with new
-    // content (as happens with @interact in widgets, for example), the
-    // quickly changing height can make the page jitter.
-    // We introduce a small delay in the minimum height
-    // to prevent this jitter.
-    let rect = this.node.getBoundingClientRect();
-    this.node.style.minHeight = `${rect.height}px`;
-    if (this._minHeightTimeout) {
-      clearTimeout(this._minHeightTimeout);
-    }
-    this._minHeightTimeout = setTimeout(() => {
-      if (this.isDisposed) {
-        return;
-      }
-      this.node.style.minHeight = '';
-    }, 50);
-  }
-
-  /**
-   * Execute code on a kernel and send outputs to the model.
+   * Execute code on a kernel and handle response messages.
    */
   execute(code: string, kernel: Kernel.IKernel): Promise<KernelMessage.IExecuteReplyMsg> {
+    // Bail if the model is disposed.
+    if (this.model.isDisposed) {
+      return Promise.reject('Model is disposed');
+    }
     // Override the default for `stop_on_error`.
     let content: KernelMessage.IExecuteRequest = {
       code,
@@ -261,8 +226,14 @@ class OutputAreaWidget extends Widget {
     };
     this.model.clear();
     // Make sure there were no input widgets.
-    this.clear();
+    if (this.widgets.length) {
+      this._clear();
+    }
     return new Promise<KernelMessage.IExecuteReplyMsg>((resolve, reject) => {
+      // Bail if the model is disposed.
+      if (this.model.isDisposed) {
+        return Promise.reject('Model is disposed');
+      }
       let future = kernel.requestExecute(content);
       // Handle published messages.
       future.onIOPub = (msg: KernelMessage.IIOPubMessage) => {
@@ -288,6 +259,42 @@ class OutputAreaWidget extends Widget {
   protected onUpdateRequest(msg: Message): void {
     this.toggleClass(COLLAPSED_CLASS, this.collapsed);
     this.toggleClass(FIXED_HEIGHT_CLASS, this.fixedHeight);
+  }
+
+  /**
+   * Clear the widget inputs and outputs.
+   */
+  private _clear(): void {
+    // Bail if there is no work to do.
+    if (!this.widgets.length) {
+      return;
+    }
+
+    // Remove all of our widgets.
+    let length = this.widgets.length;
+    let layout = this.layout as PanelLayout;
+    for (let i = 0; i < length; i++) {
+      let widget = this.widgets.at(0);
+      layout.removeWidget(widget);
+      widget.dispose();
+    }
+
+    // When an output area is cleared and then quickly replaced with new
+    // content (as happens with @interact in widgets, for example), the
+    // quickly changing height can make the page jitter.
+    // We introduce a small delay in the minimum height
+    // to prevent this jitter.
+    let rect = this.node.getBoundingClientRect();
+    this.node.style.minHeight = `${rect.height}px`;
+    if (this._minHeightTimeout) {
+      clearTimeout(this._minHeightTimeout);
+    }
+    this._minHeightTimeout = setTimeout(() => {
+      if (this.isDisposed) {
+        return;
+      }
+      this.node.style.minHeight = '';
+    }, 50);
   }
 
   /**
@@ -407,14 +414,9 @@ class OutputAreaWidget extends Widget {
    */
   private _createOutput(model: IOutputModel): Widget {
     let widget = this.rendermime.render(model);
-
-    // Create the output result area.
-    if (!widget) {
-      widget = new Widget();
-      return new Widget();
-    }
     widget.addClass(CHILD_CLASS);
     widget.addClass(OUTPUT_CLASS);
+    return widget;
   }
 
   /**
@@ -428,7 +430,9 @@ class OutputAreaWidget extends Widget {
       break;
     case 'remove':
       // Only clear is supported by the model.
-      this.clear();
+      if (this.widgets.length) {
+        this._clear();
+      }
       break;
     case 'set':
       this._setOutput(args.newIndex, args.newValues[0]);

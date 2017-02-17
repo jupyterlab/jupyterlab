@@ -145,6 +145,7 @@ class OutputAreaModel implements IOutputAreaModel {
    * @param wait Delay clearing the output until the next message is added.
    */
   clear(wait: boolean = false): void {
+    this._lastStream = '';
     if (wait) {
       this.clearNext = true;
       return;
