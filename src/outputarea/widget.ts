@@ -596,8 +596,6 @@ namespace OutputAreaWidget {
           }
           this.node.replaceChild(rendered, input);
         }
-        // Suppress keydown events from leaving the input.
-        event.stopPropagation();
       }
     }
 

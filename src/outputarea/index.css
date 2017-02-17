@@ -101,6 +101,11 @@
 }
 
 
+.jp-OutputAreaWidget-output {
+  display: flex;
+}
+
+
 /* Hide the gutter in case of
  *  - nested output areas (e.g. in the case of output widgets)
  *  - mirrored output areas
