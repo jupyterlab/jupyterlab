@@ -98,10 +98,11 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     // Add an initial code cell by default.
     this._cells.pushBack(factory.createCodeCell({}));
     this._cells.changed.connect(this._onCellsChanged, this);
-    if (options.languagePreference) {
-      let name = options.languagePreference;
-      this._metadata.set('language_info', { name });
-    }
+
+    // Handle initial metadata.
+    let name = options.languagePreference || '';
+    this._metadata.set('language_info', { name });
+    this._ensureMetadata();
     this._metadata.changed.connect(this._onGenericChange, this);
   }
 
@@ -199,12 +200,11 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       let cell = this.cells.at(i);
       cells.push(cell.toJSON());
     }
+    this._ensureMetadata();
     let metadata = Object.create(null) as nbformat.INotebookMetadata;
-    for (let key in this.metadata.keys()) {
+    for (let key of this.metadata.keys()) {
       metadata[key] = JSON.parse(JSON.stringify(this.metadata.get(key)));
     }
-    // orig_nbformat should not be written to file per spec.
-    delete metadata['orig_nbformat'];
     return {
       metadata,
       nbformat_minor: this._nbformatMinor,
@@ -261,8 +261,13 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     this._metadata.clear();
     let metadata = value.metadata;
     for (let key in metadata) {
+      // orig_nbformat is not intended to be stored per spec.
+      if (key === 'orig_nbformat') {
+        continue;
+      }
       this._metadata.set(key, metadata[key]);
     }
+    this._ensureMetadata();
     this.dirty = true;
   }
 
@@ -305,6 +310,19 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     }
     this.contentChanged.emit(void 0);
     this.dirty = true;
+  }
+
+  /**
+   * Make sure we have the required metadata fields.
+   */
+  private _ensureMetadata(): void {
+    let metadata = this._metadata;
+    if (!metadata.has('language_info')) {
+      metadata.set('language_info', { name: '' });
+    }
+    if (!metadata.has('kernelspec')) {
+      metadata.set('kernelspec', { name: '', display_name: '' });
+    }
   }
 
   /**
@@ -463,22 +481,4 @@ namespace NotebookModel {
    */
   export
   const defaultContentFactory = new ContentFactory({});
-}
-
-
-/**
- * A private namespace for notebook model data.
- */
-namespace Private {
-  /**
-   * Create the default metadata for the notebook.
-   */
-  export
-  function createMetadata(): nbformat.INotebookMetadata {
-    return {
-      kernelspec: { name: '', display_name: '' },
-      language_info: { name: '' },
-      orig_nbformat: 1
-    };
-  }
 }
