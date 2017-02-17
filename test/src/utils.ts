@@ -16,10 +16,6 @@ import {
 } from 'phosphor/lib/ui/widget';
 
 import {
-  defaultSanitizer
-} from '../../lib/common/sanitizer';
-
-import {
   TextModelFactory, DocumentRegistry, Context
 } from '../../lib/docregistry';
 
@@ -159,23 +155,16 @@ namespace Private {
     }
   }
 
-  const TRANSFORMERS = RenderMime.defaultRenderers().concat([
+  let renderers = [
     new JSONRenderer(),
     new InjectionRenderer()
-  ]);
-
-  let renderers: RenderMime.MimeMap<RenderMime.IRenderer> = {};
-  let order: string[] = [];
-  for (let t of TRANSFORMERS) {
-    for (let m of t.mimeTypes) {
-      renderers[m] = t;
-      order.push(m);
-    }
+  ];
+  let items = RenderMime.getDefaultItems();
+  for (let renderer of renderers) {
+    items.push({ mimeType: renderer.mimeTypes[0], renderer });
   }
-  let sanitizer = defaultSanitizer;
-
   export
-  const rendermime = new RenderMime({ renderers, order, sanitizer });
+  const rendermime = new RenderMime({ items });
 }
 
 

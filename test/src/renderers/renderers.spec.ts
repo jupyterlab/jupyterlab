@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  JSONValue
+  JSONObject, JSONValue
 } from 'phosphor/lib/algorithm/json';
 
 import {
@@ -30,7 +30,7 @@ const EXPECTED_MD = `<h1>Title first level</h1>\n<h2>Title second Level</h2>\n<h
 
 function runCanRunder(renderer: RenderMime.IRenderer, trusted: boolean): boolean {
   let canRender = true;
-  let data: RenderMime.MimeMap<JSONValue> = Object.create(null);
+  let data: JSONObject = Object.create(null);
   for (let mimeType in renderer.mimeTypes) {
     data[mimeType] = 'test';
   }
@@ -50,7 +50,7 @@ function runCanRunder(renderer: RenderMime.IRenderer, trusted: boolean): boolean
 
 
 function createModel(mimeType: string, source: JSONValue, trusted=false): RenderMime.IMimeModel {
-  let data: RenderMime.MimeMap<JSONValue> = {};
+  let data: JSONObject = {};
   data[mimeType] = source;
   return new MimeModel({ data, trusted });
 }

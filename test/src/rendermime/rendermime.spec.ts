@@ -12,7 +12,7 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  JSONValue
+  JSONObject
 } from 'phosphor/lib/algorithm/json';
 
 import {
@@ -35,7 +35,7 @@ import {
 const RESOLVER: RenderMime.IResolver = createFileContext();
 
 
-function createModel(data: RenderMime.MimeMap<JSONValue>, trusted=false): RenderMime.IMimeModel {
+function createModel(data: JSONObject, trusted=false): RenderMime.IMimeModel {
   return new MimeModel({ data, trusted });
 }
 
@@ -235,8 +235,8 @@ describe('rendermime/index', () => {
       it('should clone the rendermime instance with shallow copies of data', () => {
         let c = r.clone();
         expect(toArray(c.mimeTypes())).to.eql(toArray(r.mimeTypes()));
-        let t = new TextRenderer();
-        c.addRenderer('text/foo', t);
+        let renderer = new TextRenderer();
+        c.addRenderer({ mimeType: 'text/foo', renderer });
         expect(r).to.not.be(c);
       });
 
@@ -245,16 +245,16 @@ describe('rendermime/index', () => {
     describe('#addRenderer()', () => {
 
       it('should add a renderer by mimeType', () => {
-        let t = new TextRenderer();
-        r.addRenderer('text/foo', t);
+        let renderer = new TextRenderer();
+        r.addRenderer({ mimeType: 'text/foo', renderer });
         let index = toArray(r.mimeTypes()).indexOf('text/foo');
         expect(index).to.be(0);
       });
 
       it('should take an optional order index', () => {
-        let t = new TextRenderer();
+        let renderer = new TextRenderer();
         let len = toArray(r.mimeTypes()).length;
-        r.addRenderer('text/foo', t, 0);
+        r.addRenderer({ mimeType: 'text/foo', renderer }, 0);
         let index = toArray(r.mimeTypes()).indexOf('text/foo');
         expect(index).to.be(0);
         expect(toArray(r.mimeTypes()).length).to.be(len + 1);
