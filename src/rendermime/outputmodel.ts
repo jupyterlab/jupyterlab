@@ -73,23 +73,29 @@ class OutputModel extends MimeModel implements IOutputModel {
    */
   constructor(options: IOutputModel.IOptions) {
     super(Private.getBundleOptions(options));
-    let output = this._raw = options.value;
-    this.type = output.output_type;
+    // Make a shallow copy.
+    for (let key in options.value) {
+      this._raw[key] = options.value;
+    }
+    let raw = this._raw;
+    this.type = raw.output_type;
     // Remove redundant data.
-    switch (output.output_type) {
+    switch (raw.output_type) {
     case 'display_data':
     case 'execute_result':
-      output.data = Object.create(null);
-      output.metadata = Object.create(null);
+      raw.data = {};
+      raw.metadata = {};
       break;
     default:
       break;
     }
-    if (output.output_type === 'execute_result') {
-      this.executionCount = output.execution_count;
+    if (raw.output_type === 'execute_result') {
+      this.executionCount = raw.execution_count;
     } else {
       this.executionCount = null;
     }
+    // Now a deep copy.
+    this._raw = JSON.parse(JSON.stringify(raw));
   }
 
   /**

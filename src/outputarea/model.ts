@@ -175,8 +175,6 @@ class OutputAreaModel implements IOutputAreaModel {
    * Add an item to the list.
    */
   private _add(value: nbformat.IOutput): number {
-    // Make a copy of the output bundle.
-    value = JSON.parse(JSON.stringify(value)) as nbformat.IOutput;
     let trusted = this._trusted;
 
     // Normalize stream data.
