@@ -217,8 +217,10 @@ namespace OutputModel {
       let value = bundle[mimeType];
       if (Array.isArray(value)) {
         map[mimeType] = (value as string[]).join('\n');
+      } else if (typeof value === 'string') {
+        map[mimeType] = value;
       } else {
-        map[mimeType] = value as string;
+        map[mimeType] = JSON.parse(JSON.stringify(value));
       }
     }
     return map;

@@ -103,7 +103,7 @@ class ObservableJSON extends ObservableMap<JSONValue> {
   toJSON(): JSONObject {
     let out: JSONObject = Object.create(null);
     for (let key in this.keys()) {
-      out[key] = this.get(key);
+      out[key] = JSON.parse(JSON.stringify(this.get(key));
     }
     return out;
   }
