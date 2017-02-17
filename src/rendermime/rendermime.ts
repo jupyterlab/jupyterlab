@@ -153,7 +153,7 @@ class RenderMime {
   preferredMimeType(model: RenderMime.IMimeModel): string {
     let sanitizer = this._sanitizer;
     return find(this._order, mimeType => {
-      if (mimeType in model.data.keys()) {
+      if (model.data.has(mimeType)) {
         let options = { mimeType, model, sanitizer };
         let renderer = this._renderers[mimeType];
         if (renderer.canRender(options)) {
