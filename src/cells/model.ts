@@ -208,9 +208,12 @@ class CellModel extends CodeEditor.Model implements ICellModel {
    */
   toJSON(): nbformat.ICell {
     let metadata: nbformat.IBaseCellMetadata = Object.create(null);
-    for (let key in this.metadata.keys()) {
+    for (let key of this.metadata.keys()) {
       let value = JSON.parse(JSON.stringify(this.metadata.get(key)));
       metadata[key] = value as JSONValue;
+    }
+    if (this.trusted) {
+      metadata['trusted'] = true;
     }
     return {
       cell_type: this.type,

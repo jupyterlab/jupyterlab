@@ -23,6 +23,10 @@ import {
   OutputAreaModel
 } from '../../../lib/outputarea';
 
+import {
+  DEFAULT_OUTPUTS
+} from '../utils';
+
 
 class TestModel extends CellModel {
   get type(): 'raw' { return 'raw'; }
@@ -100,6 +104,27 @@ describe('cells/model', () => {
         expect(called).to.be(1);
         model.executionCount = 1;
         expect(called).to.be(1);
+      });
+
+    });
+
+    describe('#trusted', () => {
+
+      it('should be the trusted state of the cell', () => {
+        let model = new CodeCellModel({});
+        expect(model.trusted).to.be(false);
+        model.trusted = true;
+        expect(model.trusted).to.be(true);
+        let other = new CodeCellModel({ cell: model.toJSON() });
+        expect(other.trusted).to.be(true);
+      });
+
+      it('should update the trusted state of the output models', () => {
+        let model = new CodeCellModel({});
+        model.outputs.add(DEFAULT_OUTPUTS[0]);
+        expect(model.outputs.at(0).trusted).to.be(false);
+        model.trusted = true;
+        expect(model.outputs.at(0).trusted).to.be(true);
       });
 
     });
