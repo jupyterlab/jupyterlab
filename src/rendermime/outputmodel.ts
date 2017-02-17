@@ -73,11 +73,7 @@ class OutputModel extends MimeModel implements IOutputModel {
    */
   constructor(options: IOutputModel.IOptions) {
     super(Private.getBundleOptions(options));
-    // Make a shallow copy.
-    for (let key in options.value) {
-      this._raw[key] = options.value;
-    }
-    let raw = this._raw;
+    let raw = this._raw = options.value;
     this.type = raw.output_type;
     // Remove redundant data.
     switch (raw.output_type) {
@@ -94,8 +90,6 @@ class OutputModel extends MimeModel implements IOutputModel {
     } else {
       this.executionCount = null;
     }
-    // Now a deep copy.
-    this._raw = JSON.parse(JSON.stringify(raw));
   }
 
   /**
@@ -202,6 +196,7 @@ namespace OutputModel {
    */
   export
   function getBundleOptions(options: IOutputModel.IOptions): MimeModel.IOptions {
+    options.value = JSON.parse(JSON.stringify(options.value));
     let data = OutputModel.getData(options.value);
     let metadata = OutputModel.getMetadata(options.value);
     let trusted = !!options.trusted;
@@ -217,10 +212,8 @@ namespace OutputModel {
       let value = bundle[mimeType];
       if (Array.isArray(value)) {
         map[mimeType] = (value as string[]).join('\n');
-      } else if (typeof value === 'string') {
-        map[mimeType] = value;
       } else {
-        map[mimeType] = JSON.parse(JSON.stringify(value));
+        map[mimeType] = value as string;
       }
     }
     return map;
