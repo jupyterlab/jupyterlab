@@ -17,12 +17,12 @@ import './commandlinker/commandlinker.spec';
 import './common/activitymonitor.spec';
 import './common/dialog.spec';
 import './common/instancetracker.spec';
-import './common/observablejson.spec';
 import './common/observablestring.spec';
 import './common/observablevector.spec';
 import './common/undoablevector.spec';
 import './common/sanitizer.spec';
 import './common/vdom.spec';
+import './common/observablejson.spec';
 
 import './completer/handler.spec';
 import './completer/model.spec';
