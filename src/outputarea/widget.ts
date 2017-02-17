@@ -82,6 +82,11 @@ const GUTTER_CLASS = 'jp-OutputAreaWidget-gutter';
 const OUTPUT_CLASS = 'jp-OutputAreaWidget-output';
 
 /**
+ * The class name added to an execution result.
+ */
+const EXECTUTE_CLASS = 'jp-OutputAreaWidget-executeResult';
+
+/**
  * The class name added to stdin data.
  */
 const STDIN_CLASS = 'jp-OutputAreaWidget-stdin';
@@ -374,6 +379,7 @@ class OutputAreaWidget extends Widget {
     panel.addWidget(gutter);
 
     let output = this._createOutput(model);
+    output.toggleClass(EXECTUTE_CLASS, model.executionCount !== null);
     panel.addWidget(output);
 
     let layout = this.layout as PanelLayout;

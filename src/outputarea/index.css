@@ -119,3 +119,20 @@
   height: 100%;
 }
 
+
+/*-----------------------------------------------------------------------------
+| executeResult is added to any Output-result for the display of the object
+| returned by a cell
+|----------------------------------------------------------------------------*/
+
+
+.jp-OutputAreaWidget-output.jp-OutputAreaWidget-executeResult {
+  margin-left: 0px;
+  flex: 1 1 auto;
+}
+
+
+.jp-OutputAreaWidget-executeResult.jp-RenderedText {
+  padding-top: var(--jp-code-padding);
+}
+

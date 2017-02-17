@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject, JSONValue
+  JSONObject
 } from 'phosphor/lib/algorithm/json';
 
 import {
