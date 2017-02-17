@@ -37,7 +37,7 @@ function runCanRunder(renderer: RenderMime.IRenderer, trusted: boolean): boolean
   data['fizz/buzz'] = 'test';
   let model = new MimeModel({ data, trusted });
 
-  for (let mimeType in renderer.mimeTypes) {
+  for (let mimeType of renderer.mimeTypes) {
     let options = { model, mimeType, sanitizer };
     if (!renderer.canRender(options)) {
       canRender = false;
@@ -49,7 +49,9 @@ function runCanRunder(renderer: RenderMime.IRenderer, trusted: boolean): boolean
 }
 
 
-function createModel(data: RenderMime.MimeMap<JSONValue>, trusted=false): RenderMime.IMimeModel {
+function createModel(mimeType: string, source: JSONValue, trusted=false): RenderMime.IMimeModel {
+  let data: RenderMime.MimeMap<JSONValue> = {};
+  data[mimeType] = source;
   return new MimeModel({ data, trusted });
 }
 
@@ -62,8 +64,9 @@ describe('renderers', () => {
 
     describe('#mimeTypes', () => {
 
-      it('should have the text/plain and jupyter/console-text mimeType', () => {
-        let mimeTypes = ['text/plain', 'application/vnd.jupyter.console-text'];
+      it('should have text related mimeTypes', () => {
+        let mimeTypes = ['text/plain', 'application/vnd.jupyter.stdout',
+               'application/vnd.jupyter.stderr'];
         let t = new TextRenderer();
         expect(t.mimeTypes).to.eql(mimeTypes);
       });
@@ -85,7 +88,7 @@ describe('renderers', () => {
       it('should output the correct HTML', () => {
         let t = new TextRenderer();
         let mimeType = 'text/plain';
-        let model = createModel({ mimeType: 'x = 2 ** a' });
+        let model = createModel(mimeType, 'x = 2 ** a');
         let widget = t.render({ mimeType, model, sanitizer });
         expect(widget.node.innerHTML).to.be('<pre>x = 2 ** a</pre>');
       });
@@ -94,7 +97,7 @@ describe('renderers', () => {
         let t = new TextRenderer();
         let source = 'There is no text but \x1b[01;41;32mtext\x1b[00m.\nWoo.';
         let mimeType = 'application/vnd.jupyter.console-text';
-        let model = createModel({ mimeType: source });
+        let model = createModel(mimeType, source);
         let widget = t.render({ mimeType, model, sanitizer });
         expect(widget.node.innerHTML).to.be('<pre>There is no text but <span style="color:rgb(0, 255, 0);background-color:rgb(187, 0, 0)">text</span>.\nWoo.</pre>');
       });
@@ -103,7 +106,7 @@ describe('renderers', () => {
         let t = new TextRenderer();
         let source = 'There is no text <script>window.x=1</script> but \x1b[01;41;32mtext\x1b[00m.\nWoo.';
         let mimeType = 'application/vnd.jupyter.console-text';
-        let model = createModel({ mimeType: source });
+        let model = createModel(mimeType, source);
         let widget = t.render({ mimeType, model, sanitizer });
         expect(widget.node.innerHTML).to.be('<pre>There is no text &lt;script&gt;window.x=1&lt;/script&gt; but <span style="color:rgb(0, 255, 0);background-color:rgb(187, 0, 0)">text</span>.\nWoo.</pre>');
       });
@@ -139,7 +142,7 @@ describe('renderers', () => {
         let source = '\sum\limits_{i=0}^{\infty} \frac{1}{n^2}';
         let t = new LatexRenderer();
         let mimeType = 'text/latex';
-        let model = createModel({ mimeType: source });
+        let model = createModel(mimeType, source);
         let widget = t.render({ mimeType, model, sanitizer });
         expect(widget.node.textContent).to.be(source);
       });
@@ -175,7 +178,7 @@ describe('renderers', () => {
         let source = 'test';
         let t = new PDFRenderer();
         let mimeType = 'application/pdf';
-        let model = createModel({ mimeType: source });
+        let model = createModel(mimeType, source);
         let w = t.render({ mimeType, model, sanitizer });
         let node = w.node.firstChild as HTMLAnchorElement;
         expect(node.localName).to.be('a');
@@ -215,7 +218,7 @@ describe('renderers', () => {
         let t = new JavaScriptRenderer();
         let source = 'window.x = 1';
         let mimeType = 'text/javascript';
-        let model = createModel({ mimeType: source });
+        let model = createModel(mimeType, source);
         let w = t.render({ mimeType, model, sanitizer });
         let el = w.node.firstChild as HTMLElement;
         expect(el.localName).to.be('script');
@@ -261,7 +264,7 @@ describe('renderers', () => {
         const source = '<svg></svg>';
         let t = new SVGRenderer();
         let mimeType = 'image/svg+xml';
-        let model = createModel({ mimeType: source });
+        let model = createModel(mimeType, source);
         let w = t.render({ mimeType, model, sanitizer });
         let svgEl = w.node.getElementsByTagName('svg')[0];
         expect(svgEl).to.be.ok();
@@ -298,7 +301,7 @@ describe('renderers', () => {
         let r = new MarkdownRenderer();
         let source = '<p>hello</p>';
         let mimeType = 'text/markdown';
-        let model = createModel({ mimeType: source });
+        let model = createModel(mimeType, source);
         let widget = r.render({ mimeType, model, sanitizer });
         let loop = () => {
           if ((widget as any)._rendered) {
@@ -315,7 +318,7 @@ describe('renderers', () => {
         let source = require('../../../examples/filebrowser/sample.md') as string;
         let r = new MarkdownRenderer();
         let mimeType = 'text/markdown';
-        let model = createModel({ mimeType: source });
+        let model = createModel(mimeType, source);
         let widget = r.render({ mimeType, model, sanitizer });
         let loop = () => {
           if ((widget as any)._rendered) {
@@ -359,7 +362,7 @@ describe('renderers', () => {
         let r = new HTMLRenderer();
         const source = '<h1>This is great</h1>';
         let mimeType = 'text/html';
-        let model = createModel({ mimeType: source });
+        let model = createModel(mimeType, source);
         let w = r.render({ mimeType, model, sanitizer });
         expect(w.node.innerHTML).to.be('<h1>This is great</h1>');
       });
@@ -368,7 +371,7 @@ describe('renderers', () => {
         const source = '<script>window.y=3;</script>';
         let r = new HTMLRenderer();
         let mimeType = 'text/html';
-        let model = createModel({ mimeType: source }, true);
+        let model = createModel(mimeType, source, true);
         let w = r.render({ mimeType, model, sanitizer });
         expect((window as any).y).to.be(void 0);
         Widget.attach(w, document.body);
@@ -380,7 +383,7 @@ describe('renderers', () => {
         const source = '<pre><script>window.y=3;</script></pre>';
         let r = new HTMLRenderer();
         let mimeType = 'text/html';
-        let model = createModel({ mimeType: source });
+        let model = createModel(mimeType, source);
         let w = r.render({ mimeType, model, sanitizer });
         expect(w.node.innerHTML).to.be('<pre></pre>');
       });
@@ -416,7 +419,7 @@ describe('renderers', () => {
         let source = 'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
         let r = new ImageRenderer();
         let mimeType = 'image/png';
-        let model = createModel({ mimeType: source });
+        let model = createModel(mimeType, source);
         let w = r.render({ mimeType, model, sanitizer });
         let el = w.node.firstChild as HTMLImageElement;
         expect(el.src).to.be('data:image/png;base64,' + source);
@@ -424,8 +427,8 @@ describe('renderers', () => {
         expect(el.innerHTML).to.be('');
 
         source = 'R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=';
-        mimeType = 'image/png';
-        model = createModel({ mimeType: source });
+        mimeType = 'image/gif';
+        model = createModel(mimeType, source);
         w = r.render({ mimeType, model, sanitizer });
         el = w.node.firstChild as HTMLImageElement;
         expect(el.src).to.be('data:image/gif;base64,' + source);
