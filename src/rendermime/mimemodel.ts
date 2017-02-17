@@ -119,4 +119,4 @@ namespace MimeModel {
 
 
 // Define the signals for the `MimeModel` class.
-defineSignal(MimeModel.prototype, 'changed');
+defineSignal(MimeModel.prototype, 'stateChanged');

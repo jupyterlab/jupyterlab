@@ -17,7 +17,7 @@
 // import './common/activitymonitor.spec';
 // import './common/dialog.spec';
 // import './common/instancetracker.spec';
-import './common/observablejson.spec';
+// import './common/observablejson.spec';
 // import './common/observablestring.spec';
 // import './common/observablevector.spec';
 // import './common/undoablevector.spec';
@@ -58,10 +58,10 @@ import './common/observablejson.spec';
 
 // import './markdownwidget/widget.spec';
 
-import './renderers/renderers.spec';
+// import './renderers/renderers.spec';
 // import './renderers/latex.spec';
 
-// import './rendermime/mimemodel.spec';
+import './rendermime/mimemodel.spec';
 // import './rendermime/outputmodel.spec';
 // import './rendermime/rendermime.spec';
 

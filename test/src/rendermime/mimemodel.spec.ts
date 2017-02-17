@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  deepEqual
+} from 'phosphor/lib/algorithm/json';
+
+import {
   MimeModel
 } from '../../../lib/rendermime';
 
@@ -36,6 +40,24 @@ describe('rendermime/mimemodel', () => {
           metadata: { 'bar': 'baz' }
         });
         expect(model).to.be.a(MimeModel);
+      });
+
+    });
+
+    describe('#stateChanged', () => {
+
+      it('should be emitted when the state changes', () => {
+        let count = 0;
+        let model = new MimeModel();
+        model.stateChanged.connect((sender, args) => {
+          expect(sender).to.be(model);
+          expect(args).to.be(void 0);
+          count++;
+        });
+        model.data.set('foo', 1);
+        model.data.delete('foo');
+        model.metadata.set('foo', 2);
+        expect(count).to.be(3);
       });
 
     });
@@ -81,6 +103,21 @@ describe('rendermime/mimemodel', () => {
           metadata: { 'bar': 'baz' }
         });
         expect(model.metadata.get('bar')).to.be('baz');
+      });
+
+    });
+
+    describe('#toJSON()', () => {
+
+      it('should return the raw JSON values', () => {
+        let model = new MimeModel();
+        model.data.set('foo', 1);
+        model.metadata.set('bar', 'baz');
+        expect(deepEqual(model.toJSON(), {
+          trusted: false,
+          data: {'foo': 1 },
+          metadata: {'bar': 'baz'}
+        })).to.be(true);
       });
 
     });
