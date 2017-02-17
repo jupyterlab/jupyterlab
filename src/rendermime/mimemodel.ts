@@ -6,10 +6,6 @@ import {
 } from 'phosphor/lib/algorithm/json';
 
 import {
-  ISignal, clearSignalData, defineSignal
-} from 'phosphor/lib/core/signaling';
-
-import {
   IObservableJSON, ObservableJSON
 } from '../common/observablejson';
 
@@ -33,11 +29,6 @@ class MimeModel implements RenderMime.IMimeModel {
     this.data.changed.connect(this._onGenericChange, this);
     this.metadata.changed.connect(this._onGenericChange, this);
   }
-
-  /**
-   * A signal emitted when the state of the model changes.
-   */
-  readonly stateChanged: ISignal<this, void>;
 
   /**
    * The data associated with the model.
@@ -67,7 +58,6 @@ class MimeModel implements RenderMime.IMimeModel {
   dispose(): void {
     this.data.dispose();
     this.metadata.dispose();
-    clearSignalData(this);
   }
 
   /**
@@ -117,6 +107,3 @@ namespace MimeModel {
   }
 }
 
-
-// Define the signals for the `MimeModel` class.
-defineSignal(MimeModel.prototype, 'stateChanged');

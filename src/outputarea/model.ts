@@ -18,7 +18,7 @@ import {
 } from '../common/observablevector';
 
 import {
-  IOutputModel, OutputModel, RenderMime
+  IOutputModel, OutputModel
 } from '../rendermime';
 
 import {
@@ -194,6 +194,8 @@ class OutputAreaModel implements IOutputAreaModel {
       value.text = this._lastStream;
       let item = this._createItem({ value, trusted });
       let index = this.length - 1;
+      let prev = this.list.at(index);
+      prev.dispose();
       this.list.set(index, item);
       return index;
     }
@@ -222,7 +224,8 @@ class OutputAreaModel implements IOutputAreaModel {
   private _createItem(options: IOutputModel.IOptions): IOutputModel {
     let factory = this.contentFactory;
     let item = factory.createOutputModel(options);
-    item.stateChanged.connect(this._onGenericChange, this);
+    item.data.changed.connect(this._onGenericChange, this);
+    item.metadata.changed.connect(this._onGenericChange, this);
     return item;
   }
 

@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  JSONObject
+  isArray, isPrimitive, JSONObject, JSONValue
 } from 'phosphor/lib/algorithm/json';
 
 import {
@@ -73,20 +73,21 @@ class OutputModel extends MimeModel implements IOutputModel {
    */
   constructor(options: IOutputModel.IOptions) {
     super(Private.getBundleOptions(options));
-    let raw = this._raw = options.value;
-    this.type = raw.output_type;
-    // Remove redundant data.
-    switch (raw.output_type) {
-    case 'display_data':
-    case 'execute_result':
-      raw.data = {};
-      raw.metadata = {};
-      break;
-    default:
-      break;
+    // Make a copy of the data.
+    let value = options.value;
+    for (let key in value) {
+      // Ignore data and metadata that were stripped.
+      switch (key) {
+      case 'data':
+      case 'metadata':
+        break;
+      default:
+        this._raw[key] = Private.extract(value, key);
+      }
     }
-    if (raw.output_type === 'execute_result') {
-      this.executionCount = raw.execution_count;
+    this.type = value.output_type;
+    if (value.output_type === 'execute_result') {
+      this.executionCount = value.execution_count;
     } else {
       this.executionCount = null;
     }
@@ -106,20 +107,23 @@ class OutputModel extends MimeModel implements IOutputModel {
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.IOutput {
-    let output = JSON.parse(JSON.stringify(this._raw)) as nbformat.IOutput;
-    switch (output.output_type) {
+    let output: JSONValue = {};
+    for (let key in this._raw) {
+      output[key] = Private.extract(this._raw, key);
+    }
+    switch (this.type) {
     case 'display_data':
     case 'execute_result':
-      output.data = this.data.toJSON() as nbformat.IMimeBundle;
-      output.metadata = this.metadata.toJSON() as nbformat.IMimeBundle;
+      output['data'] = this.data.toJSON() as nbformat.IMimeBundle;
+      output['metadata'] = this.metadata.toJSON() as nbformat.IMimeBundle;
       break;
     default:
       break;
     }
-    return output;
+    return output as nbformat.IOutput;
   }
 
-  private _raw: nbformat.IOutput;
+  private _raw: JSONObject = {};
 }
 
 
@@ -142,17 +146,14 @@ namespace OutputModel {
 
   /**
    * Get the metadata from an output message.
+   *
+   * @params output - A kernel output message payload.
+   *
+   * @returns - The metadata for the payload.
    */
   export
   function getMetadata(output: nbformat.IOutput): JSONObject {
-    switch (output.output_type) {
-    case 'execute_result':
-    case 'display_data':
-      return (output as nbformat.IDisplayData).metadata;
-    default:
-      break;
-    }
-    return Object.create(null);
+    return Private.getMetadata(output);
   }
 }
 
@@ -192,15 +193,45 @@ namespace OutputModel {
   }
 
   /**
+   * Get the metadata from an output message.
+   */
+  export
+  function getMetadata(output: nbformat.IOutput): JSONObject {
+    switch (output.output_type) {
+    case 'execute_result':
+    case 'display_data':
+      return (output as nbformat.IDisplayData).metadata;
+    default:
+      break;
+    }
+    return Object.create(null);
+  }
+
+  /**
    * Get the bundle options given output model options.
    */
   export
   function getBundleOptions(options: IOutputModel.IOptions): MimeModel.IOptions {
-    options.value = JSON.parse(JSON.stringify(options.value));
-    let data = OutputModel.getData(options.value);
-    let metadata = OutputModel.getMetadata(options.value);
+    let data = getData(options.value);
+    let metadata = getMetadata(options.value);
     let trusted = !!options.trusted;
     return { data, trusted, metadata };
+  }
+
+  /**
+   * Extract a value from a JSONObject.
+   */
+  export
+  function extract(value: JSONObject, key: string): JSONValue {
+    let item = value[key];
+    // Convert multi-line strings to strings.
+    if (isArray(item)) {
+      return (item as string[]).join('\n');
+    }
+    if (isPrimitive(item)) {
+      return item;
+    }
+    return JSON.parse(JSON.stringify(item));
   }
 
   /**
@@ -209,12 +240,7 @@ namespace OutputModel {
   function convertBundle(bundle: nbformat.IMimeBundle): JSONObject {
     let map: JSONObject = Object.create(null);
     for (let mimeType in bundle) {
-      let value = bundle[mimeType];
-      if (Array.isArray(value)) {
-        map[mimeType] = (value as string[]).join('\n');
-      } else {
-        map[mimeType] = value as string;
-      }
+      map[mimeType] = extract(bundle, mimeType);
     }
     return map;
   }
