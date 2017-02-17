@@ -6,7 +6,7 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  indexOf
+  findIndex, indexOf
 } from 'phosphor/lib/algorithm/searching';
 
 import {
@@ -160,9 +160,6 @@ interface IObservableVector<T> extends IDisposable, ISequence<T> {
    *
    * #### Iterator Validity
    * Iterators pointing at the removed value and beyond are invalidated.
-   *
-   * #### Notes
-   * Comparison is performed using strict `===` equality.
    */
   remove(value: T): number;
 
@@ -440,12 +437,10 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    *
    * #### Iterator Validity
    * Iterators pointing at the removed value and beyond are invalidated.
-   *
-   * #### Notes
-   * Comparison is performed using strict `===` equality.
    */
   remove(value: T): number {
-    let index = indexOf(this, value);
+    let itemCmp = this._itemCmp;
+    let index = findIndex(this, item => itemCmp(item, value));
     this.removeAt(index);
     return index;
   }
