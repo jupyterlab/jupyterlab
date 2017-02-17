@@ -43,7 +43,6 @@ export default plugin;
  * Activate the rendermine plugin.
  */
 function activate(app: JupyterLab, linker: ICommandLinker): IRenderMime {
-  let rendererItems = RenderMime.defaultRendererItems();
   let linkHandler = {
     handleLink: (node: HTMLElement, path: string) => {
       if (!utils.urlParse(path).protocol && path.indexOf('//') !== 0) {
@@ -51,5 +50,6 @@ function activate(app: JupyterLab, linker: ICommandLinker): IRenderMime {
       }
     }
   };
-  return new RenderMime({ rendererItems, linkHandler });
+  let items = RenderMime.getDefaultItems();
+  return new RenderMime({ items, linkHandler });
 };

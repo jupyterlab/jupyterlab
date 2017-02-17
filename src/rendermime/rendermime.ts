@@ -73,9 +73,8 @@ class RenderMime {
    * Construct a renderer.
    */
   constructor(options: RenderMime.IOptions = {}) {
-    let items = options.rendererItems;
-    if (items) {
-      for (let item of items) {
+    if (options.items) {
+      for (let item of options.items) {
         this._order.pushBack(item.mimeType);
         this._renderers[item.mimeType] = item.renderer;
       }
@@ -169,11 +168,11 @@ class RenderMime {
    * The resolver is explicitly not cloned in this operation.
    */
   clone(): RenderMime {
-    let rendererItems = toArray(map(this._order, mimeType => {
+    let items = toArray(map(this._order, mimeType => {
       return { mimeType, renderer: this._renderers[mimeType] };
     }));
     return new RenderMime({
-      rendererItems,
+      items,
       sanitizer: this._sanitizer,
       linkHandler: this._handler
     });
@@ -262,7 +261,7 @@ namespace RenderMime {
     /**
      * The intial renderer items.
      */
-    rendererItems?: IRendererItem[];
+    items?: IRendererItem[];
 
     /**
      * The sanitizer used to sanitize untrusted html inputs.
@@ -330,7 +329,7 @@ namespace RenderMime {
    * Get an array of the default renderer items.
    */
   export
-  function defaultRendererItems(): IRendererItem[] {
+  function getDefaultItems(): IRendererItem[] {
     let renderers = Private.defaultRenderers;
     let items: IRendererItem[] = [];
     let mimes: { [key: string]: boolean } = {};
