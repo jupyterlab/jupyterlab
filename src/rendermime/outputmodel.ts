@@ -114,8 +114,8 @@ class OutputModel extends MimeModel implements IOutputModel {
     switch (this.type) {
     case 'display_data':
     case 'execute_result':
-      output['data'] = this.data.toJSON() as nbformat.IMimeBundle;
-      output['metadata'] = this.metadata.toJSON() as nbformat.IMimeBundle;
+      output['data'] = this.data.toJSON();
+      output['metadata'] = this.metadata.toJSON();
       break;
     default:
       break;
@@ -197,14 +197,18 @@ namespace OutputModel {
    */
   export
   function getMetadata(output: nbformat.IOutput): JSONObject {
+    let value: JSONObject = Object.create(null);
     switch (output.output_type) {
     case 'execute_result':
     case 'display_data':
-      return (output as nbformat.IDisplayData).metadata;
+      for (let key in output.metadata) {
+        value[key] = extract(output.metadata, key);
+      }
+      break;
     default:
       break;
     }
-    return Object.create(null);
+    return value;
   }
 
   /**
@@ -224,10 +228,6 @@ namespace OutputModel {
   export
   function extract(value: JSONObject, key: string): JSONValue {
     let item = value[key];
-    // Convert multi-line strings to strings.
-    if (isArray(item)) {
-      return (item as string[]).join('\n');
-    }
     if (isPrimitive(item)) {
       return item;
     }
@@ -240,7 +240,14 @@ namespace OutputModel {
   function convertBundle(bundle: nbformat.IMimeBundle): JSONObject {
     let map: JSONObject = Object.create(null);
     for (let mimeType in bundle) {
-      map[mimeType] = extract(bundle, mimeType);
+      let item = bundle[mimeType];
+      // Convert multi-line strings to strings.
+      if (isArray(item)) {
+        item = (item as string[]).join('\n');
+      } else if (!isPrimitive(item)) {
+        item = JSON.parse(JSON.stringify(item));
+      }
+      map[mimeType] = item;
     }
     return map;
   }
