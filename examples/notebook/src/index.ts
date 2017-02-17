@@ -39,10 +39,6 @@ import {
 } from 'jupyterlab/lib/codemirror';
 
 import {
-  defaultSanitizer
-} from 'jupyterlab/lib/common/sanitizer';
-
-import {
   DocumentManager
 } from 'jupyterlab/lib/docmanager';
 
@@ -103,18 +99,7 @@ function createApp(manager: ServiceManager.IManager): void {
     keymap.processKeydownEvent(event);
   }, useCapture);
 
-  const transformers = RenderMime.defaultRenderers();
-  let renderers: RenderMime.MimeMap<RenderMime.IRenderer> = {};
-  let order: string[] = [];
-  for (let t of transformers) {
-    for (let m of t.mimetypes) {
-      renderers[m] = t;
-      order.push(m);
-    }
-  }
-  let sanitizer = defaultSanitizer;
-  let rendermime = new RenderMime({ renderers, order, sanitizer });
-
+  let rendermime = new RenderMime({ items: RenderMime.getDefaultItems() });
   let opener = {
     open: (widget: Widget) => {
       // Do nothing for sibling widgets for now.
