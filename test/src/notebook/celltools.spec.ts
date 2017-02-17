@@ -427,8 +427,8 @@ describe('notebook/celltools', () => {
     describe('#onActiveCellChanged()', () => {
 
       it('should update the select value', () => {
-        let metadata = celltools.activeCell.model.metadata;
-        metadata.set('foo', 1);
+        let cell = panel0.notebook.model.cells.at(1);
+        cell.metadata.set('foo', 1);
         panel0.notebook.activeCellIndex = 1;
         expect(tool.methods).to.contain('onActiveCellChanged');
         expect(tool.selectNode.value).to.be('1');

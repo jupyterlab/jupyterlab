@@ -122,9 +122,9 @@ describe('cells/model', () => {
       it('should update the trusted state of the output models', () => {
         let model = new CodeCellModel({});
         model.outputs.add(DEFAULT_OUTPUTS[0]);
-        expect(model.outputs.at(0).trusted).to.be(false);
+        expect(model.outputs.get(0).trusted).to.be(false);
         model.trusted = true;
-        expect(model.outputs.at(0).trusted).to.be(true);
+        expect(model.outputs.get(0).trusted).to.be(true);
       });
 
     });

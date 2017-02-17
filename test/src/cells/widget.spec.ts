@@ -286,30 +286,6 @@ describe('cells/widget', () => {
 
     });
 
-    describe('#onModelStateChanged()', () => {
-
-      it('should fire when model state changes', () => {
-        let method = 'onModelStateChanged';
-        let widget = new LogCodeCell();
-        expect(widget.methods).to.not.contain(method);
-        widget.model.executionCount = 1;
-        expect(widget.methods).to.contain(method);
-      });
-
-    });
-
-    describe('#onMetadataChanged()', () => {
-
-      it('should fire when model metadata changes', () => {
-        let method = 'onMetadataChanged';
-        let widget = new LogBaseCell();
-        expect(widget.methods).to.not.contain(method);
-        widget.model.metadata.set('foo', 'bar');
-        expect(widget.methods).to.contain(method);
-      });
-
-    });
-
     describe('#contentFactory', () => {
 
       it('should be a contentFactory', () => {
@@ -441,18 +417,6 @@ describe('cells/widget', () => {
         expect(widget.methods).to.not.contain('onUpdateRequest');
         sendMessage(widget, WidgetMessage.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
-      });
-
-    });
-
-    describe('#onModelStateChanged()', () => {
-
-      it('should fire when model state changes', () => {
-        let method = 'onModelStateChanged';
-        let widget = new LogCodeCell();
-        expect(widget.methods).to.not.contain(method);
-        widget.model.executionCount = 1;
-        expect(widget.methods).to.contain(method);
       });
 
     });

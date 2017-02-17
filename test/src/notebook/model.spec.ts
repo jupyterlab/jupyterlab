@@ -329,7 +329,15 @@ describe('notebook/notebook/model', () => {
 
     describe('#metadata', () => {
 
-      it('should set the dirty flag', () => {
+      it('should have default values', () => {
+        let model = new NotebookModel();
+        let metadata = model.metadata;
+        expect(metadata.has('kernelspec'));
+        expect(metadata.has('language_info'));
+        expect(metadata.size).to.be(2);
+      });
+
+      it('should set the dirty flag when changed', () => {
         let model = new NotebookModel();
         expect(model.dirty).to.be(false);
         model.metadata.set('foo', 'bar');
@@ -356,15 +364,6 @@ describe('notebook/notebook/model', () => {
         });
         model.metadata.set('foo', 'bar');
         expect(called).to.be(true);
-      });
-
-      it('should list the metadata namespace keys for the notebook', () => {
-        let model = new NotebookModel();
-        let keys = ['kernelspec', 'language_info', 'orig_nbformat'];
-        expect(toArray(model.metadata.keys())).to.eql(keys);
-        model.metadata.set('foo', 'bar');
-        keys.push('foo');
-        expect(toArray(model.metadata.keys())).to.eql(keys);
       });
 
     });
