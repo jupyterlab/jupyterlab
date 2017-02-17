@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  deepEqual, JSONObject, JSONValue
+  deepEqual, isPrimitive, JSONObject, JSONValue
 } from 'phosphor/lib/algorithm/json';
 
 import {
@@ -103,7 +103,12 @@ class ObservableJSON extends ObservableMap<JSONValue> {
   toJSON(): JSONObject {
     let out: JSONObject = Object.create(null);
     for (let key of this.keys()) {
-      out[key] = JSON.parse(JSON.stringify(this.get(key)));
+      let value = this.get(key);
+      if (isPrimitive(value)) {
+        out[key] = value;
+      } else {
+        out[key] = JSON.parse(JSON.stringify(value));
+      }
     }
     return out;
   }
@@ -366,7 +371,7 @@ class ObservableJSONWidget extends Widget {
       return void 0;
     }
     let content: JSONObject = {};
-    for (let key in source.keys()) {
+    for (let key of source.keys()) {
       content[key] = source.get(key);
     }
     return content;

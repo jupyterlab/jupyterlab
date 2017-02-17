@@ -80,7 +80,7 @@ describe('common/observablejson', () => {
         item.set('foo', { 'bar': 1 });
         let value = item.toJSON();
         value['bar'] = 2;
-        expect(item.get('bar')).to.be(1);
+        expect((item.get('foo') as any)['bar']).to.be(1);
       });
 
     });
@@ -145,7 +145,7 @@ describe('common/observablejson', () => {
     describe('#editorHostNode', () => {
 
       it('should be the editor host node used by the editor', () => {
-        expect(editor.editorHostNode.classList).to.contain('jp-MetadataEditor-host');
+        expect(editor.editorHostNode.classList).to.contain('jp-ObservableJSONWidget-host');
       });
 
     });
@@ -153,7 +153,7 @@ describe('common/observablejson', () => {
     describe('#revertButtonNode', () => {
 
       it('should be the revert button node used by the editor', () => {
-        expect(editor.revertButtonNode.classList).to.contain('jp-MetadataEditor-revertButton');
+        expect(editor.revertButtonNode.classList).to.contain('jp-ObservableJSONWidget-revertButton');
       });
 
     });
@@ -161,7 +161,7 @@ describe('common/observablejson', () => {
     describe('#commitButtonNode', () => {
 
       it('should be the commit button node used by the editor', () => {
-        expect(editor.commitButtonNode.classList).to.contain('jp-MetadataEditor-commitButton');
+        expect(editor.commitButtonNode.classList).to.contain('jp-ObservableJSONWidget-commitButton');
       });
 
     });
@@ -410,7 +410,7 @@ describe('common/observablejson', () => {
       it('should update the value', () => {
         editor.source = new ObservableJSON();
         editor.source.set('foo', 1);
-        expect(editor.model.value.text).to.be('No data!');
+        expect(editor.model.value.text).to.be('{\n  "foo": 1\n}');
       });
 
       it('should bail if the input is dirty', () => {
