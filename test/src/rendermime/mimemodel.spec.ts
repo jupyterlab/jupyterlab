@@ -44,24 +44,6 @@ describe('rendermime/mimemodel', () => {
 
     });
 
-    describe('#stateChanged', () => {
-
-      it('should be emitted when the state changes', () => {
-        let count = 0;
-        let model = new MimeModel();
-        model.stateChanged.connect((sender, args) => {
-          expect(sender).to.be(model);
-          expect(args).to.be(void 0);
-          count++;
-        });
-        model.data.set('foo', 1);
-        model.data.delete('foo');
-        model.metadata.set('foo', 2);
-        expect(count).to.be(3);
-      });
-
-    });
-
     describe('#trusted', () => {
 
       it('should get the trusted state of the model', () => {

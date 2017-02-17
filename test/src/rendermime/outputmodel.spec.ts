@@ -79,10 +79,8 @@ describe('rendermime/outputmodel', () => {
 
     describe('#toJSON()', () => {
 
-      it('should yield the original value', () => {
-        let model = new OutputModel({ value: DEFAULT_STREAM });
-        expect(model.toJSON()).to.eql(DEFAULT_STREAM);
-        model = new OutputModel({ value: DEFAULT_EXECUTE });
+      it('should yield the raw value', () => {
+        let model = new OutputModel({ value: DEFAULT_EXECUTE });
         expect(model.toJSON()).to.eql(DEFAULT_EXECUTE);
       });
 
