@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  JSONObject
+} from 'phosphor/lib/algorithm/json';
+
+import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -22,7 +26,7 @@ import {
 } from '../common/hoverbox';
 
 import {
-  IRenderMime, MimeModel, RenderMime
+  IRenderMime, MimeModel
 } from '../rendermime';
 
 
@@ -221,7 +225,7 @@ namespace TooltipWidget {
     /**
      * The data that populates the tooltip widget.
      */
-    bundle: RenderMime.MimeMap<string>;
+    bundle: JSONObject;
 
     /**
      * The editor referent of the tooltip model.

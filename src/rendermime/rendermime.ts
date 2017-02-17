@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  IIterable, IterableOrArrayLike
+  IIterable, map, toArray
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
@@ -20,10 +20,6 @@ import {
 import {
   IDisposable
 } from 'phosphor/lib/core/disposable';
-
-import {
-  ISignal
-} from 'phosphor/lib/core/signaling';
 
 import {
   Vector
@@ -76,11 +72,14 @@ class RenderMime {
   /**
    * Construct a renderer.
    */
-  constructor(options: RenderMime.IOptions) {
-    for (let mime in options.renderers) {
-      this._renderers[mime] = options.renderers[mime];
+  constructor(options: RenderMime.IOptions = {}) {
+    let items = options.rendererItems;
+    if (items) {
+      for (let item of items) {
+        this._order.pushBack(item.mimeType);
+        this._renderers[item.mimeType] = item.renderer;
+      }
     }
-    this._order = new Vector(options.order);
     this._sanitizer = options.sanitizer || defaultSanitizer;
     this._resolver = options.resolver || null;
     this._handler = options.linkHandler || null;
@@ -165,11 +164,16 @@ class RenderMime {
 
   /**
    * Clone the rendermime instance with shallow copies of data.
+   *
+   * #### Notes
+   * The resolver is explicitly not cloned in this operation.
    */
   clone(): RenderMime {
+    let rendererItems = toArray(map(this._order, mimeType => {
+      return { mimeType, renderer: this._renderers[mimeType] };
+    }));
     return new RenderMime({
-      renderers: this._renderers,
-      order: this._order.iter(),
+      rendererItems,
       sanitizer: this._sanitizer,
       linkHandler: this._handler
     });
@@ -178,16 +182,23 @@ class RenderMime {
   /**
    * Add a renderer by mimeType.
    *
-   * @param mimeType - The mimeType of the renderer.
-   * @param renderer - The renderer instance.
+   * @param item - A renderer item.
+   *
    * @param index - The optional order index.
    *
    * ####Notes
    * Negative indices count from the end, so -1 refers to the penultimate index.
    * Use the index of `.order.length` to add to the end of the render precedence list,
    * which would make the new renderer the last choice.
+   * The renderer will replace an existing renderer for the given
+   * mimeType.
    */
-  addRenderer(mimeType: string, renderer: RenderMime.IRenderer, index = 0): void {
+  addRenderer(item: RenderMime.IRendererItem, index = 0): void {
+    let { mimeType, renderer } = item;
+    let orig = this._order.remove(mimeType);
+    if (orig !== -1 && orig < index) {
+      index -= 1;
+    }
     this._renderers[mimeType] = renderer;
     this._order.insert(index, mimeType);
   }
@@ -230,8 +241,8 @@ class RenderMime {
    return new RenderedText(options);
   }
 
-  private _renderers: RenderMime.MimeMap<RenderMime.IRenderer> = Object.create(null);
-  private _order: Vector<string>;
+  private _renderers: { [key: string]: RenderMime.IRenderer } = Object.create(null);
+  private _order = new Vector<string>();
   private _sanitizer: ISanitizer;
   private _resolver: RenderMime.IResolver | null;
   private _handler: RenderMime.ILinkHandler | null;
@@ -249,14 +260,9 @@ namespace RenderMime {
   export
   interface IOptions {
     /**
-     * A map of mimeTypes to renderers.
+     * The intial renderer items.
      */
-    renderers: MimeMap<IRenderer>;
-
-    /**
-     * A list of mimeTypes in order of precedence (earliest has precedence).
-     */
-    order: IterableOrArrayLike<string>;
+    rendererItems?: IRendererItem[];
 
     /**
      * The sanitizer used to sanitize untrusted html inputs.
@@ -279,10 +285,20 @@ namespace RenderMime {
   }
 
   /**
-   * A map of mimetypes to types.
+   * A render item.
    */
   export
-  type MimeMap<T> = { [mimetype: string]: T };
+  interface IRendererItem {
+    /**
+     * The mimeType to be renderered.
+     */
+    mimeType: string;
+
+    /**
+     * The renderer.
+     */
+    renderer: IRenderer;
+  }
 
   /**
    * An observable model for mime data.
@@ -311,20 +327,23 @@ namespace RenderMime {
   }
 
   /**
-   * Default renderer order
+   * Get an array of the default renderer items.
    */
   export
-  function defaultRenderers(): IRenderer[] {
-    return [
-      new JavaScriptRenderer(),
-      new HTMLRenderer(),
-      new MarkdownRenderer(),
-      new LatexRenderer(),
-      new SVGRenderer(),
-      new ImageRenderer(),
-      new PDFRenderer(),
-      new TextRenderer()
-    ];
+  function defaultRendererItems(): IRendererItem[] {
+    let renderers = Private.defaultRenderers;
+    let items: IRendererItem[] = [];
+    let mimes: { [key: string]: boolean } = {};
+    for (let renderer of renderers) {
+      for (let mime of renderer.mimeTypes) {
+        if (mime in mimes) {
+          continue;
+        }
+        mimes[mime] = true;
+        items.push({ mimeType: mime, renderer });
+      }
+    }
+    return items;
   }
 
   /**
@@ -467,4 +486,26 @@ namespace RenderMime {
      */
     contents: Contents.IManager;
   }
+}
+
+
+/**
+ * The namespace for private module data.
+ */
+export
+namespace Private {
+  /**
+   * The default renderer instances.
+   */
+  export
+  const defaultRenderers = [
+    new JavaScriptRenderer(),
+    new HTMLRenderer(),
+    new MarkdownRenderer(),
+    new LatexRenderer(),
+    new SVGRenderer(),
+    new ImageRenderer(),
+    new PDFRenderer(),
+    new TextRenderer()
+  ];
 }

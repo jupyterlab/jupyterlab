@@ -10,10 +10,6 @@ import {
 } from '../application';
 
 import {
-  defaultSanitizer
-} from '../common/sanitizer';
-
-import {
   ICommandLinker
 } from '../commandlinker';
 
@@ -47,16 +43,7 @@ export default plugin;
  * Activate the rendermine plugin.
  */
 function activate(app: JupyterLab, linker: ICommandLinker): IRenderMime {
-  let sanitizer = defaultSanitizer;
-  const transformers = RenderMime.defaultRenderers();
-  let renderers: RenderMime.MimeMap<RenderMime.IRenderer> = {};
-  let order: string[] = [];
-  for (let t of transformers) {
-    for (let m of t.mimeTypes) {
-      renderers[m] = t;
-      order.push(m);
-    }
-  }
+  let rendererItems = RenderMime.defaultRendererItems();
   let linkHandler = {
     handleLink: (node: HTMLElement, path: string) => {
       if (!utils.urlParse(path).protocol && path.indexOf('//') !== 0) {
@@ -64,10 +51,5 @@ function activate(app: JupyterLab, linker: ICommandLinker): IRenderMime {
       }
     }
   };
-  return new RenderMime({
-    renderers,
-    order,
-    sanitizer,
-    linkHandler
-  });
+  return new RenderMime({ rendererItems, linkHandler });
 };
