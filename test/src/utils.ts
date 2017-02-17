@@ -138,16 +138,11 @@ namespace Private {
 
 
   class JSONRenderer extends HTMLRenderer {
-    /**
-     * The mimetypes this renderer accepts.
-     */
-    mimetypes = ['application/json'];
 
-    /**
-     * Render the transformed mime bundle.
-     */
+    mimeTypes = ['application/json'];
+
     render(options: RenderMime.IRenderOptions): Widget {
-      let source = String(options.model.data.get(options.mimeType));
+      let source = options.model.data.get(options.mimeType);
       options.model.data.set(options.mimeType, json2html(source));
       return super.render(options);
     }
@@ -155,14 +150,9 @@ namespace Private {
 
 
   class InjectionRenderer extends TextRenderer {
-    /**
-     * The mimetypes this renderer accepts.
-     */
+
     mimeTypes = ['test/injector'];
 
-    /**
-     * Render the transformed mime model.
-     */
     render(options: RenderMime.IRenderOptions): Widget {
       options.model.data.set('application/json', { 'foo': 1 } );
       return super.render(options);

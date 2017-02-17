@@ -98,10 +98,10 @@ describe('rendermime/index', () => {
         expect(w instanceof Widget).to.be(true);
       });
 
-      it('should return `undefined` for an unregistered mime type', () => {
+      it('should return a placeholder for an unregistered mime type', () => {
         let model = createModel({ 'text/fizz': 'buzz' });
         let value = r.render(model);
-        expect(value).to.be(void 0);
+        expect(value).to.be.a(Widget);
       });
 
       it('should render with the mimeType of highest precidence', () => {
