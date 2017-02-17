@@ -26,8 +26,6 @@ class MimeModel implements RenderMime.IMimeModel {
     this.trusted = !!options.trusted;
     this.data = new ObservableJSON({ values: options.data });
     this.metadata = new ObservableJSON({ values: options.metadata });
-    this.data.changed.connect(this._onGenericChange, this);
-    this.metadata.changed.connect(this._onGenericChange, this);
   }
 
   /**
@@ -69,13 +67,6 @@ class MimeModel implements RenderMime.IMimeModel {
       data: this.data.toJSON(),
       metadata: this.metadata.toJSON()
     };
-  }
-
-  /**
-   * Emit a changedState signal when data or metadata changes.
-   */
-  private _onGenericChange(): void {
-    this.stateChanged.emit(void 0);
   }
 }
 

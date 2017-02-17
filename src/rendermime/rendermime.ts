@@ -290,11 +290,6 @@ namespace RenderMime {
   export
   interface IMimeModel extends IDisposable {
     /**
-     * A signal emitted when the state of the model changes.
-     */
-    readonly stateChanged: ISignal<IMimeModel, void>;
-
-    /**
      * Whether the model is trusted.
      */
     readonly trusted: boolean;
