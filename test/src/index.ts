@@ -76,8 +76,8 @@
 // import './notebook/widgetfactory.spec';
 // import './notebook/tracker.spec';
 
-import './outputarea/model.spec';
-// import './outputarea/widget.spec';
+// import './outputarea/model.spec';
+import './outputarea/widget.spec';
 
 // import './statedb/statedb.spec';
 

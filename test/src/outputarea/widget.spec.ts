@@ -28,7 +28,6 @@ import {
  * The default rendermime instance to use for testing.
  */
 const rendermime = defaultRenderMime();
-const model = new OutputAreaModel({ values: DEFAULT_OUTPUTS, trusted: true });
 
 
 class LogOutputAreaWidget extends OutputAreaWidget {
@@ -45,9 +44,16 @@ class LogOutputAreaWidget extends OutputAreaWidget {
 describe('outputarea/widget', () => {
 
   let widget: LogOutputAreaWidget;
+  let model: OutputAreaModel;
 
   beforeEach(() => {
+    model = new OutputAreaModel({ values: DEFAULT_OUTPUTS, trusted: true });
     widget = new LogOutputAreaWidget({ rendermime, model });
+  });
+
+  afterEach(() => {
+    model.dispose();
+    widget.dispose();
   });
 
   describe('OutputAreaWidget', () => {
@@ -98,7 +104,7 @@ describe('outputarea/widget', () => {
       });
 
       it('should get the number of child widgets', () => {
-        expect(widget.widgets.length).to.be(DEFAULT_OUTPUTS.length);
+        expect(widget.widgets.length).to.be(DEFAULT_OUTPUTS.length - 1);
         widget.model.clear();
         expect(widget.widgets.length).to.be(0);
       });
@@ -154,17 +160,6 @@ describe('outputarea/widget', () => {
         expect(widget.isDisposed).to.be(true);
         widget.dispose();
         expect(widget.isDisposed).to.be(true);
-      });
-
-    });
-
-    describe('#clear()', () => {
-
-      it('should clear all of the widgets', () => {
-        widget.model.fromJSON(DEFAULT_OUTPUTS);
-        expect(widget.widgets.length).to.be.ok();
-        widget.clear();
-        expect(widget.widgets.length).to.be(0);
       });
 
     });
