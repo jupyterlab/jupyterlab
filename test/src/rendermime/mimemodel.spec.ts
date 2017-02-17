@@ -8,7 +8,7 @@ import {
 } from '../../../lib/rendermime';
 
 
-describe('rendermime/index', () => {
+describe('rendermime/mimemodel', () => {
 
   let model: MimeModel;
 

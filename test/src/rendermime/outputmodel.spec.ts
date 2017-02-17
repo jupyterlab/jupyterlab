@@ -36,7 +36,7 @@ const DEFAULT_STREAM: nbformat.IOutput = {
 };
 
 
-describe('rendermime/output', () => {
+describe('rendermime/outputmodel', () => {
 
   describe('OutputModel', () => {
 
@@ -105,7 +105,7 @@ describe('rendermime/output', () => {
       it('should get the metadata from the bundle', () => {
         let metadata = OutputModel.getMetadata(DEFAULT_EXECUTE);
         expect(metadata['foo']).to.be(1);
-        expect(metadata['baz']).to.be('baz');
+        expect(metadata['bar']).to.be('baz');
       });
 
       it('should handle output with no metadata field', () => {
