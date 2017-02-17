@@ -61,9 +61,9 @@
 // import './renderers/renderers.spec';
 // import './renderers/latex.spec';
 
-import './rendermime/mimemodel.spec';
-import './rendermime/outputmodel.spec';
-import './rendermime/rendermime.spec';
+// import './rendermime/mimemodel.spec';
+// import './rendermime/outputmodel.spec';
+// import './rendermime/rendermime.spec';
 
 // import './notebook/actions.spec';
 // import './notebook/celltools.spec';
@@ -76,7 +76,7 @@ import './rendermime/rendermime.spec';
 // import './notebook/widgetfactory.spec';
 // import './notebook/tracker.spec';
 
-// import './outputarea/model.spec';
+import './outputarea/model.spec';
 // import './outputarea/widget.spec';
 
 // import './statedb/statedb.spec';
