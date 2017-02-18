@@ -426,9 +426,6 @@ namespace Private {
     return Promise.all(promises).then(() => { return void 0; });
   }
 
-  /**
-   * Handle a node with a `src` or `href` attribute.
-   */
   function handleAttr(node: HTMLElement, name: 'src' | 'href', resolver: RenderMime.IResolver): Promise<void> {
     let source = node.getAttribute(name);
     if (!source) {
@@ -442,6 +439,21 @@ namespace Private {
     });
   }
 
+  /**
+  * Apply ids to headers. 
+  */
+  function headerAnchors(node: HTMLElement): void {
+    let headerNames = ['h1','h2','h3','h4','h5','h6'];
+    for (let headerType of headerNames){
+      let headers = node.getElementsByTagName(headerType);
+      for (let i=0; i<headers.length; i++){
+        let header = headers[i];
+        header.id = header.innerHTML.replace(/ /g, '-');
+        let anchor = document.createElement('a');
+        anchor.target = '_self';
+        anchor.textContent = '¶';
+        anchor.href = '#'+ header.id;
+        header.appendChild(anchor);
   /**
    * Handle an anchor node.
    */
