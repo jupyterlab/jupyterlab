@@ -115,12 +115,10 @@ A getter should yield the same value every time.
 
 ## Data Structures
 
-Prefer to use Phosphor [Phosphor `Vector`](http://phosphorjs.github.io/phosphor/api/classes/_collections_vector_.vector.html) 
-over JavaScript `Array` for internal use for its extra flexibility.
+Prefer to use Vector over JavaScript `Array` for internal use for its extra flexibility.
 
 For public API, we have three options: JavaScript `Array`, 
-[Phosphor `IIterator`](http://phosphorjs.github.io/phosphor/api/interfaces/_algorithm_iteration_.iiterable.html), and 
-[Phosphor `ISequence`](http://phosphorjs.github.io/phosphor/api/interfaces/_algorithm_sequence_.isequence.html).
+`IIterator`, and `ISequence`.
 
 Prefer an `Array` for:
 - A return value is the result of a newly allocated array, to avoid the 
