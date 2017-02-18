@@ -9,19 +9,19 @@ JupyterLab can be extended in two ways via:
   them in the "Documents" tutorial.
 
 A JupyterLab application is comprised of:
-- A core [Application](https://github.com/phosphorjs/phosphide/blob/master/src/core/application.ts) object
+- A core Application object
 - Plugins
 
 A full example of an application is contained [here](https://github.com/jupyterlab/jupyterlab/tree/master/examples/lab).
 Looking at the `index.js` file, you can see the extensions
 used in the tutorial example.
 
-## [Plugins](http://phosphorjs.github.io/phosphor/api/interfaces/_ui_application_.application.iplugin.html)
+## Plugins
 A plugin adds a core functionality to the application:
 - A plugin can require other plugins for operation.
 - A plugin is activated when it is needed by other plugins, or when explicitly
 activated.
-- Plugins require and provide [Token](http://phosphorjs.github.io/phosphor/api/classes/_core_token_.token.html) objects, which are used to provide
+- Plugins require and provide `Token` objects, which are used to provide
 a typed value to the plugin's `activate()` method.
 - The module providing plugin(s) must meet the [JupyterLab.IPluginModule](http://jupyterlab.github.io/jupyterlab/interfaces/_application_index_.jupyterlab.ipluginmodule.html) interface, by
 exporting a plugin object or array of plugin objects as the default export.
@@ -42,11 +42,11 @@ interactive kernel console sessions.
 - [Instance Restorer](https://github.com/jupyterlab/jupyterlab/blob/master/src/instancerestorer/instancerestorer.ts) - The application-wide instance restorer, which takes care of the application state restoration lifecycle.
 
 ## Application Object
-The JupyterLab [Application](http://phosphorjs.github.io/phosphor/api/classes/_ui_application_.application.html) object is given to each plugin in
+The JupyterLab Application object is given to each plugin in
 its `activate()` function.  The Application object has a:
-- [commands](http://phosphorjs.github.io/phosphor/api/classes/_ui_application_.application.html#commands) - used to add and execute commands in the application.
-- [keymap](http://phosphorjs.github.io/phosphor/api/classes/_ui_application_.application.html#keymap) - used to add keyboard shortcuts to the application.
-- [shell](http://phosphorjs.github.io/phosphor/api/classes/_ui_application_.application.html#shell) - a JupyterLab shell instance.
+- commands - used to add and execute commands in the application.
+- keymap - used to add keyboard shortcuts to the application.
+- shell - a JupyterLab shell instance.
 
 ## JupyterLab Shell
 The JupyterLab [shell](http://jupyterlab.github.io/jupyterlab/classes/_application_shell_.applicationshell.html) is used to add and interact with content in the
@@ -68,4 +68,3 @@ throughout.  **Phosphor messages** are a *many-to-one* interaction that allows
 information like resize events to flow through the widget hierarchy in
 the application.  **Phosphor signals** are a *one-to-many* interaction that allow
 listeners to react to changes in an observed object.
-
