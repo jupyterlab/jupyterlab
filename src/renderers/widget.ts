@@ -453,6 +453,7 @@ namespace Private {
         anchor.target = '_self';
         anchor.textContent = '¶';
         anchor.href = '#'+ header.id;
+        anchor.classList.add('jp-InternalAnchorLink');
         header.appendChild(anchor);
   /**
    * Handle an anchor node.
