@@ -208,6 +208,7 @@ class RenderedMarkdown extends RenderedHTMLCommon {
         this._urlResolved = Private.handleUrls(this.node, options.resolver,
                                                options.linkHandler);
       }
+      headerAnchors(this.node);
       this.fit();
       this._rendered = true;
       if (this.isAttached) {
