@@ -111,6 +111,7 @@ class DocumentWidgetManager implements IDisposable {
 
     this.adoptWidget(context, widget);
     context.fileChanged.connect(this._onFileChanged, this);
+    context.pathChanged.connect(this._onPathChanged, this);
     context.ready.then(() => {
       this.setCaption(widget);
     });
@@ -327,6 +328,14 @@ class DocumentWidgetManager implements IDisposable {
    * Handle a file changed signal for a context.
    */
   private _onFileChanged(context: DocumentRegistry.Context): void {
+    let widgets = Private.widgetsProperty.get(context);
+    each(widgets, widget => { this.setCaption(widget); });
+  }
+
+  /**
+   * Handle a path changed signal for a context.
+   */
+  private _onPathChanged(context: DocumentRegistry.Context): void {
     let widgets = Private.widgetsProperty.get(context);
     each(widgets, widget => { this.setCaption(widget); });
   }
