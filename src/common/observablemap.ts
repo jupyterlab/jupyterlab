@@ -334,7 +334,7 @@ defineSignal(ObservableMap.prototype, 'changed');
  */
 namespace Private {
   /**
-   * The default strict equality item cmp.
+   * The default strict equality item comparator.
    */
   export
   function itemCmp(first: any, second: any): boolean {

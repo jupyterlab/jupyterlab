@@ -186,7 +186,7 @@ class RenderMime {
    * @param index - The optional order index.
    *
    * ####Notes
-   * Negative indices count from the end, so -1 refers to the penultimate index.
+   * Negative indices count from the end, so -1 refers to the last index.
    * Use the index of `.order.length` to add to the end of the render precedence list,
    * which would make the new renderer the last choice.
    * The renderer will replace an existing renderer for the given
