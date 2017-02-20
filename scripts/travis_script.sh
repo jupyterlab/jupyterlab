@@ -38,6 +38,10 @@ if [[ $GROUP == coverage_and_docs ]]; then
     # Run the coverage check.
     npm run test:coverage
 
+    # Run the link check
+    pip install -q pytest-check-links
+    py.test --check-links -k .md .
+
     # Build the docs
     npm run docs
     cp jupyter-plugins-demo.gif docs

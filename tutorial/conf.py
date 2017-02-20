@@ -23,6 +23,7 @@ import shlex
 
 # For conversion from markdown to html
 import recommonmark.parser
+from recommonmark.transform import AutoStructify
 
 # Set paths
 #sys.path.insert(0, os.path.abspath('.'))
@@ -325,6 +326,7 @@ texinfo_documents = [
      'Miscellaneous'),
 ]
 
+
 # Documents to append as an appendix to all manuals.
 #
 # texinfo_appendices = []
@@ -352,3 +354,11 @@ if not on_rtd:
     html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # readthedocs.org uses their theme by default, so no need to specify it
+
+
+# See http://recommonmark.readthedocs.io/en/latest/auto_structify.html
+def setup(app):
+    app.add_config_value('recommonmark_config', {
+        'enable_auto_doc_ref': True
+    }, True)
+    app.add_transform(AutoStructify)
