@@ -1269,10 +1269,10 @@ class Notebook extends StaticNotebook {
         value = factory.createRawCell({ cell });
         break;
       }
-      model.cells.insert(index, value);
+      model.cells.insert(index++, value);
     });
     // Activate the last cell.
-    this.activeCellIndex = index + values.length - 1;
+    this.activeCellIndex = index - 1;
   }
 
   /**
