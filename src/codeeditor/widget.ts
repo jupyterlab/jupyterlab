@@ -56,6 +56,7 @@ class CodeEditorWidget extends Widget {
       return;
     }
     clearTimeout(this._resizing);
+    this._resizing = -1;
     super.dispose();
     this._editor.dispose();
     this._editor = null;
@@ -93,10 +94,8 @@ class CodeEditorWidget extends Widget {
    * A message handler invoked on an `'after-show'` message.
    */
   protected onAfterShow(msg: Message): void {
-    if (this._needsRefresh) {
-      this._editor.refresh();
-      this._needsRefresh = false;
-    }
+    this._editor.refresh();
+    this._needsRefresh = false;
   }
 
   /**
@@ -118,6 +117,7 @@ class CodeEditorWidget extends Widget {
       }
     } else {
       this._editor.setSize(msg);
+      this._needsResize = false;
     }
     this._needsRefresh = true;
   }

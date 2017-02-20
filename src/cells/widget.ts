@@ -775,11 +775,11 @@ class InputAreaWidget extends Widget {
    * Show the text editor.
    */
   showEditor(): void {
-    this._editor.show();
     let layout = this.layout as PanelLayout;
     if (this._rendered) {
       layout.removeWidget(this._rendered);
     }
+    this._editor.show();
   }
 
   /**
