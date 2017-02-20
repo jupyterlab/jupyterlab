@@ -356,7 +356,7 @@ if not on_rtd:
 # readthedocs.org uses their theme by default, so no need to specify it
 
 
-# At the bottom of conf.py
+# See http://recommonmark.readthedocs.io/en/latest/auto_structify.html
 def setup(app):
     app.add_config_value('recommonmark_config', {
         'enable_auto_doc_ref': True
