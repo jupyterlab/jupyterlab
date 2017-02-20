@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  each
+} from 'phosphor/lib/algorithm/iteration';
+
+import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -269,6 +273,9 @@ class NotebookPanel extends Widget {
         // Clear the undo state of the cells.
         if (model) {
           model.cells.clearUndo();
+          each(this.notebook.widgets, widget => {
+            widget.editor.clearHistory();
+          });
         }
       });
     }
