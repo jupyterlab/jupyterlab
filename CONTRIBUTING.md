@@ -123,7 +123,7 @@ python main.py
 
 ### Build API Docs
 
-To build the [API docs](http://jupyter.github.io/jupyterlab/):
+To build the [API docs](http://jupyterlab.github.io/jupyterlab/):
 
 ```bash
 npm run docs
