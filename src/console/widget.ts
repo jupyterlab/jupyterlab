@@ -443,6 +443,7 @@ class CodeConsole extends Widget {
   private _evtKeyDown(event: KeyboardEvent): void {
     let editor = this.prompt.editor;
     if (event.keyCode === 13 && !editor.hasFocus()) {
+      event.preventDefault();
       editor.focus();
     }
   }
