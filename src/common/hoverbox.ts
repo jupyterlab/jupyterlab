@@ -128,8 +128,8 @@ namespace HoverBox {
 
     // Make sure the box ought to be visible.
     let withinBounds = maxHeight > minHeight &&
-                       spaceBelow >= lineHeight &&
-                       spaceAbove >= anchorRect.top;
+      (spaceBelow >= lineHeight || spaceAbove >= anchorRect.top);
+
     if (!withinBounds) {
       node.classList.add(OUTOFVIEW_CLASS);
       return;
