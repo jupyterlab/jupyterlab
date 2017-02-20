@@ -87,7 +87,7 @@ also contains an [OutputAreaWidget](http://jupyterlab.github.io/jupyterlab/class
 An OutputAreaWidget is responsible for rendering the outputs in the
 [OutputAreaModel](http://jupyterlab.github.io/jupyterlab/classes/_outputarea_model_.outputareamodel.html)
 list. An OutputAreaWidget uses a
-notebook-specific [RenderMime](http://jupyterlab.github.io/jupyterlab/classes/_rendermime_index_.rendermime.html)
+notebook-specific [RenderMime](http://jupyterlab.github.io/jupyterlab/classes/_rendermime_rendermime_.rendermime.html)
 object to render `display_data` output messages.
 
 #### Rendering output messages

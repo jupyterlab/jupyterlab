@@ -468,6 +468,9 @@ class StaticNotebook extends Widget {
    */
   private _updateMimetype(): void {
     let info = this._model.metadata.get('language_info') as nbformat.ILanguageInfoMetadata;
+    if (!info) {
+      return;
+    }
     this._mimetype = this._mimetypeService.getMimeTypeByLanguage(info);
     each(this.widgets, widget => {
       if (widget.model.type === 'code') {
