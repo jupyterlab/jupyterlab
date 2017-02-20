@@ -54,8 +54,12 @@ import {
 } from '../common/interfaces';
 
 import {
-  Metadata
-} from '../common/metadata';
+  ObservableJSON, ObservableJSONWidget
+} from '../common/observablejson';
+
+import {
+  IObservableMap, ObservableMap
+} from '../common/observablemap';
 
 import {
   INotebookTracker
@@ -207,12 +211,12 @@ class CellTools extends Widget {
    */
   private _onActiveCellChanged(): void {
     if (this._prevActive) {
-      this._prevActive.metadataChanged.disconnect(this._onMetadataChanged, this);
+      this._prevActive.metadata.changed.disconnect(this._onMetadataChanged, this);
     }
     let activeCell = this._tracker.activeCell;
     this._prevActive = activeCell ? activeCell.model : null;
     if (activeCell) {
-      activeCell.model.metadataChanged.connect(this._onMetadataChanged, this);
+      activeCell.model.metadata.changed.connect(this._onMetadataChanged, this);
     }
     each(this.children(), widget => {
       sendMessage(widget, CellTools.ActiveCellMessage);
@@ -231,8 +235,8 @@ class CellTools extends Widget {
   /**
    * Handle a change in the metadata.
    */
-  private _onMetadataChanged(sender: ICellModel, args: IChangedArgs<JSONValue>): void {
-    let message = new Metadata.ChangeMessage(args);
+  private _onMetadataChanged(sender: IObservableMap<JSONValue>, args: ObservableMap.IChangedArgs<JSONValue>): void {
+    let message = new ObservableJSON.ChangeMessage(args);
     each(this.children(), widget => {
       sendMessage(widget, message);
     });
@@ -312,8 +316,8 @@ namespace CellTools {
       case 'selection-changed':
         this.onSelectionChanged(msg);
         break;
-      case 'metadata-changed':
-        this.onMetadataChanged(msg as Metadata.ChangeMessage);
+      case 'jsonvalue-changed':
+        this.onMetadataChanged(msg as ObservableJSON.ChangeMessage);
         break;
       default:
         break;
@@ -342,7 +346,7 @@ namespace CellTools {
      * #### Notes
      * The default implementation is a no-op.
      */
-     protected onMetadataChanged(msg: Metadata.ChangeMessage): void { /* no-op */ }
+     protected onMetadataChanged(msg: ObservableJSON.ChangeMessage): void { /* no-op */ }
   }
 
   /**
@@ -446,7 +450,7 @@ namespace CellTools {
       let layout = this.layout = new PanelLayout();
       let header = Private.createMetadataHeader();
       layout.addWidget(header);
-      this.editor = new Metadata.Editor({ editorFactory });
+      this.editor = new ObservableJSONWidget({ editorFactory });
       layout.addWidget(this.editor);
       header.addClass(COLLAPSED_CLASS);
       this.editor.addClass(COLLAPSED_CLASS);
@@ -456,7 +460,7 @@ namespace CellTools {
     /**
      * The editor used by the tool.
      */
-    readonly editor: Metadata.Editor;
+    readonly editor: ObservableJSONWidget;
 
     /**
      * Get the toggle node used by the editor.
@@ -497,7 +501,7 @@ namespace CellTools {
     protected onAfterAttach(msg: Message): void {
       this.toggleNode.addEventListener('click', this);
       let cell = this.parent.activeCell;
-      this.editor.owner = cell ? cell.model : null;
+      this.editor.source = cell ? cell.model.metadata : null;
     }
 
     /**
@@ -512,14 +516,7 @@ namespace CellTools {
      */
     protected onActiveCellChanged(msg: Message): void {
       let cell = this.parent.activeCell;
-      this.editor.owner = cell ? cell.model : null;
-    }
-
-    /**
-     * Handle a change to the metadata of the active cell.
-     */
-    protected onMetadataChanged(msg: Metadata.ChangeMessage) {
-      sendMessage(this.editor, msg);
+      this.editor.source = cell ? cell.model.metadata : null;
     }
   }
 
@@ -632,19 +629,19 @@ namespace CellTools {
         return;
       }
       select.disabled = false;
-      let cursor = activeCell.model.getMetadata(this.key);
-      select.value = JSON.stringify(cursor.getValue());
+      let source = activeCell.model.metadata;
+      select.value = JSON.stringify(source.get(this.key));
     }
 
     /**
      * Handle a change to the metadata of the active cell.
      */
-    protected onMetadataChanged(msg: Metadata.ChangeMessage) {
+    protected onMetadataChanged(msg: ObservableJSON.ChangeMessage) {
       if (this._changeGuard) {
         return;
       }
       let select = this.selectNode;
-      if (msg.args.name === this.key) {
+      if (msg.args.key === this.key) {
         this._changeGuard = true;
         select.value = JSON.stringify(msg.args.newValue);
         this._changeGuard = false;
@@ -661,8 +658,8 @@ namespace CellTools {
       }
       this._changeGuard = true;
       let select = this.selectNode;
-      let cursor = activeCell.model.getMetadata(this.key);
-      cursor.setValue(JSON.parse(select.value));
+      let source = activeCell.model.metadata;
+      source.set(this.key, JSON.parse(select.value));
       this._changeGuard = false;
     }
 

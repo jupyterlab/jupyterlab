@@ -298,8 +298,7 @@ class NotebookPanel extends Widget {
    * Update the kernel language.
    */
   private _updateLanguage(language: KernelMessage.ILanguageInfo): void {
-    let infoCursor = this.model.getMetadata('language_info');
-    infoCursor.setValue(language);
+    this.model.metadata.set('language_info', language);
   }
 
   /**
@@ -310,8 +309,7 @@ class NotebookPanel extends Widget {
       if (this.isDisposed) {
         return;
       }
-      let specCursor = this.model.getMetadata('kernelspec');
-      specCursor.setValue({
+      this.model.metadata.set('kernelspec', {
         name: kernel.name,
         display_name: spec.display_name,
         language: spec.language

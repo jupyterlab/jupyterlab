@@ -39,10 +39,6 @@ import {
 } from 'jupyterlab/lib/codemirror';
 
 import {
-  defaultSanitizer
-} from 'jupyterlab/lib/common/sanitizer';
-
-import {
   DocumentManager
 } from 'jupyterlab/lib/docmanager';
 
@@ -103,18 +99,7 @@ function createApp(manager: ServiceManager.IManager): void {
     keymap.processKeydownEvent(event);
   }, useCapture);
 
-  const transformers = RenderMime.defaultRenderers();
-  let renderers: RenderMime.MimeMap<RenderMime.IRenderer> = {};
-  let order: string[] = [];
-  for (let t of transformers) {
-    for (let m of t.mimetypes) {
-      renderers[m] = t;
-      order.push(m);
-    }
-  }
-  let sanitizer = defaultSanitizer;
-  let rendermime = new RenderMime({ renderers, order, sanitizer });
-
+  let rendermime = new RenderMime({ items: RenderMime.getDefaultItems() });
   let opener = {
     open: (widget: Widget) => {
       // Do nothing for sibling widgets for now.
@@ -261,17 +246,17 @@ function createApp(manager: ServiceManager.IManager): void {
     command: cmdIds.save
   },
   {
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['I', 'I'],
     command: cmdIds.interrupt
   },
   {
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['0', '0'],
     command: cmdIds.restart
   },
   {
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['Enter'],
     command: cmdIds.editMode
   },
@@ -281,7 +266,7 @@ function createApp(manager: ServiceManager.IManager): void {
     command: cmdIds.commandMode
   },
   {
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['Shift M'],
     command: cmdIds.merge
   },
@@ -291,42 +276,42 @@ function createApp(manager: ServiceManager.IManager): void {
     command: cmdIds.split
   },
   {
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['J'],
     command: cmdIds.selectBelow
   },
   {
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['ArrowDown'],
     command: cmdIds.selectBelow
   },
   {
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['K'],
     command: cmdIds.selectAbove
   },
   {
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['ArrowUp'],
     command: cmdIds.selectAbove
   },
   {
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['Shift K'],
     command: cmdIds.extendAbove
   },
   {
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['Shift J'],
     command: cmdIds.extendBelow
   },
   {
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['Z'],
     command: cmdIds.undo
   },
     {
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['Y'],
     command: cmdIds.redo
   }

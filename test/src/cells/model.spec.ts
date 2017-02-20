@@ -23,13 +23,13 @@ import {
   OutputAreaModel
 } from '../../../lib/outputarea';
 
+import {
+  DEFAULT_OUTPUTS
+} from '../utils';
+
 
 class TestModel extends CellModel {
   get type(): 'raw' { return 'raw'; }
-
-  setCursorData(name: string, newValue: any): void {
-    super.setCursorData(name, newValue);
-  }
 }
 
 
@@ -108,28 +108,49 @@ describe('cells/model', () => {
 
     });
 
+    describe('#trusted', () => {
+
+      it('should be the trusted state of the cell', () => {
+        let model = new CodeCellModel({});
+        expect(model.trusted).to.be(false);
+        model.trusted = true;
+        expect(model.trusted).to.be(true);
+        let other = new CodeCellModel({ cell: model.toJSON() });
+        expect(other.trusted).to.be(true);
+      });
+
+      it('should update the trusted state of the output models', () => {
+        let model = new CodeCellModel({});
+        model.outputs.add(DEFAULT_OUTPUTS[0]);
+        expect(model.outputs.get(0).trusted).to.be(false);
+        model.trusted = true;
+        expect(model.outputs.get(0).trusted).to.be(true);
+      });
+
+    });
+
     describe('#metadataChanged', () => {
 
       it('should signal when model metadata has changed', () => {
         let model = new TestModel({});
-        let listener = (sender: any, args: IChangedArgs<any>) => {
+        let listener = (sender: any, args: any) => {
           value = args.newValue;
         };
         let value = '';
-        model.metadataChanged.connect(listener);
+        model.metadata.changed.connect(listener);
         expect(value).to.be.empty();
-        model.setCursorData('foo', 'bar');
+        model.metadata.set('foo', 'bar');
         expect(value).to.be('bar');
       });
 
       it('should not signal when model metadata has not changed', () => {
         let model = new TestModel({});
         let called = 0;
-        model.metadataChanged.connect(() => { called++; });
+        model.metadata.changed.connect(() => { called++; });
         expect(called).to.be(0);
-        model.setCursorData('foo', 'bar');
+        model.metadata.set('foo', 'bar');
         expect(called).to.be(1);
-        model.setCursorData('foo', 'bar');
+        model.metadata.set('foo', 'bar');
         expect(called).to.be(1);
       });
 
@@ -170,12 +191,8 @@ describe('cells/model', () => {
 
       it('should dispose of the resources held by the model', () => {
         let model = new TestModel({});
-
-        model.setCursorData('foo', 'bar');
-        expect(model.getMetadata('foo').getValue()).to.be('bar');
         model.dispose();
         expect(model.isDisposed).to.be(true);
-        expect(model.getMetadata('foo')).to.be(null);
       });
 
       it('should be safe to call multiple times', () => {
@@ -214,34 +231,28 @@ describe('cells/model', () => {
 
     });
 
-    describe('#getMetadata()', () => {
+    describe('#metadata', () => {
 
-      it('should get a metadata cursor for the cell', () => {
+      it('should handle a metadata for the cell', () => {
         let model = new CellModel({});
-        let c1 = model.getMetadata('foo');
-
-        expect(c1.getValue()).to.be(void 0);
-        c1.setValue(1);
-        expect(c1.getValue()).to.be(1);
-
-        let c2 = model.getMetadata('foo');
-
-        expect(c2.getValue()).to.be(1);
-        c2.setValue(2);
-        expect(c1.getValue()).to.be(2);
-        expect(c2.getValue()).to.be(2);
+        expect(model.metadata.get('foo')).to.be(void 0);
+        model.metadata.set('foo', 1);
+        expect(model.metadata.get('foo')).to.be(1);
       });
-
-    });
-
-    describe('#listMetadata()', () => {
 
       it('should get a list of user metadata keys', () => {
         let model = new CellModel({});
-        let cursor = model.getMetadata('foo');
-        expect(toArray(model.listMetadata())).to.be.empty();
-        cursor.setValue(1);
-        expect(toArray(model.listMetadata())).to.eql(['foo']);
+        expect(toArray(model.metadata.keys())).to.be.empty();
+        model.metadata.set('foo', 1);
+        expect(model.metadata.keys()).to.eql(['foo']);
+      });
+
+      it('should trigger changed signal', () => {
+        let model = new CellModel({});
+        let called = false;
+        model.metadata.changed.connect(() => { called = true; });
+        model.metadata.set('foo', 1);
+        expect(called).to.be(true);
       });
 
     });
@@ -445,7 +456,7 @@ describe('cells/model', () => {
 
         it('should create an output area model', () => {
           let factory = new CodeCellModel.ContentFactory();
-          expect(factory.createOutputArea()).to.be.an(OutputAreaModel);
+          expect(factory.createOutputArea({ trusted: true })).to.be.an(OutputAreaModel);
         });
 
       });

@@ -8,16 +8,12 @@ import {
 } from 'simulate-event';
 
 import {
-  ServiceManager, utils
+  ServiceManager, nbformat, utils
 } from '@jupyterlab/services';
 
 import {
   Widget
 } from 'phosphor/lib/ui/widget';
-
-import {
-  defaultSanitizer
-} from '../../lib/common/sanitizer';
 
 import {
   TextModelFactory, DocumentRegistry, Context
@@ -138,54 +134,84 @@ namespace Private {
 
 
   class JSONRenderer extends HTMLRenderer {
-    /**
-     * The mimetypes this renderer accepts.
-     */
-    mimetypes = ['application/json'];
 
-    /**
-     * Render the transformed mime bundle.
-     */
-    render(options: RenderMime.IRendererOptions<string>): Widget {
-      options.source = json2html(options.source);
+    mimeTypes = ['application/json'];
+
+    render(options: RenderMime.IRenderOptions): Widget {
+      let source = options.model.data.get(options.mimeType);
+      options.model.data.set(options.mimeType, json2html(source));
       return super.render(options);
     }
   }
 
 
   class InjectionRenderer extends TextRenderer {
-    /**
-     * The mimetypes this renderer accepts.
-     */
-    mimetypes = ['foo/bar'];
 
-    /**
-     * Render the transformed mime bundle.
-     */
-    render(options: RenderMime.IRendererOptions<string>): Widget {
-      if (options.injector) {
-        options.injector.add('text/plain', 'foo');
-        options.injector.add('application/json', { 'foo': 1 } );
-      }
+    mimeTypes = ['test/injector'];
+
+    render(options: RenderMime.IRenderOptions): Widget {
+      options.model.data.set('application/json', { 'foo': 1 } );
       return super.render(options);
     }
   }
 
-  const TRANSFORMERS = RenderMime.defaultRenderers().concat([
+  let renderers = [
     new JSONRenderer(),
     new InjectionRenderer()
-  ]);
-
-  let renderers: RenderMime.MimeMap<RenderMime.IRenderer> = {};
-  let order: string[] = [];
-  for (let t of TRANSFORMERS) {
-    for (let m of t.mimetypes) {
-      renderers[m] = t;
-      order.push(m);
-    }
+  ];
+  let items = RenderMime.getDefaultItems();
+  for (let renderer of renderers) {
+    items.push({ mimeType: renderer.mimeTypes[0], renderer });
   }
-  let sanitizer = defaultSanitizer;
-
   export
-  const rendermime = new RenderMime({ renderers, order, sanitizer });
+  const rendermime = new RenderMime({ items });
 }
+
+
+/**
+ * The default outputs used for testing.
+ */
+export
+const DEFAULT_OUTPUTS: nbformat.IOutput[] = [
+  {
+   name: 'stdout',
+   output_type: 'stream',
+   text: [
+    'hello world\n',
+    '0\n',
+    '1\n',
+    '2\n'
+   ]
+  },
+  {
+   name: 'stderr',
+   output_type: 'stream',
+   text: [
+    'output to stderr\n'
+   ]
+  },
+  {
+   name: 'stderr',
+   output_type: 'stream',
+   text: [
+    'output to stderr2\n'
+   ]
+  },
+  {
+    output_type: 'execute_result',
+    execution_count: 1,
+    data: { 'text/plain': 'foo' },
+    metadata: {}
+  },
+  {
+   output_type: 'display_data',
+   data: { 'text/plain': 'hello, world' },
+   metadata: {}
+  },
+  {
+    output_type: 'error',
+    ename: 'foo',
+    evalue: 'bar',
+    traceback: ['fizz', 'buzz']
+  }
+];

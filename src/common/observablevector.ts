@@ -6,7 +6,7 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  indexOf
+  findIndex, indexOf
 } from 'phosphor/lib/algorithm/searching';
 
 import {
@@ -160,9 +160,6 @@ interface IObservableVector<T> extends IDisposable, ISequence<T> {
    *
    * #### Iterator Validity
    * Iterators pointing at the removed value and beyond are invalidated.
-   *
-   * #### Notes
-   * Comparison is performed using strict `===` equality.
    */
   remove(value: T): number;
 
@@ -281,6 +278,14 @@ interface IObservableVector<T> extends IDisposable, ISequence<T> {
 export
 class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
   /**
+   * Construct a new observable map.
+   */
+  constructor(options: ObservableVector.IOptions<T> = {}) {
+    super(options.values || []);
+    this._itemCmp = options.itemCmp || Private.itemCmp;
+  }
+
+  /**
    * A signal emitted when the vector has changed.
    */
   changed: ISignal<ObservableVector<T>, ObservableVector.IChangedArgs<T>>;
@@ -322,6 +327,11 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    */
   set(index: number, value: T): void {
     let oldValues = [this.at(index)];
+    // Bail if the value does not change.
+    let itemCmp = this._itemCmp;
+    if (itemCmp(oldValues[0], value)) {
+      return;
+    }
     super.set(index, value);
     this.changed.emit({
       type: 'set',
@@ -427,12 +437,10 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    *
    * #### Iterator Validity
    * Iterators pointing at the removed value and beyond are invalidated.
-   *
-   * #### Notes
-   * Comparison is performed using strict `===` equality.
    */
   remove(value: T): number {
-    let index = indexOf(this, value);
+    let itemCmp = this._itemCmp;
+    let index = findIndex(this, item => itemCmp(item, value));
     this.removeAt(index);
     return index;
   }
@@ -618,6 +626,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
   }
 
   private _isDisposed = false;
+  private _itemCmp: (first: T, second: T) => boolean;
 }
 
 
@@ -626,6 +635,24 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
  */
 export
 namespace ObservableVector {
+  /**
+   * The options used to initialize an observable map.
+   */
+  export
+  interface IOptions<T> {
+    /**
+     * An optional intial set of values.
+     */
+    values?: T[];
+
+    /**
+     * The item comparison function for change detection on `set`.
+     *
+     * If not given, strict `===` equality will be used.
+     */
+    itemCmp?: (first: T, second: T) => boolean;
+  }
+
   /**
    * The change types which occur on an observable vector.
    */
@@ -692,3 +719,18 @@ namespace ObservableVector {
 
 // Define the signals for the `ObservableVector` class.
 defineSignal(ObservableVector.prototype, 'changed');
+
+
+/**
+ * The namespace for module private data.
+ */
+namespace Private {
+  /**
+   * The default strict equality item cmp.
+   */
+  export
+  function itemCmp(first: any, second: any): boolean {
+    return first === second;
+  }
+}
+

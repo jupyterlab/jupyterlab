@@ -6,12 +6,8 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  deepEqual, JSONValue
+  JSONValue
 } from 'phosphor/lib/algorithm/json';
-
-import {
-  IIterator, iter
-} from 'phosphor/lib/algorithm/iteration';
 
 import {
   defineSignal, ISignal
@@ -26,12 +22,8 @@ import {
 } from '../common/interfaces';
 
 import {
-  IObservableString, ObservableString
-} from '../common/observablestring';
-
-import {
-  Metadata
-} from '../common/metadata';
+  IObservableJSON, ObservableJSON
+} from '../common/observablejson';
 
 import {
   IOutputAreaModel, OutputAreaModel
@@ -51,40 +43,27 @@ interface ICellModel extends CodeEditor.IModel {
   /**
    * A signal emitted when the content of the model changes.
    */
-  contentChanged: ISignal<ICellModel, void>;
-
-  /**
-   * A signal emitted when a metadata field changes.
-   */
-  metadataChanged: ISignal<ICellModel, IChangedArgs<JSONValue>>;
+  readonly contentChanged: ISignal<ICellModel, void>;
 
   /**
    * A signal emitted when a model state changes.
    */
-  stateChanged: ISignal<ICellModel, IChangedArgs<any>>;
+  readonly stateChanged: ISignal<ICellModel, IChangedArgs<any>>;
+
+  /**
+   * Whether the cell is trusted.
+   */
+  trusted: boolean;
+
+  /**
+   * The metadata associated with the cell.
+   */
+  readonly metadata: IObservableJSON;
 
   /**
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.ICell;
-
-  /**
-   * Get a metadata cursor for the cell.
-   *
-   * #### Notes
-   * Metadata associated with the nbformat spec are set directly
-   * on the model.  This method is used to interact with a namespaced
-   * set of metadata on the cell.
-   */
-  getMetadata(name: string): Metadata.ICursor;
-
-  /**
-   * List the metadata namespace keys for the notebook.
-   *
-   * #### Notes
-   * Metadata associated with the nbformat are not included.
-   */
-  listMetadata(): IIterator<string>;
 }
 
 
@@ -147,11 +126,14 @@ class CellModel extends CodeEditor.Model implements ICellModel {
    */
   constructor(options: CellModel.IOptions) {
     super();
-    this.value.changed.connect(this._onValueChanged, this);
+    this.value.changed.connect(this.onGenericChange, this);
     let cell = options.cell;
     if (!cell) {
       return;
     }
+    this._trusted = !!cell.metadata['trusted'];
+    delete cell.metadata['trusted'];
+
     if (Array.isArray(cell.source)) {
       this.value.text = (cell.source as string[]).join('\n');
     } else {
@@ -165,37 +147,59 @@ class CellModel extends CodeEditor.Model implements ICellModel {
       delete metadata['collapsed'];
       delete metadata['scrolled'];
     }
-    this._metadata = metadata;
+    for (let key in metadata) {
+      this._metadata.set(key, metadata[key]);
+    }
+    this._metadata.changed.connect(this.onGenericChange, this);
   }
+
+  /**
+   * The type of cell.
+   */
+  readonly type: nbformat.CellType;
 
   /**
    * A signal emitted when the state of the model changes.
    */
-  contentChanged: ISignal<this, void>;
-
-  /**
-   * A signal emitted when a metadata field changes.
-   */
-  metadataChanged: ISignal<this, IChangedArgs<any>>;
+  readonly contentChanged: ISignal<this, void>;
 
   /**
    * A signal emitted when a model state changes.
    */
-  stateChanged: ISignal<this, IChangedArgs<any>>;
+  readonly stateChanged: ISignal<this, IChangedArgs<any>>;
+
+  /**
+   * The metadata associated with the cell.
+   */
+  get metadata(): IObservableJSON {
+    return this._metadata;
+  }
+
+  /**
+   * Get the trusted state of the model.
+   */
+  get trusted(): boolean {
+    return this._trusted;
+  }
+
+  /**
+   * Set the trusted state of the model.
+   */
+  set trusted(newValue: boolean) {
+    if (this._trusted === newValue) {
+      return;
+    }
+    let oldValue = this._trusted;
+    this._trusted = newValue;
+    this.onTrustedChanged(newValue);
+    this.stateChanged.emit({ name: 'trusted', oldValue, newValue });
+  }
 
   /**
    * Dispose of the resources held by the model.
    */
   dispose(): void {
-    // Do nothing if already disposed.
-    if (this.isDisposed) {
-      return;
-    }
-    for (let key in this._cursors) {
-      this._cursors[key].dispose();
-    }
-    this._cursors = null;
-    this._metadata = null;
+    this._metadata.dispose();
     super.dispose();
   }
 
@@ -203,87 +207,37 @@ class CellModel extends CodeEditor.Model implements ICellModel {
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.ICell {
+    let metadata: nbformat.IBaseCellMetadata = Object.create(null);
+    for (let key of this.metadata.keys()) {
+      let value = JSON.parse(JSON.stringify(this.metadata.get(key)));
+      metadata[key] = value as JSONValue;
+    }
+    if (this.trusted) {
+      metadata['trusted'] = true;
+    }
     return {
       cell_type: this.type,
       source: this.value.text,
-      metadata: utils.copy(this._metadata) as nbformat.IBaseCellMetadata
+      metadata,
     } as nbformat.ICell;
   }
 
   /**
-   * Get a metadata cursor for the cell.
+   * Handle a change to the trusted state.
    *
-   * #### Notes
-   * Metadata associated with the nbformat spec are set directly
-   * on the model.  This method is used to interact with a namespaced
-   * set of metadata on the cell.
+   * The default implementation is a no-op.
    */
-  getMetadata(name: string): Metadata.ICursor {
-    if (this.isDisposed) {
-      return null;
-    }
-    if (name in this._cursors) {
-      return this._cursors[name];
-    }
-    if (!this._reader) {
-      this._reader = this._readCursorData.bind(this);
-      this._writer = this.setCursorData.bind(this);
-    }
-    let cursor = new Metadata.Cursor({
-      name,
-      read: this._reader,
-      write: this._writer
-    });
-    this._cursors[name] = cursor;
-    return cursor;
-  }
-
-  /**
-   * List the metadata namespace keys for the notebook.
-   *
-   * #### Notes
-   * Metadata associated with the nbformat are not included.
-   */
-  listMetadata(): IIterator<string> {
-    return iter(Object.keys(this._metadata));
-  }
-
-  /**
-   * Set the cursor data for a given field.
-   */
-  protected setCursorData(name: string, newValue: any): void {
-    let oldValue = this._metadata[name];
-    if (deepEqual(oldValue, newValue)) {
-      return;
-    }
-    this._metadata[name] = newValue;
-    this.contentChanged.emit(void 0);
-    this.metadataChanged.emit({ name, oldValue, newValue });
-  }
-
-  /**
-   * The type of cell.
-   */
-  type: nbformat.CellType;
+  onTrustedChanged(value: boolean): void { /* no-op */}
 
   /**
    * Handle a change to the observable value.
    */
-  private _onValueChanged(sender: IObservableString, args: ObservableString.IChangedArgs): void {
+  protected onGenericChange(): void {
     this.contentChanged.emit(void 0);
   }
 
-  /**
-   * Read the metadata of a given name.
-   */
-  private _readCursorData(name: string): JSONValue {
-    return this._metadata[name];
-  }
-
-  private _metadata: { [key: string]: any } = Object.create(null);
-  private _cursors: { [key: string]: Metadata.Cursor } = Object.create(null);
-  private _reader: (name: string) => JSONValue;
-  private _writer: (name: string, value: JSONValue) => void;
+  private _trusted = false;
+  private _metadata = new ObservableJSON();
 }
 
 
@@ -306,7 +260,6 @@ namespace CellModel {
 
 // Define the signals for the `CellModel` class.
 defineSignal(CellModel.prototype, 'contentChanged');
-defineSignal(CellModel.prototype, 'metadataChanged');
 defineSignal(CellModel.prototype, 'stateChanged');
 
 
@@ -360,15 +313,18 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
     let factory = (options.contentFactory ||
       CodeCellModel.defaultContentFactory
     );
-    this._outputs = factory.createOutputArea();
+    let trusted = this.trusted;
     let cell = options.cell as nbformat.ICodeCell;
+    let outputs: nbformat.IOutput[] = [];
     if (cell && cell.cell_type === 'code') {
       this.executionCount = cell.execution_count;
-      for (let output of cell.outputs) {
-        this._outputs.add(output);
-      }
+      outputs = cell.outputs;
     }
-    this._outputs.changed.connect(this._onOutputsChanged, this);
+    this._outputs = factory.createOutputArea({
+      trusted,
+      values: outputs
+    });
+    this._outputs.stateChanged.connect(this.onGenericChange, this);
   }
 
   /**
@@ -419,22 +375,17 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
   toJSON(): nbformat.ICodeCell {
     let cell = super.toJSON() as nbformat.ICodeCell;
     cell.execution_count = this.executionCount || null;
-    let outputs = this.outputs;
-    cell.outputs = [];
-    for (let i = 0; i < outputs.length; i++) {
-      let output = outputs.get(i);
-      if (output.output_type !== 'input_request') {
-        cell.outputs.push(output as nbformat.IOutput);
-      }
-    }
+    cell.outputs = this.outputs.toJSON();
     return cell;
   }
 
   /**
-   * Handle the outputs changing.
+   * Handle a change to the trusted state.
+   *
+   * The default implementation is a no-op.
    */
-  private _onOutputsChanged(): void {
-    this.contentChanged.emit(void 0);
+  onTrustedChanged(value: boolean): void {
+    this._outputs.trusted = value;
   }
 
   private _outputs: IOutputAreaModel = null;
@@ -470,7 +421,7 @@ namespace CodeCellModel {
     /**
      * Create an output area.
      */
-    createOutputArea(): IOutputAreaModel;
+    createOutputArea(options: IOutputAreaModel.IOptions): IOutputAreaModel;
   }
 
   /**
@@ -481,8 +432,8 @@ namespace CodeCellModel {
     /**
      * Create an output area.
      */
-    createOutputArea(): IOutputAreaModel {
-      return new OutputAreaModel();
+    createOutputArea(options: IOutputAreaModel.IOptions): IOutputAreaModel {
+      return new OutputAreaModel(options);
     }
   }
 

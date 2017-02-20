@@ -22,7 +22,7 @@ import {
 } from '../docregistry';
 
 import {
-  RenderMime
+  MimeModel, RenderMime
 } from '../rendermime';
 
 
@@ -104,8 +104,9 @@ class MarkdownWidget extends Widget {
     let context = this._context;
     let model = context.model;
     let layout = this.layout as PanelLayout;
-    let bundle = { 'text/markdown': model.toString() };
-    let widget = this._rendermime.render({ bundle });
+    let data = { 'text/markdown': model.toString() };
+    let mimeModel = new MimeModel({ data, trusted: false });
+    let widget = this._rendermime.render(mimeModel);
     if (layout.widgets.length) {
       layout.widgets.at(0).dispose();
     }

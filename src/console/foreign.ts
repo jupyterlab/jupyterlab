@@ -114,9 +114,10 @@ class ForeignHandler implements IDisposable {
     case 'execute_input':
       let inputMsg = msg as KernelMessage.IExecuteInputMsg;
       cell = this._newCell(parentMsgId);
-      cell.model.executionCount = inputMsg.content.execution_count;
-      cell.model.value.text = inputMsg.content.code;
-      cell.trusted = true;
+      let model = cell.model;
+      model.executionCount = inputMsg.content.execution_count;
+      model.value.text = inputMsg.content.code;
+      model.trusted = true;
       parent.update();
       return true;
     case 'execute_result':

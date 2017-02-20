@@ -66,7 +66,7 @@ class LogStaticNotebook extends StaticNotebook {
     this.methods.push('onModelChanged');
   }
 
-  protected onMetadataChanged(model: INotebookModel, args: IChangedArgs<any>): void {
+  protected onMetadataChanged(model: any, args: any): void {
     super.onMetadataChanged(model, args);
     this.methods.push('onMetadataChanged');
   }
@@ -201,8 +201,7 @@ describe('notebook/notebook/widget', () => {
         widget.model = new NotebookModel();
         let called = false;
         widget.modelContentChanged.connect(() => { called = true; });
-        let cursor = widget.model.getMetadata('foo');
-        cursor.setValue(1);
+        let cursor = widget.model.metadata.set('foo', 1);
         expect(called).to.be(true);
       });
 
@@ -253,8 +252,8 @@ describe('notebook/notebook/widget', () => {
       it('should set the mime types of the cell widgets', () => {
         let widget = new LogStaticNotebook(options);
         let model = new NotebookModel();
-        let cursor = model.getMetadata('language_info');
-        cursor.setValue({ name: 'python', codemirror_mode: 'python' });
+        let value = { name: 'python', codemirror_mode: 'python' };
+        model.metadata.set('language_info', value);
         widget.model = model;
         let child = widget.widgets.at(0);
         expect(child.model.mimeType).to.be('text/x-python');
@@ -344,8 +343,8 @@ describe('notebook/notebook/widget', () => {
       it('should be set from language metadata', () => {
         let widget = new LogStaticNotebook(options);
         let model = new NotebookModel();
-        let cursor = model.getMetadata('language_info');
-        cursor.setValue({ name: 'python', codemirror_mode: 'python' });
+        let value = { name: 'python', codemirror_mode: 'python' };
+        model.metadata.set('language_info', value);
         widget.model = model;
         expect(widget.codeMimetype).to.be('text/x-python');
       });
@@ -413,23 +412,22 @@ describe('notebook/notebook/widget', () => {
 
       it('should be called when the metadata on the notebook changes', () => {
         let widget = createWidget();
-        let cursor = widget.model.getMetadata('foo');
-        cursor.setValue(1);
+        widget.model.metadata.set('foo', 1);
         expect(widget.methods).to.contain('onMetadataChanged');
       });
 
       it('should update the `codeMimetype`', () => {
         let widget = createWidget();
-        let cursor = widget.model.getMetadata('language_info');
-        cursor.setValue({ name: 'python', codemirror_mode: 'python' });
+        let value = { name: 'python', codemirror_mode: 'python' };
+        widget.model.metadata.set('language_info', value);
         expect(widget.methods).to.contain('onMetadataChanged');
         expect(widget.codeMimetype).to.be('text/x-python');
       });
 
       it('should update the cell widget mimetype', () => {
         let widget = createWidget();
-        let cursor = widget.model.getMetadata('language_info');
-        cursor.setValue({ name: 'python', mimetype: 'text/x-python' });
+        let value = { name: 'python', mimetype: 'text/x-python' };
+        widget.model.metadata.set('language_info', value);
         expect(widget.methods).to.contain('onMetadataChanged');
         let child = widget.widgets.at(0);
         expect(child.model.mimeType).to.be('text/x-python');

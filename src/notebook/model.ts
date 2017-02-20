@@ -10,16 +10,8 @@ import {
 } from 'phosphor/lib/algorithm/iteration';
 
 import {
-  deepEqual, JSONValue
+  JSONValue
 } from 'phosphor/lib/algorithm/json';
-
-import {
-  IIterator, iter
-} from 'phosphor/lib/algorithm/iteration';
-
-import {
-  defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
 
 import {
   IObservableVector, ObservableVector
@@ -39,8 +31,8 @@ import {
 } from '../common/interfaces';
 
 import {
-  Metadata
-} from '../common/metadata';
+  IObservableJSON, ObservableJSON
+} from '../common/observablejson';
 
 import {
   IObservableUndoableVector, ObservableUndoableVector
@@ -52,11 +44,6 @@ import {
  */
 export
 interface INotebookModel extends DocumentRegistry.IModel {
-  /**
-   * A signal emitted when a metadata field changes.
-   */
-  metadataChanged: ISignal<DocumentRegistry.IModel, IChangedArgs<JSONValue>>;
-
   /**
    * The list of cells in the notebook.
    */
@@ -78,18 +65,9 @@ interface INotebookModel extends DocumentRegistry.IModel {
   readonly nbformatMinor: number;
 
   /**
-   * Get a metadata cursor for the notebook.
-   *
-   * #### Notes
-   * This method is used to interact with a namespaced
-   * set of metadata on the notebook.
+   * The metadata associated with the notebook.
    */
-  getMetadata(namespace: string): Metadata.ICursor;
-
-  /**
-   * List the metadata namespace keys for the notebook.
-   */
-  listMetadata(): IIterator<string>;
+  readonly metadata: IObservableJSON;
 }
 
 
@@ -120,20 +98,25 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     // Add an initial code cell by default.
     this._cells.pushBack(factory.createCodeCell({}));
     this._cells.changed.connect(this._onCellsChanged, this);
-    if (options.languagePreference) {
-      this._metadata['language_info'] = { name: options.languagePreference };
-    }
-  }
 
-  /**
-   * A signal emitted when a metadata field changes.
-   */
-  readonly metadataChanged: ISignal<this, IChangedArgs<JSONValue>>;
+    // Handle initial metadata.
+    let name = options.languagePreference || '';
+    this._metadata.set('language_info', { name });
+    this._ensureMetadata();
+    this._metadata.changed.connect(this._onGenericChange, this);
+  }
 
   /**
    * The cell model factory for the notebook.
    */
   readonly contentFactory: NotebookModel.IContentFactory;
+
+  /**
+   * The metadata associated with the notebook.
+   */
+  get metadata(): IObservableJSON {
+    return this._metadata;
+  }
 
   /**
    * Get the observable list of notebook cells.
@@ -160,7 +143,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    * The default kernel name of the document.
    */
   get defaultKernelName(): string {
-    let spec = this._metadata['kernelspec'];
+    let spec = this._metadata.get('kernelspec') as nbformat.IKernelspecMetadata;
     return spec ? spec.name : '';
   }
 
@@ -168,7 +151,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    * The default kernel language of the document.
    */
   get defaultKernelLanguage(): string {
-    let info = this._metadata['language_info'];
+    let info = this._metadata.get('language_info') as nbformat.ILanguageInfoMetadata;
     return info ? info.name : '';
   }
 
@@ -181,19 +164,13 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       return;
     }
     let cells = this._cells;
-    let cursors = this._cursors;
     this._cells = null;
-    this._cursors = null;
-    this._metadata = null;
-
+    this._metadata.dispose();
     for (let i = 0; i < cells.length; i++) {
       let cell = cells.at(i);
       cell.dispose();
     }
     cells.dispose();
-    for (let key in cursors) {
-      cursors[key].dispose();
-    }
     super.dispose();
   }
 
@@ -223,9 +200,11 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       let cell = this.cells.at(i);
       cells.push(cell.toJSON());
     }
-    let metadata = utils.copy(this._metadata) as nbformat.INotebookMetadata;
-    // orig_nbformat should not be written to file per spec.
-    delete metadata['orig_nbformat'];
+    this._ensureMetadata();
+    let metadata = Object.create(null) as nbformat.INotebookMetadata;
+    for (let key of this.metadata.keys()) {
+      metadata[key] = JSON.parse(JSON.stringify(this.metadata.get(key)));
+    }
     return {
       metadata,
       nbformat_minor: this._nbformatMinor,
@@ -279,78 +258,17 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       this.stateChanged.emit({ name: 'nbformatMinor', oldValue, newValue });
     }
     // Update the metadata.
+    this._metadata.clear();
     let metadata = value.metadata;
-    let builtins = ['kernelspec', 'language_info', 'orig_nbformat'];
-    for (let key in this._metadata) {
-      if (builtins.indexOf(key) !== -1) {
+    for (let key in metadata) {
+      // orig_nbformat is not intended to be stored per spec.
+      if (key === 'orig_nbformat') {
         continue;
       }
-      if (!(key in metadata)) {
-        this._setCursorData(key, null);
-        delete this._metadata[key];
-        if (this._cursors[key]) {
-          this._cursors[key].dispose();
-          delete this._cursors[key];
-        }
-      }
+      this._metadata.set(key, metadata[key]);
     }
-    for (let key in metadata) {
-      this._setCursorData(key, (metadata as any)[key]);
-    }
+    this._ensureMetadata();
     this.dirty = true;
-  }
-
-  /**
-   * Get a metadata cursor for the notebook.
-   *
-   * #### Notes
-   * Metadata associated with the nbformat spec are set directly
-   * on the model.  This method is used to interact with a namespaced
-   * set of metadata on the notebook.
-   */
-  getMetadata(name: string): Metadata.ICursor {
-    if (name in this._cursors) {
-      return this._cursors[name];
-    }
-    if (!this._reader) {
-      this._reader = this._readCursorData.bind(this);
-      this._writer = this._setCursorData.bind(this);
-    }
-    let cursor = new Metadata.Cursor({
-      name,
-      read: this._reader,
-      write: this._writer
-    });
-    this._cursors[name] = cursor;
-    return cursor;
-  }
-
-  /**
-   * List the metadata namespace keys for the notebook.
-   */
-  listMetadata(): IIterator<string> {
-    return iter(Object.keys(this._metadata));
-  }
-
-  /**
-   * Set the cursor data for a given field.
-   */
-  private _setCursorData(name: string, newValue: any): void {
-    let oldValue = this._metadata[name];
-    if (deepEqual(oldValue, newValue)) {
-      return;
-    }
-    this._metadata[name] = newValue;
-    this.dirty = true;
-    this.contentChanged.emit(void 0);
-    this.metadataChanged.emit({ name, oldValue, newValue });
-  }
-
-  /**
-   * Read the metadata of a given name.
-   */
-  private _readCursorData(name: string): JSONValue {
-    return this._metadata[name];
   }
 
   /**
@@ -360,7 +278,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     switch (change.type) {
     case 'add':
       each(change.newValues, cell => {
-        cell.contentChanged.connect(this._onCellChanged, this);
+        cell.contentChanged.connect(this._onGenericChange, this);
       });
       break;
     case 'remove':
@@ -370,7 +288,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       break;
     case 'set':
       each(change.newValues, cell => {
-        cell.contentChanged.connect(this._onCellChanged, this);
+        cell.contentChanged.connect(this._onGenericChange, this);
       });
       each(change.oldValues, cell => {
         cell.dispose();
@@ -395,25 +313,31 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   }
 
   /**
-   * Handle a change to a cell state.
+   * Make sure we have the required metadata fields.
    */
-  private _onCellChanged(cell: ICellModel, change: any): void {
+  private _ensureMetadata(): void {
+    let metadata = this._metadata;
+    if (!metadata.has('language_info')) {
+      metadata.set('language_info', { name: '' });
+    }
+    if (!metadata.has('kernelspec')) {
+      metadata.set('kernelspec', { name: '', display_name: '' });
+    }
+  }
+
+  /**
+   * Handle a generic state change.
+   */
+  private _onGenericChange(): void {
     this.dirty = true;
     this.contentChanged.emit(void 0);
   }
 
   private _cells: IObservableUndoableVector<ICellModel> = null;
-  private _metadata: { [key: string]: any } = Private.createMetadata();
-  private _cursors: { [key: string]: Metadata.Cursor } = Object.create(null);
   private _nbformat = nbformat.MAJOR_VERSION;
   private _nbformatMinor = nbformat.MINOR_VERSION;
-  private _reader: (name: string) => JSONValue;
-  private _writer: (name: string, value: JSONValue) => void;
+  private _metadata = new ObservableJSON();
 }
-
-
-// Define the signals for the `NotebookModel` class.
-defineSignal(NotebookModel.prototype, 'metadataChanged');
 
 
 /**
@@ -557,22 +481,4 @@ namespace NotebookModel {
    */
   export
   const defaultContentFactory = new ContentFactory({});
-}
-
-
-/**
- * A private namespace for notebook model data.
- */
-namespace Private {
-  /**
-   * Create the default metadata for the notebook.
-   */
-  export
-  function createMetadata(): nbformat.INotebookMetadata {
-    return {
-      kernelspec: { name: '', display_name: '' },
-      language_info: { name: '' },
-      orig_nbformat: 1
-    };
-  }
 }

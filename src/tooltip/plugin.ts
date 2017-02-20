@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  JSONObject
+} from 'phosphor/lib/algorithm/json';
+
+import {
   Widget
 } from 'phosphor/lib/ui/widget';
 
@@ -24,10 +28,6 @@ import {
 import {
   INotebookTracker
 } from '../notebook';
-
-import {
-  RenderMime
-} from '../rendermime';
 
 import {
   CommandIDs, ITooltipManager, TooltipWidget
@@ -173,7 +173,7 @@ namespace Private {
    * Fetch a tooltip's content from the API server.
    */
   export
-  function fetch(options: IFetchOptions): Promise<RenderMime.MimeMap<string>> {
+  function fetch(options: IFetchOptions): Promise<JSONObject> {
     let { detail, editor, kernel } = options;
     let code = editor.model.value.text;
     let position = editor.getCursorPosition();
@@ -204,7 +204,7 @@ namespace Private {
         return Promise.reject(void 0);
       }
 
-      return Promise.resolve(value.data as RenderMime.MimeMap<string>);
+      return Promise.resolve(value.data);
     });
   }
 }

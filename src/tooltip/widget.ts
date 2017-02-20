@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  JSONObject
+} from 'phosphor/lib/algorithm/json';
+
+import {
   Message
 } from 'phosphor/lib/core/messaging';
 
@@ -22,7 +26,7 @@ import {
 } from '../common/hoverbox';
 
 import {
-  IRenderMime, RenderMime
+  IRenderMime, MimeModel
 } from '../rendermime';
 
 
@@ -70,10 +74,11 @@ class TooltipWidget extends Widget {
 
     this._editor = options.editor;
     this._rendermime = options.rendermime;
-    this._content = this._rendermime.render({
-      bundle: options.bundle,
+    let model = new MimeModel({
+      data: options.bundle,
       trusted: true
     });
+    this._content = this._rendermime.render(model);
     if (this._content) {
       (this.layout as PanelLayout).addWidget(this._content);
     }
@@ -222,7 +227,7 @@ namespace TooltipWidget {
     /**
      * The data that populates the tooltip widget.
      */
-    bundle: RenderMime.MimeMap<string>;
+    bundle: JSONObject;
 
     /**
      * The editor referent of the tooltip model.

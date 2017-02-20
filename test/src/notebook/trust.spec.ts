@@ -28,10 +28,9 @@ describe('notebook/notebook/trust', () => {
       let model = new NotebookModel();
       model.fromJSON(DEFAULT_CONTENT);
       let cell = model.cells.at(0);
-      let cursor = cell.getMetadata('trusted');
-      expect(cursor.getValue()).to.not.be(true);
+      expect(cell.trusted).to.not.be(true);
       trustNotebook(model).then(() => {
-        expect(cursor.getValue()).to.be(true);
+        expect(cell.trusted).to.be(true);
         done();
       });
       acceptDialog();
@@ -41,10 +40,9 @@ describe('notebook/notebook/trust', () => {
       let model = new NotebookModel();
       model.fromJSON(DEFAULT_CONTENT);
       let cell = model.cells.at(0);
-      let cursor = cell.getMetadata('trusted');
-      expect(cursor.getValue()).to.not.be(true);
+      expect(cell.trusted).to.not.be(true);
       trustNotebook(model).then(() => {
-        expect(cursor.getValue()).to.not.be(true);
+        expect(cell.trusted).to.not.be(true);
         done();
       });
       dismissDialog();
@@ -59,8 +57,7 @@ describe('notebook/notebook/trust', () => {
       model.fromJSON(DEFAULT_CONTENT);
       for (let i = 0; i < model.cells.length; i++) {
         let cell = model.cells.at(i);
-        let cursor = cell.getMetadata('trusted');
-        cursor.setValue(true);
+        cell.trusted = true;
       }
       trustNotebook(model).then(() => { done(); });
       acceptDialog();

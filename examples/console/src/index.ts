@@ -30,10 +30,6 @@ import {
 } from 'jupyterlab/lib/codemirror';
 
 import {
-  defaultSanitizer
-} from 'jupyterlab/lib/common/sanitizer';
-
-import {
   ConsolePanel
 } from 'jupyterlab/lib/console';
 
@@ -83,17 +79,7 @@ function startApp(session: Session.ISession) {
     keymap.processKeydownEvent(event);
   });
 
-  const transformers = RenderMime.defaultRenderers();
-  let renderers: RenderMime.MimeMap<RenderMime.IRenderer> = {};
-  let order: string[] = [];
-  for (let t of transformers) {
-    for (let m of t.mimetypes) {
-      renderers[m] = t;
-      order.push(m);
-    }
-  }
-  let sanitizer = defaultSanitizer;
-  let rendermime = new RenderMime({ renderers, order, sanitizer });
+  let rendermime = new RenderMime({ items: RenderMime.getDefaultItems() });
   let editorFactory = editorServices.factoryService.newInlineEditor;
   let contentFactory = new ConsolePanel.ContentFactory({ editorFactory });
   let consolePanel = new ConsolePanel({
