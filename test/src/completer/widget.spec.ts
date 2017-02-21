@@ -5,15 +5,15 @@ import expect = require('expect.js');
 
 import {
   sendMessage, Message
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
   Panel
-} from 'phosphor/lib/ui/panel';
+} from '@phosphor/widgetpanel';
 
 import {
   Widget, WidgetMessage
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgetwidget';
 
 import {
   simulate

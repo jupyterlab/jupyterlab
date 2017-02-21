@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
+} from '@phosphor/signaling';
 
 import {
   ActivityMonitor

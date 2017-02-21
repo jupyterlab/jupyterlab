@@ -7,11 +7,11 @@ import {
 
 import {
   JSONObject
-} from 'phosphor/lib/algorithm/json';
+} from '@phosphor/coreutils';
 
 import {
   Menu
-} from 'phosphor/lib/ui/menu';
+} from '@phosphor/widgetmenu';
 
 import {
   JupyterLab, JupyterLabPlugin

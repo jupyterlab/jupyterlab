@@ -14,11 +14,11 @@ import {
 
 import {
   IDisposable, DisposableDelegate
-} from 'phosphor/lib/core/disposable';
+} from '@phosphor/disposable';
 
 import {
   clearSignalData, defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
+} from '@phosphor/signaling';
 
 import {
   Vector

@@ -3,11 +3,11 @@
 
 import {
   IIterator, IterableOrArrayLike, iter, map, toArray
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
 
 import {
   deepEqual
-} from 'phosphor/lib/algorithm/json';
+} from '@phosphor/coreutils';
 
 import {
   StringSearch
@@ -15,7 +15,7 @@ import {
 
 import {
   clearSignalData, defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
+} from '@phosphor/signaling';
 
 import {
   CompleterWidget

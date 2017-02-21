@@ -3,11 +3,11 @@
 
 import {
   IIterator, map, toArray
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
 
 import {
   JSONObject
-} from 'phosphor/lib/algorithm/json';
+} from '@phosphor/coreutils';
 
 import {
   Vector
@@ -15,15 +15,15 @@ import {
 
 import {
   DisposableDelegate, IDisposable
-} from 'phosphor/lib/core/disposable';
+} from '@phosphor/disposable';
 
 import {
   Token
-} from 'phosphor/lib/core/token';
+} from '@phosphor/application';
 
 import {
   h, VNode
-} from 'phosphor/lib/ui/vdom';
+} from '@phosphor/widgetvdom';
 
 import {
   ICommandLinker

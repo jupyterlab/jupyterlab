@@ -7,11 +7,11 @@ import {
 
 import {
   IterableOrArrayLike, each
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgetwidget';
 
 import {
   showDialog

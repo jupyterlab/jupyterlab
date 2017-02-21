@@ -3,11 +3,11 @@
 
 import {
   DockPanel
-} from 'phosphor/lib/ui/dockpanel';
+} from '@phosphor/widgetdockpanel';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgetwidget';
 
 import {
   TerminalSession

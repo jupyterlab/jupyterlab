@@ -9,15 +9,15 @@ import {
 
 import {
   CommandRegistry
-} from 'phosphor/lib/ui/commandregistry';
+} from '@phosphor/widgetcommandregistry';
 
 import {
   Keymap
-} from 'phosphor/lib/ui/keymap';
+} from '@phosphor/widgetkeymap';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgetwidget';
 
 import {
   simulate

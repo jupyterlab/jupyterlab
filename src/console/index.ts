@@ -7,7 +7,7 @@ import {
 
 import {
   JSONObject
-} from 'phosphor/lib/algorithm/json';
+} from '@phosphor/coreutils';
 
 export * from './panel';
 export * from './tracker';

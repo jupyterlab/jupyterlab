@@ -3,27 +3,27 @@
 
 import {
   CommandRegistry
-} from 'phosphor/lib/ui/commandregistry';
+} from '@phosphor/widgetcommandregistry';
 
 import {
   DockPanel
-} from 'phosphor/lib/ui/dockpanel';
+} from '@phosphor/widgetdockpanel';
 
 import {
   Keymap
-} from 'phosphor/lib/ui/keymap';
+} from '@phosphor/widgetkeymap';
 
 import {
   Menu
-} from 'phosphor/lib/ui/menu';
+} from '@phosphor/widgetmenu';
 
 import {
   SplitPanel
-} from 'phosphor/lib/ui/splitpanel';
+} from '@phosphor/widgetsplitpanel';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgetwidget';
 
 import {
   ServiceManager

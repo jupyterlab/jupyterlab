@@ -9,11 +9,11 @@ import {
 
 import {
   Message, sendMessage
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
   Widget, WidgetMessage
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgetwidget';
 
 import {
   CodeEditorWidget

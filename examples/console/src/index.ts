@@ -3,23 +3,23 @@
 
 import {
   CommandRegistry
-} from 'phosphor/lib/ui/commandregistry';
+} from '@phosphor/widgetcommandregistry';
 
 import {
   CommandPalette
-} from 'phosphor/lib/ui/commandpalette';
+} from '@phosphor/widgetcommandpalette';
 
 import {
   Keymap
-} from 'phosphor/lib/ui/keymap';
+} from '@phosphor/widgetkeymap';
 
 import {
   SplitPanel
-} from 'phosphor/lib/ui/splitpanel';
+} from '@phosphor/widgetsplitpanel';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgetwidget';
 
 import {
   Session

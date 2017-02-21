@@ -7,7 +7,7 @@ import {
 
 import {
   Message, sendMessage
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
   boxSizing, IBoxSizing
@@ -15,7 +15,7 @@ import {
 
 import {
   ResizeMessage, Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgetwidget';
 
 import * as Xterm
   from 'xterm';

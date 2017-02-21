@@ -3,7 +3,7 @@
 
 import {
   Token
-} from 'phosphor/lib/core/token';
+} from '@phosphor/application';
 
 import {
   IInstanceTracker

@@ -5,11 +5,11 @@ import expect = require('expect.js');
 
 import {
   JSONObject, JSONValue
-} from 'phosphor/lib/algorithm/json';
+} from '@phosphor/coreutils';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgetwidget';
 
 import {
   defaultSanitizer

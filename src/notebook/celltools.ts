@@ -7,11 +7,11 @@ import {
 
 import {
   each
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
 
 import {
   JSONValue
-} from 'phosphor/lib/algorithm/json';
+} from '@phosphor/coreutils';
 
 import {
   findIndex, upperBound
@@ -19,7 +19,7 @@ import {
 
 import {
   ConflatableMessage, Message, sendMessage
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
   Vector
@@ -27,19 +27,19 @@ import {
 
 import {
   Token
-} from 'phosphor/lib/core/token';
+} from '@phosphor/application';
 
 import {
   PanelLayout
-} from 'phosphor/lib/ui/panel';
+} from '@phosphor/widgetpanel';
 
 import {
   ChildMessage, Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgetwidget';
 
 import {
   h, realize, VNode
-} from 'phosphor/lib/ui/vdom';
+} from '@phosphor/widgetvdom';
 
 import {
   BaseCellWidget, ICellModel

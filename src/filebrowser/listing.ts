@@ -7,7 +7,7 @@ import {
 
 import {
   IIterator, each, filter, map, toArray
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
 
 import {
   find, findIndex, indexOf
@@ -19,15 +19,15 @@ import {
 
 import {
   Message, sendMessage
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
   MimeData
-} from 'phosphor/lib/core/mimedata';
+} from '@phosphor/coreutils';
 
 import {
   Drag, IDragEvent
-} from 'phosphor/lib/dom/dragdrop';
+} from '@phosphor/dragdrop';
 
 import {
   hitTest, scrollIntoViewIfNeeded
@@ -35,7 +35,7 @@ import {
 
 import {
   Widget, WidgetMessage
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgetwidget';
 
 import {
   humanTime, dateTime

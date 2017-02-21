@@ -3,7 +3,7 @@
 
 import {
   Token
-} from 'phosphor/lib/core/token';
+} from '@phosphor/application';
 
 import {
   Session
@@ -11,11 +11,11 @@ import {
 
 import {
   Message
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
   Panel
-} from 'phosphor/lib/ui/panel';
+} from '@phosphor/widgetpanel';
 
 import {
   IEditorMimeTypeService, CodeEditor

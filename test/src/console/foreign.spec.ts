@@ -9,11 +9,11 @@ import {
 
 import {
   clearSignalData, defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
+} from '@phosphor/signaling';
 
 import {
   Panel
-} from 'phosphor/lib/ui/panel';
+} from '@phosphor/widgetpanel';
 
 import {
   ForeignHandler

@@ -7,7 +7,7 @@ import {
 
 import {
   IDisposable
-} from 'phosphor/lib/core/disposable';
+} from '@phosphor/disposable';
 
 import {
   BaseCellWidget, CodeCellWidget

@@ -7,11 +7,11 @@ import {
 
 import {
   each, map, toArray
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
 
 import {
   clearSignalData, defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
+} from '@phosphor/signaling';
 
 import {
   IObservableVector, ObservableVector

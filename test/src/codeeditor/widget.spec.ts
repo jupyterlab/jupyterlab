@@ -5,11 +5,11 @@ import expect = require('expect.js');
 
 import {
   Message, sendMessage
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
   ResizeMessage, Widget, WidgetMessage
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgetwidget';
 
 import {
   simulate

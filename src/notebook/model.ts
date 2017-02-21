@@ -7,11 +7,11 @@ import {
 
 import {
   each
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
 
 import {
   JSONValue
-} from 'phosphor/lib/algorithm/json';
+} from '@phosphor/coreutils';
 
 import {
   IObservableVector, ObservableVector

@@ -7,23 +7,23 @@ import {
 
 import {
   each
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
 
 import {
   CommandRegistry
-} from 'phosphor/lib/ui/commandregistry';
+} from '@phosphor/widgetcommandregistry';
 
 import {
   Keymap
-} from 'phosphor/lib/ui/keymap';
+} from '@phosphor/widgetkeymap';
 
 import {
   PanelLayout
-} from 'phosphor/lib/ui/panel';
+} from '@phosphor/widgetpanel';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgetwidget';
 
 import {
   DocumentManager

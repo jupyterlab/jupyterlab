@@ -3,7 +3,7 @@
 
 import {
   AttachedProperty
-} from 'phosphor/lib/core/properties';
+} from '@phosphor/properties';
 
 import {
   JupyterLab, JupyterLabPlugin

@@ -7,11 +7,11 @@ import {
 
 import {
   each, enumerate
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
 
 import {
   JSONValue
-} from 'phosphor/lib/algorithm/json';
+} from '@phosphor/coreutils';
 
 import {
   find, findIndex, indexOf
@@ -23,23 +23,23 @@ import {
 
 import {
   Message
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
   MimeData
-} from 'phosphor/lib/core/mimedata';
+} from '@phosphor/coreutils';
 
 import {
   AttachedProperty
-} from 'phosphor/lib/core/properties';
+} from '@phosphor/properties';
 
 import {
   defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
+} from '@phosphor/signaling';
 
 import {
   Drag, IDragEvent
-} from 'phosphor/lib/dom/dragdrop';
+} from '@phosphor/dragdrop';
 
 import {
   scrollIntoViewIfNeeded
@@ -47,11 +47,11 @@ import {
 
 import {
   PanelLayout
-} from 'phosphor/lib/ui/panel';
+} from '@phosphor/widgetpanel';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgetwidget';
 
 import {
   ICellModel, BaseCellWidget, IMarkdownCellModel,

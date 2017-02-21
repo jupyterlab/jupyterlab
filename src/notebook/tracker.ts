@@ -3,11 +3,11 @@
 
 import {
   defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
+} from '@phosphor/signaling';
 
 import {
   Token
-} from 'phosphor/lib/core/token';
+} from '@phosphor/application';
 
 import {
   IInstanceTracker, InstanceTracker

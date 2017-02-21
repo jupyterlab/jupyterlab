@@ -3,7 +3,7 @@
 
 import {
   MimeData as IClipboard
-} from 'phosphor/lib/core/mimedata';
+} from '@phosphor/coreutils';
 
 import {
   IEditorMimeTypeService

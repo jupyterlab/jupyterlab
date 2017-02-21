@@ -9,7 +9,7 @@ import {
 
 import {
   each
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
 
 import {
   CodeCellWidget, MarkdownCellWidget, RawCellWidget

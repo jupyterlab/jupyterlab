@@ -3,15 +3,15 @@
 
 import {
   each, map, toArray
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
 
 import {
   DisposableSet
-} from 'phosphor/lib/core/disposable';
+} from '@phosphor/disposable';
 
 import {
   Menu
-} from 'phosphor/lib/ui/menu';
+} from '@phosphor/widgetmenu';
 
 import {
   JupyterLab, JupyterLabPlugin

@@ -9,11 +9,11 @@ import {
 
 import {
   CommandRegistry
-} from 'phosphor/lib/ui/commandregistry';
+} from '@phosphor/widgetcommandregistry';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgetwidget';
 
 import {
   IInstanceRestorer, InstanceRestorer

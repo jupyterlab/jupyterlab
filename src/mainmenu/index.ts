@@ -11,15 +11,15 @@ import {
 
 import {
   Token
-} from 'phosphor/lib/core/token';
+} from '@phosphor/application';
 
 import {
   Menu
-} from 'phosphor/lib/ui/menu';
+} from '@phosphor/widgetmenu';
 
 import {
   MenuBar
-} from 'phosphor/lib/ui/menubar';
+} from '@phosphor/widgetmenubar';
 
 
 /* tslint:disable */

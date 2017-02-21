@@ -5,11 +5,11 @@ import expect = require('expect.js');
 
 import {
   CommandRegistry
-} from 'phosphor/lib/ui/commandregistry';
+} from '@phosphor/widgetcommandregistry';
 
 import {
   h, IElementAttrs, VNode, realize
-} from 'phosphor/lib/ui/vdom';
+} from '@phosphor/widgetvdom';
 
 import {
   simulate

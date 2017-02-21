@@ -3,19 +3,19 @@
 
 import {
   Message
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
   disconnectReceiver
-} from 'phosphor/lib/core/signaling';
+} from '@phosphor/signaling';
 
 import {
   PanelLayout
-} from 'phosphor/lib/ui/panel';
+} from '@phosphor/widgetpanel';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgetwidget';
 
 import {
   ABCWidgetFactory, DocumentRegistry

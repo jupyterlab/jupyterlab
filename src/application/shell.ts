@@ -7,7 +7,7 @@ import {
 
 import {
   each, toArray
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
 
 import {
   contains, find, indexOf, findIndex, upperBound
@@ -19,43 +19,43 @@ import {
 
 import {
   defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
+} from '@phosphor/signaling';
 
 import {
   BoxLayout, BoxPanel
-} from 'phosphor/lib/ui/boxpanel';
+} from '@phosphor/widgetboxpanel';
 
 import {
   DockPanel
-} from 'phosphor/lib/ui/dockpanel';
+} from '@phosphor/widgetdockpanel';
 
 import {
   FocusTracker
-} from 'phosphor/lib/ui/focustracker';
+} from '@phosphor/widgetfocustracker';
 
 import {
   Panel
-} from 'phosphor/lib/ui/panel';
+} from '@phosphor/widgetpanel';
 
 import {
   SplitPanel
-} from 'phosphor/lib/ui/splitpanel';
+} from '@phosphor/widgetsplitpanel';
 
 import {
   StackedPanel
-} from 'phosphor/lib/ui/stackedpanel';
+} from '@phosphor/widgetstackedpanel';
 
 import {
   TabBar
-} from 'phosphor/lib/ui/tabbar';
+} from '@phosphor/widgettabbar';
 
 import {
   Title
-} from 'phosphor/lib/ui/title';
+} from '@phosphor/widgettitle';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgetwidget';
 
 import {
   IInstanceRestorer

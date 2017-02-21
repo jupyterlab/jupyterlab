@@ -7,7 +7,7 @@ import {
 
 import {
   IterableOrArrayLike, each
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
 
 import {
   showDialog

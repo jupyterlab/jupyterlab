@@ -5,11 +5,11 @@ import expect = require('expect.js');
 
 import {
   ISignal, defineSignal
-} from 'phosphor/lib/core/signaling';
+} from '@phosphor/signaling';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgetwidget';
 
 import {
   Inspector

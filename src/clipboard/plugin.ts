@@ -3,7 +3,7 @@
 
 import {
   MimeData
-} from 'phosphor/lib/core/mimedata';
+} from '@phosphor/coreutils';
 
 import {
   JupyterLabPlugin

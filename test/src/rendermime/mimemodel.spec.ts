@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   deepEqual
-} from 'phosphor/lib/algorithm/json';
+} from '@phosphor/coreutils';
 
 import {
   MimeModel

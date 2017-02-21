@@ -7,11 +7,11 @@ import {
 
 import {
   Message
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
   Menu
-} from 'phosphor/lib/ui/menu';
+} from '@phosphor/widgetmenu';
 
 import {
   CommandIDs as AboutCommandIDs

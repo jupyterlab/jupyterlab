@@ -3,7 +3,7 @@
 
 import {
   each
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
 
 import {
   find
@@ -15,23 +15,23 @@ import {
 
 import {
   DisposableSet, IDisposable
-} from 'phosphor/lib/core/disposable';
+} from '@phosphor/disposable';
 
 import {
   IMessageHandler, Message, installMessageHook
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
   AttachedProperty
-} from 'phosphor/lib/core/properties';
+} from '@phosphor/properties';
 
 import {
   disconnectReceiver
-} from 'phosphor/lib/core/signaling';
+} from '@phosphor/signaling';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgetwidget';
 
 import {
   dateTime

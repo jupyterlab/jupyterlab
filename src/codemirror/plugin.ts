@@ -8,7 +8,7 @@ import 'codemirror/keymap/vim.js';
 
 import {
   Menu
-} from 'phosphor/lib/ui/menu';
+} from '@phosphor/widgetmenu';
 
 import {
   JupyterLab, JupyterLabPlugin

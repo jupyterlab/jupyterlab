@@ -7,7 +7,7 @@ import {
 
 import {
   isArray, isPrimitive, JSONObject, JSONValue
-} from 'phosphor/lib/algorithm/json';
+} from '@phosphor/coreutils';
 
 import {
   MimeModel

@@ -7,7 +7,7 @@ import {
 
 import {
   each, enumerate
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
 
 import {
   indexOf
@@ -15,7 +15,7 @@ import {
 
 import {
   MimeData as IClipboard
-} from 'phosphor/lib/core/mimedata';
+} from '@phosphor/coreutils';
 
 import {
   ICellModel, ICodeCellModel,

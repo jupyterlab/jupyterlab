@@ -5,15 +5,15 @@
 
 import {
   IDisposable
-} from 'phosphor/lib/core/disposable';
+} from '@phosphor/disposable';
 
 import {
   Token
-} from 'phosphor/lib/core/token';
+} from '@phosphor/application';
 
 import {
   CommandPalette
-} from 'phosphor/lib/ui/commandpalette';
+} from '@phosphor/widgetcommandpalette';
 
 
 /**

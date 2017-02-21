@@ -11,7 +11,7 @@ import {
 
 import {
   Menu
-} from 'phosphor/lib/ui/menu';
+} from '@phosphor/widgetmenu';
 
 import {
   JupyterLab, JupyterLabPlugin

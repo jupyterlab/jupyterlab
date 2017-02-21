@@ -15,11 +15,11 @@ import {
 
 import {
   Message
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
   IDragEvent
-} from 'phosphor/lib/dom/dragdrop';
+} from '@phosphor/dragdrop';
 
 import {
   hitTest
@@ -27,7 +27,7 @@ import {
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgetwidget';
 
 import {
   showDialog

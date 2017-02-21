@@ -3,11 +3,11 @@
 
 import {
   Application
-} from 'phosphor/lib/ui/application';
+} from '@phosphor/widgetapplication';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgetwidget';
 
 import {
   maxSatisfying, satisfies

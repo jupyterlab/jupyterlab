@@ -5,11 +5,11 @@
 
 import {
   DisposableDelegate, IDisposable
-} from 'phosphor/lib/core/disposable';
+} from '@phosphor/disposable';
 
 import {
   CommandPalette
-} from 'phosphor/lib/ui/commandpalette';
+} from '@phosphor/widgetcommandpalette';
 
 import {
   JupyterLab, JupyterLabPlugin

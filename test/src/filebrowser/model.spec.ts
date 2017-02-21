@@ -9,7 +9,7 @@ import {
 
 import {
   toArray
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
 
 import {
   FileBrowserModel
