@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  defineSignal, ISignal
+  ISignal, Signal
 } from '@phosphor/signaling';
 
 import {
@@ -82,12 +82,16 @@ class NotebookTracker extends InstanceTracker<NotebookPanel> implements INoteboo
    * #### Notes
    * If there is no cell with the focus, then `null` will be emitted.
    */
-  readonly activeCellChanged: ISignal<this, BaseCellWidget>;
+  get activeCellChanged(): ISignal<this, BaseCellWidget> {
+    return this._activeCellChanged;
+  }
 
   /**
    * A signal emitted when the selection state changes.
    */
-  readonly selectionChanged: ISignal<this, void>;
+  get selectionChanged(): ISignal<this, void> {
+    return this._selectionChanged;
+  }
 
   /**
    * Add a new notebook panel to the tracker.
@@ -125,28 +129,26 @@ class NotebookTracker extends InstanceTracker<NotebookPanel> implements INoteboo
       return;
     }
 
-    // Since the notebook has changed, immediately signal an active cell change.
-    this.activeCellChanged.emit(widget.notebook.activeCell || null);
+    // Since the notebook has changed, immediately signal an active cell change
+    this._activeCellChanged.emit(widget.notebook.activeCell || null);
   }
 
   private _onActiveCellChanged(sender: Notebook, cell: BaseCellWidget): void {
     // Check if the active cell change happened for the current notebook.
     if (this.currentWidget && this.currentWidget.notebook === sender) {
       this._activeCell = cell || null;
-      this.activeCellChanged.emit(this._activeCell);
+      this._activeCellChanged.emit(this._activeCell);
     }
   }
 
   private _onSelectionChanged(sender: Notebook): void {
     // Check if the selection change happened for the current notebook.
     if (this.currentWidget && this.currentWidget.notebook === sender) {
-      this.selectionChanged.emit(void 0);
+      this._selectionChanged.emit(void 0);
     }
   }
 
   private _activeCell: BaseCellWidget | null = null;
+  private _activeCellChanged = new Signal<this, BaseCellWidget>(this);
+  private _selectionChanged = new Signal<this, void>(this);
 }
-
-// Define the signals for the `NotebookTracker` class.
-defineSignal(NotebookTracker.prototype, 'activeCellChanged');
-defineSignal(NotebookTracker.prototype, 'selectionChanged');

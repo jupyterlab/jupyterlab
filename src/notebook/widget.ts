@@ -343,7 +343,7 @@ class StaticNotebook extends Widget {
     }
     this._updateMimetype();
     let cells = newValue.cells;
-    each(cells, (cell: ICellModel, i) => {
+    each(cells, (cell: ICellModel, i: number) => {
       this._insertCell(i, cell);
     });
     cells.changed.connect(this._onCellsChanged, this);
