@@ -19,7 +19,6 @@
     "less": "^2.7.1",
     "marked": "^0.3.5",
     "moment": "^2.11.2",
-    "phosphor": "^0.7.0",
     "sanitize-html": "^1.12.0",
     "semver": "^5.3.0",
     "simulate-event": "^1.2.0",
