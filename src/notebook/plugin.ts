@@ -730,7 +730,7 @@ function createMenu(app: JupyterLab): Menu {
   menu.addItem({ command: CommandIDs.closeAndShutdown });
   menu.addItem({ command: CommandIDs.trust });
   menu.addItem({ type: 'separator' });
-  menu.addItem({ type: 'submenu', menu: settings });
+  menu.addItem({ type: 'submenu', submenu: settings });
 
   return menu;
 }

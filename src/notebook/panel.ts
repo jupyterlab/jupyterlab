@@ -18,7 +18,7 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  defineSignal, ISignal
+  ISignal, Signal
 } from '@phosphor/signaling';
 
 import {
@@ -117,17 +117,23 @@ class NotebookPanel extends Widget {
   /**
    * A signal emitted when the panel has been activated.
    */
-  readonly activated: ISignal<this, void>;
+  get activated(): ISignal<this, void> {
+    return this._activated;
+  }
 
   /**
    * A signal emitted when the panel context changes.
    */
-  readonly contextChanged: ISignal<this, void>;
+  get contextChanged(): ISignal<this, void> {
+    return this._contextChanged;
+  }
 
   /**
    * A signal emitted when the kernel used by the panel changes.
    */
-  readonly kernelChanged: ISignal<this, Kernel.IKernel>;
+  get kernelChanged(): ISignal<this, Kernel.IKernel> {
+    return this._kernelChanged;
+  }
 
   /**
    * The factory used by the widget.
@@ -153,7 +159,7 @@ class NotebookPanel extends Widget {
    * Get the toolbar used by the widget.
    */
   get toolbar(): Toolbar<Widget> {
-    return (this.layout as PanelLayout).widgets.at(0) as Toolbar<Widget>;
+    return (this.layout as PanelLayout).widgets[0] as Toolbar<Widget>;
   }
 
   /**
@@ -191,7 +197,7 @@ class NotebookPanel extends Widget {
     // Trigger private, protected, and public changes.
     this._onContextChanged(oldValue, newValue);
     this.onContextChanged(oldValue, newValue);
-    this.contextChanged.emit(void 0);
+    this._contextChanged.emit(void 0);
   }
 
   /**
@@ -208,7 +214,7 @@ class NotebookPanel extends Widget {
    */
   protected onActivateRequest(msg: Message): void {
     this.notebook.activate();
-    this.activated.emit(void 0);
+    this._activated.emit(void 0);
   }
 
   /**
@@ -289,7 +295,7 @@ class NotebookPanel extends Widget {
    * Handle a change in the kernel by updating the document metadata.
    */
   private _onKernelChanged(context: DocumentRegistry.IContext<INotebookModel>, kernel: Kernel.IKernel): void {
-    this.kernelChanged.emit(kernel);
+    this._kernelChanged.emit(kernel);
     if (!this.model || !kernel) {
       return;
     }
@@ -339,13 +345,10 @@ class NotebookPanel extends Widget {
   }
 
   private _context: DocumentRegistry.IContext<INotebookModel> = null;
+  private _activated = new Signal<this, void>(this);
+  private _contextChanged = new Signal<this, void>(this);
+  private _kernelChanged = new Signal<this, Kernel.IKernel>(this);
 }
-
-
-// Define the signals for the `NotebookPanel` class.
-defineSignal(NotebookPanel.prototype, 'activated');
-defineSignal(NotebookPanel.prototype, 'contextChanged');
-defineSignal(NotebookPanel.prototype, 'kernelChanged');
 
 
 /**

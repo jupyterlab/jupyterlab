@@ -11,7 +11,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  defineSignal, ISignal
+  ISignal, Signal
 } from '@phosphor/signaling';
 
 import {
@@ -46,18 +46,22 @@ class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeMo
   constructor(languagePreference?: string) {
     super();
     this._defaultLang = languagePreference || '';
-    this.value.changed.connect(this._onValueChanged, this);
+    this.value.changed.connect(this.triggerContentChange, this);
   }
 
   /**
    * A signal emitted when the document content changes.
    */
-  contentChanged: ISignal<this, void>;
+  get contentChanged(): ISignal<this, void> {
+    return this._contentChanged;
+  }
 
   /**
    * A signal emitted when the document state changes.
    */
-  stateChanged: ISignal<this, IChangedArgs<any>>;
+  get stateChanged(): ISignal<this, IChangedArgs<any>> {
+    return this._stateChanged;
+  }
 
   /**
    * The dirty state of the document.
@@ -71,7 +75,7 @@ class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeMo
     }
     let oldValue = this._dirty;
     this._dirty = newValue;
-    this.stateChanged.emit({ name: 'dirty', oldValue, newValue });
+    this.triggerChange({ name: 'dirty', oldValue, newValue });
   }
 
   /**
@@ -86,7 +90,7 @@ class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeMo
     }
     let oldValue = this._readOnly;
     this._readOnly = newValue;
-    this.stateChanged.emit({ name: 'readOnly', oldValue, newValue });
+    this.triggerChange({ name: 'readOnly', oldValue, newValue });
   }
 
   /**
@@ -144,22 +148,26 @@ class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeMo
   }
 
   /**
-   * Handle a change to the observable value.
+   * Trigger a state change signal.
    */
-  private _onValueChanged(sender: IObservableString, args: ObservableString.IChangedArgs): void {
-    this.contentChanged.emit(void 0);
+  protected triggerStateChange(args: IChangedArgs<any>): void {
+    this._stateChanged.emit(args);
+  }
+
+  /**
+   * Trigger a content changed signal.
+   */
+  protected triggerContentChange(): void {
+    this._contentChanged.emit(void 0);
     this.dirty = true;
   }
 
   private _defaultLang = '';
   private _dirty = false;
   private _readOnly = false;
+  private _contentChanged = new Signal<this, void>(this);
+  private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
 }
-
-
-// Define the signals for the `DocumentModel` class.
-defineSignal(DocumentModel.prototype, 'contentChanged');
-defineSignal(DocumentModel.prototype, 'stateChanged');
 
 
 /**

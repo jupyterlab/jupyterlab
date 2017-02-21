@@ -2,16 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  nbformat, utils
+  nbformat
 } from '@jupyterlab/services';
 
 import {
   each
 } from '@phosphor/algorithm';
-
-import {
-  JSONValue
-} from '@phosphor/coreutils';
 
 import {
   IObservableVector, ObservableVector
@@ -103,7 +99,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     let name = options.languagePreference || '';
     this._metadata.set('language_info', { name });
     this._ensureMetadata();
-    this._metadata.changed.connect(this._onGenericChange, this);
+    this._metadata.changed.connect(this.triggerContentChange, this);
   }
 
   /**
@@ -250,12 +246,12 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     if (value.nbformat !== this._nbformat) {
       oldValue = this._nbformat;
       this._nbformat = newValue = value.nbformat;
-      this.stateChanged.emit({ name: 'nbformat', oldValue, newValue });
+      this.triggerStateChange({ name: 'nbformat', oldValue, newValue });
     }
     if (value.nbformat_minor > this._nbformatMinor) {
       oldValue = this._nbformatMinor;
       this._nbformatMinor = newValue = value.nbformat_minor;
-      this.stateChanged.emit({ name: 'nbformatMinor', oldValue, newValue });
+      this.triggerStateChange({ name: 'nbformatMinor', oldValue, newValue });
     }
     // Update the metadata.
     this._metadata.clear();
@@ -278,7 +274,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     switch (change.type) {
     case 'add':
       each(change.newValues, cell => {
-        cell.contentChanged.connect(this._onGenericChange, this);
+        cell.contentChanged.connect(this.triggerContentChange, this);
       });
       break;
     case 'remove':
@@ -288,7 +284,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       break;
     case 'set':
       each(change.newValues, cell => {
-        cell.contentChanged.connect(this._onGenericChange, this);
+        cell.contentChanged.connect(this.triggerContentChange, this);
       });
       each(change.oldValues, cell => {
         cell.dispose();
@@ -308,8 +304,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
         }
       });
     }
-    this.contentChanged.emit(void 0);
-    this.dirty = true;
+    this.triggerContentChange();
   }
 
   /**
@@ -323,14 +318,6 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     if (!metadata.has('kernelspec')) {
       metadata.set('kernelspec', { name: '', display_name: '' });
     }
-  }
-
-  /**
-   * Handle a generic state change.
-   */
-  private _onGenericChange(): void {
-    this.dirty = true;
-    this.contentChanged.emit(void 0);
   }
 
   private _cells: IObservableUndoableVector<ICellModel> = null;
