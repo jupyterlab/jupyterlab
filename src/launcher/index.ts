@@ -22,7 +22,7 @@ import {
 } from '@phosphor/application';
 
 import {
-  h, VNode
+  h, VirtualNode
 } from '@phosphor/virtualdom';
 
 import {
@@ -238,12 +238,12 @@ class LauncherWidget extends VDomWidget<LauncherModel> {
   /**
    * Render the launcher to virtual DOM nodes.
    */
-  protected render(): VNode | VNode[] {
+  protected render(): VirtualNode | VirtualNode[] {
     // Create an iterator that yields rendered item nodes.
     let children = map(this.model.items(), item => {
       let img = h.span({className: item.imgClassName + ' ' + IMAGE_CLASS});
       let text = h.span({className: TEXT_CLASS }, item.name);
-      let attrs = this._linker.populateVNodeAttrs({
+      let attrs = this._linker.populateVirtualNodeAttrs({
         className: ITEM_CLASS
       }, item.command, item.args);
       return h.div(attrs, [img, text]);

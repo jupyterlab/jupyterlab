@@ -8,7 +8,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  h, VNode
+  h, VirtualNode
 } from '@phosphor/virtualdom';
 
 import {
@@ -166,7 +166,7 @@ class CSVTable extends VDomWidget<CSVModel> {
   /**
    * Render the content as virtual DOM nodes.
    */
-  protected render(): VNode | VNode[] {
+  protected render(): VirtualNode | VirtualNode[] {
     if (!this.model) {
       return h.table([h.thead(), h.tbody()]);
     }

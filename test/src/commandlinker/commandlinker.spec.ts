@@ -8,7 +8,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  h, IElementAttrs, VNode, realize
+  h, IElementAttrs, VirtualNode, realize
 } from '@phosphor/virtualdom';
 
 import {
@@ -118,7 +118,7 @@ describe('commandlinker/commandlinker', () => {
 
     });
 
-    describe('#populateVNodeAttributes()', () => {
+    describe('#populateVirtualNodeAttributes()', () => {
 
       it('should connect a node to a command', () => {
         let called = false;
@@ -126,13 +126,13 @@ describe('commandlinker/commandlinker', () => {
         let commands =new CommandRegistry();
         let linker = new CommandLinker({ commands });
         let node: HTMLElement;
-        let vnode: VNode;
+        let vnode: VirtualNode;
         let disposable = commands.addCommand(command, {
           execute: () => { called = true; }
         });
         let attrs: IElementAttrs = {};
 
-        vnode = h.div(linker.populateVNodeAttrs(attrs, command, null));
+        vnode = h.div(linker.populateVirtualNodeAttrs(attrs, command, null));
         node = realize(vnode);
         document.body.appendChild(node);
 

@@ -115,7 +115,7 @@ class Vector<T> {
    * No changes.
    */
   iter(): IIterator<T> {
-    return new ArrayIterator<T>(this._array, 0);
+    return new ArrayIterator<T>(this._array);
   }
 
   /**

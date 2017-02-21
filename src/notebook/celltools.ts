@@ -38,7 +38,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  h, realize, VNode
+  h, realize, VirtualNode
 } from '@phosphor/virtualdom';
 
 import {
@@ -779,7 +779,7 @@ namespace Private {
     let title = (
       options.title || name[0].toLocaleUpperCase() + name.slice(1)
     );
-    let optionNodes: VNode[] = [];
+    let optionNodes: VirtualNode[] = [];
     for (let label in options.optionsMap) {
       let value = JSON.stringify(options.optionsMap[label]);
       optionNodes.push(h.option({ label, value }));

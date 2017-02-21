@@ -18,12 +18,12 @@ import {
 } from '@phosphor/properties';
 
 import {
-  Signal.clearData, defineSignal, ISignal
+  ISignal, Signal
 } from '@phosphor/signaling';
 
 import {
   CommandRegistry
-} from '@phosphor/widgets';
+} from '@phosphor/commands';
 
 import {
   FocusTracker
@@ -56,6 +56,15 @@ interface IInstanceTracker<T extends Widget> extends IDisposable {
   readonly currentChanged: ISignal<this, T>;
 
   /**
+   * A signal emitted when a widget is added.
+   *
+   * #### Notes
+   * This signal will only fire when a widget is added to the tracker. It will
+   * not fire if a widget is injected into the tracker.
+   */
+  readonly widgetAdded: ISignal<this, T>;
+
+  /**
    * The current widget is the most recently focused widget.
    */
   readonly currentWidget: T;
@@ -64,15 +73,6 @@ interface IInstanceTracker<T extends Widget> extends IDisposable {
    * The number of widgets held by the tracker.
    */
   readonly size: number;
-
-  /**
-   * A signal emitted when a widget is added.
-   *
-   * #### Notes
-   * This signal will only fire when a widget is added to the tracker. It will
-   * not fire if a widget is injected into the tracker.
-   */
-  readonly widgetAdded: ISignal<this, T>;
 
   /**
    * Iterate through each widget in the tracker.
@@ -130,14 +130,11 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   }
 
   /**
-   * A namespace for all tracked widgets, (e.g., `notebook`).
-   */
-  readonly namespace: string;
-
-  /**
    * A signal emitted when the current widget changes.
    */
-  readonly currentChanged: ISignal<this, T>;
+  get currentChanged(): ISignal<this, T> {
+    return this._currentChanged;
+  }
 
   /**
    * A signal emitted when a widget is added.
@@ -146,7 +143,14 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * This signal will only fire when a widget is added to the tracker. It will
    * not fire if a widget is injected into the tracker.
    */
-  readonly widgetAdded: ISignal<this, T>;
+  get widgetAdded(): ISignal<this, T> {
+    return this._widgetAdded;
+  }
+
+  /**
+   * A namespace for all tracked widgets, (e.g., `notebook`).
+   */
+  readonly namespace: string;
 
   /**
    * The current widget is the most recently focused widget.
@@ -202,7 +206,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     }
 
     // Emit the widget added signal.
-    this.widgetAdded.emit(widget);
+    this._widgetAdded.emit(widget);
 
     return promise;
   }
@@ -354,9 +358,9 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   /**
    * Handle the current change signal from the internal focus tracker.
    */
-  private _onCurrentChanged(sender: any, args: FocusTracker.ICurrentChangedArgs<T>): void {
+  private _onCurrentChanged(sender: any, args: FocusTracker.IChangedArgs<T>): void {
     this.onCurrentChanged();
-    this.currentChanged.emit(args.newValue);
+    this._currentChanged.emit(args.newValue);
   }
 
   /**
@@ -378,12 +382,10 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
 
   private _restore: InstanceTracker.IRestoreOptions<T> = null;
   private _tracker = new FocusTracker<T>();
+  private _currentChanged = new Signal<this, T>(this);
+  private _widgetAdded = new Signal<this, T>(this);
 }
 
-
-// Define the signals for the `InstanceTracker` class.
-defineSignal(InstanceTracker.prototype, 'currentChanged');
-defineSignal(InstanceTracker.prototype, 'widgetAdded');
 
 
 /**
@@ -435,12 +437,15 @@ namespace Private {
   export
   const injectedProperty = new AttachedProperty<Widget, boolean>({
     name: 'injected',
-    value: false
+    create: () => false
   });
 
   /**
    * An attached property for a widget's ID in the state database.
    */
   export
-  const nameProperty = new AttachedProperty<Widget, string>({ name: 'name' });
+  const nameProperty = new AttachedProperty<Widget, string>({
+    name: 'name',
+    create: () => ''
+  });
 }

@@ -47,7 +47,7 @@ class StateDB implements IStateDB {
     let i = window.localStorage.length;
     while (i) {
       let key = window.localStorage.key(--i);
-      if (key.ArrayExt.firstIndexOf(prefix) === 0) {
+      if (key.indexOf(prefix) === 0) {
         window.localStorage.removeItem(key);
       }
     }
@@ -103,7 +103,7 @@ class StateDB implements IStateDB {
     let i = window.localStorage.length;
     while (i) {
       let key = window.localStorage.key(--i);
-      if (key.ArrayExt.firstIndexOf(prefix) === 0) {
+      if (key.indexOf(prefix) === 0) {
         try {
           items.push({
             id: key.replace(regex, ''),

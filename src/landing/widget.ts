@@ -6,7 +6,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  h, VNode
+  h, VirtualNode
 } from '@phosphor/virtualdom';
 
 import {
@@ -214,8 +214,8 @@ class LandingWidget extends VDomWidget<LandingModel> {
   /**
    * Render the landing plugin to virtual DOM nodes.
    */
-  protected render(): VNode {
-    let activitiesList: VNode[] = [];
+  protected render(): VirtualNode {
+    let activitiesList: VirtualNode[] = [];
     let activites = this.model.activities;
     for (let activityName of activites) {
       let imgName = activityName[0].replace(' ', '');

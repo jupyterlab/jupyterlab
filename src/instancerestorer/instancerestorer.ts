@@ -17,7 +17,7 @@ import {
 
 import {
   CommandRegistry
-} from '@phosphor/widgets';
+} from '@phosphor/commands';
 
 import {
   Widget
@@ -520,5 +520,8 @@ namespace Private {
    * An attached property for a widget's ID in the state database.
    */
   export
-  const nameProperty = new AttachedProperty<Widget, string>({ name: 'name' });
+  const nameProperty = new AttachedProperty<Widget, string>({
+    name: 'name',
+    create: owner => ''
+  });
 }

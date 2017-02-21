@@ -6,7 +6,7 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  Signal.clearData, defineSignal, ISignal
+  ISignal, Signal
 } from '@phosphor/signaling';
 
 
@@ -18,7 +18,7 @@ interface IObservableMap<T> extends IDisposable {
   /**
    * A signal emitted when the map has changed.
    */
-  changed: ISignal<IObservableMap<T>, ObservableMap.IChangedArgs<T>>;
+  readonly changed: ISignal<this, ObservableMap.IChangedArgs<T>>;
 
   /**
    * The number of key-value pairs in the map.
@@ -111,7 +111,9 @@ class ObservableMap<T> implements IObservableMap<T> {
   /**
    * A signal emitted when the map has changed.
    */
-  changed: ISignal<IObservableMap<T>, ObservableMap.IChangedArgs<T>>;
+  get changed(): ISignal<this, ObservableMap.IChangedArgs<T>> {
+    return this._changed;
+  }
 
   /**
    * Whether this map has been disposed.
@@ -148,7 +150,7 @@ class ObservableMap<T> implements IObservableMap<T> {
       return;
     }
     this._map.set(key, value);
-    this.changed.emit({
+    this._changed.emit({
       type: oldVal ? 'change' : 'add',
       key: key,
       oldValue: oldVal,
@@ -217,7 +219,7 @@ class ObservableMap<T> implements IObservableMap<T> {
   delete(key: string): T {
     let oldVal = this._map.get(key);
     this._map.delete(key);
-    this.changed.emit({
+    this._changed.emit({
       type: 'remove',
       key: key,
       oldValue: oldVal,
@@ -251,6 +253,7 @@ class ObservableMap<T> implements IObservableMap<T> {
 
   private _map: Map<string, T> = new Map<string, T>();
   private _itemCmp: (first: T, second: T) => boolean;
+  private _changed = new Signal<this, ObservableMap.IChangedArgs<T>>(this);
 }
 
 
@@ -323,10 +326,6 @@ namespace ObservableMap {
     newValue: T;
   }
 }
-
-
-// Define the signals for the `ObservableMap` class.
-defineSignal(ObservableMap.prototype, 'changed');
 
 
 /**

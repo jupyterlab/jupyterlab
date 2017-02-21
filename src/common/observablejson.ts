@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONExt.deepEqual, JSONExt.isPrimitive, JSONObject, JSONValue
+  JSONExt, JSONObject, JSONValue
 } from '@phosphor/coreutils';
 
 import {
@@ -14,7 +14,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  h, realize
+  h, VirtualDOM
 } from '@phosphor/virtualdom';
 
 import {
@@ -440,7 +440,7 @@ namespace Private {
   function createEditorNode(): HTMLElement {
     let cancelTitle = 'Revert changes to data';
     let confirmTitle = 'Commit changes to data';
-    return realize(
+    return VirtualDOM.realize(
       h.div({ className: METADATA_CLASS },
         h.div({ className: BUTTON_AREA_CLASS },
           h.span({ className: REVERT_CLASS, title: cancelTitle }),

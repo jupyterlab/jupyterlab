@@ -6,7 +6,7 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  ISignal, Signal.clearData, defineSignal
+  ISignal, Signal
 } from '@phosphor/signaling';
 
 import {
@@ -209,7 +209,9 @@ namespace CodeEditor {
     /**
      * A signal emitted when a mimetype changes.
      */
-    readonly mimeTypeChanged: ISignal<this, IChangedArgs<string>>;
+    get mimeTypeChanged(): ISignal<this, IChangedArgs<string>> {
+      return this._mimeTypeChanged;
+    }
 
     /**
      * Get the value of the model.
@@ -237,7 +239,7 @@ namespace CodeEditor {
         return;
       }
       this._mimetype = newValue;
-      this.mimeTypeChanged.emit({
+      this._mimeTypeChanged.emit({
         name: 'mimeType',
         oldValue,
         newValue
@@ -268,12 +270,8 @@ namespace CodeEditor {
     private _selections = new ObservableMap<ITextSelection[]>();
     private _mimetype: string;
     private _isDisposed = false;
+    private _mimeTypeChanged = new Signal<this, IChangedArgs<string>>(this);
   }
-
-  /**
-   * The signals for the `Model` class.
-   */
-  defineSignal(Model.prototype, 'mimeTypeChanged');
 
   /**
    * A selection owner.

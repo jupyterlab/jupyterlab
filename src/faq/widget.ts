@@ -6,7 +6,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  h, VNode
+  h, VirtualNode
 } from '@phosphor/virtualdom';
 
 import {
@@ -173,7 +173,7 @@ class FaqWidget extends VDomWidget<FaqModel> {
   /**
    * Render the faq plugin to virtual DOM nodes.
    */
-  protected render(): VNode[] {
+  protected render(): VirtualNode[] {
     let subheadings = this.model.subheadings;
     let basicsQuestions = this.model.basicsQuestions;
     let featuresQuestions = this.model.featuresQuestions;
@@ -265,7 +265,7 @@ class FaqWidget extends VDomWidget<FaqModel> {
         h.li({ className: QUESTION_CLASS, id: 'basicsQ4' }, basicsQuestions[3]),
         h.li({ className: ANSWER_CLASS },
           'Check out the JupyterLab tour ',
-          h.a(this._linker.populateVNodeAttrs({
+          h.a(this._linker.populateVirtualNodeAttrs({
             className: ANCHOR_CLASS
           }, AboutCommandIDs.open, null), 'here')
         )

@@ -10,7 +10,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  Signal.clearData, defineSignal, ISignal
+  ISignal, Signal
 } from '@phosphor/signaling';
 
 import {
@@ -18,7 +18,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  render, VNode
+  VirtualDOM, VirtualNode
 } from '@phosphor/virtualdom';
 
 
@@ -42,7 +42,9 @@ class VDomModel implements IVDomModel {
   /**
    * A signal emitted when any model state changes.
    */
-  readonly stateChanged: ISignal<this, void>;
+  get stateChanged(): ISignal<this, void> {
+    return this._stateChanged;
+  }
 
   /**
    * Test whether the model is disposed.
@@ -62,12 +64,16 @@ class VDomModel implements IVDomModel {
     Signal.clearData(this);
   }
 
+  /**
+   * Trigger a change signal.
+   */
+  protected triggerChange(): void {
+    this._stateChanged.emit(void 0);
+  }
+
   private _isDisposed = false;
+  private _stateChanged = new Signal<this, void>(this);
 }
-
-
-// Define the signals for the VDomModel class.
-defineSignal(VDomModel.prototype, 'stateChanged');
 
 
 /**
@@ -78,7 +84,9 @@ abstract class VDomWidget<T extends IVDomModel> extends Widget {
   /**
    * A signal emited when the model changes.
    */
-  modelChanged: ISignal<this, void>;
+  get modelChanged(): ISignal<this, void> {
+    return this._modelChanged;
+  }
 
   /**
    * Set the model and fire changed signals.
@@ -95,7 +103,7 @@ abstract class VDomWidget<T extends IVDomModel> extends Widget {
     this._model = newValue;
     this._model.stateChanged.connect(this.update, this);
     this.update();
-    this.modelChanged.emit(void 0);
+    this._modelChanged.emit(void 0);
   }
 
   /**
@@ -121,7 +129,7 @@ abstract class VDomWidget<T extends IVDomModel> extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     let vnode = this.render();
-    render(vnode, this.node);
+    VirtualDOM.render(vnode, this.node);
   }
 
   /**
@@ -131,14 +139,11 @@ abstract class VDomWidget<T extends IVDomModel> extends Widget {
    * which includes layout triggered rendering and all model changes.
    *
    * Subclasses should define this method and use the current model state
-   * in this.model and return a phosphor VNode or VNode[] using the phosphor
+   * in this.model and return a phosphor VirtualNode or VirtualNode[] using the phosphor
    * VDOM API.
    */
-  protected abstract render(): VNode | VNode[];
+  protected abstract render(): VirtualNode | VirtualNode[];
 
   private _model: T;
+  private _modelChanged = new Signal<this, void>(this);
 }
-
-
-// Define the signal for the VDomWidget class.
-defineSignal(VDomWidget.prototype, 'modelChanged');

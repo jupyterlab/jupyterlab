@@ -81,7 +81,7 @@ interface ICommandLinker extends IDisposable {
    * that were never connected.
    *
    * This method can be called on rendered virtual DOM nodes that were populated
-   * using the `populateVNodeAttributes` method in order to disconnect them from
+   * using the `populateVirtualNodeAttributes` method in order to disconnect them from
    * executing their command/argument pair.
    */
   disconnectNode(node: HTMLElement): HTMLElement;
@@ -104,7 +104,7 @@ interface ICommandLinker extends IDisposable {
    * The attributes instance that is returned is identical to the attributes
    * instance that was passed in, i.e., this method mutates the original.
    */
-  populateVNodeAttrs(attrs: IElementAttrs, command: string, args: JSONObject): IElementAttrs;
+  populateVirtualNodeAttrs(attrs: IElementAttrs, command: string, args: JSONObject): IElementAttrs;
 }
 
 
@@ -179,7 +179,7 @@ class CommandLinker implements ICommandLinker {
    * that were never connected.
    *
    * This method can be called on rendered virtual DOM nodes that were populated
-   * using the `populateVNodeAttributes` method in order to disconnect them from
+   * using the `populateVirtualNodeAttributes` method in order to disconnect them from
    * executing their command/argument pair.
    */
   disconnectNode(node: HTMLElement): HTMLElement {
@@ -226,7 +226,7 @@ class CommandLinker implements ICommandLinker {
    * The attributes instance that is returned is identical to the attributes
    * instance that was passed in, i.e., this method mutates the original.
    */
-  populateVNodeAttrs(attrs: IElementAttrs, command: string, args: JSONObject): IElementAttrs {
+  populateVirtualNodeAttrs(attrs: IElementAttrs, command: string, args: JSONObject): IElementAttrs {
     let argsValue = JSON.stringify(args);
     attrs.dataset = attrs.dataset || {};
     attrs.dataset[COMMAND_ATTR] = command;

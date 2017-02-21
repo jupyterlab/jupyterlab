@@ -6,7 +6,7 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  Signal.clearData, defineSignal, ISignal
+  ISignal, Signal
 } from '@phosphor/signaling';
 
 
@@ -18,7 +18,7 @@ interface IObservableString extends IDisposable {
   /**
    * A signal emitted when the string has changed.
    */
-  changed: ISignal<IObservableString, ObservableString.IChangedArgs>;
+  readonly changed: ISignal<this, ObservableString.IChangedArgs>;
 
   /**
    * The value of the string.
@@ -70,7 +70,9 @@ class ObservableString implements IObservableString {
   /**
    * A signal emitted when the string has changed.
    */
-  readonly changed: ISignal<IObservableString, ObservableString.IChangedArgs>;
+  get changed(): ISignal<this, ObservableString.IChangedArgs> {
+    return this._changed;
+  }
 
   /**
    * Set the value of the string.
@@ -80,7 +82,7 @@ class ObservableString implements IObservableString {
       return;
     }
     this._text = value;
-    this.changed.emit({
+    this._changed.emit({
       type: 'set',
       start: 0,
       end: value.length,
@@ -106,7 +108,7 @@ class ObservableString implements IObservableString {
     this._text = this._text.slice(0, index) +
                  text +
                  this._text.slice(index);
-    this.changed.emit({
+    this._changed.emit({
       type: 'insert',
       start: index,
       end: index + text.length,
@@ -125,7 +127,7 @@ class ObservableString implements IObservableString {
     let oldValue: string = this._text.slice(start, end);
     this._text = this._text.slice(0, start) +
                  this._text.slice(end);
-    this.changed.emit({
+    this._changed.emit({
       type: 'remove',
       start: start,
       end: end,
@@ -161,7 +163,9 @@ class ObservableString implements IObservableString {
 
   private _text = '';
   private _isDisposed : boolean = false;
+  private _changed = new Signal<this, ObservableString.IChangedArgs>(this);
 }
+
 
 /**
  * The namespace for `ObservableVector` class statics.
@@ -224,6 +228,3 @@ namespace ObservableString {
     value: string;
   }
 }
-
-// Define the signals for the `ObservableString` class.
-defineSignal(ObservableString.prototype, 'changed');

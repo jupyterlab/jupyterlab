@@ -6,7 +6,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  h, VNode
+  h, VirtualNode
 } from '@phosphor/virtualdom';
 
 import {
@@ -327,7 +327,7 @@ class AboutWidget extends VDomWidget<AboutModel> {
   /**
    * Render the about plugin to virtual DOM nodes.
    */
-  protected render(): VNode {
+  protected render(): VirtualNode {
     let title = this.model.title;
     let version = `v${this.model.version}`;
     let headerText = this.model.headerText;

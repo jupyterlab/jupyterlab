@@ -6,7 +6,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  ResizeMessage, Widget
+  Widget
 } from '@phosphor/widgets';
 
 import {
@@ -102,7 +102,7 @@ class CodeEditorWidget extends Widget {
   /**
    * A message handler invoked on an `'resize'` message.
    */
-  protected onResize(msg: ResizeMessage): void {
+  protected onResize(msg: Widget.ResizeMessage): void {
     if (msg.width < 0 || msg.height < 0) {
       if (this._resizing === -1) {
         this._editor.setSize(null);
