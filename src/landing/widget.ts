@@ -176,7 +176,7 @@ class LandingModel extends VDomModel {
    */
   set path(value: string) {
     this._path = value;
-    this.stateChanged.emit(void 0);
+    this.triggerChange();
   }
 
   private _path: string;

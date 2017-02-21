@@ -14,12 +14,8 @@ import {
 } from '@phosphor/application';
 
 import {
-  Panel
+  Panel, TabPanel
 } from '@phosphor/widgets';
-
-import {
-  TabPanel
-} from '@phosphor/widgettabpanel';
 
 import {
   Widget

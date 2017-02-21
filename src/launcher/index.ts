@@ -2,16 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IIterator, map, toArray
+  ArrayExt, ArrayIterator, IIterator, map, toArray
 } from '@phosphor/algorithm';
 
 import {
   JSONObject
 } from '@phosphor/coreutils';
-
-import {
-  Vector
-} from 'phosphor/lib/collections/vector';
 
 import {
   DisposableDelegate, IDisposable
@@ -165,7 +161,6 @@ class LauncherModel extends VDomModel implements ILauncher {
    */
   constructor() {
     super();
-    this._items = new Vector<ILauncherItem>();
   }
 
   /**
@@ -179,7 +174,7 @@ class LauncherModel extends VDomModel implements ILauncher {
       return;
     }
     this._path = path;
-    this.stateChanged.emit(void 0);
+    this.triggerChange();
   }
 
   /**
@@ -200,12 +195,12 @@ class LauncherModel extends VDomModel implements ILauncher {
     item.imgClassName = item.imgClassName ||
       `jp-Image${item.name.replace(/\ /g, '')}`;
 
-    this._items.pushBack(item);
-    this.stateChanged.emit(void 0);
+    this._items.push(item);
+    this.triggerChange();
 
     return new DisposableDelegate(() => {
-      this._items.remove(item);
-      this.stateChanged.emit(void 0);
+      ArrayExt.removeFirstOf(this._items, item);
+      this.triggerChange();
     });
   }
 
@@ -213,10 +208,10 @@ class LauncherModel extends VDomModel implements ILauncher {
    * Return an iterator of launcher items.
    */
   items(): IIterator<ILauncherItem> {
-    return this._items.iter();
+    return new ArrayIterator(this._items);
   }
 
-  private _items: Vector<ILauncherItem> = null;
+  private _items: ILauncherItem[] = [];
   private _path: string = 'home';
 }
 
