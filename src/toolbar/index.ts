@@ -2,12 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IIterator, map
+  IIterator, find, map
 } from '@phosphor/algorithm';
-
-import {
-  find
-} from 'phosphor/lib/algorithm/searching';
 
 import {
   Message

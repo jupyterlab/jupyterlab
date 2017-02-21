@@ -34,8 +34,8 @@ import {
 } from '@phosphor/dragdrop';
 
 import {
-  scrollIntoViewIfNeeded
-} from 'phosphor/lib/dom/query';
+  ElementExt
+} from '@phosphor/domutils';
 
 import {
   PanelLayout
@@ -850,7 +850,7 @@ class Notebook extends StaticNotebook {
    */
   scrollToActiveCell(): void {
     if (this.activeCell) {
-      scrollIntoViewIfNeeded(this.node, this.activeCell.node);
+      ElementExt.scrollIntoViewIfNeeded(this.node, this.activeCell.node);
     }
   }
 

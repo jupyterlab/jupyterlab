@@ -32,7 +32,7 @@ const plugin: JupyterLabPlugin<IMainMenu> = {
   id: 'jupyter.services.main-menu',
   provides: IMainMenu,
   activate: (app: JupyterLab): IMainMenu => {
-    let menu = new MainMenu({ keymap: app.keymap });
+    let menu = new MainMenu();
     menu.id = 'jp-MainMenu';
 
     let logo = new Widget();

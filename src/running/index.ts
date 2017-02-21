@@ -14,8 +14,8 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  hitTest
-} from 'phosphor/lib/dom/query';
+  ElementExt
+} from '@phosphor/domutils';
 
 import {
   Widget
@@ -311,7 +311,7 @@ class RunningSessions extends Widget {
     let clientY = event.clientY;
 
     // Check for a refresh.
-    if (hitTest(refresh, clientX, clientY)) {
+    if (ElementExt.hittest(refresh, clientX, clientY)) {
       return;
     }
 
@@ -321,7 +321,7 @@ class RunningSessions extends Widget {
       let node = termList.children[index] as HTMLLIElement;
       let shutdown = renderer.getTerminalShutdown(node);
       let model = this._runningTerminals[index];
-      if (hitTest(shutdown, clientX, clientY)) {
+      if (ElementExt.hittest(shutdown, clientX, clientY)) {
         this._manager.terminals.shutdown(model.name);
         return;
       }
@@ -334,7 +334,7 @@ class RunningSessions extends Widget {
       let node = sessionList.children[index] as HTMLLIElement;
       let shutdown = renderer.getSessionShutdown(node);
       let model = this._runningSessions[index];
-      if (hitTest(shutdown, clientX, clientY)) {
+      if (ElementExt.hittest(shutdown, clientX, clientY)) {
         this._manager.sessions.shutdown(model.id);
         return;
       }

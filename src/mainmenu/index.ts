@@ -2,12 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ArrayExt.findFirstIndex, ArrayExt.firstIndexOf, ArrayExt.upperBound
-} from 'phosphor/lib/algorithm/searching';
-
-import {
-  Vector
-} from 'phosphor/lib/collections/vector';
+  ArrayExt
+} from '@phosphor/algorithm';
 
 import {
   Token
@@ -19,7 +15,7 @@ import {
 
 import {
   MenuBar
-} from '@phosphor/widgetsbar';
+} from '@phosphor/widgets';
 
 
 /* tslint:disable */
@@ -75,7 +71,7 @@ class MainMenu extends MenuBar implements IMainMenu {
     // Upon disposal, remove the menu and its rank reference.
     menu.disposed.connect(this._onMenuDisposed, this);
 
-    this._items.insert(index, rankItem);
+    ArrayExt.insert(this._items, index, rankItem);
     this.insertMenu(index, menu);
   }
 
@@ -86,11 +82,11 @@ class MainMenu extends MenuBar implements IMainMenu {
     this.removeMenu(menu);
     let index = ArrayExt.findFirstIndex(this._items, item => item.menu === menu);
     if (index !== -1) {
-      this._items.removeAt(index);
+      ArrayExt.removeAt(this._items, index);
     }
   }
 
-  private _items = new Vector<Private.IRankItem>();
+  private _items: Private.IRankItem[] = [];
 }
 
 

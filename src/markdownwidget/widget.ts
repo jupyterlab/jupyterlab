@@ -108,7 +108,7 @@ class MarkdownWidget extends Widget {
     let mimeModel = new MimeModel({ data, trusted: false });
     let widget = this._rendermime.render(mimeModel);
     if (layout.widgets.length) {
-      layout.widgets.at(0).dispose();
+      layout.widgets[0].dispose();
     }
     layout.addWidget(widget);
   }
