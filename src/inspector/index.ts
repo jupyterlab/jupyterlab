@@ -11,5 +11,5 @@ export * from './inspector';
 export
 namespace CommandIDs {
   export
-  const open = 'inspector:open';
+  const open: string = 'inspector:open';
 };

@@ -26,7 +26,7 @@ import {
  * A class added to editors that can host a completer.
  */
 export
-const COMPLETABLE_CLASS = 'jp-mod-completable';
+const COMPLETABLE_CLASS: string = 'jp-mod-completable';
 
 
 /**

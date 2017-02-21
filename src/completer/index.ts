@@ -29,13 +29,13 @@ export * from './widget';
 export
 namespace CommandIDs {
   export
-  const invoke = 'completer:invoke';
+  const invoke: string = 'completer:invoke';
 
   export
-  const invokeConsole = 'completer:invoke-console';
+  const invokeConsole: string = 'completer:invoke-console';
 
   export
-  const invokeNotebook = 'completer:invoke-notebook';
+  const invokeNotebook: string = 'completer:invoke-notebook';
 }
 
 

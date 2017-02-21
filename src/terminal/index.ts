@@ -10,20 +10,20 @@ export * from './widget';
 export
 namespace CommandIDs {
   export
-  const createNew = 'terminal:create-new';
+  const createNew: string = 'terminal:create-new';
 
   export
-  const open = 'terminal:open';
+  const open: string = 'terminal:open';
 
   export
-  const refresh = 'terminal:refresh';
+  const refresh: string = 'terminal:refresh';
 
   export
-  const increaseFont = 'terminal:increase-font';
+  const increaseFont: string = 'terminal:increase-font';
 
   export
-  const decreaseFont = 'terminal:decrease-font';
+  const decreaseFont: string = 'terminal:decrease-font';
 
   export
-  const toggleTheme = 'terminal:toggle-theme';
+  const toggleTheme: string = 'terminal:toggle-theme';
 };

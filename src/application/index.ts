@@ -31,13 +31,13 @@ export { ApplicationShell } from './shell';
 export
 namespace CommandIDs {
   export
-  const closeAll = 'main-jupyterlab:close-all';
+  const closeAll: string = 'main-jupyterlab:close-all';
 
   export
-  const activateNextTab = 'main-jupyterlab:activate-next-tab';
+  const activateNextTab: string = 'main-jupyterlab:activate-next-tab';
 
   export
-  const activatePreviousTab = 'main-jupyterlab:activate-previous-tab';
+  const activatePreviousTab: string = 'main-jupyterlab:activate-previous-tab';
 };
 
 

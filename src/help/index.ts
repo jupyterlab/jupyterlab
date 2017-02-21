@@ -8,23 +8,23 @@
 export
 namespace CommandIDs {
   export
-  const open = 'help-jupyterlab:open';
+  const open: string = 'help-jupyterlab:open';
 
   export
-  const activate = 'help-jupyterlab:activate';
+  const activate: string = 'help-jupyterlab:activate';
 
   export
-  const close = 'help-jupyterlab:close';
+  const close: string = 'help-jupyterlab:close';
 
   export
-  const show = 'help-jupyterlab:show';
+  const show: string = 'help-jupyterlab:show';
 
   export
-  const hide = 'help-jupyterlab:hide';
+  const hide: string = 'help-jupyterlab:hide';
 
   export
-  const toggle = 'help-jupyterlab:toggle';
+  const toggle: string = 'help-jupyterlab:toggle';
 
   export
-  const launchClassic = 'classic-notebook:launchClassic';
+  const launchClassic: string = 'classic-notebook:launchClassic';
 };

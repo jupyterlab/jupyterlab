@@ -15,35 +15,35 @@ export * from './tracker';
 export
 namespace CommandIDs {
   export
-  const save = 'file-operations:save';
+  const save: string = 'file-operations:save';
 
   export
-  const restoreCheckpoint = 'file-operations:restore-checkpoint';
+  const restoreCheckpoint: string = 'file-operations:restore-checkpoint';
 
   export
-  const saveAs = 'file-operations:save-as';
+  const saveAs: string = 'file-operations:save-as';
 
   export
-  const close = 'file-operations:close';
+  const close: string = 'file-operations:close';
 
   export
-  const closeAllFiles = 'file-operations:close-all-files';
+  const closeAllFiles: string = 'file-operations:close-all-files';
 
   export
-  const open = 'file-operations:open';
+  const open: string = 'file-operations:open';
 
   export
-  const newTextFile = 'file-operations:new-text-file';
+  const newTextFile: string = 'file-operations:new-text-file';
 
   export
-  const newNotebook = 'file-operations:new-notebook';
+  const newNotebook: string = 'file-operations:new-notebook';
 
   export
-  const showBrowser = 'file-browser:activate';
+  const showBrowser: string = 'file-browser:activate';
 
   export
-  const hideBrowser = 'file-browser:hide';
+  const hideBrowser: string = 'file-browser:hide';
 
   export
-  const toggleBrowser = 'file-browser:toggle';
+  const toggleBrowser: string = 'file-browser:toggle';
 };
