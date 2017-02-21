@@ -48,7 +48,7 @@ import {
  * The definition of a model object for a notebook widget.
  */
 export
-interface INotebookModel extends DocumentRegistry.IModel {
+interface INotebookModel extends DocumentRegistry.IModel, IRealtimeModel {
   /**
    * The list of cells in the notebook.
    */
@@ -73,6 +73,11 @@ interface INotebookModel extends DocumentRegistry.IModel {
    * The metadata associated with the notebook.
    */
   readonly metadata: IObservableJSON;
+
+  /**
+   * Describe the model to an existing RealtimeHandler.
+   */
+  registerCollaborative( realtimeHandler : IRealtimeHandler ): Promise<void>;
 }
 
 
@@ -80,7 +85,7 @@ interface INotebookModel extends DocumentRegistry.IModel {
  * An implementation of a notebook Model.
  */
 export
-class NotebookModel extends DocumentModel implements INotebookModel, IRealtimeModel {
+class NotebookModel extends DocumentModel implements INotebookModel {
   /**
    * Construct a new notebook model.
    */
@@ -293,15 +298,27 @@ class NotebookModel extends DocumentModel implements INotebookModel, IRealtimeMo
 
   /**
    * Describe the model to an existing RealtimeHandler.
-   * Meant to be subclassed by other DocumentModels.
    */
   registerCollaborative( realtimeHandler : IRealtimeHandler ) : Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this._realtimeHandler = realtimeHandler;
-      this._realtimeHandler.linkVector(this._cells, 'notebook:cells').then(()=>{
+      let cellPromise = realtimeHandler.linkVector(this._cells, 'notebook:cells');
+
+      realtimeHandler.collaborators.changed.connect((collaborators, change)=>{
+        //If there are selections corresponding to non-collaborators,
+        //they are stale and should be removed. Also update the styling
+        //of the collaborators that are present.
+        for(let i=0; i<this.cells.length; i++) {
+          let cell = this.cells.at(i);
+          for(let key of cell.selections.keys()) {
+            if(!collaborators.has(key)) {
+              cell.selections.delete(key);
+            }
+          }
+        }
+      });
+      cellPromise.then(()=>{
         resolve();
-//      }).catch( ()=> {
-//        console.log("Unable to register notebook as collaborative");
       });
     });
   }

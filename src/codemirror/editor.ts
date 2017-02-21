@@ -622,26 +622,11 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     this._changeGuard = false;
   }
 
-  private _getCaret(uuid: string) {
+  private _getCaret(uuid: string): HTMLElement {
     let caret: HTMLElement = document.createElement('span');
     caret.className = 'CodeMirror-cursor';
     let color: string = '';
-    if((this.model as any).realtimeHandler) {
-      let collaborator: any =
-        (this.model as any).realtimeHandler.collaborators.get(uuid);
-      color = collaborator ? collaborator.color || '' : '';
-      let me: any =
-        (this.model as any).realtimeHandler.collaborators.get((this.model as any).realtimeHandler.localCollaborator.sessionId);
-      let myColor: string = me ? me.color || '' : '';
-
-      if(myColor) {
-        let r: number = parseInt(myColor.slice(1,3), 16);
-        let g: number  = parseInt(myColor.slice(3,5), 16);
-        let b: number  = parseInt(myColor.slice(5,7), 16);
-        this.selectionStyle = { css: `background-color: rgba( ${r}, ${g}, ${b}, 0.1)`};
-      }
-    }
-    caret.style.borderLeft=`2px ${color} solid`;
+    caret.style.borderLeft=`2px ${this._selectionStyle.color} solid`;
     caret.appendChild(document.createTextNode('\u00a0'));
     return caret;
   }
