@@ -6,20 +6,12 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  each, enumerate
+  ArrayExt, each, find, toArray
 } from '@phosphor/algorithm';
 
 import {
   JSONValue
 } from '@phosphor/coreutils';
-
-import {
-  find, ArrayExt
-} from 'phosphor/lib/algorithm/searching';
-
-import {
-  ReadonlyArray
-} from 'phosphor/lib/algorithm/sequence';
 
 import {
   Message
@@ -34,7 +26,7 @@ import {
 } from '@phosphor/properties';
 
 import {
-  defineSignal, ISignal
+  ISignal, Signal
 } from '@phosphor/signaling';
 
 import {
@@ -196,7 +188,9 @@ class StaticNotebook extends Widget {
   /**
    * A signal emitted when the model of the notebook changes.
    */
-  readonly modelChanged: ISignal<this, void>;
+  get modelChanged(): ISignal<this, void> {
+    return this._modelChanged;
+  }
 
   /**
    * A signal emitted when the model content changes.
@@ -204,7 +198,9 @@ class StaticNotebook extends Widget {
    * #### Notes
    * This is a convenience signal that follows the current model.
    */
-  readonly modelContentChanged: ISignal<this, void>;
+  get modelContentChanged(): ISignal<this, void> {
+    return this._modelContentChanged;
+  }
 
   /**
    * The cell factory used by the widget.
@@ -232,7 +228,7 @@ class StaticNotebook extends Widget {
     // Trigger private, protected, and public changes.
     this._onModelChanged(oldValue, newValue);
     this.onModelChanged(oldValue, newValue);
-    this.modelChanged.emit(void 0);
+    this._modelChanged.emit(void 0);
   }
 
   /**
@@ -280,7 +276,7 @@ class StaticNotebook extends Widget {
    * The default implementation emits the `modelContentChanged` signal.
    */
   protected onModelContentChanged(model: INotebookModel, args: void): void {
-    this.modelContentChanged.emit(void 0);
+    this._modelContentChanged.emit(void 0);
   }
 
   /**
@@ -347,7 +343,7 @@ class StaticNotebook extends Widget {
     }
     this._updateMimetype();
     let cells = newValue.cells;
-    each(enumerate(cells), ([i, cell]) => {
+    each(cells, (cell: ICellModel, i) => {
       this._insertCell(i, cell);
     });
     cells.changed.connect(this._onCellsChanged, this);
@@ -448,7 +444,7 @@ class StaticNotebook extends Widget {
    */
   private _moveCell(fromIndex: number, toIndex: number): void {
     let layout = this.layout as PanelLayout;
-    layout.insertWidget(toIndex, layout.widgets.at(fromIndex));
+    layout.insertWidget(toIndex, layout.widgets[fromIndex]);
     this.onCellMoved(fromIndex, toIndex);
   }
 
@@ -457,7 +453,7 @@ class StaticNotebook extends Widget {
    */
   private _removeCell(index: number): void {
     let layout = this.layout as PanelLayout;
-    let widget = layout.widgets.at(index) as BaseCellWidget;
+    let widget = layout.widgets[index] as BaseCellWidget;
     widget.parent = null;
     this.onCellRemoved(widget);
     widget.dispose();
@@ -482,12 +478,9 @@ class StaticNotebook extends Widget {
   private _mimetype = 'text/plain';
   private _model: INotebookModel = null;
   private _mimetypeService: IEditorMimeTypeService;
+  private _modelChanged = new Signal<this, void>(this);
+  private _modelContentChanged = new Signal<this, void>(this);
 }
-
-
-// Define the signals for the `StaticNotebook` class.
-defineSignal(StaticNotebook.prototype, 'modelChanged');
-defineSignal(StaticNotebook.prototype, 'modelContentChanged');
 
 
 /**
@@ -686,17 +679,23 @@ class Notebook extends StaticNotebook {
    * This can be due to the active index changing or the
    * cell at the active index changing.
    */
-  readonly activeCellChanged: ISignal<this, BaseCellWidget>;
+  get activeCellChanged(): ISignal<this, BaseCellWidget> {
+    return this._activeCellChanged;
+  }
 
   /**
    * A signal emitted when the state of the notebook changes.
    */
-  readonly stateChanged: ISignal<this, IChangedArgs<any>>;
+  get stateChanged(): ISignal<this, IChangedArgs<any>> {
+    return this._stateChanged;
+  }
 
   /**
    * A signal emitted when the selection state of the notebook changes.
    */
-  readonly selectionChanged: ISignal<this, void>;
+  get selectionChanged(): ISignal<this, void> {
+    return this._selectionChanged;
+  }
 
   /**
    * The interactivity mode of the notebook.
@@ -726,7 +725,7 @@ class Notebook extends StaticNotebook {
         activeCell.rendered = false;
       }
     }
-    this.stateChanged.emit({ name: 'mode', oldValue, newValue });
+    this._stateChanged.emit({ name: 'mode', oldValue, newValue });
     this._ensureFocus();
   }
 
@@ -751,12 +750,12 @@ class Notebook extends StaticNotebook {
       newValue = Math.min(newValue, this.model.cells.length - 1);
     }
     this._activeCellIndex = newValue;
-    let cell = this.widgets.at(newValue);
+    let cell = this.widgets[newValue];
     if (cell !== this._activeCell) {
       // Post an update request.
       this.update();
       this._activeCell = cell;
-      this.activeCellChanged.emit(cell);
+      this._activeCellChanged.emit(cell);
     }
     if (this.mode === 'edit' && cell instanceof MarkdownCellWidget) {
       cell.rendered = false;
@@ -765,7 +764,7 @@ class Notebook extends StaticNotebook {
     if (newValue === oldValue) {
       return;
     }
-    this.stateChanged.emit({ name: 'activeCellIndex', oldValue, newValue });
+    this._stateChanged.emit({ name: 'activeCellIndex', oldValue, newValue });
   }
 
   /**
@@ -798,7 +797,7 @@ class Notebook extends StaticNotebook {
       return;
     }
     Private.selectedProperty.set(widget, true);
-    this.selectionChanged.emit(void 0);
+    this._selectionChanged.emit(void 0);
     this.update();
   }
 
@@ -814,7 +813,7 @@ class Notebook extends StaticNotebook {
       return;
     }
     Private.selectedProperty.set(widget, false);
-    this.selectionChanged.emit(void 0);
+    this._selectionChanged.emit(void 0);
     this.update();
   }
 
@@ -840,7 +839,7 @@ class Notebook extends StaticNotebook {
       Private.selectedProperty.set(widget, false);
     });
     if (changed) {
-      this.selectionChanged.emit(void 0);
+      this._selectionChanged.emit(void 0);
     }
     // Make sure we have a valid active cell.
     this.activeCellIndex = this.activeCellIndex;
@@ -1006,7 +1005,7 @@ class Notebook extends StaticNotebook {
     // Trigger an update of the active cell.
     this.activeCellIndex = this.activeCellIndex;
     if (this.isSelected(cell)) {
-      this.selectionChanged.emit(void 0);
+      this._selectionChanged.emit(void 0);
     }
   }
 
@@ -1095,7 +1094,7 @@ class Notebook extends StaticNotebook {
     let shouldDrag = false;
 
     if (i !== -1) {
-      let widget = this.widgets.at(i);
+      let widget = this.widgets[i];
       // Event is on a cell but not in its editor, switch to command mode.
       if (!widget.editorWidget.node.contains(target)) {
         this.mode = 'command';
@@ -1180,7 +1179,7 @@ class Notebook extends StaticNotebook {
       return;
     }
 
-    let widget = (this.layout as PanelLayout).widgets.at(index);
+    let widget = (this.layout as PanelLayout).widgets[index];
     widget.node.classList.add(DROP_TARGET_CLASS);
   }
 
@@ -1220,7 +1219,7 @@ class Notebook extends StaticNotebook {
     if (index === -1) {
       return;
     }
-    let widget = (this.layout as PanelLayout).widgets.at(index);
+    let widget = (this.layout as PanelLayout).widgets[index];
     widget.node.classList.add(DROP_TARGET_CLASS);
   }
 
@@ -1286,7 +1285,7 @@ class Notebook extends StaticNotebook {
     let selected: nbformat.ICell[] = [];
     let toremove: BaseCellWidget[] = [];
 
-    each(enumerate(this.widgets), ([i, widget]) => {
+    each(this.widgets, (widget, i) => {
       let cell = cells.at(i);
       if (this.isSelected(widget)) {
         widget.addClass(DROP_SOURCE_CLASS);
@@ -1323,7 +1322,7 @@ class Notebook extends StaticNotebook {
       each(toremove, widget => {
         this.model.cells.remove(widget.model);
       });
-      this.activeCellIndex = ArrayExt.firstIndexOf(cells, activeCell);
+      this.activeCellIndex = ArrayExt.firstIndexOf(toArray(cells), activeCell);
     });
 
   }
@@ -1335,7 +1334,7 @@ class Notebook extends StaticNotebook {
     let target = event.target as HTMLElement;
     let i = this._findCell(target);
     if (i !== -1) {
-      let widget = this.widgets.at(i);
+      let widget = this.widgets[i];
       // If the editor itself does not have focus, ensure command mode.
       if (!widget.editorWidget.node.contains(target)) {
         this.mode = 'command';
@@ -1396,17 +1395,17 @@ class Notebook extends StaticNotebook {
     // extend the existing selection.
     if (j > activeIndex) {
       while (j > activeIndex) {
-        Private.selectedProperty.set(this.widgets.at(j), true);
+        Private.selectedProperty.set(this.widgets[j], true);
         j--;
       }
     } else if (j < activeIndex) {
       while (j < activeIndex) {
-        Private.selectedProperty.set(this.widgets.at(j), true);
+        Private.selectedProperty.set(this.widgets[j], true);
         j++;
       }
     }
-    Private.selectedProperty.set(this.widgets.at(activeIndex), true);
-    this.selectionChanged.emit(void 0);
+    Private.selectedProperty.set(this.widgets[activeIndex], true);
+    this._selectionChanged.emit(void 0);
   }
 
   private _activeCellIndex = -1;
@@ -1415,13 +1414,10 @@ class Notebook extends StaticNotebook {
   private _drag: Drag = null;
   private _dragData: { pressX: number, pressY: number, index: number } = null;
   private _scrollHandler: DragScrollHandler = null;
+  private _activeCellChanged = new Signal<this, BaseCellWidget>(this);
+  private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
+  private _selectionChanged = new Signal<this, void>(this);
 }
-
-
-// Define the signals for the `Notebook` class.
-defineSignal(Notebook.prototype, 'activeCellChanged');
-defineSignal(Notebook.prototype, 'selectionChanged');
-defineSignal(Notebook.prototype, 'stateChanged');
 
 
 /**
@@ -1460,7 +1456,7 @@ namespace Private {
   export
   const selectedProperty = new AttachedProperty<BaseCellWidget, boolean>({
     name: 'selected',
-    value: false
+    create: () => false
   });
 
   /**
