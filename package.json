@@ -24,7 +24,7 @@
     "xterm": "^2.3.0"
   },
   "devDependencies": {
-    "@jupyterlab/extension-builder": "^0.10.1",
+    "@jupyterlab/extension-builder": "^0.11.0",
     "@types/d3-dsv": "^1.0.29",
     "@types/expect.js": "^0.3.29",
     "@types/marked": "0.0.28",
