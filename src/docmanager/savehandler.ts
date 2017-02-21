@@ -10,7 +10,7 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  Signal.clearData
+  Signal
 } from '@phosphor/signaling';
 
 import {
