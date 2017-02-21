@@ -18,7 +18,7 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  IMessageHandler, Message, installMessageHook
+  IMessageHandler, Message, MessageLoop.installMessageHook
 } from '@phosphor/messaging';
 
 import {
@@ -26,12 +26,12 @@ import {
 } from '@phosphor/properties';
 
 import {
-  disconnectReceiver
+  Signal.disconnectReceiver
 } from '@phosphor/signaling';
 
 import {
   Widget
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   dateTime
@@ -79,7 +79,7 @@ class DocumentWidgetManager implements IDisposable {
       return;
     }
     this._registry = null;
-    disconnectReceiver(this);
+    Signal.disconnectReceiver(this);
   }
 
   /**
@@ -129,7 +129,7 @@ class DocumentWidgetManager implements IDisposable {
   adoptWidget(context: DocumentRegistry.Context, widget: Widget): void {
     let widgets = Private.widgetsProperty.get(context);
     widgets.pushBack(widget);
-    installMessageHook(widget, (handler: IMessageHandler, msg: Message) => {
+    MessageLoop.installMessageHook(widget, (handler: IMessageHandler, msg: Message) => {
       return this.filterMessage(handler, msg);
     });
     widget.addClass(DOCUMENT_CLASS);

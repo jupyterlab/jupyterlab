@@ -15,7 +15,7 @@ import {
 
 import {
   CommandRegistry
-} from '@phosphor/widgetcommandregistry';
+} from '@phosphor/widgets';
 
 import {
   Keymap
@@ -23,11 +23,11 @@ import {
 
 import {
   Menu
-} from '@phosphor/widgetmenu';
+} from '@phosphor/widgets';
 
 import {
   Widget
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   showDialog

@@ -7,7 +7,7 @@ import {
 
 import {
   Application
-} from '@phosphor/widgetapplication';
+} from '@phosphor/application';
 
 import {
   IInstanceRestorer

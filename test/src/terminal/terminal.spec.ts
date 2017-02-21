@@ -8,12 +8,12 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Message, sendMessage
+  Message, MessageLoop.sendMessage
 } from '@phosphor/messaging';
 
 import {
   ResizeMessage, WidgetMessage, Widget
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   TerminalWidget
@@ -233,7 +233,7 @@ describe('terminal/index', () => {
 
       it('should trigger an update request', (done) => {
         let msg = ResizeMessage.UnknownSize;
-        sendMessage(widget, msg);
+        MessageLoop.sendMessage(widget, msg);
         expect(widget.methods).to.contain('onResize');
         requestAnimationFrame(() => {
           expect(widget.methods).to.contain('onUpdateRequest');
@@ -247,7 +247,7 @@ describe('terminal/index', () => {
 
       it('should set the style of the terminal', () => {
         Widget.attach(widget, document.body);
-        sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
         let style = window.getComputedStyle(widget.node);
         expect(style.backgroundColor).to.be('rgb(0, 0, 0)');
@@ -259,7 +259,7 @@ describe('terminal/index', () => {
     describe('#onFitRequest', () => {
 
       it('should send a resize request', () => {
-        sendMessage(widget, WidgetMessage.FitRequest);
+        MessageLoop.sendMessage(widget, WidgetMessage.FitRequest);
         expect(widget.methods).to.contain('onResize');
       });
 
@@ -270,7 +270,7 @@ describe('terminal/index', () => {
       it('should focus the terminal element', () => {
         Widget.attach(widget, document.body);
         expect(widget.node.contains(document.activeElement)).to.be(false);
-        sendMessage(widget, WidgetMessage.ActivateRequest);
+        MessageLoop.sendMessage(widget, WidgetMessage.ActivateRequest);
         expect(widget.methods).to.contain('onActivateRequest');
         expect(widget.node.contains(document.activeElement)).to.be(true);
       });

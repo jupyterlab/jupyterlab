@@ -18,7 +18,7 @@ import {
 } from 'phosphor/lib/collections/vector';
 
 import {
-  Message, sendMessage
+  Message, MessageLoop.sendMessage
 } from '@phosphor/messaging';
 
 import {
@@ -35,7 +35,7 @@ import {
 
 import {
   Widget, WidgetMessage
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   humanTime, dateTime
@@ -1129,7 +1129,7 @@ class DirListing extends Widget {
       let items = this._sortedItems;
       let index = findIndex(items, value => value.name === name);
       this._selectItem(index, false);
-      sendMessage(this, WidgetMessage.UpdateRequest);
+      MessageLoop.sendMessage(this, WidgetMessage.UpdateRequest);
       scrollIntoViewIfNeeded(this.contentNode, this._items.at(index));
     });
   }

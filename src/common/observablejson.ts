@@ -11,11 +11,11 @@ import {
 
 import {
   Widget
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   h, realize
-} from '@phosphor/widgetvdom';
+} from '@phosphor/virtualdom';
 
 import {
   CodeEditor

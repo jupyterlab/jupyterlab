@@ -6,16 +6,16 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  disconnectReceiver
+  Signal.disconnectReceiver
 } from '@phosphor/signaling';
 
 import {
   PanelLayout
-} from '@phosphor/widgetpanel';
+} from '@phosphor/widgets';
 
 import {
   Widget
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   ABCWidgetFactory, DocumentRegistry

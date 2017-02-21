@@ -8,12 +8,12 @@ import {
 
 import {
   Panel
-} from '@phosphor/widgetpanel';
+} from '@phosphor/widgets';
 
 
 import {
   Widget
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 /**
  * The class name added to dialog instances.

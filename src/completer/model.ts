@@ -14,7 +14,7 @@ import {
 } from 'phosphor/lib/algorithm/searching';
 
 import {
-  clearSignalData, defineSignal, ISignal
+  Signal.clearData, defineSignal, ISignal
 } from '@phosphor/signaling';
 
 import {
@@ -148,7 +148,7 @@ class CompleterModel implements CompleterWidget.IModel {
       return;
     }
     this._isDisposed = true;
-    clearSignalData(this);
+    Signal.clearData(this);
   }
 
   /**

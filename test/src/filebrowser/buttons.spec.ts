@@ -9,7 +9,7 @@ import {
 
 import {
   CommandRegistry
-} from '@phosphor/widgetcommandregistry';
+} from '@phosphor/widgets';
 
 import {
   Keymap
@@ -17,7 +17,7 @@ import {
 
 import {
   Widget
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   simulate

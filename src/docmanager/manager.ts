@@ -26,7 +26,7 @@ import {
 } from '@phosphor/properties';
 
 import {
-  clearSignalData
+  Signal.clearData
 } from '@phosphor/signaling';
 
 import {
@@ -35,7 +35,7 @@ import {
 
 import {
   Widget
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   DocumentRegistry, Context
@@ -118,7 +118,7 @@ class DocumentManager implements IDisposable {
     }
     this._serviceManager = null;
     this._widgetManager = null;
-    clearSignalData(this);
+    Signal.clearData(this);
     each(this._contexts, context => {
       context.dispose();
     });

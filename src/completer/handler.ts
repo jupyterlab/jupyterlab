@@ -10,7 +10,7 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  Message, sendMessage
+  Message, MessageLoop.sendMessage
 } from '@phosphor/messaging';
 
 import {
@@ -102,7 +102,7 @@ class CompletionHandler implements IDisposable {
    * Invoke the handler and launch a completer.
    */
   invoke(): void {
-    sendMessage(this, CompletionHandler.Msg.InvokeRequest);
+    MessageLoop.sendMessage(this, CompletionHandler.Msg.InvokeRequest);
   }
 
   /**

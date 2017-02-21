@@ -15,7 +15,7 @@ import {
 
 import {
   Panel
-} from '@phosphor/widgetpanel';
+} from '@phosphor/widgets';
 
 import {
   IEditorMimeTypeService, CodeEditor

@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   h, VNode
-} from '@phosphor/widgetvdom';
+} from '@phosphor/virtualdom';
 
 import {
   VDomModel, VDomWidget

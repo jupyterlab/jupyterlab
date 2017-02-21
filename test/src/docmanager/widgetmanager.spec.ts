@@ -8,12 +8,12 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  IMessageHandler, Message, sendMessage
+  IMessageHandler, Message, MessageLoop.sendMessage
 } from '@phosphor/messaging';
 
 import {
   Widget
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   DocumentWidgetManager
@@ -152,7 +152,7 @@ describe('docmanager/widgetmanager', () => {
       it('should install a message hook', () => {
         let widget = new Widget();
         manager.adoptWidget(context, widget);
-        sendMessage(widget, new Message('foo'));
+        MessageLoop.sendMessage(widget, new Message('foo'));
         expect(manager.methods).to.contain('filterMessage');
       });
 
@@ -240,7 +240,7 @@ describe('docmanager/widgetmanager', () => {
       it('should be called for a message to a tracked widget', () => {
         let widget = new Widget();
         manager.adoptWidget(context, widget);
-        sendMessage(widget, new Message('foo'));
+        MessageLoop.sendMessage(widget, new Message('foo'));
         expect(manager.methods).to.contain('filterMessage');
       });
 

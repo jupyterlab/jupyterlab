@@ -8,12 +8,12 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Message, sendMessage
+  Message, MessageLoop.sendMessage
 } from '@phosphor/messaging';
 
 import {
   Widget, WidgetMessage
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   Base64ModelFactory, Context, DocumentRegistry
@@ -109,7 +109,7 @@ describe('ImageWidget', () => {
 
     it('should set the content after the context is ready', (done) => {
       context.ready.then(() => {
-        sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
         let img = widget.node.querySelector('img') as HTMLImageElement;
         expect(img.src).to.contain(IMAGE.content);
         done();
@@ -119,7 +119,7 @@ describe('ImageWidget', () => {
     it('should handle a change to the content', (done) => {
       context.ready.then(() => {
         context.model.fromString(OTHER);
-        sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
         let img = widget.node.querySelector('img') as HTMLImageElement;
         expect(img.src).to.contain(OTHER);
         done();
@@ -167,7 +167,7 @@ describe('ImageWidget', () => {
       let img: HTMLImageElement = widget.node.querySelector('img');
       expect(img.src).to.be('');
       context.ready.then(() => {
-        sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
         expect(img.src).to.contain(IMAGE.content);
         done();
@@ -180,7 +180,7 @@ describe('ImageWidget', () => {
 
     it('should focus the widget', () => {
       Widget.attach(widget, document.body);
-      sendMessage(widget, WidgetMessage.ActivateRequest);
+      MessageLoop.sendMessage(widget, WidgetMessage.ActivateRequest);
       expect(widget.methods).to.contain('onActivateRequest');
       expect(widget.node.contains(document.activeElement)).to.be(true);
     });

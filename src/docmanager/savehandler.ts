@@ -10,7 +10,7 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  clearSignalData
+  Signal.clearData
 } from '@phosphor/signaling';
 
 import {
@@ -79,7 +79,7 @@ class SaveHandler implements IDisposable {
     }
     this._context = null;
     clearTimeout(this._autosaveTimer);
-    clearSignalData(this);
+    Signal.clearData(this);
   }
 
   /**

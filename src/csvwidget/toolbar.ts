@@ -10,12 +10,12 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  clearSignalData, defineSignal, ISignal
+  Signal.clearData, defineSignal, ISignal
 } from '@phosphor/signaling';
 
 import {
   Widget
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 
 /**

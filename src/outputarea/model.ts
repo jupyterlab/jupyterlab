@@ -10,7 +10,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  clearSignalData, defineSignal, ISignal
+  Signal.clearData, defineSignal, ISignal
 } from '@phosphor/signaling';
 
 import {
@@ -112,7 +112,7 @@ class OutputAreaModel implements IOutputAreaModel {
     let list = this.list;
     this.list = null;
     list.dispose();
-    clearSignalData(this);
+    Signal.clearData(this);
   }
 
   /**

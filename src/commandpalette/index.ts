@@ -13,7 +13,7 @@ import {
 
 import {
   CommandPalette
-} from '@phosphor/widgetcommandpalette';
+} from '@phosphor/widgets';
 
 
 /**

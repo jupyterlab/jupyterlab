@@ -17,11 +17,11 @@ import {
 
 import {
   CommandRegistry
-} from '@phosphor/widgetcommandregistry';
+} from '@phosphor/widgets';
 
 import {
   Widget
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   Token

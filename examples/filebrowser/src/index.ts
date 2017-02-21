@@ -3,11 +3,11 @@
 
 import {
   CommandRegistry
-} from '@phosphor/widgetcommandregistry';
+} from '@phosphor/widgets';
 
 import {
   DockPanel
-} from '@phosphor/widgetdockpanel';
+} from '@phosphor/widgets';
 
 import {
   Keymap
@@ -15,15 +15,15 @@ import {
 
 import {
   Menu
-} from '@phosphor/widgetmenu';
+} from '@phosphor/widgets';
 
 import {
   SplitPanel
-} from '@phosphor/widgetsplitpanel';
+} from '@phosphor/widgets';
 
 import {
   Widget
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   ServiceManager

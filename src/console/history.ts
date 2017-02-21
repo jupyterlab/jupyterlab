@@ -14,7 +14,7 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  clearSignalData
+  Signal.clearData
 } from '@phosphor/signaling';
 
 import {
@@ -165,7 +165,7 @@ class ConsoleHistory implements IConsoleHistory {
       return;
     }
     this._history = null;
-    clearSignalData(this);
+    Signal.clearData(this);
   }
 
   /**

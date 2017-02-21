@@ -17,7 +17,7 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  clearSignalData, defineSignal, ISignal
+  Signal.clearData, defineSignal, ISignal
 } from '@phosphor/signaling';
 
 import {
@@ -238,7 +238,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     this._editor = null;
     this._model = null;
     this._keydownHandlers.clear();
-    clearSignalData(this);
+    Signal.clearData(this);
   }
 
   /**

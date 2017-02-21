@@ -7,7 +7,7 @@ import {
 
 import {
   ResizeMessage, Widget
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   CodeEditor

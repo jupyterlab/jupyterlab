@@ -3,7 +3,7 @@
 
 import {
   Menu
-} from '@phosphor/widgetmenu';
+} from '@phosphor/widgets';
 
 import {
   JupyterLab, JupyterLabPlugin

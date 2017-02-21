@@ -22,7 +22,7 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  clearSignalData, defineSignal, ISignal
+  Signal.clearData, defineSignal, ISignal
 } from '@phosphor/signaling';
 
 import {
@@ -127,7 +127,7 @@ class FileBrowserModel implements IDisposable, IPathTracker {
     clearTimeout(this._blackoutId);
     this._sessions.clear();
     this._items.clear();
-    clearSignalData(this);
+    Signal.clearData(this);
   }
 
   /**

@@ -6,7 +6,7 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  clearSignalData, defineSignal, ISignal
+  Signal.clearData, defineSignal, ISignal
 } from '@phosphor/signaling';
 
 
@@ -155,7 +155,7 @@ class ObservableString implements IObservableString {
       return;
     }
     this._isDisposed = true;
-    clearSignalData(this);
+    Signal.clearData(this);
     this.clear();
   }
 

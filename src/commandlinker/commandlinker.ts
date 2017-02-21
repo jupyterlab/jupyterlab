@@ -17,11 +17,11 @@ import {
 
 import {
   CommandRegistry
-} from '@phosphor/widgetcommandregistry';
+} from '@phosphor/widgets';
 
 import {
   IElementAttrs
-} from '@phosphor/widgetvdom';
+} from '@phosphor/virtualdom';
 
 
 /**

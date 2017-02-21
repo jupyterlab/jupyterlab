@@ -4,12 +4,12 @@
 import expect = require('expect.js');
 
 import {
-  sendMessage, Message
+  MessageLoop.sendMessage, Message
 } from '@phosphor/messaging';
 
 import {
   Widget, WidgetMessage
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   simulate
@@ -694,7 +694,7 @@ describe('notebook/notebook/widget', () => {
       it('should unrender a markdown cell when switching to edit mode', () => {
         let widget = createActiveWidget();
         Widget.attach(widget, document.body);
-        sendMessage(widget, WidgetMessage.ActivateRequest);
+        MessageLoop.sendMessage(widget, WidgetMessage.ActivateRequest);
         let cell = widget.model.contentFactory.createMarkdownCell({});
         widget.model.cells.pushBack(cell);
         let child = widget.widgets.at(widget.widgets.length - 1) as MarkdownCellWidget;
@@ -1025,7 +1025,7 @@ describe('notebook/notebook/widget', () => {
       it('should focus the node after an update', (done) => {
         let widget = createActiveWidget();
         Widget.attach(widget, document.body);
-        sendMessage(widget, WidgetMessage.ActivateRequest);
+        MessageLoop.sendMessage(widget, WidgetMessage.ActivateRequest);
         expect(widget.methods).to.contain('onActivateRequest');
         requestAnimationFrame(() => {
           expect(document.activeElement).to.be(widget.node);
@@ -1036,7 +1036,7 @@ describe('notebook/notebook/widget', () => {
 
       it('should post an `update-request', (done) => {
         let widget = createActiveWidget();
-        sendMessage(widget, WidgetMessage.ActivateRequest);
+        MessageLoop.sendMessage(widget, WidgetMessage.ActivateRequest);
         expect(widget.methods).to.contain('onActivateRequest');
         requestAnimationFrame(() => {
           expect(widget.methods).to.contain('onUpdateRequest');

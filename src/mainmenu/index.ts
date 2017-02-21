@@ -15,11 +15,11 @@ import {
 
 import {
   Menu
-} from '@phosphor/widgetmenu';
+} from '@phosphor/widgets';
 
 import {
   MenuBar
-} from '@phosphor/widgetmenubar';
+} from '@phosphor/widgetsbar';
 
 
 /* tslint:disable */

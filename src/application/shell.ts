@@ -23,27 +23,27 @@ import {
 
 import {
   BoxLayout, BoxPanel
-} from '@phosphor/widgetboxpanel';
+} from '@phosphor/widgets';
 
 import {
   DockPanel
-} from '@phosphor/widgetdockpanel';
+} from '@phosphor/widgets';
 
 import {
   FocusTracker
-} from '@phosphor/widgetfocustracker';
+} from '@phosphor/widgets';
 
 import {
   Panel
-} from '@phosphor/widgetpanel';
+} from '@phosphor/widgets';
 
 import {
   SplitPanel
-} from '@phosphor/widgetsplitpanel';
+} from '@phosphor/widgets';
 
 import {
   StackedPanel
-} from '@phosphor/widgetstackedpanel';
+} from '@phosphor/widgets';
 
 import {
   TabBar
@@ -55,7 +55,7 @@ import {
 
 import {
   Widget
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   IInstanceRestorer

@@ -4,16 +4,16 @@
 import expect = require('expect.js');
 
 import {
-  sendMessage, Message
+  MessageLoop.sendMessage, Message
 } from '@phosphor/messaging';
 
 import {
   Panel
-} from '@phosphor/widgetpanel';
+} from '@phosphor/widgets';
 
 import {
   Widget, WidgetMessage
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   simulate
@@ -93,7 +93,7 @@ describe('completer/widget', () => {
 
         let widget = new CompleterWidget(options);
         expect(widget).to.be.a(CompleterWidget);
-        sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
 
         let items = widget.node.querySelectorAll(`.${ITEM_CLASS}`);
         expect(items).to.have.length(2);
@@ -119,7 +119,7 @@ describe('completer/widget', () => {
 
         widget.selected.connect(listener);
         Widget.attach(widget, document.body);
-        sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
         expect(value).to.be('');
         simulate(anchor.node, 'keydown', { keyCode: 13 }); // Enter
         expect(value).to.be('foo');
@@ -147,7 +147,7 @@ describe('completer/widget', () => {
         widget.visibilityChanged.connect(listener);
         expect(called).to.be(false);
         Widget.attach(widget, document.body);
-        sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
         expect(called).to.be(true);
         widget.dispose();
         anchor.dispose();
@@ -240,11 +240,11 @@ describe('completer/widget', () => {
         let widget = new CompleterWidget(options);
 
         Widget.attach(widget, document.body);
-        sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
         expect(widget.isHidden).to.be(false);
         expect(model.options).to.be.ok();
         widget.reset();
-        sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
         expect(widget.isHidden).to.be(true);
         expect(model.options().next()).to.be(void 0);
         widget.dispose();
@@ -286,11 +286,11 @@ describe('completer/widget', () => {
           let widget = new CompleterWidget(options);
 
           Widget.attach(widget, document.body);
-          sendMessage(widget, WidgetMessage.UpdateRequest);
+          MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
           expect(widget.isHidden).to.be(false);
           expect(model.options).to.be.ok();
           simulate(document.body, 'keydown', { keyCode: 70 }); // F
-          sendMessage(widget, WidgetMessage.UpdateRequest);
+          MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
           expect(widget.isHidden).to.be(true);
           expect(model.options().next()).to.be(void 0);
           widget.dispose();
@@ -312,7 +312,7 @@ describe('completer/widget', () => {
 
           widget.selected.connect(listener);
           Widget.attach(widget, document.body);
-          sendMessage(widget, WidgetMessage.UpdateRequest);
+          MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
           expect(value).to.be('');
           simulate(anchor.node, 'keydown', { keyCode: 13 }); // Enter
           expect(value).to.be('foo');
@@ -332,7 +332,7 @@ describe('completer/widget', () => {
 
           anchor.node.appendChild(target);
           Widget.attach(widget, document.body);
-          sendMessage(widget, WidgetMessage.UpdateRequest);
+          MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
 
           let items = widget.node.querySelectorAll(`.${ITEM_CLASS}`);
 
@@ -365,7 +365,7 @@ describe('completer/widget', () => {
           let widget = new CompleterWidget(options);
 
           Widget.attach(widget, document.body);
-          sendMessage(widget, WidgetMessage.UpdateRequest);
+          MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
 
           let items = widget.node.querySelectorAll(`.${ITEM_CLASS}`);
 
@@ -403,7 +403,7 @@ describe('completer/widget', () => {
 
           widget.selected.connect(listener);
           Widget.attach(widget, document.body);
-          sendMessage(widget, WidgetMessage.UpdateRequest);
+          MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
           requestAnimationFrame(() => {
             let marked = widget.node.querySelectorAll(`.${ITEM_CLASS} mark`);
             expect(value).to.be('fo');
@@ -413,7 +413,7 @@ describe('completer/widget', () => {
             expect(marked[2].textContent).to.be('fo');
             expect(marked[3].textContent).to.be('fo');
             simulate(anchor.node, 'keydown', { keyCode: 9 });  // Tab key
-            sendMessage(widget, WidgetMessage.UpdateRequest);
+            MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
             expect(value).to.be('fo');
             widget.dispose();
             anchor.dispose();
@@ -441,7 +441,7 @@ describe('completer/widget', () => {
 
           widget.selected.connect(listener);
           Widget.attach(widget, document.body);
-          sendMessage(widget, WidgetMessage.UpdateRequest);
+          MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
 
           let item = widget.node.querySelectorAll(`.${ITEM_CLASS} mark`)[1];
 
@@ -467,7 +467,7 @@ describe('completer/widget', () => {
 
           widget.selected.connect(listener);
           Widget.attach(widget, document.body);
-          sendMessage(widget, WidgetMessage.UpdateRequest);
+          MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
           expect(value).to.be('');
           simulate(widget.node, 'mousedown', { button: 1 });
           expect(value).to.be('');
@@ -490,7 +490,7 @@ describe('completer/widget', () => {
 
           widget.selected.connect(listener);
           Widget.attach(widget, document.body);
-          sendMessage(widget, WidgetMessage.UpdateRequest);
+          MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
           expect(value).to.be('');
           simulate(widget.node, 'mousedown');
           expect(value).to.be('');
@@ -513,10 +513,10 @@ describe('completer/widget', () => {
 
           widget.selected.connect(listener);
           Widget.attach(widget, document.body);
-          sendMessage(widget, WidgetMessage.UpdateRequest);
+          MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
           expect(widget.isHidden).to.be(false);
           simulate(anchor.node, 'mousedown');
-          sendMessage(widget, WidgetMessage.UpdateRequest);
+          MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
           expect(widget.isHidden).to.be(true);
           widget.dispose();
           anchor.dispose();
@@ -561,7 +561,7 @@ describe('completer/widget', () => {
 
           let widget = new CompleterWidget({ model, anchor: anchor });
           Widget.attach(widget, document.body);
-          sendMessage(widget, WidgetMessage.UpdateRequest);
+          MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
 
           simulate(anchor.node, 'scroll');
 
@@ -607,7 +607,7 @@ describe('completer/widget', () => {
         Widget.attach(widget, document.body);
 
         expect(value).to.be('');
-        sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
         expect(value).to.be('foo');
         widget.dispose();
         anchor.dispose();
@@ -615,7 +615,7 @@ describe('completer/widget', () => {
 
       it('should do nothing if a model does not exist', () => {
         let widget = new LogWidget();
-        sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
       });
 
@@ -642,7 +642,7 @@ describe('completer/widget', () => {
         widget.hide();
         expect(widget.isHidden).to.be(true);
         Widget.attach(widget, document.body);
-        sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
         expect(widget.isVisible).to.be(true);
         widget.dispose();
         anchor.dispose();

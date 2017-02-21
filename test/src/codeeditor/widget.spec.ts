@@ -4,12 +4,12 @@
 import expect = require('expect.js');
 
 import {
-  Message, sendMessage
+  Message, MessageLoop.sendMessage
 } from '@phosphor/messaging';
 
 import {
   ResizeMessage, Widget, WidgetMessage
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   simulate
@@ -145,7 +145,7 @@ describe('CodeEditorWidget', () => {
 
     it('should focus the editor', () => {
       Widget.attach(widget, document.body);
-      sendMessage(widget, WidgetMessage.ActivateRequest);
+      MessageLoop.sendMessage(widget, WidgetMessage.ActivateRequest);
       expect(widget.methods).to.contain('onActivateRequest');
       expect(widget.editor.hasFocus()).to.be(true);
     });
@@ -202,22 +202,22 @@ describe('CodeEditorWidget', () => {
     it('should set the size of the editor', () => {
       let msg = new ResizeMessage(10, 10);
       let editor = widget.editor as LogEditor;
-      sendMessage(widget, msg);
+      MessageLoop.sendMessage(widget, msg);
       expect(editor.methods).to.contain('setSize');
     });
 
     it('should set the size of the editor', () => {
       let editor = widget.editor as LogEditor;
-      sendMessage(widget, ResizeMessage.UnknownSize);
+      MessageLoop.sendMessage(widget, ResizeMessage.UnknownSize);
       expect(editor.methods).to.contain('setSize');
     });
 
     it('should make a subsequent request wait', () => {
       let editor = widget.editor as LogEditor;
-      sendMessage(widget, ResizeMessage.UnknownSize);
+      MessageLoop.sendMessage(widget, ResizeMessage.UnknownSize);
       expect(editor.methods).to.contain('setSize');
       editor.methods = [];
-      sendMessage(widget, ResizeMessage.UnknownSize);
+      MessageLoop.sendMessage(widget, ResizeMessage.UnknownSize);
       expect(editor.methods).to.not.contain('setSize');
     });
 

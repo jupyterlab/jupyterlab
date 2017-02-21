@@ -10,7 +10,7 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  clearSignalData, defineSignal, ISignal
+  Signal.clearData, defineSignal, ISignal
 } from '@phosphor/signaling';
 
 import {
@@ -107,7 +107,7 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
     this._kernel = null;
     this._rendermime = null;
     this.disposed.emit(void 0);
-    clearSignalData(this);
+    Signal.clearData(this);
   }
 
   /**

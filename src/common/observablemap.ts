@@ -6,7 +6,7 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  clearSignalData, defineSignal, ISignal
+  Signal.clearData, defineSignal, ISignal
 } from '@phosphor/signaling';
 
 
@@ -244,7 +244,7 @@ class ObservableMap<T> implements IObservableMap<T> {
     if (this._map === null) {
       return;
     }
-    clearSignalData(this);
+    Signal.clearData(this);
     this._map.clear();
     this._map = null;
   }

@@ -6,7 +6,7 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  clearSignalData, defineSignal, ISignal
+  Signal.clearData, defineSignal, ISignal
 } from '@phosphor/signaling';
 
 
@@ -56,7 +56,7 @@ class ActivityMonitor<Sender, Args> implements IDisposable {
       return;
     }
     this._isDisposed = true;
-    clearSignalData(this);
+    Signal.clearData(this);
   }
 
   /**

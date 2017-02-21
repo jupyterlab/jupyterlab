@@ -31,11 +31,11 @@ import {
 
 import {
   Panel, PanelLayout
-} from '@phosphor/widgetpanel';
+} from '@phosphor/widgets';
 
 import {
   Widget
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   ObservableVector

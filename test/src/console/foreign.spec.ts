@@ -8,12 +8,12 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  clearSignalData, defineSignal, ISignal
+  Signal.clearData, defineSignal, ISignal
 } from '@phosphor/signaling';
 
 import {
   Panel
-} from '@phosphor/widgetpanel';
+} from '@phosphor/widgets';
 
 import {
   ForeignHandler
@@ -54,7 +54,7 @@ class TestHandler extends ForeignHandler {
       return;
     }
     super.dispose();
-    clearSignalData(this);
+    Signal.clearData(this);
   }
 
   protected onIOPubMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage): boolean {

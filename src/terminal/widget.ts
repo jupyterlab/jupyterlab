@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Message, sendMessage
+  Message, MessageLoop.sendMessage
 } from '@phosphor/messaging';
 
 import {
@@ -15,7 +15,7 @@ import {
 
 import {
   ResizeMessage, Widget
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import * as Xterm
   from 'xterm';
@@ -250,7 +250,7 @@ class TerminalWidget extends Widget {
    */
   protected onFitRequest(msg: Message): void {
     let resize = ResizeMessage.UnknownSize;
-    sendMessage(this, resize);
+    MessageLoop.sendMessage(this, resize);
   }
 
   /**

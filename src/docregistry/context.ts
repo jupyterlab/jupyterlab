@@ -18,12 +18,12 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  clearSignalData, defineSignal, ISignal
+  Signal.clearData, defineSignal, ISignal
 } from '@phosphor/signaling';
 
 import {
   Widget
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   showDialog, okButton
@@ -150,7 +150,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       session.dispose();
     }
     this.disposed.emit(void 0);
-    clearSignalData(this);
+    Signal.clearData(this);
   }
 
   /**

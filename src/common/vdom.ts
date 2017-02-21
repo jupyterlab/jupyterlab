@@ -10,16 +10,16 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  clearSignalData, defineSignal, ISignal
+  Signal.clearData, defineSignal, ISignal
 } from '@phosphor/signaling';
 
 import {
   Widget
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   render, VNode
-} from '@phosphor/widgetvdom';
+} from '@phosphor/virtualdom';
 
 
 /**
@@ -59,7 +59,7 @@ class VDomModel implements IVDomModel {
       return;
     }
     this._isDisposed = true;
-    clearSignalData(this);
+    Signal.clearData(this);
   }
 
   private _isDisposed = false;

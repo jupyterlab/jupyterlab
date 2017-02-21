@@ -18,20 +18,20 @@ import {
 } from '@phosphor/properties';
 
 import {
-  clearSignalData, defineSignal, ISignal
+  Signal.clearData, defineSignal, ISignal
 } from '@phosphor/signaling';
 
 import {
   CommandRegistry
-} from '@phosphor/widgetcommandregistry';
+} from '@phosphor/widgets';
 
 import {
   FocusTracker
-} from '@phosphor/widgetfocustracker';
+} from '@phosphor/widgets';
 
 import {
   Widget
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   IInstanceRestorer
@@ -223,7 +223,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     }
     let tracker = this._tracker;
     this._tracker = null;
-    clearSignalData(this);
+    Signal.clearData(this);
     tracker.dispose();
   }
 

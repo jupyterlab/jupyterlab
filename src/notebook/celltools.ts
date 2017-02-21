@@ -18,7 +18,7 @@ import {
 } from 'phosphor/lib/algorithm/searching';
 
 import {
-  ConflatableMessage, Message, sendMessage
+  ConflatableMessage, Message, MessageLoop.sendMessage
 } from '@phosphor/messaging';
 
 import {
@@ -31,15 +31,15 @@ import {
 
 import {
   PanelLayout
-} from '@phosphor/widgetpanel';
+} from '@phosphor/widgets';
 
 import {
   ChildMessage, Widget
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   h, realize, VNode
-} from '@phosphor/widgetvdom';
+} from '@phosphor/virtualdom';
 
 import {
   BaseCellWidget, ICellModel
@@ -193,7 +193,7 @@ class CellTools extends Widget {
     layout.insertWidget(index, tool);
 
     // Trigger the tool to update its active cell.
-    sendMessage(tool, CellTools.ActiveCellMessage);
+    MessageLoop.sendMessage(tool, CellTools.ActiveCellMessage);
   }
 
   /**
@@ -219,7 +219,7 @@ class CellTools extends Widget {
       activeCell.model.metadata.changed.connect(this._onMetadataChanged, this);
     }
     each(this.children(), widget => {
-      sendMessage(widget, CellTools.ActiveCellMessage);
+      MessageLoop.sendMessage(widget, CellTools.ActiveCellMessage);
     });
   }
 
@@ -228,7 +228,7 @@ class CellTools extends Widget {
    */
   private _onSelectionChanged(): void {
     each(this.children(), widget => {
-      sendMessage(widget, CellTools.SelectionMessage);
+      MessageLoop.sendMessage(widget, CellTools.SelectionMessage);
     });
   }
 
@@ -238,7 +238,7 @@ class CellTools extends Widget {
   private _onMetadataChanged(sender: IObservableMap<JSONValue>, args: ObservableMap.IChangedArgs<JSONValue>): void {
     let message = new ObservableJSON.ChangeMessage(args);
     each(this.children(), widget => {
-      sendMessage(widget, message);
+      MessageLoop.sendMessage(widget, message);
     });
   }
 

@@ -16,7 +16,7 @@ import {
 
 import {
   Widget
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   CodeEditor

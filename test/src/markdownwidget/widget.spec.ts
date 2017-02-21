@@ -4,16 +4,16 @@
 import expect = require('expect.js');
 
 import {
-  Message, sendMessage
+  Message, MessageLoop.sendMessage
 } from '@phosphor/messaging';
 
 import {
   PanelLayout
-} from '@phosphor/widgetpanel';
+} from '@phosphor/widgets';
 
 import {
   Widget, WidgetMessage
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   MarkdownWidget, MarkdownWidgetFactory
@@ -103,7 +103,7 @@ describe('markdownwidget/widget', () => {
         let widget = new LogWidget(context, RENDERMIME);
         expect(widget.methods).to.not.contain('onUpdateRequest');
         context.model.contentChanged.emit(void 0);
-        sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
         widget.dispose();
       });
@@ -111,12 +111,12 @@ describe('markdownwidget/widget', () => {
       it('should replace children on subsequent updates', () => {
         let widget = new LogWidget(context, RENDERMIME);
         context.model.contentChanged.emit(void 0);
-        sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
 
         let layout = widget.layout as PanelLayout;
         let oldChild = layout.widgets.at(0);
 
-        sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
 
         let newChild = layout.widgets.at(0);
 

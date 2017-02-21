@@ -22,7 +22,7 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  ISignal, clearSignalData, defineSignal
+  ISignal, Signal.clearData, defineSignal
 } from '@phosphor/signaling';
 
 import {
@@ -31,7 +31,7 @@ import {
 
 import {
   Widget
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   CodeEditor
@@ -101,7 +101,7 @@ class DocumentRegistry implements IDisposable {
 
     this._fileTypes.clear();
     this._creators.clear();
-    clearSignalData(this);
+    Signal.clearData(this);
   }
 
   /**

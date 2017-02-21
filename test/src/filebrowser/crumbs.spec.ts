@@ -8,12 +8,12 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Message, sendMessage
+  Message, MessageLoop.sendMessage
 } from '@phosphor/messaging';
 
 import {
   Widget, WidgetMessage
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   simulate
@@ -113,11 +113,11 @@ describe('filebrowser/model', () => {
 
         it('should switch to the parent directory', (done) => {
           Widget.attach(crumbs, document.body);
-          sendMessage(crumbs, WidgetMessage.UpdateRequest);
+          MessageLoop.sendMessage(crumbs, WidgetMessage.UpdateRequest);
           let items = crumbs.node.getElementsByClassName(ITEM_CLASS);
           expect(items.length).to.be(4);
           model.pathChanged.connect(() => {
-            sendMessage(crumbs, WidgetMessage.UpdateRequest);
+            MessageLoop.sendMessage(crumbs, WidgetMessage.UpdateRequest);
             items = crumbs.node.getElementsByClassName(ITEM_CLASS);
             expect(items.length).to.be(3);
             done();
@@ -128,10 +128,10 @@ describe('filebrowser/model', () => {
 
         it('should switch to the home directory', (done) => {
           Widget.attach(crumbs, document.body);
-          sendMessage(crumbs, WidgetMessage.UpdateRequest);
+          MessageLoop.sendMessage(crumbs, WidgetMessage.UpdateRequest);
           let items = crumbs.node.getElementsByClassName(ITEM_CLASS);
           model.pathChanged.connect(() => {
-            sendMessage(crumbs, WidgetMessage.UpdateRequest);
+            MessageLoop.sendMessage(crumbs, WidgetMessage.UpdateRequest);
             items = crumbs.node.getElementsByClassName(ITEM_CLASS);
             expect(items.length).to.be(1);
             expect(model.path).to.be('');
@@ -142,10 +142,10 @@ describe('filebrowser/model', () => {
 
         it('should switch to the grandparent directory', (done) => {
           Widget.attach(crumbs, document.body);
-          sendMessage(crumbs, WidgetMessage.UpdateRequest);
+          MessageLoop.sendMessage(crumbs, WidgetMessage.UpdateRequest);
           let items = crumbs.node.getElementsByClassName(ITEM_CLASS);
           model.pathChanged.connect(() => {
-            sendMessage(crumbs, WidgetMessage.UpdateRequest);
+            MessageLoop.sendMessage(crumbs, WidgetMessage.UpdateRequest);
             items = crumbs.node.getElementsByClassName(ITEM_CLASS);
             expect(items.length).to.be(2);
             expect(model.path).to.be(first);
@@ -156,10 +156,10 @@ describe('filebrowser/model', () => {
 
         it('should refresh the current directory', (done) => {
           Widget.attach(crumbs, document.body);
-          sendMessage(crumbs, WidgetMessage.UpdateRequest);
+          MessageLoop.sendMessage(crumbs, WidgetMessage.UpdateRequest);
           let items = crumbs.node.getElementsByClassName(ITEM_CLASS);
           model.refreshed.connect(() => {
-            sendMessage(crumbs, WidgetMessage.UpdateRequest);
+            MessageLoop.sendMessage(crumbs, WidgetMessage.UpdateRequest);
             items = crumbs.node.getElementsByClassName(ITEM_CLASS);
             expect(items.length).to.be(4);
             expect(model.path).to.be(path);

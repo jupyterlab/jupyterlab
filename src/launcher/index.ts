@@ -23,7 +23,7 @@ import {
 
 import {
   h, VNode
-} from '@phosphor/widgetvdom';
+} from '@phosphor/virtualdom';
 
 import {
   ICommandLinker

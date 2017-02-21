@@ -9,7 +9,7 @@ import {
 
 import {
   CommandPalette
-} from '@phosphor/widgetcommandpalette';
+} from '@phosphor/widgets';
 
 import {
   JupyterLab, JupyterLabPlugin

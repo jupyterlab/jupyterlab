@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   realize, VNode
-} from '@phosphor/widgetvdom';
+} from '@phosphor/virtualdom';
 
 import {
   CSVModel, CSVTable, DISPLAY_LIMIT

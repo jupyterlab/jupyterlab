@@ -6,7 +6,7 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  ISignal, clearSignalData, defineSignal
+  ISignal, Signal.clearData, defineSignal
 } from '@phosphor/signaling';
 
 import {
@@ -259,7 +259,7 @@ namespace CodeEditor {
         return;
       }
       this._isDisposed = true;
-      clearSignalData(this);
+      Signal.clearData(this);
       this._selections.dispose();
       this._value.dispose();
     }

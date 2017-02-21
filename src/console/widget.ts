@@ -14,16 +14,16 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  clearSignalData, defineSignal, ISignal
+  Signal.clearData, defineSignal, ISignal
 } from '@phosphor/signaling';
 
 import {
   Panel, PanelLayout
-} from '@phosphor/widgetpanel';
+} from '@phosphor/widgets';
 
 import {
   Widget
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   IEditorMimeTypeService, CodeEditor
@@ -404,7 +404,7 @@ class CodeConsole extends Widget {
     if (prompt) {
       prompt.readOnly = true;
       prompt.removeClass(PROMPT_CLASS);
-      clearSignalData(prompt.editor);
+      Signal.clearData(prompt.editor);
       (input.layout as PanelLayout).removeWidgetAt(0);
       this.addCell(prompt);
     }

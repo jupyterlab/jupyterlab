@@ -22,7 +22,7 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  clearSignalData, defineSignal, ISignal
+  Signal.clearData, defineSignal, ISignal
 } from '@phosphor/signaling';
 
 
@@ -305,7 +305,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
       return;
     }
     this._isDisposed = true;
-    clearSignalData(this);
+    Signal.clearData(this);
     this.clear();
   }
 

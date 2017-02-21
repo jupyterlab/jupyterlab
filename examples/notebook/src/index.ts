@@ -7,11 +7,11 @@ import {
 
 import {
   CommandRegistry
-} from '@phosphor/widgetcommandregistry';
+} from '@phosphor/widgets';
 
 import {
   CommandPalette
-} from '@phosphor/widgetcommandpalette';
+} from '@phosphor/widgets';
 
 import {
   Keymap
@@ -19,11 +19,11 @@ import {
 
 import {
   SplitPanel
-} from '@phosphor/widgetsplitpanel';
+} from '@phosphor/widgets';
 
 import {
   Widget
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   ServiceManager

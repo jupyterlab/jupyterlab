@@ -15,7 +15,7 @@ import {
 
 import {
   Panel
-} from '@phosphor/widgetpanel';
+} from '@phosphor/widgets';
 
 import {
   TabPanel
@@ -23,7 +23,7 @@ import {
 
 import {
   Widget
-} from '@phosphor/widgetwidget';
+} from '@phosphor/widgets';
 
 import {
   Toolbar, ToolbarButton
