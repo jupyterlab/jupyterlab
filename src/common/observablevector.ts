@@ -2,35 +2,26 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IterableOrArrayLike, each, toArray
+  ArrayExt, IterableOrArrayLike, each, toArray
 } from '@phosphor/algorithm';
-
-import {
-  ArrayExt.findFirstIndex, ArrayExt.firstIndexOf
-} from 'phosphor/lib/algorithm/searching';
-
-import {
-  ReadonlyArray
-} from 'phosphor/lib/algorithm/sequence';
-
-import {
-  Vector
-} from 'phosphor/lib/collections/vector';
 
 import {
   IDisposable
 } from '@phosphor/disposable';
 
 import {
-  Signal.clearData, defineSignal, ISignal
+  ISignal, Signal
 } from '@phosphor/signaling';
 
+import {
+  Vector
+} from './vector';
 
 /**
  * A vector which can be observed for changes.
  */
 export
-interface IObservableVector<T> extends IDisposable, ReadonlyArray<T> {
+interface IObservableVector<T> extends IDisposable {
   /**
    * A signal emitted when the vector has changed.
    */
