@@ -245,5 +245,8 @@ namespace Private {
    * An attached property for the name of a toolbar item.
    */
   export
-  const nameProperty = new AttachedProperty<Widget, string>({ name: 'name' });
+  const nameProperty = new AttachedProperty<Widget, string>({
+    name: 'name',
+    create: () => ''
+  });
 }

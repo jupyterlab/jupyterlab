@@ -6,10 +6,6 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  ReadonlyArray
-} from 'phosphor/lib/algorithm/sequence';
-
-import {
   IDisposable
 } from '@phosphor/disposable';
 
@@ -272,10 +268,9 @@ class OutputAreaWidget extends Widget {
 
     // Remove all of our widgets.
     let length = this.widgets.length;
-    let layout = this.layout as PanelLayout;
     for (let i = 0; i < length; i++) {
-      let widget = this.widgets.at(0);
-      layout.removeWidget(widget);
+      let widget = this.widgets[0];
+      widget.parent = null;
       widget.dispose();
     }
 
@@ -401,11 +396,11 @@ class OutputAreaWidget extends Widget {
     let widgets = this.widgets;
     // Skip any stdin widgets to find the correct index.
     for (let i = 0; i < index; i++) {
-      if (widgets.at(i).hasClass(STDIN_CLASS)) {
+      if (widgets[i].hasClass(STDIN_CLASS)) {
         index++;
       }
     }
-    layout.widgets.at(index).dispose();
+    layout.widgets[index].dispose();
     this._insertOutput(index, model);
   }
 

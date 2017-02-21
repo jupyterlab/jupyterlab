@@ -11,6 +11,5 @@
     "outDir": "../lib",
     "sourceMap": true
   },
-  "include": ["common/*"],
   "exclude": ["typedoc.d.ts"]
 }

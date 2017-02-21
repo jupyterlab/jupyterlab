@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  isArray, JSONExt.isPrimitive, JSONObject, JSONValue
+  JSONExt, JSONObject, JSONValue
 } from '@phosphor/coreutils';
 
 import {
@@ -242,7 +242,7 @@ namespace OutputModel {
     for (let mimeType in bundle) {
       let item = bundle[mimeType];
       // Convert multi-line strings to strings.
-      if (isArray(item)) {
+      if (JSONExt.isArray(item)) {
         item = (item as string[]).join('\n');
       } else if (!JSONExt.isPrimitive(item)) {
         item = JSON.parse(JSON.stringify(item));

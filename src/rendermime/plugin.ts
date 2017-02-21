@@ -45,7 +45,7 @@ export default plugin;
 function activate(app: JupyterLab, linker: ICommandLinker): IRenderMime {
   let linkHandler = {
     handleLink: (node: HTMLElement, path: string) => {
-      if (!utils.urlParse(path).protocol && path.ArrayExt.firstIndexOf('//') !== 0) {
+      if (!utils.urlParse(path).protocol && path.indexOf('//') !== 0) {
         linker.connectNode(node, CommandIDs.open, { path });
       }
     }

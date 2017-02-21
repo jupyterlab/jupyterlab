@@ -10,7 +10,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  Signal.clearData, defineSignal, ISignal
+  ISignal, Signal
 } from '@phosphor/signaling';
 
 import {
@@ -49,12 +49,16 @@ class OutputAreaModel implements IOutputAreaModel {
   /**
    * A signal emitted when the model state changes.
    */
-  readonly stateChanged: ISignal<IOutputAreaModel, void>;
+  get stateChanged(): ISignal<IOutputAreaModel, void> {
+    return this._stateChanged;
+  }
 
   /**
    * A signal emitted when the model changes.
    */
-  readonly changed: ISignal<this, ObservableVector.IChangedArgs<IOutputModel>>;
+  get changed(): ISignal<this, ObservableVector.IChangedArgs<IOutputModel>> {
+    return this._changed;
+  }
 
   /**
    * Get the length of the items in the model.
@@ -150,7 +154,7 @@ class OutputAreaModel implements IOutputAreaModel {
       this.clearNext = true;
       return;
     }
-    each(this.list, item => { item.dispose(); });
+    each(this.list, (item: IOutputModel) => { item.dispose(); });
     this.list.clear();
   }
 
@@ -169,7 +173,7 @@ class OutputAreaModel implements IOutputAreaModel {
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.IOutput[] {
-    return toArray(map(this.list, output => output.toJSON() ));
+    return toArray(map(this.list, (output: IOutputModel) => output.toJSON() ));
   }
 
   /**
@@ -234,20 +238,22 @@ class OutputAreaModel implements IOutputAreaModel {
    * Handle a change to the list.
    */
   private _onListChanged(sender: IObservableVector<IOutputModel>, args: ObservableVector.IChangedArgs<IOutputModel>) {
-    this.changed.emit(args);
-    this.stateChanged.emit(void 0);
+    this._changed.emit(args);
+    this._stateChanged.emit(void 0);
   }
 
   /**
    * Handle a change to an item.
    */
   private _onGenericChange(): void {
-    this.stateChanged.emit(void 0);
+    this._stateChanged.emit(void 0);
   }
 
   private _lastStream: string;
   private _lastName: 'stdout' | 'stderr';
   private _trusted = false;
+  private _stateChanged = new Signal<IOutputAreaModel, void>(this);
+  private _changed = new Signal<this, ObservableVector.IChangedArgs<IOutputModel>>(this);
 }
 
 
@@ -275,8 +281,3 @@ namespace OutputAreaModel {
   export
   const defaultContentFactory = new ContentFactory();
 }
-
-
-// Define the signals for the `OutputAreaModel` class.
-defineSignal(OutputAreaModel.prototype, 'stateChanged');
-defineSignal(OutputAreaModel.prototype, 'changed');

@@ -10,7 +10,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  defineSignal, ISignal
+  ISignal, Signal
 } from '@phosphor/signaling';
 
 import {
@@ -168,12 +168,16 @@ class RunningSessions extends Widget {
   /**
    * A signal emitted when a kernel session open is requested.
    */
-  readonly sessionOpenRequested: ISignal<RunningSessions, Session.IModel>;
+  get sessionOpenRequested(): ISignal<this, Session.IModel> {
+    return this._sessionOpenRequested;
+  }
 
   /**
    * A signal emitted when a terminal session open is requested.
    */
-  readonly terminalOpenRequested: ISignal<RunningSessions, TerminalSession.IModel>;
+  get terminalOpenRequested(): ISignal<this, TerminalSession.IModel> {
+    return this._terminalOpenRequested;
+  }
 
   /**
    * The renderer used by the running sessions widget.
@@ -321,7 +325,7 @@ class RunningSessions extends Widget {
         this._manager.terminals.shutdown(model.name);
         return;
       }
-      this.terminalOpenRequested.emit(model);
+      this._terminalOpenRequested.emit(model);
     }
 
     // Check for a session item click.
@@ -334,7 +338,7 @@ class RunningSessions extends Widget {
         this._manager.sessions.shutdown(model.id);
         return;
       }
-      this.sessionOpenRequested.emit(model);
+      this._sessionOpenRequested.emit(model);
     }
   }
 
@@ -346,7 +350,7 @@ class RunningSessions extends Widget {
     this._runningSessions = [];
     for (let session of models) {
       let name = session.notebook.path.split('/').pop();
-      if (name.ArrayExt.firstIndexOf('.') !== -1 || CONSOLE_REGEX.test(name)) {
+      if (name.indexOf('.') !== -1 || CONSOLE_REGEX.test(name)) {
         this._runningSessions.push(session);
       }
     }
@@ -366,12 +370,9 @@ class RunningSessions extends Widget {
   private _runningSessions: Session.IModel[] = [];
   private _runningTerminals: TerminalSession.IModel[] = [];
   private _refreshId = -1;
+  private _sessionOpenRequested = new Signal<this, Session.IModel>(this);
+  private _terminalOpenRequested = new Signal<this, TerminalSession.IModel>(this);
 }
-
-
-// Define the signals for the `RunningSessions` class.
-defineSignal(RunningSessions.prototype, 'sessionOpenRequested');
-defineSignal(RunningSessions.prototype, 'terminalOpenRequested');
 
 
 /**
@@ -665,7 +666,7 @@ namespace RunningSessions {
       let icon = findElement(node, ITEM_ICON_CLASS);
       let path = model.notebook.path;
       let name = path.split('/').pop();
-      if (name.ArrayExt.firstIndexOf('.ipynb') !== -1) {
+      if (name.indexOf('.ipynb') !== -1) {
         icon.className = `${ITEM_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
       } else if (CONSOLE_REGEX.test(name)) {
         icon.className = `${ITEM_ICON_CLASS} ${CONSOLE_ICON_CLASS}`;

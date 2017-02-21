@@ -14,7 +14,7 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  find, ArrayExt.findFirstIndex, ArrayExt.firstIndexOf
+  find, ArrayExt
 } from 'phosphor/lib/algorithm/searching';
 
 import {

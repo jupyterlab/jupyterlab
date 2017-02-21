@@ -8,7 +8,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  ResizeMessage, Widget, WidgetMessage
+  Widget.ResizeMessage, Widget, WidgetMessage
 } from '@phosphor/widgets';
 
 import {
@@ -70,7 +70,7 @@ class LogWidget extends CodeEditorWidget {
     this.methods.push('onAfterShow');
   }
 
-  protected onResize(msg: ResizeMessage): void {
+  protected onResize(msg: Widget.ResizeMessage): void {
     super.onResize(msg);
     this.methods.push('onResize');
   }
@@ -200,7 +200,7 @@ describe('CodeEditorWidget', () => {
   describe('#onResize()', () => {
 
     it('should set the size of the editor', () => {
-      let msg = new ResizeMessage(10, 10);
+      let msg = new Widget.ResizeMessage(10, 10);
       let editor = widget.editor as LogEditor;
       MessageLoop.sendMessage(widget, msg);
       expect(editor.methods).to.contain('setSize');
@@ -208,16 +208,16 @@ describe('CodeEditorWidget', () => {
 
     it('should set the size of the editor', () => {
       let editor = widget.editor as LogEditor;
-      MessageLoop.sendMessage(widget, ResizeMessage.UnknownSize);
+      MessageLoop.sendMessage(widget, Widget.ResizeMessage.UnknownSize);
       expect(editor.methods).to.contain('setSize');
     });
 
     it('should make a subsequent request wait', () => {
       let editor = widget.editor as LogEditor;
-      MessageLoop.sendMessage(widget, ResizeMessage.UnknownSize);
+      MessageLoop.sendMessage(widget, Widget.ResizeMessage.UnknownSize);
       expect(editor.methods).to.contain('setSize');
       editor.methods = [];
-      MessageLoop.sendMessage(widget, ResizeMessage.UnknownSize);
+      MessageLoop.sendMessage(widget, Widget.ResizeMessage.UnknownSize);
       expect(editor.methods).to.not.contain('setSize');
     });
 

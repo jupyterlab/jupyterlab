@@ -42,6 +42,27 @@ interface IObservableVector<T> extends IDisposable {
   readonly isEmpty: boolean;
 
   /**
+   * The length of the sequence.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  length: number;
+
+  /**
+   * Create an iterator over the values in the vector.
+   *
+   * @returns A new iterator starting at the front of the vector.
+   *
+   * #### Complexity
+   * Constant.
+   *
+   * #### Iterator Validity
+   * No changes.
+   */
+  iter(): IIterator<T>;
+
+  /**
    * Get the value at the front of the vector.
    *
    * @returns The value at the front of the vector, or `undefined` if
@@ -68,6 +89,18 @@ interface IObservableVector<T> extends IDisposable {
    * No changes.
    */
   readonly back: T;
+
+  /**
+   * Get the value at the specified index.
+   *
+   * @param index - The positive integer index of interest.
+   *
+   * @returns The value at the specified index.
+   *
+   * #### Undefined Behavior
+   * An `index` which is non-integral or out of range.
+   */
+  at(index: number): T;
 
   /**
    * Set the value at the specified index.

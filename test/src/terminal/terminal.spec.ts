@@ -12,7 +12,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  ResizeMessage, WidgetMessage, Widget
+  Widget.ResizeMessage, WidgetMessage, Widget
 } from '@phosphor/widgets';
 
 import {
@@ -39,7 +39,7 @@ class LogTerminal extends TerminalWidget {
     this.methods.push('onCloseRequest');
   }
 
-  protected onResize(msg: ResizeMessage): void {
+  protected onResize(msg: Widget.ResizeMessage): void {
     super.onResize(msg);
     this.methods.push('onResize');
   }
@@ -232,7 +232,7 @@ describe('terminal/index', () => {
     describe('#onResize()', () => {
 
       it('should trigger an update request', (done) => {
-        let msg = ResizeMessage.UnknownSize;
+        let msg = Widget.ResizeMessage.UnknownSize;
         MessageLoop.sendMessage(widget, msg);
         expect(widget.methods).to.contain('onResize');
         requestAnimationFrame(() => {

@@ -369,7 +369,7 @@ const SHORTCUTS = [
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.shortcuts',
   activate: (app: JupyterLab): void => {
-    SHORTCUTS.forEach(shortcut => { app.keymap.addBinding(shortcut); });
+    SHORTCUTS.forEach(shortcut => { app.commands.addKeyBinding(shortcut); });
   },
   autoStart: true
 };

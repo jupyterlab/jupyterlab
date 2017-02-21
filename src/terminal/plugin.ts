@@ -82,7 +82,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
   const namespace = 'terminal';
   const tracker = new InstanceTracker<TerminalWidget>({ namespace });
 
-  let { commands, keymap } = app;
+  let { commands } = app;
   let options = {
     background: 'black',
     color: 'white',
@@ -190,7 +190,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
   });
 
   // Add command palette and menu items.
-  let menu = new Menu({ commands, keymap });
+  let menu = new Menu({ commands });
   menu.title.label = category;
   [
     CommandIDs.createNew,

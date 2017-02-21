@@ -446,7 +446,7 @@ namespace RenderMime {
      */
     resolveUrl(url: string): Promise<string> {
       // Ignore urls that have a protocol.
-      if (utils.urlParse(url).protocol || url.ArrayExt.firstIndexOf('//') === 0) {
+      if (utils.urlParse(url).protocol || url.indexOf('//') === 0) {
         return Promise.resolve(url);
       }
       let path = this._session.path;
@@ -460,7 +460,7 @@ namespace RenderMime {
      */
     getDownloadUrl(path: string): Promise<string> {
       // Ignore urls that have a protocol.
-      if (utils.urlParse(path).protocol || path.ArrayExt.firstIndexOf('//') === 0) {
+      if (utils.urlParse(path).protocol || path.indexOf('//') === 0) {
         return Promise.resolve(path);
       }
       return this._contents.getDownloadUrl(path);
