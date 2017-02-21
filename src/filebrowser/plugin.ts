@@ -85,10 +85,10 @@ const NAMESPACE = 'filebrowser';
  * Activate the file browser.
  */
 function activate(app: JupyterLab, manager: IServiceManager, documentManager: IDocumentManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, restorer: IInstanceRestorer, state: IStateDB): IPathTracker {
-  const { commands, keymap } = app;
+  const { commands } = app;
   let fbModel = new FileBrowserModel({ manager });
   let fbWidget = new FileBrowser({
-    commands, keymap,
+    commands,
     manager: documentManager,
     model: fbModel
   });
@@ -145,7 +145,7 @@ function activate(app: JupyterLab, manager: IServiceManager, documentManager: ID
       let disposables = new DisposableSet();
       let command: string;
 
-      openWith = new Menu({ commands, keymap });
+      openWith = new Menu({ commands });
       openWith.title.label = 'Open With...';
       openWith.disposed.connect(() => { disposables.dispose(); });
 
@@ -306,8 +306,8 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocume
  * Create a top level menu for the file browser.
  */
 function createMenu(app: JupyterLab, creatorCmds: string[]): Menu {
-  let { commands, keymap } = app;
-  let menu = new Menu({ commands, keymap });
+  let { commands } = app;
+  let menu = new Menu({ commands });
   menu.title.label = 'File';
   creatorCmds.forEach(name => {
     menu.addItem({ command: Private.commandForName(name) });
@@ -332,8 +332,8 @@ function createMenu(app: JupyterLab, creatorCmds: string[]): Menu {
  * commands are disposed when the menu itself is disposed.
  */
 function createContextMenu(fbWidget: FileBrowser, openWith: Menu):  Menu {
-  let { commands, keymap } = fbWidget;
-  let menu = new Menu({ commands, keymap });
+  let { commands } = fbWidget;
+  let menu = new Menu({ commands });
   let prefix = `file-browser-${++Private.id}`;
   let disposables = new DisposableSet();
   let command: string;
@@ -351,7 +351,7 @@ function createContextMenu(fbWidget: FileBrowser, openWith: Menu):  Menu {
   menu.addItem({ command });
 
   if (openWith) {
-    menu.addItem({ type: 'submenu', menu: openWith });
+    menu.addItem({ type: 'submenu', submenu: openWith });
   }
 
   command = `${prefix}:rename`;
