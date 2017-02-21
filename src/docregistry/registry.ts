@@ -6,23 +6,15 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  IIterator, each, empty, map
+  ArrayExt, ArrayIterator, IIterator, each, empty, find, map
 } from '@phosphor/algorithm';
-
-import {
-  find, ArrayExt.findFirstIndex, ArrayExt.firstIndexOf
-} from 'phosphor/lib/algorithm/searching';
-
-import {
-  Vector
-} from 'phosphor/lib/collections/vector';
 
 import {
   IDisposable, DisposableDelegate
 } from '@phosphor/disposable';
 
 import {
-  ISignal, Signal.clearData, defineSignal
+  ISignal, Signal
 } from '@phosphor/signaling';
 
 import {
@@ -66,7 +58,9 @@ class DocumentRegistry implements IDisposable {
   /**
    * A signal emitted when the registry has changed.
    */
-  readonly changed: ISignal<this, DocumentRegistry.IChangedArgs>;
+  get changed(): ISignal<this, DocumentRegistry.IChangedArgs> {
+    return this._changed;
+  }
 
   /**
    * Get whether the document registry has been disposed.
@@ -96,11 +90,11 @@ class DocumentRegistry implements IDisposable {
       widgetFactories[widgetName].dispose();
     }
     for (let widgetName in extenders) {
-      extenders[widgetName].clear();
+      extenders[widgetName].length = 0;
     }
 
-    this._fileTypes.clear();
-    this._creators.clear();
+    this._fileTypes.length = 0;
+    this._creators.length = 0;
     Signal.clearData(this);
   }
 
@@ -127,7 +121,7 @@ class DocumentRegistry implements IDisposable {
     }
     this._widgetFactories[name] = factory;
     for (let ext of factory.defaultFor) {
-      if (factory.fileExtensions.ArrayExt.firstIndexOf(ext) === -1) {
+      if (factory.fileExtensions.indexOf(ext) === -1) {
         continue;
       }
       if (ext === '*') {
@@ -139,11 +133,11 @@ class DocumentRegistry implements IDisposable {
     // For convenience, store a mapping of ext -> name
     for (let ext of factory.fileExtensions) {
       if (!this._widgetFactoryExtensions[ext]) {
-        this._widgetFactoryExtensions[ext] = new Vector<string>();
+        this._widgetFactoryExtensions[ext] = [];
       }
-      this._widgetFactoryExtensions[ext].pushBack(name);
+      this._widgetFactoryExtensions[ext].push(name);
     }
-    this.changed.emit({
+    this._changed.emit({
       type: 'widgetFactory',
       name,
       change: 'added'
@@ -159,12 +153,12 @@ class DocumentRegistry implements IDisposable {
         }
       }
       for (let ext of Object.keys(this._widgetFactoryExtensions)) {
-        this._widgetFactoryExtensions[ext].remove(name);
+        ArrayExt.removeFirstOf(this._widgetFactoryExtensions[ext], name);
         if (this._widgetFactoryExtensions[ext].length === 0) {
           delete this._widgetFactoryExtensions[ext];
         }
       }
-      this.changed.emit({
+      this._changed.emit({
         type: 'widgetFactory',
         name,
         change: 'removed'
@@ -191,14 +185,14 @@ class DocumentRegistry implements IDisposable {
       return new DisposableDelegate(null);
     }
     this._modelFactories[name] = factory;
-    this.changed.emit({
+    this._changed.emit({
       type: 'modelFactory',
       name,
       change: 'added'
     });
     return new DisposableDelegate(() => {
       delete this._modelFactories[name];
-      this.changed.emit({
+      this._changed.emit({
         type: 'modelFactory',
         name,
         change: 'removed'
@@ -222,7 +216,7 @@ class DocumentRegistry implements IDisposable {
   addWidgetExtension(widgetName: string, extension: DocumentRegistry.WidgetExtension): IDisposable {
     widgetName = widgetName.toLowerCase();
     if (!(widgetName in this._extenders)) {
-      this._extenders[widgetName] = new Vector<DocumentRegistry.WidgetExtension>();
+      this._extenders[widgetName] = [];
     }
     let extenders = this._extenders[widgetName];
     let index = ArrayExt.firstIndexOf(extenders, extension);
@@ -230,15 +224,15 @@ class DocumentRegistry implements IDisposable {
       console.warn(`Duplicate registered extension for ${widgetName}`);
       return new DisposableDelegate(null);
     }
-    this._extenders[widgetName].pushBack(extension);
-    this.changed.emit({
+    this._extenders[widgetName].push(extension);
+    this._changed.emit({
       type: 'widgetExtension',
       name: null,
       change: 'added'
     });
     return new DisposableDelegate(() => {
-      this._extenders[widgetName].remove(extension);
-      this.changed.emit({
+      ArrayExt.removeFirstOf(this._extenders[widgetName], extension);
+      this._changed.emit({
         type: 'widgetExtension',
         name: null,
         change: 'removed'
@@ -257,15 +251,15 @@ class DocumentRegistry implements IDisposable {
    * These are used to populate the "Create New" dialog.
    */
   addFileType(fileType: DocumentRegistry.IFileType): IDisposable {
-    this._fileTypes.pushBack(fileType);
-    this.changed.emit({
+    this._fileTypes.push(fileType);
+    this._changed.emit({
       type: 'fileType',
       name: fileType.name,
       change: 'added'
     });
     return new DisposableDelegate(() => {
-      this._fileTypes.remove(fileType);
-      this.changed.emit({
+      ArrayExt.removeFirstOf(this._fileTypes, fileType);
+      this._changed.emit({
         type: 'fileType',
         name: fileType.name,
         change: 'removed'
@@ -285,18 +279,18 @@ class DocumentRegistry implements IDisposable {
       return value.name.localeCompare(creator.name) > 0;
     });
     if (index !== -1) {
-      this._creators.insert(index, creator);
+      ArrayExt.insert(this._creators, index, creator);
     } else {
-      this._creators.pushBack(creator);
+      this._creators.push(creator);
     }
-    this.changed.emit({
+    this._changed.emit({
       type: 'fileCreator',
       name: creator.name,
       change: 'added'
     });
     return new DisposableDelegate(() => {
-      this._creators.remove(creator);
-      this.changed.emit({
+      ArrayExt.removeFirstOf(this._creators, creator);
+      this._changed.emit({
         type: 'fileCreator',
         name: creator.name,
         change: 'removed'
@@ -430,7 +424,7 @@ class DocumentRegistry implements IDisposable {
     if (!(widgetName in this._extenders)) {
       return empty<DocumentRegistry.WidgetExtension>();
     }
-    return this._extenders[widgetName].iter();
+    return new ArrayIterator(this._extenders[widgetName]);
   }
 
   /**
@@ -439,7 +433,7 @@ class DocumentRegistry implements IDisposable {
    * @returns A new iterator of file types.
    */
   fileTypes(): IIterator<DocumentRegistry.IFileType> {
-    return this._fileTypes.iter();
+    return new ArrayIterator(this._fileTypes);
   }
 
   /**
@@ -448,7 +442,7 @@ class DocumentRegistry implements IDisposable {
    * @returns A new iterator of file creatores.
    */
   creators(): IIterator<DocumentRegistry.IFileCreator> {
-    return this._creators.iter();
+    return new ArrayIterator(this._creators);
   }
 
   /**
@@ -525,10 +519,11 @@ class DocumentRegistry implements IDisposable {
   private _widgetFactories: { [key: string]: DocumentRegistry.WidgetFactory } = Object.create(null);
   private _defaultWidgetFactory = '';
   private _defaultWidgetFactories: { [key: string]: string } = Object.create(null);
-  private _widgetFactoryExtensions: {[key: string]: Vector<string> } = Object.create(null);
-  private _fileTypes = new Vector<DocumentRegistry.IFileType>();
-  private _creators = new Vector<DocumentRegistry.IFileCreator>();
-  private _extenders: { [key: string] : Vector<DocumentRegistry.WidgetExtension> } = Object.create(null);
+  private _widgetFactoryExtensions: {[key: string]: string[] } = Object.create(null);
+  private _fileTypes: DocumentRegistry.IFileType[] = [];
+  private _creators: DocumentRegistry.IFileCreator[] = [];
+  private _extenders: { [key: string] : DocumentRegistry.WidgetExtension[] } = Object.create(null);
+  private _changed = new Signal<this, DocumentRegistry.IChangedArgs>(this);
 }
 
 
@@ -1030,10 +1025,6 @@ namespace DocumentRegistry {
 }
 
 
-// Define the signals for the `DocumentRegistry` class.
-defineSignal(DocumentRegistry.prototype, 'changed');
-
-
 /**
  * A private namespace for DocumentRegistry data.
  */
@@ -1051,7 +1042,7 @@ namespace Private {
     if (extension === '.*') {
       return '*';
     }
-    if (extension.ArrayExt.firstIndexOf('.') !== 0) {
+    if (extension.indexOf('.') !== 0) {
       extension = `.${extension}`;
     }
     return extension.toLowerCase();

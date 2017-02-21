@@ -8,11 +8,11 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Message, MessageLoop.sendMessage
+  Message, MessageLoop
 } from '@phosphor/messaging';
 
 import {
-  Widget.ResizeMessage, WidgetMessage, Widget
+  Widget
 } from '@phosphor/widgets';
 
 import {
@@ -182,7 +182,7 @@ describe('terminal/index', () => {
     describe('#processMessage()', () => {
 
       it('should handle fit requests', () => {
-        widget.processMessage(WidgetMessage.FitRequest);
+        widget.processMessage(Widget.Msg.FitRequest);
         expect(widget.methods).to.contain('onFitRequest');
       });
 
@@ -247,7 +247,7 @@ describe('terminal/index', () => {
 
       it('should set the style of the terminal', () => {
         Widget.attach(widget, document.body);
-        MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
         let style = window.getComputedStyle(widget.node);
         expect(style.backgroundColor).to.be('rgb(0, 0, 0)');
@@ -259,7 +259,7 @@ describe('terminal/index', () => {
     describe('#onFitRequest', () => {
 
       it('should send a resize request', () => {
-        MessageLoop.sendMessage(widget, WidgetMessage.FitRequest);
+        MessageLoop.sendMessage(widget, Widget.Msg.FitRequest);
         expect(widget.methods).to.contain('onResize');
       });
 
@@ -270,7 +270,7 @@ describe('terminal/index', () => {
       it('should focus the terminal element', () => {
         Widget.attach(widget, document.body);
         expect(widget.node.contains(document.activeElement)).to.be(false);
-        MessageLoop.sendMessage(widget, WidgetMessage.ActivateRequest);
+        MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
         expect(widget.methods).to.contain('onActivateRequest');
         expect(widget.node.contains(document.activeElement)).to.be(true);
       });

@@ -27,10 +27,6 @@ import {
 } from '../common/interfaces';
 
 import {
-  IObservableString, ObservableString
-} from '../common/observablestring';
-
-import {
   DocumentRegistry
 } from './index';
 
@@ -75,7 +71,7 @@ class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeMo
     }
     let oldValue = this._dirty;
     this._dirty = newValue;
-    this.triggerChange({ name: 'dirty', oldValue, newValue });
+    this.triggerStateChange({ name: 'dirty', oldValue, newValue });
   }
 
   /**
@@ -90,7 +86,7 @@ class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeMo
     }
     let oldValue = this._readOnly;
     this._readOnly = newValue;
-    this.triggerChange({ name: 'readOnly', oldValue, newValue });
+    this.triggerStateChange({ name: 'readOnly', oldValue, newValue });
   }
 
   /**
@@ -299,7 +295,9 @@ abstract class ABCWidgetFactory<T extends Widget, U extends DocumentRegistry.IMo
   /**
    * A signal emitted when a widget is created.
    */
-  widgetCreated: ISignal<DocumentRegistry.IWidgetFactory<T, U>, T>;
+  get widgetCreated(): ISignal<DocumentRegistry.IWidgetFactory<T, U>, T> {
+    return this._widgetCreated;
+  }
 
   /**
    * Get whether the model factory has been disposed.
@@ -365,7 +363,7 @@ abstract class ABCWidgetFactory<T extends Widget, U extends DocumentRegistry.IMo
    */
   createNew(context: DocumentRegistry.IContext<U>): T {
     let widget = this.createNewWidget(context);
-    this.widgetCreated.emit(widget);
+    this._widgetCreated.emit(widget);
     return widget;
   }
 
@@ -381,8 +379,5 @@ abstract class ABCWidgetFactory<T extends Widget, U extends DocumentRegistry.IMo
   private _modelName: string;
   private _fileExtensions: string[];
   private _defaultFor: string[];
+  private _widgetCreated = new Signal<DocumentRegistry.IWidgetFactory<T, U>, T>(this);
 }
-
-
-// Define the signals for the `ABCWidgetFactory` class.
-defineSignal(ABCWidgetFactory.prototype, 'widgetCreated');
