@@ -10,5 +10,5 @@ export * from './widget';
 export
 namespace CommandIDs {
   export
-  const open = 'faq-jupyterlab:open';
+  const open: string = 'faq-jupyterlab:open';
 };

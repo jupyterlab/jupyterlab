@@ -41,7 +41,7 @@ import {
 export
 namespace CommandIDs {
   export
-  const show = 'launcher-jupyterlab:show';
+  const show: string = 'launcher-jupyterlab:show';
 };
 
 

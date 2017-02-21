@@ -10,5 +10,5 @@ export * from './widget';
 export
 namespace CommandIDs {
   export
-  const open = 'landing-jupyterlab:open';
+  const open: string = 'landing-jupyterlab:open';
 };

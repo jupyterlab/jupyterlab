@@ -22,13 +22,13 @@ import {
 export
 namespace CommandIDs {
   export
-  const activate = 'command-palette:activate';
+  const activate: string = 'command-palette:activate';
 
   export
-  const hide = 'command-palette:hide';
+  const hide: string = 'command-palette:hide';
 
   export
-  const toggle = 'command-palette:toggle';
+  const toggle: string = 'command-palette:toggle';
 };
 
 

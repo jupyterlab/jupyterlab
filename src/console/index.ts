@@ -20,37 +20,37 @@ export * from './widget';
 export
 namespace CommandIDs {
   export
-  const create = 'console:create';
+  const create: string = 'console:create';
 
   export
-  const clear = 'console:clear';
+  const clear: string = 'console:clear';
 
   export
-  const run = 'console:run';
+  const run: string = 'console:run';
 
   export
-  const runForced = 'console:run-forced';
+  const runForced: string = 'console:run-forced';
 
   export
-  const linebreak = 'console:linebreak';
+  const linebreak: string = 'console:linebreak';
 
   export
-  const interrupt = 'console:interrupt-kernel';
+  const interrupt: string = 'console:interrupt-kernel';
 
   export
-  const restart = 'console:restart-kernel';
+  const restart: string = 'console:restart-kernel';
 
   export
-  const closeAndShutdown = 'console:close-and-shutdown';
+  const closeAndShutdown: string = 'console:close-and-shutdown';
 
   export
-  const open = 'console:open';
+  const open: string = 'console:open';
 
   export
-  const inject = 'console:inject';
+  const inject: string = 'console:inject';
 
   export
-  const switchKernel = 'console:switch-kernel';
+  const switchKernel: string = 'console:switch-kernel';
 };
 
 

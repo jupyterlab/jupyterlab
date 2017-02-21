@@ -10,11 +10,11 @@ export * from './widget';
 export
 namespace CommandIDs {
   export
-  const zoomIn = 'imagewidget:zoom-in';
+  const zoomIn: string = 'imagewidget:zoom-in';
 
   export
-  const zoomOut = 'imagewidget:zoom-out';
+  const zoomOut: string = 'imagewidget:zoom-out';
 
   export
-  const resetZoom = 'imagewidget:reset-zoom';
+  const resetZoom: string = 'imagewidget:reset-zoom';
 };

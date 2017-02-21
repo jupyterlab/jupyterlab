@@ -196,12 +196,12 @@ namespace Private {
 
       // If a newer request is pending, bail.
       if (current !== pending) {
-        return Promise.reject(void 0);
+        return Promise.reject(void 0) as Promise<JSONObject>;
       }
 
       // If request fails or returns negative results, bail.
       if (value.status !== 'ok' || !value.found) {
-        return Promise.reject(void 0);
+        return Promise.reject(void 0) as Promise<JSONObject>;
       }
 
       return Promise.resolve(value.data);

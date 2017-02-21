@@ -18,7 +18,7 @@ export * from './statedb';
 export
 namespace CommandIDs {
   export
-  const clear = 'statedb:clear';
+  const clear: string = 'statedb:clear';
 };
 
 
