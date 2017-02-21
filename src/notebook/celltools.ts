@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  each
+  ArrayExt, each
 } from '@phosphor/algorithm';
 
 import {
@@ -14,16 +14,8 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  ArrayExt.findFirstIndex, ArrayExt.upperBound
-} from 'phosphor/lib/algorithm/searching';
-
-import {
-  ConflatableMessage, Message, MessageLoop.sendMessage
+  ConflatableMessage, Message, MessageLoop
 } from '@phosphor/messaging';
-
-import {
-  Vector
-} from 'phosphor/lib/collections/vector';
 
 import {
   Token
@@ -34,11 +26,11 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  ChildMessage, Widget
+  Widget
 } from '@phosphor/widgets';
 
 import {
-  h, realize, VirtualNode
+  h, VirtualDOM, VirtualNode
 } from '@phosphor/virtualdom';
 
 import {
@@ -188,7 +180,7 @@ class CellTools extends Widget {
     tool.addClass(CHILD_CLASS);
 
     // Add the tool.
-    this._items.insert(index, rankItem);
+    ArrayExt.insert(this._items, index, rankItem);
     let layout = this.layout as PanelLayout;
     layout.insertWidget(index, tool);
 
@@ -199,10 +191,10 @@ class CellTools extends Widget {
   /**
    * Handle the removal of a child
    */
-  protected onChildRemoved(msg: ChildMessage): void {
+  protected onChildRemoved(msg: Widget.ChildMessage): void {
     let index = ArrayExt.findFirstIndex(this._items, item => item.tool === msg.child);
     if (index !== -1) {
-      this._items.removeAt(index);
+      ArrayExt.removeAt(this._items, index);
     }
   }
 
@@ -242,7 +234,7 @@ class CellTools extends Widget {
     });
   }
 
-  private _items = new Vector<Private.IRankItem>();
+  private _items: Private.IRankItem[] = [];
   private _tracker: INotebookTracker;
   private _prevActive: ICellModel | null;
 }
@@ -384,7 +376,7 @@ namespace CellTools {
       let layout = this.layout as PanelLayout;
       let count = layout.widgets.length;
       for (let i = 0; i < count; i++) {
-        layout.widgets.at(0).dispose();
+        layout.widgets[0].dispose();
       }
       if (this._cellModel) {
         this._cellModel.value.changed.disconnect(this._onValueChanged, this);
@@ -624,7 +616,7 @@ namespace CellTools {
       }
       let cellType = activeCell.model.type;
       if (this._validCellTypes.length &&
-          this._validCellTypes.ArrayExt.firstIndexOf(cellType) === -1) {
+          this._validCellTypes.indexOf(cellType) === -1) {
         select.disabled = true;
         return;
       }
@@ -784,7 +776,7 @@ namespace Private {
       let value = JSON.stringify(options.optionsMap[label]);
       optionNodes.push(h.option({ label, value }));
     }
-    return realize(
+    return VirtualDOM.realize(
       h.div({},
         h.label(title),
         h.div({ className: SELECT_WRAPPER_CLASS },
@@ -798,7 +790,7 @@ namespace Private {
    */
   export
   function createMetadataHeader(): Widget {
-    let node = realize(
+    let node = VirtualDOM.realize(
       h.div({ className: EDITOR_TITLE_CLASS },
         h.label({}, 'Edit Metadata'),
         h.span({ className: TOGGLE_CLASS }))
