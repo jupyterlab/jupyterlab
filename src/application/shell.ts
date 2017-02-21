@@ -6,19 +6,11 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  each, toArray
+  ArrayExt, each, find, toArray
 } from '@phosphor/algorithm';
 
 import {
-  contains, find, ArrayExt.firstIndexOf, ArrayExt.findFirstIndex, ArrayExt.upperBound
-} from 'phosphor/lib/algorithm/searching';
-
-import {
-  Vector
-} from 'phosphor/lib/collections/vector';
-
-import {
-  defineSignal, ISignal
+  ISignal
 } from '@phosphor/signaling';
 
 import {
@@ -46,15 +38,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  TabBar
-} from '@phosphor/widgettabbar';
-
-import {
-  Title
-} from '@phosphor/widgettitle';
-
-import {
-  Widget
+  TabBar, Title, Widget
 } from '@phosphor/widgets';
 
 import {
@@ -146,40 +130,21 @@ class ApplicationShell extends Widget {
 
     this.layout = rootLayout;
 
-    this._dockPanel.currentChanged.connect(this._onCurrentChanged, this);
+    this._tracker.currentChanged.connect(this._onCurrentChanged, this);
   }
 
   /**
    * A signal emitted when main area's current focus changes.
    */
-  readonly currentChanged: ISignal<this, FocusTracker.ICurrentChangedArgs<Widget>>;
+  get currentChanged(): ISignal<any, FocusTracker.IChangedArgs<Widget>> {
+    return this._tracker.currentChanged;
+  }
 
   /**
    * The current widget in the shell's main area.
    */
   get currentWidget(): Widget {
-    return this._dockPanel.currentWidget;
-  }
-
-  /**
-   * Promise that resolves when state is restored, returning layout description.
-   */
-  get restored(): Promise<IInstanceRestorer.ILayout> {
-    return this._restored.promise;
-  }
-
-  /**
-   * True if main area is empty.
-   */
-  get mainAreaIsEmpty(): boolean {
-    return this._dockPanel.isEmpty;
-  }
-
-  /**
-   * True if top area is empty.
-   */
-  get topAreaIsEmpty(): boolean {
-    return this._topPanel.widgets.length === 0;
+    return this._tracker.currentWidget;
   }
 
   /**
@@ -190,6 +155,20 @@ class ApplicationShell extends Widget {
   }
 
   /**
+   * True if main area is empty.
+   */
+  get mainAreaIsEmpty(): boolean {
+    return this._dockPanel.isEmpty;
+  }
+
+  /**
+   * Promise that resolves when state is restored, returning layout description.
+   */
+  get restored(): Promise<IInstanceRestorer.ILayout> {
+    return this._restored.promise;
+  }
+
+  /**
    * True if right area is empty.
    */
   get rightAreaIsEmpty(): boolean {
@@ -197,66 +176,10 @@ class ApplicationShell extends Widget {
   }
 
   /**
-   * Add a widget to the top content area.
-   *
-   * #### Notes
-   * Widgets must have a unique `id` property, which will be used as the DOM id.
+   * True if top area is empty.
    */
-  addToTopArea(widget: Widget, options: ApplicationShell.ISideAreaOptions = {}): void {
-    if (!widget.id) {
-      console.error('widgets added to app shell must have unique id property');
-      return;
-    }
-    // Temporary: widgets are added to the panel in order of insertion.
-    this._topPanel.addWidget(widget);
-    this._save();
-  }
-
-  /**
-   * Add a widget to the left content area.
-   *
-   * #### Notes
-   * Widgets must have a unique `id` property, which will be used as the DOM id.
-   */
-  addToLeftArea(widget: Widget, options: ApplicationShell.ISideAreaOptions = {}): void {
-    if (!widget.id) {
-      console.error('widgets added to app shell must have unique id property');
-      return;
-    }
-    let rank = 'rank' in options ? options.rank : 100;
-    this._leftHandler.addWidget(widget, rank);
-    this._save();
-  }
-
-  /**
-   * Add a widget to the right content area.
-   *
-   * #### Notes
-   * Widgets must have a unique `id` property, which will be used as the DOM id.
-   */
-  addToRightArea(widget: Widget, options: ApplicationShell.ISideAreaOptions = {}): void {
-    if (!widget.id) {
-      console.error('widgets added to app shell must have unique id property');
-      return;
-    }
-    let rank = 'rank' in options ? options.rank : 100;
-    this._rightHandler.addWidget(widget, rank);
-    this._save();
-  }
-
-  /**
-   * Add a widget to the main content area.
-   *
-   * #### Notes
-   * Widgets must have a unique `id` property, which will be used as the DOM id.
-   */
-  addToMainArea(widget: Widget): void {
-    if (!widget.id) {
-      console.error('widgets added to app shell must have unique id property');
-      return;
-    }
-    this._dockPanel.addWidget(widget, { mode: 'tab-after' });
-    this._save();
+  get topAreaIsEmpty(): boolean {
+    return this._topPanel.widgets.length === 0;
   }
 
   /**
@@ -264,13 +187,6 @@ class ApplicationShell extends Widget {
    */
   activateLeft(id: string): void {
     this._leftHandler.activate(id);
-  }
-
-  /**
-   * Activate a widget in the right area.
-   */
-  activateRight(id: string): void {
-    this._rightHandler.activate(id);
   }
 
   /**
@@ -282,30 +198,6 @@ class ApplicationShell extends Widget {
     if (widget) {
       dock.activateWidget(widget);
     }
-  }
-
-  /**
-   * Collapse the left area.
-   */
-  collapseLeft(): void {
-    this._leftHandler.collapse();
-    this._save();
-  }
-
-  /**
-   * Collapse the right area.
-   */
-  collapseRight(): void {
-    this._rightHandler.collapse();
-    this._save();
-  }
-
-  /**
-   * Close all widgets in the main area.
-   */
-  closeAll(): void {
-    each(toArray(this._dockPanel.widgets()), widget => { widget.close(); });
-    this._save();
   }
 
   /*
@@ -354,6 +246,103 @@ class ApplicationShell extends Widget {
   }
 
   /**
+   * Activate a widget in the right area.
+   */
+  activateRight(id: string): void {
+    this._rightHandler.activate(id);
+  }
+
+  /**
+   * Add a widget to the left content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
+   */
+  addToLeftArea(widget: Widget, options: ApplicationShell.ISideAreaOptions = {}): void {
+    if (!widget.id) {
+      console.error('widgets added to app shell must have unique id property');
+      return;
+    }
+    let rank = 'rank' in options ? options.rank : 100;
+    this._leftHandler.addWidget(widget, rank);
+    this._save();
+  }
+
+  /**
+   * Add a widget to the main content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
+   * All widgets added to the main area should be disposed after removal (or
+   * simply disposed in order to remove).
+   */
+  addToMainArea(widget: Widget): void {
+    if (!widget.id) {
+      console.error('widgets added to app shell must have unique id property');
+      return;
+    }
+    this._dockPanel.addWidget(widget, { mode: 'tab-after' });
+    this._tracker.add(widget);
+    this._save();
+  }
+
+  /**
+   * Add a widget to the right content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
+   */
+  addToRightArea(widget: Widget, options: ApplicationShell.ISideAreaOptions = {}): void {
+    if (!widget.id) {
+      console.error('widgets added to app shell must have unique id property');
+      return;
+    }
+    let rank = 'rank' in options ? options.rank : 100;
+    this._rightHandler.addWidget(widget, rank);
+    this._save();
+  }
+
+  /**
+   * Add a widget to the top content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
+   */
+  addToTopArea(widget: Widget, options: ApplicationShell.ISideAreaOptions = {}): void {
+    if (!widget.id) {
+      console.error('widgets added to app shell must have unique id property');
+      return;
+    }
+    // Temporary: widgets are added to the panel in order of insertion.
+    this._topPanel.addWidget(widget);
+    this._save();
+  }
+
+  /**
+   * Collapse the left area.
+   */
+  collapseLeft(): void {
+    this._leftHandler.collapse();
+    this._save();
+  }
+
+  /**
+   * Collapse the right area.
+   */
+  collapseRight(): void {
+    this._rightHandler.collapse();
+    this._save();
+  }
+
+  /**
+   * Close all widgets in the main area.
+   */
+  closeAll(): void {
+    each(this._dockPanel.widgets(), widget => { widget.close(); });
+    this._save();
+  }
+
+  /**
    * Set the layout data store for the application shell.
    */
   setLayoutDB(database: IInstanceRestorer.ILayoutDB): void {
@@ -381,7 +370,7 @@ class ApplicationShell extends Widget {
       return this._save().then(() => { this._restored.resolve(saved); });
     });
     // Catch current changed events on the side handlers.
-    this._dockPanel.currentChanged.connect(this._save, this);
+    this._tracker.currentChanged.connect(this._save, this);
     this._leftHandler.sideBar.currentChanged.connect(this._save, this);
     this._rightHandler.sideBar.currentChanged.connect(this._save, this);
   }
@@ -389,11 +378,13 @@ class ApplicationShell extends Widget {
   /*
    * Return the TabBar that has the currently active Widget or undefined.
    */
-  private _currentTabBar(): TabBar {
-    let current = this._dockPanel.currentWidget;
+  private _currentTabBar(): TabBar<Widget> {
+    let current = this._tracker.currentWidget;
     if (current) {
       let title = current.title;
-      let tabBar = find(this._dockPanel.tabBars(), bar => contains(bar.titles, title));
+      let tabBar = find(this._dockPanel.tabBars(), bar => {
+        return ArrayExt.firstIndexOf(bar.titles, title) > -1;
+      });
       return tabBar;
     }
     return void 0;
@@ -402,13 +393,13 @@ class ApplicationShell extends Widget {
   /*
    * Return the TabBar previous to the current TabBar (see above) or undefined.
    */
-  private _previousTabBar(): TabBar {
+  private _previousTabBar(): TabBar<Widget> {
     let current = this._currentTabBar();
     if (current) {
       let bars = toArray(this._dockPanel.tabBars());
       let len = bars.length;
-      let ci = bars.ArrayExt.firstIndexOf(current);
-      let prevBar: TabBar = null;
+      let ci = ArrayExt.firstIndexOf(bars, current);
+      let prevBar: TabBar<Widget> = null;
       if (ci > 0) {
         prevBar = bars[ci - 1];
       } else if (ci === 0) {
@@ -422,13 +413,13 @@ class ApplicationShell extends Widget {
   /*
    * Return the TabBar next to the current TabBar (see above) or undefined.
    */
-  private _nextTabBar(): TabBar {
+  private _nextTabBar(): TabBar<Widget> {
     let current = this._currentTabBar();
     if (current) {
       let bars = toArray(this._dockPanel.tabBars());
       let len = bars.length;
-      let ci = bars.ArrayExt.firstIndexOf(current);
-      let nextBar: TabBar = null;
+      let ci = ArrayExt.firstIndexOf(bars, current);
+      let nextBar: TabBar<Widget> = null;
       if (ci < (len - 1)) {
         nextBar = bars[ci + 1];
       } else if (ci === len - 1) {
@@ -449,7 +440,7 @@ class ApplicationShell extends Widget {
     }
 
     let data: IInstanceRestorer.ILayout = {
-      currentWidget: this._dockPanel.currentWidget,
+      currentWidget: this._tracker.currentWidget,
       leftArea: this._leftHandler.dehydrate(),
       rightArea: this._rightHandler.dehydrate()
     };
@@ -459,7 +450,7 @@ class ApplicationShell extends Widget {
   /**
    * Handle a change to the dock area current widget.
    */
-  private _onCurrentChanged(sender: DockPanel, args: DockPanel.ICurrentChangedArgs): void {
+  private _onCurrentChanged(sender: any, args: FocusTracker.IChangedArgs<Widget>): void {
     if (args.newValue) {
       args.newValue.title.className += ` ${CURRENT_CLASS}`;
     }
@@ -467,23 +458,19 @@ class ApplicationShell extends Widget {
       let title = args.oldValue.title;
       title.className = title.className.replace(CURRENT_CLASS, '');
     }
-    this.currentChanged.emit(args);
   }
 
   private _database: IInstanceRestorer.ILayoutDB = null;
   private _dockPanel: DockPanel;
-  private _isRestored = false;
   private _hboxPanel: BoxPanel;
   private _hsplitPanel: SplitPanel;
+  private _isRestored = false;
   private _leftHandler: Private.SideBarHandler;
   private _restored = new utils.PromiseDelegate<IInstanceRestorer.ILayout>();
   private _rightHandler: Private.SideBarHandler;
   private _topPanel: Panel;
+  private _tracker = new FocusTracker<Widget>();
 }
-
-
-// Define the signals for the `ApplicationShell` class.
-defineSignal(ApplicationShell.prototype, 'currentChanged');
 
 
 /**
@@ -545,7 +532,7 @@ namespace Private {
      */
     constructor(side: string) {
       this._side = side;
-      this._sideBar = new TabBar({
+      this._sideBar = new TabBar<Widget>({
         insertBehavior: 'none',
         removeBehavior: 'none',
         allowDeselect: true
@@ -561,7 +548,7 @@ namespace Private {
     /**
      * Get the tab bar managed by the handler.
      */
-    get sideBar(): TabBar {
+    get sideBar(): TabBar<Widget> {
       return this._sideBar;
     }
 
@@ -602,7 +589,7 @@ namespace Private {
       widget.hide();
       let item = { widget, rank };
       let index = this._findInsertIndex(item);
-      this._items.insert(index, item);
+      ArrayExt.insert(this._items, index, item);
       this._stackedPanel.insertWidget(index, widget);
       this._sideBar.insertTab(index, widget.title);
       this._refreshVisibility();
@@ -646,7 +633,7 @@ namespace Private {
     /**
      * Find the widget which owns the given title, or `null`.
      */
-    private _findWidgetByTitle(title: Title): Widget {
+    private _findWidgetByTitle(title: Title<Widget>): Widget {
       let item = find(this._items, value => value.widget.title === title);
       return item ? item.widget : null;
     }
@@ -670,7 +657,7 @@ namespace Private {
     /**
      * Handle the `currentChanged` signal from the sidebar.
      */
-    private _onCurrentChanged(sender: TabBar, args: TabBar.ICurrentChangedArgs): void {
+    private _onCurrentChanged(sender: TabBar<Widget>, args: TabBar.ICurrentChangedArgs<Widget>): void {
       let oldWidget = this._findWidgetByTitle(args.previousTitle);
       let newWidget = this._findWidgetByTitle(args.currentTitle);
       if (oldWidget) {
@@ -690,7 +677,7 @@ namespace Private {
     /**
      * Handle a `tabActivateRequest` signal from the sidebar.
      */
-    private _onTabActivateRequested(sender: TabBar, args: TabBar.ITabActivateRequestedArgs): void {
+    private _onTabActivateRequested(sender: TabBar<Widget>, args: TabBar.ITabActivateRequestedArgs<Widget>): void {
       args.title.owner.activate();
     }
 
@@ -698,14 +685,14 @@ namespace Private {
      * Handle the `widgetRemoved` signal from the stacked panel.
      */
     private _onWidgetRemoved(sender: StackedPanel, widget: Widget): void {
-      this._items.removeAt(this._findWidgetIndex(widget));
+      ArrayExt.removeAt(this._items, this._findWidgetIndex(widget));
       this._sideBar.removeTab(widget.title);
       this._refreshVisibility();
     }
 
+    private _items = new Array<Private.IRankItem>();
     private _side: string;
-    private _sideBar: TabBar;
+    private _sideBar: TabBar<Widget>;
     private _stackedPanel: StackedPanel;
-    private _items = new Vector<Private.IRankItem>();
   }
 }

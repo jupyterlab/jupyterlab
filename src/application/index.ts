@@ -2,11 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  utils
-} from '@jupyterlab/services';
-
-import {
-  Application
+  Application, IPlugin
 } from '@phosphor/application';
 
 import {
@@ -45,7 +41,7 @@ namespace CommandIDs {
  * The type for all JupyterLab plugins.
  */
 export
-type JupyterLabPlugin<T> = Application.IPlugin<JupyterLab, T>;
+type JupyterLabPlugin<T> = IPlugin<JupyterLab, T>;
 
 
 /**
@@ -56,8 +52,8 @@ class JupyterLab extends Application<ApplicationShell> {
   /**
    * Construct a new JupyterLab object.
    */
-  constructor(options: JupyterLab.IOptions = {}) {
-    super();
+  constructor(options: JupyterLab.IOptions = { shell: new ApplicationShell() }) {
+    super(options);
     this._info = {
       gitDescription: options.gitDescription || 'unknown',
       namespace: options.namespace || 'jupyterlab',
@@ -88,26 +84,6 @@ class JupyterLab extends Application<ApplicationShell> {
    */
   get restored(): Promise<IInstanceRestorer.ILayout> {
     return this.shell.restored;
-  }
-
-  /**
-   * A promise that resolves when the JupyterLab application is started.
-   */
-  get started(): Promise<void> {
-    return this._startedDelegate.promise;
-  }
-
-  /**
-   * Start the JupyterLab application.
-   */
-  start(options: Application.IStartOptions = {}): Promise<void> {
-    if (this._isStarted) {
-      return Promise.resolve(void 0);
-    }
-    this._isStarted = true;
-    return super.start(options).then(() => {
-      this._startedDelegate.resolve(void 0);
-    });
   }
 
   /**
@@ -144,17 +120,8 @@ class JupyterLab extends Application<ApplicationShell> {
     window.addEventListener('resize', this);
   }
 
-  /**
-   * Create the application shell for the JupyterLab application.
-   */
-  protected createShell(): ApplicationShell {
-    return new ApplicationShell();
-  }
-
   private _info: JupyterLab.IInfo;
-  private _isStarted = false;
   private _loader: ModuleLoader | null;
-  private _startedDelegate = new utils.PromiseDelegate<void>();
 }
 
 
@@ -167,7 +134,7 @@ namespace JupyterLab {
    * The options used to initialize a JupyterLab object.
    */
   export
-  interface IOptions {
+  interface IOptions extends Application.IOptions<ApplicationShell> {
     /**
      * The git description of the JupyterLab application.
      */
