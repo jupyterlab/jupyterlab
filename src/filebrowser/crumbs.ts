@@ -2,16 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ArrayExt.findFirstIndex
-} from 'phosphor/lib/algorithm/searching';
-
-import {
-  ReadonlyArray
-} from 'phosphor/lib/algorithm/sequence';
-
-import {
-  Vector
-} from 'phosphor/lib/collections/vector';
+  ArrayExt
+} from '@phosphor/algorithm';
 
 import {
   Message
@@ -22,8 +14,8 @@ import {
 } from '@phosphor/dragdrop';
 
 import {
-  hitTest
-} from 'phosphor/lib/dom/query';
+  ElementExt
+} from '@phosphor/domutils';
 
 import {
   Widget
@@ -87,7 +79,7 @@ class BreadCrumbs extends Widget {
     this.addClass(BREADCRUMB_CLASS);
     this._crumbs = Private.createCrumbs();
     this._crumbSeps = Private.createCrumbSeparators();
-    this.node.appendChild(this._crumbs.at(Private.Crumb.Home));
+    this.node.appendChild(this._crumbs[Private.Crumb.Home]);
     this._model.refreshed.connect(this.update, this);
   }
 
@@ -190,10 +182,10 @@ class BreadCrumbs extends Widget {
    */
   private _evtDragEnter(event: IDragEvent): void {
     if (event.mimeData.hasData(utils.CONTENTS_MIME)) {
-      let index = ArrayExt.findFirstIndex(this._crumbs, node => hitTest(node, event.clientX, event.clientY));
+      let index = ArrayExt.findFirstIndex(this._crumbs, node => ElementExt.hitTest(node, event.clientX, event.clientY));
       if (index !== -1) {
         if (index !== Private.Crumb.Current) {
-          this._crumbs.at(index).classList.add(utils.DROP_TARGET_CLASS);
+          this._crumbs[index].classList.add(utils.DROP_TARGET_CLASS);
           event.preventDefault();
           event.stopPropagation();
         }
@@ -224,9 +216,9 @@ class BreadCrumbs extends Widget {
     if (dropTarget) {
       dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
     }
-    let index = ArrayExt.findFirstIndex(this._crumbs, node => hitTest(node, event.clientX, event.clientY));
+    let index = ArrayExt.findFirstIndex(this._crumbs, node => ElementExt.hitTest(node, event.clientX, event.clientY));
     if (index !== -1) {
-      this._crumbs.at(index).classList.add(utils.DROP_TARGET_CLASS);
+      this._crumbs[index].classList.add(utils.DROP_TARGET_CLASS);
     }
   }
 
@@ -340,7 +332,7 @@ namespace Private {
    */
   export
   function updateCrumbs(breadcrumbs: ReadonlyArray<HTMLElement>, separators: ReadonlyArray<HTMLElement>, path: string) {
-    let node = breadcrumbs.at(0).parentNode;
+    let node = breadcrumbs[0].parentNode;
 
     // Remove all but the home node.
     while (node.firstChild.nextSibling) {
@@ -349,24 +341,24 @@ namespace Private {
 
     let parts = path.split('/');
     if (parts.length > 2) {
-      node.appendChild(separators.at(0));
-      node.appendChild(breadcrumbs.at(Crumb.Ellipsis));
+      node.appendChild(separators[0]);
+      node.appendChild(breadcrumbs[Crumb.Ellipsis]);
       let grandParent = parts.slice(0, parts.length - 2).join('/');
-      breadcrumbs.at(Crumb.Ellipsis).title = grandParent;
+      breadcrumbs[Crumb.Ellipsis].title = grandParent;
     }
 
     if (path) {
       if (parts.length >= 2) {
-        node.appendChild(separators.at(1));
-        breadcrumbs.at(Crumb.Parent).textContent = parts[parts.length - 2];
-        node.appendChild(breadcrumbs.at(Crumb.Parent));
+        node.appendChild(separators[1]);
+        breadcrumbs[Crumb.Parent].textContent = parts[parts.length - 2];
+        node.appendChild(breadcrumbs[Crumb.Parent]);
         let parent = parts.slice(0, parts.length - 1).join('/');
-        breadcrumbs.at(Crumb.Parent).title = parent;
+        breadcrumbs[Crumb.Parent].title = parent;
       }
-      node.appendChild(separators.at(2));
-      breadcrumbs.at(Crumb.Current).textContent = parts[parts.length - 1];
-      node.appendChild(breadcrumbs.at(Crumb.Current));
-      breadcrumbs.at(Crumb.Current).title = path;
+      node.appendChild(separators[2]);
+      breadcrumbs[Crumb.Current].textContent = parts[parts.length - 1];
+      node.appendChild(breadcrumbs[Crumb.Current]);
+      breadcrumbs[Crumb.Current].title = path;
     }
   }
 
@@ -383,7 +375,7 @@ namespace Private {
     parent.className = BREADCRUMB_ITEM_CLASS;
     let current = document.createElement('span');
     current.className = BREADCRUMB_ITEM_CLASS;
-    return new Vector<HTMLElement>([home, ellipsis, parent, current]);
+    return [home, ellipsis, parent, current];
   }
 
   /**
@@ -391,11 +383,11 @@ namespace Private {
    */
   export
   function createCrumbSeparators(): ReadonlyArray<HTMLElement> {
-    let items = new Vector<HTMLElement>();
+    let items: HTMLElement[] = [];
     for (let i = 0; i < 3; i++) {
       let item = document.createElement('i');
       item.className = 'fa fa-angle-right';
-      items.pushBack(item);
+      items.push(item);
     }
     return items;
   }

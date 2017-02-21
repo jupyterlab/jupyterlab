@@ -15,18 +15,10 @@ import {
 
 import {
   CommandRegistry
-} from '@phosphor/widgets';
+} from '@phosphor/commands';
 
 import {
-  Keymap
-} from '@phosphor/widgetkeymap';
-
-import {
-  Menu
-} from '@phosphor/widgets';
-
-import {
-  Widget
+  Menu, Widget
 } from '@phosphor/widgets';
 
 import {
@@ -144,7 +136,6 @@ class FileButtons extends Widget {
     node.appendChild(this._buttons.refresh);
 
     this._commands = options.commands;
-    this._keymap = options.keymap;
     this._manager = options.manager;
   }
 
@@ -155,7 +146,6 @@ class FileButtons extends Widget {
     this._buttons = null;
     this._commands = null;
     this._input = null;
-    this._keymap = null;
     this._manager = null;
     this._model = null;
     super.dispose();
@@ -255,8 +245,7 @@ class FileButtons extends Widget {
 
     // Create a new dropdown menu and snap the button geometry.
     let commands = this._commands;
-    let keymap = this._keymap;
-    let dropdown = Private.createDropdownMenu(this, commands, keymap);
+    let dropdown = Private.createDropdownMenu(this, commands);
     let rect = button.getBoundingClientRect();
 
     // Mark the button as active.
@@ -321,7 +310,6 @@ class FileButtons extends Widget {
   private _buttons = Private.createButtons();
   private _commands: CommandRegistry = null;
   private _input = Private.createUploadInput();
-  private _keymap: Keymap = null;
   private _manager: DocumentManager = null;
   private _model: FileBrowserModel;
 }
@@ -341,11 +329,6 @@ namespace FileButtons {
      * The command registry for use with the file buttons.
      */
     commands: CommandRegistry;
-
-    /**
-     * The keymap for use with the file buttons.
-     */
-    keymap: Keymap;
 
     /**
      * A file browser model instance.
@@ -461,8 +444,8 @@ namespace Private {
    * Create a new dropdown menu for the create new button.
    */
   export
-  function createDropdownMenu(widget: FileButtons, commands: CommandRegistry, keymap: Keymap): Menu {
-    let menu = new Menu({ commands, keymap });
+  function createDropdownMenu(widget: FileButtons, commands: CommandRegistry): Menu {
+    let menu = new Menu({ commands });
     let prefix = `file-buttons-${++id}`;
     let disposables = new DisposableSet();
     let registry = widget.manager.registry;
