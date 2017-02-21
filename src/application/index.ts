@@ -52,8 +52,8 @@ class JupyterLab extends Application<ApplicationShell> {
   /**
    * Construct a new JupyterLab object.
    */
-  constructor(options: JupyterLab.IOptions = { shell: new ApplicationShell() }) {
-    super(options);
+  constructor(options: JupyterLab.IOptions = {}) {
+    super({ shell: new ApplicationShell() });
     this._info = {
       gitDescription: options.gitDescription || 'unknown',
       namespace: options.namespace || 'jupyterlab',
@@ -134,7 +134,7 @@ namespace JupyterLab {
    * The options used to initialize a JupyterLab object.
    */
   export
-  interface IOptions extends Application.IOptions<ApplicationShell> {
+  interface IOptions {
     /**
      * The git description of the JupyterLab application.
      */
