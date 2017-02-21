@@ -341,7 +341,11 @@ class ObservableMap<T> implements IObservableMap<T> {
     //Insert new key-value pairs as necessary
     for(let i=0; i<keyList.length; i++) {
       let key = keyList[i];
-      if(this._map.get(key) !== map.get(key)) {
+      let oldValue = this._map.get(key);
+      let newValue = map.get(key);
+      if(oldValue && (oldValue as any).link) {
+        (oldValue as any).link(newValue);
+      } else {
         this.set(key, map.get(key));
       }
     }
