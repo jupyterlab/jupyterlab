@@ -6,7 +6,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  Signal.disconnectReceiver
+  Signal
 } from '@phosphor/signaling';
 
 import {

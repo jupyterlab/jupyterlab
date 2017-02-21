@@ -10,7 +10,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  Signal.clearData, defineSignal, ISignal
+  ISignal, Signal
 } from '@phosphor/signaling';
 
 import {
@@ -57,7 +57,9 @@ class CSVToolbar extends Widget {
   /**
    * A signal emitted when the delimiter selection has changed.
    */
-  readonly delimiterChanged: ISignal<this, string>;
+  get delimiterChanged(): ISignal<this, string> {
+    return this._delimiterChanged;
+  }
 
   /**
    * The delimiter dropdown menu.
@@ -79,7 +81,7 @@ class CSVToolbar extends Widget {
   handleEvent(event: Event): void {
     switch (event.type) {
     case 'change':
-      this.delimiterChanged.emit(this.selectNode.value);
+      this._delimiterChanged.emit(this.selectNode.value);
       break;
     default:
       break;
@@ -99,11 +101,9 @@ class CSVToolbar extends Widget {
   protected onBeforeDetach(msg: Message): void {
     this.selectNode.removeEventListener('change', this);
   }
+
+  private _delimiterChanged = new Signal<this, string>(this);
 }
-
-
-// Define the signals for the `CSVToolbar` class.
-defineSignal(CSVToolbar.prototype, 'delimiterChanged');
 
 
 /**
