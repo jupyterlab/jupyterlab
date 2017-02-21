@@ -43,7 +43,7 @@ import {
 
 
 import {
-  IRealtime
+  IRealtime, IRealtimeHandler
 } from '../common/realtime';
 
 import {
@@ -208,6 +208,19 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
   app.resolveOptionalService(IRealtime).then((realtimeServices: IRealtime)=>{
     realtimeServices.addTracker(tracker, (widget: EditorWidget) => {
       return widget.context.model as DocumentModel;
+    }, (widget: EditorWidget)=> {
+      let localCollaborator = widget.model.realtimeHandler.localCollaborator;
+      widget.editor.uuid = localCollaborator.sessionId;
+      if(localCollaborator.color) {
+        let color = localCollaborator.color;
+        let r: number = parseInt(color.slice(1,3), 16);
+        let g: number  = parseInt(color.slice(3,5), 16);
+        let b: number  = parseInt(color.slice(5,7), 16);
+        widget.editor.selectionStyle = {
+          css: `background-color: rgba( ${r}, ${g}, ${b}, 0.1)`,
+          color: localCollaborator.color
+        };
+      }
     });
   }).catch( ()=>{/*no-op*/} );
 

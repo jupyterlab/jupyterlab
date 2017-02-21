@@ -90,7 +90,7 @@ interface IRealtime {
    *   and returns an object that implements `IRealtimeModel`,
    *   the actual collaborative data model.
    */
-  addTracker(tracker: InstanceTracker<Widget>, getModel: (widget: Widget)=>IRealtimeModel): void; 
+  addTracker(tracker: InstanceTracker<Widget>, getModel: (widget: Widget)=>IRealtimeModel, callback?: (widget: Widget)=>void): void;
 
   /**
    * Get a realtime model for a widget, for
@@ -102,7 +102,7 @@ interface IRealtime {
    * @returns an `IRealtimeModel` if `widget` belongs
    * to one of the realtime trackers, `null` otherwise.
    */
-  checkTrackers( widget: Widget ): IRealtimeModel;
+  checkTrackers( widget: Widget ): [IRealtimeModel, (widget: Widget)=>void];
 
   /**
    * The realtime services may require some setup before
