@@ -132,11 +132,11 @@ const CONSOLE_REGEX = /^console-(\d)+-[0-9a-f]+$/;
  */
 function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, palette: ICommandPalette, pathTracker: IPathTracker, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: IInstanceRestorer): IConsoleTracker {
   let manager = services.sessions;
-  let { commands, keymap } = app;
+  let { commands } = app;
   let category = 'Console';
   let command: string;
   let count = 0;
-  let menu = new Menu({ commands, keymap });
+  let menu = new Menu({ commands });
 
   // Create an instance tracker for all console panels.
   const tracker = new InstanceTracker<ConsolePanel>({ namespace: 'console' });

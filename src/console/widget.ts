@@ -14,7 +14,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  Signal.clearData, defineSignal, ISignal
+  ISignal, Signal
 } from '@phosphor/signaling';
 
 import {
@@ -160,12 +160,16 @@ class CodeConsole extends Widget {
   /**
    * A signal emitted when the console finished executing its prompt.
    */
-  readonly executed: ISignal<this, Date>;
+  get executed(): ISignal<this, Date> {
+    return this._executed;
+  }
 
   /**
    * A signal emitted when a new prompt is created.
    */
-  readonly promptCreated: ISignal<this, CodeCellWidget>;
+  get promptCreated(): ISignal<this, CodeCellWidget> {
+    return this._promptCreated;
+  }
 
   /**
    * The content factory used by the console.
@@ -207,7 +211,7 @@ class CodeConsole extends Widget {
    */
   get prompt(): CodeCellWidget | null {
     let inputLayout = (this._input.layout as PanelLayout);
-    return inputLayout.widgets.at(0) as CodeCellWidget || null;
+    return inputLayout.widgets[0] as CodeCellWidget || null;
   }
 
   /**
@@ -234,7 +238,7 @@ class CodeConsole extends Widget {
     // Dispose all the content cells except the first, which is the banner.
     let cells = this._content.widgets;
     while (cells.length > 1) {
-      cells.at(1).dispose();
+      cells[1].dispose();
     }
   }
 
@@ -427,7 +431,7 @@ class CodeConsole extends Widget {
       prompt.editor.focus();
       this.update();
     }
-    this.promptCreated.emit(prompt);
+    this._promptCreated.emit(prompt);
   }
 
   /**
@@ -490,7 +494,7 @@ class CodeConsole extends Widget {
       }
       cell.model.contentChanged.disconnect(this.update, this);
       this.update();
-      this.executed.emit(new Date());
+      this._executed.emit(new Date());
     };
     let onFailure = () => {
       if (this.isDisposed) {
@@ -507,7 +511,7 @@ class CodeConsole extends Widget {
    */
   private _handleInfo(info: KernelMessage.IInfoReply): void {
     let layout = this._content.layout as PanelLayout;
-    let banner = layout.widgets.at(0) as RawCellWidget;
+    let banner = layout.widgets[0] as RawCellWidget;
     banner.model.value.text = info.banner;
     let lang = info.language_info as nbformat.ILanguageInfoMetadata;
     this._mimetype = this._mimeTypeService.getMimeTypeByLanguage(lang);
@@ -603,12 +607,9 @@ class CodeConsole extends Widget {
   private _history: IConsoleHistory = null;
   private _input: Panel = null;
   private _mimetype = 'text/x-ipython';
+  private _executed = new Signal<this, Date>(this);
+  private _promptCreated = new Signal<this, CodeCellWidget>(this);
 }
-
-
-// Define the signals for the `CodeConsole` class.
-defineSignal(CodeConsole.prototype, 'executed');
-defineSignal(CodeConsole.prototype, 'promptCreated');
 
 
 /**
