@@ -9,7 +9,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  findIndex
+  ArrayExt.findFirstIndex
 } from 'phosphor/lib/algorithm/searching';
 
 import {
@@ -98,7 +98,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     model.selections.changed.connect(this._onSelectionsChanged, this);
 
     CodeMirror.on(editor, 'keydown', (editor, event) => {
-      let index = findIndex(this._keydownHandlers, handler => {
+      let index = ArrayExt.findFirstIndex(this._keydownHandlers, handler => {
         if (handler(this, event) === true) {
           event.preventDefault();
           return true;

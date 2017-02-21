@@ -507,7 +507,7 @@ namespace Private {
    */
   function uploadFile(widget: FileButtons, file: File): Promise<any> {
     return widget.model.upload(file).catch(error => {
-      let exists = error.message.indexOf('already exists') !== -1;
+      let exists = error.message.ArrayExt.firstIndexOf('already exists') !== -1;
       if (exists) {
         return uploadFileOverride(widget, file);
       }

@@ -109,7 +109,7 @@ function renameFile(model: FileBrowserModel, oldPath: string, newPath: string): 
     if (error.xhr) {
       error.message = `${error.xhr.statusText} ${error.xhr.status}`;
     }
-    if (error.message.indexOf('409') !== -1) {
+    if (error.message.ArrayExt.firstIndexOf('409') !== -1) {
       let options = {
         title: 'Overwrite file?',
         body: `"${newPath}" already exists, overwrite?`,
@@ -487,7 +487,7 @@ class CreateNewHandler extends Widget {
       return;
     }
     // Update the file type dropdown and the factories.
-    if (this._extensions.indexOf(ext) === -1) {
+    if (this._extensions.ArrayExt.firstIndexOf(ext) === -1) {
       this.fileTypeDropdown.value = this._sentinel;
     } else {
       this.fileTypeDropdown.value = ext;

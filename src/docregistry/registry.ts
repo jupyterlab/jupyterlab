@@ -10,7 +10,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  find, findIndex, indexOf
+  find, ArrayExt.findFirstIndex, ArrayExt.firstIndexOf
 } from 'phosphor/lib/algorithm/searching';
 
 import {
@@ -127,7 +127,7 @@ class DocumentRegistry implements IDisposable {
     }
     this._widgetFactories[name] = factory;
     for (let ext of factory.defaultFor) {
-      if (factory.fileExtensions.indexOf(ext) === -1) {
+      if (factory.fileExtensions.ArrayExt.firstIndexOf(ext) === -1) {
         continue;
       }
       if (ext === '*') {
@@ -225,7 +225,7 @@ class DocumentRegistry implements IDisposable {
       this._extenders[widgetName] = new Vector<DocumentRegistry.WidgetExtension>();
     }
     let extenders = this._extenders[widgetName];
-    let index = indexOf(extenders, extension);
+    let index = ArrayExt.firstIndexOf(extenders, extension);
     if (index !== -1) {
       console.warn(`Duplicate registered extension for ${widgetName}`);
       return new DisposableDelegate(null);
@@ -281,7 +281,7 @@ class DocumentRegistry implements IDisposable {
    * @returns A disposable which will unregister the creator.
    */
   addCreator(creator: DocumentRegistry.IFileCreator): IDisposable {
-    let index = findIndex(this._creators, (value) => {
+    let index = ArrayExt.findFirstIndex(this._creators, (value) => {
       return value.name.localeCompare(creator.name) > 0;
     });
     if (index !== -1) {
@@ -1051,7 +1051,7 @@ namespace Private {
     if (extension === '.*') {
       return '*';
     }
-    if (extension.indexOf('.') !== 0) {
+    if (extension.ArrayExt.firstIndexOf('.') !== 0) {
       extension = `.${extension}`;
     }
     return extension.toLowerCase();

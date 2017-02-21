@@ -10,7 +10,7 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  findIndex
+  ArrayExt.findFirstIndex
 } from 'phosphor/lib/algorithm/searching';
 
 import {
@@ -375,7 +375,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    */
   resolveUrl(url: string): Promise<string> {
     // Ignore urls that have a protocol.
-    if (utils.urlParse(url).protocol || url.indexOf('//') === 0) {
+    if (utils.urlParse(url).protocol || url.ArrayExt.firstIndexOf('//') === 0) {
       return Promise.resolve(url);
     }
     let cwd = ContentsManager.dirname(this._path);
@@ -388,7 +388,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    */
   getDownloadUrl(path: string): Promise<string> {
     // Ignore urls that have a protocol.
-    if (utils.urlParse(path).protocol || path.indexOf('//') === 0) {
+    if (utils.urlParse(path).protocol || path.ArrayExt.firstIndexOf('//') === 0) {
       return Promise.resolve(path);
     }
     return this._manager.contents.getDownloadUrl(path);
@@ -501,7 +501,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     if (!session) {
       return;
     }
-    let index = findIndex(models, model => model.id === session.id);
+    let index = ArrayExt.findFirstIndex(models, model => model.id === session.id);
     if (index === -1) {
       session.dispose();
       this._session = null;

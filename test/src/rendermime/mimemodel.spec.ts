@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  deepEqual
+  JSONExt.deepEqual
 } from '@phosphor/coreutils';
 
 import {
@@ -95,7 +95,7 @@ describe('rendermime/mimemodel', () => {
         let model = new MimeModel();
         model.data.set('foo', 1);
         model.metadata.set('bar', 'baz');
-        expect(deepEqual(model.toJSON(), {
+        expect(JSONExt.deepEqual(model.toJSON(), {
           trusted: false,
           data: {'foo': 1 },
           metadata: {'bar': 'baz'}

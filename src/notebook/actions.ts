@@ -10,7 +10,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  indexOf
+  ArrayExt.firstIndexOf
 } from 'phosphor/lib/algorithm/searching';
 
 import {
@@ -975,7 +975,7 @@ namespace Private {
     let cell = parent.model.contentFactory.createCodeCell({});
     cell.value.text = text;
     let cells = parent.model.cells;
-    let i = indexOf(cells, child.model);
+    let i = ArrayExt.firstIndexOf(cells, child.model);
     if (i === -1) {
       cells.pushBack(cell);
     } else {

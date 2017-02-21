@@ -264,7 +264,7 @@ function populateKernels(node: HTMLSelectElement, options: IPopulateOptions): vo
   // Add the rest of the kernel names in alphabetical order.
   let otherNames: string[] = [];
   for (let name in specs.kernelspecs) {
-    if (names.indexOf(name) !== -1) {
+    if (names.ArrayExt.firstIndexOf(name) !== -1) {
       continue;
     }
     otherNames.push(name);

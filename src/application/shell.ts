@@ -10,7 +10,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  contains, find, indexOf, findIndex, upperBound
+  contains, find, ArrayExt.firstIndexOf, ArrayExt.findFirstIndex, ArrayExt.upperBound
 } from 'phosphor/lib/algorithm/searching';
 
 import {
@@ -407,7 +407,7 @@ class ApplicationShell extends Widget {
     if (current) {
       let bars = toArray(this._dockPanel.tabBars());
       let len = bars.length;
-      let ci = bars.indexOf(current);
+      let ci = bars.ArrayExt.firstIndexOf(current);
       let prevBar: TabBar = null;
       if (ci > 0) {
         prevBar = bars[ci - 1];
@@ -427,7 +427,7 @@ class ApplicationShell extends Widget {
     if (current) {
       let bars = toArray(this._dockPanel.tabBars());
       let len = bars.length;
-      let ci = bars.indexOf(current);
+      let ci = bars.ArrayExt.firstIndexOf(current);
       let nextBar: TabBar = null;
       if (ci < (len - 1)) {
         nextBar = bars[ci + 1];
@@ -633,14 +633,14 @@ namespace Private {
      * Find the insertion index for a rank item.
      */
     private _findInsertIndex(item: Private.IRankItem): number {
-      return upperBound(this._items, item, Private.itemCmp);
+      return ArrayExt.upperBound(this._items, item, Private.itemCmp);
     }
 
     /**
      * Find the index of the item with the given widget, or `-1`.
      */
     private _findWidgetIndex(widget: Widget): number {
-      return findIndex(this._items, item => item.widget === widget);
+      return ArrayExt.findFirstIndex(this._items, item => item.widget === widget);
     }
 
     /**

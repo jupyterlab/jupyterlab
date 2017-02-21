@@ -396,7 +396,7 @@ class Dialog extends Panel {
     for (let buttonNode of this._buttonNodes) {
       if (buttonNode.contains(event.target as HTMLElement)) {
         this.close();
-        let button = this._buttons[this._buttonNodes.indexOf(buttonNode)];
+        let button = this._buttons[this._buttonNodes.ArrayExt.firstIndexOf(buttonNode)];
         this.resolve(button);
       }
     }

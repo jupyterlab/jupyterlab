@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  ISequence
+  ReadonlyArray
 } from 'phosphor/lib/algorithm/sequence';
 
 import {
@@ -179,7 +179,7 @@ class OutputAreaWidget extends Widget {
   /**
    * A read-only sequence of the widgets in the output area.
    */
-  get widgets(): ISequence<Widget> {
+  get widgets(): ReadonlyArray<Widget> {
     return (this.layout as PanelLayout).widgets;
   }
 

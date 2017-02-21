@@ -14,7 +14,7 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  findIndex, upperBound
+  ArrayExt.findFirstIndex, ArrayExt.upperBound
 } from 'phosphor/lib/algorithm/searching';
 
 import {
@@ -183,7 +183,7 @@ class CellTools extends Widget {
     let tool = options.tool;
     let rank = 'rank' in options ? options.rank : 100;
     let rankItem = { tool, rank };
-    let index = upperBound(this._items, rankItem, Private.itemCmp);
+    let index = ArrayExt.upperBound(this._items, rankItem, Private.itemCmp);
 
     tool.addClass(CHILD_CLASS);
 
@@ -200,7 +200,7 @@ class CellTools extends Widget {
    * Handle the removal of a child
    */
   protected onChildRemoved(msg: ChildMessage): void {
-    let index = findIndex(this._items, item => item.tool === msg.child);
+    let index = ArrayExt.findFirstIndex(this._items, item => item.tool === msg.child);
     if (index !== -1) {
       this._items.removeAt(index);
     }
@@ -624,7 +624,7 @@ namespace CellTools {
       }
       let cellType = activeCell.model.type;
       if (this._validCellTypes.length &&
-          this._validCellTypes.indexOf(cellType) === -1) {
+          this._validCellTypes.ArrayExt.firstIndexOf(cellType) === -1) {
         select.disabled = true;
         return;
       }

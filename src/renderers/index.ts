@@ -28,7 +28,7 @@ class HTMLRenderer implements RenderMime.IRenderer {
    * Whether the renderer can render given the render options.
    */
   canRender(options: RenderMime.IRenderOptions): boolean {
-    return this.mimeTypes.indexOf(options.mimeType) !== -1;
+    return this.mimeTypes.ArrayExt.firstIndexOf(options.mimeType) !== -1;
   }
 
   /**
@@ -54,7 +54,7 @@ class ImageRenderer implements RenderMime.IRenderer {
    * Whether the renderer can render given the render options.
    */
   canRender(options: RenderMime.IRenderOptions): boolean {
-    return this.mimeTypes.indexOf(options.mimeType) !== -1;
+    return this.mimeTypes.ArrayExt.firstIndexOf(options.mimeType) !== -1;
   }
 
   /**
@@ -81,7 +81,7 @@ class TextRenderer implements RenderMime.IRenderer {
    * Whether the renderer can render given the render options.
    */
   canRender(options: RenderMime.IRenderOptions): boolean {
-    return this.mimeTypes.indexOf(options.mimeType) !== -1;
+    return this.mimeTypes.ArrayExt.firstIndexOf(options.mimeType) !== -1;
   }
 
   /**
@@ -109,7 +109,7 @@ class JavaScriptRenderer implements RenderMime.IRenderer {
   canRender(options: RenderMime.IRenderOptions): boolean {
     return (
       options.model.trusted &&
-      this.mimeTypes.indexOf(options.mimeType) !== -1
+      this.mimeTypes.ArrayExt.firstIndexOf(options.mimeType) !== -1
     );
   }
 
@@ -138,7 +138,7 @@ class SVGRenderer implements RenderMime.IRenderer {
   canRender(options: RenderMime.IRenderOptions): boolean {
     return (
       options.model.trusted &&
-      this.mimeTypes.indexOf(options.mimeType) !== -1
+      this.mimeTypes.ArrayExt.firstIndexOf(options.mimeType) !== -1
     );
   }
 
@@ -167,7 +167,7 @@ class PDFRenderer implements RenderMime.IRenderer {
   canRender(options: RenderMime.IRenderOptions): boolean {
     return (
       options.model.trusted &&
-      this.mimeTypes.indexOf(options.mimeType) !== -1
+      this.mimeTypes.ArrayExt.firstIndexOf(options.mimeType) !== -1
     );
   }
 
@@ -194,7 +194,7 @@ class LatexRenderer implements RenderMime.IRenderer  {
    * Whether the renderer can render given the render options.
    */
   canRender(options: RenderMime.IRenderOptions): boolean {
-    return this.mimeTypes.indexOf(options.mimeType) !== -1;
+    return this.mimeTypes.ArrayExt.firstIndexOf(options.mimeType) !== -1;
   }
 
   /**
@@ -220,7 +220,7 @@ class MarkdownRenderer implements RenderMime.IRenderer {
    * Whether the renderer can render given the render options.
    */
   canRender(options: RenderMime.IRenderOptions): boolean {
-    return this.mimeTypes.indexOf(options.mimeType) !== -1;
+    return this.mimeTypes.ArrayExt.firstIndexOf(options.mimeType) !== -1;
   }
 
   /**

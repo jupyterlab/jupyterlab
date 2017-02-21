@@ -10,7 +10,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  findIndex
+  ArrayExt.findFirstIndex
 } from 'phosphor/lib/algorithm/searching';
 
 import {
@@ -345,7 +345,7 @@ class FileBrowserModel implements IDisposable, IPathTracker {
    */
   protected stopIfNeeded(path: string): Promise<void> {
     let sessions = toArray(this._sessions);
-    let index = findIndex(sessions, value => value.notebook.path === path);
+    let index = ArrayExt.findFirstIndex(sessions, value => value.notebook.path === path);
     if (index !== -1) {
       let count = 0;
       let model = sessions[index];
@@ -370,7 +370,7 @@ class FileBrowserModel implements IDisposable, IPathTracker {
     let path = this._model.path;
     path = path ? path + '/' + file.name : file.name;
     let name = file.name;
-    let isNotebook = file.name.indexOf('.ipynb') !== -1;
+    let isNotebook = file.name.ArrayExt.firstIndexOf('.ipynb') !== -1;
     let type: Contents.ContentType = isNotebook ? 'notebook' : 'file';
     let format: Contents.FileFormat = isNotebook ? 'json' : 'base64';
 

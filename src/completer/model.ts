@@ -6,7 +6,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  deepEqual
+  JSONExt.deepEqual
 } from '@phosphor/coreutils';
 
 import {
@@ -39,7 +39,7 @@ class CompleterModel implements CompleterWidget.IModel {
     return this._original;
   }
   set original(newValue: CompleterWidget.ITextState) {
-    if (deepEqual(newValue, this._original)) {
+    if (JSONExt.deepEqual(newValue, this._original)) {
       return;
     }
     this._reset();
@@ -54,7 +54,7 @@ class CompleterModel implements CompleterWidget.IModel {
     return this._current;
   }
   set current(newValue: CompleterWidget.ITextState) {
-    if (deepEqual(newValue, this._current)) {
+    if (JSONExt.deepEqual(newValue, this._current)) {
       return;
     }
     // Original request must always be set before a text change. If it isn't
@@ -173,7 +173,7 @@ class CompleterModel implements CompleterWidget.IModel {
    */
   setOptions(newValue: IterableOrArrayLike<string>) {
     let values = toArray(newValue || []);
-    if (deepEqual(values, this._options)) {
+    if (JSONExt.deepEqual(values, this._options)) {
       return;
     }
     if (values.length) {

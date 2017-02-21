@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  deepEqual, isPrimitive, JSONObject, JSONValue
+  JSONExt.deepEqual, JSONExt.isPrimitive, JSONObject, JSONValue
 } from '@phosphor/coreutils';
 
 import {
@@ -92,7 +92,7 @@ class ObservableJSON extends ObservableMap<JSONValue> {
    */
   constructor(options: ObservableJSON.IOptions = {}) {
     super({
-      itemCmp: deepEqual,
+      itemCmp: JSONExt.deepEqual,
       values: options.values
     });
   }
@@ -104,7 +104,7 @@ class ObservableJSON extends ObservableMap<JSONValue> {
     let out: JSONObject = Object.create(null);
     for (let key of this.keys()) {
       let value = this.get(key);
-      if (isPrimitive(value)) {
+      if (JSONExt.isPrimitive(value)) {
         out[key] = value;
       } else {
         out[key] = JSON.parse(JSON.stringify(value));
@@ -296,7 +296,7 @@ class ObservableJSONWidget extends Widget {
       let value = JSON.parse(this.editor.model.value.text);
       this.removeClass(ERROR_CLASS);
       this._inputDirty = (
-        !this._changeGuard && !deepEqual(value, this._originalValue)
+        !this._changeGuard && !JSONExt.deepEqual(value, this._originalValue)
       );
     } catch (err) {
       this.addClass(ERROR_CLASS);
@@ -345,7 +345,7 @@ class ObservableJSONWidget extends Widget {
     let source = this.source;
     // If it is in user and has changed from old, set in current.
     for (let key in user) {
-      if (!deepEqual(user[key], old[key])) {
+      if (!JSONExt.deepEqual(user[key], old[key])) {
         current[key] = user[key];
       }
     }

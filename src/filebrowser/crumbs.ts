@@ -2,11 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  findIndex
+  ArrayExt.findFirstIndex
 } from 'phosphor/lib/algorithm/searching';
 
 import {
-  ISequence
+  ReadonlyArray
 } from 'phosphor/lib/algorithm/sequence';
 
 import {
@@ -171,7 +171,7 @@ class BreadCrumbs extends Widget {
     let node = event.target as HTMLElement;
     while (node && node !== this.node) {
       if (node.classList.contains(BREADCRUMB_ITEM_CLASS)) {
-        let index = findIndex(this._crumbs, value => value === node);
+        let index = ArrayExt.findFirstIndex(this._crumbs, value => value === node);
         this._model.cd(BREAD_CRUMB_PATHS[index]).catch(error =>
           utils.showErrorMessage('Open Error', error)
         );
@@ -190,7 +190,7 @@ class BreadCrumbs extends Widget {
    */
   private _evtDragEnter(event: IDragEvent): void {
     if (event.mimeData.hasData(utils.CONTENTS_MIME)) {
-      let index = findIndex(this._crumbs, node => hitTest(node, event.clientX, event.clientY));
+      let index = ArrayExt.findFirstIndex(this._crumbs, node => hitTest(node, event.clientX, event.clientY));
       if (index !== -1) {
         if (index !== Private.Crumb.Current) {
           this._crumbs.at(index).classList.add(utils.DROP_TARGET_CLASS);
@@ -224,7 +224,7 @@ class BreadCrumbs extends Widget {
     if (dropTarget) {
       dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
     }
-    let index = findIndex(this._crumbs, node => hitTest(node, event.clientX, event.clientY));
+    let index = ArrayExt.findFirstIndex(this._crumbs, node => hitTest(node, event.clientX, event.clientY));
     if (index !== -1) {
       this._crumbs.at(index).classList.add(utils.DROP_TARGET_CLASS);
     }
@@ -255,7 +255,7 @@ class BreadCrumbs extends Widget {
     }
 
     // Get the path based on the target node.
-    let index = findIndex(this._crumbs, node => node === target);
+    let index = ArrayExt.findFirstIndex(this._crumbs, node => node === target);
     if (index === -1) {
       return;
     }
@@ -271,7 +271,7 @@ class BreadCrumbs extends Widget {
         if (error.xhr) {
           error.message = `${error.xhr.status}: error.statusText`;
         }
-        if (error.message.indexOf('409') !== -1) {
+        if (error.message.ArrayExt.firstIndexOf('409') !== -1) {
           let options = {
             title: 'Overwrite file?',
             body: `"${newPath}" already exists, overwrite?`,
@@ -295,8 +295,8 @@ class BreadCrumbs extends Widget {
   }
 
   private _model: FileBrowserModel = null;
-  private _crumbs: ISequence<HTMLElement> = null;
-  private _crumbSeps: ISequence<HTMLElement> = null;
+  private _crumbs: ReadonlyArray<HTMLElement> = null;
+  private _crumbSeps: ReadonlyArray<HTMLElement> = null;
 }
 
 
@@ -339,7 +339,7 @@ namespace Private {
    * Populate the breadcrumb node.
    */
   export
-  function updateCrumbs(breadcrumbs: ISequence<HTMLElement>, separators: ISequence<HTMLElement>, path: string) {
+  function updateCrumbs(breadcrumbs: ReadonlyArray<HTMLElement>, separators: ReadonlyArray<HTMLElement>, path: string) {
     let node = breadcrumbs.at(0).parentNode;
 
     // Remove all but the home node.
@@ -374,7 +374,7 @@ namespace Private {
    * Create the breadcrumb nodes.
    */
   export
-  function createCrumbs(): ISequence<HTMLElement> {
+  function createCrumbs(): ReadonlyArray<HTMLElement> {
     let home = document.createElement('span');
     home.className = MATERIAL_CLASS + ' ' + BREADCRUMB_HOME + ' ' + BREADCRUMB_ITEM_CLASS;
     let ellipsis = document.createElement('span');
@@ -390,7 +390,7 @@ namespace Private {
    * Create the breadcrumb separator nodes.
    */
   export
-  function createCrumbSeparators(): ISequence<HTMLElement> {
+  function createCrumbSeparators(): ReadonlyArray<HTMLElement> {
     let items = new Vector<HTMLElement>();
     for (let i = 0; i < 3; i++) {
       let item = document.createElement('i');

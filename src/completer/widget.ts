@@ -406,7 +406,7 @@ class CompleterWidget extends Widget {
     let items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
     let subset = Private.commonSubset(Private.itemValues(items));
     let query = this.model.query;
-    if (subset && subset !== query && subset.indexOf(query) === 0) {
+    if (subset && subset !== query && subset.ArrayExt.firstIndexOf(query) === 0) {
       this.model.query = subset;
       this.selected.emit(subset);
       this.update();

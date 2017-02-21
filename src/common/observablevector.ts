@@ -6,11 +6,11 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  findIndex, indexOf
+  ArrayExt.findFirstIndex, ArrayExt.firstIndexOf
 } from 'phosphor/lib/algorithm/searching';
 
 import {
-  ISequence
+  ReadonlyArray
 } from 'phosphor/lib/algorithm/sequence';
 
 import {
@@ -30,7 +30,7 @@ import {
  * A vector which can be observed for changes.
  */
 export
-interface IObservableVector<T> extends IDisposable, ISequence<T> {
+interface IObservableVector<T> extends IDisposable, ReadonlyArray<T> {
   /**
    * A signal emitted when the vector has changed.
    */
@@ -440,7 +440,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    */
   remove(value: T): number {
     let itemCmp = this._itemCmp;
-    let index = findIndex(this, item => itemCmp(item, value));
+    let index = ArrayExt.findFirstIndex(this, item => itemCmp(item, value));
     this.removeAt(index);
     return index;
   }

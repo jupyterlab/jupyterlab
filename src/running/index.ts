@@ -346,7 +346,7 @@ class RunningSessions extends Widget {
     this._runningSessions = [];
     for (let session of models) {
       let name = session.notebook.path.split('/').pop();
-      if (name.indexOf('.') !== -1 || CONSOLE_REGEX.test(name)) {
+      if (name.ArrayExt.firstIndexOf('.') !== -1 || CONSOLE_REGEX.test(name)) {
         this._runningSessions.push(session);
       }
     }
@@ -665,7 +665,7 @@ namespace RunningSessions {
       let icon = findElement(node, ITEM_ICON_CLASS);
       let path = model.notebook.path;
       let name = path.split('/').pop();
-      if (name.indexOf('.ipynb') !== -1) {
+      if (name.ArrayExt.firstIndexOf('.ipynb') !== -1) {
         icon.className = `${ITEM_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
       } else if (CONSOLE_REGEX.test(name)) {
         icon.className = `${ITEM_ICON_CLASS} ${CONSOLE_ICON_CLASS}`;

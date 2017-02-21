@@ -14,11 +14,11 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  find, findIndex, indexOf
+  find, ArrayExt.findFirstIndex, ArrayExt.firstIndexOf
 } from 'phosphor/lib/algorithm/searching';
 
 import {
-  ISequence
+  ReadonlyArray
 } from 'phosphor/lib/algorithm/sequence';
 
 import {
@@ -245,8 +245,8 @@ class StaticNotebook extends Widget {
   /**
    * A read-only sequence of the widgets in the notebook.
    */
-  get widgets(): ISequence<BaseCellWidget> {
-    return (this.layout as PanelLayout).widgets as ISequence<BaseCellWidget>;
+  get widgets(): ReadonlyArray<BaseCellWidget> {
+    return (this.layout as PanelLayout).widgets as ReadonlyArray<BaseCellWidget>;
   }
 
   /**
@@ -1075,7 +1075,7 @@ class Notebook extends StaticNotebook {
     // Then find the corresponding child and select it.
     while (node && node !== this.node) {
       if (node.classList.contains(NB_CELL_CLASS)) {
-        let i = findIndex(this.widgets, widget => widget.node === node);
+        let i = ArrayExt.findFirstIndex(this.widgets, widget => widget.node === node);
         if (i !== -1) {
           return i;
         }
@@ -1323,7 +1323,7 @@ class Notebook extends StaticNotebook {
       each(toremove, widget => {
         this.model.cells.remove(widget.model);
       });
-      this.activeCellIndex = indexOf(cells, activeCell);
+      this.activeCellIndex = ArrayExt.firstIndexOf(cells, activeCell);
     });
 
   }

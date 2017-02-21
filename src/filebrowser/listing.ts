@@ -10,7 +10,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  find, findIndex, indexOf
+  find, ArrayExt.findFirstIndex, ArrayExt.firstIndexOf
 } from 'phosphor/lib/algorithm/searching';
 
 import {
@@ -431,7 +431,7 @@ class DirListing extends Widget {
     let items = this._sortedItems;
     let paths = toArray(map(items, item => item.path));
     each(this._model.sessions(), session => {
-      let index = indexOf(paths, session.notebook.path);
+      let index = ArrayExt.firstIndexOf(paths, session.notebook.path);
       if (this._selection[items.at(index).name]) {
         promises.push(this._model.shutdown(session.id));
       }
@@ -453,7 +453,7 @@ class DirListing extends Widget {
     if (selected.length === 1 || keepExisting) {
       // Select the next item.
       let name = selected[selected.length - 1];
-      index = findIndex(items, value => value.name === name);
+      index = ArrayExt.findFirstIndex(items, value => value.name === name);
       index += 1;
       if (index === this._items.length) {
         index = 0;
@@ -464,7 +464,7 @@ class DirListing extends Widget {
     } else {
       // Select the last selected item.
       let name = selected[selected.length - 1];
-      index = findIndex(items, value => value.name === name);
+      index = ArrayExt.findFirstIndex(items, value => value.name === name);
     }
     if (index !== -1) {
       this._selectItem(index, keepExisting);
@@ -484,7 +484,7 @@ class DirListing extends Widget {
     if (selected.length === 1 || keepExisting) {
       // Select the previous item.
       let name = selected[0];
-      index = findIndex(items, value => value.name === name);
+      index = ArrayExt.findFirstIndex(items, value => value.name === name);
       index -= 1;
       if (index === -1) {
         index = this._items.length - 1;
@@ -495,7 +495,7 @@ class DirListing extends Widget {
     } else {
       // Select the first selected item.
       let name = selected[0];
-      index = findIndex(items, value => value.name === name);
+      index = ArrayExt.findFirstIndex(items, value => value.name === name);
     }
     if (index !== -1) {
       this._selectItem(index, keepExisting);
@@ -681,7 +681,7 @@ class DirListing extends Widget {
     // Handle notebook session statuses.
     let paths = toArray(map(items, item => item.path));
     each(this._model.sessions(), session => {
-      let index = indexOf(paths, session.notebook.path);
+      let index = ArrayExt.firstIndexOf(paths, session.notebook.path);
       let node = nodes.at(index);
       node.classList.add(RUNNING_CLASS);
       let name = session.kernel.name;
@@ -841,7 +841,7 @@ class DirListing extends Widget {
       let selected = Object.keys(this._selection);
       let name = selected[0];
       let items = this._sortedItems;
-      let i = findIndex(items, value => value.name === name);
+      let i = ArrayExt.findFirstIndex(items, value => value.name === name);
       if (i === -1) {
         return;
       }
@@ -900,7 +900,7 @@ class DirListing extends Widget {
 
     // Find a valid double click target.
     let target = event.target as HTMLElement;
-    let i = findIndex(this._items, node => node.contains(target));
+    let i = ArrayExt.findFirstIndex(this._items, node => node.contains(target));
     if (i === -1) {
       return;
     }
@@ -991,7 +991,7 @@ class DirListing extends Widget {
     }
 
     // Get the path based on the target node.
-    let index = indexOf(this._items, target);
+    let index = ArrayExt.firstIndexOf(this._items, target);
     let items = this._sortedItems;
     let path = items.at(index).name + '/';
 
@@ -1127,7 +1127,7 @@ class DirListing extends Widget {
         return;
       }
       let items = this._sortedItems;
-      let index = findIndex(items, value => value.name === name);
+      let index = ArrayExt.findFirstIndex(items, value => value.name === name);
       this._selectItem(index, false);
       MessageLoop.sendMessage(this, WidgetMessage.UpdateRequest);
       scrollIntoViewIfNeeded(this.contentNode, this._items.at(index));
@@ -1146,7 +1146,7 @@ class DirListing extends Widget {
         continue;
       }
       let name = items.at(i).name;
-      if (selected.indexOf(name) !== -1) {
+      if (selected.ArrayExt.firstIndexOf(name) !== -1) {
         if (nearestIndex === -1) {
           nearestIndex = i;
         } else {
@@ -1212,7 +1212,7 @@ class DirListing extends Widget {
   private _doRename(): Promise<string> {
     let items = this._sortedItems;
     let name = Object.keys(this._selection)[0];
-    let index = findIndex(items, value => value.name === name);
+    let index = ArrayExt.findFirstIndex(items, value => value.name === name);
     let row = this._items.at(index);
     let item = items.at(index);
     let nameNode = this.renderer.getNameNode(row);
@@ -1263,7 +1263,7 @@ class DirListing extends Widget {
     this._selection = Object.create(null);
     each(this._model.items(), item => {
       let name = item.name;
-      if (existing.indexOf(name) !== -1) {
+      if (existing.ArrayExt.firstIndexOf(name) !== -1) {
         this._selection[name] = true;
       }
     });
@@ -1733,6 +1733,6 @@ namespace Private {
    */
   export
   function hitTestNodes(nodes: Vector<HTMLElement>, x: number, y: number): number {
-    return findIndex(nodes, node => hitTest(node, x, y));
+    return ArrayExt.findFirstIndex(nodes, node => hitTest(node, x, y));
   }
 }
