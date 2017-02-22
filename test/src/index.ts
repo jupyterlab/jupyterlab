@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import '@phosphor/widgets/style/index.css';
+
 import './application/loader.spec';
 import './application/shell.spec';
 
@@ -87,5 +89,3 @@ import './statedb/statedb.spec';
 import './terminal/terminal.spec';
 
 import './toolbar/toolbar.spec';
-
-import 'phosphor/styles/base.css';
