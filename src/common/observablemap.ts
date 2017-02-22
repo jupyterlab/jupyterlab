@@ -139,17 +139,19 @@ class ObservableMap<T> implements IObservableMap<T> {
    * @returns the old value for the key, or undefined
    *   if that did not exist.
    *
+   * @throws if the new value is undefined.
+   *
    * #### Notes
    * This is a no-op if the value does not change.
    */
   set(key: string, value: T): T {
     let oldVal = this._map.get(key);
     if (value === undefined) {
-      value = null;
+      throw Error('Cannot set an undefined value, use remove');
     }
     // Bail if the value does not change.
     let itemCmp = this._itemCmp;
-    if (itemCmp(oldVal, value)) {
+    if (oldVal !== undefined && itemCmp(oldVal, value)) {
       return;
     }
     this._map.set(key, value);

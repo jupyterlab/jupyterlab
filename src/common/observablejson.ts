@@ -170,6 +170,7 @@ class ObservableJSONWidget extends Widget {
     model.value.changed.connect(this._onValueChanged, this);
     this.model = model;
     this.editor = options.editorFactory({ host, model });
+    this.editor.readOnly = true;
   }
 
   /**
@@ -217,6 +218,7 @@ class ObservableJSONWidget extends Widget {
       this._source.changed.disconnect(this._onSourceChanged, this);
     }
     this._source = value;
+    this.editor.readOnly = !value;
     value.changed.connect(this._onSourceChanged, this);
     this._setValue();
   }
@@ -339,7 +341,7 @@ class ObservableJSONWidget extends Widget {
    */
   private _mergeContent(): void {
     let model = this.editor.model;
-    let current = this._getContent() as JSONObject;
+    let current = this._getContent() || {};
     let old = this._originalValue;
     let user = JSON.parse(model.value.text) as JSONObject;
     let source = this.source;
