@@ -88,8 +88,8 @@ class ObservableUndoableVector<T extends ISerializable> extends ObservableVector
   /**
    * Construct a new undoable observable vector.
    */
-  constructor(factory: (value: JSONObject) => T, serializer?: IRealtimeConverter<T>) {
-    super(serializer);
+  constructor(factory: (value: JSONObject) => T, converter?: IRealtimeConverter<T>) {
+    super({converter});
     this._factory = factory;
     this.changed.connect(this._onVectorChanged, this);
   }

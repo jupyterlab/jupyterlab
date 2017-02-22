@@ -1427,7 +1427,7 @@ class Notebook extends StaticNotebook {
   private _trimSelections(): void {
     for(let i=0; i<this.widgets.length; i++) {
       if(i !== this._activeCellIndex) {
-        let cell = this.widgets.at(i);
+        let cell = this.widgets[i];
         cell.model.selections.delete(cell.editor.uuid);
       }
     }

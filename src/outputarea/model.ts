@@ -25,6 +25,10 @@ import {
   IOutputAreaModel
 } from './widget';
 
+import {
+  Synchronizable, IRealtimeConverter
+} from '../common/realtime';
+
 
 /**
  * The default implementation of the IOutputAreaModel.
@@ -39,7 +43,9 @@ class OutputAreaModel implements IOutputAreaModel {
     this.contentFactory = (options.contentFactory ||
       OutputAreaModel.defaultContentFactory
     );
-    this.list = new ObservableVector<IOutputModel>();
+    this.list = new ObservableVector<IOutputModel>({
+      converter: new OutputAreaModel.RealtimeOutputConverter(this.contentFactory)
+    });
     if (options.values) {
       each(options.values, value => { this._add(value); });
     }
@@ -273,6 +279,23 @@ namespace OutputAreaModel {
     }
   }
 
+  export
+  class RealtimeOutputConverter implements IRealtimeConverter<IOutputModel> {
+    constructor(factory: IOutputAreaModel.IContentFactory) {
+      this._factory = factory;
+    }
+
+    from(value: Synchronizable): IOutputModel {
+      let output = this._factory.createOutputModel({value: value as nbformat.IOutput});
+      return output;
+    }
+
+    to(value: IOutputModel): Synchronizable {
+      return value.toJSON();
+    }
+
+    private _factory: IOutputAreaModel.IContentFactory = null;
+  }
   /**
    * The default output model factory.
    */
