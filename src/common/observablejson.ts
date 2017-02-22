@@ -92,7 +92,7 @@ class ObservableJSON extends ObservableMap<JSONValue> {
    */
   constructor(options: ObservableJSON.IOptions = {}) {
     super({
-      itemCmp: Private.itemCmp,
+      itemCmp: Private.deepEqual,
       values: options.values
     });
   }
@@ -296,7 +296,7 @@ class ObservableJSONWidget extends Widget {
       let value = JSON.parse(this.editor.model.value.text);
       this.removeClass(ERROR_CLASS);
       this._inputDirty = (
-        !this._changeGuard && !JSONExt.deepEqual(value, this._originalValue)
+        !this._changeGuard && !Private.deepEqual(value, this._originalValue)
       );
     } catch (err) {
       this.addClass(ERROR_CLASS);
@@ -345,7 +345,7 @@ class ObservableJSONWidget extends Widget {
     let source = this.source;
     // If it is in user and has changed from old, set in current.
     for (let key in user) {
-      if (!JSONExt.deepEqual(user[key], old[key])) {
+      if (!Private.deepEqual(user[key], old[key])) {
         current[key] = user[key];
       }
     }
@@ -453,7 +453,7 @@ namespace Private {
    * Compare two objects for JSON equality.
    */
   export
-  function itemCmp(a: JSONValue, b: JSONValue): boolean {
+  function deepEqual(a: JSONValue, b: JSONValue): boolean {
     if (a === void 0 || b === void 0) {
       return false;
     }

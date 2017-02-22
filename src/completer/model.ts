@@ -6,7 +6,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONExt
+  JSONExt, JSONValue
 } from '@phosphor/coreutils';
 
 import {
@@ -45,7 +45,7 @@ class CompleterModel implements CompleterWidget.IModel {
     return this._original;
   }
   set original(newValue: CompleterWidget.ITextState) {
-    if (JSONExt.deepEqual(newValue, this._original)) {
+    if (Private.deepEqual(newValue, this._original)) {
       return;
     }
     this._reset();
@@ -60,7 +60,7 @@ class CompleterModel implements CompleterWidget.IModel {
     return this._current;
   }
   set current(newValue: CompleterWidget.ITextState) {
-    if (JSONExt.deepEqual(newValue, this._current)) {
+    if (Private.deepEqual(newValue, this._current)) {
       return;
     }
     // Original request must always be set before a text change. If it isn't
@@ -179,7 +179,7 @@ class CompleterModel implements CompleterWidget.IModel {
    */
   setOptions(newValue: IterableOrArrayLike<string>) {
     let values = toArray(newValue || []);
-    if (JSONExt.deepEqual(values, this._options)) {
+    if (Private.deepEqual(values, this._options)) {
       return;
     }
     if (values.length) {
@@ -336,5 +336,17 @@ namespace Private {
       return delta;
     }
     return a.raw.localeCompare(b.raw);
+  }
+
+
+  /**
+   * Compare two objects for JSON equality.
+   */
+  export
+  function deepEqual(a: JSONValue, b: JSONValue): boolean {
+    if (a === void 0 || b === void 0) {
+      return false;
+    }
+    return JSONExt.deepEqual(a, b);
   }
 }
