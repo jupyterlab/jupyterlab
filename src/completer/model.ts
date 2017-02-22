@@ -252,7 +252,9 @@ class CompleterModel implements CompleterWidget.IModel {
     let options = this._options || [];
     let query = this._query;
     if (!query) {
-      return map(options, option => ({ raw: option, text: option }));
+      return map(options, option => {
+        return { raw: option, child: h.pre({ textContent: option }) };
+      });
     }
     let results: Private.IMatch[] = [];
     for (let option of options) {
@@ -261,12 +263,12 @@ class CompleterModel implements CompleterWidget.IModel {
         results.push({
           raw: option,
           score: match.score,
-          text: StringExt.highlight(option, match.indices, h.mark)
+          child: StringExt.highlight(option, match.indices, h.mark)
         });
       }
     }
     return map(results.sort(Private.scoreCmp), result =>
-      ({ text: result.text, raw: result.raw })
+      ({ child: result.child, raw: result.raw })
     );
   }
 
@@ -315,9 +317,9 @@ namespace Private {
     score: number;
 
     /**
-     * The highlighted text of a completion match.
+     * The virtual node of a completion match.
      */
-    text: string;
+    child: h.Child;
   }
 
   /**

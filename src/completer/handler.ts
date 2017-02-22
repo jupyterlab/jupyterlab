@@ -10,7 +10,7 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  Message, MessageLoop.sendMessage
+  Message, MessageLoop
 } from '@phosphor/messaging';
 
 import {
