@@ -264,23 +264,17 @@ class CompleterModel implements CompleterWidget.IModel {
     for (let option of options) {
       let match = StringExt.matchSumOfSquares(option, query);
       if (match) {
+        let marked = StringExt.highlight(option, match.indices, Private.mark);
         results.push({
           raw: option,
           score: match.score,
-          text: StringExt.highlight(option, match.indices, this._mark).join('')
+          text: marked.join('')
         });
       }
     }
     return map(results.sort(Private.scoreCmp), result =>
       ({ text: result.text, raw: result.raw })
     );
-  }
-
-  /**
-   * Mark a highlighted chunk of text.
-   */
-  private _mark(value: string): string {
-    return `<mark>${value}</mark>`;
   }
 
   /**
@@ -331,6 +325,14 @@ namespace Private {
      * The highlighted text of a completion match.
      */
     text: string;
+  }
+
+  /**
+   * Mark a highlighted chunk of text.
+   */
+  export
+  function mark(value: string): string {
+    return `<mark>${value}</mark>`;
   }
 
   /**
