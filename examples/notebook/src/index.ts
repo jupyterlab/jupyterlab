@@ -7,22 +7,10 @@ import {
 
 import {
   CommandRegistry
-} from '@phosphor/widgets';
+} from '@phosphor/commands';
 
 import {
-  CommandPalette
-} from '@phosphor/widgets';
-
-import {
-  Keymap
-} from '@phosphor/widgetkeymap';
-
-import {
-  SplitPanel
-} from '@phosphor/widgets';
-
-import {
-  Widget
+  CommandPalette, SplitPanel, Widget
 } from '@phosphor/widgets';
 
 import {
@@ -89,14 +77,13 @@ function main(): void {
 
 
 function createApp(manager: ServiceManager.IManager): void {
-  // Initialize the keymap manager with the bindings.
+  // Initialize the command registry with the bindings.
   let commands = new CommandRegistry();
-  let keymap = new Keymap({ commands });
   let useCapture = true;
 
   // Setup the keydown listener for the document.
   document.addEventListener('keydown', event => {
-    keymap.processKeydownEvent(event);
+    commands.processKeydownEvent(event);
   }, useCapture);
 
   let rendermime = new RenderMime({ items: RenderMime.getDefaultItems() });
@@ -131,7 +118,7 @@ function createApp(manager: ServiceManager.IManager): void {
   docRegistry.addWidgetFactory(wFactory);
 
   let nbWidget = docManager.open(NOTEBOOK) as NotebookPanel;
-  let palette = new CommandPalette({ commands, keymap });
+  let palette = new CommandPalette({ commands });
 
   let panel = new SplitPanel();
   panel.id = 'main';
@@ -316,7 +303,7 @@ function createApp(manager: ServiceManager.IManager): void {
     command: cmdIds.redo
   }
   ];
-  bindings.map(binding => keymap.addBinding(binding));
+  bindings.map(binding => commands.addKeyBinding(binding));
 }
 
 window.onload = main;
