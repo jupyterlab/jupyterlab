@@ -92,7 +92,7 @@ class ObservableJSON extends ObservableMap<JSONValue> {
    */
   constructor(options: ObservableJSON.IOptions = {}) {
     super({
-      itemCmp: deepEqual,
+      itemCmp: JSONExt.deepEqual,
       values: options.values
     });
   }
@@ -296,7 +296,7 @@ class ObservableJSONWidget extends Widget {
       let value = JSON.parse(this.editor.model.value.text);
       this.removeClass(ERROR_CLASS);
       this._inputDirty = (
-        !this._changeGuard && !Private.deepEqual(value, this._originalValue)
+        !this._changeGuard && !JSONExt.deepEqual(value, this._originalValue)
       );
     } catch (err) {
       this.addClass(ERROR_CLASS);
@@ -345,7 +345,7 @@ class ObservableJSONWidget extends Widget {
     let source = this.source;
     // If it is in user and has changed from old, set in current.
     for (let key in user) {
-      if (!Private.deepEqual(user[key], old[key])) {
+      if (!JSONExt.deepEqual(user[key], old[key])) {
         current[key] = user[key];
       }
     }
@@ -391,7 +391,7 @@ class ObservableJSONWidget extends Widget {
     this._changeGuard = true;
     if (content === void 0) {
       model.value.text = 'No data!';
-      this._originalValue = {};
+      this._originalValue = null;
     } else {
       let value = JSON.stringify(content, null, 2);
       model.value.text = value;
@@ -406,7 +406,7 @@ class ObservableJSONWidget extends Widget {
   private _dataDirty = false;
   private _inputDirty = false;
   private _source: IObservableJSON | null = null;
-  private _originalValue: JSONObject;
+  private _originalValue: JSONObject = null;
   private _changeGuard = false;
 }
 
