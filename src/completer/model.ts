@@ -45,9 +45,12 @@ class CompleterModel implements CompleterWidget.IModel {
     return this._original;
   }
   set original(newValue: CompleterWidget.ITextState) {
-    if (JSONExt.deepEqual(newValue, this._original)) {
+    let unchanged = this._original && newValue &&
+      JSONExt.deepEqual(newValue, this._original);
+    if (unchanged) {
       return;
     }
+
     this._reset();
     this._original = newValue;
     this._stateChanged.emit(void 0);
@@ -60,9 +63,12 @@ class CompleterModel implements CompleterWidget.IModel {
     return this._current;
   }
   set current(newValue: CompleterWidget.ITextState) {
-    if (JSONExt.deepEqual(newValue, this._current)) {
+    let unchanged = this._current && newValue &&
+      JSONExt.deepEqual(newValue, this._current);
+    if (unchanged) {
       return;
     }
+
     // Original request must always be set before a text change. If it isn't
     // the model fails silently.
     if (!this.original) {
