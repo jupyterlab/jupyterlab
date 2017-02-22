@@ -10,7 +10,7 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  defineSignal, ISignal
+  ISignal, Signal
 } from '@phosphor/signaling';
 
 import {
@@ -161,12 +161,12 @@ class CellModel extends CodeEditor.Model implements ICellModel {
   /**
    * A signal emitted when the state of the model changes.
    */
-  readonly contentChanged: ISignal<this, void>;
+  readonly contentChanged = new Signal<this, void>(this);
 
   /**
    * A signal emitted when a model state changes.
    */
-  readonly stateChanged: ISignal<this, IChangedArgs<any>>;
+  readonly stateChanged = new Signal<this, IChangedArgs<any>>(this);
 
   /**
    * The metadata associated with the cell.
@@ -236,8 +236,8 @@ class CellModel extends CodeEditor.Model implements ICellModel {
     this.contentChanged.emit(void 0);
   }
 
-  private _trusted = false;
   private _metadata = new ObservableJSON();
+  private _trusted = false;
 }
 
 
@@ -256,11 +256,6 @@ namespace CellModel {
     cell?: nbformat.IBaseCell;
   }
 }
-
-
-// Define the signals for the `CellModel` class.
-defineSignal(CellModel.prototype, 'contentChanged');
-defineSignal(CellModel.prototype, 'stateChanged');
 
 
 /**
