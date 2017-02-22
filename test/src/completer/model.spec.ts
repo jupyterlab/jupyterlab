@@ -111,7 +111,7 @@ describe('completer/model', () => {
         expect(called).to.be(3);
       });
 
-      it('should not signal when current text has not change', () => {
+      it('should not signal when current text is unchanged', () => {
         let model = new CompleterModel();
         let called = 0;
         let currentValue = 'foo';
@@ -140,9 +140,9 @@ describe('completer/model', () => {
       it('should return an unfiltered list of items if query is blank', () => {
         let model = new CompleterModel();
         let want: CompleterWidget.IItem[] = [
-          { raw: 'foo', child: 'foo' },
-          { raw: 'bar', child: 'bar' },
-          { raw: 'baz', child: 'baz' }
+          { raw: 'foo', text: 'foo' },
+          { raw: 'bar', text: 'bar' },
+          { raw: 'baz', text: 'baz' }
         ];
         model.setOptions(['foo', 'bar', 'baz']);
         expect(toArray(model.items())).to.eql(want);
@@ -151,7 +151,7 @@ describe('completer/model', () => {
       it('should return a filtered list of items if query is set', () => {
         let model = new CompleterModel();
         let want: CompleterWidget.IItem[] = [
-          { raw: 'foo', child: '<mark>f</mark>oo' }
+          { raw: 'foo', text: '<mark>f</mark>oo' }
         ];
         model.setOptions(['foo', 'bar', 'baz']);
         model.query = 'f';
@@ -161,8 +161,8 @@ describe('completer/model', () => {
       it('should order list based on score', () => {
         let model = new CompleterModel();
         let want: CompleterWidget.IItem[] = [
-          { raw: 'qux', child: '<mark>qux</mark>' },
-          { raw: 'quux', child: '<mark>qu</mark>u<mark>x</mark>' }
+          { raw: 'qux', text: '<mark>qux</mark>' },
+          { raw: 'quux', text: '<mark>qu</mark>u<mark>x</mark>' }
         ];
         model.setOptions(['foo', 'bar', 'baz', 'quux', 'qux']);
         model.query = 'qux';
@@ -172,8 +172,8 @@ describe('completer/model', () => {
       it('should break ties in score by locale sort', () => {
         let model = new CompleterModel();
         let want: CompleterWidget.IItem[] = [
-          { raw: 'quux', child: '<mark>qu</mark>ux' },
-          { raw: 'qux', child: '<mark>qu</mark>x' }
+          { raw: 'quux', text: '<mark>qu</mark>ux' },
+          { raw: 'qux', text: '<mark>qu</mark>x' }
         ];
         model.setOptions(['foo', 'bar', 'baz', 'qux', 'quux']);
         model.query = 'qu';

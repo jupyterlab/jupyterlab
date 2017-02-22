@@ -45,7 +45,8 @@ class CompleterModel implements CompleterWidget.IModel {
     return this._original;
   }
   set original(newValue: CompleterWidget.ITextState) {
-    let unchanged = this._original && newValue &&
+    let unchanged = this._original === newValue ||
+      this._original && newValue &&
       JSONExt.deepEqual(newValue, this._original);
     if (unchanged) {
       return;
@@ -63,7 +64,8 @@ class CompleterModel implements CompleterWidget.IModel {
     return this._current;
   }
   set current(newValue: CompleterWidget.ITextState) {
-    let unchanged = this._current && newValue &&
+    let unchanged = this._current === newValue ||
+      this._current && newValue &&
       JSONExt.deepEqual(newValue, this._current);
     if (unchanged) {
       return;
