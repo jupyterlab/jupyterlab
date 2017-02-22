@@ -6,7 +6,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONExt, JSONValue
+  JSONExt
 } from '@phosphor/coreutils';
 
 import {
@@ -45,7 +45,7 @@ class CompleterModel implements CompleterWidget.IModel {
     return this._original;
   }
   set original(newValue: CompleterWidget.ITextState) {
-    if (Private.deepEqual(newValue, this._original)) {
+    if (JSONExt.deepEqual(newValue, this._original)) {
       return;
     }
     this._reset();
@@ -60,7 +60,7 @@ class CompleterModel implements CompleterWidget.IModel {
     return this._current;
   }
   set current(newValue: CompleterWidget.ITextState) {
-    if (Private.deepEqual(newValue, this._current)) {
+    if (JSONExt.deepEqual(newValue, this._current)) {
       return;
     }
     // Original request must always be set before a text change. If it isn't
@@ -179,7 +179,7 @@ class CompleterModel implements CompleterWidget.IModel {
    */
   setOptions(newValue: IterableOrArrayLike<string>) {
     let values = toArray(newValue || []);
-    if (Private.deepEqual(values, this._options)) {
+    if (JSONExt.deepEqual(values, this._options)) {
       return;
     }
     if (values.length) {
@@ -252,9 +252,7 @@ class CompleterModel implements CompleterWidget.IModel {
     let options = this._options || [];
     let query = this._query;
     if (!query) {
-      return map(options, option => {
-        return { raw: option, child: h.pre({}, option) };
-      });
+      return map(options, option => ({ raw: option, text: option }));
     }
     let results: Private.IMatch[] = [];
     for (let option of options) {
@@ -263,13 +261,20 @@ class CompleterModel implements CompleterWidget.IModel {
         results.push({
           raw: option,
           score: match.score,
-          child: StringExt.highlight(option, match.indices, h.mark)
+          text: StringExt.highlight(option, match.indices, this._mark).join('')
         });
       }
     }
     return map(results.sort(Private.scoreCmp), result =>
-      ({ child: result.child, raw: result.raw })
+      ({ text: result.text, raw: result.raw })
     );
+  }
+
+  /**
+   * Mark a highlighted chunk of text.
+   */
+  private _mark(value: string): string {
+    return `<mark>${value}</mark>`;
   }
 
   /**
@@ -317,9 +322,9 @@ namespace Private {
     score: number;
 
     /**
-     * The virtual node of a completion match.
+     * The highlighted text of a completion match.
      */
-    child: h.Child;
+    text: string;
   }
 
   /**
@@ -336,17 +341,5 @@ namespace Private {
       return delta;
     }
     return a.raw.localeCompare(b.raw);
-  }
-
-
-  /**
-   * Compare two objects for JSON equality.
-   */
-  export
-  function deepEqual(a: JSONValue, b: JSONValue): boolean {
-    if (a === void 0 || b === void 0) {
-      return false;
-    }
-    return JSONExt.deepEqual(a, b);
   }
 }

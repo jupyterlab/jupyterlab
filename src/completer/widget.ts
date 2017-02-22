@@ -30,10 +30,6 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  VirtualDOM, h
-} from '@phosphor/virtualdom';
-
-import {
   CodeEditor
 } from '../codeeditor';
 
@@ -639,9 +635,9 @@ namespace CompleterWidget {
   export
   interface IItem {
     /**
-     * The highlighted, marked up virtual node of a visible completer item.
+     * The highlighted, marked up text of a visible completer item.
      */
-    child: h.Child;
+    text: string;
 
     /**
      * The raw text of a visible completer item.
@@ -686,7 +682,15 @@ namespace CompleterWidget {
      * Create an item node for a text completer menu.
      */
     createItemNode(item: IItem): HTMLLIElement {
-      return VirtualDOM.realize(h.li({}, item.child)) as HTMLLIElement;
+      let li = document.createElement('li');
+      let code = document.createElement('code');
+
+      // Use innerHTML because search results include <mark> tags.
+      code.innerHTML = item.text;
+
+      li.className = ITEM_CLASS;
+      li.appendChild(code);
+      return li;
     }
   }
 
