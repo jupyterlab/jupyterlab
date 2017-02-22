@@ -3,22 +3,10 @@
 
 import {
   CommandRegistry
-} from '@phosphor/widgets';
+} from '@phosphor/commands';
 
 import {
-  CommandPalette
-} from '@phosphor/widgets';
-
-import {
-  Keymap
-} from '@phosphor/widgetkeymap';
-
-import {
-  SplitPanel
-} from '@phosphor/widgets';
-
-import {
-  Widget
+  CommandPalette, SplitPanel, Widget
 } from '@phosphor/widgets';
 
 import {
@@ -70,13 +58,12 @@ function main(): void {
 
 
 function startApp(session: Session.ISession) {
-  // Initialize the keymap manager with the bindings.
+  // Initialize the command registry with the key bindings.
   let commands = new CommandRegistry();
-  let keymap = new Keymap({ commands });
 
   // Setup the keydown listener for the document.
   document.addEventListener('keydown', event => {
-    keymap.processKeydownEvent(event);
+    commands.processKeydownEvent(event);
   });
 
   let rendermime = new RenderMime({ items: RenderMime.getDefaultItems() });
@@ -90,7 +77,7 @@ function startApp(session: Session.ISession) {
   });
   consolePanel.title.label = TITLE;
 
-  let palette = new CommandPalette({ commands, keymap });
+  let palette = new CommandPalette({ commands });
 
   let panel = new SplitPanel();
   panel.id = 'main';
@@ -121,7 +108,7 @@ function startApp(session: Session.ISession) {
     execute: () => { consolePanel.console.execute(); }
   });
   palette.addItem({ command, category });
-  keymap.addBinding({ command,  selector,  keys: ['Enter'] });
+  commands.addKeyBinding({ command,  selector,  keys: ['Enter'] });
 
   command = 'console:execute-forced';
   commands.addCommand(command, {
@@ -129,7 +116,7 @@ function startApp(session: Session.ISession) {
     execute: () => { consolePanel.console.execute(true); }
   });
   palette.addItem({ command, category });
-  keymap.addBinding({ command,  selector,  keys: ['Shift Enter'] });
+  commands.addKeyBinding({ command,  selector,  keys: ['Shift Enter'] });
 
   command = 'console:linebreak';
   commands.addCommand(command, {
@@ -137,7 +124,7 @@ function startApp(session: Session.ISession) {
     execute: () => { consolePanel.console.insertLinebreak(); }
   });
   palette.addItem({ command, category });
-  keymap.addBinding({ command,  selector,  keys: ['Ctrl Enter'] });
+  commands.addKeyBinding({ command,  selector,  keys: ['Ctrl Enter'] });
 }
 
 window.onload = main;
