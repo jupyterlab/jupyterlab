@@ -2,12 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  each
+  each, find
 } from '@phosphor/algorithm';
-
-import {
-  find
-} from 'phosphor/lib/algorithm/searching';
 
 import {
   IDisposable

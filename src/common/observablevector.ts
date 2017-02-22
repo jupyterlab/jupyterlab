@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ArrayExt, IterableOrArrayLike, each, toArray
+  ArrayExt, IIterator, IterableOrArrayLike, each, toArray
 } from '@phosphor/algorithm';
 
 import {
