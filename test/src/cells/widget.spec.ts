@@ -8,11 +8,11 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Message, MessageLoop.sendMessage
+  Message, MessageLoop
 } from '@phosphor/messaging';
 
 import {
-  Widget, WidgetMessage
+  Widget
 } from '@phosphor/widgets';
 
 import {
@@ -280,7 +280,7 @@ describe('cells/widget', () => {
       it('should update the widget', () => {
         let widget = new LogBaseCell();
         expect(widget.methods).to.not.contain('onUpdateRequest');
-        MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
       });
 
@@ -415,7 +415,7 @@ describe('cells/widget', () => {
       it('should update the widget', () => {
         let widget = new LogCodeCell();
         expect(widget.methods).to.not.contain('onUpdateRequest');
-        MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
       });
 
@@ -559,7 +559,7 @@ describe('cells/widget', () => {
       it('should update the widget', () => {
         let widget = new LogMarkdownCell({ model, rendermime, contentFactory });
         expect(widget.methods).to.not.contain('onUpdateRequest');
-        MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
       });
 

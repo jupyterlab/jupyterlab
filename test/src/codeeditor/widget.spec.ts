@@ -4,11 +4,11 @@
 import expect = require('expect.js');
 
 import {
-  Message, MessageLoop.sendMessage
+  Message, MessageLoop
 } from '@phosphor/messaging';
 
 import {
-  Widget.ResizeMessage, Widget, WidgetMessage
+  Widget
 } from '@phosphor/widgets';
 
 import {
@@ -145,7 +145,7 @@ describe('CodeEditorWidget', () => {
 
     it('should focus the editor', () => {
       Widget.attach(widget, document.body);
-      MessageLoop.sendMessage(widget, WidgetMessage.ActivateRequest);
+      MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
       expect(widget.methods).to.contain('onActivateRequest');
       expect(widget.editor.hasFocus()).to.be(true);
     });

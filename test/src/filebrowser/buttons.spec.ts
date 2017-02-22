@@ -9,11 +9,7 @@ import {
 
 import {
   CommandRegistry
-} from '@phosphor/widgets';
-
-import {
-  Keymap
-} from '@phosphor/widgetkeymap';
+} from '@phosphor/commands';
 
 import {
   Widget
@@ -56,7 +52,6 @@ describe('filebrowser/buttons', () => {
   let manager: DocumentManager;
   let registry: DocumentRegistry;
   let commands: CommandRegistry;
-  let keymap: Keymap;
   let model: FileBrowserModel;
   let buttons: FileButtons;
   let modelFactory = new TextModelFactory();
@@ -77,7 +72,6 @@ describe('filebrowser/buttons', () => {
   beforeEach(() => {
     openedWidget = null;
     commands = new CommandRegistry();
-    keymap = new Keymap({ commands });
     registry = new DocumentRegistry();
     registry.addModelFactory(modelFactory);
     registry.addWidgetFactory(widgetFactory);
@@ -91,7 +85,7 @@ describe('filebrowser/buttons', () => {
       }
     });
     model = new FileBrowserModel({ manager: services });
-    buttons = new FileButtons({ model, manager, commands, keymap });
+    buttons = new FileButtons({ model, manager, commands });
   });
 
   afterEach(() => {

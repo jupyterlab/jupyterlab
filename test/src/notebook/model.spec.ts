@@ -8,12 +8,8 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  toArray
+  ArrayExt, toArray
 } from '@phosphor/algorithm';
-
-import {
-  indexOf
-} from 'phosphor/lib/algorithm/searching';
 
 import {
   CodeCellModel
@@ -99,7 +95,7 @@ describe('notebook/notebook/model', () => {
         let cell = model.contentFactory.createCodeCell({});
         model.cells.pushBack(cell);
         model.fromJSON(DEFAULT_CONTENT);
-        expect(indexOf(model.cells, cell)).to.be(-1);
+        expect(ArrayExt.firstIndexOf(toArray(model.cells), cell)).to.be(-1);
         expect(model.cells.length).to.be(6);
       });
 

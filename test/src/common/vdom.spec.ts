@@ -19,7 +19,7 @@ class TestModel extends VDomModel {
 
   set value(newValue: string) {
     this._value = newValue;
-    this.stateChanged.emit(void 0);
+    this.triggerChange();
   }
 
   private _value = '';

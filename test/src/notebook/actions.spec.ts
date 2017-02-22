@@ -104,7 +104,7 @@ describe('notebook/notebook/actions', () => {
           if (i === widget.activeCellIndex) {
             continue;
           }
-          expect(widget.isSelected(widget.widgets.at(i))).to.be(false);
+          expect(widget.isSelected(widget.widgets[i])).to.be(false);
         }
       });
 
@@ -117,7 +117,7 @@ describe('notebook/notebook/actions', () => {
         NotebookActions.changeCellType(widget, 'markdown');
         NotebookActions.splitCell(widget);
         expect(widget.activeCell).to.be.a(MarkdownCellWidget);
-        let prev = widget.widgets.at(0);
+        let prev = widget.widgets[0];
         expect(prev).to.be.a(MarkdownCellWidget);
       });
 
@@ -125,7 +125,7 @@ describe('notebook/notebook/actions', () => {
         widget.activeCell.model.value.text = '';
         NotebookActions.splitCell(widget);
         expect(widget.activeCell.model.value.text).to.be('');
-        let prev = widget.widgets.at(0);
+        let prev = widget.widgets[0];
         expect(prev.model.value.text).to.be('');
       });
 
@@ -149,7 +149,7 @@ describe('notebook/notebook/actions', () => {
         NotebookActions.splitCell(widget);
         NotebookActions.undo(widget);
         expect(widget.widgets.length).to.be(count);
-        let cell = widget.widgets.at(0);
+        let cell = widget.widgets[0];
         expect(cell.model.value.text).to.be(source);
       });
 
@@ -159,10 +159,10 @@ describe('notebook/notebook/actions', () => {
 
       it('should merge the selected cells', () => {
         let source = widget.activeCell.model.value.text + '\n\n';
-        let next = widget.widgets.at(1);
+        let next = widget.widgets[1];
         widget.select(next);
         source += next.model.value.text + '\n\n';
-        next = widget.widgets.at(2);
+        next = widget.widgets[2];
         widget.select(next);
         source += next.model.value.text;
         let count = widget.widgets.length;
@@ -179,7 +179,7 @@ describe('notebook/notebook/actions', () => {
 
       it('should select the next cell if there is only one cell selected', () => {
         let source = widget.activeCell.model.value.text + '\n\n';
-        let next = widget.widgets.at(1);
+        let next = widget.widgets[1];
         source += next.model.value.text;
         NotebookActions.mergeCells(widget);
         expect(widget.activeCell.model.value.text).to.be(source);
@@ -206,7 +206,7 @@ describe('notebook/notebook/actions', () => {
         NotebookActions.mergeCells(widget);
         NotebookActions.undo(widget);
         expect(widget.widgets.length).to.be(count);
-        let cell = widget.widgets.at(0);
+        let cell = widget.widgets[0];
         expect(cell.model.value.text).to.be(source);
       });
 
@@ -232,7 +232,7 @@ describe('notebook/notebook/actions', () => {
     describe('#deleteCells()', () => {
 
       it('should delete the selected cells', () => {
-        let next = widget.widgets.at(1);
+        let next = widget.widgets[1];
         widget.select(next);
         let count = widget.widgets.length;
         NotebookActions.deleteCells(widget);
@@ -253,21 +253,21 @@ describe('notebook/notebook/actions', () => {
 
       it('should activate the cell after the last selected cell', () => {
         widget.activeCellIndex = 4;
-        let prev = widget.widgets.at(2);
+        let prev = widget.widgets[2];
         widget.select(prev);
         NotebookActions.deleteCells(widget);
         expect(widget.activeCellIndex).to.be(3);
       });
 
       it('should select the previous cell if the last cell is deleted', () => {
-        widget.select(widget.widgets.at(widget.widgets.length - 1));
+        widget.select(widget.widgets[widget.widgets.length - 1]);
         NotebookActions.deleteCells(widget);
         expect(widget.activeCellIndex).to.be(widget.widgets.length - 1);
       });
 
       it('should add a code cell if all cells are deleted', (done) => {
         for (let i = 0; i < widget.widgets.length; i++) {
-          widget.select(widget.widgets.at(i));
+          widget.select(widget.widgets[i]);
         }
         NotebookActions.deleteCells(widget);
         requestAnimationFrame(() => {
@@ -279,14 +279,14 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should be undo-able', () => {
-        let next = widget.widgets.at(1);
+        let next = widget.widgets[1];
         widget.select(next);
         let source = widget.activeCell.model.value.text;
         let count = widget.widgets.length;
         NotebookActions.deleteCells(widget);
         NotebookActions.undo(widget);
         expect(widget.widgets.length).to.be(count);
-        let cell = widget.widgets.at(0);
+        let cell = widget.widgets[0];
         expect(cell.model.value.text).to.be(source);
       });
 
@@ -325,14 +325,14 @@ describe('notebook/notebook/actions', () => {
 
       it('should clear the existing selection', () => {
         for (let i = 0; i < widget.widgets.length; i++) {
-          widget.select(widget.widgets.at(i));
+          widget.select(widget.widgets[i]);
         }
         NotebookActions.insertAbove(widget);
         for (let i = 0; i < widget.widgets.length; i++) {
           if (i === widget.activeCellIndex) {
             continue;
           }
-          expect(widget.isSelected(widget.widgets.at(i))).to.be(false);
+          expect(widget.isSelected(widget.widgets[i])).to.be(false);
         }
       });
 
@@ -376,14 +376,14 @@ describe('notebook/notebook/actions', () => {
 
       it('should clear the existing selection', () => {
         for (let i = 0; i < widget.widgets.length; i++) {
-          widget.select(widget.widgets.at(i));
+          widget.select(widget.widgets[i]);
         }
         NotebookActions.insertBelow(widget);
         for (let i = 0; i < widget.widgets.length; i++) {
           if (i === widget.activeCellIndex) {
             continue;
           }
-          expect(widget.isSelected(widget.widgets.at(i))).to.be(false);
+          expect(widget.isSelected(widget.widgets[i])).to.be(false);
         }
       });
 
@@ -397,11 +397,11 @@ describe('notebook/notebook/actions', () => {
     describe('#changeCellType()', () => {
 
       it('should change the selected cell type(s)', () => {
-        let next = widget.widgets.at(1);
+        let next = widget.widgets[1];
         widget.select(next);
         NotebookActions.changeCellType(widget, 'raw');
         expect(widget.activeCell).to.be.a(RawCellWidget);
-        next = widget.widgets.at(widget.activeCellIndex + 1);
+        next = widget.widgets[widget.activeCellIndex + 1];
         expect(next).to.be.a(RawCellWidget);
       });
 
@@ -422,20 +422,20 @@ describe('notebook/notebook/actions', () => {
       it('should be undo-able', () => {
         NotebookActions.changeCellType(widget, 'raw');
         NotebookActions.undo(widget);
-        let cell = widget.widgets.at(0);
+        let cell = widget.widgets[0];
         expect(cell).to.be.a(CodeCellWidget);
       });
 
       it('should clear the existing selection', () => {
         for (let i = 0; i < widget.widgets.length; i++) {
-          widget.select(widget.widgets.at(i));
+          widget.select(widget.widgets[i]);
         }
         NotebookActions.changeCellType(widget, 'raw');
         for (let i = 0; i < widget.widgets.length; i++) {
           if (i === widget.activeCellIndex) {
             continue;
           }
-          expect(widget.isSelected(widget.widgets.at(i))).to.be(false);
+          expect(widget.isSelected(widget.widgets[i])).to.be(false);
         }
       });
 
@@ -450,7 +450,7 @@ describe('notebook/notebook/actions', () => {
     describe('#run()', () => {
 
       it('should run the selected cells', function (done) {
-        let next = widget.widgets.at(1) as MarkdownCellWidget;
+        let next = widget.widgets[1] as MarkdownCellWidget;
         widget.select(next);
         let cell = widget.activeCell as CodeCellWidget;
         cell.model.outputs.clear();
@@ -470,7 +470,7 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should activate the last selected cell', (done) => {
-        let other = widget.widgets.at(2);
+        let other = widget.widgets[2];
         widget.select(other);
         other.model.value.text = 'a = 1';
         NotebookActions.run(widget, kernel).then(result => {
@@ -480,11 +480,11 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should clear the selection', (done) => {
-        let next = widget.widgets.at(1);
+        let next = widget.widgets[1];
         widget.select(next);
         NotebookActions.run(widget, kernel).then(result => {
           expect(result).to.be(true);
-          expect(widget.isSelected(widget.widgets.at(0))).to.be(false);
+          expect(widget.isSelected(widget.widgets[0])).to.be(false);
         }).then(done, done);
       });
 
@@ -508,10 +508,10 @@ describe('notebook/notebook/actions', () => {
         let cell = widget.model.contentFactory.createCodeCell({});
         cell.value.text = ERROR_INPUT;
         widget.model.cells.insert(2, cell);
-        widget.select(widget.widgets.at(2));
+        widget.select(widget.widgets[2]);
         cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.pushBack(cell);
-        widget.select(widget.widgets.at(widget.widgets.length - 1));
+        widget.select(widget.widgets[widget.widgets.length - 1]);
         NotebookActions.run(widget, kernel).then(result => {
           expect(result).to.be(false);
           expect(cell.executionCount).to.be(null);
@@ -521,7 +521,7 @@ describe('notebook/notebook/actions', () => {
       it('should render all markdown cells on an error', (done) => {
         let cell = widget.model.contentFactory.createMarkdownCell({});
         widget.model.cells.pushBack(cell);
-        let child = widget.widgets.at(widget.widgets.length - 1) as MarkdownCellWidget;
+        let child = widget.widgets[widget.widgets.length - 1] as MarkdownCellWidget;
         child.rendered = false;
         widget.select(child);
         widget.activeCell.model.value.text = ERROR_INPUT;
@@ -536,7 +536,7 @@ describe('notebook/notebook/actions', () => {
     describe('#runAndAdvance()', () => {
 
       it('should run the selected cells ', (done) => {
-        let next = widget.widgets.at(1) as MarkdownCellWidget;
+        let next = widget.widgets[1] as MarkdownCellWidget;
         widget.select(next);
         let cell = widget.activeCell as CodeCellWidget;
         cell.model.outputs.clear();
@@ -556,11 +556,11 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should clear the existing selection', (done) => {
-        let next = widget.widgets.at(2);
+        let next = widget.widgets[2];
         widget.select(next);
         NotebookActions.runAndAdvance(widget, kernel).then(result => {
           expect(result).to.be(false);
-          expect(widget.isSelected(widget.widgets.at(0))).to.be(false);
+          expect(widget.isSelected(widget.widgets[0])).to.be(false);
         }).then(done, done);
       });
 
@@ -573,7 +573,7 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should activate the cell after the last selected cell', (done) => {
-        let next = widget.widgets.at(3) as MarkdownCellWidget;
+        let next = widget.widgets[3] as MarkdownCellWidget;
         widget.select(next);
         NotebookActions.runAndAdvance(widget, kernel).then(result => {
           expect(result).to.be(true);
@@ -606,7 +606,7 @@ describe('notebook/notebook/actions', () => {
         widget.activeCell.model.value.text = ERROR_INPUT;
         let cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.pushBack(cell);
-        widget.select(widget.widgets.at(widget.widgets.length - 1));
+        widget.select(widget.widgets[widget.widgets.length - 1]);
         NotebookActions.runAndAdvance(widget, kernel).then(result => {
           expect(result).to.be(false);
           expect(cell.executionCount).to.be(null);
@@ -615,7 +615,7 @@ describe('notebook/notebook/actions', () => {
 
       it('should render all markdown cells on an error', (done) => {
         widget.activeCell.model.value.text = ERROR_INPUT;
-        let cell = widget.widgets.at(1) as MarkdownCellWidget;
+        let cell = widget.widgets[1] as MarkdownCellWidget;
         cell.rendered = false;
         widget.select(cell);
         NotebookActions.runAndAdvance(widget, kernel).then(result => {
@@ -630,7 +630,7 @@ describe('notebook/notebook/actions', () => {
     describe('#runAndInsert()', () => {
 
       it('should run the selected cells ', (done) => {
-        let next = widget.widgets.at(1) as MarkdownCellWidget;
+        let next = widget.widgets[1] as MarkdownCellWidget;
         widget.select(next);
         let cell = widget.activeCell as CodeCellWidget;
         cell.model.outputs.clear();
@@ -650,16 +650,16 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should clear the existing selection', (done) => {
-        let next = widget.widgets.at(1);
+        let next = widget.widgets[1];
         widget.select(next);
         NotebookActions.runAndInsert(widget, kernel).then(result => {
           expect(result).to.be(true);
-          expect(widget.isSelected(widget.widgets.at(0))).to.be(false);
+          expect(widget.isSelected(widget.widgets[0])).to.be(false);
         }).then(done, done);
       });
 
       it('should insert a new code cell in edit mode after the last selected cell', (done) => {
-        let next = widget.widgets.at(2);
+        let next = widget.widgets[2];
         widget.select(next);
         next.model.value.text = 'a = 1';
         let count = widget.widgets.length;
@@ -672,7 +672,7 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should allow an undo of the cell insert', (done) => {
-        let next = widget.widgets.at(2);
+        let next = widget.widgets[2];
         widget.select(next);
         next.model.value.text = 'a = 1';
         let count = widget.widgets.length;
@@ -687,7 +687,7 @@ describe('notebook/notebook/actions', () => {
         widget.activeCell.model.value.text = ERROR_INPUT;
         let cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.pushBack(cell);
-        widget.select(widget.widgets.at(widget.widgets.length - 1));
+        widget.select(widget.widgets[widget.widgets.length - 1]);
         NotebookActions.runAndInsert(widget, kernel).then(result => {
           expect(result).to.be(false);
           expect(cell.executionCount).to.be(null);
@@ -696,7 +696,7 @@ describe('notebook/notebook/actions', () => {
 
       it('should render all markdown cells on an error', (done) => {
         widget.activeCell.model.value.text = ERROR_INPUT;
-        let cell = widget.widgets.at(1) as MarkdownCellWidget;
+        let cell = widget.widgets[1] as MarkdownCellWidget;
         cell.rendered = false;
         widget.select(cell);
         NotebookActions.runAndInsert(widget, kernel).then(result => {
@@ -712,11 +712,11 @@ describe('notebook/notebook/actions', () => {
 
       beforeEach(() => {
         // Make sure all cells have valid code.
-        widget.widgets.at(2).model.value.text = 'a = 1';
+        widget.widgets[2].model.value.text = 'a = 1';
       });
 
       it('should run all of the cells in the notebok', (done) => {
-        let next = widget.widgets.at(1) as MarkdownCellWidget;
+        let next = widget.widgets[1] as MarkdownCellWidget;
         let cell = widget.activeCell as CodeCellWidget;
         cell.model.outputs.clear();
         next.rendered = false;
@@ -743,11 +743,11 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should clear the existing selection', (done) => {
-        let next = widget.widgets.at(2);
+        let next = widget.widgets[2];
         widget.select(next);
         NotebookActions.runAll(widget, kernel).then(result => {
           expect(result).to.be(true);
-          expect(widget.isSelected(widget.widgets.at(2))).to.be(false);
+          expect(widget.isSelected(widget.widgets[2])).to.be(false);
         }).then(done, done);
       });
 
@@ -770,7 +770,7 @@ describe('notebook/notebook/actions', () => {
 
       it('should render all markdown cells on an error', (done) => {
         widget.activeCell.model.value.text = ERROR_INPUT;
-        let cell = widget.widgets.at(1) as MarkdownCellWidget;
+        let cell = widget.widgets[1] as MarkdownCellWidget;
         cell.rendered = false;
         NotebookActions.runAll(widget, kernel).then(result => {
           expect(result).to.be(false);
@@ -845,7 +845,7 @@ describe('notebook/notebook/actions', () => {
       it('should extend the selection to the cell above', () => {
         widget.activeCellIndex = 1;
         NotebookActions.extendSelectionAbove(widget);
-        expect(widget.isSelected(widget.widgets.at(0))).to.be(true);
+        expect(widget.isSelected(widget.widgets[0])).to.be(true);
       });
 
       it('should be a no-op if there is no model', () => {
@@ -864,7 +864,7 @@ describe('notebook/notebook/actions', () => {
       it('should not wrap around to the bottom', () => {
         NotebookActions.extendSelectionAbove(widget);
         expect(widget.activeCellIndex).to.be(0);
-        let last = widget.widgets.at(widget.widgets.length - 1);
+        let last = widget.widgets[widget.widgets.length - 1];
         expect(widget.isSelected(last)).to.be(false);
       });
 
@@ -896,8 +896,8 @@ describe('notebook/notebook/actions', () => {
 
       it('should extend the selection to the cell below', () => {
         NotebookActions.extendSelectionBelow(widget);
-        expect(widget.isSelected(widget.widgets.at(0))).to.be(true);
-        expect(widget.isSelected(widget.widgets.at(1))).to.be(true);
+        expect(widget.isSelected(widget.widgets[0])).to.be(true);
+        expect(widget.isSelected(widget.widgets[1])).to.be(true);
       });
 
       it('should be a no-op if there is no model', () => {
@@ -917,7 +917,7 @@ describe('notebook/notebook/actions', () => {
         widget.activeCellIndex = last;
         NotebookActions.extendSelectionBelow(widget);
         expect(widget.activeCellIndex).to.be(last);
-        expect(widget.isSelected(widget.widgets.at(0))).to.be(false);
+        expect(widget.isSelected(widget.widgets[0])).to.be(false);
       });
 
       it('should deselect the current cell if the cell below is selected', () => {
@@ -953,9 +953,9 @@ describe('notebook/notebook/actions', () => {
         widget.activeCellIndex = 2;
         NotebookActions.extendSelectionAbove(widget);
         NotebookActions.moveUp(widget);
-        expect(widget.isSelected(widget.widgets.at(0))).to.be(true);
-        expect(widget.isSelected(widget.widgets.at(1))).to.be(true);
-        expect(widget.isSelected(widget.widgets.at(2))).to.be(false);
+        expect(widget.isSelected(widget.widgets[0])).to.be(true);
+        expect(widget.isSelected(widget.widgets[1])).to.be(true);
+        expect(widget.isSelected(widget.widgets[2])).to.be(false);
         expect(widget.activeCellIndex).to.be(0);
       });
 
@@ -987,9 +987,9 @@ describe('notebook/notebook/actions', () => {
       it('should move the selected cells down', () => {
         NotebookActions.extendSelectionBelow(widget);
         NotebookActions.moveDown(widget);
-        expect(widget.isSelected(widget.widgets.at(0))).to.be(false);
-        expect(widget.isSelected(widget.widgets.at(1))).to.be(true);
-        expect(widget.isSelected(widget.widgets.at(2))).to.be(true);
+        expect(widget.isSelected(widget.widgets[0])).to.be(false);
+        expect(widget.isSelected(widget.widgets[1])).to.be(true);
+        expect(widget.isSelected(widget.widgets[2])).to.be(true);
         expect(widget.activeCellIndex).to.be(2);
       });
 
@@ -1018,7 +1018,7 @@ describe('notebook/notebook/actions', () => {
     describe('#copy()', () => {
 
       it('should copy the selected cells to a clipboard', () => {
-        let next = widget.widgets.at(1);
+        let next = widget.widgets[1];
         widget.select(next);
         NotebookActions.copy(widget, clipboard);
         expect(clipboard.hasData(JUPYTER_CELL_MIME)).to.be(true);
@@ -1043,7 +1043,7 @@ describe('notebook/notebook/actions', () => {
     describe('#cut()', () => {
 
       it('should cut the selected cells to a clipboard', () => {
-        let next = widget.widgets.at(1);
+        let next = widget.widgets[1];
         widget.select(next);
         let count = widget.widgets.length;
         NotebookActions.cut(widget, clipboard);
@@ -1066,12 +1066,12 @@ describe('notebook/notebook/actions', () => {
         let source = widget.activeCell.model.value.text;
         NotebookActions.cut(widget, clipboard);
         NotebookActions.undo(widget);
-        expect(widget.widgets.at(0).model.value.text).to.be(source);
+        expect(widget.widgets[0].model.value.text).to.be(source);
       });
 
       it('should add a new code cell if all cells were cut', (done) => {
         for (let i = 0; i < widget.widgets.length; i++) {
-          widget.select(widget.widgets.at(i));
+          widget.select(widget.widgets[i]);
         }
         NotebookActions.cut(widget, clipboard);
         requestAnimationFrame(() => {
@@ -1087,14 +1087,14 @@ describe('notebook/notebook/actions', () => {
 
       it('should paste cells from a clipboard', () => {
         let source = widget.activeCell.model.value.text;
-        let next = widget.widgets.at(1);
+        let next = widget.widgets[1];
         widget.select(next);
         let count = widget.widgets.length;
         NotebookActions.cut(widget, clipboard);
         widget.activeCellIndex = 1;
         NotebookActions.paste(widget, clipboard);
         expect(widget.widgets.length).to.be(count);
-        expect(widget.widgets.at(2).model.value.text).to.be(source);
+        expect(widget.widgets[2].model.value.text).to.be(source);
         expect(widget.activeCellIndex).to.be(3);
       });
 
@@ -1119,7 +1119,7 @@ describe('notebook/notebook/actions', () => {
       });
 
       it('should be undo-able', () => {
-        let next = widget.widgets.at(1);
+        let next = widget.widgets[1];
         widget.select(next);
         let count = widget.widgets.length;
         NotebookActions.cut(widget, clipboard);
@@ -1135,7 +1135,7 @@ describe('notebook/notebook/actions', () => {
 
       it('should undo a cell action', () => {
         let count = widget.widgets.length;
-        let next = widget.widgets.at(1);
+        let next = widget.widgets[1];
         widget.select(next);
         NotebookActions.deleteCells(widget);
         NotebookActions.undo(widget);
@@ -1168,7 +1168,7 @@ describe('notebook/notebook/actions', () => {
 
       it('should redo a cell action', () => {
         let count = widget.widgets.length;
-        let next = widget.widgets.at(1);
+        let next = widget.widgets[1];
         widget.select(next);
         NotebookActions.deleteCells(widget);
         NotebookActions.undo(widget);
@@ -1208,12 +1208,12 @@ describe('notebook/notebook/actions', () => {
 
       it('should be based on the state of the active cell', () => {
         let state = widget.activeCell.editor.lineNumbers;
-        let next = widget.widgets.at(1);
+        let next = widget.widgets[1];
         next.editor.lineNumbers = !state;
         widget.select(next);
         NotebookActions.toggleLineNumbers(widget);
-        expect(widget.widgets.at(0).editor.lineNumbers).to.be(!state);
-        expect(widget.widgets.at(1).editor.lineNumbers).to.be(!state);
+        expect(widget.widgets[0].editor.lineNumbers).to.be(!state);
+        expect(widget.widgets[1].editor.lineNumbers).to.be(!state);
       });
 
       it('should preserve the widget mode', () => {
@@ -1238,18 +1238,18 @@ describe('notebook/notebook/actions', () => {
         let state = widget.activeCell.editor.lineNumbers;
         NotebookActions.toggleAllLineNumbers(widget);
         for (let i = 0; i < widget.widgets.length; i++) {
-          expect(widget.widgets.at(i).editor.lineNumbers).to.be(!state);
+          expect(widget.widgets[i].editor.lineNumbers).to.be(!state);
         }
       });
 
       it('should be based on the state of the active cell', () => {
         let state = widget.activeCell.editor.lineNumbers;
         for (let i = 1; i < widget.widgets.length; i++) {
-          widget.widgets.at(i).editor.lineNumbers = !state;
+          widget.widgets[i].editor.lineNumbers = !state;
         }
         NotebookActions.toggleAllLineNumbers(widget);
         for (let i = 0; i < widget.widgets.length; i++) {
-          expect(widget.widgets.at(i).editor.lineNumbers).to.be(!state);
+          expect(widget.widgets[i].editor.lineNumbers).to.be(!state);
         }
       });
 
@@ -1275,7 +1275,7 @@ describe('notebook/notebook/actions', () => {
         // Select the next code cell that has outputs.
         let index = 0;
         for (let i = 1; i < widget.widgets.length; i++) {
-          let cell = widget.widgets.at(i);
+          let cell = widget.widgets[i];
           if (cell instanceof CodeCellWidget && cell.model.outputs.length) {
             widget.select(cell);
             index = i;
@@ -1283,9 +1283,9 @@ describe('notebook/notebook/actions', () => {
           }
         }
         NotebookActions.clearOutputs(widget);
-        let cell = widget.widgets.at(0) as CodeCellWidget;
+        let cell = widget.widgets[0] as CodeCellWidget;
         expect(cell.model.outputs.length).to.be(0);
-        cell = widget.widgets.at(index) as CodeCellWidget;
+        cell = widget.widgets[index] as CodeCellWidget;
         expect(cell.model.outputs.length).to.be(0);
       });
 
@@ -1308,11 +1308,11 @@ describe('notebook/notebook/actions', () => {
     describe('#clearAllOutputs()', () => {
 
       it('should clear the outputs on all cells', () => {
-        let next = widget.widgets.at(1);
+        let next = widget.widgets[1];
         widget.select(next);
         NotebookActions.clearAllOutputs(widget);
         for (let i = 0; i < widget.widgets.length; i++) {
-          let cell = widget.widgets.at(i);
+          let cell = widget.widgets[i];
           if (cell instanceof CodeCellWidget) {
             expect(cell.model.outputs.length).to.be(0);
           }
@@ -1338,7 +1338,7 @@ describe('notebook/notebook/actions', () => {
     describe('#setMarkdownHeader()', () => {
 
       it('should set the markdown header level of selected cells', () => {
-        let next = widget.widgets.at(1);
+        let next = widget.widgets[1];
         widget.select(next);
         NotebookActions.setMarkdownHeader(widget, 2);
         expect(widget.activeCell.model.value.text.slice(0, 3)).to.be('## ');

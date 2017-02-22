@@ -100,7 +100,7 @@ describe('outputarea/widget', () => {
     describe('#widgets', () => {
 
       it('should get the child widget at the specified index', () => {
-        expect(widget.widgets.at(0)).to.be.a(Widget);
+        expect(widget.widgets[0]).to.be.a(Widget);
       });
 
       it('should get the number of child widgets', () => {

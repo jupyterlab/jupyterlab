@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  IMessageHandler, Message, MessageLoop.sendMessage
+  IMessageHandler, Message, MessageLoop
 } from '@phosphor/messaging';
 
 import {

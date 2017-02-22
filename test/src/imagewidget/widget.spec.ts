@@ -8,11 +8,11 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Message, MessageLoop.sendMessage
+  Message, MessageLoop
 } from '@phosphor/messaging';
 
 import {
-  Widget, WidgetMessage
+  Widget
 } from '@phosphor/widgets';
 
 import {
@@ -109,7 +109,7 @@ describe('ImageWidget', () => {
 
     it('should set the content after the context is ready', (done) => {
       context.ready.then(() => {
-        MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         let img = widget.node.querySelector('img') as HTMLImageElement;
         expect(img.src).to.contain(IMAGE.content);
         done();
@@ -119,7 +119,7 @@ describe('ImageWidget', () => {
     it('should handle a change to the content', (done) => {
       context.ready.then(() => {
         context.model.fromString(OTHER);
-        MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         let img = widget.node.querySelector('img') as HTMLImageElement;
         expect(img.src).to.contain(OTHER);
         done();
@@ -167,7 +167,7 @@ describe('ImageWidget', () => {
       let img: HTMLImageElement = widget.node.querySelector('img');
       expect(img.src).to.be('');
       context.ready.then(() => {
-        MessageLoop.sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
         expect(img.src).to.contain(IMAGE.content);
         done();
@@ -180,7 +180,7 @@ describe('ImageWidget', () => {
 
     it('should focus the widget', () => {
       Widget.attach(widget, document.body);
-      MessageLoop.sendMessage(widget, WidgetMessage.ActivateRequest);
+      MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
       expect(widget.methods).to.contain('onActivateRequest');
       expect(widget.node.contains(document.activeElement)).to.be(true);
     });

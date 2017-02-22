@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  JSONExt.deepEqual
+  JSONExt
 } from '@phosphor/coreutils';
 
 import {

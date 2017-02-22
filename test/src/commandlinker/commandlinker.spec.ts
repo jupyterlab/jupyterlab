@@ -5,10 +5,10 @@ import expect = require('expect.js');
 
 import {
   CommandRegistry
-} from '@phosphor/widgets';
+} from '@phosphor/commands';
 
 import {
-  h, IElementAttrs, VirtualNode, realize
+  h, ElementAttrs, VirtualNode, VirtualDOM
 } from '@phosphor/virtualdom';
 
 import {
@@ -130,10 +130,10 @@ describe('commandlinker/commandlinker', () => {
         let disposable = commands.addCommand(command, {
           execute: () => { called = true; }
         });
-        let attrs: IElementAttrs = {};
+        let attrs: ElementAttrs = {};
 
         vnode = h.div(linker.populateVirtualNodeAttrs(attrs, command, null));
-        node = realize(vnode);
+        node = VirtualDOM.realize(vnode);
         document.body.appendChild(node);
 
         expect(called).to.be(false);

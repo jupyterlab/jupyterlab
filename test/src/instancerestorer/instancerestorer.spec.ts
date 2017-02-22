@@ -9,7 +9,7 @@ import {
 
 import {
   CommandRegistry
-} from '@phosphor/widgets';
+} from '@phosphor/commands';
 
 import {
   Widget

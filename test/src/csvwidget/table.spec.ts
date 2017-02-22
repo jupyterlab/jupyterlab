@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  realize, VirtualNode
+  VirtualDOM, VirtualElement, VirtualNode
 } from '@phosphor/virtualdom';
 
 import {
@@ -152,7 +152,7 @@ describe('csvwidget/table', () => {
         let table = new TestTable();
         table.model = model;
 
-        let rendered = realize(table.render() as VirtualNode);
+        let rendered = VirtualDOM.realize(table.render() as VirtualElement);
         let rows = rendered.getElementsByTagName('tr');
         let cols = rendered.getElementsByTagName('th');
         expect(rows).to.have.length(DISPLAY_LIMIT);
