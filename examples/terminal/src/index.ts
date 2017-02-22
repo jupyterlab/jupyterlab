@@ -2,11 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  DockPanel
-} from '@phosphor/widgets';
-
-import {
-  Widget
+  DockPanel, Widget
 } from '@phosphor/widgets';
 
 import {
