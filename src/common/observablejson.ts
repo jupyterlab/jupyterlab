@@ -92,7 +92,7 @@ class ObservableJSON extends ObservableMap<JSONValue> {
    */
   constructor(options: ObservableJSON.IOptions = {}) {
     super({
-      itemCmp: Private.deepEqual,
+      itemCmp: deepEqual,
       values: options.values
     });
   }
@@ -447,16 +447,5 @@ namespace Private {
           h.span({ className: COMMIT_CLASS, title: confirmTitle })),
         h.div({ className: HOST_CLASS }))
     );
-  }
-
-  /**
-   * Compare two objects for JSON equality.
-   */
-  export
-  function deepEqual(a: JSONValue, b: JSONValue): boolean {
-    if (a === void 0 || b === void 0) {
-      return false;
-    }
-    return JSONExt.deepEqual(a, b);
   }
 }

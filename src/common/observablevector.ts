@@ -354,6 +354,9 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    */
   set(index: number, value: T): void {
     let oldValues = [this.at(index)];
+    if (value === undefined) {
+      value = null;
+    }
     // Bail if the value does not change.
     let itemCmp = this._itemCmp;
     if (itemCmp(oldValues[0], value)) {

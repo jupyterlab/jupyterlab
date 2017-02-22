@@ -144,6 +144,9 @@ class ObservableMap<T> implements IObservableMap<T> {
    */
   set(key: string, value: T): T {
     let oldVal = this._map.get(key);
+    if (value === undefined) {
+      value = null;
+    }
     // Bail if the value does not change.
     let itemCmp = this._itemCmp;
     if (itemCmp(oldVal, value)) {
