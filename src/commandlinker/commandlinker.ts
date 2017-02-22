@@ -17,10 +17,10 @@ import {
 
 import {
   CommandRegistry
-} from '@phosphor/widgets';
+} from '@phosphor/commands';
 
 import {
-  IElementAttrs
+  ElementAttrs
 } from '@phosphor/virtualdom';
 
 
@@ -104,7 +104,7 @@ interface ICommandLinker extends IDisposable {
    * The attributes instance that is returned is identical to the attributes
    * instance that was passed in, i.e., this method mutates the original.
    */
-  populateVirtualNodeAttrs(attrs: IElementAttrs, command: string, args: JSONObject): IElementAttrs;
+  populateVirtualNodeAttrs(attrs: ElementAttrs, command: string, args: JSONObject): ElementAttrs;
 }
 
 
@@ -226,12 +226,12 @@ class CommandLinker implements ICommandLinker {
    * The attributes instance that is returned is identical to the attributes
    * instance that was passed in, i.e., this method mutates the original.
    */
-  populateVirtualNodeAttrs(attrs: IElementAttrs, command: string, args: JSONObject): IElementAttrs {
+  populateVirtualNodeAttrs(attrs: ElementAttrs, command: string, args: JSONObject): ElementAttrs {
     let argsValue = JSON.stringify(args);
-    attrs.dataset = attrs.dataset || {};
-    attrs.dataset[COMMAND_ATTR] = command;
+    (attrs as any).dataset = attrs.dataset || {};
+    (attrs.dataset as JSONObject)[COMMAND_ATTR] = command;
     if (argsValue) {
-      attrs.dataset[ARGS_ATTR] = argsValue;
+      (attrs.dataset as JSONObject)[ARGS_ATTR] = argsValue;
     }
     return attrs;
   }

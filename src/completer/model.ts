@@ -253,7 +253,7 @@ class CompleterModel implements CompleterWidget.IModel {
     let query = this._query;
     if (!query) {
       return map(options, option => {
-        return { raw: option, child: h.pre({ textContent: option }) };
+        return { raw: option, child: h.pre({}, option) };
       });
     }
     let results: Private.IMatch[] = [];
