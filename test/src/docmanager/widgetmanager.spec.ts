@@ -190,8 +190,8 @@ describe('docmanager/widgetmanager', () => {
         expect(manager.contextForWidget(widget)).to.be(context);
       });
 
-      it('should return undefined if not tracked', () => {
-        expect(manager.contextForWidget(new Widget())).to.be(void 0);
+      it('should return null if not tracked', () => {
+        expect(manager.contextForWidget(new Widget())).to.be(null);
       });
 
     });

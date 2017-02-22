@@ -338,7 +338,7 @@ class ApplicationShell extends Widget {
    * Close all widgets in the main area.
    */
   closeAll(): void {
-    each(this._dockPanel.widgets(), widget => { widget.close(); });
+    each(toArray(this._dockPanel.widgets()), widget => { widget.close(); });
     this._save();
   }
 

@@ -384,6 +384,10 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    */
   pushBack(value: T): number {
     let num = super.pushBack(value);
+    // Bail if in the constructor.
+    if (!this._changed) {
+      return;
+    }
     this._changed.emit({
       type: 'add',
       oldIndex: -1,

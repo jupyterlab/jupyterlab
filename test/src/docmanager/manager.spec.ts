@@ -292,7 +292,7 @@ describe('docmanager/manager', () => {
 
       it('should fail to find the context for the widget', () => {
         let widget = new Widget();
-        expect(manager.contextForWidget(widget)).to.be(void 0);
+        expect(manager.contextForWidget(widget)).to.be(null);
       });
 
     });
