@@ -10,7 +10,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  ISignal
+  ISignal, Signal
 } from '@phosphor/signaling';
 
 import {
@@ -60,6 +60,11 @@ const SIDEBAR_CLASS = 'jp-SideBar';
  * The class name added to the current widget's title.
  */
 const CURRENT_CLASS = 'jp-mod-current';
+
+/**
+ * The class name added to the active widget's title.
+ */
+const ACTIVE_CLASS = 'jp-mod-active';
 
 
 /**
@@ -131,20 +136,35 @@ class ApplicationShell extends Widget {
     this.layout = rootLayout;
 
     this._tracker.currentChanged.connect(this._onCurrentChanged, this);
+    this._tracker.activeChanged.connect(this._onActiveChanged, this);
   }
 
   /**
    * A signal emitted when main area's current focus changes.
    */
-  get currentChanged(): ISignal<any, FocusTracker.IChangedArgs<Widget>> {
-    return this._tracker.currentChanged;
+  get currentChanged(): ISignal<this, ApplicationShell.IChangedArgs> {
+    return this._currentChanged;
+  }
+
+  /**
+   * A signal emitted when main area's active focus changes.
+   */
+  get activeChanged(): ISignal<this, ApplicationShell.IChangedArgs> {
+    return this._activeChanged;
   }
 
   /**
    * The current widget in the shell's main area.
    */
-  get currentWidget(): Widget {
+  get currentWidget(): Widget | null {
     return this._tracker.currentWidget;
+  }
+
+  /**
+   * The active widget in the shell's main area.
+   */
+  get activeWidget(): Widget | null {
+    return this._tracker.activeWidget;
   }
 
   /**
@@ -455,9 +475,26 @@ class ApplicationShell extends Widget {
       args.newValue.title.className += ` ${CURRENT_CLASS}`;
     }
     if (args.oldValue) {
-      let title = args.oldValue.title;
-      title.className = title.className.replace(CURRENT_CLASS, '');
+      args.oldValue.title.className = (
+        args.oldValue.title.className.replace(CURRENT_CLASS, '')
+      );
     }
+    this._currentChanged.emit(args);
+  }
+
+  /**
+   * Handle a change to the dock area active widget.
+   */
+  private _onActiveChanged(sender: any, args: FocusTracker.IChangedArgs<Widget>): void {
+    if (args.newValue) {
+      args.newValue.title.className += ` ${ACTIVE_CLASS}`;
+    }
+    if (args.oldValue) {
+      args.oldValue.title.className = (
+        args.oldValue.title.className.replace(ACTIVE_CLASS, '')
+      );
+    }
+    this._activeChanged.emit(args);
   }
 
   private _database: IInstanceRestorer.ILayoutDB = null;
@@ -470,6 +507,8 @@ class ApplicationShell extends Widget {
   private _rightHandler: Private.SideBarHandler;
   private _topPanel: Panel;
   private _tracker = new FocusTracker<Widget>();
+  private _currentChanged = new Signal<this, ApplicationShell.IChangedArgs>(this);
+  private _activeChanged = new Signal<this, ApplicationShell.IChangedArgs>(this);
 }
 
 
@@ -494,6 +533,12 @@ namespace ApplicationShell {
      */
     rank?: number;
   }
+
+  /**
+   * An arguments object for the changed signals.
+   */
+  export
+  type IChangedArgs = FocusTracker.IChangedArgs<Widget>;
 }
 
 
