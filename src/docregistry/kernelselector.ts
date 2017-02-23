@@ -10,6 +10,10 @@ import {
 } from '@phosphor/algorithm';
 
 import {
+  Widget
+} from '@phosphor/widgets';
+
+import {
   showDialog
 } from '../common/dialog';
 
@@ -49,9 +53,9 @@ interface IKernelSelection {
   kernel?: Kernel.IModel;
 
   /**
-   * The host node for the dialog.
+   * The host widget to be selected after the dialog is shown.
    */
-  host?: HTMLElement;
+  host?: Widget;
 }
 
 
@@ -100,10 +104,6 @@ function selectKernel(options: IKernelSelection): Promise<Kernel.IModel> {
   text.innerHTML = `Select kernel for: "${options.name}"`;
   body.appendChild(text);
 
-  if (kernel) {
-    let displayName = specs.kernelspecs[kernel.name].display_name;
-  }
-
   let selector = document.createElement('select');
   body.appendChild(selector);
 
@@ -127,7 +127,7 @@ function selectKernel(options: IKernelSelection): Promise<Kernel.IModel> {
  * Change the kernel on a context.
  */
 export
-function selectKernelForContext(context: DocumentRegistry.Context, manager: Session.IManager, host?: HTMLElement): Promise<void> {
+function selectKernelForContext(context: DocumentRegistry.Context, manager: Session.IManager, host?: Widget): Promise<void> {
   return manager.ready.then(() => {
     let options: IKernelSelection = {
       name: context.path.split('/').pop(),
@@ -135,10 +135,12 @@ function selectKernelForContext(context: DocumentRegistry.Context, manager: Sess
       sessions: manager.running(),
       preferredLanguage: context.model.defaultKernelLanguage,
       kernel: context.kernel ? context.kernel.model : null,
-      host
     };
     return selectKernel(options);
   }).then(kernel => {
+    if (host) {
+      host.activate();
+    }
     if (kernel && (kernel.id || kernel.name)) {
       context.changeKernel(kernel);
     } else if (kernel && !kernel.id && !kernel.name) {

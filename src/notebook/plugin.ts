@@ -292,9 +292,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       if (!current) {
         return;
       }
-      return restartKernel(current.kernel, current.node).then(() => {
-        current.activate();
-      });
+      restartKernel(current.kernel, current);
     }
   });
   commands.addCommand(CommandIDs.closeAndShutdown, {
@@ -332,6 +330,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
   });
   commands.addCommand(CommandIDs.restartClear, {
     label: 'Restart Kernel & Clear Outputs',
+<<<<<<< HEAD
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
@@ -345,10 +344,23 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
         }
       });
       return promise;
+=======
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        let promise = restartKernel(current.kernel, current);
+        promise.then(result => {
+          if (result) {
+            NotebookActions.clearAllOutputs(current.notebook);
+          }
+        });
+      }
+>>>>>>> a7569a5a... Clean up the handling of focus for kernel actions
     }
   });
   commands.addCommand(CommandIDs.restartRunAll, {
     label: 'Restart Kernel & Run All',
+<<<<<<< HEAD
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
@@ -360,6 +372,16 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
         NotebookActions.runAll(current.notebook, current.context.kernel);
       });
       return promise;
+=======
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        let promise = restartKernel(current.kernel, current);
+        promise.then(result => {
+          NotebookActions.runAll(current.notebook, current.context.kernel);
+        });
+      }
+>>>>>>> a7569a5a... Clean up the handling of focus for kernel actions
     }
   });
   commands.addCommand(CommandIDs.clearAllOutputs, {
@@ -627,10 +649,18 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
   });
   commands.addCommand(CommandIDs.switchKernel, {
     label: 'Switch Kernel',
+<<<<<<< HEAD
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
         return;
+=======
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (current) {
+        let context = current.context;
+        selectKernelForContext(context, services.sessions, current);
+>>>>>>> a7569a5a... Clean up the handling of focus for kernel actions
       }
       let context = current.context;
       let node = current.node;

@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  Widget
+} from '@phosphor/widgets';
+
+import {
   showDialog, cancelButton, warnButton
 } from '../common/dialog';
 
@@ -15,7 +19,7 @@ import {
  *
  * @param kernel - The kernel to restart.
  *
- * @param host - The optional host element for the dialog.
+ * @param host - The optional host widget that should be activated.
  *
  * @returns A promise that resolves to `true` the user elects to restart.
  *
@@ -23,7 +27,7 @@ import {
  * This is a no-op if there is no kernel.
  */
 export
-function restartKernel(kernel: Kernel.IKernel, host?: HTMLElement): Promise<boolean> {
+function restartKernel(kernel: Kernel.IKernel, host?: Widget): Promise<boolean> {
   if (!kernel) {
     return Promise.resolve(false);
   }
@@ -32,6 +36,9 @@ function restartKernel(kernel: Kernel.IKernel, host?: HTMLElement): Promise<bool
     body: 'Do you want to restart the current kernel? All variables will be lost.',
     buttons: [cancelButton, warnButton]
   }).then(result => {
+    if (host) {
+      host.activate();
+    }
     if (!kernel.isDisposed && result.text === 'OK') {
       return kernel.restart().then(() => { return true; });
     } else {

@@ -84,16 +84,14 @@ function createInterruptButton(kernelOwner: IKernelOwner): ToolbarButton {
  * Create a restart toolbar item.
  */
 export
-function createRestartButton(kernelOwner: IKernelOwner, host?: HTMLElement): ToolbarButton {
+function createRestartButton(kernelOwner: IKernelOwner): ToolbarButton {
   return new ToolbarButton({
     className: TOOLBAR_RESTART_CLASS,
     onClick: () => {
       if (!kernelOwner.kernel) {
         return;
       }
-      restartKernel(kernelOwner.kernel, host).then(() => {
-        kernelOwner.activate();
-      });
+      restartKernel(kernelOwner.kernel, kernelOwner);
     },
     tooltip: 'Restart the kernel'
   });

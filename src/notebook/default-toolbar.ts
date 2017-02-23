@@ -196,7 +196,7 @@ namespace ToolbarItems {
     toolbar.addItem('paste', createPasteButton(panel));
     toolbar.addItem('run', createRunButton(panel));
     toolbar.addItem('interrupt', createInterruptButton(panel));
-    toolbar.addItem('restart', createRestartButton(panel, panel.node));
+    toolbar.addItem('restart', createRestartButton(panel));
     toolbar.addItem('cellType', createCellTypeItem(panel));
     toolbar.addItem('kernelName', createKernelNameItem(panel));
     toolbar.addItem('kernelStatus', createKernelStatusItem(panel));
