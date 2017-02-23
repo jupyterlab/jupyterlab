@@ -607,9 +607,11 @@ namespace CompleterWidget {
     createPatch(patch: string): IPatch;
 
     /**
-     * Reset the state of the model.
+     * Reset the state of the model and emit a state change signal.
+     *
+     * @param hard - Reset even if a subset match is in progress.
      */
-    reset(): void;
+    reset(hard?: boolean): void;
   }
 
   /**

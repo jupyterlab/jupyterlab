@@ -202,7 +202,7 @@ class CompletionHandler implements IDisposable {
     }
     // Completion request failures or negative results fail silently.
     if (value.status !== 'ok') {
-      model.reset();
+      model.reset(true);
       return;
     }
     // Update the original request.

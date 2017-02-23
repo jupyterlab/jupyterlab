@@ -247,8 +247,17 @@ class CompleterModel implements CompleterWidget.IModel {
 
   /**
    * Reset the state of the model and emit a state change signal.
+   *
+   * @param hard - Reset even if a subset match is in progress.
    */
-  reset() {
+  reset(hard = false) {
+    // When the completer detects a common subset prefix for all options,
+    // it updates the model and sets the model source to that value, but this
+    // text change should be ignored.
+    if (!hard && this._subsetMatch) {
+      return;
+    }
+    this._subsetMatch = false;
     this._reset();
     this._stateChanged.emit(void 0);
   }
