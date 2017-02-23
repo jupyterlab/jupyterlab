@@ -253,8 +253,8 @@ class CompleterModel implements CompleterWidget.IModel {
    */
   reset(hard = false) {
     // When the completer detects a common subset prefix for all options,
-    // it updates the model and sets the model source to that value, but this
-    // text change should be ignored.
+    // it updates the model and sets the model source to that value, triggering
+    // a reset. Unless explicitly a hard reset, this should be ignored.
     if (!hard && this._subsetMatch) {
       return;
     }
