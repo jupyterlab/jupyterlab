@@ -61,6 +61,11 @@ const SIDEBAR_CLASS = 'jp-SideBar';
  */
 const CURRENT_CLASS = 'jp-mod-current';
 
+/**
+ * The class name added to the active widget's title.
+ */
+const ACTIVE_CLASS = 'jp-mod-active';
+
 
 /**
  * The application shell for JupyterLab.
@@ -131,6 +136,7 @@ class ApplicationShell extends Widget {
     this.layout = rootLayout;
 
     this._tracker.currentChanged.connect(this._onCurrentChanged, this);
+    this._tracker.activeChanged.connect(this._onActiveChanged, this);
   }
 
   /**
@@ -141,10 +147,24 @@ class ApplicationShell extends Widget {
   }
 
   /**
+   * A signal emitted when main area's active focus changes.
+   */
+  get activeChanged(): ISignal<any, FocusTracker.IChangedArgs<Widget>> {
+    return this._tracker.activeChanged;
+  }
+
+  /**
    * The current widget in the shell's main area.
    */
-  get currentWidget(): Widget {
+  get currentWidget(): Widget | null {
     return this._tracker.currentWidget;
+  }
+
+  /**
+   * The active widget in the shell's main area.
+   */
+  get activeWidget(): Widget | null {
+    return this._tracker.activeWidget;
   }
 
   /**
@@ -457,6 +477,19 @@ class ApplicationShell extends Widget {
     if (args.oldValue) {
       let title = args.oldValue.title;
       title.className = title.className.replace(CURRENT_CLASS, '');
+    }
+  }
+
+  /**
+   * Handle a change to the dock area active widget.
+   */
+  private _onActiveChanged(sender: any, args: FocusTracker.IChangedArgs<Widget>): void {
+    if (args.newValue) {
+      args.newValue.title.className += ` ${ACTIVE_CLASS}`;
+    }
+    if (args.oldValue) {
+      let title = args.oldValue.title;
+      title.className = title.className.replace(ACTIVE_CLASS, '');
     }
   }
 

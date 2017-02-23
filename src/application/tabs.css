@@ -77,8 +77,8 @@
 }
 
 
-/* This is the main application level current tab: only 1 exists. */
-.p-DockPanel-tabBar .p-TabBar-tab.jp-mod-current:before {
+/* This is the main application level active tab: only 1 exists. */
+.p-DockPanel-tabBar .p-TabBar-tab.jp-mod-active:before {
   position: absolute;
   top: calc(-1 * var(--jp-border-width));
   left: calc(-1 * var(--jp-border-width));
