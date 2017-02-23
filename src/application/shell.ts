@@ -10,7 +10,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  ISignal
+  ISignal, Signal
 } from '@phosphor/signaling';
 
 import {
@@ -142,15 +142,15 @@ class ApplicationShell extends Widget {
   /**
    * A signal emitted when main area's current focus changes.
    */
-  get currentChanged(): ISignal<any, FocusTracker.IChangedArgs<Widget>> {
-    return this._tracker.currentChanged;
+  get currentChanged(): ISignal<this, ApplicationShell.IChangedArgs> {
+    return this._currentChanged;
   }
 
   /**
    * A signal emitted when main area's active focus changes.
    */
-  get activeChanged(): ISignal<any, FocusTracker.IChangedArgs<Widget>> {
-    return this._tracker.activeChanged;
+  get activeChanged(): ISignal<this, ApplicationShell.IChangedArgs> {
+    return this._activeChanged;
   }
 
   /**
@@ -475,9 +475,11 @@ class ApplicationShell extends Widget {
       args.newValue.title.className += ` ${CURRENT_CLASS}`;
     }
     if (args.oldValue) {
-      let title = args.oldValue.title;
-      title.className = title.className.replace(CURRENT_CLASS, '');
+      args.oldValue.title.className = (
+        args.oldValue.title.className.replace(CURRENT_CLASS, '')
+      );
     }
+    this._currentChanged.emit(args);
   }
 
   /**
@@ -488,9 +490,11 @@ class ApplicationShell extends Widget {
       args.newValue.title.className += ` ${ACTIVE_CLASS}`;
     }
     if (args.oldValue) {
-      let title = args.oldValue.title;
-      title.className = title.className.replace(ACTIVE_CLASS, '');
+      args.oldValue.title.className = (
+        args.oldValue.title.className.replace(ACTIVE_CLASS, '')
+      );
     }
+    this._activeChanged.emit(args);
   }
 
   private _database: IInstanceRestorer.ILayoutDB = null;
@@ -503,6 +507,8 @@ class ApplicationShell extends Widget {
   private _rightHandler: Private.SideBarHandler;
   private _topPanel: Panel;
   private _tracker = new FocusTracker<Widget>();
+  private _currentChanged = new Signal<this, ApplicationShell.IChangedArgs>(this);
+  private _activeChanged = new Signal<this, ApplicationShell.IChangedArgs>(this);
 }
 
 
@@ -526,6 +532,22 @@ namespace ApplicationShell {
      * The rank order of the widget among its siblings.
      */
     rank?: number;
+  }
+
+  /**
+   * An arguments object for the changed signals.
+   */
+  export
+  interface IChangedArgs {
+    /**
+     * The old value for the widget.
+     */
+    oldValue: Widget;
+
+    /**
+     * The new value for the widget.
+     */
+    newValue: Widget;
   }
 }
 
