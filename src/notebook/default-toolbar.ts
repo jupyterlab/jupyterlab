@@ -104,7 +104,9 @@ namespace ToolbarItems {
   function createInsertButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
       className: TOOLBAR_INSERT_CLASS,
-      onClick: () => { NotebookActions.insertBelow(panel.notebook); },
+      onClick: () => {
+        NotebookActions.insertBelow(panel.notebook);
+      },
       tooltip: 'Insert a cell below'
     });
   }
@@ -226,6 +228,7 @@ class CellTypeSwitcher extends Widget {
       if (!this._changeGuard) {
         let value = select.value as nbformat.CellType;
         NotebookActions.changeCellType(widget, value);
+        widget.activate();
       }
     });
 

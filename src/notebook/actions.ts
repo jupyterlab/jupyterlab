@@ -814,19 +814,35 @@ namespace NotebookActions {
  */
 namespace Private {
   /**
+   * The interface for a widget state.
+   */
+  export
+  interface IState {
+    /**
+     * Whether the widget had focus.
+     */
+    wasFocused: boolean;
+  }
+
+  /**
    * Get the state of a widget before running an action.
    */
   export
-  function getState(widget: Notebook): boolean {
-    return false;
+  function getState(widget: Notebook): IState {
+    return {
+      wasFocused: widget.node.contains(document.activeElement)
+    };
   }
 
   /**
    * Handle the state of a widget after running an action.
    */
   export
-  function handleState(widget: Notebook, state: boolean): void {
-    // TODO
+  function handleState(widget: Notebook, state: IState): void {
+    if (state.wasFocused) {
+      widget.activate();
+    }
+    widget.scrollToActiveCell();
   }
 
   /**

@@ -122,6 +122,47 @@ class Toolbar<T extends Widget> extends Widget {
     let layout = this.layout as PanelLayout;
     layout.removeWidget(widget);
   }
+
+  /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the dock panel's node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+    case 'click':
+      if (!this.node.contains(document.activeElement)) {
+        this.parent.activate();
+      }
+      break;
+    case 'blur':
+      this.parent.activate();
+      break;
+    default:
+      break;
+    }
+  }
+
+  /**
+   * Handle `after-attach` messages for the widget.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this.node.addEventListener('click', this);
+    this.node.addEventListener('blur', this);
+  }
+
+  /**
+   * Handle `before_detach` messages for the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this.node.removeEventListener('click', this);
+    this.node.removeEventListener('blur', this);
+  }
 }
 
 
