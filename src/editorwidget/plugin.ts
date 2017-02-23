@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  JSONObject
+} from '@phosphor/coreutils';
+
+import {
   AttachedProperty
 } from '@phosphor/properties';
 
@@ -104,20 +108,28 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
   /**
    * Toggle editor line numbers
    */
-  function toggleLineNums() {
-    if (tracker.currentWidget) {
-      let editor = tracker.currentWidget.editor;
-      editor.lineNumbers = !editor.lineNumbers;
+  function toggleLineNums(args: JSONObject) {
+    let widget = tracker.currentWidget;
+    if (!widget) {
+      return;
+    }
+    widget.editor.lineNumbers = !widget.editor.lineNumbers;
+    if (args['activate'] !== false) {
+      widget.activate();
     }
   }
 
   /**
    * Toggle editor line wrap
    */
-  function toggleLineWrap() {
-    if (tracker.currentWidget) {
-      let editor = tracker.currentWidget.editor;
-      editor.wordWrap = !editor.wordWrap;
+  function toggleLineWrap(args: JSONObject) {
+    let widget = tracker.currentWidget;
+    if (!widget) {
+      return;
+    }
+    widget.editor.wordWrap = !widget.editor.wordWrap;
+    if (args['activate'] !== false) {
+      widget.activate();
     }
   }
 
@@ -132,12 +144,12 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
   let commands = app.commands;
 
   commands.addCommand(CommandIDs.lineNumbers, {
-    execute: () => { toggleLineNums(); },
+    execute: args => { toggleLineNums(args); },
     label: 'Toggle Line Numbers'
   });
 
   commands.addCommand(CommandIDs.lineWrap, {
-    execute: () => { toggleLineWrap(); },
+    execute: args => { toggleLineWrap(args); },
     label: 'Toggle Line Wrap'
   });
 
@@ -147,7 +159,6 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
       if (!widget) {
         return;
       }
-      app.shell.activateMain(widget.id);
       let options: any = {
         path: widget.context.path,
         preferredLanguage: widget.context.model.defaultKernelLanguage
@@ -164,7 +175,6 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
       if (!widget) {
         return;
       }
-      app.shell.activateMain(widget.id);
       // Get the session id.
       let id = sessionIdProperty.get(widget);
       if (!id) {
