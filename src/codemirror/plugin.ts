@@ -8,7 +8,7 @@ import 'codemirror/keymap/vim.js';
 
 import {
   Menu
-} from 'phosphor/lib/ui/menu';
+} from '@phosphor/widgets';
 
 import {
   JupyterLab, JupyterLabPlugin
@@ -97,7 +97,7 @@ namespace CommandIDs {
  * Set up the editor widget menu and commands.
  */
 function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMenu: IMainMenu, palette: ICommandPalette): void {
-  let { commands, keymap } = app;
+  let { commands } = app;
 
   /**
    * Toggle editor matching brackets
@@ -130,9 +130,9 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
    * Create a menu for the editor.
    */
   function createMenu(): Menu {
-    let settings = new Menu({ commands, keymap });
-    let theme = new Menu({ commands, keymap });
-    let menu = new Menu({ commands, keymap });
+    let settings = new Menu({ commands });
+    let theme = new Menu({ commands });
+    let menu = new Menu({ commands });
 
     menu.title.label = 'Editor';
     settings.title.label = 'Settings';
@@ -166,8 +166,8 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     }));
 
     menu.addItem({ type: 'separator' });
-    menu.addItem({ type: 'submenu', menu: settings });
-    menu.addItem({ type: 'submenu', menu: theme });
+    menu.addItem({ type: 'submenu', submenu: settings });
+    menu.addItem({ type: 'submenu', submenu: theme });
 
     return menu;
   }

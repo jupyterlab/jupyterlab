@@ -5,11 +5,11 @@ import expect = require('expect.js');
 
 import {
   CommandRegistry
-} from 'phosphor/lib/ui/commandregistry';
+} from '@phosphor/commands';
 
 import {
-  h, IElementAttrs, VNode, realize
-} from 'phosphor/lib/ui/vdom';
+  h, ElementAttrs, VirtualNode, VirtualDOM
+} from '@phosphor/virtualdom';
 
 import {
   simulate
@@ -118,7 +118,7 @@ describe('commandlinker/commandlinker', () => {
 
     });
 
-    describe('#populateVNodeAttributes()', () => {
+    describe('#populateVirtualNodeAttributes()', () => {
 
       it('should connect a node to a command', () => {
         let called = false;
@@ -126,14 +126,14 @@ describe('commandlinker/commandlinker', () => {
         let commands =new CommandRegistry();
         let linker = new CommandLinker({ commands });
         let node: HTMLElement;
-        let vnode: VNode;
+        let vnode: VirtualNode;
         let disposable = commands.addCommand(command, {
           execute: () => { called = true; }
         });
-        let attrs: IElementAttrs = {};
+        let attrs: ElementAttrs = {};
 
-        vnode = h.div(linker.populateVNodeAttrs(attrs, command, null));
-        node = realize(vnode);
+        vnode = h.div(linker.populateVirtualNodeAttrs(attrs, command, null));
+        node = VirtualDOM.realize(vnode);
         document.body.appendChild(node);
 
         expect(called).to.be(false);

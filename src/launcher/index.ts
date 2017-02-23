@@ -2,28 +2,24 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IIterator, map, toArray
-} from 'phosphor/lib/algorithm/iteration';
+  ArrayExt, ArrayIterator, IIterator, map, toArray
+} from '@phosphor/algorithm';
 
 import {
   JSONObject
-} from 'phosphor/lib/algorithm/json';
-
-import {
-  Vector
-} from 'phosphor/lib/collections/vector';
+} from '@phosphor/coreutils';
 
 import {
   DisposableDelegate, IDisposable
-} from 'phosphor/lib/core/disposable';
+} from '@phosphor/disposable';
 
 import {
   Token
-} from 'phosphor/lib/core/token';
+} from '@phosphor/application';
 
 import {
-  h, VNode
-} from 'phosphor/lib/ui/vdom';
+  h, VirtualNode
+} from '@phosphor/virtualdom';
 
 import {
   ICommandLinker
@@ -165,7 +161,6 @@ class LauncherModel extends VDomModel implements ILauncher {
    */
   constructor() {
     super();
-    this._items = new Vector<ILauncherItem>();
   }
 
   /**
@@ -179,7 +174,7 @@ class LauncherModel extends VDomModel implements ILauncher {
       return;
     }
     this._path = path;
-    this.stateChanged.emit(void 0);
+    this.triggerChange();
   }
 
   /**
@@ -200,12 +195,12 @@ class LauncherModel extends VDomModel implements ILauncher {
     item.imgClassName = item.imgClassName ||
       `jp-Image${item.name.replace(/\ /g, '')}`;
 
-    this._items.pushBack(item);
-    this.stateChanged.emit(void 0);
+    this._items.push(item);
+    this.triggerChange();
 
     return new DisposableDelegate(() => {
-      this._items.remove(item);
-      this.stateChanged.emit(void 0);
+      ArrayExt.removeFirstOf(this._items, item);
+      this.triggerChange();
     });
   }
 
@@ -213,10 +208,10 @@ class LauncherModel extends VDomModel implements ILauncher {
    * Return an iterator of launcher items.
    */
   items(): IIterator<ILauncherItem> {
-    return this._items.iter();
+    return new ArrayIterator(this._items);
   }
 
-  private _items: Vector<ILauncherItem> = null;
+  private _items: ILauncherItem[] = [];
   private _path: string = 'home';
 }
 
@@ -238,12 +233,12 @@ class LauncherWidget extends VDomWidget<LauncherModel> {
   /**
    * Render the launcher to virtual DOM nodes.
    */
-  protected render(): VNode | VNode[] {
+  protected render(): VirtualNode | VirtualNode[] {
     // Create an iterator that yields rendered item nodes.
     let children = map(this.model.items(), item => {
       let img = h.span({className: item.imgClassName + ' ' + IMAGE_CLASS});
       let text = h.span({className: TEXT_CLASS }, item.name);
-      let attrs = this._linker.populateVNodeAttrs({
+      let attrs = this._linker.populateVirtualNodeAttrs({
         className: ITEM_CLASS
       }, item.command, item.args);
       return h.div(attrs, [img, text]);

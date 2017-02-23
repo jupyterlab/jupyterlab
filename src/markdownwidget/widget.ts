@@ -3,15 +3,15 @@
 
 import {
   Message
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
   PanelLayout
-} from 'phosphor/lib/ui/panel';
+} from '@phosphor/widgets';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
   ActivityMonitor
@@ -108,7 +108,7 @@ class MarkdownWidget extends Widget {
     let mimeModel = new MimeModel({ data, trusted: false });
     let widget = this._rendermime.render(mimeModel);
     if (layout.widgets.length) {
-      layout.widgets.at(0).dispose();
+      layout.widgets[0].dispose();
     }
     layout.addWidget(widget);
   }

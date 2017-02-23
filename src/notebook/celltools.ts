@@ -6,40 +6,32 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  each
-} from 'phosphor/lib/algorithm/iteration';
+  ArrayExt, each
+} from '@phosphor/algorithm';
 
 import {
   JSONValue
-} from 'phosphor/lib/algorithm/json';
+} from '@phosphor/coreutils';
 
 import {
-  findIndex, upperBound
-} from 'phosphor/lib/algorithm/searching';
-
-import {
-  ConflatableMessage, Message, sendMessage
-} from 'phosphor/lib/core/messaging';
-
-import {
-  Vector
-} from 'phosphor/lib/collections/vector';
+  ConflatableMessage, Message, MessageLoop
+} from '@phosphor/messaging';
 
 import {
   Token
-} from 'phosphor/lib/core/token';
+} from '@phosphor/application';
 
 import {
   PanelLayout
-} from 'phosphor/lib/ui/panel';
+} from '@phosphor/widgets';
 
 import {
-  ChildMessage, Widget
-} from 'phosphor/lib/ui/widget';
+  Widget
+} from '@phosphor/widgets';
 
 import {
-  h, realize, VNode
-} from 'phosphor/lib/ui/vdom';
+  h, VirtualDOM, VirtualNode
+} from '@phosphor/virtualdom';
 
 import {
   BaseCellWidget, ICellModel
@@ -183,26 +175,26 @@ class CellTools extends Widget {
     let tool = options.tool;
     let rank = 'rank' in options ? options.rank : 100;
     let rankItem = { tool, rank };
-    let index = upperBound(this._items, rankItem, Private.itemCmp);
+    let index = ArrayExt.upperBound(this._items, rankItem, Private.itemCmp);
 
     tool.addClass(CHILD_CLASS);
 
     // Add the tool.
-    this._items.insert(index, rankItem);
+    ArrayExt.insert(this._items, index, rankItem);
     let layout = this.layout as PanelLayout;
     layout.insertWidget(index, tool);
 
     // Trigger the tool to update its active cell.
-    sendMessage(tool, CellTools.ActiveCellMessage);
+    MessageLoop.sendMessage(tool, CellTools.ActiveCellMessage);
   }
 
   /**
    * Handle the removal of a child
    */
-  protected onChildRemoved(msg: ChildMessage): void {
-    let index = findIndex(this._items, item => item.tool === msg.child);
+  protected onChildRemoved(msg: Widget.ChildMessage): void {
+    let index = ArrayExt.findFirstIndex(this._items, item => item.tool === msg.child);
     if (index !== -1) {
-      this._items.removeAt(index);
+      ArrayExt.removeAt(this._items, index);
     }
   }
 
@@ -219,7 +211,7 @@ class CellTools extends Widget {
       activeCell.model.metadata.changed.connect(this._onMetadataChanged, this);
     }
     each(this.children(), widget => {
-      sendMessage(widget, CellTools.ActiveCellMessage);
+      MessageLoop.sendMessage(widget, CellTools.ActiveCellMessage);
     });
   }
 
@@ -228,7 +220,7 @@ class CellTools extends Widget {
    */
   private _onSelectionChanged(): void {
     each(this.children(), widget => {
-      sendMessage(widget, CellTools.SelectionMessage);
+      MessageLoop.sendMessage(widget, CellTools.SelectionMessage);
     });
   }
 
@@ -238,11 +230,11 @@ class CellTools extends Widget {
   private _onMetadataChanged(sender: IObservableMap<JSONValue>, args: ObservableMap.IChangedArgs<JSONValue>): void {
     let message = new ObservableJSON.ChangeMessage(args);
     each(this.children(), widget => {
-      sendMessage(widget, message);
+      MessageLoop.sendMessage(widget, message);
     });
   }
 
-  private _items = new Vector<Private.IRankItem>();
+  private _items: Private.IRankItem[] = [];
   private _tracker: INotebookTracker;
   private _prevActive: ICellModel | null;
 }
@@ -384,7 +376,7 @@ namespace CellTools {
       let layout = this.layout as PanelLayout;
       let count = layout.widgets.length;
       for (let i = 0; i < count; i++) {
-        layout.widgets.at(0).dispose();
+        layout.widgets[0].dispose();
       }
       if (this._cellModel) {
         this._cellModel.value.changed.disconnect(this._onValueChanged, this);
@@ -779,12 +771,12 @@ namespace Private {
     let title = (
       options.title || name[0].toLocaleUpperCase() + name.slice(1)
     );
-    let optionNodes: VNode[] = [];
+    let optionNodes: VirtualNode[] = [];
     for (let label in options.optionsMap) {
       let value = JSON.stringify(options.optionsMap[label]);
       optionNodes.push(h.option({ label, value }));
     }
-    return realize(
+    return VirtualDOM.realize(
       h.div({},
         h.label(title),
         h.div({ className: SELECT_WRAPPER_CLASS },
@@ -798,7 +790,7 @@ namespace Private {
    */
   export
   function createMetadataHeader(): Widget {
-    let node = realize(
+    let node = VirtualDOM.realize(
       h.div({ className: EDITOR_TITLE_CLASS },
         h.label({}, 'Edit Metadata'),
         h.span({ className: TOGGLE_CLASS }))

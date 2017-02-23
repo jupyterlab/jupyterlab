@@ -9,7 +9,7 @@ import {
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
   Context, DocumentRegistry, TextModelFactory

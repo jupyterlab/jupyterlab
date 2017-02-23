@@ -2,12 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  DockPanel
-} from 'phosphor/lib/ui/dockpanel';
-
-import {
-  Widget
-} from 'phosphor/lib/ui/widget';
+  DockPanel, Widget
+} from '@phosphor/widgets';
 
 import {
   TerminalSession

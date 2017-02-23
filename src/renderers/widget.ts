@@ -27,11 +27,11 @@ import {
 
 import {
   Message
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
   typeset, removeMath, replaceMath

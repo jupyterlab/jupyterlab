@@ -5,11 +5,11 @@
 
 import {
   DisposableDelegate, IDisposable
-} from 'phosphor/lib/core/disposable';
+} from '@phosphor/disposable';
 
 import {
   CommandPalette
-} from 'phosphor/lib/ui/commandpalette';
+} from '@phosphor/widgets';
 
 import {
   JupyterLab, JupyterLabPlugin
@@ -91,8 +91,8 @@ export default plugin;
  * Activate the command palette.
  */
 function activate(app: JupyterLab, restorer: IInstanceRestorer): ICommandPalette {
-  const { commands, keymap } = app;
-  const palette = new CommandPalette({ commands, keymap });
+  const { commands } = app;
+  const palette = new CommandPalette({ commands });
 
   // Let the application restorer track the command palette for restoration of
   // application state (e.g. setting the command palette as the current side bar

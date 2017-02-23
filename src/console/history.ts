@@ -6,16 +6,12 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Vector
-} from 'phosphor/lib/collections/vector';
-
-import {
   IDisposable
-} from 'phosphor/lib/core/disposable';
+} from '@phosphor/disposable';
 
 import {
-  clearSignalData
-} from 'phosphor/lib/core/signaling';
+  Signal
+} from '@phosphor/signaling';
 
 import {
   CodeEditor
@@ -92,7 +88,6 @@ class ConsoleHistory implements IConsoleHistory {
    * Construct a new console history object.
    */
   constructor(options?: ConsoleHistory.IOptions) {
-    this._history = new Vector<string>();
     if (options && options.kernel) {
       this.kernel = options.kernel;
     }
@@ -112,7 +107,7 @@ class ConsoleHistory implements IConsoleHistory {
     this._kernel = newValue;
 
     if (!this._kernel) {
-      this._history = new Vector<string>();
+      this._history.length = 0;
       return;
     }
 
@@ -154,18 +149,16 @@ class ConsoleHistory implements IConsoleHistory {
    * Get whether the console history manager is disposed.
    */
   get isDisposed(): boolean {
-    return this._history === null;
+    return this._isDisposed;
   }
 
   /**
    * Dispose of the resources held by the console history manager.
    */
   dispose(): void {
-    if (this._history == null) {
-      return;
-    }
-    this._history = null;
-    clearSignalData(this);
+    this._isDisposed = true;
+    this._history.length = 0;
+    Signal.clearData(this);
   }
 
   /**
@@ -183,7 +176,7 @@ class ConsoleHistory implements IConsoleHistory {
       this._placeholder = placeholder;
     }
 
-    let content = this._history.at(--this._cursor);
+    let content = this._history[--this._cursor];
     this._cursor = Math.max(0, this._cursor);
     return Promise.resolve(content);
   }
@@ -203,7 +196,7 @@ class ConsoleHistory implements IConsoleHistory {
       this._placeholder = placeholder;
     }
 
-    let content = this._history.at(++this._cursor);
+    let content = this._history[++this._cursor];
     this._cursor = Math.min(this._history.length, this._cursor);
     return Promise.resolve(content);
   }
@@ -219,8 +212,8 @@ class ConsoleHistory implements IConsoleHistory {
    * so that the console's history will consist of no contiguous repetitions.
    */
   push(item: string): void {
-    if (item && item !== this._history.back) {
-      this._history.pushBack(item);
+    if (item && item !== this._history[this._history.length - 1]) {
+      this._history.push(item);
     }
     this.reset();
   }
@@ -245,13 +238,13 @@ class ConsoleHistory implements IConsoleHistory {
    * Contiguous duplicates are stripped out of the API response.
    */
   protected onHistory(value: KernelMessage.IHistoryReplyMsg): void {
-    this._history = new Vector<string>();
+    this._history.length = 0;
     let last = '';
     let current = '';
     for (let i = 0; i < value.content.history.length; i++) {
       current = (value.content.history[i] as string[])[2];
       if (current !== last) {
-        this._history.pushBack(last = current);
+        this._history.push(last = current);
       }
     }
     // Reset the history navigation cursor back to the bottom.
@@ -306,10 +299,11 @@ class ConsoleHistory implements IConsoleHistory {
 
   private _cursor = 0;
   private _hasSession = false;
-  private _history: Vector<string> = null;
+  private _history: string[] = [];
   private _kernel: Kernel.IKernel = null;
   private _placeholder: string = '';
   private _setByHistory = false;
+  private _isDisposed = false;
   private _editor: CodeEditor.IEditor = null;
 }
 

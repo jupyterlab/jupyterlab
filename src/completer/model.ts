@@ -3,19 +3,23 @@
 
 import {
   IIterator, IterableOrArrayLike, iter, map, toArray
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
 
 import {
-  deepEqual
-} from 'phosphor/lib/algorithm/json';
+  JSONExt
+} from '@phosphor/coreutils';
 
 import {
-  StringSearch
-} from 'phosphor/lib/algorithm/searching';
+  StringExt
+} from '@phosphor/algorithm';
 
 import {
-  clearSignalData, defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
+  ISignal, Signal
+} from '@phosphor/signaling';
+
+import {
+  h
+} from '@phosphor/virtualdom';
 
 import {
   CompleterWidget
@@ -30,7 +34,9 @@ class CompleterModel implements CompleterWidget.IModel {
   /**
    * A signal emitted when state of the completer menu changes.
    */
-  readonly stateChanged: ISignal<this, void>;
+  get stateChanged(): ISignal<this, void> {
+    return this._stateChanged;
+  }
 
   /**
    * The original completion request details.
@@ -39,12 +45,16 @@ class CompleterModel implements CompleterWidget.IModel {
     return this._original;
   }
   set original(newValue: CompleterWidget.ITextState) {
-    if (deepEqual(newValue, this._original)) {
+    let unchanged = this._original === newValue ||
+      this._original && newValue &&
+      JSONExt.deepEqual(newValue, this._original);
+    if (unchanged) {
       return;
     }
+
     this._reset();
     this._original = newValue;
-    this.stateChanged.emit(void 0);
+    this._stateChanged.emit(void 0);
   }
 
   /**
@@ -54,9 +64,13 @@ class CompleterModel implements CompleterWidget.IModel {
     return this._current;
   }
   set current(newValue: CompleterWidget.ITextState) {
-    if (deepEqual(newValue, this._current)) {
+    let unchanged = this._current === newValue ||
+      this._current && newValue &&
+      JSONExt.deepEqual(newValue, this._current);
+    if (unchanged) {
       return;
     }
+
     // Original request must always be set before a text change. If it isn't
     // the model fails silently.
     if (!this.original) {
@@ -71,7 +85,7 @@ class CompleterModel implements CompleterWidget.IModel {
     this._current = newValue;
 
     if (!this._current) {
-      this.stateChanged.emit(void 0);
+      this._stateChanged.emit(void 0);
       return;
     }
     let original = this._original;
@@ -93,7 +107,7 @@ class CompleterModel implements CompleterWidget.IModel {
     let ending = original.text.substring(end);
     query = query.substring(0, query.lastIndexOf(ending));
     this._query = query;
-    this.stateChanged.emit(void 0);
+    this._stateChanged.emit(void 0);
   }
 
 
@@ -148,7 +162,7 @@ class CompleterModel implements CompleterWidget.IModel {
       return;
     }
     this._isDisposed = true;
-    clearSignalData(this);
+    Signal.clearData(this);
   }
 
   /**
@@ -173,7 +187,7 @@ class CompleterModel implements CompleterWidget.IModel {
    */
   setOptions(newValue: IterableOrArrayLike<string>) {
     let values = toArray(newValue || []);
-    if (deepEqual(values, this._options)) {
+    if (JSONExt.deepEqual(values, this._options)) {
       return;
     }
     if (values.length) {
@@ -183,7 +197,7 @@ class CompleterModel implements CompleterWidget.IModel {
     } else {
       this._options = [];
     }
-    this.stateChanged.emit(void 0);
+    this._stateChanged.emit(void 0);
   }
 
   /**
@@ -236,7 +250,7 @@ class CompleterModel implements CompleterWidget.IModel {
    */
   reset() {
     this._reset();
-    this.stateChanged.emit(void 0);
+    this._stateChanged.emit(void 0);
   }
 
   /**
@@ -250,12 +264,13 @@ class CompleterModel implements CompleterWidget.IModel {
     }
     let results: Private.IMatch[] = [];
     for (let option of options) {
-      let match = StringSearch.sumOfSquares(option, query);
+      let match = StringExt.matchSumOfSquares(option, query);
       if (match) {
+        let marked = StringExt.highlight(option, match.indices, Private.mark);
         results.push({
           raw: option,
           score: match.score,
-          text: StringSearch.highlight(option, match.indices)
+          text: marked.join('')
         });
       }
     }
@@ -283,11 +298,8 @@ class CompleterModel implements CompleterWidget.IModel {
   private _original: CompleterWidget.ITextState = null;
   private _query = '';
   private _subsetMatch = false;
+  private _stateChanged = new Signal<this, void>(this);
 }
-
-
-// Define the signals for the `CompleterModel` class.
-defineSignal(CompleterModel.prototype, 'stateChanged');
 
 
 /**
@@ -315,6 +327,14 @@ namespace Private {
      * The highlighted text of a completion match.
      */
     text: string;
+  }
+
+  /**
+   * Mark a highlighted chunk of text.
+   */
+  export
+  function mark(value: string): string {
+    return `<mark>${value}</mark>`;
   }
 
   /**

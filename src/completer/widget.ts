@@ -3,31 +3,31 @@
 
 import {
   IIterator, IterableOrArrayLike, toArray
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
 
 import {
   JSONObject
-} from 'phosphor/lib/algorithm/json';
+} from '@phosphor/coreutils';
 
 import {
   IDisposable
-} from 'phosphor/lib/core/disposable';
+} from '@phosphor/disposable';
 
 import {
   Message
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
-  defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
+  ISignal, Signal
+} from '@phosphor/signaling';
 
 import {
-  scrollIntoViewIfNeeded
-} from 'phosphor/lib/dom/query';
+  ElementExt
+} from '@phosphor/domutils';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
   CodeEditor
@@ -91,7 +91,9 @@ class CompleterWidget extends Widget {
   /**
    * A signal emitted when a selection is made from the completer menu.
    */
-  readonly selected: ISignal<this, string>;
+  get selected(): ISignal<this, string> {
+    return this._selected;
+  }
 
   /**
    * A signal emitted when the completer widget's visibility changes.
@@ -100,7 +102,9 @@ class CompleterWidget extends Widget {
    * This signal is useful when there are multiple floating widgets that may
    * contend with the same space and ought to be mutually exclusive.
    */
-  readonly visibilityChanged: ISignal<this, void>;
+  get visibilityChanged(): ISignal<this, void> {
+    return this._visibilityChanged;
+  }
 
   /**
    * The model used by the completer widget.
@@ -244,14 +248,14 @@ class CompleterWidget extends Widget {
       this._reset();
       if (!this.isHidden) {
         this.hide();
-        this.visibilityChanged.emit(void 0);
+        this._visibilityChanged.emit(void 0);
       }
       return;
     }
 
     // If there is only one item, signal and bail.
     if (items.length === 1) {
-      this.selected.emit(items[0].raw);
+      this._selected.emit(items[0].raw);
       this.reset();
       return;
     }
@@ -273,7 +277,7 @@ class CompleterWidget extends Widget {
 
     if (this.isHidden) {
       this.show();
-      this.visibilityChanged.emit(void 0);
+      this._visibilityChanged.emit(void 0);
     }
     this._anchorPoint = anchor.node.scrollTop;
     this._setGeometry();
@@ -301,7 +305,7 @@ class CompleterWidget extends Widget {
     }
     active = items[this._activeIndex] as HTMLElement;
     active.classList.add(ACTIVE_CLASS);
-    scrollIntoViewIfNeeded(this.node, active);
+    ElementExt.scrollIntoViewIfNeeded(this.node, active);
   }
 
   /**
@@ -371,7 +375,7 @@ class CompleterWidget extends Widget {
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
-        this.selected.emit(target.getAttribute('data-value'));
+        this._selected.emit(target.getAttribute('data-value'));
         this.reset();
         return;
       }
@@ -408,7 +412,7 @@ class CompleterWidget extends Widget {
     let query = this.model.query;
     if (subset && subset !== query && subset.indexOf(query) === 0) {
       this.model.query = subset;
-      this.selected.emit(subset);
+      this._selected.emit(subset);
       this.update();
       return true;
     }
@@ -459,7 +463,7 @@ class CompleterWidget extends Widget {
       this._reset();
       return;
     }
-    this.selected.emit(active.getAttribute('data-value'));
+    this._selected.emit(active.getAttribute('data-value'));
     this.reset();
   }
 
@@ -468,12 +472,9 @@ class CompleterWidget extends Widget {
   private _activeIndex = 0;
   private _model: CompleterWidget.IModel | null = null;
   private _renderer: CompleterWidget.IRenderer | null = null;
+  private _selected = new Signal<this, string>(this);
+  private _visibilityChanged = new Signal<this, void>(this);
 }
-
-
-// Define the signals for the `CompleterWidget` class.
-defineSignal(CompleterWidget.prototype, 'selected');
-defineSignal(CompleterWidget.prototype, 'visibilityChanged');
 
 
 export

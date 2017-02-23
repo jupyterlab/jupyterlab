@@ -3,7 +3,7 @@
 
 import {
   Menu
-} from 'phosphor/lib/ui/menu';
+} from '@phosphor/widgets';
 
 import {
   JupyterLab, JupyterLabPlugin
@@ -701,9 +701,9 @@ function populatePalette(palette: ICommandPalette): void {
  * Creates a menu for the notebook.
  */
 function createMenu(app: JupyterLab): Menu {
-  let { commands, keymap } = app;
-  let menu = new Menu({ commands, keymap });
-  let settings = new Menu({ commands, keymap });
+  let { commands } = app;
+  let menu = new Menu({ commands });
+  let settings = new Menu({ commands });
 
   menu.title.label = 'Notebook';
   settings.title.label = 'Settings';
@@ -730,7 +730,7 @@ function createMenu(app: JupyterLab): Menu {
   menu.addItem({ command: CommandIDs.closeAndShutdown });
   menu.addItem({ command: CommandIDs.trust });
   menu.addItem({ type: 'separator' });
-  menu.addItem({ type: 'submenu', menu: settings });
+  menu.addItem({ type: 'submenu', submenu: settings });
 
   return menu;
 }

@@ -3,7 +3,7 @@
 
 import {
   IDragEvent
-} from 'phosphor/lib/dom/dragdrop';
+} from '@phosphor/dragdrop';
 
 
 /**

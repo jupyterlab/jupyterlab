@@ -7,15 +7,15 @@ import {
 
 import {
   IIterator
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
 
 import {
   ISignal
-} from 'phosphor/lib/core/signaling';
+} from '@phosphor/signaling';
 
 import {
   Token
-} from 'phosphor/lib/core/token';
+} from '@phosphor/application';
 
 import {
   IChangedArgs

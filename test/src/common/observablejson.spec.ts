@@ -5,11 +5,11 @@ import expect = require('expect.js');
 
 import {
   Message
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
   simulate
@@ -223,6 +223,7 @@ describe('common/observablejson', () => {
       });
 
       it('should show the commit button if the value has changed', () => {
+        editor.model.value.text = '{"foo": 2}';
         editor.model.value.text = '{"foo": 1}';
         expect(editor.commitButtonNode.hidden).to.be(false);
       });
@@ -356,7 +357,7 @@ describe('common/observablejson', () => {
           editor.source.set('foo', 1);
           editor.source.set('bar', 1);
           editor.model.value.text = '{"foo": 1, "bar": 3}';
-          editor.source.set('foo', void 0);
+          editor.source.delete('foo');
           simulate(editor.commitButtonNode, 'click');
           expect(editor.model.value.text).to.be('{\n  "bar": 3\n}');
         });
@@ -366,7 +367,7 @@ describe('common/observablejson', () => {
           editor.source.set('foo', 1);
           editor.source.set('bar', 1);
           editor.model.value.text = '{"foo": 2, "bar": 3}';
-          editor.source.set('foo', void 0);
+          editor.source.set('foo', null);
           simulate(editor.commitButtonNode, 'click');
           let expected = '{\n  "foo": 2,\n  "bar": 3\n}';
           expect(editor.model.value.text).to.be(expected);

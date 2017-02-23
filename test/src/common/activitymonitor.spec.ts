@@ -4,8 +4,8 @@
 import expect = require('expect.js');
 
 import {
-  defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
+  ISignal, Signal
+} from '@phosphor/signaling';
 
 import {
   ActivityMonitor
@@ -14,15 +14,10 @@ import {
 
 
 class TestObject {
-  one: ISignal<TestObject, number>;
+  one = new Signal<TestObject, number>(this);
 
-  two: ISignal<TestObject, string[]>;
+  two = new Signal<TestObject, string[]>(this);
 }
-
-
-defineSignal(TestObject.prototype, 'one');
-defineSignal(TestObject.prototype, 'two');
-
 
 
 describe('common/activitymonitor', () => {
@@ -30,7 +25,7 @@ describe('common/activitymonitor', () => {
   describe('ActivityMonitor()', () => {
 
     let testObj: TestObject;
-    let signal: ISignal<TestObject, number>;
+    let signal: Signal<TestObject, number>;
 
     beforeEach(() => {
       testObj = new TestObject();

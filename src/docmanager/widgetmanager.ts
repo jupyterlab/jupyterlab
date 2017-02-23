@@ -2,36 +2,28 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  each
-} from 'phosphor/lib/algorithm/iteration';
-
-import {
-  find
-} from 'phosphor/lib/algorithm/searching';
-
-import {
-  Vector
-} from 'phosphor/lib/collections/vector';
+  ArrayExt, each, find
+} from '@phosphor/algorithm';
 
 import {
   DisposableSet, IDisposable
-} from 'phosphor/lib/core/disposable';
+} from '@phosphor/disposable';
 
 import {
-  IMessageHandler, Message, installMessageHook
-} from 'phosphor/lib/core/messaging';
+  IMessageHandler, Message, MessageLoop
+} from '@phosphor/messaging';
 
 import {
   AttachedProperty
-} from 'phosphor/lib/core/properties';
+} from '@phosphor/properties';
 
 import {
-  disconnectReceiver
-} from 'phosphor/lib/core/signaling';
+  Signal
+} from '@phosphor/signaling';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
   dateTime
@@ -79,7 +71,7 @@ class DocumentWidgetManager implements IDisposable {
       return;
     }
     this._registry = null;
-    disconnectReceiver(this);
+    Signal.disconnectReceiver(this);
   }
 
   /**
@@ -128,8 +120,8 @@ class DocumentWidgetManager implements IDisposable {
    */
   adoptWidget(context: DocumentRegistry.Context, widget: Widget): void {
     let widgets = Private.widgetsProperty.get(context);
-    widgets.pushBack(widget);
-    installMessageHook(widget, (handler: IMessageHandler, msg: Message) => {
+    widgets.push(widget);
+    MessageLoop.installMessageHook(widget, (handler: IMessageHandler, msg: Message) => {
       return this.filterMessage(handler, msg);
     });
     widget.addClass(DOCUMENT_CLASS);
@@ -309,7 +301,7 @@ class DocumentWidgetManager implements IDisposable {
     let context = Private.contextProperty.get(widget);
     let widgets = Private.widgetsProperty.get(context);
      // Remove the widget.
-    widgets.remove(widget);
+    ArrayExt.removeFirstOf(widgets, widget);
     // Dispose of the context if this is the last widget using it.
     if (!widgets.length) {
       context.dispose();
@@ -372,7 +364,8 @@ namespace Private {
    */
   export
   const contextProperty = new AttachedProperty<Widget, DocumentRegistry.Context>({
-    name: 'context'
+    name: 'context',
+    create: () => null
   });
 
   /**
@@ -380,18 +373,17 @@ namespace Private {
    */
   export
   const nameProperty = new AttachedProperty<Widget, string>({
-    name: 'name'
+    name: 'name',
+    create: () => ''
   });
 
   /**
    * A private attached property for the widgets associated with a context.
    */
   export
-  const widgetsProperty = new AttachedProperty<DocumentRegistry.Context, Vector<Widget>>({
+  const widgetsProperty = new AttachedProperty<DocumentRegistry.Context, Widget[]>({
     name: 'widgets',
-    create: () => {
-      return new Vector<Widget>();
-    }
+    create: () => []
   });
 
   /**
@@ -399,6 +391,7 @@ namespace Private {
    */
   export
   const disposablesProperty = new AttachedProperty<Widget, DisposableSet>({
-    name: 'disposables'
+    name: 'disposables',
+    create: () => new DisposableSet()
   });
 }

@@ -4,8 +4,8 @@
 import expect = require('expect.js');
 
 import {
-  h, VNode
-} from 'phosphor/lib/ui/vdom';
+  h, VirtualNode
+} from '@phosphor/virtualdom';
 
 import {
   VDomModel, VDomWidget
@@ -19,14 +19,14 @@ class TestModel extends VDomModel {
 
   set value(newValue: string) {
     this._value = newValue;
-    this.stateChanged.emit(void 0);
+    this.triggerChange();
   }
 
   private _value = '';
 }
 
 class TestWidget extends VDomWidget<TestModel> {
-  protected render(): VNode | VNode[] {
+  protected render(): VirtualNode | VirtualNode[] {
     return h.span(this.model.value);
   }
 }

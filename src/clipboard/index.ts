@@ -3,11 +3,11 @@
 
 import {
   MimeData
-} from 'phosphor/lib/core/mimedata';
+} from '@phosphor/coreutils';
 
 import {
   Token
-} from 'phosphor/lib/core/token';
+} from '@phosphor/application';
 
 
 /* tslint:disable */

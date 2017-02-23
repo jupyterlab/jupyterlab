@@ -4,16 +4,8 @@
 import expect = require('expect.js');
 
 import {
-  JupyterLab, ApplicationShell, ModuleLoader
+  JupyterLab, ModuleLoader
 } from '../../../lib/application';
-
-
-class LabTest extends JupyterLab {
-
-  createShell(): ApplicationShell {
-    return super.createShell();
-  }
-}
 
 
 describe('JupyterLab', () => {
@@ -83,15 +75,6 @@ describe('JupyterLab', () => {
 
     it('should accept options', (done) => {
       lab.start({ hostID: 'foo' }).then(done, done);
-    });
-
-  });
-
-  describe('#createShell()', () => {
-
-    it('should create the application shell', () => {
-      let test = new LabTest();
-      expect(test.createShell()).to.be.an(ApplicationShell);
     });
 
   });

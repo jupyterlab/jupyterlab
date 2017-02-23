@@ -6,16 +6,16 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Message, sendMessage
-} from 'phosphor/lib/core/messaging';
+  Message, MessageLoop
+} from '@phosphor/messaging';
 
 import {
-  boxSizing, IBoxSizing
-} from 'phosphor/lib/dom/sizing';
+  ElementExt
+} from '@phosphor/domutils';
 
 import {
-  ResizeMessage, Widget
-} from 'phosphor/lib/ui/widget';
+  Widget
+} from '@phosphor/widgets';
 
 import * as Xterm
   from 'xterm';
@@ -220,7 +220,7 @@ class TerminalWidget extends Widget {
   /**
    * On resize, use the computed row and column sizes to resize the terminal.
    */
-  protected onResize(msg: ResizeMessage): void {
+  protected onResize(msg: Widget.ResizeMessage): void {
     this._offsetWidth = msg.width;
     this._offsetHeight = msg.height;
     this._needsResize = true;
@@ -249,8 +249,8 @@ class TerminalWidget extends Widget {
    * A message handler invoked on an `'fit-request'` message.
    */
   protected onFitRequest(msg: Message): void {
-    let resize = ResizeMessage.UnknownSize;
-    sendMessage(this, resize);
+    let resize = Widget.ResizeMessage.UnknownSize;
+    MessageLoop.sendMessage(this, resize);
   }
 
   /**
@@ -323,7 +323,7 @@ class TerminalWidget extends Widget {
     if (offsetHeight < 0) {
       offsetHeight = this.node.offsetHeight;
     }
-    let box = this._box || (this._box = boxSizing(this.node));
+    let box = this._box || (this._box = ElementExt.boxSizing(this.node));
     let height = offsetHeight - box.verticalSum;
     let width = offsetWidth - box.horizontalSum;
     let rows = Math.floor(height / this._rowHeight) - 1;
@@ -391,7 +391,7 @@ class TerminalWidget extends Widget {
   private _sessionSize: [number, number, number, number] = [1, 1, 1, 1];
   private _background = '';
   private _color = '';
-  private _box: IBoxSizing = null;
+  private _box: ElementExt.IBoxSizing = null;
   private _session: TerminalSession.ISession = null;
 }
 

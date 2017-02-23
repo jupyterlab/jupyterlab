@@ -9,23 +9,23 @@ import {
 
 import {
   JSONObject
-} from 'phosphor/lib/algorithm/json';
+} from '@phosphor/coreutils';
 
 import {
   AttachedProperty
-} from 'phosphor/lib/core/properties';
+} from '@phosphor/properties';
 
 import {
   CommandRegistry
-} from 'phosphor/lib/ui/commandregistry';
+} from '@phosphor/commands';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
   Token
-} from 'phosphor/lib/core/token';
+} from '@phosphor/application';
 
 import {
   InstanceTracker
@@ -520,5 +520,8 @@ namespace Private {
    * An attached property for a widget's ID in the state database.
    */
   export
-  const nameProperty = new AttachedProperty<Widget, string>({ name: 'name' });
+  const nameProperty = new AttachedProperty<Widget, string>({
+    name: 'name',
+    create: owner => ''
+  });
 }

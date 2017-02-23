@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
   ABCWidgetFactory, Base64ModelFactory, DocumentModel,

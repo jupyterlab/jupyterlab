@@ -2,40 +2,32 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ContentsManager, Kernel, ServiceManager
+  Kernel, ServiceManager
 } from '@jupyterlab/services';
 
 import {
-  each, toArray
-} from 'phosphor/lib/algorithm/iteration';
-
-import {
-  find
-} from 'phosphor/lib/algorithm/searching';
-
-import {
-  Vector
-} from 'phosphor/lib/collections/vector';
+  ArrayExt, each, find, toArray
+} from '@phosphor/algorithm';
 
 import {
   IDisposable
-} from 'phosphor/lib/core/disposable';
+} from '@phosphor/disposable';
 
 import {
   AttachedProperty
-} from 'phosphor/lib/core/properties';
+} from '@phosphor/properties';
 
 import {
-  clearSignalData
-} from 'phosphor/lib/core/signaling';
+  Signal
+} from '@phosphor/signaling';
 
 import {
   Token
-} from 'phosphor/lib/core/token';
+} from '@phosphor/application';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
   DocumentRegistry, Context
@@ -118,11 +110,11 @@ class DocumentManager implements IDisposable {
     }
     this._serviceManager = null;
     this._widgetManager = null;
-    clearSignalData(this);
+    Signal.clearData(this);
     each(this._contexts, context => {
       context.dispose();
     });
-    this._contexts.clear();
+    this._contexts.length = 0;
   }
 
   /**
@@ -306,7 +298,7 @@ class DocumentManager implements IDisposable {
       handler.start();
     });
     context.disposed.connect(this._onContextDisposed, this);
-    this._contexts.pushBack(context);
+    this._contexts.push(context);
     return context;
   }
 
@@ -314,7 +306,7 @@ class DocumentManager implements IDisposable {
    * Handle a context disposal.
    */
   private _onContextDisposed(context: Private.IContext): void {
-    this._contexts.remove(context);
+    ArrayExt.removeFirstOf(this._contexts, context);
   }
 
   /**
@@ -387,7 +379,7 @@ class DocumentManager implements IDisposable {
   private _serviceManager: ServiceManager.IManager = null;
   private _widgetManager: DocumentWidgetManager = null;
   private _registry: DocumentRegistry = null;
-  private _contexts: Vector<Private.IContext> = new Vector<Private.IContext>();
+  private _contexts: Private.IContext[] = [];
   private _opener: DocumentManager.IWidgetOpener = null;
 }
 
@@ -440,7 +432,8 @@ namespace Private {
    */
   export
   const saveHandlerProperty = new AttachedProperty<DocumentRegistry.Context, SaveHandler>({
-    name: 'saveHandler'
+    name: 'saveHandler',
+    create: () => null
   });
 
   /**

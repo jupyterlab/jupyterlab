@@ -6,36 +6,28 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  IIterator, each, filter, map, toArray
-} from 'phosphor/lib/algorithm/iteration';
+  ArrayExt, ArrayIterator, IIterator, each, filter, find, map, toArray
+} from '@phosphor/algorithm';
 
 import {
-  find, findIndex, indexOf
-} from 'phosphor/lib/algorithm/searching';
-
-import {
-  Vector
-} from 'phosphor/lib/collections/vector';
-
-import {
-  Message, sendMessage
-} from 'phosphor/lib/core/messaging';
+  Message, MessageLoop
+} from '@phosphor/messaging';
 
 import {
   MimeData
-} from 'phosphor/lib/core/mimedata';
+} from '@phosphor/coreutils';
 
 import {
   Drag, IDragEvent
-} from 'phosphor/lib/dom/dragdrop';
+} from '@phosphor/dragdrop';
 
 import {
-  hitTest, scrollIntoViewIfNeeded
-} from 'phosphor/lib/dom/query';
+  ElementExt
+} from '@phosphor/domutils';
 
 import {
-  Widget, WidgetMessage
-} from 'phosphor/lib/ui/widget';
+  Widget
+} from '@phosphor/widgets';
 
 import {
   humanTime, dateTime
@@ -290,14 +282,14 @@ class DirListing extends Widget {
    * @returns A new iterator over the listing's sorted items.
    */
   sortedItems(): IIterator<Contents.IModel> {
-    return this._sortedItems.iter();
+    return new ArrayIterator(this._sortedItems);
   }
 
   /**
    * Sort the items using a sort condition.
    */
   sort(state: DirListing.ISortState): void {
-    this._sortedItems = new Vector(Private.sort(this.model.items(), state));
+    this._sortedItems = Private.sort(this.model.items(), state);
     this._sortState = state;
     this.update();
   }
@@ -351,7 +343,7 @@ class DirListing extends Widget {
       item.classList.remove(CUT_CLASS);
     });
 
-    this._clipboard.clear();
+    this._clipboard.length = 0;
     this._isCut = false;
     this.removeClass(CLIPBOARD_CLASS);
     return Promise.all(promises).catch(error => {
@@ -431,8 +423,8 @@ class DirListing extends Widget {
     let items = this._sortedItems;
     let paths = toArray(map(items, item => item.path));
     each(this._model.sessions(), session => {
-      let index = indexOf(paths, session.notebook.path);
-      if (this._selection[items.at(index).name]) {
+      let index = ArrayExt.firstIndexOf(paths, session.notebook.path);
+      if (this._selection[items[index].name]) {
         promises.push(this._model.shutdown(session.id));
       }
     });
@@ -453,7 +445,7 @@ class DirListing extends Widget {
     if (selected.length === 1 || keepExisting) {
       // Select the next item.
       let name = selected[selected.length - 1];
-      index = findIndex(items, value => value.name === name);
+      index = ArrayExt.findFirstIndex(items, value => value.name === name);
       index += 1;
       if (index === this._items.length) {
         index = 0;
@@ -464,11 +456,11 @@ class DirListing extends Widget {
     } else {
       // Select the last selected item.
       let name = selected[selected.length - 1];
-      index = findIndex(items, value => value.name === name);
+      index = ArrayExt.findFirstIndex(items, value => value.name === name);
     }
     if (index !== -1) {
       this._selectItem(index, keepExisting);
-      scrollIntoViewIfNeeded(this.contentNode, this._items.at(index));
+      ElementExt.scrollIntoViewIfNeeded(this.contentNode, this._items[index]);
     }
   }
 
@@ -484,7 +476,7 @@ class DirListing extends Widget {
     if (selected.length === 1 || keepExisting) {
       // Select the previous item.
       let name = selected[0];
-      index = findIndex(items, value => value.name === name);
+      index = ArrayExt.findFirstIndex(items, value => value.name === name);
       index -= 1;
       if (index === -1) {
         index = this._items.length - 1;
@@ -495,11 +487,11 @@ class DirListing extends Widget {
     } else {
       // Select the first selected item.
       let name = selected[0];
-      index = findIndex(items, value => value.name === name);
+      index = ArrayExt.findFirstIndex(items, value => value.name === name);
     }
     if (index !== -1) {
       this._selectItem(index, keepExisting);
-      scrollIntoViewIfNeeded(this.contentNode, this._items.at(index));
+      ElementExt.scrollIntoViewIfNeeded(this.contentNode, this._items[index]);
     }
   }
 
@@ -525,7 +517,7 @@ class DirListing extends Widget {
     let items = this._sortedItems;
     let index = Private.hitTestNodes(this._items, event.clientX, event.clientY);
     if (index !== -1) {
-      return items.at(index).path;
+      return items[index].path;
     }
   }
 
@@ -637,7 +629,7 @@ class DirListing extends Widget {
 
     // Remove any excess item nodes.
     while (nodes.length > items.length) {
-      let node = nodes.popBack();
+      let node = nodes.pop();
       content.removeChild(node);
     }
 
@@ -645,7 +637,7 @@ class DirListing extends Widget {
     while (nodes.length < items.length) {
       let node = renderer.createItemNode();
       node.classList.add(ITEM_CLASS);
-      nodes.pushBack(node);
+      nodes.push(node);
       content.appendChild(node);
     }
 
@@ -658,8 +650,8 @@ class DirListing extends Widget {
 
     // Add extra classes to item nodes based on widget state.
     for (let i = 0, n = items.length; i < n; ++i) {
-      let node = nodes.at(i);
-      let item = items.at(i);
+      let node = nodes[i];
+      let item = items[i];
       renderer.updateItemNode(node, item);
       if (this._selection[item.name]) {
         node.classList.add(SELECTED_CLASS);
@@ -681,8 +673,8 @@ class DirListing extends Widget {
     // Handle notebook session statuses.
     let paths = toArray(map(items, item => item.path));
     each(this._model.sessions(), session => {
-      let index = indexOf(paths, session.notebook.path);
-      let node = nodes.at(index);
+      let index = ArrayExt.firstIndexOf(paths, session.notebook.path);
+      let node = nodes[index];
       node.classList.add(RUNNING_CLASS);
       let name = session.kernel.name;
       let specs = this._model.specs;
@@ -841,13 +833,13 @@ class DirListing extends Widget {
       let selected = Object.keys(this._selection);
       let name = selected[0];
       let items = this._sortedItems;
-      let i = findIndex(items, value => value.name === name);
+      let i = ArrayExt.findFirstIndex(items, value => value.name === name);
       if (i === -1) {
         return;
       }
 
       let model = this._model;
-      let item = this._sortedItems.at(i);
+      let item = this._sortedItems[i];
       if (item.type === 'directory') {
         model.cd(item.name).catch(error =>
           showErrorMessage('Open directory', error)
@@ -900,13 +892,13 @@ class DirListing extends Widget {
 
     // Find a valid double click target.
     let target = event.target as HTMLElement;
-    let i = findIndex(this._items, node => node.contains(target));
+    let i = ArrayExt.findFirstIndex(this._items, node => node.contains(target));
     if (i === -1) {
       return;
     }
 
     let model = this._model;
-    let item = this._sortedItems.at(i);
+    let item = this._sortedItems[i];
     if (item.type === 'directory') {
       model.cd(item.name).catch(error =>
         showErrorMessage('Open directory', error)
@@ -927,7 +919,7 @@ class DirListing extends Widget {
       if (index === -1) {
         return;
       }
-      let item = this._sortedItems.at(index);
+      let item = this._sortedItems[index];
       if (item.type !== 'directory' || this._selection[item.name]) {
         return;
       }
@@ -962,7 +954,7 @@ class DirListing extends Widget {
       dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
     }
     let index = Private.hitTestNodes(this._items, event.clientX, event.clientY);
-    this._items.at(index).classList.add(utils.DROP_TARGET_CLASS);
+    this._items[index].classList.add(utils.DROP_TARGET_CLASS);
   }
 
   /**
@@ -991,9 +983,9 @@ class DirListing extends Widget {
     }
 
     // Get the path based on the target node.
-    let index = indexOf(this._items, target);
+    let index = ArrayExt.firstIndexOf(this._items, target);
     let items = this._sortedItems;
-    let path = items.at(index).name + '/';
+    let path = items[index].name + '/';
 
     // Move all of the items.
     let promises: Promise<Contents.IModel>[] = [];
@@ -1012,13 +1004,13 @@ class DirListing extends Widget {
    */
   private _startDrag(index: number, clientX: number, clientY: number): void {
     let selectedNames = Object.keys(this._selection);
-    let source = this._items.at(index);
+    let source = this._items[index];
     let items = this._sortedItems;
     let item: Contents.IModel = null;
 
     // If the source node is not selected, use just that node.
     if (!source.classList.contains(SELECTED_CLASS)) {
-      item = items.at(index);
+      item = items[index];
       selectedNames = [item.name];
     } else if (selectedNames.length === 1) {
       let name = selectedNames[0];
@@ -1076,7 +1068,7 @@ class DirListing extends Widget {
     // Clear any existing soft selection.
     this._softSelection = '';
 
-    let name = items.at(index).name;
+    let name = items[index].name;
     let selected = Object.keys(this._selection);
 
     // Handle toggling.
@@ -1127,10 +1119,10 @@ class DirListing extends Widget {
         return;
       }
       let items = this._sortedItems;
-      let index = findIndex(items, value => value.name === name);
+      let index = ArrayExt.findFirstIndex(items, value => value.name === name);
       this._selectItem(index, false);
-      sendMessage(this, WidgetMessage.UpdateRequest);
-      scrollIntoViewIfNeeded(this.contentNode, this._items.at(index));
+      MessageLoop.sendMessage(this, Widget.Msg.UpdateRequest);
+      ElementExt.scrollIntoViewIfNeeded(this.contentNode, this._items[index]);
     });
   }
 
@@ -1145,7 +1137,7 @@ class DirListing extends Widget {
       if (i === index) {
         continue;
       }
-      let name = items.at(i).name;
+      let name = items[i].name;
       if (selected.indexOf(name) !== -1) {
         if (nearestIndex === -1) {
           nearestIndex = i;
@@ -1166,7 +1158,7 @@ class DirListing extends Widget {
     for (let i = 0; i < this._items.length; i++) {
       if (nearestIndex >= i && index <= i ||
           nearestIndex <= i && index >= i) {
-        this._selection[items.at(i).name] = true;
+        this._selection[items[i].name] = true;
       }
     }
   }
@@ -1183,11 +1175,11 @@ class DirListing extends Widget {
    * Copy the selected items, and optionally cut as well.
    */
   private _copy(): void {
-    this._clipboard.clear();
+    this._clipboard.length = 0;
     for (let item of this._getSelectedItems()) {
       if (item.type !== 'directory') {
         // Store the absolute path of the item.
-        this._clipboard.pushBack('/' + item.path);
+        this._clipboard.push('/' + item.path);
       }
     }
     this.update();
@@ -1212,9 +1204,9 @@ class DirListing extends Widget {
   private _doRename(): Promise<string> {
     let items = this._sortedItems;
     let name = Object.keys(this._selection)[0];
-    let index = findIndex(items, value => value.name === name);
-    let row = this._items.at(index);
-    let item = items.at(index);
+    let index = ArrayExt.findFirstIndex(items, value => value.name === name);
+    let row = this._items[index];
+    let item = items[index];
     let nameNode = this.renderer.getNameNode(row);
     let original = item.name;
     this._editNode.value = original;
@@ -1249,7 +1241,7 @@ class DirListing extends Widget {
     if (!keepExisting) {
       this._selection = Object.create(null);
     }
-    let name = items.at(index).name;
+    let name = items[index].name;
     this._selection[name] = true;
     this._isCut = false;
   }
@@ -1296,8 +1288,8 @@ class DirListing extends Widget {
 
   private _model: FileBrowserModel = null;
   private _editNode: HTMLInputElement = null;
-  private _items = new Vector<HTMLElement>();
-  private _sortedItems: Vector<Contents.IModel> = null;
+  private _items: HTMLElement[] = [];
+  private _sortedItems: Contents.IModel[] = [];
   private _sortState: DirListing.ISortState = { direction: 'ascending', key: 'name' };
   private _drag: Drag = null;
   private _dragData: { pressX: number, pressY: number, index: number } = null;
@@ -1305,7 +1297,7 @@ class DirListing extends Widget {
   private _noSelectTimer = -1;
   private _isCut = false;
   private _prevPath = '';
-  private _clipboard = new Vector<string>();
+  private _clipboard: string[] = [];
   private _manager: DocumentManager = null;
   private _softSelection = '';
   private _inContext = false;
@@ -1704,10 +1696,10 @@ namespace Private {
    * Sort a list of items by sort state as a new array.
    */
   export
-  function sort(items: IIterator<Contents.IModel>, state: DirListing.ISortState) : Vector<Contents.IModel> {
+  function sort(items: IIterator<Contents.IModel>, state: DirListing.ISortState) : Contents.IModel[] {
     // Shortcut for unmodified.
     if (state.key !== 'last_modified' && state.direction === 'ascending') {
-      return new Vector(items);
+      return toArray(items);
     }
 
     let copy = toArray(items);
@@ -1725,14 +1717,14 @@ namespace Private {
       copy.reverse();
     }
 
-    return new Vector(copy);
+    return copy;
   }
 
   /**
    * Get the index of the node at a client position, or `-1`.
    */
   export
-  function hitTestNodes(nodes: Vector<HTMLElement>, x: number, y: number): number {
-    return findIndex(nodes, node => hitTest(node, x, y));
+  function hitTestNodes(nodes: HTMLElement[], x: number, y: number): number {
+    return ArrayExt.findFirstIndex(nodes, node => ElementExt.hitTest(node, x, y));
   }
 }

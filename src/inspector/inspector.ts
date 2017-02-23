@@ -3,27 +3,23 @@
 
 import {
   Message
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
   ISignal
-} from 'phosphor/lib/core/signaling';
+} from '@phosphor/signaling';
 
 import {
   Token
-} from 'phosphor/lib/core/token';
+} from '@phosphor/application';
 
 import {
-  Panel
-} from 'phosphor/lib/ui/panel';
-
-import {
-  TabPanel
-} from 'phosphor/lib/ui/tabpanel';
+  Panel, TabPanel
+} from '@phosphor/widgets';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
   Toolbar, ToolbarButton

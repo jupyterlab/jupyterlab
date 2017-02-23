@@ -9,11 +9,11 @@ import {
 
 import {
   toArray
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
   Context, DocumentRegistry
@@ -203,7 +203,7 @@ describe('notebook/notebook/default-toolbar', () => {
       it('should run and advance when clicked', (done) => {
         let button = ToolbarItems.createRunButton(panel);
         let widget = panel.notebook;
-        let next = widget.widgets.at(1) as MarkdownCellWidget;
+        let next = widget.widgets[1] as MarkdownCellWidget;
         widget.select(next);
         let cell = widget.activeCell as CodeCellWidget;
         cell.model.outputs.clear();
@@ -260,7 +260,7 @@ describe('notebook/notebook/default-toolbar', () => {
         let item = ToolbarItems.createCellTypeItem(panel);
         let node = item.node.getElementsByTagName('select')[0] as HTMLSelectElement;
         expect(node.value).to.be('code');
-        panel.notebook.select(panel.notebook.widgets.at(1));
+        panel.notebook.select(panel.notebook.widgets[1]);
         expect(node.value).to.be('-');
       });
 
@@ -270,7 +270,7 @@ describe('notebook/notebook/default-toolbar', () => {
         expect(node.value).to.be('code');
         let cell = panel.model.contentFactory.createCodeCell({});
         panel.model.cells.insert(1, cell);
-        panel.notebook.select(panel.notebook.widgets.at(1));
+        panel.notebook.select(panel.notebook.widgets[1]);
         expect(node.value).to.be('code');
       });
 

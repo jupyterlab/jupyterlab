@@ -3,11 +3,11 @@
 
 import {
   IDisposable
-} from 'phosphor/lib/core/disposable';
+} from '@phosphor/disposable';
 
 import {
-  clearSignalData, defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
+  ISignal, Signal
+} from '@phosphor/signaling';
 
 
 /**
@@ -26,7 +26,9 @@ class ActivityMonitor<Sender, Args> implements IDisposable {
   /**
    * A signal emitted when activity has ceased.
    */
-  readonly activityStopped: ISignal<this, ActivityMonitor.IArguments<Sender, Args>>;
+  get activityStopped(): ISignal<this, ActivityMonitor.IArguments<Sender, Args>> {
+    return this._activityStopped;
+  }
 
   /**
    * The timeout associated with the monitor, in milliseconds.
@@ -56,7 +58,7 @@ class ActivityMonitor<Sender, Args> implements IDisposable {
       return;
     }
     this._isDisposed = true;
-    clearSignalData(this);
+    Signal.clearData(this);
   }
 
   /**
@@ -67,7 +69,7 @@ class ActivityMonitor<Sender, Args> implements IDisposable {
     this._sender = sender;
     this._args = args;
     this._timer = window.setTimeout(() => {
-      this.activityStopped.emit({
+      this._activityStopped.emit({
         sender: this._sender,
         args: this._args
       });
@@ -81,11 +83,8 @@ class ActivityMonitor<Sender, Args> implements IDisposable {
   private _sender: Sender = null;
   private _args: Args = null;
   private _isDisposed = false;
+  private _activityStopped = new Signal<this, ActivityMonitor.IArguments<Sender, Args>>(this);
 }
-
-
-// Define the signals for the `ActivityMonitor` class.
-defineSignal(ActivityMonitor.prototype, 'activityStopped');
 
 
 /**

@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   toArray
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
 
 import {
   KernelMessage, Kernel
@@ -362,7 +362,7 @@ describe('completer/handler', () => {
         editor.setCursorPosition({ line: 0, column: 2 });
         // This signal is emitted (again) because the cursor position that
         // a natural user would create need to be recreated here.
-        editor.model.value.changed.emit(void 0);
+        (editor.model.value.changed as any).emit(void 0);
         expect(model.methods).to.contain('handleTextChange');
       });
 
@@ -375,7 +375,7 @@ describe('completer/handler', () => {
         let handler = new TestCompletionHandler({ completer });
 
         expect(handler.methods).to.not.contain('onCompletionSelected');
-        completer.selected.emit('foo');
+        (completer.selected as any).emit('foo');
         expect(handler.methods).to.contain('onCompletionSelected');
       });
 
@@ -388,7 +388,7 @@ describe('completer/handler', () => {
 
         handler.editor = createEditorWidget().editor;
         expect(model.methods).to.not.contain('createPatch');
-        completer.selected.emit('foo');
+        (completer.selected as any).emit('foo');
         expect(model.methods).to.contain('createPatch');
       });
 
@@ -413,7 +413,7 @@ describe('completer/handler', () => {
         handler.editor.model.value.text = text;
         model.original = request;
         model.cursor = { start: 5, end: 8 };
-        completer.selected.emit(patch);
+        (completer.selected as any).emit(patch);
         expect(handler.editor.model.value.text).to.equal(want);
       });
 

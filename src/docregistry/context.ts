@@ -7,23 +7,23 @@ import {
 
 import {
   JSONObject
-} from 'phosphor/lib/algorithm/json';
+} from '@phosphor/coreutils';
 
 import {
-  findIndex
-} from 'phosphor/lib/algorithm/searching';
+  ArrayExt
+} from '@phosphor/algorithm';
 
 import {
   IDisposable, DisposableDelegate
-} from 'phosphor/lib/core/disposable';
+} from '@phosphor/disposable';
 
 import {
-  clearSignalData, defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
+  ISignal, Signal
+} from '@phosphor/signaling';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
   showDialog, okButton
@@ -66,22 +66,30 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   /**
    * A signal emitted when the kernel changes.
    */
-  kernelChanged: ISignal<this, Kernel.IKernel>;
+  get kernelChanged(): ISignal<this, Kernel.IKernel> {
+    return this._kernelChanged;
+  }
 
   /**
    * A signal emitted when the path changes.
    */
-  pathChanged: ISignal<this, string>;
+  get pathChanged(): ISignal<this, string> {
+    return this._pathChanged;
+  }
 
   /**
    * A signal emitted when the model is saved or reverted.
    */
-  fileChanged: ISignal<this, Contents.IModel>;
+  get fileChanged(): ISignal<this, Contents.IModel> {
+    return this._fileChanged;
+  }
 
   /**
    * A signal emitted when the context is disposed.
    */
-  disposed: ISignal<this, void>;
+  get disposed(): ISignal<this, void> {
+    return this._disposed;
+  }
 
   /**
    * Get the model associated with the document.
@@ -149,8 +157,8 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     if (session) {
       session.dispose();
     }
-    this.disposed.emit(void 0);
-    clearSignalData(this);
+    this._disposed.emit(void 0);
+    Signal.clearData(this);
   }
 
   /**
@@ -219,7 +227,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
           if (this.isDisposed) {
             return;
           }
-          this.kernelChanged.emit(null);
+          this._kernelChanged.emit(null);
           return void 0;
         });
       } else {
@@ -422,7 +430,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         this._path = newPath;
       }
       this._updateContentsModel(change.newValue);
-      this.pathChanged.emit(this._path);
+      this._pathChanged.emit(this._path);
     }
   }
 
@@ -438,7 +446,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         this._session.dispose();
       }
       this._session = session;
-      this.kernelChanged.emit(session.kernel);
+      this._kernelChanged.emit(session.kernel);
       session.pathChanged.connect(this._onSessionPathChanged, this);
       session.kernelChanged.connect(this._onKernelChanged, this);
       return session.kernel;
@@ -461,7 +469,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   private _onSessionPathChanged(sender: Session.ISession, path: string) {
     if (path !== this._path) {
       this._path = path;
-      this.pathChanged.emit(path);
+      this._pathChanged.emit(path);
     }
   }
 
@@ -469,7 +477,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    * Handle a change to the kernel.
    */
   private _onKernelChanged(sender: Session.ISession): void {
-    this.kernelChanged.emit(sender.kernel);
+    this._kernelChanged.emit(sender.kernel);
   }
 
   /**
@@ -489,7 +497,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     let mod = this._contentsModel ? this._contentsModel.last_modified : null;
     this._contentsModel = newModel;
     if (!mod || newModel.last_modified !== mod) {
-      this.fileChanged.emit(newModel);
+      this._fileChanged.emit(newModel);
     }
   }
 
@@ -501,11 +509,11 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     if (!session) {
       return;
     }
-    let index = findIndex(models, model => model.id === session.id);
+    let index = ArrayExt.findFirstIndex(models, model => model.id === session.id);
     if (index === -1) {
       session.dispose();
       this._session = null;
-      this.kernelChanged.emit(null);
+      this._kernelChanged.emit(null);
     }
   }
 
@@ -539,14 +547,11 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   private _populatedPromise = new utils.PromiseDelegate<void>();
   private _isPopulated = false;
   private _isReady = false;
+  private _kernelChanged = new Signal<this, Kernel.IKernel>(this);
+  private _pathChanged = new Signal<this, string>(this);
+  private _fileChanged = new Signal<this, Contents.IModel>(this);
+  private _disposed = new Signal<this, void>(this);
 }
-
-
-// Define the signals for the `Context` class.
-defineSignal(Context.prototype, 'kernelChanged');
-defineSignal(Context.prototype, 'pathChanged');
-defineSignal(Context.prototype, 'fileChanged');
-defineSignal(Context.prototype, 'disposed');
 
 
 /**

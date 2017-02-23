@@ -4,12 +4,12 @@
 import * as dsv from 'd3-dsv';
 
 import {
-  defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
+  ISignal, Signal
+} from '@phosphor/signaling';
 
 import {
-  h, VNode
-} from 'phosphor/lib/ui/vdom';
+  h, VirtualNode
+} from '@phosphor/virtualdom';
 
 import {
   VDomModel, VDomWidget
@@ -50,7 +50,9 @@ class CSVModel extends VDomModel {
    * A signal emitted when the parsed value's rows exceed the display limit. It
    * emits the length of the parsed value.
    */
-  readonly maxExceeded: ISignal<this, CSVModel.IOverflow>;
+  get maxExceeded(): ISignal<this, CSVModel.IOverflow> {
+    return this._maxExceeded;
+  }
 
   /**
    * The raw model content.
@@ -63,7 +65,7 @@ class CSVModel extends VDomModel {
       return;
     }
     this._content = content;
-    this.stateChanged.emit(void 0);
+    this.triggerChange();
   }
 
   /**
@@ -77,7 +79,7 @@ class CSVModel extends VDomModel {
       return;
     }
     this._delimiter = delimiter;
-    this.stateChanged.emit(void 0);
+    this.triggerChange();
   }
 
   /**
@@ -94,18 +96,15 @@ class CSVModel extends VDomModel {
     if (available > maximum) {
       // Mutate the array instead of slicing in order to conserve memory.
       output.splice(maximum);
-      this.maxExceeded.emit({ available, maximum });
+      this._maxExceeded.emit({ available, maximum });
     }
     return output;
   }
 
   private _content: string;
   private _delimiter: string;
+  private _maxExceeded = new Signal<this, CSVModel.IOverflow>(this);
 }
-
-
-// Define the signals for the `CSVModel` class.
-defineSignal(CSVModel.prototype, 'maxExceeded');
 
 
 /**
@@ -166,7 +165,7 @@ class CSVTable extends VDomWidget<CSVModel> {
   /**
    * Render the content as virtual DOM nodes.
    */
-  protected render(): VNode | VNode[] {
+  protected render(): VirtualNode | VirtualNode[] {
     if (!this.model) {
       return h.table([h.thead(), h.tbody()]);
     }

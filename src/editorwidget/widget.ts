@@ -3,7 +3,7 @@
 
 import {
   Token
-} from 'phosphor/lib/core/token';
+} from '@phosphor/application';
 
 import {
   IInstanceTracker
@@ -49,7 +49,7 @@ interface IEditorTracker extends IInstanceTracker<EditorWidget> {}
  * The editor tracker token.
  */
 export
-const IEditorTracker = new Token<EditorWidget>('jupyter.services.editor-tracker');
+const IEditorTracker = new Token<IEditorTracker>('jupyter.services.editor-tracker');
 /* tslint:enable */
 
 

@@ -7,19 +7,19 @@ import {
 
 import {
   Message
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
-  defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
+  ISignal, Signal
+} from '@phosphor/signaling';
 
 import {
-  hitTest
-} from 'phosphor/lib/dom/query';
+  ElementExt
+} from '@phosphor/domutils';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
   hitTestNodes, findElement
@@ -168,12 +168,16 @@ class RunningSessions extends Widget {
   /**
    * A signal emitted when a kernel session open is requested.
    */
-  readonly sessionOpenRequested: ISignal<RunningSessions, Session.IModel>;
+  get sessionOpenRequested(): ISignal<this, Session.IModel> {
+    return this._sessionOpenRequested;
+  }
 
   /**
    * A signal emitted when a terminal session open is requested.
    */
-  readonly terminalOpenRequested: ISignal<RunningSessions, TerminalSession.IModel>;
+  get terminalOpenRequested(): ISignal<this, TerminalSession.IModel> {
+    return this._terminalOpenRequested;
+  }
 
   /**
    * The renderer used by the running sessions widget.
@@ -307,7 +311,7 @@ class RunningSessions extends Widget {
     let clientY = event.clientY;
 
     // Check for a refresh.
-    if (hitTest(refresh, clientX, clientY)) {
+    if (ElementExt.hitTest(refresh, clientX, clientY)) {
       return;
     }
 
@@ -317,11 +321,11 @@ class RunningSessions extends Widget {
       let node = termList.children[index] as HTMLLIElement;
       let shutdown = renderer.getTerminalShutdown(node);
       let model = this._runningTerminals[index];
-      if (hitTest(shutdown, clientX, clientY)) {
+      if (ElementExt.hitTest(shutdown, clientX, clientY)) {
         this._manager.terminals.shutdown(model.name);
         return;
       }
-      this.terminalOpenRequested.emit(model);
+      this._terminalOpenRequested.emit(model);
     }
 
     // Check for a session item click.
@@ -330,11 +334,11 @@ class RunningSessions extends Widget {
       let node = sessionList.children[index] as HTMLLIElement;
       let shutdown = renderer.getSessionShutdown(node);
       let model = this._runningSessions[index];
-      if (hitTest(shutdown, clientX, clientY)) {
+      if (ElementExt.hitTest(shutdown, clientX, clientY)) {
         this._manager.sessions.shutdown(model.id);
         return;
       }
-      this.sessionOpenRequested.emit(model);
+      this._sessionOpenRequested.emit(model);
     }
   }
 
@@ -366,12 +370,9 @@ class RunningSessions extends Widget {
   private _runningSessions: Session.IModel[] = [];
   private _runningTerminals: TerminalSession.IModel[] = [];
   private _refreshId = -1;
+  private _sessionOpenRequested = new Signal<this, Session.IModel>(this);
+  private _terminalOpenRequested = new Signal<this, TerminalSession.IModel>(this);
 }
-
-
-// Define the signals for the `RunningSessions` class.
-defineSignal(RunningSessions.prototype, 'sessionOpenRequested');
-defineSignal(RunningSessions.prototype, 'terminalOpenRequested');
 
 
 /**

@@ -4,12 +4,12 @@
 import expect = require('expect.js');
 
 import {
-  ISignal, defineSignal
-} from 'phosphor/lib/core/signaling';
+  ISignal, Signal
+} from '@phosphor/signaling';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
   Inspector
@@ -27,16 +27,12 @@ class TestInspector extends Inspector {
 
 
 class TestInspectable implements Inspector.IInspectable {
-  disposed: ISignal<any, void>;
+  disposed = new Signal<any, void>(this);
 
-  ephemeralCleared: ISignal<any, void>;
+  ephemeralCleared = new Signal<any, void>(this);
 
-  inspected: ISignal<any, Inspector.IInspectorUpdate>;
+  inspected = new Signal<any, Inspector.IInspectorUpdate>(this);
 }
-
-defineSignal(TestInspectable.prototype, 'disposed');
-defineSignal(TestInspectable.prototype, 'ephemeralCleared');
-defineSignal(TestInspectable.prototype, 'inspected');
 
 
 describe('inspector/index', () => {
@@ -140,7 +136,7 @@ describe('inspector/index', () => {
         let widget = new TestInspector(options);
         widget.source = new TestInspectable();
         expect(widget.methods).to.not.contain('onInspectorUpdate');
-        widget.source.inspected.emit({
+        (widget.source.inspected as any).emit({
           content: new Widget(),
           type: 'hints'
         });

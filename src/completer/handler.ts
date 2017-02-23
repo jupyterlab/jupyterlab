@@ -7,11 +7,11 @@ import {
 
 import {
   IDisposable
-} from 'phosphor/lib/core/disposable';
+} from '@phosphor/disposable';
 
 import {
-  Message, sendMessage
-} from 'phosphor/lib/core/messaging';
+  Message, MessageLoop
+} from '@phosphor/messaging';
 
 import {
   CodeEditor
@@ -102,7 +102,7 @@ class CompletionHandler implements IDisposable {
    * Invoke the handler and launch a completer.
    */
   invoke(): void {
-    sendMessage(this, CompletionHandler.Msg.InvokeRequest);
+    MessageLoop.sendMessage(this, CompletionHandler.Msg.InvokeRequest);
   }
 
   /**

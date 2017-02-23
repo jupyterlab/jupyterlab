@@ -3,7 +3,7 @@
 
 import {
   AttachedProperty
-} from 'phosphor/lib/core/properties';
+} from '@phosphor/properties';
 
 import {
   JupyterLab, JupyterLabPlugin
@@ -125,7 +125,8 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
    * An attached property for the session id associated with an editor widget.
    */
   const sessionIdProperty = new AttachedProperty<EditorWidget, string>({
-    name: 'sessionId'
+    name: 'sessionId',
+    create: () => ''
   });
 
   let commands = app.commands;

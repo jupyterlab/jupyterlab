@@ -2,12 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Application
-} from 'phosphor/lib/ui/application';
+  Application, IPlugin
+} from '@phosphor/application';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
   maxSatisfying, satisfies
@@ -128,7 +128,7 @@ class ModuleLoader {
    * #### Notes
    * The plugin(s) are extracted and validated before being returned.
    */
-  extractPlugins(data: any): Application.IPlugin<Application<Widget>, any>[] {
+  extractPlugins(data: any): IPlugin<Application<Widget>, any>[] {
     // We use the default export from es6 modules.
     if (data.__esModule) {
       data = data.default;

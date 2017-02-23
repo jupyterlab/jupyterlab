@@ -2,28 +2,24 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IIterator, map
-} from 'phosphor/lib/algorithm/iteration';
-
-import {
-  find
-} from 'phosphor/lib/algorithm/searching';
+  IIterator, find, map
+} from '@phosphor/algorithm';
 
 import {
   Message
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
   AttachedProperty
-} from 'phosphor/lib/core/properties';
+} from '@phosphor/properties';
 
 import {
   PanelLayout
-} from 'phosphor/lib/ui/panel';
+} from '@phosphor/widgets';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 
 /**
@@ -245,5 +241,8 @@ namespace Private {
    * An attached property for the name of a toolbar item.
    */
   export
-  const nameProperty = new AttachedProperty<Widget, string>({ name: 'name' });
+  const nameProperty = new AttachedProperty<Widget, string>({
+    name: 'name',
+    create: () => ''
+  });
 }

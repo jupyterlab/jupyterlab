@@ -5,11 +5,11 @@ import expect = require('expect.js');
 
 import {
   Message
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
   simulate
@@ -308,8 +308,8 @@ describe('ApplicationShell', () => {
       bar.id = 'bar';
       shell.addToMainArea(bar);
       shell.closeAll();
-      expect(foo.isAttached).to.be(false);
-      expect(bar.isAttached).to.be(false);
+      expect(foo.parent).to.be(null);
+      expect(bar.parent).to.be(null);
     });
 
   });

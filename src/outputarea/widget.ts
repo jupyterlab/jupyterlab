@@ -6,36 +6,32 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  ISequence
-} from 'phosphor/lib/algorithm/sequence';
-
-import {
   IDisposable
-} from 'phosphor/lib/core/disposable';
+} from '@phosphor/disposable';
 
 import {
   ISignal
-} from 'phosphor/lib/core/signaling';
+} from '@phosphor/signaling';
 
 import {
   Message
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
   MimeData
-} from 'phosphor/lib/core/mimedata';
+} from '@phosphor/coreutils';
 
 import {
   Drag
-} from 'phosphor/lib/dom/dragdrop';
+} from '@phosphor/dragdrop';
 
 import {
   Panel, PanelLayout
-} from 'phosphor/lib/ui/panel';
+} from '@phosphor/widgets';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
   ObservableVector
@@ -179,7 +175,7 @@ class OutputAreaWidget extends Widget {
   /**
    * A read-only sequence of the widgets in the output area.
    */
-  get widgets(): ISequence<Widget> {
+  get widgets(): ReadonlyArray<Widget> {
     return (this.layout as PanelLayout).widgets;
   }
 
@@ -272,10 +268,9 @@ class OutputAreaWidget extends Widget {
 
     // Remove all of our widgets.
     let length = this.widgets.length;
-    let layout = this.layout as PanelLayout;
     for (let i = 0; i < length; i++) {
-      let widget = this.widgets.at(0);
-      layout.removeWidget(widget);
+      let widget = this.widgets[0];
+      widget.parent = null;
       widget.dispose();
     }
 
@@ -401,11 +396,11 @@ class OutputAreaWidget extends Widget {
     let widgets = this.widgets;
     // Skip any stdin widgets to find the correct index.
     for (let i = 0; i < index; i++) {
-      if (widgets.at(i).hasClass(STDIN_CLASS)) {
+      if (widgets[i].hasClass(STDIN_CLASS)) {
         index++;
       }
     }
-    layout.widgets.at(index).dispose();
+    layout.widgets[index].dispose();
     this._insertOutput(index, model);
   }
 

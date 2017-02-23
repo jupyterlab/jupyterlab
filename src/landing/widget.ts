@@ -3,11 +3,11 @@
 
 import {
   Message
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
-  h, VNode
-} from 'phosphor/lib/ui/vdom';
+  h, VirtualNode
+} from '@phosphor/virtualdom';
 
 import {
   CommandIDs as AboutCommandIDs
@@ -176,7 +176,7 @@ class LandingModel extends VDomModel {
    */
   set path(value: string) {
     this._path = value;
-    this.stateChanged.emit(void 0);
+    this.triggerChange();
   }
 
   private _path: string;
@@ -214,8 +214,8 @@ class LandingWidget extends VDomWidget<LandingModel> {
   /**
    * Render the landing plugin to virtual DOM nodes.
    */
-  protected render(): VNode {
-    let activitiesList: VNode[] = [];
+  protected render(): VirtualNode {
+    let activitiesList: VirtualNode[] = [];
     let activites = this.model.activities;
     for (let activityName of activites) {
       let imgName = activityName[0].replace(' ', '');

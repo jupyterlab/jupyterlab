@@ -7,23 +7,15 @@ import {
 
 import {
   each
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
 
 import {
   CommandRegistry
-} from 'phosphor/lib/ui/commandregistry';
+} from '@phosphor/commands';
 
 import {
-  Keymap
-} from 'phosphor/lib/ui/keymap';
-
-import {
-  PanelLayout
-} from 'phosphor/lib/ui/panel';
-
-import {
-  Widget
-} from 'phosphor/lib/ui/widget';
+  PanelLayout, Widget
+} from '@phosphor/widgets';
 
 import {
   DocumentManager
@@ -83,7 +75,6 @@ class FileBrowser extends Widget {
     super();
     this.addClass(FILE_BROWSER_CLASS);
     let commands = this._commands = options.commands;
-    let keymap = this._keymap = options.keymap;
     let manager = this._manager = options.manager;
     let model = this._model = options.model;
     let renderer = options.renderer;
@@ -91,7 +82,7 @@ class FileBrowser extends Widget {
     model.connectionFailure.connect(this._onConnectionFailure, this);
     this._crumbs = new BreadCrumbs({ model });
     this._buttons = new FileButtons({
-      commands, keymap, manager, model
+      commands, manager, model
     });
     this._listing = new DirListing({ manager, model, renderer });
 
@@ -112,13 +103,6 @@ class FileBrowser extends Widget {
    */
   get commands(): CommandRegistry {
     return this._commands;
-  }
-
-  /**
-   * Get the keymap manager used by the file browser.
-   */
-  get keymap(): Keymap {
-    return this._keymap;
   }
 
   /**
@@ -310,7 +294,6 @@ class FileBrowser extends Widget {
   private _buttons: FileButtons = null;
   private _commands: CommandRegistry = null;
   private _crumbs: BreadCrumbs = null;
-  private _keymap: Keymap = null;
   private _listing: DirListing = null;
   private _manager: DocumentManager = null;
   private _model: FileBrowserModel = null;
@@ -332,11 +315,6 @@ namespace FileBrowser {
      * The command registry for use with the file browser.
      */
     commands: CommandRegistry;
-
-    /**
-     * The keymap for use with the file browser.
-     */
-    keymap: Keymap;
 
     /**
      * A file browser model instance.

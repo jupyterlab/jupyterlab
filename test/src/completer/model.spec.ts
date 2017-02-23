@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   toArray
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
 
 import {
   CompleterModel, CompleterWidget
@@ -111,7 +111,7 @@ describe('completer/model', () => {
         expect(called).to.be(3);
       });
 
-      it('should not signal when current text has not change', () => {
+      it('should not signal when current text is unchanged', () => {
         let model = new CompleterModel();
         let called = 0;
         let currentValue = 'foo';

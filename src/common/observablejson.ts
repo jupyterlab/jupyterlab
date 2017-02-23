@@ -2,20 +2,20 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  deepEqual, isPrimitive, JSONObject, JSONValue
-} from 'phosphor/lib/algorithm/json';
+  JSONExt, JSONObject, JSONValue
+} from '@phosphor/coreutils';
 
 import {
   Message
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
-  h, realize
-} from 'phosphor/lib/ui/vdom';
+  h, VirtualDOM
+} from '@phosphor/virtualdom';
 
 import {
   CodeEditor
@@ -92,7 +92,7 @@ class ObservableJSON extends ObservableMap<JSONValue> {
    */
   constructor(options: ObservableJSON.IOptions = {}) {
     super({
-      itemCmp: deepEqual,
+      itemCmp: JSONExt.deepEqual,
       values: options.values
     });
   }
@@ -104,7 +104,7 @@ class ObservableJSON extends ObservableMap<JSONValue> {
     let out: JSONObject = Object.create(null);
     for (let key of this.keys()) {
       let value = this.get(key);
-      if (isPrimitive(value)) {
+      if (JSONExt.isPrimitive(value)) {
         out[key] = value;
       } else {
         out[key] = JSON.parse(JSON.stringify(value));
@@ -170,6 +170,7 @@ class ObservableJSONWidget extends Widget {
     model.value.changed.connect(this._onValueChanged, this);
     this.model = model;
     this.editor = options.editorFactory({ host, model });
+    this.editor.readOnly = true;
   }
 
   /**
@@ -217,6 +218,7 @@ class ObservableJSONWidget extends Widget {
       this._source.changed.disconnect(this._onSourceChanged, this);
     }
     this._source = value;
+    this.editor.readOnly = !value;
     value.changed.connect(this._onSourceChanged, this);
     this._setValue();
   }
@@ -296,7 +298,7 @@ class ObservableJSONWidget extends Widget {
       let value = JSON.parse(this.editor.model.value.text);
       this.removeClass(ERROR_CLASS);
       this._inputDirty = (
-        !this._changeGuard && !deepEqual(value, this._originalValue)
+        !this._changeGuard && !JSONExt.deepEqual(value, this._originalValue)
       );
     } catch (err) {
       this.addClass(ERROR_CLASS);
@@ -339,13 +341,13 @@ class ObservableJSONWidget extends Widget {
    */
   private _mergeContent(): void {
     let model = this.editor.model;
-    let current = this._getContent() as JSONObject;
+    let current = this._getContent() || {};
     let old = this._originalValue;
     let user = JSON.parse(model.value.text) as JSONObject;
     let source = this.source;
     // If it is in user and has changed from old, set in current.
     for (let key in user) {
-      if (!deepEqual(user[key], old[key])) {
+      if (!JSONExt.deepEqual(user[key], old[key])) {
         current[key] = user[key];
       }
     }
@@ -391,7 +393,7 @@ class ObservableJSONWidget extends Widget {
     this._changeGuard = true;
     if (content === void 0) {
       model.value.text = 'No data!';
-      this._originalValue = {};
+      this._originalValue = null;
     } else {
       let value = JSON.stringify(content, null, 2);
       model.value.text = value;
@@ -406,7 +408,7 @@ class ObservableJSONWidget extends Widget {
   private _dataDirty = false;
   private _inputDirty = false;
   private _source: IObservableJSON | null = null;
-  private _originalValue: JSONObject;
+  private _originalValue: JSONObject = null;
   private _changeGuard = false;
 }
 
@@ -440,7 +442,7 @@ namespace Private {
   function createEditorNode(): HTMLElement {
     let cancelTitle = 'Revert changes to data';
     let confirmTitle = 'Commit changes to data';
-    return realize(
+    return VirtualDOM.realize(
       h.div({ className: METADATA_CLASS },
         h.div({ className: BUTTON_AREA_CLASS },
           h.span({ className: REVERT_CLASS, title: cancelTitle }),

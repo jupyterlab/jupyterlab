@@ -5,23 +5,23 @@
 
 import {
   JSONObject
-} from 'phosphor/lib/algorithm/json';
+} from '@phosphor/coreutils';
 
 import {
   IDisposable
-} from 'phosphor/lib/core/disposable';
+} from '@phosphor/disposable';
 
 import {
   Token
-} from 'phosphor/lib/core/token';
+} from '@phosphor/application';
 
 import {
   CommandRegistry
-} from 'phosphor/lib/ui/commandregistry';
+} from '@phosphor/commands';
 
 import {
-  IElementAttrs
-} from 'phosphor/lib/ui/vdom';
+  ElementAttrs
+} from '@phosphor/virtualdom';
 
 
 /**
@@ -81,7 +81,7 @@ interface ICommandLinker extends IDisposable {
    * that were never connected.
    *
    * This method can be called on rendered virtual DOM nodes that were populated
-   * using the `populateVNodeAttributes` method in order to disconnect them from
+   * using the `populateVirtualNodeAttributes` method in order to disconnect them from
    * executing their command/argument pair.
    */
   disconnectNode(node: HTMLElement): HTMLElement;
@@ -104,7 +104,7 @@ interface ICommandLinker extends IDisposable {
    * The attributes instance that is returned is identical to the attributes
    * instance that was passed in, i.e., this method mutates the original.
    */
-  populateVNodeAttrs(attrs: IElementAttrs, command: string, args: JSONObject): IElementAttrs;
+  populateVirtualNodeAttrs(attrs: ElementAttrs, command: string, args: JSONObject): ElementAttrs;
 }
 
 
@@ -179,7 +179,7 @@ class CommandLinker implements ICommandLinker {
    * that were never connected.
    *
    * This method can be called on rendered virtual DOM nodes that were populated
-   * using the `populateVNodeAttributes` method in order to disconnect them from
+   * using the `populateVirtualNodeAttributes` method in order to disconnect them from
    * executing their command/argument pair.
    */
   disconnectNode(node: HTMLElement): HTMLElement {
@@ -226,12 +226,12 @@ class CommandLinker implements ICommandLinker {
    * The attributes instance that is returned is identical to the attributes
    * instance that was passed in, i.e., this method mutates the original.
    */
-  populateVNodeAttrs(attrs: IElementAttrs, command: string, args: JSONObject): IElementAttrs {
+  populateVirtualNodeAttrs(attrs: ElementAttrs, command: string, args: JSONObject): ElementAttrs {
     let argsValue = JSON.stringify(args);
-    attrs.dataset = attrs.dataset || {};
-    attrs.dataset[COMMAND_ATTR] = command;
+    (attrs as any).dataset = attrs.dataset || {};
+    (attrs.dataset as JSONObject)[COMMAND_ATTR] = command;
     if (argsValue) {
-      attrs.dataset[ARGS_ATTR] = argsValue;
+      (attrs.dataset as JSONObject)[ARGS_ATTR] = argsValue;
     }
     return attrs;
   }

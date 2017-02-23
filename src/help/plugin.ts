@@ -7,11 +7,11 @@ import {
 
 import {
   Message
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
   Menu
-} from 'phosphor/lib/ui/menu';
+} from '@phosphor/widgets';
 
 import {
   CommandIDs as AboutCommandIDs
@@ -136,8 +136,8 @@ export default plugin;
 
 /*
   * An IFrame the disposes itself when closed.
-  * 
-  * This is needed to clear the state restoration db when IFrames are closed. 
+  *
+  * This is needed to clear the state restoration db when IFrames are closed.
  */
 class ClosableIFrame extends IFrame {
 
@@ -167,7 +167,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command, 
+    command,
     args: widget => ({ url: widget.url, text: widget.title.label }),
     name: widget => widget.url
   });
@@ -190,8 +190,8 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
    * Create a menu for the help plugin.
    */
   function createMenu(): Menu {
-    let { commands, keymap } = app;
-    let menu = new Menu({ commands, keymap });
+    let { commands } = app;
+    let menu = new Menu({ commands });
     menu.title.label = category;
 
     menu.addItem({ command: AboutCommandIDs.open });

@@ -2,39 +2,31 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IterableOrArrayLike, each, toArray
-} from 'phosphor/lib/algorithm/iteration';
-
-import {
-  findIndex, indexOf
-} from 'phosphor/lib/algorithm/searching';
-
-import {
-  ISequence
-} from 'phosphor/lib/algorithm/sequence';
-
-import {
-  Vector
-} from 'phosphor/lib/collections/vector';
+  ArrayExt, IIterator, IterableOrArrayLike, each, toArray
+} from '@phosphor/algorithm';
 
 import {
   IDisposable
-} from 'phosphor/lib/core/disposable';
+} from '@phosphor/disposable';
 
 import {
-  clearSignalData, defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
+  ISignal, Signal
+} from '@phosphor/signaling';
+
+import {
+  Vector
+} from './vector';
 
 
 /**
  * A vector which can be observed for changes.
  */
 export
-interface IObservableVector<T> extends IDisposable, ISequence<T> {
+interface IObservableVector<T> extends IDisposable {
   /**
    * A signal emitted when the vector has changed.
    */
-  changed: ISignal<IObservableVector<T>, ObservableVector.IChangedArgs<T>>;
+  readonly changed: ISignal<this, ObservableVector.IChangedArgs<T>>;
 
   /**
    * Test whether the vector is empty.
@@ -48,6 +40,27 @@ interface IObservableVector<T> extends IDisposable, ISequence<T> {
    * No changes.
    */
   readonly isEmpty: boolean;
+
+  /**
+   * The length of the sequence.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  length: number;
+
+  /**
+   * Create an iterator over the values in the vector.
+   *
+   * @returns A new iterator starting at the front of the vector.
+   *
+   * #### Complexity
+   * Constant.
+   *
+   * #### Iterator Validity
+   * No changes.
+   */
+  iter(): IIterator<T>;
 
   /**
    * Get the value at the front of the vector.
@@ -76,6 +89,18 @@ interface IObservableVector<T> extends IDisposable, ISequence<T> {
    * No changes.
    */
   readonly back: T;
+
+  /**
+   * Get the value at the specified index.
+   *
+   * @param index - The positive integer index of interest.
+   *
+   * @returns The value at the specified index.
+   *
+   * #### Undefined Behavior
+   * An `index` which is non-integral or out of range.
+   */
+  at(index: number): T;
 
   /**
    * Set the value at the specified index.
@@ -288,7 +313,9 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
   /**
    * A signal emitted when the vector has changed.
    */
-  changed: ISignal<ObservableVector<T>, ObservableVector.IChangedArgs<T>>;
+  get changed(): ISignal<this, ObservableVector.IChangedArgs<T>> {
+    return this._changed;
+  }
 
   /**
    * Test whether the vector has been disposed.
@@ -305,7 +332,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
       return;
     }
     this._isDisposed = true;
-    clearSignalData(this);
+    Signal.clearData(this);
     this.clear();
   }
 
@@ -327,13 +354,16 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    */
   set(index: number, value: T): void {
     let oldValues = [this.at(index)];
+    if (value === undefined) {
+      value = null;
+    }
     // Bail if the value does not change.
     let itemCmp = this._itemCmp;
     if (itemCmp(oldValues[0], value)) {
       return;
     }
     super.set(index, value);
-    this.changed.emit({
+    this._changed.emit({
       type: 'set',
       oldIndex: index,
       newIndex: index,
@@ -357,7 +387,11 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    */
   pushBack(value: T): number {
     let num = super.pushBack(value);
-    this.changed.emit({
+    // Bail if in the constructor.
+    if (!this._changed) {
+      return;
+    }
+    this._changed.emit({
       type: 'add',
       oldIndex: -1,
       newIndex: this.length - 1,
@@ -381,7 +415,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    */
   popBack(): T {
     let value = super.popBack();
-    this.changed.emit({
+    this._changed.emit({
       type: 'remove',
       oldIndex: this.length,
       newIndex: -1,
@@ -414,7 +448,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    */
   insert(index: number, value: T): number {
     let num = super.insert(index, value);
-    this.changed.emit({
+    this._changed.emit({
       type: 'add',
       oldIndex: -1,
       newIndex: index,
@@ -440,7 +474,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    */
   remove(value: T): number {
     let itemCmp = this._itemCmp;
-    let index = findIndex(this, item => itemCmp(item, value));
+    let index = ArrayExt.findFirstIndex(toArray(this), item => itemCmp(item, value));
     this.removeAt(index);
     return index;
   }
@@ -464,7 +498,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    */
   removeAt(index: number): T {
     let value = super.removeAt(index);
-    this.changed.emit({
+    this._changed.emit({
       type: 'remove',
       oldIndex: index,
       newIndex: -1,
@@ -486,7 +520,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
   clear(): void {
     let oldValues = toArray(this);
     super.clear();
-    this.changed.emit({
+    this._changed.emit({
       type: 'remove',
       oldIndex: 0,
       newIndex: 0,
@@ -521,7 +555,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
       super.insert(toIndex, value);
     }
     let arr = [value];
-    this.changed.emit({
+    this._changed.emit({
       type: 'move',
       oldIndex: fromIndex,
       newIndex: toIndex,
@@ -547,7 +581,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
     let newIndex = this.length;
     let newValues = toArray(values);
     each(newValues, value => { super.pushBack(value); });
-    this.changed.emit({
+    this._changed.emit({
       type: 'add',
       oldIndex: -1,
       newIndex,
@@ -582,7 +616,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
     let newIndex = index;
     let newValues = toArray(values);
     each(newValues, value => { super.insert(index++, value); });
-    this.changed.emit({
+    this._changed.emit({
       type: 'add',
       oldIndex: -1,
       newIndex,
@@ -615,7 +649,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
     for (let i = startIndex; i < endIndex; i++) {
       oldValues.push(super.removeAt(startIndex));
     }
-    this.changed.emit({
+    this._changed.emit({
       type: 'remove',
       oldIndex: startIndex,
       newIndex: -1,
@@ -627,6 +661,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
 
   private _isDisposed = false;
   private _itemCmp: (first: T, second: T) => boolean;
+  private _changed = new Signal<this, ObservableVector.IChangedArgs<T>>(this);
 }
 
 
@@ -715,10 +750,6 @@ namespace ObservableVector {
     oldValues: T[];
   }
 }
-
-
-// Define the signals for the `ObservableVector` class.
-defineSignal(ObservableVector.prototype, 'changed');
 
 
 /**

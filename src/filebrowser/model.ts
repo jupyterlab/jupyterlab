@@ -6,24 +6,16 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  IterableOrArrayLike, IIterator, each, toArray
-} from 'phosphor/lib/algorithm/iteration';
-
-import {
-  findIndex
-} from 'phosphor/lib/algorithm/searching';
-
-import {
-  Vector
-} from 'phosphor/lib/collections/vector';
+  ArrayExt, ArrayIterator, IterableOrArrayLike, IIterator, each, toArray
+} from '@phosphor/algorithm';
 
 import {
   IDisposable
-} from 'phosphor/lib/core/disposable';
+} from '@phosphor/disposable';
 
 import {
-  clearSignalData, defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
+  ISignal, Signal
+} from '@phosphor/signaling';
 
 import {
   IChangedArgs
@@ -71,27 +63,37 @@ class FileBrowserModel implements IDisposable, IPathTracker {
   /**
    * A signal emitted when the path changes.
    */
-  pathChanged: ISignal<this, IChangedArgs<string>>;
+  get pathChanged(): ISignal<this, IChangedArgs<string>> {
+    return this._pathChanged;
+  }
 
   /**
    * A signal emitted when the directory listing is refreshed.
    */
-  refreshed: ISignal<this, void>;
+  get refreshed(): ISignal<this, void> {
+    return this._refreshed;
+  }
 
   /**
    * A signal emitted when the running sessions in the directory changes.
    */
-  sessionsChanged: ISignal<this, void>;
+  get sessionsChanged(): ISignal<this, void> {
+    return this._sessionsChanged;
+  }
 
   /**
    * Get the file path changed signal.
    */
-  fileChanged: ISignal<this, Contents.IChangedArgs>;
+  get fileChanged(): ISignal<this, Contents.IChangedArgs> {
+    return this._fileChanged;
+  }
 
   /**
    * A signal emitted when the file browser model loses connection.
    */
-  connectionFailure: ISignal<this, Error>;
+  get connectionFailure(): ISignal<this, Error> {
+    return this._connectionFailure;
+  }
 
   /**
    * Get the current path.
@@ -125,9 +127,9 @@ class FileBrowserModel implements IDisposable, IPathTracker {
     clearTimeout(this._timeoutId);
     clearInterval(this._refreshId);
     clearTimeout(this._blackoutId);
-    this._sessions.clear();
-    this._items.clear();
-    clearSignalData(this);
+    this._sessions.length = 0;
+    this._items.length = 0;
+    Signal.clearData(this);
   }
 
   /**
@@ -136,7 +138,7 @@ class FileBrowserModel implements IDisposable, IPathTracker {
    * @returns A new iterator over the model's items.
    */
   items(): IIterator<Contents.IModel> {
-    return this._items.iter();
+    return new ArrayIterator(this._items);
   }
 
   /**
@@ -145,7 +147,7 @@ class FileBrowserModel implements IDisposable, IPathTracker {
    * @returns A new iterator over the model's active sessions.
    */
   sessions(): IIterator<Session.IModel> {
-    return this._sessions.iter();
+    return new ArrayIterator(this._sessions);
   }
 
   /**
@@ -176,7 +178,7 @@ class FileBrowserModel implements IDisposable, IPathTracker {
     let options: Contents.IFetchOptions = { content: true };
     this._pendingPath = newValue;
     if (oldValue !== newValue) {
-      this._sessions.clear();
+      this._sessions.length = 0;
     }
     let manager = this._manager;
     this._pending = manager.contents.get(newValue, options).then(contents => {
@@ -186,17 +188,17 @@ class FileBrowserModel implements IDisposable, IPathTracker {
       this._handleContents(contents);
       this._pendingPath = null;
       if (oldValue !== newValue) {
-        this.pathChanged.emit({
+        this._pathChanged.emit({
           name: 'path',
           oldValue,
           newValue
         });
       }
       this._onRunningChanged(manager.sessions, manager.sessions.running());
-      this.refreshed.emit(void 0);
+      this._refreshed.emit(void 0);
     }).catch(error => {
       this._pendingPath = null;
-      this.connectionFailure.emit(error);
+      this._connectionFailure.emit(error);
     });
     return this._pending;
   }
@@ -345,7 +347,7 @@ class FileBrowserModel implements IDisposable, IPathTracker {
    */
   protected stopIfNeeded(path: string): Promise<void> {
     let sessions = toArray(this._sessions);
-    let index = findIndex(sessions, value => value.notebook.path === path);
+    let index = ArrayExt.findFirstIndex(sessions, value => value.notebook.path === path);
     if (index !== -1) {
       let count = 0;
       let model = sessions[index];
@@ -418,25 +420,24 @@ class FileBrowserModel implements IDisposable, IPathTracker {
       mimetype: contents.mimetype,
       format: contents.format
     };
-    this._items.clear();
+    this._items = contents.content;
     this._paths.clear();
     each(contents.content, (model: Contents.IModel) => {
       this._paths.add(model.path);
     });
-    this._items = new Vector<Contents.IModel>(contents.content);
   }
 
   /**
    * Handle a change to the running sessions.
    */
   private _onRunningChanged(sender: Session.IManager, models: IterableOrArrayLike<Session.IModel>): void {
-    this._sessions.clear();
+    this._sessions.length = 0;
     each(models, model => {
       if (this._paths.has(model.notebook.path)) {
-        this._sessions.pushBack(model);
+        this._sessions.push(model);
       }
     });
-    this.refreshed.emit(void 0);
+    this._refreshed.emit(void 0);
   }
 
   /**
@@ -446,13 +447,13 @@ class FileBrowserModel implements IDisposable, IPathTracker {
     let path = this._model.path || '.';
     let value = change.oldValue;
     if (value && value.path && ContentsManager.dirname(value.path) === path) {
-      this.fileChanged.emit(change);
+      this._fileChanged.emit(change);
       this._scheduleUpdate();
       return;
     }
     value = change.newValue;
     if (value && value.path && ContentsManager.dirname(value.path) === path) {
-      this.fileChanged.emit(change);
+      this._fileChanged.emit(change);
       this._scheduleUpdate();
       return;
     }
@@ -489,8 +490,8 @@ class FileBrowserModel implements IDisposable, IPathTracker {
 
   private _maxUploadSizeMb = 15;
   private _manager: ServiceManager.IManager = null;
-  private _sessions = new Vector<Session.IModel>();
-  private _items = new Vector<Contents.IModel>();
+  private _sessions: Session.IModel[] = [];
+  private _items: Contents.IModel[] = [];
   private _paths = new Set<string>();
   private _model: Contents.IModel;
   private _pendingPath: string = null;
@@ -499,14 +500,12 @@ class FileBrowserModel implements IDisposable, IPathTracker {
   private _refreshId = -1;
   private _blackoutId = -1;
   private _requested = false;
+  private _pathChanged = new Signal<this, IChangedArgs<string>>(this);
+  private _refreshed = new Signal<this, void>(this);
+  private _sessionsChanged = new Signal<this, void>(this);
+  private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
+  private _connectionFailure = new Signal<this, Error>(this);
 }
-
-
-// Define the signals for the `FileBrowserModel` class.
-defineSignal(FileBrowserModel.prototype, 'pathChanged');
-defineSignal(FileBrowserModel.prototype, 'refreshed');
-defineSignal(FileBrowserModel.prototype, 'fileChanged');
-defineSignal(FileBrowserModel.prototype, 'connectionFailure');
 
 
 /**

@@ -11,12 +11,12 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
+  ISignal, Signal
+} from '@phosphor/signaling';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
   CodeEditor
@@ -25,10 +25,6 @@ import {
 import {
   IChangedArgs
 } from '../common/interfaces';
-
-import {
-  IObservableString, ObservableString
-} from '../common/observablestring';
 
 import {
   DocumentRegistry
@@ -46,18 +42,22 @@ class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeMo
   constructor(languagePreference?: string) {
     super();
     this._defaultLang = languagePreference || '';
-    this.value.changed.connect(this._onValueChanged, this);
+    this.value.changed.connect(this.triggerContentChange, this);
   }
 
   /**
    * A signal emitted when the document content changes.
    */
-  contentChanged: ISignal<this, void>;
+  get contentChanged(): ISignal<this, void> {
+    return this._contentChanged;
+  }
 
   /**
    * A signal emitted when the document state changes.
    */
-  stateChanged: ISignal<this, IChangedArgs<any>>;
+  get stateChanged(): ISignal<this, IChangedArgs<any>> {
+    return this._stateChanged;
+  }
 
   /**
    * The dirty state of the document.
@@ -71,7 +71,7 @@ class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeMo
     }
     let oldValue = this._dirty;
     this._dirty = newValue;
-    this.stateChanged.emit({ name: 'dirty', oldValue, newValue });
+    this.triggerStateChange({ name: 'dirty', oldValue, newValue });
   }
 
   /**
@@ -86,7 +86,7 @@ class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeMo
     }
     let oldValue = this._readOnly;
     this._readOnly = newValue;
-    this.stateChanged.emit({ name: 'readOnly', oldValue, newValue });
+    this.triggerStateChange({ name: 'readOnly', oldValue, newValue });
   }
 
   /**
@@ -144,22 +144,26 @@ class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeMo
   }
 
   /**
-   * Handle a change to the observable value.
+   * Trigger a state change signal.
    */
-  private _onValueChanged(sender: IObservableString, args: ObservableString.IChangedArgs): void {
-    this.contentChanged.emit(void 0);
+  protected triggerStateChange(args: IChangedArgs<any>): void {
+    this._stateChanged.emit(args);
+  }
+
+  /**
+   * Trigger a content changed signal.
+   */
+  protected triggerContentChange(): void {
+    this._contentChanged.emit(void 0);
     this.dirty = true;
   }
 
   private _defaultLang = '';
   private _dirty = false;
   private _readOnly = false;
+  private _contentChanged = new Signal<this, void>(this);
+  private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
 }
-
-
-// Define the signals for the `DocumentModel` class.
-defineSignal(DocumentModel.prototype, 'contentChanged');
-defineSignal(DocumentModel.prototype, 'stateChanged');
 
 
 /**
@@ -291,7 +295,9 @@ abstract class ABCWidgetFactory<T extends Widget, U extends DocumentRegistry.IMo
   /**
    * A signal emitted when a widget is created.
    */
-  widgetCreated: ISignal<DocumentRegistry.IWidgetFactory<T, U>, T>;
+  get widgetCreated(): ISignal<DocumentRegistry.IWidgetFactory<T, U>, T> {
+    return this._widgetCreated;
+  }
 
   /**
    * Get whether the model factory has been disposed.
@@ -357,7 +363,7 @@ abstract class ABCWidgetFactory<T extends Widget, U extends DocumentRegistry.IMo
    */
   createNew(context: DocumentRegistry.IContext<U>): T {
     let widget = this.createNewWidget(context);
-    this.widgetCreated.emit(widget);
+    this._widgetCreated.emit(widget);
     return widget;
   }
 
@@ -373,8 +379,5 @@ abstract class ABCWidgetFactory<T extends Widget, U extends DocumentRegistry.IMo
   private _modelName: string;
   private _fileExtensions: string[];
   private _defaultFor: string[];
+  private _widgetCreated = new Signal<DocumentRegistry.IWidgetFactory<T, U>, T>(this);
 }
-
-
-// Define the signals for the `ABCWidgetFactory` class.
-defineSignal(ABCWidgetFactory.prototype, 'widgetCreated');

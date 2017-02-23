@@ -3,11 +3,11 @@
 
 import {
   IDisposable
-} from 'phosphor/lib/core/disposable';
+} from '@phosphor/disposable';
 
 import {
-  clearSignalData, defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
+  ISignal, Signal
+} from '@phosphor/signaling';
 
 
 /**
@@ -18,7 +18,7 @@ interface IObservableMap<T> extends IDisposable {
   /**
    * A signal emitted when the map has changed.
    */
-  changed: ISignal<IObservableMap<T>, ObservableMap.IChangedArgs<T>>;
+  readonly changed: ISignal<this, ObservableMap.IChangedArgs<T>>;
 
   /**
    * The number of key-value pairs in the map.
@@ -111,7 +111,9 @@ class ObservableMap<T> implements IObservableMap<T> {
   /**
    * A signal emitted when the map has changed.
    */
-  changed: ISignal<IObservableMap<T>, ObservableMap.IChangedArgs<T>>;
+  get changed(): ISignal<this, ObservableMap.IChangedArgs<T>> {
+    return this._changed;
+  }
 
   /**
    * Whether this map has been disposed.
@@ -137,18 +139,23 @@ class ObservableMap<T> implements IObservableMap<T> {
    * @returns the old value for the key, or undefined
    *   if that did not exist.
    *
+   * @throws if the new value is undefined.
+   *
    * #### Notes
    * This is a no-op if the value does not change.
    */
   set(key: string, value: T): T {
     let oldVal = this._map.get(key);
+    if (value === undefined) {
+      throw Error('Cannot set an undefined value, use remove');
+    }
     // Bail if the value does not change.
     let itemCmp = this._itemCmp;
-    if (itemCmp(oldVal, value)) {
+    if (oldVal !== undefined && itemCmp(oldVal, value)) {
       return;
     }
     this._map.set(key, value);
-    this.changed.emit({
+    this._changed.emit({
       type: oldVal ? 'change' : 'add',
       key: key,
       oldValue: oldVal,
@@ -217,7 +224,7 @@ class ObservableMap<T> implements IObservableMap<T> {
   delete(key: string): T {
     let oldVal = this._map.get(key);
     this._map.delete(key);
-    this.changed.emit({
+    this._changed.emit({
       type: 'remove',
       key: key,
       oldValue: oldVal,
@@ -244,13 +251,14 @@ class ObservableMap<T> implements IObservableMap<T> {
     if (this._map === null) {
       return;
     }
-    clearSignalData(this);
+    Signal.clearData(this);
     this._map.clear();
     this._map = null;
   }
 
   private _map: Map<string, T> = new Map<string, T>();
   private _itemCmp: (first: T, second: T) => boolean;
+  private _changed = new Signal<this, ObservableMap.IChangedArgs<T>>(this);
 }
 
 
@@ -323,10 +331,6 @@ namespace ObservableMap {
     newValue: T;
   }
 }
-
-
-// Define the signals for the `ObservableMap` class.
-defineSignal(ObservableMap.prototype, 'changed');
 
 
 /**

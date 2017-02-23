@@ -5,15 +5,11 @@ import expect = require('expect.js');
 
 import {
   Message
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
-  TabPanel
-} from 'phosphor/lib/ui/tabpanel';
-
-import {
-  Widget
-} from 'phosphor/lib/ui/widget';
+  TabPanel, Widget
+} from '@phosphor/widgets';
 
 import {
   simulate
@@ -161,7 +157,7 @@ describe('notebook/celltools', () => {
         tabpanel.currentIndex = 1;
         simulate(panel1.node, 'focus');
         expect(celltools.selectedCells).to.eql([panel1.notebook.activeCell]);
-        panel1.notebook.select(panel1.notebook.widgets.at(1));
+        panel1.notebook.select(panel1.notebook.widgets[1]);
         expect(celltools.selectedCells.length).to.be(2);
       });
 
@@ -225,7 +221,7 @@ describe('notebook/celltools', () => {
         celltools.addItem({ tool });
         simulate(panel0.node, 'focus');
         tool.methods = [];
-        panel0.notebook.select(panel0.notebook.widgets.at(1));
+        panel0.notebook.select(panel0.notebook.widgets[1]);
         expect(tool.methods).to.contain('onSelectionChanged');
       });
 

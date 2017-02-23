@@ -6,28 +6,20 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  IIterable, map, toArray
-} from 'phosphor/lib/algorithm/iteration';
+  ArrayExt, ArrayIterator, IIterable, find, map, toArray
+} from '@phosphor/algorithm';
 
 import {
   JSONObject
-} from 'phosphor/lib/algorithm/json';
-
-import {
-  find
-} from 'phosphor/lib/algorithm/searching';
+} from '@phosphor/coreutils';
 
 import {
   IDisposable
-} from 'phosphor/lib/core/disposable';
-
-import {
-  Vector
-} from 'phosphor/lib/collections/vector';
+} from '@phosphor/disposable';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
   IObservableJSON
@@ -75,7 +67,7 @@ class RenderMime {
   constructor(options: RenderMime.IOptions = {}) {
     if (options.items) {
       for (let item of options.items) {
-        this._order.pushBack(item.mimeType);
+        this._order.push(item.mimeType);
         this._renderers[item.mimeType] = item.renderer;
       }
     }
@@ -112,7 +104,7 @@ class RenderMime {
    * mimeType is used.
    */
   mimeTypes(): IIterable<string> {
-    return this._order.iter();
+    return new ArrayIterator(this._order);
   }
 
   /**
@@ -194,12 +186,12 @@ class RenderMime {
    */
   addRenderer(item: RenderMime.IRendererItem, index = 0): void {
     let { mimeType, renderer } = item;
-    let orig = this._order.remove(mimeType);
+    let orig = ArrayExt.removeFirstOf(this._order, mimeType);
     if (orig !== -1 && orig < index) {
       index -= 1;
     }
     this._renderers[mimeType] = renderer;
-    this._order.insert(index, mimeType);
+    ArrayExt.insert(this._order, index, mimeType);
   }
 
   /**
@@ -209,7 +201,7 @@ class RenderMime {
    */
   removeRenderer(mimeType: string): void {
     delete this._renderers[mimeType];
-    this._order.remove(mimeType);
+    ArrayExt.removeFirstOf(this._order, mimeType);
   }
 
   /**
@@ -241,7 +233,7 @@ class RenderMime {
   }
 
   private _renderers: { [key: string]: RenderMime.IRenderer } = Object.create(null);
-  private _order = new Vector<string>();
+  private _order: string[] = [];
   private _sanitizer: ISanitizer;
   private _resolver: RenderMime.IResolver | null;
   private _handler: RenderMime.ILinkHandler | null;

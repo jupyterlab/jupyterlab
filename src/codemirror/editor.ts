@@ -9,20 +9,16 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  findIndex
-} from 'phosphor/lib/algorithm/searching';
+  ArrayExt
+} from '@phosphor/algorithm';
 
 import {
   IDisposable, DisposableDelegate
-} from 'phosphor/lib/core/disposable';
+} from '@phosphor/disposable';
 
 import {
-  clearSignalData, defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
-
-import {
-  Vector
-} from 'phosphor/lib/collections/vector';
+  ISignal, Signal
+} from '@phosphor/signaling';
 
 import {
   CodeEditor
@@ -98,7 +94,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     model.selections.changed.connect(this._onSelectionsChanged, this);
 
     CodeMirror.on(editor, 'keydown', (editor, event) => {
-      let index = findIndex(this._keydownHandlers, handler => {
+      let index = ArrayExt.findFirstIndex(this._keydownHandlers, handler => {
         if (handler(this, event) === true) {
           event.preventDefault();
           return true;
@@ -117,7 +113,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * A signal emitted when either the top or bottom edge is requested.
    */
-  readonly edgeRequested: ISignal<this, CodeEditor.EdgeLocation>;
+  readonly edgeRequested = new Signal<this, CodeEditor.EdgeLocation>(this);
 
   /**
    * The DOM node that hosts the editor.
@@ -237,8 +233,8 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     }
     this._editor = null;
     this._model = null;
-    this._keydownHandlers.clear();
-    clearSignalData(this);
+    this._keydownHandlers.length = 0;
+    Signal.clearData(this);
   }
 
   /**
@@ -316,9 +312,9 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * @returns A disposable that can be used to remove the handler.
    */
   addKeydownHandler(handler: CodeEditor.KeydownHandler): IDisposable {
-    this._keydownHandlers.pushBack(handler);
+    this._keydownHandlers.push(handler);
     return new DisposableDelegate(() => {
-      this._keydownHandlers.remove(handler);
+      ArrayExt.removeAllWhere(this._keydownHandlers, val => val === handler);
     });
   }
 
@@ -631,7 +627,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   private _model: CodeEditor.IModel;
   private _editor: CodeMirror.Editor;
   protected selectionMarkers: { [key: string]: CodeMirror.TextMarker[] | undefined } = {};
-  private _keydownHandlers = new Vector<CodeEditor.KeydownHandler>();
+  private _keydownHandlers = new Array<CodeEditor.KeydownHandler>();
   private _changeGuard = false;
   private _selectionStyle: CodeEditor.ISelectionStyle;
   private _uuid = '';
@@ -649,10 +645,6 @@ namespace CodeMirrorEditor {
   export
   const DEFAULT_THEME: string = 'jupyter';
 }
-
-
-// Define the signals for the `CodeMirrorEditor` class.
-defineSignal(CodeMirrorEditor.prototype, 'edgeRequested');
 
 
 /**

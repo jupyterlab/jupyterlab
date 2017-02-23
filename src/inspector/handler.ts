@@ -7,11 +7,11 @@ import {
 
 import {
   IDisposable
-} from 'phosphor/lib/core/disposable';
+} from '@phosphor/disposable';
 
 import {
-  clearSignalData, defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
+  ISignal, Signal
+} from '@phosphor/signaling';
 
 import {
   CodeEditor
@@ -42,17 +42,23 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
   /**
    * A signal emitted when the handler is disposed.
    */
-  readonly disposed: ISignal<InspectionHandler, void>;
+  get disposed(): ISignal<InspectionHandler, void> {
+    return this._disposed;
+  }
 
   /**
    * A signal emitted when inspector should clear all items with no history.
    */
-  readonly ephemeralCleared: ISignal<InspectionHandler, void>;
+  get ephemeralCleared(): ISignal<InspectionHandler, void> {
+    return this._ephemeralCleared;
+  }
 
   /**
    * A signal emitted when an inspector value is generated.
    */
-  readonly inspected: ISignal<InspectionHandler, Inspector.IInspectorUpdate>;
+  get inspected(): ISignal<InspectionHandler, Inspector.IInspectorUpdate> {
+    return this._inspected;
+  }
 
   /**
    * The editor widget used by the inspection handler.
@@ -71,7 +77,7 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
     let editor = this._editor = newValue;
     if (editor) {
       // Clear ephemeral inspectors in preparation for a new editor.
-      this.ephemeralCleared.emit(void 0);
+      this._ephemeralCleared.emit(void 0);
       editor.model.value.changed.connect(this.onTextChanged, this);
     }
   }
@@ -106,8 +112,8 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
     this._editor = null;
     this._kernel = null;
     this._rendermime = null;
-    this.disposed.emit(void 0);
-    clearSignalData(this);
+    this._disposed.emit(void 0);
+    Signal.clearData(this);
   }
 
   /**
@@ -125,7 +131,7 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
 
     // Clear hints if the new text value is empty or kernel is unavailable.
     if (!code || !this._kernel) {
-      this.inspected.emit(update);
+      this._inspected.emit(update);
       return;
     }
 
@@ -141,19 +147,19 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
 
       // If handler has been disposed, bail.
       if (this.isDisposed) {
-        this.inspected.emit(update);
+        this._inspected.emit(update);
         return;
       }
 
       // If a newer text change has created a pending request, bail.
       if (pending !== this._pending) {
-        this.inspected.emit(update);
+        this._inspected.emit(update);
         return;
       }
 
       // Hint request failures or negative results fail silently.
       if (value.status !== 'ok' || !value.found) {
-        this.inspected.emit(update);
+        this._inspected.emit(update);
         return;
       }
 
@@ -161,7 +167,7 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
       let trusted = true;
       let model = new MimeModel({ data, trusted });
       update.content =  this._rendermime.render(model);
-      this.inspected.emit(update);
+      this._inspected.emit(update);
     });
   }
 
@@ -169,13 +175,11 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
   private _kernel: Kernel.IKernel = null;
   private _pending = 0;
   private _rendermime: RenderMime = null;
+  private _disposed = new Signal<InspectionHandler, void>(this);
+  private _ephemeralCleared = new Signal<InspectionHandler, void>(this);
+  private _inspected = new Signal<InspectionHandler, Inspector.IInspectorUpdate>(this);
+
 }
-
-
-// Define the signals for the `InspectionHandler` class.
-defineSignal(InspectionHandler.prototype, 'disposed');
-defineSignal(InspectionHandler.prototype, 'ephemeralCleared');
-defineSignal(InspectionHandler.prototype, 'inspected');
 
 
 /**

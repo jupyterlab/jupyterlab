@@ -2,8 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  hitTest
-} from 'phosphor/lib/dom/query';
+  ElementExt
+} from '@phosphor/domutils';
 
 
 /**
@@ -12,7 +12,7 @@ import {
 export
 function hitTestNodes(nodes: HTMLElement[] | NodeList, x: number, y: number): number {
   for (let i = 0, n = nodes.length; i < n; ++i) {
-    if (hitTest(nodes[i] as HTMLElement, x, y)) {
+    if (ElementExt.hitTest(nodes[i] as HTMLElement, x, y)) {
       return i;
     }
   }

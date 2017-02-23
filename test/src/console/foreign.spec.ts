@@ -8,12 +8,12 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  clearSignalData, defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
+  ISignal, Signal
+} from '@phosphor/signaling';
 
 import {
   Panel
-} from 'phosphor/lib/ui/panel';
+} from '@phosphor/widgets';
 
 import {
   ForeignHandler
@@ -41,11 +41,11 @@ class TestParent extends Panel implements ForeignHandler.IReceiver {
 
 class TestHandler extends ForeignHandler {
 
-  readonly injected: ISignal<this, void>;
+  injected = new Signal<this, void>(this);
 
-  readonly received: ISignal<this, void>;
+  received = new Signal<this, void>(this);
 
-  readonly rejected: ISignal<this, void>;
+  rejected = new Signal<this, void>(this);
 
   methods: string[] = [];
 
@@ -54,7 +54,7 @@ class TestHandler extends ForeignHandler {
       return;
     }
     super.dispose();
-    clearSignalData(this);
+    Signal.clearData(this);
   }
 
   protected onIOPubMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage): boolean {
@@ -74,11 +74,6 @@ class TestHandler extends ForeignHandler {
     return injected;
   }
 }
-
-
-defineSignal(TestHandler.prototype, 'injected');
-defineSignal(TestHandler.prototype, 'received');
-defineSignal(TestHandler.prototype, 'rejected');
 
 
 const rendermime = defaultRenderMime();

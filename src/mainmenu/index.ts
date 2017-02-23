@@ -2,24 +2,20 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  findIndex, indexOf, upperBound
-} from 'phosphor/lib/algorithm/searching';
-
-import {
-  Vector
-} from 'phosphor/lib/collections/vector';
+  ArrayExt
+} from '@phosphor/algorithm';
 
 import {
   Token
-} from 'phosphor/lib/core/token';
+} from '@phosphor/application';
 
 import {
   Menu
-} from 'phosphor/lib/ui/menu';
+} from '@phosphor/widgets';
 
 import {
   MenuBar
-} from 'phosphor/lib/ui/menubar';
+} from '@phosphor/widgets';
 
 
 /* tslint:disable */
@@ -64,18 +60,18 @@ class MainMenu extends MenuBar implements IMainMenu {
    * Add a new menu to the main menu bar.
    */
   addMenu(menu: Menu, options: IAddMenuOptions = {}): void {
-    if (indexOf(this.menus, menu) > -1) {
+    if (ArrayExt.firstIndexOf(this.menus, menu) > -1) {
       return;
     }
 
     let rank = 'rank' in options ? options.rank : 100;
     let rankItem = { menu, rank };
-    let index = upperBound(this._items, rankItem, Private.itemCmp);
+    let index = ArrayExt.upperBound(this._items, rankItem, Private.itemCmp);
 
     // Upon disposal, remove the menu and its rank reference.
     menu.disposed.connect(this._onMenuDisposed, this);
 
-    this._items.insert(index, rankItem);
+    ArrayExt.insert(this._items, index, rankItem);
     this.insertMenu(index, menu);
   }
 
@@ -84,13 +80,13 @@ class MainMenu extends MenuBar implements IMainMenu {
    */
   private _onMenuDisposed(menu: Menu): void {
     this.removeMenu(menu);
-    let index = findIndex(this._items, item => item.menu === menu);
+    let index = ArrayExt.findFirstIndex(this._items, item => item.menu === menu);
     if (index !== -1) {
-      this._items.removeAt(index);
+      ArrayExt.removeAt(this._items, index);
     }
   }
 
-  private _items = new Vector<Private.IRankItem>();
+  private _items: Private.IRankItem[] = [];
 }
 
 

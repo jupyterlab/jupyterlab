@@ -6,8 +6,8 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  isArray, isPrimitive, JSONObject, JSONValue
-} from 'phosphor/lib/algorithm/json';
+  JSONExt, JSONObject, JSONValue
+} from '@phosphor/coreutils';
 
 import {
   MimeModel
@@ -228,7 +228,7 @@ namespace OutputModel {
   export
   function extract(value: JSONObject, key: string): JSONValue {
     let item = value[key];
-    if (isPrimitive(item)) {
+    if (JSONExt.isPrimitive(item)) {
       return item;
     }
     return JSON.parse(JSON.stringify(item));
@@ -242,9 +242,9 @@ namespace OutputModel {
     for (let mimeType in bundle) {
       let item = bundle[mimeType];
       // Convert multi-line strings to strings.
-      if (isArray(item)) {
+      if (JSONExt.isArray(item)) {
         item = (item as string[]).join('\n');
-      } else if (!isPrimitive(item)) {
+      } else if (!JSONExt.isPrimitive(item)) {
         item = JSON.parse(JSON.stringify(item));
       }
       map[mimeType] = item;
