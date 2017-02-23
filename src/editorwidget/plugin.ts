@@ -154,14 +154,15 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
   });
 
   commands.addCommand(CommandIDs.createConsole, {
-    execute: () => {
+    execute: args => {
       let widget = tracker.currentWidget;
       if (!widget) {
         return;
       }
-      let options: any = {
+      let options: JSONObject = {
         path: widget.context.path,
-        preferredLanguage: widget.context.model.defaultKernelLanguage
+        preferredLanguage: widget.context.model.defaultKernelLanguage,
+        activate: args['activate']
       };
       return commands.execute(ConsoleCommandIDs.create, options)
         .then(id => { sessionIdProperty.set(widget, id); });
@@ -170,7 +171,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
   });
 
   commands.addCommand(CommandIDs.runCode, {
-    execute: () => {
+    execute: args => {
       let widget = tracker.currentWidget;
       if (!widget) {
         return;
@@ -185,8 +186,12 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
       const selection = editor.getSelection();
       const start = editor.getOffsetAt(selection.start);
       const end = editor.getOffsetAt(selection.end);
-      const code = editor.model.value.text.substring(start, end);
-      return commands.execute(ConsoleCommandIDs.inject, { id, code });
+      const options: JSONObject = {
+        id,
+        code: editor.model.value.text.substring(start, end),
+        activate: args['activate']
+      };
+      return commands.execute(ConsoleCommandIDs.inject, options);
     },
     label: 'Run Code'
   });
