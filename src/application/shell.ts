@@ -538,17 +538,7 @@ namespace ApplicationShell {
    * An arguments object for the changed signals.
    */
   export
-  interface IChangedArgs {
-    /**
-     * The old value for the widget.
-     */
-    oldValue: Widget;
-
-    /**
-     * The new value for the widget.
-     */
-    newValue: Widget;
-  }
+  type IChangedArgs = FocusTracker.IChangedArgs<Widget>;
 }
 
 
