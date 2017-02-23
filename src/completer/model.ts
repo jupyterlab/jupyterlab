@@ -207,9 +207,10 @@ class CompleterModel implements CompleterWidget.IModel {
     // When the completer detects a common subset prefix for all options,
     // it updates the model and sets the model source to that value, but this
     // text change should be ignored.
-    if (this.subsetMatch) {
+    if (this._subsetMatch) {
       return;
     }
+
     let { text, column } = request;
 
     // If last character entered is not whitespace, update completion.

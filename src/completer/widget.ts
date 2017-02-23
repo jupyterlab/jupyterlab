@@ -285,8 +285,12 @@ class CompleterWidget extends Widget {
     // If this is the first time the current completer session has loaded,
     // populate any initial subset match.
     if (this._model.subsetMatch) {
-      this._populateSubset();
+      let populated = this._populateSubset();
       this.model.subsetMatch = false;
+      if (populated) {
+        this.update();
+        return;
+      }
     }
   }
 
@@ -413,7 +417,6 @@ class CompleterWidget extends Widget {
     if (subset && subset !== query && subset.indexOf(query) === 0) {
       this.model.query = subset;
       this._selected.emit(subset);
-      this.update();
       return true;
     }
     return false;
