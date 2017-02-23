@@ -169,7 +169,13 @@ class CompletionHandler implements IDisposable {
    * Handle `invoke-request` messages.
    */
   protected onInvokeRequest(msg: Message): void {
+    // If there is neither a kernel or a completer model, bail.
     if (!this._kernel || !this._completer.model) {
+      return;
+    }
+
+    // If a completer session is already active, bail.
+    if (this._completer.model.original) {
       return;
     }
 
