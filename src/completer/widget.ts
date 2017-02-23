@@ -169,7 +169,7 @@ class CompleterWidget extends Widget {
   reset(): void {
     this._reset();
     if (this._model) {
-      this._model.reset();
+      this._model.reset(true);
     }
   }
 
@@ -245,7 +245,7 @@ class CompleterWidget extends Widget {
 
     // If there are no items, reset and bail.
     if (!items || !items.length) {
-      this._reset();
+      this.reset();
       if (!this.isHidden) {
         this.hide();
         this._visibilityChanged.emit(void 0);
@@ -463,7 +463,7 @@ class CompleterWidget extends Widget {
   private _selectActive(): void {
     let active = this.node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
     if (!active) {
-      this._reset();
+      this.reset();
       return;
     }
     this._selected.emit(active.getAttribute('data-value'));
