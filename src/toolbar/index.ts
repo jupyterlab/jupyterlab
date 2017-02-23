@@ -140,9 +140,6 @@ class Toolbar<T extends Widget> extends Widget {
         this.parent.activate();
       }
       break;
-    case 'blur':
-      this.parent.activate();
-      break;
     default:
       break;
     }
@@ -153,7 +150,6 @@ class Toolbar<T extends Widget> extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     this.node.addEventListener('click', this);
-    this.node.addEventListener('blur', this);
   }
 
   /**
@@ -161,7 +157,6 @@ class Toolbar<T extends Widget> extends Widget {
    */
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('click', this);
-    this.node.removeEventListener('blur', this);
   }
 }
 
