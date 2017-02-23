@@ -120,6 +120,8 @@ class OutputModel extends MimeModel implements IOutputModel {
     default:
       break;
     }
+    // Remove transient data.
+    delete output['transient'];
     return output as nbformat.IOutput;
   }
 
