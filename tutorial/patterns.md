@@ -122,7 +122,7 @@ For public API, we have three options: JavaScript `Array`,
 Prefer an `Array` for:
 - A and that is meant to be mutable.
 
-Prefer an a `ReadonlyArray`
+Prefer a `ReadonlyArray`
 - A return value is the result of a newly allocated array, to avoid the 
 extra allocation of an iterator.
 - A signal payload - since it will be consumed by multiple listeners.
