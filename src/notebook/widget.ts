@@ -56,10 +56,6 @@ import {
 } from '../codeeditor';
 
 import {
-  DragScrollHandler
-} from '../common/dragscroll';
-
-import {
   IChangedArgs
 } from '../common/interfaces';
 
@@ -669,7 +665,8 @@ class Notebook extends StaticNotebook {
   constructor(options: StaticNotebook.IOptions) {
     super(options);
     this.node.tabIndex = -1;  // Allow the widget to take focus.
-    this._scrollHandler = new DragScrollHandler({ node: this.node });
+    // Allow the node to scroll while dragging items.
+    this.node.setAttribute('data-p-dragscroll', 'true');
   }
 
   /**
@@ -1170,7 +1167,6 @@ class Notebook extends StaticNotebook {
     if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {
       return;
     }
-    this._scrollHandler.handleDragEvent(event);
     event.preventDefault();
     event.stopPropagation();
     let target = event.target as HTMLElement;
@@ -1190,7 +1186,6 @@ class Notebook extends StaticNotebook {
     if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {
       return;
     }
-    this._scrollHandler.handleDragEvent(event);
     event.preventDefault();
     event.stopPropagation();
     let elements = this.node.getElementsByClassName(DROP_TARGET_CLASS);
@@ -1213,7 +1208,6 @@ class Notebook extends StaticNotebook {
     if (elements.length) {
       (elements[0] as HTMLElement).classList.remove(DROP_TARGET_CLASS);
     }
-    this._scrollHandler.handleDragEvent(event);
     let target = event.target as HTMLElement;
     let index = this._findCell(target);
     if (index === -1) {
@@ -1230,7 +1224,6 @@ class Notebook extends StaticNotebook {
     if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {
       return;
     }
-    this._scrollHandler.handleDragEvent(event);
     event.preventDefault();
     event.stopPropagation();
     if (event.proposedAction === 'none') {
@@ -1413,7 +1406,6 @@ class Notebook extends StaticNotebook {
   private _mode: NotebookMode = 'command';
   private _drag: Drag = null;
   private _dragData: { pressX: number, pressY: number, index: number } = null;
-  private _scrollHandler: DragScrollHandler = null;
   private _activeCellChanged = new Signal<this, BaseCellWidget>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
   private _selectionChanged = new Signal<this, void>(this);
