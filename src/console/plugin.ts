@@ -202,7 +202,8 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   // Get the current widget and activate unless the args specify otherwise.
   function getCurrent(args: JSONObject): ConsolePanel | null {
     let widget = tracker.currentWidget;
-    if (widget && (args['activate'] !== false)) {
+    let activate = !args || args && args['activate'] !== false;
+    if (activate && widget) {
       widget.activate();
     }
     return widget;
