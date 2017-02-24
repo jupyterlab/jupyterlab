@@ -1121,6 +1121,9 @@ class DirListing extends Widget {
       }
       let items = this._sortedItems;
       let index = ArrayExt.findFirstIndex(items, value => value.name === name);
+      if (index === -1) {
+        return;
+      }
       this._selectItem(index, false);
       MessageLoop.sendMessage(this, Widget.Msg.UpdateRequest);
       ElementExt.scrollIntoViewIfNeeded(this.contentNode, this._items[index]);
@@ -1293,7 +1296,7 @@ class DirListing extends Widget {
    */
   private _onActivateRequested(sender: DocumentManager, args: string): void {
     let dirname = ContentsManager.dirname(args);
-    if (dirname == '.') {
+    if (dirname === '.') {
       dirname = '';
     }
     if (dirname !== this._model.path) {
