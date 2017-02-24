@@ -61,7 +61,9 @@ interface IInstanceTracker<T extends Widget> extends IDisposable {
   readonly widgetAdded: ISignal<this, T>;
 
   /**
-   * The current widget is the most recently focused widget.
+   * The current widget is the most recently focused widget, or the
+   * most recently added widget if the most recently added widget
+   * has not gotten focus.
    */
   readonly currentWidget: T;
 
@@ -149,10 +151,12 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   readonly namespace: string;
 
   /**
-   * The current widget is the most recently focused widget.
+   * The current widget is the most recently focused widget, or the
+   * most recently added widget if the most recently added widget
+   * has not gotten focus.
    */
   get currentWidget(): T {
-    return this._tracker.currentWidget;
+    return this._currentWidget;
   }
 
   /**
@@ -200,6 +204,8 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
         }
       }
     }
+
+    this._currentWidget = widget;
 
     // Emit the widget added signal.
     this._widgetAdded.emit(widget);
@@ -356,6 +362,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    */
   private _onCurrentChanged(sender: any, args: FocusTracker.IChangedArgs<T>): void {
     this.onCurrentChanged();
+    this._currentWidget = args.newValue;
     this._currentChanged.emit(args.newValue);
   }
 
@@ -380,6 +387,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   private _tracker = new FocusTracker<T>();
   private _currentChanged = new Signal<this, T>(this);
   private _widgetAdded = new Signal<this, T>(this);
+  private _currentWidget: T;
 }
 
 
