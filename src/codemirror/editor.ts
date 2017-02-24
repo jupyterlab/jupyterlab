@@ -592,19 +592,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       return;
     }
     this._changeGuard = true;
-
-    let value = this._model.value;
-    let start = doc.indexFromPos(change.from);
-    let inserted = change.text.join('\n');
-    let removed = change.removed.join('\n');
-
-    if (removed) {
-      value.remove(start, start + removed.length);
-    }
-    if (inserted) {
-      value.insert(start, inserted);
-    }
-
+    this._model.value.text = this.doc.getValue();
     this._changeGuard = false;
   }
 
