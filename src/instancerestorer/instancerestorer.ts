@@ -4,11 +4,15 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  utils
-} from '@jupyterlab/services';
+  Token
+} from '@phosphor/application';
 
 import {
-  JSONObject
+  CommandRegistry
+} from '@phosphor/commands';
+
+import {
+  JSONObject, PromiseDelegate
 } from '@phosphor/coreutils';
 
 import {
@@ -16,16 +20,8 @@ import {
 } from '@phosphor/properties';
 
 import {
-  CommandRegistry
-} from '@phosphor/commands';
-
-import {
   Widget
 } from '@phosphor/widgets';
-
-import {
-  Token
-} from '@phosphor/application';
 
 import {
   InstanceTracker
@@ -425,7 +421,7 @@ class InstanceRestorer implements IInstanceRestorer {
 
   private _first: Promise<any> = null;
   private _promises: Promise<any>[] = [];
-  private _restored = new utils.PromiseDelegate<void>();
+  private _restored = new PromiseDelegate<void>();
   private _registry: CommandRegistry = null;
   private _state: IStateDB = null;
   private _trackers = new Set<string>();

@@ -6,12 +6,12 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  JSONObject
-} from '@phosphor/coreutils';
-
-import {
   ArrayExt
 } from '@phosphor/algorithm';
+
+import {
+  JSONObject, PromiseDelegate
+} from '@phosphor/coreutils';
 
 import {
   IDisposable, DisposableDelegate
@@ -544,7 +544,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   private _factory: DocumentRegistry.IModelFactory<T> = null;
   private _contentsModel: Contents.IModel = null;
   private _readyPromise: Promise<void>;
-  private _populatedPromise = new utils.PromiseDelegate<void>();
+  private _populatedPromise = new PromiseDelegate<void>();
   private _isPopulated = false;
   private _isReady = false;
   private _kernelChanged = new Signal<this, Kernel.IKernel>(this);

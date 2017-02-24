@@ -2,43 +2,20 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  utils
-} from '@jupyterlab/services';
-
-import {
   ArrayExt, each, find, toArray
 } from '@phosphor/algorithm';
+
+import {
+  PromiseDelegate
+} from '@phosphor/coreutils';
 
 import {
   ISignal, Signal
 } from '@phosphor/signaling';
 
 import {
-  BoxLayout, BoxPanel
-} from '@phosphor/widgets';
-
-import {
-  DockPanel
-} from '@phosphor/widgets';
-
-import {
-  FocusTracker
-} from '@phosphor/widgets';
-
-import {
-  Panel
-} from '@phosphor/widgets';
-
-import {
-  SplitPanel
-} from '@phosphor/widgets';
-
-import {
-  StackedPanel
-} from '@phosphor/widgets';
-
-import {
-  TabBar, Title, Widget
+  BoxLayout, BoxPanel, DockPanel, FocusTracker, Panel, SplitPanel,
+  StackedPanel, TabBar, Title, Widget
 } from '@phosphor/widgets';
 
 import {
@@ -503,7 +480,7 @@ class ApplicationShell extends Widget {
   private _hsplitPanel: SplitPanel;
   private _isRestored = false;
   private _leftHandler: Private.SideBarHandler;
-  private _restored = new utils.PromiseDelegate<IInstanceRestorer.ILayout>();
+  private _restored = new PromiseDelegate<IInstanceRestorer.ILayout>();
   private _rightHandler: Private.SideBarHandler;
   private _topPanel: Panel;
   private _tracker = new FocusTracker<Widget>();
