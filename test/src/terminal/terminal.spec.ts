@@ -77,8 +77,7 @@ describe('terminal/index', () => {
       if (Platform.IS_WIN) {
         session = null;
         expect(() => { TerminalSession.startNew(); }).to.throwError();
-        done();
-        return;
+        return done();
       }
       TerminalSession.startNew().then(s => {
         session = s;
@@ -109,8 +108,7 @@ describe('terminal/index', () => {
 
       it('should set the title when ready', (done) => {
         if (Platform.IS_WIN) {
-          done();
-          return;
+          return done();
         }
         widget.session = session;
         expect(widget.session).to.be(session);
@@ -188,8 +186,8 @@ describe('terminal/index', () => {
 
       it('should refresh the widget', (done) => {
         if (Platform.IS_WIN) {
-          done();
-          return;
+          expect(widget.refresh()).to.be.a(Promise);
+          return done();
         }
         widget.session = session;
         widget.refresh().then(done, done);
