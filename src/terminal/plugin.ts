@@ -129,6 +129,21 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
     }
   });
 
+  commands.addCommand(CommandIDs.refresh, {
+    label: 'Refresh Terminal',
+    caption: 'Refresh the current terminal session',
+    execute: () => {
+      let current = tracker.currentWidget;
+      if (!current) {
+        return;
+      }
+      shell.activateMain(widget.id);
+      return current.refresh().then(() => {
+        current.activate();
+      });
+    }
+  });
+
   // Add command palette and menu items.
   let menu = new Menu({ commands });
   menu.title.label = category;

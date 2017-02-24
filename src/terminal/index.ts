@@ -71,20 +71,6 @@ const ITerminalTracker = new Token<ITerminalTracker>('jupyter.services.terminal-
 export
 function addDefaultCommands(tracker: ITerminalTracker, commands: CommandRegistry) {
 
-  commands.addCommand(CommandIDs.refresh, {
-    label: 'Refresh Terminal',
-    caption: 'Refresh the current terminal session',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (!current) {
-        return;
-      }
-      return current.refresh().then(() => {
-        current.activate();
-      });
-    }
-  });
-
   commands.addCommand(CommandIDs.increaseFont, {
     label: 'Increase Terminal Font Size',
     execute: () => {
