@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  TerminalSession
-} from '@jupyterlab/services';
-
-import {
   Token
 } from '@phosphor/application';
 
