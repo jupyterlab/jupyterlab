@@ -114,7 +114,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
       return;
     }
     widget.editor.lineNumbers = !widget.editor.lineNumbers;
-    if (args['activate'] !== false) {
+    if ((args && args['activate']) !== false) {
       widget.activate();
     }
   }
