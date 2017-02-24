@@ -2,6 +2,14 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Token
+} from '@phosphor/application';
+
+import {
+  IInstanceTracker
+} from '../common/instancetracker';
+
+import {
   CommandRegistry
 } from '@phosphor/commands';
 
@@ -18,7 +26,7 @@ import {
 } from '../console';
 
 import {
-  IEditorTracker, EditorWidget
+  EditorWidget
 } from './widget';
 
 export * from './widget';
@@ -41,6 +49,22 @@ namespace CommandIDs {
   export
   const runCode: string = 'editor:run-code';
 };
+
+
+/**
+ * A class that tracks editor widgets.
+ */
+export
+interface IEditorTracker extends IInstanceTracker<EditorWidget> {}
+
+
+/* tslint:disable */
+/**
+ * The editor tracker token.
+ */
+export
+const IEditorTracker = new Token<IEditorTracker>('jupyter.services.editor-tracker');
+/* tslint:enable */
 
 
 /**

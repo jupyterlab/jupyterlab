@@ -26,7 +26,7 @@ import {
 } from '../instancerestorer';
 
 import {
-  IEditorTracker, EditorWidget, EditorWidgetFactory, CommandIDs
+  IEditorTracker, EditorWidget, EditorWidgetFactory, CommandIDs, addDefaultCommands
 } from './';
 
 
@@ -91,6 +91,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
     tracker.add(widget);
   });
   registry.addWidgetFactory(factory);
+<<<<<<< HEAD
 <<<<<<< HEAD
 
   let { commands, shell } = app;
@@ -184,5 +185,6 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
     label: 'Run Code'
   });
 
+  addDefaultCommands(tracker, app.commands);
   return tracker;
 }

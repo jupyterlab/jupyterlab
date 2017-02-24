@@ -23,7 +23,7 @@ import {
 } from '../commandpalette';
 
 import {
-  IEditorTracker, addDefaultCommands, CommandIDs as EditorCommandIDs
+  IEditorTracker, CommandIDs as EditorCommandIDs
 } from '../editorwidget';
 
 import {
@@ -86,9 +86,6 @@ namespace CommandIDs {
  */
 function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMenu: IMainMenu, palette: ICommandPalette): void {
   let { commands } = app;
-
-  // Add the default editor commands.
-  addDefaultCommands(tracker, commands);
 
   /**
    * Toggle editor matching brackets
