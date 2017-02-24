@@ -203,6 +203,19 @@ class CompleterWidget extends Widget {
   }
 
   /**
+   * Emit the selected signal for the current active item and reset.
+   */
+  selectActive(): void {
+    let active = this.node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
+    if (!active) {
+      this.reset();
+      return;
+    }
+    this._selected.emit(active.getAttribute('data-value'));
+    this.reset();
+  }
+
+  /**
    * Handle `after-attach` messages for the widget.
    */
   protected onAfterAttach(msg: Message): void {
@@ -334,13 +347,7 @@ class CompleterWidget extends Widget {
         if (populated) {
           return;
         }
-        this._selectActive();
-        return;
-      case 13: // Enter key
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation();
-        this._selectActive();
+        this.selectActive();
         return;
       case 27: // Esc key
         event.preventDefault();
@@ -455,19 +462,6 @@ class CompleterWidget extends Widget {
       maxHeight: MAX_HEIGHT,
       minHeight: MIN_HEIGHT
     });
-  }
-
-  /**
-   * Emit the selected signal for the current active item and reset.
-   */
-  private _selectActive(): void {
-    let active = this.node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
-    if (!active) {
-      this.reset();
-      return;
-    }
-    this._selected.emit(active.getAttribute('data-value'));
-    this.reset();
   }
 
   private _anchor: Widget | null = null;

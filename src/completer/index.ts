@@ -36,6 +36,15 @@ namespace CommandIDs {
 
   export
   const invokeNotebook: string = 'completer:invoke-notebook';
+
+  export
+  const select: string = 'completer:select';
+
+  export
+  const selectConsole: string = 'completer:select-console';
+
+  export
+  const selectNotebook: string = 'completer:select-notebook';
 }
 
 

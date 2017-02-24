@@ -28,6 +28,12 @@ import {
 export
 const COMPLETABLE_CLASS: string = 'jp-mod-completable';
 
+/**
+ * A class added to editors that have an active completer.
+ */
+export
+const COMPLETER_ACTIVE_CLASS: string = 'jp-mod-completer-active';
+
 
 /**
  * A completion handler for editors.
@@ -42,6 +48,13 @@ class CompletionHandler implements IDisposable {
     this._completer.selected.connect(this.onCompletionSelected, this);
     this._completer.visibilityChanged.connect(this.onVisibilityChanged, this);
     this._kernel = options.kernel || null;
+  }
+
+  /**
+   * The completer widget managed by the handler.
+   */
+  get completer(): CompleterWidget {
+    return this._completer;
   }
 
   /**
@@ -254,10 +267,18 @@ class CompletionHandler implements IDisposable {
    * Handle a visiblity change signal from a completion widget.
    */
   protected onVisibilityChanged(completion: CompleterWidget): void {
+    // Completer is not active.
     if (completion.isDisposed || completion.isHidden) {
       if (this._editor) {
+        this._editor.host.classList.remove(COMPLETER_ACTIVE_CLASS);
         this._editor.focus();
       }
+      return;
+    }
+
+    // Completer is active.
+    if (this._editor) {
+      this._editor.host.classList.add(COMPLETER_ACTIVE_CLASS);
     }
   }
 
