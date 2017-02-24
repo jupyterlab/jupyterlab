@@ -172,7 +172,7 @@ class TerminalWidget extends Widget {
     }
     return this._session.reconnect().then(() => {
       let rows = this._sessionSize[0];
-      this._term.refresh(0, rows - 1);
+      this._term.clear();
     });
   }
 
