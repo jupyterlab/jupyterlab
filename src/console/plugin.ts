@@ -199,14 +199,24 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   });
   palette.addItem({ command, category });
 
+  // Get the current widget and activate unless the args specify otherwise.
+  function getCurrent(args: JSONObject): ConsolePanel | null {
+    let widget = tracker.currentWidget;
+    if (widget && (args['activate'] !== false)) {
+      widget.activate();
+    }
+    return widget;
+  }
+
   command = CommandIDs.clear;
   commands.addCommand(command, {
     label: 'Clear Cells',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        current.console.clear();
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      current.console.clear();
     }
   });
   palette.addItem({ command, category });
@@ -214,11 +224,12 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   command = CommandIDs.run;
   commands.addCommand(command, {
     label: 'Run Cell',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        current.console.execute();
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      current.console.execute();
     }
   });
   palette.addItem({ command, category });
@@ -226,11 +237,12 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   command = CommandIDs.runForced;
   commands.addCommand(command, {
     label: 'Run Cell (forced)',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        current.console.execute(true);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      current.console.execute(true);
     }
   });
   palette.addItem({ command, category });
@@ -238,11 +250,12 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   command = CommandIDs.linebreak;
   commands.addCommand(command, {
     label: 'Insert Line Break',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        current.console.insertLinebreak();
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      current.console.insertLinebreak();
     }
   });
   palette.addItem({ command, category });
@@ -250,13 +263,14 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   command = CommandIDs.interrupt;
   commands.addCommand(command, {
     label: 'Interrupt Kernel',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        let kernel = current.console.session.kernel;
-        if (kernel) {
-          return kernel.interrupt();
-        }
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      let kernel = current.console.session.kernel;
+      if (kernel) {
+        return kernel.interrupt();
       }
     }
   });
@@ -265,13 +279,14 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   command = CommandIDs.restart;
   commands.addCommand(command, {
     label: 'Restart Kernel',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        let kernel = current.console.session.kernel;
-        if (kernel) {
-          return kernel.restart();
-        }
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      let kernel = current.console.session.kernel;
+      if (kernel) {
+        return kernel.restart();
       }
     }
   });
@@ -280,13 +295,12 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   command = CommandIDs.closeAndShutdown;
   commands.addCommand(command, {
     label: 'Close and Shutdown',
-    execute: () => {
-      let current = tracker.currentWidget;
+    execute: args => {
+      let current = getCurrent(args);
       if (!current) {
         return;
       }
-      app.shell.activateMain(current.id);
-      showDialog({
+      return showDialog({
         title: 'Shutdown the console?',
         body: `Are you sure you want to close "${current.title.label}"?`,
         buttons: [cancelButton, warnButton]
@@ -308,6 +322,9 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       let id = args['id'];
       tracker.find(widget => {
         if (widget.console.session.id === id) {
+          if (args['activate'] !== false) {
+            widget.activate();
+          }
           widget.console.inject(args['code'] as string);
           return true;
         }
@@ -410,8 +427,8 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   command = CommandIDs.switchKernel;
   commands.addCommand(command, {
     label: 'Switch Kernel',
-    execute: () => {
-      let current = tracker.currentWidget;
+    execute: args => {
+      let current = getCurrent(args);
       if (!current) {
         return;
       }

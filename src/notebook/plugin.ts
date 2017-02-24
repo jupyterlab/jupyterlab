@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  JSONObject
+} from '@phosphor/coreutils';
+
+import {
   Menu
 } from '@phosphor/widgets';
 
@@ -228,416 +232,471 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
 function addCommands(app: JupyterLab, services: IServiceManager, tracker: NotebookTracker): void {
   let commands = app.commands;
 
+  // Get the current widget and activate unless the args specify otherwise.
+  function getCurrent(args: JSONObject): NotebookPanel | null {
+    let widget = tracker.currentWidget;
+    if (widget && (args['activate'] !== false)) {
+      widget.activate();
+    }
+    return widget;
+  }
+
   commands.addCommand(CommandIDs.runAndAdvance, {
     label: 'Run Cell(s) and Advance',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        let content = current.notebook;
-        NotebookActions.runAndAdvance(content, current.context.kernel);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      let content = current.notebook;
+      return NotebookActions.runAndAdvance(content, current.context.kernel);
     }
   });
   commands.addCommand(CommandIDs.run, {
     label: 'Run Cell(s)',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.run(current.notebook, current.context.kernel);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.run(current.notebook, current.context.kernel);
     }
   });
   commands.addCommand(CommandIDs.runAndInsert, {
     label: 'Run Cell(s) and Insert',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.runAndInsert(current.notebook, current.context.kernel);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.runAndInsert(
+        current.notebook, current.context.kernel
+      );
     }
   });
   commands.addCommand(CommandIDs.runAll, {
     label: 'Run All Cells',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.runAll(current.notebook, current.context.kernel);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.runAll(current.notebook, current.context.kernel);
     }
   });
   commands.addCommand(CommandIDs.restart, {
     label: 'Restart Kernel',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        restartKernel(current.kernel, current.node).then(() => {
-          current.activate();
-        });
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return restartKernel(current.kernel, current.node).then(() => {
+        current.activate();
+      });
     }
   });
   commands.addCommand(CommandIDs.closeAndShutdown, {
     label: 'Close and Shutdown',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        app.shell.activateMain(current.id);
-        let fileName = current.title.label;
-        showDialog({
-            title: 'Shutdown the notebook?',
-            body: `Are you sure you want to close "${fileName}"?`,
-            buttons: [cancelButton, warnButton]
-          }).then(result => {
-            if (result.text === 'OK') {
-              current.context.changeKernel(null).then(() => { current.dispose(); });
-            } else {
-              return false;
-            }
-        });
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      let fileName = current.title.label;
+      return showDialog({
+        title: 'Shutdown the notebook?',
+        body: `Are you sure you want to close "${fileName}"?`,
+        buttons: [cancelButton, warnButton]
+      }).then(result => {
+        if (result.text === 'OK') {
+          current.context.changeKernel(null).then(() => { current.dispose(); });
+        } else {
+          return false;
+        }
+      });
     }
   });
   commands.addCommand(CommandIDs.trust, {
     label: 'Trust Notebook',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        return trustNotebook(current.context.model).then(() => {
-          return current.context.save();
-        });
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return trustNotebook(current.context.model).then(() => {
+        return current.context.save();
+      });
     }
   });
   commands.addCommand(CommandIDs.restartClear, {
     label: 'Restart Kernel & Clear Outputs',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        let promise = restartKernel(current.kernel, current.node);
-        promise.then(result => {
-          current.activate();
-          if (result) {
-            NotebookActions.clearAllOutputs(current.notebook);
-          }
-        });
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      let promise = restartKernel(current.kernel, current.node);
+      promise.then(result => {
+        current.activate();
+        if (result) {
+          return NotebookActions.clearAllOutputs(current.notebook);
+        }
+      });
+      return promise;
     }
   });
   commands.addCommand(CommandIDs.restartRunAll, {
     label: 'Restart Kernel & Run All',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        let promise = restartKernel(current.kernel, current.node);
-        promise.then(result => {
-          current.activate();
-          NotebookActions.runAll(current.notebook, current.context.kernel);
-        });
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      let promise = restartKernel(current.kernel, current.node);
+      promise.then(result => {
+        current.activate();
+        NotebookActions.runAll(current.notebook, current.context.kernel);
+      });
+      return promise;
     }
   });
   commands.addCommand(CommandIDs.clearAllOutputs, {
     label: 'Clear All Outputs',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.clearAllOutputs(current.notebook);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.clearAllOutputs(current.notebook);
     }
   });
   commands.addCommand(CommandIDs.clearOutputs, {
     label: 'Clear Output(s)',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.clearOutputs(current.notebook);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.clearOutputs(current.notebook);
     }
   });
   commands.addCommand(CommandIDs.interrupt, {
     label: 'Interrupt Kernel',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        let kernel = current.context.kernel;
-        if (kernel) {
-          kernel.interrupt();
-        }
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      let kernel = current.context.kernel;
+      if (kernel) {
+        return kernel.interrupt();
       }
     }
   });
   commands.addCommand(CommandIDs.toCode, {
     label: 'Convert to Code',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.changeCellType(current.notebook, 'code');
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.changeCellType(current.notebook, 'code');
     }
   });
   commands.addCommand(CommandIDs.toMarkdown, {
     label: 'Convert to Markdown',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.changeCellType(current.notebook, 'markdown');
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.changeCellType(current.notebook, 'markdown');
     }
   });
   commands.addCommand(CommandIDs.toRaw, {
     label: 'Convert to Raw',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.changeCellType(current.notebook, 'raw');
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.changeCellType(current.notebook, 'raw');
     }
   });
   commands.addCommand(CommandIDs.cut, {
     label: 'Cut Cell(s)',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.cut(current.notebook, current.clipboard);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.cut(current.notebook, current.clipboard);
     }
   });
   commands.addCommand(CommandIDs.copy, {
     label: 'Copy Cell(s)',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.copy(current.notebook, current.clipboard);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.copy(current.notebook, current.clipboard);
     }
   });
   commands.addCommand(CommandIDs.paste, {
     label: 'Paste Cell(s)',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.paste(current.notebook, current.clipboard);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.paste(current.notebook, current.clipboard);
     }
   });
   commands.addCommand(CommandIDs.deleteCell, {
     label: 'Delete Cell(s)',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.deleteCells(current.notebook);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.deleteCells(current.notebook);
     }
   });
   commands.addCommand(CommandIDs.split, {
     label: 'Split Cell',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.splitCell(current.notebook);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.splitCell(current.notebook);
     }
   });
   commands.addCommand(CommandIDs.merge, {
     label: 'Merge Selected Cell(s)',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.mergeCells(current.notebook);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.mergeCells(current.notebook);
     }
   });
   commands.addCommand(CommandIDs.insertAbove, {
     label: 'Insert Cell Above',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.insertAbove(current.notebook);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.insertAbove(current.notebook);
     }
   });
   commands.addCommand(CommandIDs.insertBelow, {
     label: 'Insert Cell Below',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.insertBelow(current.notebook);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.insertBelow(current.notebook);
     }
   });
   commands.addCommand(CommandIDs.selectAbove, {
     label: 'Select Cell Above',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.selectAbove(current.notebook);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.selectAbove(current.notebook);
     }
   });
   commands.addCommand(CommandIDs.selectBelow, {
     label: 'Select Cell Below',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.selectBelow(current.notebook);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.selectBelow(current.notebook);
     }
   });
   commands.addCommand(CommandIDs.extendAbove, {
     label: 'Extend Selection Above',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.extendSelectionAbove(current.notebook);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.extendSelectionAbove(current.notebook);
     }
   });
   commands.addCommand(CommandIDs.extendBelow, {
     label: 'Extend Selection Below',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.extendSelectionBelow(current.notebook);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.extendSelectionBelow(current.notebook);
     }
   });
   commands.addCommand(CommandIDs.moveUp, {
     label: 'Move Cell(s) Up',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.moveUp(current.notebook);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.moveUp(current.notebook);
     }
   });
   commands.addCommand(CommandIDs.moveDown, {
     label: 'Move Cell(s) Down',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.moveDown(current.notebook);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.moveDown(current.notebook);
     }
   });
   commands.addCommand(CommandIDs.toggleLines, {
     label: 'Toggle Line Numbers',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.toggleLineNumbers(current.notebook);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.toggleLineNumbers(current.notebook);
     }
   });
   commands.addCommand(CommandIDs.toggleAllLines, {
     label: 'Toggle All Line Numbers',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.toggleAllLineNumbers(current.notebook);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.toggleAllLineNumbers(current.notebook);
     }
   });
   commands.addCommand(CommandIDs.commandMode, {
     label: 'To Command Mode',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        current.notebook.mode = 'command';
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return current.notebook.mode = 'command';
     }
   });
   commands.addCommand(CommandIDs.editMode, {
     label: 'To Edit Mode',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        current.notebook.mode = 'edit';
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      current.notebook.mode = 'edit';
     }
   });
   commands.addCommand(CommandIDs.undo, {
     label: 'Undo Cell Operation',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.undo(current.notebook);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.undo(current.notebook);
     }
   });
   commands.addCommand(CommandIDs.redo, {
     label: 'Redo Cell Operation',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.redo(current.notebook);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.redo(current.notebook);
     }
   });
   commands.addCommand(CommandIDs.switchKernel, {
     label: 'Switch Kernel',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        let context = current.context;
-        let node = current.node;
-        selectKernelForContext(context, services.sessions, node).then(() => {
-          current.activate();
-        });
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      let context = current.context;
+      let node = current.node;
+      let sessions = services.sessions;
+      return selectKernelForContext(context, sessions, node).then(() => {
+        current.activate();
+      });
     }
   });
   commands.addCommand(CommandIDs.markdown1, {
     label: 'Markdown Header 1',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.setMarkdownHeader(current.notebook, 1);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.setMarkdownHeader(current.notebook, 1);
     }
   });
   commands.addCommand(CommandIDs.markdown2, {
     label: 'Markdown Header 2',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.setMarkdownHeader(current.notebook, 2);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.setMarkdownHeader(current.notebook, 2);
     }
   });
   commands.addCommand(CommandIDs.markdown3, {
     label: 'Markdown Header 3',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.setMarkdownHeader(current.notebook, 3);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.setMarkdownHeader(current.notebook, 3);
     }
   });
   commands.addCommand(CommandIDs.markdown4, {
     label: 'Markdown Header 4',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.setMarkdownHeader(current.notebook, 4);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.setMarkdownHeader(current.notebook, 4);
     }
   });
   commands.addCommand(CommandIDs.markdown5, {
     label: 'Markdown Header 5',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.setMarkdownHeader(current.notebook, 5);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.setMarkdownHeader(current.notebook, 5);
     }
   });
   commands.addCommand(CommandIDs.markdown6, {
     label: 'Markdown Header 6',
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        NotebookActions.setMarkdownHeader(current.notebook, 6);
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
       }
+      return NotebookActions.setMarkdownHeader(current.notebook, 6);
     }
   });
   }
