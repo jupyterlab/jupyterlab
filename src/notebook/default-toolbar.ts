@@ -296,13 +296,8 @@ class CellTypeSwitcher extends Widget {
    * Handle `keydown` events for the widget.
    */
   private _evtKeyDown(event: KeyboardEvent): void {
-    switch (event.keyCode) {
-    case 13:  // Enter
-    case 27:  // Escape
+    if (event.keyCode === 13) {  // Enter
       this._notebook.activate();
-      break;
-    default:
-      break;
     }
   }
 
