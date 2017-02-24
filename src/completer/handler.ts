@@ -236,16 +236,17 @@ class CompletionHandler implements IDisposable {
 
     // Allow completion if the current or a preceding char is not whitespace.
     const position = editor.getCursorPosition();
-    const currentLine = editor.getLine(position.line);
-    if (!currentLine.substring(0, position.column).match(/\S/)) {
-      model.reset();
+    const { column, line } = position;
+    const currentLine = editor.getLine(line);
+    const currentChar = currentLine[column && column - 1];
+    if (!currentChar || !currentChar.match(/\w/)) {
+      model.reset(true);
       return;
     }
 
     const request = this.getState(position);
 
     host.classList.add(COMPLETABLE_CLASS);
-
     this._completer.model.handleTextChange(request);
   }
 
