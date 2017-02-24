@@ -96,7 +96,7 @@
   -moz-user-select: text;
   -webkit-user-select: text;
   -ms-user-select: text;
-  overflow: auto;
+  overflow: visible;
   flex-grow: 1;
 }
 
