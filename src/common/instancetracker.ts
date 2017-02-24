@@ -53,10 +53,6 @@ interface IInstanceTracker<T extends Widget> extends IDisposable {
 
   /**
    * A signal emitted when a widget is added.
-   *
-   * #### Notes
-   * This signal will only fire when a widget is added to the tracker. It will
-   * not fire if a widget is injected into the tracker.
    */
   readonly widgetAdded: ISignal<this, T>;
 
@@ -87,23 +83,6 @@ interface IInstanceTracker<T extends Widget> extends IDisposable {
    * @param widget - The widget whose existence is being checked.
    */
   has(widget: Widget): boolean;
-
-  /**
-   * Inject a foreign widget into the instance tracker.
-   *
-   * @param widget - The widget to inject into the tracker.
-   *
-   * #### Notes
-   * Any widgets injected into an instance tracker will not have their state
-   * saved by the tracker. The primary use case for widget injection is for a
-   * plugin that offers a sub-class of an extant plugin to have its instances
-   * share the same commands as the parent plugin (since most relevant commands
-   * will use the `currentWidget` of the parent plugin's instance tracker). In
-   * this situation, the sub-class plugin may well have its own instance tracker
-   * for layout and state restoration in addition to injecting its widgets into
-   * the parent plugin's instance tracker.
-   */
-  inject(widget: T): void;
 }
 
 
@@ -138,10 +117,6 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
 
   /**
    * A signal emitted when a widget is added.
-   *
-   * #### Notes
-   * This signal will only fire when a widget is added to the tracker. It will
-   * not fire if a widget is injected into the tracker.
    */
   get widgetAdded(): ISignal<this, T> {
     return this._widgetAdded;
@@ -184,7 +159,6 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     this._tracker.add(widget);
     this._widgets.push(widget);
 
-    let injected = Private.injectedProperty.get(widget);
     let promise: Promise<void> = Promise.resolve(void 0);
 
     if (injected) {
@@ -266,26 +240,6 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   }
 
   /**
-   * Inject a foreign widget into the instance tracker.
-   *
-   * @param widget - The widget to inject into the tracker.
-   *
-   * #### Notes
-   * Any widgets injected into an instance tracker will not have their state
-   * saved by the tracker. The primary use case for widget injection is for a
-   * plugin that offers a sub-class of an extant plugin to have its instances
-   * share the same commands as the parent plugin (since most relevant commands
-   * will use the `currentWidget` of the parent plugin's instance tracker). In
-   * this situation, the sub-class plugin may well have its own instance tracker
-   * for layout and state restoration in addition to injecting its widgets into
-   * the parent plugin's instance tracker.
-   */
-  inject(widget: T): void {
-    Private.injectedProperty.set(widget, true);
-    this.add(widget);
-  }
-
-  /**
    * Check if this tracker has the specified widget.
    *
    * @param widget - The widget whose existence is being checked.
@@ -334,8 +288,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * @param widget - The widget being saved.
    */
   save(widget: T): void {
-    let injected = Private.injectedProperty.get(widget);
-    if (!this._restore || !this.has(widget) || injected) {
+    if (!this._restore || !this.has(widget)) {
       return;
     }
 
@@ -466,15 +419,6 @@ namespace InstanceTracker {
  * A namespace for private data.
  */
 namespace Private {
-  /**
-   * An attached property to indicate whether a widget has been injected.
-   */
-  export
-  const injectedProperty = new AttachedProperty<Widget, boolean>({
-    name: 'injected',
-    create: () => false
-  });
-
   /**
    * An attached property for a widget's ID in the state database.
    */

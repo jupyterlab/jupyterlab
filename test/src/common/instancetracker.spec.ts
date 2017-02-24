@@ -85,24 +85,6 @@ describe('common/instancetracker', () => {
         tracker.add(widget);
       });
 
-      it('should not emit when a widget has been injected', done => {
-        let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
-        let one = new Widget();
-        let two = new Widget();
-        two.node.tabIndex = -1;
-        let total = 0;
-        tracker.widgetAdded.connect(() => { total++; });
-        tracker.currentChanged.connect(() => {
-          expect(total).to.be(1);
-          done();
-        });
-        tracker.add(one);
-        tracker.inject(two);
-        Widget.attach(two, document.body);
-        simulate(two.node, 'focus');
-        Widget.detach(two);
-      });
-
     });
 
     describe('#currentWidget', () => {
@@ -308,27 +290,6 @@ describe('common/instancetracker', () => {
         expect(tracker.has(widget)).to.be(false);
         tracker.add(widget);
         expect(tracker.has(widget)).to.be(true);
-      });
-
-    });
-
-    describe('#inject()', () => {
-
-      it('should inject a widget into the tracker', () => {
-        let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
-        let widget = new Widget();
-        expect(tracker.has(widget)).to.be(false);
-        tracker.inject(widget);
-        expect(tracker.has(widget)).to.be(true);
-      });
-
-      it('should remove an injected widget if it is disposed', () => {
-        let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
-        let widget = new Widget();
-        tracker.inject(widget);
-        expect(tracker.has(widget)).to.be(true);
-        widget.dispose();
-        expect(tracker.has(widget)).to.be(false);
       });
 
     });
