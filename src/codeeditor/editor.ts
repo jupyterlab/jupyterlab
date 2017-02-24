@@ -505,7 +505,17 @@ namespace CodeEditor {
      *
      * @returns The coordinates of the position.
      */
-    getCoordinate(position: IPosition): ICoordinate;
+    getCoordinateForPosition(position: IPosition): ICoordinate;
+
+    /**
+     * Get the cursor position given window coordinates.
+     *
+     * @param coordinate - The desired coordinate.
+     *
+     * @returns The position of the coordinates, or null if not
+     *   contained in the editor.
+     */
+    getPositionForCoordinate(coordinate: ICoordinate): IPosition | null;
   }
 
   /**

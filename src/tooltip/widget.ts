@@ -191,7 +191,7 @@ class TooltipWidget extends Widget {
     let node = this.node;
     let editor = this._editor;
     let { charWidth, lineHeight } = editor;
-    let coords = editor.getCoordinate(editor.getCursorPosition());
+    let coords = editor.getCoordinateForPosition(editor.getCursorPosition());
 
     // Calculate the geometry of the completer.
     HoverBox.setGeometry({
