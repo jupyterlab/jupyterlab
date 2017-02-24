@@ -108,7 +108,7 @@ describe('terminal/index', () => {
 
       it('should set the title when ready', function(done) {
         if (Platform.IS_WIN) {
-          return this.skip('Terminal sessions not available on Windows');
+          return this.skip();
         }
         widget.session = session;
         expect(widget.session).to.be(session);
