@@ -219,7 +219,9 @@ class ObservableJSONWidget extends Widget {
     }
     this._source = value;
     this.editor.readOnly = !value;
-    value.changed.connect(this._onSourceChanged, this);
+    if (value) {
+      value.changed.connect(this._onSourceChanged, this);
+    }
     this._setValue();
   }
 
