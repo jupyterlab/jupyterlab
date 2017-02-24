@@ -132,7 +132,7 @@ const CONSOLE_REGEX = /^console-(\d)+-[0-9a-f]+$/;
  */
 function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, palette: ICommandPalette, pathTracker: IPathTracker, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: IInstanceRestorer): IConsoleTracker {
   let manager = services.sessions;
-  let { commands } = app;
+  let { commands, shell } = app;
   let category = 'Console';
   let command: string;
   let count = 0;
@@ -204,7 +204,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     let widget = tracker.currentWidget;
     let activate = !args || args && args['activate'] !== false;
     if (activate && widget) {
-      widget.activate();
+      shell.activateMain(widget.id);
     }
     return widget;
   }
@@ -324,7 +324,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       tracker.find(widget => {
         if (widget.console.session.id === id) {
           if (args['activate'] !== false) {
-            widget.activate();
+            shell.activateMain(widget.id);
           }
           widget.console.inject(args['code'] as string);
           return true;
@@ -343,7 +343,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
         }
       });
       if (widget) {
-        app.shell.activateMain(widget.id);
+        shell.activateMain(widget.id);
       } else {
         app.commands.execute(CommandIDs.create, { id });
       }
@@ -413,16 +413,16 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     // Update the caption of the tab when the kernel changes.
     panel.console.session.kernelChanged.connect(() => {
       let newName = panel.console.session.kernel.name;
-      name = specs.kernelspecs[name].display_name;
-      captionOptions.displayName = newName;
+      name = specs.kernelspecs[newName].display_name;
+      captionOptions.displayName = name;
       captionOptions.connected = new Date();
       captionOptions.executed = null;
       panel.title.caption = Private.caption(captionOptions);
     });
     // Add the console panel to the tracker.
     tracker.add(panel);
-    app.shell.addToMainArea(panel);
-    app.shell.activateMain(panel.id);
+    shell.addToMainArea(panel);
+    shell.activateMain(panel.id);
   }
 
   command = CommandIDs.switchKernel;
