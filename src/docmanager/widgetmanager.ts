@@ -18,7 +18,7 @@ import {
 } from '@phosphor/properties';
 
 import {
-  Signal
+  ISignal, Signal
 } from '@phosphor/signaling';
 
 import {
@@ -54,6 +54,13 @@ class DocumentWidgetManager implements IDisposable {
    */
   constructor(options: DocumentWidgetManager.IOptions) {
     this._registry = options.registry;
+  }
+
+  /**
+   * A signal emitted when one of the documents is activated.
+   */
+  get activateRequested(): ISignal<this, string> {
+    return this._activateRequested;
   }
 
   /**
@@ -207,12 +214,19 @@ class DocumentWidgetManager implements IDisposable {
    *   if the message should be dispatched to the handler as normal.
    */
   protected filterMessage(handler: IMessageHandler, msg: Message): boolean {
-    if (msg.type === 'close-request') {
+    switch (msg.type) {
+    case 'close-request':
       if (this._closeGuard) {
         return true;
       }
       this.onClose(handler as Widget);
       return false;
+    case 'activate-request':
+      let context = this.contextForWidget(handler as Widget);
+      this._activateRequested.emit(context.path);
+      break;
+    default:
+      break;
     }
     return true;
   }
@@ -334,6 +348,7 @@ class DocumentWidgetManager implements IDisposable {
 
   private _closeGuard = false;
   private _registry: DocumentRegistry = null;
+  private _activateRequested = new Signal<this, string>(this);
 }
 
 
