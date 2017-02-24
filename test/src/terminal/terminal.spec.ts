@@ -8,6 +8,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  Platform
+} from '@phosphor/domutils';
+
+import {
   Message, MessageLoop
 } from '@phosphor/messaging';
 
@@ -70,6 +74,12 @@ describe('terminal/index', () => {
     let session: TerminalSession.ISession;
 
     before((done) => {
+      if (Platform.IS_WIN) {
+        session = null;
+        expect(() => { TerminalSession.startNew(); }).to.throwError();
+        done();
+        return;
+      }
       TerminalSession.startNew().then(s => {
         session = s;
       }).then(done, done);
@@ -98,6 +108,10 @@ describe('terminal/index', () => {
       });
 
       it('should set the title when ready', (done) => {
+        if (Platform.IS_WIN) {
+          done();
+          return;
+        }
         widget.session = session;
         expect(widget.session).to.be(session);
         session.ready.then(() => {
@@ -173,6 +187,10 @@ describe('terminal/index', () => {
     describe('#refresh()', () => {
 
       it('should refresh the widget', (done) => {
+        if (Platform.IS_WIN) {
+          done();
+          return;
+        }
         widget.session = session;
         widget.refresh().then(done, done);
       });
