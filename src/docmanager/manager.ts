@@ -18,7 +18,7 @@ import {
 } from '@phosphor/properties';
 
 import {
-  Signal
+  ISignal, Signal
 } from '@phosphor/signaling';
 
 import {
@@ -76,8 +76,16 @@ class DocumentManager implements IDisposable {
     this._serviceManager = options.manager;
     this._opener = options.opener;
     this._widgetManager = new DocumentWidgetManager({
-      registry: this._registry
+      registry: this._registry,
     });
+    this._widgetManager.activateRequested.connect(this._onActivateRequested, this);
+  }
+
+  /**
+   * A signal emitted when one of the documents is activated.
+   */
+  get activateRequested(): ISignal<this, string> {
+    return this._activateRequested;
   }
 
   /**
@@ -376,11 +384,19 @@ class DocumentManager implements IDisposable {
     return widget;
   }
 
+  /**
+   * Handle an activateRequested signal from the widget manager.
+   */
+  private _onActivateRequested(sender: DocumentWidgetManager, args: string): void {
+    this._activateRequested.emit(args);
+  }
+
   private _serviceManager: ServiceManager.IManager = null;
   private _widgetManager: DocumentWidgetManager = null;
   private _registry: DocumentRegistry = null;
   private _contexts: Private.IContext[] = [];
   private _opener: DocumentManager.IWidgetOpener = null;
+  private _activateRequested = new Signal<this, string>(this);
 }
 
 

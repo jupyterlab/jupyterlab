@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Contents
+  Contents, ContentsManager
 } from '@jupyterlab/services';
 
 import {
@@ -216,6 +216,7 @@ class DirListing extends Widget {
     this._renderer = options.renderer || DirListing.defaultRenderer;
     let headerNode = utils.findElement(this.node, HEADER_CLASS);
     this._renderer.populateHeaderNode(headerNode);
+    this._manager.activateRequested.connect(this._onActivateRequested, this);
   }
 
   /**
@@ -1244,6 +1245,7 @@ class DirListing extends Widget {
     let name = items[index].name;
     this._selection[name] = true;
     this._isCut = false;
+    this.update();
   }
 
   /**
@@ -1284,6 +1286,21 @@ class DirListing extends Widget {
         }
       });
     }
+  }
+
+  /**
+   * Handle an `activateRequested` signal from the manager.
+   */
+  private _onActivateRequested(sender: DocumentManager, args: string): void {
+    let dirname = ContentsManager.dirname(args);
+    if (dirname == '.') {
+      dirname = '';
+    }
+    if (dirname !== this._model.path) {
+      return;
+    }
+    let basename = ContentsManager.basename(args);
+    this._selectItemByName(basename);
   }
 
   private _model: FileBrowserModel = null;
