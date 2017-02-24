@@ -2,14 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject
-} from '@phosphor/coreutils';
-
-import {
-  AttachedProperty
-} from '@phosphor/properties';
-
-import {
   JupyterLab, JupyterLabPlugin
 } from '../application';
 
@@ -20,10 +12,6 @@ import {
 import {
   InstanceTracker
 } from '../common/instancetracker';
-
-import {
-  CommandIDs as ConsoleCommandIDs
-} from '../console';
 
 import {
   IDocumentRegistry
@@ -59,25 +47,24 @@ const FACTORY = 'Editor';
 
 
 /**
- * The editor handler extension.
+ * The editor tracker extension.
  */
 const plugin: JupyterLabPlugin<IEditorTracker> = {
   activate,
-  id: 'jupyter.services.editor-handler',
+  id: 'jupyter.services.editor-tracker',
   requires: [IDocumentRegistry, IInstanceRestorer, IEditorServices],
   provides: IEditorTracker,
   autoStart: true
 };
 
-
 /**
- * Export the plugin as default.
+ * Export the plugins as default.
  */
 export default plugin;
 
 
 /**
- * Sets up the editor widget
+ * Activate the editor tracker plugin.
  */
 function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInstanceRestorer, editorServices: IEditorServices): IEditorTracker {
   const factory = new EditorWidgetFactory({
@@ -104,6 +91,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
     tracker.add(widget);
   });
   registry.addWidgetFactory(factory);
+<<<<<<< HEAD
 
   let { commands, shell } = app;
 

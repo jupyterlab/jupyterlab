@@ -23,7 +23,7 @@ import {
 } from '../commandpalette';
 
 import {
-  IEditorTracker
+  IEditorTracker, addDefaultCommands, CommandIDs as EditorCommandIDs
 } from '../editorwidget';
 
 import {
@@ -71,12 +71,6 @@ export default plugins;
 export
 namespace CommandIDs {
   export
-  const lineNumbers = 'editor:line-numbers';
-
-  export
-  const lineWrap = 'editor:line-wrap';
-
-  export
   const matchBrackets = 'editor:match-brackets';
 
   export
@@ -84,12 +78,6 @@ namespace CommandIDs {
 
   export
   const changeTheme = 'editor:change-theme';
-
-  export
-  const createConsole = 'editor:create-console';
-
-  export
-  const runCode = 'editor:run-code';
 };
 
 
@@ -98,6 +86,9 @@ namespace CommandIDs {
  */
 function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMenu: IMainMenu, palette: ICommandPalette): void {
   let { commands } = app;
+
+  // Add the default editor commands.
+  addDefaultCommands(tracker, commands);
 
   /**
    * Toggle editor matching brackets
@@ -138,8 +129,8 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     settings.title.label = 'Settings';
     theme.title.label = 'Theme';
 
-    settings.addItem({ command: CommandIDs.lineNumbers });
-    settings.addItem({ command: CommandIDs.lineWrap });
+    settings.addItem({ command: EditorCommandIDs.lineNumbers });
+    settings.addItem({ command: EditorCommandIDs.lineWrap });
     settings.addItem({ command: CommandIDs.matchBrackets });
     settings.addItem({ command: CommandIDs.vimMode });
 
@@ -185,12 +176,12 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
   });
 
   [
-    CommandIDs.lineNumbers,
-    CommandIDs.lineWrap,
+    EditorCommandIDs.lineNumbers,
+    EditorCommandIDs.lineWrap,
     CommandIDs.matchBrackets,
     CommandIDs.vimMode,
-    CommandIDs.createConsole,
-    CommandIDs.runCode
+    EditorCommandIDs.createConsole,
+    EditorCommandIDs.runCode
   ].forEach(command => palette.addItem({ command, category: 'Editor' }));
 
 }
