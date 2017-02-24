@@ -178,3 +178,12 @@
     font-family: var(--jp-ui-font-family);
     font-weight: lighter;
 }
+
+.p-CommandPalette-emptyMessage {
+  text-align: center;
+  margin-top: 24px;
+  line-height: 1.32;
+  padding: 0px 8px;
+  color: var(--jp-content-font-color3);
+
+}
