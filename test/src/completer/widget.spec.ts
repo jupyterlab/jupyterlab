@@ -121,7 +121,7 @@ describe('completer/widget', () => {
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(value).to.be('');
-        simulate(anchor.node, 'keydown', { keyCode: 13 }); // Enter
+        simulate(anchor.node, 'keydown', { keyCode: 9 }); // Tab
         expect(value).to.be('foo');
         widget.dispose();
         anchor.dispose();
@@ -293,29 +293,6 @@ describe('completer/widget', () => {
           MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
           expect(widget.isHidden).to.be(true);
           expect(model.options().next()).to.be(void 0);
-          widget.dispose();
-          anchor.dispose();
-        });
-
-        it('should trigger a selected signal on enter key', () => {
-          let anchor = new Widget();
-          let model = new CompleterModel();
-          let options: CompleterWidget.IOptions = { anchor, model };
-          let value = '';
-          let listener = (sender: any, selected: string) => {
-            value = selected;
-          };
-          model.setOptions(['foo', 'bar', 'baz']);
-          Widget.attach(anchor, document.body);
-
-          let widget = new CompleterWidget(options);
-
-          widget.selected.connect(listener);
-          Widget.attach(widget, document.body);
-          MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-          expect(value).to.be('');
-          simulate(anchor.node, 'keydown', { keyCode: 13 }); // Enter
-          expect(value).to.be('foo');
           widget.dispose();
           anchor.dispose();
         });
