@@ -76,7 +76,7 @@ class DocumentManager implements IDisposable {
     this._serviceManager = options.manager;
     this._opener = options.opener;
     this._widgetManager = new DocumentWidgetManager({
-      registry: this._registry,
+      registry: this._registry
     });
     this._widgetManager.activateRequested.connect(this._onActivateRequested, this);
   }
