@@ -137,7 +137,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
       if (!current) {
         return;
       }
-      shell.activateMain(widget.id);
+      shell.activateMain(current.id);
       return current.refresh().then(() => {
         current.activate();
       });
