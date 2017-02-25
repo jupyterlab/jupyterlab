@@ -623,25 +623,13 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
   });
   commands.addCommand(CommandIDs.switchKernel, {
     label: 'Switch Kernel',
-<<<<<<< HEAD
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
         return;
-=======
-    execute: () => {
-      let current = tracker.currentWidget;
-      if (current) {
-        let context = current.context;
-        selectKernelForContext(context, services.sessions, current);
->>>>>>> a7569a5a... Clean up the handling of focus for kernel actions
       }
       let context = current.context;
-      let node = current.node;
-      let sessions = services.sessions;
-      return selectKernelForContext(context, sessions, node).then(() => {
-        current.activate();
-      });
+      return selectKernelForContext(context, services.sessions, current);
     }
   });
   commands.addCommand(CommandIDs.markdown1, {
