@@ -61,9 +61,11 @@ interface IInstanceTracker<T extends Widget> extends IDisposable {
   readonly widgetAdded: ISignal<this, T>;
 
   /**
-   * The current widget is the most recently focused widget, or the
-   * most recently added widget if the most recently added widget
-   * has not gotten focus.
+   * The current widget is the most recently focused or added widget.
+   *
+   * #### Notes
+   * If a widget is added and no widget currently has focus, it will
+   * be set as the current widget.
    */
   readonly currentWidget: T;
 
@@ -151,9 +153,11 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   readonly namespace: string;
 
   /**
-   * The current widget is the most recently focused widget, or the
-   * most recently added widget if the most recently added widget
-   * has not gotten focus.
+   * The current widget is the most recently focused or added widget.
+   *
+   * #### Notes
+   * If a widget is added and no widget currently has focus, it will
+   * be set as the current widget.
    */
   get currentWidget(): T {
     return this._currentWidget;
@@ -205,7 +209,13 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
       }
     }
 
-    this._currentWidget = widget;
+    // Set as the current if the existing current does not have focus.
+    if (!this._currentWidget || !this._currentWidget.node.contains(document.activeElement)) {
+      this._currentWidget = widget;
+      this.onCurrentChanged();
+      this._currentChanged.emit(widget);
+    }
+
 
     // Emit the widget added signal.
     this._widgetAdded.emit(widget);
@@ -361,8 +371,12 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * Handle the current change signal from the internal focus tracker.
    */
   private _onCurrentChanged(sender: any, args: FocusTracker.IChangedArgs<T>): void {
-    this.onCurrentChanged();
+    // Bail if the active widget did not change.
+    if (args.newValue === this._currentWidget) {
+      return;
+    }
     this._currentWidget = args.newValue;
+    this.onCurrentChanged();
     this._currentChanged.emit(args.newValue);
   }
 
