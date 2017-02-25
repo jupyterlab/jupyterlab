@@ -24,7 +24,7 @@ Distributed under the terms of the Modified BSD License.
     "wsUrl": "{{ws_url | urlencode}}"
   }</script>
 
-  {% block favicon %}<link rel="shortcut icon" type="image/x-icon" href="/static/base/images/favicon.ico">{% endblock %}
+  {% block favicon %}<link rel="shortcut icon" type="image/x-icon" href="{{ base_url }}static/base/images/favicon.ico">{% endblock %}
 
   {% for bundle_file in jupyterlab_bundles %}
   <script src="{{ bundle_file }}" type="text/javascript" charset="utf-8"></script>
