@@ -384,21 +384,11 @@ describe('CodeMirrorEditor', () => {
 
   });
 
-  describe('#getCoordinateForPosition()', () => {
+  describe('#getCoordinate()', () => {
 
     it('should get the window coordinates given a cursor position', () => {
-      let coord = editor.getCoordinateForPosition({ line: 10, column: 1 });
+      let coord = editor.getCoordinate({ line: 10, column: 1 });
       expect(coord.left).to.be.above(0);
-    });
-
-  });
-
-  describe('#getPositionForCoordinate()', () => {
-
-    it('should get the window coordinates given a cursor position', () => {
-      let pos = { line: 10, column: 1 };
-      let coord = editor.getCoordinateForPosition(pos);
-      expect(editor.getPositionForCoordinate(coord)).to.eql(pos);
     });
 
   });
