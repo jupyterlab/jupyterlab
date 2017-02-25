@@ -138,8 +138,6 @@ describe('notebook/celltools', () => {
     describe('#activeCell', () => {
 
       it('should be the active cell', () => {
-        expect(celltools.activeCell).to.be(null);
-        simulate(panel0.node, 'focus');
         expect(celltools.activeCell).to.be(panel0.notebook.activeCell);
         tabpanel.currentIndex = 1;
         simulate(panel1.node, 'focus');
@@ -151,8 +149,6 @@ describe('notebook/celltools', () => {
     describe('#selectedCells', () => {
 
       it('should be the currently selected cells', () => {
-        expect(celltools.selectedCells.length).to.be(0);
-        simulate(panel0.node, 'focus');
         expect(celltools.selectedCells).to.eql([panel0.notebook.activeCell]);
         tabpanel.currentIndex = 1;
         simulate(panel1.node, 'focus');
@@ -219,7 +215,6 @@ describe('notebook/celltools', () => {
       it('should be called when the selection changes', () => {
         let tool = new LogTool({});
         celltools.addItem({ tool });
-        simulate(panel0.node, 'focus');
         tool.methods = [];
         panel0.notebook.select(panel0.notebook.widgets[1]);
         expect(tool.methods).to.contain('onSelectionChanged');
@@ -232,7 +227,6 @@ describe('notebook/celltools', () => {
       it('should be called when the metadata changes', () => {
         let tool = new LogTool({});
         celltools.addItem({ tool });
-        simulate(panel0.node, 'focus');
         tool.methods = [];
         let metadata = celltools.activeCell.model.metadata;
         metadata.set('foo', 1);

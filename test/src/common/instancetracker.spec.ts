@@ -98,16 +98,28 @@ describe('common/instancetracker', () => {
         expect(tracker.currentWidget).to.be(null);
       });
 
-      it('should be updated if when the widget is focused', () => {
+      it('should be updated when a widget is added', () => {
         let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
         let widget = new Widget();
         widget.node.tabIndex = -1;
         tracker.add(widget);
-        Widget.attach(widget, document.body);
-        expect(tracker.currentWidget).to.be(null);
-        simulate(widget.node, 'focus');
         expect(tracker.currentWidget).to.be(widget);
         Widget.detach(widget);
+      });
+
+      it('should be updated if when the first widget is focused', () => {
+        let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
+        let widget0 = new Widget();
+        widget0.node.tabIndex = -1;
+        tracker.add(widget0);
+        let widget1 = new Widget();
+        tracker.add(widget1);
+        Widget.attach(widget, document.body);
+        expect(tracker.currentWidget).to.be(widget1);
+        simulate(widget0.node, 'focus');
+        expect(tracker.currentWidget).to.be(widget0);
+        widget0.dispose();
+        widget1.dispose();
       });
 
     });
