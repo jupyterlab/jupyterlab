@@ -409,6 +409,7 @@ describe('CodeMirrorEditor', () => {
   describe('#getCursorPosition()', () => {
 
     it('should get the primary position of the cursor', () => {
+      model.value.text = TEXT;
       let pos = editor.getCursorPosition();
       expect(pos.line).to.be(0);
       expect(pos.column).to.be(0);
