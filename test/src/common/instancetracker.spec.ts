@@ -276,13 +276,8 @@ describe('common/instancetracker', () => {
       it('should be called when the current widget is changed', () => {
         let tracker = new TestTracker<Widget>({ namespace: NAMESPACE });
         let widget = new Widget();
-        widget.node.tabIndex = -1;
         tracker.add(widget);
-        expect(tracker.methods).to.not.contain('onCurrentChanged');
-        Widget.attach(widget, document.body);
-        simulate(widget.node, 'focus');
         expect(tracker.methods).to.contain('onCurrentChanged');
-        Widget.detach(widget);
       });
 
     });

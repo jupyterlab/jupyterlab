@@ -90,9 +90,6 @@ describe('notebook/tracker', () => {
         panel.context = createNotebookContext();
         panel.notebook.model.fromJSON(DEFAULT_CONTENT);
         tracker.add(panel);
-        expect(count).to.be(0);
-        Widget.attach(panel, document.body);
-        simulate(panel.node, 'focus');
         expect(count).to.be(1);
         panel.notebook.activeCellIndex = 1;
         expect(count).to.be(2);
@@ -107,13 +104,7 @@ describe('notebook/tracker', () => {
         let tracker = new TestTracker({ namespace: NAMESPACE });
         let panel = createNotebookPanel();
         tracker.add(panel);
-        panel.context = createNotebookContext();
-        panel.notebook.model.fromJSON(DEFAULT_CONTENT);
-        expect(tracker.methods).to.not.contain('onCurrentChanged');
-        Widget.attach(panel, document.body);
-        simulate(panel.node, 'focus');
         expect(tracker.methods).to.contain('onCurrentChanged');
-        panel.dispose();
       });
 
     });
