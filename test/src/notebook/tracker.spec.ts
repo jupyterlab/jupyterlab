@@ -74,9 +74,6 @@ describe('notebook/tracker', () => {
         tracker.add(panel);
         panel.context = createNotebookContext();
         panel.notebook.model.fromJSON(DEFAULT_CONTENT);
-        expect(tracker.activeCell).to.be(null);
-        Widget.attach(panel, document.body);
-        simulate(panel.node, 'focus');
         expect(tracker.activeCell).to.be.a(BaseCellWidget);
         panel.dispose();
       });

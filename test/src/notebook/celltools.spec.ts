@@ -113,7 +113,6 @@ describe('notebook/celltools', () => {
     tabpanel.addWidget(celltools);
     tabpanel.node.style.height = '800px';
     Widget.attach(tabpanel, document.body);
-    tabpanel.currentIndex = 0;
     // Wait for posted messages.
     requestAnimationFrame(() => {
       done();
@@ -138,10 +137,10 @@ describe('notebook/celltools', () => {
     describe('#activeCell', () => {
 
       it('should be the active cell', () => {
-        expect(celltools.activeCell).to.be(panel0.notebook.activeCell);
-        tabpanel.currentIndex = 1;
-        simulate(panel1.node, 'focus');
         expect(celltools.activeCell).to.be(panel1.notebook.activeCell);
+        tabpanel.currentIndex = 0;
+        simulate(panel0.node, 'focus');
+        expect(celltools.activeCell).to.be(panel0.notebook.activeCell);
       });
 
     });
@@ -149,11 +148,11 @@ describe('notebook/celltools', () => {
     describe('#selectedCells', () => {
 
       it('should be the currently selected cells', () => {
-        expect(celltools.selectedCells).to.eql([panel0.notebook.activeCell]);
-        tabpanel.currentIndex = 1;
-        simulate(panel1.node, 'focus');
         expect(celltools.selectedCells).to.eql([panel1.notebook.activeCell]);
-        panel1.notebook.select(panel1.notebook.widgets[1]);
+        tabpanel.currentIndex = 0;
+        simulate(panel0.node, 'focus');
+        expect(celltools.selectedCells).to.eql([panel0.notebook.activeCell]);
+        panel0.notebook.select(panel0.notebook.widgets[1]);
         expect(celltools.selectedCells.length).to.be(2);
       });
 
@@ -216,7 +215,8 @@ describe('notebook/celltools', () => {
         let tool = new LogTool({});
         celltools.addItem({ tool });
         tool.methods = [];
-        panel0.notebook.select(panel0.notebook.widgets[1]);
+        let current = tracker.currentWidget;
+        current.notebook.select(current.notebook.widgets[1]);
         expect(tool.methods).to.contain('onSelectionChanged');
       });
 
@@ -230,6 +230,7 @@ describe('notebook/celltools', () => {
         tool.methods = [];
         let metadata = celltools.activeCell.model.metadata;
         metadata.set('foo', 1);
+        metadata.set('foo', 2);
         expect(tool.methods).to.contain('onMetadataChanged');
       });
 
@@ -248,7 +249,9 @@ describe('notebook/celltools', () => {
     it('should handle a change to the active cell', () => {
       let tool = new CellTools.ActiveCellTool();
       celltools.addItem({ tool });
-      simulate(panel0.node, 'focus');
+      let widget = tracker.currentWidget;
+      widget.notebook.activeCellIndex++;
+      widget.notebook.activeCell.model.metadata.set('bar', 1);
       expect(tool.node.querySelector('.jp-CellEditor')).to.be.ok();
       expect(tool.node.querySelector('.jp-InputArea-editor')).to.be.ok();
     });
@@ -268,15 +271,16 @@ describe('notebook/celltools', () => {
       let tool = new CellTools.MetadataEditorTool({ editorFactory });
       celltools.addItem({ tool });
       let model = tool.editor.model;
-      expect(model.value.text).to.be('No data!');
-      simulate(panel0.node, 'focus');
       expect(JSON.stringify(model.value.text)).to.ok();
+      let widget = tracker.currentWidget;
+      widget.notebook.activeCellIndex++;
+      widget.notebook.activeCell.model.metadata.set('bar', 1);
+      expect(JSON.stringify(model.value.text)).to.contain('bar');
     });
 
     it('should handle a change to the metadata', () => {
       let tool = new CellTools.MetadataEditorTool({ editorFactory });
       celltools.addItem({ tool });
-      simulate(panel0.node, 'focus');
       let model = tool.editor.model;
       let previous = model.value.text;
       let metadata = celltools.activeCell.model.metadata;

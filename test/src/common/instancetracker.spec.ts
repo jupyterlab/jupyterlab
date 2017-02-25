@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  Widget
+  Panel, Widget
 } from '@phosphor/widgets';
 
 import {
@@ -104,20 +104,31 @@ describe('common/instancetracker', () => {
         widget.node.tabIndex = -1;
         tracker.add(widget);
         expect(tracker.currentWidget).to.be(widget);
-        Widget.detach(widget);
+        widget.dispose();
       });
 
       it('should be updated if when the first widget is focused', () => {
         let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
-        let widget0 = new Widget();
-        widget0.node.tabIndex = -1;
+        let panel = new Panel();
+
+        function createWidget(): Widget {
+          let widget = new Widget();
+          widget.node.style.minHeight = '20px';
+          widget.node.style.minWidth = '20px';
+          widget.node.tabIndex = -1;
+          return widget;
+        }
+        let widget0 = createWidget();
         tracker.add(widget0);
-        let widget1 = new Widget();
+        let widget1 = createWidget();
         tracker.add(widget1);
-        Widget.attach(widget, document.body);
+        panel.addWidget(widget0);
+        panel.addWidget(widget1);
+        Widget.attach(panel, document.body);
         expect(tracker.currentWidget).to.be(widget1);
         simulate(widget0.node, 'focus');
         expect(tracker.currentWidget).to.be(widget0);
+        panel.dispose();
         widget0.dispose();
         widget1.dispose();
       });
