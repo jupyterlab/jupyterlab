@@ -387,7 +387,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   private _tracker = new FocusTracker<T>();
   private _currentChanged = new Signal<this, T>(this);
   private _widgetAdded = new Signal<this, T>(this);
-  private _currentWidget: T;
+  private _currentWidget: T | null = null;
 }
 
 
