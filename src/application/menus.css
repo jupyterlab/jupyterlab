@@ -142,13 +142,13 @@
 }
 
 
-.p-Menu-item.p-type-separator > div {
+.p-Menu-item[data-type='separator'] > div {
   padding: 0;
   height: 9px;
 }
 
 
-.p-Menu-item.p-type-separator > div::after {
+.p-Menu-item[data-type='separator'] > div::after {
   content: '';
   display: block;
   position: relative;
@@ -167,7 +167,7 @@
 }
 
 
-.p-Menu-item.p-type-submenu > .p-Menu-itemSubmenuIcon::before {
+.p-Menu-item[data-type='submenu'] > .p-Menu-itemSubmenuIcon::before {
   content: '\f0da';
 
 }
