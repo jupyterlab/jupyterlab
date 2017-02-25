@@ -146,11 +146,11 @@ function createApp(manager: ServiceManager.IManager): void {
   });
   commands.addCommand(cmdIds.restart, {
     label: 'Restart Kernel',
-    execute: () => restartKernel(nbWidget.kernel, nbWidget.node)
+    execute: () => restartKernel(nbWidget.kernel, nbWidget)
   });
   commands.addCommand(cmdIds.switchKernel, {
     label: 'Switch Kernel',
-    execute: () => selectKernelForContext(nbWidget.context, manager.sessions, nbWidget.node)
+    execute: () => selectKernelForContext(nbWidget.context, manager.sessions, nbWidget)
   });
   commands.addCommand(cmdIds.runAndAdvance, {
     label: 'Run and Advance',
