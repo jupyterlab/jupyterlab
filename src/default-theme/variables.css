@@ -25,7 +25,7 @@ all of MD as it is not optimized for dense, information rich UIs.
 */
 
 
-@import url('https://fonts.googleapis.com/css?family=Droid+Sans+Mono');
+@import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
 
 
 :root {
@@ -147,11 +147,11 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-cell-editor-background: #f7f7f7;
   --jp-cell-editor-border-color: #cfcfcf;
   --jp-cell-prompt-width: 90px;
-  --jp-cell-prompt-font-family: 'Droid Sans Mono', monospace;
+  --jp-cell-prompt-font-family: 'Roboto Mono', monospace;
   --jp-cell-prompt-letter-spacing: 0px;
   --jp-cell-prompt-opacity: 1.0;
-  --jp-cell-inprompt-font-color: var(--md-grey-800);
-  --jp-cell-outprompt-font-color: var(--md-grey-800);
+  --jp-cell-inprompt-font-color: var(--md-grey-700);
+  --jp-cell-outprompt-font-color: var(--md-grey-700);
   --jp-cell-padding: 5px;
 
   /* Notebook specific styles */
