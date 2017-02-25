@@ -64,8 +64,8 @@ interface IInstanceTracker<T extends Widget> extends IDisposable {
    * The current widget is the most recently focused or added widget.
    *
    * #### Notes
-   * If a widget is added and no widget currently has focus, it will
-   * be set as the current widget.
+   * It is the most recently added or focused widget, where focus
+   * takes precedence.
    */
   readonly currentWidget: T;
 
@@ -156,8 +156,8 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * The current widget is the most recently focused or added widget.
    *
    * #### Notes
-   * If a widget is added and no widget currently has focus, it will
-   * be set as the current widget.
+   * It is the most recently added or focused widget, where focus
+   * takes precedence.
    */
   get currentWidget(): T {
     return this._currentWidget;
