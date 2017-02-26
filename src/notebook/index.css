@@ -73,7 +73,7 @@
   top: calc( -1 * var(--jp-border-width) );
   left: calc( -1 * var(--jp-border-width) );
   width: var(--jp-private-notebook-left-border-width);
-  height: calc( 100% + calc( 2 * var(--jp-border-width) ) );
+  height: calc( 100% + 2 * var(--jp-border-width) );
   content: '';
   background: var(--jp-private-notebook-selected-color);
 }
@@ -101,7 +101,7 @@
   top: calc( -1 * var(--jp-border-width) );
   left: calc( -1 * var(--jp-border-width) );
   width: var(--jp-private-notebook-left-border-width);
-  height: calc( 100% + calc( 2 * var(--jp-border-width) ) );
+  height: calc( 100% + 2 * var(--jp-border-width) );
   content: '';
   background: var(--jp-private-notebook-active-color);
 }
@@ -149,7 +149,7 @@
   top: calc( -1 * var(--jp-border-width) );
   left: calc( -1 * var(--jp-border-width) );
   width: var(--jp-private-notebook-left-border-width);
-  height: calc( 100% + calc( 2 * var(--jp-border-width) ) );
+  height: calc( 100% + 2 * var(--jp-border-width) );
   content: '';
   background: var(--jp-private-notebook-selected-color);
 }
