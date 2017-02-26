@@ -43,9 +43,10 @@ EXTENSION_PREFIX = '/labextension'
 class LabHandler(IPythonHandler):
     """Render the JupyterLab View."""
 
-    def initialize(self, labextensions, extension_prefix):
+    def initialize(self, labextensions, extension_prefix, page_config_data):
         self.labextensions = labextensions
         self.extension_prefix = extension_prefix
+        self.page_config_data = page_config_data
 
     @web.authenticated
     def get(self):
@@ -79,9 +80,10 @@ class LabHandler(IPythonHandler):
             if os.path.isfile(os.path.join(BUILT_FILES, css_file)):
                 css_files.append(ujoin(static_prefix, css_file))
 
-        configData = dict(
+        configData = dict(self.page_config_data)
+        configData.update(dict(
             terminalsAvailable=self.settings.get('terminals_available', False),
-        )
+        ))
 
         # Gather the lab extension files and entry points.
         for (name, data) in sorted(labextensions.items()):
@@ -166,10 +168,12 @@ def add_handlers(web_app, labextensions):
     base_url = web_app.settings['base_url']
     prefix = ujoin(base_url, PREFIX)
     extension_prefix = ujoin(base_url, EXTENSION_PREFIX)
+    page_config_data = web_app.settings.get('page_config_data', {})
     handlers = [
         (prefix + r'/?', LabHandler, {
             'labextensions': labextensions,
-            'extension_prefix': extension_prefix
+            'extension_prefix': extension_prefix,
+            'page_config_data': page_config_data
         }),
         (prefix + r"/(.*)", FileFindHandler, {
             'path': BUILT_FILES
