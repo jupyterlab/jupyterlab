@@ -79,9 +79,9 @@
 .cm-s-jupyter span.cm-atom         { color: #88F; }
 .cm-s-jupyter span.cm-number       { color: #080; }
 .cm-s-jupyter span.cm-def          { color: #00f; }
-.cm-s-jupyter span.cm-variable     { color: --md-grey-900 }
-.cm-s-jupyter span.cm-variable-2   { color: --md-grey-800 }
-.cm-s-jupyter span.cm-variable-3   { color: --md-grey-700 }
+.cm-s-jupyter span.cm-variable     { color: var(--md-grey-900) }
+.cm-s-jupyter span.cm-variable-2   { color: var(--md-grey-800) }
+.cm-s-jupyter span.cm-variable-3   { color: var(--md-grey-700) }
 .cm-s-jupyter span.cm-punctuation  { color: #05a; }
 .cm-s-jupyter span.cm-property     { color: #05a; }
 .cm-s-jupyter span.cm-operator     { color: #AA22FF; font-weight: bold; }
