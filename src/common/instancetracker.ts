@@ -161,7 +161,9 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    */
   get currentWidget(): T | null{
     return (
-      this._tracker.currentWidget || this._widgets[this._widgets.length - 1]
+      this._tracker.currentWidget ||
+      this._widgets[this._widgets.length - 1] ||
+      null
     );
   }
 
@@ -193,12 +195,13 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
       return promise;
     }
 
+    widget.disposed.connect(this._onWidgetDisposed, this);
+
     // Handle widget state restoration.
     if (this._restore) {
       let { restorer, state } = this._restore;
       let widgetName = this._restore.name(widget);
 
-      widget.disposed.connect(this._onWidgetDisposed, this);
       if (widgetName) {
         let name = `${this.namespace}:${widgetName}`;
         let data = this._restore.args(widget);
@@ -213,7 +216,8 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     }
 
     // If there is no focused widget, set this as the current widget.
-    if (this._tracker.currentWidget) {
+    if (!this._tracker.currentWidget) {
+      this._lastCurrent = widget;
       this.onCurrentChanged(widget);
     }
 
@@ -383,7 +387,20 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    */
   private _onWidgetDisposed(widget: T): void {
     let injected = Private.injectedProperty.get(widget);
-    if (injected || !this._restore) {
+    if (injected) {
+      return;
+    }
+
+    // Handle widget removal.
+    ArrayExt.removeFirstOf(this._widgets, widget);
+
+    // Handle a current changed.
+    if (widget === this._lastCurrent) {
+      let current = this._lastCurrent = this.currentWidget;
+      this.onCurrentChanged(current);
+    }
+
+    if (!this._restore) {
       return;
     }
     // If restore data was saved, delete it from the database.
@@ -392,14 +409,6 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
 
     if (name) {
       state.remove(name);
-    }
-
-    ArrayExt.removeFirstOf(this._widgets, widget);
-
-    // Handle a current changed.
-    if (widget === this._lastCurrent) {
-      let current = this._lastCurrent = this.currentWidget;
-      this.onCurrentChanged(current);
     }
   }
 
