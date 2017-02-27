@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  each
+} from '@phosphor/algorithm';
+
+import {
   Panel, Widget
 } from '@phosphor/widgets';
 
@@ -22,10 +26,20 @@ const NAMESPACE = 'instance-tracker-test';
 class TestTracker<T extends Widget> extends InstanceTracker<T> {
   methods: string[] = [];
 
-  protected onCurrentChanged(): void {
-    super.onCurrentChanged();
+  protected onCurrentChanged(widget: T): void {
+    super.onCurrentChanged(widget);
     this.methods.push('onCurrentChanged');
   }
+}
+
+
+
+function createWidget(): Widget {
+  let widget = new Widget();
+  widget.node.style.minHeight = '20px';
+  widget.node.style.minWidth = '20px';
+  widget.node.tabIndex = -1;
+  return widget;
 }
 
 
@@ -110,14 +124,6 @@ describe('common/instancetracker', () => {
       it('should be updated if when the first widget is focused', () => {
         let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
         let panel = new Panel();
-
-        function createWidget(): Widget {
-          let widget = new Widget();
-          widget.node.style.minHeight = '20px';
-          widget.node.style.minWidth = '20px';
-          widget.node.tabIndex = -1;
-          return widget;
-        }
         let widget0 = createWidget();
         tracker.add(widget0);
         let widget1 = createWidget();
@@ -131,6 +137,62 @@ describe('common/instancetracker', () => {
         panel.dispose();
         widget0.dispose();
         widget1.dispose();
+      });
+
+      it('should revert to the previously added widget on widget disposal', () => {
+        let tracker = new TestTracker<Widget>({ namespace: NAMESPACE });
+        let widget0 = new Widget();
+        tracker.add(widget0);
+        let widget1 = new Widget();
+        tracker.add(widget1);
+        expect(tracker.currentWidget).to.be(widget1);
+        widget1.dispose();
+        expect(tracker.currentWidget).to.be(widget0);
+      });
+
+      it('should preserve the tracked widget on widget disposal', () => {
+        let panel = new Panel();
+        let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
+        let widgets = [createWidget(), createWidget(), createWidget()];
+        each(widgets, widget => {
+          tracker.add(widget);
+          panel.addWidget(widget);
+        });
+        Widget.attach(panel, document.body);
+
+        simulate(widgets[0].node, 'focus');
+        expect(tracker.currentWidget).to.be(widgets[0]);
+
+        let called = false;
+        tracker.currentChanged.connect(() => { called = true; });
+        widgets[2].dispose();
+        expect(tracker.currentWidget).to.be(widgets[0]);
+        expect(called).to.be(false);
+        panel.dispose();
+        each(widgets, widget => {
+          widget.dispose();
+        });
+      });
+
+      it('should select the previously added widget on widget disposal', () => {
+        let panel = new Panel();
+        let tracker = new InstanceTracker<Widget>({ namespace: NAMESPACE });
+        let widgets = [createWidget(), createWidget(), createWidget()];
+        each(widgets, widget => {
+          tracker.add(widget);
+          panel.addWidget(widget);
+        });
+        Widget.attach(panel, document.body);
+
+        let called = false;
+        tracker.currentChanged.connect(() => { called = true; });
+        widgets[2].dispose();
+        expect(tracker.currentWidget).to.be(widgets[1]);
+        expect(called).to.be(true);
+        panel.dispose();
+        each(widgets, widget => {
+          widget.dispose();
+        });
       });
 
     });

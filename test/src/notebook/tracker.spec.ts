@@ -4,20 +4,12 @@
 import expect = require('expect.js');
 
 import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
-  simulate
-} from 'simulate-event';
-
-import {
   BaseCellWidget
 } from '../../../lib/cells';
 
 import {
-  NotebookTracker
-} from '../../../lib/notebook/tracker';
+  NotebookPanel, NotebookTracker
+} from '../../../lib/notebook';
 
 import {
   createNotebookContext
@@ -34,8 +26,8 @@ const NAMESPACE = 'notebook-tracker-test';
 class TestTracker extends NotebookTracker {
   methods: string[] = [];
 
-  protected onCurrentChanged(): void {
-    super.onCurrentChanged();
+  protected onCurrentChanged(widget: NotebookPanel): void {
+    super.onCurrentChanged(widget);
     this.methods.push('onCurrentChanged');
   }
 }
