@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  each, find
+  ArrayExt, each, find
 } from '@phosphor/algorithm';
 
 import {
@@ -64,8 +64,8 @@ interface IInstanceTracker<T extends Widget> extends IDisposable {
    * The current widget is the most recently focused or added widget.
    *
    * #### Notes
-   * It is the most recently added or focused widget, where focus
-   * takes precedence.
+   * It is the most recently focused widget, or the most recently added
+   * widget if no widget has taken focus.
    */
   readonly currentWidget: T;
 
@@ -156,11 +156,13 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * The current widget is the most recently focused or added widget.
    *
    * #### Notes
-   * It is the most recently added or focused widget, where focus
-   * takes precedence.
+   * It is the most recently focused widget, or the most recently added
+   * widget if no widget has taken focus.
    */
-  get currentWidget(): T {
-    return this._currentWidget;
+  get currentWidget(): T | null{
+    return (
+      this._tracker.currentWidget || this._widgets[this._widgets.length - 1]
+    );
   }
 
   /**
@@ -182,6 +184,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
       return Promise.reject(warning);
     }
     this._tracker.add(widget);
+    this._widgets.push(widget);
 
     let injected = Private.injectedProperty.get(widget);
     let promise: Promise<void> = Promise.resolve(void 0);
@@ -209,13 +212,10 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
       }
     }
 
-    // Set as the current if the existing current does not have focus.
-    if (!this._currentWidget || !this._currentWidget.node.contains(document.activeElement)) {
-      this._currentWidget = widget;
-      this.onCurrentChanged();
-      this._currentChanged.emit(widget);
+    // If there is no focused widget, set this as the current widget.
+    if (this._tracker.currentWidget) {
+      this.onCurrentChanged(widget);
     }
-
 
     // Emit the widget added signal.
     this._widgetAdded.emit(widget);
@@ -360,11 +360,10 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * Handle the current change event.
    *
    * #### Notes
-   * The default implementation is a no-op. This may be reimplemented by
-   * subclasses to customize the behavior.
+   * The default implementation emits the `currentChanged` signal.
    */
-  protected onCurrentChanged(): void {
-    /* This is a no-op. */
+  protected onCurrentChanged(value: T): void {
+    this._currentChanged.emit(value);
   }
 
   /**
@@ -372,12 +371,11 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    */
   private _onCurrentChanged(sender: any, args: FocusTracker.IChangedArgs<T>): void {
     // Bail if the active widget did not change.
-    if (args.newValue === this._currentWidget) {
+    if (args.newValue === this._lastCurrent) {
       return;
     }
-    this._currentWidget = args.newValue;
-    this.onCurrentChanged();
-    this._currentChanged.emit(args.newValue);
+    this._lastCurrent = args.newValue;
+    this.onCurrentChanged(args.newValue);
   }
 
   /**
@@ -395,13 +393,22 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     if (name) {
       state.remove(name);
     }
+
+    ArrayExt.removeFirstOf(this._widgets, widget);
+
+    // Handle a current changed.
+    if (widget === this._lastCurrent) {
+      let current = this._lastCurrent = this.currentWidget;
+      this.onCurrentChanged(current);
+    }
   }
 
   private _restore: InstanceTracker.IRestoreOptions<T> = null;
   private _tracker = new FocusTracker<T>();
   private _currentChanged = new Signal<this, T>(this);
   private _widgetAdded = new Signal<this, T>(this);
-  private _currentWidget: T | null = null;
+  private _widgets: T[] = [];
+  private _lastCurrent: T | null = null;
 }
 
 
