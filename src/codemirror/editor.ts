@@ -580,23 +580,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       return;
     }
     this._changeGuard = true;
-    let doc = this.doc;
-    switch (args.type) {
-    case 'insert':
-      let pos = doc.posFromIndex(args.start);
-      doc.replaceRange(args.value, pos, pos);
-      break;
-    case 'remove':
-      let from = doc.posFromIndex(args.start);
-      let to = doc.posFromIndex(args.end);
-      doc.replaceRange('', from, to);
-      break;
-    case 'set':
-      doc.setValue(args.value);
-      break;
-    default:
-      break;
-    }
+    this.doc.setValue(this._model.value.text);
     this._changeGuard = false;
   }
 
@@ -608,19 +592,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       return;
     }
     this._changeGuard = true;
-
-    let value = this._model.value;
-    let start = doc.indexFromPos(change.from);
-    let inserted = change.text.join('\n');
-    let removed = change.removed.join('\n');
-
-    if (removed) {
-      value.remove(start, start + removed.length);
-    }
-    if (inserted) {
-      value.insert(start, inserted);
-    }
-
+    this._model.value.text = this.doc.getValue();
     this._changeGuard = false;
   }
 
