@@ -160,11 +160,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * widget if no widget has taken focus.
    */
   get currentWidget(): T | null{
-    return (
-      this._tracker.currentWidget ||
-      this._widgets[this._widgets.length - 1] ||
-      null
-    );
+    return this._currentWidget;
   }
 
   /**
@@ -217,7 +213,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
 
     // If there is no focused widget, set this as the current widget.
     if (!this._tracker.currentWidget) {
-      this._lastCurrent = widget;
+      this._currentWidget = widget;
       this.onCurrentChanged(widget);
     }
 
@@ -378,7 +374,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     if (args.newValue === this._lastCurrent) {
       return;
     }
-    this._lastCurrent = args.newValue;
+    this._currentWidget = args.newValue;
     this.onCurrentChanged(args.newValue);
   }
 
@@ -395,9 +391,13 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     ArrayExt.removeFirstOf(this._widgets, widget);
 
     // Handle a current changed.
-    if (widget === this._lastCurrent) {
-      let current = this._lastCurrent = this.currentWidget;
-      this.onCurrentChanged(current);
+    if (widget === this._currentWidget) {
+      this._currentWidget = (
+        this._tracker.currentWidget ||
+        this._widgets[this._widgets.length - 1] ||
+        null
+      );
+      this.onCurrentChanged(this._currentWidget);
     }
 
     if (!this._restore) {
@@ -417,7 +417,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   private _currentChanged = new Signal<this, T>(this);
   private _widgetAdded = new Signal<this, T>(this);
   private _widgets: T[] = [];
-  private _lastCurrent: T | null = null;
+  private _currentWidget: T | null = null;
 }
 
 
