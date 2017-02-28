@@ -375,7 +375,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     }
     this._currentWidget = args.newValue;
     this.onCurrentChanged(args.newValue);
-    this._currentChanged.emit(value);
+    this._currentChanged.emit(args.newValue);
   }
 
   /**
