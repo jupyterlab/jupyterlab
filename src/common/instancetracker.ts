@@ -215,6 +215,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     if (!this._tracker.currentWidget) {
       this._currentWidget = widget;
       this.onCurrentChanged(widget);
+      this._currentChanged.emit(value);
     }
 
     // Emit the widget added signal.
@@ -360,10 +361,10 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * Handle the current change event.
    *
    * #### Notes
-   * The default implementation emits the `currentChanged` signal.
+   * The default implementation is a no-op.
    */
   protected onCurrentChanged(value: T): void {
-    this._currentChanged.emit(value);
+
   }
 
   /**
@@ -376,6 +377,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     }
     this._currentWidget = args.newValue;
     this.onCurrentChanged(args.newValue);
+    this._currentChanged.emit(value);
   }
 
   /**
@@ -397,6 +399,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
         this._widgets[this._widgets.length - 1] ||
         null
       );
+      this._currentChanged.emit(value);
       this.onCurrentChanged(this._currentWidget);
     }
 

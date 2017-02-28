@@ -124,9 +124,6 @@ class NotebookTracker extends InstanceTracker<NotebookPanel> implements INoteboo
     }
     this._activeCell = activeCell;
 
-    // Call the base method to emit the changed signal.
-    super.onCurrentChanged(widget);
-
     if (!widget) {
       return;
     }
