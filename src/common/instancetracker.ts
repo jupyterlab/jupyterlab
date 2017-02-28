@@ -371,7 +371,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    */
   private _onCurrentChanged(sender: any, args: FocusTracker.IChangedArgs<T>): void {
     // Bail if the active widget did not change.
-    if (args.newValue === this._lastCurrent) {
+    if (args.newValue === this._currentWidget) {
       return;
     }
     this._currentWidget = args.newValue;
