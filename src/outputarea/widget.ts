@@ -260,7 +260,7 @@ class OutputAreaWidget extends Widget {
   /**
    * Follow changes on the model state.
    */
-  protected onModelChanged(sender: IOutputAreaModel, args: OutputAreaModel.ChangedArgs) {
+  protected onModelChanged(sender: IOutputAreaModel, args: IOutputAreaModel.ChangedArgs): void {
     switch (args.type) {
     case 'add':
       this._insertOutput(args.newIndex, args.newValues[0]);
@@ -783,7 +783,7 @@ interface IOutputAreaModel extends IDisposable {
   /**
    * A signal emitted when the model changes.
    */
-  readonly changed: ISignal<IOutputAreaModel, ObservableVector.IChangedArgs<IOutputModel>>;
+  readonly changed: ISignal<IOutputAreaModel, IOutputAreaModel.ChangedArgs>;
 
   /**
    * The length of the items in the model.
@@ -863,6 +863,12 @@ namespace IOutputAreaModel {
      */
     contentFactory?: IContentFactory;
   }
+
+  /**
+   * A type alias for changed args.
+   */
+  export
+  type ChangedArgs = ObservableVector.IChangedArgs<IOutputModel>;
 
   /**
    * The interface for an output content factory.

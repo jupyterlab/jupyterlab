@@ -56,7 +56,7 @@ class OutputAreaModel implements IOutputAreaModel {
   /**
    * A signal emitted when the model changes.
    */
-  get changed(): ISignal<this, OutputAreaModel.ChangedArgs> {
+  get changed(): ISignal<this, IOutputAreaModel.ChangedArgs> {
     return this._changed;
   }
 
@@ -253,7 +253,7 @@ class OutputAreaModel implements IOutputAreaModel {
   private _trusted = false;
   private _isDisposed = false;
   private _stateChanged = new Signal<IOutputAreaModel, void>(this);
-  private _changed = new Signal<this, OutputAreaModel.ChangedArgs>(this);
+  private _changed = new Signal<this, IOutputAreaModel.ChangedArgs>(this);
 }
 
 
@@ -262,12 +262,6 @@ class OutputAreaModel implements IOutputAreaModel {
  */
 export
 namespace OutputAreaModel {
-  /**
-   * A type alias for changed args.
-   */
-  export
-  type ChangedArgs = ObservableVector.IChangedArgs<IOutputModel>;
-
   /**
    * The default implementation of a `IModelOutputFactory`.
    */
