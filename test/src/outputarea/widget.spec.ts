@@ -16,7 +16,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  OutputAreaModel, OutputAreaWidget
+  IOutputAreaModel, OutputAreaModel, OutputAreaWidget
 } from '../../../lib/outputarea';
 
 import {
@@ -37,6 +37,11 @@ class LogOutputAreaWidget extends OutputAreaWidget {
   protected onUpdateRequest(msg: Message): void {
     super.onUpdateRequest(msg);
     this.methods.push('onUpdateRequest');
+  }
+
+  protected onModelChanged(sender: IOutputAreaModel, args: IOutputAreaModel.ChangedArgs) {
+    super.onModelChanged(sender, args);
+    this.methods.push('onModelChanged');
   }
 }
 
@@ -210,6 +215,35 @@ describe('outputarea/widget', () => {
           expect(widget.hasClass('jp-mod-collapsed')).to.be(true);
           done();
         });
+      });
+
+    });
+
+    describe('#onModelChanged()', () => {
+
+      it('should handle an added output', () => {
+        widget.model.clear();
+        widget.methods = [];
+        widget.model.add(DEFAULT_OUTPUTS[0]);
+        expect(widget.methods).to.contain('onModelChanged');
+        expect(widget.widgets.length).to.be(1);
+      });
+
+      it('should handle a clear', () => {
+        widget.model.fromJSON(DEFAULT_OUTPUTS);
+        widget.methods = [];
+        widget.model.clear();
+        expect(widget.methods).to.contain('onModelChanged');
+        expect(widget.widgets.length).to.be(0);
+      });
+
+      it('should handle a set', () => {
+        widget.model.clear();
+        widget.model.add(DEFAULT_OUTPUTS[0]);
+        widget.methods = [];
+        widget.model.add(DEFAULT_OUTPUTS[0]);
+        expect(widget.methods).to.contain('onModelChanged');
+        expect(widget.widgets.length).to.be(1);
       });
 
     });
