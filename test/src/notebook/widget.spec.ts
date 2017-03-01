@@ -904,7 +904,7 @@ describe('notebook/notebook/widget', () => {
           expect(child.rendered).to.be(true);
           expect(widget.mode).to.be('command');
           simulate(child.node, 'dblclick');
-          expect(widget.mode).to.be('edit');
+          expect(widget.mode).to.be('command');
           expect(child.rendered).to.be(false);
         });
 

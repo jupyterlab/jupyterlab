@@ -144,7 +144,7 @@ class CompletionHandler implements IDisposable {
    */
   protected getState(position: CodeEditor.IPosition): CompleterWidget.ITextState {
     let editor = this.editor;
-    let coords = editor.getCoordinate(position) as CompleterWidget.ICoordinate;
+    let coords = editor.getCoordinateForPosition(position) as CompleterWidget.ICoordinate;
     return {
       text: editor.model.value.text,
       lineHeight: editor.lineHeight,

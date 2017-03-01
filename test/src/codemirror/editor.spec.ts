@@ -44,6 +44,7 @@ describe('CodeMirrorEditor', () => {
 
   beforeEach(() => {
     host = document.createElement('div');
+    host.style.height = '200px';
     document.body.appendChild(host);
     model = new CodeEditor.Model();
     editor = new LogEditorWidget({ host, model }, {});
@@ -384,11 +385,23 @@ describe('CodeMirrorEditor', () => {
 
   });
 
-  describe('#getCoordinate()', () => {
+  describe('#getCoordinateForPosition()', () => {
 
     it('should get the window coordinates given a cursor position', () => {
-      let coord = editor.getCoordinate({ line: 10, column: 1 });
+      model.value.text = TEXT;
+      let coord = editor.getCoordinateForPosition({ line: 10, column: 1 });
       expect(coord.left).to.be.above(0);
+    });
+
+  });
+
+  describe('#getPositionForCoordinate()', () => {
+
+    it('should get the window coordinates given a cursor position', () => {
+      model.value.text = TEXT;
+      let pos = { line: 10, column: 1 };
+      let coord = editor.getCoordinateForPosition(pos);
+      expect(editor.getPositionForCoordinate(coord)).to.eql(pos);
     });
 
   });
@@ -396,10 +409,11 @@ describe('CodeMirrorEditor', () => {
   describe('#getCursorPosition()', () => {
 
     it('should get the primary position of the cursor', () => {
+      model.value.text = TEXT;
       let pos = editor.getCursorPosition();
       expect(pos.line).to.be(0);
       expect(pos.column).to.be(0);
-      model.value.text = TEXT;
+
       editor.setCursorPosition({ line: 12, column: 3 });
       pos = editor.getCursorPosition();
       expect(pos.line).to.be(12);

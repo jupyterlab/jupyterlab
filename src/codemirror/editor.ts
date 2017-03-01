@@ -348,8 +348,20 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Get the window coordinates given a cursor position.
    */
-  getCoordinate(position: CodeEditor.IPosition): CodeEditor.ICoordinate {
+  getCoordinateForPosition(position: CodeEditor.IPosition): CodeEditor.ICoordinate {
     return this.editor.charCoords(this._toCodeMirrorPosition(position), 'page');
+  }
+
+  /**
+   * Get the cursor position given window coordinates.
+   *
+   * @param coordinate - The desired coordinate.
+   *
+   * @returns The position of the coordinates, or null if not
+   *   contained in the editor.
+   */
+  getPositionForCoordinate(coordinate: CodeEditor.ICoordinate): CodeEditor.IPosition | null {
+    return this._toPosition(this.editor.coordsChar(coordinate)) || null;
   }
 
   /**

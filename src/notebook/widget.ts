@@ -1373,7 +1373,8 @@ class Notebook extends StaticNotebook {
     }
     this.activeCellIndex = i;
     if (model.cells.at(i).type === 'markdown') {
-      this.mode = 'edit';
+      let widget = this.widgets[i] as MarkdownCellWidget;
+      widget.rendered = false;
     } else if (target.localName === 'img') {
       target.classList.toggle(UNCONFINED_CLASS);
     }
