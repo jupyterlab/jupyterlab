@@ -18,7 +18,7 @@ import {
 } from '../notebook';
 
 import {
-  CommandIDs, COMPLETABLE_CLASS, COMPLETER_ACTIVE_CLASS, CompleterModel,
+  CommandIDs, COMPLETER_ACTIVE_CLASS, CompleterModel,
   CompleterWidget, CompletionHandler, ICompletionManager
 } from './';
 
