@@ -27,3 +27,19 @@ const editorServices: IEditorServices = {
   factoryService: new CodeMirrorEditorFactory(),
   mimeTypeService: new CodeMirrorMimeTypeService()
 };
+
+
+/**
+ * The command IDs used by the codemirro plugin.
+ */
+export
+namespace CommandIDs {
+  export
+  const matchBrackets = 'codemirror:match-brackets';
+
+  export
+  const vimMode = 'codemirror:vim-mode';
+
+  export
+  const changeTheme = 'codemirror:change-theme';
+};

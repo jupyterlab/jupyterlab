@@ -31,7 +31,7 @@ import {
 } from '../mainmenu';
 
 import {
-  editorServices, CodeMirrorEditor
+  editorServices, CodeMirrorEditor, CommandIDs
 } from '.';
 
 
@@ -63,22 +63,6 @@ const commandsPlugin: JupyterLabPlugin<void> = {
  */
 const plugins: JupyterLabPlugin<any>[] = [commandsPlugin, servicesPlugin];
 export default plugins;
-
-
-/**
- * The command IDs used by the editor plugin.
- */
-export
-namespace CommandIDs {
-  export
-  const matchBrackets = 'editor:match-brackets';
-
-  export
-  const vimMode = 'editor:vim-mode';
-
-  export
-  const changeTheme = 'editor:change-theme';
-};
 
 
 /**
