@@ -57,8 +57,8 @@ class TestCompletionHandler extends CompletionHandler {
     return promise;
   }
 
-  onReply(pending: number, request: CompleterWidget.ITextState, msg: KernelMessage.ICompleteReplyMsg): void {
-    super.onReply(pending, request, msg);
+  onReply(state: CompleterWidget.ITextState, reply: KernelMessage.ICompleteReplyMsg): void {
+    super.onReply(state, reply);
     this.methods.push('onReply');
   }
 
@@ -249,25 +249,6 @@ describe('completer/handler', () => {
 
     describe('#onReply()', () => {
 
-      it('should do nothing if handler has been disposed', () => {
-        let completer = new CompleterWidget();
-        let handler = new TestCompletionHandler({ completer });
-        completer.model = new CompleterModel();
-        completer.model.setOptions(['foo', 'bar', 'baz']);
-        handler.dispose();
-        handler.onReply(0, null, null);
-        expect(completer.model).to.be.ok();
-      });
-
-      it('should do nothing if pending request ID does not match', () => {
-        let completer = new CompleterWidget();
-        let handler = new TestCompletionHandler({ completer });
-        completer.model = new CompleterModel();
-        completer.model.setOptions(['foo', 'bar', 'baz']);
-        handler.onReply(2, null, null);
-        expect(completer.model).to.be.ok();
-      });
-
       it('should reset model if status is not ok', () => {
         let completer = new CompleterWidget();
         let handler = new TestCompletionHandler({ completer });
@@ -297,7 +278,7 @@ describe('completer/handler', () => {
         completer.model = new CompleterModel();
         completer.model.setOptions(options);
         expect(toArray(completer.model.options())).to.eql(options);
-        handler.onReply(0, request, reply);
+        handler.onReply(request, reply);
         expect(toArray(completer.model.options())).to.eql([]);
       });
 
@@ -330,7 +311,7 @@ describe('completer/handler', () => {
         completer.model = new CompleterModel();
         completer.model.setOptions(options);
         expect(toArray(completer.model.options())).to.eql(options);
-        handler.onReply(0, request, reply);
+        handler.onReply(request, reply);
         expect(toArray(completer.model.options())).to.eql(reply.content.matches);
       });
 
@@ -349,22 +330,21 @@ describe('completer/handler', () => {
       });
 
       it('should call model change handler if model exists', () => {
-        // TODO: reinstate in fix for #1795
-        // let completer = new CompleterWidget({
-        //   model: new TestCompleterModel()
-        // });
-        // let handler = new TestCompletionHandler({ completer });
-        // let editor = createEditorWidget().editor;
-        // let model = completer.model as TestCompleterModel;
+        let completer = new CompleterWidget({
+          model: new TestCompleterModel()
+        });
+        let handler = new TestCompletionHandler({ completer });
+        let editor = createEditorWidget().editor;
+        let model = completer.model as TestCompleterModel;
 
-        // handler.editor = editor;
-        // expect(model.methods).to.not.contain('handleTextChange');
-        // editor.model.value.text = 'bar';
-        // editor.setCursorPosition({ line: 0, column: 2 });
-        // // This signal is emitted (again) because the cursor position that
-        // // a natural user would create need to be recreated here.
-        // (editor.model.value.changed as any).emit(void 0);
-        // expect(model.methods).to.contain('handleTextChange');
+        handler.editor = editor;
+        expect(model.methods).to.not.contain('handleTextChange');
+        editor.model.value.text = 'bar';
+        editor.setCursorPosition({ line: 0, column: 2 });
+        // This signal is emitted (again) because the cursor position that
+        // a natural user would create need to be recreated here.
+        (editor.model.value.changed as any).emit(void 0);
+        expect(model.methods).to.contain('handleTextChange');
       });
 
     });
