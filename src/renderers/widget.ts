@@ -211,7 +211,11 @@ class RenderedMarkdown extends RenderedHTMLCommon {
       this.fit();
       this._rendered = true;
       if (this.isAttached) {
-        this._urlResolved.then(() => { typeset(this.node); });
+        if (this._urlResolved) {
+          this._urlResolved.then(() => { typeset(this.node); });
+        } else {
+          typeset(this.node);
+        }
       }
     });
   }
