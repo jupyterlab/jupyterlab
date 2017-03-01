@@ -4,20 +4,12 @@
 import expect = require('expect.js');
 
 import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
-  simulate
-} from 'simulate-event';
-
-import {
   BaseCellWidget
 } from '../../../lib/cells';
 
 import {
-  NotebookTracker
-} from '../../../lib/notebook/tracker';
+  NotebookPanel, NotebookTracker
+} from '../../../lib/notebook';
 
 import {
   createNotebookContext
@@ -34,8 +26,8 @@ const NAMESPACE = 'notebook-tracker-test';
 class TestTracker extends NotebookTracker {
   methods: string[] = [];
 
-  protected onCurrentChanged(): void {
-    super.onCurrentChanged();
+  protected onCurrentChanged(widget: NotebookPanel): void {
+    super.onCurrentChanged(widget);
     this.methods.push('onCurrentChanged');
   }
 }
@@ -74,9 +66,6 @@ describe('notebook/tracker', () => {
         tracker.add(panel);
         panel.context = createNotebookContext();
         panel.notebook.model.fromJSON(DEFAULT_CONTENT);
-        expect(tracker.activeCell).to.be(null);
-        Widget.attach(panel, document.body);
-        simulate(panel.node, 'focus');
         expect(tracker.activeCell).to.be.a(BaseCellWidget);
         panel.dispose();
       });
@@ -93,9 +82,6 @@ describe('notebook/tracker', () => {
         panel.context = createNotebookContext();
         panel.notebook.model.fromJSON(DEFAULT_CONTENT);
         tracker.add(panel);
-        expect(count).to.be(0);
-        Widget.attach(panel, document.body);
-        simulate(panel.node, 'focus');
         expect(count).to.be(1);
         panel.notebook.activeCellIndex = 1;
         expect(count).to.be(2);
@@ -110,13 +96,7 @@ describe('notebook/tracker', () => {
         let tracker = new TestTracker({ namespace: NAMESPACE });
         let panel = createNotebookPanel();
         tracker.add(panel);
-        panel.context = createNotebookContext();
-        panel.notebook.model.fromJSON(DEFAULT_CONTENT);
-        expect(tracker.methods).to.not.contain('onCurrentChanged');
-        Widget.attach(panel, document.body);
-        simulate(panel.node, 'focus');
         expect(tracker.methods).to.contain('onCurrentChanged');
-        panel.dispose();
       });
 
     });

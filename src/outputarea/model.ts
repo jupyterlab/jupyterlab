@@ -103,7 +103,7 @@ class OutputAreaModel implements IOutputAreaModel {
    * Test whether the model is disposed.
    */
   get isDisposed(): boolean {
-    return this.list === null;
+    return this._isDisposed;
   }
 
   /**
@@ -113,9 +113,8 @@ class OutputAreaModel implements IOutputAreaModel {
     if (this.isDisposed) {
       return;
     }
-    let list = this.list;
-    this.list = null;
-    list.dispose();
+    this._isDisposed = true;
+    this.list.dispose();
     Signal.clearData(this);
   }
 
@@ -252,6 +251,7 @@ class OutputAreaModel implements IOutputAreaModel {
   private _lastStream: string;
   private _lastName: 'stdout' | 'stderr';
   private _trusted = false;
+  private _isDisposed = false;
   private _stateChanged = new Signal<IOutputAreaModel, void>(this);
   private _changed = new Signal<this, ObservableVector.IChangedArgs<IOutputModel>>(this);
 }

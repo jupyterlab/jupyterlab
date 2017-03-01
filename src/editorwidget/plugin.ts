@@ -105,6 +105,8 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
   });
   registry.addWidgetFactory(factory);
 
+  let { commands, shell } = app;
+
   /**
    * Toggle editor line numbers
    */
@@ -114,8 +116,8 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
       return;
     }
     widget.editor.lineNumbers = !widget.editor.lineNumbers;
-    if (args['activate'] !== false) {
-      widget.activate();
+    if ((args && args['activate']) !== false) {
+      shell.activateMain(widget.id);
     }
   }
 
@@ -128,8 +130,8 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
       return;
     }
     widget.editor.wordWrap = !widget.editor.wordWrap;
-    if (args['activate'] !== false) {
-      widget.activate();
+    if ((args && args['activate']) !== false) {
+      shell.activateMain(widget.id);
     }
   }
 
@@ -140,8 +142,6 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
     name: 'sessionId',
     create: () => ''
   });
-
-  let commands = app.commands;
 
   commands.addCommand(CommandIDs.lineNumbers, {
     execute: args => { toggleLineNums(args); },

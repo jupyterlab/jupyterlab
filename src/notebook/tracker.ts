@@ -116,7 +116,7 @@ class NotebookTracker extends InstanceTracker<NotebookPanel> implements INoteboo
   /**
    * Handle the current change event.
    */
-  protected onCurrentChanged(): void {
+  protected onCurrentChanged(widget: NotebookPanel): void {
     // Store an internal reference to active cell to prevent false positives.
     let activeCell = this.activeCell;
     if (activeCell && activeCell === this._activeCell) {
@@ -124,7 +124,6 @@ class NotebookTracker extends InstanceTracker<NotebookPanel> implements INoteboo
     }
     this._activeCell = activeCell;
 
-    let widget = this.currentWidget;
     if (!widget) {
       return;
     }
