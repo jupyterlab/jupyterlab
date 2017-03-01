@@ -169,7 +169,11 @@ class RenderedHTML extends RenderedHTMLCommon {
    * A message handler invoked on an `'after-attach'` message.
    */
   onAfterAttach(msg: Message): void {
-    this._urlResolved.then( () => { typeset(this.node); });
+    if (this._urlResolved) {
+      this._urlResolved.then( () => { typeset(this.node); });
+    } else {
+      typeset(this.node);
+    }
   }
 
   private _urlResolved: Promise<void> = null;
@@ -207,7 +211,11 @@ class RenderedMarkdown extends RenderedHTMLCommon {
       this.fit();
       this._rendered = true;
       if (this.isAttached) {
-        this._urlResolved.then(() => { typeset(this.node); });
+        if (this._urlResolved) {
+          this._urlResolved.then(() => { typeset(this.node); });
+        } else {
+          typeset(this.node);
+        }
       }
     });
   }
