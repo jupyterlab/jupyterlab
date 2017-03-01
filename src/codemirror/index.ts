@@ -30,7 +30,7 @@ const editorServices: IEditorServices = {
 
 
 /**
- * The command IDs used by the codemirro plugin.
+ * The command IDs used by the codemirror plugin.
  */
 export
 namespace CommandIDs {
