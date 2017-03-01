@@ -219,7 +219,7 @@ class ObservableMap<T> implements IObservableMap<T> {
       }
       // Bail if the value does not change.
       let itemCmp = this._itemCmp;
-      if (itemCmp(oldVal, value)) {
+      if (oldVal !== undefined && itemCmp(oldVal, value)) {
         return;
       }
       this._map.set(key, value);
