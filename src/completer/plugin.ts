@@ -18,8 +18,8 @@ import {
 } from '../notebook';
 
 import {
-  CommandIDs, CompleterModel, CompleterWidget, CompletionHandler,
-  ICompletionManager
+  CommandIDs, COMPLETER_ACTIVE_CLASS, CompleterModel,
+  CompleterWidget, CompletionHandler, ICompletionManager
 } from './';
 
 
@@ -35,7 +35,7 @@ const service: JupyterLabPlugin<ICompletionManager> = {
 
     app.commands.addCommand(CommandIDs.invoke, {
       execute: args => {
-        let id = args['id'] as string;
+        let id = args && (args['id'] as string);
         if (!id) {
           return;
         }
@@ -43,6 +43,20 @@ const service: JupyterLabPlugin<ICompletionManager> = {
         const handler = handlers[id];
         if (handler) {
           handler.invoke();
+        }
+      }
+    });
+
+    app.commands.addCommand(CommandIDs.select, {
+      execute: args => {
+        let id = args && (args['id'] as string);
+        if (!id) {
+          return;
+        }
+
+        const handler = handlers[id];
+        if (handler) {
+          handler.completer.selectActive();
         }
       }
     });
@@ -107,7 +121,7 @@ const consolePlugin: JupyterLabPlugin<void> = {
       });
     });
 
-    // Add console completer command.
+    // Add console completer invoke command.
     app.commands.addCommand(CommandIDs.invokeConsole, {
       execute: () => {
         const id = consoles.currentWidget && consoles.currentWidget.id;
@@ -116,6 +130,24 @@ const consolePlugin: JupyterLabPlugin<void> = {
         }
         return app.commands.execute(CommandIDs.invoke, { id });
       }
+    });
+
+    // Add console completer select command.
+    app.commands.addCommand(CommandIDs.selectConsole, {
+      execute: () => {
+        const id = consoles.currentWidget && consoles.currentWidget.id;
+        if (!id) {
+          return;
+        }
+        return app.commands.execute(CommandIDs.select, { id });
+      }
+    });
+
+    // Set enter key for console completer select command.
+    app.commands.addKeyBinding({
+      command: CommandIDs.selectConsole,
+      keys: ['Enter'],
+      selector: `.jp-ConsolePanel .${COMPLETER_ACTIVE_CLASS}`
     });
   }
 };
@@ -154,6 +186,24 @@ const notebookPlugin: JupyterLabPlugin<void> = {
         const id = notebooks.currentWidget && notebooks.currentWidget.id;
         return app.commands.execute(CommandIDs.invoke, { id });
       }
+    });
+
+    // Add notebook completer select command.
+    app.commands.addCommand(CommandIDs.selectNotebook, {
+      execute: () => {
+        const id = notebooks.currentWidget && notebooks.currentWidget.id;
+        if (!id) {
+          return;
+        }
+        return app.commands.execute(CommandIDs.select, { id });
+      }
+    });
+
+    // Set enter key for notebook completer select command.
+    app.commands.addKeyBinding({
+      command: CommandIDs.selectNotebook,
+      keys: ['Enter'],
+      selector: `.jp-Notebook .${COMPLETER_ACTIVE_CLASS}`
     });
   }
 };

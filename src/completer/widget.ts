@@ -169,7 +169,7 @@ class CompleterWidget extends Widget {
   reset(): void {
     this._reset();
     if (this._model) {
-      this._model.reset();
+      this._model.reset(true);
     }
   }
 
@@ -200,6 +200,19 @@ class CompleterWidget extends Widget {
     default:
       break;
     }
+  }
+
+  /**
+   * Emit the selected signal for the current active item and reset.
+   */
+  selectActive(): void {
+    let active = this.node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
+    if (!active) {
+      this.reset();
+      return;
+    }
+    this._selected.emit(active.getAttribute('data-value'));
+    this.reset();
   }
 
   /**
@@ -245,7 +258,7 @@ class CompleterWidget extends Widget {
 
     // If there are no items, reset and bail.
     if (!items || !items.length) {
-      this._reset();
+      this.reset();
       if (!this.isHidden) {
         this.hide();
         this._visibilityChanged.emit(void 0);
@@ -285,8 +298,12 @@ class CompleterWidget extends Widget {
     // If this is the first time the current completer session has loaded,
     // populate any initial subset match.
     if (this._model.subsetMatch) {
-      this._populateSubset();
+      let populated = this._populateSubset();
       this.model.subsetMatch = false;
+      if (populated) {
+        this.update();
+        return;
+      }
     }
   }
 
@@ -330,13 +347,7 @@ class CompleterWidget extends Widget {
         if (populated) {
           return;
         }
-        this._selectActive();
-        return;
-      case 13: // Enter key
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation();
-        this._selectActive();
+        this.selectActive();
         return;
       case 27: // Esc key
         event.preventDefault();
@@ -413,7 +424,6 @@ class CompleterWidget extends Widget {
     if (subset && subset !== query && subset.indexOf(query) === 0) {
       this.model.query = subset;
       this._selected.emit(subset);
-      this.update();
       return true;
     }
     return false;
@@ -452,19 +462,6 @@ class CompleterWidget extends Widget {
       maxHeight: MAX_HEIGHT,
       minHeight: MIN_HEIGHT
     });
-  }
-
-  /**
-   * Emit the selected signal for the current active item and reset.
-   */
-  private _selectActive(): void {
-    let active = this.node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
-    if (!active) {
-      this._reset();
-      return;
-    }
-    this._selected.emit(active.getAttribute('data-value'));
-    this.reset();
   }
 
   private _anchor: Widget | null = null;
@@ -511,7 +508,7 @@ namespace CompleterWidget {
 
 
   /**
-   * An interface for a completion request.
+   * An interface for a completion request reflecting the state of the editor.
    */
   export
   interface ITextState extends JSONObject {
@@ -607,9 +604,11 @@ namespace CompleterWidget {
     createPatch(patch: string): IPatch;
 
     /**
-     * Reset the state of the model.
+     * Reset the state of the model and emit a state change signal.
+     *
+     * @param hard - Reset even if a subset match is in progress.
      */
-    reset(): void;
+    reset(hard?: boolean): void;
   }
 
   /**

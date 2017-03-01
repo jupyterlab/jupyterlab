@@ -76,6 +76,7 @@ class CompleterModel implements CompleterWidget.IModel {
     if (!this.original) {
       return;
     }
+
     // Cursor must always be set before a text change. This happens
     // automatically in the completer handler, but since `current` is a public
     // attribute, this defensive check is necessary.
@@ -207,9 +208,10 @@ class CompleterModel implements CompleterWidget.IModel {
     // When the completer detects a common subset prefix for all options,
     // it updates the model and sets the model source to that value, but this
     // text change should be ignored.
-    if (this.subsetMatch) {
+    if (this._subsetMatch) {
       return;
     }
+
     let { text, column } = request;
 
     // If last character entered is not whitespace, update completion.
@@ -247,8 +249,17 @@ class CompleterModel implements CompleterWidget.IModel {
 
   /**
    * Reset the state of the model and emit a state change signal.
+   *
+   * @param hard - Reset even if a subset match is in progress.
    */
-  reset() {
+  reset(hard = false) {
+    // When the completer detects a common subset prefix for all options,
+    // it updates the model and sets the model source to that value, triggering
+    // a reset. Unless explicitly a hard reset, this should be ignored.
+    if (!hard && this._subsetMatch) {
+      return;
+    }
+    this._subsetMatch = false;
     this._reset();
     this._stateChanged.emit(void 0);
   }
