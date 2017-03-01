@@ -260,7 +260,7 @@ class OutputAreaWidget extends Widget {
   /**
    * Follow changes on the model state.
    */
-  protected onModelChanged(sender: IOutputAreaModel, args: ObservableVector.IChangedArgs<IOutputModel>) {
+  protected onModelChanged(sender: IOutputAreaModel, args: OutputAreaModel.ChangedArgs) {
     switch (args.type) {
     case 'add':
       this._insertOutput(args.newIndex, args.newValues[0]);
