@@ -363,7 +363,6 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
         specs: manager.specs,
         sessions: manager.running(),
         preferredLanguage: args.preferredLanguage || '',
-        host: document.body
       };
       return selectKernel(options);
     });
@@ -447,7 +446,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
           sessions: manager.running(),
           preferredLanguage: lang,
           kernel: session.kernel.model,
-          host: widget.parent.node
+          host: widget
         };
         return selectKernel(options);
       }).then((kernelId: Kernel.IModel) => {

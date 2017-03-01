@@ -51,7 +51,7 @@ const TOOLBAR_BUSY_CLASS = 'jp-mod-busy';
  * A kernel owner interface.
  */
 export
-interface IKernelOwner {
+interface IKernelOwner extends Widget {
   /**
    * An associated kernel.
    */
@@ -84,11 +84,14 @@ function createInterruptButton(kernelOwner: IKernelOwner): ToolbarButton {
  * Create a restart toolbar item.
  */
 export
-function createRestartButton(kernelOwner: IKernelOwner, host?: HTMLElement): ToolbarButton {
+function createRestartButton(kernelOwner: IKernelOwner): ToolbarButton {
   return new ToolbarButton({
     className: TOOLBAR_RESTART_CLASS,
     onClick: () => {
-      restartKernel(kernelOwner.kernel, host);
+      if (!kernelOwner.kernel) {
+        return;
+      }
+      restartKernel(kernelOwner.kernel, kernelOwner);
     },
     tooltip: 'Restart the kernel'
   });

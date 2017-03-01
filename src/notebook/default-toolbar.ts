@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  Message
+} from '@phosphor/messaging';
+
+import {
   Widget
 } from '@phosphor/widgets';
 
@@ -104,7 +108,9 @@ namespace ToolbarItems {
   function createInsertButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
       className: TOOLBAR_INSERT_CLASS,
-      onClick: () => { NotebookActions.insertBelow(panel.notebook); },
+      onClick: () => {
+        NotebookActions.insertBelow(panel.notebook);
+      },
       tooltip: 'Insert a cell below'
     });
   }
@@ -194,7 +200,7 @@ namespace ToolbarItems {
     toolbar.addItem('paste', createPasteButton(panel));
     toolbar.addItem('run', createRunButton(panel));
     toolbar.addItem('interrupt', createInterruptButton(panel));
-    toolbar.addItem('restart', createRestartButton(panel, panel.node));
+    toolbar.addItem('restart', createRestartButton(panel));
     toolbar.addItem('cellType', createCellTypeItem(panel));
     toolbar.addItem('kernelName', createKernelNameItem(panel));
     toolbar.addItem('kernelStatus', createKernelStatusItem(panel));
@@ -213,22 +219,10 @@ class CellTypeSwitcher extends Widget {
     super({ node: createCellTypeSwitcherNode() });
     this.addClass(TOOLBAR_CELLTYPE_CLASS);
 
-    let select = this._select = this.node.firstChild as HTMLSelectElement;
+    this._select = this.node.firstChild as HTMLSelectElement;
     this._wildCard = document.createElement('option');
     this._wildCard.value = '-';
     this._wildCard.textContent = '-';
-
-    // Change current cell type on a change in the dropdown.
-    select.addEventListener('change', event => {
-      if (select.value === '-') {
-        return;
-      }
-      if (!this._changeGuard) {
-        let value = select.value as nbformat.CellType;
-        NotebookActions.changeCellType(widget, value);
-      }
-    });
-
     this._notebook = widget;
 
     // Set the initial value.
@@ -241,6 +235,70 @@ class CellTypeSwitcher extends Widget {
 
     // Follow a change in the selection.
     widget.selectionChanged.connect(this._updateValue, this);
+  }
+
+  /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the dock panel's node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+    case 'change':
+      this._evtChange(event);
+      break;
+    case 'keydown':
+      this._evtKeyDown(event as KeyboardEvent);
+      break;
+    default:
+      break;
+    }
+  }
+
+  /**
+   * Handle `after-attach` messages for the widget.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this._select.addEventListener('change', this);
+    this._select.addEventListener('keydown', this);
+  }
+
+  /**
+   * Handle `before_detach` messages for the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this._select.removeEventListener('change', this);
+    this._select.removeEventListener('keydown', this);
+  }
+
+  /**
+   * Handle `changed` events for the widget.
+   */
+  private _evtChange(event: Event): void {
+    let select = this._select;
+    let widget = this._notebook;
+    if (select.value === '-') {
+      return;
+    }
+    if (!this._changeGuard) {
+      let value = select.value as nbformat.CellType;
+      NotebookActions.changeCellType(widget, value);
+      widget.activate();
+    }
+  }
+
+  /**
+   * Handle `keydown` events for the widget.
+   */
+  private _evtKeyDown(event: KeyboardEvent): void {
+    if (event.keyCode === 13) {  // Enter
+      this._notebook.activate();
+    }
   }
 
   /**

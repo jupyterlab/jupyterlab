@@ -57,6 +57,7 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
+    let state = Private.getState(widget);
     widget.deselectAll();
     let nbModel = widget.model;
     let index = widget.activeCellIndex;
@@ -83,8 +84,7 @@ namespace NotebookActions {
     cells.endCompoundOperation();
 
     widget.activeCellIndex++;
-    widget.scrollToActiveCell();
-    widget.activate();
+    Private.handleState(widget, state);
   }
 
   /**
@@ -105,6 +105,7 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
+    let state = Private.getState(widget);
     let toMerge: string[] = [];
     let toDelete: ICellModel[] = [];
     let model = widget.model;
@@ -163,6 +164,7 @@ namespace NotebookActions {
     }
 
     widget.activeCellIndex -= offset;
+    Private.handleState(widget, state);
   }
 
   /**
@@ -180,40 +182,9 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
-    let model = widget.model;
-    let cells = model.cells;
-    let toDelete: number[] = [];
-    widget.mode = 'command';
-
-    // Find the cells to delete.
-    each(widget.widgets, (child, i) => {
-      let deletable = child.model.metadata.get('deletable');
-      if (widget.isSelected(child) && deletable !== false) {
-        toDelete.push(i);
-      }
-    });
-
-    // If cells are not deletable, we may not have anything to delete.
-    if (toDelete.length > 0) {
-      // Delete the cells as one undo event.
-      cells.beginCompoundOperation();
-      each(toDelete.reverse(), i => {
-        cells.removeAt(i);
-      });
-      // The model will add a new code cell if there are no
-      // remaining cells.
-      model.cells.endCompoundOperation();
-
-      // Select the *first* interior cell not deleted or the cell
-      // *after* the last selected cell.
-      // Note: The activeCellIndex is clamped to the available cells,
-      // so if the last cell is deleted the previous cell will be activated.
-      widget.activeCellIndex = toDelete[0];
-    }
-
-    // Deselect any remaining, undeletable cells. Do this even if we don't
-    // delete anything so that users are aware *something* happened.
-    widget.deselectAll();
+    let state = Private.getState(widget);
+    Private.deleteCells(widget);
+    Private.handleState(widget, state);
   }
 
   /**
@@ -232,10 +203,12 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
+    let state = Private.getState(widget);
     let model = widget.model;
     let cell = model.contentFactory.createCodeCell({ });
     model.cells.insert(widget.activeCellIndex, cell);
     widget.deselectAll();
+    Private.handleState(widget, state);
   }
 
   /**
@@ -254,11 +227,13 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
+    let state = Private.getState(widget);
     let model = widget.model;
     let cell = model.contentFactory.createCodeCell({});
     model.cells.insert(widget.activeCellIndex + 1, cell);
     widget.activeCellIndex++;
     widget.deselectAll();
+    Private.handleState(widget, state);
   }
 
   /**
@@ -271,6 +246,7 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
+    let state = Private.getState(widget);
     let cells = widget.model.cells;
     let widgets = widget.widgets;
     cells.beginCompoundOperation();
@@ -287,6 +263,7 @@ namespace NotebookActions {
       }
     }
     cells.endCompoundOperation();
+    Private.handleState(widget, state);
   }
 
   /**
@@ -299,6 +276,7 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
+    let state = Private.getState(widget);
     let cells = widget.model.cells;
     let widgets = widget.widgets;
     cells.beginCompoundOperation();
@@ -315,6 +293,7 @@ namespace NotebookActions {
       }
     }
     cells.endCompoundOperation();
+    Private.handleState(widget, state);
   }
 
   /**
@@ -335,37 +314,9 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
-    let model = widget.model;
-    let cells = model.cells;
-
-    cells.beginCompoundOperation();
-    each(widget.widgets, (child, i) => {
-      if (!widget.isSelected(child)) {
-        return;
-      }
-      if (child.model.type !== value) {
-        let cell: nbformat.IBaseCell = child.model.toJSON();
-        let newCell: ICellModel;
-        switch (value) {
-        case 'code':
-          newCell = model.contentFactory.createCodeCell({ cell });
-          break;
-        case 'markdown':
-          newCell = model.contentFactory.createMarkdownCell({ cell });
-          break;
-        default:
-          newCell = model.contentFactory.createRawCell({ cell });
-        }
-        cells.set(i, newCell);
-      }
-      if (value === 'markdown') {
-        // Fetch the new widget and unrender it.
-        child = widget.widgets[i];
-        (child as MarkdownCellWidget).rendered = false;
-      }
-    });
-    cells.endCompoundOperation();
-    widget.deselectAll();
+    let state = Private.getState(widget);
+    Private.changeCellType(widget, value);
+    Private.handleState(widget, state);
   }
 
   /**
@@ -386,37 +337,10 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return Promise.resolve(false);
     }
-    widget.mode = 'command';
-    let selected: BaseCellWidget[] = [];
-    let lastIndex = widget.activeCellIndex;
-    let i = 0;
-    each(widget.widgets, child => {
-      if (widget.isSelected(child)) {
-        selected.push(child);
-        lastIndex = i;
-      }
-      i++;
-    });
-    widget.activeCellIndex = lastIndex;
-    widget.deselectAll();
-
-    let promises: Promise<boolean>[] = [];
-    each(selected, child => {
-      promises.push(Private.runCell(widget, child, kernel));
-    });
-    return Promise.all(promises).then(results => {
-      if (widget.isDisposed) {
-        return false;
-      }
-      // Post an update request.
-      widget.update();
-      for (let result of results) {
-        if (!result) {
-          return false;
-        }
-      }
-      return true;
-    });
+    let state = Private.getState(widget);
+    let promise = Private.runSelected(widget, kernel);
+    Private.handleState(widget, state);
+    return promise;
   }
 
   /**
@@ -439,7 +363,8 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return Promise.resolve(false);
     }
-    let promise = run(widget, kernel);
+    let state = Private.getState(widget);
+    let promise = Private.runSelected(widget, kernel);
     let model = widget.model;
     if (widget.activeCellIndex === widget.widgets.length - 1) {
       let cell = model.contentFactory.createCodeCell({});
@@ -449,8 +374,7 @@ namespace NotebookActions {
     } else {
       widget.activeCellIndex++;
     }
-    widget.scrollToActiveCell();
-
+    Private.handleState(widget, state);
     return promise;
   }
 
@@ -473,13 +397,14 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return Promise.resolve(false);
     }
-    let promise = run(widget, kernel);
+    let state = Private.getState(widget);
+    let promise = Private.runSelected(widget, kernel);
     let model = widget.model;
     let cell = model.contentFactory.createCodeCell({});
     model.cells.insert(widget.activeCellIndex + 1, cell);
     widget.activeCellIndex++;
-    widget.scrollToActiveCell();
     widget.mode = 'edit';
+    Private.handleState(widget, state);
     return promise;
   }
 
@@ -500,10 +425,13 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return Promise.resolve(false);
     }
+    let state = Private.getState(widget);
     each(widget.widgets, child => {
       widget.select(child);
     });
-    return run(widget, kernel);
+    let promise = Private.runSelected(widget, kernel);
+    Private.handleState(widget, state);
+    return promise;
   }
 
   /**
@@ -524,9 +452,10 @@ namespace NotebookActions {
     if (widget.activeCellIndex === 0) {
       return;
     }
+    let state = Private.getState(widget);
     widget.activeCellIndex -= 1;
-    widget.scrollToActiveCell();
     widget.deselectAll();
+    Private.handleState(widget, state);
   }
 
   /**
@@ -547,9 +476,10 @@ namespace NotebookActions {
     if (widget.activeCellIndex === widget.widgets.length - 1) {
       return;
     }
+    let state = Private.getState(widget);
     widget.activeCellIndex += 1;
-    widget.scrollToActiveCell();
     widget.deselectAll();
+    Private.handleState(widget, state);
   }
 
   /**
@@ -570,6 +500,7 @@ namespace NotebookActions {
     if (widget.activeCellIndex === 0) {
       return;
     }
+    let state = Private.getState(widget);
     widget.mode = 'command';
     let current = widget.activeCell;
     let prev = widget.widgets[widget.activeCellIndex - 1];
@@ -585,7 +516,7 @@ namespace NotebookActions {
       widget.select(current);
     }
     widget.activeCellIndex -= 1;
-    widget.scrollToActiveCell();
+    Private.handleState(widget, state);
   }
 
   /**
@@ -606,6 +537,7 @@ namespace NotebookActions {
     if (widget.activeCellIndex === widget.widgets.length - 1) {
       return;
     }
+    let state = Private.getState(widget);
     widget.mode = 'command';
     let current = widget.activeCell;
     let next = widget.widgets[widget.activeCellIndex + 1];
@@ -621,37 +553,8 @@ namespace NotebookActions {
       widget.select(current);
     }
     widget.activeCellIndex += 1;
-    widget.scrollToActiveCell();
+    Private.handleState(widget, state);
   }
-
-  /**
-   * Copy or cut the selected cell data to a clipboard.
-   *
-   * @param widget - The target notebook widget.
-   *
-   * @param clipboard - The clipboard object.
-   *
-   * @param cut - Whether to copy or cut.
-   */
-   function copyOrCut(widget: Notebook, clipboard: IClipboard, cut: boolean): void {
-     if (!widget.model || !widget.activeCell) {
-       return;
-     }
-     widget.mode = 'command';
-     clipboard.clear();
-     let data: nbformat.IBaseCell[] = [];
-     each(widget.widgets, child => {
-       if (widget.isSelected(child)) {
-         data.push(child.model.toJSON());
-       }
-     });
-     clipboard.setData(JUPYTER_CELL_MIME, data);
-     if (cut) {
-       deleteCells(widget);
-     } else {
-       widget.deselectAll();
-     }
-   }
 
   /**
    * Copy the selected cell data to a clipboard.
@@ -662,7 +565,7 @@ namespace NotebookActions {
    */
   export
   function copy(widget: Notebook, clipboard: IClipboard): void {
-    copyOrCut(widget, clipboard, false);
+    Private.copyOrCut(widget, clipboard, false);
   }
 
   /**
@@ -678,7 +581,7 @@ namespace NotebookActions {
    */
   export
   function cut(widget: Notebook, clipboard: IClipboard): void {
-    copyOrCut(widget, clipboard, true);
+    Private.copyOrCut(widget, clipboard, true);
   }
 
   /**
@@ -702,6 +605,7 @@ namespace NotebookActions {
     if (!clipboard.hasData(JUPYTER_CELL_MIME)) {
       return;
     }
+    let state = Private.getState(widget);
     let values = clipboard.getData(JUPYTER_CELL_MIME) as nbformat.IBaseCell[];
     let model = widget.model;
     let newCells: ICellModel[] = [];
@@ -731,6 +635,7 @@ namespace NotebookActions {
 
     widget.activeCellIndex += newCells.length;
     widget.deselectAll();
+    Private.handleState(widget, state);
   }
 
   /**
@@ -746,9 +651,11 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
+    let state = Private.getState(widget);
     widget.mode = 'command';
     widget.model.cells.undo();
     widget.deselectAll();
+    Private.handleState(widget, state);
   }
 
   /**
@@ -764,9 +671,11 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
+    let state = Private.getState(widget);
     widget.mode = 'command';
     widget.model.cells.redo();
     widget.deselectAll();
+    Private.handleState(widget, state);
   }
 
   /**
@@ -783,12 +692,14 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
+    let state = Private.getState(widget);
     let lineNumbers = widget.activeCell.editor.lineNumbers;
     each(widget.widgets, child => {
       if (widget.isSelected(child)) {
         child.editor.lineNumbers = !lineNumbers;
       }
     });
+    Private.handleState(widget, state);
   }
 
   /**
@@ -805,10 +716,12 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
+    let state = Private.getState(widget);
     let lineNumbers = widget.activeCell.editor.lineNumbers;
     each(widget.widgets, child => {
       child.editor.lineNumbers = !lineNumbers;
     });
+    Private.handleState(widget, state);
   }
 
   /**
@@ -824,6 +737,7 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
+    let state = Private.getState(widget);
     let cells = widget.model.cells;
     let i = 0;
     each(cells, (cell: ICodeCellModel) => {
@@ -834,6 +748,7 @@ namespace NotebookActions {
       }
       i++;
     });
+    Private.handleState(widget, state);
   }
 
   /**
@@ -849,12 +764,14 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
+    let state = Private.getState(widget);
     each(widget.model.cells, (cell: ICodeCellModel) => {
       if (cell.type === 'code') {
         cell.outputs.clear();
         cell.executionCount = null;
       }
     });
+    Private.handleState(widget, state);
   }
 
   /**
@@ -876,6 +793,7 @@ namespace NotebookActions {
     if (!widget.model || !widget.activeCell) {
       return;
     }
+    let state = Private.getState(widget);
     level = Math.min(Math.max(level, 1), 6);
     let cells = widget.model.cells;
     let i = 0;
@@ -885,7 +803,8 @@ namespace NotebookActions {
       }
       i++;
     });
-    changeCellType(widget, 'markdown');
+    Private.changeCellType(widget, 'markdown');
+    Private.handleState(widget, state);
   }
 }
 
@@ -894,6 +813,38 @@ namespace NotebookActions {
  * A namespace for private data.
  */
 namespace Private {
+  /**
+   * The interface for a widget state.
+   */
+  export
+  interface IState {
+    /**
+     * Whether the widget had focus.
+     */
+    wasFocused: boolean;
+  }
+
+  /**
+   * Get the state of a widget before running an action.
+   */
+  export
+  function getState(widget: Notebook): IState {
+    return {
+      wasFocused: widget.node.contains(document.activeElement)
+    };
+  }
+
+  /**
+   * Handle the state of a widget after running an action.
+   */
+  export
+  function handleState(widget: Notebook, state: IState): void {
+    if (state.wasFocused) {
+      widget.activate();
+    }
+    widget.scrollToActiveCell();
+  }
+
   /**
    * Clone a cell model.
    */
@@ -910,9 +861,46 @@ namespace Private {
   }
 
   /**
-   * Run a cell.
+   * Run the selected cells.
    */
   export
+  function runSelected(widget: Notebook, kernel?: Kernel.IKernel): Promise<boolean> {
+    widget.mode = 'command';
+    let selected: BaseCellWidget[] = [];
+    let lastIndex = widget.activeCellIndex;
+    let i = 0;
+    each(widget.widgets, child => {
+      if (widget.isSelected(child)) {
+        selected.push(child);
+        lastIndex = i;
+      }
+      i++;
+    });
+    widget.activeCellIndex = lastIndex;
+    widget.deselectAll();
+
+    let promises: Promise<boolean>[] = [];
+    each(selected, child => {
+      promises.push(runCell(widget, child, kernel));
+    });
+    return Promise.all(promises).then(results => {
+      if (widget.isDisposed) {
+        return false;
+      }
+      // Post an update request.
+      widget.update();
+      for (let result of results) {
+        if (!result) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }
+
+  /**
+   * Run a cell.
+   */
   function runCell(parent: Notebook, child: BaseCellWidget, kernel?: Kernel.IKernel): Promise<boolean> {
 
     switch (child.model.type) {
@@ -977,6 +965,134 @@ namespace Private {
     } else {
       cells.insert(i + 1, cell);
     }
+  }
+
+  /**
+   * Copy or cut the selected cell data to a clipboard.
+   *
+   * @param widget - The target notebook widget.
+   *
+   * @param clipboard - The clipboard object.
+   *
+   * @param cut - Whether to copy or cut.
+   */
+   export
+   function copyOrCut(widget: Notebook, clipboard: IClipboard, cut: boolean): void {
+     if (!widget.model || !widget.activeCell) {
+       return;
+     }
+     let state = getState(widget);
+     widget.mode = 'command';
+     clipboard.clear();
+     let data: nbformat.IBaseCell[] = [];
+     each(widget.widgets, child => {
+       if (widget.isSelected(child)) {
+         data.push(child.model.toJSON());
+       }
+     });
+     clipboard.setData(JUPYTER_CELL_MIME, data);
+     if (cut) {
+       deleteCells(widget);
+     } else {
+       widget.deselectAll();
+     }
+     handleState(widget, state);
+   }
+
+  /**
+   * Change the selected cell type(s).
+   *
+   * @param widget - The target notebook widget.
+   *
+   * @param value - The target cell type.
+   *
+   * #### Notes
+   * It should preserve the widget mode.
+   * This action can be undone.
+   * The existing selection will be cleared.
+   * Any cells converted to markdown will be unrendered.
+   */
+  export
+  function changeCellType(widget: Notebook, value: nbformat.CellType): void {
+    let model = widget.model;
+    let cells = model.cells;
+
+    cells.beginCompoundOperation();
+    each(widget.widgets, (child, i) => {
+      if (!widget.isSelected(child)) {
+        return;
+      }
+      if (child.model.type !== value) {
+        let cell: nbformat.IBaseCell = child.model.toJSON();
+        let newCell: ICellModel;
+        switch (value) {
+        case 'code':
+          newCell = model.contentFactory.createCodeCell({ cell });
+          break;
+        case 'markdown':
+          newCell = model.contentFactory.createMarkdownCell({ cell });
+          break;
+        default:
+          newCell = model.contentFactory.createRawCell({ cell });
+        }
+        cells.set(i, newCell);
+      }
+      if (value === 'markdown') {
+        // Fetch the new widget and unrender it.
+        child = widget.widgets[i];
+        (child as MarkdownCellWidget).rendered = false;
+      }
+    });
+    cells.endCompoundOperation();
+    widget.deselectAll();
+  }
+
+  /**
+   * Delete the selected cells.
+   *
+   * @param widget - The target notebook widget.
+   *
+   * #### Notes
+   * The cell after the last selected cell will be activated.
+   * It will add a code cell if all cells are deleted.
+   * This action can be undone.
+   */
+  export
+  function deleteCells(widget: Notebook): void {
+    let model = widget.model;
+    let cells = model.cells;
+    let toDelete: number[] = [];
+    widget.mode = 'command';
+
+    // Find the cells to delete.
+    each(widget.widgets, (child, i) => {
+      let deletable = child.model.metadata.get('deletable');
+      if (widget.isSelected(child) && deletable !== false) {
+        toDelete.push(i);
+      }
+    });
+
+    // If cells are not deletable, we may not have anything to delete.
+    if (toDelete.length > 0) {
+      // Delete the cells as one undo event.
+      cells.beginCompoundOperation();
+      each(toDelete.reverse(), i => {
+        cells.removeAt(i);
+      });
+      // The model will add a new code cell if there are no
+      // remaining cells.
+      model.cells.endCompoundOperation();
+
+      // Select the *first* interior cell not deleted or the cell
+      // *after* the last selected cell.
+      // Note: The activeCellIndex is clamped to the available cells,
+      // so if the last cell is deleted the previous cell will be activated.
+      widget.activeCellIndex = toDelete[0];
+    }
+
+    // Deselect any remaining, undeletable cells. Do this even if we don't
+    // delete anything so that users are aware *something* happened.
+    widget.deselectAll();
   }
 
   /**
