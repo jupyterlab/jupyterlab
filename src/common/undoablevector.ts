@@ -13,6 +13,9 @@ import {
   IObservableVector, ObservableVector
 } from './observablevector';
 
+import {
+  IRealtimeConverter
+} from './realtime';
 
 /**
  * An object which can be serialized to JSON.
@@ -40,6 +43,12 @@ interface IObservableUndoableVector<T extends ISerializable> extends IObservable
    * Whether the object can undo changes.
    */
   readonly canUndo: boolean;
+
+  /**
+   * A factory function that can construct
+   * objects of type T from JSON.
+   */
+  factory: (value: JSONObject)=>T;
 
   /**
    * Begin a compound operation.
@@ -79,8 +88,8 @@ class ObservableUndoableVector<T extends ISerializable> extends ObservableVector
   /**
    * Construct a new undoable observable vector.
    */
-  constructor(factory: (value: JSONObject) => T) {
-    super();
+  constructor(factory: (value: JSONObject) => T, converter?: IRealtimeConverter<T>) {
+    super({converter});
     this._factory = factory;
     this.changed.connect(this._onVectorChanged, this);
   }
@@ -97,6 +106,13 @@ class ObservableUndoableVector<T extends ISerializable> extends ObservableVector
    */
   get canUndo(): boolean {
     return this._index >= 0;
+  }
+
+  /**
+   * Get the factory object for deserialization.
+   */
+  get factory(): (value: JSONObject)=>T {
+    return this._factory;
   }
 
   /**

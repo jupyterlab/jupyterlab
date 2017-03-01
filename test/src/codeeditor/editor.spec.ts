@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  ObservableMap
+} from '../../../lib/common/observablemap';
+
+import {
   CodeEditor
 } from '../../../lib/codeeditor';
 

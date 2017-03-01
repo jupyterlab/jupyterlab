@@ -397,6 +397,7 @@ class StaticNotebook extends Widget {
     default:
       widget = this._createRawCell(cell as IRawCellModel);
     }
+    cell.mimeType = this._mimetype;
     widget.addClass(NB_CELL_CLASS);
     let layout = this.layout as PanelLayout;
     layout.insertWidget(index, widget);
@@ -761,6 +762,7 @@ class Notebook extends StaticNotebook {
     if (newValue === oldValue) {
       return;
     }
+    this._trimSelections();
     this._stateChanged.emit({ name: 'activeCellIndex', oldValue, newValue });
   }
 
@@ -981,6 +983,22 @@ class Notebook extends StaticNotebook {
    * Handle a cell being inserted.
    */
   protected onCellInserted(index: number, cell: BaseCellWidget): void {
+    let realtime = this.model.realtimeHandler
+    if(realtime) {
+      //Set the id of the editor to be the same
+      //as that of the local editing session
+      cell.editor.uuid = realtime.localCollaborator.sessionId;
+      if(realtime.localCollaborator.color) {
+        let color = realtime.localCollaborator.color;
+        let r: number = parseInt(color.slice(1,3), 16);
+        let g: number  = parseInt(color.slice(3,5), 16);
+        let b: number  = parseInt(color.slice(5,7), 16);
+        cell.editor.selectionStyle = {
+          css: `background-color: rgba( ${r}, ${g}, ${b}, 0.1)`,
+          color: realtime.localCollaborator.color
+        };
+      }
+    }
     cell.editor.edgeRequested.connect(this._onEdgeRequest, this);
     // Trigger an update of the active cell.
     this.activeCellIndex = this.activeCellIndex;
@@ -1400,6 +1418,19 @@ class Notebook extends StaticNotebook {
     }
     Private.selectedProperty.set(this.widgets[activeIndex], true);
     this._selectionChanged.emit(void 0);
+  }
+
+  /**
+   * Remove selections from inactive cells to avoid
+   * spurious cursors.
+   */
+  private _trimSelections(): void {
+    for(let i=0; i<this.widgets.length; i++) {
+      if(i !== this._activeCellIndex) {
+        let cell = this.widgets[i];
+        cell.model.selections.delete(cell.editor.uuid);
+      }
+    }
   }
 
   private _activeCellIndex = -1;

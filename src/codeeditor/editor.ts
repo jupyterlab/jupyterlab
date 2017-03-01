@@ -21,6 +21,10 @@ import {
   IObservableMap, ObservableMap
 } from '../common/observablemap';
 
+import {
+  IRealtimeHandler, IRealtimeModel
+} from '../common/realtime';
+
 
 /**
  * A namespace for code editors.
@@ -128,6 +132,16 @@ namespace CodeEditor {
      * A display name added to a selection.
      */
     displayName?: string;
+
+    /**
+     * A CSS string to apply to the selection.
+     */
+    css?: string;
+
+    /**
+     * A color for the selection.
+     */
+    color?: string;
   }
 
   /**
@@ -167,7 +181,7 @@ namespace CodeEditor {
    * An editor model.
    */
   export
-  interface IModel extends IDisposable {
+  interface IModel extends IDisposable, IRealtimeModel {
     /**
      * A signal emitted when a property changes.
      */
@@ -190,20 +204,44 @@ namespace CodeEditor {
      * The currently selected code.
      */
     readonly selections: IObservableMap<ITextSelection[]>;
+
+    /**
+     * The realtime handler for the editor model.
+     * If there is no realtime for this model it is null.
+     */
+    readonly realtimeHandler: IRealtimeHandler;
+
+    /**
+     * Describe the editor model to an existing RealtimeHandler.
+     */
+    registerCollaborative( realtimeHandler : IRealtimeHandler ): Promise<void>;
   }
 
   /**
    * The default implementation of the editor model.
    */
   export
-  class Model implements IModel {
+  class Model extends ObservableMap<any> implements IModel {
     /**
      * Construct a new Model.
      */
     constructor(options?: Model.IOptions) {
+      super();
       options = options || {};
       this._value = new ObservableString(options.value);
       this._mimetype = options.mimeType || 'text/plain';
+      this.synchronizedItems.set('mimeType', this._mimetype);
+      this.synchronizedItems.set('value', this._value);
+      this.synchronizedItems.set('selections', this._selections);
+      this.synchronizedItems.changed.connect((s, change)=>{
+        if(change.key === 'mimeType') {
+          this._mimeTypeChanged.emit({
+            name: 'mimeType',
+            oldValue: change.oldValue,
+            newValue: change.oldValue
+          });
+        }
+      });
     }
 
     /**
@@ -217,33 +255,28 @@ namespace CodeEditor {
      * Get the value of the model.
      */
     get value(): IObservableString {
-      return this._value;
+      return this.synchronizedItems.get("value");
     }
 
     /**
      * Get the selections for the model.
      */
     get selections(): IObservableMap<ITextSelection[]> {
-      return this._selections;
+      return this.synchronizedItems.get("selections");
     }
 
     /**
      * A mime type of the model.
      */
     get mimeType(): string {
-      return this._mimetype;
+      return this.synchronizedItems.get("mimeType");
     }
     set mimeType(newValue: string) {
-      const oldValue = this._mimetype;
+      const oldValue = this.synchronizedItems.get("mimeType");
       if (oldValue === newValue) {
         return;
       }
-      this._mimetype = newValue;
-      this._mimeTypeChanged.emit({
-        name: 'mimeType',
-        oldValue,
-        newValue
-      });
+      this.synchronizedItems.set("mimeType", newValue);
     }
 
     /**
@@ -254,6 +287,14 @@ namespace CodeEditor {
     }
 
     /**
+     * The realtime handler associated with the document.
+     */
+    get realtimeHandler(): IRealtimeHandler {
+      return this._realtime;
+    }
+
+
+    /**
      * Dipose of the resources used by the model.
      */
     dispose(): void {
@@ -262,15 +303,47 @@ namespace CodeEditor {
       }
       this._isDisposed = true;
       Signal.clearData(this);
+      if(this._realtime) {
+        this._realtime.dispose();
+      }
       this._selections.dispose();
       this._value.dispose();
+      //super.dispose();
     }
 
+    /**
+     * Describe the model to an existing RealtimeHandler.
+     */
+    registerCollaborative( realtimeHandler : IRealtimeHandler ) : Promise<void> {
+      return new Promise<void>((resolve,reject)=>{
+        this._realtime = realtimeHandler;
+        let mapPromise =
+          this._realtime.linkMap(this.synchronizedItems, 'codeeditor');
+        this._realtime.collaborators.changed.connect((collaborators, change)=>{
+          //if there are selections corresponding to non-collaborators,
+          //they are stale and should be removed.
+          for(let key of this.selections.keys()) {
+            if(!collaborators.has(key)) {
+              this.selections.delete(key);
+            }
+          }
+        });
+        mapPromise.then(()=>{
+          resolve();
+        //}).catch(()=>{
+        //  console.log("Unable to register document as collaborative");
+        });
+      });
+    }
+
+    protected synchronizedItems = new ObservableMap<any>();
+
     private _value: ObservableString;
-    private _selections = new ObservableMap<ITextSelection[]>();
     private _mimetype: string;
+    private _selections = new ObservableMap<ITextSelection[]>();
     private _isDisposed = false;
     private _mimeTypeChanged = new Signal<this, IChangedArgs<string>>(this);
+    private _realtime : IRealtimeHandler = null;
   }
 
   /**

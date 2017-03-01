@@ -30,12 +30,20 @@ import {
   DocumentRegistry
 } from './index';
 
+import {
+  IRealtimeHandler, IRealtimeModel
+} from '../common/realtime';
+
+import {
+  IObservableString, ObservableString
+} from '../common/observablestring';
+
 
 /**
  * The default implementation of a document model.
  */
 export
-class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeModel  {
+class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeModel, IRealtimeModel  {
   /**
    * Construct a new document model.
    */
@@ -158,6 +166,14 @@ class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeMo
     this.dirty = true;
   }
 
+  /**
+   * Dispose of the resources held by the model.
+   */
+  dispose(): void {
+    super.dispose();
+  }
+
+  private _text: IObservableString = new ObservableString('');
   private _defaultLang = '';
   private _dirty = false;
   private _readOnly = false;

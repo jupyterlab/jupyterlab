@@ -6,12 +6,16 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  each
+  each, iter, toArray
 } from '@phosphor/algorithm';
 
 import {
   IObservableVector, ObservableVector
 } from '../common/observablevector';
+
+import {
+  IObservableMap
+} from '../common/observablemap';
 
 import {
   DocumentModel, DocumentRegistry
@@ -34,12 +38,17 @@ import {
   IObservableUndoableVector, ObservableUndoableVector
 } from '../common/undoablevector';
 
+import {
+  IRealtimeHandler, IRealtimeModel, Synchronizable,
+  IRealtimeConverter
+} from '../common/realtime';
+
 
 /**
  * The definition of a model object for a notebook widget.
  */
 export
-interface INotebookModel extends DocumentRegistry.IModel {
+interface INotebookModel extends DocumentRegistry.IModel, IRealtimeModel {
   /**
    * The list of cells in the notebook.
    */
@@ -64,6 +73,11 @@ interface INotebookModel extends DocumentRegistry.IModel {
    * The metadata associated with the notebook.
    */
   readonly metadata: IObservableJSON;
+
+  /**
+   * Describe the model to an existing RealtimeHandler.
+   */
+  registerCollaborative( realtimeHandler : IRealtimeHandler ): Promise<void>;
 }
 
 
@@ -81,7 +95,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       options.contentFactory || NotebookModel.defaultContentFactory
     );
     this.contentFactory = factory;
-    this._cells = new ObservableUndoableVector<ICellModel>((cell: nbformat.IBaseCell) => {
+    let fromJSONFactory = (cell: nbformat.IBaseCell): ICellModel=>{
       switch (cell.cell_type) {
         case 'code':
           return factory.createCodeCell({ cell });
@@ -90,7 +104,12 @@ class NotebookModel extends DocumentModel implements INotebookModel {
         default:
           return factory.createRawCell({ cell });
       }
-    });
+    };
+    let realtimeConverter = new NotebookModel.RealtimeCellConverter(factory);
+    this._cells = new ObservableUndoableVector<ICellModel>(
+      fromJSONFactory, realtimeConverter);
+
+
     // Add an initial code cell by default.
     this._cells.pushBack(factory.createCodeCell({}));
     this._cells.changed.connect(this._onCellsChanged, this);
@@ -152,6 +171,13 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   }
 
   /**
+   * The realtime handler associated with the notebook.
+   */
+  get realtimeHandler(): IRealtimeHandler {
+   return this._realtimeHandler;
+  }
+
+  /**
    * Dispose of the resources held by the model.
    */
   dispose(): void {
@@ -167,6 +193,9 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       cell.dispose();
     }
     cells.dispose();
+    if(this._realtimeHandler) {
+      this._realtimeHandler.dispose();
+    }
     super.dispose();
   }
 
@@ -268,6 +297,33 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   }
 
   /**
+   * Describe the model to an existing RealtimeHandler.
+   */
+  registerCollaborative( realtimeHandler : IRealtimeHandler ) : Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this._realtimeHandler = realtimeHandler;
+      let cellPromise = realtimeHandler.linkVector(this._cells, 'notebook:cells');
+
+      realtimeHandler.collaborators.changed.connect((collaborators, change)=>{
+        //If there are selections corresponding to non-collaborators,
+        //they are stale and should be removed. Also update the styling
+        //of the collaborators that are present.
+        for(let i=0; i<this.cells.length; i++) {
+          let cell = this.cells.at(i);
+          for(let key of cell.selections.keys()) {
+            if(!collaborators.has(key)) {
+              cell.selections.delete(key);
+            }
+          }
+        }
+      });
+      cellPromise.then(()=>{
+        resolve();
+      });
+    });
+  }
+
+  /**
    * Handle a change in the cells list.
    */
   private _onCellsChanged(list: IObservableVector<ICellModel>, change: ObservableVector.IChangedArgs<ICellModel>): void {
@@ -324,6 +380,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   private _nbformat = nbformat.MAJOR_VERSION;
   private _nbformatMinor = nbformat.MINOR_VERSION;
   private _metadata = new ObservableJSON();
+  private _realtimeHandler: IRealtimeHandler = null;
 }
 
 
@@ -468,4 +525,38 @@ namespace NotebookModel {
    */
   export
   const defaultContentFactory = new ContentFactory({});
+
+  export
+  class RealtimeCellConverter implements IRealtimeConverter<ICellModel> {
+    constructor(contentFactory: IContentFactory) {
+      this._factory = contentFactory;
+    }
+
+    to(value: ICellModel): Synchronizable {
+      return (value as any).synchronizedItems;
+    }
+
+    from(value: Synchronizable): ICellModel {
+      let map: any = value as IObservableMap<any>;
+      let cell: any = {
+        cell_type: map.get('cell_type'),
+        source: (map.get('value') as any).text,
+        metadata: map.get('metadata') || {}
+      }
+      if(cell.cell_type === 'code') {
+        cell.outputs = toArray(map.get('outputs'));
+        cell.execution_count = map.get('executionCount') || null;
+      }
+      switch (cell.cell_type) {
+        case 'code':
+          return this._factory.createCodeCell({ cell });
+        case 'markdown':
+          return this._factory.createMarkdownCell({ cell });
+        default:
+          return this._factory.createRawCell({ cell });
+      }
+    }
+
+    private _factory: IContentFactory = null;
+  }
 }

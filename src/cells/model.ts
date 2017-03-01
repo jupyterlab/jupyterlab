@@ -26,8 +26,20 @@ import {
 } from '../common/observablejson';
 
 import {
+  IObservableString, ObservableString
+} from '../common/observablestring';
+
+import {
+  IObservableVector
+} from '../common/observablevector';
+
+import {
   IOutputAreaModel, OutputAreaModel
 } from '../outputarea';
+
+import {
+  IRealtimeConverter, Synchronizable
+} from '../common/realtime';
 
 
 /**
@@ -128,6 +140,8 @@ class CellModel extends CodeEditor.Model implements ICellModel {
     super();
     this.value.changed.connect(this.onGenericChange, this);
     let cell = options.cell;
+    this.synchronizedItems.set('cell_type', this.type);
+
     if (!cell) {
       return;
     }
@@ -233,6 +247,7 @@ class CellModel extends CodeEditor.Model implements ICellModel {
    * Handle a change to the observable value.
    */
   protected onGenericChange(): void {
+    //this.set('outputs', this.get('outputs'));
     this.contentChanged.emit(void 0);
   }
 
@@ -312,14 +327,16 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
     let cell = options.cell as nbformat.ICodeCell;
     let outputs: nbformat.IOutput[] = [];
     if (cell && cell.cell_type === 'code') {
-      this.executionCount = cell.execution_count;
+      this.synchronizedItems.set('executionCount', cell.execution_count);
       outputs = cell.outputs;
     }
-    this._outputs = factory.createOutputArea({
+    let outputArea = factory.createOutputArea({
       trusted,
       values: outputs
     });
-    this._outputs.stateChanged.connect(this.onGenericChange, this);
+    outputArea.stateChanged.connect(this.onGenericChange, this);
+    this.synchronizedItems.set('outputs', outputArea);
+    this.synchronizedItems.converters.set('outputs', new CodeCellModel.RealtimeOutputAreaConverter(factory));
   }
 
   /**
@@ -333,14 +350,14 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
    * The execution count of the cell.
    */
   get executionCount(): nbformat.ExecutionCount {
-    return this._executionCount || null;
+    return this.synchronizedItems.get('executionCount') || null;
   }
   set executionCount(newValue: nbformat.ExecutionCount) {
-    if (newValue === this._executionCount) {
+    if (newValue === this.synchronizedItems.get('executionCount')) {
       return;
     }
     let oldValue = this.executionCount;
-    this._executionCount = newValue || null;
+    this.synchronizedItems.set('executionCount', newValue || null);
     this.contentChanged.emit(void 0);
     this.stateChanged.emit({ name: 'executionCount', oldValue, newValue });
   }
@@ -349,7 +366,7 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
    * The cell outputs.
    */
   get outputs(): IOutputAreaModel {
-    return this._outputs;
+    return this.synchronizedItems.get('outputs');
   }
 
   /**
@@ -359,8 +376,9 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
     if (this.isDisposed) {
       return;
     }
-    this._outputs.dispose();
-    this._outputs = null;
+    Signal.clearData(this);
+    this.synchronizedItems.get('outputs').dispose();
+    this.synchronizedItems.delete('outputs');
     super.dispose();
   }
 
@@ -369,8 +387,8 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
    */
   toJSON(): nbformat.ICodeCell {
     let cell = super.toJSON() as nbformat.ICodeCell;
-    cell.execution_count = this.executionCount || null;
-    cell.outputs = this.outputs.toJSON();
+    cell.execution_count = this.synchronizedItems.get('executionCount') || null;
+    cell.outputs = this.synchronizedItems.get('outputs').toJSON();
     return cell;
   }
 
@@ -380,11 +398,9 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
    * The default implementation is a no-op.
    */
   onTrustedChanged(value: boolean): void {
-    this._outputs.trusted = value;
+    (this.get('outputs') as any).trusted = value;
   }
 
-  private _outputs: IOutputAreaModel = null;
-  private _executionCount: nbformat.ExecutionCount = null;
 }
 
 
@@ -431,6 +447,28 @@ namespace CodeCellModel {
       return new OutputAreaModel(options);
     }
   }
+
+  export
+  class RealtimeOutputAreaConverter implements IRealtimeConverter<IOutputAreaModel> {
+    constructor(factory: IContentFactory) {
+      this._factory = factory;
+    }
+
+    from(value: Synchronizable): IOutputAreaModel {
+      let vec = value as any as IObservableVector<nbformat.IOutput>;
+      let outputs = this._factory.createOutputArea({});
+      for(let i=0; i<outputs.length;i++) {
+        outputs.add(vec.at(i));
+      }
+      return outputs;
+    }
+
+    to(value: IOutputAreaModel): Synchronizable {
+      return (value as any).list;
+    }
+    private _factory: IContentFactory = null;
+  }
+
 
   /**
    * The shared `ConetntFactory` instance.

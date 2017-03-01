@@ -483,7 +483,9 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     const uuid = args.key;
     if (uuid !== this.uuid) {
       this._cleanSelections(uuid);
-      this._markSelections(uuid, args.newValue);
+      if(args.type !== 'remove') {
+        this._markSelections(uuid, args.newValue);
+      }
     }
   }
 
@@ -505,8 +507,11 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     const markers: CodeMirror.TextMarker[] = [];
     selections.forEach(selection => {
       const { anchor, head } = this._toCodeMirrorSelection(selection);
-      const markerOptions = this._toTextMarkerOptions(selection);
-      this.doc.markText(anchor, head, markerOptions);
+      const markerOptions = this._toTextMarkerOptions(selection.style);
+      markers.push(this.doc.markText(anchor, head, markerOptions));
+      let caret = this._getCaret(selection.uuid);
+      markers.push(this.doc.setBookmark(
+        this._toCodeMirrorPosition(selection.end), {widget: caret}));
     });
     this.selectionMarkers[uuid] = markers;
   }
@@ -538,7 +543,8 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     if (style) {
       return {
         className: style.className,
-        title: style.displayName
+        title: style.displayName,
+        css: style.css
       };
     }
     return undefined;
@@ -548,9 +554,17 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Converts an editor selection to a code mirror selection.
    */
   private _toCodeMirrorSelection(selection: CodeEditor.IRange): CodeMirror.Selection {
+    //Selections only appear to render correctly if the anchor
+    //is before the head in the document. That is, reverse selections
+    //do not appear as intended.
+    let forward: boolean = (selection.start.line < selection.end.line) ||
+                           (selection.start.line === selection.end.line &&
+                            selection.start.column <= selection.end.column);
+    let anchor = forward ? selection.start : selection.end;
+    let head = forward ? selection.end : selection.start;
     return {
-      anchor: this._toCodeMirrorPosition(selection.start),
-      head: this._toCodeMirrorPosition(selection.end)
+      anchor: this._toCodeMirrorPosition(anchor),
+      head: this._toCodeMirrorPosition(head)
     };
   }
 
@@ -608,6 +622,15 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     this._changeGuard = false;
   }
 
+  private _getCaret(uuid: string): HTMLElement {
+    let caret: HTMLElement = document.createElement('span');
+    caret.className = 'CodeMirror-cursor';
+    let color: string = '';
+    caret.style.borderLeft=`2px ${this._selectionStyle.color} solid`;
+    caret.appendChild(document.createTextNode('\u00a0'));
+    return caret;
+  }
+
   private _model: CodeEditor.IModel;
   private _editor: CodeMirror.Editor;
   protected selectionMarkers: { [key: string]: CodeMirror.TextMarker[] | undefined } = {};
@@ -619,8 +642,8 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
 
 
 /**
- * The namespace for `CodeMirrorEditor` statics.
- */
+* The namespace for `CodeMirrorEditor` statics.
+*/
 export
 namespace CodeMirrorEditor {
   /**

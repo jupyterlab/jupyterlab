@@ -17,6 +17,14 @@ import {
   Vector
 } from './vector';
 
+import {
+  IObservableMap
+} from './observablemap';
+
+import {
+  Synchronizable, IRealtimeConverter
+} from './realtime';
+
 
 /**
  * A vector which can be observed for changes.
@@ -101,6 +109,29 @@ interface IObservableVector<T> extends IDisposable {
    * An `index` which is non-integral or out of range.
    */
   at(index: number): T;
+
+  /**
+   * Get whether this vector can be linked to another.
+   * If so, the functions `link` and `unlink` will perform
+   * that. Otherwise, they are no-op functions.
+   *
+   * @returns `true` if the vector may be linked to another,
+   *   `false` otherwise.
+   */
+  readonly isLinkable: boolean;
+
+  /**
+   * Get whether this vector can is linked to another.
+   *
+   * @returns `true` if the vector is linked to another,
+   *   `false` otherwise.
+   */
+  readonly isLinked: boolean;
+
+  /**
+   * Converter for realtime synchronization.
+   */
+  readonly converter: IRealtimeConverter<T>;
 
   /**
    * Set the value at the specified index.
@@ -294,6 +325,19 @@ interface IObservableVector<T> extends IDisposable {
    * A `startIndex` or `endIndex` which is non-integral.
    */
   removeRange(startIndex: number, endIndex: number): number;
+
+  /**
+   * Link the vector to another vector.
+   * Any changes to either are mirrored in the other.
+   *
+   * @param vec: the parent vector.
+   */
+  link(vec: IObservableVector<T>): void;
+
+  /**
+   * Unlink the vector from its parent vector.
+   */
+  unlink(): void;
 }
 
 
@@ -303,11 +347,12 @@ interface IObservableVector<T> extends IDisposable {
 export
 class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
   /**
-   * Construct a new observable map.
+   * Construct a new observable vector.
    */
   constructor(options: ObservableVector.IOptions<T> = {}) {
     super(options.values || []);
     this._itemCmp = options.itemCmp || Private.itemCmp;
+    this._converter = options.converter;
   }
 
   /**
@@ -318,10 +363,122 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
   }
 
   /**
+   * Get whether this vector can be linked to another.
+   * If so, the functions `link` and `unlink` will perform
+   * that. Otherwise, they are no-op functions.
+   *
+   * @returns `true` if the vector may be linked to another,
+   *   `false` otherwise.
+   */
+  readonly isLinkable: boolean = true;
+
+  /**
+   * Get whether this vector can is linked to another.
+   *
+   * @returns `true` if the vector is linked to another,
+   *   `false` otherwise.
+   */
+  get isLinked(): boolean {
+    return !!this._parent;
+  }
+
+  /**
    * Test whether the vector has been disposed.
    */
   get isDisposed(): boolean {
     return this._isDisposed;
+  }
+
+  /**
+   * Get the converter for realtime synchronization.
+   */
+  get converter(): IRealtimeConverter<T> {
+    return this._converter;
+  }
+
+  /**
+   * Test whether the vector is empty.
+   *
+   * @returns `true` if the vector is empty, `false` otherwise.
+   *
+   * #### Notes
+   * This is a read-only property.
+   *
+   * #### Complexity
+   * Constant.
+   *
+   * #### Iterator Validity
+   * No changes.
+   */
+  get isEmpty(): boolean {
+    return this.length === 0;
+  }
+
+  /**
+   * Get the length of the vector.
+   *
+   * @return The number of values in the vector.
+   *
+   * #### Notes
+   * This is a read-only property.
+   *
+   * #### Complexity
+   * Constant.
+   *
+   * #### Iterator Validity
+   * No changes.
+   */
+  get length(): number {
+    //TODO: How to call super.length?
+    if (!this.isLinked) {
+      return (this as any)._array.length;
+    } else {
+      return this._parent.length;
+    }
+  }
+
+
+  /**
+   * Create an iterator over the values in the vector.
+   *
+   * @returns A new iterator starting at the front of the vector.
+   *
+   * #### Complexity
+   * Constant.
+   *
+   * #### Iterator Validity
+   * No changes.
+   */
+  iter(): IIterator<T> {
+    if(!this.isLinked) {
+      return super.iter();
+    } else {
+      return this._parent.iter();
+    }
+  }
+
+  /**
+   * Get the value at the specified index.
+   *
+   * @param index - The positive integer index of interest.
+   *
+   * @returns The value at the specified index.
+   *
+   * #### Complexity
+   * Constant.
+   *
+   * #### Iterator Validity
+   * No changes.
+   *
+   * #### Undefined Behavior
+   * An `index` which is non-integral or out of range.
+   */
+  at(index: number): T {
+    if(!this.isLinked) {
+      return super.at(index);
+    } else {
+      return this._parent.at(index);
+    }
   }
 
   /**
@@ -332,6 +489,9 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
       return;
     }
     this._isDisposed = true;
+    if(this.isLinked) {
+      this.unlink();
+    }
     Signal.clearData(this);
     this.clear();
   }
@@ -353,23 +513,27 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * An `index` which is non-integral or out of range.
    */
   set(index: number, value: T): void {
-    let oldValues = [this.at(index)];
-    if (value === undefined) {
-      value = null;
+    if(!this.isLinked) {
+      let oldValues = [this.at(index)];
+      if (value === undefined) {
+        value = null;
+      }
+      // Bail if the value does not change.
+      let itemCmp = this._itemCmp;
+      if (itemCmp(oldValues[0], value)) {
+        return;
+      }
+      super.set(index, value);
+      this._changed.emit({
+        type: 'set',
+        oldIndex: index,
+        newIndex: index,
+        oldValues,
+        newValues: [value]
+      });
+    } else {
+      this._parent.set(index, value);
     }
-    // Bail if the value does not change.
-    let itemCmp = this._itemCmp;
-    if (itemCmp(oldValues[0], value)) {
-      return;
-    }
-    super.set(index, value);
-    this._changed.emit({
-      type: 'set',
-      oldIndex: index,
-      newIndex: index,
-      oldValues,
-      newValues: [value]
-    });
   }
 
   /**
@@ -386,19 +550,23 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * No changes.
    */
   pushBack(value: T): number {
-    let num = super.pushBack(value);
-    // Bail if in the constructor.
-    if (!this._changed) {
-      return;
+    if(!this.isLinked) {
+      let num = super.pushBack(value);
+      // Bail if in the constructor.
+      if (!this._changed) {
+        return;
+      }
+      this._changed.emit({
+        type: 'add',
+        oldIndex: -1,
+        newIndex: this.length - 1,
+        oldValues: [],
+        newValues: [value]
+      });
+      return num;
+    } else {
+      return this._parent.pushBack(value);
     }
-    this._changed.emit({
-      type: 'add',
-      oldIndex: -1,
-      newIndex: this.length - 1,
-      oldValues: [],
-      newValues: [value]
-    });
-    return num;
   }
 
   /**
@@ -414,15 +582,19 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * Iterators pointing at the removed value are invalidated.
    */
   popBack(): T {
-    let value = super.popBack();
-    this._changed.emit({
-      type: 'remove',
-      oldIndex: this.length,
-      newIndex: -1,
-      oldValues: [value],
-      newValues: []
-    });
-    return value;
+    if(!this.isLinked) {
+      let value = super.popBack();
+      this._changed.emit({
+        type: 'remove',
+        oldIndex: this.length,
+        newIndex: -1,
+        oldValues: [value],
+        newValues: []
+      });
+      return value;
+    } else {
+      return this._parent.popBack();
+    }
   }
 
   /**
@@ -447,15 +619,19 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * An `index` which is non-integral.
    */
   insert(index: number, value: T): number {
-    let num = super.insert(index, value);
-    this._changed.emit({
-      type: 'add',
-      oldIndex: -1,
-      newIndex: index,
-      oldValues: [],
-      newValues: [value]
-    });
-    return num;
+    if(!this.isLinked) {
+      let num = super.insert(index, value);
+      this._changed.emit({
+        type: 'add',
+        oldIndex: -1,
+        newIndex: index,
+        oldValues: [],
+        newValues: [value]
+      });
+      return num;
+    } else {
+      return this._parent.insert(index, value);
+    }
   }
 
   /**
@@ -473,10 +649,14 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * Iterators pointing at the removed value and beyond are invalidated.
    */
   remove(value: T): number {
-    let itemCmp = this._itemCmp;
-    let index = ArrayExt.findFirstIndex(toArray(this), item => itemCmp(item, value));
-    this.removeAt(index);
-    return index;
+    if(!this.isLinked) {
+      let itemCmp = this._itemCmp;
+      let index = ArrayExt.findFirstIndex(toArray(this), item => itemCmp(item, value));
+      this.removeAt(index);
+      return index;
+    } else {
+      return this._parent.remove(value);
+    }
   }
 
   /**
@@ -497,15 +677,19 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * An `index` which is non-integral.
    */
   removeAt(index: number): T {
-    let value = super.removeAt(index);
-    this._changed.emit({
-      type: 'remove',
-      oldIndex: index,
-      newIndex: -1,
-      oldValues: [value],
-      newValues: []
-    });
-    return value;
+    if(!this.isLinked) {
+      let value = super.removeAt(index);
+      this._changed.emit({
+        type: 'remove',
+        oldIndex: index,
+        newIndex: -1,
+        oldValues: [value],
+        newValues: []
+      });
+      return value;
+    } else {
+      return this._parent.removeAt(index);
+    }
   }
 
   /**
@@ -518,15 +702,19 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * All current iterators are invalidated.
    */
   clear(): void {
-    let oldValues = toArray(this);
-    super.clear();
-    this._changed.emit({
-      type: 'remove',
-      oldIndex: 0,
-      newIndex: 0,
-      oldValues,
-      newValues: []
-    });
+    if(!this.isLinked) {
+      let oldValues = toArray(this);
+      super.clear();
+      this._changed.emit({
+        type: 'remove',
+        oldIndex: 0,
+        newIndex: 0,
+        oldValues,
+        newValues: []
+      });
+    } else {
+      this._parent.clear();
+    }
   }
 
   /**
@@ -547,21 +735,25 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * A `fromIndex` or a `toIndex` which is non-integral.
    */
   move(fromIndex: number, toIndex: number): void {
-    let value = this.at(fromIndex);
-    super.removeAt(fromIndex);
-    if (toIndex < fromIndex) {
-      super.insert(toIndex - 1, value);
+    if(!this.isLinked) {
+      let value = this.at(fromIndex);
+      super.removeAt(fromIndex);
+      if (toIndex < fromIndex) {
+        super.insert(toIndex - 1, value);
+      } else {
+        super.insert(toIndex, value);
+      }
+      let arr = [value];
+      this._changed.emit({
+        type: 'move',
+        oldIndex: fromIndex,
+        newIndex: toIndex,
+        oldValues: arr,
+        newValues: arr
+      });
     } else {
-      super.insert(toIndex, value);
+      this._parent.move(fromIndex, toIndex);
     }
-    let arr = [value];
-    this._changed.emit({
-      type: 'move',
-      oldIndex: fromIndex,
-      newIndex: toIndex,
-      oldValues: arr,
-      newValues: arr
-    });
   }
 
   /**
@@ -578,17 +770,21 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * No changes.
    */
   pushAll(values: IterableOrArrayLike<T>): number {
-    let newIndex = this.length;
-    let newValues = toArray(values);
-    each(newValues, value => { super.pushBack(value); });
-    this._changed.emit({
-      type: 'add',
-      oldIndex: -1,
-      newIndex,
-      oldValues: [],
-      newValues
-    });
-    return this.length;
+    if(!this.isLinked) {
+      let newIndex = this.length;
+      let newValues = toArray(values);
+      each(newValues, value => { super.pushBack(value); });
+      this._changed.emit({
+        type: 'add',
+        oldIndex: -1,
+        newIndex,
+        oldValues: [],
+        newValues
+      });
+      return this.length;
+    } else {
+      return this._parent.pushAll(values);
+    }
   }
 
   /**
@@ -613,17 +809,21 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * An `index` which is non-integral.
    */
   insertAll(index: number, values: IterableOrArrayLike<T>): number {
-    let newIndex = index;
-    let newValues = toArray(values);
-    each(newValues, value => { super.insert(index++, value); });
-    this._changed.emit({
-      type: 'add',
-      oldIndex: -1,
-      newIndex,
-      oldValues: [],
-      newValues
-    });
-    return this.length;
+    if(!this.isLinked) {
+      let newIndex = index;
+      let newValues = toArray(values);
+      each(newValues, value => { super.insert(index++, value); });
+      this._changed.emit({
+        type: 'add',
+        oldIndex: -1,
+        newIndex,
+        oldValues: [],
+        newValues
+      });
+      return this.length;
+    } else {
+      return this._parent.insertAll(index, values);
+    }
   }
 
   /**
@@ -645,23 +845,83 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * A `startIndex` or `endIndex` which is non-integral.
    */
   removeRange(startIndex: number, endIndex: number): number {
-    let oldValues: T[] = [];
-    for (let i = startIndex; i < endIndex; i++) {
-      oldValues.push(super.removeAt(startIndex));
+    if(!this.isLinked) {
+      let oldValues: T[] = [];
+      for (let i = startIndex; i < endIndex; i++) {
+        oldValues.push(super.removeAt(startIndex));
+      }
+      this._changed.emit({
+        type: 'remove',
+        oldIndex: startIndex,
+        newIndex: -1,
+        oldValues,
+        newValues: []
+      });
+      return this.length;
+    } else {
+      return this._parent.removeRange(startIndex, endIndex);
     }
-    this._changed.emit({
-      type: 'remove',
-      oldIndex: startIndex,
-      newIndex: -1,
-      oldValues,
-      newValues: []
-    });
-    return this.length;
+  }
+
+  /**
+   * Link the vector to another vector.
+   * Any changes to either are mirrored in the other.
+   *
+   * @param vec: the parent vector.
+   */
+  link(vec: IObservableVector<T>): void {
+    //First, recreate the parent vector locally to trigger the 
+    //appropriate changed signals.
+    let min = vec.length <= this.length ? vec.length : this.length;
+    for (let i=0; i<min; i++) {
+      if (vec.at(i) !== this.at(i)) {
+        this.set(i, vec.at(i));
+      }
+    }
+    if (vec.length < this.length) {
+      while(this.length > min) {
+        this.popBack();
+      }
+    } else if (this.length < vec.length) {
+      for(let i = min; i < vec.length; i++) {
+        this.pushBack(vec.at(i));
+      }
+    }
+    //Now clear the local copy without triggering signals
+    super.clear();
+
+    //Set the parent vector and forward its signals
+    this._parent = vec;
+    this._parent.changed.connect(this._forwardSignal, this);
+  }
+
+  /**
+   * Unlink the vector from its parent vector.
+   */
+  unlink(): void {
+    if(this._parent) {
+      if(!this._parent.isDisposed) {
+        //reconstruct the local array without sending signals
+        each(this._parent, (value: T)=>{ super.pushBack(value); });
+      }
+      this._parent.changed.disconnect(this._forwardSignal, this);
+      this._parent = null;
+    }
+  }
+
+  /**
+   * Catch a signal from the parent vector and pass it on.
+   */
+  private _forwardSignal(s: IObservableVector<T>,
+                         c: ObservableVector.IChangedArgs<T>) {
+    this._changed.emit(c);
   }
 
   private _isDisposed = false;
   private _itemCmp: (first: T, second: T) => boolean;
   private _changed = new Signal<this, ObservableVector.IChangedArgs<T>>(this);
+  private _parent: IObservableVector<T> = null;
+  private _converter: IRealtimeConverter<T> = null;
 }
 
 
@@ -686,6 +946,8 @@ namespace ObservableVector {
      * If not given, strict `===` equality will be used.
      */
     itemCmp?: (first: T, second: T) => boolean;
+
+    converter?: IRealtimeConverter<T>;
   }
 
   /**

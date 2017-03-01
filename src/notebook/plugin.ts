@@ -56,8 +56,12 @@ import {
 import {
   CellTools, CommandIDs, ICellTools, INotebookTracker, NotebookActions,
   NotebookModelFactory,  NotebookPanel, NotebookTracker, NotebookWidgetFactory,
-  trustNotebook
+  trustNotebook, Notebook, NotebookModel
 } from './';
+
+import {
+  IRealtime
+} from '../common/realtime';
 
 
 /**
@@ -222,6 +226,13 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
 
   // Add main menu notebook menu.
   mainMenu.addMenu(createMenu(app), { rank: 20 });
+
+  //Register this widget tracker with the Realtime services if it exists.
+  app.resolveOptionalService(IRealtime).then((realtimeServices: IRealtime)=>{
+    realtimeServices.addTracker(tracker, (widget: NotebookPanel) => {
+      return widget.context.model as NotebookModel;
+    });
+  }).catch( ()=> {/*no-op*/} );
 
   return tracker;
 }
