@@ -140,7 +140,7 @@ class OutputAreaWidget extends Widget {
       let output = model.get(i);
       this._insertOutput(i, output);
     }
-    model.changed.connect(this._onModelChanged, this);
+    model.changed.connect(this.onModelChanged, this);
   }
 
   /**
@@ -255,6 +255,28 @@ class OutputAreaWidget extends Widget {
   protected onUpdateRequest(msg: Message): void {
     this.toggleClass(COLLAPSED_CLASS, this.collapsed);
     this.toggleClass(FIXED_HEIGHT_CLASS, this.fixedHeight);
+  }
+
+  /**
+   * Follow changes on the model state.
+   */
+  protected onModelChanged(sender: IOutputAreaModel, args: IOutputAreaModel.ChangedArgs): void {
+    switch (args.type) {
+    case 'add':
+      this._insertOutput(args.newIndex, args.newValues[0]);
+      break;
+    case 'remove':
+      // Only clear is supported by the model.
+      if (this.widgets.length) {
+        this._clear();
+      }
+      break;
+    case 'set':
+      this._setOutput(args.newIndex, args.newValues[0]);
+      break;
+    default:
+      break;
+    }
   }
 
   /**
@@ -412,29 +434,6 @@ class OutputAreaWidget extends Widget {
     widget.addClass(CHILD_CLASS);
     widget.addClass(OUTPUT_CLASS);
     return widget;
-  }
-
-  /**
-   * Follow changes on the model state.
-   */
-  private _onModelChanged(sender: IOutputAreaModel, args: ObservableVector.IChangedArgs<IOutputModel>) {
-    switch (args.type) {
-    case 'add':
-      // Children are always added at the end.
-      this._insertOutput(this.widgets.length, args.newValues[0]);
-      break;
-    case 'remove':
-      // Only clear is supported by the model.
-      if (this.widgets.length) {
-        this._clear();
-      }
-      break;
-    case 'set':
-      this._setOutput(args.newIndex, args.newValues[0]);
-      break;
-    default:
-      break;
-    }
   }
 
   private _fixedHeight = false;
@@ -784,7 +783,7 @@ interface IOutputAreaModel extends IDisposable {
   /**
    * A signal emitted when the model changes.
    */
-  readonly changed: ISignal<IOutputAreaModel, ObservableVector.IChangedArgs<IOutputModel>>;
+  readonly changed: ISignal<IOutputAreaModel, IOutputAreaModel.ChangedArgs>;
 
   /**
    * The length of the items in the model.
@@ -864,6 +863,12 @@ namespace IOutputAreaModel {
      */
     contentFactory?: IContentFactory;
   }
+
+  /**
+   * A type alias for changed args.
+   */
+  export
+  type ChangedArgs = ObservableVector.IChangedArgs<IOutputModel>;
 
   /**
    * The interface for an output content factory.

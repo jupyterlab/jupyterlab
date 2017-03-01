@@ -56,7 +56,7 @@ class OutputAreaModel implements IOutputAreaModel {
   /**
    * A signal emitted when the model changes.
    */
-  get changed(): ISignal<this, ObservableVector.IChangedArgs<IOutputModel>> {
+  get changed(): ISignal<this, IOutputAreaModel.ChangedArgs> {
     return this._changed;
   }
 
@@ -253,7 +253,7 @@ class OutputAreaModel implements IOutputAreaModel {
   private _trusted = false;
   private _isDisposed = false;
   private _stateChanged = new Signal<IOutputAreaModel, void>(this);
-  private _changed = new Signal<this, ObservableVector.IChangedArgs<IOutputModel>>(this);
+  private _changed = new Signal<this, IOutputAreaModel.ChangedArgs>(this);
 }
 
 

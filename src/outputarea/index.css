@@ -83,24 +83,6 @@
 }
 
 
-.jp-OutputWidget:first-child {
-  margin-top: 5px;
-}
-
-
-.jp-OutputWidget {
-  display: flex;
-  flex-direction: row;
-  color: var(--jp-content-font-color1);
-  user-select: text;
-  -moz-user-select: text;
-  -webkit-user-select: text;
-  -ms-user-select: text;
-  overflow: visible;
-  flex-grow: 1;
-}
-
-
 .jp-OutputAreaWidget-output {
   display: flex;
 }
