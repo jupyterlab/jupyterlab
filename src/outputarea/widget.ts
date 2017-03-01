@@ -263,8 +263,7 @@ class OutputAreaWidget extends Widget {
   protected onModelChanged(sender: IOutputAreaModel, args: ObservableVector.IChangedArgs<IOutputModel>) {
     switch (args.type) {
     case 'add':
-      // Children are always added at the end.
-      this._insertOutput(this.widgets.length, args.newValues[0]);
+      this._insertOutput(args.newIndex, args.newValues[0]);
       break;
     case 'remove':
       // Only clear is supported by the model.
