@@ -508,7 +508,7 @@ namespace CompleterWidget {
 
 
   /**
-   * An interface for a completion request.
+   * An interface for a completion request reflecting the state of the editor.
    */
   export
   interface ITextState extends JSONObject {

@@ -194,7 +194,7 @@ class CompletionHandler implements IDisposable {
    * Handle `invoke-request` messages.
    */
   protected onInvokeRequest(msg: Message): void {
-    // If there is neither a kernel or a completer model, bail.
+    // If there is neither a kernel nor a completer model, bail.
     if (!this._kernel || !this._completer.model) {
       return;
     }
@@ -210,22 +210,30 @@ class CompletionHandler implements IDisposable {
 
   /**
    * Receive a completion reply from the kernel.
+   *
+   * @param state - The state of the editor when completion request was made.
+   *
+   * @param reply - The API response returned for a completion request.
    */
-  protected onReply(request: CompleterWidget.ITextState, msg: KernelMessage.ICompleteReplyMsg): void {
-    let value = msg.content;
-    let model = this._completer.model;
+  protected onReply(state: CompleterWidget.ITextState, reply: KernelMessage.ICompleteReplyMsg): void {
+    const model = this._completer.model;
     if (!model) {
       return;
     }
+
     // Completion request failures or negative results fail silently.
+    const value = reply.content;
     if (value.status !== 'ok') {
       model.reset(true);
       return;
     }
+
     // Update the original request.
-    model.original = request;
+    model.original = state;
+
     // Update the options.
     model.setOptions(value.matches || []);
+
     // Update the cursor.
     model.cursor = { start: value.cursor_start, end: value.cursor_end };
   }

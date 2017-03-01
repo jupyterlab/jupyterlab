@@ -76,6 +76,7 @@ class CompleterModel implements CompleterWidget.IModel {
     if (!this.original) {
       return;
     }
+
     // Cursor must always be set before a text change. This happens
     // automatically in the completer handler, but since `current` is a public
     // attribute, this defensive check is necessary.
