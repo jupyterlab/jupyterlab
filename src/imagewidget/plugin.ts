@@ -89,7 +89,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, palette: IComman
 
   let category = 'Image Widget';
   [CommandIDs.zoomIn, CommandIDs.zoomOut, CommandIDs.resetZoom]
-    .forEach(command => palette.addItem({ command, category }));
+    .forEach(command => { palette.addItem({ command, category }); });
 
   return tracker;
 }
