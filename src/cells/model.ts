@@ -398,7 +398,7 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
    * The default implementation is a no-op.
    */
   onTrustedChanged(value: boolean): void {
-    (this.get('outputs') as any).trusted = value;
+    this.synchronizedItems.get('outputs').trusted = value;
   }
 
 }

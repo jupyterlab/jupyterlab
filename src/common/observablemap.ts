@@ -343,11 +343,7 @@ class ObservableMap<T> implements IObservableMap<T> {
       let key = keyList[i];
       let oldValue = this._map.get(key);
       let newValue = map.get(key);
-      if(oldValue && (oldValue as any).link) {
-        (oldValue as any).link(newValue);
-      } else {
-        this.set(key, map.get(key));
-      }
+      this.set(key, map.get(key));
     }
     //Now that we have mirrored the two maps,
     //clear the local one and forward the signals
