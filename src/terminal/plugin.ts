@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  TerminalSession
-} from '@jupyterlab/services';
-
-import {
   InstanceTracker
 } from '../common/instancetracker';
 
@@ -34,7 +30,7 @@ import {
 } from '../services';
 
 import {
-  CommandIDs, TerminalWidget
+  CommandIDs, TerminalWidget, ITerminalTracker, addDefaultCommands
 } from './';
 
 
@@ -52,9 +48,10 @@ const TERMINAL_ICON_CLASS = 'jp-ImageTerminal';
 /**
  * The default terminal extension.
  */
-const plugin: JupyterLabPlugin<void> = {
+const plugin: JupyterLabPlugin<ITerminalTracker> = {
   activate,
   id: 'jupyter.extensions.terminal',
+  provides: ITerminalTracker,
   requires: [
     IServiceManager, IMainMenu, ICommandPalette, IInstanceRestorer
   ],
@@ -71,7 +68,7 @@ export default plugin;
 /**
  * Activate the terminal plugin.
  */
-function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, restorer: IInstanceRestorer): void {
+function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, restorer: IInstanceRestorer): ITerminalTracker {
   // Bail if there are no terminals available.
   if (!services.terminals.isAvailable()) {
     console.log('Disabling terminals plugin because they are not available on the server');
@@ -82,12 +79,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
   const namespace = 'terminal';
   const tracker = new InstanceTracker<TerminalWidget>({ namespace });
 
-  let { commands } = app;
-  let options = {
-    background: 'black',
-    color: 'white',
-    fontSize: 13
-  };
+  let { commands, shell } = app;
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -96,29 +88,44 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
     name: widget => widget.session && widget.session.name
   });
 
+  addDefaultCommands(tracker, commands);
+
   // Add terminal commands.
   commands.addCommand(CommandIDs.createNew, {
     label: 'New Terminal',
     caption: 'Start a new terminal session',
     execute: args => {
       let name = args ? args['name'] as string : '';
-      let promise: Promise<TerminalSession.ISession>;
+      let term = new TerminalWidget();
+      term.title.closable = true;
+      term.title.icon = `${LANDSCAPE_ICON_CLASS} ${TERMINAL_ICON_CLASS}`;
+      tracker.add(term);
+      shell.addToMainArea(term);
+      shell.activateMain(term.id);
+
       if (name) {
-        promise = services.terminals.connectTo(name);
-      } else {
-        promise = services.terminals.startNew();
-      }
-      return promise.then(session => {
-        return session.ready.then(() => {
-          let term = new TerminalWidget(options);
+        services.terminals.connectTo(name).then(session => {
           term.session = session;
-          term.title.closable = true;
-          term.title.icon = `${LANDSCAPE_ICON_CLASS} ${TERMINAL_ICON_CLASS}`;
-          tracker.add(term);
-          app.shell.addToMainArea(term);
-          app.shell.activateMain(term.id);
         });
-      });
+      } else {
+        services.terminals.startNew().then(session => {
+          term.session = session;
+        });
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.open, {
+    execute: args => {
+      let name = args['name'] as string;
+      // Check for a running terminal with the given name.
+      let widget = tracker.find(value => value.session.name === name);
+      if (widget) {
+        shell.activateMain(widget.id);
+      } else {
+        // Otherwise, create a new terminal with a given name.
+        return commands.execute(CommandIDs.createNew, { name });
+      }
     }
   });
 
@@ -130,62 +137,10 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
       if (!current) {
         return;
       }
-      app.shell.activateMain(current.id);
+      shell.activateMain(current.id);
       return current.refresh().then(() => {
         current.activate();
       });
-    }
-  });
-
-  commands.addCommand(CommandIDs.increaseFont, {
-    label: 'Increase Terminal Font Size',
-    execute: () => {
-      if (options.fontSize < 72) {
-        options.fontSize++;
-        tracker.forEach(widget => { widget.fontSize = options.fontSize; });
-      }
-    }
-  });
-
-  commands.addCommand(CommandIDs.decreaseFont, {
-    label: 'Decrease Terminal Font Size',
-    execute: () => {
-      if (options.fontSize > 9) {
-        options.fontSize--;
-        tracker.forEach(widget => { widget.fontSize = options.fontSize; });
-      }
-    }
-  });
-
-  commands.addCommand(CommandIDs.toggleTheme, {
-    label: 'Toggle Terminal Theme',
-    caption: 'Switch Terminal Background and Font Colors',
-    execute: () => {
-      if (options.background === 'black') {
-        options.background = 'white';
-        options.color = 'black';
-      } else {
-        options.background = 'black';
-        options.color = 'white';
-      }
-      tracker.forEach(widget => {
-        widget.background = options.background;
-        widget.color = options.color;
-      });
-    }
-  });
-
-  commands.addCommand(CommandIDs.open, {
-    execute: args => {
-      let name = args['name'] as string;
-      // Check for a running terminal with the given name.
-      let widget = tracker.find(value => value.session.name === name);
-      if (widget) {
-        app.shell.activateMain(widget.id);
-      } else {
-        // Otherwise, create a new terminal with a given name.
-        return commands.execute(CommandIDs.createNew, { name });
-      }
     }
   });
 
@@ -203,4 +158,6 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
     menu.addItem({ command });
   });
   mainMenu.addMenu(menu, {rank: 40});
+
+  return tracker;
 }

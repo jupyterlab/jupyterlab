@@ -2,14 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Token
-} from '@phosphor/application';
-
-import {
-  IInstanceTracker
-} from '../common/instancetracker';
-
-import {
   IChangedArgs
 } from '../common/interfaces';
 
@@ -35,22 +27,6 @@ const DIRTY_CLASS = 'jp-mod-dirty';
  * The class name added to a jupyter code mirror widget.
  */
 const EDITOR_CLASS = 'jp-EditorWidget';
-
-
-/**
- * A class that tracks editor widgets.
- */
-export
-interface IEditorTracker extends IInstanceTracker<EditorWidget> {}
-
-
-/* tslint:disable */
-/**
- * The editor tracker token.
- */
-export
-const IEditorTracker = new Token<IEditorTracker>('jupyter.services.editor-tracker');
-/* tslint:enable */
 
 
 /**

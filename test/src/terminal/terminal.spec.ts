@@ -121,13 +121,13 @@ describe('terminal/index', () => {
 
     describe('#fontSize', () => {
 
-      it('should be 14 by default', () => {
-        expect(widget.fontSize).to.be(14);
+      it('should be 13 by default', () => {
+        expect(widget.fontSize).to.be(13);
       });
 
       it('should trigger an update request', (done) => {
-        widget.fontSize = 13;
-        expect(widget.fontSize).to.be(13);
+        widget.fontSize = 14;
+        expect(widget.fontSize).to.be(14);
         requestAnimationFrame(() => {
           expect(widget.methods).to.contain('onUpdateRequest');
           done();

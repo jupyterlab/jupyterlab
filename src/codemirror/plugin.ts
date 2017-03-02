@@ -23,7 +23,7 @@ import {
 } from '../commandpalette';
 
 import {
-  IEditorTracker
+  IEditorTracker, CommandIDs as EditorCommandIDs
 } from '../editorwidget';
 
 import {
@@ -31,7 +31,7 @@ import {
 } from '../mainmenu';
 
 import {
-  editorServices, CodeMirrorEditor
+  editorServices, CodeMirrorEditor, CommandIDs
 } from '.';
 
 
@@ -51,7 +51,7 @@ const servicesPlugin: JupyterLabPlugin<IEditorServices> = {
  */
 export
 const commandsPlugin: JupyterLabPlugin<void> = {
-  id: 'jupyter.services.editor-commands',
+  id: 'jupyter.services.codemirror-commands',
   requires: [IEditorTracker, IMainMenu, ICommandPalette],
   activate: activateEditorCommands,
   autoStart: true
@@ -63,34 +63,6 @@ const commandsPlugin: JupyterLabPlugin<void> = {
  */
 const plugins: JupyterLabPlugin<any>[] = [commandsPlugin, servicesPlugin];
 export default plugins;
-
-
-/**
- * The command IDs used by the editor plugin.
- */
-export
-namespace CommandIDs {
-  export
-  const lineNumbers = 'editor:line-numbers';
-
-  export
-  const lineWrap = 'editor:line-wrap';
-
-  export
-  const matchBrackets = 'editor:match-brackets';
-
-  export
-  const vimMode = 'editor:vim-mode';
-
-  export
-  const changeTheme = 'editor:change-theme';
-
-  export
-  const createConsole = 'editor:create-console';
-
-  export
-  const runCode = 'editor:run-code';
-};
 
 
 /**
@@ -130,18 +102,11 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
    * Create a menu for the editor.
    */
   function createMenu(): Menu {
-    let settings = new Menu({ commands });
     let theme = new Menu({ commands });
     let menu = new Menu({ commands });
 
     menu.title.label = 'Editor';
-    settings.title.label = 'Settings';
     theme.title.label = 'Theme';
-
-    settings.addItem({ command: CommandIDs.lineNumbers });
-    settings.addItem({ command: CommandIDs.lineWrap });
-    settings.addItem({ command: CommandIDs.matchBrackets });
-    settings.addItem({ command: CommandIDs.vimMode });
 
     commands.addCommand(CommandIDs.changeTheme, {
       label: args => args['theme'] as string,
@@ -161,12 +126,15 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
      'hopscotch', 'material', 'mbo', 'mdn-like', 'seti', 'the-matrix',
      'xq-light', 'zenburn'
     ].forEach(name => theme.addItem({
-      command: 'editor:change-theme',
+      command: 'codemirror:change-theme',
       args: { theme: name }
     }));
 
+    menu.addItem({ command: EditorCommandIDs.lineNumbers });
+    menu.addItem({ command: EditorCommandIDs.lineWrap });
+    menu.addItem({ command: CommandIDs.matchBrackets });
+    menu.addItem({ command: CommandIDs.vimMode });
     menu.addItem({ type: 'separator' });
-    menu.addItem({ type: 'submenu', submenu: settings });
     menu.addItem({ type: 'submenu', submenu: theme });
 
     return menu;
@@ -185,12 +153,12 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
   });
 
   [
-    CommandIDs.lineNumbers,
-    CommandIDs.lineWrap,
+    EditorCommandIDs.lineNumbers,
+    EditorCommandIDs.lineWrap,
     CommandIDs.matchBrackets,
     CommandIDs.vimMode,
-    CommandIDs.createConsole,
-    CommandIDs.runCode
+    EditorCommandIDs.createConsole,
+    EditorCommandIDs.runCode
   ].forEach(command => palette.addItem({ command, category: 'Editor' }));
 
 }

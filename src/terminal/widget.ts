@@ -63,9 +63,10 @@ class TerminalWidget extends Widget {
     this.node.appendChild(this._sheet);
 
     // Initialize settings.
-    this._fontSize = options.fontSize || 14;
-    this._background = options.background || 'black';
-    this._color = options.color || 'white';
+    let defaults = TerminalWidget.defaultOptions;
+    this._fontSize = options.fontSize || defaults.fontSize;
+    this._background = options.background || defaults.background;
+    this._color = options.color || defaults.color;
     this.id = `jp-TerminalWidget-${Private.id++}`;
     this.title.label = 'Terminal';
   }
@@ -426,6 +427,17 @@ namespace TerminalWidget {
      */
     cursorBlink?: boolean;
   }
+
+  /**
+   * The default options used for creating terminals.
+   */
+  export
+  const defaultOptions: IOptions = {
+    background: 'black',
+    color: 'white',
+    fontSize: 13,
+    cursorBlink: true
+  };
 }
 
 
@@ -442,7 +454,7 @@ namespace Private {
     if (options.cursorBlink !== void 0) {
       config.cursorBlink = options.cursorBlink;
     } else {
-      config.cursorBlink = true;
+      config.cursorBlink = TerminalWidget.defaultOptions.cursorBlink;
     }
     return config;
   }
