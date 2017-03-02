@@ -17,12 +17,21 @@ import {
   Vector
 } from './vector';
 
+import {
+  IObservable
+} from './modeldb';
+
 
 /**
  * A vector which can be observed for changes.
  */
 export
-interface IObservableVector<T> extends IDisposable {
+interface IObservableVector<T> extends IDisposable, IObservable {
+  /**
+   * The type of the Observable.
+   */
+  type: 'Vector';
+
   /**
    * A signal emitted when the vector has changed.
    */
@@ -309,6 +318,11 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
     super(options.values || []);
     this._itemCmp = options.itemCmp || Private.itemCmp;
   }
+
+  /**
+   * The type of the Observable.
+   */
+  type: 'Vector';
 
   /**
    * A signal emitted when the vector has changed.

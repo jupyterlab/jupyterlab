@@ -29,6 +29,10 @@ import {
   DocumentRegistry
 } from './index';
 
+import {
+  IModelDB
+} from '../common/modeldb';
+
 
 /**
  * The default implementation of a document model.
@@ -106,6 +110,13 @@ class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeMo
    */
   get defaultKernelLanguage(): string {
     return this._defaultLang;
+  }
+
+  /**
+   * Return the model database used by the document.
+   */
+  get modelDB(): IModelDB {
+    return this._modelDB;
   }
 
   /**

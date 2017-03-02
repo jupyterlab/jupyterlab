@@ -9,12 +9,21 @@ import {
   ISignal, Signal
 } from '@phosphor/signaling';
 
+import {
+  IObservable
+} from './modeldb';
+
 
 /**
  * A string which can be observed for changes.
  */
 export
-interface IObservableString extends IDisposable {
+interface IObservableString extends IDisposable, IObservable {
+  /**
+   * The type of the Observable.
+   */
+  type: 'String';
+
   /**
    * A signal emitted when the string has changed.
    */
@@ -66,6 +75,11 @@ class ObservableString implements IObservableString {
   constructor(initialText: string = '') {
     this._text = initialText;
   }
+
+  /**
+   * The type of the Observable.
+   */
+  type: 'String';
 
   /**
    * A signal emitted when the string has changed.

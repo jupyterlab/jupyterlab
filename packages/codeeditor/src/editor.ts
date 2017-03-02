@@ -25,6 +25,10 @@ import {
   IObservableMap, ObservableMap
 } from '@jupyterlab/coreutils';
 
+import {
+  IModelDB, ModelDB, IObservableValue, ObservableValue
+} from '../common/modeldb';
+
 
 /**
  * A namespace for code editors.
@@ -186,8 +190,20 @@ namespace CodeEditor {
      */
     constructor(options?: Model.IOptions) {
       options = options || {};
-      this._value = new ObservableString(options.value);
-      this._mimetype = options.mimeType || 'text/plain';
+      let value = new ObservableString(options.value);
+      let mimeType = new ObservableValue(options.mimeType || 'text/plain');
+      let selections = new ObservableMap<ITextSelection[]>();
+
+      this._modelDB.set('value', value);
+      this._modelDB.set('selections', selections);
+      this._modelDB.set('mimeType', mimeType);
+      mimeType.changed.connect((val, args)=>{
+        this._mimeTypeChanged.emit({
+          name: 'mimeType',
+          oldValue: args.oldValue as string,
+          newValue: args.newValue as string
+        });
+      });
     }
 
     /**
@@ -201,33 +217,28 @@ namespace CodeEditor {
      * Get the value of the model.
      */
     get value(): IObservableString {
-      return this._value;
+      return this._modelDB.get('value') as IObservableString;
     }
 
     /**
      * Get the selections for the model.
      */
     get selections(): IObservableMap<ITextSelection[]> {
-      return this._selections;
+      return this._modelDB.get('selections') as IObservableMap<ITextSelection[]>;
     }
 
     /**
      * A mime type of the model.
      */
     get mimeType(): string {
-      return this._mimetype;
+      return (this._modelDB.get('mimeType') as IObservableValue).get() as string;
     }
     set mimeType(newValue: string) {
-      const oldValue = this._mimetype;
+      const oldValue = this.mimeType;
       if (oldValue === newValue) {
         return;
       }
-      this._mimetype = newValue;
-      this._mimeTypeChanged.emit({
-        name: 'mimeType',
-        oldValue,
-        newValue
-      });
+      (this._modelDB.get('mimeType') as IObservableValue).set(newValue);
     }
 
     /**
@@ -246,13 +257,10 @@ namespace CodeEditor {
       }
       this._isDisposed = true;
       Signal.clearData(this);
-      this._selections.dispose();
-      this._value.dispose();
     }
 
-    private _value: ObservableString;
-    private _selections = new ObservableMap<ITextSelection[]>();
-    private _mimetype: string;
+
+    protected _modelDB = new ModelDB();
     private _isDisposed = false;
     private _mimeTypeChanged = new Signal<this, IChangedArgs<string>>(this);
   }

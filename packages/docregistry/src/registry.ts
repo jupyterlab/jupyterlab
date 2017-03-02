@@ -33,6 +33,9 @@ import {
   IChangedArgs as IChangedArgsGeneric, PathExt
 } from '@jupyterlab/coreutils';
 
+import {
+  IModelDB
+} from '../common/modeldb';
 
 /* tslint:disable */
 /**
@@ -570,6 +573,11 @@ namespace DocumentRegistry {
      * The default kernel language of the document.
      */
     readonly defaultKernelLanguage: string;
+
+    /**
+     * The database for the model content.
+     */
+    readonly modelDB: IModelDB;
 
     /**
      * Serialize the model to a string.

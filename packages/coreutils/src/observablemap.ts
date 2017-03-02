@@ -9,12 +9,21 @@ import {
   ISignal, Signal
 } from '@phosphor/signaling';
 
+import {
+  IObservable
+} from './modeldb';
+
 
 /**
  * A map which can be observed for changes.
  */
 export
-interface IObservableMap<T> extends IDisposable {
+interface IObservableMap<T> extends IDisposable, IObservable {
+  /**
+   * The type of the Observable.
+   */
+  type: 'Map';
+
   /**
    * A signal emitted when the map has changed.
    */
@@ -107,6 +116,12 @@ class ObservableMap<T> implements IObservableMap<T> {
       }
     }
   }
+
+  /**
+   * The type of the Observable.
+   */
+  type: 'Map';
+
 
   /**
    * A signal emitted when the map has changed.
