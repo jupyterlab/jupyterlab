@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin
+  InstanceTracker, JupyterLab, JupyterLabPlugin
 } from '../application';
 
 import {
@@ -12,10 +12,6 @@ import {
 import {
   ICommandPalette
 } from '../commandpalette';
-
-import {
-  InstanceTracker
-} from '../common/instancetracker';
 
 import {
   IInstanceRestorer
@@ -50,7 +46,8 @@ function activate(app: JupyterLab, palette: ICommandPalette, linker: ICommandLin
   const category = 'Help';
   const command = CommandIDs.open;
   const model = new FaqModel();
-  const tracker = new InstanceTracker<FaqWidget>({ namespace: 'faq' });
+  const { commands, shell } = app;
+  const tracker = new InstanceTracker<FaqWidget>({ namespace: 'faq', shell  });
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -71,14 +68,14 @@ function activate(app: JupyterLab, palette: ICommandPalette, linker: ICommandLin
     return widget;
   }
 
-  app.commands.addCommand(command, {
+  commands.addCommand(command, {
     label: 'Open FAQ',
     execute: () => {
       if (!widget || widget.isDisposed) {
         widget = newWidget();
-        app.shell.addToMainArea(widget);
+        shell.addToMainArea(widget);
       }
-      app.shell.activateMain(widget.id);
+      tracker.activate(widget);
     }
   });
 

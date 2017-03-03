@@ -16,6 +16,10 @@ import {
 } from 'simulate-event';
 
 import {
+  ApplicationShell
+} from '../../../lib/application';
+
+import {
   CodeMirrorEditorFactory
 } from '../../../lib/codemirror';
 
@@ -99,7 +103,10 @@ describe('notebook/celltools', () => {
   let panel1: NotebookPanel;
 
   beforeEach((done) => {
-    tracker = new NotebookTracker({ namespace: 'notebook' });
+    tracker = new NotebookTracker({
+      namespace: 'notebook',
+      shell: new ApplicationShell()
+    });
     panel0 = createNotebookPanel();
     populateNotebook(panel0.notebook);
     panel1 = createNotebookPanel();

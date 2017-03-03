@@ -2,16 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin
+  InstanceTracker, JupyterLab, JupyterLabPlugin
 } from '../application';
 
 import {
   IEditorServices
 } from '../codeeditor';
-
-import {
-  InstanceTracker
-} from '../common/instancetracker';
 
 import {
   IDocumentRegistry
@@ -75,7 +71,11 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
       defaultFor: ['*']
     }
   });
-  const tracker = new InstanceTracker<EditorWidget>({ namespace: 'editor' });
+  const shell = app.shell;
+  const tracker = new InstanceTracker<EditorWidget>({
+    namespace: 'editor',
+    shell
+  });
 
   // Handle state restoration.
   restorer.restore(tracker, {

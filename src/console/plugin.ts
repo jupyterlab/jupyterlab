@@ -14,7 +14,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  JupyterLab, JupyterLabPlugin
+  InstanceTracker, JupyterLab, JupyterLabPlugin
 } from '../application';
 
 import {
@@ -32,10 +32,6 @@ import {
 import {
   showDialog, cancelButton, warnButton
 } from '../common/dialog';
-
-import {
-  InstanceTracker
-} from '../common/instancetracker';
 
 import {
   selectKernel
@@ -139,7 +135,10 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   let menu = new Menu({ commands });
 
   // Create an instance tracker for all console panels.
-  const tracker = new InstanceTracker<ConsolePanel>({ namespace: 'console' });
+  const tracker = new InstanceTracker<ConsolePanel>({
+    namespace: 'console',
+    shell
+  });
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -202,9 +201,9 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   // Get the current widget and activate unless the args specify otherwise.
   function getCurrent(args: JSONObject): ConsolePanel | null {
     let widget = tracker.currentWidget;
-    let activate = !args || args && args['activate'] !== false;
+    let activate = args['activate'] !== false;
     if (activate && widget) {
-      shell.activateMain(widget.id);
+      tracker.activate(widget);
     }
     return widget;
   }
@@ -324,7 +323,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       tracker.find(widget => {
         if (widget.console.session.id === id) {
           if (args['activate'] !== false) {
-            shell.activateMain(widget.id);
+            tracker.activate(widget);
           }
           widget.console.inject(args['code'] as string);
           return true;
@@ -343,7 +342,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
         }
       });
       if (widget) {
-        shell.activateMain(widget.id);
+        tracker.activate(widget);
       } else {
         app.commands.execute(CommandIDs.create, { id });
       }
@@ -421,7 +420,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     // Add the console panel to the tracker.
     tracker.add(panel);
     shell.addToMainArea(panel);
-    shell.activateMain(panel.id);
+    tracker.activate(panel);
   }
 
   command = CommandIDs.switchKernel;

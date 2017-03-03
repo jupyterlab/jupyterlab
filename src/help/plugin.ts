@@ -18,16 +18,12 @@ import {
 } from '../about';
 
 import {
-  JupyterLab, JupyterLabPlugin
+  InstanceTracker, JupyterLab, JupyterLabPlugin
 } from '../application';
 
 import {
   IFrame
 } from '../common/iframe';
-
-import {
-  InstanceTracker
-} from '../common/instancetracker';
 
 import {
   ICommandPalette
@@ -163,7 +159,8 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   const namespace = 'help-doc';
   const command = CommandIDs.open;
   const menu = createMenu();
-  const tracker = new InstanceTracker<ClosableIFrame>({ namespace });
+  const { commands, shell } = app;
+  const tracker = new InstanceTracker<ClosableIFrame>({ namespace, shell });
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -205,7 +202,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     return menu;
   }
 
-  app.commands.addCommand(command, {
+  commands.addCommand(command, {
     label: args => args['text'] as string,
     execute: args => {
       const url = args['url'] as string;
@@ -218,13 +215,13 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
       }
 
       let iframe = newClosableIFrame(url, text);
-      app.shell.addToMainArea(iframe);
-      app.shell.activateMain(iframe.id);
+      shell.addToMainArea(iframe);
+      tracker.activate(iframe);
     }
   });
 
 
-  app.commands.addCommand(CommandIDs.launchClassic, {
+  commands.addCommand(CommandIDs.launchClassic, {
     label: 'Launch Classic Notebook',
     execute: () => { window.open(utils.getBaseUrl() + 'tree'); }
   });

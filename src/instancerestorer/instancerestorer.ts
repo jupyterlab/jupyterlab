@@ -25,7 +25,7 @@ import {
 
 import {
   InstanceTracker
-} from '../common/instancetracker';
+} from '../application';
 
 import {
   IStateDB

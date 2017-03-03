@@ -70,6 +70,8 @@ export default plugin;
  * Activate the launcher.
  */
 function activate(app: JupyterLab, services: IServiceManager, pathTracker: IPathTracker, palette: ICommandPalette, linker: ICommandLinker, restorer: IInstanceRestorer): ILauncher {
+  const { commands, shell } = app;
+
   let model = new LauncherModel();
 
   // Set launcher path and track the path as it changes.
@@ -114,18 +116,18 @@ function activate(app: JupyterLab, services: IServiceManager, pathTracker: IPath
   // means we have to way of removing them after the fact.
   defaults.forEach(options => { model.add(options); });
 
-  app.commands.addCommand(CommandIDs.show, {
+  commands.addCommand(CommandIDs.show, {
     label: 'Show Launcher',
     execute: () => {
       if (!widget.isAttached) {
-        app.shell.addToLeftArea(widget);
+        shell.addToLeftArea(widget);
       }
-      app.shell.activateLeft(widget.id);
+      shell.activateById(widget.id);
     }
   });
   palette.addItem({ command: CommandIDs.show, category: 'Help' });
 
-  app.shell.addToLeftArea(widget);
+  shell.addToLeftArea(widget);
 
   return model;
 }

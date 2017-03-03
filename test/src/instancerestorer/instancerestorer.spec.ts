@@ -20,8 +20,8 @@ import {
 } from '../../../lib/instancerestorer/instancerestorer';
 
 import {
-  InstanceTracker
-} from '../../../lib/common/instancetracker';
+  ApplicationShell, InstanceTracker
+} from '../../../lib/application';
 
 import {
   StateDB
@@ -147,7 +147,10 @@ describe('instancerestorer/instancerestorer', () => {
     describe('#restore()', () => {
 
       it('should restore the widgets in a tracker', done => {
-        let tracker = new InstanceTracker<Widget>({ namespace: 'foo-widget' });
+        let tracker = new InstanceTracker<Widget>({
+          namespace: 'foo-widget',
+          shell: new ApplicationShell()
+        });
         let registry = new CommandRegistry();
         let state = new StateDB({ namespace: NAMESPACE });
         let ready = new utils.PromiseDelegate<void>();

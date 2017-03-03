@@ -2,12 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin
+  JupyterLab, JupyterLabPlugin, InstanceTracker
 } from '../application';
-
-import {
-  InstanceTracker
-} from '../common/instancetracker';
 
 import {
   IDocumentRegistry
@@ -66,8 +62,9 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, rendermime: IRen
       fileExtensions: ['.md'],
       rendermime
     });
+    const shell = app.shell;
     const namespace = 'rendered-markdown';
-    const tracker = new InstanceTracker<MarkdownWidget>({ namespace });
+    const tracker = new InstanceTracker<MarkdownWidget>({ namespace, shell });
     let icon = `${PORTRAIT_ICON_CLASS} ${TEXTEDITOR_ICON_CLASS}`;
 
     // Handle state restoration.

@@ -7,7 +7,7 @@ import {
 
 import {
   IInstanceTracker
-} from '../common/instancetracker';
+} from '../application';
 
 import {
   ConsolePanel

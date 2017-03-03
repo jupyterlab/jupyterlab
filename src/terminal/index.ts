@@ -6,12 +6,12 @@ import {
 } from '@phosphor/application';
 
 import {
-  IInstanceTracker
-} from '../common/instancetracker';
-
-import {
   CommandRegistry
 } from '@phosphor/commands';
+
+import {
+  IInstanceTracker
+} from '../application';
 
 import {
   TerminalWidget

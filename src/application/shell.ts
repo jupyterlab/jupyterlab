@@ -145,17 +145,21 @@ class ApplicationShell extends Widget {
   }
 
   /**
-   * True if left area is empty.
+   * True if the given area is empty.
    */
-  get leftAreaIsEmpty(): boolean {
-    return this._leftHandler.stackedPanel.widgets.length === 0;
-  }
-
-  /**
-   * True if main area is empty.
-   */
-  get mainAreaIsEmpty(): boolean {
-    return this._dockPanel.isEmpty;
+  isEmpty(area: ApplicationShell.Area): boolean {
+    switch (area) {
+    case 'left':
+      return this._leftHandler.stackedPanel.widgets.length === 0;
+    case 'main':
+      return this._dockPanel.isEmpty;
+    case 'top':
+      return this._topPanel.widgets.length === 0;
+    case 'right':
+      return this._rightHandler.stackedPanel.widgets.length === 0;
+    default:
+      return true;
+    }
   }
 
   /**
@@ -166,34 +170,19 @@ class ApplicationShell extends Widget {
   }
 
   /**
-   * True if right area is empty.
+   * Activate a widget in it's area.
    */
-  get rightAreaIsEmpty(): boolean {
-    return this._rightHandler.stackedPanel.widgets.length === 0;
-  }
-
-  /**
-   * True if top area is empty.
-   */
-  get topAreaIsEmpty(): boolean {
-    return this._topPanel.widgets.length === 0;
-  }
-
-  /**
-   * Activate a widget in the left area.
-   */
-  activateLeft(id: string): void {
-    this._leftHandler.activate(id);
-  }
-
-  /**
-   * Activate a widget in the main area.
-   */
-  activateMain(id: string): void {
-    let dock = this._dockPanel;
-    let widget = find(dock.widgets(), value => value.id === id);
-    if (widget) {
-      dock.activateWidget(widget);
+  activateById(id: string): void {
+    if (this._leftHandler.has(id)) {
+      this._leftHandler.activate(id);
+    } else if (this._rightHandler.has(id)) {
+      this._rightHandler.activate(id);
+    } else {
+      let dock = this._dockPanel;
+      let widget = find(dock.widgets(), value => value.id === id);
+      if (widget) {
+        dock.activateWidget(widget);
+      }
     }
   }
 
@@ -240,13 +229,6 @@ class ApplicationShell extends Widget {
         }
       }
     }
-  }
-
-  /**
-   * Activate a widget in the right area.
-   */
-  activateRight(id: string): void {
-    this._rightHandler.activate(id);
   }
 
   /**
@@ -361,7 +343,7 @@ class ApplicationShell extends Widget {
         this._rightHandler.rehydrate(rightArea);
       }
       if (currentWidget) {
-        this.activateMain(currentWidget.id);
+        this.activateById(currentWidget.id);
       }
       this._isRestored = true;
       return this._save().then(() => { this._restored.resolve(saved); });
@@ -592,6 +574,13 @@ namespace Private {
         this._sideBar.currentTitle = widget.title;
         widget.activate();
       }
+    }
+
+    /**
+     * Test whether the sidebar has the given widget by id.
+     */
+    has(id: string): boolean {
+      return this._findWidgetByID(id) !== null;
     }
 
     /**
