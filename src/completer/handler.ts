@@ -26,7 +26,7 @@ import {
  * A class added to editors that can host a completer.
  */
 export
-const COMPLETABLE_CLASS: string = 'jp-mod-completer-enabled';
+const COMPLETER_ENABLED_CLASS: string = 'jp-mod-completer-enabled';
 
 /**
  * A class added to editors that have an active completer.
@@ -73,7 +73,7 @@ class CompletionHandler implements IDisposable {
     // Clean up and disconnect from old editor.
     if (editor && !editor.isDisposed) {
       let model = editor.model;
-      editor.host.classList.remove(COMPLETABLE_CLASS);
+      editor.host.classList.remove(COMPLETER_ENABLED_CLASS);
       model.selections.changed.disconnect(this.onSelectionsChanged, this);
       model.value.changed.disconnect(this.onTextChanged, this);
     }
@@ -89,6 +89,8 @@ class CompletionHandler implements IDisposable {
       let model = editor.model;
       model.selections.changed.connect(this.onSelectionsChanged, this);
       model.value.changed.connect(this.onTextChanged, this);
+      // On initial load, manually check the cursor position.
+      this.onSelectionsChanged();
     }
   }
 
@@ -282,11 +284,13 @@ class CompletionHandler implements IDisposable {
     const line = editor.getLine(position.line);
 
     if (line.match(/^\W*$/)) {
+      this._enabled = false;
       model.reset(true);
-      host.classList.remove(COMPLETABLE_CLASS);
+      host.classList.remove(COMPLETER_ENABLED_CLASS);
       return;
     }
-    host.classList.add(COMPLETABLE_CLASS);
+    this._enabled = true;
+    host.classList.add(COMPLETER_ENABLED_CLASS);
   }
 
   /**
@@ -294,7 +298,7 @@ class CompletionHandler implements IDisposable {
    */
   protected onTextChanged(): void {
     const model = this._completer.model;
-    if (!model) {
+    if (!model || !this._enabled) {
       return;
     }
 
@@ -329,6 +333,7 @@ class CompletionHandler implements IDisposable {
   }
 
   private _editor: CodeEditor.IEditor | null = null;
+  private _enabled = false;
   private _completer: CompleterWidget | null = null;
   private _kernel: Kernel.IKernel | null = null;
   private _pending = 0;

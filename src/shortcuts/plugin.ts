@@ -10,7 +10,7 @@ import {
 } from '../commandpalette';
 
 import {
-  CommandIDs as CompleterCommandIDs, COMPLETABLE_CLASS
+  CommandIDs as CompleterCommandIDs, COMPLETER_ENABLED_CLASS
 } from '../completer';
 
 import {
@@ -87,12 +87,12 @@ const SHORTCUTS = [
   },
   {
     command: CompleterCommandIDs.invokeConsole,
-    selector: `.jp-ConsolePanel .${COMPLETABLE_CLASS}`,
+    selector: `.jp-ConsolePanel .${COMPLETER_ENABLED_CLASS}`,
     keys: ['Tab']
   },
   {
     command: CompleterCommandIDs.invokeNotebook,
-    selector: `.jp-Notebook .${COMPLETABLE_CLASS}`,
+    selector: `.jp-Notebook .${COMPLETER_ENABLED_CLASS}`,
     keys: ['Tab']
   },
   {
