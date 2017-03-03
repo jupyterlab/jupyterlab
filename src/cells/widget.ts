@@ -761,13 +761,13 @@ class InputAreaWidget extends Widget {
    * Render an input instead of the text editor.
    */
   renderInput(widget: Widget): void {
-    this._editor.hide();
     let layout = this.layout as PanelLayout;
     if (this._rendered) {
       layout.removeWidget(this._rendered);
+    } else {
+      layout.removeWidget(this._editor);
     }
     this._rendered = widget;
-    widget.show();
     layout.addWidget(widget);
   }
 
@@ -778,8 +778,8 @@ class InputAreaWidget extends Widget {
     let layout = this.layout as PanelLayout;
     if (this._rendered) {
       layout.removeWidget(this._rendered);
+      layout.addWidget(this._editor);
     }
-    this._editor.show();
   }
 
   /**
