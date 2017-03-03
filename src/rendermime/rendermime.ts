@@ -71,7 +71,7 @@ class RenderMime {
         this._renderers[item.mimeType] = item.renderer;
       }
     }
-    this._sanitizer = options.sanitizer || defaultSanitizer;
+    this.sanitizer = options.sanitizer || defaultSanitizer;
     this._resolver = options.resolver || null;
     this._handler = options.linkHandler || null;
   }
@@ -125,7 +125,7 @@ class RenderMime {
       mimeType,
       model,
       resolver: this._resolver,
-      sanitizer: this._sanitizer,
+      sanitizer: this.sanitizer,
       linkHandler: this._handler
     };
     return this._renderers[mimeType].render(rendererOptions);
@@ -141,7 +141,7 @@ class RenderMime {
    * until a renderer returns `true` for `.canRender`.
    */
   preferredMimeType(model: RenderMime.IMimeModel): string {
-    let sanitizer = this._sanitizer;
+    let sanitizer = this.sanitizer;
     return find(this._order, mimeType => {
       if (model.data.has(mimeType)) {
         let options = { mimeType, model, sanitizer };
@@ -165,7 +165,7 @@ class RenderMime {
     }));
     return new RenderMime({
       items,
-      sanitizer: this._sanitizer,
+      sanitizer: this.sanitizer,
       linkHandler: this._handler
     });
   }
@@ -227,14 +227,15 @@ class RenderMime {
    let options = {
       mimeType: 'application/vnd.jupyter.stderr',
       model: errModel,
-      sanitizer: this._sanitizer,
+      sanitizer: this.sanitizer,
     };
    return new RenderedText(options);
   }
 
+  readonly sanitizer: ISanitizer;
+
   private _renderers: { [key: string]: RenderMime.IRenderer } = Object.create(null);
   private _order: string[] = [];
-  private _sanitizer: ISanitizer;
   private _resolver: RenderMime.IResolver | null;
   private _handler: RenderMime.ILinkHandler | null;
 }
@@ -355,11 +356,18 @@ namespace RenderMime {
     canRender(options: IRenderOptions): boolean;
 
     /**
-     * Render the transformed mime diata.
+     * Render the transformed mime data.
      *
      * @param options - The options used to render the data.
      */
     render(options: IRenderOptions): Widget;
+
+    /**
+     * Whether the renderer will sanitize the data given the render options.
+     *
+     * @param options - The options that would be used to render the data.
+     */
+    wouldSanitize(options: IRenderOptions): boolean;
   }
 
   /**
