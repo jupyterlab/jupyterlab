@@ -193,8 +193,8 @@ class CompletionHandler implements IDisposable {
   /**
    * Handle a completion selected signal from the completion widget.
    */
-  protected onCompletionSelected(widget: CompleterWidget, value: string): void {
-    let model = this._completer.model;
+  protected onCompletionSelected(completer: CompleterWidget, value: string): void {
+    let model = completer.model;
     let editor = this._editor;
     if (!editor || !model) {
       return;
