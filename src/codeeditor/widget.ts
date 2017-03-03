@@ -55,8 +55,6 @@ class CodeEditorWidget extends Widget {
     if (this.isDisposed) {
       return;
     }
-    clearTimeout(this._resizing);
-    this._resizing = -1;
     super.dispose();
     this._editor.dispose();
     this._editor = null;
@@ -75,12 +73,10 @@ class CodeEditorWidget extends Widget {
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     this.node.addEventListener('focus', this, true);
-    if (!this.isVisible) {
-      this._needsRefresh = true;
-      return;
+    if (this.isVisible) {
+      this._editor.refresh();
+      this._needsRefresh = false;
     }
-    this._editor.refresh();
-    this._needsRefresh = false;
   }
 
   /**
@@ -102,24 +98,15 @@ class CodeEditorWidget extends Widget {
    * A message handler invoked on an `'resize'` message.
    */
   protected onResize(msg: Widget.ResizeMessage): void {
-    if (msg.width < 0 || msg.height < 0) {
-      if (this._resizing === -1) {
-        this._editor.setSize(null);
-        this._resizing = window.setTimeout(() => {
-          if (this._needsResize) {
-            this._editor.setSize(null);
-            this._needsResize = false;
-          }
-          this._resizing = -1;
-        }, 500);
-      } else {
-        this._needsResize = true;
-      }
-    } else {
+    if (msg.width >= 0 && msg.height >= 0) {
       this._editor.setSize(msg);
-      this._needsResize = false;
+      this._needsRefresh = false;
+    } else if (this._editor.hasFocus()) {
+      this._editor.refresh();
+      this._needsRefresh = false;
+    } else {
+      this._needsRefresh = true;
     }
-    this._needsRefresh = true;
   }
 
   /**
@@ -153,9 +140,7 @@ class CodeEditorWidget extends Widget {
   }
 
   private _editor: CodeEditor.IEditor = null;
-  private _needsRefresh = true;
-  private _needsResize = false;
-  private _resizing = -1;
+  private _needsRefresh = false;
 }
 
 
