@@ -98,6 +98,8 @@ class CodeEditorWidget extends Widget {
   protected onResize(msg: Widget.ResizeMessage): void {
     if (msg.width >= 0 && msg.height >= 0) {
       this._editor.setSize(msg);
+    } else if (this._editor.hasFocus()) {
+      this._editor.refresh();
     }
   }
 
