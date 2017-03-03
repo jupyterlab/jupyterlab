@@ -21,7 +21,6 @@
   margin: 4px 0 0 -4px;
   max-height: calc((10 * var(--jp-private-completer-item-height)) + (2 * var(--jp-border-width)));
   min-height: calc(var(--jp-private-completer-item-height) + (2 * var(--jp-border-width)));
-  position: absolute;
   z-index: 10001;
 }
 
