@@ -181,6 +181,13 @@ class TooltipWidget extends Widget {
    * Handle scroll events for the widget
    */
   private _evtScroll(event: MouseEvent) {
+    // All scrolls except scrolls in the actual hover box node may cause the
+    // referent editor that anchors the node to move, so the only scroll events
+    // that can safely be ignored are ones that happen inside the hovering node.
+    if (this.node.contains(event.target as HTMLElement)) {
+      return;
+    }
+
     this.update();
   }
 
