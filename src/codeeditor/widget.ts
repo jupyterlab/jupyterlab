@@ -94,7 +94,8 @@ class CodeEditorWidget extends Widget {
    * A message handler invoked on an `'after-show'` message.
    */
   protected onAfterShow(msg: Message): void {
-    this._editor.refresh();
+    this._editor.setSize(null);
+    this._needsResize = false;
     this._needsRefresh = false;
   }
 
