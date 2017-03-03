@@ -79,7 +79,9 @@ class CompletionHandler implements IDisposable {
     }
 
     // Reset completer state.
-    this._completer.reset();
+    if (this._completer) {
+      this._completer.reset();
+    }
 
     // Update the editor and signal connections.
     editor = this._editor = this._completer.editor = newValue;
