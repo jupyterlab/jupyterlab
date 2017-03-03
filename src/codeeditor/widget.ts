@@ -75,12 +75,9 @@ class CodeEditorWidget extends Widget {
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     this.node.addEventListener('focus', this, true);
-    if (!this.isVisible) {
-      this._needsRefresh = true;
-      return;
+    if (this.isVisible) {
+      this._editor.refresh();
     }
-    this._editor.refresh();
-    this._needsRefresh = false;
   }
 
   /**
@@ -94,9 +91,7 @@ class CodeEditorWidget extends Widget {
    * A message handler invoked on an `'after-show'` message.
    */
   protected onAfterShow(msg: Message): void {
-    this._editor.setSize(null);
-    this._needsResize = false;
-    this._needsRefresh = false;
+    this._editor.refresh();
   }
 
   /**
@@ -120,7 +115,6 @@ class CodeEditorWidget extends Widget {
       this._editor.setSize(msg);
       this._needsResize = false;
     }
-    this._needsRefresh = true;
   }
 
   /**
@@ -147,14 +141,10 @@ class CodeEditorWidget extends Widget {
    * Handle `focus` events for the widget.
    */
   private _evtFocus(event: FocusEvent): void {
-    if (this._needsRefresh) {
-      this._editor.refresh();
-      this._needsRefresh = false;
-    }
+    this._editor.refresh();
   }
 
   private _editor: CodeEditor.IEditor = null;
-  private _needsRefresh = true;
   private _needsResize = false;
   private _resizing = -1;
 }
