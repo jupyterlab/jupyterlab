@@ -217,7 +217,7 @@ describe('CodeEditorWidget', () => {
     it('should be a no-op', () => {
       let editor = widget.editor as LogEditor;
       Widget.attach(widget, document.body);
-      widget.messages = [];
+      widget.methods = [];
       MessageLoop.sendMessage(widget, Widget.ResizeMessage.UnknownSize);
       expect(editor.methods).to.eql(['onResize']);
     });
