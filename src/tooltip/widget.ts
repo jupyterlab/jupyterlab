@@ -188,19 +188,13 @@ class TooltipWidget extends Widget {
    * Set the geometry of the tooltip widget.
    */
   private _setGeometry():  void {
-    let node = this.node;
-    let editor = this._editor;
-    let { charWidth, lineHeight } = editor;
-    let coords = editor.getCoordinateForPosition(editor.getCursorPosition());
-
     // Calculate the geometry of the completer.
     HoverBox.setGeometry({
-      charWidth, coords, lineHeight, node,
-      anchor: this.anchor.node,
-      anchorPoint: this.anchor.node.scrollTop,
       cursor: { start: 0, end: 0 },
+      editor: this._editor,
       maxHeight: MAX_HEIGHT,
-      minHeight: MIN_HEIGHT
+      minHeight: MIN_HEIGHT,
+      node: this.node
     });
   }
 
