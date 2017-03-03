@@ -26,7 +26,7 @@ import {
  * A class added to editors that can host a completer.
  */
 export
-const COMPLETABLE_CLASS: string = 'jp-mod-completable';
+const COMPLETABLE_CLASS: string = 'jp-mod-completer-enabled';
 
 /**
  * A class added to editors that have an active completer.
@@ -82,7 +82,7 @@ class CompletionHandler implements IDisposable {
     this._completer.reset();
 
     // Update the editor and signal connections.
-    editor = this._editor = newValue;
+    editor = this._editor = this._completer.editor = newValue;
     if (editor) {
       let model = editor.model;
       model.selections.changed.connect(this.onSelectionsChanged, this);
@@ -191,6 +191,28 @@ class CompletionHandler implements IDisposable {
   }
 
   /**
+   * Handle a completion selected signal from the completion widget.
+   */
+  protected onCompletionSelected(widget: CompleterWidget, value: string): void {
+    let model = this._completer.model;
+    let editor = this._editor;
+    if (!editor || !model) {
+      return;
+    }
+
+    let patch = model.createPatch(value);
+    if (!patch) {
+      return;
+    }
+
+    let { offset, text } = patch;
+    editor.model.value.text = text;
+
+    let position = editor.getPositionAt(offset);
+    editor.setCursorPosition(position);
+  }
+
+  /**
    * Handle `invoke-request` messages.
    */
   protected onInvokeRequest(msg: Message): void {
@@ -281,18 +303,18 @@ class CompletionHandler implements IDisposable {
       return;
     }
 
-    // Allow completion if the current or a preceding char is not whitespace.
-    const position = editor.getCursorPosition();
-    const request = this.getState(position);
-    this._completer.model.handleTextChange(request);
+    const request = this.getState(editor.getCursorPosition());
+    console.log('request', request);
+    model.handleTextChange(request);
   }
 
   /**
-   * Handle a visiblity change signal from a completion widget.
+   * Handle a visiblity change signal from a completer widget.
    */
-  protected onVisibilityChanged(completion: CompleterWidget): void {
+  protected onVisibilityChanged(completer: CompleterWidget): void {
     // Completer is not active.
-    if (completion.isDisposed || completion.isHidden) {
+    if (completer.isDisposed || completer.isHidden) {
+      console.log('visiblity changed to hidden');
       if (this._editor) {
         this._editor.host.classList.remove(COMPLETER_ACTIVE_CLASS);
         this._editor.focus();
@@ -304,28 +326,6 @@ class CompletionHandler implements IDisposable {
     if (this._editor) {
       this._editor.host.classList.add(COMPLETER_ACTIVE_CLASS);
     }
-  }
-
-  /**
-   * Handle a completion selected signal from the completion widget.
-   */
-  protected onCompletionSelected(widget: CompleterWidget, value: string): void {
-    let model = this._completer.model;
-    let editor = this._editor;
-    if (!editor || !model) {
-      return;
-    }
-
-    let patch = model.createPatch(value);
-    if (!patch) {
-      return;
-    }
-
-    let { offset, text } = patch;
-    editor.model.value.text = text;
-
-    let position = editor.getPositionAt(offset);
-    editor.setCursorPosition(position);
   }
 
   private _editor: CodeEditor.IEditor | null = null;
