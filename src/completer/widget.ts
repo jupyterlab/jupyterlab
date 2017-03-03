@@ -237,7 +237,6 @@ class CompleterWidget extends Widget {
     if (!items || !items.length) {
       this._reset();
       if (!this.isHidden) {
-        console.log('hiding', toArray(model.options()));
         this.hide();
         this._visibilityChanged.emit(void 0);
       }

@@ -304,7 +304,6 @@ class CompletionHandler implements IDisposable {
     }
 
     const request = this.getState(editor.getCursorPosition());
-    console.log('request', request);
     model.handleTextChange(request);
   }
 
@@ -314,7 +313,6 @@ class CompletionHandler implements IDisposable {
   protected onVisibilityChanged(completer: CompleterWidget): void {
     // Completer is not active.
     if (completer.isDisposed || completer.isHidden) {
-      console.log('visiblity changed to hidden');
       if (this._editor) {
         this._editor.host.classList.remove(COMPLETER_ACTIVE_CLASS);
         this._editor.focus();
