@@ -99,11 +99,6 @@ namespace ICompletionManager {
   export
   interface ICompletable extends ICompletableAttributes {
     /**
-     * The referent anchor the completer follows.
-     */
-    readonly anchor: Widget;
-
-    /**
      * The parent of the completer; the completer resources dispose with parent.
      */
     readonly parent: Widget;
