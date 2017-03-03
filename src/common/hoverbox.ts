@@ -66,7 +66,7 @@ namespace HoverBox {
   export
   function setGeometry(options: IOptions): void {
     const { cursor, editor, node } = options;
-    const { charWidth, host } = editor;
+    const { host } = editor;
     const position = editor.getPositionAt(cursor.start);
     const coords = editor.getCoordinateForPosition(position);
 
@@ -101,7 +101,7 @@ namespace HoverBox {
     // If the whole box fits below or if there is more space below, then
     // rendering the box below the text being typed is privileged so that
     // the code above is not obscured.
-    let renderBelow = spaceBelow >= maxHeight || spaceBelow >= spaceAbove;
+    const renderBelow = spaceBelow >= maxHeight || spaceBelow >= spaceAbove;
     if (renderBelow) {
       maxHeight = Math.min(spaceBelow - marginTop, maxHeight);
     } else {
@@ -112,7 +112,7 @@ namespace HoverBox {
     node.style.maxHeight = `${maxHeight}px`;
 
     // Make sure the box ought to be visible.
-    let withinBounds = maxHeight > minHeight &&
+    const withinBounds = maxHeight > minHeight &&
       (spaceBelow >= minHeight || spaceAbove >= minHeight);
 
     if (!withinBounds) {
@@ -120,17 +120,16 @@ namespace HoverBox {
       return;
     }
 
-    let borderLeftWidth = style.borderLeftWidth;
-    let left = coords.left + (parseInt(borderLeftWidth, 10) || 0);
-    let { start, end } = cursor;
-    let nodeRect = node.getBoundingClientRect();
+    const borderLeft = parseInt(style.borderLeftWidth, 10) || 0;
+    const paddingLeft = parseInt(style.paddingLeft, 10) || 0;
+    const left = coords.left + borderLeft + paddingLeft;
+    const nodeRect = node.getBoundingClientRect();
 
     // Position the box vertically.
     top = renderBelow ? innerHeight - spaceBelow : spaceAbove - nodeRect.height;
     node.style.top = `${Math.floor(top)}px`;
 
     // Move box to the start of the blob of text in the referent editor.
-    left -= charWidth * (end - start);
     node.style.left = `${Math.ceil(left)}px`;
     node.style.width = 'auto';
 
