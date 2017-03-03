@@ -355,11 +355,18 @@ namespace RenderMime {
     canRender(options: IRenderOptions): boolean;
 
     /**
-     * Render the transformed mime diata.
+     * Render the transformed mime data.
      *
      * @param options - The options used to render the data.
      */
     render(options: IRenderOptions): Widget;
+
+    /**
+     * Whether the renderer will sanitize the data given the render options.
+     *
+     * @param options - The options that would be used to render the data.
+     */
+    wouldSanitize(options: IRenderOptions): boolean;
   }
 
   /**

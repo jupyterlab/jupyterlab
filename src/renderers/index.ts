@@ -37,6 +37,13 @@ class HTMLRenderer implements RenderMime.IRenderer {
   render(options: RenderMime.IRenderOptions): Widget {
     return new RenderedHTML(options);
   }
+
+  /**
+   * Whether the renderer will sanitize the data given the render options.
+   */
+  wouldSanitize(options: RenderMime.IRenderOptions): boolean {
+    return !options.model.trusted;
+  }
 }
 
 
@@ -62,6 +69,13 @@ class ImageRenderer implements RenderMime.IRenderer {
    */
   render(options: RenderMime.IRenderOptions): Widget {
     return new RenderedImage(options);
+  }
+
+  /**
+   * Whether the renderer will sanitize the data given the render options.
+   */
+  wouldSanitize(options: RenderMime.IRenderOptions): boolean {
+    return false;
   }
 }
 
@@ -89,6 +103,13 @@ class TextRenderer implements RenderMime.IRenderer {
    */
   render(options: RenderMime.IRenderOptions): Widget {
     return new RenderedText(options);
+  }
+
+  /**
+   * Whether the renderer will sanitize the data given the render options.
+   */
+  wouldSanitize(options: RenderMime.IRenderOptions): boolean {
+    return false;
   }
 }
 
@@ -119,6 +140,13 @@ class JavaScriptRenderer implements RenderMime.IRenderer {
   render(options: RenderMime.IRenderOptions): Widget {
     return new RenderedJavaScript(options);
   }
+
+  /**
+   * Whether the renderer will sanitize the data given the render options.
+   */
+  wouldSanitize(options: RenderMime.IRenderOptions): boolean {
+    return false;
+  }
 }
 
 
@@ -147,6 +175,13 @@ class SVGRenderer implements RenderMime.IRenderer {
    */
   render(options: RenderMime.IRenderOptions): Widget {
     return new RenderedSVG(options);
+  }
+
+  /**
+   * Whether the renderer will sanitize the data given the render options.
+   */
+  wouldSanitize(options: RenderMime.IRenderOptions): boolean {
+    return false;
   }
 }
 
@@ -177,6 +212,13 @@ class PDFRenderer implements RenderMime.IRenderer {
   render(options: RenderMime.IRenderOptions): Widget {
     return new RenderedPDF(options);
   }
+
+  /**
+   * Whether the renderer will sanitize the data given the render options.
+   */
+  wouldSanitize(options: RenderMime.IRenderOptions): boolean {
+    return false;
+  }
 }
 
 
@@ -203,6 +245,13 @@ class LatexRenderer implements RenderMime.IRenderer  {
   render(options: RenderMime.IRenderOptions): Widget {
     return new RenderedLatex(options);
   }
+
+  /**
+   * Whether the renderer will sanitize the data given the render options.
+   */
+  wouldSanitize(options: RenderMime.IRenderOptions): boolean {
+    return false;
+  }
 }
 
 
@@ -228,5 +277,12 @@ class MarkdownRenderer implements RenderMime.IRenderer {
    */
   render(options: RenderMime.IRenderOptions): Widget {
     return new RenderedMarkdown(options);
+  }
+
+  /**
+   * Whether the renderer will sanitize the data given the render options.
+   */
+  wouldSanitize(options: RenderMime.IRenderOptions): boolean {
+    return !options.model.trusted;
   }
 }
