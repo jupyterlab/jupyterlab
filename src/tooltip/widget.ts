@@ -206,8 +206,6 @@ class TooltipWidget extends Widget {
     const style = window.getComputedStyle(this.node);
     const paddingLeft = parseInt(style.paddingLeft, 10) || 0;
 
-    console.log(`start: ${start} end: ${end}`);
-
     // Calculate the geometry of the tooltip.
     HoverBox.setGeometry({
       cursor: { start, end },
