@@ -436,7 +436,10 @@ class CompleterWidget extends Widget {
       return;
     }
 
-    let { coords, charWidth, lineHeight } = model.original;
+    const { coords, charWidth, lineHeight } = model.original;
+    const style = window.getComputedStyle(this.node);
+    const borderLeft = parseInt(style.borderLeftWidth, 10) || 0;
+    const paddingLeft = parseInt(style.paddingLeft, 10) || 0;
 
     // Calculate the geometry of the completer.
     HoverBox.setGeometry({
@@ -444,7 +447,8 @@ class CompleterWidget extends Widget {
       editor: this._editor,
       maxHeight: MAX_HEIGHT,
       minHeight: MIN_HEIGHT,
-      node: this.node
+      node: this.node,
+      offset: { horizontal: borderLeft + paddingLeft }
     });
   }
 
