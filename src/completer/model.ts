@@ -212,7 +212,7 @@ class CompleterModel implements CompleterWidget.IModel {
     const last = text.split('\n')[line][column - 1];
 
     // If last character entered is not whitespace, update completion.
-    if (last.match(/\S/)) {
+    if (last && last.match(/\S/)) {
       // If there is currently an active completion, update the current state.
       if (this.original) {
         this.current = request;
