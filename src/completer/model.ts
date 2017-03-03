@@ -208,10 +208,11 @@ class CompleterModel implements CompleterWidget.IModel {
       return;
     }
 
-    let { text, column } = request;
+    const { text, column, line } = request;
+    const last = text.split('\n')[line][column - 1];
 
     // If last character entered is not whitespace, update completion.
-    if (text[column - 1] && text[column - 1].match(/\S/)) {
+    if (last.match(/\S/)) {
       // If there is currently an active completion, update the current state.
       if (this.original) {
         this.current = request;
