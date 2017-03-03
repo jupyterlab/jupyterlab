@@ -126,15 +126,21 @@ describe('CodeEditorWidget', () => {
 
     context('focus', () => {
 
-      it('should refresh the editor', () => {
+      it('should be a no-op if the editor was not resized', () => {
         Widget.attach(widget, document.body);
-        widget.methods = [];
-        widget.editor.focus();
-        widget.node.tabIndex = -1;
-        simulate(widget.node, 'focus');
-        expect(widget.events).to.contain('focus');
         let editor = widget.editor as LogEditor;
-        expect(editor.methods).to.contain('refresh');
+        editor.methods = [];
+        simulate(editor.editor.getInputField(), 'focus');
+        expect(editor.methods).to.eql([]);
+      });
+
+      it('should refresh if editor was resized', () => {
+        Widget.attach(widget, document.body);
+        let editor = widget.editor as LogEditor;
+        MessageLoop.sendMessage(widget, Widget.ResizeMessage.UnknownSize);
+        editor.methods = [];
+        simulate(editor.editor.getInputField(), 'focus');
+        expect(editor.methods).to.eql(['refresh']);
       });
 
     });
@@ -210,16 +216,19 @@ describe('CodeEditorWidget', () => {
       let editor = widget.editor as LogEditor;
       Widget.attach(widget, document.body);
       editor.focus();
+      editor.methods = [];
       MessageLoop.sendMessage(widget, Widget.ResizeMessage.UnknownSize);
       expect(editor.methods).to.contain('refresh');
     });
 
-    it('should be a no-op', () => {
+    it('should defer the refresh until focused', () => {
       let editor = widget.editor as LogEditor;
       Widget.attach(widget, document.body);
-      widget.methods = [];
+      editor.methods = [];
       MessageLoop.sendMessage(widget, Widget.ResizeMessage.UnknownSize);
-      expect(editor.methods).to.eql(['onResize']);
+      expect(editor.methods).to.eql([]);
+      simulate(editor.editor.getInputField(), 'focus');
+      expect(editor.methods).to.eql(['refresh']);
     });
 
   });
