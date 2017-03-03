@@ -55,6 +55,23 @@ namespace HoverBox {
      * The hover box node.
      */
     node: HTMLElement;
+
+    /**
+     * Optional pixel offset values added to where the hover box should render.
+     *
+     * #### Notes
+     * This option is useful for passing in values that may pertain to CSS
+     * borders or padding in cases where the text inside the hover box may need
+     * to align with the text of the referent editor.
+     *
+     * Because the hover box calculation may render a box either above or below
+     * the cursor, the `vertical` offset accepts `above` and `below` values for
+     * the different render modes.
+     */
+    offset?: {
+      horizontal?: number,
+      vertical?: { above?: number, below?: number }
+    };
   }
 
 
@@ -96,7 +113,6 @@ namespace HoverBox {
     const minHeight = parseInt(style.minHeight, 10) || options.minHeight;
 
     let maxHeight = parseInt(style.maxHeight, 10) || options.maxHeight;
-    let top: number;
 
     // If the whole box fits below or if there is more space below, then
     // rendering the box below the text being typed is privileged so that
@@ -120,16 +136,18 @@ namespace HoverBox {
       return;
     }
 
-    const borderLeft = parseInt(style.borderLeftWidth, 10) || 0;
-    const paddingLeft = parseInt(style.paddingLeft, 10) || 0;
-    const left = coords.left + borderLeft + paddingLeft;
-    const nodeRect = node.getBoundingClientRect();
-
     // Position the box vertically.
-    top = renderBelow ? innerHeight - spaceBelow : spaceAbove - nodeRect.height;
+    const offsetAbove = options.offset && options.offset.vertical &&
+      options.offset.vertical.above || 0;
+    const offsetBelow = options.offset && options.offset.vertical &&
+      options.offset.vertical.below || 0;
+    const top = renderBelow ? (innerHeight - spaceBelow) + offsetBelow
+      : (spaceAbove - node.getBoundingClientRect().height) + offsetAbove;
     node.style.top = `${Math.floor(top)}px`;
 
-    // Move box to the start of the blob of text in the referent editor.
+    // Position the box horizontally.
+    const offsetHorizontal = options.offset && options.offset.horizontal || 0;
+    const left = coords.left + offsetHorizontal;
     node.style.left = `${Math.ceil(left)}px`;
     node.style.width = 'auto';
 
