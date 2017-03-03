@@ -206,19 +206,20 @@ describe('CodeEditorWidget', () => {
       expect(editor.methods).to.contain('setSize');
     });
 
-    it('should set the size of the editor', () => {
+    it('should refresh the editor', () => {
       let editor = widget.editor as LogEditor;
+      Widget.attach(widget, document.body);
+      editor.focus();
       MessageLoop.sendMessage(widget, Widget.ResizeMessage.UnknownSize);
-      expect(editor.methods).to.contain('setSize');
+      expect(editor.methods).to.contain('refresh');
     });
 
-    it('should make a subsequent request wait', () => {
+    it('should be a no-op', () => {
       let editor = widget.editor as LogEditor;
+      Widget.attach(widget, document.body);
+      widget.messages = [];
       MessageLoop.sendMessage(widget, Widget.ResizeMessage.UnknownSize);
-      expect(editor.methods).to.contain('setSize');
-      editor.methods = [];
-      MessageLoop.sendMessage(widget, Widget.ResizeMessage.UnknownSize);
-      expect(editor.methods).to.not.contain('setSize');
+      expect(editor.methods).to.eql(['onResize']);
     });
 
   });
