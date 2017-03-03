@@ -11,7 +11,7 @@ import {
 
 import {
   InstanceTracker
-} from '../common/instancetracker';
+} from '../application';
 
 import {
   IInstanceRestorer
@@ -43,7 +43,8 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: IInstance
   const model = new AboutModel({ version: app.info.version });
   const command = CommandIDs.open;
   const category = 'Help';
-  const tracker = new InstanceTracker<AboutWidget>({ namespace });
+  const { shell, commands } = app;
+  const tracker = new InstanceTracker<AboutWidget>({ namespace, shell });
 
   restorer.restore(tracker, {
     command,
@@ -63,14 +64,14 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: IInstance
     return widget;
   }
 
-  app.commands.addCommand(command, {
+  commands.addCommand(command, {
     label: 'About JupyterLab',
     execute: () => {
       if (!widget || widget.isDisposed) {
         widget = newWidget();
-        app.shell.addToMainArea(widget);
+        shell.addToMainArea(widget);
       }
-      app.shell.activateMain(widget.id);
+      tracker.activate(widget);
     }
   });
 

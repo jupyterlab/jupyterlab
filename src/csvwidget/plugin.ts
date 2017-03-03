@@ -2,12 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin
+  InstanceTracker, JupyterLab, JupyterLabPlugin
 } from '../application';
-
-import {
-  InstanceTracker
-} from '../common/instancetracker';
 
 import {
   IDocumentRegistry
@@ -58,7 +54,10 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
     fileExtensions: ['.csv'],
     defaultFor: ['.csv']
   });
-  const tracker = new InstanceTracker<CSVWidget>({ namespace: 'csvwidget' });
+  const tracker = new InstanceTracker<CSVWidget>({
+    namespace: 'csvwidget',
+    shell: app.shell
+  });
 
   // Handle state restoration.
   restorer.restore(tracker, {

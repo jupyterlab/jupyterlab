@@ -38,7 +38,7 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
         if (!widget.isAttached) {
           app.shell.addToMainArea(widget);
         }
-        app.shell.activateMain(widget.id);
+        app.shell.activateById(widget.id);
       }
     };
     return new DocumentManager({ registry, manager, opener });

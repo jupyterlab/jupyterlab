@@ -181,7 +181,8 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     mimeTypeService: editorServices.mimeTypeService
   });
 
-  const tracker = new NotebookTracker({ namespace: 'notebook' });
+  const shell = app.shell;
+  const tracker = new NotebookTracker({ namespace: 'notebook', shell });
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -230,14 +231,14 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
  * Add the notebook commands to the application's command registry.
  */
 function addCommands(app: JupyterLab, services: IServiceManager, tracker: NotebookTracker): void {
-  let { commands, shell } = app;
+  let { commands } = app;
 
   // Get the current widget and activate unless the args specify otherwise.
   function getCurrent(args: JSONObject): NotebookPanel | null {
     let widget = tracker.currentWidget;
-    let activate = !args || args && args['activate'] !== false;
+    let activate = args['activate'] !== false;
     if (activate && widget) {
-      shell.activateMain(widget.id);
+      tracker.activate(widget);
     }
     return widget;
   }

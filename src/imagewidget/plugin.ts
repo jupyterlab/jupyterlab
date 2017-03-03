@@ -2,16 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin
+  InstanceTracker, JupyterLab, JupyterLabPlugin
 } from '../application';
 
 import {
   ICommandPalette
 } from '../commandpalette';
-
-import {
-  InstanceTracker
-} from '../common/instancetracker';
 
 import {
   IDocumentRegistry
@@ -70,7 +66,8 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, palette: IComman
     fileExtensions: EXTENSIONS,
     defaultFor: EXTENSIONS
   });
-  const tracker = new InstanceTracker<ImageWidget>({ namespace });
+  const { shell } = app;
+  const tracker = new InstanceTracker<ImageWidget>({ namespace, shell });
 
   // Handle state restoration.
   restorer.restore(tracker, {

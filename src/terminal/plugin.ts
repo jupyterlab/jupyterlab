@@ -1,16 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  InstanceTracker
-} from '../common/instancetracker';
 
 import {
   Menu
 } from '@phosphor/widgets';
 
 import {
-  JupyterLab, JupyterLabPlugin
+  JupyterLab, JupyterLabPlugin, InstanceTracker
 } from '../application';
 
 import {
@@ -75,11 +72,10 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
     return;
   }
 
+  const { commands, shell } = app;
   const category = 'Terminal';
   const namespace = 'terminal';
-  const tracker = new InstanceTracker<TerminalWidget>({ namespace });
-
-  let { commands, shell } = app;
+  const tracker = new InstanceTracker<TerminalWidget>({ namespace, shell });
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -101,7 +97,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
       term.title.icon = `${LANDSCAPE_ICON_CLASS} ${TERMINAL_ICON_CLASS}`;
       tracker.add(term);
       shell.addToMainArea(term);
-      shell.activateMain(term.id);
+      tracker.activate(term);
 
       if (name) {
         services.terminals.connectTo(name).then(session => {
@@ -121,7 +117,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
       // Check for a running terminal with the given name.
       let widget = tracker.find(value => value.session.name === name);
       if (widget) {
-        shell.activateMain(widget.id);
+        tracker.activate(widget);
       } else {
         // Otherwise, create a new terminal with a given name.
         return commands.execute(CommandIDs.createNew, { name });
@@ -137,7 +133,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
       if (!current) {
         return;
       }
-      shell.activateMain(current.id);
+      tracker.activate(current);
       return current.refresh().then(() => {
         current.activate();
       });

@@ -37,6 +37,10 @@ import {
   IStateDB
 } from '../statedb';
 
+import {
+  ApplicationShell
+} from './shell';
+
 
 /**
  * An object that tracks widget instances.
@@ -104,11 +108,16 @@ interface IInstanceTracker<T extends Widget> extends IDisposable {
    * the parent plugin's instance tracker.
    */
   inject(widget: T): void;
+
+  /**
+   * Activate the given widget in the application, making it current.
+   */
+  activate(widget: T): void;
 }
 
 
 /**
- * A class that keeps track of widget instances.
+ * A class that keeps track of widget instances on an Application shell.
  *
  * #### Notes
  * The API surface area of this concrete implementation is substantially larger
@@ -125,6 +134,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * @param options - The instantiation options for an instance tracker.
    */
   constructor(options: InstanceTracker.IOptions) {
+    this._shell = options.shell;
     this.namespace = options.namespace;
     this._tracker.currentChanged.connect(this._onCurrentChanged, this);
   }
@@ -295,6 +305,13 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   }
 
   /**
+   * Activate the given widget in the application shell.
+   */
+  activate(widget: T): void {
+    this._shell.activateById(widget.id);
+  }
+
+  /**
    * Restore the widgets in this tracker's namespace.
    *
    * @param options - The configuration options that describe restoration.
@@ -419,6 +436,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   private _widgetAdded = new Signal<this, T>(this);
   private _widgets: T[] = [];
   private _currentWidget: T | null = null;
+  private _shell: ApplicationShell;
 }
 
 
@@ -433,6 +451,11 @@ namespace InstanceTracker {
    */
   export
   interface IOptions {
+    /**
+     * The application shell associated with the tracker.
+     */
+    shell: ApplicationShell;
+
     /**
      * A namespace for all tracked widgets, (e.g., `notebook`).
      */

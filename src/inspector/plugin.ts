@@ -2,24 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  AttachedProperty
-} from '@phosphor/properties';
-
-import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
-  JupyterLab, JupyterLabPlugin
+  InstanceTracker, JupyterLab, JupyterLabPlugin
 } from '../application';
 
 import {
   ICommandPalette
 } from '../commandpalette';
-
-import {
-  InstanceTracker
-} from '../common/instancetracker';
 
 import {
   IConsoleTracker
@@ -43,11 +31,6 @@ import {
 
 
 /**
- * The inspector instance tracker.
- */
-const tracker = new InstanceTracker<Inspector>({ namespace: 'inspector' });
-
-/**
  * A service providing code introspection.
  */
 const service: JupyterLabPlugin<IInspector> = {
@@ -56,10 +39,15 @@ const service: JupyterLabPlugin<IInspector> = {
   provides: IInspector,
   autoStart: true,
   activate: (app: JupyterLab, palette: ICommandPalette, restorer: IInstanceRestorer): IInspector => {
+    const { commands, shell } = app;
     const manager = new InspectorManager();
     const category = 'Inspector';
     const command = CommandIDs.open;
     const label = 'Open Inspector';
+    const tracker = new InstanceTracker<Inspector>({
+      namespace: 'inspector',
+      shell
+    });
 
     /**
      * Create and track a new inspector.
@@ -86,15 +74,15 @@ const service: JupyterLabPlugin<IInspector> = {
     });
 
     // Add command to registry and palette.
-    app.commands.addCommand(command, {
+    commands.addCommand(command, {
       label,
       execute: () => {
         if (!manager.inspector || manager.inspector.isDisposed) {
           manager.inspector = newInspector();
-          app.shell.addToMainArea(manager.inspector);
+          shell.addToMainArea(manager.inspector);
         }
         if (manager.inspector.isAttached) {
-          app.shell.activateMain(manager.inspector.id);
+          tracker.activate(manager.inspector);
         }
       }
     });

@@ -2,16 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin
+  InstanceTracker, JupyterLab, JupyterLabPlugin
 } from '../application';
 
 import {
   ICommandPalette
 } from '../commandpalette';
-
-import {
-  InstanceTracker
-} from '../common/instancetracker';
 
 import {
   IPathTracker
@@ -55,10 +51,14 @@ export default plugin;
  * Activate the landing plugin.
  */
 function activate(app: JupyterLab, pathTracker: IPathTracker, palette: ICommandPalette, services: IServiceManager, restorer: IInstanceRestorer): void {
+  const { commands, shell } = app;
   const category = 'Help';
   const command = CommandIDs.open;
   const model = new LandingModel(services.terminals.isAvailable());
-  const tracker = new InstanceTracker<LandingWidget>({ namespace: 'landing' });
+  const tracker = new InstanceTracker<LandingWidget>({
+    namespace: 'landing',
+    shell
+  });
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -80,14 +80,14 @@ function activate(app: JupyterLab, pathTracker: IPathTracker, palette: ICommandP
     return widget;
   }
 
-  app.commands.addCommand(command, {
+  commands.addCommand(command, {
     label: 'Open Landing',
     execute: () => {
       if (!widget || widget.isDisposed) {
         widget = newWidget();
-        app.shell.addToMainArea(widget);
+        shell.addToMainArea(widget);
       }
-      app.shell.activateMain(widget.id);
+      tracker.activate(widget);
     }
   });
 
@@ -103,8 +103,8 @@ function activate(app: JupyterLab, pathTracker: IPathTracker, palette: ICommandP
 
   // Only create a landing page if there are no other tabs open.
   app.restored.then(() => {
-    if (app.shell.mainAreaIsEmpty) {
-      app.commands.execute(command, void 0);
+    if (shell.isEmpty('main')) {
+      commands.execute(command, void 0);
     }
   });
 }

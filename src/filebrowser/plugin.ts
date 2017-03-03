@@ -279,7 +279,7 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocume
   });
 
   commands.addCommand(CommandIDs.showBrowser, {
-    execute: () => { app.shell.activateLeft(fbWidget.id); }
+    execute: () => { app.shell.activateById(fbWidget.id); }
   });
 
   commands.addCommand(CommandIDs.hideBrowser, {

@@ -91,7 +91,7 @@ export default plugin;
  * Activate the command palette.
  */
 function activate(app: JupyterLab, restorer: IInstanceRestorer): ICommandPalette {
-  const { commands } = app;
+  const { commands, shell } = app;
   const palette = new CommandPalette({ commands });
 
   // Let the application restorer track the command palette for restoration of
@@ -102,33 +102,33 @@ function activate(app: JupyterLab, restorer: IInstanceRestorer): ICommandPalette
   palette.id = 'command-palette';
   palette.title.label = 'Commands';
 
-  app.commands.addCommand(CommandIDs.activate, {
-    execute: () => { app.shell.activateLeft(palette.id); },
+  commands.addCommand(CommandIDs.activate, {
+    execute: () => { shell.activateById(palette.id); },
     label: 'Activate Command Palette'
   });
 
-  app.commands.addCommand(CommandIDs.hide, {
+  commands.addCommand(CommandIDs.hide, {
     execute: () => {
       if (!palette.isHidden) {
-        app.shell.collapseLeft();
+        shell.collapseLeft();
       }
     },
     label: 'Hide Command Palette'
   });
 
-  app.commands.addCommand(CommandIDs.toggle, {
+  commands.addCommand(CommandIDs.toggle, {
     execute: () => {
       if (palette.isHidden) {
-        return app.commands.execute(CommandIDs.activate, void 0);
+        return commands.execute(CommandIDs.activate, void 0);
       }
-      return app.commands.execute(CommandIDs.hide, void 0);
+      return commands.execute(CommandIDs.hide, void 0);
     },
     label: 'Toggle Command Palette'
   });
 
   palette.inputNode.placeholder = 'SEARCH';
 
-  app.shell.addToLeftArea(palette);
+  shell.addToLeftArea(palette);
 
   return new Palette(palette);
 }
