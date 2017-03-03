@@ -28,34 +28,14 @@ namespace HoverBox {
   export
   interface IOptions {
     /**
-     * The referent anchor for the hover box.
-     */
-    anchor: HTMLElement;
-
-    /**
-     * The initial point along the anchor's scroll axis when scrolling began.
-     */
-    anchorPoint: number;
-
-    /**
-     * The character width of the referent editor.
-     */
-    charWidth: number;
-
-    /**
-     * The cursor coordinates of the referent editor.
-     */
-    coords: CodeEditor.ICoordinate;
-
-    /**
      * The cursor definition of the referent editor.
      */
     cursor: { start: number; end: number; };
 
     /**
-     * The line height of the referent editor.
+     * The referent editor.
      */
-    lineHeight: number;
+    editor: CodeEditor.IEditor;
 
     /**
      * The maximum height of a hover box.
@@ -79,18 +59,25 @@ namespace HoverBox {
 
 
   /**
-   * Set the visible dimensions of a hovering box anchored to a scrollable node.
+   * Set the visible dimensions of a hovering box anchored to an editor cursor.
    *
    * @param options - The hover box geometry calculation options.
    */
   export
   function setGeometry(options: IOptions): void {
-    let {
-      anchor, anchorPoint, charWidth, coords, cursor, lineHeight, node
-    } = options;
+    const { cursor, editor, node } = options;
+    const { charWidth, host } = editor;
+    const position = editor.getPositionAt(cursor.start);
+    const coords = editor.getCoordinateForPosition(position);
 
     // Add hover box class if it does not exist.
     node.classList.add(HOVERBOX_CLASS);
+
+    // If the current coordinates are not visible, bail.
+    if (!host.contains(document.elementFromPoint(coords.left, coords.top))) {
+      node.classList.add(OUTOFVIEW_CLASS);
+      return;
+    }
 
     // Clear any previously set max-height.
     node.style.maxHeight = '';
@@ -101,16 +88,14 @@ namespace HoverBox {
     // Make sure the node is visible.
     node.classList.remove(OUTOFVIEW_CLASS);
 
-    // Always use the original coordinates to calculate box position.
-    let style = window.getComputedStyle(node);
-    let innerHeight = window.innerHeight;
-    let scrollDelta = anchorPoint - anchor.scrollTop;
-    let spaceAbove = coords.top + scrollDelta;
-    let spaceBelow = innerHeight - coords.bottom - scrollDelta;
-    let marginTop = parseInt(style.marginTop, 10) || 0;
+    const style = window.getComputedStyle(node);
+    const innerHeight = window.innerHeight;
+    const spaceAbove = coords.top;
+    const spaceBelow = innerHeight - coords.bottom;
+    const marginTop = parseInt(style.marginTop, 10) || 0;
+    const minHeight = parseInt(style.minHeight, 10) || options.minHeight;
+
     let maxHeight = parseInt(style.maxHeight, 10) || options.maxHeight;
-    let minHeight = parseInt(style.minHeight, 10) || options.minHeight;
-    let anchorRect = anchor.getBoundingClientRect();
     let top: number;
 
     // If the whole box fits below or if there is more space below, then
@@ -128,7 +113,7 @@ namespace HoverBox {
 
     // Make sure the box ought to be visible.
     let withinBounds = maxHeight > minHeight &&
-      (spaceBelow >= lineHeight || spaceAbove >= anchorRect.top);
+      (spaceBelow >= minHeight || spaceAbove >= minHeight);
 
     if (!withinBounds) {
       node.classList.add(OUTOFVIEW_CLASS);
