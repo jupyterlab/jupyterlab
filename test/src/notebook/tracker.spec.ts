@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  ApplicationShell
+} from '../../../lib/application';
+
+import {
   BaseCellWidget
 } from '../../../lib/cells';
 
@@ -20,7 +24,8 @@ import {
 } from './utils';
 
 
-const NAMESPACE = 'notebook-tracker-test';
+const namespace = 'notebook-tracker-test';
+const shell = new ApplicationShell();
 
 
 class TestTracker extends NotebookTracker {
@@ -40,7 +45,7 @@ describe('notebook/tracker', () => {
     describe('#constructor()', () => {
 
       it('should create a NotebookTracker', () => {
-        let tracker = new NotebookTracker({ namespace: NAMESPACE });
+        let tracker = new NotebookTracker({ namespace, shell });
         expect(tracker).to.be.a(NotebookTracker);
       });
 
@@ -49,19 +54,19 @@ describe('notebook/tracker', () => {
     describe('#activeCell', () => {
 
       it('should be `null` if there is no tracked notebook panel', () => {
-        let tracker = new NotebookTracker({ namespace: NAMESPACE });
+        let tracker = new NotebookTracker({ namespace, shell });
         expect(tracker.activeCell).to.be(null);
       });
 
       it('should be `null` if a tracked notebook has no active cell', () => {
-        let tracker = new NotebookTracker({ namespace: NAMESPACE });
+        let tracker = new NotebookTracker({ namespace, shell });
         let panel = createNotebookPanel();
         tracker.add(panel);
         expect(tracker.activeCell).to.be(null);
       });
 
       it('should be the active cell if a tracked notebook has one', () => {
-        let tracker = new NotebookTracker({ namespace: NAMESPACE });
+        let tracker = new NotebookTracker({ namespace, shell });
         let panel = createNotebookPanel();
         tracker.add(panel);
         panel.context = createNotebookContext();
@@ -75,7 +80,7 @@ describe('notebook/tracker', () => {
     describe('#activeCellChanged', () => {
 
       it('should emit a signal when the active cell changes', () => {
-        let tracker = new NotebookTracker({ namespace: NAMESPACE });
+        let tracker = new NotebookTracker({ namespace, shell });
         let panel = createNotebookPanel();
         let count = 0;
         tracker.activeCellChanged.connect(() => { count++; });
@@ -93,7 +98,7 @@ describe('notebook/tracker', () => {
     describe('#onCurrentChanged()', () => {
 
       it('should be called when the active cell changes', () => {
-        let tracker = new TestTracker({ namespace: NAMESPACE });
+        let tracker = new TestTracker({ namespace, shell });
         let panel = createNotebookPanel();
         tracker.add(panel);
         expect(tracker.methods).to.contain('onCurrentChanged');
