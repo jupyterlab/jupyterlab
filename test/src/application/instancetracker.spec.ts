@@ -135,7 +135,7 @@ describe('common/instancetracker', () => {
         panel.addWidget(widget1);
         Widget.attach(panel, document.body);
         expect(tracker.currentWidget).to.be(widget1);
-        widget10.node.focus();
+        widget0.node.focus();
         simulate(widget0.node, 'focus');
         expect(tracker.currentWidget).to.be(widget0);
         panel.dispose();
@@ -164,7 +164,7 @@ describe('common/instancetracker', () => {
         });
         Widget.attach(panel, document.body);
 
-        widget[0].node.focus();
+        widgets[0].node.focus();
         simulate(widgets[0].node, 'focus');
         expect(tracker.currentWidget).to.be(widgets[0]);
 
