@@ -461,6 +461,11 @@ namespace CodeEditor {
     hasFocus(): boolean;
 
     /**
+     * Explicitly blur the editor.
+     */
+    blur(): void;
+
+    /**
      * Repaint the editor.
      */
     refresh(): void;
