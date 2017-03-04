@@ -109,30 +109,28 @@ describe('console/widget', () => {
         expect(widget.cells).to.be.ok();
       });
 
-      it('should reflect the contents of the widget', done => {
+      it('should reflect the contents of the widget', () => {
         let force = true;
         Widget.attach(widget, document.body);
-        widget.execute(force).then(() => {
+        return widget.execute(force).then(() => {
           expect(widget.cells.length).to.be(1);
           widget.clear();
           expect(widget.cells.length).to.be(0);
-          done();
-        }).catch(done);
+        });
       });
 
     });
 
     describe('#executed', () => {
 
-      it('should emit a date upon execution', done => {
+      it('should emit a date upon execution', () => {
         let called: Date = null;
         let force = true;
         Widget.attach(widget, document.body);
         widget.executed.connect((sender, time) => { called = time; });
-        widget.execute(force).then(() => {
+        return widget.execute(force).then(() => {
           expect(called).to.be.a(Date);
-          done();
-        }).catch(done);
+        });
       });
 
     });
@@ -144,18 +142,17 @@ describe('console/widget', () => {
         expect(widget.prompt).to.be.a(CodeCellWidget);
       });
 
-      it('should be replaced after execution', done => {
+      it('should be replaced after execution', () => {
         let force = true;
         Widget.attach(widget, document.body);
 
         let old = widget.prompt;
         expect(old).to.be.a(CodeCellWidget);
 
-        widget.execute(force).then(() => {
+        return widget.execute(force).then(() => {
           expect(widget.prompt).to.be.a(CodeCellWidget);
           expect(widget.prompt).to.not.be(old);
-          done();
-        }).catch(done);
+        });
       });
 
     });
@@ -192,16 +189,15 @@ describe('console/widget', () => {
 
     describe('#clear()', () => {
 
-      it('should clear all of the content cells except the banner', done => {
+      it('should clear all of the content cells except the banner', () => {
         let force = true;
         Widget.attach(widget, document.body);
-        widget.execute(force).then(() => {
+        return widget.execute(force).then(() => {
           expect(widget.cells.length).to.be.greaterThan(0);
           widget.clear();
           expect(widget.cells.length).to.be(0);
           expect(widget.prompt.model.value.text).to.be('');
-          done();
-        }).catch(done);
+        });
       });
 
     });
@@ -227,26 +223,24 @@ describe('console/widget', () => {
 
     describe('#execute()', () => {
 
-      it('should execute contents of the prompt if forced', done => {
+      it('should execute contents of the prompt if forced', () => {
         let force = true;
         Widget.attach(widget, document.body);
         expect(widget.cells.length).to.be(0);
-        widget.execute(force).then(() => {
+        return widget.execute(force).then(() => {
           expect(widget.cells.length).to.be.greaterThan(0);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should check if code is multiline and allow amending', done => {
+      it('should check if code is multiline and allow amending', () => {
         let force = false;
         let timeout = 9000;
         Widget.attach(widget, document.body);
         widget.prompt.model.value.text = 'for x in range(5):';
         expect(widget.cells.length).to.be(0);
-        widget.execute(force, timeout).then(() => {
+        return widget.execute(force, timeout).then(() => {
           expect(widget.cells.length).to.be(0);
-          done();
-        }).catch(done);
+        });
       });
 
     });
@@ -301,7 +295,7 @@ describe('console/widget', () => {
         expect(widget.prompt).to.be.ok();
       });
 
-      it('should be called after execution, creating a prompt', done => {
+      it('should be called after execution, creating a prompt', () => {
         expect(widget.prompt).to.not.be.ok();
         expect(widget.methods).to.not.contain('newPrompt');
         Widget.attach(widget, document.body);
@@ -312,12 +306,11 @@ describe('console/widget', () => {
         expect(old).to.be.a(CodeCellWidget);
         widget.methods = [];
 
-        widget.execute(force).then(() => {
+        return widget.execute(force).then(() => {
           expect(widget.prompt).to.be.a(CodeCellWidget);
           expect(widget.prompt).to.not.be(old);
           expect(widget.methods).to.contain('newPrompt');
-          done();
-        }).catch(done);
+        });
       });
 
     });
