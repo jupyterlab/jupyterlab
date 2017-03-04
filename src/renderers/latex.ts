@@ -12,7 +12,7 @@ const inline = '$'; // the inline math delimiter
 
 // MATHSPLIT contains the pattern for math delimiters and special symbols
 // needed for searching for math in the text input.
-const MATHSPLIT = /(\$\$?|\\(?:begin|end)\{[a-z]*\*?\}|\\[\\{}$]|[{}]|(?:\n\s*)+|@@\d+@@)/i;
+const MATHSPLIT = /(\$\$?|\\(?:begin|end)\{[a-z]*\*?\}|\\[{}$]|[{}]|(?:\n\s*)+|@@\d+@@|\\\\(?:\(|\)|\[|\]))/i;
 
 // A module-level initialization flag.
 let initialized = false;
@@ -106,12 +106,15 @@ function removeMath(text: string): { text: string, math: string[] } {
       //  Look for math start delimiters and when
       //    found, set up the end delimiter.
       //
-      if (block === inline || block === '$$') {
+      if (block === '$' || block === '$$') {
         start = i;
         end = block;
         braces = 0;
-      }
-      else if (block.substr(1, 5) === 'begin') {
+      } else if (block === "\\\\\(" || block === "\\\\\[") {
+        start = i;
+        end = block.slice(-1) === "(" ? "\\\\\)" : "\\\\\]";
+        braces = 0;
+      } else if (block.substr(1, 5) === 'begin') {
         start = i;
         end = '\\end' + block.substr(6);
         braces = 0;
@@ -134,8 +137,25 @@ function removeMath(text: string): { text: string, math: string[] } {
  */
 export
 function replaceMath(text: string, math: string[]): string {
-  text = text.replace(/@@(\d+)@@/g, (match, n) => math[n]);
-  return text;
+  /**
+   * Replace a math placeholder with its corresponding group.
+   * The math delimiters "\\(", "\\[", "\\)" and "\\]" are replaced
+   * removing one backslash in order to be interpreted correctly by MathJax.
+   */
+  let process = (match: string, n: number): string => {
+    let group = math[n];
+    if (group.substr(0, 3) === "\\\\\(" && 
+        group.substr(group.length - 3) === "\\\\\)") {
+      group = "\\\(" + group.substring(3, group.length - 3) + "\\\)";
+    } else if (group.substr(0, 3) === "\\\\\[" && 
+               group.substr(group.length - 3) === "\\\\\]") {
+      group = "\\\[" + group.substring(3, group.length - 3) + "\\\]";
+    }
+    return group;
+  };
+  // Replace all the math group placeholders in the text
+  // with the saved strings.
+  return text.replace(/@@(\d+)@@/g, process);
 };
 
 
