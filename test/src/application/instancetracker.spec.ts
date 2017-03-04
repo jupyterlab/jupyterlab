@@ -67,6 +67,7 @@ describe('common/instancetracker', () => {
         tracker.currentChanged.connect(() => { called = true; });
         Widget.attach(widget, document.body);
         widget.node.focus();
+        simulate(widget.node, 'focus');
         tracker.add(widget);
         expect(called).to.be(true);
         Widget.detach(widget);
@@ -100,6 +101,7 @@ describe('common/instancetracker', () => {
         tracker.add(one);
         tracker.inject(two);
         Widget.attach(two, document.body);
+        two.node.focus();
         simulate(two.node, 'focus');
         Widget.detach(two);
       });
@@ -133,6 +135,7 @@ describe('common/instancetracker', () => {
         panel.addWidget(widget1);
         Widget.attach(panel, document.body);
         expect(tracker.currentWidget).to.be(widget1);
+        widget10.node.focus();
         simulate(widget0.node, 'focus');
         expect(tracker.currentWidget).to.be(widget0);
         panel.dispose();
@@ -161,6 +164,7 @@ describe('common/instancetracker', () => {
         });
         Widget.attach(panel, document.body);
 
+        widget[0].node.focus();
         simulate(widgets[0].node, 'focus');
         expect(tracker.currentWidget).to.be(widgets[0]);
 
