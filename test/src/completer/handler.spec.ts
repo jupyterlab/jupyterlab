@@ -73,8 +73,6 @@ class TestCompletionHandler extends CompletionHandler {
   }
 }
 
-const kernelPromise = .;
-
 
 describe('completer/handler', () => {
 
@@ -210,8 +208,8 @@ describe('completer/handler', () => {
           line: 0
         };
         return handler.makeRequest(request).then(
-          () => { throw Error('Should have rejected'),
-          (reason: Error) => {
+          () => { throw Error('Should have rejected'); },
+          reason => {
             expect(reason).to.be.an(Error);
           }
         )
@@ -227,7 +225,7 @@ describe('completer/handler', () => {
           line: 0
         };
         return handler.makeRequest(request).then(
-          () => { throw Error('Should have rejected'),
+          () => { throw Error('Should have rejected') },
           (reason: Error) => {
             expect(reason).to.be.an(Error);
           }
