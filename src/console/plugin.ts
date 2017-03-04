@@ -133,6 +133,9 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   let command: string;
   let count = 0;
   let menu = new Menu({ commands });
+  const DEAD_SESSION_MSG = (
+    'Console session was shut down, please start a new console.'
+  );
 
   // Create an instance tracker for all console panels.
   const tracker = new InstanceTracker<ConsolePanel>({
@@ -287,6 +290,10 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       let kernel = current.console.session.kernel;
       if (kernel) {
         return kernel.restart();
+      } else {
+        return showDialog({
+          body: DEAD_SESSION_MSG
+        })
       }
     }
   });
@@ -435,6 +442,13 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       let session = widget.session;
       let lang = '';
       manager.ready.then(() => {
+        if (session.isDisposed) {
+          return showDialog({
+            body: DEAD_SESSION_MSG
+          }).then(() => {
+            return Promise.reject<Kernel.IModel>(DEAD_SESSION_MSG);
+          });
+        }
         let specs = manager.specs;
         if (session.kernel) {
           lang = specs.kernelspecs[session.kernel.name].language;

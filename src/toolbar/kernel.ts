@@ -14,7 +14,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  restartKernel
+  DocumentRegistry
 } from '../docregistry';
 
 import {
@@ -46,28 +46,18 @@ const TOOLBAR_INDICATOR_CLASS = 'jp-Kernel-toolbarKernelIndicator';
  */
 const TOOLBAR_BUSY_CLASS = 'jp-mod-busy';
 
-
 /**
- * A kernel owner interface.
+ * An alias for a kernel owner.
  */
 export
-interface IKernelOwner extends Widget {
-  /**
-   * An associated kernel.
-   */
-  kernel: Kernel.IKernel;
-  /**
-   * A signal emitted when the kernel is changed.
-   */
-  kernelChanged: ISignal<IKernelOwner, Kernel.IKernel>;
-}
+type KernelOwner = DocumentRegistry.IKernelOwner;
 
 
 /**
  * Create an interrupt toolbar item.
  */
 export
-function createInterruptButton(kernelOwner: IKernelOwner): ToolbarButton {
+function createInterruptButton(kernelOwner: KernelOwner): ToolbarButton {
   return new ToolbarButton({
     className: TOOLBAR_INTERRUPT_CLASS,
     onClick: () => {
@@ -84,14 +74,15 @@ function createInterruptButton(kernelOwner: IKernelOwner): ToolbarButton {
  * Create a restart toolbar item.
  */
 export
-function createRestartButton(kernelOwner: IKernelOwner): ToolbarButton {
+function createRestartButton(kernelOwner: KernelOwner): ToolbarButton {
   return new ToolbarButton({
     className: TOOLBAR_RESTART_CLASS,
     onClick: () => {
-      if (!kernelOwner.kernel) {
-        return;
+      if (kernelOwner.kernel) {
+        kernelOwner.kernel.restart();
+      } else {
+        kernelOwner.startDefaultKernel();
       }
-      restartKernel(kernelOwner.kernel, kernelOwner);
     },
     tooltip: 'Restart the kernel'
   });
@@ -107,7 +98,7 @@ function createRestartButton(kernelOwner: IKernelOwner): ToolbarButton {
  * It can handle a change in context or kernel.
  */
 export
-function createKernelNameItem(kernelOwner: IKernelOwner): Widget {
+function createKernelNameItem(kernelOwner: KernelOwner): Widget {
   return new KernelName(kernelOwner);
 }
 
@@ -119,7 +110,7 @@ class KernelName extends Widget {
   /**
    * Construct a new kernel name widget.
    */
-  constructor(kernelOwner: IKernelOwner) {
+  constructor(kernelOwner: KernelOwner) {
     super();
     this.addClass(TOOLBAR_KERNEL_CLASS);
     this._onKernelChanged(kernelOwner, kernelOwner.kernel);
@@ -129,7 +120,7 @@ class KernelName extends Widget {
   /**
    * Update the text of the kernel name item.
    */
-  _onKernelChanged(sender: IKernelOwner, kernel: Kernel.IKernel): void {
+  _onKernelChanged(sender: KernelOwner, kernel: Kernel.IKernel): void {
     this.node.textContent = 'No Kernel!';
     if (!kernel) {
       return;
@@ -153,7 +144,7 @@ class KernelName extends Widget {
  * It can handle a change to the context or the kernel.
  */
 export
-function createKernelStatusItem(kernelOwner: IKernelOwner): Widget {
+function createKernelStatusItem(kernelOwner: KernelOwner): Widget {
   return new KernelIndicator(kernelOwner);
 }
 
@@ -165,7 +156,7 @@ class KernelIndicator extends Widget {
   /**
    * Construct a new kernel status widget.
    */
-  constructor(kernelOwner: IKernelOwner) {
+  constructor(kernelOwner: KernelOwner) {
     super();
     this.addClass(TOOLBAR_INDICATOR_CLASS);
     this._onKernelChanged(kernelOwner, kernelOwner.kernel);
@@ -175,7 +166,7 @@ class KernelIndicator extends Widget {
   /**
    * Handle a change in kernel.
    */
-  private _onKernelChanged(sender: IKernelOwner, kernel: Kernel.IKernel): void {
+  private _onKernelChanged(sender: KernelOwner, kernel: Kernel.IKernel): void {
     if (this._kernel) {
       this._kernel.statusChanged.disconnect(this._handleStatus, this);
     }
