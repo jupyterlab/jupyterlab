@@ -1045,15 +1045,8 @@ class Notebook extends StaticNotebook {
     let activeCell = this.activeCell;
     if (this.mode === 'edit') {
       activeCell.editor.focus();
-    } else if (this.node.contains(document.activeElement)) {
-      // If an editor currently has focus, focus our node.
-      // Otherwise, another input field has focus and should keep it.
-      let w = find(this.layout, widget => {
-        return (widget as BaseCellWidget).editor.hasFocus();
-      });
-      if (w) {
-        this.node.focus();
-      }
+    } else {
+      activeCell.editor.blur();
     }
     if (force && !this.node.contains(document.activeElement)) {
       this.node.focus();
@@ -1344,12 +1337,12 @@ class Notebook extends StaticNotebook {
   }
 
   /**
-   * Handle `blur` events for the widget.
+   * Handle `blur` events for the notebook.
    */
   private _evtBlur(event: MouseEvent): void {
     let relatedTarget = event.relatedTarget as HTMLElement;
     if (!this.node.contains(relatedTarget)) {
-      this.mode = 'command';
+      return;
     }
     // If the root node is not blurring and we are in command mode,
     // focus ourselves.
