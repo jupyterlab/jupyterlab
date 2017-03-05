@@ -1043,10 +1043,7 @@ class Notebook extends StaticNotebook {
    */
   private _ensureFocus(force=false): void {
     let activeCell = this.activeCell;
-    if (!activeCell) {
-      this.mode = 'command';
-    }
-    if (this.mode === 'edit') {
+    if (this.mode === 'edit' && activeCell) {
       activeCell.editor.focus();
     } else if (activeCell) {
       activeCell.editor.blur();
