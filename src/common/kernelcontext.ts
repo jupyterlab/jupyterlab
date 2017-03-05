@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  IterableOrArrayLike
+} from '@phosphor/algorithm';
+
+import {
   IDisposable
 } from '@phosphor/disposable';
 
@@ -14,7 +18,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  showDialog, cancelButton, warnButton
+  showDialog, okButton, cancelButton, warnButton
 } from './dialog';
 
 
@@ -56,7 +60,7 @@ interface IKernelContext extends IDisposable {
    * #### Notes
    * Will use [[selectKernel]] if the default is not available.
    */
-  startDefaultKernel(): void;
+  startDefaultKernel(): Promise<Kernel.IKernel>
 
   /**
    * Change the current kernel associated with the document.
@@ -69,12 +73,12 @@ interface IKernelContext extends IDisposable {
   /**
    * Select the kernel using a dialog.
    */
-  selectKernel(): Promise<Kernel.IKernel>;
+  selectKernel(message?: string): Promise<Kernel.IKernel>;
 
   /**
    * Restart the kernel after presenting a dialog.
    */
-  restart(message?: string): Promise<boolean>;
+  restartKernel(message?: string): Promise<boolean>;
 }
 
 
@@ -88,7 +92,9 @@ class KernelContext implements IKernelContext {
    */
   constructor(options: KernelContext.IOptions) {
     this._manager = options.manager;
-    this._path = path;
+    this._path = options.path;
+    this._type = options.type;
+    this._name = options.name || '';
     this._preferredName = options.preferredKernelName || '';
     this._preferredLanguage = options.preferredKernelLanguage || '';
   }
@@ -118,7 +124,7 @@ class KernelContext implements IKernelContext {
    * The name of the session.
    */
   get name(): string {
-    return this._name | ContentsManager.basename(this._path);
+    return this._name || ContentsManager.basename(this._path);
   }
 
   /**
@@ -144,8 +150,23 @@ class KernelContext implements IKernelContext {
   get preferredKernelLanguage(): string {
     return this._preferredLanguage;
   }
-  set preferredKernelLanguage(value: string): void {
+  set preferredKernelLanguage(value: string) {
     this._preferredLanguage = value;
+  }
+
+  /**
+   * Test whether the context is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed === null;
+  }
+
+  /**
+   * Dispose of the resources held by the context.
+   */
+  dispose(): void {
+    this._isDisposed = true;
+    Signal.clearData(this);
   }
 
   /**
@@ -182,12 +203,12 @@ class KernelContext implements IKernelContext {
    * #### Notes
    * Will use [[selectKernel]] if the default is not available.
    */
-  startDefaultKernel(): void {
-    let name = KernelContext.getDefaultKernel(
-      this._preferredName,
-      this._preferredLanguage,
-      this._manager.specs
-    );
+  startDefaultKernel(): Promise<Kernel.IKernel> {
+    let name = KernelContext.getDefaultKernel({
+      preferredName: this._preferredName,
+      preferredLanguage: this._preferredLanguage,
+      specs: this._manager.specs
+    });
     if (!name) {
       name = this._preferredName || this._preferredLanguage;
       let msg = `Could not find a kernel matching ${name}.`;
@@ -204,8 +225,8 @@ class KernelContext implements IKernelContext {
       specs: this._manager.specs,
       sessions: this._manager.running,
       kernel: this.kernel && this.kernel.model,
-      preferredKernel: this._preferredName,
-      preferredLanguage: this._preferredLanguage
+      preferredName: this._preferredName,
+      preferredLanguage: this._preferredLanguage,
       message
     }).then(selection => {
       return this.changeKernel(selection);
@@ -236,23 +257,22 @@ class KernelContext implements IKernelContext {
   /**
    * Ensure there is a session with the given options.
    */
-  private _ensureSession(options): Promise<Kernel.IKernel> {
+  private _ensureSession(options: Kernel.IModel): Promise<Kernel.IKernel> {
     if (this._session) {
       return this._session.changeKernel(options);
     }
-    let sOptions: Session.IOptions = {
+    return this._startSession({
       path: this._path,
       kernelName: options.name,
       kernelId: options.id
-    };
-    return this._startSession(sOptions);
+    });
   }
 
   /**
    * Start a session with the given options.
    */
-  private _startSession(options: Session.IOptions): Promise<void> {
-    return this._manager.sessions.startNew(options).then(session => {
+  private _startSession(options: Session.IOptions): Promise<Kernel.IKernel> {
+    return this._manager.startNew(options).then(session => {
       if (this.isDisposed) {
         return;
       }
@@ -260,7 +280,7 @@ class KernelContext implements IKernelContext {
         this._session.dispose();
       }
       this._session = session;
-      this._kernelChanged.emit(session.kernel);
+      this._changed.emit(session.kernel);
       session.kernelChanged.connect(this._onKernelChanged, this);
       return session.kernel;
     });
@@ -278,7 +298,7 @@ class KernelContext implements IKernelContext {
     this._changed.emit(null);
     return session.shutdown().then(() => {
       session.dispose();
-      return Promise.resolve(null);
+      return Promise.resolve<Kernel.IKernel>(null);
     });
   }
 
@@ -297,6 +317,7 @@ class KernelContext implements IKernelContext {
   private _preferredName = '';
   private _session: Session.ISession;
   private _changed = new Signal<this, Kernel.IKernel>(this);
+  private _isDisposed = false;
 }
 
 
@@ -440,7 +461,7 @@ namespace Private {
   function getDefaultKernel(options: KernelContext.IKernelSearch): string | null {
     let { preferredName, preferredLanguage, specs } = options;
     if (!preferredName && !preferredLanguage) {
-      return specs.preferred;
+      return specs.default;
     }
     // Look for an exact match.
     for (let specName in specs.kernelspecs) {
@@ -458,7 +479,7 @@ namespace Private {
     let matches: string[] = [];
     for (let specName in specs.kernelspecs) {
       let kernelLanguage = specs.kernelspecs[specName].language;
-      if (language === kernelLanguage) {
+      if (preferredLanguage === kernelLanguage) {
         matches.push[specName];
       }
     }
@@ -556,7 +577,7 @@ namespace Private {
     }
     let maxLength = 10;
 
-    let { preferredKernel, preferredLanguage, sessions, specs, kernel } = options;
+    let { preferredName, preferredLanguage, sessions, specs, kernel } = options;
     let existing = kernel ? kernel.id : void 0;
 
     // Create mappings of display names and languages for kernel name.
@@ -571,7 +592,7 @@ namespace Private {
 
     // Handle a kernel by name.
     let names: string[] = [];
-    if (preferredKernel && preferredKernel in specs.kernelspecs) {
+    if (preferredName && preferredName in specs.kernelspecs) {
       names.push(name);
     }
 
