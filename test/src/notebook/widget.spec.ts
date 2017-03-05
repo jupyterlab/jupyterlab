@@ -140,7 +140,7 @@ function createActiveWidget(): LogNotebook {
 }
 
 
-describe('notebook/notebook/widget', () => {
+describe('notebook/widget', () => {
 
   describe('StaticNotebook', () => {
 
@@ -944,12 +944,25 @@ describe('notebook/notebook/widget', () => {
 
       context('blur', () => {
 
-        it('should set the mode to `command`', () => {
+        it('should preserve the mode', () => {
           simulate(widget.node, 'focus');
           widget.mode = 'edit';
           let other = document.createElement('div');
           simulate(widget.node, 'blur', { relatedTarget: other });
+          expect(widget.mode).to.be('edit');
+          MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
+          expect(widget.mode).to.be('edit');
+          expect(widget.activeCell.editor.hasFocus()).to.be(true);
+        });
+
+        it('should give focus back to the notebook', () => {
+          simulate(widget.node, 'focus');
+          let other = document.createElement('div');
+          simulate(widget.node, 'blur', { relatedTarget: other });
           expect(widget.mode).to.be('command');
+          MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
+          expect(widget.mode).to.be('command');
+          expect(widget.activeCell.editor.hasFocus()).to.be(false);
         });
 
       });
