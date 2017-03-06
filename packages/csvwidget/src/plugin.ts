@@ -3,19 +3,19 @@
 
 import {
   InstanceTracker, JupyterLab, JupyterLabPlugin
-} from '../application';
+} from '@jupyterlab/application';
 
 import {
   IDocumentRegistry
-} from '../docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   CommandIDs as FileBrowserCommandIDs
-} from '../filebrowser';
+} from '@jupyterlab/filebrowser';
 
 import {
   IInstanceRestorer
-} from '../instancerestorer';
+} from '@jupyterlab/instancerestorer';
 
 import {
   CSVWidget, CSVWidgetFactory

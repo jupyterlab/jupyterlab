@@ -6,10 +6,6 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  Signal
-} from '@phosphor/signaling';
-
-import {
   PanelLayout
 } from '@phosphor/widgets';
 
@@ -19,7 +15,7 @@ import {
 
 import {
   ABCWidgetFactory, DocumentRegistry
-} from '../docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   CSVModel, CSVTable

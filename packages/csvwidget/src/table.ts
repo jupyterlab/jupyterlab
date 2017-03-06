@@ -13,11 +13,11 @@ import {
 
 import {
   VDomModel, VDomWidget
-} from '../common/vdom';
+} from '@jupyterlab/common';
 
 import {
   HTML_COMMON_CLASS
-} from '../renderers/widget';
+} from '@jupyterlab/renderers';
 
 
 /**
