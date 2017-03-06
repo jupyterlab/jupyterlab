@@ -7,7 +7,7 @@ import {
 
 import {
   JupyterLabPlugin
-} from '../application';
+} from '@jupyterlab/application';
 
 import {
   IClipboard
