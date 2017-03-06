@@ -136,9 +136,6 @@ class CompleterWidget extends Widget {
    * Dispose of the resources held by the completer widget.
    */
   dispose() {
-    if (this.isDisposed) {
-      return;
-    }
     this._model = null;
     super.dispose();
   }
@@ -205,7 +202,7 @@ class CompleterWidget extends Widget {
   }
 
   /**
-   * Handle `before_detach` messages for the widget.
+   * Handle `before-detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
     document.removeEventListener('keydown', this, USE_CAPTURE);
@@ -427,7 +424,7 @@ class CompleterWidget extends Widget {
    * Set the visible dimensions of the widget.
    */
   private _setGeometry(): void {
-    let model = this._model;
+    const model = this._model;
 
     // This is an overly defensive test: `cursor` will always exist if
     // `original` exists, except in contrived tests. But since it is possible
@@ -437,7 +434,7 @@ class CompleterWidget extends Widget {
     }
 
     const editor = this._editor;
-    const { coords, charWidth, lineHeight } = model.original;
+    const { charWidth, lineHeight } = model.original;
     const position = editor.getPositionAt(model.cursor.start);
     const anchor = editor.getCoordinateForPosition(position) as ClientRect;
     const style = window.getComputedStyle(this.node);
@@ -518,11 +515,6 @@ namespace CompleterWidget {
      * The character number of the editor cursor within a line.
      */
     readonly column: number;
-
-    /**
-     * The coordinate rectangle that describes the cursor.
-     */
-    readonly coords: CodeEditor.ICoordinate;
   }
 
   /**

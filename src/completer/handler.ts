@@ -153,7 +153,6 @@ class CompletionHandler implements IDisposable {
       text: editor.model.value.text,
       lineHeight: editor.lineHeight,
       charWidth: editor.charWidth,
-      coords: editor.getCoordinateForPosition(position),
       line: position.line,
       column: position.column
     };
