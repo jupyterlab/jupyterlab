@@ -161,7 +161,7 @@ class TooltipWidget extends Widget {
   }
 
   /**
-   * Handle `before_detach` messages for the widget.
+   * Handle `before-detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
     document.removeEventListener('keydown', this, USE_CAPTURE);
