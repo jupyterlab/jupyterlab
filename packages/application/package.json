@@ -13,6 +13,9 @@
     "lib": "lib/"
   },
   "dependencies": {
+    "@jupyterlab/commandpalette": "^0.1.0",
+    "@jupyterlab/instancerestorer": "^0.1.0",
+    "@jupyterlab/statedb": "^0.1.0",
     "@phosphor/algorithm": "^0.1.1",
     "@phosphor/commands": "^0.1.4",
     "@phosphor/disposable": "^0.1.1",
@@ -21,7 +24,7 @@
     "@phosphor/signaling": "^0.1.2",
     "@phosphor/virtualdom": "^0.1.0",
     "@phosphor/widgets": "^0.1.7",
-    "jupyterlab": "^0.17.2"
+    "semver": "^5.3.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",

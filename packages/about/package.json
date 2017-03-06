@@ -15,7 +15,9 @@
   "dependencies": {
     "@phosphor/messaging": "^0.1.0",
     "@phosphor/virtualdom": "^0.1.0",
-    "jupyterlab": "^0.17.2"
+    "@jupyterlab/common": "^0.1.0",
+    "@jupyterlab/commandpalette": "^0.1.0",
+    "@jupyterlab/instancerestorer": "^0.1.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
