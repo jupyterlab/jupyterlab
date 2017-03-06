@@ -7,15 +7,15 @@ import {
 
 import {
   JupyterLab, JupyterLabPlugin
-} from '../application';
+} from '@jupyterlab/application';
 
 import {
   IConsoleTracker
-} from '../console';
+} from '@jupyterlab/console';
 
 import {
   INotebookTracker
-} from '../notebook';
+} from '@jupyterlab/notebook';
 
 import {
   CommandIDs, COMPLETER_ACTIVE_CLASS, CompleterModel,

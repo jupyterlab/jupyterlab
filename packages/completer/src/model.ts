@@ -18,10 +18,6 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  h
-} from '@phosphor/virtualdom';
-
-import {
   CompleterWidget
 } from './widget';
 
