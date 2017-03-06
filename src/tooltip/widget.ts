@@ -195,7 +195,7 @@ class TooltipWidget extends Widget {
    * Set the geometry of the tooltip widget.
    */
   private _setGeometry():  void {
-    // Find the start and end of the cursor for hover box placement.
+    // Find the start of the current token for hover box placement.
     const editor = this._editor;
     const cursor = editor.getCursorPosition();
     const end = editor.getOffsetAt(cursor);
@@ -203,13 +203,15 @@ class TooltipWidget extends Widget {
     const tokens = line.substring(0, end).split(/\W+/);
     const last = tokens[tokens.length - 1];
     const start = last ? end - last.length : end;
+    const position = editor.getPositionAt(start);
+    const anchor = editor.getCoordinateForPosition(position) as ClientRect;
     const style = window.getComputedStyle(this.node);
     const paddingLeft = parseInt(style.paddingLeft, 10) || 0;
 
     // Calculate the geometry of the tooltip.
     HoverBox.setGeometry({
-      cursor: { start, end },
-      editor,
+      anchor,
+      host: editor.host,
       maxHeight: MAX_HEIGHT,
       minHeight: MIN_HEIGHT,
       node: this.node,
