@@ -2,12 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ContentsManager, Contents, Kernel, ServiceManager, Session, utils
+  ContentsManager, Contents, Kernel, ServiceManager, utils
 } from '@jupyterlab/services';
-
-import {
-  ArrayExt
-} from '@phosphor/algorithm';
 
 import {
   JSONObject, PromiseDelegate
@@ -30,8 +26,8 @@ import {
 } from '../common/dialog';
 
 import {
-  findKernel
-} from '../docregistry';
+  IKernelContext, KernelContext
+} from '../common/kernelcontext';
 
 import {
   DocumentRegistry
@@ -56,18 +52,20 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     let ext = DocumentRegistry.extname(this._path);
     let lang = this._factory.preferredLanguage(ext);
     this._model = this._factory.createNew(lang);
-    manager.sessions.runningChanged.connect(this._onSessionsChanged, this);
+    let type = this._path.indexOf('.ipynb') !== -1 ? 'notebook' : 'file';
+    this._kernelContext = new KernelContext({
+      manager: manager.sessions,
+      path: this._path,
+      type,
+      name: this._path.split('/').pop(),
+      preferredKernelName: this._model.preferredKernelName,
+      preferredKernelLanguage: this._model.preferredKernelLanguage
+    });
+    this._model.stateChanged.connect(this._onModelStateChanged, this);
     manager.contents.fileChanged.connect(this._onFileChanged, this);
     this._readyPromise = manager.ready.then(() => {
       return this._populatedPromise.promise;
     });
-  }
-
-  /**
-   * A signal emitted when the kernel changes.
-   */
-  get kernelChanged(): ISignal<this, Kernel.IKernel> {
-    return this._kernelChanged;
   }
 
   /**
@@ -102,7 +100,14 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    * The current kernel associated with the document.
    */
   get kernel(): Kernel.IKernel {
-    return this._session ? this._session.kernel : null;
+    return this._kernelContext.kernel;
+  }
+
+  /**
+   * The kernel context associated with the documnet.
+   */
+  get kernelContext(): IKernelContext {
+    return this._kernelContext;
   }
 
   /**
@@ -147,25 +152,13 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       return;
     }
     let model = this._model;
-    let session = this._session;
     this._model = null;
-    this._session = null;
     this._manager = null;
     this._factory = null;
 
     model.dispose();
-    if (session) {
-      session.dispose();
-    }
     this._disposed.emit(void 0);
     Signal.clearData(this);
-  }
-
-  /**
-   * The kernel spec models
-   */
-  get specs(): Kernel.ISpecModels {
-    return this._manager.specs;
   }
 
   /**
@@ -180,60 +173,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   */
   get ready(): Promise<void> {
     return this._readyPromise;
-  }
-
-  /**
-   * Start the default kernel for the context.
-   *
-   * @returns A promise that resolves with the new kernel.
-   */
-  startDefaultKernel(): Promise<Kernel.IKernel> {
-    return this.ready.then(() => {
-      if (this.isDisposed) {
-        return;
-      }
-      let model = this.model;
-      let name = findKernel(
-        model.defaultKernelName,
-        model.defaultKernelLanguage,
-        this._manager.specs
-      );
-      return this.changeKernel({ name });
-    });
-  }
-
-  /**
-   * Change the current kernel associated with the document.
-   */
-  changeKernel(options: Kernel.IModel): Promise<Kernel.IKernel> {
-    let session = this._session;
-    if (options) {
-      if (session) {
-        return session.changeKernel(options);
-      } else {
-        let path = this._path;
-        let sOptions: Session.IOptions = {
-          path,
-          kernelName: options.name,
-          kernelId: options.id
-        };
-        return this._startSession(sOptions);
-      }
-    } else {
-      if (session) {
-        this._session = null;
-        return session.shutdown().then(() => {
-          session.dispose();
-          if (this.isDisposed) {
-            return;
-          }
-          this._kernelChanged.emit(null);
-          return void 0;
-        });
-      } else {
-        return Promise.resolve(void 0);
-      }
-    }
   }
 
   /**
@@ -287,22 +226,10 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         return;
       }
       this._path = newPath;
-      let session = this._session;
-      if (session) {
-        let options: Session.IOptions = {
-          path: newPath,
-          kernelId: session.kernel.id,
-          kernelName: session.kernel.name
-        };
-        return this._startSession(options).then(() => {
-          if (this.isDisposed) {
-            return;
-          }
-          return this.save();
-        });
-      }
-      return this.save();
-    });
+      this._pathChanged.emit(newPath);
+      let promises = [this._kernelContext.rename(newPath), this.save()];
+      return Promise.all(promises);
+    }).then(() => void 0);
   }
 
   /**
@@ -424,60 +351,11 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     }
     if (change.oldValue.path === this._path) {
       let newPath = change.newValue.path;
-      if (this._session) {
-        this._session.rename(newPath);
-      } else {
-        this._path = newPath;
-      }
+      this._path = newPath;
+      this._kernelContext.rename(newPath);
       this._updateContentsModel(change.newValue);
       this._pathChanged.emit(this._path);
     }
-  }
-
-  /**
-   * Start a session and set up its signals.
-   */
-  private _startSession(options: Session.IOptions): Promise<Kernel.IKernel> {
-    return this._manager.sessions.startNew(options).then(session => {
-      if (this.isDisposed) {
-        return;
-      }
-      if (this._session) {
-        this._session.dispose();
-      }
-      this._session = session;
-      this._kernelChanged.emit(session.kernel);
-      session.pathChanged.connect(this._onSessionPathChanged, this);
-      session.kernelChanged.connect(this._onKernelChanged, this);
-      return session.kernel;
-    }).catch(err => {
-      let response = JSON.parse(err.xhr.response);
-      let body = document.createElement('pre');
-      body.textContent = response['traceback'];
-      showDialog({
-        title: 'Error Starting Kernel',
-        body,
-        buttons: [okButton]
-      });
-      return Promise.reject(err);
-    });
-  }
-
-  /**
-   * Handle a change to a session path.
-   */
-  private _onSessionPathChanged(sender: Session.ISession, path: string) {
-    if (path !== this._path) {
-      this._path = path;
-      this._pathChanged.emit(path);
-    }
-  }
-
-  /**
-   * Handle a change to the kernel.
-   */
-  private _onKernelChanged(sender: Session.ISession): void {
-    this._kernelChanged.emit(sender.kernel);
   }
 
   /**
@@ -502,22 +380,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   }
 
   /**
-   * Handle a change to the running sessions.
-   */
-  private _onSessionsChanged(sender: Session.IManager, models: Session.IModel[]): void {
-    let session = this._session;
-    if (!session) {
-      return;
-    }
-    let index = ArrayExt.findFirstIndex(models, model => model.id === session.id);
-    if (index === -1) {
-      session.dispose();
-      this._session = null;
-      this._kernelChanged.emit(null);
-    }
-  }
-
-  /**
    * Handle an initial population.
    */
   private _populate(): Promise<void> {
@@ -536,21 +398,30 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     });
   }
 
+  /**
+   * Handle a change in model state.
+   */
+  private _onModelStateChanged(): void {
+    let model = this._model;
+    let context = this._kernelContext;
+    context.preferredKernelName = model.preferredKernelName;
+    context.preferredKernelLanguage = model.preferredKernelLanguage;
+  }
+
   private _manager: ServiceManager.IManager = null;
   private _opener: (widget: Widget) => void = null;
   private _model: T = null;
   private _path = '';
-  private _session: Session.ISession = null;
   private _factory: DocumentRegistry.IModelFactory<T> = null;
   private _contentsModel: Contents.IModel = null;
   private _readyPromise: Promise<void>;
   private _populatedPromise = new PromiseDelegate<void>();
   private _isPopulated = false;
   private _isReady = false;
-  private _kernelChanged = new Signal<this, Kernel.IKernel>(this);
   private _pathChanged = new Signal<this, string>(this);
   private _fileChanged = new Signal<this, Contents.IModel>(this);
   private _disposed = new Signal<this, void>(this);
+  private _kernelContext: KernelContext;
 }
 
 

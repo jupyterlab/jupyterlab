@@ -97,6 +97,7 @@ class KernelContext implements IKernelContext {
     this._name = options.name || '';
     this._preferredName = options.preferredKernelName || '';
     this._preferredLanguage = options.preferredKernelLanguage || '';
+    this._manager.runningChanged.connect(this._onSessionsChanged, this);
   }
 
   /**
@@ -166,6 +167,9 @@ class KernelContext implements IKernelContext {
    */
   dispose(): void {
     this._isDisposed = true;
+    if (this._session) {
+      this._session.dispose();
+    }
     Signal.clearData(this);
   }
 
@@ -311,6 +315,7 @@ class KernelContext implements IKernelContext {
       this._session = session;
       this._changed.emit('kernel');
       session.kernelChanged.connect(this._onKernelChanged, this);
+      session.pathChanged.connect(this._onSessionPathChanged, this);
       return session.kernel;
     });
   }
@@ -339,6 +344,31 @@ class KernelContext implements IKernelContext {
    */
   private _onKernelChanged(): void {
     this._changed.emit('kernel');
+  }
+
+  /**
+   * Handle a change to a session path.
+   */
+  private _onSessionPathChanged(sender: Session.ISession, path: string) {
+    if (path === this._path) {
+      return;
+    }
+    this._path = path;
+    this._changed.emit('path');
+  }
+
+  /**
+   * Handle a change to the running sessions.
+   */
+  private _onSessionsChanged(sender: Session.IManager, models: Session.IModel[]): void {
+    let session = this._session;
+    if (!session) {
+      return;
+    }
+    let index = ArrayExt.findFirstIndex(models, model => model.id === session.id);
+    if (index === -1) {
+      this._ensureNoSession();
+    }
   }
 
   private _manager: Session.IManager;

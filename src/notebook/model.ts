@@ -99,7 +99,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     let name = options.languagePreference || '';
     this._metadata.set('language_info', { name });
     this._ensureMetadata();
-    this._metadata.changed.connect(this.triggerContentChange, this);
+    this._metadata.changed.connect(this._onMetadataChanged, this);
   }
 
   /**
@@ -318,6 +318,21 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     if (!metadata.has('kernelspec')) {
       metadata.set('kernelspec', { name: '', display_name: '' });
     }
+  }
+
+  /**
+   * Handle a change in metadata.
+   */
+  private _onMetadataChanged(sender: ObservableJSON, args: ObservableJSON.IChangedArgs): void {
+    switch (args.key) {
+    case 'language_info':
+    case 'kernelspec':
+      this.stateChanged.emit(args.key);
+      break;
+    default:
+      break;
+    }
+    this.triggerContentChange();
   }
 
   private _cells: IObservableUndoableVector<ICellModel> = null;
