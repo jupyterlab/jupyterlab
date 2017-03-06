@@ -27,17 +27,17 @@ import {
 
 import {
   IEditorMimeTypeService, CodeEditor
-} from '../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   BaseCellWidget, CodeCellWidget, RawCellWidget,
   ICodeCellModel, IRawCellModel, CellModel,
   RawCellModel, CodeCellModel
-} from '../cells';
+} from '@jupyterlab/cells';
 
 import {
   OutputAreaWidget
-} from '../outputarea';
+} from '@jupyterlab/outputarea';
 
 import {
   IRenderMime

@@ -19,19 +19,19 @@ import {
 
 import {
   IEditorMimeTypeService, CodeEditor
-} from '../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   BaseCellWidget, CodeCellWidget
-} from '../cells';
+} from '@jupyterlab/cells';
 
 import {
   OutputAreaWidget
-} from '../outputarea';
+} from '@jupyterlab/outputarea';
 
 import {
   IRenderMime
-} from '../rendermime';
+} from '@jupyterlab/rendermime';
 
 import {
   CodeConsole
