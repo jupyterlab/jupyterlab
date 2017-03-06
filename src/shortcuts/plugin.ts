@@ -73,12 +73,12 @@ const SHORTCUTS = [
   {
     command: ApplicationCommandIDs.activateNextTab,
     selector: 'body',
-    keys: ['Accel ArrowRight']
+    keys: ['Ctrl Shift ]']
   },
   {
     command: ApplicationCommandIDs.activatePreviousTab,
     selector: 'body',
-    keys: ['Accel ArrowLeft']
+    keys: ['Ctrl Shift [']
   },
   {
     command: CommandPaletteCommandIDs.activate,
