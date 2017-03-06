@@ -1,0 +1,45 @@
+{
+  "name": "@jupyterlab/common",
+  "version": "0.1.0",
+  "description": "JupyterLab - Common Utilities",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js",
+    "style/*.css"
+  ],
+  "directories": {
+    "lib": "lib/"
+  },
+  "dependencies": {
+    "@jupyterlab/codeeditor": "^0.1.0",
+    "@phosphor/algorithm": "^0.1.1",
+    "@phosphor/disposable": "^0.1.1",
+    "@phosphor/domutils": "^0.1.2",
+    "@phosphor/messaging": "^0.1.0",
+    "@phosphor/signaling": "^0.1.2",
+    "@phosphor/virtualdom": "^0.1.0",
+    "@phosphor/widgets": "^0.1.7",
+    "moment": "^2.17.1",
+    "sanitize-html": "^1.14.1"
+  },
+  "devDependencies": {
+    "rimraf": "^2.5.2",
+    "typescript": "^2.2.1"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "author": "Project Jupyter",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "homepage": "https://github.com/jupyterlab/jupyterlab"
+}

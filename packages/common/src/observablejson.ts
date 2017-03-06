@@ -19,7 +19,7 @@ import {
 
 import {
   CodeEditor
-} from '../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   IObservableMap, ObservableMap
