@@ -182,24 +182,22 @@ describe('outputarea/widget', () => {
         }).catch(done);
       });
 
-      it('should execute code on a kernel and send outputs to the model', (done) => {
-        widget.execute('print("hello")', kernel).then(reply => {
-          expect(reply.content.execution_count).to.be(1);
+      it('should execute code on a kernel and send outputs to the model', () => {
+        return widget.execute('print("hello")', kernel).then(reply => {
+          expect(reply.content.execution_count).to.be.ok();
           expect(reply.content.status).to.be('ok');
           expect(model.length).to.be(1);
-          kernel.shutdown();
-          done();
-        }).catch(done);
+          return kernel.shutdown();
+        });
       });
 
-      it('should clear existing outputs', (done) => {
+      it('should clear existing outputs', () => {
         widget.model.fromJSON(DEFAULT_OUTPUTS);
         return widget.execute('print("hello")', kernel).then(reply => {
-          expect(reply.content.execution_count).to.be(1);
+          expect(reply.content.execution_count).to.be.ok();
           expect(model.length).to.be(1);
-          kernel.shutdown();
-          done();
-        }).catch(done);
+          return kernel.shutdown();
+        });
       });
 
     });

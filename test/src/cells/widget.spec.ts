@@ -383,29 +383,35 @@ describe('cells/widget', () => {
 
     describe('#execute()', () => {
 
-      it('should fulfill a promise if there is no code to execute', (done) => {
+      it('should fulfill a promise if there is no code to execute', () => {
         let widget = new CodeCellWidget({ model, rendermime, contentFactory });
-        Kernel.startNew().then(kernel => {
-          return widget.execute(kernel).then(() => {
-            kernel.shutdown();
-            done();
-          });
-        }).catch(done);
+        let kernel: Kernel.IKernel;
+        return Kernel.startNew().then(k => {
+          kernel = k;
+          return kernel.ready;
+        }).then(() => {
+          return widget.execute(kernel);
+        }).then(() => {
+          return kernel.shutdown();
+        });
       });
 
-      it('should fulfill a promise if there is code to execute', (done) => {
+      it('should fulfill a promise if there is code to execute', () => {
         let widget = new CodeCellWidget({ model, rendermime, contentFactory });
-        Kernel.startNew().then(kernel => {
+        let kernel: Kernel.IKernel;
+        let originalCount: number;
+        return Kernel.startNew().then(k => {
+          kernel = k;
+          return kernel.ready;
+        }).then(() => {
           widget.model.value.text = 'foo';
-
-          let originalCount = (widget.model).executionCount;
-          return widget.execute(kernel).then(() => {
-            let executionCount = (widget.model).executionCount;
-            expect(executionCount).to.not.equal(originalCount);
-            kernel.shutdown();
-            done();
-          });
-        }).catch(done);
+          originalCount = (widget.model).executionCount;
+          return widget.execute(kernel);
+        }).then(() => {
+          let executionCount = (widget.model).executionCount;
+          expect(executionCount).to.not.equal(originalCount);
+          return kernel.shutdown();
+        });
       });
 
     });

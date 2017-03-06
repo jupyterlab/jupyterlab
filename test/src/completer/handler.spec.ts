@@ -73,17 +73,15 @@ class TestCompletionHandler extends CompletionHandler {
   }
 }
 
-const kernelPromise = Kernel.startNew();
-
 
 describe('completer/handler', () => {
 
   let kernel: Kernel.IKernel;
 
-  beforeEach((done) => {
-    kernelPromise.then(k => {
+  before(() => {
+    return Kernel.startNew().then(k => {
       kernel = k;
-      done();
+      return kernel.ready;
     });
   });
 
@@ -200,7 +198,7 @@ describe('completer/handler', () => {
 
     describe('#makeRequest()', () => {
 
-      it('should reject if handler has no kernel', (done) => {
+      it('should reject if handler has no kernel', () => {
         let handler = new TestCompletionHandler({
           completer: new CompleterWidget()
         });
@@ -209,13 +207,15 @@ describe('completer/handler', () => {
           column: 0,
           line: 0
         };
-        handler.makeRequest(request).catch((reason: Error) => {
-          expect(reason).to.be.an(Error);
-          done();
-        });
+        return handler.makeRequest(request).then(
+          () => { throw Error('Should have rejected'); },
+          reason => {
+            expect(reason).to.be.an(Error);
+          }
+        )
       });
 
-      it('should reject if handler has no active cell', (done) => {
+      it('should reject if handler has no active cell', () => {
         let handler = new TestCompletionHandler({
           completer: new CompleterWidget()
         });
@@ -224,13 +224,15 @@ describe('completer/handler', () => {
           column: 0,
           line: 0
         };
-        handler.makeRequest(request).catch((reason: Error) => {
-          expect(reason).to.be.an(Error);
-          done();
-        });
+        return handler.makeRequest(request).then(
+          () => { throw Error('Should have rejected') },
+          (reason: Error) => {
+            expect(reason).to.be.an(Error);
+          }
+        )
       });
 
-      it('should resolve if handler has a kernel and an active cell', (done) => {
+      it('should resolve if handler has a kernel and an active cell', () => {
         let handler = new TestCompletionHandler({
           completer: new CompleterWidget()
         });
@@ -242,7 +244,7 @@ describe('completer/handler', () => {
         handler.editor = createEditorWidget().editor;
         handler.editor.model.value.text = 'a=1';
 
-        handler.makeRequest(request).then(() => { done(); }).catch(done);
+        return handler.makeRequest(request);
       });
 
     });
