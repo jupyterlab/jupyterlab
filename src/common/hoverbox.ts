@@ -1,11 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  CodeEditor
-} from '../codeeditor';
-
-
 /**
  * The class name added to all hover boxes.
  */
@@ -28,14 +23,23 @@ namespace HoverBox {
   export
   interface IOptions {
     /**
-     * The cursor definition of the referent editor.
+     * The referent anchor rectangle to which the hover box is bound.
+     *
+     * #### Notes
+     * In an editor context, this value will typically be the cursor's
+     * coordinate position, which can be retrieved via calling the
+     * `getCoordinateForPosition` method.
      */
-    cursor: { start: number; end: number; };
+    anchor: ClientRect;
 
     /**
-     * The referent editor.
+     * The node that hosts the anchor.
+     *
+     * #### Notes
+     * The visibility of the anchor rectangle within this host node is the
+     * heuristic that determines whether the hover box ought to be visible.
      */
-    editor: CodeEditor.IEditor;
+    host: HTMLElement;
 
     /**
      * The maximum height of a hover box.
@@ -82,16 +86,13 @@ namespace HoverBox {
    */
   export
   function setGeometry(options: IOptions): void {
-    const { cursor, editor, node } = options;
-    const { host } = editor;
-    const position = editor.getPositionAt(cursor.start);
-    const coords = editor.getCoordinateForPosition(position);
+    const { anchor, host, node } = options;
 
     // Add hover box class if it does not exist.
     node.classList.add(HOVERBOX_CLASS);
 
     // If the current coordinates are not visible, bail.
-    if (!host.contains(document.elementFromPoint(coords.left, coords.top))) {
+    if (!host.contains(document.elementFromPoint(anchor.left, anchor.top))) {
       node.classList.add(OUTOFVIEW_CLASS);
       return;
     }
@@ -107,8 +108,8 @@ namespace HoverBox {
 
     const style = window.getComputedStyle(node);
     const innerHeight = window.innerHeight;
-    const spaceAbove = coords.top;
-    const spaceBelow = innerHeight - coords.bottom;
+    const spaceAbove = anchor.top;
+    const spaceBelow = innerHeight - anchor.bottom;
     const marginTop = parseInt(style.marginTop, 10) || 0;
     const minHeight = parseInt(style.minHeight, 10) || options.minHeight;
 
@@ -147,7 +148,7 @@ namespace HoverBox {
 
     // Position the box horizontally.
     const offsetHorizontal = options.offset && options.offset.horizontal || 0;
-    const left = coords.left + offsetHorizontal;
+    const left = anchor.left + offsetHorizontal;
     node.style.left = `${Math.ceil(left)}px`;
     node.style.width = 'auto';
 
