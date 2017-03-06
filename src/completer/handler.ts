@@ -81,10 +81,11 @@ class CompletionHandler implements IDisposable {
     // Reset completer state.
     if (this._completer) {
       this._completer.reset();
+      this._completer.editor = newValue;
     }
 
     // Update the editor and signal connections.
-    editor = this._editor = this._completer.editor = newValue;
+    editor = this._editor = newValue;
     if (editor) {
       let model = editor.model;
       model.selections.changed.connect(this.onSelectionsChanged, this);
