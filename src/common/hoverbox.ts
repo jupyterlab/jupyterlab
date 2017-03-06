@@ -76,6 +76,15 @@ namespace HoverBox {
       horizontal?: number,
       vertical?: { above?: number, below?: number }
     };
+
+    /**
+     * If space is available both above and below the anchor, denote which
+     * location is privileged.
+     *
+     * #### Notes
+     * The default value is `'below'`.
+     */
+    privilege?: 'above' | 'below';
   }
 
 
@@ -115,10 +124,11 @@ namespace HoverBox {
 
     let maxHeight = parseInt(style.maxHeight, 10) || options.maxHeight;
 
-    // If the whole box fits below or if there is more space below, then
-    // rendering the box below the text being typed is privileged so that
-    // the code above is not obscured.
-    const renderBelow = spaceBelow >= maxHeight || spaceBelow >= spaceAbove;
+    // Determine whether to render above or below; check privilege.
+    const renderBelow = options.privilege === 'above' ?
+      spaceAbove < maxHeight && spaceAbove < spaceBelow
+        : spaceBelow >= maxHeight || spaceBelow >= spaceAbove;
+
     if (renderBelow) {
       maxHeight = Math.min(spaceBelow - marginTop, maxHeight);
     } else {

@@ -451,7 +451,8 @@ class CompleterWidget extends Widget {
       maxHeight: MAX_HEIGHT,
       minHeight: MIN_HEIGHT,
       node: this.node,
-      offset: { horizontal: borderLeft + paddingLeft }
+      offset: { horizontal: borderLeft + paddingLeft },
+      privilege: 'below'
     });
   }
 

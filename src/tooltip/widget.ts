@@ -215,7 +215,8 @@ class TooltipWidget extends Widget {
       maxHeight: MAX_HEIGHT,
       minHeight: MIN_HEIGHT,
       node: this.node,
-      offset: { horizontal: -1 * paddingLeft }
+      offset: { horizontal: -1 * paddingLeft },
+      privilege: 'below'
     });
   }
 
