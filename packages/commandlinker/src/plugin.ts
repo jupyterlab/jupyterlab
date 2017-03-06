@@ -5,7 +5,7 @@
 
 import {
   JupyterLab, JupyterLabPlugin
-} from '../application';
+} from '@jupyterlab/application';
 
 import {
   CommandLinker, ICommandLinker
