@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  IterableOrArrayLike
+  IterableOrArrayLike, each
 } from '@phosphor/algorithm';
 
 import {
@@ -30,9 +30,9 @@ import {
 export
 interface IKernelContext extends IDisposable {
   /**
-   * A signal emitted when the kernel changes.
+   * A signal emitted when a property changes.
    */
-  kernelChanged: ISignal<this, Kernel.IKernel>;
+  changed: ISignal<this, keyof IKernelContext>;
 
   /**
    * The current kernel associated with the context.
@@ -60,7 +60,7 @@ interface IKernelContext extends IDisposable {
    * #### Notes
    * Will use [[selectKernel]] if the default is not available.
    */
-  startDefaultKernel(): Promise<Kernel.IKernel>
+  startDefaultKernel(): Promise<Kernel.IKernel>;
 
   /**
    * Change the current kernel associated with the document.
@@ -100,9 +100,9 @@ class KernelContext implements IKernelContext {
   }
 
   /**
-   * A signal emitted when the kernel changes.
+   * A signal emitted when an attribute changes.
    */
-  get kernelChanged(): ISignal<this, Kernel.IKernel> {
+  get changed(): ISignal<this, keyof IKernelContext> {
     return this._changed;
   }
 
@@ -215,6 +215,7 @@ class KernelContext implements IKernelContext {
       msg += '\nPlease select a kernel:';
       return this.selectKernel(msg);
     }
+    throw 'need to check for existing first';
   }
 
   /**
@@ -223,7 +224,7 @@ class KernelContext implements IKernelContext {
   selectKernel(message?: string): Promise<Kernel.IKernel> {
     return KernelContext.selectKernel({
       specs: this._manager.specs,
-      sessions: this._manager.running,
+      sessions: this._manager.running(),
       kernel: this.kernel && this.kernel.model,
       preferredName: this._preferredName,
       preferredLanguage: this._preferredLanguage,
@@ -248,6 +249,7 @@ class KernelContext implements IKernelContext {
    */
   rename(path: string): Promise<void> {
     this._path = path;
+    this._changed.emit('path');
     if (!this._session) {
       return Promise.resolve(void 0);
     }
@@ -280,7 +282,7 @@ class KernelContext implements IKernelContext {
         this._session.dispose();
       }
       this._session = session;
-      this._changed.emit(session.kernel);
+      this._changed.emit('kernel');
       session.kernelChanged.connect(this._onKernelChanged, this);
       return session.kernel;
     });
@@ -306,7 +308,7 @@ class KernelContext implements IKernelContext {
    * Handle a change of kernel on the session.
    */
   private _onKernelChanged(): void {
-    this._changed.emit(this.kernel);
+    this._changed.emit('kernel');
   }
 
   private _manager: Session.IManager;
@@ -316,7 +318,7 @@ class KernelContext implements IKernelContext {
   private _preferredLanguage = '';
   private _preferredName = '';
   private _session: Session.ISession;
-  private _changed = new Signal<this, Kernel.IKernel>(this);
+  private _changed = new Signal<this, keyof IKernelContext>(this);
   private _isDisposed = false;
 }
 
@@ -329,7 +331,7 @@ namespace KernelContext {
   /**
    * The options used to create a kernel handler.
    */
-  export 
+  export
   interface IOptions {
     /**
      * A session manager instance.
@@ -411,12 +413,12 @@ namespace KernelContext {
    * Will return `none` if no suitable kernel is available.
    * If neither a name nor a language is given, the default kernel
    * name is returned.
-   * If the name is given and there is an exact match, the 
+   * If the name is given and there is an exact match, the
    * name is returned.
-   * Otherwise if the language is given and only one kernel 
+   * Otherwise if the language is given and only one kernel
    * matches the language, that kernel name will be returned.
    * If `null` is returned, it is expected that the user should
-   * be prompted 
+   * be prompted
    */
   export
   function getDefaultKernel(options: IKernelSearch): string | null {
@@ -480,14 +482,14 @@ namespace Private {
     for (let specName in specs.kernelspecs) {
       let kernelLanguage = specs.kernelspecs[specName].language;
       if (preferredLanguage === kernelLanguage) {
-        matches.push[specName];
+        matches.push(specName);
       }
     }
     if (matches.length === 1) {
       let specName = matches[0];
       console.log('No exact match found for ' + specName +
                   ', using kernel ' + specName + ' that matches ' +
-                  'language=' + language);
+                  'language=' + preferredLanguage);
       return specName;
     }
 
@@ -499,7 +501,7 @@ namespace Private {
    * Bring up a dialog to select a kernel.
    */
   export
-  function selectKernel(options: IKernelSelection): Promise<Kernel.IModel> {
+  function selectKernel(options: KernelContext.IKernelSelection): Promise<Kernel.IModel> {
     // Create the dialog body.
     let body = document.createElement('div');
     let text = document.createElement('label');
@@ -533,7 +535,7 @@ namespace Private {
       return Promise.resolve(false);
     }
     let body = (
-      message || 
+      message ||
       'Do you want to restart the current kernel? All variables will be lost.'
     );
     return showDialog({
