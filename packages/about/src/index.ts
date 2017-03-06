@@ -11,7 +11,7 @@ import {
 
 import {
   VDomModel, VDomWidget
-} from '../common/vdom';
+} from '@jupyterlab/common';
 
 
 /**

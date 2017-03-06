@@ -2,20 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin
-} from '../application';
+  InstanceTracker, JupyterLab, JupyterLabPlugin
+} from '@jupyterlab/application';
 
 import {
   ICommandPalette
-} from '../commandpalette';
-
-import {
-  InstanceTracker
-} from '../application';
+} from '@jupyterlab/commandpalette';
 
 import {
   IInstanceRestorer
-} from '../instancerestorer';
+} from '@jupyterlab/instancerestorer';
 
 import {
   AboutModel, AboutWidget, CommandIDs
