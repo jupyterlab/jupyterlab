@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  IterableOrArrayLike, each
+  ArrayExt, IterableOrArrayLike, each, toArray
 } from '@phosphor/algorithm';
 
 import {
@@ -201,9 +201,19 @@ class KernelContext implements IKernelContext {
    * Start the default kernel for the context.
    *
    * #### Notes
+   * Will use an existing session on the server if one is
+   * running on our [[path]].
    * Will use [[selectKernel]] if the default is not available.
    */
   startDefaultKernel(): Promise<Kernel.IKernel> {
+    // First check for a running session on our path.
+    let sessions = toArray(this._manager.running());
+    let index = ArrayExt.findFirstIndex(sessions, session => {
+      return session.notebook.path === this.path;
+    });
+    if (index !== -1) {
+      return this._connectTo(sessions[index]);
+    }
     let name = KernelContext.getDefaultKernel({
       preferredName: this._preferredName,
       preferredLanguage: this._preferredLanguage,
@@ -214,8 +224,9 @@ class KernelContext implements IKernelContext {
       let msg = `Could not find a kernel matching ${name}.`;
       msg += '\nPlease select a kernel:';
       return this.selectKernel(msg);
+    } else {
+      return this.changeKernel({ name });
     }
-    throw 'need to check for existing first';
   }
 
   /**
@@ -271,6 +282,22 @@ class KernelContext implements IKernelContext {
   }
 
   /**
+   * Connect to the given session model.
+   */
+  private _connectTo(model: Session.IModel): Promise<Kernel.IKernel> {
+    if (this._session && this._session.id === model.id) {
+      return Promise.resolve(this.kernel);
+    }
+    return this._ensureNoSession().then(() => {
+      return this._manager.connectTo(model.id);
+    }).then(session => {
+      this._session = session;
+      this._changed.emit('kernel');
+      return session.kernel;
+    });
+  }
+
+  /**
    * Start a session with the given options.
    */
   private _startSession(options: Session.IOptions): Promise<Kernel.IKernel> {
@@ -296,8 +323,11 @@ class KernelContext implements IKernelContext {
       return Promise.resolve(null);
     }
     let session = this._session;
+    let kernel = this.kernel;
     this._session = null;
-    this._changed.emit(null);
+    if (kernel) {
+      this._changed.emit('kernel');
+    }
     return session.shutdown().then(() => {
       session.dispose();
       return Promise.resolve<Kernel.IKernel>(null);
