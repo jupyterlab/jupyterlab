@@ -1,6 +1,6 @@
 {
   "name": "jupyterlab",
-  "version": "0.17.1",
+  "version": "0.17.2",
   "description": "A computational environment for Jupyter.",
   "directories": {
     "lib": "lib/"
