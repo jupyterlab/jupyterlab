@@ -15,19 +15,19 @@ import {
 
 import {
   CodeEditor
-} from '../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   IChangedArgs
-} from '../common/interfaces';
+} from '@jupyterlab/common';
 
 import {
   IObservableJSON, ObservableJSON
-} from '../common/observablejson';
+} from '@jupyterlab/common';
 
 import {
   IOutputAreaModel, OutputAreaModel
-} from '../outputarea';
+} from '@jupyterlab/outputarea';
 
 
 /**
