@@ -488,11 +488,6 @@ namespace CompleterWidget {
     renderer?: IRenderer;
   }
 
-  /**
-   * An interface describing editor state coordinates.
-   */
-  export interface ICoordinate extends CodeEditor.ICoordinate, JSONObject { }
-
 
   /**
    * An interface for a completion request reflecting the state of the editor.
@@ -525,9 +520,9 @@ namespace CompleterWidget {
     readonly column: number;
 
     /**
-     * The coordinate position of the cursor.
+     * The coordinate rectangle that describes the cursor.
      */
-    readonly coords: ICoordinate;
+    readonly coords: CodeEditor.ICoordinate;
   }
 
   /**
