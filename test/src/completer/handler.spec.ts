@@ -95,7 +95,7 @@ describe('completer/handler', () => {
 
       it('should create a completer handler', () => {
         let handler = new CompletionHandler({
-          completer: new CompleterWidget()
+          completer: new CompleterWidget({ editor: null })
         });
         expect(handler).to.be.a(CompletionHandler);
       });
@@ -106,14 +106,14 @@ describe('completer/handler', () => {
 
       it('should default to null', () => {
         let handler = new CompletionHandler({
-          completer: new CompleterWidget()
+          completer: new CompleterWidget({ editor: null })
         });
         expect(handler.kernel).to.be(null);
       });
 
       it('should be settable', () => {
         let handler = new CompletionHandler({
-          completer: new CompleterWidget()
+          completer: new CompleterWidget({ editor: null })
         });
         expect(handler.kernel).to.be(null);
         handler.kernel = kernel;
@@ -127,14 +127,14 @@ describe('completer/handler', () => {
 
       it('should default to null', () => {
         let handler = new CompletionHandler({
-          completer: new CompleterWidget()
+          completer: new CompleterWidget({ editor: null })
         });
         expect(handler.editor).to.be(null);
       });
 
       it('should be settable', () => {
         let handler = new CompletionHandler({
-          completer: new CompleterWidget()
+          completer: new CompleterWidget({ editor: null })
         });
         let widget = createEditorWidget();
         expect(handler.editor).to.be(null);
@@ -144,7 +144,7 @@ describe('completer/handler', () => {
 
       it('should be resettable', () => {
         let handler = new CompletionHandler({
-          completer: new CompleterWidget()
+          completer: new CompleterWidget({ editor: null })
         });
         let one = createEditorWidget();
         let two = createEditorWidget();
@@ -161,7 +161,7 @@ describe('completer/handler', () => {
 
       it('should be true if handler has been disposed', () => {
         let handler = new CompletionHandler({
-          completer: new CompleterWidget()
+          completer: new CompleterWidget({ editor: null })
         });
         expect(handler.isDisposed).to.be(false);
         handler.dispose();
@@ -174,7 +174,7 @@ describe('completer/handler', () => {
 
       it('should dispose of the handler resources', () => {
         let handler = new CompletionHandler({
-          completer: new CompleterWidget(),
+          completer: new CompleterWidget({ editor: null }),
           kernel: kernel
         });
         expect(handler.isDisposed).to.be(false);
@@ -186,7 +186,7 @@ describe('completer/handler', () => {
 
       it('should be safe to call multiple times', () => {
         let handler = new CompletionHandler({
-          completer: new CompleterWidget()
+          completer: new CompleterWidget({ editor: null })
         });
         expect(handler.isDisposed).to.be(false);
         handler.dispose();
@@ -200,7 +200,7 @@ describe('completer/handler', () => {
 
       it('should reject if handler has no kernel', () => {
         let handler = new TestCompletionHandler({
-          completer: new CompleterWidget()
+          completer: new CompleterWidget({ editor: null })
         });
         handler.editor = createEditorWidget().editor;
         let request = {
@@ -217,7 +217,7 @@ describe('completer/handler', () => {
 
       it('should reject if handler has no active cell', () => {
         let handler = new TestCompletionHandler({
-          completer: new CompleterWidget()
+          completer: new CompleterWidget({ editor: null })
         });
         handler.kernel = kernel;
         let request = {
@@ -234,7 +234,7 @@ describe('completer/handler', () => {
 
       it('should resolve if handler has a kernel and an active cell', () => {
         let handler = new TestCompletionHandler({
-          completer: new CompleterWidget()
+          completer: new CompleterWidget({ editor: null })
         });
         let request = {
           column: 0,
@@ -252,7 +252,7 @@ describe('completer/handler', () => {
     describe('#onReply()', () => {
 
       it('should reset model if status is not ok', () => {
-        let completer = new CompleterWidget();
+        let completer = new CompleterWidget({ editor: null });
         let handler = new TestCompletionHandler({ completer });
         let options = ['a', 'b', 'c'];
         let request: CompleterWidget.ITextState = {
@@ -285,7 +285,7 @@ describe('completer/handler', () => {
       });
 
       it('should update model if status is ok', () => {
-        let completer = new CompleterWidget();
+        let completer = new CompleterWidget({ editor: null });
         let handler = new TestCompletionHandler({ completer });
         let options = ['a', 'b', 'c'];
         let request: CompleterWidget.ITextState = {
@@ -323,7 +323,7 @@ describe('completer/handler', () => {
 
       it('should fire when the active editor emits a text change', () => {
         let handler = new TestCompletionHandler({
-          completer: new CompleterWidget()
+          completer: new CompleterWidget({ editor: null })
         });
         handler.editor = createEditorWidget().editor;
         expect(handler.methods).to.not.contain('onTextChanged');
@@ -333,6 +333,7 @@ describe('completer/handler', () => {
 
       it('should call model change handler if model exists', () => {
         let completer = new CompleterWidget({
+          editor: null,
           model: new TestCompleterModel()
         });
         let handler = new TestCompletionHandler({ completer });
@@ -354,7 +355,7 @@ describe('completer/handler', () => {
     describe('#onCompletionSelected()', () => {
 
       it('should fire when the completer widget emits a signal', () => {
-        let completer = new CompleterWidget();
+        let completer = new CompleterWidget({ editor: null });
         let handler = new TestCompletionHandler({ completer });
 
         expect(handler.methods).to.not.contain('onCompletionSelected');
@@ -364,6 +365,7 @@ describe('completer/handler', () => {
 
       it('should call model create patch method if model exists', () => {
         let completer = new CompleterWidget({
+          editor: null,
           model: new TestCompleterModel()
         });
         let handler = new TestCompletionHandler({ completer });
@@ -378,7 +380,7 @@ describe('completer/handler', () => {
       it('should update cell if patch exists', () => {
         let model = new CompleterModel();
         let patch = 'foobar';
-        let completer = new CompleterWidget({ model });
+        let completer = new CompleterWidget({ editor: null, model });
         let handler = new TestCompletionHandler({ completer });
         let editor = createEditorWidget().editor;
         let text = 'eggs\nfoo # comment\nbaz';
