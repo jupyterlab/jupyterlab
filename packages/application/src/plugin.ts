@@ -2,12 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin, CommandIDs
-} from './';
+  ICommandPalette
+} from '@jupyterlab/commandpalette';
 
 import {
-  ICommandPalette
-} from '../commandpalette';
+  JupyterLab, JupyterLabPlugin, CommandIDs
+} from './';
 
 
 /**

@@ -6,6 +6,10 @@ import {
 } from '@phosphor/algorithm';
 
 import {
+  CommandRegistry
+} from '@phosphor/commands';
+
+import {
   IDisposable
 } from '@phosphor/disposable';
 
@@ -18,24 +22,16 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  CommandRegistry
-} from '@phosphor/commands';
-
-import {
-  FocusTracker
-} from '@phosphor/widgets';
-
-import {
-  Widget
+  FocusTracker, Widget
 } from '@phosphor/widgets';
 
 import {
   IInstanceRestorer
-} from '../instancerestorer';
+} from '@jupyterlab/instancerestorer';
 
 import {
   IStateDB
-} from '../statedb';
+} from '@jupyterlab/statedb';
 
 import {
   ApplicationShell

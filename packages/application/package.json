@@ -1,0 +1,44 @@
+{
+  "name": "@jupyterlab/application",
+  "version": "0.1.0",
+  "description": "JupyterLab - Application",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js",
+    "style/*.css"
+  ],
+  "directories": {
+    "lib": "lib/"
+  },
+  "dependencies": {
+    "@phosphor/algorithm": "^0.1.1",
+    "@phosphor/commands": "^0.1.4",
+    "@phosphor/disposable": "^0.1.1",
+    "@phosphor/messaging": "^0.1.0",
+    "@phosphor/properties": "^0.1.1",
+    "@phosphor/signaling": "^0.1.2",
+    "@phosphor/virtualdom": "^0.1.0",
+    "@phosphor/widgets": "^0.1.7",
+    "jupyterlab": "^0.17.2"
+  },
+  "devDependencies": {
+    "rimraf": "^2.5.2",
+    "typescript": "^2.2.1"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "author": "Project Jupyter",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "homepage": "https://github.com/jupyterlab/jupyterlab"
+}

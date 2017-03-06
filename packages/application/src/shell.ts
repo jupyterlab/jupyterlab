@@ -20,7 +20,7 @@ import {
 
 import {
   IInstanceRestorer
-} from '../instancerestorer';
+} from '@jupyterlab/instancerestorer';
 
 
 /**
