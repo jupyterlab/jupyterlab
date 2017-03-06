@@ -3,7 +3,7 @@
 
 import {
   IEditorServices
-} from '../codeeditor';
+} from '@phosphor/codeeditor';
 
 import {
   CodeMirrorEditorFactory

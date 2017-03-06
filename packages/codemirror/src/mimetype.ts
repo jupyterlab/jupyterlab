@@ -10,7 +10,7 @@ import {
 
 import {
   IEditorMimeTypeService
-} from '../codeeditor';
+} from '@phosphor/codeeditor';
 
 import {
   findMode

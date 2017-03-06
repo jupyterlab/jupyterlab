@@ -1,0 +1,45 @@
+{
+  "name": "@jupyterlab/codemirror",
+  "version": "0.1.0",
+  "description": "JupyterLab - CodeMirror Services",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js",
+    "style/*.css"
+  ],
+  "directories": {
+    "lib": "lib/"
+  },
+  "dependencies": {
+    "@jupyterlab/application": "^0.1.0",
+    "@jupyterlab/codeeditor": "^0.1.0",
+    "@jupyterlab/commandpaelette": "^0.1.0",
+    "@jupyterlab/common": "^0.1.0",
+    "@jupyterlab/editorwidget": "^0.1.0",
+    "@jupyterlab/mainmenu": "^0.1.0",
+    "@jupyterlab/services": "^0.39.1",
+    "@phosphor/disposable": "^0.1.1",
+    "@phosphor/signaling": "^0.1.2",
+    "codemirror": "^5.24.2"
+  },
+  "devDependencies": {
+    "rimraf": "^2.5.2",
+    "typescript": "^2.2.1"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "author": "Project Jupyter",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "homepage": "https://github.com/jupyterlab/jupyterlab"
+}

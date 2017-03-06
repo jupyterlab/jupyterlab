@@ -17,24 +17,24 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  ISignal, Signal
+  Signal
 } from '@phosphor/signaling';
 
 import {
   CodeEditor
-} from '../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   IChangedArgs
-} from '../common/interfaces';
+} from '@jupyterlab/common';
 
 import {
   IObservableString, ObservableString
-} from '../common/observablestring';
+} from '@jupyterlab/common';
 
 import {
   IObservableMap, ObservableMap
-} from '../common/observablemap';
+} from '@jupyterlab/common';
 
 import {
   loadModeByMIME

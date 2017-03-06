@@ -6,7 +6,7 @@ import * as CodeMirror
 
 import {
   CodeEditor, IEditorFactoryService
-} from '../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   CodeMirrorEditor

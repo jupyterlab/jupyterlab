@@ -12,23 +12,23 @@ import {
 
 import {
   JupyterLab, JupyterLabPlugin
-} from '../application';
+} from '@jupyterlab/application';
 
 import {
   IEditorServices
-} from '../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   ICommandPalette
-} from '../commandpalette';
+} from '@jupyterlab/commandpalette';
 
 import {
   IEditorTracker, CommandIDs as EditorCommandIDs
-} from '../editorwidget';
+} from '@jupyterlab/editorwidget';
 
 import {
   IMainMenu
-} from '../mainmenu';
+} from '@jupyterlab/mainmenu';
 
 import {
   editorServices, CodeMirrorEditor, CommandIDs
