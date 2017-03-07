@@ -100,17 +100,19 @@ interface ICommandLinker extends IDisposable {
    *
    * #### Notes
    * The return value can be used on its own as the value for the `dataset`
-   * attribute of a virtual element, or it can be added to an existig `dataset`
+   * attribute of a virtual element, or it can be added to an existing `dataset`
    * as in the example below.
    *
    * #### Example
    * ```typescript
+   * let command = 'some:command-id';
+   * let args = { alpha: 'beta' };
    * let anchor = h.a({
    *   className: 'some-class',
    *   dataset: {
    *     foo: '1',
    *     bar: '2',
-   *     ...linker.populateVNodeDataset(item.command, item.args)
+   *     ...linker.populateVNodeDataset(command, args)
    *   }
    * }, 'some text');
    * ```
@@ -233,17 +235,19 @@ class CommandLinker implements ICommandLinker {
    *
    * #### Notes
    * The return value can be used on its own as the value for the `dataset`
-   * attribute of a virtual element, or it can be added to an existig `dataset`
+   * attribute of a virtual element, or it can be added to an existing `dataset`
    * as in the example below.
    *
    * #### Example
    * ```typescript
+   * let command = 'some:command-id';
+   * let args = { alpha: 'beta' };
    * let anchor = h.a({
    *   className: 'some-class',
    *   dataset: {
    *     foo: '1',
    *     bar: '2',
-   *     ...linker.populateVNodeDataset(item.command, item.args)
+   *     ...linker.populateVNodeDataset(command, args)
    *   }
    * }, 'some text');
    * ```
