@@ -199,11 +199,11 @@ namespace ToolbarItems {
     toolbar.addItem('copy', createCopyButton(panel));
     toolbar.addItem('paste', createPasteButton(panel));
     toolbar.addItem('run', createRunButton(panel));
-    toolbar.addItem('interrupt', createInterruptButton(panel));
-    toolbar.addItem('restart', createRestartButton(panel));
+    toolbar.addItem('interrupt', createInterruptButton(panel.context));
+    toolbar.addItem('restart', createRestartButton(panel.context));
     toolbar.addItem('cellType', createCellTypeItem(panel));
-    toolbar.addItem('kernelName', createKernelNameItem(panel));
-    toolbar.addItem('kernelStatus', createKernelStatusItem(panel));
+    toolbar.addItem('kernelName', createKernelNameItem(panel.context));
+    toolbar.addItem('kernelStatus', createKernelStatusItem(panel.context));
   }
 }
 

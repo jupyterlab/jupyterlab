@@ -231,7 +231,7 @@ describe('notebook/notebook/default-toolbar', () => {
     describe('#createInterruptButton()', () => {
 
       it('should have the `\'jp-StopIcon\'` class', () => {
-        let button = createInterruptButton(panel);
+        let button = createInterruptButton(panel.context);
         expect(button.hasClass('jp-StopIcon')).to.be(true);
       });
 
@@ -240,7 +240,7 @@ describe('notebook/notebook/default-toolbar', () => {
     describe('#createRestartButton()', () => {
 
       it('should have the `\'jp-RefreshIcon\'` class', () => {
-        let button = createRestartButton(panel);
+        let button = createRestartButton(panel.context);
         expect(button.hasClass('jp-RefreshIcon')).to.be(true);
       });
 
@@ -289,7 +289,7 @@ describe('notebook/notebook/default-toolbar', () => {
     describe('#createKernelNameItem()', () => {
 
       it('should display the `\'display_name\'` of the kernel', (done) => {
-        let item = createKernelNameItem(panel);
+        let item = createKernelNameItem(panel.context);
         startKernel(context).then(kernel => {
           console.log('started kernel');
           return kernel.getSpec();
@@ -301,12 +301,12 @@ describe('notebook/notebook/default-toolbar', () => {
       });
 
       it('should display `\'No Kernel!\'` if there is no kernel', () => {
-        let item = createKernelNameItem(panel);
+        let item = createKernelNameItem(panel.context);
         expect(item.node.textContent).to.be('No Kernel!');
       });
 
       it('should handle a change in context', (done) => {
-        let item = createKernelNameItem(panel);
+        let item = createKernelNameItem(panel.context);
         startKernel(context).then(kernel => {
           console.log('started kernel');
           return kernel.ready;
@@ -328,7 +328,7 @@ describe('notebook/notebook/default-toolbar', () => {
       });
 
       it('should display a busy status if the kernel status is not idle', (done) => {
-        let item = createKernelStatusItem(panel);
+        let item = createKernelStatusItem(panel.context);
         panel.kernel.statusChanged.connect(() => {
           if (panel.kernel.status === 'busy') {
             expect(item.hasClass('jp-mod-busy')).to.be(true);
@@ -339,7 +339,7 @@ describe('notebook/notebook/default-toolbar', () => {
       });
 
       it('should show the current status in the node title', (done) => {
-        let item = createKernelStatusItem(panel);
+        let item = createKernelStatusItem(panel.context);
         let status = panel.kernel.status;
         expect(item.node.title.toLowerCase()).to.contain(status);
         panel.kernel.statusChanged.connect(() => {
@@ -352,7 +352,7 @@ describe('notebook/notebook/default-toolbar', () => {
       });
 
       it('should handle a null kernel', (done) => {
-        let item = createKernelStatusItem(panel);
+        let item = createKernelStatusItem(panel.context);
         panel.context.changeKernel(void 0).then(() => {
           expect(item.node.title).to.be('No Kernel!');
           expect(item.hasClass('jp-mod-busy')).to.be(true);
@@ -361,7 +361,7 @@ describe('notebook/notebook/default-toolbar', () => {
       });
 
       it('should handle a change to the context', () => {
-        let item = createKernelStatusItem(panel);
+        let item = createKernelStatusItem(panel.context);
         context = createNotebookContext();
         context.model.fromJSON(DEFAULT_CONTENT);
         panel.context = context;

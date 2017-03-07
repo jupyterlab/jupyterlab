@@ -605,15 +605,41 @@ namespace DocumentRegistry {
   interface ICodeModel extends IModel, CodeEditor.IModel { }
 
   /**
+   * A kernel owner interface.
+   */
+  export
+  interface IKernelOwner {
+    /**
+     * An associated kernel.
+     */
+    readonly kernel: Kernel.IKernel;
+
+    /**
+     * A signal emitted when the kernel is changed.
+     */
+    readonly kernelChanged: ISignal<IKernelOwner, Kernel.IKernel>;
+
+    /**
+     * Start the default kernel for the owner.
+     *
+     * @returns A promise that resolves with the new kernel.
+     */
+    startDefaultKernel(): Promise<Kernel.IKernel>;
+
+    /**
+     * Change the current kernel associated with the owner.
+     *
+     * #### Notes
+     * If no options are given, the session is shut down.
+     */
+    changeKernel(options?: Kernel.IModel): Promise<Kernel.IKernel>;
+  }
+
+  /**
    * The document context object.
    */
   export
-  interface IContext<T extends IModel> extends IDisposable {
-    /**
-     * A signal emitted when the kernel changes.
-     */
-    kernelChanged: ISignal<this, Kernel.IKernel>;
-
+  interface IContext<T extends IModel> extends IDisposable, IKernelOwner {
     /**
      * A signal emitted when the path changes.
      */
@@ -633,11 +659,6 @@ namespace DocumentRegistry {
      * Get the model associated with the document.
      */
     readonly model: T;
-
-    /**
-     * The current kernel associated with the document.
-     */
-    readonly kernel: Kernel.IKernel;
 
     /**
      * The current path associated with the document.
@@ -662,21 +683,6 @@ namespace DocumentRegistry {
      * A promise that is fulfilled when the context is ready.
      */
     readonly ready: Promise<void>;
-
-    /**
-     * Start the default kernel for the context.
-     *
-     * @returns A promise that resolves with the new kernel.
-     */
-    startDefaultKernel(): Promise<Kernel.IKernel>;
-
-    /**
-     * Change the current kernel associated with the document.
-     *
-     * #### Notes
-     * If no options are given, the session is shut down.
-     */
-    changeKernel(options?: Kernel.IModel): Promise<Kernel.IKernel>;
 
     /**
      * Save the document contents to disk.
