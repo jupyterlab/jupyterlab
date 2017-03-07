@@ -28,7 +28,7 @@ import {
 } from '../utils';
 
 import {
-  createNotebookPanelFactory, clipboard, rendermime, mimeTypeService
+  createNotebookPanelFactory, rendermime, mimeTypeService
 } from './utils';
 
 
@@ -40,7 +40,6 @@ function createFactory(): NotebookWidgetFactory {
     name: 'notebook',
     fileExtensions: ['.ipynb'],
     rendermime,
-    clipboard,
     contentFactory,
     mimeTypeService
   });

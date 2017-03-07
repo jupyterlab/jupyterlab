@@ -36,7 +36,7 @@ import {
 } from '../utils';
 
 import {
-  DEFAULT_CONTENT, createNotebookPanelFactory, rendermime, clipboard,
+  DEFAULT_CONTENT, createNotebookPanelFactory, rendermime,
   mimeTypeService, editorFactory
 } from './utils';
 
@@ -45,7 +45,7 @@ import {
  * Default data.
  */
 const contentFactory = createNotebookPanelFactory();
-const options = { rendermime, clipboard, mimeTypeService, contentFactory };
+const options = { rendermime, mimeTypeService, contentFactory };
 
 
 class LogNotebookPanel extends NotebookPanel {
@@ -112,7 +112,7 @@ describe('notebook/notebook/panel', () => {
       it('should accept an optional content factory', () => {
         let newFactory = createNotebookPanelFactory();
         let panel = new NotebookPanel({
-          mimeTypeService, rendermime, clipboard, contentFactory: newFactory
+          mimeTypeService, rendermime, contentFactory: newFactory
         });
         expect(panel.contentFactory).to.be(newFactory);
       });
@@ -207,17 +207,8 @@ describe('notebook/notebook/panel', () => {
       it('should be the contentFactory used by the widget', () => {
         let r = createNotebookPanelFactory();
         let panel = new NotebookPanel({
-          mimeTypeService, rendermime, clipboard, contentFactory: r });
+          mimeTypeService, rendermime, contentFactory: r });
         expect(panel.contentFactory).to.be(r);
-      });
-
-    });
-
-    describe('#clipboard', () => {
-
-      it('should be the clipboard instance used by the widget', () => {
-        let panel = new NotebookPanel(options);
-        expect(panel.clipboard).to.be(clipboard);
       });
 
     });
