@@ -6,7 +6,7 @@ import {
 } from 'chai';
 
 import {
-  each
+  each, map, toArray
 } from '@phosphor/algorithm';
 
 import {
@@ -154,20 +154,20 @@ describe('@jupyterlab/domutils', () => {
 
       });
 
-      describe('#show()', () => {
+      describe('#launch()', () => {
 
         it('should attach the dialog to the host', () => {
           let host = document.createElement('div');
           document.body.appendChild(host);
           dialog = new TestDialog({ host });
-          dialog.show();
+          dialog.launch();
           expect(host.firstChild).to.equal(dialog.node);
           dialog.dispose();
           document.body.removeChild(host);
         });
 
         it('should resolve with `true` when accepted', () => {
-          let promise = dialog.show().then(result => {
+          let promise = dialog.launch().then(result => {
             expect(result.accept).to.equal(true);
           });
           dialog.resolve();
@@ -175,7 +175,7 @@ describe('@jupyterlab/domutils', () => {
         });
 
         it('should resolve with `false` when accepted', () => {
-          let promise = dialog.show().then(result => {
+          let promise = dialog.launch().then(result => {
             expect(result.accept).to.equal(false);
           });
           dialog.reject();
@@ -183,7 +183,7 @@ describe('@jupyterlab/domutils', () => {
         });
 
         it('should resolve with `false` when closed', () => {
-          let promise = dialog.show().then(result => {
+          let promise = dialog.launch().then(result => {
             expect(result.accept).to.equal(false);
           });
           dialog.close();
@@ -195,7 +195,7 @@ describe('@jupyterlab/domutils', () => {
           document.body.appendChild(input);
           input.focus();
           expect(document.activeElement).to.equal(input);
-          let promise = dialog.show().then(() => {
+          let promise = dialog.launch().then(() => {
             expect(document.activeElement).to.equal(input);
             document.body.removeChild(input);
           });
@@ -209,7 +209,7 @@ describe('@jupyterlab/domutils', () => {
       describe('#resolve()', () => {
 
         it('should resolve with the default item', () => {
-          let promise = dialog.show().then(result => {
+          let promise = dialog.launch().then(result => {
             expect(result.accept).to.equal(true);
           });
           dialog.resolve();
@@ -217,7 +217,7 @@ describe('@jupyterlab/domutils', () => {
         });
 
         it('should resolve with the item at the given index', () => {
-          let promise = dialog.show().then(result => {
+          let promise = dialog.launch().then(result => {
             expect(result.accept).to.equal(false);
           });
           dialog.resolve(0);
@@ -229,7 +229,7 @@ describe('@jupyterlab/domutils', () => {
       describe('#reject()', () => {
 
         it('should reject with the default reject item', () => {
-          let promise = dialog.show().then(result => {
+          let promise = dialog.launch().then(result => {
             expect(result.label).to.equal('CANCEL');
             expect(result.accept).to.equal(false);
           });
@@ -244,7 +244,7 @@ describe('@jupyterlab/domutils', () => {
         context('keydown', () => {
 
           it('should reject on escape key', () => {
-            let promise = dialog.show().then(result => {
+            let promise = dialog.launch().then(result => {
               expect(result.accept).to.equal(false);
             });
             simulate(dialog.node, 'keydown', { keyCode: 27 });
@@ -252,7 +252,7 @@ describe('@jupyterlab/domutils', () => {
           });
 
           it('should accept on enter key', () => {
-            let promise = dialog.show().then(result => {
+            let promise = dialog.launch().then(result => {
               expect(result.accept).to.equal(true);
             });
             simulate(dialog.node, 'keydown', { keyCode: 13 });
@@ -260,7 +260,7 @@ describe('@jupyterlab/domutils', () => {
           });
 
           it('should cycle to the first button on a tab key', () => {
-            let promise = dialog.show().then(result => {
+            let promise = dialog.launch().then(result => {
               expect(result.accept).to.equal(false);
             });
             let node = document.activeElement;
@@ -277,7 +277,7 @@ describe('@jupyterlab/domutils', () => {
         context('contextmenu', () => {
 
           it('should cancel context menu events', () => {
-            let promise = dialog.show().then(result => {
+            let promise = dialog.launch().then(result => {
               expect(result.accept).to.equal(false);
             });
             let node = document.body.getElementsByClassName('jp-Dialog')[0];
@@ -293,7 +293,7 @@ describe('@jupyterlab/domutils', () => {
         context('click', () => {
 
           it('should prevent clicking outside of the content area', () => {
-            let promise = dialog.show();
+            let promise = dialog.launch();
             let evt = generate('click');
             let cancelled = !dialog.node.dispatchEvent(evt);
             expect(cancelled).to.equal(true);
@@ -302,7 +302,7 @@ describe('@jupyterlab/domutils', () => {
           });
 
           it('should resolve a clicked button', () => {
-            let promise = dialog.show().then(result => {
+            let promise = dialog.launch().then(result => {
               expect(result.accept).to.equal(false);
             });
             let node = dialog.node.querySelector('.jp-mod-reject');
@@ -321,7 +321,7 @@ describe('@jupyterlab/domutils', () => {
             let host = document.createElement('div');
             document.body.appendChild(host);
             dialog = new TestDialog({ host });
-            let promise = dialog.show();
+            let promise = dialog.launch();
             simulate(target, 'focus');
             expect(document.activeElement).to.not.equal(target);
             expect(document.activeElement.className).to.contain('jp-mod-accept');
@@ -387,7 +387,7 @@ describe('@jupyterlab/domutils', () => {
       describe('#onCloseRequest()', () => {
 
         it('should reject an existing promise', () => {
-          let promise = dialog.show().then(result => {
+          let promise = dialog.launch().then(result => {
             expect(result.accept).to.equal(false);
           });
           dialog.close();
@@ -456,22 +456,13 @@ describe('@jupyterlab/domutils', () => {
 
         });
 
-        describe('#createButtonNodes()', () => {
-
-          it('should create the button nodes of the dialog', () => {
-            let buttons = [Dialog.okButton, { label: 'foo' }] as Dialog.IButton[];
-            let nodes = renderer.createButtonNodes(buttons);
-            expect(nodes[0].className).to.contain('jp-Dialog-button');
-            expect(nodes[1].className).to.contain('jp-Dialog-button');
-          });
-
-        });
-
         describe('#createFooter()', () => {
 
           it('should create the footer of the dialog', () => {
             let buttons = [Dialog.okButton, { label: 'foo' }] as Dialog.IButton[];
-            let nodes = renderer.createButtonNodes(buttons);
+            let nodes = toArray(map(buttons, button => {
+              return renderer.createButtonNode(button);
+            }));
             let footer = renderer.createFooter(nodes);
             expect(footer.hasClass('jp-Dialog-footer')).to.equal(true);
             expect(footer.node.contains(nodes[0])).to.equal(true);
@@ -485,10 +476,10 @@ describe('@jupyterlab/domutils', () => {
 
         });
 
-        describe('#renderButtonNode()', () => {
+        describe('#createButtonNode()', () => {
 
-          it('should render a button node for the dialog', () => {
-            let node = VirtualDOM.realize(renderer.renderButtonNode(data));
+          it('should create a button node for the dialog', () => {
+            let node = renderer.createButtonNode(data);
             expect(node.className).to.contain('jp-Dialog-button');
             expect(node.querySelector('.jp-Dialog-buttonIcon')).to.be.ok;
             expect(node.querySelector('.jp-Dialog-buttonLabel')).to.be.ok;

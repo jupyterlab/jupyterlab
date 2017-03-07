@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  each
+  each, map, toArray
 } from '@phosphor/algorithm';
 
 import {
@@ -36,7 +36,7 @@ import {
 export
 function showDialog(options: Dialog.IOptions={}): Promise<Dialog.IButton> {
   let dialog = new Dialog(options);
-  return dialog.show().then(result => {
+  return dialog.launch().then(result => {
     dialog.dispose();
     return result;
   });
@@ -62,7 +62,9 @@ class Dialog extends Widget {
     this._host = options.host;
     this._defaultButton = options.defaultButton;
     this._buttons = options.buttons;
-    this._buttonNodes = renderer.createButtonNodes(this._buttons);
+    this._buttonNodes = toArray(map(this._buttons, button => {
+      return renderer.createButtonNode(button);
+    }));
     this._primary = (
       options.primaryElement || this._buttonNodes[this._defaultButton]
     );
@@ -85,7 +87,11 @@ class Dialog extends Widget {
    *
    * @returns a promise that resolves with the button that was selected.
    */
-  show(): Promise<Dialog.IButton> {
+  launch(): Promise<Dialog.IButton> {
+    // Return the existing dialog if already open.
+    if (this._promise) {
+      return this._promise.promise;
+    }
     this._promise = new PromiseDelegate<Dialog.IButton>();
     Widget.attach(this, this._host);
     return this._promise.promise;
@@ -446,22 +452,22 @@ namespace Dialog {
     createBody(body: BodyType): Widget;
 
     /**
-     * Create the button nodes of the dialog.
-     *
-     * @param buttons - The buttons data.
-     *
-     * @returns An array of elements for the buttons.
-     */
-    createButtonNodes(buttons: ReadonlyArray<IButton>): ReadonlyArray<HTMLElement>;
-
-    /**
      * Create the footer of the dialog.
      *
-     * @param buttons - The buttons to add to the footer.
+     * @param buttons - The button nodes to add to the footer.
      *
      * @returns A widget for the footer.
      */
     createFooter(buttons: ReadonlyArray<HTMLElement>): Widget;
+
+    /**
+     * Create a button node for the dialog.
+     *
+     * @param button - The button data.
+     *
+     * @returns A node for the button.
+     */
+    createButtonNode(button: IButton): HTMLElement;
   }
 
   /**
@@ -509,24 +515,9 @@ namespace Dialog {
     }
 
     /**
-     * Create the button nodes of the dialog.
-     *
-     * @param buttons - The buttons data.
-     *
-     * @returns An array of elements for the buttons.
-     */
-    createButtonNodes(buttons: ReadonlyArray<IButton>): ReadonlyArray<HTMLElement> {
-      let nodes = new Array<HTMLElement>(buttons.length);
-      each(buttons, (button, i) => {
-        nodes[i] = VirtualDOM.realize(this.renderButtonNode(button));
-      });
-      return nodes;
-    }
-
-    /**
      * Create the footer of the dialog.
      *
-     * @param buttons - The buttons to add to the footer.
+     * @param buttonNodes - The buttons nodes to add to the footer.
      *
      * @returns A widget for the footer.
      */
@@ -541,29 +532,19 @@ namespace Dialog {
     }
 
     /**
-     * Render a button node for the dialog.
+     * Create a button node for the dialog.
      *
-     * @param data - The data to use for rendering the button.
+     * @param button - The button data.
      *
-     * @returns A virtual element representing the button.
+     * @returns A node for the button.
      */
-    renderButtonNode(data: IButton): VirtualElement {
-      let className = this.createItemClass(data);
-      return h.button({ className },
-              this.renderIcon(data),
-              this.renderLabel(data)
+    createButtonNode(button: IButton): HTMLElement {
+      let className = this.createItemClass(button);
+      return VirtualDOM.realize(
+        h.button({ className },
+              this.renderIcon(button),
+              this.renderLabel(button))
       );
-    }
-
-    /**
-     * Render an icon element for a dialog item.
-     *
-     * @param data - The data to use for rendering the icon.
-     *
-     * @returns A virtual element representing the icon.
-     */
-    renderIcon(data: IButton): VirtualElement {
-      return h.div({ className: this.createIconClass(data) });
     }
 
     /**
@@ -595,6 +576,17 @@ namespace Dialog {
 
       // Return the complete class name.
       return name;
+    }
+
+    /**
+     * Render an icon element for a dialog item.
+     *
+     * @param data - The data to use for rendering the icon.
+     *
+     * @returns A virtual element representing the icon.
+     */
+    renderIcon(data: IButton): VirtualElement {
+      return h.div({ className: this.createIconClass(data) });
     }
 
     /**
