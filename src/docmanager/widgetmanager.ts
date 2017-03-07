@@ -27,7 +27,7 @@ import {
 
 import {
   Time
-} from '../common/dates';
+} from '../common/time';
 
 import {
   showDialog, Dialog
