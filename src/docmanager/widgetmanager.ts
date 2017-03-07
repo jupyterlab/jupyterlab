@@ -26,7 +26,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  dateTime
+  Time
 } from '../common/dates';
 
 import {
@@ -248,11 +248,11 @@ class DocumentWidgetManager implements IDisposable {
         return;
       }
       let last = checkpoints[checkpoints.length - 1];
-      let checkpoint = last ? dateTime(last.last_modified) : 'None';
+      let checkpoint = last ? Time.format(last.last_modified) : 'None';
       widget.title.caption = (
         `Name: ${model.name}\n` +
         `Path: ${model.path}\n` +
-        `Last Saved: ${dateTime(model.last_modified)}\n` +
+        `Last Saved: ${Time.format(model.last_modified)}\n` +
         `Last Checkpoint: ${checkpoint}`
       );
     });

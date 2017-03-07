@@ -27,6 +27,7 @@ import './common/observablemap.spec';
 import './common/metadata.spec';
 import './common/sanitizer.spec';
 import './common/styling.spec';
+import './common/time.spec';
 import './common/undoablevector.spec';
 import './common/vdom.spec';
 
