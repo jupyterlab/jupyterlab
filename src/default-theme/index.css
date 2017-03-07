@@ -25,6 +25,7 @@
 @import '../common/dialog.css';
 @import '../common/iframe.css';
 @import '../common/observablejson.css';
+@import '../common/styling.css';
 @import '../completer/index.css';
 @import '../console/index.css';
 @import '../csvwidget/index.css';

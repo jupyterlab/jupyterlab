@@ -1,6 +1,6 @@
 
 /*-----------------------------------------------------------------------------
-| Copyright (c) 2014-2016, Jupyter Development Team.
+| Copyright (c) 2014-2017, Jupyter Development Team.
 |
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
@@ -52,19 +52,13 @@
 
 
 .jp-Dialog-body {
+  display: flex;
+  flex-direction: column;
   flex: 1 1 auto;
   font-size: var(--jp-ui-font-size2);
   background: #FAFAFA;
   overflow: auto;
   max-width: 252px;
-}
-
-
-.jp-Dialog-bodyContent {
-  display: flex;
-  flex-direction: column;
-  font-size: var(--jp-ui-font-size2);
-  overflow: auto;
 }
 
 
@@ -87,35 +81,26 @@
 }
 
 
-.jp-Dialog-button {
-  font-size: var(--jp-ui-font-size1);
-  border: none;
-  text-transform: uppercase;
-  line-height: 32px;
-  padding: 0px 16px;
-  letter-spacing: .4px;
-}
-
-
-.jp-Dialog-okButton {
+button.jp-mod-accept {
   background: var(--jp-brand-color1);
   color: var(--jp-inverse-ui-font-color0);
 }
 
 
-.jp-Dialog-cancelButton {
+button.jp-mod-reject {
   background: #9E9E9E;
   margin-right: 12px;
   color: var(--jp-inverse-ui-font-color0);
 }
 
-.jp-Dialog-warningButton {
+
+button.jp-mod-warn {
   background: var(--jp-error-color1);
   color: var(--jp-inverse-ui-font-color0);
 }
 
 
-.jp-Dialog-bodyContent > label {
+.jp-Dialog-body > label {
   padding-top: 4px;
   padding-bottom: 4px;
   line-height: 1.4;
@@ -123,64 +108,3 @@
   color: var(--md-grey-700);
 }
 
-
-.jp-Dialog-inputWrapper {
-  display: flex;
-  background: white;
-  height: 28px;
-  width: 252px;
-  box-sizing: border-box;
-  border: var(--jp-border-width) solid var(--jp-border-color1);
-  margin-bottom: 8px;
-  padding: 1px;
-}
-
-
-.jp-Dialog-input {
-  flex: 1 1 auto;
-  padding-left: 7px;
-  padding-right: 7px;
-  font-size: var(--jp-ui-font-size2);
-  color: var(--jp-ui-font-color0);
-  border: none;
-  outline: none;
-}
-
-
-.jp-Dialog-selectWrapper {
-  display: flex;
-  flex-direction: column;
-  padding: 1px;
-  background: white;
-  height: 28px;
-  width: 252px;
-  box-sizing: border-box;
-  border: var(--jp-border-width) solid var(--jp-border-color1);
-  margin-bottom: 12px;
-}
-
-
-.jp-Dialog-selectWrapper.jp-mod-focused,
-.jp-Dialog-inputWrapper.jp-mod-focused {
-  border: var(--jp-border-width) solid var(--md-blue-500);
-  box-shadow: inset 0 0 4px var(--md-blue-300);
-}
-
-
-.jp-Dialog-select {
-  flex: 1 1 auto;
-  height: 32px;
-  font-size: var(--jp-ui-font-size2);
-  background: white;
-  color: var(--jp-ui-font-color0);
-  border: none;
-  border-radius: 0px;
-  outline: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  padding-left: 8px;
-  background-image: url('../default-theme/images/down_caret.svg');
-  background-repeat: no-repeat;
-  background-position: right center;
-  background-size: 20px;
-}

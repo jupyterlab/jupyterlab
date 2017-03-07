@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  showDialog, okButton, cancelButton, warnButton
+  Dialog, showDialog
 } from '../common/dialog';
 
 import {
@@ -43,15 +43,15 @@ function trustNotebook(model: INotebookModel, host?: HTMLElement): Promise<void>
   if (trusted) {
     return showDialog({
       body: 'Notebook is already trusted',
-      buttons: [okButton]
+      buttons: [Dialog.okButton()]
     }).then(() => void 0);
   }
   return showDialog({
     body: TRUST_MESSAGE,
     title: 'Trust this notebook?',
-    buttons: [cancelButton, warnButton]
+    buttons: [Dialog.cancelButton(), Dialog.warnButton()]
   }).then(result => {
-    if (result.text === 'OK') {
+    if (result.accept) {
       for (let i = 0; i < cells.length; i++) {
         let cell = cells.at(i);
         cell.trusted = true;

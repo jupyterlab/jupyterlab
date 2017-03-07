@@ -14,7 +14,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-okButton, cancelButton, showDialog
+Dialog, showDialog
 } from '../common/dialog';
 
 import {
@@ -159,17 +159,19 @@ class SaveHandler implements IDisposable {
                `Do you want to overwrite the file on disk with the version ` +
                ` open here, or load the version on disk (revert)?`;
     this._inDialog = true;
+    let revertBtn = Dialog.okButton({ label: 'REVERT' });
+    let overwriteBtn = Dialog.warnButton({ label: 'OVERWRITE' });
     return showDialog({
-      title: 'File Changed', body, okText: 'OVERWRITE',
-      buttons: [cancelButton, { text: 'REVERT' }, okButton]
+      title: 'File Changed', body,
+      buttons: [Dialog.cancelButton(), revertBtn, overwriteBtn]
     }).then(result => {
       if (this.isDisposed) {
         return;
       }
       this._inDialog = false;
-      if (result.text === 'OVERWRITE') {
+      if (result.label === 'OVERWRITE') {
         return this._finishSave();
-      } else if (result.text === 'REVERT') {
+      } else if (result.label === 'REVERT') {
         return this._context.revert();
       }
     });
