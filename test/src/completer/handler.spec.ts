@@ -209,10 +209,8 @@ describe('completer/handler', () => {
         };
         return handler.makeRequest(request).then(
           () => { throw Error('Should have rejected'); },
-          reason => {
-            expect(reason).to.be.an(Error);
-          }
-        )
+          reason => { expect(reason).to.be.an(Error); }
+        );
       });
 
       it('should reject if handler has no active cell', () => {
@@ -225,11 +223,9 @@ describe('completer/handler', () => {
           line: 0
         };
         return handler.makeRequest(request).then(
-          () => { throw Error('Should have rejected') },
-          (reason: Error) => {
-            expect(reason).to.be.an(Error);
-          }
-        )
+          () => { throw Error('Should have rejected'); },
+          reason => { expect(reason).to.be.an(Error); }
+        );
       });
 
       it('should resolve if handler has a kernel and an active cell', () => {
