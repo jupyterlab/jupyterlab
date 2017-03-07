@@ -1,7 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import {
+  expect
+} from 'chai';
 
 import {
   h, VirtualNode
@@ -9,7 +11,7 @@ import {
 
 import {
   VDomModel, VDomWidget
-} from '../../../lib/common/vdom';
+} from '..';
 
 
 class TestModel extends VDomModel {
@@ -19,20 +21,20 @@ class TestModel extends VDomModel {
 
   set value(newValue: string) {
     this._value = newValue;
-    this.triggerChange();
+    this.stateChanged.emit(void 0);
   }
 
   private _value = '';
 }
 
 class TestWidget extends VDomWidget<TestModel> {
-  protected render(): VirtualNode | VirtualNode[] {
+  protected render(): VirtualNode {
     return h.span(this.model.value);
   }
 }
 
 
-describe('common/vdom', () => {
+describe('@jupyterlab/domutils', () => {
 
   describe('VDomModel', () => {
 
@@ -40,12 +42,12 @@ describe('common/vdom', () => {
 
       it('should create a VDomModel', () => {
         let model = new VDomModel();
-        expect(model).to.be.a(VDomModel);
+        expect(model).to.be.an.instanceof(VDomModel);
       });
 
       it('should create a TestModel', () => {
         let model = new TestModel();
-        expect(model).to.be.a(TestModel);
+        expect(model).to.be.an.instanceof(TestModel);
       });
 
       it('should be properly disposed', () => {
@@ -62,7 +64,7 @@ describe('common/vdom', () => {
         let changed = false;
         model.stateChanged.connect(() => { changed = true; });
         model.value = 'newvalue';
-        expect(changed).to.be(true);
+        expect(changed).to.equal(true);
       });
 
     });
@@ -75,13 +77,13 @@ describe('common/vdom', () => {
 
       it('should create a TestWidget', () => {
         let widget = new TestWidget();
-        expect(widget).to.be.a(TestWidget);
+        expect(widget).to.be.an.instanceof(TestWidget);
       });
 
       it('should be properly disposed', () => {
         let widget = new TestWidget();
         widget.dispose();
-        expect(widget.isDisposed).to.be(true);
+        expect(widget.isDisposed).to.equal(true);
       });
     });
 
@@ -93,7 +95,7 @@ describe('common/vdom', () => {
         let changed = false;
         widget.modelChanged.connect(() => { changed = true; });
         widget.model = model;
-        expect(changed).to.be(true);
+        expect(changed).to.equal(true);
       });
 
     });
@@ -107,7 +109,7 @@ describe('common/vdom', () => {
         model.value = 'foo';
         requestAnimationFrame(() => {
           let span = widget.node.firstChild as HTMLElement;
-          expect(span.textContent).to.be('foo');
+          expect(span.textContent).to.equal('foo');
           done();
         });
       });

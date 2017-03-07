@@ -65,7 +65,7 @@ class CSVModel extends VDomModel {
       return;
     }
     this._content = content;
-    this.triggerChange();
+    this.stateChanged.emit(void 0);
   }
 
   /**
@@ -79,7 +79,7 @@ class CSVModel extends VDomModel {
       return;
     }
     this._delimiter = delimiter;
-    this.triggerChange();
+    this.stateChanged.emit(void 0);
   }
 
   /**
