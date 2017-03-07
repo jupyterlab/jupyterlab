@@ -20,6 +20,7 @@ import './commandlinker/commandlinker.spec';
 
 import './common/activitymonitor.spec';
 import './common/dialog.spec';
+import './common/iframe.spec';
 import './common/observablejson.spec';
 import './common/observablestring.spec';
 import './common/observablevector.spec';
