@@ -1,171 +1,544 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import {
+  expect
+} from 'chai';
+
+import {
+  each
+} from '@phosphor/algorithm';
 
 import {
   Message
 } from '@phosphor/messaging';
 
 import {
+  VirtualDOM, h
+} from '@phosphor/virtualdom';
+
+import {
   Widget
 } from '@phosphor/widgets';
 
 import {
-  simulate
+  generate, simulate
 } from 'simulate-event';
 
 import {
-  showDialog, okButton
+  Dialog, showDialog
 } from '../../../lib/common/dialog';
 
-import {
-  acceptDialog, dismissDialog
-} from '../utils';
+
+/**
+ * Accept a dialog.
+ */
+function acceptDialog(host: HTMLElement = document.body): void {
+  let node = host.getElementsByClassName('jp-Dialog')[0];
+  simulate(node as HTMLElement, 'keydown', { keyCode: 13 });
+}
 
 
-describe('dialog/index', () => {
+/**
+ * Reject a dialog.
+ */
+function rejectDialog(host: HTMLElement = document.body): void {
+  let node = host.getElementsByClassName('jp-Dialog')[0];
+  simulate(node as HTMLElement, 'keydown', { keyCode: 27 });
+}
+
+
+class TestDialog extends Dialog {
+  methods: string[] = [];
+  events: string[] = [];
+
+  handleEvent(event: Event): void {
+    super.handleEvent(event);
+    this.events.push(event.type);
+  }
+
+  protected onBeforeAttach(msg: Message): void {
+    super.onBeforeAttach(msg);
+    this.methods.push('onBeforeAttach');
+  }
+
+  protected onAfterDetach(msg: Message): void {
+    super.onAfterDetach(msg);
+    this.methods.push('onAfterDetach');
+  }
+
+  protected onCloseRequest(msg: Message): void {
+    super.onCloseRequest(msg);
+    this.methods.push('onCloseRequest');
+  }
+}
+
+
+describe('@jupyterlab/domutils', () => {
 
   describe('showDialog()', () => {
 
-    it('should accept zero arguments', (done) => {
-      showDialog().then(result => {
-        expect(result.text).to.be('CANCEL');
-        done();
+    it('should accept zero arguments', () => {
+      let promise = showDialog().then(result => {
+        expect(result.accept).to.equal(false);
       });
-      Promise.resolve().then(() => {
-        let node = document.body.getElementsByClassName('jp-Dialog')[0];
-        simulate(node as HTMLElement, 'keydown', { keyCode: 27 });
-      });
+      rejectDialog();
+      return promise;
     });
 
-    it('should accept dialog options', (done) => {
+    it('should accept dialog options', () => {
       let node = document.createElement('div');
       document.body.appendChild(node);
       let options = {
         title: 'foo',
         body: 'Hello',
         host: node,
-        buttons: [okButton],
-        okText: 'Yep'
+        buttons: [Dialog.okButton()],
       };
-      showDialog(options).then(result => {
-        expect(result.text).to.be('CANCEL');
-        done();
+      let promise = showDialog(options).then(result => {
+        expect(result.accept).to.equal(false);
       });
-      Promise.resolve().then(() => {
-        let target = document.body.getElementsByClassName('jp-Dialog')[0];
-        simulate(target as HTMLElement, 'keydown', { keyCode: 27 });
-      });
+      rejectDialog();
+      return promise;
     });
 
-    it('should accept an html body', (done) => {
+    it('should accept an html body', () => {
       let body = document.createElement('div');
       let input = document.createElement('input');
       let select = document.createElement('select');
       body.appendChild(input);
       body.appendChild(select);
-      showDialog({ body, okText: 'CONFIRM' }).then(result => {
-        expect(result.text).to.be('CONFIRM');
-        done();
+      let promise = showDialog({ body }).then(result => {
+        expect(result.accept).to.equal(true);
       });
       acceptDialog();
+      return promise;
     });
 
-    it('should accept an input body', (done) => {
-      let body = document.createElement('input');
-      showDialog({ body }).then(result => {
-        expect(result.text).to.be('CANCEL');
-        done();
-      });
-      dismissDialog();
-    });
-
-    it('should accept a select body', (done) => {
-      let body = document.createElement('select');
-      showDialog({ body }).then(result => {
-        expect(result.text).to.be('OK');
-        done();
+    it('should accept a widget body', () => {
+      let body = new Widget();
+      let promise = showDialog({ body }).then(result => {
+        expect(result.accept).to.equal(true);
       });
       acceptDialog();
+      return promise;
     });
 
-    it('should accept a widget body', (done) => {
-      let body = new Widget({node: document.createElement('div')});
-      showDialog({ body }).then(result => {
-        expect(result.text).to.be('OK');
-        done();
-      });
-      acceptDialog();
-    });
 
-    it('should apply an additional CSS class', (done) => {
-      showDialog({ dialogClass: 'test-class' }).then(result => {
-        expect(result.text).to.be('OK');
-        done();
-      });
-      Promise.resolve().then(() => {
-        let nodes = document.body.getElementsByClassName('test-class');
-        expect(nodes.length).to.be(1);
-        let node = nodes[0];
-        expect(node.classList).to.eql(['jp-Dialog', 'test-class']);
-      });
-      acceptDialog();
-    });
+    describe('Dialog', () => {
 
-    it('should resolve with the clicked button result', (done) => {
-      let button = {
-        text: 'foo',
-        className: 'bar',
-        icon: 'baz'
-      };
-      showDialog({ buttons: [button] }).then(result => {
-        expect(result.text).to.be('foo');
-        done();
-      });
-      Promise.resolve().then(() => {
-        let node = document.body.getElementsByClassName('bar')[0];
-        (node as HTMLElement).click();
-      });
-    });
+      let dialog: TestDialog;
 
-    it('should ignore context menu events', (done) => {
-      let body = document.createElement('div');
-      showDialog({ body }).then(result => {
-        expect(result.text).to.be('CANCEL');
-        done();
+      beforeEach(() => {
+        dialog = new TestDialog();
       });
-      Promise.resolve().then(() => {
-        let node = document.body.getElementsByClassName('jp-Dialog')[0];
-        simulate(node as HTMLElement, 'contextmenu');
-        simulate(node as HTMLElement, 'keydown', { keyCode: 27 });
-      });
-    });
 
-    /**
-     * Class to test that onAfterAttach is called
-     */
-    class TestWidget extends Widget {
-      constructor(resolve: () => void) {
-        super();
-        this.resolve = resolve;
-      }
-      protected onAfterAttach(msg: Message): void {
-        this.resolve();
-      }
-
-      resolve: () => void;
-    }
-
-    it('should fire onAfterAttach on widget body', (done) => {
-      let promise = new Promise((resolve, reject) => {
-        let body = new TestWidget(resolve);
-        showDialog({ body });
+      afterEach(() => {
+        dialog.dispose();
       });
-      promise.then(() => {
-        dismissDialog();
-        done();
+
+      describe('#constructor()', () => {
+
+        it('should create a new dialog', () => {
+          expect(dialog).to.be.an.instanceof(Dialog);
+        });
+
+        it('should accept options', () => {
+          dialog = new TestDialog({
+            title: 'foo',
+            body: 'Hello',
+            buttons: [Dialog.okButton()]
+          });
+          expect(dialog).to.be.an.instanceof(Dialog);
+        });
+
       });
+
+      describe('#show()', () => {
+
+        it('should attach the dialog to the host', () => {
+          let host = document.createElement('div');
+          document.body.appendChild(host);
+          dialog = new TestDialog({ host });
+          dialog.show();
+          expect(host.firstChild).to.equal(dialog.node);
+          dialog.dispose();
+          document.body.removeChild(host);
+        });
+
+        it('should resolve with `true` when accepted', () => {
+          let promise = dialog.show().then(result => {
+            expect(result.accept).to.equal(true);
+          });
+          dialog.resolve();
+          return promise;
+        });
+
+        it('should resolve with `false` when accepted', () => {
+          let promise = dialog.show().then(result => {
+            expect(result.accept).to.equal(false);
+          });
+          dialog.reject();
+          return promise;
+        });
+
+        it('should resolve with `false` when closed', () => {
+          let promise = dialog.show().then(result => {
+            expect(result.accept).to.equal(false);
+          });
+          dialog.close();
+          return promise;
+        });
+
+        it('should return focus to the original focused element', () => {
+          let input = document.createElement('input');
+          document.body.appendChild(input);
+          input.focus();
+          expect(document.activeElement).to.equal(input);
+          let promise = dialog.show().then(() => {
+            expect(document.activeElement).to.equal(input);
+            document.body.removeChild(input);
+          });
+          expect(document.activeElement).to.not.equal(input);
+          dialog.resolve();
+          return promise;
+        });
+
+      });
+
+      describe('#resolve()', () => {
+
+        it('should resolve with the default item', () => {
+          let promise = dialog.show().then(result => {
+            expect(result.accept).to.equal(true);
+          });
+          dialog.resolve();
+          return promise;
+        });
+
+        it('should resolve with the item at the given index', () => {
+          let promise = dialog.show().then(result => {
+            expect(result.accept).to.equal(false);
+          });
+          dialog.resolve(0);
+          return promise;
+        });
+
+      });
+
+      describe('#reject()', () => {
+
+        it('should reject with the default reject item', () => {
+          let promise = dialog.show().then(result => {
+            expect(result.label).to.equal('CANCEL');
+            expect(result.accept).to.equal(false);
+          });
+          dialog.reject();
+          return promise;
+        });
+
+      });
+
+      describe('#handleEvent()', () => {
+
+        context('keydown', () => {
+
+          it('should reject on escape key', () => {
+            let promise = dialog.show().then(result => {
+              expect(result.accept).to.equal(false);
+            });
+            simulate(dialog.node, 'keydown', { keyCode: 27 });
+            return promise;
+          });
+
+          it('should accept on enter key', () => {
+            let promise = dialog.show().then(result => {
+              expect(result.accept).to.equal(true);
+            });
+            simulate(dialog.node, 'keydown', { keyCode: 13 });
+            return promise;
+          });
+
+          it('should cycle to the first button on a tab key', () => {
+            let promise = dialog.show().then(result => {
+              expect(result.accept).to.equal(false);
+            });
+            let node = document.activeElement;
+            expect(node.className).to.contain('jp-mod-accept');
+            simulate(dialog.node, 'keydown', { keyCode: 9 });
+            node = document.activeElement;
+            expect(node.className).to.contain('jp-mod-reject');
+            simulate(node, 'click');
+            return promise;
+          });
+
+        });
+
+        context('contextmenu', () => {
+
+          it('should cancel context menu events', () => {
+            let promise = dialog.show().then(result => {
+              expect(result.accept).to.equal(false);
+            });
+            let node = document.body.getElementsByClassName('jp-Dialog')[0];
+            let evt = generate('contextmenu');
+            let cancelled = !node.dispatchEvent(evt);
+            expect(cancelled).to.equal(true);
+            simulate(node as HTMLElement, 'keydown', { keyCode: 27 });
+            return promise;
+          });
+
+        });
+
+        context('click', () => {
+
+          it('should prevent clicking outside of the content area', () => {
+            let promise = dialog.show();
+            let evt = generate('click');
+            let cancelled = !dialog.node.dispatchEvent(evt);
+            expect(cancelled).to.equal(true);
+            dialog.resolve();
+            return promise;
+          });
+
+          it('should resolve a clicked button', () => {
+            let promise = dialog.show().then(result => {
+              expect(result.accept).to.equal(false);
+            });
+            let node = dialog.node.querySelector('.jp-mod-reject');
+            simulate(node, 'click');
+            return promise;
+          });
+
+        });
+
+        context('focus', () => {
+
+          it('should focus the default button when focus leaves the dialog', () => {
+            let target = document.createElement('div');
+            target.tabIndex = -1;
+            document.body.appendChild(target);
+            let host = document.createElement('div');
+            document.body.appendChild(host);
+            dialog = new TestDialog({ host });
+            let promise = dialog.show();
+            simulate(target, 'focus');
+            expect(document.activeElement).to.not.equal(target);
+            expect(document.activeElement.className).to.contain('jp-mod-accept');
+            dialog.resolve();
+            return promise;
+          });
+
+        });
+
+      });
+
+      describe('#onBeforeAttach()', () => {
+
+        it('should attach event listeners', () => {
+          Widget.attach(dialog, document.body);
+          expect(dialog.methods).to.contain('onBeforeAttach');
+          let events = ['keydown', 'contextmenu', 'click', 'focus'];
+          each(events, evt => {
+            simulate(dialog.node, evt);
+            expect(dialog.events).to.contain(evt);
+          });
+        });
+
+        it('should focus the default button', () => {
+          Widget.attach(dialog, document.body);
+          expect(document.activeElement.className).to.contain('jp-mod-accept');
+        });
+
+        it('should focus the primary element', () => {
+          let body = document.createElement('input');
+          dialog = new TestDialog({ body, primaryElement: body });
+          Widget.attach(dialog, document.body);
+          expect(document.activeElement).to.equal(body);
+        });
+
+      });
+
+      describe('#onAfterDetach()', () => {
+
+        it('should remove event listeners', () => {
+          Widget.attach(dialog, document.body);
+          Widget.detach(dialog);
+          expect(dialog.methods).to.contain('onAfterDetach');
+          dialog.events = [];
+          let events = ['keydown', 'contextmenu', 'click', 'focus'];
+          each(events, evt => {
+            simulate(dialog.node, evt);
+            expect(dialog.events).to.not.contain(evt);
+          });
+        });
+
+        it('should return focus to the original focused element', () => {
+          let input = document.createElement('input');
+          document.body.appendChild(input);
+          input.focus();
+          Widget.attach(dialog, document.body);
+          Widget.detach(dialog);
+          expect(document.activeElement).to.equal(input);
+        });
+
+      });
+
+      describe('#onCloseRequest()', () => {
+
+        it('should reject an existing promise', () => {
+          let promise = dialog.show().then(result => {
+            expect(result.accept).to.equal(false);
+          });
+          dialog.close();
+          return promise;
+        });
+
+      });
+
+      describe('.defaultRenderer', () => {
+
+        it('should be an instance of a Renderer', () => {
+          expect(Dialog.defaultRenderer).to.be.an.instanceof(Dialog.Renderer);
+        });
+
+      });
+
+      describe('.Renderer', () => {
+
+        const renderer = Dialog.defaultRenderer;
+
+        const data: Dialog.IButton = {
+          label: 'foo',
+          icon: 'bar',
+          caption: 'hello',
+          className: 'baz',
+          accept: false,
+          displayType: 'warn'
+        };
+
+        describe('#createHeader()', () => {
+
+          it('should create the header of the dialog', () => {
+            let widget = renderer.createHeader('foo');
+            expect(widget.hasClass('jp-Dialog-header')).to.equal(true);
+            let node = widget.node.querySelector('.jp-Dialog-title');
+            expect(node.textContent).to.equal('foo');
+          });
+
+        });
+
+        describe('#createBody()', () => {
+
+          it('should create the body from a string', () => {
+            let widget = renderer.createBody('foo');
+            expect(widget.hasClass('jp-Dialog-body')).to.equal(true);
+            let node = widget.node.firstChild;
+            expect(node.textContent).to.equal('foo');
+          });
+
+          it('should create the body from an element', () => {
+            let vnode = h.div({}, [h.input(), h.select(), h.button()]);
+            let widget = renderer.createBody(VirtualDOM.realize(vnode));
+            let button = widget.node.querySelector('button');
+            expect(button.className).to.contain('jp-mod-styled');
+            let input = widget.node.querySelector('input');
+            expect(input.className).to.contain('jp-mod-styled');
+            let select = widget.node.querySelector('select');
+            expect(select.className).to.contain('jp-mod-styled');
+          });
+
+          it('should create the body from a widget', () => {
+            let body = new Widget();
+            renderer.createBody(body);
+            expect(body.hasClass('jp-Dialog-body')).to.equal(true);
+          });
+
+        });
+
+        describe('#createButtonNodes()', () => {
+
+          it('should create the button nodes of the dialog', () => {
+            let buttons = [Dialog.okButton, { label: 'foo' }] as Dialog.IButton[];
+            let nodes = renderer.createButtonNodes(buttons);
+            expect(nodes[0].className).to.contain('jp-Dialog-button');
+            expect(nodes[1].className).to.contain('jp-Dialog-button');
+          });
+
+        });
+
+        describe('#createFooter()', () => {
+
+          it('should create the footer of the dialog', () => {
+            let buttons = [Dialog.okButton, { label: 'foo' }] as Dialog.IButton[];
+            let nodes = renderer.createButtonNodes(buttons);
+            let footer = renderer.createFooter(nodes);
+            expect(footer.hasClass('jp-Dialog-footer')).to.equal(true);
+            expect(footer.node.contains(nodes[0])).to.equal(true);
+            expect(footer.node.contains(nodes[1])).to.equal(true);
+            let buttonNodes = footer.node.querySelectorAll('button');
+            expect(buttonNodes.length).to.be.ok;
+            each(buttonNodes, (node: Element) => {
+              expect(node.className).to.contain('jp-mod-styled');
+            });
+          });
+
+        });
+
+        describe('#renderButtonNode()', () => {
+
+          it('should render a button node for the dialog', () => {
+            let node = VirtualDOM.realize(renderer.renderButtonNode(data));
+            expect(node.className).to.contain('jp-Dialog-button');
+            expect(node.querySelector('.jp-Dialog-buttonIcon')).to.be.ok;
+            expect(node.querySelector('.jp-Dialog-buttonLabel')).to.be.ok;
+          });
+
+        });
+
+        describe('#renderIcon()', () => {
+
+          it('should render an icon element for a dialog item', () => {
+            let node = VirtualDOM.realize(renderer.renderIcon(data));
+            expect(node.className).to.contain('jp-Dialog-buttonIcon');
+          });
+
+        });
+
+        describe('#createItemClass()', () => {
+
+          it('should create the class name for the button', () => {
+            let value = renderer.createItemClass(data);
+            expect(value).to.contain('jp-Dialog-button');
+            expect(value).to.contain('jp-mod-reject');
+            expect(value).to.contain(data.className);
+          });
+
+        });
+
+        describe('#createIconClass()', () => {
+
+          it('should create the class name for the button icon', () => {
+            let value = renderer.createIconClass(data);
+            expect(value).to.contain('jp-Dialog-buttonIcon');
+            expect(value).to.contain(data.icon);
+          });
+
+        });
+
+        describe('#renderLabel()', () => {
+
+          it('should render a label element for a button', () => {
+            let node = VirtualDOM.realize(renderer.renderLabel(data));
+            expect(node.className).to.equal('jp-Dialog-buttonLabel');
+            expect(node.title).to.equal(data.caption);
+            expect(node.textContent).to.equal(data.label);
+          });
+
+        });
+
+      });
+
     });
 
   });

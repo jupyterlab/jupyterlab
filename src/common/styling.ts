@@ -35,6 +35,9 @@ namespace Styling {
     if (node.localName === tagName) {
       node.classList.add('jp-mod-styled');
     }
+    if (node.localName === 'select') {
+      wrapSelect(node as HTMLSelectElement);
+    }
     let nodes = node.getElementsByTagName(tagName);
     for (let i = 0; i < nodes.length; i++) {
       let child = nodes[i];
@@ -57,6 +60,7 @@ namespace Styling {
     wrapper.classList.add('jp-select-wrapper');
     node.addEventListener('focus', Private.onFocus);
     node.addEventListener('blur', Private.onFocus);
+    node.classList.add('jp-mod-styled');
     if (node.parentElement) {
       node.parentElement.replaceChild(wrapper, node);
     }

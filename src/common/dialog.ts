@@ -76,11 +76,8 @@ class Dialog extends Widget {
     let body = renderer.createBody(options.body);
     let footer = renderer.createFooter(this._buttonNodes);
     content.addWidget(header);
-    Styling.styleNode(header.node);
     content.addWidget(body);
-    Styling.styleNode(body.node);
     content.addWidget(footer);
-    Styling.styleNode(footer.node);
   }
 
   /**
@@ -385,7 +382,7 @@ namespace Dialog {
    * Create an accept button.
    */
   export
-  function okButton(options: ButtonOptions = {}): IButton {
+  function okButton(options: ButtonOptions = {}): Readonly<IButton> {
     options.accept = true;
     return createButton(options);
   };
@@ -394,7 +391,7 @@ namespace Dialog {
    * Create a reject button.
    */
   export
-  function cancelButton(options: ButtonOptions = {}): IButton {
+  function cancelButton(options: ButtonOptions = {}): Readonly<IButton>  {
     options.accept = false;
     return createButton(options);
   };
@@ -403,7 +400,7 @@ namespace Dialog {
    * Create a warn button.
    */
   export
-  function warnButton(options: ButtonOptions = {}): IButton {
+  function warnButton(options: ButtonOptions = {}): Readonly<IButton>  {
     options.displayType = 'warn';
     return createButton(options);
   };
@@ -412,7 +409,7 @@ namespace Dialog {
    * Create a button item.
    */
   export
-  function createButton(value: Dialog.ButtonOptions): Dialog.IButton {
+  function createButton(value: Dialog.ButtonOptions): Readonly<IButton>  {
     value.accept = value.accept !== false;
     let defaultLabel = value.accept ? 'OK' : 'CANCEL';
     return {
@@ -507,6 +504,7 @@ namespace Dialog {
         body = new Widget({ node: value });
       }
       body.addClass('jp-Dialog-body');
+      Styling.styleNode(body.node);
       return body;
     }
 
@@ -538,6 +536,7 @@ namespace Dialog {
       each(buttons, button => {
         footer.node.appendChild(button);
       });
+      Styling.styleNode(footer.node);
       return footer;
     }
 
