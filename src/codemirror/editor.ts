@@ -193,6 +193,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       this.host.classList.add(READ_ONLY_CLASS);
     } else {
       this.host.classList.remove(READ_ONLY_CLASS);
+      this.blur();
     }
   }
 
@@ -295,6 +296,13 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   hasFocus(): boolean {
     return this._editor.hasFocus();
+  }
+
+  /**
+   * Explicitly blur the editor.
+   */
+  blur(): void {
+    this._editor.getInputField().blur();
   }
 
   /**
