@@ -2,49 +2,66 @@
 // Distributed under the terms of the Modified BSD License.
 
 /**
- * Style a node and its child elements with the default tag names.
- *
- * @param node - The base node.
- *
- * @param className - The optional CSS class to add to styled nodes.
+ * A namespace for node styling.
  */
 export
-function styleNode(node: HTMLElement, className=''): void {
-  styleNodeByTag(node, 'select', className);
-  styleNodeByTag(node, 'input', className);
-  styleNodeByTag(node, 'button', className);
-}
-
-
-/**
- * Style a node and its elements that have a given tag name.
- *
- * @param node - The base node.
- *
- * @param tagName - The html tag name to style.
- *
- * @param className - The optional CSS class to add to styled nodes.
- */
-export
-function styleNodeByTag(node: HTMLElement, tagName: string, className=''): void {
-  if (node.localName === tagName) {
-    node.classList.add('jp-mod-styled');
+namespace Styling {
+  /**
+   * Style a node and its child elements with the default tag names.
+   *
+   * @param node - The base node.
+   *
+   * @param className - The optional CSS class to add to styled nodes.
+   */
+  export
+  function styleNode(node: HTMLElement, className=''): void {
+    styleNodeByTag(node, 'select', className);
+    styleNodeByTag(node, 'input', className);
+    styleNodeByTag(node, 'button', className);
   }
-  let nodes = node.getElementsByTagName(tagName);
-  for (let i = 0; i < nodes.length; i++) {
-    let child = nodes[i];
-    child.classList.add('jp-mod-styled');
-    if (className) {
-      child.classList.add(className);
+
+
+  /**
+   * Style a node and its elements that have a given tag name.
+   *
+   * @param node - The base node.
+   *
+   * @param tagName - The html tag name to style.
+   *
+   * @param className - The optional CSS class to add to styled nodes.
+   */
+  export
+  function styleNodeByTag(node: HTMLElement, tagName: string, className=''): void {
+    if (node.localName === tagName) {
+      node.classList.add('jp-mod-styled');
     }
-    if (tagName === 'select') {
-      let wrapper = document.createElement('div');
-      wrapper.classList.add('jp-select-wrapper');
-      child.addEventListener('focus', Private.onFocus);
-      child.addEventListener('blur', Private.onFocus);
-      node.replaceChild(wrapper, child);
-      wrapper.appendChild(child);
+    let nodes = node.getElementsByTagName(tagName);
+    for (let i = 0; i < nodes.length; i++) {
+      let child = nodes[i];
+      child.classList.add('jp-mod-styled');
+      if (className) {
+        child.classList.add(className);
+      }
+      if (tagName === 'select') {
+        wrapSelect(child as HTMLSelectElement);
+      }
     }
+  }
+
+  /**
+   * Wrap a select node.
+   */
+  export
+  function wrapSelect(node: HTMLSelectElement): HTMLElement {
+    let wrapper = document.createElement('div');
+    wrapper.classList.add('jp-select-wrapper');
+    node.addEventListener('focus', Private.onFocus);
+    node.addEventListener('blur', Private.onFocus);
+    if (node.parentElement) {
+      node.parentElement.replaceChild(wrapper, node);
+    }
+    wrapper.appendChild(child);
+    return wrapper;
   }
 }
 

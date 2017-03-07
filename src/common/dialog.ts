@@ -22,7 +22,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  styleNode
+  Styling
 } from './styling';
 
 
@@ -76,11 +76,11 @@ class Dialog extends Widget {
     let body = renderer.createBody(options.body);
     let footer = renderer.createFooter(this._buttonNodes);
     content.addWidget(header);
-    styleNode(header.node);
+    Styling.styleNode(header.node);
     content.addWidget(body);
-    styleNode(body.node);
+    Styling.styleNode(body.node);
     content.addWidget(footer);
-    styleNode(footer.node);
+    Styling.styleNode(footer.node);
   }
 
   /**

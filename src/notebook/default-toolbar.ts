@@ -18,7 +18,7 @@ import {
 } from './actions';
 
 import {
-  styleNode
+  Styling
 } from '../common/styling';
 
 import {
@@ -224,7 +224,7 @@ class CellTypeSwitcher extends Widget {
     this.addClass(TOOLBAR_CELLTYPE_CLASS);
 
     this._select = this.node.firstChild as HTMLSelectElement;
-    styleNode(this.node);
+    Styling.wrapSelect(this._select);
     this._wildCard = document.createElement('option');
     this._wildCard.value = '-';
     this._wildCard.textContent = '-';
