@@ -121,7 +121,7 @@ class Dialog extends Widget {
     if (!this._promise) {
       return;
     }
-    this._resolve(Private.rejectButton);
+    this._resolve(Dialog.cancelButton());
   }
 
   /**
@@ -650,25 +650,13 @@ namespace Private {
     newOptions.body = options.body || '';
     newOptions.host = options.host || document.body;
     newOptions.buttons = (
-      options.buttons || [rejectButton, acceptButton]
+      options.buttons || [Dialog.cancelButton(), Dialog.okButton()]
     );
     newOptions.defaultButton = options.defaultButton || newOptions.buttons.length - 1;
     newOptions.renderer = options.renderer || Dialog.defaultRenderer;
     newOptions.primaryElement = options.primaryElement;
     return newOptions;
   }
-
-  /**
-   * The default reject button.
-   */
-  export
-  const rejectButton = Dialog.cancelButton();
-
-  /**
-   * The default accept button.
-   */
-  export
-  const acceptButton = Dialog.okButton();
 
   /**
    *  Find the first focusable item in the dialog.
