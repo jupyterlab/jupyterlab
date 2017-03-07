@@ -89,17 +89,14 @@ function waitForDialog(host: HTMLElement = document.body): Promise<void> {
 
 
 /**
- * Accept a dialog after it is attached if it has an OK button.
+ * Accept a dialog after it is attached by accepting the default button.
  */
 export
 function acceptDialog(host: HTMLElement = document.body): Promise<void> {
   return waitForDialog(host).then(() => {
-    let node = host.getElementsByClassName('jp-Dialog-okButton')[0];
-    if (!node) {
-      node = host.getElementsByClassName('jp-Dialog-warningButton')[0];
-    }
+    let node = host.getElementsByClassName('jp-Dialog')[0];
     if (node) {
-      (node as HTMLElement).click();
+      simulate(node as HTMLElement, 'keydown', { keyCode: 13 });
     }
   });
 }
