@@ -7,31 +7,25 @@ import {
 
 
 /**
- * The class name added to an IFrame widget.
- */
-const IFRAME_CLASS = 'jp-IFrame';
-
-
-/**
  * A phosphor widget which wraps an IFrame.
  */
 export
-class IFrame extends Widget {
+class IFrameWidget extends Widget {
   /**
    * Create a new IFrame widget.
    */
   constructor() {
     super({ node: Private.createNode() });
-    this.addClass(IFRAME_CLASS);
+    this.addClass('jp-IFrameWidget');
   }
 
   /**
-   * The IFrame's URL.
+   * The url of the IFrame.
    */
-  get url(): string {
+  get url(): string | null {
     return this.node.querySelector('iframe').getAttribute('src');
   }
-  set url(url: string) {
+  set url(url: string | null) {
     this.node.querySelector('iframe').setAttribute('src', url);
   }
 }
