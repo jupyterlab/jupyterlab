@@ -30,7 +30,7 @@ import {
 } from '../common/dates';
 
 import {
-  showDialog, cancelButton, warnButton
+  showDialog, Dialog
 } from '../common/dialog';
 
 import {
@@ -303,9 +303,9 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       return showDialog({
         title: 'Shutdown the console?',
         body: `Are you sure you want to close "${current.title.label}"?`,
-        buttons: [cancelButton, warnButton]
+        buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
-        if (result.text === 'OK') {
+        if (result.accept) {
           current.console.session.shutdown().then(() => {
             current.dispose();
           });

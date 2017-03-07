@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  okButton, showDialog
+  Dialog, showDialog
 } from '../common/dialog';
 
 export * from '../common/dom';
@@ -42,7 +42,7 @@ function showErrorMessage(title: string, error: Error): Promise<void> {
   let options = {
     title: title,
     body: error.message || `File ${title}`,
-    buttons: [okButton],
+    buttons: [Dialog.okButton()],
     okText: 'DISMISS'
   };
   return showDialog(options).then(() => { /* no-op */ });

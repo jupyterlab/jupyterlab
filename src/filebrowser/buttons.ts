@@ -22,7 +22,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  showDialog
+  Dialog, showDialog
 } from '../common/dialog';
 
 import {
@@ -502,12 +502,14 @@ namespace Private {
    * Upload a file to the server checking for override.
    */
   function uploadFileOverride(widget: FileButtons, file: File): Promise<any> {
+    let overwrite = Dialog.warnButton({ label: 'OVERWRITE' });
     let options = {
       title: 'Overwrite File?',
-      body: `"${file.name}" already exists, overwrite?`
+      body: `"${file.name}" already exists, overwrite?`,
+      buttons: [Dialog.cancelButton(), overwrite]
     };
     return showDialog(options).then(button => {
-      if (widget.isDisposed || button.text !== 'Ok') {
+      if (widget.isDisposed || button.accept) {
         return;
       }
       return widget.model.upload(file, true);

@@ -1,0 +1,95 @@
+
+/*-----------------------------------------------------------------------------
+| Copyright (c) 2014-2017, Jupyter Development Team.
+|
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+button.jp-mod-styled {
+  font-size: var(--jp-ui-font-size1);
+  border: none;
+  box-sizing: border-box;
+  outline: none;
+  text-transform: uppercase;
+  line-height: 32px;
+  height: 32px;
+  padding: 0px 4px;
+  letter-spacing: 1px;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+
+input.jp-mod-styled {
+  background: white;
+  height: 28px;
+  box-sizing: border-box;
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  padding-left: 7px;
+  padding-right: 7px;
+  font-size: var(--jp-ui-font-size2);
+  color: var(--jp-ui-font-color0);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+
+input.jp-mod-styled:focus,
+button.jp-mod-styled:focus {
+  border: var(--jp-border-width) solid var(--md-blue-500);
+  box-shadow: inset 0 0 4px var(--md-blue-300);
+}
+
+.jp-select-wrapper {
+  display: flex;
+  flex-direction: column;
+  padding: 1px;
+  background: white;
+  height: 28px;
+  box-sizing: border-box;
+  margin-bottom: 12px;
+}
+
+
+.jp-select-wrapper.jp-mod-focused{
+  border: var(--jp-border-width) solid var(--md-blue-500);
+  box-shadow: inset 0 0 4px var(--md-blue-300);
+}
+
+
+.jp-select-wrapper:hover,
+ input.jp-mod-styled:hover {
+  background-color: var(--md-grey-200);
+  box-shadow: inset 0 0px 1px rgba(0, 0, 0, 0.5);
+}
+
+
+select.jp-mod-styled:hover {
+  background-color: var(--md-grey-200);
+}
+
+
+select.jp-mod-styled {
+  flex: 1 1 auto;
+  height: 32px;
+  width: 100%;
+  font-size: var(--jp-ui-font-size2);
+  background: white;
+  color: var(--jp-ui-font-color0);
+  padding-left: 8px;
+  padding-right: 8px;
+  background-image: var(--jp-ui-select-caret);
+  background-repeat: no-repeat;
+  background-position: right center;
+  background-size: 20px;
+  border: none;
+  border-radius: 0px;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}

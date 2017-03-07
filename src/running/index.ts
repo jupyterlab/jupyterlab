@@ -567,8 +567,8 @@ namespace RunningSessions {
       icon.className = `${ITEM_ICON_CLASS} ${TERMINAL_ICON_CLASS}`;
       let label = document.createElement('span');
       label.className = ITEM_LABEL_CLASS;
-      let shutdown = document.createElement('span');
-      shutdown.className = SHUTDOWN_BUTTON_CLASS;
+      let shutdown = document.createElement('button');
+      shutdown.className = `${SHUTDOWN_BUTTON_CLASS} jp-mod-styled`;
       shutdown.textContent = 'SHUTDOWN';
 
       node.appendChild(icon);
@@ -593,8 +593,8 @@ namespace RunningSessions {
       icon.className = ITEM_ICON_CLASS;
       let label = document.createElement('span');
       label.className = ITEM_LABEL_CLASS;
-      let shutdown = document.createElement('span');
-      shutdown.className = SHUTDOWN_BUTTON_CLASS;
+      let shutdown = document.createElement('button');
+      shutdown.className = `${SHUTDOWN_BUTTON_CLASS} jp-mod-styled`;
       shutdown.textContent = 'SHUTDOWN';
 
       node.appendChild(icon);

@@ -13,38 +13,17 @@
 |----------------------------------------------------------------------------*/
 
 
-.jp-Notebook-toolbarCellType select {
-  background: var(--jp-layout-color1);
-}
-
-
-.jp-Notebook-toolbarCellType:hover {
-    background-color: #EEEEEE;
-    box-shadow: inset 0 0px 1px rgba(0, 0, 0, 0.5);
-}
-
-
 .jp-Notebook-toolbarCellType select.jp-Notebook-toolbarCellTypeDropdown {
-  border: var(--jp-border-width) solid var(--jp-border-color4);
-  border-radius: 0;
-  outline: none;
-  width: 100%;
   font-size: var(--jp-ui-font-size1);
   height: 20px;
-  margin-top: 2px;
-  margin-bottom: 2px;
-  -webkit-appearance: none;
-  padding-left: 4px;
-  padding-right: 16px;
-  background-image: url('../default-theme/images/down_caret.svg');
-  background-repeat: no-repeat;
-  background-position: right;
   background-size: 16px;
+  padding-right: 16px;
 }
 
 
-.jp-Notebook-toolbarCellType:hover > .jp-Notebook-toolbarCellTypeDropdown {
-    background-color: #EEEEEE;
+.jp-Notebook-toolbarCellType .jp-select-wrapper.jp-mod-focused {
+  border: none;
+  box-shadow: none;
 }
 
 

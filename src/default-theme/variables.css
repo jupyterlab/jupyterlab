@@ -143,4 +143,6 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   --jp-notebook-scroll-padding: 100px;
 
+  /* The caret used for select dropdown styling. */
+  --jp-ui-select-caret: url('./images/down_caret.svg')
 }

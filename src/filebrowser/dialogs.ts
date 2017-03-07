@@ -14,7 +14,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  showDialog
+  Dialog, showDialog
 } from '../common/dialog';
 
 import {
@@ -66,11 +66,11 @@ function openWithDialog(path: string, manager: DocumentManager, host?: HTMLEleme
     return showDialog({
       title: 'Open File',
       body: handler.node,
-      primary: handler.inputNode,
-      okText: 'OPEN'
+      primaryElement: handler.inputNode,
+      buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OPEN' })]
     });
   }).then(result => {
-    if (result.text === 'OPEN') {
+    if (result.accept) {
       return handler.open();
     }
   });
@@ -89,11 +89,11 @@ function createNewDialog(model: FileBrowserModel, manager: DocumentManager, host
       title: 'Create New File',
       host,
       body: handler.node,
-      primary: handler.inputNode,
-      okText: 'CREATE'
+      primaryElement: handler.inputNode,
+      buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OPEN' })]
     });
   }).then(result => {
-    if (result.text === 'CREATE') {
+    if (result.accept) {
       return handler.open();
     }
   });
@@ -109,14 +109,15 @@ function renameFile(model: FileBrowserModel, oldPath: string, newPath: string): 
     if (error.xhr) {
       error.message = `${error.xhr.statusText} ${error.xhr.status}`;
     }
+    let overwriteBtn = Dialog.warnButton({ label: 'OVERWRITE' });
     if (error.message.indexOf('409') !== -1) {
       let options = {
         title: 'Overwrite file?',
         body: `"${newPath}" already exists, overwrite?`,
-        okText: 'OVERWRITE'
+        buttons: [Dialog.cancelButton(), overwriteBtn]
       };
       return showDialog(options).then(button => {
-        if (button.text === 'OVERWRITE') {
+        if (button.accept) {
           return model.deleteFile(newPath).then(() => {
             return model.rename(oldPath, newPath);
           });
@@ -283,10 +284,10 @@ class CreateFromHandler extends Widget {
     return showDialog({
       title: `Create New ${this._creatorName}`,
       body: this.node,
-      primary: this.inputNode,
-      okText: 'CREATE'
+      primaryElement: this.inputNode,
+      buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'CREATE' })]
     }).then(result => {
-      if (result.text === 'CREATE') {
+      if (result.accept) {
         return this._open().then(widget => {
           if (!widget) {
             return this.showDialog();

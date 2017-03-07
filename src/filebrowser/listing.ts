@@ -34,7 +34,7 @@ import {
 } from '../common/dates';
 
 import {
-  showDialog, cancelButton, deleteButton
+  Dialog, showDialog
 } from '../common/dialog';
 
 import {
@@ -372,10 +372,9 @@ class DirListing extends Widget {
       return showDialog({
         title: 'Delete file?',
         body: message,
-        okText: 'DELETE',
-        buttons: [cancelButton, deleteButton]
+        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'DELETE'})]
       }).then(result => {
-        if (!this.isDisposed && result.text === 'DELETE') {
+        if (!this.isDisposed && result.accept) {
           return this._delete(names);
         }
       });

@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  showDialog, okButton
+  Dialog, showDialog
 } from 'jupyterlab/lib/common/dialog';
 
 import {
@@ -189,7 +189,7 @@ function createApp(manager: ServiceManager.IManager): void {
       showDialog({
         title: 'Cool Title',
         body: msg,
-        buttons: [okButton]
+        buttons: [Dialog.okButton()]
       });
     }
   });

@@ -50,7 +50,7 @@ import {
 } from '../services';
 
 import {
-  showDialog, cancelButton, warnButton
+  Dialog, showDialog
 } from '../common/dialog';
 
 import {
@@ -307,9 +307,9 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       return showDialog({
         title: 'Shutdown the notebook?',
         body: `Are you sure you want to close "${fileName}"?`,
-        buttons: [cancelButton, warnButton]
+        buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
-        if (result.text === 'OK') {
+        if (result.accept) {
           current.context.changeKernel(null).then(() => { current.dispose(); });
         } else {
           return false;

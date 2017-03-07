@@ -144,14 +144,10 @@
   white-space: nowrap;
 }
 
-.jp-RunningSessions-itemShutdown {
-  letter-spacing: .8px;
-  flex: 0 0 auto;
-  padding: 0px 4px;
+.jp-RunningSessions-itemShutdown.jp-mod-styled {
   margin: 2px 8px 2px 0px;
   color: var(--jp-inverse-ui-font-color0);
   background: var(--jp-warn-color1);
-  cursor: pointer;
   height: var(--jp-private-running-shutdown-button-height);
   line-height: var(--jp-private-running-shutdown-button-height);
 }

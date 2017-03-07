@@ -10,7 +10,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  showDialog, cancelButton, warnButton
+  showDialog, Dialog
 } from '../common/dialog';
 
 
@@ -31,15 +31,16 @@ function restartKernel(kernel: Kernel.IKernel, host?: Widget): Promise<boolean> 
   if (!kernel) {
     return Promise.resolve(false);
   }
+  let restartBtn = Dialog.warnButton({ label: 'RESTART '});
   return showDialog({
     title: 'Restart Kernel?',
     body: 'Do you want to restart the current kernel? All variables will be lost.',
-    buttons: [cancelButton, warnButton]
+    buttons: [Dialog.cancelButton(), restartBtn]
   }).then(result => {
     if (host) {
       host.activate();
     }
-    if (!kernel.isDisposed && result.text === 'OK') {
+    if (!kernel.isDisposed && result.accept) {
       return kernel.restart().then(() => { return true; });
     } else {
       return false;

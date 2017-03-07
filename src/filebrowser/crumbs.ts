@@ -22,7 +22,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  showDialog
+  Dialog, showDialog
 } from '../common/dialog';
 
 import {
@@ -264,13 +264,14 @@ class BreadCrumbs extends Widget {
           error.message = `${error.xhr.status}: error.statusText`;
         }
         if (error.message.ArrayExt.firstIndexOf('409') !== -1) {
+          let overwrite = Dialog.warnButton({ label: 'OVERWRITE' });
           let options = {
             title: 'Overwrite file?',
             body: `"${newPath}" already exists, overwrite?`,
-            okText: 'OVERWRITE'
+            buttons: [Dialog.cancelButton(), overwrite]
           };
           return showDialog(options).then(button => {
-            if (!model.isDisposed && button.text === 'OVERWRITE') {
+            if (!model.isDisposed && button.accept) {
               return model.deleteFile(newPath).then(() => {
                 if (!model.isDisposed) {
                   return this._model.rename(name, newPath);

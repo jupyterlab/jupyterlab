@@ -26,7 +26,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  showDialog, okButton
+  showDialog, Dialog
 } from '../common/dialog';
 
 import {
@@ -273,7 +273,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       showDialog({
         title: 'File Save Error',
         body: err.xhr.responseText,
-        buttons: [okButton]
+        buttons: [Dialog.okButton()]
       });
     });
   }
@@ -334,7 +334,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       showDialog({
         title: 'File Load Error',
         body: err.xhr.responseText,
-        buttons: [okButton]
+        buttons: [Dialog.okButton()]
       });
     });
   }
@@ -457,7 +457,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       showDialog({
         title: 'Error Starting Kernel',
         body,
-        buttons: [okButton]
+        buttons: [Dialog.okButton()]
       });
       return Promise.reject(err);
     });
@@ -597,12 +597,13 @@ namespace Private {
   function getSavePath(path: string): Promise<string> {
     let input = document.createElement('input');
     input.value = path;
+    let saveBtn = Dialog.okButton({ label: 'SAVE' });
     return showDialog({
       title: 'Save File As..',
       body: input,
-      okText: 'SAVE'
+      buttons: [Dialog.cancelButton(), saveBtn]
     }).then(result => {
-      if (result.text === 'SAVE') {
+      if (result.label === 'SAVE') {
         return input.value;
       }
     });

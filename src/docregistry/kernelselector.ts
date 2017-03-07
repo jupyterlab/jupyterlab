@@ -14,7 +14,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  showDialog
+  Dialog, showDialog
 } from '../common/dialog';
 
 import {
@@ -109,13 +109,14 @@ function selectKernel(options: IKernelSelection): Promise<Kernel.IModel> {
 
   // Get the current sessions, populate the kernels, and show the dialog.
   populateKernels(selector, { specs, sessions, preferredLanguage, kernel });
+  let select = Dialog.okButton({ label: 'SELECT' });
   return showDialog({
     title: 'Select Kernel',
     body,
-    okText: 'SELECT'
+    buttons: [Dialog.cancelButton(), select]
   }).then(result => {
     // Change the kernel if a kernel was selected.
-    if (result.text === 'SELECT') {
+    if (result.accept) {
       return JSON.parse(selector.value) as Kernel.IModel;
     }
     return void 0;

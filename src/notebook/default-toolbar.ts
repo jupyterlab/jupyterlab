@@ -18,6 +18,10 @@ import {
 } from './actions';
 
 import {
+  Styling
+} from '../common/styling';
+
+import {
   NotebookPanel
 } from './panel';
 
@@ -220,6 +224,7 @@ class CellTypeSwitcher extends Widget {
     this.addClass(TOOLBAR_CELLTYPE_CLASS);
 
     this._select = this.node.firstChild as HTMLSelectElement;
+    Styling.wrapSelect(this._select);
     this._wildCard = document.createElement('option');
     this._wildCard.value = '-';
     this._wildCard.textContent = '-';

@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "@jupyterlab/extension-builder": "^0.11.0",
+    "@types/chai": "^3.4.35",
     "@types/d3-dsv": "^1.0.29",
     "@types/expect.js": "^0.3.29",
     "@types/marked": "0.0.28",
@@ -41,6 +42,7 @@
     "@types/node": "0.0.1",
     "@types/sanitize-html": "^1.13.31",
     "@types/semver": "^5.3.30",
+    "chai": "^3.5.0",
     "concurrently": "^2.0.0",
     "css-loader": "^0.23.1",
     "expect.js": "^0.3.1",

@@ -30,7 +30,7 @@ import {
 } from '../common/dates';
 
 import {
-  showDialog, cancelButton, warnButton
+  showDialog, Dialog
 } from '../common/dialog';
 
 import {
@@ -299,12 +299,9 @@ class DocumentWidgetManager implements IDisposable {
     return showDialog({
       title: 'Close without saving?',
       body: `File "${fileName}" has unsaved changes, close without saving?`,
-      buttons: [cancelButton, warnButton]
+      buttons: [Dialog.cancelButton(), Dialog.warnButton()]
     }).then(value => {
-      if (value && value.text === 'OK') {
-        return true;
-      }
-      return false;
+      return value.accept;
     });
   }
 
