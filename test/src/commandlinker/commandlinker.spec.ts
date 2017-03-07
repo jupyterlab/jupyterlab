@@ -118,7 +118,7 @@ describe('commandlinker/commandlinker', () => {
 
     });
 
-    describe('#populateVirtualNodeAttributes()', () => {
+    describe('#populateVNodeDataset()', () => {
 
       it('should connect a node to a command', () => {
         let called = false;
@@ -130,9 +130,8 @@ describe('commandlinker/commandlinker', () => {
         let disposable = commands.addCommand(command, {
           execute: () => { called = true; }
         });
-        let attrs: ElementAttrs = {};
 
-        vnode = h.div(linker.populateVirtualNodeAttrs(attrs, command, null));
+        vnode = h.div({ dataset: linker.populateVNodeDataset(command, null) });
         node = VirtualDOM.realize(vnode);
         document.body.appendChild(node);
 

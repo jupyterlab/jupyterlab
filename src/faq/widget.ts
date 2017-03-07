@@ -174,6 +174,7 @@ class FaqWidget extends VDomWidget<FaqModel> {
    * Render the faq plugin to virtual DOM nodes.
    */
   protected render(): VirtualNode[] {
+    let linker = this._linker;
     let subheadings = this.model.subheadings;
     let basicsQuestions = this.model.basicsQuestions;
     let featuresQuestions = this.model.featuresQuestions;
@@ -265,9 +266,10 @@ class FaqWidget extends VDomWidget<FaqModel> {
         h.li({ className: QUESTION_CLASS, id: 'basicsQ4' }, basicsQuestions[3]),
         h.li({ className: ANSWER_CLASS },
           'Check out the JupyterLab tour ',
-          h.a(this._linker.populateVirtualNodeAttrs({
-            className: ANCHOR_CLASS
-          }, AboutCommandIDs.open, null), 'here')
+          h.a({
+            className: ANCHOR_CLASS,
+            dataset: linker.populateVNodeDataset(AboutCommandIDs.open, null)
+          }, 'here')
         )
       ),
       h.h2({ className: SUBHEADER_CLASS }, subheadings[1]),

@@ -235,13 +235,14 @@ class LauncherWidget extends VDomWidget<LauncherModel> {
    */
   protected render(): VirtualNode | VirtualNode[] {
     // Create an iterator that yields rendered item nodes.
+    let linker = this._linker;
     let children = map(this.model.items(), item => {
       let img = h.span({className: item.imgClassName + ' ' + IMAGE_CLASS});
       let text = h.span({className: TEXT_CLASS }, item.name);
-      let attrs = this._linker.populateVirtualNodeAttrs({
-        className: ITEM_CLASS
-      }, item.command, item.args);
-      return h.div(attrs, [img, text]);
+      return h.div({
+        className: ITEM_CLASS,
+        dataset: linker.populateVNodeDataset(item.command, item.args)
+      }, [img, text]);
     });
 
     let folderImage = h.span({

@@ -20,7 +20,7 @@ import {
 } from '@phosphor/commands';
 
 import {
-  ElementAttrs
+  ElementDataset
 } from '@phosphor/virtualdom';
 
 
@@ -81,30 +81,43 @@ interface ICommandLinker extends IDisposable {
    * that were never connected.
    *
    * This method can be called on rendered virtual DOM nodes that were populated
-   * using the `populateVirtualNodeAttributes` method in order to disconnect them from
+   * using the `populateVNodeDataset` method in order to disconnect them from
    * executing their command/argument pair.
    */
   disconnectNode(node: HTMLElement): HTMLElement;
 
   /**
-   * Populate the attributes used to instantiate a virtual DOM node with the
-   * data set values necessary for its rendered DOM node to respond to clicks by
-   * executing a command/argument pair
-   *
-   * @param attrs - The attributes that will eventually be used to instantiate
-   * a virtual DOM node.
+   * Populate the `dataset` attribute within the collection of attributes used
+   * to instantiate a virtual DOM node with the values necessary for its
+   * rendered DOM node to respond to clicks by executing a command/argument
+   * pair.
    *
    * @param command - The command ID to execute upon click.
    *
    * @param args - The arguments with which to invoke the command.
    *
-   * @returns The same attributes that were passed in.
+   * @returns A `dataset` collection for use within virtual node attributes.
    *
    * #### Notes
-   * The attributes instance that is returned is identical to the attributes
-   * instance that was passed in, i.e., this method mutates the original.
+   * The return value can be used on its own as the value for the `dataset`
+   * attribute of a virtual element, or it can be added to an existing `dataset`
+   * as in the example below.
+   *
+   * #### Example
+   * ```typescript
+   * let command = 'some:command-id';
+   * let args = { alpha: 'beta' };
+   * let anchor = h.a({
+   *   className: 'some-class',
+   *   dataset: {
+   *     foo: '1',
+   *     bar: '2',
+   *     ...linker.populateVNodeDataset(command, args)
+   *   }
+   * }, 'some text');
+   * ```
    */
-  populateVirtualNodeAttrs(attrs: ElementAttrs, command: string, args: JSONObject): ElementAttrs;
+  populateVNodeDataset(command: string, args: JSONObject): ElementDataset;
 }
 
 
@@ -179,7 +192,7 @@ class CommandLinker implements ICommandLinker {
    * that were never connected.
    *
    * This method can be called on rendered virtual DOM nodes that were populated
-   * using the `populateVirtualNodeAttributes` method in order to disconnect them from
+   * using the `populateVNodeDataset` method in order to disconnect them from
    * executing their command/argument pair.
    */
   disconnectNode(node: HTMLElement): HTMLElement {
@@ -209,31 +222,41 @@ class CommandLinker implements ICommandLinker {
   }
 
   /**
-   * Populate the attributes used to instantiate a virtual DOM node with the
-   * data set values necessary for its rendered DOM node to respond to clicks by
-   * executing a command/argument pair
-   *
-   * @param attrs - The attributes that will eventually be used to instantiate
-   * a virtual DOM node.
+   * Populate the `dataset` attribute within the collection of attributes used
+   * to instantiate a virtual DOM node with the values necessary for its
+   * rendered DOM node to respond to clicks by executing a command/argument
+   * pair.
    *
    * @param command - The command ID to execute upon click.
    *
    * @param args - The arguments with which to invoke the command.
    *
-   * @returns The same attributes that were passed in.
+   * @returns A `dataset` collection for use within virtual node attributes.
    *
    * #### Notes
-   * The attributes instance that is returned is identical to the attributes
-   * instance that was passed in, i.e., this method mutates the original.
+   * The return value can be used on its own as the value for the `dataset`
+   * attribute of a virtual element, or it can be added to an existing `dataset`
+   * as in the example below.
+   *
+   * #### Example
+   * ```typescript
+   * let command = 'some:command-id';
+   * let args = { alpha: 'beta' };
+   * let anchor = h.a({
+   *   className: 'some-class',
+   *   dataset: {
+   *     foo: '1',
+   *     bar: '2',
+   *     ...linker.populateVNodeDataset(command, args)
+   *   }
+   * }, 'some text');
+   * ```
    */
-  populateVirtualNodeAttrs(attrs: ElementAttrs, command: string, args: JSONObject): ElementAttrs {
-    let argsValue = JSON.stringify(args);
-    (attrs as any).dataset = attrs.dataset || {};
-    (attrs.dataset as JSONObject)[COMMAND_ATTR] = command;
-    if (argsValue) {
-      (attrs.dataset as JSONObject)[ARGS_ATTR] = argsValue;
-    }
-    return attrs;
+  populateVNodeDataset(command: string, args: JSONObject): ElementDataset {
+    return {
+      [COMMAND_ATTR]: command,
+      [ARGS_ATTR]: JSON.stringify(args)
+    } as ElementDataset;
   }
 
   /**
