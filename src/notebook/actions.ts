@@ -10,8 +10,8 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  MimeData as IClipboard
-} from '@phosphor/coreutils';
+  Clipboard
+} from '../common/clipboard';
 
 import {
   ICellModel, ICodeCellModel,
@@ -560,12 +560,10 @@ namespace NotebookActions {
    * Copy the selected cell data to a clipboard.
    *
    * @param widget - The target notebook widget.
-   *
-   * @param clipboard - The clipboard object.
    */
   export
-  function copy(widget: Notebook, clipboard: IClipboard): void {
-    Private.copyOrCut(widget, clipboard, false);
+  function copy(widget: Notebook): void {
+    Private.copyOrCut(widget, false);
   }
 
   /**
@@ -573,23 +571,19 @@ namespace NotebookActions {
    *
    * @param widget - The target notebook widget.
    *
-   * @param clipboard - The clipboard object.
-   *
    * #### Notes
    * This action can be undone.
    * A new code cell is added if all cells are cut.
    */
   export
-  function cut(widget: Notebook, clipboard: IClipboard): void {
-    Private.copyOrCut(widget, clipboard, true);
+  function cut(widget: Notebook): void {
+    Private.copyOrCut(widget, true);
   }
 
   /**
-   * Paste cells from a clipboard.
+   * Paste cells from the application clipboard.
    *
    * @param widget - The target notebook widget.
-   *
-   * @param clipboard - The clipboard object.
    *
    * #### Notes
    * The cells are pasted below the active cell.
@@ -598,10 +592,11 @@ namespace NotebookActions {
    * This action can be undone.
    */
   export
-  function paste(widget: Notebook, clipboard: IClipboard): void {
+  function paste(widget: Notebook): void {
     if (!widget.model || !widget.activeCell) {
       return;
     }
+    let clipboard = Clipboard.getInstance();
     if (!clipboard.hasData(JUPYTER_CELL_MIME)) {
       return;
     }
@@ -968,21 +963,20 @@ namespace Private {
   }
 
   /**
-   * Copy or cut the selected cell data to a clipboard.
+   * Copy or cut the selected cell data to the application clipboard.
    *
    * @param widget - The target notebook widget.
-   *
-   * @param clipboard - The clipboard object.
    *
    * @param cut - Whether to copy or cut.
    */
    export
-   function copyOrCut(widget: Notebook, clipboard: IClipboard, cut: boolean): void {
+   function copyOrCut(widget: Notebook, cut: boolean): void {
      if (!widget.model || !widget.activeCell) {
        return;
      }
      let state = getState(widget);
      widget.mode = 'command';
+     let clipboard = Clipboard.getInstance();
      clipboard.clear();
      let data: nbformat.IBaseCell[] = [];
      each(widget.widgets, child => {

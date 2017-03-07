@@ -14,10 +14,6 @@ import {
 } from '../application';
 
 import {
-  IClipboard
-} from '../clipboard';
-
-import {
   IEditorServices
 } from '../codeeditor';
 
@@ -87,7 +83,6 @@ const trackerPlugin: JupyterLabPlugin<INotebookTracker> = {
     IDocumentRegistry,
     IServiceManager,
     IRenderMime,
-    IClipboard,
     IMainMenu,
     ICommandPalette,
     NotebookPanel.IContentFactory,
@@ -166,7 +161,7 @@ function activateCellTools(app: JupyterLab, restorer: IInstanceRestorer, tracker
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, clipboard: IClipboard, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: NotebookPanel.IContentFactory, editorServices: IEditorServices, restorer: IInstanceRestorer): INotebookTracker {
+function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: NotebookPanel.IContentFactory, editorServices: IEditorServices, restorer: IInstanceRestorer): INotebookTracker {
 
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
@@ -176,7 +171,6 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     preferKernel: true,
     canStartKernel: true,
     rendermime,
-    clipboard,
     contentFactory,
     mimeTypeService: editorServices.mimeTypeService
   });
@@ -429,7 +423,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       if (!current) {
         return;
       }
-      return NotebookActions.cut(current.notebook, current.clipboard);
+      return NotebookActions.cut(current.notebook);
     }
   });
   commands.addCommand(CommandIDs.copy, {
@@ -439,7 +433,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       if (!current) {
         return;
       }
-      return NotebookActions.copy(current.notebook, current.clipboard);
+      return NotebookActions.copy(current.notebook);
     }
   });
   commands.addCommand(CommandIDs.paste, {
@@ -449,7 +443,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       if (!current) {
         return;
       }
-      return NotebookActions.paste(current.notebook, current.clipboard);
+      return NotebookActions.paste(current.notebook);
     }
   });
   commands.addCommand(CommandIDs.deleteCell, {

@@ -14,10 +14,6 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  MimeData as IClipboard
-} from '@phosphor/coreutils';
-
-import {
   ISignal, Signal
 } from '@phosphor/signaling';
 
@@ -97,7 +93,6 @@ class NotebookPanel extends Widget {
     super();
     this.addClass(NB_PANEL);
     this.rendermime = options.rendermime;
-    this.clipboard = options.clipboard;
 
     let layout = this.layout = new PanelLayout();
     let factory = this.contentFactory = options.contentFactory;
@@ -144,11 +139,6 @@ class NotebookPanel extends Widget {
    * The Rendermime instance used by the widget.
    */
   readonly rendermime: RenderMime;
-
-  /**
-   * The clipboard instance used by the widget.
-   */
-  readonly clipboard: IClipboard;
 
   /**
    * The notebook used by the widget.
@@ -364,11 +354,6 @@ export namespace NotebookPanel {
      * The rendermime instance used by the panel.
      */
     rendermime: RenderMime;
-
-    /**
-     * The application clipboard.
-     */
-    clipboard: IClipboard;
 
     /**
      * The language preference for the model.

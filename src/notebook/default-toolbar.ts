@@ -127,7 +127,7 @@ namespace ToolbarItems {
     return new ToolbarButton({
       className: TOOLBAR_CUT_CLASS,
       onClick: () => {
-        NotebookActions.cut(panel.notebook, panel.clipboard);
+        NotebookActions.cut(panel.notebook);
       },
       tooltip: 'Cut the selected cell(s)'
     });
@@ -141,7 +141,7 @@ namespace ToolbarItems {
     return new ToolbarButton({
       className: TOOLBAR_COPY_CLASS,
       onClick: () => {
-        NotebookActions.copy(panel.notebook, panel.clipboard);
+        NotebookActions.copy(panel.notebook);
       },
       tooltip: 'Copy the selected cell(s)'
     });
@@ -155,7 +155,7 @@ namespace ToolbarItems {
     return new ToolbarButton({
       className: TOOLBAR_PASTE_CLASS,
       onClick: () => {
-        NotebookActions.paste(panel.notebook, panel.clipboard);
+        NotebookActions.paste(panel.notebook);
       },
       tooltip: 'Paste cell(s) from the clipboard'
     });

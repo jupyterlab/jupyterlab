@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  MimeData as IClipboard
-} from '@phosphor/coreutils';
-
-import {
   IEditorMimeTypeService
 } from '../codeeditor';
 
@@ -43,7 +39,6 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
   constructor(options: NotebookWidgetFactory.IOptions) {
     super(options);
     this.rendermime = options.rendermime;
-    this.clipboard = options.clipboard;
     this.contentFactory = options.contentFactory;
     this.mimeTypeService = options.mimeTypeService;
   }
@@ -57,11 +52,6 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
    * The content factory used by the widget factory.
    */
   readonly contentFactory: NotebookPanel.IContentFactory;
-
-  /**
-   * A clipboard instance.
-   */
-  readonly clipboard: IClipboard;
 
   /**
    * The service used to look up mime types.
@@ -79,7 +69,6 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
     let rendermime = this.rendermime.clone();
     let panel = new NotebookPanel({
       rendermime,
-      clipboard: this.clipboard,
       contentFactory: this.contentFactory,
       mimeTypeService: this.mimeTypeService
     });
@@ -104,11 +93,6 @@ namespace NotebookWidgetFactory {
       * A rendermime instance.
       */
     rendermime: RenderMime;
-
-    /**
-     * A clipboard instance.
-     */
-    clipboard: IClipboard;
 
     /**
      * A notebook panel content factory.
