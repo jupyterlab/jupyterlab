@@ -161,7 +161,7 @@ class TooltipWidget extends Widget {
   }
 
   /**
-   * Handle `before_detach` messages for the widget.
+   * Handle `before-detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
     document.removeEventListener('keydown', this, USE_CAPTURE);
@@ -181,6 +181,13 @@ class TooltipWidget extends Widget {
    * Handle scroll events for the widget
    */
   private _evtScroll(event: MouseEvent) {
+    // All scrolls except scrolls in the actual hover box node may cause the
+    // referent editor that anchors the node to move, so the only scroll events
+    // that can safely be ignored are ones that happen inside the hovering node.
+    if (this.node.contains(event.target as HTMLElement)) {
+      return;
+    }
+
     this.update();
   }
 
@@ -188,19 +195,28 @@ class TooltipWidget extends Widget {
    * Set the geometry of the tooltip widget.
    */
   private _setGeometry():  void {
-    let node = this.node;
-    let editor = this._editor;
-    let { charWidth, lineHeight } = editor;
-    let coords = editor.getCoordinateForPosition(editor.getCursorPosition());
+    // Find the start of the current token for hover box placement.
+    const editor = this._editor;
+    const cursor = editor.getCursorPosition();
+    const end = editor.getOffsetAt(cursor);
+    const line = editor.getLine(cursor.line);
+    const tokens = line.substring(0, end).split(/\W+/);
+    const last = tokens[tokens.length - 1];
+    const start = last ? end - last.length : end;
+    const position = editor.getPositionAt(start);
+    const anchor = editor.getCoordinateForPosition(position) as ClientRect;
+    const style = window.getComputedStyle(this.node);
+    const paddingLeft = parseInt(style.paddingLeft, 10) || 0;
 
-    // Calculate the geometry of the completer.
+    // Calculate the geometry of the tooltip.
     HoverBox.setGeometry({
-      charWidth, coords, lineHeight, node,
-      anchor: this.anchor.node,
-      anchorPoint: this.anchor.node.scrollTop,
-      cursor: { start: 0, end: 0 },
+      anchor,
+      host: editor.host,
       maxHeight: MAX_HEIGHT,
-      minHeight: MIN_HEIGHT
+      minHeight: MIN_HEIGHT,
+      node: this.node,
+      offset: { horizontal: -1 * paddingLeft },
+      privilege: 'below'
     });
   }
 

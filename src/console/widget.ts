@@ -382,7 +382,7 @@ class CodeConsole extends Widget {
   }
 
   /**
-   * Handle `before_detach` messages for the widget.
+   * Handle `before-detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
     let node = this.node;

@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  JSONObject
+} from '@phosphor/coreutils';
+
+import {
   IDisposable
 } from '@phosphor/disposable';
 
@@ -68,27 +72,7 @@ namespace CodeEditor {
    * An interface describing editor state coordinates.
    */
   export
-  interface ICoordinate {
-    /**
-     * The left coordinate value.
-     */
-    readonly left: number;
-
-    /**
-     * The right coordinate value.
-     */
-    readonly right: number;
-
-    /**
-     * The top coordinate value.
-     */
-    readonly top: number;
-
-    /**
-     * The bottom coordinate value.
-     */
-    readonly bottom: number;
-  }
+  interface ICoordinate extends JSONObject, ClientRect {}
 
   /**
    * A range.

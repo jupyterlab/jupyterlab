@@ -26,7 +26,7 @@ import {
  * A class added to editors that can host a completer.
  */
 export
-const COMPLETABLE_CLASS: string = 'jp-mod-completable';
+const COMPLETER_ENABLED_CLASS: string = 'jp-mod-completer-enabled';
 
 /**
  * A class added to editors that have an active completer.
@@ -73,13 +73,16 @@ class CompletionHandler implements IDisposable {
     // Clean up and disconnect from old editor.
     if (editor && !editor.isDisposed) {
       let model = editor.model;
-      editor.host.classList.remove(COMPLETABLE_CLASS);
+      editor.host.classList.remove(COMPLETER_ENABLED_CLASS);
       model.selections.changed.disconnect(this.onSelectionsChanged, this);
       model.value.changed.disconnect(this.onTextChanged, this);
     }
 
     // Reset completer state.
-    this._completer.reset();
+    if (this._completer) {
+      this._completer.reset();
+      this._completer.editor = newValue;
+    }
 
     // Update the editor and signal connections.
     editor = this._editor = newValue;
@@ -87,6 +90,8 @@ class CompletionHandler implements IDisposable {
       let model = editor.model;
       model.selections.changed.connect(this.onSelectionsChanged, this);
       model.value.changed.connect(this.onTextChanged, this);
+      // On initial load, manually check the cursor position.
+      this.onSelectionsChanged();
     }
   }
 
@@ -143,13 +148,11 @@ class CompletionHandler implements IDisposable {
    * Get the state of the text editor at the given position.
    */
   protected getState(position: CodeEditor.IPosition): CompleterWidget.ITextState {
-    let editor = this.editor;
-    let coords = editor.getCoordinateForPosition(position) as CompleterWidget.ICoordinate;
+    const editor = this.editor;
     return {
       text: editor.model.value.text,
       lineHeight: editor.lineHeight,
       charWidth: editor.charWidth,
-      coords,
       line: position.line,
       column: position.column
     };
@@ -188,6 +191,28 @@ class CompletionHandler implements IDisposable {
 
       this.onReply(request, msg);
     });
+  }
+
+  /**
+   * Handle a completion selected signal from the completion widget.
+   */
+  protected onCompletionSelected(completer: CompleterWidget, value: string): void {
+    let model = completer.model;
+    let editor = this._editor;
+    if (!editor || !model) {
+      return;
+    }
+
+    let patch = model.createPatch(value);
+    if (!patch) {
+      return;
+    }
+
+    let { offset, text } = patch;
+    editor.model.value.text = text;
+
+    let position = editor.getPositionAt(offset);
+    editor.setCursorPosition(position);
   }
 
   /**
@@ -258,11 +283,13 @@ class CompletionHandler implements IDisposable {
     const line = editor.getLine(position.line);
 
     if (line.match(/^\W*$/)) {
+      this._enabled = false;
       model.reset(true);
-      host.classList.remove(COMPLETABLE_CLASS);
+      host.classList.remove(COMPLETER_ENABLED_CLASS);
       return;
     }
-    host.classList.add(COMPLETABLE_CLASS);
+    this._enabled = true;
+    host.classList.add(COMPLETER_ENABLED_CLASS);
   }
 
   /**
@@ -270,7 +297,7 @@ class CompletionHandler implements IDisposable {
    */
   protected onTextChanged(): void {
     const model = this._completer.model;
-    if (!model) {
+    if (!model || !this._enabled) {
       return;
     }
 
@@ -281,18 +308,16 @@ class CompletionHandler implements IDisposable {
       return;
     }
 
-    // Allow completion if the current or a preceding char is not whitespace.
-    const position = editor.getCursorPosition();
-    const request = this.getState(position);
-    this._completer.model.handleTextChange(request);
+    const request = this.getState(editor.getCursorPosition());
+    model.handleTextChange(request);
   }
 
   /**
-   * Handle a visiblity change signal from a completion widget.
+   * Handle a visiblity change signal from a completer widget.
    */
-  protected onVisibilityChanged(completion: CompleterWidget): void {
+  protected onVisibilityChanged(completer: CompleterWidget): void {
     // Completer is not active.
-    if (completion.isDisposed || completion.isHidden) {
+    if (completer.isDisposed || completer.isHidden) {
       if (this._editor) {
         this._editor.host.classList.remove(COMPLETER_ACTIVE_CLASS);
         this._editor.focus();
@@ -306,29 +331,8 @@ class CompletionHandler implements IDisposable {
     }
   }
 
-  /**
-   * Handle a completion selected signal from the completion widget.
-   */
-  protected onCompletionSelected(widget: CompleterWidget, value: string): void {
-    let model = this._completer.model;
-    let editor = this._editor;
-    if (!editor || !model) {
-      return;
-    }
-
-    let patch = model.createPatch(value);
-    if (!patch) {
-      return;
-    }
-
-    let { offset, text } = patch;
-    editor.model.value.text = text;
-
-    let position = editor.getPositionAt(offset);
-    editor.setCursorPosition(position);
-  }
-
   private _editor: CodeEditor.IEditor | null = null;
+  private _enabled = false;
   private _completer: CompleterWidget | null = null;
   private _kernel: Kernel.IKernel | null = null;
   private _pending = 0;

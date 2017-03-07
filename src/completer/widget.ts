@@ -77,15 +77,22 @@ class CompleterWidget extends Widget {
   /**
    * Construct a text completer menu widget.
    */
-  constructor(options: CompleterWidget.IOptions = {}) {
+  constructor(options: CompleterWidget.IOptions) {
     super({ node: document.createElement('ul') });
     this._renderer = options.renderer || CompleterWidget.defaultRenderer;
-    this.anchor = options.anchor || null;
     this.model = options.model;
+    this._editor = options.editor;
     this.addClass(COMPLETER_CLASS);
+  }
 
-    // Completer widgets are hidden until they are populated.
-    this.hide();
+  /**
+   * The editor used by the completion widget.
+   */
+  get editor(): CodeEditor.IEditor {
+    return this._editor;
+  }
+  set editor(newValue: CodeEditor.IEditor) {
+    this._editor = newValue;
   }
 
   /**
@@ -126,39 +133,9 @@ class CompleterWidget extends Widget {
   }
 
   /**
-   * The semantic parent of the completer widget, its anchor widget.
-   *
-   * #### Notes
-   * An event listener will peg the position of the completer widget to the
-   * anchor's scroll position.
-   */
-  get anchor(): Widget {
-    return this._anchor;
-  }
-  set anchor(widget: Widget) {
-    if (this._anchor === widget) {
-      return;
-    }
-    // Clean up scroll listener if anchor is being replaced.
-    if (this._anchor && !this._anchor.isDisposed) {
-      this._anchor.node.removeEventListener('scroll', this, USE_CAPTURE);
-    }
-
-    this._anchor = widget;
-
-    // Add scroll listener to anchor element.
-    if (this._anchor) {
-      this._anchor.node.addEventListener('scroll', this, USE_CAPTURE);
-    }
-  }
-
-  /**
    * Dispose of the resources held by the completer widget.
    */
   dispose() {
-    if (this.isDisposed) {
-      return;
-    }
     this._model = null;
     super.dispose();
   }
@@ -184,7 +161,7 @@ class CompleterWidget extends Widget {
    * not be called directly by user code.
    */
   handleEvent(event: Event): void {
-    if (this.isHidden || !this._anchor) {
+    if (this.isHidden || !this._editor) {
       return;
     }
     switch (event.type) {
@@ -221,18 +198,16 @@ class CompleterWidget extends Widget {
   protected onAfterAttach(msg: Message): void {
     document.addEventListener('keydown', this, USE_CAPTURE);
     document.addEventListener('mousedown', this, USE_CAPTURE);
+    document.addEventListener('scroll', this, USE_CAPTURE);
   }
 
   /**
-   * Handle `before_detach` messages for the widget.
+   * Handle `before-detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
     document.removeEventListener('keydown', this, USE_CAPTURE);
     document.removeEventListener('mousedown', this, USE_CAPTURE);
-
-    if (this._anchor && !this._anchor.isDisposed) {
-      this._anchor.node.removeEventListener('scroll', this, USE_CAPTURE);
-    }
+    document.removeEventListener('scroll', this, USE_CAPTURE);
   }
 
   /**
@@ -249,8 +224,7 @@ class CompleterWidget extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     let model = this._model;
-    let anchor = this._anchor;
-    if (!model || !anchor) {
+    if (!model) {
       return;
     }
 
@@ -292,7 +266,6 @@ class CompleterWidget extends Widget {
       this.show();
       this._visibilityChanged.emit(void 0);
     }
-    this._anchorPoint = anchor.node.scrollTop;
     this._setGeometry();
 
     // If this is the first time the current completer session has loaded,
@@ -329,10 +302,10 @@ class CompleterWidget extends Widget {
    * Handle keydown events for the widget.
    */
   private _evtKeydown(event: KeyboardEvent) {
-    if (this.isHidden || !this._anchor) {
+    if (this.isHidden || !this._editor) {
       return;
     }
-    if (!this._anchor.node.contains(event.target as HTMLElement)) {
+    if (!this._editor.host.contains(event.target as HTMLElement)) {
       this.reset();
       return;
     }
@@ -371,7 +344,7 @@ class CompleterWidget extends Widget {
    * Handle mousedown events for the widget.
    */
   private _evtMousedown(event: MouseEvent) {
-    if (this.isHidden || !this._anchor) {
+    if (this.isHidden || !this._editor) {
       return;
     }
     if (Private.nonstandardClick(event)) {
@@ -381,6 +354,7 @@ class CompleterWidget extends Widget {
 
     let target = event.target as HTMLElement;
     while (target !== document.documentElement) {
+
       // If the user has made a selection, emit its value and reset the widget.
       if (target.classList.contains(ITEM_CLASS)) {
         event.preventDefault();
@@ -390,6 +364,7 @@ class CompleterWidget extends Widget {
         this.reset();
         return;
       }
+
       // If the mouse event happened anywhere else in the widget, bail.
       if (target === this.node) {
         event.preventDefault();
@@ -397,6 +372,7 @@ class CompleterWidget extends Widget {
         event.stopImmediatePropagation();
         return;
       }
+
       target = target.parentElement;
     }
     this.reset();
@@ -406,9 +382,17 @@ class CompleterWidget extends Widget {
    * Handle scroll events for the widget
    */
   private _evtScroll(event: MouseEvent) {
-    if (this.isHidden || !this._anchor) {
+    if (this.isHidden || !this._editor) {
       return;
     }
+
+    // All scrolls except scrolls in the actual hover box node may cause the
+    // referent editor that anchors the node to move, so the only scroll events
+    // that can safely be ignored are ones that happen inside the hovering node.
+    if (this.node.contains(event.target as HTMLElement)) {
+      return;
+    }
+
     this._setGeometry();
   }
 
@@ -434,14 +418,13 @@ class CompleterWidget extends Widget {
    */
   private _reset(): void {
     this._activeIndex = 0;
-    this._anchorPoint = 0;
   }
 
   /**
    * Set the visible dimensions of the widget.
    */
   private _setGeometry(): void {
-    let model = this._model;
+    const model = this._model;
 
     // This is an overly defensive test: `cursor` will always exist if
     // `original` exists, except in contrived tests. But since it is possible
@@ -450,23 +433,28 @@ class CompleterWidget extends Widget {
       return;
     }
 
-    let node = this.node;
-    let { coords, charWidth, lineHeight } = model.original;
+    const editor = this._editor;
+    const { charWidth, lineHeight } = model.original;
+    const position = editor.getPositionAt(model.cursor.start);
+    const anchor = editor.getCoordinateForPosition(position) as ClientRect;
+    const style = window.getComputedStyle(this.node);
+    const borderLeft = parseInt(style.borderLeftWidth, 10) || 0;
+    const paddingLeft = parseInt(style.paddingLeft, 10) || 0;
 
     // Calculate the geometry of the completer.
     HoverBox.setGeometry({
-      charWidth, coords, lineHeight, node,
-      anchor: this._anchor.node,
-      anchorPoint: this._anchorPoint,
-      cursor: this._model.cursor,
+      anchor,
+      host: editor.host,
       maxHeight: MAX_HEIGHT,
-      minHeight: MIN_HEIGHT
+      minHeight: MIN_HEIGHT,
+      node: this.node,
+      offset: { horizontal: borderLeft + paddingLeft },
+      privilege: 'below'
     });
   }
 
-  private _anchor: Widget | null = null;
-  private _anchorPoint = 0;
   private _activeIndex = 0;
+  private _editor: CodeEditor.IEditor | null = null;
   private _model: CompleterWidget.IModel | null = null;
   private _renderer: CompleterWidget.IRenderer | null = null;
   private _selected = new Signal<this, string>(this);
@@ -482,13 +470,9 @@ namespace CompleterWidget {
   export
   interface IOptions {
     /**
-     * The semantic parent of the completer widget, its anchor widget.
-     *
-     * #### Notes
-     * An event listener will peg the position of the completer widget to the
-     * anchor's scroll position.
+     * The semantic parent of the completer widget, its referent editor.
      */
-    anchor?: Widget;
+    editor: CodeEditor.IEditor;
 
     /**
      * The model for the completer widget.
@@ -500,11 +484,6 @@ namespace CompleterWidget {
      */
     renderer?: IRenderer;
   }
-
-  /**
-   * An interface describing editor state coordinates.
-   */
-  export interface ICoordinate extends CodeEditor.ICoordinate, JSONObject { }
 
 
   /**
@@ -536,11 +515,6 @@ namespace CompleterWidget {
      * The character number of the editor cursor within a line.
      */
     readonly column: number;
-
-    /**
-     * The coordinate position of the cursor.
-     */
-    readonly coords: ICoordinate;
   }
 
   /**

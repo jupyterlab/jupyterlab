@@ -5,6 +5,11 @@
 |----------------------------------------------------------------------------*/
 
 
+.jp-HoverBox {
+  position: fixed;
+}
+
+
 .jp-HoverBox.jp-mod-outofview {
   display: none;
 }

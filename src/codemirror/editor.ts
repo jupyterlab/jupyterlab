@@ -357,7 +357,9 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Get the window coordinates given a cursor position.
    */
   getCoordinateForPosition(position: CodeEditor.IPosition): CodeEditor.ICoordinate {
-    return this.editor.charCoords(this._toCodeMirrorPosition(position), 'page');
+    const pos = this._toCodeMirrorPosition(position);
+    const rect = this.editor.charCoords(pos, 'page');
+    return rect as CodeEditor.ICoordinate;
   }
 
   /**

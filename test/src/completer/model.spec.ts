@@ -8,6 +8,10 @@ import {
 } from '@phosphor/algorithm';
 
 import {
+  CodeEditor
+} from '../../../lib/codeeditor';
+
+import {
   CompleterModel, CompleterWidget
 } from '../../../lib/completer';
 
@@ -18,7 +22,7 @@ function makeState(text: string): CompleterWidget.ITextState {
     lineHeight: 0,
     charWidth: 0,
     line: 0,
-    coords: { left: 0, right: 0, top: 0, bottom: 0 },
+    coords: { left: 0, right: 0, top: 0, bottom: 0 } as CodeEditor.ICoordinate,
     text
   };
 }

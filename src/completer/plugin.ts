@@ -63,11 +63,14 @@ const service: JupyterLabPlugin<ICompletionManager> = {
 
     return {
       register: (completable: ICompletionManager.ICompletable): ICompletionManager.ICompletableAttributes => {
-        const { anchor, editor, kernel, parent } = completable;
+        const { editor, kernel, parent } = completable;
         const model = new CompleterModel();
-        const completer = new CompleterWidget({ anchor, model });
+        const completer = new CompleterWidget({ editor, model });
         const handler = new CompletionHandler({ completer, kernel });
         const id = parent.id;
+
+        // Hide the widget when it first loads.
+        completer.hide();
 
         // Associate the handler with the parent widget.
         handlers[id] = handler;
@@ -108,7 +111,7 @@ const consolePlugin: JupyterLabPlugin<void> = {
       const editor = cell && cell.editor;
       const kernel = anchor.session.kernel;
       const parent = panel;
-      const handler = manager.register({ anchor, editor, kernel, parent });
+      const handler = manager.register({ editor, kernel, parent });
 
       // Listen for prompt creation.
       anchor.promptCreated.connect((sender, cell) => {
@@ -162,12 +165,11 @@ const notebookPlugin: JupyterLabPlugin<void> = {
   activate: (app: JupyterLab, manager: ICompletionManager, notebooks: INotebookTracker): void => {
     // Create a handler for each notebook that is created.
     notebooks.widgetAdded.connect((sender, panel) => {
-      const anchor = panel.notebook;
       const cell = panel.notebook.activeCell;
       const editor = cell && cell.editor;
       const kernel = panel.kernel;
       const parent = panel;
-      const handler = manager.register({ anchor, editor, kernel, parent });
+      const handler = manager.register({ editor, kernel, parent });
 
       // Listen for active cell changes.
       panel.notebook.activeCellChanged.connect((sender, cell) => {
