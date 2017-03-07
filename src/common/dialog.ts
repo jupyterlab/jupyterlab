@@ -540,6 +540,10 @@ namespace Dialog {
      */
     createButtonNode(button: IButton): HTMLElement {
       let className = this.createItemClass(button);
+      // We use realize here instead of creating
+      // nodes with document.createElement as a
+      // shorthand, and only because this is not
+      // called often.
       return VirtualDOM.realize(
         h.button({ className },
               this.renderIcon(button),
