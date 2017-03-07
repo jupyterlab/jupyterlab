@@ -43,16 +43,13 @@ button.jp-mod-styled:focus {
   box-shadow: inset 0 0 4px var(--md-blue-300);
 }
 
-
 .jp-select-wrapper {
   display: flex;
   flex-direction: column;
   padding: 1px;
   background: white;
   height: 28px;
-  width: 252px;
   box-sizing: border-box;
-  border: var(--jp-border-width) solid var(--jp-border-color1);
   margin-bottom: 12px;
 }
 
@@ -63,13 +60,27 @@ button.jp-mod-styled:focus {
 }
 
 
+.jp-select-wrapper:hover,
+ input.jp-mod-styled:hover {
+  background-color: var(--md-grey-200);
+  box-shadow: inset 0 0px 1px rgba(0, 0, 0, 0.5);
+}
+
+
+select.jp-mod-styled:hover {
+  background-color: var(--md-grey-200);
+}
+
+
 select.jp-mod-styled {
   flex: 1 1 auto;
   height: 32px;
+  width: 100%;
   font-size: var(--jp-ui-font-size2);
   background: white;
   color: var(--jp-ui-font-color0);
   padding-left: 8px;
+  padding-right: 8px;
   background-image: var(--jp-ui-select-caret);
   background-repeat: no-repeat;
   background-position: right center;
