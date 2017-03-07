@@ -54,6 +54,10 @@ import {
 } from '../common/observablemap';
 
 import {
+  Styling
+} from '../common/styling';
+
+import {
   INotebookTracker
 } from './';
 
@@ -97,11 +101,6 @@ const COLLAPSED_CLASS = 'jp-mod-collapsed';
  * The class name added to a KeySelector instance.
  */
 const KEYSELECTOR_CLASS = 'jp-KeySelector';
-
-/**
- * The class name added to a select wrapper.
- */
-const SELECT_WRAPPER_CLASS = 'jp-KeySelector-selectWrapper';
 
 /**
  * The class name added to a wrapper that has focus.
@@ -567,16 +566,9 @@ namespace CellTools {
      * not be called directly by user code.
      */
     handleEvent(event: Event): void {
-      let wrapper = this.node.getElementsByClassName(SELECT_WRAPPER_CLASS)[0];
       switch (event.type) {
         case 'change':
           this.onValueChanged();
-          break;
-        case 'focus':
-          wrapper.classList.add(FOCUS_CLASS);
-          break;
-        case 'blur':
-          wrapper.classList.remove(FOCUS_CLASS);
           break;
         default:
           break;
@@ -589,8 +581,6 @@ namespace CellTools {
     protected onAfterAttach(msg: Message): void {
       let node = this.selectNode;
       node.addEventListener('change', this);
-      node.addEventListener('focus', this);
-      node.addEventListener('blur', this);
     }
 
     /**
@@ -599,8 +589,6 @@ namespace CellTools {
     protected onBeforeDetach(msg: Message): void {
       let node = this.selectNode;
       node.removeEventListener('change', this);
-      node.removeEventListener('focus', this);
-      node.removeEventListener('blur', this);
     }
 
     /**
@@ -776,13 +764,13 @@ namespace Private {
       let value = JSON.stringify(options.optionsMap[label]);
       optionNodes.push(h.option({ label, value }));
     }
-    return VirtualDOM.realize(
+    let node = VirtualDOM.realize(
       h.div({},
         h.label(title),
-        h.div({ className: SELECT_WRAPPER_CLASS },
-          h.select({},
-            optionNodes)))
+        h.select({}, optionNodes))
     );
+    Styling.styleNode(node);
+    return node;
   }
 
   /**

@@ -60,7 +60,7 @@ namespace Styling {
     if (node.parentElement) {
       node.parentElement.replaceChild(wrapper, node);
     }
-    wrapper.appendChild(child);
+    wrapper.appendChild(node);
     return wrapper;
   }
 }
