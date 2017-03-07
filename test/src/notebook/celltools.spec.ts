@@ -363,7 +363,7 @@ describe('notebook/celltools', () => {
         it('should add the focused class to the wrapper node', () => {
           let select = tool.selectNode;
           simulate(select, 'focus');
-          let selector = '.jp-KeySelector-selectWrapper.jp-mod-focused';
+          let selector = '.jp-mod-focused';
           expect(tool.node.querySelector(selector)).to.be.ok();
         });
 
@@ -375,7 +375,7 @@ describe('notebook/celltools', () => {
           let select = tool.selectNode;
           simulate(select, 'focus');
           simulate(select, 'blur');
-          let selector = '.jp-KeySelector-selectWrapper.jp-mod-focused';
+          let selector = '.jp-mod-focused';
           expect(tool.node.querySelector(selector)).to.not.be.ok();
         });
 
@@ -392,7 +392,7 @@ describe('notebook/celltools', () => {
         simulate(select, 'blur');
         select.selectedIndex = 0;
         simulate(select, 'change');
-        expect(tool.events).to.eql(['focus', 'blur', 'change']);
+        expect(tool.events).to.eql(['change']);
       });
 
     });
