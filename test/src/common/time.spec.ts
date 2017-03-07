@@ -7,7 +7,7 @@ import {
 
 import {
   Time
-} from '..';
+} from '../../../lib/common/time';
 
 
 describe('@jupyterlab/coreutils', () => {
