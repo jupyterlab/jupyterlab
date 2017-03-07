@@ -26,11 +26,17 @@ import {
 } from '../common/dialog';
 
 import {
+  DOMUtils
+} from '../common/domutils';
+
+import {
   FileBrowserModel
 } from './model';
 
 import * as utils
   from './utils';
+
+
 /**
  * The class name added to material icons
  */
@@ -199,7 +205,7 @@ class BreadCrumbs extends Widget {
   private _evtDragLeave(event: IDragEvent): void {
     event.preventDefault();
     event.stopPropagation();
-    let dropTarget = utils.findElement(this.node, utils.DROP_TARGET_CLASS);
+    let dropTarget = DOMUtils.findElement(this.node, utils.DROP_TARGET_CLASS);
     if (dropTarget) {
       dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
     }
@@ -212,7 +218,7 @@ class BreadCrumbs extends Widget {
     event.preventDefault();
     event.stopPropagation();
     event.dropAction = event.proposedAction;
-    let dropTarget = utils.findElement(this.node, utils.DROP_TARGET_CLASS);
+    let dropTarget = DOMUtils.findElement(this.node, utils.DROP_TARGET_CLASS);
     if (dropTarget) {
       dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
     }
