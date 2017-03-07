@@ -253,10 +253,11 @@ class CommandLinker implements ICommandLinker {
    * ```
    */
   populateVNodeDataset(command: string, args: JSONObject): ElementDataset {
-    return {
-      [COMMAND_ATTR]: command,
-      [ARGS_ATTR]: JSON.stringify(args)
-    } as ElementDataset;
+    let dataset = { [COMMAND_ATTR]: command };
+    if (args !== void 0) {
+      dataset[ARGS_ATTR] = JSON.stringify(args);
+    }
+    return dataset;
   }
 
   /**
