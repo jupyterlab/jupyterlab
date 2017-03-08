@@ -191,19 +191,26 @@ class ApplicationShell extends Widget {
   */
   activateNextTab(): void {
     let current = this._currentTabBar();
-    if (current) {
-      let ci = current.currentIndex;
-      if (ci !== -1) {
-        if (ci < current.titles.length - 1) {
-          current.currentIndex += 1;
-          current.currentTitle.owner.activate();
-        } else if (ci === current.titles.length - 1) {
-          let nextBar = this._nextTabBar();
-          if (nextBar) {
-            nextBar.currentIndex = 0;
-            nextBar.currentTitle.owner.activate();
-          }
-        }
+    if (!current) {
+      return;
+    }
+
+    let ci = current.currentIndex;
+    if (ci === -1) {
+      return;
+    }
+
+    if (ci < current.titles.length - 1) {
+      current.currentIndex += 1;
+      current.currentTitle.owner.activate();
+      return;
+    }
+
+    if (ci === current.titles.length - 1) {
+      let nextBar = this._nextTabBar();
+      if (nextBar) {
+        nextBar.currentIndex = 0;
+        nextBar.currentTitle.owner.activate();
       }
     }
   }
@@ -213,20 +220,27 @@ class ApplicationShell extends Widget {
   */
   activatePreviousTab(): void {
     let current = this._currentTabBar();
-    if (current) {
-      let ci = current.currentIndex;
-      if (ci !== -1) {
-        if (ci > 0) {
-          current.currentIndex -= 1;
-          current.currentTitle.owner.activate();
-        } else if (ci === 0) {
-          let prevBar = this._previousTabBar();
-          if (prevBar) {
-            let len = prevBar.titles.length;
-            prevBar.currentIndex = len - 1;
-            prevBar.currentTitle.owner.activate();
-          }
-        }
+    if (!current) {
+      return;
+    }
+
+    let ci = current.currentIndex;
+    if (ci === -1) {
+      return;
+    }
+
+    if (ci > 0) {
+      current.currentIndex -= 1;
+      current.currentTitle.owner.activate();
+      return;
+    }
+
+    if (ci === 0) {
+      let prevBar = this._previousTabBar();
+      if (prevBar) {
+        let len = prevBar.titles.length;
+        prevBar.currentIndex = len - 1;
+        prevBar.currentTitle.owner.activate();
       }
     }
   }
