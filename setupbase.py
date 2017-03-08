@@ -117,9 +117,7 @@ def should_run_npm():
     if not shutil.which('npm'):
         log.error("npm unavailable")
         return False
-    if not os.path.exists(node_modules):
-        return True
-    return mtime(node_modules) < mtime(pjoin(here, 'package.json'))
+    return is_stale(node_modules, pjoin(here, 'package.json'))
 
 
 def run_npm():
@@ -129,6 +127,15 @@ def run_npm():
     os.utime(node_modules)
     env = os.environ.copy()
     env['PATH'] = npm_path
+
+
+def is_stale(target, source):
+    """Test if a target location is stale based on a source location
+    modified time.
+    """
+    if not os.path.exists(target):
+        return True
+    return mtime(target) < mtime(source)
 
 
 class BaseCommand(Command):

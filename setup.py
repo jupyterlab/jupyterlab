@@ -12,7 +12,7 @@ import os
 from os.path import join as pjoin
 from setupbase import (
     create_cmdclass, should_run_npm, run, run_npm, BaseCommand, find_packages,
-    mtime
+    is_stale
 )
 
 
@@ -71,7 +71,7 @@ class NPM(BaseCommand):
         if should_run_npm():
             run_npm()
         build_path = os.path.join(here, 'jupyterlab', 'build')
-        if mtime(build_path) < mtime(os.path.join(here, 'src')):
+        if is_stale(build_path, os.path.join(here, 'src')):
             run(['npm', 'run', 'build:all'])
 
 
