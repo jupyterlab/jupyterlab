@@ -4,19 +4,19 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-
 import os
 from os.path import join as pjoin
 import functools
 import pipes
 
-from distutils.cmd import Command
+from setuptools import Command
 from setuptools.command.build_py import build_py
 from setuptools.command.sdist import sdist
 from setuptools.command.develop import develop
 from setuptools.command.bdist_egg import bdist_egg
 from distutils import log
 from subprocess import check_call
+from distutils.spawn import find_executable as which
 import sys
 
 try:
@@ -30,6 +30,9 @@ else:
     def list2cmdline(cmd_list):
         return ' '.join(map(pipes.quote, cmd_list))
 
+
+__version__ = '0.1.0'
+
 # ---------------------------------------------------------------------------
 # Top Level Variables
 # ---------------------------------------------------------------------------
@@ -42,6 +45,13 @@ npm_path = ':'.join([
     pjoin(here, 'node_modules', '.bin'),
     os.environ.get('PATH', os.defpath),
 ])
+
+if "--skip-npm" in sys.argv:
+    print("Skipping install of webtools as requested.")
+    skip_npm = True
+    sys.argv.remove("--skip-npm")
+else:
+    skip_npm = False
 
 # ---------------------------------------------------------------------------
 # Public Functions
@@ -114,25 +124,8 @@ def is_stale(target, source):
     return mtime(target) < mtime(source)
 
 
-def should_run_npm():
-    """Test whether npm should be run"""
-    if not which('npm'):
-        log.error("npm unavailable")
-        return False
-    return is_stale(node_modules, pjoin(here, 'package.json'))
-
-
-def run_npm():
-    """Run npm install"""
-    log.info("Installing build dependencies with npm")
-    run(['npm', 'install', '--progress=false'])
-    os.utime(node_modules)
-    env = os.environ.copy()
-    env['PATH'] = npm_path
-
-
 class BaseCommand(Command):
-    """Dumb empty command because Command needs subclasses to override too much"""
+    """Empty command because Command needs subclasses to override too much"""
     user_options = []
 
     def initialize_options(self):
@@ -148,13 +141,61 @@ class BaseCommand(Command):
         return []
 
 
-# ---------------------------------------------------------------------------
-# Private Functions
-# ---------------------------------------------------------------------------
+def combine_commands(*commands):
+    """Return a Command that combines several commands."""
+
+    class CombinedCommand(Command):
+
+        def initialize_options(self):
+            self.commands = []
+            for C in commands:
+                self.commands.append(C(self.distribution))
+            for c in self.commands:
+                c.initialize_options()
+
+        def finalize_options(self):
+            for c in self.commands:
+                c.finalize_options()
+
+        def run(self):
+            for c in self.commands:
+                c.run()
+    return CombinedCommand
+
 
 def mtime(path):
     """shorthand for mtime"""
     return os.stat(path).st_mtime
+
+
+def install_npm(path, build_dir, source_dir, build_cmd='build'):
+    """Return a Command for running npm install and npm build at a given path."""
+
+    class NPM(BaseCommand):
+        description = 'install package.json dependencies using npm'
+
+        def run(self):
+            if skip_npm:
+                log.info('Skipping npm-installation')
+                return
+            node_package = path
+            node_modules = pjoin(node_package, 'node_modules')
+
+            if not which("npm"):
+                log.error("`npm` unavailable.  If you're running this command "
+                          "using sudo, make sure `npm` is availble to sudo")
+            if is_stale(node_modules, pjoin(node_package, 'package.json')):
+                log.info('Installing build dependencies with npm.  This may '
+                         'take a while...')
+                run('npm install', cwd=node_package)
+            if is_stale(build_dir, source_dir):
+                run(['npm', 'run', build_cmd], cwd=node_package)
+    return NPM
+
+
+# ---------------------------------------------------------------------------
+# Private Functions
+# ---------------------------------------------------------------------------
 
 
 def wrap_command(cmds, data_dirs, cls, strict=True):
@@ -167,7 +208,7 @@ def wrap_command(cmds, data_dirs, cls, strict=True):
     strict: boolean, optional
         Wether to raise errors when a pre-command fails.
     """
-    class Command(cls):
+    class WrappedCommand(cls):
 
         def run(self):
             if not getattr(self, 'uninstall', None):
@@ -179,14 +220,14 @@ def wrap_command(cmds, data_dirs, cls, strict=True):
                     else:
                         pass
 
-            result = super().run()
+            result = cls.run(self)
             data_files = []
             for dname in data_dirs:
                 data_files.extend(get_data_files(dname))
             # update data-files in case this created new files
             self.distribution.data_files = data_files
             return result
-    return Command
+    return WrappedCommand
 
 
 class bdist_egg_disabled(bdist_egg):
@@ -198,69 +239,3 @@ class bdist_egg_disabled(bdist_egg):
     def run(self):
         sys.exit("Aborting implicit building of eggs. Use `pip install .` " +
                  " to install from source.")
-
-
-try:
-    from shutil import which
-except ImportError:
-    ## which() function copied from Python 3.4.3; PSF license
-    def which(cmd, mode=os.F_OK | os.X_OK, path=None):
-        """Given a command, mode, and a PATH string, return the path which
-        conforms to the given mode on the PATH, or None if there is no such
-        file.
-        `mode` defaults to os.F_OK | os.X_OK. `path` defaults to the result
-        of os.environ.get("PATH"), or can be overridden with a custom search
-        path.
-        """
-        # Check that a given file can be accessed with the correct mode.
-        # Additionally check that `file` is not a directory, as on Windows
-        # directories pass the os.access check.
-        def _access_check(fn, mode):
-            return (os.path.exists(fn) and os.access(fn, mode)
-                    and not os.path.isdir(fn))
-
-        # If we're given a path with a directory part, look it up directly rather
-        # than referring to PATH directories. This includes checking relative to the
-        # current directory, e.g. ./script
-        if os.path.dirname(cmd):
-            if _access_check(cmd, mode):
-                return cmd
-            return None
-
-        if path is None:
-            path = os.environ.get("PATH", os.defpath)
-        if not path:
-            return None
-        path = path.split(os.pathsep)
-
-        if sys.platform == "win32":
-            # The current directory takes precedence on Windows.
-            if not os.curdir in path:
-                path.insert(0, os.curdir)
-
-            # PATHEXT is necessary to check on Windows.
-            pathext = os.environ.get("PATHEXT", "").split(os.pathsep)
-            # See if the given file matches any of the expected path extensions.
-            # This will allow us to short circuit when given "python.exe".
-            # If it does match, only test that one, otherwise we have to try
-            # others.
-            if any(cmd.lower().endswith(ext.lower()) for ext in pathext):
-                files = [cmd]
-            else:
-                files = [cmd + ext for ext in pathext]
-        else:
-            # On other platforms you don't have things like PATHEXT to tell you
-            # what file suffixes are executable, so just pass on cmd as-is.
-            files = [cmd]
-
-        seen = set()
-        for dir in path:
-            normdir = os.path.normcase(dir)
-            if not normdir in seen:
-                seen.add(normdir)
-                for thefile in files:
-                    name = os.path.join(dir, thefile)
-                    if _access_check(name, mode):
-                        return name
-        return None
-

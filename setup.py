@@ -11,7 +11,7 @@ import json
 import os
 from os.path import join as pjoin
 from setupbase import (
-    create_cmdclass, should_run_npm, run, run_npm, BaseCommand, find_packages,
+    create_cmdclass, install_npm, BaseCommand, find_packages,
     is_stale
 )
 
@@ -64,19 +64,13 @@ setup_args = dict(
 )
 
 
-class NPM(BaseCommand):
-    description = 'install package.json dependencies using npm'
-
-    def run(self):
-        if should_run_npm():
-            run_npm()
-        build_path = os.path.join(here, 'jupyterlab', 'build')
-        if is_stale(build_path, os.path.join(here, 'src')):
-            run(['npm', 'run', 'build:all'])
-
-
 setup_args['cmdclass'] = create_cmdclass(['js'], ['jupyterlab/build'])
-setup_args['cmdclass']['js'] = NPM
+
+build_path = os.path.join(here, 'jupyterlab', 'build')
+source_path = os.path.join(here, 'src')
+setup_args['cmdclass']['js'] = install_npm(
+    here, build_path, source_path, 'build:all'
+)
 
 
 # setuptools requirements
