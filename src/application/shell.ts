@@ -394,19 +394,20 @@ class ApplicationShell extends Widget {
    */
   private _nextTabBar(): TabBar<Widget> {
     let current = this._currentTabBar();
-    if (current) {
-      let bars = toArray(this._dockPanel.tabBars());
-      let len = bars.length;
-      let ci = ArrayExt.firstIndexOf(bars, current);
-      let nextBar: TabBar<Widget> = null;
-      if (ci < (len - 1)) {
-        nextBar = bars[ci + 1];
-      } else if (ci === len - 1) {
-        nextBar = bars[0];
-      }
-      return nextBar;
+    if (!current) {
+      return void 0;
     }
-    return void 0;
+
+    let bars = toArray(this._dockPanel.tabBars());
+    let len = bars.length;
+    let ci = ArrayExt.firstIndexOf(bars, current);
+    let nextBar: TabBar<Widget> = null;
+    if (ci < (len - 1)) {
+      nextBar = bars[ci + 1];
+    } else if (ci === len - 1) {
+      nextBar = bars[0];
+    }
+    return nextBar;
   }
 
 
