@@ -317,7 +317,7 @@ class ApplicationShell extends Widget {
    * Close all widgets in the main area.
    */
   closeAll(): void {
-    each(toArray(this._dockPanel.widgets()), widget => { widget.close(); });
+    each(this._dockPanel.widgets(), widget => { widget.close(); });
     this._save();
   }
 
@@ -355,59 +355,65 @@ class ApplicationShell extends Widget {
   }
 
   /*
-   * Return the TabBar that has the currently active Widget or undefined.
+   * Return the TabBar that has the currently active Widget or null.
    */
-  private _currentTabBar(): TabBar<Widget> {
+  private _currentTabBar(): TabBar<Widget> | null {
     let current = this._tracker.currentWidget;
-    if (current) {
-      let title = current.title;
-      let tabBar = find(this._dockPanel.tabBars(), bar => {
-        return ArrayExt.firstIndexOf(bar.titles, title) > -1;
-      });
-      return tabBar;
+    if (!current) {
+      return null;
     }
-    return void 0;
+
+    let title = current.title;
+    return find(this._dockPanel.tabBars(), bar => {
+      return ArrayExt.firstIndexOf(bar.titles, title) > -1;
+    }) || null;
   }
 
   /*
-   * Return the TabBar previous to the current TabBar (see above) or undefined.
+   * Return the TabBar previous to the current TabBar (see above) or null.
    */
-  private _previousTabBar(): TabBar<Widget> {
+  private _previousTabBar(): TabBar<Widget> | null {
     let current = this._currentTabBar();
     if (current) {
-      let bars = toArray(this._dockPanel.tabBars());
-      let len = bars.length;
-      let ci = ArrayExt.firstIndexOf(bars, current);
-      let prevBar: TabBar<Widget> = null;
-      if (ci > 0) {
-        prevBar = bars[ci - 1];
-      } else if (ci === 0) {
-        prevBar = bars[len - 1];
-      }
-      return prevBar;
+      return null;
     }
-    return void 0;
+    let bars = toArray(this._dockPanel.tabBars());
+    let len = bars.length;
+    let ci = ArrayExt.firstIndexOf(bars, current);
+
+    if (ci > 0) {
+      return bars[ci - 1];
+    }
+
+    if (ci === 0) {
+      return bars[len - 1];
+    }
+
+    return null;
   }
 
   /*
-   * Return the TabBar next to the current TabBar (see above) or undefined.
+   * Return the TabBar next to the current TabBar (see above) or null.
    */
-  private _nextTabBar(): TabBar<Widget> {
+  private _nextTabBar(): TabBar<Widget> | null {
     let current = this._currentTabBar();
     if (!current) {
-      return void 0;
+      return null;
     }
 
     let bars = toArray(this._dockPanel.tabBars());
     let len = bars.length;
     let ci = ArrayExt.firstIndexOf(bars, current);
-    let nextBar: TabBar<Widget> = null;
+
     if (ci < (len - 1)) {
-      nextBar = bars[ci + 1];
-    } else if (ci === len - 1) {
-      nextBar = bars[0];
+      return bars[ci + 1];
     }
-    return nextBar;
+
+    if (ci === len - 1) {
+      return bars[0];
+    }
+
+    return null;
   }
 
 
