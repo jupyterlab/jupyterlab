@@ -20,11 +20,15 @@ import {
 } from '../../../lib/codemirror';
 
 import {
-  IObservableJSON, ObservableJSON, ObservableJSONWidget
+  ObservableJSON
 } from '../../../lib/coreutils';
 
+import {
+  JSONEditorWidget
+  } from '../../../lib/apputils';
 
-class LogEditor extends ObservableJSONWidget {
+
+class LogEditor extends JSONEditorWidget {
 
   methods: string[] = [];
 
@@ -47,80 +51,9 @@ class LogEditor extends ObservableJSONWidget {
 }
 
 
-describe('coreutils', () => {
+describe('apputils', () => {
 
-  describe('ObservableJSON', () => {
-
-    describe('#constructor()', () => {
-
-      it('should create an observable JSON object', () => {
-        let item = new ObservableJSON();
-        expect(item).to.be.an(ObservableJSON);
-      });
-
-      it('should accept initial values', () => {
-        let item = new ObservableJSON({
-          values: { 'foo': 1, 'bar': 'baz'}
-        });
-        expect(item).to.be.an(ObservableJSON);
-      });
-
-    });
-
-    describe('#toJSON()', () => {
-
-      it('should serialize the model to JSON', () => {
-        let item = new ObservableJSON();
-        item.set('foo', 1);
-        expect(item.toJSON()['foo']).to.be(1);
-      });
-
-      it('should return a copy of the data', () => {
-        let item = new ObservableJSON();
-        item.set('foo', { 'bar': 1 });
-        let value = item.toJSON();
-        value['bar'] = 2;
-        expect((item.get('foo') as any)['bar']).to.be(1);
-      });
-
-    });
-
-  });
-
-  describe('ObservableJSON.ChangeMessage', () => {
-
-    describe('#constructor()', () => {
-
-      it('should create a new message', () => {
-        let message = new ObservableJSON.ChangeMessage({
-          key: 'foo',
-          type: 'add',
-          oldValue: 1,
-          newValue: 2
-        });
-        expect(message).to.be.a(ObservableJSON.ChangeMessage);
-      });
-
-    });
-
-    describe('#args', () => {
-
-      it('should be the args of the message', () => {
-        let args: IObservableJSON.IChangedArgs = {
-          key: 'foo',
-          type: 'add',
-          oldValue: 'ho',
-          newValue: 'hi'
-        };
-        let message = new ObservableJSON.ChangeMessage(args);
-        expect(message.args).to.be(args);
-      });
-
-    });
-
-  });
-
-  describe('ObservableJSONWidget', () => {
+  describe('JSONEditorWidget', () => {
 
     let editor: LogEditor;
     const editorFactory = new CodeMirrorEditorFactory().newInlineEditor;
@@ -136,8 +69,8 @@ describe('coreutils', () => {
     describe('#constructor', () => {
 
       it('should create a new metadata editor', () => {
-        let newEditor = new ObservableJSONWidget({ editorFactory });
-        expect(newEditor).to.be.a(ObservableJSONWidget);
+        let newEditor = new JSONEditorWidget({ editorFactory });
+        expect(newEditor).to.be.a(JSONEditorWidget);
       });
 
     });
@@ -145,7 +78,7 @@ describe('coreutils', () => {
     describe('#editorHostNode', () => {
 
       it('should be the editor host node used by the editor', () => {
-        expect(editor.editorHostNode.classList).to.contain('jp-ObservableJSONWidget-host');
+        expect(editor.editorHostNode.classList).to.contain('jp-JSONEditorWidget-host');
       });
 
     });
@@ -153,7 +86,7 @@ describe('coreutils', () => {
     describe('#revertButtonNode', () => {
 
       it('should be the revert button node used by the editor', () => {
-        expect(editor.revertButtonNode.classList).to.contain('jp-ObservableJSONWidget-revertButton');
+        expect(editor.revertButtonNode.classList).to.contain('jp-JSONEditorWidget-revertButton');
       });
 
     });
@@ -161,7 +94,7 @@ describe('coreutils', () => {
     describe('#commitButtonNode', () => {
 
       it('should be the commit button node used by the editor', () => {
-        expect(editor.commitButtonNode.classList).to.contain('jp-ObservableJSONWidget-commitButton');
+        expect(editor.commitButtonNode.classList).to.contain('jp-JSONEditorWidget-commitButton');
       });
 
     });
