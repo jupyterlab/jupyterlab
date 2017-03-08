@@ -30,8 +30,8 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  humanTime, dateTime
-} from '../common/dates';
+  Time
+} from '../common/time';
 
 import {
   Dialog, showDialog
@@ -1567,8 +1567,8 @@ namespace DirListing {
       let modText = '';
       let modTitle = '';
       if (model.last_modified) {
-        modText = humanTime(model.last_modified);
-        modTitle = dateTime(model.last_modified);
+        modText = Time.formatHuman(model.last_modified);
+        modTitle = Time.format(model.last_modified);
       }
 
       // If an item is being edited currently, its text node is unavailable.

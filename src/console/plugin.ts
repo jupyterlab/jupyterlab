@@ -26,8 +26,8 @@ import {
 } from '../commandpalette';
 
 import {
-  dateTime
-} from '../common/dates';
+  Time
+} from '../common/time';
 
 import {
   showDialog, Dialog
@@ -524,10 +524,10 @@ namespace Private {
       `Name: ${label}\n` +
       `Directory: ${ContentsManager.dirname(path)}\n` +
       `Kernel: ${displayName}\n` +
-      `Connected: ${dateTime(connected.toISOString())}`
+      `Connected: ${Time.format(connected.toISOString())}`
     );
     if (executed) {
-      caption += `\nLast Execution: ${dateTime(executed.toISOString())}`;
+      caption += `\nLast Execution: ${Time.format(executed.toISOString())}`;
     }
     return caption;
   }
