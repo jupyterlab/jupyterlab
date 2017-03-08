@@ -14,73 +14,19 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
   VirtualDOM, VirtualNode
 } from '@phosphor/virtualdom';
 
-
-/**
- * An interface for a model to be used with vdom rendering.
- */
-export
-interface IVDomModel extends IDisposable {
-  /**
-   * A signal emited when any model state changes.
-   */
-  readonly stateChanged: ISignal<IVDomModel, void>;
-}
-
-
-/**
- * Concrete implementation of IVDomModel.
- */
-export
-class VDomModel implements IVDomModel {
-  /**
-   * A signal emitted when any model state changes.
-   */
-  get stateChanged(): ISignal<this, void> {
-    return this._stateChanged;
-  }
-
-  /**
-   * Test whether the model is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
-  /**
-   * Dispose the model.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    this._isDisposed = true;
-    Signal.clearData(this);
-  }
-
-  /**
-   * Trigger a change signal.
-   */
-  protected triggerChange(): void {
-    this._stateChanged.emit(void 0);
-  }
-
-  private _isDisposed = false;
-  private _stateChanged = new Signal<this, void>(this);
-}
+import {
+  Widget
+} from '@phosphor/widgets';
 
 
 /**
  * Phosphor widget that encodes best practices for VDOM based rendering.
  */
 export
-abstract class VDomWidget<T extends IVDomModel> extends Widget {
+abstract class VDomWidget<T extends VDomWidget.IModel> extends Widget {
   /**
    * A signal emited when the model changes.
    */
@@ -91,7 +37,7 @@ abstract class VDomWidget<T extends IVDomModel> extends Widget {
   /**
    * Set the model and fire changed signals.
    */
-  set model(newValue: T) {
+  set model(newValue: T | null) {
     newValue = newValue || null;
     if (this._model === newValue) {
       return;
@@ -101,7 +47,9 @@ abstract class VDomWidget<T extends IVDomModel> extends Widget {
       this._model.stateChanged.disconnect(this.update, this);
     }
     this._model = newValue;
-    this._model.stateChanged.connect(this.update, this);
+    if (this._model) {
+      this._model.stateChanged.connect(this.update, this);
+    }
     this.update();
     this._modelChanged.emit(void 0);
   }
@@ -109,7 +57,7 @@ abstract class VDomWidget<T extends IVDomModel> extends Widget {
   /**
    * Get the current model.
    */
-  get model(): T {
+  get model(): T | null {
     return this._model;
   }
 
@@ -139,11 +87,60 @@ abstract class VDomWidget<T extends IVDomModel> extends Widget {
    * which includes layout triggered rendering and all model changes.
    *
    * Subclasses should define this method and use the current model state
-   * in this.model and return a phosphor VirtualNode or VirtualNode[] using the phosphor
-   * VDOM API.
+   * to create a virtual node or nodes to render.
    */
-  protected abstract render(): VirtualNode | VirtualNode[];
+  protected abstract render(): VirtualNode | ReadonlyArray<VirtualNode>;
 
-  private _model: T;
+  private _model: T | null;
   private _modelChanged = new Signal<this, void>(this);
+}
+
+
+/**
+ * The namespace for VDomWidget statics.
+ */
+export
+namespace VDomWidget {
+  /**
+   * An interface for a model to be used with vdom rendering.
+   */
+  export
+  interface IModel extends IDisposable {
+    /**
+     * A signal emited when any model state changes.
+     */
+    readonly stateChanged: ISignal<this, void>;
+  }
+}
+
+
+/**
+ * Concrete implementation of VDomWidget model.
+ */
+export
+class VDomModel implements VDomWidget.IModel {
+  /**
+   * A signal emitted when any model state changes.
+   */
+  readonly stateChanged = new Signal<this, void>(this);
+
+  /**
+   * Test whether the model is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose the model.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    Signal.clearData(this);
+  }
+
+  private _isDisposed = false;
 }

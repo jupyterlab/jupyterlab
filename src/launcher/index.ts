@@ -174,7 +174,7 @@ class LauncherModel extends VDomModel implements ILauncher {
       return;
     }
     this._path = path;
-    this.triggerChange();
+    this.stateChanged.emit(void 0);
   }
 
   /**
@@ -196,11 +196,11 @@ class LauncherModel extends VDomModel implements ILauncher {
       `jp-Image${item.name.replace(/\ /g, '')}`;
 
     this._items.push(item);
-    this.triggerChange();
+    this.stateChanged.emit(void 0);
 
     return new DisposableDelegate(() => {
       ArrayExt.removeFirstOf(this._items, item);
-      this.triggerChange();
+      this.stateChanged.emit(void 0);
     });
   }
 
