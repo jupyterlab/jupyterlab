@@ -22,8 +22,8 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  hitTestNodes, findElement
-} from '../common/dom';
+  DOMUtils
+} from '../common/domutils';
 
 
 /**
@@ -136,7 +136,7 @@ class RunningSessions extends Widget {
 
     // Populate the terminals section.
     if (manager.terminals.isAvailable()) {
-      let termNode = findElement(this.node, TERMINALS_CLASS);
+      let termNode = DOMUtils.findElement(this.node, TERMINALS_CLASS);
       let termHeader = this._renderer.createTerminalHeaderNode();
       termHeader.className = SECTION_HEADER_CLASS;
       termNode.appendChild(termHeader);
@@ -151,7 +151,7 @@ class RunningSessions extends Widget {
     }
 
     // Populate the sessions section.
-    let sessionNode = findElement(this.node, SESSIONS_CLASS);
+    let sessionNode = DOMUtils.findElement(this.node, SESSIONS_CLASS);
     let sessionHeader = this._renderer.createSessionHeaderNode();
     sessionHeader.className = SECTION_HEADER_CLASS;
     sessionNode.appendChild(sessionHeader);
@@ -247,10 +247,10 @@ class RunningSessions extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     // Fetch common variables.
-    let termSection = findElement(this.node, TERMINALS_CLASS);
-    let termList = findElement(termSection, LIST_CLASS);
-    let sessionSection = findElement(this.node, SESSIONS_CLASS);
-    let sessionList = findElement(sessionSection, LIST_CLASS);
+    let termSection = DOMUtils.findElement(this.node, TERMINALS_CLASS);
+    let termList = DOMUtils.findElement(termSection, LIST_CLASS);
+    let sessionSection = DOMUtils.findElement(this.node, SESSIONS_CLASS);
+    let sessionList = DOMUtils.findElement(sessionSection, LIST_CLASS);
     let renderer = this._renderer;
     let specs = this._manager.specs;
 
@@ -301,11 +301,11 @@ class RunningSessions extends Widget {
    */
   private _evtClick(event: MouseEvent): void {
     // Fetch common variables.
-    let termSection = findElement(this.node, TERMINALS_CLASS);
-    let termList = findElement(termSection, LIST_CLASS);
-    let sessionSection = findElement(this.node, SESSIONS_CLASS);
-    let sessionList = findElement(sessionSection, LIST_CLASS);
-    let refresh = findElement(this.node, REFRESH_CLASS);
+    let termSection = DOMUtils.findElement(this.node, TERMINALS_CLASS);
+    let termList = DOMUtils.findElement(termSection, LIST_CLASS);
+    let sessionSection = DOMUtils.findElement(this.node, SESSIONS_CLASS);
+    let sessionList = DOMUtils.findElement(sessionSection, LIST_CLASS);
+    let refresh = DOMUtils.findElement(this.node, REFRESH_CLASS);
     let renderer = this._renderer;
     let clientX = event.clientX;
     let clientY = event.clientY;
@@ -316,7 +316,7 @@ class RunningSessions extends Widget {
     }
 
     // Check for a terminal item click.
-    let index = hitTestNodes(termList.children, clientX, clientY);
+    let index = DOMUtils.hitTestNodes(termList.children, clientX, clientY);
     if (index !== -1) {
       let node = termList.children[index] as HTMLLIElement;
       let shutdown = renderer.getTerminalShutdown(node);
@@ -329,7 +329,7 @@ class RunningSessions extends Widget {
     }
 
     // Check for a session item click.
-    index = hitTestNodes(sessionList.children, clientX, clientY);
+    index = DOMUtils.hitTestNodes(sessionList.children, clientX, clientY);
     if (index !== -1) {
       let node = sessionList.children[index] as HTMLLIElement;
       let shutdown = renderer.getSessionShutdown(node);
@@ -615,7 +615,7 @@ namespace RunningSessions {
      * A click anywhere else on the node is considered an open request.
      */
     getTerminalShutdown(node: HTMLLIElement): HTMLElement {
-      return findElement(node, SHUTDOWN_BUTTON_CLASS);
+      return DOMUtils.findElement(node, SHUTDOWN_BUTTON_CLASS);
     }
 
     /**
@@ -630,7 +630,7 @@ namespace RunningSessions {
      * A click anywhere else on the node is considered an open request.
      */
     getSessionShutdown(node: HTMLLIElement): HTMLElement {
-      return findElement(node, SHUTDOWN_BUTTON_CLASS);
+      return DOMUtils.findElement(node, SHUTDOWN_BUTTON_CLASS);
     }
 
     /**
@@ -645,7 +645,7 @@ namespace RunningSessions {
      * reflect the data for the session models.
      */
     updateTerminalNode(node: HTMLLIElement, model: TerminalSession.IModel): void {
-      let label = findElement(node, ITEM_LABEL_CLASS);
+      let label = DOMUtils.findElement(node, ITEM_LABEL_CLASS);
       label.textContent = `terminals/${model.name}`;
     }
 
@@ -663,7 +663,7 @@ namespace RunningSessions {
      * reflect the data for the session models.
      */
     updateSessionNode(node: HTMLLIElement, model: Session.IModel, kernelName: string): void {
-      let icon = findElement(node, ITEM_ICON_CLASS);
+      let icon = DOMUtils.findElement(node, ITEM_ICON_CLASS);
       let path = model.notebook.path;
       let name = path.split('/').pop();
       if (name.indexOf('.ipynb') !== -1) {
@@ -674,7 +674,7 @@ namespace RunningSessions {
       } else {
         icon.className = `${ITEM_ICON_CLASS} ${FILE_ICON_CLASS}`;
       }
-      let label = findElement(node, ITEM_LABEL_CLASS);
+      let label = DOMUtils.findElement(node, ITEM_LABEL_CLASS);
       label.textContent = path;
       let title = (
         `Path: ${model.notebook.path}\n` +

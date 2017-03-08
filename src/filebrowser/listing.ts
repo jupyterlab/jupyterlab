@@ -38,6 +38,10 @@ import {
 } from '../common/dialog';
 
 import {
+  DOMUtils
+} from '../common/domutils';
+
+import {
   DocumentManager
 } from '../docmanager';
 
@@ -214,7 +218,7 @@ class DirListing extends Widget {
     this._editNode.className = EDITOR_CLASS;
     this._manager = options.manager;
     this._renderer = options.renderer || DirListing.defaultRenderer;
-    let headerNode = utils.findElement(this.node, HEADER_CLASS);
+    let headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
     this._renderer.populateHeaderNode(headerNode);
     this._manager.activateRequested.connect(this._onActivateRequested, this);
   }
@@ -248,7 +252,7 @@ class DirListing extends Widget {
    * Modifying this node directly can lead to undefined behavior.
    */
   get headerNode(): HTMLElement {
-    return utils.findElement(this.node, HEADER_CLASS);
+    return DOMUtils.findElement(this.node, HEADER_CLASS);
   }
 
   /**
@@ -260,7 +264,7 @@ class DirListing extends Widget {
    * Modifying this node directly can lead to undefined behavior.
    */
   get contentNode(): HTMLElement {
-    return utils.findElement(this.node, CONTENT_CLASS);
+    return DOMUtils.findElement(this.node, CONTENT_CLASS);
   }
 
   /**
@@ -580,7 +584,7 @@ class DirListing extends Widget {
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     let node = this.node;
-    let content = utils.findElement(node, CONTENT_CLASS);
+    let content = DOMUtils.findElement(node, CONTENT_CLASS);
     node.addEventListener('mousedown', this);
     node.addEventListener('keydown', this);
     node.addEventListener('click', this);
@@ -599,7 +603,7 @@ class DirListing extends Widget {
   protected onBeforeDetach(msg: Message): void {
     super.onBeforeDetach(msg);
     let node = this.node;
-    let content = utils.findElement(node, CONTENT_CLASS);
+    let content = DOMUtils.findElement(node, CONTENT_CLASS);
     node.removeEventListener('mousedown', this);
     node.removeEventListener('keydown', this);
     node.removeEventListener('click', this);
@@ -621,7 +625,7 @@ class DirListing extends Widget {
     // Fetch common variables.
     let items = this._sortedItems;
     let nodes = this._items;
-    let content = utils.findElement(this.node, CONTENT_CLASS);
+    let content = DOMUtils.findElement(this.node, CONTENT_CLASS);
     let renderer = this._renderer;
 
     this.removeClass(MULTI_SELECTED_CLASS);
@@ -936,7 +940,7 @@ class DirListing extends Widget {
   private _evtDragLeave(event: IDragEvent): void {
     event.preventDefault();
     event.stopPropagation();
-    let dropTarget = utils.findElement(this.node, utils.DROP_TARGET_CLASS);
+    let dropTarget = DOMUtils.findElement(this.node, utils.DROP_TARGET_CLASS);
     if (dropTarget) {
       dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
     }
@@ -949,7 +953,7 @@ class DirListing extends Widget {
     event.preventDefault();
     event.stopPropagation();
     event.dropAction = event.proposedAction;
-    let dropTarget = utils.findElement(this.node, utils.DROP_TARGET_CLASS);
+    let dropTarget = DOMUtils.findElement(this.node, utils.DROP_TARGET_CLASS);
     if (dropTarget) {
       dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
     }
@@ -1479,8 +1483,8 @@ namespace DirListing {
      * @returns The sort state of the header after the click event.
      */
     handleHeaderClick(node: HTMLElement, event: MouseEvent): ISortState {
-      let name = utils.findElement(node, NAME_ID_CLASS);
-      let modified = utils.findElement(node, MODIFIED_ID_CLASS);
+      let name = DOMUtils.findElement(node, NAME_ID_CLASS);
+      let modified = DOMUtils.findElement(node, MODIFIED_ID_CLASS);
       let state: ISortState = { direction: 'ascending', key: 'name' };
       let target = event.target as HTMLElement;
       if (name.contains(target)) {
@@ -1546,9 +1550,9 @@ namespace DirListing {
      * @param model - The model object to use for the item state.
      */
     updateItemNode(node: HTMLElement, model: Contents.IModel): void {
-      let icon = utils.findElement(node, ITEM_ICON_CLASS);
-      let text = utils.findElement(node, ITEM_TEXT_CLASS);
-      let modified = utils.findElement(node, ITEM_MODIFIED_CLASS);
+      let icon = DOMUtils.findElement(node, ITEM_ICON_CLASS);
+      let text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
+      let modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
       icon.className = ITEM_ICON_CLASS + ' ' + MATERIAL_ICON_CLASS;
       switch (model.type) {
@@ -1588,7 +1592,7 @@ namespace DirListing {
      * @returns The node containing the file name.
      */
     getNameNode(node: HTMLElement): HTMLElement {
-      return utils.findElement(node, ITEM_TEXT_CLASS);
+      return DOMUtils.findElement(node, ITEM_TEXT_CLASS);
     }
 
     /**
@@ -1602,8 +1606,8 @@ namespace DirListing {
      */
     createDragImage(node: HTMLElement, count: number, model: Contents.IModel): HTMLElement {
       let dragImage = node.cloneNode(true) as HTMLElement;
-      let modified = utils.findElement(dragImage, ITEM_MODIFIED_CLASS);
-      let iconNode = utils.findElement(dragImage, ITEM_ICON_CLASS);
+      let modified = DOMUtils.findElement(dragImage, ITEM_MODIFIED_CLASS);
+      let iconNode = DOMUtils.findElement(dragImage, ITEM_ICON_CLASS);
       dragImage.removeChild(modified as HTMLElement);
       if (model) {
         switch (model.type) {
@@ -1619,7 +1623,7 @@ namespace DirListing {
         }
       }
       if (count > 1) {
-        let nameNode = utils.findElement(dragImage, ITEM_TEXT_CLASS);
+        let nameNode = DOMUtils.findElement(dragImage, ITEM_TEXT_CLASS);
         nameNode.textContent = count + ' Items';
       }
       return dragImage;

@@ -5,8 +5,6 @@ import {
   Dialog, showDialog
 } from '../common/dialog';
 
-export * from '../common/dom';
-
 
 /**
  * The class name added to FileBrowser instances.
