@@ -90,7 +90,6 @@ module.exports = {
   node: {
     fs: 'empty'
   },
-  debug: true,
   bail: true,
   devtool: 'source-map'
 }

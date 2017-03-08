@@ -31,6 +31,11 @@ class ModuleLoader {
     // https://webpack.github.io/docs/code-splitting.html
     this._boundRequire = this.require.bind(this) as any;
     this._boundRequire.ensure = this.ensureBundle.bind(this);
+    this._boundRequire.i = this.inject.bind(this);
+    this._boundRequire.d = this.harmonyExports.bind(this);
+    this._boundRequire.o = this.hasOwnPropertyCall.bind(this);
+    this._boundRequire.n = this.getDefaultExport.bind(this);
+    this._boundRequire.oe = this.asyncLoadError.bind(this);
   }
 
   /**
@@ -75,19 +80,15 @@ class ModuleLoader {
     }
 
     // Create a new module (and put it into the cache).
-    let mod: ModuleLoader.IModule = installed[id] = {
+    let mod: ModuleLoader.IModule = installed[id] = Object.create({
       exports: {},
       require: this._boundRequire,
-      id,
-      loaded: false
-    };
+      id
+    });
 
     // Execute the module function.
     let callback = this._registered[id];
     callback.call(mod.exports, mod, mod.exports, this._boundRequire);
-
-    // Flag the module as loaded.
-    mod.loaded = true;
 
     // Return the exports of the module.
     return mod.exports;
@@ -116,6 +117,41 @@ class ModuleLoader {
       bundle.callbacks.push(callback);
     }
     return bundle.promise;
+  }
+
+  inject(data: any): any {
+    return data;
+  }
+
+  // define getter function for harmony exports - d
+  harmonyExports(exports: any , name: any, getter: any): void {
+    if (!this.hasOwnPropertyCall(exports, name)) {
+      Object.defineProperty(exports, name, {
+        configurable: false,
+        enumerable: true,
+        get: getter
+      });
+    }
+  };
+
+  // Object.prototype.hasOwnProperty.call - o
+  hasOwnPropertyCall(object: any, property: any): boolean {
+    return Object.prototype.hasOwnProperty.call(object, property);
+  }
+
+  // getDefaultExport function for compatibility with non-harmony modules - n
+  getDefaultExport(module: any): any {
+    let getter = module && module.__esModule ?
+      function getDefault() { return module['default']; } :
+      function getModuleExports() { return module; };
+    this.harmonyExports(getter, 'a', getter);
+    return getter;
+  };
+
+  // on error function for async loading - oe
+  asyncLoadError(err: Error): void {
+    console.error(err);
+    throw err;
   }
 
   /**
@@ -295,6 +331,11 @@ namespace ModuleLoader {
   interface IRequire {
     (path: string): any;
     ensure(path: string, callback?: EnsureCallback): Promise<void>;
+    i(data: any): any;
+    d(exports: any , name: string, getter: any): void;
+    o(object: any, property: any): boolean;
+    n(module: any): any;
+    oe(error: Error): void
   }
 
   /**
@@ -305,7 +346,6 @@ namespace ModuleLoader {
     exports: any;
     require: IRequire;
     id: string;
-    loaded: boolean;
   }
 
   /**
