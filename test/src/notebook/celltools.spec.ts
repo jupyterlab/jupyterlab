@@ -25,7 +25,7 @@ import {
 
 import {
   ObservableJSON
-} from '../../../lib/common/observablejson';
+} from '../../../lib/coreutils';
 
 import {
   CellTools, NotebookPanel, NotebookTracker, NotebookActions

@@ -14,7 +14,7 @@
 
 
 /* Commonly shared functions */
-@import '../common/hoverbox.css';
+@import '../apputils/index.css';
 
 
 /* Individual plugins */
@@ -22,10 +22,6 @@
 @import '../cells/index.css';
 @import '../codemirror/index.css';
 @import '../commandpalette/index.css';
-@import '../common/dialog.css';
-@import '../common/iframe.css';
-@import '../common/observablejson.css';
-@import '../common/styling.css';
 @import '../completer/index.css';
 @import '../console/index.css';
 @import '../csvwidget/index.css';

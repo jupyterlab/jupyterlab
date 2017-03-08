@@ -11,7 +11,7 @@ import {
 
 import {
   IObservableVector, ObservableVector
-} from '../common/observablevector';
+} from '../coreutils';
 
 import {
   DocumentModel, DocumentRegistry
@@ -24,15 +24,15 @@ import {
 
 import {
   IChangedArgs
-} from '../common/interfaces';
+} from '../coreutils';
 
 import {
   IObservableJSON, ObservableJSON
-} from '../common/observablejson';
+} from '../coreutils';
 
 import {
   IObservableUndoableVector, ObservableUndoableVector
-} from '../common/undoablevector';
+} from '../coreutils';
 
 
 /**

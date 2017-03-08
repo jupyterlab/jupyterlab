@@ -35,7 +35,7 @@ import {
 
 import {
   ObservableVector
-} from '../common/observablevector';
+} from '../coreutils';
 
 import {
   IOutputModel, RenderMime

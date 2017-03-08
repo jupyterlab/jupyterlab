@@ -11,7 +11,7 @@ import {
 
 import {
   VDomModel, VDomWidget
-} from '../../../lib/common/vdom';
+} from '../../../lib/apputils';
 
 
 class TestModel extends VDomModel {

@@ -23,7 +23,7 @@ import {
 
 import {
   IChangedArgs
-} from '../common/interfaces';
+} from '../coreutils';
 
 import {
   CodeEditor, CodeEditorWidget
@@ -35,7 +35,7 @@ import {
 
 import {
   IObservableMap, ObservableMap
-} from '../common/observablemap';
+} from '../coreutils';
 
 import {
   OutputAreaWidget

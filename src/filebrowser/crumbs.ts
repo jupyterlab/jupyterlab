@@ -23,11 +23,11 @@ import {
 
 import {
   Dialog, showDialog
-} from '../common/dialog';
+} from '../apputils';
 
 import {
   DOMUtils
-} from '../common/domutils';
+} from '../apputils';
 
 import {
   FileBrowserModel

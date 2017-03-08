@@ -35,7 +35,7 @@ import {
 
 import {
   HoverBox
-} from '../common/hoverbox';
+} from '../apputils';
 
 
 /**

@@ -19,7 +19,7 @@ import {
 
 import {
   IChangedArgs
-} from '../common/interfaces';
+} from '../coreutils';
 
 
 /* tslint:disable */

@@ -43,19 +43,23 @@ import {
 
 import {
   IChangedArgs
-} from '../common/interfaces';
+} from '../coreutils';
 
 import {
-  ObservableJSON, ObservableJSONWidget
-} from '../common/observablejson';
+  ObservableJSON
+} from '../coreutils';
+
+import {
+  JSONEditorWidget
+} from '../apputils';
 
 import {
   IObservableMap, ObservableMap
-} from '../common/observablemap';
+} from '../coreutils';
 
 import {
   Styling
-} from '../common/styling';
+} from '../apputils';
 
 import {
   INotebookTracker
@@ -441,7 +445,7 @@ namespace CellTools {
       let layout = this.layout = new PanelLayout();
       let header = Private.createMetadataHeader();
       layout.addWidget(header);
-      this.editor = new ObservableJSONWidget({ editorFactory });
+      this.editor = new JSONEditorWidget({ editorFactory });
       layout.addWidget(this.editor);
       header.addClass(COLLAPSED_CLASS);
       this.editor.addClass(COLLAPSED_CLASS);
@@ -451,7 +455,7 @@ namespace CellTools {
     /**
      * The editor used by the tool.
      */
-    readonly editor: ObservableJSONWidget;
+    readonly editor: JSONEditorWidget;
 
     /**
      * Get the toggle node used by the editor.

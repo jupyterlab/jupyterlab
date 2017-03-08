@@ -3,7 +3,7 @@
 
 import {
   Dialog, showDialog
-} from '../common/dialog';
+} from '../apputils';
 
 
 /**

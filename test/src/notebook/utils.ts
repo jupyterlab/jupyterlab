@@ -15,7 +15,7 @@ import {
 
 import {
   Clipboard
-} from '../../../lib/common/clipboard';
+} from '../../../lib/apputils';
 
 import {
   NotebookPanel, Notebook, NotebookModel

@@ -53,7 +53,7 @@ import {
 
 import {
   IObservableVector, ObservableVector
-} from '../common/observablevector';
+} from '../coreutils';
 
 /**
  * The class name added to console widgets.

@@ -9,7 +9,7 @@ import {
 
 import {
   ActivityMonitor
-} from '../../../lib/common/activitymonitor';
+} from '../../../lib/coreutils';
 
 
 
@@ -20,7 +20,7 @@ class TestObject {
 }
 
 
-describe('common/activitymonitor', () => {
+describe('coreutils', () => {
 
   describe('ActivityMonitor()', () => {
 

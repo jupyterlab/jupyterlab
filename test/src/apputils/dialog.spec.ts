@@ -27,7 +27,7 @@ import {
 
 import {
   Dialog, showDialog
-} from '../../../lib/common/dialog';
+} from '../../../lib/apputils';
 
 
 /**

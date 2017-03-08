@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   ObservableMap
-} from '../../../lib/common/observablemap';
+} from '../../../lib/coreutils';
 
 
 describe('common/ObservableMap', () => {

@@ -57,15 +57,15 @@ import {
 
 import {
   IChangedArgs
-} from '../common/interfaces';
+} from '../coreutils';
 
 import {
   IObservableMap, ObservableMap
-} from '../common/observablemap';
+} from '../coreutils';
 
 import {
   IObservableVector, ObservableVector
-} from '../common/observablevector';
+} from '../coreutils';
 
 import {
   RenderMime

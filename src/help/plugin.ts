@@ -23,7 +23,7 @@ import {
 
 import {
   IFrameWidget
-} from '../common/iframe';
+} from '../apputils';
 
 import {
   ICommandPalette

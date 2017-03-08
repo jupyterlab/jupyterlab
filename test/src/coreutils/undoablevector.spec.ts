@@ -9,7 +9,7 @@ import {
 
 import {
   ObservableUndoableVector, ISerializable
-} from '../../../lib/common/undoablevector';
+} from '../../../lib/coreutils';
 
 
 

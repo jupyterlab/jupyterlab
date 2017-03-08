@@ -27,11 +27,11 @@ import {
 
 import {
   Time
-} from '../common/time';
+} from '../coreutils';
 
 import {
   showDialog, Dialog
-} from '../common/dialog';
+} from '../apputils';
 
 import {
   selectKernel

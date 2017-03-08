@@ -31,7 +31,7 @@ import {
 
 import {
   IChangedArgs as IChangedArgsGeneric
-} from '../common/interfaces';
+} from '../coreutils';
 
 
 /* tslint:disable */

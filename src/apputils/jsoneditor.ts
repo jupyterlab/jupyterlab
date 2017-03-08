@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONExt, JSONObject, JSONValue
+  JSONExt, JSONObject
 } from '@phosphor/coreutils';
 
 import {
@@ -22,14 +22,14 @@ import {
 } from '../codeeditor';
 
 import {
-  IObservableMap, ObservableMap
-} from './observablemap';
+  IObservableJSON
+} from '../coreutils';
 
 
 /**
- * The class name added to a ObservableJSONWidget instance.
+ * The class name added to a JSONEditorWidget instance.
  */
-const METADATA_CLASS = 'jp-ObservableJSONWidget';
+const METADATA_CLASS = 'jp-JSONEditorWidget';
 
 /**
  * The class name added when the Metadata editor contains invalid JSON.
@@ -39,128 +39,33 @@ const ERROR_CLASS = 'jp-mod-error';
 /**
  * The class name added to the editor host node.
  */
-const HOST_CLASS = 'jp-ObservableJSONWidget-host';
+const HOST_CLASS = 'jp-JSONEditorWidget-host';
 
 /**
  * The class name added to the button area.
  */
-const BUTTON_AREA_CLASS = 'jp-ObservableJSONWidget-buttons';
+const BUTTON_AREA_CLASS = 'jp-JSONEditorWidget-buttons';
 
 /**
  * The class name added to the revert button.
  */
-const REVERT_CLASS = 'jp-ObservableJSONWidget-revertButton';
+const REVERT_CLASS = 'jp-JSONEditorWidget-revertButton';
 
 /**
  * The class name added to the commit button.
  */
-const COMMIT_CLASS = 'jp-ObservableJSONWidget-commitButton';
-
-
-/**
- * An observable JSON value.
- */
-export
-interface IObservableJSON extends IObservableMap<JSONValue> {
-  /**
-   * Serialize the model to JSON.
-   */
-  toJSON(): JSONObject;
-}
-
-
-/**
- * The namespace for IObservableJSON related interfaces.
- */
-export
-namespace IObservableJSON {
-  /**
-   * A type alias for observable JSON changed args.
-   */
-  export
-  type IChangedArgs = ObservableMap.IChangedArgs<JSONValue>;
-}
-
-
-/**
- * A concrete Observable map for JSON data.
- */
-export
-class ObservableJSON extends ObservableMap<JSONValue> {
-  /**
-   * Construct a new observable JSON object.
-   */
-  constructor(options: ObservableJSON.IOptions = {}) {
-    super({
-      itemCmp: JSONExt.deepEqual,
-      values: options.values
-    });
-  }
-
-  /**
-   * Serialize the model to JSON.
-   */
-  toJSON(): JSONObject {
-    let out: JSONObject = Object.create(null);
-    for (let key of this.keys()) {
-      let value = this.get(key);
-      if (JSONExt.isPrimitive(value)) {
-        out[key] = value;
-      } else {
-        out[key] = JSON.parse(JSON.stringify(value));
-      }
-    }
-    return out;
-  }
-}
-
-
-/**
- * The namespace for ObservableJSON static data.
- */
-export
-namespace ObservableJSON {
-  /**
-   * The options use to initialize an observable JSON object.
-   */
-  export
-  interface IOptions {
-    /**
-     * The optional intitial value for the object.
-     */
-    values?: JSONObject;
-  }
-
-  /**
-   * An observable JSON change message.
-   */
-  export
-  class ChangeMessage extends Message {
-    /**
-     * Create a new metadata changed message.
-     */
-    constructor(args: IObservableJSON.IChangedArgs) {
-      super('jsonvalue-changed');
-      this.args = args;
-    }
-
-    /**
-     * The arguments of the change.
-     */
-    readonly args: IObservableJSON.IChangedArgs;
-  }
-}
+const COMMIT_CLASS = 'jp-JSONEditorWidget-commitButton';
 
 
 /**
  * A widget for editing observable JSON.
  */
 export
-class ObservableJSONWidget extends Widget {
+class JSONEditorWidget extends Widget {
   /**
    * Construct a new metadata editor.
    */
-  constructor(options: ObservableJSONWidget.IOptions) {
+  constructor(options: JSONEditorWidget.IOptions) {
     super({ node: Private.createEditorNode() });
     this.addClass(METADATA_CLASS);
     let host = this.editorHostNode;
@@ -416,10 +321,10 @@ class ObservableJSONWidget extends Widget {
 
 
 /**
- * The static namespace ObservableJSONWidget class statics.
+ * The static namespace JSONEditorWidget class statics.
  */
 export
-namespace ObservableJSONWidget {
+namespace JSONEditorWidget {
   /**
    * The options used to initialize a metadata editor.
    */

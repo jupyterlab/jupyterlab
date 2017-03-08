@@ -15,7 +15,7 @@ import {
 
 import {
   Dialog, showDialog
-} from 'jupyterlab/lib/common/dialog';
+} from 'jupyterlab/lib/apputils';
 
 import {
   FileBrowser, FileBrowserModel

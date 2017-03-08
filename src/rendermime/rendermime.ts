@@ -23,11 +23,11 @@ import {
 
 import {
   IObservableJSON
-} from '../common/observablejson';
+} from '../coreutils';
 
 import {
   ISanitizer, defaultSanitizer
-} from '../common/sanitizer';
+} from '../apputils';
 
 import {
   HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,

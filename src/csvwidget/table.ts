@@ -13,7 +13,7 @@ import {
 
 import {
   VDomModel, VDomWidget
-} from '../common/vdom';
+} from '../apputils';
 
 import {
   HTML_COMMON_CLASS
