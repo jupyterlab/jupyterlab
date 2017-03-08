@@ -112,6 +112,8 @@ def run(cmd, *args, **kwargs):
     log.info('> ' + list2cmdline(cmd))
     kwargs.setdefault('cwd', here)
     kwargs.setdefault('shell', sys.platform == 'win32')
+    if not isinstance(cmd, list):
+        cmd = cmd.split()
     return check_call(cmd, *args, **kwargs)
 
 
@@ -187,7 +189,7 @@ def install_npm(path, build_dir, source_dir, build_cmd='build'):
             if is_stale(node_modules, pjoin(node_package, 'package.json')):
                 log.info('Installing build dependencies with npm.  This may '
                          'take a while...')
-                run('npm install', cwd=node_package)
+                run(['npm', 'install'], cwd=node_package)
             if is_stale(build_dir, source_dir):
                 run(['npm', 'run', build_cmd], cwd=node_package)
     return NPM
