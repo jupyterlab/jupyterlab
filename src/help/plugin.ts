@@ -22,7 +22,7 @@ import {
 } from '../application';
 
 import {
-  IFrame
+  IFrameWidget
 } from '../common/iframe';
 
 import {
@@ -131,14 +131,14 @@ const plugin: JupyterLabPlugin<void> = {
 export default plugin;
 
 /*
-  * An IFrame the disposes itself when closed.
+  * An IFrameWidget the disposes itself when closed.
   *
   * This is needed to clear the state restoration db when IFrames are closed.
  */
-class ClosableIFrame extends IFrame {
+class ClosableIFrame extends IFrameWidget {
 
   /**
-   * Dispose of the IFrame when closing.
+   * Dispose of the IFrameWidget when closing.
    */
   protected onCloseRequest(msg: Message): void {
     this.dispose();
