@@ -38,7 +38,6 @@ interactive kernel console sessions.
 - [Services](https://github.com/jupyterlab/jupyterlab/blob/master/src/services/plugin.ts) - An application-specific interface to `@jupyterlab/services`.
 - [RenderMime](https://github.com/jupyterlab/jupyterlab/blob/master/src/rendermime/plugin.ts) - The registry for adding kernel `display_data` renderers.
 - [Document Registry](https://github.com/jupyterlab/jupyterlab/blob/master/src/docregistry/plugin.ts) - Used to add functionality around widgets backed by files.
-- [Clipboard](https://github.com/jupyterlab/jupyterlab/blob/master/src/common/clipboard.ts) - The application-wide clipboard for arbitrary MIME data.
 - [Instance Restorer](https://github.com/jupyterlab/jupyterlab/blob/master/src/instancerestorer/instancerestorer.ts) - The application-wide instance restorer, which takes care of the application state restoration lifecycle.
 
 ## Application Object
