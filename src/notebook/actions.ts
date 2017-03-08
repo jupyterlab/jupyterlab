@@ -11,7 +11,7 @@ import {
 
 import {
   Clipboard
-} from '../common/clipboard';
+} from '../apputils';
 
 import {
   ICellModel, ICodeCellModel,

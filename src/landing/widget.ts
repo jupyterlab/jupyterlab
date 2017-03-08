@@ -19,7 +19,7 @@ import {
 
 import {
   VDomModel, VDomWidget
-} from '../common/vdom';
+} from '../apputils';
 
 import {
   CommandIDs as ConsoleCommandIDs

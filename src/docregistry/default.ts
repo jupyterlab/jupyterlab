@@ -24,7 +24,7 @@ import {
 
 import {
   IChangedArgs
-} from '../common/interfaces';
+} from '../coreutils';
 
 import {
   DocumentRegistry

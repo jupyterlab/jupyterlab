@@ -19,11 +19,11 @@ import {
 
 import {
   IChangedArgs
-} from '../common/interfaces';
+} from '../coreutils';
 
 import {
   IObservableJSON, ObservableJSON
-} from '../common/observablejson';
+} from '../coreutils';
 
 import {
   IOutputAreaModel, OutputAreaModel

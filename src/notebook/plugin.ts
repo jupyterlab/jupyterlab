@@ -47,7 +47,7 @@ import {
 
 import {
   Dialog, showDialog
-} from '../common/dialog';
+} from '../apputils';
 
 import {
   CellTools, CommandIDs, ICellTools, INotebookTracker, NotebookActions,

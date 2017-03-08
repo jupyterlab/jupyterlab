@@ -9,7 +9,7 @@ import {
 
 import {
   IChangedArgs
-} from '../../../lib/common/interfaces';
+} from '../../../lib/coreutils';
 
 import {
   DocumentRegistry, Context

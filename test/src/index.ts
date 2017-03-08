@@ -18,19 +18,19 @@ import './codemirror/factory.spec';
 
 import './commandlinker/commandlinker.spec';
 
-import './common/activitymonitor.spec';
-import './common/dialog.spec';
-import './common/iframe.spec';
-import './common/observablejson.spec';
-import './common/observablestring.spec';
-import './common/observablevector.spec';
-import './common/observablemap.spec';
+import './coreutils.spec';
+import './apputils.spec';
+import './apputils.spec';
+import './coreutils.spec';
+import './coreutils.spec';
+import './coreutils.spec';
+import './coreutils.spec';
 import './common/metadata.spec';
-import './common/sanitizer.spec';
-import './common/styling.spec';
-import './common/time.spec';
-import './common/undoablevector.spec';
-import './common/vdom.spec';
+import './apputils.spec';
+import './apputils.spec';
+import './coreutils.spec';
+import './coreutils.spec';
+import './apputils.spec';
 
 import './completer/handler.spec';
 import './completer/model.spec';

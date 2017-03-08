@@ -43,19 +43,19 @@ import {
 
 import {
   IChangedArgs
-} from '../common/interfaces';
+} from '../coreutils';
 
 import {
   ObservableJSON, ObservableJSONWidget
-} from '../common/observablejson';
+} from '../coreutils';
 
 import {
   IObservableMap, ObservableMap
-} from '../common/observablemap';
+} from '../coreutils';
 
 import {
   Styling
-} from '../common/styling';
+} from '../apputils';
 
 import {
   INotebookTracker

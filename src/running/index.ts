@@ -23,7 +23,7 @@ import {
 
 import {
   DOMUtils
-} from '../common/domutils';
+} from '../apputils';
 
 
 /**

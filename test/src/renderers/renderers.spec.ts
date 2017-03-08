@@ -13,7 +13,7 @@ import {
 
 import {
   defaultSanitizer
-} from '../../../lib/common/sanitizer';
+} from '../../../lib/apputils';
 
 import {
   LatexRenderer, PDFRenderer, JavaScriptRenderer,

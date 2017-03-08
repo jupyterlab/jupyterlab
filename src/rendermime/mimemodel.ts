@@ -7,7 +7,7 @@ import {
 
 import {
   IObservableJSON, ObservableJSON
-} from '../common/observablejson';
+} from '../coreutils';
 
 import {
   RenderMime

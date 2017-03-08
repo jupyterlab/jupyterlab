@@ -3,7 +3,7 @@
 
 import {
   IChangedArgs
-} from '../common/interfaces';
+} from '../coreutils';
 
 import {
   ABCWidgetFactory, DocumentRegistry

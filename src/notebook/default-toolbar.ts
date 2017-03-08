@@ -19,7 +19,7 @@ import {
 
 import {
   Styling
-} from '../common/styling';
+} from '../apputils';
 
 import {
   NotebookPanel

@@ -31,15 +31,15 @@ import {
 
 import {
   Time
-} from '../common/time';
+} from '../coreutils';
 
 import {
   Dialog, showDialog
-} from '../common/dialog';
+} from '../apputils';
 
 import {
   DOMUtils
-} from '../common/domutils';
+} from '../apputils';
 
 import {
   DocumentManager

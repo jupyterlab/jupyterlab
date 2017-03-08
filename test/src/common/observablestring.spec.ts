@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   ObservableString 
-} from '../../../lib/common/observablestring';
+} from '../../../lib/coreutils';
 
 
 describe('common/ObservableString', () => {

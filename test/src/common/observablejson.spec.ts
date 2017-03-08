@@ -21,7 +21,7 @@ import {
 
 import {
   IObservableJSON, ObservableJSON, ObservableJSONWidget
-} from '../../../lib/common/observablejson';
+} from '../../../lib/coreutils';
 
 
 class LogEditor extends ObservableJSONWidget {
@@ -47,7 +47,7 @@ class LogEditor extends ObservableJSONWidget {
 }
 
 
-describe('common/observablejson', () => {
+describe('coreutils', () => {
 
   describe('ObservableJSON', () => {
 

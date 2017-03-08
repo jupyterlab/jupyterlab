@@ -15,7 +15,7 @@ import {
 
 import {
   ActivityMonitor
-} from '../common/activitymonitor';
+} from '../coreutils';
 
 import {
   DocumentRegistry, ABCWidgetFactory

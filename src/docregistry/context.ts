@@ -27,7 +27,7 @@ import {
 
 import {
   showDialog, Dialog
-} from '../common/dialog';
+} from '../apputils';
 
 import {
   findKernel

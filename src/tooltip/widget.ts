@@ -23,7 +23,7 @@ import {
 
 import {
   HoverBox
-} from '../common/hoverbox';
+} from '../apputils';
 
 import {
   IRenderMime, MimeModel

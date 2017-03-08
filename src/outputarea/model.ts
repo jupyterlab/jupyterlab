@@ -15,7 +15,7 @@ import {
 
 import {
   IObservableVector, ObservableVector
-} from '../common/observablevector';
+} from '../coreutils';
 
 import {
   IOutputModel, OutputModel
