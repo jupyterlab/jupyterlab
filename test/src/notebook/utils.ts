@@ -6,16 +6,16 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  MimeData
-} from '@phosphor/coreutils';
-
-import {
   editorServices
 } from '../../../lib/codemirror';
 
 import {
   CodeEditorWidget
 } from '../../../lib/codeeditor';
+
+import {
+  Clipboard
+} from '../../../lib/common/clipboard';
 
 import {
   NotebookPanel, Notebook, NotebookModel
@@ -46,7 +46,7 @@ export
 const rendermime = defaultRenderMime();
 
 export
-const clipboard = new MimeData();
+const clipboard = Clipboard.getInstance();
 
 
 /**
@@ -118,8 +118,7 @@ function createNotebookPanel(): NotebookPanel {
   return new NotebookPanel({
     rendermime,
     contentFactory: createNotebookPanelFactory(),
-    mimeTypeService,
-    clipboard
+    mimeTypeService
   });
 }
 

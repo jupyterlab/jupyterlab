@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  MimeData
-} from '@phosphor/coreutils';
-
-import {
   CommandRegistry
 } from '@phosphor/commands';
 
@@ -100,7 +96,6 @@ function createApp(manager: ServiceManager.IManager): void {
     opener
   });
   let mFactory = new NotebookModelFactory({});
-  let clipboard = new MimeData();
   let editorFactory = editorServices.factoryService.newInlineEditor;
   let contentFactory = new NotebookPanel.ContentFactory({ editorFactory });
 
@@ -111,7 +106,7 @@ function createApp(manager: ServiceManager.IManager): void {
     defaultFor: ['.ipynb'],
     preferKernel: true,
     canStartKernel: true,
-    rendermime, clipboard, contentFactory,
+    rendermime, contentFactory,
     mimeTypeService: editorServices.mimeTypeService
   });
   docRegistry.addModelFactory(mFactory);

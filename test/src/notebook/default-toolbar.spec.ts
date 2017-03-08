@@ -91,7 +91,7 @@ describe('notebook/notebook/default-toolbar', () => {
     const contentFactory = createNotebookPanelFactory();
 
     beforeEach(() => {
-      panel = new NotebookPanel({ rendermime, clipboard, contentFactory,
+      panel = new NotebookPanel({ rendermime, contentFactory,
                                   mimeTypeService });
       context.model.fromJSON(DEFAULT_CONTENT);
       panel.context = context;
@@ -182,7 +182,7 @@ describe('notebook/notebook/default-toolbar', () => {
         let button = ToolbarItems.createPasteButton(panel);
         let count = panel.notebook.widgets.length;
         Widget.attach(button, document.body);
-        NotebookActions.copy(panel.notebook, clipboard);
+        NotebookActions.copy(panel.notebook);
         button.node.click();
         requestAnimationFrame(() => {
           expect(panel.notebook.widgets.length).to.be(count + 1);
