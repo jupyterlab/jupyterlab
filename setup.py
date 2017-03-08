@@ -11,8 +11,7 @@ import json
 import os
 from os.path import join as pjoin
 from setupbase import (
-    create_cmdclass, install_npm, BaseCommand, find_packages,
-    is_stale
+    create_cmdclass, install_npm, find_packages
 )
 
 
@@ -34,6 +33,15 @@ with open(os.path.join(here, 'jupyterlab', '_version.py'), 'w') as f:
 
 package_data = dict(jupyterlab=['build/*', 'lab.html'])
 
+cmdclass = create_cmdclass(['js'], ['jupyterlab/build'])
+
+build_path = os.path.join(here, 'jupyterlab', 'build')
+source_path = os.path.join(here, 'src')
+cmdclass['js'] = install_npm(
+    here, build_path, source_path, 'build:all'
+)
+
+
 setup_args = dict(
     name             = name,
     description      = DESCRIPTION,
@@ -42,6 +50,7 @@ setup_args = dict(
     scripts          = glob(pjoin('scripts', '*')),
     packages         = find_packages(name),
     package_data     = package_data,
+    cmdclass         = cmdclass,
     author           = 'Jupyter Development Team',
     author_email     = 'jupyter@googlegroups.com',
     url              = 'http://jupyter.org',
@@ -61,42 +70,28 @@ setup_args = dict(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
     ],
-)
-
-
-setup_args['cmdclass'] = create_cmdclass(['js'], ['jupyterlab/build'])
-
-build_path = os.path.join(here, 'jupyterlab', 'build')
-source_path = os.path.join(here, 'src')
-setup_args['cmdclass']['js'] = install_npm(
-    here, build_path, source_path, 'build:all'
-)
-
-
-# setuptools requirements
-
-setup_args['zip_safe'] = False
-
-setup_args['install_requires'] = [
-    'notebook>=4.2.0',
-]
-
-setup_args['extras_require'] = {
-    'test:python_version == "2.7"': ['mock'],
-    'test': ['pytest'],
-    'docs': [
-        'sphinx',
-        'recommonmark',
-        'sphinx_rtd_theme'
+    # setuptools requirements
+    zip_safe         = False,
+    install_requires = [
+        'notebook>=4.2.0',
     ],
-}
+    extras_require   = {
+        'test:python_version == "2.7"': ['mock'],
+        'test': ['pytest'],
+        'docs': [
+            'sphinx',
+            'recommonmark',
+            'sphinx_rtd_theme'
+        ]
+    },
+    entry_points     = {
+        'console_scripts': [
+            'jupyter-lab = jupyterlab.labapp:main',
+            'jupyter-labextension = jupyterlab.labextensions:main',
+        ]
+    }
+)
 
-setup_args['entry_points'] = {
-    'console_scripts': [
-        'jupyter-lab = jupyterlab.labapp:main',
-        'jupyter-labextension = jupyterlab.labextensions:main',
-    ]
-}
 
 if __name__ == '__main__':
     setup(**setup_args)
