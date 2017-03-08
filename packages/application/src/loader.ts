@@ -117,6 +117,41 @@ class ModuleLoader {
     return bundle.promise;
   }
 
+  inject(data: any): any {
+    return data;
+  }
+
+  // define getter function for harmony exports - d
+  harmonyExports(exports: any , name: any, getter: any): void {
+    if (!this.hasOwnPropertyCall(exports, name)) {
+      Object.defineProperty(exports, name, {
+        configurable: false,
+        enumerable: true,
+        get: getter
+      });
+    }
+  };
+
+  // Object.prototype.hasOwnProperty.call - o
+  hasOwnPropertyCall(object: any, property: any): boolean {
+    return Object.prototype.hasOwnProperty.call(object, property);
+  }
+
+  // getDefaultExport function for compatibility with non-harmony modules - n
+  getDefaultExport(module: any): any {
+    let getter = module && module.__esModule ?
+      function getDefault() { return module['default']; } :
+      function getModuleExports() { return module; };
+    this.harmonyExports(getter, 'a', getter);
+    return getter;
+  };
+
+  // on error function for async loading - oe
+  asyncLoadError(err: Error): void {
+    console.error(err);
+    throw err;
+  }
+
   /**
    * Inject data into a module (`__webpack_require.i`).
    *
