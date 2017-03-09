@@ -35,7 +35,7 @@ install:
   # Ensure python and python scripts are from right version:
   - 'SET "PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"'
   # Install our package:
-  - 'pip install -e ".[test]"'
+  - 'pip install -v -e ".[test]"'
 
 build: off
 
