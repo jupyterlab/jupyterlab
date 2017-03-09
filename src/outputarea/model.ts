@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  nbformat
-} from '@jupyterlab/services';
-
-import {
   each, map, toArray
 } from '@phosphor/algorithm';
 
@@ -14,7 +10,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  IObservableVector, ObservableVector
+  IObservableVector, ObservableVector, nbformat
 } from '../coreutils';
 
 import {
@@ -182,14 +178,14 @@ class OutputAreaModel implements IOutputAreaModel {
     let trusted = this._trusted;
 
     // Normalize stream data.
-    if (value.output_type === 'stream') {
+    if (nbformat.isStream(value)) {
       if (Array.isArray(value.text)) {
         value.text = (value.text as string[]).join('\n');
       }
     }
 
     // Consolidate outputs if they are stream outputs of the same kind.
-    if (value.output_type === 'stream' && this._lastStream &&
+    if (nbformat.isStream(value) && this._lastStream &&
         value.name === this._lastName) {
       // In order to get a list change event, we add the previous
       // text to the current item and replace the previous item.
@@ -208,7 +204,7 @@ class OutputAreaModel implements IOutputAreaModel {
     let item = this._createItem({ value, trusted });
 
     // Update the stream information.
-    if (value.output_type === 'stream') {
+    if (nbformat.isStream(value)) {
       this._lastStream = value.text as string;
       this._lastName = value.name;
     } else {

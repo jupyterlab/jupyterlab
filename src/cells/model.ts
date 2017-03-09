@@ -2,11 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  nbformat, utils
-} from '@jupyterlab/services';
-
-import {
-  JSONValue
+  JSONExt, JSONValue
 } from '@phosphor/coreutils';
 
 import {
@@ -18,7 +14,7 @@ import {
 } from '../codeeditor';
 
 import {
-  IChangedArgs
+  IChangedArgs, nbformat
 } from '../coreutils';
 
 import {
@@ -139,7 +135,7 @@ class CellModel extends CodeEditor.Model implements ICellModel {
     } else {
       this.value.text = cell.source as string;
     }
-    let metadata = utils.copy(cell.metadata);
+    let metadata = JSONExt.deepCopy(cell.metadata);
     if (this.type !== 'raw') {
       delete metadata['format'];
     }

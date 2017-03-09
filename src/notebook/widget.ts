@@ -2,11 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  nbformat
-} from '@jupyterlab/services';
-
-import {
-  ArrayExt, each, find, toArray
+  ArrayExt, each, toArray
 } from '@phosphor/algorithm';
 
 import {
@@ -56,15 +52,8 @@ import {
 } from '../codeeditor';
 
 import {
-  IChangedArgs
-} from '../coreutils';
-
-import {
-  IObservableMap, ObservableMap
-} from '../coreutils';
-
-import {
-  IObservableVector, ObservableVector
+  IChangedArgs, IObservableMap, ObservableMap, IObservableVector,
+  ObservableVector, nbformat
 } from '../coreutils';
 
 import {

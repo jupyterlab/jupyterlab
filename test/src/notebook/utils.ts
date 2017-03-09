@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  nbformat
-} from '@jupyterlab/services';
-
-import {
   editorServices
 } from '../../../lib/codemirror';
 
@@ -16,6 +12,10 @@ import {
 import {
   Clipboard
 } from '../../../lib/apputils';
+
+import {
+  nbformat
+} from '../../../lib/coreutils';
 
 import {
   NotebookPanel, Notebook, NotebookModel

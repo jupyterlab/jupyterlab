@@ -2,12 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  nbformat
-} from '@jupyterlab/services';
-
-import {
   JSONExt, JSONObject, JSONValue
 } from '@phosphor/coreutils';
+
+import {
+  nbformat
+} from '../coreutils';
 
 import {
   MimeModel
@@ -26,7 +26,7 @@ interface IOutputModel extends RenderMime.IMimeModel {
   /**
    * The output type.
    */
-  readonly type: nbformat.OutputType;
+  readonly type: string;
 
   /**
    * The execution count of the model.
@@ -86,7 +86,7 @@ class OutputModel extends MimeModel implements IOutputModel {
       }
     }
     this.type = value.output_type;
-    if (value.output_type === 'execute_result') {
+    if (nbformat.isExecuteResult(value)) {
       this.executionCount = value.execution_count;
     } else {
       this.executionCount = null;
@@ -96,7 +96,7 @@ class OutputModel extends MimeModel implements IOutputModel {
   /**
    * The output type.
    */
-  readonly type: nbformat.OutputType;
+  readonly type: string;
 
   /**
    * The execution count.
@@ -170,26 +170,19 @@ namespace OutputModel {
   export
   function getData(output: nbformat.IOutput): JSONObject {
     let bundle: nbformat.IMimeBundle = {};
-    switch (output.output_type) {
-    case 'execute_result':
-    case 'display_data':
-      bundle = output.data;
-      break;
-    case 'stream':
+    if (nbformat.isExecuteResult(output) || nbformat.isDisplayData(output)) {
+      bundle = (output as nbformat.IExecuteResult).data;
+    } else if (nbformat.isStream(output)) {
       if (output.name === 'stderr') {
         bundle['application/vnd.jupyter.stderr'] = output.text;
       } else {
         bundle['application/vnd.jupyter.stdout'] = output.text;
       }
-      break;
-    case 'error':
+    } else if (nbformat.isError(output)) {
       let traceback = output.traceback.join('\n');
       bundle['application/vnd.jupyter.stderr'] = (
         traceback || `${output.ename}: ${output.evalue}`
       );
-      break;
-    default:
-      break;
     }
     return convertBundle(bundle);
   }
@@ -200,15 +193,10 @@ namespace OutputModel {
   export
   function getMetadata(output: nbformat.IOutput): JSONObject {
     let value: JSONObject = Object.create(null);
-    switch (output.output_type) {
-    case 'execute_result':
-    case 'display_data':
+    if (nbformat.isExecuteResult(output) || nbformat.isDisplayData(output)) {
       for (let key in output.metadata) {
         value[key] = extract(output.metadata, key);
       }
-      break;
-    default:
-      break;
     }
     return value;
   }

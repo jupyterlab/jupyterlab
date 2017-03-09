@@ -2,16 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  nbformat
-} from '@jupyterlab/services';
-
-import {
   each
 } from '@phosphor/algorithm';
-
-import {
-  IObservableVector, ObservableVector
-} from '../coreutils';
 
 import {
   DocumentModel, DocumentRegistry
@@ -23,15 +15,8 @@ import {
 } from '../cells/model';
 
 import {
-  IChangedArgs
-} from '../coreutils';
-
-import {
-  IObservableJSON, ObservableJSON
-} from '../coreutils';
-
-import {
-  IObservableUndoableVector, ObservableUndoableVector
+  IChangedArgs, IObservableJSON, ObservableJSON, IObservableUndoableVector,
+  ObservableUndoableVector, IObservableVector, ObservableVector, nbformat
 } from '../coreutils';
 
 

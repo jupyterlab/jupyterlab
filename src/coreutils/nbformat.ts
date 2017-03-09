@@ -301,12 +301,36 @@ namespace nbformat {
   export
   interface IUnrecognizedCell extends IBaseCell { }
 
+
   /**
    * A cell union type.
    */
   export
   type ICell = IRawCell | IMarkdownCell | ICodeCell | IUnrecognizedCell;
 
+  /**
+   * Test whether a cell is a raw cell.
+   */
+  export
+  function isRaw(cell: ICell): cell is IRawCell {
+    return cell.cell_type === 'raw';
+  }
+
+  /**
+   * Test whether a cell is a markdown cell.
+   */
+  export
+  function isMarkdown(cell: ICell): cell is IMarkdownCell {
+    return cell.cell_type === 'markdown';
+  }
+
+  /**
+   * Test whether a cell is a code cell.
+   */
+  export
+  function isCode(cell: ICell): cell is ICodeCell {
+    return cell.cell_type === 'code';
+  }
 
   /**
    * A union metadata type.
@@ -437,10 +461,41 @@ namespace nbformat {
   export
   interface IUnrecognizedOutput extends IBaseOutput { }
 
+  /**
+   * Test whether an output is an execute result.
+   */
+  export
+  function isExecuteResult(output: IOutput): output is IExecuteResult {
+    return output.output_type === 'execute_result';
+  }
+
+  /**
+   * Test whether an output is from display data.
+   */
+  export
+  function isDisplayData(output: IOutput): output is IDisplayData {
+    return output.output_type === 'display_data';
+  }
+
+  /**
+   * Test whether an output is from a stream.
+   */
+  export
+  function isStream(output: IOutput): output is IStream {
+    return output.output_type === 'stream';
+  }
+
+  /**
+   * Test whether an output is from a stream.
+   */
+  export
+  function isError(output: IOutput): output is IError {
+    return output.output_type === 'error';
+  }
 
   /**
    * An output union type.
    */
   export
-  type IOutput = IExecuteResult | IDisplayData | IStream | IError | IUnrecognizedOutput;
+  type IOutput = IUnrecognizedOutput | IExecuteResult | IDisplayData | IStream | IError;
 }

@@ -4,15 +4,11 @@
 import expect = require('expect.js');
 
 import {
-  nbformat
-} from '@jupyterlab/services';
-
-import {
   toArray
 } from '@phosphor/algorithm';
 
 import {
-  IChangedArgs
+  IChangedArgs, nbformat
 } from '../../../lib/coreutils';
 
 import {

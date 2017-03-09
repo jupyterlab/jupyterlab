@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel, KernelMessage, Session, nbformat
+  Kernel, KernelMessage, Session
 } from '@jupyterlab/services';
 
 import {
@@ -34,6 +34,10 @@ import {
   ICodeCellModel, IRawCellModel, CellModel,
   RawCellModel, CodeCellModel
 } from '../cells';
+
+import {
+  nbformat
+} from '../coreutils';
 
 import {
   OutputAreaWidget

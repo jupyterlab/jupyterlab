@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  nbformat
-} from '@jupyterlab/services';
-
-import {
   Message
 } from '@phosphor/messaging';
 
@@ -20,6 +16,10 @@ import {
 import {
   Styling
 } from '../apputils';
+
+import {
+  nbformat
+} from '../coreutils';
 
 import {
   NotebookPanel

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel, KernelMessage, nbformat
+  Kernel, KernelMessage
 } from '@jupyterlab/services';
 
 import {
@@ -34,7 +34,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  ObservableVector
+  ObservableVector, nbformat
 } from '../coreutils';
 
 import {
