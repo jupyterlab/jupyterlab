@@ -202,7 +202,7 @@ namespace nbformat {
     /**
      * Cell-level metadata.
      */
-    metadata: ICellMetadata;
+    metadata: Partial<ICellMetadata>;
   }
 
   /**
@@ -229,12 +229,12 @@ namespace nbformat {
     /**
      * Cell-level metadata.
      */
-    metadata: IRawCellMetadata;
+    metadata: Partial<IRawCellMetadata>;
 
     /**
      * Cell attachments.
      */
-    attachments: IAttachments;
+    attachments?: IAttachments;
   }
 
   /**
@@ -250,7 +250,7 @@ namespace nbformat {
     /**
      * Cell attachments.
      */
-    attachments: IAttachments;
+    attachments?: IAttachments;
   }
 
   /**
@@ -282,7 +282,7 @@ namespace nbformat {
     /**
      * Cell-level metadata.
      */
-    metadata: ICodeCellMetadata;
+    metadata: Partial<ICodeCellMetadata>;
 
     /**
      * Execution, display, or stream outputs.

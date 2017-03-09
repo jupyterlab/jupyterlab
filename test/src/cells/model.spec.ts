@@ -41,7 +41,7 @@ describe('cells/model', () => {
       });
 
       it('should accept a base cell argument', () => {
-        let cell: nbformat.IBaseCell = {
+        let cell: nbformat.IRawCell = {
           cell_type: 'raw',
           source: 'foo',
           metadata: { trusted: false }
@@ -52,7 +52,7 @@ describe('cells/model', () => {
       });
 
       it('should accept a base cell argument with a multiline source', () => {
-        let cell: nbformat.IBaseCell = {
+        let cell: nbformat.IRawCell = {
           cell_type: 'raw',
           source: ['foo', 'bar', 'baz'],
           metadata: { trusted: false }
@@ -203,7 +203,7 @@ describe('cells/model', () => {
     describe('#toJSON()', () => {
 
       it('should return a base cell encapsulation of the model value', () => {
-        let cell: nbformat.IBaseCell = {
+        let cell: nbformat.IRawCell = {
           cell_type: 'raw',
           source: 'foo',
           metadata: { trusted: false }
@@ -214,7 +214,7 @@ describe('cells/model', () => {
       });
 
       it('should always return a string source', () => {
-        let cell: nbformat.IBaseCell = {
+        let cell: nbformat.IRawCell = {
           cell_type: 'raw',
           source: ['foo', 'bar', 'baz'],
           metadata: { trusted: false }
