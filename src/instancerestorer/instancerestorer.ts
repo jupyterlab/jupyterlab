@@ -195,8 +195,8 @@ class InstanceRestorer implements IInstanceRestorer {
    * Fetching the layout relies on all widget restoration to be complete, so
    * calls to `fetch` are guaranteed to return after restoration is complete.
    */
-  fetch(): Promise<ApplicationShell.Dehydrated.ILayout> {
-    const blank: ApplicationShell.Dehydrated.ILayout = {
+  fetch(): Promise<ApplicationShell.ILayout> {
+    const blank: ApplicationShell.ILayout = {
       currentWidget: null,
       fresh: true,
       mainArea: null,
@@ -210,16 +210,17 @@ class InstanceRestorer implements IInstanceRestorer {
         return blank;
       }
 
-      const {
-        current, left, right
-      } = data as InstanceRestorer.Dehydrated.ILayout;
+      const { current, main, left, right } = data as Private.ILayout;
 
       // If any data exists, then this is not a fresh session.
       const fresh = false;
 
-      // Rehydrate main area. Coerce type of `current` in case of bad data.
+      // Rehydrate current widget. Coerce type of `current` in case of bad data.
       const currentWidget = current && this._widgets.has(`${current}`) ?
         this._widgets.get(`${current}`) : null;
+
+      // Rehydrate main area.
+      const mainArea = this._rehydrateMainArea(main);
 
       // Rehydrate left area.
       const leftArea = this._rehydrateSideArea(left);
@@ -227,7 +228,7 @@ class InstanceRestorer implements IInstanceRestorer {
       // Rehydrate right area.
       const rightArea = this._rehydrateSideArea(right);
 
-      return { currentWidget, fresh, leftArea, rightArea };
+      return { currentWidget, fresh, mainArea, leftArea, rightArea };
     }).catch(() => blank); // Let fetch fail gracefully; return blank slate.
   }
 
@@ -271,7 +272,7 @@ class InstanceRestorer implements IInstanceRestorer {
   /**
    * Save the layout state for the application.
    */
-  save(data: ApplicationShell.Dehydrated.ILayout): Promise<void> {
+  save(data: ApplicationShell.ILayout): Promise<void> {
     // If there are promises that are unresolved, bail.
     if (this._promises) {
       let warning = 'save() was called prematurely.';
@@ -279,16 +280,19 @@ class InstanceRestorer implements IInstanceRestorer {
       return Promise.reject(warning);
     }
 
-    let dehydrated: InstanceRestorer.Dehydrated.ILayout = {};
+    let dehydrated: Private.ILayout = {};
     let current: string;
 
-    // Dehydrate main area.
+    // Dehydrate the currently focused widget if possible.
     if (data.currentWidget) {
       current = Private.nameProperty.get(data.currentWidget);
       if (current) {
         dehydrated.current = current;
       }
     }
+
+    // Dehydrate main area.
+    dehydrated.main = this._dehydrateMainArea(data.mainArea);
 
     // Dehydrate left area.
     dehydrated.left = this._dehydrateSideArea(data.leftArea);
@@ -300,12 +304,28 @@ class InstanceRestorer implements IInstanceRestorer {
   }
 
   /**
-   * Dehydrate a side area into a serialized description object.
+   * Dehydrate a main area description into a serializable object.
    */
-  private _dehydrateSideArea(area: ApplicationShell.Dehydrated.ISideArea): InstanceRestorer.Dehydrated.ISideArea {
-    let dehydrated: InstanceRestorer.Dehydrated.ISideArea = {
-      collapsed: area.collapsed
-    };
+  private _dehydrateMainArea(area: ApplicationShell.IMainArea): Private.IMainArea {
+    return {};
+  }
+
+  /**
+   * Reydrate a serialized main area description object.
+   *
+   * #### Notes
+   * This function consumes data that can become corrupted, so it uses type
+   * coercion to guarantee the dehydrated object is safely processed.
+   */
+  private _rehydrateMainArea(area: Private.IMainArea): ApplicationShell.IMainArea {
+    return { main: null };
+  }
+
+  /**
+   * Dehydrate a side area description into a serializable object.
+   */
+  private _dehydrateSideArea(area: ApplicationShell.ISideArea): Private.ISideArea {
+    let dehydrated: Private.ISideArea = { collapsed: area.collapsed };
     if (area.currentWidget) {
       let current = Private.nameProperty.get(area.currentWidget);
       if (current) {
@@ -327,7 +347,7 @@ class InstanceRestorer implements IInstanceRestorer {
    * This function consumes data that can become corrupted, so it uses type
    * coercion to guarantee the dehydrated object is safely processed.
    */
-  private _rehydrateSideArea(area: InstanceRestorer.Dehydrated.ISideArea): ApplicationShell.Dehydrated.ISideArea {
+  private _rehydrateSideArea(area: Private.ISideArea): ApplicationShell.ISideArea {
     if (!area) {
       return { collapsed: true, currentWidget: null, widgets: null };
     }
@@ -389,60 +409,6 @@ namespace InstanceRestorer {
      */
     state: IStateDB;
   }
-
-  /**
-   * A namespace for dehydrated restore state that can be serialized and saved.
-   */
-  export
-  namespace Dehydrated {
-    /**
-     * The dehydrated state of the application layout.
-     *
-     * #### Notes
-     * This format is JSON serializable and saved in the state database.
-     * It is meant to be a data structure can translate into an
-     * `ApplicationShell.Dehydrated.ILayout` data structure for consumption by
-     * the application shell.
-     */
-    export
-    interface ILayout extends JSONObject {
-      /**
-       * The current widget that has application focus.
-       */
-      current?: string | null;
-
-      /**
-       * The left area of the user interface.
-       */
-      left?: ISideArea | null;
-
-      /**
-       * The right area of the user interface.
-       */
-      right?: ISideArea | null;
-    }
-
-    /**
-     * The restorable description of a sidebar in the user interface.
-     */
-    export
-    interface ISideArea extends JSONObject {
-      /**
-       * A flag denoting whether the sidebar has been collapsed.
-       */
-      collapsed?: boolean | null;
-
-      /**
-       * The current widget that has side area focus.
-       */
-      current?: string | null;
-
-      /**
-       * The collection of widgets held by the sidebar.
-       */
-      widgets?: Array<string> | null;
-    }
-  }
 }
 
 /*
@@ -457,4 +423,63 @@ namespace Private {
     name: 'name',
     create: owner => ''
   });
+
+  /**
+   * The dehydrated state of the application layout.
+   *
+   * #### Notes
+   * This format is JSON serializable and saved in the state database.
+   * It is meant to be a data structure can translate into an
+   * `ApplicationShell.ILayout` data structure for consumption by
+   * the application shell.
+   */
+  export
+  interface ILayout extends JSONObject {
+    /**
+     * The current widget that has application focus.
+     */
+    current?: string | null;
+
+    /**
+     * The main area of the user interface.
+     */
+    main?: IMainArea | null;
+
+    /**
+     * The left area of the user interface.
+     */
+    left?: ISideArea | null;
+
+    /**
+     * The right area of the user interface.
+     */
+    right?: ISideArea | null;
+  }
+
+  /**
+   * The restorable description of the main application area.
+   */
+  export
+  interface IMainArea extends JSONObject {}
+
+  /**
+   * The restorable description of a sidebar in the user interface.
+   */
+  export
+  interface ISideArea extends JSONObject {
+    /**
+     * A flag denoting whether the sidebar has been collapsed.
+     */
+    collapsed?: boolean | null;
+
+    /**
+     * The current widget that has side area focus.
+     */
+    current?: string | null;
+
+    /**
+     * The collection of widgets held by the sidebar.
+     */
+    widgets?: Array<string> | null;
+  }
 }

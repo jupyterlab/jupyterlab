@@ -161,7 +161,7 @@ class ApplicationShell extends Widget {
   /**
    * Promise that resolves when state is restored, returning layout description.
    */
-  get restored(): Promise<ApplicationShell.Dehydrated.ILayout> {
+  get restored(): Promise<ApplicationShell.ILayout> {
     return this._restored.promise;
   }
 
@@ -436,7 +436,7 @@ class ApplicationShell extends Widget {
     }
     const dock = this._dockPanel;
     console.log(dock.saveLayout());
-    let data: ApplicationShell.Dehydrated.ILayout = {
+    let data: ApplicationShell.ILayout = {
       currentWidget: this._tracker.currentWidget,
       mainArea: this._dockPanel.saveLayout(),
       leftArea: this._leftHandler.dehydrate(),
@@ -481,7 +481,7 @@ class ApplicationShell extends Widget {
   private _hsplitPanel: SplitPanel;
   private _isRestored = false;
   private _leftHandler: Private.SideBarHandler;
-  private _restored = new PromiseDelegate<ApplicationShell.Dehydrated.ILayout>();
+  private _restored = new PromiseDelegate<ApplicationShell.ILayout>();
   private _rightHandler: Private.SideBarHandler;
   private _topPanel: Panel;
   private _tracker = new FocusTracker<Widget>();
@@ -518,69 +518,68 @@ namespace ApplicationShell {
   export
   type IChangedArgs = FocusTracker.IChangedArgs<Widget>;
 
-
   /**
-   * A namespace for hydrated restorable state.
+   * A description of the application's user interface layout.
    */
   export
-  namespace Dehydrated {
+  interface ILayout {
     /**
-     * A description of the application's user interface layout.
+     * The current widget that has application focus.
      */
-    export
-    interface ILayout {
-      /**
-       * The current widget that has application focus.
-       */
-      readonly currentWidget: Widget | null;
-
-      /**
-       * Indicates whether fetched session restore data was actually retrieved
-       * from the state database or whether it is a fresh blank slate.
-       *
-       * #### Notes
-       * This attribute is only relevant when the layout data is retrieved via a
-       * `fetch` call. If it is set when being passed into `save`, it will be
-       * ignored.
-       */
-      readonly fresh?: boolean;
-
-      /**
-       * The main area of the user interface.
-       */
-      readonly mainArea: DockPanel.ILayoutConfig;
-
-      /**
-       * The left area of the user interface.
-       */
-      readonly leftArea: ISideArea;
-
-      /**
-       * The right area of the user interface.
-       */
-      readonly rightArea: ISideArea;
-    }
+    readonly currentWidget: Widget | null;
 
     /**
-     * The restorable description of a sidebar in the user interface.
+     * Indicates whether fetched session restore data was actually retrieved
+     * from the state database or whether it is a fresh blank slate.
+     *
+     * #### Notes
+     * This attribute is only relevant when the layout data is retrieved via a
+     * `fetch` call. If it is set when being passed into `save`, it will be
+     * ignored.
      */
-    export
-    interface ISideArea {
-      /**
-       * A flag denoting whether the sidebar has been collapsed.
-       */
-      readonly collapsed: boolean;
+    readonly fresh?: boolean;
 
-      /**
-       * The current widget that has side area focus.
-       */
-      readonly currentWidget: Widget | null;
+    /**
+     * The main area of the user interface.
+     */
+    readonly mainArea: IMainArea;
 
-      /**
-       * The collection of widgets held by the sidebar.
-       */
-      readonly widgets: Array<Widget> | null;
-    }
+    /**
+     * The left area of the user interface.
+     */
+    readonly leftArea: ISideArea;
+
+    /**
+     * The right area of the user interface.
+     */
+    readonly rightArea: ISideArea;
+  }
+
+  /**
+   * The restorable description of the main application area.
+   */
+  export
+  interface IMainArea extends DockPanel.ILayoutConfig {}
+
+  /**
+   * The restorable description of a sidebar in the user interface.
+   */
+  export
+  interface ISideArea {
+    /**
+     * A flag denoting whether the sidebar has been collapsed.
+     */
+    readonly collapsed: boolean;
+
+    /**
+     * The current widget that has side area focus.
+     */
+    readonly currentWidget: Widget | null;
+
+    /**
+     * The collection of widgets held by the sidebar.
+     */
+    readonly widgets: Array<Widget> | null;
   }
 
   /**
@@ -595,12 +594,12 @@ namespace ApplicationShell {
      * Fetching the layout relies on all widget restoration to be complete, so
      * calls to `fetch` are guaranteed to return after restoration is complete.
      */
-    fetch(): Promise<ApplicationShell.Dehydrated.ILayout>;
+    fetch(): Promise<ApplicationShell.ILayout>;
 
     /**
      * Save the layout state for the application.
      */
-    save(data: ApplicationShell.Dehydrated.ILayout): Promise<void>;
+    save(data: ApplicationShell.ILayout): Promise<void>;
   }
 }
 
@@ -713,7 +712,7 @@ namespace Private {
     /**
      * Dehydrate the side bar data.
      */
-    dehydrate(): ApplicationShell.Dehydrated.ISideArea {
+    dehydrate(): ApplicationShell.ISideArea {
       let collapsed = this._sideBar.currentTitle === null;
       let widgets = toArray(this._stackedPanel.widgets);
       let currentWidget = widgets[this._sideBar.currentIndex];
@@ -723,7 +722,7 @@ namespace Private {
     /**
      * Rehydrate the side bar.
      */
-    rehydrate(data: ApplicationShell.Dehydrated.ISideArea): void {
+    rehydrate(data: ApplicationShell.ISideArea): void {
       if (data.currentWidget) {
         this.activate(data.currentWidget.id);
       } else if (data.collapsed) {
