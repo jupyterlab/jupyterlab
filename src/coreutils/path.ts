@@ -71,7 +71,7 @@ namespace PathExt {
    */
   export
   function normalize(path: string): string {
-    return posix.normalize(path);
+    return removeSlash(posix.normalize(path));
   }
 
   /**
@@ -89,11 +89,7 @@ namespace PathExt {
    */
   export
   function resolve(...parts: string[]): string {
-    let path = posix.resolve(...parts);
-    if (path.indexOf('/') === 0) {
-      path = path.slice(1);
-    }
-    return path;
+    return removeSlash(posix.resolve(...parts));
   }
 
   /**
@@ -111,7 +107,7 @@ namespace PathExt {
    */
   export
   function relative(from: string, to: string): string {
-    return posix.relative(from, to);
+    return removeSlash(posix.relative(from, to));
   }
 
   /**
@@ -139,5 +135,15 @@ namespace PathExt {
       extension = `.${extension}`;
     }
     return extension;
+  }
+
+  /**
+   * Remove the leading slash from a path.
+   */
+  function removeSlash(path: string): string {
+    if (path.indexOf('/') === 0) {
+      path = path.slice(1);
+    }
+    return path;
   }
 }
