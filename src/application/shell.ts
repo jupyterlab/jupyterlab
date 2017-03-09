@@ -545,17 +545,17 @@ namespace ApplicationShell {
     /**
      * The main area of the user interface.
      */
-    readonly mainArea: IMainArea;
+    readonly mainArea: IMainArea | null;
 
     /**
      * The left area of the user interface.
      */
-    readonly leftArea: ISideArea;
+    readonly leftArea: ISideArea | null;
 
     /**
      * The right area of the user interface.
      */
-    readonly rightArea: ISideArea;
+    readonly rightArea: ISideArea | null;
   }
 
   /**

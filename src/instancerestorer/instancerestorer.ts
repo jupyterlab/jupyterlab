@@ -566,55 +566,78 @@ namespace Private {
 
   /**
    * Deserialize individual areas within the main area.
+   *
+   * #### Notes
+   * Because this data comes from a potentially unreliable foreign source, it is
+   * typed as a `JSONObject`; but the actual expected type is:
+   * `ITabArea | ISplitArea`.
+   *
+   * For fault tolerance, types are manually checked in deserialization.
    */
-  function deserializeArea(area: ITabArea | ISplitArea, widgets: Map<string, Widget>): ApplicationShell.AreaConfig {
-    if (!area || !area.type) {
+  function deserializeArea(area: JSONObject, names: Map<string, Widget>): ApplicationShell.AreaConfig | null {
+    if (!area) {
       return null;
     }
 
     // Because this data is saved to a foreign data source, its type safety is
     // not guaranteed when it is retrieved, so exhaustive checks are necessary.
-    if (area.type !== 'tab-area' && area.type !== 'split-area') {
-      const type = (area as any).type as string || 'unknown';
+    const type = (area as any).type as string || 'unknown';
+    if (type === 'unknown' || (type !== 'tab-area' && type !== 'split-area')) {
       console.warn(`Attempted to deserialize unknown type: ${type}`);
       return null;
     }
 
-    if (area.type === 'tab-area') {
-      let hydrated = {
-        type: 'tab-area' as 'tab-area',
-        currentIndex: area.currentIndex || 0,
-        widgets: area.widgets &&
-          area.widgets.map(widget => widgets.get(widget))
+    if (type === 'tab-area') {
+      const { currentIndex, widgets } = area as ITabArea;
+      let hydrated: ApplicationShell.AreaConfig = {
+        type: 'tab-area',
+        currentIndex: currentIndex || 0,
+        widgets: widgets && widgets.map(widget => names.get(widget))
             .filter(widget => !!widget) || []
       };
+
       // Make sure the current index is within bounds.
       if (hydrated.currentIndex > hydrated.widgets.length - 1) {
         hydrated.currentIndex = 0;
       }
+
       return hydrated;
     }
 
-    let hydrated = {
-      type: 'split-area' as 'split-area',
-      orientation: area.orientation,
-      sizes: area.sizes,
-      children: area.children &&
-        area.children.map(child => deserializeArea(child, widgets))
-          .filter(widget => !!widget) || []
+    const { orientation, sizes, children } = area as ISplitArea;
+    let hydrated: ApplicationShell.AreaConfig = {
+      type: 'split-area',
+      orientation: orientation,
+      sizes: sizes || [],
+      children: children &&
+        children.map(child => deserializeArea(child, names))
+           .filter(widget => !!widget) || []
     };
+
     return hydrated;
   }
 
   /**
    * Return the hydrated version of the main dock panel, ready to restore.
+   *
+   * #### Notes
+   * Because this data comes from a potentially unreliable foreign source, it is
+   * typed as a `JSONObject`; but the actual expected type is: `IMainArea`.
+   *
+   * For fault tolerance, types are manually checked in deserialization.
    */
   export
-  function deserializeMain(area: IMainArea, widgets: Map<string, Widget>): ApplicationShell.IMainArea {
-    const name = area.current || null;
+  function deserializeMain(area: JSONObject, names: Map<string, Widget>): ApplicationShell.IMainArea | null {
+    if (!area) {
+      return null;
+    }
+
+    const name = (area as any).current || null;
+    const dock = (area as any).dock || null;
+
     return {
-      currentWidget: name && widgets.has(name) && widgets.get(name) || null,
-      dock: { main: deserializeArea(area.dock, widgets) }
+      currentWidget: name && names.has(name) && names.get(name) || null,
+      dock: { main: deserializeArea(dock, names) }
     };
   }
 }
