@@ -83,7 +83,7 @@ class JupyterLab extends Application<ApplicationShell> {
    * #### Notes
    * This is just a reference to `shell.restored`.
    */
-  get restored(): Promise<IInstanceRestorer.ILayout> {
+  get restored(): Promise<ApplicationShell.Hydrated.ILayout> {
     return this.shell.restored;
   }
 

@@ -6,7 +6,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  PromiseDelegate
+  JSONObject, PromiseDelegate
 } from '@phosphor/coreutils';
 
 import {
@@ -165,7 +165,7 @@ class ApplicationShell extends Widget {
   /**
    * Promise that resolves when state is restored, returning layout description.
    */
-  get restored(): Promise<IInstanceRestorer.ILayout> {
+  get restored(): Promise<ApplicationShell.Hydrated.ILayout> {
     return this._restored.promise;
   }
 
@@ -338,7 +338,7 @@ class ApplicationShell extends Widget {
   /**
    * Set the layout data store for the application shell.
    */
-  setLayoutDB(database: IInstanceRestorer.ILayoutDB): void {
+  setLayoutDB(database: ApplicationShell.ILayoutDB): void {
     if (this._database) {
       throw new Error('cannot reset layout database');
     }
@@ -438,8 +438,9 @@ class ApplicationShell extends Widget {
     if (!this._database || !this._isRestored) {
       return;
     }
-
-    let data: IInstanceRestorer.ILayout = {
+    const dock = this._dockPanel;
+    console.log(dock.saveLayout());
+    let data: ApplicationShell.Hydrated.ILayout = {
       currentWidget: this._tracker.currentWidget,
       leftArea: this._leftHandler.dehydrate(),
       rightArea: this._rightHandler.dehydrate()
@@ -477,13 +478,13 @@ class ApplicationShell extends Widget {
     this._activeChanged.emit(args);
   }
 
-  private _database: IInstanceRestorer.ILayoutDB = null;
+  private _database: ApplicationShell.ILayoutDB = null;
   private _dockPanel: DockPanel;
   private _hboxPanel: BoxPanel;
   private _hsplitPanel: SplitPanel;
   private _isRestored = false;
   private _leftHandler: Private.SideBarHandler;
-  private _restored = new PromiseDelegate<IInstanceRestorer.ILayout>();
+  private _restored = new PromiseDelegate<ApplicationShell.Hydrated.ILayout>();
   private _rightHandler: Private.SideBarHandler;
   private _topPanel: Panel;
   private _tracker = new FocusTracker<Widget>();
@@ -519,6 +520,140 @@ namespace ApplicationShell {
    */
   export
   type IChangedArgs = FocusTracker.IChangedArgs<Widget>;
+
+
+  /**
+   * A namespace for hydrated restorable state.
+   */
+  export
+  namespace Hydrated {
+    /**
+     * A description of the application's user interface layout.
+     */
+    export
+    interface ILayout {
+      /**
+       * The current widget that has application focus.
+       */
+      readonly currentWidget: Widget | null;
+
+      /**
+       * Indicates whether fetched session restore data was actually retrieved
+       * from the state database or whether it is a fresh blank slate.
+       *
+       * #### Notes
+       * This attribute is only relevant when the layout data is retrieved via a
+       * `fetch` call. If it is set when being passed into `save`, it will be
+       * ignored.
+       */
+      readonly fresh?: boolean;
+
+      /**
+       * The left area of the user interface.
+       */
+      readonly leftArea: ISideArea;
+
+      /**
+       * The right area of the user interface.
+       */
+      readonly rightArea: ISideArea;
+    }
+
+    /**
+     * The restorable description of a sidebar in the user interface.
+     */
+    export
+    interface ISideArea {
+      /**
+       * A flag denoting whether the sidebar has been collapsed.
+       */
+      readonly collapsed: boolean;
+
+      /**
+       * The current widget that has side area focus.
+       */
+      readonly currentWidget: Widget | null;
+
+      /**
+       * The collection of widgets held by the sidebar.
+       */
+      readonly widgets: Array<Widget> | null;
+    }
+  }
+
+  /**
+   * A namespace for dehydrated restore state that can be serialized and saved.
+   */
+  export
+  namespace Dehydrated {
+    /**
+     * The dehydrated state of the application layout.
+     *
+     * #### Notes
+     * This format is JSON serializable and saved in the state database.
+     * It is meant to be a data structure can translate into an
+     * `ApplicationShell.Hydrated.ILayout` data structure for consumption by the
+     * application shell.
+     */
+    export
+    interface ILayout extends JSONObject {
+      /**
+       * The current widget that has application focus.
+       */
+      current?: string | null;
+
+      /**
+       * The left area of the user interface.
+       */
+      left?: ISideArea | null;
+
+      /**
+       * The right area of the user interface.
+       */
+      right?: ISideArea | null;
+    }
+
+    /**
+     * The restorable description of a sidebar in the user interface.
+     */
+    export
+    interface ISideArea extends JSONObject {
+      /**
+       * A flag denoting whether the sidebar has been collapsed.
+       */
+      collapsed?: boolean | null;
+
+      /**
+       * The current widget that has side area focus.
+       */
+      current?: string | null;
+
+      /**
+       * The collection of widgets held by the sidebar.
+       */
+      widgets?: Array<string> | null;
+    }
+  }
+
+  /**
+   * An application layout data store.
+   */
+  export
+  interface ILayoutDB {
+    /**
+     * Fetch the layout state for the application.
+     *
+     * #### Notes
+     * Fetching the layout relies on all widget restoration to be complete, so
+     * calls to `fetch` are guaranteed to return after restoration is complete.
+     */
+    fetch(): Promise<ApplicationShell.Hydrated.ILayout>;
+
+    /**
+     * Save the layout state for the application.
+     */
+    save(data: ApplicationShell.Hydrated.ILayout): Promise<void>;
+  }
 }
 
 
@@ -629,8 +764,15 @@ namespace Private {
 
     /**
      * Dehydrate the side bar data.
+     *
+     * #### Notes
+     * While this method is called `dehydrate`, what it actually returns is a
+     * "live" (hydrated) version of the data structure that defines a side area.
+     * The job of serializing this live object is delegated to the layout
+     * restorer that consumes this object. So as far as the application shell is
+     * concerned, this data structure *is* dehydrated.
      */
-    dehydrate(): IInstanceRestorer.ISideArea {
+    dehydrate(): ApplicationShell.Hydrated.ISideArea {
       let collapsed = this._sideBar.currentTitle === null;
       let widgets = toArray(this._stackedPanel.widgets);
       let currentWidget = widgets[this._sideBar.currentIndex];
@@ -640,7 +782,7 @@ namespace Private {
     /**
      * Rehydrate the side bar.
      */
-    rehydrate(data: IInstanceRestorer.ISideArea): void {
+    rehydrate(data: ApplicationShell.Hydrated.ISideArea): void {
       if (data.currentWidget) {
         this.activate(data.currentWidget.id);
       } else if (data.collapsed) {
