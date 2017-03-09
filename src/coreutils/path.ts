@@ -76,6 +76,7 @@ namespace PathExt {
 
   /**
    * Resolve a sequence of paths or path segments into an absolute path.
+   * The root path in the application has no leading slash, so it is removed.
    *
    * @param parts - The paths to join.
    *
@@ -88,7 +89,11 @@ namespace PathExt {
    */
   export
   function resolve(...parts: string[]): string {
-    return posix.resolve(...parts);
+    let path = posix.resolve(...parts);
+    if (path.indexOf('/') === 0) {
+      path = path.slice(1);
+    }
+    return path;
   }
 
   /**
