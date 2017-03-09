@@ -344,20 +344,33 @@ class ApplicationShell extends Widget {
         return;
       }
 
-      // Rehydrate the application.
-      let { currentWidget, leftArea, rightArea } = saved;
+      const { mainArea, leftArea, rightArea } = saved;
+
+      // Rehydrate the main area.
+      if (mainArea) {
+        if (mainArea.dock) {
+          this._dockPanel.restoreLayout(mainArea.dock);
+        }
+        if (mainArea.currentWidget) {
+          this.activateById(mainArea.currentWidget.id);
+        }
+      }
+
+      // Rehydrate the left area.
       if (leftArea) {
         this._leftHandler.rehydrate(leftArea);
       }
+
+      // Rehydrate the right area.
       if (rightArea) {
         this._rightHandler.rehydrate(rightArea);
       }
-      if (currentWidget) {
-        this.activateById(currentWidget.id);
-      }
+
+      // Set restored flag, save state, and resolve the restoration promise.
       this._isRestored = true;
       return this._save().then(() => { this._restored.resolve(saved); });
     });
+
     // Catch current changed events on the side handlers.
     this._tracker.currentChanged.connect(this._save, this);
     this._leftHandler.sideBar.currentChanged.connect(this._save, this);
@@ -434,11 +447,11 @@ class ApplicationShell extends Widget {
     if (!this._database || !this._isRestored) {
       return;
     }
-    const dock = this._dockPanel;
-    console.log(dock.saveLayout());
     let data: ApplicationShell.ILayout = {
-      currentWidget: this._tracker.currentWidget,
-      mainArea: this._dockPanel.saveLayout(),
+      mainArea: {
+        currentWidget: this._tracker.currentWidget,
+        dock: this._dockPanel.saveLayout(),
+      },
       leftArea: this._leftHandler.dehydrate(),
       rightArea: this._rightHandler.dehydrate()
     };
@@ -519,11 +532,6 @@ namespace ApplicationShell {
   export
   interface ILayout {
     /**
-     * The current widget that has application focus.
-     */
-    readonly currentWidget: Widget | null;
-
-    /**
      * Indicates whether fetched session restore data was actually retrieved
      * from the state database or whether it is a fresh blank slate.
      *
@@ -574,7 +582,17 @@ namespace ApplicationShell {
    * The restorable description of the main application area.
    */
   export
-  interface IMainArea extends DockLayout.ILayoutConfig {};
+  interface IMainArea {
+    /**
+     * The current widget that has application focus.
+     */
+    readonly currentWidget: Widget | null;
+
+    /**
+     * The contents of the main application dock panel.
+     */
+    readonly dock: DockLayout.ILayoutConfig | null;
+  };
 
   /**
    * The restorable description of a sidebar in the user interface.

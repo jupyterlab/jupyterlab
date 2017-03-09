@@ -197,7 +197,6 @@ class InstanceRestorer implements IInstanceRestorer {
    */
   fetch(): Promise<ApplicationShell.ILayout> {
     const blank: ApplicationShell.ILayout = {
-      currentWidget: null,
       fresh: true,
       mainArea: null,
       leftArea: { collapsed: true, currentWidget: null, widgets: null },
@@ -281,15 +280,6 @@ class InstanceRestorer implements IInstanceRestorer {
     }
 
     let dehydrated: Private.ILayout = {};
-    let current: string;
-
-    // Dehydrate the currently focused widget if possible.
-    if (data.currentWidget) {
-      current = Private.nameProperty.get(data.currentWidget);
-      if (current) {
-        dehydrated.current = current;
-      }
-    }
 
     // Dehydrate main area.
     dehydrated.main = this._dehydrateMainArea(data.mainArea);
@@ -299,6 +289,8 @@ class InstanceRestorer implements IInstanceRestorer {
 
     // Dehydrate right area.
     dehydrated.right = this._dehydrateSideArea(data.rightArea);
+
+    console.log('dehydrated', dehydrated);
 
     return this._state.save(KEY, dehydrated);
   }
@@ -318,7 +310,7 @@ class InstanceRestorer implements IInstanceRestorer {
    * coercion to guarantee the dehydrated object is safely processed.
    */
   private _rehydrateMainArea(area: Private.IMainArea): ApplicationShell.IMainArea {
-    return { main: null };
+    return { currentWidget: null, dock: null };
   }
 
   /**
@@ -427,11 +419,6 @@ namespace Private {
   export
   interface ILayout extends JSONObject {
     /**
-     * The current widget that has application focus.
-     */
-    current?: string | null;
-
-    /**
      * The main area of the user interface.
      */
     main?: IMainArea | null;
@@ -452,7 +439,15 @@ namespace Private {
    */
   export
   interface IMainArea extends JSONObject {
-    main: ISplitArea | ITabArea | null;
+    /**
+     * The current widget that has application focus.
+     */
+    current?: string | null;
+
+    /**
+     * The main application dock panel.
+     */
+    dock?: ISplitArea | ITabArea | null;
   }
 
   /**
@@ -520,7 +515,7 @@ namespace Private {
     /**
      * The sizes of the children.
      */
-    sizes: number[];
+    sizes: Array<number>;
   }
 
   /**
@@ -555,14 +550,20 @@ namespace Private {
   }
 
   /**
-   * Return a dehydrated, serializable version of the main area.
+   * Return a dehydrated, serializable version of the main dock panel.
    */
   export
-  function serializeMain(shell: ApplicationShell.IMainArea): IMainArea {
-    if (!shell || !shell.main) {
-      return { main: null };
+  function serializeMain(area: ApplicationShell.IMainArea): IMainArea {
+    let dehydrated: IMainArea = {
+      dock: area && area.dock && serializeArea(area.dock.main) || null
+    };
+    if (area.currentWidget) {
+      let current = Private.nameProperty.get(area.currentWidget);
+      if (current) {
+        dehydrated.current = current;
+      }
     }
-    return { main: serializeArea(shell.main) };
+    return dehydrated;
   }
 
   export
