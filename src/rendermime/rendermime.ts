@@ -445,25 +445,21 @@ namespace RenderMime {
      * Resolve a relative url to a correct server path.
      */
     resolveUrl(url: string): Promise<string> {
-      // Ignore urls that have a protocol.
-      if (URLExt.parse(url).protocol || url.indexOf('//') === 0) {
-        return Promise.resolve(url);
+      if (URLExt.isLocal(url)) {
+        let cwd = PathExt.dirname(this._session.path);
+        url = PathExt.resolve(cwd, url);
       }
-      let path = this._session.path;
-      let cwd = PathExt.dirname(path);
-      path = PathExt.resolve(cwd, path);
-      return Promise.resolve(path);
+      return Promise.resolve(url);
     }
 
     /**
      * Get the download url of a given absolute server path.
      */
     getDownloadUrl(path: string): Promise<string> {
-      // Ignore urls that have a protocol.
-      if (URLExt.parse(path).protocol || path.indexOf('//') === 0) {
-        return Promise.resolve(path);
+      if (URLExt.isLocal(path)) {
+        return this._contents.getDownloadUrl(path);
       }
-      return this._contents.getDownloadUrl(path);
+      return Promise.resolve(path);
     }
 
     private _session: Session.ISession;
