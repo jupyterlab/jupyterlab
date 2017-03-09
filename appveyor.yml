@@ -36,7 +36,7 @@ install:
   - 'SET "PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"'
 
   # Install our package:
-  - 'pip install -v -e ".[test]"'
+  - 'pip install -e ".[test]"'
 
 build: off
 
