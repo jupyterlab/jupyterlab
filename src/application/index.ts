@@ -6,10 +6,6 @@ import {
 } from '@phosphor/application';
 
 import {
-  IInstanceRestorer
-} from '../instancerestorer';
-
-import {
   ModuleLoader
 } from './loader';
 

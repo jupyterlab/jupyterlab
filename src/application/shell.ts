@@ -438,6 +438,7 @@ class ApplicationShell extends Widget {
     console.log(dock.saveLayout());
     let data: ApplicationShell.Dehydrated.ILayout = {
       currentWidget: this._tracker.currentWidget,
+      mainArea: this._dockPanel.saveLayout(),
       leftArea: this._leftHandler.dehydrate(),
       rightArea: this._rightHandler.dehydrate()
     };
@@ -543,6 +544,11 @@ namespace ApplicationShell {
        * ignored.
        */
       readonly fresh?: boolean;
+
+      /**
+       * The main area of the user interface.
+       */
+      readonly mainArea: DockPanel.ILayoutConfig;
 
       /**
        * The left area of the user interface.

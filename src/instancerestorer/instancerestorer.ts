@@ -199,6 +199,7 @@ class InstanceRestorer implements IInstanceRestorer {
     const blank: ApplicationShell.Dehydrated.ILayout = {
       currentWidget: null,
       fresh: true,
+      mainArea: null,
       leftArea: { collapsed: true, currentWidget: null, widgets: null },
       rightArea: { collapsed: true, currentWidget: null, widgets: null }
     };
