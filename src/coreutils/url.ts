@@ -8,9 +8,6 @@ import {
 import * as posix
  from 'path-posix';
 
-import * as url
-  from 'url';
-
 
 /**
  * The namespace for URL-related functions.
@@ -22,28 +19,19 @@ namespace URLExt {
    *
    * @param urlString - The URL string to parse.
    *
-   * @param parseQueryString - If `true`, the query property will always be set
-   *   to an object returned by the `querystring` module's `parse()` method.
-   *   If `false`, the `query` property on the returned URL object will be an
-   *   unparsed, undecoded string. Defaults to `false`.
-   *
-   * @param slashedDenoteHost - If `true`, the first token after the literal
-   *   string `//` and preceeding the next `/` will be interpreted as the
-   *   `host`.
-   *   For instance, given `//foo/bar`, the result would be
-   *   `{host: 'foo', pathname: '/bar'}` rather than `{pathname: '//foo/bar'}`.
-   *   Defaults to `false`.
-   *
    * @returns A URL object.
    */
   export
-  function parse(urlStr: string, parseQueryString?: boolean, slashesDenoteHost?: boolean): IUrl {
-    return url.parse(urlStr, parseQueryString, slashesDenoteHost);
+  function parse(url: string): IUrl {
+    if (typeof document !== 'undefined') {
+      let a = document.createElement('a');
+      return a;
+    }
+    throw Error('Cannot parse a URL without a document object');
   }
 
   /**
-   * Resolve a target URL relative to a base URL in a manner similar to that
-   * of a Web browser resolving an anchor tag HRE
+   * Resolve a target URL relative to a base URL.
    *
    * @param from - The Base URL being resolved against.
    *
@@ -53,7 +41,7 @@ namespace URLExt {
    */
   export
   function resolve(from: string, to: string): string {
-    return url.resolve(from, to);
+    return posix.resolve(from, to);
   }
 
   /**
@@ -128,21 +116,10 @@ namespace URLExt {
     protocol?: string;
 
     /**
-     * Whether two ASCII forward-slash characters (/) are required
-     * following the colon in the protocol.
-     */
-    slashes?: boolean;
-
-    /**
      * The full lower-cased host portion of the URL, including the port if
      * specified.
      */
     host?: string;
-
-    /**
-     * The username and password portion of the URL.
-     */
-    auth?: string;
 
     /**
      * The lower-cased host name portion of the host component without the
@@ -159,24 +136,6 @@ namespace URLExt {
      * The entire path section of the URL.
      */
     pathname?: string;
-
-    /**
-     * The the entire "query string" portion of the URL, including the
-     * leading ASCII question mark `(?)` character.
-     */
-    search?: string;
-
-    /**
-     * Aaconcatenation of the pathname and search components.
-     */
-    path?: string;
-
-    /**
-     * Either the query string without the leading ASCII question mark
-     * `(?)`, or an object returned by the `parse()` method when
-     * `parseQuestyString` is `true`.
-     */
-    query?: string | any;
 
     /**
      * The "fragment" portion of the URL including the leading ASCII hash
