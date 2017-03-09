@@ -524,7 +524,11 @@ namespace Private {
   /**
    * Serialize individual areas within the main area.
    */
-  function serializeArea(area: ApplicationShell.AreaConfig): ITabArea | ISplitArea {
+  function serializeArea(area: ApplicationShell.AreaConfig): ITabArea | ISplitArea | null {
+    if (!area || !area.type) {
+      return null;
+    }
+
     if (area.type === 'tab-area') {
       return {
         type: 'tab-area',
@@ -561,6 +565,48 @@ namespace Private {
   }
 
   /**
+   * Deserialize individual areas within the main area.
+   */
+  function deserializeArea(area: ITabArea | ISplitArea, widgets: Map<string, Widget>): ApplicationShell.AreaConfig {
+    if (!area || !area.type) {
+      return null;
+    }
+
+    // Because this data is saved to a foreign data source, its type safety is
+    // not guaranteed when it is retrieved, so exhaustive checks are necessary.
+    if (area.type !== 'tab-area' && area.type !== 'split-area') {
+      const type = (area as any).type as string || 'unknown';
+      console.warn(`Attempted to deserialize unknown type: ${type}`);
+      return null;
+    }
+
+    if (area.type === 'tab-area') {
+      let hydrated = {
+        type: 'tab-area' as 'tab-area',
+        currentIndex: area.currentIndex || 0,
+        widgets: area.widgets &&
+          area.widgets.map(widget => widgets.get(widget))
+            .filter(widget => !!widget) || []
+      };
+      // Make sure the current index is within bounds.
+      if (hydrated.currentIndex > hydrated.widgets.length - 1) {
+        hydrated.currentIndex = 0;
+      }
+      return hydrated;
+    }
+
+    let hydrated = {
+      type: 'split-area' as 'split-area',
+      orientation: area.orientation,
+      sizes: area.sizes,
+      children: area.children &&
+        area.children.map(child => deserializeArea(child, widgets))
+          .filter(widget => !!widget) || []
+    };
+    return hydrated;
+  }
+
+  /**
    * Return the hydrated version of the main dock panel, ready to restore.
    */
   export
@@ -568,7 +614,7 @@ namespace Private {
     const name = area.current || null;
     return {
       currentWidget: name && widgets.has(name) && widgets.get(name) || null,
-      dock: null
+      dock: { main: deserializeArea(area.dock, widgets) }
     };
   }
 }
