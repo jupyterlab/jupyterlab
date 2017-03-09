@@ -197,10 +197,7 @@ class InstanceRestorer implements IInstanceRestorer {
    */
   fetch(): Promise<ApplicationShell.ILayout> {
     const blank: ApplicationShell.ILayout = {
-      fresh: true,
-      mainArea: null,
-      leftArea: { collapsed: true, currentWidget: null, widgets: null },
-      rightArea: { collapsed: true, currentWidget: null, widgets: null }
+      fresh: true, mainArea: null, leftArea: null, rightArea: null
     };
     let layout = this._state.fetch(KEY);
 
@@ -555,7 +552,7 @@ namespace Private {
     let dehydrated: IMainArea = {
       dock: area && area.dock && serializeArea(area.dock.main) || null
     };
-    if (area.currentWidget) {
+    if (area && area.currentWidget) {
       let current = Private.nameProperty.get(area.currentWidget);
       if (current) {
         dehydrated.current = current;
@@ -637,7 +634,7 @@ namespace Private {
 
     return {
       currentWidget: name && names.has(name) && names.get(name) || null,
-      dock: { main: deserializeArea(dock, names) }
+      dock: dock ? { main: deserializeArea(dock, names) } : null
     };
   }
 }
