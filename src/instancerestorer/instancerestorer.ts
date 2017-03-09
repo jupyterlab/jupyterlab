@@ -195,8 +195,8 @@ class InstanceRestorer implements IInstanceRestorer {
    * Fetching the layout relies on all widget restoration to be complete, so
    * calls to `fetch` are guaranteed to return after restoration is complete.
    */
-  fetch(): Promise<ApplicationShell.Hydrated.ILayout> {
-    const blank: ApplicationShell.Hydrated.ILayout = {
+  fetch(): Promise<ApplicationShell.Dehydrated.ILayout> {
+    const blank: ApplicationShell.Dehydrated.ILayout = {
       currentWidget: null,
       fresh: true,
       leftArea: { collapsed: true, currentWidget: null, widgets: null },
@@ -211,7 +211,7 @@ class InstanceRestorer implements IInstanceRestorer {
 
       const {
         current, left, right
-      } = data as ApplicationShell.Dehydrated.ILayout;
+      } = data as InstanceRestorer.Dehydrated.ILayout;
 
       // If any data exists, then this is not a fresh session.
       const fresh = false;
@@ -270,7 +270,7 @@ class InstanceRestorer implements IInstanceRestorer {
   /**
    * Save the layout state for the application.
    */
-  save(data: ApplicationShell.Hydrated.ILayout): Promise<void> {
+  save(data: ApplicationShell.Dehydrated.ILayout): Promise<void> {
     // If there are promises that are unresolved, bail.
     if (this._promises) {
       let warning = 'save() was called prematurely.';
@@ -278,7 +278,7 @@ class InstanceRestorer implements IInstanceRestorer {
       return Promise.reject(warning);
     }
 
-    let dehydrated: ApplicationShell.Dehydrated.ILayout = {};
+    let dehydrated: InstanceRestorer.Dehydrated.ILayout = {};
     let current: string;
 
     // Dehydrate main area.
@@ -301,8 +301,8 @@ class InstanceRestorer implements IInstanceRestorer {
   /**
    * Dehydrate a side area into a serialized description object.
    */
-  private _dehydrateSideArea(area: ApplicationShell.Hydrated.ISideArea): ApplicationShell.Dehydrated.ISideArea {
-    let dehydrated: ApplicationShell.Dehydrated.ISideArea = {
+  private _dehydrateSideArea(area: ApplicationShell.Dehydrated.ISideArea): InstanceRestorer.Dehydrated.ISideArea {
+    let dehydrated: InstanceRestorer.Dehydrated.ISideArea = {
       collapsed: area.collapsed
     };
     if (area.currentWidget) {
@@ -326,7 +326,7 @@ class InstanceRestorer implements IInstanceRestorer {
    * This function consumes data that can become corrupted, so it uses type
    * coercion to guarantee the dehydrated object is safely processed.
    */
-  private _rehydrateSideArea(area: ApplicationShell.Dehydrated.ISideArea): ApplicationShell.Hydrated.ISideArea {
+  private _rehydrateSideArea(area: InstanceRestorer.Dehydrated.ISideArea): ApplicationShell.Dehydrated.ISideArea {
     if (!area) {
       return { collapsed: true, currentWidget: null, widgets: null };
     }
@@ -387,6 +387,60 @@ namespace InstanceRestorer {
      * The state database instance.
      */
     state: IStateDB;
+  }
+
+  /**
+   * A namespace for dehydrated restore state that can be serialized and saved.
+   */
+  export
+  namespace Dehydrated {
+    /**
+     * The dehydrated state of the application layout.
+     *
+     * #### Notes
+     * This format is JSON serializable and saved in the state database.
+     * It is meant to be a data structure can translate into an
+     * `ApplicationShell.Dehydrated.ILayout` data structure for consumption by
+     * the application shell.
+     */
+    export
+    interface ILayout extends JSONObject {
+      /**
+       * The current widget that has application focus.
+       */
+      current?: string | null;
+
+      /**
+       * The left area of the user interface.
+       */
+      left?: ISideArea | null;
+
+      /**
+       * The right area of the user interface.
+       */
+      right?: ISideArea | null;
+    }
+
+    /**
+     * The restorable description of a sidebar in the user interface.
+     */
+    export
+    interface ISideArea extends JSONObject {
+      /**
+       * A flag denoting whether the sidebar has been collapsed.
+       */
+      collapsed?: boolean | null;
+
+      /**
+       * The current widget that has side area focus.
+       */
+      current?: string | null;
+
+      /**
+       * The collection of widgets held by the sidebar.
+       */
+      widgets?: Array<string> | null;
+    }
   }
 }
 
