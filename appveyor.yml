@@ -28,8 +28,6 @@ install:
 
   # Install node:
   - ps: Install-Product node $env:nodejs_version
-  - python -c "from distutils.spawn import find_executable; print(find_executable('npm'))"
-  - blargh
   # Install newer Firefox
   - choco install firefox
   # Make sure our packages are up to date.
