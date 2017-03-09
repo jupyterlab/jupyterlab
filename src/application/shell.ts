@@ -340,6 +340,7 @@ class ApplicationShell extends Widget {
     }
     this._database = database;
     this._database.fetch().then(saved => {
+      console.log('saved', saved);
       if (this.isDisposed && !saved) {
         return;
       }

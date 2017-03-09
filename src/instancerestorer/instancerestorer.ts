@@ -209,14 +209,10 @@ class InstanceRestorer implements IInstanceRestorer {
         return blank;
       }
 
-      const { current, main, left, right } = data as Private.ILayout;
+      const { main, left, right } = data as Private.ILayout;
 
       // If any data exists, then this is not a fresh session.
       const fresh = false;
-
-      // Rehydrate current widget. Coerce type of `current` in case of bad data.
-      const currentWidget = current && this._widgets.has(`${current}`) ?
-        this._widgets.get(`${current}`) : null;
 
       // Rehydrate main area.
       const mainArea = this._rehydrateMainArea(main);
@@ -227,7 +223,7 @@ class InstanceRestorer implements IInstanceRestorer {
       // Rehydrate right area.
       const rightArea = this._rehydrateSideArea(right);
 
-      return { currentWidget, fresh, mainArea, leftArea, rightArea };
+      return { fresh, mainArea, leftArea, rightArea };
     }).catch(() => blank); // Let fetch fail gracefully; return blank slate.
   }
 
@@ -290,8 +286,6 @@ class InstanceRestorer implements IInstanceRestorer {
     // Dehydrate right area.
     dehydrated.right = this._dehydrateSideArea(data.rightArea);
 
-    console.log('dehydrated', dehydrated);
-
     return this._state.save(KEY, dehydrated);
   }
 
@@ -310,7 +304,7 @@ class InstanceRestorer implements IInstanceRestorer {
    * coercion to guarantee the dehydrated object is safely processed.
    */
   private _rehydrateMainArea(area: Private.IMainArea): ApplicationShell.IMainArea {
-    return { currentWidget: null, dock: null };
+    return Private.deserializeMain(area, this._widgets);
   }
 
   /**
@@ -566,8 +560,15 @@ namespace Private {
     return dehydrated;
   }
 
+  /**
+   * Return the hydrated version of the main dock panel, ready to restore.
+   */
   export
-  function deserializeMain(area: IMainArea): ApplicationShell.IMainArea {
-    return null;
+  function deserializeMain(area: IMainArea, widgets: Map<string, Widget>): ApplicationShell.IMainArea {
+    const name = area.current || null;
+    return {
+      currentWidget: name && widgets.has(name) && widgets.get(name) || null,
+      dock: null
+    };
   }
 }
