@@ -5,9 +5,6 @@ import {
   JSONObject
 } from '@phosphor/coreutils';
 
-import * as posix
- from 'path-posix';
-
 
 /**
  * The namespace for URL-related functions.
@@ -31,20 +28,6 @@ namespace URLExt {
   }
 
   /**
-   * Resolve a target URL relative to a base URL.
-   *
-   * @param from - The Base URL being resolved against.
-   *
-   * @param to - The HREF URL being resolved
-   *
-   * @returns the resolved url.
-   */
-  export
-  function resolve(from: string, to: string): string {
-    return posix.resolve(from, to);
-  }
-
-  /**
    * Join a sequence of url components and normalizes as in node `path.join`.
    *
    * @param parts - The url components.
@@ -53,7 +36,24 @@ namespace URLExt {
    */
   export
   function join(...parts: string[]): string {
-    return posix.join(...parts);
+    let url = '';
+    for (let i = 0; i < parts.length; i++) {
+      if (parts[i] === '') {
+        continue;
+      }
+      if (url.length > 0 && url[url.length - 1] !== '/') {
+        url = url + '/' + parts[i];
+      } else {
+        url = url + parts[i];
+      }
+    }
+    url = url.replace(/\/\/+/, '/');
+
+    // Handle a protocol in the first part.
+    if (parts[0] && parts[0].indexOf('//') !== -1) {
+      url = url.replace('/', '//');
+    }
+    return url;
   }
 
   /**
@@ -69,10 +69,7 @@ namespace URLExt {
    */
   export
   function encodeParts(url: string): string {
-    // Normalize and join, split, encode, then join.
-    url = join(url);
-    let parts = url.split('/').map(encodeURIComponent);
-    return join(...parts);
+    return join(...uri.split('/').map(encodeURIComponent));
   }
 
   /**
