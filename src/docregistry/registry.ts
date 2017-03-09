@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Contents, ContentsManager, Kernel
+  Contents, Kernel
 } from '@jupyterlab/services';
 
 import {
@@ -30,7 +30,7 @@ import {
 } from '../codeeditor';
 
 import {
-  IChangedArgs as IChangedArgsGeneric
+  IChangedArgs as IChangedArgsGeneric, PathExt
 } from '../coreutils';
 
 
@@ -1018,7 +1018,7 @@ namespace DocumentRegistry {
    */
   export
   function extname(path: string): string {
-    let parts = ContentsManager.basename(path).split('.');
+    let parts = PathExt.basename(path).split('.');
     parts.shift();
     return '.' + parts.join('.');
   }

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Contents, ContentsManager, Session
+  Contents, Session
 } from '@jupyterlab/services';
 
 import {
@@ -22,7 +22,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IObservableJSON, URLExt
+  IObservableJSON, PathExt, URLExt
 } from '../coreutils';
 
 import {
@@ -450,8 +450,8 @@ namespace RenderMime {
         return Promise.resolve(url);
       }
       let path = this._session.path;
-      let cwd = ContentsManager.dirname(path);
-      path = ContentsManager.getAbsolutePath(url, cwd);
+      let cwd = PathExt.dirname(path);
+      path = PathExt.resolve(url, cwd);
       return Promise.resolve(path);
     }
 

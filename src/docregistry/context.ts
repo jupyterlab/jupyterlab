@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ContentsManager, Contents, Kernel, ServiceManager, Session
+  Contents, Kernel, ServiceManager, Session
 } from '@jupyterlab/services';
 
 import {
@@ -30,7 +30,7 @@ import {
 } from '../apputils';
 
 import {
-  URLExt
+  PathExt, URLExt
 } from '../coreutils';
 
 import {
@@ -390,8 +390,8 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     if (URLExt.parse(url).protocol || url.indexOf('//') === 0) {
       return Promise.resolve(url);
     }
-    let cwd = ContentsManager.dirname(this._path);
-    let path = ContentsManager.getAbsolutePath(url, cwd);
+    let cwd = PathExt.dirname(this._path);
+    let path = PathExt.resolve(url, cwd);
     return Promise.resolve(path);
   }
 

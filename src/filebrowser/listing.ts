@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Contents, ContentsManager
+  Contents
 } from '@jupyterlab/services';
 
 import {
@@ -30,16 +30,12 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  Time
+  Dialog, DOMUtils, showDialog
+} from '../apputils';
+
+import {
+  PathExt, Time
 } from '../coreutils';
-
-import {
-  Dialog, showDialog
-} from '../apputils';
-
-import {
-  DOMUtils
-} from '../apputils';
 
 import {
   DocumentManager
@@ -1298,14 +1294,14 @@ class DirListing extends Widget {
    * Handle an `activateRequested` signal from the manager.
    */
   private _onActivateRequested(sender: DocumentManager, args: string): void {
-    let dirname = ContentsManager.dirname(args);
+    let dirname = PathExt.dirname(args);
     if (dirname === '.') {
       dirname = '';
     }
     if (dirname !== this._model.path) {
       return;
     }
-    let basename = ContentsManager.basename(args);
+    let basename = PathExt.basename(args);
     this._selectItemByName(basename);
   }
 

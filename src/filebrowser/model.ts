@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Contents, ContentsManager, Kernel, ServiceManager, Session
+  Contents, Kernel, ServiceManager, Session
 } from '@jupyterlab/services';
 
 import {
@@ -18,7 +18,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  IChangedArgs
+  IChangedArgs, PathExt
 } from '../coreutils';
 
 import {
@@ -446,13 +446,13 @@ class FileBrowserModel implements IDisposable, IPathTracker {
   private _onFileChanged(sender: Contents.IManager, change: Contents.IChangedArgs): void {
     let path = this._model.path || '.';
     let value = change.oldValue;
-    if (value && value.path && ContentsManager.dirname(value.path) === path) {
+    if (value && value.path && PathExt.dirname(value.path) === path) {
       this._fileChanged.emit(change);
       this._scheduleUpdate();
       return;
     }
     value = change.newValue;
-    if (value && value.path && ContentsManager.dirname(value.path) === path) {
+    if (value && value.path && PathExt.dirname(value.path) === path) {
       this._fileChanged.emit(change);
       this._scheduleUpdate();
       return;
@@ -557,6 +557,6 @@ namespace Private {
    */
   export
   function normalizePath(root: string, path: string): string {
-    return ContentsManager.getAbsolutePath(path, root);
+    return PathExt.resolve(path, root);
   }
 }
