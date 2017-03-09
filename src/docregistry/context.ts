@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ContentsManager, Contents, Kernel, ServiceManager, Session, utils
+  Contents, Kernel, ServiceManager, Session
 } from '@jupyterlab/services';
 
 import {
@@ -28,6 +28,10 @@ import {
 import {
   showDialog, Dialog
 } from '../apputils';
+
+import {
+  PathExt, URLExt
+} from '../coreutils';
 
 import {
   findKernel
@@ -382,24 +386,22 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    * Resolve a relative url to a correct server path.
    */
   resolveUrl(url: string): Promise<string> {
-    // Ignore urls that have a protocol.
-    if (utils.urlParse(url).protocol || url.indexOf('//') === 0) {
-      return Promise.resolve(url);
+    if (URLExt.isLocal(url)) {
+      let path = this._session ? this._session.path : '';
+      let cwd = PathExt.dirname(path);
+      url = PathExt.resolve(cwd, url);
     }
-    let cwd = ContentsManager.dirname(this._path);
-    let path = ContentsManager.getAbsolutePath(url, cwd);
-    return Promise.resolve(path);
+    return Promise.resolve(url);
   }
 
   /**
    * Get the download url of a given absolute server path.
    */
   getDownloadUrl(path: string): Promise<string> {
-    // Ignore urls that have a protocol.
-    if (utils.urlParse(path).protocol || path.indexOf('//') === 0) {
-      return Promise.resolve(path);
+    if (URLExt.isLocal(path)) {
+      return this._manager.contents.getDownloadUrl(path);
     }
-    return this._manager.contents.getDownloadUrl(path);
+    return Promise.resolve(path);
   }
 
   /**

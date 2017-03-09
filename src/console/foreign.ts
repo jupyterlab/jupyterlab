@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel, KernelMessage, nbformat
+  Kernel, KernelMessage
 } from '@jupyterlab/services';
 
 import {
@@ -12,6 +12,10 @@ import {
 import {
   BaseCellWidget, CodeCellWidget
 } from '../cells';
+
+import {
+  nbformat
+} from '../coreutils';
 
 
 /**

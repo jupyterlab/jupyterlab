@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ContentsManager, Kernel, Session, utils
+  Kernel, Session
 } from '@jupyterlab/services';
 
 import {
@@ -26,7 +26,7 @@ import {
 } from '../commandpalette';
 
 import {
-  Time
+  PathExt, Time, uuid
 } from '../coreutils';
 
 import {
@@ -173,10 +173,10 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       // Find the correct path for the new session.
       // Use the given path or the cwd.
       let path = args.path || pathTracker.path;
-      if (ContentsManager.extname(path)) {
-        path = ContentsManager.dirname(path);
+      if (PathExt.extname(path)) {
+        path = PathExt.dirname(path);
       }
-      path = `${path}/console-${count}-${utils.uuid()}`;
+      path = `${path}/console-${count}-${uuid()}`;
 
       // Get the kernel model.
       return manager.ready.then(() => getKernel(args, name)).then(kernel => {
@@ -522,7 +522,7 @@ namespace Private {
     let { label, path, displayName, connected, executed } = options;
     let caption = (
       `Name: ${label}\n` +
-      `Directory: ${ContentsManager.dirname(path)}\n` +
+      `Directory: ${PathExt.dirname(path)}\n` +
       `Kernel: ${displayName}\n` +
       `Connected: ${Time.format(connected.toISOString())}`
     );

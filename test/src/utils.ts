@@ -8,12 +8,16 @@ import {
 } from 'simulate-event';
 
 import {
-  ServiceManager, nbformat, utils
+  ServiceManager
 } from '@jupyterlab/services';
 
 import {
   Widget
 } from '@phosphor/widgets';
+
+import {
+  nbformat, uuid
+} from '../../lib/coreutils';
 
 import {
   TextModelFactory, DocumentRegistry, Context
@@ -52,7 +56,7 @@ export
 function createFileContext(path?: string, manager?: ServiceManager.IManager): Context<DocumentRegistry.IModel> {
   manager = manager || Private.manager;
   let factory = Private.textFactory;
-  path = path || utils.uuid() + '.txt';
+  path = path || uuid() + '.txt';
   return new Context({ manager, factory, path });
 }
 
@@ -64,7 +68,7 @@ export
 function createNotebookContext(path?: string, manager?: ServiceManager.IManager): Context<INotebookModel> {
   manager = manager || Private.manager;
   let factory = Private.notebookFactory;
-  path = path || utils.uuid() + '.ipynb';
+  path = path || uuid() + '.ipynb';
   return new Context({ manager, factory, path });
 }
 

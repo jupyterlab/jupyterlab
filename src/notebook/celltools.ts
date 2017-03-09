@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  nbformat
-} from '@jupyterlab/services';
-
-import {
   ArrayExt, each
 } from '@phosphor/algorithm';
 
@@ -42,11 +38,7 @@ import {
 } from '../codeeditor';
 
 import {
-  IChangedArgs
-} from '../coreutils';
-
-import {
-  ObservableJSON
+  IChangedArgs, ObservableJSON, nbformat
 } from '../coreutils';
 
 import {

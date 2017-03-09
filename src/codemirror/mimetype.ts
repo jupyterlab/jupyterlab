@@ -5,12 +5,12 @@ import * as CodeMirror
   from 'codemirror';
 
 import {
-  nbformat
-} from '@jupyterlab/services';
-
-import {
   IEditorMimeTypeService
 } from '../codeeditor';
+
+import {
+  nbformat
+} from '../coreutils';
 
 import {
   findMode
