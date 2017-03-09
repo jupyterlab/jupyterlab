@@ -6,7 +6,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONObject, PromiseDelegate
+  PromiseDelegate
 } from '@phosphor/coreutils';
 
 import {
@@ -14,8 +14,8 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  BoxLayout, BoxPanel, DockPanel, FocusTracker, Panel, SplitPanel,
-  StackedPanel, TabBar, Title, Widget
+  BoxLayout, BoxPanel, DockLayout, DockPanel, FocusTracker,
+  Panel, SplitPanel, StackedPanel, TabBar, Title, Widget
 } from '@phosphor/widgets';
 
 
@@ -502,15 +502,10 @@ namespace ApplicationShell {
   type Area = 'main' | 'top' | 'left' | 'right';
 
   /**
-   * The options for adding a widget to a side area of the shell.
+   * The restorable description of an area within the main dock panel.
    */
   export
-  interface ISideAreaOptions {
-    /**
-     * The rank order of the widget among its siblings.
-     */
-    rank?: number;
-  }
+  type AreaConfig = DockLayout.AreaConfig;
 
   /**
    * An arguments object for the changed signals.
@@ -556,10 +551,30 @@ namespace ApplicationShell {
   }
 
   /**
+   * An application layout data store.
+   */
+  export
+  interface ILayoutDB {
+    /**
+     * Fetch the layout state for the application.
+     *
+     * #### Notes
+     * Fetching the layout relies on all widget restoration to be complete, so
+     * calls to `fetch` are guaranteed to return after restoration is complete.
+     */
+    fetch(): Promise<ApplicationShell.ILayout>;
+
+    /**
+     * Save the layout state for the application.
+     */
+    save(data: ApplicationShell.ILayout): Promise<void>;
+  }
+
+  /**
    * The restorable description of the main application area.
    */
   export
-  interface IMainArea extends DockPanel.ILayoutConfig {}
+  interface IMainArea extends DockLayout.ILayoutConfig {};
 
   /**
    * The restorable description of a sidebar in the user interface.
@@ -583,23 +598,14 @@ namespace ApplicationShell {
   }
 
   /**
-   * An application layout data store.
+   * The options for adding a widget to a side area of the shell.
    */
   export
-  interface ILayoutDB {
+  interface ISideAreaOptions {
     /**
-     * Fetch the layout state for the application.
-     *
-     * #### Notes
-     * Fetching the layout relies on all widget restoration to be complete, so
-     * calls to `fetch` are guaranteed to return after restoration is complete.
+     * The rank order of the widget among its siblings.
      */
-    fetch(): Promise<ApplicationShell.ILayout>;
-
-    /**
-     * Save the layout state for the application.
-     */
-    save(data: ApplicationShell.ILayout): Promise<void>;
+    rank?: number;
   }
 }
 

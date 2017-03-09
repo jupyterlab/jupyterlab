@@ -307,7 +307,7 @@ class InstanceRestorer implements IInstanceRestorer {
    * Dehydrate a main area description into a serializable object.
    */
   private _dehydrateMainArea(area: ApplicationShell.IMainArea): Private.IMainArea {
-    return {};
+    return Private.serializeMain(area);
   }
 
   /**
@@ -416,15 +416,6 @@ namespace InstanceRestorer {
  */
 namespace Private {
   /**
-   * An attached property for a widget's ID in the state database.
-   */
-  export
-  const nameProperty = new AttachedProperty<Widget, string>({
-    name: 'name',
-    create: owner => ''
-  });
-
-  /**
    * The dehydrated state of the application layout.
    *
    * #### Notes
@@ -460,7 +451,9 @@ namespace Private {
    * The restorable description of the main application area.
    */
   export
-  interface IMainArea extends JSONObject {}
+  interface IMainArea extends JSONObject {
+    main: ISplitArea | ITabArea | null;
+  }
 
   /**
    * The restorable description of a sidebar in the user interface.
@@ -481,5 +474,99 @@ namespace Private {
      * The collection of widgets held by the sidebar.
      */
     widgets?: Array<string> | null;
+  }
+
+  /**
+   * The restorable description of a tab area in the user interface.
+   */
+  export
+  interface ITabArea extends JSONObject {
+    /**
+     * The type indicator of the serialized tab area.
+     */
+    type: 'tab-area';
+
+    /**
+     * The widgets in the tab area.
+     */
+    widgets: Array<string> | null;
+
+    /**
+     * The index of the selected tab.
+     */
+    currentIndex: number;
+  }
+
+  /**
+   * The restorable description of a split area in the user interface.
+   */
+  export
+  interface ISplitArea extends JSONObject {
+    /**
+     * The type indicator of the serialized split area.
+     */
+    type: 'split-area';
+
+    /**
+     * The orientation of the split area.
+     */
+    orientation: 'horizontal' | 'vertical';
+
+    /**
+     * The children in the split area.
+     */
+    children: Array<ITabArea | ISplitArea> | null;
+
+    /**
+     * The sizes of the children.
+     */
+    sizes: number[];
+  }
+
+  /**
+   * An attached property for a widget's ID in the state database.
+   */
+  export
+  const nameProperty = new AttachedProperty<Widget, string>({
+    name: 'name',
+    create: owner => ''
+  });
+
+  /**
+   * Serialize individual areas within the main area.
+   */
+  function serializeArea(area: ApplicationShell.AreaConfig): ITabArea | ISplitArea {
+    if (area.type === 'tab-area') {
+      return {
+        type: 'tab-area',
+        currentIndex: area.currentIndex,
+        widgets: area.widgets
+          .map(widget => nameProperty.get(widget))
+          .filter(name => !!name)
+      };
+    }
+
+    return {
+      type: 'split-area',
+      orientation: area.orientation,
+      sizes: area.sizes,
+      children: area.children.map(serializeArea)
+    };
+  }
+
+  /**
+   * Return a dehydrated, serializable version of the main area.
+   */
+  export
+  function serializeMain(shell: ApplicationShell.IMainArea): IMainArea {
+    if (!shell || !shell.main) {
+      return { main: null };
+    }
+    return { main: serializeArea(shell.main) };
+  }
+
+  export
+  function deserializeMain(area: IMainArea): ApplicationShell.IMainArea {
+    return null;
   }
 }
