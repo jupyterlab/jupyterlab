@@ -2,16 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  utils
-} from '@jupyterlab/services';
-
-import {
   JupyterLabPlugin, JupyterLab
 } from '../application';
 
 import {
   ICommandLinker
 } from '../commandlinker';
+
+import {
+  URLExt
+} from '../coreutils';
 
 import {
   CommandIDs
@@ -45,7 +45,7 @@ export default plugin;
 function activate(app: JupyterLab, linker: ICommandLinker): IRenderMime {
   let linkHandler = {
     handleLink: (node: HTMLElement, path: string) => {
-      if (!utils.urlParse(path).protocol && path.indexOf('//') !== 0) {
+      if (!URLExt.parse(path).protocol && path.indexOf('//') !== 0) {
         linker.connectNode(node, CommandIDs.open, { path });
       }
     }

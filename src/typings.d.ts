@@ -3,4 +3,6 @@
 
 /// <reference path="../typings/ansi_up/ansi_up.d.ts"/>
 /// <reference path="../typings/codemirror/codemirror.d.ts"/>
+/// <reference path="../typings/path-posix/path-posix.d.ts"/>
+/// <reference path="../typings/url/url.d.ts"/>
 /// <reference path="../typings/xterm/xterm.d.ts"/>
