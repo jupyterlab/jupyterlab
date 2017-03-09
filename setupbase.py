@@ -4,6 +4,8 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+# From https://github.com/jupyter/jupyter-packaging/blob/11678d1eddcc33c735fe1ae9f75b404353d5e161/jupyter_packaging.py
+
 import os
 from os.path import join as pjoin
 import functools
@@ -16,7 +18,7 @@ from setuptools.command.develop import develop
 from setuptools.command.bdist_egg import bdist_egg
 from distutils import log
 from subprocess import check_call
-from distutils.spawn import find_executable as which
+from distutils.spawn import find_executable
 import sys
 
 try:
@@ -47,7 +49,7 @@ npm_path = ':'.join([
 ])
 
 if "--skip-npm" in sys.argv:
-    print("Skipping install of webtools as requested.")
+    print("Skipping npm install as requested.")
     skip_npm = True
     sys.argv.remove("--skip-npm")
 else:
@@ -108,7 +110,7 @@ def create_cmdclass(wrappers=None, data_dirs=None):
 
 
 def run(cmd, *args, **kwargs):
-    """Echo a command before running it"""
+    """Echo a command before running it.  Defaults to repo as cwd"""
     log.info('> ' + list2cmdline(cmd))
     kwargs.setdefault('cwd', here)
     kwargs.setdefault('shell', sys.platform == 'win32')
@@ -196,15 +198,21 @@ def install_npm(path=None, build_dir=None, source_dir=None, build_cmd='build'):
             node_package = path or here
             node_modules = pjoin(node_package, 'node_modules')
 
-            if not which("npm"):
+            if not find_executable("npm"):
                 log.error("`npm` unavailable.  If you're running this command "
                           "using sudo, make sure `npm` is availble to sudo")
+                return
             if is_stale(node_modules, pjoin(node_package, 'package.json')):
                 log.info('Installing build dependencies with npm.  This may '
                          'take a while...')
                 run(['npm', 'install'], cwd=node_package)
-            if build_dir and source_dir and is_stale(build_dir, source_dir):
+            if build_dir and source_dir:
+                should_build = is_stale(build_dir, source_dir)
+            else:
+                should_build = True
+            if should_build:
                 run(['npm', 'run', build_cmd], cwd=node_package)
+
     return NPM
 
 
