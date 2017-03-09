@@ -142,5 +142,12 @@ namespace URLExt {
      * `(#)` character
      */
     hash?: string;
+
+
+    /**
+     * The search element, including leading question mark (`'?'`), if any,
+     * of the URL.
+     */
+    search?: string;
   }
 }
