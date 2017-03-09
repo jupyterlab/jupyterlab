@@ -117,12 +117,27 @@ class ModuleLoader {
     return bundle.promise;
   }
 
+  /**
+   * Inject data into a module (`__webpack_require.i`).
+   *
+   * @param data - The source data.
+   *
+   * @returns The original data (no-op).
+   */
   inject(data: any): any {
     return data;
   }
 
-  // define getter function for harmony exports - d
-  harmonyExports(exports: any , name: any, getter: any): void {
+  /**
+   * A getter function for harmony exports (`__webpack_require.d`).
+   *
+   * @param exports - The module exports.
+   *
+   * @param name - The property name.
+   *
+   * @param getter - The getter function.
+   */
+  harmonyExports(exports: any , name: string, getter: () => any): void {
     if (!this.hasOwnPropertyCall(exports, name)) {
       Object.defineProperty(exports, name, {
         configurable: false,
@@ -132,12 +147,27 @@ class ModuleLoader {
     }
   };
 
-  // Object.prototype.hasOwnProperty.call - o
-  hasOwnPropertyCall(object: any, property: any): boolean {
+  /**
+   * An Object.prototype.hasOwnProperty.call - (`__webpack_require.o`).
+   *
+   * @param object - The target object.
+   *
+   * @param property - The target property.
+   *
+   * @returns Whether the object has the property.
+   */
+  hasOwnPropertyCall(object: any, property: string): boolean {
     return Object.prototype.hasOwnProperty.call(object, property);
   }
 
-  // getDefaultExport function for compatibility with non-harmony modules - n
+  /**
+   * Default export function for compatibility with non-harmony modules
+   *   (`__webpack_require.n`).
+   *
+   * @param module - The target module.
+   *
+   * @returns The default export of the module.
+   */
   getDefaultExport(module: any): any {
     let getter = module && module.__esModule ?
       function getDefault() { return module['default']; } :
@@ -146,7 +176,11 @@ class ModuleLoader {
     return getter;
   };
 
-  // on error function for async loading - oe
+  /**
+   * An on error function for async loading - (`__webpack_require.oe`).
+   *
+   * @param err - The original error.
+   */
   asyncLoadError(err: Error): void {
     console.error(err);
     throw err;
