@@ -399,7 +399,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    */
   getDownloadUrl(path: string): Promise<string> {
     if (URLExt.isLocal(path)) {
-      return this._contents.getDownloadUrl(path);
+      return this._manager.contents.getDownloadUrl(path);
     }
     return Promise.resolve(path);
   }
