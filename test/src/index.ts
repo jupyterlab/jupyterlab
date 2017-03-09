@@ -35,11 +35,15 @@ import './console/panel.spec';
 import './console/widget.spec';
 
 import './coreutils/activitymonitor.spec';
+import './coreutils/nbformat.spec';
 import './coreutils/observablejson.spec';
 import './coreutils/observablemap.spec';
 import './coreutils/observablestring.spec';
 import './coreutils/observablevector.spec';
+import './coreutils/path.spec';
 import './coreutils/time.spec';
+import './coreutils/url.spec';
+import './coreutils/uuid.spec';
 import './coreutils/undoablevector.spec';
 
 import './csvwidget/table.spec';

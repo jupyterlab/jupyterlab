@@ -5,10 +5,6 @@ import * as CodeMirror
   from 'codemirror';
 
 import {
-  utils
-} from '@jupyterlab/services';
-
-import {
   ArrayExt
 } from '@phosphor/algorithm';
 
@@ -17,7 +13,7 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  ISignal, Signal
+  Signal
 } from '@phosphor/signaling';
 
 import {
@@ -25,7 +21,7 @@ import {
 } from '../codeeditor';
 
 import {
-  IChangedArgs
+  IChangedArgs, uuid
 } from '../coreutils';
 
 import {
@@ -74,7 +70,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     let host = this.host = options.host;
     host.classList.add(EDITOR_CLASS);
 
-    this._uuid = options.uuid || utils.uuid();
+    this._uuid = options.uuid || uuid();
     this._selectionStyle = options.selectionStyle || {};
 
     Private.updateConfig(options, config);

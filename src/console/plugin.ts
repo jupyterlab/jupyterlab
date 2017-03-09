@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ContentsManager, Kernel, Session, utils
+  ContentsManager, Kernel, Session
 } from '@jupyterlab/services';
 
 import {
@@ -26,7 +26,7 @@ import {
 } from '../commandpalette';
 
 import {
-  Time
+  Time, uuid
 } from '../coreutils';
 
 import {
@@ -176,7 +176,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       if (ContentsManager.extname(path)) {
         path = ContentsManager.dirname(path);
       }
-      path = `${path}/console-${count}-${utils.uuid()}`;
+      path = `${path}/console-${count}-${uuid()}`;
 
       // Get the kernel model.
       return manager.ready.then(() => getKernel(args, name)).then(kernel => {
