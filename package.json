@@ -20,7 +20,7 @@
     "@phosphor/properties": "^0.1.0",
     "@phosphor/signaling": "^0.1.1",
     "@phosphor/virtualdom": "^0.1.0",
-    "@phosphor/widgets": "^0.1.4",
+    "@phosphor/widgets": "^0.1.7",
     "ansi_up": "^1.3.0",
     "codemirror": "^5.23",
     "d3-dsv": "^1.0.0",

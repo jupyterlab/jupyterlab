@@ -6,10 +6,6 @@ import {
 } from '@phosphor/application';
 
 import {
-  IInstanceRestorer
-} from '../instancerestorer';
-
-import {
   ModuleLoader
 } from './loader';
 
@@ -83,7 +79,7 @@ class JupyterLab extends Application<ApplicationShell> {
    * #### Notes
    * This is just a reference to `shell.restored`.
    */
-  get restored(): Promise<IInstanceRestorer.ILayout> {
+  get restored(): Promise<ApplicationShell.ILayout> {
     return this.shell.restored;
   }
 

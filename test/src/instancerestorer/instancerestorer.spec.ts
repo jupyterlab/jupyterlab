@@ -16,12 +16,12 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IInstanceRestorer, InstanceRestorer
-} from '../../../lib/instancerestorer/instancerestorer';
-
-import {
   ApplicationShell, InstanceTracker
 } from '../../../lib/application';
+
+import {
+  InstanceRestorer
+} from '../../../lib/instancerestorer/instancerestorer';
 
 import {
   StateDB
@@ -82,8 +82,8 @@ describe('instancerestorer/instancerestorer', () => {
           state: new StateDB({ namespace: NAMESPACE })
         });
         let currentWidget = new Widget();
-        let dehydrated: IInstanceRestorer.ILayout = {
-          currentWidget,
+        let dehydrated: ApplicationShell.ILayout = {
+          mainArea: { currentWidget, dock: null },
           leftArea: { collapsed: true, currentWidget: null, widgets: null },
           rightArea: { collapsed: true, currentWidget: null, widgets: null }
         };
@@ -92,7 +92,7 @@ describe('instancerestorer/instancerestorer', () => {
         restorer.restored.then(() => restorer.save(dehydrated))
           .then(() => restorer.fetch())
           .then(layout => {
-            expect(layout.currentWidget).to.be(currentWidget);
+            expect(layout.mainArea.currentWidget).to.be(currentWidget);
             done();
           }).catch(done);
       });
@@ -122,9 +122,9 @@ describe('instancerestorer/instancerestorer', () => {
         });
         let currentWidget = new Widget();
         // The `fresh` attribute is only here to check against the return value.
-        let dehydrated: IInstanceRestorer.ILayout = {
-          currentWidget: null,
+        let dehydrated: ApplicationShell.ILayout = {
           fresh: false,
+          mainArea: { currentWidget: null, dock: null },
           leftArea: {
             currentWidget,
             collapsed: true,
@@ -187,8 +187,8 @@ describe('instancerestorer/instancerestorer', () => {
           registry: new CommandRegistry(),
           state: new StateDB({ namespace: NAMESPACE })
         });
-        let dehydrated: IInstanceRestorer.ILayout = {
-          currentWidget: null,
+        let dehydrated: ApplicationShell.ILayout = {
+          mainArea: { currentWidget: null, dock: null },
           leftArea: { currentWidget: null, collapsed: true, widgets: null },
           rightArea: { collapsed: true, currentWidget: null, widgets: null }
         };
@@ -206,9 +206,9 @@ describe('instancerestorer/instancerestorer', () => {
         });
         let currentWidget = new Widget();
         // The `fresh` attribute is only here to check against the return value.
-        let dehydrated: IInstanceRestorer.ILayout = {
-          currentWidget: null,
+        let dehydrated: ApplicationShell.ILayout = {
           fresh: false,
+          mainArea: { currentWidget: null, dock: null },
           leftArea: {
             currentWidget,
             collapsed: true,

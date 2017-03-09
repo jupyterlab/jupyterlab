@@ -14,13 +14,9 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  BoxLayout, BoxPanel, DockPanel, FocusTracker, Panel, SplitPanel,
-  StackedPanel, TabBar, Title, Widget
+  BoxLayout, BoxPanel, DockLayout, DockPanel, FocusTracker,
+  Panel, SplitPanel, StackedPanel, TabBar, Title, Widget
 } from '@phosphor/widgets';
-
-import {
-  IInstanceRestorer
-} from '../instancerestorer';
 
 
 /**
@@ -165,7 +161,7 @@ class ApplicationShell extends Widget {
   /**
    * Promise that resolves when state is restored, returning layout description.
    */
-  get restored(): Promise<IInstanceRestorer.ILayout> {
+  get restored(): Promise<ApplicationShell.ILayout> {
     return this._restored.promise;
   }
 
@@ -191,19 +187,26 @@ class ApplicationShell extends Widget {
   */
   activateNextTab(): void {
     let current = this._currentTabBar();
-    if (current) {
-      let ci = current.currentIndex;
-      if (ci !== -1) {
-        if (ci < current.titles.length - 1) {
-          current.currentIndex += 1;
-          current.currentTitle.owner.activate();
-        } else if (ci === current.titles.length - 1) {
-          let nextBar = this._nextTabBar();
-          if (nextBar) {
-            nextBar.currentIndex = 0;
-            nextBar.currentTitle.owner.activate();
-          }
-        }
+    if (!current) {
+      return;
+    }
+
+    let ci = current.currentIndex;
+    if (ci === -1) {
+      return;
+    }
+
+    if (ci < current.titles.length - 1) {
+      current.currentIndex += 1;
+      current.currentTitle.owner.activate();
+      return;
+    }
+
+    if (ci === current.titles.length - 1) {
+      let nextBar = this._nextTabBar();
+      if (nextBar) {
+        nextBar.currentIndex = 0;
+        nextBar.currentTitle.owner.activate();
       }
     }
   }
@@ -213,20 +216,27 @@ class ApplicationShell extends Widget {
   */
   activatePreviousTab(): void {
     let current = this._currentTabBar();
-    if (current) {
-      let ci = current.currentIndex;
-      if (ci !== -1) {
-        if (ci > 0) {
-          current.currentIndex -= 1;
-          current.currentTitle.owner.activate();
-        } else if (ci === 0) {
-          let prevBar = this._previousTabBar();
-          if (prevBar) {
-            let len = prevBar.titles.length;
-            prevBar.currentIndex = len - 1;
-            prevBar.currentTitle.owner.activate();
-          }
-        }
+    if (!current) {
+      return;
+    }
+
+    let ci = current.currentIndex;
+    if (ci === -1) {
+      return;
+    }
+
+    if (ci > 0) {
+      current.currentIndex -= 1;
+      current.currentTitle.owner.activate();
+      return;
+    }
+
+    if (ci === 0) {
+      let prevBar = this._previousTabBar();
+      if (prevBar) {
+        let len = prevBar.titles.length;
+        prevBar.currentIndex = len - 1;
+        prevBar.currentTitle.owner.activate();
       }
     }
   }
@@ -317,14 +327,14 @@ class ApplicationShell extends Widget {
    * Close all widgets in the main area.
    */
   closeAll(): void {
-    each(toArray(this._dockPanel.widgets()), widget => { widget.close(); });
+    each(this._dockPanel.widgets(), widget => { widget.close(); });
     this._save();
   }
 
   /**
    * Set the layout data store for the application shell.
    */
-  setLayoutDB(database: IInstanceRestorer.ILayoutDB): void {
+  setLayoutDB(database: ApplicationShell.ILayoutDB): void {
     if (this._database) {
       throw new Error('cannot reset layout database');
     }
@@ -334,20 +344,33 @@ class ApplicationShell extends Widget {
         return;
       }
 
-      // Rehydrate the application.
-      let { currentWidget, leftArea, rightArea } = saved;
+      const { mainArea, leftArea, rightArea } = saved;
+
+      // Rehydrate the main area.
+      if (mainArea) {
+        if (mainArea.dock) {
+          this._dockPanel.restoreLayout(mainArea.dock);
+        }
+        if (mainArea.currentWidget) {
+          this.activateById(mainArea.currentWidget.id);
+        }
+      }
+
+      // Rehydrate the left area.
       if (leftArea) {
         this._leftHandler.rehydrate(leftArea);
       }
+
+      // Rehydrate the right area.
       if (rightArea) {
         this._rightHandler.rehydrate(rightArea);
       }
-      if (currentWidget) {
-        this.activateById(currentWidget.id);
-      }
+
+      // Set restored flag, save state, and resolve the restoration promise.
       this._isRestored = true;
       return this._save().then(() => { this._restored.resolve(saved); });
     });
+
     // Catch current changed events on the side handlers.
     this._tracker.currentChanged.connect(this._save, this);
     this._leftHandler.sideBar.currentChanged.connect(this._save, this);
@@ -355,58 +378,65 @@ class ApplicationShell extends Widget {
   }
 
   /*
-   * Return the TabBar that has the currently active Widget or undefined.
+   * Return the TabBar that has the currently active Widget or null.
    */
-  private _currentTabBar(): TabBar<Widget> {
+  private _currentTabBar(): TabBar<Widget> | null {
     let current = this._tracker.currentWidget;
-    if (current) {
-      let title = current.title;
-      let tabBar = find(this._dockPanel.tabBars(), bar => {
-        return ArrayExt.firstIndexOf(bar.titles, title) > -1;
-      });
-      return tabBar;
+    if (!current) {
+      return null;
     }
-    return void 0;
+
+    let title = current.title;
+    return find(this._dockPanel.tabBars(), bar => {
+      return ArrayExt.firstIndexOf(bar.titles, title) > -1;
+    }) || null;
   }
 
   /*
-   * Return the TabBar previous to the current TabBar (see above) or undefined.
+   * Return the TabBar previous to the current TabBar (see above) or null.
    */
-  private _previousTabBar(): TabBar<Widget> {
+  private _previousTabBar(): TabBar<Widget> | null {
     let current = this._currentTabBar();
     if (current) {
-      let bars = toArray(this._dockPanel.tabBars());
-      let len = bars.length;
-      let ci = ArrayExt.firstIndexOf(bars, current);
-      let prevBar: TabBar<Widget> = null;
-      if (ci > 0) {
-        prevBar = bars[ci - 1];
-      } else if (ci === 0) {
-        prevBar = bars[len - 1];
-      }
-      return prevBar;
+      return null;
     }
-    return void 0;
+    let bars = toArray(this._dockPanel.tabBars());
+    let len = bars.length;
+    let ci = ArrayExt.firstIndexOf(bars, current);
+
+    if (ci > 0) {
+      return bars[ci - 1];
+    }
+
+    if (ci === 0) {
+      return bars[len - 1];
+    }
+
+    return null;
   }
 
   /*
-   * Return the TabBar next to the current TabBar (see above) or undefined.
+   * Return the TabBar next to the current TabBar (see above) or null.
    */
-  private _nextTabBar(): TabBar<Widget> {
+  private _nextTabBar(): TabBar<Widget> | null {
     let current = this._currentTabBar();
-    if (current) {
-      let bars = toArray(this._dockPanel.tabBars());
-      let len = bars.length;
-      let ci = ArrayExt.firstIndexOf(bars, current);
-      let nextBar: TabBar<Widget> = null;
-      if (ci < (len - 1)) {
-        nextBar = bars[ci + 1];
-      } else if (ci === len - 1) {
-        nextBar = bars[0];
-      }
-      return nextBar;
+    if (!current) {
+      return null;
     }
-    return void 0;
+
+    let bars = toArray(this._dockPanel.tabBars());
+    let len = bars.length;
+    let ci = ArrayExt.firstIndexOf(bars, current);
+
+    if (ci < (len - 1)) {
+      return bars[ci + 1];
+    }
+
+    if (ci === len - 1) {
+      return bars[0];
+    }
+
+    return null;
   }
 
 
@@ -417,9 +447,11 @@ class ApplicationShell extends Widget {
     if (!this._database || !this._isRestored) {
       return;
     }
-
-    let data: IInstanceRestorer.ILayout = {
-      currentWidget: this._tracker.currentWidget,
+    let data: ApplicationShell.ILayout = {
+      mainArea: {
+        currentWidget: this._tracker.currentWidget,
+        dock: this._dockPanel.saveLayout(),
+      },
       leftArea: this._leftHandler.dehydrate(),
       rightArea: this._rightHandler.dehydrate()
     };
@@ -456,13 +488,13 @@ class ApplicationShell extends Widget {
     this._activeChanged.emit(args);
   }
 
-  private _database: IInstanceRestorer.ILayoutDB = null;
+  private _database: ApplicationShell.ILayoutDB = null;
   private _dockPanel: DockPanel;
   private _hboxPanel: BoxPanel;
   private _hsplitPanel: SplitPanel;
   private _isRestored = false;
   private _leftHandler: Private.SideBarHandler;
-  private _restored = new PromiseDelegate<IInstanceRestorer.ILayout>();
+  private _restored = new PromiseDelegate<ApplicationShell.ILayout>();
   private _rightHandler: Private.SideBarHandler;
   private _topPanel: Panel;
   private _tracker = new FocusTracker<Widget>();
@@ -483,6 +515,107 @@ namespace ApplicationShell {
   type Area = 'main' | 'top' | 'left' | 'right';
 
   /**
+   * The restorable description of an area within the main dock panel.
+   */
+  export
+  type AreaConfig = DockLayout.AreaConfig;
+
+  /**
+   * An arguments object for the changed signals.
+   */
+  export
+  type IChangedArgs = FocusTracker.IChangedArgs<Widget>;
+
+  /**
+   * A description of the application's user interface layout.
+   */
+  export
+  interface ILayout {
+    /**
+     * Indicates whether fetched session restore data was actually retrieved
+     * from the state database or whether it is a fresh blank slate.
+     *
+     * #### Notes
+     * This attribute is only relevant when the layout data is retrieved via a
+     * `fetch` call. If it is set when being passed into `save`, it will be
+     * ignored.
+     */
+    readonly fresh?: boolean;
+
+    /**
+     * The main area of the user interface.
+     */
+    readonly mainArea: IMainArea | null;
+
+    /**
+     * The left area of the user interface.
+     */
+    readonly leftArea: ISideArea | null;
+
+    /**
+     * The right area of the user interface.
+     */
+    readonly rightArea: ISideArea | null;
+  }
+
+  /**
+   * An application layout data store.
+   */
+  export
+  interface ILayoutDB {
+    /**
+     * Fetch the layout state for the application.
+     *
+     * #### Notes
+     * Fetching the layout relies on all widget restoration to be complete, so
+     * calls to `fetch` are guaranteed to return after restoration is complete.
+     */
+    fetch(): Promise<ApplicationShell.ILayout>;
+
+    /**
+     * Save the layout state for the application.
+     */
+    save(data: ApplicationShell.ILayout): Promise<void>;
+  }
+
+  /**
+   * The restorable description of the main application area.
+   */
+  export
+  interface IMainArea {
+    /**
+     * The current widget that has application focus.
+     */
+    readonly currentWidget: Widget | null;
+
+    /**
+     * The contents of the main application dock panel.
+     */
+    readonly dock: DockLayout.ILayoutConfig | null;
+  };
+
+  /**
+   * The restorable description of a sidebar in the user interface.
+   */
+  export
+  interface ISideArea {
+    /**
+     * A flag denoting whether the sidebar has been collapsed.
+     */
+    readonly collapsed: boolean;
+
+    /**
+     * The current widget that has side area focus.
+     */
+    readonly currentWidget: Widget | null;
+
+    /**
+     * The collection of widgets held by the sidebar.
+     */
+    readonly widgets: Array<Widget> | null;
+  }
+
+  /**
    * The options for adding a widget to a side area of the shell.
    */
   export
@@ -492,12 +625,6 @@ namespace ApplicationShell {
      */
     rank?: number;
   }
-
-  /**
-   * An arguments object for the changed signals.
-   */
-  export
-  type IChangedArgs = FocusTracker.IChangedArgs<Widget>;
 }
 
 
@@ -609,7 +736,7 @@ namespace Private {
     /**
      * Dehydrate the side bar data.
      */
-    dehydrate(): IInstanceRestorer.ISideArea {
+    dehydrate(): ApplicationShell.ISideArea {
       let collapsed = this._sideBar.currentTitle === null;
       let widgets = toArray(this._stackedPanel.widgets);
       let currentWidget = widgets[this._sideBar.currentIndex];
@@ -619,7 +746,7 @@ namespace Private {
     /**
      * Rehydrate the side bar.
      */
-    rehydrate(data: IInstanceRestorer.ISideArea): void {
+    rehydrate(data: ApplicationShell.ISideArea): void {
       if (data.currentWidget) {
         this.activate(data.currentWidget.id);
       } else if (data.collapsed) {
