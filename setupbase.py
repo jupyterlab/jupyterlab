@@ -18,7 +18,6 @@ from setuptools.command.develop import develop
 from setuptools.command.bdist_egg import bdist_egg
 from distutils import log
 from subprocess import check_call
-from distutils.spawn import find_executable
 import sys
 
 try:
@@ -262,3 +261,19 @@ class bdist_egg_disabled(bdist_egg):
     def run(self):
         sys.exit("Aborting implicit building of eggs. Use `pip install .` " +
                  " to install from source.")
+
+
+def find_executable(cmd):
+    path = os.environ.get("PATH", os.defpath)
+    path = path.split(os.pathsep)
+    seen = set()
+    if os.name == 'nt':
+        cmd += '.exe'
+    for dir in path:
+        normdir = os.path.normcase(dir)
+        if normdir not in seen:
+            seen.add(normdir)
+            name = os.path.join(dir, cmd)
+            if os.path.exists(name):
+                return name
+    return None
