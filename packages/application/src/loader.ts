@@ -78,11 +78,11 @@ class ModuleLoader {
     }
 
     // Create a new module (and put it into the cache).
-    let mod: ModuleLoader.IModule = installed[id] = Object.create({
+    let mod: ModuleLoader.IModule = installed[id] = {
       exports: {},
       require: this._boundRequire,
       id
-    });
+    };
 
     // Execute the module function.
     let callback = this._registered[id];
