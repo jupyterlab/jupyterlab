@@ -557,6 +557,6 @@ namespace Private {
    */
   export
   function normalizePath(root: string, path: string): string {
-    return PathExt.resolve(path, root);
+    return PathExt.resolve(root, path);
   }
 }

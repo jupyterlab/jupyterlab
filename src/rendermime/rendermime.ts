@@ -451,7 +451,7 @@ namespace RenderMime {
       }
       let path = this._session.path;
       let cwd = PathExt.dirname(path);
-      path = PathExt.resolve(url, cwd);
+      path = PathExt.resolve(cwd, path);
       return Promise.resolve(path);
     }
 

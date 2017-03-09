@@ -390,8 +390,9 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     if (URLExt.parse(url).protocol || url.indexOf('//') === 0) {
       return Promise.resolve(url);
     }
-    let cwd = PathExt.dirname(this._path);
-    let path = PathExt.resolve(url, cwd);
+    let path = this._session.path;
+    let cwd = PathExt.dirname(path);
+    path = PathExt.resolve(cwd, path);
     return Promise.resolve(path);
   }
 
