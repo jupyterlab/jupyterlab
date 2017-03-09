@@ -7,7 +7,7 @@ import {
 
 import {
   nbformat
-} from '..';
+} from '../../../lib/coreutils';
 
 
 const VALIDATE = nbformat.validateMimeValue;

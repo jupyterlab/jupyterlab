@@ -7,7 +7,7 @@ import {
 
 import {
   PathExt
-} from '..';
+} from '../../../lib/coreutils';
 
 
 const TESTPATH = '/foo/test/simple/test-path.js';
