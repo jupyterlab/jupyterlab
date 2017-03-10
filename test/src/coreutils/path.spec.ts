@@ -10,7 +10,7 @@ import {
 } from '../../../lib/coreutils';
 
 
-const TESTPATH = '/foo/test/simple/test-path.js';
+const TESTPATH = 'foo/test/simple/test-path.js';
 
 
 describe('@jupyterlab/coreutils', () => {
@@ -20,8 +20,8 @@ describe('@jupyterlab/coreutils', () => {
     describe('.join()', () => {
 
       it('should join the arguments and normalize the path', () => {
-        let path = PathExt.join('/foo', '../../../bar');
-        expect(path).to.equal('/bar');
+        let path = PathExt.join('foo', '../../../bar');
+        expect(path).to.equal('../../bar');
       });
 
     });
@@ -37,7 +37,7 @@ describe('@jupyterlab/coreutils', () => {
     describe('.dirname()', () => {
 
       it('should get the directory name of a path', () => {
-        expect(PathExt.dirname(TESTPATH)).to.equal('/foo/test/simple');
+        expect(PathExt.dirname(TESTPATH)).to.equal('foo/test/simple');
       });
 
     });
@@ -65,9 +65,9 @@ describe('@jupyterlab/coreutils', () => {
 
     describe('.resolve()', () => {
 
-      it('should resolve a sequence of paths to an absolute path', () => {
-        let path = PathExt.resolve('/var/lib', '../', 'file/');
-        expect(path).to.equal('/var/file');
+      it('should resolve a sequence of paths to an absolute path on the server', () => {
+        let path = PathExt.resolve('var/lib', '../', 'file/');
+        expect(path).to.equal('var/file');
       });
 
     });
@@ -75,17 +75,8 @@ describe('@jupyterlab/coreutils', () => {
     describe('.relative()', () => {
 
       it('should solve the relative path', () => {
-        let path = PathExt.relative('/var/lib', '/var/apache');
+        let path = PathExt.relative('var/lib', 'var/apache');
         expect(path).to.equal('../apache');
-      });
-
-    });
-
-    describe('.isAbsolute()', () => {
-
-      it('should determine whether a path is absolute', () => {
-        expect(PathExt.isAbsolute('/home/foo')).to.equal(true);
-        expect(PathExt.isAbsolute('./baz')).to.equal(false);
       });
 
     });
