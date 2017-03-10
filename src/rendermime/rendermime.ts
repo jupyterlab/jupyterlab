@@ -146,7 +146,14 @@ class RenderMime {
       if (model.data.has(mimeType)) {
         let options = { mimeType, model, sanitizer };
         let renderer = this._renderers[mimeType];
-        if (renderer.canRender(options)) {
+        let canRender = false;
+        try {
+          canRender = renderer.canRender(options);
+        } catch (err) {
+          console.error(
+            `Got an error when checking the renderer for the mimeType '${mimeType}'\n`, err);
+        }
+        if (canRender) {
           return true;
         }
       }
