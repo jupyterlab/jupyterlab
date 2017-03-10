@@ -5,6 +5,8 @@ import {
   JSONObject
 } from '@phosphor/coreutils';
 
+import * as urlparse
+ from 'url-parse';
 
 /**
  * The namespace for URL-related functions.
@@ -24,7 +26,7 @@ namespace URLExt {
       let a = document.createElement('a');
       return a;
     }
-    throw Error('Cannot parse a URL without a document object');
+    return urlparse(url);
   }
 
   /**
