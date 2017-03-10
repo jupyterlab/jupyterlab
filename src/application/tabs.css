@@ -168,6 +168,10 @@
   background-image: url(../default-theme/icons/md/circle.svg);
 }
 
+.p-DockPanel-tabBar .p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon:hover {
+  background-size: 16px;
+  background-image: url(../default-theme/icons/md/close-black.svg);
+}
 
 .p-TabBar-tab.p-mod-drag-image {
   background: var(--jp-layout-color1);
