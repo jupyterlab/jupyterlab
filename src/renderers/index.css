@@ -214,13 +214,17 @@ margin-top = 14, 14, 14, 14, 8, 8
 }
 
 
+.jp-RenderedHTMLCommon * + ol,
 .jp-RenderedHTMLCommon * + ul {
   margin-top: 1em;
 }
 
 
-.jp-RenderedHTMLCommon * + ol {
-  margin-top: 1em;
+.jp-RenderedHTMLCommon ul * + ul,
+.jp-RenderedHTMLCommon ul * + ol,
+.jp-RenderedHTMLCommon ol * + ul,
+.jp-RenderedHTMLCommon ol * + ol {
+  margin-top: 0em;
 }
 
 
