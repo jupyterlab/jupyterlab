@@ -38,21 +38,6 @@ describe('@jupyterlab/coreutils', () => {
 
     });
 
-    describe('.resolve()', () => {
-
-      it('should resolve a target URLExt relative to a base url', () => {
-        let path = URLExt.resolve('/foo/bar/baz', '/bar');
-        expect(path).to.equal('/bar');
-        expect(URLExt.resolve('/foo/bar', '.')).to.equal('/foo/');
-        path = URLExt.resolve(
-          'http://example.com/b//c//d;p?q#blarg',
-          'https://u:p@h.com/p/a/t/h?s#hash2'
-        );
-        expect(path).to.equal('https://u:p@h.com/p/a/t/h?s#hash2');
-      });
-
-    });
-
     describe('.join()', () => {
 
       it('should join a sequence of url components', () => {
