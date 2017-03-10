@@ -327,7 +327,10 @@ class ApplicationShell extends Widget {
    * Close all widgets in the main area.
    */
   closeAll(): void {
-    each(this._dockPanel.widgets(), widget => { widget.close(); });
+    // Make a copy of all the widget in the dock panel (using `toArray()`)
+    // before removing them because removing them while iterating through them
+    // modifies the underlying data of the iterator.
+    each(toArray(this._dockPanel.widgets()), widget => { widget.close(); });
     this._save();
   }
 
