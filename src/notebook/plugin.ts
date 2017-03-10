@@ -152,7 +152,19 @@ function activateCellTools(app: JupyterLab, restorer: IInstanceRestorer, tracker
   celltools.addItem({ tool: metadataEditor, rank: 4 });
 
   restorer.add(celltools, namespace);
-  app.shell.addToLeftArea(celltools);
+
+  app.shell.currentChanged.connect((sender, args) => {
+    if (args.newValue instanceof NotebookPanel) {
+      app.shell.addToLeftArea(celltools);
+    } else {
+      celltools.close();
+    }
+  });
+  // To avoid a race condition (if it was changed before the plugin was
+  // activated), add it here also
+  if (app.shell.currentWidget instanceof NotebookPanel) {
+     app.shell.addToLeftArea(celltools);
+  }
 
   return Promise.resolve(celltools);
 }
