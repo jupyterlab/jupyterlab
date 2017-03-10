@@ -5,9 +5,8 @@ import {
   JSONObject
 } from '@phosphor/coreutils';
 
-import * as posix
- from 'path-posix';
-
+import * as urlparse
+ from 'url-parse';
 
 /**
  * The namespace for URL-related functions.
@@ -27,21 +26,7 @@ namespace URLExt {
       let a = document.createElement('a');
       return a;
     }
-    throw Error('Cannot parse a URL without a document object');
-  }
-
-  /**
-   * Resolve a target URL relative to a base URL.
-   *
-   * @param from - The Base URL being resolved against.
-   *
-   * @param to - The HREF URL being resolved
-   *
-   * @returns the resolved url.
-   */
-  export
-  function resolve(from: string, to: string): string {
-    return posix.resolve(from, to);
+    return urlparse(url);
   }
 
   /**
@@ -53,7 +38,24 @@ namespace URLExt {
    */
   export
   function join(...parts: string[]): string {
-    return posix.join(...parts);
+    // Adapted from url-join.
+    // Copyright (c) 2016 José F. Romaniello, MIT License.
+    // https://github.com/jfromaniello/url-join/blob/v1.1.0/lib/url-join.js
+    let str = [].slice.call(parts, 0).join('/');
+
+    // make sure protocol is followed by two slashes
+    str = str.replace(/:\//g, '://');
+
+    // remove consecutive slashes
+    str = str.replace(/([^:\s])\/+/g, '$1/');
+
+    // remove trailing slash before parameters or hash
+    str = str.replace(/\/(\?|&|#[^!])/g, '$1');
+
+    // replace ? in parameters with &
+    str = str.replace(/(\?.+)\?/g, '$1&');
+
+    return str;
   }
 
   /**
@@ -69,10 +71,7 @@ namespace URLExt {
    */
   export
   function encodeParts(url: string): string {
-    // Normalize and join, split, encode, then join.
-    url = join(url);
-    let parts = url.split('/').map(encodeURIComponent);
-    return join(...parts);
+    return join(...url.split('/').map(encodeURIComponent));
   }
 
   /**
