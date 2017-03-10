@@ -194,6 +194,12 @@ namespace CodeEditor {
       let mimeType = new ObservableValue(options.mimeType || 'text/plain');
       let selections = new ObservableMap<ITextSelection[]>();
 
+      if(options.modelDB) {
+        this._modelDB = options.modelDB;
+      } else {
+        this._modelDB = new ModelDB();
+      }
+
       this._modelDB.set('value', value);
       this._modelDB.set('selections', selections);
       this._modelDB.set('mimeType', mimeType);
@@ -260,7 +266,7 @@ namespace CodeEditor {
     }
 
 
-    protected _modelDB = new ModelDB();
+    protected _modelDB: IModelDB = null;
     private _isDisposed = false;
     private _mimeTypeChanged = new Signal<this, IChangedArgs<string>>(this);
   }
@@ -575,6 +581,11 @@ namespace CodeEditor {
        * The mimetype of the model.
        */
       mimeType?: string;
+
+      /**
+       * An optional modelDB for storing model state.
+       */
+      modelDB?: IModelDB;
     }
   }
 }

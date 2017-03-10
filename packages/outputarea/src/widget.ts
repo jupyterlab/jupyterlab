@@ -41,6 +41,10 @@ import {
   IOutputModel, RenderMime
 } from '@jupyterlab/rendermime';
 
+import {
+  IModelDB
+} from '../common/modeldb';
+
 
 /**
  * The threshold in pixels to start a drag event.
@@ -862,6 +866,11 @@ namespace IOutputAreaModel {
      * If not given, a default factory will be used.
      */
     contentFactory?: IContentFactory;
+
+    /**
+     * An optional IModelDB to store the output area model.
+     */
+    modelDB?: IModelDB;
   }
 
   /**

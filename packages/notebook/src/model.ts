@@ -16,7 +16,7 @@ import {
 
 import {
   IObservableJSON, ObservableJSON, IObservableUndoableVector,
-  IObservableVector, ObservableVector, nbformat
+  IObservableVector, ObservableVector, nbformat, IModelDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -435,6 +435,11 @@ namespace NotebookModel {
      * The factory for code cell model content.
      */
     codeCellContentFactory?: CodeCellModel.IContentFactory;
+
+    /**
+     * The modelDB in which to place new content.
+     */
+    modelDB?: IModelDB;
   }
 
   /**

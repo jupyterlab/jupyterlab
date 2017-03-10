@@ -25,6 +25,10 @@ import {
   IOutputAreaModel, OutputAreaModel
 } from '@jupyterlab/outputarea';
 
+import {
+  IModelDB, ObservableValue, IObservableValue
+} from '../common/modeldb';
+
 
 /**
  * The definition of a model object for a cell.
@@ -121,13 +125,15 @@ class CellModel extends CodeEditor.Model implements ICellModel {
    * Construct a cell model from optional cell content.
    */
   constructor(options: CellModel.IOptions) {
-    super();
+    super({modelDB: options.modelDB});
     this.value.changed.connect(this.onGenericChange, this);
     let cell = options.cell;
     if (!cell) {
+      this._modelDB.set('trusted', new ObservableValue(false));
       return;
     }
-    this._trusted = !!cell.metadata['trusted'];
+    let trusted = new ObservableValue(!!cell.metadata['trusted']);
+    this._modelDB.set('trusted', trusted);
     delete cell.metadata['trusted'];
 
     if (Array.isArray(cell.source)) {
@@ -175,18 +181,18 @@ class CellModel extends CodeEditor.Model implements ICellModel {
    * Get the trusted state of the model.
    */
   get trusted(): boolean {
-    return this._trusted;
+    return (this._modelDB.get('trusted') as IObservableValue).get() as boolean;
   }
 
   /**
    * Set the trusted state of the model.
    */
   set trusted(newValue: boolean) {
-    if (this._trusted === newValue) {
+    let oldValue = this.trusted;
+    if (oldValue === newValue) {
       return;
     }
-    let oldValue = this._trusted;
-    this._trusted = newValue;
+    (this._modelDB.get('trusted') as IObservableValue).set(newValue);
     this.onTrustedChanged(newValue);
     this.stateChanged.emit({ name: 'trusted', oldValue, newValue });
   }
@@ -233,7 +239,6 @@ class CellModel extends CodeEditor.Model implements ICellModel {
   }
 
   private _metadata = new ObservableJSON();
-  private _trusted = false;
 }
 
 
@@ -250,6 +255,11 @@ namespace CellModel {
      * The source cell data.
      */
     cell?: nbformat.IBaseCell;
+
+    /**
+     * An IModelDB in which to store cell data.
+     */
+    modelDB?: IModelDB;
   }
 }
 
@@ -308,8 +318,11 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
     let cell = options.cell as nbformat.ICodeCell;
     let outputs: nbformat.IOutput[] = [];
     if (cell && cell.cell_type === 'code') {
-      this.executionCount = cell.execution_count;
+      let executionCount = new ObservableValue(cell.execution_count || null);
+      this._modelDB.set('executionCount', executionCount);
       outputs = cell.outputs;
+    } else {
+      this._modelDB.set('executionCount', new ObservableValue(null));
     }
     this._outputs = factory.createOutputArea({
       trusted,
@@ -329,14 +342,14 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
    * The execution count of the cell.
    */
   get executionCount(): nbformat.ExecutionCount {
-    return this._executionCount || null;
+    return (this._modelDB.get('executionCount') as IObservableValue).get() as number || null;
   }
   set executionCount(newValue: nbformat.ExecutionCount) {
-    if (newValue === this._executionCount) {
+    let oldValue = this.executionCount;
+    if (newValue === oldValue) {
       return;
     }
-    let oldValue = this.executionCount;
-    this._executionCount = newValue || null;
+    (this._modelDB.get('executionCount') as IObservableValue).set(newValue || null);
     this.contentChanged.emit(void 0);
     this.stateChanged.emit({ name: 'executionCount', oldValue, newValue });
   }
@@ -380,7 +393,6 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
   }
 
   private _outputs: IOutputAreaModel = null;
-  private _executionCount: nbformat.ExecutionCount = null;
 }
 
 

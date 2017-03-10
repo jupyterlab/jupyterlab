@@ -25,7 +25,7 @@ interface IObservableChangedArgs {
 }
 
 export
-interface IObservableValue extends IObservable{
+interface IObservableValue extends IObservable {
 
   type: 'value';
 
@@ -45,20 +45,13 @@ interface IObservableValueChangedArgs extends IObservableChangedArgs {
 
 export
 interface IModelDB {
-  changed: ISignal<IModelDB, IModelDBChangedArgs>
+  changed: ISignal<IModelDB, ModelDB.IChangedArgs>
+
+  readonly basePath: string;
 
   get(path: string): IObservable;
 
   set(path: string, value: IObservable): void;
-}
-
-export
-interface IModelDBChangedArgs {
-  path: string;
-
-  oldValue: IObservable;
-
-  newValue: IObservable;
 }
 
 export
@@ -92,27 +85,69 @@ class ObservableValue implements IObservableValue {
 
 export
 class ModelDB implements IModelDB {
-  constructor() {
-    this._db.changed.connect((db, args)=>{
-      this._changed.emit({
-        path: args.key,
-        newValue: args.newValue,
-        oldValue: args.oldValue
+  constructor(options: ModelDB.ICreateOptions = {}) {
+    this._basePath = options.basePath || '';
+    if(options.baseDB) {
+      this._baseDB = options.baseDB;
+      this._baseDB.changed.connect((db, args)=>{
+        this._changed.emit({
+          path: args.path
+        });
+      })
+    } else {
+      this._db = new ObservableMap<IObservable>();
+      this._db.changed.connect((db, args)=>{
+        this._changed.emit({
+          path: args.key,
+        });
       });
-    });
+    }
   }
-  get changed(): ISignal<this, IModelDBChangedArgs> {
+
+  get basePath(): string {
+    return this._basePath;
+  }
+
+  get changed(): ISignal<this, ModelDB.IChangedArgs> {
     return this._changed;
   }
 
   get(path: string): IObservable {
-    return this._db.get(path);
+    if(this._baseDB) {
+      return this._baseDB.get(this._basePath+path);
+    } else {
+      return this._db.get(this._basePath + path);
+    }
   }
 
   set(path: string, value: IObservable): void {
-    this._db.set(path, value);
+    if(this._baseDB) {
+      this._baseDB.set(this._basePath+path, value);
+    } else {
+      this._db.set(this._basePath + path, value);
+    }
   }
 
-  private _changed = new Signal<this, IModelDBChangedArgs>(this);
-  private _db = new ObservableMap<IObservable>();
+  view(basePath: string): ModelDB {
+    return new ModelDB({basePath, baseDB: this});
+  }
+
+  private _changed = new Signal<this, ModelDB.IChangedArgs>(this);
+  private _db: ObservableMap<IObservable>;
+  private _basePath: string;
+  private _baseDB: IModelDB = null;
+}
+
+export
+namespace ModelDB {
+  export
+  interface IChangedArgs {
+    path: string;
+  }
+
+  export
+  interface ICreateOptions {
+    basePath?: string;
+    baseDB?: IModelDB;
+  }
 }
