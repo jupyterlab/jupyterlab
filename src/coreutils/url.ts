@@ -36,24 +36,24 @@ namespace URLExt {
    */
   export
   function join(...parts: string[]): string {
-    let url = '';
-    for (let i = 0; i < parts.length; i++) {
-      if (parts[i] === '') {
-        continue;
-      }
-      if (url.length > 0 && url[url.length - 1] !== '/') {
-        url = url + '/' + parts[i];
-      } else {
-        url = url + parts[i];
-      }
-    }
-    url = url.replace(/\/\/+/, '/');
+    // Adapted from url-join.
+    // Copyright (c) 2016 José F. Romaniello, MIT License.
+    // https://github.com/jfromaniello/url-join/blob/v1.1.0/lib/url-join.js
+    let str = [].slice.call(parts, 0).join('/');
 
-    // Handle a protocol in the first part.
-    if (parts[0] && parts[0].indexOf('//') !== -1) {
-      url = url.replace('/', '//');
-    }
-    return url;
+    // make sure protocol is followed by two slashes
+    str = str.replace(/:\//g, '://');
+
+    // remove consecutive slashes
+    str = str.replace(/([^:\s])\/+/g, '$1/');
+
+    // remove trailing slash before parameters or hash
+    str = str.replace(/\/(\?|&|#[^!])/g, '$1');
+
+    // replace ? in parameters with &
+    str = str.replace(/(\?.+)\?/g, '$1&');
+
+    return str;
   }
 
   /**
@@ -69,7 +69,7 @@ namespace URLExt {
    */
   export
   function encodeParts(url: string): string {
-    return join(...uri.split('/').map(encodeURIComponent));
+    return join(...url.split('/').map(encodeURIComponent));
   }
 
   /**
