@@ -270,11 +270,9 @@ margin-top = 14, 14, 14, 14, 8, 8
   text-align: right;
   vertical-align: middle;
   padding: 0.5em 0.5em;
-  line-height: 1.0;
-  white-space: nowrap;
-  max-width: 150px;
-  text-overflow: ellipsis;
-  overflow: hidden;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
   border: none;
 }
 
