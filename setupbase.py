@@ -4,7 +4,7 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-# From https://github.com/jupyter/jupyter-packaging/blob/11678d1eddcc33c735fe1ae9f75b404353d5e161/jupyter_packaging.py
+# from https://github.com/jupyter/jupyter-packaging/blob/v0.2.0/jupyter_packaging.py
 
 import os
 from os.path import join as pjoin
@@ -32,7 +32,7 @@ else:
         return ' '.join(map(pipes.quote, cmd_list))
 
 
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 # ---------------------------------------------------------------------------
 # Top Level Variables
@@ -215,56 +215,7 @@ def install_npm(path=None, build_dir=None, source_dir=None, build_cmd='build'):
     return NPM
 
 
-# ---------------------------------------------------------------------------
-# Private Functions
-# ---------------------------------------------------------------------------
-
-
-def wrap_command(cmds, data_dirs, cls, strict=True):
-    """Wrap a setup command
-
-    Parameters
-    ----------
-    cmds: list(str)
-        The names of the other commands to run prior to the command.
-    strict: boolean, optional
-        Wether to raise errors when a pre-command fails.
-    """
-    class WrappedCommand(cls):
-
-        def run(self):
-            if not getattr(self, 'uninstall', None):
-                try:
-                    [self.run_command(cmd) for cmd in cmds]
-                except Exception:
-                    if strict:
-                        raise
-                    else:
-                        pass
-
-            result = cls.run(self)
-            data_files = []
-            for dname in data_dirs:
-                data_files.extend(get_data_files(dname))
-            # update data-files in case this created new files
-            self.distribution.data_files = data_files
-            return result
-    return WrappedCommand
-
-
-class bdist_egg_disabled(bdist_egg):
-    """Disabled version of bdist_egg
-    Prevents setup.py install performing setuptools' default easy_install,
-    which it should never ever do.
-    """
-
-    def run(self):
-        sys.exit("Aborting implicit building of eggs. Use `pip install .` " +
-                 " to install from source.")
-
-
-# Everything below this point has been copied verbatim from the Python-3.3
-# sources.
+# `shutils.which` function copied verbatim from the Python-3.3 source.
 def which(cmd, mode=os.F_OK | os.X_OK, path=None):
     """Given a command, mode, and a PATH string, return the path which
     conforms to the given mode on the PATH, or None if there is no such
@@ -316,3 +267,51 @@ def which(cmd, mode=os.F_OK | os.X_OK, path=None):
                 if _access_check(name, mode):
                     return name
     return None
+
+
+# ---------------------------------------------------------------------------
+# Private Functions
+# ---------------------------------------------------------------------------
+
+
+def wrap_command(cmds, data_dirs, cls, strict=True):
+    """Wrap a setup command
+
+    Parameters
+    ----------
+    cmds: list(str)
+        The names of the other commands to run prior to the command.
+    strict: boolean, optional
+        Wether to raise errors when a pre-command fails.
+    """
+    class WrappedCommand(cls):
+
+        def run(self):
+            if not getattr(self, 'uninstall', None):
+                try:
+                    [self.run_command(cmd) for cmd in cmds]
+                except Exception:
+                    if strict:
+                        raise
+                    else:
+                        pass
+
+            result = cls.run(self)
+            data_files = []
+            for dname in data_dirs:
+                data_files.extend(get_data_files(dname))
+            # update data-files in case this created new files
+            self.distribution.data_files = data_files
+            return result
+    return WrappedCommand
+
+
+class bdist_egg_disabled(bdist_egg):
+    """Disabled version of bdist_egg
+    Prevents setup.py install performing setuptools' default easy_install,
+    which it should never ever do.
+    """
+
+    def run(self):
+        sys.exit("Aborting implicit building of eggs. Use `pip install .` " +
+                 " to install from source.")
