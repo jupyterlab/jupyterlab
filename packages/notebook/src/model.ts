@@ -6,6 +6,10 @@ import {
 } from '@phosphor/algorithm';
 
 import {
+  nbformat, utils
+} from '@jupyterlab/services';
+
+import {
   DocumentModel, DocumentRegistry
 } from '@jupyterlab/docregistry';
 
@@ -16,7 +20,7 @@ import {
 
 import {
   IObservableJSON, ObservableJSON, IObservableUndoableVector,
-  IObservableVector, ObservableVector, nbformat, IModelDB
+  IObservableVector, ObservableVector, nbformat, IModelDB, ObservableValue
 } from '@jupyterlab/coreutils';
 
 import {
@@ -69,11 +73,13 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     let factory = (
       options.contentFactory || NotebookModel.defaultContentFactory
     );
+    factory.modelDB = this._modelDB.view('cells');
     this.contentFactory = factory;
     this._cells = new CellList();
     // Add an initial code cell by default.
-    this._cells.pushBack(factory.createCodeCell({}));
-    this._cells.changed.connect(this._onCellsChanged, this);
+    cells.pushBack(factory.createCodeCell({}));
+    cells.changed.connect(this._onCellsChanged, this);
+    this._modelDB.set('cells', cells);
 
     // Handle initial metadata.
     let name = options.languagePreference || '';
@@ -98,7 +104,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    * Get the observable list of notebook cells.
    */
   get cells(): IObservableUndoableVector<ICellModel> {
-    return this._cells;
+    return this._modelDB.get('cells') as IObservableUndoableVector<ICellModel>;
   }
 
   /**
@@ -136,11 +142,11 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    */
   dispose(): void {
     // Do nothing if already disposed.
-    if (this._cells === null) {
+    if (this.cells === null) {
       return;
     }
-    let cells = this._cells;
-    this._cells = null;
+    let cells = this.cells;
+    this._modelDB.set('cells', new ObservableValue(null));
     this._metadata.dispose();
     cells.dispose();
     super.dispose();
@@ -269,12 +275,12 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     }
     let factory = this.contentFactory;
     // Add code cell if there are no cells remaining.
-    if (!this._cells.length) {
+    if (!this.cells.length) {
       // Add the cell in a new context to avoid triggering another
       // cell changed event during the handling of this signal.
       requestAnimationFrame(() => {
-        if (!this.isDisposed && !this._cells.length) {
-          this._cells.pushBack(factory.createCodeCell({}));
+        if (!this.isDisposed && !this.cells.length) {
+          this.cells.pushBack(factory.createCodeCell({}));
         }
       });
     }
@@ -294,7 +300,6 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     }
   }
 
-  private _cells: IObservableUndoableVector<ICellModel> = null;
   private _nbformat = nbformat.MAJOR_VERSION;
   private _nbformatMinor = nbformat.MINOR_VERSION;
   private _metadata = new ObservableJSON();
@@ -333,6 +338,8 @@ namespace NotebookModel {
      * The factory for output area models.
      */
     readonly codeCellContentFactory: CodeCellModel.IContentFactory;
+
+    modelDB: IModelDB;
 
     /**
      * Create a new code cell.
@@ -377,12 +384,21 @@ namespace NotebookModel {
       this.codeCellContentFactory = (options.codeCellContentFactory ||
         CodeCellModel.defaultContentFactory
       );
+      this._modelDB = options.modelDB || null;
     }
 
     /**
      * The factory for code cell content.
      */
     readonly codeCellContentFactory: CodeCellModel.IContentFactory;
+
+    get modelDB(): IModelDB {
+      return this._modelDB;
+    }
+
+    set modelDB(db: IModelDB) {
+      this._modelDB = db;
+    }
 
     /**
      * Create a new code cell.
@@ -398,6 +414,9 @@ namespace NotebookModel {
       if (options.contentFactory) {
         options.contentFactory = this.codeCellContentFactory;
       }
+      if(this._modelDB) {
+        options.modelDB = this._modelDB.view(utils.uuid());
+      }
       return new CodeCellModel(options);
     }
 
@@ -410,6 +429,9 @@ namespace NotebookModel {
      *   new cell will be intialized with the data from the source.
      */
     createMarkdownCell(options: CellModel.IOptions): IMarkdownCellModel {
+      if(this._modelDB) {
+        options.modelDB = this._modelDB.view(utils.uuid());
+      }
       return new MarkdownCellModel(options);
     }
 
@@ -422,8 +444,13 @@ namespace NotebookModel {
      *   new cell will be intialized with the data from the source.
      */
     createRawCell(options: CellModel.IOptions): IRawCellModel {
+      if(this._modelDB) {
+        options.modelDB = this._modelDB.view(utils.uuid());
+      }
      return new RawCellModel(options);
     }
+
+    private _modelDB: IModelDB;
   }
 
   /**

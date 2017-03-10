@@ -404,12 +404,7 @@ namespace CodeCellModel {
   /**
    * The options used to initialize a `CodeCellModel`.
    */
-  export interface IOptions {
-    /**
-     * The source cell data.
-     */
-    cell?: nbformat.IBaseCell;
-
+  export interface IOptions extends CellModel.IOptions {
     /**
      * The factory for output area model creation.
      */

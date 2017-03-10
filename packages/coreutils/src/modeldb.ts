@@ -52,6 +52,8 @@ interface IModelDB {
   get(path: string): IObservable;
 
   set(path: string, value: IObservable): void;
+
+  view(basePath: string): IModelDB;
 }
 
 export
@@ -114,17 +116,17 @@ class ModelDB implements IModelDB {
 
   get(path: string): IObservable {
     if(this._baseDB) {
-      return this._baseDB.get(this._basePath+path);
+      return this._baseDB.get(this._basePath+'/'+path);
     } else {
-      return this._db.get(this._basePath + path);
+      return this._db.get(this._basePath+'/'+path);
     }
   }
 
   set(path: string, value: IObservable): void {
     if(this._baseDB) {
-      this._baseDB.set(this._basePath+path, value);
+      this._baseDB.set(this._basePath+'/'+path, value);
     } else {
-      this._db.set(this._basePath + path, value);
+      this._db.set(this._basePath+'/'+path, value);
     }
   }
 
