@@ -27,7 +27,7 @@ var mods = [
   require('jupyterlab/lib/plugin-help'),
   require('jupyterlab/lib/imagewidget/plugin'),
   require('jupyterlab/lib/inspector/plugin'),
-  require('jupyterlab/lib/landing/plugin'),
+  require('jupyterlab/lib/plugin-landing'),
   require('jupyterlab/lib/launcher/plugin'),
   require('jupyterlab/lib/instancerestorer/plugin'),
   require('jupyterlab/lib/mainmenu/plugin'),

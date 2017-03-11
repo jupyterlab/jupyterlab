@@ -22,8 +22,18 @@ import {
 } from '../services';
 
 import {
-  CommandIDs, LandingModel, LandingWidget
-} from './';
+  LandingModel, LandingWidget
+} from './widget';
+
+
+/**
+ * The command IDs used by the landing plugin.
+ */
+namespace CommandIDs {
+  export
+  const open: string = 'landing-jupyterlab:open';
+};
+
 
 /**
  * The class name added to the landing plugin.
