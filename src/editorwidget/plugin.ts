@@ -27,11 +27,6 @@ import {
 
 
 /**
- * The class name for all main area portrait tab icons.
- */
-const PORTRAIT_ICON_CLASS = 'jp-MainAreaPortraitIcon';
-
-/**
  * The class name for the text editor icon from the default theme.
  */
 const EDITOR_ICON_CLASS = 'jp-ImageTextEditor';
@@ -85,7 +80,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInsta
   });
 
   factory.widgetCreated.connect((sender, widget) => {
-    widget.title.icon = `${PORTRAIT_ICON_CLASS} ${EDITOR_ICON_CLASS}`;
+    widget.title.icon = EDITOR_ICON_CLASS;
     // Notify the instance tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => { tracker.save(widget); });
     tracker.add(widget);

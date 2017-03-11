@@ -27,11 +27,6 @@ import {
 
 
 /**
- * The class name for all main area portrait tab icons.
- */
-const PORTRAIT_ICON_CLASS = 'jp-MainAreaPortraitIcon';
-
-/**
  * The class name for the text editor icon from the default theme.
  */
 const TEXTEDITOR_ICON_CLASS = 'jp-ImageTextEditor';
@@ -65,7 +60,6 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, rendermime: IRen
     const shell = app.shell;
     const namespace = 'rendered-markdown';
     const tracker = new InstanceTracker<MarkdownWidget>({ namespace, shell });
-    let icon = `${PORTRAIT_ICON_CLASS} ${TEXTEDITOR_ICON_CLASS}`;
 
     // Handle state restoration.
     restorer.restore(tracker, {
@@ -75,7 +69,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, rendermime: IRen
     });
 
     factory.widgetCreated.connect((sender, widget) => {
-      widget.title.icon = icon;
+      widget.title.icon = TEXTEDITOR_ICON_CLASS;
       // Notify the instance tracker if restore data needs to update.
       widget.context.pathChanged.connect(() => { tracker.save(widget); });
       tracker.add(widget);

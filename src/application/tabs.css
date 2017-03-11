@@ -143,10 +143,17 @@
 }
 
 
-.p-DockPanel-tabBar .p-TabBar-tabIcon {
+.p-DockPanel-tabBar .p-TabBar-tab .p-TabBar-tabIcon {
   width: 14px;
-  margin-top: 2px;
+  background-position: left center;
+  background-repeat: no-repeat;
+  margin-right: 2px;
 }
+
+.p-DockPanel-tabBar .p-TabBar-tab.p-mod-current .p-TabBar-tabIcon {
+  margin-bottom: var(--jp-border-width);
+}
+
 .p-TabBar-WindowTabLabel {
   margin-top: 4px;
 }

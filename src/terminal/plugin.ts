@@ -32,11 +32,6 @@ import {
 
 
 /**
- * The class name for all main area landscape tab icons.
- */
-const LANDSCAPE_ICON_CLASS = 'jp-MainAreaLandscapeIcon';
-
-/**
  * The class name for the terminal icon in the default theme.
  */
 const TERMINAL_ICON_CLASS = 'jp-ImageTerminal';
@@ -94,7 +89,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
       let name = args ? args['name'] as string : '';
       let term = new TerminalWidget();
       term.title.closable = true;
-      term.title.icon = `${LANDSCAPE_ICON_CLASS} ${TERMINAL_ICON_CLASS}`;
+      term.title.icon = TERMINAL_ICON_CLASS;
       tracker.add(term);
       shell.addToMainArea(term);
       tracker.activate(term);

@@ -57,11 +57,6 @@ import {
 
 
 /**
- * The class name for all main area portrait tab icons.
- */
-const PORTRAIT_ICON_CLASS = 'jp-MainAreaPortraitIcon';
-
-/**
  * The class name for the notebook icon from the default theme.
  */
 const NOTEBOOK_ICON_CLASS = 'jp-ImageNotebook';
@@ -208,7 +203,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
   factory.widgetCreated.connect((sender, widget) => {
     // If the notebook panel does not have an ID, assign it one.
     widget.id = widget.id || `notebook-${++id}`;
-    widget.title.icon = `${PORTRAIT_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
+    widget.title.icon = NOTEBOOK_ICON_CLASS;
     // Notify the instance tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => { tracker.save(widget); });
     // Add the notebook panel to the tracker.
