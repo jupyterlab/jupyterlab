@@ -28,10 +28,10 @@
 @import '../editorwidget/index.css';
 @import '../plugin-faq/index.css';
 @import '../filebrowser/index.css';
-@import '../help/index.css';
+@import '../plugin-help/index.css';
 @import '../imagewidget/index.css';
 @import '../inspector/index.css';
-@import '../landing/index.css';
+@import '../plugin-landing/index.css';
 @import '../launcher/index.css';
 @import '../markdownwidget/index.css';
 @import '../notebook/index.css';
