@@ -26,10 +26,6 @@ import {
 } from '../commandpalette';
 
 import {
-  CommandIDs as FAQCommandIDs
-} from '../faq';
-
-import {
   IInstanceRestorer
 } from '../instancerestorer';
 
@@ -188,7 +184,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     menu.title.label = category;
 
     menu.addItem({ command: 'about-jupyterlab:open' });
-    menu.addItem({ command: FAQCommandIDs.open });
+    menu.addItem({ command: 'faq-jupyterlab:open' });
     menu.addItem({ command: CommandIDs.launchClassic });
     menu.addItem({ type: 'separator' });
     RESOURCES.forEach(args => { menu.addItem({ args, command }); });

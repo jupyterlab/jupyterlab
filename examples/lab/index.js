@@ -22,7 +22,7 @@ var mods = [
   require('jupyterlab/lib/docmanager/plugin'),
   require('jupyterlab/lib/docregistry/plugin'),
   require('jupyterlab/lib/editorwidget/plugin'),
-  require('jupyterlab/lib/faq/plugin'),
+  require('jupyterlab/lib/plugin-faq'),
   require('jupyterlab/lib/filebrowser/plugin'),
   require('jupyterlab/lib/help/plugin'),
   require('jupyterlab/lib/imagewidget/plugin'),
