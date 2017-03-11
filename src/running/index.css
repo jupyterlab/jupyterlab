@@ -42,7 +42,7 @@
   background: var(--jp-layout-color1);
   border: none;
   outline: 0;
-  background-image: url(../default-theme/images/refresh.svg);
+  background-image: url(../default-theme/icons/md/refresh.svg);
   background-size: 16px;
   display: block;
   vertical-align: middle;

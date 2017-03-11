@@ -108,11 +108,6 @@ export default plugins;
 
 
 /**
- * The class name for all main area landscape tab icons.
- */
-const LANDSCAPE_ICON_CLASS = 'jp-MainAreaLandscapeIcon';
-
-/**
  * The class name for the console icon from the default theme.
  */
 const CONSOLE_ICON_CLASS = 'jp-ImageCodeConsole';
@@ -401,7 +396,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     panel.id = panel.id || `console-${++id}`;
     panel.title.label = name;
     panel.title.caption = Private.caption(captionOptions);
-    panel.title.icon = `${LANDSCAPE_ICON_CLASS} ${CONSOLE_ICON_CLASS}`;
+    panel.title.icon = CONSOLE_ICON_CLASS;
     panel.title.closable = true;
     // Update the caption of the tab with the last execution time.
     panel.console.executed.connect((sender, executed) => {
