@@ -121,9 +121,13 @@
   background-origin: content-box;
   background-repeat: no-repeat;
   clear: none;
-  padding-top: 2px;
-  height: 12px;
-  width: 12px;
+  height: 1em;
+  width: 1em;
+  line-height: 1em;
+}
+
+.jp-Landing-folder:empty:before {
+  content: "\00a0";
 }
 
 .jp-Landing-path {
