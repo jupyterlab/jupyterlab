@@ -31,7 +31,7 @@ const mods: JupyterLab.IPluginModule[] = [
   require('../../lib/editorwidget/plugin'),
   require('../../lib/plugin-faq'),
   require('../../lib/filebrowser/plugin'),
-  require('../../lib/help/plugin'),
+  require('../../lib/plugin-help'),
   require('../../lib/imagewidget/plugin'),
   require('../../lib/inspector/plugin'),
   require('../../lib/landing/plugin'),

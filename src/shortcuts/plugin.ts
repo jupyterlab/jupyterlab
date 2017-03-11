@@ -26,10 +26,6 @@ import {
 } from '../filebrowser';
 
 import {
-  CommandIDs as HelpCommandIDs
-} from '../help';
-
-import {
   CommandIDs as ImageWidgetCommandIDs
 } from '../imagewidget';
 
@@ -146,7 +142,7 @@ const SHORTCUTS = [
     keys: ['Ctrl Shift Q']
   },
   {
-    command: HelpCommandIDs.toggle,
+    command: 'help-jupyterlab:toggle',
     selector: 'body',
     keys: ['Accel Shift H']
   },
