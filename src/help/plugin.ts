@@ -14,10 +14,6 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  CommandIDs as AboutCommandIDs
-} from '../about';
-
-import {
   InstanceTracker, JupyterLab, JupyterLabPlugin
 } from '../application';
 
@@ -191,7 +187,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     let menu = new Menu({ commands });
     menu.title.label = category;
 
-    menu.addItem({ command: AboutCommandIDs.open });
+    menu.addItem({ command: 'about-jupyterlab:open' });
     menu.addItem({ command: FAQCommandIDs.open });
     menu.addItem({ command: CommandIDs.launchClassic });
     menu.addItem({ type: 'separator' });

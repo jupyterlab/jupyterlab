@@ -18,7 +18,7 @@
 
 
 /* Individual plugins */
-@import '../about/index.css';
+@import '../plugin-about/index.css';
 @import '../cells/index.css';
 @import '../codemirror/index.css';
 @import '../commandpalette/index.css';

@@ -18,7 +18,7 @@ polyfill();
 
 /* tslint:disable */
 const mods: JupyterLab.IPluginModule[] = [
-  require('../../lib/about/plugin'),
+  require('../../lib/plugin-about'),
   require('../../lib/application/plugin'),
   require('../../lib/codemirror/plugin'),
   require('../../lib/commandlinker/plugin'),

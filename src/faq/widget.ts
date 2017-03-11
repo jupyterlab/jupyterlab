@@ -10,10 +10,6 @@ import {
 } from '@phosphor/virtualdom';
 
 import {
-  CommandIDs as AboutCommandIDs
-} from '../about';
-
-import {
   ICommandLinker
 } from '../commandlinker';
 
@@ -268,7 +264,7 @@ class FaqWidget extends VDomWidget<FaqModel> {
           'Check out the JupyterLab tour ',
           h.a({
             className: ANCHOR_CLASS,
-            dataset: linker.populateVNodeDataset(AboutCommandIDs.open, null)
+            dataset: linker.populateVNodeDataset('about-jupyterlab:open', null)
           }, 'here')
         )
       ),
