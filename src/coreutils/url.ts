@@ -24,6 +24,7 @@ namespace URLExt {
   function parse(url: string): IUrl {
     if (typeof document !== 'undefined') {
       let a = document.createElement('a');
+      a.href = url;
       return a;
     }
     return urlparse(url);
@@ -96,7 +97,13 @@ namespace URLExt {
    */
   export
   function isLocal(url: string): boolean {
-    return !parse(url).protocol && url.indexOf('//') !== 0;
+    switch (parse(url).hostname) {
+    case 'localhost':
+    case '':
+      return true;
+    default:
+      return false;
+    }
   }
 
   /**

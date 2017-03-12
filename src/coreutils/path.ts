@@ -7,6 +7,8 @@ import * as posix
 
 /**
  * The namespace for path-related functions.
+ *
+ * Note that Jupyter server paths do not start with a leading slash.
  */
 export
 namespace PathExt {
@@ -18,7 +20,7 @@ namespace PathExt {
    */
   export
   function join(...paths: string[]): string {
-    return posix.join(...paths);
+    return removeSlash(posix.join(...paths));
   }
 
   /**
@@ -41,7 +43,7 @@ namespace PathExt {
    */
   export
   function dirname(path: string): string {
-    return posix.dirname(path);
+    return removeSlash(posix.dirname(path));
   }
 
   /**
@@ -108,17 +110,6 @@ namespace PathExt {
   export
   function relative(from: string, to: string): string {
     return removeSlash(posix.relative(from, to));
-  }
-
-  /**
-   * Determines whether {path} is an absolute path. An absolute path will
-   * always resolve to the same location, regardless of the working directory.
-   *
-   * @param path - The path to test.
-   */
-  export
-  function isAbsolute(path: string): boolean {
-    return posix.isAbsolute(path);
   }
 
   /**
