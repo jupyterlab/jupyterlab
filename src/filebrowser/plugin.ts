@@ -18,6 +18,10 @@ import {
 } from '../application';
 
 import {
+  ILayoutRestorer
+} from '../apputils/layoutrestorer';
+
+import {
   ICommandPalette
 } from '../commandpalette';
 
@@ -28,10 +32,6 @@ import {
 import {
   IDocumentRegistry, DocumentRegistry
 } from '../docregistry';
-
-import {
-  IInstanceRestorer
-} from '../instancerestorer';
 
 import {
   IMainMenu
@@ -63,7 +63,7 @@ const plugin: JupyterLabPlugin<IPathTracker> = {
     IDocumentRegistry,
     IMainMenu,
     ICommandPalette,
-    IInstanceRestorer,
+    ILayoutRestorer,
     IStateDB
   ],
   autoStart: true
@@ -84,7 +84,7 @@ const NAMESPACE = 'filebrowser';
 /**
  * Activate the file browser.
  */
-function activate(app: JupyterLab, manager: IServiceManager, documentManager: IDocumentManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, restorer: IInstanceRestorer, state: IStateDB): IPathTracker {
+function activate(app: JupyterLab, manager: IServiceManager, documentManager: IDocumentManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer, state: IStateDB): IPathTracker {
   const { commands } = app;
   let fbModel = new FileBrowserModel({ manager });
   let fbWidget = new FileBrowser({

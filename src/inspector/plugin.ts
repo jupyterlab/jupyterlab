@@ -6,16 +6,16 @@ import {
 } from '../application';
 
 import {
+  ILayoutRestorer
+} from '../apputils/layoutrestorer';
+
+import {
   ICommandPalette
 } from '../commandpalette';
 
 import {
   IConsoleTracker
 } from '../console';
-
-import {
-  IInstanceRestorer
-} from '../instancerestorer';
 
 import {
   INotebookTracker
@@ -35,10 +35,10 @@ import {
  */
 const service: JupyterLabPlugin<IInspector> = {
   id: 'jupyter.services.inspector',
-  requires: [ICommandPalette, IInstanceRestorer],
+  requires: [ICommandPalette, ILayoutRestorer],
   provides: IInspector,
   autoStart: true,
-  activate: (app: JupyterLab, palette: ICommandPalette, restorer: IInstanceRestorer): IInspector => {
+  activate: (app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRestorer): IInspector => {
     const { commands, shell } = app;
     const manager = new InspectorManager();
     const category = 'Inspector';

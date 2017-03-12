@@ -11,12 +11,12 @@ import {
 } from '../application';
 
 import {
-  ICommandPalette
-} from '../commandpalette';
+  ILayoutRestorer
+} from '../apputils/layoutrestorer';
 
 import {
-  IInstanceRestorer
-} from '../instancerestorer';
+  ICommandPalette
+} from '../commandpalette';
 
 import {
   IMainMenu
@@ -45,7 +45,7 @@ const plugin: JupyterLabPlugin<ITerminalTracker> = {
   id: 'jupyter.extensions.terminal',
   provides: ITerminalTracker,
   requires: [
-    IServiceManager, IMainMenu, ICommandPalette, IInstanceRestorer
+    IServiceManager, IMainMenu, ICommandPalette, ILayoutRestorer
   ],
   autoStart: true
 };
@@ -60,7 +60,7 @@ export default plugin;
 /**
  * Activate the terminal plugin.
  */
-function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, restorer: IInstanceRestorer): ITerminalTracker {
+function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer): ITerminalTracker {
   // Bail if there are no terminals available.
   if (!services.terminals.isAvailable()) {
     console.log('Disabling terminals plugin because they are not available on the server');

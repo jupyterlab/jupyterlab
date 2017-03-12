@@ -6,6 +6,10 @@ import {
 } from '../application';
 
 import {
+  ILayoutRestorer
+} from '../apputils/layoutrestorer';
+
+import {
   ICommandPalette
 } from '../commandpalette';
 
@@ -16,10 +20,6 @@ import {
 import {
   CommandIDs as FileBrowserCommandIDs
 } from '../filebrowser';
-
-import {
-  IInstanceRestorer
-} from '../instancerestorer';
 
 import {
   CommandIDs, ImageWidget, ImageWidgetFactory, IImageTracker
@@ -44,7 +44,7 @@ const plugin: JupyterLabPlugin<IImageTracker> = {
   activate,
   id: 'jupyter.extensions.image-handler',
   provides: IImageTracker,
-  requires: [IDocumentRegistry, ICommandPalette, IInstanceRestorer],
+  requires: [IDocumentRegistry, ICommandPalette, ILayoutRestorer],
   autoStart: true
 };
 
@@ -58,7 +58,7 @@ export default plugin;
 /**
  * Activate the image widget extension.
  */
-function activate(app: JupyterLab, registry: IDocumentRegistry, palette: ICommandPalette, restorer: IInstanceRestorer): IImageTracker {
+function activate(app: JupyterLab, registry: IDocumentRegistry, palette: ICommandPalette, restorer: ILayoutRestorer): IImageTracker {
   const namespace = 'image-widget';
   const factory = new ImageWidgetFactory({
     name: FACTORY,

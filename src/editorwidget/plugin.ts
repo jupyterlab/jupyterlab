@@ -6,6 +6,10 @@ import {
 } from '../application';
 
 import {
+  ILayoutRestorer
+} from '../apputils/layoutrestorer';
+
+import {
   IEditorServices
 } from '../codeeditor';
 
@@ -18,11 +22,7 @@ import {
 } from '../filebrowser';
 
 import {
-  IInstanceRestorer
-} from '../instancerestorer';
-
-import {
-  IEditorTracker, EditorWidget, EditorWidgetFactory, CommandIDs, addDefaultCommands
+  IEditorTracker, EditorWidget, EditorWidgetFactory, addDefaultCommands
 } from './';
 
 
@@ -43,7 +43,7 @@ const FACTORY = 'Editor';
 const plugin: JupyterLabPlugin<IEditorTracker> = {
   activate,
   id: 'jupyter.services.editor-tracker',
-  requires: [IDocumentRegistry, IInstanceRestorer, IEditorServices],
+  requires: [IDocumentRegistry, ILayoutRestorer, IEditorServices],
   provides: IEditorTracker,
   autoStart: true
 };
@@ -57,7 +57,7 @@ export default plugin;
 /**
  * Activate the editor tracker plugin.
  */
-function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInstanceRestorer, editorServices: IEditorServices): IEditorTracker {
+function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayoutRestorer, editorServices: IEditorServices): IEditorTracker {
   const factory = new EditorWidgetFactory({
     editorServices,
     factoryOptions: {

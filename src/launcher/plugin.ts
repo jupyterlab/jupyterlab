@@ -6,6 +6,10 @@ import {
 } from '../application';
 
 import {
+  ILayoutRestorer
+} from '../apputils/layoutrestorer';
+
+import {
   ICommandLinker
 } from '../commandlinker';
 
@@ -20,10 +24,6 @@ import {
 import {
   CommandIDs as FileBrowserCommandIDs
 } from '../filebrowser';
-
-import {
-  IInstanceRestorer
-} from '../instancerestorer';
 
 import {
   IPathTracker
@@ -53,7 +53,7 @@ const plugin: JupyterLabPlugin<ILauncher> = {
     IPathTracker,
     ICommandPalette,
     ICommandLinker,
-    IInstanceRestorer
+    ILayoutRestorer
   ],
   provides: ILauncher,
   autoStart: true
@@ -69,7 +69,7 @@ export default plugin;
 /**
  * Activate the launcher.
  */
-function activate(app: JupyterLab, services: IServiceManager, pathTracker: IPathTracker, palette: ICommandPalette, linker: ICommandLinker, restorer: IInstanceRestorer): ILauncher {
+function activate(app: JupyterLab, services: IServiceManager, pathTracker: IPathTracker, palette: ICommandPalette, linker: ICommandLinker, restorer: ILayoutRestorer): ILauncher {
   const { commands, shell } = app;
 
   let model = new LauncherModel();

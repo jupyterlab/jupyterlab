@@ -10,6 +10,7 @@ import './application/shell.spec';
 import './apputils/dialog.spec';
 import './apputils/iframe.spec';
 import './apputils/jsoneditor.spec';
+import './apputils/layoutrestorer.spec';
 import './apputils/sanitizer.spec';
 import './apputils/styling.spec';
 import './apputils/vdom.spec';
@@ -66,8 +67,6 @@ import './filebrowser/model.spec';
 import './imagewidget/widget.spec';
 
 import './inspector/inspector.spec';
-
-import './instancerestorer/instancerestorer.spec';
 
 import './markdownwidget/widget.spec';
 

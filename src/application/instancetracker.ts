@@ -30,8 +30,8 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IInstanceRestorer
-} from '../instancerestorer';
+  ILayoutRestorer
+} from '../apputils/layoutrestorer';
 
 import {
   IStateDB
@@ -320,7 +320,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    *
    * #### Notes
    * This function should almost never be invoked by client code. Its primary
-   * use case is to be invoked by an instance restorer plugin that handles
+   * use case is to be invoked by a layout restorer plugin that handles
    * multiple instance trackers and, when ready, asks them each to restore their
    * respective widgets.
    */
@@ -466,11 +466,11 @@ namespace InstanceTracker {
    * The state restoration configuration options.
    */
   export
-  interface IRestoreOptions<T extends Widget> extends IInstanceRestorer.IRestoreOptions<T> {
+  interface IRestoreOptions<T extends Widget> extends ILayoutRestorer.IRestoreOptions<T> {
     /*
-     * The instance restorer to use to recreate restored widgets.
+     * The layout restorer to use to recreate restored widgets.
      */
-    restorer: IInstanceRestorer;
+    restorer: ILayoutRestorer;
 
     /**
      * The command registry which holds the restore command.

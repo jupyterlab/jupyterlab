@@ -6,16 +6,16 @@ import {
 } from '../application';
 
 import {
+  ILayoutRestorer
+} from '../apputils';
+
+import {
   ICommandLinker
 } from '../commandlinker';
 
 import {
   ICommandPalette
 } from '../commandpalette';
-
-import {
-  IInstanceRestorer
-} from '../instancerestorer';
 
 import {
   FaqModel, FaqWidget
@@ -37,7 +37,7 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<void> = {
   activate,
   id: 'jupyter.extensions.faq',
-  requires: [ICommandPalette, ICommandLinker, IInstanceRestorer],
+  requires: [ICommandPalette, ICommandLinker, ILayoutRestorer],
   autoStart: true
 };
 
@@ -51,7 +51,7 @@ export default plugin;
 /**
  * Activate the FAQ plugin.
  */
-function activate(app: JupyterLab, palette: ICommandPalette, linker: ICommandLinker, restorer: IInstanceRestorer): void {
+function activate(app: JupyterLab, palette: ICommandPalette, linker: ICommandLinker, restorer: ILayoutRestorer): void {
   const category = 'Help';
   const command = CommandIDs.open;
   const model = new FaqModel();

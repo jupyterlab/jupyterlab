@@ -42,8 +42,8 @@ import {
 } from '../filebrowser';
 
 import {
-  IInstanceRestorer
-} from '../instancerestorer';
+  ILayoutRestorer
+} from '../apputils/layoutrestorer';
 
 import {
   IMainMenu
@@ -77,7 +77,7 @@ const trackerPlugin: JupyterLabPlugin<IConsoleTracker> = {
     IPathTracker,
     ConsolePanel.IContentFactory,
     IEditorServices,
-    IInstanceRestorer
+    ILayoutRestorer
   ],
   activate: activateConsole,
   autoStart: true
@@ -121,7 +121,7 @@ const CONSOLE_REGEX = /^console-(\d)+-[0-9a-f]+$/;
 /**
  * Activate the console extension.
  */
-function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, palette: ICommandPalette, pathTracker: IPathTracker, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: IInstanceRestorer): IConsoleTracker {
+function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, palette: ICommandPalette, pathTracker: IPathTracker, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer): IConsoleTracker {
   let manager = services.sessions;
   let { commands, shell } = app;
   let category = 'Console';

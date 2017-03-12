@@ -37,7 +37,7 @@ describe('instancerestorer/instancerestorer', () => {
 
     describe('#constructor()', () => {
 
-      it('should construct a new instance restorer', () => {
+      it('should construct a new layout restorer', () => {
         let restorer = new InstanceRestorer({
           first: Promise.resolve<void>(void 0),
           registry: new CommandRegistry(),
