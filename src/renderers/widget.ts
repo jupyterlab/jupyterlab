@@ -34,6 +34,10 @@ import {
 } from '@phosphor/widgets';
 
 import {
+  JSONObject
+} from '@phosphor/coreutils';
+
+import {
   typeset, removeMath, replaceMath
 } from './latex';
 
@@ -272,6 +276,16 @@ class RenderedImage extends Widget {
     let img = document.createElement('img');
     let source = Private.getSource(options);
     img.src = `data:${options.mimeType};base64,${source}`;
+    let metadata = options.model.metadata.get(options.mimeType);
+    if (metadata) {
+      let metaJSON = metadata as JSONObject;
+      if (typeof metaJSON['height'] === "number") {
+        img.height = <number> metaJSON['height'];
+      }
+      if (typeof metaJSON['width'] === "number") {
+        img.width = <number> metaJSON['width'];
+      }
+    }
     this.node.appendChild(img);
     this.addClass(IMAGE_CLASS);
   }
