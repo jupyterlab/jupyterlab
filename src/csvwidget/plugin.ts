@@ -2,8 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  InstanceTracker, JupyterLab, JupyterLabPlugin
+  JupyterLab, JupyterLabPlugin
 } from '../application';
+
+import {
+  ILayoutRestorer, InstanceTracker
+} from '../apputils';
 
 import {
   IDocumentRegistry
@@ -12,10 +16,6 @@ import {
 import {
   CommandIDs as FileBrowserCommandIDs
 } from '../filebrowser';
-
-import {
-  IInstanceRestorer
-} from '../instancerestorer';
 
 import {
   CSVWidget, CSVWidgetFactory
@@ -34,7 +34,7 @@ const FACTORY = 'Table';
 const plugin: JupyterLabPlugin<void> = {
   activate,
   id: 'jupyter.extensions.csv-handler',
-  requires: [IDocumentRegistry, IInstanceRestorer],
+  requires: [IDocumentRegistry, ILayoutRestorer],
   autoStart: true
 };
 
@@ -48,7 +48,7 @@ export default plugin;
 /**
  * Activate the table widget extension.
  */
-function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: IInstanceRestorer): void {
+function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayoutRestorer): void {
   const factory = new CSVWidgetFactory({
     name: FACTORY,
     fileExtensions: ['.csv'],

@@ -14,11 +14,11 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  InstanceTracker, JupyterLab, JupyterLabPlugin
+  JupyterLab, JupyterLabPlugin
 } from '../application';
 
 import {
-  IFrameWidget
+  IFrameWidget, ILayoutRestorer, InstanceTracker
 } from '../apputils';
 
 import {
@@ -28,10 +28,6 @@ import {
 import {
   ICommandPalette
 } from '../commandpalette';
-
-import {
-  IInstanceRestorer
-} from '../instancerestorer';
 
 import {
   IMainMenu
@@ -139,7 +135,7 @@ RESOURCES.sort((a: any, b: any) => {
 const plugin: JupyterLabPlugin<void> = {
   activate,
   id: 'jupyter.extensions.help-handler',
-  requires: [IMainMenu, ICommandPalette, IInstanceRestorer],
+  requires: [IMainMenu, ICommandPalette, ILayoutRestorer],
   autoStart: true
 };
 
@@ -172,7 +168,7 @@ class ClosableIFrame extends IFrameWidget {
  *
  * returns A promise that resolves when the extension is activated.
  */
-function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, restorer: IInstanceRestorer): void {
+function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer): void {
   let counter = 0;
   const category = 'Help';
   const namespace = 'help-doc';

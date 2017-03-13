@@ -10,12 +10,8 @@ import {
 } from '../commandpalette';
 
 import {
-  InstanceTracker
-} from '../application';
-
-import {
-  IInstanceRestorer
-} from '../instancerestorer';
+  ILayoutRestorer, InstanceTracker
+} from '../apputils';
 
 import {
   AboutModel, AboutWidget
@@ -38,7 +34,7 @@ const plugin: JupyterLabPlugin<void> = {
   activate,
   id: 'jupyter.extensions.about',
   autoStart: true,
-  requires: [ICommandPalette, IInstanceRestorer]
+  requires: [ICommandPalette, ILayoutRestorer]
 };
 
 
@@ -48,7 +44,7 @@ const plugin: JupyterLabPlugin<void> = {
 export default plugin;
 
 
-function activate(app: JupyterLab, palette: ICommandPalette, restorer: IInstanceRestorer): void {
+function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRestorer): void {
   const namespace = 'about-jupyterlab';
   const model = new AboutModel({ version: app.info.version });
   const command = CommandIDs.open;

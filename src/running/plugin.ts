@@ -6,12 +6,12 @@ import {
 } from '../application';
 
 import {
-  CommandIDs as ConsoleCommandIDs
-} from '../console';
+  ILayoutRestorer
+} from '../apputils';
 
 import {
-  IInstanceRestorer
-} from '../instancerestorer';
+  CommandIDs as ConsoleCommandIDs
+} from '../console';
 
 import {
   CommandIDs as FileBrowserCommandIDs
@@ -36,7 +36,7 @@ import {
 const plugin: JupyterLabPlugin<void> = {
   activate,
   id: 'jupyter.extensions.running-sessions',
-  requires: [IServiceManager, IInstanceRestorer],
+  requires: [IServiceManager, ILayoutRestorer],
   autoStart: true
 };
 
@@ -50,7 +50,7 @@ export default plugin;
 /**
  * Activate the running plugin.
  */
-function activate(app: JupyterLab, services: IServiceManager, restorer: IInstanceRestorer): void {
+function activate(app: JupyterLab, services: IServiceManager, restorer: ILayoutRestorer): void {
   let running = new RunningSessions({ manager: services });
   running.id = 'jp-running-sessions';
   running.title.label = 'Running';

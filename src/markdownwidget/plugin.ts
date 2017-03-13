@@ -2,8 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin, InstanceTracker
+  JupyterLab, JupyterLabPlugin
 } from '../application';
+
+import {
+  ILayoutRestorer, InstanceTracker
+} from '../apputils';
 
 import {
   IDocumentRegistry
@@ -12,10 +16,6 @@ import {
 import {
   CommandIDs as FileBrowserCommandIDs
 } from '../filebrowser';
-
-import {
-  IInstanceRestorer
-} from '../instancerestorer';
 
 import {
   IRenderMime
@@ -43,7 +43,7 @@ const FACTORY = 'Rendered Markdown';
 const plugin: JupyterLabPlugin<void> = {
   activate,
   id: 'jupyter.extensions.rendered-markdown',
-  requires: [IDocumentRegistry, IRenderMime, IInstanceRestorer],
+  requires: [IDocumentRegistry, IRenderMime, ILayoutRestorer],
   autoStart: true
 };
 
@@ -51,7 +51,7 @@ const plugin: JupyterLabPlugin<void> = {
 /**
  * Activate the markdown plugin.
  */
-function activate(app: JupyterLab, registry: IDocumentRegistry, rendermime: IRenderMime, restorer: IInstanceRestorer) {
+function activate(app: JupyterLab, registry: IDocumentRegistry, rendermime: IRenderMime, restorer: ILayoutRestorer) {
     const factory = new MarkdownWidgetFactory({
       name: FACTORY,
       fileExtensions: ['.md'],

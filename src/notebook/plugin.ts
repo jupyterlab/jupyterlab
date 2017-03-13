@@ -14,6 +14,10 @@ import {
 } from '../application';
 
 import {
+  ILayoutRestorer
+} from '../apputils';
+
+import {
   IEditorServices
 } from '../codeeditor';
 
@@ -32,10 +36,6 @@ import {
 import {
   CommandIDs as FileBrowserCommandIDs
 } from '../filebrowser';
-
-import {
-  IInstanceRestorer
-} from '../instancerestorer';
 
 import {
   IRenderMime
@@ -82,7 +82,7 @@ const trackerPlugin: JupyterLabPlugin<INotebookTracker> = {
     ICommandPalette,
     NotebookPanel.IContentFactory,
     IEditorServices,
-    IInstanceRestorer
+    ILayoutRestorer
   ],
   activate: activateNotebookHandler,
   autoStart: true
@@ -112,7 +112,7 @@ const cellToolsPlugin: JupyterLabPlugin<ICellTools> = {
   provides: ICellTools,
   id: 'jupyter.extensions.cell-tools',
   autoStart: true,
-  requires: [IInstanceRestorer, INotebookTracker, IEditorServices]
+  requires: [ILayoutRestorer, INotebookTracker, IEditorServices]
 };
 
 
@@ -126,7 +126,7 @@ export default plugins;
 /**
  * Activate the cell tools extension.
  */
-function activateCellTools(app: JupyterLab, restorer: IInstanceRestorer, tracker: INotebookTracker, editorServices: IEditorServices): Promise<ICellTools> {
+function activateCellTools(app: JupyterLab, restorer: ILayoutRestorer, tracker: INotebookTracker, editorServices: IEditorServices): Promise<ICellTools> {
   const namespace = 'cell-tools';
 
   const celltools = new CellTools({ tracker });
@@ -168,7 +168,7 @@ function activateCellTools(app: JupyterLab, restorer: IInstanceRestorer, tracker
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: NotebookPanel.IContentFactory, editorServices: IEditorServices, restorer: IInstanceRestorer): INotebookTracker {
+function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: NotebookPanel.IContentFactory, editorServices: IEditorServices, restorer: ILayoutRestorer): INotebookTracker {
 
   const factory = new NotebookWidgetFactory({
     name: FACTORY,

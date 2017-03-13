@@ -7,16 +7,16 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  JupyterLab, JupyterLabPlugin, InstanceTracker
+  JupyterLab, JupyterLabPlugin
 } from '../application';
+
+import {
+  ILayoutRestorer, InstanceTracker
+} from '../apputils';
 
 import {
   ICommandPalette
 } from '../commandpalette';
-
-import {
-  IInstanceRestorer
-} from '../instancerestorer';
 
 import {
   IMainMenu
@@ -45,7 +45,7 @@ const plugin: JupyterLabPlugin<ITerminalTracker> = {
   id: 'jupyter.extensions.terminal',
   provides: ITerminalTracker,
   requires: [
-    IServiceManager, IMainMenu, ICommandPalette, IInstanceRestorer
+    IServiceManager, IMainMenu, ICommandPalette, ILayoutRestorer
   ],
   autoStart: true
 };
@@ -60,7 +60,7 @@ export default plugin;
 /**
  * Activate the terminal plugin.
  */
-function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, restorer: IInstanceRestorer): ITerminalTracker {
+function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer): ITerminalTracker {
   // Bail if there are no terminals available.
   if (!services.terminals.isAvailable()) {
     console.log('Disabling terminals plugin because they are not available on the server');

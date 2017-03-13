@@ -16,8 +16,12 @@ import {
 } from 'simulate-event';
 
 import {
-  ApplicationShell, InstanceTracker
+  ApplicationShell
 } from '../../../lib/application';
+
+import {
+  InstanceTracker
+} from '../../../lib/apputils';
 
 
 const namespace = 'instance-tracker-test';

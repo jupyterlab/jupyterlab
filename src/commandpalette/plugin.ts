@@ -16,8 +16,8 @@ import {
 } from '../application';
 
 import {
-  IInstanceRestorer
-} from '../instancerestorer';
+  ILayoutRestorer
+} from '../apputils';
 
 import {
   CommandIDs, ICommandPalette, IPaletteItem
@@ -76,7 +76,7 @@ const plugin: JupyterLabPlugin<ICommandPalette> = {
   activate,
   id: 'jupyter.services.commandpalette',
   provides: ICommandPalette,
-  requires: [IInstanceRestorer],
+  requires: [ILayoutRestorer],
   autoStart: true
 };
 
@@ -90,7 +90,7 @@ export default plugin;
 /**
  * Activate the command palette.
  */
-function activate(app: JupyterLab, restorer: IInstanceRestorer): ICommandPalette {
+function activate(app: JupyterLab, restorer: ILayoutRestorer): ICommandPalette {
   const { commands, shell } = app;
   const palette = new CommandPalette({ commands });
 

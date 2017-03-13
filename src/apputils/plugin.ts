@@ -12,27 +12,27 @@ import {
 } from '../statedb';
 
 import {
-  IInstanceRestorer, InstanceRestorer
-} from './instancerestorer';
+  ILayoutRestorer, LayoutRestorer
+} from './layoutrestorer';
 
 
 /**
- * The default instance restorer provider.
+ * The default layout restorer provider.
  */
-const plugin: JupyterLabPlugin<IInstanceRestorer> = {
-  id: 'jupyter.services.instance-restorer',
+const plugin: JupyterLabPlugin<ILayoutRestorer> = {
+  id: 'jupyter.services.layout-restorer',
   requires: [IStateDB],
   activate: (app: JupyterLab, state: IStateDB) => {
     const first = app.started;
     const registry = app.commands;
     const shell = app.shell;
-    let restorer = new InstanceRestorer({ first, registry, state });
+    let restorer = new LayoutRestorer({ first, registry, state });
     // Use the restorer as the application shell's layout database.
     shell.setLayoutDB(restorer);
     return restorer;
   },
   autoStart: true,
-  provides: IInstanceRestorer
+  provides: ILayoutRestorer
 };
 
 

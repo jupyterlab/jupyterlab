@@ -2,8 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  InstanceTracker, JupyterLab, JupyterLabPlugin
+  JupyterLab, JupyterLabPlugin
 } from '../application';
+
+import {
+  ILayoutRestorer, InstanceTracker
+} from '../apputils';
 
 import {
   ICommandPalette
@@ -12,10 +16,6 @@ import {
 import {
   IPathTracker
 } from '../filebrowser';
-
-import {
-  IInstanceRestorer
-} from '../instancerestorer';
 
 import {
   IServiceManager
@@ -46,7 +46,7 @@ const LANDING_CLASS = 'jp-Landing';
 const plugin: JupyterLabPlugin<void> = {
   activate,
   id: 'jupyter.extensions.landing',
-  requires: [IPathTracker, ICommandPalette, IServiceManager, IInstanceRestorer],
+  requires: [IPathTracker, ICommandPalette, IServiceManager, ILayoutRestorer],
   autoStart: true
 };
 
@@ -60,7 +60,7 @@ export default plugin;
 /**
  * Activate the landing plugin.
  */
-function activate(app: JupyterLab, pathTracker: IPathTracker, palette: ICommandPalette, services: IServiceManager, restorer: IInstanceRestorer): void {
+function activate(app: JupyterLab, pathTracker: IPathTracker, palette: ICommandPalette, services: IServiceManager, restorer: ILayoutRestorer): void {
   const { commands, shell } = app;
   const category = 'Help';
   const command = CommandIDs.open;
