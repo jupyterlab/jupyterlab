@@ -117,9 +117,7 @@ function renameFile(model: FileBrowserModel, oldPath: string, newPath: string): 
       };
       return showDialog(options).then(button => {
         if (button.text === 'OVERWRITE') {
-          return model.deleteFile(newPath).then(() => {
-            return model.rename(oldPath, newPath);
-          });
+          return model.overwrite(oldPath, newPath);
         }
       });
     } else {
