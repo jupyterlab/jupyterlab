@@ -15,16 +15,16 @@ import {
 } from '../application';
 
 import {
+  ICommandPalette
+} from '../apputils';
+
+import {
   IEditorServices
 } from '../codeeditor';
 
 import {
   editorServices, CodeMirrorEditor
 } from '../codemirror';
-
-import {
-  ICommandPalette
-} from '../commandpalette';
 
 import {
   IEditorTracker

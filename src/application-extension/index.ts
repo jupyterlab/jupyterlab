@@ -7,7 +7,7 @@ import {
 
 import {
   ICommandPalette
-} from '../commandpalette';
+} from '../apputils';
 
 
 /**

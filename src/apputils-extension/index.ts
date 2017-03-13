@@ -8,18 +8,22 @@ import {
 } from '../application';
 
 import {
+  ICommandPalette, ILayoutRestorer, LayoutRestorer
+} from '../apputils';
+
+import {
   IStateDB
 } from '../statedb';
 
 import {
-  ILayoutRestorer, LayoutRestorer
-} from './layoutrestorer';
+  activatePalette
+} from './palette';
 
 
 /**
  * The default layout restorer provider.
  */
-const plugin: JupyterLabPlugin<ILayoutRestorer> = {
+const layoutPlugin: JupyterLabPlugin<ILayoutRestorer> = {
   id: 'jupyter.services.layout-restorer',
   requires: [IStateDB],
   activate: (app: JupyterLab, state: IStateDB) => {
@@ -37,7 +41,20 @@ const plugin: JupyterLabPlugin<ILayoutRestorer> = {
 
 
 /**
+ * The default commmand palette extension.
+ */
+const palettePlugin: JupyterLabPlugin<ICommandPalette> = {
+  activate: activatePalette,
+  id: 'jupyter.services.commandpalette',
+  provides: ICommandPalette,
+  requires: [ILayoutRestorer],
+  autoStart: true
+};
+
+
+/**
  * Export the plugin as default.
  */
-export default plugin;
+const plugins: JupyterLabPlugin<any>[] = [layoutPlugin, palettePlugin];
+export default plugins;
 

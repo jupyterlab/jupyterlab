@@ -14,16 +14,12 @@ import {
 } from '../application';
 
 import {
-  ILayoutRestorer
+  ICommandPalette, ILayoutRestorer
 } from '../apputils';
 
 import {
   IEditorServices
 } from '../codeeditor';
-
-import {
-  ICommandPalette
-} from '../commandpalette';
 
 import {
   IMainMenu

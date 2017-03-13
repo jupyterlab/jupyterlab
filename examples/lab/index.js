@@ -13,7 +13,7 @@ require('jupyterlab/lib/default-theme/index.css');
 var mods = [
   require('jupyterlab/lib/about-extension'),
   require('jupyterlab/lib/application-extension'),
-  require('jupyterlab/lib/apputils/plugin'),
+  require('jupyterlab/lib/apputils-extension'),
   require('jupyterlab/lib/codemirror-extension'),
   require('jupyterlab/lib/commandlinker/plugin'),
   require('jupyterlab/lib/commandpalette/plugin'),

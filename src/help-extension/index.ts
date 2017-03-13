@@ -18,16 +18,12 @@ import {
 } from '../application';
 
 import {
-  IFrameWidget, ILayoutRestorer, InstanceTracker
+  ICommandPalette, IFrameWidget, ILayoutRestorer, InstanceTracker
 } from '../apputils';
 
 import {
   URLExt
 } from '../coreutils';
-
-import {
-  ICommandPalette
-} from '../commandpalette';
 
 import {
   IMainMenu

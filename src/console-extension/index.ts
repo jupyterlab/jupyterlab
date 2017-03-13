@@ -18,7 +18,7 @@ import {
 } from '../application';
 
 import {
-  InstanceTracker
+  Dialog, ICommandPalette, InstanceTracker, ILayoutRestorer, showDialog
 } from '../apputils';
 
 import {
@@ -26,16 +26,8 @@ import {
 } from '../codeeditor';
 
 import {
-  ICommandPalette
-} from '../commandpalette';
-
-import {
   PathExt, Time, uuid
 } from '../coreutils';
-
-import {
-  Dialog, ILayoutRestorer, showDialog
-} from '../apputils';
 
 import {
   IConsoleTracker, ICreateConsoleArgs, ConsolePanel

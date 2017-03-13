@@ -18,12 +18,8 @@ import {
 } from '../application';
 
 import {
-  ILayoutRestorer
+  ICommandPalette, ILayoutRestorer
 } from '../apputils';
-
-import {
-  ICommandPalette
-} from '../commandpalette';
 
 import {
   IDocumentManager
