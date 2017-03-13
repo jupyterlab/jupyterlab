@@ -4,22 +4,25 @@
 |----------------------------------------------------------------------------*/
 
 import {
+  JSONObject
+} from '@phosphor/coreutils';
+
+import {
   JupyterLab, JupyterLabPlugin
 } from '../application';
 
 import {
   CommandLinker, ICommandLinker, ICommandPalette, ILayoutRestorer,
-  LayoutRestorer
+  IStateDB, LayoutRestorer
 } from '../apputils';
-
-import {
-  IStateDB
-} from '../statedb';
 
 import {
   activatePalette
 } from './palette';
 
+import {
+  StateDB
+} from './statedb';
 
 
 /**
@@ -66,10 +69,42 @@ const palettePlugin: JupyterLabPlugin<ICommandPalette> = {
 
 
 /**
+ * The default state database for storing application state.
+ */
+const stateDBPlugin: JupyterLabPlugin<IStateDB> = {
+  id: 'jupyter.services.statedb',
+  autoStart: true,
+  provides: IStateDB,
+  activate: (app: JupyterLab) => {
+    let state = new StateDB({ namespace: app.info.namespace });
+    let version = app.info.version;
+    let key = 'statedb:version';
+    let fetch = state.fetch(key);
+    let save = () => state.save(key, { version });
+    let reset = () => state.clear().then(save);
+    let check = (value: JSONObject) => {
+      let old = value && value['version'];
+      if (!old || old !== version) {
+        console.log(`Upgraded: ${old || 'unknown'} to ${version}; Resetting DB.`);
+        return reset();
+      }
+    };
+
+    app.commands.addCommand('statedb:clear', {
+      label: 'Clear Application Restore State',
+      execute: () => state.clear()
+    });
+
+    return fetch.then(check, reset).then(() => state);
+  }
+};
+
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterLabPlugin<any>[] = [
-  linkerPlugin, layoutPlugin, palettePlugin
+  linkerPlugin, layoutPlugin, palettePlugin, stateDBPlugin
 ];
 export default plugins;
 

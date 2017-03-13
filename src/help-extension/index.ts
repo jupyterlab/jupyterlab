@@ -29,10 +29,6 @@ import {
   IMainMenu
 } from '../mainmenu';
 
-import {
-  CommandIDs as StateDBCommandIDs
-} from '../statedb';
-
 
 /**
  * The command IDs used by the help plugin.
@@ -208,7 +204,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     menu.addItem({ type: 'separator' });
     RESOURCES.forEach(args => { menu.addItem({ args, command }); });
     menu.addItem({ type: 'separator' });
-    menu.addItem({ command: StateDBCommandIDs.clear });
+    menu.addItem({ command: 'statedb:clear' });
 
     return menu;
   }
@@ -238,7 +234,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   });
 
   RESOURCES.forEach(args => { palette.addItem({ args, command, category }); });
-  palette.addItem({ command: StateDBCommandIDs.clear, category });
+  palette.addItem({ command: 'statedb:clear', category });
   palette.addItem({ command: CommandIDs.launchClassic, category });
 
   mainMenu.addMenu(menu, {});

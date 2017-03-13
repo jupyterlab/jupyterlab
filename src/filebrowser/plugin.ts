@@ -18,7 +18,7 @@ import {
 } from '../application';
 
 import {
-  ICommandPalette, ILayoutRestorer
+  ICommandPalette, ILayoutRestorer, IStateDB
 } from '../apputils';
 
 import {
@@ -36,10 +36,6 @@ import {
 import {
   IServiceManager
 } from '../services';
-
-import {
-  IStateDB
-} from '../statedb';
 
 import {
   CommandIDs, FileBrowserModel, FileBrowser, IPathTracker

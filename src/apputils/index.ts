@@ -12,5 +12,6 @@ export * from './instancetracker';
 export * from './jsoneditor';
 export * from './layoutrestorer';
 export * from './sanitizer';
+export * from './statedb';
 export * from './styling';
 export * from './vdom';

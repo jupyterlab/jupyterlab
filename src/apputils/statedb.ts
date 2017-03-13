@@ -6,28 +6,44 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  IStateDB, IStateItem
-} from './index';
+  Token
+} from '@phosphor/application';
+
+
+/* tslint:disable */
+/**
+ * The default state database token.
+ */
+export
+const IStateDB = new Token<IStateDB>('jupyter.services.statedb');
+/* tslint:enable */
 
 
 /**
- * The default concrete implementation of a state database.
  */
 export
-class StateDB implements IStateDB {
+interface IStateItem {
   /**
-   * Create a new state database.
-   *
-   * @param options - The instantiation options for a state database.
+   * The identifier key for a state item.
    */
-  constructor(options: StateDB.IOptions) {
-    this.namespace = options.namespace;
-  }
+  id: string;
 
+  /**
+   * The data value for a state item.
+   */
+  value: JSONObject;
+}
+
+
+/**
+ * The description of a state database.
+ */
+export
+interface IStateDB {
   /**
    * The maximum allowed length of the data after it has been serialized.
    */
-  readonly maxLength = 2000;
+  readonly maxLength: number;
 
   /**
    * The namespace prefix for all state database entries.
@@ -38,21 +54,6 @@ class StateDB implements IStateDB {
    * multiple, mutually exclusive state databases.
    */
   readonly namespace: string;
-
-  /**
-   * Clear the entire database.
-   */
-  clear(): Promise<void> {
-    const prefix = `${this.namespace}:`;
-    let i = window.localStorage.length;
-    while (i) {
-      let key = window.localStorage.key(--i);
-      if (key.indexOf(prefix) === 0) {
-        window.localStorage.removeItem(key);
-      }
-    }
-    return Promise.resolve(void 0);
-  }
 
   /**
    * Retrieve a saved bundle from the database.
@@ -71,14 +72,7 @@ class StateDB implements IStateDB {
    * The promise returned by this method may be rejected if an error occurs in
    * retrieving the data. Non-existence of an `id` will succeed, however.
    */
-  fetch(id: string): Promise<JSONObject> {
-    const key = `${this.namespace}:${id}`;
-    try {
-      return Promise.resolve(JSON.parse(window.localStorage.getItem(key)));
-    } catch (error) {
-      return Promise.reject(error);
-    }
-  }
+  fetch(id: string): Promise<JSONObject>;
 
   /**
    * Retrieve all the saved bundles for a namespace.
@@ -96,27 +90,7 @@ class StateDB implements IStateDB {
    * console in order to optimistically return any extant data without failing.
    * This promise will always succeed.
    */
-  fetchNamespace(namespace: string): Promise<IStateItem[]> {
-    const prefix = `${this.namespace}:${namespace}:`;
-    const regex = new RegExp(`^${this.namespace}\:`);
-    let items: IStateItem[] = [];
-    let i = window.localStorage.length;
-    while (i) {
-      let key = window.localStorage.key(--i);
-      if (key.indexOf(prefix) === 0) {
-        try {
-          items.push({
-            id: key.replace(regex, ''),
-            value: JSON.parse(window.localStorage.getItem(key))
-          });
-        } catch (error) {
-          console.warn(error);
-          window.localStorage.removeItem(key);
-        }
-      }
-    }
-    return Promise.resolve(items);
-  }
+  fetchNamespace(namespace: string): Promise<IStateItem[]>;
 
   /**
    * Remove a value from the database.
@@ -125,10 +99,7 @@ class StateDB implements IStateDB {
    *
    * @returns A promise that is rejected if remove fails and succeeds otherwise.
    */
-  remove(id: string): Promise<void> {
-    window.localStorage.removeItem(`${this.namespace}:${id}`);
-    return Promise.resolve(void 0);
-  }
+  remove(id: string): Promise<void>;
 
   /**
    * Save a value in the database.
@@ -146,36 +117,5 @@ class StateDB implements IStateDB {
    * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
    * using the `fetchNamespace()` method.
    */
-  save(id: string, value: JSONObject): Promise<void> {
-    try {
-      const key = `${this.namespace}:${id}`;
-      const serialized = JSON.stringify(value);
-      const length = serialized.length;
-      const max = this.maxLength;
-      if (length > max) {
-        throw new Error(`Data length (${length}) exceeds maximum (${max})`);
-      }
-      window.localStorage.setItem(key, serialized);
-      return Promise.resolve(void 0);
-    } catch (error) {
-      return Promise.reject(error);
-    }
-  }
-}
-
-/**
- * A namespace for StateDB statics.
- */
-export
-namespace StateDB {
-  /**
-   * The instantiation options for a state database.
-   */
-  export
-  interface IOptions {
-    /**
-     * The namespace prefix for all state database entries.
-     */
-    namespace: string;
-  }
+  save(id: string, value: JSONObject): Promise<void>;
 }

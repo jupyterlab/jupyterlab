@@ -42,7 +42,6 @@ const mods: JupyterLab.IPluginModule[] = [
   require('../../lib/running/plugin'),
   require('../../lib/services/plugin'),
   require('../../lib/shortcuts-extension'),
-  require('../../lib/statedb/plugin'),
   require('../../lib/terminal/plugin'),
   require('../../lib/tooltip/plugin')
 ];

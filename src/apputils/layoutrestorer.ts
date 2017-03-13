@@ -28,11 +28,7 @@ import {
 } from '../application';
 
 import {
-  IStateDB
-} from '../statedb';
-
-import {
-  InstanceTracker
+  InstanceTracker, IStateDB
 } from './';
 
 
