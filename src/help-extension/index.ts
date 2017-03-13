@@ -18,11 +18,7 @@ import {
 } from '../application';
 
 import {
-  ILayoutRestorer
-} from '../apputils/layoutrestorer';
-
-import {
-  IFrameWidget
+  IFrameWidget, ILayoutRestorer
 } from '../apputils';
 
 import {

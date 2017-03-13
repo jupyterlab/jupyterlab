@@ -6,16 +6,16 @@ import {
 } from '../application';
 
 import {
+  ILayoutRestorer
+} from '../apputils';
+
+import {
   IDocumentRegistry
 } from '../docregistry';
 
 import {
   CommandIDs as FileBrowserCommandIDs
 } from '../filebrowser';
-
-import {
-  ILayoutRestorer
-} from '../apputils/layoutrestorer';
 
 import {
   CSVWidget, CSVWidgetFactory

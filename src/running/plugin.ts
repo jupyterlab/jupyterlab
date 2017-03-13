@@ -7,7 +7,7 @@ import {
 
 import {
   ILayoutRestorer
-} from '../apputils/layoutrestorer';
+} from '../apputils';
 
 import {
   CommandIDs as ConsoleCommandIDs

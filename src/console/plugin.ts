@@ -30,7 +30,7 @@ import {
 } from '../coreutils';
 
 import {
-  showDialog, Dialog
+  Dialog, ILayoutRestorer, showDialog
 } from '../apputils';
 
 import {
@@ -40,10 +40,6 @@ import {
 import {
   IPathTracker
 } from '../filebrowser';
-
-import {
-  ILayoutRestorer
-} from '../apputils/layoutrestorer';
 
 import {
   IMainMenu
