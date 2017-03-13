@@ -15,7 +15,6 @@ import {
 
 export { ModuleLoader } from './loader';
 export { ApplicationShell } from './shell';
-export * from './instancetracker';
 
 
 /**

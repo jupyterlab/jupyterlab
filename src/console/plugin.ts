@@ -14,8 +14,12 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  InstanceTracker, JupyterLab, JupyterLabPlugin
+  JupyterLab, JupyterLabPlugin
 } from '../application';
+
+import {
+  InstanceTracker
+} from '../apputils';
 
 import {
   IEditorServices

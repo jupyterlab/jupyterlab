@@ -34,12 +34,12 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IStateDB
-} from '../statedb';
+  ApplicationShell
+} from '../application';
 
 import {
-  ApplicationShell
-} from './shell';
+  IStateDB
+} from '../statedb';
 
 
 /**

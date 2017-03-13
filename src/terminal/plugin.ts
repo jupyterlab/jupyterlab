@@ -7,11 +7,11 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  JupyterLab, JupyterLabPlugin, InstanceTracker
+  JupyterLab, JupyterLabPlugin
 } from '../application';
 
 import {
-  ILayoutRestorer
+  ILayoutRestorer, InstanceTracker
 } from '../apputils';
 
 import {

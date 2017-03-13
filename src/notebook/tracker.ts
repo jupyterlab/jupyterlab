@@ -11,7 +11,7 @@ import {
 
 import {
   IInstanceTracker, InstanceTracker
-} from '../application';
+} from '../apputils';
 
 import {
   NotebookPanel, Notebook

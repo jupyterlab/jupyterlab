@@ -14,11 +14,11 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  InstanceTracker, JupyterLab, JupyterLabPlugin
+  JupyterLab, JupyterLabPlugin
 } from '../application';
 
 import {
-  IFrameWidget, ILayoutRestorer
+  IFrameWidget, ILayoutRestorer, InstanceTracker
 } from '../apputils';
 
 import {

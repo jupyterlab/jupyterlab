@@ -10,11 +10,7 @@ import {
 } from '../commandpalette';
 
 import {
-  InstanceTracker
-} from '../application';
-
-import {
-  ILayoutRestorer
+  ILayoutRestorer, InstanceTracker
 } from '../apputils';
 
 import {

@@ -24,12 +24,16 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  ApplicationShell, InstanceTracker
+  ApplicationShell
 } from '../application';
 
 import {
   IStateDB
 } from '../statedb';
+
+import {
+  InstanceTracker
+} from './';
 
 
 /* tslint:disable */

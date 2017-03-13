@@ -6,6 +6,7 @@ export * from './dialog';
 export * from './domutils';
 export * from './hoverbox';
 export * from './iframe';
+export * from './instancetracker';
 export * from './jsoneditor';
 export * from './layoutrestorer';
 export * from './sanitizer';

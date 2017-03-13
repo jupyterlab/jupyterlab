@@ -2,11 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  InstanceTracker, JupyterLab, JupyterLabPlugin
+  JupyterLab, JupyterLabPlugin
 } from '../application';
 
 import {
-  ILayoutRestorer
+  ILayoutRestorer, InstanceTracker
 } from '../apputils';
 
 import {
