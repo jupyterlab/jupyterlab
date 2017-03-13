@@ -6,12 +6,14 @@ import '@phosphor/widgets/style/index.css';
 import './application/loader.spec';
 import './application/shell.spec';
 
+import './apputils/commandlinker.spec';
 import './apputils/dialog.spec';
 import './apputils/iframe.spec';
 import './apputils/instancetracker.spec';
 import './apputils/jsoneditor.spec';
 import './apputils/layoutrestorer.spec';
 import './apputils/sanitizer.spec';
+import './apputils/statedb.spec';
 import './apputils/styling.spec';
 import './apputils/vdom.spec';
 
@@ -23,8 +25,6 @@ import './codeeditor/widget.spec';
 
 import './codemirror/editor.spec';
 import './codemirror/factory.spec';
-
-import './commandlinker/commandlinker.spec';
 
 import './completer/handler.spec';
 import './completer/model.spec';
@@ -90,8 +90,6 @@ import './notebook/tracker.spec';
 
 import './outputarea/model.spec';
 import './outputarea/widget.spec';
-
-import './statedb/statedb.spec';
 
 import './terminal/terminal.spec';
 

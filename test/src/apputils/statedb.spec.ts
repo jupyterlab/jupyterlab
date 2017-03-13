@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   StateDB
-} from '../../../lib/statedb/statedb';
+} from '../../../lib/apputils';
 
 
 describe('StateDB', () => {

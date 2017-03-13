@@ -17,20 +17,22 @@ import {
 
 import {
   CommandLinker, ICommandLinker, ICommandPalette, ILayoutRestorer,
-  IMainMenu, IStateDB, LayoutRestorer
+  IMainMenu, IStateDB, LayoutRestorer, MainMenu, StateDB
 } from '../apputils';
-
-import {
-  MainMenu
-} from './mainmenu';
 
 import {
   activatePalette
 } from './palette';
 
-import {
-  StateDB
-} from './statedb';
+
+/**
+ * The command IDs used by the apputils plugin.
+ */
+namespace CommandIDs {
+  export
+  const clearStateDB = 'statedb:clear';
+};
+
 
 
 /**
@@ -120,7 +122,7 @@ const stateDBPlugin: JupyterLabPlugin<IStateDB> = {
       }
     };
 
-    app.commands.addCommand('statedb:clear', {
+    app.commands.addCommand(CommandIDs.clearStateDB, {
       label: 'Clear Application Restore State',
       execute: () => state.clear()
     });

@@ -25,7 +25,7 @@ import {
 
 import {
   StateDB
-} from '../../../lib/statedb/statedb';
+} from '../../../lib/apputils';
 
 
 const NAMESPACE = 'jupyterlab-layout-restorer-tests';
