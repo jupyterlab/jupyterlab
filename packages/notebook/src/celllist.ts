@@ -219,16 +219,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
     let id = utils.uuid();
     // Set the internal data structures.
     this._cellMap.set(id, value);
-    //let oldId = this._cellOrder.at(index);
-    //let oldValue = this._cellMap.get(oldId.id);
     this._cellOrder.set(index, new CellID(id));
-    /*this._changed.emit({
-      type: 'set',
-      oldIndex: index,
-      newIndex: index,
-      oldValues: [oldValue],
-      newValues: [value]
-    });*/
   }
 
   /**
@@ -250,13 +241,6 @@ class CellList implements IObservableUndoableVector<ICellModel> {
     // Set the internal data structures.
     this._cellMap.set(id, value);
     let num = this._cellOrder.pushBack(new CellID(id));
-    /*this._changed.emit({
-      type: 'add',
-      oldIndex: -1,
-      newIndex: this.length - 1,
-      oldValues: [],
-      newValues: [value]
-    });*/
     return num;
   }
 
@@ -276,13 +260,6 @@ class CellList implements IObservableUndoableVector<ICellModel> {
     //Don't clear the map in case we need to reinstate the cell
     let id = this._cellOrder.popBack();
     let value = this._cellMap.get(id.id);
-    /*this._changed.emit({
-      type: 'remove',
-      oldIndex: this.length,
-      newIndex: -1,
-      oldValues: [value],
-      newValues: []
-    });*/
     return value;
   }
 
@@ -311,15 +288,8 @@ class CellList implements IObservableUndoableVector<ICellModel> {
     // Generate a new uuid for the cell.
     let id = utils.uuid();
     // Set the internal data structures.
-    let num = this._cellOrder.insert(index, new CellID(id));
     this._cellMap.set(id, value);
-    /*this._changed.emit({
-      type: 'add',
-      oldIndex: -1,
-      newIndex: index,
-      oldValues: [],
-      newValues: [value]
-    });*/
+    let num = this._cellOrder.insert(index, new CellID(id));
     return num;
   }
 
@@ -338,7 +308,8 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    * Iterators pointing at the removed value and beyond are invalidated.
    */
   remove(value: ICellModel): number {
-    let index = ArrayExt.findFirstIndex(toArray(this._cellOrder), id => (this._cellMap.get(id.id)===value));
+    let index = ArrayExt.findFirstIndex(
+      toArray(this._cellOrder), id => (this._cellMap.get(id.id)===value));
     this.removeAt(index);
     return index;
   }
@@ -363,13 +334,6 @@ class CellList implements IObservableUndoableVector<ICellModel> {
   removeAt(index: number): ICellModel {
     let id= this._cellOrder.removeAt(index);
     let value = this._cellMap.get(id.id);
-    /*this._changed.emit({
-      type: 'remove',
-      oldIndex: index,
-      newIndex: -1,
-      oldValues: [value],
-      newValues: []
-    });*/
     return value;
   }
 
@@ -388,13 +352,6 @@ class CellList implements IObservableUndoableVector<ICellModel> {
       oldValues.push(this._cellMap.get(id.id));
     }
     this._cellOrder.clear();
-    /*this._changed.emit({
-      type: 'remove',
-      oldIndex: 0,
-      newIndex: 0,
-      oldValues,
-      newValues: []
-    });*/
   }
 
   /**
@@ -417,13 +374,6 @@ class CellList implements IObservableUndoableVector<ICellModel> {
   move(fromIndex: number, toIndex: number): void {
     let value = this.at(fromIndex);
     this._cellOrder.move(fromIndex, toIndex);
-    /*this._changed.emit({
-      type: 'move',
-      oldIndex: fromIndex,
-      newIndex: toIndex,
-      oldValues: [value],
-      newValues: [value]
-    });*/
   }
 
   /**
@@ -449,13 +399,6 @@ class CellList implements IObservableUndoableVector<ICellModel> {
       this._cellMap.set(id, value);
       let num = this._cellOrder.pushBack(new CellID(id));
     });
-    /*this._changed.emit({
-      type: 'add',
-      oldIndex: -1,
-      newIndex,
-      oldValues: [],
-      newValues
-    });*/
     return this.length;
   }
 
@@ -489,13 +432,6 @@ class CellList implements IObservableUndoableVector<ICellModel> {
       this._cellMap.set(id, value);
       this._cellOrder.insert(index++, new CellID(id));
     });
-    /*this._changed.emit({
-      type: 'add',
-      oldIndex: -1,
-      newIndex,
-      oldValues: [],
-      newValues
-    });*/
     return this.length;
   }
 
@@ -523,13 +459,6 @@ class CellList implements IObservableUndoableVector<ICellModel> {
       let id = this._cellOrder.removeAt(startIndex);
       oldValues.push(this._cellMap.get(id.id));
     }
-    /*this._changed.emit({
-      type: 'remove',
-      oldIndex: startIndex,
-      newIndex: -1,
-      oldValues,
-      newValues: []
-    });*/
     return this.length;
   }
 
