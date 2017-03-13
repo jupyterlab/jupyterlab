@@ -208,7 +208,7 @@ class RenderedMarkdown extends RenderedHTMLCommon {
         this._urlResolved = Private.handleUrls(this.node, options.resolver,
                                                options.linkHandler);
       }
-      headerAnchors(this.node);
+      Private.headerAnchors(this.node);
       this.fit();
       this._rendered = true;
       if (this.isAttached) {
@@ -445,6 +445,7 @@ namespace Private {
   /**
   * Apply ids to headers. 
   */
+  export
   function headerAnchors(node: HTMLElement): void {
     let headerNames = ['h1','h2','h3','h4','h5','h6'];
     for (let headerType of headerNames){
