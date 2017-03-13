@@ -22,33 +22,10 @@ import {
 } from '../apputils';
 
 import {
-  CommandIDs as ConsoleCommandIDs
-} from '../console';
-
-import {
   EditorWidget
 } from './widget';
 
 export * from './widget';
-
-
-/**
- * The command IDs used by the editor plugin.
- */
-export
-namespace CommandIDs {
-  export
-  const lineNumbers: string = 'editor:line-numbers';
-
-  export
-  const lineWrap: string = 'editor:line-wrap';
-
-  export
-  const createConsole: string = 'editor:create-console';
-
-  export
-  const runCode: string = 'editor:run-code';
-};
 
 
 /**
@@ -108,17 +85,17 @@ function addDefaultCommands(tracker: IEditorTracker, commands: CommandRegistry) 
     create: () => ''
   });
 
-  commands.addCommand(CommandIDs.lineNumbers, {
+  commands.addCommand('editor:line-numbers', {
     execute: args => { toggleLineNums(args); },
     label: 'Toggle Line Numbers'
   });
 
-  commands.addCommand(CommandIDs.lineWrap, {
+  commands.addCommand('editor:line-wrap', {
     execute: args => { toggleLineWrap(args); },
     label: 'Toggle Line Wrap'
   });
 
-  commands.addCommand(CommandIDs.createConsole, {
+  commands.addCommand('editor:create-console', {
     execute: args => {
       let widget = tracker.currentWidget;
       if (!widget) {
@@ -129,13 +106,13 @@ function addDefaultCommands(tracker: IEditorTracker, commands: CommandRegistry) 
         preferredLanguage: widget.context.model.defaultKernelLanguage,
         activate: args['activate']
       };
-      return commands.execute(ConsoleCommandIDs.create, options)
+      return commands.execute('console:create', options)
         .then(id => { sessionIdProperty.set(widget, id); });
     },
     label: 'Create Console for Editor'
   });
 
-  commands.addCommand(CommandIDs.runCode, {
+  commands.addCommand('editor:run-code', {
     execute: args => {
       let widget = tracker.currentWidget;
       if (!widget) {
@@ -156,7 +133,7 @@ function addDefaultCommands(tracker: IEditorTracker, commands: CommandRegistry) 
         code: editor.model.value.text.substring(start, end),
         activate: args['activate']
       };
-      return commands.execute(ConsoleCommandIDs.inject, options);
+      return commands.execute('console:inject', options);
     },
     label: 'Run Code'
   });

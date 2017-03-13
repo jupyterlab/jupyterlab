@@ -38,6 +38,10 @@ import {
 } from '../apputils';
 
 import {
+  IConsoleTracker, ICreateConsoleArgs, ConsolePanel
+} from '../console';
+
+import {
   selectKernel
 } from '../docregistry';
 
@@ -56,10 +60,6 @@ import {
 import {
   IServiceManager
 } from '../services';
-
-import {
-  IConsoleTracker, ICreateConsoleArgs, ConsolePanel
-} from './index';
 
 
 /**

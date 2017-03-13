@@ -18,12 +18,35 @@ import {
 } from '../docregistry';
 
 import {
+  IEditorTracker, EditorWidget, EditorWidgetFactory, addDefaultCommands
+} from '../editorwidget';
+
+import {
   CommandIDs as FileBrowserCommandIDs
 } from '../filebrowser';
 
 import {
   IEditorTracker, EditorWidget, EditorWidgetFactory, addDefaultCommands
 } from './';
+
+
+/**
+ * The command IDs used by the editor plugin.
+ */
+namespace CommandIDs {
+  export
+  const lineNumbers: string = 'editor:line-numbers';
+
+  export
+  const lineWrap: string = 'editor:line-wrap';
+
+  export
+  const createConsole: string = 'editor:create-console';
+
+  export
+  const runCode: string = 'editor:run-code';
+};
+>>>>>>> 3e46b197... Clean up imports:src/editorwidget-extension/index.ts
 
 
 /**

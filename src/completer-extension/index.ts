@@ -10,6 +10,11 @@ import {
 } from '../application';
 
 import {
+  COMPLETER_ACTIVE_CLASS, CompleterModel,
+  CompleterWidget, CompletionHandler, ICompletionManager
+} from '../completer';
+
+import {
   IConsoleTracker
 } from '../console';
 
@@ -17,10 +22,6 @@ import {
   INotebookTracker
 } from '../notebook';
 
-import {
-  COMPLETER_ACTIVE_CLASS, CompleterModel,
-  CompleterWidget, CompletionHandler, ICompletionManager
-} from './';
 
 
 /**

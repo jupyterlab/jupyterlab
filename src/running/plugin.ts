@@ -10,10 +10,6 @@ import {
 } from '../apputils';
 
 import {
-  CommandIDs as ConsoleCommandIDs
-} from '../console';
-
-import {
   CommandIDs as FileBrowserCommandIDs
 } from '../filebrowser';
 
@@ -64,7 +60,7 @@ function activate(app: JupyterLab, services: IServiceManager, restorer: ILayoutR
     let path = model.notebook.path;
     let name = path.split('/').pop();
     if (CONSOLE_REGEX.test(name)) {
-      app.commands.execute(ConsoleCommandIDs.open, { id: model.id });
+      app.commands.execute('console:open', { id: model.id });
     } else {
       app.commands.execute(FileBrowserCommandIDs.open, { path });
     }

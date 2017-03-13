@@ -3,7 +3,7 @@
 
 import {
   JupyterLab, JupyterLabPlugin
-} from './';
+} from '../application';
 
 import {
   ICommandPalette

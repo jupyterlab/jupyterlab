@@ -16,10 +16,10 @@
 /* Individual plugins */
 @import '../about-extension/index.css';
 @import '../cells/index.css';
-@import '../codemirror-extension/index.css';
+@import '../codemirror/index.css';
 @import '../commandpalette/index.css';
-@import '../completer-extension/index.css';
-@import '../console-extension/index.css';
+@import '../completer/index.css';
+@import '../console/index.css';
 @import '../csvwidget/index.css';
 @import '../editorwidget/index.css';
 @import '../faq-extension/index.css';
