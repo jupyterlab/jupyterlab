@@ -6,10 +6,6 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  Token
-} from '@phosphor/application';
-
-import {
   Menu
 } from '@phosphor/widgets';
 
@@ -17,38 +13,9 @@ import {
   MenuBar
 } from '@phosphor/widgets';
 
-
-/* tslint:disable */
-/**
- * The main menu token.
- */
-export
-const IMainMenu = new Token<IMainMenu>('jupyter.services.main-menu');
-/* tslint:enable */
-
-
-/**
- * The main menu interface.
- */
-export
-interface IMainMenu {
-  /**
-   * Add a new menu to the main menu bar.
-   */
-  addMenu(menu: Menu, options: IAddMenuOptions): void;
-}
-
-
-/**
- * The options used to add a menu to the main menu.
- */
-export
-interface IAddMenuOptions {
-  /**
-   * The rank order of the menu among its siblings.
-   */
-  rank?: number;
-}
+import {
+  IMainMenu
+} from '../apputils';
 
 
 /**
@@ -59,7 +26,7 @@ class MainMenu extends MenuBar implements IMainMenu {
   /**
    * Add a new menu to the main menu bar.
    */
-  addMenu(menu: Menu, options: IAddMenuOptions = {}): void {
+  addMenu(menu: Menu, options: IMainMenu.IAddOptions = {}): void {
     if (ArrayExt.firstIndexOf(this.menus, menu) > -1) {
       return;
     }

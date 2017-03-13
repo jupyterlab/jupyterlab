@@ -18,16 +18,13 @@ import {
 } from '../application';
 
 import {
-  ICommandPalette, IFrameWidget, ILayoutRestorer, InstanceTracker
+  ICommandPalette, IFrameWidget, ILayoutRestorer, InstanceTracker,
+  IMainMenu
 } from '../apputils';
 
 import {
   URLExt
 } from '../coreutils';
-
-import {
-  IMainMenu
-} from '../mainmenu';
 
 
 /**
@@ -35,25 +32,25 @@ import {
  */
 namespace CommandIDs {
   export
-  const open: string = 'help-jupyterlab:open';
+  const open = 'help-jupyterlab:open';
 
   export
-  const activate: string = 'help-jupyterlab:activate';
+  const activate = 'help-jupyterlab:activate';
 
   export
-  const close: string = 'help-jupyterlab:close';
+  const close = 'help-jupyterlab:close';
 
   export
-  const show: string = 'help-jupyterlab:show';
+  const show = 'help-jupyterlab:show';
 
   export
-  const hide: string = 'help-jupyterlab:hide';
+  const hide = 'help-jupyterlab:hide';
 
   export
-  const toggle: string = 'help-jupyterlab:toggle';
+  const toggle = 'help-jupyterlab:toggle';
 
   export
-  const launchClassic: string = 'classic-notebook:launchClassic';
+  const launchClassic = 'classic-notebook:launchClassic';
 };
 
 
@@ -237,5 +234,5 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   palette.addItem({ command: 'statedb:clear', category });
   palette.addItem({ command: CommandIDs.launchClassic, category });
 
-  mainMenu.addMenu(menu, {});
+  mainMenu.addMenu(menu);
 }

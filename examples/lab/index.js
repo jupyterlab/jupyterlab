@@ -28,7 +28,6 @@ var mods = [
   require('jupyterlab/lib/inspector/plugin'),
   require('jupyterlab/lib/landing-extension'),
   require('jupyterlab/lib/launcher/plugin'),
-  require('jupyterlab/lib/mainmenu/plugin'),
   require('jupyterlab/lib/markdownwidget/plugin'),
   require('jupyterlab/lib/notebook/plugin'),
   require('jupyterlab/lib/rendermime/plugin'),

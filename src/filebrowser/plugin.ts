@@ -18,7 +18,7 @@ import {
 } from '../application';
 
 import {
-  ICommandPalette, ILayoutRestorer, IStateDB
+  ICommandPalette, ILayoutRestorer, IMainMenu, IStateDB
 } from '../apputils';
 
 import {
@@ -28,10 +28,6 @@ import {
 import {
   IDocumentRegistry, DocumentRegistry
 } from '../docregistry';
-
-import {
-  IMainMenu
-} from '../mainmenu';
 
 import {
   IServiceManager

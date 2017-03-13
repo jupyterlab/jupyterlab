@@ -15,7 +15,7 @@ import {
 } from '../application';
 
 import {
-  ICommandPalette
+  ICommandPalette, IMainMenu
 } from '../apputils';
 
 import {
@@ -29,10 +29,6 @@ import {
 import {
   IEditorTracker
 } from '../editorwidget';
-
-import {
-  IMainMenu
-} from '../mainmenu';
 
 
 /**

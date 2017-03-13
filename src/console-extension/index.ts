@@ -18,7 +18,8 @@ import {
 } from '../application';
 
 import {
-  Dialog, ICommandPalette, InstanceTracker, ILayoutRestorer, showDialog
+  Dialog, ICommandPalette, InstanceTracker, ILayoutRestorer, IMainMenu,
+  showDialog
 } from '../apputils';
 
 import {
@@ -40,10 +41,6 @@ import {
 import {
   IPathTracker
 } from '../filebrowser';
-
-import {
-  IMainMenu
-} from '../mainmenu';
 
 import {
   IRenderMime, RenderMime

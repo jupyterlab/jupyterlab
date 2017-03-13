@@ -8,13 +8,21 @@ import {
 } from '@phosphor/coreutils';
 
 import {
+  Widget
+} from '@phosphor/widgets';
+
+import {
   JupyterLab, JupyterLabPlugin
 } from '../application';
 
 import {
   CommandLinker, ICommandLinker, ICommandPalette, ILayoutRestorer,
-  IStateDB, LayoutRestorer
+  IMainMenu, IStateDB, LayoutRestorer
 } from '../apputils';
+
+import {
+  MainMenu
+} from './mainmenu';
 
 import {
   activatePalette
@@ -53,6 +61,28 @@ const layoutPlugin: JupyterLabPlugin<ILayoutRestorer> = {
   },
   autoStart: true,
   provides: ILayoutRestorer
+};
+
+
+/**
+ * A service providing an interface to the main menu.
+ */
+const mainMenuPlugin: JupyterLabPlugin<IMainMenu> = {
+  id: 'jupyter.services.main-menu',
+  provides: IMainMenu,
+  activate: (app: JupyterLab): IMainMenu => {
+    let menu = new MainMenu();
+    menu.id = 'jp-MainMenu';
+
+    let logo = new Widget();
+    logo.node.className = 'jp-MainAreaPortraitIcon jp-JupyterIcon';
+    logo.id = 'jp-MainLogo';
+
+    app.shell.addToTopArea(logo);
+    app.shell.addToTopArea(menu);
+
+    return menu;
+  }
 };
 
 
@@ -104,7 +134,7 @@ const stateDBPlugin: JupyterLabPlugin<IStateDB> = {
  * Export the plugins as default.
  */
 const plugins: JupyterLabPlugin<any>[] = [
-  linkerPlugin, layoutPlugin, palettePlugin, stateDBPlugin
+  linkerPlugin, layoutPlugin, palettePlugin, mainMenuPlugin, stateDBPlugin
 ];
 export default plugins;
 

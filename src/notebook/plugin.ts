@@ -14,16 +14,12 @@ import {
 } from '../application';
 
 import {
-  ICommandPalette, ILayoutRestorer
+  Dialog, ICommandPalette, ILayoutRestorer, IMainMenu, showDialog
 } from '../apputils';
 
 import {
   IEditorServices
 } from '../codeeditor';
-
-import {
-  IMainMenu
-} from '../mainmenu';
 
 import {
   IDocumentRegistry, restartKernel, selectKernelForContext
@@ -40,10 +36,6 @@ import {
 import {
   IServiceManager
 } from '../services';
-
-import {
-  Dialog, showDialog
-} from '../apputils';
 
 import {
   CellTools, CommandIDs, ICellTools, INotebookTracker, NotebookActions,
