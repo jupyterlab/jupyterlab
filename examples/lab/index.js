@@ -12,13 +12,14 @@ require('jupyterlab/lib/default-theme/index.css');
 
 var mods = [
   require('jupyterlab/lib/about-extension'),
-  require('jupyterlab/lib/application/plugin'),
-  require('jupyterlab/lib/apputils/plugin'),
   require('jupyterlab/lib/codemirror/plugin'),
+  require('jupyterlab/lib/application-extension'),
+  require('jupyterlab/lib/apputils/plugin'),
+  require('jupyterlab/lib/codemirror-extension'),
   require('jupyterlab/lib/commandlinker/plugin'),
   require('jupyterlab/lib/commandpalette/plugin'),
-  require('jupyterlab/lib/completer/plugin'),
-  require('jupyterlab/lib/console/plugin'),
+  require('jupyterlab/lib/completer-extension'),
+  require('jupyterlab/lib/console-extension'),
   require('jupyterlab/lib/csvwidget/plugin'),
   require('jupyterlab/lib/docmanager/plugin'),
   require('jupyterlab/lib/docregistry/plugin'),
