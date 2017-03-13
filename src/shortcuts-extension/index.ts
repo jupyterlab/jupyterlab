@@ -2,24 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin, CommandIDs as ApplicationCommandIDs
+  JupyterLab, JupyterLabPlugin
 } from '../application';
 
 import {
   CommandIDs as CommandPaletteCommandIDs
 } from '../commandpalette';
-
-import {
-  CommandIDs as CompleterCommandIDs, COMPLETER_ENABLED_CLASS
-} from '../completer';
-
-import {
-  CommandIDs as ConsoleCommandIDs
-} from '../console';
-
-import {
-  CommandIDs as EditorWidgetCommandIDs
-} from '../editorwidget';
 
 import {
   CommandIDs as FileBrowserCommandIDs
@@ -67,12 +55,12 @@ import {
  */
 const SHORTCUTS = [
   {
-    command: ApplicationCommandIDs.activateNextTab,
+    command: 'main-jupyterlab:activate-next-tab',
     selector: 'body',
     keys: ['Ctrl Shift ]']
   },
   {
-    command: ApplicationCommandIDs.activatePreviousTab,
+    command: 'main-jupyterlab:activate-previous-tab',
     selector: 'body',
     keys: ['Ctrl Shift [']
   },
@@ -82,32 +70,32 @@ const SHORTCUTS = [
     keys: ['Accel Shift P']
   },
   {
-    command: CompleterCommandIDs.invokeConsole,
-    selector: `.jp-ConsolePanel .${COMPLETER_ENABLED_CLASS}`,
+    command: 'completer:invoke-console',
+    selector: '.jp-ConsolePanel .jp-mod-completer-enabled',
     keys: ['Tab']
   },
   {
-    command: CompleterCommandIDs.invokeNotebook,
-    selector: `.jp-Notebook .${COMPLETER_ENABLED_CLASS}`,
+    command: 'completer:invoke-notebook',
+    selector: '.jp-Notebook .jp-mod-completer-enabled',
     keys: ['Tab']
   },
   {
-    command: ConsoleCommandIDs.run,
+    command: 'console:run',
     selector: '.jp-CodeConsole-prompt',
     keys: ['Enter']
   },
   {
-    command: ConsoleCommandIDs.runForced,
+    command: 'console:run-forced',
     selector: '.jp-CodeConsole-prompt',
     keys: ['Shift Enter']
   },
   {
-    command: ConsoleCommandIDs.linebreak,
+    command: 'console:linebreak',
     selector: '.jp-CodeConsole-prompt',
     keys: ['Ctrl Enter']
   },
   {
-    command: EditorWidgetCommandIDs.runCode,
+    command: 'editor:run-code',
     selector: '.jp-EditorWidget',
     keys: ['Shift Enter']
   },

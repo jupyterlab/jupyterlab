@@ -18,10 +18,6 @@ import {
 } from '../apputils';
 
 import {
-  CommandIDs as ConsoleCommandIDs
-} from '../console';
-
-import {
   CommandIDs as FileBrowserCommandIDs
 } from '../filebrowser';
 
@@ -149,7 +145,7 @@ class LandingModel extends VDomModel {
     this.headerText = 'Start a new activity';
     this.activities =
     [['Notebook', FileBrowserCommandIDs.newNotebook],
-     ['Code Console', ConsoleCommandIDs.create],
+     ['Code Console', 'console:create'],
      ['Text Editor', FileBrowserCommandIDs.newTextFile]];
 
     if (terminalsAvailable) {
