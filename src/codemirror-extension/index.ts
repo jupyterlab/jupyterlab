@@ -19,20 +19,35 @@ import {
 } from '../codeeditor';
 
 import {
+  editorServices, CodeMirrorEditor
+} from '../codemirror';
+
+import {
   ICommandPalette
 } from '../commandpalette';
 
 import {
-  IEditorTracker, CommandIDs as EditorCommandIDs
+  IEditorTracker
 } from '../editorwidget';
 
 import {
   IMainMenu
 } from '../mainmenu';
 
-import {
-  editorServices, CodeMirrorEditor, CommandIDs
-} from '.';
+
+/**
+ * The command IDs used by the codemirror plugin.
+ */
+namespace CommandIDs {
+  export
+  const matchBrackets = 'codemirror:match-brackets';
+
+  export
+  const vimMode = 'codemirror:vim-mode';
+
+  export
+  const changeTheme = 'codemirror:change-theme';
+};
 
 
 /**
@@ -130,8 +145,8 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
       args: { theme: name }
     }));
 
-    menu.addItem({ command: EditorCommandIDs.lineNumbers });
-    menu.addItem({ command: EditorCommandIDs.lineWrap });
+    menu.addItem({ command: 'editor:line-numbers' });
+    menu.addItem({ command: 'editor:line-wrap' });
     menu.addItem({ command: CommandIDs.matchBrackets });
     menu.addItem({ command: CommandIDs.vimMode });
     menu.addItem({ type: 'separator' });
@@ -153,12 +168,12 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
   });
 
   [
-    EditorCommandIDs.lineNumbers,
-    EditorCommandIDs.lineWrap,
+    'editor:line-numbers',
+    'editor:line-wrap',
     CommandIDs.matchBrackets,
     CommandIDs.vimMode,
-    EditorCommandIDs.createConsole,
-    EditorCommandIDs.runCode
+    'editor-create-console',
+    'editor:run-code'
   ].forEach(command => palette.addItem({ command, category: 'Editor' }));
 
 }

@@ -38,6 +38,10 @@ import {
 } from '../apputils';
 
 import {
+  IConsoleTracker, ICreateConsoleArgs, ConsolePanel
+} from '../console';
+
+import {
   selectKernel
 } from '../docregistry';
 
@@ -57,10 +61,44 @@ import {
   IServiceManager
 } from '../services';
 
-import {
-  IConsoleTracker, ICreateConsoleArgs, ConsolePanel, CommandIDs
-} from './index';
 
+/**
+ * The command IDs used by the console plugin.
+ */
+namespace CommandIDs {
+  export
+  const create = 'console:create';
+
+  export
+  const clear = 'console:clear';
+
+  export
+  const run = 'console:run';
+
+  export
+  const runForced = 'console:run-forced';
+
+  export
+  const linebreak = 'console:linebreak';
+
+  export
+  const interrupt = 'console:interrupt-kernel';
+
+  export
+  const restart = 'console:restart-kernel';
+
+  export
+  const closeAndShutdown = 'console:close-and-shutdown';
+
+  export
+  const open = 'console:open';
+
+  export
+  const inject = 'console:inject';
+
+  export
+  const switchKernel = 'console:switch-kernel';
+};
 
 /**
  * The console widget tracker provider.

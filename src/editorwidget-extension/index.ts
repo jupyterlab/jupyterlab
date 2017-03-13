@@ -18,12 +18,12 @@ import {
 } from '../docregistry';
 
 import {
-  CommandIDs as FileBrowserCommandIDs
-} from '../filebrowser';
+  IEditorTracker, EditorWidget, EditorWidgetFactory, addDefaultCommands
+} from '../editorwidget';
 
 import {
-  IEditorTracker, EditorWidget, EditorWidgetFactory, addDefaultCommands
-} from './';
+  CommandIDs as FileBrowserCommandIDs
+} from '../filebrowser';
 
 
 /**

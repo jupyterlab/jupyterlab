@@ -18,10 +18,6 @@ import {
 } from '../commandpalette';
 
 import {
-  CommandIDs as ConsoleCommandIDs
-} from '../console';
-
-import {
   CommandIDs as FileBrowserCommandIDs
 } from '../filebrowser';
 
@@ -97,7 +93,7 @@ function activate(app: JupyterLab, services: IServiceManager, pathTracker: IPath
     },
     {
       name: 'Code Console',
-      command: ConsoleCommandIDs.create
+      command: 'console:create'
     },
     {
       name: 'Text Editor',

@@ -10,6 +10,11 @@ import {
 } from '../application';
 
 import {
+  COMPLETER_ACTIVE_CLASS, CompleterModel,
+  CompleterWidget, CompletionHandler, ICompletionManager
+} from '../completer';
+
+import {
   IConsoleTracker
 } from '../console';
 
@@ -17,10 +22,30 @@ import {
   INotebookTracker
 } from '../notebook';
 
-import {
-  CommandIDs, COMPLETER_ACTIVE_CLASS, CompleterModel,
-  CompleterWidget, CompletionHandler, ICompletionManager
-} from './';
+
+
+/**
+ * The command IDs used by the completer plugin.
+ */
+namespace CommandIDs {
+  export
+  const invoke = 'completer:invoke';
+
+  export
+  const invokeConsole = 'completer:invoke-console';
+
+  export
+  const invokeNotebook = 'completer:invoke-notebook';
+
+  export
+  const select = 'completer:select';
+
+  export
+  const selectConsole = 'completer:select-console';
+
+  export
+  const selectNotebook = 'completer:select-notebook';
+}
 
 
 /**
