@@ -3,12 +3,12 @@
 
 import '@phosphor/widgets/style/index.css';
 
-import './application/instancetracker.spec';
 import './application/loader.spec';
 import './application/shell.spec';
 
 import './apputils/dialog.spec';
 import './apputils/iframe.spec';
+import './apputils/instancetracker.spec';
 import './apputils/jsoneditor.spec';
 import './apputils/layoutrestorer.spec';
 import './apputils/sanitizer.spec';

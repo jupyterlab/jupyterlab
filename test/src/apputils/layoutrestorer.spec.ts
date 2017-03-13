@@ -16,12 +16,12 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  ApplicationShell, InstanceTracker
+  ApplicationShell
 } from '../../../lib/application';
 
 import {
-  LayoutRestorer
-} from '../../../lib/apputils/layoutrestorer';
+  InstanceTracker, LayoutRestorer
+} from '../../../lib/apputils';
 
 import {
   StateDB
