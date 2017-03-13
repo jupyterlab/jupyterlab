@@ -67,37 +67,37 @@ import {
  */
 namespace CommandIDs {
   export
-  const create: string = 'console:create';
+  const create = 'console:create';
 
   export
-  const clear: string = 'console:clear';
+  const clear = 'console:clear';
 
   export
-  const run: string = 'console:run';
+  const run = 'console:run';
 
   export
-  const runForced: string = 'console:run-forced';
+  const runForced = 'console:run-forced';
 
   export
-  const linebreak: string = 'console:linebreak';
+  const linebreak = 'console:linebreak';
 
   export
-  const interrupt: string = 'console:interrupt-kernel';
+  const interrupt = 'console:interrupt-kernel';
 
   export
-  const restart: string = 'console:restart-kernel';
+  const restart = 'console:restart-kernel';
 
   export
-  const closeAndShutdown: string = 'console:close-and-shutdown';
+  const closeAndShutdown = 'console:close-and-shutdown';
 
   export
-  const open: string = 'console:open';
+  const open = 'console:open';
 
   export
-  const inject: string = 'console:inject';
+  const inject = 'console:inject';
 
   export
-  const switchKernel: string = 'console:switch-kernel';
+  const switchKernel = 'console:switch-kernel';
 };
 
 /**

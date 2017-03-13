@@ -31,7 +31,7 @@ import {
  */
 namespace CommandIDs {
   export
-  const open: string = 'landing-jupyterlab:open';
+  const open = 'landing-jupyterlab:open';
 };
 
 

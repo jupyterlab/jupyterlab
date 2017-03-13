@@ -35,16 +35,16 @@ import {
  */
 namespace CommandIDs {
   export
-  const lineNumbers: string = 'editor:line-numbers';
+  const lineNumbers = 'editor:line-numbers';
 
   export
-  const lineWrap: string = 'editor:line-wrap';
+  const lineWrap = 'editor:line-wrap';
 
   export
-  const createConsole: string = 'editor:create-console';
+  const createConsole = 'editor:create-console';
 
   export
-  const runCode: string = 'editor:run-code';
+  const runCode = 'editor:run-code';
 };
 >>>>>>> 3e46b197... Clean up imports:src/editorwidget-extension/index.ts
 
