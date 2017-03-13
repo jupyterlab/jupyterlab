@@ -511,6 +511,16 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    * Clear the change stack.
    */
   clearUndo(): void {
+    //dispose of cells not in the current
+    //cell order.
+    for(let key of this._cellMap.keys()) {
+      if(ArrayExt.findFirstIndex(
+         toArray(this._cellOrder), id => (id.id)===key) === -1) {
+        let cell = this._cellMap.get(key) as ICellModel;
+        cell.dispose();
+        this._cellMap.delete(key);
+      }
+    }
     this._cellOrder.clearUndo();
   }
 
