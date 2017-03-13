@@ -16,8 +16,12 @@ import {
 
 import {
   IObservableJSON, ObservableJSON, IObservableUndoableVector,
-  ObservableUndoableVector, IObservableVector, ObservableVector, nbformat
+  IObservableVector, ObservableVector, nbformat
 } from '@jupyterlab/coreutils';
+
+import {
+  CellList
+} from './celllist';
 
 
 /**
@@ -66,16 +70,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       options.contentFactory || NotebookModel.defaultContentFactory
     );
     this.contentFactory = factory;
-    this._cells = new ObservableUndoableVector<ICellModel>((cell: nbformat.IBaseCell) => {
-      switch (cell.cell_type) {
-        case 'code':
-          return factory.createCodeCell({ cell });
-        case 'markdown':
-          return factory.createMarkdownCell({ cell });
-        default:
-          return factory.createRawCell({ cell });
-      }
-    });
+    this._cells = new CellList();
     // Add an initial code cell by default.
     this._cells.pushBack(factory.createCodeCell({}));
     this._cells.changed.connect(this._onCellsChanged, this);
@@ -264,7 +259,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       break;
     case 'remove':
       each(change.oldValues, cell => {
-        cell.dispose();
+        //cell.dispose();
       });
       break;
     case 'set':
@@ -272,7 +267,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
         cell.contentChanged.connect(this.triggerContentChange, this);
       });
       each(change.oldValues, cell => {
-        cell.dispose();
+        //cell.dispose();
       });
       break;
     default:
