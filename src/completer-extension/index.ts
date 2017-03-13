@@ -29,22 +29,22 @@ import {
  */
 namespace CommandIDs {
   export
-  const invoke: string = 'completer:invoke';
+  const invoke = 'completer:invoke';
 
   export
-  const invokeConsole: string = 'completer:invoke-console';
+  const invokeConsole = 'completer:invoke-console';
 
   export
-  const invokeNotebook: string = 'completer:invoke-notebook';
+  const invokeNotebook = 'completer:invoke-notebook';
 
   export
-  const select: string = 'completer:select';
+  const select = 'completer:select';
 
   export
-  const selectConsole: string = 'completer:select-console';
+  const selectConsole = 'completer:select-console';
 
   export
-  const selectNotebook: string = 'completer:select-notebook';
+  const selectNotebook = 'completer:select-notebook';
 }
 
 
