@@ -28,9 +28,9 @@ exporting a plugin object or array of plugin objects as the default export.
 
 The default plugins in the JupyterLab application include:
 - [Terminal](https://github.com/jupyterlab/jupyterlab/blob/master/src/terminal/plugin.ts) - Adds the ability to create command prompt terminals.
-- [Shortcuts](https://github.com/jupyterlab/jupyterlab/blob/master/src/shortcuts/plugin.ts) - Provides the default set of shortcuts for the application.
+- [Shortcuts](https://github.com/jupyterlab/jupyterlab/blob/master/src/shortcuts-extension/index.ts) - Sets the default set of shortcuts for the application.
 - [Images](https://github.com/jupyterlab/jupyterlab/blob/master/src/imagewidget/plugin.ts) - Adds a widget factory for displaying image files.
-- [Help](https://github.com/jupyterlab/jupyterlab/blob/master/src/help/plugin.ts) - Adds a side bar widget for displaying external documentation.
+- [Help](https://github.com/jupyterlab/jupyterlab/blob/master/src/help-extension/index.ts) - Adds a side bar widget for displaying external documentation.
 - [File Browser](https://github.com/jupyterlab/jupyterlab/blob/master/src/filebrowser/plugin.ts) - Creates the file browser and the document manager and the file browser to the side bar.
 - [Editor](https://github.com/jupyterlab/jupyterlab/blob/master/src/editorwidget/plugin.ts) - Add a widget factory for displaying editable source files.
 - [Console](https://github.com/jupyterlab/jupyterlab/blob/master/src/console/plugin.ts) - Adds the ability to launch Jupyter Console instances for
