@@ -31,7 +31,7 @@ const mods: JupyterLab.IPluginModule[] = [
   require('../../lib/csvwidget/plugin'),
   require('../../lib/docmanager/plugin'),
   require('../../lib/docregistry/plugin'),
-  require('../../lib/editorwidget/plugin'),
+  require('../../lib/editorwidget-extension'),
   require('../../lib/faq-extension'),
   require('../../lib/filebrowser/plugin'),
   require('../../lib/help-extension'),
