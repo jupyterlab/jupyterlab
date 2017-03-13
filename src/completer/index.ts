@@ -23,31 +23,6 @@ export * from './model';
 export * from './widget';
 
 
-/**
- * The command IDs used by the completer plugin.
- */
-export
-namespace CommandIDs {
-  export
-  const invoke: string = 'completer:invoke';
-
-  export
-  const invokeConsole: string = 'completer:invoke-console';
-
-  export
-  const invokeNotebook: string = 'completer:invoke-notebook';
-
-  export
-  const select: string = 'completer:select';
-
-  export
-  const selectConsole: string = 'completer:select-console';
-
-  export
-  const selectNotebook: string = 'completer:select-notebook';
-}
-
-
 
 /* tslint:disable */
 /**

@@ -2,12 +2,27 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin, CommandIDs
+  JupyterLab, JupyterLabPlugin
 } from './';
 
 import {
   ICommandPalette
 } from '../commandpalette';
+
+
+/**
+ * The command IDs used by the application plugin.
+ */
+namespace CommandIDs {
+  export
+  const closeAll: string = 'main-jupyterlab:close-all';
+
+  export
+  const activateNextTab: string = 'main-jupyterlab:activate-next-tab';
+
+  export
+  const activatePreviousTab: string = 'main-jupyterlab:activate-previous-tab';
+};
 
 
 /**

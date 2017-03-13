@@ -31,8 +31,23 @@ import {
 } from '../mainmenu';
 
 import {
-  editorServices, CodeMirrorEditor, CommandIDs
+  editorServices, CodeMirrorEditor
 } from '.';
+
+
+/**
+ * The command IDs used by the codemirror plugin.
+ */
+namespace CommandIDs {
+  export
+  const matchBrackets = 'codemirror:match-brackets';
+
+  export
+  const vimMode = 'codemirror:vim-mode';
+
+  export
+  const changeTheme = 'codemirror:change-theme';
+};
 
 
 /**
