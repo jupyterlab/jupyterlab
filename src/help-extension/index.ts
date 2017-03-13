@@ -14,10 +14,6 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  CommandIDs as AboutCommandIDs
-} from '../about';
-
-import {
   InstanceTracker, JupyterLab, JupyterLabPlugin
 } from '../application';
 
@@ -26,12 +22,12 @@ import {
 } from '../apputils';
 
 import {
-  ICommandPalette
-} from '../commandpalette';
+  URLExt
+} from '../coreutils';
 
 import {
-  CommandIDs as FAQCommandIDs
-} from '../faq';
+  ICommandPalette
+} from '../commandpalette';
 
 import {
   IInstanceRestorer
@@ -45,9 +41,32 @@ import {
   CommandIDs as StateDBCommandIDs
 } from '../statedb';
 
-import {
-  CommandIDs
-} from './';
+
+/**
+ * The command IDs used by the help plugin.
+ */
+namespace CommandIDs {
+  export
+  const open: string = 'help-jupyterlab:open';
+
+  export
+  const activate: string = 'help-jupyterlab:activate';
+
+  export
+  const close: string = 'help-jupyterlab:close';
+
+  export
+  const show: string = 'help-jupyterlab:show';
+
+  export
+  const hide: string = 'help-jupyterlab:hide';
+
+  export
+  const toggle: string = 'help-jupyterlab:toggle';
+
+  export
+  const launchClassic: string = 'classic-notebook:launchClassic';
+};
 
 
 /**
@@ -191,8 +210,8 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     let menu = new Menu({ commands });
     menu.title.label = category;
 
-    menu.addItem({ command: AboutCommandIDs.open });
-    menu.addItem({ command: FAQCommandIDs.open });
+    menu.addItem({ command: 'about-jupyterlab:open' });
+    menu.addItem({ command: 'faq-jupyterlab:open' });
     menu.addItem({ command: CommandIDs.launchClassic });
     menu.addItem({ type: 'separator' });
     RESOURCES.forEach(args => { menu.addItem({ args, command }); });
@@ -209,7 +228,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
       const text = args['text'] as string;
 
       // If help resource will generate a mixed content error, load externally.
-      if (LAB_IS_SECURE && utils.urlParse(url).protocol !== 'https:') {
+      if (LAB_IS_SECURE && URLExt.parse(url).protocol !== 'https:') {
         window.open(url);
         return;
       }

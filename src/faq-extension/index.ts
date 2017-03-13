@@ -18,8 +18,17 @@ import {
 } from '../instancerestorer';
 
 import {
-  FaqModel, FaqWidget, CommandIDs
-} from './';
+  FaqModel, FaqWidget
+} from './widget';
+
+
+/**
+ * The command IDs used by the FAQ plugin.
+ */
+namespace CommandIDs {
+  export
+  const open: string = 'faq-jupyterlab:open';
+};
 
 
 /**

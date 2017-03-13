@@ -221,16 +221,6 @@ const NOTEBOOK_DESC = [
 
 
 /**
- * The command IDs used by the about plugin.
- */
-export
-namespace CommandIDs {
-  export
-  const open = 'about-jupyterlab:open';
-}
-
-
-/**
  * AboutModel holds data which the AboutWidgetwill render.
  */
 export

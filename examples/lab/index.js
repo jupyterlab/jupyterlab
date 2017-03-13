@@ -11,7 +11,7 @@ require('jupyterlab/lib/default-theme/index.css');
 
 
 var mods = [
-  require('jupyterlab/lib/about/plugin'),
+  require('jupyterlab/lib/about-extension'),
   require('jupyterlab/lib/application/plugin'),
   require('jupyterlab/lib/codemirror/plugin'),
   require('jupyterlab/lib/commandlinker/plugin'),
@@ -22,12 +22,12 @@ var mods = [
   require('jupyterlab/lib/docmanager/plugin'),
   require('jupyterlab/lib/docregistry/plugin'),
   require('jupyterlab/lib/editorwidget/plugin'),
-  require('jupyterlab/lib/faq/plugin'),
+  require('jupyterlab/lib/faq-extension'),
   require('jupyterlab/lib/filebrowser/plugin'),
-  require('jupyterlab/lib/help/plugin'),
+  require('jupyterlab/lib/help-extension'),
   require('jupyterlab/lib/imagewidget/plugin'),
   require('jupyterlab/lib/inspector/plugin'),
-  require('jupyterlab/lib/landing/plugin'),
+  require('jupyterlab/lib/landing-extension'),
   require('jupyterlab/lib/launcher/plugin'),
   require('jupyterlab/lib/instancerestorer/plugin'),
   require('jupyterlab/lib/mainmenu/plugin'),
@@ -36,7 +36,7 @@ var mods = [
   require('jupyterlab/lib/rendermime/plugin'),
   require('jupyterlab/lib/running/plugin'),
   require('jupyterlab/lib/services/plugin'),
-  require('jupyterlab/lib/shortcuts/plugin'),
+  require('jupyterlab/lib/shortcuts-extension'),
   require('jupyterlab/lib/statedb/plugin'),
   require('jupyterlab/lib/terminal/plugin'),
   require('jupyterlab/lib/tooltip/plugin')

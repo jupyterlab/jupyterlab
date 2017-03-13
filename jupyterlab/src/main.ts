@@ -18,7 +18,7 @@ polyfill();
 
 /* tslint:disable */
 const mods: JupyterLab.IPluginModule[] = [
-  require('../../lib/about/plugin'),
+  require('../../lib/about-extension'),
   require('../../lib/application/plugin'),
   require('../../lib/codemirror/plugin'),
   require('../../lib/commandlinker/plugin'),
@@ -29,12 +29,12 @@ const mods: JupyterLab.IPluginModule[] = [
   require('../../lib/docmanager/plugin'),
   require('../../lib/docregistry/plugin'),
   require('../../lib/editorwidget/plugin'),
-  require('../../lib/faq/plugin'),
+  require('../../lib/faq-extension'),
   require('../../lib/filebrowser/plugin'),
-  require('../../lib/help/plugin'),
+  require('../../lib/help-extension'),
   require('../../lib/imagewidget/plugin'),
   require('../../lib/inspector/plugin'),
-  require('../../lib/landing/plugin'),
+  require('../../lib/landing-extension'),
   require('../../lib/launcher/plugin'),
   require('../../lib/instancerestorer/plugin'),
   require('../../lib/mainmenu/plugin'),
@@ -43,7 +43,7 @@ const mods: JupyterLab.IPluginModule[] = [
   require('../../lib/rendermime/plugin'),
   require('../../lib/running/plugin'),
   require('../../lib/services/plugin'),
-  require('../../lib/shortcuts/plugin'),
+  require('../../lib/shortcuts-extension'),
   require('../../lib/statedb/plugin'),
   require('../../lib/terminal/plugin'),
   require('../../lib/tooltip/plugin')

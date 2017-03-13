@@ -10,10 +10,6 @@ import {
 } from '@phosphor/virtualdom';
 
 import {
-  CommandIDs as AboutCommandIDs
-} from '../about';
-
-import {
   JupyterLab
 } from '../application';
 
@@ -239,7 +235,7 @@ class LandingWidget extends VDomWidget<LandingModel> {
     let tour =
     h.span({className: TOUR_ICON_CLASS,
       onclick: () => {
-        this._app.commands.execute(AboutCommandIDs.open, void 0);
+        this._app.commands.execute('about-jupyterlab:open', void 0);
       }}
     );
     let header = h.span({

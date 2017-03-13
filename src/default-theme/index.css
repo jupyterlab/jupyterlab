@@ -18,7 +18,7 @@
 
 
 /* Individual plugins */
-@import '../about/index.css';
+@import '../about-extension/index.css';
 @import '../cells/index.css';
 @import '../codemirror/index.css';
 @import '../commandpalette/index.css';
@@ -26,12 +26,12 @@
 @import '../console/index.css';
 @import '../csvwidget/index.css';
 @import '../editorwidget/index.css';
-@import '../faq/index.css';
+@import '../faq-extension/index.css';
 @import '../filebrowser/index.css';
-@import '../help/index.css';
+@import '../help-extension/index.css';
 @import '../imagewidget/index.css';
 @import '../inspector/index.css';
-@import '../landing/index.css';
+@import '../landing-extension/index.css';
 @import '../launcher/index.css';
 @import '../markdownwidget/index.css';
 @import '../notebook/index.css';

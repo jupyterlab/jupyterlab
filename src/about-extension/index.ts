@@ -18,8 +18,18 @@ import {
 } from '../instancerestorer';
 
 import {
-  AboutModel, AboutWidget, CommandIDs
-} from './';
+  AboutModel, AboutWidget
+} from './widget';
+
+
+/**
+ * The command IDs used by the about plugin.
+ */
+namespace CommandIDs {
+  export
+  const open = 'about-jupyterlab:open';
+}
+
 
 /**
  * The about page extension.
