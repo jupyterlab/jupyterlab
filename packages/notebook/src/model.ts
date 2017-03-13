@@ -259,7 +259,6 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       break;
     case 'remove':
       each(change.oldValues, cell => {
-        //cell.dispose();
       });
       break;
     case 'set':
@@ -267,7 +266,6 @@ class NotebookModel extends DocumentModel implements INotebookModel {
         cell.contentChanged.connect(this.triggerContentChange, this);
       });
       each(change.oldValues, cell => {
-        //cell.dispose();
       });
       break;
     default:
