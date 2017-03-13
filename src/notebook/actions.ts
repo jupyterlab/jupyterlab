@@ -1077,9 +1077,13 @@ namespace Private {
       each(toDelete.reverse(), i => {
         cells.removeAt(i);
       });
-      // The model will add a new code cell if there are no
-      // remaining cells.
-      model.cells.endCompoundOperation();
+      // Add a new cell if the notebook is empty. This is done
+      // within the compound operation to make the deletion of
+      // a notebook's last cell undoable.
+      if(!cells.length) {
+        cells.pushBack(model.contentFactory.createCodeCell({}));
+      }
+      cells.endCompoundOperation();
 
       // Select the *first* interior cell not deleted or the cell
       // *after* the last selected cell.
