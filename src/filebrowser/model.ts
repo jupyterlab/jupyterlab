@@ -18,7 +18,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  IChangedArgs, PathExt
+  IChangedArgs, PathExt, uuid
 } from '../coreutils';
 
 import {
@@ -281,7 +281,9 @@ class FileBrowserModel implements IDisposable, IPathTracker {
    *
    * @param newPath - The path to the new file.
    *
-   * @returns A promise containing the new file contents model.
+   * @returns A promise containing the new file contents model.  The promise
+   *   will reject if the newPath already exists.  Use [[overwrite]] to
+   *   overwrite a file.
    */
   rename(path: string, newPath: string): Promise<Contents.IModel> {
     // Handle relative paths.
@@ -289,6 +291,25 @@ class FileBrowserModel implements IDisposable, IPathTracker {
     newPath = Private.normalizePath(this._model.path, newPath);
 
     return this._manager.contents.rename(path, newPath);
+  }
+
+  /**
+   * Overwrite a file.
+   *
+   * @param path - The path to the original file.
+   *
+   * @param newPath - The path to the new file.
+   *
+   * @returns A promise containing the new file contents model.
+   */
+  overwrite(path: string, newPath: string): Promise<Contents.IModel> {
+    // Cleanly overwrite the file by moving it, making sure the original
+    // does not exist, and then renaming to the new path.
+    let tempPath = `${newPath}.${uuid()}`;
+    let cb = () => { return this.rename(tempPath, newPath); };
+    return this.rename(path, tempPath).then(() => {
+      return this.deleteFile(newPath);
+    }).then(cb, cb);
   }
 
   /**
