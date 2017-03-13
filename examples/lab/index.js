@@ -15,8 +15,6 @@ var mods = [
   require('jupyterlab/lib/application-extension'),
   require('jupyterlab/lib/apputils-extension'),
   require('jupyterlab/lib/codemirror-extension'),
-  require('jupyterlab/lib/commandlinker/plugin'),
-  require('jupyterlab/lib/commandpalette/plugin'),
   require('jupyterlab/lib/completer-extension'),
   require('jupyterlab/lib/console-extension'),
   require('jupyterlab/lib/csvwidget/plugin'),

@@ -8,7 +8,8 @@ import {
 } from '../application';
 
 import {
-  ICommandPalette, ILayoutRestorer, LayoutRestorer
+  CommandLinker, ICommandLinker, ICommandPalette, ILayoutRestorer,
+  LayoutRestorer
 } from '../apputils';
 
 import {
@@ -18,6 +19,18 @@ import {
 import {
   activatePalette
 } from './palette';
+
+
+
+/**
+ * The default commmand linker provider.
+ */
+const linkerPlugin: JupyterLabPlugin<ICommandLinker> = {
+  id: 'jupyter.services.command-linker',
+  provides: ICommandLinker,
+  activate: (app: JupyterLab) => new CommandLinker({ commands: app.commands }),
+  autoStart: true
+};
 
 
 /**
@@ -53,8 +66,10 @@ const palettePlugin: JupyterLabPlugin<ICommandPalette> = {
 
 
 /**
- * Export the plugin as default.
+ * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [layoutPlugin, palettePlugin];
+const plugins: JupyterLabPlugin<any>[] = [
+  linkerPlugin, layoutPlugin, palettePlugin
+];
 export default plugins;
 

@@ -6,12 +6,8 @@ import {
 } from '../application';
 
 import {
-  ICommandPalette, ILayoutRestorer, InstanceTracker
+  ICommandLinker, ICommandPalette, ILayoutRestorer, InstanceTracker
 } from '../apputils';
-
-import {
-  ICommandLinker
-} from '../commandlinker';
 
 import {
   FaqModel, FaqWidget

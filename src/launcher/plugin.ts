@@ -6,12 +6,8 @@ import {
 } from '../application';
 
 import {
-  ICommandPalette, ILayoutRestorer
+  ICommandLinker, ICommandPalette, ILayoutRestorer
 } from '../apputils';
-
-import {
-  ICommandLinker
-} from '../commandlinker';
 
 import {
   CommandIDs as FileBrowserCommandIDs

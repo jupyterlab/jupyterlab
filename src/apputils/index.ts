@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 export * from './clipboard';
+export * from './commandlinker';
 export * from './commandpalette';
 export * from './dialog';
 export * from './domutils';

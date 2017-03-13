@@ -22,11 +22,7 @@ import {
 } from '@phosphor/virtualdom';
 
 import {
-  ICommandLinker
-} from '../commandlinker';
-
-import {
-  VDomModel, VDomWidget
+  ICommandLinker, VDomModel, VDomWidget
 } from '../apputils';
 
 
