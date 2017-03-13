@@ -426,6 +426,9 @@ namespace Private {
     return Promise.all(promises).then(() => { return void 0; });
   }
 
+  /**
+   * Handle a node with a `src` or `href` attribute.
+   */
   function handleAttr(node: HTMLElement, name: 'src' | 'href', resolver: RenderMime.IResolver): Promise<void> {
     let source = node.getAttribute(name);
     if (!source) {
