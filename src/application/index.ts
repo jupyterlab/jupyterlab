@@ -18,22 +18,6 @@ export { ApplicationShell } from './shell';
 
 
 /**
- * The command IDs used by the application plugin.
- */
-export
-namespace CommandIDs {
-  export
-  const closeAll: string = 'main-jupyterlab:close-all';
-
-  export
-  const activateNextTab: string = 'main-jupyterlab:activate-next-tab';
-
-  export
-  const activatePreviousTab: string = 'main-jupyterlab:activate-previous-tab';
-};
-
-
-/**
  * The type for all JupyterLab plugins.
  */
 export

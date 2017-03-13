@@ -4,17 +4,13 @@
 |----------------------------------------------------------------------------*/
 
 
-/* Variables and mixins */
-@import '../basestyle/materialcolors.css';
+/* Variables and common functions */
+@import '../apputils/index.css';
 @import './variables.css';
 
 
 /* Main application (1st) */
 @import '../application/index.css';
-
-
-/* Commonly shared functions */
-@import '../apputils/index.css';
 
 
 /* Individual plugins */
