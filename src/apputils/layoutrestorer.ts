@@ -233,26 +233,35 @@ class LayoutRestorer implements ILayoutRestorer {
    */
   restore(tracker: InstanceTracker<Widget>, options: ILayoutRestorer.IRestoreOptions<Widget>): Promise<any> {
     if (!this._promises) {
-      let warning = 'restore() can only be called before `first` has resolved.';
+      const warning = 'restore() can only be called before `first` has resolved.';
       console.warn(warning);
       return Promise.reject(warning);
     }
 
-    let { namespace } = tracker;
+    const { namespace } = tracker;
     if (this._trackers.has(namespace)) {
       let warning = `A tracker namespaced ${namespace} was already restored.`;
       console.warn(warning);
       return Promise.reject(warning);
     }
+
+    const { args, command, name, when } = options;
+
+    // Add the tracker to the private trackers collection.
     this._trackers.add(namespace);
 
-    let { args, command, name, when } = options;
-    let first = this._first;
+    // Whenever a new widget is added to the tracker, record its name.
+    tracker.widgetAdded.connect((sender: any, widget: Widget) => {
+      const widgetName = name(widget);
+      if (widgetName) {
+        this.add(widget, widgetName);
+      }
+    }, this);
 
-    let promise = tracker.restore({
+    const first = this._first;
+    const promise = tracker.restore({
       args, command, name,
       registry: this._registry,
-      restorer: this,
       state: this._state,
       when: when ? [first].concat(when) : first
     });

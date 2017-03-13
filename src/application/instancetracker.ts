@@ -6,6 +6,10 @@ import {
 } from '@phosphor/algorithm';
 
 import {
+  JSONObject
+} from '@phosphor/coreutils';
+
+import {
   IDisposable
 } from '@phosphor/disposable';
 
@@ -28,10 +32,6 @@ import {
 import {
   Widget
 } from '@phosphor/widgets';
-
-import {
-  ILayoutRestorer
-} from '../apputils';
 
 import {
   IStateDB
@@ -205,7 +205,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
 
     // Handle widget state restoration.
     if (this._restore) {
-      let { restorer, state } = this._restore;
+      let { state } = this._restore;
       let widgetName = this._restore.name(widget);
 
       if (widgetName) {
@@ -214,10 +214,6 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
 
         Private.nameProperty.set(widget, name);
         promise = state.save(name, { data });
-
-        if (restorer) {
-          restorer.add(widget, name);
-        }
       }
     }
 
@@ -421,9 +417,10 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     if (!this._restore) {
       return;
     }
+
     // If restore data was saved, delete it from the database.
-    let { state } = this._restore;
-    let name = Private.nameProperty.get(widget);
+    const { state } = this._restore;
+    const name = Private.nameProperty.get(widget);
 
     if (name) {
       state.remove(name);
@@ -466,11 +463,21 @@ namespace InstanceTracker {
    * The state restoration configuration options.
    */
   export
-  interface IRestoreOptions<T extends Widget> extends ILayoutRestorer.IRestoreOptions<T> {
-    /*
-     * The layout restorer to use to recreate restored widgets.
+  interface IRestoreOptions<T extends Widget> {
+    /**
+     * The command to execute when restoring instances.
      */
-    restorer: ILayoutRestorer;
+    command: string;
+
+    /**
+     * A function that returns the args needed to restore an instance.
+     */
+    args: (widget: T) => JSONObject;
+
+    /**
+     * A function that returns a unique persistent name for this instance.
+     */
+    name: (widget: T) => string;
 
     /**
      * The command registry which holds the restore command.
@@ -481,6 +488,15 @@ namespace InstanceTracker {
      * The state database instance.
      */
     state: IStateDB;
+
+    /**
+     * The point after which it is safe to restore state.
+     *
+     * #### Notes
+     * By definition, this promise or promises will happen after the application
+     * has `started`.
+     */
+    when?: Promise<any> | Array<Promise<any>>;
   }
 }
 
