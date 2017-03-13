@@ -13,6 +13,7 @@ require('jupyterlab/lib/default-theme/index.css');
 var mods = [
   require('jupyterlab/lib/about-extension'),
   require('jupyterlab/lib/application/plugin'),
+  require('jupyterlab/lib/apputils/plugin'),
   require('jupyterlab/lib/codemirror/plugin'),
   require('jupyterlab/lib/commandlinker/plugin'),
   require('jupyterlab/lib/commandpalette/plugin'),
@@ -29,7 +30,6 @@ var mods = [
   require('jupyterlab/lib/inspector/plugin'),
   require('jupyterlab/lib/landing-extension'),
   require('jupyterlab/lib/launcher/plugin'),
-  require('jupyterlab/lib/instancerestorer/plugin'),
   require('jupyterlab/lib/mainmenu/plugin'),
   require('jupyterlab/lib/markdownwidget/plugin'),
   require('jupyterlab/lib/notebook/plugin'),

@@ -20,30 +20,30 @@ import {
 } from '../../../lib/application';
 
 import {
-  InstanceRestorer
-} from '../../../lib/instancerestorer/instancerestorer';
+  LayoutRestorer
+} from '../../../lib/apputils/layoutrestorer';
 
 import {
   StateDB
 } from '../../../lib/statedb/statedb';
 
 
-const NAMESPACE = 'jupyterlab-instance-restorer-tests';
+const NAMESPACE = 'jupyterlab-layout-restorer-tests';
 
 
-describe('instancerestorer/instancerestorer', () => {
+describe('apputils', () => {
 
-  describe('InstanceRestorer', () => {
+  describe('LayoutRestorer', () => {
 
     describe('#constructor()', () => {
 
       it('should construct a new layout restorer', () => {
-        let restorer = new InstanceRestorer({
+        let restorer = new LayoutRestorer({
           first: Promise.resolve<void>(void 0),
           registry: new CommandRegistry(),
           state: new StateDB({ namespace: NAMESPACE })
         });
-        expect(restorer).to.be.an(InstanceRestorer);
+        expect(restorer).to.be.a(LayoutRestorer);
       });
 
     });
@@ -51,7 +51,7 @@ describe('instancerestorer/instancerestorer', () => {
     describe('#restored', () => {
 
       it('should be a promise available right away', () => {
-        let restorer = new InstanceRestorer({
+        let restorer = new LayoutRestorer({
           first: Promise.resolve<void>(void 0),
           registry: new CommandRegistry(),
           state: new StateDB({ namespace: NAMESPACE })
@@ -61,7 +61,7 @@ describe('instancerestorer/instancerestorer', () => {
 
       it('should resolve when restorer is done', done => {
         let ready = new utils.PromiseDelegate<void>();
-        let restorer = new InstanceRestorer({
+        let restorer = new LayoutRestorer({
           first: ready.promise,
           registry: new CommandRegistry(),
           state: new StateDB({ namespace: NAMESPACE })
@@ -76,7 +76,7 @@ describe('instancerestorer/instancerestorer', () => {
 
       it('should add a widget to be tracked by the restorer', done => {
         let ready = new utils.PromiseDelegate<void>();
-        let restorer = new InstanceRestorer({
+        let restorer = new LayoutRestorer({
           first: ready.promise,
           registry: new CommandRegistry(),
           state: new StateDB({ namespace: NAMESPACE })
@@ -102,7 +102,7 @@ describe('instancerestorer/instancerestorer', () => {
     describe('#fetch()', () => {
 
       it('should always return a value', done => {
-        let restorer = new InstanceRestorer({
+        let restorer = new LayoutRestorer({
           first: Promise.resolve(void 0),
           registry: new CommandRegistry(),
           state: new StateDB({ namespace: NAMESPACE })
@@ -115,7 +115,7 @@ describe('instancerestorer/instancerestorer', () => {
 
       it('should fetch saved data', done => {
         let ready = new utils.PromiseDelegate<void>();
-        let restorer = new InstanceRestorer({
+        let restorer = new LayoutRestorer({
           first: ready.promise,
           registry: new CommandRegistry(),
           state: new StateDB({ namespace: NAMESPACE })
@@ -154,7 +154,7 @@ describe('instancerestorer/instancerestorer', () => {
         let registry = new CommandRegistry();
         let state = new StateDB({ namespace: NAMESPACE });
         let ready = new utils.PromiseDelegate<void>();
-        let restorer = new InstanceRestorer({
+        let restorer = new LayoutRestorer({
           first: ready.promise, registry, state
         });
         let called = false;
@@ -182,7 +182,7 @@ describe('instancerestorer/instancerestorer', () => {
     describe('#save()', () => {
 
       it('should not run before `first` promise', done => {
-        let restorer = new InstanceRestorer({
+        let restorer = new LayoutRestorer({
           first: new Promise(() => { /* no op */ }),
           registry: new CommandRegistry(),
           state: new StateDB({ namespace: NAMESPACE })
@@ -199,7 +199,7 @@ describe('instancerestorer/instancerestorer', () => {
 
       it('should save data', done => {
         let ready = new utils.PromiseDelegate<void>();
-        let restorer = new InstanceRestorer({
+        let restorer = new LayoutRestorer({
           first: ready.promise,
           registry: new CommandRegistry(),
           state: new StateDB({ namespace: NAMESPACE })

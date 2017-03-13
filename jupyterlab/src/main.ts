@@ -20,6 +20,7 @@ polyfill();
 const mods: JupyterLab.IPluginModule[] = [
   require('../../lib/about-extension'),
   require('../../lib/application/plugin'),
+  require('../../lib/apputils/plugin'),
   require('../../lib/codemirror/plugin'),
   require('../../lib/commandlinker/plugin'),
   require('../../lib/commandpalette/plugin'),
@@ -36,7 +37,6 @@ const mods: JupyterLab.IPluginModule[] = [
   require('../../lib/inspector/plugin'),
   require('../../lib/landing-extension'),
   require('../../lib/launcher/plugin'),
-  require('../../lib/instancerestorer/plugin'),
   require('../../lib/mainmenu/plugin'),
   require('../../lib/markdownwidget/plugin'),
   require('../../lib/notebook/plugin'),
