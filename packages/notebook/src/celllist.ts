@@ -28,7 +28,9 @@ import {
 
 
 /**
- * Unfortunate, this.
+ * Unfortunately, the current implementation of the ObservableUndoableVector
+ * requires the values to implement to/from JSON. This should not be 
+ * necessary for primitives (in this case strings).
  */
 class CellID implements ISerializable { 
   constructor(id: string) {
@@ -76,7 +78,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
   /**
    * Test whether the list is empty.
    *
-   * @returns `true` if the vector is empty, `false` otherwise.
+   * @returns `true` if the cell list is empty, `false` otherwise.
    *
    * #### Notes
    * This is a read-only property.
@@ -92,9 +94,9 @@ class CellList implements IObservableUndoableVector<ICellModel> {
   }
 
   /**
-   * Get the length of the vector.
+   * Get the length of the cell list.
    *
-   * @return The number of values in the vector.
+   * @return The number of cells in the cell list.
    *
    * #### Notes
    * This is a read-only property.
@@ -110,10 +112,10 @@ class CellList implements IObservableUndoableVector<ICellModel> {
   }
 
   /**
-   * Get the value at the front of the vector.
+   * Get the cell at the front of the cell list.
    *
-   * @returns The value at the front of the vector, or `undefined` if
-   *   the vector is empty.
+   * @returns The cell at the front of the cell list, or `undefined` if
+   *   the cell list is empty.
    *
    * #### Notes
    * This is a read-only property.
@@ -129,10 +131,10 @@ class CellList implements IObservableUndoableVector<ICellModel> {
   }
 
   /**
-   * Get the value at the back of the vector.
+   * Get the cell at the back of the cell list.
    *
-   * @returns The value at the back of the vector, or `undefined` if
-   *   the vector is empty.
+   * @returns The cell at the back of the cell list, or `undefined` if
+   *   the cell list is empty.
    *
    * #### Notes
    * This is a read-only property.
@@ -148,9 +150,9 @@ class CellList implements IObservableUndoableVector<ICellModel> {
   }
 
   /**
-   * Create an iterator over the values in the vector.
+   * Create an iterator over the cells in the cell list.
    *
-   * @returns A new iterator starting at the front of the vector.
+   * @returns A new iterator starting at the front of the cell list.
    *
    * #### Complexity
    * Constant.
@@ -167,7 +169,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
   }
 
   /**
-   * Dispose of the resources held by the vector.
+   * Dispose of the resources held by the cell list.
    */
   dispose(): void {
     if (this._isDisposed) {
@@ -179,11 +181,11 @@ class CellList implements IObservableUndoableVector<ICellModel> {
   }
 
   /**
-   * Get the value at the specified index.
+   * Get the cell at the specified index.
    *
    * @param index - The positive integer index of interest.
    *
-   * @returns The value at the specified index.
+   * @returns The cell at the specified index.
    *
    * #### Complexity
    * Constant.
@@ -199,11 +201,11 @@ class CellList implements IObservableUndoableVector<ICellModel> {
   }
 
   /**
-   * Set the value at the specified index.
+   * Set the cell at the specified index.
    *
    * @param index - The positive integer index of interest.
    *
-   * @param value - The value to set at the specified index.
+   * @param cell - The cell to set at the specified index.
    *
    * #### Complexity
    * Constant.
@@ -214,20 +216,20 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    * #### Undefined Behavior
    * An `index` which is non-integral or out of range.
    */
-  set(index: number, value: ICellModel): void {
+  set(index: number, cell: ICellModel): void {
     // Generate a new uuid for the cell.
     let id = utils.uuid();
     // Set the internal data structures.
-    this._cellMap.set(id, value);
+    this._cellMap.set(id, cell);
     this._cellOrder.set(index, new CellID(id));
   }
 
   /**
-   * Add a value to the back of the vector.
+   * Add a cell to the back of the cell list.
    *
-   * @param value - The value to add to the back of the vector.
+   * @param cell - The cell to add to the back of the cell list.
    *
-   * @returns The new length of the vector.
+   * @returns The new length of the cell list.
    *
    * #### Complexity
    * Constant.
@@ -235,42 +237,42 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    * #### Iterator Validity
    * No changes.
    */
-  pushBack(value: ICellModel): number {
+  pushBack(cell: ICellModel): number {
     // Generate a new uuid for the cell.
     let id = utils.uuid();
     // Set the internal data structures.
-    this._cellMap.set(id, value);
+    this._cellMap.set(id, cell);
     let num = this._cellOrder.pushBack(new CellID(id));
     return num;
   }
 
   /**
-   * Remove and return the value at the back of the vector.
+   * Remove and return the cell at the back of the cell list.
    *
-   * @returns The value at the back of the vector, or `undefined` if
-   *   the vector is empty.
+   * @returns The cell at the back of the cell list, or `undefined` if
+   *   the cell list is empty.
    *
    * #### Complexity
    * Constant.
    *
    * #### Iterator Validity
-   * Iterators pointing at the removed value are invalidated.
+   * Iterators pointing at the removed cell are invalidated.
    */
   popBack(): ICellModel {
     //Don't clear the map in case we need to reinstate the cell
     let id = this._cellOrder.popBack();
-    let value = this._cellMap.get(id.id);
-    return value;
+    let cell = this._cellMap.get(id.id);
+    return cell;
   }
 
   /**
-   * Insert a value into the vector at a specific index.
+   * Insert a cell into the cell list at a specific index.
    *
-   * @param index - The index at which to insert the value.
+   * @param index - The index at which to insert the cell.
    *
-   * @param value - The value to set at the specified index.
+   * @param cell - The cell to set at the specified index.
    *
-   * @returns The new length of the vector.
+   * @returns The new length of the cell list.
    *
    * #### Complexity
    * Linear.
@@ -279,66 +281,66 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    * No changes.
    *
    * #### Notes
-   * The `index` will be clamped to the bounds of the vector.
+   * The `index` will be clamped to the bounds of the cell list.
    *
    * #### Undefined Behavior
    * An `index` which is non-integral.
    */
-  insert(index: number, value: ICellModel): number {
+  insert(index: number, cell: ICellModel): number {
     // Generate a new uuid for the cell.
     let id = utils.uuid();
     // Set the internal data structures.
-    this._cellMap.set(id, value);
+    this._cellMap.set(id, cell);
     let num = this._cellOrder.insert(index, new CellID(id));
     return num;
   }
 
   /**
-   * Remove the first occurrence of a value from the vector.
+   * Remove the first occurrence of a cell from the cell list.
    *
-   * @param value - The value of interest.
+   * @param cell - The cell of interest.
    *
-   * @returns The index of the removed value, or `-1` if the value
-   *   is not contained in the vector.
+   * @returns The index of the removed cell, or `-1` if the cell
+   *   is not contained in the cell list.
    *
    * #### Complexity
    * Linear.
    *
    * #### Iterator Validity
-   * Iterators pointing at the removed value and beyond are invalidated.
+   * Iterators pointing at the removed cell and beyond are invalidated.
    */
-  remove(value: ICellModel): number {
+  remove(cell: ICellModel): number {
     let index = ArrayExt.findFirstIndex(
-      toArray(this._cellOrder), id => (this._cellMap.get(id.id)===value));
+      toArray(this._cellOrder), id => (this._cellMap.get(id.id)===cell));
     this.removeAt(index);
     return index;
   }
 
   /**
-   * Remove and return the value at a specific index.
+   * Remove and return the cell at a specific index.
    *
-   * @param index - The index of the value of interest.
+   * @param index - The index of the cell of interest.
    *
-   * @returns The value at the specified index, or `undefined` if the
+   * @returns The cell at the specified index, or `undefined` if the
    *   index is out of range.
    *
    * #### Complexity
    * Constant.
    *
    * #### Iterator Validity
-   * Iterators pointing at the removed value and beyond are invalidated.
+   * Iterators pointing at the removed cell and beyond are invalidated.
    *
    * #### Undefined Behavior
    * An `index` which is non-integral.
    */
   removeAt(index: number): ICellModel {
     let id= this._cellOrder.removeAt(index);
-    let value = this._cellMap.get(id.id);
-    return value;
+    let cell = this._cellMap.get(id.id);
+    return cell;
   }
 
   /**
-   * Remove all values from the vector.
+   * Remove all cells from the cell list.
    *
    * #### Complexity
    * Linear.
@@ -355,7 +357,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
   }
 
   /**
-   * Move a value from one index to another.
+   * Move a cell from one index to another.
    *
    * @parm fromIndex - The index of the element to move.
    *
@@ -372,16 +374,16 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    * A `fromIndex` or a `toIndex` which is non-integral.
    */
   move(fromIndex: number, toIndex: number): void {
-    let value = this.at(fromIndex);
+    let cell = this.at(fromIndex);
     this._cellOrder.move(fromIndex, toIndex);
   }
 
   /**
-   * Push a set of values to the back of the vector.
+   * Push a set of cells to the back of the cell list.
    *
-   * @param values - An iterable or array-like set of values to add.
+   * @param cells - An iterable or array-like set of cells to add.
    *
-   * @returns The new length of the vector.
+   * @returns The new length of the cell list.
    *
    * #### Complexity
    * Linear.
@@ -389,27 +391,27 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    * #### Iterator Validity
    * No changes.
    */
-  pushAll(values: IterableOrArrayLike<ICellModel>): number {
+  pushAll(cells: IterableOrArrayLike<ICellModel>): number {
     let newIndex = this.length;
-    let newValues = toArray(values);
-    each(newValues, value => {
+    let newValues = toArray(cells);
+    each(newValues, cell => {
       // Generate a new uuid for the cell.
       let id = utils.uuid();
       // Set the internal data structures.
-      this._cellMap.set(id, value);
+      this._cellMap.set(id, cell);
       let num = this._cellOrder.pushBack(new CellID(id));
     });
     return this.length;
   }
 
   /**
-   * Insert a set of items into the vector at the specified index.
+   * Insert a set of items into the cell list at the specified index.
    *
-   * @param index - The index at which to insert the values.
+   * @param index - The index at which to insert the cells.
    *
-   * @param values - The values to insert at the specified index.
+   * @param cells - The cells to insert at the specified index.
    *
-   * @returns The new length of the vector.
+   * @returns The new length of the cell list.
    *
    * #### Complexity.
    * Linear.
@@ -418,37 +420,37 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    * No changes.
    *
    * #### Notes
-   * The `index` will be clamped to the bounds of the vector.
+   * The `index` will be clamped to the bounds of the cell list.
    *
    * #### Undefined Behavior.
    * An `index` which is non-integral.
    */
-  insertAll(index: number, values: IterableOrArrayLike<ICellModel>): number {
+  insertAll(index: number, cells: IterableOrArrayLike<ICellModel>): number {
     let newIndex = index;
-    let newValues = toArray(values);
-    each(newValues, value => {
+    let newValues = toArray(cells);
+    each(newValues, cell => {
       // Generate a new uuid for the cell.
       let id = utils.uuid();
-      this._cellMap.set(id, value);
+      this._cellMap.set(id, cell);
       this._cellOrder.insert(index++, new CellID(id));
     });
     return this.length;
   }
 
   /**
-   * Remove a range of items from the vector.
+   * Remove a range of items from the cell list.
    *
    * @param startIndex - The start index of the range to remove (inclusive).
    *
    * @param endIndex - The end index of the range to remove (exclusive).
    *
-   * @returns The new length of the vector.
+   * @returns The new length of the cell list.
    *
    * #### Complexity
    * Linear.
    *
    * #### Iterator Validity
-   * Iterators pointing to the first removed value and beyond are invalid.
+   * Iterators pointing to the first removed cell and beyond are invalid.
    *
    * #### Undefined Behavior
    * A `startIndex` or `endIndex` which is non-integral.
