@@ -1275,7 +1275,6 @@ class Notebook extends StaticNotebook {
       }
       let model = this.model;
       let values = event.mimeData.getData(JUPYTER_CELL_MIME);
-      let toRemove: BaseCellWidget[] = event.mimeData.getData('internal:cells');
       let factory = model.contentFactory;
 
       // Insert the copies of the original cells.
@@ -1298,16 +1297,6 @@ class Notebook extends StaticNotebook {
       model.cells.endCompoundOperation();
       // Activate the last cell.
       this.activeCellIndex = index - 1;
-
-      // Now remove the cells from the source notebook.
-      let activeCell = source.model.cells.at(source.activeCellIndex);
-      source.model.cells.beginCompoundOperation();
-      each(toRemove, widget => {
-        source.model.cells.remove(widget.model);
-      });
-      source.model.cells.endCompoundOperation();
-      source.activeCellIndex =
-        ArrayExt.firstIndexOf(toArray(source.model.cells), activeCell);
     }
   }
 
