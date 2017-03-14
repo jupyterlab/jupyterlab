@@ -349,7 +349,7 @@ class StaticNotebook extends Widget {
       });
       break;
     case 'move':
-      this._moveCell(args.newIndex, args.oldIndex);
+      this._moveCell(args.oldIndex, args.newIndex);
       break;
     case 'remove':
       each(args.oldValues, value => {
