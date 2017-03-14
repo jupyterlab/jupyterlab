@@ -32,8 +32,8 @@ The default plugins in the JupyterLab application include:
 - [Images](https://github.com/jupyterlab/jupyterlab/blob/master/src/imagewidget/plugin.ts) - Adds a widget factory for displaying image files.
 - [Help](https://github.com/jupyterlab/jupyterlab/blob/master/src/help-extension/index.ts) - Adds a side bar widget for displaying external documentation.
 - [File Browser](https://github.com/jupyterlab/jupyterlab/blob/master/src/filebrowser/plugin.ts) - Creates the file browser and the document manager and the file browser to the side bar.
-- [Editor](https://github.com/jupyterlab/jupyterlab/blob/master/src/editorwidget/plugin.ts) - Add a widget factory for displaying editable source files.
-- [Console](https://github.com/jupyterlab/jupyterlab/blob/master/src/console/plugin.ts) - Adds the ability to launch Jupyter Console instances for
+- [Editor](https://github.com/jupyterlab/jupyterlab/blob/master/src/editorwidget-extension/index.ts) - Add a widget factory for displaying editable source files.
+- [Console](https://github.com/jupyterlab/jupyterlab/blob/master/src/console-extension/index.ts) - Adds the ability to launch Jupyter Console instances for
 interactive kernel console sessions.
 - [Services](https://github.com/jupyterlab/jupyterlab/blob/master/src/services/plugin.ts) - An application-specific interface to `@jupyterlab/services`.
 - [RenderMime](https://github.com/jupyterlab/jupyterlab/blob/master/src/rendermime/plugin.ts) - The registry for adding kernel `display_data` renderers.
