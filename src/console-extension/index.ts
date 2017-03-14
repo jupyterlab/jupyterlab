@@ -132,7 +132,8 @@ const contentFactoryPlugin: JupyterLabPlugin<ConsolePanel.IContentFactory> = {
   requires: [IEditorServices],
   autoStart: true,
   activate: (app: JupyterLab, editorServices: IEditorServices) => {
-    let editorFactory = editorServices.factoryService.newInlineEditor;
+    let editorFactory = editorServices.factoryService.newInlineEditor.bind(
+      editorServices.factoryService);
     return new ConsolePanel.ContentFactory({ editorFactory });
   }
 };
