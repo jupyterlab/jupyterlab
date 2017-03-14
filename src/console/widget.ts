@@ -680,8 +680,7 @@ namespace CodeConsole {
     /**
      * The foreign handler for a console widget.
      */
-    createForeignHandler(options: ForeignHandler.IOptions):
-    ForeignHandler;
+    createForeignHandler(options: ForeignHandler.IOptions): ForeignHandler;
 
     /**
      * Create a new banner widget.
