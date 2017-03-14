@@ -88,10 +88,10 @@ class ClientSession implements IDisposable {
   }
 
   /**
-   * A signal emitted when the session path changes.
+   * A signal emitted when a session property changes.
    */
-  get pathChanged(): ISignal<this, string> {
-    return this._pathChanged;
+  get propertyChanged(): ISignal<this, 'path' | 'name' | 'type'> {
+    return this._propertyChanged;
   }
 
   /**
@@ -343,7 +343,7 @@ class ClientSession implements IDisposable {
   private _onPathChanged(sender: Session.ISession, path: string) {
     if (path !== this._path) {
       this._path = path;
-      this._pathChanged.emit(path);
+      this._propertyChanged.emit('path');
     }
   }
 
@@ -408,7 +408,7 @@ class ClientSession implements IDisposable {
   private _statusChanged = new Signal<this, Kernel.Status>(this);
   private _iopubMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
-  private _pathChanged = new Signal<this, string>(this);
+  private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);
 }
 
 
