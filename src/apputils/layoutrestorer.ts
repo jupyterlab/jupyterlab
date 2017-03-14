@@ -131,7 +131,7 @@ const KEY = 'layout-restorer:data';
  * 4. After all the load-time plugins have finished initializing, the lab
  *    application `started` promise will resolve. This is the `first`
  *    promise that the layout restorer waits for. By this point, all of the
- *    plugins that care about restoration will have instructed the instance
+ *    plugins that care about restoration will have instructed the layout
  *    restorer to `restore` their state.
  *
  * 5. The layout restorer will then instruct each plugin's instance tracker
@@ -139,11 +139,12 @@ const KEY = 'layout-restorer:data';
  *    tracker returns a promise to the layout restorer that resolves when it
  *    has completed restoring the tracked widgets it cares about.
  *
- * 6. As each instance finishes restoring, it resolves the promise that was
- *    made to the layout restorer (in step 5). After all of the promises that
- *    the restorer is awaiting have resolved, the restorer then resolves its
- *    `restored` promise allowing the application shell to rehydrate its saved
- *    layout.
+ * 6. As each instance tracker finishes restoring the widget instances it cares
+ *    about, it resolves the promise that was made to the layout restorer
+ *    (in step 5). After all of the promises that the restorer is awaiting have
+ *    resolved, the restorer then resolves its `restored` promise allowing the
+ *    application shell to `fetch` the dehydrated layout state and rehydrate the
+ *    saved layout.
  *
  * Of particular note are steps 5 and 6: since state restoration of plugins
  * is accomplished by executing commands, the command that is used to restore
