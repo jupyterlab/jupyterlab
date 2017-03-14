@@ -5,6 +5,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+@import './commandpalette.css';
 @import './dialog.css';
 @import './hoverbox.css';
 @import './iframe.css';

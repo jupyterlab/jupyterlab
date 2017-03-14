@@ -16,22 +16,6 @@ import {
 } from '@phosphor/widgets';
 
 
-/**
- * The command IDs used by the command palette plugin.
- */
-export
-namespace CommandIDs {
-  export
-  const activate: string = 'command-palette:activate';
-
-  export
-  const hide: string = 'command-palette:hide';
-
-  export
-  const toggle: string = 'command-palette:toggle';
-};
-
-
 /* tslint:disable */
 /**
  * The command palette token.

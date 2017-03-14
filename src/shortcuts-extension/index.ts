@@ -6,10 +6,6 @@ import {
 } from '../application';
 
 import {
-  CommandIDs as CommandPaletteCommandIDs
-} from '../commandpalette';
-
-import {
   CommandIDs as FileBrowserCommandIDs
 } from '../filebrowser';
 
@@ -65,7 +61,7 @@ const SHORTCUTS = [
     keys: ['Ctrl Shift [']
   },
   {
-    command: CommandPaletteCommandIDs.activate,
+    command: 'command-palette:activate',
     selector: 'body',
     keys: ['Accel Shift P']
   },

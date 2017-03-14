@@ -11,16 +11,8 @@ import {
 } from '../application';
 
 import {
-  ILayoutRestorer, InstanceTracker
+  ICommandPalette, ILayoutRestorer, InstanceTracker, IMainMenu
 } from '../apputils';
-
-import {
-  ICommandPalette
-} from '../commandpalette';
-
-import {
-  IMainMenu
-} from '../mainmenu';
 
 import {
   IServiceManager

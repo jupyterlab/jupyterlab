@@ -6,11 +6,7 @@ import {
 } from '../application';
 
 import {
-  ICommandPalette
-} from '../commandpalette';
-
-import {
-  ILayoutRestorer, InstanceTracker
+  ICommandPalette, ILayoutRestorer, InstanceTracker
 } from '../apputils';
 
 import {

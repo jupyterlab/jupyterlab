@@ -18,12 +18,8 @@ import {
 } from '../application';
 
 import {
-  ILayoutRestorer
+  ICommandPalette, ILayoutRestorer, IMainMenu, IStateDB
 } from '../apputils';
-
-import {
-  ICommandPalette
-} from '../commandpalette';
 
 import {
   IDocumentManager
@@ -34,16 +30,8 @@ import {
 } from '../docregistry';
 
 import {
-  IMainMenu
-} from '../mainmenu';
-
-import {
   IServiceManager
 } from '../services';
-
-import {
-  IStateDB
-} from '../statedb';
 
 import {
   CommandIDs, FileBrowserModel, FileBrowser, IPathTracker

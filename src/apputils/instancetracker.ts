@@ -39,7 +39,7 @@ import {
 
 import {
   IStateDB
-} from '../statedb';
+} from './statedb';
 
 
 /**

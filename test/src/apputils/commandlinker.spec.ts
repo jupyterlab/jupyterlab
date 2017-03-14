@@ -8,7 +8,7 @@ import {
 } from '@phosphor/commands';
 
 import {
-  h, ElementAttrs, VirtualNode, VirtualDOM
+  h, VirtualNode, VirtualDOM
 } from '@phosphor/virtualdom';
 
 import {
@@ -17,10 +17,10 @@ import {
 
 import {
   CommandLinker
-} from '../../../lib/commandlinker/commandlinker';
+} from '../../../lib/apputils';
 
 
-describe('commandlinker/commandlinker', () => {
+describe('@jupyterlab/apputils', () => {
 
   describe('CommandLinker', () => {
 

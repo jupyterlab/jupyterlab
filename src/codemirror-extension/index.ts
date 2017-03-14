@@ -15,6 +15,10 @@ import {
 } from '../application';
 
 import {
+  ICommandPalette, IMainMenu
+} from '../apputils';
+
+import {
   IEditorServices
 } from '../codeeditor';
 
@@ -23,16 +27,8 @@ import {
 } from '../codemirror';
 
 import {
-  ICommandPalette
-} from '../commandpalette';
-
-import {
   IEditorTracker
 } from '../editorwidget';
-
-import {
-  IMainMenu
-} from '../mainmenu';
 
 
 /**

@@ -10,11 +10,7 @@ import {
 } from '@phosphor/application';
 
 import {
-  Menu
-} from '@phosphor/widgets';
-
-import {
-  MenuBar
+  Menu, MenuBar
 } from '@phosphor/widgets';
 
 
@@ -35,19 +31,25 @@ interface IMainMenu {
   /**
    * Add a new menu to the main menu bar.
    */
-  addMenu(menu: Menu, options: IAddMenuOptions): void;
+  addMenu(menu: Menu, options?: IMainMenu.IAddOptions): void;
 }
 
 
 /**
- * The options used to add a menu to the main menu.
+ * The namespace for IMainMenu attached interfaces.
  */
 export
-interface IAddMenuOptions {
+namespace IMainMenu {
   /**
-   * The rank order of the menu among its siblings.
+   * The options used to add a menu to the main menu.
    */
-  rank?: number;
+  export
+  interface IAddOptions {
+    /**
+     * The rank order of the menu among its siblings.
+     */
+    rank?: number;
+  }
 }
 
 
@@ -59,7 +61,7 @@ class MainMenu extends MenuBar implements IMainMenu {
   /**
    * Add a new menu to the main menu bar.
    */
-  addMenu(menu: Menu, options: IAddMenuOptions = {}): void {
+  addMenu(menu: Menu, options: IMainMenu.IAddOptions = {}): void {
     if (ArrayExt.firstIndexOf(this.menus, menu) > -1) {
       return;
     }
@@ -118,3 +120,4 @@ namespace Private {
     return first.rank - second.rank;
   }
 }
+

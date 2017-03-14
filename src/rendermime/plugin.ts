@@ -7,7 +7,7 @@ import {
 
 import {
   ICommandLinker
-} from '../commandlinker';
+} from '../apputils';
 
 import {
   URLExt

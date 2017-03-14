@@ -12,16 +12,29 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  JupyterLab, JupyterLabPlugin
+  JupyterLab
 } from '../application';
 
 import {
-  ILayoutRestorer
+  ILayoutRestorer, ICommandPalette, IPaletteItem
 } from '../apputils';
 
-import {
-  CommandIDs, ICommandPalette, IPaletteItem
-} from './';
+
+
+/**
+ * The command IDs used by the apputils extension.
+ */
+export
+namespace CommandIDs {
+  export
+  const activate = 'command-palette:activate';
+
+  export
+  const hide = 'command-palette:hide';
+
+  export
+  const toggle = 'command-palette:toggle';
+};
 
 
 /**
@@ -70,27 +83,10 @@ class Palette implements ICommandPalette {
 
 
 /**
- * The default commmand palette extension.
- */
-const plugin: JupyterLabPlugin<ICommandPalette> = {
-  activate,
-  id: 'jupyter.services.commandpalette',
-  provides: ICommandPalette,
-  requires: [ILayoutRestorer],
-  autoStart: true
-};
-
-
-/**
- * Export the plugin as default.
- */
-export default plugin;
-
-
-/**
  * Activate the command palette.
  */
-function activate(app: JupyterLab, restorer: ILayoutRestorer): ICommandPalette {
+export
+function activatePalette(app: JupyterLab, restorer: ILayoutRestorer): ICommandPalette {
   const { commands, shell } = app;
   const palette = new CommandPalette({ commands });
 
