@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  ArrayExt, toArray
+  ArrayExt, IterableOrArrayLike, each, toArray
 } from '@phosphor/algorithm';
 
 import {
@@ -237,13 +237,6 @@ class ClientSession implements IDisposable {
         return this.shutdown() as Promise<null>;
       }
     }).then(() => void 0);
-  }
-
-  /**
-   * Get a kernel select node for the session.
-   */
-  getKernelSelect(): HTMLSelectElement {
-    return Private.getKernelSelect(this, this._manager);
   }
 
   /**
@@ -488,6 +481,68 @@ export namespace ClientSession {
       }
     });
   }
+
+  /**
+   * An interface for populating a kernel selector.
+   */
+  export
+  interface IKernelSearch {
+     /**
+      * The Kernel specs.
+      */
+    specs: Kernel.ISpecModels;
+
+    /**
+     * The current running sessions.
+     */
+    sessions?: IterableOrArrayLike<Session.IModel>;
+
+    /**
+     * The optional existing kernel model.
+     */
+    existing?: Kernel.IModel;
+
+    /**
+     * The preferred kernel name.
+     */
+    preferredName?: string;
+
+    /**
+     * The preferred kernel language.
+     */
+    preferredLanguage?: string;
+  }
+
+  /**
+   * Get the default kernel name given select options.
+   */
+  export
+  function getDefaultKernel(options: IKernelSearch): string {
+    return Private.getDefaultKernel(options);
+  }
+
+  /**
+   * Create a kernel dropdown list.
+   *
+   * @param options - The options used to populate the kernels.
+   *
+   * #### Notes
+   * Populates the list with separated sections:
+   *   - Kernels matching the preferred language (display names).
+   *   - "None" signifying no kernel.
+   *   - The remaining kernels.
+   *   - Sessions matching the preferred language (file names).
+   *   - The remaining sessions.
+   * If no preferred language is given or no kernels are found using
+   * the preferred language, the default kernel is used in the first
+   * section.  Kernels are sorted by display name.  Sessions display the
+   * base name of the file with an ellipsis overflow and a tooltip with
+   * the explicit session information.
+   */
+  export
+  function createKernelSelect(options: IKernelSearch): HTMLSelectElement {
+    return Private.createKernelSelect(options);
+  }
 }
 
 
@@ -504,10 +559,229 @@ namespace Private {
   }
 
   /**
+   * Get the default kernel name given select options.
+   */
+  export
+  function getDefaultKernel(options: ClientSession.IKernelSearch): string {
+    let { preferredName, preferredLanguage, specs, existing } = options;
+    let existingName = existing && existing.name;
+    if (!existingName && !preferredName && !preferredLanguage) {
+      return specs.default;
+    }
+    // Look for an exact match of preferred name.
+    for (let specName in specs.kernelspecs) {
+      if (specName === preferredName) {
+        return preferredName;
+      }
+    }
+
+    // Look for an exact match of existing name.
+    for (let specName in specs.kernelspecs) {
+      if (specName === existingName) {
+        return existing.name;
+      }
+    }
+
+    // Bail if there is no language.
+    if (!preferredLanguage) {
+      return null;
+    }
+
+    // Check for a single kernel matching the language.
+    let matches: string[] = [];
+    for (let specName in specs.kernelspecs) {
+      let kernelLanguage = specs.kernelspecs[specName].language;
+      if (preferredLanguage === kernelLanguage) {
+        matches.push(specName);
+      }
+    }
+    if (matches.length === 1) {
+      let specName = matches[0];
+      console.log('No exact match found for ' + specName +
+                  ', using kernel ' + specName + ' that matches ' +
+                  'language=' + preferredLanguage);
+      return specName;
+    }
+
+    // No matches found.
+    return null;
+  }
+
+  /**
    * Get a kernel select node for the session.
    */
   export
-  function getKernelSelect(session: ClientSession, manager: Session.IManager): HTMLSelectElement {
-    return null;
+  function createKernelSelect(options: ClientSession.IKernelSearch): HTMLSelectElement {
+    let node = document.createElement('select');
+    let maxLength = 10;
+
+    let {
+      preferredName, preferredLanguage, sessions, specs, existing
+    } = options;
+    let existingName = existing && existing.name;
+    let existingId = existing && existing.id;
+
+    if (existingName === preferredName) {
+      existingName = '';
+    }
+
+    // Create mappings of display names and languages for kernel name.
+    let displayNames: { [key: string]: string } = Object.create(null);
+    let languages: { [key: string]: string } = Object.create(null);
+    for (let name in specs.kernelspecs) {
+      let spec = specs.kernelspecs[name];
+      displayNames[name] = spec.display_name;
+      maxLength = Math.max(maxLength, displayNames[name].length);
+      languages[name] = spec.language;
+    }
+
+    // Handle a preferred kernel by name.
+    let names: string[] = [];
+    if (preferredName && preferredName in specs.kernelspecs) {
+      names.push(name);
+    }
+
+    // Handle an existing kernel by name.
+    if (existingName && existingName in specs.kernelspecs) {
+      names.push(name);
+    }
+
+    // Handle a preferred kernel language in order of display name.
+    let preferred = document.createElement('optgroup');
+    preferred.label = 'Start Preferred Kernel';
+
+    if (preferredLanguage && specs) {
+      for (let name in specs.kernelspecs) {
+        if (languages[name] === preferredLanguage) {
+          names.push(name);
+        }
+      }
+      names.sort((a, b) => displayNames[a].localeCompare(displayNames[b]));
+      for (let name of names) {
+        preferred.appendChild(optionForName(name, displayNames[name]));
+      }
+    }
+    // Use the default kernel if no preferred language or none were found.
+    if (!names.length) {
+      let name = specs.default;
+      preferred.appendChild(optionForName(name, displayNames[name]));
+    }
+    if (preferred.firstChild) {
+      node.appendChild(preferred);
+    }
+
+    // Add an option for no kernel
+    node.appendChild(optionForNone());
+
+    let other = document.createElement('optgroup');
+    other.label = 'Start Other Kernel';
+
+    // Add the rest of the kernel names in alphabetical order.
+    let otherNames: string[] = [];
+    for (let name in specs.kernelspecs) {
+      if (names.indexOf(name) !== -1) {
+        continue;
+      }
+      otherNames.push(name);
+    }
+    otherNames.sort((a, b) => displayNames[a].localeCompare(displayNames[b]));
+    for (let name of otherNames) {
+      other.appendChild(optionForName(name, displayNames[name]));
+    }
+    // Add a separator option if there were any other names.
+    if (otherNames.length) {
+      node.appendChild(other);
+    }
+
+    // Add the sessions using the preferred language first.
+    let matchingSessions: Session.IModel[] = [];
+    let otherSessions: Session.IModel[] = [];
+
+    each(sessions, session => {
+      if (preferredLanguage &&
+          languages[session.kernel.name] === preferredLanguage &&
+          session.kernel.id !== existingId) {
+        matchingSessions.push(session);
+      } else if (session.kernel.id !== existingId) {
+        otherSessions.push(session);
+      }
+    });
+
+    let matching = document.createElement('optgroup');
+    matching.label = 'Use Kernel from Preferred Session';
+    node.appendChild(matching);
+
+    if (matchingSessions.length) {
+      matchingSessions.sort((a, b) => {
+        return a.notebook.path.localeCompare(b.notebook.path);
+      });
+
+      each(matchingSessions, session => {
+        let name = displayNames[session.kernel.name];
+        matching.appendChild(optionForSession(session, name, maxLength));
+      });
+
+    }
+
+    let otherSessionsNode = document.createElement('optgroup');
+    otherSessionsNode.label = 'Use Kernel from Other Session';
+    node.appendChild(otherSessionsNode);
+
+    if (otherSessions.length) {
+      otherSessions.sort((a, b) => {
+        return a.notebook.path.localeCompare(b.notebook.path);
+      });
+
+      each(otherSessions, session => {
+        let name = displayNames[session.kernel.name] || session.kernel.name;
+        otherSessionsNode.appendChild(optionForSession(session, name, maxLength));
+      });
+    }
+    node.selectedIndex = 0;
+    return node;
+  }
+
+  /**
+   * Create an option element for a kernel name.
+   */
+  function optionForName(name: string, displayName: string): HTMLOptionElement {
+    let option = document.createElement('option');
+    option.text = displayName;
+    option.value = JSON.stringify({ name });
+    return option;
+  }
+
+  /**
+   * Create an option for no kernel.
+   */
+  function optionForNone(): HTMLOptGroupElement {
+    let group = document.createElement('optgroup');
+    group.label = 'Use No Kernel';
+    let option = document.createElement('option');
+    option.text = 'No Kernel';
+    option.value = JSON.stringify({id: null, name: null});
+    group.appendChild(option);
+    return group;
+  }
+
+  /**
+   * Create an option element for a session.
+   */
+  function optionForSession(session: Session.IModel, displayName: string, maxLength: number): HTMLOptionElement {
+    let option = document.createElement('option');
+    let sessionName = session.notebook.path.split('/').pop();
+    const CONSOLE_REGEX = /^console-(\d)+-[0-9a-f]+$/;
+    if (CONSOLE_REGEX.test(sessionName)) {
+      sessionName = `Console ${sessionName.match(CONSOLE_REGEX)[1]}`;
+    }
+    if (sessionName.length > maxLength) {
+      sessionName = sessionName.slice(0, maxLength - 3) + '...';
+    }
+    option.text = sessionName;
+    option.value = JSON.stringify({ id: session.kernel.id });
+    option.title = `Path: ${session.notebook.path}\n` +
+      `Kernel Name: ${displayName}\n` +
+      `Kernel Id: ${session.kernel.id}`;
+    return option;
   }
 }
