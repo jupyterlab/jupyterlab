@@ -1,6 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import {
+  IServiceManager
+} from '@jupyterlab/services';
 
 import {
   Menu
@@ -13,10 +16,6 @@ import {
 import {
   ICommandPalette, ILayoutRestorer, InstanceTracker, IMainMenu
 } from '../apputils';
-
-import {
-  IServiceManager
-} from '../services';
 
 import {
   TerminalWidget, ITerminalTracker, addDefaultCommands

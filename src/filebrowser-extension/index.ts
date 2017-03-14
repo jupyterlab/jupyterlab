@@ -31,11 +31,11 @@ import {
 
 import {
   FileBrowserModel, FileBrowser, IPathTracker
-} from '../FileBrowser';
+} from '../filebrowser';
 
 import {
   IServiceManager
-} from '../services';
+} from '@jupyterlab/services';
 
 
 /**

@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IServiceManager
+} from '@jupyterlab/services';
+
+import {
   JSONObject
 } from '@phosphor/coreutils';
 
@@ -28,10 +32,6 @@ import {
 import {
   IRenderMime
 } from '../rendermime';
-
-import {
-  IServiceManager
-} from '../services';
 
 import {
   CellTools, ICellTools, INotebookTracker, NotebookActions,

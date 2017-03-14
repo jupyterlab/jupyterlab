@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IServiceManager
+} from '@jupyterlab/services';
+
+import {
   JupyterLab, JupyterLabPlugin
 } from '../application';
 
@@ -12,10 +16,6 @@ import {
 import {
   IPathTracker
 } from '../filebrowser';
-
-import {
-  IServiceManager
-} from '../services';
 
 import {
   LandingModel, LandingWidget

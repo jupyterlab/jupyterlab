@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IServiceManager
+} from '@jupyterlab/services';
+
+import {
   JupyterLab, JupyterLabPlugin
 } from '../application';
 
@@ -16,10 +20,6 @@ import {
 import {
   ILauncher, ILauncherItem, LauncherModel, LauncherWidget
 } from '../launcher';
-
-import {
-  IServiceManager
-} from '../services';
 
 
 /**

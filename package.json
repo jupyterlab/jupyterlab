@@ -7,7 +7,7 @@
   },
   "typings": "lib/index.d.ts",
   "dependencies": {
-    "@jupyterlab/services": "^0.39.1",
+    "@jupyterlab/services": "^0.40.1",
     "@phosphor/algorithm": "^0.1.0",
     "@phosphor/application": "^0.2.0",
     "@phosphor/commands": "^0.1.3",

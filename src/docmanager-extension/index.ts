@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLabPlugin
+  JupyterLab, JupyterLabPlugin
 } from '../application';
 
 import {
@@ -14,12 +14,8 @@ import {
 } from '../docregistry';
 
 import {
-  JupyterLab
-} from '../application';
-
-import {
   IServiceManager
-} from '../services';
+} from '@jupyterlab/services';
 
 /**
  * The default document manager provider.
