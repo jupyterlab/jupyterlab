@@ -41,7 +41,7 @@ const ITerminalTracker = new Token<ITerminalTracker>('jupyter.services.terminal-
 export
 function addDefaultCommands(tracker: ITerminalTracker, commands: CommandRegistry) {
 
-  commands.addCommand(CommandIDs.increaseFont, {
+  commands.addCommand('terminal:increase-font', {
     label: 'Increase Terminal Font Size',
     execute: () => {
       let options = TerminalWidget.defaultOptions;
@@ -52,7 +52,7 @@ function addDefaultCommands(tracker: ITerminalTracker, commands: CommandRegistry
     }
   });
 
-  commands.addCommand(CommandIDs.decreaseFont, {
+  commands.addCommand('terminal:decrease-font', {
     label: 'Decrease Terminal Font Size',
     execute: () => {
       let options = TerminalWidget.defaultOptions;
@@ -63,7 +63,7 @@ function addDefaultCommands(tracker: ITerminalTracker, commands: CommandRegistry
     }
   });
 
-  commands.addCommand(CommandIDs.toggleTheme, {
+  commands.addCommand('terminal:toggle-theme', {
     label: 'Toggle Terminal Theme',
     caption: 'Switch Terminal Background and Font Colors',
     execute: () => {

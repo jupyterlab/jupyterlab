@@ -17,14 +17,6 @@ import {
   VDomModel, VDomWidget
 } from '../apputils';
 
-import {
-  CommandIDs as FileBrowserCommandIDs
-} from '../filebrowser';
-
-import {
-  CommandIDs as TerminalCommandIDs
-} from '../terminal';
-
 
 /**
  * The class name added to the landing scroll wrapper.
@@ -144,13 +136,13 @@ class LandingModel extends VDomModel {
     ];
     this.headerText = 'Start a new activity';
     this.activities =
-    [['Notebook', FileBrowserCommandIDs.newNotebook],
+    [['Notebook', 'file-operations:new-notebook'],
      ['Code Console', 'console:create'],
-     ['Text Editor', FileBrowserCommandIDs.newTextFile]];
+     ['Text Editor', 'file-operations:new-text-file']];
 
     if (terminalsAvailable) {
       this.activities.push(
-        ['Terminal', TerminalCommandIDs.createNew]
+        ['Terminal', 'terminal:create-new']
       );
     }
     this._path = 'home';

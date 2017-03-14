@@ -10,10 +10,6 @@ import {
 } from '../apputils';
 
 import {
-  CommandIDs as FileBrowserCommandIDs
-} from '../filebrowser';
-
-import {
   IPathTracker
 } from '../filebrowser';
 
@@ -24,10 +20,6 @@ import {
 import {
   IServiceManager
 } from '../services';
-
-import {
-  CommandIDs as TerminalCommandIDs
-} from '../terminal';
 
 
 /**
@@ -90,7 +82,7 @@ function activate(app: JupyterLab, services: IServiceManager, pathTracker: IPath
   let defaults: ILauncherItem[] = [
     {
       name: 'Notebook',
-      command: FileBrowserCommandIDs.newNotebook
+      command: 'file-operations:new-notebook'
     },
     {
       name: 'Code Console',
@@ -98,14 +90,14 @@ function activate(app: JupyterLab, services: IServiceManager, pathTracker: IPath
     },
     {
       name: 'Text Editor',
-      command: FileBrowserCommandIDs.newTextFile
+      command: 'file-operations:new-text-file'
     }
   ];
 
   if (services.terminals.isAvailable()) {
     defaults.push({
       name: 'Terminal',
-      command: TerminalCommandIDs.createNew
+      command: 'terminal:create-new'
     });
   }
 

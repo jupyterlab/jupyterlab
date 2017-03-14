@@ -7,7 +7,7 @@ import {
 
 import {
   DocumentManager, IDocumentManager
-} from './index';
+} from '../docmanager';
 
 import {
   IDocumentRegistry

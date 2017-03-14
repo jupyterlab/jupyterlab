@@ -41,17 +41,17 @@ const IImageTracker = new Token<IImageTracker>('jupyter.services.image-tracker')
  */
 export
 function addDefaultCommands(tracker: IImageTracker, commands: CommandRegistry) {
-  commands.addCommand(CommandIDs.zoomIn, {
+  commands.addCommand('imagewidget:zoom-in', {
     execute: zoomIn,
     label: 'Zoom In'
   });
 
-  commands.addCommand(CommandIDs.zoomOut, {
+  commands.addCommand('imagewidget:zoom-out', {
     execute: zoomOut,
     label: 'Zoom Out'
   });
 
-  commands.addCommand(CommandIDs.resetZoom, {
+  commands.addCommand('imagewidget:reset-zoom', {
     execute: resetZoom,
     label: 'Reset Zoom'
   });

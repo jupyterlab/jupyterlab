@@ -35,7 +35,6 @@ namespace CommandIDs {
 };
 
 
-
 /**
  * A service providing code introspection.
  */

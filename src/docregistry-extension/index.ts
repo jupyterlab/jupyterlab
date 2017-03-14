@@ -7,7 +7,7 @@ import {
 
 import {
   DocumentRegistry, IDocumentRegistry, TextModelFactory, Base64ModelFactory
-} from './index';
+} from '../docregistry';
 
 
 /**

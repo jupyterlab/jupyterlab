@@ -3,7 +3,7 @@
 
 import {
   IInspector, Inspector
-} from './';
+} from '../inspector';
 
 
 /**

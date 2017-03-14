@@ -26,10 +26,6 @@ import {
 } from '../docregistry';
 
 import {
-  CommandIDs as FileBrowserCommandIDs
-} from '../filebrowser';
-
-import {
   IRenderMime
 } from '../rendermime';
 
@@ -310,7 +306,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command: FileBrowserCommandIDs.open,
+    command: 'file-operations:open',
     args: panel => ({ path: panel.context.path, factory: FACTORY }),
     name: panel => panel.context.path,
     when: services.ready

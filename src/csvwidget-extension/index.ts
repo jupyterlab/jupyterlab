@@ -10,16 +10,12 @@ import {
 } from '../apputils';
 
 import {
+  CSVWidget, CSVWidgetFactory
+} from '../csvwidget';
+
+import {
   IDocumentRegistry
 } from '../docregistry';
-
-import {
-  CommandIDs as FileBrowserCommandIDs
-} from '../filebrowser';
-
-import {
-  CSVWidget, CSVWidgetFactory
-} from './widget';
 
 
 /**
@@ -61,7 +57,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command: FileBrowserCommandIDs.open,
+    command: 'file-operations:open',
     args: widget => ({ path: widget.context.path, factory: FACTORY }),
     name: widget => widget.context.path
   });
