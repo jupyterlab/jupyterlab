@@ -21,22 +21,6 @@ export * from './widget';
 
 
 /**
- * The command IDs used by the image widget plugin.
- */
-export
-namespace CommandIDs {
-  export
-  const zoomIn: string = 'imagewidget:zoom-in';
-
-  export
-  const zoomOut: string = 'imagewidget:zoom-out';
-
-  export
-  const resetZoom: string = 'imagewidget:reset-zoom';
-};
-
-
-/**
  * A class that tracks editor widgets.
  */
 export

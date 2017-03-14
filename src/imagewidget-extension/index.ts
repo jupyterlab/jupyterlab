@@ -18,8 +18,23 @@ import {
 } from '../filebrowser';
 
 import {
-  CommandIDs, ImageWidget, ImageWidgetFactory, IImageTracker
-} from './';
+  ImageWidget, ImageWidgetFactory, IImageTracker
+} from '../imagewidget';
+
+
+/**
+ * The command IDs used by the image widget plugin.
+ */
+namespace CommandIDs {
+  export
+  const zoomIn = 'imagewidget:zoom-in';
+
+  export
+  const zoomOut = 'imagewidget:zoom-out';
+
+  export
+  const resetZoom = 'imagewidget:reset-zoom';
+};
 
 
 /**

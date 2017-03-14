@@ -19,8 +19,34 @@ import {
 } from '../services';
 
 import {
-  CommandIDs, TerminalWidget, ITerminalTracker, addDefaultCommands
-} from './';
+  TerminalWidget, ITerminalTracker, addDefaultCommands
+} from '../terminal';
+
+
+
+/**
+ * The command IDs used by the terminal plugin.
+ */
+namespace CommandIDs {
+  export
+  const createNew = 'terminal:create-new';
+
+  export
+  const open = 'terminal:open';
+
+  export
+  const refresh = 'terminal:refresh';
+
+  export
+  const increaseFont = 'terminal:increase-font';
+
+  export
+  const decreaseFont = 'terminal:decrease-font';
+
+  export
+  const toggleTheme = 'terminal:toggle-theme';
+};
+
 
 
 /**

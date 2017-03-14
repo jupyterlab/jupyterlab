@@ -18,6 +18,10 @@ import {
 } from '../filebrowser';
 
 import {
+  ILauncher, ILauncherItem, LauncherModel, LauncherWidget
+} from '../launcher';
+
+import {
   IServiceManager
 } from '../services';
 
@@ -25,9 +29,14 @@ import {
   CommandIDs as TerminalCommandIDs
 } from '../terminal';
 
-import {
-  CommandIDs, ILauncher, ILauncherItem, LauncherModel, LauncherWidget
-} from './';
+
+/**
+ * The command IDs used by the launcher plugin.
+ */
+namespace CommandIDs {
+  export
+  const show = 'launcher-jupyterlab:show';
+};
 
 
 /**
