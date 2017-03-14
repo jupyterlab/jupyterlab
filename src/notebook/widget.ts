@@ -1250,19 +1250,28 @@ class Notebook extends StaticNotebook {
       event.dropAction = 'move';
       let toMove: BaseCellWidget[] = event.mimeData.getData('internal:cells');
 
-      // Move the cells one by one
+      //Compute the to/from indices for the move.
       let fromIndex = ArrayExt.firstIndexOf(this.widgets, toMove[0]);
       let toIndex = this._findCell(target);
+      if(toIndex === -1) {
+        toIndex = this.widgets.length;
+      }
+      console.log(fromIndex, toIndex);
+      //Don't move if we are within the block of selected cells.
+      if(toIndex-fromIndex > 0 && toIndex-fromIndex <= toMove.length) {
+        return;
+      }
+      // Move the cells one by one
       this.model.cells.beginCompoundOperation();
       if(fromIndex < toIndex) {
         each(toMove, (cellWidget)=> {
-          this.model.cells.move(fromIndex, toIndex++);
+          this.model.cells.move(fromIndex, toIndex);
         });
       } else if (fromIndex > toIndex) {
         each(toMove, (cellWidget)=> {
           this.model.cells.move(fromIndex++, toIndex++);
         });
-      } //no-op if fromIndex === toIndex
+      }
       this.model.cells.endCompoundOperation();
     } else {
       // Handle the case where we are copying cells between
