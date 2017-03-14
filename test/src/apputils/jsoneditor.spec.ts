@@ -56,7 +56,8 @@ describe('apputils', () => {
   describe('JSONEditorWidget', () => {
 
     let editor: LogEditor;
-    const editorFactory = new CodeMirrorEditorFactory().newInlineEditor;
+    let editorServices = new CodeMirrorEditorFactory();
+    const editorFactory = editorServices.newInlineEditor.bind(editorServices);
 
     beforeEach(() => {
       editor = new LogEditor({ editorFactory });
