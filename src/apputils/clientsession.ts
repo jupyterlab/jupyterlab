@@ -35,107 +35,7 @@ import {
  * kernel, and can start a new kernel at any time.
  */
 export
-interface IClientSession extends IDisposable {
-  /**
-   * A signal emitted when the session is shut down.
-   */
-  readonly terminated: ISignal<this, void>;
-
-  /**
-   * A signal emitted when the kernel changes.
-   */
-  readonly kernelChanged: ISignal<this, Kernel.IKernel>;
-
-  /**
-   * A signal emitted when the session status changes.
-   */
-  readonly statusChanged: ISignal<this, Kernel.Status>;
-
-  /**
-   * A signal emitted when the session path changes.
-   */
-  readonly pathChanged: ISignal<this, string>;
-
-  /**
-   * A signal emitted for iopub kernel messages.
-   */
-  readonly iopubMessage: ISignal<this, KernelMessage.IIOPubMessage>;
-
-  /**
-   * A signal emitted for unhandled kernel message.
-   */
-  readonly unhandledMessage: ISignal<this, KernelMessage.IMessage>;
-
-  /**
-   * The path associated with the session.
-   */
-  readonly path: string;
-
-  /**
-   * The name of with the session.
-   */
-  readonly name: string;
-
-  /**
-   * The type of the session.
-   */
-  readonly type: string;
-
-  /**
-   * The preferred kernel name.
-   */
-  readonly preferredKernelName: string;
-
-  /**
-   * The desired kernel language.
-   */
-  readonly preferredKernelLanguage: string;
-
-  /**
-   * The kernel.
-   *
-   * #### Notes
-   * This is a read-only property, and can be altered by [changeKernel].
-   */
-  readonly kernel: Kernel.IKernel | null;
-
-  /**
-   * The kernel spec information.
-   */
-  readonly specs: Kernel.ISpecModels;
-
-  /**
-   * The current running server sessions.
-   */
-  readonly sessions: ReadonlyArray<Session.IModel>;
-
-  /**
-   * Change the kernel.
-   *
-   * @param options - The name or id of the new kernel.
-   *
-   * @returns A promise that resolves with the new kernel model.
-   *
-   * #### Notes
-   * This shuts down the existing kernel and creates a new kernel,
-   * keeping the existing session ID and path.
-   */
-  changeKernel(options: Kernel.IModel): Promise<Kernel.IKernel>;
-
-  /**
-   * Kill the kernel and shutdown the session.
-   *
-   * @returns A promise that resolves when the session is shut down.
-   */
-  shutdown(): Promise<void>;
-}
-
-
-/**
- * The default implementation of a client session.
- */
-export
-class ClientSession implements IClientSession {
+class ClientSession implements IDisposable {
   /**
    * Construct a new client session.
    */
@@ -255,7 +155,7 @@ class ClientSession implements IClientSession {
   /**
    * The current running server sessions.
    */
-  get sessions(): ReadonlyArray<Session.IModel> {
+  get runningSessions(): ReadonlyArray<Session.IModel> {
     return this._sessions;
   }
 
@@ -317,6 +217,44 @@ class ClientSession implements IClientSession {
       });
     }
     return Promise.resolve(void 0);
+  }
+
+  /**
+   * Restart the session.
+   *
+   * @returns A promise that resolves with the kernel model.
+   *
+   * #### Notes
+   * If there is a running kernel, present a dialog.
+   * If there is no kernel, we start a kernel with the last run
+   * kernel name.  If no kernel has been started, this is a no-op.
+   */
+  restart(): Promise<Kernel.IKernel | null> {
+    let kernel = this.kernel;
+    if (!kernel) {
+      if (this._prevKernelName) {
+        return this.changeKernel({ name: this._prevKernelName });
+      }
+      return Promise.resolve(null);
+    }
+
+    let restartBtn = Dialog.warnButton({ label: 'RESTART '});
+    return showDialog({
+      title: 'Restart Kernel?',
+      body: 'Do you want to restart the current kernel? All variables will be lost.',
+      buttons: [Dialog.cancelButton(), restartBtn]
+    }).then(result => {
+      if (kernel.isDisposed) {
+        return null;
+      }
+      if (result.accept) {
+        return kernel.restart().then(() => {
+          return kernel;
+        });
+      } else {
+        return kernel;
+      }
+    });
   }
 
   /**
@@ -392,6 +330,7 @@ class ClientSession implements IClientSession {
     session.iopubMessage.connect(this._onIopubMessage, this);
     session.unhandledMessage.connect(this._onUnhandledMessage, this);
     this._kernelChanged.emit(session.kernel);
+    this._prevKernelName = session.kernel.name;
     return session.kernel;
   }
 
@@ -485,6 +424,7 @@ class ClientSession implements IClientSession {
   private _type = '';
   private _preferredKernelName = '';
   private _preferredKernelLanguage = '';
+  private _prevKernelName = '';
   private _isDisposed = false;
   private _session: Session.ISession | null = null;
   private _sessions: Session.IModel[] = [];
