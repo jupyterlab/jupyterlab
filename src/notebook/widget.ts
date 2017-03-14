@@ -1233,7 +1233,6 @@ class Notebook extends StaticNotebook {
       event.dropAction = 'none';
       return;
     }
-    event.dropAction = event.proposedAction;
 
     let target = event.target as HTMLElement;
     while (target && target.parentElement) {
@@ -1246,8 +1245,9 @@ class Notebook extends StaticNotebook {
 
     let source: Notebook = event.source
     if(source === this) {
-      //Handle the case where we are moving cells within
-      //the same notebook.
+      // Handle the case where we are moving cells within
+      // the same notebook.
+      event.dropAction = 'move';
       let toMove: BaseCellWidget[] = event.mimeData.getData('internal:cells');
 
       // Move the cells one by one
@@ -1265,6 +1265,9 @@ class Notebook extends StaticNotebook {
       } //no-op if fromIndex === toIndex
       this.model.cells.endCompoundOperation();
     } else {
+      // Handle the case where we are copying cells between
+      // notebooks.
+      event.dropAction = 'copy';
       // Find the target cell and insert the copied cells.
       let index = this._findCell(target);
       if (index === -1) {
@@ -1332,8 +1335,8 @@ class Notebook extends StaticNotebook {
     this._drag = new Drag({
       mimeData: new MimeData(),
       dragImage,
-      supportedActions: 'move',
-      proposedAction: 'move',
+      supportedActions: 'copy-move',
+      proposedAction: 'copy',
       source: this
     });
     this._drag.mimeData.setData(JUPYTER_CELL_MIME, selected);
@@ -1351,9 +1354,6 @@ class Notebook extends StaticNotebook {
       }
       this._drag = null;
       each(toMove, widget => { widget.removeClass(DROP_SOURCE_CLASS); });
-      if (action === 'none') {
-        return;
-      }
     });
 
   }
