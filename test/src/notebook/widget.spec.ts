@@ -1158,7 +1158,7 @@ describe('notebook/widget', () => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
         widget.model.cells.move(1, 0);
-        expect(widget.activeCellIndex).to.be(1);
+        expect(widget.activeCellIndex).to.be(0);
       });
 
     });
