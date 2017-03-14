@@ -108,8 +108,12 @@ class ApplicationShell extends Widget {
 
     this.layout = rootLayout;
 
+    // Connect change listeners.
     this._tracker.currentChanged.connect(this._onCurrentChanged, this);
     this._tracker.activeChanged.connect(this._onActiveChanged, this);
+
+    // Connect main layout change listener.
+    this._dockPanel.layoutModified.connect(() => this._save, this);
   }
 
   /**
@@ -272,7 +276,6 @@ class ApplicationShell extends Widget {
     }
     this._dockPanel.addWidget(widget, { mode: 'tab-after' });
     this._tracker.add(widget);
-    this._save();
   }
 
   /**
@@ -331,7 +334,6 @@ class ApplicationShell extends Widget {
     // before removing them because removing them while iterating through them
     // modifies the underlying data of the iterator.
     each(toArray(this._dockPanel.widgets()), widget => { widget.close(); });
-    this._save();
   }
 
   /**
@@ -453,7 +455,7 @@ class ApplicationShell extends Widget {
     let data: ApplicationShell.ILayout = {
       mainArea: {
         currentWidget: this._tracker.currentWidget,
-        dock: this._dockPanel.saveLayout(),
+        dock: this._dockPanel.saveLayout({ version: '1' }),
       },
       leftArea: this._leftHandler.dehydrate(),
       rightArea: this._rightHandler.dehydrate()
@@ -594,7 +596,7 @@ namespace ApplicationShell {
     /**
      * The contents of the main application dock panel.
      */
-    readonly dock: DockLayout.ILayoutConfig | null;
+    readonly dock: DockLayout.ILayoutConfigV1 | null;
   };
 
   /**

@@ -639,7 +639,7 @@ namespace Private {
 
     return {
       currentWidget: name && names.has(name) && names.get(name) || null,
-      dock: dock ? { main: deserializeArea(dock, names) } : null
+      dock: dock ? { main: deserializeArea(dock, names), version: '1' } : null
     };
   }
 }
