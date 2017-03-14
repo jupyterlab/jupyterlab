@@ -153,13 +153,6 @@ class ClientSession implements IDisposable {
   }
 
   /**
-   * The current running server sessions.
-   */
-  get runningSessions(): ReadonlyArray<Session.IModel> {
-    return this._sessions;
-  }
-
-  /**
    * Test whether the context is disposed.
    */
   get isDisposed(): boolean {
@@ -178,13 +171,6 @@ class ClientSession implements IDisposable {
       this._session.dispose();
     }
     Signal.clearData(this);
-  }
-
-  /**
-   * The kernel spec models
-   */
-  get specs(): Kernel.ISpecModels {
-    return this._manager.specs;
   }
 
   /**
@@ -237,24 +223,27 @@ class ClientSession implements IDisposable {
       }
       return Promise.resolve(null);
     }
+    return ClientSession.restartKernel(kernel);
+  }
 
-    let restartBtn = Dialog.warnButton({ label: 'RESTART '});
-    return showDialog({
-      title: 'Restart Kernel?',
-      body: 'Do you want to restart the current kernel? All variables will be lost.',
-      buttons: [Dialog.cancelButton(), restartBtn]
-    }).then(result => {
-      if (kernel.isDisposed) {
-        return null;
-      }
-      if (result.accept) {
-        return kernel.restart().then(() => {
-          return kernel;
-        });
+  /**
+   * Select a kernel for the session.
+   */
+  selectKernel(): Promise<void> {
+    return Private.selectKernel(this, this._manager).then(kernel => {
+      if (kernel) {
+        return this.changeKernel(kernel);
       } else {
-        return kernel;
+        return this.shutdown() as Promise<null>;
       }
-    });
+    }).then(() => void 0);
+  }
+
+  /**
+   * Get a kernel select node for the session.
+   */
+  getKernelSelect(): HTMLSelectElement {
+    return Private.getKernelSelect(this, this._manager);
   }
 
   /**
@@ -403,7 +392,6 @@ class ClientSession implements IDisposable {
    * Handle a change to the running sessions.
    */
   private _onSessionsChanged(sender: Session.IManager, models: Session.IModel[]): void {
-    this._sessions = models;
     let index = ArrayExt.findFirstIndex(models, model => {
       return model.notebook.path === this._path;
     });
@@ -427,7 +415,6 @@ class ClientSession implements IDisposable {
   private _prevKernelName = '';
   private _isDisposed = false;
   private _session: Session.ISession | null = null;
-  private _sessions: Session.IModel[] = [];
   private _promise: PromiseDelegate<void> | null;
   private _terminated = new Signal<this, void>(this);
   private _kernelChanged = new Signal<this, Kernel.IKernel>(this);
@@ -476,5 +463,51 @@ export namespace ClientSession {
      * The desired kernel language.
      */
     preferredKernelLanguage?: string;
+  }
+
+  /**
+   * Restart a kernel if the user accepts the risk.
+   */
+  export
+  function restartKernel(kernel: Kernel.IKernel): Promise<Kernel.IKernel | null> {
+    let restartBtn = Dialog.warnButton({ label: 'RESTART '});
+    return showDialog({
+      title: 'Restart Kernel?',
+      body: 'Do you want to restart the current kernel? All variables will be lost.',
+      buttons: [Dialog.cancelButton(), restartBtn]
+    }).then(result => {
+      if (kernel.isDisposed) {
+        return null;
+      }
+      if (result.accept) {
+        return kernel.restart().then(() => {
+          return kernel;
+        });
+      } else {
+        return kernel;
+      }
+    });
+  }
+}
+
+
+/**
+ * The namespace for module private data.
+ */
+namespace Private {
+  /**
+   * Select a kernel for the session.
+   */
+  export
+  function selectKernel(session: ClientSession, manager: Session.IManager): Promise<Kernel.IModel | null> {
+    return Promise.resolve<Kernel.IModel | null>(null);
+  }
+
+  /**
+   * Get a kernel select node for the session.
+   */
+  export
+  function getKernelSelect(session: ClientSession, manager: Session.IManager): HTMLSelectElement {
+    return null;
   }
 }
