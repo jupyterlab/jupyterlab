@@ -4,12 +4,12 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  IDisposable
-} from '@phosphor/disposable';
+  Token
+} from '@phosphor/coreutils';
 
 import {
-  Token
-} from '@phosphor/application';
+  IDisposable
+} from '@phosphor/disposable';
 
 import {
   CommandPalette

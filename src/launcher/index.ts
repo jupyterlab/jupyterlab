@@ -6,16 +6,12 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONObject
+  JSONObject, Token
 } from '@phosphor/coreutils';
 
 import {
   DisposableDelegate, IDisposable
 } from '@phosphor/disposable';
-
-import {
-  Token
-} from '@phosphor/application';
 
 import {
   h, VirtualNode

@@ -2,24 +2,24 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+  Token
+} from '@phosphor/coreutils';
 
 import {
-  Token
-} from '@phosphor/application';
+  ISignal, Signal
+} from '@phosphor/signaling';
 
 import {
   IInstanceTracker, InstanceTracker
 } from '../apputils';
 
 import {
-  NotebookPanel, Notebook
-} from './';
-
-import {
   BaseCellWidget
 } from '../cells';
+
+import {
+  NotebookPanel, Notebook
+} from './';
 
 
 /**

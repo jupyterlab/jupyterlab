@@ -27,12 +27,12 @@
 }
 
 
-.p-DockPanel-tabBar.p-mod-horizontal {
+.p-DockPanel-tabBar[data-orientation='horizontal'] {
   min-height: calc(var(--jp-private-horizontal-tab-height) + 2 * var(--jp-border-width));
 }
 
 
-.p-DockPanel-tabBar.p-mod-vertical {
+.p-DockPanel-tabBar[data-orientation='vertical'] {
   min-width: 80px;
 }
 

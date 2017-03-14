@@ -10,12 +10,12 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  ISignal
-} from '@phosphor/signaling';
+  Token
+} from '@phosphor/coreutils';
 
 import {
-  Token
-} from '@phosphor/application';
+  ISignal
+} from '@phosphor/signaling';
 
 import {
   IChangedArgs

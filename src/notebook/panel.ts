@@ -10,6 +10,10 @@ import {
 } from '@phosphor/algorithm';
 
 import {
+  Token
+} from '@phosphor/coreutils';
+
+import {
   Message
 } from '@phosphor/messaging';
 
@@ -18,15 +22,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  Token
-} from '@phosphor/application';
-
-import {
-  PanelLayout
-} from '@phosphor/widgets';
-
-import {
-  Widget
+  PanelLayout, Widget
 } from '@phosphor/widgets';
 
 import {

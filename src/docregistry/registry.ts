@@ -10,16 +10,16 @@ import {
 } from '@phosphor/algorithm';
 
 import {
+  Token
+} from '@phosphor/coreutils';
+
+import {
   IDisposable, DisposableDelegate
 } from '@phosphor/disposable';
 
 import {
   ISignal, Signal
 } from '@phosphor/signaling';
-
-import {
-  Token
-} from '@phosphor/application';
 
 import {
   Widget

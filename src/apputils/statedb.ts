@@ -2,12 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject
+  JSONObject, Token
 } from '@phosphor/coreutils';
-
-import {
-  Token
-} from '@phosphor/application';
 
 
 /* tslint:disable */

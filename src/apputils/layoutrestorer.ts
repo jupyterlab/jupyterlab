@@ -4,15 +4,11 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  Token
-} from '@phosphor/application';
-
-import {
   CommandRegistry
 } from '@phosphor/commands';
 
 import {
-  JSONObject, PromiseDelegate
+  JSONObject, PromiseDelegate, Token
 } from '@phosphor/coreutils';
 
 import {
@@ -643,7 +639,7 @@ namespace Private {
 
     return {
       currentWidget: name && names.has(name) && names.get(name) || null,
-      dock: dock ? { main: deserializeArea(dock, names) } : null
+      dock: dock ? { main: deserializeArea(dock, names), version: '1' } : null
     };
   }
 }

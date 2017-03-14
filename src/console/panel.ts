@@ -2,12 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Token
-} from '@phosphor/application';
-
-import {
   Session
 } from '@jupyterlab/services';
+
+import {
+  Token
+} from '@phosphor/coreutils';
 
 import {
   Message
@@ -18,12 +18,12 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IEditorMimeTypeService, CodeEditor
-} from '../codeeditor';
-
-import {
   BaseCellWidget, CodeCellWidget
 } from '../cells';
+
+import {
+  IEditorMimeTypeService, CodeEditor
+} from '../codeeditor';
 
 import {
   OutputAreaWidget

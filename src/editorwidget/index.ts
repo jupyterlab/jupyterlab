@@ -2,15 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Token
-} from '@phosphor/application';
-
-import {
   CommandRegistry
 } from '@phosphor/commands';
 
 import {
-  JSONObject
+  JSONObject, Token
 } from '@phosphor/coreutils';
 
 import {
