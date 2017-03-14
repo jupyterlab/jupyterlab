@@ -1235,16 +1235,6 @@ class Notebook extends StaticNotebook {
     }
     event.dropAction = event.proposedAction;
 
-    // If the drag happens within the same notebook,
-    // the move is handled elsewhere.
-    let [source, dragDone] = event.source;
-    if(source === this) {
-      dragDone.resolve(event);
-      return;
-    } else {
-      dragDone.resolve(void 0);
-    }
-
     let target = event.target as HTMLElement;
     while (target && target.parentElement) {
       if (target.classList.contains(DROP_TARGET_CLASS)) {
@@ -1254,35 +1244,68 @@ class Notebook extends StaticNotebook {
       target = target.parentElement;
     }
 
-    // Find the target cell and insert the copied cells.
-    let index = this._findCell(target);
-    if (index === -1) {
-      index = this.widgets.length;
-    }
-    let model = this.model;
-    let values = event.mimeData.getData(JUPYTER_CELL_MIME);
-    let factory = model.contentFactory;
+    let source: Notebook = event.source
+    if(source === this) {
+      //Handle the case where we are moving cells within
+      //the same notebook.
+      let toMove: BaseCellWidget[] = event.mimeData.getData('internal:cells');
 
-    // Insert the copies of the original cells.
-    model.cells.beginCompoundOperation();
-    each(values, (cell: nbformat.ICell) => {
-      let value: ICellModel;
-      switch (cell.cell_type) {
-      case 'code':
-        value = factory.createCodeCell({ cell });
-        break;
-      case 'markdown':
-        value = factory.createMarkdownCell({ cell });
-        break;
-      default:
-        value = factory.createRawCell({ cell });
-        break;
+      // Move the cells one by one
+      let fromIndex = ArrayExt.firstIndexOf(this.widgets, toMove[0]);
+      let toIndex = this._findCell(target);
+      this.model.cells.beginCompoundOperation();
+      if(fromIndex < toIndex) {
+        each(toMove, (cellWidget)=> {
+          this.model.cells.move(fromIndex, toIndex++);
+        });
+      } else if (fromIndex > toIndex) {
+        each(toMove, (cellWidget)=> {
+          this.model.cells.move(fromIndex++, toIndex++);
+        });
+      } //no-op if fromIndex === toIndex
+      this.model.cells.endCompoundOperation();
+    } else {
+      // Find the target cell and insert the copied cells.
+      let index = this._findCell(target);
+      if (index === -1) {
+        index = this.widgets.length;
       }
-      model.cells.insert(index++, value);
-    });
-    model.cells.endCompoundOperation();
-    // Activate the last cell.
-    this.activeCellIndex = index - 1;
+      let model = this.model;
+      let values = event.mimeData.getData(JUPYTER_CELL_MIME);
+      let toRemove: BaseCellWidget[] = event.mimeData.getData('internal:cells');
+      let factory = model.contentFactory;
+
+      // Insert the copies of the original cells.
+      model.cells.beginCompoundOperation();
+      each(values, (cell: nbformat.ICell) => {
+        let value: ICellModel;
+        switch (cell.cell_type) {
+        case 'code':
+          value = factory.createCodeCell({ cell });
+          break;
+        case 'markdown':
+          value = factory.createMarkdownCell({ cell });
+          break;
+        default:
+          value = factory.createRawCell({ cell });
+          break;
+        }
+        model.cells.insert(index++, value);
+      });
+      model.cells.endCompoundOperation();
+      // Activate the last cell.
+      this.activeCellIndex = index - 1;
+
+      // Now remove the cells from the source notebook.
+      let activeCell = source.model.cells.at(source.activeCellIndex);
+      source.model.cells.beginCompoundOperation();
+      each(toRemove, widget => {
+        source.model.cells.remove(widget.model);
+      });
+      source.model.cells.endCompoundOperation();
+      source.activeCellIndex =
+        ArrayExt.firstIndexOf(toArray(source.model.cells), activeCell);
+    }
   }
 
   /**
@@ -1305,19 +1328,19 @@ class Notebook extends StaticNotebook {
     // Create the drag image.
     let dragImage = Private.createDragImage(selected.length);
 
-    // Create a promise that can be resolved by the recipient
-    // of the drag operation.
-    let dragDone = new utils.PromiseDelegate<IDragEvent>();
-
     // Set up the drag event.
     this._drag = new Drag({
       mimeData: new MimeData(),
       dragImage,
       supportedActions: 'move',
       proposedAction: 'move',
-      source: [this, dragDone]
+      source: this
     });
     this._drag.mimeData.setData(JUPYTER_CELL_MIME, selected);
+    // Add mimeData for the fully reified cell models, for the
+    // case where the target is in the same notebook and we
+    // can just move the cells.
+    this._drag.mimeData.setData('internal:cells', toMove);
 
     // Remove mousemove and mouseup listeners and start the drag.
     document.removeEventListener('mousemove', this, true);
@@ -1331,40 +1354,6 @@ class Notebook extends StaticNotebook {
       if (action === 'none') {
         return;
       }
-      dragDone.promise.then((event: IDragEvent) => {
-        if(!event) {
-          // The case where the drop happened outside of this widget,
-          // so we simply remove the moved cells.
-          let activeCell = cells.at(this.activeCellIndex);
-          this.model.cells.beginCompoundOperation();
-          each(toMove, widget => {
-            this.model.cells.remove(widget.model);
-          });
-          this.model.cells.endCompoundOperation();
-          this.activeCellIndex = ArrayExt.firstIndexOf(toArray(cells), activeCell);
-        } else {
-          let target = event.target as HTMLElement;
-          while (target && target.parentElement) {
-            if (target.classList.contains(DROP_TARGET_CLASS)) {
-              target.classList.remove(DROP_TARGET_CLASS);
-              break;
-            }
-            target = target.parentElement;
-          }
-
-          // Move the cells one by one
-          this.model.cells.beginCompoundOperation();
-          for(let cellWidget of toMove) {
-            let fromIndex = ArrayExt.firstIndexOf(this.widgets, cellWidget);
-            let toIndex = this._findCell(target);
-            if (toIndex === -1) {
-              toIndex = this.widgets.length - 1;
-            }
-            this.model.cells.move(fromIndex, toIndex);
-          }
-          this.model.cells.endCompoundOperation();
-        }
-      });
     });
 
   }
