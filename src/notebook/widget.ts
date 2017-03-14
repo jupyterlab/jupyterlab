@@ -1256,7 +1256,6 @@ class Notebook extends StaticNotebook {
       if(toIndex === -1) {
         toIndex = this.widgets.length;
       }
-      console.log(fromIndex, toIndex);
       //Don't move if we are within the block of selected cells.
       if(toIndex-fromIndex > 0 && toIndex-fromIndex <= toMove.length) {
         return;
