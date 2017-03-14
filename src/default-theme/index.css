@@ -4,16 +4,14 @@
 |----------------------------------------------------------------------------*/
 
 
-/* Variables and common functions */
-@import '../apputils/index.css';
+/* Variables */
 @import './variables.css';
-
 
 /* Main application (1st) */
 @import '../application/index.css';
 
-
 /* Individual plugins */
+@import '../apputils/index.css';
 @import '../about-extension/index.css';
 @import '../cells/index.css';
 @import '../codemirror/index.css';

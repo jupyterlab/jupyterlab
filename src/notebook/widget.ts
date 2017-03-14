@@ -1096,6 +1096,8 @@ class Notebook extends StaticNotebook {
       this.activeCellIndex = i;
     }
 
+    this._ensureFocus();
+
     // Left mouse press for drag start.
     if (event.button === 0 && shouldDrag) {
       this._dragData = { pressX: event.clientX, pressY: event.clientY, index: i};
