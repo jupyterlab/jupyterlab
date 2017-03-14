@@ -62,7 +62,7 @@ class ClientSession implements IDisposable {
   /**
    * A signal emitted when the kernel changes.
    */
-  get kernelChanged(): ISignal<this, Kernel.IKernel> {
+  get kernelChanged(): ISignal<this, Kernel.IKernel | null> {
     return this._kernelChanged;
   }
 
@@ -404,7 +404,7 @@ class ClientSession implements IDisposable {
   private _session: Session.ISession | null = null;
   private _promise: PromiseDelegate<void> | null;
   private _terminated = new Signal<this, void>(this);
-  private _kernelChanged = new Signal<this, Kernel.IKernel>(this);
+  private _kernelChanged = new Signal<this, Kernel.IKernel | null>(this);
   private _statusChanged = new Signal<this, Kernel.Status>(this);
   private _iopubMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
