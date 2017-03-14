@@ -108,7 +108,7 @@
   cursor: pointer;
   text-transform: uppercase;
   border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
-  letter-spacing: .8px;
+  letter-spacing: 1px;
 }
 
 
