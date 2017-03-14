@@ -276,14 +276,14 @@ class RenderedImage extends Widget {
     let img = document.createElement('img');
     let source = Private.getSource(options);
     img.src = `data:${options.mimeType};base64,${source}`;
-    let metadata = options.model.metadata.get(options.mimeType);
+    let metadata = options.model.metadata.get(options.mimeType) as JSONObject;
     if (metadata) {
       let metaJSON = metadata as JSONObject;
-      if (typeof metaJSON['height'] === "number") {
-        img.height = <number> metaJSON['height'];
+      if (typeof metaJSON['height'] === 'number') {
+        img.height = metaJSON['height'] as number;
       }
-      if (typeof metaJSON['width'] === "number") {
-        img.width = <number> metaJSON['width'];
+      if (typeof metaJSON['width'] === 'number') {
+        img.width = metaJSON['width'] as number;
       }
     }
     this.node.appendChild(img);
@@ -457,7 +457,7 @@ namespace Private {
   }
 
   /**
-  * Apply ids to headers. 
+  * Apply ids to headers.
   */
   export
   function headerAnchors(node: HTMLElement): void {
