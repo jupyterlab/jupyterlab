@@ -4,15 +4,11 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  Token
-} from '@phosphor/application';
-
-import {
   CommandRegistry
 } from '@phosphor/commands';
 
 import {
-  JSONObject, PromiseDelegate
+  JSONObject, PromiseDelegate, Token
 } from '@phosphor/coreutils';
 
 import {

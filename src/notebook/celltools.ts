@@ -6,7 +6,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONValue
+  JSONValue, Token
 } from '@phosphor/coreutils';
 
 import {
@@ -14,20 +14,16 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  Token
-} from '@phosphor/application';
-
-import {
-  PanelLayout
-} from '@phosphor/widgets';
-
-import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
   h, VirtualDOM, VirtualNode
 } from '@phosphor/virtualdom';
+
+import {
+  PanelLayout, Widget
+} from '@phosphor/widgets';
+
+import {
+  JSONEditorWidget, Styling
+} from '../apputils';
 
 import {
   BaseCellWidget, ICellModel
@@ -38,20 +34,8 @@ import {
 } from '../codeeditor';
 
 import {
-  IChangedArgs, ObservableJSON, nbformat
+  IObservableMap, nbformat, ObservableJSON, ObservableMap
 } from '../coreutils';
-
-import {
-  JSONEditorWidget
-} from '../apputils';
-
-import {
-  IObservableMap, ObservableMap
-} from '../coreutils';
-
-import {
-  Styling
-} from '../apputils';
 
 import {
   INotebookTracker

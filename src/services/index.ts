@@ -7,7 +7,7 @@ import {
 
 import {
   Token
-} from '@phosphor/application';
+} from '@phosphor/coreutils';
 
 
 /* tslint:disable */

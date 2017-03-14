@@ -2,16 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Token
+} from '@phosphor/coreutils';
+
+import {
   Message
 } from '@phosphor/messaging';
 
 import {
   ISignal
 } from '@phosphor/signaling';
-
-import {
-  Token
-} from '@phosphor/application';
 
 import {
   Panel, TabPanel

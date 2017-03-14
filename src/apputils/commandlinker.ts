@@ -4,16 +4,12 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  JSONObject
+  JSONObject, Token
 } from '@phosphor/coreutils';
 
 import {
   IDisposable
 } from '@phosphor/disposable';
-
-import {
-  Token
-} from '@phosphor/application';
 
 import {
   CommandRegistry
