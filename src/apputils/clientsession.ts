@@ -230,13 +230,7 @@ class ClientSession implements IDisposable {
    * Select a kernel for the session.
    */
   selectKernel(): Promise<void> {
-    return Private.selectKernel(this, this._manager).then(kernel => {
-      if (kernel) {
-        return this.changeKernel(kernel);
-      } else {
-        return this.shutdown() as Promise<null>;
-      }
-    }).then(() => void 0);
+    return Private.selectKernel(this, this._manager);
   }
 
   /**
@@ -487,9 +481,9 @@ export namespace ClientSession {
    */
   export
   interface IKernelSearch {
-     /**
-      * The Kernel specs.
-      */
+    /**
+     * The Kernel specs.
+     */
     specs: Kernel.ISpecModels;
 
     /**
@@ -554,8 +548,33 @@ namespace Private {
    * Select a kernel for the session.
    */
   export
-  function selectKernel(session: ClientSession, manager: Session.IManager): Promise<Kernel.IModel | null> {
-    return Promise.resolve<Kernel.IModel | null>(null);
+  function selectKernel(session: ClientSession, manager: Session.IManager): Promise<void> {
+    // Create the dialog body.
+    let body = document.createElement('div');
+    let text = document.createElement('label');
+    text.innerHTML = `Select kernel for: "${session.name}"`;
+    body.appendChild(text);
+
+    let options = getKernelSearch(session, manager);
+    let selector = ClientSession.createKernelSelect(options);
+    body.appendChild(selector);
+
+    let select = Dialog.okButton({ label: 'SELECT' });
+    return showDialog({
+      title: 'Select Kernel',
+      body,
+      buttons: [Dialog.cancelButton(), select]
+    }).then(result => {
+      // Change the kernel if a kernel was selected.
+      if (!result.accept) {
+        return;
+      }
+      let model = JSON.parse(selector.value) as Kernel.IModel | null;
+      if (!model) {
+        return session.shutdown();
+      }
+      return session.changeKernel(model).then(() => void 0);
+    }).then(() => void 0);
   }
 
   /**
@@ -742,6 +761,19 @@ namespace Private {
   }
 
   /**
+   * Get the kernel search options given a client session and sesion manager.
+   */
+  function getKernelSearch(session: ClientSession, manager: Session.IManager): ClientSession.IKernelSearch {
+      return {
+        specs: manager.specs,
+        sessions: manager.running(),
+        existing: session.kernel ? session.kernel.model : null,
+        preferredName: session.preferredKernelName,
+        preferredLanguage: session.preferredKernelLanguage
+      };
+  }
+
+  /**
    * Create an option element for a kernel name.
    */
   function optionForName(name: string, displayName: string): HTMLOptionElement {
@@ -759,7 +791,7 @@ namespace Private {
     group.label = 'Use No Kernel';
     let option = document.createElement('option');
     option.text = 'No Kernel';
-    option.value = JSON.stringify({id: null, name: null});
+    option.value = JSON.stringify(null);
     group.appendChild(option);
     return group;
   }
