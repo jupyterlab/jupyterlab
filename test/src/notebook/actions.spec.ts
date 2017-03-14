@@ -290,6 +290,18 @@ describe('notebook/notebook/actions', () => {
         expect(cell.model.value.text).to.be(source);
       });
 
+      it('should be undo-able if all the cells are deleted', () => {
+        for (let i = 0; i < widget.widgets.length; i++) {
+          widget.select(widget.widgets[i]);
+        }
+        let count = widget.widgets.length;
+        let source = widget.widgets[1].model.value.text;
+        NotebookActions.deleteCells(widget);
+        NotebookActions.undo(widget);
+        expect(widget.widgets.length).to.be(count);
+        expect(widget.widgets[1].model.value.text).to.be(source);
+      });
+
     });
 
     describe('#insertAbove()', () => {
