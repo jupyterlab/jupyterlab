@@ -1457,7 +1457,6 @@ class Notebook extends StaticNotebook {
   private _activeCell: BaseCellWidget = null;
   private _mode: NotebookMode = 'command';
   private _drag: Drag = null;
-  private _dragDone: utils.PromiseDelegate<'intra' | 'inter'>;
   private _dragData: { pressX: number, pressY: number, index: number } = null;
   private _activeCellChanged = new Signal<this, BaseCellWidget>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
