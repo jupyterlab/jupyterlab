@@ -42,6 +42,10 @@ import {
 } from '@phosphor/widgets';
 
 import {
+  utils
+} from '@jupyterlab/services';
+
+import {
   ICellModel, BaseCellWidget, IMarkdownCellModel,
   CodeCellWidget, MarkdownCellWidget,
   ICodeCellModel, RawCellWidget, IRawCellModel,
@@ -1231,6 +1235,16 @@ class Notebook extends StaticNotebook {
     }
     event.dropAction = event.proposedAction;
 
+    // If the drag happens within the same notebook,
+    // the move is handled elsewhere.
+    let [source, dragDone] = event.source;
+    if(source === this) {
+      dragDone.resolve(event);
+      return;
+    } else {
+      dragDone.resolve(void 0);
+    }
+
     let target = event.target as HTMLElement;
     while (target && target.parentElement) {
       if (target.classList.contains(DROP_TARGET_CLASS)) {
@@ -1250,6 +1264,7 @@ class Notebook extends StaticNotebook {
     let factory = model.contentFactory;
 
     // Insert the copies of the original cells.
+    model.cells.beginCompoundOperation();
     each(values, (cell: nbformat.ICell) => {
       let value: ICellModel;
       switch (cell.cell_type) {
@@ -1265,6 +1280,7 @@ class Notebook extends StaticNotebook {
       }
       model.cells.insert(index++, value);
     });
+    model.cells.endCompoundOperation();
     // Activate the last cell.
     this.activeCellIndex = index - 1;
   }
@@ -1275,26 +1291,31 @@ class Notebook extends StaticNotebook {
   private _startDrag(index: number, clientX: number, clientY: number): void {
     let cells = this.model.cells;
     let selected: nbformat.ICell[] = [];
-    let toremove: BaseCellWidget[] = [];
+    let toMove: BaseCellWidget[] = [];
 
     each(this.widgets, (widget, i) => {
       let cell = cells.at(i);
       if (this.isSelected(widget)) {
         widget.addClass(DROP_SOURCE_CLASS);
         selected.push(cell.toJSON());
-        toremove.push(widget);
+        toMove.push(widget);
       }
     });
 
     // Create the drag image.
     let dragImage = Private.createDragImage(selected.length);
 
+    // Create a promise that can be resolved by the recipient
+    // of the drag operation.
+    let dragDone = new utils.PromiseDelegate<IDragEvent>();
+
     // Set up the drag event.
     this._drag = new Drag({
       mimeData: new MimeData(),
       dragImage,
       supportedActions: 'move',
-      proposedAction: 'move'
+      proposedAction: 'move',
+      source: [this, dragDone]
     });
     this._drag.mimeData.setData(JUPYTER_CELL_MIME, selected);
 
@@ -1306,15 +1327,44 @@ class Notebook extends StaticNotebook {
         return;
       }
       this._drag = null;
-      each(toremove, widget => { widget.removeClass(DROP_SOURCE_CLASS); });
+      each(toMove, widget => { widget.removeClass(DROP_SOURCE_CLASS); });
       if (action === 'none') {
         return;
       }
-      let activeCell = cells.at(this.activeCellIndex);
-      each(toremove, widget => {
-        this.model.cells.remove(widget.model);
+      dragDone.promise.then((event: IDragEvent) => {
+        if(!event) {
+          // The case where the drop happened outside of this widget,
+          // so we simply remove the moved cells.
+          let activeCell = cells.at(this.activeCellIndex);
+          this.model.cells.beginCompoundOperation();
+          each(toMove, widget => {
+            this.model.cells.remove(widget.model);
+          });
+          this.model.cells.endCompoundOperation();
+          this.activeCellIndex = ArrayExt.firstIndexOf(toArray(cells), activeCell);
+        } else {
+          let target = event.target as HTMLElement;
+          while (target && target.parentElement) {
+            if (target.classList.contains(DROP_TARGET_CLASS)) {
+              target.classList.remove(DROP_TARGET_CLASS);
+              break;
+            }
+            target = target.parentElement;
+          }
+
+          // Move the cells one by one
+          this.model.cells.beginCompoundOperation();
+          for(let cellWidget of toMove) {
+            let fromIndex = ArrayExt.firstIndexOf(this.widgets, cellWidget);
+            let toIndex = this._findCell(target);
+            if (toIndex === -1) {
+              toIndex = this.widgets.length - 1;
+            }
+            this.model.cells.move(fromIndex, toIndex);
+          }
+          this.model.cells.endCompoundOperation();
+        }
       });
-      this.activeCellIndex = ArrayExt.firstIndexOf(toArray(cells), activeCell);
     });
 
   }
@@ -1407,6 +1457,7 @@ class Notebook extends StaticNotebook {
   private _activeCell: BaseCellWidget = null;
   private _mode: NotebookMode = 'command';
   private _drag: Drag = null;
+  private _dragDone: utils.PromiseDelegate<'intra' | 'inter'>;
   private _dragData: { pressX: number, pressY: number, index: number } = null;
   private _activeCellChanged = new Signal<this, BaseCellWidget>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
