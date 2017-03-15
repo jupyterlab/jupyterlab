@@ -58,7 +58,8 @@ const service: JupyterLabPlugin<IInspector> = {
      * Create and track a new inspector.
      */
     function newInspectorPanel(): InspectorPanel {
-      let inspector = new InspectorPanel({ items: Private.defaultInspectorItems });
+      const inspector = new InspectorPanel();
+
       inspector.id = 'jp-inspector';
       inspector.title.label = 'Inspector';
       inspector.title.closable = true;
@@ -67,7 +68,13 @@ const service: JupyterLabPlugin<IInspector> = {
           manager.inspector = null;
         }
       });
+
+      // Track the inspector.
       tracker.add(inspector);
+
+      // Add the default inspector child items.
+      Private.defaultInspectorItems.forEach(item => { inspector.add(item); });
+
       return inspector;
     }
 

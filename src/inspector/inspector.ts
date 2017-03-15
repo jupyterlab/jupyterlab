@@ -177,7 +177,7 @@ class InspectorPanel extends TabPanel implements IInspector {
   /**
    * Construct an inspector.
    */
-  constructor(options: InspectorPanel.IOptions) {
+  constructor() {
     super();
     this.addClass(PANEL_CLASS);
   }
@@ -335,28 +335,6 @@ class InspectorPanel extends TabPanel implements IInspector {
 
   private _items: { [type: string]: InspectorItemWidget } = Object.create(null);
   private _source: IInspector.IInspectable = null;
-}
-
-
-/**
- * A namespace for Inspector statics.
- */
-export
-namespace InspectorPanel {
-  /**
-   * The initialization options for an inspector panel.
-   */
-  export
-  interface IOptions {
-    /**
-     * The list of available child inspectors items for code introspection.
-     *
-     * #### Notes
-     * The order of items in the inspectors array is the order in which they
-     * will be rendered in the inspectors tab panel.
-     */
-    items?: IInspector.IInspectorItem[];
-  }
 }
 
 
