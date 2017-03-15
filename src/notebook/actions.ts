@@ -10,10 +10,6 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  ElementExt
-} from '@phosphor/domutils';
-
-import {
   Clipboard
 } from '../apputils';
 
