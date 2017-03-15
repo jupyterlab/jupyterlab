@@ -1229,7 +1229,6 @@ class Notebook extends StaticNotebook {
       event.dropAction = 'none';
       return;
     }
-    event.dropAction = event.proposedAction;
 
     let target = event.target as HTMLElement;
     while (target && target.parentElement) {
@@ -1240,33 +1239,75 @@ class Notebook extends StaticNotebook {
       target = target.parentElement;
     }
 
-    // Find the target cell and insert the copied cells.
-    let index = this._findCell(target);
-    if (index === -1) {
-      index = this.widgets.length;
-    }
-    let model = this.model;
-    let values = event.mimeData.getData(JUPYTER_CELL_MIME);
-    let factory = model.contentFactory;
+    let source: Notebook = event.source;
+    if (source === this) {
+      // Handle the case where we are moving cells within
+      // the same notebook.
+      event.dropAction = 'move';
+      let toMove: BaseCellWidget[] = event.mimeData.getData('internal:cells');
 
-    // Insert the copies of the original cells.
-    each(values, (cell: nbformat.ICell) => {
-      let value: ICellModel;
-      switch (cell.cell_type) {
-      case 'code':
-        value = factory.createCodeCell({ cell });
-        break;
-      case 'markdown':
-        value = factory.createMarkdownCell({ cell });
-        break;
-      default:
-        value = factory.createRawCell({ cell });
-        break;
+      //Compute the to/from indices for the move.
+      let fromIndex = ArrayExt.firstIndexOf(this.widgets, toMove[0]);
+      let toIndex = this._findCell(target);
+      // This check is needed for consistency with the view.
+      if (toIndex !== -1 && toIndex > fromIndex) {
+        toIndex -= 1;
+      } else if (toIndex === -1) {
+        // If the drop is within the notebook but not on any cell,
+        // most often this means it is past the cell areas, so
+        // set it to move the cells to the end of the notebook.
+        toIndex = this.widgets.length - 1;
       }
-      model.cells.insert(index++, value);
-    });
-    // Activate the last cell.
-    this.activeCellIndex = index - 1;
+      //Don't move if we are within the block of selected cells.
+      if (toIndex >= fromIndex && toIndex < fromIndex + toMove.length) {
+        return;
+      }
+      // Move the cells one by one
+      this.model.cells.beginCompoundOperation();
+      if (fromIndex < toIndex) {
+        each(toMove, (cellWidget)=> {
+          this.model.cells.move(fromIndex, toIndex);
+        });
+      } else if (fromIndex > toIndex) {
+        each(toMove, (cellWidget)=> {
+          this.model.cells.move(fromIndex++, toIndex++);
+        });
+      }
+      this.model.cells.endCompoundOperation();
+    } else {
+      // Handle the case where we are copying cells between
+      // notebooks.
+      event.dropAction = 'copy';
+      // Find the target cell and insert the copied cells.
+      let index = this._findCell(target);
+      if (index === -1) {
+        index = this.widgets.length;
+      }
+      let model = this.model;
+      let values = event.mimeData.getData(JUPYTER_CELL_MIME);
+      let factory = model.contentFactory;
+
+      // Insert the copies of the original cells.
+      model.cells.beginCompoundOperation();
+      each(values, (cell: nbformat.ICell) => {
+        let value: ICellModel;
+        switch (cell.cell_type) {
+        case 'code':
+          value = factory.createCodeCell({ cell });
+          break;
+        case 'markdown':
+          value = factory.createMarkdownCell({ cell });
+          break;
+        default:
+          value = factory.createRawCell({ cell });
+          break;
+        }
+        model.cells.insert(index++, value);
+      });
+      model.cells.endCompoundOperation();
+      // Activate the last cell.
+      this.activeCellIndex = index - 1;
+    }
   }
 
   /**
@@ -1275,14 +1316,14 @@ class Notebook extends StaticNotebook {
   private _startDrag(index: number, clientX: number, clientY: number): void {
     let cells = this.model.cells;
     let selected: nbformat.ICell[] = [];
-    let toremove: BaseCellWidget[] = [];
+    let toMove: BaseCellWidget[] = [];
 
     each(this.widgets, (widget, i) => {
       let cell = cells.at(i);
       if (this.isSelected(widget)) {
         widget.addClass(DROP_SOURCE_CLASS);
         selected.push(cell.toJSON());
-        toremove.push(widget);
+        toMove.push(widget);
       }
     });
 
@@ -1293,10 +1334,15 @@ class Notebook extends StaticNotebook {
     this._drag = new Drag({
       mimeData: new MimeData(),
       dragImage,
-      supportedActions: 'move',
-      proposedAction: 'move'
+      supportedActions: 'copy-move',
+      proposedAction: 'copy',
+      source: this
     });
     this._drag.mimeData.setData(JUPYTER_CELL_MIME, selected);
+    // Add mimeData for the fully reified cell widgets, for the
+    // case where the target is in the same notebook and we
+    // can just move the cells.
+    this._drag.mimeData.setData('internal:cells', toMove);
 
     // Remove mousemove and mouseup listeners and start the drag.
     document.removeEventListener('mousemove', this, true);
@@ -1306,15 +1352,7 @@ class Notebook extends StaticNotebook {
         return;
       }
       this._drag = null;
-      each(toremove, widget => { widget.removeClass(DROP_SOURCE_CLASS); });
-      if (action === 'none') {
-        return;
-      }
-      let activeCell = cells.at(this.activeCellIndex);
-      each(toremove, widget => {
-        this.model.cells.remove(widget.model);
-      });
-      this.activeCellIndex = ArrayExt.firstIndexOf(toArray(cells), activeCell);
+      each(toMove, widget => { widget.removeClass(DROP_SOURCE_CLASS); });
     });
 
   }
