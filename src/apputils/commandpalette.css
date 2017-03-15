@@ -108,7 +108,7 @@
   cursor: pointer;
   text-transform: uppercase;
   border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
-  letter-spacing: 1.2px;
+  letter-spacing: 1px;
 }
 
 
@@ -134,7 +134,7 @@
   padding: 4px 12px;
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
-  font-weight: 500;
+  font-weight: 400;
 }
 
 
