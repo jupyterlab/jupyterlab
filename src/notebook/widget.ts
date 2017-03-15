@@ -1244,7 +1244,7 @@ class Notebook extends StaticNotebook {
     }
 
     let source: Notebook = event.source
-    if(source === this) {
+    if (source === this) {
       // Handle the case where we are moving cells within
       // the same notebook.
       event.dropAction = 'move';
@@ -1253,16 +1253,16 @@ class Notebook extends StaticNotebook {
       //Compute the to/from indices for the move.
       let fromIndex = ArrayExt.firstIndexOf(this.widgets, toMove[0]);
       let toIndex = this._findCell(target);
-      if(toIndex === -1) {
+      if (toIndex === -1) {
         toIndex = this.widgets.length;
       }
       //Don't move if we are within the block of selected cells.
-      if(toIndex-fromIndex > 0 && toIndex-fromIndex <= toMove.length) {
+      if (toIndex - fromIndex > 0 && toIndex - fromIndex <= toMove.length) {
         return;
       }
       // Move the cells one by one
       this.model.cells.beginCompoundOperation();
-      if(fromIndex < toIndex) {
+      if (fromIndex < toIndex) {
         each(toMove, (cellWidget)=> {
           this.model.cells.move(fromIndex, toIndex);
         });
@@ -1337,7 +1337,7 @@ class Notebook extends StaticNotebook {
       source: this
     });
     this._drag.mimeData.setData(JUPYTER_CELL_MIME, selected);
-    // Add mimeData for the fully reified cell models, for the
+    // Add mimeData for the fully reified cell widgets, for the
     // case where the target is in the same notebook and we
     // can just move the cells.
     this._drag.mimeData.setData('internal:cells', toMove);
