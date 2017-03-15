@@ -162,7 +162,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    */
   iter(): IIterator<ICellModel> {
     let arr: ICellModel[] = [];
-    for(let id of toArray(this._cellOrder)) {
+    for (let id of toArray(this._cellOrder)) {
       arr.push(this._cellMap.get(id.id));
     }
     return new ArrayIterator<ICellModel>(arr);
@@ -177,7 +177,12 @@ class CellList implements IObservableUndoableVector<ICellModel> {
     }
     this._isDisposed = true;
     Signal.clearData(this);
-    this.clear();
+    // Clean up the cell map and cell order objects.
+    for (let cell of this._cellMap.values()) {
+      cell.dispose();
+    }
+    this._cellMap.dispose();
+    this._cellOrder.dispose();
   }
 
   /**
@@ -215,6 +220,11 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    *
    * #### Undefined Behavior
    * An `index` which is non-integral or out of range.
+   *
+   * #### Notes
+   * This should be considered to transfer ownership of the
+   * cell to the `CellList`. As such, `cell.dispose()` should
+   * not be called by other actors.
    */
   set(index: number, cell: ICellModel): void {
     // Generate a new uuid for the cell.
@@ -236,6 +246,11 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    *
    * #### Iterator Validity
    * No changes.
+   *
+   * #### Notes
+   * This should be considered to transfer ownership of the
+   * cell to the `CellList`. As such, `cell.dispose()` should
+   * not be called by other actors.
    */
   pushBack(cell: ICellModel): number {
     // Generate a new uuid for the cell.
@@ -285,6 +300,11 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    *
    * #### Undefined Behavior
    * An `index` which is non-integral.
+   *
+   * #### Notes
+   * This should be considered to transfer ownership of the
+   * cell to the `CellList`. As such, `cell.dispose()` should
+   * not be called by other actors.
    */
   insert(index: number, cell: ICellModel): number {
     // Generate a new uuid for the cell.
@@ -349,10 +369,6 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    * All current iterators are invalidated.
    */
   clear(): void {
-    let oldValues: ICellModel[] = []
-    for(let id of toArray(this._cellOrder)) {
-      oldValues.push(this._cellMap.get(id.id));
-    }
     this._cellOrder.clear();
   }
 
@@ -390,6 +406,11 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    *
    * #### Iterator Validity
    * No changes.
+   *
+   * #### Notes
+   * This should be considered to transfer ownership of the
+   * cells to the `CellList`. As such, `cell.dispose()` should
+   * not be called by other actors.
    */
   pushAll(cells: IterableOrArrayLike<ICellModel>): number {
     let newIndex = this.length;
@@ -424,15 +445,21 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    *
    * #### Undefined Behavior.
    * An `index` which is non-integral.
+   *
+   * #### Notes
+   * This should be considered to transfer ownership of the
+   * cells to the `CellList`. As such, `cell.dispose()` should
+   * not be called by other actors.
    */
   insertAll(index: number, cells: IterableOrArrayLike<ICellModel>): number {
-    let newIndex = index;
     let newValues = toArray(cells);
     each(newValues, cell => {
       // Generate a new uuid for the cell.
       let id = utils.uuid();
       this._cellMap.set(id, cell);
+      this._cellOrder.beginCompoundOperation();
       this._cellOrder.insert(index++, new CellID(id));
+      this._cellOrder.endCompoundOperation();
     });
     return this.length;
   }
@@ -456,11 +483,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    * A `startIndex` or `endIndex` which is non-integral.
    */
   removeRange(startIndex: number, endIndex: number): number {
-    let oldValues: ICellModel[] = [];
-    for (let i = startIndex; i < endIndex; i++) {
-      let id = this._cellOrder.removeAt(startIndex);
-      oldValues.push(this._cellMap.get(id.id));
-    }
+    this._cellOrder.removeRange(startIndex, endIndex);
     return this.length;
   }
 
@@ -513,10 +536,10 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    * Clear the change stack.
    */
   clearUndo(): void {
-    //dispose of cells not in the current
-    //cell order.
-    for(let key of this._cellMap.keys()) {
-      if(ArrayExt.findFirstIndex(
+    // Dispose of cells not in the current
+    // cell order.
+    for (let key of this._cellMap.keys()) {
+      if (ArrayExt.findFirstIndex(
          toArray(this._cellOrder), id => (id.id)===key) === -1) {
         let cell = this._cellMap.get(key) as ICellModel;
         cell.dispose();
