@@ -87,7 +87,8 @@ const contentFactoryPlugin: JupyterLabPlugin<NotebookPanel.IContentFactory> = {
   requires: [IEditorServices],
   autoStart: true,
   activate: (app: JupyterLab, editorServices: IEditorServices) => {
-    let editorFactory = editorServices.factoryService.newInlineEditor;
+    let editorFactory = editorServices.factoryService.newInlineEditor.bind(
+      editorServices.factoryService);
     return new NotebookPanel.ContentFactory({ editorFactory });
   }
 };
@@ -130,7 +131,8 @@ function activateCellTools(app: JupyterLab, restorer: ILayoutRestorer, tracker: 
   const nbConvert = CellTools.createNBConvertSelector();
   celltools.addItem({ tool: nbConvert, rank: 3 });
 
-  const editorFactory = editorServices.factoryService.newInlineEditor;
+  const editorFactory = editorServices.factoryService.newInlineEditor.bind(
+    editorServices.factoryService);
   const metadataEditor = new CellTools.MetadataEditorTool({ editorFactory });
   celltools.addItem({ tool: metadataEditor, rank: 4 });
 

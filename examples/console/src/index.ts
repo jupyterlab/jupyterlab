@@ -67,7 +67,8 @@ function startApp(session: Session.ISession) {
   });
 
   let rendermime = new RenderMime({ items: RenderMime.getDefaultItems() });
-  let editorFactory = editorServices.factoryService.newInlineEditor;
+  let editorFactory = editorServices.factoryService.newInlineEditor.bind(
+    editorServices.factoryService);
   let contentFactory = new ConsolePanel.ContentFactory({ editorFactory });
   let consolePanel = new ConsolePanel({
     rendermime,
