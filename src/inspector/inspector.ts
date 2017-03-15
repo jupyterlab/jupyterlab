@@ -6,6 +6,10 @@ import {
 } from '@phosphor/coreutils';
 
 import {
+  DisposableDelegate, IDisposable
+} from '@phosphor/disposable';
+
+import {
   Message
 } from '@phosphor/messaging';
 
@@ -71,6 +75,15 @@ const IInspector = new Token<IInspector>('jupyter.services.inspector');
  */
 export
 interface IInspector {
+  /**
+   * Create an inspector child item and return a disposable to remove it.
+   *
+   * @param item - The inspector child item being added to the inspector.
+   *
+   * @returns A disposable that removes the child item from the inspector.
+   */
+  add(item: IInspector.IInspectorItem): IDisposable;
+
   /**
    * The source of events the inspector listens for.
    */
@@ -167,26 +180,6 @@ class InspectorPanel extends TabPanel implements IInspector {
   constructor(options: InspectorPanel.IOptions) {
     super();
     this.addClass(PANEL_CLASS);
-
-    let items = options.items || [];
-
-    // Create inspector child items and add them to the inspectors panel.
-    items.forEach(value => {
-      let widget = new InspectorItemWidget();
-      widget.rank = value.rank;
-      widget.remembers = !!value.remembers;
-      widget.title.closable = false;
-      widget.title.label = value.name;
-      if (value.className) {
-        widget.addClass(value.className);
-      }
-      this._items[value.type] = widget;
-      this.addWidget(widget);
-    });
-
-    if (items.length < 2) {
-      this.tabBar.hide();
-    }
   }
 
   /**
@@ -218,6 +211,43 @@ class InspectorPanel extends TabPanel implements IInspector {
       this._source.inspected.connect(this.onInspectorUpdate, this);
       this._source.disposed.connect(this.onSourceDisposed, this);
     }
+  }
+
+  /**
+   * Create an inspector child item and return a disposable to remove it.
+   *
+   * @param item - The inspector child item being added to the inspector.
+   *
+   * @returns A disposable that removes the child item from the inspector.
+   */
+  add(item: IInspector.IInspectorItem): IDisposable {
+    const widget = new InspectorItemWidget();
+
+    widget.rank = item.rank;
+    widget.remembers = !!item.remembers;
+    widget.title.closable = false;
+    widget.title.label = item.name;
+    if (item.className) {
+      widget.addClass(item.className);
+    }
+    this._items[item.type] = widget;
+    this.addWidget(widget);
+
+    if ((Object.keys(this._items)).length < 2) {
+      this.tabBar.hide();
+    } else {
+      this.tabBar.show();
+    }
+
+    return new DisposableDelegate(() => {
+      widget.dispose();
+      delete this._items[item.type];
+      if ((Object.keys(this._items)).length < 2) {
+        this.tabBar.hide();
+      } else {
+        this.tabBar.show();
+      }
+    });
   }
 
   /**
