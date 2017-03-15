@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  ISignal, Signal
+  Signal
 } from '@phosphor/signaling';
 
 import {
@@ -12,26 +12,28 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  Inspector
+  IInspector, InspectorPanel
 } from '../../../lib/inspector';
 
 
-class TestInspector extends Inspector {
+class TestInspectorPanel extends InspectorPanel {
   methods: string[] = [];
 
-  protected onInspectorUpdate(sender: any, args: Inspector.IInspectorUpdate): void {
+  protected onInspectorUpdate(sender: any, args: IInspector.IInspectorUpdate): void {
     super.onInspectorUpdate(sender, args);
     this.methods.push('onInspectorUpdate');
   }
 }
 
 
-class TestInspectable implements Inspector.IInspectable {
-  disposed = new Signal<any, void>(this);
+class TestInspectable implements IInspector.IInspectable {
+  disposed = new Signal<this, void>(this);
 
-  ephemeralCleared = new Signal<any, void>(this);
+  ephemeralCleared = new Signal<this, void>(this);
 
-  inspected = new Signal<any, Inspector.IInspectorUpdate>(this);
+  inspected = new Signal<this, IInspector.IInspectorUpdate>(this);
+
+  standby = false;
 }
 
 
@@ -42,43 +44,27 @@ describe('inspector/index', () => {
     describe('#constructor()', () => {
 
       it('should construct a new inspector widget', () => {
-        let options: Inspector.IOptions = {};
-        let widget = new Inspector(options);
-        expect(widget).to.be.an(Inspector);
+        let widget = new InspectorPanel();
+        expect(widget).to.be.an(InspectorPanel);
       });
 
       it('should add the `jp-Inspector` class', () => {
-        let options: Inspector.IOptions = {};
-        let widget = new Inspector(options);
+        let widget = new InspectorPanel();
         expect(widget.hasClass('jp-Inspector')).to.be(true);
       });
 
-      it('should accept an options argument with inspector items', () => {
-        let options: Inspector.IOptions = {
-          items: [{ name: 'Foo', rank: 20, type: 'foo' }]
-        };
-        let widget = new Inspector(options);
-        expect(widget).to.be.an(Inspector);
-      });
-
       it('should hide its tab bar if there are less than two items', () => {
-        let options: Inspector.IOptions = {
-          items: [{ name: 'Foo', rank: 20, type: 'foo' }]
-        };
-        let widget = new Inspector(options);
-        expect(widget).to.be.an(Inspector);
+        let widget = new InspectorPanel();
+        widget.add({ name: 'Foo', rank: 20, type: 'foo' });
+        expect(widget).to.be.an(InspectorPanel);
         expect(widget.tabBar.isHidden).to.be(true);
       });
 
       it('should show its tab bar if there is more than one item', () => {
-        let options: Inspector.IOptions = {
-          items: [
-            { name: 'Foo', rank: 20, type: 'foo' },
-            { name: 'Boo', rank: 30, type: 'bar' }
-          ]
-        };
-        let widget = new Inspector(options);
-        expect(widget).to.be.an(Inspector);
+        let widget = new InspectorPanel();
+        widget.add({ name: 'Foo', rank: 20, type: 'foo' });
+        widget.add({ name: 'Boo', rank: 30, type: 'bar' });
+        expect(widget).to.be.an(InspectorPanel);
         expect(widget.tabBar.isHidden).to.be(false);
       });
 
@@ -87,14 +73,12 @@ describe('inspector/index', () => {
     describe('#source', () => {
 
       it('should default to `null`', () => {
-        let options: Inspector.IOptions = {};
-        let widget = new Inspector(options);
+        let widget = new InspectorPanel();
         expect(widget.source).to.be(null);
       });
 
       it('should be settable multiple times', () => {
-        let options: Inspector.IOptions = {};
-        let widget = new Inspector(options);
+        let widget = new InspectorPanel();
         let source = new TestInspectable();
         expect(widget.source).to.be(null);
         widget.source = source;
@@ -107,19 +91,41 @@ describe('inspector/index', () => {
 
     });
 
+    describe('#add()', () => {
+
+      it('should add inspector child items', () => {
+        let panel = new InspectorPanel();
+        let original = panel.widgets.length;
+
+        panel.add({ name: 'Foo', rank: 20, type: 'foo' });
+        panel.add({ name: 'Boo', rank: 30, type: 'bar' });
+
+        expect(panel.widgets.length).to.be(original + 2);
+      });
+
+      it('should return disposables to remove child items', () => {
+        let panel = new InspectorPanel();
+        let original = panel.widgets.length;
+        let disposable = panel.add({ name: 'Boo', rank: 30, type: 'bar' });
+
+        expect(panel.widgets.length).to.be(original + 1);
+        disposable.dispose();
+        expect(panel.widgets.length).to.be(original);
+      });
+
+    });
+
     describe('#dispose()', () => {
 
       it('should dispose of the resources used by the inspector', () => {
-        let options: Inspector.IOptions = {};
-        let widget = new Inspector(options);
+        let widget = new InspectorPanel();
         expect(widget.isDisposed).to.be(false);
         widget.dispose();
         expect(widget.isDisposed).to.be(true);
       });
 
       it('should be a no-op if called more than once', () => {
-        let options: Inspector.IOptions = {};
-        let widget = new Inspector(options);
+        let widget = new InspectorPanel();
         expect(widget.isDisposed).to.be(false);
         widget.dispose();
         widget.dispose();
@@ -132,8 +138,7 @@ describe('inspector/index', () => {
     describe('#onInspectorUpdate()', () => {
 
       it('should fire when a source updates', () => {
-        let options: Inspector.IOptions = {};
-        let widget = new TestInspector(options);
+        let widget = new TestInspectorPanel();
         widget.source = new TestInspectable();
         expect(widget.methods).to.not.contain('onInspectorUpdate');
         (widget.source.inspected as any).emit({

@@ -6,6 +6,10 @@ import {
 } from '@phosphor/coreutils';
 
 import {
+  DisposableDelegate, IDisposable
+} from '@phosphor/disposable';
+
+import {
   Message
 } from '@phosphor/messaging';
 
@@ -14,7 +18,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  Panel, TabPanel
+  PanelLayout, TabPanel
 } from '@phosphor/widgets';
 
 import {
@@ -67,14 +71,110 @@ const IInspector = new Token<IInspector>('jupyter.services.inspector');
 
 
 /**
- * An interface for an inspector panel.
+ * An interface for an inspector.
  */
 export
 interface IInspector {
   /**
-   * The source of events the inspector panel listens for.
+   * Create an inspector child item and return a disposable to remove it.
+   *
+   * @param item - The inspector child item being added to the inspector.
+   *
+   * @returns A disposable that removes the child item from the inspector.
    */
-  source: Inspector.IInspectable;
+  add(item: IInspector.IInspectorItem): IDisposable;
+
+  /**
+   * The source of events the inspector listens for.
+   */
+  source: IInspector.IInspectable;
+}
+
+
+/**
+ * A namespace for inspector interfaces.
+ */
+export
+namespace IInspector {
+  /**
+   * The definition of an inspectable source.
+   */
+  export
+  interface IInspectable {
+    /**
+     * A signal emitted when the handler is disposed.
+     */
+    disposed: ISignal<any, void>;
+
+    /**
+     * A signal emitted when inspector should clear all items with no history.
+     */
+    ephemeralCleared: ISignal<any, void>;
+
+    /**
+     * A signal emitted when an inspector value is generated.
+     */
+    inspected: ISignal<any, IInspectorUpdate>;
+
+    /**
+     * Indicates whether the inspectable source emits signals.
+     *
+     * #### Notes
+     * The use case for this attribute is to limit the API traffic when no
+     * inspector is visible.
+     */
+    standby: boolean;
+  }
+
+  /**
+   * The definition of a child item of an inspector.
+   */
+  export
+  interface IInspectorItem {
+    /**
+     * The optional class name added to the inspector child widget.
+     */
+    className?: string;
+
+    /**
+     * The display name of the inspector child.
+     */
+    name: string;
+
+    /**
+     * The rank order of display priority for inspector updates. A lower rank
+     * denotes a higher display priority.
+     */
+    rank: number;
+
+    /**
+     * A flag that indicates whether the inspector remembers history.
+     *
+     * The default value is `false`.
+     */
+    remembers?: boolean;
+
+    /**
+     * The type of the inspector.
+     */
+    type: string;
+  }
+
+  /**
+   * An update value for code inspectors.
+   */
+  export
+  interface IInspectorUpdate {
+    /**
+     * The content being sent to the inspector for display.
+     */
+    content: Widget;
+
+    /**
+     * The type of the inspector being updated.
+     */
+    type: string;
+  }
 }
 
 
@@ -82,48 +182,29 @@ interface IInspector {
  * A panel which contains a set of inspectors.
  */
 export
-class Inspector extends TabPanel implements IInspector {
+class InspectorPanel extends TabPanel implements IInspector {
   /**
    * Construct an inspector.
    */
-  constructor(options: Inspector.IOptions) {
+  constructor() {
     super();
     this.addClass(PANEL_CLASS);
-
-    let items = options.items || [];
-
-    // Create inspector child items and add them to the inspectors panel.
-    items.forEach(value => {
-      let widget = value.widget || new InspectorItem();
-      widget.rank = value.rank;
-      widget.remembers = !!value.remembers;
-      widget.title.closable = false;
-      widget.title.label = value.name;
-      if (value.className) {
-        widget.addClass(value.className);
-      }
-      this._items[value.type] = widget;
-      this.addWidget(widget);
-    });
-
-    if (items.length < 2) {
-      this.tabBar.hide();
-    }
   }
 
   /**
    * The source of events the inspector panel listens for.
    */
-  get source(): Inspector.IInspectable {
+  get source(): IInspector.IInspectable {
     return this._source;
   }
-  set source(source: Inspector.IInspectable) {
+  set source(source: IInspector.IInspectable) {
     if (this._source === source) {
       return;
     }
 
     // Disconnect old signal handler.
     if (this._source) {
+      this._source.standby = true;
       this._source.inspected.disconnect(this.onInspectorUpdate, this);
       this._source.disposed.disconnect(this.onSourceDisposed, this);
     }
@@ -137,9 +218,52 @@ class Inspector extends TabPanel implements IInspector {
 
     // Connect new signal handler.
     if (this._source) {
+      this._source.standby = false;
       this._source.inspected.connect(this.onInspectorUpdate, this);
       this._source.disposed.connect(this.onSourceDisposed, this);
     }
+  }
+
+  /**
+   * Create an inspector child item and return a disposable to remove it.
+   *
+   * @param item - The inspector child item being added to the inspector.
+   *
+   * @returns A disposable that removes the child item from the inspector.
+   */
+  add(item: IInspector.IInspectorItem): IDisposable {
+    const widget = new InspectorItemWidget();
+
+    widget.rank = item.rank;
+    widget.remembers = !!item.remembers;
+    widget.title.closable = false;
+    widget.title.label = item.name;
+    if (item.className) {
+      widget.addClass(item.className);
+    }
+    this._items[item.type] = widget;
+    this.addWidget(widget);
+
+    if ((Object.keys(this._items)).length < 2) {
+      this.tabBar.hide();
+    } else {
+      this.tabBar.show();
+    }
+
+    return new DisposableDelegate(() => {
+      if (widget.isDisposed || this.isDisposed) {
+        return;
+      }
+
+      widget.dispose();
+      delete this._items[item.type];
+
+      if ((Object.keys(this._items)).length < 2) {
+        this.tabBar.hide();
+      } else {
+        this.tabBar.show();
+      }
+    });
   }
 
   /**
@@ -180,7 +304,7 @@ class Inspector extends TabPanel implements IInspector {
   /**
    * Handle inspector update signals.
    */
-  protected onInspectorUpdate(sender: any, args: Inspector.IInspectorUpdate): void {
+  protected onInspectorUpdate(sender: any, args: IInspector.IInspectorUpdate): void {
     let widget = this._items[args.type];
     if (!widget) {
       return;
@@ -225,122 +349,24 @@ class Inspector extends TabPanel implements IInspector {
     this.source = null;
   }
 
-  private _items: { [type: string]: InspectorItem } = Object.create(null);
-  private _source: Inspector.IInspectable = null;
-}
-
-
-/**
- * A namespace for Inspector statics.
- */
-export
-namespace Inspector {
-  /**
-   * The definition of an inspector.
-   */
-  export
-  interface IInspectable {
-    /**
-     * A signal emitted when the handler is disposed.
-     */
-    disposed: ISignal<any, void>;
-
-    /**
-     * A signal emitted when inspector should clear all items with no history.
-     */
-    ephemeralCleared: ISignal<any, void>;
-
-    /**
-     * A signal emitted when an inspector value is generated.
-     */
-    inspected: ISignal<any, IInspectorUpdate>;
-  }
-
-  /**
-   * An update value for code inspectors.
-   */
-  export
-  interface IInspectorUpdate {
-    /**
-     * The content being sent to the inspector for display.
-     */
-    content: Widget;
-
-    /**
-     * The type of the inspector being updated.
-     */
-    type: string;
-  }
-
-  /**
-   * The definition of a child item of an inspector panel.
-   */
-  export
-  interface IInspectorItem {
-    /**
-     * The optional class name added to the inspector child widget.
-     */
-    className?: string;
-
-    /**
-     * The display name of the inspector child.
-     */
-    name: string;
-
-    /**
-     * The rank order of display priority for inspector updates. A lower rank
-     * denotes a higher display priority.
-     */
-    rank: number;
-
-    /**
-     * A flag that indicates whether the inspector remembers history.
-     *
-     * The default value is `false`.
-     */
-    remembers?: boolean;
-
-    /**
-     * The type of the inspector.
-     */
-    type: string;
-
-    /**
-     * The optional inspector child item instance.
-     */
-    widget?: InspectorItem;
-  }
-
-  /**
-   * The initialization options for an inspector panel.
-   */
-  export
-  interface IOptions {
-    /**
-     * The list of available child inspectors items for code introspection.
-     *
-     * #### Notes
-     * The order of items in the inspectors array is the order in which they
-     * will be rendered in the inspectors tab panel.
-     */
-    items?: IInspectorItem[];
-  }
+  private _items: { [type: string]: InspectorItemWidget } = Object.create(null);
+  private _source: IInspector.IInspectable = null;
 }
 
 
 /**
  * A code inspector child widget.
  */
-export
-class InspectorItem extends Panel {
+class InspectorItemWidget extends Widget {
   /**
    * Construct an inspector widget.
    */
   constructor() {
     super();
+    this.layout = new PanelLayout();
     this.addClass(ITEM_CLASS);
     this._toolbar = this._createToolbar();
-    this.addWidget(this._toolbar);
+    (this.layout as PanelLayout).addWidget(this._toolbar);
   }
 
   /**
@@ -363,7 +389,7 @@ class InspectorItem extends Panel {
     this._content = newValue;
     if (this._content) {
       this._content.addClass(CONTENT_CLASS);
-      this.addWidget(this._content);
+      (this.layout as PanelLayout).addWidget(this._content);
       if (this.remembers) {
         this._history.push(newValue);
         this._index++;
