@@ -22,7 +22,7 @@ import {
 } from '../rendermime';
 
 import {
-  Inspector
+  IInspector
 } from './';
 
 
@@ -30,7 +30,7 @@ import {
  * An object that handles code inspection.
  */
 export
-class InspectionHandler implements IDisposable, Inspector.IInspectable {
+class InspectionHandler implements IDisposable, IInspector.IInspectable {
   /**
    * Construct a new inspection handler for a widget.
    */
@@ -56,7 +56,7 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
   /**
    * A signal emitted when an inspector value is generated.
    */
-  get inspected(): ISignal<InspectionHandler, Inspector.IInspectorUpdate> {
+  get inspected(): ISignal<InspectionHandler, IInspector.IInspectorUpdate> {
     return this._inspected;
   }
 
@@ -146,7 +146,7 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
     const code = editor.model.value.text;
     const position = editor.getCursorPosition();
     const offset = editor.getOffsetAt(position);
-    let update: Inspector.IInspectorUpdate = { content: null, type: 'hints' };
+    let update: IInspector.IInspectorUpdate = { content: null, type: 'hints' };
 
     // Clear hints if the new text value is empty or kernel is unavailable.
     if (!code || !this._kernel) {
@@ -191,10 +191,10 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
     });
   }
 
-  private _disposed = new Signal<InspectionHandler, void>(this);
+  private _disposed = new Signal<this, void>(this);
   private _editor: CodeEditor.IEditor = null;
   private _ephemeralCleared = new Signal<InspectionHandler, void>(this);
-  private _inspected = new Signal<InspectionHandler, Inspector.IInspectorUpdate>(this);
+  private _inspected = new Signal<this, IInspector.IInspectorUpdate>(this);
   private _kernel: Kernel.IKernel = null;
   private _pending = 0;
   private _rendermime: RenderMime = null;

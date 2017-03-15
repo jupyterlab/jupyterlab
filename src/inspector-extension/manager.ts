@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IInspector, Inspector
+  IInspector, InspectorPanel
 } from '../inspector';
 
 
@@ -11,14 +11,14 @@ import {
  * `IInspector` instance that other plugins can communicate with.
  */
 export
-class InspectorManager implements IInspector {
+class InspectorManager {
   /**
    * The current inspector widget.
    */
-  get inspector(): Inspector {
+  get inspector(): InspectorPanel {
     return this._inspector;
   }
-  set inspector(inspector: Inspector) {
+  set inspector(inspector: InspectorPanel) {
     if (this._inspector === inspector) {
       return;
     }
@@ -32,10 +32,10 @@ class InspectorManager implements IInspector {
   /**
    * The source of events the inspector panel listens for.
    */
-  get source(): Inspector.IInspectable {
+  get source(): IInspector.IInspectable {
     return this._source;
   }
-  set source(source: Inspector.IInspectable) {
+  set source(source: IInspector.IInspectable) {
     if (this._source !== source) {
       if (this._source) {
         this._source.disposed.disconnect(this._onSourceDisposed, this);
@@ -55,6 +55,6 @@ class InspectorManager implements IInspector {
     this._source = null;
   }
 
-  private _inspector: Inspector = null;
-  private _source: Inspector.IInspectable = null;
+  private _inspector: InspectorPanel = null;
+  private _source: IInspector.IInspectable = null;
 }

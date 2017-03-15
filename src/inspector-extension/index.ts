@@ -14,7 +14,7 @@ import {
 } from '../console';
 
 import {
-  IInspector, Inspector, InspectionHandler
+  IInspector, InspectorPanel, InspectionHandler
 } from '../inspector';
 
 import {
@@ -49,7 +49,7 @@ const service: JupyterLabPlugin<IInspector> = {
     const category = 'Inspector';
     const command = CommandIDs.open;
     const label = 'Open Inspector';
-    const tracker = new InstanceTracker<Inspector>({
+    const tracker = new InstanceTracker<InspectorPanel>({
       namespace: 'inspector',
       shell
     });
@@ -57,8 +57,8 @@ const service: JupyterLabPlugin<IInspector> = {
     /**
      * Create and track a new inspector.
      */
-    function newInspector(): Inspector {
-      let inspector = new Inspector({ items: Private.defaultInspectorItems });
+    function newInspectorPanel(): InspectorPanel {
+      let inspector = new InspectorPanel({ items: Private.defaultInspectorItems });
       inspector.id = 'jp-inspector';
       inspector.title.label = 'Inspector';
       inspector.title.closable = true;
@@ -83,7 +83,7 @@ const service: JupyterLabPlugin<IInspector> = {
       label,
       execute: () => {
         if (!manager.inspector || manager.inspector.isDisposed) {
-          manager.inspector = newInspector();
+          manager.inspector = newInspectorPanel();
           shell.addToMainArea(manager.inspector);
         }
         if (manager.inspector.isAttached) {
@@ -225,7 +225,7 @@ namespace Private {
    * The default set of inspector items added to the inspector panel.
    */
   export
-  const defaultInspectorItems: Inspector.IInspectorItem[] = [
+  const defaultInspectorItems: IInspector.IInspectorItem[] = [
     {
       className: 'jp-HintsInspectorItem',
       name: 'Hints',
