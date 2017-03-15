@@ -72,16 +72,14 @@ describe('ImageWidget', () => {
   let manager: ServiceManager.IManager;
   let widget: LogImage;
 
-  before((done) => {
+  before(() => {
     manager = new ServiceManager();
-    manager.ready.then(() => {
+    return manager.ready.then(() => {
       return manager.contents.save(IMAGE.path, IMAGE);
-    }).then(() => {
-      done();
-    }).catch(done);
+    });
   });
 
-  beforeEach((done) => {
+  beforeEach(() => {
     context = new Context({ manager, factory, path: IMAGE.path });
     widget = new LogImage(context);
     return context.revert();
