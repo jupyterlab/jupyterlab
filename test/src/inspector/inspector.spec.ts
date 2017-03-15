@@ -91,6 +91,30 @@ describe('inspector/index', () => {
 
     });
 
+    describe('#add()', () => {
+
+      it('should add inspector child items', () => {
+        let panel = new InspectorPanel();
+        let original = panel.widgets.length;
+
+        panel.add({ name: 'Foo', rank: 20, type: 'foo' });
+        panel.add({ name: 'Boo', rank: 30, type: 'bar' });
+
+        expect(panel.widgets.length).to.be(original + 2);
+      });
+
+      it('should return disposables to remove child items', () => {
+        let panel = new InspectorPanel();
+        let original = panel.widgets.length;
+        let disposable = panel.add({ name: 'Boo', rank: 30, type: 'bar' });
+
+        expect(panel.widgets.length).to.be(original + 1);
+        disposable.dispose();
+        expect(panel.widgets.length).to.be(original);
+      });
+
+    });
+
     describe('#dispose()', () => {
 
       it('should dispose of the resources used by the inspector', () => {
