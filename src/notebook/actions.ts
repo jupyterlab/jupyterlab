@@ -852,7 +852,8 @@ namespace Private {
       widget.activate();
     }
     // Scroll to the appropriate client position.
-    if (state.activeCell && widget.mode === 'command') {
+    if (state.activeCell && !state.activeCell.isDisposed &&
+        widget.mode === 'command') {
       // Scroll to the top of the previous output.
       let er = state.activeCell.editorWidget.node.getBoundingClientRect();
       widget.scrollToPosition(er.bottom);
