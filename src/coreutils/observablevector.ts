@@ -547,13 +547,15 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * A `fromIndex` or a `toIndex` which is non-integral.
    */
   move(fromIndex: number, toIndex: number): void {
-    let value = this.at(fromIndex);
-    super.removeAt(fromIndex);
-    if (toIndex < fromIndex) {
-      super.insert(toIndex - 1, value);
-    } else {
-      super.insert(toIndex, value);
+    if(this.length <= 1 || fromIndex === toIndex) {
+      return;
     }
+    let value = this.at(fromIndex);
+    let step = fromIndex < toIndex ? 1 : -1;
+    for (let i = fromIndex; i !== toIndex; i += step) {
+      super.set(i, this.at(i + step));
+    }
+    super.set(toIndex, value);
     let arr = [value];
     this._changed.emit({
       type: 'move',

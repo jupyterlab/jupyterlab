@@ -205,6 +205,8 @@ describe('common/ObservableVector', () => {
         let value = new ObservableVector<number>({ values: [1, 2, 3] });
         value.move(1, 2);
         expect(toArray(value)).to.eql([1, 3, 2]);
+        value.move(2, 0);
+        expect(toArray(value)).to.eql([2, 1, 3]);
       });
 
       it('should trigger a changed signal', () => {
