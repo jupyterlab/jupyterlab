@@ -31,7 +31,7 @@ import {
 
 import {
   IModelDB
-} from '../common/modeldb';
+} from '../coreutils/modeldb';
 
 
 /**

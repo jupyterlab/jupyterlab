@@ -6,7 +6,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  nbformat, utils
+  utils
 } from '@jupyterlab/services';
 
 import {

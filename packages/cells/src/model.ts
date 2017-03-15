@@ -27,7 +27,7 @@ import {
 
 import {
   IModelDB, ObservableValue, IObservableValue
-} from '../common/modeldb';
+} from '../coreutils/modeldb';
 
 
 /**
