@@ -42,10 +42,6 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  utils
-} from '@jupyterlab/services';
-
-import {
   ICellModel, BaseCellWidget, IMarkdownCellModel,
   CodeCellWidget, MarkdownCellWidget,
   ICodeCellModel, RawCellWidget, IRawCellModel,
@@ -1243,7 +1239,7 @@ class Notebook extends StaticNotebook {
       target = target.parentElement;
     }
 
-    let source: Notebook = event.source
+    let source: Notebook = event.source;
     if (source === this) {
       // Handle the case where we are moving cells within
       // the same notebook.
