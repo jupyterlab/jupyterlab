@@ -15,7 +15,8 @@ import {
 
 
 export
-const editorFactory = editorServices.factoryService.newInlineEditor;
+const editorFactory = editorServices.factoryService.newInlineEditor.bind(
+    editorServices.factoryService);
 
 export
 const mimeTypeService = editorServices.mimeTypeService;

@@ -267,7 +267,8 @@ describe('notebook/celltools', () => {
 
   describe('CellTools.MetadataEditorTool', () => {
 
-    const editorFactory = new CodeMirrorEditorFactory().newInlineEditor;
+    let editorServices = new CodeMirrorEditorFactory();
+    const editorFactory = editorServices.newInlineEditor.bind(editorServices);
 
     it('should create a new metadata editor tool', () => {
       let tool = new CellTools.MetadataEditorTool({ editorFactory });
