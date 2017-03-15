@@ -26,6 +26,10 @@ import {
 } from '@phosphor/widgets';
 
 import {
+  Toolbar
+} from '../apputils';
+
+import {
   BaseCellWidget, CodeCellWidget
 } from '../cells';
 
@@ -48,10 +52,6 @@ import {
 import {
   RenderMime
 } from '../rendermime';
-
-import {
-  Toolbar
-} from '../toolbar';
 
 import {
   INotebookModel
