@@ -97,7 +97,7 @@ interface IInspector {
 export
 namespace IInspector {
   /**
-   * The definition of an inspector.
+   * The definition of an inspectable source.
    */
   export
   interface IInspectable {
@@ -115,6 +115,15 @@ namespace IInspector {
      * A signal emitted when an inspector value is generated.
      */
     inspected: ISignal<any, IInspectorUpdate>;
+
+    /**
+     * Indicates whether the inspectable source emits signals.
+     *
+     * #### Notes
+     * The use case for this attribute is to limit the API traffic when no
+     * inspector is visible.
+     */
+    standby: boolean;
   }
 
   /**
@@ -195,6 +204,7 @@ class InspectorPanel extends TabPanel implements IInspector {
 
     // Disconnect old signal handler.
     if (this._source) {
+      this._source.standby = true;
       this._source.inspected.disconnect(this.onInspectorUpdate, this);
       this._source.disposed.disconnect(this.onSourceDisposed, this);
     }
@@ -208,6 +218,7 @@ class InspectorPanel extends TabPanel implements IInspector {
 
     // Connect new signal handler.
     if (this._source) {
+      this._source.standby = false;
       this._source.inspected.connect(this.onInspectorUpdate, this);
       this._source.disposed.connect(this.onSourceDisposed, this);
     }
@@ -240,8 +251,13 @@ class InspectorPanel extends TabPanel implements IInspector {
     }
 
     return new DisposableDelegate(() => {
+      if (widget.isDisposed || this.isDisposed) {
+        return;
+      }
+
       widget.dispose();
       delete this._items[item.type];
+
       if ((Object.keys(this._items)).length < 2) {
         this.tabBar.hide();
       } else {

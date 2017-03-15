@@ -198,7 +198,7 @@ class InspectionHandler implements IDisposable, IInspector.IInspectable {
   private _kernel: Kernel.IKernel = null;
   private _pending = 0;
   private _rendermime: RenderMime = null;
-  private _standby = false;
+  private _standby = true;
 }
 
 

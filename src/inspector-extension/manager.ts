@@ -40,15 +40,22 @@ class InspectorManager implements IInspector {
     return this._source;
   }
   set source(source: IInspector.IInspectable) {
-    if (this._source !== source) {
-      if (this._source) {
-        this._source.disposed.disconnect(this._onSourceDisposed, this);
-      }
-      this._source = source;
-      this._source.disposed.connect(this._onSourceDisposed, this);
+    if (this._source === source) {
+      return;
     }
+
+    if (this._source) {
+      this._source.disposed.disconnect(this._onSourceDisposed, this);
+    }
+
+    this._source = source;
+
     if (this._inspector && !this._inspector.isDisposed) {
       this._inspector.source = this._source;
+    }
+
+    if (this._source) {
+      this._source.disposed.connect(this._onSourceDisposed, this);
     }
   }
 
