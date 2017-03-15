@@ -821,6 +821,11 @@ namespace Private {
      * Whether the widget had focus.
      */
     wasFocused: boolean;
+
+    /**
+     * The active cell before the action.
+     */
+    activeCell: BaseCellWidget;
   }
 
   /**
@@ -829,7 +834,8 @@ namespace Private {
   export
   function getState(widget: Notebook): IState {
     return {
-      wasFocused: widget.node.contains(document.activeElement)
+      wasFocused: widget.node.contains(document.activeElement),
+      activeCell: widget.activeCell
     };
   }
 
@@ -841,7 +847,17 @@ namespace Private {
     if (state.wasFocused) {
       widget.activate();
     }
-    widget.scrollToActiveCell();
+    // Scroll to the appropriate client position.
+    if (state.activeCell && !state.activeCell.isDisposed &&
+        widget.mode === 'command') {
+      // Scroll to the top of the previous output.
+      let er = state.activeCell.editorWidget.node.getBoundingClientRect();
+      widget.scrollToPosition(er.bottom);
+    } else if (widget.activeCell) {
+      // Scroll to the top of the next active cell.
+      let er = widget.activeCell.node.getBoundingClientRect();
+      widget.scrollToPosition(er.top);
+    }
   }
 
   /**
