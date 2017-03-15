@@ -14,16 +14,12 @@ import {
 } from '../docregistry';
 
 import {
-  CommandIDs as FileBrowserCommandIDs
-} from '../filebrowser';
-
-import {
   IRenderMime
 } from '../rendermime';
 
 import {
   MarkdownWidget, MarkdownWidgetFactory
-} from './widget';
+} from '../markdownwidget';
 
 
 /**
@@ -63,7 +59,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, rendermime: IRen
 
     // Handle state restoration.
     restorer.restore(tracker, {
-      command: FileBrowserCommandIDs.open,
+      command: 'file-operations:open',
       args: widget => ({ path: widget.context.path, factory: FACTORY }),
       name: widget => widget.context.path
     });

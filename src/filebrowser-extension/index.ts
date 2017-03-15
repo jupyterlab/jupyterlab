@@ -30,13 +30,51 @@ import {
 } from '../docregistry';
 
 import {
-  IServiceManager
-} from '../services';
+  FileBrowserModel, FileBrowser, IPathTracker
+} from '../filebrowser';
 
 import {
-  CommandIDs, FileBrowserModel, FileBrowser, IPathTracker
-} from './';
+  IServiceManager
+} from '@jupyterlab/services';
 
+
+/**
+ * The command IDs used by the file browser plugin.
+ */
+namespace CommandIDs {
+  export
+  const save = 'file-operations:save';
+
+  export
+  const restoreCheckpoint = 'file-operations:restore-checkpoint';
+
+  export
+  const saveAs = 'file-operations:save-as';
+
+  export
+  const close = 'file-operations:close';
+
+  export
+  const closeAllFiles = 'file-operations:close-all-files';
+
+  export
+  const open = 'file-operations:open';
+
+  export
+  const newTextFile = 'file-operations:new-text-file';
+
+  export
+  const newNotebook = 'file-operations:new-notebook';
+
+  export
+  const showBrowser = 'file-browser:activate';
+
+  export
+  const hideBrowser = 'file-browser:hide';
+
+  export
+  const toggleBrowser = 'file-browser:toggle';
+};
 
 /**
  * The default file browser provider.
@@ -435,7 +473,7 @@ namespace Private {
    * Get the command for a name.
    */
   export
-  function commandForName(name: string): string {
+  function commandForName(name: string){
     name = name.split(' ').join('-').toLocaleLowerCase();
     return `file-operations:new-${name}`;
   }

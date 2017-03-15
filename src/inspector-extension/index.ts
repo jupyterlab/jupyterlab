@@ -14,6 +14,10 @@ import {
 } from '../console';
 
 import {
+  IInspector, Inspector, InspectionHandler
+} from '../inspector';
+
+import {
   INotebookTracker
 } from '../notebook';
 
@@ -21,9 +25,14 @@ import {
   InspectorManager
 } from './manager';
 
-import {
-  CommandIDs, IInspector, Inspector, InspectionHandler
-} from './';
+
+/**
+ * The command IDs used by the inspector plugin.
+ */
+namespace CommandIDs {
+  export
+  const open = 'inspector:open';
+};
 
 
 /**

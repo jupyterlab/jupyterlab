@@ -30,8 +30,21 @@ import {
 } from '../notebook';
 
 import {
-  CommandIDs, ITooltipManager, TooltipWidget
-} from './';
+  ITooltipManager, TooltipWidget
+} from '../tooltip';
+
+
+/**
+ * The command IDs used by the tooltip plugin.
+ */
+namespace CommandIDs {
+  export
+  const launchConsole = 'tooltip:launch-console';
+
+  export
+  const launchNotebook = 'tooltip:launch-notebook';
+};
+
 
 
 /**

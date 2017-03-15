@@ -21,10 +21,6 @@ import {
   IEditorTracker, EditorWidget, EditorWidgetFactory, addDefaultCommands
 } from '../editorwidget';
 
-import {
-  CommandIDs as FileBrowserCommandIDs
-} from '../filebrowser';
-
 
 /**
  * The class name for the text editor icon from the default theme.
@@ -74,7 +70,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command: FileBrowserCommandIDs.open,
+    command: 'file-operations:open',
     args: widget => ({ path: widget.context.path, factory: FACTORY }),
     name: widget => widget.context.path
   });

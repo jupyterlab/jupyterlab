@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IServiceManager
+} from '@jupyterlab/services';
+
+import {
   JupyterLab, JupyterLabPlugin
 } from '../application';
 
@@ -10,24 +14,21 @@ import {
 } from '../apputils';
 
 import {
-  CommandIDs as FileBrowserCommandIDs
-} from '../filebrowser';
-
-import {
   IPathTracker
 } from '../filebrowser';
 
 import {
-  IServiceManager
-} from '../services';
+  ILauncher, ILauncherItem, LauncherModel, LauncherWidget
+} from '../launcher';
 
-import {
-  CommandIDs as TerminalCommandIDs
-} from '../terminal';
 
-import {
-  CommandIDs, ILauncher, ILauncherItem, LauncherModel, LauncherWidget
-} from './';
+/**
+ * The command IDs used by the launcher plugin.
+ */
+namespace CommandIDs {
+  export
+  const show = 'launcher-jupyterlab:show';
+};
 
 
 /**
@@ -81,7 +82,7 @@ function activate(app: JupyterLab, services: IServiceManager, pathTracker: IPath
   let defaults: ILauncherItem[] = [
     {
       name: 'Notebook',
-      command: FileBrowserCommandIDs.newNotebook
+      command: 'file-operations:new-notebook'
     },
     {
       name: 'Code Console',
@@ -89,14 +90,14 @@ function activate(app: JupyterLab, services: IServiceManager, pathTracker: IPath
     },
     {
       name: 'Text Editor',
-      command: FileBrowserCommandIDs.newTextFile
+      command: 'file-operations:new-text-file'
     }
   ];
 
   if (services.terminals.isAvailable()) {
     defaults.push({
       name: 'Terminal',
-      command: TerminalCommandIDs.createNew
+      command: 'terminal:create-new'
     });
   }
 

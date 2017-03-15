@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel, Session
+  IServiceManager, Kernel, Session
 } from '@jupyterlab/services';
 
 import {
@@ -45,10 +45,6 @@ import {
 import {
   IRenderMime, RenderMime
 } from '../rendermime';
-
-import {
-  IServiceManager
-} from '../services';
 
 
 /**

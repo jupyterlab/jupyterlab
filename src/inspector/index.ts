@@ -3,13 +3,3 @@
 
 export * from './handler';
 export * from './inspector';
-
-
-/**
- * The command IDs used by the inspector plugin.
- */
-export
-namespace CommandIDs {
-  export
-  const open: string = 'inspector:open';
-};

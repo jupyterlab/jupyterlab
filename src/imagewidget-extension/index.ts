@@ -14,12 +14,23 @@ import {
 } from '../docregistry';
 
 import {
-  CommandIDs as FileBrowserCommandIDs
-} from '../filebrowser';
+  ImageWidget, ImageWidgetFactory, IImageTracker
+} from '../imagewidget';
 
-import {
-  CommandIDs, ImageWidget, ImageWidgetFactory, IImageTracker
-} from './';
+
+/**
+ * The command IDs used by the image widget plugin.
+ */
+namespace CommandIDs {
+  export
+  const zoomIn = 'imagewidget:zoom-in';
+
+  export
+  const zoomOut = 'imagewidget:zoom-out';
+
+  export
+  const resetZoom = 'imagewidget:reset-zoom';
+};
 
 
 /**
@@ -67,7 +78,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, palette: IComman
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command: FileBrowserCommandIDs.open,
+    command: 'file-operations:open',
     args: widget => ({ path: widget.context.path, factory: FACTORY }),
     name: widget => widget.context.path
   });

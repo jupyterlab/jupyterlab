@@ -19,32 +19,6 @@ import {
 
 export * from './widget';
 
-
-/**
- * The command IDs used by the terminal plugin.
- */
-export
-namespace CommandIDs {
-  export
-  const createNew: string = 'terminal:create-new';
-
-  export
-  const open: string = 'terminal:open';
-
-  export
-  const refresh: string = 'terminal:refresh';
-
-  export
-  const increaseFont: string = 'terminal:increase-font';
-
-  export
-  const decreaseFont: string = 'terminal:decrease-font';
-
-  export
-  const toggleTheme: string = 'terminal:toggle-theme';
-};
-
-
 /**
  * A class that tracks editor widgets.
  */
@@ -67,7 +41,7 @@ const ITerminalTracker = new Token<ITerminalTracker>('jupyter.services.terminal-
 export
 function addDefaultCommands(tracker: ITerminalTracker, commands: CommandRegistry) {
 
-  commands.addCommand(CommandIDs.increaseFont, {
+  commands.addCommand('terminal:increase-font', {
     label: 'Increase Terminal Font Size',
     execute: () => {
       let options = TerminalWidget.defaultOptions;
@@ -78,7 +52,7 @@ function addDefaultCommands(tracker: ITerminalTracker, commands: CommandRegistry
     }
   });
 
-  commands.addCommand(CommandIDs.decreaseFont, {
+  commands.addCommand('terminal:decrease-font', {
     label: 'Decrease Terminal Font Size',
     execute: () => {
       let options = TerminalWidget.defaultOptions;
@@ -89,7 +63,7 @@ function addDefaultCommands(tracker: ITerminalTracker, commands: CommandRegistry
     }
   });
 
-  commands.addCommand(CommandIDs.toggleTheme, {
+  commands.addCommand('terminal:toggle-theme', {
     label: 'Toggle Terminal Theme',
     caption: 'Switch Terminal Background and Font Colors',
     execute: () => {

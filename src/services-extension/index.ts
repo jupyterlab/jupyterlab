@@ -2,16 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ServiceManager
+  IServiceManager, ServiceManager
 } from '@jupyterlab/services';
 
 import {
   JupyterLabPlugin
 } from '../application';
-
-import {
-  IServiceManager
-} from './';
 
 
 /**

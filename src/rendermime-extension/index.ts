@@ -14,12 +14,8 @@ import {
 } from '../coreutils';
 
 import {
-  CommandIDs
-} from '../filebrowser';
-
-import {
   IRenderMime, RenderMime
-} from './';
+} from '../rendermime';
 
 
 /**
@@ -46,7 +42,7 @@ function activate(app: JupyterLab, linker: ICommandLinker): IRenderMime {
   let linkHandler = {
     handleLink: (node: HTMLElement, path: string) => {
       if (!URLExt.parse(path).protocol && path.indexOf('//') !== 0) {
-        linker.connectNode(node, CommandIDs.open, { path });
+        linker.connectNode(node, 'file-operations:open', { path });
       }
     }
   };

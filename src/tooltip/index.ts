@@ -25,19 +25,6 @@ import {
 export * from './widget';
 
 
-/**
- * The command IDs used by the tooltip plugin.
- */
-export
-namespace CommandIDs {
-  export
-  const launchConsole = 'tooltip:launch-console';
-
-  export
-  const launchNotebook = 'tooltip:launch-notebook';
-};
-
-
 /* tslint:disable */
 /**
  * The tooltip manager token.

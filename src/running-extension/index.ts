@@ -10,20 +10,12 @@ import {
 } from '../apputils';
 
 import {
-  CommandIDs as FileBrowserCommandIDs
-} from '../filebrowser';
-
-import {
   IServiceManager
-} from '../services';
-
-import {
-  CommandIDs as TerminalCommandIDs
-} from '../terminal';
+} from '@jupyterlab/services';
 
 import {
   RunningSessions, CONSOLE_REGEX
-} from './';
+} from '../running';
 
 
 /**
@@ -62,13 +54,13 @@ function activate(app: JupyterLab, services: IServiceManager, restorer: ILayoutR
     if (CONSOLE_REGEX.test(name)) {
       app.commands.execute('console:open', { id: model.id });
     } else {
-      app.commands.execute(FileBrowserCommandIDs.open, { path });
+      app.commands.execute('file-operations:open', { path });
     }
 
   });
 
   running.terminalOpenRequested.connect((sender, model) => {
-    app.commands.execute(TerminalCommandIDs.open, { name: model.name });
+    app.commands.execute('terminal:open', { name: model.name });
   });
 
   // Rank has been chosen somewhat arbitrarily to give priority to the running

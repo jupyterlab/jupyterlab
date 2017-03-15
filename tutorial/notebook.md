@@ -50,7 +50,7 @@ After the NotebookModel is created, the NotebookWidgetFactory constructs a
 new NotebookPanel from the model. The NotebookPanel widget is added to
 the DockPanel. The **NotebookPanel** contains:
 
-- a [Toolbar](http://jupyterlab.github.io/jupyterlab/modules/_toolbar_index_.html)
+- a [Toolbar](http://jupyterlab.github.io/jupyterlab/modules/_apputils_toolbar_.html)
 - a [Notebook widget](http://jupyterlab.github.io/jupyterlab/classes/_notebook_widget_.notebook.html).
 
 The NotebookPanel also adds completion logic.
