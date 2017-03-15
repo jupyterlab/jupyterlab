@@ -1253,13 +1253,17 @@ class Notebook extends StaticNotebook {
       //Compute the to/from indices for the move.
       let fromIndex = ArrayExt.firstIndexOf(this.widgets, toMove[0]);
       let toIndex = this._findCell(target);
+      // This check is needed for consistency with the view.
       if (toIndex !== -1 && toIndex > fromIndex) {
         toIndex -= 1;
       } else if (toIndex === -1) {
+        // If the drop is within the notebook but not on any cell,
+        // most often this means it is past the cell areas, so
+        // set it to move the cells to the end of the notebook.
         toIndex = this.widgets.length - 1;
       }
       //Don't move if we are within the block of selected cells.
-      if (toIndex - fromIndex > 0 && toIndex - fromIndex < toMove.length) {
+      if (toIndex >= fromIndex && toIndex < fromIndex + toMove.length) {
         return;
       }
       // Move the cells one by one
