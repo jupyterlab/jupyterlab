@@ -282,7 +282,7 @@ describe('notebook/widget', () => {
           let cell = widget.model.cells.at(1);
           let child = widget.widgets[1];
           widget.model.cells.remove(cell);
-          expect(cell.isDisposed).to.be(true);
+          expect(cell.isDisposed).to.be(false);
           expect(child.isDisposed).to.be(true);
         });
 
