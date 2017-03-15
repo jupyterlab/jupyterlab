@@ -229,26 +229,36 @@ describe('@jupyterlab/apputils', () => {
 
         it('should display a busy status if the kernel status is not idle', (done) => {
           let item = Toolbar.createKernelStatusItem(owner);
-          owner.kernel.statusChanged.connect(() => {
+          let called = false;
+          let future = owner.kernel.requestExecute({ code: 'a = 1' });
+          future.onIOPub = msg => {
             if (owner.kernel.status === 'busy') {
               expect(item.hasClass('jp-mod-busy')).to.be(true);
-              done();
+              called = true;
             }
-          });
-          owner.kernel.requestExecute({ code: 'a = 1' });
+          };
+          future.onDone = () => {
+            expect(called).to.be(true);
+            done();
+          };
         });
 
         it('should show the current status in the node title', (done) => {
           let item = Toolbar.createKernelStatusItem(owner);
           let status = owner.kernel.status;
           expect(item.node.title.toLowerCase()).to.contain(status);
-          owner.kernel.statusChanged.connect(() => {
+          let called = false;
+          let future = owner.kernel.requestExecute({ code: 'a = 1' });
+          future.onIOPub = msg => {
             if (owner.kernel.status === 'busy') {
               expect(item.node.title.toLowerCase()).to.contain('busy');
-              done();
+              called = true;
             }
-          });
-          owner.kernel.requestExecute({ code: 'a = 1' });
+          };
+          future.onDone = () => {
+            expect(called).to.be(true);
+            done();
+          };
         });
 
         it('should handle a null kernel', () => {
