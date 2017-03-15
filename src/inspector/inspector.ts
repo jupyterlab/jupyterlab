@@ -23,7 +23,7 @@ import {
 
 import {
   Toolbar, ToolbarButton
-} from '../toolbar';
+} from '../apputils';
 
 
 /**

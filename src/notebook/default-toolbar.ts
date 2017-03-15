@@ -14,7 +14,7 @@ import {
 } from './actions';
 
 import {
-  Styling
+  Styling, Toolbar, ToolbarButton
 } from '../apputils';
 
 import {
@@ -24,17 +24,6 @@ import {
 import {
   NotebookPanel
 } from './panel';
-
-import {
-  ToolbarButton
-} from '../toolbar';
-
-import {
-  createInterruptButton,
-  createRestartButton,
-  createKernelNameItem,
-  createKernelStatusItem
-} from '../toolbar/kernel';
 
 import {
   Notebook
@@ -203,11 +192,11 @@ namespace ToolbarItems {
     toolbar.addItem('copy', createCopyButton(panel));
     toolbar.addItem('paste', createPasteButton(panel));
     toolbar.addItem('run', createRunButton(panel));
-    toolbar.addItem('interrupt', createInterruptButton(panel));
-    toolbar.addItem('restart', createRestartButton(panel));
+    toolbar.addItem('interrupt', Toolbar.createInterruptButton(panel));
+    toolbar.addItem('restart', Toolbar.createRestartButton(panel));
     toolbar.addItem('cellType', createCellTypeItem(panel));
-    toolbar.addItem('kernelName', createKernelNameItem(panel));
-    toolbar.addItem('kernelStatus', createKernelStatusItem(panel));
+    toolbar.addItem('kernelName', Toolbar.createKernelNameItem(panel));
+    toolbar.addItem('kernelStatus', Toolbar.createKernelStatusItem(panel));
   }
 }
 

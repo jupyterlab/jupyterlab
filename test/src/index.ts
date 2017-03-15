@@ -15,6 +15,7 @@ import './apputils/layoutrestorer.spec';
 import './apputils/sanitizer.spec';
 import './apputils/statedb.spec';
 import './apputils/styling.spec';
+import './apputils/toolbar.spec';
 import './apputils/vdom.spec';
 
 import './cells/model.spec';
@@ -92,5 +93,3 @@ import './outputarea/model.spec';
 import './outputarea/widget.spec';
 
 import './terminal/terminal.spec';
-
-import './toolbar/toolbar.spec';

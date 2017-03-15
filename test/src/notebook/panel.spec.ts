@@ -16,20 +16,12 @@ import {
 } from '../../../lib/docregistry';
 
 import {
-  INotebookModel
-} from '../../../lib/notebook/model';
-
-import {
-  NotebookPanel
-} from '../../../lib/notebook/panel';
-
-import {
-  Notebook
-} from '../../../lib/notebook/widget';
+  INotebookModel, NotebookPanel, Notebook
+} from '../../../lib/notebook';
 
 import {
   Toolbar
-} from '../../../lib/toolbar';
+} from '../../../lib/apputils';
 
 import {
   createNotebookContext

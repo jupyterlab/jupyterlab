@@ -44,13 +44,6 @@ import {
 } from '../../../lib/notebook/panel';
 
 import {
- createInterruptButton,
- createKernelNameItem,
- createKernelStatusItem,
- createRestartButton
-} from '../../../lib/toolbar/kernel';
-
-import {
   createNotebookContext
 } from '../utils';
 
@@ -228,24 +221,6 @@ describe('notebook/notebook/default-toolbar', () => {
 
     });
 
-    describe('#createInterruptButton()', () => {
-
-      it('should have the `\'jp-StopIcon\'` class', () => {
-        let button = createInterruptButton(panel);
-        expect(button.hasClass('jp-StopIcon')).to.be(true);
-      });
-
-    });
-
-    describe('#createRestartButton()', () => {
-
-      it('should have the `\'jp-RefreshIcon\'` class', () => {
-        let button = createRestartButton(panel);
-        expect(button.hasClass('jp-RefreshIcon')).to.be(true);
-      });
-
-    });
-
     describe('#createCellTypeItem()', () => {
 
       it('should track the cell type of the current cell', () => {
@@ -282,91 +257,6 @@ describe('notebook/notebook/default-toolbar', () => {
         panel.notebook.activeCellIndex++;
         let node = item.node.getElementsByTagName('select')[0];
         expect((node as HTMLSelectElement).value).to.be('markdown');
-      });
-
-    });
-
-    describe('#createKernelNameItem()', () => {
-
-      it('should display the `\'display_name\'` of the kernel', (done) => {
-        let item = createKernelNameItem(panel);
-        startKernel(context).then(kernel => {
-          console.log('started kernel');
-          return kernel.getSpec();
-        }).then(spec => {
-          let name = spec.display_name;
-          expect(item.node.textContent).to.be(name);
-          done();
-        }).catch(done);
-      });
-
-      it('should display `\'No Kernel!\'` if there is no kernel', () => {
-        let item = createKernelNameItem(panel);
-        expect(item.node.textContent).to.be('No Kernel!');
-      });
-
-      it('should handle a change in context', (done) => {
-        let item = createKernelNameItem(panel);
-        startKernel(context).then(kernel => {
-          console.log('started kernel');
-          return kernel.ready;
-        }).then(() => {
-          panel.context = null;
-          expect(item.node.textContent).to.be('No Kernel!');
-          done();
-        }).catch(done);
-      });
-
-    });
-
-    describe('#createKernelStatusItem()', () => {
-
-      beforeEach((done) => {
-        startKernel(panel.context).then(() => {
-          done();
-        }).catch(done);
-      });
-
-      it('should display a busy status if the kernel status is not idle', (done) => {
-        let item = createKernelStatusItem(panel);
-        panel.kernel.statusChanged.connect(() => {
-          if (panel.kernel.status === 'busy') {
-            expect(item.hasClass('jp-mod-busy')).to.be(true);
-            done();
-          }
-        });
-        panel.kernel.requestExecute({ code: 'a = 1' });
-      });
-
-      it('should show the current status in the node title', (done) => {
-        let item = createKernelStatusItem(panel);
-        let status = panel.kernel.status;
-        expect(item.node.title.toLowerCase()).to.contain(status);
-        panel.kernel.statusChanged.connect(() => {
-          if (panel.kernel.status === 'busy') {
-            expect(item.node.title.toLowerCase()).to.contain('busy');
-            done();
-          }
-        });
-        panel.kernel.requestExecute({ code: 'a = 1' });
-      });
-
-      it('should handle a null kernel', (done) => {
-        let item = createKernelStatusItem(panel);
-        panel.context.changeKernel(void 0).then(() => {
-          expect(item.node.title).to.be('No Kernel!');
-          expect(item.hasClass('jp-mod-busy')).to.be(true);
-          done();
-        }).catch(done);
-      });
-
-      it('should handle a change to the context', () => {
-        let item = createKernelStatusItem(panel);
-        context = createNotebookContext();
-        context.model.fromJSON(DEFAULT_CONTENT);
-        panel.context = context;
-        expect(item.node.title).to.be('No Kernel!');
-        expect(item.hasClass('jp-mod-busy')).to.be(true);
       });
 
     });

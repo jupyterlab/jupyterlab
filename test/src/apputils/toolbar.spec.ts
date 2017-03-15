@@ -4,12 +4,20 @@
 import expect = require('expect.js');
 
 import {
+  Kernel
+} from '@jupyterlab/services';
+
+import {
   toArray
 } from '@phosphor/algorithm';
 
 import {
   Message
 } from '@phosphor/messaging';
+
+import {
+  Signal
+} from '@phosphor/signaling';
 
 import {
   Widget
@@ -21,7 +29,7 @@ import {
 
 import {
   Toolbar, ToolbarButton
-} from '../../../lib/toolbar';
+} from '../../../lib/apputils';
 
 
 class LogToolbarButton extends ToolbarButton {
@@ -47,7 +55,26 @@ class LogToolbarButton extends ToolbarButton {
 }
 
 
-describe('toolbar/toolbar', () => {
+class KernelOwner extends Widget implements Toolbar.IKernelOwner {
+  kernelChanged = new Signal<this, Kernel.IKernel>(this);
+  kernel: Kernel.IKernel | null = null;
+
+  startKernel(): Promise<void> {
+    return Kernel.startNew().then(k => {
+      this.kernel = k;
+      this.kernelChanged.emit(k);
+      this.kernel.terminated.connect(this._onTerminated, this);
+    });
+  }
+
+  private _onTerminated(): void {
+    this.kernel = null;
+    this.kernelChanged.emit(null);
+  }
+}
+
+
+describe('@jupyterlab/apputils', () => {
 
   describe('Toolbar', () => {
 
@@ -135,6 +162,103 @@ describe('toolbar/toolbar', () => {
         let widget = new Toolbar();
         widget.addItem('a', new Widget());
         expect(widget.removeItem(new Widget())).to.be(void 0);
+      });
+
+    });
+
+    context('IKernelOwner', () => {
+
+      let owner: KernelOwner;
+
+      beforeEach(() => {
+        owner = new KernelOwner();
+      });
+
+      afterEach(() => {
+        if (owner.kernel) {
+          return owner.kernel.shutdown().then(() => {
+            owner.dispose();
+          });
+        }
+        owner.dispose();
+      });
+
+      describe('.createInterruptButton()', () => {
+
+        it('should have the `\'jp-StopIcon\'` class', () => {
+          let button = Toolbar.createInterruptButton(owner);
+          expect(button.hasClass('jp-StopIcon')).to.be(true);
+        });
+
+      });
+
+      describe('.createRestartButton()', () => {
+
+        it('should have the `\'jp-RefreshIcon\'` class', () => {
+          let button = Toolbar.createRestartButton(owner);
+          expect(button.hasClass('jp-RefreshIcon')).to.be(true);
+        });
+
+      });
+
+
+      describe('.createKernelNameItem()', () => {
+
+        it('should display the `\'display_name\'` of the kernel', () => {
+          let item = Toolbar.createKernelNameItem(owner);
+          return owner.startKernel().then(() => {
+            return owner.kernel.getSpec();
+          }).then(spec => {
+            let name = spec.display_name;
+            expect(item.node.textContent).to.be(name);
+          });
+        });
+
+        it('should display `\'No Kernel!\'` if there is no kernel', () => {
+          let item = Toolbar.createKernelNameItem(owner);
+          expect(item.node.textContent).to.be('No Kernel!');
+        });
+
+      });
+
+      describe('.createKernelStatusItem()', () => {
+
+        beforeEach(() => {
+          return owner.startKernel();
+        });
+
+        it('should display a busy status if the kernel status is not idle', (done) => {
+          let item = Toolbar.createKernelStatusItem(owner);
+          owner.kernel.statusChanged.connect(() => {
+            if (owner.kernel.status === 'busy') {
+              expect(item.hasClass('jp-mod-busy')).to.be(true);
+              done();
+            }
+          });
+          owner.kernel.requestExecute({ code: 'a = 1' });
+        });
+
+        it('should show the current status in the node title', (done) => {
+          let item = Toolbar.createKernelStatusItem(owner);
+          let status = owner.kernel.status;
+          expect(item.node.title.toLowerCase()).to.contain(status);
+          owner.kernel.statusChanged.connect(() => {
+            if (owner.kernel.status === 'busy') {
+              expect(item.node.title.toLowerCase()).to.contain('busy');
+              done();
+            }
+          });
+          owner.kernel.requestExecute({ code: 'a = 1' });
+        });
+
+        it('should handle a null kernel', () => {
+          let item = Toolbar.createKernelStatusItem(owner);
+          return owner.kernel.shutdown().then(() => {
+            expect(item.node.title).to.be('No Kernel!');
+            expect(item.hasClass('jp-mod-busy')).to.be(true);
+          });
+        });
+
       });
 
     });

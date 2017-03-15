@@ -15,4 +15,5 @@ export * from './mainmenu';
 export * from './sanitizer';
 export * from './statedb';
 export * from './styling';
+export * from './toolbar';
 export * from './vdom';
