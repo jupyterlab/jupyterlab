@@ -704,6 +704,9 @@ class Notebook extends StaticNotebook {
     this._mode = newValue;
 
     if (newValue === 'edit') {
+      let node = this.activeCell.editorWidget.node;
+      this.scrollToPosition(node.getBoundingClientRect().top);
+
       // Edit mode deselects all cells.
       each(this.widgets, widget => { this.deselect(widget); });
       //  Edit mode unrenders an active markdown widget.
@@ -832,11 +835,23 @@ class Notebook extends StaticNotebook {
   }
 
   /**
-   * Scroll so that the active cell is visible.
+   * Scroll so that the given position is visible.
+   *
+   * @param position - The vertical position in the notebook widget.
+   *
+   * @param threshold - An optional threshold for the scroll.  Defaults to 25
+   *   percent of the widget height.
    */
-  scrollToActiveCell(): void {
-    if (this.activeCell) {
-      ElementExt.scrollIntoViewIfNeeded(this.node, this.activeCell.node);
+  scrollToPosition(position: number, threshold=25): void {
+    let node = this.node;
+    let ar = node.getBoundingClientRect();
+    let after = window.getComputedStyle(node, ':after');
+    let afterHeight = parseInt(after.height, 10);
+    // Abort if the move if too small.
+    let totalHeight = ar.height + afterHeight;
+    let delta = position - totalHeight / 2;
+    if (Math.abs(delta) > totalHeight * threshold / 100) {
+      node.scrollTop += delta;
     }
   }
 
@@ -1096,7 +1111,7 @@ class Notebook extends StaticNotebook {
       this.activeCellIndex = i;
     }
 
-    this._ensureFocus();
+    this._ensureFocus(true);
 
     // Left mouse press for drag start.
     if (event.button === 0 && shouldDrag) {
@@ -1318,8 +1333,10 @@ class Notebook extends StaticNotebook {
       }
       this.activeCellIndex = i;
       // If the editor has focus, ensure edit mode.
-      if (widget.editorWidget.node.contains(target)) {
+      let node = widget.editorWidget.node;
+      if (node.contains(target)) {
         this.mode = 'edit';
+        this.scrollToPosition(node.getBoundingClientRect().top);
       }
     } else {
       // No cell has focus, ensure command mode.
