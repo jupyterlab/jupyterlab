@@ -93,6 +93,20 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
   }
 
   /**
+   * Indicates whether the handler makes API inspection requests or stands by.
+   *
+   * #### Notes
+   * The use case for this attribute is to limit the API traffic when no
+   * inspector is visible.
+   */
+  get standby(): boolean {
+    return this._standby;
+  }
+  set standby(value: boolean) {
+    this._standby = value;
+  }
+
+  /**
    * Get whether the inspection handler is disposed.
    *
    * #### Notes
@@ -123,10 +137,15 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
    * Update the hints inspector based on a text change.
    */
   protected onTextChanged(): void {
-    let editor = this.editor;
-    let code = editor.model.value.text;
-    let position = editor.getCursorPosition();
-    let offset = editor.getOffsetAt(position);
+    // If the handler is in standby mode, bail.
+    if (this._standby) {
+      return;
+    }
+
+    const editor = this.editor;
+    const code = editor.model.value.text;
+    const position = editor.getCursorPosition();
+    const offset = editor.getOffsetAt(position);
     let update: Inspector.IInspectorUpdate = { content: null, type: 'hints' };
 
     // Clear hints if the new text value is empty or kernel is unavailable.
@@ -135,12 +154,12 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
       return;
     }
 
-    let contents: KernelMessage.IInspectRequest = {
+    const contents: KernelMessage.IInspectRequest = {
       code,
       cursor_pos: offset,
       detail_level: 0
     };
-    let pending = ++this._pending;
+    const pending = ++this._pending;
 
     this._kernel.requestInspect(contents).then(msg => {
       let value = msg.content;
@@ -163,22 +182,23 @@ class InspectionHandler implements IDisposable, Inspector.IInspectable {
         return;
       }
 
-      let data = value.data;
-      let trusted = true;
-      let model = new MimeModel({ data, trusted });
+      const data = value.data;
+      const trusted = true;
+      const model = new MimeModel({ data, trusted });
+
       update.content =  this._rendermime.render(model);
       this._inspected.emit(update);
     });
   }
 
+  private _disposed = new Signal<InspectionHandler, void>(this);
   private _editor: CodeEditor.IEditor = null;
+  private _ephemeralCleared = new Signal<InspectionHandler, void>(this);
+  private _inspected = new Signal<InspectionHandler, Inspector.IInspectorUpdate>(this);
   private _kernel: Kernel.IKernel = null;
   private _pending = 0;
   private _rendermime: RenderMime = null;
-  private _disposed = new Signal<InspectionHandler, void>(this);
-  private _ephemeralCleared = new Signal<InspectionHandler, void>(this);
-  private _inspected = new Signal<InspectionHandler, Inspector.IInspectorUpdate>(this);
-
+  private _standby = false;
 }
 
 
