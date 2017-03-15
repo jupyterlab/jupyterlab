@@ -104,7 +104,7 @@ describe('ImageWidget', () => {
         expect(widget.title.label).to.be(newPath);
         done();
       });
-      return manager.contents.rename(context.path, newPath).catch(done);
+      manager.contents.rename(context.path, newPath).catch(done);
     });
 
     it('should set the content after the context is ready', (done) => {
