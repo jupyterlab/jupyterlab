@@ -49,7 +49,7 @@ describe('defaultSanitizer', () => {
     });
 
     it('should strip script tags', () => {
-      let script = '<script>altert("foo")</script>';
+      let script = '<script>alert("foo")</script>';
       expect(defaultSanitizer.sanitize(script)).to.be('');
     });
 

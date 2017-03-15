@@ -208,6 +208,7 @@ class RenderedMarkdown extends RenderedHTMLCommon {
         this._urlResolved = Private.handleUrls(this.node, options.resolver,
                                                options.linkHandler);
       }
+      Private.headerAnchors(this.node);
       this.fit();
       this._rendered = true;
       if (this.isAttached) {
@@ -439,6 +440,27 @@ namespace Private {
     }).then(url => {
       node.setAttribute(name, url);
     });
+  }
+
+  /**
+  * Apply ids to headers. 
+  */
+  export
+  function headerAnchors(node: HTMLElement): void {
+    let headerNames = ['h1','h2','h3','h4','h5','h6'];
+    for (let headerType of headerNames){
+      let headers = node.getElementsByTagName(headerType);
+      for (let i=0; i<headers.length; i++){
+        let header = headers[i];
+        header.id = header.innerHTML.replace(/ /g, '-');
+        let anchor = document.createElement('a');
+        anchor.target = '_self';
+        anchor.textContent = '¶';
+        anchor.href = '#'+ header.id;
+        anchor.classList.add('jp-InternalAnchorLink');
+        header.appendChild(anchor);
+      };
+    };
   }
 
   /**

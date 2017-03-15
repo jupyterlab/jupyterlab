@@ -357,3 +357,16 @@ margin-top = 14, 14, 14, 14, 8, 8
   padding: 0 1em;
   border-left: 5px solid var(--jp-border-color2);
 }
+
+a.jp-InternalAnchorLink {
+  visibility: hidden;
+}
+
+h1:hover .jp-InternalAnchorLink,
+h2:hover .jp-InternalAnchorLink,
+h3:hover .jp-InternalAnchorLink,
+h4:hover .jp-InternalAnchorLink,
+h5:hover .jp-InternalAnchorLink,
+h6:hover .jp-InternalAnchorLink {
+  visibility: visible;
+}

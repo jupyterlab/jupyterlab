@@ -25,9 +25,6 @@ import {
 } from '../../../lib/rendermime';
 
 
-const EXPECTED_MD = `<h1>Title first level</h1>\n<h2>Title second Level</h2>\n<h3>Title third level</h3>\n<h4>h4</h4>\n<h5>h5</h5>\n<h6>h6</h6>\n<h1>h1</h1>\n<h2>h2</h2>\n<h3>h3</h3>\n<h4>h4</h4>\n<h5>h6</h5>\n<p>This is just a sample paragraph\nYou can look at different level of nested unorderd list ljbakjn arsvlasc asc asc awsc asc ascd ascd ascd asdc asc</p>\n<ul>\n<li>level 1<ul>\n<li>level 2</li>\n<li>level 2</li>\n<li>level 2<ul>\n<li>level 3</li>\n<li>level 3<ul>\n<li>level 4<ul>\n<li>level 5<ul>\n<li>level 6</li>\n</ul>\n</li>\n</ul>\n</li>\n</ul>\n</li>\n</ul>\n</li>\n<li>level 2</li>\n</ul>\n</li>\n<li>level 1</li>\n<li>level 1</li>\n<li>level 1\nOrdered list</li>\n<li>level 1<ol>\n<li>level 1</li>\n<li>level 1<ol>\n<li>level 1</li>\n<li>level 1</li>\n<li>level 1<ol>\n<li>level 1</li>\n<li>level 1<ol>\n<li>level 1</li>\n<li>level 1</li>\n<li>level 1</li>\n</ol>\n</li>\n</ol>\n</li>\n</ol>\n</li>\n</ol>\n</li>\n<li>level 1</li>\n<li>level 1\nsome Horizontal line</li>\n</ul>\n<hr>\n<h2>and another one</h2>\n<p>Colons can be used to align columns.</p>\n<table>\n<thead>\n<tr>\n<th>Tables</th>\n<th>Are</th>\n<th>Cool</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>col 3 is</td>\n<td>right-aligned</td>\n<td>1600</td>\n</tr>\n<tr>\n<td>col 2 is</td>\n<td>centered</td>\n<td>12</td>\n</tr>\n<tr>\n<td>zebra stripes</td>\n<td>are neat</td>\n<td>1</td>\n</tr>\n</tbody>\n</table>\n<p>There must be at least 3 dashes separating each header cell.\nThe outer pipes (|) are optional, and you don\'t need to make the\nraw Markdown line up prettily. You can also use inline Markdown.</p>\n`;
-
-
 function runCanRunder(renderer: RenderMime.IRenderer, trusted: boolean): boolean {
   let canRender = true;
   let data: JSONObject = Object.create(null);
@@ -314,7 +311,7 @@ describe('renderers', () => {
         setTimeout(loop, 100);
       });
 
-      it('should sanitize if untrusted', (done) => {
+      it('should add header anchors', (done) => {
         let source = require('../../../examples/filebrowser/sample.md') as string;
         let r = new MarkdownRenderer();
         let mimeType = 'text/markdown';
@@ -322,7 +319,32 @@ describe('renderers', () => {
         let widget = r.render({ mimeType, model, sanitizer });
         let loop = () => {
           if ((widget as any)._rendered) {
-            expect(widget.node.innerHTML).to.be(EXPECTED_MD);
+            Widget.attach(widget, document.body);
+            let node = document.getElementById('Title-third-level');
+            expect(node.localName).to.be('h3');
+            let anchor = node.firstChild.nextSibling as HTMLAnchorElement;
+            expect(anchor.href).to.contain('#Title-third-level');
+            expect(anchor.target).to.be('_self');
+            expect(anchor.className).to.contain('jp-InternalAnchorLink');
+            expect(anchor.textContent).to.be('¶');
+            Widget.detach(widget);
+            done();
+            return;
+          }
+          setTimeout(loop, 100);
+        };
+        setTimeout(loop, 100);
+      });
+
+      it('should sanitize the html', (done) => {
+        let r = new MarkdownRenderer();
+        let source = '<p>hello</p><script>alert("foo")</script>';
+        let mimeType = 'text/markdown';
+        let model = createModel(mimeType, source);
+        let widget = r.render({ mimeType, model, sanitizer });
+        let loop = () => {
+          if ((widget as any)._rendered) {
+            expect(widget.node.innerHTML).to.not.contain('script');
             done();
             return;
           }
