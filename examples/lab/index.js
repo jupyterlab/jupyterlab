@@ -7,7 +7,7 @@ var JupyterLab = require('@jupyterlab/application').JupyterLab;
 require('es6-promise').polyfill();
 
 require('font-awesome/css/font-awesome.min.css');
-require('@jupyterlab/default-theme/index.css');
+require('@jupyterlab/default-theme/style/index.css');
 
 
 var mods = [

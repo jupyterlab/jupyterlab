@@ -6,6 +6,7 @@
     "clean": "rimraf build && rimraf node_modules"
   },
   "dependencies": {
+    "@jupyterlab/about": "^0.1.0",
     "@jupyterlab/about-extension": "^0.1.0",
     "@jupyterlab/application-extension": "^0.1.0",
     "@jupyterlab/apputils-extension": "^0.1.0",
@@ -13,6 +14,7 @@
     "@jupyterlab/completer-extension": "^0.1.0",
     "@jupyterlab/console-extension": "^0.1.0",
     "@jupyterlab/csvwidget-extension": "^0.1.0",
+    "@jupyterlab/default-theme": "^0.1.0",
     "@jupyterlab/docmanager-extension": "^0.1.0",
     "@jupyterlab/docregistry-extension": "^0.1.0",
     "@jupyterlab/editorwidget-extension": "^0.1.0",
@@ -39,6 +41,6 @@
     "rimraf": "^2.5.2",
     "url-loader": "^0.5.7",
     "watch": "^0.18.0",
-    "webpack": "^1.13.0"
+    "webpack": "^2.2.1"
   }
 }
