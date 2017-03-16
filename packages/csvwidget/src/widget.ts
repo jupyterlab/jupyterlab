@@ -6,10 +6,6 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  Signal
-} from '@phosphor/signaling';
-
-import {
   PanelLayout
 } from '@phosphor/widgets';
 
