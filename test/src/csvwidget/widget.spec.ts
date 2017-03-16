@@ -9,11 +9,11 @@ import {
 
 import {
   CSVModel
-} from '@jupyterlab/csvwidget/table';
+} from '@jupyterlab/csvwidget';
 
 import {
   CSVWidget
-} from '@jupyterlab/csvwidget/widget';
+} from '@jupyterlab/csvwidget';
 
 import {
   Context, DocumentRegistry, TextModelFactory

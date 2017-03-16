@@ -21,11 +21,11 @@ import {
 
 import {
   ConsoleHistory
-} from '@jupyterlab/console/history';
+} from '@jupyterlab/console';
 
 import {
   ForeignHandler
-} from '@jupyterlab/console/foreign';
+} from '@jupyterlab/console';
 
 import {
   BaseCellWidget, CodeCellWidget, CodeCellModel, RawCellModel, RawCellWidget

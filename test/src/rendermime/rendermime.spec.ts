@@ -21,7 +21,7 @@ import {
 
 import {
    TextRenderer
-} from '@jupyterlab/renderers';
+} from '@jupyterlab/rendermime';
 
 import {
   MimeModel, RenderMime

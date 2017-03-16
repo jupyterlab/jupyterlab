@@ -13,19 +13,19 @@ import {
 
 import {
   CodeCellWidget, MarkdownCellWidget, RawCellWidget
-} from '@jupyterlab/cells/widget';
+} from '@jupyterlab/cells';
 
 import {
  NotebookModel
-} from '@jupyterlab/notebook/model';
+} from '@jupyterlab/notebook';
 
 import {
   NotebookActions
-} from '@jupyterlab/notebook/actions';
+} from '@jupyterlab/notebook';
 
 import {
   Notebook, JUPYTER_CELL_MIME
-} from '@jupyterlab/notebook/widget';
+} from '@jupyterlab/notebook';
 
 import {
   DEFAULT_CONTENT, createNotebookFactory, rendermime, clipboard,

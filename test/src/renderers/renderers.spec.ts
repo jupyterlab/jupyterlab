@@ -18,7 +18,7 @@ import {
 import {
   LatexRenderer, PDFRenderer, JavaScriptRenderer,
   SVGRenderer, MarkdownRenderer, TextRenderer, HTMLRenderer, ImageRenderer
-} from '@jupyterlab/renderers';
+} from '@jupyterlab/rendermime';
 
 import {
   MimeModel, RenderMime

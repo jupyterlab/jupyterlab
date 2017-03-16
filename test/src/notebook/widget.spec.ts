@@ -22,11 +22,11 @@ import {
 
 import {
   INotebookModel, NotebookModel
-} from '@jupyterlab/notebook/model';
+} from '@jupyterlab/notebook';
 
 import {
   Notebook, StaticNotebook
-} from '@jupyterlab/notebook/widget';
+} from '@jupyterlab/notebook';
 
 import {
   DEFAULT_CONTENT, createNotebookFactory, rendermime, mimeTypeService,

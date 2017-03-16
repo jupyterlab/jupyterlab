@@ -17,7 +17,7 @@ import {
 
 import {
   MarkdownWidget, MarkdownWidgetFactory
-} from '@jupyterlab/markdownwidget/widget';
+} from '@jupyterlab/markdownwidget';
 
 import {
   DocumentRegistry, Context

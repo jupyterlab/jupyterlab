@@ -9,7 +9,7 @@ import {
 
 import {
   OutputAreaModel
-} from '@jupyterlab/outputarea/model';
+} from '@jupyterlab/outputarea';
 
 import {
   DEFAULT_OUTPUTS

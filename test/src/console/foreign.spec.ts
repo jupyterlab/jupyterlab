@@ -17,7 +17,7 @@ import {
 
 import {
   ForeignHandler
-} from '@jupyterlab/console/foreign';
+} from '@jupyterlab/console';
 
 import {
   CodeCellModel, CodeCellWidget

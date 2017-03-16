@@ -15,7 +15,7 @@ module.exports = function (config) {
       './build/bundle.js'
     ],
     preprocessors: {
-      'test/build/bundle.js': ['sourcemap']
+      'build/bundle.js': ['sourcemap']
     },
     port: 9876,
     colors: true,

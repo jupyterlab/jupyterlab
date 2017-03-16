@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   removeMath, replaceMath, typeset
-} from '@jupyterlab/renderers/latex';
+} from '@jupyterlab/renderers';
 
 
 describe('jupyter-ui', () => {
@@ -76,7 +76,7 @@ describe('jupyter-ui', () => {
 
     it('should handle `\\\\\(` delimiters for math', () => {
       let input = `hello, \\\\\(
-          /alpha 
+          /alpha
       \\\\\), there`;
       let { text, math } = removeMath(input);
       expect(text).to.be('hello, @@0@@, there');
@@ -85,7 +85,7 @@ describe('jupyter-ui', () => {
 
     it('should handle `\\\\\[` delimiters for math', () => {
       let input = `hello, \\\\\[
-          /alpha 
+          /alpha
       \\\\\], there`;
       let { text, math } = removeMath(input);
       expect(text).to.be('hello, @@0@@, there');

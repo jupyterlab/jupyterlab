@@ -17,7 +17,7 @@ import {
 
 import {
   ConsoleHistory
-} from '@jupyterlab/console/history';
+} from '@jupyterlab/console';
 
 
 const mockHistory: KernelMessage.IHistoryReplyMsg = {
