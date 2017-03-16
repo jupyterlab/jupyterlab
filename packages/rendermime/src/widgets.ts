@@ -13,10 +13,6 @@ import * as marked
   from 'marked';
 
 import {
-  RenderMime
-} from '@jupyterlab/rendermime';
-
-import {
   Message
 } from '@phosphor/messaging';
 
@@ -29,8 +25,8 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  typeset, removeMath, replaceMath
-} from './latex';
+  RenderMime, typeset, removeMath, replaceMath
+} from '.';
 
 
 /*
