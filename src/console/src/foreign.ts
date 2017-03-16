@@ -11,11 +11,11 @@ import {
 
 import {
   BaseCellWidget, CodeCellWidget
-} from '../cells';
+} from '@jupyterlab/cells';
 
 import {
   nbformat
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 
 /**

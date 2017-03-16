@@ -27,25 +27,25 @@ import {
 
 import {
   IEditorMimeTypeService, CodeEditor
-} from '../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   BaseCellWidget, CodeCellWidget, RawCellWidget,
   ICodeCellModel, IRawCellModel, CellModel,
   RawCellModel, CodeCellModel
-} from '../cells';
+} from '@jupyterlab/cells';
 
 import {
   nbformat
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   OutputAreaWidget
-} from '../outputarea';
+} from '@jupyterlab/outputarea';
 
 import {
   IRenderMime
-} from '../rendermime';
+} from '@jupyterlab/rendermime';
 
 import {
   ForeignHandler
@@ -57,7 +57,7 @@ import {
 
 import {
   IObservableVector, ObservableVector
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 /**
  * The class name added to console widgets.

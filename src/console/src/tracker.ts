@@ -7,7 +7,7 @@ import {
 
 import {
   IInstanceTracker
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   ConsolePanel
