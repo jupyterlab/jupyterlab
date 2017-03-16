@@ -27,7 +27,7 @@ import {
 
 import {
   Toolbar, ToolbarButton
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 
 /**

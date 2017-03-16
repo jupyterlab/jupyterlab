@@ -15,11 +15,11 @@ import {
 
 import {
   CodeEditor
-} from '../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   MimeModel, RenderMime
-} from '../rendermime';
+} from '@jupyterlab/rendermime';
 
 import {
   IInspector
