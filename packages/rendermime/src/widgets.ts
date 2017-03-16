@@ -5,17 +5,8 @@ import {
   ansi_to_html, escape_for_html
 } from 'ansi_up';
 
-import * as CodeMirror
-  from 'codemirror';
-
-import 'codemirror/addon/runmode/runmode';
-
 import {
-  requireMode
-} from '@jupyterlab/codemirror';
-
-import {
-  CodeMirrorEditor
+  requireMode, runMode, CodeMirrorEditor
 } from '@jupyterlab/codemirror';
 
 import * as marked
@@ -119,7 +110,7 @@ marked.setOptions({
           return;
       }
       try {
-        CodeMirror.runMode(code, spec.mime, el);
+        runMode(code, spec.mime, el);
         callback(null, el.innerHTML);
       } catch (err) {
         console.log(`Failed to highlight ${lang} code`, err);

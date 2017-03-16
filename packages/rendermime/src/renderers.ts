@@ -6,13 +6,10 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  RenderMime
-} from '@jupyterlab/rendermime';
-
-import {
-  RenderedHTML, RenderedMarkdown, RenderedText, RenderedImage,
+  RenderMime, RenderedHTML, RenderedMarkdown, RenderedText, RenderedImage,
   RenderedJavaScript, RenderedSVG, RenderedPDF, RenderedLatex
-} from './widget';
+} from '.';
+
 
 /**
  * A renderer for raw html.

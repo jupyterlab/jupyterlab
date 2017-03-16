@@ -18,6 +18,9 @@ const MATHSPLIT = /(\$\$?|\\(?:begin|end)\{[a-z]*\*?\}|\\[{}$]|[{}]|(?:\n\s*)+|@
 let initialized = false;
 
 
+// Stub for window MathJax.
+declare var MathJax: any;
+
 /**
  *  Break up the text into its component parts and search
  *    through them for math delimiters, braces, linebreaks, etc.
@@ -49,7 +52,7 @@ function removeMath(text: string): { text: string, math: string[] } {
     text = text.replace(/~/g, '~T').replace(/(^|[^\\])(`+)([^\n]*?[^`\n])\2(?!`)/gm, (wholematch) => wholematch.replace(/\$/g, '~D'));
     deTilde = (text: string) => {
       return text.replace(/~([TD])/g,
-        (wholematch, character) => (character === 'T') ? '~' : '$');
+        (wholematch, character) => (character === 'T') ? '~' : inline);
     };
   } else {
     deTilde = (text: string) => { return text; };
@@ -66,8 +69,7 @@ function removeMath(text: string): { text: string, math: string[] } {
       //
       blocks[i] = '@@' + math.length + '@@';
       math.push(block);
-    }
-    else if (start) {
+    } else if (start) {
       //
       //  If we are in math, look for the end delimiter,
       //    but don't go past double line breaks, and
@@ -76,15 +78,13 @@ function removeMath(text: string): { text: string, math: string[] } {
       if (block === end) {
         if (braces) {
           last = i;
-        }
-        else {
+        } else {
           blocks = processMath(start, i, deTilde, math, blocks);
           start  = null;
           end    = null;
           last   = null;
         }
-      }
-      else if (block.match(/\n.*\n/)) {
+      } else if (block.match(/\n.*\n/)) {
         if (last) {
           i = last;
           blocks = processMath(start, i, deTilde, math, blocks);
@@ -93,26 +93,23 @@ function removeMath(text: string): { text: string, math: string[] } {
         end = null;
         last = null;
         braces = 0;
-      }
-      else if (block === '{') {
+      } else if (block === '{') {
         braces++;
-      }
-      else if (block === '}' && braces) {
+      } else if (block === '}' && braces) {
         braces--;
       }
-    }
-    else {
+    } else {
       //
       //  Look for math start delimiters and when
       //    found, set up the end delimiter.
       //
-      if (block === '$' || block === '$$') {
+      if (block === inline || block === '$$') {
         start = i;
         end = block;
         braces = 0;
-      } else if (block === "\\\\\(" || block === "\\\\\[") {
+      } else if (block === '\\\\\(' || block === '\\\\\[') {
         start = i;
-        end = block.slice(-1) === "(" ? "\\\\\)" : "\\\\\]";
+        end = block.slice(-1) === '(' ? '\\\\\)' : '\\\\\]';
         braces = 0;
       } else if (block.substr(1, 5) === 'begin') {
         start = i;
@@ -144,10 +141,10 @@ function replaceMath(text: string, math: string[]): string {
    */
   let process = (match: string, n: number): string => {
     let group = math[n];
-    if (group.substr(0, 3) === "\\\\\(" && 
+    if (group.substr(0, 3) === "\\\\\(" &&
         group.substr(group.length - 3) === "\\\\\)") {
       group = "\\\(" + group.substring(3, group.length - 3) + "\\\)";
-    } else if (group.substr(0, 3) === "\\\\\[" && 
+    } else if (group.substr(0, 3) === "\\\\\[" &&
                group.substr(group.length - 3) === "\\\\\]") {
       group = "\\\[" + group.substring(3, group.length - 3) + "\\\]";
     }

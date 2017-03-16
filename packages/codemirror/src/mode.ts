@@ -22,6 +22,15 @@ declare var require: any;
 
 
 /**
+ * Running a CodeMirror mode outside of an editor.
+ */
+export
+function runMode(code: string, mode: modespec | string, el: HTMLElement): void {
+  CodeMirror.runMode(code, mode, el);
+}
+
+
+/**
  * Find a mode name by extension.
  */
 export

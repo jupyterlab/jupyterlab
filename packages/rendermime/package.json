@@ -13,12 +13,16 @@
   },
   "dependencies": {
     "@jupyterlab/apputils": "^0.1.0",
+    "@jupyterlab/codemirror": "^0.1.0",
     "@jupyterlab/coreutils": "^0.1.0",
     "@jupyterlab/services": "^0.40.1",
     "@phosphor/algorithm": "^0.1.1",
     "@phosphor/coreutils": "^0.1.5",
     "@phosphor/disposable": "^0.1.1",
-    "@phosphor/widgets": "^0.3.0"
+    "@phosphor/widgets": "^0.3.0",
+    "@types/marked": "0.0.28",
+    "@types/mathjax": "0.0.31",
+    "ansi_up": "^1.3.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
