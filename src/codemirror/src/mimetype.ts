@@ -6,11 +6,11 @@ import * as CodeMirror
 
 import {
   IEditorMimeTypeService
-} from '../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   nbformat
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   findMode

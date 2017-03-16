@@ -18,19 +18,19 @@ import {
 
 import {
   CodeEditor
-} from '../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   IChangedArgs, uuid
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   IObservableString, ObservableString
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   IObservableMap, ObservableMap
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   loadModeByMIME
