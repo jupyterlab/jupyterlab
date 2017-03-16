@@ -23,7 +23,7 @@ import {
 
 import {
   DOMUtils
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 
 /**
