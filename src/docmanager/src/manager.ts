@@ -31,7 +31,7 @@ import {
 
 import {
   DocumentRegistry, Context
-} from '../docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   SaveHandler
