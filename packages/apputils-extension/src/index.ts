@@ -13,12 +13,12 @@ import {
 
 import {
   JupyterLab, JupyterLabPlugin
-} from '@jupyterlab/../application';
+} from '@jupyterlab/application';
 
 import {
   CommandLinker, ICommandLinker, ICommandPalette, ILayoutRestorer,
   IMainMenu, IStateDB, LayoutRestorer, MainMenu, StateDB
-} from '@jupyterlab/../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   activatePalette

@@ -26,7 +26,7 @@ declare var require: any;
  */
 export
 function findModeByExension(ext: string): string {
-  let mode = findModeByExtension(ext);
+  let mode = CodeMirror.findModeByExtension(ext);
   return mode && mode.mode;
 }
 
