@@ -8,12 +8,6 @@
 |----------------------------------------------------------------------------*/
 
 
-:root {
-  --jp-private-outputarea-prompt-color: #D84315;
-  --jp-private-outputarea-prompt-width: 90px;
-}
-
-
 /*-----------------------------------------------------------------------------
 | Main OutputAreaWidget
 | OutputAreaWidget has a list of Outputs
@@ -65,16 +59,18 @@
 
 
 .jp-OutputAreaWidget-gutter {
-  color: var(--jp-private-outputarea-prompt-color);
-  font-family: var(--jp-code-font-family);
+  color: var(--jp-cell-outprompt-font-color);
+  font-family: var(--jp-cell-prompt-font-family);
   text-align: right;
   vertical-align: middle;
   padding: var(--jp-code-padding);
   font-size: var(--jp-code-font-size);
+  letter-spacing: var(--jp-cell-prompt-letter-spacing);
   line-height: var(--jp-code-line-height);
   border: var(--jp-border-width) solid transparent;
-  flex: 0 0 var(--jp-private-outputarea-prompt-width);
+  flex: 0 0 var(--jp-cell-prompt-width);
   box-sizing: border-box;
+  opacity: var(--jp-cell-prompt-opacity);
 }
 
 

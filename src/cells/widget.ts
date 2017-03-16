@@ -789,7 +789,7 @@ class InputAreaWidget extends Widget {
     if (value === 'null') {
       value = ' ';
     }
-    let text = `In [${value || ' '}]:`;
+    let text = `In[${value || ' '}]:`;
     this._prompt.node.textContent = text;
   }
 
