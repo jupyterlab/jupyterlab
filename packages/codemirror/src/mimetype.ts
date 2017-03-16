@@ -14,7 +14,7 @@ import {
 
 import {
   findMode
-} from './index';
+} from '.';
 
 /**
  * The mime type service for CodeMirror.

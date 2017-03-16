@@ -5,6 +5,7 @@ import * as CodeMirror
   from 'codemirror';
 
 import 'codemirror/mode/meta';
+import 'codemirror/addons/runmode';
 
 import './codemirror-ipython';
 import './codemirror-ipythongfm';
@@ -25,7 +26,7 @@ declare var require: any;
  * Running a CodeMirror mode outside of an editor.
  */
 export
-function runMode(code: string, mode: string, el: HTMLElement): void {
+function runMode(code: string, mode: string | CodeMirror.modespec, el: HTMLElement): void {
   CodeMirror.runMode(code, mode, el);
 }
 

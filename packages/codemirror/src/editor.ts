@@ -34,7 +34,7 @@ import {
 
 import {
   loadModeByMIME
-} from './';
+} from './mode';
 
 import 'codemirror/addon/edit/matchbrackets.js';
 import 'codemirror/addon/edit/closebrackets.js';

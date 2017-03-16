@@ -17,6 +17,7 @@
     "@phosphor/algorithm": "^0.1.1",
     "@phosphor/disposable": "^0.1.1",
     "@phosphor/signaling": "^0.1.2",
+    "@types/codemirror": "0.0.38",
     "codemirror": "^5.24.2"
   },
   "devDependencies": {
