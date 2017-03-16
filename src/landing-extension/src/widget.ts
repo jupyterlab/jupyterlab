@@ -11,11 +11,11 @@ import {
 
 import {
   JupyterLab
-} from '../application';
+} from '@jupyterlab/application';
 
 import {
   VDomModel, VDomWidget
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 
 /**

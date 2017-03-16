@@ -7,15 +7,15 @@ import {
 
 import {
   JupyterLab, JupyterLabPlugin
-} from '../application';
+} from '@jupyterlab/application';
 
 import {
   ICommandPalette, ILayoutRestorer, InstanceTracker
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   IPathTracker
-} from '../filebrowser';
+} from '@jupyterlab/filebrowser';
 
 import {
   LandingModel, LandingWidget
