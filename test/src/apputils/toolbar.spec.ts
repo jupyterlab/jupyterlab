@@ -225,7 +225,7 @@ describe('@jupyterlab/apputils', () => {
 
         beforeEach(() => {
           return owner.startKernel().then(kernel => {
-            return kernel.ready;
+            return owner.kernel.ready;
           });
         });
 
