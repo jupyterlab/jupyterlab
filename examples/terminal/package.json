@@ -9,9 +9,10 @@
     "watch": "watch \"npm run update && npm run build\" ../../src src --wait 10"
   },
   "dependencies": {
+    "@jupyterlab/terminal": "^0.1.0",
+    "@jupyterlab/default-theme": "^0.1.0",
     "@jupyterlab/services": "^0.39.1",
-    "@phosphor/widgets": "^0.2.0",
-    "jupyterlab": "file:../.."
+    "@phosphor/widgets": "^0.2.0"
   },
   "devDependencies": {
     "css-loader": "^0.23.1",

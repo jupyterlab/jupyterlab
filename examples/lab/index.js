@@ -1,41 +1,41 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-var JupyterLab = require('jupyterlab/lib/application').JupyterLab;
+var JupyterLab = require('@jupyterlab/application').JupyterLab;
 
 // ES6 Promise polyfill
 require('es6-promise').polyfill();
 
 require('font-awesome/css/font-awesome.min.css');
-require('jupyterlab/lib/default-theme/index.css');
+require('@jupyterlab/default-theme/index.css');
 
 
 var mods = [
-  require('jupyterlab/lib/about-extension'),
-  require('jupyterlab/lib/application-extension'),
-  require('jupyterlab/lib/apputils-extension'),
-  require('jupyterlab/lib/codemirror-extension'),
-  require('jupyterlab/lib/completer-extension'),
-  require('jupyterlab/lib/console-extension'),
-  require('jupyterlab/lib/csvwidget-extension'),
-  require('jupyterlab/lib/docmanager-extension'),
-  require('jupyterlab/lib/docregistry-extension'),
-  require('jupyterlab/lib/editorwidget-extension'),
-  require('jupyterlab/lib/faq-extension'),
-  require('jupyterlab/lib/filebrowser-extension'),
-  require('jupyterlab/lib/help-extension'),
-  require('jupyterlab/lib/imagewidget-extension'),
-  require('jupyterlab/lib/inspector-extension'),
-  require('jupyterlab/lib/landing-extension'),
-  require('jupyterlab/lib/launcher-extension'),
-  require('jupyterlab/lib/markdownwidget-extension'),
-  require('jupyterlab/lib/notebook-extension'),
-  require('jupyterlab/lib/rendermime-extension'),
-  require('jupyterlab/lib/running-extension'),
-  require('jupyterlab/lib/services-extension'),
-  require('jupyterlab/lib/shortcuts-extension'),
-  require('jupyterlab/lib/terminal-extension'),
-  require('jupyterlab/lib/tooltip-extension')
+  require('@jupyterlab/about-extension'),
+  require('@jupyterlab/application-extension'),
+  require('@jupyterlab/apputils-extension'),
+  require('@jupyterlab/codemirror-extension'),
+  require('@jupyterlab/completer-extension'),
+  require('@jupyterlab/console-extension'),
+  require('@jupyterlab/csvwidget-extension'),
+  require('@jupyterlab/docmanager-extension'),
+  require('@jupyterlab/docregistry-extension'),
+  require('@jupyterlab/editorwidget-extension'),
+  require('@jupyterlab/faq-extension'),
+  require('@jupyterlab/filebrowser-extension'),
+  require('@jupyterlab/help-extension'),
+  require('@jupyterlab/imagewidget-extension'),
+  require('@jupyterlab/inspector-extension'),
+  require('@jupyterlab/landing-extension'),
+  require('@jupyterlab/launcher-extension'),
+  require('@jupyterlab/markdownwidget-extension'),
+  require('@jupyterlab/notebook-extension'),
+  require('@jupyterlab/rendermime-extension'),
+  require('@jupyterlab/running-extension'),
+  require('@jupyterlab/services-extension'),
+  require('@jupyterlab/shortcuts-extension'),
+  require('@jupyterlab/terminal-extension'),
+  require('@jupyterlab/tooltip-extension')
 ];
 
 

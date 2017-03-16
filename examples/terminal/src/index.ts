@@ -11,9 +11,9 @@ import {
 
 import {
   TerminalWidget
-} from 'jupyterlab/lib/terminal';
+} from '@jupyterlab/terminal';
 
-import 'jupyterlab/lib/default-theme/index.css';
+import '@jupyterlab/default-theme/style/index.css';
 import '../index.css';
 
 

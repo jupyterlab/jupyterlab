@@ -9,10 +9,16 @@
     "watch": "watch \"npm run update && npm run build\" ../../src src --wait 10"
   },
   "dependencies": {
+    "@jupyterlab/apputils": "^0.1.0",
+    "@jupyterlab/filebrowser": "^0.1.0",
+    "@jupyterlab/docmanager": "^0.1.0",
+    "@jupyterlab/docregistry": "^0.1.0",
+    "@jupyterlab/codemirror": "^0.1.0",
+    "@jupyterlab/editorwidget": "^0.1.0",
+    "@jupyterlab/default-theme": "^0.1.0",
     "@jupyterlab/services": "^0.39.0",
     "@phosphor/commands": "^0.1.2",
     "@phosphor/widgets": "^0.2.0",
-    "jupyterlab": "file:../.."
   },
   "devDependencies": {
     "css-loader": "^0.23.1",

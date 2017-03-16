@@ -15,29 +15,29 @@ import {
 
 import {
   Dialog, showDialog
-} from 'jupyterlab/lib/apputils';
+} from '@jupyterlab/apputils';
 
 import {
   FileBrowser, FileBrowserModel
-} from 'jupyterlab/lib/filebrowser';
+} from '@jupyterlab/filebrowser';
 
 import {
   DocumentManager
-} from 'jupyterlab/lib/docmanager';
+} from '@jupyterlab/docmanager';
 
 import {
   DocumentRegistry, TextModelFactory
-} from 'jupyterlab/lib/docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   CodeMirrorEditorFactory, CodeMirrorMimeTypeService
-} from 'jupyterlab/lib/codemirror';
+} from '@jupyterlab/codemirror';
 
 import {
   EditorWidgetFactory
-} from 'jupyterlab/lib/editorwidget/widget';
+} from '@jupyterlab/editorwidget';
 
-import 'jupyterlab/lib/default-theme/index.css';
+import '@jupyterlab/default-theme/style/index.css';
 import '../index.css';
 
 
