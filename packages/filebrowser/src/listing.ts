@@ -130,7 +130,6 @@ const FILE_TYPE_CLASS = 'jp-FileIcon';
 /**
  * The class name added to a material icon content item.
  */
-const FOLDER_TYPE_CLASS = 'jp-type-folder';
 const FOLDER_MATERIAL_ICON_CLASS = 'jp-OpenFolderIcon';
 const NOTEBOOK_MATERIAL_ICON_CLASS = 'jp-NotebookIcon';
 const MATERIAL_ICON_CLASS = 'jp-MaterialIcon';
@@ -139,11 +138,6 @@ const MATERIAL_ICON_CLASS = 'jp-MaterialIcon';
  * The class name added to drag state icons to add space between the icon and the file name
  */
 const DRAG_ICON_CLASS = 'jp-DragIcon';
-
-/**
- * The class name added to a notebook type content item.
- */
-const NOTEBOOK_TYPE_CLASS = 'jp-type-notebook';
 
 /**
  * The class name added to the widget when there are items on the clipboard.
