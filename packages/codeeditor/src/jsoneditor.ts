@@ -18,13 +18,12 @@ import {
 } from '@phosphor/virtualdom';
 
 import {
-  CodeEditor
-} from '@jupyterlab/codeeditor';
-
-import {
   IObservableJSON
 } from '@jupyterlab/coreutils';
 
+import {
+  CodeEditor
+} from '.';
 
 /**
  * The class name added to a JSONEditorWidget instance.
