@@ -10,12 +10,8 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  CodeEditor, IEditorServices, IEditorMimeTypeService
+  CodeEditor, IEditorServices, IEditorMimeTypeService, CodeEditorWidget
 } from '@jupyterlab/codeeditor';
-
-import {
-  CodeEditorWidget
-} from '@jupyterlab/codeeditor/widget';
 
 
 /**
