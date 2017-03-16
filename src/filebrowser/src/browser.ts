@@ -19,7 +19,7 @@ import {
 
 import {
   DocumentManager
-} from '../docmanager';
+} from '@jupyterlab/docmanager';
 
 import {
   FileButtons

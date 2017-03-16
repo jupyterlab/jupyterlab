@@ -19,7 +19,7 @@ import {
 
 import {
   IChangedArgs
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 
 /* tslint:disable */

@@ -15,15 +15,15 @@ import {
 
 import {
   Dialog, showDialog
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   DocumentManager
-} from '../docmanager';
+} from '@jupyterlab/docmanager';
 
 import {
   DocumentRegistry, populateKernels
-} from '../docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   FileBrowserModel

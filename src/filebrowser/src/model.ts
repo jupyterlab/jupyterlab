@@ -19,7 +19,7 @@ import {
 
 import {
   IChangedArgs, PathExt, uuid
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   IPathTracker

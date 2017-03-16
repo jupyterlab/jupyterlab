@@ -23,11 +23,11 @@ import {
 
 import {
   Dialog, showDialog
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   DocumentManager
-} from '../docmanager';
+} from '@jupyterlab/docmanager';
 
 import {
   createFromDialog

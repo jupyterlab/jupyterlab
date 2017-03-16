@@ -31,15 +31,15 @@ import {
 
 import {
   Dialog, DOMUtils, showDialog
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   PathExt, Time
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   DocumentManager
-} from '../docmanager';
+} from '@jupyterlab/docmanager';
 
 import {
   renameFile
