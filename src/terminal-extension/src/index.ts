@@ -11,15 +11,15 @@ import {
 
 import {
   JupyterLab, JupyterLabPlugin
-} from '../application';
+} from '@jupyterlab/application';
 
 import {
   ICommandPalette, ILayoutRestorer, InstanceTracker, IMainMenu
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   TerminalWidget, ITerminalTracker, addDefaultCommands
-} from '../terminal';
+} from '@jupyterlab/terminal';
 
 
 
