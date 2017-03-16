@@ -455,7 +455,7 @@ class ApplicationShell extends Widget {
     let data: ApplicationShell.ILayout = {
       mainArea: {
         currentWidget: this._tracker.currentWidget,
-        dock: this._dockPanel.saveLayout({ version: '1' }),
+        dock: this._dockPanel.saveLayout()
       },
       leftArea: this._leftHandler.dehydrate(),
       rightArea: this._rightHandler.dehydrate()
@@ -596,7 +596,7 @@ namespace ApplicationShell {
     /**
      * The contents of the main application dock panel.
      */
-    readonly dock: DockLayout.ILayoutConfigV1 | null;
+    readonly dock: DockLayout.ILayoutConfig | null;
   };
 
   /**
