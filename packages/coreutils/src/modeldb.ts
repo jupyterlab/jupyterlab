@@ -10,8 +10,17 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  ObservableMap
+  IObservableMap, ObservableMap
 } from './observablemap';
+
+import {
+  IObservableString, ObservableString
+} from './observablestring';
+
+import {
+  IObservableVector, ObservableVector
+} from './observablevector';
+
 
 export
 interface IObservable {
@@ -53,12 +62,20 @@ interface IModelDB {
 
   set(path: string, value: IObservable): void;
 
+  createString(): IObservableString;
+
+  createVector<T extends JSONValue>(): IObservableVector<T>;
+
+  createMap<T extends JSONValue>(): IObservableMap<T>;
+
+  createValue(): IObservableValue;
+
   view(basePath: string): IModelDB;
 }
 
 export
 class ObservableValue implements IObservableValue {
-  constructor(initialValue: JSONValue) {
+  constructor(initialValue?: JSONValue) {
     this._value = initialValue;
   }
 
@@ -128,6 +145,22 @@ class ModelDB implements IModelDB {
     } else {
       this._db.set(this._basePath+'/'+path, value);
     }
+  }
+
+  createString(): IObservableString {
+    return new ObservableString();
+  }
+
+  createVector(): IObservableVector<JSONValue> {
+    return new ObservableVector<JSONValue>();
+  }
+
+  createMap(): IObservableMap<JSONValue> {
+    return new ObservableMap<JSONValue>();
+  }
+
+  createValue(): IObservableValue {
+    return new ObservableValue();
   }
 
   view(basePath: string): ModelDB {

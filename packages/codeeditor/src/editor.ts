@@ -44,7 +44,7 @@ namespace CodeEditor {
    * A zero-based position in the editor.
    */
   export
-  interface IPosition {
+  interface IPosition extends JSONObject {
     /**
      * The cursor line number.
      */
@@ -82,7 +82,7 @@ namespace CodeEditor {
    * A range.
    */
   export
-  interface IRange {
+  interface IRange extends JSONObject {
     /**
      * The position of the first character in the current range.
      *
@@ -106,7 +106,7 @@ namespace CodeEditor {
    * A selection style.
    */
   export
-  interface ISelectionStyle {
+  interface ISelectionStyle extends JSONObject {
     /**
      * A class name added to a selection.
      */
@@ -190,15 +190,18 @@ namespace CodeEditor {
      */
     constructor(options?: Model.IOptions) {
       options = options || {};
-      let value = new ObservableString(options.value);
-      let mimeType = new ObservableValue(options.mimeType || 'text/plain');
-      let selections = new ObservableMap<ITextSelection[]>();
 
       if(options.modelDB) {
         this._modelDB = options.modelDB;
       } else {
         this._modelDB = new ModelDB();
       }
+
+      let value = this._modelDB.createString();
+      value.text = options.value || '';
+      let mimeType = this._modelDB.createValue();
+      mimeType.set(options.mimeType || 'text/plain');
+      let selections = this._modelDB.createMap<ITextSelection[]>();
 
       this._modelDB.set('value', value);
       this._modelDB.set('selections', selections);
