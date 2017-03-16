@@ -17,6 +17,7 @@
     "@phosphor/signaling": "^0.1.2",
     "@phosphor/virtualdom": "^0.1.1",
     "@phosphor/widgets": "^0.3.0",
+    "@types/d3-dsv": "^1.0.30",
     "d3-dsv": "^1.0.5"
   },
   "devDependencies": {
