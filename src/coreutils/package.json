@@ -1,0 +1,42 @@
+{
+  "name": "@jupyterlab/coreutils",
+  "version": "0.1.0",
+  "description": "JupyterLab - Core Utilities",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js"
+  ],
+  "directories": {
+    "lib": "lib/"
+  },
+  "dependencies": {
+    "@phosphor/algorithm": "^0.1.1",
+    "@phosphor/coreutils": "^0.1.5",
+    "@phosphor/disposable": "^0.1.1",
+    "@phosphor/messaging": "^0.1.2",
+    "@phosphor/signaling": "^0.1.2",
+    "moment": "^2.17.1",
+    "path-posix": "^1.0.0",
+    "url-parse": "^1.1.8"
+  },
+  "devDependencies": {
+    "rimraf": "^2.5.2",
+    "typescript": "^2.2.1"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "author": "Project Jupyter",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "homepage": "https://github.com/jupyterlab/jupyterlab"
+}
