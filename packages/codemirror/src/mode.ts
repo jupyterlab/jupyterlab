@@ -5,7 +5,7 @@ import * as CodeMirror
   from 'codemirror';
 
 import 'codemirror/mode/meta';
-import 'codemirror/addons/runmode';
+import 'codemirror/addon/runmode/runmode';
 
 import './codemirror-ipython';
 import './codemirror-ipythongfm';
@@ -111,7 +111,7 @@ function requireMode(mode: string | IModeSpec): Promise<IModeSpec> {
 
   // Fetch the mode asynchronously.
   return new Promise<CodeMirror.modespec>((resolve, reject) => {
-    require([`codemirror/mode/${info.mode}/${info.mode}`], () => {
+    require([`codemirror/mode/${info.mode}/${info.mode}.js`], () => {
       resolve(info);
     });
   });

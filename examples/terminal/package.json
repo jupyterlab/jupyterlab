@@ -6,10 +6,11 @@
     "clean": "rimraf build"
   },
   "dependencies": {
-    "@jupyterlab/terminal": "^0.1.0",
     "@jupyterlab/default-theme": "^0.1.0",
     "@jupyterlab/services": "^0.40.1",
-    "@phosphor/widgets": "^0.3.0"
+    "@jupyterlab/terminal": "^0.1.0",
+    "@phosphor/widgets": "^0.3.0",
+    "webpack": "^2.2.1"
   },
   "devDependencies": {
     "css-loader": "^0.23.1",
