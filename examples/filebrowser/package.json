@@ -18,7 +18,7 @@
     "@jupyterlab/default-theme": "^0.1.0",
     "@jupyterlab/services": "^0.39.0",
     "@phosphor/commands": "^0.1.2",
-    "@phosphor/widgets": "^0.2.0",
+    "@phosphor/widgets": "^0.2.0"
   },
   "devDependencies": {
     "css-loader": "^0.23.1",
