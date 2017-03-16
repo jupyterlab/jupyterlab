@@ -11,7 +11,7 @@ import {
 
 import {
   ABCWidgetFactory, DocumentRegistry
-} from '../docregistry';
+} from '@jupyterlab/docregistry';
 
 /**
  * The class name added to a imagewidget.
