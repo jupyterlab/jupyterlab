@@ -1,7 +1,7 @@
 {
   "name": "@jupyterlab/apputils",
   "version": "0.1.0",
-  "description": "JupyterLab - Application Utitlities",
+  "description": "JupyterLab - Application Utilities",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
