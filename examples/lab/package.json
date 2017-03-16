@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "jupyterlab-example",
+  "name": "jupyterlab-example-app",
   "scripts": {
     "build": "webpack --config webpack.conf.js",
     "clean": "rimraf build && rimraf node_modules"
@@ -39,6 +39,6 @@
     "rimraf": "^2.5.2",
     "url-loader": "^0.5.7",
     "watch": "^0.18.0",
-    "webpack": "^1.13.1"
+    "webpack": "^1.13.0"
   }
 }

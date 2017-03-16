@@ -16,7 +16,7 @@
     "@phosphor/application": "^0.2.0",
     "@phosphor/coreutils": "^0.1.5",
     "@phosphor/signaling": "^0.1.2",
-    "@phosphor/widgets": "^0.2.0",
+    "@phosphor/widgets": "^0.3.0",
     "semver": "^5.3.0"
   },
   "devDependencies": {

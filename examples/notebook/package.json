@@ -11,17 +11,17 @@
     "@jupyterlab/notebook": "^0.1.0",
     "@jupyterlab/rendermime": "^0.1.0",
     "@jupyterlab/default-theme": "^0.1.0",
-    "@jupyterlab/services": "^0.39.1",
-    "@phosphor/commands": "^0.1.2",
-    "@phosphor/widgets": "^0.2.0"
+    "@jupyterlab/services": "^0.40.1",
+    "@phosphor/commands": "^0.1.5",
+    "@phosphor/widgets": "^0.3.0"
   },
   "devDependencies": {
-    "concurrently": "^2.0.0",
     "css-loader": "^0.23.1",
     "file-loader": "^0.9.0",
     "rimraf": "^2.5.2",
     "style-loader": "^0.13.1",
-    "typescript": "^2.0.3",
+    "typescript": "^2.2.1",
+    "url-loader": "^0.5.7",
     "watch": "^0.18.0",
     "webpack": "^1.13.0"
   }
