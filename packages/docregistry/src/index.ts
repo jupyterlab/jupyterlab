@@ -3,6 +3,5 @@
 
 export * from './context';
 export * from './default';
-export * from './kernelactions';
 export * from './kernelselector';
 export * from './registry';

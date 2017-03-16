@@ -22,6 +22,16 @@ declare var require: any;
 
 
 /**
+ * Find a mode name by extension.
+ */
+export
+function findModeByExension(ext: string): string {
+  let mode = findModeByExtension(ext);
+  return mode && mode.mode;
+}
+
+
+/**
  * Load a codemirror mode by file name.
  */
 export

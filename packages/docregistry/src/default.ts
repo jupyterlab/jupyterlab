@@ -1,10 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as CodeMirror
-  from 'codemirror';
-
-import 'codemirror/mode/meta';
+import {
+  findModeByExtension
+} from '@jupyterlab/codemirror';
 
 import {
   Contents
@@ -229,10 +228,7 @@ class TextModelFactory implements DocumentRegistry.CodeModelFactory {
    * Get the preferred kernel language given an extension.
    */
   preferredLanguage(ext: string): string {
-    let mode = CodeMirror.findModeByExtension(ext.slice(1));
-    if (mode) {
-      return mode.mode;
-    }
+    return findModeByExtension(ext.slice(1));
   }
 
   private _isDisposed = false;
