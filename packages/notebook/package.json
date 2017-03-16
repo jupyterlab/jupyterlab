@@ -14,7 +14,6 @@
   "dependencies": {
     "@jupyterlab/apputils": "^0.1.0",
     "@jupyterlab/cells": "^0.1.0",
-    "@jupyterlab/cells/model": "^0.1.0",
     "@jupyterlab/codeeditor": "^0.1.0",
     "@jupyterlab/coreutils": "^0.1.0",
     "@jupyterlab/docregistry": "^0.1.0",
