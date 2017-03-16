@@ -36,6 +36,11 @@ import {
   loadModeByMIME
 } from './';
 
+import 'codemirror/addon/edit/matchbrackets.js';
+import 'codemirror/addon/edit/closebrackets.js';
+import 'codemirror/addon/comment/comment.js';
+import 'codemirror/keymap/vim.js';
+
 
 /**
  * The class name added to CodeMirrorWidget instances.

@@ -1,34 +1,29 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import 'codemirror/addon/edit/matchbrackets.js';
-import 'codemirror/addon/edit/closebrackets.js';
-import 'codemirror/addon/comment/comment.js';
-import 'codemirror/keymap/vim.js';
-
 import {
   Menu
 } from '@phosphor/widgets';
 
 import {
   JupyterLab, JupyterLabPlugin
-} from '../application';
+} from '@jupyterlab/application';
 
 import {
   ICommandPalette, IMainMenu
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   IEditorServices
-} from '../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   editorServices, CodeMirrorEditor
-} from '../codemirror';
+} from '@jupyterlab/codemirror';
 
 import {
   IEditorTracker
-} from '../editorwidget';
+} from '@jupyterlab/editorwidget';
 
 
 /**
