@@ -34,12 +34,8 @@ import {
 } from '../coreutils';
 
 import {
-  findKernel
-} from '../docregistry';
-
-import {
-  DocumentRegistry
-} from '../docregistry';
+  findKernel, DocumentRegistry
+} from '.';
 
 
 /**

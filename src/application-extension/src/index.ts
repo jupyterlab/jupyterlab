@@ -3,11 +3,11 @@
 
 import {
   JupyterLab, JupyterLabPlugin
-} from '../application';
+} from '../../application';
 
 import {
   ICommandPalette
-} from '../apputils';
+} from '../../apputils';
 
 
 /**
