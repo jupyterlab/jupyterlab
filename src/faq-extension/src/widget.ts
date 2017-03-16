@@ -11,7 +11,7 @@ import {
 
 import {
   ICommandLinker, VDomModel, VDomWidget
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 
 /**

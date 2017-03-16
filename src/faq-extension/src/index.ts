@@ -3,11 +3,11 @@
 
 import {
   JupyterLab, JupyterLabPlugin
-} from '../application';
+} from '@jupyterlab/application';
 
 import {
   ICommandLinker, ICommandPalette, ILayoutRestorer, InstanceTracker
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   FaqModel, FaqWidget
