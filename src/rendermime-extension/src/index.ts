@@ -3,19 +3,19 @@
 
 import {
   JupyterLabPlugin, JupyterLab
-} from '../application';
+} from '@jupyterlab/application';
 
 import {
   ICommandLinker
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   URLExt
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   IRenderMime, RenderMime
-} from '../rendermime';
+} from '@jupyterlab/rendermime';
 
 
 /**
