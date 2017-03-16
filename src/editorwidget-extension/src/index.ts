@@ -3,23 +3,23 @@
 
 import {
   JupyterLab, JupyterLabPlugin
-} from '../application';
+} from '@jupyterlab/application';
 
 import {
   ILayoutRestorer, InstanceTracker
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   IEditorServices
-} from '../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   IDocumentRegistry
-} from '../docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   IEditorTracker, EditorWidget, EditorWidgetFactory, addDefaultCommands
-} from '../editorwidget';
+} from '@jupyterlab/editorwidget';
 
 
 /**
