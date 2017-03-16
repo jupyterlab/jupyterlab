@@ -72,19 +72,17 @@ describe('ImageWidget', () => {
   let manager: ServiceManager.IManager;
   let widget: LogImage;
 
-  before((done) => {
+  before(() => {
     manager = new ServiceManager();
-    manager.ready.then(() => {
+    return manager.ready.then(() => {
       return manager.contents.save(IMAGE.path, IMAGE);
-    }).then(() => {
-      done();
-    }).catch(done);
+    });
   });
 
-  beforeEach((done) => {
+  beforeEach(() => {
     context = new Context({ manager, factory, path: IMAGE.path });
     widget = new LogImage(context);
-    return context.revert().then(done, done);
+    return context.revert();
   });
 
   afterEach(() => {
@@ -104,7 +102,7 @@ describe('ImageWidget', () => {
         expect(widget.title.label).to.be(newPath);
         done();
       });
-      return manager.contents.rename(context.path, newPath).catch(done);
+      manager.contents.rename(context.path, newPath).catch(done);
     });
 
     it('should set the content after the context is ready', (done) => {

@@ -26,12 +26,12 @@ describe('filebrowser/model', () => {
     manager = new ServiceManager();
   });
 
-  beforeEach((done) => {
+  beforeEach(() => {
     model = new FileBrowserModel({ manager });
-    model.newUntitled({ type: 'file' }).then(contents => {
+    return model.newUntitled({ type: 'file' }).then(contents => {
       name = contents.name;
       return model.cd();
-    }).then(done, done);
+    });
   });
 
   afterEach(() => {
@@ -365,11 +365,11 @@ describe('filebrowser/model', () => {
 
     describe('#shutdown()', () => {
 
-      it('should shut down a session by session id', (done) => {
+      it('should shut down a session by session id', () => {
         let length = 0;
         let sessions = manager.sessions;
         length = toArray(sessions.running()).length;
-        model.newUntitled({ type: 'notebook' }).then(contents => {
+        return model.newUntitled({ type: 'notebook' }).then(contents => {
           return sessions.startNew({ path: contents.path });
         }).then(session => {
           session.dispose();
@@ -378,8 +378,7 @@ describe('filebrowser/model', () => {
           return sessions.refreshRunning();
         }).then(() => {
           expect(toArray(sessions.running()).length).to.be(length);
-          done();
-        }).catch(done);
+        });
       });
 
     });

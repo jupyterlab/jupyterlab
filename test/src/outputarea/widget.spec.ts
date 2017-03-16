@@ -173,13 +173,11 @@ describe('outputarea/widget', () => {
 
       let kernel: Kernel.IKernel;
 
-      beforeEach((done) => {
-        Kernel.startNew().then(k => {
+      beforeEach(() => {
+        return Kernel.startNew().then(k => {
           kernel = k;
           return kernel.ready;
-        }).then(() => {
-          done();
-        }).catch(done);
+        });
       });
 
       it('should execute code on a kernel and send outputs to the model', () => {
@@ -259,8 +257,8 @@ describe('outputarea/widget', () => {
 
       describe('#createStdin()', () => {
 
-        it('should create a stdin widget', (done) => {
-          Kernel.startNew().then(kernel => {
+        it('should create a stdin widget', () => {
+          return Kernel.startNew().then(kernel => {
             let factory = new OutputAreaWidget.ContentFactory();
             let options = {
               prompt: 'hello',
@@ -269,7 +267,7 @@ describe('outputarea/widget', () => {
             };
             expect(factory.createStdin(options)).to.be.a(Widget);
             kernel.dispose();
-          }).then(done, done);
+          });
         });
 
       });
