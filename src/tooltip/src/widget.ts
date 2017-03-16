@@ -19,15 +19,15 @@ import {
 
 import {
   CodeEditor
-} from '../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   HoverBox
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   IRenderMime, MimeModel
-} from '../rendermime';
+} from '@jupyterlab/rendermime';
 
 
 /**

@@ -15,11 +15,11 @@ import  {
 
 import {
   CodeEditor
-} from '../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   IRenderMime
-} from '../rendermime';
+} from '@jupyterlab/rendermime';
 
 
 export * from './widget';
