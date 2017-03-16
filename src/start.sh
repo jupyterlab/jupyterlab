@@ -6,7 +6,7 @@ cp package.json $1
 cd $1
 mkdir src
 git mv *.ts src
-PATTERN=(/*.css)
+PATTERN=(./*.css)
 if [ -f ${PATTERN[0]} ]; then
     mkdir style
     git mv *.css style

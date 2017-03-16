@@ -3,19 +3,19 @@
 
 import {
   IChangedArgs
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   ABCWidgetFactory, DocumentRegistry
-} from '../docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   CodeEditor, IEditorServices, IEditorMimeTypeService
-} from '../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   CodeEditorWidget
-} from '../codeeditor/widget';
+} from '@jupyterlab/codeeditor/widget';
 
 
 /**
