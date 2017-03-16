@@ -6,12 +6,38 @@
   "types": "lib/index.d.ts",
   "files": [
     "lib/*.d.ts",
-    "lib/*.js"
+    "lib/*.js",
+    "style/*.css",
+    "style/images/*.*",
+    "style/icons/*.*"
   ],
   "directories": {
     "lib": "lib/"
   },
   "dependencies": {
+    "@jupyterlab/about-extension": "^0.1.0",
+    "@jupyterlab/application-extension": "^0.1.0",
+    "@jupyterlab/apputils-extension": "^0.1.0",
+    "@jupyterlab/codemirror-extension": "^0.1.0",
+    "@jupyterlab/completer-extension": "^0.1.0",
+    "@jupyterlab/console-extension": "^0.1.0",
+    "@jupyterlab/csvwidget-extension": "^0.1.0",
+    "@jupyterlab/editorwidget-extension": "^0.1.0",
+    "@jupyterlab/faq-extension": "^0.1.0",
+    "@jupyterlab/filebrowser-extension": "^0.1.0",
+    "@jupyterlab/help-extension": "^0.1.0",
+    "@jupyterlab/imagewidget-extension": "^0.1.0",
+    "@jupyterlab/inspector-extension": "^0.1.0",
+    "@jupyterlab/landing-extension": "^0.1.0",
+    "@jupyterlab/launcher-extension": "^0.1.0",
+    "@jupyterlab/markdownwidget-extension": "^0.1.0",
+    "@jupyterlab/notebook-extension": "^0.1.0",
+    "@jupyterlab/rendermime-extension": "^0.1.0",
+    "@jupyterlab/running-extension": "^0.1.0",
+    "@jupyterlab/services-extension": "^0.1.0",
+    "@jupyterlab/shortcuts-extension": "^0.1.0",
+    "@jupyterlab/terminal-extension": "^0.1.0",
+    "@jupyterlab/tooltip-extension": "^0.1.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",

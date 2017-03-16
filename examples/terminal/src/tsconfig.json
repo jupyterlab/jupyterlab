@@ -10,7 +10,6 @@
         "outDir": "../build"
     },
     "files": [
-        "index.ts",
-        "typings.d.ts"
+        "index.ts"
     ]
 }

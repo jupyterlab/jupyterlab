@@ -8,31 +8,31 @@
 @import './variables.css';
 
 /* Main application (1st) */
-@import '../application/index.css';
+@import '~@jupyterlab/application/style/index.css';
 
 /* Individual plugins */
-@import '../apputils/index.css';
-@import '../about-extension/index.css';
-@import '../cells/index.css';
-@import '../codemirror/index.css';
-@import '../completer/index.css';
-@import '../console/index.css';
-@import '../csvwidget/index.css';
-@import '../editorwidget/index.css';
-@import '../faq-extension/index.css';
-@import '../filebrowser/index.css';
-@import '../help-extension/index.css';
-@import '../imagewidget/index.css';
-@import '../inspector/index.css';
-@import '../landing-extension/index.css';
-@import '../launcher/index.css';
-@import '../markdownwidget/index.css';
-@import '../notebook/index.css';
-@import '../outputarea/index.css';
-@import '../renderers/index.css';
-@import '../running/index.css';
-@import '../terminal/index.css';
-@import '../tooltip/index.css';
+@import '~@jupyterlab/apputils/style/index.css';
+@import '~@jupyterlab/about-extension/style/index.css';
+@import '~@jupyterlab/cells/style/index.css';
+@import '~@jupyterlab/codemirror/style/index.css';
+@import '~@jupyterlab/completer/style/index.css';
+@import '~@jupyterlab/console/style/index.css';
+@import '~@jupyterlab/csvwidget/style/index.css';
+@import '~@jupyterlab/editorwidget/style/index.css';
+@import '~@jupyterlab/faq-extension/style/index.css';
+@import '~@jupyterlab/filebrowser/style/index.css';
+@import '~@jupyterlab/help-extension/style/index.css';
+@import '~@jupyterlab/imagewidget/style/index.css';
+@import '~@jupyterlab/inspector/style/index.css';
+@import '~@jupyterlab/landing-extension/style/index.css';
+@import '~@jupyterlab/launcher/style/index.css';
+@import '~@jupyterlab/markdownwidget/style/index.css';
+@import '~@jupyterlab/notebook/style/index.css';
+@import '~@jupyterlab/outputarea/style/index.css';
+@import '~@jupyterlab/rendermime/style/index.css';
+@import '~@jupyterlab/running/style/index.css';
+@import '~@jupyterlab/terminal/style/index.css';
+@import '~@jupyterlab/tooltip/style/index.css';
 
 
 /* Theme images */
