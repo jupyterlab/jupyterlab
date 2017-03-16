@@ -15,36 +15,36 @@ import {
 
 import {
   JupyterLab, JupyterLabPlugin
-} from '../application';
+} from '@jupyterlab/application';
 
 import {
   Dialog, ICommandPalette, InstanceTracker, ILayoutRestorer, IMainMenu,
   showDialog
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   IEditorServices
-} from '../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   PathExt, Time, uuid
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   IConsoleTracker, ICreateConsoleArgs, ConsolePanel
-} from '../console';
+} from '@jupyterlab/console';
 
 import {
   selectKernel
-} from '../docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   IPathTracker
-} from '../filebrowser';
+} from '@jupyterlab/filebrowser';
 
 import {
   IRenderMime, RenderMime
-} from '../rendermime';
+} from '@jupyterlab/rendermime';
 
 
 /**
