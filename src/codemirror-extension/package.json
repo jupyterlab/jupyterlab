@@ -1,7 +1,7 @@
 {
-  "name": "@jupyterlab/codemirror",
+  "name": "@jupyterlab/codemirror-extension",
   "version": "0.1.0",
-  "description": "JupyterLab - CodeMirror Editor Provider",
+  "description": "JupyterLab - CodeMirror Provider Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
@@ -11,14 +11,7 @@
   "directories": {
     "lib": "lib/"
   },
-  "dependencies": {
-    "@jupyterlab/codeeditor": "^0.1.0",
-    "@jupyterlab/coreutils": "^0.1.0",
-    "@phosphor/algorithm": "^0.1.1",
-    "@phosphor/disposable": "^0.1.1",
-    "@phosphor/signaling": "^0.1.2",
-    "codemirror": "^5.24.2"
-  },
+  "dependencies": {},
   "devDependencies": {
     "rimraf": "^2.5.2",
     "typescript": "^2.2.1"
