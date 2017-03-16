@@ -3,11 +3,11 @@
 
 import {
   JupyterLab, JupyterLabPlugin
-} from '../application';
+} from '@jupyterlab/application';
 
 import {
   ILayoutRestorer
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   IServiceManager
@@ -15,7 +15,7 @@ import {
 
 import {
   RunningSessions, CONSOLE_REGEX
-} from '../running';
+} from '@jupyterlab/running';
 
 
 /**
