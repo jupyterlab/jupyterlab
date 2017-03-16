@@ -3,23 +3,23 @@
 
 import {
   JupyterLab, JupyterLabPlugin
-} from '../application';
+} from '@jupyterlab/application';
 
 import {
   ILayoutRestorer, InstanceTracker
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   IDocumentRegistry
-} from '../docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   IRenderMime
-} from '../rendermime';
+} from '@jupyterlab/rendermime';
 
 import {
   MarkdownWidget, MarkdownWidgetFactory
-} from '../markdownwidget';
+} from '@jupyterlab/markdownwidget';
 
 
 /**
