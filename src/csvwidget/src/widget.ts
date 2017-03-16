@@ -19,7 +19,7 @@ import {
 
 import {
   ABCWidgetFactory, DocumentRegistry
-} from '../docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   CSVModel, CSVTable
