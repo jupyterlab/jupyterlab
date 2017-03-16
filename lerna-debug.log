@@ -1,0 +1,194 @@
+lerna(verbose) GitUtilities.isInitialized    ()
+lerna(verbose) GitUtilities.isInitialized    () => true
+lerna(verbose) GitUtilities.getTopLevelDirectory()
+lerna(verbose) GitUtilities.getTopLevelDirectory() => "."
+lerna(verbose) FileSystemUtilities.existsSync("./lerna.json")
+lerna(verbose) FileSystemUtilities.existsSync("./lerna.json") => true
+lerna(verbose) FileSystemUtilities.readFileSync("./lerna.json")
+lerna(verbose) FileSystemUtilities.readFileSync("./lerna.json") => "{\n  \"lerna\": \"2.0.0-beta.38\",\n  \"packages\": [\n    \"jupyterlab/*\",\n    \"examples/*\",\n    \"packages/*\",\n    \"tests/*\"\n  ],\n  \"version\": \"independent\"\n}"
+lerna(verbose) FileSystemUtilities.existsSync("./package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./package.json") => true
+lerna(verbose) FileSystemUtilities.readFileSync("./package.json")
+lerna(verbose) FileSystemUtilities.readFileSync("./package.json") => "{\n  \"private\": true,\n  \"dependencies\": {\n    \"lerna\": \"^2.0.0-beta.38\"\n  },\n  \"devDependencies\": {\n    \"lerna\": \"2.0.0-beta.38\"\n  },\n  \"scripts\": {\n    \"install\": \"lerna bootstrap --hoist\",\n    \"build\": \"lerna run build\",\n    \"build:examples\": \"lerna run build --scope \\\"@jupyterlab/example-*\\\"\",\n    \"build:src\": \"lerna run build --scope \\\"@jupyterlab/!(test-|example-)*\\\"\",\n    \"build:tests\": \"lerna run build --scope \\\"@jupyterlab/test-*\\\"\",\n    \"clean\": \"lerna run clean\",\n    \"clean:examples\": \"lerna run clean --scope \\\"@jupyterlab/example-*\\\"\",\n    \"clean:src\": \"lerna run clean --scope \\\"@jupyterlab/!(test-|example-)*\\\"\",\n    \"clean:tests\": \"lerna run clean --scope \\\"@jupyterlab/test-*\\\"\",\n    \"test\": \"lerna run test --scope \\\"@jupyterlab/test-*\\\"\",\n    \"test:chrome\": \"lerna run test:chrome --scope \\\"@jupyterlab/test-*\\\"\",\n    \"test:firefox\": \"lerna run test:firefox --scope \\\"@jupyterlab/test-*\\\"\",\n    \"test:ie\": \"lerna run test:ie --concurrency 1 --scope \\\"@jupyterlab/test-*\\\"\",\n    \"publish\": \"npm run clean && npm run build && lerna publish -m \\\"Publish\\\"\"\n  }\n}"
+lerna(info)    Lerna v2.0.0-beta.38
+lerna(info)    Independent Versioning Mode
+lerna(verbose) FileSystemUtilities.existsSync("./package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./lerna.json")
+lerna(verbose) FileSystemUtilities.existsSync("./lerna.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./VERSION")
+lerna(verbose) FileSystemUtilities.existsSync("./VERSION") => false
+lerna(verbose) FileSystemUtilities.existsSync("./examples/console/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./examples/console/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./examples/filebrowser/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./examples/filebrowser/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./examples/lab/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./examples/lab/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./examples/notebook/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./examples/notebook/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./examples/terminal/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./examples/terminal/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/about-extension/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/about-extension/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/application-extension/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/application-extension/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/application/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/application/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/apputils-extension/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/apputils-extension/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/apputils/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/apputils/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/cells/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/cells/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/codeeditor/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/codeeditor/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/codemirror-extension/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/codemirror-extension/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/codemirror/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/codemirror/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/completer-extension/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/completer-extension/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/completer/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/completer/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/console-extension/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/console-extension/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/console/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/console/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/coreutils/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/coreutils/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/csvwidget-extension/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/csvwidget-extension/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/csvwidget/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/csvwidget/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/default-theme/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/default-theme/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/docmanager-extension/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/docmanager-extension/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/docmanager/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/docmanager/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/docregistry-extension/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/docregistry-extension/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/docregistry/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/docregistry/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/editorwidget-extension/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/editorwidget-extension/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/editorwidget/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/editorwidget/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/faq-extension/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/faq-extension/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/filebrowser-extension/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/filebrowser-extension/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/filebrowser/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/filebrowser/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/help-extension/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/help-extension/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/imagewidget-extension/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/imagewidget-extension/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/imagewidget/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/imagewidget/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/inspector-extension/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/inspector-extension/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/inspector/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/inspector/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/landing-extension/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/landing-extension/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/launcher-extension/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/launcher-extension/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/launcher/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/launcher/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/markdownwidget-extension/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/markdownwidget-extension/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/markdownwidget/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/markdownwidget/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/notebook-extension/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/notebook-extension/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/notebook/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/notebook/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/outputarea/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/outputarea/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/rendermime-extension/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/rendermime-extension/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/rendermime/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/rendermime/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/running-extension/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/running-extension/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/running/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/running/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/services-extension/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/services-extension/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/shortcuts-extension/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/shortcuts-extension/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/terminal-extension/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/terminal-extension/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/terminal/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/terminal/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/tooltip-extension/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/tooltip-extension/package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./packages/tooltip/package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./packages/tooltip/package.json") => true
+lerna(verbose) Attempting running RunCommand.initialize
+lerna(verbose) Successfully ran RunCommand.initialize
+lerna(verbose) Attempting running RunCommand.execute
+lerna(verbose) NpmUtilities.runScriptInDir   ("build", [], "./packages/application")
+lerna(verbose) NpmUtilities.execInDir        ("run build", [], "./packages/application")
+lerna(verbose) NpmUtilities.runScriptInDir   ("build", [], "./packages/codemirror-extension")
+lerna(verbose) NpmUtilities.execInDir        ("run build", [], "./packages/codemirror-extension")
+lerna(verbose) NpmUtilities.runScriptInDir   ("build", [], "./packages/coreutils")
+lerna(verbose) NpmUtilities.execInDir        ("run build", [], "./packages/coreutils")
+lerna(verbose) NpmUtilities.runScriptInDir   ("build", [], "./packages/csvwidget")
+lerna(verbose) NpmUtilities.execInDir        ("run build", [], "./packages/csvwidget")
+lerna(error)   NpmUtilities.execInDir        ("run build", [], "./packages/codemirror-extension")
+    Error: Command failed: npm run build 
+    
+    npm ERR! Darwin 16.4.0
+    npm ERR! argv "/usr/local/bin/node" "/usr/local/bin/npm" "run" "build"
+    npm ERR! node v6.9.3
+    npm ERR! npm  v3.10.10
+    npm ERR! code ELIFECYCLE
+    npm ERR! @jupyterlab/codemirror-extension@0.1.0 build: `tsc`
+    npm ERR! Exit status 1
+    npm ERR! 
+    npm ERR! Failed at the @jupyterlab/codemirror-extension@0.1.0 build script 'tsc'.
+    npm ERR! Make sure you have the latest version of node.js and npm installed.
+    npm ERR! If you do, this is most likely a problem with the @jupyterlab/codemirror-extension package,
+    npm ERR! not with npm itself.
+    npm ERR! Tell the author that this fails on your system:
+    npm ERR!     tsc
+    npm ERR! You can get information on how to open an issue for this project with:
+    npm ERR!     npm bugs @jupyterlab/codemirror-extension
+    npm ERR! Or if that isn't available, you can get their info via:
+    npm ERR!     npm owner ls @jupyterlab/codemirror-extension
+    npm ERR! There is likely additional logging output above.
+    
+    npm ERR! Please include the following file with any support request:
+    npm ERR!     /Users/ssilvester/workspace/jupyter/lab/packages/codemirror-extension/npm-debug.log
+    
+        at ChildProcess.exithandler (child_process.js:206:12)
+        at emitTwo (events.js:106:13)
+        at ChildProcess.emit (events.js:191:7)
+        at maybeClose (internal/child_process.js:877:16)
+        at Socket.<anonymous> (internal/child_process.js:334:11)
+        at emitOne (events.js:96:13)
+        at Socket.emit (events.js:188:7)
+        at Pipe._handle.close [as _onclose] (net.js:498:12)
+lerna(error)   
+> @jupyterlab/codemirror-extension@0.1.0 build /Users/ssilvester/workspace/jupyter/lab/packages/codemirror-extension
+> tsc
+
+error TS18003: No inputs were found in config file '/Users/ssilvester/workspace/jupyter/lab/packages/codemirror-extension/tsconfig.json'. Specified 'include' paths were '["src/*"]' and 'exclude' paths were '["./lib"]'.
+
+lerna(error)   NpmUtilities.runScriptInDir   ("build", [], "./packages/codemirror-extension")
+lerna(error)   
+> @jupyterlab/codemirror-extension@0.1.0 build /Users/ssilvester/workspace/jupyter/lab/packages/codemirror-extension
+> tsc
+
+error TS18003: No inputs were found in config file '/Users/ssilvester/workspace/jupyter/lab/packages/codemirror-extension/tsconfig.json'. Specified 'include' paths were '["src/*"]' and 'exclude' paths were '["./lib"]'.
+
+lerna(info)    
+> @jupyterlab/codemirror-extension@0.1.0 build /Users/ssilvester/workspace/jupyter/lab/packages/codemirror-extension
+> tsc
+
+error TS18003: No inputs were found in config file '/Users/ssilvester/workspace/jupyter/lab/packages/codemirror-extension/tsconfig.json'. Specified 'include' paths were '["src/*"]' and 'exclude' paths were '["./lib"]'.
+
+lerna(error)   Errored while running npm script 'build' in '@jupyterlab/codemirror-extension'
+lerna(error)   Errored while running RunCommand.execute
