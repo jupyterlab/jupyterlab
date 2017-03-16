@@ -434,7 +434,6 @@ class CompleterWidget extends Widget {
     }
 
     const editor = this._editor;
-    const { charWidth, lineHeight } = model.original;
     const position = editor.getPositionAt(model.cursor.start);
     const anchor = editor.getCoordinateForPosition(position) as ClientRect;
     const style = window.getComputedStyle(this.node);
