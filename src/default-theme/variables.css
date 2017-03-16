@@ -93,6 +93,9 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-code-padding: 5px;
   --jp-code-font-family: monospace;
 
+  --jp-prompt-font-family: var(--jp-code-font-family);
+  --jp-prompt-font-size: var(--jp-code-font-size);
+
 
   /* Layout
 

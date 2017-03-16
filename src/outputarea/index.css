@@ -66,11 +66,11 @@
 
 .jp-OutputAreaWidget-gutter {
   color: var(--jp-private-outputarea-prompt-color);
-  font-family: var(--jp-code-font-family);
+  font-family: var(--jp-prompt-font-family);
+  font-size: var(--jp-prompt-font-size);
   text-align: right;
   vertical-align: middle;
   padding: var(--jp-code-padding);
-  font-size: var(--jp-code-font-size);
   line-height: var(--jp-code-line-height);
   border: var(--jp-border-width) solid transparent;
   flex: 0 0 var(--jp-private-outputarea-prompt-width);
