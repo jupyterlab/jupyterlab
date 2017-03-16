@@ -15,10 +15,6 @@ import {
   VDomModel, VDomWidget
 } from '@jupyterlab/apputils';
 
-import {
-  HTML_COMMON_CLASS
-} from '@jupyterlab/renderers';
-
 
 /**
  * The hard limit on the number of rows to display.
@@ -159,7 +155,7 @@ class CSVTable extends VDomWidget<CSVModel> {
   constructor() {
     super();
     this.addClass(CSV_TABLE_CLASS);
-    this.addClass(HTML_COMMON_CLASS);
+    this.addClass('jp-RenderedHTMLCommon');
   }
 
   /**
