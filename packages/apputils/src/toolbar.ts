@@ -27,7 +27,7 @@ import {
 
 import {
   restartKernel
-} from '@jupyterlab/docregistry';
+} from './restartkernel';
 
 
 /**
