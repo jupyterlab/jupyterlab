@@ -86,7 +86,7 @@ describe('completer/handler', () => {
   });
 
   after(() => {
-    kernel.shutdown();
+    return kernel.shutdown();
   });
 
   describe('CompletionHandler', () => {
