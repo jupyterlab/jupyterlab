@@ -22,6 +22,6 @@
     "typescript": "^2.2.1",
     "url-loader": "^0.5.7",
     "watch": "^0.18.0",
-    "webpack": "^1.13.0"
+    "webpack": "^2.2.1"
   }
 }
