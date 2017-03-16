@@ -3,11 +3,11 @@
 
 import {
   JupyterLabPlugin
-} from '../application';
+} from '@jupyterlab/application';
 
 import {
   DocumentRegistry, IDocumentRegistry, TextModelFactory, Base64ModelFactory
-} from '../docregistry';
+} from '@jupyterlab/docregistry';
 
 
 /**
