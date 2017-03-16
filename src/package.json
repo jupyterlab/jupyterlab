@@ -1,0 +1,34 @@
+{
+  "name": "@jupyterlab/csvwidget",
+  "version": "0.1.0",
+  "description": "JupyterLab - CSV Widget",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js"
+  ],
+  "directories": {
+    "lib": "lib/"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "rimraf": "^2.5.2",
+    "typescript": "^2.2.1"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "author": "Project Jupyter",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "homepage": "https://github.com/jupyterlab/jupyterlab"
+}
