@@ -19,6 +19,10 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
+  restartKernel
+} from '@jupyterlab/apputils';
+
+import {
   editorServices
 } from '@jupyterlab/codemirror';
 
@@ -27,7 +31,7 @@ import {
 } from '@jupyterlab/docmanager';
 
 import {
-  DocumentRegistry, restartKernel, selectKernelForContext
+  DocumentRegistry, selectKernelForContext
 } from '@jupyterlab/docregistry';
 
 import {

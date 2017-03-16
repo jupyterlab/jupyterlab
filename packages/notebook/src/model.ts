@@ -12,10 +12,10 @@ import {
 import {
   ICellModel, ICodeCellModel, IRawCellModel, IMarkdownCellModel,
   CodeCellModel, RawCellModel, MarkdownCellModel, CellModel
-} from '@jupyterlab/cells/model';
+} from '@jupyterlab/cells';
 
 import {
-  IChangedArgs, IObservableJSON, ObservableJSON, IObservableUndoableVector,
+  IObservableJSON, ObservableJSON, IObservableUndoableVector,
   ObservableUndoableVector, IObservableVector, ObservableVector, nbformat
 } from '@jupyterlab/coreutils';
 

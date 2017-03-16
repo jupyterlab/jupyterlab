@@ -6,8 +6,10 @@
     "clean": "rimraf build && rimraf node_modules"
   },
   "dependencies": {
+    "@jupyterlab/apputils": "^0.1.0",
     "@jupyterlab/codemirror": "^0.1.0",
     "@jupyterlab/docmanager": "^0.1.0",
+    "@jupyterlab/docregistry": "^0.1.0",
     "@jupyterlab/notebook": "^0.1.0",
     "@jupyterlab/rendermime": "^0.1.0",
     "@jupyterlab/default-theme": "^0.1.0",
@@ -23,6 +25,6 @@
     "typescript": "^2.2.1",
     "url-loader": "^0.5.7",
     "watch": "^0.18.0",
-    "webpack": "^1.13.0"
+    "webpack": "^2.2.1"
   }
 }

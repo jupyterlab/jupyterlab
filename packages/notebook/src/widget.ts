@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ArrayExt, each, toArray
+  ArrayExt, each
 } from '@phosphor/algorithm';
 
 import {
@@ -28,10 +28,6 @@ import {
 import {
   Drag, IDragEvent
 } from '@phosphor/dragdrop';
-
-import {
-  ElementExt
-} from '@phosphor/domutils';
 
 import {
   PanelLayout

@@ -11,6 +11,7 @@ export * from './iframe';
 export * from './instancetracker';
 export * from './layoutrestorer';
 export * from './mainmenu';
+export * from './restartkernel';
 export * from './sanitizer';
 export * from './statedb';
 export * from './styling';

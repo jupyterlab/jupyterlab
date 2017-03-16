@@ -22,7 +22,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  JSONEditorWidget, Styling
+  Styling
 } from '@jupyterlab/apputils';
 
 import {
@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/cells';
 
 import {
-  CodeEditor, CodeEditorWidget
+  CodeEditor, CodeEditorWidget, JSONEditorWidget
 } from '@jupyterlab/codeeditor';
 
 import {
@@ -81,11 +81,6 @@ const COLLAPSED_CLASS = 'jp-mod-collapsed';
  * The class name added to a KeySelector instance.
  */
 const KEYSELECTOR_CLASS = 'jp-KeySelector';
-
-/**
- * The class name added to a wrapper that has focus.
- */
-const FOCUS_CLASS = 'jp-mod-focused';
 
 
 /* tslint:disable */
