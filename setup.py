@@ -28,6 +28,7 @@ PY3 = (sys.version_info[0] >= 3)
 #-----------------------------------------------------------------------------
 
 from distutils import log
+import io
 import json
 import os
 from glob import glob
@@ -107,7 +108,7 @@ except ImportError:
     pass
 
 
-setup_args['cmdclass'] = cmdclass
+#setup_args['cmdclass'] = cmdclass
 
 
 setuptools_args = {}

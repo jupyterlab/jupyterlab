@@ -9,6 +9,8 @@ import {
   JSONObject
 } from '@phosphor/coreutils';
 
+export * from './foreign';
+export * from './history';
 export * from './panel';
 export * from './tracker';
 export * from './widget';

@@ -1,5 +1,6 @@
 {
-  "private": true,
+  "name": "@jupyterlab/private",
+  "version": "0.1.0",
   "dependencies": {
   },
   "devDependencies": {
