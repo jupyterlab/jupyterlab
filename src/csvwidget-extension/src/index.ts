@@ -3,19 +3,19 @@
 
 import {
   JupyterLab, JupyterLabPlugin
-} from '../application';
+} from '@jupyterlab/application';
 
 import {
   ILayoutRestorer, InstanceTracker
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   CSVWidget, CSVWidgetFactory
-} from '../csvwidget';
+} from '@jupyterlab/csvwidget';
 
 import {
   IDocumentRegistry
-} from '../docregistry';
+} from '@jupyterlab/docregistry';
 
 
 /**
