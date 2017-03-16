@@ -21,7 +21,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IChangedArgs, uuid
+  uuid
 } from '@jupyterlab/coreutils';
 
 import {
