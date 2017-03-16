@@ -21,7 +21,7 @@ import {
 
 import {
   ABCWidgetFactory, DocumentRegistry, TextModelFactory
-} from '../../../lib/docregistry';
+} from '@jupyterlab/docregistry';
 
 
 class WidgetFactory extends ABCWidgetFactory<Widget, DocumentRegistry.IModel> {

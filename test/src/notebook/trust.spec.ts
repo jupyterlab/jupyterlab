@@ -5,11 +5,11 @@ import expect = require('expect.js');
 
 import {
  NotebookModel
-} from '../../../lib/notebook/model';
+} from '@jupyterlab/notebook/model';
 
 import {
   trustNotebook
-} from '../../../lib/notebook/trust';
+} from '@jupyterlab/notebook/trust';
 
 import {
   acceptDialog, dismissDialog

@@ -9,7 +9,7 @@ import {
 
 import {
   ObservableVector
-} from '../../../lib/coreutils';
+} from '@jupyterlab/coreutils';
 
 
 describe('common/ObservableVector', () => {

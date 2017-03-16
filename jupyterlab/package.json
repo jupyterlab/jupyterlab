@@ -3,7 +3,7 @@
   "name": "jupyterlab-main",
   "scripts": {
     "build": "tsc && webpack",
-    "clean": "rimraf build && rimraf node_modules"
+    "clean": "rimraf build"
   },
   "dependencies": {
     "@jupyterlab/about-extension": "^0.1.0",
@@ -35,6 +35,7 @@
     "font-awesome": "^4.6.3"
   },
   "devDependencies": {
+    "@jupyterlab/extension-builder": "^0.11.0",
     "file-loader": "^0.9.0",
     "rimraf": "^2.5.2",
     "url-loader": "^0.5.7",

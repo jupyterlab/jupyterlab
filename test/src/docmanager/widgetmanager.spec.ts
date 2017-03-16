@@ -17,11 +17,11 @@ import {
 
 import {
   DocumentWidgetManager
-} from '../../../lib/docmanager';
+} from '@jupyterlab/docmanager';
 
 import {
   DocumentRegistry, TextModelFactory, ABCWidgetFactory, Context
-} from '../../../lib/docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   acceptDialog, dismissDialog

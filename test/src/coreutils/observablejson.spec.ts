@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   IObservableJSON, ObservableJSON
-} from '../../../lib/coreutils';
+} from '@jupyterlab/coreutils';
 
 
 describe('coreutils', () => {

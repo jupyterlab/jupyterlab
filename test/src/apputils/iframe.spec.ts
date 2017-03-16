@@ -7,7 +7,7 @@ import {
 
 import {
   IFrameWidget
-} from '../../../lib/apputils';
+} from '@jupyterlab/apputils';
 
 
 describe('@jupyterlab/domutils', () => {

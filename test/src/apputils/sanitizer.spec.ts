@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   defaultSanitizer
-} from '../../../lib/apputils';
+} from '@jupyterlab/apputils';
 
 
 describe('defaultSanitizer', () => {

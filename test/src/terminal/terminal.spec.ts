@@ -21,7 +21,7 @@ import {
 
 import {
   TerminalWidget
-} from '../../../lib/terminal';
+} from '@jupyterlab/terminal';
 
 
 class LogTerminal extends TerminalWidget {

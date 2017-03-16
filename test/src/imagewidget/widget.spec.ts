@@ -17,11 +17,11 @@ import {
 
 import {
   Base64ModelFactory, Context, DocumentRegistry
-} from '../../../lib/docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   ImageWidget, ImageWidgetFactory
-} from '../../../lib/imagewidget';
+} from '@jupyterlab/imagewidget';
 
 import {
   createFileContext

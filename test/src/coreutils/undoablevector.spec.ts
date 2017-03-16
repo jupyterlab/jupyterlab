@@ -9,7 +9,7 @@ import {
 
 import {
   ObservableUndoableVector, ISerializable
-} from '../../../lib/coreutils';
+} from '@jupyterlab/coreutils';
 
 
 

@@ -10,7 +10,7 @@ import {
 import {
   ABCWidgetFactory, Base64ModelFactory, DocumentModel,
   DocumentRegistry, TextModelFactory, Context
-} from '../../../lib/docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   createFileContext

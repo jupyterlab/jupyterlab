@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   ModuleLoader
-} from '../../../lib/application';
+} from '@jupyterlab/application';
 
 
 describe('ModuleLoader', () => {

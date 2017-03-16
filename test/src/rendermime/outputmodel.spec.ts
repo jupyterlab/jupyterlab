@@ -5,11 +5,11 @@ import expect = require('expect.js');
 
 import {
   nbformat
-} from '../../../lib/coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   OutputModel
-} from '../../../lib/rendermime';
+} from '@jupyterlab/rendermime';
 
 import {
   DEFAULT_OUTPUTS

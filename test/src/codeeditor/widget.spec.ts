@@ -17,11 +17,11 @@ import {
 
 import {
   CodeEditor, CodeEditorWidget
-} from '../../../lib/codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   CodeMirrorEditor
-} from '../../../lib/codemirror';
+} from '@jupyterlab/codemirror';
 
 
 class LogEditor extends CodeMirrorEditor {

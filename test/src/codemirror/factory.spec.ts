@@ -5,11 +5,11 @@ import expect = require('expect.js');
 
 import {
   CodeEditor
-} from '../../../lib/codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   CodeMirrorEditorFactory, CodeMirrorEditor
-} from '../../../lib/codemirror';
+} from '@jupyterlab/codemirror';
 
 
 class ExposeCodeMirrorEditorFactory extends CodeMirrorEditorFactory {

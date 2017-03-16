@@ -21,15 +21,15 @@ import {
 
 import {
   DocumentManager
-} from '../../../lib/docmanager';
+} from '@jupyterlab/docmanager';
 
 import {
   DocumentRegistry, TextModelFactory, ABCWidgetFactory
-} from '../../../lib/docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   FileButtons, FileBrowserModel
-} from '../../../lib/filebrowser';
+} from '@jupyterlab/filebrowser';
 
 import {
   acceptDialog

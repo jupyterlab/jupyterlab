@@ -7,7 +7,7 @@ import {
 
 import {
   nbformat
-} from '../../../lib/coreutils';
+} from '@jupyterlab/coreutils';
 
 
 const VALIDATE = nbformat.validateMimeValue;

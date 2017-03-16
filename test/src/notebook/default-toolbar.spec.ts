@@ -17,31 +17,31 @@ import {
 
 import {
   Context, DocumentRegistry
-} from '../../../lib/docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
  CodeCellWidget, MarkdownCellWidget
-} from '../../../lib/cells/widget';
+} from '@jupyterlab/cells/widget';
 
 import {
   NotebookActions
-} from '../../../lib/notebook/actions';
+} from '@jupyterlab/notebook/actions';
 
 import {
  ToolbarItems
-} from '../../../lib/notebook/default-toolbar';
+} from '@jupyterlab/notebook/default-toolbar';
 
 import {
  INotebookModel
-} from '../../../lib/notebook/model';
+} from '@jupyterlab/notebook/model';
 
 import {
   JUPYTER_CELL_MIME
-} from '../../../lib/notebook/widget';
+} from '@jupyterlab/notebook/widget';
 
 import {
  NotebookPanel
-} from '../../../lib/notebook/panel';
+} from '@jupyterlab/notebook/panel';
 
 import {
   createNotebookContext

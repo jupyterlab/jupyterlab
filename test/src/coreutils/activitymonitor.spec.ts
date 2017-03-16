@@ -9,7 +9,7 @@ import {
 
 import {
   ActivityMonitor
-} from '../../../lib/coreutils';
+} from '@jupyterlab/coreutils';
 
 
 

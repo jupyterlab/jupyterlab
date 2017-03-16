@@ -21,11 +21,11 @@ import {
 
 import {
    TextRenderer
-} from '../../../lib/renderers';
+} from '@jupyterlab/renderers';
 
 import {
   MimeModel, RenderMime
-} from '../../../lib/rendermime';
+} from '@jupyterlab/rendermime';
 
 import {
   defaultRenderMime, createFileContext

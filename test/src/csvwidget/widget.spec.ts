@@ -9,15 +9,15 @@ import {
 
 import {
   CSVModel
-} from '../../../lib/csvwidget/table';
+} from '@jupyterlab/csvwidget/table';
 
 import {
   CSVWidget
-} from '../../../lib/csvwidget/widget';
+} from '@jupyterlab/csvwidget/widget';
 
 import {
   Context, DocumentRegistry, TextModelFactory
-} from '../../../lib/docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   CSV_DATA

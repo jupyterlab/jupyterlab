@@ -7,7 +7,7 @@ import {
 
 import {
   PathExt
-} from '../../../lib/coreutils';
+} from '@jupyterlab/coreutils';
 
 
 const TESTPATH = 'foo/test/simple/test-path.js';

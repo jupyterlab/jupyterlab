@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   removeMath, replaceMath, typeset
-} from '../../../lib/renderers/latex';
+} from '@jupyterlab/renderers/latex';
 
 
 describe('jupyter-ui', () => {

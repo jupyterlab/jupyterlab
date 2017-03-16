@@ -3,11 +3,11 @@
 
 import {
   editorServices
-} from '../../../lib/codemirror';
+} from '@jupyterlab/codemirror';
 
 import {
   CodeConsole, ConsolePanel
-} from '../../../lib/console';
+} from '@jupyterlab/console';
 
 import {
   defaultRenderMime

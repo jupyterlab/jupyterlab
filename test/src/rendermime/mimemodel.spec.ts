@@ -9,7 +9,7 @@ import {
 
 import {
   MimeModel
-} from '../../../lib/rendermime';
+} from '@jupyterlab/rendermime';
 
 
 describe('rendermime/mimemodel', () => {

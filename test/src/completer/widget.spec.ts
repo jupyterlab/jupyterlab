@@ -21,15 +21,15 @@ import {
 
 import {
   CodeEditor, CodeEditorWidget
-} from '../../../lib/codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   CodeMirrorEditor
-} from '../../../lib/codemirror';
+} from '@jupyterlab/codemirror';
 
 import {
   CompleterWidget, CompleterModel
-} from '../../../lib/completer';
+} from '@jupyterlab/completer';
 
 
 const TEST_ITEM_CLASS = 'jp-TestItem';

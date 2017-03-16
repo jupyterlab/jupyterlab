@@ -9,11 +9,11 @@ import {
 
 import {
   CodeEditor
-} from '../../../lib/codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   CompleterModel, CompleterWidget
-} from '../../../lib/completer';
+} from '@jupyterlab/completer';
 
 
 function makeState(text: string): CompleterWidget.ITextState {

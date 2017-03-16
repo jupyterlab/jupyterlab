@@ -17,7 +17,7 @@ import {
 
 import {
   CommandLinker
-} from '../../../lib/apputils';
+} from '@jupyterlab/apputils';
 
 
 describe('@jupyterlab/apputils', () => {

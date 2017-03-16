@@ -13,7 +13,7 @@ import {
 
 import {
   FileBrowserModel
-} from '../../../lib/filebrowser';
+} from '@jupyterlab/filebrowser';
 
 
 describe('filebrowser/model', () => {

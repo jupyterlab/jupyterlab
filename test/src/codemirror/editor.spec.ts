@@ -9,11 +9,11 @@ import {
 
 import {
   CodeEditor
-} from '../../../lib/codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   CodeMirrorEditor
-} from '../../../lib/codemirror';
+} from '@jupyterlab/codemirror';
 
 
 const UP_ARROW = 38;

@@ -3,27 +3,27 @@
 
 import {
   editorServices
-} from '../../../lib/codemirror';
+} from '@jupyterlab/codemirror';
 
 import {
   CodeEditorWidget
-} from '../../../lib/codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   Clipboard
-} from '../../../lib/apputils';
+} from '@jupyterlab/apputils';
 
 import {
   nbformat
-} from '../../../lib/coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   NotebookPanel, Notebook, NotebookModel
-} from '../../../lib/notebook';
+} from '@jupyterlab/notebook';
 
 import {
   BaseCellWidget, CodeCellWidget, CodeCellModel
-} from '../../../lib/cells';
+} from '@jupyterlab/cells';
 
 import {
   defaultRenderMime

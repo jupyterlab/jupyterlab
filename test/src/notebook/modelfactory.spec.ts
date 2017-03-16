@@ -5,15 +5,15 @@ import expect = require('expect.js');
 
 import {
   CodeCellModel
-} from '../../../lib/cells/model';
+} from '@jupyterlab/cells/model';
 
 import {
   NotebookModel
-} from '../../../lib/notebook/model';
+} from '@jupyterlab/notebook/model';
 
 import {
   NotebookModelFactory
-} from '../../../lib/notebook/modelfactory';
+} from '@jupyterlab/notebook/modelfactory';
 
 
 describe('notebook/notebook/modelfactory', () => {
