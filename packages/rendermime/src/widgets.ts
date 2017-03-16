@@ -454,6 +454,10 @@ namespace Private {
       for (let i=0; i<headers.length; i++){
         let header = headers[i];
         header.id = header.innerHTML.replace(/ /g, '-');
+        let anchor1 = document.createElement('a');
+        anchor1.target = '_self';
+        anchor1.id = header.id.toLowerCase();
+        header.appendChild(anchor1);
         let anchor = document.createElement('a');
         anchor.target = '_self';
         anchor.textContent = '¶';
@@ -473,6 +477,10 @@ namespace Private {
     if (!href) {
       return Promise.resolve(void 0);
     }
+    if ( href[0] === "#"){
+      anchor.target = '_self';
+      return Promise.resolve(void 0);
+    } 
     return resolver.resolveUrl(href).then(path => {
       if (linkHandler) {
         linkHandler.handleLink(anchor, path);
