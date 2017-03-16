@@ -35,11 +35,11 @@ import {
 
 import {
   ObservableVector, nbformat
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   IOutputModel, RenderMime
-} from '../rendermime';
+} from '@jupyterlab/rendermime';
 
 
 /**

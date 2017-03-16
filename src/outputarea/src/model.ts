@@ -11,11 +11,11 @@ import {
 
 import {
   IObservableVector, ObservableVector, nbformat
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   IOutputModel, OutputModel
-} from '../rendermime';
+} from '@jupyterlab/rendermime';
 
 import {
   IOutputAreaModel
