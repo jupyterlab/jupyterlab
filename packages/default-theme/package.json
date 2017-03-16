@@ -9,7 +9,8 @@
     "lib/*.js",
     "style/*.css",
     "style/images/*.*",
-    "style/icons/*.*"
+    "style/icons/*.*",
+    "style/icons/**/*.*"
   ],
   "directories": {
     "lib": "lib/"
@@ -19,6 +20,7 @@
     "@jupyterlab/application": "^0.1.0",
     "@jupyterlab/apputils": "^0.1.0",
     "@jupyterlab/cells": "^0.1.0",
+    "@jupyterlab/codeeditor": "^0.1.0",
     "@jupyterlab/codemirror": "^0.1.0",
     "@jupyterlab/completer": "^0.1.0",
     "@jupyterlab/console": "^0.1.0",
@@ -33,6 +35,7 @@
     "@jupyterlab/launcher": "^0.1.0",
     "@jupyterlab/markdownwidget": "^0.1.0",
     "@jupyterlab/notebook": "^0.1.0",
+    "@jupyterlab/outputarea": "^0.1.0",
     "@jupyterlab/rendermime": "^0.1.0",
     "@jupyterlab/running": "^0.1.0",
     "@jupyterlab/terminal": "^0.1.0",

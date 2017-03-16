@@ -42,7 +42,7 @@
   background: var(--jp-layout-color1);
   border: none;
   outline: 0;
-  background-image: url(../default-theme/icons/md/refresh.svg);
+  background-image: var(--jp-icon-refresh);
   background-size: 16px;
   display: block;
   vertical-align: middle;
@@ -114,23 +114,24 @@
   background-position: center;
 }
 
+
 .jp-RunningSessions-itemIcon.jp-mod-notebook {
-  background-image: url(../default-theme/icons/md/book.svg);
+  background-image: var(--jp-icon-book);
 }
 
 
 .jp-RunningSessions-itemIcon.jp-mod-console {
-  background-image: url(../default-theme/icons/md/terminal.svg);
+  background-image: var(--jp-icon-terminal);
 }
 
 
 .jp-RunningSessions-itemIcon.jp-mod-file:before {
-  background-image: url(../default-theme/icons/md/file.svg);
+  background-image: var(--jp-icon-file);
 }
 
 
 .jp-RunningSessions-itemIcon.jp-mod-terminal {
-  background-image: url(../default-theme/icons/md/terminal.svg);
+  background-image: var(--jp-icon-terminal);
 }
 
 

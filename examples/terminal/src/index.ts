@@ -13,7 +13,6 @@ import {
   TerminalWidget
 } from '@jupyterlab/terminal';
 
-import '@jupyterlab/default-theme/style/index.css';
 import '../index.css';
 
 

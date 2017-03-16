@@ -164,7 +164,7 @@
   background-size: 16px;
   height: 16px;
   width: 16px;
-  background-image: url(../default-theme/icons/md/close.svg);
+  background-image: var(--jp-icon-close);
   background-position: center;
   background-repeat: no-repeat;
 }
@@ -172,12 +172,12 @@
 
 .p-DockPanel-tabBar .p-TabBar-tab.p-mod-closable.jp-mod-dirty > .p-TabBar-tabCloseIcon {
   background-size: 10px;
-  background-image: url(../default-theme/icons/md/circle.svg);
+  background-image: var(--jp-icon-circle);
 }
 
 .p-DockPanel-tabBar .p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon:hover {
   background-size: 16px;
-  background-image: url(../default-theme/icons/md/close-black.svg);
+  background-image: var(--jp-icon-close-black);
 }
 
 .p-TabBar-tab.p-mod-drag-image {
