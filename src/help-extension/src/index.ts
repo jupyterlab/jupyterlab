@@ -15,16 +15,16 @@ import {
 
 import {
   JupyterLab, JupyterLabPlugin
-} from '../application';
+} from '@jupyterlab/application';
 
 import {
   ICommandPalette, IFrameWidget, ILayoutRestorer, InstanceTracker,
   IMainMenu
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   URLExt
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 
 /**
