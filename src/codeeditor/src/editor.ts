@@ -15,15 +15,15 @@ import {
 
 import {
   IChangedArgs
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   IObservableString, ObservableString
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   IObservableMap, ObservableMap
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 
 /**
