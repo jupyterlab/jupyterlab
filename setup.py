@@ -59,19 +59,16 @@ DESCRIPTION = 'An alpha preview of the JupyterLab notebook server extension.'
 LONG_DESCRIPTION = 'This is an alpha preview of JupyterLab. It is not ready for general usage yet. Development happens on https://github.com/jupyter/jupyterlab, with chat on https://gitter.im/jupyter/jupyterlab.'
 
 
-# Get the npm package version and set the python package to the same.
-with open(os.path.join(here, 'package.json')) as f:
-    packagejson = json.load(f)
-with open(os.path.join(here, 'jupyterlab', '_version.py'), 'w') as f:
-    f.write('# This file is auto-generated, do not edit!\n')
-    f.write('__version__ = "%s"\n' % packagejson['version'])
+version_ns = {}
+with io.open(pjoin(here, name, '_version.py'), encoding="utf8") as f:
+    exec(f.read(), {}, version_ns)
 
 
 setup_args = dict(
     name             = name,
     description      = DESCRIPTION,
     long_description = LONG_DESCRIPTION,
-    version          = packagejson['version'],
+    version          = version_ns['__version__'],
     scripts          = glob(pjoin('scripts', '*')),
     packages         = find_packages(),
     package_data     = find_package_data(),
