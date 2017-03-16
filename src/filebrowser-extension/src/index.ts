@@ -15,23 +15,23 @@ import {
 
 import {
   JupyterLab, JupyterLabPlugin
-} from '../application';
+} from '@jupyterlab/application';
 
 import {
   ICommandPalette, ILayoutRestorer, IMainMenu, IStateDB
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   IDocumentManager
-} from '../docmanager';
+} from '@jupyterlab/docmanager';
 
 import {
   IDocumentRegistry, DocumentRegistry
-} from '../docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   FileBrowserModel, FileBrowser, IPathTracker
-} from '../filebrowser';
+} from '@jupyterlab/filebrowser';
 
 import {
   IServiceManager
