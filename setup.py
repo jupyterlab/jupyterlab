@@ -5,55 +5,20 @@
 # Distributed under the terms of the Modified BSD License.
 
 from __future__ import print_function
+from setuptools import setup
+from glob import glob
+import json
+import os
+from os.path import join as pjoin
+from setupbase import (
+    create_cmdclass, install_npm, find_packages
+)
+
 
 # the name of the project
 name = 'jupyterlab'
 
-#-----------------------------------------------------------------------------
-# Minimal Python version sanity check
-#-----------------------------------------------------------------------------
-
-import sys
-
-v = sys.version_info
-if v[:2] < (2,7) or (v[0] >= 3 and v[:2] < (3,3)):
-    error = "ERROR: %s requires Python version 2.7 or 3.3 or above." % name
-    print(error, file=sys.stderr)
-    sys.exit(1)
-
-PY3 = (sys.version_info[0] >= 3)
-
-#-----------------------------------------------------------------------------
-# get on with it
-#-----------------------------------------------------------------------------
-
-from distutils import log
-import json
-import os
-from glob import glob
-from distutils.command.build_ext import build_ext
-from distutils.command.sdist import sdist
-from setuptools import setup
-from setuptools.command.bdist_egg import bdist_egg
-
-
-# Our own imports
-
-from setupbase import (
-    bdist_egg_disabled,
-    find_packages,
-    find_package_data,
-    js_prerelease,
-    NPM
-)
-
-# BEFORE importing distutils, remove MANIFEST. distutils doesn't properly
-# update it when the contents of directories change.
-if os.path.exists('MANIFEST'): os.remove('MANIFEST')
-
-
 here = os.path.dirname(os.path.abspath(__file__))
-pjoin = os.path.join
 
 DESCRIPTION = 'An alpha preview of the JupyterLab notebook server extension.'
 LONG_DESCRIPTION = 'This is an alpha preview of JupyterLab. It is not ready for general usage yet. Development happens on https://github.com/jupyter/jupyterlab, with chat on https://gitter.im/jupyter/jupyterlab.'
@@ -66,6 +31,16 @@ with open(os.path.join(here, 'jupyterlab', '_version.py'), 'w') as f:
     f.write('# This file is auto-generated, do not edit!\n')
     f.write('__version__ = "%s"\n' % packagejson['version'])
 
+package_data = dict(jupyterlab=['build/*', 'lab.html'])
+
+cmdclass = create_cmdclass(['js'], ['jupyterlab/build'])
+
+build_path = os.path.join(here, 'jupyterlab', 'build')
+source_path = os.path.join(here, 'src')
+cmdclass['js'] = install_npm(
+    here, build_path, source_path, 'build:all'
+)
+
 
 setup_args = dict(
     name             = name,
@@ -73,8 +48,9 @@ setup_args = dict(
     long_description = LONG_DESCRIPTION,
     version          = packagejson['version'],
     scripts          = glob(pjoin('scripts', '*')),
-    packages         = find_packages(),
-    package_data     = find_package_data(),
+    packages         = find_packages(name),
+    package_data     = package_data,
+    cmdclass         = cmdclass,
     author           = 'Jupyter Development Team',
     author_email     = 'jupyter@googlegroups.com',
     url              = 'http://jupyter.org',
@@ -94,54 +70,28 @@ setup_args = dict(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
     ],
-)
-
-
-cmdclass = dict(
-    build_ext = js_prerelease(build_ext),
-    sdist  = js_prerelease(sdist, strict=True),
-    jsdeps = NPM,
-    bdist_egg = bdist_egg if 'bdist_egg' in sys.argv else bdist_egg_disabled,
-)
-try:
-    from wheel.bdist_wheel import bdist_wheel
-    cmdclass['bdist_wheel'] = js_prerelease(bdist_wheel, strict=True)
-except ImportError:
-    pass
-
-
-setup_args['cmdclass'] = cmdclass
-
-
-setuptools_args = {}
-install_requires = setuptools_args['install_requires'] = [
-    'notebook>=4.2.0',
-]
-
-extras_require = setuptools_args['extras_require'] = {
-    'test:python_version == "2.7"': ['mock'],
-    'test': ['pytest'],
-    'docs': [
-        'sphinx',
-        'recommonmark',
-        'sphinx_rtd_theme'
+    # setuptools requirements
+    zip_safe         = False,
+    install_requires = [
+        'notebook>=4.2.0',
     ],
-}
-
-
-if 'setuptools' in sys.modules:
-    setup_args.update(setuptools_args)
-
-    # force entrypoints with setuptools (needed for Windows, unconditional because of wheels)
-    setup_args['entry_points'] = {
+    extras_require   = {
+        'test:python_version == "2.7"': ['mock'],
+        'test': ['pytest'],
+        'docs': [
+            'sphinx',
+            'recommonmark',
+            'sphinx_rtd_theme'
+        ]
+    },
+    entry_points     = {
         'console_scripts': [
             'jupyter-lab = jupyterlab.labapp:main',
             'jupyter-labextension = jupyterlab.labextensions:main',
         ]
     }
-    setup_args.pop('scripts', None)
+)
 
-    setup_args.update(setuptools_args)
 
 if __name__ == '__main__':
     setup(**setup_args)

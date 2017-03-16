@@ -34,8 +34,9 @@ install:
   - npm update
   # Ensure python and python scripts are from right version:
   - 'SET "PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"'
+
   # Install our package:
-  - 'pip install --upgrade -e ".[test]"'
+  - 'pip install -e ".[test]"'
 
 build: off
 
