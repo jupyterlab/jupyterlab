@@ -51,6 +51,7 @@ glob(dname + '/src/*.ts', function(er, filenames) {
     }
     writeFileSync(path.resolve(dname) + '/package.json', JSON.stringify(package, null, 2));
 
+    process.chdir(dname);
     for (let i = 0; i < names.length; i++) {
         if (names[i] in package['dependencies']) {
             continue;

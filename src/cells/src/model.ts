@@ -11,19 +11,19 @@ import {
 
 import {
   CodeEditor
-} from '../codeeditor';
+} from '../../codeeditor';
 
 import {
   IChangedArgs, nbformat
-} from '../coreutils';
+} from '../../coreutils';
 
 import {
   IObservableJSON, ObservableJSON
-} from '../coreutils';
+} from '../../coreutils';
 
 import {
   IOutputAreaModel, OutputAreaModel
-} from '../outputarea';
+} from '../../outputarea';
 
 
 /**

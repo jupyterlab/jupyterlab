@@ -23,23 +23,23 @@ import {
 
 import {
   IChangedArgs
-} from '../coreutils';
+} from '../../coreutils';
 
 import {
   CodeEditor, CodeEditorWidget
-} from '../codeeditor';
+} from '../../codeeditor';
 
 import {
   MimeModel, RenderMime
-} from '../rendermime';
+} from '../../rendermime';
 
 import {
   IObservableMap, ObservableMap
-} from '../coreutils';
+} from '../../coreutils';
 
 import {
   OutputAreaWidget
-} from '../outputarea';
+} from '../../outputarea';
 
 import {
   ICellModel, ICodeCellModel,
