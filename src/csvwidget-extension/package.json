@@ -1,7 +1,7 @@
 {
   "name": "@jupyterlab/csvwidget-extension",
   "version": "0.1.0",
-  "description": "JupyterLab - CSV Widget",
+  "description": "JupyterLab - CSV Widget Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
