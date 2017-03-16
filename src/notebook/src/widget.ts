@@ -45,24 +45,24 @@ import {
   ICellModel, BaseCellWidget, IMarkdownCellModel,
   CodeCellWidget, MarkdownCellWidget,
   ICodeCellModel, RawCellWidget, IRawCellModel,
-} from '../cells';
+} from '@jupyterlab/cells';
 
 import {
   IEditorMimeTypeService, CodeEditor
-} from '../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   IChangedArgs, IObservableMap, ObservableMap, IObservableVector,
   ObservableVector, nbformat
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   RenderMime
-} from '../rendermime';
+} from '@jupyterlab/rendermime';
 
 import {
   OutputAreaWidget
-} from '../outputarea';
+} from '@jupyterlab/outputarea';
 
 import {
   INotebookModel

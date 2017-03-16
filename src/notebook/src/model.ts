@@ -7,17 +7,17 @@ import {
 
 import {
   DocumentModel, DocumentRegistry
-} from '../docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   ICellModel, ICodeCellModel, IRawCellModel, IMarkdownCellModel,
   CodeCellModel, RawCellModel, MarkdownCellModel, CellModel
-} from '../cells/model';
+} from '@jupyterlab/cells/model';
 
 import {
   IChangedArgs, IObservableJSON, ObservableJSON, IObservableUndoableVector,
   ObservableUndoableVector, IObservableVector, ObservableVector, nbformat
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 
 /**

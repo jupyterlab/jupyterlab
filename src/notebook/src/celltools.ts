@@ -23,19 +23,19 @@ import {
 
 import {
   JSONEditorWidget, Styling
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   BaseCellWidget, ICellModel
-} from '../cells';
+} from '@jupyterlab/cells';
 
 import {
   CodeEditor, CodeEditorWidget
-} from '../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   IObservableMap, nbformat, ObservableJSON, ObservableMap
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   INotebookTracker

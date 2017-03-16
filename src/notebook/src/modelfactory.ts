@@ -7,11 +7,11 @@ import {
 
 import {
   DocumentRegistry
-} from '../docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   CodeCellModel
-} from '../cells';
+} from '@jupyterlab/cells';
 
 import {
   INotebookModel, NotebookModel

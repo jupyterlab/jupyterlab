@@ -11,16 +11,16 @@ import {
 
 import {
   Clipboard
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   nbformat
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   ICellModel, ICodeCellModel,
   CodeCellWidget, BaseCellWidget, MarkdownCellWidget
-} from '../cells';
+} from '@jupyterlab/cells';
 
 import {
   INotebookModel

@@ -15,11 +15,11 @@ import {
 
 import {
   Styling, Toolbar, ToolbarButton
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   nbformat
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   NotebookPanel

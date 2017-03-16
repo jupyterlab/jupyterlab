@@ -3,15 +3,15 @@
 
 import {
   IEditorMimeTypeService
-} from '../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   ABCWidgetFactory, DocumentRegistry
-} from '../docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   RenderMime
-} from '../rendermime';
+} from '@jupyterlab/rendermime';
 
 import {
   ToolbarItems

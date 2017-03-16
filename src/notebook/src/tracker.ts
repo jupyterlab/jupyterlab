@@ -11,11 +11,11 @@ import {
 
 import {
   IInstanceTracker, InstanceTracker
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   BaseCellWidget
-} from '../cells';
+} from '@jupyterlab/cells';
 
 import {
   NotebookPanel, Notebook

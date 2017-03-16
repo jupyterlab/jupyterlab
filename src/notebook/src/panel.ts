@@ -28,31 +28,31 @@ import {
 
 import {
   Toolbar
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   BaseCellWidget, CodeCellWidget
-} from '../cells';
+} from '@jupyterlab/cells';
 
 import {
   IEditorMimeTypeService, CodeEditor
-} from '../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   IChangedArgs
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   DocumentRegistry
-} from '../docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   OutputAreaWidget
-} from '../outputarea';
+} from '@jupyterlab/outputarea';
 
 import {
   RenderMime
-} from '../rendermime';
+} from '@jupyterlab/rendermime';
 
 import {
   INotebookModel
