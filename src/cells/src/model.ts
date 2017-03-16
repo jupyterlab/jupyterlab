@@ -11,19 +11,19 @@ import {
 
 import {
   CodeEditor
-} from '../../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   IChangedArgs, nbformat
-} from '../../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   IObservableJSON, ObservableJSON
-} from '../../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   IOutputAreaModel, OutputAreaModel
-} from '../../outputarea';
+} from '@jupyterlab/outputarea';
 
 
 /**

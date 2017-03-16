@@ -19,11 +19,11 @@ import {
 
 import {
   CodeEditor
-} from '../../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   IObservableJSON
-} from '../../coreutils';
+} from '@jupyterlab/coreutils';
 
 
 /**

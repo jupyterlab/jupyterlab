@@ -35,7 +35,7 @@ import {
 
 import {
   ApplicationShell
-} from '../../application';
+} from '@jupyterlab/application';
 
 import {
   IStateDB

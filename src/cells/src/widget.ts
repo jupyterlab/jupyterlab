@@ -23,23 +23,23 @@ import {
 
 import {
   IChangedArgs
-} from '../../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   CodeEditor, CodeEditorWidget
-} from '../../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   MimeModel, RenderMime
-} from '../../rendermime';
+} from '@jupyterlab/rendermime';
 
 import {
   IObservableMap, ObservableMap
-} from '../../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   OutputAreaWidget
-} from '../../outputarea';
+} from '@jupyterlab/outputarea';
 
 import {
   ICellModel, ICodeCellModel,

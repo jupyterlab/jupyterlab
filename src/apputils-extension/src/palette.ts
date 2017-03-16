@@ -13,11 +13,11 @@ import {
 
 import {
   JupyterLab
-} from '../../application';
+} from '@jupyterlab/../application';
 
 import {
   ILayoutRestorer, ICommandPalette, IPaletteItem
-} from '../../apputils';
+} from '@jupyterlab/../apputils';
 
 
 

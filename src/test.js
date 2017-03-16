@@ -62,7 +62,7 @@ glob(dname + '/src/*.ts', function(er, filenames) {
             try {
                 childProcess.execSync(cmd, { stdio: [0, 1, 2] });
             } catch (err) {
-                process.stdout.write('skipping ' + files[i] + '\n');
+                process.stdout.write('skipping ' + names[i] + '\n');
             }
         }
     }
