@@ -30,18 +30,17 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
-  JavaScriptRenderer, SVGRenderer, MarkdownRenderer, PDFRenderer
-} from '@jupyterlab/renderers';
-
-import {
-  RenderedText
-} from '@jupyterlab/renderers/widget';
-
-import {
   MimeModel
 } from './mimemodel';
 
+import {
+  HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
+  JavaScriptRenderer, SVGRenderer, MarkdownRenderer, PDFRenderer
+} from './renderers';
+
+import {
+  RenderedText
+} from './widgets';
 
 /**
  * A composite renderer.

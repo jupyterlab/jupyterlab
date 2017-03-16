@@ -9,9 +9,12 @@ import {
   RenderMime
 } from './rendermime';
 
+export * from './latex';
 export * from './mimemodel';
 export * from './outputmodel';
 export * from './rendermime';
+export * from './renderers';
+export * from './widgets';
 
 
 /* tslint:disable */
