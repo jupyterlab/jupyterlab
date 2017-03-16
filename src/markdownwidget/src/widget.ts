@@ -15,15 +15,15 @@ import {
 
 import {
   ActivityMonitor
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   DocumentRegistry, ABCWidgetFactory
-} from '../docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   MimeModel, RenderMime
-} from '../rendermime';
+} from '@jupyterlab/rendermime';
 
 
 /**
