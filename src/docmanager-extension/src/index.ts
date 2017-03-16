@@ -3,15 +3,15 @@
 
 import {
   JupyterLab, JupyterLabPlugin
-} from '../application';
+} from '@jupyterlab/application';
 
 import {
   DocumentManager, IDocumentManager
-} from '../docmanager';
+} from '@jupyterlab/docmanager';
 
 import {
   IDocumentRegistry
-} from '../docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   IServiceManager
