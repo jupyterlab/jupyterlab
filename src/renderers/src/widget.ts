@@ -16,7 +16,7 @@ import {
 
 import {
   CodeMirrorEditor
-} from '@jupyterlab/codemirror/editor';
+} from '@jupyterlab/codemirror';
 
 import * as marked
   from 'marked';

@@ -23,20 +23,20 @@ import {
 
 import {
   IObservableJSON, PathExt, URLExt
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   ISanitizer, defaultSanitizer
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
   JavaScriptRenderer, SVGRenderer, MarkdownRenderer, PDFRenderer
-} from '../renderers';
+} from '@jupyterlab/renderers';
 
 import {
   RenderedText
-} from '../renderers/widget';
+} from '@jupyterlab/renderers/widget';
 
 import {
   MimeModel

@@ -7,7 +7,7 @@ import {
 
 import {
   IObservableJSON, ObservableJSON
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   RenderMime
