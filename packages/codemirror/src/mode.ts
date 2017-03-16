@@ -23,10 +23,22 @@ declare var require: any;
 
 
 /**
+ * The interface of a codemirror mode.
+ */
+export
+interface IModeSpec {
+  [ key: string ]: string;
+  name?: string;
+  mode: string;
+  mime: string;
+}
+
+
+/**
  * Running a CodeMirror mode outside of an editor.
  */
 export
-function runMode(code: string, mode: string | CodeMirror.modespec, el: HTMLElement): void {
+function runMode(code: string, mode: string | IModeSpec, el: HTMLElement): void {
   CodeMirror.runMode(code, mode, el);
 }
 
@@ -35,7 +47,7 @@ function runMode(code: string, mode: string | CodeMirror.modespec, el: HTMLEleme
  * Find a mode name by extension.
  */
 export
-function findModeByExension(ext: string): string {
+function findModeByExtension(ext: string): string {
   let mode = CodeMirror.findModeByExtension(ext);
   return mode && mode.mode;
 }
@@ -72,7 +84,7 @@ function loadModeByName(editor: CodeMirror.Editor, mode: string): void {
  * Find a codemirror mode by name or CodeMirror spec.
  */
 export
-function findMode(mode: string | CodeMirror.modespec): CodeMirror.modespec {
+function findMode(mode: string | IModeSpec): IModeSpec {
   let modename = (typeof mode === 'string') ? mode :
       mode.mode || mode.name;
   let mimetype = (typeof mode !== 'string') ? mode.mime : '';
@@ -89,7 +101,7 @@ function findMode(mode: string | CodeMirror.modespec): CodeMirror.modespec {
  * Require a codemirror mode by name or Codemirror spec.
  */
 export
-function requireMode(mode: string | CodeMirror.modespec): Promise<CodeMirror.modespec> {
+function requireMode(mode: string | IModeSpec): Promise<IModeSpec> {
   let info = findMode(mode);
 
   // Simplest, cheapest check by mode name.
