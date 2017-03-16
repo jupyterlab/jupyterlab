@@ -17,7 +17,7 @@ import {
 
 import {
   HTML_COMMON_CLASS
-} from '@jupyterlab/renderers/widget';
+} from '@jupyterlab/renderers';
 
 
 /**
