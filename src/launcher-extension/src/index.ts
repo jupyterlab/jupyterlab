@@ -7,19 +7,19 @@ import {
 
 import {
   JupyterLab, JupyterLabPlugin
-} from '../application';
+} from '@jupyterlab/application';
 
 import {
   ICommandLinker, ICommandPalette, ILayoutRestorer
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   IPathTracker
-} from '../filebrowser';
+} from '@jupyterlab/filebrowser';
 
 import {
   ILauncher, ILauncherItem, LauncherModel, LauncherWidget
-} from '../launcher';
+} from '@jupyterlab/launcher';
 
 
 /**
