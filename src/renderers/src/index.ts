@@ -7,7 +7,7 @@ import {
 
 import {
   RenderMime
-} from '../rendermime';
+} from '@jupyterlab/rendermime';
 
 import {
   RenderedHTML, RenderedMarkdown, RenderedText, RenderedImage,

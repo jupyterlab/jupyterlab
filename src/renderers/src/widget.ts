@@ -12,18 +12,18 @@ import 'codemirror/addon/runmode/runmode';
 
 import {
   requireMode
-} from '../codemirror';
+} from '@jupyterlab/codemirror';
 
 import {
   CodeMirrorEditor
-} from '../codemirror/editor';
+} from '@jupyterlab/codemirror/editor';
 
 import * as marked
   from 'marked';
 
 import {
   RenderMime
-} from '../rendermime';
+} from '@jupyterlab/rendermime';
 
 import {
   Message
