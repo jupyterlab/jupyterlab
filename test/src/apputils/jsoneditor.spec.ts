@@ -25,7 +25,7 @@ import {
 
 import {
   JSONEditorWidget
-  } from '@jupyterlab/apputils';
+  } from '@jupyterlab/codeeditor';
 
 
 class LogEditor extends JSONEditorWidget {

@@ -21,27 +21,27 @@ import {
 
 import {
  CodeCellWidget, MarkdownCellWidget
-} from '@jupyterlab/cells/widget';
+} from '@jupyterlab/cells';
 
 import {
   NotebookActions
-} from '@jupyterlab/notebook/actions';
+} from '@jupyterlab/notebook';
 
 import {
  ToolbarItems
-} from '@jupyterlab/notebook/default-toolbar';
+} from '@jupyterlab/notebook';
 
 import {
  INotebookModel
-} from '@jupyterlab/notebook/model';
+} from '@jupyterlab/notebook';
 
 import {
   JUPYTER_CELL_MIME
-} from '@jupyterlab/notebook/widget';
+} from '@jupyterlab/notebook';
 
 import {
  NotebookPanel
-} from '@jupyterlab/notebook/panel';
+} from '@jupyterlab/notebook';
 
 import {
   createNotebookContext

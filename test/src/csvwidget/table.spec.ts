@@ -9,7 +9,7 @@ import {
 
 import {
   CSVModel, CSVTable, DISPLAY_LIMIT
-} from '@jupyterlab/csvwidget/table';
+} from '@jupyterlab/csvwidget';
 
 import {
   CSV_DATA

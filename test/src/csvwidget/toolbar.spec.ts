@@ -13,7 +13,7 @@ import {
 
 import {
   CSVToolbar, DELIMITERS
-} from '@jupyterlab/csvwidget/toolbar';
+} from '@jupyterlab/csvwidget';
 
 
 describe('csvwidget/toolbar', () => {

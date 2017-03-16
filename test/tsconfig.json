@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "declaration": true,
     "noImplicitAny": true,
     "noEmitOnError": true,
     "module": "commonjs",

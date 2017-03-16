@@ -9,7 +9,7 @@ import {
 
 import {
   CodeCellModel
-} from '@jupyterlab/cells/model';
+} from '@jupyterlab/cells';
 
 import {
   nbformat
@@ -17,7 +17,7 @@ import {
 
 import {
   NotebookModel
-} from '@jupyterlab/notebook/model';
+} from '@jupyterlab/notebook';
 
 import {
   DEFAULT_CONTENT
