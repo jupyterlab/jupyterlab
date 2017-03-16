@@ -18,7 +18,8 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, ILayoutRestorer, IMainMenu, showDialog
+  Dialog, ICommandPalette, ILayoutRestorer, IMainMenu, restartKernel,
+  showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -26,7 +27,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IDocumentRegistry, restartKernel, selectKernelForContext
+  IDocumentRegistry, selectKernelForContext
 } from '@jupyterlab/docregistry';
 
 import {
