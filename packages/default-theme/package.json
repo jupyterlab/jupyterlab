@@ -17,10 +17,6 @@
     "rimraf": "^2.5.2",
     "typescript": "^2.2.1"
   },
-  "scripts": {
-    "build": "tsc",
-    "clean": "rimraf lib"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/jupyterlab/jupyterlab.git"
