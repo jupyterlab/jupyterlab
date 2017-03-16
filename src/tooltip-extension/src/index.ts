@@ -15,23 +15,23 @@ import {
 
 import {
   JupyterLab, JupyterLabPlugin
-} from '../application';
+} from '@jupyterlab/application';
 
 import {
   CodeEditor
-} from '../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   IConsoleTracker
-} from '../console';
+} from '@jupyterlab/console';
 
 import {
   INotebookTracker
-} from '../notebook';
+} from '@jupyterlab/notebook';
 
 import {
   ITooltipManager, TooltipWidget
-} from '../tooltip';
+} from '@jupyterlab/tooltip';
 
 
 /**
