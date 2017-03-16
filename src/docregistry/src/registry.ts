@@ -27,11 +27,11 @@ import {
 
 import {
   CodeEditor
-} from '../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   IChangedArgs as IChangedArgsGeneric, PathExt
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 
 /* tslint:disable */

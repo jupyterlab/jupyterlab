@@ -15,7 +15,7 @@ import {
 
 import {
   Dialog, showDialog
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   DocumentRegistry

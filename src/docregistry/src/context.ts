@@ -27,11 +27,11 @@ import {
 
 import {
   showDialog, Dialog
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   PathExt, URLExt
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   findKernel, DocumentRegistry

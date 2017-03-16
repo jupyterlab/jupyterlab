@@ -20,11 +20,11 @@ import {
 
 import {
   CodeEditor
-} from '../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   IChangedArgs
-} from '../coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   DocumentRegistry
