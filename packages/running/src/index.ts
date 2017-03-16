@@ -40,7 +40,7 @@ const HEADER_CLASS = 'jp-RunningSessions-header';
  * The class name added to a running widget header refresh button.
  */
 const REFRESH_CLASS = 'jp-RunningSessions-headerRefresh';
-const MATERIAL_CLASS = 'jp-MaterialIcon';
+
 /**
  * The class name added to the running terminal sessions section.
  */
