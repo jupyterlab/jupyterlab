@@ -19,11 +19,11 @@ import {
 
 import {
   CodeEditor
-} from '../codeeditor';
+} from '../../codeeditor';
 
 import {
   IObservableJSON
-} from '../coreutils';
+} from '../../coreutils';
 
 
 /**

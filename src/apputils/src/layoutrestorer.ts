@@ -21,7 +21,7 @@ import {
 
 import {
   ApplicationShell
-} from '../application';
+} from '../../application';
 
 import {
   InstanceTracker, IStateDB

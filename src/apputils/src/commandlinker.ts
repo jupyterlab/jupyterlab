@@ -108,7 +108,7 @@ interface ICommandLinker extends IDisposable {
    *   dataset: {
    *     foo: '1',
    *     bar: '2',
-   *     ...linker.populateVNodeDataset(command, args)
+   *     ../...linker.populateVNodeDataset(command, args)
    *   }
    * }, 'some text');
    * ```
@@ -243,7 +243,7 @@ class CommandLinker implements ICommandLinker {
    *   dataset: {
    *     foo: '1',
    *     bar: '2',
-   *     ...linker.populateVNodeDataset(command, args)
+   *     ../...linker.populateVNodeDataset(command, args)
    *   }
    * }, 'some text');
    * ```
