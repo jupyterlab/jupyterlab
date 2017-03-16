@@ -3,19 +3,19 @@
 
 import {
   JupyterLab, JupyterLabPlugin
-} from '../application';
+} from '@jupyterlab/application';
 
 import {
   ICommandPalette, ILayoutRestorer, InstanceTracker
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   IDocumentRegistry
-} from '../docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   ImageWidget, ImageWidgetFactory, IImageTracker
-} from '../imagewidget';
+} from '@jupyterlab/imagewidget';
 
 
 /**
