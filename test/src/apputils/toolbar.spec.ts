@@ -224,7 +224,9 @@ describe('@jupyterlab/apputils', () => {
       describe('.createKernelStatusItem()', () => {
 
         beforeEach(() => {
-          return owner.startKernel();
+          return owner.startKernel().then(kernel => {
+            return kernel.ready;
+          });
         });
 
         it('should display a busy status if the kernel status is not idle', (done) => {
