@@ -15,29 +15,29 @@ import {
 
 import {
   JupyterLab, JupyterLabPlugin
-} from '../application';
+} from '@jupyterlab/application';
 
 import {
   Dialog, ICommandPalette, ILayoutRestorer, IMainMenu, showDialog
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   IEditorServices
-} from '../codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   IDocumentRegistry, restartKernel, selectKernelForContext
-} from '../docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   IRenderMime
-} from '../rendermime';
+} from '@jupyterlab/rendermime';
 
 import {
   CellTools, ICellTools, INotebookTracker, NotebookActions,
   NotebookModelFactory,  NotebookPanel, NotebookTracker, NotebookWidgetFactory,
   trustNotebook
-} from '../notebook';
+} from '@jupyterlab/notebook';
 
 
 
