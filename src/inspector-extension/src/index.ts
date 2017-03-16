@@ -3,23 +3,23 @@
 
 import {
   JupyterLab, JupyterLabPlugin
-} from '../application';
+} from '@jupyterlab/application';
 
 import {
   ICommandPalette, ILayoutRestorer, InstanceTracker
-} from '../apputils';
+} from '@jupyterlab/apputils';
 
 import {
   IConsoleTracker
-} from '../console';
+} from '@jupyterlab/console';
 
 import {
   IInspector, InspectorPanel, InspectionHandler
-} from '../inspector';
+} from '@jupyterlab/inspector';
 
 import {
   INotebookTracker
-} from '../notebook';
+} from '@jupyterlab/notebook';
 
 import {
   InspectorManager

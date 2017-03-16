@@ -7,7 +7,7 @@ import {
 
 import {
   IInspector, InspectorPanel
-} from '../inspector';
+} from '@jupyterlab/inspector';
 
 
 /**
