@@ -3,7 +3,7 @@
   "name": "jupyterlab-example-console",
   "scripts": {
     "build": "tsc --project src && webpack --config webpack.conf.js",
-    "clean": "rimraf build && rimraf node_modules"
+    "clean": "rimraf build"
   },
   "dependencies": {
     "@jupyterlab/codemirror": "^0.1.0",

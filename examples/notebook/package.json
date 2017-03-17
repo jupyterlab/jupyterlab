@@ -3,7 +3,7 @@
   "name": "jupyterlab-example-notebook",
   "scripts": {
     "build": "tsc --project src && webpack --config webpack.conf.js",
-    "clean": "rimraf build && rimraf node_modules"
+    "clean": "rimraf build"
   },
   "dependencies": {
     "@jupyterlab/apputils": "^0.1.0",
