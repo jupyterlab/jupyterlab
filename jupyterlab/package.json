@@ -3,7 +3,7 @@
   "name": "@jupyterlab/main",
   "version": "0.1.0",
   "scripts": {
-    "build": "tsc && webpack",
+    "build": "npm install && tsc && webpack",
     "clean": "rimraf build"
   },
   "dependencies": {
