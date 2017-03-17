@@ -3,7 +3,7 @@
   "name": "jupyterlab-example-app",
   "scripts": {
     "build": "webpack --config webpack.conf.js",
-    "clean": "rimraf build && rimraf node_modules"
+    "clean": "rimraf build"
   },
   "dependencies": {
     "@jupyterlab/application": "^0.1.0",
