@@ -10,20 +10,18 @@ module.exports = {
   bail: true,
   devtool: 'source-map',
   module: {
-    loaders: [
+    rules: [
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },
       { test: /\.md$/, use: 'raw-loader'},
       { test: /\.html$/, use: 'file-loader?name=[name].[ext]' },
       { test: /\.ipynb$/, use: 'json-loader' },
       { test: /\.json$/, use: 'json-loader' },
-    ],
-    rules: [
-      // instrument only testing sources with Istanbul
       {
+        enforce: 'pre',
         test: /\.js$/,
         include: path.resolve('node_modules/@jupyterlab'),
         use: 'istanbul-instrumenter'
       }
-    ]
+    ],
   }
 }

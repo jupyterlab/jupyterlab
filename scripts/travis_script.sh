@@ -30,7 +30,7 @@ if [[ $GROUP == tests ]]; then
 fi
 
 
-if [[ $GROUP == coverage_and_docs ]]; then
+if [[ $GROUP == coverage ]]; then
     # Run the coverage check.
     npm run test:coverage
 
