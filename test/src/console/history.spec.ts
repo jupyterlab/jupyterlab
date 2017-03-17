@@ -9,15 +9,15 @@ import {
 
 import {
   CodeEditor
-} from '../../../lib/codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   CodeMirrorEditor
-} from '../../../lib/codemirror';
+} from '@jupyterlab/codemirror';
 
 import {
   ConsoleHistory
-} from '../../../lib/console/history';
+} from '@jupyterlab/console';
 
 
 const mockHistory: KernelMessage.IHistoryReplyMsg = {

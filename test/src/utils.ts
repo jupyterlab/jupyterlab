@@ -17,27 +17,19 @@ import {
 
 import {
   nbformat, uuid
-} from '../../lib/coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   TextModelFactory, DocumentRegistry, Context
-} from '../../lib/docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
-  INotebookModel
-} from '../../lib/notebook/model';
+  INotebookModel, NotebookModelFactory
+} from '@jupyterlab/notebook';
 
 import {
-  NotebookModelFactory
-} from '../../lib/notebook/modelfactory';
-
-import {
-  TextRenderer, HTMLRenderer
-} from '../../lib/renderers';
-
-import {
-  RenderMime
-} from '../../lib/rendermime';
+  RenderMime, TextRenderer, HTMLRenderer
+} from '@jupyterlab/rendermime';
 
 
 /**

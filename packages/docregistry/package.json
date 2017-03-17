@@ -1,0 +1,45 @@
+{
+  "name": "@jupyterlab/docregistry",
+  "version": "0.1.0",
+  "description": "JupyterLab - Document Registry",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js"
+  ],
+  "directories": {
+    "lib": "lib/"
+  },
+  "dependencies": {
+    "@jupyterlab/apputils": "^0.1.0",
+    "@jupyterlab/codeeditor": "^0.1.0",
+    "@jupyterlab/codemirror": "^0.1.0",
+    "@jupyterlab/coreutils": "^0.1.0",
+    "@jupyterlab/services": "^0.40.1",
+    "@phosphor/algorithm": "^0.1.1",
+    "@phosphor/coreutils": "^0.1.5",
+    "@phosphor/disposable": "^0.1.1",
+    "@phosphor/signaling": "^0.1.2",
+    "@phosphor/widgets": "^0.3.0",
+    "codemirror": "^5.24.2"
+  },
+  "devDependencies": {
+    "rimraf": "^2.5.2",
+    "typescript": "^2.2.1"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "author": "Project Jupyter",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "homepage": "https://github.com/jupyterlab/jupyterlab"
+}

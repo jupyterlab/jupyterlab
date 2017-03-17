@@ -29,7 +29,7 @@ import {
 
 import {
   Toolbar, ToolbarButton
-} from '../../../lib/apputils';
+} from '@jupyterlab/apputils';
 
 
 class LogToolbarButton extends ToolbarButton {

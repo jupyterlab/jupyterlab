@@ -15,17 +15,17 @@ import {
 
 import {
   editorServices
-} from 'jupyterlab/lib/codemirror';
+} from '@jupyterlab/codemirror';
 
 import {
   ConsolePanel
-} from 'jupyterlab/lib/console';
+} from '@jupyterlab/console';
 
 import {
   RenderMime
-} from 'jupyterlab/lib/rendermime';
+} from '@jupyterlab/rendermime';
 
-import 'jupyterlab/lib/default-theme/index.css';
+import '@jupyterlab/default-theme/style/index.css';
 import '../index.css';
 
 let TITLE = 'Console';

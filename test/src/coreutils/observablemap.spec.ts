@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   ObservableMap
-} from '../../../lib/coreutils';
+} from '@jupyterlab/coreutils';
 
 
 describe('common/ObservableMap', () => {

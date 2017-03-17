@@ -9,19 +9,19 @@ import {
 
 import {
   IChangedArgs
-} from '../../../lib/coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   DocumentRegistry, Context
-} from '../../../lib/docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   INotebookModel, NotebookPanel, Notebook
-} from '../../../lib/notebook';
+} from '@jupyterlab/notebook';
 
 import {
   Toolbar
-} from '../../../lib/apputils';
+} from '@jupyterlab/apputils';
 
 import {
   createNotebookContext

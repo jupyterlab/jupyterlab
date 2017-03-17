@@ -17,11 +17,11 @@ import {
 
 import {
   ApplicationShell
-} from '../../../lib/application';
+} from '@jupyterlab/application';
 
 import {
   InstanceTracker
-} from '../../../lib/apputils';
+} from '@jupyterlab/apputils';
 
 
 const namespace = 'instance-tracker-test';

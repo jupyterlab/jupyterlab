@@ -187,7 +187,7 @@ function activate(lab: JupyterLab, registry: IDocumentRegistry) {
 ```
 
 Then add this extension to the JupyterLab extensions list in the
-[`index.js` file](../examples/lab/index.js) and relaunch JupyterLab:
+[`index.js` file](../examples/app/index.js) and relaunch JupyterLab:
 
 ```typescript
     require('jupyterlab/lib/mybutton/plugin').widgetExtension,

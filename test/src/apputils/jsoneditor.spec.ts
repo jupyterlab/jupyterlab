@@ -17,15 +17,15 @@ import {
 
 import {
   CodeMirrorEditorFactory
-} from '../../../lib/codemirror';
+} from '@jupyterlab/codemirror';
 
 import {
   ObservableJSON
-} from '../../../lib/coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   JSONEditorWidget
-  } from '../../../lib/apputils';
+  } from '@jupyterlab/codeeditor';
 
 
 class LogEditor extends JSONEditorWidget {

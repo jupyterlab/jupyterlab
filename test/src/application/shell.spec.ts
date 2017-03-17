@@ -17,7 +17,7 @@ import {
 
 import {
   ApplicationShell
-} from '../../../lib/application';
+} from '@jupyterlab/application';
 
 
 class ContentWidget extends Widget {

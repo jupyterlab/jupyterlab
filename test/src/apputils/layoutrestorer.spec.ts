@@ -17,15 +17,15 @@ import {
 
 import {
   ApplicationShell
-} from '../../../lib/application';
+} from '@jupyterlab/application';
 
 import {
   InstanceTracker, LayoutRestorer
-} from '../../../lib/apputils';
+} from '@jupyterlab/apputils';
 
 import {
   StateDB
-} from '../../../lib/apputils';
+} from '@jupyterlab/apputils';
 
 
 const NAMESPACE = 'jupyterlab-layout-restorer-tests';

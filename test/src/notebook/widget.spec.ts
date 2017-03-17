@@ -18,15 +18,15 @@ import {
 import {
   CodeCellModel, CodeCellWidget, MarkdownCellModel, MarkdownCellWidget,
   RawCellModel, RawCellWidget, BaseCellWidget
-} from '../../../lib/cells';
+} from '@jupyterlab/cells';
 
 import {
   INotebookModel, NotebookModel
-} from '../../../lib/notebook/model';
+} from '@jupyterlab/notebook';
 
 import {
   Notebook, StaticNotebook
-} from '../../../lib/notebook/widget';
+} from '@jupyterlab/notebook';
 
 import {
   DEFAULT_CONTENT, createNotebookFactory, rendermime, mimeTypeService,

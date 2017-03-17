@@ -13,15 +13,15 @@ import {
 
 import {
   CodeEditor, CodeEditorWidget
-} from '../../../lib/codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   CodeMirrorEditor
-} from '../../../lib/codemirror';
+} from '@jupyterlab/codemirror';
 
 import {
   CompleterWidget, CompletionHandler, CompleterModel
-} from '../../../lib/completer';
+} from '@jupyterlab/completer';
 
 
 function createEditorWidget(): CodeEditorWidget {

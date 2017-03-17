@@ -20,6 +20,5 @@ __pycache__
 *.map
 .idea/
 
-jupyterlab/_version.py
 test/coverage
 docs

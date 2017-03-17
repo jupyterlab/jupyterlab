@@ -13,16 +13,16 @@ import {
 
 import {
   defaultSanitizer
-} from '../../../lib/apputils';
+} from '@jupyterlab/apputils';
 
 import {
   LatexRenderer, PDFRenderer, JavaScriptRenderer,
   SVGRenderer, MarkdownRenderer, TextRenderer, HTMLRenderer, ImageRenderer
-} from '../../../lib/renderers';
+} from '@jupyterlab/rendermime';
 
 import {
   MimeModel, RenderMime
-} from '../../../lib/rendermime';
+} from '@jupyterlab/rendermime';
 
 
 function runCanRunder(renderer: RenderMime.IRenderer, trusted: boolean): boolean {

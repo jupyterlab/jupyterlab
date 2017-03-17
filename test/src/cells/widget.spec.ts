@@ -17,17 +17,17 @@ import {
 
 import {
   CodeEditorWidget
-} from '../../../lib/codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   BaseCellWidget, CellModel, InputAreaWidget,
   CodeCellWidget, CodeCellModel, MarkdownCellWidget,
   RawCellWidget, RawCellModel, MarkdownCellModel
-} from '../../../lib/cells';
+} from '@jupyterlab/cells';
 
 import {
   OutputAreaModel, OutputAreaWidget
-} from '../../../lib/outputarea';
+} from '@jupyterlab/outputarea';
 
 import {
   createBaseCellFactory, createCodeCellFactory, createCellEditor, rendermime,

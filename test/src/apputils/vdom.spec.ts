@@ -11,7 +11,7 @@ import {
 
 import {
   VDomModel, VDomWidget
-} from '../../../lib/apputils';
+} from '@jupyterlab/apputils';
 
 
 class TestModel extends VDomModel {

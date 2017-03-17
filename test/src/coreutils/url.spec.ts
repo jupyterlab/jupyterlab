@@ -7,7 +7,7 @@ import {
 
 import {
   URLExt
-} from '../../../lib/coreutils';
+} from '@jupyterlab/coreutils';
 
 
 describe('@jupyterlab/coreutils', () => {

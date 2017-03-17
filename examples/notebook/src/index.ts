@@ -16,25 +16,29 @@ import {
 import {
   NotebookPanel, NotebookWidgetFactory,
   NotebookModelFactory, NotebookActions
-} from 'jupyterlab/lib/notebook';
+} from '@jupyterlab/notebook';
+
+import {
+  restartKernel
+} from '@jupyterlab/apputils';
 
 import {
   editorServices
-} from 'jupyterlab/lib/codemirror';
+} from '@jupyterlab/codemirror';
 
 import {
   DocumentManager
-} from 'jupyterlab/lib/docmanager';
+} from '@jupyterlab/docmanager';
 
 import {
-  DocumentRegistry, restartKernel, selectKernelForContext
-} from 'jupyterlab/lib/docregistry';
+  DocumentRegistry, selectKernelForContext
+} from '@jupyterlab/docregistry';
 
 import {
   RenderMime
-} from 'jupyterlab/lib/rendermime';
+} from '@jupyterlab/rendermime';
 
-import 'jupyterlab/lib/default-theme/index.css';
+import '@jupyterlab/default-theme/style/index.css';
 import '../index.css';
 
 

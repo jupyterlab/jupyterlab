@@ -3,22 +3,22 @@
   "name": "jupyterlab-example-terminal",
   "scripts": {
     "build": "tsc --project src && webpack --config webpack.conf.js",
-    "clean": "rimraf build && rimraf node_modules",
-    "postinstall": "node ../../scripts/dedupe.js && npm run build",
-    "update": "(rimraf node_modules/jupyterlab || true) && npm install",
-    "watch": "watch \"npm run update && npm run build\" ../../src src --wait 10"
+    "clean": "rimraf build"
   },
   "dependencies": {
-    "@jupyterlab/services": "^0.39.1",
-    "@phosphor/widgets": "^0.2.0",
-    "jupyterlab": "file:../.."
+    "@jupyterlab/default-theme": "^0.1.0",
+    "@jupyterlab/services": "^0.40.1",
+    "@jupyterlab/terminal": "^0.1.0",
+    "@phosphor/widgets": "^0.3.0",
+    "webpack": "^2.2.1"
   },
   "devDependencies": {
     "css-loader": "^0.23.1",
     "file-loader": "^0.9.0",
+    "json-loader": "^0.5.4",
     "rimraf": "^2.5.2",
     "style-loader": "^0.13.1",
-    "typescript": "^2.0.3",
+    "typescript": "^2.2.1",
     "url-loader": "^0.5.7",
     "watch": "^0.18.0",
     "webpack": "^1.13.0"

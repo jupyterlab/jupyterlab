@@ -15,7 +15,7 @@ import {
 
 import {
   Styling
-} from '../../../lib/apputils';
+} from '@jupyterlab/apputils';
 
 
 describe('@jupyterlab/domutils', () => {

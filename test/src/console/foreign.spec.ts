@@ -17,11 +17,11 @@ import {
 
 import {
   ForeignHandler
-} from '../../../lib/console/foreign';
+} from '@jupyterlab/console';
 
 import {
   CodeCellModel, CodeCellWidget
-} from '../../../lib/cells';
+} from '@jupyterlab/cells';
 
 import {
   createCodeCellFactory

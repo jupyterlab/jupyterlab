@@ -7,7 +7,7 @@ import {
 
 import {
   uuid
-} from '../../../lib/coreutils';
+} from '@jupyterlab/coreutils';
 
 
 describe('@jupyterlab/coreutils', () => {

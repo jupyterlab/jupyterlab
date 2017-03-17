@@ -17,19 +17,19 @@ import {
 
 import {
   CodeConsole
-} from '../../../lib/console';
+} from '@jupyterlab/console';
 
 import {
   ConsoleHistory
-} from '../../../lib/console/history';
+} from '@jupyterlab/console';
 
 import {
   ForeignHandler
-} from '../../../lib/console/foreign';
+} from '@jupyterlab/console';
 
 import {
   BaseCellWidget, CodeCellWidget, CodeCellModel, RawCellModel, RawCellWidget
-} from '../../../lib/cells';
+} from '@jupyterlab/cells';
 
 import {
   createCodeCellFactory

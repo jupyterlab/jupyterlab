@@ -5,15 +5,15 @@ import expect = require('expect.js');
 
 import {
   ApplicationShell
-} from '../../../lib/application';
+} from '@jupyterlab/application';
 
 import {
   BaseCellWidget
-} from '../../../lib/cells';
+} from '@jupyterlab/cells';
 
 import {
   NotebookPanel, NotebookTracker
-} from '../../../lib/notebook';
+} from '@jupyterlab/notebook';
 
 import {
   createNotebookContext

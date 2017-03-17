@@ -9,11 +9,11 @@ import {
 
 import {
   Context, DocumentRegistry, TextModelFactory
-} from '../../../lib/docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   SaveHandler
-} from '../../../lib/docmanager';
+} from '@jupyterlab/docmanager';
 
 import {
   acceptDialog, waitForDialog

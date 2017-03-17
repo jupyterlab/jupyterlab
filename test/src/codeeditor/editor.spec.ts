@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   CodeEditor
-} from '../../../lib/codeeditor';
+} from '@jupyterlab/codeeditor';
 
 describe('CodeEditor.Model', () => {
 

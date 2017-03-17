@@ -17,11 +17,11 @@ import {
 
 import {
   MarkdownWidget, MarkdownWidgetFactory
-} from '../../../lib/markdownwidget/widget';
+} from '@jupyterlab/markdownwidget';
 
 import {
   DocumentRegistry, Context
-} from '../../../lib/docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   createFileContext, defaultRenderMime

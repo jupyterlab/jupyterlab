@@ -9,19 +9,19 @@ import {
 
 import {
   INotebookModel
-} from '../../../lib/notebook/model';
+} from '@jupyterlab/notebook';
 
 import {
   NotebookPanel
-} from '../../../lib/notebook/panel';
+} from '@jupyterlab/notebook';
 
 import {
   NotebookWidgetFactory
-} from '../../../lib/notebook/widgetfactory';
+} from '@jupyterlab/notebook';
 
 import {
   Context
-} from '../../../lib/docregistry/context';
+} from '@jupyterlab/docregistry';
 
 import {
   createNotebookContext

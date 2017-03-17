@@ -21,7 +21,7 @@ import {
 
 import {
   BreadCrumbs, FileBrowserModel
-} from '../../../lib/filebrowser';
+} from '@jupyterlab/filebrowser';
 
 
 

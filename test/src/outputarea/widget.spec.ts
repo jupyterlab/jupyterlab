@@ -17,7 +17,7 @@ import {
 
 import {
   IOutputAreaModel, OutputAreaModel, OutputAreaWidget
-} from '../../../lib/outputarea';
+} from '@jupyterlab/outputarea';
 
 import {
   defaultRenderMime, DEFAULT_OUTPUTS

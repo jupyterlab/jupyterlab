@@ -103,7 +103,6 @@ and you may participate in development discussions or get live help on [Gitter](
 ## Resources
 
 - [Reporting Issues](https://github.com/jupyterlab/jupyterlab/issues)
-- [API Docs](http://jupyterlab.github.io/jupyterlab/)
 - [Architecture tutorial](https://jupyterlab-tutorial.readthedocs.io/en/latest/index.html)
 - [Documentation for Project Jupyter](https://jupyter.readthedocs.io/en/latest/index.html) | [PDF](https://media.readthedocs.org/pdf/jupyter/latest/jupyter.pdf)
 - [Project Jupyter website](https://jupyter.org)

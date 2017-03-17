@@ -13,7 +13,7 @@ import {
 
 import {
   Context, DocumentRegistry, TextModelFactory
-} from '../../../lib/docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   waitForDialog, acceptDialog

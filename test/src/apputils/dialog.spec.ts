@@ -27,7 +27,7 @@ import {
 
 import {
   Dialog, showDialog
-} from '../../../lib/apputils';
+} from '@jupyterlab/apputils';
 
 
 /**

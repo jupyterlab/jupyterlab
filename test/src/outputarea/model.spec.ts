@@ -5,11 +5,11 @@ import expect = require('expect.js');
 
 import {
   OutputModel
-} from '../../../lib/rendermime';
+} from '@jupyterlab/rendermime';
 
 import {
   OutputAreaModel
-} from '../../../lib/outputarea/model';
+} from '@jupyterlab/outputarea';
 
 import {
   DEFAULT_OUTPUTS

@@ -9,15 +9,15 @@ import {
 
 import {
   CodeCellModel
-} from '../../../lib/cells/model';
+} from '@jupyterlab/cells';
 
 import {
   nbformat
-} from '../../../lib/coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   NotebookModel
-} from '../../../lib/notebook/model';
+} from '@jupyterlab/notebook';
 
 import {
   DEFAULT_CONTENT

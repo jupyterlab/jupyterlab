@@ -17,7 +17,7 @@ import {
 
 import {
   CodeConsole, ConsolePanel
-} from '../../../lib/console';
+} from '@jupyterlab/console';
 
 import {
   createConsolePanelFactory, rendermime, mimeTypeService, editorFactory

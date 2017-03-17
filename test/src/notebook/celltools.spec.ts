@@ -17,19 +17,19 @@ import {
 
 import {
   ApplicationShell
-} from '../../../lib/application';
+} from '@jupyterlab/application';
 
 import {
   CodeMirrorEditorFactory
-} from '../../../lib/codemirror';
+} from '@jupyterlab/codemirror';
 
 import {
   ObservableJSON
-} from '../../../lib/coreutils';
+} from '@jupyterlab/coreutils';
 
 import {
   CellTools, NotebookPanel, NotebookTracker, NotebookActions
-} from '../../../lib/notebook';
+} from '@jupyterlab/notebook';
 
 import {
   createNotebookPanel, populateNotebook
