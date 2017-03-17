@@ -454,18 +454,31 @@ namespace Private {
       for (let i=0; i<headers.length; i++){
         let header = headers[i];
         header.id = header.innerHTML.replace(/ /g, '-');
-        let anchor1 = document.createElement('a');
-        anchor1.target = '_self';
-        anchor1.id = header.id.toLowerCase();
-        header.appendChild(anchor1);
-        let anchor = document.createElement('a');
-        anchor.target = '_self';
-        anchor.textContent = '¶';
-        anchor.href = '#'+ header.id;
-        anchor.classList.add('jp-InternalAnchorLink');
-        header.appendChild(anchor);
+        let fakeAnchor = postfixAnchor(header, undefined, null, null, header.id.toLowerCase(), null);
+        let realAnchor = postfixAnchor(header, undefined, '#' + header.id, ['jp-InternalAnchorLink'], null, '¶');
       };
     };
+    function postfixAnchor(node: Element, target = '_self', href?: string,
+                           localClass?: Array<string>, id?: string, content?: string): Node{
+      let anchor = document.createElement('a');
+      anchor.target = target;
+      if (href){
+        anchor.href = href; 
+      }
+      if (localClass){
+        for (let thisLocalClass of localClass){
+          anchor.classList.add(thisLocalClass);
+        }
+      }
+      if (id){
+        anchor.id = id;
+      }
+      if (content){
+        anchor.textContent = content;
+      }
+      let new_node = node.appendChild(anchor);
+      return new_node;
+    }
   }
 
   /**
