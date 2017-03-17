@@ -169,6 +169,7 @@ class ClientSession implements IDisposable {
     this._isDisposed = true;
     if (this._session) {
       this._session.dispose();
+      this._session = null;
     }
     Signal.clearData(this);
   }
@@ -316,7 +317,12 @@ class ClientSession implements IDisposable {
   private _handleSessionError(err: utils.IAjaxError): Promise<void> {
     this._promise.resolve(void 0);
     this._promise = null;
-    let response = JSON.parse(err.xhr.response);
+    let response = String(err.xhr.response);
+    try {
+      response = JSON.parse(err.xhr.response);
+    } catch (err) {
+      // no-op
+    }
     let body = document.createElement('pre');
     body.textContent = response['traceback'];
     return showDialog({
@@ -469,10 +475,9 @@ export namespace ClientSession {
       if (result.accept) {
         return kernel.restart().then(() => {
           return kernel;
-        });
-      } else {
-        return kernel;
+        }
       }
+      return kernel;
     });
   }
 
