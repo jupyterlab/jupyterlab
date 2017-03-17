@@ -462,6 +462,7 @@ class DirListing extends Widget {
       this._selectItem(index, keepExisting);
       ElementExt.scrollIntoViewIfNeeded(this.contentNode, this._items[index]);
     }
+    this.update();
   }
 
   /**
@@ -493,6 +494,7 @@ class DirListing extends Widget {
       this._selectItem(index, keepExisting);
       ElementExt.scrollIntoViewIfNeeded(this.contentNode, this._items[index]);
     }
+    this.update();
   }
 
   /**
