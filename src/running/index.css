@@ -150,4 +150,5 @@
   background: var(--jp-warn-color1);
   height: var(--jp-private-running-shutdown-button-height);
   line-height: var(--jp-private-running-shutdown-button-height);
+  letter-spacing: .8px;
 }
