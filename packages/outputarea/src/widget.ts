@@ -34,16 +34,12 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  ObservableVector, nbformat
+  ObservableVector, nbformat, IModelDB
 } from '@jupyterlab/coreutils';
 
 import {
   IOutputModel, RenderMime
 } from '@jupyterlab/rendermime';
-
-import {
-  IModelDB
-} from '../coreutils/modeldb';
 
 
 /**

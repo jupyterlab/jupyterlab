@@ -6,7 +6,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  JSONValue, JSONObject
+  JSONValue
 } from '@phosphor/coreutils';
 
 import {

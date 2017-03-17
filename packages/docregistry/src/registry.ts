@@ -30,12 +30,8 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IChangedArgs as IChangedArgsGeneric, PathExt
+  IChangedArgs as IChangedArgsGeneric, PathExt, IModelDB
 } from '@jupyterlab/coreutils';
-
-import {
-  IModelDB
-} from '../coreutils/modeldb';
 
 /* tslint:disable */
 /**

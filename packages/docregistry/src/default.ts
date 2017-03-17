@@ -22,16 +22,12 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IChangedArgs
+  IChangedArgs, IModelDB
 } from '@jupyterlab/coreutils';
 
 import {
   DocumentRegistry
 } from './index';
-
-import {
-  IModelDB
-} from '../coreutils/modeldb';
 
 
 /**

@@ -18,16 +18,13 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IObservableJSON, ObservableJSON
+  IObservableJSON, ObservableJSON,
+  IModelDB, IObservableValue
 } from '@jupyterlab/coreutils';
 
 import {
   IOutputAreaModel, OutputAreaModel
 } from '@jupyterlab/outputarea';
-
-import {
-  IModelDB, ObservableValue, IObservableValue
-} from '../coreutils/modeldb';
 
 
 /**

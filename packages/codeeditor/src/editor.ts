@@ -14,20 +14,9 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  IChangedArgs
+  IModelDB, ModelDB, IObservableValue,
+  IObservableMap, IObservableString, IChangedArgs
 } from '@jupyterlab/coreutils';
-
-import {
-  IObservableString, ObservableString
-} from '@jupyterlab/coreutils';
-
-import {
-  IObservableMap, ObservableMap
-} from '@jupyterlab/coreutils';
-
-import {
-  IModelDB, ModelDB, IObservableValue, ObservableValue
-} from '../coreutils/modeldb';
 
 
 /**
