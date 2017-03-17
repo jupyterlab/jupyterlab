@@ -18,7 +18,7 @@ module.exports = {
   bail: true,
   devtool: 'source-map',
   module: {
-    loaders: [
+    rules: [
       { test: /\.css$/, use: [ 'style-loader', 'css-loader' ] },
       { test: /\.json$/, use: 'json-loader' },
       { test: /\.html$/, use: 'file-loader' },
