@@ -8,18 +8,17 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  ObservableUndoableVector, ISerializable
+  ObservableUndoableVector, ISerializer
 } from '@jupyterlab/coreutils';
 
 
 
-class Test implements ISerializable {
-
+class Test {
   constructor(value: JSONObject) {
     this._value = value;
   }
 
-  toJSON(): JSONObject {
+  get value(): JSONObject {
     return this._value;
   }
 
@@ -29,12 +28,18 @@ class Test implements ISerializable {
 
 let count = 0;
 
-function factory(value: JSONObject): Test {
-  value['count'] = count++;
-  return new Test(value);
+class Serializer implements ISerializer<Test> {
+  fromJSON(value: JSONObject): Test {
+    value['count'] = count++;
+    return new Test(value);
+  }
+
+  toJSON(value: Test): JSONObject {
+    return value.value;
+  }
 }
 
-
+const serializer = new Serializer();
 const value: JSONObject = { name: 'foo' };
 
 
@@ -45,7 +50,7 @@ describe('notebook/common/undo', () => {
     describe('#constructor', () => {
 
       it('should create a new ObservableUndoableVector', () => {
-        let vector = new ObservableUndoableVector(factory);
+        let vector = new ObservableUndoableVector(serializer);
         expect(vector).to.be.an(ObservableUndoableVector);
       });
 
@@ -54,12 +59,12 @@ describe('notebook/common/undo', () => {
     describe('#canRedo', () => {
 
       it('should return false if there is no history', () => {
-        let vector = new ObservableUndoableVector(factory);
+        let vector = new ObservableUndoableVector(serializer);
         expect(vector.canRedo).to.be(false);
       });
 
       it('should return true if there is an undo that can be redone', () => {
-        let vector = new ObservableUndoableVector(factory);
+        let vector = new ObservableUndoableVector(serializer);
         vector.pushBack(new Test(value));
         vector.undo();
         expect(vector.canRedo).to.be(true);
@@ -70,13 +75,13 @@ describe('notebook/common/undo', () => {
     describe('#canUndo', () => {
 
       it('should return false if there is no history', () => {
-        let vector = new ObservableUndoableVector(factory);
+        let vector = new ObservableUndoableVector(serializer);
         expect(vector.canUndo).to.be(false);
       });
 
       it('should return true if there is a change that can be undone', () => {
-        let vector = new ObservableUndoableVector(factory);
-        vector.pushBack(factory(value));
+        let vector = new ObservableUndoableVector(serializer);
+        vector.pushBack(serializer.fromJSON(value));
         expect(vector.canUndo).to.be(true);
       });
 
@@ -85,7 +90,7 @@ describe('notebook/common/undo', () => {
     describe('#dispose()', () => {
 
       it('should dispose of the resources used by the vector', () => {
-        let vector = new ObservableUndoableVector(factory);
+        let vector = new ObservableUndoableVector(serializer);
         vector.dispose();
         expect(vector.isDisposed).to.be(true);
         vector.dispose();
@@ -97,10 +102,10 @@ describe('notebook/common/undo', () => {
     describe('#beginCompoundOperation()', () => {
 
       it('should begin a compound operation', () => {
-        let vector = new ObservableUndoableVector(factory);
+        let vector = new ObservableUndoableVector(serializer);
         vector.beginCompoundOperation();
-        vector.pushBack(factory(value));
-        vector.pushBack(factory(value));
+        vector.pushBack(serializer.fromJSON(value));
+        vector.pushBack(serializer.fromJSON(value));
         vector.endCompoundOperation();
         expect(vector.canUndo).to.be(true);
         vector.undo();
@@ -108,10 +113,10 @@ describe('notebook/common/undo', () => {
       });
 
       it('should not be undoable if isUndoAble is set to false', () => {
-        let vector = new ObservableUndoableVector(factory);
+        let vector = new ObservableUndoableVector(serializer);
         vector.beginCompoundOperation(false);
-        vector.pushBack(factory(value));
-        vector.pushBack(factory(value));
+        vector.pushBack(serializer.fromJSON(value));
+        vector.pushBack(serializer.fromJSON(value));
         vector.endCompoundOperation();
         expect(vector.canUndo).to.be(false);
       });
@@ -121,10 +126,10 @@ describe('notebook/common/undo', () => {
     describe('#endCompoundOperation()', () => {
 
       it('should end a compound operation', () => {
-        let vector = new ObservableUndoableVector(factory);
+        let vector = new ObservableUndoableVector(serializer);
         vector.beginCompoundOperation();
-        vector.pushBack(factory(value));
-        vector.pushBack(factory(value));
+        vector.pushBack(serializer.fromJSON(value));
+        vector.pushBack(serializer.fromJSON(value));
         vector.endCompoundOperation();
         expect(vector.canUndo).to.be(true);
         vector.undo();
@@ -136,39 +141,47 @@ describe('notebook/common/undo', () => {
     describe('#undo()', () => {
 
       it('should undo a pushBack', () => {
-        let vector = new ObservableUndoableVector(factory);
-        vector.pushBack(factory(value));
+        let vector = new ObservableUndoableVector(serializer);
+        vector.pushBack(serializer.fromJSON(value));
         vector.undo();
         expect(vector.length).to.be(0);
       });
 
       it('should undo a pushAll', () => {
-        let vector = new ObservableUndoableVector(factory);
-        vector.pushAll([factory(value), factory(value)]);
+        let vector = new ObservableUndoableVector(serializer);
+        vector.pushAll([serializer.fromJSON(value),
+                        serializer.fromJSON(value)]);
         vector.undo();
         expect(vector.length).to.be(0);
       });
 
       it('should undo a remove', () => {
-         let vector = new ObservableUndoableVector(factory);
-         vector.pushAll([factory(value), factory(value)]);
+         let vector = new ObservableUndoableVector(serializer);
+         vector.pushAll([serializer.fromJSON(value),
+                         serializer.fromJSON(value)]);
          vector.removeAt(0);
          vector.undo();
          expect(vector.length).to.be(2);
       });
 
       it('should undo a removeRange', () => {
-        let vector = new ObservableUndoableVector(factory);
-        vector.pushAll([factory(value), factory(value), factory(value),
-          factory(value), factory(value), factory(value)]);
+        let vector = new ObservableUndoableVector(serializer);
+        vector.pushAll([serializer.fromJSON(value),
+                        serializer.fromJSON(value),
+                        serializer.fromJSON(value),
+                        serializer.fromJSON(value),
+                        serializer.fromJSON(value),
+                        serializer.fromJSON(value)]);
         vector.removeRange(1, 3);
         vector.undo();
         expect(vector.length).to.be(6);
       });
 
       it('should undo a move', () => {
-        let items = [factory(value), factory(value), factory(value)];
-        let vector = new ObservableUndoableVector(factory);
+        let items = [serializer.fromJSON(value),
+                     serializer.fromJSON(value),
+                     serializer.fromJSON(value)];
+        let vector = new ObservableUndoableVector(serializer);
         vector.pushAll(items);
         vector.move(1, 2);
         vector.undo();
@@ -180,24 +193,26 @@ describe('notebook/common/undo', () => {
     describe('#redo()', () => {
 
       it('should redo a pushBack', () => {
-        let vector = new ObservableUndoableVector(factory);
-        vector.pushBack(factory(value));
+        let vector = new ObservableUndoableVector(serializer);
+        vector.pushBack(serializer.fromJSON(value));
         vector.undo();
         vector.redo();
         expect(vector.length).to.be(1);
       });
 
       it('should redo a pushAll', () => {
-        let vector = new ObservableUndoableVector(factory);
-        vector.pushAll([factory(value), factory(value)]);
+        let vector = new ObservableUndoableVector(serializer);
+        vector.pushAll([serializer.fromJSON(value),
+                        serializer.fromJSON(value)]);
         vector.undo();
         vector.redo();
         expect(vector.length).to.be(2);
       });
 
       it('should redo a remove', () => {
-         let vector = new ObservableUndoableVector(factory);
-         vector.pushAll([factory(value), factory(value)]);
+         let vector = new ObservableUndoableVector(serializer);
+         vector.pushAll([serializer.fromJSON(value),
+                         serializer.fromJSON(value)]);
          vector.removeAt(0);
          vector.undo();
          vector.redo();
@@ -205,9 +220,13 @@ describe('notebook/common/undo', () => {
       });
 
       it('should redo a removeRange', () => {
-        let vector = new ObservableUndoableVector(factory);
-        vector.pushAll([factory(value), factory(value), factory(value),
-          factory(value), factory(value), factory(value)]);
+        let vector = new ObservableUndoableVector(serializer);
+        vector.pushAll([serializer.fromJSON(value),
+                        serializer.fromJSON(value),
+                        serializer.fromJSON(value),
+                        serializer.fromJSON(value),
+                        serializer.fromJSON(value),
+                        serializer.fromJSON(value)]);
         vector.removeRange(1, 3);
         vector.undo();
         vector.redo();
@@ -215,8 +234,10 @@ describe('notebook/common/undo', () => {
       });
 
       it('should undo a move', () => {
-        let items = [factory(value), factory(value), factory(value)];
-        let vector = new ObservableUndoableVector(factory);
+        let items = [serializer.fromJSON(value),
+                     serializer.fromJSON(value),
+                     serializer.fromJSON(value)];
+        let vector = new ObservableUndoableVector(serializer);
         vector.pushAll(items);
         vector.move(1, 2);
         vector.undo();
@@ -229,8 +250,8 @@ describe('notebook/common/undo', () => {
     describe('#clearUndo()', () => {
 
       it('should clear the undo stack', () => {
-        let vector = new ObservableUndoableVector(factory);
-        vector.pushBack(factory(value));
+        let vector = new ObservableUndoableVector(serializer);
+        vector.pushBack(serializer.fromJSON(value));
         vector.clearUndo();
         expect(vector.canUndo).to.be(false);
       });

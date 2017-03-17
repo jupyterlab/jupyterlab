@@ -19,30 +19,13 @@ import {
 
 import {
   IObservableMap, ObservableMap, IObservableVector, ObservableVector,
-  IObservableUndoableVector, ObservableUndoableVector, ISerializable
+  IObservableUndoableVector, ObservableUndoableVector
 } from '@jupyterlab/coreutils';
 
 import {
   ICellModel
 } from '@jupyterlab/cells';
 
-
-/**
- * Unfortunately, the current implementation of the ObservableUndoableVector
- * requires the values to implement to/from JSON. This should not be 
- * necessary for primitives (in this case strings).
- */
-class CellID implements ISerializable { 
-  constructor(id: string) {
-    this.id = id;
-  }
-
-  readonly id: string;
-
-  toJSON(): JSONObject {
-    return { id: this.id };
-  }
-}
 
 /**
  * A cell list object that supports undo/redo.
@@ -53,8 +36,9 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    * Construct the cell list.
    */
   constructor() {
-    this._cellOrder = new ObservableUndoableVector<CellID>((id: JSONObject) => {
-      return new CellID((id as any).id);
+    this._cellOrder = new ObservableUndoableVector<string>({
+      toJSON: (val: string)=>{return val;},
+      fromJSON: (val: string)=>{return val;}
     });
     this._cellMap = new ObservableMap<ICellModel>();
 
@@ -163,7 +147,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
   iter(): IIterator<ICellModel> {
     let arr: ICellModel[] = [];
     for (let id of toArray(this._cellOrder)) {
-      arr.push(this._cellMap.get(id.id));
+      arr.push(this._cellMap.get(id));
     }
     return new ArrayIterator<ICellModel>(arr);
   }
@@ -202,7 +186,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    * An `index` which is non-integral or out of range.
    */
   at(index: number): ICellModel {
-    return this._cellMap.get(this._cellOrder.at(index).id) as ICellModel;
+    return this._cellMap.get(this._cellOrder.at(index)) as ICellModel;
   }
 
   /**
@@ -231,7 +215,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
     let id = utils.uuid();
     // Set the internal data structures.
     this._cellMap.set(id, cell);
-    this._cellOrder.set(index, new CellID(id));
+    this._cellOrder.set(index, id);
   }
 
   /**
@@ -257,7 +241,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
     let id = utils.uuid();
     // Set the internal data structures.
     this._cellMap.set(id, cell);
-    let num = this._cellOrder.pushBack(new CellID(id));
+    let num = this._cellOrder.pushBack(id);
     return num;
   }
 
@@ -276,7 +260,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
   popBack(): ICellModel {
     //Don't clear the map in case we need to reinstate the cell
     let id = this._cellOrder.popBack();
-    let cell = this._cellMap.get(id.id);
+    let cell = this._cellMap.get(id);
     return cell;
   }
 
@@ -311,7 +295,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
     let id = utils.uuid();
     // Set the internal data structures.
     this._cellMap.set(id, cell);
-    let num = this._cellOrder.insert(index, new CellID(id));
+    let num = this._cellOrder.insert(index, id);
     return num;
   }
 
@@ -331,7 +315,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    */
   remove(cell: ICellModel): number {
     let index = ArrayExt.findFirstIndex(
-      toArray(this._cellOrder), id => (this._cellMap.get(id.id)===cell));
+      toArray(this._cellOrder), id => (this._cellMap.get(id)===cell));
     this.removeAt(index);
     return index;
   }
@@ -355,7 +339,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    */
   removeAt(index: number): ICellModel {
     let id= this._cellOrder.removeAt(index);
-    let cell = this._cellMap.get(id.id);
+    let cell = this._cellMap.get(id);
     return cell;
   }
 
@@ -420,7 +404,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
       let id = utils.uuid();
       // Set the internal data structures.
       this._cellMap.set(id, cell);
-      let num = this._cellOrder.pushBack(new CellID(id));
+      let num = this._cellOrder.pushBack(id);
     });
     return this.length;
   }
@@ -458,7 +442,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
       let id = utils.uuid();
       this._cellMap.set(id, cell);
       this._cellOrder.beginCompoundOperation();
-      this._cellOrder.insert(index++, new CellID(id));
+      this._cellOrder.insert(index++, id);
       this._cellOrder.endCompoundOperation();
     });
     return this.length;
@@ -540,7 +524,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
     // cell order.
     for (let key of this._cellMap.keys()) {
       if (ArrayExt.findFirstIndex(
-         toArray(this._cellOrder), id => (id.id)===key) === -1) {
+         toArray(this._cellOrder), id => (id)===key) === -1) {
         let cell = this._cellMap.get(key) as ICellModel;
         cell.dispose();
         this._cellMap.delete(key);
@@ -549,14 +533,14 @@ class CellList implements IObservableUndoableVector<ICellModel> {
     this._cellOrder.clearUndo();
   }
 
-  private _onOrderChanged(order: IObservableVector<CellID>, change: ObservableVector.IChangedArgs<CellID>): void {
+  private _onOrderChanged(order: IObservableVector<string>, change: ObservableVector.IChangedArgs<string>): void {
     let newValues: ICellModel[] = [];
     let oldValues: ICellModel[] = [];
     each(change.newValues, (id)=>{
-      newValues.push(this._cellMap.get(id.id));
+      newValues.push(this._cellMap.get(id));
     });
     each(change.oldValues, (id)=>{
-      oldValues.push(this._cellMap.get(id.id));
+      oldValues.push(this._cellMap.get(id));
     });
     this._changed.emit({
       type: change.type,
@@ -568,7 +552,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
   }
 
   private _isDisposed: boolean = false;
-  private _cellOrder: IObservableUndoableVector<CellID> = null;
+  private _cellOrder: IObservableUndoableVector<string> = null;
   private _cellMap: IObservableMap<ICellModel> = null;
   private _changed = new Signal<this, ObservableVector.IChangedArgs<ICellModel>>(this);
 }
