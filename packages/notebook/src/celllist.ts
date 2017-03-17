@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject
-} from '@phosphor/coreutils';
-
-import {
   ArrayExt, IIterator, IterableOrArrayLike, each, toArray, ArrayIterator
 } from '@phosphor/algorithm';
 
@@ -374,7 +370,6 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    * A `fromIndex` or a `toIndex` which is non-integral.
    */
   move(fromIndex: number, toIndex: number): void {
-    let cell = this.at(fromIndex);
     this._cellOrder.move(fromIndex, toIndex);
   }
 
@@ -397,14 +392,13 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    * not be called by other actors.
    */
   pushAll(cells: IterableOrArrayLike<ICellModel>): number {
-    let newIndex = this.length;
     let newValues = toArray(cells);
     each(newValues, cell => {
       // Generate a new uuid for the cell.
       let id = utils.uuid();
       // Set the internal data structures.
       this._cellMap.set(id, cell);
-      let num = this._cellOrder.pushBack(id);
+      this._cellOrder.pushBack(id);
     });
     return this.length;
   }
