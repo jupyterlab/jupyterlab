@@ -16,10 +16,10 @@
     "clean:examples": "lerna run clean --scope \"@jupyterlab/example-*\"",
     "clean:src": "lerna run clean --scope \"@jupyterlab/!(test-|example-)*\"",
     "clean:tests": "lerna run clean --scope \"@jupyterlab/test-*\"",
-    "test": "lerna run test --scope \"@jupyterlab/test-*\"",
-    "test:chrome": "lerna run test:chrome --scope \"@jupyterlab/test-*\"",
-    "test:firefox": "lerna run test:firefox --scope \"@jupyterlab/test-*\"",
-    "test:ie": "lerna run test:ie --concurrency 1 --scope \"@jupyterlab/test-*\"",
+    "test": "lerna run test --stream --scope \"@jupyterlab/test-*\"",
+    "test:chrome": "lerna run test:chrome --stream --scope \"@jupyterlab/test-*\"",
+    "test:firefox": "lerna run test:firefox --streamn--scope \"@jupyterlab/test-*\"",
+    "test:ie": "lerna run test:ie --concurrency 1 --stream --scope \"@jupyterlab/test-*\"",
     "publish": "npm run clean && npm run build && lerna publish -m \"Publish\""
   }
 }
