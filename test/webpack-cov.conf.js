@@ -1,7 +1,7 @@
 var path = require('path');
 
 module.exports = {
-  entry: './test/build/index.js',
+  entry: './build/index.js',
   output: {
     path: __dirname + "/build",
     filename: "coverage.js",
@@ -11,18 +11,18 @@ module.exports = {
   devtool: 'source-map',
   module: {
     loaders: [
-      { test: /\.css$/, loader: 'style-loader!css-loader' },
-      { test: /\.md$/, loader: 'raw-loader'},
-      { test: /\.html$/, loader: 'file-loader?name=[name].[ext]' },
-      { test: /\.ipynb$/, loader: 'json-loader' },
-      { test: /\.json$/, loader: 'json-loader' },
+      { test: /\.css$/, use: ['style-loader', 'css-loader'] },
+      { test: /\.md$/, use: 'raw-loader'},
+      { test: /\.html$/, use: 'file-loader?name=[name].[ext]' },
+      { test: /\.ipynb$/, use: 'json-loader' },
+      { test: /\.json$/, use: 'json-loader' },
     ],
-    preLoaders: [
+    rules: [
       // instrument only testing sources with Istanbul
       {
         test: /\.js$/,
-        include: path.resolve('lib/'),
-        loader: 'istanbul-instrumenter'
+        include: path.resolve('node_modules/@jupyterlab'),
+        use: 'istanbul-instrumenter'
       }
     ]
   }

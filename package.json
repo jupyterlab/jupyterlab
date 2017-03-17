@@ -16,6 +16,7 @@
     "clean:examples": "lerna run clean --scope \"@jupyterlab/example-*\"",
     "clean:src": "lerna run clean --scope \"@jupyterlab/!(test-|example-)*\"",
     "clean:tests": "lerna run clean --scope \"@jupyterlab/test-*\"",
+    "coverage": "lerna run coverage --stream --scope \"@jupyterlab/test-*\"",
     "test": "lerna run test --stream --scope \"@jupyterlab/test-*\"",
     "test:chrome": "lerna run test:chrome --stream --scope \"@jupyterlab/test-*\"",
     "test:firefox": "lerna run test:firefox --streamn--scope \"@jupyterlab/test-*\"",

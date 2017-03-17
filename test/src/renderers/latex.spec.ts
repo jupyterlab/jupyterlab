@@ -80,7 +80,7 @@ describe('jupyter-ui', () => {
       \\\\\), there`;
       let { text, math } = removeMath(input);
       expect(text).to.be('hello, @@0@@, there');
-      expect(math).to.eql(['\\\\(\n          /alpha \n      \\\\)']);
+      expect(math).to.eql(['\\\\(\n          /alpha\n      \\\\)']);
     });
 
     it('should handle `\\\\\[` delimiters for math', () => {
@@ -89,7 +89,7 @@ describe('jupyter-ui', () => {
       \\\\\], there`;
       let { text, math } = removeMath(input);
       expect(text).to.be('hello, @@0@@, there');
-      expect(math).to.eql(['\\\\[\n          /alpha \n      \\\\]']);
+      expect(math).to.eql(['\\\\[\n          /alpha\n      \\\\]']);
     });
 
   });
