@@ -1045,9 +1045,15 @@ namespace Private {
           break;
         case 'markdown':
           newCell = model.contentFactory.createMarkdownCell({ cell });
+          if (child.model.type == "code") {
+            newCell.trusted = false;
+          }
           break;
         default:
           newCell = model.contentFactory.createRawCell({ cell });
+          if (child.model.type == "code") {
+            newCell.trusted = false;
+          }
         }
         cells.set(i, newCell);
       }
