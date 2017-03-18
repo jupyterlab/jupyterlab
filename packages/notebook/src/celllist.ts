@@ -10,12 +10,8 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  utils
-} from '@jupyterlab/services';
-
-import {
   IObservableMap, ObservableMap, IObservableVector, ObservableVector,
-  IObservableUndoableVector, ObservableUndoableVector
+  IObservableUndoableVector, ObservableUndoableVector, uuid
 } from '@jupyterlab/coreutils';
 
 import {
@@ -33,8 +29,8 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    */
   constructor() {
     this._cellOrder = new ObservableUndoableVector<string>({
-      toJSON: (val: string)=>{return val;},
-      fromJSON: (val: string)=>{return val;}
+      toJSON: (val: string) => { return val; },
+      fromJSON: (val: string) => { return val; }
     });
     this._cellMap = new ObservableMap<ICellModel>();
 
@@ -208,7 +204,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    */
   set(index: number, cell: ICellModel): void {
     // Generate a new uuid for the cell.
-    let id = utils.uuid();
+    let id = uuid();
     // Set the internal data structures.
     this._cellMap.set(id, cell);
     this._cellOrder.set(index, id);
@@ -234,7 +230,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    */
   pushBack(cell: ICellModel): number {
     // Generate a new uuid for the cell.
-    let id = utils.uuid();
+    let id = uuid();
     // Set the internal data structures.
     this._cellMap.set(id, cell);
     let num = this._cellOrder.pushBack(id);
@@ -288,7 +284,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    */
   insert(index: number, cell: ICellModel): number {
     // Generate a new uuid for the cell.
-    let id = utils.uuid();
+    let id = uuid();
     // Set the internal data structures.
     this._cellMap.set(id, cell);
     let num = this._cellOrder.insert(index, id);
@@ -395,7 +391,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
     let newValues = toArray(cells);
     each(newValues, cell => {
       // Generate a new uuid for the cell.
-      let id = utils.uuid();
+      let id = uuid();
       // Set the internal data structures.
       this._cellMap.set(id, cell);
       this._cellOrder.pushBack(id);
@@ -433,7 +429,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
     let newValues = toArray(cells);
     each(newValues, cell => {
       // Generate a new uuid for the cell.
-      let id = utils.uuid();
+      let id = uuid();
       this._cellMap.set(id, cell);
       this._cellOrder.beginCompoundOperation();
       this._cellOrder.insert(index++, id);
@@ -518,7 +514,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
     // cell order.
     for (let key of this._cellMap.keys()) {
       if (ArrayExt.findFirstIndex(
-         toArray(this._cellOrder), id => (id)===key) === -1) {
+         toArray(this._cellOrder), id => id===key) === -1) {
         let cell = this._cellMap.get(key) as ICellModel;
         cell.dispose();
         this._cellMap.delete(key);
