@@ -27,8 +27,6 @@ from traitlets.utils.importstring import import_item
 
 from tornado.log import LogFormatter
 
-from .semver import satisfies
-
 
 # Constants for pretty print extension listing function.
 # Window doesn't support coloring in the commandline
@@ -498,18 +496,6 @@ def validate_labextension_folder(name, full_dest, logger=None):
                 path = os.path.join(full_dest, fname)
                 if not os.path.exists(path):
                     has_files.append("File in manifest does not exist: {}".format(path))
-
-        for (mod, deps) in manifest.get('modules', {}).items():
-            # ignore jupyterlab modules since
-            # they are only semver compatibile with their own version
-            if mod.startswith('jupyterlab@'):
-                continue
-            for dep in deps:
-                if dep.startswith('jupyterlab@'):
-                    dep = dep.split('/')[0].split('@')[-1]
-                    if not satisfies(__version__, dep, False):
-                        version_compatible.append('Expects JupyterLab version %s from packaged module %s'%(dep, mod))
-                        break
 
     indent = "        "
     subindent = indent + "    "
