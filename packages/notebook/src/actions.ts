@@ -347,10 +347,7 @@ namespace NotebookActions {
     }
     let state = Private.getState(widget);
     let promise = Private.runSelected(widget, kernel);
-    Private.handleState(widget, state);
-    // Scroll to the top of the previous output.
-    let er = state.activeCell.editorWidget.node.getBoundingClientRect();
-    widget.scrollToPosition(er.bottom);
+    Private.handleRunState(widget, state);
     return promise;
   }
 
@@ -385,12 +382,7 @@ namespace NotebookActions {
     } else {
       widget.activeCellIndex++;
     }
-    Private.handleState(widget, state);
-    if (widget.mode === 'command') {
-      // Scroll to the top of the previous output.
-      let er = state.activeCell.editorWidget.node.getBoundingClientRect();
-      widget.scrollToPosition(er.bottom);
-    }
+    Private.handleRunState(widget, state);
     return promise;
   }
 
@@ -420,7 +412,7 @@ namespace NotebookActions {
     model.cells.insert(widget.activeCellIndex + 1, cell);
     widget.activeCellIndex++;
     widget.mode = 'edit';
-    Private.handleState(widget, state);
+    Private.handleRunState(widget, state);
     return promise;
   }
 
@@ -446,12 +438,7 @@ namespace NotebookActions {
       widget.select(child);
     });
     let promise = Private.runSelected(widget, kernel);
-    Private.handleState(widget, state);
-    if (widget.mode === 'command') {
-      // Scroll to the top of the previous output.
-      let er = state.activeCell.editorWidget.node.getBoundingClientRect();
-      widget.scrollToPosition(er.bottom);
-    }
+    Private.handleRunState(widget, state);
     return promise;
   }
 
@@ -868,6 +855,19 @@ namespace Private {
   }
 
   /**
+   * Handle the state of a widget after running a run action.
+   */
+  export
+  function handleRunState(widget: Notebook, state: IState): void {
+    if (state.wasFocused || widget.mode === 'edit') {
+      widget.activate();
+    }
+    // Scroll to the top of the previous active cell output.
+    let er = state.activeCell.editorWidget.node.getBoundingClientRect();
+    widget.scrollToPosition(er.bottom);
+  }
+
+  /**
    * Clone a cell model.
    */
   export
@@ -1052,13 +1052,13 @@ namespace Private {
           break;
         case 'markdown':
           newCell = model.contentFactory.createMarkdownCell({ cell });
-          if (child.model.type == "code") {
+          if (child.model.type === 'code') {
             newCell.trusted = false;
           }
           break;
         default:
           newCell = model.contentFactory.createRawCell({ cell });
-          if (child.model.type == "code") {
+          if (child.model.type === 'code') {
             newCell.trusted = false;
           }
         }
