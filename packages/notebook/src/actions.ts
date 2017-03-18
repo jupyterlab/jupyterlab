@@ -848,7 +848,7 @@ namespace Private {
    */
   export
   function handleState(widget: Notebook, state: IState): void {
-    if (state.wasFocused) {
+    if (state.wasFocused || widget.mode === 'edit') {
       widget.activate();
     }
     ElementExt.scrollIntoViewIfNeeded(widget.node, widget.activeCell.node);
