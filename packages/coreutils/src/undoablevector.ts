@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject
+  JSONValue
 } from '@phosphor/coreutils';
 
 import {
@@ -15,14 +15,20 @@ import {
 
 
 /**
- * An object which can be serialized to JSON.
+ * An object which knows how to serialize and
+ * deserialize the type T.
  */
 export
-interface ISerializable {
+interface ISerializer<T> {
   /**
    * Convert the object to JSON.
    */
-  toJSON(): JSONObject;
+  toJSON(value: T): JSONValue;
+
+  /**
+   * Deserialize the object from JSON.
+   */
+  fromJSON(value: JSONValue): T;
 }
 
 
@@ -30,7 +36,7 @@ interface ISerializable {
  * An observable vector that supports undo/redo.
  */
 export
-interface IObservableUndoableVector<T extends ISerializable> extends IObservableVector<T> {
+interface IObservableUndoableVector<T> extends IObservableVector<T> {
   /**
    * Whether the object can redo changes.
    */
@@ -75,13 +81,13 @@ interface IObservableUndoableVector<T extends ISerializable> extends IObservable
  * A concrete implementation of an observable undoable vector.
  */
 export
-class ObservableUndoableVector<T extends ISerializable> extends ObservableVector<T> implements IObservableUndoableVector<T> {
+class ObservableUndoableVector<T> extends ObservableVector<T> implements IObservableUndoableVector<T> {
   /**
    * Construct a new undoable observable vector.
    */
-  constructor(factory: (value: JSONObject) => T) {
+  constructor(serializer: ISerializer<T>) {
     super();
-    this._factory = factory;
+    this._serializer = serializer;
     this.changed.connect(this._onVectorChanged, this);
   }
 
@@ -103,7 +109,7 @@ class ObservableUndoableVector<T extends ISerializable> extends ObservableVector
    * Dispose of the resources held by the model.
    */
   dispose(): void {
-    this._factory = null;
+    this._serializer = null;
     this._stack = null;
     super.dispose();
   }
@@ -201,9 +207,9 @@ class ObservableUndoableVector<T extends ISerializable> extends ObservableVector
   /**
    * Undo a change event.
    */
-  private _undoChange(change: ObservableVector.IChangedArgs<JSONObject>): void {
+  private _undoChange(change: ObservableVector.IChangedArgs<JSONValue>): void {
     let index = 0;
-    let factory = this._factory;
+    let serializer = this._serializer;
     switch (change.type) {
     case 'add':
       each(change.newValues, () => {
@@ -213,13 +219,13 @@ class ObservableUndoableVector<T extends ISerializable> extends ObservableVector
     case 'set':
       index = change.oldIndex;
       each(change.oldValues, value => {
-        this.set(index++, factory(value));
+        this.set(index++, serializer.fromJSON(value));
       });
       break;
     case 'remove':
       index = change.oldIndex;
       each(change.oldValues, value => {
-        this.insert(index++, factory(value));
+        this.insert(index++, serializer.fromJSON(value));
       });
       break;
     case 'move':
@@ -233,20 +239,20 @@ class ObservableUndoableVector<T extends ISerializable> extends ObservableVector
   /**
    * Redo a change event.
    */
-  private _redoChange(change: ObservableVector.IChangedArgs<JSONObject>): void {
+  private _redoChange(change: ObservableVector.IChangedArgs<JSONValue>): void {
     let index = 0;
-    let factory = this._factory;
+    let serializer = this._serializer;
     switch (change.type) {
     case 'add':
       index = change.newIndex;
       each(change.newValues, value => {
-        this.insert(index++, factory(value));
+        this.insert(index++, serializer.fromJSON(value));
       });
       break;
     case 'set':
       index = change.newIndex;
       each(change.newValues, value => {
-        this.set(change.newIndex++, factory(value));
+        this.set(change.newIndex++, serializer.fromJSON(value));
       });
       break;
     case 'remove':
@@ -265,14 +271,14 @@ class ObservableUndoableVector<T extends ISerializable> extends ObservableVector
   /**
    * Copy a change as JSON.
    */
-  private _copyChange(change: ObservableVector.IChangedArgs<T>): ObservableVector.IChangedArgs<JSONObject> {
-    let oldValues: JSONObject[] = [];
+  private _copyChange(change: ObservableVector.IChangedArgs<T>): ObservableVector.IChangedArgs<JSONValue> {
+    let oldValues: JSONValue[] = [];
     each(change.oldValues, value => {
-      oldValues.push(value.toJSON());
+      oldValues.push(this._serializer.toJSON(value));
     });
-    let newValues: JSONObject[] = [];
+    let newValues: JSONValue[] = [];
     each(change.newValues, value => {
-      newValues.push(value.toJSON());
+      newValues.push(this._serializer.toJSON(value));
     });
     return {
       type: change.type,
@@ -287,6 +293,6 @@ class ObservableUndoableVector<T extends ISerializable> extends ObservableVector
   private _isUndoable = true;
   private _madeCompoundChange = false;
   private _index = -1;
-  private _stack: ObservableVector.IChangedArgs<JSONObject>[][] = [];
-  private _factory: (value: JSONObject) => T = null;
+  private _stack: ObservableVector.IChangedArgs<JSONValue>[][] = [];
+  private _serializer: ISerializer<T> = null;
 }

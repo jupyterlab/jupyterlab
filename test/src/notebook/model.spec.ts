@@ -108,7 +108,7 @@ describe('notebook/notebook/model', () => {
         model.cells.undo();
         expect(model.cells.length).to.be(2);
         expect(model.cells.at(1).value.text).to.be('foo');
-        expect(model.cells.at(1)).to.not.be(cell);  // should be a clone.
+        expect(model.cells.at(1)).to.be(cell);  // should be ===.
       });
 
       context('cells `changed` signal', () => {
@@ -127,14 +127,6 @@ describe('notebook/notebook/model', () => {
           let cell = model.contentFactory.createCodeCell({});
           model.cells.pushBack(cell);
           expect(model.dirty).to.be(true);
-        });
-
-        it('should dispose of old cells', () => {
-          let model = new NotebookModel();
-          let cell = model.contentFactory.createCodeCell({});
-          model.cells.pushBack(cell);
-          model.cells.clear();
-          expect(cell.isDisposed).to.be(true);
         });
 
         it('should add a new code cell when cells are cleared', (done) => {
