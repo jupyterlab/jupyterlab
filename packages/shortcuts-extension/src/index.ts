@@ -47,27 +47,27 @@ const SHORTCUTS = [
   },
   {
     command: 'completer:invoke-console',
-    selector: '.jp-ConsolePanel .jp-mod-completer-enabled',
+    selector: '.jp-ConsolePanel:focus .jp-mod-completer-enabled',
     keys: ['Tab']
   },
   {
     command: 'completer:invoke-notebook',
-    selector: '.jp-Notebook .jp-mod-completer-enabled',
+    selector: '.jp-Notebook:focus .jp-mod-completer-enabled',
     keys: ['Tab']
   },
   {
     command: 'console:run',
-    selector: '.jp-CodeConsole-prompt',
+    selector: '.jp-CodeConsole-prompt:focus',
     keys: ['Enter']
   },
   {
     command: 'console:run-forced',
-    selector: '.jp-CodeConsole-prompt',
+    selector: '.jp-CodeConsole-prompt:focus',
     keys: ['Shift Enter']
   },
   {
     command: 'console:linebreak',
-    selector: '.jp-CodeConsole-prompt',
+    selector: '.jp-CodeConsole-prompt:focus',
     keys: ['Ctrl Enter']
   },
   {
@@ -127,22 +127,22 @@ const SHORTCUTS = [
   },
   {
     command: 'inspector:open',
-    selector: '.jp-CodeConsole-prompt',
+    selector: '.jp-CodeConsole-prompt:focus',
     keys: ['Accel I']
   },
   {
     command: 'notebook-cells:run-and-advance',
-    selector: '.jp-Notebook',
+    selector: '.jp-Notebook:focus',
     keys: ['Shift Enter']
   },
   {
     command: 'notebook-cells:run-and-insert',
-    selector: '.jp-Notebook',
+    selector: '.jp-Notebook:focus',
     keys: ['Alt Enter']
   },
   {
     command: 'notebook-cells:run',
-    selector: '.jp-Notebook',
+    selector: '.jp-Notebook:focus',
     keys: ['Ctrl Enter']
   },
   {
@@ -312,12 +312,12 @@ const SHORTCUTS = [
   },
   {
     command: 'tooltip:launch-notebook',
-    selector: '.jp-Notebook',
+    selector: '.jp-Notebook:focus',
     keys: ['Shift Tab']
   },
   {
     command: 'tooltip:launch-console',
-    selector: '.jp-ConsolePanel',
+    selector: '.jp-ConsolePanel:focus',
     keys: ['Shift Tab']
   }
 ];
