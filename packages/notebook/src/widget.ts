@@ -842,7 +842,7 @@ class Notebook extends StaticNotebook {
     let node = this.node;
     let ar = node.getBoundingClientRect();
     let delta = position - ar.top - ar.height / 2;
-    if (Math.abs(delta) > totalHeight * threshold / 100) {
+    if (Math.abs(delta) > ar.height * threshold / 100) {
       node.scrollTop += delta;
     }
   }
