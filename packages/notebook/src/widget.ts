@@ -841,11 +841,7 @@ class Notebook extends StaticNotebook {
   scrollToPosition(position: number, threshold=25): void {
     let node = this.node;
     let ar = node.getBoundingClientRect();
-    let after = window.getComputedStyle(node, ':after');
-    let afterHeight = parseInt(after.height, 10);
-    // Abort if the move if too small.
-    let totalHeight = ar.height + afterHeight;
-    let delta = position - totalHeight / 2;
+    let delta = position - ar.top - ar.height / 2;
     if (Math.abs(delta) > totalHeight * threshold / 100) {
       node.scrollTop += delta;
     }
