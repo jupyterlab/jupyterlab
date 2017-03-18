@@ -113,7 +113,7 @@ class ApplicationShell extends Widget {
     this._tracker.activeChanged.connect(this._onActiveChanged, this);
 
     // Connect main layout change listener.
-    this._dockPanel.layoutModified.connect(() => this._save, this);
+    this._dockPanel.layoutModified.connect(this._save, this);
   }
 
   /**
@@ -345,7 +345,7 @@ class ApplicationShell extends Widget {
     }
     this._database = database;
     this._database.fetch().then(saved => {
-      if (this.isDisposed && !saved) {
+      if (this.isDisposed || !saved) {
         return;
       }
 
