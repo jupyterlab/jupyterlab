@@ -10,7 +10,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  IObservableVector, ObservableVector, nbformat
+  IObservableList, ObservableList, nbformat
 } from '@jupyterlab/coreutils';
 
 import {
@@ -35,7 +35,7 @@ class OutputAreaModel implements IOutputAreaModel {
     this.contentFactory = (options.contentFactory ||
       OutputAreaModel.defaultContentFactory
     );
-    this.list = new ObservableVector<IOutputModel>();
+    this.list = new ObservableList<IOutputModel>();
     if (options.values) {
       each(options.values, value => { this._add(value); });
     }
@@ -81,13 +81,12 @@ class OutputAreaModel implements IOutputAreaModel {
       return;
     }
     let trusted = this._trusted = value;
-    for (let i = 0; i < this.list.length; i++) {
-      let item = this.list.at(i);
+    each(this.list, (item, i) => {
       let value = item.toJSON();
       item.dispose();
       item = this._createItem({ value, trusted });
       this.list.set(i, item);
-    }
+    });
   }
 
   /**
@@ -118,7 +117,7 @@ class OutputAreaModel implements IOutputAreaModel {
    * Get an item at the specified index.
    */
   get(index: number): IOutputModel {
-    return this.list.at(index);
+    return this.list.get(index);
   }
 
   /**
@@ -194,7 +193,7 @@ class OutputAreaModel implements IOutputAreaModel {
       value.text = this._lastStream;
       let item = this._createItem({ value, trusted });
       let index = this.length - 1;
-      let prev = this.list.at(index);
+      let prev = this.list.get(index);
       prev.dispose();
       this.list.set(index, item);
       return index;
@@ -212,11 +211,11 @@ class OutputAreaModel implements IOutputAreaModel {
     }
 
     // Add the item to our list and return the new length.
-    return this.list.pushBack(item);
+    return this.list.push(item);
   }
 
   protected clearNext = false;
-  protected list: IObservableVector<IOutputModel> = null;
+  protected list: IObservableList<IOutputModel> = null;
 
   /**
    * Create an output item and hook up its signals.
@@ -232,7 +231,7 @@ class OutputAreaModel implements IOutputAreaModel {
   /**
    * Handle a change to the list.
    */
-  private _onListChanged(sender: IObservableVector<IOutputModel>, args: ObservableVector.IChangedArgs<IOutputModel>) {
+  private _onListChanged(sender: IObservableList<IOutputModel>, args: ObservableList.IChangedArgs) {
     this._changed.emit(args);
     this._stateChanged.emit(void 0);
   }
