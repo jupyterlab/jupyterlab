@@ -947,12 +947,8 @@ describe('notebook/widget', () => {
         it('should set the mode to command', () => {
           simulate(widget.node, 'focus');
           widget.mode = 'edit';
-          let other = document.createElement('div');
-          simulate(widget.node, 'blur', { relatedTarget: other });
+          simulate(widget.node, 'blur');
           expect(widget.mode).to.be('command');
-          MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
-          expect(widget.mode).to.be('edit');
-          expect(widget.activeCell.editor.hasFocus()).to.be(true);
         });
 
       });
