@@ -56,7 +56,7 @@ import {
 } from './history';
 
 import {
-  IObservableVector, ObservableVector
+  IObservableList, ObservableList
 } from '@jupyterlab/coreutils';
 
 /**
@@ -113,7 +113,7 @@ class CodeConsole extends Widget {
 
     // Create the panels that hold the content and input.
     let layout = this.layout = new PanelLayout();
-    this._cells = new ObservableVector<BaseCellWidget>();
+    this._cells = new ObservableList<BaseCellWidget>();
     this._content = new Panel();
     this._input = new Panel();
 
@@ -206,7 +206,7 @@ class CodeConsole extends Widget {
    * #### Notes
    * This list does not include the banner or the prompt for a console.
    */
-  get cells(): IObservableVector<BaseCellWidget> {
+  get cells(): IObservableList<BaseCellWidget> {
     return this._cells;
   }
 
@@ -230,7 +230,7 @@ class CodeConsole extends Widget {
    */
   addCell(cell: BaseCellWidget) {
     this._content.addWidget(cell);
-    this._cells.pushBack(cell);
+    this._cells.push(cell);
     cell.disposed.connect(this._onCellDisposed, this);
     this.update();
   }
@@ -554,7 +554,7 @@ class CodeConsole extends Widget {
    */
   private _onCellDisposed(sender: Widget, args: void): void {
     if (!this.isDisposed) {
-      this._cells.remove(sender as CodeCellWidget);
+      this._cells.removeValue(sender as CodeCellWidget);
     }
   }
 
@@ -605,7 +605,7 @@ class CodeConsole extends Widget {
   }
 
   private _mimeTypeService: IEditorMimeTypeService;
-  private _cells: IObservableVector<BaseCellWidget> = null;
+  private _cells: IObservableList<BaseCellWidget> = null;
   private _content: Panel = null;
   private _foreignHandler: ForeignHandler =  null;
   private _history: IConsoleHistory = null;
