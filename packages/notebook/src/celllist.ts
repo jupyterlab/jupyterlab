@@ -346,15 +346,14 @@ class CellList implements IObservableUndoableList<ICellModel> {
    * not be called by other actors.
    */
   insertAll(index: number, cells: IterableOrArrayLike<ICellModel>): void {
-    let newValues = toArray(cells);
-    each(newValues, cell => {
+    let ids = string[];
+    each(cells, cell => {
       // Generate a new uuid for the cell.
       let id = uuid();
       this._cellMap.set(id, cell);
-      this._cellOrder.beginCompoundOperation();
-      this._cellOrder.insert(index++, id);
-      this._cellOrder.endCompoundOperation();
+      ids.push(id);
     });
+    this._cellOrder.insertAll(index, ids);
   }
 
   /**
