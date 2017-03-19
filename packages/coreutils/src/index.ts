@@ -5,6 +5,7 @@ export * from './activitymonitor';
 export * from './interfaces';
 export * from './nbformat';
 export * from './observablejson';
+export * from './observablelist';
 export * from './observablemap';
 export * from './observablestring';
 export * from './observablevector';
