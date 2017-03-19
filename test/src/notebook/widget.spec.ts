@@ -12,7 +12,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  simulate
+  generate, simulate
 } from 'simulate-event';
 
 import {
@@ -958,7 +958,9 @@ describe('notebook/widget', () => {
         it('should set command mode', () => {
           simulate(widget.node, 'focus');
           widget.mode = 'edit';
-          simulate(widget.node, 'blur', { relatedTarget: widget.activeCell.node });
+          let evt = generate('blur');
+          (evt as any).relatedTarget = widget.activeCell.node;
+          widget.node.dispatchEvent(evt);
           expect(widget.mode).to.be('command');
         });
 
