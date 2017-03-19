@@ -70,7 +70,7 @@ describe('coreutils', () => {
         let message = new ObservableJSON.ChangeMessage(sender, {
           key: 'foo',
           type: 'add'
-        }
+        });
         expect(message.sender).to.be(sender);
       });
 

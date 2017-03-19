@@ -63,8 +63,7 @@ describe('notebook/notebook/model', () => {
         model.metadata.changed.connect((sender, args) => {
           expect(sender).to.be(model.metadata);
           expect(args.key).to.be('foo');
-          expect(args.oldValue).to.be(void 0);
-          expect(args.newValue).to.be(1);
+          expect(sender.get(args.key)).to.be(1);
           called = true;
         });
         model.metadata.set('foo', 1);
@@ -346,8 +345,7 @@ describe('notebook/notebook/model', () => {
         model.metadata.changed.connect((sender, args) => {
           expect(sender).to.be(model.metadata);
           expect(args.key).to.be('foo');
-          expect(args.oldValue).to.be(void 0);
-          expect(args.newValue).to.be('bar');
+          expect(sender.get(args.key)).to.be('bar');
           called = true;
         });
         model.metadata.set('foo', 'bar');
