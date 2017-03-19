@@ -11,6 +11,7 @@ export * from './observablestring';
 export * from './observablevector';
 export * from './path';
 export * from './time';
+export * from './undoablelist';
 export * from './undoablevector';
 export * from './url';
 export * from './uuid';

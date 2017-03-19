@@ -46,11 +46,6 @@ interface IObservableList<T> extends IDisposable {
   iter(): IIterator<T>;
 
   /**
-   * Get a copy of the observable list as an array.
-   */
-  asArray(): Array<T>;
-
-  /**
    * Remove all values from the list.
    *
    * #### Complexity
@@ -360,13 +355,6 @@ class ObservableList<T> implements IObservableList<T> {
    */
   iter(): IIterator<T> {
     return new ArrayIterator(this._array);
-  }
-
-  /**
-   * Get a copy of the observable list as an array.
-   */
-  asArray(): Array<T> {
-    return this._array.slice();
   }
 
   /**

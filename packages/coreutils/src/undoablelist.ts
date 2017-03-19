@@ -6,7 +6,7 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  IterableOrArrayLike, each
+  IterableOrArrayLike, each, toArray
 } from '@phosphor/algorithm';
 
 import {
@@ -95,7 +95,7 @@ class ObservableUndoableList<T> extends ObservableList<T> implements IObservable
     super(options);
     this._serializer = options.serializer;
     this.changed.connect(this._onListChanged, this);
-    this._previous = this.asArray();
+    this._previous = toArray(this);
   }
 
   /**
@@ -279,7 +279,7 @@ class ObservableUndoableList<T> extends ObservableList<T> implements IObservable
    * Copy a change as JSON.
    */
   private _copyChange(change: IObservableList.IChangedArgs): ObservableUndoableList.IChangedArgs {
-    this._previous = this.asArray();
+    this._previous = toArray(this);
     let oldValues: JSONValue[] = [];
     let newValues: JSONValue[] = [];
     let value: T;
