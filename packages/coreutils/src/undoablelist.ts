@@ -279,34 +279,31 @@ class ObservableUndoableList<T> extends ObservableList<T> implements IObservable
    * Copy a change as JSON.
    */
   private _copyChange(change: IObservableList.IChangedArgs): ObservableUndoableList.IChangedArgs {
-    this._previous = toArray(this);
     let oldValues: JSONValue[] = [];
     let newValues: JSONValue[] = [];
-    let value: T;
     let toJSON = this._serializer.toJSON;
     let { newIndex, oldIndex, type, count } = change;
 
     switch (type) {
     case 'add':
       for (let i = 0; i < count; i++) {
-        value = this.get(i + newIndex);
-        newValues.push(toJSON(value));
+        newValues.push(toJSON(this.get(i + newIndex)));
       }
       break;
     case 'set':
     case 'move':
-      newValues.push(toJSON(this.get(oldIndex)));
-      oldValues.push(toJSON(this._previous[newIndex]));
+      newValues.push(toJSON(this.get(newIndex)));
+      oldValues.push(toJSON(this._previous[oldIndex]));
       break;
     case 'remove':
       for (let i = 0; i < count; i++) {
-        oldValues.push(toJSON(this._previous[i + newIndex]));
+        oldValues.push(toJSON(this._previous[i + oldIndex]));
       }
       break;
     default:
       break;
     }
-
+    this._previous = toArray(this);
     return {
       type,
       newIndex,

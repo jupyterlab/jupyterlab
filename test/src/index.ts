@@ -41,12 +41,12 @@ import './coreutils/nbformat.spec';
 import './coreutils/observablejson.spec';
 import './coreutils/observablemap.spec';
 import './coreutils/observablestring.spec';
-import './coreutils/observablevector.spec';
+import './coreutils/observablelist.spec';
 import './coreutils/path.spec';
 import './coreutils/time.spec';
 import './coreutils/url.spec';
 import './coreutils/uuid.spec';
-import './coreutils/undoablevector.spec';
+import './coreutils/undoablelist.spec';
 
 import './csvwidget/table.spec';
 import './csvwidget/toolbar.spec';
