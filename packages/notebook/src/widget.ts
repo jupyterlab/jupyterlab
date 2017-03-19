@@ -6,10 +6,6 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONValue
-} from '@phosphor/coreutils';
-
-import {
   Message
 } from '@phosphor/messaging';
 
@@ -48,7 +44,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IChangedArgs, IObservableMap, ObservableMap, IObservableVector,
+  IChangedArgs, IObservableJSON, IObservableVector,
   ObservableVector, nbformat
 } from '@jupyterlab/coreutils';
 
@@ -267,7 +263,7 @@ class StaticNotebook extends Widget {
    * The default implementation updates the mimetypes of the code cells
    * when the `language_info` metadata changes.
    */
-  protected onMetadataChanged(sender: IObservableMap<JSONValue>, args: ObservableMap.IChangedArgs<JSONValue>): void {
+  protected onMetadataChanged(sender: IObservableJSON, args: IObservableJSON.IChangedArgs): void {
     switch (args.key) {
     case 'language_info':
       this._updateMimetype();

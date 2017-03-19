@@ -34,7 +34,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IObservableMap, nbformat, ObservableJSON, ObservableMap
+  IObservableJSON, nbformat, ObservableJSON
 } from '@jupyterlab/coreutils';
 
 import {
@@ -201,8 +201,8 @@ class CellTools extends Widget {
   /**
    * Handle a change in the metadata.
    */
-  private _onMetadataChanged(sender: IObservableMap<JSONValue>, args: ObservableMap.IChangedArgs<JSONValue>): void {
-    let message = new ObservableJSON.ChangeMessage(args);
+  private _onMetadataChanged(sender: IObservableJSON, args: IObservableJSON.IChangedArgs): void {
+    let message = new ObservableJSON.ChangeMessage(sender, args);
     each(this.children(), widget => {
       MessageLoop.sendMessage(widget, message);
     });
@@ -598,7 +598,7 @@ namespace CellTools {
       let select = this.selectNode;
       if (msg.args.key === this.key) {
         this._changeGuard = true;
-        select.value = JSON.stringify(msg.args.newValue);
+        select.value = JSON.stringify(msg.sender.get(msg.args.key));
         this._changeGuard = false;
       }
     }

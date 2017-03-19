@@ -34,7 +34,7 @@ import {
 } from '@jupyterlab/rendermime';
 
 import {
-  IObservableMap, ObservableMap
+  IObservableMap
 } from '@jupyterlab/coreutils';
 
 import {
@@ -448,7 +448,7 @@ class CodeCellWidget extends BaseCellWidget {
   /**
    * Handle changes in the metadata.
    */
-  protected onMetadataChanged(model: IObservableMap<JSONValue>, args: ObservableMap.IChangedArgs<JSONValue>): void {
+  protected onMetadataChanged(model: IObservableMap<JSONValue>, args: IObservableMap.IChangedArgs): void {
     switch (args.key) {
     case 'collapsed':
     case 'scrolled':
