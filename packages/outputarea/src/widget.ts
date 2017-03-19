@@ -34,7 +34,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  ObservableList, nbformat
+  IObservableList, nbformat
 } from '@jupyterlab/coreutils';
 
 import {
@@ -868,7 +868,7 @@ namespace IOutputAreaModel {
    * A type alias for changed args.
    */
   export
-  type ChangedArgs = ObservableList.IChangedArgs;
+  type ChangedArgs = IObservableList.IChangedArgs;
 
   /**
    * The interface for an output content factory.
