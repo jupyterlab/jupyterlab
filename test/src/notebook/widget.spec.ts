@@ -944,10 +944,21 @@ describe('notebook/widget', () => {
 
       context('blur', () => {
 
-        it('should set the mode to command', () => {
+        it('should preserve the mode', () => {
           simulate(widget.node, 'focus');
           widget.mode = 'edit';
-          simulate(widget.node, 'blur');
+          let other = document.createElement('div');
+          simulate(widget.node, 'blur', { relatedTarget: other });
+          expect(widget.mode).to.be('edit');
+          MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
+          expect(widget.mode).to.be('edit');
+          expect(widget.activeCell.editor.hasFocus()).to.be(true);
+        });
+
+        it('should set command mode', () => {
+          simulate(widget.node, 'focus');
+          widget.mode = 'edit';
+          simulate(widget.node, 'blur', { relatedTarget: widget.activeCell.node });
           expect(widget.mode).to.be('command');
         });
 

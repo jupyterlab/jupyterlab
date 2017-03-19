@@ -1387,6 +1387,11 @@ class Notebook extends StaticNotebook {
    * Handle `blur` events for the notebook.
    */
   private _evtBlur(event: MouseEvent): void {
+    let relatedTarget = event.relatedTarget as HTMLElement;
+    // Bail if focus is leaving the notebook.
+    if (!this.node.contains(relatedTarget)) {
+      return;
+    }
     this.mode = 'command';
   }
 
