@@ -338,8 +338,8 @@ class StaticNotebook extends Widget {
     let { newIndex, count, oldIndex } = args;
     switch (args.type) {
     case 'add':
-      for (let i = 0; i < count; i++) {
-        this._insertCell(i, sender.get(i + newIndex));
+      for (let i = newIndex; i < count + newIndex; i++) {
+        this._insertCell(i, sender.get(i));
       }
       break;
     case 'move':
