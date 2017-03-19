@@ -58,7 +58,7 @@ describe('outputarea/model', () => {
           expect(args.type).to.be('add');
           expect(args.oldIndex).to.be(-1);
           expect(args.newIndex).to.be(0);
-          expect(args.count).to.be(0);
+          expect(args.count).to.be(1);
           called = true;
         });
         model.add(DEFAULT_OUTPUTS[0]);
