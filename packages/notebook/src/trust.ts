@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  each
+} from '@phosphor/algorithm';
+
+import {
   Dialog, showDialog
 } from '@jupyterlab/apputils';
 
@@ -32,14 +36,12 @@ function trustNotebook(model: INotebookModel, host?: HTMLElement): Promise<void>
     return Promise.resolve(void 0);
   }
   // Do nothing if already trusted.
-  let cells = model.cells;
   let trusted = true;
-  for (let i = 0; i < cells.length; i++) {
-    let cell = cells.at(i);
+  each(model.cells, cell => {
     if (!cell.trusted) {
       trusted = false;
     }
-  }
+  });
   if (trusted) {
     return showDialog({
       body: 'Notebook is already trusted',
@@ -52,10 +54,9 @@ function trustNotebook(model: INotebookModel, host?: HTMLElement): Promise<void>
     buttons: [Dialog.cancelButton(), Dialog.warnButton()]
   }).then(result => {
     if (result.accept) {
-      for (let i = 0; i < cells.length; i++) {
-        let cell = cells.at(i);
+      each(model.cells, cell => {
         cell.trusted = true;
-      }
+      });
     }
   });
 }

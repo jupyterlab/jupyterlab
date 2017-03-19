@@ -48,8 +48,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IChangedArgs, IObservableMap, ObservableMap, IObservableVector,
-  ObservableVector, nbformat
+  IChangedArgs, IObservableMap, ObservableMap, IObservableList, nbformat
 } from '@jupyterlab/coreutils';
 
 import {
@@ -335,31 +334,26 @@ class StaticNotebook extends Widget {
   /**
    * Handle a change cells event.
    */
-  private _onCellsChanged(sender: IObservableVector<ICellModel>, args: ObservableVector.IChangedArgs<ICellModel>) {
-    let index = 0;
+  private _onCellsChanged(sender: IObservableList<ICellModel>, args: IObservableList.IChangedArgs) {
+    let { newIndex, count, oldIndex } = args;
     switch (args.type) {
     case 'add':
-      index = args.newIndex;
-      each(args.newValues, value => {
-        this._insertCell(index++, value);
-      });
+      for (let i = 0; i < count; i++) {
+        this._insertCell(i, sender.get(i + newIndex));
+      }
       break;
     case 'move':
-      this._moveCell(args.oldIndex, args.newIndex);
+      this._moveCell(oldIndex, newIndex);
       break;
     case 'remove':
-      each(args.oldValues, value => {
-        this._removeCell(args.oldIndex);
-      });
+      for (let i = 0; i < count; i++) {
+        this._removeCell(oldIndex);
+      }
       break;
     case 'set':
       // TODO: reuse existing widgets if possible.
-      index = args.newIndex;
-      each(args.newValues, value => {
-        this._removeCell(index);
-        this._insertCell(index, value);
-        index++;
-      });
+      this._removeCell(newIndex);
+      this._insertCell(newIndex, sender.get(newIndex));
       break;
     default:
       return;
@@ -1315,7 +1309,7 @@ class Notebook extends StaticNotebook {
     let toMove: BaseCellWidget[] = [];
 
     each(this.widgets, (widget, i) => {
-      let cell = cells.at(i);
+      let cell = cells.get(i);
       if (this.isSelected(widget)) {
         widget.addClass(DROP_SOURCE_CLASS);
         selected.push(cell.toJSON());
@@ -1407,7 +1401,7 @@ class Notebook extends StaticNotebook {
       return;
     }
     this.activeCellIndex = i;
-    if (model.cells.at(i).type === 'markdown') {
+    if (model.cells.get(i).type === 'markdown') {
       let widget = this.widgets[i] as MarkdownCellWidget;
       widget.rendered = false;
     } else if (target.localName === 'img') {
