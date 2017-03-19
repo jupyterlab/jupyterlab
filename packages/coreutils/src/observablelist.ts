@@ -22,7 +22,7 @@ interface IObservableList<T> extends IDisposable {
   /**
    * A signal emitted when the list has changed.
    */
-  readonly changed: ISignal<this, ObservableList.IChangedArgs>;
+  readonly changed: ISignal<this, IObservableList.IChangedArgs>;
 
   /**
    * The length of the list.
@@ -241,6 +241,64 @@ interface IObservableList<T> extends IDisposable {
 
 
 /**
+ * The namespace for IObservableList related interfaces.
+ */
+export
+namespace IObservableList {
+  /**
+   * The change types which occur on an observable list.
+   */
+  export
+  type ChangeType =
+    /**
+     * Item(s) were added to the list.
+     */
+    'add' |
+
+    /**
+     * An item was moved within the list.
+     */
+    'move' |
+
+    /**
+     * Item(s) were removed from the list.
+     */
+    'remove' |
+
+    /**
+     * An item was set in the list.
+     */
+    'set';
+
+  /**
+   * The changed args object which is emitted by an observable list.
+   */
+  export
+  interface IChangedArgs {
+    /**
+     * The type of change undergone by the list.
+     */
+    type: ChangeType;
+
+    /**
+     * The new index associated with the change.
+     */
+    newIndex: number;
+
+    /**
+     * The old index associated with the change.
+     */
+    oldIndex: number;
+
+    /**
+     * The number of items added or removed.
+     */
+    count: number;
+  }
+}
+
+
+/**
  * A concrete implementation of [[IObservableList]].
  */
 export
@@ -258,7 +316,7 @@ class ObservableList<T> implements IObservableList<T> {
   /**
    * A signal emitted when the list has changed.
    */
-  get changed(): ISignal<this, ObservableList.IChangedArgs> {
+  get changed(): ISignal<this, IObservableList.IChangedArgs> {
     return this._changed;
   }
 
@@ -611,7 +669,7 @@ class ObservableList<T> implements IObservableList<T> {
   private _array: Array<T> = [];
   private _isDisposed = false;
   private _itemCmp: (first: T, second: T) => boolean;
-  private _changed = new Signal<this, ObservableList.IChangedArgs>(this);
+  private _changed = new Signal<this, IObservableList.IChangedArgs>(this);
 }
 
 
@@ -628,7 +686,7 @@ namespace ObservableList {
     /**
      * An optional intial set of values.
      */
-    values?: T[];
+    values?: IterableOrArrayLike<T>;
 
     /**
      * The item comparison function for change detection on `set`.
@@ -636,57 +694,6 @@ namespace ObservableList {
      * If not given, strict `===` equality will be used.
      */
     itemCmp?: (first: T, second: T) => boolean;
-  }
-
-  /**
-   * The change types which occur on an observable list.
-   */
-  export
-  type ChangeType =
-    /**
-     * Item(s) were added to the list.
-     */
-    'add' |
-
-    /**
-     * An item was moved within the list.
-     */
-    'move' |
-
-    /**
-     * Item(s) were removed from the list.
-     */
-    'remove' |
-
-    /**
-     * An item was set in the list.
-     */
-    'set';
-
-  /**
-   * The changed args object which is emitted by an observable list.
-   */
-  export
-  interface IChangedArgs {
-    /**
-     * The type of change undergone by the list.
-     */
-    type: ChangeType;
-
-    /**
-     * The new index associated with the change.
-     */
-    newIndex: number;
-
-    /**
-     * The old index associated with the change.
-     */
-    oldIndex: number;
-
-    /**
-     * The number of items added or removed.
-     */
-    count: number;
   }
 }
 
