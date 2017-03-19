@@ -1387,15 +1387,7 @@ class Notebook extends StaticNotebook {
    * Handle `blur` events for the notebook.
    */
   private _evtBlur(event: MouseEvent): void {
-    let relatedTarget = event.relatedTarget as HTMLElement;
-    if (!this.node.contains(relatedTarget)) {
-      return;
-    }
-    // If the root node is not blurring and we are in command mode,
-    // focus ourselves.
-    if (this.mode === 'command' && event.target !== this.node) {
-      this.node.focus();
-    }
+    this.mode = 'command';
   }
 
   /**
