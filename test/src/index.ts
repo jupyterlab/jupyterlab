@@ -79,6 +79,7 @@ import './rendermime/outputmodel.spec';
 import './rendermime/rendermime.spec';
 
 import './notebook/actions.spec';
+import './notebook/celllist.spec';
 import './notebook/celltools.spec';
 import './notebook/default-toolbar.spec';
 import './notebook/model.spec';

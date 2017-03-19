@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 export * from './actions';
+export * from './celllist';
 export * from './celltools';
 export * from './default-toolbar';
 export * from './model';
