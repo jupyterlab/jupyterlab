@@ -10,8 +10,7 @@ var buildExtension = require('@jupyterlab/extension-builder/lib/builder').buildE
 var webpack = require('webpack');
 
 
-console.log('Generating bundles...');
-
+// Get the git description.
 try {
   var notice = childProcess.execSync('git describe', { encoding: 'utf8' });
 } catch (e) {
@@ -19,6 +18,7 @@ try {
 }
 
 
+// Get the python package version.
 var cwd = process.cwd();
 process.chdir('..');
 try {
@@ -28,6 +28,9 @@ try {
 }
 process.chdir(cwd);
 
+
+// Build the main extension.
+console.log('Generating bundles...');
 
 buildExtension({
   name: 'main',
