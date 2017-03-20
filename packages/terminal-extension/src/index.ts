@@ -112,7 +112,6 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
 
       let promise = name ?
         services.terminals.connectTo(name)
-          .catch(() => services.terminals.startNew())
         : services.terminals.startNew();
 
       return promise.then(session => {
