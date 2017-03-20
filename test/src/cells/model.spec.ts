@@ -134,7 +134,6 @@ describe('cells/model', () => {
         };
         let key = '';
         model.metadata.changed.connect(listener);
-        expect(value).to.be.empty();
         model.metadata.set('foo', 'bar');
         expect(key).to.be('foo');
       });
