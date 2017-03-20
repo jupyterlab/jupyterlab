@@ -6,10 +6,6 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  ArrayExt, each, toArray
-} from '@phosphor/algorithm';
-
-import {
   Clipboard
 } from '@jupyterlab/apputils';
 
@@ -21,6 +17,14 @@ import {
   ICellModel, ICodeCellModel,
   CodeCellWidget, BaseCellWidget, MarkdownCellWidget
 } from '@jupyterlab/cells';
+
+import {
+  ArrayExt, each, toArray
+} from '@phosphor/algorithm';
+
+import {
+  ElementExt
+} from '@phosphor/domutils';
 
 import {
   INotebookModel
@@ -343,7 +347,7 @@ namespace NotebookActions {
     }
     let state = Private.getState(widget);
     let promise = Private.runSelected(widget, kernel);
-    Private.handleState(widget, state);
+    Private.handleRunState(widget, state);
     return promise;
   }
 
@@ -378,7 +382,7 @@ namespace NotebookActions {
     } else {
       widget.activeCellIndex++;
     }
-    Private.handleState(widget, state);
+    Private.handleRunState(widget, state);
     return promise;
   }
 
@@ -408,7 +412,7 @@ namespace NotebookActions {
     model.cells.insert(widget.activeCellIndex + 1, cell);
     widget.activeCellIndex++;
     widget.mode = 'edit';
-    Private.handleState(widget, state);
+    Private.handleRunState(widget, state);
     return promise;
   }
 
@@ -434,7 +438,7 @@ namespace NotebookActions {
       widget.select(child);
     });
     let promise = Private.runSelected(widget, kernel);
-    Private.handleState(widget, state);
+    Private.handleRunState(widget, state);
     return promise;
   }
 
@@ -844,20 +848,23 @@ namespace Private {
    */
   export
   function handleState(widget: Notebook, state: IState): void {
-    if (state.wasFocused) {
+    if (state.wasFocused || widget.mode === 'edit') {
       widget.activate();
     }
-    // Scroll to the appropriate client position.
-    if (state.activeCell && !state.activeCell.isDisposed &&
-        widget.mode === 'command') {
-      // Scroll to the top of the previous output.
-      let er = state.activeCell.editorWidget.node.getBoundingClientRect();
-      widget.scrollToPosition(er.bottom);
-    } else if (widget.activeCell) {
-      // Scroll to the top of the next active cell.
-      let er = widget.activeCell.node.getBoundingClientRect();
-      widget.scrollToPosition(er.top);
+    ElementExt.scrollIntoViewIfNeeded(widget.node, widget.activeCell.node);
+  }
+
+  /**
+   * Handle the state of a widget after running a run action.
+   */
+  export
+  function handleRunState(widget: Notebook, state: IState): void {
+    if (state.wasFocused || widget.mode === 'edit') {
+      widget.activate();
     }
+    // Scroll to the top of the previous active cell output.
+    let er = state.activeCell.editorWidget.node.getBoundingClientRect();
+    widget.scrollToPosition(er.bottom);
   }
 
   /**
@@ -1045,13 +1052,13 @@ namespace Private {
           break;
         case 'markdown':
           newCell = model.contentFactory.createMarkdownCell({ cell });
-          if (child.model.type == "code") {
+          if (child.model.type === 'code') {
             newCell.trusted = false;
           }
           break;
         default:
           newCell = model.contentFactory.createRawCell({ cell });
-          if (child.model.type == "code") {
+          if (child.model.type === 'code') {
             newCell.trusted = false;
           }
         }
