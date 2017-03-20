@@ -131,8 +131,7 @@ class NPM(Command):
         log.info("Installing build dependencies with npm. This may take a while...")
         run(['npm', 'install'], cwd=here)
         run(['npm', 'run', 'clean'], cwd=here)
-        run(['npm', 'run', 'install'], cwd=here)
-        run(['npm', 'run', 'build'], cwd=here)
+        run(['npm', 'run', 'prepublish'], cwd=here)
 
         for t in self.targets:
             if not os.path.exists(t):
