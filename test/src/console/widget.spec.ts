@@ -345,19 +345,6 @@ describe('console/widget', () => {
 
     });
 
-    describe('#onUpdateRequest()', () => {
-
-      it('should be called upon an update, after attach', done => {
-        expect(widget.methods).to.not.contain('onUpdateRequest');
-        Widget.attach(widget, document.body);
-        requestAnimationFrame(() => {
-          expect(widget.methods).to.contain('onUpdateRequest');
-          done();
-        });
-      });
-
-    });
-
     describe('.ContentFactory', () => {
 
       describe('#constructor', () => {
