@@ -430,10 +430,8 @@ class CodeConsole extends Widget {
     editor.addKeydownHandler(this._onEditorKeydown);
 
     this._history.editor = editor;
-
     if (this.isAttached) {
-      prompt.editor.focus();
-      this.update();
+      this.activate();
     }
     this._promptCreated.emit(prompt);
   }

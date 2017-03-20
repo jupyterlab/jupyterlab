@@ -248,7 +248,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       if (!current) {
         return;
       }
-      current.console.execute();
+      return current.console.execute();
     }
   });
   palette.addItem({ command, category });
