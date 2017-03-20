@@ -33,6 +33,7 @@ fi
 
 if [[ $GROUP == coverage ]]; then
     # Run the coverage check.
+    npm run build:tests
     npm run coverage
 
     # Run the link check
