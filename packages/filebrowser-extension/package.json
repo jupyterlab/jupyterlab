@@ -28,7 +28,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "clean": "rimraf lib"
+    "clean": "rimraf lib",
+    "watch": "tsc -w"
   },
   "repository": {
     "type": "git",
