@@ -69,7 +69,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    * Construct a new notebook model.
    */
   constructor(options: NotebookModel.IOptions = {}) {
-    super(options.languagePreference);
+    super(options.languagePreference, options.modelDB);
     let factory = (
       options.contentFactory || NotebookModel.defaultContentFactory
     );
@@ -327,6 +327,12 @@ namespace NotebookModel {
      * The default is a shared factory instance.
      */
     contentFactory?: IContentFactory;
+
+
+    /**
+     * An optional modelDB for storing notebook data.
+     */
+    modelDB?: IModelDB;
   }
 
   /**

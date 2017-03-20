@@ -38,8 +38,8 @@ class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeMo
   /**
    * Construct a new document model.
    */
-  constructor(languagePreference?: string) {
-    super();
+  constructor(languagePreference?: string, modelDB?: IModelDB) {
+    super({modelDB});
     this._defaultLang = languagePreference || '';
     this.value.changed.connect(this.triggerContentChange, this);
   }
@@ -227,8 +227,8 @@ class TextModelFactory implements DocumentRegistry.CodeModelFactory {
    *
    * @returns A new document model.
    */
-  createNew(languagePreference?: string): DocumentRegistry.ICodeModel {
-    return new DocumentModel(languagePreference);
+  createNew(languagePreference?: string, modelDB?: IModelDB): DocumentRegistry.ICodeModel {
+    return new DocumentModel(languagePreference, modelDB);
   }
 
   /**

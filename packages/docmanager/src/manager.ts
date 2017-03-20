@@ -30,6 +30,10 @@ import {
 } from '@phosphor/widgets';
 
 import {
+  IModelDBFactory
+} from '@jupyterlab/coreutils';
+
+import {
   DocumentRegistry, Context
 } from '@jupyterlab/docregistry';
 
@@ -75,6 +79,7 @@ class DocumentManager implements IDisposable {
     this._registry = options.registry;
     this._serviceManager = options.manager;
     this._opener = options.opener;
+    this._modelDBFactory = options.modelDBFactory;
     this._widgetManager = new DocumentWidgetManager({
       registry: this._registry
     });
@@ -295,7 +300,8 @@ class DocumentManager implements IDisposable {
       opener: adopter,
       manager: this._serviceManager,
       factory,
-      path
+      path,
+      modelDBFactory: this._modelDBFactory
     });
     let handler = new SaveHandler({
       context,
@@ -397,6 +403,7 @@ class DocumentManager implements IDisposable {
   private _contexts: Private.IContext[] = [];
   private _opener: DocumentManager.IWidgetOpener = null;
   private _activateRequested = new Signal<this, string>(this);
+  private _modelDBFactory: IModelDBFactory;
 }
 
 
@@ -424,6 +431,12 @@ namespace DocumentManager {
      * A widget opener for sibling widgets.
      */
     opener: IWidgetOpener;
+
+    /**
+     * A factory for a database in which to store
+     * model data.
+     */
+    modelDBFactory?: IModelDBFactory;
   }
 
   /**

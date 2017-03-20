@@ -53,6 +53,11 @@ interface IObservableValueChangedArgs extends IObservableChangedArgs {
 }
 
 export
+interface IModelDBFactory {
+  createNew(): IModelDB;
+}
+
+export
 interface IModelDB {
   changed: ISignal<IModelDB, ModelDB.IChangedArgs>
 
@@ -100,6 +105,13 @@ class ObservableValue implements IObservableValue {
 
   private _value: JSONValue = null;
   private _changed = new Signal<ObservableValue, IObservableValueChangedArgs>(this);
+}
+
+export
+class ModelDBFactory implements IModelDBFactory {
+  createNew(): ModelDB {
+    return new ModelDB();
+  }
 }
 
 export

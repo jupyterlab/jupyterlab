@@ -887,7 +887,7 @@ namespace DocumentRegistry {
      *
      * @returns A new document model.
      */
-    createNew(languagePreference?: string): T;
+    createNew(languagePreference?: string, modelDB?: IModelDB): T;
 
     /**
      * Get the preferred kernel language given an extension.

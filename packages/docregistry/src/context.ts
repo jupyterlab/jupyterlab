@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  PathExt, URLExt
+  PathExt, URLExt, IModelDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -55,7 +55,11 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     this._path = options.path;
     let ext = DocumentRegistry.extname(this._path);
     let lang = this._factory.preferredLanguage(ext);
-    this._model = this._factory.createNew(lang);
+    let modelDB: IModelDB;
+    if(options.modelDBFactory) {
+      modelDB = options.modelDBFactory.createNew();
+    }
+    this._model = this._factory.createNew(lang, modelDB);
     manager.sessions.runningChanged.connect(this._onSessionsChanged, this);
     manager.contents.fileChanged.connect(this._onFileChanged, this);
     this._readyPromise = manager.ready.then(() => {
@@ -575,6 +579,12 @@ export namespace Context {
      * The initial path of the file.
      */
     path: string;
+
+    /**
+     * An IModelDB factory for creating a database
+     * in which to store model data.
+     */
+    modelDBFactory?: any;
 
     /**
      * An optional callback for opening sibling widgets.
