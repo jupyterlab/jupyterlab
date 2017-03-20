@@ -19,6 +19,16 @@ try {
 }
 
 
+var cwd = process.cwd();
+process.chdir('..');
+try {
+  var version = childProcess.execSync('python setup.py --version', { encoding: 'utf8' });
+} catch (e) {
+  var version = 'unknown';
+}
+process.chdir(cwd);
+
+
 buildExtension({
   name: 'main',
   entry: './build/main',
@@ -30,7 +40,8 @@ buildExtension({
     plugins: [
       new webpack.DefinePlugin({
         'process.env': {
-          'GIT_DESCRIPTION': JSON.stringify(notice.trim())
+          'GIT_DESCRIPTION': JSON.stringify(notice.trim()),
+          'JUPYTERLAB_VERSION': JSON.stringify(version.trim())
         }
       })
     ]

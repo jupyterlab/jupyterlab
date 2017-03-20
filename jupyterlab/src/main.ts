@@ -60,7 +60,7 @@ function createLab(loader: ModuleLoader): JupyterLab {
     loader,
     gitDescription: process.env.GIT_DESCRIPTION,
     namespace: 'jupyterlab',
-    version: require('../../package.json').version
+    version: process.env.JUPYTERLAB_VERSION
   });
   lab.registerPluginModules(mods);
   return lab;
