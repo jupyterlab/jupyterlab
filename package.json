@@ -7,6 +7,7 @@
   "scripts": {
     "install": "lerna bootstrap --hoist",
     "build": "lerna run build",
+    "build:changed": "lerna exec --scope \"@jupyterlab/!(test-|main|example-)*\" -- node ../../scripts/build-changed.js",
     "build:examples": "lerna run build --scope \"@jupyterlab/example-*\"",
     "build:src": "lerna run build --scope \"@jupyterlab/!(test-|example-)*\"",
     "build:tests": "lerna run build --scope \"@jupyterlab/test-*\"",
