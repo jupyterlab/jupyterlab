@@ -256,6 +256,11 @@
 
 
 .jp-KeySelector .jp-select-wrapper {
+  background: white;
+}
+
+
+.jp-KeySelector select.jp-mod-styled {
   font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color0);
 }
