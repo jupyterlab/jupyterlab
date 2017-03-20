@@ -875,6 +875,9 @@ class Notebook extends StaticNotebook {
     case 'mousemove':
       this._evtMousemove(event as MouseEvent);
       break;
+    case 'keydown':
+      this._ensureFocus(true);
+      break;
     case 'dblclick':
       this._evtDblClick(event as MouseEvent);
       break;
@@ -908,6 +911,7 @@ class Notebook extends StaticNotebook {
     super.onAfterAttach(msg);
     let node = this.node;
     node.addEventListener('mousedown', this);
+    node.addEventListener('keydown', this);
     node.addEventListener('dblclick', this);
     node.addEventListener('focus', this, true);
     node.addEventListener('blur', this, true);
@@ -923,6 +927,7 @@ class Notebook extends StaticNotebook {
   protected onBeforeDetach(msg: Message): void {
     let node = this.node;
     node.removeEventListener('mousedown', this);
+    node.removeEventListener('keydown', this);
     node.removeEventListener('dblclick', this);
     node.removeEventListener('focus', this, true);
     node.removeEventListener('blur', this, true);
@@ -1383,14 +1388,11 @@ class Notebook extends StaticNotebook {
    */
   private _evtBlur(event: MouseEvent): void {
     let relatedTarget = event.relatedTarget as HTMLElement;
+    // Bail if focus is leaving the notebook.
     if (!this.node.contains(relatedTarget)) {
       return;
     }
-    // If the root node is not blurring and we are in command mode,
-    // focus ourselves.
-    if (this.mode === 'command' && event.target !== this.node) {
-      this.node.focus();
-    }
+    this.mode = 'command';
   }
 
   /**

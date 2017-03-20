@@ -12,7 +12,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  simulate
+  generate, simulate
 } from 'simulate-event';
 
 import {
@@ -955,14 +955,13 @@ describe('notebook/widget', () => {
           expect(widget.activeCell.editor.hasFocus()).to.be(true);
         });
 
-        it('should give focus back to the notebook', () => {
+        it('should set command mode', () => {
           simulate(widget.node, 'focus');
-          let other = document.createElement('div');
-          simulate(widget.node, 'blur', { relatedTarget: other });
+          widget.mode = 'edit';
+          let evt = generate('blur');
+          (evt as any).relatedTarget = widget.activeCell.node;
+          widget.node.dispatchEvent(evt);
           expect(widget.mode).to.be('command');
-          MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
-          expect(widget.mode).to.be('command');
-          expect(widget.activeCell.editor.hasFocus()).to.be(false);
         });
 
       });

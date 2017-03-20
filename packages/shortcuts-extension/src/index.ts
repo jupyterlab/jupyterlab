@@ -47,12 +47,12 @@ const SHORTCUTS = [
   },
   {
     command: 'completer:invoke-console',
-    selector: '.jp-ConsolePanel .jp-mod-completer-enabled',
+    selector: '.jp-CodeConsole-prompt .jp-mod-completer-enabled',
     keys: ['Tab']
   },
   {
     command: 'completer:invoke-notebook',
-    selector: '.jp-Notebook .jp-mod-completer-enabled',
+    selector: '.jp-Notebook.jp-mod-editMode .jp-mod-completer-enabled',
     keys: ['Tab']
   },
   {
@@ -132,47 +132,62 @@ const SHORTCUTS = [
   },
   {
     command: 'notebook-cells:run-and-advance',
-    selector: '.jp-Notebook',
+    selector: '.jp-Notebook:focus',
     keys: ['Shift Enter']
   },
   {
     command: 'notebook-cells:run-and-insert',
-    selector: '.jp-Notebook',
+    selector: '.jp-Notebook:focus',
     keys: ['Alt Enter']
   },
   {
     command: 'notebook-cells:run',
-    selector: '.jp-Notebook',
+    selector: '.jp-Notebook:focus',
+    keys: ['Ctrl Enter']
+  },
+  {
+    command: 'notebook-cells:run-and-advance',
+    selector: '.jp-Notebook.jp-mod-editMode',
+    keys: ['Shift Enter']
+  },
+  {
+    command: 'notebook-cells:run-and-insert',
+    selector: '.jp-Notebook.jp-mod-editMode',
+    keys: ['Alt Enter']
+  },
+  {
+    command: 'notebook-cells:run',
+    selector: '.jp-Notebook.jp-mod-editMode',
     keys: ['Ctrl Enter']
   },
   {
     command: 'notebook:interrupt-kernel',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['I', 'I']
   },
   {
     command: 'notebook:restart-kernel',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['0', '0']
   },
   {
     command: 'notebook-cells:to-code',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['Y']
   },
   {
     command: 'notebook-cells:to-markdown',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['M']
   },
   {
     command: 'notebook-cells:to-raw',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['R']
   },
   {
     command: 'notebook-cells:delete',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['D', 'D'],
   },
   {
@@ -182,122 +197,122 @@ const SHORTCUTS = [
   },
   {
     command: 'notebook-cells:merge',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['Shift M'],
   },
   {
     command: 'notebook-cells:select-above',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['ArrowUp'],
   },
   {
     command: 'notebook-cells:select-above',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['K'],
   },
   {
     command: 'notebook-cells:select-below',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['ArrowDown'],
   },
   {
     command: 'notebook-cells:select-below',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['J'],
   },
   {
     command: 'notebook-cells:extend-above',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['Shift ArrowUp'],
   },
   {
     command: 'notebook-cells:extend-above',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['Shift K'],
   },
   {
     command: 'notebook-cells:extend-below',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['Shift ArrowDown'],
   },
   {
     command: 'notebook-cells:extend-below',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['Shift J'],
   },
   {
     command: 'notebook-cells:undo',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['Z'],
   },
   {
     command: 'notebook-cells:redo',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['Shift Z'],
   },
   {
     command: 'notebook-cells:cut',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['X']
   },
   {
     command: 'notebook-cells:copy',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['C']
   },
   {
     command: 'notebook-cells:paste',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['V']
   },
   {
     command: 'notebook-cells:insert-above',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['A']
   },
   {
     command: 'notebook-cells:insert-below',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['B']
   },
   {
     command: 'notebook-cells:toggle-line-numbers',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['L']
   },
   {
     command: 'notebook-cells:markdown-header1',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['1']
   },
   {
     command: 'notebook-cells:markdown-header2',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['2']
   },
   {
     command: 'notebook-cells:markdown-header3',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['3']
   },
   {
     command: 'notebook-cells:markdown-header4',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['4']
   },
   {
     command: 'notebook-cells:markdown-header5',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['5']
   },
   {
     command: 'notebook-cells:markdown-header6',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['6']
   },
   {
     command: 'notebook:edit-mode',
-    selector: '.jp-Notebook.jp-mod-commandMode:focus',
+    selector: '.jp-Notebook:focus',
     keys: ['Enter']
   },
   {
@@ -312,12 +327,12 @@ const SHORTCUTS = [
   },
   {
     command: 'tooltip:launch-notebook',
-    selector: '.jp-Notebook',
+    selector: '.jp-Notebook.jp-mod-editMode',
     keys: ['Shift Tab']
   },
   {
     command: 'tooltip:launch-console',
-    selector: '.jp-ConsolePanel',
+    selector: '.jp-CodeConsole-prompt',
     keys: ['Shift Tab']
   }
 ];
