@@ -107,19 +107,19 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
       let term = new TerminalWidget();
       term.title.closable = true;
       term.title.icon = TERMINAL_ICON_CLASS;
-      tracker.add(term);
+      term.title.label = '...';
       shell.addToMainArea(term);
-      tracker.activate(term);
 
-      if (name) {
-        services.terminals.connectTo(name).then(session => {
-          term.session = session;
-        });
-      } else {
-        services.terminals.startNew().then(session => {
-          term.session = session;
-        });
-      }
+      let promise = name ?
+        services.terminals.connectTo(name)
+          .catch(() => services.terminals.startNew())
+        : services.terminals.startNew();
+
+      return promise.then(session => {
+        term.session = session;
+        tracker.add(term);
+        tracker.activate(term);
+      }).catch(() => { term.dispose(); });
     }
   });
 
