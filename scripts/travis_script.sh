@@ -12,7 +12,7 @@ export PATH="$HOME/miniconda/bin:$PATH"
 if [[ $GROUP == tests ]]; then
 
     # Run the JS and python tests
-    npm run build:test
+    npm run build:tests
     npm test
     py.test
 
