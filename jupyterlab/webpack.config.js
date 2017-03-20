@@ -10,14 +10,27 @@ var buildExtension = require('@jupyterlab/extension-builder/lib/builder').buildE
 var webpack = require('webpack');
 
 
-console.log('Generating bundles...');
-
+// Get the git description.
 try {
   var notice = childProcess.execSync('git describe', { encoding: 'utf8' });
 } catch (e) {
   var notice = 'unknown';
 }
 
+
+// Get the python package version.
+var cwd = process.cwd();
+process.chdir('..');
+try {
+  var version = childProcess.execSync('python setup.py --version', { encoding: 'utf8' });
+} catch (e) {
+  var version = 'unknown';
+}
+process.chdir(cwd);
+
+
+// Build the main extension.
+console.log('Generating bundles...');
 
 buildExtension({
   name: 'main',
@@ -30,7 +43,8 @@ buildExtension({
     plugins: [
       new webpack.DefinePlugin({
         'process.env': {
-          'GIT_DESCRIPTION': JSON.stringify(notice.trim())
+          'GIT_DESCRIPTION': JSON.stringify(notice.trim()),
+          'JUPYTERLAB_VERSION': JSON.stringify(version.trim())
         }
       })
     ]
