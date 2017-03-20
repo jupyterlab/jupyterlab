@@ -37,6 +37,8 @@ class CellList implements IObservableUndoableVector<ICellModel> {
     this._cellOrder.changed.connect(this._onOrderChanged, this);
   }
 
+  type: 'Vector';
+
   /**
    * A signal emitted when the cell list has changed.
    */

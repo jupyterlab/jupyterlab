@@ -75,7 +75,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     );
     factory.modelDB = this._modelDB.view('cells');
     this.contentFactory = factory;
-    this._cells = new CellList();
+    let cells = new CellList();
     // Add an initial code cell by default.
     cells.pushBack(factory.createCodeCell({}));
     cells.changed.connect(this._onCellsChanged, this);
