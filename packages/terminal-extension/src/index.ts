@@ -112,18 +112,14 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
 
       let promise = name ?
         services.terminals.connectTo(name)
-          .then(session => session || services.terminals.startNew())
+          .catch(() => services.terminals.startNew())
         : services.terminals.startNew();
 
       return promise.then(session => {
-        if (!session) {
-          term.title.label = 'Error: failed to create a session';
-          return;
-        }
         term.session = session;
         tracker.add(term);
         tracker.activate(term);
-      });
+      }).catch(() => { term.dispose(); });
     }
   });
 
