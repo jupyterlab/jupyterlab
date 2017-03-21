@@ -115,11 +115,11 @@ function gatherPackageData(file) {
  */
 function processPackage(data, name) {
   if (!data.scripts || !data.scripts.build) {
-    return;
+    return Promise.resolve(void 0);
   }
 
   if (!minimatch(name, scope) || minimatch(name, ignore)) {
-    return;
+    return Promise.resolve(void 0);
   }
 
   var pkgPath = paths.get(name);
@@ -129,7 +129,7 @@ function processPackage(data, name) {
 
   // Bail if there are no source files.
   if (!fs.existsSync(path.join(pkgPath, 'src'))) {
-    return;
+    return Promise.resolve(void 0);
   }
 
   // Always build if there are not built files.
@@ -144,9 +144,6 @@ function processPackage(data, name) {
 
   // Take into account the css time for webpack builds.
   var time = Math.max(times.get(name), styleTime);
-  if (isWebpack) {
-    debugger;
-  }
   if (isWebpack && findNewest(path.join(pkgPath, 'build')) < time) {
     return buildPackage(name);
   }
@@ -159,13 +156,19 @@ function processPackage(data, name) {
  */
 function buildPackage(name) {
   var pkgPath = paths.get(name);
-  childProcess.execSync('npm run build', { stdio: [0, 1, 2], cwd: pkgPath });
-  // Update the declaration file time.
-  try {
-    dtsTimes.set(name, findNewest(path.join(pkgPath, 'lib'), /.d.ts$/));
-  } catch (err) {
-    dtsTimes.set(name, -1);
-  }
+  var options = { cwd: pkgPath };
+  console.log('Building', name);
+  return new Promise(function(resolve, reject) {
+    childProcess.exec('npm run build', options, function () {
+      // Update the declaration file time.
+      try {
+        dtsTimes.set(name, findNewest(path.join(pkgPath, 'lib'), /.d.ts$/));
+      } catch (err) {
+        dtsTimes.set(name, -1);
+      }
+      resolve(void 0);
+    });
+  });
 }
 
 
@@ -178,17 +181,26 @@ function buildPackage(name) {
  */
 function processPackageAndDeps(data, name) {
   if (seen.has(name)) {
-    return;
+    return Promise.resolve(void 0);
   }
+  let promises = [];
   for (var dep in data.dependencies) {
     if (!packages.has(dep)) {
       continue;
     }
     if (!seen.has(dep)) {
-      processPackageAndDeps(packages.get(dep), dep);
+      promises.push(processPackageAndDeps(packages.get(dep), dep));
     }
-    times.set(name, Math.max(times.get(name), dtsTimes.get(dep)));
   }
   seen.add(name);
-  processPackage(data, name);
+  return Promise.all(promises).then(function () {
+    for (var dep in data.dependencies) {
+      if (!packages.has(dep)) {
+        continue;
+      }
+      times.set(name, Math.max(times.get(name), dtsTimes.get(dep)));
+    }
+    return processPackage(data, name);
+  });
+
 }
