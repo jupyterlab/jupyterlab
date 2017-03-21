@@ -39,9 +39,9 @@ var ignore = argv['ignore'] || '';
 
 
 // Gather the package data.
-for (let i = 0; i < packageConfig.length; i++) {
+for (var i = 0; i < packageConfig.length; i++) {
   var files = glob.sync(path.join(basePath, packageConfig[i]));
-  for (let j = 0; j < files.length; j++) {
+  for (var j = 0; j < files.length; j++) {
     gatherPackageData(files[j]);
   }
 }
@@ -179,7 +179,7 @@ function processTree(data, name) {
   if (seen.has(name)) {
     return;
   }
-  for (let dep in data.dependencies) {
+  for (var dep in data.dependencies) {
     if (!packages.has(dep)) {
       continue;
     }

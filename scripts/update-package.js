@@ -30,9 +30,9 @@ var packageConfig = lernaConfig.packages;
 
 
 // Handle the packages
-for (let i = 0; i < packageConfig.length; i++) {
+for (var i = 0; i < packageConfig.length; i++) {
   var files = glob.sync(path.join(basePath, packageConfig[i]));
-  for (let j = 0; j < files.length; j++) {
+  for (var j = 0; j < files.length; j++) {
     handlePackage(files[j]);
   }
 }
