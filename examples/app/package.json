@@ -41,7 +41,7 @@
     "rimraf": "^2.5.2",
     "style-loader": "^0.13.1",
     "url-loader": "^0.5.7",
-    "watch": "^0.18.0",
+    "watch": "^1.0.2",
     "webpack": "^2.2.1"
   },
   "version": "0.1.1"

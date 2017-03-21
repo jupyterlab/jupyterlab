@@ -2,12 +2,18 @@
   "private": true,
   "dependencies": {},
   "devDependencies": {
-    "lerna": "2.0.0-beta.38"
+    "glob": "^7.1.1",
+    "lerna": "2.0.0-beta.38",
+    "minimatch": "^3.0.3",
+    "minimist": "^1.2.0",
+    "watch": "^1.0.2"
   },
   "scripts": {
     "install": "lerna bootstrap --hoist",
     "build": "lerna run build",
+    "build:changed": "node scripts/build-changed.js --scope \"@jupyterlab/!(test-|example-)*\"",
     "build:examples": "lerna run build --scope \"@jupyterlab/example-*\"",
+    "build:main": "cd jupyterlab && npm run build",
     "build:src": "lerna run build --scope \"@jupyterlab/!(test-|example-)*\"",
     "build:tests": "lerna run build --scope \"@jupyterlab/test-*\"",
     "clean": "lerna run clean",
@@ -15,11 +21,13 @@
     "clean:src": "lerna run clean --scope \"@jupyterlab/!(test-|example-)*\"",
     "clean:tests": "lerna run clean --scope \"@jupyterlab/test-*\"",
     "coverage": "lerna run coverage --stream --scope \"@jupyterlab/test-*\"",
+    "prepublish": "npm update && npm run install && npm run build:changed",
     "test": "lerna run test --stream --scope \"@jupyterlab/test-*\"",
     "test:chrome": "lerna run test:chrome --stream --scope \"@jupyterlab/test-*\"",
     "test:firefox": "lerna run test:firefox --stream --scope \"@jupyterlab/test-*\"",
     "test:ie": "lerna run test:ie --concurrency 1 --stream --scope \"@jupyterlab/test-*\"",
-    "package:update": "lerna exec --scope \"@jupyterlab/!(test-|main)*\" -- node ../../scripts/package-update.js",
-    "publish": "npm run clean && npm run build && lerna publish -m \"Publish\""
+    "update:package": "node scripts/package-update.js",
+    "publish": "lerna publish -m \"Publish\"",
+    "watch": "watch \"npm run build:changed\" --wait=10 --filter=scripts/watch-filter.js"
   }
 }
