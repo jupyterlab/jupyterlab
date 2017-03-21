@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/rendermime",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "description": "JupyterLab - RenderMime",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

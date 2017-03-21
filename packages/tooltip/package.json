@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/tooltip",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "JupyterLab - Tooltip Widget",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

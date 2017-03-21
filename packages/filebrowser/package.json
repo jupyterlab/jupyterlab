@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/filebrowser",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "JupyterLab - FileBrowser Widget",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
