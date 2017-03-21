@@ -9,6 +9,106 @@ import {
   JupyterLab, ModuleLoader
 } from '@jupyterlab/application';
 
+import {
+  default as aboutExtension
+} from '@jupyterlab/about-extension';
+
+import {
+  default as applicationExtension
+} from '@jupyterlab/application-extension';
+
+import {
+  default as apputilsExtension
+} from '@jupyterlab/apputils-extension';
+
+import {
+  default as codemirrorExtension
+} from '@jupyterlab/codemirror-extension';
+
+import {
+  default as completerExtension
+} from '@jupyterlab/completer-extension';
+
+import {
+  default as consoleExtension
+} from '@jupyterlab/console-extension';
+
+import {
+  default as csvwidgetExtension
+} from '@jupyterlab/csvwidget-extension';
+
+import {
+  default as docmanagerExtension
+} from '@jupyterlab/docmanager-extension';
+
+import {
+  default as docregistryExtension
+} from '@jupyterlab/docregistry-extension';
+
+import {
+  default as editorwidgetExtension
+} from '@jupyterlab/editorwidget-extension';
+
+import {
+  default as faqExtension
+} from '@jupyterlab/faq-extension';
+
+import {
+  default as filebrowserExtension
+} from '@jupyterlab/filebrowser-extension';
+
+import {
+  default as helpExtension
+} from '@jupyterlab/help-extension';
+
+import {
+  default as imagewidgetExtension
+} from '@jupyterlab/imagewidget-extension';
+
+import {
+  default as inspectorExtension
+} from '@jupyterlab/inspector-extension';
+
+import {
+  default as landingExtension
+} from '@jupyterlab/landing-extension';
+
+import {
+  default as launchExtension
+} from '@jupyterlab/launcher-extension';
+
+import {
+  default as markdownwidgetExtension
+} from '@jupyterlab/markdownwidget-extension';
+
+import {
+  default as notebookExtension
+} from '@jupyterlab/notebook-extension';
+
+import {
+  default as rendermimeExtension
+} from '@jupyterlab/rendermime-extension';
+
+import {
+  default as runningExtension
+} from '@jupyterlab/running-extension';
+
+import {
+  default as servicesExtension
+} from '@jupyterlab/services-extension';
+
+import {
+  default as shortcutsExtension
+} from '@jupyterlab/shortcuts-extension';
+
+import {
+  default as terminalExtension
+} from '@jupyterlab/terminal-extension';
+
+import {
+  default as tooltipExtension
+} from '@jupyterlab/tooltip-extension';
+
 import 'font-awesome/css/font-awesome.min.css';
 import '@jupyterlab/default-theme/style/index.css';
 
@@ -18,31 +118,31 @@ polyfill();
 
 /* tslint:disable */
 const mods: JupyterLab.IPluginModule[] = [
-  require('@jupyterlab/about-extension'),
-  require('@jupyterlab/application-extension'),
-  require('@jupyterlab/apputils-extension'),
-  require('@jupyterlab/codemirror-extension'),
-  require('@jupyterlab/completer-extension'),
-  require('@jupyterlab/console-extension'),
-  require('@jupyterlab/csvwidget-extension'),
-  require('@jupyterlab/docmanager-extension'),
-  require('@jupyterlab/docregistry-extension'),
-  require('@jupyterlab/editorwidget-extension'),
-  require('@jupyterlab/faq-extension'),
-  require('@jupyterlab/filebrowser-extension'),
-  require('@jupyterlab/help-extension'),
-  require('@jupyterlab/imagewidget-extension'),
-  require('@jupyterlab/inspector-extension'),
-  require('@jupyterlab/landing-extension'),
-  require('@jupyterlab/launcher-extension'),
-  require('@jupyterlab/markdownwidget-extension'),
-  require('@jupyterlab/notebook-extension'),
-  require('@jupyterlab/rendermime-extension'),
-  require('@jupyterlab/running-extension'),
-  require('@jupyterlab/services-extension'),
-  require('@jupyterlab/shortcuts-extension'),
-  require('@jupyterlab/terminal-extension'),
-  require('@jupyterlab/tooltip-extension')
+aboutExtension,
+applicationExtension,
+apputilsExtension,
+codemirrorExtension,
+completerExtension,
+consoleExtension,
+csvwidgetExtension,
+docmanagerExtension,
+docregistryExtension,
+editorwidgetExtension,
+faqExtension,
+filebrowserExtension,
+helpExtension,
+imagewidgetExtension,
+inspectorExtension,
+landingExtension,
+launchExtension,
+markdownwidgetExtension,
+notebookExtension,
+rendermimeExtension,
+runningExtension,
+servicesExtension,
+shortcutsExtension,
+terminalExtension,
+tooltipExtension,
 ];
 /* tslint:enable */
 
