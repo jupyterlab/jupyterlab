@@ -3,11 +3,86 @@
 
 import {
   polyfill
-} from 'es6-promise';
+}  from 'es6-promise';
 
 import {
   JupyterLab, ModuleLoader
 } from '@jupyterlab/application';
+
+import * as aboutExtension
+  from '@jupyterlab/about-extension';
+
+import * as applicationExtension
+  from '@jupyterlab/application-extension';
+
+import * as apputilsExtension
+  from '@jupyterlab/apputils-extension';
+
+import * as codemirrorExtension
+  from '@jupyterlab/codemirror-extension';
+
+import * as completerExtension
+  from '@jupyterlab/completer-extension';
+
+import * as consoleExtension
+  from '@jupyterlab/console-extension';
+
+import * as csvwidgetExtension
+  from '@jupyterlab/csvwidget-extension';
+
+import * as docmanagerExtension
+  from '@jupyterlab/docmanager-extension';
+
+import * as docregistryExtension
+  from '@jupyterlab/docregistry-extension';
+
+import * as editorwidgetExtension
+  from '@jupyterlab/editorwidget-extension';
+
+import * as faqExtension
+  from '@jupyterlab/faq-extension';
+
+import * as filebrowserExtension
+  from '@jupyterlab/filebrowser-extension';
+
+import * as helpExtension
+  from '@jupyterlab/help-extension';
+
+import * as imagewidgetExtension
+  from '@jupyterlab/imagewidget-extension';
+
+import * as inspectorExtension
+  from '@jupyterlab/inspector-extension';
+
+import * as landingExtension
+  from '@jupyterlab/landing-extension';
+
+import * as launchExtension
+  from '@jupyterlab/launcher-extension';
+
+import * as markdownwidgetExtension
+  from '@jupyterlab/markdownwidget-extension';
+
+import * as notebookExtension
+  from '@jupyterlab/notebook-extension';
+
+import * as rendermimeExtension
+  from '@jupyterlab/rendermime-extension';
+
+import * as runningExtension
+  from '@jupyterlab/running-extension';
+
+import * as servicesExtension
+  from '@jupyterlab/services-extension';
+
+import * as shortcutsExtension
+  from '@jupyterlab/shortcuts-extension';
+
+import * as terminalExtension
+  from '@jupyterlab/terminal-extension';
+
+import * as tooltipExtension
+  from '@jupyterlab/tooltip-extension';
 
 import 'font-awesome/css/font-awesome.min.css';
 import '@jupyterlab/default-theme/style/index.css';
@@ -18,31 +93,31 @@ polyfill();
 
 /* tslint:disable */
 const mods: JupyterLab.IPluginModule[] = [
-  require('@jupyterlab/about-extension'),
-  require('@jupyterlab/application-extension'),
-  require('@jupyterlab/apputils-extension'),
-  require('@jupyterlab/codemirror-extension'),
-  require('@jupyterlab/completer-extension'),
-  require('@jupyterlab/console-extension'),
-  require('@jupyterlab/csvwidget-extension'),
-  require('@jupyterlab/docmanager-extension'),
-  require('@jupyterlab/docregistry-extension'),
-  require('@jupyterlab/editorwidget-extension'),
-  require('@jupyterlab/faq-extension'),
-  require('@jupyterlab/filebrowser-extension'),
-  require('@jupyterlab/help-extension'),
-  require('@jupyterlab/imagewidget-extension'),
-  require('@jupyterlab/inspector-extension'),
-  require('@jupyterlab/landing-extension'),
-  require('@jupyterlab/launcher-extension'),
-  require('@jupyterlab/markdownwidget-extension'),
-  require('@jupyterlab/notebook-extension'),
-  require('@jupyterlab/rendermime-extension'),
-  require('@jupyterlab/running-extension'),
-  require('@jupyterlab/services-extension'),
-  require('@jupyterlab/shortcuts-extension'),
-  require('@jupyterlab/terminal-extension'),
-  require('@jupyterlab/tooltip-extension')
+aboutExtension,
+applicationExtension,
+apputilsExtension,
+codemirrorExtension,
+completerExtension,
+consoleExtension,
+csvwidgetExtension,
+docmanagerExtension,
+docregistryExtension,
+editorwidgetExtension,
+faqExtension,
+filebrowserExtension,
+helpExtension,
+imagewidgetExtension,
+inspectorExtension,
+landingExtension,
+launchExtension,
+markdownwidgetExtension,
+notebookExtension,
+rendermimeExtension,
+runningExtension,
+servicesExtension,
+shortcutsExtension,
+terminalExtension,
+tooltipExtension,
 ];
 /* tslint:enable */
 
