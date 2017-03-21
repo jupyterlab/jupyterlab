@@ -2,18 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IServiceManager
-} from '@jupyterlab/services';
-
-import {
-  JSONObject
-} from '@phosphor/coreutils';
-
-import {
-  Menu
-} from '@phosphor/widgets';
-
-import {
   JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
@@ -31,14 +19,30 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  IRenderMime
-} from '@jupyterlab/rendermime';
-
-import {
   CellTools, ICellTools, INotebookTracker, NotebookActions,
   NotebookModelFactory,  NotebookPanel, NotebookTracker, NotebookWidgetFactory,
   trustNotebook
 } from '@jupyterlab/notebook';
+
+import {
+  IRenderMime
+} from '@jupyterlab/rendermime';
+
+import {
+  IServiceManager
+} from '@jupyterlab/services';
+
+import {
+  JSONObject
+} from '@phosphor/coreutils';
+
+import {
+  Message, MessageLoop
+} from '@phosphor/messaging';
+
+import {
+  Menu, Widget
+} from '@phosphor/widgets';
 
 
 
@@ -48,6 +52,9 @@ import {
 namespace CommandIDs {
   export
   const interrupt = 'notebook:interrupt-kernel';
+
+  export
+  const open = 'notebook:open';
 
   export
   const restart = 'notebook:restart-kernel';
@@ -247,26 +254,30 @@ export default plugins;
  */
 function activateCellTools(app: JupyterLab, restorer: ILayoutRestorer, tracker: INotebookTracker, editorServices: IEditorServices): Promise<ICellTools> {
   const namespace = 'cell-tools';
-
   const celltools = new CellTools({ tracker });
+  const activeCellTool = new CellTools.ActiveCellTool();
+  const slideShow = CellTools.createSlideShowSelector();
+  const nbConvert = CellTools.createNBConvertSelector();
+  const editorFactory = editorServices.factoryService.newInlineEditor
+    .bind(editorServices.factoryService);
+  const metadataEditor = new CellTools.MetadataEditorTool({ editorFactory });
+  const hook = (handler: any, message: Message): boolean => {
+    if (message === Widget.Msg.ActivateRequest) {
+      console.log('cell tools activated');
+    }
+    return true;
+  };
+
   celltools.title.label = 'Cell Tools';
   celltools.id = 'cell-tools';
-
-  const activeCellTool = new CellTools.ActiveCellTool();
   celltools.addItem({ tool: activeCellTool, rank: 1 });
-
-  const slideShow = CellTools.createSlideShowSelector();
   celltools.addItem({ tool: slideShow, rank: 2 });
-
-  const nbConvert = CellTools.createNBConvertSelector();
   celltools.addItem({ tool: nbConvert, rank: 3 });
-
-  const editorFactory = editorServices.factoryService.newInlineEditor.bind(
-    editorServices.factoryService);
-  const metadataEditor = new CellTools.MetadataEditorTool({ editorFactory });
   celltools.addItem({ tool: metadataEditor, rank: 4 });
 
   restorer.add(celltools, namespace);
+
+  MessageLoop.installMessageHook(celltools, hook);
 
   app.shell.currentChanged.connect((sender, args) => {
     if (args.newValue instanceof NotebookPanel) {
@@ -347,6 +358,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
 
   return tracker;
 }
+
 
 /**
  * Add the notebook commands to the application's command registry.
@@ -816,6 +828,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
   });
   }
 
+
 /**
  * Populate the application's command palette with notebook commands.
  */
@@ -871,6 +884,7 @@ function populatePalette(palette: ICommandPalette): void {
   ].forEach(command => { palette.addItem({ command, category }); });
 }
 
+
 /**
  * Creates a menu for the notebook.
  */
@@ -907,4 +921,19 @@ function createMenu(app: JupyterLab): Menu {
   menu.addItem({ type: 'submenu', submenu: settings });
 
   return menu;
+}
+
+
+/**
+ * A namespace for private module data.
+ */
+namespace Private {
+  /**
+   * The ID of the notebook that cell tools are current open for.
+   *
+   * #### Notes
+   * If cell tools are not open, this is an empty string.
+   */
+  export
+  let toolsOpenFor = '';
 }
