@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/codeeditor",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "JupyterLab - Abstract Code Editor",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -12,7 +12,7 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^0.1.0",
+    "@jupyterlab/coreutils": "^0.1.1",
     "@jupyterlab/services": "^0.40.1",
     "@phosphor/coreutils": "^0.1.5",
     "@phosphor/disposable": "^0.1.1",

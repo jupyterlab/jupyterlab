@@ -6,10 +6,10 @@
     "clean": "rimraf build"
   },
   "dependencies": {
-    "@jupyterlab/codemirror": "^0.1.0",
-    "@jupyterlab/console": "^0.1.0",
-    "@jupyterlab/default-theme": "^0.1.0",
-    "@jupyterlab/rendermime": "^0.1.0",
+    "@jupyterlab/codemirror": "^0.1.1",
+    "@jupyterlab/console": "^0.1.1",
+    "@jupyterlab/default-theme": "^0.1.1",
+    "@jupyterlab/rendermime": "^0.1.1",
     "@jupyterlab/services": "^0.40.1",
     "@phosphor/commands": "^0.1.5",
     "@phosphor/widgets": "^0.3.0"
@@ -23,5 +23,6 @@
     "url-loader": "^0.5.7",
     "watch": "^0.18.0",
     "webpack": "^2.2.1"
-  }
+  },
+  "version": "0.1.0"
 }

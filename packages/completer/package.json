@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/completer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "JupyterLab - Completer",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -13,8 +13,8 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^0.1.0",
-    "@jupyterlab/codeeditor": "^0.1.0",
+    "@jupyterlab/apputils": "^0.1.1",
+    "@jupyterlab/codeeditor": "^0.1.1",
     "@jupyterlab/services": "^0.40.1",
     "@phosphor/algorithm": "^0.1.1",
     "@phosphor/coreutils": "^0.1.5",

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/apputils",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "JupyterLab - Application Utilities",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -12,8 +12,8 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.1.0",
-    "@jupyterlab/coreutils": "^0.1.0",
+    "@jupyterlab/application": "^0.1.1",
+    "@jupyterlab/coreutils": "^0.1.1",
     "@jupyterlab/services": "^0.40.1",
     "@phosphor/algorithm": "^0.1.1",
     "@phosphor/commands": "^0.1.5",

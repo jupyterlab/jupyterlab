@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/editorwidget-extension",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "JupyterLab - Editor Widget Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -12,11 +12,11 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.1.0",
-    "@jupyterlab/apputils": "^0.1.0",
-    "@jupyterlab/codeeditor": "^0.1.0",
-    "@jupyterlab/docregistry": "^0.1.0",
-    "@jupyterlab/editorwidget": "^0.1.0"
+    "@jupyterlab/application": "^0.1.1",
+    "@jupyterlab/apputils": "^0.1.1",
+    "@jupyterlab/codeeditor": "^0.1.1",
+    "@jupyterlab/docregistry": "^0.1.1",
+    "@jupyterlab/editorwidget": "^0.1.1"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",

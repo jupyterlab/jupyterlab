@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/docmanager",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "JupyterLab - Document Manager",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -12,9 +12,9 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^0.1.0",
-    "@jupyterlab/coreutils": "^0.1.0",
-    "@jupyterlab/docregistry": "^0.1.0",
+    "@jupyterlab/apputils": "^0.1.1",
+    "@jupyterlab/coreutils": "^0.1.1",
+    "@jupyterlab/docregistry": "^0.1.1",
     "@jupyterlab/services": "^0.40.1",
     "@phosphor/algorithm": "^0.1.1",
     "@phosphor/coreutils": "^0.1.5",

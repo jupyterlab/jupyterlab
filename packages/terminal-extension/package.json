@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/terminal-extension",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "JupyterLab - Terminal Emulator Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -12,10 +12,10 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.1.0",
-    "@jupyterlab/apputils": "^0.1.0",
+    "@jupyterlab/application": "^0.1.1",
+    "@jupyterlab/apputils": "^0.1.1",
     "@jupyterlab/services": "^0.40.1",
-    "@jupyterlab/terminal": "^0.1.0",
+    "@jupyterlab/terminal": "^0.1.1",
     "@phosphor/widgets": "^0.3.0"
   },
   "devDependencies": {

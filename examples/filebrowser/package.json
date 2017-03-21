@@ -6,13 +6,13 @@
     "clean": "rimraf build"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^0.1.0",
-    "@jupyterlab/codemirror": "^0.1.0",
-    "@jupyterlab/default-theme": "^0.1.0",
-    "@jupyterlab/docmanager": "^0.1.0",
-    "@jupyterlab/docregistry": "^0.1.0",
-    "@jupyterlab/editorwidget": "^0.1.0",
-    "@jupyterlab/filebrowser": "^0.1.0",
+    "@jupyterlab/apputils": "^0.1.1",
+    "@jupyterlab/codemirror": "^0.1.1",
+    "@jupyterlab/default-theme": "^0.1.1",
+    "@jupyterlab/docmanager": "^0.1.1",
+    "@jupyterlab/docregistry": "^0.1.1",
+    "@jupyterlab/editorwidget": "^0.1.1",
+    "@jupyterlab/filebrowser": "^0.1.1",
     "@jupyterlab/services": "^0.40.1",
     "@phosphor/commands": "^0.1.5",
     "@phosphor/widgets": "^0.3.0",
@@ -28,5 +28,6 @@
     "url-loader": "^0.5.7",
     "watch": "^0.18.0",
     "webpack": "^1.13.0"
-  }
+  },
+  "version": "0.1.0"
 }
