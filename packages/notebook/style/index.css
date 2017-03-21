@@ -181,12 +181,6 @@
 }
 
 
-.jp-CellTools .jp-MetadataEditor-host {
-  background-color: white;
-  border-color: var(--jp-border-color1);
-}
-
-
 .jp-ActiveCellTool {
   padding: 12px;
   border-bottom: 1px solid var(--jp-border-color1);
@@ -220,6 +214,7 @@
 .jp-MetadataEditorTool-header {
   flex: 1 0 auto;
   padding: 10px;
+  padding-bottom: 16px;
 }
 
 
@@ -244,13 +239,36 @@
 }
 
 
-.jp-MetadataEditor.jp-mod-collapsed {
+.jp-MetadataEditorTool .jp-JSONEditorWidget {
+  background-color: white;
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  margin: 8px;
+}
+
+
+.jp-MetadataEditorTool .jp-JSONEditorWidget.jp-mod-collapsed {
   display: none;
 }
 
 
 .jp-KeySelector {
   padding: 12px;
+}
+
+
+.jp-KeySelector .jp-select-wrapper {
+  background: white;
+}
+
+
+.jp-KeySelector select.jp-mod-styled {
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color0);
+}
+
+
+.jp-KeySelector .jp-select-wrapper:not(.jp-mod-focused) {
+  border: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
 
