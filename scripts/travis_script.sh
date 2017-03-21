@@ -14,6 +14,8 @@ if [[ $GROUP == tests ]]; then
     # Run the JS and python tests
     npm run build:tests
     npm test
+
+    npm run build:main
     py.test
 
     # Make sure we have CSS that can be converted with postcss
