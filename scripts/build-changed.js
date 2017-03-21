@@ -89,7 +89,7 @@ function gatherPackageData(file) {
   } catch (err) {
     times.set(name, -1);
   }
-  // Get the style file time.
+  // Update the max style time.
   try {
     styleTime = Math.max(styleTime, findNewest(path.join(file, 'style')));
   } catch (err) {
