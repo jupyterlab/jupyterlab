@@ -54,7 +54,7 @@ interface IObservableValueChangedArgs extends IObservableChangedArgs {
 
 export
 interface IModelDBFactory {
-  createNew(): IModelDB;
+  createNew(path: string): Promise<IModelDB>;
 }
 
 export
@@ -109,8 +109,8 @@ class ObservableValue implements IObservableValue {
 
 export
 class ModelDBFactory implements IModelDBFactory {
-  createNew(): ModelDB {
-    return new ModelDB();
+  createNew(path: string): Promise<ModelDB> {
+    return Promise.resolve(new ModelDB());
   }
 }
 

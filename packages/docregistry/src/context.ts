@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  PathExt, URLExt, IModelDB
+  PathExt, URLExt, IModelDB, IModelDBFactory
 } from '@jupyterlab/coreutils';
 
 import {
@@ -55,11 +55,16 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     this._path = options.path;
     let ext = DocumentRegistry.extname(this._path);
     let lang = this._factory.preferredLanguage(ext);
-    let modelDB: IModelDB;
     if(options.modelDBFactory) {
-      modelDB = options.modelDBFactory.createNew();
+      this._modelCreated = options.modelDBFactory.createNew(options.path)
+      .then((modelDB: IModelDB) => {
+        this._modelDB = modelDB;
+        this._model = this._factory.createNew(lang, modelDB);
+      });
+    } else {
+      this._model = this._factory.createNew(lang);
+      this._modelCreated = Promise.resolve(void 0);
     }
-    this._model = this._factory.createNew(lang, modelDB);
     manager.sessions.runningChanged.connect(this._onSessionsChanged, this);
     manager.contents.fileChanged.connect(this._onFileChanged, this);
     this._readyPromise = manager.ready.then(() => {
@@ -523,29 +528,33 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    * Handle an initial population.
    */
   private _populate(): Promise<void> {
-    this._isPopulated = true;
-    // Add a checkpoint if none exists.
-    return this.listCheckpoints().then(checkpoints => {
-      if (!this.isDisposed && !checkpoints) {
-        return this.createCheckpoint();
-      }
-    }).then(() => {
-      if (this.isDisposed) {
-        return;
-      }
-      this._isReady = true;
-      this._populatedPromise.resolve(void 0);
-    });
+    return this._modelCreated.then(() => {
+      this._isPopulated = true;
+      // Add a checkpoint if none exists.
+      return this.listCheckpoints().then(checkpoints => {
+        if (!this.isDisposed && !checkpoints) {
+          return this.createCheckpoint();
+        }
+      }).then(() => {
+        if (this.isDisposed) {
+          return;
+        }
+        this._isReady = true;
+        this._populatedPromise.resolve(void 0);
+      });
+    })
   }
 
   private _manager: ServiceManager.IManager = null;
   private _opener: (widget: Widget) => void = null;
   private _model: T = null;
+  private _modelDB: IModelDB;
   private _path = '';
   private _session: Session.ISession = null;
   private _factory: DocumentRegistry.IModelFactory<T> = null;
   private _contentsModel: Contents.IModel = null;
   private _readyPromise: Promise<void>;
+  private _modelCreated: Promise<void>;
   private _populatedPromise = new PromiseDelegate<void>();
   private _isPopulated = false;
   private _isReady = false;
@@ -584,7 +593,7 @@ export namespace Context {
      * An IModelDB factory for creating a database
      * in which to store model data.
      */
-    modelDBFactory?: any;
+    modelDBFactory?: IModelDBFactory;
 
     /**
      * An optional callback for opening sibling widgets.

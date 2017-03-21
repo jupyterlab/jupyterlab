@@ -15,3 +15,4 @@ export * from './url';
 export * from './uuid';
 export * from './vector';
 export * from './modeldb';
+export * from './realtime';
