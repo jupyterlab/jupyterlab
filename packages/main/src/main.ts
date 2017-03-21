@@ -3,111 +3,86 @@
 
 import {
   polyfill
-} from 'es6-promise';
+}  from 'es6-promise';
 
 import {
   JupyterLab, ModuleLoader
 } from '@jupyterlab/application';
 
-import {
-  default as aboutExtension
-} from '@jupyterlab/about-extension';
+import * as aboutExtension
+  from '@jupyterlab/about-extension';
 
-import {
-  default as applicationExtension
-} from '@jupyterlab/application-extension';
+import * as applicationExtension
+  from '@jupyterlab/application-extension';
 
-import {
-  default as apputilsExtension
-} from '@jupyterlab/apputils-extension';
+import * as apputilsExtension
+  from '@jupyterlab/apputils-extension';
 
-import {
-  default as codemirrorExtension
-} from '@jupyterlab/codemirror-extension';
+import * as codemirrorExtension
+  from '@jupyterlab/codemirror-extension';
 
-import {
-  default as completerExtension
-} from '@jupyterlab/completer-extension';
+import * as completerExtension
+  from '@jupyterlab/completer-extension';
 
-import {
-  default as consoleExtension
-} from '@jupyterlab/console-extension';
+import * as consoleExtension
+  from '@jupyterlab/console-extension';
 
-import {
-  default as csvwidgetExtension
-} from '@jupyterlab/csvwidget-extension';
+import * as csvwidgetExtension
+  from '@jupyterlab/csvwidget-extension';
 
-import {
-  default as docmanagerExtension
-} from '@jupyterlab/docmanager-extension';
+import * as docmanagerExtension
+  from '@jupyterlab/docmanager-extension';
 
-import {
-  default as docregistryExtension
-} from '@jupyterlab/docregistry-extension';
+import * as docregistryExtension
+  from '@jupyterlab/docregistry-extension';
 
-import {
-  default as editorwidgetExtension
-} from '@jupyterlab/editorwidget-extension';
+import * as editorwidgetExtension
+  from '@jupyterlab/editorwidget-extension';
 
-import {
-  default as faqExtension
-} from '@jupyterlab/faq-extension';
+import * as faqExtension
+  from '@jupyterlab/faq-extension';
 
-import {
-  default as filebrowserExtension
-} from '@jupyterlab/filebrowser-extension';
+import * as filebrowserExtension
+  from '@jupyterlab/filebrowser-extension';
 
-import {
-  default as helpExtension
-} from '@jupyterlab/help-extension';
+import * as helpExtension
+  from '@jupyterlab/help-extension';
 
-import {
-  default as imagewidgetExtension
-} from '@jupyterlab/imagewidget-extension';
+import * as imagewidgetExtension
+  from '@jupyterlab/imagewidget-extension';
 
-import {
-  default as inspectorExtension
-} from '@jupyterlab/inspector-extension';
+import * as inspectorExtension
+  from '@jupyterlab/inspector-extension';
 
-import {
-  default as landingExtension
-} from '@jupyterlab/landing-extension';
+import * as landingExtension
+  from '@jupyterlab/landing-extension';
 
-import {
-  default as launchExtension
-} from '@jupyterlab/launcher-extension';
+import * as launchExtension
+  from '@jupyterlab/launcher-extension';
 
-import {
-  default as markdownwidgetExtension
-} from '@jupyterlab/markdownwidget-extension';
+import * as markdownwidgetExtension
+  from '@jupyterlab/markdownwidget-extension';
 
-import {
-  default as notebookExtension
-} from '@jupyterlab/notebook-extension';
+import * as notebookExtension
+  from '@jupyterlab/notebook-extension';
 
-import {
-  default as rendermimeExtension
-} from '@jupyterlab/rendermime-extension';
+import * as rendermimeExtension
+  from '@jupyterlab/rendermime-extension';
 
-import {
-  default as runningExtension
-} from '@jupyterlab/running-extension';
+import * as runningExtension
+  from '@jupyterlab/running-extension';
 
-import {
-  default as servicesExtension
-} from '@jupyterlab/services-extension';
+import * as servicesExtension
+  from '@jupyterlab/services-extension';
 
-import {
-  default as shortcutsExtension
-} from '@jupyterlab/shortcuts-extension';
+import * as shortcutsExtension
+  from '@jupyterlab/shortcuts-extension';
 
-import {
-  default as terminalExtension
-} from '@jupyterlab/terminal-extension';
+import * as terminalExtension
+  from '@jupyterlab/terminal-extension';
 
-import {
-  default as tooltipExtension
-} from '@jupyterlab/tooltip-extension';
+import * as tooltipExtension
+  from '@jupyterlab/tooltip-extension';
 
 import 'font-awesome/css/font-awesome.min.css';
 import '@jupyterlab/default-theme/style/index.css';
