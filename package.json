@@ -26,7 +26,7 @@
     "test:chrome": "lerna run test:chrome --stream --scope \"@jupyterlab/test-*\"",
     "test:firefox": "lerna run test:firefox --stream --scope \"@jupyterlab/test-*\"",
     "test:ie": "lerna run test:ie --concurrency 1 --stream --scope \"@jupyterlab/test-*\"",
-    "package:update": "lerna exec --scope \"@jupyterlab/!(test-|main)*\" -- node ../../scripts/package-update.js",
+    "update:package": "node scripts/package-update.js",
     "publish": "lerna publish -m \"Publish\"",
     "watch": "watch \"npm run build:changed\" --wait=10 --filter=scripts/watch-filter.js"
   }
