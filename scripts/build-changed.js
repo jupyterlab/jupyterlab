@@ -28,7 +28,7 @@ var packageConfig = lernaConfig.packages;
 var packages = new Map();
 var times = new Map();
 var dtsTimes = new Map();
-var cssTime = 0;
+var styleTime = 0;
 var paths = new Map();
 var seen = new Set();
 
@@ -47,7 +47,7 @@ for (var i = 0; i < packageConfig.length; i++) {
 }
 
 // Evalutate each package.
-packages.forEach(processTree);
+packages.forEach(processPackageAndDeps);
 
 
 /**
@@ -89,12 +89,13 @@ function gatherPackageData(file) {
   } catch (err) {
     times.set(name, -1);
   }
+  // Get the style file time.
   try {
-    cssTime = Math.max(cssTime, findNewest(path.join(file, 'style')));
+    styleTime = Math.max(styleTime, findNewest(path.join(file, 'style')));
   } catch (err) {
     // no-op
   }
-  // Update the declaration file time.
+  // Get the declaration file time.
   try {
     dtsTimes.set(name, findNewest(path.join(pkgPath, 'lib'), /.d.ts$/));
   } catch (err) {
@@ -142,7 +143,7 @@ function processPackage(data, name) {
   }
 
   // Take into account the css time for webpack builds.
-  var time = Math.max(times.get(name), cssTime);
+  var time = Math.max(times.get(name), styleTime);
   if (isWebpack) {
     debugger;
   }
@@ -169,13 +170,13 @@ function buildPackage(name) {
 
 
 /**
- * Process the package tree.
+ * Process a package and its dependencies.
  *
  * @param data - the package.json data.
  *
  * @param name - the name of the package.
  */
-function processTree(data, name) {
+function processPackageAndDeps(data, name) {
   if (seen.has(name)) {
     return;
   }
@@ -184,7 +185,7 @@ function processTree(data, name) {
       continue;
     }
     if (!seen.has(dep)) {
-      processTree(packages.get(dep), dep);
+      processPackageAndDeps(packages.get(dep), dep);
     }
     times.set(name, Math.max(times.get(name), dtsTimes.get(dep)));
   }
