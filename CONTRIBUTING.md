@@ -121,16 +121,6 @@ To run a specific example, change to the example's directory (i.e.
 python main.py
 ```
 
-### Build API Docs
-
-To build the [API docs](http://jupyterlab.github.io/jupyterlab/):
-
-```bash
-npm run docs
-```
-
-Navigate to `docs/index.html`.
-
 ----
 
 ## High level Architecture
@@ -143,9 +133,10 @@ The JupyterLab application is made up of two major parts:
 Each part is named `jupyterlab`. The [developer tutorial documentation](https://jupyterlab-tutorial.readthedocs.io/en/latest/index.html)
 provides additional architecture information.
 
-## The NPM Package
+## The NPM Packages
 
-The npm package source files are in the `src/` subdirectory.
+The repository consists of many npm packages that are managed using the lerna
+build tool.  The npm package source files are in the `packages/` subdirectory.
 
 **Prerequisites**
 - [node](http://nodejs.org/) (preferably version 5 or later)
@@ -182,7 +173,7 @@ version 4.2 or later is installed.
 When you make a change to JupyterLab npm package source files, run:
 
 ```bash
-npm run build:serverextension
+npm run build:main
 ```
 
 to build the changes and then refresh your browser to see the changes.
@@ -202,6 +193,6 @@ Follow the package install instructions first.
 Any bundler that understands how to `require()` files with `.js` and `.css`
 extensions can be used with this package.
 
-**Note:** This npm module is fully compatible with Node/Babel/ES6/ES5. Simply
+**Note:** The npm modules are fully compatible with Node/Babel/ES6/ES5. Simply
 omit the type declarations when using a language other than TypeScript.
 
