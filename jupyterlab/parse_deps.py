@@ -18,9 +18,9 @@ def handle_deps(data):
             dupes[name].append(key)
         else:
             seen[name] = key
-        if ('jupyterlab' in value and
-                'singletonPackages' in value['jupyterlab']):
-            for package in value['jupyterlab']['singletonPackages']:
+        jlab = value.get('jupyterlab', {})
+        if 'singletonPackages' in jlab:
+            for package in jlab['singletonPackages']:
                 singletons.add(package)
 
     # For each dupe check for overlapping semver.
@@ -31,9 +31,8 @@ def handle_deps(data):
         except ValueError as e:
             if key in singletons:
                 raise e
-            else:
-                print(key)
-                print(str(singletons))
+    print('singletons', singletons)
+    print('to_remove', to_remove)
 
 
 def handle_dupe(data, name, dupes):
