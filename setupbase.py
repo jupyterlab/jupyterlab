@@ -129,10 +129,10 @@ class NPM(Command):
         if not has_npm:
             log.error("`npm` unavailable. If you're running this command using sudo, make sure `npm` is available to sudo")
         log.info("Installing build dependencies with npm. This may take a while...")
+        main = os.path.join(here, 'jupyterlab')
         run(['npm', 'install'], cwd=here)
-        run(['npm', 'run', 'clean'], cwd=here)
-        run(['npm', 'run', 'install'], cwd=here)
-        run(['npm', 'run', 'build'], cwd=here)
+        run(['npm', 'run', 'clean'], cwd=main)
+        run(['npm', 'run', 'build'], cwd=main)
 
         for t in self.targets:
             if not os.path.exists(t):
