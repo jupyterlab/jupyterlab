@@ -56,14 +56,10 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     let ext = DocumentRegistry.extname(this._path);
     let lang = this._factory.preferredLanguage(ext);
     if(options.modelDBFactory) {
-      this._modelCreated = options.modelDBFactory.createNew(options.path)
-      .then((modelDB: IModelDB) => {
-        this._modelDB = modelDB;
-        this._model = this._factory.createNew(lang, modelDB);
-      });
+      this._modelDB = options.modelDBFactory.createNew(options.path);
+      this._model = this._factory.createNew(lang, this._modelDB);
     } else {
       this._model = this._factory.createNew(lang);
-      this._modelCreated = Promise.resolve(void 0);
     }
     manager.sessions.runningChanged.connect(this._onSessionsChanged, this);
     manager.contents.fileChanged.connect(this._onFileChanged, this);
@@ -528,21 +524,19 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    * Handle an initial population.
    */
   private _populate(): Promise<void> {
-    return this._modelCreated.then(() => {
-      this._isPopulated = true;
-      // Add a checkpoint if none exists.
-      return this.listCheckpoints().then(checkpoints => {
-        if (!this.isDisposed && !checkpoints) {
-          return this.createCheckpoint();
-        }
-      }).then(() => {
-        if (this.isDisposed) {
-          return;
-        }
-        this._isReady = true;
-        this._populatedPromise.resolve(void 0);
-      });
-    })
+    this._isPopulated = true;
+    // Add a checkpoint if none exists.
+    return this.listCheckpoints().then(checkpoints => {
+      if (!this.isDisposed && !checkpoints) {
+        return this.createCheckpoint();
+      }
+    }).then(() => {
+      if (this.isDisposed) {
+        return;
+      }
+      this._isReady = true;
+      this._populatedPromise.resolve(void 0);
+    });
   }
 
   private _manager: ServiceManager.IManager = null;
@@ -554,7 +548,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   private _factory: DocumentRegistry.IModelFactory<T> = null;
   private _contentsModel: Contents.IModel = null;
   private _readyPromise: Promise<void>;
-  private _modelCreated: Promise<void>;
   private _populatedPromise = new PromiseDelegate<void>();
   private _isPopulated = false;
   private _isReady = false;
