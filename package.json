@@ -1,7 +1,6 @@
 {
   "private": true,
   "dependencies": {
-    "@types/codemirror": "0.0.38"
   },
   "devDependencies": {
     "lerna": "2.0.0-beta.38"
