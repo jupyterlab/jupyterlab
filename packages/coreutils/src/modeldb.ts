@@ -67,13 +67,13 @@ interface IModelDB {
 
   set(path: string, value: IObservable): void;
 
-  createString(): IObservableString;
+  createString(path: string): IObservableString;
 
-  createVector<T extends JSONValue>(): IObservableVector<T>;
+  createVector<T extends JSONValue>(path: string): IObservableVector<T>;
 
-  createMap<T extends JSONValue>(): IObservableMap<T>;
+  createMap<T extends JSONValue>(path: string): IObservableMap<T>;
 
-  createValue(): IObservableValue;
+  createValue(path: string): IObservableValue;
 
   view(basePath: string): IModelDB;
 }
@@ -159,20 +159,28 @@ class ModelDB implements IModelDB {
     }
   }
 
-  createString(): IObservableString {
-    return new ObservableString();
+  createString(path: string): IObservableString {
+    let str = new ObservableString();
+    this.set(path, str);
+    return str;
   }
 
-  createVector(): IObservableVector<JSONValue> {
-    return new ObservableVector<JSONValue>();
+  createVector(path: string): IObservableVector<JSONValue> {
+    let vec = new ObservableVector<JSONValue>();
+    this.set(path, vec);
+    return vec;
   }
 
-  createMap(): IObservableMap<JSONValue> {
-    return new ObservableMap<JSONValue>();
+  createMap(path: string): IObservableMap<JSONValue> {
+    let map = new ObservableMap<JSONValue>();
+    this.set(path, map);
+    return map;
   }
 
-  createValue(): IObservableValue {
-    return new ObservableValue();
+  createValue(path: string): IObservableValue {
+    let val = new ObservableValue();
+    this.set(path, val);
+    return val;
   }
 
   view(basePath: string): ModelDB {

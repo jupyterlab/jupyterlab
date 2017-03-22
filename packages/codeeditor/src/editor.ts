@@ -186,15 +186,12 @@ namespace CodeEditor {
         this._modelDB = new ModelDB();
       }
 
-      let value = this._modelDB.createString();
+      let value = this._modelDB.createString('value');
       value.text = options.value || '';
-      let mimeType = this._modelDB.createValue();
+      let mimeType = this._modelDB.createValue('mimeType');
       mimeType.set(options.mimeType || 'text/plain');
-      let selections = this._modelDB.createMap<ITextSelection[]>();
+      this._modelDB.createMap<ITextSelection[]>('selections');
 
-      this._modelDB.set('value', value);
-      this._modelDB.set('selections', selections);
-      this._modelDB.set('mimeType', mimeType);
       mimeType.changed.connect((val, args)=>{
         this._mimeTypeChanged.emit({
           name: 'mimeType',
