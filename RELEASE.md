@@ -26,14 +26,17 @@ previous attempts.
 Create the release
 ------------------
 
-We publish an npm package, a Python source package, and a Python universal binary wheel.  We also publish a conda package on conda-forge (see below).
+We publish the npm packages, a Python source package, and a Python universal binary wheel.  We also publish a conda package on conda-forge (see below).
 See the Python docs on [package uploading](https://packaging.python.org/distributing/#uploading-your-project-to-pypi)
 for twine setup instructions and for why twine is the recommended method.
 
 ```bash
-npm version patch
-git push origin master --tags
-npm publish
+# this takes a while to ensure the latest builds of everything,
+# then prompts you to select package versions.  When one package has an 
+# effective major release, the packages that depend on it should also get a 
+# major release, to prevent consumers that are using the `^` semver 
+# requirement from getting a conflict.
+npm publish  
 rm -rf dist
 python setup.py sdist
 python setup.py bdist_wheel --universal
