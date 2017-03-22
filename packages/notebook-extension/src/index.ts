@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, ILayoutRestorer, IMainMenu, restartKernel,
+  Dialog, ICommandPalette, ILayoutRestorer, IMainMenu, IStateDB, restartKernel,
   showDialog
 } from '@jupyterlab/apputils';
 
@@ -52,9 +52,6 @@ import {
 namespace CommandIDs {
   export
   const interrupt = 'notebook:interrupt-kernel';
-
-  export
-  const open = 'notebook:open';
 
   export
   const restart = 'notebook:restart-kernel';
@@ -238,7 +235,7 @@ const cellToolsPlugin: JupyterLabPlugin<ICellTools> = {
   provides: ICellTools,
   id: 'jupyter.extensions.cell-tools',
   autoStart: true,
-  requires: [ILayoutRestorer, INotebookTracker, IEditorServices]
+  requires: [INotebookTracker, IEditorServices, IStateDB]
 };
 
 
@@ -252,8 +249,8 @@ export default plugins;
 /**
  * Activate the cell tools extension.
  */
-function activateCellTools(app: JupyterLab, restorer: ILayoutRestorer, tracker: INotebookTracker, editorServices: IEditorServices): Promise<ICellTools> {
-  const namespace = 'cell-tools';
+function activateCellTools(app: JupyterLab, tracker: INotebookTracker, editorServices: IEditorServices, state: IStateDB): Promise<ICellTools> {
+  const id = 'cell-tools';
   const celltools = new CellTools({ tracker });
   const activeCellTool = new CellTools.ActiveCellTool();
   const slideShow = CellTools.createSlideShowSelector();
@@ -261,36 +258,56 @@ function activateCellTools(app: JupyterLab, restorer: ILayoutRestorer, tracker: 
   const editorFactory = editorServices.factoryService.newInlineEditor
     .bind(editorServices.factoryService);
   const metadataEditor = new CellTools.MetadataEditorTool({ editorFactory });
-  const hook = (handler: any, message: Message): boolean => {
-    if (message === Widget.Msg.ActivateRequest) {
-      console.log('cell tools activated');
+
+  // Create message hook for triggers to save to the database.
+  const hook = (sender: any, message: Message): boolean => {
+    switch (message) {
+      case Widget.Msg.ActivateRequest:
+        state.save(id, { open: true });
+        break;
+      case Widget.Msg.CloseRequest:
+        state.remove(celltools.id);
+        break;
+      default:
+        break;
     }
     return true;
   };
 
   celltools.title.label = 'Cell Tools';
-  celltools.id = 'cell-tools';
+  celltools.id = id;
   celltools.addItem({ tool: activeCellTool, rank: 1 });
   celltools.addItem({ tool: slideShow, rank: 2 });
   celltools.addItem({ tool: nbConvert, rank: 3 });
   celltools.addItem({ tool: metadataEditor, rank: 4 });
-
-  restorer.add(celltools, namespace);
-
   MessageLoop.installMessageHook(celltools, hook);
 
-  app.shell.currentChanged.connect((sender, args) => {
-    if (args.newValue instanceof NotebookPanel) {
+  // Wait until the application has finished restoring before rendering.
+  Promise.all([state.fetch(id), app.restored]).then(([args]) => {
+    const open = (args && args['open'] as boolean) || false;
+
+    // After initial restoration, check if the cell tools should render.
+    if (tracker.size) {
       app.shell.addToLeftArea(celltools);
-    } else {
-      celltools.close();
+      if (open) {
+        app.shell.activateById(celltools.id);
+      }
     }
+
+    // For all subsequent widget changes, check if the cell tools should render.
+    app.shell.currentChanged.connect((sender, args) => {
+      // If there are any open notebooks, add cell tools to the side panel if
+      // it is not already there.
+      if (tracker.size) {
+        if (!celltools.isAttached) {
+          app.shell.addToLeftArea(celltools);
+        }
+        return;
+      }
+      // If there are no notebooks, close cell tools.
+      celltools.close();
+    });
   });
-  // To avoid a race condition (if it was changed before the plugin was
-  // activated), add it here also
-  if (app.shell.currentWidget instanceof NotebookPanel) {
-     app.shell.addToLeftArea(celltools);
-  }
 
   return Promise.resolve(celltools);
 }
@@ -921,19 +938,4 @@ function createMenu(app: JupyterLab): Menu {
   menu.addItem({ type: 'submenu', submenu: settings });
 
   return menu;
-}
-
-
-/**
- * A namespace for private module data.
- */
-namespace Private {
-  /**
-   * The ID of the notebook that cell tools are current open for.
-   *
-   * #### Notes
-   * If cell tools are not open, this is an empty string.
-   */
-  export
-  let toolsOpenFor = '';
 }
