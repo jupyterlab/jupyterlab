@@ -17,7 +17,5 @@
     "rootDirs": [
       "../packages"
     ]
-  },
-  "include": ["src/*"],
-  "exclude": ["node_modules/@jupyterlab/*", "../node_modules/@jupyterlab/*"]
+  }
 }

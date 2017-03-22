@@ -10,6 +10,7 @@
     "install": "lerna bootstrap --hoist",
     "build": "lerna run build",
     "build:examples": "lerna run build --scope \"@jupyterlab/example-*\"",
+    "build:main": "cd jupyterlab && npm run build",
     "build:src": "lerna run build --scope \"@jupyterlab/!(test-|example-)*\"",
     "build:tests": "lerna run build --scope \"@jupyterlab/test-*\"",
     "clean": "lerna run clean",
