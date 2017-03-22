@@ -8,6 +8,7 @@ def handle_deps(data):
     # Check for duplicates of packages.
     seen = dict()
     dupes = dict()
+    singletons = set()
 
     for (key, value) in data.items():
         name = value['name']
@@ -17,13 +18,22 @@ def handle_deps(data):
             dupes[name].append(key)
         else:
             seen[name] = key
+        if ('jupyterlab' in value and
+                'singletonPackages' in value['jupyterlab']):
+            for package in value['jupyterlab']['singletonPackages']:
+                singletons.add(package)
 
     # For each dupe check for overlapping semver.
     to_remove = []
     for (key, value) in dupes.items():
-        to_remove.extend(handle_dupe(data, key, value))
-
-    print('We should remove %s' % to_remove)
+        try:
+            to_remove.extend(handle_dupe(data, key, value))
+        except ValueError as e:
+            if key in singletons:
+                raise e
+            else:
+                print(key)
+                print(str(singletons))
 
 
 def handle_dupe(data, name, dupes):
@@ -57,11 +67,7 @@ def handle_dupe(data, name, dupes):
                 to_remove.append(name + '@' + version)
             return to_remove
 
-    # If there is no overlap, make sure it is not marked as a singleton.
-    # TODO: handle singleton data.
-    print('*** "%s" must be a singleton' % name)
-
-    return to_remove
+    raise ValueError('"%s" is a duplicate' % name)
 
 
 if __name__ == '__main__':

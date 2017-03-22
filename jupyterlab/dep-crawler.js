@@ -16,7 +16,8 @@ function getDependencies(basePath) {
         return;
     }
     packages.set(name, { name: data.name, version: data.version,
-                         dependencies: data.dependencies });
+                         dependencies: data.dependencies,
+                         jupyterlab: data.jupyterlab });
     for (let name in data.dependencies) {
         getDependency(basePath, name);
     }

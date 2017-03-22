@@ -46,5 +46,8 @@
     "url-loader": "^0.5.7",
     "watch": "^1.0.2",
     "webpack": "^2.2.1"
+  },
+  "jupyterlab": {
+    "singletonPackages": ["@phosphor/widgets"]
   }
 }
