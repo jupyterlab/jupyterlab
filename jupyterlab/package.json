@@ -5,7 +5,7 @@
   "scripts": {
     "build": "npm install && tsc && webpack",
     "clean": "rimraf build",
-    "watch": "watch \"npm run build\" ../packages --wait 10 --ignoreDotFiles"
+    "watch": "watch \"npm run build\" ../packages --wait 10 --filter=../scripts/watch-filter.js"
   },
   "dependencies": {
     "@jupyterlab/application": "^0.1.1",

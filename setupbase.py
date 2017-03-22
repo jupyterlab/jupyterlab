@@ -131,7 +131,6 @@ class NPM(Command):
         log.info("Installing build dependencies with npm. This may take a while...")
         main = os.path.join(here, 'jupyterlab')
         run(['npm', 'install'], cwd=here)
-        run(['npm', 'run', 'clean'], cwd=main)
         run(['npm', 'run', 'build'], cwd=main)
 
         for t in self.targets:

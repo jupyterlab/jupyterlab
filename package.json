@@ -11,9 +11,10 @@
     "build:main": "cd jupyterlab && npm run build",
     "build:src": "lerna run build --scope \"@jupyterlab/!(test-|example-)*\"",
     "build:tests": "lerna run build --scope \"@jupyterlab/test-*\"",
-    "clean": "lerna run clean",
-    "clean:examples": "lerna run clean --scope \"@jupyterlab/example-*\"",
-    "clean:src": "lerna run clean --scope \"@jupyterlab/!(test-|example-)*\"",
+    "clean": "node scripts/clean-packages.js examples packages",
+    "clean:examples": "node scripts/clean-packages.js examples",
+    "clean:main": "cd jupyterlab && npm run clean",
+    "clean:src": "node scripts/clean-packages.js packages",
     "clean:tests": "lerna run clean --scope \"@jupyterlab/test-*\"",
     "coverage": "lerna run coverage --stream --scope \"@jupyterlab/test-*\"",
     "test": "lerna run test --stream --scope \"@jupyterlab/test-*\"",
@@ -21,6 +22,7 @@
     "test:firefox": "lerna run test:firefox --stream --scope \"@jupyterlab/test-*\"",
     "test:ie": "lerna run test:ie --concurrency 1 --stream --scope \"@jupyterlab/test-*\"",
     "package:update": "lerna exec --scope \"@jupyterlab/!(test-|main)*\" -- node ../../scripts/package-update.js",
-    "publish": "npm run clean && npm run build && lerna publish -m \"Publish\""
+    "publish": "lerna publish -m \"Publish\"",
+    "watch": "cd jupyterlab && npm run watch"
   }
 }
