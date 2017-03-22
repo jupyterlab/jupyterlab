@@ -12,8 +12,9 @@ export PATH="$HOME/miniconda/bin:$PATH"
 if [[ $GROUP == tests ]]; then
 
     # Run the JS and python tests
-    npm test
     py.test
+    npm run build
+    npm test
 
     # Make sure we have CSS that can be converted with postcss
     npm install -g postcss-cli
@@ -32,6 +33,7 @@ fi
 
 if [[ $GROUP == coverage ]]; then
     # Run the coverage check.
+    npm run build
     npm run coverage
 
     # Run the link check

@@ -8,8 +8,14 @@
     "moduleResolution": "node",
     "target": "ES5",
     "outDir": "./build",
-    "lib": ["ES5", "ES2015.Promise", "DOM", "ES2015.Collection"],
-    "types": ["node"]
-  },
-  "include": ["src/*"]
+    "lib": ["ES5", "ES2015.Collection", "ES2015.Promise", "DOM"],
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@jupyterlab/*": ["../packages/*/src"]
+    },
+    "rootDirs": [
+      "../packages"
+    ]
+  }
 }
