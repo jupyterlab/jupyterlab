@@ -1,8 +1,8 @@
 {
   "private": true,
-  "name": "jupyterlab-example-notebook",
+  "name": "@jupyterlab/example-notebook",
   "scripts": {
-    "build": "tsc --project src && webpack --config webpack.conf.js",
+    "build": "tsc && webpack",
     "clean": "rimraf build"
   },
   "dependencies": {

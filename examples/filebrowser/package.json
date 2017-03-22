@@ -1,8 +1,8 @@
 {
   "private": true,
-  "name": "jupyterlab-example-filebrowser",
+  "name": "@jupyterlab/example-filebrowser",
   "scripts": {
-    "build": "tsc --project src && webpack --config webpack.conf.js",
+    "build": "tsc && webpack",
     "clean": "rimraf build"
   },
   "dependencies": {

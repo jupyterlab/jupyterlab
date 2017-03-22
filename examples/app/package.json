@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "jupyterlab-example-app",
+  "name": "@jupyterlab/example-app",
   "scripts": {
     "build": "webpack",
     "clean": "rimraf build"
