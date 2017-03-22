@@ -10,6 +10,10 @@ import {
 } from '@phosphor/coreutils';
 
 import {
+  MessageLoop
+} from '@phosphor/messaging';
+
+import {
   ISignal, Signal
 } from '@phosphor/signaling';
 
@@ -373,7 +377,13 @@ class ApplicationShell extends Widget {
 
       // Set restored flag, save state, and resolve the restoration promise.
       this._isRestored = true;
-      return this._save().then(() => { this._restored.resolve(saved); });
+      return this._save().then(() => {
+        // Make sure all messages in the queue are finished before notifying
+        // any extensions that are waiting for the promise that guarantees the
+        // application state has been restored.
+        MessageLoop.flush();
+        this._restored.resolve(saved);
+      });
     });
 
     // Catch current changed events on the side handlers.
