@@ -1,9 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  polyfill
-}  from 'es6-promise';
+import 'es6-promise/auto';  // polyfill Promise on IE
 
 import {
   JupyterLab, ModuleLoader
@@ -86,9 +84,6 @@ import * as tooltipExtension
 
 import 'font-awesome/css/font-awesome.min.css';
 import '@jupyterlab/default-theme/style/index.css';
-
-
-polyfill();
 
 
 /* tslint:disable */
