@@ -15,7 +15,8 @@ function getDependencies(basePath) {
     if (packages.has(name)) {
         return;
     }
-    packages.set(name, data.dependencies);
+    packages.set(name, { name: data.name, version: data.version,
+                         dependencies: data.dependencies });
     for (let name in data.dependencies) {
         getDependency(basePath, name);
     }
