@@ -42,4 +42,5 @@ build: off
 # to run your custom scripts instead of automatic tests
 test_script:
   - 'py.test'
+  - 'npm run build'
   - 'npm test'
