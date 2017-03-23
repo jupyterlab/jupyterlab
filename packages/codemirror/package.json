@@ -15,9 +15,9 @@
   "dependencies": {
     "@jupyterlab/codeeditor": "^0.1.1",
     "@jupyterlab/coreutils": "^0.1.1",
-    "@phosphor/algorithm": "^0.1.1",
-    "@phosphor/disposable": "^0.1.1",
-    "@phosphor/signaling": "^0.1.2",
+    "@phosphor/algorithm": "^1.0.0",
+    "@phosphor/disposable": "^1.0.0",
+    "@phosphor/signaling": "^1.0.0",
     "@types/codemirror": "0.0.38",
     "codemirror": "^5.24.2"
   },

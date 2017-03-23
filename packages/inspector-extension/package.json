@@ -17,7 +17,7 @@
     "@jupyterlab/console": "^0.1.1",
     "@jupyterlab/inspector": "^0.1.1",
     "@jupyterlab/notebook": "^0.1.1",
-    "@phosphor/disposable": "^0.1.1"
+    "@phosphor/disposable": "^1.0.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",

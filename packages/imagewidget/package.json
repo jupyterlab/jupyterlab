@@ -15,10 +15,10 @@
   "dependencies": {
     "@jupyterlab/apputils": "^0.1.1",
     "@jupyterlab/docregistry": "^0.1.1",
-    "@phosphor/commands": "^0.1.5",
-    "@phosphor/coreutils": "^0.1.5",
-    "@phosphor/messaging": "^0.1.2",
-    "@phosphor/widgets": "^0.3.0"
+    "@phosphor/commands": "^1.0.0",
+    "@phosphor/coreutils": "^1.0.0",
+    "@phosphor/messaging": "^1.0.0",
+    "@phosphor/widgets": "^1.0.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",

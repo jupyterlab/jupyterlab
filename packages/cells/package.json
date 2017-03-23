@@ -18,10 +18,10 @@
     "@jupyterlab/outputarea": "^0.1.1",
     "@jupyterlab/rendermime": "^0.1.1",
     "@jupyterlab/services": "^0.40.1",
-    "@phosphor/coreutils": "^0.1.5",
-    "@phosphor/messaging": "^0.1.2",
-    "@phosphor/signaling": "^0.1.2",
-    "@phosphor/widgets": "^0.3.0"
+    "@phosphor/coreutils": "^1.0.0",
+    "@phosphor/messaging": "^1.0.0",
+    "@phosphor/signaling": "^1.0.0",
+    "@phosphor/widgets": "^1.0.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",

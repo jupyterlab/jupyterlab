@@ -27,4 +27,3 @@
     "watch": "cd jupyterlab && npm run watch"
   }
 }
-

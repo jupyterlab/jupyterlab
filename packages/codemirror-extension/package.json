@@ -17,7 +17,7 @@
     "@jupyterlab/codeeditor": "^0.1.1",
     "@jupyterlab/codemirror": "^0.1.1",
     "@jupyterlab/editorwidget": "^0.1.1",
-    "@phosphor/widgets": "^0.3.0"
+    "@phosphor/widgets": "^1.0.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
