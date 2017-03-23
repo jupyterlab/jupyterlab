@@ -2,7 +2,7 @@
   "private": true,
   "name": "@jupyterlab/test-all",
   "scripts": {
-    "build": "tsc && webpack",
+    "build:test": "tsc && webpack",
     "coverage": "webpack --config webpack-cov.conf.js && python run-test.py karma-cov.conf.js",
     "test": "npm run test:firefox",
     "test:chrome": "python run-test.py --browsers=Chrome karma.conf.js",

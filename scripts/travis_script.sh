@@ -14,6 +14,7 @@ if [[ $GROUP == tests ]]; then
     # Run the JS and python tests
     py.test
     npm run build
+    npm run build:test
     npm test
 
     # Make sure we have CSS that can be converted with postcss
@@ -34,6 +35,7 @@ fi
 if [[ $GROUP == coverage ]]; then
     # Run the coverage check.
     npm run build
+    npm run build:test
     npm run coverage
 
     # Run the link check
