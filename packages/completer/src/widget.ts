@@ -141,16 +141,6 @@ class CompleterWidget extends Widget {
   }
 
   /**
-   * Reset the widget.
-   */
-  reset(): void {
-    this._reset();
-    if (this._model) {
-      this._model.reset(true);
-    }
-  }
-
-  /**
    * Handle the DOM events for the widget.
    *
    * @param event - The DOM event sent to the widget.
@@ -176,6 +166,16 @@ class CompleterWidget extends Widget {
       break;
     default:
       break;
+    }
+  }
+
+  /**
+   * Reset the widget.
+   */
+  reset(): void {
+    this._reset();
+    if (this._model) {
+      this._model.reset(true);
     }
   }
 
@@ -223,8 +223,17 @@ class CompleterWidget extends Widget {
    * Handle `update-request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    let model = this._model;
+    const model = this._model;
     if (!model) {
+      return;
+    }
+
+    if (this._resetFlag) {
+      this._resetFlag = false;
+      if (!this.isHidden) {
+        this.hide();
+        this._visibilityChanged.emit(void 0);
+      }
       return;
     }
 
@@ -232,7 +241,8 @@ class CompleterWidget extends Widget {
 
     // If there are no items, reset and bail.
     if (!items || !items.length) {
-      this._reset();
+      this._resetFlag = true;
+      this.reset();
       if (!this.isHidden) {
         this.hide();
         this._visibilityChanged.emit(void 0);
@@ -456,6 +466,7 @@ class CompleterWidget extends Widget {
   private _editor: CodeEditor.IEditor | null = null;
   private _model: CompleterWidget.IModel | null = null;
   private _renderer: CompleterWidget.IRenderer | null = null;
+  private _resetFlag = false;
   private _selected = new Signal<this, string>(this);
   private _visibilityChanged = new Signal<this, void>(this);
 }
