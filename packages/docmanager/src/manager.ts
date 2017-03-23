@@ -30,7 +30,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IModelDBFactory
+  IRealtime
 } from '@jupyterlab/coreutils';
 
 import {
@@ -79,7 +79,7 @@ class DocumentManager implements IDisposable {
     this._registry = options.registry;
     this._serviceManager = options.manager;
     this._opener = options.opener;
-    this._modelDBFactory = options.modelDBFactory;
+    this._realtimeServices = options.realtimeServices;
     this._widgetManager = new DocumentWidgetManager({
       registry: this._registry
     });
@@ -301,7 +301,7 @@ class DocumentManager implements IDisposable {
       manager: this._serviceManager,
       factory,
       path,
-      modelDBFactory: this._modelDBFactory
+      realtimeServices: this._realtimeServices
     });
     let handler = new SaveHandler({
       context,
@@ -403,7 +403,7 @@ class DocumentManager implements IDisposable {
   private _contexts: Private.IContext[] = [];
   private _opener: DocumentManager.IWidgetOpener = null;
   private _activateRequested = new Signal<this, string>(this);
-  private _modelDBFactory: IModelDBFactory;
+  private _realtimeServices: IRealtime;
 }
 
 
@@ -433,10 +433,9 @@ namespace DocumentManager {
     opener: IWidgetOpener;
 
     /**
-     * A factory for a database in which to store
-     * model data.
+     * A provider for realtime services.
      */
-    modelDBFactory?: IModelDBFactory;
+    realtimeServices?: IRealtime;
   }
 
   /**

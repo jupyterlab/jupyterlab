@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  PathExt, URLExt, IModelDB, IModelDBFactory
+  PathExt, URLExt, IModelDB, IRealtime, IRealtimeHandler
 } from '@jupyterlab/coreutils';
 
 import {
@@ -55,8 +55,9 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     this._path = options.path;
     let ext = DocumentRegistry.extname(this._path);
     let lang = this._factory.preferredLanguage(ext);
-    if(options.modelDBFactory) {
-      this._modelDB = options.modelDBFactory.createNew(options.path);
+    if(options.realtimeServices) {
+      this._realtimeHandler = options.realtimeServices.createHandler(this._path);
+      this._modelDB = this._realtimeHandler.modelDB;
       this._model = this._factory.createNew(lang, this._modelDB);
     } else {
       this._model = this._factory.createNew(lang);
@@ -543,6 +544,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   private _opener: (widget: Widget) => void = null;
   private _model: T = null;
   private _modelDB: IModelDB;
+  private _realtimeHandler: IRealtimeHandler = null;
   private _path = '';
   private _session: Session.ISession = null;
   private _factory: DocumentRegistry.IModelFactory<T> = null;
@@ -583,10 +585,9 @@ export namespace Context {
     path: string;
 
     /**
-     * An IModelDB factory for creating a database
-     * in which to store model data.
+     * Provider for realtime services.
      */
-    modelDBFactory?: IModelDBFactory;
+    realtimeServices?: IRealtime;
 
     /**
      * An optional callback for opening sibling widgets.

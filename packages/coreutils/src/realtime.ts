@@ -6,7 +6,7 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  JSONObject, Token
+  JSONValue, Token
 } from '@phosphor/coreutils';
 
 import {
@@ -39,30 +39,6 @@ const IRealtime = new Token<IRealtime>('jupyter.services.realtime');
  */
 export
 interface IRealtime {
-
-  /**
-   * Share a realtime model with a collaborator.
-   *
-   * @param model: The model to be shared.
-   *
-   * @returns a promise that is resolved when the model
-   *   has been successfully shared.
-   */
-  addCollaborator(model: IRealtimeModel): Promise<void>;
-
-  /**
-   * Share a model through the realtime services.
-   *
-   * @param model: The model to be shared.
-   *
-   * @param uid: Optional unique identifier for the model,
-   *   which can be used to identify it across different clients.
-   *
-   * @returns a promise that is resolved when the model
-   *   has been successfully opened.
-   */
-  shareModel(model: IRealtimeModel, uid?: string): Promise<void>;
-
   /**
    * The realtime services may require some setup before
    * it can be used (e.g., loading external APIs, authorization).
@@ -70,34 +46,12 @@ interface IRealtime {
    * be used.
    */
   ready: Promise<void>;
-}
-
-/**
- * Interface for an object which has the ability to be shared via
- * the realtime interface. These objects are required to implement
- * method `registerCollaborative( handler : IRealtimeHandler)`
- * which describes to the handler the members which are realtime-enabled.
- */
-export
-interface IRealtimeModel {
 
   /**
-   * The realtime handler associated with this realtime model.
-   * Should only be non-null after registerCollaborative() has
-   * successfully resolved.
+   * Create an IRealtimeHandler for use with a document or other
+   * model.
    */
-  readonly realtimeHandler: IRealtimeHandler;
-
-  /**
-   * Register this object as collaborative.
-   *
-   * @param handler: the realtime handler to which the model
-   *   describes itself.
-   *
-   * @returns a promise that is resolved when the model is done
-   * registering itself as collaborative.
-   */
-  registerCollaborative (handler: IRealtimeHandler): Promise<void>;
+  createHandler(path: string): IRealtimeHandler;
 }
 
 
@@ -109,7 +63,6 @@ interface IRealtimeModel {
  */
 export
 interface IRealtimeHandler extends IDisposable {
-
   /**
    * A map of the currently active collaborators
    * for the handler, including the local user.
@@ -137,14 +90,7 @@ interface IRealtimeHandler extends IDisposable {
  * A type which is able to be synchronized between collaborators
  */
 export
-type Synchronizable = JSONObject | IObservableMap<any> | IObservableVector<any> | IObservableString;
-
-export
-interface IRealtimeConverter<T> {
-  from(value: Synchronizable): T;
-
-  to(value: T): Synchronizable;
-}
+type Synchronizable = JSONValue | IObservableMap<JSONValue> | IObservableVector<JSONValue> | IObservableString;
 
 /**
  * Interface for an object representing a single collaborator
