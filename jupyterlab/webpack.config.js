@@ -39,9 +39,9 @@ var alias = {};
 var files = fs.readdirSync('./build/packages');
 for (var i = 0; i < files.length; i++) {
   var package = path.basename(files[i]);
+  var target = path.resolve('./build/packages/' + files[i] + '/src');
   if (fs.existsSync(path.join('../packages', package, 'style'))) {
     var source = path.join('../packages', package, 'style');
-    var target = path.resolve('./build/packages/' + files[i] + '/src');
     var styleTarget = path.join(target, 'style');
     fs.copySync(source, styleTarget, { filter: /\.css$/ });
     fs.copySync(source, styleTarget, { filter: /\.svg$/ });
