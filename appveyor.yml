@@ -44,4 +44,4 @@ test_script:
   - 'py.test'
   - 'npm run build'
   - 'npm run build:test'
-  - 'npm test'
+  - 'npm test || npm test || npm test'
