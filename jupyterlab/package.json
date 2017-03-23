@@ -48,6 +48,15 @@
     "webpack": "^2.2.1"
   },
   "jupyterlab": {
-    "singletonPackages": ["@phosphor/widgets"]
+    "singletonPackages": [
+      "@phosphor/widgets",
+      "@jupyterlab/application",
+      "@jupyterlab/apputils",
+      "@jupyterlab/codemirror",
+      "@jupyterlab/docmanager",
+      "@jupyterlab/docregistry",
+      "@jupyterlab/filebrowser",
+      "@jupyterlab/services"
+    ]
   }
 }
