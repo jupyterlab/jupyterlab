@@ -110,6 +110,11 @@ namespace CodeEditor {
      * A CSS string to apply to the selection.
      */
     css?: string;
+
+    /**
+     * A color for the selection.
+     */
+    color?: string;
   }
 
   /**
