@@ -239,13 +239,6 @@
 }
 
 
-.jp-MetadataEditorTool .jp-JSONEditorWidget {
-  background-color: white;
-  border: var(--jp-border-width) solid var(--jp-border-color1);
-  margin: 8px;
-}
-
-
 .jp-MetadataEditorTool .jp-JSONEditorWidget.jp-mod-collapsed {
   display: none;
 }
