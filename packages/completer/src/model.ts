@@ -79,16 +79,17 @@ class CompleterModel implements CompleterWidget.IModel {
     if (!this._cursor) {
       return;
     }
-    this._current = newValue;
 
+    this._current = newValue;
     if (!this._current) {
       this._stateChanged.emit(void 0);
       return;
     }
-    let original = this._original;
-    let current = this._current;
-    let originalLine = original.text.split('\n')[original.line];
-    let currentLine = current.text.split('\n')[current.line];
+
+    const original = this._original;
+    const current = this._current;
+    const originalLine = original.text.split('\n')[original.line];
+    const currentLine = current.text.split('\n')[current.line];
 
     // If the text change means that the original start point has been preceded,
     // then the completion is no longer valid and should be reset.
@@ -97,11 +98,11 @@ class CompleterModel implements CompleterWidget.IModel {
       return;
     }
 
-    let { start, end } = this._cursor;
+    const { start, end } = this._cursor;
     // Clip the front of the current line.
     let query = current.text.substring(start);
     // Clip the back of the current line by calculating the end of the original.
-    let ending = original.text.substring(end);
+    const ending = original.text.substring(end);
     query = query.substring(0, query.lastIndexOf(ending));
     this._query = query;
     this._stateChanged.emit(void 0);
