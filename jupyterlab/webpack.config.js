@@ -37,7 +37,6 @@ console.log('Generating bundles...');
 // Get the module aliases and copy styles.
 var alias = {};
 var files = fs.readdirSync('./build/packages');
-debugger;
 for (var i = 0; i < files.length; i++) {
   var package = path.basename(files[i]);
   var target = path.resolve('./build/packages/' + files[i] + '/src');
@@ -50,7 +49,6 @@ for (var i = 0; i < files.length; i++) {
   }
   alias['@jupyterlab/' + package] = target;
 }
-debugger;
 
 
 buildExtension({
