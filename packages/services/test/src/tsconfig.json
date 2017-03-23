@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "noImplicitAny": true,
+    "noEmitOnError": true,
+    "lib": ["DOM", "ES5", "ES2015.Promise", "ES2015.Collection", 
+            "ES2015.Iterable", "ES2015.Symbol"],
+    "types": ["mocha"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "ES5",
+    "outDir": "../build"
+  }
+}

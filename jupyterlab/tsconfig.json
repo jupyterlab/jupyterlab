@@ -9,7 +9,7 @@
     "target": "ES5",
     "outDir": "./build",
     "lib": ["ES5", "ES2015.Collection", "ES2015.Promise", "DOM"],
-    "types": ["node"],
+    "types": ["node", "text-encoding"],
     "baseUrl": ".",
     "paths": {
       "@jupyterlab/*": ["../packages/*/src"]

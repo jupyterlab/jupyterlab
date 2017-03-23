@@ -18,6 +18,7 @@
     "clean:tests": "lerna run clean --scope \"@jupyterlab/test-*\"",
     "coverage": "lerna run coverage --stream",
     "test": "cd packages/extension-builder && npm test && cd ../../test && npm test",
+    "test:services": "cd packages/services && npm run build:examples && npm test && npm run test:integration",
     "test:chrome": "lerna run test:chrome --stream",
     "test:firefox": "lerna run test:firefox --stream",
     "test:ie": "lerna run test:ie --concurrency 1 --stream",

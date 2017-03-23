@@ -1,0 +1,12 @@
+{
+  "mode": "file",
+  "module": "commonjs",
+  "excludeNotExported": true,
+  "target": "es5",
+  "moduleResolution": "node",
+  "out": "docs/",
+  "excludeExternals": "true",
+  "exclude": "**/node_modules/@types/**/*.ts"
+}
+
+

@@ -1,0 +1,72 @@
+{
+  "name": "@jupyterlab/services",
+  "version": "0.40.3",
+  "description": "Client APIs for the Jupyter services REST APIs",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "dependencies": {
+    "@phosphor/algorithm": "^0.1.1",
+    "@phosphor/coreutils": "^0.1.5",
+    "@phosphor/disposable": "^0.1.1",
+    "@phosphor/signaling": "^0.1.2",
+    "@types/minimist": "^1.2.0",
+    "@types/text-encoding": "0.0.30",
+    "minimist": "^1.2.0",
+    "path-posix": "^1.0.0",
+    "url-parse": "^1.1.8"
+  },
+  "devDependencies": {
+    "@types/expect.js": "^0.3.29",
+    "@types/mocha": "^2.2.32",
+    "@types/ws": "0.0.39",
+    "expect.js": "^0.3.1",
+    "istanbul": "^0.3.18",
+    "mocha": "^2.3.4",
+    "rimraf": "^2.5.2",
+    "text-encoding": "^0.5.2",
+    "typedoc": "^0.5.0",
+    "typescript": "^2.2.1",
+    "webpack": "^2.2.1",
+    "ws": "^1.0.1",
+    "xmlhttprequest": "^1.8.0"
+  },
+  "scripts": {
+    "clean": "rimraf docs && rimraf lib && rimraf test/build && rimraf test/coverage",
+    "build:src": "tsc --project src",
+    "build:test": "tsc --project test/src",
+    "build": "npm run build:src",
+    "example:browser": "cd examples/browser && npm run update && npm run build",
+    "example:node": "cd examples/node && npm install",
+    "build:examples": "npm run example:browser && npm run example:node",
+    "docs": "typedoc --options typedoc.json src",
+    "prepublish": "npm run build && webpack",
+    "test:coverage": "istanbul cover --dir test/coverage _mocha -- --retries 3 test/build/**/*.spec.js --foo bar --terminalsAvailable True",
+    "test:integration": "cd test && python integration_test.py",
+    "test:devtool": "devtool node_modules/mocha/bin/_mocha -qc test/build/**/**.spec.js --foo bar --terminalsAvailable True",
+    "test:debug": "mocha test/build/**/*.spec.js --foo bar --terminalsAvailable True --debug-brk",
+    "test": "mocha --retries 3 test/build/**/*.spec.js --foo bar --terminalsAvailable True"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab"
+  },
+  "keywords": [
+    "jupyter",
+    "services",
+    "notebook"
+  ],
+  "files": [
+    "lib/**/*.js",
+    "lib/**/*.d.ts",
+    "lib/*.js",
+    "lib/*.d.ts",
+    "dist/*.js",
+    "dist/**/*.js"
+  ],
+  "author": "Project Jupyter",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "homepage": "https://github.com/jupyterlab/jupyterlab"
+}
