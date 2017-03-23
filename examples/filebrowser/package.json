@@ -16,6 +16,7 @@
     "@jupyterlab/services": "^0.40.1",
     "@phosphor/commands": "^0.1.5",
     "@phosphor/widgets": "^0.3.0",
+    "es6-promise": "^4.1.0",
     "webpack": "^2.2.1"
   },
   "devDependencies": {
