@@ -9,7 +9,16 @@ sh -e /etc/init.d/xvfb start || true
 
 export PATH="$HOME/miniconda/bin:$PATH"
 
+
 if [[ $GROUP == tests ]]; then
+    # Make sure we can start and kill the lab server
+    jupyter lab --no-browser &
+    TASK_PID=$!
+    # Make sure the task is running
+    ps -p $TASK_PID || exit 1
+    sleep 5
+    kill $TASK_PID
+    wait $TASK_PID
 
     # Run the JS and python tests
     py.test
@@ -21,14 +30,6 @@ if [[ $GROUP == tests ]]; then
     npm install -g postcss-cli
     postcss jupyterlab/build/*.css > /dev/null
 
-    # Make sure we can start and kill the lab server
-    jupyter lab --no-browser &
-    TASK_PID=$!
-    # Make sure the task is running
-    ps -p $TASK_PID || exit 1
-    sleep 5
-    kill $TASK_PID
-    wait $TASK_PID
 fi
 
 
