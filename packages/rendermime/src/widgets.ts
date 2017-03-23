@@ -81,46 +81,6 @@ const SVG_CLASS = 'jp-RenderedSVG';
 const PDF_CLASS = 'jp-RenderedPDF';
 
 
-// Support GitHub flavored Markdown, leave sanitizing to external library.
-marked.setOptions({
-  gfm: true,
-  sanitize: false,
-  tables: true,
-  // breaks: true; We can't use GFM breaks as it causes problems with HTML tables
-  langPrefix: `cm-s-${CodeMirrorEditor.DEFAULT_THEME} language-`,
-  highlight: (code, lang, callback) => {
-    if (!lang) {
-        // no language, no highlight
-        if (callback) {
-            callback(null, code);
-            return;
-        } else {
-            return code;
-        }
-    }
-    requireMode(lang).then(spec => {
-      let el = document.createElement('div');
-      if (!spec) {
-          console.log(`No CodeMirror mode: ${lang}`);
-          callback(null, code);
-          return;
-      }
-      try {
-        runMode(code, spec.mime, el);
-        callback(null, el.innerHTML);
-      } catch (err) {
-        console.log(`Failed to highlight ${lang} code`, err);
-        callback(err, code);
-      }
-    }).catch(err => {
-      console.log(`No CodeMirror mode: ${lang}`);
-      console.log(`Require CodeMirror mode error: ${err}`);
-      callback(null, code);
-    });
-  }
-});
-
-
 /*
  * A widget for displaying any widget whoes representation is rendered HTML
  * */
@@ -182,6 +142,10 @@ class RenderedMarkdown extends RenderedHTMLCommon {
   constructor(options: RenderMime.IRenderOptions) {
     super(options);
     this.addClass(MARKDOWN_CLASS);
+
+    // Initialize the marked library if necessary.
+    Private.initializeMarked();
+
     let source = Private.getSource(options);
     let parts = removeMath(source);
     // Add the markdown content asynchronously.
@@ -444,24 +408,24 @@ namespace Private {
   }
 
   /**
-  * Apply ids to headers.
-  */
+   * Apply ids to headers.
+   */
   export
   function headerAnchors(node: HTMLElement): void {
-    let headerNames = ['h1','h2','h3','h4','h5','h6'];
+    let headerNames = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
     for (let headerType of headerNames){
       let headers = node.getElementsByTagName(headerType);
-      for (let i=0; i<headers.length; i++){
+      for (let i=0; i < headers.length; i++) {
         let header = headers[i];
         header.id = header.innerHTML.replace(/ /g, '-');
         let anchor = document.createElement('a');
         anchor.target = '_self';
         anchor.textContent = '¶';
-        anchor.href = '#'+ header.id;
+        anchor.href = '#' + header.id;
         anchor.classList.add('jp-InternalAnchorLink');
         header.appendChild(anchor);
-      };
-    };
+      }
+    }
   }
 
   /**
@@ -480,6 +444,61 @@ namespace Private {
       return resolver.getDownloadUrl(path);
     }).then(url => {
       anchor.href = url;
+    });
+  }
+}
+
+/**
+ * A namespace for private module data.
+ */
+namespace Private {
+  let initialized = false;
+
+  /**
+   * Support GitHub flavored Markdown, leave sanitizing to external library.
+   */
+  export
+  function initializeMarked(): void {
+    if (initialized) {
+      return;
+    }
+    initialized = true;
+    marked.setOptions({
+      gfm: true,
+      sanitize: false,
+      tables: true,
+      // breaks: true; We can't use GFM breaks as it causes problems with tables
+      langPrefix: `cm-s-${CodeMirrorEditor.DEFAULT_THEME} language-`,
+      highlight: (code, lang, callback) => {
+        if (!lang) {
+            // no language, no highlight
+            if (callback) {
+                callback(null, code);
+                return;
+            } else {
+                return code;
+            }
+        }
+        requireMode(lang).then(spec => {
+          let el = document.createElement('div');
+          if (!spec) {
+              console.log(`No CodeMirror mode: ${lang}`);
+              callback(null, code);
+              return;
+          }
+          try {
+            runMode(code, spec.mime, el);
+            callback(null, el.innerHTML);
+          } catch (err) {
+            console.log(`Failed to highlight ${lang} code`, err);
+            callback(err, code);
+          }
+        }).catch(err => {
+          console.log(`No CodeMirror mode: ${lang}`);
+          console.log(`Require CodeMirror mode error: ${err}`);
+          callback(null, code);
+        });
+      }
     });
   }
 }
