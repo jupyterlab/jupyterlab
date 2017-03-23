@@ -47,6 +47,22 @@ class EditorWidget extends CodeEditorWidget {
     context.ready.then(() => {
       this._onContextReady();
     });
+    if(context.realtimeHandler) {
+      let realtime = context.realtimeHandler;
+      realtime.ready.then(() => {
+        this.editor.uuid = realtime.localCollaborator.sessionId;
+        realtime.collaborators.changed.connect((collaborators, change) => {
+          this.editor.uuid = realtime.localCollaborator.sessionId;
+          //if there are selections corresponding to non-collaborators,
+          //they are stale and should be removed.
+          for(let key of context.model.selections.keys()) {
+            if(!collaborators.has(key)) {
+              context.model.selections.delete(key);
+            }
+          }
+        });
+      });
+    }
   }
 
   /**

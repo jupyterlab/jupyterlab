@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IChangedArgs as IChangedArgsGeneric, PathExt, IModelDB
+  IChangedArgs as IChangedArgsGeneric, PathExt, IModelDB, IRealtimeHandler
 } from '@jupyterlab/coreutils';
 
 /* tslint:disable */
@@ -656,6 +656,13 @@ namespace DocumentRegistry {
      * It will be `null` until the context is ready.
      */
     readonly contentsModel: Contents.IModel;
+
+    /**
+     * An optional `IRealtimeHandler for the document.
+     * It will be null unless the `IContext` is given an
+     * `IRealtime` object at creation time.
+     */
+    readonly realtimeHandler: IRealtimeHandler;
 
     /**
      * Whether the context is ready.

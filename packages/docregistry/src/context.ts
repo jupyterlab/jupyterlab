@@ -129,6 +129,13 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   }
 
   /**
+   * The realtime handler associated with the document.
+   */
+  get realtimeHandler(): IRealtimeHandler {
+    return this._realtimeHandler;
+  }
+
+  /**
    * Get the model factory name.
    *
    * #### Notes
