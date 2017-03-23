@@ -454,14 +454,31 @@ namespace Private {
       for (let i=0; i<headers.length; i++){
         let header = headers[i];
         header.id = header.innerHTML.replace(/ /g, '-');
-        let anchor = document.createElement('a');
-        anchor.target = '_self';
-        anchor.textContent = '¶';
-        anchor.href = '#'+ header.id;
-        anchor.classList.add('jp-InternalAnchorLink');
-        header.appendChild(anchor);
+        let fakeAnchor = postfixAnchor(header, undefined, null, null, header.id.toLowerCase(), null);
+        let realAnchor = postfixAnchor(header, undefined, '#' + header.id, ['jp-InternalAnchorLink'], null, '¶');
       };
     };
+    function postfixAnchor(node: Element, target = '_self', href?: string,
+                           localClass?: Array<string>, id?: string, content?: string): Node{
+      let anchor = document.createElement('a');
+      anchor.target = target;
+      if (href){
+        anchor.href = href; 
+      }
+      if (localClass){
+        for (let thisLocalClass of localClass){
+          anchor.classList.add(thisLocalClass);
+        }
+      }
+      if (id){
+        anchor.id = id;
+      }
+      if (content){
+        anchor.textContent = content;
+      }
+      let new_node = node.appendChild(anchor);
+      return new_node;
+    }
   }
 
   /**
@@ -473,6 +490,10 @@ namespace Private {
     if (!href) {
       return Promise.resolve(void 0);
     }
+    if ( href[0] === "#"){
+      anchor.target = '_self';
+      return Promise.resolve(void 0);
+    } 
     return resolver.resolveUrl(href).then(path => {
       if (linkHandler) {
         linkHandler.handleLink(anchor, path);
