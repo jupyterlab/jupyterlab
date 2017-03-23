@@ -4,7 +4,7 @@
 var JupyterLab = require('@jupyterlab/application').JupyterLab;
 
 // ES6 Promise polyfill
-require('es6-promise').polyfill();
+require('es6-promise/auto');
 
 require('font-awesome/css/font-awesome.min.css');
 require('@jupyterlab/default-theme/style/index.css');
