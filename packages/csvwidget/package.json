@@ -15,11 +15,11 @@
   "dependencies": {
     "@jupyterlab/apputils": "^0.1.1",
     "@jupyterlab/docregistry": "^0.1.1",
-    "@phosphor/algorithm": "^0.1.1",
-    "@phosphor/messaging": "^0.1.2",
-    "@phosphor/signaling": "^0.1.2",
-    "@phosphor/virtualdom": "^0.1.1",
-    "@phosphor/widgets": "^0.3.0",
+    "@phosphor/algorithm": "^1.0.0",
+    "@phosphor/messaging": "^1.0.0",
+    "@phosphor/signaling": "^1.0.0",
+    "@phosphor/virtualdom": "^1.0.0",
+    "@phosphor/widgets": "^1.0.0",
     "@types/d3-dsv": "^1.0.30",
     "d3-dsv": "^1.0.5"
   },
