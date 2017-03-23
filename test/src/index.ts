@@ -62,9 +62,6 @@ import './docregistry/registry.spec';
 
 import './editorwidget/widget.spec';
 
-import './extension-builder/builder.spec.ts';
-import './extension-builder/plugin.spec.ts';
-
 import './filebrowser/crumbs.spec';
 import './filebrowser/model.spec';
 
