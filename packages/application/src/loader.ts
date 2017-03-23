@@ -26,11 +26,14 @@ class ModuleLoader {
    * Construct a new module loader.
    */
   constructor() {
-    // Provide the `require.ensure` function used for code
-    // splitting in the WebPack bundles.
-    // https://webpack.github.io/docs/code-splitting.html
+    // Provide the extra functions used by webpack.
     this._boundRequire = this.require.bind(this) as any;
-    this._boundRequire.ensure = this.ensureBundle.bind(this);
+    this._boundRequire.e = this.ensureBundle.bind(this);
+    this._boundRequire.i = this.inject.bind(this);
+    this._boundRequire.d = this.harmonyExports.bind(this);
+    this._boundRequire.o = this.hasOwnPropertyCall.bind(this);
+    this._boundRequire.n = this.getDefaultExport.bind(this);
+    this._boundRequire.oe = this.asyncLoadError.bind(this);
   }
 
   /**
@@ -78,23 +81,19 @@ class ModuleLoader {
     let mod: ModuleLoader.IModule = installed[id] = {
       exports: {},
       require: this._boundRequire,
-      id,
-      loaded: false
+      id
     };
 
     // Execute the module function.
     let callback = this._registered[id];
     callback.call(mod.exports, mod, mod.exports, this._boundRequire);
 
-    // Flag the module as loaded.
-    mod.loaded = true;
-
     // Return the exports of the module.
     return mod.exports;
   }
 
   /**
-   * Ensure a bundle is loaded on the page.
+   * Ensure a bundle is loaded on the page (`__webpack_require.e`)
    *
    * @param path - The public path of the bundle (e.g. "lab/jupyter.bundle.js").
    *
@@ -116,6 +115,75 @@ class ModuleLoader {
       bundle.callbacks.push(callback);
     }
     return bundle.promise;
+  }
+
+  /**
+   * Inject data into a module (`__webpack_require.i`).
+   *
+   * @param data - The source data.
+   *
+   * @returns The original data (no-op).
+   */
+  inject(data: any): any {
+    return data;
+  }
+
+  /**
+   * A getter function for harmony exports (`__webpack_require.d`).
+   *
+   * @param exports - The module exports.
+   *
+   * @param name - The property name.
+   *
+   * @param getter - The getter function.
+   */
+  harmonyExports(exports: any , name: string, getter: () => any): void {
+    if (!this.hasOwnPropertyCall(exports, name)) {
+      Object.defineProperty(exports, name, {
+        configurable: false,
+        enumerable: true,
+        get: getter
+      });
+    }
+  };
+
+  /**
+   * An Object.prototype.hasOwnProperty.call - (`__webpack_require.o`).
+   *
+   * @param object - The target object.
+   *
+   * @param property - The target property.
+   *
+   * @returns Whether the object has the property.
+   */
+  hasOwnPropertyCall(object: any, property: string): boolean {
+    return Object.prototype.hasOwnProperty.call(object, property);
+  }
+
+  /**
+   * Default export function for compatibility with non-harmony modules
+   *   (`__webpack_require.n`).
+   *
+   * @param module - The target module.
+   *
+   * @returns The default export of the module.
+   */
+  getDefaultExport(module: any): any {
+    let getter = module && module.__esModule ?
+      function getDefault() { return module['default']; } :
+      function getModuleExports() { return module; };
+    this.harmonyExports(getter, 'a', getter);
+    return getter;
+  };
+
+  /**
+   * An on error function for async loading - (`__webpack_require.oe`).
+   *
+   * @param err - The original error.
+   */
+  asyncLoadError(err: Error): void {
+    console.error(err);
+    throw err;
   }
 
   /**
@@ -289,12 +357,17 @@ class ModuleLoader {
 export
 namespace ModuleLoader {
   /**
-   * The interface for the require function.
+   * The interface for the require function, mirroring `__webpack_require__`.
    */
   export
   interface IRequire {
     (path: string): any;
-    ensure(path: string, callback?: EnsureCallback): Promise<void>;
+    e(path: string, callback?: EnsureCallback): Promise<void>;
+    i(data: any): any;
+    d(exports: any , name: string, getter: () => any): void;
+    o(object: any, property: string): boolean;
+    n(module: any): any;
+    oe(error: Error): void;
   }
 
   /**
@@ -305,7 +378,6 @@ namespace ModuleLoader {
     exports: any;
     require: IRequire;
     id: string;
-    loaded: boolean;
   }
 
   /**

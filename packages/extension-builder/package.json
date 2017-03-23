@@ -1,0 +1,56 @@
+{
+  "name": "@jupyterlab/extension-builder",
+  "version": "0.11.0",
+  "description": "Tools for building JupyterLab extensions",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js",
+    "style/*.css"
+  ],
+  "directories": {
+    "lib": "lib/"
+  },
+  "dependencies": {
+    "@types/webpack": "^2.2.12",
+    "css-loader": "^0.23.1",
+    "extract-text-webpack-plugin": "^2.1.0",
+    "file-loader": "^0.9.0",
+    "json-loader": "^0.5.4",
+    "semver": "^5.3.0",
+    "style-loader": "^0.13.1",
+    "supports-color": "^3.1.2",
+    "url-loader": "^0.5.7",
+    "webpack": "^2.2.1",
+    "webpack-config": "^6.2.0"
+  },
+  "devDependencies": {
+    "@types/expect.js": "^0.3.29",
+    "@types/extract-text-webpack-plugin": "^2.0.1",
+    "@types/mocha": "^2.2.32",
+    "@types/semver": "^5.3.31",
+    "mocha": "^2.3.4",
+    "rimraf": "^2.5.2",
+    "typescript": "^2.2.1"
+  },
+  "scripts": {
+    "build": "tsc",
+    "build:test": "tsc --project test",
+    "clean": "rimraf lib",
+    "test:coverage": "istanbul cover --dir test/coverage _mocha -- test/build/**/**.spec.js",
+    "test:debug": "mocha test/build/**/**.spec.js --debug-brk",
+    "test": "mocha test/build/**/**.spec.js",
+    "watch": "tsc -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "author": "Project Jupyter",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "homepage": "https://github.com/jupyterlab/jupyterlab"
+}

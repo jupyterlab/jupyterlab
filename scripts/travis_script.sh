@@ -9,17 +9,8 @@ sh -e /etc/init.d/xvfb start || true
 
 export PATH="$HOME/miniconda/bin:$PATH"
 
+
 if [[ $GROUP == tests ]]; then
-
-    # Run the JS and python tests
-    py.test
-    npm run build
-    npm test
-
-    # Make sure we have CSS that can be converted with postcss
-    npm install -g postcss-cli
-    postcss jupyterlab/build/*.css > /dev/null
-
     # Make sure we can start and kill the lab server
     jupyter lab --no-browser &
     TASK_PID=$!
@@ -28,12 +19,24 @@ if [[ $GROUP == tests ]]; then
     sleep 5
     kill $TASK_PID
     wait $TASK_PID
+
+    # Run the JS and python tests
+    py.test
+    npm run build
+    npm run build:test
+    npm test
+
+    # Make sure we have CSS that can be converted with postcss
+    npm install -g postcss-cli
+    postcss jupyterlab/build/*.css > /dev/null
+
 fi
 
 
 if [[ $GROUP == coverage ]]; then
     # Run the coverage check.
     npm run build
+    npm run build:test
     npm run coverage
 
     # Run the link check

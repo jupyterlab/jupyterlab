@@ -10,19 +10,20 @@
     "build:examples": "lerna run build --scope \"@jupyterlab/example-*\"",
     "build:main": "cd jupyterlab && npm run build",
     "build:src": "lerna run build --scope \"@jupyterlab/!(test-|example-)*\"",
-    "build:tests": "lerna run build --scope \"@jupyterlab/test-*\"",
+    "build:test": "lerna run build:test",
     "clean": "node scripts/clean-packages.js examples packages",
     "clean:examples": "node scripts/clean-packages.js examples",
     "clean:main": "cd jupyterlab && npm run clean",
     "clean:src": "node scripts/clean-packages.js packages",
     "clean:tests": "lerna run clean --scope \"@jupyterlab/test-*\"",
-    "coverage": "lerna run coverage --stream --scope \"@jupyterlab/test-*\"",
-    "test": "lerna run test --stream --scope \"@jupyterlab/test-*\"",
-    "test:chrome": "lerna run test:chrome --stream --scope \"@jupyterlab/test-*\"",
-    "test:firefox": "lerna run test:firefox --stream --scope \"@jupyterlab/test-*\"",
-    "test:ie": "lerna run test:ie --concurrency 1 --stream --scope \"@jupyterlab/test-*\"",
+    "coverage": "lerna run coverage --stream",
+    "test": "cd packages/extension-builder && npm test && cd ../../test && npm test",
+    "test:chrome": "lerna run test:chrome --stream",
+    "test:firefox": "lerna run test:firefox --stream",
+    "test:ie": "lerna run test:ie --concurrency 1 --stream",
     "publish": "npm update && npm install && npm run clean && npm run build && lerna publish -m \"Publish\"",
     "update:dependency": "node scripts/update-dependency.js",
     "watch": "cd jupyterlab && npm run watch"
   }
 }
+
