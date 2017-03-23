@@ -1,0 +1,17 @@
+{
+  "private": true,
+  "name": "node-example",
+  "dependencies": {
+    "@jupyterlab/services": "file:../..",
+    "requirejs": "^2.2.0",
+    "ws": "^1.1.1",
+    "xmlhttprequest": "^1.8.0"
+  },
+  "scripts": {
+    "clean": "rimraf node_modules",
+    "update": "rimraf node_modules/@jupyterlab/services && npm install"
+  },
+  "devDependencies": {
+    "rimraf": "^2.5.2"
+  }
+}
