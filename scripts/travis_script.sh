@@ -25,7 +25,7 @@ if [[ $GROUP == tests ]]; then
     npm run build
     npm run build:test
     npm test
-    npm run test:services
+    npm run test:services || npm run test:services
 
     # Make sure we have CSS that can be converted with postcss
     npm install -g postcss-cli
