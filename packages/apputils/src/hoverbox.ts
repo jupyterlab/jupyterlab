@@ -100,7 +100,7 @@ namespace HoverBox {
     // Add hover box class if it does not exist.
     node.classList.add(HOVERBOX_CLASS);
 
-    // Hide the hover box until its dimensions and visibility are known.
+    // Hide the hover box before querying the DOM for the anchor coordinates.
     node.classList.add(OUTOFVIEW_CLASS);
 
     // If the current coordinates are not visible, bail.
@@ -114,7 +114,7 @@ namespace HoverBox {
     // Clear any programmatically set margin-top.
     node.style.marginTop = '';
 
-    // Make sure the node is visible.
+    // Make sure the node is visible so that its dimensions can be queried.
     node.classList.remove(OUTOFVIEW_CLASS);
 
     const style = window.getComputedStyle(node);
