@@ -329,7 +329,7 @@ function createMenu(app: JupyterLab, creatorCmds: string[]): Menu {
 
 
 /**
- * Populated the context menu for the file browser listing.
+ * Populate the context menu for the file browser listing.
  *
  * #### Notes
  * The Open With menu is dynamically added/removed as the selection on
