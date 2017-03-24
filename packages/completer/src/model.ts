@@ -208,16 +208,29 @@ class CompleterModel implements CompleterWidget.IModel {
 
     const { column, line } = change;
     const { original } = this;
+
     // If a cursor change results in a the cursor being on a different line
-    // than the original request, cancel completion.
+    // than the original request, cancel.
     if (line !== original.line) {
       this.reset(true);
       return;
     }
 
     // If a cursor change results in the cursor being set to a position that
-    // precedes the original request, cancel completion.
+    // precedes the original request, cancel.
     if (column < original.column) {
+      this.reset(true);
+      return;
+    }
+
+    // If a cursor change results in the cursor being set to a position beyond
+    // the end of the area that would be affected by completion, cancel.
+    const { current } = this;
+    const cursorDelta = this._cursor.end - this._cursor.start;
+    const originalLine = original.text.split('\n')[original.line];
+    const currentLine = current.text.split('\n')[current.line];
+    const inputDelta = currentLine.length - originalLine.length;
+    if (column > original.column + cursorDelta + inputDelta) {
       this.reset(true);
       return;
     }
