@@ -50,11 +50,21 @@ class EditorWidget extends CodeEditorWidget {
     if(context.realtimeHandler) {
       let realtime = context.realtimeHandler;
       realtime.ready.then(() => {
+        //Setup the selection style for collaborators
         this.editor.uuid = realtime.localCollaborator.sessionId;
+        let color = realtime.localCollaborator.color;
+        let r = parseInt(color.slice(1,3), 16);
+        let g  = parseInt(color.slice(3,5), 16);
+        let b  = parseInt(color.slice(5,7), 16);
+        this.editor.selectionStyle = {
+          css: `background-color: rgba( ${r}, ${g}, ${b}, 0.1)`,
+          color: realtime.localCollaborator.color
+        };
+
+        //if there are selections corresponding to non-collaborators,
+        //they are stale and should be removed.
         realtime.collaborators.changed.connect((collaborators, change) => {
           this.editor.uuid = realtime.localCollaborator.sessionId;
-          //if there are selections corresponding to non-collaborators,
-          //they are stale and should be removed.
           for(let key of context.model.selections.keys()) {
             if(!collaborators.has(key)) {
               context.model.selections.delete(key);
