@@ -94,7 +94,7 @@ class CompleterModel implements CompleterWidget.IModel {
     // If the text change means that the original start point has been preceded,
     // then the completion is no longer valid and should be reset.
     if (currentLine.length < originalLine.length) {
-      this.reset();
+      this.reset(true);
       return;
     }
 
@@ -198,9 +198,40 @@ class CompleterModel implements CompleterWidget.IModel {
   }
 
   /**
+   * Handle a cursor change.
+   */
+  handleCursorChange(change: CompleterWidget.ITextState): void {
+    // If there is no active completion, return.
+    if (!this._original) {
+      return;
+    }
+
+    const { column, line } = change;
+    const { original } = this;
+    // If a cursor change results in a the cursor being on a different line
+    // than the original request, cancel completion.
+    if (line !== original.line) {
+      this.reset(true);
+      return;
+    }
+
+    // If a cursor change results in the cursor being set to a position that
+    // precedes the original request, cancel completion.
+    if (column < original.column) {
+      this.reset(true);
+      return;
+    }
+  }
+
+  /**
    * Handle a text change.
    */
-  handleTextChange(request: CompleterWidget.ITextState): void {
+  handleTextChange(change: CompleterWidget.ITextState): void {
+    // If there is no active completion, return.
+    if (!this._original) {
+      return;
+    }
+
     // When the completer detects a common subset prefix for all options,
     // it updates the model and sets the model source to that value, but this
     // text change should be ignored.
@@ -208,15 +239,12 @@ class CompleterModel implements CompleterWidget.IModel {
       return;
     }
 
-    const { text, column, line } = request;
+    const { text, column, line } = change;
     const last = text.split('\n')[line][column - 1];
 
     // If last character entered is not whitespace, update completion.
     if (last && last.match(/\S/)) {
-      // If there is currently an active completion, update the current state.
-      if (this.original) {
-        this.current = request;
-      }
+      this.current = change;
     } else {
       // If final character is whitespace, reset completion.
       this.reset();

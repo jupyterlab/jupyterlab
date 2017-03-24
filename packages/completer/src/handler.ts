@@ -274,12 +274,16 @@ class CompletionHandler implements IDisposable {
    */
   protected onSelectionsChanged(): void {
     const model = this._completer.model;
+    const editor = this._editor;
+    const host = editor.host;
+
+    // If there is no model, return.
     if (!model) {
+      this._enabled = false;
+      host.classList.remove(COMPLETER_ENABLED_CLASS);
       return;
     }
 
-    const editor = this._editor;
-    const host = editor.host;
     const position = editor.getCursorPosition();
     const line = editor.getLine(position.line);
     const { start, end } = editor.getSelection();
@@ -300,13 +304,14 @@ class CompletionHandler implements IDisposable {
       return;
     }
 
-    // If the completer is already enabled, return;
-    if (this._enabled) {
-      return;
+    // Enable completion.
+    if (!this._enabled) {
+      this._enabled = true;
+      host.classList.add(COMPLETER_ENABLED_CLASS);
     }
 
-    this._enabled = true;
-    host.classList.add(COMPLETER_ENABLED_CLASS);
+    // Dispath the cursor change.
+    model.handleCursorChange(this.getState(editor.getCursorPosition()));
   }
 
   /**
@@ -325,8 +330,8 @@ class CompletionHandler implements IDisposable {
       return;
     }
 
-    const request = this.getState(editor.getCursorPosition());
-    model.handleTextChange(request);
+    // Dispatch the text change.
+    model.handleTextChange(this.getState(editor.getCursorPosition()));
   }
 
   /**

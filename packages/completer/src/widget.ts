@@ -579,6 +579,11 @@ namespace CompleterWidget {
     setOptions(options: IterableOrArrayLike<string>): void;
 
     /**
+     * Handle a cursor change.
+     */
+    handleCursorChange(change: CompleterWidget.ITextState): void;
+
+    /**
      * Handle a completion request.
      */
     handleTextChange(change: CompleterWidget.ITextState): void;
