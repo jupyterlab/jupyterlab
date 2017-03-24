@@ -173,7 +173,7 @@ class CompleterWidget extends Widget {
    * Reset the widget.
    */
   reset(): void {
-    this._reset();
+    this._activeIndex = 0;
     if (this._model) {
       this._model.reset(true);
     }
@@ -215,6 +215,7 @@ class CompleterWidget extends Widget {
    */
   protected onModelStateChanged(): void {
     if (this.isAttached) {
+      this._activeIndex = 0;
       this.update();
     }
   }
@@ -294,6 +295,11 @@ class CompleterWidget extends Widget {
 
   /**
    * Cycle through the available completer items.
+   *
+   * #### Notes
+   * When the user cycles all the way `down` to the last index, subsequent
+   * `down` cycles will remain on the last index. When the user cycles `up` to
+   * the first item, subsequent `up` cycles will remain on the first cycle.
    */
   private _cycle(direction: 'up' | 'down'): void {
     let items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
@@ -301,9 +307,9 @@ class CompleterWidget extends Widget {
     let active = this.node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
     active.classList.remove(ACTIVE_CLASS);
     if (direction === 'up') {
-      this._activeIndex = index === 0 ? items.length - 1 : index - 1;
+      this._activeIndex = index === 0 ? index : index - 1;
     } else {
-      this._activeIndex = index < items.length - 1 ? index + 1 : 0;
+      this._activeIndex = index < items.length - 1 ? index + 1 : index;
     }
     active = items[this._activeIndex] as HTMLElement;
     active.classList.add(ACTIVE_CLASS);
@@ -423,13 +429,6 @@ class CompleterWidget extends Widget {
       return true;
     }
     return false;
-  }
-
-  /**
-   * Reset the internal flags to defaults.
-   */
-  private _reset(): void {
-    this._activeIndex = 0;
   }
 
   /**
