@@ -283,11 +283,12 @@ class CompleterWidget extends Widget {
       }
     }
 
-    this._setGeometry();
-
     if (this.isHidden) {
       this.show();
+      this._setGeometry();
       this._visibilityChanged.emit(void 0);
+    } else {
+      this._setGeometry();
     }
   }
 
