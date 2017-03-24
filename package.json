@@ -1,6 +1,7 @@
 {
   "private": true,
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
     "@types/chai": "^3.4.35",
     "@types/d3-dsv": "^1.0.30",
     "@types/expect.js": "^0.3.29",
@@ -28,6 +29,7 @@
     "karma-mocha-reporter": "^1.1.5",
     "karma-remap-coverage": "^0.1.1",
     "karma-sourcemap-loader": "^0.3.7",
+    "lerna": "2.0.0-beta.38",
     "raw-loader": "^0.5.1",
     "rimraf": "^2.5.2",
     "style-loader": "^0.13.1",
@@ -36,9 +38,6 @@
     "url-loader": "^0.5.7",
     "watch": "^0.18.0",
     "webpack": "^2.2.1"
-  },
-  "devDependencies": {
-    "lerna": "2.0.0-beta.38"
   },
   "scripts": {
     "install": "lerna bootstrap --hoist",
