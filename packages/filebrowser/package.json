@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/filebrowser",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "JupyterLab - FileBrowser Widget",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -15,8 +15,8 @@
   "dependencies": {
     "@jupyterlab/apputils": "^0.1.1",
     "@jupyterlab/coreutils": "^0.1.1",
-    "@jupyterlab/docmanager": "^0.1.1",
-    "@jupyterlab/docregistry": "^0.1.1",
+    "@jupyterlab/docmanager": "^0.1.3",
+    "@jupyterlab/docregistry": "^0.1.4",
     "@jupyterlab/services": "^0.40.1",
     "@phosphor/algorithm": "^1.0.0",
     "@phosphor/commands": "^1.0.0",
