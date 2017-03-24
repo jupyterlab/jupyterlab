@@ -329,11 +329,11 @@ function createMenu(app: JupyterLab, creatorCmds: string[]): Menu {
 
 
 /**
- * Create a context menu for the file browser listing.
+ * Populated the context menu for the file browser listing.
  *
  * #### Notes
- * This function generates temporary commands with an incremented name. These
- * commands are disposed when the menu itself is disposed.
+ * The Open With menu is dynamically added/removed as the selection on
+ * the file browser changes.
  */
 function populateContextMenu(fbWidget: FileBrowser, menu: ContextMenu, commands: CommandRegistry) {
   let selector = '.jp-DirListing-content';
