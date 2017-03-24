@@ -31,6 +31,9 @@ def handle_deps(data):
         except ValueError as e:
             if key in singletons:
                 raise e
+            else:
+                print(e)
+
     print('singletons', singletons)
     print('to_remove', to_remove)
 
