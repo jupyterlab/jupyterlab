@@ -337,7 +337,7 @@ describe('completer/widget', () => {
           anchor.dispose();
         });
 
-        it('should select the item below and cycle back on down', () => {
+        it('should select the item below and not progress past last', () => {
           let anchor = createEditorWidget();
           let model = new CompleterModel();
           let options: CompleterWidget.IOptions = {
@@ -367,14 +367,14 @@ describe('completer/widget', () => {
           expect(items[1].classList).to.not.contain(ACTIVE_CLASS);
           expect(items[2].classList).to.contain(ACTIVE_CLASS);
           simulate(target, 'keydown', { keyCode: 40 });  // Down
-          expect(items[0].classList).to.contain(ACTIVE_CLASS);
+          expect(items[0].classList).to.not.contain(ACTIVE_CLASS);
           expect(items[1].classList).to.not.contain(ACTIVE_CLASS);
-          expect(items[2].classList).to.not.contain(ACTIVE_CLASS);
+          expect(items[2].classList).to.contain(ACTIVE_CLASS);
           widget.dispose();
           anchor.dispose();
         });
 
-        it('should select the item above and cycle back on up', () => {
+        it('should select the item above and not progress beyond first', () => {
           let anchor = createEditorWidget();
           let model = new CompleterModel();
           let options: CompleterWidget.IOptions = {
@@ -393,13 +393,21 @@ describe('completer/widget', () => {
           expect(items[0].classList).to.contain(ACTIVE_CLASS);
           expect(items[1].classList).to.not.contain(ACTIVE_CLASS);
           expect(items[2].classList).to.not.contain(ACTIVE_CLASS);
-          simulate(anchor.node, 'keydown', { keyCode: 38 }); // Up
+          simulate(target, 'keydown', { keyCode: 40 });  // Down
+          expect(items[0].classList).to.not.contain(ACTIVE_CLASS);
+          expect(items[1].classList).to.contain(ACTIVE_CLASS);
+          expect(items[2].classList).to.not.contain(ACTIVE_CLASS);
+          simulate(target, 'keydown', { keyCode: 40 });  // Down
           expect(items[0].classList).to.not.contain(ACTIVE_CLASS);
           expect(items[1].classList).to.not.contain(ACTIVE_CLASS);
           expect(items[2].classList).to.contain(ACTIVE_CLASS);
           simulate(anchor.node, 'keydown', { keyCode: 38 }); // Up
           expect(items[0].classList).to.not.contain(ACTIVE_CLASS);
           expect(items[1].classList).to.contain(ACTIVE_CLASS);
+          expect(items[2].classList).to.not.contain(ACTIVE_CLASS);
+          simulate(anchor.node, 'keydown', { keyCode: 38 }); // Up
+          expect(items[0].classList).to.contain(ACTIVE_CLASS);
+          expect(items[1].classList).to.not.contain(ACTIVE_CLASS);
           expect(items[2].classList).to.not.contain(ACTIVE_CLASS);
           simulate(anchor.node, 'keydown', { keyCode: 38 }); // Up
           expect(items[0].classList).to.contain(ACTIVE_CLASS);
