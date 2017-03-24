@@ -272,12 +272,6 @@ class CompleterWidget extends Widget {
     let active = node.querySelectorAll(`.${ITEM_CLASS}`)[this._activeIndex];
     active.classList.add(ACTIVE_CLASS);
 
-    if (this.isHidden) {
-      this.show();
-      this._visibilityChanged.emit(void 0);
-    }
-    this._setGeometry();
-
     // If this is the first time the current completer session has loaded,
     // populate any initial subset match.
     if (this._model.subsetMatch) {
@@ -287,6 +281,13 @@ class CompleterWidget extends Widget {
         this.update();
         return;
       }
+    }
+
+    this._setGeometry();
+
+    if (this.isHidden) {
+      this.show();
+      this._visibilityChanged.emit(void 0);
     }
   }
 
