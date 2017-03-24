@@ -332,7 +332,7 @@ function createMenu(app: JupyterLab, creatorCmds: string[]): Menu {
  * Populate the context menu for the file browser listing.
  *
  * #### Notes
- * The Open With menu is dynamically added/removed as the selection on
+ * The `"Open With"` menu is dynamically added/removed as the selection on
  * the file browser changes.
  */
 function populateContextMenu(fbWidget: FileBrowser, menu: ContextMenu, commands: CommandRegistry) {
