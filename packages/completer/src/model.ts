@@ -184,13 +184,12 @@ class CompleterModel implements CompleterWidget.IModel {
    * Set the avilable options in the completer menu.
    */
   setOptions(newValue: IterableOrArrayLike<string>) {
-    let values = toArray(newValue || []);
+    const values = toArray(newValue || []);
     if (JSONExt.deepEqual(values, this._options)) {
       return;
     }
     if (values.length) {
-      this._options = [];
-      this._options.push(...values);
+      this._options = values;
       this._subsetMatch = true;
     } else {
       this._options = [];
