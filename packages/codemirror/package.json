@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/codemirror",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "JupyterLab - CodeMirror Editor Provider",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -13,7 +13,7 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/codeeditor": "^0.1.1",
+    "@jupyterlab/codeeditor": "^0.1.4",
     "@jupyterlab/coreutils": "^0.1.1",
     "@phosphor/algorithm": "^0.1.1",
     "@phosphor/disposable": "^0.1.1",
