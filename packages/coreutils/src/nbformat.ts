@@ -42,7 +42,7 @@ namespace nbformat {
   export
   interface ILanguageInfoMetadata extends  JSONObject {
     name: string;
-    codemirror_mode: string | JSONObject;
+    codemirror_mode?: string | JSONObject;
     file_extension: string;
     mimetype: string;
     pygments_lexer: string;
