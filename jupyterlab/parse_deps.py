@@ -5,6 +5,23 @@ from semver import max_satisfying, satisfies
 
 
 def handle_deps(data):
+    """Handle the dependencies in a package data tree. 
+
+    Parameters
+    ----------
+    data: dict
+        The dependency tree. 
+
+    
+    Returns
+    -------
+    A list of packages to remove. 
+
+
+    Raises
+    ------
+    ValueError if a singleton package cannot be deduplicated. 
+    """
     # Check for duplicates of packages.
     seen = dict()
     dupes = dict()
@@ -39,6 +56,29 @@ def handle_deps(data):
 
 
 def handle_dupe(data, name, dupes):
+    """Handle a duplicate package. 
+
+    Attempt to find the best overlapping package version, and provide
+    a list of the other packages to remove.
+
+    Parameters
+    ----------
+    data: dict
+        The dependency tree.
+    name: str
+        The name of the duplicate package. 
+    dupes: list of dicts
+        The available packages for the given name.
+
+    
+    Returns
+    -------
+    The list of duplicate packages to remove. 
+
+    Raises
+    ------
+    ValueError when the conflict cannot be resolved.
+    """
     deps = dict()
     best = dict()
     sats = defaultdict(list)
@@ -55,11 +95,7 @@ def handle_dupe(data, name, dupes):
             for version in versions:
                 sats[version].append(satisfies(version, deps[key], False))
 
-    # Prefer all best being the same.
-    if all(best.values()) == list(best.values())[0]:
-        return to_remove
-
-    # Then find the best of the remaining overlap.
+    # Find the best match and remove the others.
     for version in versions:
         if all(sats[version]):
             # handle the replacements
@@ -69,6 +105,7 @@ def handle_dupe(data, name, dupes):
                 to_remove.append(name + '@' + version)
             return to_remove
 
+    # Could not find a match, raise Error.
     raise ValueError('"%s" is a duplicate' % name)
 
 
