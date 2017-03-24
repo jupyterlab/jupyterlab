@@ -18,9 +18,10 @@ An extensible computational environment for Jupyter.
 general usage yet. Features and implementation are subject to change. **
 
 With JupyterLab, you can create a computational environment for Jupyter that
-meets your workflow needs. Here's a quick preview of JupyterLab:
+meets your workflow needs. Here's a quick preview of JupyterLab (link to 
+YouTube):
 
-<img src="jupyter-plugins-demo.gif" alt="JupyterLab Demo" style="width: 100%;"/>
+[![JupyterLab Demo](https://img.youtube.com/vi/sf8PuLcijuA/0.jpg)](https://www.youtube.com/watch?v=sf8PuLcijuA)
 
 We have a [roadmap](https://github.com/jupyter/roadmap/blob/master/jupyterlab.md) of planned development.
 
