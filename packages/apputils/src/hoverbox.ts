@@ -100,9 +100,11 @@ namespace HoverBox {
     // Add hover box class if it does not exist.
     node.classList.add(HOVERBOX_CLASS);
 
+    // Hide the hover box until its dimensions and visibility are known.
+    node.classList.add(OUTOFVIEW_CLASS);
+
     // If the current coordinates are not visible, bail.
     if (!host.contains(document.elementFromPoint(anchor.left, anchor.top))) {
-      node.classList.add(OUTOFVIEW_CLASS);
       return;
     }
 
