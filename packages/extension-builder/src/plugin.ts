@@ -1,6 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import {
+  JSONObject
+} from '@phosphor/coreutils';
+
+import * as fs
+  from 'fs';
+
 import * as path
   from 'path';
 
@@ -20,6 +27,13 @@ class JupyterLabPlugin {
   constructor(options?: JupyterLabPlugin.IOptions) {
     options = options || {};
     this._name = options.name || 'jupyter';
+    let rootPath = options.rootPath || path.resolve('.');
+    this._packages = new Map<string, JSONObject>();
+    try {
+      this._getDependencies(rootPath);
+    } catch (e) {
+      throw new Error('Root path must contain a package.json');
+    }
   }
 
   /**
@@ -45,15 +59,47 @@ class JupyterLabPlugin {
     compiler.plugin('emit', this._onEmit.bind(this));
   }
 
+  /**
+   * Get the dependencies on a given path.
+   */
+  private _getDependencies(basePath: string): void {
+    const data = require(path.join(basePath, 'package.json'));
+    const name = data.name + '@' + data.version;
+    if (this._packages.has(name)) {
+        return;
+    }
+    this._packages.set(name, {
+      name: data.name, version: data.version,
+      dependencies: data.dependencies, jupyterlab: data.jupyterlab
+    });
+    for (let name in data.dependencies) {
+      this._getDependency(basePath, name);
+    }
+  }
+
+  /**
+   * Get a given dependency.
+   */
+  private _getDependency(basePath: string, name: string): void {
+    // Walk up the tree to the root path looking for the package.
+    while (true) {
+      let fullPath = path.join(basePath, 'node_modules', name);
+      if (fs.existsSync(fullPath)) {
+        return this._getDependencies(fs.realpathSync(fullPath));
+      }
+      basePath = path.resolve(basePath, '..');
+    }
+  }
+
+  /**
+   * Handle the emit stage of the compilation.
+   */
   private _onEmit(compilation: any, callback: () => void): void {
 
     // Explore each chunk (build output):
     compilation.chunks.forEach((chunk: any) => {
 
       let sources: string[] = [];
-
-      // A mapping for each module name and its dependencies.
-      let modules: any = {};
 
       // Explore each module within the chunk (built inputs):
       chunk.modules.forEach((mod: any) => {
@@ -66,16 +112,6 @@ class JupyterLabPlugin {
         // Parse each module.
         let source = this._parseModule(compilation, mod);
         sources.push(source);
-
-        // Add dependencies to the manifest.
-        let deps: string[] = [];
-        for (let i = 0; i < mod.dependencies.length; i++) {
-          let dep = mod.dependencies[i];
-          if (dep.module && dep.module.id && dep.module.id !== mod.id) {
-            deps.push(Private.getRequirePath(mod, dep.module));
-          }
-        }
-        modules[Private.getDefinePath(mod)] = deps;
       });
 
       let code = sources.join('\n\n');
@@ -102,7 +138,7 @@ class JupyterLabPlugin {
       manifest['id'] = chunk.id;
       manifest['name'] = chunk.name || chunk.id;
       manifest['files'] = chunk.files;
-      manifest['modules'] = modules;
+      manifest['dependencies'] = this._packages;
 
       let manifestSource = JSON.stringify(manifest, null, '\t');
 
@@ -232,6 +268,7 @@ ${pluginName}.define('${definePath}', function (module, exports, ${requireName})
 
   private _name = '';
   private _publicPath = '';
+  private _packages: Map<string, JSONObject>;
 }
 
 
@@ -246,6 +283,11 @@ namespace JupyterLabPlugin {
      * The name of the plugin.
      */
     name?: string;
+
+    /**
+     * The root path of the plugin, containing the package.json.
+     */
+    rootPath?: string;
   }
 }
 
