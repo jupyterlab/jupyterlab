@@ -539,7 +539,7 @@ describe('kernel', () => {
 
     context('#ready', () => {
 
-      it('should resolve when the kernel is ready', (done) => {
+      it('should resolve when the kernel is ready', () => {
         return kernel.ready;
       });
 
