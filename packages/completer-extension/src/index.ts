@@ -10,8 +10,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  COMPLETER_ACTIVE_CLASS, CompleterModel,
-  CompleterWidget, CompletionHandler, ICompletionManager
+  CompleterModel, CompleterWidget, CompletionHandler, ICompletionManager
 } from '@jupyterlab/completer';
 
 import {
@@ -175,7 +174,7 @@ const consolePlugin: JupyterLabPlugin<void> = {
     app.commands.addKeyBinding({
       command: CommandIDs.selectConsole,
       keys: ['Enter'],
-      selector: `.jp-ConsolePanel .${COMPLETER_ACTIVE_CLASS}`
+      selector: `.jp-ConsolePanel .jp-mod-completer-active`
     });
   }
 };
@@ -230,7 +229,7 @@ const notebookPlugin: JupyterLabPlugin<void> = {
     app.commands.addKeyBinding({
       command: CommandIDs.selectNotebook,
       keys: ['Enter'],
-      selector: `.jp-Notebook .${COMPLETER_ACTIVE_CLASS}`
+      selector: `.jp-Notebook .jp-mod-completer-active`
     });
   }
 };

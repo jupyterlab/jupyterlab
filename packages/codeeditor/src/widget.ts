@@ -17,7 +17,6 @@ import {
 /**
  * The class name added to an editor widget that has a primary selection.
  */
-export
 const HAS_SELECTION_CLASS = 'jp-mod-has-primary-selection';
 
 

@@ -327,11 +327,11 @@ const SHORTCUTS = [
   },
   {
     command: 'tooltip:launch-notebook',
-    selector: '.jp-Notebook.jp-mod-editMode',
+    selector: '.jp-Notebook.jp-mod-editMode .jp-CellEditor:not(.jp-mod-has-primary-selection)',
     keys: ['Shift Tab']
   },
   {
-    command: 'tooltip:launch-console',
+    command: 'tooltip:launch-console .jp-CellEditor:not(.jp-mod-has-primary-selection)',
     selector: '.jp-CodeConsole-prompt',
     keys: ['Shift Tab']
   }
