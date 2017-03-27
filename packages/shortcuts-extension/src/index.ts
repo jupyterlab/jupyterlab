@@ -331,8 +331,8 @@ const SHORTCUTS = [
     keys: ['Shift Tab']
   },
   {
-    command: 'tooltip:launch-console .jp-CellEditor:not(.jp-mod-has-primary-selection)',
-    selector: '.jp-CodeConsole-prompt',
+    command: 'tooltip:launch-console',
+    selector: '.jp-CodeConsole-prompt .jp-CellEditor:not(.jp-mod-has-primary-selection)',
     keys: ['Shift Tab']
   }
 ];
