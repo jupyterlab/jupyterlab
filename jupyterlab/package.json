@@ -40,11 +40,11 @@
   },
   "devDependencies": {
     "@jupyterlab/extension-builder": "^0.11.0",
-    "file-loader": "^0.9.0",
+    "file-loader": "^0.10.1",
     "rimraf": "^2.5.2",
     "typescript": "^2.2.1",
     "url-loader": "^0.5.7",
-    "watch": "^0.18.0",
+    "watch": "^1.0.2",
     "webpack": "^2.2.1"
   }
 }
