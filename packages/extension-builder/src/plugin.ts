@@ -28,7 +28,6 @@ class JupyterLabPlugin {
     options = options || {};
     this._name = options.name || 'jupyter';
     let rootPath = options.rootPath || path.resolve('.');
-    this._packages = new Map<string, JSONObject>();
     try {
       this._getDependencies(rootPath);
     } catch (e) {
@@ -65,13 +64,13 @@ class JupyterLabPlugin {
   private _getDependencies(basePath: string): void {
     const data = require(path.join(basePath, 'package.json'));
     const name = data.name + '@' + data.version;
-    if (this._packages.has(name)) {
+    if (name in this._packages) {
         return;
     }
-    this._packages.set(name, {
+    this._packages[name] = {
       name: data.name, version: data.version,
       dependencies: data.dependencies, jupyterlab: data.jupyterlab
-    });
+    };
     for (let name in data.dependencies) {
       this._getDependency(basePath, name);
     }
@@ -138,7 +137,7 @@ class JupyterLabPlugin {
       manifest['id'] = chunk.id;
       manifest['name'] = chunk.name || chunk.id;
       manifest['files'] = chunk.files;
-      manifest['dependencies'] = this._packages;
+      manifest['packages'] = this._packages;
 
       let manifestSource = JSON.stringify(manifest, null, '\t');
 
@@ -268,7 +267,7 @@ ${pluginName}.define('${definePath}', function (module, exports, ${requireName})
 
   private _name = '';
   private _publicPath = '';
-  private _packages: Map<string, JSONObject>;
+  private _packages: JSONObject = Object.create(null);
 }
 
 
