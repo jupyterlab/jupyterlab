@@ -502,21 +502,21 @@ describe('kernel', () => {
 
     context('#info', () => {
 
-      it('should get the kernel info', (done) => {
+      it('should get the kernel info', () => {
         return kernel.ready.then(() => {
           let name = kernel.info.language_info.name;
           expect(name).to.be(EXAMPLE_KERNEL_INFO.language_info.name);
-        }).then(done, done);
+        });
       });
 
     });
 
     context('#getSpec()', () => {
 
-      it('should resolve with the spec', (done) => {
+      it('should resolve with the spec', () => {
         return kernel.getSpec().then(spec => {
           expect(spec.language).to.be('python');
-        }).then(done, done);
+        });
       });
 
     });
@@ -540,7 +540,7 @@ describe('kernel', () => {
     context('#ready', () => {
 
       it('should resolve when the kernel is ready', (done) => {
-        return kernel.ready.then(done, done);
+        return kernel.ready;
       });
 
     });

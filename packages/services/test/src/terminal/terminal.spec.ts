@@ -133,10 +133,9 @@ describe('terminals', () => {
 
   describe('.ISession', () => {
 
-    beforeEach((done) => {
-      TerminalSession.startNew().then(s => {
+    beforeEach(() => {
+      return TerminalSession.startNew().then(s => {
         session = s;
-        done();
       });
     });
 

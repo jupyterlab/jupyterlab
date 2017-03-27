@@ -26,19 +26,18 @@ describe('terminals', () => {
   let manager: TerminalSession.IManager;
   let data: TerminalSession.IModel[] =  [{ name: 'foo'}, { name: 'bar' }];
 
-  beforeEach((done) => {
+  beforeEach(() => {
     tester = new TerminalTester();
     tester.runningTerminals = data;
     manager = new TerminalManager();
-    return manager.ready.then(done, done);
+    return manager.ready;
   });
 
-  afterEach((done) => {
-    manager.ready.then(() => {
+  afterEach(() => {
+    return manager.ready.then(() => {
       manager.dispose();
       tester.dispose();
-      done();
-    }).catch(done);
+    });
   });
 
   describe('TerminalManager', () => {

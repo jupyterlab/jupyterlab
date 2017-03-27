@@ -245,14 +245,14 @@ describe('kernel/manager', () => {
 
     describe('#connectTo()', () => {
 
-      it('should connect to an existing kernel', (done) => {
+      it('should connect to an existing kernel', () => {
         let id = uuid();
         tester.runningKernels = [{ name: 'foo', id }];
         return manager.connectTo(id).then(kernel => {
           expect(kernel.name).to.be('foo');
           expect(kernel.id).to.be(id);
           return kernel.shutdown();
-        }).then(done, done);
+        });
       });
 
       it('should emit a runningChanged signal', (done) => {
@@ -268,8 +268,8 @@ describe('kernel/manager', () => {
 
     describe('shutdown()', () => {
 
-      it('should shut down a kernel by id', (done) => {
-        manager.shutdown('foo').then(done, done);
+      it('should shut down a kernel by id', () => {
+        return manager.shutdown('foo');
       });
 
       it('should emit a runningChanged signal', (done) => {
