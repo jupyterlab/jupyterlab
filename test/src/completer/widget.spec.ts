@@ -393,11 +393,11 @@ describe('completer/widget', () => {
           expect(items[0].classList).to.contain(ACTIVE_CLASS);
           expect(items[1].classList).to.not.contain(ACTIVE_CLASS);
           expect(items[2].classList).to.not.contain(ACTIVE_CLASS);
-          simulate(target, 'keydown', { keyCode: 40 });  // Down
+          simulate(anchor.node, 'keydown', { keyCode: 40 });  // Down
           expect(items[0].classList).to.not.contain(ACTIVE_CLASS);
           expect(items[1].classList).to.contain(ACTIVE_CLASS);
           expect(items[2].classList).to.not.contain(ACTIVE_CLASS);
-          simulate(target, 'keydown', { keyCode: 40 });  // Down
+          simulate(anchor.node, 'keydown', { keyCode: 40 });  // Down
           expect(items[0].classList).to.not.contain(ACTIVE_CLASS);
           expect(items[1].classList).to.not.contain(ACTIVE_CLASS);
           expect(items[2].classList).to.contain(ACTIVE_CLASS);
