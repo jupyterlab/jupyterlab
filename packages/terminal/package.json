@@ -18,7 +18,7 @@
     "@phosphor/coreutils": "^1.0.0",
     "@phosphor/domutils": "^1.0.0",
     "@phosphor/messaging": "^1.0.0",
-    "@phosphor/widgets": "^1.0.0",
+    "@phosphor/widgets": "^1.0.1",
     "xterm": "^2.4.0"
   },
   "devDependencies": {

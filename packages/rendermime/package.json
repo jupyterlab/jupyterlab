@@ -20,7 +20,7 @@
     "@phosphor/algorithm": "^1.0.0",
     "@phosphor/coreutils": "^1.0.0",
     "@phosphor/disposable": "^1.0.0",
-    "@phosphor/widgets": "^1.0.0",
+    "@phosphor/widgets": "^1.0.1",
     "@types/marked": "0.0.28",
     "@types/mathjax": "0.0.31",
     "ansi_up": "^1.3.0",

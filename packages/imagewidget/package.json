@@ -18,7 +18,7 @@
     "@phosphor/commands": "^1.0.0",
     "@phosphor/coreutils": "^1.0.0",
     "@phosphor/messaging": "^1.0.0",
-    "@phosphor/widgets": "^1.0.0"
+    "@phosphor/widgets": "^1.0.1"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",

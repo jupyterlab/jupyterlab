@@ -293,32 +293,39 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocume
       return { path, factory };
   }
 
-  function factoryMatch(path: string, factory: string): boolean {
+  function factoryMatch(path: string, factory='default'): boolean {
     let ext = PathExt.extname(path);
+    if (!ext && factory !== 'default') {
+      return false;
+    }
+    if (factory === 'default') {
+      return  fbWidget.registry.defaultWidgetFactory(ext) !== void 0;
+    }
     let factories = fbWidget.registry.preferredWidgetFactories(ext);
     return find(factories, item => item.name === factory) !== undefined;
   }
 
   commands.addCommand(CommandIDs.open, {
     icon: args => {
-      let { path } = getOpenArgs(args);
-      return path ? 'jp-MaterialIcon jp-OpenFolderIcon' : '';
+      // Only show the icon if no factory is given.
+      let { factory } = getOpenArgs(args);
+      return factory ? '' : 'jp-MaterialIcon jp-OpenFolderIcon';
     },
     mnemonic: args => {
-      let { path } = getOpenArgs(args);
-      return path ? 0 : -1;
+      // Only use the mnemonic if no factory is given.
+      let { factory } = getOpenArgs(args);
+      return factory ? -1 : 0;
     },
     label: args => {
+      // Show the factory as the label if given or use "Open".
       let { factory } = getOpenArgs(args);
       return factory || 'Open';
     },
     isEnabled: args => {
       let { path, factory } = getOpenArgs(args);
+      // Check for an exact match.
       if (path && factory) {
         return factoryMatch(path, factory);
-      }
-      if (path) {
-        return true;
       }
       let match = true;
       each(fbWidget.selection(), item => {
@@ -333,9 +340,6 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocume
       if (path && factory) {
         return factoryMatch(path, factory);
       }
-      if (path) {
-        return true;
-      }
       let match = false;
       each(fbWidget.selection(), item => {
         if (factoryMatch(item.path, factory)) {
@@ -347,7 +351,7 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocume
     execute: args => {
       let { path, factory } = getOpenArgs(args);
       if (path === void 0) {
-        return docManager.open(factory);
+        return fbWidget.open(factory);
       }
       return docManager.services.contents.get(path)
         .then(() => fbWidget.openPath(path, factory));
@@ -434,24 +438,21 @@ function populateContextMenu(fbWidget: FileBrowser, menu: ContextMenu, commands:
 
   fbWidget.selectionChanged.connect(() => {
     openWith.clearItems();
-    let visible = new Set<string>();
-    each(fbWidget.selection(), item => {
-      let path = item.path;
-      each(fbWidget.registry.widgetFactories(), widgetFactory => {
-        let factory = widgetFactory.name;
-        if (commands.isVisible(CommandIDs.open, { path, factory })) {
-          visible.add(factory);
-        }
-      });
+    let anyEnabled = false;
+    each(fbWidget.registry.widgetFactories(), widgetFactory => {
+      let factory = widgetFactory.name;
+      if (commands.isVisible(CommandIDs.open, { factory })) {
+        openWith.addItem({ command: CommandIDs.open, args: { factory } });
+      }
+      if (commands.isEnabled(CommandIDs.open, { factory })) {
+        anyEnabled = true;
+      }
     });
-    if (visible.size < 2) {
+    if (!anyEnabled || openWith.items.length < 2) {
       fbWidget.listingContentNode.classList.remove('jp-mod-open-with');
       return;
     }
     fbWidget.listingContentNode.classList.add('jp-mod-open-with');
-    visible.forEach(factory => {
-      openWith.addItem({ command: CommandIDs.open, args: { factory } });
-    });
   });
 
   commands.addCommand(CommandIDs.rename, {

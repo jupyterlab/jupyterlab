@@ -14,10 +14,10 @@
   },
   "dependencies": {
     "@phosphor/algorithm": "^1.0.0",
-    "@phosphor/application": "^1.0.0",
+    "@phosphor/application": "^1.0.1",
     "@phosphor/coreutils": "^1.0.0",
     "@phosphor/signaling": "^1.0.0",
-    "@phosphor/widgets": "^1.0.0",
+    "@phosphor/widgets": "^1.0.1",
     "@types/semver": "^5.3.31",
     "semver": "^5.3.0"
   },
