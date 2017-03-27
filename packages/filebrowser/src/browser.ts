@@ -128,6 +128,13 @@ class FileBrowser extends Widget {
   }
 
   /**
+   * Get the listing content node.
+   */
+  get listingContentNode(): HTMLElement {
+    return this._listing.contentNode;
+  }
+
+  /**
    * Dispose of the resources held by the file browser.
    */
   dispose() {
@@ -152,19 +159,16 @@ class FileBrowser extends Widget {
    *
    * Changes to the first directory encountered.
    */
-  open(): void {
+  open(widgetName='default'): void {
     let foundDir = false;
-    each(this._model.items(), item => {
-      if (!this._listing.isSelected(item.name)) {
-        return;
-      }
+    each(this._listing.selection(), item => {
       if (item.type === 'directory') {
         if (!foundDir) {
           foundDir = true;
           this._model.cd(item.name);
         }
       } else {
-        this.openPath(item.path);
+        this.openPath(item.path, widgetName);
       }
     });
   }

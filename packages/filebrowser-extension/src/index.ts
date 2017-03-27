@@ -2,12 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  each, map, toArray
+  each, find
 } from '@phosphor/algorithm';
 
 import {
   CommandRegistry
 } from '@phosphor/commands';
+
+import {
+  JSONObject
+} from '@phosphor/coreutils';
 
 import {
   DisposableSet
@@ -66,7 +70,31 @@ namespace CommandIDs {
   const closeAllFiles = 'file-operations:close-all-files';
 
   export
+  const deleteFiles = 'file-operations:delete';
+
+  export
   const open = 'file-operations:open';
+
+  export
+  const cut = 'file-operations:cut';
+
+  export
+  const copy = 'file-operations:copy';
+
+  export
+  const paste = 'file-operations:paste';
+
+  export
+  const duplicate = 'file-operations:duplicate';
+
+  export
+  const download = 'file-operations:download';
+
+  export
+  const rename = 'file-operations:rename';
+
+  export
+  const shutdown = 'file-operations:shutdown';
 
   export
   const newTextFile = 'file-operations:new-text-file';
@@ -259,10 +287,68 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocume
     }
   });
 
-  commands.addCommand(CommandIDs.open, {
-    execute: args => {
-      let path = args['path'] as string;
+  function getOpenArgs(args: JSONObject): { path: string, factory: string } {
+      let path = args['path'] as string || void 0;
       let factory = args['factory'] as string || void 0;
+      return { path, factory };
+  }
+
+  function factoryMatch(path: string, factory: string): boolean {
+    let ext = PathExt.extname(path);
+    let factories = fbWidget.registry.preferredWidgetFactories(ext);
+    return find(factories, item => item.name === factory) !== undefined;
+  }
+
+  commands.addCommand(CommandIDs.open, {
+    icon: args => {
+      let { path } = getOpenArgs(args);
+      return path ? 'jp-MaterialIcon jp-OpenFolderIcon' : '';
+    },
+    mnemonic: args => {
+      let { path } = getOpenArgs(args);
+      return path ? 0 : -1;
+    },
+    label: args => {
+      let { factory } = getOpenArgs(args);
+      return factory || 'Open';
+    },
+    isEnabled: args => {
+      let { path, factory } = getOpenArgs(args);
+      if (path && factory) {
+        return factoryMatch(path, factory);
+      }
+      if (path) {
+        return true;
+      }
+      let match = true;
+      each(fbWidget.selection(), item => {
+        if (!factoryMatch(item.path, factory)) {
+          match = false;
+        }
+      });
+      return match;
+    },
+    isVisible: args => {
+      let { path, factory } = getOpenArgs(args);
+      if (path && factory) {
+        return factoryMatch(path, factory);
+      }
+      if (path) {
+        return true;
+      }
+      let match = false;
+      each(fbWidget.selection(), item => {
+        if (factoryMatch(item.path, factory)) {
+          match = true;
+        }
+      });
+      return match;
+    },
+    execute: args => {
+      let { path, factory } = getOpenArgs(args);
+      if (path === void 0) {
+        return docManager.open(factory);
+      }
       return docManager.services.contents.get(path)
         .then(() => fbWidget.openPath(path, factory));
     }
@@ -337,123 +423,96 @@ function createMenu(app: JupyterLab, creatorCmds: string[]): Menu {
  */
 function populateContextMenu(fbWidget: FileBrowser, menu: ContextMenu, commands: CommandRegistry) {
   let selector = '.jp-DirListing-content';
-  let prefix = `file-browser-${++Private.id}`;
-  let disposables = new DisposableSet();
-  let command: string;
-
-  // Remove all the commands associated with this menu upon disposal.
-  menu.menu.disposed.connect(() => { disposables.dispose(); });
-
-  command = `${prefix}:open`;
-  disposables.add(commands.addCommand(command, {
-    execute: () => { fbWidget.open(); },
-    icon: 'jp-MaterialIcon jp-OpenFolderIcon',
-    label: 'Open',
-    mnemonic: 0
-  }));
-  menu.addItem({ command, selector, rank: 1 });
+  menu.addItem({ command: CommandIDs.open, selector, rank: 1 });
 
   let openWith = new Menu({ commands });
   openWith.title.label = 'Open With...';
-  disposables.add(openWith);
-  let subDisposables = new DisposableSet();
-
-  fbWidget.selectionChanged.connect(() => {
-    subDisposables.dispose();
-    openWith.clearItems();
-    let selection = toArray(fbWidget.selection());
-    if (selection.length !== 1) {
-      return;
-    }
-    let path = selection[0].path;
-    let ext = PathExt.extname(path);
-    let factories = fbWidget.registry.preferredWidgetFactories(ext);
-    let widgetNames = toArray(map(factories, factory => factory.name));
-    if (path && widgetNames.length > 1) {
-      subDisposables = new DisposableSet();
-      subDisposables.add(menu.addItem({
-        type: 'submenu', submenu: openWith, selector, rank: 1
-      }));
-      let command: string;
-
-      for (let widgetName of widgetNames) {
-        command = `${prefix}:${widgetName}`;
-        subDisposables.add(commands.addCommand(command, {
-          execute: () => fbWidget.openPath(path, widgetName),
-          label: widgetName
-        }));
-        openWith.addItem({ command });
-      }
-    }
+  let submenuSelector = `${selector}.jp-mod-open-with`;
+  menu.addItem({
+    type: 'submenu', submenu: openWith, selector: submenuSelector, rank: 1
   });
 
-  command = `${prefix}:rename`;
-  disposables.add(commands.addCommand(command, {
+  fbWidget.selectionChanged.connect(() => {
+    openWith.clearItems();
+    let visible = new Set<string>();
+    each(fbWidget.selection(), item => {
+      let path = item.path;
+      each(fbWidget.registry.widgetFactories(), widgetFactory => {
+        let factory = widgetFactory.name;
+        if (commands.isVisible(CommandIDs.open, { path, factory })) {
+          visible.add(factory);
+        }
+      });
+    });
+    if (visible.size < 2) {
+      fbWidget.listingContentNode.classList.remove('jp-mod-open-with');
+      return;
+    }
+    fbWidget.listingContentNode.classList.add('jp-mod-open-with');
+    visible.forEach(factory => {
+      openWith.addItem({ command: CommandIDs.open, args: { factory } });
+    });
+  });
+
+  commands.addCommand(CommandIDs.rename, {
     execute: () => fbWidget.rename(),
     icon: 'jp-MaterialIcon jp-EditIcon',
     label: 'Rename',
     mnemonic: 0
-  }));
-  menu.addItem({ command, selector });
+  });
+  menu.addItem({ command: CommandIDs.rename, selector });
 
-  command = `${prefix}:delete`;
-  disposables.add(commands.addCommand(command, {
+  commands.addCommand(CommandIDs.deleteFiles, {
     execute: () => fbWidget.delete(),
     icon: 'jp-MaterialIcon jp-CloseIcon',
     label: 'Delete',
     mnemonic: 0
-  }));
-  menu.addItem({ command, selector });
+  });
+  menu.addItem({ command: CommandIDs.deleteFiles, selector });
 
-  command = `${prefix}:duplicate`;
-  disposables.add(commands.addCommand(command, {
+  commands.addCommand(CommandIDs.duplicate, {
     execute: () => fbWidget.duplicate(),
     icon: 'jp-MaterialIcon jp-CopyIcon',
     label: 'Duplicate'
-  }));
-  menu.addItem({ command, selector });
+  });
+  menu.addItem({ command: CommandIDs.duplicate, selector });
 
-  command = `${prefix}:cut`;
-  disposables.add(commands.addCommand(command, {
+  commands.addCommand(CommandIDs.cut, {
     execute: () => { fbWidget.cut(); },
     icon: 'jp-MaterialIcon jp-CutIcon',
     label: 'Cut'
-  }));
-  menu.addItem({ command, selector });
+  });
+  menu.addItem({ command: CommandIDs.cut, selector });
 
-  command = `${prefix}:copy`;
-  disposables.add(commands.addCommand(command, {
+  commands.addCommand(CommandIDs.copy, {
     execute: () => { fbWidget.copy(); },
     icon: 'jp-MaterialIcon jp-CopyIcon',
     label: 'Copy',
     mnemonic: 0
-  }));
-  menu.addItem({ command, selector });
+  });
+  menu.addItem({ command: CommandIDs.copy, selector });
 
-  command = `${prefix}:paste`;
-  disposables.add(commands.addCommand(command, {
+  commands.addCommand(CommandIDs.paste, {
     execute: () => fbWidget.paste(),
     icon: 'jp-MaterialIcon jp-PasteIcon',
     label: 'Paste',
     mnemonic: 0
-  }));
-  menu.addItem({ command, selector });
+  });
+  menu.addItem({ command: CommandIDs.paste, selector });
 
-  command = `${prefix}:download`;
-  disposables.add(commands.addCommand(command, {
+  commands.addCommand(CommandIDs.download, {
     execute: () => { fbWidget.download(); },
     icon: 'jp-MaterialIcon jp-DownloadIcon',
     label: 'Download'
-  }));
-  menu.addItem({ command, selector });
+  });
+  menu.addItem({ command: CommandIDs.download, selector });
 
-  command = `${prefix}:shutdown`;
-  disposables.add(commands.addCommand(command, {
+  commands.addCommand(CommandIDs.shutdown, {
     execute: () => fbWidget.shutdownKernels(),
     icon: 'jp-MaterialIcon jp-StopIcon',
     label: 'Shutdown Kernel'
-  }));
-  menu.addItem({ command, selector });
+  });
+  menu.addItem({ command: CommandIDs.shutdown, selector });
 
   return menu;
 }
