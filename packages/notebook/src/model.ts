@@ -20,7 +20,7 @@ import {
 
 import {
   IObservableJSON, ObservableJSON, IObservableUndoableVector,
-  IObservableVector, ObservableVector, nbformat, IModelDB, ObservableValue
+  IObservableVector, ObservableVector, nbformat, IModelDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -73,13 +73,13 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     let factory = (
       options.contentFactory || NotebookModel.defaultContentFactory
     );
-    factory.modelDB = this._modelDB.view('cells');
+    let cellDB = this._modelDB.view('cells');
+    factory.modelDB = cellDB;
     this.contentFactory = factory;
-    let cells = new CellList();
+    this._cells = new CellList(cellDB);
     // Add an initial code cell by default.
-    cells.pushBack(factory.createCodeCell({}));
-    cells.changed.connect(this._onCellsChanged, this);
-    this._modelDB.set('cells', cells);
+    this._cells.pushBack(factory.createCodeCell({}));
+    this._cells.changed.connect(this._onCellsChanged, this);
 
     // Handle initial metadata.
     let name = options.languagePreference || '';
@@ -104,7 +104,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    * Get the observable list of notebook cells.
    */
   get cells(): IObservableUndoableVector<ICellModel> {
-    return this._modelDB.get('cells') as IObservableUndoableVector<ICellModel>;
+    return this._cells;
   }
 
   /**
@@ -146,7 +146,6 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       return;
     }
     let cells = this.cells;
-    this._modelDB.set('cells', new ObservableValue(null));
     this._metadata.dispose();
     cells.dispose();
     super.dispose();
@@ -300,6 +299,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     }
   }
 
+  private _cells: CellList;
   private _nbformat = nbformat.MAJOR_VERSION;
   private _nbformatMinor = nbformat.MINOR_VERSION;
   private _metadata = new ObservableJSON();
