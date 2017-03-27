@@ -20,7 +20,7 @@ import {
 const DIRTY_CLASS = 'jp-mod-dirty';
 
 /**
- * The class name added to a jupyter code mirror widget.
+ * The class name added to a jupyter editor widget.
  */
 const EDITOR_CLASS = 'jp-EditorWidget';
 
@@ -38,15 +38,16 @@ class EditorWidget extends CodeEditorWidget {
       factory: options.factory,
       model: options.context.model
     });
+
+    const context = this._context = options.context;
+    const editor = this.editor;
+
     this.addClass(EDITOR_CLASS);
-    let context = this._context = options.context;
     this._mimeTypeService = options.mimeTypeService;
-    this.editor.model.value.text = context.model.toString();
-    this._onPathChanged();
+    editor.model.value.text = context.model.toString();
     context.pathChanged.connect(this._onPathChanged, this);
-    context.ready.then(() => {
-      this._onContextReady();
-    });
+    context.ready.then(() => { this._onContextReady(); });
+    this._onPathChanged();
   }
 
   /**
@@ -63,21 +64,24 @@ class EditorWidget extends CodeEditorWidget {
     if (this.isDisposed) {
       return;
     }
-    let model = this._context.model;
-    let editor = this.editor;
-    let value = editor.model.value;
-    value.text = model.toString();
+    const contextModel = this._context.model;
+    const editor = this.editor;
+    const editorModel = editor.model;
+
+    // Set the editor model value.
+    editorModel.value.text = contextModel.toString();
 
     // Prevent the initial loading from disk from being in the editor history.
     editor.clearHistory();
     this._handleDirtyState();
 
-    model.stateChanged.connect(this._onModelStateChanged, this);
-    model.contentChanged.connect(this._onContentChanged, this);
+    // Wire signal connections.
+    contextModel.stateChanged.connect(this._onModelStateChanged, this);
+    contextModel.contentChanged.connect(this._onContentChanged, this);
   }
 
   /**
-   * Handle a change to the model state.
+   * Handle a change to the context model state.
    */
   private _onModelStateChanged(sender: DocumentRegistry.IModel, args: IChangedArgs<any>): void {
     if (args.name === 'dirty') {
@@ -86,7 +90,7 @@ class EditorWidget extends CodeEditorWidget {
   }
 
   /**
-   * Handle the dirty state of the model.
+   * Handle the dirty state of the context model.
    */
   private _handleDirtyState(): void {
     if (this._context.model.dirty) {
@@ -97,14 +101,15 @@ class EditorWidget extends CodeEditorWidget {
   }
 
   /**
-   * Handle a change in model content.
+   * Handle a change in context model content.
    */
   private _onContentChanged(): void {
-    let value = this.editor.model.value;
-    let old = value.text;
-    let text = this._context.model.toString();
-    if (old !== text) {
-      value.text = text;
+    const editorModel = this.editor.model;
+    const oldValue = editorModel.value.text;
+    const newValue = this._context.model.toString();
+
+    if (oldValue !== newValue) {
+      editorModel.value.text = newValue;
     }
   }
 
@@ -112,8 +117,9 @@ class EditorWidget extends CodeEditorWidget {
    * Handle a change to the path.
    */
   private _onPathChanged(): void {
-    let editor = this.editor;
-    let path = this._context.path;
+    const editor = this.editor;
+    const path = this._context.path;
+
     editor.model.mimeType = this._mimeTypeService.getMimeTypeByFilePath(path);
     this.title.label = path.split('/').pop();
   }
