@@ -141,16 +141,6 @@ class CompleterWidget extends Widget {
   }
 
   /**
-   * Reset the widget.
-   */
-  reset(): void {
-    this._reset();
-    if (this._model) {
-      this._model.reset(true);
-    }
-  }
-
-  /**
    * Handle the DOM events for the widget.
    *
    * @param event - The DOM event sent to the widget.
@@ -176,6 +166,16 @@ class CompleterWidget extends Widget {
       break;
     default:
       break;
+    }
+  }
+
+  /**
+   * Reset the widget.
+   */
+  reset(): void {
+    this._activeIndex = 0;
+    if (this._model) {
+      this._model.reset(true);
     }
   }
 
@@ -215,6 +215,7 @@ class CompleterWidget extends Widget {
    */
   protected onModelStateChanged(): void {
     if (this.isAttached) {
+      this._activeIndex = 0;
       this.update();
     }
   }
@@ -223,8 +224,17 @@ class CompleterWidget extends Widget {
    * Handle `update-request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    let model = this._model;
+    const model = this._model;
     if (!model) {
+      return;
+    }
+
+    if (this._resetFlag) {
+      this._resetFlag = false;
+      if (!this.isHidden) {
+        this.hide();
+        this._visibilityChanged.emit(void 0);
+      }
       return;
     }
 
@@ -232,7 +242,8 @@ class CompleterWidget extends Widget {
 
     // If there are no items, reset and bail.
     if (!items || !items.length) {
-      this._reset();
+      this._resetFlag = true;
+      this.reset();
       if (!this.isHidden) {
         this.hide();
         this._visibilityChanged.emit(void 0);
@@ -262,12 +273,6 @@ class CompleterWidget extends Widget {
     let active = node.querySelectorAll(`.${ITEM_CLASS}`)[this._activeIndex];
     active.classList.add(ACTIVE_CLASS);
 
-    if (this.isHidden) {
-      this.show();
-      this._visibilityChanged.emit(void 0);
-    }
-    this._setGeometry();
-
     // If this is the first time the current completer session has loaded,
     // populate any initial subset match.
     if (this._model.subsetMatch) {
@@ -278,10 +283,23 @@ class CompleterWidget extends Widget {
         return;
       }
     }
+
+    if (this.isHidden) {
+      this.show();
+      this._setGeometry();
+      this._visibilityChanged.emit(void 0);
+    } else {
+      this._setGeometry();
+    }
   }
 
   /**
    * Cycle through the available completer items.
+   *
+   * #### Notes
+   * When the user cycles all the way `down` to the last index, subsequent
+   * `down` cycles will remain on the last index. When the user cycles `up` to
+   * the first item, subsequent `up` cycles will remain on the first cycle.
    */
   private _cycle(direction: 'up' | 'down'): void {
     let items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
@@ -289,9 +307,9 @@ class CompleterWidget extends Widget {
     let active = this.node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
     active.classList.remove(ACTIVE_CLASS);
     if (direction === 'up') {
-      this._activeIndex = index === 0 ? items.length - 1 : index - 1;
+      this._activeIndex = index === 0 ? index : index - 1;
     } else {
-      this._activeIndex = index < items.length - 1 ? index + 1 : 0;
+      this._activeIndex = index < items.length - 1 ? index + 1 : index;
     }
     active = items[this._activeIndex] as HTMLElement;
     active.classList.add(ACTIVE_CLASS);
@@ -414,13 +432,6 @@ class CompleterWidget extends Widget {
   }
 
   /**
-   * Reset the internal flags to defaults.
-   */
-  private _reset(): void {
-    this._activeIndex = 0;
-  }
-
-  /**
    * Set the visible dimensions of the widget.
    */
   private _setGeometry(): void {
@@ -456,6 +467,7 @@ class CompleterWidget extends Widget {
   private _editor: CodeEditor.IEditor | null = null;
   private _model: CompleterWidget.IModel | null = null;
   private _renderer: CompleterWidget.IRenderer | null = null;
+  private _resetFlag = false;
   private _selected = new Signal<this, string>(this);
   private _visibilityChanged = new Signal<this, void>(this);
 }
@@ -565,6 +577,11 @@ namespace CompleterWidget {
      * Set the avilable options in the completer menu.
      */
     setOptions(options: IterableOrArrayLike<string>): void;
+
+    /**
+     * Handle a cursor change.
+     */
+    handleCursorChange(change: CompleterWidget.ITextState): void;
 
     /**
      * Handle a completion request.
