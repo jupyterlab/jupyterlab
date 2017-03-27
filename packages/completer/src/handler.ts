@@ -281,7 +281,17 @@ class CompletionHandler implements IDisposable {
     const host = editor.host;
     const position = editor.getCursorPosition();
     const line = editor.getLine(position.line);
+    const { start, end } = editor.getSelection();
 
+    // If there is a text selection, no completion is allowed.
+    if (start.column !== end.column || start.line !== end.line) {
+      this._enabled = false;
+      model.reset(true);
+      host.classList.remove(COMPLETER_ENABLED_CLASS);
+      return;
+    }
+
+    // If the entire line the curson is on consists of whitespace, bail.
     if (line.match(/^\W*$/)) {
       this._enabled = false;
       model.reset(true);
