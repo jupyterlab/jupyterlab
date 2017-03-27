@@ -2,12 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject, JSONValue
-} from '@phosphor/coreutils';
+  nbformat
+} from '@jupyterlab/coreutils';
 
 import {
-  nbformat
-} from '../nbformat';
+  JSONObject, JSONValue
+} from '@phosphor/coreutils';
 
 import * as utils
  from '../utils';

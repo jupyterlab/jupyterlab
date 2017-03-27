@@ -5,6 +5,7 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "dependencies": {
+    "@jupyterlab/coreutils": "^0.1.3",
     "@phosphor/algorithm": "^1.0.0",
     "@phosphor/coreutils": "^1.0.0",
     "@phosphor/disposable": "^1.0.0",
@@ -39,7 +40,6 @@
     "example:node": "cd examples/node && npm install",
     "build:examples": "npm run example:browser && npm run example:node",
     "docs": "typedoc --options typedoc.json src",
-    "prepublish": "npm run build && webpack",
     "test:coverage": "istanbul cover --dir test/coverage _mocha -- --retries 3 test/build/**/*.spec.js --foo bar --terminalsAvailable True",
     "test:integration": "cd test && python integration_test.py",
     "test:devtool": "devtool node_modules/mocha/bin/_mocha -qc test/build/**/**.spec.js --foo bar --terminalsAvailable True",
