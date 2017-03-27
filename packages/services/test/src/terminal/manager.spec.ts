@@ -26,19 +26,18 @@ describe('terminals', () => {
   let manager: TerminalSession.IManager;
   let data: TerminalSession.IModel[] =  [{ name: 'foo'}, { name: 'bar' }];
 
-  beforeEach((done) => {
+  beforeEach(() => {
     tester = new TerminalTester();
     tester.runningTerminals = data;
     manager = new TerminalManager();
-    return manager.ready.then(done, done);
+    return manager.ready;
   });
 
-  afterEach((done) => {
-    manager.ready.then(() => {
+  afterEach(() => {
+    return manager.ready.then(() => {
       manager.dispose();
       tester.dispose();
-      done();
-    }).catch(done);
+    });
   });
 
   describe('TerminalManager', () => {
@@ -110,8 +109,8 @@ describe('terminals', () => {
 
     describe('#ready', () => {
 
-      it('should resolve when the manager is ready', (done) => {
-        manager.ready.then(done, done);
+      it('should resolve when the manager is ready', () => {
+        return manager.ready;
       });
 
     });
@@ -152,10 +151,10 @@ describe('terminals', () => {
 
     describe('#connectTo()', () => {
 
-      it('should connect to an existing kernel', (done) => {
+      it('should connect to an existing kernel', () => {
         return manager.connectTo(data[0].name).then(session => {
           expect(session.name).to.be(data[0].name);
-        }).then(done, done);
+        });
       });
 
       it('should emit a runningChanged signal', (done) => {

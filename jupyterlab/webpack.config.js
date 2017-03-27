@@ -43,9 +43,7 @@ for (var i = 0; i < files.length; i++) {
   if (fs.existsSync(path.join('../packages', package, 'style'))) {
     var source = path.join('../packages', package, 'style');
     var styleTarget = path.join(target, 'style');
-    fs.copySync(source, styleTarget, { filter: /\.css$/ });
-    fs.copySync(source, styleTarget, { filter: /\.svg$/ });
-    fs.copySync(source, styleTarget, { filter: /\.gif$/ });
+    fs.copySync(source, styleTarget);
   }
   alias['@jupyterlab/' + package] = target;
 }
