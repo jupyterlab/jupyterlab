@@ -310,7 +310,7 @@ class CompletionHandler implements IDisposable {
       host.classList.add(COMPLETER_ENABLED_CLASS);
     }
 
-    // Dispath the cursor change.
+    // Dispatch the cursor change.
     model.handleCursorChange(this.getState(editor.getCursorPosition()));
   }
 
