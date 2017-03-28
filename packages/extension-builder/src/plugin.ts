@@ -88,7 +88,6 @@ class JupyterLabPlugin {
       if (fs.existsSync(fullPath)) {
         return this._getDependencies(fs.realpathSync(fullPath));
       }
-      basePath = path.resolve(basePath, '..');
 
       // Use require.resolve if we get to the root path.
       if (basePath === this._rootPath) {
@@ -102,6 +101,8 @@ class JupyterLabPlugin {
           }
           basePath = path.resolve(basePath, '..');
         }
+      } else {
+        basePath = path.resolve(basePath, '..');
       }
     }
   }
