@@ -21,6 +21,10 @@ import {
   IEditorTracker, EditorWidget, EditorWidgetFactory, addDefaultCommands
 } from '@jupyterlab/editorwidget';
 
+import {
+  ILauncher
+} from '@jupyterlab/launcher';
+
 
 /**
  * The class name for the text editor icon from the default theme.
@@ -40,6 +44,7 @@ const plugin: JupyterLabPlugin<IEditorTracker> = {
   activate,
   id: 'jupyter.services.editor-tracker',
   requires: [IDocumentRegistry, ILayoutRestorer, IEditorServices],
+  optional: [ILauncher],
   provides: IEditorTracker,
   autoStart: true
 };
@@ -53,7 +58,7 @@ export default plugin;
 /**
  * Activate the editor tracker plugin.
  */
-function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayoutRestorer, editorServices: IEditorServices): IEditorTracker {
+function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayoutRestorer, editorServices: IEditorServices, launcher: ILauncher | null): IEditorTracker {
   const factory = new EditorWidgetFactory({
     editorServices,
     factoryOptions: {
@@ -84,5 +89,14 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   registry.addWidgetFactory(factory);
 
   addDefaultCommands(tracker, app.commands);
+
+  // Add a launcher item if the launcher is available.
+  if (launcher) {
+    launcher.add({
+      name: 'Text Editor',
+      command: 'file-operations:new-text-file'
+    });
+  }
+
   return tracker;
 }

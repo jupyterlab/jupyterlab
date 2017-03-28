@@ -18,6 +18,10 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
+  ILauncher
+} from '@jupyterlab/launcher';
+
+import {
   TerminalWidget, ITerminalTracker, addDefaultCommands
 } from '@jupyterlab/terminal';
 
@@ -64,6 +68,7 @@ const plugin: JupyterLabPlugin<ITerminalTracker> = {
   requires: [
     IServiceManager, IMainMenu, ICommandPalette, ILayoutRestorer
   ],
+  optional: [ILauncher],
   autoStart: true
 };
 
@@ -77,7 +82,7 @@ export default plugin;
 /**
  * Activate the terminal plugin.
  */
-function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer): ITerminalTracker {
+function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer, launcher: ILauncher | null): ITerminalTracker {
   // Bail if there are no terminals available.
   if (!services.terminals.isAvailable()) {
     console.log('Disabling terminals plugin because they are not available on the server');
@@ -165,6 +170,14 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
     menu.addItem({ command });
   });
   mainMenu.addMenu(menu, {rank: 40});
+
+  // Add a launcher item if the launcher is available.
+  if (launcher) {
+    launcher.add({
+      name: 'Terminal',
+      command: CommandIDs.createNew
+    });
+  }
 
   return tracker;
 }
