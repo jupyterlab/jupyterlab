@@ -280,7 +280,7 @@ class CompletionHandler implements IDisposable {
    *    querying the DOM in either case.
    * 2. Because this method adds a class that indicates whether completer
    *    functionality ought to be enabled, relying on the behavior of the
-   *    `jp-mod-has-primary-selector` to filter out any editors that have
+   *    `jp-mod-has-primary-selection` to filter out any editors that have
    *    a selection means the semantic meaning of `jp-mod-completer-enabled`
    *    is obscured because there may be cases where the enabled class is added
    *    even though the completer is not available.
