@@ -27,9 +27,10 @@ class JupyterLabPlugin {
   constructor(options?: JupyterLabPlugin.IOptions) {
     options = options || {};
     this._name = options.name || 'jupyter';
-    let rootPath = options.rootPath || path.resolve('.');
+    let rootPath = this._rootPath = options.rootPath || path.resolve('.');
     try {
       this._getDependencies(rootPath);
+      console.log('got dependencies');
     } catch (e) {
       throw new Error('Root path must contain a package.json');
     }
@@ -88,6 +89,19 @@ class JupyterLabPlugin {
         return this._getDependencies(fs.realpathSync(fullPath));
       }
       basePath = path.resolve(basePath, '..');
+
+      // Use require.resolve if we get to the root path.
+      if (basePath === this._rootPath) {
+        basePath = require.resolve(name);
+         // Walk up the tree looking for the package.json.
+        while (true) {
+          let fullPath = path.join(basePath, 'package.json');
+          if (fs.existsSync(fullPath)) {
+            return this._getDependencies(fs.realpathSync(basePath));
+          }
+          basePath = path.resolve(basePath, '..');
+        }
+      }
     }
   }
 
