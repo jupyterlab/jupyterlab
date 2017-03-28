@@ -233,7 +233,8 @@ class JupyterLabPlugin {
 
     // Create our header and footer with a version-mangled defined name.
     let definePath = Private.getDefinePath(mod);
-    let header = `/** START DEFINE BLOCK for ${definePath} **/
+    let header = `/** JUPYTERLAB PLUGIN MODULE SEPARATOR **/
+/** START DEFINE BLOCK for ${definePath} **/
 ${pluginName}.define('${definePath}', function (module, exports, ${requireName}) {
 \t`;
     let footer = `
