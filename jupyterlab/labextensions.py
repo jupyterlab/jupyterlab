@@ -485,9 +485,8 @@ def validate_labextension_folder(name, full_dest, logger=None):
 
     data = get_labextension_manifest_data_by_folder(full_dest)
     for manifest in data.values():
-        if ('entry' in manifest and 'modules' in manifest):
-            if (manifest['entry'] in manifest['modules']):
-                has_entry = True
+        if 'entry' in manifest and 'packages' in manifest:
+            has_entry = True
         files = manifest.get('files', [])
         if not files:
             has_files.append("No 'files' key in manifest")
