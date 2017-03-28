@@ -3,7 +3,7 @@
   "name": "@jupyterlab/main",
   "version": "0.1.3",
   "scripts": {
-    "build": "cd ../packages/extension-builder && npm run build && cd ../../jupyterlab && tsc && webpack",
+    "build": "tsc && webpack",
     "clean": "rimraf build",
     "watch": "watch \"npm run build\" ../packages --wait 10 --filter=../scripts/watch-filter.js"
   },
