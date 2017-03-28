@@ -92,18 +92,9 @@ class JupyterLabPlugin {
 
       basePath = path.resolve(basePath, '..');
 
-      // Use require.resolve if we get to the root path.
+      // Bail if we get to the root path.
       if (basePath === path.resolve(basePath, '..')) {
-        basePath = require.resolve(name);
-         // Walk up the tree looking for the package.json.
-        while (true) {
-          console.log(basePath);
-          let fullPath = path.join(basePath, 'package.json');
-          if (fs.existsSync(fullPath)) {
-            return this._getDependencies(fs.realpathSync(basePath));
-          }
-          basePath = path.resolve(basePath, '..');
-        }
+        return;
       }
     }
   }
