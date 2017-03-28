@@ -12,28 +12,24 @@ export PATH="$HOME/miniconda/bin:$PATH"
 
 if [[ $GROUP == tests ]]; then
     # Make sure we can start and kill the lab server
-    # jupyter lab --no-browser &
-    # TASK_PID=$!
-    # # Make sure the task is running
-    # ps -p $TASK_PID || exit 1
-    # sleep 5
-    # kill $TASK_PID
-    # wait $TASK_PID
+    jupyter lab --no-browser &
+    TASK_PID=$!
+    # Make sure the task is running
+    ps -p $TASK_PID || exit 1
+    sleep 5
+    kill $TASK_PID
+    wait $TASK_PID
 
     # Run the JS and python tests
-    #py.test
-    #npm run build
-    # pushd packages/coreutils && npm run build && popd
-    cd packages/extension-builder
-    # npm run build
+    py.test
+    npm run build
     npm run build:test
     npm test
-    #npm run test:services || npm run test:services
+    npm run test:services || npm run test:services
 
     # Make sure we have CSS that can be converted with postcss
-    #npm install -g postcss-cli
-    #postcss jupyterlab/build/*.css > /dev/null
-
+    npm install -g postcss-cli
+    postcss jupyterlab/build/*.css > /dev/null
 fi
 
 
