@@ -531,6 +531,8 @@ class FileBrowserModel implements IDisposable {
     }
     this._timeoutId = window.setTimeout(() => {
       this.refresh();
+      clearTimeout(this._timeoutId);
+      this._timeoutId = -1;
       if (this._requested && this._blackoutId !== -1) {
         this._requested = false;
         clearTimeout(this._blackoutId);
