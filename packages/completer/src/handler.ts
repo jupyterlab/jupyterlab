@@ -269,6 +269,21 @@ class CompletionHandler implements IDisposable {
    * If a sub-class reimplements this method, then that class must either call
    * its super method or it must take responsibility for adding and removing
    * the completer completable class to the editor host node.
+   *
+   * Despite the fact that the editor widget adds a class whenever there is a
+   * primary selection, this method checks indepenently for two reasons:
+   *
+   * 1. The editor widget connects to the same signal to add that class, so
+   *    there is no guarantee that the class will be added before this method
+   *    is invoked so simply checking for the CSS class's existence is not an
+   *    option. Secondarily, checking the editor state should be faster than
+   *    querying the DOM in either case.
+   * 2. Because this method adds a class that indicates whether completer
+   *    functionality ought to be enabled, relying on the behavior of the
+   *    `jp-mod-has-primary-selector` to filter out any editors that have
+   *    a selection means the semantic meaning of `jp-mod-completer-enabled`
+   *    is obscured because there may be cases where the enabled class is added
+   *    even though the completer is not available.
    */
   protected onSelectionsChanged(): void {
     const model = this._completer.model;
