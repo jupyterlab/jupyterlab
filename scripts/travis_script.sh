@@ -23,9 +23,9 @@ if [[ $GROUP == tests ]]; then
     # Run the JS and python tests
     #py.test
     #npm run build
-    pushd packages/coreutils && npm run build && popd
+    # pushd packages/coreutils && npm run build && popd
     cd packages/extension-builder
-    npm run build
+    # npm run build
     npm run build:test
     npm test
     #npm run test:services || npm run test:services
