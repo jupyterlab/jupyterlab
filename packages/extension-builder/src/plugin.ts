@@ -106,6 +106,9 @@ class JupyterLabPlugin {
 
       let sources: string[] = [];
 
+      // The module names.
+      let modules: string[] = [];
+
       // Explore each module within the chunk (built inputs):
       chunk.modules.forEach((mod: any) => {
 
@@ -117,6 +120,8 @@ class JupyterLabPlugin {
         // Parse each module.
         let source = this._parseModule(compilation, mod);
         sources.push(source);
+
+        modules.push(Private.getDefinePath(mod));
       });
 
       let code = sources.join('\n\n');
@@ -144,6 +149,7 @@ class JupyterLabPlugin {
       manifest['name'] = chunk.name || chunk.id;
       manifest['files'] = chunk.files;
       manifest['packages'] = this._packages;
+      manifest['modules'] = modules;
 
       let manifestSource = JSON.stringify(manifest, null, '\t');
 
