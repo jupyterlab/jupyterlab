@@ -283,6 +283,7 @@ ${pluginName}.define('${definePath}', function (module, exports, ${requireName})
   private _name = '';
   private _publicPath = '';
   private _packages: JSONObject = Object.create(null);
+  private _rootPath = '';
 }
 
 
