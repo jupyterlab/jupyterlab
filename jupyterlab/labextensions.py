@@ -490,6 +490,8 @@ def validate_labextension_folder(name, full_dest, logger=None):
         if 'entry' not in manifest:
             has_data.append('Missing `entry` key')
             manifest['entry'] = ''
+        if 'hash' not in manifest:
+            has_data.append('Missing `hash` key')
         if manifest['entry'] not in manifest['modules']:
             has_data.append('Missing `entry` in `modules`')
         if 'packages' not in manifest:
