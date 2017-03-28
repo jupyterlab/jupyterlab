@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  each, find
+  each, some, every
 } from '@phosphor/algorithm';
 
 import {
@@ -288,9 +288,9 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocume
   });
 
   function getOpenArgs(args: JSONObject): { path: string, factory: string } {
-      let path = args['path'] as string || void 0;
-      let factory = args['factory'] as string || void 0;
-      return { path, factory };
+    let path = args['path'] ? args['path'] as string : void 0;
+    let factory = args['factory'] ? args['factory'] as string : void 0;
+    return { path, factory };
   }
 
   function factoryMatch(path: string, factory='default'): boolean {
@@ -299,10 +299,10 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocume
       return false;
     }
     if (factory === 'default') {
-      return  fbWidget.registry.defaultWidgetFactory(ext) !== void 0;
+      return fbWidget.registry.defaultWidgetFactory(ext) !== void 0;
     }
     let factories = fbWidget.registry.preferredWidgetFactories(ext);
-    return find(factories, item => item.name === factory) !== undefined;
+    return some(factories, item => item.name === factory);
   }
 
   commands.addCommand(CommandIDs.open, {
@@ -327,26 +327,18 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocume
       if (path && factory) {
         return factoryMatch(path, factory);
       }
-      let match = true;
-      each(fbWidget.selection(), item => {
-        if (!factoryMatch(item.path, factory)) {
-          match = false;
-        }
+      return every(fbWidget.selection(), item => {
+        return factoryMatch(item.path, factory);
       });
-      return match;
     },
     isVisible: args => {
       let { path, factory } = getOpenArgs(args);
       if (path && factory) {
         return factoryMatch(path, factory);
       }
-      let match = false;
-      each(fbWidget.selection(), item => {
-        if (factoryMatch(item.path, factory)) {
-          match = true;
-        }
+      return some(fbWidget.selection(), item => {
+        return factoryMatch(item.path, factory);
       });
-      return match;
     },
     execute: args => {
       let { path, factory } = getOpenArgs(args);
@@ -436,7 +428,7 @@ function populateContextMenu(fbWidget: FileBrowser, menu: ContextMenu, commands:
     type: 'submenu', submenu: openWith, selector: submenuSelector, rank: 1
   });
 
-  fbWidget.selectionChanged.connect(() => {
+  function updateOpenWith() {
     openWith.clearItems();
     let anyEnabled = false;
     each(fbWidget.registry.widgetFactories(), widgetFactory => {
@@ -453,7 +445,10 @@ function populateContextMenu(fbWidget: FileBrowser, menu: ContextMenu, commands:
       return;
     }
     fbWidget.listingContentNode.classList.add('jp-mod-open-with');
-  });
+  }
+
+  fbWidget.selectionChanged.connect(updateOpenWith);
+  fbWidget.registry.changed.connect(updateOpenWith);
 
   commands.addCommand(CommandIDs.rename, {
     execute: () => fbWidget.rename(),
