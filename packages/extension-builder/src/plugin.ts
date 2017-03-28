@@ -30,7 +30,6 @@ class JupyterLabPlugin {
     let rootPath = options.rootPath || path.resolve('.');
     try {
       this._getDependencies(rootPath);
-      console.log('got dependencies');
     } catch (e) {
       throw new Error('Root path must contain a package.json');
     }
@@ -88,6 +87,7 @@ class JupyterLabPlugin {
       if (fs.existsSync(fullPath)) {
         return this._getDependencies(fs.realpathSync(fullPath));
       }
+      console.log(basePath);
       basePath = path.resolve(basePath, '..');
     }
   }
