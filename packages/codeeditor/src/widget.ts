@@ -15,6 +15,12 @@ import {
 
 
 /**
+ * The class name added to an editor widget that has a primary selection.
+ */
+const HAS_SELECTION_CLASS = 'jp-mod-has-primary-selection';
+
+
+/**
  * A widget which hosts a code editor.
  */
 export
@@ -24,7 +30,7 @@ class CodeEditorWidget extends Widget {
    */
   constructor(options: CodeEditorWidget.IOptions) {
     super();
-    this._editor = options.factory({
+    const editor = this._editor = options.factory({
       host: this.node,
       model: options.model,
       uuid: options.uuid,
@@ -32,6 +38,7 @@ class CodeEditorWidget extends Widget {
       readOnly: options.readOnly,
       selectionStyle: options.selectionStyle
     });
+    editor.model.selections.changed.connect(this._onSelectionsChanged, this);
   }
 
   /**
@@ -61,55 +68,6 @@ class CodeEditorWidget extends Widget {
   }
 
   /**
-   * Handle `'activate-request'` messages.
-   */
-  protected onActivateRequest(msg: Message): void {
-    this._editor.focus();
-  }
-
-  /**
-   * A message handler invoked on an `'after-attach'` message.
-   */
-  protected onAfterAttach(msg: Message): void {
-    super.onAfterAttach(msg);
-    this.node.addEventListener('focus', this, true);
-    if (this.isVisible) {
-      this._editor.refresh();
-      this._needsRefresh = false;
-    }
-  }
-
-  /**
-   * Handle `before-detach` messages for the widget.
-   */
-  protected onBeforeDetach(msg: Message): void {
-    this.node.removeEventListener('focus', this, true);
-  }
-
-  /**
-   * A message handler invoked on an `'after-show'` message.
-   */
-  protected onAfterShow(msg: Message): void {
-    this._editor.refresh();
-    this._needsRefresh = false;
-  }
-
-  /**
-   * A message handler invoked on an `'resize'` message.
-   */
-  protected onResize(msg: Widget.ResizeMessage): void {
-    if (msg.width >= 0 && msg.height >= 0) {
-      this._editor.setSize(msg);
-      this._needsRefresh = false;
-    } else if (this._editor.hasFocus()) {
-      this._editor.refresh();
-      this._needsRefresh = false;
-    } else {
-      this._needsRefresh = true;
-    }
-  }
-
-  /**
    * Handle the DOM events for the widget.
    *
    * @param event - The DOM event sent to the widget.
@@ -130,12 +88,74 @@ class CodeEditorWidget extends Widget {
   }
 
   /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this._editor.focus();
+  }
+
+  /**
+   * A message handler invoked on an `'after-attach'` message.
+   */
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+    this.node.addEventListener('focus', this, true);
+    if (this.isVisible) {
+      this._editor.refresh();
+      this._needsRefresh = false;
+    }
+  }
+
+  /**
+   * A message handler invoked on an `'after-show'` message.
+   */
+  protected onAfterShow(msg: Message): void {
+    this._editor.refresh();
+    this._needsRefresh = false;
+  }
+
+  /**
+   * Handle `before-detach` messages for the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this.node.removeEventListener('focus', this, true);
+  }
+
+  /**
+   * A message handler invoked on a `'resize'` message.
+   */
+  protected onResize(msg: Widget.ResizeMessage): void {
+    if (msg.width >= 0 && msg.height >= 0) {
+      this._editor.setSize(msg);
+      this._needsRefresh = false;
+    } else if (this._editor.hasFocus()) {
+      this._editor.refresh();
+      this._needsRefresh = false;
+    } else {
+      this._needsRefresh = true;
+    }
+  }
+
+  /**
    * Handle `focus` events for the widget.
    */
   private _evtFocus(event: FocusEvent): void {
     if (this._needsRefresh) {
       this._editor.refresh();
       this._needsRefresh = false;
+    }
+  }
+
+  /**
+   * Handle a change in model selections.
+   */
+  private _onSelectionsChanged(): void {
+    const { start, end } = this._editor.getSelection();
+
+    if (start.column !== end.column || start.line !== end.line) {
+      this.addClass(HAS_SELECTION_CLASS);
+    } else {
+      this.removeClass(HAS_SELECTION_CLASS);
     }
   }
 
