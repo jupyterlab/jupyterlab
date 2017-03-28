@@ -30,9 +30,7 @@ class JupyterLabPlugin {
     let rootPath = this._rootPath = options.rootPath || path.resolve('.');
     try {
       this._getDependencies(rootPath);
-      console.log('got dependencies');
     } catch (e) {
-      console.log(e.message);
       throw new Error('Root path must contain a package.json');
     }
   }
@@ -66,7 +64,6 @@ class JupyterLabPlugin {
   private _getDependencies(basePath: string): void {
     const data = require(path.join(basePath, 'package.json'));
     const name = data.name + '@' + data.version;
-    console.log(name);
     if (name in this._packages) {
         return;
     }
