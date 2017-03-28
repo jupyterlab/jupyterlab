@@ -64,6 +64,7 @@ class JupyterLabPlugin {
   private _getDependencies(basePath: string): void {
     const data = require(path.join(basePath, 'package.json'));
     const name = data.name + '@' + data.version;
+    console.log(name);
     if (name in this._packages) {
         return;
     }
