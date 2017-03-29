@@ -67,7 +67,7 @@ class DefaultSession implements Session.ISession {
   /**
    * A signal emitted when the kernel changes.
    */
-  get kernelChanged(): ISignal<this, Kernel.IKernel> {
+  get kernelChanged(): ISignal<this, Kernel.IKernelConnection> {
     return this._kernelChanged;
   }
 
@@ -114,7 +114,7 @@ class DefaultSession implements Session.ISession {
    * Use the [statusChanged] and [unhandledMessage] signals on the session
    * instead of the ones on the kernel.
    */
-  get kernel() : Kernel.IKernel {
+  get kernel() : Kernel.IKernelConnection {
     return this._kernel;
   }
 
@@ -259,7 +259,7 @@ class DefaultSession implements Session.ISession {
    * This shuts down the existing kernel and creates a new kernel,
    * keeping the existing session ID and session path.
    */
-  changeKernel(options: Kernel.IModel): Promise<Kernel.IKernel> {
+  changeKernel(options: Kernel.IModel): Promise<Kernel.IKernelConnection> {
     if (this.isDisposed) {
       return Promise.reject(new Error('Session is disposed'));
     }
@@ -369,7 +369,7 @@ class DefaultSession implements Session.ISession {
   private _baseUrl = '';
   private _options: Session.IOptions = null;
   private _updating = false;
-  private _kernelChanged = new Signal<this, Kernel.IKernel>(this);
+  private _kernelChanged = new Signal<this, Kernel.IKernelConnection>(this);
   private _statusChanged = new Signal<this, Kernel.Status>(this);
   private _iopubMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);

@@ -48,7 +48,7 @@ namespace Session {
     /**
      * A signal emitted when the kernel changes.
      */
-    kernelChanged: ISignal<ISession, Kernel.IKernel>;
+    kernelChanged: ISignal<ISession, Kernel.IKernelConnection>;
 
     /**
      * A signal emitted when the session status changes.
@@ -95,10 +95,8 @@ namespace Session {
      *
      * #### Notes
      * This is a read-only property, and can be altered by [changeKernel].
-     * Use the [statusChanged] and [unhandledMessage] signals on the session
-     * instead of the ones on the kernel.
      */
-    readonly kernel: Kernel.IKernel;
+    readonly kernel: Kernel.IKernelConnection;
 
     /**
      * The current status of the session.

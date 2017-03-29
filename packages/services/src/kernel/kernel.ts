@@ -36,7 +36,7 @@ import {
 export
 namespace Kernel {
   /**
-   * Interface of a Kernel object.
+   * Interface of a Kernel connection that is managed by a session.
    *
    * #### Notes
    * The Kernel object is tied to the lifetime of the Kernel id, which is
@@ -46,27 +46,7 @@ namespace Kernel {
    * process on the server, but preserves the Kernel id.
    */
   export
-  interface IKernel extends IDisposable {
-    /**
-     * A signal emitted when the kernel is shut down.
-     */
-    terminated: ISignal<this, void>;
-
-    /**
-     * A signal emitted when the kernel status changes.
-     */
-    statusChanged: ISignal<this, Kernel.Status>;
-
-    /**
-     * A signal emitted for iopub kernel messages.
-     */
-    iopubMessage: ISignal<this, KernelMessage.IIOPubMessage>;
-
-    /**
-     * A signal emitted for unhandled kernel message.
-     */
-    unhandledMessage: ISignal<this, KernelMessage.IMessage>;
-
+  interface IKernelConnection extends IDisposable {
     /**
      * The id of the server-side kernel.
      */
@@ -91,16 +71,6 @@ namespace Kernel {
      * The client unique id.
      */
     readonly clientId: string;
-
-    /**
-     * The base url of the kernel.
-     */
-    readonly baseUrl: string;
-
-    /**
-     * The Ajax settings used for server requests.
-     */
-    ajaxSettings: IAjaxSettings;
 
     /**
      * The current status of the kernel.
@@ -161,6 +131,18 @@ namespace Kernel {
     sendShellMessage(msg: KernelMessage.IShellMessage, expectReply?: boolean, disposeOnDone?: boolean): Kernel.IFuture;
 
     /**
+     * Reconnect to a disconnected kernel.
+     *
+     * @returns A promise that resolves when the kernel has reconnected.
+     *
+     * #### Notes
+     * This is not actually a  standard HTTP request, but useful function
+     * nonetheless for reconnecting to the kernel if the connection is somehow
+     * lost.
+     */
+    reconnect(): Promise<void>;
+
+    /**
      * Interrupt a kernel.
      *
      * @returns A promise that resolves when the kernel has interrupted.
@@ -193,37 +175,6 @@ namespace Kernel {
      * request fails or the response is invalid.
      */
     restart(): Promise<void>;
-
-    /**
-     * Reconnect to a disconnected kernel.
-     *
-     * @returns A promise that resolves when the kernel has reconnected.
-     *
-     * #### Notes
-     * This is not actually a  standard HTTP request, but useful function
-     * nonetheless for reconnecting to the kernel if the connection is somehow
-     * lost.
-     */
-    reconnect(): Promise<void>;
-
-    /**
-     * Shutdown a kernel.
-     *
-     * @returns A promise that resolves when the kernel has shut down.
-     *
-     * #### Notes
-     * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels).
-     *
-     * On a valid response, closes the websocket and disposes of the kernel
-     * object, and fulfills the promise.
-     *
-     * The promise will be rejected if the kernel status is `'dead'` or if the
-     * request fails or the response is invalid.
-     *
-     * If the server call is successful, the [[terminated]] signal will be
-     * emitted.
-     */
-    shutdown(): Promise<void>;
 
     /**
      * Send a `kernel_info_request` message.
@@ -397,6 +348,61 @@ namespace Kernel {
   }
 
   /**
+   * The full interface of a kernel.
+   */
+  export
+  interface IKernel extends IKernelConnection {
+    /**
+     * A signal emitted when the kernel is shut down.
+     */
+    terminated: ISignal<this, void>;
+
+    /**
+     * A signal emitted when the kernel status changes.
+     */
+    statusChanged: ISignal<this, Kernel.Status>;
+
+    /**
+     * A signal emitted for iopub kernel messages.
+     */
+    iopubMessage: ISignal<this, KernelMessage.IIOPubMessage>;
+
+    /**
+     * A signal emitted for unhandled kernel message.
+     */
+    unhandledMessage: ISignal<this, KernelMessage.IMessage>;
+
+    /**
+     * The base url of the kernel.
+     */
+    readonly baseUrl: string;
+
+    /**
+     * The Ajax settings used for server requests.
+     */
+    ajaxSettings: IAjaxSettings;
+
+    /**
+     * Shutdown a kernel.
+     *
+     * @returns A promise that resolves when the kernel has shut down.
+     *
+     * #### Notes
+     * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels).
+     *
+     * On a valid response, closes the websocket and disposes of the kernel
+     * object, and fulfills the promise.
+     *
+     * The promise will be rejected if the kernel status is `'dead'` or if the
+     * request fails or the response is invalid.
+     *
+     * If the server call is successful, the [[terminated]] signal will be
+     * emitted.
+     */
+    shutdown(): Promise<void>;
+  }
+
+  /**
    * Find a kernel by id.
    *
    * #### Notes
@@ -483,6 +489,8 @@ namespace Kernel {
     return DefaultKernel.shutdown(id, options);
   }
 
+  /**
+   * The interface of a kernel
   /**
    * The options object used to initialize a kernel.
    */
