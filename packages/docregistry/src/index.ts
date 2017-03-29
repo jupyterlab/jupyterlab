@@ -3,5 +3,4 @@
 
 export * from './context';
 export * from './default';
-export * from './kernelselector';
 export * from './registry';

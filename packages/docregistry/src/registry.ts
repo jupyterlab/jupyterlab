@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Contents, Kernel
+  Contents
 } from '@jupyterlab/services';
 
 import {
@@ -24,6 +24,10 @@ import {
 import {
   Widget
 } from '@phosphor/widgets';
+
+import {
+  ClientSession
+} from '@jupyterlab/apputils';
 
 import {
   CodeEditor
@@ -610,11 +614,6 @@ namespace DocumentRegistry {
   export
   interface IContext<T extends IModel> extends IDisposable {
     /**
-     * A signal emitted when the kernel changes.
-     */
-    kernelChanged: ISignal<this, Kernel.IKernel>;
-
-    /**
      * A signal emitted when the path changes.
      */
     pathChanged: ISignal<this, string>;
@@ -635,9 +634,9 @@ namespace DocumentRegistry {
     readonly model: T;
 
     /**
-     * The current kernel associated with the document.
+     * The client session object associated with the context.
      */
-    readonly kernel: Kernel.IKernel;
+    readonly session: ClientSession;
 
     /**
      * The current path associated with the document.
@@ -662,21 +661,6 @@ namespace DocumentRegistry {
      * A promise that is fulfilled when the context is ready.
      */
     readonly ready: Promise<void>;
-
-    /**
-     * Start the default kernel for the context.
-     *
-     * @returns A promise that resolves with the new kernel.
-     */
-    startDefaultKernel(): Promise<Kernel.IKernel>;
-
-    /**
-     * Change the current kernel associated with the document.
-     *
-     * #### Notes
-     * If no options are given, the session is shut down.
-     */
-    changeKernel(options?: Kernel.IModel): Promise<Kernel.IKernel>;
 
     /**
      * Save the document contents to disk.
