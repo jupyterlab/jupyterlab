@@ -365,8 +365,13 @@ class DocumentManager implements IDisposable {
       context = this._findContext(path, factory.name);
       if (!context) {
         context = this._createContext(path, factory);
-        // Load the contents from disk.
-        context.revert();
+        if (!(context as any)._realtimeHandler) {
+          // Load the contents from disk.
+          context.revert();
+        } else {
+          // Load the contents from disk.
+          context.save();
+        }
       }
     } else if (which === 'create') {
       context = this._createContext(path, factory);

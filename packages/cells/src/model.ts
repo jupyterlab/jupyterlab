@@ -257,6 +257,11 @@ namespace CellModel {
      * An IModelDB in which to store cell data.
      */
     modelDB?: IModelDB;
+
+    /**
+     * A unique identifier for this cell.
+     */
+    uuid?: string;
   }
 }
 

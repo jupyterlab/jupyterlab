@@ -197,7 +197,7 @@ namespace CodeEditor {
       }
 
       let value = this._modelDB.createString('value');
-      value.text = options.value || '';
+      value.text = value.text || options.value || '';
       let mimeType = this._modelDB.createValue('mimeType');
       mimeType.set(options.mimeType || 'text/plain');
       this._modelDB.createMap<ITextSelection[]>('selections');

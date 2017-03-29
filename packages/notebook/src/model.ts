@@ -76,9 +76,11 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     let cellDB = this._modelDB.view('cells');
     factory.modelDB = cellDB;
     this.contentFactory = factory;
-    this._cells = new CellList(cellDB);
+    this._cells = new CellList(this._modelDB, this.contentFactory);
     // Add an initial code cell by default.
-    this._cells.pushBack(factory.createCodeCell({}));
+    if (!this._cells.length) {
+      this._cells.pushBack(factory.createCodeCell({}));
+    }
     this._cells.changed.connect(this._onCellsChanged, this);
 
     // Handle initial metadata.
@@ -421,7 +423,7 @@ namespace NotebookModel {
         options.contentFactory = this.codeCellContentFactory;
       }
       if(this._modelDB) {
-        options.modelDB = this._modelDB.view(utils.uuid());
+        options.modelDB = this._modelDB.view(options.uuid || utils.uuid());
       }
       return new CodeCellModel(options);
     }
@@ -436,7 +438,7 @@ namespace NotebookModel {
      */
     createMarkdownCell(options: CellModel.IOptions): IMarkdownCellModel {
       if(this._modelDB) {
-        options.modelDB = this._modelDB.view(utils.uuid());
+        options.modelDB = this._modelDB.view(options.uuid || utils.uuid());
       }
       return new MarkdownCellModel(options);
     }
@@ -451,7 +453,7 @@ namespace NotebookModel {
      */
     createRawCell(options: CellModel.IOptions): IRawCellModel {
       if(this._modelDB) {
-        options.modelDB = this._modelDB.view(utils.uuid());
+        options.modelDB = this._modelDB.view(options.uuid || utils.uuid());
       }
      return new RawCellModel(options);
     }

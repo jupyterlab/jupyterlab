@@ -18,6 +18,10 @@ import {
   ICellModel
 } from '@jupyterlab/cells';
 
+import {
+  NotebookModel
+} from './model';
+
 
 /**
  * A cell list object that supports undo/redo.
@@ -27,7 +31,9 @@ class CellList implements IObservableUndoableVector<ICellModel> {
   /**
    * Construct the cell list.
    */
-  constructor(modelDB: IModelDB) {
+  constructor(modelDB: IModelDB, factory: NotebookModel.IContentFactory) {
+    this._modelDB = modelDB;
+    this._factory = factory;
     this._cellOrder = modelDB.createVector<string>('cellOrder') as IObservableUndoableVector<string>;
     this._cellMap = new ObservableMap<ICellModel>();
 
@@ -523,6 +529,15 @@ class CellList implements IObservableUndoableVector<ICellModel> {
   }
 
   private _onOrderChanged(order: IObservableVector<string>, change: ObservableVector.IChangedArgs<string>): void {
+    if (change.type === 'add' || change.type === 'set') {
+      each(change.newValues, (id) => {
+        if (!this._cellMap.has(id)) {
+          let cellDB = this._modelDB.view(id);
+          let cell = this._factory.createCodeCell({modelDB: cellDB, uuid: id});
+          this._cellMap.set(id, cell);
+        }
+      });
+    }
     let newValues: ICellModel[] = [];
     let oldValues: ICellModel[] = [];
     each(change.newValues, (id)=>{
@@ -544,4 +559,6 @@ class CellList implements IObservableUndoableVector<ICellModel> {
   private _cellOrder: IObservableUndoableVector<string> = null;
   private _cellMap: IObservableMap<ICellModel> = null;
   private _changed = new Signal<this, ObservableVector.IChangedArgs<ICellModel>>(this);
+  private _modelDB: IModelDB = null;
+  private _factory: NotebookModel.IContentFactory = null;
 }
