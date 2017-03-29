@@ -68,7 +68,7 @@ class ConsolePanel extends Panel {
     } = options;
     let factory = options.contentFactory;
     let contentFactory = factory.consoleContentFactory;
-    path = path || `console-${Private.count++}-${uuid()}`;
+    path = `${path || ''}/console-${Private.count++}-${uuid()}`;
 
     let session = new ClientSession({
       manager: manager.sessions,
@@ -177,7 +177,7 @@ namespace ConsolePanel {
     manager: ServiceManager.IManager;
 
     /**
-     * The path of the console
+     * The working directory of the console.
      */
     path?: string;
 

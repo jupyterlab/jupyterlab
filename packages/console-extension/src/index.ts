@@ -151,7 +151,6 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   let { commands, shell } = app;
   let category = 'Console';
   let command: string;
-  let count = 0;
   let menu = new Menu({ commands });
 
   // Create an instance tracker for all console panels.
@@ -189,6 +188,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
 
       // If we get a session, use it.
       if (args.path) {
+
         return manager.ready.then(() => manager.connectTo(args.id))
           .then(session => {
             name = session.path.split('/').pop();
@@ -378,26 +378,6 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   });
 
   /**
-   * Get the kernel given the create args.
-   */
-  function getKernel(args: ICreateConsoleArgs, name: string): Promise<Kernel.IModel> {
-    if (args.kernel) {
-      return Promise.resolve(args.kernel);
-    }
-    return manager.ready.then(() => {
-      let options = {
-        name,
-        specs: manager.specs,
-        sessions: manager.running(),
-        preferredLanguage: args.preferredLanguage || '',
-      };
-      return selectKernel(options);
-    });
-  }
-
-  let id = 0; // The ID counter for notebook panels.
-
-  /**
    * Create a console for a given session.
    *
    * #### Notes
@@ -411,6 +391,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       mimeTypeService: editorServices.mimeTypeService
     };
     let panel = new ConsolePanel(options);
+
     // Add the console panel to the tracker.
     tracker.add(panel);
     shell.addToMainArea(panel);
@@ -425,29 +406,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       if (!current) {
         return;
       }
-      let widget = current.console;
-      let session = widget.session;
-      let lang = '';
-      manager.ready.then(() => {
-        let specs = manager.specs;
-        if (session.kernel) {
-          lang = specs.kernelspecs[session.kernel.name].language;
-        }
-        let options = {
-          name: widget.parent.title.label,
-          specs,
-          sessions: manager.running(),
-          preferredLanguage: lang,
-          kernel: session.kernel.model,
-          host: widget
-        };
-        return selectKernel(options);
-      }).then((kernelId: Kernel.IModel) => {
-        // If the user cancels, kernelId will be void and should be ignored.
-        if (kernelId) {
-          return session.changeKernel(kernelId);
-        }
-      });
+      return current.console.session.selectKernel();
     }
   });
   palette.addItem({ command, category });
@@ -466,63 +425,4 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
 
   mainMenu.addMenu(menu, {rank: 50});
   return tracker;
-}
-
-
-/**
- * A namespace for private data.
- */
-namespace Private {
-  /**
-   * An interface for caption options.
-   */
-  export
-  interface ICaptionOptions {
-    /**
-     * The time when the console connected to the current kernel.
-     */
-    connected: Date;
-
-    /**
-     * The time when the console last executed its prompt.
-     */
-    executed?: Date;
-
-    /**
-     * The path to the file backing the console.
-     *
-     * #### Notes
-     * Currently, the actual file does not exist, but the directory is the
-     * current working directory at the time the console was opened.
-     */
-    path: string;
-
-    /**
-     * The label of the console (as displayed in tabs).
-     */
-    label: string;
-
-    /**
-     * The display name of the console's kernel.
-     */
-    displayName: string;
-  }
-
-  /**
-   * Generate a caption for a console's title.
-   */
-  export
-  function caption(options: ICaptionOptions): string {
-    let { label, path, displayName, connected, executed } = options;
-    let caption = (
-      `Name: ${label}\n` +
-      `Directory: ${PathExt.dirname(path)}\n` +
-      `Kernel: ${displayName}\n` +
-      `Connected: ${Time.format(connected.toISOString())}`
-    );
-    if (executed) {
-      caption += `\nLast Execution: ${Time.format(executed.toISOString())}`;
-    }
-    return caption;
-  }
 }
