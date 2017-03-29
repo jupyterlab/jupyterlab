@@ -23,7 +23,7 @@ import {
 
 
 /**
- * The command IDs used by the file browser plugin.
+ * The command IDs used by the document manager plugin.
  */
 namespace CommandIDs {
   export
