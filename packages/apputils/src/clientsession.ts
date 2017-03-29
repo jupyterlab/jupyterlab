@@ -521,7 +521,9 @@ export namespace ClientSession {
   }
 
   /**
-   * Create a kernel dropdown list.
+   * Populate a kernel dropdown list.
+   *
+   * @param node - The node to populate.
    *
    * @param options - The options used to populate the kernels.
    *
@@ -539,8 +541,8 @@ export namespace ClientSession {
    * the explicit session information.
    */
   export
-  function createKernelSelect(options: IKernelSearch): HTMLSelectElement {
-    return Private.createKernelSelect(options);
+  function populateKernelSelect(node: HTMLSelectElement, options: IKernelSearch): void {
+    return Private.populateKernelSelect(node, options);
   }
 }
 
@@ -561,7 +563,8 @@ namespace Private {
     body.appendChild(text);
 
     let options = getKernelSearch(session, manager);
-    let selector = ClientSession.createKernelSelect(options);
+    let selector = document.createElement('select');
+    ClientSession.populateKernelSelect(selector, options);
     body.appendChild(selector);
 
     let select = Dialog.okButton({ label: 'SELECT' });
@@ -632,11 +635,14 @@ namespace Private {
   }
 
   /**
-   * Get a kernel select node for the session.
+   * Populate a kernel select node for the session.
    */
   export
-  function createKernelSelect(options: ClientSession.IKernelSearch): HTMLSelectElement {
-    let node = document.createElement('select');
+  function populateKernelSelect(node: HTMLSelectElement, options: ClientSession.IKernelSearch): void {
+    while (node.firstChild) {
+      node.removeChild(node.firstChild);
+    }
+
     let maxLength = 10;
 
     let {
@@ -762,7 +768,6 @@ namespace Private {
       });
     }
     node.selectedIndex = 0;
-    return node;
   }
 
   /**

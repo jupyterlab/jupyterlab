@@ -2,11 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Contents, Kernel, Session
+  Contents, Kernel
 } from '@jupyterlab/services';
 
 import {
-  IterableOrArrayLike, each
+  each
 } from '@phosphor/algorithm';
 
 import {
@@ -14,7 +14,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  Dialog, showDialog
+  ClientSession, Dialog, showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -22,7 +22,7 @@ import {
 } from '@jupyterlab/docmanager';
 
 import {
-  DocumentRegistry, populateKernels
+  DocumentRegistry
 } from '@jupyterlab/docregistry';
 
 import {
@@ -211,11 +211,11 @@ class OpenWithHandler extends Widget {
     let preference = this._manager.registry.getKernelPreference(
       this._ext, widgetName
     );
-    let specs = this._manager.services.specs;
-    let sessions = this._manager.services.sessions.running();
-    Private.updateKernels(this.kernelDropdownNode,
-      { preference, specs, sessions }
-    );
+    let services = this._manager.services;
+    Private.updateKernels(this.kernelDropdownNode, preference, {
+      specs: services.specs,
+      sessions: services.sessions.running()
+    });
   }
 
   private _ext = '';
@@ -323,16 +323,17 @@ class CreateFromHandler extends Widget {
 
     // Handle the kernel preferences.
     let preference = registry.getKernelPreference(ext, widgetName);
-    if (preference.canStartKernel) {
-      let specs = this._manager.services.specs;
-      let sessions = this._manager.services.sessions.running();
-      let preferredKernel = kernelName;
-      Private.updateKernels(this.kernelDropdownNode,
-        { specs, sessions, preferredKernel, preference }
-      );
-    } else {
+    if (!preference.canStartKernel) {
       this.node.removeChild(this.kernelDropdownNode.previousSibling);
       this.node.removeChild(this.kernelDropdownNode);
+    } else {
+      let services = this._manager.services;
+      ClientSession.populateKernelSelect(this.kernelDropdownNode, {
+        specs: services.specs,
+        sessions: services.sessions.running(),
+        preferredName: kernelName,
+        preferredLanguage: preference.language
+      });
     }
 
     return model.newUntitled({ ext, type }).then(contents => {
@@ -556,11 +557,11 @@ class CreateNewHandler extends Widget {
     let widgetName = this.widgetDropdown.value;
     let manager = this._manager;
     let preference = manager.registry.getKernelPreference(ext, widgetName);
-    let specs = manager.services.specs;
-    let sessions = manager.services.sessions.running();
-    Private.updateKernels(this.kernelDropdownNode,
-      { preference, sessions, specs }
-    );
+    let services = this._manager.services;
+    Private.updateKernels(this.kernelDropdownNode, preference, {
+      specs: services.specs,
+      sessions: services.sessions.running()
+    });
   }
 
   private _model: FileBrowserModel = null;
@@ -651,8 +652,7 @@ namespace Private {
    * Update a kernel listing based on a kernel preference.
    */
   export
-  function updateKernels(node: HTMLSelectElement, options: IKernelOptions): void {
-    let { preference, specs, sessions, preferredKernel } = options;
+  function updateKernels(node: HTMLSelectElement, preference: DocumentRegistry.IKernelPreference, options: ClientSession.IKernelSearch): void {
     if (!preference.canStartKernel) {
       while (node.firstChild) {
         node.removeChild(node.firstChild);
@@ -660,46 +660,13 @@ namespace Private {
       node.disabled = true;
       return;
     }
-    // Bail if there are no kernel specs.
-    if (!specs) {
-      return;
-    }
-    let preferredLanguage = preference.language;
     node.disabled = false;
-
-    populateKernels(node,
-      { specs, sessions, preferredLanguage, preferredKernel }
-    );
+    options.preferredLanguage = preference.language;
+    ClientSession.populateKernelSelect(node, options);
 
     // Select the "null" valued kernel if we do not prefer a kernel.
     if (!preference.preferKernel) {
       node.value = 'null';
     }
-  }
-
-  /**
-   * The options for updating kernels.
-   */
-  export
-  interface IKernelOptions {
-    /**
-     * The kernel preference.
-     */
-    preference: DocumentRegistry.IKernelPreference;
-
-    /**
-     * The kernel specs.
-     */
-    specs: Kernel.ISpecModels;
-
-    /**
-     * The running sessions.
-     */
-    sessions: IterableOrArrayLike<Session.IModel>;
-
-    /**
-     * The preferred kernel name.
-     */
-    preferredKernel?: string;
   }
 }
