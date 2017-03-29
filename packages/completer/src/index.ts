@@ -2,8 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel
-} from '@jupyterlab/services';
+  IClientSession
+} from '@jupyterlab/apputils';
+
+import {
+  CodeEditor
+} from '@jupyterlab/codeeditor';
 
 import {
   Token
@@ -12,11 +16,6 @@ import {
 import {
   Widget
 } from '@phosphor/widgets';
-
-import {
-  CodeEditor
-} from '@jupyterlab/codeeditor';
-
 
 export * from './handler';
 export * from './model';
@@ -63,9 +62,9 @@ namespace ICompletionManager {
     editor: CodeEditor.IEditor;
 
     /**
-     * The kernel used by the completer to make API requests.
+     * The session used by the completer to make API requests.
      */
-    kernel: Kernel.IKernel;
+    session: IClientSession;
   }
 
   /**
