@@ -128,7 +128,7 @@ const notebookPlugin: JupyterLabPlugin<void> = {
 
         const anchor = parent.notebook;
         const editor = anchor.activeCell.editor;
-        const kernel = parent.kernel;
+        const kernel = parent.session.kernel;
         const rendermime = parent.rendermime;
 
         // If all components necessary for rendering exist, create a tooltip.
@@ -179,7 +179,7 @@ namespace Private {
     /**
      * The kernel against which the API request will be made.
      */
-    kernel: Kernel.IKernel;
+    kernel: Kernel.IKernelConnection;
   }
 
   /**

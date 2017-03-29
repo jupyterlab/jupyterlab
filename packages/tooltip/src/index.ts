@@ -69,7 +69,7 @@ namespace ITooltipManager {
     /**
      * The kernel the tooltip communicates with to populate itself.
      */
-    readonly kernel: Kernel.IKernel;
+    readonly kernel: Kernel.IKernelConnection;
 
     /**
      * The renderer the tooltip uses to render API responses.
