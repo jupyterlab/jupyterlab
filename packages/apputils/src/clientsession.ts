@@ -23,7 +23,7 @@ import {
 
 import {
   showDialog, Dialog
-} from '../apputils';
+} from '.';
 
 
 /**
@@ -62,7 +62,7 @@ class ClientSession implements IDisposable {
   /**
    * A signal emitted when the kernel changes.
    */
-  get kernelChanged(): ISignal<this, Kernel.IKernel | null> {
+  get kernelChanged(): ISignal<this, Kernel.IKernelConnection | null> {
     return this._kernelChanged;
   }
 
@@ -97,7 +97,7 @@ class ClientSession implements IDisposable {
   /**
    * The current kernel associated with the document.
    */
-  get kernel(): Kernel.IKernel {
+  get kernel(): Kernel.IKernelConnection {
     return this._session ? this._session.kernel : null;
   }
 
@@ -177,7 +177,7 @@ class ClientSession implements IDisposable {
   /**
    * Change the current kernel associated with the document.
    */
-  changeKernel(options: Kernel.IModel): Promise<Kernel.IKernel> {
+  changeKernel(options: Kernel.IModel): Promise<Kernel.IKernelConnection> {
     let session = this._session;
     if (session) {
       return session.changeKernel(options);
@@ -216,7 +216,7 @@ class ClientSession implements IDisposable {
    * If there is no kernel, we start a kernel with the last run
    * kernel name.  If no kernel has been started, this is a no-op.
    */
-  restart(): Promise<Kernel.IKernel | null> {
+  restart(): Promise<Kernel.IKernelConnection | null> {
     let kernel = this.kernel;
     if (!kernel) {
       if (this._prevKernelName) {
@@ -274,7 +274,7 @@ class ClientSession implements IDisposable {
   /**
    * Start a session and set up its signals.
    */
-  private _startSession(model: Kernel.IModel): Promise<Kernel.IKernel> {
+  private _startSession(model: Kernel.IModel): Promise<Kernel.IKernelConnection> {
     this._promise = new PromiseDelegate<void>();
     return this._manager.startNew({
       path: this._path,
@@ -290,7 +290,7 @@ class ClientSession implements IDisposable {
   /**
    * Handle a new session object.
    */
-  private _handleNewSession(session: Session.ISession): Kernel.IKernel {
+  private _handleNewSession(session: Session.ISession): Kernel.IKernelConnection {
     if (this.isDisposed) {
       return null;
     }
@@ -319,12 +319,12 @@ class ClientSession implements IDisposable {
     this._promise = null;
     let response = String(err.xhr.response);
     try {
-      response = JSON.parse(err.xhr.response);
+      response = JSON.parse(err.xhr.response)['traceback'];
     } catch (err) {
       // no-op
     }
     let body = document.createElement('pre');
-    body.textContent = response['traceback'];
+    body.textContent = response;
     return showDialog({
       title: 'Error Starting Kernel',
       body,
@@ -410,7 +410,7 @@ class ClientSession implements IDisposable {
   private _session: Session.ISession | null = null;
   private _promise: PromiseDelegate<void> | null;
   private _terminated = new Signal<this, void>(this);
-  private _kernelChanged = new Signal<this, Kernel.IKernel | null>(this);
+  private _kernelChanged = new Signal<this, Kernel.IKernelConnection | null>(this);
   private _statusChanged = new Signal<this, Kernel.Status>(this);
   private _iopubMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
@@ -462,7 +462,7 @@ export namespace ClientSession {
    * Restart a kernel if the user accepts the risk.
    */
   export
-  function restartKernel(kernel: Kernel.IKernel): Promise<Kernel.IKernel | null> {
+  function restartKernel(kernel: Kernel.IKernelConnection): Promise<Kernel.IKernelConnection | null> {
     let restartBtn = Dialog.warnButton({ label: 'RESTART '});
     return showDialog({
       title: 'Restart Kernel?',
@@ -475,7 +475,7 @@ export namespace ClientSession {
       if (result.accept) {
         return kernel.restart().then(() => {
           return kernel;
-        }
+        });
       }
       return kernel;
     });
