@@ -43,24 +43,6 @@ import {
  */
 namespace CommandIDs {
   export
-  const save = 'file-operations:save';
-
-  export
-  const restoreCheckpoint = 'file-operations:restore-checkpoint';
-
-  export
-  const saveAs = 'file-operations:save-as';
-
-  export
-  const close = 'file-operations:close';
-
-  export
-  const closeAllFiles = 'file-operations:close-all-files';
-
-  export
-  const open = 'file-operations:open';
-
-  export
   const newTextFile = 'file-operations:new-text-file';
 
   export
@@ -191,14 +173,6 @@ function activate(app: JupyterLab, manager: IServiceManager, documentManager: ID
 
   addCommands(app, fbWidget, documentManager);
 
-  [
-    CommandIDs.save,
-    CommandIDs.restoreCheckpoint,
-    CommandIDs.saveAs,
-    CommandIDs.close,
-    CommandIDs.closeAllFiles
-  ].forEach(command => { palette.addItem({ command, category }); });
-
   let menu = createMenu(app, Object.keys(creatorCmds));
   mainMenu.addMenu(menu, { rank: 1 });
 
@@ -237,72 +211,7 @@ function activate(app: JupyterLab, manager: IServiceManager, documentManager: ID
  * Add the filebrowser commands to the application's command registry.
  */
 function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocumentManager): void {
-  let commands = app.commands;
-  let isEnabled = () => {
-    let currentWidget = app.shell.currentWidget;
-    return !!(currentWidget && docManager.contextForWidget(currentWidget));
-  };
-
-  commands.addCommand(CommandIDs.save, {
-    label: 'Save',
-    caption: 'Save and create checkpoint',
-    isEnabled,
-    execute: () => {
-      if (isEnabled()) {
-        let context = docManager.contextForWidget(app.shell.currentWidget);
-        return context.save().then(() => context.createCheckpoint());
-      }
-    }
-  });
-
-  commands.addCommand(CommandIDs.restoreCheckpoint, {
-    label: 'Revert to Checkpoint',
-    caption: 'Revert contents to previous checkpoint',
-    isEnabled,
-    execute: () => {
-      if (isEnabled()) {
-        let context = docManager.contextForWidget(app.shell.currentWidget);
-        return context.restoreCheckpoint().then(() => context.revert());
-      }
-    }
-  });
-
-  commands.addCommand(CommandIDs.saveAs, {
-    label: 'Save As...',
-    caption: 'Save with new path and create checkpoint',
-    isEnabled,
-    execute: () => {
-      if (isEnabled()) {
-        let context = docManager.contextForWidget(app.shell.currentWidget);
-        return context.saveAs().then(() => {
-          return context.createCheckpoint();
-        });
-      }
-    }
-  });
-
-  commands.addCommand(CommandIDs.open, {
-    execute: args => {
-      let path = args['path'] as string;
-      let factory = args['factory'] as string || void 0;
-      return docManager.services.contents.get(path)
-        .then(() => fbWidget.openPath(path, factory));
-    }
-  });
-
-  commands.addCommand(CommandIDs.close, {
-    label: 'Close',
-    execute: () => {
-      if (app.shell.currentWidget) {
-        app.shell.currentWidget.close();
-      }
-    }
-  });
-
-  commands.addCommand(CommandIDs.closeAllFiles, {
-    label: 'Close All',
-    execute: () => { app.shell.closeAll(); }
-  });
+  const { commands } = app;
 
   commands.addCommand(CommandIDs.showBrowser, {
     execute: () => { app.shell.activateById(fbWidget.id); }
@@ -339,11 +248,11 @@ function createMenu(app: JupyterLab, creatorCmds: string[]): Menu {
     menu.addItem({ command: Private.commandForName(name) });
   });
   [
-    CommandIDs.save,
-    CommandIDs.restoreCheckpoint,
-    CommandIDs.saveAs,
-    CommandIDs.close,
-    CommandIDs.closeAllFiles
+    'file-operations:save',
+    'file-operations:restore-checkpoint',
+    'file-operations:save-as',
+    'file-operations:close',
+    'file-operations:close-all-files'
   ].forEach(command => { menu.addItem({ command }); });
 
   return menu;
@@ -473,7 +382,7 @@ namespace Private {
    * Get the command for a name.
    */
   export
-  function commandForName(name: string){
+  function commandForName(name: string) {
     name = name.split(' ').join('-').toLocaleLowerCase();
     return `file-operations:new-${name}`;
   }
