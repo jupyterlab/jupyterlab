@@ -2,8 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Session
-} from '@jupyterlab/services';
+  ClientSession
+} from '@jupyterlab/apputils';
 
 import {
   Token
@@ -117,9 +117,9 @@ namespace ConsolePanel {
     contentFactory: IContentFactory;
 
     /**
-     * The session for the console widget.
+     * The client session for the console widget.
      */
-    session: Session.ISession;
+    session: ClientSession;
 
     /**
      * The model factory for the console widget.

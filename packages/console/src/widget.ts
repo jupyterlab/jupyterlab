@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel, KernelMessage, Session
+  KernelMessage
 } from '@jupyterlab/services';
 
 import {
@@ -26,6 +26,10 @@ import {
 } from '@phosphor/widgets';
 
 import {
+  ClientSession
+} from '@jupyterlab/apputils';
+
+import {
   IEditorMimeTypeService, CodeEditor
 } from '@jupyterlab/codeeditor';
 
@@ -36,7 +40,7 @@ import {
 } from '@jupyterlab/cells';
 
 import {
-  nbformat
+  nbformat, IObservableVector, ObservableVector
 } from '@jupyterlab/coreutils';
 
 import {
@@ -55,9 +59,6 @@ import {
   ConsoleHistory, IConsoleHistory
 } from './history';
 
-import {
-  IObservableVector, ObservableVector
-} from '@jupyterlab/coreutils';
 
 /**
  * The class name added to console widgets.
@@ -149,13 +150,13 @@ class CodeConsole extends Widget {
 
     // Set up the foreign iopub handler.
     this._foreignHandler = factory.createForeignHandler({
-      kernel: this.session.kernel,
+      session: this.session,
       parent: this,
       cellFactory: () => this._createForeignCell(),
     });
 
     this._history = factory.createConsoleHistory({
-      kernel: this.session.kernel
+      session: this.session
     });
 
     this.session.kernelChanged.connect(this._onKernelChanged, this);
@@ -191,9 +192,9 @@ class CodeConsole extends Widget {
   readonly rendermime: IRenderMime;
 
   /**
-   * The session used by the console.
+   * The client session used by the console.
    */
-  readonly session: Session.ISession;
+  readonly session: ClientSession;
 
   /**
    * The console banner widget.
@@ -505,7 +506,7 @@ class CodeConsole extends Widget {
       cell.model.contentChanged.disconnect(this.update, this);
       this.update();
     };
-    return cell.execute(this.session.kernel).then(onSuccess, onFailure);
+    return cell.execute(this.session).then(onSuccess, onFailure);
   }
 
   /**
@@ -594,11 +595,9 @@ class CodeConsole extends Widget {
   /**
    * Handle a change to the kernel.
    */
-  private _onKernelChanged(sender: Session.ISession, kernel: Kernel.IKernel): void {
+  private _onKernelChanged(): void {
     this.clear();
     this._initialize();
-    this._history.kernel = kernel;
-    this._foreignHandler.kernel = kernel;
     this.newPrompt();
   }
 
@@ -640,9 +639,9 @@ namespace CodeConsole {
     rendermime: IRenderMime;
 
     /**
-     * The session for the console widget.
+     * The client session for the console widget.
      */
-    session: Session.ISession;
+    session: ClientSession;
 
     /**
      * The service used to look up mime types.

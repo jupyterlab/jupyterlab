@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel, KernelMessage
+  KernelMessage
 } from '@jupyterlab/services';
 
 import {
@@ -12,6 +12,10 @@ import {
 import {
   Signal
 } from '@phosphor/signaling';
+
+import {
+  ClientSession
+} from '@jupyterlab/apputils';
 
 import {
   CodeEditor
@@ -24,9 +28,9 @@ import {
 export
 interface IConsoleHistory extends IDisposable {
   /**
-   * The current kernel supplying navigation history.
+   * The client session used by the foreign handler.
    */
-  kernel: Kernel.IKernel;
+  readonly session: ClientSession;
 
   /**
    * The current editor used by the history widget.
@@ -87,34 +91,16 @@ class ConsoleHistory implements IConsoleHistory {
   /**
    * Construct a new console history object.
    */
-  constructor(options?: ConsoleHistory.IOptions) {
-    if (options && options.kernel) {
-      this.kernel = options.kernel;
-    }
+  constructor(options: ConsoleHistory.IOptions) {
+    this.session = options.session;
+    this._handleKernel();
+    this.session.kernelChanged.connect(this._handleKernel, this);
   }
 
   /**
-   * The current kernel supplying navigation history.
+   * The client session used by the foreign handler.
    */
-  get kernel(): Kernel.IKernel {
-    return this._kernel;
-  }
-  set kernel(newValue: Kernel.IKernel) {
-    if (newValue === this._kernel) {
-      return;
-    }
-
-    this._kernel = newValue;
-
-    if (!this._kernel) {
-      this._history.length = 0;
-      return;
-    }
-
-    this._kernel.requestHistory(Private.initialRequest).then(v => {
-      this.onHistory(v);
-    });
-  }
+  readonly session: ClientSession;
 
   /**
    * The current editor used by the history manager.
@@ -297,10 +283,24 @@ class ConsoleHistory implements IConsoleHistory {
     }
   }
 
+  /**
+   * Handle the current kernel changing.
+   */
+  private _handleKernel(): void {
+    let kernel = this.session.kernel;
+    if (!kernel) {
+      this._history.length = 0;
+      return;
+    }
+
+    kernel.requestHistory(Private.initialRequest).then(v => {
+      this.onHistory(v);
+    });
+  }
+
   private _cursor = 0;
   private _hasSession = false;
   private _history: string[] = [];
-  private _kernel: Kernel.IKernel = null;
   private _placeholder: string = '';
   private _setByHistory = false;
   private _isDisposed = false;
@@ -319,9 +319,9 @@ namespace ConsoleHistory {
   export
   interface IOptions {
     /**
-     * The kernel instance to query for history.
+     * The client session used by the foreign handler.
      */
-    kernel?: Kernel.IKernel;
+    session: ClientSession;
   }
 }
 

@@ -2,12 +2,20 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel, KernelMessage
+  KernelMessage
 } from '@jupyterlab/services';
 
 import {
   IDisposable
 } from '@phosphor/disposable';
+
+import {
+  Signal
+} from '@phosphor/signaling';
+
+import {
+  ClientSession
+} from '@jupyterlab/apputils';
 
 import {
   BaseCellWidget, CodeCellWidget
@@ -28,7 +36,8 @@ class ForeignHandler implements IDisposable {
    * Construct a new foreign message handler.
    */
   constructor(options: ForeignHandler.IOptions) {
-    this.kernel = options.kernel;
+    this.session = options.session;
+    this.session.iopubMessage.connect(this.onIOPubMessage, this);
     this._factory = options.cellFactory;
     this._parent = options.parent;
   }
@@ -44,27 +53,9 @@ class ForeignHandler implements IDisposable {
   }
 
   /**
-   * The kernel used by the foreign handler.
+   * The client session used by the foreign handler.
    */
-  get kernel(): Kernel.IKernel {
-    return this._kernel;
-  }
-  set kernel(value: Kernel.IKernel) {
-    if (this._kernel === value) {
-      return;
-    }
-
-    // Disconnect previously connected kernel.
-    if (this._kernel) {
-      this._cells.clear();
-      this._kernel.iopubMessage.disconnect(this.onIOPubMessage, this);
-    }
-
-    this._kernel = value;
-    if (this._kernel) {
-      this._kernel.iopubMessage.connect(this.onIOPubMessage, this);
-    }
-  }
+  readonly session: ClientSession;
 
   /**
    * The foreign handler's parent receiver.
@@ -89,8 +80,8 @@ class ForeignHandler implements IDisposable {
     }
     let cells = this._cells;
     this._cells = null;
-    this._kernel = null;
     cells.clear();
+    Signal.clearData(this);
   }
 
   /**
@@ -99,15 +90,20 @@ class ForeignHandler implements IDisposable {
    * @returns `true` if the message resulted in a new cell injection or a
    * previously injected cell being updated and `false` for all other messages.
    */
-  protected onIOPubMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage): boolean {
+  protected onIOPubMessage(sender: ClientSession, msg: KernelMessage.IIOPubMessage): boolean {
     // Only process messages if foreign cell injection is enabled.
     if (!this._enabled) {
       return false;
     }
+    let kernel = this.session.kernel;
+    if (!kernel) {
+      return;
+    }
+
     // Check whether this message came from an external session.
     let parent = this._parent;
     let session = (msg.parent_header as KernelMessage.IHeader).session;
-    if (session === this._kernel.clientId) {
+    if (session === kernel.clientId) {
       return false;
     }
     let msgType = msg.header.msg_type;
@@ -162,7 +158,6 @@ class ForeignHandler implements IDisposable {
 
   private _cells = new Map<string, CodeCellWidget>();
   private _enabled = true;
-  private _kernel: Kernel.IKernel = null;
   private _parent: ForeignHandler.IReceiver = null;
   private _factory: () => CodeCellWidget = null;
 }
@@ -179,9 +174,9 @@ namespace ForeignHandler {
   export
   interface IOptions {
     /**
-     * The kernel that the handler will listen to.
+     * The client session used by the foreign handler.
      */
-    kernel: Kernel.IKernel;
+    session: ClientSession;
 
     /**
      * The parent into which the handler will inject code cells.
