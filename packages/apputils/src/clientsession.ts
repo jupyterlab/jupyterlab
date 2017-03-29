@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  ArrayExt, IterableOrArrayLike, each, toArray
+  IterableOrArrayLike, each, find
 } from '@phosphor/algorithm';
 
 import {
@@ -35,21 +35,174 @@ import {
  * kernel, and can start a new kernel at any time.
  */
 export
+interface IClientSession extends IDisposable {
+  /**
+   * A signal emitted when the session is shut down.
+   */
+  readonly terminated: ISignal<this, void>;
+
+  /**
+   * A signal emitted when the kernel changes.
+   */
+  readonly kernelChanged: ISignal<this, Kernel.IKernelConnection | null>;
+
+  /**
+   * A signal emitted when the kernel status changes.
+   */
+  readonly statusChanged: ISignal<this, Kernel.Status>;
+
+  /**
+   * A signal emitted for a kernel messages.
+   */
+  readonly iopubMessage: ISignal<this, KernelMessage.IMessage>;
+
+  /**
+   * A signal emitted for an unhandled kernel message.
+   */
+  readonly unhandledMessage: ISignal<this, KernelMessage.IMessage>;
+
+  /**
+   * A signal emitted when a session property changes.
+   */
+  readonly propertyChanged: ISignal<this, 'path' | 'name' | 'type'>;
+
+  /**
+   * The current kernel associated with the document.
+   */
+  readonly kernel: Kernel.IKernelConnection | null;
+
+  /**
+   * The current path associated with the client sesssion.
+   */
+  readonly path: string;
+
+  /**
+   * The kernel preference.
+   */
+  kernelPreference: IClientSession.IKernelPreference;
+
+  /**
+   * The current name associated with the client sesssion.
+   */
+  readonly name: string;
+
+  /**
+   * The current status of the client session.
+   */
+  readonly status: Kernel.Status;
+
+  /**
+   * The type of the client session.
+   */
+  readonly type: string;
+
+  /**
+   * Change the current kernel associated with the document.
+   */
+  changeKernel(options: Kernel.IModel): Promise<Kernel.IKernelConnection>;
+
+  /**
+   * Kill the kernel and shutdown the session.
+   *
+   * @returns A promise that resolves when the session is shut down.
+   */
+  shutdown(): Promise<void>;
+
+  /**
+   * Select a kernel for the session.
+   */
+  selectKernel(): Promise<void>;
+
+  /**
+   * Restart the session.
+   *
+   * @returns A promise that resolves with the kernel model.
+   *
+   * #### Notes
+   * If there is a running kernel, present a dialog.
+   * If there is no kernel, we start a kernel with the last run
+   * kernel name.  If no kernel has been started, this is a no-op.
+   */
+  restart(): Promise<Kernel.IKernelConnection | null>;
+
+  /**
+   * Change the session path.
+   *
+   * @param path - The new session path.
+   *
+   * @returns A promise that resolves when the session has renamed.
+   *
+   * #### Notes
+   * This uses the Jupyter REST API, and the response is validated.
+   * The promise is fulfilled on a valid response and rejected otherwise.
+   */
+  setPath(path: string): Promise<void>;
+
+  /**
+   * Change the session name.
+   */
+  setName(name: string): Promise<void>;
+
+  /**
+   * Change the session type.
+   */
+  setType(type: string): Promise<void>;
+}
+
+
+/**
+ * The namespace for Client Session related interfaces.
+ */
+export
+namespace IClientSession {
+  /**
+   * A kernel preference.
+   */
+  export
+  interface IKernelPreference {
+    /**
+     * The name of the kernel.
+     */
+    readonly name?: string;
+
+    /**
+     * The preferred kernel language.
+     */
+    readonly language?: string;
+
+    /**
+     * The id of an existing kernel.
+     */
+    readonly id?: string;
+
+    /**
+     * Whether to prefer starting a kernel.
+     */
+    readonly shouldStart?: boolean;
+
+    /**
+     * Whether a kernel can be started.
+     */
+    readonly canStart?: boolean;
+  }
+}
+
+
+/**
+ * The default implementation of client session object.
+ */
+export
 class ClientSession implements IDisposable {
   /**
    * Construct a new client session.
    */
   constructor(options: ClientSession.IOptions) {
-    let manager = this._manager = options.manager;
-    manager.runningChanged.connect(this._onSessionsChanged, this);
+    this.manager = options.manager;
+    this.manager.runningChanged.connect(this._update, this);
     this._path = options.path;
     this._type = options.type || '';
     this._name = options.name || '';
-    this._preferredKernelName = options.preferredKernelName || '';
-    this._preferredKernelLanguage = (
-      options.preferredKernelLanguage || ''
-    );
-    this._onSessionsChanged(manager, toArray(manager.running()));
+    this._kernelPreference = options.kernelPreference || {};
   }
 
   /**
@@ -116,6 +269,21 @@ class ClientSession implements IDisposable {
   }
 
   /**
+   * The kernel preference.
+   */
+  get kernelPreference(): IClientSession.IKernelPreference {
+    return this._kernelPreference;
+  }
+  set kernelPreference(value: IClientSession.IKernelPreference) {
+    this._kernelPreference = value;
+  }
+
+  /**
+   * The session manager used by the client session.
+   */
+  readonly manager: Session.IManager;
+
+  /**
    * The current status of the client session.
    */
   get status(): Kernel.Status {
@@ -123,26 +291,6 @@ class ClientSession implements IDisposable {
       return 'starting';
     }
     return this._session ? this._session.status : 'dead';
-  }
-
-  /**
-   * The preferred kernel name.
-   */
-  get preferredKernelName(): string {
-    return this._preferredKernelName;
-  }
-  set preferredKernelName(value: string) {
-    this._preferredKernelName = value;
-  }
-
-  /**
-   * The desired kernel language.
-   */
-  get preferredKernelLanguage(): string {
-    return this._preferredKernelLanguage;
-  }
-  set preferredKernelLanguage(value: string) {
-    this._preferredKernelLanguage = value;
   }
 
   /**
@@ -191,6 +339,13 @@ class ClientSession implements IDisposable {
   }
 
   /**
+   * Select a kernel for the session.
+   */
+  selectKernel(): Promise<void> {
+    return Private.selectKernel(this);
+  }
+
+  /**
    * Kill the kernel and shutdown the session.
    *
    * @returns A promise that resolves when the session is shut down.
@@ -225,13 +380,6 @@ class ClientSession implements IDisposable {
       return Promise.resolve(null);
     }
     return ClientSession.restartKernel(kernel);
-  }
-
-  /**
-   * Select a kernel for the session.
-   */
-  selectKernel(): Promise<void> {
-    return Private.selectKernel(this, this._manager);
   }
 
   /**
@@ -272,11 +420,61 @@ class ClientSession implements IDisposable {
   }
 
   /**
+   * Initialize the session.
+   */
+  initialize(): Promise<void> {
+    return this._update().then(() => {
+      return this._initialize();
+    }).then(() => {
+      if (this.kernel) {
+        return;
+      }
+      let name = ClientSession.getDefaultKernel({
+        specs: this._manager.specs,
+        sessions: this._manager.running()
+        preference: this.kernelPreference
+      });
+      if (name) {
+        return this.changeKernel({ name }).then(() => undefined);
+      }
+      return this.selectKernel().then(() => undefined);
+    });
+  }
+
+  /**
+   * Initialize the session.
+   */
+  private _initialize(): Promise<void> {
+    let preference = this.kernelPreference;
+    if (this.kernel || preference.shouldStart === false) {
+      return Promise.resolve(void 0);
+    }
+    // Try to use an existing kernel.
+    if (preference.id) {
+      return this.changeKernel({ id: preference.id }).then(
+        () => void 0,
+        () => void 0
+      );
+    }
+    let name = ClientSession.getDefaultKernel({
+      specs: this.manager.specs,
+      sessions: this.manager.running(),
+      preference
+    });
+    if (name) {
+      return this.changeKernel({ name }).then(
+        () => void 0,
+        () => void 0
+      );
+    }
+  }
+
+  /**
    * Start a session and set up its signals.
    */
   private _startSession(model: Kernel.IModel): Promise<Kernel.IKernelConnection> {
     this._promise = new PromiseDelegate<void>();
-    return this._manager.startNew({
+    return this.manager.startNew({
       path: this._path,
       kernelName: model.name,
       kernelId: model.id
@@ -384,28 +582,29 @@ class ClientSession implements IDisposable {
   /**
    * Handle a change to the running sessions.
    */
-  private _onSessionsChanged(sender: Session.IManager, models: Session.IModel[]): void {
-    let index = ArrayExt.findFirstIndex(models, model => {
-      return model.notebook.path === this._path;
+  private _update(): Promise<void> {
+    let manager = this.manager;
+    let model = find(manager.running(), item => {
+      return item.notebook.path === this._path;
     });
-    if (index !== -1 && !this._session && !this._promise) {
-      let id = models[index].id;
+    if (model && !this._session && !this._promise) {
+      let id = model.id;
       this._promise = new PromiseDelegate<void>();
-      this._manager.connectTo(id).then(session => {
+      manager.connectTo(id).then(session => {
         this._handleNewSession(session);
       }).catch(err => {
         this._handleSessionError(err);
       });
+      return this._promise.promise;
     }
+    return Promise.resolve(void 0);
   }
 
-  private _manager: Session.IManager;
   private _path = '';
   private _name = '';
   private _type = '';
-  private _preferredKernelName = '';
-  private _preferredKernelLanguage = '';
   private _prevKernelName = '';
+  private _kernelPreference: IClientSession.IKernelPreference;
   private _isDisposed = false;
   private _session: Session.ISession | null = null;
   private _promise: PromiseDelegate<void> | null;
@@ -448,14 +647,9 @@ export namespace ClientSession {
     type?: string;
 
     /**
-     * The preferred kernel name.
+     * A kernel preference.
      */
-    preferredKernelName?: string;
-
-    /**
-     * The desired kernel language.
-     */
-    preferredKernelLanguage?: string;
+    kernelPreference?: IClientSession.IKernelPreference;
   }
 
   /**
@@ -492,24 +686,14 @@ export namespace ClientSession {
     specs: Kernel.ISpecModels;
 
     /**
+     * The kernel preference.
+     */
+    preference: IClientSession.IKernelPreference;
+
+    /**
      * The current running sessions.
      */
     sessions?: IterableOrArrayLike<Session.IModel>;
-
-    /**
-     * The optional existing kernel model.
-     */
-    existing?: Kernel.IModel;
-
-    /**
-     * The preferred kernel name.
-     */
-    preferredName?: string;
-
-    /**
-     * The preferred kernel language.
-     */
-    preferredLanguage?: string;
   }
 
   /**
@@ -555,14 +739,14 @@ namespace Private {
    * Select a kernel for the session.
    */
   export
-  function selectKernel(session: ClientSession, manager: Session.IManager): Promise<void> {
+  function selectKernel(session: ClientSession): Promise<void> {
     // Create the dialog body.
     let body = document.createElement('div');
     let text = document.createElement('label');
     text.innerHTML = `Select kernel for: "${session.name}"`;
     body.appendChild(text);
 
-    let options = getKernelSearch(session, manager);
+    let options = getKernelSearch(session);
     let selector = document.createElement('select');
     ClientSession.populateKernelSelect(selector, options);
     body.appendChild(selector);
@@ -590,27 +774,31 @@ namespace Private {
    */
   export
   function getDefaultKernel(options: ClientSession.IKernelSearch): string | null {
-    let { preferredName, preferredLanguage, specs, existing } = options;
-    let existingName = existing && existing.name;
-    if (!existingName && !preferredName && !preferredLanguage) {
+    let { specs, preference } = options;
+    let { name, language, id, shouldStart } = preference;
+    if (!shouldStart) {
+      return null;
+    }
+
+    if (!name && !language && !id) {
       return specs.default;
     }
     // Look for an exact match of preferred name.
     for (let specName in specs.kernelspecs) {
-      if (specName === preferredName) {
-        return preferredName;
+      if (specName === name) {
+        return name;
       }
     }
 
     // Look for an exact match of existing name.
     for (let specName in specs.kernelspecs) {
-      if (specName === existingName) {
-        return existing.name;
+      if (specName === name) {
+        return name;
       }
     }
 
     // Bail if there is no language.
-    if (!preferredLanguage) {
+    if (!language) {
       return null;
     }
 
@@ -618,7 +806,7 @@ namespace Private {
     let matches: string[] = [];
     for (let specName in specs.kernelspecs) {
       let kernelLanguage = specs.kernelspecs[specName].language;
-      if (preferredLanguage === kernelLanguage) {
+      if (language === kernelLanguage) {
         matches.push(specName);
       }
     }
@@ -626,7 +814,7 @@ namespace Private {
       let specName = matches[0];
       console.log('No exact match found for ' + specName +
                   ', using kernel ' + specName + ' that matches ' +
-                  'language=' + preferredLanguage);
+                  'language=' + language);
       return specName;
     }
 
@@ -642,18 +830,17 @@ namespace Private {
     while (node.firstChild) {
       node.removeChild(node.firstChild);
     }
-
     let maxLength = 10;
 
-    let {
-      preferredName, preferredLanguage, sessions, specs, existing
-    } = options;
-    let existingName = existing && existing.name;
-    let existingId = existing && existing.id;
+    let { preference, sessions, specs } = options;
+    let { name, id, language, canStart, shouldStart } = preference;
 
-    if (existingName === preferredName) {
-      existingName = '';
+    if (!canStart) {
+      node.disabled = true;
+      return;
     }
+
+    node.disabled = false;
 
     // Create mappings of display names and languages for kernel name.
     let displayNames: { [key: string]: string } = Object.create(null);
@@ -667,12 +854,7 @@ namespace Private {
 
     // Handle a preferred kernel by name.
     let names: string[] = [];
-    if (preferredName && preferredName in specs.kernelspecs) {
-      names.push(name);
-    }
-
-    // Handle an existing kernel by name.
-    if (existingName && existingName in specs.kernelspecs) {
+    if (name && name in specs.kernelspecs) {
       names.push(name);
     }
 
@@ -680,10 +862,10 @@ namespace Private {
     let preferred = document.createElement('optgroup');
     preferred.label = 'Start Preferred Kernel';
 
-    if (preferredLanguage && specs) {
-      for (let name in specs.kernelspecs) {
-        if (languages[name] === preferredLanguage) {
-          names.push(name);
+    if (language) {
+      for (let specName in specs.kernelspecs) {
+        if (languages[specName] === language) {
+          names.push(specName);
         }
       }
       names.sort((a, b) => displayNames[a].localeCompare(displayNames[b]));
@@ -693,8 +875,8 @@ namespace Private {
     }
     // Use the default kernel if no preferred language or none were found.
     if (!names.length) {
-      let name = specs.default;
-      preferred.appendChild(optionForName(name, displayNames[name]));
+      let defaultName = specs.default;
+      preferred.appendChild(optionForName(defaultName, displayNames[defaultName]));
     }
     if (preferred.firstChild) {
       node.appendChild(preferred);
@@ -703,20 +885,24 @@ namespace Private {
     // Add an option for no kernel
     node.appendChild(optionForNone());
 
+    if (!shouldStart) {
+      node.value = JSON.stringify(null);
+    }
+
     let other = document.createElement('optgroup');
     other.label = 'Start Other Kernel';
 
     // Add the rest of the kernel names in alphabetical order.
     let otherNames: string[] = [];
-    for (let name in specs.kernelspecs) {
-      if (names.indexOf(name) !== -1) {
+    for (let specName in specs.kernelspecs) {
+      if (names.indexOf(specName) !== -1) {
         continue;
       }
-      otherNames.push(name);
+      otherNames.push(specName);
     }
     otherNames.sort((a, b) => displayNames[a].localeCompare(displayNames[b]));
-    for (let name of otherNames) {
-      other.appendChild(optionForName(name, displayNames[name]));
+    for (let otherName of otherNames) {
+      other.appendChild(optionForName(otherName, displayNames[otherName]));
     }
     // Add a separator option if there were any other names.
     if (otherNames.length) {
@@ -728,11 +914,11 @@ namespace Private {
     let otherSessions: Session.IModel[] = [];
 
     each(sessions, session => {
-      if (preferredLanguage &&
-          languages[session.kernel.name] === preferredLanguage &&
-          session.kernel.id !== existingId) {
+      if (language &&
+          languages[session.kernel.name] === language &&
+          session.kernel.id !== id) {
         matchingSessions.push(session);
-      } else if (session.kernel.id !== existingId) {
+      } else if (session.kernel.id !== id) {
         otherSessions.push(session);
       }
     });
@@ -773,14 +959,12 @@ namespace Private {
   /**
    * Get the kernel search options given a client session and sesion manager.
    */
-  function getKernelSearch(session: ClientSession, manager: Session.IManager): ClientSession.IKernelSearch {
-      return {
-        specs: manager.specs,
-        sessions: manager.running(),
-        existing: session.kernel ? session.kernel.model : null,
-        preferredName: session.preferredKernelName,
-        preferredLanguage: session.preferredKernelLanguage
-      };
+  function getKernelSearch(session: ClientSession): ClientSession.IKernelSearch {
+    return {
+      specs: session.manager.specs,
+      sessions: session.manager.running(),
+      preference: session.kernelPreference
+    };
   }
 
   /**

@@ -22,7 +22,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  ClientSession
+  IClientSession
 } from '@jupyterlab/apputils';
 
 import {
@@ -401,7 +401,7 @@ class CodeCellWidget extends BaseCellWidget {
   /**
    * Execute the cell given a client session.
    */
-  execute(session: ClientSession): Promise<KernelMessage.IExecuteReplyMsg> {
+  execute(session: IClientSession): Promise<KernelMessage.IExecuteReplyMsg> {
     let model = this.model;
     let code = model.value.text;
     if (!code.trim() || !session.kernel) {

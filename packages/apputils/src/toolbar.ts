@@ -18,7 +18,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  ClientSession
+  IClientSession
 } from '.';
 
 
@@ -196,7 +196,7 @@ namespace Toolbar {
    * Create an interrupt toolbar item.
    */
   export
-  function createInterruptButton(session: ClientSession): ToolbarButton {
+  function createInterruptButton(session: IClientSession): ToolbarButton {
     return new ToolbarButton({
       className: TOOLBAR_INTERRUPT_CLASS,
       onClick: () => {
@@ -213,7 +213,7 @@ namespace Toolbar {
    * Create a restart toolbar item.
    */
   export
-  function createRestartButton(session: ClientSession): ToolbarButton {
+  function createRestartButton(session: IClientSession): ToolbarButton {
     return new ToolbarButton({
       className: TOOLBAR_RESTART_CLASS,
       onClick: () => {
@@ -233,7 +233,7 @@ namespace Toolbar {
    * It can handle a change in context or kernel.
    */
   export
-  function createKernelNameItem(session: ClientSession): Widget {
+  function createKernelNameItem(session: IClientSession): Widget {
     return new Private.KernelName(session);
   }
 
@@ -248,7 +248,7 @@ namespace Toolbar {
    * It can handle a change to the context or the kernel.
    */
   export
-  function createKernelStatusItem(session: ClientSession): Widget {
+  function createKernelStatusItem(session: IClientSession): Widget {
     return new Private.KernelIndicator(session);
   }
 }
@@ -383,7 +383,7 @@ namespace Private {
     /**
      * Construct a new kernel name widget.
      */
-    constructor(session: ClientSession) {
+    constructor(session: IClientSession) {
       super();
       this.addClass(TOOLBAR_KERNEL_CLASS);
       this._onKernelChanged(session);
@@ -393,7 +393,7 @@ namespace Private {
     /**
      * Update the text of the kernel name item.
      */
-    _onKernelChanged(session: ClientSession): void {
+    _onKernelChanged(session: IClientSession): void {
       let kernel = session.kernel;
       this.node.textContent = 'No Kernel!';
       if (!kernel) {
@@ -416,7 +416,7 @@ namespace Private {
     /**
      * Construct a new kernel status widget.
      */
-    constructor(session: ClientSession) {
+    constructor(session: IClientSession) {
       super();
       this.addClass(TOOLBAR_INDICATOR_CLASS);
       this._onStatusChanged(session);
@@ -426,7 +426,7 @@ namespace Private {
     /**
      * Handle a status on a kernel.
      */
-    private _onStatusChanged(session: ClientSession) {
+    private _onStatusChanged(session: IClientSession) {
       if (this.isDisposed) {
         return;
       }

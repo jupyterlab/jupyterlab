@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Contents
+  Contents, Kernel
 } from '@jupyterlab/services';
 
 import {
@@ -26,7 +26,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  ClientSession
+  IClientSession
 } from '@jupyterlab/apputils';
 
 import {
@@ -498,9 +498,11 @@ class DocumentRegistry implements IDisposable {
    *
    * @param widgetName - The name of the widget factory.
    *
+   * @param kernel - An optional existing kernel model.
+   *
    * @returns A kernel preference.
    */
-  getKernelPreference(ext: string, widgetName: string): DocumentRegistry.IKernelPreference {
+  getKernelPreference(ext: string, widgetName: string, kernel?: Kernel.IModel): IClientSession.IKernelPreference {
     ext = Private.normalizeExtension(ext);
     widgetName = widgetName.toLowerCase();
     let widgetFactory = this._widgetFactories[widgetName];
@@ -512,10 +514,14 @@ class DocumentRegistry implements IDisposable {
       return void 0;
     }
     let language = modelFactory.preferredLanguage(ext);
+    let name = kernel && kernel.name;
+    let id = kernel && kernel.id;
     return {
+      id,
+      name,
       language,
-      preferKernel: widgetFactory.preferKernel,
-      canStartKernel: widgetFactory.canStartKernel
+      shouldStart: widgetFactory.preferKernel,
+      canStart: widgetFactory.canStartKernel
     };
   }
 
@@ -636,7 +642,7 @@ namespace DocumentRegistry {
     /**
      * The client session object associated with the context.
      */
-    readonly session: ClientSession;
+    readonly session: IClientSession;
 
     /**
      * The current path associated with the document.
@@ -886,27 +892,6 @@ namespace DocumentRegistry {
    */
   export
   type CodeModelFactory = IModelFactory<ICodeModel>;
-
-  /**
-   * A kernel preference for a given file path and widget.
-   */
-  export
-  interface IKernelPreference {
-    /**
-     * The preferred kernel language.
-     */
-    readonly language: string;
-
-    /**
-     * Whether to prefer having a kernel started when opening.
-     */
-    readonly preferKernel: boolean;
-
-    /**
-     * Whether a kernel when can be started when opening.
-     */
-    readonly canStartKernel: boolean;
-  }
 
   /**
    * An interface for a file type.

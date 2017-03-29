@@ -18,8 +18,8 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, InstanceTracker, ILayoutRestorer, IMainMenu,
-  showDialog
+  ClientSession, Dialog, ICommandPalette, InstanceTracker, ILayoutRestorer,
+  IMainMenu, showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -33,10 +33,6 @@ import {
 import {
   IConsoleTracker, ICreateConsoleArgs, ConsolePanel
 } from '@jupyterlab/console';
-
-import {
-  selectKernel
-} from '@jupyterlab/docregistry';
 
 import {
   IPathTracker
@@ -192,7 +188,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       args = args || {};
 
       // If we get a session, use it.
-      if (args.id) {
+      if (args.path) {
         return manager.ready.then(() => manager.connectTo(args.id))
           .then(session => {
             name = session.path.split('/').pop();
@@ -351,9 +347,9 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   command = CommandIDs.inject;
   commands.addCommand(command, {
     execute: (args: JSONObject) => {
-      let id = args['id'];
+      let path = args['path'];
       tracker.find(widget => {
-        if (widget.console.session.id === id) {
+        if (widget.console.session.path === path) {
           if (args['activate'] !== false) {
             tracker.activate(widget);
           }
@@ -367,16 +363,16 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   command = CommandIDs.open;
   commands.addCommand(command, {
     execute: (args: JSONObject) => {
-      let id = args['id'];
+      let path = args['path'];
       let widget = tracker.find(value => {
-        if (value.console.session.id === id) {
+        if (value.console.session.path === path) {
           return true;
         }
       });
       if (widget) {
         tracker.activate(widget);
       } else {
-        app.commands.execute(CommandIDs.create, { id });
+        app.commands.execute(CommandIDs.create, { path });
       }
     }
   });

@@ -22,7 +22,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  showDialog, ClientSession, Dialog
+  showDialog, ClientSession, Dialog, IClientSession
 } from '@jupyterlab/apputils';
 
 import {
@@ -55,8 +55,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     this.session = new ClientSession({
       manager: manager.sessions,
       path: this._path,
-      preferredKernelName: this._model.defaultKernelName,
-      preferredKernelLanguage: this._model.defaultKernelLanguage
+      kernelPreference: options.kernelPreference
     });
     this.session.propertyChanged.connect(this._onSessionChanged, this);
     manager.contents.fileChanged.connect(this._onFileChanged, this);
@@ -327,28 +326,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   }
 
   /**
-   * Start the default kernel for the context.
-   */
-  startDefaultKernel(): Promise<void> {
-    return this.ready.then(() => {
-      if (this.isDisposed) {
-        return;
-      }
-      let name = ClientSession.getDefaultKernel({
-        specs: this._manager.specs,
-        sessions: this._manager.sessions.running(),
-        preferredName: this.session.preferredKernelName,
-        preferredLanguage: this.session.preferredKernelLanguage
-      });
-      if (name) {
-        return this.session.changeKernel({ name }).then(() => undefined);
-      } else {
-        return this.session.selectKernel().then(() => undefined);
-      }
-    });
-  }
-
-  /**
    * Handle a change on the contents manager.
    */
   private _onFileChanged(sender: Contents.IManager, change: Contents.IChangedArgs): void {
@@ -410,8 +387,12 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       if (this.isDisposed) {
         return;
       }
-      this.session.preferredKernelName = this._model.defaultKernelName;
-      this.session.preferredKernelLanguage = this._model.defaultKernelLanguage;
+      // Update the kernel preference.
+      this.session.kernelPreference = {
+        ...this.session.kernelPreference,
+        name: this._model.defaultKernelName,
+        language: this._model.defaultKernelLanguage,
+      };
       this._isReady = true;
       this._populatedPromise.resolve(void 0);
     });
@@ -456,6 +437,11 @@ export namespace Context {
      * The initial path of the file.
      */
     path: string;
+
+    /**
+     * The kernel preference associated with the context.
+     */
+    kernelPreference: IClientSession.IKernelPreference;
 
     /**
      * An optional callback for opening sibling widgets.

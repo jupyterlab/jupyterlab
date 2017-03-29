@@ -26,7 +26,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  ClientSession
+  IClientSession
 } from '@jupyterlab/apputils';
 
 import {
@@ -194,7 +194,7 @@ class CodeConsole extends Widget {
   /**
    * The client session used by the console.
    */
-  readonly session: ClientSession;
+  readonly session: IClientSession;
 
   /**
    * The console banner widget.
@@ -641,7 +641,7 @@ namespace CodeConsole {
     /**
      * The client session for the console widget.
      */
-    session: ClientSession;
+    session: IClientSession;
 
     /**
      * The service used to look up mime types.

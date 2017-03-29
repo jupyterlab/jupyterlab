@@ -2,8 +2,32 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ClientSession
+  ClientSession, IClientSession
 } from '@jupyterlab/apputils';
+
+import {
+  BaseCellWidget, CodeCellWidget
+} from '@jupyterlab/cells';
+
+import {
+  IEditorMimeTypeService, CodeEditor
+} from '@jupyterlab/codeeditor';
+
+import {
+  uuid
+} from '@jupyterlab/coreutils';
+
+import {
+  OutputAreaWidget
+} from '@jupyterlab/outputarea';
+
+import {
+  IRenderMime
+} from '@jupyterlab/rendermime';
+
+import {
+  Session
+} from '@jupyterlab/services';
 
 import {
   Token
@@ -16,22 +40,6 @@ import {
 import {
   Panel
 } from '@phosphor/widgets';
-
-import {
-  BaseCellWidget, CodeCellWidget
-} from '@jupyterlab/cells';
-
-import {
-  IEditorMimeTypeService, CodeEditor
-} from '@jupyterlab/codeeditor';
-
-import {
-  OutputAreaWidget
-} from '@jupyterlab/outputarea';
-
-import {
-  IRenderMime
-} from '@jupyterlab/rendermime';
 
 import {
   CodeConsole
@@ -119,7 +127,7 @@ namespace ConsolePanel {
     /**
      * The client session for the console widget.
      */
-    session: ClientSession;
+    session: IClientSession;
 
     /**
      * The model factory for the console widget.
@@ -130,6 +138,49 @@ namespace ConsolePanel {
      * The service used to look up mime types.
      */
     mimeTypeService: IEditorMimeTypeService;
+  }
+
+  /**
+   * The options used to create a session for a console.
+   */
+  export
+  interface ISessionOptions {
+    /**
+     * A session manager instance.
+     */
+    manager: Session.IManager;
+
+    /**
+     * The path of the console
+     */
+    path?: string;
+
+    /**
+     * The name of with the console.
+     */
+    name?: string;
+
+    /**
+     * A kernel preference.
+     */
+    kernelPreference?: IClientSession.IKernelPreference;
+  }
+
+  /**
+   * Create a client session for a console.
+   */
+  export
+  function createSession(options: ISessionOptions): IClientSession {
+    let path = options.path || `console-${Private.count++}-${uuid()}`;
+    let session = new ClientSession({
+      manager: options.manager,
+      path,
+      name: options.name || '',
+      type: 'console',
+      kernelPreference: options.kernelPreference
+    });
+    session.initialize();
+    return session;
   }
 
   /**
@@ -238,4 +289,16 @@ namespace ConsolePanel {
   export
   const IContentFactory = new Token<IContentFactory>('jupyter.services.console.content-factory');
   /* tslint:enable */
+}
+
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * The counter for new consoles.
+   */
+  export
+  let count = 0;
 }

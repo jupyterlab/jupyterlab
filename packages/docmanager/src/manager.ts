@@ -30,6 +30,10 @@ import {
 } from '@phosphor/widgets';
 
 import {
+  IClientSession
+} from '@jupyterlab/apputils';
+
+import {
   DocumentRegistry, Context
 } from '@jupyterlab/docregistry';
 
@@ -286,7 +290,7 @@ class DocumentManager implements IDisposable {
   /**
    * Create a context from a path and a model factory.
    */
-  private _createContext(path: string, factory: DocumentRegistry.ModelFactory): Private.IContext {
+  private _createContext(path: string, factory: DocumentRegistry.ModelFactory, kernelPreference: IClientSession.IKernelPreference): Private.IContext {
     let adopter = (widget: Widget) => {
       this._widgetManager.adoptWidget(context, widget);
       this._opener.open(widget);
@@ -295,7 +299,8 @@ class DocumentManager implements IDisposable {
       opener: adopter,
       manager: this._serviceManager,
       factory,
-      path
+      path,
+      kernelPreference
     });
     let handler = new SaveHandler({
       context,
@@ -351,6 +356,12 @@ class DocumentManager implements IDisposable {
       return;
     }
 
+    // Handle the kernel pereference.
+    let ext = DocumentRegistry.extname(path);
+    let preference = this._registry.getKernelPreference(
+      ext, widgetFactory.name, kernel
+    );
+
     let context: Private.IContext = null;
 
     // Handle the load-from-disk case
@@ -358,26 +369,19 @@ class DocumentManager implements IDisposable {
       // Use an existing context if available.
       context = this._findContext(path, factory.name);
       if (!context) {
-        context = this._createContext(path, factory);
+        context = this._createContext(path, factory, preference);
         // Load the contents from disk.
         context.revert();
       }
     } else if (which === 'create') {
-      context = this._createContext(path, factory);
+      context = this._createContext(path, factory, preference);
       // Immediately save the contents to disk.
       context.save();
     }
 
-    // Maybe launch/connect the kernel for the context.
-    if (kernel && (kernel.id || kernel.name) && widgetFactory.canStartKernel) {
-      // If the kernel is valid and the widgetFactory wants one.
-      context.session.changeKernel(kernel);
-    } else if (widgetFactory.preferKernel &&
-               !(kernel && !kernel.id && !kernel.name) &&
-               !context.session.kernel) {
-      // If the kernel is not the `None` kernel and the widgetFactory wants one
-      context.startDefaultKernel();
-    }
+    context.ready.then(() => {
+      context.session.initialize();
+    });
 
     let widget = this._widgetManager.createWidget(widgetFactory.name, context);
     this._opener.open(widget);

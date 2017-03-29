@@ -14,7 +14,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  ClientSession
+  IClientSession
 } from '@jupyterlab/apputils';
 
 import {
@@ -55,7 +55,7 @@ class ForeignHandler implements IDisposable {
   /**
    * The client session used by the foreign handler.
    */
-  readonly session: ClientSession;
+  readonly session: IClientSession;
 
   /**
    * The foreign handler's parent receiver.
@@ -90,7 +90,7 @@ class ForeignHandler implements IDisposable {
    * @returns `true` if the message resulted in a new cell injection or a
    * previously injected cell being updated and `false` for all other messages.
    */
-  protected onIOPubMessage(sender: ClientSession, msg: KernelMessage.IIOPubMessage): boolean {
+  protected onIOPubMessage(sender: IClientSession, msg: KernelMessage.IIOPubMessage): boolean {
     // Only process messages if foreign cell injection is enabled.
     if (!this._enabled) {
       return false;
@@ -176,7 +176,7 @@ namespace ForeignHandler {
     /**
      * The client session used by the foreign handler.
      */
-    session: ClientSession;
+    session: IClientSession;
 
     /**
      * The parent into which the handler will inject code cells.

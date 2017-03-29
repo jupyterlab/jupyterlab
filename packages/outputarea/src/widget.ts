@@ -34,7 +34,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  ClientSession
+  IClientSession
 } from '@jupyterlab/apputils';
 
 import {
@@ -214,7 +214,7 @@ class OutputAreaWidget extends Widget {
   /**
    * Execute code on a client session and handle response messages.
    */
-  execute(code: string, session: ClientSession): Promise<KernelMessage.IExecuteReplyMsg> {
+  execute(code: string, session: IClientSession): Promise<KernelMessage.IExecuteReplyMsg> {
     // Bail if the model is disposed.
     if (this.model.isDisposed) {
       return Promise.reject('Model is disposed');
@@ -380,7 +380,7 @@ class OutputAreaWidget extends Widget {
   /**
    * Handle an input request from a kernel.
    */
-  private _onInputRequest(msg: KernelMessage.IInputRequestMsg, session: ClientSession): void {
+  private _onInputRequest(msg: KernelMessage.IInputRequestMsg, session: IClientSession): void {
     // Add an output widget to the end.
     let factory = this.contentFactory;
     let prompt = msg.content.prompt;

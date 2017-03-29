@@ -14,7 +14,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  ClientSession
+  IClientSession
 } from '@jupyterlab/apputils';
 
 import {
@@ -30,7 +30,7 @@ interface IConsoleHistory extends IDisposable {
   /**
    * The client session used by the foreign handler.
    */
-  readonly session: ClientSession;
+  readonly session: IClientSession;
 
   /**
    * The current editor used by the history widget.
@@ -100,7 +100,7 @@ class ConsoleHistory implements IConsoleHistory {
   /**
    * The client session used by the foreign handler.
    */
-  readonly session: ClientSession;
+  readonly session: IClientSession;
 
   /**
    * The current editor used by the history manager.
@@ -321,7 +321,7 @@ namespace ConsoleHistory {
     /**
      * The client session used by the foreign handler.
      */
-    session: ClientSession;
+    session: IClientSession;
   }
 }
 
