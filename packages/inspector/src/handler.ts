@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel, KernelMessage
+ KernelMessage
 } from '@jupyterlab/services';
 
 import {
@@ -12,6 +12,10 @@ import {
 import {
   ISignal, Signal
 } from '@phosphor/signaling';
+
+import {
+  IClientSession
+} from '@jupyterlab/apputils';
 
 import {
   CodeEditor
@@ -35,7 +39,7 @@ class InspectionHandler implements IDisposable, IInspector.IInspectable {
    * Construct a new inspection handler for a widget.
    */
   constructor(options: InspectionHandler.IOptions) {
-    this._kernel = options.kernel || null;
+    this.session = options.session;
     this._rendermime = options.rendermime;
   }
 
@@ -61,6 +65,11 @@ class InspectionHandler implements IDisposable, IInspector.IInspectable {
   }
 
   /**
+   * The client session used by the inspection handler.
+   */
+  readonly session: IClientSession;
+
+  /**
    * The editor widget used by the inspection handler.
    */
   get editor(): CodeEditor.IEditor {
@@ -80,16 +89,6 @@ class InspectionHandler implements IDisposable, IInspector.IInspectable {
       this._ephemeralCleared.emit(void 0);
       editor.model.value.changed.connect(this.onTextChanged, this);
     }
-  }
-
-  /**
-   * The kernel used by the inspection handler.
-   */
-  get kernel(): Kernel.IKernel {
-    return this._kernel;
-  }
-  set kernel(value: Kernel.IKernel) {
-    this._kernel = value;
   }
 
   /**
@@ -124,7 +123,6 @@ class InspectionHandler implements IDisposable, IInspector.IInspectable {
       return;
     }
     this._editor = null;
-    this._kernel = null;
     this._rendermime = null;
     this._disposed.emit(void 0);
     Signal.clearData(this);
@@ -149,7 +147,7 @@ class InspectionHandler implements IDisposable, IInspector.IInspectable {
     let update: IInspector.IInspectorUpdate = { content: null, type: 'hints' };
 
     // Clear hints if the new text value is empty or kernel is unavailable.
-    if (!code || !this._kernel) {
+    if (!code || !this.session.kernel) {
       this._inspected.emit(update);
       return;
     }
@@ -161,7 +159,7 @@ class InspectionHandler implements IDisposable, IInspector.IInspectable {
     };
     const pending = ++this._pending;
 
-    this._kernel.requestInspect(contents).then(msg => {
+    this.session.kernel.requestInspect(contents).then(msg => {
       let value = msg.content;
 
       // If handler has been disposed, bail.
@@ -195,7 +193,6 @@ class InspectionHandler implements IDisposable, IInspector.IInspectable {
   private _editor: CodeEditor.IEditor = null;
   private _ephemeralCleared = new Signal<InspectionHandler, void>(this);
   private _inspected = new Signal<this, IInspector.IInspectorUpdate>(this);
-  private _kernel: Kernel.IKernel = null;
   private _pending = 0;
   private _rendermime: RenderMime = null;
   private _standby = true;
@@ -213,9 +210,9 @@ namespace InspectionHandler {
   export
   interface IOptions {
     /**
-     * The kernel for the inspection handler.
+     * The client session for the inspection handler.
      */
-    kernel?: Kernel.IKernel;
+    session: IClientSession;
 
     /**
      * The mime renderer for the inspection handler.

@@ -118,9 +118,8 @@ const consolePlugin: JupyterLabPlugin<void> = {
     // Create a handler for each console that is created.
     consoles.widgetAdded.connect((sender, parent) => {
       const session = parent.console.session;
-      const kernel = session.kernel;
       const rendermime = parent.console.rendermime;
-      const handler = new InspectionHandler({ kernel, rendermime });
+      const handler = new InspectionHandler({ session, rendermime });
 
       // Associate the handler to the widget.
       handlers[parent.id] = handler;
@@ -132,11 +131,6 @@ const consolePlugin: JupyterLabPlugin<void> = {
       // Listen for prompt creation.
       parent.console.promptCreated.connect((sender, cell) => {
         handler.editor = cell && cell.editor;
-      });
-
-      // Listen for kernel changes.
-      session.kernelChanged.connect((sender, kernel) => {
-        handler.kernel = kernel;
       });
 
       // Listen for parent disposal.
@@ -173,9 +167,9 @@ const notebookPlugin: JupyterLabPlugin<void> = {
 
     // Create a handler for each notebook that is created.
     notebooks.widgetAdded.connect((sender, parent) => {
-      const kernel = parent.kernel;
+      const session = parent.session;
       const rendermime = parent.rendermime;
-      const handler = new InspectionHandler({ kernel, rendermime });
+      const handler = new InspectionHandler({ session, rendermime });
 
       // Associate the handler to the widget.
       handlers[parent.id] = handler;
@@ -187,11 +181,6 @@ const notebookPlugin: JupyterLabPlugin<void> = {
       // Listen for active cell changes.
       parent.notebook.activeCellChanged.connect((sender, cell) => {
         handler.editor = cell && cell.editor;
-      });
-
-      // Listen for kernel changes.
-      parent.kernelChanged.connect((sender, kernel) => {
-        handler.kernel = kernel;
       });
 
       // Listen for parent disposal.
