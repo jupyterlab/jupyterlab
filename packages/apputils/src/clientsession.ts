@@ -97,6 +97,11 @@ interface IClientSession extends IDisposable {
   readonly type: string;
 
   /**
+   * The display name of the kernel.
+   */
+  readonly kernelDisplayName: string;
+
+  /**
    * Change the current kernel associated with the document.
    */
   changeKernel(options: Kernel.IModel): Promise<Kernel.IKernelConnection>;
@@ -301,6 +306,18 @@ class ClientSession implements IDisposable {
   }
 
   /**
+   * The display name of the kernel.
+   */
+  get kernelDisplayName(): string {
+    let kernel = this.kernel;
+    if (!kernel) {
+      return 'No Kernel!';
+    }
+    let spec = this.manager.specs.kernelspecs[kernel.name];
+    return spec ? spec.name : kernel.name;
+  }
+
+  /**
    * Test whether the context is disposed.
    */
   get isDisposed(): boolean {
@@ -430,8 +447,8 @@ class ClientSession implements IDisposable {
         return;
       }
       let name = ClientSession.getDefaultKernel({
-        specs: this._manager.specs,
-        sessions: this._manager.running()
+        specs: this.manager.specs,
+        sessions: this.manager.running(),
         preference: this.kernelPreference
       });
       if (name) {

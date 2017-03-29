@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  uuid
+  PathExt, Time, uuid
 } from '@jupyterlab/coreutils';
 
 import {
@@ -22,11 +22,11 @@ import {
 } from '@jupyterlab/outputarea';
 
 import {
-  IRenderMime
+  IRenderMime, RenderMime
 } from '@jupyterlab/rendermime';
 
 import {
-  Session
+  ServiceManager
 } from '@jupyterlab/services';
 
 import {
@@ -63,15 +63,43 @@ class ConsolePanel extends Panel {
   constructor(options: ConsolePanel.IOptions) {
     super();
     this.addClass(PANEL_CLASS);
+    let {
+      rendermime, mimeTypeService, path, name, manager, modelFactory
+    } = options;
     let factory = options.contentFactory;
-    let { rendermime, session, mimeTypeService } = options;
     let contentFactory = factory.consoleContentFactory;
-    let modelFactory = options.modelFactory;
-    let consoleOpts = {
+    path = path || `console-${Private.count++}-${uuid()}`;
+
+    let session = new ClientSession({
+      manager: manager.sessions,
+      path,
+      name: name || '',
+      type: 'console',
+      kernelPreference: options.kernelPreference
+    });
+
+    rendermime.resolver = new RenderMime.UrlResolver({
+      session,
+      contents: manager.contents
+    });
+
+    this.console = factory.createConsole({
       rendermime, session, mimeTypeService, contentFactory, modelFactory
-    };
-    this.console = factory.createConsole(consoleOpts);
+    });
     this.addWidget(this.console);
+
+    session.initialize().then(() => {
+      this._connected = new Date();
+      this._updateTitle();
+    });
+
+    this._manager = manager;
+    this.console.executed.connect(this._onExecuted, this);
+    session.kernelChanged.connect(this._updateTitle, this);
+    session.propertyChanged.connect(this._updateTitle, this);
+
+    this.title.icon = 'jp-ImageCodeConsole';
+    this.title.closable = true;
   }
 
   /**
@@ -101,6 +129,25 @@ class ConsolePanel extends Panel {
     super.onCloseRequest(msg);
     this.dispose();
   }
+
+  /**
+   * Handle a console execution.
+   */
+  private _onExecuted(sender: CodeConsole, args: Date) {
+    this._executed = args;
+    this._updateTitle();
+  }
+
+  /**
+   * Update the console panel title.
+   */
+  private _updateTitle(): void {
+    Private.updateTitle(this, this._connected, this._executed);
+  }
+
+  private _manager: ServiceManager.IManager;
+  private _executed: Date = null;
+  private _connected: Date = null;
 }
 
 
@@ -125,30 +172,9 @@ namespace ConsolePanel {
     contentFactory: IContentFactory;
 
     /**
-     * The client session for the console widget.
+     * The service manager used by the panel.
      */
-    session: IClientSession;
-
-    /**
-     * The model factory for the console widget.
-     */
-    modelFactory?: CodeConsole.IModelFactory;
-
-    /**
-     * The service used to look up mime types.
-     */
-    mimeTypeService: IEditorMimeTypeService;
-  }
-
-  /**
-   * The options used to create a session for a console.
-   */
-  export
-  interface ISessionOptions {
-    /**
-     * A session manager instance.
-     */
-    manager: Session.IManager;
+    manager: ServiceManager.IManager;
 
     /**
      * The path of the console
@@ -164,23 +190,16 @@ namespace ConsolePanel {
      * A kernel preference.
      */
     kernelPreference?: IClientSession.IKernelPreference;
-  }
 
-  /**
-   * Create a client session for a console.
-   */
-  export
-  function createSession(options: ISessionOptions): IClientSession {
-    let path = options.path || `console-${Private.count++}-${uuid()}`;
-    let session = new ClientSession({
-      manager: options.manager,
-      path,
-      name: options.name || '',
-      type: 'console',
-      kernelPreference: options.kernelPreference
-    });
-    session.initialize();
-    return session;
+    /**
+     * The model factory for the console widget.
+     */
+    modelFactory?: CodeConsole.IModelFactory;
+
+    /**
+     * The service used to look up mime types.
+     */
+    mimeTypeService: IEditorMimeTypeService;
   }
 
   /**
@@ -301,4 +320,25 @@ namespace Private {
    */
   export
   let count = 0;
+
+  /**
+   * Update the title of a console panel.
+   */
+  export
+  function updateTitle(panel: ConsolePanel, connected: Date | null, executed: Date | null) {
+    let session = panel.console.session;
+    let caption = (
+      `Name: ${session.name}\n` +
+      `Directory: ${PathExt.dirname(session.path)}\n` +
+      `Kernel: ${session.kernelDisplayName}`
+    );
+    if (connected) {
+      caption += `\nConnected: ${Time.format(connected.toISOString())}`;
+    }
+    if (executed) {
+      caption += `\nLast Execution: ${Time.format(executed.toISOString())}`;
+    }
+    panel.title.label = session.name;
+    panel.title.caption = caption;
+  }
 }

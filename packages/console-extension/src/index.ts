@@ -18,7 +18,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ClientSession, Dialog, ICommandPalette, InstanceTracker, ILayoutRestorer,
+  Dialog, ICommandPalette, InstanceTracker, ILayoutRestorer,
   IMainMenu, showDialog
 } from '@jupyterlab/apputils';
 
@@ -411,40 +411,6 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       mimeTypeService: editorServices.mimeTypeService
     };
     let panel = new ConsolePanel(options);
-    let resolver = new RenderMime.UrlResolver({
-      session,
-      contents: services.contents
-    });
-    panel.console.rendermime.resolver = resolver;
-
-    let specs = manager.specs;
-    let displayName = specs.kernelspecs[session.kernel.name].display_name;
-    let captionOptions: Private.ICaptionOptions = {
-      label: name,
-      displayName,
-      path: session.path,
-      connected: new Date()
-    };
-    // If the console panel does not have an ID, assign it one.
-    panel.id = panel.id || `console-${++id}`;
-    panel.title.label = name;
-    panel.title.caption = Private.caption(captionOptions);
-    panel.title.icon = CONSOLE_ICON_CLASS;
-    panel.title.closable = true;
-    // Update the caption of the tab with the last execution time.
-    panel.console.executed.connect((sender, executed) => {
-      captionOptions.executed = executed;
-      panel.title.caption = Private.caption(captionOptions);
-    });
-    // Update the caption of the tab when the kernel changes.
-    panel.console.session.kernelChanged.connect(() => {
-      let newName = panel.console.session.kernel.name;
-      name = specs.kernelspecs[newName].display_name;
-      captionOptions.displayName = name;
-      captionOptions.connected = new Date();
-      captionOptions.executed = null;
-      panel.title.caption = Private.caption(captionOptions);
-    });
     // Add the console panel to the tracker.
     tracker.add(panel);
     shell.addToMainArea(panel);
