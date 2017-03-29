@@ -212,9 +212,10 @@ class OpenWithHandler extends Widget {
       this._ext, widgetName
     );
     let services = this._manager.services;
-    Private.updateKernels(this.kernelDropdownNode, preference, {
+    ClientSession.populateKernelSelect(this.kernelDropdownNode, {
       specs: services.specs,
-      sessions: services.sessions.running()
+      sessions: services.sessions.running(),
+      preference
     });
   }
 
@@ -322,8 +323,10 @@ class CreateFromHandler extends Widget {
     }
 
     // Handle the kernel preferences.
-    let preference = registry.getKernelPreference(ext, widgetName);
-    if (!preference.canStartKernel) {
+    let preference = registry.getKernelPreference(
+      ext, widgetName, { name: kernelName }
+    );
+    if (!preference.canStart) {
       this.node.removeChild(this.kernelDropdownNode.previousSibling);
       this.node.removeChild(this.kernelDropdownNode);
     } else {
@@ -331,8 +334,7 @@ class CreateFromHandler extends Widget {
       ClientSession.populateKernelSelect(this.kernelDropdownNode, {
         specs: services.specs,
         sessions: services.sessions.running(),
-        preferredName: kernelName,
-        preferredLanguage: preference.language
+        preference
       });
     }
 
@@ -558,9 +560,10 @@ class CreateNewHandler extends Widget {
     let manager = this._manager;
     let preference = manager.registry.getKernelPreference(ext, widgetName);
     let services = this._manager.services;
-    Private.updateKernels(this.kernelDropdownNode, preference, {
+    ClientSession.populateKernelSelect(this.kernelDropdownNode, {
       specs: services.specs,
-      sessions: services.sessions.running()
+      sessions: services.sessions.running(),
+      preference
     });
   }
 
@@ -646,27 +649,5 @@ namespace Private {
     body.appendChild(kernelTitle);
     body.appendChild(kernelDropdownNode);
     return body;
-  }
-
-  /**
-   * Update a kernel listing based on a kernel preference.
-   */
-  export
-  function updateKernels(node: HTMLSelectElement, preference: DocumentRegistry.IKernelPreference, options: ClientSession.IKernelSearch): void {
-    if (!preference.canStartKernel) {
-      while (node.firstChild) {
-        node.removeChild(node.firstChild);
-      }
-      node.disabled = true;
-      return;
-    }
-    node.disabled = false;
-    options.preferredLanguage = preference.language;
-    ClientSession.populateKernelSelect(node, options);
-
-    // Select the "null" valued kernel if we do not prefer a kernel.
-    if (!preference.preferKernel) {
-      node.value = 'null';
-    }
   }
 }
