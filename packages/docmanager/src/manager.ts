@@ -371,10 +371,10 @@ class DocumentManager implements IDisposable {
     // Maybe launch/connect the kernel for the context.
     if (kernel && (kernel.id || kernel.name) && widgetFactory.canStartKernel) {
       // If the kernel is valid and the widgetFactory wants one.
-      context.changeKernel(kernel);
+      context.session.changeKernel(kernel);
     } else if (widgetFactory.preferKernel &&
                !(kernel && !kernel.id && !kernel.name) &&
-               !context.kernel) {
+               !context.session.kernel) {
       // If the kernel is not the `None` kernel and the widgetFactory wants one
       context.startDefaultKernel();
     }

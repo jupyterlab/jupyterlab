@@ -516,7 +516,7 @@ export namespace ClientSession {
    * Get the default kernel name given select options.
    */
   export
-  function getDefaultKernel(options: IKernelSearch): string {
+  function getDefaultKernel(options: IKernelSearch): string | null {
     return Private.getDefaultKernel(options);
   }
 
@@ -586,7 +586,7 @@ namespace Private {
    * Get the default kernel name given select options.
    */
   export
-  function getDefaultKernel(options: ClientSession.IKernelSearch): string {
+  function getDefaultKernel(options: ClientSession.IKernelSearch): string | null {
     let { preferredName, preferredLanguage, specs, existing } = options;
     let existingName = existing && existing.name;
     if (!existingName && !preferredName && !preferredLanguage) {
