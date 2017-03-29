@@ -81,12 +81,12 @@ const SHORTCUTS = [
     keys: ['Accel Shift F']
   },
   {
-    command: 'file-operations:new-text-file',
+    command: 'file-browser:new-text-file',
     selector: 'body',
     keys: ['Ctrl O']
   },
   {
-    command: 'file-operations:new-notebook',
+    command: 'file-browser:new-notebook',
     selector: 'body',
     keys: ['Ctrl Shift N']
   },

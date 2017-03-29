@@ -43,12 +43,6 @@ import {
  */
 namespace CommandIDs {
   export
-  const newTextFile = 'file-operations:new-text-file';
-
-  export
-  const newNotebook = 'file-operations:new-notebook';
-
-  export
   const showBrowser = 'file-browser:activate';
 
   export
@@ -384,6 +378,6 @@ namespace Private {
   export
   function commandForName(name: string) {
     name = name.split(' ').join('-').toLocaleLowerCase();
-    return `file-operations:new-${name}`;
+    return `file-browser:new-${name}`;
   }
 }
