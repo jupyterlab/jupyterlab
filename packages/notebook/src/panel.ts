@@ -27,7 +27,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  Toolbar
+  ClientSession, Toolbar
 } from '@jupyterlab/apputils';
 
 import {
@@ -121,10 +121,10 @@ class NotebookPanel extends Widget {
   }
 
   /**
-   * A signal emitted when the kernel used by the panel changes.
+   * The client session used by the panel.
    */
-  get kernelChanged(): ISignal<this, Kernel.IKernel> {
-    return this._kernelChanged;
+  get session(): ClientSession {
+    return this._context ? this._context.session : null;
   }
 
   /**
@@ -147,13 +147,6 @@ class NotebookPanel extends Widget {
    */
   get toolbar(): Toolbar<Widget> {
     return (this.layout as PanelLayout).widgets[0] as Toolbar<Widget>;
-  }
-
-  /**
-   * Get the current kernel used by the panel.
-   */
-  get kernel(): Kernel.IKernel {
-    return this._context ? this._context.kernel : null;
   }
 
   /**
@@ -236,7 +229,6 @@ class NotebookPanel extends Widget {
    */
   private _onContextChanged(oldValue: DocumentRegistry.IContext<INotebookModel>, newValue: DocumentRegistry.IContext<INotebookModel>): void {
     if (oldValue) {
-      oldValue.kernelChanged.disconnect(this._onKernelChanged, this);
       oldValue.pathChanged.disconnect(this.onPathChanged, this);
       if (oldValue.model) {
         oldValue.model.stateChanged.disconnect(this.onModelStateChanged, this);
@@ -247,11 +239,6 @@ class NotebookPanel extends Widget {
       return;
     }
     let context = newValue;
-    context.kernelChanged.connect(this._onKernelChanged, this);
-    let oldKernel = oldValue ? oldValue.kernel : null;
-    if (context.kernel !== oldKernel) {
-      this._onKernelChanged(this._context, this._context.kernel);
-    }
     this.notebook.model = newValue.model;
     this._handleDirtyState();
     newValue.model.stateChanged.connect(this.onModelStateChanged, this);

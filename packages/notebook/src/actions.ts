@@ -2,11 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel, KernelMessage
+  KernelMessage
 } from '@jupyterlab/services';
 
 import {
-  Clipboard
+  ClientSession, Clipboard
 } from '@jupyterlab/apputils';
 
 import {
@@ -332,7 +332,7 @@ namespace NotebookActions {
    *
    * @param widget - The target notebook widget.
    *
-   * @param kernel - An optional kernel object.
+   * @param session - The optional client session object.
    *
    * #### Notes
    * The last selected cell will be activated.
@@ -341,12 +341,12 @@ namespace NotebookActions {
    * All markdown cells will be rendered.
    */
   export
-  function run(widget: Notebook, kernel?: Kernel.IKernel): Promise<boolean> {
+  function run(widget: Notebook, session?: ClientSession): Promise<boolean> {
     if (!widget.model || !widget.activeCell) {
       return Promise.resolve(false);
     }
     let state = Private.getState(widget);
-    let promise = Private.runSelected(widget, kernel);
+    let promise = Private.runSelected(widget, session);
     Private.handleRunState(widget, state);
     return promise;
   }
@@ -356,7 +356,7 @@ namespace NotebookActions {
    *
    * @param widget - The target notebook widget.
    *
-   * @param kernel - An optional kernel object.
+   * @param session - The optional client session object.
    *
    * #### Notes
    * The existing selection will be cleared.
@@ -367,12 +367,12 @@ namespace NotebookActions {
    * will be created in `'edit'` mode.  The new cell creation can be undone.
    */
   export
-  function runAndAdvance(widget: Notebook, kernel?: Kernel.IKernel): Promise<boolean> {
+  function runAndAdvance(widget: Notebook, session?: ClientSession): Promise<boolean> {
     if (!widget.model || !widget.activeCell) {
       return Promise.resolve(false);
     }
     let state = Private.getState(widget);
-    let promise = Private.runSelected(widget, kernel);
+    let promise = Private.runSelected(widget, session);
     let model = widget.model;
     if (widget.activeCellIndex === widget.widgets.length - 1) {
       let cell = model.contentFactory.createCodeCell({});
@@ -391,7 +391,7 @@ namespace NotebookActions {
    *
    * @param widget - The target notebook widget.
    *
-   * @param kernel - An optional kernel object.
+   * @param session - The optional client session object.
    *
    * #### Notes
    * An execution error will prevent the remaining code cells from executing.
@@ -401,12 +401,12 @@ namespace NotebookActions {
    * The cell insert can be undone.
    */
   export
-  function runAndInsert(widget: Notebook, kernel?: Kernel.IKernel): Promise<boolean> {
+  function runAndInsert(widget: Notebook, session: ClientSession): Promise<boolean> {
     if (!widget.model || !widget.activeCell) {
       return Promise.resolve(false);
     }
     let state = Private.getState(widget);
-    let promise = Private.runSelected(widget, kernel);
+    let promise = Private.runSelected(widget, session);
     let model = widget.model;
     let cell = model.contentFactory.createCodeCell({});
     model.cells.insert(widget.activeCellIndex + 1, cell);
@@ -421,7 +421,8 @@ namespace NotebookActions {
    *
    * @param widget - The target notebook widget.
    *
-   * @param kernel - An optional kernel object.
+   * @param session - The optional client session object.
+   *
    * #### Notes
    * The existing selection will be cleared.
    * An execution error will prevent the remaining code cells from executing.
@@ -429,7 +430,7 @@ namespace NotebookActions {
    * The last cell in the notebook will be activated.
    */
   export
-  function runAll(widget: Notebook, kernel?: Kernel.IKernel): Promise<boolean> {
+  function runAll(widget: Notebook, session?: ClientSession): Promise<boolean> {
     if (!widget.model || !widget.activeCell) {
       return Promise.resolve(false);
     }
@@ -437,7 +438,7 @@ namespace NotebookActions {
     each(widget.widgets, child => {
       widget.select(child);
     });
-    let promise = Private.runSelected(widget, kernel);
+    let promise = Private.runSelected(widget, session);
     Private.handleRunState(widget, state);
     return promise;
   }
@@ -886,7 +887,7 @@ namespace Private {
    * Run the selected cells.
    */
   export
-  function runSelected(widget: Notebook, kernel?: Kernel.IKernel): Promise<boolean> {
+  function runSelected(widget: Notebook, session?: ClientSession): Promise<boolean> {
     widget.mode = 'command';
     let selected: BaseCellWidget[] = [];
     let lastIndex = widget.activeCellIndex;
@@ -903,7 +904,7 @@ namespace Private {
 
     let promises: Promise<boolean>[] = [];
     each(selected, child => {
-      promises.push(runCell(widget, child, kernel));
+      promises.push(runCell(widget, child, session));
     });
     return Promise.all(promises).then(results => {
       if (widget.isDisposed) {
@@ -923,15 +924,15 @@ namespace Private {
   /**
    * Run a cell.
    */
-  function runCell(parent: Notebook, child: BaseCellWidget, kernel?: Kernel.IKernel): Promise<boolean> {
+  function runCell(parent: Notebook, child: BaseCellWidget, session?: ClientSession): Promise<boolean> {
 
     switch (child.model.type) {
     case 'markdown':
       (child as MarkdownCellWidget).rendered = true;
       break;
     case 'code':
-      if (kernel) {
-        return (child as CodeCellWidget).execute(kernel).then(reply => {
+      if (session) {
+        return (child as CodeCellWidget).execute(session).then(reply => {
           if (child.isDisposed) {
             return false;
           }

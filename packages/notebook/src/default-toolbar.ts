@@ -158,7 +158,7 @@ namespace ToolbarItems {
     return new ToolbarButton({
       className: TOOLBAR_RUN_CLASS,
       onClick: () => {
-        NotebookActions.runAndAdvance(panel.notebook, panel.kernel);
+        NotebookActions.runAndAdvance(panel.notebook, panel.session);
       },
       tooltip: 'Run the selected cell(s) and advance'
     });
@@ -192,11 +192,11 @@ namespace ToolbarItems {
     toolbar.addItem('copy', createCopyButton(panel));
     toolbar.addItem('paste', createPasteButton(panel));
     toolbar.addItem('run', createRunButton(panel));
-    toolbar.addItem('interrupt', Toolbar.createInterruptButton(panel));
-    toolbar.addItem('restart', Toolbar.createRestartButton(panel));
+    toolbar.addItem('interrupt', Toolbar.createInterruptButton(panel.session));
+    toolbar.addItem('restart', Toolbar.createRestartButton(panel.session));
     toolbar.addItem('cellType', createCellTypeItem(panel));
-    toolbar.addItem('kernelName', Toolbar.createKernelNameItem(panel));
-    toolbar.addItem('kernelStatus', Toolbar.createKernelStatusItem(panel));
+    toolbar.addItem('kernelName', Toolbar.createKernelNameItem(panel.session));
+    toolbar.addItem('kernelStatus', Toolbar.createKernelStatusItem(panel.session));
   }
 }
 
