@@ -2,23 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  each, map, toArray
-} from '@phosphor/algorithm';
-
-import {
-  DisposableSet
-} from '@phosphor/disposable';
-
-import {
-  Menu
-} from '@phosphor/widgets';
-
-import {
   JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, ILayoutRestorer, IMainMenu, IStateDB
+  ICommandPalette, ILayoutRestorer, IMainMenu, InstanceTracker, IStateDB
 } from '@jupyterlab/apputils';
 
 import {
@@ -37,19 +25,31 @@ import {
   IServiceManager
 } from '@jupyterlab/services';
 
+import {
+  each, map, toArray
+} from '@phosphor/algorithm';
+
+import {
+  DisposableSet
+} from '@phosphor/disposable';
+
+import {
+  Menu
+} from '@phosphor/widgets';
+
 
 /**
  * The command IDs used by the file browser plugin.
  */
 namespace CommandIDs {
   export
-  const showBrowser = 'file-browser:activate';
+  const showBrowser = 'filebrowser:activate';
 
   export
-  const hideBrowser = 'file-browser:hide';
+  const hideBrowser = 'filebrowser:hide';
 
   export
-  const toggleBrowser = 'file-browser:toggle';
+  const toggleBrowser = 'filebrowser:toggle';
 };
 
 /**
@@ -77,30 +77,31 @@ const plugin: JupyterLabPlugin<IPathTracker> = {
  */
 export default plugin;
 
-/**
- * The filebrowser plugin state namespace.
- */
-const NAMESPACE = 'filebrowser';
-
 
 /**
  * Activate the file browser.
  */
 function activate(app: JupyterLab, manager: IServiceManager, documentManager: IDocumentManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer, state: IStateDB): IPathTracker {
-  const { commands } = app;
-  let fbModel = new FileBrowserModel({ manager });
-  let fbWidget = new FileBrowser({
+  const { commands, shell } = app;
+  const namespace = 'filebrowser';
+  const tracker = new InstanceTracker<FileBrowser>({ namespace, shell });
+  const category = 'File Operations';
+  const fbModel = new FileBrowserModel({ manager });
+  const fbWidget = new FileBrowser({
     commands,
     manager: documentManager,
     model: fbModel
   });
 
-  // Let the application restorer track the file browser for restoration of
-  // application state (e.g. setting the file browser as the current side bar
-  // widget).
-  restorer.add(fbWidget, NAMESPACE);
+  // Let the application restorer track the primary file browser (that is
+  // automatically created) for restoration of application state (e.g. setting
+  // the file browser as the current side bar widget).
+  //
+  // All other file browsers created by using the factory function are
+  // responsible for their own restoration behavior, if any.
+  restorer.add(fbWidget, namespace);
+  tracker.add(fbWidget);
 
-  let category = 'File Operations';
   let creatorCmds: { [key: string]: DisposableSet } = Object.create(null);
   let addCreator = (name: string) => {
     let disposables = creatorCmds[name] = new DisposableSet();
@@ -113,7 +114,7 @@ function activate(app: JupyterLab, manager: IServiceManager, documentManager: ID
   };
 
   // Restore the state of the file browser on reload.
-  const key = `${NAMESPACE}:cwd`;
+  const key = `${namespace}:cwd`;
   let connect = () => {
     // Save the subsequent state of the file browser in the state database.
     fbModel.pathChanged.connect((sender, args) => {
@@ -171,7 +172,7 @@ function activate(app: JupyterLab, manager: IServiceManager, documentManager: ID
   mainMenu.addMenu(menu, { rank: 1 });
 
   fbWidget.title.label = 'Files';
-  fbWidget.id = 'file-browser';
+  fbWidget.id = 'filebrowser';
   app.shell.addToLeftArea(fbWidget, { rank: 40 });
 
   // If the layout is a fresh session without saved data, open file browser.

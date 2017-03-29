@@ -136,9 +136,9 @@ class LandingModel extends VDomModel {
     ];
     this.headerText = 'Start a new activity';
     this.activities =
-    [['Notebook', 'file-browser:new-notebook'],
+    [['Notebook', 'filebrowser:new-notebook'],
      ['Code Console', 'console:create'],
-     ['Text Editor', 'file-browser:new-text-file']];
+     ['Text Editor', 'filebrowser:new-text-file']];
 
     if (terminalsAvailable) {
       this.activities.push(

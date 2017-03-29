@@ -76,17 +76,17 @@ const SHORTCUTS = [
     keys: ['Shift Enter']
   },
   {
-    command: 'file-browser:toggle',
+    command: 'filebrowser:toggle',
     selector: 'body',
     keys: ['Accel Shift F']
   },
   {
-    command: 'file-browser:new-text-file',
+    command: 'filebrowser:new-text-file',
     selector: 'body',
     keys: ['Ctrl O']
   },
   {
-    command: 'file-browser:new-notebook',
+    command: 'filebrowser:new-notebook',
     selector: 'body',
     keys: ['Ctrl Shift N']
   },
