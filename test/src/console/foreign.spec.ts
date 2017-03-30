@@ -120,8 +120,11 @@ describe('@jupyterlab/console', () => {
       handler = new TestHandler({ session, parent, cellFactory });
     });
 
-    after(() => {
+    afterEach(() => {
       handler.dispose();
+    });
+
+    after(() => {
       return session.shutdown().then(() => {
         session.dispose();
       });
@@ -130,8 +133,6 @@ describe('@jupyterlab/console', () => {
     describe('#constructor()', () => {
 
       it('should create a new foreign handler', () => {
-        let parent = new TestParent();
-        handler = new TestHandler({ session, parent, cellFactory });
         expect(handler).to.be.a(ForeignHandler);
       });
 
