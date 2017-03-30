@@ -136,6 +136,7 @@ describe('@jupyterlab/docmanager', () => {
             expect(context.session.kernel.id).to.be(id);
             done();
           });
+          return context.save();
         }).catch(done);
       });
 
@@ -148,38 +149,40 @@ describe('@jupyterlab/docmanager', () => {
             expect(context.session.kernel.name).to.be(name);
             done();
           });
+          debugger;
+          return context.save();
         }).catch(done);
       });
 
-      it('should not start a kernel if given an invalid one', (done) => {
-        services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
+      it('should not start a kernel if given an invalid one', () => {
+        let context: DocumentRegistry.Context;
+        return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
           let widget = manager.open(model.path, 'default');
-          let context = manager.contextForWidget(widget);
+          context = manager.contextForWidget(widget);
+          return context.save();
+        }).then(() => {
           expect(context.session.kernel).to.be(null);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should return undefined if the factory is not found', (done) => {
-        services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
+      it('should return undefined if the factory is not found', () => {
+        return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
           let widget = manager.open(model.path, 'foo');
           expect(widget).to.be(void 0);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should return undefined if the factory has no model factory', (done) => {
+      it('should return undefined if the factory has no model factory', () => {
         let widgetFactory2 = new WidgetFactory({
           name: 'test',
           modelName: 'foo',
           fileExtensions: ['.txt']
         });
         manager.registry.addWidgetFactory(widgetFactory2);
-        services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
+        return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
           let widget = manager.open(model.path, 'foo');
           expect(widget).to.be(void 0);
-          done();
-        }).catch(done);
+        });
       });
 
     });
