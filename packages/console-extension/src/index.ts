@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IServiceManager, Kernel, Session
+  IServiceManager
 } from '@jupyterlab/services';
 
 import {
@@ -27,11 +27,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  PathExt, Time, uuid
-} from '@jupyterlab/coreutils';
-
-import {
-  IConsoleTracker, ICreateConsoleArgs, ConsolePanel
+  IConsoleTracker, ConsolePanel
 } from '@jupyterlab/console';
 
 import {
@@ -43,7 +39,7 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
-  IRenderMime, RenderMime
+  IRenderMime
 } from '@jupyterlab/rendermime';
 
 
@@ -133,21 +129,9 @@ export default plugins;
 
 
 /**
- * The class name for the console icon from the default theme.
- */
-const CONSOLE_ICON_CLASS = 'jp-ImageCodeConsole';
-
-/**
- * A regex for console names.
- */
-const CONSOLE_REGEX = /^console-(\d)+-[0-9a-f]+$/;
-
-
-/**
  * Activate the console extension.
  */
-function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, palette: ICommandPalette, pathTracker: IPathTracker, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): IConsoleTracker {
-  let manager = services.sessions;
+function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, palette: ICommandPalette, pathTracker: IPathTracker, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): IConsoleTracker {
   let { commands, shell } = app;
   let category = 'Console';
   let command: string;
@@ -161,9 +145,12 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command: CommandIDs.create,
-    args: panel => ({ id: panel.console.session.id }),
-    name: panel => panel.console.session && panel.console.session.id,
+    command: CommandIDs.open,
+    args: panel => ({
+      path: panel.console.session.path,
+      name: panel.console.session.name
+    }),
+    name: panel => panel.console.session.path,
     when: manager.ready
   });
 
@@ -178,50 +165,43 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
   // Set the main menu title.
   menu.title.label = category;
 
+  /**
+   * Create a console for a given path.
+   */
+  function createConsole(options: Partial<ConsolePanel.IOptions>): Promise<void> {
+    return manager.ready.then(() => {
+      let panel = new ConsolePanel({
+        manager,
+        rendermime: rendermime.clone(),
+        contentFactory,
+        mimeTypeService: editorServices.mimeTypeService,
+        ...options
+      });
+
+      // Add the console panel to the tracker.
+      tracker.add(panel);
+      shell.addToMainArea(panel);
+      tracker.activate(panel);
+    });
+  }
+
+  command = CommandIDs.open;
+  commands.addCommand(command, {
+    label: 'Open Console',
+    execute: (args: Partial<ConsolePanel.IOptions>) => {
+      if (!args.path) {
+        return;
+      }
+      return createConsole(args);
+    }
+  });
+
   command = CommandIDs.create;
   commands.addCommand(command, {
     label: 'Start New Console',
-    execute: (args?: ICreateConsoleArgs) => {
-      let name = `Console ${++count}`;
-
-      args = args || {};
-
-      // If we get a session, use it.
-      if (args.path) {
-
-        return manager.ready.then(() => manager.connectTo(args.id))
-          .then(session => {
-            name = session.path.split('/').pop();
-            name = `Console ${name.match(CONSOLE_REGEX)[1]}`;
-            createConsole(session, name);
-            return session.id;
-          });
-      }
-
-      // Find the correct path for the new session.
-      // Use the given path or the cwd.
-      let path = args.path || pathTracker.path;
-      if (PathExt.extname(path)) {
-        path = PathExt.dirname(path);
-      }
-      path = `${path}/console-${count}-${uuid()}`;
-
-      // Get the kernel model.
-      return manager.ready.then(() => getKernel(args, name)).then(kernel => {
-        if (!kernel || (kernel && !kernel.id && !kernel.name)) {
-          return;
-        }
-        // Start the session.
-        let options: Session.IOptions = {
-          path,
-          kernelName: kernel.name,
-          kernelId: kernel.id
-        };
-        return manager.startNew(options).then(session => {
-          createConsole(session, name);
-          return session.id;
-        });
-      });
+    execute: (args: Partial<ConsolePanel.IOptions>) => {
+      args.basePath = args.basePath || pathTracker.path;
+      return createConsole(args);
     }
   });
   palette.addItem({ command, category });
@@ -312,10 +292,7 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       if (!current) {
         return;
       }
-      let kernel = current.console.session.kernel;
-      if (kernel) {
-        return kernel.restart();
-      }
+      return current.console.session.restart();
     }
   });
   palette.addItem({ command, category });
@@ -376,27 +353,6 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
       }
     }
   });
-
-  /**
-   * Create a console for a given session.
-   *
-   * #### Notes
-   * The manager must be ready before calling this function.
-   */
-  function createConsole(session: Session.ISession, name: string): void {
-    let options = {
-      rendermime: rendermime.clone(),
-      session,
-      contentFactory,
-      mimeTypeService: editorServices.mimeTypeService
-    };
-    let panel = new ConsolePanel(options);
-
-    // Add the console panel to the tracker.
-    tracker.add(panel);
-    shell.addToMainArea(panel);
-    tracker.activate(panel);
-  }
 
   command = CommandIDs.switchKernel;
   commands.addCommand(command, {

@@ -64,16 +64,19 @@ class ConsolePanel extends Panel {
     super();
     this.addClass(PANEL_CLASS);
     let {
-      rendermime, mimeTypeService, path, name, manager, modelFactory
+      rendermime, mimeTypeService, path, basePath, name, manager, modelFactory
     } = options;
     let factory = options.contentFactory;
     let contentFactory = factory.consoleContentFactory;
-    path = `${path || ''}/console-${Private.count++}-${uuid()}`;
+    let count = Private.count++;
+    if (!path) {
+      path = `${basePath || ''}/console-${count}-${uuid()}`;
+    }
 
     let session = new ClientSession({
       manager: manager.sessions,
       path,
-      name: name || '',
+      name: name || `Console ${count}`,
       type: 'console',
       kernelPreference: options.kernelPreference
     });
@@ -100,6 +103,7 @@ class ConsolePanel extends Panel {
 
     this.title.icon = 'jp-ImageCodeConsole';
     this.title.closable = true;
+    this.id = `console-${count}`;
   }
 
   /**
@@ -177,12 +181,17 @@ namespace ConsolePanel {
     manager: ServiceManager.IManager;
 
     /**
-     * The working directory of the console.
+     * The path of an existing console.
      */
     path?: string;
 
     /**
-     * The name of with the console.
+     * The base path for a new console.
+     */
+    basePath?: string;
+
+    /**
+     * The name of the console.
      */
     name?: string;
 
