@@ -10,7 +10,8 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  IObservableVector, ObservableVector, nbformat
+  IObservableVector, ObservableVector, nbformat,
+  IObservableValue, IModelDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -40,6 +41,29 @@ class OutputAreaModel implements IOutputAreaModel {
       each(options.values, value => { this._add(value); });
     }
     this.list.changed.connect(this._onListChanged, this);
+
+    if(options.modelDB) {
+      let changeGuard = false;
+      this._modelDB = options.modelDB;
+      this._serialized = this._modelDB.createValue('outputs');
+      this._serialized.changed.connect((obs, args) => {
+        if(!changeGuard) {
+          changeGuard = true;
+          this.fromJSON(args.newValue as nbformat.IOutput[]);
+          changeGuard = false;
+        }
+      });
+      this.list.changed.connect((list, args) => {
+        if(!changeGuard) {
+          changeGuard = true;
+          this._serialized.set(this.toJSON());
+          changeGuard = false;
+        }
+      });
+      // Trigger a changed to update if the outputs
+      // already exist.
+      this._serialized.set(this._serialized.get());
+    }
   }
 
   /**
@@ -250,6 +274,8 @@ class OutputAreaModel implements IOutputAreaModel {
   private _isDisposed = false;
   private _stateChanged = new Signal<IOutputAreaModel, void>(this);
   private _changed = new Signal<this, IOutputAreaModel.ChangedArgs>(this);
+  private _modelDB: IModelDB = null;
+  private _serialized: IObservableValue = null;
 }
 
 

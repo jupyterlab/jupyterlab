@@ -328,7 +328,8 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
     }
     this._outputs = factory.createOutputArea({
       trusted,
-      values: outputs
+      values: outputs,
+      modelDB: this._modelDB
     });
     this._outputs.stateChanged.connect(this.onGenericChange, this);
   }

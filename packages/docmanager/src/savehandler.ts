@@ -36,7 +36,7 @@ class SaveHandler implements IDisposable {
   constructor(options: SaveHandler.IOptions) {
     this._manager = options.manager;
     this._context = options.context;
-    this._minInterval = options.saveInterval * 1000 || 120000;
+    this._minInterval = options.saveInterval * 1000 || 1200000000;
     this._interval = this._minInterval;
     // Restart the timer when the contents model is updated.
     this._context.fileChanged.connect(this._setTimer, this);
