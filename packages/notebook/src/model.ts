@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  each
-} from '@phosphor/algorithm';
-
-import {
   DocumentModel, DocumentRegistry
 } from '@jupyterlab/docregistry';
 
@@ -15,8 +11,8 @@ import {
 } from '@jupyterlab/cells';
 
 import {
-  IObservableJSON, ObservableJSON, IObservableUndoableVector,
-  IObservableVector, ObservableVector, nbformat
+  IObservableJSON, ObservableJSON, IObservableUndoableList,
+  IObservableList, nbformat
 } from '@jupyterlab/coreutils';
 
 import {
@@ -32,7 +28,7 @@ interface INotebookModel extends DocumentRegistry.IModel {
   /**
    * The list of cells in the notebook.
    */
-  readonly cells: IObservableUndoableVector<ICellModel>;
+  readonly cells: IObservableUndoableList<ICellModel>;
 
   /**
    * The cell model factory for the notebook.
@@ -72,7 +68,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     this.contentFactory = factory;
     this._cells = new CellList();
     // Add an initial code cell by default.
-    this._cells.pushBack(factory.createCodeCell({}));
+    this._cells.push(factory.createCodeCell({}));
     this._cells.changed.connect(this._onCellsChanged, this);
 
     // Handle initial metadata.
@@ -97,7 +93,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   /**
    * Get the observable list of notebook cells.
    */
-  get cells(): IObservableUndoableVector<ICellModel> {
+  get cells(): IObservableUndoableList<ICellModel> {
     return this._cells;
   }
 
@@ -169,7 +165,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   toJSON(): nbformat.INotebookContent {
     let cells: nbformat.ICell[] = [];
     for (let i = 0; i < this.cells.length; i++) {
-      let cell = this.cells.at(i);
+      let cell = this.cells.get(i);
       cells.push(cell.toJSON());
     }
     this._ensureMetadata();
@@ -246,23 +242,20 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   /**
    * Handle a change in the cells list.
    */
-  private _onCellsChanged(list: IObservableVector<ICellModel>, change: ObservableVector.IChangedArgs<ICellModel>): void {
-    switch (change.type) {
+  private _onCellsChanged(list: IObservableList<ICellModel>, change: IObservableList.IChangedArgs): void {
+    let { type, newIndex, count } = change;
+    switch (type) {
     case 'add':
-      each(change.newValues, cell => {
-        cell.contentChanged.connect(this.triggerContentChange, this);
-      });
+      for (let i = 0; i < count; i++) {
+        let item = list.get(i + newIndex);
+        item.contentChanged.connect(this.triggerContentChange, this);
+      }
       break;
     case 'remove':
-      each(change.oldValues, cell => {
-      });
       break;
     case 'set':
-      each(change.newValues, cell => {
-        cell.contentChanged.connect(this.triggerContentChange, this);
-      });
-      each(change.oldValues, cell => {
-      });
+      let item = list.get(newIndex);
+      item.contentChanged.connect(this.triggerContentChange, this);
       break;
     default:
       return;
@@ -274,7 +267,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       // cell changed event during the handling of this signal.
       requestAnimationFrame(() => {
         if (!this.isDisposed && !this._cells.length) {
-          this._cells.pushBack(factory.createCodeCell({}));
+          this._cells.push(factory.createCodeCell({}));
         }
       });
     }
@@ -294,7 +287,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     }
   }
 
-  private _cells: IObservableUndoableVector<ICellModel> = null;
+  private _cells: IObservableUndoableList<ICellModel> = null;
   private _nbformat = nbformat.MAJOR_VERSION;
   private _nbformatMinor = nbformat.MINOR_VERSION;
   private _metadata = new ObservableJSON();

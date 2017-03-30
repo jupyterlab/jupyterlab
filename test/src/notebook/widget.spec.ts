@@ -188,7 +188,7 @@ describe('notebook/widget', () => {
         let called = false;
         widget.modelContentChanged.connect(() => { called = true; });
         let cell = widget.model.contentFactory.createCodeCell({});
-        widget.model.cells.pushBack(cell);
+        widget.model.cells.push(cell);
         expect(called).to.be(true);
       });
 
@@ -197,7 +197,7 @@ describe('notebook/widget', () => {
         widget.model = new NotebookModel();
         let called = false;
         widget.modelContentChanged.connect(() => { called = true; });
-        let cursor = widget.model.metadata.set('foo', 1);
+        widget.model.metadata.set('foo', 1);
         expect(called).to.be(true);
       });
 
@@ -279,16 +279,16 @@ describe('notebook/widget', () => {
         });
 
         it('should handle a remove', () => {
-          let cell = widget.model.cells.at(1);
+          let cell = widget.model.cells.get(1);
           let child = widget.widgets[1];
-          widget.model.cells.remove(cell);
+          widget.model.cells.removeValue(cell);
           expect(cell.isDisposed).to.be(false);
           expect(child.isDisposed).to.be(true);
         });
 
         it('should handle an add', () => {
           let cell = widget.model.contentFactory.createCodeCell({});
-          widget.model.cells.pushBack(cell);
+          widget.model.cells.push(cell);
           expect(widget.widgets.length).to.be(7);
           let child = widget.widgets[0];
           expect(child.hasClass('jp-Notebook-cell')).to.be(true);
@@ -302,7 +302,7 @@ describe('notebook/widget', () => {
 
         it('should handle a clear', () => {
           let cell = widget.model.contentFactory.createCodeCell({});
-          widget.model.cells.pushBack(cell);
+          widget.model.cells.push(cell);
           widget.model.cells.clear();
           expect(widget.widgets.length).to.be(0);
         });
@@ -456,8 +456,8 @@ describe('notebook/widget', () => {
 
       it('should be called when a cell is removed', () => {
         let widget = createWidget();
-        let cell = widget.model.cells.at(0);
-        widget.model.cells.remove(cell);
+        let cell = widget.model.cells.get(0);
+        widget.model.cells.removeValue(cell);
         expect(widget.methods).to.contain('onCellRemoved');
       });
 
@@ -692,7 +692,7 @@ describe('notebook/widget', () => {
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
         let cell = widget.model.contentFactory.createMarkdownCell({});
-        widget.model.cells.pushBack(cell);
+        widget.model.cells.push(cell);
         let child = widget.widgets[widget.widgets.length - 1] as MarkdownCellWidget;
         expect(child.rendered).to.be(true);
         widget.activeCellIndex = widget.widgets.length - 1;
@@ -884,7 +884,7 @@ describe('notebook/widget', () => {
 
         it('should preserve "command" mode if in a markdown cell', () => {
           let cell = widget.model.contentFactory.createMarkdownCell({});
-          widget.model.cells.pushBack(cell);
+          widget.model.cells.push(cell);
           let count = widget.widgets.length;
           let child = widget.widgets[count - 1] as MarkdownCellWidget;
           expect(child.rendered).to.be(true);
@@ -899,7 +899,7 @@ describe('notebook/widget', () => {
 
         it('should unrender a markdown cell', () => {
           let cell = widget.model.contentFactory.createMarkdownCell({});
-          widget.model.cells.pushBack(cell);
+          widget.model.cells.push(cell);
           let child = widget.widgets[widget.widgets.length - 1] as MarkdownCellWidget;
           expect(child.rendered).to.be(true);
           expect(widget.mode).to.be('command');
@@ -910,7 +910,7 @@ describe('notebook/widget', () => {
 
         it('should be a no-op if the model is read only', () => {
           let cell = widget.model.contentFactory.createMarkdownCell({});
-          widget.model.cells.pushBack(cell);
+          widget.model.cells.push(cell);
           widget.model.readOnly = true;
           let child = widget.widgets[widget.widgets.length - 1] as MarkdownCellWidget;
           expect(child.rendered).to.be(true);
@@ -1166,8 +1166,8 @@ describe('notebook/widget', () => {
 
       it('should post an `update-request', (done) => {
         let widget = createActiveWidget();
-        let cell = widget.model.cells.at(0);
-        widget.model.cells.remove(cell);
+        let cell = widget.model.cells.get(0);
+        widget.model.cells.removeValue(cell);
         expect(widget.methods).to.contain('onCellRemoved');
         requestAnimationFrame(() => {
           expect(widget.methods).to.contain('onUpdateRequest');
@@ -1178,7 +1178,7 @@ describe('notebook/widget', () => {
       it('should update the active cell if necessary', () => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
-        widget.model.cells.removeAt(0);
+        widget.model.cells.remove(0);
         expect(widget.activeCell).to.be(widget.widgets[0]);
       });
 

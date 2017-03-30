@@ -6,37 +6,19 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  each
+  IterableOrArrayLike, each, toArray
 } from '@phosphor/algorithm';
 
 import {
-  IObservableVector, ObservableVector
-} from './observablevector';
-
-
-/**
- * An object which knows how to serialize and
- * deserialize the type T.
- */
-export
-interface ISerializer<T> {
-  /**
-   * Convert the object to JSON.
-   */
-  toJSON(value: T): JSONValue;
-
-  /**
-   * Deserialize the object from JSON.
-   */
-  fromJSON(value: JSONValue): T;
-}
+  IObservableList, ObservableList
+} from './observablelist';
 
 
 /**
  * An observable vector that supports undo/redo.
  */
 export
-interface IObservableUndoableVector<T> extends IObservableVector<T> {
+interface IObservableUndoableList<T> extends IObservableList<T> {
   /**
    * Whether the object can redo changes.
    */
@@ -78,17 +60,42 @@ interface IObservableUndoableVector<T> extends IObservableVector<T> {
 
 
 /**
+ * The namespace for IObservableUndoableList related interfaces.
+ */
+export
+namespace IObservableUndoableList {
+  /**
+   * An object which knows how to serialize and
+   * deserialize the type T.
+   */
+  export
+  interface ISerializer<T> {
+    /**
+     * Convert the object to JSON.
+     */
+    toJSON(value: T): JSONValue;
+
+    /**
+     * Deserialize the object from JSON.
+     */
+    fromJSON(value: JSONValue): T;
+  }
+}
+
+
+/**
  * A concrete implementation of an observable undoable vector.
  */
 export
-class ObservableUndoableVector<T> extends ObservableVector<T> implements IObservableUndoableVector<T> {
+class ObservableUndoableList<T> extends ObservableList<T> implements IObservableUndoableList<T> {
   /**
    * Construct a new undoable observable vector.
    */
-  constructor(serializer: ISerializer<T>) {
-    super();
-    this._serializer = serializer;
-    this.changed.connect(this._onVectorChanged, this);
+  constructor(options: ObservableUndoableList.IOptions<T>) {
+    super(options);
+    this._serializer = options.serializer;
+    this.changed.connect(this._onListChanged, this);
+    this._previous = toArray(this);
   }
 
   /**
@@ -180,7 +187,7 @@ class ObservableUndoableVector<T> extends ObservableVector<T> implements IObserv
   /**
    * Handle a change in the vector.
    */
-  private _onVectorChanged(list: IObservableVector<T>, change: ObservableVector.IChangedArgs<T>): void {
+  private _onListChanged(list: IObservableList<T>, change: IObservableList.IChangedArgs): void {
     if (this.isDisposed || !this._isUndoable) {
       return;
     }
@@ -207,14 +214,14 @@ class ObservableUndoableVector<T> extends ObservableVector<T> implements IObserv
   /**
    * Undo a change event.
    */
-  private _undoChange(change: ObservableVector.IChangedArgs<JSONValue>): void {
+  private _undoChange(change: ObservableUndoableList.IChangedArgs): void {
     let index = 0;
     let serializer = this._serializer;
     switch (change.type) {
     case 'add':
-      each(change.newValues, () => {
-        this.removeAt(change.newIndex);
-      });
+      for (let i = 0; i < change.count; i++) {
+        this.remove(change.newIndex);
+      }
       break;
     case 'set':
       index = change.oldIndex;
@@ -239,7 +246,7 @@ class ObservableUndoableVector<T> extends ObservableVector<T> implements IObserv
   /**
    * Redo a change event.
    */
-  private _redoChange(change: ObservableVector.IChangedArgs<JSONValue>): void {
+  private _redoChange(change: ObservableUndoableList.IChangedArgs): void {
     let index = 0;
     let serializer = this._serializer;
     switch (change.type) {
@@ -257,7 +264,7 @@ class ObservableUndoableVector<T> extends ObservableVector<T> implements IObserv
       break;
     case 'remove':
       each(change.oldValues, () => {
-        this.removeAt(change.oldIndex);
+        this.remove(change.oldIndex);
       });
       break;
     case 'move':
@@ -271,21 +278,39 @@ class ObservableUndoableVector<T> extends ObservableVector<T> implements IObserv
   /**
    * Copy a change as JSON.
    */
-  private _copyChange(change: ObservableVector.IChangedArgs<T>): ObservableVector.IChangedArgs<JSONValue> {
+  private _copyChange(change: IObservableList.IChangedArgs): ObservableUndoableList.IChangedArgs {
     let oldValues: JSONValue[] = [];
-    each(change.oldValues, value => {
-      oldValues.push(this._serializer.toJSON(value));
-    });
     let newValues: JSONValue[] = [];
-    each(change.newValues, value => {
-      newValues.push(this._serializer.toJSON(value));
-    });
+    let toJSON = this._serializer.toJSON;
+    let { newIndex, oldIndex, type, count } = change;
+
+    switch (type) {
+    case 'add':
+      for (let i = 0; i < count; i++) {
+        newValues.push(toJSON(this.get(i + newIndex)));
+      }
+      break;
+    case 'set':
+    case 'move':
+      newValues.push(toJSON(this.get(newIndex)));
+      oldValues.push(toJSON(this._previous[oldIndex]));
+      break;
+    case 'remove':
+      for (let i = 0; i < count; i++) {
+        oldValues.push(toJSON(this._previous[i + oldIndex]));
+      }
+      break;
+    default:
+      break;
+    }
+    this._previous = toArray(this);
     return {
-      type: change.type,
-      oldIndex: change.oldIndex,
-      newIndex: change.newIndex,
-      oldValues,
-      newValues
+      type,
+      newIndex,
+      oldIndex,
+      count,
+      newValues,
+      oldValues
     };
   }
 
@@ -293,6 +318,73 @@ class ObservableUndoableVector<T> extends ObservableVector<T> implements IObserv
   private _isUndoable = true;
   private _madeCompoundChange = false;
   private _index = -1;
-  private _stack: ObservableVector.IChangedArgs<JSONValue>[][] = [];
-  private _serializer: ISerializer<T> = null;
+  private _stack: ObservableUndoableList.IChangedArgs[][] = [];
+  private _serializer: IObservableUndoableList.ISerializer<T> = null;
+  private _previous: Array<T>;
+}
+
+
+/**
+ * The namespace for ObservableUndoableList statics.
+ */
+export
+namespace ObservableUndoableList {
+  /**
+   * The options used to create an ObservableUndoableList.
+   */
+  export
+  interface IOptions<T> {
+    /**
+     * The serializer object for the list.
+     */
+    serializer: IObservableUndoableList.ISerializer<T>;
+
+    /**
+     * The initial values for the list.
+     */
+    values?: IterableOrArrayLike<T>;
+
+    /**
+     * The item comparison function for change detection on `set`.
+     *
+     * If not given, strict `===` equality will be used.
+     */
+    itemCmp?: (first: T, second: T) => boolean;
+  }
+
+  /**
+   * The changed args object which is emitted by an observable list.
+   */
+  export
+  interface IChangedArgs {
+    /**
+     * The type of change undergone by the list.
+     */
+    type: IObservableList.ChangeType;
+
+    /**
+     * The new index associated with the change.
+     */
+    newIndex: number;
+
+    /**
+     * The old index associated with the change.
+     */
+    oldIndex: number;
+
+    /**
+     * The number of items added or removed.
+     */
+    count: number;
+
+    /**
+     * The old values associated with the change.
+     */
+    oldValues: Array<JSONValue>;
+
+    /**
+     * The new values associated with the change.
+     */
+    newValues: Array<JSONValue>;
+  }
 }

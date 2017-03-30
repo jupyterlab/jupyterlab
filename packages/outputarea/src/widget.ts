@@ -34,7 +34,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  ObservableVector, nbformat
+  IObservableList, nbformat
 } from '@jupyterlab/coreutils';
 
 import {
@@ -263,7 +263,7 @@ class OutputAreaWidget extends Widget {
   protected onModelChanged(sender: IOutputAreaModel, args: IOutputAreaModel.ChangedArgs): void {
     switch (args.type) {
     case 'add':
-      this._insertOutput(args.newIndex, args.newValues[0]);
+      this._insertOutput(args.newIndex, sender.get(args.newIndex));
       break;
     case 'remove':
       // Only clear is supported by the model.
@@ -272,7 +272,7 @@ class OutputAreaWidget extends Widget {
       }
       break;
     case 'set':
-      this._setOutput(args.newIndex, args.newValues[0]);
+      this._setOutput(args.newIndex, sender.get(args.newIndex));
       break;
     default:
       break;
@@ -868,7 +868,7 @@ namespace IOutputAreaModel {
    * A type alias for changed args.
    */
   export
-  type ChangedArgs = ObservableVector.IChangedArgs<IOutputModel>;
+  type ChangedArgs = IObservableList.IChangedArgs;
 
   /**
    * The interface for an output content factory.
