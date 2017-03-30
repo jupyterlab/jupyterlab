@@ -71,6 +71,11 @@ const plugin: JupyterLabPlugin<IPathTracker> = {
   autoStart: true
 };
 
+/**
+ * The file browser namespace token.
+ */
+const namespace = 'filebrowser';
+
 
 /**
  * Export the plugin as default.
@@ -83,7 +88,6 @@ export default plugin;
  */
 function activate(app: JupyterLab, manager: IServiceManager, documentManager: IDocumentManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer, state: IStateDB): IPathTracker {
   const { commands, shell } = app;
-  const namespace = 'filebrowser';
   const tracker = new InstanceTracker<FileBrowser>({ namespace, shell });
   const category = 'File Operations';
   const fbModel = new FileBrowserModel({ manager });
@@ -142,7 +146,7 @@ function activate(app: JupyterLab, manager: IServiceManager, documentManager: ID
     let ext = DocumentRegistry.extname(path);
     let factories = registry.preferredWidgetFactories(ext);
     let widgetNames = toArray(map(factories, factory => factory.name));
-    let prefix = `file-browser-contextmenu-${++Private.id}`;
+    let prefix = `${namespace}-contextmenu-${++Private.id}`;
     let openWith: Menu = null;
     if (path && widgetNames.length > 1) {
       let disposables = new DisposableSet();
@@ -264,7 +268,7 @@ function createMenu(app: JupyterLab, creatorCmds: string[]): Menu {
 function createContextMenu(fbWidget: FileBrowser, openWith: Menu):  Menu {
   let { commands } = fbWidget;
   let menu = new Menu({ commands });
-  let prefix = `file-browser-${++Private.id}`;
+  let prefix = `${namespace}-${++Private.id}`;
   let disposables = new DisposableSet();
   let command: string;
 
@@ -379,6 +383,6 @@ namespace Private {
   export
   function commandForName(name: string) {
     name = name.split(' ').join('-').toLocaleLowerCase();
-    return `file-browser:new-${name}`;
+    return `filebrowser:new-${name}`;
   }
 }
