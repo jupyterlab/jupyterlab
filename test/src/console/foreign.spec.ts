@@ -53,14 +53,6 @@ class TestHandler extends ForeignHandler {
 
   methods: string[] = [];
 
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    super.dispose();
-    Signal.clearData(this);
-  }
-
   protected onIOPubMessage(sender: IClientSession, msg: KernelMessage.IIOPubMessage): boolean {
     let injected = super.onIOPubMessage(sender, msg);
     this.received.emit(void 0);
@@ -129,13 +121,17 @@ describe('@jupyterlab/console', () => {
     });
 
     after(() => {
-      return session.shutdown();
+      handler.dispose();
+      return session.shutdown().then(() => {
+        session.dispose();
+      });
     });
 
     describe('#constructor()', () => {
 
       it('should create a new foreign handler', () => {
-        handler = new TestHandler({ session, parent: null, cellFactory });
+        let parent = new TestParent();
+        handler = new TestHandler({ session, parent, cellFactory });
         expect(handler).to.be.a(ForeignHandler);
       });
 
