@@ -379,10 +379,6 @@ class DocumentManager implements IDisposable {
       context.save();
     }
 
-    context.ready.then(() => {
-      context.session.initialize();
-    });
-
     let widget = this._widgetManager.createWidget(widgetFactory.name, context);
     this._opener.open(widget);
     return widget;
