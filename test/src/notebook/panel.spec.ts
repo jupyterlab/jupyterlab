@@ -141,7 +141,7 @@ describe('@jupyterlab/notebook', () => {
       it('should be emitted when the kernel on the panel changes', (done) => {
         let panel = createPanel(context);
         panel.session.kernelChanged.connect((sender, args) => {
-          expect(sender).to.be(panel);
+          expect(sender).to.be(panel.session);
           expect(args.name).to.be.ok();
           done();
         });
