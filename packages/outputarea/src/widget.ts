@@ -239,10 +239,6 @@ class OutputAreaWidget extends Widget {
     }
 
     return new Promise<KernelMessage.IExecuteReplyMsg>((resolve, reject) => {
-      // Bail if the model is disposed.
-      if (this.model.isDisposed) {
-        return Promise.reject('Model is disposed');
-      }
       let future = kernel.requestExecute(content);
       // Handle published messages.
       future.onIOPub = (msg: KernelMessage.IIOPubMessage) => {

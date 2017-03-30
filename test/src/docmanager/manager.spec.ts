@@ -149,7 +149,6 @@ describe('@jupyterlab/docmanager', () => {
             expect(context.session.kernel.name).to.be(name);
             done();
           });
-          debugger;
           return context.save();
         }).catch(done);
       });
