@@ -8,7 +8,8 @@
     "test:chrome": "python run-test.py --browsers=Chrome karma.conf.js",
     "test:debug": "python run-test.py  --browsers=Chrome --singleRun=false --debug=true karma.conf.js",
     "test:firefox": "python run-test.py --browsers=Firefox karma.conf.js",
-    "test:ie": "python run-test.py  --browsers=IE karma.conf.js"
+    "test:ie": "python run-test.py  --browsers=IE karma.conf.js",
+    "watch": "watch \"npm run build:test && npm test\" src --wait 10 --filter=../scripts/watch-filter.js"
   },
   "dependencies": {
     "@jupyterlab/application": "^0.1.1",
