@@ -4,6 +4,6 @@
 export * from './browser';
 export * from './buttons';
 export * from './crumbs';
+export * from './factory';
 export * from './listing';
 export * from './model';
-export * from './tracker';

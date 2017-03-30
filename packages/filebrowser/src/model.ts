@@ -21,10 +21,6 @@ import {
   IChangedArgs, PathExt, uuid
 } from '@jupyterlab/coreutils';
 
-import {
-  IPathTracker
-} from './tracker';
-
 
 /**
  * The duration of auto-refresh in ms.
@@ -45,7 +41,7 @@ const MIN_REFRESH = 1000;
  * the current directory.  Supports `'../'` syntax.
  */
 export
-class FileBrowserModel implements IDisposable, IPathTracker {
+class FileBrowserModel implements IDisposable {
   /**
    * Construct a new file browser model.
    */
