@@ -252,7 +252,7 @@ class NotebookPanel extends Widget {
     if (context.kernel !== oldKernel) {
       this._onKernelChanged(this._context, this._context.kernel);
     }
-    this.notebook.model = newValue.model;
+    this.notebook.context = newValue;
     this._handleDirtyState();
     newValue.model.stateChanged.connect(this.onModelStateChanged, this);
 

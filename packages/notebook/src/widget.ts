@@ -61,6 +61,10 @@ import {
 } from '@jupyterlab/outputarea';
 
 import {
+  DocumentRegistry
+} from '@jupyterlab/docregistry';
+
+import {
   INotebookModel
 } from './model';
 
@@ -194,22 +198,31 @@ class StaticNotebook extends Widget {
   readonly rendermime: RenderMime;
 
   /**
+   * The context for the notebook model.
+   */
+  get context(): DocumentRegistry.IContext<INotebookModel> {
+    return this._context;
+  }
+  set context(newValue: DocumentRegistry.IContext<INotebookModel>) {
+    this._context = newValue;
+    if (this._model === newValue.model) {
+      return;
+    }
+    let oldModel = this._model;
+    this._model = newValue.model;
+
+    // Trigger private, protected, and public changes.
+    this._onModelChanged(oldModel, newValue.model);
+    this.onModelChanged(oldModel, newValue.model);
+    this._modelChanged.emit(void 0);
+  }
+
+
+  /**
    * The model for the widget.
    */
   get model(): INotebookModel {
     return this._model;
-  }
-  set model(newValue: INotebookModel) {
-    newValue = newValue || null;
-    if (this._model === newValue) {
-      return;
-    }
-    let oldValue = this._model;
-    this._model = newValue;
-    // Trigger private, protected, and public changes.
-    this._onModelChanged(oldValue, newValue);
-    this.onModelChanged(oldValue, newValue);
-    this._modelChanged.emit(void 0);
   }
 
   /**
@@ -458,6 +471,7 @@ class StaticNotebook extends Widget {
 
   private _mimetype = 'text/plain';
   private _model: INotebookModel = null;
+  private _context: DocumentRegistry.IContext<INotebookModel> = null;
   private _mimetypeService: IEditorMimeTypeService;
   private _modelChanged = new Signal<this, void>(this);
   private _modelContentChanged = new Signal<this, void>(this);
@@ -749,6 +763,7 @@ class Notebook extends StaticNotebook {
     if (newValue === oldValue) {
       return;
     }
+    this._trimSelections();
     this._stateChanged.emit({ name: 'activeCellIndex', oldValue, newValue });
   }
 
@@ -982,6 +997,32 @@ class Notebook extends StaticNotebook {
    * Handle a cell being inserted.
    */
   protected onCellInserted(index: number, cell: BaseCellWidget): void {
+    if(this.context.realtimeHandler) {
+      let realtime = this.context.realtimeHandler;
+      realtime.ready.then(() => {
+        //Setup the selection style for collaborators
+        cell.editor.uuid = realtime.localCollaborator.sessionId;
+        let color = realtime.localCollaborator.color;
+        let r = parseInt(color.slice(1,3), 16);
+        let g  = parseInt(color.slice(3,5), 16);
+        let b  = parseInt(color.slice(5,7), 16);
+        cell.editor.selectionStyle = {
+          css: `background-color: rgba( ${r}, ${g}, ${b}, 0.1)`,
+          color: realtime.localCollaborator.color
+        };
+
+        //if there are selections corresponding to non-collaborators,
+        //they are stale and should be removed.
+        realtime.collaborators.changed.connect((collaborators, change) => {
+          cell.editor.uuid = realtime.localCollaborator.sessionId;
+          for(let key of cell.model.selections.keys()) {
+            if(!collaborators.has(key)) {
+              cell.model.selections.delete(key);
+            }
+          }
+        });
+      });
+    }
     cell.editor.edgeRequested.connect(this._onEdgeRequest, this);
     // Trigger an update of the active cell.
     this.activeCellIndex = this.activeCellIndex;
@@ -1433,6 +1474,19 @@ class Notebook extends StaticNotebook {
     }
     Private.selectedProperty.set(this.widgets[activeIndex], true);
     this._selectionChanged.emit(void 0);
+  }
+
+  /**
+   * Remove selections from inactive cells to avoid
+   * spurious cursors.
+   */
+  private _trimSelections(): void {
+    for(let i=0; i<this.widgets.length; i++) {
+      if(i !== this._activeCellIndex) {
+        let cell = this.widgets[i];
+        cell.model.selections.delete(cell.editor.uuid);
+      }
+    }
   }
 
   private _activeCellIndex = -1;
