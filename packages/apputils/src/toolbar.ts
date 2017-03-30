@@ -394,18 +394,8 @@ namespace Private {
      * Update the text of the kernel name item.
      */
     _onKernelChanged(session: IClientSession): void {
-      let kernel = session.kernel;
-      this.node.textContent = 'No Kernel!';
-      if (!kernel) {
-        return;
-      }
-      kernel.getSpec().then(spec => {
-        if (!this.isDisposed) {
-          this.node.textContent = spec.display_name;
-        }
-      });
+      this.node.textContent = session.kernelDisplayName;
     }
-
   }
 
   /**
