@@ -443,7 +443,7 @@ class ClientSession implements IDisposable {
     return this._update().then(() => {
       return this._initialize();
     }).then(() => {
-      if (this.kernel) {
+      if (this.kernel || this.kernelPreference.shouldStart === false) {
         return;
       }
       let name = ClientSession.getDefaultKernel({
