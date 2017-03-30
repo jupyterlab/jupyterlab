@@ -4,20 +4,12 @@
 import expect = require('expect.js');
 
 import {
-  Kernel
-} from '@jupyterlab/services';
-
-import {
   toArray
 } from '@phosphor/algorithm';
 
 import {
   Message
 } from '@phosphor/messaging';
-
-import {
-  Signal
-} from '@phosphor/signaling';
 
 import {
   Widget
@@ -28,8 +20,12 @@ import {
 } from 'simulate-event';
 
 import {
-  Toolbar, ToolbarButton
+  ClientSession, Toolbar, ToolbarButton
 } from '@jupyterlab/apputils';
+
+import {
+  createClientSession
+} from '../utils';
 
 
 class LogToolbarButton extends ToolbarButton {
@@ -55,26 +51,15 @@ class LogToolbarButton extends ToolbarButton {
 }
 
 
-class KernelOwner extends Widget implements Toolbar.IKernelOwner {
-  kernelChanged = new Signal<this, Kernel.IKernel>(this);
-  kernel: Kernel.IKernel | null = null;
-
-  startKernel(): Promise<void> {
-    return Kernel.startNew().then(k => {
-      this.kernel = k;
-      this.kernelChanged.emit(k);
-      this.kernel.terminated.connect(this._onTerminated, this);
-    });
-  }
-
-  private _onTerminated(): void {
-    this.kernel = null;
-    this.kernelChanged.emit(null);
-  }
-}
-
-
 describe('@jupyterlab/apputils', () => {
+
+  let session: ClientSession;
+
+  beforeEach(() => {
+    return createClientSession().then(s => {
+      session = s;
+    });
+  });
 
   describe('Toolbar', () => {
 
@@ -166,111 +151,87 @@ describe('@jupyterlab/apputils', () => {
 
     });
 
-    context('IKernelOwner', () => {
+    describe('.createInterruptButton()', () => {
 
-      let owner: KernelOwner;
+      it('should have the `\'jp-StopIcon\'` class', () => {
+        let button = Toolbar.createInterruptButton(session);
+        expect(button.hasClass('jp-StopIcon')).to.be(true);
+      });
+
+    });
+
+    describe('.createRestartButton()', () => {
+
+      it('should have the `\'jp-RefreshIcon\'` class', () => {
+        let button = Toolbar.createRestartButton(session);
+        expect(button.hasClass('jp-RefreshIcon')).to.be(true);
+      });
+
+    });
+
+
+    describe('.createKernelNameItem()', () => {
+
+      it('should display the `\'display_name\'` of the kernel', () => {
+        let item = Toolbar.createKernelNameItem(session);
+        return session.initialize().then(() => {
+          expect(item.node.textContent).to.be(session.kernelDisplayName);
+        });
+      });
+
+      it('should display `\'No Kernel!\'` if there is no kernel', () => {
+        let item = Toolbar.createKernelNameItem(session);
+        expect(item.node.textContent).to.be('No Kernel!');
+      });
+
+    });
+
+    describe('.createKernelStatusItem()', () => {
 
       beforeEach(() => {
-        owner = new KernelOwner();
+        return session.initialize().then(() => {
+          return session.kernel.ready;
+        });
       });
 
-      afterEach(() => {
-        if (owner.kernel) {
-          return owner.kernel.shutdown().then(() => {
-            owner.dispose();
-          });
-        }
-        owner.dispose();
-      });
-
-      describe('.createInterruptButton()', () => {
-
-        it('should have the `\'jp-StopIcon\'` class', () => {
-          let button = Toolbar.createInterruptButton(owner);
-          expect(button.hasClass('jp-StopIcon')).to.be(true);
-        });
-
-      });
-
-      describe('.createRestartButton()', () => {
-
-        it('should have the `\'jp-RefreshIcon\'` class', () => {
-          let button = Toolbar.createRestartButton(owner);
-          expect(button.hasClass('jp-RefreshIcon')).to.be(true);
-        });
-
-      });
-
-
-      describe('.createKernelNameItem()', () => {
-
-        it('should display the `\'display_name\'` of the kernel', () => {
-          let item = Toolbar.createKernelNameItem(owner);
-          return owner.startKernel().then(() => {
-            return owner.kernel.getSpec();
-          }).then(spec => {
-            let name = spec.display_name;
-            expect(item.node.textContent).to.be(name);
-          });
-        });
-
-        it('should display `\'No Kernel!\'` if there is no kernel', () => {
-          let item = Toolbar.createKernelNameItem(owner);
-          expect(item.node.textContent).to.be('No Kernel!');
-        });
-
-      });
-
-      describe('.createKernelStatusItem()', () => {
-
-        beforeEach(() => {
-          return owner.startKernel().then(kernel => {
-            return owner.kernel.ready;
-          });
-        });
-
-        it('should display a busy status if the kernel status is not idle', (done) => {
-          let item = Toolbar.createKernelStatusItem(owner);
-          let called = false;
-          let future = owner.kernel.requestExecute({ code: 'a = 1' });
-          future.onIOPub = msg => {
-            if (owner.kernel.status === 'busy') {
-              expect(item.hasClass('jp-mod-busy')).to.be(true);
-              called = true;
-            }
-          };
-          future.onDone = () => {
-            expect(called).to.be(true);
-            done();
-          };
-        });
-
-        it('should show the current status in the node title', (done) => {
-          let item = Toolbar.createKernelStatusItem(owner);
-          let status = owner.kernel.status;
-          expect(item.node.title.toLowerCase()).to.contain(status);
-          let called = false;
-          let future = owner.kernel.requestExecute({ code: 'a = 1' });
-          future.onIOPub = msg => {
-            if (owner.kernel.status === 'busy') {
-              expect(item.node.title.toLowerCase()).to.contain('busy');
-              called = true;
-            }
-          };
-          future.onDone = () => {
-            expect(called).to.be(true);
-            done();
-          };
-        });
-
-        it('should handle a null kernel', () => {
-          let item = Toolbar.createKernelStatusItem(owner);
-          return owner.kernel.shutdown().then(() => {
-            expect(item.node.title).to.be('No Kernel!');
+      it('should display a busy status if the kernel status is not idle', (done) => {
+        let item = Toolbar.createKernelStatusItem(session);
+        let called = false;
+        let future = session.kernel.requestExecute({ code: 'a = 1' });
+        future.onIOPub = msg => {
+          if (session.status === 'busy') {
             expect(item.hasClass('jp-mod-busy')).to.be(true);
-          });
-        });
+            called = true;
+          }
+        };
+        future.onDone = () => {
+          expect(called).to.be(true);
+          done();
+        };
+      });
 
+      it('should show the current status in the node title', (done) => {
+        let item = Toolbar.createKernelStatusItem(session);
+        let status = session.status;
+        expect(item.node.title.toLowerCase()).to.contain(status);
+        let called = false;
+        let future = session.kernel.requestExecute({ code: 'a = 1' });
+        future.onIOPub = msg => {
+          if (session.status === 'busy') {
+            expect(item.node.title.toLowerCase()).to.contain('busy');
+            called = true;
+          }
+        };
+        future.onDone = () => {
+          expect(called).to.be(true);
+          done();
+        };
+      });
+
+      it('should handle a null kernel', () => {
+        let item = Toolbar.createKernelStatusItem(session);
+        expect(item.node.title).to.be('No Kernel!');
+        expect(item.hasClass('jp-mod-busy')).to.be(true);
       });
 
     });
