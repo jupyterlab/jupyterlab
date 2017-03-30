@@ -10,12 +10,8 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, ILayoutRestorer, InstanceTracker
+  ICommandLinker, ICommandPalette, ILayoutRestorer, InstanceTracker
 } from '@jupyterlab/apputils';
-
-import {
-  IPathTracker
-} from '@jupyterlab/filebrowser';
 
 import {
   LandingModel, LandingWidget
@@ -42,7 +38,7 @@ const LANDING_CLASS = 'jp-Landing';
 const plugin: JupyterLabPlugin<void> = {
   activate,
   id: 'jupyter.extensions.landing',
-  requires: [IPathTracker, ICommandPalette, IServiceManager, ILayoutRestorer],
+  requires: [ICommandLinker, ICommandPalette, IServiceManager, ILayoutRestorer],
   autoStart: true
 };
 
@@ -56,7 +52,7 @@ export default plugin;
 /**
  * Activate the landing plugin.
  */
-function activate(app: JupyterLab, pathTracker: IPathTracker, palette: ICommandPalette, services: IServiceManager, restorer: ILayoutRestorer): void {
+function activate(app: JupyterLab, linker: ICommandLinker, palette: ICommandPalette, services: IServiceManager, restorer: ILayoutRestorer): void {
   const { commands, shell } = app;
   const category = 'Help';
   const command = CommandIDs.open;
@@ -76,7 +72,7 @@ function activate(app: JupyterLab, pathTracker: IPathTracker, palette: ICommandP
   let widget: LandingWidget;
 
   function newWidget(): LandingWidget {
-    let widget = new LandingWidget(app);
+    let widget = new LandingWidget(linker);
     widget.model = model;
     widget.id = 'landing-jupyterlab';
     widget.title.label = 'Landing';
@@ -94,14 +90,6 @@ function activate(app: JupyterLab, pathTracker: IPathTracker, palette: ICommandP
         shell.addToMainArea(widget);
       }
       tracker.activate(widget);
-    }
-  });
-
-  pathTracker.pathChanged.connect(() => {
-    if (pathTracker.path.length) {
-      model.path = 'home > ' + pathTracker.path.replace('/', ' > ');
-    } else {
-      model.path = 'home';
     }
   });
 
