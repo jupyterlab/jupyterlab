@@ -145,9 +145,6 @@ class CodeConsole extends Widget {
     banner.readOnly = true;
     this._content.addWidget(banner);
 
-    // Set the banner text and the mimetype.
-    this._initialize();
-
     // Set up the foreign iopub handler.
     this._foreignHandler = factory.createForeignHandler({
       session: this.session,
@@ -159,6 +156,7 @@ class CodeConsole extends Widget {
       session: this.session
     });
 
+    this._onKernelChanged();
     this.session.kernelChanged.connect(this._onKernelChanged, this);
   }
 
@@ -456,22 +454,6 @@ class CodeConsole extends Widget {
   }
 
   /**
-   * Initialize the banner and mimetype.
-   */
-  private _initialize(): void {
-    let kernel = this.session.kernel;
-    if (!kernel) {
-      return;
-    }
-    kernel.ready.then(() => {
-      if (this.isDisposed) {
-        return;
-      }
-      this._handleInfo(kernel.info);
-    });
-  }
-
-  /**
    * Execute the code in the current prompt.
    */
   private _execute(cell: CodeCellWidget): Promise<void> {
@@ -597,8 +579,16 @@ class CodeConsole extends Widget {
    */
   private _onKernelChanged(): void {
     this.clear();
-    this._initialize();
-    this.newPrompt();
+    let kernel = this.session.kernel;
+    if (!kernel) {
+      return;
+    }
+    kernel.ready.then(() => {
+      if (this.isDisposed) {
+        return;
+      }
+      this._handleInfo(kernel.info);
+    });
   }
 
   private _mimeTypeService: IEditorMimeTypeService;
