@@ -16,6 +16,10 @@ import {
 } from '@phosphor/widgets';
 
 import {
+  ClientSession
+} from '@jupyterlab/apputils';
+
+import {
   nbformat, uuid
 } from '@jupyterlab/coreutils';
 
@@ -38,6 +42,28 @@ import {
 export
 function defaultRenderMime(): RenderMime {
   return Private.rendermime.clone();
+}
+
+
+/**
+ * Create a client session object.
+ */
+export
+function createClientSession(options: Partial<ClientSession.IOptions> = {}): Promise<ClientSession> {
+  let manager = options.manager || Private.manager.sessions;
+  return manager.ready.then(() => {
+    return new ClientSession({
+      manager,
+      path: options.path || uuid(),
+      name: options.name,
+      type: options.type,
+      kernelPreference: options.kernelPreference || {
+        shouldStart: true,
+        canStart: true,
+        name: manager.specs.default
+      }
+    });
+  });
 }
 
 

@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  ClientSession
+} from '@jupyterlab/apputils';
+
+import {
   Kernel
 } from '@jupyterlab/services';
 
@@ -20,7 +24,7 @@ import {
 } from '@jupyterlab/outputarea';
 
 import {
-  defaultRenderMime, DEFAULT_OUTPUTS
+  createClientSession, defaultRenderMime, DEFAULT_OUTPUTS
 } from '../utils';
 
 
@@ -171,30 +175,34 @@ describe('outputarea/widget', () => {
 
     describe('#execute()', () => {
 
-      let kernel: Kernel.IKernel;
+      let session: ClientSession;
 
       beforeEach(() => {
-        return Kernel.startNew().then(k => {
-          kernel = k;
-          return kernel.ready;
+        return createClientSession().then(s => {
+          session = s;
+          return session.initialize();
+        });
+      });
+
+      afterEach(() => {
+        return session.shutdown().then(() => {
+          session.dispose();
         });
       });
 
       it('should execute code on a kernel and send outputs to the model', () => {
-        return widget.execute('print("hello")', kernel).then(reply => {
+        return widget.execute('print("hello")', session).then(reply => {
           expect(reply.content.execution_count).to.be.ok();
           expect(reply.content.status).to.be('ok');
           expect(model.length).to.be(1);
-          return kernel.shutdown();
         });
       });
 
       it('should clear existing outputs', () => {
         widget.model.fromJSON(DEFAULT_OUTPUTS);
-        return widget.execute('print("hello")', kernel).then(reply => {
+        return widget.execute('print("hello")', session).then(reply => {
           expect(reply.content.execution_count).to.be.ok();
           expect(model.length).to.be(1);
-          return kernel.shutdown();
         });
       });
 
