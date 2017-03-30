@@ -64,26 +64,6 @@ const TEXT_CLASS = 'jp-LauncherWidget-text';
 const ITEM_CLASS = 'jp-LauncherWidget-item';
 
 /**
- * The class name added to LauncherWidget folder node.
- */
-const FOLDER_CLASS = 'jp-LauncherWidget-folder';
-
-/**
- * The class name added for the folder icon from default-theme.
- */
-const FOLDER_ICON_CLASS = 'jp-FolderIcon';
-
-/**
- * The class name added to LauncherWidget path nodes.
- */
-const PATH_CLASS = 'jp-LauncherWidget-path';
-
-/**
- * The class name added to LauncherWidget current working directory node.
- */
-const CWD_CLASS = 'jp-LauncherWidget-cwd';
-
-/**
  * The class name added to LauncherWidget body nodes.
  */
 const BODY_CLASS = 'jp-LauncherWidget-body';
@@ -156,20 +136,6 @@ class LauncherModel extends VDomModel implements ILauncher {
   }
 
   /**
-   * The path to the current working directory.
-   */
-  get path(): string {
-    return this._path;
-  }
-  set path(path: string) {
-    if (path === this._path) {
-      return;
-    }
-    this._path = path;
-    this.stateChanged.emit(void 0);
-  }
-
-  /**
    * Add a command item to the launcher, and trigger re-render event for parent
    * widget.
    *
@@ -204,7 +170,6 @@ class LauncherModel extends VDomModel implements ILauncher {
   }
 
   private _items: ILauncherItem[] = [];
-  private _path: string = 'home';
 }
 
 
@@ -237,16 +202,9 @@ class LauncherWidget extends VDomWidget<LauncherModel> {
       }, [img, text]);
     });
 
-    let folderImage = h.span({
-      className: `${FOLDER_CLASS} ${FOLDER_ICON_CLASS}`
-    });
-    let p = this.model.path;
-    let pathName = p.length ? `home > ${p.replace(/\//g, ' > ')}` : 'home';
-    let path = h.span({ className: PATH_CLASS }, pathName );
-    let cwd = h.div({ className: CWD_CLASS }, [folderImage, path]);
     let body = h.div({ className: BODY_CLASS  }, toArray(children));
 
-    return h.div({ className: DIALOG_CLASS }, [cwd, body]);
+    return h.div({ className: DIALOG_CLASS }, [body]);
   }
 
   private _linker: ICommandLinker = null;
