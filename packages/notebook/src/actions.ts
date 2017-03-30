@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  ClientSession, Clipboard
+  IClientSession, Clipboard
 } from '@jupyterlab/apputils';
 
 import {
@@ -341,7 +341,7 @@ namespace NotebookActions {
    * All markdown cells will be rendered.
    */
   export
-  function run(widget: Notebook, session?: ClientSession): Promise<boolean> {
+  function run(widget: Notebook, session?: IClientSession): Promise<boolean> {
     if (!widget.model || !widget.activeCell) {
       return Promise.resolve(false);
     }
@@ -367,7 +367,7 @@ namespace NotebookActions {
    * will be created in `'edit'` mode.  The new cell creation can be undone.
    */
   export
-  function runAndAdvance(widget: Notebook, session?: ClientSession): Promise<boolean> {
+  function runAndAdvance(widget: Notebook, session?: IClientSession): Promise<boolean> {
     if (!widget.model || !widget.activeCell) {
       return Promise.resolve(false);
     }
@@ -401,7 +401,7 @@ namespace NotebookActions {
    * The cell insert can be undone.
    */
   export
-  function runAndInsert(widget: Notebook, session: ClientSession): Promise<boolean> {
+  function runAndInsert(widget: Notebook, session: IClientSession): Promise<boolean> {
     if (!widget.model || !widget.activeCell) {
       return Promise.resolve(false);
     }
@@ -430,7 +430,7 @@ namespace NotebookActions {
    * The last cell in the notebook will be activated.
    */
   export
-  function runAll(widget: Notebook, session?: ClientSession): Promise<boolean> {
+  function runAll(widget: Notebook, session?: IClientSession): Promise<boolean> {
     if (!widget.model || !widget.activeCell) {
       return Promise.resolve(false);
     }
@@ -887,7 +887,7 @@ namespace Private {
    * Run the selected cells.
    */
   export
-  function runSelected(widget: Notebook, session?: ClientSession): Promise<boolean> {
+  function runSelected(widget: Notebook, session?: IClientSession): Promise<boolean> {
     widget.mode = 'command';
     let selected: BaseCellWidget[] = [];
     let lastIndex = widget.activeCellIndex;
@@ -924,7 +924,7 @@ namespace Private {
   /**
    * Run a cell.
    */
-  function runCell(parent: Notebook, child: BaseCellWidget, session?: ClientSession): Promise<boolean> {
+  function runCell(parent: Notebook, child: BaseCellWidget, session?: IClientSession): Promise<boolean> {
 
     switch (child.model.type) {
     case 'markdown':

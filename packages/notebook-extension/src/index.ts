@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, ILayoutRestorer, IMainMenu, IStateDB, restartKernel,
+  Dialog, ICommandPalette, ILayoutRestorer, IMainMenu, IStateDB,
   showDialog
 } from '@jupyterlab/apputils';
 
@@ -15,7 +15,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IDocumentRegistry, selectKernelForContext
+  IDocumentRegistry
 } from '@jupyterlab/docregistry';
 
 import {
@@ -415,7 +415,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
         return;
       }
       let content = current.notebook;
-      return NotebookActions.runAndAdvance(content, current.context.kernel);
+      return NotebookActions.runAndAdvance(content, current.context.session);
     }
   });
   commands.addCommand(CommandIDs.run, {
@@ -425,7 +425,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       if (!current) {
         return;
       }
-      return NotebookActions.run(current.notebook, current.context.kernel);
+      return NotebookActions.run(current.notebook, current.context.session);
     }
   });
   commands.addCommand(CommandIDs.runAndInsert, {
@@ -436,7 +436,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
         return;
       }
       return NotebookActions.runAndInsert(
-        current.notebook, current.context.kernel
+        current.notebook, current.context.session
       );
     }
   });
@@ -447,7 +447,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       if (!current) {
         return;
       }
-      return NotebookActions.runAll(current.notebook, current.context.kernel);
+      return NotebookActions.runAll(current.notebook, current.context.session);
     }
   });
   commands.addCommand(CommandIDs.restart, {
@@ -457,7 +457,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       if (!current) {
         return;
       }
-      restartKernel(current.kernel, current);
+      current.session.restart();
     }
   });
   commands.addCommand(CommandIDs.closeAndShutdown, {
@@ -474,9 +474,11 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
         if (result.accept) {
-          current.context.changeKernel(null).then(() => { current.dispose(); });
+          return current.context.session.shutdown().then(() => {
+            current.dispose();
+          });
         } else {
-          return false;
+          return;
         }
       });
     }
@@ -500,13 +502,9 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       if (!current) {
         return;
       }
-      let promise = restartKernel(current.kernel, current);
-      promise.then(result => {
-        if (result) {
-          return NotebookActions.clearAllOutputs(current.notebook);
-        }
+      return current.session.restart().then(() => {
+        NotebookActions.clearAllOutputs(current.notebook);
       });
-      return promise;
     }
   });
   commands.addCommand(CommandIDs.restartRunAll, {
@@ -516,11 +514,9 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       if (!current) {
         return;
       }
-      let promise = restartKernel(current.kernel, current);
-      promise.then(result => {
-        NotebookActions.runAll(current.notebook, current.context.kernel);
+      return current.session.restart().then(() => {
+        NotebookActions.runAll(current.notebook, current.context.session);
       });
-      return promise;
     }
   });
   commands.addCommand(CommandIDs.clearAllOutputs, {
@@ -550,7 +546,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       if (!current) {
         return;
       }
-      let kernel = current.context.kernel;
+      let kernel = current.context.session.kernel;
       if (kernel) {
         return kernel.interrupt();
       }
@@ -793,8 +789,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       if (!current) {
         return;
       }
-      let context = current.context;
-      return selectKernelForContext(context, services.sessions, current);
+      return current.context.session.selectKernel();
     }
   });
   commands.addCommand(CommandIDs.markdown1, {

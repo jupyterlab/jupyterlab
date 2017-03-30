@@ -27,7 +27,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  ClientSession, Toolbar
+  IClientSession, Toolbar
 } from '@jupyterlab/apputils';
 
 import {
@@ -123,7 +123,7 @@ class NotebookPanel extends Widget {
   /**
    * The client session used by the panel.
    */
-  get session(): ClientSession {
+  get session(): IClientSession {
     return this._context ? this._context.session : null;
   }
 
