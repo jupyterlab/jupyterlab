@@ -12,7 +12,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  Session
+  ServiceManager
 } from '@jupyterlab/services';
 
 import {
@@ -34,7 +34,7 @@ let TITLE = 'Console';
 
 
 function main(): void {
-  let path = 'dummy_path';
+  let path = '';
   let query: { [key: string]: string } = Object.create(null);
 
   window.location.search.substr(1).split('&').forEach(item => {
@@ -44,22 +44,22 @@ function main(): void {
     }
   });
 
-  if (!query['path']) {
-    Session.startNew({ path }).then(session => { startApp(session); });
-    return;
+  if (query['path']) {
+    path = query['path'];
   }
 
-  Session.findByPath(query['path'])
-    .then(model => { return Session.connectTo(model.id); })
-    .then(session => { startApp(session); })
-    .catch(error => {
-      console.warn(`path="${query['path']}"`, error);
-      Session.startNew({ path }).then(session => { startApp(session); });
-    });
+  let manager = new ServiceManager();
+  manager.ready.then(() => {
+    startApp(path, manager);
+  });
 }
 
 
-function startApp(session: Session.ISession) {
+/**
+ * Start the application.
+ */
+function startApp(path: string, manager: ServiceManager.IManager) {
+
   // Initialize the command registry with the key bindings.
   let commands = new CommandRegistry();
 
@@ -74,7 +74,8 @@ function startApp(session: Session.ISession) {
   let contentFactory = new ConsolePanel.ContentFactory({ editorFactory });
   let consolePanel = new ConsolePanel({
     rendermime,
-    session,
+    manager,
+    path,
     contentFactory,
     mimeTypeService: editorServices.mimeTypeService
   });
