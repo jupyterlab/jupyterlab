@@ -30,7 +30,7 @@ class WidgetFactory extends ABCWidgetFactory<Widget, DocumentRegistry.IModel> {
 }
 
 
-describe('docmanager/manager', () => {
+describe('@jupyterlab/docmanager', () => {
 
   let manager: DocumentManager;
   let services: ServiceManager.IManager;
@@ -132,8 +132,8 @@ describe('docmanager/manager', () => {
           let id = session.kernel.id;
           let widget = manager.open(session.path, 'default', { id });
           let context = manager.contextForWidget(widget);
-          context.kernelChanged.connect(() => {
-            expect(context.kernel.id).to.be(id);
+          context.session.kernelChanged.connect(() => {
+            expect(context.session.kernel.id).to.be(id);
             done();
           });
         }).catch(done);
@@ -144,8 +144,8 @@ describe('docmanager/manager', () => {
           let name = services.specs.default;
           let widget = manager.open(model.path, 'default');
           let context = manager.contextForWidget(widget);
-          context.kernelChanged.connect(() => {
-            expect(context.kernel.name).to.be(name);
+          context.session.kernelChanged.connect(() => {
+            expect(context.session.kernel.name).to.be(name);
             done();
           });
         }).catch(done);
@@ -153,10 +153,9 @@ describe('docmanager/manager', () => {
 
       it('should not start a kernel if given an invalid one', (done) => {
         services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
-          let name = services.specs.default;
           let widget = manager.open(model.path, 'default');
           let context = manager.contextForWidget(widget);
-          expect(context.kernel).to.be(null);
+          expect(context.session.kernel).to.be(null);
           done();
         }).catch(done);
       });
@@ -202,8 +201,8 @@ describe('docmanager/manager', () => {
           let id = session.kernel.id;
           let widget = manager.createNew(session.path, 'default', { id });
           let context = manager.contextForWidget(widget);
-          context.kernelChanged.connect(() => {
-            expect(context.kernel.id).to.be(id);
+          context.session.kernelChanged.connect(() => {
+            expect(context.session.kernel.id).to.be(id);
             done();
           });
         }).catch(done);
@@ -214,8 +213,8 @@ describe('docmanager/manager', () => {
           let name = services.specs.default;
           let widget = manager.createNew(model.path, 'default');
           let context = manager.contextForWidget(widget);
-          context.kernelChanged.connect(() => {
-            expect(context.kernel.name).to.be(name);
+          context.session.kernelChanged.connect(() => {
+            expect(context.session.kernel.name).to.be(name);
             done();
           });
         }).catch(done);
@@ -223,10 +222,9 @@ describe('docmanager/manager', () => {
 
       it('should not start a kernel if given an invalid one', (done) => {
         services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
-          let name = services.specs.default;
           let widget = manager.createNew(model.path, 'default');
           let context = manager.contextForWidget(widget);
-          expect(context.kernel).to.be(null);
+          expect(context.session.kernel).to.be(null);
           done();
         }).catch(done);
       });
