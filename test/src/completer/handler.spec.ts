@@ -183,10 +183,8 @@ describe('@jupyterlab/completer', () => {
           session
         });
         expect(handler.isDisposed).to.be(false);
-        expect(handler.session.kernel).to.be.ok();
         handler.dispose();
         expect(handler.isDisposed).to.be(true);
-        expect(handler.session.kernel).to.not.be.ok();
       });
 
       it('should be safe to call multiple times', () => {
@@ -205,19 +203,21 @@ describe('@jupyterlab/completer', () => {
     describe('#makeRequest()', () => {
 
       it('should reject if handler has no kernel', () => {
-        let handler = new TestCompletionHandler({
-          session,
-          completer: new CompleterWidget({ editor: null })
+        return createClientSession().then(session => {
+          let handler = new TestCompletionHandler({
+            session,
+            completer: new CompleterWidget({ editor: null })
+          });
+          handler.editor = createEditorWidget().editor;
+          let request = {
+            column: 0,
+            line: 0
+          };
+          return handler.makeRequest(request).then(
+            () => { throw Error('Should have rejected'); },
+            reason => { expect(reason).to.be.an(Error); }
+          );
         });
-        handler.editor = createEditorWidget().editor;
-        let request = {
-          column: 0,
-          line: 0
-        };
-        return handler.makeRequest(request).then(
-          () => { throw Error('Should have rejected'); },
-          reason => { expect(reason).to.be.an(Error); }
-        );
       });
 
       it('should reject if handler has no active cell', () => {
