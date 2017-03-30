@@ -4,12 +4,16 @@
 import expect = require('expect.js');
 
 import {
-  SessionManager
+  Session, SessionManager
 } from '@jupyterlab/services';
 
 import {
   ClientSession, IClientSession
 } from '@jupyterlab/apputils';
+
+import {
+  uuid
+} from '@jupyterlab/coreutils';
 
 import {
   acceptDialog, dismissDialog
@@ -22,6 +26,10 @@ describe('@jupyterlab/apputils', () => {
 
     const manager = new SessionManager();
     let session: ClientSession;
+
+    before(() => {
+      return manager.ready;
+    });
 
     beforeEach(() => {
       session = new ClientSession({ manager });
@@ -360,6 +368,27 @@ describe('@jupyterlab/apputils', () => {
         });
       });
 
+      it('should connect to an existing session on the path', () => {
+        let other: Session.ISession;
+        return manager.startNew({ path: session.path }).then(o => {
+          other = o;
+          return session.initialize();
+        }).then(() => {
+          expect(session.kernel.id).to.be(other.kernel.id);
+        });
+      });
+
+      it('should connect to an existing kernel', () => {
+        let other: Session.ISession;
+        return manager.startNew({ path: uuid() }).then(o => {
+          other = o;
+          session.kernelPreference = { id: other.kernel.id };
+          return session.initialize();
+        }).then(() => {
+          expect(session.kernel.id).to.be(other.kernel.id);
+        });
+      });
+
       it('should present a dialog if there is no distinct kernel to start', () => {
         session.kernelPreference = { name: 'foo' };
         acceptDialog();
@@ -375,17 +404,108 @@ describe('@jupyterlab/apputils', () => {
         });
       });
 
+
+      it('should be a no-op if if the canStart kernelPreference is false', () => {
+        session.kernelPreference = { canStart: false };
+        return session.initialize().then(() => {
+          expect(session.kernel).to.not.be.ok();
+        });
+      });
+
     });
 
     describe('.restartKernel()', () => {
+
+      it('should restart if the user accepts the dialog', () => {
+        let called = false;
+        return session.initialize().then(() => {
+          acceptDialog();
+          session.statusChanged.connect((sender, args) => {
+            if (args === 'restarting') {
+              called = true;
+            }
+          });
+          return ClientSession.restartKernel(session.kernel);
+        }).then(() => {
+          expect(called).to.be(true);
+        });
+      });
+
+      it('should not restart if the user rejects the dialog', () => {
+        let called = false;
+        return session.initialize().then(() => {
+          dismissDialog();
+          session.statusChanged.connect((sender, args) => {
+            if (args === 'restarting') {
+              called = true;
+            }
+          });
+          return ClientSession.restartKernel(session.kernel);
+        }).then(() => {
+          expect(called).to.be(false);
+        });
+      });
 
     });
 
     describe('.getDefaultKernel()', () => {
 
+      it('should get the global default', () => {
+        expect(ClientSession.getDefaultKernel({
+          specs: manager.specs,
+          preference: {}
+        })).to.be(manager.specs.default);
+      });
+
+      it('should return null if no match is found', () => {
+        expect(ClientSession.getDefaultKernel({
+          specs: manager.specs,
+          preference: { name: 'foo' }
+        })).to.be(null);
+      });
+
+      it('should return a matching language', () => {
+        let spec = manager.specs.kernelspecs[manager.specs.default];
+        expect(ClientSession.getDefaultKernel({
+          specs: manager.specs,
+          preference: { language: spec.language }
+        })).to.be(spec.name);
+      });
+
     });
 
     describe('.populateKernelSelect()', () => {
+
+      it('should populate the select div', () => {
+        let div = document.createElement('select');
+        ClientSession.populateKernelSelect(div, {
+          specs: manager.specs,
+          preference: {}
+        });
+        expect(div.firstChild).to.be.ok();
+        expect(div.value).to.not.be('null');
+      });
+
+      it('should select the null option', () => {
+        let div = document.createElement('select');
+        ClientSession.populateKernelSelect(div, {
+          specs: manager.specs,
+          preference: { shouldStart: false }
+        });
+        expect(div.firstChild).to.be.ok();
+        expect(div.value).to.be('null');
+      });
+
+      it('should disable the node', () => {
+        let div = document.createElement('select');
+        ClientSession.populateKernelSelect(div, {
+          specs: manager.specs,
+          preference: { canStart: false }
+        });
+        expect(div.firstChild).to.be.ok();
+        expect(div.value).to.be('null');
+        expect(div.disabled).to.be(true);
+      });
 
     });
 
