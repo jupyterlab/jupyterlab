@@ -4,8 +4,8 @@
 import expect = require('expect.js');
 
 import {
-  Kernel
-} from '@jupyterlab/services';
+  ClientSession
+} from '@jupyterlab/apputils';
 
 import {
   each
@@ -28,23 +28,26 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
-  DEFAULT_CONTENT, createNotebookFactory, rendermime, clipboard,
-  mimeTypeService
+  createClientSession
+} from '../utils';
+
+import {
+  DEFAULT_CONTENT, createNotebookFactory, rendermime,
+  clipboard, mimeTypeService
 } from './utils';
 
 
 const ERROR_INPUT = 'a = foo';
-const kernelPromise = Kernel.startNew();
 
 
-describe('notebook/notebook/actions', () => {
+describe('@jupyterlab/notebook', () => {
 
   describe('NotebookActions', () => {
 
     let widget: Notebook;
-    let kernel: Kernel.IKernel;
+    let session: ClientSession;
 
-    beforeEach((done) => {
+    beforeEach(() => {
       widget = new Notebook({
         rendermime,
         contentFactory: createNotebookFactory(),
@@ -54,11 +57,10 @@ describe('notebook/notebook/actions', () => {
       model.fromJSON(DEFAULT_CONTENT);
       widget.model = model;
 
-      kernelPromise.then(k => {
-        kernel = k;
-        done();
-      });
       widget.activeCellIndex = 0;
+      return createClientSession().then(s => {
+        session = s;
+      });
     });
 
     afterEach(() => {
@@ -67,7 +69,7 @@ describe('notebook/notebook/actions', () => {
     });
 
     after(() => {
-      kernel.shutdown();
+      session.shutdown();
     });
 
     describe('#splitCell({})', () => {
@@ -461,13 +463,17 @@ describe('notebook/notebook/actions', () => {
 
     describe('#run()', () => {
 
+      beforeEach(() => {
+        return session.initialize();
+      });
+
       it('should run the selected cells', function (done) {
         let next = widget.widgets[1] as MarkdownCellWidget;
         widget.select(next);
         let cell = widget.activeCell as CodeCellWidget;
         cell.model.outputs.clear();
         next.rendered = false;
-        NotebookActions.run(widget, kernel).then(result => {
+        NotebookActions.run(widget, session).then(result => {
           expect(result).to.be(true);
           expect(cell.model.outputs.length).to.be.above(0);
           expect(next.rendered).to.be(true);
@@ -476,7 +482,7 @@ describe('notebook/notebook/actions', () => {
 
       it('should be a no-op if there is no model', (done) => {
         widget.model = null;
-        NotebookActions.run(widget, kernel).then(result => {
+        NotebookActions.run(widget, session).then(result => {
           expect(result).to.be(false);
         }).then(done, done);
       });
@@ -485,7 +491,7 @@ describe('notebook/notebook/actions', () => {
         let other = widget.widgets[2];
         widget.select(other);
         other.model.value.text = 'a = 1';
-        NotebookActions.run(widget, kernel).then(result => {
+        NotebookActions.run(widget, session).then(result => {
           expect(result).to.be(true);
           expect(widget.activeCell).to.be(other);
         }).then(done, done);
@@ -494,7 +500,7 @@ describe('notebook/notebook/actions', () => {
       it('should clear the selection', (done) => {
         let next = widget.widgets[1];
         widget.select(next);
-        NotebookActions.run(widget, kernel).then(result => {
+        NotebookActions.run(widget, session).then(result => {
           expect(result).to.be(true);
           expect(widget.isSelected(widget.widgets[0])).to.be(false);
         }).then(done, done);
@@ -502,13 +508,13 @@ describe('notebook/notebook/actions', () => {
 
       it('should change to command mode', (done) => {
         widget.mode = 'edit';
-        NotebookActions.run(widget, kernel).then(result => {
+        NotebookActions.run(widget, session).then(result => {
           expect(result).to.be(true);
           expect(widget.mode).to.be('command');
         }).then(done, done);
       });
 
-      it('should handle no kernel', (done) => {
+      it('should handle no session', (done) => {
         NotebookActions.run(widget, null).then(result => {
           expect(result).to.be(true);
           let cell = widget.activeCell as CodeCellWidget;
@@ -524,7 +530,7 @@ describe('notebook/notebook/actions', () => {
         cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.pushBack(cell);
         widget.select(widget.widgets[widget.widgets.length - 1]);
-        NotebookActions.run(widget, kernel).then(result => {
+        NotebookActions.run(widget, session).then(result => {
           expect(result).to.be(false);
           expect(cell.executionCount).to.be(null);
         }).then(done, done);
@@ -537,7 +543,7 @@ describe('notebook/notebook/actions', () => {
         child.rendered = false;
         widget.select(child);
         widget.activeCell.model.value.text = ERROR_INPUT;
-        NotebookActions.run(widget, kernel).then(result => {
+        NotebookActions.run(widget, session).then(result => {
           expect(result).to.be(false);
           expect(child.rendered).to.be(true);
         }).then(done, done);
@@ -547,13 +553,17 @@ describe('notebook/notebook/actions', () => {
 
     describe('#runAndAdvance()', () => {
 
+      beforeEach(() => {
+        return session.initialize();
+      });
+
       it('should run the selected cells ', (done) => {
         let next = widget.widgets[1] as MarkdownCellWidget;
         widget.select(next);
         let cell = widget.activeCell as CodeCellWidget;
         cell.model.outputs.clear();
         next.rendered = false;
-        NotebookActions.runAndAdvance(widget, kernel).then(result => {
+        NotebookActions.runAndAdvance(widget, session).then(result => {
           expect(result).to.be(true);
           expect(cell.model.outputs.length).to.be.above(0);
           expect(next.rendered).to.be(true);
@@ -562,7 +572,7 @@ describe('notebook/notebook/actions', () => {
 
       it('should be a no-op if there is no model', (done) => {
         widget.model = null;
-        NotebookActions.runAndAdvance(widget, kernel).then(result => {
+        NotebookActions.runAndAdvance(widget, session).then(result => {
           expect(result).to.be(false);
         }).then(done, done);
       });
@@ -570,7 +580,7 @@ describe('notebook/notebook/actions', () => {
       it('should clear the existing selection', (done) => {
         let next = widget.widgets[2];
         widget.select(next);
-        NotebookActions.runAndAdvance(widget, kernel).then(result => {
+        NotebookActions.runAndAdvance(widget, session).then(result => {
           expect(result).to.be(false);
           expect(widget.isSelected(widget.widgets[0])).to.be(false);
         }).then(done, done);
@@ -578,7 +588,7 @@ describe('notebook/notebook/actions', () => {
 
       it('should change to command mode', (done) => {
         widget.mode = 'edit';
-        NotebookActions.runAndAdvance(widget, kernel).then(result => {
+        NotebookActions.runAndAdvance(widget, session).then(result => {
           expect(result).to.be(true);
           expect(widget.mode).to.be('command');
         }).then(done, done);
@@ -587,7 +597,7 @@ describe('notebook/notebook/actions', () => {
       it('should activate the cell after the last selected cell', (done) => {
         let next = widget.widgets[3] as MarkdownCellWidget;
         widget.select(next);
-        NotebookActions.runAndAdvance(widget, kernel).then(result => {
+        NotebookActions.runAndAdvance(widget, session).then(result => {
           expect(result).to.be(true);
           expect(widget.activeCellIndex).to.be(4);
         }).then(done, done);
@@ -596,7 +606,7 @@ describe('notebook/notebook/actions', () => {
       it('should create a new code cell in edit mode if necessary', (done) => {
         let count = widget.widgets.length;
         widget.activeCellIndex = count - 1;
-        NotebookActions.runAndAdvance(widget, kernel).then(result => {
+        NotebookActions.runAndAdvance(widget, session).then(result => {
           expect(result).to.be(true);
           expect(widget.widgets.length).to.be(count + 1);
           expect(widget.activeCell).to.be.a(CodeCellWidget);
@@ -607,7 +617,7 @@ describe('notebook/notebook/actions', () => {
       it('should allow an undo of the new cell', (done) => {
         let count = widget.widgets.length;
         widget.activeCellIndex = count - 1;
-        NotebookActions.runAndAdvance(widget, kernel).then(result => {
+        NotebookActions.runAndAdvance(widget, session).then(result => {
           expect(result).to.be(true);
           NotebookActions.undo(widget);
           expect(widget.widgets.length).to.be(count);
@@ -619,7 +629,7 @@ describe('notebook/notebook/actions', () => {
         let cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.pushBack(cell);
         widget.select(widget.widgets[widget.widgets.length - 1]);
-        NotebookActions.runAndAdvance(widget, kernel).then(result => {
+        NotebookActions.runAndAdvance(widget, session).then(result => {
           expect(result).to.be(false);
           expect(cell.executionCount).to.be(null);
         }).then(done, done);
@@ -630,7 +640,7 @@ describe('notebook/notebook/actions', () => {
         let cell = widget.widgets[1] as MarkdownCellWidget;
         cell.rendered = false;
         widget.select(cell);
-        NotebookActions.runAndAdvance(widget, kernel).then(result => {
+        NotebookActions.runAndAdvance(widget, session).then(result => {
           expect(result).to.be(false);
           expect(cell.rendered).to.be(true);
           expect(widget.activeCellIndex).to.be(2);
@@ -641,13 +651,17 @@ describe('notebook/notebook/actions', () => {
 
     describe('#runAndInsert()', () => {
 
+      beforeEach(() => {
+        return session.initialize();
+      });
+
       it('should run the selected cells ', (done) => {
         let next = widget.widgets[1] as MarkdownCellWidget;
         widget.select(next);
         let cell = widget.activeCell as CodeCellWidget;
         cell.model.outputs.clear();
         next.rendered = false;
-        NotebookActions.runAndInsert(widget, kernel).then(result => {
+        NotebookActions.runAndInsert(widget, session).then(result => {
           expect(result).to.be(true);
           expect(cell.model.outputs.length).to.be.above(0);
           expect(next.rendered).to.be(true);
@@ -656,7 +670,7 @@ describe('notebook/notebook/actions', () => {
 
       it('should be a no-op if there is no model', (done) => {
         widget.model = null;
-        NotebookActions.runAndInsert(widget, kernel).then(result => {
+        NotebookActions.runAndInsert(widget, session).then(result => {
           expect(result).to.be(false);
         }).then(done, done);
       });
@@ -664,7 +678,7 @@ describe('notebook/notebook/actions', () => {
       it('should clear the existing selection', (done) => {
         let next = widget.widgets[1];
         widget.select(next);
-        NotebookActions.runAndInsert(widget, kernel).then(result => {
+        NotebookActions.runAndInsert(widget, session).then(result => {
           expect(result).to.be(true);
           expect(widget.isSelected(widget.widgets[0])).to.be(false);
         }).then(done, done);
@@ -675,7 +689,7 @@ describe('notebook/notebook/actions', () => {
         widget.select(next);
         next.model.value.text = 'a = 1';
         let count = widget.widgets.length;
-        NotebookActions.runAndInsert(widget, kernel).then(result => {
+        NotebookActions.runAndInsert(widget, session).then(result => {
           expect(result).to.be(true);
           expect(widget.activeCell).to.be.a(CodeCellWidget);
           expect(widget.mode).to.be('edit');
@@ -688,7 +702,7 @@ describe('notebook/notebook/actions', () => {
         widget.select(next);
         next.model.value.text = 'a = 1';
         let count = widget.widgets.length;
-        NotebookActions.runAndInsert(widget, kernel).then(result => {
+        NotebookActions.runAndInsert(widget, session).then(result => {
           expect(result).to.be(true);
           NotebookActions.undo(widget);
           expect(widget.widgets.length).to.be(count);
@@ -700,7 +714,7 @@ describe('notebook/notebook/actions', () => {
         let cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.pushBack(cell);
         widget.select(widget.widgets[widget.widgets.length - 1]);
-        NotebookActions.runAndInsert(widget, kernel).then(result => {
+        NotebookActions.runAndInsert(widget, session).then(result => {
           expect(result).to.be(false);
           expect(cell.executionCount).to.be(null);
         }).then(done, done);
@@ -711,7 +725,7 @@ describe('notebook/notebook/actions', () => {
         let cell = widget.widgets[1] as MarkdownCellWidget;
         cell.rendered = false;
         widget.select(cell);
-        NotebookActions.runAndInsert(widget, kernel).then(result => {
+        NotebookActions.runAndInsert(widget, session).then(result => {
           expect(result).to.be(false);
           expect(cell.rendered).to.be(true);
           expect(widget.activeCellIndex).to.be(2);
@@ -725,6 +739,8 @@ describe('notebook/notebook/actions', () => {
       beforeEach(() => {
         // Make sure all cells have valid code.
         widget.widgets[2].model.value.text = 'a = 1';
+
+        return session.initialize();
       });
 
       it('should run all of the cells in the notebok', (done) => {
@@ -732,7 +748,7 @@ describe('notebook/notebook/actions', () => {
         let cell = widget.activeCell as CodeCellWidget;
         cell.model.outputs.clear();
         next.rendered = false;
-        NotebookActions.runAll(widget, kernel).then(result => {
+        NotebookActions.runAll(widget, session).then(result => {
           expect(result).to.be(true);
           expect(cell.model.outputs.length).to.be.above(0);
           expect(next.rendered).to.be(true);
@@ -741,14 +757,14 @@ describe('notebook/notebook/actions', () => {
 
       it('should be a no-op if there is no model', (done) => {
         widget.model = null;
-        NotebookActions.runAll(widget, kernel).then(result => {
+        NotebookActions.runAll(widget, session).then(result => {
           expect(result).to.be(false);
         }).then(done, done);
       });
 
       it('should change to command mode', (done) => {
         widget.mode = 'edit';
-        NotebookActions.runAll(widget, kernel).then(result => {
+        NotebookActions.runAll(widget, session).then(result => {
           expect(result).to.be(true);
           expect(widget.mode).to.be('command');
         }).then(done, done);
@@ -757,14 +773,14 @@ describe('notebook/notebook/actions', () => {
       it('should clear the existing selection', (done) => {
         let next = widget.widgets[2];
         widget.select(next);
-        NotebookActions.runAll(widget, kernel).then(result => {
+        NotebookActions.runAll(widget, session).then(result => {
           expect(result).to.be(true);
           expect(widget.isSelected(widget.widgets[2])).to.be(false);
         }).then(done, done);
       });
 
       it('should activate the last cell', (done) => {
-        NotebookActions.runAll(widget, kernel).then(result => {
+        NotebookActions.runAll(widget, session).then(result => {
           expect(widget.activeCellIndex).to.be(widget.widgets.length - 1);
         }).then(done, done);
       });
@@ -773,7 +789,7 @@ describe('notebook/notebook/actions', () => {
         widget.activeCell.model.value.text = ERROR_INPUT;
         let cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.pushBack(cell);
-        NotebookActions.runAll(widget, kernel).then(result => {
+        NotebookActions.runAll(widget, session).then(result => {
           expect(result).to.be(false);
           expect(cell.executionCount).to.be(null);
           expect(widget.activeCellIndex).to.be(widget.widgets.length - 1);
@@ -784,7 +800,7 @@ describe('notebook/notebook/actions', () => {
         widget.activeCell.model.value.text = ERROR_INPUT;
         let cell = widget.widgets[1] as MarkdownCellWidget;
         cell.rendered = false;
-        NotebookActions.runAll(widget, kernel).then(result => {
+        NotebookActions.runAll(widget, session).then(result => {
           expect(result).to.be(false);
           expect(cell.rendered).to.be(true);
         }).then(done, done);

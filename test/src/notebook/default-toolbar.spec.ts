@@ -4,8 +4,8 @@
 import expect = require('expect.js');
 
 import {
-  Kernel
-} from '@jupyterlab/services';
+  IClientSession
+} from '@jupyterlab/apputils';
 
 import {
   toArray
@@ -53,14 +53,12 @@ import {
 } from './utils';
 
 
-function startKernel(context: DocumentRegistry.IContext<INotebookModel>): Promise<Kernel.IKernel> {
-  let kernel: Kernel.IKernel;
+function startSession(context: DocumentRegistry.IContext<INotebookModel>): Promise<IClientSession> {
   context.save();
   return context.ready.then(() => {
-    kernel = context.session.kernel;
-    return kernel.ready;
+    return context.session.kernel.ready;
   }).then(() => {
-    return kernel;
+    return context.session;
   });
 }
 
@@ -201,8 +199,8 @@ describe('@jupyterlab/notebook', () => {
         cell.model.outputs.clear();
         next.rendered = false;
         Widget.attach(button, document.body);
-        startKernel(panel.context).then(kernel => {
-          kernel.statusChanged.connect((sender, status) => {
+        startSession(panel.context).then(session => {
+          session.statusChanged.connect((sender, status) => {
             if (status === 'idle' && cell.model.outputs.length > 0) {
               expect(next.rendered).to.be(true);
               button.dispose();
