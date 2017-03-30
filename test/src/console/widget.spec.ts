@@ -4,10 +4,6 @@
 import expect = require('expect.js');
 
 import {
-  Session, utils
-} from '@jupyterlab/services';
-
-import {
   Message
 } from '@phosphor/messaging';
 
@@ -30,6 +26,10 @@ import {
 import {
   BaseCellWidget, CodeCellWidget, CodeCellModel, RawCellModel, RawCellWidget
 } from '@jupyterlab/cells';
+
+import {
+  createClientSession
+} from '../utils';
 
 import {
   createCodeCellFactory
@@ -73,24 +73,21 @@ describe('console/widget', () => {
 
   describe('CodeConsole', () => {
 
-    let session: Session.ISession;
     let widget: TestConsole;
 
-    beforeEach(done => {
-      Session.startNew({ path: utils.uuid() }).then(newSession => {
-        session = newSession;
-        widget = new TestConsole({ contentFactory, rendermime, session,
-                                   mimeTypeService });
-        done();
+    beforeEach(() => {
+      return createClientSession().then(session => {
+        widget = new TestConsole({
+          contentFactory, rendermime, session, mimeTypeService
+        });
       });
     });
 
-    afterEach(done => {
-      session.shutdown().then(() => {
-        session.dispose();
+    afterEach(() => {
+      return widget.session.shutdown().then(() => {
+        widget.session.dispose();
         widget.dispose();
-        done();
-      }).catch(done);
+      });
     });
 
     describe('#constructor()', () => {
@@ -159,8 +156,8 @@ describe('console/widget', () => {
 
     describe('#session', () => {
 
-      it('should return the session passed in at instantiation', () => {
-        expect(widget.session).to.be(session);
+      it('should be a client session object', () => {
+        expect(widget.session.path).to.ok();
       });
 
     });
@@ -375,8 +372,10 @@ describe('console/widget', () => {
       describe('#createConsoleHistory', () => {
 
         it('should create a ConsoleHistory', () => {
-          let history = contentFactory.createConsoleHistory({});
-          expect(history).to.be.a(ConsoleHistory);
+          return createClientSession().then(session => {
+            let history = contentFactory.createConsoleHistory({ session });
+            expect(history).to.be.a(ConsoleHistory);
+          });
         });
 
       });
@@ -393,12 +392,14 @@ describe('console/widget', () => {
             };
             return contentFactory.createForeignCell(options, widget);
           };
-          let handler = contentFactory.createForeignHandler({
-            kernel: null,
-            parent: widget,
-            cellFactory
+          return createClientSession().then(session => {
+            let handler = contentFactory.createForeignHandler({
+              session,
+              parent: widget,
+              cellFactory
+            });
+            expect(handler).to.be.a(ForeignHandler);
           });
-          expect(handler).to.be.a(ForeignHandler);
         });
 
       });
