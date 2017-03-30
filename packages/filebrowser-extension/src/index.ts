@@ -18,7 +18,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  FileBrowserModel, FileBrowser
+  FileBrowserModel, FileBrowser, IFileBrowserFactory
 } from '@jupyterlab/filebrowser';
 
 import {
@@ -53,12 +53,13 @@ namespace CommandIDs {
 };
 
 /**
- * The default file browser provider.
+ * The default file browser extension.
  */
-const plugin: JupyterLabPlugin<void> = {
-  activate,
-  id: 'jupyter.services.file-browser',
+const fileBrowserPlugin: JupyterLabPlugin<void> = {
+  activate: activateFileBrowser,
+  id: 'jupyter.extensions.filebrowser',
   requires: [
+    IFileBrowserFactory,
     IServiceManager,
     IDocumentManager,
     IDocumentRegistry,
@@ -71,30 +72,62 @@ const plugin: JupyterLabPlugin<void> = {
 };
 
 /**
+ * The default file browser factory provider.
+ */
+const factoryPlugin: JupyterLabPlugin<IFileBrowserFactory> = {
+  activate: activateFactory,
+  id: 'jupyter.services.filebrowser',
+  provides: IFileBrowserFactory,
+  autoStart: true
+};
+
+/**
  * The file browser namespace token.
  */
 const namespace = 'filebrowser';
 
 
 /**
- * Export the plugin as default.
+ * Export the plugins as default.
  */
-export default plugin;
+const plugins: JupyterLabPlugin<any>[] = [factoryPlugin, fileBrowserPlugin];
+export default plugins;
 
 
 /**
- * Activate the file browser.
+ * Activate the file browser factory provider.
  */
-function activate(app: JupyterLab, manager: IServiceManager, documentManager: IDocumentManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer, state: IStateDB): void {
-  const { commands, shell } = app;
+function activateFactory(app: JupyterLab): IFileBrowserFactory {
+  const { shell } = app;
   const tracker = new InstanceTracker<FileBrowser>({ namespace, shell });
+
+  return {
+    createFileBrowser(options: IFileBrowserFactory.IOptions): FileBrowser {
+      const widget = new FileBrowser({
+        commands: options.commands,
+        manager: options.documentManager,
+        model: new FileBrowserModel({ manager: options.serviceManager })
+      });
+
+      tracker.add(widget);
+      return widget;
+    }
+  };
+}
+
+
+/**
+ * Activate the file browser in the sidebar.
+ */
+function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, manager: IServiceManager, documentManager: IDocumentManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer, state: IStateDB): void {
+  const { commands } = app;
   const category = 'File Operations';
-  const fbModel = new FileBrowserModel({ manager });
-  const fbWidget = new FileBrowser({
-    commands,
-    manager: documentManager,
-    model: fbModel
+  const fbWidget = factory.createFileBrowser({
+    commands: commands,
+    documentManager: documentManager,
+    serviceManager: manager
   });
+  const fbModel = fbWidget.model;
 
   // Let the application restorer track the primary file browser (that is
   // automatically created) for restoration of application state (e.g. setting
@@ -103,7 +136,6 @@ function activate(app: JupyterLab, manager: IServiceManager, documentManager: ID
   // All other file browsers created by using the factory function are
   // responsible for their own restoration behavior, if any.
   restorer.add(fbWidget, namespace);
-  tracker.add(fbWidget);
 
   let creatorCmds: { [key: string]: DisposableSet } = Object.create(null);
   let addCreator = (name: string) => {
@@ -169,7 +201,7 @@ function activate(app: JupyterLab, manager: IServiceManager, documentManager: ID
     menu.open(event.clientX, event.clientY);
   });
 
-  addCommands(app, fbWidget, documentManager);
+  addCommands(app, fbWidget);
 
   let menu = createMenu(app, Object.keys(creatorCmds));
   mainMenu.addMenu(menu, { rank: 1 });
@@ -206,7 +238,7 @@ function activate(app: JupyterLab, manager: IServiceManager, documentManager: ID
 /**
  * Add the filebrowser commands to the application's command registry.
  */
-function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocumentManager): void {
+function addCommands(app: JupyterLab, fbWidget: FileBrowser): void {
   const { commands } = app;
 
   commands.addCommand(CommandIDs.showBrowser, {
