@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  Session, utils
+  ServiceManager
 } from '@jupyterlab/services';
 
 import {
@@ -46,23 +46,22 @@ const contentFactory = createConsolePanelFactory();
 describe('console/panel', () => {
 
   let panel: TestPanel;
-  let session: Session.ISession;
+  let manager = new ServiceManager();
 
-  beforeEach(done => {
-    Session.startNew({ path: utils.uuid() }).then(newSession => {
-      session = newSession;
-      panel = new TestPanel({ contentFactory, rendermime, session,
-                              mimeTypeService });
-      done();
+  before(() => {
+    return manager.ready;
+  });
+
+  beforeEach(() => {
+    panel = new TestPanel({
+      manager, contentFactory, rendermime, mimeTypeService
     });
   });
 
-  afterEach(done => {
-    session.shutdown().then(() => {
-      session.dispose();
+  afterEach(() => {
+    return panel.session.shutdown().then(() => {
       panel.dispose();
-      done();
-    }).catch(done);
+    });
   });
 
   describe('ConsolePanel', () => {
@@ -83,6 +82,15 @@ describe('console/panel', () => {
       });
 
     });
+
+    describe('#session', () => {
+
+      it('should be a client session object', () => {
+        expect(panel.session.path).to.be.ok();
+      });
+
+    });
+
 
     describe('#dispose()', () => {
 
@@ -151,12 +159,12 @@ describe('console/panel', () => {
 
       describe('#createConsole()', () => {
 
-        it('should create a notebook widget', () => {
+        it('should create a console widget', () => {
           let options = {
             contentFactory: contentFactory.consoleContentFactory,
             rendermime,
             mimeTypeService,
-            session
+            session: panel.session
           };
           expect(contentFactory.createConsole(options)).to.be.a(CodeConsole);
         });

@@ -73,7 +73,7 @@ class ConsolePanel extends Panel {
       path = `${basePath || ''}/console-${count}-${uuid()}`;
     }
 
-    let session = new ClientSession({
+    let session = this.session = new ClientSession({
       manager: manager.sessions,
       path,
       name: name || `Console ${count}`,
@@ -110,6 +110,11 @@ class ConsolePanel extends Panel {
    * The console widget used by the panel.
    */
   readonly console: CodeConsole;
+
+  /**
+   * The session used by the panel.
+   */
+  readonly session: IClientSession;
 
   /**
    * Dispose of the resources held by the widget.
