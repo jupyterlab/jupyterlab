@@ -440,7 +440,9 @@ class ClientSession implements IDisposable {
    * Initialize the session.
    */
   initialize(): Promise<void> {
-    return this._update().then(() => {
+    return this.manager.ready.then(() => {
+      return this._update();
+    }).then(() => {
       return this._initialize();
     }).then(() => {
       if (this.kernel || this.kernelPreference.shouldStart === false) {
