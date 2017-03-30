@@ -18,7 +18,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  FileBrowserModel, FileBrowser, IPathTracker
+  FileBrowserModel, FileBrowser
 } from '@jupyterlab/filebrowser';
 
 import {
@@ -55,10 +55,9 @@ namespace CommandIDs {
 /**
  * The default file browser provider.
  */
-const plugin: JupyterLabPlugin<IPathTracker> = {
+const plugin: JupyterLabPlugin<void> = {
   activate,
   id: 'jupyter.services.file-browser',
-  provides: IPathTracker,
   requires: [
     IServiceManager,
     IDocumentManager,
@@ -86,7 +85,7 @@ export default plugin;
 /**
  * Activate the file browser.
  */
-function activate(app: JupyterLab, manager: IServiceManager, documentManager: IDocumentManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer, state: IStateDB): IPathTracker {
+function activate(app: JupyterLab, manager: IServiceManager, documentManager: IDocumentManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer, state: IStateDB): void {
   const { commands, shell } = app;
   const tracker = new InstanceTracker<FileBrowser>({ namespace, shell });
   const category = 'File Operations';
@@ -201,8 +200,6 @@ function activate(app: JupyterLab, manager: IServiceManager, documentManager: ID
       mainMenu.addMenu(menu, { rank: 1 });
     }
   });
-
-  return fbModel;
 }
 
 
