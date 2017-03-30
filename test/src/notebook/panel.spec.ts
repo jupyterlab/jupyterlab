@@ -69,14 +69,14 @@ function createPanel(context: Context<INotebookModel>): LogNotebookPanel {
 }
 
 
-describe('notebook/notebook/panel', () => {
+describe('@jupyterlab/notebook', () => {
 
   let context: Context<INotebookModel>;
   let manager: ServiceManager.IManager;
 
-  before((done) => {
+  before(() => {
     manager = new ServiceManager();
-    manager.ready.then(done, done);
+    return manager.ready;
   });
 
   beforeEach(() => {
@@ -140,14 +140,12 @@ describe('notebook/notebook/panel', () => {
 
       it('should be emitted when the kernel on the panel changes', (done) => {
         let panel = createPanel(context);
-        panel.kernelChanged.connect((sender, args) => {
+        panel.session.kernelChanged.connect((sender, args) => {
           expect(sender).to.be(panel);
           expect(args.name).to.be.ok();
           done();
         });
-        panel.context.save().then(() => {
-          return panel.context.startDefaultKernel();
-        }).catch(done);
+        panel.context.save().catch(done);
       });
 
     });
@@ -174,11 +172,9 @@ describe('notebook/notebook/panel', () => {
 
       it('should be the current kernel used by the panel', (done) => {
         let panel = createPanel(context);
-        context.save().then(() => {
-          return context.startDefaultKernel();
-        }).catch(done);
-        context.kernelChanged.connect(() => {
-          expect(panel.kernel.name).to.be.ok();
+        context.save().catch(done);
+        context.session.kernelChanged.connect(() => {
+          expect(panel.session.kernel.name).to.be.ok();
           done();
         });
       });

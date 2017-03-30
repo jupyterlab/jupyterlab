@@ -55,10 +55,9 @@ import {
 
 function startKernel(context: DocumentRegistry.IContext<INotebookModel>): Promise<Kernel.IKernel> {
   let kernel: Kernel.IKernel;
-  return context.save().then(() => {
-    return context.startDefaultKernel();
-  }).then(k => {
-    kernel = k;
+  context.save();
+  return context.ready.then(() => {
+    kernel = context.session.kernel;
     return kernel.ready;
   }).then(() => {
     return kernel;
@@ -66,7 +65,7 @@ function startKernel(context: DocumentRegistry.IContext<INotebookModel>): Promis
 }
 
 
-describe('notebook/notebook/default-toolbar', () => {
+describe('@jupyterlab/notebook', () => {
 
   let context: Context<INotebookModel>;
 
@@ -252,7 +251,6 @@ describe('notebook/notebook/default-toolbar', () => {
       it('should handle a change in context', () => {
         let item = ToolbarItems.createCellTypeItem(panel);
         context.model.fromJSON(DEFAULT_CONTENT);
-        context.startDefaultKernel();
         panel.context = null;
         panel.notebook.activeCellIndex++;
         let node = item.node.getElementsByTagName('select')[0];
