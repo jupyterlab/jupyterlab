@@ -22,6 +22,10 @@ import {
 } from '@phosphor/signaling';
 
 import {
+  uuid
+} from '@jupyterlab/coreutils';
+
+import {
   showDialog, Dialog
 } from '.';
 
@@ -197,14 +201,14 @@ namespace IClientSession {
  * The default implementation of client session object.
  */
 export
-class ClientSession implements IDisposable {
+class ClientSession implements IClientSession {
   /**
    * Construct a new client session.
    */
   constructor(options: ClientSession.IOptions) {
     this.manager = options.manager;
     this.manager.runningChanged.connect(this._update, this);
-    this._path = options.path;
+    this._path = options.path || uuid();
     this._type = options.type || '';
     this._name = options.name || '';
     this._kernelPreference = options.kernelPreference || {};
@@ -225,14 +229,14 @@ class ClientSession implements IDisposable {
   }
 
   /**
-   * A signal emitted when the kernel status changes.
+   * A signal emitted when the status changes.
    */
   get statusChanged(): ISignal<this, Kernel.Status> {
     return this._statusChanged;
   }
 
   /**
-   * A signal emitted for a kernel messages.
+   * A signal emitted for iopub kernel messages.
    */
   get iopubMessage(): ISignal<this, KernelMessage.IMessage> {
     return this._iopubMessage;
@@ -253,28 +257,28 @@ class ClientSession implements IDisposable {
   }
 
   /**
-   * The current kernel associated with the document.
+   * The current kernel of the session.
    */
   get kernel(): Kernel.IKernelConnection {
     return this._session ? this._session.kernel : null;
   }
 
   /**
-   * The current path associated with the client sesssion.
+   * The current path of the session.
    */
   get path(): string {
     return this._path;
   }
 
   /**
-   * The current name associated with the client sesssion.
+   * The current name of the session.
    */
   get name(): string {
     return this._name;
   }
 
   /**
-   * The kernel preference.
+   * The kernel preference of the session.
    */
   get kernelPreference(): IClientSession.IKernelPreference {
     return this._kernelPreference;
@@ -284,12 +288,12 @@ class ClientSession implements IDisposable {
   }
 
   /**
-   * The session manager used by the client session.
+   * The session manager used by the session.
    */
   readonly manager: Session.IManager;
 
   /**
-   * The current status of the client session.
+   * The current status of the session.
    */
   get status(): Kernel.Status {
     if (this._promise) {
@@ -306,7 +310,7 @@ class ClientSession implements IDisposable {
   }
 
   /**
-   * The display name of the kernel.
+   * The display name of the current kernel.
    */
   get kernelDisplayName(): string {
     let kernel = this.kernel;
@@ -386,7 +390,8 @@ class ClientSession implements IDisposable {
    * #### Notes
    * If there is a running kernel, present a dialog.
    * If there is no kernel, we start a kernel with the last run
-   * kernel name.  If no kernel has been started, this is a no-op.
+   * kernel name.
+   * If no kernel has been started, this is a no-op.
    */
   restart(): Promise<Kernel.IKernelConnection | null> {
     let kernel = this.kernel;
@@ -411,7 +416,11 @@ class ClientSession implements IDisposable {
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
   setPath(path: string): Promise<void> {
+    if (this._path === path) {
+      return;
+    }
     this._path = path;
+    this._propertyChanged.emit('path');
     if (this._session) {
       return this._session.rename(path);
     }
@@ -422,8 +431,12 @@ class ClientSession implements IDisposable {
    * Change the session name.
    */
   setName(name: string): Promise<void> {
-    // no-op until supported.
+    if (this._name === name) {
+      return;
+    }
     this._name = name;
+    this._propertyChanged.emit('name');
+    // no-op until supported.
     return Promise.resolve(void 0);
   }
 
@@ -431,8 +444,12 @@ class ClientSession implements IDisposable {
    * Change the session type.
    */
   setType(type: string): Promise<void> {
-    // no-op until supported.
+    if (this._type === type) {
+      return;
+    }
     this._type = type;
+    this._propertyChanged.emit('type');
+    // no-op until supported.
     return Promise.resolve(void 0);
   }
 
@@ -452,7 +469,8 @@ class ClientSession implements IDisposable {
    */
   private _initialize(): Promise<void> {
     let preference = this.kernelPreference;
-    if (this.kernel || preference.shouldStart === false) {
+    if (this.kernel || preference.shouldStart === false ||
+        preference.canStart === false) {
       return Promise.resolve(void 0);
     }
     // Try to use an existing kernel.
@@ -641,7 +659,7 @@ export namespace ClientSession {
     /**
      * The initial path of the file.
      */
-    path: string;
+    path?: string;
 
     /**
      * The name of with the session.
@@ -782,8 +800,8 @@ namespace Private {
   export
   function getDefaultKernel(options: ClientSession.IKernelSearch): string | null {
     let { specs, preference } = options;
-    let { name, language, id, shouldStart } = preference;
-    if (shouldStart === false) {
+    let { name, language, id, shouldStart, canStart } = preference;
+    if (shouldStart === false || canStart === false) {
       return null;
     }
 
