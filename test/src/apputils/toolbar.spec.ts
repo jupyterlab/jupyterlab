@@ -229,9 +229,11 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should handle a null kernel', () => {
-        let item = Toolbar.createKernelStatusItem(session);
-        expect(item.node.title).to.be('No Kernel!');
-        expect(item.hasClass('jp-mod-busy')).to.be(true);
+        return createClientSession().then(session => {
+          let item = Toolbar.createKernelStatusItem(session);
+          expect(item.node.title).to.be('Kernel Dead');
+          expect(item.hasClass('jp-mod-busy')).to.be(true);
+        });
       });
 
     });
