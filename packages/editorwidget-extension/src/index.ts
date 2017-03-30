@@ -94,7 +94,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   if (launcher) {
     launcher.add({
       name: 'Text Editor',
-      command: 'file-operations:new-text-file'
+      command: 'filebrowser:new-text-file'
     });
   }
 
