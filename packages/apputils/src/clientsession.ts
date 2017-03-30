@@ -444,19 +444,6 @@ class ClientSession implements IDisposable {
       return this._update();
     }).then(() => {
       return this._initialize();
-    }).then(() => {
-      if (this.kernel || this.kernelPreference.shouldStart === false) {
-        return;
-      }
-      let name = ClientSession.getDefaultKernel({
-        specs: this.manager.specs,
-        sessions: this.manager.running(),
-        preference: this.kernelPreference
-      });
-      if (name) {
-        return this.changeKernel({ name }).then(() => undefined);
-      }
-      return this.selectKernel().then(() => undefined);
     });
   }
 
@@ -472,7 +459,7 @@ class ClientSession implements IDisposable {
     if (preference.id) {
       return this.changeKernel({ id: preference.id }).then(
         () => void 0,
-        () => void 0
+        () => this.selectKernel()
       );
     }
     let name = ClientSession.getDefaultKernel({
@@ -483,9 +470,10 @@ class ClientSession implements IDisposable {
     if (name) {
       return this.changeKernel({ name }).then(
         () => void 0,
-        () => void 0
+        () => this.selectKernel()
       );
     }
+    return this.selectKernel();
   }
 
   /**
