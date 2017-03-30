@@ -333,7 +333,7 @@ namespace Private {
    * The counter for new consoles.
    */
   export
-  let count = 0;
+  let count = 1;
 
   /**
    * Update the title of a console panel.
