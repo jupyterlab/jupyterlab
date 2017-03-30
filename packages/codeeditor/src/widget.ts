@@ -68,26 +68,6 @@ class CodeEditorWidget extends Widget {
   }
 
   /**
-   * Handle the DOM events for the widget.
-   *
-   * @param event - The DOM event sent to the widget.
-   *
-   * #### Notes
-   * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the panel's DOM node. It should
-   * not be called directly by user code.
-   */
-  handleEvent(event: Event): void {
-    switch (event.type) {
-    case 'focus':
-      this._evtFocus(event as FocusEvent);
-      break;
-    default:
-      break;
-    }
-  }
-
-  /**
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
@@ -99,10 +79,8 @@ class CodeEditorWidget extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
-    this.node.addEventListener('focus', this, true);
     if (this.isVisible) {
       this._editor.refresh();
-      this._needsRefresh = false;
     }
   }
 
@@ -111,14 +89,6 @@ class CodeEditorWidget extends Widget {
    */
   protected onAfterShow(msg: Message): void {
     this._editor.refresh();
-    this._needsRefresh = false;
-  }
-
-  /**
-   * Handle `before-detach` messages for the widget.
-   */
-  protected onBeforeDetach(msg: Message): void {
-    this.node.removeEventListener('focus', this, true);
   }
 
   /**
@@ -127,22 +97,8 @@ class CodeEditorWidget extends Widget {
   protected onResize(msg: Widget.ResizeMessage): void {
     if (msg.width >= 0 && msg.height >= 0) {
       this._editor.setSize(msg);
-      this._needsRefresh = false;
-    } else if (this._editor.hasFocus()) {
-      this._editor.refresh();
-      this._needsRefresh = false;
     } else {
-      this._needsRefresh = true;
-    }
-  }
-
-  /**
-   * Handle `focus` events for the widget.
-   */
-  private _evtFocus(event: FocusEvent): void {
-    if (this._needsRefresh) {
-      this._editor.refresh();
-      this._needsRefresh = false;
+      this._editor.resizeToFit();
     }
   }
 
@@ -160,7 +116,6 @@ class CodeEditorWidget extends Widget {
   }
 
   private _editor: CodeEditor.IEditor = null;
-  private _needsRefresh = false;
 }
 
 
