@@ -455,6 +455,14 @@ class ClientSession implements IClientSession {
 
   /**
    * Initialize the session.
+   *
+   * #### Notes
+   * If a server session exists on the current path, we will connect to it.
+   * If preferences include disabling `canStart` or `shouldStart`, no
+   * server session will be started.
+   * If a kernel id is given, we attempt to start a session with that id.
+   * If a default kernel is available, we connect to it.
+   * Otherwise we ask the user to select a kernel.
    */
   initialize(): Promise<void> {
     return this.manager.ready.then(() => {
@@ -865,6 +873,8 @@ namespace Private {
     let { name, id, language, canStart, shouldStart } = preference;
 
     if (canStart === false) {
+      node.appendChild(optionForNone());
+      node.value = 'null';
       node.disabled = true;
       return;
     }
@@ -914,10 +924,6 @@ namespace Private {
     // Add an option for no kernel
     node.appendChild(optionForNone());
 
-    if (shouldStart === false) {
-      node.value = JSON.stringify(null);
-    }
-
     let other = document.createElement('optgroup');
     other.label = 'Start Other Kernel';
 
@@ -936,6 +942,18 @@ namespace Private {
     // Add a separator option if there were any other names.
     if (otherNames.length) {
       node.appendChild(other);
+    }
+
+    // Handle the default value.
+    if (shouldStart === false) {
+      node.value = 'null';
+    } else {
+      node.selectedIndex = 0;
+    }
+
+    // Bail if there are no sessions.
+    if (!sessions) {
+      return;
     }
 
     // Add the sessions using the preferred language first.
@@ -982,7 +1000,6 @@ namespace Private {
         otherSessionsNode.appendChild(optionForSession(session, name, maxLength));
       });
     }
-    node.selectedIndex = 0;
   }
 
   /**
@@ -1014,7 +1031,7 @@ namespace Private {
     group.label = 'Use No Kernel';
     let option = document.createElement('option');
     option.text = 'No Kernel';
-    option.value = JSON.stringify(null);
+    option.value = 'null';
     group.appendChild(option);
     return group;
   }
