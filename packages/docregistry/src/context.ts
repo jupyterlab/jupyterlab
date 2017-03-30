@@ -444,7 +444,7 @@ export namespace Context {
     /**
      * The kernel preference associated with the context.
      */
-    kernelPreference: IClientSession.IKernelPreference;
+    kernelPreference?: IClientSession.IKernelPreference;
 
     /**
      * An optional callback for opening sibling widgets.
