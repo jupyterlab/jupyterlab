@@ -55,6 +55,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     this.session = new ClientSession({
       manager: manager.sessions,
       path: this._path,
+      name: this._path.split('/').pop(),
       kernelPreference: options.kernelPreference
     });
     this.session.propertyChanged.connect(this._onSessionChanged, this);
@@ -214,6 +215,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         return;
       }
       this._path = newPath;
+      this.session.setName(newPath.split('/').pop());
       return this.session.setPath(newPath).then(() => this.save());
     });
   }
@@ -335,6 +337,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     if (change.oldValue.path === this._path) {
       let newPath = change.newValue.path;
       this.session.setPath(newPath);
+      this.session.setName(newPath.split('/').pop());
       this._path = newPath;
       this._updateContentsModel(change.newValue);
       this._pathChanged.emit(this._path);

@@ -314,7 +314,7 @@ class ClientSession implements IDisposable {
       return 'No Kernel!';
     }
     let spec = this.manager.specs.kernelspecs[kernel.name];
-    return spec ? spec.name : kernel.name;
+    return spec ? spec.display_name : kernel.name;
   }
 
   /**
@@ -793,7 +793,7 @@ namespace Private {
   function getDefaultKernel(options: ClientSession.IKernelSearch): string | null {
     let { specs, preference } = options;
     let { name, language, id, shouldStart } = preference;
-    if (!shouldStart) {
+    if (shouldStart === false) {
       return null;
     }
 
@@ -852,7 +852,7 @@ namespace Private {
     let { preference, sessions, specs } = options;
     let { name, id, language, canStart, shouldStart } = preference;
 
-    if (!canStart) {
+    if (canStart === false) {
       node.disabled = true;
       return;
     }
@@ -902,7 +902,7 @@ namespace Private {
     // Add an option for no kernel
     node.appendChild(optionForNone());
 
-    if (!shouldStart) {
+    if (shouldStart === false) {
       node.value = JSON.stringify(null);
     }
 

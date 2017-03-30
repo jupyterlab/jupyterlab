@@ -187,12 +187,18 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
 
   command = CommandIDs.open;
   commands.addCommand(command, {
-    label: 'Open Console',
     execute: (args: Partial<ConsolePanel.IOptions>) => {
-      if (!args.path) {
-        return;
+      let path = args['path'];
+      let widget = tracker.find(value => {
+        if (value.console.session.path === path) {
+          return true;
+        }
+      });
+      if (widget) {
+        tracker.activate(widget);
+      } else {
+        return createConsole(args);
       }
-      return createConsole(args);
     }
   });
 
@@ -334,23 +340,6 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
           return true;
         }
       });
-    }
-  });
-
-  command = CommandIDs.open;
-  commands.addCommand(command, {
-    execute: (args: JSONObject) => {
-      let path = args['path'];
-      let widget = tracker.find(value => {
-        if (value.console.session.path === path) {
-          return true;
-        }
-      });
-      if (widget) {
-        tracker.activate(widget);
-      } else {
-        app.commands.execute(CommandIDs.create, { path });
-      }
     }
   });
 
