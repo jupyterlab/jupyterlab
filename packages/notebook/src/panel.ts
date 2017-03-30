@@ -230,6 +230,7 @@ class NotebookPanel extends Widget {
   private _onContextChanged(oldValue: DocumentRegistry.IContext<INotebookModel>, newValue: DocumentRegistry.IContext<INotebookModel>): void {
     if (oldValue) {
       oldValue.pathChanged.disconnect(this.onPathChanged, this);
+      oldValue.session.kernelChanged.disconnect(this._onKernelChanged, this);
       if (oldValue.model) {
         oldValue.model.stateChanged.disconnect(this.onModelStateChanged, this);
       }
@@ -242,6 +243,7 @@ class NotebookPanel extends Widget {
     this.notebook.model = newValue.model;
     this._handleDirtyState();
     newValue.model.stateChanged.connect(this.onModelStateChanged, this);
+    context.session.kernelChanged.connect(this._onKernelChanged, this);
 
     // Clear the cells when the context is initially populated.
     if (!newValue.isReady) {
@@ -268,8 +270,7 @@ class NotebookPanel extends Widget {
   /**
    * Handle a change in the kernel by updating the document metadata.
    */
-  private _onKernelChanged(context: DocumentRegistry.IContext<INotebookModel>, kernel: Kernel.IKernel): void {
-    this._kernelChanged.emit(kernel);
+  private _onKernelChanged(sender: any, kernel: Kernel.IKernelConnection): void {
     if (!this.model || !kernel) {
       return;
     }
@@ -291,7 +292,7 @@ class NotebookPanel extends Widget {
   /**
    * Update the kernel spec.
    */
-  private _updateSpec(kernel: Kernel.IKernel): void {
+  private _updateSpec(kernel: Kernel.IKernelConnection): void {
     kernel.getSpec().then(spec => {
       if (this.isDisposed) {
         return;
@@ -321,7 +322,6 @@ class NotebookPanel extends Widget {
   private _context: DocumentRegistry.IContext<INotebookModel> = null;
   private _activated = new Signal<this, void>(this);
   private _contextChanged = new Signal<this, void>(this);
-  private _kernelChanged = new Signal<this, Kernel.IKernel>(this);
 }
 
 
