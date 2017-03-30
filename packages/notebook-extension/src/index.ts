@@ -19,6 +19,10 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
+  ILauncher
+} from '@jupyterlab/launcher';
+
+import {
   CellTools, ICellTools, INotebookTracker, NotebookActions,
   NotebookModelFactory,  NotebookPanel, NotebookTracker, NotebookWidgetFactory,
   trustNotebook
@@ -206,6 +210,7 @@ const trackerPlugin: JupyterLabPlugin<INotebookTracker> = {
     IEditorServices,
     ILayoutRestorer
   ],
+  optional: [ILauncher],
   activate: activateNotebookHandler,
   autoStart: true
 };
@@ -316,7 +321,7 @@ function activateCellTools(app: JupyterLab, tracker: INotebookTracker, editorSer
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: NotebookPanel.IContentFactory, editorServices: IEditorServices, restorer: ILayoutRestorer): INotebookTracker {
+function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: NotebookPanel.IContentFactory, editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): INotebookTracker {
 
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
@@ -373,8 +378,17 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
   // Add main menu notebook menu.
   mainMenu.addMenu(createMenu(app), { rank: 20 });
 
+  // Add a launcher item if the launcher is available.
+  if (launcher) {
+    launcher.add({
+      name: 'Notebook',
+      command: 'file-operations:new-notebook'
+    });
+  }
+
   return tracker;
 }
+
 
 
 /**

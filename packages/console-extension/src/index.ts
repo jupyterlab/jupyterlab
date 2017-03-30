@@ -43,6 +43,10 @@ import {
 } from '@jupyterlab/filebrowser';
 
 import {
+  ILauncher
+} from '@jupyterlab/launcher';
+
+import {
   IRenderMime, RenderMime
 } from '@jupyterlab/rendermime';
 
@@ -102,6 +106,7 @@ const trackerPlugin: JupyterLabPlugin<IConsoleTracker> = {
     IEditorServices,
     ILayoutRestorer
   ],
+  optional: [ILauncher],
   activate: activateConsole,
   autoStart: true
 };
@@ -145,7 +150,7 @@ const CONSOLE_REGEX = /^console-(\d)+-[0-9a-f]+$/;
 /**
  * Activate the console extension.
  */
-function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, palette: ICommandPalette, pathTracker: IPathTracker, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer): IConsoleTracker {
+function activateConsole(app: JupyterLab, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, palette: ICommandPalette, pathTracker: IPathTracker, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): IConsoleTracker {
   let manager = services.sessions;
   let { commands, shell } = app;
   let category = 'Console';
@@ -166,6 +171,14 @@ function activateConsole(app: JupyterLab, services: IServiceManager, rendermime:
     name: panel => panel.console.session && panel.console.session.id,
     when: manager.ready
   });
+
+  // Add a launcher item if the launcher is available.
+  if (launcher) {
+    launcher.add({
+      name: 'Code Console',
+      command: CommandIDs.create
+    });
+  }
 
   // Set the main menu title.
   menu.title.label = category;

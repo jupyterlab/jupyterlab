@@ -18,7 +18,7 @@ import {
 } from '@jupyterlab/filebrowser';
 
 import {
-  ILauncher, ILauncherItem, LauncherModel, LauncherWidget
+  ILauncher, LauncherModel, LauncherWidget
 } from '@jupyterlab/launcher';
 
 
@@ -77,33 +77,6 @@ function activate(app: JupyterLab, services: IServiceManager, pathTracker: IPath
   // application state (e.g. setting the launcher as the current side bar
   // widget).
   restorer.add(widget, 'launcher');
-
-  // Hardcoded defaults.
-  let defaults: ILauncherItem[] = [
-    {
-      name: 'Notebook',
-      command: 'file-operations:new-notebook'
-    },
-    {
-      name: 'Code Console',
-      command: 'console:create'
-    },
-    {
-      name: 'Text Editor',
-      command: 'file-operations:new-text-file'
-    }
-  ];
-
-  if (services.terminals.isAvailable()) {
-    defaults.push({
-      name: 'Terminal',
-      command: 'terminal:create-new'
-    });
-  }
-
-  // Note: we do not retain a handle on the items added by default, which
-  // means we have to way of removing them after the fact.
-  defaults.forEach(options => { model.add(options); });
 
   commands.addCommand(CommandIDs.show, {
     label: 'Show Launcher',
