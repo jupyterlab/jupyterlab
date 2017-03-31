@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  uuid
+} from '@jupyterlab/coreutils';
+
+import {
   Kernel, KernelMessage, Session, utils
 } from '@jupyterlab/services';
 
@@ -20,10 +24,6 @@ import {
 import {
   ISignal, Signal
 } from '@phosphor/signaling';
-
-import {
-  uuid
-} from '@jupyterlab/coreutils';
 
 import {
   showDialog, Dialog
@@ -511,11 +511,8 @@ class ClientSession implements IClientSession {
       path: this._path,
       kernelName: model.name,
       kernelId: model.id
-    }).then(session => {
-      return this._handleNewSession(session);
-    }).catch(err => {
-      return this._handleSessionError(err);
-    });
+    }).then(session => this._handleNewSession(session))
+    .catch(err => this._handleSessionError(err));
   }
 
   /**
@@ -656,7 +653,8 @@ class ClientSession implements IClientSession {
 /**
  * A namespace for `ClientSession` statics.
  */
-export namespace ClientSession {
+export
+namespace ClientSession {
   /**
    * The options used to initialize a context.
    */
@@ -673,7 +671,7 @@ export namespace ClientSession {
     path?: string;
 
     /**
-     * The name of with the session.
+     * The name of the session.
      */
     name?: string;
 
