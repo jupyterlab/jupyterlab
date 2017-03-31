@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  acceptDialog, dismissDialog
+  acceptDialog, dismissDialog, waitForDialog
 } from '../utils';
 
 
@@ -147,16 +147,20 @@ describe('@jupyterlab/domutils', () => {
           document.body.appendChild(host);
           dialog = new TestDialog({ host });
           dialog.launch();
-          expect(host.firstChild).to.equal(dialog.node);
-          dialog.dispose();
-          document.body.removeChild(host);
+          return waitForDialog().then(() => {
+            expect(host.firstChild).to.equal(dialog.node);
+            dialog.dispose();
+            document.body.removeChild(host);
+          });
         });
 
         it('should resolve with `true` when accepted', () => {
           let promise = dialog.launch().then(result => {
             expect(result.accept).to.equal(true);
           });
-          dialog.resolve();
+          waitForDialog().then(() => {
+            dialog.resolve();
+          });
           return promise;
         });
 
@@ -164,7 +168,9 @@ describe('@jupyterlab/domutils', () => {
           let promise = dialog.launch().then(result => {
             expect(result.accept).to.equal(false);
           });
-          dialog.reject();
+          waitForDialog().then(() => {
+            dialog.reject();
+          });
           return promise;
         });
 
@@ -172,7 +178,9 @@ describe('@jupyterlab/domutils', () => {
           let promise = dialog.launch().then(result => {
             expect(result.accept).to.equal(false);
           });
-          dialog.close();
+          waitForDialog().then(() => {
+            dialog.close();
+          });
           return promise;
         });
 
@@ -185,8 +193,10 @@ describe('@jupyterlab/domutils', () => {
             expect(document.activeElement).to.equal(input);
             document.body.removeChild(input);
           });
-          expect(document.activeElement).to.not.equal(input);
-          dialog.resolve();
+          waitForDialog().then(() => {
+            expect(document.activeElement).to.not.equal(input);
+            dialog.resolve();
+          });
           return promise;
         });
 
@@ -198,7 +208,7 @@ describe('@jupyterlab/domutils', () => {
           let promise = dialog.launch().then(result => {
             expect(result.accept).to.equal(true);
           });
-          dialog.resolve();
+          waitForDialog().then(() => { dialog.resolve(); });
           return promise;
         });
 
@@ -206,7 +216,7 @@ describe('@jupyterlab/domutils', () => {
           let promise = dialog.launch().then(result => {
             expect(result.accept).to.equal(false);
           });
-          dialog.resolve(0);
+          waitForDialog().then(() => { dialog.resolve(0); });
           return promise;
         });
 
@@ -219,7 +229,7 @@ describe('@jupyterlab/domutils', () => {
             expect(result.label).to.equal('CANCEL');
             expect(result.accept).to.equal(false);
           });
-          dialog.reject();
+          waitForDialog().then(() => { dialog.reject(); });
           return promise;
         });
 
@@ -233,7 +243,9 @@ describe('@jupyterlab/domutils', () => {
             let promise = dialog.launch().then(result => {
               expect(result.accept).to.equal(false);
             });
-            simulate(dialog.node, 'keydown', { keyCode: 27 });
+            waitForDialog().then(() => {
+              simulate(dialog.node, 'keydown', { keyCode: 27 });
+            });
             return promise;
           });
 
@@ -241,7 +253,9 @@ describe('@jupyterlab/domutils', () => {
             let promise = dialog.launch().then(result => {
               expect(result.accept).to.equal(true);
             });
-            simulate(dialog.node, 'keydown', { keyCode: 13 });
+            waitForDialog().then(() => {
+              simulate(dialog.node, 'keydown', { keyCode: 13 });
+            });
             return promise;
           });
 
@@ -249,12 +263,14 @@ describe('@jupyterlab/domutils', () => {
             let promise = dialog.launch().then(result => {
               expect(result.accept).to.equal(false);
             });
-            let node = document.activeElement;
-            expect(node.className).to.contain('jp-mod-accept');
-            simulate(dialog.node, 'keydown', { keyCode: 9 });
-            node = document.activeElement;
-            expect(node.className).to.contain('jp-mod-reject');
-            simulate(node, 'click');
+            waitForDialog().then(() => {
+              let node = document.activeElement;
+              expect(node.className).to.contain('jp-mod-accept');
+              simulate(dialog.node, 'keydown', { keyCode: 9 });
+              node = document.activeElement;
+              expect(node.className).to.contain('jp-mod-reject');
+              simulate(node, 'click');
+            });
             return promise;
           });
 
@@ -266,11 +282,13 @@ describe('@jupyterlab/domutils', () => {
             let promise = dialog.launch().then(result => {
               expect(result.accept).to.equal(false);
             });
-            let node = document.body.getElementsByClassName('jp-Dialog')[0];
-            let evt = generate('contextmenu');
-            let cancelled = !node.dispatchEvent(evt);
-            expect(cancelled).to.equal(true);
-            simulate(node as HTMLElement, 'keydown', { keyCode: 27 });
+            waitForDialog().then(() => {
+              let node = document.body.getElementsByClassName('jp-Dialog')[0];
+              let evt = generate('contextmenu');
+              let cancelled = !node.dispatchEvent(evt);
+              expect(cancelled).to.equal(true);
+              simulate(node as HTMLElement, 'keydown', { keyCode: 27 });
+            });
             return promise;
           });
 
@@ -280,10 +298,12 @@ describe('@jupyterlab/domutils', () => {
 
           it('should prevent clicking outside of the content area', () => {
             let promise = dialog.launch();
-            let evt = generate('click');
-            let cancelled = !dialog.node.dispatchEvent(evt);
-            expect(cancelled).to.equal(true);
-            dialog.resolve();
+            waitForDialog().then(() => {
+              let evt = generate('click');
+              let cancelled = !dialog.node.dispatchEvent(evt);
+              expect(cancelled).to.equal(true);
+              dialog.resolve();
+            });
             return promise;
           });
 
@@ -291,8 +311,10 @@ describe('@jupyterlab/domutils', () => {
             let promise = dialog.launch().then(result => {
               expect(result.accept).to.equal(false);
             });
-            let node = dialog.node.querySelector('.jp-mod-reject');
-            simulate(node, 'click');
+            waitForDialog().then(() => {
+              let node = dialog.node.querySelector('.jp-mod-reject');
+              simulate(node, 'click');
+            });
             return promise;
           });
 
@@ -308,10 +330,12 @@ describe('@jupyterlab/domutils', () => {
             document.body.appendChild(host);
             dialog = new TestDialog({ host });
             let promise = dialog.launch();
-            simulate(target, 'focus');
-            expect(document.activeElement).to.not.equal(target);
-            expect(document.activeElement.className).to.contain('jp-mod-accept');
-            dialog.resolve();
+            waitForDialog().then(() => {
+              simulate(target, 'focus');
+              expect(document.activeElement).to.not.equal(target);
+              expect(document.activeElement.className).to.contain('jp-mod-accept');
+              dialog.resolve();
+            });
             return promise;
           });
 
@@ -376,7 +400,7 @@ describe('@jupyterlab/domutils', () => {
           let promise = dialog.launch().then(result => {
             expect(result.accept).to.equal(false);
           });
-          dialog.close();
+          waitForDialog().then(() => { dialog.close(); });
           return promise;
         });
 
