@@ -79,16 +79,15 @@ interface IClientSession extends IDisposable {
    * The current path associated with the client sesssion.
    */
   readonly path: string;
-
-  /**
-   * The kernel preference.
-   */
-  kernelPreference: IClientSession.IKernelPreference;
-
   /**
    * The current name associated with the client sesssion.
    */
   readonly name: string;
+
+  /**
+   * The type of the client session.
+   */
+  readonly type: string;
 
   /**
    * The current status of the client session.
@@ -96,9 +95,19 @@ interface IClientSession extends IDisposable {
   readonly status: Kernel.Status;
 
   /**
-   * The type of the client session.
+   * Whether the session is ready.
    */
-  readonly type: string;
+  readonly isReady: boolean;
+
+ /**
+  * A promise that is fulfilled when the session is ready.
+  */
+  readonly ready: Promise<void>;
+
+  /**
+   * The kernel preference.
+   */
+  kernelPreference: IClientSession.IKernelPreference;
 
   /**
    * The display name of the kernel.
@@ -199,6 +208,14 @@ namespace IClientSession {
 
 /**
  * The default implementation of client session object.
+ *
+ * #### Notes
+ * If a server session exists on the current path, we will connect to it.
+ * If preferences include disabling `canStart` or `shouldStart`, no
+ * server session will be started.
+ * If a kernel id is given, we attempt to start a session with that id.
+ * If a default kernel is available, we connect to it.
+ * Otherwise we ask the user to select a kernel.
  */
 export
 class ClientSession implements IClientSession {
@@ -207,11 +224,12 @@ class ClientSession implements IClientSession {
    */
   constructor(options: ClientSession.IOptions) {
     this.manager = options.manager;
-    this.manager.runningChanged.connect(this._update, this);
     this._path = options.path || uuid();
     this._type = options.type || '';
     this._name = options.name || '';
+    this._start = options.start || Promise.resolve(void 0);
     this._kernelPreference = options.kernelPreference || {};
+    this._initialize();
   }
 
   /**
@@ -278,6 +296,13 @@ class ClientSession implements IClientSession {
   }
 
   /**
+   * The type of the client session.
+   */
+  get type(): string {
+    return this._type;
+  }
+
+  /**
    * The kernel preference of the session.
    */
   get kernelPreference(): IClientSession.IKernelPreference {
@@ -296,17 +321,24 @@ class ClientSession implements IClientSession {
    * The current status of the session.
    */
   get status(): Kernel.Status {
-    if (this._promise) {
+    if (!this.isReady) {
       return 'starting';
     }
     return this._session ? this._session.status : 'dead';
   }
 
   /**
-   * The type of the client session.
+   * Whether the session is ready.
    */
-  get type(): string {
-    return this._type;
+  get isReady(): boolean {
+    return this._isReady;
+  }
+
+ /**
+  * A promise that is fulfilled when the session is ready.
+  */
+  get ready(): Promise<void> {
+    return this._ready.promise;
   }
 
   /**
@@ -350,23 +382,21 @@ class ClientSession implements IClientSession {
    * Change the current kernel associated with the document.
    */
   changeKernel(options: Kernel.IModel): Promise<Kernel.IKernelConnection> {
-    let session = this._session;
-    if (session) {
-      return session.changeKernel(options);
-    } else if (this._promise) {
-      return this._promise.promise.then(() => {
+    return this.ready.then(() => {
+      let session = this._session;
+      if (session) {
         return session.changeKernel(options);
-      });
-    } else {
-      return this._startSession(options);
-    }
+      } else {
+        return this._startSession(options);
+      }
+    });
   }
 
   /**
    * Select a kernel for the session.
    */
   selectKernel(): Promise<void> {
-    return this.manager.ready.then(() => Private.selectKernel(this));
+    return this.ready.then(() => Private.selectKernel(this));
   }
 
   /**
@@ -375,14 +405,11 @@ class ClientSession implements IClientSession {
    * @returns A promise that resolves when the session is shut down.
    */
   shutdown(): Promise<void> {
-    if (this._session) {
-      return this._session.shutdown();
-    } else if (this._promise) {
-      return this._promise.promise.then(() => {
+    return this.ready.then(() => {
+      if (this._session) {
         return this._session.shutdown();
-      });
-    }
-    return Promise.resolve(void 0);
+      }
+    });
   }
 
   /**
@@ -397,14 +424,17 @@ class ClientSession implements IClientSession {
    * If no kernel has been started, this is a no-op.
    */
   restart(): Promise<Kernel.IKernelConnection | null> {
-    let kernel = this.kernel;
-    if (!kernel) {
-      if (this._prevKernelName) {
-        return this.changeKernel({ name: this._prevKernelName });
+    return this.ready.then(() => {
+      let kernel = this.kernel;
+      if (!kernel) {
+        if (this._prevKernelName) {
+          return this.changeKernel({ name: this._prevKernelName });
+        }
+        // Bail if there is no previous kernel to start.
+        return;
       }
-      return Promise.resolve(null);
-    }
-    return ClientSession.restartKernel(kernel);
+      return ClientSession.restartKernel(kernel);
+    });
   }
 
   /**
@@ -419,66 +449,77 @@ class ClientSession implements IClientSession {
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
   setPath(path: string): Promise<void> {
-    if (this._path === path) {
-      return;
-    }
-    this._path = path;
-    this._propertyChanged.emit('path');
-    if (this._session) {
-      return this._session.rename(path);
-    }
-    return Promise.resolve(void 0);
+    return this.ready.then(() => {
+      if (this._path === path) {
+        return;
+      }
+      this._path = path;
+      this._propertyChanged.emit('path');
+      if (this._session) {
+        return this._session.rename(path);
+      }
+    });
   }
 
   /**
    * Change the session name.
    */
   setName(name: string): Promise<void> {
-    if (this._name === name) {
-      return;
-    }
-    this._name = name;
-    this._propertyChanged.emit('name');
-    // no-op until supported.
-    return Promise.resolve(void 0);
+    return this.ready.then(() => {
+      if (this._name === name) {
+        return;
+      }
+      this._name = name;
+      // no-op until supported.
+      this._propertyChanged.emit('name');
+    });
   }
 
   /**
    * Change the session type.
    */
   setType(type: string): Promise<void> {
-    if (this._type === type) {
-      return;
-    }
-    this._type = type;
-    this._propertyChanged.emit('type');
-    // no-op until supported.
-    return Promise.resolve(void 0);
-  }
-
-  /**
-   * Initialize the session.
-   *
-   * #### Notes
-   * If a server session exists on the current path, we will connect to it.
-   * If preferences include disabling `canStart` or `shouldStart`, no
-   * server session will be started.
-   * If a kernel id is given, we attempt to start a session with that id.
-   * If a default kernel is available, we connect to it.
-   * Otherwise we ask the user to select a kernel.
-   */
-  initialize(): Promise<void> {
-    return this.manager.ready.then(() => {
-      return this._update();
-    }).then(() => {
-      return this._initialize();
+    return this.ready.then(() => {
+      if (this._type === type) {
+        return;
+      }
+      this._type = type;
+      // no-op until supported.
+      this._propertyChanged.emit('type');
     });
   }
 
   /**
    * Initialize the session.
    */
-  private _initialize(): Promise<void> {
+  private _initialize(): void {
+    let manager = this.manager;
+    manager.ready.then(() => {
+      let model = find(manager.running(), item => {
+        return item.notebook.path === this._path;
+      });
+      if (!model) {
+        return;
+      }
+      return manager.connectTo(model.id).then(session => {
+        this._handleNewSession(session);
+      }).catch(err => {
+        this._handleSessionError(err);
+      });
+    }).then(() => {
+      return this._start;
+    }).then(() => {
+      return this._startIfNecessary();
+    }).then(() => {
+      this._isReady = true;
+      this._ready.resolve(void 0);
+    });
+  }
+
+  /**
+   * Start the session if necessary.
+   */
+  private _startIfNecessary(): Promise<void> {
     let preference = this.kernelPreference;
     if (this.kernel || preference.shouldStart === false ||
         preference.canStart === false) {
@@ -509,13 +550,10 @@ class ClientSession implements IClientSession {
    * Start a session and set up its signals.
    */
   private _startSession(model: Kernel.IModel): Promise<Kernel.IKernelConnection> {
-    this._promise = new PromiseDelegate<void>();
-    return this.manager.ready.then(() => {
-      return this.manager.startNew({
-        path: this._path,
-        kernelName: model.name,
-        kernelId: model.id
-      });
+    return this.manager.startNew({
+      path: this._path,
+      kernelName: model.name,
+      kernelId: model.id
     }).then(session => this._handleNewSession(session))
     .catch(err => this._handleSessionError(err));
   }
@@ -530,8 +568,6 @@ class ClientSession implements IClientSession {
     if (this._session) {
       this._session.dispose();
     }
-    this._promise.resolve(void 0);
-    this._promise = null;
     this._session = session;
     session.terminated.connect(this._onTerminated, this);
     session.pathChanged.connect(this._onPathChanged, this);
@@ -548,8 +584,6 @@ class ClientSession implements IClientSession {
    * Handle an error in session startup.
    */
   private _handleSessionError(err: utils.IAjaxError): Promise<void> {
-    this._promise.resolve(void 0);
-    this._promise = null;
     let response = String(err.xhr.response);
     try {
       response = JSON.parse(err.xhr.response)['traceback'];
@@ -562,9 +596,7 @@ class ClientSession implements IClientSession {
       title: 'Error Starting Kernel',
       body,
       buttons: [Dialog.okButton()]
-    }).then(() => {
-      return Promise.reject<void>(err);
-    });
+    }).then(() => void 0);
   }
 
   /**
@@ -614,30 +646,6 @@ class ClientSession implements IClientSession {
     this._unhandledMessage.emit(message);
   }
 
-  /**
-   * Handle a change to the running sessions.
-   */
-  private _update(): Promise<void> {
-    let manager = this.manager;
-    let model = find(manager.running(), item => {
-      return item.notebook.path === this._path;
-    });
-    if (model && !this._session && !this._promise) {
-      let id = model.id;
-      this._promise = new PromiseDelegate<void>();
-      manager.connectTo(id).then(session => {
-        this._handleNewSession(session);
-      }).catch(err => {
-        this._handleSessionError(err);
-      });
-      return this._promise.promise;
-    }
-    if (this._promise) {
-      return this._promise.promise;
-    }
-    return Promise.resolve(void 0);
-  }
-
   private _path = '';
   private _name = '';
   private _type = '';
@@ -645,7 +653,9 @@ class ClientSession implements IClientSession {
   private _kernelPreference: IClientSession.IKernelPreference;
   private _isDisposed = false;
   private _session: Session.ISession | null = null;
-  private _promise: PromiseDelegate<void> | null;
+  private _ready = new PromiseDelegate<void>();
+  private _start: Promise<void>;
+  private _isReady = false;
   private _terminated = new Signal<this, void>(this);
   private _kernelChanged = new Signal<this, Kernel.IKernelConnection | null>(this);
   private _statusChanged = new Signal<this, Kernel.Status>(this);
@@ -669,6 +679,13 @@ namespace ClientSession {
      * A session manager instance.
      */
     manager: Session.IManager;
+
+    /**
+     * A promise used to determine when to start the session.
+     * If not given, the session will start immediately and potentially
+     * ask the user to select the kernel.
+     */
+    start?: Promise<void>;
 
     /**
      * The initial path of the file.
