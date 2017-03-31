@@ -139,7 +139,7 @@ describe('jupyter.services - Integration', () => {
         };
         future.onDone = () => {
           console.log('Execute finished');
-          return kernel.shutdown();
+          kernel.shutdown();
         };
       });
     });

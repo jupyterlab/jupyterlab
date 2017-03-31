@@ -20,7 +20,7 @@ import {
 } from '@jupyterlab/docmanager';
 
 import {
-  acceptDialog, waitForDialog
+  acceptDialog, dismissDialog
 } from '../utils';
 
 
@@ -178,15 +178,7 @@ describe('docregistry/savehandler', () => {
             });
           }, 1500);  // The server has a one second resolution for saves.
         }).catch(done);
-        waitForDialog().then(() => {
-          let dialog = document.body.getElementsByClassName('jp-Dialog')[0];
-          let buttons = dialog.getElementsByTagName('button');
-          for (let i = 0; i < buttons.length; i++) {
-            if (buttons[i].textContent === 'REVERT') {
-              buttons[i].click();
-            }
-          }
-        });
+        dismissDialog().catch(done);
       });
 
     });
