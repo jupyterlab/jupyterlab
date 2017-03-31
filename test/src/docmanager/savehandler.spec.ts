@@ -29,6 +29,7 @@ describe('docregistry/savehandler', () => {
 
   before(() => {
     manager = new ServiceManager();
+    return manager.ready;
   });
 
   beforeEach(() => {
