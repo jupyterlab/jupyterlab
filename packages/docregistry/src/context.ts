@@ -56,7 +56,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       manager: manager.sessions,
       path: this._path,
       name: this._path.split('/').pop(),
-      kernelPreference: options.kernelPreference
+      kernelPreference: options.kernelPreference || { shouldStart: false }
     });
     this.session.propertyChanged.connect(this._onSessionChanged, this);
     manager.contents.fileChanged.connect(this._onFileChanged, this);
