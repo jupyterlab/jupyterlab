@@ -578,7 +578,7 @@ describe('session', () => {
 
     context('#changeKernel()', () => {
 
-      it('should create a new kernel with the new name', (done) => {
+      it('should create a new kernel with the new name', () => {
         let previous = session.kernel;
         let model = createSessionModel(session.id);
         let name = model.kernel.name;
@@ -589,14 +589,13 @@ describe('session', () => {
             tester.respond(200, { name, id: model.kernel.id });
           }
         };
-        session.changeKernel({ name }).then(kernel => {
+        return session.changeKernel({ name }).then(kernel => {
           expect(kernel.name).to.be(name);
           expect(session.kernel).to.not.be(previous);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should accept the id of the new kernel', (done) => {
+      it('should accept the id of the new kernel', () => {
         let previous = session.kernel;
         let model = createSessionModel(session.id);
         let id = model.kernel.id;
@@ -608,36 +607,16 @@ describe('session', () => {
             tester.respond(200, { name, id });
           }
         };
-        session.changeKernel({ id }).then(kernel => {
+        return session.changeKernel({ id }).then(kernel => {
           expect(kernel.name).to.be(name);
           expect(kernel.id).to.be(id);
           expect(session.kernel).to.not.be(previous);
-          done();
-        }).catch(done);
-      });
-
-      it('should work when there is no current kernel', (done) => {
-        let model = createSessionModel(session.id);
-        session.kernel.dispose();
-        let name = model.kernel.name;
-        tester.onRequest = request => {
-          if (request.method === 'PATCH') {
-            tester.respond(200, model);
-          } else {
-            tester.respond(200, { name, id: model.kernel.id });
-          }
-        };
-        session.changeKernel({ name }).then(kernel => {
-          expect(kernel.name).to.be(name);
-          session.dispose();
-          done();
         });
       });
 
-      it('should update the session path if it has changed', (done) => {
+      it('should update the session path if it has changed', () => {
         let model = session.model;
         model.notebook.path = 'foo.ipynb';
-        session.kernel.dispose();
         let name = model.kernel.name;
         let id = model.kernel.id;
         tester.onRequest = request => {
@@ -647,11 +626,10 @@ describe('session', () => {
             tester.respond(200, { name, id});
           }
         };
-        session.changeKernel({ name }).then(kernel => {
+        return session.changeKernel({ name }).then(kernel => {
           expect(kernel.name).to.be(name);
           expect(session.path).to.be(model.notebook.path);
           session.dispose();
-          done();
         });
       });
 
@@ -716,19 +694,19 @@ describe('session', () => {
         expectFailure(session.shutdown(), done, 'Session is disposed');
       });
 
-      it('should dispose of all session instances', (done) => {
-        let session2: Session.ISession;
-        Session.connectTo(session.id).then(s => {
-          session2 = s;
-          tester.onRequest = () => {
-            tester.respond(204, { });
-          };
-          return session.shutdown();
-        }).then(() => {
-          expect(session2.isDisposed).to.be(true);
-          done();
-        }).catch(done);
-      });
+      // it('should dispose of all session instances', () => {
+      // TODO: reinstate after swithing to server based tests.
+      //   let session2: Session.ISession;
+      //   return Session.connectTo(session.id).then(s => {
+      //     session2 = s;
+      //     tester.onRequest = () => {
+      //       tester.respond(204, { });
+      //     };
+      //     return session.shutdown();
+      //   }).then(() => {
+      //     expect(session2.isDisposed).to.be(true);
+      //   });
+      // });
 
     });
 
