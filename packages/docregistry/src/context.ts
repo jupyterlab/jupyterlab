@@ -186,8 +186,9 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       content
     };
 
-    let promise = this._manager.contents.save(path, options);
-    return promise.then(value => {
+    return this._manager.ready.then(() => {
+      return this._manager.contents.save(path, options);
+    }).then(value => {
       if (this.isDisposed) {
         return;
       }
@@ -231,7 +232,9 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     };
     let path = this._path;
     let model = this._model;
-    return this._manager.contents.get(path, opts).then(contents => {
+    return this._manager.ready.then(() => {
+      return this._manager.contents.get(path, opts);
+    }).then(contents => {
       if (this.isDisposed) {
         return;
       }
@@ -258,14 +261,18 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    * Create a checkpoint for the file.
    */
   createCheckpoint(): Promise<Contents.ICheckpointModel> {
-    return this._manager.contents.createCheckpoint(this._path);
+    return this._manager.ready.then(() => {
+      return contents.createCheckpoint(this._path);
+    });
   }
 
   /**
    * Delete a checkpoint for the file.
    */
   deleteCheckpoint(checkpointId: string): Promise<void> {
-    return this._manager.contents.deleteCheckpoint(this._path, checkpointId);
+    return this._manager.ready.then(() => {
+      return contents.deleteCheckpoint(this._path, checkpointId);
+    });
   }
 
   /**
@@ -274,15 +281,17 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   restoreCheckpoint(checkpointId?: string): Promise<void> {
     let contents = this._manager.contents;
     let path = this._path;
-    if (checkpointId) {
-      return contents.restoreCheckpoint(path, checkpointId);
-    }
-    return this.listCheckpoints().then(checkpoints => {
-      if (this.isDisposed || !checkpoints.length) {
-        return;
+    return this._manager.ready.then(() => {
+      if (checkpointId) {
+        return contents.restoreCheckpoint(path, checkpointId);
       }
-      checkpointId = checkpoints[checkpoints.length - 1].id;
-      return contents.restoreCheckpoint(path, checkpointId);
+      return this.listCheckpoints().then(checkpoints => {
+        if (this.isDisposed || !checkpoints.length) {
+          return;
+        }
+        checkpointId = checkpoints[checkpoints.length - 1].id;
+        return contents.restoreCheckpoint(path, checkpointId);
+      });
     });
   }
 
@@ -290,7 +299,9 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    * List available checkpoints for a file.
    */
   listCheckpoints(): Promise<Contents.ICheckpointModel[]> {
-    return this._manager.contents.listCheckpoints(this._path);
+    return this._manager.ready.then(() => {
+      return contents.listCheckpoints(this._path);
+    });
   }
 
   /**
@@ -309,7 +320,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    */
   getDownloadUrl(path: string): Promise<string> {
     if (URLExt.isLocal(path)) {
-      return this._manager.contents.getDownloadUrl(path);
+      return this._manager.ready.then(() => contents.getDownloadUrl(path));
     }
     return Promise.resolve(path);
   }
