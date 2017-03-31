@@ -814,11 +814,8 @@ namespace Private {
     }
 
     if (!name && !language && !id) {
-      return specs.default;
+      return null;
     }
-
-    // Set the default return value.
-    let value = name ? null : specs.default;
 
     // Look for an exact match of preferred name.
     for (let specName in specs.kernelspecs) {
@@ -836,7 +833,7 @@ namespace Private {
 
     // Bail if there is no language.
     if (!language) {
-      return value;
+      return null;
     }
 
     // Check for a single kernel matching the language.
@@ -856,7 +853,7 @@ namespace Private {
     }
 
     // No matches found.
-    return value;
+    return null;
   }
 
   /**
