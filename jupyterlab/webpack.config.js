@@ -3,10 +3,10 @@
 
 // Support for Node 0.10
 // See https://github.com/webpack/css-loader/issues/144
-require('es6-promise').polyfill();
+require('es6-promise/auto');
 
 var childProcess = require('child_process');
-var buildExtension = require('@jupyterlab/extension-builder/lib/builder').buildExtension;
+var buildExtension = require('./build/jupyterlab/src/builder').buildExtension;
 var webpack = require('webpack');
 var path = require('path');
 var fs = require('fs-extra');

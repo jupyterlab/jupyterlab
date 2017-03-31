@@ -478,16 +478,24 @@ def validate_labextension_folder(name, full_dest, logger=None):
     """
     infos = []
     warnings = []
-
     has_files = []
-    has_entry = False
-    version_compatible = []
+    has_data = []
 
     data = get_labextension_manifest_data_by_folder(full_dest)
+
     for manifest in data.values():
-        if ('entry' in manifest and 'modules' in manifest):
-            if (manifest['entry'] in manifest['modules']):
-                has_entry = True
+        if 'modules' not in manifest:
+            has_data.append('Missing `modules` key')
+            manifest['modules'] = []
+        if 'entry' not in manifest:
+            has_data.append('Missing `entry` key')
+            manifest['entry'] = ''
+        if 'hash' not in manifest:
+            has_data.append('Missing `hash` key')
+        if manifest['entry'] not in manifest['modules']:
+            has_data.append('Missing `entry` in `modules`')
+        if 'packages' not in manifest:
+            has_data.append('Missing `packages` key')
         files = manifest.get('files', [])
         if not files:
             has_files.append("No 'files' key in manifest")
@@ -495,35 +503,29 @@ def validate_labextension_folder(name, full_dest, logger=None):
             for fname in files:
                 path = os.path.join(full_dest, fname)
                 if not os.path.exists(path):
-                    has_files.append("File in manifest does not exist: {}".format(path))
+                    msg = "File in manifest does not exist: {}".format(path)
+                    has_files.append(msg)
 
     indent = "        "
     subindent = indent + "    "
-    entry_msg = indent + u"{} has entry point in manifest"
-    name = os.path.basename(full_dest)
-    if has_entry:
+    entry_msg = indent + u"{} has manifest data"
+    if len(has_files) == 0:
         infos.append(entry_msg.format(GREEN_OK))
     else:
         warnings.append(entry_msg.format(RED_X))
+        for m in has_data:
+            warnings.append(subindent + m)
 
-    files_msg = indent+u"{} has necessary files"
-    if len(has_files)==0:
+    files_msg = indent + u"{} has necessary files"
+    if len(has_files) == 0:
         infos.append(files_msg.format(GREEN_OK))
     else:
         warnings.append(files_msg.format(RED_X))
         for m in has_files:
-            warnings.append(subindent+m)
-
-    if len(version_compatible)==0:
-        infos.append(indent+"{} is version compatible with installed JupyterLab version {}".format(GREEN_OK, __version__))
-    else:
-        warnings.append(indent+"{} is not version compatible with installed JupyterLab version {}".format(RED_X, __version__))
-        for m in version_compatible:
-            warnings.append(subindent+m)
+            warnings.append(subindent + m)
 
     if logger and warnings:
-            #[logger.info(info) for info in infos]
-            [logger.warn(warning) for warning in warnings]
+        [logger.warn(warning) for warning in warnings]
 
     return warnings
 

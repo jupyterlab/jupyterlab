@@ -38,9 +38,9 @@
     "build": "tsc",
     "build:test": "tsc --project test",
     "clean": "rimraf lib",
-    "test:coverage": "istanbul cover --dir test/coverage _mocha -- test/build/**/**.spec.js",
-    "test:debug": "mocha test/build/**/**.spec.js --debug-brk",
-    "test": "mocha test/build/**/**.spec.js",
+    "test:coverage": "istanbul cover --dir test/coverage _mocha -- --timeout 10000 test/build/**/**.spec.js",
+    "test:debug": "mocha --timeout 10000 test/build/**/**.spec.js --debug-brk",
+    "test": "mocha --timeout 10000 test/build/**/**.spec.js",
     "watch": "tsc -w"
   },
   "repository": {

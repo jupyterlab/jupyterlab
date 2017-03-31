@@ -379,3 +379,9 @@ class TestInstallLabExtension(TestCase):
         assert mod['id'] == 0
         assert len(mod['hash']) == 32
         assert len(mod['modules']) == 1
+        assert '@jupyterlab/python-tests@0.1.0' in mod['packages']
+        pkg = mod['packages']['@jupyterlab/python-tests@0.1.0']
+        assert pkg['name'] == '@jupyterlab/python-tests'
+        assert pkg['version'] == '0.1.0'
+        assert isinstance(pkg['dependencies'], dict)
+        assert len(pkg['dependencies']) == 0

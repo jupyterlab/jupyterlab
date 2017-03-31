@@ -3,7 +3,7 @@
   "name": "@jupyterlab/main",
   "version": "0.1.3",
   "scripts": {
-    "build": "cd ../packages/extension-builder && npm run build && cd ../../jupyterlab && tsc && webpack",
+    "build": "tsc && webpack",
     "clean": "rimraf build",
     "watch": "watch \"npm run build\" ../packages --wait 10 --filter=../scripts/watch-filter.js"
   },
@@ -20,6 +20,7 @@
     "@jupyterlab/docmanager-extension": "^0.1.3",
     "@jupyterlab/docregistry-extension": "^0.1.3",
     "@jupyterlab/editorwidget-extension": "^0.1.3",
+    "@jupyterlab/extension-builder": "^0.11.0",
     "@jupyterlab/faq-extension": "^0.1.1",
     "@jupyterlab/filebrowser-extension": "^0.1.3",
     "@jupyterlab/help-extension": "^0.1.1",
@@ -39,12 +40,17 @@
     "font-awesome": "^4.6.3"
   },
   "devDependencies": {
-    "@jupyterlab/extension-builder": "^0.11.0",
     "file-loader": "^0.10.1",
     "rimraf": "^2.5.2",
     "typescript": "^2.2.1",
     "url-loader": "^0.5.7",
     "watch": "^1.0.2",
     "webpack": "^2.2.1"
+  },
+  "jupyterlab": {
+    "singletonPackages": [
+      "@phosphor/*",
+      "@jupyterlab/*"
+    ]
   }
 }
