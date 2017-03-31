@@ -532,8 +532,21 @@ class CellList implements IObservableUndoableVector<ICellModel> {
     if (change.type === 'add' || change.type === 'set') {
       each(change.newValues, (id) => {
         if (!this._cellMap.has(id)) {
-          let cellDB = this._modelDB.view(id);
-          let cell = this._factory.createCodeCell({modelDB: cellDB, uuid: id});
+          let cellDB = this._factory.modelDB;
+          let cellType = (cellDB as any).getGoogleObject(id+'/type');
+          let cell: ICellModel;
+          switch (cellType) {
+            case 'code':
+              cell = this._factory.createCodeCell({ uuid: id});
+              break;
+            case 'markdown':
+              cell = this._factory.createMarkdownCell({ uuid: id});
+              break;
+            case 'raw':
+            default:
+              cell = this._factory.createRawCell({ uuid: id});
+              break;
+          }
           this._cellMap.set(id, cell);
         }
       });

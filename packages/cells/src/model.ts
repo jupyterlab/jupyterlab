@@ -123,6 +123,10 @@ class CellModel extends CodeEditor.Model implements ICellModel {
    */
   constructor(options: CellModel.IOptions) {
     super({modelDB: options.modelDB});
+
+    let cellType = this._modelDB.createValue('type');
+    cellType.set(this.type);
+
     this.value.changed.connect(this.onGenericChange, this);
     let cell = options.cell;
     let trusted = this._modelDB.createValue('trusted');
@@ -320,11 +324,13 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
     let cell = options.cell as nbformat.ICodeCell;
     let outputs: nbformat.IOutput[] = [];
     let executionCount = this._modelDB.createValue('executionCount');
-    if (cell && cell.cell_type === 'code') {
-      executionCount.set(cell.execution_count || null);
-      outputs = cell.outputs;
-    } else {
-      executionCount.set(null);
+    if (!executionCount.get()) {
+      if (cell && cell.cell_type === 'code') {
+        executionCount.set(cell.execution_count || null);
+        outputs = cell.outputs;
+      } else {
+        executionCount.set(null);
+      }
     }
     this._outputs = factory.createOutputArea({
       trusted,
