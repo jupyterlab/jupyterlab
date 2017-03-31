@@ -386,12 +386,7 @@ class ClientSession implements IClientSession {
       if (this.isDisposed) {
         return;
       }
-      let session = this._session;
-      if (session) {
-        return session.changeKernel(options);
-      } else {
-        return this._startSession(options);
-      }
+      return this._changeKernel(options);
     });
   }
 
@@ -403,7 +398,7 @@ class ClientSession implements IClientSession {
       if (this.isDisposed) {
         return;
       }
-      return Private.selectKernel(this);
+      return this._selectKernel();
     });
   }
 
@@ -414,12 +409,7 @@ class ClientSession implements IClientSession {
    */
   shutdown(): Promise<void> {
     return this.ready.then(() => {
-      if (this.isDisposed) {
-        return;
-      }
-      if (this._session) {
-        return this._session.shutdown();
-      }
+      return this._shutdown();
     });
   }
 
@@ -533,6 +523,9 @@ class ClientSession implements IClientSession {
       return this._start;
     }).then(() => {
       return this._startIfNecessary();
+    }).then(() => {
+      this._isReady = true;
+      this._ready.resolve(void 0);
     });
   }
 
@@ -541,8 +534,6 @@ class ClientSession implements IClientSession {
    */
   private _startIfNecessary(): Promise<void> {
     let preference = this.kernelPreference;
-    this._isReady = true;
-    this._ready.resolve(void 0);
     if (this.isDisposed ||
         this.kernel || preference.shouldStart === false ||
         preference.canStart === false) {
@@ -550,9 +541,9 @@ class ClientSession implements IClientSession {
     }
     // Try to use an existing kernel.
     if (preference.id) {
-      return this.changeKernel({ id: preference.id }).then(
+      return this._changeKernel({ id: preference.id }).then(
         () => void 0,
-        () => this.selectKernel()
+        () => this._selectKernel()
       );
     }
     let name = ClientSession.getDefaultKernel({
@@ -561,12 +552,51 @@ class ClientSession implements IClientSession {
       preference
     });
     if (name) {
-      return this.changeKernel({ name }).then(
+      return this._changeKernel({ name }).then(
         () => void 0,
-        () => this.selectKernel()
+        () => this._selectKernel()
       );
     }
-    return this.selectKernel();
+    return this._selectKernel();
+  }
+
+  /**
+   * Change the kernel.
+   */
+  private _changeKernel(options: Kernel.IModel): Promise<Kernel.IKernelConnection> {
+    let session = this._session;
+    if (session) {
+      return session.changeKernel(options);
+    } else {
+      return this._startSession(options);
+    }
+  }
+
+  /**
+   * Select a kernel.
+   */
+  private _selectKernel(): Promise<void> {
+    return Private.selectKernel(this).then(model => {
+      if (model === void 0) {
+        return;
+      }
+      if (model === null && this._session) {
+        return this._shutdown();
+      }
+      return this._changeKernel(model).then(() => void 0);
+    }).then(() => void 0);
+  }
+
+  /**
+   * Shut down the session.
+   */
+  private _shutdown(): Promise<void> {
+    if (this.isDisposed || !this._session) {
+      return Promise.resolve(void 0);
+    }
+    let session = this._session;
+    this._session = null;
+    return session.shutdown();
   }
 
   /**
@@ -626,7 +656,9 @@ class ClientSession implements IClientSession {
    * Handle a session termination.
    */
   private _onTerminated(): void {
-    this._session.dispose();
+    if (this._session) {
+      this._session.dispose();
+    }
     this._session = null;
     this._terminated.emit(void 0);
   }
@@ -818,7 +850,7 @@ namespace Private {
    * Select a kernel for the session.
    */
   export
-  function selectKernel(session: ClientSession): Promise<void> {
+  function selectKernel(session: ClientSession): Promise<Kernel.IModel> {
     // Create the dialog body.
     let body = document.createElement('div');
     let text = document.createElement('label');
@@ -836,16 +868,11 @@ namespace Private {
       body,
       buttons: [Dialog.cancelButton(), select]
     }).then(result => {
-      // Change the kernel if a kernel was selected.
       if (!result.accept) {
-        return;
+        return void 0;
       }
-      let model = JSON.parse(selector.value) as Kernel.IModel | null;
-      if (!model) {
-        return session.shutdown();
-      }
-      return session.changeKernel(model).then(() => void 0);
-    }).then(() => void 0);
+      return JSON.parse(selector.value) as Kernel.IModel;
+    });
   }
 
   /**
