@@ -467,7 +467,7 @@ describe('@jupyterlab/notebook', () => {
     describe('#run()', () => {
 
       beforeEach(() => {
-        return session.initialize();
+        return session.ready;
       });
 
       it('should run the selected cells', function (done) {
@@ -557,7 +557,7 @@ describe('@jupyterlab/notebook', () => {
     describe('#runAndAdvance()', () => {
 
       beforeEach(() => {
-        return session.initialize();
+        return session;
       });
 
       it('should run the selected cells ', (done) => {
@@ -655,7 +655,7 @@ describe('@jupyterlab/notebook', () => {
     describe('#runAndInsert()', () => {
 
       beforeEach(() => {
-        return session.initialize();
+        return session.ready;
       });
 
       it('should run the selected cells ', (done) => {
@@ -743,7 +743,7 @@ describe('@jupyterlab/notebook', () => {
         // Make sure all cells have valid code.
         widget.widgets[2].model.value.text = 'a = 1';
 
-        return session.initialize();
+        return session.ready;
       });
 
       it('should run all of the cells in the notebok', (done) => {

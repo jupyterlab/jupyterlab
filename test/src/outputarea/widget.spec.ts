@@ -180,7 +180,7 @@ describe('outputarea/widget', () => {
       beforeEach(() => {
         return createClientSession().then(s => {
           session = s;
-          return session.initialize();
+          return session.ready;
         });
       });
 

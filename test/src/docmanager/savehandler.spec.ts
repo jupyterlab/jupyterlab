@@ -20,7 +20,7 @@ import {
 } from '@jupyterlab/docmanager';
 
 import {
-  acceptDialog, dismissDialog
+  acceptDialog, waitForDialog
 } from '../utils';
 
 

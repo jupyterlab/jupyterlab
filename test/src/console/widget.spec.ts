@@ -105,7 +105,7 @@ describe('console/widget', () => {
       it('should reflect the contents of the widget', () => {
         let force = true;
         Widget.attach(widget, document.body);
-        return (widget.session as ClientSession).initialize().then(() => {
+        return widget.session.ready.then(() => {
           return widget.execute(force);
         }).then(() => {
           expect(widget.cells.length).to.be(1);
@@ -123,7 +123,7 @@ describe('console/widget', () => {
         let force = true;
         Widget.attach(widget, document.body);
         widget.executed.connect((sender, time) => { called = time; });
-        return (widget.session as ClientSession).initialize().then(() => {
+        return widget.session.ready.then(() => {
           return widget.execute(force);
         }).then(() => {
           expect(called).to.be.a(Date);
@@ -146,7 +146,7 @@ describe('console/widget', () => {
         let old = widget.prompt;
         expect(old).to.be.a(CodeCellWidget);
 
-        return (widget.session as ClientSession).initialize().then(() => {
+        return widget.session.ready.then(() => {
           return widget.execute(force);
         }).then(() => {
           expect(widget.prompt).to.be.a(CodeCellWidget);
@@ -191,7 +191,7 @@ describe('console/widget', () => {
       it('should clear all of the content cells except the banner', () => {
         let force = true;
         Widget.attach(widget, document.body);
-        return (widget.session as ClientSession).initialize().then(() => {
+        return widget.session.ready.then(() => {
           return widget.execute(force);
         }).then(() => {
           expect(widget.cells.length).to.be.greaterThan(0);
@@ -228,7 +228,7 @@ describe('console/widget', () => {
         let force = true;
         Widget.attach(widget, document.body);
         expect(widget.cells.length).to.be(0);
-        return (widget.session as ClientSession).initialize().then(() => {
+        return widget.session.ready.then(() => {
           return widget.execute(force);
         }).then(() => {
           expect(widget.cells.length).to.be.greaterThan(0);
@@ -241,7 +241,7 @@ describe('console/widget', () => {
         Widget.attach(widget, document.body);
         widget.prompt.model.value.text = 'for x in range(5):';
         expect(widget.cells.length).to.be(0);
-        return (widget.session as ClientSession).initialize().then(() => {
+        return widget.session.ready.then(() => {
           return widget.execute(force, timeout);
         }).then(() => {
           expect(widget.cells.length).to.be(0);
@@ -311,7 +311,7 @@ describe('console/widget', () => {
         expect(old).to.be.a(CodeCellWidget);
         widget.methods = [];
 
-        return (widget.session as ClientSession).initialize().then(() => {
+        return widget.session.ready.then(() => {
           return widget.execute(force);
         }).then(() => {
           expect(widget.prompt).to.be.a(CodeCellWidget);

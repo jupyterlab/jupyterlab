@@ -89,7 +89,7 @@ describe('@jupyterlab/completer', () => {
   before(() => {
     return createClientSession().then(s => {
       session = s;
-      return s.initialize();
+      return s.ready;
     });
   });
 

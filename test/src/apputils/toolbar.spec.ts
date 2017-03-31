@@ -178,7 +178,7 @@ describe('@jupyterlab/apputils', () => {
 
       it('should display the `\'display_name\'` of the kernel', () => {
         let item = Toolbar.createKernelNameItem(session);
-        return session.initialize().then(() => {
+        return session.ready.then(() => {
           expect(item.node.textContent).to.be(session.kernelDisplayName);
         });
       });
@@ -193,7 +193,7 @@ describe('@jupyterlab/apputils', () => {
     describe('.createKernelStatusItem()', () => {
 
       beforeEach(() => {
-        return session.initialize().then(() => {
+        return session.ready.then(() => {
           return session.kernel.ready;
         });
       });
