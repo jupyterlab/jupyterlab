@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  find
+} from '@phosphor/algorithm';
+
+import {
   JSONObject
 } from '@phosphor/coreutils';
 
@@ -197,7 +201,14 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
       if (widget) {
         tracker.activate(widget);
       } else {
-        return createConsole(args);
+        return manager.ready.then(() => {
+          let model = find(manager.sessions.running(), item => {
+            return item.path === path;
+          });
+          if (model) {
+            return createConsole(args);
+          }
+        });
       }
     }
   });
