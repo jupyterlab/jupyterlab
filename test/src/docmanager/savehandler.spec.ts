@@ -163,6 +163,10 @@ describe('docregistry/savehandler', () => {
       it('should revert to the file on disk', (done) => {
         context.model.fromString('foo');
         context.save().then(() => {
+          context.fileChanged.connect(() => {
+            expect(context.model.toString()).to.be('bar');
+            done();
+          });
           setTimeout(() => {
             manager.contents.save(context.path, {
               type: factory.contentType,
@@ -172,13 +176,17 @@ describe('docregistry/savehandler', () => {
             handler.saveInterval = 1;
             handler.start();
             context.model.fromString('baz');
-            context.fileChanged.connect(() => {
-              expect(context.model.toString()).to.be('bar');
-              done();
-            });
           }, 1500);  // The server has a one second resolution for saves.
         }).catch(done);
-        dismissDialog().catch(done);
+        waitForDialog().then(() => {
+          let dialog = document.body.getElementsByClassName('jp-Dialog')[0];
+          let buttons = dialog.getElementsByTagName('button');
+          for (let i = 0; i < buttons.length; i++) {
+            if (buttons[i].textContent === 'REVERT') {
+              buttons[i].click();
+            }
+          }
+        });
       });
 
     });
