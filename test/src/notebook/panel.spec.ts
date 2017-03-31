@@ -84,7 +84,9 @@ describe('@jupyterlab/notebook', () => {
   });
 
   afterEach(() => {
-    context.dispose();
+    return context.session.shutdown().then(() => {
+      context.dispose();
+    });
   });
 
   after(() => {

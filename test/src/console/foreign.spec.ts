@@ -54,7 +54,6 @@ class TestHandler extends ForeignHandler {
   methods: string[] = [];
 
   protected onIOPubMessage(sender: IClientSession, msg: KernelMessage.IIOPubMessage): boolean {
-    debugger;
     let injected = super.onIOPubMessage(sender, msg);
     this.received.emit(void 0);
     if (injected) {
@@ -127,6 +126,8 @@ describe('@jupyterlab/console', () => {
     });
 
     after(() => {
+      local.dispose();
+      foreign.dispose();
       return session.shutdown().then(() => {
         session.dispose();
       });

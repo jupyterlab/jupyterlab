@@ -243,6 +243,30 @@ describe('@jupyterlab/apputils', () => {
 
     });
 
+    describe('#changeKernel()', () => {
+
+      it('should change the current kernel', () => {
+        let id = '';
+        let name = '';
+        return session.initialize().then(() => {
+          name = session.kernel.name;
+          id = session.kernel.id;
+          return session.changeKernel({ name });
+        }).then(kernel => {
+          expect(kernel.id).to.not.be(id);
+          expect(kernel.name).to.be(name);
+        });
+      });
+
+      it('should work when not initialized', () => {
+        let name = manager.specs.default;
+        return session.changeKernel({ name }).then(kernel => {
+          expect(kernel.name).to.be(name);
+        });
+      });
+
+    });
+
     describe('#selectKernel()', () => {
 
       it('should select a kernel for the session', () => {
@@ -376,6 +400,7 @@ describe('@jupyterlab/apputils', () => {
           return session.initialize();
         }).then(() => {
           expect(session.kernel.id).to.be(other.kernel.id);
+          return other.dispose();
         });
       });
 
@@ -387,6 +412,7 @@ describe('@jupyterlab/apputils', () => {
           return session.initialize();
         }).then(() => {
           expect(session.kernel.id).to.be(other.kernel.id);
+          return other.dispose();
         });
       });
 

@@ -61,6 +61,10 @@ describe('@jupyterlab/apputils', () => {
     });
   });
 
+  afterEach(() => {
+    return session.shutdown();
+  });
+
   describe('Toolbar', () => {
 
     describe('#constructor()', () => {

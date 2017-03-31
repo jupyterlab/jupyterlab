@@ -38,17 +38,10 @@ describe('docregistry/context', () => {
       context = new Context({ manager, factory, path: 'foo' });
     });
 
-    afterEach((done) => {
-      if (context.session.kernel) {
-        context.session.kernel.ready.then(() => {
-          return context.session.shutdown();
-        }).then(() => {
-          context.dispose();
-        }).then(done, done);
-      } else {
+    afterEach(() => {
+      return context.session.shutdown().then(() => {
         context.dispose();
-        done();
-      }
+      });
     });
 
     describe('#constructor()', () => {

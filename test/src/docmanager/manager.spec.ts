@@ -134,6 +134,7 @@ describe('@jupyterlab/docmanager', () => {
           let context = manager.contextForWidget(widget);
           context.session.kernelChanged.connect(() => {
             expect(context.session.kernel.id).to.be(id);
+            context.session.shutdown();
             done();
           });
           return context.save();
@@ -147,6 +148,7 @@ describe('@jupyterlab/docmanager', () => {
           let context = manager.contextForWidget(widget);
           context.session.kernelChanged.connect(() => {
             expect(context.session.kernel.name).to.be(name);
+            context.session.shutdown();
             done();
           });
           return context.save();
@@ -205,6 +207,7 @@ describe('@jupyterlab/docmanager', () => {
           let context = manager.contextForWidget(widget);
           context.session.kernelChanged.connect(() => {
             expect(context.session.kernel.id).to.be(id);
+            context.session.shutdown();
             done();
           });
         }).catch(done);
@@ -217,6 +220,7 @@ describe('@jupyterlab/docmanager', () => {
           let context = manager.contextForWidget(widget);
           context.session.kernelChanged.connect(() => {
             expect(context.session.kernel.name).to.be(name);
+            context.session.shutdown();
             done();
           });
         }).catch(done);
