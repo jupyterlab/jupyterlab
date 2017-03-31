@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Token
+  PromiseDelegate, Token
 } from '@phosphor/coreutils';
 
 import {
@@ -78,6 +78,7 @@ class ConsolePanel extends Panel {
       path,
       name: name || `Console ${count}`,
       type: 'console',
+      start: this._startPromise.promise,
       kernelPreference: options.kernelPreference
     });
 
@@ -91,7 +92,7 @@ class ConsolePanel extends Panel {
     });
     this.addWidget(this.console);
 
-    session.initialize().then(() => {
+    session.ready.then(() => {
       this._connected = new Date();
       this._updateTitle();
     });
@@ -122,6 +123,17 @@ class ConsolePanel extends Panel {
   dispose(): void {
     this.console.dispose();
     super.dispose();
+  }
+
+  /**
+   * Handle `'after-attach'` messages.
+   */
+  protected onAfterAttach(msg: Message): void {
+    // Fullfill the start promise to the session.
+    if (!this._started) {
+      this._started = true;
+      this._startPromise.resolve(void 0);
+    }
   }
 
   /**
@@ -157,6 +169,8 @@ class ConsolePanel extends Panel {
   private _manager: ServiceManager.IManager;
   private _executed: Date = null;
   private _connected: Date = null;
+  private _started = false;
+  private _startPromise = new PromiseDelegate<void>();
 }
 
 
