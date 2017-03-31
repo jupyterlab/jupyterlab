@@ -1015,10 +1015,12 @@ class Notebook extends StaticNotebook {
           //if there are selections corresponding to non-collaborators,
           //they are stale and should be removed.
           realtime.collaborators.changed.connect((collaborators, change) => {
-            cell.editor.uuid = realtime.localCollaborator.sessionId;
-            for(let key of cell.model.selections.keys()) {
-              if(!collaborators.has(key)) {
-                cell.model.selections.delete(key);
+            if (!cell.isDisposed) {
+              cell.editor.uuid = realtime.localCollaborator.sessionId;
+              for(let key of cell.model.selections.keys()) {
+                if(!collaborators.has(key)) {
+                  cell.model.selections.delete(key);
+                }
               }
             }
           });
