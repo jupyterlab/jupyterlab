@@ -141,21 +141,7 @@ describe('@jupyterlab/docmanager', () => {
         }).catch(done);
       });
 
-      it('should start the default kernel if applicable', (done) => {
-        services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
-          let name = services.specs.default;
-          let widget = manager.open(model.path, 'default');
-          let context = manager.contextForWidget(widget);
-          context.session.kernelChanged.connect(() => {
-            expect(context.session.kernel.name).to.be(name);
-            context.session.shutdown();
-            done();
-          });
-          return context.save();
-        }).catch(done);
-      });
-
-      it('should not start a kernel if given an invalid one', () => {
+      it('should not start a kernel if there is none given', () => {
         let context: DocumentRegistry.Context;
         return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
           let widget = manager.open(model.path, 'default');
@@ -213,20 +199,7 @@ describe('@jupyterlab/docmanager', () => {
         }).catch(done);
       });
 
-      it('should start the default kernel if applicable', (done) => {
-        services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
-          let name = services.specs.default;
-          let widget = manager.createNew(model.path, 'default');
-          let context = manager.contextForWidget(widget);
-          context.session.kernelChanged.connect(() => {
-            expect(context.session.kernel.name).to.be(name);
-            context.session.shutdown();
-            done();
-          });
-        }).catch(done);
-      });
-
-      it('should not start a kernel if given an invalid one', (done) => {
+      it('should not start a kernel if not given', (done) => {
         services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
           let widget = manager.createNew(model.path, 'default');
           let context = manager.contextForWidget(widget);
@@ -337,10 +310,7 @@ describe('@jupyterlab/docmanager', () => {
               done();
             }
           });
-          let context = manager.contextForWidget(widget);
-          context.ready.then(() => {
-            manager.closeFile(model.path);
-          });
+          manager.closeFile(model.path);
         }).catch(done);
       });
 
@@ -368,10 +338,7 @@ describe('@jupyterlab/docmanager', () => {
               done();
             }
           });
-          let context = manager.contextForWidget(widget);
-          context.ready.then(() => {
-            manager.closeAll();
-          });
+          manager.closeAll();
         }).catch(done);
       });
 
