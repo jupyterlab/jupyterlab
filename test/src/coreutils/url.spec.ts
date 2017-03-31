@@ -29,7 +29,9 @@ describe('@jupyterlab/coreutils', () => {
         let url = 'http://example.com/path?that\'s#all, folks';
         let obj = URLExt.parse(url);
         try {
-          expect(obj.href).to.equal(url.replace(' ', '%20'));
+          expect(obj.href).to.equal(
+            'http://example.com/path?that%27s#all,%20folks'
+          );
         } catch (e) {
           // Chrome
           expect(obj.href).to.equal(url);
