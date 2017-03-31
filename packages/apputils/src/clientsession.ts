@@ -408,9 +408,12 @@ class ClientSession implements IClientSession {
    * @returns A promise that resolves when the session is shut down.
    */
   shutdown(): Promise<void> {
-    return this.ready.then(() => {
-      return this._shutdown();
-    });
+    if (this.isDisposed || !this._session) {
+      return Promise.resolve(void 0);
+    }
+    let session = this._session;
+    this._session = null;
+    return session.shutdown();
   }
 
   /**
@@ -453,53 +456,41 @@ class ClientSession implements IClientSession {
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
   setPath(path: string): Promise<void> {
-    return this.ready.then(() => {
-      if (this.isDisposed) {
-        return;
-      }
-      if (this._path === path) {
-        return;
-      }
-      this._path = path;
-      this._propertyChanged.emit('path');
-      if (this._session) {
-        return this._session.rename(path);
-      }
-    });
+    if (this.isDisposed || this._path === path) {
+      return Promise.resolve(void 0);
+    }
+    this._path = path;
+    this._propertyChanged.emit('path');
+    if (this._session) {
+      return this._session.rename(path);
+    }
+    return Promise.resolve(void 0);
   }
 
   /**
    * Change the session name.
    */
   setName(name: string): Promise<void> {
-    return this.ready.then(() => {
-      if (this.isDisposed) {
-        return;
-      }
-      if (this._name === name) {
-        return;
-      }
-      this._name = name;
-      // no-op until supported.
-      this._propertyChanged.emit('name');
-    });
+    if (this.isDisposed || this._name === name) {
+      return Promise.resolve(void 0);
+    }
+    this._name = name;
+    // no-op until supported.
+    this._propertyChanged.emit('name');
+    return Promise.resolve(void 0);
   }
 
   /**
    * Change the session type.
    */
   setType(type: string): Promise<void> {
-    return this.ready.then(() => {
-      if (this.isDisposed) {
-        return;
-      }
-      if (this._type === type) {
-        return;
-      }
-      this._type = type;
-      // no-op until supported.
-      this._propertyChanged.emit('type');
-    });
+    if (this.isDisposed || this._type === type) {
+      return Promise.resolve(void 0);
+    }
+    this._type = type;
+    // no-op until supported.
+    this._propertyChanged.emit('type');
+    return Promise.resolve(void 0);
   }
 
   /**
@@ -581,22 +572,10 @@ class ClientSession implements IClientSession {
         return;
       }
       if (model === null && this._session) {
-        return this._shutdown();
+        return this.shutdown();
       }
       return this._changeKernel(model).then(() => void 0);
     }).then(() => void 0);
-  }
-
-  /**
-   * Shut down the session.
-   */
-  private _shutdown(): Promise<void> {
-    if (this.isDisposed || !this._session) {
-      return Promise.resolve(void 0);
-    }
-    let session = this._session;
-    this._session = null;
-    return session.shutdown();
   }
 
   /**
@@ -622,6 +601,7 @@ class ClientSession implements IClientSession {
       this._session.dispose();
     }
     this._session = session;
+    this._onPathChanged(session, session.path);
     session.terminated.connect(this._onTerminated, this);
     session.pathChanged.connect(this._onPathChanged, this);
     session.kernelChanged.connect(this._onKernelChanged, this);
