@@ -33,7 +33,7 @@ describe('@jupyterlab/apputils', () => {
 
     beforeEach(() => {
       session = new ClientSession({
-        manager, preference: { name: manager.specs.default }
+        manager, kernelPreference: { name: manager.specs.default }
       });
     });
 
@@ -182,7 +182,6 @@ describe('@jupyterlab/apputils', () => {
     describe('#kernelPreference', () => {
 
       it('should be the kernel preference of the session', () => {
-        expect(session.kernelPreference).to.eql({});
         let preference: IClientSession.IKernelPreference = {
           name: 'foo',
           language: 'bar',
@@ -452,11 +451,19 @@ describe('@jupyterlab/apputils', () => {
 
     describe('.getDefaultKernel()', () => {
 
-      it('should get the global default', () => {
+      it('should return null if no options are given', () => {
         expect(ClientSession.getDefaultKernel({
           specs: manager.specs,
           preference: {}
-        })).to.be(manager.specs.default);
+        })).to.be(null);
+      });
+
+      it('should return a matching name', () => {
+        let spec = manager.specs.kernelspecs[manager.specs.default];
+        expect(ClientSession.getDefaultKernel({
+          specs: manager.specs,
+          preference: { name: spec.name }
+        })).to.be(spec.name);
       });
 
       it('should return null if no match is found', () => {
@@ -468,10 +475,29 @@ describe('@jupyterlab/apputils', () => {
 
       it('should return a matching language', () => {
         let spec = manager.specs.kernelspecs[manager.specs.default];
+        let kernelspecs: any = {};
+        kernelspecs[spec.name] = spec;
         expect(ClientSession.getDefaultKernel({
-          specs: manager.specs,
+          specs: {
+            default: spec.name,
+            kernelspecs,
+          },
           preference: { language: spec.language }
         })).to.be(spec.name);
+      });
+
+      it('should return null if a language matches twice', () => {
+        let spec = manager.specs.kernelspecs[manager.specs.default];
+        let kernelspecs: any = {};
+        kernelspecs['foo'] = spec;
+        kernelspecs['bar'] = spec;
+        expect(ClientSession.getDefaultKernel({
+          specs: {
+            default: spec.name,
+            kernelspecs,
+          },
+          preference: { language: spec.language }
+        })).to.be(null);
       });
 
     });
