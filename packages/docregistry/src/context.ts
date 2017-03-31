@@ -414,7 +414,8 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         name,
         language: this._model.defaultKernelLanguage,
       };
-      this.session.initialize();
+      return this.session.initialize();
+    }).then(() => {
       this._isReady = true;
       this._populatedPromise.resolve(void 0);
     });
