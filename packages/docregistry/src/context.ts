@@ -407,9 +407,12 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         return;
       }
       // Update the kernel preference.
+      let name = (
+        this._model.defaultKernelName || this.session.kernelPreference.name
+      );
       this.session.kernelPreference = {
         ...this.session.kernelPreference,
-        name: this._model.defaultKernelName,
+        name,
         language: this._model.defaultKernelLanguage,
       };
       this._isReady = true;
