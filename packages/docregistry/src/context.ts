@@ -59,7 +59,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       manager: manager.sessions,
       path: this._path,
       name: this._path.split('/').pop(),
-      start: this._readyPromise,
       kernelPreference: options.kernelPreference || { shouldStart: false }
     });
     this.session.propertyChanged.connect(this._onSessionChanged, this);
@@ -415,6 +414,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         name,
         language: this._model.defaultKernelLanguage,
       };
+      this.session.initialize();
       this._isReady = true;
       this._populatedPromise.resolve(void 0);
     });

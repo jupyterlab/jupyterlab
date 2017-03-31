@@ -227,9 +227,7 @@ class ClientSession implements IClientSession {
     this._path = options.path || uuid();
     this._type = options.type || '';
     this._name = options.name || '';
-    this._start = options.start || Promise.resolve(void 0);
     this._kernelPreference = options.kernelPreference || {};
-    this._initialize();
   }
 
   /**
@@ -413,7 +411,9 @@ class ClientSession implements IClientSession {
     }
     let session = this._session;
     this._session = null;
-    return session.shutdown();
+    if (session) {
+      return session.shutdown();
+    }
   }
 
   /**
@@ -496,9 +496,13 @@ class ClientSession implements IClientSession {
   /**
    * Initialize the session.
    */
-  private _initialize(): void {
+  initialize(): Promise<void> {
+    if (this._initializing) {
+      return this._ready.promise;
+    }
+    this._initializing = true;
     let manager = this.manager;
-    manager.ready.then(() => {
+    return manager.ready.then(() => {
       let model = find(manager.running(), item => {
         return item.notebook.path === this._path;
       });
@@ -510,8 +514,6 @@ class ClientSession implements IClientSession {
       }).catch(err => {
         this._handleSessionError(err);
       });
-    }).then(() => {
-      return this._start;
     }).then(() => {
       return this._startIfNecessary();
     }).then(() => {
@@ -555,6 +557,9 @@ class ClientSession implements IClientSession {
    * Change the kernel.
    */
   private _changeKernel(options: Kernel.IModel): Promise<Kernel.IKernelConnection> {
+    if (this.isDisposed) {
+      return Promise.resolve(void 0);
+    }
     let session = this._session;
     if (session) {
       return session.changeKernel(options);
@@ -567,8 +572,11 @@ class ClientSession implements IClientSession {
    * Select a kernel.
    */
   private _selectKernel(): Promise<void> {
+    if (this.isDisposed) {
+      return Promise.resolve(void 0);
+    }
     return Private.selectKernel(this).then(model => {
-      if (model === void 0) {
+      if (this.isDisposed || model === void 0) {
         return;
       }
       if (model === null && this._session) {
@@ -582,6 +590,9 @@ class ClientSession implements IClientSession {
    * Start a session and set up its signals.
    */
   private _startSession(model: Kernel.IModel): Promise<Kernel.IKernelConnection> {
+    if (this.isDisposed) {
+      return Promise.resolve(void 0);
+    }
     return this.manager.startNew({
       path: this._path,
       kernelName: model.name,
@@ -689,7 +700,7 @@ class ClientSession implements IClientSession {
   private _isDisposed = false;
   private _session: Session.ISession | null = null;
   private _ready = new PromiseDelegate<void>();
-  private _start: Promise<void>;
+  private _initializing = false;
   private _isReady = false;
   private _terminated = new Signal<this, void>(this);
   private _kernelChanged = new Signal<this, Kernel.IKernelConnection | null>(this);
@@ -714,13 +725,6 @@ namespace ClientSession {
      * A session manager instance.
      */
     manager: Session.IManager;
-
-    /**
-     * A promise used to determine when to start the session.
-     * If not given, the session will start immediately and potentially
-     * ask the user to select the kernel.
-     */
-    start?: Promise<void>;
 
     /**
      * The initial path of the file.

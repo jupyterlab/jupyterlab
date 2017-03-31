@@ -62,7 +62,7 @@ describe('@jupyterlab/apputils', () => {
   });
 
   afterEach(() => {
-    return session.shutdown();
+    return session.shutdown().then(() => { session.dispose(); });
   });
 
   describe('Toolbar', () => {
@@ -178,7 +178,7 @@ describe('@jupyterlab/apputils', () => {
 
       it('should display the `\'display_name\'` of the kernel', () => {
         let item = Toolbar.createKernelNameItem(session);
-        return session.ready.then(() => {
+        return session.initialize().then(() => {
           expect(item.node.textContent).to.be(session.kernelDisplayName);
         });
       });
@@ -193,7 +193,7 @@ describe('@jupyterlab/apputils', () => {
     describe('.createKernelStatusItem()', () => {
 
       beforeEach(() => {
-        return session.ready.then(() => {
+        return session.initialize().then(() => {
           return session.kernel.ready;
         });
       });
@@ -232,10 +232,11 @@ describe('@jupyterlab/apputils', () => {
         };
       });
 
-      it('should handle a null kernel', () => {
+      it('should handle a starting session', () => {
+        session.dispose();
         return createClientSession().then(session => {
           let item = Toolbar.createKernelStatusItem(session);
-          expect(item.node.title).to.be('Kernel Dead');
+          expect(item.node.title).to.be('Kernel Starting');
           expect(item.hasClass('jp-mod-busy')).to.be(true);
         });
       });

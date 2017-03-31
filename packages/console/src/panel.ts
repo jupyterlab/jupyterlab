@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  PromiseDelegate, Token
+  Token
 } from '@phosphor/coreutils';
 
 import {
@@ -73,12 +73,11 @@ class ConsolePanel extends Panel {
       path = `${basePath || ''}/console-${count}-${uuid()}`;
     }
 
-    let session = this.session = new ClientSession({
+    let session = this._session = new ClientSession({
       manager: manager.sessions,
       path,
       name: name || `Console ${count}`,
       type: 'console',
-      start: this._startPromise.promise,
       kernelPreference: options.kernelPreference
     });
 
@@ -115,7 +114,9 @@ class ConsolePanel extends Panel {
   /**
    * The session used by the panel.
    */
-  readonly session: IClientSession;
+  get session(): IClientSession {
+    return this._session;
+  }
 
   /**
    * Dispose of the resources held by the widget.
@@ -129,11 +130,7 @@ class ConsolePanel extends Panel {
    * Handle `'after-attach'` messages.
    */
   protected onAfterAttach(msg: Message): void {
-    // Fullfill the start promise to the session.
-    if (!this._started) {
-      this._started = true;
-      this._startPromise.resolve(void 0);
-    }
+    this._session.initialize();
   }
 
   /**
@@ -169,8 +166,7 @@ class ConsolePanel extends Panel {
   private _manager: ServiceManager.IManager;
   private _executed: Date = null;
   private _connected: Date = null;
-  private _started = false;
-  private _startPromise = new PromiseDelegate<void>();
+  private _session: ClientSession;
 }
 
 
