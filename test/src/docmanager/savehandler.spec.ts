@@ -150,7 +150,7 @@ describe('docregistry/savehandler', () => {
               expect(context.model.toString()).to.be('baz');
               done();
             });
-          }, 1000);  // The server has a one second resolution for saves.
+          }, 1500);  // The server has a one second resolution for saves.
         }).catch(done);
         acceptDialog().catch(done);
       });
@@ -171,7 +171,7 @@ describe('docregistry/savehandler', () => {
               expect(context.model.toString()).to.be('bar');
               done();
             });
-          }, 1000);  // The server has a one second resolution for saves.
+          }, 1500);  // The server has a one second resolution for saves.
         }).catch(done);
         waitForDialog().then(() => {
           let dialog = document.body.getElementsByClassName('jp-Dialog')[0];
