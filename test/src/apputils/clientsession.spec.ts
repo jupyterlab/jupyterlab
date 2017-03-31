@@ -107,6 +107,7 @@ describe('@jupyterlab/apputils', () => {
     describe('#propertyChanged', () => {
 
       it('should be emitted when a session path changes', (done) => {
+        session.kernelPreference = { canStart: false };
         session.propertyChanged.connect((sender, args) => {
           expect(sender).to.be(session);
           expect(args).to.be('path');
@@ -116,6 +117,7 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should be emitted when a session name changes', (done) => {
+        session.kernelPreference = { canStart: false };
         session.propertyChanged.connect((sender, args) => {
           expect(sender).to.be(session);
           expect(args).to.be('name');
@@ -125,6 +127,7 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should be emitted when a session type changes', (done) => {
+        session.kernelPreference = { canStart: false };
         session.propertyChanged.connect((sender, args) => {
           expect(sender).to.be(session);
           expect(args).to.be('type');
@@ -149,6 +152,7 @@ describe('@jupyterlab/apputils', () => {
     describe('#path', () => {
 
       it('should current path of the the session', () => {
+        session.kernelPreference = { canStart: false };
         expect(typeof session.path).to.be('string');
         return session.setPath('foo').then(() => {
           expect(session.path).to.be('foo');
@@ -160,6 +164,7 @@ describe('@jupyterlab/apputils', () => {
     describe('#name', () => {
 
       it('should the current name of the the session', () => {
+        session.kernelPreference = { canStart: false };
         expect(typeof session.name).to.be('string');
         return session.setName('foo').then(() => {
           expect(session.name).to.be('foo');
@@ -171,6 +176,7 @@ describe('@jupyterlab/apputils', () => {
     describe('#type', () => {
 
       it('should the current type of the the session', () => {
+        session.kernelPreference = { canStart: false };
         expect(typeof session.type).to.be('string');
         return session.setType('foo').then(() => {
           expect(session.type).to.be('foo');
@@ -243,9 +249,12 @@ describe('@jupyterlab/apputils', () => {
 
       it('should connect to an existing kernel', () => {
         let other: Session.ISession;
+        session.dispose();
         return manager.startNew({ path: uuid() }).then(o => {
           other = o;
-          session.kernelPreference = { id: other.kernel.id };
+          session = new ClientSession({
+            manager, kernelPreference: { id: other.kernel.id }
+          });
           return session.ready;
         }).then(() => {
           expect(session.kernel.id).to.be(other.kernel.id);
@@ -416,6 +425,7 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should be a no-op if no kernel has been started', () => {
+        session.kernelPreference = { shouldStart: false };
         return session.restart().then(() => {
           expect(session.kernel).to.not.be.ok();
         });
@@ -426,6 +436,7 @@ describe('@jupyterlab/apputils', () => {
     describe('#setPath()', () => {
 
       it('should change the session path', () => {
+        session.kernelPreference = { canStart: false };
         return session.setPath('foo').then(() => {
           expect(session.path).to.be('foo');
         });
@@ -436,6 +447,7 @@ describe('@jupyterlab/apputils', () => {
     describe('#setName', () => {
 
       it('should change the session name', () => {
+        session.kernelPreference = { canStart: false };
         return session.setName('foo').then(() => {
           expect(session.name).to.be('foo');
         });
@@ -446,6 +458,7 @@ describe('@jupyterlab/apputils', () => {
     describe('#setType()', () => {
 
       it('should set the session type', () => {
+        session.kernelPreference = { canStart: false };
         return session.setType('foo').then(() => {
           expect(session.type).to.be('foo');
         });
@@ -457,13 +470,14 @@ describe('@jupyterlab/apputils', () => {
 
       it('should restart if the user accepts the dialog', () => {
         let called = false;
+
         return session.ready.then(() => {
-          acceptDialog();
           session.statusChanged.connect((sender, args) => {
             if (args === 'restarting') {
               called = true;
             }
           });
+          acceptDialog();
           return ClientSession.restartKernel(session.kernel);
         }).then(() => {
           expect(called).to.be(true);
@@ -473,12 +487,12 @@ describe('@jupyterlab/apputils', () => {
       it('should not restart if the user rejects the dialog', () => {
         let called = false;
         return session.ready.then(() => {
-          dismissDialog();
           session.statusChanged.connect((sender, args) => {
             if (args === 'restarting') {
               called = true;
             }
           });
+          dismissDialog();
           return ClientSession.restartKernel(session.kernel);
         }).then(() => {
           expect(called).to.be(false);
@@ -488,6 +502,10 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('.getDefaultKernel()', () => {
+
+      beforeEach(() => {
+        session.dispose();
+      });
 
       it('should return null if no options are given', () => {
         expect(ClientSession.getDefaultKernel({
@@ -541,6 +559,10 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('.populateKernelSelect()', () => {
+
+      beforeEach(() => {
+        session.dispose();
+      });
 
       it('should populate the select div', () => {
         let div = document.createElement('select');
