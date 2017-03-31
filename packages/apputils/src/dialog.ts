@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  each, map, toArray
+  ArrayExt, each, map, toArray
 } from '@phosphor/algorithm';
 
 import {
@@ -93,8 +93,12 @@ class Dialog extends Widget {
       return this._promise.promise;
     }
     this._promise = new PromiseDelegate<Dialog.IButton>();
-    Widget.attach(this, this._host);
-    return this._promise.promise;
+    let promise = Promise.all(Private.launchQueue);
+    Private.launchQueue.push(this._promise.promise);
+    return promise.then(() => {
+      Widget.attach(this, this._host);
+      return this._promise.promise;
+    });
   }
 
   /**
@@ -269,6 +273,7 @@ class Dialog extends Widget {
     let promise = this._promise;
     this._promise = null;
     this.close();
+    ArrayExt.removeFirstOf(Private.launchQueue, promise.promise);
     promise.resolve(item);
   }
 
@@ -632,6 +637,12 @@ namespace Dialog {
  * The namespace for module private data.
  */
 namespace Private {
+  /**
+   * The queue for launching dialogs.
+   */
+  export
+  let launchQueue: Promise<Dialog.IButton>[] = [];
+
   /**
    * Handle the input options for a dialog.
    *

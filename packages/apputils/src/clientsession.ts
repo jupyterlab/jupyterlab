@@ -510,9 +510,6 @@ class ClientSession implements IClientSession {
       return this._start;
     }).then(() => {
       return this._startIfNecessary();
-    }).then(() => {
-      this._isReady = true;
-      this._ready.resolve(void 0);
     });
   }
 
@@ -521,6 +518,8 @@ class ClientSession implements IClientSession {
    */
   private _startIfNecessary(): Promise<void> {
     let preference = this.kernelPreference;
+    this._isReady = true;
+    this._ready.resolve(void 0);
     if (this.kernel || preference.shouldStart === false ||
         preference.canStart === false) {
       return Promise.resolve(void 0);
