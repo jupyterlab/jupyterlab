@@ -317,6 +317,9 @@ class ClientSession implements IClientSession {
     if (!kernel) {
       return 'No Kernel!';
     }
+    if (!this.manager.isReady) {
+      return 'Unknown!';
+    }
     let spec = this.manager.specs.kernelspecs[kernel.name];
     return spec ? spec.display_name : kernel.name;
   }
@@ -363,7 +366,7 @@ class ClientSession implements IClientSession {
    * Select a kernel for the session.
    */
   selectKernel(): Promise<void> {
-    return Private.selectKernel(this);
+    return this.manager.ready.then(() => Private.selectKernel(this));
   }
 
   /**
@@ -507,10 +510,12 @@ class ClientSession implements IClientSession {
    */
   private _startSession(model: Kernel.IModel): Promise<Kernel.IKernelConnection> {
     this._promise = new PromiseDelegate<void>();
-    return this.manager.startNew({
-      path: this._path,
-      kernelName: model.name,
-      kernelId: model.id
+    return this.manager.ready.then(() => {
+      return this.manager.startNew({
+        path: this._path,
+        kernelName: model.name,
+        kernelId: model.id
+      });
     }).then(session => this._handleNewSession(session))
     .catch(err => this._handleSessionError(err));
   }
