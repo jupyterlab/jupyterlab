@@ -53,7 +53,7 @@ class LogToolbarButton extends ToolbarButton {
 
 describe('@jupyterlab/apputils', () => {
 
-  let widget: Toolbar;
+  let widget: Toolbar<Widget>;
   let session: ClientSession;
 
   beforeEach(() => {

@@ -34,7 +34,9 @@ describe('@jupyterlab/coreutils', () => {
           );
         } catch (e) {
           // Chrome
-          expect(obj.href).to.equal(url);
+          expect(obj.href).to.equal(
+            'http://example.com/path?that%27s#all, folks'
+          );
         }
         expect(obj.protocol).to.equal('http:');
         expect(obj.host).to.equal('example.com');
