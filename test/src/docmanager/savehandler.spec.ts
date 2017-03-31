@@ -144,11 +144,6 @@ describe('docregistry/savehandler', () => {
       });
 
       it('should overwrite the file on disk', (done) => {
-        // Skipping this test on Windows because it fails on appveyor.
-        if (Platform.IS_WIN) {
-          done();
-          return;
-        }
         context.model.fromString('foo');
         context.save().then(() => {
           setTimeout(() => {
@@ -170,11 +165,6 @@ describe('docregistry/savehandler', () => {
       });
 
       it('should revert to the file on disk', (done) => {
-        // Skipping this test on Windows because it fails on appveyor.
-        if (Platform.IS_WIN) {
-          done();
-          return;
-        }
         context.model.fromString('foo');
         context.save().then(() => {
           context.fileChanged.connect(() => {
