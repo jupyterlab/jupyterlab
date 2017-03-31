@@ -52,17 +52,18 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     let ext = DocumentRegistry.extname(this._path);
     let lang = this._factory.preferredLanguage(ext);
     this._model = this._factory.createNew(lang);
+    this._readyPromise = manager.ready.then(() => {
+      return this._populatedPromise.promise;
+    });
     this.session = new ClientSession({
       manager: manager.sessions,
       path: this._path,
       name: this._path.split('/').pop(),
+      start: this._readyPromise,
       kernelPreference: options.kernelPreference || { shouldStart: false }
     });
     this.session.propertyChanged.connect(this._onSessionChanged, this);
     manager.contents.fileChanged.connect(this._onFileChanged, this);
-    this._readyPromise = manager.ready.then(() => {
-      return this._populatedPromise.promise;
-    });
   }
 
   /**
@@ -411,8 +412,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         name: this._model.defaultKernelName,
         language: this._model.defaultKernelLanguage,
       };
-      return this.session.initialize();
-    }).then(() => {
       this._isReady = true;
       this._populatedPromise.resolve(void 0);
     });
