@@ -587,7 +587,11 @@ class MarkdownCellWidget extends BaseCellWidget {
       signal: this.model.contentChanged,
       timeout: RENDER_TIMEOUT
     });
-    this._monitor.activityStopped.connect(this.update, this);
+    this._monitor.activityStopped.connect(()=>{
+      if(this._rendered) {
+        this.update();
+      }
+    }, this);
   }
 
   /**
