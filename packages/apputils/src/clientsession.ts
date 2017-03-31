@@ -808,23 +808,16 @@ namespace Private {
   export
   function getDefaultKernel(options: ClientSession.IKernelSearch): string | null {
     let { specs, preference } = options;
-    let { name, language, id, shouldStart, canStart } = preference;
+    let { name, language, shouldStart, canStart } = preference;
     if (shouldStart === false || canStart === false) {
       return null;
     }
 
-    if (!name && !language && !id) {
+    if (!name && !language) {
       return null;
     }
 
-    // Look for an exact match of preferred name.
-    for (let specName in specs.kernelspecs) {
-      if (specName === name) {
-        return name;
-      }
-    }
-
-    // Look for an exact match of existing name.
+    // Look for an exact match of a spec name.
     for (let specName in specs.kernelspecs) {
       if (specName === name) {
         return name;
@@ -888,32 +881,35 @@ namespace Private {
       languages[name] = spec.language;
     }
 
-    // Handle a preferred kernel by name.
+    // Handle a kernel by name.
     let names: string[] = [];
     if (name && name in specs.kernelspecs) {
       names.push(name);
     }
 
-    // Handle a preferred kernel language in order of display name.
+    // Then look by language.
+    if (language) {
+      for (let specName in specs.kernelspecs) {
+        if (name !== specName && languages[specName] === language) {
+          names.push(name);
+        }
+      }
+    }
+
+    // Use the default kernel if no kernels were found.
+    if (!names.length) {
+      names.push(specs.default);
+    }
+
+    // Handle a preferred kernels in order of display name.
     let preferred = document.createElement('optgroup');
     preferred.label = 'Start Preferred Kernel';
 
-    if (language) {
-      for (let specName in specs.kernelspecs) {
-        if (languages[specName] === language) {
-          names.push(specName);
-        }
-      }
-      names.sort((a, b) => displayNames[a].localeCompare(displayNames[b]));
-      for (let name of names) {
-        preferred.appendChild(optionForName(name, displayNames[name]));
-      }
+    names.sort((a, b) => displayNames[a].localeCompare(displayNames[b]));
+    for (let name of names) {
+      preferred.appendChild(optionForName(name, displayNames[name]));
     }
-    // Use the default kernel if no preferred language or none were found.
-    if (!names.length) {
-      let defaultName = specs.default;
-      preferred.appendChild(optionForName(defaultName, displayNames[defaultName]));
-    }
+
     if (preferred.firstChild) {
       node.appendChild(preferred);
     }
