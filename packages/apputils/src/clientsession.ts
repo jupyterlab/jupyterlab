@@ -208,14 +208,6 @@ namespace IClientSession {
 
 /**
  * The default implementation of client session object.
- *
- * #### Notes
- * If a server session exists on the current path, we will connect to it.
- * If preferences include disabling `canStart` or `shouldStart`, no
- * server session will be started.
- * If a kernel id is given, we attempt to start a session with that id.
- * If a default kernel is available, we connect to it.
- * Otherwise we ask the user to select a kernel.
  */
 export
 class ClientSession implements IClientSession {
@@ -495,6 +487,14 @@ class ClientSession implements IClientSession {
 
   /**
    * Initialize the session.
+   *
+   * #### Notes
+   * If a server session exists on the current path, we will connect to it.
+   * If preferences include disabling `canStart` or `shouldStart`, no
+   * server session will be started.
+   * If a kernel id is given, we attempt to start a session with that id.
+   * If a default kernel is available, we connect to it.
+   * Otherwise we ask the user to select a kernel.
    */
   initialize(): Promise<void> {
     if (this._initializing) {
