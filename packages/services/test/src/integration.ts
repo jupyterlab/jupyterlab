@@ -8,7 +8,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONObject, JSONExt
+  JSONObject, JSONExt, PromiseDelegate
 } from '@phosphor/coreutils';
 
 import * as NodeWebSocket
@@ -133,15 +133,17 @@ describe('jupyter.services - Integration', () => {
         };
         return kernel.requestHistory(options);
       }).then(msg => {
-        let future = kernel.requestExecute({ code: 'a = 1\n' });
-        future.onReply = (reply: KernelMessage.IExecuteReplyMsg) => {
-          expect(reply.content.status).to.be('ok');
-        };
-        future.onDone = () => {
-          console.log('Execute finished');
-          kernel.shutdown();
-        };
-      });
+        return new Promise<void>((resolve, reject) => {
+          let future = kernel.requestExecute({ code: 'a = 1\n' });
+          future.onReply = (reply: KernelMessage.IExecuteReplyMsg) => {
+            expect(reply.content.status).to.be('ok');
+          };
+          future.onDone = () => {
+            console.log('Execute finished');
+            resolve(void 0);
+          };
+        });
+      }).then(() => kernel.shutdown());
     });
 
   });
@@ -238,6 +240,7 @@ describe('jupyter.services - Integration', () => {
       }).then(() => {
         expect(session.path).to.be(newPath);
         expect(session.model.notebook.path).to.be(newPath);
+        return session.shutdown();
       });
     });
 
@@ -245,8 +248,11 @@ describe('jupyter.services - Integration', () => {
 
   describe('Comm', () => {
 
-    it('should start a comm from the server end', (done) => {
-      Kernel.startNew().then((kernel) => {
+    it('should start a comm from the server end', () => {
+      let kernel: Kernel.IKernel;
+      return Kernel.startNew().then(k => {
+        kernel = k;
+        let promise = new PromiseDelegate<void>();
         kernel.registerCommTarget('test', (comm, msg) => {
           let content = msg.content;
           expect(content.target_name).to.be('test');
@@ -258,7 +264,7 @@ describe('jupyter.services - Integration', () => {
           };
           comm.onClose = (msg) => {
             expect(msg.content.data).to.eql(['0', '1', '2']);
-            done();
+            promise.resolve(void 0);
           };
         });
         let code = [
@@ -273,7 +279,8 @@ describe('jupyter.services - Integration', () => {
           'comm.on_msg(on_msg)'
         ].join('\n');
         kernel.requestExecute({ code: code });
-      }).catch(done);
+        return promise;
+      }).then(() => kernel.shutdown());
     });
 
   });
