@@ -112,7 +112,7 @@ describe('@jupyterlab/console', () => {
         return createClientSession({ path: local.path });
       }).then(s => {
         session = s;
-        return s.ready;
+        return s.initialize();
       });
     });
 

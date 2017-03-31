@@ -392,7 +392,7 @@ describe('cells/widget', () => {
       beforeEach(() => {
         return createClientSession().then(s => {
           session = s;
-          return s.ready;
+          return s.initialize();
         }).then(() => {
           return session.kernel.ready;
         });

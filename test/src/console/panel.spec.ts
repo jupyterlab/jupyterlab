@@ -60,7 +60,6 @@ describe('console/panel', () => {
     panel = new TestPanel({
       manager, contentFactory, rendermime, mimeTypeService
     });
-    return dismissDialog();
   });
 
   afterEach(() => {
@@ -102,6 +101,16 @@ describe('console/panel', () => {
         expect(panel.isDisposed).to.be(true);
         panel.dispose();
         expect(panel.isDisposed).to.be(true);
+      });
+
+    });
+
+    describe('#onAfterAttach()', () => {
+
+      it('should start the session', () => {
+        Widget.attach(panel, document.body);
+        dismissDialog();
+        return panel.session.ready;
       });
 
     });

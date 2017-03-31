@@ -233,8 +233,9 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should handle a starting session', () => {
-        session.dispose();
-        return createClientSession().then(session => {
+        return session.shutdown().then(() => {
+          return createClientSession();
+        }).then(session => {
           let item = Toolbar.createKernelStatusItem(session);
           expect(item.node.title).to.be('Kernel Starting');
           expect(item.hasClass('jp-mod-busy')).to.be(true);
