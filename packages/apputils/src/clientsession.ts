@@ -383,6 +383,9 @@ class ClientSession implements IClientSession {
    */
   changeKernel(options: Kernel.IModel): Promise<Kernel.IKernelConnection> {
     return this.ready.then(() => {
+      if (this.isDisposed) {
+        return;
+      }
       let session = this._session;
       if (session) {
         return session.changeKernel(options);
@@ -396,7 +399,12 @@ class ClientSession implements IClientSession {
    * Select a kernel for the session.
    */
   selectKernel(): Promise<void> {
-    return this.ready.then(() => Private.selectKernel(this));
+    return this.ready.then(() => {
+      if (this.isDisposed) {
+        return;
+      }
+      return Private.selectKernel(this);
+    });
   }
 
   /**
@@ -406,6 +414,9 @@ class ClientSession implements IClientSession {
    */
   shutdown(): Promise<void> {
     return this.ready.then(() => {
+      if (this.isDisposed) {
+        return;
+      }
       if (this._session) {
         return this._session.shutdown();
       }
@@ -425,6 +436,9 @@ class ClientSession implements IClientSession {
    */
   restart(): Promise<Kernel.IKernelConnection | null> {
     return this.ready.then(() => {
+      if (this.isDisposed) {
+        return;
+      }
       let kernel = this.kernel;
       if (!kernel) {
         if (this._prevKernelName) {
@@ -450,6 +464,9 @@ class ClientSession implements IClientSession {
    */
   setPath(path: string): Promise<void> {
     return this.ready.then(() => {
+      if (this.isDisposed) {
+        return;
+      }
       if (this._path === path) {
         return;
       }
@@ -466,6 +483,9 @@ class ClientSession implements IClientSession {
    */
   setName(name: string): Promise<void> {
     return this.ready.then(() => {
+      if (this.isDisposed) {
+        return;
+      }
       if (this._name === name) {
         return;
       }
@@ -480,6 +500,9 @@ class ClientSession implements IClientSession {
    */
   setType(type: string): Promise<void> {
     return this.ready.then(() => {
+      if (this.isDisposed) {
+        return;
+      }
       if (this._type === type) {
         return;
       }
@@ -520,7 +543,8 @@ class ClientSession implements IClientSession {
     let preference = this.kernelPreference;
     this._isReady = true;
     this._ready.resolve(void 0);
-    if (this.kernel || preference.shouldStart === false ||
+    if (this.isDisposed ||
+        this.kernel || preference.shouldStart === false ||
         preference.canStart === false) {
       return Promise.resolve(void 0);
     }
