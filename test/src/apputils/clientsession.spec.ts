@@ -32,7 +32,9 @@ describe('@jupyterlab/apputils', () => {
     });
 
     beforeEach(() => {
-      session = new ClientSession({ manager });
+      session = new ClientSession({
+        manager, preference: { name: manager.specs.default }
+      });
     });
 
     afterEach(() => {
@@ -390,7 +392,7 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should present a dialog if there is no distinct kernel to start', () => {
-        session.kernelPreference = { name: 'foo' };
+        session.kernelPreference = {};
         acceptDialog();
         return session.initialize().then(() => {
           expect(session.kernel.name).to.be(manager.specs.default);
