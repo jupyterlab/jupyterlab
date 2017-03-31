@@ -263,11 +263,14 @@ class DefaultSession implements Session.ISession {
     if (this.isDisposed) {
       return Promise.reject(new Error('Session is disposed'));
     }
-    this._kernel.dispose();
     let data = JSON.stringify({ kernel: options });
-    return this._patch(data).then(() => {
-      return this.kernel;
-    });
+    if (this._kernel) {
+      return this._kernel.ready.then(() => {
+        this._kernel.dispose();
+        return this._patch(data);
+      }).then(() => this.kernel);
+    }
+    return this._patch(data).then(() => this.kernel);
   }
 
   /**
@@ -282,6 +285,13 @@ class DefaultSession implements Session.ISession {
   shutdown(): Promise<void> {
     if (this.isDisposed) {
       return Promise.reject(new Error('Session is disposed'));
+    }
+    if (this._kernel) {
+      return this._kernel.ready.then(() => {
+        return Private.shutdownSession(
+          this.id, this._baseUrl, this.ajaxSettings
+        );
+      });
     }
     return Private.shutdownSession(this.id, this._baseUrl, this.ajaxSettings);
   }
