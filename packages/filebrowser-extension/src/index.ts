@@ -78,6 +78,7 @@ const factoryPlugin: JupyterLabPlugin<IFileBrowserFactory> = {
   activate: activateFactory,
   id: 'jupyter.services.filebrowser',
   provides: IFileBrowserFactory,
+  requires: [IServiceManager, IDocumentManager],
   autoStart: true
 };
 
@@ -97,16 +98,18 @@ export default plugins;
 /**
  * Activate the file browser factory provider.
  */
-function activateFactory(app: JupyterLab): IFileBrowserFactory {
-  const { shell } = app;
+function activateFactory(app: JupyterLab, serviceManager: IServiceManager, documentManager: IDocumentManager): IFileBrowserFactory {
+  const { commands, shell } = app;
   const tracker = new InstanceTracker<FileBrowser>({ namespace, shell });
 
   return {
-    createFileBrowser(options: IFileBrowserFactory.IOptions): FileBrowser {
+    createFileBrowser(options: IFileBrowserFactory.IOptions = {}): FileBrowser {
       const widget = new FileBrowser({
-        commands: options.commands,
-        manager: options.documentManager,
-        model: new FileBrowserModel({ manager: options.serviceManager })
+        commands: options.commands || commands,
+        manager: options.documentManager || documentManager,
+        model: new FileBrowserModel({
+          manager: options.serviceManager || serviceManager
+        })
       });
 
       tracker.add(widget);

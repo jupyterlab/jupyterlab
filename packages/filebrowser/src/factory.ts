@@ -39,7 +39,7 @@ interface IFileBrowserFactory {
   /**
    * Create a new file browser instance.
    */
-  createFileBrowser(options: IFileBrowserFactory.IOptions): FileBrowser;
+  createFileBrowser(options?: IFileBrowserFactory.IOptions): FileBrowser;
 }
 
 
@@ -55,17 +55,26 @@ namespace IFileBrowserFactory {
   interface IOptions {
     /**
      * The command registry used by the file browser.
+     *
+     * #### Notes
+     * If no command registry is provided, the application default will be used.
      */
-    commands: CommandRegistry;
+    commands?: CommandRegistry;
 
     /**
      * The document manager used by the file browser.
+     *
+     * #### Notes
+     * If no manager is provided, the application default will be used.
      */
-    documentManager: IDocumentManager;
+    documentManager?: IDocumentManager;
 
     /**
      * The service manager used by the file browser.
+     *
+     * #### Notes
+     * If no manager is provided, the application default will be used.
      */
-    serviceManager: IServiceManager;
+    serviceManager?: IServiceManager;
   }
 }
