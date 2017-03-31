@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Message
+  Message, MessageLoop
 } from '@phosphor/messaging';
 
 import {
@@ -117,35 +117,27 @@ describe('console/panel', () => {
 
     describe('#onActivateRequest()', () => {
 
-      it('should give the focus to the console prompt', done => {
+      it('should give the focus to the console prompt', () => {
         expect(panel.methods).to.not.contain('onActivateRequest');
         Widget.attach(panel, document.body);
-        requestAnimationFrame(() => {
-          panel.activate();
-          requestAnimationFrame(() => {
-            expect(panel.methods).to.contain('onActivateRequest');
-            expect(panel.console.prompt.editor.hasFocus()).to.be(true);
-            done();
-          });
-        });
+        MessageLoop.sendMessage(panel, Widget.Msg.ActivateRequest);
+        expect(panel.methods).to.contain('onActivateRequest');
+        expect(panel.console.prompt.editor.hasFocus()).to.be(true);
+        return dismissDialog();
       });
 
     });
 
     describe('#onCloseRequest()', () => {
 
-      it('should dispose of the panel resources after closing', done => {
+      it('should dispose of the panel resources after closing', () => {
         expect(panel.methods).to.not.contain('onCloseRequest');
         Widget.attach(panel, document.body);
-        requestAnimationFrame(() => {
-          expect(panel.isDisposed).to.be(false);
-          panel.close();
-          requestAnimationFrame(() => {
-            expect(panel.methods).to.contain('onCloseRequest');
-            expect(panel.isDisposed).to.be(true);
-            done();
-          });
-        });
+        expect(panel.isDisposed).to.be(false);
+        MessageLoop.sendMessage(panel, Widget.Msg.CloseRequest);
+        expect(panel.methods).to.contain('onCloseRequest');
+        expect(panel.isDisposed).to.be(true);
+        return dismissDialog();
       });
 
     });
