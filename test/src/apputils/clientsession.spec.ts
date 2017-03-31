@@ -335,13 +335,6 @@ describe('@jupyterlab/apputils', () => {
         });
       });
 
-      it('should work when not initialized', () => {
-        let name = manager.specs.default;
-        return session.changeKernel({ name }).then(kernel => {
-          expect(kernel.name).to.be(name);
-        });
-      });
-
     });
 
     describe('#selectKernel()', () => {
@@ -421,13 +414,6 @@ describe('@jupyterlab/apputils', () => {
           return session.restart();
         }).then(() => {
           expect(session.kernel).to.be.ok();
-        });
-      });
-
-      it('should be a no-op if no kernel has been started', () => {
-        session.kernelPreference = { shouldStart: false };
-        return session.restart().then(() => {
-          expect(session.kernel).to.not.be.ok();
         });
       });
 
