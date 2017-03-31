@@ -261,6 +261,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    * Create a checkpoint for the file.
    */
   createCheckpoint(): Promise<Contents.ICheckpointModel> {
+    let contents = this._manager.contents;
     return this._manager.ready.then(() => {
       return contents.createCheckpoint(this._path);
     });
@@ -270,6 +271,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    * Delete a checkpoint for the file.
    */
   deleteCheckpoint(checkpointId: string): Promise<void> {
+    let contents = this._manager.contents;
     return this._manager.ready.then(() => {
       return contents.deleteCheckpoint(this._path, checkpointId);
     });
@@ -299,6 +301,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    * List available checkpoints for a file.
    */
   listCheckpoints(): Promise<Contents.ICheckpointModel[]> {
+    let contents = this._manager.contents;
     return this._manager.ready.then(() => {
       return contents.listCheckpoints(this._path);
     });
@@ -319,6 +322,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    * Get the download url of a given absolute server path.
    */
   getDownloadUrl(path: string): Promise<string> {
+    let contents = this._manager.contents;
     if (URLExt.isLocal(path)) {
       return this._manager.ready.then(() => contents.getDownloadUrl(path));
     }
