@@ -83,6 +83,19 @@ class Dialog extends Widget {
   }
 
   /**
+   * Dispose of the resources used by the dialog.
+   */
+  dispose(): void {
+    if (this._promise) {
+      let promise = this._promise;
+      this._promise = null;
+      promise.resolve(void 0);
+      ArrayExt.removeFirstOf(Private.launchQueue, promise.promise);
+    }
+    super.dispose();
+  }
+
+  /**
    * Launch the dialog as a modal window.
    *
    * @returns a promise that resolves with the button that was selected.

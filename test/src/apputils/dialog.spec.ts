@@ -29,23 +29,9 @@ import {
   Dialog, showDialog
 } from '@jupyterlab/apputils';
 
-
-/**
- * Accept a dialog.
- */
-function acceptDialog(host: HTMLElement = document.body): void {
-  let node = host.getElementsByClassName('jp-Dialog')[0];
-  simulate(node as HTMLElement, 'keydown', { keyCode: 13 });
-}
-
-
-/**
- * Reject a dialog.
- */
-function rejectDialog(host: HTMLElement = document.body): void {
-  let node = host.getElementsByClassName('jp-Dialog')[0];
-  simulate(node as HTMLElement, 'keydown', { keyCode: 27 });
-}
+import {
+  acceptDialog, dismissDialog
+} from '../utils';
 
 
 class TestDialog extends Dialog {
@@ -82,7 +68,7 @@ describe('@jupyterlab/domutils', () => {
       let promise = showDialog().then(result => {
         expect(result.accept).to.equal(false);
       });
-      rejectDialog();
+      dismissDialog();
       return promise;
     });
 
@@ -98,7 +84,7 @@ describe('@jupyterlab/domutils', () => {
       let promise = showDialog(options).then(result => {
         expect(result.accept).to.equal(false);
       });
-      rejectDialog();
+      dismissDialog();
       return promise;
     });
 
