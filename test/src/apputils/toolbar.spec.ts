@@ -53,15 +53,18 @@ class LogToolbarButton extends ToolbarButton {
 
 describe('@jupyterlab/apputils', () => {
 
+  let widget: Toolbar;
   let session: ClientSession;
 
   beforeEach(() => {
+    widget = new Toolbar();
     return createClientSession().then(s => {
       session = s;
     });
   });
 
   afterEach(() => {
+    widget.dispose();
     return session.shutdown().then(() => { session.dispose(); });
   });
 
@@ -84,7 +87,6 @@ describe('@jupyterlab/apputils', () => {
     describe('#names()', () => {
 
       it('should get an ordered list the toolbar item names', () => {
-        let widget = new Toolbar();
         widget.addItem('foo', new Widget());
         widget.addItem('bar', new Widget());
         widget.addItem('baz', new Widget());
@@ -97,20 +99,17 @@ describe('@jupyterlab/apputils', () => {
 
       it('should add an item to the toolbar', () => {
         let item = new Widget();
-        let widget = new Toolbar();
         expect(widget.addItem('test', item)).to.be(true);
         expect(toArray(widget.names())).to.contain('test');
       });
 
       it('should add the `jp-Toolbar-item` class to the widget', () => {
         let item = new Widget();
-        let widget = new Toolbar();
         widget.addItem('test', item);
         expect(item.hasClass('jp-Toolbar-item')).to.be(true);
       });
 
       it('should return false if the name is already used', () => {
-        let widget = new Toolbar();
         widget.addItem('test', new Widget());
         expect(widget.addItem('test', new Widget())).to.be(false);
       });
@@ -120,7 +119,6 @@ describe('@jupyterlab/apputils', () => {
     describe('#insertItem()', () => {
 
       it('should insert the item into the toolbar', () => {
-        let widget = new Toolbar();
         widget.addItem('a', new Widget());
         widget.addItem('b', new Widget());
         widget.insertItem(1, 'c', new Widget());
@@ -128,7 +126,6 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should clamp the bounds', () => {
-        let widget = new Toolbar();
         widget.addItem('a', new Widget());
         widget.addItem('b', new Widget());
         widget.insertItem(10, 'c', new Widget());
@@ -140,7 +137,6 @@ describe('@jupyterlab/apputils', () => {
     describe('#removeItem()', () => {
 
       it('should remove the item from the toolbar', () => {
-        let widget = new Toolbar();
         widget.addItem('a', new Widget());
         let b = new Widget();
         widget.addItem('b', b);
@@ -148,7 +144,6 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should be a no-op the widget is not in the toolbar', () => {
-        let widget = new Toolbar();
         widget.addItem('a', new Widget());
         expect(widget.removeItem(new Widget())).to.be(void 0);
       });
@@ -297,6 +292,7 @@ describe('@jupyterlab/apputils', () => {
           requestAnimationFrame(() => {
             simulate(button.node, 'click');
             expect(called).to.be(true);
+            button.dispose();
             done();
           });
         });
@@ -311,6 +307,7 @@ describe('@jupyterlab/apputils', () => {
           requestAnimationFrame(() => {
             simulate(button.node, 'mousedown');
             expect(button.hasClass('jp-mod-pressed')).to.be(true);
+            button.dispose();
             done();
           });
         });
@@ -326,6 +323,7 @@ describe('@jupyterlab/apputils', () => {
             simulate(button.node, 'mousedown');
             simulate(button.node, 'mouseup');
             expect(button.hasClass('jp-mod-pressed')).to.be(false);
+            button.dispose();
             done();
           });
         });
@@ -341,6 +339,7 @@ describe('@jupyterlab/apputils', () => {
             simulate(button.node, 'mousedown');
             simulate(button.node, 'mouseout');
             expect(button.hasClass('jp-mod-pressed')).to.be(false);
+            button.dispose();
             done();
           });
         });
@@ -361,6 +360,7 @@ describe('@jupyterlab/apputils', () => {
         expect(button.events).to.contain('mousedown');
         expect(button.events).to.contain('mouseup');
         expect(button.events).to.contain('mouseout');
+        button.dispose();
       });
 
     });
@@ -379,6 +379,7 @@ describe('@jupyterlab/apputils', () => {
           expect(button.events).to.not.contain('mousedown');
           expect(button.events).to.not.contain('mouseup');
           expect(button.events).to.not.contain('mouseout');
+          button.dispose();
           done();
         });
       });

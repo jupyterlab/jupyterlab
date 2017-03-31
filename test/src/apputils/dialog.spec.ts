@@ -390,6 +390,7 @@ describe('@jupyterlab/domutils', () => {
           Widget.attach(dialog, document.body);
           Widget.detach(dialog);
           expect(document.activeElement).to.equal(input);
+          document.body.removeChild(input);
         });
 
       });
