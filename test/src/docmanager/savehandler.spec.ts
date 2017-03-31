@@ -4,7 +4,11 @@
 import expect = require('expect.js');
 
 import {
-  ServiceManager, utils
+  uuid
+} from '@jupyterlab/coreutils';
+
+import {
+  ServiceManager
 } from '@jupyterlab/services';
 
 import {
@@ -33,7 +37,7 @@ describe('docregistry/savehandler', () => {
   });
 
   beforeEach(() => {
-    context = new Context({ manager, factory, path: utils.uuid() });
+    context = new Context({ manager, factory, path: uuid() });
     handler = new SaveHandler({ context, manager });
   });
 
