@@ -68,11 +68,15 @@ describe('@jupyterlab/notebook', () => {
   let context: Context<INotebookModel>;
 
   beforeEach(() => {
-    context = createNotebookContext();
+    return createNotebookContext().then(c => {
+      context = c;
+    });
   });
 
   afterEach(() => {
-    context.dispose();
+    return context.session.shutdown().then(() => {
+      context.dispose();
+    });
   });
 
   describe('ToolbarItems', () => {

@@ -80,7 +80,9 @@ describe('@jupyterlab/notebook', () => {
   });
 
   beforeEach(() => {
-    context = createNotebookContext('', manager);
+    return createNotebookContext('', manager).then(c => {
+      context = c;
+    });
   });
 
   afterEach(() => {

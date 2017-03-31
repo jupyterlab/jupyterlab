@@ -43,9 +43,9 @@ describe('@jupyterlab/docmanager', () => {
   });
   let openedWidget: Widget;
 
-  before((done) => {
+  before(() => {
     services = new ServiceManager();
-    services.ready.then(done, done);
+    return services.ready;
   });
 
   beforeEach(() => {
@@ -134,8 +134,7 @@ describe('@jupyterlab/docmanager', () => {
           let context = manager.contextForWidget(widget);
           context.session.kernelChanged.connect(() => {
             expect(context.session.kernel.id).to.be(id);
-            context.session.shutdown();
-            done();
+            context.session.shutdown().then(done, done);
           });
           return context.save();
         }).catch(done);
@@ -193,8 +192,7 @@ describe('@jupyterlab/docmanager', () => {
           let context = manager.contextForWidget(widget);
           context.session.kernelChanged.connect(() => {
             expect(context.session.kernel.id).to.be(id);
-            context.session.shutdown();
-            done();
+            context.session.shutdown().then(done, done);
           });
         }).catch(done);
       });
@@ -230,7 +228,6 @@ describe('@jupyterlab/docmanager', () => {
         }).catch(done);
       });
     });
-
 
     describe('#findWidget()', () => {
 

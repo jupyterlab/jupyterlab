@@ -83,11 +83,15 @@ function createFileContext(path?: string, manager?: ServiceManager.IManager): Co
  * Create a context for a notebook.
  */
 export
-function createNotebookContext(path?: string, manager?: ServiceManager.IManager): Context<INotebookModel> {
+function createNotebookContext(path?: string, manager?: ServiceManager.IManager): Promise<Context<INotebookModel>> {
   manager = manager || Private.manager;
-  let factory = Private.notebookFactory;
-  path = path || uuid() + '.ipynb';
-  return new Context({ manager, factory, path });
+  return manager.ready.then(() => {
+    let factory = Private.notebookFactory;
+    path = path || uuid() + '.ipynb';
+    return new Context({
+      manager, factory, path, kernelPreference: { name: manager.specs.default }
+    });
+  });
 }
 
 

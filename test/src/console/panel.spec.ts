@@ -20,6 +20,10 @@ import {
 } from '@jupyterlab/console';
 
 import {
+  dismissDialog
+} from '../utils';
+
+import {
   createConsolePanelFactory, rendermime, mimeTypeService, editorFactory
 } from './utils';
 
@@ -56,12 +60,11 @@ describe('console/panel', () => {
     panel = new TestPanel({
       manager, contentFactory, rendermime, mimeTypeService
     });
+    return dismissDialog();
   });
 
   afterEach(() => {
-    return panel.session.shutdown().then(() => {
-      panel.dispose();
-    });
+    panel.dispose();
   });
 
   describe('ConsolePanel', () => {

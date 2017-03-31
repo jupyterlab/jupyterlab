@@ -500,19 +500,14 @@ describe('notebook/celltools', () => {
       tool.selectNode.selectedIndex = -1;
       celltools.addItem({ tool });
       simulate(panel0.node, 'focus');
+      NotebookActions.changeCellType(panel0.notebook, 'code');
+
       tabpanel.currentIndex = 2;
       expect(tool).to.be.a(CellTools.KeySelector);
       expect(tool.key).to.be('raw_mimetype');
       let select = tool.selectNode;
       expect(select.disabled).to.be(true);
       expect(select.value).to.be('');
-
-      let metadata = celltools.activeCell.model.metadata;
-      expect(metadata.get('raw_mimetype')).to.be(void 0);
-      simulate(select, 'focus');
-      tool.selectNode.selectedIndex = 2;
-      simulate(select, 'change');
-      expect(metadata.get('raw_mimetype')).to.be(void 0);
     });
 
   });

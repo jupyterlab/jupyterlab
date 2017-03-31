@@ -47,6 +47,12 @@ describe('@jupyterlab/notebook', () => {
     let widget: Notebook;
     let session: ClientSession;
 
+    before(() => {
+      return createClientSession().then(s => {
+        session = s;
+      });
+    });
+
     beforeEach(() => {
       widget = new Notebook({
         rendermime,
@@ -58,9 +64,6 @@ describe('@jupyterlab/notebook', () => {
       widget.model = model;
 
       widget.activeCellIndex = 0;
-      return createClientSession().then(s => {
-        session = s;
-      });
     });
 
     afterEach(() => {
@@ -69,7 +72,7 @@ describe('@jupyterlab/notebook', () => {
     });
 
     after(() => {
-      session.shutdown();
+      return session.shutdown();
     });
 
     describe('#splitCell({})', () => {

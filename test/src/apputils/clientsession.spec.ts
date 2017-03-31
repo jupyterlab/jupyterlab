@@ -236,7 +236,8 @@ describe('@jupyterlab/apputils', () => {
     describe('#dispose()', () => {
 
       it('should dispose the resources held by the client session', () => {
-        expect(session.isDisposed).to.be(false);
+        session.dispose();
+        expect(session.isDisposed).to.be(true);
         session.dispose();
         expect(session.isDisposed).to.be(true);
       });

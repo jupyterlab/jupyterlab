@@ -12,7 +12,11 @@ import {
 } from '@jupyterlab/cells';
 
 import {
-  NotebookPanel, NotebookTracker
+  Context
+} from '@jupyterlab/docregistry';
+
+import {
+  INotebookModel, NotebookPanel, NotebookTracker
 } from '@jupyterlab/notebook';
 
 import {
@@ -42,6 +46,20 @@ describe('notebook/tracker', () => {
 
   describe('NotebookTracker', () => {
 
+    let context: Context<INotebookModel>;
+
+    beforeEach(() => {
+      return createNotebookContext().then(c => {
+        context = c;
+      });
+    });
+
+    afterEach(() => {
+      return context.session.shutdown().then(() => {
+        context.dispose();
+      });
+    });
+
     describe('#constructor()', () => {
 
       it('should create a NotebookTracker', () => {
@@ -69,7 +87,7 @@ describe('notebook/tracker', () => {
         let tracker = new NotebookTracker({ namespace, shell });
         let panel = createNotebookPanel();
         tracker.add(panel);
-        panel.context = createNotebookContext();
+        panel.context = context;
         panel.notebook.model.fromJSON(DEFAULT_CONTENT);
         expect(tracker.activeCell).to.be.a(BaseCellWidget);
         panel.dispose();
@@ -84,7 +102,7 @@ describe('notebook/tracker', () => {
         let panel = createNotebookPanel();
         let count = 0;
         tracker.activeCellChanged.connect(() => { count++; });
-        panel.context = createNotebookContext();
+        panel.context = context;
         panel.notebook.model.fromJSON(DEFAULT_CONTENT);
         tracker.add(panel);
         expect(count).to.be(1);
