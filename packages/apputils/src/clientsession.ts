@@ -630,6 +630,9 @@ class ClientSession implements IClientSession {
       });
       return this._promise.promise;
     }
+    if (this._promise) {
+      return this._promise.promise;
+    }
     return Promise.resolve(void 0);
   }
 
