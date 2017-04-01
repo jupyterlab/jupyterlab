@@ -19,15 +19,11 @@ import {
   DocumentRegistry, TextModelFactory, ABCWidgetFactory
 } from '@jupyterlab/docregistry';
 
-import {
-  dismissDialog
-} from '../utils';
-
 
 class WidgetFactory extends ABCWidgetFactory<Widget, DocumentRegistry.IModel> {
 
   protected createNewWidget(context: DocumentRegistry.Context): Widget {
-    widget = new Widget();
+    let widget = new Widget();
     widget.addClass('WidgetFactory');
     return widget;
   }
@@ -322,15 +318,20 @@ describe('@jupyterlab/docmanager', () => {
 
       it('should close all of the open documents', () => {
         let called = 0;
+        let path = '';
+        let widget0: Widget;
+        let widget1: Widget;
         return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
-          widget = manager.createNew(model.path);
-          widget.disposed.connect(() => { called++; });
-        }).then(() => {
-          widget = manager.createNew(model.path);
-          widget.disposed.connect(() => { called++; });
+          path = model.path;
+          widget0 = manager.createNew(path);
+          widget0.disposed.connect(() => { called++; });
+          widget1 = manager.createNew(path);
+          widget1.disposed.connect(() => { called++; });
         }).then(() => {
           manager.closeAll();
           expect(called).to.be(2);
+          widget0.dispose();
+          widget1.dispose();
         });
       });
 
