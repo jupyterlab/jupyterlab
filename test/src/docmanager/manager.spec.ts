@@ -37,9 +37,7 @@ describe('@jupyterlab/docmanager', () => {
   let modelFactory = new TextModelFactory();
   let widgetFactory = new WidgetFactory({
     name: 'test',
-    fileExtensions: ['.txt'],
-    canStartKernel: true,
-    preferKernel: true
+    fileExtensions: ['.txt']
   });
   let openedWidget: Widget;
 
