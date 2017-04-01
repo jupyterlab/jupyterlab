@@ -19,6 +19,10 @@ import {
   DocumentRegistry, TextModelFactory, ABCWidgetFactory
 } from '@jupyterlab/docregistry';
 
+import {
+  dismissDialog
+} from '../utils';
+
 
 class WidgetFactory extends ABCWidgetFactory<Widget, DocumentRegistry.IModel> {
 
@@ -34,10 +38,13 @@ describe('@jupyterlab/docmanager', () => {
 
   let manager: DocumentManager;
   let services: ServiceManager.IManager;
+  let context: DocumentRegistry.Context;
   let modelFactory = new TextModelFactory();
   let widgetFactory = new WidgetFactory({
     name: 'test',
-    fileExtensions: ['.txt']
+    fileExtensions: ['.txt'],
+    canStartKernel: true,
+    preferKernel: true
   });
   let openedWidget: Widget;
 
@@ -62,6 +69,9 @@ describe('@jupyterlab/docmanager', () => {
   });
 
   afterEach(() => {
+    if (context) {
+      context.dispose();
+    }
     manager.dispose();
   });
 
@@ -115,37 +125,36 @@ describe('@jupyterlab/docmanager', () => {
 
     describe('#open()', () => {
 
-      it('should open a file and return the widget used to view it', (done) => {
-        services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
+      it('should open a file and return the widget used to view it', () => {
+        return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
           let widget = manager.open(model.path);
           expect(widget.hasClass('WidgetFactory')).to.be(true);
-          done();
-        }).catch(done);
+          return dismissDialog();
+        });
       });
 
-      it('should start a kernel if one is given', (done) => {
-        services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
+      it('should start a kernel if one is given', () => {
+        return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
           return services.sessions.startNew({ path: model.path });
         }).then(session => {
           let id = session.kernel.id;
           let widget = manager.open(session.path, 'default', { id });
-          let context = manager.contextForWidget(widget);
-          context.session.kernelChanged.connect(() => {
-            expect(context.session.kernel.id).to.be(id);
-            context.session.shutdown().then(done, done);
-          });
+          context = manager.contextForWidget(widget);
           return context.save();
-        }).catch(done);
+        }).then(() => {
+          expect(context.session.kernel).to.be.ok();
+          return context.session.shutdown();
+        });
       });
 
-      it('should not start a kernel if there is none given', () => {
-        let context: DocumentRegistry.Context;
+      it('should not auto-start a kernel if there is none given', () => {
         return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
           let widget = manager.open(model.path, 'default');
           context = manager.contextForWidget(widget);
           return context.save();
         }).then(() => {
           expect(context.session.kernel).to.be(null);
+          return dismissDialog();
         });
       });
 
@@ -173,76 +182,75 @@ describe('@jupyterlab/docmanager', () => {
 
     describe('#createNew()', () => {
 
-      it('should open a file and return the widget used to view it', (done) => {
-        services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
+      it('should open a file and return the widget used to view it', () => {
+        return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
           let widget = manager.createNew(model.path);
           expect(widget.hasClass('WidgetFactory')).to.be(true);
-          done();
-        }).catch(done);
+          return dismissDialog();
+        });
       });
 
-      it('should start a kernel if one is given', (done) => {
-        services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
+      it('should start a kernel if one is given', () => {
+        let id: string;
+        return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
           return services.sessions.startNew({ path: model.path });
         }).then(session => {
-          let id = session.kernel.id;
+          id = session.kernel.id;
           let widget = manager.createNew(session.path, 'default', { id });
-          let context = manager.contextForWidget(widget);
-          context.session.kernelChanged.connect(() => {
-            expect(context.session.kernel.id).to.be(id);
-            context.session.shutdown().then(done, done);
-          });
-        }).catch(done);
+          context = manager.contextForWidget(widget);
+          return context.save();
+        }).then(() => {
+          expect(context.session.kernel.id).to.be(id);
+          return context.session.shutdown();
+        });
       });
 
-      it('should not start a kernel if not given', (done) => {
-        services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
+      it('should not start a kernel if not given', () => {
+        return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
           let widget = manager.createNew(model.path, 'default');
-          let context = manager.contextForWidget(widget);
+          context = manager.contextForWidget(widget);
+          return context.save();
+        }).then(() => {
           expect(context.session.kernel).to.be(null);
-          done();
-        }).catch(done);
+          return dismissDialog();
+        });
       });
 
-      it('should return undefined if the factory is not found', (done) => {
-        services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
+      it('should return undefined if the factory is not found', () => {
+        return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
           let widget = manager.createNew(model.path, 'foo');
           expect(widget).to.be(void 0);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should return undefined if the factory has no model factory', (done) => {
+      it('should return undefined if the factory has no model factory', () => {
         let widgetFactory2 = new WidgetFactory({
           name: 'test',
           modelName: 'foo',
           fileExtensions: ['.txt']
         });
         manager.registry.addWidgetFactory(widgetFactory2);
-        services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
+        return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
           let widget = manager.createNew(model.path, 'foo');
           expect(widget).to.be(void 0);
-          done();
-        }).catch(done);
+        });
       });
     });
 
     describe('#findWidget()', () => {
 
-      it('should find a widget given a file and a widget name', (done) => {
-        services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
+      it('should find a widget given a file and a widget name', () => {
+        return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
           let widget = manager.createNew(model.path);
           expect(manager.findWidget(model.path, 'test')).to.be(widget);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should find a widget given a file', (done) => {
-        services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
+      it('should find a widget given a file', () => {
+        return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
           let widget = manager.createNew(model.path);
           expect(manager.findWidget(model.path)).to.be(widget);
-          done();
-        }).catch(done);
+        });
       });
 
       it('should fail to find a widget', () => {
@@ -253,13 +261,12 @@ describe('@jupyterlab/docmanager', () => {
 
     describe('#contextForWidget()', () => {
 
-      it('should find the context for a widget', (done) => {
-        services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
+      it('should find the context for a widget', () => {
+        return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
           let widget = manager.createNew(model.path);
-          let context = manager.contextForWidget(widget);
+          context = manager.contextForWidget(widget);
           expect(context.path).to.be(model.path);
-          done();
-        }).catch(done);
+        });
       });
 
       it('should fail to find the context for the widget', () => {
@@ -271,13 +278,12 @@ describe('@jupyterlab/docmanager', () => {
 
     describe('#cloneWidget()', () => {
 
-      it('should clone the given widget', (done) => {
-        services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
+      it('should clone the given widget', () => {
+        return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
           let widget = manager.createNew(model.path);
           let clone = manager.cloneWidget(widget);
           expect(manager.contextForWidget(widget)).to.be(manager.contextForWidget(clone));
-          done();
-        }).catch(done);
+        });
       });
 
       it('should return undefined if the source widget is not managed', () => {
