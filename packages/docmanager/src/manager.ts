@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  ArrayExt, each, find, toArray
+  ArrayExt, each, find, map, toArray
 } from '@phosphor/algorithm';
 
 import {
@@ -120,12 +120,14 @@ class DocumentManager implements IDisposable {
     if (this._serviceManager === null) {
       return;
     }
+    let widgetManager = this._widgetManager;
     this._serviceManager = null;
     this._widgetManager = null;
     Signal.clearData(this);
-    each(this._contexts, context => {
-      context.dispose();
+    each(toArray(this._contexts), context => {
+      widgetManager.closeWidgets(context);
     });
+    widgetManager.dispose();
     this._contexts.length = 0;
   }
 
@@ -252,20 +254,23 @@ class DocumentManager implements IDisposable {
    *
    * @param path - The target path.
    */
-  closeFile(path: string): void {
+  closeFile(path: string): Promise<void> {
     let context = this._contextForPath(path);
     if (context) {
-      this._widgetManager.closeWidgets(context);
+      return this._widgetManager.closeWidgets(context);
     }
+    return Promise.resolve(void 0);
   }
 
   /**
    * Close all of the open documents.
    */
-  closeAll(): void {
-    each(toArray(this._contexts), context => {
-      this._widgetManager.closeWidgets(context);
-    });
+  closeAll(): Promise<void> {
+    return Promise.all(
+      toArray(map(this._contexts, context => {
+        return this._widgetManager.closeWidgets(context);
+      }))
+    ).then(() => undefined);
   }
 
   /**
