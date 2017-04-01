@@ -27,7 +27,7 @@ import {
 class WidgetFactory extends ABCWidgetFactory<Widget, DocumentRegistry.IModel> {
 
   protected createNewWidget(context: DocumentRegistry.Context): Widget {
-    let widget = new Widget();
+    widget = new Widget();
     widget.addClass('WidgetFactory');
     return widget;
   }
@@ -39,6 +39,7 @@ describe('@jupyterlab/docmanager', () => {
   let manager: DocumentManager;
   let services: ServiceManager.IManager;
   let context: DocumentRegistry.Context;
+  let widget: Widget;
   let modelFactory = new TextModelFactory();
   let widgetFactory = new WidgetFactory({
     name: 'test',
@@ -69,6 +70,9 @@ describe('@jupyterlab/docmanager', () => {
   });
 
   afterEach(() => {
+    if (widget) {
+      widget.dispose();
+    }
     if (context) {
       context.dispose();
     }
@@ -127,9 +131,9 @@ describe('@jupyterlab/docmanager', () => {
 
       it('should open a file and return the widget used to view it', () => {
         return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
-          let widget = manager.open(model.path);
+          widget = manager.open(model.path);
           expect(widget.hasClass('WidgetFactory')).to.be(true);
-          return dismissDialog();
+          widget.dispose();
         });
       });
 
@@ -138,29 +142,30 @@ describe('@jupyterlab/docmanager', () => {
           return services.sessions.startNew({ path: model.path });
         }).then(session => {
           let id = session.kernel.id;
-          let widget = manager.open(session.path, 'default', { id });
+          widget = manager.open(session.path, 'default', { id });
           context = manager.contextForWidget(widget);
-          return context.save();
+          return context.ready;
         }).then(() => {
           expect(context.session.kernel).to.be.ok();
+          widget.dispose();
           return context.session.shutdown();
         });
       });
 
       it('should not auto-start a kernel if there is none given', () => {
         return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
-          let widget = manager.open(model.path, 'default');
+          widget = manager.open(model.path, 'default');
           context = manager.contextForWidget(widget);
-          return context.save();
+          return context.ready;
         }).then(() => {
           expect(context.session.kernel).to.be(null);
-          return dismissDialog();
+          widget.dispose();
         });
       });
 
       it('should return undefined if the factory is not found', () => {
         return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
-          let widget = manager.open(model.path, 'foo');
+          widget = manager.open(model.path, 'foo');
           expect(widget).to.be(void 0);
         });
       });
@@ -173,7 +178,7 @@ describe('@jupyterlab/docmanager', () => {
         });
         manager.registry.addWidgetFactory(widgetFactory2);
         return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
-          let widget = manager.open(model.path, 'foo');
+          widget = manager.open(model.path, 'foo');
           expect(widget).to.be(void 0);
         });
       });
@@ -184,9 +189,8 @@ describe('@jupyterlab/docmanager', () => {
 
       it('should open a file and return the widget used to view it', () => {
         return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
-          let widget = manager.createNew(model.path);
+          widget = manager.createNew(model.path);
           expect(widget.hasClass('WidgetFactory')).to.be(true);
-          return dismissDialog();
         });
       });
 
@@ -196,9 +200,9 @@ describe('@jupyterlab/docmanager', () => {
           return services.sessions.startNew({ path: model.path });
         }).then(session => {
           id = session.kernel.id;
-          let widget = manager.createNew(session.path, 'default', { id });
+          widget = manager.createNew(session.path, 'default', { id });
           context = manager.contextForWidget(widget);
-          return context.save();
+          return context.ready;
         }).then(() => {
           expect(context.session.kernel.id).to.be(id);
           return context.session.shutdown();
@@ -207,18 +211,17 @@ describe('@jupyterlab/docmanager', () => {
 
       it('should not start a kernel if not given', () => {
         return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
-          let widget = manager.createNew(model.path, 'default');
+          widget = manager.createNew(model.path, 'default');
           context = manager.contextForWidget(widget);
-          return context.save();
+          return context.ready;
         }).then(() => {
           expect(context.session.kernel).to.be(null);
-          return dismissDialog();
         });
       });
 
       it('should return undefined if the factory is not found', () => {
         return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
-          let widget = manager.createNew(model.path, 'foo');
+          widget = manager.createNew(model.path, 'foo');
           expect(widget).to.be(void 0);
         });
       });
@@ -231,7 +234,7 @@ describe('@jupyterlab/docmanager', () => {
         });
         manager.registry.addWidgetFactory(widgetFactory2);
         return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
-          let widget = manager.createNew(model.path, 'foo');
+          widget = manager.createNew(model.path, 'foo');
           expect(widget).to.be(void 0);
         });
       });
@@ -241,14 +244,14 @@ describe('@jupyterlab/docmanager', () => {
 
       it('should find a widget given a file and a widget name', () => {
         return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
-          let widget = manager.createNew(model.path);
+          widget = manager.createNew(model.path);
           expect(manager.findWidget(model.path, 'test')).to.be(widget);
         });
       });
 
       it('should find a widget given a file', () => {
         return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
-          let widget = manager.createNew(model.path);
+          widget = manager.createNew(model.path);
           expect(manager.findWidget(model.path)).to.be(widget);
         });
       });
@@ -263,14 +266,14 @@ describe('@jupyterlab/docmanager', () => {
 
       it('should find the context for a widget', () => {
         return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
-          let widget = manager.createNew(model.path);
+          widget = manager.createNew(model.path);
           context = manager.contextForWidget(widget);
           expect(context.path).to.be(model.path);
         });
       });
 
       it('should fail to find the context for the widget', () => {
-        let widget = new Widget();
+        widget = new Widget();
         expect(manager.contextForWidget(widget)).to.be(null);
       });
 
@@ -280,14 +283,14 @@ describe('@jupyterlab/docmanager', () => {
 
       it('should clone the given widget', () => {
         return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
-          let widget = manager.createNew(model.path);
+          widget = manager.createNew(model.path);
           let clone = manager.cloneWidget(widget);
           expect(manager.contextForWidget(widget)).to.be(manager.contextForWidget(clone));
         });
       });
 
       it('should return undefined if the source widget is not managed', () => {
-        let widget = new Widget();
+        widget = new Widget();
         expect(manager.cloneWidget(widget)).to.be(void 0);
       });
 
@@ -295,24 +298,18 @@ describe('@jupyterlab/docmanager', () => {
 
     describe('#closeFile()', () => {
 
-      it('should close the widgets associated with a given path', (done) => {
-        services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
-          let widget = manager.createNew(model.path);
+      it('should close the widgets associated with a given path', () => {
+        let called = 0;
+        return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
+          widget = manager.createNew(model.path);
           let clone = manager.cloneWidget(widget);
-          let called = 0;
 
-          widget.disposed.connect(() => {
-            if (called++) {
-              done();
-            }
-          });
-          clone.disposed.connect(() => {
-            if (called++) {
-              done();
-            }
-          });
+          widget.disposed.connect(() => { called++; });
+          clone.disposed.connect(() => { called++; });
           manager.closeFile(model.path);
-        }).catch(done);
+        }).then(() => {
+          expect(called).to.be(2);
+        });
       });
 
       it('should be a no-op if there are no open files on that path', () => {
@@ -323,24 +320,18 @@ describe('@jupyterlab/docmanager', () => {
 
     describe('#closeAll()', () => {
 
-      it('should close all of the open documents', (done) => {
-        services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
-          let widget = manager.createNew(model.path);
-          let clone = manager.cloneWidget(widget);
-          let called = 0;
-
-          widget.disposed.connect(() => {
-            if (called++) {
-              done();
-            }
-          });
-          clone.disposed.connect(() => {
-            if (called++) {
-              done();
-            }
-          });
+      it('should close all of the open documents', () => {
+        let called = 0;
+        return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
+          widget = manager.createNew(model.path);
+          widget.disposed.connect(() => { called++; });
+        }).then(() => {
+          widget = manager.createNew(model.path);
+          widget.disposed.connect(() => { called++; });
+        }).then(() => {
           manager.closeAll();
-        }).catch(done);
+          expect(called).to.be(2);
+        });
       });
 
       it('should be a no-op if there are no open documents', () => {
