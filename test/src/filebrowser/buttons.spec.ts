@@ -58,9 +58,7 @@ describe('filebrowser/buttons', () => {
   let widgetFactory = new WidgetFactory({
     name: 'test',
     fileExtensions: ['.txt'],
-    defaultFor: ['.txt'],
-    canStartKernel: true,
-    preferKernel: true
+    defaultFor: ['.txt']
   });
   let openedWidget: Widget;
 
