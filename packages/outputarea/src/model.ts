@@ -46,6 +46,9 @@ class OutputAreaModel implements IOutputAreaModel {
       let changeGuard = false;
       this._modelDB = options.modelDB;
       this._serialized = this._modelDB.createValue('outputs');
+      if (this._serialized.get()) {
+        this.fromJSON(this._serialized.get() as nbformat.IOutput[]);
+      }
       this._serialized.changed.connect((obs, args) => {
         if(!changeGuard) {
           changeGuard = true;
@@ -60,9 +63,6 @@ class OutputAreaModel implements IOutputAreaModel {
           changeGuard = false;
         }
       });
-      // Trigger a changed to update if the outputs
-      // already exist.
-      this._serialized.set(this._serialized.get());
     }
   }
 

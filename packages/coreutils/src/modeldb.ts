@@ -21,6 +21,10 @@ import {
   IObservableVector, ObservableVector
 } from './observablevector';
 
+import {
+  IObservableUndoableVector, ObservableUndoableVector
+} from './undoablevector';
+
 
 export
 interface IObservable {
@@ -70,6 +74,8 @@ interface IModelDB {
   createString(path: string): IObservableString;
 
   createVector<T extends JSONValue>(path: string): IObservableVector<T>;
+
+  createUndoableVector<T extends JSONValue>(path: string): IObservableUndoableVector<T>;
 
   createMap<T extends JSONValue>(path: string): IObservableMap<T>;
 
@@ -167,6 +173,13 @@ class ModelDB implements IModelDB {
 
   createVector(path: string): IObservableVector<JSONValue> {
     let vec = new ObservableVector<JSONValue>();
+    this.set(path, vec);
+    return vec;
+  }
+
+  createUndoableVector(path: string): IObservableUndoableVector<JSONValue> {
+    let vec = new ObservableUndoableVector<JSONValue>(
+      new ObservableUndoableVector.IdentitySerializer());
     this.set(path, vec);
     return vec;
   }

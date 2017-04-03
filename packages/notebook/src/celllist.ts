@@ -10,7 +10,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  IObservableMap, ObservableMap, IObservableVector, ObservableVector,
+  IObservableMap, ObservableMap, ObservableVector,
   IObservableUndoableVector, IModelDB
 } from '@jupyterlab/coreutils';
 
@@ -34,7 +34,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
   constructor(modelDB: IModelDB, factory: NotebookModel.IContentFactory) {
     this._modelDB = modelDB;
     this._factory = factory;
-    this._cellOrder = modelDB.createVector<string>('cellOrder') as IObservableUndoableVector<string>;
+    this._cellOrder = modelDB.createUndoableVector<string>('cellOrder');
     this._cellMap = new ObservableMap<ICellModel>();
 
     this._cellOrder.changed.connect(this._onOrderChanged, this);
@@ -470,14 +470,14 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    * Whether the object can redo changes.
    */
   get canRedo(): boolean {
-    return false;//this._cellOrder.canRedo;
+    return this._cellOrder.canRedo;
   }
 
   /**
    * Whether the object can undo changes.
    */
   get canUndo(): boolean {
-    return false;//this._cellOrder.canUndo;
+    return this._cellOrder.canUndo;
   }
 
   /**
@@ -487,28 +487,28 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    *   The default is `true`.
    */
   beginCompoundOperation(isUndoAble?: boolean): void {
-    //this._cellOrder.beginCompoundOperation(isUndoAble);
+    this._cellOrder.beginCompoundOperation(isUndoAble);
   }
 
   /**
    * End a compound operation.
    */
   endCompoundOperation(): void {
-    //this._cellOrder.endCompoundOperation();
+    this._cellOrder.endCompoundOperation();
   }
 
   /**
    * Undo an operation.
    */
   undo(): void {
-    //this._cellOrder.undo();
+    this._cellOrder.undo();
   }
 
   /**
    * Redo an operation.
    */
   redo(): void {
-    //this._cellOrder.redo();
+    this._cellOrder.redo();
   }
 
   /**
@@ -525,10 +525,10 @@ class CellList implements IObservableUndoableVector<ICellModel> {
         this._cellMap.delete(key);
       }
     }
-    //this._cellOrder.clearUndo();
+    this._cellOrder.clearUndo();
   }
 
-  private _onOrderChanged(order: IObservableVector<string>, change: ObservableVector.IChangedArgs<string>): void {
+  private _onOrderChanged(order: IObservableUndoableVector<string>, change: ObservableVector.IChangedArgs<string>): void {
     if (change.type === 'add' || change.type === 'set') {
       each(change.newValues, (id) => {
         if (!this._cellMap.has(id)) {
