@@ -105,14 +105,14 @@ function activateFactory(app: JupyterLab, serviceManager: IServiceManager, docum
     createFileBrowser(id: string, options: IFileBrowserFactory.IOptions = {}): FileBrowser {
       const widget = new FileBrowser({
         commands: options.commands || commands,
+        id: id,
         manager: options.documentManager || documentManager,
         model: new FileBrowserModel({
-          manager: options.serviceManager || serviceManager
-        }),
-        state: options.state === null ? null : options.state || state
+          manager: options.serviceManager || serviceManager,
+          state: options.state === null ? null : options.state || state
+        })
       });
 
-      widget.id = id;
       tracker.add(widget);
       return widget;
     }

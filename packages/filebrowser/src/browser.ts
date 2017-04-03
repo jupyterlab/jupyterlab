@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IStateDB
-} from '@jupyterlab/apputils';
-
-import {
   DocumentManager
 } from '@jupyterlab/docmanager';
 
@@ -79,13 +75,14 @@ class FileBrowser extends Widget {
   constructor(options: FileBrowser.IOptions) {
     super();
     this.addClass(FILE_BROWSER_CLASS);
+    this.id = options.id;
+
     let commands = this._commands = options.commands;
     let manager = this._manager = options.manager;
     let model = this._model = options.model;
     let renderer = options.renderer;
 
     model.connectionFailure.connect(this._onConnectionFailure, this);
-    this._state = options.state || null;
     this._crumbs = new BreadCrumbs({ model });
     this._buttons = new FileButtons({
       commands, manager, model
@@ -102,6 +99,7 @@ class FileBrowser extends Widget {
     layout.addWidget(this._listing);
 
     this.layout = layout;
+    model.restore(this.id);
   }
 
   /**
@@ -303,7 +301,6 @@ class FileBrowser extends Widget {
   private _manager: DocumentManager | null = null;
   private _model: FileBrowserModel | null = null;
   private _showingError = false;
-  private _state: IStateDB | null = null;
 }
 
 
@@ -323,6 +320,11 @@ namespace FileBrowser {
     commands: CommandRegistry;
 
     /**
+     * The widget/DOM id of the file browser.
+     */
+    id: string;
+
+    /**
      * A file browser model instance.
      */
     model: FileBrowserModel;
@@ -338,11 +340,5 @@ namespace FileBrowser {
      * The default is a shared instance of `DirListing.Renderer`.
      */
     renderer?: DirListing.IRenderer;
-
-    /**
-     * An optional state database. If provided, the file browser will remember
-     * which folder was last opened when it is restored.
-     */
-    state?: IStateDB;
   }
 }

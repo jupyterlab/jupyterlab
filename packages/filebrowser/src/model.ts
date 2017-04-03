@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IStateDB
+} from '@jupyterlab/apputils';
+
+import {
   Contents, Kernel, ServiceManager, Session
 } from '@jupyterlab/services';
 
@@ -50,6 +54,7 @@ class FileBrowserModel implements IDisposable {
     this._model = { path: '', name: '/', type: 'directory' };
     this._manager.contents.fileChanged.connect(this._onFileChanged, this);
     this._manager.sessions.runningChanged.connect(this._onRunningChanged, this);
+    this._state = options.state || null;
     this._scheduleUpdate();
     this._refreshId = window.setInterval(() => {
       this._scheduleUpdate();
@@ -309,6 +314,52 @@ class FileBrowserModel implements IDisposable {
   }
 
   /**
+   * Restore the state of the file browser.
+   *
+   * #### Notes
+   * This function will only restore the model *once*. If it is called multiple
+   * times, all subsequent invocations are no-ops.
+   */
+  restore(id: string): void {
+    const state = this._state;
+    if (!state || this._restored) {
+      return;
+    }
+
+    this._restored = true;
+
+    const manager = this._manager;
+    const key = `file-browser-${id}:cwd`;
+    const connect = () => {
+      // Save the subsequent state of the file browser in the state database.
+      this.pathChanged.connect((sender, args) => {
+        state.save(key, { path: args.newValue });
+      });
+    };
+    Promise.all([state.fetch(key), manager.ready]).then(([cwd]) => {
+      if (!cwd) {
+        return;
+      }
+      let path = cwd['path'] as string;
+      return manager.contents.get(path)
+        .then(() => this.cd(path))
+        .catch(() => state.remove(key));
+    }).then(connect)
+      .catch(() => state.remove(key).then(connect));
+  }
+
+  /**
+   * Shut down a session by session id.
+   *
+   * @param id - The id of the session.
+   *
+   * @returns A promise that resolves when the action is complete.
+   */
+  shutdown(id: string): Promise<void> {
+    return this._manager.sessions.shutdown(id);
+  }
+
+  /**
    * Upload a `File` object.
    *
    * @param file - The `File` object to upload.
@@ -345,17 +396,6 @@ class FileBrowserModel implements IDisposable {
       }
       return this._upload(file);
     });
-  }
-
-  /**
-   * Shut down a session by session id.
-   *
-   * @param id - The id of the session.
-   *
-   * @returns A promise that resolves when the action is complete.
-   */
-  shutdown(id: string): Promise<void> {
-    return this._manager.sessions.shutdown(id);
   }
 
   /**
@@ -505,23 +545,25 @@ class FileBrowserModel implements IDisposable {
     }, 0);
   }
 
-  private _maxUploadSizeMb = 15;
-  private _manager: ServiceManager.IManager = null;
-  private _sessions: Session.IModel[] = [];
-  private _items: Contents.IModel[] = [];
-  private _paths = new Set<string>();
-  private _model: Contents.IModel;
-  private _pendingPath: string = null;
-  private _pending: Promise<void> = null;
-  private _timeoutId = -1;
-  private _refreshId = -1;
   private _blackoutId = -1;
-  private _requested = false;
-  private _pathChanged = new Signal<this, IChangedArgs<string>>(this);
-  private _refreshed = new Signal<this, void>(this);
-  private _sessionsChanged = new Signal<this, void>(this);
-  private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
   private _connectionFailure = new Signal<this, Error>(this);
+  private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
+  private _items: Contents.IModel[] = [];
+  private _manager: ServiceManager.IManager = null;
+  private _maxUploadSizeMb = 15;
+  private _model: Contents.IModel;
+  private _pathChanged = new Signal<this, IChangedArgs<string>>(this);
+  private _paths = new Set<string>();
+  private _pending: Promise<void> = null;
+  private _pendingPath: string = null;
+  private _refreshed = new Signal<this, void>(this);
+  private _refreshId = -1;
+  private _requested = false;
+  private _restored = false;
+  private _sessions: Session.IModel[] = [];
+  private _sessionsChanged = new Signal<this, void>(this);
+  private _state: IStateDB | null = null;
+  private _timeoutId = -1;
 }
 
 
@@ -539,6 +581,12 @@ namespace FileBrowserModel {
      * A service manager instance.
      */
     manager: ServiceManager.IManager;
+
+    /**
+     * An optional state database. If provided, the model will restore which
+     * folder was last opened when it is restored.
+     */
+    state?: IStateDB;
   }
 }
 
