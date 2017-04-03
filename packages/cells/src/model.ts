@@ -332,6 +332,14 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
         executionCount.set(null);
       }
     }
+    executionCount.changed.connect((value, args) => {
+      this.contentChanged.emit(void 0);
+      this.stateChanged.emit({
+        name: 'executionCount',
+        oldValue: args.oldValue,
+        newValue: args.newValue });
+    });
+
     this._outputs = factory.createOutputArea({
       trusted,
       values: outputs,
@@ -359,8 +367,6 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
       return;
     }
     (this._modelDB.get('executionCount') as IObservableValue).set(newValue || null);
-    this.contentChanged.emit(void 0);
-    this.stateChanged.emit({ name: 'executionCount', oldValue, newValue });
   }
 
   /**
