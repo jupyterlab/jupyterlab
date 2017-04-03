@@ -163,7 +163,7 @@ class LandingWidget extends VDomWidget<LandingModel> {
       h.div({ className: LANDING_COLUMN_CLASS },
         h.span({
           className: LANDING_ICON_CLASS + ` jp-Image${imgName}` ,
-          dataset: this._linker.populateVNodeDataset(activityName[1], null)
+          dataset: this._linker.populateVNodeDataset(activityName[1], {})
         }),
         h.span({ className: LANDING_TEXT_CLASS }, activityName[0])
       );
@@ -179,7 +179,7 @@ class LandingWidget extends VDomWidget<LandingModel> {
     );
     let tour = h.span({
       className: TOUR_ICON_CLASS,
-      dataset: this._linker.populateVNodeDataset('about-jupyterlab:open', null)
+      dataset: this._linker.populateVNodeDataset('about-jupyterlab:open', {})
     });
     let header = h.span({
       className: LANDING_HEADER_CLASS
