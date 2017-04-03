@@ -99,6 +99,7 @@ function createApp(manager: ServiceManager.IManager): void {
 
   let fbModel = new FileBrowserModel({ manager });
   let fbWidget = new FileBrowser({
+    id: 'filebrowser',
     commands,
     model: fbModel,
     manager: docManager,
