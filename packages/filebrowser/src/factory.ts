@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IStateDB
+} from '@jupyterlab/apputils';
+
+import {
   IDocumentManager
 } from '@jupyterlab/docmanager';
 
@@ -50,6 +54,13 @@ export
 namespace IFileBrowserFactory {
   /**
    * The options for creating a file browser using a file browser factory.
+   *
+   * #### Notes
+   * In future versions of JupyterLab, these options may disappear altogether,
+   * which is a backward-incompatible API change and will necessitate a new
+   * version release. This is because in future versions, there will likely be
+   * an application-wide notion of a singleton document manager, a single
+   * command registry, a single services manager, and a single state database.
    */
   export
   interface IOptions {
@@ -76,5 +87,14 @@ namespace IFileBrowserFactory {
      * If no manager is provided, the application default will be used.
      */
     serviceManager?: IServiceManager;
+
+    /**
+     * The state database to use for saving file browser state and restoring it.
+     *
+     * #### Notes
+     * Unless the value `null` is set for this option, the application state
+     * database will be automatically passed in and used for state restoration.
+     */
+    state?: IStateDB | null;
   }
 }

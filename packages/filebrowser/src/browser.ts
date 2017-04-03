@@ -2,6 +2,14 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IStateDB
+} from '@jupyterlab/apputils';
+
+import {
+  DocumentManager
+} from '@jupyterlab/docmanager';
+
+import {
   Contents
 } from '@jupyterlab/services';
 
@@ -16,10 +24,6 @@ import {
 import {
   PanelLayout, Widget
 } from '@phosphor/widgets';
-
-import {
-  DocumentManager
-} from '@jupyterlab/docmanager';
 
 import {
   FileButtons
@@ -40,6 +44,7 @@ import {
 import {
   FILE_BROWSER_CLASS, showErrorMessage
 } from './utils';
+
 
 /**
  * The class name added to the filebrowser crumbs node.
@@ -80,6 +85,7 @@ class FileBrowser extends Widget {
     let renderer = options.renderer;
 
     model.connectionFailure.connect(this._onConnectionFailure, this);
+    this._state = options.state || null;
     this._crumbs = new BreadCrumbs({ model });
     this._buttons = new FileButtons({
       commands, manager, model
@@ -111,7 +117,6 @@ class FileBrowser extends Widget {
   get model(): FileBrowserModel {
     return this._model;
   }
-
 
   /**
    * Dispose of the resources held by the file browser.
@@ -291,13 +296,14 @@ class FileBrowser extends Widget {
     });
   }
 
-  private _buttons: FileButtons = null;
-  private _commands: CommandRegistry = null;
-  private _crumbs: BreadCrumbs = null;
-  private _listing: DirListing = null;
-  private _manager: DocumentManager = null;
-  private _model: FileBrowserModel = null;
+  private _buttons: FileButtons | null = null;
+  private _commands: CommandRegistry | null = null;
+  private _crumbs: BreadCrumbs | null = null;
+  private _listing: DirListing | null = null;
+  private _manager: DocumentManager | null = null;
+  private _model: FileBrowserModel | null = null;
   private _showingError = false;
+  private _state: IStateDB | null = null;
 }
 
 
@@ -332,5 +338,11 @@ namespace FileBrowser {
      * The default is a shared instance of `DirListing.Renderer`.
      */
     renderer?: DirListing.IRenderer;
+
+    /**
+     * An optional state database. If provided, the file browser will remember
+     * which folder was last opened when it is restored.
+     */
+    state?: IStateDB;
   }
 }
