@@ -65,8 +65,7 @@ const fileBrowserPlugin: JupyterLabPlugin<void> = {
     IDocumentRegistry,
     IMainMenu,
     ICommandPalette,
-    ILayoutRestorer,
-    IStateDB
+    ILayoutRestorer
   ],
   autoStart: true
 };
@@ -103,7 +102,7 @@ function activateFactory(app: JupyterLab, serviceManager: IServiceManager, docum
   const tracker = new InstanceTracker<FileBrowser>({ namespace, shell });
 
   return {
-    createFileBrowser(options: IFileBrowserFactory.IOptions = {}): FileBrowser {
+    createFileBrowser(id: string, options: IFileBrowserFactory.IOptions = {}): FileBrowser {
       const widget = new FileBrowser({
         commands: options.commands || commands,
         manager: options.documentManager || documentManager,
@@ -113,6 +112,7 @@ function activateFactory(app: JupyterLab, serviceManager: IServiceManager, docum
         state: options.state === null ? null : options.state || state
       });
 
+      widget.id = id;
       tracker.add(widget);
       return widget;
     }
@@ -123,15 +123,14 @@ function activateFactory(app: JupyterLab, serviceManager: IServiceManager, docum
 /**
  * Activate the file browser in the sidebar.
  */
-function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, manager: IServiceManager, documentManager: IDocumentManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer, state: IStateDB): void {
+function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, manager: IServiceManager, documentManager: IDocumentManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer): void {
   const { commands } = app;
   const category = 'File Operations';
-  const fbWidget = factory.createFileBrowser({
+  const fbWidget = factory.createFileBrowser('filebrowser', {
     commands: commands,
     documentManager: documentManager,
     serviceManager: manager
   });
-  const fbModel = fbWidget.model;
 
   // Let the application restorer track the primary file browser (that is
   // automatically created) for restoration of application state (e.g. setting
@@ -151,25 +150,6 @@ function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, mana
     }));
     disposables.add(palette.addItem({ command, category }));
   };
-
-  // Restore the state of the file browser on reload.
-  const key = `${namespace}:cwd`;
-  let connect = () => {
-    // Save the subsequent state of the file browser in the state database.
-    fbModel.pathChanged.connect((sender, args) => {
-      state.save(key, { path: args.newValue });
-    });
-  };
-  Promise.all([state.fetch(key), app.started, manager.ready]).then(([cwd]) => {
-    if (!cwd) {
-      return;
-    }
-    let path = cwd['path'] as string;
-    return manager.contents.get(path)
-      .then(() => fbModel.cd(path))
-      .catch(() => state.remove(key));
-  }).then(connect)
-    .catch(() => state.remove(key).then(connect));
 
   each(registry.creators(), creator => { addCreator(creator.name); });
 
@@ -211,7 +191,6 @@ function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, mana
   mainMenu.addMenu(menu, { rank: 1 });
 
   fbWidget.title.label = 'Files';
-  fbWidget.id = 'filebrowser';
   app.shell.addToLeftArea(fbWidget, { rank: 40 });
 
   // If the layout is a fresh session without saved data, open file browser.

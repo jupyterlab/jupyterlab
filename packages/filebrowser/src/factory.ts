@@ -42,8 +42,12 @@ export
 interface IFileBrowserFactory {
   /**
    * Create a new file browser instance.
+   *
+   * @param id - The widget/DOM id of the file browser.
+   *
+   * @param options - The optional file browser configuration object.
    */
-  createFileBrowser(options?: IFileBrowserFactory.IOptions): FileBrowser;
+  createFileBrowser(id: string, options?: IFileBrowserFactory.IOptions): FileBrowser;
 }
 
 
