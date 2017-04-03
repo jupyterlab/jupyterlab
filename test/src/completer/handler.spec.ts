@@ -8,8 +8,12 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  KernelMessage, Kernel
+  KernelMessage
 } from '@jupyterlab/services';
+
+import {
+  IClientSession
+} from '@jupyterlab/apputils';
 
 import {
   CodeEditor, CodeEditorWidget
@@ -22,6 +26,10 @@ import {
 import {
   CompleterWidget, CompletionHandler, CompleterModel
 } from '@jupyterlab/completer';
+
+import {
+  createClientSession
+} from '../utils';
 
 
 function createEditorWidget(): CodeEditorWidget {
@@ -74,19 +82,19 @@ class TestCompletionHandler extends CompletionHandler {
 }
 
 
-describe('completer/handler', () => {
+describe('@jupyterlab/completer', () => {
 
-  let kernel: Kernel.IKernel;
+  let session: IClientSession;
 
   before(() => {
-    return Kernel.startNew().then(k => {
-      kernel = k;
-      return kernel.ready;
+    return createClientSession().then(s => {
+      session = s;
+      return s.initialize();
     });
   });
 
   after(() => {
-    return kernel.shutdown();
+    return session.shutdown();
   });
 
   describe('CompletionHandler', () => {
@@ -95,6 +103,7 @@ describe('completer/handler', () => {
 
       it('should create a completer handler', () => {
         let handler = new CompletionHandler({
+          session,
           completer: new CompleterWidget({ editor: null })
         });
         expect(handler).to.be.a(CompletionHandler);
@@ -102,22 +111,14 @@ describe('completer/handler', () => {
 
     });
 
-    describe('#kernel', () => {
+    describe('#session', () => {
 
-      it('should default to null', () => {
+      it('should be the client session object', () => {
         let handler = new CompletionHandler({
+          session,
           completer: new CompleterWidget({ editor: null })
         });
-        expect(handler.kernel).to.be(null);
-      });
-
-      it('should be settable', () => {
-        let handler = new CompletionHandler({
-          completer: new CompleterWidget({ editor: null })
-        });
-        expect(handler.kernel).to.be(null);
-        handler.kernel = kernel;
-        expect(handler.kernel).to.be(kernel);
+        expect(handler.session).to.be(session);
       });
 
     });
@@ -127,6 +128,7 @@ describe('completer/handler', () => {
 
       it('should default to null', () => {
         let handler = new CompletionHandler({
+          session,
           completer: new CompleterWidget({ editor: null })
         });
         expect(handler.editor).to.be(null);
@@ -134,6 +136,7 @@ describe('completer/handler', () => {
 
       it('should be settable', () => {
         let handler = new CompletionHandler({
+          session,
           completer: new CompleterWidget({ editor: null })
         });
         let widget = createEditorWidget();
@@ -144,6 +147,7 @@ describe('completer/handler', () => {
 
       it('should be resettable', () => {
         let handler = new CompletionHandler({
+          session,
           completer: new CompleterWidget({ editor: null })
         });
         let one = createEditorWidget();
@@ -161,6 +165,7 @@ describe('completer/handler', () => {
 
       it('should be true if handler has been disposed', () => {
         let handler = new CompletionHandler({
+          session,
           completer: new CompleterWidget({ editor: null })
         });
         expect(handler.isDisposed).to.be(false);
@@ -175,17 +180,16 @@ describe('completer/handler', () => {
       it('should dispose of the handler resources', () => {
         let handler = new CompletionHandler({
           completer: new CompleterWidget({ editor: null }),
-          kernel: kernel
+          session
         });
         expect(handler.isDisposed).to.be(false);
-        expect(handler.kernel).to.be.ok();
         handler.dispose();
         expect(handler.isDisposed).to.be(true);
-        expect(handler.kernel).to.not.be.ok();
       });
 
       it('should be safe to call multiple times', () => {
         let handler = new CompletionHandler({
+          session,
           completer: new CompleterWidget({ editor: null })
         });
         expect(handler.isDisposed).to.be(false);
@@ -199,25 +203,28 @@ describe('completer/handler', () => {
     describe('#makeRequest()', () => {
 
       it('should reject if handler has no kernel', () => {
-        let handler = new TestCompletionHandler({
-          completer: new CompleterWidget({ editor: null })
+        return createClientSession().then(session => {
+          let handler = new TestCompletionHandler({
+            session,
+            completer: new CompleterWidget({ editor: null })
+          });
+          handler.editor = createEditorWidget().editor;
+          let request = {
+            column: 0,
+            line: 0
+          };
+          return handler.makeRequest(request).then(
+            () => { throw Error('Should have rejected'); },
+            reason => { expect(reason).to.be.an(Error); }
+          );
         });
-        handler.editor = createEditorWidget().editor;
-        let request = {
-          column: 0,
-          line: 0
-        };
-        return handler.makeRequest(request).then(
-          () => { throw Error('Should have rejected'); },
-          reason => { expect(reason).to.be.an(Error); }
-        );
       });
 
       it('should reject if handler has no active cell', () => {
         let handler = new TestCompletionHandler({
+          session,
           completer: new CompleterWidget({ editor: null })
         });
-        handler.kernel = kernel;
         let request = {
           column: 0,
           line: 0
@@ -230,13 +237,13 @@ describe('completer/handler', () => {
 
       it('should resolve if handler has a kernel and an active cell', () => {
         let handler = new TestCompletionHandler({
+          session,
           completer: new CompleterWidget({ editor: null })
         });
         let request = {
           column: 0,
           line: 0
         };
-        handler.kernel = kernel;
         handler.editor = createEditorWidget().editor;
         handler.editor.model.value.text = 'a=1';
 
@@ -249,7 +256,7 @@ describe('completer/handler', () => {
 
       it('should reset model if status is not ok', () => {
         let completer = new CompleterWidget({ editor: null });
-        let handler = new TestCompletionHandler({ completer });
+        let handler = new TestCompletionHandler({ session, completer });
         let options = ['a', 'b', 'c'];
         let request: CompleterWidget.ITextState = {
           column: 0,
@@ -282,7 +289,7 @@ describe('completer/handler', () => {
 
       it('should update model if status is ok', () => {
         let completer = new CompleterWidget({ editor: null });
-        let handler = new TestCompletionHandler({ completer });
+        let handler = new TestCompletionHandler({ session, completer });
         let options = ['a', 'b', 'c'];
         let request: CompleterWidget.ITextState = {
           column: 0,
@@ -319,6 +326,7 @@ describe('completer/handler', () => {
 
       it('should fire when the active editor emits a text change', () => {
         let handler = new TestCompletionHandler({
+          session,
           completer: new CompleterWidget({ editor: null })
         });
         handler.editor = createEditorWidget().editor;
@@ -332,7 +340,7 @@ describe('completer/handler', () => {
           editor: null,
           model: new TestCompleterModel()
         });
-        let handler = new TestCompletionHandler({ completer });
+        let handler = new TestCompletionHandler({ session, completer });
         let editor = createEditorWidget().editor;
         let model = completer.model as TestCompleterModel;
 
@@ -352,7 +360,7 @@ describe('completer/handler', () => {
 
       it('should fire when the completer widget emits a signal', () => {
         let completer = new CompleterWidget({ editor: null });
-        let handler = new TestCompletionHandler({ completer });
+        let handler = new TestCompletionHandler({ session, completer });
 
         expect(handler.methods).to.not.contain('onCompletionSelected');
         (completer.selected as any).emit('foo');
@@ -364,7 +372,7 @@ describe('completer/handler', () => {
           editor: null,
           model: new TestCompleterModel()
         });
-        let handler = new TestCompletionHandler({ completer });
+        let handler = new TestCompletionHandler({ session, completer });
         let model = completer.model as TestCompleterModel;
 
         handler.editor = createEditorWidget().editor;
@@ -377,7 +385,7 @@ describe('completer/handler', () => {
         let model = new CompleterModel();
         let patch = 'foobar';
         let completer = new CompleterWidget({ editor: null, model });
-        let handler = new TestCompletionHandler({ completer });
+        let handler = new TestCompletionHandler({ session, completer });
         let editor = createEditorWidget().editor;
         let text = 'eggs\nfoo # comment\nbaz';
         let want = 'eggs\nfoobar # comment\nbaz';

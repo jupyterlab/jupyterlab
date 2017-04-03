@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel
-} from '@jupyterlab/services';
-
-import {
   IIterator, find, map
 } from '@phosphor/algorithm';
 
@@ -18,16 +14,12 @@ import {
 } from '@phosphor/properties';
 
 import {
-  ISignal
-} from '@phosphor/signaling';
-
-import {
   PanelLayout, Widget
 } from '@phosphor/widgets';
 
 import {
-  restartKernel
-} from './restartkernel';
+  IClientSession
+} from '.';
 
 
 /**
@@ -201,30 +193,15 @@ class Toolbar<T extends Widget> extends Widget {
 export
 namespace Toolbar {
   /**
-   * A kernel owner interface.
-   */
-  export
-  interface IKernelOwner extends Widget {
-    /**
-     * An associated kernel.
-     */
-    kernel: Kernel.IKernel;
-    /**
-     * A signal emitted when the kernel is changed.
-     */
-    kernelChanged: ISignal<IKernelOwner, Kernel.IKernel>;
-  }
-
-  /**
    * Create an interrupt toolbar item.
    */
   export
-  function createInterruptButton(kernelOwner: IKernelOwner): ToolbarButton {
+  function createInterruptButton(session: IClientSession): ToolbarButton {
     return new ToolbarButton({
       className: TOOLBAR_INTERRUPT_CLASS,
       onClick: () => {
-        if (kernelOwner.kernel) {
-          kernelOwner.kernel.interrupt();
+        if (session.kernel) {
+          session.kernel.interrupt();
         }
       },
       tooltip: 'Interrupt the kernel'
@@ -236,14 +213,11 @@ namespace Toolbar {
    * Create a restart toolbar item.
    */
   export
-  function createRestartButton(kernelOwner: IKernelOwner): ToolbarButton {
+  function createRestartButton(session: IClientSession): ToolbarButton {
     return new ToolbarButton({
       className: TOOLBAR_RESTART_CLASS,
       onClick: () => {
-        if (!kernelOwner.kernel) {
-          return;
-        }
-        restartKernel(kernelOwner.kernel, kernelOwner);
+        session.restart();
       },
       tooltip: 'Restart the kernel'
     });
@@ -259,8 +233,8 @@ namespace Toolbar {
    * It can handle a change in context or kernel.
    */
   export
-  function createKernelNameItem(kernelOwner: IKernelOwner): Widget {
-    return new Private.KernelName(kernelOwner);
+  function createKernelNameItem(session: IClientSession): Widget {
+    return new Private.KernelName(session);
   }
 
 
@@ -274,8 +248,8 @@ namespace Toolbar {
    * It can handle a change to the context or the kernel.
    */
   export
-  function createKernelStatusItem(kernelOwner: IKernelOwner): Widget {
-    return new Private.KernelIndicator(kernelOwner);
+  function createKernelStatusItem(session: IClientSession): Widget {
+    return new Private.KernelIndicator(session);
   }
 }
 
@@ -409,26 +383,18 @@ namespace Private {
     /**
      * Construct a new kernel name widget.
      */
-    constructor(kernelOwner: Toolbar.IKernelOwner) {
+    constructor(session: IClientSession) {
       super();
       this.addClass(TOOLBAR_KERNEL_CLASS);
-      this._onKernelChanged(kernelOwner, kernelOwner.kernel);
-      kernelOwner.kernelChanged.connect(this._onKernelChanged, this);
+      this._onKernelChanged(session);
+      session.kernelChanged.connect(this._onKernelChanged, this);
     }
 
     /**
      * Update the text of the kernel name item.
      */
-    _onKernelChanged(sender: Toolbar.IKernelOwner, kernel: Kernel.IKernel): void {
-      this.node.textContent = 'No Kernel!';
-      if (!kernel) {
-        return;
-      }
-      kernel.getSpec().then(spec => {
-        if (!this.isDisposed) {
-          this.node.textContent = spec.display_name;
-        }
-      });
+    _onKernelChanged(session: IClientSession): void {
+      this.node.textContent = session.kernelDisplayName;
     }
   }
 
@@ -440,42 +406,24 @@ namespace Private {
     /**
      * Construct a new kernel status widget.
      */
-    constructor(kernelOwner: Toolbar.IKernelOwner) {
+    constructor(session: IClientSession) {
       super();
       this.addClass(TOOLBAR_INDICATOR_CLASS);
-      this._onKernelChanged(kernelOwner, kernelOwner.kernel);
-      kernelOwner.kernelChanged.connect(this._onKernelChanged, this);
-    }
-
-    /**
-     * Handle a change in kernel.
-     */
-    private _onKernelChanged(sender: Toolbar.IKernelOwner, kernel: Kernel.IKernel): void {
-      if (this._kernel) {
-        this._kernel.statusChanged.disconnect(this._handleStatus, this);
-      }
-      this._kernel = kernel;
-      if (kernel) {
-        this._handleStatus(kernel, kernel.status);
-        kernel.statusChanged.connect(this._handleStatus, this);
-      } else {
-        this.node.title = 'No Kernel!';
-        this.addClass(TOOLBAR_BUSY_CLASS);
-      }
+      this._onStatusChanged(session);
+      session.statusChanged.connect(this._onStatusChanged, this);
     }
 
     /**
      * Handle a status on a kernel.
      */
-    private _handleStatus(kernel: Kernel.IKernel, status: Kernel.Status) {
+    private _onStatusChanged(session: IClientSession) {
       if (this.isDisposed) {
         return;
       }
+      let status = session.status;
       this.toggleClass(TOOLBAR_BUSY_CLASS, status !== 'idle');
       let title = 'Kernel ' + status[0].toUpperCase() + status.slice(1);
       this.node.title = title;
     }
-
-    private _kernel: Kernel.IKernel = null;
   }
 }

@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  ArrayExt, each, find, toArray
+  ArrayExt, each, find, map, toArray
 } from '@phosphor/algorithm';
 
 import {
@@ -28,6 +28,10 @@ import {
 import {
   Widget
 } from '@phosphor/widgets';
+
+import {
+  IClientSession
+} from '@jupyterlab/apputils';
 
 import {
   DocumentRegistry, Context
@@ -116,12 +120,14 @@ class DocumentManager implements IDisposable {
     if (this._serviceManager === null) {
       return;
     }
+    let widgetManager = this._widgetManager;
     this._serviceManager = null;
     this._widgetManager = null;
     Signal.clearData(this);
-    each(this._contexts, context => {
-      context.dispose();
+    each(toArray(this._contexts), context => {
+      widgetManager.closeWidgets(context);
     });
+    widgetManager.dispose();
     this._contexts.length = 0;
   }
 
@@ -248,20 +254,23 @@ class DocumentManager implements IDisposable {
    *
    * @param path - The target path.
    */
-  closeFile(path: string): void {
+  closeFile(path: string): Promise<void> {
     let context = this._contextForPath(path);
     if (context) {
-      this._widgetManager.closeWidgets(context);
+      return this._widgetManager.closeWidgets(context);
     }
+    return Promise.resolve(void 0);
   }
 
   /**
    * Close all of the open documents.
    */
-  closeAll(): void {
-    each(toArray(this._contexts), context => {
-      this._widgetManager.closeWidgets(context);
-    });
+  closeAll(): Promise<void> {
+    return Promise.all(
+      toArray(map(this._contexts, context => {
+        return this._widgetManager.closeWidgets(context);
+      }))
+    ).then(() => undefined);
   }
 
   /**
@@ -286,7 +295,7 @@ class DocumentManager implements IDisposable {
   /**
    * Create a context from a path and a model factory.
    */
-  private _createContext(path: string, factory: DocumentRegistry.ModelFactory): Private.IContext {
+  private _createContext(path: string, factory: DocumentRegistry.ModelFactory, kernelPreference: IClientSession.IKernelPreference): Private.IContext {
     let adopter = (widget: Widget) => {
       this._widgetManager.adoptWidget(context, widget);
       this._opener.open(widget);
@@ -295,7 +304,8 @@ class DocumentManager implements IDisposable {
       opener: adopter,
       manager: this._serviceManager,
       factory,
-      path
+      path,
+      kernelPreference
     });
     let handler = new SaveHandler({
       context,
@@ -351,6 +361,12 @@ class DocumentManager implements IDisposable {
       return;
     }
 
+    // Handle the kernel pereference.
+    let ext = DocumentRegistry.extname(path);
+    let preference = this._registry.getKernelPreference(
+      ext, widgetFactory.name, kernel
+    );
+
     let context: Private.IContext = null;
 
     // Handle the load-from-disk case
@@ -358,25 +374,14 @@ class DocumentManager implements IDisposable {
       // Use an existing context if available.
       context = this._findContext(path, factory.name);
       if (!context) {
-        context = this._createContext(path, factory);
+        context = this._createContext(path, factory, preference);
         // Load the contents from disk.
         context.revert();
       }
     } else if (which === 'create') {
-      context = this._createContext(path, factory);
+      context = this._createContext(path, factory, preference);
       // Immediately save the contents to disk.
       context.save();
-    }
-
-    // Maybe launch/connect the kernel for the context.
-    if (kernel && (kernel.id || kernel.name) && widgetFactory.canStartKernel) {
-      // If the kernel is valid and the widgetFactory wants one.
-      context.changeKernel(kernel);
-    } else if (widgetFactory.preferKernel &&
-               !(kernel && !kernel.id && !kernel.name) &&
-               !context.kernel) {
-      // If the kernel is not the `None` kernel and the widgetFactory wants one
-      context.startDefaultKernel();
     }
 
     let widget = this._widgetManager.createWidget(widgetFactory.name, context);

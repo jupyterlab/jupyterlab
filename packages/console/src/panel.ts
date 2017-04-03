@@ -2,7 +2,31 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Session
+  ClientSession, IClientSession
+} from '@jupyterlab/apputils';
+
+import {
+  BaseCellWidget, CodeCellWidget
+} from '@jupyterlab/cells';
+
+import {
+  IEditorMimeTypeService, CodeEditor
+} from '@jupyterlab/codeeditor';
+
+import {
+  PathExt, Time, uuid
+} from '@jupyterlab/coreutils';
+
+import {
+  OutputAreaWidget
+} from '@jupyterlab/outputarea';
+
+import {
+  IRenderMime, RenderMime
+} from '@jupyterlab/rendermime';
+
+import {
+  ServiceManager
 } from '@jupyterlab/services';
 
 import {
@@ -16,22 +40,6 @@ import {
 import {
   Panel
 } from '@phosphor/widgets';
-
-import {
-  BaseCellWidget, CodeCellWidget
-} from '@jupyterlab/cells';
-
-import {
-  IEditorMimeTypeService, CodeEditor
-} from '@jupyterlab/codeeditor';
-
-import {
-  OutputAreaWidget
-} from '@jupyterlab/outputarea';
-
-import {
-  IRenderMime
-} from '@jupyterlab/rendermime';
 
 import {
   CodeConsole
@@ -55,15 +63,47 @@ class ConsolePanel extends Panel {
   constructor(options: ConsolePanel.IOptions) {
     super();
     this.addClass(PANEL_CLASS);
+    let {
+      rendermime, mimeTypeService, path, basePath, name, manager, modelFactory
+    } = options;
     let factory = options.contentFactory;
-    let { rendermime, session, mimeTypeService } = options;
     let contentFactory = factory.consoleContentFactory;
-    let modelFactory = options.modelFactory;
-    let consoleOpts = {
+    let count = Private.count++;
+    if (!path) {
+      path = `${basePath || ''}/console-${count}-${uuid()}`;
+    }
+
+    let session = this._session = new ClientSession({
+      manager: manager.sessions,
+      path,
+      name: name || `Console ${count}`,
+      type: 'console',
+      kernelPreference: options.kernelPreference
+    });
+
+    rendermime.resolver = new RenderMime.UrlResolver({
+      session,
+      contents: manager.contents
+    });
+
+    this.console = factory.createConsole({
       rendermime, session, mimeTypeService, contentFactory, modelFactory
-    };
-    this.console = factory.createConsole(consoleOpts);
+    });
     this.addWidget(this.console);
+
+    session.ready.then(() => {
+      this._connected = new Date();
+      this._updateTitle();
+    });
+
+    this._manager = manager;
+    this.console.executed.connect(this._onExecuted, this);
+    session.kernelChanged.connect(this._updateTitle, this);
+    session.propertyChanged.connect(this._updateTitle, this);
+
+    this.title.icon = 'jp-ImageCodeConsole';
+    this.title.closable = true;
+    this.id = `console-${count}`;
   }
 
   /**
@@ -72,11 +112,25 @@ class ConsolePanel extends Panel {
   readonly console: CodeConsole;
 
   /**
+   * The session used by the panel.
+   */
+  get session(): IClientSession {
+    return this._session;
+  }
+
+  /**
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
     this.console.dispose();
     super.dispose();
+  }
+
+  /**
+   * Handle `'after-attach'` messages.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this._session.initialize();
   }
 
   /**
@@ -93,6 +147,26 @@ class ConsolePanel extends Panel {
     super.onCloseRequest(msg);
     this.dispose();
   }
+
+  /**
+   * Handle a console execution.
+   */
+  private _onExecuted(sender: CodeConsole, args: Date) {
+    this._executed = args;
+    this._updateTitle();
+  }
+
+  /**
+   * Update the console panel title.
+   */
+  private _updateTitle(): void {
+    Private.updateTitle(this, this._connected, this._executed);
+  }
+
+  private _manager: ServiceManager.IManager;
+  private _executed: Date = null;
+  private _connected: Date = null;
+  private _session: ClientSession;
 }
 
 
@@ -117,9 +191,29 @@ namespace ConsolePanel {
     contentFactory: IContentFactory;
 
     /**
-     * The session for the console widget.
+     * The service manager used by the panel.
      */
-    session: Session.ISession;
+    manager: ServiceManager.IManager;
+
+    /**
+     * The path of an existing console.
+     */
+    path?: string;
+
+    /**
+     * The base path for a new console.
+     */
+    basePath?: string;
+
+    /**
+     * The name of the console.
+     */
+    name?: string;
+
+    /**
+     * A kernel preference.
+     */
+    kernelPreference?: IClientSession.IKernelPreference;
 
     /**
      * The model factory for the console widget.
@@ -238,4 +332,37 @@ namespace ConsolePanel {
   export
   const IContentFactory = new Token<IContentFactory>('jupyter.services.console.content-factory');
   /* tslint:enable */
+}
+
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * The counter for new consoles.
+   */
+  export
+  let count = 1;
+
+  /**
+   * Update the title of a console panel.
+   */
+  export
+  function updateTitle(panel: ConsolePanel, connected: Date | null, executed: Date | null) {
+    let session = panel.console.session;
+    let caption = (
+      `Name: ${session.name}\n` +
+      `Directory: ${PathExt.dirname(session.path)}\n` +
+      `Kernel: ${session.kernelDisplayName}`
+    );
+    if (connected) {
+      caption += `\nConnected: ${Time.format(connected.toISOString())}`;
+    }
+    if (executed) {
+      caption += `\nLast Execution: ${Time.format(executed.toISOString())}`;
+    }
+    panel.title.label = session.name;
+    panel.title.caption = caption;
+  }
 }

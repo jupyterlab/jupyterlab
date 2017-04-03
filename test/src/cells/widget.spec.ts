@@ -4,16 +4,16 @@
 import expect = require('expect.js');
 
 import {
-  Kernel
-} from '@jupyterlab/services';
-
-import {
   Message, MessageLoop
 } from '@phosphor/messaging';
 
 import {
   Widget
 } from '@phosphor/widgets';
+
+import {
+  IClientSession
+} from '@jupyterlab/apputils';
 
 import {
   CodeEditorWidget
@@ -33,6 +33,10 @@ import {
   createBaseCellFactory, createCodeCellFactory, createCellEditor, rendermime,
   editorFactory
 } from '../notebook/utils';
+
+import {
+  createClientSession
+} from '../utils';
 
 
 const RENDERED_CLASS = 'jp-mod-rendered';
@@ -383,34 +387,34 @@ describe('cells/widget', () => {
 
     describe('#execute()', () => {
 
+      let session: IClientSession;
+
+      beforeEach(() => {
+        return createClientSession().then(s => {
+          session = s;
+          return s.initialize();
+        }).then(() => {
+          return session.kernel.ready;
+        });
+      });
+
+      afterEach(() => {
+        return session.shutdown();
+      });
+
       it('should fulfill a promise if there is no code to execute', () => {
         let widget = new CodeCellWidget({ model, rendermime, contentFactory });
-        let kernel: Kernel.IKernel;
-        return Kernel.startNew().then(k => {
-          kernel = k;
-          return kernel.ready;
-        }).then(() => {
-          return widget.execute(kernel);
-        }).then(() => {
-          return kernel.shutdown();
-        });
+        return widget.execute(session);
       });
 
       it('should fulfill a promise if there is code to execute', () => {
         let widget = new CodeCellWidget({ model, rendermime, contentFactory });
-        let kernel: Kernel.IKernel;
         let originalCount: number;
-        return Kernel.startNew().then(k => {
-          kernel = k;
-          return kernel.ready;
-        }).then(() => {
-          widget.model.value.text = 'foo';
-          originalCount = (widget.model).executionCount;
-          return widget.execute(kernel);
-        }).then(() => {
+        widget.model.value.text = 'foo';
+        originalCount = (widget.model).executionCount;
+        return widget.execute(session).then(() => {
           let executionCount = (widget.model).executionCount;
           expect(executionCount).to.not.equal(originalCount);
-          return kernel.shutdown();
         });
       });
 

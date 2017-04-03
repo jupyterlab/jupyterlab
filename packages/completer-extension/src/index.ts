@@ -87,10 +87,10 @@ const service: JupyterLabPlugin<ICompletionManager> = {
 
     return {
       register: (completable: ICompletionManager.ICompletable): ICompletionManager.ICompletableAttributes => {
-        const { editor, kernel, parent } = completable;
+        const { editor, session, parent } = completable;
         const model = new CompleterModel();
         const completer = new CompleterWidget({ editor, model });
-        const handler = new CompletionHandler({ completer, kernel });
+        const handler = new CompletionHandler({ completer, session });
         const id = parent.id;
 
         // Hide the widget when it first loads.
@@ -133,18 +133,13 @@ const consolePlugin: JupyterLabPlugin<void> = {
       const anchor = panel.console;
       const cell = anchor.prompt;
       const editor = cell && cell.editor;
-      const kernel = anchor.session.kernel;
+      const session = anchor.session;
       const parent = panel;
-      const handler = manager.register({ editor, kernel, parent });
+      const handler = manager.register({ editor, session, parent });
 
       // Listen for prompt creation.
       anchor.promptCreated.connect((sender, cell) => {
         handler.editor = cell && cell.editor;
-      });
-
-      // Listen for kernel changes.
-      anchor.session.kernelChanged.connect((sender, kernel) => {
-        handler.kernel = kernel;
       });
     });
 
@@ -191,18 +186,13 @@ const notebookPlugin: JupyterLabPlugin<void> = {
     notebooks.widgetAdded.connect((sender, panel) => {
       const cell = panel.notebook.activeCell;
       const editor = cell && cell.editor;
-      const kernel = panel.kernel;
+      const session = panel.session;
       const parent = panel;
-      const handler = manager.register({ editor, kernel, parent });
+      const handler = manager.register({ editor, session, parent });
 
       // Listen for active cell changes.
       panel.notebook.activeCellChanged.connect((sender, cell) => {
         handler.editor = cell && cell.editor;
-      });
-
-      // Listen for kernel changes.
-      panel.kernelChanged.connect((sender, kernel) => {
-        handler.kernel = kernel;
       });
     });
 

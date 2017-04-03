@@ -466,13 +466,13 @@ describe('docregistry/registry', () => {
         }));
         let pref = registry.getKernelPreference('.c', 'global');
         expect(pref.language).to.be('clike');
-        expect(pref.preferKernel).to.be(false);
-        expect(pref.canStartKernel).to.be(false);
+        expect(pref.shouldStart).to.be(false);
+        expect(pref.canStart).to.be(false);
 
         pref = registry.getKernelPreference('.py', 'python');
         expect(pref.language).to.be('python');
-        expect(pref.preferKernel).to.be(true);
-        expect(pref.canStartKernel).to.be(true);
+        expect(pref.shouldStart).to.be(true);
+        expect(pref.canStart).to.be(true);
 
         pref = registry.getKernelPreference('.py', 'baz');
         expect(pref).to.be(void 0);

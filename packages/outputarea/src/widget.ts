@@ -34,6 +34,10 @@ import {
 } from '@phosphor/widgets';
 
 import {
+  IClientSession
+} from '@jupyterlab/apputils';
+
+import {
   ObservableVector, nbformat
 } from '@jupyterlab/coreutils';
 
@@ -208,28 +212,33 @@ class OutputAreaWidget extends Widget {
   }
 
   /**
-   * Execute code on a kernel and handle response messages.
+   * Execute code on a client session and handle response messages.
    */
-  execute(code: string, kernel: Kernel.IKernel): Promise<KernelMessage.IExecuteReplyMsg> {
+  execute(code: string, session: IClientSession): Promise<KernelMessage.IExecuteReplyMsg> {
     // Bail if the model is disposed.
     if (this.model.isDisposed) {
       return Promise.reject('Model is disposed');
     }
+
+    // Bail if there is no kernel.
+    let kernel = session.kernel;
+    if (!kernel) {
+      return Promise.reject('No kernel exists on the session');
+    }
+
     // Override the default for `stop_on_error`.
     let content: KernelMessage.IExecuteRequest = {
       code,
       stop_on_error: true
     };
     this.model.clear();
+
     // Make sure there were no input widgets.
     if (this.widgets.length) {
       this._clear();
     }
+
     return new Promise<KernelMessage.IExecuteReplyMsg>((resolve, reject) => {
-      // Bail if the model is disposed.
-      if (this.model.isDisposed) {
-        return Promise.reject('Model is disposed');
-      }
       let future = kernel.requestExecute(content);
       // Handle published messages.
       future.onIOPub = (msg: KernelMessage.IIOPubMessage) => {
@@ -243,7 +252,7 @@ class OutputAreaWidget extends Widget {
       // Handle stdin.
       future.onStdin = (msg: KernelMessage.IStdinMessage) => {
         if (KernelMessage.isInputRequestMsg(msg)) {
-          this._onInputRequest(msg, kernel);
+          this._onInputRequest(msg, session);
         }
       };
     });
@@ -367,7 +376,7 @@ class OutputAreaWidget extends Widget {
   /**
    * Handle an input request from a kernel.
    */
-  private _onInputRequest(msg: KernelMessage.IInputRequestMsg, kernel: Kernel.IKernel): void {
+  private _onInputRequest(msg: KernelMessage.IInputRequestMsg, session: IClientSession): void {
     // Add an output widget to the end.
     let factory = this.contentFactory;
     let prompt = msg.content.prompt;
@@ -381,6 +390,7 @@ class OutputAreaWidget extends Widget {
     gutter.addClass(GUTTER_CLASS);
     panel.addWidget(gutter);
 
+    let kernel = session.kernel;
     let input = factory.createStdin({ prompt, password, kernel });
     input.addClass(STDIN_CLASS);
     panel.addWidget(input);
@@ -499,7 +509,7 @@ namespace OutputAreaWidget {
     /**
      * The kernel associated with the request.
      */
-    kernel: Kernel.IKernel;
+    kernel: Kernel.IKernelConnection;
   }
 
   /**
@@ -615,7 +625,7 @@ namespace OutputAreaWidget {
       this._input.removeEventListener('keydown', this);
     }
 
-    private _kernel: Kernel.IKernel = null;
+    private _kernel: Kernel.IKernelConnection = null;
     private _input: HTMLInputElement = null;
   }
 

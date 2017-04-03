@@ -214,23 +214,15 @@ describe('docmanager/widgetmanager', () => {
 
     describe('#closeWidgets()', () => {
 
-      it('should close all of the widgets associated with a context', (done) => {
-        let called = false;
+      it('should close all of the widgets associated with a context', () => {
+        let called = 0;
         let widget = manager.createWidget('test', context);
         let clone = manager.cloneWidget(widget);
-        widget.disposed.connect(() => {
-          if (called) {
-            done();
-          }
-          called = true;
+        widget.disposed.connect(() => { called++; });
+        clone.disposed.connect(() => { called++; });
+        return manager.closeWidgets(context).then(() => {
+          expect(called).to.be(2);
         });
-        clone.disposed.connect(() => {
-          if (called) {
-            done();
-          }
-          called = true;
-        });
-        manager.closeWidgets(context);
       });
 
     });

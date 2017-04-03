@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel, KernelMessage
+  KernelMessage
 } from '@jupyterlab/services';
 
 import {
@@ -12,6 +12,10 @@ import {
 import {
   Message, MessageLoop
 } from '@phosphor/messaging';
+
+import {
+  IClientSession
+} from '@jupyterlab/apputils';
 
 import {
   CodeEditor
@@ -45,7 +49,7 @@ class CompletionHandler implements IDisposable {
     this._completer = options.completer;
     this._completer.selected.connect(this.onCompletionSelected, this);
     this._completer.visibilityChanged.connect(this.onVisibilityChanged, this);
-    this._kernel = options.kernel || null;
+    this.session = options.session;
   }
 
   /**
@@ -94,6 +98,10 @@ class CompletionHandler implements IDisposable {
     }
   }
 
+  /**
+   * The session used by the completion handler.
+   */
+  readonly session: IClientSession;
 
   /**
    * Get whether the completion handler is disposed.
@@ -103,21 +111,10 @@ class CompletionHandler implements IDisposable {
   }
 
   /**
-   * The kernel used by the completion handler.
-   */
-  get kernel(): Kernel.IKernel {
-    return this._kernel;
-  }
-  set kernel(value: Kernel.IKernel) {
-    this._kernel = value;
-  }
-
-  /**
    * Dispose of the resources used by the handler.
    */
   dispose(): void {
     this._completer = null;
-    this._kernel = null;
 
     // Use public accessor to disconnect from editor signals.
     this.editor = null;
@@ -158,10 +155,10 @@ class CompletionHandler implements IDisposable {
   }
 
   /**
-   * Make a complete request using the kernel.
+   * Make a complete request using the session.
    */
   protected makeRequest(position: CodeEditor.IPosition): Promise<void> {
-    if (!this._kernel) {
+    if (!this.session.kernel) {
       return Promise.reject(new Error('no kernel for completion request'));
     }
 
@@ -178,7 +175,7 @@ class CompletionHandler implements IDisposable {
     let pending = ++this._pending;
     let request = this.getState(position);
 
-    return this._kernel.requestComplete(content).then(msg => {
+    return this.session.kernel.requestComplete(content).then(msg => {
       if (this.isDisposed) {
         return;
       }
@@ -219,7 +216,7 @@ class CompletionHandler implements IDisposable {
    */
   protected onInvokeRequest(msg: Message): void {
     // If there is neither a kernel nor a completer model, bail.
-    if (!this._kernel || !this._completer.model) {
+    if (!this.session.kernel || !this._completer.model) {
       return;
     }
 
@@ -369,7 +366,6 @@ class CompletionHandler implements IDisposable {
   private _editor: CodeEditor.IEditor | null = null;
   private _enabled = false;
   private _completer: CompleterWidget | null = null;
-  private _kernel: Kernel.IKernel | null = null;
   private _pending = 0;
 }
 
@@ -390,9 +386,9 @@ namespace CompletionHandler {
     completer: CompleterWidget;
 
     /**
-     * The kernel for the completion handler.
+     * The session for the completion handler.
      */
-    kernel?: Kernel.IKernel;
+    session: IClientSession;
   }
 
   /**

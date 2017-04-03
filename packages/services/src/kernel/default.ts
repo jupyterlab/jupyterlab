@@ -377,7 +377,11 @@ class DefaultKernel implements Kernel.IKernel {
       return Promise.reject(new Error('Kernel is dead'));
     }
     this._clearState();
-    return Private.shutdownKernel(this.id, this._baseUrl, this.ajaxSettings);
+    return this.ready.then(() => {
+      return Private.shutdownKernel(
+        this.id, this._baseUrl, this.ajaxSettings
+      );
+    });
   }
 
   /**

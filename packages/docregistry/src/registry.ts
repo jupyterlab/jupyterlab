@@ -26,6 +26,10 @@ import {
 } from '@phosphor/widgets';
 
 import {
+  IClientSession
+} from '@jupyterlab/apputils';
+
+import {
   CodeEditor
 } from '@jupyterlab/codeeditor';
 
@@ -494,9 +498,11 @@ class DocumentRegistry implements IDisposable {
    *
    * @param widgetName - The name of the widget factory.
    *
+   * @param kernel - An optional existing kernel model.
+   *
    * @returns A kernel preference.
    */
-  getKernelPreference(ext: string, widgetName: string): DocumentRegistry.IKernelPreference {
+  getKernelPreference(ext: string, widgetName: string, kernel?: Kernel.IModel): IClientSession.IKernelPreference {
     ext = Private.normalizeExtension(ext);
     widgetName = widgetName.toLowerCase();
     let widgetFactory = this._widgetFactories[widgetName];
@@ -508,10 +514,14 @@ class DocumentRegistry implements IDisposable {
       return void 0;
     }
     let language = modelFactory.preferredLanguage(ext);
+    let name = kernel && kernel.name;
+    let id = kernel && kernel.id;
     return {
+      id,
+      name,
       language,
-      preferKernel: widgetFactory.preferKernel,
-      canStartKernel: widgetFactory.canStartKernel
+      shouldStart: widgetFactory.preferKernel,
+      canStart: widgetFactory.canStartKernel
     };
   }
 
@@ -610,11 +620,6 @@ namespace DocumentRegistry {
   export
   interface IContext<T extends IModel> extends IDisposable {
     /**
-     * A signal emitted when the kernel changes.
-     */
-    kernelChanged: ISignal<this, Kernel.IKernel>;
-
-    /**
      * A signal emitted when the path changes.
      */
     pathChanged: ISignal<this, string>;
@@ -635,9 +640,9 @@ namespace DocumentRegistry {
     readonly model: T;
 
     /**
-     * The current kernel associated with the document.
+     * The client session object associated with the context.
      */
-    readonly kernel: Kernel.IKernel;
+    readonly session: IClientSession;
 
     /**
      * The current path associated with the document.
@@ -662,21 +667,6 @@ namespace DocumentRegistry {
      * A promise that is fulfilled when the context is ready.
      */
     readonly ready: Promise<void>;
-
-    /**
-     * Start the default kernel for the context.
-     *
-     * @returns A promise that resolves with the new kernel.
-     */
-    startDefaultKernel(): Promise<Kernel.IKernel>;
-
-    /**
-     * Change the current kernel associated with the document.
-     *
-     * #### Notes
-     * If no options are given, the session is shut down.
-     */
-    changeKernel(options?: Kernel.IModel): Promise<Kernel.IKernel>;
 
     /**
      * Save the document contents to disk.
@@ -902,27 +892,6 @@ namespace DocumentRegistry {
    */
   export
   type CodeModelFactory = IModelFactory<ICodeModel>;
-
-  /**
-   * A kernel preference for a given file path and widget.
-   */
-  export
-  interface IKernelPreference {
-    /**
-     * The preferred kernel language.
-     */
-    readonly language: string;
-
-    /**
-     * Whether to prefer having a kernel started when opening.
-     */
-    readonly preferKernel: boolean;
-
-    /**
-     * Whether a kernel when can be started when opening.
-     */
-    readonly canStartKernel: boolean;
-  }
 
   /**
    * An interface for a file type.

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ArrayExt, each, find
+  ArrayExt, each, map, find, toArray
 } from '@phosphor/algorithm';
 
 import {
@@ -196,11 +196,11 @@ class DocumentWidgetManager implements IDisposable {
    *
    * @param context - The document context object.
    */
-  closeWidgets(context: DocumentRegistry.Context): void {
+  closeWidgets(context: DocumentRegistry.Context): Promise<void> {
     let widgets = Private.widgetsProperty.get(context);
-    each(widgets, widget => {
-      widget.close();
-    });
+    return Promise.all(
+      toArray(map(widgets, widget => this.onClose(widget)))
+    ).then(() => undefined);
   }
 
   /**
@@ -288,8 +288,11 @@ class DocumentWidgetManager implements IDisposable {
    * Ask the user whether to close an unsaved file.
    */
   private _maybeClose(widget: Widget): Promise<boolean> {
-    // Bail if the model is not dirty or other widgets are using the model.
+    // Bail if the model is not dirty or other widgets are using the model.)
     let context = Private.contextProperty.get(widget);
+    if (!context) {
+      return Promise.resolve(true);
+    }
     let widgets = Private.widgetsProperty.get(context);
     let model = context.model;
     if (!model.dirty || widgets.length > 1) {

@@ -26,7 +26,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  ISanitizer, defaultSanitizer
+  IClientSession, ISanitizer, defaultSanitizer
 } from '@jupyterlab/apputils';
 
 import {
@@ -468,7 +468,7 @@ namespace RenderMime {
       return Promise.resolve(path);
     }
 
-    private _session: Session.ISession;
+    private _session: Session.ISession | IClientSession;
     private _contents: Contents.IManager;
   }
 
@@ -480,7 +480,7 @@ namespace RenderMime {
     /**
      * The session used by the resolver.
      */
-    session: Session.ISession;
+    session: Session.ISession | IClientSession;
 
     /**
      * The contents manager used by the resolver.

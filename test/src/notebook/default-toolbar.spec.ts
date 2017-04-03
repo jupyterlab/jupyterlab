@@ -4,8 +4,8 @@
 import expect = require('expect.js');
 
 import {
-  Kernel
-} from '@jupyterlab/services';
+  IClientSession
+} from '@jupyterlab/apputils';
 
 import {
   toArray
@@ -53,29 +53,30 @@ import {
 } from './utils';
 
 
-function startKernel(context: DocumentRegistry.IContext<INotebookModel>): Promise<Kernel.IKernel> {
-  let kernel: Kernel.IKernel;
-  return context.save().then(() => {
-    return context.startDefaultKernel();
-  }).then(k => {
-    kernel = k;
-    return kernel.ready;
+function startSession(context: DocumentRegistry.IContext<INotebookModel>): Promise<IClientSession> {
+  context.save();
+  return context.ready.then(() => {
+    return context.session.kernel.ready;
   }).then(() => {
-    return kernel;
+    return context.session;
   });
 }
 
 
-describe('notebook/notebook/default-toolbar', () => {
+describe('@jupyterlab/notebook', () => {
 
   let context: Context<INotebookModel>;
 
   beforeEach(() => {
-    context = createNotebookContext();
+    return createNotebookContext().then(c => {
+      context = c;
+    });
   });
 
   afterEach(() => {
-    context.dispose();
+    return context.session.shutdown().then(() => {
+      context.dispose();
+    });
   });
 
   describe('ToolbarItems', () => {
@@ -202,8 +203,8 @@ describe('notebook/notebook/default-toolbar', () => {
         cell.model.outputs.clear();
         next.rendered = false;
         Widget.attach(button, document.body);
-        startKernel(panel.context).then(kernel => {
-          kernel.statusChanged.connect((sender, status) => {
+        startSession(panel.context).then(session => {
+          session.statusChanged.connect((sender, status) => {
             if (status === 'idle' && cell.model.outputs.length > 0) {
               expect(next.rendered).to.be(true);
               button.dispose();
@@ -252,7 +253,6 @@ describe('notebook/notebook/default-toolbar', () => {
       it('should handle a change in context', () => {
         let item = ToolbarItems.createCellTypeItem(panel);
         context.model.fromJSON(DEFAULT_CONTENT);
-        context.startDefaultKernel();
         panel.context = null;
         panel.notebook.activeCellIndex++;
         let node = item.node.getElementsByTagName('select')[0];

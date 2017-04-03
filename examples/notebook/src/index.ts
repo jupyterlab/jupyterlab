@@ -21,10 +21,6 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
-  restartKernel
-} from '@jupyterlab/apputils';
-
-import {
   editorServices
 } from '@jupyterlab/codemirror';
 
@@ -33,7 +29,7 @@ import {
 } from '@jupyterlab/docmanager';
 
 import {
-  DocumentRegistry, selectKernelForContext
+  DocumentRegistry
 } from '@jupyterlab/docregistry';
 
 import {
@@ -141,23 +137,23 @@ function createApp(manager: ServiceManager.IManager): void {
   commands.addCommand(cmdIds.interrupt, {
     label: 'Interrupt',
     execute: () => {
-      if (nbWidget.context.kernel) {
-        nbWidget.context.kernel.interrupt();
+      if (nbWidget.context.session.kernel) {
+        nbWidget.context.session.kernel.interrupt();
       }
     }
   });
   commands.addCommand(cmdIds.restart, {
     label: 'Restart Kernel',
-    execute: () => restartKernel(nbWidget.kernel, nbWidget)
+    execute: () => nbWidget.context.session.restart()
   });
   commands.addCommand(cmdIds.switchKernel, {
     label: 'Switch Kernel',
-    execute: () => selectKernelForContext(nbWidget.context, manager.sessions, nbWidget)
+    execute: () => nbWidget.context.session.selectKernel()
   });
   commands.addCommand(cmdIds.runAndAdvance, {
     label: 'Run and Advance',
     execute: () => {
-      NotebookActions.runAndAdvance(nbWidget.notebook, nbWidget.context.kernel);
+      NotebookActions.runAndAdvance(nbWidget.notebook, nbWidget.context.session);
     }
   });
   commands.addCommand(cmdIds.editMode, {

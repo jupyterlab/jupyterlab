@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel, KernelMessage
+  KernelMessage
 } from '@jupyterlab/services';
 
 import {
@@ -20,6 +20,10 @@ import {
 import {
   Widget
 } from '@phosphor/widgets';
+
+import {
+  IClientSession
+} from '@jupyterlab/apputils';
 
 import {
   IChangedArgs
@@ -395,12 +399,12 @@ class CodeCellWidget extends BaseCellWidget {
   }
 
   /**
-   * Execute the cell given a kernel.
+   * Execute the cell given a client session.
    */
-  execute(kernel: Kernel.IKernel): Promise<KernelMessage.IExecuteReplyMsg> {
+  execute(session: IClientSession): Promise<KernelMessage.IExecuteReplyMsg> {
     let model = this.model;
     let code = model.value.text;
-    if (!code.trim()) {
+    if (!code.trim() || !session.kernel) {
       model.executionCount = null;
       model.outputs.clear();
       return Promise.resolve(null);
@@ -408,7 +412,8 @@ class CodeCellWidget extends BaseCellWidget {
     model.executionCount = null;
     this.setPrompt('*');
     this.model.trusted = true;
-    return this._output.execute(code, kernel).then(reply => {
+
+    return this._output.execute(code, session).then(reply => {
       let status = reply.content.status;
       if (status === 'abort') {
         model.executionCount = null;

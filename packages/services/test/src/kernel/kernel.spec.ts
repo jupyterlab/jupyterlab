@@ -523,18 +523,17 @@ describe('kernel', () => {
 
     context('#isReady', () => {
 
-      it('should test whether the kernel is ready', (done) => {
-        kernel.shutdown();
-        Kernel.startNew().then(k => {
+      it('should test whether the kernel is ready', () => {
+        return kernel.shutdown().then (() => {
+          return Kernel.startNew();
+        }).then(k => {
           kernel = k;
           expect(kernel.isReady).to.be(false);
           return kernel.ready;
         }).then(() => {
           expect(kernel.isReady).to.be(true);
-          done();
-        }).catch(done);
+        });
       });
-
     });
 
     context('#ready', () => {

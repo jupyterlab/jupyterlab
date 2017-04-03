@@ -26,14 +26,29 @@ describe('@jupyterlab/coreutils', () => {
       });
 
       it('should handle query and hash', () => {
-        let obj = URLExt.parse('http://x.com/path?that\'s#all, folks');
-        expect(obj.href).to.equal('http://x.com/path?that%27s#all,%20folks');
+        let url = 'http://example.com/path?that\'s#all, folks';
+        let obj = URLExt.parse(url);
+        try {
+          expect(obj.href).to.equal(
+            'http://example.com/path?that%27s#all,%20folks'
+          );
+        } catch (e) {
+          // Chrome
+          expect(obj.href).to.equal(
+            'http://example.com/path?that%27s#all, folks'
+          );
+        }
         expect(obj.protocol).to.equal('http:');
-        expect(obj.host).to.equal('x.com');
-        expect(obj.hostname).to.equal('x.com');
+        expect(obj.host).to.equal('example.com');
+        expect(obj.hostname).to.equal('example.com');
         expect(obj.search).to.equal('?that%27s');
         expect(obj.pathname).to.equal('/path');
-        expect(obj.hash).to.equal('#all,%20folks');
+        try {
+          expect(obj.hash).to.equal('#all,%20folks');
+        } catch (e) {
+          // Chrome
+          expect(obj.hash).to.equal('#all, folks');
+        }
       });
 
     });

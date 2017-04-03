@@ -209,16 +209,10 @@ describe('kernel/manager', () => {
 
     describe('#startNew()', () => {
 
-      it('should start a new kernel', (done) => {
-        manager.startNew().then(kernel => {
-          expect(kernel.status).to.be('unknown');
-          kernel.statusChanged.connect(() => {
-            if (kernel.status === 'starting') {
-              kernel.shutdown().then(done, done);
-            }
-          });
+      it('should start a new kernel', () => {
+        return manager.startNew().then(kernel => {
+          return kernel.ready;
         });
-
       });
 
       it('should emit a runningChanged signal', (done) => {
