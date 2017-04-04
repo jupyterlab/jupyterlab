@@ -10,6 +10,10 @@ import {
 } from '@phosphor/coreutils';
 
 import {
+  PathExt
+} from './path';
+
+import {
   IObservableMap, ObservableMap
 } from './observablemap';
 
@@ -259,7 +263,7 @@ class ModelDB implements IModelDB {
   constructor(options: ModelDB.ICreateOptions = {}) {
     this._basePath = options.basePath || '';
     if(options.baseDB) {
-      this._baseDB = options.baseDB;
+      this._db = options.baseDB;
     } else {
       this._db = new ObservableMap<IObservable>();
     }
@@ -282,11 +286,7 @@ class ModelDB implements IModelDB {
    * @returns an `IObservable`.
    */
   get(path: string): IObservable {
-    if(this._baseDB) {
-      return this._baseDB.get(this._basePath+'/'+path);
-    } else {
-      return this._db.get(this._basePath+'/'+path);
-    }
+    return this._db.get(this._resolvePath(path));
   }
 
   /**
@@ -297,11 +297,7 @@ class ModelDB implements IModelDB {
    * @returns a boolean for whether an object is at `path`.
    */
   has(path: string): boolean {
-    if (this._baseDB) {
-      return this._baseDB.has(this._basePath+'/'+path);
-    } else {
-      return this._db.has(path);
-    }
+    return this._db.has(this._resolvePath(path));
   }
 
   /**
@@ -390,7 +386,6 @@ class ModelDB implements IModelDB {
    * @returns an `IModelDB` with a view onto the original
    *   `IModelDB`, with `basePath` prepended to all paths.
    */
-  view(basePath: string): IModelDB;
   view(basePath: string): ModelDB {
     return new ModelDB({basePath, baseDB: this});
   }
@@ -399,16 +394,21 @@ class ModelDB implements IModelDB {
    * Set a value at a path.
    */
   set(path: string, value: IObservable): void {
-    if(this._baseDB) {
-      this._baseDB.set(this._basePath+'/'+path, value);
-    } else {
-      this._db.set(this._basePath+'/'+path, value);
-    }
+    this._db.set(this._resolvePath(path), value);
   }
 
-  private _db: ObservableMap<IObservable>;
+  /**
+   * Compute the fully resolved path for a path argument.
+   */
+  private _resolvePath(path: string): string {
+    if (this._basePath) {
+      path = this._basePath + '/' + path;
+    }
+    return PathExt.normalize(path)
+  }
+
   private _basePath: string;
-  private _baseDB: IModelDB = null;
+  private _db: IModelDB | ObservableMap<IObservable> = null;
 }
 
 /**
