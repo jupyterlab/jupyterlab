@@ -26,80 +26,192 @@ import {
 } from './undoablevector';
 
 
+/**
+ * String type annotations for Observable objects that can be
+ * created and placed in the IModelDB interface.
+ */
+export
+type ObservableType = 'JSONValue' | 'Map' | 'Vector' | 'String' | 'JSONObject'
+
+/**
+ * Base interface for Observable objects.
+ */
 export
 interface IObservable {
-  readonly type: string;
-
-  readonly changed: ISignal<IObservable, IObservableChangedArgs>;
+  /**
+   * The type of this object.
+   */
+  readonly type: ObservableType;
 }
 
-export
-interface IObservableChangedArgs {
-}
-
+/**
+ * Interface for an Observable object that represents
+ * an opaque JSON value.
+ */
 export
 interface IObservableValue extends IObservable {
+  /**
+   * The type of this object.
+   */
+  type: 'JSONValue';
 
-  type: 'value';
+  /**
+   * The changed signal.
+   */
+  readonly changed: ISignal<IObservableValue, ObservableValue.IChangedArgs>;
 
-  readonly changed: ISignal<IObservableValue, IObservableValueChangedArgs> 
-
+  /**
+   * Get the current value.
+   */
   get(): JSONValue;
 
+  /**
+   * Set the value.
+   */
   set(value: JSONValue): void;
 }
 
-export
-interface IObservableValueChangedArgs extends IObservableChangedArgs {
-  oldValue: JSONValue;
-
-  newValue: JSONValue;
-}
-
-export
-interface IModelDBFactory {
-  createNew(path: string): IModelDB;
-}
-
+/**
+ * An interface for a path based database for
+ * creating and storing values, which is agnostic
+ * to the particular type of store in the backend.
+ */
 export
 interface IModelDB {
-  changed: ISignal<IModelDB, ModelDB.IChangedArgs>
-
+  /**
+   * The base path for the `IModelDB`. This is prepended
+   * to all the paths that are passed in to the member
+   * functions of the object.
+   */
   readonly basePath: string;
 
+  /**
+   * Get a value for a path.
+   *
+   * @param path: the path for the object.
+   *
+   * @returns an `IObservable`.
+   */
   get(path: string): IObservable;
 
-  set(path: string, value: IObservable): void;
+  /**
+   * Whether the `IModelDB` has an object at this path.
+   *
+   * @param path: the path for the object.
+   *
+   * @returns a boolean for whether an object is at `path`.
+   */
+  has(path: string): boolean;
 
+  /**
+   * Create a string and insert it in the database.
+   *
+   * @param path: the path for the string.
+   *
+   * @returns the string that was created.
+   */
   createString(path: string): IObservableString;
 
+  /**
+   * Create a vector and insert it in the database.
+   *
+   * @param path: the path for the vector.
+   *
+   * @returns the vector that was created.
+   *
+   * #### Notes
+   * The vector can only store objects that are simple
+   * JSON Objects and primitives.
+   */
   createVector<T extends JSONValue>(path: string): IObservableVector<T>;
 
+  /**
+   * Create an undoable vector and insert it in the database.
+   *
+   * @param path: the path for the vector.
+   *
+   * @returns the vector that was created.
+   *
+   * #### Notes
+   * The vector can only store objects that are simple
+   * JSON Objects and primitives.
+   */
   createUndoableVector<T extends JSONValue>(path: string): IObservableUndoableVector<T>;
 
+  /**
+   * Create a map and insert it in the database.
+   *
+   * @param path: the path for the map.
+   *
+   * @returns the map that was created.
+   *
+   * #### Notes
+   * The map can only store objects that are simple
+   * JSON Objects and primitives.
+   */
   createMap<T extends JSONValue>(path: string): IObservableMap<T>;
 
+  /**
+   * Create a string and insert it in the database.
+   *
+   * @param path: the path for the string.
+   *
+   * @returns the string that was created.
+   */
   createValue(path: string): IObservableValue;
 
+  /**
+   * Create a view onto a subtree of the model database.
+   *
+   * @param basePath: the path for the root of the subtree.
+   *
+   * @returns an `IModelDB` with a view onto the original
+   *   `IModelDB`, with `basePath` prepended to all paths.
+   */
   view(basePath: string): IModelDB;
+
+  /**
+   * Set a value at a path.
+   */
+  set(path: string, value: IObservable): void;
 }
 
+/**
+ * A concrete implementation of an `IObservableValue`.
+ */
 export
 class ObservableValue implements IObservableValue {
+  /**
+   * Constructor for the value.
+   *
+   * @param initialValue: the starting value for the `ObservableValue`.
+   */
   constructor(initialValue?: JSONValue) {
     this._value = initialValue;
   }
 
-  readonly type: 'value';
+  /**
+   * The observable type.
+   */
+  readonly type: 'JSONValue';
 
-  get changed(): ISignal<this, IObservableValueChangedArgs> {
+  /**
+   * The changed signal.
+   */
+  get changed(): ISignal<this, ObservableValue.IChangedArgs> {
     return this._changed;
   }
 
+  /**
+   * Get the current value.
+   */
   get(): JSONValue {
     return this._value;
   }
 
+  /**
+   * Set the current value.
+   */
   set(value: JSONValue): void {
     let oldValue = this._value;
     this._value = value;
@@ -110,45 +222,65 @@ class ObservableValue implements IObservableValue {
   }
 
   private _value: JSONValue = null;
-  private _changed = new Signal<ObservableValue, IObservableValueChangedArgs>(this);
+  private _changed = new Signal<ObservableValue, ObservableValue.IChangedArgs>(this);
 }
 
+/**
+ * The namespace for the `ObservableValue` class statics.
+ */
 export
-class ModelDBFactory implements IModelDBFactory {
-  createNew(path: string): ModelDB {
-    return new ModelDB();
+namespace ObservableValue {
+  /**
+   * The changed args object emitted by the `IObservableValue`.
+   */
+  export
+  class IChangedArgs {
+    /**
+     * The old value.
+     */
+    oldValue: JSONValue;
+
+    /**
+     * The new value.
+     */
+    newValue: JSONValue;
   }
 }
 
+
+/**
+ * A concrete implementation of an `IModelDB`.
+ */
 export
 class ModelDB implements IModelDB {
+  /**
+   * Constructor for the `ModelDB`.
+   */
   constructor(options: ModelDB.ICreateOptions = {}) {
     this._basePath = options.basePath || '';
     if(options.baseDB) {
       this._baseDB = options.baseDB;
-      this._baseDB.changed.connect((db, args)=>{
-        this._changed.emit({
-          path: args.path
-        });
-      })
     } else {
       this._db = new ObservableMap<IObservable>();
-      this._db.changed.connect((db, args)=>{
-        this._changed.emit({
-          path: args.key,
-        });
-      });
     }
   }
 
+  /**
+   * The base path for the `ModelDB`. This is prepended
+   * to all the paths that are passed in to the member
+   * functions of the object.
+   */
   get basePath(): string {
     return this._basePath;
   }
 
-  get changed(): ISignal<this, ModelDB.IChangedArgs> {
-    return this._changed;
-  }
-
+  /**
+   * Get a value for a path.
+   *
+   * @param path: the path for the object.
+   *
+   * @returns an `IObservable`.
+   */
   get(path: string): IObservable {
     if(this._baseDB) {
       return this._baseDB.get(this._basePath+'/'+path);
@@ -157,6 +289,115 @@ class ModelDB implements IModelDB {
     }
   }
 
+  /**
+   * Whether the `IModelDB` has an object at this path.
+   *
+   * @param path: the path for the object.
+   *
+   * @returns a boolean for whether an object is at `path`.
+   */
+  has(path: string): boolean {
+    if (this._baseDB) {
+      return this._baseDB.has(this._basePath+'/'+path);
+    } else {
+      return this._db.has(path);
+    }
+  }
+
+  /**
+   * Create a string and insert it in the database.
+   *
+   * @param path: the path for the string.
+   *
+   * @returns the string that was created.
+   */
+  createString(path: string): IObservableString {
+    let str = new ObservableString();
+    this.set(path, str);
+    return str;
+  }
+
+  /**
+   * Create a vector and insert it in the database.
+   *
+   * @param path: the path for the vector.
+   *
+   * @returns the vector that was created.
+   *
+   * #### Notes
+   * The vector can only store objects that are simple
+   * JSON Objects and primitives.
+   */
+  createVector(path: string): IObservableVector<JSONValue> {
+    let vec = new ObservableVector<JSONValue>();
+    this.set(path, vec);
+    return vec;
+  }
+
+  /**
+   * Create an undoable vector and insert it in the database.
+   *
+   * @param path: the path for the vector.
+   *
+   * @returns the vector that was created.
+   *
+   * #### Notes
+   * The vector can only store objects that are simple
+   * JSON Objects and primitives.
+   */
+  createUndoableVector(path: string): IObservableUndoableVector<JSONValue> {
+    let vec = new ObservableUndoableVector<JSONValue>(
+      new ObservableUndoableVector.IdentitySerializer());
+    this.set(path, vec);
+    return vec;
+  }
+
+  /**
+   * Create a map and insert it in the database.
+   *
+   * @param path: the path for the map.
+   *
+   * @returns the map that was created.
+   *
+   * #### Notes
+   * The map can only store objects that are simple
+   * JSON Objects and primitives.
+   */
+  createMap(path: string): IObservableMap<JSONValue> {
+    let map = new ObservableMap<JSONValue>();
+    this.set(path, map);
+    return map;
+  }
+
+  /**
+   * Create a string and insert it in the database.
+   *
+   * @param path: the path for the string.
+   *
+   * @returns the string that was created.
+   */
+  createValue(path: string): IObservableValue {
+    let val = new ObservableValue();
+    this.set(path, val);
+    return val;
+  }
+
+  /**
+   * Create a view onto a subtree of the model database.
+   *
+   * @param basePath: the path for the root of the subtree.
+   *
+   * @returns an `IModelDB` with a view onto the original
+   *   `IModelDB`, with `basePath` prepended to all paths.
+   */
+  view(basePath: string): IModelDB;
+  view(basePath: string): ModelDB {
+    return new ModelDB({basePath, baseDB: this});
+  }
+
+  /**
+   * Set a value at a path.
+   */
   set(path: string, value: IObservable): void {
     if(this._baseDB) {
       this._baseDB.set(this._basePath+'/'+path, value);
@@ -165,57 +406,30 @@ class ModelDB implements IModelDB {
     }
   }
 
-  createString(path: string): IObservableString {
-    let str = new ObservableString();
-    this.set(path, str);
-    return str;
-  }
-
-  createVector(path: string): IObservableVector<JSONValue> {
-    let vec = new ObservableVector<JSONValue>();
-    this.set(path, vec);
-    return vec;
-  }
-
-  createUndoableVector(path: string): IObservableUndoableVector<JSONValue> {
-    let vec = new ObservableUndoableVector<JSONValue>(
-      new ObservableUndoableVector.IdentitySerializer());
-    this.set(path, vec);
-    return vec;
-  }
-
-  createMap(path: string): IObservableMap<JSONValue> {
-    let map = new ObservableMap<JSONValue>();
-    this.set(path, map);
-    return map;
-  }
-
-  createValue(path: string): IObservableValue {
-    let val = new ObservableValue();
-    this.set(path, val);
-    return val;
-  }
-
-  view(basePath: string): ModelDB {
-    return new ModelDB({basePath, baseDB: this});
-  }
-
-  private _changed = new Signal<this, ModelDB.IChangedArgs>(this);
   private _db: ObservableMap<IObservable>;
   private _basePath: string;
   private _baseDB: IModelDB = null;
 }
 
+/**
+ * A namespace for the `ModelDB` class statics.
+ */
 export
 namespace ModelDB {
-  export
-  interface IChangedArgs {
-    path: string;
-  }
-
+  /**
+   * Options for creating a `ModelDB` object.
+   */
   export
   interface ICreateOptions {
+    /**
+     * The base path to prepend to all the path arguments.
+     */
     basePath?: string;
-    baseDB?: IModelDB;
+
+    /**
+     * A ModelDB to use as the store for this
+     * ModelDB. If none is given, it uses its own store.
+     */
+    baseDB?: ModelDB;
   }
 }
