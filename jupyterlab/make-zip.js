@@ -13,7 +13,7 @@ var outDir = fs.mkdtempSync('/tmp/jupyterlab');
 var stageDir = path.join(outDir, 'stage');
 fs.mkdirSync(stageDir);
 getDependencies(rootPath);
-debugger;
+
 
 function getDependencies(basePath) {
     var data = require(path.join(basePath, 'package.json'));
@@ -22,31 +22,33 @@ function getDependencies(basePath) {
         return;
     }
     packages.set(name, data);
-    packFolder(basePath, data, name);
+    moveFolder(basePath, data, name);
     for (let name in data.dependencies) {
         getDependency(basePath, name);
     }
 }
 
 
-function packFolder(basePath, data, name) {
+function moveFolder(basePath, data, name) {
     // Pull in the whole package except .git and node_modules
-    fs.copySync(basePath, stageDir);
-    prune(path.join(stageDir, 'node_modules'));
-    prune(path.join(stageDir, '.git'));
-    if (name[0] === '@') name = name.substr(1).replace(/\//g, '-')
-    var fname = name + '.tgz';
-    var dirDest = fs.createWriteStream(path.join(outDir, fname));
+    var relPath = path.relative(basePath, rootPath);
+    debugger;
+    // var dirDest = fs.createWriteStream(path.join(outDir, fname));
 
-    function f (entry) {
-      return entry.basename !== '.git' && entry.basename !== 'node_modules';
-    }
+    // function filter(entry) {
+    //   switch (entry.basename) {
+    //   case '.git':
+    //   case 'node_modules':
+    //     return false;
+    //   default:
+    //     return true;
+    //   }
+    // }
 
-    var reader = new fstream.DirReader({
-        path: path.join(outDir, fname), type: 'Directory',
-        Directory: true, filter: f })
-      .pipe(tar.Pack())
-      .pipe(dirDest)
+    // var reader = new fstream.DirReader({
+    //     path: path.join(outDir, fname), type: 'Directory',
+    //     Directory: true, filter: filter })
+    //   .pipe(dirDest)
 }
 
 
