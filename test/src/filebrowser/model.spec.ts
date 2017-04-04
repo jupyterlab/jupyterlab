@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  StateDB
+} from '@jupyterlab/apputils';
+
+import {
   ServiceManager, Session
 } from '@jupyterlab/services';
 
@@ -21,13 +25,16 @@ describe('filebrowser/model', () => {
   let manager: ServiceManager.IManager;
   let model: FileBrowserModel;
   let name: string;
+  let state: StateDB;
 
   before(() => {
     manager = new ServiceManager();
+    state = new StateDB({ namespace: 'filebrowser/model' });
   });
 
   beforeEach(() => {
-    model = new FileBrowserModel({ manager });
+    state.clear();
+    model = new FileBrowserModel({ manager, state });
     return model.newUntitled({ type: 'file' }).then(contents => {
       name = contents.name;
       return model.cd();
@@ -91,7 +98,6 @@ describe('filebrowser/model', () => {
       it('should be emitted when a file is created', (done) => {
         model.fileChanged.connect((sender, args) => {
           expect(sender).to.be(model);
-          console.log(args);
           expect(args.type).to.be('new');
           expect(args.oldValue).to.be(null);
           expect(args.newValue.type).to.be('file');
@@ -218,6 +224,41 @@ describe('filebrowser/model', () => {
           expect(model.path).to.be('');
           done();
         }).catch(done);
+      });
+
+    });
+
+    describe('#restore()', () => {
+
+      it('should restore based on ID', (done) => {
+        const id = 'foo';
+        const model2 = new FileBrowserModel({ manager, state });
+        model.restore(id)
+          .then(() => model.cd('src'))
+          .then(() => { expect(model.path).to.be('src'); })
+          .then(() => { expect(model2.path).to.be(''); })
+          .then(() => model2.restore(id))
+          .then(() => { expect(model2.path).to.be('src'); })
+          .then(() => {
+            model2.dispose();
+            done();
+          }).catch(done);
+      });
+
+      it('should be safe to call multiple times', (done) => {
+        const id = 'bar';
+        const model2 = new FileBrowserModel({ manager, state });
+        model.restore(id)
+          .then(() => model.cd('src'))
+          .then(() => { expect(model.path).to.be('src'); })
+          .then(() => { expect(model2.path).to.be(''); })
+          .then(() => model2.restore(id))
+          .then(() => model2.restore(id))
+          .then(() => { expect(model2.path).to.be('src'); })
+          .then(() => {
+            model2.dispose();
+            done();
+          }).catch(done);
       });
 
     });
