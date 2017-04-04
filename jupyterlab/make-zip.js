@@ -4,6 +4,7 @@ var fs = require('fs-extra');
 var path = require('path');
 var childProcess = require('child_process');
 var tar = require('tar');
+var zlib = require('zlib');
 
 
 // Get all of the packages.
@@ -11,7 +12,16 @@ var rootPath = path.resolve('.');
 var packages = new Map();
 var outDir = fs.mkdtempSync('/tmp/jupyterlab');
 getDependencies(rootPath);
-debugger;
+
+var tarFile = fs.createWriteStream('extension.tgz')
+tarFile.on('finish', function() {
+    console.log('Finished!')
+});
+fstream.Reader({ path: outDir, type: "Directory" })
+  .pipe(tar.Pack())
+  .pipe(zlib.createGzip())
+  .pipe(tarFile)
+
 
 
 function getDependencies(basePath) {
@@ -43,13 +53,12 @@ function fileFilter(entry) {
 function moveLocal(basePath, data, name) {
     var srcDir = data.name.replace('@jupyterlab', './build/packages') + '/src';
     var destDir = path.join(outDir, 'node_modules', data.name);
+    fs.ensureDir(destDir);
     if (fs.existsSync(srcDir)) {
-        fs.ensureDir(path.join(destDir, 'lib'));
         fs.copySync(srcDir, path.join(destDir, 'lib'));
     }
     var styleDir = path.join(basePath, 'style');
     if (fs.existsSync(styleDir)) {
-        fs.ensureDir(path.join(destDir, 'style'));
         fs.copySync(styleDir, path.join(destDir, 'style'));
     }
     var packagePath = path.join(destDir, 'package.json');
@@ -74,7 +83,7 @@ function moveFolder(basePath, data, name) {
         relPath = relPath.slice(3);
     }
     var dirDest = path.join(outDir, relPath);
-    fs.ensureDir(path.basename(dirDest));
+    fs.ensureDir(dirDest);
     fs.copySync(basePath, dirDest, { filter: fileFilter });
 }
 
