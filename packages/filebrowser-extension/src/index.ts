@@ -2,15 +2,23 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  each, map, toArray
+  each, some, every
 } from '@phosphor/algorithm';
+
+import {
+  CommandRegistry
+} from '@phosphor/commands';
+
+import {
+  JSONObject
+} from '@phosphor/coreutils';
 
 import {
   DisposableSet
 } from '@phosphor/disposable';
 
 import {
-  Menu
+  ContextMenu, Menu
 } from '@phosphor/widgets';
 
 import {
@@ -22,11 +30,15 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
+  PathExt
+} from '@jupyterlab/coreutils';
+
+import {
   IDocumentManager
 } from '@jupyterlab/docmanager';
 
 import {
-  IDocumentRegistry, DocumentRegistry
+  IDocumentRegistry
 } from '@jupyterlab/docregistry';
 
 import {
@@ -58,7 +70,31 @@ namespace CommandIDs {
   const closeAllFiles = 'file-operations:close-all-files';
 
   export
+  const deleteFiles = 'file-operations:delete';
+
+  export
   const open = 'file-operations:open';
+
+  export
+  const cut = 'file-operations:cut';
+
+  export
+  const copy = 'file-operations:copy';
+
+  export
+  const paste = 'file-operations:paste';
+
+  export
+  const duplicate = 'file-operations:duplicate';
+
+  export
+  const download = 'file-operations:download';
+
+  export
+  const rename = 'file-operations:rename';
+
+  export
+  const shutdown = 'file-operations:shutdown';
 
   export
   const newTextFile = 'file-operations:new-text-file';
@@ -111,7 +147,7 @@ const NAMESPACE = 'filebrowser';
  * Activate the file browser.
  */
 function activate(app: JupyterLab, manager: IServiceManager, documentManager: IDocumentManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer, state: IStateDB): IPathTracker {
-  const { commands } = app;
+  const { commands, contextMenu, shell } = app;
   let fbModel = new FileBrowserModel({ manager });
   let fbWidget = new FileBrowser({
     commands,
@@ -157,37 +193,7 @@ function activate(app: JupyterLab, manager: IServiceManager, documentManager: ID
 
   each(registry.creators(), creator => { addCreator(creator.name); });
 
-  // Add a context menu to the dir listing.
-  let node = fbWidget.node.getElementsByClassName('jp-DirListing-content')[0];
-  node.addEventListener('contextmenu', (event: MouseEvent) => {
-    event.preventDefault();
-    let path = fbWidget.pathForClick(event) || '';
-    let ext = DocumentRegistry.extname(path);
-    let factories = registry.preferredWidgetFactories(ext);
-    let widgetNames = toArray(map(factories, factory => factory.name));
-    let prefix = `file-browser-contextmenu-${++Private.id}`;
-    let openWith: Menu = null;
-    if (path && widgetNames.length > 1) {
-      let disposables = new DisposableSet();
-      let command: string;
-
-      openWith = new Menu({ commands });
-      openWith.title.label = 'Open With...';
-      openWith.disposed.connect(() => { disposables.dispose(); });
-
-      for (let widgetName of widgetNames) {
-        command = `${prefix}:${widgetName}`;
-        disposables.add(commands.addCommand(command, {
-          execute: () => fbWidget.openPath(path, widgetName),
-          label: widgetName
-        }));
-        openWith.addItem({ command });
-      }
-    }
-
-    let menu = createContextMenu(fbWidget, openWith);
-    menu.open(event.clientX, event.clientY);
-  });
+  populateContextMenu(fbWidget, contextMenu, commands);
 
   addCommands(app, fbWidget, documentManager);
 
@@ -204,12 +210,12 @@ function activate(app: JupyterLab, manager: IServiceManager, documentManager: ID
 
   fbWidget.title.label = 'Files';
   fbWidget.id = 'file-browser';
-  app.shell.addToLeftArea(fbWidget, { rank: 40 });
+  shell.addToLeftArea(fbWidget, { rank: 40 });
 
   // If the layout is a fresh session without saved data, open file browser.
   app.restored.then(layout => {
     if (layout.fresh) {
-      app.commands.execute(CommandIDs.showBrowser, void 0);
+      commands.execute(CommandIDs.showBrowser, void 0);
     }
   });
 
@@ -237,9 +243,9 @@ function activate(app: JupyterLab, manager: IServiceManager, documentManager: ID
  * Add the filebrowser commands to the application's command registry.
  */
 function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocumentManager): void {
-  let commands = app.commands;
+  let { commands, shell } = app;
   let isEnabled = () => {
-    let currentWidget = app.shell.currentWidget;
+    let currentWidget = shell.currentWidget;
     return !!(currentWidget && docManager.contextForWidget(currentWidget));
   };
 
@@ -249,7 +255,7 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocume
     isEnabled,
     execute: () => {
       if (isEnabled()) {
-        let context = docManager.contextForWidget(app.shell.currentWidget);
+        let context = docManager.contextForWidget(shell.currentWidget);
         return context.save().then(() => context.createCheckpoint());
       }
     }
@@ -261,7 +267,7 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocume
     isEnabled,
     execute: () => {
       if (isEnabled()) {
-        let context = docManager.contextForWidget(app.shell.currentWidget);
+        let context = docManager.contextForWidget(shell.currentWidget);
         return context.restoreCheckpoint().then(() => context.revert());
       }
     }
@@ -273,7 +279,7 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocume
     isEnabled,
     execute: () => {
       if (isEnabled()) {
-        let context = docManager.contextForWidget(app.shell.currentWidget);
+        let context = docManager.contextForWidget(shell.currentWidget);
         return context.saveAs().then(() => {
           return context.createCheckpoint();
         });
@@ -281,10 +287,64 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocume
     }
   });
 
+  function getOpenArgs(args: JSONObject): { path: string, factory: string } {
+    let path = args['path'] ? args['path'] as string : void 0;
+    let factory = args['factory'] ? args['factory'] as string : void 0;
+    return { path, factory };
+  }
+
+  function factoryMatch(path: string, factory='default'): boolean {
+    let ext = PathExt.extname(path);
+    if (!ext && factory !== 'default') {
+      return false;
+    }
+    if (factory === 'default') {
+      return fbWidget.registry.defaultWidgetFactory(ext) !== void 0;
+    }
+    let factories = fbWidget.registry.preferredWidgetFactories(ext);
+    return some(factories, item => item.name === factory);
+  }
+
   commands.addCommand(CommandIDs.open, {
+    icon: args => {
+      // Only show the icon if no factory is given.
+      let { factory } = getOpenArgs(args);
+      return factory ? '' : 'jp-MaterialIcon jp-OpenFolderIcon';
+    },
+    mnemonic: args => {
+      // Only use the mnemonic if no factory is given.
+      let { factory } = getOpenArgs(args);
+      return factory ? -1 : 0;
+    },
+    label: args => {
+      // Show the factory as the label if given or use "Open".
+      let { factory } = getOpenArgs(args);
+      return factory || 'Open';
+    },
+    isEnabled: args => {
+      let { path, factory } = getOpenArgs(args);
+      // Check for an exact match.
+      if (path && factory) {
+        return factoryMatch(path, factory);
+      }
+      return every(fbWidget.selection(), item => {
+        return factoryMatch(item.path, factory);
+      });
+    },
+    isVisible: args => {
+      let { path, factory } = getOpenArgs(args);
+      if (path && factory) {
+        return factoryMatch(path, factory);
+      }
+      return some(fbWidget.selection(), item => {
+        return factoryMatch(item.path, factory);
+      });
+    },
     execute: args => {
-      let path = args['path'] as string;
-      let factory = args['factory'] as string || void 0;
+      let { path, factory } = getOpenArgs(args);
+      if (path === void 0) {
+        return fbWidget.open(factory);
+      }
       return docManager.services.contents.get(path)
         .then(() => fbWidget.openPath(path, factory));
     }
@@ -293,25 +353,25 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser, docManager: IDocume
   commands.addCommand(CommandIDs.close, {
     label: 'Close',
     execute: () => {
-      if (app.shell.currentWidget) {
-        app.shell.currentWidget.close();
+      if (shell.currentWidget) {
+        shell.currentWidget.close();
       }
     }
   });
 
   commands.addCommand(CommandIDs.closeAllFiles, {
     label: 'Close All',
-    execute: () => { app.shell.closeAll(); }
+    execute: () => { shell.closeAll(); }
   });
 
   commands.addCommand(CommandIDs.showBrowser, {
-    execute: () => { app.shell.activateById(fbWidget.id); }
+    execute: () => { shell.activateById(fbWidget.id); }
   });
 
   commands.addCommand(CommandIDs.hideBrowser, {
     execute: () => {
       if (!fbWidget.isHidden) {
-        app.shell.collapseLeft();
+        shell.collapseLeft();
       }
     }
   });
@@ -351,104 +411,104 @@ function createMenu(app: JupyterLab, creatorCmds: string[]): Menu {
 
 
 /**
- * Create a context menu for the file browser listing.
+ * Populate the context menu for the file browser listing.
  *
  * #### Notes
- * This function generates temporary commands with an incremented name. These
- * commands are disposed when the menu itself is disposed.
+ * The `"Open With"` menu is dynamically added/removed as the selection on
+ * the file browser changes.
  */
-function createContextMenu(fbWidget: FileBrowser, openWith: Menu):  Menu {
-  let { commands } = fbWidget;
-  let menu = new Menu({ commands });
-  let prefix = `file-browser-${++Private.id}`;
-  let disposables = new DisposableSet();
-  let command: string;
+function populateContextMenu(fbWidget: FileBrowser, menu: ContextMenu, commands: CommandRegistry) {
+  let selector = '.jp-DirListing-content';
+  menu.addItem({ command: CommandIDs.open, selector, rank: 1 });
 
-  // Remove all the commands associated with this menu upon disposal.
-  menu.disposed.connect(() => { disposables.dispose(); });
+  let openWith = new Menu({ commands });
+  openWith.title.label = 'Open With...';
+  let submenuSelector = `${selector}.jp-mod-open-with`;
+  menu.addItem({
+    type: 'submenu', submenu: openWith, selector: submenuSelector, rank: 1
+  });
 
-  command = `${prefix}:open`;
-  disposables.add(commands.addCommand(command, {
-    execute: () => { fbWidget.open(); },
-    icon: 'jp-MaterialIcon jp-OpenFolderIcon',
-    label: 'Open',
-    mnemonic: 0
-  }));
-  menu.addItem({ command });
-
-  if (openWith) {
-    menu.addItem({ type: 'submenu', submenu: openWith });
+  function updateOpenWith() {
+    openWith.clearItems();
+    let anyEnabled = false;
+    each(fbWidget.registry.widgetFactories(), widgetFactory => {
+      let factory = widgetFactory.name;
+      if (commands.isVisible(CommandIDs.open, { factory })) {
+        openWith.addItem({ command: CommandIDs.open, args: { factory } });
+      }
+      if (commands.isEnabled(CommandIDs.open, { factory })) {
+        anyEnabled = true;
+      }
+    });
+    if (!anyEnabled || openWith.items.length < 2) {
+      fbWidget.listingContentNode.classList.remove('jp-mod-open-with');
+      return;
+    }
+    fbWidget.listingContentNode.classList.add('jp-mod-open-with');
   }
 
-  command = `${prefix}:rename`;
-  disposables.add(commands.addCommand(command, {
+  fbWidget.selectionChanged.connect(updateOpenWith);
+  fbWidget.registry.changed.connect(updateOpenWith);
+
+  commands.addCommand(CommandIDs.rename, {
     execute: () => fbWidget.rename(),
     icon: 'jp-MaterialIcon jp-EditIcon',
     label: 'Rename',
     mnemonic: 0
-  }));
-  menu.addItem({ command });
+  });
+  menu.addItem({ command: CommandIDs.rename, selector });
 
-  command = `${prefix}:delete`;
-  disposables.add(commands.addCommand(command, {
+  commands.addCommand(CommandIDs.deleteFiles, {
     execute: () => fbWidget.delete(),
     icon: 'jp-MaterialIcon jp-CloseIcon',
     label: 'Delete',
     mnemonic: 0
-  }));
-  menu.addItem({ command });
+  });
+  menu.addItem({ command: CommandIDs.deleteFiles, selector });
 
-  command = `${prefix}:duplicate`;
-  disposables.add(commands.addCommand(command, {
+  commands.addCommand(CommandIDs.duplicate, {
     execute: () => fbWidget.duplicate(),
     icon: 'jp-MaterialIcon jp-CopyIcon',
     label: 'Duplicate'
-  }));
-  menu.addItem({ command });
+  });
+  menu.addItem({ command: CommandIDs.duplicate, selector });
 
-  command = `${prefix}:cut`;
-  disposables.add(commands.addCommand(command, {
+  commands.addCommand(CommandIDs.cut, {
     execute: () => { fbWidget.cut(); },
     icon: 'jp-MaterialIcon jp-CutIcon',
     label: 'Cut'
-  }));
-  menu.addItem({ command });
+  });
+  menu.addItem({ command: CommandIDs.cut, selector });
 
-  command = `${prefix}:copy`;
-  disposables.add(commands.addCommand(command, {
+  commands.addCommand(CommandIDs.copy, {
     execute: () => { fbWidget.copy(); },
     icon: 'jp-MaterialIcon jp-CopyIcon',
     label: 'Copy',
     mnemonic: 0
-  }));
-  menu.addItem({ command });
+  });
+  menu.addItem({ command: CommandIDs.copy, selector });
 
-  command = `${prefix}:paste`;
-  disposables.add(commands.addCommand(command, {
+  commands.addCommand(CommandIDs.paste, {
     execute: () => fbWidget.paste(),
     icon: 'jp-MaterialIcon jp-PasteIcon',
     label: 'Paste',
     mnemonic: 0
-  }));
-  menu.addItem({ command });
+  });
+  menu.addItem({ command: CommandIDs.paste, selector });
 
-  command = `${prefix}:download`;
-  disposables.add(commands.addCommand(command, {
+  commands.addCommand(CommandIDs.download, {
     execute: () => { fbWidget.download(); },
     icon: 'jp-MaterialIcon jp-DownloadIcon',
     label: 'Download'
-  }));
-  menu.addItem({ command });
+  });
+  menu.addItem({ command: CommandIDs.download, selector });
 
-  command = `${prefix}:shutdown`;
-  disposables.add(commands.addCommand(command, {
+  commands.addCommand(CommandIDs.shutdown, {
     execute: () => fbWidget.shutdownKernels(),
     icon: 'jp-MaterialIcon jp-StopIcon',
     label: 'Shutdown Kernel'
-  }));
-  menu.addItem({ command });
-
-  menu.disposed.connect(() => { disposables.dispose(); });
+  });
+  menu.addItem({ command: CommandIDs.shutdown, selector });
 
   return menu;
 }

@@ -391,7 +391,8 @@ class DocumentRegistry implements IDisposable {
    * This is equivalent to the first value in [[preferredWidgetFactories]].
    */
   defaultWidgetFactory(ext: string = '*'): DocumentRegistry.WidgetFactory {
-    return this.preferredWidgetFactories(ext)[0];
+    let factories = this.preferredWidgetFactories(ext);
+    return factories ? factories[0] : void 0;
   }
 
   /**

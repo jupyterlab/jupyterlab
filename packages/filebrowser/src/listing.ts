@@ -26,6 +26,10 @@ import {
 } from '@phosphor/domutils';
 
 import {
+  ISignal, Signal
+} from '@phosphor/signaling';
+
+import {
   Widget
 } from '@phosphor/widgets';
 
@@ -214,6 +218,22 @@ class DirListing extends Widget {
   }
 
   /**
+   * Handle a change in selection.
+   */
+  get selectionChanged(): ISignal<this, void> {
+    return this._selectionChanged;
+  }
+
+  /**
+   * Return an iterator over the selected items.
+   */
+  selection(): IIterator<Contents.IModel> {
+    return filter(this._sortedItems, item => {
+      return item.name in this._selection;
+    });
+  }
+
+  /**
    * Dispose of the resources held by the directory listing.
    */
   dispose(): void {
@@ -383,11 +403,11 @@ class DirListing extends Widget {
    */
   duplicate(): Promise<void> {
     let promises: Promise<Contents.IModel>[] = [];
-    for (let item of this._getSelectedItems()) {
+    each(this.selection(), item => {
       if (item.type !== 'directory') {
         promises.push(this._model.copy(item.name, '.'));
       }
-    }
+    });
     return Promise.all(promises).catch(error => {
       if (error.throwError) {
         error.message = error.throwError;
@@ -400,11 +420,11 @@ class DirListing extends Widget {
    * Download the currently selected item(s).
    */
   download(): void {
-    for (let item of this._getSelectedItems()) {
+    each(this.selection(), item => {
       if (item.type !== 'directory') {
         this._model.download(item.path);
       }
-    }
+    });
   }
 
   /**
@@ -498,21 +518,6 @@ class DirListing extends Widget {
    */
   isSelected(name: string): boolean {
     return this._selection[name] === true;
-  }
-
-  /**
-   * Find a path given a click.
-   *
-   * @param event - The mouse event.
-   *
-   * @returns The path to the selected file.
-   */
-  pathForClick(event: MouseEvent): string {
-    let items = this._sortedItems;
-    let index = Private.hitTestNodes(this._items, event.clientX, event.clientY);
-    if (index !== -1) {
-      return items[index].path;
-    }
   }
 
   /**
@@ -769,6 +774,7 @@ class DirListing extends Widget {
       if (!altered && event.button === 0) {
         this._selection = Object.create(null);
         this._selection[this._softSelection] = true;
+        this._selectionChanged.emit(void 0);
         this.update();
       }
       this._softSelection = '';
@@ -1067,6 +1073,7 @@ class DirListing extends Widget {
 
     // Handle toggling.
     if ((IS_MAC && event.metaKey) || (!IS_MAC && event.ctrlKey)) {
+      this._selectionChanged.emit(void 0);
       if (this._selection[name]) {
         delete this._selection[name];
       } else {
@@ -1094,6 +1101,7 @@ class DirListing extends Widget {
       // Select only the given item.
       this._selection = Object.create(null);
       this._selection[name] = true;
+      this._selectionChanged.emit(void 0);
     }
     this._isCut = false;
     this.update();
@@ -1152,20 +1160,17 @@ class DirListing extends Widget {
     }
 
     // Select the rows between the current and the nearest selected.
+    let changed = false;
     for (let i = 0; i < this._items.length; i++) {
       if (nearestIndex >= i && index <= i ||
           nearestIndex <= i && index >= i) {
         this._selection[items[i].name] = true;
+        changed = true;
       }
     }
-  }
-
-  /**
-   * Get the currently selected items.
-   */
-  private _getSelectedItems(): Contents.IModel[] {
-    let items = this._sortedItems;
-    return toArray(filter(items, item => this._selection[item.name]));
+    if (changed) {
+      this._selectionChanged.emit(void 0);
+    }
   }
 
   /**
@@ -1173,12 +1178,12 @@ class DirListing extends Widget {
    */
   private _copy(): void {
     this._clipboard.length = 0;
-    for (let item of this._getSelectedItems()) {
+    each(this.selection(), item => {
       if (item.type !== 'directory') {
         // Store the absolute path of the item.
         this._clipboard.push('/' + item.path);
       }
-    }
+    });
     this.update();
   }
 
@@ -1240,6 +1245,7 @@ class DirListing extends Widget {
     }
     let name = items[index].name;
     this._selection[name] = true;
+    this._selectionChanged.emit(void 0);
     this._isCut = false;
     this.update();
   }
@@ -1257,6 +1263,7 @@ class DirListing extends Widget {
         this._selection[name] = true;
       }
     });
+    this._selectionChanged.emit(void 0);
     // Update the sorted items.
     this.sort(this.sortState);
   }
@@ -1267,6 +1274,7 @@ class DirListing extends Widget {
   private _onPathChanged(): void {
     // Reset the selection.
     this._selection = Object.create(null);
+    this._selectionChanged.emit(void 0);
     // Update the sorted items.
     this.sort(this.sortState);
   }
@@ -1316,6 +1324,7 @@ class DirListing extends Widget {
   private _inContext = false;
   private _selection: { [key: string]: boolean; } = Object.create(null);
   private _renderer: DirListing.IRenderer = null;
+  private _selectionChanged = new Signal<this, void>(this);
 }
 
 

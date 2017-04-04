@@ -6,12 +6,16 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  each
+  IIterator, each
 } from '@phosphor/algorithm';
 
 import {
   CommandRegistry
 } from '@phosphor/commands';
+
+import {
+  ISignal, Signal
+} from '@phosphor/signaling';
 
 import {
   PanelLayout, Widget
@@ -20,6 +24,10 @@ import {
 import {
   DocumentManager
 } from '@jupyterlab/docmanager';
+
+import {
+  IDocumentRegistry
+} from '@jupyterlab/docregistry';
 
 import {
   FileButtons
@@ -74,7 +82,6 @@ class FileBrowser extends Widget {
   constructor(options: FileBrowser.IOptions) {
     super();
     this.addClass(FILE_BROWSER_CLASS);
-    let commands = this._commands = options.commands;
     let manager = this._manager = options.manager;
     let model = this._model = options.model;
     let renderer = options.renderer;
@@ -82,9 +89,10 @@ class FileBrowser extends Widget {
     model.connectionFailure.connect(this._onConnectionFailure, this);
     this._crumbs = new BreadCrumbs({ model });
     this._buttons = new FileButtons({
-      commands, manager, model
+      commands: options.commands, manager, model
     });
     this._listing = new DirListing({ manager, model, renderer });
+    this._listing.selectionChanged.connect(this._onSelectionChanged, this);
 
     this._crumbs.addClass(CRUMBS_CLASS);
     this._buttons.addClass(BUTTON_CLASS);
@@ -99,10 +107,10 @@ class FileBrowser extends Widget {
   }
 
   /**
-   * Get the command registry used by the file browser.
+   * The document registry used by the file browser.
    */
-  get commands(): CommandRegistry {
-    return this._commands;
+  get registry(): IDocumentRegistry {
+    return this._manager.registry;
   }
 
   /**
@@ -112,6 +120,19 @@ class FileBrowser extends Widget {
     return this._model;
   }
 
+  /**
+   * Handle a change in selection.
+   */
+  get selectionChanged(): ISignal<this, void> {
+    return this._selectionChanged;
+  }
+
+  /**
+   * Get the listing content node.
+   */
+  get listingContentNode(): HTMLElement {
+    return this._listing.contentNode;
+  }
 
   /**
    * Dispose of the resources held by the file browser.
@@ -125,24 +146,29 @@ class FileBrowser extends Widget {
     super.dispose();
   }
 
+
+  /**
+   * Return an iterator over the selected items.
+   */
+  selection(): IIterator<Contents.IModel> {
+    return this._listing.selection();
+  }
+
   /**
    * Open the currently selected item(s).
    *
    * Changes to the first directory encountered.
    */
-  open(): void {
+  open(widgetName='default'): void {
     let foundDir = false;
-    each(this._model.items(), item => {
-      if (!this._listing.isSelected(item.name)) {
-        return;
-      }
+    each(this._listing.selection(), item => {
       if (item.type === 'directory') {
         if (!foundDir) {
           foundDir = true;
           this._model.cd(item.name);
         }
       } else {
-        this.openPath(item.path);
+        this.openPath(item.path, widgetName);
       }
     });
   }
@@ -268,17 +294,6 @@ class FileBrowser extends Widget {
   }
 
   /**
-   * Find a path given a click.
-   *
-   * @param event - The mouse event.
-   *
-   * @returns The path to the selected file.
-   */
-  pathForClick(event: MouseEvent): string {
-    return this._listing.pathForClick(event);
-  }
-
-  /**
    * Handle a connection lost signal from the model.
    */
   private _onConnectionFailure(sender: FileBrowserModel, args: Error): void {
@@ -291,13 +306,20 @@ class FileBrowser extends Widget {
     });
   }
 
+  /**
+   * Handle a selection change in the listing.
+   */
+  private _onSelectionChanged(): void {
+    this._selectionChanged.emit(void 0);
+  }
+
   private _buttons: FileButtons = null;
-  private _commands: CommandRegistry = null;
   private _crumbs: BreadCrumbs = null;
   private _listing: DirListing = null;
   private _manager: DocumentManager = null;
   private _model: FileBrowserModel = null;
   private _showingError = false;
+  private _selectionChanged = new Signal<this, void>(this);
 }
 
 

@@ -25,7 +25,7 @@
     "@phosphor/properties": "^1.0.0",
     "@phosphor/signaling": "^1.0.0",
     "@phosphor/virtualdom": "^1.0.0",
-    "@phosphor/widgets": "^1.0.0",
+    "@phosphor/widgets": "^1.0.1",
     "@types/sanitize-html": "^1.13.31",
     "sanitize-html": "^1.14.1"
   },
