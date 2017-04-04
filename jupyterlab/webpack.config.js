@@ -6,7 +6,7 @@
 require('es6-promise/auto');
 
 var childProcess = require('child_process');
-var buildExtension = require('./build/jupyterlab/src/builder').buildExtension;
+var buildExtension = require('./build/packages/extension-builder/src/builder').buildExtension;
 var webpack = require('webpack');
 var path = require('path');
 var fs = require('fs-extra');
