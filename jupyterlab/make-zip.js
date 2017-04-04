@@ -38,17 +38,6 @@ function getDependencies(basePath) {
 }
 
 
-function fileFilter(entry) {
-  if (entry.indexOf('node_modules') !== -1) {
-    return false;
-  }
-  if (entry.indexOf('.git') !== -1) {
-    return false;
-  }
-  return true;
-}
-
-
 
 function moveLocal(basePath, data, name) {
     var srcDir = data.name.replace('@jupyterlab', './build/packages') + '/src';
@@ -71,11 +60,6 @@ function moveLocal(basePath, data, name) {
 function moveFolder(basePath, data, name) {
     // Pull in the whole package except .git and node_modules
     var relPath = path.relative(rootPath, basePath);
-    // if (!relPath) {
-    //     var packagePath = path.join(outDir, 'package.json');
-    //     fs.writeFileSync(packagePath, JSON.stringify(data, null, 2) + '\n');
-    //     return;
-    // }
     if (relPath.indexOf('../packages') === 0) {
         return moveLocal(basePath, data, name);
     }
@@ -84,6 +68,18 @@ function moveFolder(basePath, data, name) {
     }
     var dirDest = path.join(outDir, relPath);
     fs.ensureDir(dirDest);
+
+    function fileFilter(source, destination) {
+      var localRel = path.relative(basePath, source);
+      if (localRel.indexOf('node_modules') !== -1) {
+        return false;
+      }
+      if (localRel.indexOf('.git') !== -1) {
+        return false;
+      }
+      return true;
+    }
+
     fs.copySync(basePath, dirDest, { filter: fileFilter });
 }
 
