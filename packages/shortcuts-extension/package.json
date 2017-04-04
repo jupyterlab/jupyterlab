@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/shortcuts-extension",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "JupyterLab - Shortcuts Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -12,7 +12,7 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.1.1"
+    "@jupyterlab/application": "^0.2.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",

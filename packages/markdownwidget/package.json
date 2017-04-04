@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/markdownwidget",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "JupyterLab - Markdown Renderer",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -13,9 +13,9 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^0.1.1",
-    "@jupyterlab/docregistry": "^0.1.4",
-    "@jupyterlab/rendermime": "^0.1.4",
+    "@jupyterlab/coreutils": "^0.2.0",
+    "@jupyterlab/docregistry": "^0.2.0",
+    "@jupyterlab/rendermime": "^0.2.0",
     "@phosphor/messaging": "^1.0.0",
     "@phosphor/widgets": "^1.0.0"
   },
