@@ -139,6 +139,14 @@ class CellModel extends CodeEditor.Model implements ICellModel {
     }
     trusted.set(!!cell.metadata['trusted']);
     delete cell.metadata['trusted'];
+    trusted.changed.connect((value, args) => {
+      this.onTrustedChanged(args.newValue as boolean);
+      this.stateChanged.emit({
+        name: 'trusted',
+        oldValue: args.oldValue,
+        newValue: args.newValue
+      });
+    });
 
     if (Array.isArray(cell.source)) {
       this.value.text = (cell.source as string[]).join('\n');
@@ -197,8 +205,6 @@ class CellModel extends CodeEditor.Model implements ICellModel {
       return;
     }
     (this._modelDB.get('trusted') as IObservableValue).set(newValue);
-    this.onTrustedChanged(newValue);
-    this.stateChanged.emit({ name: 'trusted', oldValue, newValue });
   }
 
   /**
@@ -393,8 +399,6 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
 
   /**
    * Handle a change to the trusted state.
-   *
-   * The default implementation is a no-op.
    */
   onTrustedChanged(value: boolean): void {
     this._outputs.trusted = value;
