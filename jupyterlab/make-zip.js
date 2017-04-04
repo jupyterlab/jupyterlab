@@ -10,9 +10,8 @@ var tar = require('tar');
 var rootPath = path.resolve('.');
 var packages = new Map();
 var outDir = fs.mkdtempSync('/tmp/jupyterlab');
-var stageDir = path.join(outDir, 'stage');
-fs.mkdirSync(stageDir);
 getDependencies(rootPath);
+debugger;
 
 
 function getDependencies(basePath) {
@@ -22,33 +21,61 @@ function getDependencies(basePath) {
         return;
     }
     packages.set(name, data);
-    moveFolder(basePath, data, name);
     for (let name in data.dependencies) {
         getDependency(basePath, name);
     }
+    moveFolder(basePath, data, name);
 }
+
+
+function fileFilter(entry) {
+  if (entry.indexOf('node_modules') !== -1) {
+    return false;
+  }
+  if (entry.indexOf('.git') !== -1) {
+    return false;
+  }
+  return true;
+}
+
+
+
+function moveLocal(basePath, data, name) {
+    var srcDir = data.name.replace('@jupyterlab', './build/packages') + '/src';
+    var destDir = path.join(outDir, 'node_modules', data.name);
+    if (fs.existsSync(srcDir)) {
+        fs.ensureDir(path.join(destDir, 'lib'));
+        fs.copySync(srcDir, path.join(destDir, 'lib'));
+    }
+    var styleDir = path.join(basePath, 'style');
+    if (fs.existsSync(styleDir)) {
+        fs.ensureDir(path.join(destDir, 'style'));
+        fs.copySync(styleDir, path.join(destDir, 'style'));
+    }
+    var packagePath = path.join(destDir, 'package.json');
+    fs.writeFileSync(packagePath, JSON.stringify(data, null, 2) + '\n');
+}
+
+
 
 
 function moveFolder(basePath, data, name) {
     // Pull in the whole package except .git and node_modules
-    var relPath = path.relative(basePath, rootPath);
-    debugger;
-    // var dirDest = fs.createWriteStream(path.join(outDir, fname));
-
-    // function filter(entry) {
-    //   switch (entry.basename) {
-    //   case '.git':
-    //   case 'node_modules':
-    //     return false;
-    //   default:
-    //     return true;
-    //   }
+    var relPath = path.relative(rootPath, basePath);
+    // if (!relPath) {
+    //     var packagePath = path.join(outDir, 'package.json');
+    //     fs.writeFileSync(packagePath, JSON.stringify(data, null, 2) + '\n');
+    //     return;
     // }
-
-    // var reader = new fstream.DirReader({
-    //     path: path.join(outDir, fname), type: 'Directory',
-    //     Directory: true, filter: filter })
-    //   .pipe(dirDest)
+    if (relPath.indexOf('../packages') === 0) {
+        return moveLocal(basePath, data, name);
+    }
+    if (relPath.indexOf('../node_modules') === 0) {
+        relPath = relPath.slice(3);
+    }
+    var dirDest = path.join(outDir, relPath);
+    fs.ensureDir(path.basename(dirDest));
+    fs.copySync(basePath, dirDest, { filter: fileFilter });
 }
 
 
