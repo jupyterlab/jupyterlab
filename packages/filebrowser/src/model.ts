@@ -62,6 +62,27 @@ class FileBrowserModel implements IDisposable {
   }
 
   /**
+   * A signal emitted when the file browser model loses connection.
+   */
+  get connectionFailure(): ISignal<this, Error> {
+    return this._connectionFailure;
+  }
+
+  /**
+   * Get the file path changed signal.
+   */
+  get fileChanged(): ISignal<this, Contents.IChangedArgs> {
+    return this._fileChanged;
+  }
+
+  /**
+   * Get the current path.
+   */
+  get path(): string {
+    return this._model ? this._model.path : '';
+  }
+
+  /**
    * A signal emitted when the path changes.
    */
   get pathChanged(): ISignal<this, IChangedArgs<string>> {
@@ -83,27 +104,6 @@ class FileBrowserModel implements IDisposable {
   }
 
   /**
-   * Get the file path changed signal.
-   */
-  get fileChanged(): ISignal<this, Contents.IChangedArgs> {
-    return this._fileChanged;
-  }
-
-  /**
-   * A signal emitted when the file browser model loses connection.
-   */
-  get connectionFailure(): ISignal<this, Error> {
-    return this._connectionFailure;
-  }
-
-  /**
-   * Get the current path.
-   */
-  get path(): string {
-    return this._model ? this._model.path : '';
-  }
-
-  /**
    * Get the kernel spec models.
    */
   get specs(): Kernel.ISpecModels | null {
@@ -116,6 +116,7 @@ class FileBrowserModel implements IDisposable {
   get isDisposed(): boolean {
     return this._model === null;
   }
+
   /**
    * Dispose of the resources held by the model.
    */
@@ -189,6 +190,11 @@ class FileBrowserModel implements IDisposable {
       this._handleContents(contents);
       this._pendingPath = null;
       if (oldValue !== newValue) {
+        // If there is a state database and a unique key, save the new path.
+        if (this._state && this._key) {
+          this._state.save(this._key, { path: newValue });
+        }
+
         this._pathChanged.emit({
           name: 'path',
           oldValue,
@@ -316,36 +322,33 @@ class FileBrowserModel implements IDisposable {
   /**
    * Restore the state of the file browser.
    *
+   * @param id - The unique ID that is used to construct a state database key.
+   *
+   * @returns A promise when restoration is complete.
+   *
    * #### Notes
    * This function will only restore the model *once*. If it is called multiple
    * times, all subsequent invocations are no-ops.
    */
-  restore(id: string): void {
+  restore(id: string): Promise<void> {
     const state = this._state;
-    if (!state || this._restored) {
-      return;
+    const restored = !!this._key;
+    if (!state || restored) {
+      return Promise.resolve(void 0);
     }
 
-    this._restored = true;
-
     const manager = this._manager;
-    const key = `file-browser-${id}:cwd`;
-    const connect = () => {
-      // Save the subsequent state of the file browser in the state database.
-      this.pathChanged.connect((sender, args) => {
-        state.save(key, { path: args.newValue });
-      });
-    };
-    Promise.all([state.fetch(key), manager.ready]).then(([cwd]) => {
+    const key = this._key = `file-browser-${id}:cwd`;
+    return Promise.all([state.fetch(key), manager.ready]).then(([cwd]) => {
       if (!cwd) {
         return;
       }
-      let path = cwd['path'] as string;
+
+      const path = cwd['path'] as string;
       return manager.contents.get(path)
         .then(() => this.cd(path))
         .catch(() => state.remove(key));
-    }).then(connect)
-      .catch(() => state.remove(key).then(connect));
+    }).catch(() => state.remove(key));
   }
 
   /**
@@ -549,6 +552,7 @@ class FileBrowserModel implements IDisposable {
   private _connectionFailure = new Signal<this, Error>(this);
   private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
   private _items: Contents.IModel[] = [];
+  private _key: string = '';
   private _manager: ServiceManager.IManager = null;
   private _maxUploadSizeMb = 15;
   private _model: Contents.IModel;
@@ -559,7 +563,6 @@ class FileBrowserModel implements IDisposable {
   private _refreshed = new Signal<this, void>(this);
   private _refreshId = -1;
   private _requested = false;
-  private _restored = false;
   private _sessions: Session.IModel[] = [];
   private _sessionsChanged = new Signal<this, void>(this);
   private _state: IStateDB | null = null;
