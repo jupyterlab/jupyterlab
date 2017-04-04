@@ -19,7 +19,7 @@ import {
 } from '@jupyterlab/cells';
 
 import {
-  IObservableJSON, ObservableJSON, IObservableUndoableVector,
+  IObservableJSON, IObservableUndoableVector,
   IObservableVector, ObservableVector, nbformat, IModelDB
 } from '@jupyterlab/coreutils';
 
@@ -84,10 +84,13 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     this._cells.changed.connect(this._onCellsChanged, this);
 
     // Handle initial metadata.
-    let name = options.languagePreference || '';
-    this._metadata.set('language_info', { name });
+    let metadata = this._modelDB.createJSON('metadata');
+    if (!metadata.has('language_info')) {
+      let name = options.languagePreference || '';
+      metadata.set('language_info', { name });
+    }
     this._ensureMetadata();
-    this._metadata.changed.connect(this.triggerContentChange, this);
+    metadata.changed.connect(this.triggerContentChange, this);
   }
 
   /**
@@ -99,7 +102,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    * The metadata associated with the notebook.
    */
   get metadata(): IObservableJSON {
-    return this._metadata;
+    return this._modelDB.get('metadata') as IObservableJSON;
   }
 
   /**
@@ -127,7 +130,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    * The default kernel name of the document.
    */
   get defaultKernelName(): string {
-    let spec = this._metadata.get('kernelspec') as nbformat.IKernelspecMetadata;
+    let spec = this.metadata.get('kernelspec') as nbformat.IKernelspecMetadata;
     return spec ? spec.name : '';
   }
 
@@ -135,7 +138,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    * The default kernel language of the document.
    */
   get defaultKernelLanguage(): string {
-    let info = this._metadata.get('language_info') as nbformat.ILanguageInfoMetadata;
+    let info = this.metadata.get('language_info') as nbformat.ILanguageInfoMetadata;
     return info ? info.name : '';
   }
 
@@ -148,7 +151,6 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       return;
     }
     let cells = this.cells;
-    this._metadata.dispose();
     cells.dispose();
     super.dispose();
   }
@@ -237,14 +239,14 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       this.triggerStateChange({ name: 'nbformatMinor', oldValue, newValue });
     }
     // Update the metadata.
-    this._metadata.clear();
+    this.metadata.clear();
     let metadata = value.metadata;
     for (let key in metadata) {
       // orig_nbformat is not intended to be stored per spec.
       if (key === 'orig_nbformat') {
         continue;
       }
-      this._metadata.set(key, metadata[key]);
+      this.metadata.set(key, metadata[key]);
     }
     this._ensureMetadata();
     this.dirty = true;
@@ -292,7 +294,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    * Make sure we have the required metadata fields.
    */
   private _ensureMetadata(): void {
-    let metadata = this._metadata;
+    let metadata = this.metadata;
     if (!metadata.has('language_info')) {
       metadata.set('language_info', { name: '' });
     }
@@ -304,7 +306,6 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   private _cells: CellList;
   private _nbformat = nbformat.MAJOR_VERSION;
   private _nbformatMinor = nbformat.MINOR_VERSION;
-  private _metadata = new ObservableJSON();
 }
 
 

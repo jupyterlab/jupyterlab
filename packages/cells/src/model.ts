@@ -18,8 +18,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IObservableJSON, ObservableJSON,
-  IModelDB, IObservableValue
+  IObservableJSON, IModelDB, IObservableValue
 } from '@jupyterlab/coreutils';
 
 import {
@@ -124,10 +123,14 @@ class CellModel extends CodeEditor.Model implements ICellModel {
   constructor(options: CellModel.IOptions) {
     super({modelDB: options.modelDB});
 
+    this.value.changed.connect(this.onGenericChange, this);
+
     let cellType = this._modelDB.createValue('type');
     cellType.set(this.type);
 
-    this.value.changed.connect(this.onGenericChange, this);
+    let observableMetadata = this._modelDB.createJSON('metadata');
+    observableMetadata.changed.connect(this.onGenericChange, this);
+
     let cell = options.cell;
     let trusted = this._modelDB.createValue('trusted');
     if (!cell) {
@@ -150,10 +153,10 @@ class CellModel extends CodeEditor.Model implements ICellModel {
       delete metadata['collapsed'];
       delete metadata['scrolled'];
     }
+
     for (let key in metadata) {
-      this._metadata.set(key, metadata[key]);
+      observableMetadata.set(key, metadata[key]);
     }
-    this._metadata.changed.connect(this.onGenericChange, this);
   }
 
   /**
@@ -175,7 +178,7 @@ class CellModel extends CodeEditor.Model implements ICellModel {
    * The metadata associated with the cell.
    */
   get metadata(): IObservableJSON {
-    return this._metadata;
+    return this._modelDB.get('metadata') as IObservableJSON;
   }
 
   /**
@@ -196,14 +199,6 @@ class CellModel extends CodeEditor.Model implements ICellModel {
     (this._modelDB.get('trusted') as IObservableValue).set(newValue);
     this.onTrustedChanged(newValue);
     this.stateChanged.emit({ name: 'trusted', oldValue, newValue });
-  }
-
-  /**
-   * Dispose of the resources held by the model.
-   */
-  dispose(): void {
-    this._metadata.dispose();
-    super.dispose();
   }
 
   /**
@@ -238,8 +233,6 @@ class CellModel extends CodeEditor.Model implements ICellModel {
   protected onGenericChange(): void {
     this.contentChanged.emit(void 0);
   }
-
-  private _metadata = new ObservableJSON();
 }
 
 

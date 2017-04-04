@@ -18,6 +18,10 @@ import {
 } from './observablemap';
 
 import {
+  IObservableJSON, ObservableJSON
+} from './observablejson';
+
+import {
   IObservableString, ObservableString
 } from './observablestring';
 
@@ -35,7 +39,7 @@ import {
  * created and placed in the IModelDB interface.
  */
 export
-type ObservableType = 'JSONValue' | 'Map' | 'Vector' | 'String' | 'JSONObject'
+type ObservableType = 'Map' | 'Vector' | 'String' | 'Value';
 
 /**
  * Base interface for Observable objects.
@@ -57,7 +61,7 @@ interface IObservableValue extends IObservable {
   /**
    * The type of this object.
    */
-  type: 'JSONValue';
+  type: 'Value';
 
   /**
    * The changed signal.
@@ -156,11 +160,20 @@ interface IModelDB {
   createMap<T extends JSONValue>(path: string): IObservableMap<T>;
 
   /**
-   * Create a string and insert it in the database.
+   * Create an `IObservableJSON` and insert it in the database.
    *
-   * @param path: the path for the string.
+   * @param path: the path for the object.
    *
-   * @returns the string that was created.
+   * @returns the object that wsa created.
+   */
+  createJSON(path: string): IObservableJSON;
+
+  /**
+   * Create an opaque value and insert it in the database.
+   *
+   * @param path: the path for the value.
+   *
+   * @returns the value that was created.
    */
   createValue(path: string): IObservableValue;
 
@@ -197,7 +210,7 @@ class ObservableValue implements IObservableValue {
   /**
    * The observable type.
    */
-  readonly type: 'JSONValue';
+  readonly type: 'Value';
 
   /**
    * The changed signal.
@@ -366,11 +379,24 @@ class ModelDB implements IModelDB {
   }
 
   /**
-   * Create a string and insert it in the database.
+   * Create an `IObservableJSON` and insert it in the database.
    *
-   * @param path: the path for the string.
+   * @param path: the path for the object.
    *
-   * @returns the string that was created.
+   * @returns the object that wsa created.
+   */
+  createJSON(path: string): IObservableJSON {
+    let json = new ObservableJSON();
+    this.set(path, json);
+    return json;
+  }
+
+  /**
+   * Create an opaque value and insert it in the database.
+   *
+   * @param path: the path for the value.
+   *
+   * @returns the value that was created.
    */
   createValue(path: string): IObservableValue {
     let val = new ObservableValue();
