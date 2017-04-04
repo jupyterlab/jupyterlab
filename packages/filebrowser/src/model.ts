@@ -338,7 +338,7 @@ class FileBrowserModel implements IDisposable {
     }
 
     const manager = this._manager;
-    const key = this._key = `file-browser-${id}:cwd`;
+    const key = `file-browser-${id}:cwd`;
     return Promise.all([state.fetch(key), manager.ready]).then(([cwd]) => {
       if (!cwd) {
         return;
@@ -348,7 +348,8 @@ class FileBrowserModel implements IDisposable {
       return manager.contents.get(path)
         .then(() => this.cd(path))
         .catch(() => state.remove(key));
-    }).catch(() => state.remove(key));
+    }).catch(() => state.remove(key))
+      .then(() => { this._key = key; }); // Set key after restoration is done.
   }
 
   /**
