@@ -2,9 +2,6 @@
 var fstream = require('fstream');
 var fs = require('fs-extra');
 var path = require('path');
-var childProcess = require('child_process');
-var tar = require('tar');
-var zlib = require('zlib');
 var glob = require('glob');
 
 
@@ -16,27 +13,12 @@ var outDir = path.resolve('./build');
 fs.removeSync(outDir);
 fs.ensureDir(outDir);
 
-
-// We want the tarball to be the name of the package, mangled.
-// if (name[0] === '@') name = name.substr(1).replace(/\//g, '-')
-// We pre-process to move the local source stuff back to the source dir libs.
-
-// Then, we run this script which uses `files` to determine what to use
-// if it is a symlink
-getDependencies(rootPath);
-
-// var tarFile = fs.createWriteStream('extension.tgz')
-// tarFile.on('finish', function() {
-//     console.log('Finished!')
-// });
-// fstream.Reader({ path: outDir, type: "Directory" })
-//   .pipe(tar.Pack())
-//   .pipe(zlib.createGzip())
-//   .pipe(tarFile)
+// Handle the packages starting at the root.
+handlePackage(rootPath);
 
 
-
-function getDependencies(basePath) {
+function handlePackage(basePath) {
+    // Handle the package and its dependencies, recursively.
     var data = require(path.join(basePath, 'package.json'));
     var name = data.name + '@' + data.version;
     if (packages.has(name)) {
@@ -44,7 +26,7 @@ function getDependencies(basePath) {
     }
     packages.set(name, data);
     for (let name in data.dependencies) {
-        getDependency(basePath, name);
+        handlePackage(findPackage(basePath, name));
     }
     // Handle paths that are not in node_modules.
     var relPath = path.relative(rootPath, basePath);
@@ -55,7 +37,6 @@ function getDependencies(basePath) {
     // Handle others.
     movePackage(basePath, data, name);
 }
-
 
 
 function moveLocal(basePath, data, name) {
@@ -101,15 +82,11 @@ function moveLocal(basePath, data, name) {
 
 
 function movePackage(basePath, data, name) {
-    // Pull in the whole package except .git and node_modules
-    var relPath = path.relative(rootPath, basePath);
-    var dirDest = path.join(outDir, relPath.split('../').join(''));
-    fs.ensureDir(dirDest);
+    // Pull in the whole package except files that should be ignored.
+    // List from  https://docs.npmjs.com/files/package.json#files
 
     function fileFilter(source, destination) {
       var localRel = path.relative(basePath, source);
-      // Always ignored files
-      // from https://docs.npmjs.com/files/package.json#files
       switch (localRel.split(path.sep).shift()) {
       case 'node_modules':
       case '.git':
@@ -126,20 +103,23 @@ function movePackage(basePath, data, name) {
         return false;
       default:
         return true;
+      }
     }
 
+    var relPath = path.relative(rootPath, basePath);
+    var dirDest = path.join(outDir, relPath.split('../').join(''));
+    fs.ensureDir(dirDest);
     fs.copySync(basePath, dirDest, { filter: fileFilter });
 }
 
 
-function getDependency(basePath, name) {
+function findPackage(basePath, name) {
     // Walk up the tree to the root path looking for the package.
     while (true) {
         var packagePath = path.join(basePath, 'node_modules', name);
         if (fs.existsSync(packagePath)) {
-            return getDependencies(fs.realpathSync(packagePath));
+            return fs.realpathSync(packagePath);
         }
         basePath = path.resolve(basePath, '..');
     }
-
 }
