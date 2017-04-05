@@ -78,10 +78,9 @@ namespace Private {
       for (let name in data.dependencies) {
         this._handlePackage(this._findPackage(basePath, name));
       }
-      // Handle paths that are not in node_modules.
-      let relPath = path.relative(this._rootPath, basePath);
-      relPath = relPath.split('../').join('');
-      if (relPath.indexOf('node_modules') !== 0) {
+      // Handle paths that are not in a node_modules directory.
+      let parts = basePath.split(path.sep);
+      if (parts.length > 2 && parts[parts.length - 2] !== 'node_modules') {
         return this._moveLocal(basePath, data, name);
       }
       // Handle others.
