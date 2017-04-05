@@ -5,26 +5,30 @@ var path = require('path');
 var childProcess = require('child_process');
 var tar = require('tar');
 var zlib = require('zlib');
+var glob = require('glob');
 
 
 // Get all of the packages.
 var rootPath = path.resolve('.');
 var packages = new Map();
+var outDir = '';
 
 // We want the tarball to be the name of the package, mangled.
+// if (name[0] === '@') name = name.substr(1).replace(/\//g, '-')
 // We pre-process to move the local source stuff back to the source dir libs.
+
 // Then, we run this script which uses `files` to determine what to use
-// If it doesn't start with `node_modules`, put it in node_modules.
+// if it is a symlink
 getDependencies(rootPath);
 
-var tarFile = fs.createWriteStream('extension.tgz')
-tarFile.on('finish', function() {
-    console.log('Finished!')
-});
-fstream.Reader({ path: outDir, type: "Directory" })
-  .pipe(tar.Pack())
-  .pipe(zlib.createGzip())
-  .pipe(tarFile)
+// var tarFile = fs.createWriteStream('extension.tgz')
+// tarFile.on('finish', function() {
+//     console.log('Finished!')
+// });
+// fstream.Reader({ path: outDir, type: "Directory" })
+//   .pipe(tar.Pack())
+//   .pipe(zlib.createGzip())
+//   .pipe(tarFile)
 
 
 
@@ -38,12 +42,25 @@ function getDependencies(basePath) {
     for (let name in data.dependencies) {
         getDependency(basePath, name);
     }
+    var stat = fs.lstatSync(basePath);
+    // Handle root path and links.
+    if (stat.isSymbolicLink() || basePath === rootPath) {
+        basePath = fs.realpathSync(basePath);
+        return moveLocal(basePath, data, name);
+    }
+    // Handle others.
     moveFolder(basePath, data, name);
 }
 
 
 
 function moveLocal(basePath, data, name) {
+    data.files = data.files || [];
+    data.files.forEach(function(pattern) {
+        var files = glob.sync(pattern, { cwd: basePath });
+        // Move these files.
+    });
+    return;
     var srcDir = data.name.replace('@jupyterlab', './build/packages') + '/src';
     var destDir = path.join(outDir, 'node_modules', data.name);
     fs.ensureDir(destDir);
@@ -62,6 +79,7 @@ function moveLocal(basePath, data, name) {
 
 
 function moveFolder(basePath, data, name) {
+    return;
     // Pull in the whole package except .git and node_modules
     var relPath = path.relative(rootPath, basePath);
     if (relPath.indexOf('../packages') === 0) {
@@ -93,16 +111,9 @@ function getDependency(basePath, name) {
     while (true) {
         var packagePath = path.join(basePath, 'node_modules', name);
         if (fs.existsSync(packagePath)) {
-            var realPath = fs.realpathSync(packagePath);
-            return getDependencies(realPath);
+            return getDependencies(packagePath);
         }
         basePath = path.resolve(basePath, '..');
     }
 
 }
-
-
-
-
-
-
