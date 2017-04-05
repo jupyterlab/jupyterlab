@@ -8,6 +8,9 @@ fs.removeSync('./build');
 fs.ensureDirSync('./build/node_modules');
 fs.copySync('../node_modules', './build/node_modules');
 
+
+childProcess.execSync('npm run build', { cwd: path.resolve('../packages/main') });
+
 build({
     rootPath: '../packages/main',
     outPath: './build/node_modules/@jupyterlab/main'

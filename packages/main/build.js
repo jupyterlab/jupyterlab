@@ -8,6 +8,9 @@ var path = require('path');
 var modules = fs.readdirSync('./lib');
 
 modules.forEach(function(name) {
+    if (name.indexOf('.') !== -1) {
+        return;
+    }
     var dest = path.join('..', name, 'lib');
     fs.copySync(path.join('./lib', name, 'src'), dest);
 });
