@@ -6,14 +6,9 @@ import {
 } from '@phosphor/application';
 
 import {
-  ModuleLoader
-} from './loader';
-
-import {
   ApplicationShell
 } from './shell';
 
-export { ModuleLoader } from './loader';
 export { ApplicationShell } from './shell';
 
 
@@ -39,7 +34,6 @@ class JupyterLab extends Application<ApplicationShell> {
       namespace: options.namespace || 'jupyterlab',
       version:  options.version || 'unknown'
     };
-    this._loader = options.loader || null;
   }
 
   /**
@@ -47,13 +41,6 @@ class JupyterLab extends Application<ApplicationShell> {
    */
   get info(): JupyterLab.IInfo {
     return this._info;
-  }
-
-  /**
-   * The module loader used by the application.
-   */
-  get loader(): ModuleLoader | null {
-    return this._loader;
   }
 
   /**
@@ -89,7 +76,6 @@ class JupyterLab extends Application<ApplicationShell> {
   }
 
   private _info: JupyterLab.IInfo;
-  private _loader: ModuleLoader | null;
 }
 
 
@@ -107,11 +93,6 @@ namespace JupyterLab {
      * The git description of the JupyterLab application.
      */
     gitDescription?: string;
-
-    /**
-     * The module loader used by the application.
-     */
-    loader?: ModuleLoader;
 
     /**
      * The namespace/prefix plugins may use to denote their origin.
