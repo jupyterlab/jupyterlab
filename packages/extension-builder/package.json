@@ -28,6 +28,8 @@
   "devDependencies": {
     "@types/expect.js": "^0.3.29",
     "@types/extract-text-webpack-plugin": "^2.0.1",
+    "@types/fs-extra": "^2.0.0",
+    "@types/glob": "^5.0.30",
     "@types/mocha": "^2.2.32",
     "@types/semver": "^5.3.31",
     "mocha": "^3.2.0",

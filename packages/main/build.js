@@ -5,9 +5,9 @@
 var fs = require('fs-extra');
 var path = require('path');
 
-var modules = fs.readdirSync('./lib/packages');
+var modules = fs.readdirSync('./lib');
 
 modules.forEach(function(name) {
-    var dest = path.join('../packages', name, 'lib');
-    fs.copySync(path.join('./lib/packages', name, 'src'), dest);
+    var dest = path.join('..', name, 'lib');
+    fs.copySync(path.join('./lib', name, 'src'), dest);
 });

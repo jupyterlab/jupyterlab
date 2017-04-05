@@ -12,7 +12,7 @@
     "types": ["node", "text-encoding"],
     "baseUrl": ".",
     "paths": {
-      "@jupyterlab/*": ["../packages/*/src"]
+      "@jupyterlab/*": ["../*/src"]
     }
   }
 }
