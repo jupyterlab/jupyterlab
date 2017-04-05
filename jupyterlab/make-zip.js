@@ -10,7 +10,11 @@ var zlib = require('zlib');
 // Get all of the packages.
 var rootPath = path.resolve('.');
 var packages = new Map();
-var outDir = fs.mkdtempSync('/tmp/jupyterlab');
+
+// We want the tarball to be the name of the package, mangled.
+// We pre-process to move the local source stuff back to the source dir libs.
+// Then, we run this script which uses `files` to determine what to use
+// If it doesn't start with `node_modules`, put it in node_modules.
 getDependencies(rootPath);
 
 var tarFile = fs.createWriteStream('extension.tgz')

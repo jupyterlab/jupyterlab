@@ -3,10 +3,13 @@
   "name": "@jupyterlab/main",
   "version": "0.2.0",
   "scripts": {
-    "build": "tsc && webpack",
-    "clean": "rimraf build",
+    "build": "tsc && node build.js",
+    "clean": "rimraf lib",
     "watch": "watch \"npm run build\" ../packages --wait 10 --filter=../scripts/watch-filter.js"
   },
+  "files": [
+    "lib/jupyterlab/src/*"
+  ],
   "dependencies": {
     "@jupyterlab/application": "^0.2.0",
     "@jupyterlab/about-extension": "^0.2.0",
