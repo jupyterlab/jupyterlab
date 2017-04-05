@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IDisposable
+} from '@phosphor/disposable';
+
+import {
   ISignal, Signal
 } from '@phosphor/signaling';
 
@@ -45,7 +49,7 @@ type ObservableType = 'Map' | 'Vector' | 'String' | 'Value';
  * Base interface for Observable objects.
  */
 export
-interface IObservable {
+interface IObservable extends IDisposable {
   /**
    * The type of this object.
    */
@@ -85,13 +89,18 @@ interface IObservableValue extends IObservable {
  * to the particular type of store in the backend.
  */
 export
-interface IModelDB {
+interface IModelDB extends IDisposable {
   /**
    * The base path for the `IModelDB`. This is prepended
    * to all the paths that are passed in to the member
    * functions of the object.
    */
   readonly basePath: string;
+
+  /**
+   * Whether the database has been disposed.
+   */
+  readonly isDisposed: boolean;
 
   /**
    * Get a value for a path.
@@ -191,6 +200,11 @@ interface IModelDB {
    * Set a value at a path.
    */
   set(path: string, value: IObservable): void;
+
+  /**
+   * Dispose of the resources held by the database.
+   */
+  dispose(): void;
 }
 
 /**
@@ -211,6 +225,13 @@ class ObservableValue implements IObservableValue {
    * The observable type.
    */
   readonly type: 'Value';
+
+  /**
+   * Whether the value has been disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
 
   /**
    * The changed signal.
@@ -238,8 +259,21 @@ class ObservableValue implements IObservableValue {
     });
   }
 
+  /**
+   * Dispose of the resources held by the value.
+   */
+  dispose(): void {
+    if (this._isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    Signal.clearData(this);
+    this._value = null;
+  }
+
   private _value: JSONValue = null;
   private _changed = new Signal<ObservableValue, ObservableValue.IChangedArgs>(this);
+  private _isDisposed = false;
 }
 
 /**
@@ -279,6 +313,7 @@ class ModelDB implements IModelDB {
       this._db = options.baseDB;
     } else {
       this._db = new ObservableMap<IObservable>();
+      this._toDispose = true;
     }
   }
 
@@ -289,6 +324,13 @@ class ModelDB implements IModelDB {
    */
   get basePath(): string {
     return this._basePath;
+  }
+
+  /**
+   * Whether the database is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._db === null;
   }
 
   /**
@@ -322,6 +364,7 @@ class ModelDB implements IModelDB {
    */
   createString(path: string): IObservableString {
     let str = new ObservableString();
+    this._createdObjects.push(str);
     this.set(path, str);
     return str;
   }
@@ -339,6 +382,7 @@ class ModelDB implements IModelDB {
    */
   createVector(path: string): IObservableVector<JSONValue> {
     let vec = new ObservableVector<JSONValue>();
+    this._createdObjects.push(vec);
     this.set(path, vec);
     return vec;
   }
@@ -357,6 +401,7 @@ class ModelDB implements IModelDB {
   createUndoableVector(path: string): IObservableUndoableVector<JSONValue> {
     let vec = new ObservableUndoableVector<JSONValue>(
       new ObservableUndoableVector.IdentitySerializer());
+    this._createdObjects.push(vec);
     this.set(path, vec);
     return vec;
   }
@@ -374,6 +419,7 @@ class ModelDB implements IModelDB {
    */
   createMap(path: string): IObservableMap<JSONValue> {
     let map = new ObservableMap<JSONValue>();
+    this._createdObjects.push(map);
     this.set(path, map);
     return map;
   }
@@ -387,6 +433,7 @@ class ModelDB implements IModelDB {
    */
   createJSON(path: string): IObservableJSON {
     let json = new ObservableJSON();
+    this._createdObjects.push(json);
     this.set(path, json);
     return json;
   }
@@ -400,6 +447,7 @@ class ModelDB implements IModelDB {
    */
   createValue(path: string): IObservableValue {
     let val = new ObservableValue();
+    this._createdObjects.push(val);
     this.set(path, val);
     return val;
   }
@@ -424,6 +472,25 @@ class ModelDB implements IModelDB {
   }
 
   /**
+   * Dispose of the resources held by the database.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    let db = this._db;
+    this._db = null;
+
+    if (this._toDispose) {
+      db.dispose();
+    }
+    for (let item of this._createdObjects) {
+      item.dispose();
+    }
+    this._createdObjects = null;
+  }
+
+  /**
    * Compute the fully resolved path for a path argument.
    */
   private _resolvePath(path: string): string {
@@ -435,6 +502,8 @@ class ModelDB implements IModelDB {
 
   private _basePath: string;
   private _db: IModelDB | ObservableMap<IObservable> = null;
+  private _toDispose = true;
+  private _createdObjects: IObservable[] = [];
 }
 
 /**
