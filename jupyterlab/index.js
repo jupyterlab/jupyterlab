@@ -2,7 +2,7 @@
 
 function main() {
     var JupyterLab = require('@jupyterlab/application').JupyterLab;
-    var extensions = require('./lib').extensions;
+    var extensions = require('@jupyterlab/main').extensions;
 
     lab = new JupyterLab({
         gitDescription: '2',
