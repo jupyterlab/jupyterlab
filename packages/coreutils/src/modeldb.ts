@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IDisposable
+  IDisposable, DisposableSet
 } from '@phosphor/disposable';
 
 import {
@@ -364,7 +364,7 @@ class ModelDB implements IModelDB {
    */
   createString(path: string): IObservableString {
     let str = new ObservableString();
-    this._createdObjects.push(str);
+    this._disposables.add(str);
     this.set(path, str);
     return str;
   }
@@ -382,7 +382,7 @@ class ModelDB implements IModelDB {
    */
   createVector(path: string): IObservableVector<JSONValue> {
     let vec = new ObservableVector<JSONValue>();
-    this._createdObjects.push(vec);
+    this._disposables.add(vec);
     this.set(path, vec);
     return vec;
   }
@@ -401,7 +401,7 @@ class ModelDB implements IModelDB {
   createUndoableVector(path: string): IObservableUndoableVector<JSONValue> {
     let vec = new ObservableUndoableVector<JSONValue>(
       new ObservableUndoableVector.IdentitySerializer());
-    this._createdObjects.push(vec);
+    this._disposables.add(vec);
     this.set(path, vec);
     return vec;
   }
@@ -419,7 +419,7 @@ class ModelDB implements IModelDB {
    */
   createMap(path: string): IObservableMap<JSONValue> {
     let map = new ObservableMap<JSONValue>();
-    this._createdObjects.push(map);
+    this._disposables.add(map);
     this.set(path, map);
     return map;
   }
@@ -433,7 +433,7 @@ class ModelDB implements IModelDB {
    */
   createJSON(path: string): IObservableJSON {
     let json = new ObservableJSON();
-    this._createdObjects.push(json);
+    this._disposables.add(json);
     this.set(path, json);
     return json;
   }
@@ -447,7 +447,7 @@ class ModelDB implements IModelDB {
    */
   createValue(path: string): IObservableValue {
     let val = new ObservableValue();
-    this._createdObjects.push(val);
+    this._disposables.add(val);
     this.set(path, val);
     return val;
   }
@@ -484,10 +484,7 @@ class ModelDB implements IModelDB {
     if (this._toDispose) {
       db.dispose();
     }
-    for (let item of this._createdObjects) {
-      item.dispose();
-    }
-    this._createdObjects = null;
+    this._disposables.dispose();
   }
 
   /**
@@ -503,7 +500,7 @@ class ModelDB implements IModelDB {
   private _basePath: string;
   private _db: IModelDB | ObservableMap<IObservable> = null;
   private _toDispose = true;
-  private _createdObjects: IObservable[] = [];
+  private _disposables = new DisposableSet();
 }
 
 /**
