@@ -635,8 +635,8 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
 
   private _getCaret(uuid: string): HTMLElement {
     let caret: HTMLElement = document.createElement('span');
-    caret.className = 'CodeMirror-cursor';
-    caret.style.borderLeft=`2px ${this._selectionStyle.color} solid`;
+    caret.className = 'jp-CollaboratorCursor';
+    caret.style.borderBottomColor=`${this._selectionStyle.color}`
     caret.appendChild(document.createTextNode('\u00a0'));
     return caret;
   }
