@@ -2,19 +2,12 @@
   "name": "@jupyterlab/default-theme",
   "version": "0.2.0",
   "description": "JupyterLab - Default Theme",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
   "files": [
-    "lib/*.d.ts",
-    "lib/*.js",
     "style/*.css",
     "style/images/*.*",
     "style/icons/*.*",
     "style/icons/**/*.*"
   ],
-  "directories": {
-    "lib": "lib/"
-  },
   "dependencies": {
     "@jupyterlab/about-extension": "^0.2.0",
     "@jupyterlab/application": "^0.2.0",

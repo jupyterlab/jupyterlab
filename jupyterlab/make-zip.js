@@ -10,8 +10,12 @@ var glob = require('glob');
 
 // Get all of the packages.
 var rootPath = path.resolve('.');
+var rootPackage = require('./package.json');
 var packages = new Map();
-var outDir = '';
+var outDir = path.join('./build', 'node_modules');
+fs.ensureDir(outDir);
+fs.remove(outDir);
+
 
 // We want the tarball to be the name of the package, mangled.
 // if (name[0] === '@') name = name.substr(1).replace(/\//g, '-')
@@ -42,10 +46,10 @@ function getDependencies(basePath) {
     for (let name in data.dependencies) {
         getDependency(basePath, name);
     }
-    var stat = fs.lstatSync(basePath);
-    // Handle root path and links.
-    if (stat.isSymbolicLink() || basePath === rootPath) {
-        basePath = fs.realpathSync(basePath);
+    // Handle paths that are not in node_modules.
+    var relPath = path.relative(rootPath, basePath);
+    relPath = relPath.split('../').join('');
+    if (relPath.indexOf('node_modules') !== 0) {
         return moveLocal(basePath, data, name);
     }
     // Handle others.
@@ -55,27 +59,45 @@ function getDependencies(basePath) {
 
 
 function moveLocal(basePath, data, name) {
+    // Move symlinked or root files using the package.json config.
+    var destDir = path.join(outDir, data.name);
+    if (basePath === rootPath) {
+        destDir = outDir;
+    }
+    fs.ensureDir(destDir);
+    var seen = new Set();
+    var seenDir = new Set();
     data.files = data.files || [];
     data.files.forEach(function(pattern) {
         var files = glob.sync(pattern, { cwd: basePath });
         // Move these files.
+        files.forEach(function(fname) {
+            var source = path.join(basePath, fname);
+            if (seen.has(source)) {
+                return;
+            }
+            seen.add(source);
+            var target = path.join(destDir, fname);
+            var targetDir = path.dirname(target);
+            if (!seenDir.has(targetDir)) {
+                fs.ensureDir(targetDir);
+            }
+            seenDir.add(targetDir);
+            fs.copySync(source, path.join(destDir, fname));
+        })
     });
-    return;
-    var srcDir = data.name.replace('@jupyterlab', './build/packages') + '/src';
-    var destDir = path.join(outDir, 'node_modules', data.name);
-    fs.ensureDir(destDir);
-    if (fs.existsSync(srcDir)) {
-        fs.copySync(srcDir, path.join(destDir, 'lib'));
-    }
-    var styleDir = path.join(basePath, 'style');
-    if (fs.existsSync(styleDir)) {
-        fs.copySync(styleDir, path.join(destDir, 'style'));
+    // Make sure we have the main entry point.
+    if (data.main) {
+        var source = path.join(basePath, data.main);
+        if (!seen.has(source)) {
+            var target = path.join(destDir, data.main);
+            fs.ensureDir(path.dirname(target));
+            fs.copySync(source, path.join(destDir, data.main));
+        }
     }
     var packagePath = path.join(destDir, 'package.json');
     fs.writeFileSync(packagePath, JSON.stringify(data, null, 2) + '\n');
 }
-
-
 
 
 function moveFolder(basePath, data, name) {
@@ -111,7 +133,7 @@ function getDependency(basePath, name) {
     while (true) {
         var packagePath = path.join(basePath, 'node_modules', name);
         if (fs.existsSync(packagePath)) {
-            return getDependencies(packagePath);
+            return getDependencies(fs.realpathSync(packagePath));
         }
         basePath = path.resolve(basePath, '..');
     }
