@@ -7,6 +7,8 @@
 
 # [JupyterLab](http://jupyterlab.github.io/jupyterlab/)
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/jupyterlab/jupyterlab.svg)](https://greenkeeper.io/)
+
 [![Build Status](https://travis-ci.org/jupyterlab/jupyterlab.svg?branch=master)](https://travis-ci.org/jupyterlab/jupyterlab)
 [![Binder](http://mybinder.org/badge.svg)](http://mybinder.org/repo/jupyterlab/jupyterlab/lab)
 [![Documentation Status](https://readthedocs.org/projects/jupyterlab-tutorial/badge/?version=latest)](https://jupyterlab-tutorial.readthedocs.io/en/latest/?badge=latest)
@@ -18,9 +20,10 @@ An extensible computational environment for Jupyter.
 general usage yet. Features and implementation are subject to change. **
 
 With JupyterLab, you can create a computational environment for Jupyter that
-meets your workflow needs. Here's a quick preview of JupyterLab:
+meets your workflow needs. Here's a quick preview of JupyterLab (link to 
+YouTube):
 
-<img src="jupyter-plugins-demo.gif" alt="JupyterLab Demo" style="width: 100%;"/>
+[![JupyterLab Demo](https://img.youtube.com/vi/sf8PuLcijuA/0.jpg)](https://www.youtube.com/watch?v=sf8PuLcijuA)
 
 We have a [roadmap](https://github.com/jupyter/roadmap/blob/master/jupyterlab.md) of planned development.
 
@@ -103,7 +106,6 @@ and you may participate in development discussions or get live help on [Gitter](
 ## Resources
 
 - [Reporting Issues](https://github.com/jupyterlab/jupyterlab/issues)
-- [API Docs](http://jupyterlab.github.io/jupyterlab/)
 - [Architecture tutorial](https://jupyterlab-tutorial.readthedocs.io/en/latest/index.html)
 - [Documentation for Project Jupyter](https://jupyter.readthedocs.io/en/latest/index.html) | [PDF](https://media.readthedocs.org/pdf/jupyter/latest/jupyter.pdf)
 - [Project Jupyter website](https://jupyter.org)

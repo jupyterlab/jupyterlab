@@ -1,13 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  DockPanel
-} from 'phosphor/lib/ui/dockpanel';
+import 'es6-promise/auto';  // polyfill Promise on IE
 
 import {
-  Widget
-} from 'phosphor/lib/ui/widget';
+  DockPanel, Widget
+} from '@phosphor/widgets';
 
 import {
   TerminalSession
@@ -15,9 +13,8 @@ import {
 
 import {
   TerminalWidget
-} from 'jupyterlab/lib/terminal';
+} from '@jupyterlab/terminal';
 
-import 'jupyterlab/lib/default-theme/index.css';
 import '../index.css';
 
 

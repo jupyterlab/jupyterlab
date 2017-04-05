@@ -1,0 +1,372 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-RenderedText {
+  text-align: left;
+  padding-left: var(--jp-code-padding);
+  font-size: var(--jp-code-font-size);
+  line-height: var(--jp-code-line-height);
+}
+
+
+.jp-RenderedText pre,
+.jp-RenderedHTMLCommon pre {
+  border: none;
+  margin: 0px;
+  padding: 0px;
+  overflow-x: auto;
+  overflow-y: auto;
+  word-break: break-all;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+
+.jp-RenderedText.jp-mod-error {
+  background: #fdd;
+}
+
+
+.jp-RenderedLatex {
+  color: var(--jp-content-font-color1);
+  font-size: var(--jp-content-font-size);
+  line-height: var(--jp-content-line-height);
+}
+
+
+.jp-RenderedHTMLCommon {
+  color: var(--jp-content-font-color1);
+  font-size: var(--jp-content-font-size);
+  line-height: var(--jp-content-line-height);
+}
+
+
+.jp-RenderedHTMLCommon .MathJax_Display {
+  margin: 0;
+}
+
+
+.jp-RenderedHTMLCommon em {
+  font-style: italic;
+}
+
+
+.jp-RenderedHTMLCommon img.jp-mod-unconfined {
+  max-width: none;
+}
+
+
+.jp-RenderedHTMLCommon img {
+  max-width: 100%;
+  height: auto;
+}
+
+
+.jp-RenderedHTMLCommon strong {
+  font-weight: bold;
+}
+
+
+.jp-RenderedHTMLCommon u {
+  text-decoration: underline;
+}
+
+
+.jp-RenderedHTMLCommon:link {
+  text-decoration: underline;
+}
+
+
+.jp-RenderedHTMLCommon:visited {
+  text-decoration: underline;
+}
+
+/*For a 14px base font size this goes as:
+font-size = 26, 22, 18, 14, 12, 12
+margin-top = 14, 14, 14, 14, 8, 8
+*/
+
+.jp-RenderedHTMLCommon h1 {
+  font-size: 185.7%;
+  margin: 1.08em 0 0 0;
+  font-weight: bold;
+  line-height: 1.0;
+}
+
+
+.jp-RenderedHTMLCommon h2 {
+  font-size: 157.1%;
+  margin: 1.27em 0 0 0;
+  font-weight: bold;
+  line-height: 1.0;
+}
+
+
+.jp-RenderedHTMLCommon h3 {
+  font-size: 128.6%;
+  margin: 1.55em 0 0 0;
+  font-weight: bold;
+  line-height: 1.0;
+}
+
+
+.jp-RenderedHTMLCommon h4 {
+  font-size: 100%;
+  margin: 2em 0 0 0;
+  font-weight: bold;
+  line-height: 1.0;
+}
+
+
+.jp-RenderedHTMLCommon h5 {
+  font-size: 100%;
+  margin: 2em 0 0 0;
+  font-weight: bold;
+  line-height: 1.0;
+  font-style: italic;
+}
+
+
+.jp-RenderedHTMLCommon h6 {
+  font-size: 100%;
+  margin: 2em 0 0 0;
+  font-weight: bold;
+  line-height: 1.0;
+  font-style: italic;
+}
+
+
+.jp-RenderedHTMLCommon h1:first-child {
+  margin-top: 0.538em;
+}
+
+
+.jp-RenderedHTMLCommon h2:first-child {
+  margin-top: 0.636em;
+}
+
+
+.jp-RenderedHTMLCommon h3:first-child {
+  margin-top: 0.777em;
+}
+
+
+.jp-RenderedHTMLCommon h4:first-child {
+  margin-top: 1em;
+}
+
+
+.jp-RenderedHTMLCommon h5:first-child {
+  margin-top: 1em;
+}
+
+
+.jp-RenderedHTMLCommon h6:first-child {
+  margin-top: 1em;
+}
+
+
+.jp-RenderedHTMLCommon ul:not(.list-inline),
+.jp-RenderedHTMLCommon ol:not(.list-inline) {
+  padding-left: 2em;
+}
+
+
+.jp-RenderedHTMLCommon ul {
+  list-style: disc;
+}
+
+
+.jp-RenderedHTMLCommon ul ul {
+  list-style: square;
+}
+
+
+.jp-RenderedHTMLCommon ul ul ul {
+  list-style: circle;
+}
+
+
+.jp-RenderedHTMLCommon ol {
+  list-style: decimal;
+}
+
+
+.jp-RenderedHTMLCommon ol ol {
+  list-style: upper-alpha;
+}
+
+
+.jp-RenderedHTMLCommon ol ol ol {
+  list-style: lower-alpha;
+}
+
+
+.jp-RenderedHTMLCommon ol ol ol ol {
+  list-style: lower-roman;
+}
+
+
+.jp-RenderedHTMLCommon ol ol ol ol ol {
+  list-style: decimal;
+}
+
+
+.jp-RenderedHTMLCommon * + ol,
+.jp-RenderedHTMLCommon * + ul {
+  margin-top: 1em;
+}
+
+
+.jp-RenderedHTMLCommon ul * + ul,
+.jp-RenderedHTMLCommon ul * + ol,
+.jp-RenderedHTMLCommon ol * + ul,
+.jp-RenderedHTMLCommon ol * + ol {
+  margin-top: 0em;
+}
+
+
+.jp-RenderedHTMLCommon hr {
+  color: var(--jp-border-color1);
+  background-color: var(--jp-border-color1);
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+
+.jp-RenderedHTMLCommon pre {
+  margin: 1em 2em;
+}
+
+
+.jp-RenderedHTMLCommon pre,
+.jp-RenderedHTMLCommon code {
+  border: 0;
+  background-color: var(--jp-layout-color1);
+  color: var(--jp-content-font-color1);
+  font-size: 100%;
+  padding: 0px;
+}
+
+
+.jp-RenderedHTMLCommon table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: var(--jp-ui-font-color1);
+  font-size: 12px;
+  table-layout: fixed;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+.jp-RenderedHTMLCommon thead {
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
+  vertical-align: bottom;
+}
+
+
+.jp-RenderedHTMLCommon td,
+.jp-RenderedHTMLCommon th {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+
+
+.jp-RenderedMarkdown.jp-RenderedHTMLCommon td,
+.jp-RenderedMarkdown.jp-RenderedHTMLCommon th {
+  max-width: none;
+}
+
+
+.jp-RenderedHTMLCommon th {
+  font-weight: bold;
+}
+
+
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd) {
+  background: var(--md-grey-100);
+}
+
+
+.jp-RenderedHTMLCommon tbody tr:hover {
+  background: var(--md-light-blue-50);
+}
+
+
+.jp-RenderedHTMLCommon * + table {
+  margin-top: 1em;
+}
+
+
+.jp-RenderedHTMLCommon p {
+  text-align: left;
+  margin: 0px;
+}
+
+
+.jp-RenderedHTMLCommon * + p {
+  margin-top: 1em;
+}
+
+
+.jp-RenderedHTMLCommon img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+.jp-RenderedHTMLCommon * + img {
+  margin-top: 1em;
+}
+
+
+.jp-RenderedHTMLCommon img,
+.jp-RenderedHTMLCommon svg {
+  max-width: 100%;
+  height: auto;
+}
+
+
+.jp-RenderedHTMLCommon img.unconfined,
+.jp-RenderedHTMLCommon svg.unconfined {
+  max-width: none;
+}
+
+.jp-RenderedHTMLCommon .alert {
+  margin-bottom: initial;
+}
+
+
+.jp-RenderedHTMLCommon * + .alert {
+  margin-top: 1em;
+}
+
+
+.jp-RenderedHTMLCommon blockquote {
+  margin: 1em 2em;
+  padding: 0 1em;
+  border-left: 5px solid var(--jp-border-color2);
+}
+
+a.jp-InternalAnchorLink {
+  visibility: hidden;
+}
+
+h1:hover .jp-InternalAnchorLink,
+h2:hover .jp-InternalAnchorLink,
+h3:hover .jp-InternalAnchorLink,
+h4:hover .jp-InternalAnchorLink,
+h5:hover .jp-InternalAnchorLink,
+h6:hover .jp-InternalAnchorLink {
+  visibility: visible;
+}

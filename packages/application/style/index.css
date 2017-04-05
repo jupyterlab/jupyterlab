@@ -1,0 +1,48 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+@import url('~@phosphor/widgets/style/index.css');
+
+
+/*-----------------------------------------------------------------------------
+| General
+|----------------------------------------------------------------------------*/
+
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: var(--jp-ui-font-family);
+  background: var(--jp-layout-color3);
+}
+
+
+.jp-ApplicationShell {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+
+.p-Widget.p-mod-hidden {
+  display: none !important;
+}
+
+
+/*-----------------------------------------------------------------------------
+| Import children style files
+|----------------------------------------------------------------------------*/
+
+
+@import './dockpanel.css';
+@import './menus.css';
+@import './sidepanel.css';
+@import './tabs.css';
+
+

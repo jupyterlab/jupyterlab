@@ -8,36 +8,32 @@ import {
 } from 'simulate-event';
 
 import {
-  ServiceManager, utils
+  ServiceManager
 } from '@jupyterlab/services';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
-  defaultSanitizer
-} from '../../lib/common/sanitizer';
+  ClientSession
+} from '@jupyterlab/apputils';
+
+import {
+  nbformat, uuid
+} from '@jupyterlab/coreutils';
 
 import {
   TextModelFactory, DocumentRegistry, Context
-} from '../../lib/docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
-  INotebookModel
-} from '../../lib/notebook/model';
+  INotebookModel, NotebookModelFactory
+} from '@jupyterlab/notebook';
 
 import {
-  NotebookModelFactory
-} from '../../lib/notebook/modelfactory';
-
-import {
-  TextRenderer, HTMLRenderer
-} from '../../lib/renderers';
-
-import {
-  RenderMime
-} from '../../lib/rendermime';
+  RenderMime, TextRenderer, HTMLRenderer
+} from '@jupyterlab/rendermime';
 
 
 /**
@@ -50,13 +46,35 @@ function defaultRenderMime(): RenderMime {
 
 
 /**
+ * Create a client session object.
+ */
+export
+function createClientSession(options: Partial<ClientSession.IOptions> = {}): Promise<ClientSession> {
+  let manager = options.manager || Private.manager.sessions;
+  return manager.ready.then(() => {
+    return new ClientSession({
+      manager,
+      path: options.path || uuid(),
+      name: options.name,
+      type: options.type,
+      kernelPreference: options.kernelPreference || {
+        shouldStart: true,
+        canStart: true,
+        name: manager.specs.default
+      }
+    });
+  });
+}
+
+
+/**
  * Create a context for a file.
  */
 export
 function createFileContext(path?: string, manager?: ServiceManager.IManager): Context<DocumentRegistry.IModel> {
   manager = manager || Private.manager;
   let factory = Private.textFactory;
-  path = path || utils.uuid() + '.txt';
+  path = path || uuid() + '.txt';
   return new Context({ manager, factory, path });
 }
 
@@ -65,11 +83,15 @@ function createFileContext(path?: string, manager?: ServiceManager.IManager): Co
  * Create a context for a notebook.
  */
 export
-function createNotebookContext(path?: string, manager?: ServiceManager.IManager): Context<INotebookModel> {
+function createNotebookContext(path?: string, manager?: ServiceManager.IManager): Promise<Context<INotebookModel>> {
   manager = manager || Private.manager;
-  let factory = Private.notebookFactory;
-  path = path || utils.uuid() + '.ipynb';
-  return new Context({ manager, factory, path });
+  return manager.ready.then(() => {
+    let factory = Private.notebookFactory;
+    path = path || uuid() + '.ipynb';
+    return new Context({
+      manager, factory, path, kernelPreference: { name: manager.specs.default }
+    });
+  });
 }
 
 
@@ -93,17 +115,14 @@ function waitForDialog(host: HTMLElement = document.body): Promise<void> {
 
 
 /**
- * Accept a dialog after it is attached if it has an OK button.
+ * Accept a dialog after it is attached by accepting the default button.
  */
 export
 function acceptDialog(host: HTMLElement = document.body): Promise<void> {
   return waitForDialog(host).then(() => {
-    let node = host.getElementsByClassName('jp-Dialog-okButton')[0];
-    if (!node) {
-      node = host.getElementsByClassName('jp-Dialog-warningButton')[0];
-    }
+    let node = host.getElementsByClassName('jp-Dialog')[0];
     if (node) {
-      (node as HTMLElement).click();
+      simulate(node as HTMLElement, 'keydown', { keyCode: 13 });
     }
   });
 }
@@ -138,54 +157,84 @@ namespace Private {
 
 
   class JSONRenderer extends HTMLRenderer {
-    /**
-     * The mimetypes this renderer accepts.
-     */
-    mimetypes = ['application/json'];
 
-    /**
-     * Render the transformed mime bundle.
-     */
-    render(options: RenderMime.IRendererOptions<string>): Widget {
-      options.source = json2html(options.source);
+    mimeTypes = ['application/json'];
+
+    render(options: RenderMime.IRenderOptions): Widget {
+      let source = options.model.data.get(options.mimeType);
+      options.model.data.set(options.mimeType, json2html(source));
       return super.render(options);
     }
   }
 
 
   class InjectionRenderer extends TextRenderer {
-    /**
-     * The mimetypes this renderer accepts.
-     */
-    mimetypes = ['foo/bar'];
 
-    /**
-     * Render the transformed mime bundle.
-     */
-    render(options: RenderMime.IRendererOptions<string>): Widget {
-      if (options.injector) {
-        options.injector('text/plain', 'foo');
-        options.injector('application/json', { 'foo': 1 } );
-      }
+    mimeTypes = ['test/injector'];
+
+    render(options: RenderMime.IRenderOptions): Widget {
+      options.model.data.set('application/json', { 'foo': 1 } );
       return super.render(options);
     }
   }
 
-  const TRANSFORMERS = RenderMime.defaultRenderers().concat([
+  let renderers = [
     new JSONRenderer(),
     new InjectionRenderer()
-  ]);
-
-  let renderers: RenderMime.MimeMap<RenderMime.IRenderer> = {};
-  let order: string[] = [];
-  for (let t of TRANSFORMERS) {
-    for (let m of t.mimetypes) {
-      renderers[m] = t;
-      order.push(m);
-    }
+  ];
+  let items = RenderMime.getDefaultItems();
+  for (let renderer of renderers) {
+    items.push({ mimeType: renderer.mimeTypes[0], renderer });
   }
-  let sanitizer = defaultSanitizer;
-
   export
-  const rendermime = new RenderMime({ renderers, order, sanitizer });
+  const rendermime = new RenderMime({ items });
 }
+
+
+/**
+ * The default outputs used for testing.
+ */
+export
+const DEFAULT_OUTPUTS: nbformat.IOutput[] = [
+  {
+   name: 'stdout',
+   output_type: 'stream',
+   text: [
+    'hello world\n',
+    '0\n',
+    '1\n',
+    '2\n'
+   ]
+  },
+  {
+   name: 'stderr',
+   output_type: 'stream',
+   text: [
+    'output to stderr\n'
+   ]
+  },
+  {
+   name: 'stderr',
+   output_type: 'stream',
+   text: [
+    'output to stderr2\n'
+   ]
+  },
+  {
+    output_type: 'execute_result',
+    execution_count: 1,
+    data: { 'text/plain': 'foo' },
+    metadata: {}
+  },
+  {
+   output_type: 'display_data',
+   data: { 'text/plain': 'hello, world' },
+   metadata: {}
+  },
+  {
+    output_type: 'error',
+    ename: 'foo',
+    evalue: 'bar',
+    traceback: ['fizz', 'buzz']
+  }
+];

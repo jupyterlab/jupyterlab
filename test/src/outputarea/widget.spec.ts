@@ -4,32 +4,34 @@
 import expect = require('expect.js');
 
 import {
+  ClientSession
+} from '@jupyterlab/apputils';
+
+import {
+  Kernel
+} from '@jupyterlab/services';
+
+import {
   Message
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
-  ChildMessage, Widget
-} from 'phosphor/lib/ui/widget';
+  Widget
+} from '@phosphor/widgets';
 
 import {
-  OutputAreaModel, OutputAreaWidget, OutputWidget
-} from '../../../lib/outputarea';
+  IOutputAreaModel, OutputAreaModel, OutputAreaWidget
+} from '@jupyterlab/outputarea';
 
 import {
-  defaultRenderMime
+  createClientSession, defaultRenderMime, DEFAULT_OUTPUTS
 } from '../utils';
-
-import {
-  DEFAULT_OUTPUTS
-} from './model.spec';
 
 
 /**
  * The default rendermime instance to use for testing.
  */
 const rendermime = defaultRenderMime();
-const contentFactory = OutputAreaWidget.defaultContentFactory;
-const OPTIONS = { rendermime, contentFactory };
 
 
 class LogOutputAreaWidget extends OutputAreaWidget {
@@ -41,128 +43,49 @@ class LogOutputAreaWidget extends OutputAreaWidget {
     this.methods.push('onUpdateRequest');
   }
 
-  protected onChildAdded(msg: ChildMessage): void {
-    super.onChildAdded(msg);
-    this.methods.push('onChildAdded');
-  }
-
-  protected onChildRemoved(msg: ChildMessage): void {
-    super.onChildRemoved(msg);
-    this.methods.push('onChildRemoved');
-  }
-
-  protected onModelChanged(oldValue: OutputAreaModel, newValue: OutputAreaModel): void {
-    super.onModelChanged(oldValue, newValue);
+  protected onModelChanged(sender: IOutputAreaModel, args: IOutputAreaModel.ChangedArgs) {
+    super.onModelChanged(sender, args);
     this.methods.push('onModelChanged');
   }
 }
 
 
-class CustomOutputWidget extends OutputWidget {
+describe('outputarea/widget', () => {
 
-  setOutput(value: Widget): void {
-    super.setOutput(value);
-  }
-}
+  let widget: LogOutputAreaWidget;
+  let model: OutputAreaModel;
 
+  beforeEach(() => {
+    model = new OutputAreaModel({ values: DEFAULT_OUTPUTS, trusted: true });
+    widget = new LogOutputAreaWidget({ rendermime, model });
+  });
 
-function createWidget(): LogOutputAreaWidget {
-  let widget = new LogOutputAreaWidget(OPTIONS);
-  let model = new OutputAreaModel();
-  for (let output of DEFAULT_OUTPUTS) {
-    model.add(output);
-  }
-  widget.model = model;
-  return widget;
-}
-
-
-describe('notebook/output-area/widget', () => {
+  afterEach(() => {
+    model.dispose();
+    widget.dispose();
+  });
 
   describe('OutputAreaWidget', () => {
 
     describe('#constructor()', () => {
 
-      it('should take an options object', () => {
-        let widget = new OutputAreaWidget(OPTIONS);
+      it('should create an output area widget', () => {
         expect(widget).to.be.an(OutputAreaWidget);
+        expect(widget.hasClass('jp-OutputAreaWidget')).to.be(true);
       });
 
       it('should take an optional contentFactory', () => {
         let contentFactory = Object.create(OutputAreaWidget.defaultContentFactory);
-        let widget = new OutputAreaWidget({ rendermime, contentFactory });
+        let widget = new OutputAreaWidget({ rendermime, contentFactory, model });
         expect(widget.contentFactory).to.be(contentFactory);
-      });
-
-      it('should add the `jp-OutputArea` class', () => {
-        let widget = new OutputAreaWidget(OPTIONS);
-        expect(widget.hasClass('jp-OutputArea')).to.be(true);
-      });
-
-    });
-
-    describe('#modelChanged', () => {
-
-      it('should be emitted when the model of the widget changes', () => {
-        let widget = new OutputAreaWidget(OPTIONS);
-        let called = false;
-        widget.modelChanged.connect((sender, args) => {
-          expect(sender).to.be(widget);
-          expect(args).to.be(void 0);
-          called = true;
-        });
-        widget.model = new OutputAreaModel();
-        expect(called).to.be(true);
       });
 
     });
 
     describe('#model', () => {
 
-      it('should default to `null`', () => {
-        let widget = new OutputAreaWidget(OPTIONS);
-        expect(widget.model).to.be(null);
-      });
-
-      it('should set the model', () => {
-        let widget = new OutputAreaWidget(OPTIONS);
-        let model = new OutputAreaModel();
-        widget.model = model;
+      it('should be the model used by the widget', () => {
         expect(widget.model).to.be(model);
-      });
-
-      it('should emit `modelChanged` when the model changes', () => {
-        let widget = new OutputAreaWidget(OPTIONS);
-        let called = false;
-        widget.modelChanged.connect(() => { called = true; });
-        widget.model = new OutputAreaModel();
-        expect(called).to.be(true);
-      });
-
-      it('should not emit `modelChanged` when the model does not change', () => {
-        let widget = new OutputAreaWidget(OPTIONS);
-        let called = false;
-        let model = new OutputAreaModel();
-        widget.model = model;
-        widget.modelChanged.connect(() => { called = true; });
-        widget.model = model;
-        expect(called).to.be(false);
-      });
-
-      it('should create widgets for the model items', () => {
-        let widget = createWidget();
-        expect(widget.widgets.length).to.be(5);
-      });
-
-      context('model `changed` signal', () => {
-
-        it('should dispose of the child widget when an output is removed', () => {
-          let widget = createWidget();
-          let child = widget.widgets.at(0);
-          widget.model.clear();
-          expect(child.isDisposed).to.be(true);
-        });
-
       });
 
     });
@@ -170,7 +93,6 @@ describe('notebook/output-area/widget', () => {
     describe('#rendermime', () => {
 
       it('should be the rendermime instance used by the widget', () => {
-        let widget = new OutputAreaWidget(OPTIONS);
         expect(widget.rendermime).to.be(rendermime);
       });
 
@@ -179,24 +101,21 @@ describe('notebook/output-area/widget', () => {
     describe('#contentFactory', () => {
 
       it('should be the contentFactory used by the widget', () => {
-        let contentFactory = new OutputAreaWidget.ContentFactory();
-        let widget = new OutputAreaWidget({ rendermime, contentFactory });
-        expect(widget.contentFactory).to.be(contentFactory);
+        expect(widget.contentFactory).to.be(OutputAreaWidget.defaultContentFactory);
       });
 
     });
 
-    describe('#trusted', () => {
+    describe('#widgets', () => {
 
-      it('should get the trusted state of the widget', () => {
-        let widget = new OutputAreaWidget(OPTIONS);
-        expect(widget.trusted).to.be(false);
+      it('should get the child widget at the specified index', () => {
+        expect(widget.widgets[0]).to.be.a(Widget);
       });
 
-      it('should set the trusted state of the widget', () => {
-        let widget = new OutputAreaWidget(OPTIONS);
-        widget.trusted = true;
-        expect(widget.trusted).to.be(true);
+      it('should get the number of child widgets', () => {
+        expect(widget.widgets.length).to.be(DEFAULT_OUTPUTS.length - 1);
+        widget.model.clear();
+        expect(widget.widgets.length).to.be(0);
       });
 
     });
@@ -204,18 +123,15 @@ describe('notebook/output-area/widget', () => {
     describe('#collapsed', () => {
 
       it('should get the collapsed state of the widget', () => {
-        let widget = createWidget();
         expect(widget.collapsed).to.be(false);
       });
 
       it('should set the collapsed state of the widget', () => {
-        let widget = createWidget();
         widget.collapsed = true;
         expect(widget.collapsed).to.be(true);
       });
 
       it('should post an update request', (done) => {
-        let widget = new LogOutputAreaWidget(OPTIONS);
         widget.collapsed = true;
         requestAnimationFrame(() => {
           expect(widget.methods).to.contain('onUpdateRequest');
@@ -228,18 +144,15 @@ describe('notebook/output-area/widget', () => {
     describe('#fixedHeight', () => {
 
       it('should get the fixed height state of the widget', () => {
-        let widget = createWidget();
         expect(widget.fixedHeight).to.be(false);
       });
 
       it('should set the fixed height state of the widget', () => {
-        let widget = createWidget();
         widget.fixedHeight = true;
         expect(widget.fixedHeight).to.be(true);
       });
 
       it('should post an update request', (done) => {
-        let widget = new LogOutputAreaWidget(OPTIONS);
         widget.fixedHeight = true;
         requestAnimationFrame(() => {
           expect(widget.methods).to.contain('onUpdateRequest');
@@ -252,32 +165,47 @@ describe('notebook/output-area/widget', () => {
     describe('#dispose()', () => {
 
       it('should dispose of the resources held by the widget', () => {
-        let widget = createWidget();
         widget.dispose();
         expect(widget.isDisposed).to.be(true);
-      });
-
-      it('should be safe to call more than once', () => {
-        let widget = createWidget();
-        widget.dispose();
         widget.dispose();
         expect(widget.isDisposed).to.be(true);
       });
 
     });
 
-    describe('#widgets', () => {
+    describe('#execute()', () => {
 
-      it('should get the child widget at the specified index', () => {
-        let widget = createWidget();
-        expect(widget.widgets.at(0)).to.be.a(Widget);
+      let session: ClientSession;
+
+      beforeEach(() => {
+        return createClientSession().then(s => {
+          session = s;
+          return session.initialize();
+        });
       });
 
-      it('should get the number of child widgets', () => {
-        let widget = createWidget();
-        expect(widget.widgets.length).to.be(5);
-        widget.model.clear();
-        expect(widget.widgets.length).to.be(0);
+      afterEach(() => {
+        return session.shutdown().then(() => {
+          session.dispose();
+        });
+      });
+
+      it('should execute code on a kernel and send outputs to the model', () => {
+        return session.kernel.ready.then(() => {
+          return widget.execute('print("hello")', session).then(reply => {
+            expect(reply.content.execution_count).to.be.ok();
+            expect(reply.content.status).to.be('ok');
+            expect(model.length).to.be(1);
+          });
+        });
+      });
+
+      it('should clear existing outputs', () => {
+        widget.model.fromJSON(DEFAULT_OUTPUTS);
+        return widget.execute('print("hello")', session).then(reply => {
+          expect(reply.content.execution_count).to.be.ok();
+          expect(model.length).to.be(1);
+        });
       });
 
     });
@@ -285,7 +213,6 @@ describe('notebook/output-area/widget', () => {
     describe('#onUpdateRequest()', () => {
 
       it('should set the appropriate classes on the widget', (done) => {
-        let widget = createWidget();
         widget.collapsed = true;
         widget.fixedHeight = true;
         requestAnimationFrame(() => {
@@ -300,30 +227,57 @@ describe('notebook/output-area/widget', () => {
 
     describe('#onModelChanged()', () => {
 
-      it('should be called when the model changes', () => {
-        let widget = new LogOutputAreaWidget(OPTIONS);
-        widget.model = new OutputAreaModel();
+      it('should handle an added output', () => {
+        widget.model.clear();
+        widget.methods = [];
+        widget.model.add(DEFAULT_OUTPUTS[0]);
         expect(widget.methods).to.contain('onModelChanged');
+        expect(widget.widgets.length).to.be(1);
       });
 
-      it('should not be called when the model does not change', () => {
-        let widget = new LogOutputAreaWidget(OPTIONS);
-        widget.model = new OutputAreaModel();
+      it('should handle a clear', () => {
+        widget.model.fromJSON(DEFAULT_OUTPUTS);
         widget.methods = [];
-        widget.model = widget.model;
-        expect(widget.methods).to.not.contain('onModelChanged');
+        widget.model.clear();
+        expect(widget.methods).to.contain('onModelChanged');
+        expect(widget.widgets.length).to.be(0);
+      });
+
+      it('should handle a set', () => {
+        widget.model.clear();
+        widget.model.add(DEFAULT_OUTPUTS[0]);
+        widget.methods = [];
+        widget.model.add(DEFAULT_OUTPUTS[0]);
+        expect(widget.methods).to.contain('onModelChanged');
+        expect(widget.widgets.length).to.be(1);
       });
 
     });
 
     describe('.contentFactory', () => {
 
-      describe('#createOutput()', () => {
+      describe('#createGutter()', () => {
 
-        it('should create a on output widget', () => {
-          let contentFactory = new OutputAreaWidget.ContentFactory();
-          let widget = contentFactory.createOutput(OPTIONS);
-          expect(widget).to.be.an(OutputWidget);
+        it('should create a gutter widget', () => {
+          let factory = new OutputAreaWidget.ContentFactory();
+          expect(factory.createGutter().executionCount).to.be(null);
+        });
+
+      });
+
+      describe('#createStdin()', () => {
+
+        it('should create a stdin widget', () => {
+          return Kernel.startNew().then(kernel => {
+            let factory = new OutputAreaWidget.ContentFactory();
+            let options = {
+              prompt: 'hello',
+              password: false,
+              kernel
+            };
+            expect(factory.createStdin(options)).to.be.a(Widget);
+            return kernel.shutdown().then(() => { kernel.dispose(); });
+          });
         });
 
       });
@@ -334,92 +288,6 @@ describe('notebook/output-area/widget', () => {
 
       it('should be a `contentFactory` instance', () => {
         expect(OutputAreaWidget.defaultContentFactory).to.be.an(OutputAreaWidget.ContentFactory);
-      });
-
-    });
-
-  });
-
-  describe('OutputWidget', () => {
-
-    describe('#constructor()', () => {
-
-      it('should accept a rendermime instance', () => {
-        let widget = new OutputWidget(OPTIONS);
-        expect(widget).to.be.an(OutputWidget);
-      });
-
-      it('should add the `jp-OutputArea-output` class', () => {
-        let widget = new OutputWidget(OPTIONS);
-        expect(widget.hasClass('jp-Output')).to.be(true);
-      });
-
-    });
-
-    describe('#prompt', () => {
-
-      it('should get the prompt widget used by the output widget', () => {
-        let widget = new OutputWidget(OPTIONS);
-        expect(widget.prompt.hasClass('jp-Output-prompt')).to.be(true);
-      });
-
-    });
-
-    describe('#output', () => {
-
-      it('should get the rendered output used by the output widget', () => {
-        let widget = new OutputWidget(OPTIONS);
-        expect(widget.output.hasClass('jp-Output-result')).to.be(true);
-      });
-
-    });
-
-    describe('#clear()', () => {
-
-      it('should clear the current output', () => {
-        let widget = new OutputWidget(OPTIONS);
-        widget.render({ output: DEFAULT_OUTPUTS[0], trusted: true });
-        let output = widget.output;
-        widget.clear();
-        expect(widget.output).to.not.be(output);
-        expect(widget.output).to.be.a(Widget);
-      });
-
-    });
-
-    describe('#render()', () => {
-
-      it('should handle all bundle types when trusted', () => {
-        let widget = new OutputWidget(OPTIONS);
-        for (let i = 0; i < DEFAULT_OUTPUTS.length; i++) {
-          let output = DEFAULT_OUTPUTS[i];
-          widget.render({ output, trusted: true });
-        }
-      });
-
-      it('should handle all bundle types when not trusted', () => {
-        let widget = new OutputWidget(OPTIONS);
-        for (let i = 0; i < DEFAULT_OUTPUTS.length; i++) {
-          let output = DEFAULT_OUTPUTS[i];
-          widget.render({ output, trusted: false });
-        }
-      });
-
-    });
-
-    describe('#setOutput()', () => {
-
-      it('should set the rendered output widget used by the output widget', () => {
-        let widget = new CustomOutputWidget(OPTIONS);
-        let child = new Widget();
-        widget.setOutput(child);
-        expect(widget.output).to.be(child);
-      });
-
-      it('should default to a placeholder if set to `null`', () => {
-        let widget = new CustomOutputWidget(OPTIONS);
-        widget.setOutput(null);
-        expect(widget.output).to.be.a(Widget);
       });
 
     });

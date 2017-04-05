@@ -4,32 +4,28 @@
 import expect = require('expect.js');
 
 import {
-  Session, utils
-} from '@jupyterlab/services';
-
-import {
   Message
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
-  CodeConsole
-} from '../../../lib/console';
+  ClientSession
+} from '@jupyterlab/apputils';
 
 import {
-  ConsoleHistory
-} from '../../../lib/console/history';
-
-import {
-  ForeignHandler
-} from '../../../lib/console/foreign';
+  CodeConsole, ConsoleHistory, ForeignHandler
+} from '@jupyterlab/console';
 
 import {
   BaseCellWidget, CodeCellWidget, CodeCellModel, RawCellModel, RawCellWidget
-} from '../../../lib/cells';
+} from '@jupyterlab/cells';
+
+import {
+  createClientSession
+} from '../utils';
 
 import {
   createCodeCellFactory
@@ -73,24 +69,21 @@ describe('console/widget', () => {
 
   describe('CodeConsole', () => {
 
-    let session: Session.ISession;
     let widget: TestConsole;
 
-    beforeEach(done => {
-      Session.startNew({ path: utils.uuid() }).then(newSession => {
-        session = newSession;
-        widget = new TestConsole({ contentFactory, rendermime, session,
-                                   mimeTypeService });
-        done();
+    beforeEach(() => {
+      return createClientSession().then(session => {
+        widget = new TestConsole({
+          contentFactory, rendermime, session, mimeTypeService
+        });
       });
     });
 
-    afterEach(done => {
-      session.shutdown().then(() => {
-        session.dispose();
+    afterEach(() => {
+      return widget.session.shutdown().then(() => {
+        widget.session.dispose();
         widget.dispose();
-        done();
-      }).catch(done);
+      });
     });
 
     describe('#constructor()', () => {
@@ -109,30 +102,32 @@ describe('console/widget', () => {
         expect(widget.cells).to.be.ok();
       });
 
-      it('should reflect the contents of the widget', done => {
+      it('should reflect the contents of the widget', () => {
         let force = true;
         Widget.attach(widget, document.body);
-        widget.execute(force).then(() => {
+        return (widget.session as ClientSession).initialize().then(() => {
+          return widget.execute(force);
+        }).then(() => {
           expect(widget.cells.length).to.be(1);
           widget.clear();
           expect(widget.cells.length).to.be(0);
-          done();
-        }).catch(done);
+        });
       });
 
     });
 
     describe('#executed', () => {
 
-      it('should emit a date upon execution', done => {
+      it('should emit a date upon execution', () => {
         let called: Date = null;
         let force = true;
         Widget.attach(widget, document.body);
         widget.executed.connect((sender, time) => { called = time; });
-        widget.execute(force).then(() => {
+        return (widget.session as ClientSession).initialize().then(() => {
+          return widget.execute(force);
+        }).then(() => {
           expect(called).to.be.a(Date);
-          done();
-        }).catch(done);
+        });
       });
 
     });
@@ -144,26 +139,27 @@ describe('console/widget', () => {
         expect(widget.prompt).to.be.a(CodeCellWidget);
       });
 
-      it('should be replaced after execution', done => {
+      it('should be replaced after execution', () => {
         let force = true;
         Widget.attach(widget, document.body);
 
         let old = widget.prompt;
         expect(old).to.be.a(CodeCellWidget);
 
-        widget.execute(force).then(() => {
+        return (widget.session as ClientSession).initialize().then(() => {
+          return widget.execute(force);
+        }).then(() => {
           expect(widget.prompt).to.be.a(CodeCellWidget);
           expect(widget.prompt).to.not.be(old);
-          done();
-        }).catch(done);
+        });
       });
 
     });
 
     describe('#session', () => {
 
-      it('should return the session passed in at instantiation', () => {
-        expect(widget.session).to.be(session);
+      it('should be a client session object', () => {
+        expect(widget.session.path).to.ok();
       });
 
     });
@@ -192,16 +188,17 @@ describe('console/widget', () => {
 
     describe('#clear()', () => {
 
-      it('should clear all of the content cells except the banner', done => {
+      it('should clear all of the content cells except the banner', () => {
         let force = true;
         Widget.attach(widget, document.body);
-        widget.execute(force).then(() => {
+        return (widget.session as ClientSession).initialize().then(() => {
+          return widget.execute(force);
+        }).then(() => {
           expect(widget.cells.length).to.be.greaterThan(0);
           widget.clear();
           expect(widget.cells.length).to.be(0);
           expect(widget.prompt.model.value.text).to.be('');
-          done();
-        }).catch(done);
+        });
       });
 
     });
@@ -227,26 +224,28 @@ describe('console/widget', () => {
 
     describe('#execute()', () => {
 
-      it('should execute contents of the prompt if forced', done => {
+      it('should execute contents of the prompt if forced', () => {
         let force = true;
         Widget.attach(widget, document.body);
         expect(widget.cells.length).to.be(0);
-        widget.execute(force).then(() => {
+        return (widget.session as ClientSession).initialize().then(() => {
+          return widget.execute(force);
+        }).then(() => {
           expect(widget.cells.length).to.be.greaterThan(0);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should check if code is multiline and allow amending', done => {
+      it('should check if code is multiline and allow amending', () => {
         let force = false;
         let timeout = 9000;
         Widget.attach(widget, document.body);
         widget.prompt.model.value.text = 'for x in range(5):';
         expect(widget.cells.length).to.be(0);
-        widget.execute(force, timeout).then(() => {
+        return (widget.session as ClientSession).initialize().then(() => {
+          return widget.execute(force, timeout);
+        }).then(() => {
           expect(widget.cells.length).to.be(0);
-          done();
-        }).catch(done);
+        });
       });
 
     });
@@ -301,7 +300,7 @@ describe('console/widget', () => {
         expect(widget.prompt).to.be.ok();
       });
 
-      it('should be called after execution, creating a prompt', done => {
+      it('should be called after execution, creating a prompt', () => {
         expect(widget.prompt).to.not.be.ok();
         expect(widget.methods).to.not.contain('newPrompt');
         Widget.attach(widget, document.body);
@@ -312,12 +311,13 @@ describe('console/widget', () => {
         expect(old).to.be.a(CodeCellWidget);
         widget.methods = [];
 
-        widget.execute(force).then(() => {
+        return (widget.session as ClientSession).initialize().then(() => {
+          return widget.execute(force);
+        }).then(() => {
           expect(widget.prompt).to.be.a(CodeCellWidget);
           expect(widget.prompt).to.not.be(old);
           expect(widget.methods).to.contain('newPrompt');
-          done();
-        }).catch(done);
+        });
       });
 
     });
@@ -352,19 +352,6 @@ describe('console/widget', () => {
 
     });
 
-    describe('#onUpdateRequest()', () => {
-
-      it('should be called upon an update, after attach', done => {
-        expect(widget.methods).to.not.contain('onUpdateRequest');
-        Widget.attach(widget, document.body);
-        requestAnimationFrame(() => {
-          expect(widget.methods).to.contain('onUpdateRequest');
-          done();
-        });
-      });
-
-    });
-
     describe('.ContentFactory', () => {
 
       describe('#constructor', () => {
@@ -395,8 +382,10 @@ describe('console/widget', () => {
       describe('#createConsoleHistory', () => {
 
         it('should create a ConsoleHistory', () => {
-          let history = contentFactory.createConsoleHistory({});
-          expect(history).to.be.a(ConsoleHistory);
+          return createClientSession().then(session => {
+            let history = contentFactory.createConsoleHistory({ session });
+            expect(history).to.be.a(ConsoleHistory);
+          });
         });
 
       });
@@ -413,12 +402,14 @@ describe('console/widget', () => {
             };
             return contentFactory.createForeignCell(options, widget);
           };
-          let handler = contentFactory.createForeignHandler({
-            kernel: null,
-            parent: widget,
-            cellFactory
+          return createClientSession().then(session => {
+            let handler = contentFactory.createForeignHandler({
+              session,
+              parent: widget,
+              cellFactory
+            });
+            expect(handler).to.be.a(ForeignHandler);
           });
-          expect(handler).to.be.a(ForeignHandler);
         });
 
       });

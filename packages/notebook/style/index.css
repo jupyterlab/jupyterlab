@@ -1,0 +1,270 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+| Variables
+|----------------------------------------------------------------------------*/
+
+
+:root {
+  --jp-private-notebook-padding: 10px;
+  --jp-private-notebook-dragImage-width: 90px;
+  --jp-private-notebook-dragImage-height: 39px;
+  --jp-private-notebook-dragImage-circleRadius: 20px;
+  --jp-private-notebook-selected-color: var(--md-blue-400);
+  --jp-private-notebook-multiselected-color: var(--md-blue-50);
+  --jp-private-notebook-active-color: var(--md-green-400);
+  --jp-private-notebook-cell-border-color: #ABABAB;
+  --jp-private-notebook-left-border-width: 5px;
+}
+
+/*-----------------------------------------------------------------------------
+| Imports
+|----------------------------------------------------------------------------*/
+
+@import './toolbar.css';
+
+
+
+/*-----------------------------------------------------------------------------
+| Notebook
+|----------------------------------------------------------------------------*/
+
+
+.jp-Notebook {
+  padding: var(--jp-private-notebook-padding);
+  min-width: 50px;
+  min-height: 50px;
+  outline: none;
+  overflow: auto;
+  background: var(--jp-layout-color1);
+}
+
+
+.jp-Notebook::after {
+  display: block;
+  content: '';
+  min-height: var(--jp-notebook-scroll-padding);
+}
+
+
+.jp-Notebook-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+
+.jp-Notebook .jp-Cell.jp-Notebook-cell {
+  overflow: visible
+}
+
+
+.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected {
+  border-color: var(--jp-private-notebook-cell-border-color);
+}
+
+
+.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected:before {
+  position: absolute;
+  display: block;
+  top: calc( -1 * var(--jp-border-width) );
+  left: calc( -1 * var(--jp-border-width) );
+  width: var(--jp-private-notebook-left-border-width);
+  height: calc( 100% + 2 * var(--jp-border-width) );
+  content: '';
+  background: var(--jp-private-notebook-selected-color);
+}
+
+
+.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-selected {
+  background: var(--jp-private-notebook-multiselected-color);
+}
+
+
+.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected:not(.jp-mod-multiSelected) {
+  background: transparent;
+}
+
+
+
+.jp-Notebook.jp-mod-editMode .jp-Notebook-cell.jp-mod-active {
+  border-color: var(--jp-private-notebook-active-color);
+}
+
+
+.jp-Notebook.jp-mod-editMode .jp-Notebook-cell.jp-mod-active:before {
+  position: absolute;
+  display: block;
+  top: calc( -1 * var(--jp-border-width) );
+  left: calc( -1 * var(--jp-border-width) );
+  width: var(--jp-private-notebook-left-border-width);
+  height: calc( 100% + 2 * var(--jp-border-width) );
+  content: '';
+  background: var(--jp-private-notebook-active-color);
+}
+
+
+.jp-Notebook {
+  flex: 1 1 auto;
+}
+
+
+.jp-Notebook-cell.jp-mod-dropSource {
+  opacity: 0.5;
+}
+
+
+.jp-Notebook-cell.jp-mod-dropTarget,
+.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected.jp-mod-dropTarget {
+  border-top-color: var(--jp-private-notebook-selected-color);
+}
+
+
+.jp-Notebook-cell .jp-Cell-prompt {
+  cursor: move;
+}
+
+
+.jp-Notebook-cell .jp-OutputArea {
+  max-height: 1000px;
+}
+
+
+.jp-dragImage {
+  position: absolute;
+  width: var(--jp-private-notebook-dragImage-width);
+  height: var(--jp-private-notebook-dragImage-height);
+  border: var(--jp-border-width) solid var(--jp-private-notebook-cell-border-color);
+  background: var(--jp-layout-color1);
+  overflow: visible;
+}
+
+
+.jp-dragImage:before {
+  position: absolute;
+  display: block;
+  top: calc( -1 * var(--jp-border-width) );
+  left: calc( -1 * var(--jp-border-width) );
+  width: var(--jp-private-notebook-left-border-width);
+  height: calc( 100% + 2 * var(--jp-border-width) );
+  content: '';
+  background: var(--jp-private-notebook-selected-color);
+}
+
+
+.jp-dragImage .jp-filledCircle {
+    position: absolute;
+    left: calc( ( var(--jp-private-notebook-dragImage-width) - var(--jp-private-notebook-dragImage-circleRadius) ) / 2 );
+    top: calc( ( var(--jp-private-notebook-dragImage-height) - var(--jp-private-notebook-dragImage-circleRadius) ) / 2 );
+    border-radius: 50%;
+
+    width: var(--jp-private-notebook-dragImage-circleRadius);
+    height: var(--jp-private-notebook-dragImage-circleRadius);
+
+    background: var(--jp-accent-color1);
+    color: white;
+    text-align: center;
+    line-height: var(--jp-private-notebook-dragImage-circleRadius);
+}
+
+
+.jp-CellTools {
+  display: flex;
+  flex-direction: column;
+  min-width: 300px;
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  font-size: var(--jp-ui-font-size1);
+}
+
+
+.jp-ActiveCellTool {
+  padding: 12px;
+  border-bottom: 1px solid var(--jp-border-color1);
+  background-color: var(--jp-border-color3);
+}
+
+
+.jp-ActiveCellTool .jp-Cell-prompt {
+  flex: 0 0 auto;
+  padding-left: 0px;
+}
+
+
+.jp-ActiveCellTool .jp-CellEditor {
+  flex: 1 1 auto;
+  background-color: white;
+  border-color: var(--jp-border-color1);
+}
+
+
+.jp-CellTools-tool:not(:first-child) {
+  border-top: 1px solid var(--md-grey-300);
+}
+
+
+.jp-MetadataEditorTool {
+  flex-direction: column;
+}
+
+
+.jp-MetadataEditorTool-header {
+  flex: 1 0 auto;
+  padding: 10px;
+  padding-bottom: 16px;
+}
+
+
+.jp-MetadataEditorTool-header label {
+  flex: 0 0 auto;
+}
+
+
+.jp-MetadataEditorTool-toggleButton {
+  padding-left: 6px;
+  font-family: FontAwesome;
+}
+
+
+.jp-MetadataEditorTool-toggleButton::before {
+  content: '\f0d8'; /* caret-up */
+}
+
+
+.jp-MetadataEditorTool-toggleButton.jp-mod-collapsed::before {
+  content: '\f0d7'; /* caret-down */
+}
+
+
+.jp-MetadataEditorTool .jp-JSONEditorWidget.jp-mod-collapsed {
+  display: none;
+}
+
+
+.jp-KeySelector {
+  padding: 12px;
+}
+
+
+.jp-KeySelector .jp-select-wrapper {
+  background: white;
+}
+
+
+.jp-KeySelector select.jp-mod-styled {
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color0);
+}
+
+
+.jp-KeySelector .jp-select-wrapper:not(.jp-mod-focused) {
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+}
+
+
+.jp-KeySelector label {
+  line-height: 1.4;
+}

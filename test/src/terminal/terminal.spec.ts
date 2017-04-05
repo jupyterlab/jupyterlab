@@ -8,16 +8,20 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Message, sendMessage
-} from 'phosphor/lib/core/messaging';
+  Platform
+} from '@phosphor/domutils';
 
 import {
-  ResizeMessage, WidgetMessage, Widget
-} from 'phosphor/lib/ui/widget';
+  Message, MessageLoop
+} from '@phosphor/messaging';
+
+import {
+  Widget
+} from '@phosphor/widgets';
 
 import {
   TerminalWidget
-} from '../../../lib/terminal';
+} from '@jupyterlab/terminal';
 
 
 class LogTerminal extends TerminalWidget {
@@ -39,7 +43,7 @@ class LogTerminal extends TerminalWidget {
     this.methods.push('onCloseRequest');
   }
 
-  protected onResize(msg: ResizeMessage): void {
+  protected onResize(msg: Widget.ResizeMessage): void {
     super.onResize(msg);
     this.methods.push('onResize');
   }
@@ -70,6 +74,11 @@ describe('terminal/index', () => {
     let session: TerminalSession.ISession;
 
     before((done) => {
+      if (Platform.IS_WIN) {
+        session = null;
+        expect(() => { TerminalSession.startNew(); }).to.throwError();
+        return done();
+      }
       TerminalSession.startNew().then(s => {
         session = s;
       }).then(done, done);
@@ -97,7 +106,10 @@ describe('terminal/index', () => {
         expect(widget.session).to.be(null);
       });
 
-      it('should set the title when ready', (done) => {
+      it('should set the title when ready', function(done) {
+        if (Platform.IS_WIN) {
+          return this.skip();
+        }
         widget.session = session;
         expect(widget.session).to.be(session);
         session.ready.then(() => {
@@ -109,13 +121,13 @@ describe('terminal/index', () => {
 
     describe('#fontSize', () => {
 
-      it('should be 14 by default', () => {
-        expect(widget.fontSize).to.be(14);
+      it('should be 13 by default', () => {
+        expect(widget.fontSize).to.be(13);
       });
 
       it('should trigger an update request', (done) => {
-        widget.fontSize = 13;
-        expect(widget.fontSize).to.be(13);
+        widget.fontSize = 14;
+        expect(widget.fontSize).to.be(14);
         requestAnimationFrame(() => {
           expect(widget.methods).to.contain('onUpdateRequest');
           done();
@@ -170,10 +182,23 @@ describe('terminal/index', () => {
 
     });
 
+    describe('#refresh()', () => {
+
+      it('should refresh the widget', (done) => {
+        if (Platform.IS_WIN) {
+          expect(widget.refresh()).to.be.a(Promise);
+          return done();
+        }
+        widget.session = session;
+        widget.refresh().then(done, done);
+      });
+
+    });
+
     describe('#processMessage()', () => {
 
       it('should handle fit requests', () => {
-        widget.processMessage(WidgetMessage.FitRequest);
+        widget.processMessage(Widget.Msg.FitRequest);
         expect(widget.methods).to.contain('onFitRequest');
       });
 
@@ -223,8 +248,8 @@ describe('terminal/index', () => {
     describe('#onResize()', () => {
 
       it('should trigger an update request', (done) => {
-        let msg = ResizeMessage.UnknownSize;
-        sendMessage(widget, msg);
+        let msg = Widget.ResizeMessage.UnknownSize;
+        MessageLoop.sendMessage(widget, msg);
         expect(widget.methods).to.contain('onResize');
         requestAnimationFrame(() => {
           expect(widget.methods).to.contain('onUpdateRequest');
@@ -238,7 +263,7 @@ describe('terminal/index', () => {
 
       it('should set the style of the terminal', () => {
         Widget.attach(widget, document.body);
-        sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
         let style = window.getComputedStyle(widget.node);
         expect(style.backgroundColor).to.be('rgb(0, 0, 0)');
@@ -250,7 +275,7 @@ describe('terminal/index', () => {
     describe('#onFitRequest', () => {
 
       it('should send a resize request', () => {
-        sendMessage(widget, WidgetMessage.FitRequest);
+        MessageLoop.sendMessage(widget, Widget.Msg.FitRequest);
         expect(widget.methods).to.contain('onResize');
       });
 
@@ -261,7 +286,7 @@ describe('terminal/index', () => {
       it('should focus the terminal element', () => {
         Widget.attach(widget, document.body);
         expect(widget.node.contains(document.activeElement)).to.be(false);
-        sendMessage(widget, WidgetMessage.ActivateRequest);
+        MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
         expect(widget.methods).to.contain('onActivateRequest');
         expect(widget.node.contains(document.activeElement)).to.be(true);
       });

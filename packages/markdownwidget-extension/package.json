@@ -1,0 +1,40 @@
+{
+  "name": "@jupyterlab/markdownwidget-extension",
+  "version": "0.2.0",
+  "description": "JupyterLab - Markdown Renderer Extension",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js"
+  ],
+  "directories": {
+    "lib": "lib/"
+  },
+  "dependencies": {
+    "@jupyterlab/application": "^0.2.0",
+    "@jupyterlab/apputils": "^0.2.0",
+    "@jupyterlab/docregistry": "^0.2.0",
+    "@jupyterlab/markdownwidget": "^0.2.0",
+    "@jupyterlab/rendermime": "^0.2.0"
+  },
+  "devDependencies": {
+    "rimraf": "^2.5.2",
+    "typescript": "^2.2.1"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib",
+    "watch": "tsc -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "author": "Project Jupyter",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "homepage": "https://github.com/jupyterlab/jupyterlab"
+}

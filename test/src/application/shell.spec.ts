@@ -5,11 +5,11 @@ import expect = require('expect.js');
 
 import {
   Message
-} from 'phosphor/lib/core/messaging';
+} from '@phosphor/messaging';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
   simulate
@@ -17,7 +17,7 @@ import {
 
 import {
   ApplicationShell
-} from '../../../lib/application';
+} from '@jupyterlab/application';
 
 
 class ContentWidget extends Widget {
@@ -66,50 +66,38 @@ describe('ApplicationShell', () => {
 
   });
 
-  describe('#mainAreaIsEmpty', () => {
+  describe('#isEmpty()', () => {
 
     it('should test whether the main area is empty', () => {
-      expect(shell.mainAreaIsEmpty).to.be(true);
+      expect(shell.isEmpty('top')).to.be(true);
       let widget = new Widget();
       widget.id = 'foo';
       shell.addToMainArea(widget);
-      expect(shell.mainAreaIsEmpty).to.be(false);
+      expect(shell.isEmpty('main')).to.be(false);
     });
 
-  });
-
-  describe('#topAreaIsEmpty', () => {
-
     it('should test whether the top area is empty', () => {
-      expect(shell.topAreaIsEmpty).to.be(true);
+      expect(shell.isEmpty('top')).to.be(true);
       let widget = new Widget();
       widget.id = 'foo';
       shell.addToTopArea(widget);
-      expect(shell.topAreaIsEmpty).to.be(false);
+      expect(shell.isEmpty('top')).to.be(false);
     });
 
-  });
-
-  describe('#leftAreaIsEmpty', () => {
-
     it('should test whether the left area is empty', () => {
-      expect(shell.leftAreaIsEmpty).to.be(true);
+      expect(shell.isEmpty('left')).to.be(true);
       let widget = new Widget();
       widget.id = 'foo';
       shell.addToLeftArea(widget);
-      expect(shell.leftAreaIsEmpty).to.be(false);
+      expect(shell.isEmpty('left')).to.be(false);
     });
 
-  });
-
-  describe('#rightAreaIsEmpty', () => {
-
     it('should test whether the right area is empty', () => {
-      expect(shell.rightAreaIsEmpty).to.be(true);
+      expect(shell.isEmpty('right')).to.be(true);
       let widget = new Widget();
       widget.id = 'foo';
       shell.addToRightArea(widget);
-      expect(shell.rightAreaIsEmpty).to.be(false);
+      expect(shell.isEmpty('right')).to.be(false);
     });
 
   });
@@ -120,20 +108,20 @@ describe('ApplicationShell', () => {
       let widget = new Widget();
       widget.id = 'foo';
       shell.addToTopArea(widget);
-      expect(shell.topAreaIsEmpty).to.be(false);
+      expect(shell.isEmpty('top')).to.be(false);
     });
 
     it('should be a no-op if the widget has no id', () => {
       let widget = new Widget();
       shell.addToTopArea(widget);
-      expect(shell.topAreaIsEmpty).to.be(true);
+      expect(shell.isEmpty('top')).to.be(true);
     });
 
     it('should accept options', () => {
       let widget = new Widget();
       widget.id = 'foo';
       shell.addToTopArea(widget, { rank: 10 });
-      expect(shell.topAreaIsEmpty).to.be(false);
+      expect(shell.isEmpty('top')).to.be(false);
     });
 
   });
@@ -144,20 +132,20 @@ describe('ApplicationShell', () => {
       let widget = new Widget();
       widget.id = 'foo';
       shell.addToLeftArea(widget);
-      expect(shell.leftAreaIsEmpty).to.be(false);
+      expect(shell.isEmpty('left')).to.be(false);
     });
 
     it('should be a no-op if the widget has no id', () => {
       let widget = new Widget();
       shell.addToLeftArea(widget);
-      expect(shell.leftAreaIsEmpty).to.be(true);
+      expect(shell.isEmpty('left')).to.be(true);
     });
 
     it('should accept options', () => {
       let widget = new Widget();
       widget.id = 'foo';
       shell.addToLeftArea(widget, { rank: 10 });
-      expect(shell.leftAreaIsEmpty).to.be(false);
+      expect(shell.isEmpty('left')).to.be(false);
     });
 
   });
@@ -168,20 +156,20 @@ describe('ApplicationShell', () => {
       let widget = new Widget();
       widget.id = 'foo';
       shell.addToRightArea(widget);
-      expect(shell.rightAreaIsEmpty).to.be(false);
+      expect(shell.isEmpty('right')).to.be(false);
     });
 
     it('should be a no-op if the widget has no id', () => {
       let widget = new Widget();
       shell.addToRightArea(widget);
-      expect(shell.rightAreaIsEmpty).to.be(true);
+      expect(shell.isEmpty('right')).to.be(true);
     });
 
     it('should accept options', () => {
       let widget = new Widget();
       widget.id = 'foo';
       shell.addToRightArea(widget, { rank: 10 });
-      expect(shell.rightAreaIsEmpty).to.be(false);
+      expect(shell.isEmpty('right')).to.be(false);
     });
 
   });
@@ -192,25 +180,25 @@ describe('ApplicationShell', () => {
       let widget = new Widget();
       widget.id = 'foo';
       shell.addToMainArea(widget);
-      expect(shell.mainAreaIsEmpty).to.be(false);
+      expect(shell.isEmpty('main')).to.be(false);
     });
 
     it('should be a no-op if the widget has no id', () => {
       let widget = new Widget();
       shell.addToMainArea(widget);
-      expect(shell.mainAreaIsEmpty).to.be(true);
+      expect(shell.isEmpty('main')).to.be(true);
     });
 
   });
 
-  describe('#activateLeft()', () => {
+  describe('#activateById()', () => {
 
     it('should activate a widget in the left area', () => {
       let widget = new Widget();
       widget.id = 'foo';
       shell.addToLeftArea(widget);
       expect(widget.isVisible).to.be(false);
-      shell.activateLeft('foo');
+      shell.activateById('foo');
       expect(widget.isVisible).to.be(true);
     });
 
@@ -218,20 +206,16 @@ describe('ApplicationShell', () => {
       let widget = new Widget();
       widget.id = 'foo';
       expect(widget.isVisible).to.be(false);
-      shell.activateLeft('foo');
+      shell.activateById('foo');
       expect(widget.isVisible).to.be(false);
     });
-
-  });
-
-  describe('#activateRight()', () => {
 
     it('should activate a widget in the right area', () => {
       let widget = new Widget();
       widget.id = 'foo';
       shell.addToRightArea(widget);
       expect(widget.isVisible).to.be(false);
-      shell.activateRight('foo');
+      shell.activateById('foo');
       expect(widget.isVisible).to.be(true);
     });
 
@@ -239,19 +223,15 @@ describe('ApplicationShell', () => {
       let widget = new Widget();
       widget.id = 'foo';
       expect(widget.isVisible).to.be(false);
-      shell.activateRight('foo');
+      shell.activateById('foo');
       expect(widget.isVisible).to.be(false);
     });
-
-  });
-
-  describe('#activateMain()', () => {
 
     it('should activate a widget in the main area', (done) => {
       let widget = new ContentWidget();
       widget.id = 'foo';
       shell.addToMainArea(widget);
-      shell.activateMain('foo');
+      shell.activateById('foo');
       requestAnimationFrame(() => {
         expect(widget.activated).to.be(true);
         done();
@@ -261,7 +241,7 @@ describe('ApplicationShell', () => {
     it('should be a no-op if the widget is not in the main area', (done) => {
       let widget = new ContentWidget();
       widget.id = 'foo';
-      shell.activateMain('foo');
+      shell.activateById('foo');
       requestAnimationFrame(() => {
         expect(widget.activated).to.be(false);
         done();
@@ -276,7 +256,7 @@ describe('ApplicationShell', () => {
       let widget = new Widget();
       widget.id = 'foo';
       shell.addToLeftArea(widget);
-      shell.activateLeft('foo');
+      shell.activateById('foo');
       expect(widget.isVisible).to.be(true);
       shell.collapseLeft();
       expect(widget.isVisible).to.be(false);
@@ -290,7 +270,7 @@ describe('ApplicationShell', () => {
       let widget = new Widget();
       widget.id = 'foo';
       shell.addToRightArea(widget);
-      shell.activateRight('foo');
+      shell.activateById('foo');
       expect(widget.isVisible).to.be(true);
       shell.collapseRight();
       expect(widget.isVisible).to.be(false);
@@ -308,8 +288,8 @@ describe('ApplicationShell', () => {
       bar.id = 'bar';
       shell.addToMainArea(bar);
       shell.closeAll();
-      expect(foo.isAttached).to.be(false);
-      expect(bar.isAttached).to.be(false);
+      expect(foo.parent).to.be(null);
+      expect(bar.parent).to.be(null);
     });
 
   });

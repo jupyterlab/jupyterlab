@@ -3,28 +3,22 @@
 
 import expect = require('expect.js');
 
-import * as CodeMirror
-  from 'codemirror';
-
 import {
   generate
 } from 'simulate-event';
 
 import {
   CodeEditor
-} from '../../../lib/codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   CodeMirrorEditor
-} from '../../../lib/codemirror';
-
+} from '@jupyterlab/codemirror';
 
 
 const UP_ARROW = 38;
 
 const DOWN_ARROW = 40;
-
-const TAB = 9;
 
 const ENTER = 13;
 
@@ -38,11 +32,6 @@ class LogEditorWidget extends CodeMirrorEditor {
     this.methods.push('onKeydown');
     return value;
   }
-
-  protected onTabEvent(event: KeyboardEvent, position: CodeEditor.IPosition): void {
-    super.onTabEvent(event, position);
-    this.methods.push('onTabEvent');
-  }
 }
 
 
@@ -55,6 +44,7 @@ describe('CodeMirrorEditor', () => {
 
   beforeEach(() => {
     host = document.createElement('div');
+    host.style.height = '200px';
     document.body.appendChild(host);
     model = new CodeEditor.Model();
     editor = new LogEditorWidget({ host, model }, {});
@@ -93,29 +83,6 @@ describe('CodeMirrorEditor', () => {
       expect(edge).to.be(null);
       editor.editor.triggerOnKeyDown(event);
       expect(edge).to.be('bottom');
-    });
-
-  });
-
-  describe('#completionRequested', () => {
-
-    it('should emit a signal when the user requests a tab completion', () => {
-      let want = { line: 0, column: 3 };
-      let request: CodeEditor.IPosition = null;
-      let listener = (sender: any, args: CodeEditor.IPosition) => {
-        request = args;
-      };
-      let event = generate('keydown', { keyCode: TAB });
-      editor.completionRequested.connect(listener);
-
-      expect(request).to.not.be.ok();
-      editor.model.value.text = 'foo';
-      editor.setCursorPosition(editor.getPositionAt(3));
-
-      editor.editor.triggerOnKeyDown(event);
-      expect(request).to.be.ok();
-      expect(request.column).to.equal(want.column);
-      expect(request.line).to.equal(want.line);
     });
 
   });
@@ -418,11 +385,23 @@ describe('CodeMirrorEditor', () => {
 
   });
 
-  describe('#getCoordinate()', () => {
+  describe('#getCoordinateForPosition()', () => {
 
     it('should get the window coordinates given a cursor position', () => {
-      let coord = editor.getCoordinate({ line: 10, column: 1 });
+      model.value.text = TEXT;
+      let coord = editor.getCoordinateForPosition({ line: 10, column: 1 });
       expect(coord.left).to.be.above(0);
+    });
+
+  });
+
+  describe('#getPositionForCoordinate()', () => {
+
+    it('should get the window coordinates given a cursor position', () => {
+      model.value.text = TEXT;
+      let pos = { line: 10, column: 1 };
+      let coord = editor.getCoordinateForPosition(pos);
+      expect(editor.getPositionForCoordinate(coord)).to.eql(pos);
     });
 
   });
@@ -430,10 +409,11 @@ describe('CodeMirrorEditor', () => {
   describe('#getCursorPosition()', () => {
 
     it('should get the primary position of the cursor', () => {
+      model.value.text = TEXT;
       let pos = editor.getCursorPosition();
       expect(pos.line).to.be(0);
       expect(pos.column).to.be(0);
-      model.value.text = TEXT;
+
       editor.setCursorPosition({ line: 12, column: 3 });
       pos = editor.getCursorPosition();
       expect(pos.line).to.be(12);
@@ -547,17 +527,6 @@ describe('CodeMirrorEditor', () => {
       expect(editor.methods).to.not.contain('onKeydown');
       editor.editor.triggerOnKeyDown(event);
       expect(editor.methods).to.contain('onKeydown');
-    });
-
-  });
-
-  describe('#onTabEvent()', () => {
-
-    it('should run when there is a tab keydown event on the editor', () => {
-      let event = generate('keydown', { keyCode: TAB });
-      expect(editor.methods).to.not.contain('onTabEvent');
-      editor.editor.triggerOnKeyDown(event);
-      expect(editor.methods).to.contain('onTabEvent');
     });
 
   });

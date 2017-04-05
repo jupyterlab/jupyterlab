@@ -1,0 +1,108 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+@import url('~codemirror/lib/codemirror.css');
+
+@import url('~codemirror/theme/material.css');
+@import url('~codemirror/theme/zenburn.css');
+@import url('~codemirror/theme/abcdef.css');
+@import url('~codemirror/theme/base16-light.css');
+@import url('~codemirror/theme/base16-dark.css');
+@import url('~codemirror/theme/dracula.css');
+@import url('~codemirror/theme/hopscotch.css');
+@import url('~codemirror/theme/mbo.css');
+@import url('~codemirror/theme/mdn-like.css');
+@import url('~codemirror/theme/seti.css');
+@import url('~codemirror/theme/the-matrix.css');
+@import url('~codemirror/theme/xq-light.css');
+
+
+.CodeMirror {
+  line-height: var(--jp-code-line-height);
+  font-size: var(--jp-code-font-size);
+  height: auto;
+  /* Changed to auto to autogrow */
+  background: none;
+}
+
+
+.CodeMirror pre {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+
+/* This causes https://github.com/jupyter/jupyterlab/issues/522 */
+/* May not cause it not because we changed it! */
+.CodeMirror-lines {
+  padding: var(--jp-code-padding);
+}
+
+
+.CodeMirror-linenumbers {
+  padding: 0 4px 0 4px;
+}
+
+
+.jp-CodeMirrorWidget-static {
+  margin: var(--jp-code-padding);
+}
+
+
+.jp-CodeMirrorWidget, .jp-CodeMirrorWidget-static {
+  cursor: text;
+}
+
+
+.jp-CodeMirrorWidget.jp-mod-readOnly .CodeMirror-cursor {
+  display: none;
+}
+
+
+.CodeMirror-gutter-wrapper {
+  margin-left: calc(-1 * var(--jp-code-padding));
+}
+
+
+/*
+  Here is our jupyter theme for CodeMirror syntax highlighting
+  This is used in our marked.js syntax highlighting and CodeMirror itself
+  The string "jupyter" is set in ../codemirror/widget.DEFAULT_CODEMIRROR_THEME
+  This came from the classic notebook, which came form highlight.js/GitHub
+*/
+
+
+.cm-s-jupyter span.cm-keyword      { color: #008000; font-weight: bold; }
+.cm-s-jupyter span.cm-atom         { color: #88F; }
+.cm-s-jupyter span.cm-number       { color: #080; }
+.cm-s-jupyter span.cm-def          { color: #00f; }
+.cm-s-jupyter span.cm-variable     { color: var(--md-grey-900) }
+.cm-s-jupyter span.cm-variable-2   { color: var(--md-grey-800) }
+.cm-s-jupyter span.cm-variable-3   { color: var(--md-grey-700) }
+.cm-s-jupyter span.cm-punctuation  { color: #05a; }
+.cm-s-jupyter span.cm-property     { color: #05a; }
+.cm-s-jupyter span.cm-operator     { color: #AA22FF; font-weight: bold; }
+.cm-s-jupyter span.cm-comment      { color: #408080; font-style: italic; }
+.cm-s-jupyter span.cm-string       { color: #BA2121; }
+.cm-s-jupyter span.cm-string-2     { color: #f50; }
+.cm-s-jupyter span.cm-meta         { color: #AA22FF; }
+.cm-s-jupyter span.cm-qualifier    { color: #555; }
+.cm-s-jupyter span.cm-builtin      { color: #008000; }
+.cm-s-jupyter span.cm-bracket      { color: #997; }
+.cm-s-jupyter span.cm-tag          { color: #170; }
+.cm-s-jupyter span.cm-attribute    { color: #00c; }
+.cm-s-jupyter span.cm-header       { color: blue; }
+.cm-s-jupyter span.cm-quote        { color: #090; }
+.cm-s-jupyter span.cm-link         { color: #00c; }
+.cm-s-jupyter span.cm-error        { color: #f00; }
+.cm-s-jupyter span.cm-hr           { color: #999; }
+
+.cm-s-jupyter span.cm-tab {
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAMCAYAAAAkuj5RAAAAAXNSR0IArs4c6QAAAGFJREFUSMft1LsRQFAQheHPowAKoACx3IgEKtaEHujDjORSgWTH/ZOdnZOcM/sgk/kFFWY0qV8foQwS4MKBCS3qR6ixBJvElOobYAtivseIE120FaowJPN75GMu8j/LfMwNjh4HUpwg4LUAAAAASUVORK5CYII=);
+  background-position: right;
+  background-repeat: no-repeat;
+}
+

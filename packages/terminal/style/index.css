@@ -1,0 +1,32 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+@import url('~xterm/src/xterm.css');
+
+
+.jp-TerminalWidget {
+  min-width: 200px;
+  min-height: 200px;
+  padding: 8px;
+  margin: 0;
+}
+
+
+.jp-TerminalWidget-body {
+  font-family: var(--jp-code-font-family);
+  outline: none;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+
+.terminal {
+  font-family: var(--jp-code-font-family);
+}
+
+
+.terminal .xterm-viewport {
+  overflow-y: auto;
+}

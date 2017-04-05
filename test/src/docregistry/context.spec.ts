@@ -9,11 +9,11 @@ import {
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
   Context, DocumentRegistry, TextModelFactory
-} from '../../../lib/docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   waitForDialog, acceptDialog
@@ -25,9 +25,9 @@ describe('docregistry/context', () => {
   let manager: ServiceManager.IManager;
   let factory = new TextModelFactory();
 
-  before((done) => {
+  before(() => {
     manager = new ServiceManager();
-    manager.ready.then(done, done);
+    return manager.ready;
   });
 
   describe('Context', () => {
@@ -38,17 +38,10 @@ describe('docregistry/context', () => {
       context = new Context({ manager, factory, path: 'foo' });
     });
 
-    afterEach((done) => {
-      if (context.kernel) {
-        context.kernel.ready.then(() => {
-          return context.changeKernel(null);
-        }).then(() => {
-          context.dispose();
-        }).then(done, done);
-      } else {
+    afterEach(() => {
+      return context.session.shutdown().then(() => {
         context.dispose();
-        done();
-      }
+      });
     });
 
     describe('#constructor()', () => {
@@ -56,20 +49,6 @@ describe('docregistry/context', () => {
       it('should create a new context', () => {
         context = new Context({ manager, factory, path: 'bar' });
         expect(context).to.be.a(Context);
-      });
-
-    });
-
-    describe('#kernelChanged', () => {
-
-      it('should be emitted when the kernel changes', (done) => {
-        let name = manager.specs.default;
-        context.kernelChanged.connect((sender, args) => {
-          expect(sender).to.be(context);
-          expect(args.name).to.be(name);
-          done();
-        });
-        context.changeKernel({ name });
       });
 
     });
@@ -155,18 +134,10 @@ describe('docregistry/context', () => {
 
     });
 
-    describe('#kernel', () => {
+    describe('#session', () => {
 
-      it('should default to `null`', () => {
-        expect(context.kernel).to.be(null);
-      });
-
-      it('should be set after switching kernels', (done) => {
-        let name = manager.specs.default;
-        context.changeKernel({ name }).then(() => {
-          expect(context.kernel.name).to.be(name);
-          done();
-        }).catch(done);
+      it('should be a client session object', () => {
+        expect(context.session.path).to.be(context.path);
       });
 
     });
@@ -220,43 +191,6 @@ describe('docregistry/context', () => {
         expect(context.isDisposed).to.be(true);
         context.dispose();
         expect(context.isDisposed).to.be(true);
-      });
-
-    });
-
-    describe('#startDefaultKernel()', () => {
-
-      it('should start the default kernel for the context', (done) => {
-        context.save().then(() => {
-          return context.startDefaultKernel();
-        }).then(kernel => {
-          expect(kernel.name).to.be.ok();
-          done();
-        }).catch(done);
-      });
-
-    });
-
-    describe('#changeKernel()', () => {
-
-      it('should change the kernel instance', (done) => {
-        let name = manager.specs.default;
-        context.changeKernel({ name }).then(() => {
-          expect(context.kernel.name).to.be(name);
-        }).then(done, done);
-      });
-
-      it('should shut down the session if given `null`', (done) => {
-        let name = manager.specs.default;
-        context.changeKernel({ name }).then(() => {
-          expect(context.kernel.name).to.be(name);
-          return context.kernel.ready;
-        }).then(() => {
-          return context.changeKernel(null);
-        }).then(() => {
-          expect(context.kernel).to.be(null);
-          done();
-        }).catch(done);
       });
 
     });

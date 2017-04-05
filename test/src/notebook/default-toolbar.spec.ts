@@ -4,51 +4,44 @@
 import expect = require('expect.js');
 
 import {
-  Kernel
-} from '@jupyterlab/services';
+  IClientSession
+} from '@jupyterlab/apputils';
 
 import {
   toArray
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
   Context, DocumentRegistry
-} from '../../../lib/docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
  CodeCellWidget, MarkdownCellWidget
-} from '../../../lib/cells/widget';
+} from '@jupyterlab/cells';
 
 import {
   NotebookActions
-} from '../../../lib/notebook/actions';
+} from '@jupyterlab/notebook';
 
 import {
  ToolbarItems
-} from '../../../lib/notebook/default-toolbar';
+} from '@jupyterlab/notebook';
 
 import {
  INotebookModel
-} from '../../../lib/notebook/model';
+} from '@jupyterlab/notebook';
 
 import {
   JUPYTER_CELL_MIME
-} from '../../../lib/notebook/widget';
+} from '@jupyterlab/notebook';
 
 import {
  NotebookPanel
-} from '../../../lib/notebook/panel';
-
-import {
- createInterruptButton,
- createKernelNameItem,
- createKernelStatusItem,
- createRestartButton
-} from '../../../lib/toolbar/kernel';
+} from '@jupyterlab/notebook';
 
 import {
   createNotebookContext
@@ -60,29 +53,30 @@ import {
 } from './utils';
 
 
-function startKernel(context: DocumentRegistry.IContext<INotebookModel>): Promise<Kernel.IKernel> {
-  let kernel: Kernel.IKernel;
-  return context.save().then(() => {
-    return context.startDefaultKernel();
-  }).then(k => {
-    kernel = k;
-    return kernel.ready;
+function startSession(context: DocumentRegistry.IContext<INotebookModel>): Promise<IClientSession> {
+  context.save();
+  return context.ready.then(() => {
+    return context.session.kernel.ready;
   }).then(() => {
-    return kernel;
+    return context.session;
   });
 }
 
 
-describe('notebook/notebook/default-toolbar', () => {
+describe('@jupyterlab/notebook', () => {
 
   let context: Context<INotebookModel>;
 
   beforeEach(() => {
-    context = createNotebookContext();
+    return createNotebookContext().then(c => {
+      context = c;
+    });
   });
 
   afterEach(() => {
-    context.dispose();
+    return context.session.shutdown().then(() => {
+      context.dispose();
+    });
   });
 
   describe('ToolbarItems', () => {
@@ -91,7 +85,7 @@ describe('notebook/notebook/default-toolbar', () => {
     const contentFactory = createNotebookPanelFactory();
 
     beforeEach(() => {
-      panel = new NotebookPanel({ rendermime, clipboard, contentFactory,
+      panel = new NotebookPanel({ rendermime, contentFactory,
                                   mimeTypeService });
       context.model.fromJSON(DEFAULT_CONTENT);
       panel.context = context;
@@ -182,7 +176,7 @@ describe('notebook/notebook/default-toolbar', () => {
         let button = ToolbarItems.createPasteButton(panel);
         let count = panel.notebook.widgets.length;
         Widget.attach(button, document.body);
-        NotebookActions.copy(panel.notebook, clipboard);
+        NotebookActions.copy(panel.notebook);
         button.node.click();
         requestAnimationFrame(() => {
           expect(panel.notebook.widgets.length).to.be(count + 1);
@@ -203,14 +197,14 @@ describe('notebook/notebook/default-toolbar', () => {
       it('should run and advance when clicked', (done) => {
         let button = ToolbarItems.createRunButton(panel);
         let widget = panel.notebook;
-        let next = widget.widgets.at(1) as MarkdownCellWidget;
+        let next = widget.widgets[1] as MarkdownCellWidget;
         widget.select(next);
         let cell = widget.activeCell as CodeCellWidget;
         cell.model.outputs.clear();
         next.rendered = false;
         Widget.attach(button, document.body);
-        startKernel(panel.context).then(kernel => {
-          kernel.statusChanged.connect((sender, status) => {
+        startSession(panel.context).then(session => {
+          session.statusChanged.connect((sender, status) => {
             if (status === 'idle' && cell.model.outputs.length > 0) {
               expect(next.rendered).to.be(true);
               button.dispose();
@@ -224,24 +218,6 @@ describe('notebook/notebook/default-toolbar', () => {
       it('should have the `\'jp-RunIcon\'` class', () => {
         let button = ToolbarItems.createRunButton(panel);
         expect(button.hasClass('jp-RunIcon')).to.be(true);
-      });
-
-    });
-
-    describe('#createInterruptButton()', () => {
-
-      it('should have the `\'jp-StopIcon\'` class', () => {
-        let button = createInterruptButton(panel);
-        expect(button.hasClass('jp-StopIcon')).to.be(true);
-      });
-
-    });
-
-    describe('#createRestartButton()', () => {
-
-      it('should have the `\'jp-RefreshIcon\'` class', () => {
-        let button = createRestartButton(panel);
-        expect(button.hasClass('jp-RefreshIcon')).to.be(true);
       });
 
     });
@@ -260,7 +236,7 @@ describe('notebook/notebook/default-toolbar', () => {
         let item = ToolbarItems.createCellTypeItem(panel);
         let node = item.node.getElementsByTagName('select')[0] as HTMLSelectElement;
         expect(node.value).to.be('code');
-        panel.notebook.select(panel.notebook.widgets.at(1));
+        panel.notebook.select(panel.notebook.widgets[1]);
         expect(node.value).to.be('-');
       });
 
@@ -270,103 +246,17 @@ describe('notebook/notebook/default-toolbar', () => {
         expect(node.value).to.be('code');
         let cell = panel.model.contentFactory.createCodeCell({});
         panel.model.cells.insert(1, cell);
-        panel.notebook.select(panel.notebook.widgets.at(1));
+        panel.notebook.select(panel.notebook.widgets[1]);
         expect(node.value).to.be('code');
       });
 
       it('should handle a change in context', () => {
         let item = ToolbarItems.createCellTypeItem(panel);
         context.model.fromJSON(DEFAULT_CONTENT);
-        context.startDefaultKernel();
         panel.context = null;
         panel.notebook.activeCellIndex++;
         let node = item.node.getElementsByTagName('select')[0];
         expect((node as HTMLSelectElement).value).to.be('markdown');
-      });
-
-    });
-
-    describe('#createKernelNameItem()', () => {
-
-      it('should display the `\'display_name\'` of the kernel', (done) => {
-        let item = createKernelNameItem(panel);
-        startKernel(context).then(kernel => {
-          console.log('started kernel');
-          return kernel.getSpec();
-        }).then(spec => {
-          let name = spec.display_name;
-          expect(item.node.textContent).to.be(name);
-          done();
-        }).catch(done);
-      });
-
-      it('should display `\'No Kernel!\'` if there is no kernel', () => {
-        let item = createKernelNameItem(panel);
-        expect(item.node.textContent).to.be('No Kernel!');
-      });
-
-      it('should handle a change in context', (done) => {
-        let item = createKernelNameItem(panel);
-        startKernel(context).then(kernel => {
-          console.log('started kernel');
-          return kernel.ready;
-        }).then(() => {
-          panel.context = null;
-          expect(item.node.textContent).to.be('No Kernel!');
-          done();
-        }).catch(done);
-      });
-
-    });
-
-    describe('#createKernelStatusItem()', () => {
-
-      beforeEach((done) => {
-        startKernel(panel.context).then(() => {
-          done();
-        }).catch(done);
-      });
-
-      it('should display a busy status if the kernel status is not idle', (done) => {
-        let item = createKernelStatusItem(panel);
-        panel.kernel.statusChanged.connect(() => {
-          if (panel.kernel.status === 'busy') {
-            expect(item.hasClass('jp-mod-busy')).to.be(true);
-            done();
-          }
-        });
-        panel.kernel.requestExecute({ code: 'a = 1' });
-      });
-
-      it('should show the current status in the node title', (done) => {
-        let item = createKernelStatusItem(panel);
-        let status = panel.kernel.status;
-        expect(item.node.title.toLowerCase()).to.contain(status);
-        panel.kernel.statusChanged.connect(() => {
-          if (panel.kernel.status === 'busy') {
-            expect(item.node.title.toLowerCase()).to.contain('busy');
-            done();
-          }
-        });
-        panel.kernel.requestExecute({ code: 'a = 1' });
-      });
-
-      it('should handle a null kernel', (done) => {
-        let item = createKernelStatusItem(panel);
-        panel.context.changeKernel(void 0).then(() => {
-          expect(item.node.title).to.be('No Kernel!');
-          expect(item.hasClass('jp-mod-busy')).to.be(true);
-          done();
-        }).catch(done);
-      });
-
-      it('should handle a change to the context', () => {
-        let item = createKernelStatusItem(panel);
-        context = createNotebookContext();
-        context.model.fromJSON(DEFAULT_CONTENT);
-        panel.context = context;
-        expect(item.node.title).to.be('No Kernel!');
-        expect(item.hasClass('jp-mod-busy')).to.be(true);
       });
 
     });

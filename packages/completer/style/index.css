@@ -1,0 +1,52 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) 2014-2016, Jupyter Development Team.
+|
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+:root {
+  --jp-private-completer-code-font-size: 14px;
+  --jp-private-completer-item-height: 24px;
+}
+
+
+.jp-Completer {
+  background: var(--jp-layout-color1);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.2);
+  list-style-type: none;
+  overflow: auto;
+  padding: 0;
+  margin: 4px 0 0 -4px;
+  max-height: calc((10 * var(--jp-private-completer-item-height)) + (2 * var(--jp-border-width)));
+  min-height: calc(var(--jp-private-completer-item-height) + (2 * var(--jp-border-width)));
+  z-index: 10001;
+}
+
+
+.jp-Completer-item {
+  margin: 0;
+  min-width: 150px;
+  padding: 0 2px;
+}
+
+
+.jp-Completer-item:hover, .jp-Completer-item.jp-mod-active {
+  background: var(--jp-layout-color2);
+}
+
+
+.jp-Completer-item code {
+  font-size: var(--jp-private-completer-code-font-size);
+  height: var(--jp-private-completer-item-height);
+  padding: 0;
+  margin: 0;
+}
+
+
+.jp-Completer-item mark {
+  font-weight: bold;
+  background: inherit;
+  color: inherit;
+}

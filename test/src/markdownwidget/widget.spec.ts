@@ -4,24 +4,24 @@
 import expect = require('expect.js');
 
 import {
-  Message, sendMessage
-} from 'phosphor/lib/core/messaging';
+  Message, MessageLoop
+} from '@phosphor/messaging';
 
 import {
   PanelLayout
-} from 'phosphor/lib/ui/panel';
+} from '@phosphor/widgets';
 
 import {
-  Widget, WidgetMessage
-} from 'phosphor/lib/ui/widget';
+  Widget
+} from '@phosphor/widgets';
 
 import {
   MarkdownWidget, MarkdownWidgetFactory
-} from '../../../lib/markdownwidget/widget';
+} from '@jupyterlab/markdownwidget';
 
 import {
   DocumentRegistry, Context
-} from '../../../lib/docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   createFileContext, defaultRenderMime
@@ -102,23 +102,23 @@ describe('markdownwidget/widget', () => {
       it('should update rendered markdown', () => {
         let widget = new LogWidget(context, RENDERMIME);
         expect(widget.methods).to.not.contain('onUpdateRequest');
-        context.model.contentChanged.emit(void 0);
-        sendMessage(widget, WidgetMessage.UpdateRequest);
+        (context.model.contentChanged as any).emit(void 0);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
         widget.dispose();
       });
 
       it('should replace children on subsequent updates', () => {
         let widget = new LogWidget(context, RENDERMIME);
-        context.model.contentChanged.emit(void 0);
-        sendMessage(widget, WidgetMessage.UpdateRequest);
+        (context.model.contentChanged as any).emit(void 0);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
 
         let layout = widget.layout as PanelLayout;
-        let oldChild = layout.widgets.at(0);
+        let oldChild = layout.widgets[0];
 
-        sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
 
-        let newChild = layout.widgets.at(0);
+        let newChild = layout.widgets[0];
 
         expect(oldChild).to.not.be(newChild);
         expect(layout.widgets.length).to.be(1);

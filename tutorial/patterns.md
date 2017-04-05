@@ -115,28 +115,24 @@ A getter should yield the same value every time.
 
 ## Data Structures
 
-Prefer to use Phosphor [Phosphor `Vector`](http://phosphorjs.github.io/phosphor/api/classes/_collections_vector_.vector.html) 
-over JavaScript `Array` for internal use for its extra flexibility.
 
 For public API, we have three options: JavaScript `Array`, 
-[Phosphor `IIterator`](http://phosphorjs.github.io/phosphor/api/interfaces/_algorithm_iteration_.iiterable.html), and 
-[Phosphor `ISequence`](http://phosphorjs.github.io/phosphor/api/interfaces/_algorithm_sequence_.isequence.html).
+`IIterator`, and `ReadonlyArray` (an interface defined by TypeScript).
 
 Prefer an `Array` for:
+- A value that is meant to be mutable.
+
+Prefer a `ReadonlyArray`
 - A return value is the result of a newly allocated array, to avoid the 
 extra allocation of an iterator.
-- A signal payload.
-- A public attribute that is inherently static.  Use `.slice()` to
-make sure the internal value cannot be mutated by the consumer.
+- A signal payload - since it will be consumed by multiple listeners.
+- The values may need to be accessed randomly.
+- A public attribute that is inherently static.
 
 Prefer an `IIterator` for:
-- A return value where the value is based on an internal `Vector` but the 
-value should not need to be accessed randomly.
+- A return value where the value is based on an internal data structure but 
+the value should not need to be accessed randomly.
 - A set of return values that can be computed lazily.
-
-Prefer an `ISequence` when:
-- A return value or public attribute based on an internal `Vector` where the 
-value may need to be accessed randomly.
 
 
 ## DOM Events

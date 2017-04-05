@@ -1,0 +1,49 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+.jp-ImageCodeConsole {
+  background-image: url(images/console.svg);
+}
+
+
+.jp-ImageJupyterLab {
+  background-image: url(images/jupyterlab.svg);
+}
+
+
+.jp-ImageNotebook {
+  background-image: url(images/notebook.svg);
+}
+
+
+.jp-ImageTerminal {
+  background-image: url(images/terminal.svg);
+}
+
+
+.jp-ImageTextEditor {
+  background-image: url(images/texteditor.svg);
+}
+
+
+.jp-QuestionMark {
+  background-image: url(images/questionmark.svg);
+}
+
+
+.jp-JupyterIcon {
+  background-image: url(images/jupyter.svg);
+  background-size: 16px;
+  margin: 2px;
+  margin-left: 8px;
+  margin-right: 0px;
+  padding-right: 0px;
+}
+
+
+.jp-Landing-tour {
+  background-image: url(images/tour.svg);
+}

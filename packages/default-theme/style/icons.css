@@ -1,0 +1,143 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-MaterialIcon {
+  min-width: 16px;
+  min-height: 16px;
+  background-size: 16px;
+  display: inline-block;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+
+.jp-AddIcon {
+  background-image: url(icons/md/add.svg);
+}
+
+
+.jp-CloseIcon {
+  background-image: url(icons/md/close.svg);
+}
+
+
+.jp-CutIcon {
+  background-image: url(icons/md/cut.svg);
+}
+
+
+.jp-CopyIcon {
+  background-image: url(icons/md/copy.svg);
+}
+
+
+.jp-DownCaretIcon {
+  background-image: url(icons/md/down_caret.svg);
+}
+
+
+.jp-DownloadIcon {
+  background-image: url(icons/md/download.svg);
+}
+
+
+.jp-DragIcon {
+  margin-right: 4px;
+}
+
+
+.jp-EditIcon {
+  background-image: url(icons/md/edit.svg);
+}
+
+
+.jp-EllipsesIcon {
+  background-image: url(icons/md/ellipses.svg);
+}
+
+
+.jp-FileIcon {
+  background-image: url(icons/md/file.svg);
+}
+
+
+.jp-FolderIcon {
+  background-image: url(icons/md/landingfolder.svg);
+}
+
+
+.jp-HomeIcon {
+  background-image: url(icons/md/home.svg);
+  min-width: 14px;
+  min-height: 14px;
+  background-size: 14px;
+  vertical-align: sub;
+}
+
+
+.jp-JupyterIcon {
+  background-image: url(icons/jupyter/jupyter.svg);
+  background-size: 16px;
+  margin: 2px;
+  margin-left: 8px;
+  margin-right: 0px;
+  padding-right: 0px;
+}
+
+
+.jp-MainAreaLandscapeIcon {
+  background-repeat: no-repeat;
+  margin-right: 2px;
+  width: 22px;
+}
+
+
+.jp-MainAreaPortraitIcon {
+  background-position: 0 2px;
+  background-repeat: no-repeat;
+  margin-right: 2px;
+  width: 20px;
+}
+
+
+.jp-NotebookIcon {
+  background-image: url(icons/md/book.svg);
+}
+
+
+.jp-OpenFolderIcon {
+  background-image: url(icons/md/directory.svg);
+}
+
+
+.jp-PasteIcon {
+  background-image: url(icons/md/paste.svg);
+}
+
+
+.jp-RefreshIcon {
+  background-image: url(icons/md/refresh.svg);
+}
+
+
+.jp-RunIcon {
+  background-image: url(icons/md/run.svg);
+}
+
+
+.jp-SaveIcon {
+  background-image: url(icons/md/save.svg);
+}
+
+
+.jp-StopIcon {
+  background-image: url(icons/md/stop.svg);
+}
+
+
+.jp-UploadIcon {
+  background-image: url(icons/md/upload.svg);
+}

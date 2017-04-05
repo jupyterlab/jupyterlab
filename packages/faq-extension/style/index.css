@@ -1,0 +1,133 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+.jp-FAQ {
+  font-family: var(--jp-ui-font-family);
+  outline: none;
+  overflow-y: auto;
+}
+
+#faq-header {
+  width: 412px;
+  display: flex;
+  margin: 40px auto 40px auto;
+  text-align: center;
+}
+
+
+.jp-FAQ-content {
+  margin: 0 auto 70px auto;
+  display: block;
+  width: 94%;
+  max-width: 700px;
+}
+
+
+.jp-FAQ-h1 {
+  font-size: 26px;
+  font-weight: 400;
+  color: #313940;
+  margin: 10px 0 0 20px;
+}
+
+
+.jp-FAQ-h2 {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--md-grey-500);
+  margin: 28px 0 0 0;
+  margin-bottom: 8px;
+}
+
+
+.jp-FAQ-ul {
+  margin: 0 0 0 0;
+  padding: 0;
+}
+
+
+.jp-FAQ-question:target {
+  animation: highlight 0.9s cubic-bezier(0.15, 0.08, 0.54, 0.85);
+}
+
+
+@keyframes highlight {
+    0%   {background-color: transparent;}
+    50%  {background-color: var(--md-blue-100);}
+    100% {background-color: transparent;}
+}
+
+
+.jp-FAQ-question {
+  list-style-type: none;
+  padding: 4px 16px;
+  margin-left: -16px;
+  display: inline-block;
+}
+
+
+.jp-FAQ-question > a {
+  font-size: 20px;
+  color: var(--jp-ui-font-color0);
+  font-weight: 400;
+  line-height: 150%;
+  list-style-type: none;
+  margin: 28px 0 0 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+
+.jp-FAQ-question > a:hover {
+  color: var(--md-blue-500);
+}
+
+
+.jp-FAQ-answer{
+  font-size: 15px;
+  font-weight: 200;
+  color: var(--md-grey-500);
+  line-height: 160%;
+  border-left: 2px solid var(--md-grey-500);
+  padding-left: 25px;
+  list-style-type: none;
+  margin: 15px 0 15px 20px;
+}
+
+
+.jp-FAQ-toc {
+  display: block;
+}
+
+
+.jp-FAQ-toc:focus{
+  color: var(--md-blue-500);
+}
+
+
+li > jp-FAQ-answer {
+  color: var(--md-grey-500);
+  text-decoration: none;
+}
+
+
+.jp-FAQ-title {
+  color: var(--jp-ui-font-color0);
+  display: block;
+}
+
+
+.jp-FAQ-a {
+    text-decoration: none;
+    cursor: pointer;
+    color: var(--jp-brand-color1);
+}
+
+
+.jp-QuestionMark.jp-FAQ-QuestionMark {
+  height: 49px;
+  width: 49px;
+}

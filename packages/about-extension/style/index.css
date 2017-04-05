@@ -1,0 +1,306 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+#about {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  outline: none;
+  overflow-y: auto;
+  scroll-snap-points-y: repeat(100%);
+  scroll-snap-type: mandatory;
+  scroll-snap-destination: 100% 0%;
+  font-family: var(--jp-ui-font-family);
+  text-align: center;
+}
+
+#about .jp-About-section {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: table;
+}
+#about .jp-About-sectioncenter {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+#about .jp-About-container {
+  position: relative;
+  width: 100%;
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+#about .jp-About-column,
+#about .jp-About-columns {
+  width: 100%;
+  margin: 0 auto;
+  float: none;
+  box-sizing: border-box;
+}
+
+/* For devices larger than 400px */
+@media (min-width: 400px) {
+  #about .jp-About-container {
+    width: 85%;
+    padding: 0;
+  }
+}
+
+/* For devices larger than 550px */
+@media (min-width: 550px) {
+  #about .jp-About-container {
+    width: 80%;
+  }
+  #about .jp-About-column,
+  #about .jp-About-columns {
+    margin-left: 4%;
+  }
+  #about .jp-About-column:first-child,
+  #about .jp-About-columns:first-child {
+    margin-left: 0;
+  }
+
+
+  #about .jp-About-one-half.jp-About-column {
+    width: 48%;
+  }
+}
+
+#about * {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -ms-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+#about .jp-About-row {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+#about .jp-About-header {
+  font-size: 26px;
+  font-weight: 300;
+  color: #333333;
+  padding-left: 10px;
+  padding-right: 10px;
+  margin: 10px 0;
+}
+
+#about .jp-About-desc-one {
+  font-size: 13px;
+  color: #555555;
+  line-height: 20px;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+#about .jp-About-desc-two {
+  font-size: 13px;
+  color: #555555;
+  padding-left: 50px;
+  padding-right: 50px;
+  margin-top: 0px;
+}
+
+#about .jp-About-desc-two-header {
+  color: #333333;
+  font-size: 20px;
+  margin-bottom: 9px;
+  margin-top: 9px;
+}
+
+#about .jp-About-row img {
+  margin-top: 20px
+}
+
+#about .jp-About-header.jp-About-content img {
+  vertical-align: middle;
+  padding-right: 30px;
+}
+
+#about .jp-About-header.jp-About-content {
+  vertical-align: middle;
+  line-height: 20px;
+}
+
+#about .jp-About-content-desc {
+  font-family: var(--jp-code-font-family);
+  font-size: 13px;
+  max-width: 550px;
+  margin: 0 auto;
+  float: none;
+  color: #555555;
+  line-height: 20px;
+  padding-bottom: 8px;
+}
+
+#about .jp-About-content-desc ul {
+  text-align: left;
+  margin-left: 92px;
+  float: none;
+}
+
+#about .jp-About-desc-two-header {
+  padding: 15px 0 10px 0;
+}
+
+#about .jp-About-desc-one p {
+  max-width: 740px;
+  margin: 0 auto;
+  float: none;
+}
+
+#about .jp-About-column .jp-About-desc-two-header a {
+  color: #555555;
+  text-decoration: none;
+}
+
+#about .jp-About-desc-two-header:hover a{
+  color: #e46e2e;
+}
+
+#about .jp-About-nav-button {
+  display: block;
+  position: relative;
+  margin: auto;
+  width: 28px;
+  height: 17px;
+  overflow: hidden;
+  margin-top: 35px;
+  margin-bottom: 10px;
+  background-image: url(images/next-arrow-sprite.svg);
+  background-size: 100%;
+  background-position: top;
+  -webkit-animation: navbtn-anim ease 4s infinite;
+  animation: navbtn-anim ease 4s infinite;
+  -webkit-transition: all 300ms ease;
+  transition: all 300ms ease;
+}
+
+#about .jp-About-nav-button:hover {
+  background-position: bottom;
+}
+
+@keyframes navbtn-anim {
+  0% { transform: translate(0px,0px); }
+  50% { transform: translate(0px,20px); }
+  100% { transform: translate(0px,0px); }
+}
+
+@-webkit-keyframes navbtn-anim {
+  0% { transform: translate(0px,0px); }
+  50% { transform: translate(0px,20px); }
+  100% { transform: translate(0px,0px); }
+}
+
+#about a, #about a:visited {
+  font-weight: 500;
+  color: #e46e2e;
+  text-decoration: none;
+  -webkit-transition: all 200ms ease-out;
+  transition: all 200ms ease-out;
+}
+
+#about a:hover, #about a:active {
+  color: #ad4b16;
+  text-decoration: underline;
+}
+
+
+/* * * IMAGES * * */
+#about .jp-img {
+  display: block;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+#about .jp-About-logo {
+  background-image: url(images/logo.svg);
+  width: 234px;
+  height: 51px;
+  margin: 20px auto 0 auto;
+}
+
+#about .jp-About-hero-mainarea {
+  display: inline-block;
+  background-image: url(images/main-area.svg);
+  width: 40px;
+  height: 40px;
+  margin: 0 30px;
+  vertical-align: middle;
+}
+
+#about .jp-About-hero-command {
+  display: inline-block;
+  background-image: url(images/command.svg);
+  width: 40px;
+  height: 40px;
+  margin: 0 30px;
+  vertical-align: middle;
+}
+
+#about .jp-About-hero-filebrowser {
+  display: inline-block;
+  background-image: url(images/file-browser.svg);
+  width: 60px;
+  height: 40px;
+  margin: 0 30px;
+  vertical-align: middle;
+}
+
+#about .jp-About-hero-notebook {
+  display: inline-block;
+  background-image: url(images/jl-About-hero-nb.svg);
+  width: 31px;
+  height: 40px;
+  margin: 0 30px;
+  vertical-align: middle;
+}
+
+#about .jp-About-nb {
+  background-image: url(images/jl-About-nb.svg);
+  display: block;
+  background-size: contain;
+  margin: 0 0 35px 0;
+  height: 38vh;
+}
+
+#about .jp-About-mainarea {
+  background-image: url(images/jl-About-ma.gif);
+  display: inline-block;
+  margin: 0 0 35px 0;
+  max-height: 390px;
+  height: 325px;
+  width: 650px;
+}
+
+#about .jp-About-fb {
+  background-image: url(images/jl-About-fb.gif);
+  display: inline-block;
+  margin: 0 0 35px 0;
+  max-height: 390px;
+  height: 325px;
+  width: 650px;
+}
+
+#about .jp-About-command {
+  background-image: url(images/jl-About-cp.gif);
+  display: inline-block;
+  margin: 0 0 35px 0;
+  max-height: 390px;
+  height: 325px;
+  width: 650px;
+}

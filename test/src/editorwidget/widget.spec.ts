@@ -8,20 +8,16 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Widget
-} from 'phosphor/lib/ui/widget';
-
-import {
   CodeMirrorEditorFactory, CodeMirrorMimeTypeService
-} from '../../../lib/codemirror';
+} from '@jupyterlab/codemirror';
 
 import {
   Context, DocumentRegistry, TextModelFactory
-} from '../../../lib/docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   EditorWidget, EditorWidgetFactory
-} from '../../../lib/editorwidget';
+} from '@jupyterlab/editorwidget';
 
 
 describe('editorwidget', () => {

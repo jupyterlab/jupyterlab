@@ -9,15 +9,11 @@ import {
 
 import {
   CommandRegistry
-} from 'phosphor/lib/ui/commandregistry';
-
-import {
-  Keymap
-} from 'phosphor/lib/ui/keymap';
+} from '@phosphor/commands';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
   simulate
@@ -25,15 +21,15 @@ import {
 
 import {
   DocumentManager
-} from '../../../lib/docmanager';
+} from '@jupyterlab/docmanager';
 
 import {
   DocumentRegistry, TextModelFactory, ABCWidgetFactory
-} from '../../../lib/docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   FileButtons, FileBrowserModel
-} from '../../../lib/filebrowser';
+} from '@jupyterlab/filebrowser';
 
 import {
   acceptDialog
@@ -56,16 +52,13 @@ describe('filebrowser/buttons', () => {
   let manager: DocumentManager;
   let registry: DocumentRegistry;
   let commands: CommandRegistry;
-  let keymap: Keymap;
   let model: FileBrowserModel;
   let buttons: FileButtons;
   let modelFactory = new TextModelFactory();
   let widgetFactory = new WidgetFactory({
     name: 'test',
     fileExtensions: ['.txt'],
-    defaultFor: ['.txt'],
-    canStartKernel: true,
-    preferKernel: true
+    defaultFor: ['.txt']
   });
   let openedWidget: Widget;
 
@@ -77,7 +70,6 @@ describe('filebrowser/buttons', () => {
   beforeEach(() => {
     openedWidget = null;
     commands = new CommandRegistry();
-    keymap = new Keymap({ commands });
     registry = new DocumentRegistry();
     registry.addModelFactory(modelFactory);
     registry.addWidgetFactory(widgetFactory);
@@ -91,7 +83,7 @@ describe('filebrowser/buttons', () => {
       }
     });
     model = new FileBrowserModel({ manager: services });
-    buttons = new FileButtons({ model, manager, commands, keymap });
+    buttons = new FileButtons({ model, manager, commands });
   });
 
   afterEach(() => {

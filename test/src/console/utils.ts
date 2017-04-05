@@ -3,11 +3,11 @@
 
 import {
   editorServices
-} from '../../../lib/codemirror';
+} from '@jupyterlab/codemirror';
 
 import {
   CodeConsole, ConsolePanel
-} from '../../../lib/console';
+} from '@jupyterlab/console';
 
 import {
   defaultRenderMime
@@ -15,7 +15,8 @@ import {
 
 
 export
-const editorFactory = editorServices.factoryService.newInlineEditor;
+const editorFactory = editorServices.factoryService.newInlineEditor.bind(
+    editorServices.factoryService);
 
 export
 const mimeTypeService = editorServices.mimeTypeService;

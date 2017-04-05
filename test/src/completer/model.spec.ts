@@ -5,11 +5,15 @@ import expect = require('expect.js');
 
 import {
   toArray
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
+
+import {
+  CodeEditor
+} from '@jupyterlab/codeeditor';
 
 import {
   CompleterModel, CompleterWidget
-} from '../../../lib/completer';
+} from '@jupyterlab/completer';
 
 
 function makeState(text: string): CompleterWidget.ITextState {
@@ -18,7 +22,7 @@ function makeState(text: string): CompleterWidget.ITextState {
     lineHeight: 0,
     charWidth: 0,
     line: 0,
-    coords: { left: 0, right: 0, top: 0, bottom: 0 },
+    coords: { left: 0, right: 0, top: 0, bottom: 0 } as CodeEditor.ICoordinate,
     text
   };
 }
@@ -111,7 +115,7 @@ describe('completer/model', () => {
         expect(called).to.be(3);
       });
 
-      it('should not signal when current text has not change', () => {
+      it('should not signal when current text is unchanged', () => {
         let model = new CompleterModel();
         let called = 0;
         let currentValue = 'foo';

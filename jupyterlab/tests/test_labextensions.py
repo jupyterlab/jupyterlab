@@ -372,7 +372,8 @@ class TestInstallLabExtension(TestCase):
         assert 'mockextension' in manifest
         mod = manifest['mockextension']
         assert mod['name'] == 'mockextension'
-        assert 'jupyterlab/tests/mockextension/index.js' in mod['entry']
+        modname = '@jupyterlab/python-tests@0.1.0/mockextension/index.js'
+        assert modname in mod['entry']
         filename = 'mockextension.bundle.js'
         assert mod['files'][0] == filename
         assert mod['id'] == 0

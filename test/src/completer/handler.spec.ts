@@ -5,23 +5,31 @@ import expect = require('expect.js');
 
 import {
   toArray
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
 
 import {
-  KernelMessage, Kernel
+  KernelMessage
 } from '@jupyterlab/services';
 
 import {
+  IClientSession
+} from '@jupyterlab/apputils';
+
+import {
   CodeEditor, CodeEditorWidget
-} from '../../../lib/codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   CodeMirrorEditor
-} from '../../../lib/codemirror';
+} from '@jupyterlab/codemirror';
 
 import {
   CompleterWidget, CompletionHandler, CompleterModel
-} from '../../../lib/completer';
+} from '@jupyterlab/completer';
+
+import {
+  createClientSession
+} from '../utils';
 
 
 function createEditorWidget(): CodeEditorWidget {
@@ -57,8 +65,8 @@ class TestCompletionHandler extends CompletionHandler {
     return promise;
   }
 
-  onReply(pending: number, request: CompleterWidget.ITextState, msg: KernelMessage.ICompleteReplyMsg): void {
-    super.onReply(pending, request, msg);
+  onReply(state: CompleterWidget.ITextState, reply: KernelMessage.ICompleteReplyMsg): void {
+    super.onReply(state, reply);
     this.methods.push('onReply');
   }
 
@@ -67,33 +75,26 @@ class TestCompletionHandler extends CompletionHandler {
     this.methods.push('onTextChanged');
   }
 
-  onCompletionRequested(editor: CodeEditor.IEditor, position: CodeEditor.IPosition): void {
-    super.onCompletionRequested(editor, position);
-    this.methods.push('onCompletionRequested');
-  }
-
   onCompletionSelected(widget: CompleterWidget, value: string): void {
     super.onCompletionSelected(widget, value);
     this.methods.push('onCompletionSelected');
   }
 }
 
-const kernelPromise = Kernel.startNew();
 
+describe('@jupyterlab/completer', () => {
 
-describe('completer/handler', () => {
+  let session: IClientSession;
 
-  let kernel: Kernel.IKernel;
-
-  beforeEach((done) => {
-    kernelPromise.then(k => {
-      kernel = k;
-      done();
+  before(() => {
+    return createClientSession().then(s => {
+      session = s;
+      return s.initialize();
     });
   });
 
   after(() => {
-    kernel.shutdown();
+    return session.shutdown();
   });
 
   describe('CompletionHandler', () => {
@@ -102,29 +103,22 @@ describe('completer/handler', () => {
 
       it('should create a completer handler', () => {
         let handler = new CompletionHandler({
-          completer: new CompleterWidget()
+          session,
+          completer: new CompleterWidget({ editor: null })
         });
         expect(handler).to.be.a(CompletionHandler);
       });
 
     });
 
-    describe('#kernel', () => {
+    describe('#session', () => {
 
-      it('should default to null', () => {
+      it('should be the client session object', () => {
         let handler = new CompletionHandler({
-          completer: new CompleterWidget()
+          session,
+          completer: new CompleterWidget({ editor: null })
         });
-        expect(handler.kernel).to.be(null);
-      });
-
-      it('should be settable', () => {
-        let handler = new CompletionHandler({
-          completer: new CompleterWidget()
-        });
-        expect(handler.kernel).to.be(null);
-        handler.kernel = kernel;
-        expect(handler.kernel).to.be(kernel);
+        expect(handler.session).to.be(session);
       });
 
     });
@@ -134,14 +128,16 @@ describe('completer/handler', () => {
 
       it('should default to null', () => {
         let handler = new CompletionHandler({
-          completer: new CompleterWidget()
+          session,
+          completer: new CompleterWidget({ editor: null })
         });
         expect(handler.editor).to.be(null);
       });
 
       it('should be settable', () => {
         let handler = new CompletionHandler({
-          completer: new CompleterWidget()
+          session,
+          completer: new CompleterWidget({ editor: null })
         });
         let widget = createEditorWidget();
         expect(handler.editor).to.be(null);
@@ -151,7 +147,8 @@ describe('completer/handler', () => {
 
       it('should be resettable', () => {
         let handler = new CompletionHandler({
-          completer: new CompleterWidget()
+          session,
+          completer: new CompleterWidget({ editor: null })
         });
         let one = createEditorWidget();
         let two = createEditorWidget();
@@ -168,7 +165,8 @@ describe('completer/handler', () => {
 
       it('should be true if handler has been disposed', () => {
         let handler = new CompletionHandler({
-          completer: new CompleterWidget()
+          session,
+          completer: new CompleterWidget({ editor: null })
         });
         expect(handler.isDisposed).to.be(false);
         handler.dispose();
@@ -181,19 +179,18 @@ describe('completer/handler', () => {
 
       it('should dispose of the handler resources', () => {
         let handler = new CompletionHandler({
-          completer: new CompleterWidget(),
-          kernel: kernel
+          completer: new CompleterWidget({ editor: null }),
+          session
         });
         expect(handler.isDisposed).to.be(false);
-        expect(handler.kernel).to.be.ok();
         handler.dispose();
         expect(handler.isDisposed).to.be(true);
-        expect(handler.kernel).to.not.be.ok();
       });
 
       it('should be safe to call multiple times', () => {
         let handler = new CompletionHandler({
-          completer: new CompleterWidget()
+          session,
+          completer: new CompleterWidget({ editor: null })
         });
         expect(handler.isDisposed).to.be(false);
         handler.dispose();
@@ -205,77 +202,61 @@ describe('completer/handler', () => {
 
     describe('#makeRequest()', () => {
 
-      it('should reject if handler has no kernel', (done) => {
-        let handler = new TestCompletionHandler({
-          completer: new CompleterWidget()
-        });
-        handler.editor = createEditorWidget().editor;
-        let request = {
-          column: 0,
-          line: 0
-        };
-        handler.makeRequest(request).catch((reason: Error) => {
-          expect(reason).to.be.an(Error);
-          done();
-        });
-      });
-
-      it('should reject if handler has no active cell', (done) => {
-        let handler = new TestCompletionHandler({
-          completer: new CompleterWidget()
-        });
-        handler.kernel = kernel;
-        let request = {
-          column: 0,
-          line: 0
-        };
-        handler.makeRequest(request).catch((reason: Error) => {
-          expect(reason).to.be.an(Error);
-          done();
+      it('should reject if handler has no kernel', () => {
+        return createClientSession().then(session => {
+          let handler = new TestCompletionHandler({
+            session,
+            completer: new CompleterWidget({ editor: null })
+          });
+          handler.editor = createEditorWidget().editor;
+          let request = {
+            column: 0,
+            line: 0
+          };
+          return handler.makeRequest(request).then(
+            () => { throw Error('Should have rejected'); },
+            reason => { expect(reason).to.be.an(Error); }
+          );
         });
       });
 
-      it('should resolve if handler has a kernel and an active cell', (done) => {
+      it('should reject if handler has no active cell', () => {
         let handler = new TestCompletionHandler({
-          completer: new CompleterWidget()
+          session,
+          completer: new CompleterWidget({ editor: null })
         });
         let request = {
           column: 0,
           line: 0
         };
-        handler.kernel = kernel;
+        return handler.makeRequest(request).then(
+          () => { throw Error('Should have rejected'); },
+          reason => { expect(reason).to.be.an(Error); }
+        );
+      });
+
+      it('should resolve if handler has a kernel and an active cell', () => {
+        let handler = new TestCompletionHandler({
+          session,
+          completer: new CompleterWidget({ editor: null })
+        });
+        let request = {
+          column: 0,
+          line: 0
+        };
         handler.editor = createEditorWidget().editor;
         handler.editor.model.value.text = 'a=1';
 
-        handler.makeRequest(request).then(() => { done(); }).catch(done);
+        return handler.makeRequest(request);
       });
 
     });
 
     describe('#onReply()', () => {
 
-      it('should do nothing if handler has been disposed', () => {
-        let completer = new CompleterWidget();
-        let handler = new TestCompletionHandler({ completer });
-        completer.model = new CompleterModel();
-        completer.model.setOptions(['foo', 'bar', 'baz']);
-        handler.dispose();
-        handler.onReply(0, null, null);
-        expect(completer.model).to.be.ok();
-      });
-
-      it('should do nothing if pending request ID does not match', () => {
-        let completer = new CompleterWidget();
-        let handler = new TestCompletionHandler({ completer });
-        completer.model = new CompleterModel();
-        completer.model.setOptions(['foo', 'bar', 'baz']);
-        handler.onReply(2, null, null);
-        expect(completer.model).to.be.ok();
-      });
-
       it('should reset model if status is not ok', () => {
-        let completer = new CompleterWidget();
-        let handler = new TestCompletionHandler({ completer });
+        let completer = new CompleterWidget({ editor: null });
+        let handler = new TestCompletionHandler({ session, completer });
         let options = ['a', 'b', 'c'];
         let request: CompleterWidget.ITextState = {
           column: 0,
@@ -302,13 +283,13 @@ describe('completer/handler', () => {
         completer.model = new CompleterModel();
         completer.model.setOptions(options);
         expect(toArray(completer.model.options())).to.eql(options);
-        handler.onReply(0, request, reply);
+        handler.onReply(request, reply);
         expect(toArray(completer.model.options())).to.eql([]);
       });
 
       it('should update model if status is ok', () => {
-        let completer = new CompleterWidget();
-        let handler = new TestCompletionHandler({ completer });
+        let completer = new CompleterWidget({ editor: null });
+        let handler = new TestCompletionHandler({ session, completer });
         let options = ['a', 'b', 'c'];
         let request: CompleterWidget.ITextState = {
           column: 0,
@@ -335,7 +316,7 @@ describe('completer/handler', () => {
         completer.model = new CompleterModel();
         completer.model.setOptions(options);
         expect(toArray(completer.model.options())).to.eql(options);
-        handler.onReply(0, request, reply);
+        handler.onReply(request, reply);
         expect(toArray(completer.model.options())).to.eql(reply.content.matches);
       });
 
@@ -345,7 +326,8 @@ describe('completer/handler', () => {
 
       it('should fire when the active editor emits a text change', () => {
         let handler = new TestCompletionHandler({
-          completer: new CompleterWidget()
+          session,
+          completer: new CompleterWidget({ editor: null })
         });
         handler.editor = createEditorWidget().editor;
         expect(handler.methods).to.not.contain('onTextChanged');
@@ -355,51 +337,21 @@ describe('completer/handler', () => {
 
       it('should call model change handler if model exists', () => {
         let completer = new CompleterWidget({
+          editor: null,
           model: new TestCompleterModel()
         });
-        let handler = new TestCompletionHandler({ completer });
+        let handler = new TestCompletionHandler({ session, completer });
         let editor = createEditorWidget().editor;
         let model = completer.model as TestCompleterModel;
 
         handler.editor = editor;
         expect(model.methods).to.not.contain('handleTextChange');
-        handler.editor.model.value.text = 'foo';
+        editor.model.value.text = 'bar';
+        editor.setCursorPosition({ line: 0, column: 2 });
+        // This signal is emitted (again) because the cursor position that
+        // a natural user would create need to be recreated here.
+        (editor.model.value.changed as any).emit(void 0);
         expect(model.methods).to.contain('handleTextChange');
-      });
-
-    });
-
-    describe('#onCompletionRequested()', () => {
-
-      it('should fire when the active editor emits a request', () => {
-        let handler = new TestCompletionHandler({
-          completer: new CompleterWidget()
-        });
-        let request: CodeEditor.IPosition = {
-          column: 0,
-          line: 0
-        };
-
-        handler.editor = createEditorWidget().editor;
-        expect(handler.methods).to.not.contain('onCompletionRequested');
-        handler.editor.completionRequested.emit(request);
-        expect(handler.methods).to.contain('onCompletionRequested');
-      });
-
-      it('should make a kernel request if kernel and model exist', () => {
-        let completer = new CompleterWidget({
-          model: new TestCompleterModel()
-        });
-        let handler = new TestCompletionHandler({ completer });
-        let request: CodeEditor.IPosition = {
-          column: 0,
-          line: 0
-        };
-        handler.kernel = kernel;
-        handler.editor = createEditorWidget().editor;
-        expect(handler.methods).to.not.contain('makeRequest');
-        handler.editor.completionRequested.emit(request);
-        expect(handler.methods).to.contain('makeRequest');
       });
 
     });
@@ -407,32 +359,33 @@ describe('completer/handler', () => {
     describe('#onCompletionSelected()', () => {
 
       it('should fire when the completer widget emits a signal', () => {
-        let completer = new CompleterWidget();
-        let handler = new TestCompletionHandler({ completer });
+        let completer = new CompleterWidget({ editor: null });
+        let handler = new TestCompletionHandler({ session, completer });
 
         expect(handler.methods).to.not.contain('onCompletionSelected');
-        completer.selected.emit('foo');
+        (completer.selected as any).emit('foo');
         expect(handler.methods).to.contain('onCompletionSelected');
       });
 
       it('should call model create patch method if model exists', () => {
         let completer = new CompleterWidget({
+          editor: null,
           model: new TestCompleterModel()
         });
-        let handler = new TestCompletionHandler({ completer });
+        let handler = new TestCompletionHandler({ session, completer });
         let model = completer.model as TestCompleterModel;
 
         handler.editor = createEditorWidget().editor;
         expect(model.methods).to.not.contain('createPatch');
-        completer.selected.emit('foo');
+        (completer.selected as any).emit('foo');
         expect(model.methods).to.contain('createPatch');
       });
 
       it('should update cell if patch exists', () => {
         let model = new CompleterModel();
         let patch = 'foobar';
-        let completer = new CompleterWidget({ model });
-        let handler = new TestCompletionHandler({ completer });
+        let completer = new CompleterWidget({ editor: null, model });
+        let handler = new TestCompletionHandler({ session, completer });
         let editor = createEditorWidget().editor;
         let text = 'eggs\nfoo # comment\nbaz';
         let want = 'eggs\nfoobar # comment\nbaz';
@@ -449,7 +402,7 @@ describe('completer/handler', () => {
         handler.editor.model.value.text = text;
         model.original = request;
         model.cursor = { start: 5, end: 8 };
-        completer.selected.emit(patch);
+        (completer.selected as any).emit(patch);
         expect(handler.editor.model.value.text).to.equal(want);
       });
 

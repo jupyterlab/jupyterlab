@@ -9,19 +9,19 @@ import {
 
 import {
   toArray
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
 
 import {
   DisposableDelegate, IDisposable
-} from 'phosphor/lib/core/disposable';
+} from '@phosphor/disposable';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
   ABCWidgetFactory, DocumentRegistry, TextModelFactory
-} from '../../../lib/docregistry';
+} from '@jupyterlab/docregistry';
 
 
 class WidgetFactory extends ABCWidgetFactory<Widget, DocumentRegistry.IModel> {
@@ -466,13 +466,13 @@ describe('docregistry/registry', () => {
         }));
         let pref = registry.getKernelPreference('.c', 'global');
         expect(pref.language).to.be('clike');
-        expect(pref.preferKernel).to.be(false);
-        expect(pref.canStartKernel).to.be(false);
+        expect(pref.shouldStart).to.be(false);
+        expect(pref.canStart).to.be(false);
 
         pref = registry.getKernelPreference('.py', 'python');
         expect(pref.language).to.be('python');
-        expect(pref.preferKernel).to.be(true);
-        expect(pref.canStartKernel).to.be(true);
+        expect(pref.shouldStart).to.be(true);
+        expect(pref.canStart).to.be(true);
 
         pref = registry.getKernelPreference('.py', 'baz');
         expect(pref).to.be(void 0);

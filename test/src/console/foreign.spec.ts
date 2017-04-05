@@ -4,31 +4,35 @@
 import expect = require('expect.js');
 
 import {
-  Kernel, KernelMessage, utils, Session
+  KernelMessage, utils, Session
 } from '@jupyterlab/services';
 
 import {
-  clearSignalData, defineSignal, ISignal
-} from 'phosphor/lib/core/signaling';
+  Signal
+} from '@phosphor/signaling';
 
 import {
   Panel
-} from 'phosphor/lib/ui/panel';
+} from '@phosphor/widgets';
+
+import {
+  IClientSession
+} from '@jupyterlab/apputils';
 
 import {
   ForeignHandler
-} from '../../../lib/console/foreign';
+} from '@jupyterlab/console';
 
 import {
   CodeCellModel, CodeCellWidget
-} from '../../../lib/cells';
+} from '@jupyterlab/cells';
 
 import {
   createCodeCellFactory
 } from '../notebook/utils';
 
 import {
-  defaultRenderMime
+  createClientSession, defaultRenderMime
 } from '../utils';
 
 
@@ -41,23 +45,15 @@ class TestParent extends Panel implements ForeignHandler.IReceiver {
 
 class TestHandler extends ForeignHandler {
 
-  readonly injected: ISignal<this, void>;
+  injected = new Signal<this, void>(this);
 
-  readonly received: ISignal<this, void>;
+  received = new Signal<this, void>(this);
 
-  readonly rejected: ISignal<this, void>;
+  rejected = new Signal<this, void>(this);
 
   methods: string[] = [];
 
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    super.dispose();
-    clearSignalData(this);
-  }
-
-  protected onIOPubMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage): boolean {
+  protected onIOPubMessage(sender: IClientSession, msg: KernelMessage.IIOPubMessage): boolean {
     let injected = super.onIOPubMessage(sender, msg);
     this.received.emit(void 0);
     if (injected) {
@@ -67,18 +63,13 @@ class TestHandler extends ForeignHandler {
       // a rejected signal. This should only happen if `enabled` is `false`.
       let session = (msg.parent_header as KernelMessage.IHeader).session;
       let msgType = msg.header.msg_type;
-      if (session !== this.kernel.clientId && relevantTypes.has(msgType)) {
+      if (session !== this.session.kernel.clientId && relevantTypes.has(msgType)) {
         this.rejected.emit(void 0);
       }
     }
     return injected;
   }
 }
-
-
-defineSignal(TestHandler.prototype, 'injected');
-defineSignal(TestHandler.prototype, 'received');
-defineSignal(TestHandler.prototype, 'rejected');
 
 
 const rendermime = defaultRenderMime();
@@ -102,46 +93,55 @@ const relevantTypes = [
 }, new Set<string>());
 
 
-describe('console/foreign', () => {
+describe('@jupyterlab/console', () => {
 
   describe('ForeignHandler', () => {
+
+    let local: Session.ISession;
+    let foreign: Session.ISession;
+    let handler: TestHandler;
+    let session: IClientSession;
+
+    before(() => {
+      let path = utils.uuid();
+      let sessions = [Session.startNew({ path }), Session.startNew({ path })];
+      return Promise.all(sessions).then(([one, two]) => {
+        local = one;
+        foreign = two;
+      }).then(() => {
+        return createClientSession({ path: local.path });
+      }).then(s => {
+        session = s;
+        return s.initialize();
+      });
+    });
+
+    beforeEach(() => {
+      let parent = new TestParent();
+      handler = new TestHandler({ session, parent, cellFactory });
+    });
+
+    afterEach(() => {
+      handler.dispose();
+    });
+
+    after(() => {
+      local.dispose();
+      foreign.dispose();
+      return session.shutdown().then(() => {
+        session.dispose();
+      });
+    });
 
     describe('#constructor()', () => {
 
       it('should create a new foreign handler', () => {
-        let handler = new TestHandler({ kernel: null, parent: null,
-                                        cellFactory });
         expect(handler).to.be.a(ForeignHandler);
       });
 
     });
 
     describe('#enabled', () => {
-
-      let local: Session.ISession;
-      let foreign: Session.ISession;
-      let handler: TestHandler;
-
-      beforeEach(done => {
-        let parent = new TestParent();
-        let path = utils.uuid();
-        let sessions = [Session.startNew({ path }), Session.startNew({ path })];
-        Promise.all(sessions).then(([one, two]) => {
-          local = one;
-          foreign = two;
-          handler = new TestHandler({ kernel: local.kernel, parent, cellFactory });
-          done();
-        }).catch(done);
-      });
-
-      afterEach(done => {
-        handler.dispose();
-        local.shutdown().then(() => {
-          local.dispose();
-          foreign.dispose();
-          done();
-        }).catch(done);
-      });
 
       it('should default to `true`', () => {
         expect(handler.enabled).to.be(true);
@@ -165,7 +165,6 @@ describe('console/foreign', () => {
     describe('#isDisposed', () => {
 
       it('should indicate whether the handler is disposed', () => {
-        let handler = new TestHandler({ kernel: null, parent: null, cellFactory });
         expect(handler.isDisposed).to.be(false);
         handler.dispose();
         expect(handler.isDisposed).to.be(true);
@@ -173,23 +172,10 @@ describe('console/foreign', () => {
 
     });
 
-    describe('#kernel', () => {
+    describe('#session', () => {
 
-      it('should be set upon instantiation', () => {
-        let handler = new TestHandler({ kernel: null, parent: null, cellFactory });
-        expect(handler.kernel).to.be(null);
-      });
-
-      it('should be resettable', done => {
-        let handler = new TestHandler({ kernel: null, parent: null, cellFactory });
-        Session.startNew({ path: utils.uuid() }).then(session => {
-          expect(handler.kernel).to.be(null);
-          handler.kernel = session.kernel;
-          expect(handler.kernel).to.be(session.kernel);
-          session.dispose();
-          handler.dispose();
-          done();
-        }).catch(done);
+      it('should be a client session object', () => {
+        expect(handler.session.path).to.ok();
       });
 
     });
@@ -198,7 +184,9 @@ describe('console/foreign', () => {
 
       it('should be set upon instantiation', () => {
         let parent = new TestParent();
-        let handler = new TestHandler({ kernel: null, parent, cellFactory });
+        handler = new TestHandler({
+          session: handler.session, parent, cellFactory
+        });
         expect(handler.parent).to.be(parent);
       });
 
@@ -207,14 +195,12 @@ describe('console/foreign', () => {
     describe('#dispose()', () => {
 
       it('should dispose the resources held by the handler', () => {
-        let handler = new TestHandler({ kernel: null, parent: null, cellFactory });
         expect(handler.isDisposed).to.be(false);
         handler.dispose();
         expect(handler.isDisposed).to.be(true);
       });
 
       it('should be safe to call multiple times', () => {
-        let handler = new TestHandler({ kernel: null, parent: null, cellFactory });
         expect(handler.isDisposed).to.be(false);
         handler.dispose();
         handler.dispose();
@@ -224,31 +210,6 @@ describe('console/foreign', () => {
     });
 
     describe('#onIOPubMessage()', () => {
-
-      let local: Session.ISession;
-      let foreign: Session.ISession;
-      let handler: TestHandler;
-
-      beforeEach(done => {
-        let parent = new TestParent();
-        let path = utils.uuid();
-        let sessions = [Session.startNew({ path }), Session.startNew({ path })];
-        Promise.all(sessions).then(([one, two]) => {
-          local = one;
-          foreign = two;
-          handler = new TestHandler({ kernel: local.kernel, parent, cellFactory });
-          done();
-        }).catch(done);
-      });
-
-      afterEach(done => {
-        handler.dispose();
-        local.shutdown().then(() => {
-          local.dispose();
-          foreign.dispose();
-          done();
-        }).catch(done);
-      });
 
       it('should be called when messages come through', done => {
         let code = 'print("onIOPubMessage:disabled")';

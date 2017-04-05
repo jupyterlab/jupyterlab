@@ -1,0 +1,7 @@
+{
+  "name": "@jupyterlab/python-tests",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {},
+  "devDependencies": {}
+}

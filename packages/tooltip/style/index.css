@@ -1,0 +1,28 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-Tooltip {
+  background: var(--jp-layout-color1);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  font-size: var(--jp-ui-font-size0);
+  box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.2);
+  max-width: 500px;
+  overflow: auto;
+  z-index: 10001;
+  padding: 4px;
+}
+
+.jp-Tooltip:focus {
+  outline: 0;
+}
+
+.jp-Tooltip pre {
+  margin: 0;
+}
+
+
+.jp-Tooltip > .jp-RenderedText {
+    overflow: visible;
+}

@@ -2,6 +2,10 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+
+@import url('~@jupyterlab/default-theme/style/index.css');
+
+
 body {
   margin: 0;
   padding: 0;

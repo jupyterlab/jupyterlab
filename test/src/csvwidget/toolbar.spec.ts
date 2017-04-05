@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
   simulate
@@ -13,7 +13,7 @@ import {
 
 import {
   CSVToolbar, DELIMITERS
-} from '../../../lib/csvwidget/toolbar';
+} from '@jupyterlab/csvwidget';
 
 
 describe('csvwidget/toolbar', () => {

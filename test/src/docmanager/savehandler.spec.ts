@@ -4,16 +4,24 @@
 import expect = require('expect.js');
 
 import {
-  ServiceManager, utils
+  uuid
+} from '@jupyterlab/coreutils';
+
+import {
+  Platform
+} from '@phosphor/domutils';
+
+import {
+  ServiceManager
 } from '@jupyterlab/services';
 
 import {
   Context, DocumentRegistry, TextModelFactory
-} from '../../../lib/docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   SaveHandler
-} from '../../../lib/docmanager';
+} from '@jupyterlab/docmanager';
 
 import {
   acceptDialog, waitForDialog
@@ -29,10 +37,11 @@ describe('docregistry/savehandler', () => {
 
   before(() => {
     manager = new ServiceManager();
+    return manager.ready;
   });
 
   beforeEach(() => {
-    context = new Context({ manager, factory, path: utils.uuid() });
+    context = new Context({ manager, factory, path: uuid() });
     handler = new SaveHandler({ context, manager });
   });
 
@@ -150,7 +159,7 @@ describe('docregistry/savehandler', () => {
               expect(context.model.toString()).to.be('baz');
               done();
             });
-          }, 1000);  // The server has a one second resolution for saves.
+          }, 1500);  // The server has a one second resolution for saves.
         }).catch(done);
         acceptDialog().catch(done);
       });
@@ -158,6 +167,10 @@ describe('docregistry/savehandler', () => {
       it('should revert to the file on disk', (done) => {
         context.model.fromString('foo');
         context.save().then(() => {
+          context.fileChanged.connect(() => {
+            expect(context.model.toString()).to.be('bar');
+            done();
+          });
           setTimeout(() => {
             manager.contents.save(context.path, {
               type: factory.contentType,
@@ -167,11 +180,7 @@ describe('docregistry/savehandler', () => {
             handler.saveInterval = 1;
             handler.start();
             context.model.fromString('baz');
-            context.fileChanged.connect(() => {
-              expect(context.model.toString()).to.be('bar');
-              done();
-            });
-          }, 1000);  // The server has a one second resolution for saves.
+          }, 1500);  // The server has a one second resolution for saves.
         }).catch(done);
         waitForDialog().then(() => {
           let dialog = document.body.getElementsByClassName('jp-Dialog')[0];

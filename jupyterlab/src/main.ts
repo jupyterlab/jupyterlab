@@ -1,54 +1,118 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  polyfill
-} from 'es6-promise';
+import 'es6-promise/auto';  // polyfill Promise on IE
 
 import {
   JupyterLab, ModuleLoader
-} from '../../lib/application';
+} from '@jupyterlab/application';
+
+import * as aboutExtension
+  from '@jupyterlab/about-extension';
+
+import * as applicationExtension
+  from '@jupyterlab/application-extension';
+
+import * as apputilsExtension
+  from '@jupyterlab/apputils-extension';
+
+import * as codemirrorExtension
+  from '@jupyterlab/codemirror-extension';
+
+import * as completerExtension
+  from '@jupyterlab/completer-extension';
+
+import * as consoleExtension
+  from '@jupyterlab/console-extension';
+
+import * as csvwidgetExtension
+  from '@jupyterlab/csvwidget-extension';
+
+import * as docmanagerExtension
+  from '@jupyterlab/docmanager-extension';
+
+import * as docregistryExtension
+  from '@jupyterlab/docregistry-extension';
+
+import * as editorwidgetExtension
+  from '@jupyterlab/editorwidget-extension';
+
+import * as faqExtension
+  from '@jupyterlab/faq-extension';
+
+import * as filebrowserExtension
+  from '@jupyterlab/filebrowser-extension';
+
+import * as helpExtension
+  from '@jupyterlab/help-extension';
+
+import * as imagewidgetExtension
+  from '@jupyterlab/imagewidget-extension';
+
+import * as inspectorExtension
+  from '@jupyterlab/inspector-extension';
+
+import * as landingExtension
+  from '@jupyterlab/landing-extension';
+
+import * as launchExtension
+  from '@jupyterlab/launcher-extension';
+
+import * as markdownwidgetExtension
+  from '@jupyterlab/markdownwidget-extension';
+
+import * as notebookExtension
+  from '@jupyterlab/notebook-extension';
+
+import * as rendermimeExtension
+  from '@jupyterlab/rendermime-extension';
+
+import * as runningExtension
+  from '@jupyterlab/running-extension';
+
+import * as servicesExtension
+  from '@jupyterlab/services-extension';
+
+import * as shortcutsExtension
+  from '@jupyterlab/shortcuts-extension';
+
+import * as terminalExtension
+  from '@jupyterlab/terminal-extension';
+
+import * as tooltipExtension
+  from '@jupyterlab/tooltip-extension';
 
 import 'font-awesome/css/font-awesome.min.css';
-import '../../lib/default-theme/index.css';
+import '@jupyterlab/default-theme/style/index.css';
 
 
-polyfill();
-
-
-/* tslint:disable */
 const mods: JupyterLab.IPluginModule[] = [
-  require('../../lib/about/plugin'),
-  require('../../lib/application/plugin'),
-  require('../../lib/clipboard/plugin'),
-  require('../../lib/codemirror/plugin'),
-  require('../../lib/commandlinker/plugin'),
-  require('../../lib/commandpalette/plugin'),
-  require('../../lib/console/plugin'),
-  require('../../lib/csvwidget/plugin'),
-  require('../../lib/docmanager/plugin'),
-  require('../../lib/docregistry/plugin'),
-  require('../../lib/editorwidget/plugin'),
-  require('../../lib/faq/plugin'),
-  require('../../lib/filebrowser/plugin'),
-  require('../../lib/help/plugin'),
-  require('../../lib/imagewidget/plugin'),
-  require('../../lib/inspector/plugin'),
-  require('../../lib/landing/plugin'),
-  require('../../lib/launcher/plugin'),
-  require('../../lib/instancerestorer/plugin'),
-  require('../../lib/mainmenu/plugin'),
-  require('../../lib/markdownwidget/plugin'),
-  require('../../lib/notebook/plugin'),
-  require('../../lib/rendermime/plugin'),
-  require('../../lib/running/plugin'),
-  require('../../lib/services/plugin'),
-  require('../../lib/shortcuts/plugin'),
-  require('../../lib/statedb/plugin'),
-  require('../../lib/terminal/plugin'),
-  require('../../lib/tooltip/plugin')
+  aboutExtension,
+  applicationExtension,
+  apputilsExtension,
+  codemirrorExtension,
+  completerExtension,
+  consoleExtension,
+  csvwidgetExtension,
+  docmanagerExtension,
+  docregistryExtension,
+  editorwidgetExtension,
+  faqExtension,
+  filebrowserExtension,
+  helpExtension,
+  imagewidgetExtension,
+  inspectorExtension,
+  landingExtension,
+  launchExtension,
+  markdownwidgetExtension,
+  notebookExtension,
+  rendermimeExtension,
+  runningExtension,
+  servicesExtension,
+  shortcutsExtension,
+  terminalExtension,
+  tooltipExtension,
 ];
-/* tslint:enable */
 
 
 /**
@@ -64,7 +128,7 @@ function createLab(loader: ModuleLoader): JupyterLab {
     loader,
     gitDescription: process.env.GIT_DESCRIPTION,
     namespace: 'jupyterlab',
-    version: require('../../package.json').version
+    version: process.env.JUPYTERLAB_VERSION
   });
   lab.registerPluginModules(mods);
   return lab;

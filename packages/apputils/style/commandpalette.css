@@ -1,0 +1,189 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+| Variables
+|----------------------------------------------------------------------------*/
+
+
+:root {
+  --jp-private-commandpalette-search-height: 28px;
+}
+
+/*-----------------------------------------------------------------------------
+| Overall styles
+|----------------------------------------------------------------------------*/
+
+
+.p-CommandPalette {
+  padding-bottom: 0px;
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+}
+
+/*-----------------------------------------------------------------------------
+| Search
+|----------------------------------------------------------------------------*/
+
+
+.p-CommandPalette-search {
+  padding: 8px;
+  background-color: var(--jp-border-color3);
+  border-bottom: 1px solid var(--jp-border-color1);
+}
+
+.p-CommandPalette-wrapper {
+  overflow: overlay;
+  padding: 0px 8px;
+  border: 1px solid var(--jp-border-color1);
+  background-color: white;
+  height: 30px;
+}
+
+
+.p-CommandPalette.p-mod-focused .p-CommandPalette-wrapper {
+  border: var(--jp-border-width) solid var(--md-blue-500);
+  box-shadow: inset 0 0 4px var(--md-blue-300);
+}
+
+
+.p-CommandPalette-wrapper::after {
+  content: " ";
+  color: white;
+  background-color: var(--jp-brand-color1);
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  height: 32px;
+  width: 12px;
+  padding: 0px 12px;
+  background-image: var(--jp-icon-search);
+  background-size: 20px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.p-CommandPalette-input {
+  background: transparent;
+  width: calc(100% - 18px);
+  float: left;
+  border: none;
+  outline: none;
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color0);
+  line-height: var(--jp-private-commandpalette-search-height);
+}
+
+
+.p-CommandPalette-input::-webkit-input-placeholder {
+  color: var(--jp-ui-font-color3);
+  font-size: var(--jp-ui-font-size1);
+}
+
+
+.p-CommandPalette-input::-moz-placeholder {
+  color: var(--jp-ui-font-color3);
+  font-size: var(--jp-ui-font-size1);
+}
+
+
+.p-CommandPalette-input:-ms-input-placeholder {
+  color: var(--jp-ui-font-color3);
+  font-size: var(--jp-ui-font-size1);
+}
+
+
+/*-----------------------------------------------------------------------------
+| Results
+|----------------------------------------------------------------------------*/
+
+
+.p-CommandPalette-header {
+  padding: 12px 0 4px 12px;
+  color: var(--jp-ui-font-color1);
+  font-size: var(--jp-ui-font-size0);
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: uppercase;
+  border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
+  letter-spacing: 1px;
+}
+
+
+.p-CommandPalette-header.p-mod-active {
+  background: var(--jp-layout-color2);
+}
+
+
+.p-CommandPalette-header:hover::before {
+  content: '\2026'; /* ellipsis */
+  float: right;
+  margin-right: 4px;
+}
+
+
+.p-CommandPalette-header > mark {
+  background-color: transparent;
+  font-weight: bold;
+}
+
+
+.p-CommandPalette-item {
+  padding: 4px 12px;
+  color: var(--jp-ui-font-color1);
+  font-size: var(--jp-ui-font-size1);
+  font-weight: 400;
+}
+
+
+.p-CommandPalette-item.p-mod-disabled {
+  color: rgba(0, 0, 0, 0.25);
+}
+
+
+.p-CommandPalette-item.p-mod-active {
+  background: #e0e0e0;
+}
+
+
+.p-CommandPalette-item:hover:not(.p-mod-active):not(.p-mod-disabled) {
+  background: #E5E5E5;
+}
+
+
+.p-CommandPalette-itemLabel > mark {
+  background-color: transparent;
+  font-weight: bold;
+}
+
+
+.p-CommandPalette-item.p-mod-disabled mark {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+
+.p-CommandPalette-itemCaption {
+  display: none;
+}
+
+.p-CommandPalette-content:empty:after {
+    content: "No results";
+    margin: auto;
+    margin-top: 20px;
+    width: 100px;
+    display: block;
+    font-size: var(--jp-ui-font-size2);
+    font-family: var(--jp-ui-font-family);
+    font-weight: lighter;
+}
+
+.p-CommandPalette-emptyMessage {
+  text-align: center;
+  margin-top: 24px;
+  line-height: 1.32;
+  padding: 0px 8px;
+  color: var(--jp-content-font-color3);
+
+}

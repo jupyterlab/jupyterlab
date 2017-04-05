@@ -1,54 +1,40 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import 'es6-promise/auto';  // polyfill Promise on IE
+
 import {
   CommandRegistry
-} from 'phosphor/lib/ui/commandregistry';
+} from '@phosphor/commands';
 
 import {
-  CommandPalette
-} from 'phosphor/lib/ui/commandpalette';
+  CommandPalette, SplitPanel, Widget
+} from '@phosphor/widgets';
 
 import {
-  Keymap
-} from 'phosphor/lib/ui/keymap';
-
-import {
-  SplitPanel
-} from 'phosphor/lib/ui/splitpanel';
-
-import {
-  Widget
-} from 'phosphor/lib/ui/widget';
-
-import {
-  Session
+  ServiceManager
 } from '@jupyterlab/services';
 
 import {
   editorServices
-} from 'jupyterlab/lib/codemirror';
-
-import {
-  defaultSanitizer
-} from 'jupyterlab/lib/common/sanitizer';
+} from '@jupyterlab/codemirror';
 
 import {
   ConsolePanel
-} from 'jupyterlab/lib/console';
+} from '@jupyterlab/console';
 
 import {
   RenderMime
-} from 'jupyterlab/lib/rendermime';
+} from '@jupyterlab/rendermime';
 
-import 'jupyterlab/lib/default-theme/index.css';
+import '@jupyterlab/default-theme/style/index.css';
 import '../index.css';
 
 let TITLE = 'Console';
 
 
 function main(): void {
-  let path = 'dummy_path';
+  let path = '';
   let query: { [key: string]: string } = Object.create(null);
 
   window.location.search.substr(1).split('&').forEach(item => {
@@ -58,53 +44,44 @@ function main(): void {
     }
   });
 
-  if (!query['path']) {
-    Session.startNew({ path }).then(session => { startApp(session); });
-    return;
+  if (query['path']) {
+    path = query['path'];
   }
 
-  Session.findByPath(query['path'])
-    .then(model => { return Session.connectTo(model.id); })
-    .then(session => { startApp(session); })
-    .catch(error => {
-      console.warn(`path="${query['path']}"`, error);
-      Session.startNew({ path }).then(session => { startApp(session); });
-    });
+  let manager = new ServiceManager();
+  manager.ready.then(() => {
+    startApp(path, manager);
+  });
 }
 
 
-function startApp(session: Session.ISession) {
-  // Initialize the keymap manager with the bindings.
+/**
+ * Start the application.
+ */
+function startApp(path: string, manager: ServiceManager.IManager) {
+
+  // Initialize the command registry with the key bindings.
   let commands = new CommandRegistry();
-  let keymap = new Keymap({ commands });
 
   // Setup the keydown listener for the document.
   document.addEventListener('keydown', event => {
-    keymap.processKeydownEvent(event);
+    commands.processKeydownEvent(event);
   });
 
-  const transformers = RenderMime.defaultRenderers();
-  let renderers: RenderMime.MimeMap<RenderMime.IRenderer> = {};
-  let order: string[] = [];
-  for (let t of transformers) {
-    for (let m of t.mimetypes) {
-      renderers[m] = t;
-      order.push(m);
-    }
-  }
-  let sanitizer = defaultSanitizer;
-  let rendermime = new RenderMime({ renderers, order, sanitizer });
-  let editorFactory = editorServices.factoryService.newInlineEditor;
+  let rendermime = new RenderMime({ items: RenderMime.getDefaultItems() });
+  let editorFactory = editorServices.factoryService.newInlineEditor.bind(
+    editorServices.factoryService);
   let contentFactory = new ConsolePanel.ContentFactory({ editorFactory });
   let consolePanel = new ConsolePanel({
     rendermime,
-    session,
+    manager,
+    path,
     contentFactory,
     mimeTypeService: editorServices.mimeTypeService
   });
   consolePanel.title.label = TITLE;
 
-  let palette = new CommandPalette({ commands, keymap });
+  let palette = new CommandPalette({ commands });
 
   let panel = new SplitPanel();
   panel.id = 'main';
@@ -135,7 +112,7 @@ function startApp(session: Session.ISession) {
     execute: () => { consolePanel.console.execute(); }
   });
   palette.addItem({ command, category });
-  keymap.addBinding({ command,  selector,  keys: ['Enter'] });
+  commands.addKeyBinding({ command,  selector,  keys: ['Enter'] });
 
   command = 'console:execute-forced';
   commands.addCommand(command, {
@@ -143,7 +120,7 @@ function startApp(session: Session.ISession) {
     execute: () => { consolePanel.console.execute(true); }
   });
   palette.addItem({ command, category });
-  keymap.addBinding({ command,  selector,  keys: ['Shift Enter'] });
+  commands.addKeyBinding({ command,  selector,  keys: ['Shift Enter'] });
 
   command = 'console:linebreak';
   commands.addCommand(command, {
@@ -151,7 +128,7 @@ function startApp(session: Session.ISession) {
     execute: () => { consolePanel.console.insertLinebreak(); }
   });
   palette.addItem({ command, category });
-  keymap.addBinding({ command,  selector,  keys: ['Ctrl Enter'] });
+  commands.addKeyBinding({ command,  selector,  keys: ['Ctrl Enter'] });
 }
 
 window.onload = main;

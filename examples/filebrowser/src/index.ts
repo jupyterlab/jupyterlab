@@ -1,59 +1,45 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import 'es6-promise/auto';  // polyfill Promise on IE
+
 import {
   CommandRegistry
-} from 'phosphor/lib/ui/commandregistry';
+} from '@phosphor/commands';
 
 import {
-  DockPanel
-} from 'phosphor/lib/ui/dockpanel';
-
-import {
-  Keymap
-} from 'phosphor/lib/ui/keymap';
-
-import {
-  Menu
-} from 'phosphor/lib/ui/menu';
-
-import {
-  SplitPanel
-} from 'phosphor/lib/ui/splitpanel';
-
-import {
-  Widget
-} from 'phosphor/lib/ui/widget';
+  DockPanel, Menu, SplitPanel, Widget
+} from '@phosphor/widgets';
 
 import {
   ServiceManager
 } from '@jupyterlab/services';
 
 import {
-  showDialog, okButton
-} from 'jupyterlab/lib/common/dialog';
+  Dialog, showDialog
+} from '@jupyterlab/apputils';
 
 import {
   FileBrowser, FileBrowserModel
-} from 'jupyterlab/lib/filebrowser';
+} from '@jupyterlab/filebrowser';
 
 import {
   DocumentManager
-} from 'jupyterlab/lib/docmanager';
+} from '@jupyterlab/docmanager';
 
 import {
   DocumentRegistry, TextModelFactory
-} from 'jupyterlab/lib/docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   CodeMirrorEditorFactory, CodeMirrorMimeTypeService
-} from 'jupyterlab/lib/codemirror';
+} from '@jupyterlab/codemirror';
 
 import {
   EditorWidgetFactory
-} from 'jupyterlab/lib/editorwidget/widget';
+} from '@jupyterlab/editorwidget';
 
-import 'jupyterlab/lib/default-theme/index.css';
+import '@jupyterlab/default-theme/style/index.css';
 import '../index.css';
 
 
@@ -110,12 +96,11 @@ function createApp(manager: ServiceManager.IManager): void {
   docRegistry.addWidgetFactory(wFactory);
 
   let commands = new CommandRegistry();
-  let keymap = new Keymap({ commands });
 
   let fbModel = new FileBrowserModel({ manager });
   let fbWidget = new FileBrowser({
+    id: 'filebrowser',
     commands,
-    keymap,
     model: fbModel,
     manager: docManager,
   });
@@ -207,26 +192,26 @@ function createApp(manager: ServiceManager.IManager): void {
       showDialog({
         title: 'Cool Title',
         body: msg,
-        buttons: [okButton]
+        buttons: [Dialog.okButton()]
       });
     }
   });
 
-  keymap.addBinding({
+  commands.addKeyBinding({
     keys: ['Enter'],
     selector: '.jp-DirListing',
     command: 'file-open'
   });
-  keymap.addBinding({
+  commands.addKeyBinding({
     keys: ['Accel S'],
     selector: '.jp-CodeMirrorWidget',
     command: 'file-save'
   });
   window.addEventListener('keydown', (event) => {
-    keymap.processKeydownEvent(event);
+    commands.processKeydownEvent(event);
   });
 
-  let menu = new Menu({ commands, keymap });
+  let menu = new Menu({ commands });
   menu.addItem({ command: 'file-open' });
   menu.addItem({ command: 'file-rename' });
   menu.addItem({ command: 'file-remove' });

@@ -5,30 +5,30 @@ import expect = require('expect.js');
 
 import {
   toArray
-} from 'phosphor/lib/algorithm/iteration';
+} from '@phosphor/algorithm';
 
 import {
   INotebookModel
-} from '../../../lib/notebook/model';
+} from '@jupyterlab/notebook';
 
 import {
   NotebookPanel
-} from '../../../lib/notebook/panel';
+} from '@jupyterlab/notebook';
 
 import {
   NotebookWidgetFactory
-} from '../../../lib/notebook/widgetfactory';
+} from '@jupyterlab/notebook';
 
 import {
   Context
-} from '../../../lib/docregistry/context';
+} from '@jupyterlab/docregistry';
 
 import {
   createNotebookContext
 } from '../utils';
 
 import {
-  createNotebookPanelFactory, clipboard, rendermime, mimeTypeService
+  createNotebookPanelFactory, rendermime, mimeTypeService
 } from './utils';
 
 
@@ -40,7 +40,6 @@ function createFactory(): NotebookWidgetFactory {
     name: 'notebook',
     fileExtensions: ['.ipynb'],
     rendermime,
-    clipboard,
     contentFactory,
     mimeTypeService
   });
@@ -52,11 +51,15 @@ describe('notebook/notebook/widgetfactory', () => {
   let context: Context<INotebookModel>;
 
   beforeEach(() => {
-    context = createNotebookContext();
+    return createNotebookContext().then(c => {
+      context = c;
+    });
   });
 
   afterEach(() => {
-    context.dispose();
+    return context.session.shutdown().then(() => {
+      context.dispose();
+    });
   });
 
   describe('NotebookWidgetFactory', () => {

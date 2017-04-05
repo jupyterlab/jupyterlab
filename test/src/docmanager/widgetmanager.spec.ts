@@ -8,20 +8,20 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  IMessageHandler, Message, sendMessage
-} from 'phosphor/lib/core/messaging';
+  IMessageHandler, Message, MessageLoop
+} from '@phosphor/messaging';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
+} from '@phosphor/widgets';
 
 import {
   DocumentWidgetManager
-} from '../../../lib/docmanager';
+} from '@jupyterlab/docmanager';
 
 import {
   DocumentRegistry, TextModelFactory, ABCWidgetFactory, Context
-} from '../../../lib/docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   acceptDialog, dismissDialog
@@ -152,7 +152,7 @@ describe('docmanager/widgetmanager', () => {
       it('should install a message hook', () => {
         let widget = new Widget();
         manager.adoptWidget(context, widget);
-        sendMessage(widget, new Message('foo'));
+        MessageLoop.sendMessage(widget, new Message('foo'));
         expect(manager.methods).to.contain('filterMessage');
       });
 
@@ -190,8 +190,8 @@ describe('docmanager/widgetmanager', () => {
         expect(manager.contextForWidget(widget)).to.be(context);
       });
 
-      it('should return undefined if not tracked', () => {
-        expect(manager.contextForWidget(new Widget())).to.be(void 0);
+      it('should return null if not tracked', () => {
+        expect(manager.contextForWidget(new Widget())).to.be(null);
       });
 
     });
@@ -214,23 +214,15 @@ describe('docmanager/widgetmanager', () => {
 
     describe('#closeWidgets()', () => {
 
-      it('should close all of the widgets associated with a context', (done) => {
-        let called = false;
+      it('should close all of the widgets associated with a context', () => {
+        let called = 0;
         let widget = manager.createWidget('test', context);
         let clone = manager.cloneWidget(widget);
-        widget.disposed.connect(() => {
-          if (called) {
-            done();
-          }
-          called = true;
+        widget.disposed.connect(() => { called++; });
+        clone.disposed.connect(() => { called++; });
+        return manager.closeWidgets(context).then(() => {
+          expect(called).to.be(2);
         });
-        clone.disposed.connect(() => {
-          if (called) {
-            done();
-          }
-          called = true;
-        });
-        manager.closeWidgets(context);
       });
 
     });
@@ -240,7 +232,7 @@ describe('docmanager/widgetmanager', () => {
       it('should be called for a message to a tracked widget', () => {
         let widget = new Widget();
         manager.adoptWidget(context, widget);
-        sendMessage(widget, new Message('foo'));
+        MessageLoop.sendMessage(widget, new Message('foo'));
         expect(manager.methods).to.contain('filterMessage');
       });
 

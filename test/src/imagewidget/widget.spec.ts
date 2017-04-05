@@ -8,20 +8,20 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Message, sendMessage
-} from 'phosphor/lib/core/messaging';
+  Message, MessageLoop
+} from '@phosphor/messaging';
 
 import {
-  Widget, WidgetMessage
-} from 'phosphor/lib/ui/widget';
+  Widget
+} from '@phosphor/widgets';
 
 import {
   Base64ModelFactory, Context, DocumentRegistry
-} from '../../../lib/docregistry';
+} from '@jupyterlab/docregistry';
 
 import {
   ImageWidget, ImageWidgetFactory
-} from '../../../lib/imagewidget';
+} from '@jupyterlab/imagewidget';
 
 import {
   createFileContext
@@ -72,19 +72,17 @@ describe('ImageWidget', () => {
   let manager: ServiceManager.IManager;
   let widget: LogImage;
 
-  before((done) => {
+  before(() => {
     manager = new ServiceManager();
-    manager.ready.then(() => {
+    return manager.ready.then(() => {
       return manager.contents.save(IMAGE.path, IMAGE);
-    }).then(() => {
-      done();
-    }).catch(done);
+    });
   });
 
-  beforeEach((done) => {
+  beforeEach(() => {
     context = new Context({ manager, factory, path: IMAGE.path });
     widget = new LogImage(context);
-    return context.revert().then(done, done);
+    return context.revert();
   });
 
   afterEach(() => {
@@ -104,12 +102,12 @@ describe('ImageWidget', () => {
         expect(widget.title.label).to.be(newPath);
         done();
       });
-      return manager.contents.rename(context.path, newPath).catch(done);
+      manager.contents.rename(context.path, newPath).catch(done);
     });
 
     it('should set the content after the context is ready', (done) => {
       context.ready.then(() => {
-        sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         let img = widget.node.querySelector('img') as HTMLImageElement;
         expect(img.src).to.contain(IMAGE.content);
         done();
@@ -119,7 +117,7 @@ describe('ImageWidget', () => {
     it('should handle a change to the content', (done) => {
       context.ready.then(() => {
         context.model.fromString(OTHER);
-        sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         let img = widget.node.querySelector('img') as HTMLImageElement;
         expect(img.src).to.contain(OTHER);
         done();
@@ -167,7 +165,7 @@ describe('ImageWidget', () => {
       let img: HTMLImageElement = widget.node.querySelector('img');
       expect(img.src).to.be('');
       context.ready.then(() => {
-        sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
         expect(img.src).to.contain(IMAGE.content);
         done();
@@ -180,7 +178,7 @@ describe('ImageWidget', () => {
 
     it('should focus the widget', () => {
       Widget.attach(widget, document.body);
-      sendMessage(widget, WidgetMessage.ActivateRequest);
+      MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
       expect(widget.methods).to.contain('onActivateRequest');
       expect(widget.node.contains(document.activeElement)).to.be(true);
     });

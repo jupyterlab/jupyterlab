@@ -4,35 +4,39 @@
 import expect = require('expect.js');
 
 import {
-  Kernel
-} from '@jupyterlab/services';
+  Message, MessageLoop
+} from '@phosphor/messaging';
 
 import {
-  Message, sendMessage
-} from 'phosphor/lib/core/messaging';
+  Widget
+} from '@phosphor/widgets';
 
 import {
-  Widget, WidgetMessage
-} from 'phosphor/lib/ui/widget';
+  IClientSession
+} from '@jupyterlab/apputils';
 
 import {
   CodeEditorWidget
-} from '../../../lib/codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
-  BaseCellWidget, CellModel, InputAreaWidget, ICellModel,
+  BaseCellWidget, CellModel, InputAreaWidget,
   CodeCellWidget, CodeCellModel, MarkdownCellWidget,
   RawCellWidget, RawCellModel, MarkdownCellModel
-} from '../../../lib/cells';
+} from '@jupyterlab/cells';
 
 import {
-  OutputAreaWidget
-} from '../../../lib/outputarea';
+  OutputAreaModel, OutputAreaWidget
+} from '@jupyterlab/outputarea';
 
 import {
   createBaseCellFactory, createCodeCellFactory, createCellEditor, rendermime,
   editorFactory
 } from '../notebook/utils';
+
+import {
+  createClientSession
+} from '../utils';
 
 
 const RENDERED_CLASS = 'jp-mod-rendered';
@@ -72,16 +76,6 @@ class LogBaseCell extends BaseCellWidget {
     super.onUpdateRequest(msg);
     this.methods.push('onUpdateRequest');
   }
-
-  protected onMetadataChanged(model: ICellModel, args: any): void {
-    super.onMetadataChanged(model, args);
-    this.methods.push('onMetadataChanged');
-  }
-
-  protected onModelStateChanged(model: ICellModel, args: any): void {
-    super.onModelStateChanged(model, args);
-    this.methods.push('onModelStateChanged');
-  }
 }
 
 
@@ -90,7 +84,8 @@ class LogCodeCell extends CodeCellWidget {
   methods: string[] = [];
 
   constructor() {
-    super({ model: new CodeCellModel({}), contentFactory: createCodeCellFactory(),
+    super({ model: new CodeCellModel({}),
+            contentFactory: createCodeCellFactory(),
             rendermime });
   }
 
@@ -99,14 +94,9 @@ class LogCodeCell extends CodeCellWidget {
     this.methods.push('onUpdateRequest');
   }
 
-  protected onMetadataChanged(model: ICellModel, args: any): void {
+  protected onMetadataChanged(model: any, args: any): void {
     super.onMetadataChanged(model, args);
     this.methods.push('onMetadataChanged');
-  }
-
-  protected onModelStateChanged(model: ICellModel, args: any): void {
-    super.onModelStateChanged(model, args);
-    this.methods.push('onModelStateChanged');
   }
 }
 
@@ -205,26 +195,6 @@ describe('cells/widget', () => {
 
     });
 
-    describe('#trusted', () => {
-
-      it('should be a boolean', () => {
-        let widget = new BaseCellWidget({ model, contentFactory });
-        expect(typeof widget.trusted).to.be('boolean');
-      });
-
-      it('should default to false', () => {
-        let widget = new BaseCellWidget({ model, contentFactory });
-        expect(widget.trusted).to.be(false);
-      });
-
-      it('should be settable', () => {
-        let widget = new BaseCellWidget({ model, contentFactory });
-        widget.trusted = true;
-        expect(widget.trusted).to.be(true);
-      });
-
-    });
-
     describe('#onActivateRequest()', () => {
 
       it('should focus the cell editor', (done) => {
@@ -314,36 +284,8 @@ describe('cells/widget', () => {
       it('should update the widget', () => {
         let widget = new LogBaseCell();
         expect(widget.methods).to.not.contain('onUpdateRequest');
-        sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
-      });
-
-    });
-
-    describe('#onModelStateChanged()', () => {
-
-      it('should fire when model state changes', () => {
-        let method = 'onModelStateChanged';
-        let widget = new LogCodeCell();
-        expect(widget.methods).to.not.contain(method);
-        widget.model.executionCount = 1;
-        expect(widget.methods).to.contain(method);
-      });
-
-    });
-
-    describe('#onMetadataChanged()', () => {
-
-      it('should fire when model metadata changes', () => {
-        let method = 'onMetadataChanged';
-        let widget = new LogBaseCell();
-        expect(widget.methods).to.not.contain(method);
-        widget.model.metadataChanged.emit({
-          name: 'foo',
-          oldValue: 'bar',
-          newValue: 'baz'
-        });
-        expect(widget.methods).to.contain(method);
       });
 
     });
@@ -445,29 +387,35 @@ describe('cells/widget', () => {
 
     describe('#execute()', () => {
 
-      it('should fulfill a promise if there is no code to execute', (done) => {
-        let widget = new CodeCellWidget({ model, rendermime, contentFactory });
-        Kernel.startNew().then(kernel => {
-          return widget.execute(kernel).then(() => {
-            kernel.shutdown();
-            done();
-          });
-        }).catch(done);
+      let session: IClientSession;
+
+      beforeEach(() => {
+        return createClientSession().then(s => {
+          session = s;
+          return s.initialize();
+        }).then(() => {
+          return session.kernel.ready;
+        });
       });
 
-      it('should fulfill a promise if there is code to execute', (done) => {
-        let widget = new CodeCellWidget({ model, rendermime, contentFactory });
-        Kernel.startNew().then(kernel => {
-          widget.model.value.text = 'foo';
+      afterEach(() => {
+        return session.shutdown();
+      });
 
-          let originalCount = (widget.model).executionCount;
-          return widget.execute(kernel).then(() => {
-            let executionCount = (widget.model).executionCount;
-            expect(executionCount).to.not.equal(originalCount);
-            kernel.shutdown();
-            done();
-          });
-        }).catch(done);
+      it('should fulfill a promise if there is no code to execute', () => {
+        let widget = new CodeCellWidget({ model, rendermime, contentFactory });
+        return widget.execute(session);
+      });
+
+      it('should fulfill a promise if there is code to execute', () => {
+        let widget = new CodeCellWidget({ model, rendermime, contentFactory });
+        let originalCount: number;
+        widget.model.value.text = 'foo';
+        originalCount = (widget.model).executionCount;
+        return widget.execute(session).then(() => {
+          let executionCount = (widget.model).executionCount;
+          expect(executionCount).to.not.equal(originalCount);
+        });
       });
 
     });
@@ -477,20 +425,8 @@ describe('cells/widget', () => {
       it('should update the widget', () => {
         let widget = new LogCodeCell();
         expect(widget.methods).to.not.contain('onUpdateRequest');
-        sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
-      });
-
-    });
-
-    describe('#onModelStateChanged()', () => {
-
-      it('should fire when model state changes', () => {
-        let method = 'onModelStateChanged';
-        let widget = new LogCodeCell();
-        expect(widget.methods).to.not.contain(method);
-        widget.model.executionCount = 1;
-        expect(widget.methods).to.contain(method);
       });
 
     });
@@ -501,11 +437,7 @@ describe('cells/widget', () => {
         let method = 'onMetadataChanged';
         let widget = new LogCodeCell();
         expect(widget.methods).to.not.contain(method);
-        widget.model.metadataChanged.emit({
-          name: 'foo',
-          oldValue: 'bar',
-          newValue: 'baz'
-        });
+        widget.model.metadata.set('foo', 1);
         expect(widget.methods).to.contain(method);
       });
 
@@ -535,7 +467,9 @@ describe('cells/widget', () => {
 
         it('should create an output area widget', () => {
           let factory = new CodeCellWidget.ContentFactory({ editorFactory });
+          let model = new OutputAreaModel();
           let output = factory.createOutputArea({
+            model,
             rendermime,
             contentFactory: OutputAreaWidget.defaultContentFactory
           });
@@ -635,7 +569,7 @@ describe('cells/widget', () => {
       it('should update the widget', () => {
         let widget = new LogMarkdownCell({ model, rendermime, contentFactory });
         expect(widget.methods).to.not.contain('onUpdateRequest');
-        sendMessage(widget, WidgetMessage.UpdateRequest);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
       });
 

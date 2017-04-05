@@ -1,0 +1,41 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+/* Variables */
+@import './variables.css';
+
+/* Main application (1st) */
+@import url('~@jupyterlab/application/style/index.css');
+
+/* Individual plugins */
+@import url('~@jupyterlab/apputils/style/index.css');
+@import url('~@jupyterlab/about-extension/style/index.css');
+@import url('~@jupyterlab/cells/style/index.css');
+@import url('~@jupyterlab/codeeditor/style/index.css');
+@import url('~@jupyterlab/codemirror/style/index.css');
+@import url('~@jupyterlab/completer/style/index.css');
+@import url('~@jupyterlab/console/style/index.css');
+@import url('~@jupyterlab/csvwidget/style/index.css');
+@import url('~@jupyterlab/editorwidget/style/index.css');
+@import url('~@jupyterlab/faq-extension/style/index.css');
+@import url('~@jupyterlab/filebrowser/style/index.css');
+@import url('~@jupyterlab/help-extension/style/index.css');
+@import url('~@jupyterlab/imagewidget/style/index.css');
+@import url('~@jupyterlab/inspector/style/index.css');
+@import url('~@jupyterlab/landing-extension/style/index.css');
+@import url('~@jupyterlab/launcher/style/index.css');
+@import url('~@jupyterlab/markdownwidget/style/index.css');
+@import url('~@jupyterlab/notebook/style/index.css');
+@import url('~@jupyterlab/outputarea/style/index.css');
+@import url('~@jupyterlab/rendermime/style/index.css');
+@import url('~@jupyterlab/running/style/index.css');
+@import url('~@jupyterlab/terminal/style/index.css');
+@import url('~@jupyterlab/tooltip/style/index.css');
+
+
+/* Theme images */
+@import './images.css';
+@import './icons.css';

@@ -4,28 +4,24 @@
 import expect = require('expect.js');
 
 import {
-  Session, utils
+  ServiceManager
 } from '@jupyterlab/services';
 
 import {
-  Message
-} from 'phosphor/lib/core/messaging';
+  Message, MessageLoop
+} from '@phosphor/messaging';
 
 import {
   Widget
-} from 'phosphor/lib/ui/widget';
-
-import {
-  CompletionHandler, CompleterWidget
-} from '../../../lib/completer';
+} from '@phosphor/widgets';
 
 import {
   CodeConsole, ConsolePanel
-} from '../../../lib/console';
+} from '@jupyterlab/console';
 
 import {
-  InspectionHandler
-} from '../../../lib/inspector';
+  dismissDialog
+} from '../utils';
 
 import {
   createConsolePanelFactory, rendermime, mimeTypeService, editorFactory
@@ -54,23 +50,20 @@ const contentFactory = createConsolePanelFactory();
 describe('console/panel', () => {
 
   let panel: TestPanel;
-  let session: Session.ISession;
+  let manager = new ServiceManager();
 
-  beforeEach(done => {
-    Session.startNew({ path: utils.uuid() }).then(newSession => {
-      session = newSession;
-      panel = new TestPanel({ contentFactory, rendermime, session,
-                              mimeTypeService });
-      done();
+  before(() => {
+    return manager.ready;
+  });
+
+  beforeEach(() => {
+    panel = new TestPanel({
+      manager, contentFactory, rendermime, mimeTypeService
     });
   });
 
-  afterEach(done => {
-    session.shutdown().then(() => {
-      session.dispose();
-      panel.dispose();
-      done();
-    }).catch(done);
+  afterEach(() => {
+    panel.dispose();
   });
 
   describe('ConsolePanel', () => {
@@ -92,6 +85,15 @@ describe('console/panel', () => {
 
     });
 
+    describe('#session', () => {
+
+      it('should be a client session object', () => {
+        expect(panel.session.path).to.be.ok();
+      });
+
+    });
+
+
     describe('#dispose()', () => {
 
       it('should dispose of the resources held by the panel', () => {
@@ -103,37 +105,39 @@ describe('console/panel', () => {
 
     });
 
+    describe('#onAfterAttach()', () => {
+
+      it('should start the session', () => {
+        Widget.attach(panel, document.body);
+        dismissDialog();
+        return panel.session.ready;
+      });
+
+    });
+
     describe('#onActivateRequest()', () => {
 
-      it('should give the focus to the console prompt', done => {
+      it('should give the focus to the console prompt', () => {
         expect(panel.methods).to.not.contain('onActivateRequest');
         Widget.attach(panel, document.body);
-        requestAnimationFrame(() => {
-          panel.activate();
-          requestAnimationFrame(() => {
-            expect(panel.methods).to.contain('onActivateRequest');
-            expect(panel.console.prompt.editor.hasFocus()).to.be(true);
-            done();
-          });
-        });
+        MessageLoop.sendMessage(panel, Widget.Msg.ActivateRequest);
+        expect(panel.methods).to.contain('onActivateRequest');
+        expect(panel.console.prompt.editor.hasFocus()).to.be(true);
+        return dismissDialog();
       });
 
     });
 
     describe('#onCloseRequest()', () => {
 
-      it('should dispose of the panel resources after closing', done => {
+      it('should dispose of the panel resources after closing', () => {
         expect(panel.methods).to.not.contain('onCloseRequest');
         Widget.attach(panel, document.body);
-        requestAnimationFrame(() => {
-          expect(panel.isDisposed).to.be(false);
-          panel.close();
-          requestAnimationFrame(() => {
-            expect(panel.methods).to.contain('onCloseRequest');
-            expect(panel.isDisposed).to.be(true);
-            done();
-          });
-        });
+        expect(panel.isDisposed).to.be(false);
+        MessageLoop.sendMessage(panel, Widget.Msg.CloseRequest);
+        expect(panel.methods).to.contain('onCloseRequest');
+        expect(panel.isDisposed).to.be(true);
+        return dismissDialog();
       });
 
     });
@@ -159,32 +163,14 @@ describe('console/panel', () => {
 
       describe('#createConsole()', () => {
 
-        it('should create a notebook widget', () => {
+        it('should create a console widget', () => {
           let options = {
             contentFactory: contentFactory.consoleContentFactory,
             rendermime,
             mimeTypeService,
-            session
+            session: panel.session
           };
           expect(contentFactory.createConsole(options)).to.be.a(CodeConsole);
-        });
-
-      });
-
-      describe('#createCompleter()', () => {
-
-        it('should create a completer widget', () => {
-          expect(contentFactory.createCompleter({})).to.be.a(CompleterWidget);
-        });
-
-      });
-
-      describe('#createCompleterHandler()', () => {
-
-        it('should create a completer handler', () => {
-          let options = { completer:  new CompleterWidget({}) };
-          let handler = contentFactory.createCompleterHandler(options);
-          expect(handler).to.be.a(CompletionHandler);
         });
 
       });

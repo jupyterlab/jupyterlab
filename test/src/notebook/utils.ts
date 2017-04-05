@@ -2,28 +2,28 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  nbformat
-} from '@jupyterlab/services';
-
-import {
-  MimeData
-} from 'phosphor/lib/core/mimedata';
-
-import {
   editorServices
-} from '../../../lib/codemirror';
+} from '@jupyterlab/codemirror';
 
 import {
   CodeEditorWidget
-} from '../../../lib/codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
-  NotebookPanel, Notebook
-} from '../../../lib/notebook';
+  Clipboard
+} from '@jupyterlab/apputils';
+
+import {
+  nbformat
+} from '@jupyterlab/coreutils';
+
+import {
+  NotebookPanel, Notebook, NotebookModel
+} from '@jupyterlab/notebook';
 
 import {
   BaseCellWidget, CodeCellWidget, CodeCellModel
-} from '../../../lib/cells';
+} from '@jupyterlab/cells';
 
 import {
   defaultRenderMime
@@ -37,7 +37,8 @@ const DEFAULT_CONTENT: nbformat.INotebookContent = require('../../../examples/no
 
 
 export
-const editorFactory = editorServices.factoryService.newInlineEditor;
+const editorFactory = editorServices.factoryService.newInlineEditor.bind(
+  editorServices.factoryService);
 
 export
 const mimeTypeService = editorServices.mimeTypeService;
@@ -46,7 +47,7 @@ export
 const rendermime = defaultRenderMime();
 
 export
-const clipboard = new MimeData();
+const clipboard = Clipboard.getInstance();
 
 
 /**
@@ -118,7 +119,17 @@ function createNotebookPanel(): NotebookPanel {
   return new NotebookPanel({
     rendermime,
     contentFactory: createNotebookPanelFactory(),
-    mimeTypeService,
-    clipboard
+    mimeTypeService
   });
+}
+
+
+/**
+ * Populate a notebook with default content.
+ */
+export
+function populateNotebook(notebook: Notebook): void {
+  let model = new NotebookModel();
+  model.fromJSON(DEFAULT_CONTENT);
+  notebook.model = model;
 }

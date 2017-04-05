@@ -1,0 +1,173 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+| Variables
+|----------------------------------------------------------------------------*/
+
+
+/*-----------------------------------------------------------------------------
+| Styles
+|----------------------------------------------------------------------------*/
+
+
+.jp-Notebook-toolbarCellType select.jp-Notebook-toolbarCellTypeDropdown {
+  font-size: var(--jp-ui-font-size1);
+  height: 20px;
+  background-size: 16px;
+  padding-right: 16px;
+}
+
+
+.jp-Notebook-toolbarCellType .jp-select-wrapper.jp-mod-focused {
+  border: none;
+  box-shadow: none;
+}
+
+
+.jp-Notebook-toolbarSave::before {
+  content: "\f0c7";  /* save */
+}
+
+
+.jp-Notebook-toolbarInsert::before {
+  content: "\f067";  /* plus */
+}
+
+
+.jp-Notebook-toolbarCut::before {
+  content: "\f0c4";  /* cut */
+}
+
+
+.jp-Notebook-toolbarCopy::before {
+  content: "\f0c5";  /* copy */
+}
+
+
+.jp-Notebook-toolbarPaste::before {
+  content: "\f0ea";  /* paste */
+}
+
+
+.jp-Notebook-toolbarRun::before {
+  content: "\f051";  /* step-forward */
+}
+
+
+.jp-NBToolbar {
+  color: var(--jp-ui-font-color1);
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  height: 24px;
+}
+
+
+.jp-NBToolbar > .jp-NBToolbar-item {
+  flex: 0 0 auto;
+  padding-left: 8px;
+  padding-right: 8px;
+  vertical-align: middle;
+  font-size: 14px;
+  line-height: 23px;
+}
+
+
+.jp-NBToolbar-item.jp-NBToolbar-button,
+.jp-NBToolbar-item.jp-NBToolbar-kernelIndicator {
+  font-family: FontAwesome;
+  text-align: center;
+  display: inline-block;
+}
+
+
+.jp-NBToolbar-item.jp-NBToolbar-cellType select {
+    background: #FFFFFF;
+}
+
+.jp-NBToolbar-cellType .jp-NBToolbar-cellTypeDropdown {
+    border: var(--jp-border-width) solid var(--jp-border-color1);
+    border-radius: 0;
+    outline: none;
+    width: 100%;
+    font-size: 14px;
+    line-height: 23px;
+}
+
+
+.jp-NBToolbar-item.jp-NBToolbar-kernelName {
+    text-align: right;
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+
+.jp-NBToolbar-item.jp-NBToolbar-kernelIndicator {
+    border-right: none;
+}
+
+
+.jp-NBToolbar-button.jp-mod-pressed {
+    background-color: #E0E0E0;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+
+.jp-NBToolbar-button:hover {
+    background-color: #EEEEEE;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+
+.jp-NBToolbar-button.jp-NBToolbar-save::before {
+   content: "\f0c7";  /* Save */
+}
+
+
+.jp-NBToolbar-button.jp-NBToolbar-insert::before {
+   content: "\f067";  /* Plus */
+}
+
+
+.jp-NBToolbar-button.jp-NBToolbar-cut::before {
+   content: "\f0c4";  /* Cut */
+}
+
+
+.jp-NBToolbar-button.jp-NBToolbar-copy::before {
+   content: "\f0c5";  /* Copy */
+}
+
+
+.jp-NBToolbar-button.jp-NBToolbar-paste::before {
+   content: "\f0ea";  /* Paste */
+}
+
+
+.jp-NBToolbar-button.jp-NBToolbar-run::before {
+   content: "\f051";  /* Step-forward */
+}
+
+
+.jp-NBToolbar-button.jp-NBToolbar-interrupt::before {
+   content: "\f04d";  /* Stop */
+}
+
+
+.jp-NBToolbar-button.jp-NBToolbar-restart::before {
+   content: "\f01e";  /* Rotate-right */
+}
+
+
+.jp-NBToolbar-item.jp-NBToolbar-kernelIndicator::before {
+    content: "\f10c";  /* Circle-o */
+}
+
+
+.jp-NBToolbar-item.jp-NBToolbar-kernelIndicator.jp-mod-busy::before {
+    content: "\f111";  /* Circle */
+}

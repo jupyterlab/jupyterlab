@@ -28,8 +28,12 @@ install:
 
   # Install node:
   - ps: Install-Product node $env:nodejs_version
-  # Ensure python scripts are from right version:
-  - 'SET "PATH=%PYTHON%\\Scripts;%PATH%"'
+  # Install newer Firefox
+  - choco install firefox
+  # Make sure our packages are up to date.
+  - npm update
+  # Ensure python and python scripts are from right version:
+  - 'SET "PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"'
   # Install our package:
   - 'pip install --upgrade -e ".[test]"'
 
@@ -38,3 +42,6 @@ build: off
 # to run your custom scripts instead of automatic tests
 test_script:
   - 'py.test'
+  - 'npm run build'
+  - 'npm run build:test'
+  - 'npm test || npm test || npm test'

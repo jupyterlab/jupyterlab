@@ -1,26 +1,32 @@
 {
   "private": true,
-  "name": "jupyterlab-example-notebook",
+  "name": "@jupyterlab/example-notebook",
   "scripts": {
-    "build": "tsc --project src && webpack --config webpack.conf.js",
-    "clean": "rimraf build && rimraf node_modules",
-    "postinstall": "node ../../scripts/dedupe.js && npm run build",
-    "update": "(rimraf node_modules/jupyterlab || true) && npm install",
-    "watch": "watch \"npm run update && npm run build\" ../../src src --wait 10"
+    "build": "tsc && webpack",
+    "clean": "rimraf build"
   },
   "dependencies": {
-    "@jupyterlab/services": "^0.36.0",
-    "jupyterlab": "file:../..",
-    "phosphor": "^0.7.0"
+    "@jupyterlab/apputils": "^0.2.0",
+    "@jupyterlab/codemirror": "^0.2.0",
+    "@jupyterlab/docmanager": "^0.2.0",
+    "@jupyterlab/docregistry": "^0.2.0",
+    "@jupyterlab/notebook": "^0.2.0",
+    "@jupyterlab/rendermime": "^0.2.0",
+    "@jupyterlab/default-theme": "^0.2.0",
+    "@jupyterlab/services": "^0.41.0",
+    "@phosphor/commands": "^1.0.0",
+    "@phosphor/widgets": "^1.0.0",
+    "es6-promise": "^4.1.0"
   },
   "devDependencies": {
-    "concurrently": "^2.0.0",
-    "css-loader": "^0.23.1",
-    "file-loader": "^0.9.0",
+    "css-loader": "^0.27.3",
+    "file-loader": "^0.10.1",
     "rimraf": "^2.5.2",
     "style-loader": "^0.13.1",
-    "typescript": "^2.0.3",
-    "watch": "^0.18.0",
-    "webpack": "^1.13.0"
-  }
+    "typescript": "^2.2.1",
+    "url-loader": "^0.5.7",
+    "watch": "^1.0.2",
+    "webpack": "^2.2.1"
+  },
+  "version": "0.2.0"
 }

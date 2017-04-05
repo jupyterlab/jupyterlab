@@ -4,12 +4,12 @@
 import expect = require('expect.js');
 
 import {
-  Message, sendMessage
-} from 'phosphor/lib/core/messaging';
+  Message, MessageLoop
+} from '@phosphor/messaging';
 
 import {
-  ResizeMessage, Widget, WidgetMessage
-} from 'phosphor/lib/ui/widget';
+  Widget
+} from '@phosphor/widgets';
 
 import {
   simulate
@@ -17,11 +17,11 @@ import {
 
 import {
   CodeEditor, CodeEditorWidget
-} from '../../../lib/codeeditor';
+} from '@jupyterlab/codeeditor';
 
 import {
   CodeMirrorEditor
-} from '../../../lib/codemirror';
+} from '@jupyterlab/codemirror';
 
 
 class LogEditor extends CodeMirrorEditor {
@@ -70,7 +70,7 @@ class LogWidget extends CodeEditorWidget {
     this.methods.push('onAfterShow');
   }
 
-  protected onResize(msg: ResizeMessage): void {
+  protected onResize(msg: Widget.ResizeMessage): void {
     super.onResize(msg);
     this.methods.push('onResize');
   }
@@ -126,15 +126,21 @@ describe('CodeEditorWidget', () => {
 
     context('focus', () => {
 
-      it('should refresh the editor', () => {
+      it('should be a no-op if the editor was not resized', () => {
         Widget.attach(widget, document.body);
-        widget.methods = [];
-        widget.editor.focus();
-        widget.node.tabIndex = -1;
-        simulate(widget.node, 'focus');
-        expect(widget.events).to.contain('focus');
         let editor = widget.editor as LogEditor;
-        expect(editor.methods).to.contain('refresh');
+        editor.methods = [];
+        simulate(editor.editor.getInputField(), 'focus');
+        expect(editor.methods).to.eql([]);
+      });
+
+      it('should refresh if editor was resized', () => {
+        Widget.attach(widget, document.body);
+        let editor = widget.editor as LogEditor;
+        MessageLoop.sendMessage(widget, Widget.ResizeMessage.UnknownSize);
+        editor.methods = [];
+        simulate(editor.editor.getInputField(), 'focus');
+        expect(editor.methods).to.eql(['refresh']);
       });
 
     });
@@ -145,7 +151,7 @@ describe('CodeEditorWidget', () => {
 
     it('should focus the editor', () => {
       Widget.attach(widget, document.body);
-      sendMessage(widget, WidgetMessage.ActivateRequest);
+      MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
       expect(widget.methods).to.contain('onActivateRequest');
       expect(widget.editor.hasFocus()).to.be(true);
     });
@@ -200,25 +206,29 @@ describe('CodeEditorWidget', () => {
   describe('#onResize()', () => {
 
     it('should set the size of the editor', () => {
-      let msg = new ResizeMessage(10, 10);
+      let msg = new Widget.ResizeMessage(10, 10);
       let editor = widget.editor as LogEditor;
-      sendMessage(widget, msg);
+      MessageLoop.sendMessage(widget, msg);
       expect(editor.methods).to.contain('setSize');
     });
 
-    it('should set the size of the editor', () => {
+    it('should refresh the editor', () => {
       let editor = widget.editor as LogEditor;
-      sendMessage(widget, ResizeMessage.UnknownSize);
-      expect(editor.methods).to.contain('setSize');
-    });
-
-    it('should make a subsequent request wait', () => {
-      let editor = widget.editor as LogEditor;
-      sendMessage(widget, ResizeMessage.UnknownSize);
-      expect(editor.methods).to.contain('setSize');
+      Widget.attach(widget, document.body);
+      editor.focus();
       editor.methods = [];
-      sendMessage(widget, ResizeMessage.UnknownSize);
-      expect(editor.methods).to.not.contain('setSize');
+      MessageLoop.sendMessage(widget, Widget.ResizeMessage.UnknownSize);
+      expect(editor.methods).to.contain('refresh');
+    });
+
+    it('should defer the refresh until focused', () => {
+      let editor = widget.editor as LogEditor;
+      Widget.attach(widget, document.body);
+      editor.methods = [];
+      MessageLoop.sendMessage(widget, Widget.ResizeMessage.UnknownSize);
+      expect(editor.methods).to.eql([]);
+      simulate(editor.editor.getInputField(), 'focus');
+      expect(editor.methods).to.eql(['refresh']);
     });
 
   });

@@ -1,29 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  MimeData
-} from 'phosphor/lib/core/mimedata';
+import 'es6-promise/auto';  // polyfill Promise on IE
 
 import {
   CommandRegistry
-} from 'phosphor/lib/ui/commandregistry';
+} from '@phosphor/commands';
 
 import {
-  CommandPalette
-} from 'phosphor/lib/ui/commandpalette';
-
-import {
-  Keymap
-} from 'phosphor/lib/ui/keymap';
-
-import {
-  SplitPanel
-} from 'phosphor/lib/ui/splitpanel';
-
-import {
-  Widget
-} from 'phosphor/lib/ui/widget';
+  CommandPalette, SplitPanel, Widget
+} from '@phosphor/widgets';
 
 import {
   ServiceManager
@@ -32,29 +18,25 @@ import {
 import {
   NotebookPanel, NotebookWidgetFactory,
   NotebookModelFactory, NotebookActions
-} from 'jupyterlab/lib/notebook';
+} from '@jupyterlab/notebook';
 
 import {
   editorServices
-} from 'jupyterlab/lib/codemirror';
-
-import {
-  defaultSanitizer
-} from 'jupyterlab/lib/common/sanitizer';
+} from '@jupyterlab/codemirror';
 
 import {
   DocumentManager
-} from 'jupyterlab/lib/docmanager';
+} from '@jupyterlab/docmanager';
 
 import {
-  DocumentRegistry, restartKernel, selectKernelForContext
-} from 'jupyterlab/lib/docregistry';
+  DocumentRegistry
+} from '@jupyterlab/docregistry';
 
 import {
   RenderMime
-} from 'jupyterlab/lib/rendermime';
+} from '@jupyterlab/rendermime';
 
-import 'jupyterlab/lib/default-theme/index.css';
+import '@jupyterlab/default-theme/style/index.css';
 import '../index.css';
 
 
@@ -93,28 +75,16 @@ function main(): void {
 
 
 function createApp(manager: ServiceManager.IManager): void {
-  // Initialize the keymap manager with the bindings.
+  // Initialize the command registry with the bindings.
   let commands = new CommandRegistry();
-  let keymap = new Keymap({ commands });
   let useCapture = true;
 
   // Setup the keydown listener for the document.
   document.addEventListener('keydown', event => {
-    keymap.processKeydownEvent(event);
+    commands.processKeydownEvent(event);
   }, useCapture);
 
-  const transformers = RenderMime.defaultRenderers();
-  let renderers: RenderMime.MimeMap<RenderMime.IRenderer> = {};
-  let order: string[] = [];
-  for (let t of transformers) {
-    for (let m of t.mimetypes) {
-      renderers[m] = t;
-      order.push(m);
-    }
-  }
-  let sanitizer = defaultSanitizer;
-  let rendermime = new RenderMime({ renderers, order, sanitizer });
-
+  let rendermime = new RenderMime({ items: RenderMime.getDefaultItems() });
   let opener = {
     open: (widget: Widget) => {
       // Do nothing for sibling widgets for now.
@@ -128,8 +98,8 @@ function createApp(manager: ServiceManager.IManager): void {
     opener
   });
   let mFactory = new NotebookModelFactory({});
-  let clipboard = new MimeData();
-  let editorFactory = editorServices.factoryService.newInlineEditor;
+  let editorFactory = editorServices.factoryService.newInlineEditor.bind(
+    editorServices.factoryService);
   let contentFactory = new NotebookPanel.ContentFactory({ editorFactory });
 
   let wFactory = new NotebookWidgetFactory({
@@ -139,14 +109,14 @@ function createApp(manager: ServiceManager.IManager): void {
     defaultFor: ['.ipynb'],
     preferKernel: true,
     canStartKernel: true,
-    rendermime, clipboard, contentFactory,
+    rendermime, contentFactory,
     mimeTypeService: editorServices.mimeTypeService
   });
   docRegistry.addModelFactory(mFactory);
   docRegistry.addWidgetFactory(wFactory);
 
   let nbWidget = docManager.open(NOTEBOOK) as NotebookPanel;
-  let palette = new CommandPalette({ commands, keymap });
+  let palette = new CommandPalette({ commands });
 
   let panel = new SplitPanel();
   panel.id = 'main';
@@ -167,23 +137,23 @@ function createApp(manager: ServiceManager.IManager): void {
   commands.addCommand(cmdIds.interrupt, {
     label: 'Interrupt',
     execute: () => {
-      if (nbWidget.context.kernel) {
-        nbWidget.context.kernel.interrupt();
+      if (nbWidget.context.session.kernel) {
+        nbWidget.context.session.kernel.interrupt();
       }
     }
   });
   commands.addCommand(cmdIds.restart, {
     label: 'Restart Kernel',
-    execute: () => restartKernel(nbWidget.kernel, nbWidget.node)
+    execute: () => nbWidget.context.session.restart()
   });
   commands.addCommand(cmdIds.switchKernel, {
     label: 'Switch Kernel',
-    execute: () => selectKernelForContext(nbWidget.context, manager.sessions, nbWidget.node)
+    execute: () => nbWidget.context.session.selectKernel()
   });
   commands.addCommand(cmdIds.runAndAdvance, {
     label: 'Run and Advance',
     execute: () => {
-      NotebookActions.runAndAdvance(nbWidget.notebook, nbWidget.context.kernel);
+      NotebookActions.runAndAdvance(nbWidget.notebook, nbWidget.context.session);
     }
   });
   commands.addCommand(cmdIds.editMode, {
@@ -261,17 +231,17 @@ function createApp(manager: ServiceManager.IManager): void {
     command: cmdIds.save
   },
   {
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['I', 'I'],
     command: cmdIds.interrupt
   },
   {
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['0', '0'],
     command: cmdIds.restart
   },
   {
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['Enter'],
     command: cmdIds.editMode
   },
@@ -281,7 +251,7 @@ function createApp(manager: ServiceManager.IManager): void {
     command: cmdIds.commandMode
   },
   {
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['Shift M'],
     command: cmdIds.merge
   },
@@ -291,47 +261,47 @@ function createApp(manager: ServiceManager.IManager): void {
     command: cmdIds.split
   },
   {
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['J'],
     command: cmdIds.selectBelow
   },
   {
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['ArrowDown'],
     command: cmdIds.selectBelow
   },
   {
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['K'],
     command: cmdIds.selectAbove
   },
   {
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['ArrowUp'],
     command: cmdIds.selectAbove
   },
   {
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['Shift K'],
     command: cmdIds.extendAbove
   },
   {
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['Shift J'],
     command: cmdIds.extendBelow
   },
   {
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['Z'],
     command: cmdIds.undo
   },
     {
-    selector: '.jp-Notebook.jp-mod-commandMode',
+    selector: '.jp-Notebook.jp-mod-commandMode:focus',
     keys: ['Y'],
     command: cmdIds.redo
   }
   ];
-  bindings.map(binding => keymap.addBinding(binding));
+  bindings.map(binding => commands.addKeyBinding(binding));
 }
 
 window.onload = main;

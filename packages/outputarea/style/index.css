@@ -1,0 +1,125 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+| Variables
+|----------------------------------------------------------------------------*/
+
+
+:root {
+  --jp-private-outputarea-prompt-color: #D84315;
+  --jp-private-outputarea-prompt-width: 90px;
+}
+
+
+/*-----------------------------------------------------------------------------
+| Main OutputAreaWidget
+| OutputAreaWidget has a list of Outputs
+|----------------------------------------------------------------------------*/
+
+.jp-OutputAreaWidget {
+  overflow-y: auto;
+}
+
+/*-----------------------------------------------------------------------------
+| Individual OutputWidget(s) and their prompts
+| OutputWidget[
+|   OutputWidget-prompt, OutputWidget-result
+| ]
+|----------------------------------------------------------------------------*/
+
+
+.jp-OutputAreaWidget-stdin {
+  line-height: var(--jp-code-line-height);
+  padding-top: var(--jp-code-padding);
+  display: flex;
+}
+
+
+.jp-StdinWidget-prompt {
+  padding-right: var(--jp-code-padding);
+  vertical-align: baseline;
+  flex: 0 0 auto;
+}
+
+
+.jp-StdinWidget-input {
+  font-family: var(--jp-code-font-family);
+  font-size: inherit;
+  color: inherit;
+  width: auto;
+  /* make sure input baseline aligns with prompt */
+  vertical-align: baseline;
+  /* padding + margin = 0.5em between prompt and cursor */
+  padding: 0em 0.25em;
+  margin: 0em 0.25em;
+  flex: 0 0 70%;
+}
+
+
+.jp-StdinWidget-input:focus {
+    box-shadow: none;
+}
+
+
+.jp-OutputAreaWidget-gutter {
+  color: var(--jp-private-outputarea-prompt-color);
+  font-family: var(--jp-code-font-family);
+  text-align: right;
+  vertical-align: middle;
+  padding: var(--jp-code-padding);
+  font-size: var(--jp-code-font-size);
+  line-height: var(--jp-code-line-height);
+  border: var(--jp-border-width) solid transparent;
+  flex: 0 0 var(--jp-private-outputarea-prompt-width);
+  box-sizing: border-box;
+}
+
+
+.jp-OutputAreaWidget-gutter:hover {
+  background: var(--md-grey-100);
+}
+
+
+.jp-OutputAreaWidget-output {
+  display: flex;
+}
+
+
+/* Hide the gutter in case of
+ *  - nested output areas (e.g. in the case of output widgets)
+ *  - mirrored output areas
+ */
+.jp-OutputAreaWidget .jp-OutputAreaWidget .jp-OutputAreaWidget-gutter, 
+.jp-MirroredOutputArea .jp-OutputAreaWidget-gutter {
+  display: none;
+}
+
+
+/**
+ * Allow outputs to expand in mirrored output areas.
+ */
+.jp-MirroredOutputArea .jp-OutputAreaWidget-output {
+  width: 100%;
+  height: 100%;
+}
+
+
+/*-----------------------------------------------------------------------------
+| executeResult is added to any Output-result for the display of the object
+| returned by a cell
+|----------------------------------------------------------------------------*/
+
+
+.jp-OutputAreaWidget-output.jp-OutputAreaWidget-executeResult {
+  margin-left: 0px;
+  flex: 1 1 auto;
+}
+
+
+.jp-OutputAreaWidget-executeResult.jp-RenderedText {
+  padding-top: var(--jp-code-padding);
+}
+

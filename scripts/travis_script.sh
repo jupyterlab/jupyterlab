@@ -9,20 +9,8 @@ sh -e /etc/init.d/xvfb start || true
 
 export PATH="$HOME/miniconda/bin:$PATH"
 
+
 if [[ $GROUP == tests ]]; then
-
-    # Test against a clean npm build
-    npm run clean
-    npm run build:all
-    npm test
-
-    # Run the python tests
-    py.test
-
-    # Make sure we have CSS that can be converted with postcss
-    npm install -g postcss-cli
-    postcss jupyterlab/build/*.css > /dev/null
-
     # Make sure we can start and kill the lab server
     jupyter lab --no-browser &
     TASK_PID=$!
@@ -31,29 +19,28 @@ if [[ $GROUP == tests ]]; then
     sleep 5
     kill $TASK_PID
     wait $TASK_PID
+
+    # Run the JS and python tests
+    py.test
+    npm run build
+    npm run build:test
+    npm test
+    npm run test:services || npm run test:services
+
+    # Make sure we have CSS that can be converted with postcss
+    npm install -g postcss-cli
+    postcss jupyterlab/build/*.css > /dev/null
+
 fi
 
 
-if [[ $GROUP == coverage_and_docs ]]; then
+if [[ $GROUP == coverage ]]; then
     # Run the coverage check.
-    npm run test:coverage
+    npm run build
+    npm run build:test
+    npm run coverage
 
-    # Build the docs
-    npm run docs
-    cp jupyter-plugins-demo.gif docs
-
-    # Verify docs build
-    pushd tutorial
-    conda env create -n test_docs -f environment.yml
-    source activate test_docs
-    make linkcheck
-    make html
-    source deactivate
-    popd
-fi
-
-
-if [[ $GROUP == examples ]]; then
-    # Make sure the examples build
-    npm run build:examples
+    # Run the link check
+    pip install -q pytest-check-links
+    py.test --check-links -k .md .
 fi

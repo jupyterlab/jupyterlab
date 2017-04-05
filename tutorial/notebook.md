@@ -50,7 +50,7 @@ After the NotebookModel is created, the NotebookWidgetFactory constructs a
 new NotebookPanel from the model. The NotebookPanel widget is added to
 the DockPanel. The **NotebookPanel** contains:
 
-- a [Toolbar](http://jupyterlab.github.io/jupyterlab/modules/_toolbar_index_.html)
+- a [Toolbar](http://jupyterlab.github.io/jupyterlab/modules/_apputils_toolbar_.html)
 - a [Notebook widget](http://jupyterlab.github.io/jupyterlab/classes/_notebook_widget_.notebook.html).
 
 The NotebookPanel also adds completion logic.
@@ -87,7 +87,7 @@ also contains an [OutputAreaWidget](http://jupyterlab.github.io/jupyterlab/class
 An OutputAreaWidget is responsible for rendering the outputs in the
 [OutputAreaModel](http://jupyterlab.github.io/jupyterlab/classes/_outputarea_model_.outputareamodel.html)
 list. An OutputAreaWidget uses a
-notebook-specific [RenderMime](http://jupyterlab.github.io/jupyterlab/classes/_rendermime_index_.rendermime.html)
+notebook-specific [RenderMime](http://jupyterlab.github.io/jupyterlab/classes/_rendermime_rendermime_.rendermime.html)
 object to render `display_data` output messages.
 
 #### Rendering output messages
@@ -187,7 +187,7 @@ function activate(lab: JupyterLab, registry: IDocumentRegistry) {
 ```
 
 Then add this extension to the JupyterLab extensions list in the
-[`index.js` file](../examples/lab/index.js) and relaunch JupyterLab:
+[`index.js` file](../examples/app/index.js) and relaunch JupyterLab:
 
 ```typescript
     require('jupyterlab/lib/mybutton/plugin').widgetExtension,
