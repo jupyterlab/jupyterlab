@@ -48,6 +48,8 @@ class OutputAreaModel implements IOutputAreaModel {
       this._serialized = this._modelDB.createValue('outputs');
       if (this._serialized.get()) {
         this.fromJSON(this._serialized.get() as nbformat.IOutput[]);
+      } else {
+        this._serialized.set(this.toJSON());
       }
       this._serialized.changed.connect((obs, args) => {
         if(!changeGuard) {
