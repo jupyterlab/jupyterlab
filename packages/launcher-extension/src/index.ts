@@ -14,10 +14,6 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IPathTracker
-} from '@jupyterlab/filebrowser';
-
-import {
   ILauncher, LauncherModel, LauncherWidget
 } from '@jupyterlab/launcher';
 
@@ -39,7 +35,6 @@ const plugin: JupyterLabPlugin<ILauncher> = {
   id: 'jupyter.services.launcher',
   requires: [
     IServiceManager,
-    IPathTracker,
     ICommandPalette,
     ICommandLinker,
     ILayoutRestorer
@@ -58,15 +53,10 @@ export default plugin;
 /**
  * Activate the launcher.
  */
-function activate(app: JupyterLab, services: IServiceManager, pathTracker: IPathTracker, palette: ICommandPalette, linker: ICommandLinker, restorer: ILayoutRestorer): ILauncher {
+function activate(app: JupyterLab, services: IServiceManager, palette: ICommandPalette, linker: ICommandLinker, restorer: ILayoutRestorer): ILauncher {
   const { commands, shell } = app;
 
   let model = new LauncherModel();
-
-  // Set launcher path and track the path as it changes.
-  model.path = pathTracker.path;
-  pathTracker.pathChanged.connect(() => { model.path = pathTracker.path; });
-
   let widget = new LauncherWidget({ linker });
 
   widget.model = model;

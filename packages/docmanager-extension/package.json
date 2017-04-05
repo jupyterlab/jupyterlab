@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^0.2.0",
+    "@jupyterlab/apputils": "^0.2.0",
     "@jupyterlab/docmanager": "^0.2.0",
     "@jupyterlab/docregistry": "^0.2.0",
     "@jupyterlab/services": "^0.41.0"

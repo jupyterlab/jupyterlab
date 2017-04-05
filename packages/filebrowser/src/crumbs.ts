@@ -269,7 +269,7 @@ class BreadCrumbs extends Widget {
         if (error.xhr) {
           error.message = `${error.xhr.status}: error.statusText`;
         }
-        if (error.message.ArrayExt.firstIndexOf('409') !== -1) {
+        if (error.message.indexOf('409') !== -1) {
           let overwrite = Dialog.warnButton({ label: 'OVERWRITE' });
           let options = {
             title: 'Overwrite file?',

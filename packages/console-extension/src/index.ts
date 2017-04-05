@@ -35,10 +35,6 @@ import {
 } from '@jupyterlab/console';
 
 import {
-  IPathTracker
-} from '@jupyterlab/filebrowser';
-
-import {
   ILauncher
 } from '@jupyterlab/launcher';
 
@@ -97,7 +93,6 @@ const trackerPlugin: JupyterLabPlugin<IConsoleTracker> = {
     IRenderMime,
     IMainMenu,
     ICommandPalette,
-    IPathTracker,
     ConsolePanel.IContentFactory,
     IEditorServices,
     ILayoutRestorer
@@ -135,7 +130,7 @@ export default plugins;
 /**
  * Activate the console extension.
  */
-function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, palette: ICommandPalette, pathTracker: IPathTracker, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): IConsoleTracker {
+function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): IConsoleTracker {
   let { commands, shell } = app;
   let category = 'Console';
   let command: string;
@@ -217,7 +212,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
   commands.addCommand(command, {
     label: 'Start New Console',
     execute: (args: Partial<ConsolePanel.IOptions>) => {
-      args.basePath = args.basePath || pathTracker.path;
+      args.basePath = args.basePath || '.';
       return createConsole(args);
     }
   });

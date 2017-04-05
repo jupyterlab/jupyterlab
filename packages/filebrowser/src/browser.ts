@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  DocumentManager
+} from '@jupyterlab/docmanager';
+
+import {
   Contents
 } from '@jupyterlab/services';
 
@@ -16,10 +20,6 @@ import {
 import {
   PanelLayout, Widget
 } from '@phosphor/widgets';
-
-import {
-  DocumentManager
-} from '@jupyterlab/docmanager';
 
 import {
   FileButtons
@@ -40,6 +40,7 @@ import {
 import {
   FILE_BROWSER_CLASS, showErrorMessage
 } from './utils';
+
 
 /**
  * The class name added to the filebrowser crumbs node.
@@ -74,6 +75,8 @@ class FileBrowser extends Widget {
   constructor(options: FileBrowser.IOptions) {
     super();
     this.addClass(FILE_BROWSER_CLASS);
+    this.id = options.id;
+
     let commands = this._commands = options.commands;
     let manager = this._manager = options.manager;
     let model = this._model = options.model;
@@ -96,6 +99,7 @@ class FileBrowser extends Widget {
     layout.addWidget(this._listing);
 
     this.layout = layout;
+    model.restore(this.id);
   }
 
   /**
@@ -111,7 +115,6 @@ class FileBrowser extends Widget {
   get model(): FileBrowserModel {
     return this._model;
   }
-
 
   /**
    * Dispose of the resources held by the file browser.
@@ -291,12 +294,12 @@ class FileBrowser extends Widget {
     });
   }
 
-  private _buttons: FileButtons = null;
-  private _commands: CommandRegistry = null;
-  private _crumbs: BreadCrumbs = null;
-  private _listing: DirListing = null;
-  private _manager: DocumentManager = null;
-  private _model: FileBrowserModel = null;
+  private _buttons: FileButtons | null = null;
+  private _commands: CommandRegistry | null = null;
+  private _crumbs: BreadCrumbs | null = null;
+  private _listing: DirListing | null = null;
+  private _manager: DocumentManager | null = null;
+  private _model: FileBrowserModel | null = null;
   private _showingError = false;
 }
 
@@ -315,6 +318,11 @@ namespace FileBrowser {
      * The command registry for use with the file browser.
      */
     commands: CommandRegistry;
+
+    /**
+     * The widget/DOM id of the file browser.
+     */
+    id: string;
 
     /**
      * A file browser model instance.

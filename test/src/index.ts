@@ -45,9 +45,9 @@ import './coreutils/observablestring.spec';
 import './coreutils/observablevector.spec';
 import './coreutils/path.spec';
 import './coreutils/time.spec';
+import './coreutils/undoablevector.spec';
 import './coreutils/url.spec';
 import './coreutils/uuid.spec';
-import './coreutils/undoablevector.spec';
 
 import './csvwidget/table.spec';
 import './csvwidget/toolbar.spec';
@@ -72,25 +72,25 @@ import './inspector/inspector.spec';
 
 import './markdownwidget/widget.spec';
 
-import './renderers/renderers.spec';
-import './renderers/latex.spec';
-
-import './rendermime/mimemodel.spec';
-import './rendermime/outputmodel.spec';
-import './rendermime/rendermime.spec';
-
 import './notebook/actions.spec';
 import './notebook/celltools.spec';
 import './notebook/default-toolbar.spec';
 import './notebook/model.spec';
 import './notebook/modelfactory.spec';
 import './notebook/panel.spec';
+import './notebook/tracker.spec';
 import './notebook/trust.spec';
 import './notebook/widget.spec';
 import './notebook/widgetfactory.spec';
-import './notebook/tracker.spec';
 
 import './outputarea/model.spec';
 import './outputarea/widget.spec';
+
+import './renderers/latex.spec';
+import './renderers/renderers.spec';
+
+import './rendermime/mimemodel.spec';
+import './rendermime/outputmodel.spec';
+import './rendermime/rendermime.spec';
 
 import './terminal/terminal.spec';

@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IStateDB
+} from '@jupyterlab/apputils';
+
+import {
   Contents, Kernel, ServiceManager, Session
 } from '@jupyterlab/services';
 
@@ -20,10 +24,6 @@ import {
 import {
   IChangedArgs, PathExt, uuid
 } from '@jupyterlab/coreutils';
-
-import {
-  IPathTracker
-} from './tracker';
 
 
 /**
@@ -45,7 +45,7 @@ const MIN_REFRESH = 1000;
  * the current directory.  Supports `'../'` syntax.
  */
 export
-class FileBrowserModel implements IDisposable, IPathTracker {
+class FileBrowserModel implements IDisposable {
   /**
    * Construct a new file browser model.
    */
@@ -54,10 +54,32 @@ class FileBrowserModel implements IDisposable, IPathTracker {
     this._model = { path: '', name: '/', type: 'directory' };
     this._manager.contents.fileChanged.connect(this._onFileChanged, this);
     this._manager.sessions.runningChanged.connect(this._onRunningChanged, this);
+    this._state = options.state || null;
     this._scheduleUpdate();
     this._refreshId = window.setInterval(() => {
       this._scheduleUpdate();
     }, REFRESH_DURATION);
+  }
+
+  /**
+   * A signal emitted when the file browser model loses connection.
+   */
+  get connectionFailure(): ISignal<this, Error> {
+    return this._connectionFailure;
+  }
+
+  /**
+   * Get the file path changed signal.
+   */
+  get fileChanged(): ISignal<this, Contents.IChangedArgs> {
+    return this._fileChanged;
+  }
+
+  /**
+   * Get the current path.
+   */
+  get path(): string {
+    return this._model ? this._model.path : '';
   }
 
   /**
@@ -82,27 +104,6 @@ class FileBrowserModel implements IDisposable, IPathTracker {
   }
 
   /**
-   * Get the file path changed signal.
-   */
-  get fileChanged(): ISignal<this, Contents.IChangedArgs> {
-    return this._fileChanged;
-  }
-
-  /**
-   * A signal emitted when the file browser model loses connection.
-   */
-  get connectionFailure(): ISignal<this, Error> {
-    return this._connectionFailure;
-  }
-
-  /**
-   * Get the current path.
-   */
-  get path(): string {
-    return this._model ? this._model.path : '';
-  }
-
-  /**
    * Get the kernel spec models.
    */
   get specs(): Kernel.ISpecModels | null {
@@ -115,6 +116,7 @@ class FileBrowserModel implements IDisposable, IPathTracker {
   get isDisposed(): boolean {
     return this._model === null;
   }
+
   /**
    * Dispose of the resources held by the model.
    */
@@ -188,6 +190,11 @@ class FileBrowserModel implements IDisposable, IPathTracker {
       this._handleContents(contents);
       this._pendingPath = null;
       if (oldValue !== newValue) {
+        // If there is a state database and a unique key, save the new path.
+        if (this._state && this._key) {
+          this._state.save(this._key, { path: newValue });
+        }
+
         this._pathChanged.emit({
           name: 'path',
           oldValue,
@@ -313,6 +320,50 @@ class FileBrowserModel implements IDisposable, IPathTracker {
   }
 
   /**
+   * Restore the state of the file browser.
+   *
+   * @param id - The unique ID that is used to construct a state database key.
+   *
+   * @returns A promise when restoration is complete.
+   *
+   * #### Notes
+   * This function will only restore the model *once*. If it is called multiple
+   * times, all subsequent invocations are no-ops.
+   */
+  restore(id: string): Promise<void> {
+    const state = this._state;
+    const restored = !!this._key;
+    if (!state || restored) {
+      return Promise.resolve(void 0);
+    }
+
+    const manager = this._manager;
+    const key = `file-browser-${id}:cwd`;
+    return Promise.all([state.fetch(key), manager.ready]).then(([cwd]) => {
+      if (!cwd) {
+        return;
+      }
+
+      const path = cwd['path'] as string;
+      return manager.contents.get(path)
+        .then(() => this.cd(path))
+        .catch(() => state.remove(key));
+    }).catch(() => state.remove(key))
+      .then(() => { this._key = key; }); // Set key after restoration is done.
+  }
+
+  /**
+   * Shut down a session by session id.
+   *
+   * @param id - The id of the session.
+   *
+   * @returns A promise that resolves when the action is complete.
+   */
+  shutdown(id: string): Promise<void> {
+    return this._manager.sessions.shutdown(id);
+  }
+
+  /**
    * Upload a `File` object.
    *
    * @param file - The `File` object to upload.
@@ -349,17 +400,6 @@ class FileBrowserModel implements IDisposable, IPathTracker {
       }
       return this._upload(file);
     });
-  }
-
-  /**
-   * Shut down a session by session id.
-   *
-   * @param id - The id of the session.
-   *
-   * @returns A promise that resolves when the action is complete.
-   */
-  shutdown(id: string): Promise<void> {
-    return this._manager.sessions.shutdown(id);
   }
 
   /**
@@ -509,23 +549,25 @@ class FileBrowserModel implements IDisposable, IPathTracker {
     }, 0);
   }
 
-  private _maxUploadSizeMb = 15;
-  private _manager: ServiceManager.IManager = null;
-  private _sessions: Session.IModel[] = [];
-  private _items: Contents.IModel[] = [];
-  private _paths = new Set<string>();
-  private _model: Contents.IModel;
-  private _pendingPath: string = null;
-  private _pending: Promise<void> = null;
-  private _timeoutId = -1;
-  private _refreshId = -1;
   private _blackoutId = -1;
-  private _requested = false;
-  private _pathChanged = new Signal<this, IChangedArgs<string>>(this);
-  private _refreshed = new Signal<this, void>(this);
-  private _sessionsChanged = new Signal<this, void>(this);
-  private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
   private _connectionFailure = new Signal<this, Error>(this);
+  private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
+  private _items: Contents.IModel[] = [];
+  private _key: string = '';
+  private _manager: ServiceManager.IManager = null;
+  private _maxUploadSizeMb = 15;
+  private _model: Contents.IModel;
+  private _pathChanged = new Signal<this, IChangedArgs<string>>(this);
+  private _paths = new Set<string>();
+  private _pending: Promise<void> = null;
+  private _pendingPath: string = null;
+  private _refreshed = new Signal<this, void>(this);
+  private _refreshId = -1;
+  private _requested = false;
+  private _sessions: Session.IModel[] = [];
+  private _sessionsChanged = new Signal<this, void>(this);
+  private _state: IStateDB | null = null;
+  private _timeoutId = -1;
 }
 
 
@@ -543,6 +585,12 @@ namespace FileBrowserModel {
      * A service manager instance.
      */
     manager: ServiceManager.IManager;
+
+    /**
+     * An optional state database. If provided, the model will restore which
+     * folder was last opened when it is restored.
+     */
+    state?: IStateDB;
   }
 }
 

@@ -114,30 +114,3 @@
     background-position: top center;
     background-repeat: no-repeat;
 }
-
-.jp-Landing-folder {
-  margin-right: 0;
-  display: inline-block;
-  background-origin: content-box;
-  background-repeat: no-repeat;
-  clear: none;
-  height: 1em;
-  width: 1em;
-  line-height: 1em;
-}
-
-.jp-Landing-folder:empty:before {
-  content: "\00a0";
-}
-
-.jp-Landing-path {
-    padding-left: 8px;
-    color: var(--jp-ui-font-color2);
-}
-
-.jp-Landing-cwd {
-    float: left;
-    padding-top: 24px;
-    padding-left: 14px;
-    margin-right: auto;
-}
