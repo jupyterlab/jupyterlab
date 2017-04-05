@@ -35,7 +35,7 @@ make changes.
 
 HERE = os.path.dirname(__file__)
 FILE_LOADER = FileSystemLoader(HERE)
-BUILT_FILES = os.path.join(HERE, 'build')
+BUILT_FILES = os.path.join(HERE, 'build', 'build')
 PREFIX = '/lab'
 EXTENSION_PREFIX = '/labextension'
 
@@ -50,28 +50,30 @@ class LabHandler(IPythonHandler):
 
     @web.authenticated
     def get(self):
-        manifest = get_labextension_manifest_data_by_folder(BUILT_FILES)
-        if 'main' not in manifest:
-            msg = ('JupyterLab build artifacts not detected, please see ' +
-                   'CONTRIBUTING.md for build instructions.')
-            self.log.error(msg)
-            self.write(self.render_template('error.html',
-                       status_code=500,
-                       status_message='JupyterLab Error',
-                       page_title='JupyterLab Error',
-                       message=msg))
-            return
+        # manifest = get_labextension_manifest_data_by_folder(BUILT_FILES)
+        # if 'main' not in manifest:
+        #     msg = ('JupyterLab build artifacts not detected, please see ' +
+        #            'CONTRIBUTING.md for build instructions.')
+        #     self.log.error(msg)
+        #     self.write(self.render_template('error.html',
+        #                status_code=500,
+        #                status_message='JupyterLab Error',
+        #                page_title='JupyterLab Error',
+        #                message=msg))
+        #     return
 
-        config = self._get_lab_config(manifest)
+        # config = self._get_lab_config(manifest)
+        config = self._get_lab_config(dict())
         self.write(self.render_template('lab.html', **config))
 
     def _get_lab_config(self, manifest):
         """Get the config data for the page template."""
         static_prefix = ujoin(self.base_url, PREFIX)
         labextensions = self.labextensions
-        main = manifest['main']['entry']
+        # main = manifest['main']['entry']
+        #main = ujoin(static_prefix, )
         bundles = [ujoin(static_prefix, name + '.bundle.js') for name in
-                   ['loader', 'main']]
+                   ['main']]
         entries = []
 
         # Only load CSS files if they exist.
@@ -115,7 +117,7 @@ class LabHandler(IPythonHandler):
             page_title='JupyterLab Alpha Preview',
             mathjax_url=self.mathjax_url,
             mathjax_config=mathjax_config,
-            jupyterlab_main=main,
+            #jupyterlab_main=main,
             jupyterlab_css=css_files,
             jupyterlab_bundles=bundles,
             plugin_entries=entries,

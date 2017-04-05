@@ -130,15 +130,15 @@ class NPM(Command):
             log.error("`npm` unavailable. If you're running this command using sudo, make sure `npm` is available to sudo")
         log.info("Installing build dependencies with npm. This may take a while...")
         main = os.path.join(here, 'jupyterlab')
-        run(['npm', 'install'], cwd=here)
-        run(['npm', 'run', 'build'], cwd=main)
+        # run(['npm', 'install'], cwd=here)
+        # run(['npm', 'run', 'build'], cwd=main)
 
-        for t in self.targets:
-            if not os.path.exists(t):
-                msg = 'Missing file: %s' % t
-                if not has_npm:
-                    msg += '\nnpm is required to build the development version'
-                raise ValueError(msg)
+        # for t in self.targets:
+        #     if not os.path.exists(t):
+        #         msg = 'Missing file: %s' % t
+        #         if not has_npm:
+        #             msg += '\nnpm is required to build the development version'
+        #         raise ValueError(msg)
 
         # update package data in case this created new files
         update_package_data(self.distribution)

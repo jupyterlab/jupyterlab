@@ -7,12 +7,10 @@
     "clean": "rimraf lib",
     "watch": "watch \"npm run build\" ../packages --wait 10 --filter=../scripts/watch-filter.js"
   },
-  "files": [
-    "lib/jupyterlab/src/*"
-  ],
+  "main": "lib/index.js",
   "dependencies": {
-    "@jupyterlab/application": "^0.1.1",
     "@jupyterlab/about-extension": "^0.1.1",
+    "@jupyterlab/application": "^0.1.1",
     "@jupyterlab/application-extension": "^0.1.1",
     "@jupyterlab/apputils-extension": "^0.1.1",
     "@jupyterlab/codemirror-extension": "^0.1.3",
@@ -37,15 +35,15 @@
     "@jupyterlab/services-extension": "^0.1.1",
     "@jupyterlab/shortcuts-extension": "^0.1.1",
     "@jupyterlab/terminal-extension": "^0.1.1",
-    "@jupyterlab/tooltip-extension": "^0.1.3"
-  },
-  "devDependencies": {
-    "@jupyterlab/extension-builder": "^0.11.0",
+    "@jupyterlab/tooltip-extension": "^0.1.3",
+    "css-loader": "^0.27.3",
     "file-loader": "^0.10.1",
     "rimraf": "^2.5.2",
+    "style-loader": "^0.13.1",
     "typescript": "^2.2.1",
     "url-loader": "^0.5.7",
     "watch": "^1.0.2",
     "webpack": "^2.2.1"
-  }
+  },
+  "devDependencies": {}
 }
