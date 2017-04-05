@@ -12,9 +12,9 @@ var glob = require('glob');
 var rootPath = path.resolve('.');
 var rootPackage = require('./package.json');
 var packages = new Map();
-var outDir = path.join('./build', 'node_modules');
+var outDir = path.resolve('./build');
+fs.removeSync(outDir);
 fs.ensureDir(outDir);
-fs.remove(outDir);
 
 
 // We want the tarball to be the name of the package, mangled.
@@ -60,7 +60,7 @@ function getDependencies(basePath) {
 
 function moveLocal(basePath, data, name) {
     // Move symlinked or root files using the package.json config.
-    var destDir = path.join(outDir, data.name);
+    var destDir = path.join(outDir, 'node_modules', data.name);
     if (basePath === rootPath) {
         destDir = outDir;
     }
@@ -101,16 +101,9 @@ function moveLocal(basePath, data, name) {
 
 
 function moveFolder(basePath, data, name) {
-    return;
     // Pull in the whole package except .git and node_modules
     var relPath = path.relative(rootPath, basePath);
-    if (relPath.indexOf('../packages') === 0) {
-        return moveLocal(basePath, data, name);
-    }
-    if (relPath.indexOf('../node_modules') === 0) {
-        relPath = relPath.slice(3);
-    }
-    var dirDest = path.join(outDir, relPath);
+    var dirDest = path.join(outDir, relPath.split('../').join(''));
     fs.ensureDir(dirDest);
 
     function fileFilter(source, destination) {
