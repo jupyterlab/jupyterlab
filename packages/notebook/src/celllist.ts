@@ -209,7 +209,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    */
   set(index: number, cell: ICellModel): void {
     // Generate a new uuid for the cell.
-    let id = (cell as any)._modelDB._basePath;
+    let id = (cell as any).modelDB.basePath;
     // Set the internal data structures.
     this._cellMap.set(id, cell);
     this._cellOrder.set(index, id);
@@ -235,7 +235,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    */
   pushBack(cell: ICellModel): number {
     // Generate a new uuid for the cell.
-    let id = (cell as any)._modelDB._basePath;
+    let id = (cell as any).modelDB.basePath;
     // Set the internal data structures.
     this._cellMap.set(id, cell);
     let num = this._cellOrder.pushBack(id);
@@ -289,7 +289,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    */
   insert(index: number, cell: ICellModel): number {
     // Generate a new uuid for the cell.
-    let id = (cell as any)._modelDB._basePath;
+    let id = (cell as any).modelDB.basePath;
     // Set the internal data structures.
     this._cellMap.set(id, cell);
     let num = this._cellOrder.insert(index, id);
@@ -396,7 +396,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
     let newValues = toArray(cells);
     each(newValues, cell => {
       // Generate a new uuid for the cell.
-      let id = (cell as any)._modelDB._basePath;
+      let id = (cell as any).modelDB.basePath;
       // Set the internal data structures.
       this._cellMap.set(id, cell);
       this._cellOrder.pushBack(id);
@@ -434,7 +434,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
     let newValues = toArray(cells);
     each(newValues, cell => {
       // Generate a new uuid for the cell.
-      let id = (cell as any)._modelDB._basePath;
+      let id = (cell as any).modelDB.basePath;
       this._cellMap.set(id, cell);
       this._cellOrder.beginCompoundOperation();
       this._cellOrder.insert(index++, id);

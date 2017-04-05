@@ -73,10 +73,10 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     let factory = (
       options.contentFactory || NotebookModel.defaultContentFactory
     );
-    let cellDB = this._modelDB.view('cells');
+    let cellDB = this.modelDB.view('cells');
     factory.modelDB = cellDB;
     this.contentFactory = factory;
-    this._cells = new CellList(this._modelDB, this.contentFactory);
+    this._cells = new CellList(this.modelDB, this.contentFactory);
     // Add an initial code cell by default.
     if (!this._cells.length) {
       this._cells.pushBack(factory.createCodeCell({}));
@@ -84,7 +84,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     this._cells.changed.connect(this._onCellsChanged, this);
 
     // Handle initial metadata.
-    let metadata = this._modelDB.createJSON('metadata');
+    let metadata = this.modelDB.createJSON('metadata');
     if (!metadata.has('language_info')) {
       let name = options.languagePreference || '';
       metadata.set('language_info', { name });
@@ -102,7 +102,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    * The metadata associated with the notebook.
    */
   get metadata(): IObservableJSON {
-    return this._modelDB.get('metadata') as IObservableJSON;
+    return this.modelDB.get('metadata') as IObservableJSON;
   }
 
   /**

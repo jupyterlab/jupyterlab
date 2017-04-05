@@ -109,13 +109,6 @@ class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeMo
   }
 
   /**
-   * Return the model database used by the document.
-   */
-  get modelDB(): IModelDB {
-    return this._modelDB;
-  }
-
-  /**
    * Serialize the model to a string.
    */
   toString(): string {

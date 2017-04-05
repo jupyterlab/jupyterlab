@@ -191,16 +191,16 @@ namespace CodeEditor {
       options = options || {};
 
       if(options.modelDB) {
-        this._modelDB = options.modelDB;
+        this.modelDB = options.modelDB;
       } else {
-        this._modelDB = new ModelDB();
+        this.modelDB = new ModelDB();
       }
 
-      let value = this._modelDB.createString('value');
+      let value = this.modelDB.createString('value');
       value.text = value.text || options.value || '';
-      let mimeType = this._modelDB.createValue('mimeType');
+      let mimeType = this.modelDB.createValue('mimeType');
       mimeType.set(options.mimeType || 'text/plain');
-      this._modelDB.createMap<ITextSelection[]>('selections');
+      this.modelDB.createMap<ITextSelection[]>('selections');
 
       mimeType.changed.connect((val, args)=>{
         this._mimeTypeChanged.emit({
@@ -222,28 +222,28 @@ namespace CodeEditor {
      * Get the value of the model.
      */
     get value(): IObservableString {
-      return this._modelDB.get('value') as IObservableString;
+      return this.modelDB.get('value') as IObservableString;
     }
 
     /**
      * Get the selections for the model.
      */
     get selections(): IObservableMap<ITextSelection[]> {
-      return this._modelDB.get('selections') as IObservableMap<ITextSelection[]>;
+      return this.modelDB.get('selections') as IObservableMap<ITextSelection[]>;
     }
 
     /**
      * A mime type of the model.
      */
     get mimeType(): string {
-      return (this._modelDB.get('mimeType') as IObservableValue).get() as string;
+      return (this.modelDB.get('mimeType') as IObservableValue).get() as string;
     }
     set mimeType(newValue: string) {
       const oldValue = this.mimeType;
       if (oldValue === newValue) {
         return;
       }
-      (this._modelDB.get('mimeType') as IObservableValue).set(newValue);
+      (this.modelDB.get('mimeType') as IObservableValue).set(newValue);
     }
 
     /**
@@ -265,7 +265,7 @@ namespace CodeEditor {
     }
 
 
-    protected _modelDB: IModelDB = null;
+    protected modelDB: IModelDB = null;
     private _isDisposed = false;
     private _mimeTypeChanged = new Signal<this, IChangedArgs<string>>(this);
   }

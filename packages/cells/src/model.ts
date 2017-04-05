@@ -125,14 +125,14 @@ class CellModel extends CodeEditor.Model implements ICellModel {
 
     this.value.changed.connect(this.onGenericChange, this);
 
-    let cellType = this._modelDB.createValue('type');
+    let cellType = this.modelDB.createValue('type');
     cellType.set(this.type);
 
-    let observableMetadata = this._modelDB.createJSON('metadata');
+    let observableMetadata = this.modelDB.createJSON('metadata');
     observableMetadata.changed.connect(this.onGenericChange, this);
 
     let cell = options.cell;
-    let trusted = this._modelDB.createValue('trusted');
+    let trusted = this.modelDB.createValue('trusted');
     if (!cell) {
       trusted.set(false);
       return;
@@ -186,14 +186,14 @@ class CellModel extends CodeEditor.Model implements ICellModel {
    * The metadata associated with the cell.
    */
   get metadata(): IObservableJSON {
-    return this._modelDB.get('metadata') as IObservableJSON;
+    return this.modelDB.get('metadata') as IObservableJSON;
   }
 
   /**
    * Get the trusted state of the model.
    */
   get trusted(): boolean {
-    return (this._modelDB.get('trusted') as IObservableValue).get() as boolean;
+    return (this.modelDB.get('trusted') as IObservableValue).get() as boolean;
   }
 
   /**
@@ -204,7 +204,7 @@ class CellModel extends CodeEditor.Model implements ICellModel {
     if (oldValue === newValue) {
       return;
     }
-    (this._modelDB.get('trusted') as IObservableValue).set(newValue);
+    (this.modelDB.get('trusted') as IObservableValue).set(newValue);
   }
 
   /**
@@ -322,7 +322,7 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
     let trusted = this.trusted;
     let cell = options.cell as nbformat.ICodeCell;
     let outputs: nbformat.IOutput[] = [];
-    let executionCount = this._modelDB.createValue('executionCount');
+    let executionCount = this.modelDB.createValue('executionCount');
     if (!executionCount.get()) {
       if (cell && cell.cell_type === 'code') {
         executionCount.set(cell.execution_count || null);
@@ -342,7 +342,7 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
     this._outputs = factory.createOutputArea({
       trusted,
       values: outputs,
-      modelDB: this._modelDB
+      modelDB: this.modelDB
     });
     this._outputs.stateChanged.connect(this.onGenericChange, this);
   }
@@ -358,14 +358,14 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
    * The execution count of the cell.
    */
   get executionCount(): nbformat.ExecutionCount {
-    return (this._modelDB.get('executionCount') as IObservableValue).get() as number || null;
+    return (this.modelDB.get('executionCount') as IObservableValue).get() as number || null;
   }
   set executionCount(newValue: nbformat.ExecutionCount) {
     let oldValue = this.executionCount;
     if (newValue === oldValue) {
       return;
     }
-    (this._modelDB.get('executionCount') as IObservableValue).set(newValue || null);
+    (this.modelDB.get('executionCount') as IObservableValue).set(newValue || null);
   }
 
   /**
