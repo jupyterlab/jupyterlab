@@ -161,14 +161,19 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     }
     let model = this._model;
     let session = this._session;
+    let realtimeHandler = this._realtimeHandler;
     this._model = null;
     this._session = null;
     this._manager = null;
     this._factory = null;
+    this._realtimeHandler = null;
 
     model.dispose();
     if (session) {
       session.dispose();
+    }
+    if (realtimeHandler) {
+      realtimeHandler.dispose();
     }
     this._disposed.emit(void 0);
     Signal.clearData(this);
