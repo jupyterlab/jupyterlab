@@ -5,6 +5,10 @@ import * as CodeMirror
   from 'codemirror';
 
 import {
+  JSONExt
+} from '@phosphor/coreutils';
+
+import {
   ArrayExt
 } from '@phosphor/algorithm';
 
@@ -517,12 +521,19 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   private _markSelections(uuid: string, selections: CodeEditor.ITextSelection[]) {
     const markers: CodeMirror.TextMarker[] = [];
     selections.forEach(selection => {
-      const { anchor, head } = this._toCodeMirrorSelection(selection);
-      const markerOptions = this._toTextMarkerOptions(selection.style);
-      markers.push(this.doc.markText(anchor, head, markerOptions));
-      let caret = this._getCaret(selection.uuid);
-      markers.push(this.doc.setBookmark(
-        this._toCodeMirrorPosition(selection.end), {widget: caret}));
+      // Only render selections if the start is not equal to the end.
+      // In that case, we don't need to render the cursor.
+      // Furthermore, inactive collaborator cursors can pile up at the start
+      // of a document, so don't render those either.
+      if (!JSONExt.deepEqual(selection.start, selection.end)) {
+        const { anchor, head } = this._toCodeMirrorSelection(selection);
+        const markerOptions = this._toTextMarkerOptions(selection.style);
+        markers.push(this.doc.markText(anchor, head, markerOptions));
+      } else if (selection.start.line !== 0 || selection.start.column !== 0) {
+        let caret = this._getCaret(selection.uuid);
+        markers.push(this.doc.setBookmark(
+          this._toCodeMirrorPosition(selection.end), {widget: caret}));
+      }
     });
     this.selectionMarkers[uuid] = markers;
   }
