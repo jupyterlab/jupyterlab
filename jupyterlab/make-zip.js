@@ -53,7 +53,7 @@ function getDependencies(basePath) {
         return moveLocal(basePath, data, name);
     }
     // Handle others.
-    moveFolder(basePath, data, name);
+    movePackage(basePath, data, name);
 }
 
 
@@ -100,7 +100,7 @@ function moveLocal(basePath, data, name) {
 }
 
 
-function moveFolder(basePath, data, name) {
+function movePackage(basePath, data, name) {
     // Pull in the whole package except .git and node_modules
     var relPath = path.relative(rootPath, basePath);
     var dirDest = path.join(outDir, relPath.split('../').join(''));
@@ -108,13 +108,24 @@ function moveFolder(basePath, data, name) {
 
     function fileFilter(source, destination) {
       var localRel = path.relative(basePath, source);
-      if (localRel.indexOf('node_modules') !== -1) {
+      // Always ignored files
+      // from https://docs.npmjs.com/files/package.json#files
+      switch (localRel.split(path.sep).shift()) {
+      case 'node_modules':
+      case '.git':
+      case 'CVS':
+      case '.svn':
+      case '.hg':
+      case '.lock-wscript':
+      case '.wafpickle-N':
+      case '.DS_Store':
+      case 'npm-debug.log':
+      case '.npmrc':
+      case 'node_modules':
+      case 'config.gypi':
         return false;
-      }
-      if (localRel.indexOf('.git') !== -1) {
-        return false;
-      }
-      return true;
+      default:
+        return true;
     }
 
     fs.copySync(basePath, dirDest, { filter: fileFilter });
