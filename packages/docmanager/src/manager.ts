@@ -365,15 +365,9 @@ class DocumentManager implements IDisposable {
       context = this._findContext(path, factory.name);
       if (!context) {
         context = this._createContext(path, factory);
-        // If there is a live realtime handler on the
-        // context, we don't want to revert to a checkpoint.
-        if (!context.realtimeHandler) {
-          // Load the contents from disk.
-          context.revert();
-        } else {
-          // Save the contents to disk.
-          context.save();
-        }
+        // Populate the model, either from disk or a
+        // model backend.
+        context.fromStore();
       }
     } else if (which === 'create') {
       context = this._createContext(path, factory);

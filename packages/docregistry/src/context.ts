@@ -201,6 +201,26 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   }
 
   /**
+   * Populate the contents of the model, either from
+   * disk or from the realtime handler.
+   *
+   * @returns a promise that resolves upon model population.
+   */
+  fromStore(): Promise<void> {
+    if (this.realtimeHandler) {
+      return this._modelDB.connected.then(() => {
+        if (this._modelDB.isPrepopulated) {
+          return this.save();
+        } else {
+          return this.revert();
+        }
+      });
+    } else {
+      return this.revert();
+    }
+  }
+
+  /**
    * Start the default kernel for the context.
    *
    * @returns A promise that resolves with the new kernel.

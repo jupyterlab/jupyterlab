@@ -103,6 +103,18 @@ interface IModelDB extends IDisposable {
   readonly isDisposed: boolean;
 
   /**
+   * Whether the database has been populated
+   * with model values prior to connection.
+   */
+  readonly isPrepopulated: boolean;
+
+  /**
+   * A promise that resolves when the database
+   * has connected to its backend, if any.
+   */
+  readonly connected: Promise<void>;
+
+  /**
    * Get a value for a path.
    *
    * @param path: the path for the object.
@@ -326,6 +338,23 @@ class ModelDB implements IModelDB {
    */
   get isDisposed(): boolean {
     return this._db === null;
+  }
+
+  /**
+   * Whether the model has been populated with
+   * any model values.
+   */
+  get isPrepopulated(): boolean {
+    return true;
+  }
+
+  /**
+   * A promise resolved when the model is connected
+   * to its backend. For the in-memory ModelDB it
+   * is immediately resolved.
+   */
+  get connected(): Promise<void> {
+    return Promise.resolve(void 0);
   }
 
   /**
