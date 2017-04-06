@@ -3,9 +3,9 @@
   "name": "@jupyterlab/main",
   "version": "0.2.0",
   "scripts": {
-    "build": "tsc && node build.js",
+    "build": "tsc",
     "clean": "rimraf lib",
-    "watch": "watch \"npm run build\" .. --wait 10 --filter=../../scripts/watch-filter.js"
+    "watch": "tsc -w"
   },
   "main": "lib/index.js",
   "dependencies": {
@@ -39,7 +39,6 @@
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
-    "typescript": "^2.2.1",
-    "watch": "^1.0.2"
+    "typescript": "^2.2.1"
   }
 }
