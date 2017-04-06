@@ -3,8 +3,7 @@
   "packages": [
     "jupyterlab",
     "examples/*",
-    "packages/*",
-    "test"
+    "packages/*"
   ],
   "version": "independent"
 }
