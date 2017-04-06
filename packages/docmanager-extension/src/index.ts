@@ -42,6 +42,9 @@ namespace CommandIDs {
   const closeAllFiles = 'file-operations:close-all-files';
 
   export
+  const newUntitled = 'file-operations:new-untitled';
+
+  export
   const open = 'file-operations:open';
 };
 
@@ -93,15 +96,36 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     return !!(currentWidget && docManager.contextForWidget(currentWidget));
   };
 
-  commands.addCommand(CommandIDs.save, {
-    label: 'Save',
-    caption: 'Save and create checkpoint',
-    isEnabled,
+  commands.addCommand(CommandIDs.close, {
+    label: 'Close',
     execute: () => {
-      if (isEnabled()) {
-        let context = docManager.contextForWidget(app.shell.currentWidget);
-        return context.save().then(() => context.createCheckpoint());
+      if (app.shell.currentWidget) {
+        app.shell.currentWidget.close();
       }
+    }
+  });
+
+  commands.addCommand(CommandIDs.closeAllFiles, {
+    label: 'Close All',
+    execute: () => { app.shell.closeAll(); }
+  });
+
+  commands.addCommand(CommandIDs.open, {
+    execute: args => {
+      let path = args['path'] as string;
+      let factory = args['factory'] as string || void 0;
+      return docManager.services.contents.get(path)
+        .then(() => docManager.openOrReveal(path, factory));
+    }
+  });
+
+  commands.addCommand(CommandIDs.newUntitled, {
+    execute: args => {
+      if (args.type === 'file') {
+        args.ext = args.ext || '.txt';
+      }
+
+      return docManager.services.contents.newUntitled(args);
     }
   });
 
@@ -113,6 +137,18 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
       if (isEnabled()) {
         let context = docManager.contextForWidget(app.shell.currentWidget);
         return context.restoreCheckpoint().then(() => context.revert());
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.save, {
+    label: 'Save',
+    caption: 'Save and create checkpoint',
+    isEnabled,
+    execute: () => {
+      if (isEnabled()) {
+        let context = docManager.contextForWidget(app.shell.currentWidget);
+        return context.save().then(() => context.createCheckpoint());
       }
     }
   });
@@ -129,29 +165,6 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
         });
       }
     }
-  });
-
-  commands.addCommand(CommandIDs.open, {
-    execute: args => {
-      let path = args['path'] as string;
-      let factory = args['factory'] as string || void 0;
-      return docManager.services.contents.get(path)
-        .then(() => docManager.openOrReveal(path, factory));
-    }
-  });
-
-  commands.addCommand(CommandIDs.close, {
-    label: 'Close',
-    execute: () => {
-      if (app.shell.currentWidget) {
-        app.shell.currentWidget.close();
-      }
-    }
-  });
-
-  commands.addCommand(CommandIDs.closeAllFiles, {
-    label: 'Close All',
-    execute: () => { app.shell.closeAll(); }
   });
 
   [
