@@ -430,15 +430,6 @@ namespace Private {
     return input;
   }
 
-  /**
-   * Create a new folder.
-   */
-  export
-  function createNewFolder(widget: FileButtons): void {
-    widget.model.newUntitled({ type: 'directory' }).catch(error => {
-      utils.showErrorMessage('New Folder Error', error);
-    });
-  }
 
   /**
    * Create a new dropdown menu for the create new button.
@@ -454,12 +445,16 @@ namespace Private {
     // Remove all the commands associated with this menu upon disposal.
     menu.disposed.connect(() => disposables.dispose());
 
-    command = `${prefix}:new-text-folder`;
-    disposables.add(commands.addCommand(command, {
-      execute: () => { createNewFolder(widget); },
-      label: 'Folder'
-    }));
-    menu.addItem({ command });
+    // Add new folder menu item.
+    menu.addItem({
+      args: {
+        error: 'New Folder Error',
+        label: 'Folder',
+        path: widget.model.path,
+        type: 'directory'
+      },
+      command: 'file-operations:new-untitled'
+    });
 
     each(registry.creators(), creator => {
       command = `${prefix}:new-${creator.name}`;
