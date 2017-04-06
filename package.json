@@ -2,9 +2,9 @@
   "private": true,
   "scripts": {
     "install": "lerna bootstrap --hoist",
-    "build": "lerna run build",
+    "build:app": "cd jupyterlab && npm run build && cd .. && python -m jupyterlab.build",
+    "build": "lerna run build --scope \"@jupyterlab/all-packages\"",
     "build:examples": "lerna run build --scope \"@jupyterlab/example-*\"",
-    "build:main": "cd jupyterlab && npm run build",
     "build:src": "lerna run build --scope \"@jupyterlab/!(test-|example-)*\"",
     "build:test": "lerna run build:test",
     "clean": "node scripts/clean-packages.js examples packages",

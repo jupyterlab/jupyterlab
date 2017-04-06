@@ -5,6 +5,7 @@
 # Distributed under the terms of the Modified BSD License.
 import json
 import os
+from os.path import join as pjoin
 import shutil
 from subprocess import check_call
 
@@ -23,7 +24,7 @@ from .labextensions import (
 HERE = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_ENVIRONMENT = Environment(
     autoescape=False,
-    loader=FileSystemLoader(os.path.join(HERE, 'src')),
+    loader=FileSystemLoader(pjoin(HERE, 'src')),
     trim_blocks=False)
 
 
@@ -41,7 +42,7 @@ def get_labconfig(app):
     if app.config_dir not in config_path:
         # add nbapp's config_dir to the front, if set manually
         config_path.insert(0, app.config_dir)
-    config_path = [os.path.join(p, CONFIG_DIR) for p in config_path]
+    config_path = [pjoin(p, CONFIG_DIR) for p in config_path]
     return ConfigManager(read_config_path=config_path)
 
 
@@ -72,7 +73,7 @@ def move_extension(value):
     # Figure out the target path.
     parts = value['name'].split('/')
     path = os.sep.join(parts)
-    path = os.path.join('./build/node_modules', path)
+    path = pjoin(HERE, 'build/node_modules', path)
     try:
         shutil.copytree(value['jupyter']['labextension_path'], path)
     except OSError:
@@ -91,33 +92,33 @@ class LabBuilder(JupyterApp):
         extensions = get_extensions(config)
 
         try:
-            shutil.rmtree('./build')
+            shutil.rmtree(pjoin(HERE, 'build'))
         except OSError:
             pass
 
         # Copy the template files.
-        target = './build/node_modules/@jupyterlab'
+        target = pjoin(HERE, 'build/node_modules/@jupyterlab')
         try:
             os.makedirs(target)
         except OSError:
             pass
-        shutil.copytree('./default-extensions',
-                        os.path.join(target, 'default-extensions'))
-        for item in os.listdir('./src'):
-            shutil.copy2(os.path.join('./src', item), './build')
+        shutil.copytree(pjoin(HERE, 'default-extensions'),
+                        pjoin(target, 'default-extensions'))
+        for item in os.listdir(pjoin(HERE, 'src')):
+            shutil.copy2(pjoin(HERE, 'src', item), pjoin(HERE, 'build'))
 
         # Template index.js
         names = [data['name'] for data in extensions.values()]
         context = dict(jupyterlab_extensions=names)
-        with open(os.path.join(HERE, 'build', 'index.js'), 'w') as fid:
+        with open(pjoin(HERE, 'build', 'index.js'), 'w') as fid:
             fid.write(render_template('index.js', context))
 
         # Fill in package.json dependencies
-        with open(os.path.join(HERE, 'build', 'package.json')) as fid:
+        with open(pjoin(HERE, 'build', 'package.json')) as fid:
             data = json.load(fid)
         for value in extensions.values():
             data['dependencies'][value['name']] = '^' + value['version']
-        with open(os.path.join(HERE, 'build', 'package.json'), 'w') as fid:
+        with open(pjoin(HERE, 'build', 'package.json'), 'w') as fid:
             json.dump(data, fid)
 
         # Copy the labextension folders
