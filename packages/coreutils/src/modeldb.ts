@@ -197,11 +197,6 @@ interface IModelDB extends IDisposable {
   view(basePath: string): IModelDB;
 
   /**
-   * Set a value at a path.
-   */
-  set(path: string, value: IObservable): void;
-
-  /**
    * Dispose of the resources held by the database.
    */
   dispose(): void;
@@ -498,7 +493,7 @@ class ModelDB implements IModelDB {
   }
 
   private _basePath: string;
-  private _db: IModelDB | ObservableMap<IObservable> = null;
+  private _db: ModelDB | ObservableMap<IObservable> = null;
   private _toDispose = true;
   private _disposables = new DisposableSet();
 }
