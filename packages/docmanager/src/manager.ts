@@ -399,11 +399,11 @@ class DocumentManager implements IDisposable {
     this._activateRequested.emit(args);
   }
 
-  private _widgetManager: DocumentWidgetManager = null;
-  private _contexts: Private.IContext[] = [];
-  private _opener: DocumentManager.IWidgetOpener = null;
   private _activateRequested = new Signal<this, string>(this);
+  private _contexts: Private.IContext[] = [];
   private _modelDBFactory: ModelDB.IFactory = null;
+  private _opener: DocumentManager.IWidgetOpener = null;
+  private _widgetManager: DocumentWidgetManager = null;
 }
 
 
