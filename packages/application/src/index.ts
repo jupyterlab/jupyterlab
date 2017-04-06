@@ -71,15 +71,6 @@ class JupyterLab extends Application<ApplicationShell> {
     data.forEach(item => { this.registerPlugin(item); });
   }
 
-  /**
-   * Register the plugins from multiple plugin modules.
-   *
-   * @param mods - The plugin modules to register.
-   */
-  registerPluginModules(mods: JupyterLab.PluginModule[]): void {
-    mods.forEach(mod => { this.registerPluginModule(mod); });
-  }
-
   private _info: JupyterLab.IInfo;
 }
 

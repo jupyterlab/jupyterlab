@@ -1,4 +1,8 @@
 
+import {
+  JupyterLab
+} from '@jupyterlab/application';
+
 import * as fs
   from 'fs-extra';
 
@@ -57,12 +61,34 @@ namespace Private {
     constructor(options: build.IOptions) {
       this._rootPath = path.resolve(options.rootPath || '.');
       this._outPath = path.resolve(options.outPath || './build');
+      this._validateEntry();
 
       fs.removeSync(this._outPath);
       fs.ensureDirSync(this._outPath);
 
       // Handle the packages starting at the root.
       this._handlePackage(this._rootPath);
+    }
+
+    /**
+     * Validate the entry point of the extension.
+     */
+    private _validateEntry(): void {
+      let packagePath = path.join(this._rootPath, 'package.json');
+      if (!fs.existsSync(packagePath)) {
+        throw Error('Requires a package.json file in the root path');
+      }
+      let data = require(packagePath);
+      if (!data.main) {
+        throw Error('Must specify a "main" entry point in package.json');
+      }
+      let mainPath = path.join(this._rootPath, data.main);
+      if (!fs.existsSync(mainPath)) {
+        throw Error('Main entry point not found, perhaps unbuilt?');
+      }
+      let main = require(mainPath) as JupyterLab.PluginModule;
+      let app = new JupyterLab();
+      app.registerPluginModule(main);
     }
 
     /**

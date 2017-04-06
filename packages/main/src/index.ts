@@ -83,35 +83,32 @@ import * as tooltipExtension
 import '@jupyterlab/default-theme/style/index.css';
 
 
-export
-const extensions: JupyterLab.PluginModule[] = [
-  aboutExtension,
-  applicationExtension,
-  apputilsExtension,
-  codemirrorExtension,
-  completerExtension,
-  consoleExtension,
-  csvwidgetExtension,
-  docmanagerExtension,
-  docregistryExtension,
-  editorwidgetExtension,
-  faqExtension,
-  filebrowserExtension,
-  helpExtension,
-  imagewidgetExtension,
-  inspectorExtension,
-  landingExtension,
-  launchExtension,
-  markdownwidgetExtension,
-  notebookExtension,
-  rendermimeExtension,
-  runningExtension,
-  servicesExtension,
-  shortcutsExtension,
-  terminalExtension,
-  tooltipExtension,
-];
+const extensions: JupyterLab.PluginModule = [].concat(
+  aboutExtension.default,
+  applicationExtension.default,
+  apputilsExtension.default,
+  codemirrorExtension.default,
+  completerExtension.default,
+  consoleExtension.default,
+  csvwidgetExtension.default,
+  docmanagerExtension.default,
+  docregistryExtension.default,
+  editorwidgetExtension.default,
+  faqExtension.default,
+  filebrowserExtension.default,
+  helpExtension.default,
+  imagewidgetExtension.default,
+  inspectorExtension.default,
+  landingExtension.default,
+  launchExtension.default,
+  markdownwidgetExtension.default,
+  notebookExtension.default,
+  rendermimeExtension.default,
+  runningExtension.default,
+  servicesExtension.default,
+  shortcutsExtension.default,
+  terminalExtension.default,
+  tooltipExtension.default
+);
 
-
-export
-const app = JupyterLab;
+export default extensions;
