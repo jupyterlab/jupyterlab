@@ -111,3 +111,7 @@ const extensions: JupyterLab.IPluginModule[] = [
   terminalExtension,
   tooltipExtension,
 ];
+
+
+export
+const app = JupyterLab;

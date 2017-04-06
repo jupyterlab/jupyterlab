@@ -1,10 +1,10 @@
 
 
 function main() {
-    var JupyterLab = require('@jupyterlab/application').JupyterLab;
+    var app = require('@jupyterlab/main').app;
     var extensions = require('@jupyterlab/main').extensions;
 
-    lab = new JupyterLab({
+    lab = new app({
         gitDescription: '2',
         namespace: 'jupyterlab',
         version: '1'

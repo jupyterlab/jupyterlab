@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "name": "@jupyterlab/top",
+  "version": "0.2.0",
+  "scripts": {
+    "build": "webpack"
+  },
+  "dependencies": {
+    "@jupyterlab/main": "^0.2.0"
+  },
+  "devDependencies": {}
+}
