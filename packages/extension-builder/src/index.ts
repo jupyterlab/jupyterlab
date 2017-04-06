@@ -135,32 +135,16 @@ namespace Private {
      * Move packages from npm.
      */
     private _movePackage(basePath: string, data: any, name: string): void {
-      // Pull in the whole package except files that should be ignored.
-      // List from  https://docs.npmjs.com/files/package.json#files
-
+      // Pull in the whole package except its node modules.
       function fileFilter(source: string): boolean {
         let localRel = path.relative(basePath, source);
-        switch (localRel.split(path.sep).shift()) {
-        case 'node_modules':
-        case '.git':
-        case 'CVS':
-        case '.svn':
-        case '.hg':
-        case '.lock-wscript':
-        case '.wafpickle-N':
-        case '.DS_Store':
-        case 'npm-debug.log':
-        case '.npmrc':
-        case 'node_modules':
-        case 'config.gypi':
-          return false;
-        default:
-          return true;
-        }
+        return localRel.split(path.sep)[0] !== 'node_modules';
       }
 
-      let relPath = path.relative(this._rootPath, basePath);
-      let dirDest = path.join(this._outPath, relPath.split('../').join(''));
+      let parts = basePath.split(path.sep);
+      let index = parts.indexOf('node_modules');
+      let relPath = parts.slice(index).join(path.sep);
+      let dirDest = path.join(this._outPath, relPath);
       fs.ensureDirSync(dirDest);
       fs.copySync(basePath, dirDest, { filter: fileFilter });
     }
