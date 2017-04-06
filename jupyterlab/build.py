@@ -98,7 +98,8 @@ class LabBuilder(JupyterApp):
             move_extension(value)
 
         # Template index.js
-        context = dict(jupyterlab_extensions=list(extensions.keys()))
+        names = [data['name'] for data in extensions.values()]
+        context = dict(jupyterlab_extensions=names)
         with open(os.path.join(HERE, 'build', 'index.js'), 'w') as fid:
             fid.write(render_template('index.js', context))
 
