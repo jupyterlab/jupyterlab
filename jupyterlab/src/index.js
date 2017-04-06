@@ -1,14 +1,19 @@
 
-function main() {
-    var app = require('@jupyterlab/main').app;
-    var extensions = require('@jupyterlab/main').extensions;
+require('es6-promise/auto');  // polyfill Promise on IE'
+require('font-awesome/css/font-awesome.min.css');
+require('@jupyterlab/default-theme/style/index.css');
 
+var app = require('@jupyterlab/application').JupyterLab;
+var mainExtensions = require('@jupyterlab/main');
+
+
+function main() {
     lab = new app({
-        gitDescription: '2',
+        gitDescription: process.env.GIT_DESCRIPTION,
         namespace: 'jupyterlab',
-        version: '1'
+        version: process.env.JUPYTERLAB_VERSION
     });
-    lab.registerPluginModules(extensions);
+    lab.registerPluginModule(mainExtensions);
     {% for extension in jupyterlab_extensions %}
     try {
         lab.registerPluginModule(require('{{extension}}'));
