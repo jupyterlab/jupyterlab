@@ -127,6 +127,7 @@ class LabBuilder(JupyterApp):
         # Run finish-build
         check_call(['node', 'finish-build'], cwd=HERE)
 
+
 #-----------------------------------------------------------------------------
 # Main entry point
 #-----------------------------------------------------------------------------
