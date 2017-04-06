@@ -1,5 +1,4 @@
 
-
 function main() {
     var app = require('@jupyterlab/main').app;
     var extensions = require('@jupyterlab/main').extensions;
@@ -10,6 +9,13 @@ function main() {
         version: '1'
     });
     lab.registerPluginModules(extensions);
+    {% for extension in jupyterlab_extensions %}
+    try {
+        lab.registerPluginModule(require('{{extension}}'));
+    } catch (e) {
+        console.error(e);
+    }
+    {% endfor %}
     lab.start();
 }
 

@@ -476,68 +476,40 @@ def validate_labextension_folder(name, full_dest, logger=None):
     logger : Jupyter logger [optional]
         Logger instance to use
     """
-    infos = []
     warnings = []
-
-    has_files = []
-    has_entry = False
-    version_compatible = []
+    indent = "        "
 
     data = get_labextension_manifest_data_by_folder(full_dest)
-    for manifest in data.values():
-        if ('entry' in manifest and 'modules' in manifest):
-            if (manifest['entry'] in manifest['modules']):
-                has_entry = True
-        files = manifest.get('files', [])
-        if not files:
-            has_files.append("No 'files' key in manifest")
-        else:
-            for fname in files:
-                path = os.path.join(full_dest, fname)
-                if not os.path.exists(path):
-                    has_files.append("File in manifest does not exist: {}".format(path))
+    if not data:
+        msg = indent + "{} No package.json found"
+        warnings.append(msg.format(RED_X))
+        return warnings
 
-    indent = "        "
-    subindent = indent + "    "
-    entry_msg = indent + u"{} has entry point in manifest"
-    name = os.path.basename(full_dest)
-    if has_entry:
-        infos.append(entry_msg.format(GREEN_OK))
-    else:
-        warnings.append(entry_msg.format(RED_X))
+    if 'main' not in data:
+        msg = indent + "{} No main entry point found"
+        warnings.append(msg.format(RED_X))
+        return warnings
 
-    files_msg = indent+u"{} has necessary files"
-    if len(has_files)==0:
-        infos.append(files_msg.format(GREEN_OK))
-    else:
-        warnings.append(files_msg.format(RED_X))
-        for m in has_files:
-            warnings.append(subindent+m)
+    parts = data.get('main', '').split('/')
+    main = os.sep.join(parts)
+    if not os.path.exists(os.path.join(full_dest, main)):
+        msg = indent + "{} Entry point file not found"
+        warnings.append(msg.format(RED_X))
+        return warnings
 
-    if len(version_compatible)==0:
-        infos.append(indent+"{} is version compatible with installed JupyterLab version {}".format(GREEN_OK, __version__))
-    else:
-        warnings.append(indent+"{} is not version compatible with installed JupyterLab version {}".format(RED_X, __version__))
-        for m in version_compatible:
-            warnings.append(subindent+m)
-
-    if logger and warnings:
-            #[logger.info(info) for info in infos]
-            [logger.warn(warning) for warning in warnings]
-
-    return warnings
+    return []
 
 
 def get_labextension_manifest_data_by_folder(folder):
     """Get the manifest data for a given lab extension folder
     """
-    manifest_files = glob.glob(os.path.join(folder, '*.manifest'))
-    manifests = {}
-    for file in manifest_files:
-        with open(file) as fid:
-            manifest = json.load(fid)
-        manifests[manifest['name']] = manifest
-    return manifests
+    manifest_file = os.path.join(folder, 'package.json')
+    if os.path.exists(manifest_file):
+        with open(manifest_file) as fid:
+            data = json.load(fid)
+            data.setdefault('jupyter', {})
+            data['jupyter']['labextension_path'] = folder
+            return data
 
 
 def get_labextension_manifest_data_by_name(name):

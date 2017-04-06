@@ -58,8 +58,13 @@ class JupyterLab extends Application<ApplicationShell> {
    *
    * @param mod - The plugin module to register.
    */
-  registerPluginModule(mod: JupyterLab.IPluginModule): void {
-    let data = mod.default;
+  registerPluginModule(mod: JupyterLab.PluginModule): void {
+    let data: JupyterLabPlugin<any> | JupyterLabPlugin<any>[];
+    if (mod.hasOwnProperty('__esModule')) {
+      data = (mod as JupyterLab.IPluginModuleES6).default;
+    } else {
+      data = mod as JupyterLab.PluginModuleES5;
+    }
     if (!Array.isArray(data)) {
       data = [data];
     }
@@ -71,7 +76,7 @@ class JupyterLab extends Application<ApplicationShell> {
    *
    * @param mods - The plugin modules to register.
    */
-  registerPluginModules(mods: JupyterLab.IPluginModule[]): void {
+  registerPluginModules(mods: JupyterLab.PluginModule[]): void {
     mods.forEach(mod => { this.registerPluginModule(mod); });
   }
 
@@ -133,14 +138,27 @@ namespace JupyterLab {
   }
 
   /**
-   * The interface for a module that exports a plugin or plugins as
-   * the default value.
+   * The type for a module that exports a plugin or plugins as
+   * the default value using ES5 syntax.
    */
   export
-  interface IPluginModule {
+  type PluginModuleES5 = JupyterLabPlugin<any> | JupyterLabPlugin<any>[];
+
+  /**
+   * The interface for a module that exports a plugin or plugins as
+   * the default value using ES6 syntax.
+   */
+  export
+  interface IPluginModuleES6 {
     /**
      * The default export.
      */
     default: JupyterLabPlugin<any> | JupyterLabPlugin<any>[];
   }
+
+  /**
+   * A type alias for a plugin module.
+   */
+  export
+  type PluginModule = PluginModuleES5 | IPluginModuleES6;
 }

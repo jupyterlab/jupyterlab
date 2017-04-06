@@ -84,7 +84,7 @@ import '@jupyterlab/default-theme/style/index.css';
 
 
 export
-const extensions: JupyterLab.IPluginModule[] = [
+const extensions: JupyterLab.PluginModule[] = [
   aboutExtension,
   applicationExtension,
   apputilsExtension,
