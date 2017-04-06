@@ -80,15 +80,25 @@ class DocumentManager implements IDisposable {
    * Construct a new document manager.
    */
   constructor(options: DocumentManager.IOptions) {
-    this._registry = options.registry;
-    this._serviceManager = options.manager;
+    this.registry = options.registry;
+    this.services = options.manager;
     this._opener = options.opener;
     this._modelDBFactory = options.modelDBFactory;
     this._widgetManager = new DocumentWidgetManager({
-      registry: this._registry
+      registry: this.registry
     });
     this._widgetManager.activateRequested.connect(this._onActivateRequested, this);
   }
+
+  /**
+   * The registry used by the manager.
+   */
+  readonly registry: DocumentRegistry;
+
+  /**
+   * The service manager used by the manager.
+   */
+  readonly services: ServiceManager.IManager;
 
   /**
    * A signal emitted when one of the documents is activated.
@@ -98,35 +108,21 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * Get the registry used by the manager.
-   */
-  get registry(): DocumentRegistry {
-    return this._registry;
-  }
-
-  /**
-   * Get the service manager used by the manager.
-   */
-  get services(): ServiceManager.IManager {
-    return this._serviceManager;
-  }
-
-  /**
    * Get whether the document manager has been disposed.
    */
   get isDisposed(): boolean {
-    return this._serviceManager === null;
+    return this._widgetManager === null;
   }
 
   /**
    * Dispose of the resources held by the document manager.
    */
   dispose(): void {
-    if (this._serviceManager === null) {
+    if (this._widgetManager === null) {
       return;
     }
+
     let widgetManager = this._widgetManager;
-    this._serviceManager = null;
     this._widgetManager = null;
     Signal.clearData(this);
     each(toArray(this._contexts), context => {
@@ -216,7 +212,7 @@ class DocumentManager implements IDisposable {
   findWidget(path: string, widgetName='default'): Widget {
     if (widgetName === 'default') {
       let extname = DocumentRegistry.extname(path);
-      let factory = this._registry.defaultWidgetFactory(extname);
+      let factory = this.registry.defaultWidgetFactory(extname);
       if (!factory) {
         return;
       }
@@ -307,7 +303,7 @@ class DocumentManager implements IDisposable {
     };
     let context = new Context({
       opener: adopter,
-      manager: this._serviceManager,
+      manager: this.services,
       factory,
       path,
       kernelPreference,
@@ -315,7 +311,7 @@ class DocumentManager implements IDisposable {
     });
     let handler = new SaveHandler({
       context,
-      manager: this._serviceManager
+      manager: this.services
     });
     Private.saveHandlerProperty.set(context, handler);
     context.ready.then(() => {
@@ -337,7 +333,7 @@ class DocumentManager implements IDisposable {
    * Get the model factory for a given widget name.
    */
   private _widgetFactoryFor(path: string, widgetName: string): DocumentRegistry.WidgetFactory {
-    let registry = this._registry;
+    let { registry } = this;
     if (widgetName === 'default') {
       let extname = DocumentRegistry.extname(path);
       let factory = registry.defaultWidgetFactory(extname);
@@ -362,14 +358,14 @@ class DocumentManager implements IDisposable {
     if (!widgetFactory) {
       return;
     }
-    let factory = this._registry.getModelFactory(widgetFactory.modelName);
+    let factory = this.registry.getModelFactory(widgetFactory.modelName);
     if (!factory) {
       return;
     }
 
     // Handle the kernel pereference.
     let ext = DocumentRegistry.extname(path);
-    let preference = this._registry.getKernelPreference(
+    let preference = this.registry.getKernelPreference(
       ext, widgetFactory.name, kernel
     );
 
@@ -403,9 +399,7 @@ class DocumentManager implements IDisposable {
     this._activateRequested.emit(args);
   }
 
-  private _serviceManager: ServiceManager.IManager = null;
   private _widgetManager: DocumentWidgetManager = null;
-  private _registry: DocumentRegistry = null;
   private _contexts: Private.IContext[] = [];
   private _opener: DocumentManager.IWidgetOpener = null;
   private _activateRequested = new Signal<this, string>(this);
