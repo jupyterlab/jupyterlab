@@ -4,7 +4,7 @@ require('font-awesome/css/font-awesome.min.css');
 require('@jupyterlab/default-theme/style/index.css');
 
 var app = require('@jupyterlab/application').JupyterLab;
-var mainExtensions = require('@jupyterlab/main');
+var defaultExtensions = require('@jupyterlab/default-extensions');
 
 
 function main() {
@@ -13,7 +13,7 @@ function main() {
         namespace: 'jupyterlab',
         version: process.env.JUPYTERLAB_VERSION
     });
-    lab.registerPluginModule(mainExtensions);
+    lab.registerPluginModule(defaultExtensions);
     {% for extension in jupyterlab_extensions %}
     try {
         lab.registerPluginModule(require('{{extension}}'));

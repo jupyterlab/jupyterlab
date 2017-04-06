@@ -13,7 +13,6 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.2.0"
   },
   "devDependencies": {
     "@types/expect.js": "^0.3.29",

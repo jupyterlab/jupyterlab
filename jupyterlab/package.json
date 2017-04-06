@@ -16,5 +16,7 @@
     "url-loader": "^0.5.7",
     "webpack": "^2.2.1"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "jsdom": "^9.12.0"
+  }
 }

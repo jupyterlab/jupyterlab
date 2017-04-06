@@ -6,7 +6,7 @@
     "build": "webpack"
   },
   "dependencies": {
-    "@jupyterlab/main": "^0.2.0"
+    "@jupyterlab/default-extensions": "^0.2.0"
   },
   "devDependencies": {}
 }

@@ -7,14 +7,13 @@ fs.removeSync('./build');
 fs.ensureDirSync('./build/node_modules');
 
 
-childProcess.execSync('npm run build', { cwd: path.resolve('../packages/extension-builder') });
-childProcess.execSync('npm run build', { cwd: path.resolve('../packages/main') });
+childProcess.execSync('npm run build', { cwd: path.resolve('../packages/all-packages') });
 
 
 var build = require('../packages/extension-builder').build
 build({
-    rootPath: '../packages/main',
-    outPath: './build/node_modules/@jupyterlab/main'
+    rootPath: '../packages/default-extensions',
+    outPath: './build/node_modules/@jupyterlab/default-extensions'
 });
 
 fs.copySync('./src/webpack.config.js', './build/webpack.config.js');
