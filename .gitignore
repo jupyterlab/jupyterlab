@@ -2,6 +2,7 @@ MANIFEST
 build
 dist
 lib
+jupyterlab/default-extensions
 
 node_modules
 .cache

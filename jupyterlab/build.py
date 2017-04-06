@@ -90,12 +90,21 @@ class LabBuilder(JupyterApp):
         config = get_labconfig(self)
         extensions = get_extensions(config)
 
-        # Run build-main
-        check_call(['node', 'build-main'], cwd=HERE)
+        try:
+            shutil.rmtree('./build')
+        except OSError:
+            pass
 
-        # Copy the labextension folders
-        for value in extensions.values():
-            move_extension(value)
+        # Copy the template files.
+        target = './build/node_modules/@jupyterlab'
+        try:
+            os.makedirs(target)
+        except OSError:
+            pass
+        shutil.copytree('./default-extensions',
+                        os.path.join(target, 'default-extensions'))
+        for item in os.listdir('./src'):
+            shutil.copy2(os.path.join('./src', item), './build')
 
         # Template index.js
         names = [data['name'] for data in extensions.values()]
@@ -104,16 +113,19 @@ class LabBuilder(JupyterApp):
             fid.write(render_template('index.js', context))
 
         # Fill in package.json dependencies
-        with open(os.path.join(HERE, 'src', 'package.json')) as fid:
+        with open(os.path.join(HERE, 'build', 'package.json')) as fid:
             data = json.load(fid)
         for value in extensions.values():
             data['dependencies'][value['name']] = '^' + value['version']
         with open(os.path.join(HERE, 'build', 'package.json'), 'w') as fid:
             json.dump(data, fid)
 
+        # Copy the labextension folders
+        for value in extensions.values():
+            move_extension(value)
+
         # Run finish-build
         check_call(['node', 'finish-build'], cwd=HERE)
-
 
 #-----------------------------------------------------------------------------
 # Main entry point
