@@ -16,7 +16,7 @@ try {
 
 // Get the python package version.
 var cwd = process.cwd();
-process.chdir('..');
+process.chdir('../..');
 try {
   var version = childProcess.execSync('python setup.py --version', { encoding: 'utf8' });
 } catch (e) {

@@ -82,28 +82,6 @@ namespace Private {
       if (!fs.existsSync(mainPath)) {
         throw Error('Main entry point not found, perhaps unbuilt?');
       }
-      let main = require(mainPath) as any;
-      if (main.hasOwnProperty('__esModule')) {
-        main = main.default;
-      }
-      if (!Array.isArray(main)) {
-        main = [main];
-      }
-      main.forEach((item: any) => { this._verifyPlugin(item); });
-    }
-
-    /**
-     * Verify a plugin item.
-     */
-    private _verifyPlugin(item: any): void {
-      let id = item.id || null;
-      if (typeof id !== 'string') {
-        throw Error(`Plugin must provide an id string: ${item}`);
-      }
-      let activate = item.activate || null;
-      if (typeof activate !== 'function') {
-        throw Error(`Plugin must provide an activate function: ${id}`);
-      }
     }
 
     /**
