@@ -134,7 +134,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
       return docManager.services.contents.newUntitled(options)
         .catch(error => showErrorMessage(errorMessage, error));
     },
-    label: args => args.label as string || 'New Folder'
+    label: args => (args.label as string) || `New ${args.type as string}`
   });
 
   commands.addCommand(CommandIDs.restoreCheckpoint, {
