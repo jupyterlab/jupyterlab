@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "@jupyterlab/top",
+  "name": "@jupyterlab/application-manifest",
   "version": "0.2.0",
   "scripts": {
     "build": "webpack"

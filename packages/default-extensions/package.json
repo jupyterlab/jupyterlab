@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "@jupyterlab/main",
+  "name": "@jupyterlab/default-extensions",
   "version": "0.2.0",
   "scripts": {
     "build": "tsc",

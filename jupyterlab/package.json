@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "@jupyterlab/build",
+  "name": "@jupyterlab/application-builder",
   "version": "0.2.0",
   "scripts": {
     "build": "node build-main.js"
