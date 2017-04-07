@@ -9,7 +9,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  nbformat, path as PathExt
+  nbformat, PathExt
 } from '@jupyterlab/coreutils';
 
 import {
