@@ -22,7 +22,10 @@
     "update:dependency": "node scripts/update-dependency.js",
     "watch": "cd jupyterlab && npm run watch"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@phosphor/application": "^1.0.0",
+    "@phosphor/widgets": "^1.0.0"
+  },
   "devDependencies": {
     "@types/chai": "^3.4.35",
     "@types/codemirror": "0.0.38",

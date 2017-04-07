@@ -12,8 +12,7 @@
   "directories": {
     "lib": "lib/"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/expect.js": "^0.3.29",
     "@types/fs-extra": "^2.0.0",
@@ -21,6 +20,7 @@
     "@types/mocha": "^2.2.32",
     "mocha": "^3.2.0",
     "rimraf": "^2.5.2",
+    "tar-pack": "^3.4.0",
     "typescript": "^2.2.1"
   },
   "scripts": {

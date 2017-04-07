@@ -7,6 +7,7 @@ import json
 import os
 from os.path import join as pjoin
 import shutil
+from distutils.dir_util import copy_tree
 from subprocess import check_call
 
 from jupyter_core.application import JupyterApp
@@ -68,18 +69,6 @@ def get_extensions(lab_config):
     return extensions
 
 
-def move_extension(value):
-    """Move an extension to the appropriate folder in the build directory"""
-    # Figure out the target path.
-    parts = value['name'].split('/')
-    path = os.sep.join(parts)
-    path = pjoin(HERE, 'build/node_modules', path)
-    try:
-        shutil.copytree(value['jupyter']['labextension_path'], path)
-    except OSError:
-        pass
-
-
 class LabBuilder(JupyterApp):
     version = __version__
 
@@ -90,22 +79,24 @@ class LabBuilder(JupyterApp):
     def start(self):
         config = get_labconfig(self)
         extensions = get_extensions(config)
+        target = pjoin(HERE, 'build')
+        cache = pjoin(target, 'npm_cache')
 
         try:
-            shutil.rmtree(pjoin(HERE, 'build'))
+            shutil.rmtree(target)
         except OSError:
             pass
 
-        # Copy the template files.
-        target = pjoin(HERE, 'build/node_modules/@jupyterlab')
+        # Copy the files.
         try:
             os.makedirs(target)
         except OSError:
             pass
-        shutil.copytree(pjoin(HERE, 'default-extensions'),
-                        pjoin(target, 'default-extensions'))
+        copy_tree(pjoin(HERE, 'npm_cache'), cache)
+        copy_tree(pjoin(HERE, 'default-extensions'), cache)
         for item in os.listdir(pjoin(HERE, 'src')):
-            shutil.copy2(pjoin(HERE, 'src', item), pjoin(HERE, 'build'))
+            shutil.copy2(pjoin(HERE, 'src', item), target)
+        shutil.copy2(pjoin(HERE, '.npmrc'), target)
 
         # Template index.js
         names = [data['name'] for data in extensions.values()]
@@ -123,10 +114,11 @@ class LabBuilder(JupyterApp):
 
         # Copy the labextension folders
         for value in extensions.values():
-            move_extension(value)
+            copy_tree(value['jupyter']['labextension_path'], cache)
 
         # Run finish-build
-        check_call(['node', 'finish-build'], cwd=HERE)
+        # check_call(['npm', 'install'], cwd=target)
+        # check_call(['npm', 'run', 'build'], cwd=target)
 
 
 #-----------------------------------------------------------------------------

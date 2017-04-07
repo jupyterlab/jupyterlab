@@ -2,9 +2,6 @@
 import * as fs
   from 'fs-extra';
 
-import * as glob
-  from 'glob';
-
 import * as path
   from 'path';
 
@@ -93,79 +90,38 @@ namespace Private {
       if (this._packages.has(name)) {
         return;
       }
-      this._packages.set(name, data);
-      for (let name in data.dependencies) {
-        this._handlePackage(this._findPackage(basePath, name));
-      }
-      // Handle paths that are not in a node_modules directory.
-      let parts = basePath.split(path.sep);
-      if (parts.length > 2 && parts[parts.length - 2] !== 'node_modules') {
-        return this._moveLocal(basePath, data, name);
-      }
-      // Handle others.
+      this._packages.add(name);
       this._movePackage(basePath, data, name);
-    }
 
-    /**
-     * Move local packages using the package.json config.
-     */
-    private _moveLocal(basePath: string, data: any, name: string): void {
-      let destDir = path.join(this._outPath, 'node_modules', data.name);
-      if (basePath === this._rootPath) {
-        destDir = this._outPath;
+      // Handle the dependencies.
+      for (let dep in data.dependencies) {
+        this._handlePackage(this._findPackage(basePath, dep));
       }
-      fs.ensureDirSync(destDir);
-      let seen = new Set();
-      let seenDir = new Set();
-      data.files = data.files || [];
-      data.files.forEach((pattern: string) => {
-        let files = glob.sync(pattern, { cwd: basePath });
-        // Move these files.
-        files.forEach((fname: string) => {
-          let source = path.join(basePath, fname);
-          if (seen.has(source)) {
-            return;
-          }
-          seen.add(source);
-          let target = path.join(destDir, fname);
-          let targetDir = path.dirname(target);
-          if (!seenDir.has(targetDir)) {
-              fs.ensureDirSync(targetDir);
-          }
-          seenDir.add(targetDir);
-          fs.copySync(source, path.join(destDir, fname));
-        });
-      });
-      // Make sure we have the main entry point.
-      if (data.main) {
-        let source = path.join(basePath, data.main);
-        if (!seen.has(source)) {
-          let target = path.join(destDir, data.main);
-          fs.ensureDirSync(path.dirname(target));
-          fs.copySync(source, path.join(destDir, data.main));
-        }
-      }
-      let packagePath = path.join(destDir, 'package.json');
-      fs.writeFileSync(packagePath, JSON.stringify(data, null, 2) + '\n');
     }
-
 
     /**
      * Move packages from npm.
      */
     private _movePackage(basePath: string, data: any, name: string): void {
       // Pull in the whole package except its node modules.
-      function fileFilter(source: string): boolean {
-        let localRel = path.relative(basePath, source);
-        return localRel.split(path.sep)[0] !== 'node_modules';
+      function fileFilter(entry: any): boolean {
+        return entry.basename !== 'node_modules';
       }
 
-      let parts = basePath.split(path.sep);
-      let index = parts.indexOf('node_modules');
-      let relPath = parts.slice(index).join(path.sep);
-      let dirDest = path.join(this._outPath, relPath);
-      fs.ensureDirSync(dirDest);
-      fs.copySync(basePath, dirDest, { filter: fileFilter });
+      let destDir = path.join(this._outPath, data.name, data.version);
+      fs.ensureDirSync(path.join(destDir, 'package'));
+      let tarFile = path.join(destDir, 'package.tgz');
+      let options = {
+        noProprietary: true,
+        filter: fileFilter,
+        fromBase: true
+      };
+      let pack = (require('tar-pack') as any).pack;
+      pack(basePath, options)
+         .pipe(fs.createWriteStream(tarFile));
+
+      let packageFile = path.join(destDir, 'package', 'package.json');
+      fs.writeFileSync(packageFile, JSON.stringify(data, null, 2) + '\n');
     }
 
     /**
@@ -185,7 +141,7 @@ namespace Private {
       }
     }
 
-    private _packages = new Map();
+    private _packages = new Set();
     private _rootPath: string;
     private _outPath: string;
   }
