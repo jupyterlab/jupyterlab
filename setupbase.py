@@ -64,7 +64,8 @@ def find_package_data():
     Find package_data.
     """
     return {
-        'jupyterlab': ['build/*', 'lab.html']
+        'jupyterlab': ['build/*', 'lab.html', 'node_modules/*',
+                       'default_extensions/*']
     }
 
 
@@ -109,6 +110,8 @@ class NPM(Command):
     targets = [
         os.path.join(here, 'jupyterlab', 'build', 'build', 'main.css'),
         os.path.join(here, 'jupyterlab', 'build', 'build', 'main.bundle.js'),
+        os.path.join(here, 'jupyterlab', 'node_modules', 'webpack', 'package.json'),
+        os.path.join(here, 'jupyterlab', 'default-extensions', 'package.json')
     ]
 
     def initialize_options(self):
