@@ -10,6 +10,7 @@
   "main": "lib/index.js",
   "dependencies": {
     "@jupyterlab/about-extension": "^0.2.0",
+    "@jupyterlab/application": "^0.2.0",
     "@jupyterlab/application-extension": "^0.2.0",
     "@jupyterlab/apputils-extension": "^0.2.0",
     "@jupyterlab/codemirror-extension": "^0.2.0",
