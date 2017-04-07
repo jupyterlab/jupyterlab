@@ -489,7 +489,13 @@ class ModelDB implements IModelDB {
   }
 
   /**
-   * Set a value at a path.
+   * Set a value at a path. Not intended to
+   * be called by user code, instead use the
+   * `create*` factory methods.
+   *
+   * @param path: the path to set the value at.
+   *
+   * @param value: the value to set at the path.
    */
   set(path: string, value: IObservable): void {
     this._db.set(this._resolvePath(path), value);
