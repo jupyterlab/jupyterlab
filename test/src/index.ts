@@ -3,7 +3,6 @@
 
 import '@phosphor/widgets/style/index.css';
 
-import './application/loader.spec';
 import './application/shell.spec';
 
 import './apputils/clientsession.spec';
