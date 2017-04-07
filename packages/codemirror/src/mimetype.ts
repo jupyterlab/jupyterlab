@@ -9,7 +9,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  nbformat
+  nbformat, path as PathExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -51,7 +51,7 @@ class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
    * If a mime type cannot be found returns the defaul mime type `text/plain`, never `null`.
    */
   getMimeTypeByFilePath(path: string): string {
-    if (path.split('.').slice(-1)[0] === 'ipy') {
+    if (PathExt.extname === 'ipy') {
       return 'text/x-python';
     }
     const mode = CodeMirror.findModeByFileName(path);
