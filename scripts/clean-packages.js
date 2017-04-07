@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-var fs = require('fs');
+var fs = require('fs-extra');
 var path = require('path');
 var glob = require('glob');
 var childProcess = require('child_process');
@@ -37,8 +37,7 @@ for (var i = 0; i < packageConfig.length; i++) {
  */
 function handlePackage(packagePath) {
   // Read in the package.json.
-  var packagePath = path.join(packagePath, 'package.json');
-  var package = require(packagePath);
+  var package = require(path.join(packagePath, 'package.json'));
   if (!package.scripts || !package.scripts.clean) {
     return;
   }
