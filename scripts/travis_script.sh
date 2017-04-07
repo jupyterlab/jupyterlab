@@ -34,7 +34,7 @@ if [[ $GROUP == tests ]]; then
 
     # Make sure we have CSS that can be converted with postcss
     npm install -g postcss-cli
-    postcss jupyterlab/build/*.css > /dev/null
+    postcss jupyterlab/build/build/*.css > /dev/null
 fi
 
 
