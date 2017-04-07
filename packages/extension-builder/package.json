@@ -25,11 +25,11 @@
   },
   "scripts": {
     "build": "tsc",
-    "build:test": "tsc --project test",
+    "build:test": "tsc --project test && cd test && node copy-manifest",
     "clean": "rimraf lib",
-    "test:coverage": "istanbul cover --dir test/coverage _mocha -- --timeout=10000 test/build/**/**.spec.js",
-    "test:debug": "mocha --timeout=10000 test/build/**/**.spec.js --debug-brk",
-    "test": "mocha --timeout=10000 test/build/**/**.spec.js",
+    "test:coverage": "istanbul cover --dir test/coverage _mocha -- --timeout=10000 test/build/index.js",
+    "test:debug": "mocha --timeout=10000 test/build/index.js --debug-brk",
+    "test": "mocha --timeout=10000 test/build/index.js",
     "watch": "tsc -w"
   },
   "repository": {

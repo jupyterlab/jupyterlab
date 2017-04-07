@@ -1,11 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+var fs = require('fs-extra');
 
-describe('JupyterLabPlugin', () => {
+fs.copySync('./src/package.json', './build/package.json')
 
-  it('should pass', () => {
-
-  });
-
-});
