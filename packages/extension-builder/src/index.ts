@@ -54,13 +54,27 @@ namespace Private {
     constructor(options: build.IOptions) {
       this._rootPath = path.resolve(options.rootPath || '.');
       this._outPath = path.resolve(options.outPath || './build');
+      this._tempDir = path.join(this._outPath, 'temp');
       this._validateEntry();
+
+      // Find the cache dir.
+      let childProcess = (require('child_process') as any);
+      this._cacheDir = childProcess.execSync('npm config get cache',
+        { encoding: 'utf8' }
+      ).trim();
 
       fs.removeSync(this._outPath);
       fs.ensureDirSync(this._outPath);
+      fs.ensureDirSync(this._tempDir);
 
       // Handle the packages starting at the root.
       this._handlePackage(this._rootPath);
+
+      // Create the entry point file.
+      this._createEntry();
+
+      // Remove the temp dir.
+      fs.removeSync(this._tempDir);
     }
 
     /**
@@ -91,7 +105,18 @@ namespace Private {
         return;
       }
       this._packages.add(name);
-      this._movePackage(basePath, data, name);
+
+      // If it is a remote package, attempt to get it from the cache.
+      if (data.dist) {
+        let cacheDir = path.join(this._cacheDir, data.name, data.version);
+        if (fs.existsSync(cacheDir)) {
+          this._moveCached(cacheDir, data);
+        } else {
+          this._moveDist(basePath, data, name);
+        }
+      } else {
+        this._moveLocal(basePath, data, name);
+      }
 
       // Handle the dependencies.
       for (let dep in data.dependencies) {
@@ -100,28 +125,94 @@ namespace Private {
     }
 
     /**
-     * Move packages from npm.
+     * Move a cached package to our store.
      */
-    private _movePackage(basePath: string, data: any, name: string): void {
-      // Pull in the whole package except its node modules.
-      function fileFilter(entry: any): boolean {
-        return entry.basename !== 'node_modules';
-      }
+    private _moveCached(cacheDir: string, data: any): void {
+      let destDir = path.join(this._outPath, 'cache', data.name, data.version);
+      fs.ensureDirSync(destDir);
+      fs.copySync(cacheDir, destDir);
+    }
 
-      let destDir = path.join(this._outPath, data.name, data.version);
+    /**
+     * Move a remote package that was not in our cache.
+     */
+    private _moveDist(basePath: string, data: any, name: string): void {
+      // Move to a staging directory - remove node_modules.
+      // TODO
+
+      // Cleanse the data and write
+      // TODO - remove underscore keys and dist.
+      let packageFile = path.join(destDir, 'package', 'package.json');
+      fs.writeFileSync(packageFile, JSON.stringify(data, null, 2) + '\n');
+
+      // Create the cache files.
+      this._createCache(stageDir, data);
+    }
+
+    /**
+     * Move a local package.
+     */
+    private _moveLocal(basePath: string, data: any, name: string): void {
+      // Stream to the staging directory.
+      let FN = require('fstream-npm') as any;
+      // TODO
+      // https://github.com/npm/fstream-npm
+
+      // Create the cache files.
+      this._createCache(stageDir, data);
+    }
+
+    /**
+     * Create the cache data from a staging directory.
+     */
+    private _createCache(stageDir: string, data: any): void {
+      // Ensure directories.
+      let destDir = path.join(this._outPath, 'cache', data.name, data.version);
       fs.ensureDirSync(path.join(destDir, 'package'));
+
+      // Create the tarball.
       let tarFile = path.join(destDir, 'package.tgz');
       let options = {
         noProprietary: true,
-        filter: fileFilter,
         fromBase: true
       };
       let pack = (require('tar-pack') as any).pack;
       pack(basePath, options)
          .pipe(fs.createWriteStream(tarFile));
 
+      // Create the package.json
       let packageFile = path.join(destDir, 'package', 'package.json');
       fs.writeFileSync(packageFile, JSON.stringify(data, null, 2) + '\n');
+    }
+
+
+    /**
+     * Create the entry point file.
+     */
+    private _createEntry() {
+      let data = require(path.join(this._rootPath, 'package.json'));
+      // Scoped packages get special treatment.
+      let name = data.name;
+      if (name[0] === '@') {
+        name = name.substr(1).replace(/\//g, '-');
+      }
+      let tarFile = name + '-' + data.version + '.tgz';
+
+      // Create a `package` dir and pull the staged file contents.
+      let packageDir = path.join(this._outPath, 'package');
+      fs.ensureDirSync(packageDir);
+      let sourcePath = path.join(
+        this._outPath, 'cache', data.name, data.version
+      );
+      fs.copySync(sourcePath, packageDir);
+
+      // Create the tarball from that dir.
+      let pack = (require('tar-pack') as any).pack;
+      pack(packageDir, options)
+         .pipe(fs.createWriteStream(tarFile));
+
+      // Remove the temp dir.
+      fs.removeSync(packageDir);
     }
 
     /**
@@ -142,7 +233,9 @@ namespace Private {
     }
 
     private _packages = new Set();
+    private _tempDir: string;
     private _rootPath: string;
     private _outPath: string;
+    private _cacheDir: string;
   }
 }
