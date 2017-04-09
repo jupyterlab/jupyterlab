@@ -38,9 +38,14 @@ import {
 } from './model';
 
 import {
-  FILE_BROWSER_CLASS, showErrorMessage
+  showErrorMessage
 } from './utils';
 
+
+/**
+ * The class name added to file browsers.
+ */
+const FILE_BROWSER_CLASS = 'jp-FileBrowser';
 
 /**
  * The class name added to the filebrowser crumbs node.
