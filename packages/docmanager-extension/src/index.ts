@@ -121,20 +121,20 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
 
   commands.addCommand(CommandIDs.newUntitled, {
     execute: args => {
-      const errorMessage = args.error as string || 'Error';
+      const errorTitle = args['error'] as string || 'Error';
       let options: Partial<Contents.ICreateOptions> = {
-        type: args.type as Contents.ContentType,
-        path: args.path as string
+        type: args['type'] as Contents.ContentType,
+        path: args['path'] as string
       };
 
-      if (args.type === 'file') {
-        options.ext = args.ext as string || '.txt';
+      if (args['type'] === 'file') {
+        options.ext = args['ext'] as string || '.txt';
       }
 
       return docManager.services.contents.newUntitled(options)
-        .catch(error => showErrorMessage(errorMessage, error));
+        .catch(error => showErrorMessage(errorTitle, error));
     },
-    label: args => (args.label as string) || `New ${args.type as string}`
+    label: args => args['label'] as string || `New ${args['type'] as string}`
   });
 
   commands.addCommand(CommandIDs.restoreCheckpoint, {

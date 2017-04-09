@@ -7,12 +7,6 @@ import {
 
 
 /**
- * The class name added to FileBrowser instances.
- */
-export
-const FILE_BROWSER_CLASS = 'jp-FileBrowser';
-
-/**
  * The class name added to drop targets.
  */
 export
