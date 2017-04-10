@@ -12,8 +12,9 @@ import * as path
  * @param options - The options used to build the extension asset tree.
  */
 export
-function build(options: build.IOptions): void {
-  new Private.Builder(options);
+function build(options: build.IOptions): Promise<void> {
+  let builder = new Private.Builder(options);
+  return builder.build();
 }
 
 
@@ -55,7 +56,13 @@ namespace Private {
       this._rootPath = path.resolve(options.rootPath || '.');
       this._outPath = path.resolve(options.outPath || './build');
       this._tempDir = path.join(this._outPath, 'temp');
-      this._validateEntry();
+    }
+
+    /**
+     * Build the files.
+     */
+    build(): Promise<void> {
+      this._validateEntry(this._rootPath);
 
       // Find the cache dir.
       let childProcess = (require('child_process') as any);
@@ -68,28 +75,28 @@ namespace Private {
       fs.ensureDirSync(this._tempDir);
 
       // Handle the packages starting at the root.
-      this._handlePackage(this._rootPath);
-
-      // Create the entry point file.
-      this._createEntry();
-
-      // Remove the temp dir.
-      fs.removeSync(this._tempDir);
+      return this._handlePackage(this._rootPath).then(() => {
+        // Create the entry point file.
+        return this._createEntry();
+      }).then(() => {
+        // Remove the temp dir.
+        fs.removeSync(this._tempDir);
+      });
     }
 
     /**
      * Validate the entry point of the extension.
      */
-    private _validateEntry(): void {
-      let packagePath = path.join(this._rootPath, 'package.json');
+    private _validateEntry(basePath: string): void {
+      let packagePath = path.join(basePath, 'package.json');
       if (!fs.existsSync(packagePath)) {
-        throw Error('Requires a package.json file in the root path');
+        throw Error(`Missing package.json file in package: ${basePath}`);
       }
       let data = require(packagePath);
       if (!data.main) {
         throw Error('Must specify a "main" entry point in package.json');
       }
-      let mainPath = path.join(this._rootPath, data.main);
+      let mainPath = path.join(basePath, data.main);
       if (!fs.existsSync(mainPath)) {
         throw Error('Main entry point not found, perhaps unbuilt?');
       }
@@ -98,13 +105,21 @@ namespace Private {
     /**
      * Handle the package and its dependencies, recursively.
      */
-    private _handlePackage(basePath: string): void {
+    private _handlePackage(basePath: string): Promise<void> {
       let data = require(path.join(basePath, 'package.json'));
-      let name = data.name + '@' + data.version;
+      let name = this._getPackageName(data);
+
       if (this._packages.has(name)) {
-        return;
+        return Promise.resolve(void 0);
       }
       this._packages.add(name);
+
+      let promises: Promise<void>[] = [];
+
+      // // Handle the dependencies.
+      for (let dep in data.dependencies) {
+        promises.push(this._handlePackage(this._findPackage(basePath, dep)));
+      }
 
       // If it is a remote package, attempt to get it from the cache.
       if (data.dist) {
@@ -112,16 +127,12 @@ namespace Private {
         if (fs.existsSync(cacheDir)) {
           this._moveCached(cacheDir, data);
         } else {
-          this._moveDist(basePath, data, name);
+          promises.push();
         }
       } else {
-        this._moveLocal(basePath, data, name);
+        promises.push(this._moveLocal(basePath, data, name));
       }
-
-      // Handle the dependencies.
-      for (let dep in data.dependencies) {
-        this._handlePackage(this._findPackage(basePath, dep));
-      }
+      return Promise.all(promises).then(() => { /* no-op */ });
     }
 
     /**
@@ -134,41 +145,54 @@ namespace Private {
     }
 
     /**
-     * Move a remote package that was not in our cache.
-     */
-    private _moveDist(basePath: string, data: any, name: string): void {
-      // Move to a staging directory - remove node_modules.
-      // TODO
-
-      // Cleanse the data and write
-      // TODO - remove underscore keys and dist.
-      let packageFile = path.join(destDir, 'package', 'package.json');
-      fs.writeFileSync(packageFile, JSON.stringify(data, null, 2) + '\n');
-
-      // Create the cache files.
-      this._createCache(stageDir, data);
-    }
-
-    /**
      * Move a local package.
      */
-    private _moveLocal(basePath: string, data: any, name: string): void {
-      // Stream to the staging directory.
+    private _moveLocal(basePath: string, data: any, name: string): Promise<void> {
+      // Stream to the staging directory and cache.
       let FN = require('fstream-npm') as any;
-      // TODO
-      // https://github.com/npm/fstream-npm
+      let fstream = require('fstream') as any;
+      this._validateEntry(basePath);
+      let stageDir = path.join(this._tempDir, name);
+      fs.ensureDirSync(stageDir);
 
-      // Create the cache files.
-      this._createCache(stageDir, data);
+      let target = new fstream.DirWriter({
+        Directory: true, type: 'Directory', path: stageDir
+      });
+
+      return new Promise<void>((resolve, reject) => {
+        FN({ path: basePath })
+          .on('error', (err: any) => reject(err))
+          .pipe(target)
+          .on('end', () => {
+            this._createCache(stageDir, data).then(() => {
+              resolve();
+            });
+          });
+      });
     }
 
     /**
      * Create the cache data from a staging directory.
      */
-    private _createCache(stageDir: string, data: any): void {
+    private _createCache(stageDir: string, data: any): Promise<void> {
       // Ensure directories.
       let destDir = path.join(this._outPath, 'cache', data.name, data.version);
       fs.ensureDirSync(path.join(destDir, 'package'));
+
+      // Remove extra keys from data.
+      let keys = Object.keys(data);
+      for (let key of keys) {
+        if (key[0] === '_' || key === 'dist') {
+          delete data[key];
+        }
+      }
+      // Overwrite the package.json
+      let packageFile = path.join(stageDir, 'package.json');
+      fs.writeFileSync(packageFile, JSON.stringify(data, null, 2) + '\n');
+
+      // Create the package.json in the new folder.
+      packageFile = path.join(destDir, 'package', 'package.json');
+      fs.writeFileSync(packageFile, JSON.stringify(data, null, 2) + '\n');
 
       // Create the tarball.
       let tarFile = path.join(destDir, 'package.tgz');
@@ -177,42 +201,57 @@ namespace Private {
         fromBase: true
       };
       let pack = (require('tar-pack') as any).pack;
-      pack(basePath, options)
-         .pipe(fs.createWriteStream(tarFile));
 
-      // Create the package.json
-      let packageFile = path.join(destDir, 'package', 'package.json');
-      fs.writeFileSync(packageFile, JSON.stringify(data, null, 2) + '\n');
+      return new Promise<void>((resolve, reject) => {
+        pack(stageDir, options)
+           .pipe(fs.createWriteStream(tarFile))
+           .on('error', (err: any) => reject(err))
+           .on('close', () => {
+            resolve();
+           });
+      });
     }
 
-
     /**
-     * Create the entry point file.
+     * Get path-friendly name of package.
      */
-    private _createEntry() {
-      let data = require(path.join(this._rootPath, 'package.json'));
-      // Scoped packages get special treatment.
+    private _getPackageName(data: any): string {
       let name = data.name;
       if (name[0] === '@') {
         name = name.substr(1).replace(/\//g, '-');
       }
-      let tarFile = name + '-' + data.version + '.tgz';
+      return name + '-' + data.version;
+    }
+
+    /**
+     * Create the entry point file.
+     */
+    private _createEntry(): Promise<void> {
+      let data = require(path.join(this._rootPath, 'package.json'));
+      let name = this._getPackageName(data);
+      let tarFile = path.join(this._outPath, name + '.tgz');
 
       // Create a `package` dir and pull the staged file contents.
       let packageDir = path.join(this._outPath, 'package');
       fs.ensureDirSync(packageDir);
-      let sourcePath = path.join(
-        this._outPath, 'cache', data.name, data.version
-      );
+      let sourcePath = path.join(this._tempDir, name);
       fs.copySync(sourcePath, packageDir);
 
       // Create the tarball from that dir.
       let pack = (require('tar-pack') as any).pack;
-      pack(packageDir, options)
-         .pipe(fs.createWriteStream(tarFile));
-
-      // Remove the temp dir.
-      fs.removeSync(packageDir);
+      let options = {
+        noProprietary: true
+      };
+      return new Promise<void>((resolve, reject) => {
+        pack(packageDir, options)
+         .on('error', (err: any) => reject(err))
+         .pipe(fs.createWriteStream(tarFile))
+         .on('close', () => {
+            // Remove the temp dir.
+            fs.removeSync(packageDir);
+            resolve();
+          });
+      });
     }
 
     /**
