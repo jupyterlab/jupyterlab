@@ -490,13 +490,6 @@ def validate_labextension_folder(name, full_dest, logger=None):
         warnings.append(msg.format(RED_X))
         return warnings
 
-    parts = data.get('main', '').split('/')
-    main = os.sep.join(parts)
-    if not os.path.exists(os.path.join(full_dest, main)):
-        msg = indent + "{} Entry point file not found"
-        warnings.append(msg.format(RED_X))
-        return warnings
-
     return []
 
 

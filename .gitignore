@@ -3,6 +3,7 @@ build
 dist
 lib
 jupyterlab/default-extensions
+jupyterlab/npm_cache
 
 node_modules
 .cache

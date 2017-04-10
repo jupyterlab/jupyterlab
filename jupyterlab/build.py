@@ -93,7 +93,7 @@ class LabBuilder(JupyterApp):
         except OSError:
             pass
         copy_tree(pjoin(HERE, 'npm_cache'), cache)
-        copy_tree(pjoin(HERE, 'default-extensions'), cache)
+        copy_tree(pjoin(HERE, 'default-extensions'), target)
         for item in os.listdir(pjoin(HERE, 'src')):
             shutil.copy2(pjoin(HERE, 'src', item), target)
         shutil.copy2(pjoin(HERE, '.npmrc'), target)
@@ -114,7 +114,10 @@ class LabBuilder(JupyterApp):
 
         # Copy the labextension folders
         for value in extensions.values():
-            copy_tree(value['jupyter']['labextension_path'], cache)
+            # TODO
+            # Copy the tar file and the npm cache only
+            # Add the tar file name to the templated package.json
+            copy_tree(value['jupyter']['labextension_path'], target)
 
         # Run finish-build
         # check_call(['npm', 'install'], cwd=target)

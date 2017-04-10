@@ -8,6 +8,7 @@ fs.removeSync('./default-extensions');
 childProcess.execSync('npm run build', { cwd: path.resolve('../packages/all-packages') });
 
 var build = require('../packages/extension-builder').build
+debugger;
 build({
     rootPath: '../packages/default-extensions',
     outPath: './default-extensions'
