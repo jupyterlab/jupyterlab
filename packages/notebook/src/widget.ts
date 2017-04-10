@@ -313,7 +313,7 @@ class StaticNotebook extends Widget {
    *
    * The default implementation is a no-op
    */
-  protected onCellRemoved(cell: BaseCellWidget): void {
+  protected onCellRemoved(index: number, cell: BaseCellWidget): void {
     // This is a no-op.
   }
 
@@ -449,7 +449,7 @@ class StaticNotebook extends Widget {
     let layout = this.layout as PanelLayout;
     let widget = layout.widgets[index] as BaseCellWidget;
     widget.parent = null;
-    this.onCellRemoved(widget);
+    this.onCellRemoved(index, widget);
     widget.dispose();
   }
 
@@ -1028,8 +1028,10 @@ class Notebook extends StaticNotebook {
       });
     }
     cell.editor.edgeRequested.connect(this._onEdgeRequest, this);
-    // Trigger an update of the active cell.
-    this.activeCellIndex = this.activeCellIndex;
+    // If the insertion happened above, increment the active cell
+    // index, otherwise it stays the same.
+    this.activeCellIndex = index <= this.activeCellIndex ?
+      this.activeCellIndex + 1 : this.activeCellIndex ;
   }
 
   /**
@@ -1044,9 +1046,11 @@ class Notebook extends StaticNotebook {
   /**
    * Handle a cell being removed.
    */
-  protected onCellRemoved(cell: BaseCellWidget): void {
-    // Trigger an update of the active cell.
-    this.activeCellIndex = this.activeCellIndex;
+  protected onCellRemoved(index:number, cell: BaseCellWidget): void {
+    // If the removal happened above, decrement the active
+    // cell index, otherwise it stays the same.
+    this.activeCellIndex = index < this.activeCellIndex ?
+      this.activeCellIndex - 1 : this.activeCellIndex ;
     if (this.isSelected(cell)) {
       this._selectionChanged.emit(void 0);
     }
