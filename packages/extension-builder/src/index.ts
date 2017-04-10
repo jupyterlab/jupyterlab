@@ -62,7 +62,7 @@ namespace Private {
      * Build the files.
      */
     build(): Promise<void> {
-      this._validateEntry(this._rootPath);
+      this._validateEntry();
 
       // Find the cache dir.
       let childProcess = (require('child_process') as any);
@@ -87,18 +87,18 @@ namespace Private {
     /**
      * Validate the entry point of the extension.
      */
-    private _validateEntry(basePath: string): void {
-      let packagePath = path.join(basePath, 'package.json');
+    private _validateEntry(): void {
+      let packagePath = path.join(this._rootPath, 'package.json');
       if (!fs.existsSync(packagePath)) {
-        throw Error(`Missing package.json file in package: ${basePath}`);
+        throw Error('Missing package.json file in entry point');
       }
       let data = require(packagePath);
       if (!data.main) {
-        throw Error('Must specify a "main" entry point in package.json');
+        throw Error('Missing "main" entry point in package.json');
       }
-      let mainPath = path.join(basePath, data.main);
+      let mainPath = path.join(this._rootPath, data.main);
       if (!fs.existsSync(mainPath)) {
-        throw Error('Main entry point not found, perhaps unbuilt?');
+        throw Error('Missing entry point, perhaps not built');
       }
     }
 
@@ -139,7 +139,9 @@ namespace Private {
      * Move a cached package to our store.
      */
     private _moveCached(cacheDir: string, data: any): void {
-      let destDir = path.join(this._outPath, 'cache', data.name, data.version);
+      let destDir = path.join(
+        this._outPath, 'npm_cache', data.name, data.version
+      );
       fs.ensureDirSync(destDir);
       fs.copySync(cacheDir, destDir);
     }
@@ -151,7 +153,6 @@ namespace Private {
       // Stream to the staging directory and cache.
       let FN = require('fstream-npm') as any;
       let fstream = require('fstream') as any;
-      this._validateEntry(basePath);
       let stageDir = path.join(this._tempDir, name);
       fs.ensureDirSync(stageDir);
 
@@ -176,7 +177,9 @@ namespace Private {
      */
     private _createCache(stageDir: string, data: any): Promise<void> {
       // Ensure directories.
-      let destDir = path.join(this._outPath, 'cache', data.name, data.version);
+      let destDir = path.join(
+        this._outPath, 'npm_cache', data.name, data.version
+      );
       fs.ensureDirSync(path.join(destDir, 'package'));
 
       // Remove extra keys from data.
@@ -230,6 +233,10 @@ namespace Private {
       let data = require(path.join(this._rootPath, 'package.json'));
       let name = this._getPackageName(data);
       let tarFile = path.join(this._outPath, name + '.tgz');
+
+      // Add the package.json to the top level folder.
+      let packageFile = path.join(this._outPath, 'package.json');
+      fs.writeFileSync(packageFile, JSON.stringify(data, null, 2) + '\n');
 
       // Create a `package` dir and pull the staged file contents.
       let packageDir = path.join(this._outPath, 'package');
