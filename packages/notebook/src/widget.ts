@@ -356,8 +356,11 @@ class StaticNotebook extends Widget {
       // TODO: reuse existing widgets if possible.
       index = args.newIndex;
       each(args.newValues, value => {
-        this._removeCell(index);
+        // Note: this ordering (insert then remove)
+        // is important for getting the active cell
+        // index for the editable notebook correct.
         this._insertCell(index, value);
+        this._removeCell(index+1);
         index++;
       });
       break;
@@ -1001,10 +1004,10 @@ class Notebook extends StaticNotebook {
   /**
    * Handle a cell being removed.
    */
-  protected onCellRemoved(index:number, cell: BaseCellWidget): void {
+  protected onCellRemoved(index: number, cell: BaseCellWidget): void {
     // If the removal happened above, decrement the active
     // cell index, otherwise it stays the same.
-    this.activeCellIndex = index < this.activeCellIndex ?
+    this.activeCellIndex = index <= this.activeCellIndex ?
       this.activeCellIndex - 1 : this.activeCellIndex ;
     if (this.isSelected(cell)) {
       this._selectionChanged.emit(void 0);
