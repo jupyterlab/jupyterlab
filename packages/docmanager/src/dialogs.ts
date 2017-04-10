@@ -6,7 +6,11 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  Contents, Kernel
+  PathExt
+} from '@jupyterlab/coreutils';
+
+import {
+  Contents, IServiceManager, Kernel
 } from '@jupyterlab/services';
 
 import {
@@ -42,6 +46,11 @@ interface IFileContainer {
    * Returns an iterator over the container's items.
    */
   items(): IIterator<Contents.IModel>;
+
+  /**
+   * The current working directory of the file container.
+   */
+  path: string;
 }
 
 
@@ -55,6 +64,48 @@ function createFromDialog(container: IFileContainer, manager: DocumentManager, c
     return handler.populate();
   }).then(() => {
     return handler.showDialog();
+  });
+}
+
+
+/**
+ * Create a new untitled file.
+ */
+export
+function newUntitled(manager: DocumentManager, options: Contents.ICreateOptions): Promise<Contents.IModel> {
+  if (options.type === 'file') {
+    options.ext = options.ext || '.txt';
+  }
+
+  return manager.services.contents.newUntitled(options);
+}
+
+
+/**
+ * Rename a file with optional dialog.
+ */
+export
+function renameFile(manager: DocumentManager, container: IFileContainer, oldPath: string, newPath: string): Promise<Contents.IModel> {
+  const rename = Private.rename(manager.services, container, oldPath, newPath);
+  return rename.catch(error => {
+    if (error.xhr) {
+      error.message = `${error.xhr.statusText} ${error.xhr.status}`;
+    }
+    let overwriteBtn = Dialog.warnButton({ label: 'OVERWRITE' });
+    if (error.message.indexOf('409') !== -1) {
+      let options = {
+        title: 'Overwrite file?',
+        body: `"${newPath}" already exists, overwrite?`,
+        buttons: [Dialog.cancelButton(), overwriteBtn]
+      };
+      return showDialog(options).then(button => {
+        if (button.accept) {
+          return model.overwrite(oldPath, newPath);
+        }
+      });
+    } else {
+      throw error;
+    }
   });
 }
 
@@ -145,7 +196,7 @@ class CreateFromHandler extends Widget {
           return widget;
         });
       }
-      this._model.deleteFile('/' + this._orig.path);
+      // this._model.deleteFile('/' + this._orig.path);
       return null;
     });
   }
@@ -154,7 +205,7 @@ class CreateFromHandler extends Widget {
    * Populate the create from widget.
    */
   populate(): Promise<void> {
-    let model = this._model;
+    let container = this._container;
     let manager = this._manager;
     let registry = manager.registry;
     let creator = registry.getCreator(this._creatorName);
@@ -189,7 +240,8 @@ class CreateFromHandler extends Widget {
       });
     }
 
-    return model.newUntitled({ ext, type }).then(contents => {
+    let path = container.path;
+    return newUntitled(manager, { ext, path, type }).then(contents => {
       let value = this.inputNode.value = contents.name;
       this.inputNode.setSelectionRange(0, value.length - ext.length);
       this._orig = contents;
@@ -250,5 +302,27 @@ namespace Private {
     body.appendChild(kernelTitle);
     body.appendChild(kernelDropdownNode);
     return body;
+  }
+
+  /**
+   * Rename a file or directory.
+   *
+   * @param path - The path to the original file.
+   *
+   * @param newPath - The path to the new file.
+   *
+   * @returns A promise containing the new file contents model.  The promise
+   *   will reject if the newPath already exists.  Use [[overwrite]] to
+   *   overwrite a file.
+   */
+  export
+  function rename(manager: IServiceManager, container: IFileContainer, path: string, newPath: string): Promise<Contents.IModel> {
+    const base = container.path;
+
+    // Normalize paths.
+    path = PathExt.resolve(base, path);
+    newPath = PathExt.resolve(base, newPath);
+
+    return manager.contents.rename(path, newPath);
   }
 }
