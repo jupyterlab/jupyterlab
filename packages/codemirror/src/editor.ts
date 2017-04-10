@@ -106,7 +106,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       }
     });
     CodeMirror.on(editor, 'cursorActivity', () => this._onCursorActivity());
-    CodeMirror.on(editor.getDoc(), 'change', (instance, change) => {
+    CodeMirror.on(editor.getDoc(), 'beforeChange', (instance, change) => {
       this._onDocChanged(instance, change);
     });
   }
@@ -633,11 +633,11 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     this._changeGuard = true;
     let value = this._model.value;
     let start = doc.indexFromPos(change.from);
+    let end = doc.indexFromPos(change.to);
     let inserted = change.text.join('\n');
-    let removed = change.removed.join('\n');
 
-    if (removed) {
-      value.remove(start, start + removed.length);
+    if (end-start) {
+      value.remove(start, end);
     }
     if (inserted) {
       value.insert(start, inserted);
