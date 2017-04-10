@@ -82,34 +82,6 @@ function createNewDialog(model: FileBrowserModel, manager: DocumentManager, host
 
 
 /**
- * Rename a file with optional dialog.
- */
-export
-function renameFile(model: FileBrowserModel, oldPath: string, newPath: string): Promise<Contents.IModel> {
-  return model.rename(oldPath, newPath).catch(error => {
-    if (error.xhr) {
-      error.message = `${error.xhr.statusText} ${error.xhr.status}`;
-    }
-    let overwriteBtn = Dialog.warnButton({ label: 'OVERWRITE' });
-    if (error.message.indexOf('409') !== -1) {
-      let options = {
-        title: 'Overwrite file?',
-        body: `"${newPath}" already exists, overwrite?`,
-        buttons: [Dialog.cancelButton(), overwriteBtn]
-      };
-      return showDialog(options).then(button => {
-        if (button.accept) {
-          return model.overwrite(oldPath, newPath);
-        }
-      });
-    } else {
-      throw error;
-    }
-  });
-}
-
-
-/**
  * A widget used to open files with a specific widget/kernel.
  */
 class OpenWithHandler extends Widget {
