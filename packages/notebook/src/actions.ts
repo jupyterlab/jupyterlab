@@ -120,7 +120,6 @@ namespace NotebookActions {
     let cells = model.cells;
     let primary = widget.activeCell;
     let index = widget.activeCellIndex;
-    let offset = 0;
 
     // Get the cells to merge.
     each(widget.widgets, (child, i) => {
@@ -128,9 +127,6 @@ namespace NotebookActions {
         toMerge.push(child.model.value.text);
         if (i !== index) {
           toDelete.push(child.model);
-          if (i < index) {
-            offset += 1;
-          }
         }
       }
     });
@@ -171,7 +167,6 @@ namespace NotebookActions {
       cell.rendered = false;
     }
 
-    widget.activeCellIndex -= offset;
     Private.handleState(widget, state);
   }
 
@@ -214,7 +209,10 @@ namespace NotebookActions {
     let state = Private.getState(widget);
     let model = widget.model;
     let cell = model.contentFactory.createCodeCell({ });
-    model.cells.insert(widget.activeCellIndex, cell);
+    let index = widget.activeCellIndex;
+    model.cells.insert(index, cell);
+    // Make the newly inserted cell active.
+    widget.activeCellIndex = index;
     widget.deselectAll();
     Private.handleState(widget, state);
   }
@@ -239,6 +237,7 @@ namespace NotebookActions {
     let model = widget.model;
     let cell = model.contentFactory.createCodeCell({});
     model.cells.insert(widget.activeCellIndex + 1, cell);
+    // Make the newly inserted cell active.
     widget.activeCellIndex++;
     widget.deselectAll();
     Private.handleState(widget, state);
