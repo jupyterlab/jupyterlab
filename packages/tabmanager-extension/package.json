@@ -6,13 +6,15 @@
   "types": "lib/index.d.ts",
   "files": [
     "lib/*.d.ts",
-    "lib/*.js"
+    "lib/*.js",
+    "style/*.css"
   ],
   "directories": {
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.2.0"
+    "@jupyterlab/application": "^0.2.0",
+    "@jupyterlab/apputils": "^0.2.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
