@@ -636,7 +636,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     let end = doc.indexFromPos(change.to);
     let inserted = change.text.join('\n');
 
-    if (end-start) {
+    if (end !== start) {
       value.remove(start, end);
     }
     if (inserted) {
