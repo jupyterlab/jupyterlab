@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ArrayExt, each, find, toArray
+  ArrayExt, each, find, IIterator, iter, toArray
 } from '@phosphor/algorithm';
 
 import {
@@ -400,6 +400,24 @@ class ApplicationShell extends Widget {
     this._tracker.currentChanged.connect(this._save, this);
     this._leftHandler.sideBar.currentChanged.connect(this._save, this);
     this._rightHandler.sideBar.currentChanged.connect(this._save, this);
+  }
+
+  /**
+   * Returns the widgets for an application area.
+   */
+  widgets(area: ApplicationShell.Area): IIterator<Widget> {
+    switch (area) {
+      case 'main':
+        return this._dockPanel.widgets();
+      case 'left':
+        return iter(this._leftHandler.sideBar.titles.map(t => t.owner));
+      case 'right':
+        return iter(this._rightHandler.sideBar.titles.map(t => t.owner));
+      case 'top':
+        return this._topPanel.children();
+      default:
+        break;
+    }
   }
 
   /*
