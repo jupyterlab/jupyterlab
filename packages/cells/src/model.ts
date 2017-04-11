@@ -18,7 +18,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IObservableJSON, IModelDB
+  IObservableJSON, IModelDB, IObservableValue, ObservableValue
 } from '@jupyterlab/coreutils';
 
 import {
@@ -139,14 +139,7 @@ class CellModel extends CodeEditor.Model implements ICellModel {
     }
     trusted.set(!!cell.metadata['trusted']);
     delete cell.metadata['trusted'];
-    trusted.changed.connect((value, args) => {
-      this.onTrustedChanged(args.newValue as boolean);
-      this.stateChanged.emit({
-        name: 'trusted',
-        oldValue: args.oldValue,
-        newValue: args.newValue
-      });
-    });
+    trusted.changed.connect(this.onTrustedChanged, this);
 
     if (Array.isArray(cell.source)) {
       this.value.text = (cell.source as string[]).join('\n');
@@ -231,7 +224,7 @@ class CellModel extends CodeEditor.Model implements ICellModel {
    *
    * The default implementation is a no-op.
    */
-  onTrustedChanged(value: boolean): void { /* no-op */}
+  onTrustedChanged(trusted: IObservableValue, args: ObservableValue.IChangedArgs): void { /* no-op */ }
 
   /**
    * Handle a change to the observable value.
@@ -331,13 +324,7 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
         executionCount.set(null);
       }
     }
-    executionCount.changed.connect((value, args) => {
-      this.contentChanged.emit(void 0);
-      this.stateChanged.emit({
-        name: 'executionCount',
-        oldValue: args.oldValue,
-        newValue: args.newValue });
-    });
+    executionCount.changed.connect(this._onExecutionCountChanged, this);
 
     this._outputs = factory.createOutputArea({
       trusted,
@@ -400,9 +387,26 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
   /**
    * Handle a change to the trusted state.
    */
-  onTrustedChanged(value: boolean): void {
-    this._outputs.trusted = value;
+  onTrustedChanged(trusted: IObservableValue, args: ObservableValue.IChangedArgs): void {
+    this._outputs.trusted = args.newValue as boolean;
+    this.stateChanged.emit({
+      name: 'trusted',
+      oldValue: args.oldValue,
+      newValue: args.newValue
+    });
   }
+
+  /**
+   * Handle a change to the execution count.
+   */
+  private _onExecutionCountChanged(count: IObservableValue, args: ObservableValue.IChangedArgs): void {
+    this.contentChanged.emit(void 0);
+    this.stateChanged.emit({
+      name: 'executionCount',
+      oldValue: args.oldValue,
+      newValue: args.newValue });
+  }
+
 
   private _outputs: IOutputAreaModel = null;
 }
