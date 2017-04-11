@@ -31,6 +31,7 @@
     "@jupyterlab/running-extension": "^0.2.0",
     "@jupyterlab/services-extension": "^0.2.0",
     "@jupyterlab/shortcuts-extension": "^0.2.0",
+    "@jupyterlab/tabmanager-extension": "^0.2.0",
     "@jupyterlab/terminal-extension": "^0.2.0",
     "@jupyterlab/tooltip-extension": "^0.2.0",
     "es6-promise": "^4.1.0",
