@@ -10,6 +10,10 @@ import {
 } from '@phosphor/signaling';
 
 import {
+  utils
+} from '@jupyterlab/services';
+
+import {
   CodeEditor
 } from '@jupyterlab/codeeditor';
 
@@ -35,6 +39,11 @@ interface ICellModel extends CodeEditor.IModel {
    * The type of the cell.
    */
   readonly type: nbformat.CellType;
+
+  /**
+   * A unique identifier for the cell.
+   */
+  readonly id: string;
 
   /**
    * A signal emitted when the content of the model changes.
@@ -123,6 +132,8 @@ class CellModel extends CodeEditor.Model implements ICellModel {
   constructor(options: CellModel.IOptions) {
     super({modelDB: options.modelDB});
 
+    this._id = options.id || utils.uuid();
+
     this.value.changed.connect(this.onGenericChange, this);
 
     let cellType = this.modelDB.createValue('type');
@@ -174,6 +185,13 @@ class CellModel extends CodeEditor.Model implements ICellModel {
    * A signal emitted when a model state changes.
    */
   readonly stateChanged = new Signal<this, IChangedArgs<any>>(this);
+
+  /**
+   * The id for the cell.
+   */
+  get id(): string {
+    return this._id;
+  }
 
   /**
    * The metadata associated with the cell.
@@ -232,6 +250,8 @@ class CellModel extends CodeEditor.Model implements ICellModel {
   protected onGenericChange(): void {
     this.contentChanged.emit(void 0);
   }
+
+  private _id: string = '';
 }
 
 
@@ -257,7 +277,7 @@ namespace CellModel {
     /**
      * A unique identifier for this cell.
      */
-    uuid?: string;
+    id?: string;
   }
 }
 
