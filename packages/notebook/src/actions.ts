@@ -1109,7 +1109,7 @@ namespace Private {
       // Add a new cell if the notebook is empty. This is done
       // within the compound operation to make the deletion of
       // a notebook's last cell undoable.
-      if(!cells.length) {
+      if (!cells.length) {
         cells.pushBack(model.contentFactory.createCodeCell({}));
       }
       cells.endCompoundOperation();

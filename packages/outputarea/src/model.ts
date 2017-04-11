@@ -42,7 +42,7 @@ class OutputAreaModel implements IOutputAreaModel {
     }
     this.list.changed.connect(this._onListChanged, this);
 
-    if(options.modelDB) {
+    if (options.modelDB) {
       let changeGuard = false;
       this._modelDB = options.modelDB;
       this._serialized = this._modelDB.createValue('outputs');
@@ -52,14 +52,14 @@ class OutputAreaModel implements IOutputAreaModel {
         this._serialized.set(this.toJSON());
       }
       this._serialized.changed.connect((obs, args) => {
-        if(!changeGuard) {
+        if (!changeGuard) {
           changeGuard = true;
           this.fromJSON(args.newValue as nbformat.IOutput[]);
           changeGuard = false;
         }
       });
       this.list.changed.connect((list, args) => {
-        if(!changeGuard) {
+        if (!changeGuard) {
           changeGuard = true;
           this._serialized.set(this.toJSON());
           changeGuard = false;
