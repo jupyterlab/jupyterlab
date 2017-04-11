@@ -38,7 +38,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  ObservableVector, nbformat
+  ObservableVector, nbformat, IModelDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -872,6 +872,11 @@ namespace IOutputAreaModel {
      * If not given, a default factory will be used.
      */
     contentFactory?: IContentFactory;
+
+    /**
+     * An optional IModelDB to store the output area model.
+     */
+    modelDB?: IModelDB;
   }
 
   /**

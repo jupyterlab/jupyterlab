@@ -10,13 +10,17 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  IObservableMap, ObservableMap, IObservableVector, ObservableVector,
-  IObservableUndoableVector, ObservableUndoableVector, uuid
+  IObservableMap, ObservableMap, ObservableVector,
+  IObservableUndoableVector, IModelDB
 } from '@jupyterlab/coreutils';
 
 import {
   ICellModel
 } from '@jupyterlab/cells';
+
+import {
+  NotebookModel
+} from './model';
 
 
 /**
@@ -27,15 +31,16 @@ class CellList implements IObservableUndoableVector<ICellModel> {
   /**
    * Construct the cell list.
    */
-  constructor() {
-    this._cellOrder = new ObservableUndoableVector<string>({
-      toJSON: (val: string) => { return val; },
-      fromJSON: (val: string) => { return val; }
-    });
+  constructor(modelDB: IModelDB, factory: NotebookModel.IContentFactory) {
+    this._modelDB = modelDB;
+    this._factory = factory;
+    this._cellOrder = modelDB.createUndoableVector<string>('cellOrder');
     this._cellMap = new ObservableMap<ICellModel>();
 
     this._cellOrder.changed.connect(this._onOrderChanged, this);
   }
+
+  type: 'Vector';
 
   /**
    * A signal emitted when the cell list has changed.
@@ -204,7 +209,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    */
   set(index: number, cell: ICellModel): void {
     // Generate a new uuid for the cell.
-    let id = uuid();
+    let id = (cell as any).modelDB.basePath;
     // Set the internal data structures.
     this._cellMap.set(id, cell);
     this._cellOrder.set(index, id);
@@ -230,7 +235,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    */
   pushBack(cell: ICellModel): number {
     // Generate a new uuid for the cell.
-    let id = uuid();
+    let id = (cell as any).modelDB.basePath;
     // Set the internal data structures.
     this._cellMap.set(id, cell);
     let num = this._cellOrder.pushBack(id);
@@ -284,7 +289,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    */
   insert(index: number, cell: ICellModel): number {
     // Generate a new uuid for the cell.
-    let id = uuid();
+    let id = (cell as any).modelDB.basePath;
     // Set the internal data structures.
     this._cellMap.set(id, cell);
     let num = this._cellOrder.insert(index, id);
@@ -391,7 +396,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
     let newValues = toArray(cells);
     each(newValues, cell => {
       // Generate a new uuid for the cell.
-      let id = uuid();
+      let id = (cell as any).modelDB.basePath;
       // Set the internal data structures.
       this._cellMap.set(id, cell);
       this._cellOrder.pushBack(id);
@@ -429,7 +434,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
     let newValues = toArray(cells);
     each(newValues, cell => {
       // Generate a new uuid for the cell.
-      let id = uuid();
+      let id = (cell as any).modelDB.basePath;
       this._cellMap.set(id, cell);
       this._cellOrder.beginCompoundOperation();
       this._cellOrder.insert(index++, id);
@@ -523,7 +528,29 @@ class CellList implements IObservableUndoableVector<ICellModel> {
     this._cellOrder.clearUndo();
   }
 
-  private _onOrderChanged(order: IObservableVector<string>, change: ObservableVector.IChangedArgs<string>): void {
+  private _onOrderChanged(order: IObservableUndoableVector<string>, change: ObservableVector.IChangedArgs<string>): void {
+    if (change.type === 'add' || change.type === 'set') {
+      each(change.newValues, (id) => {
+        if (!this._cellMap.has(id)) {
+          let cellDB = this._factory.modelDB;
+          let cellType = (cellDB as any).getGoogleObject(id+'/type');
+          let cell: ICellModel;
+          switch (cellType) {
+            case 'code':
+              cell = this._factory.createCodeCell({ uuid: id});
+              break;
+            case 'markdown':
+              cell = this._factory.createMarkdownCell({ uuid: id});
+              break;
+            case 'raw':
+            default:
+              cell = this._factory.createRawCell({ uuid: id});
+              break;
+          }
+          this._cellMap.set(id, cell);
+        }
+      });
+    }
     let newValues: ICellModel[] = [];
     let oldValues: ICellModel[] = [];
     each(change.newValues, (id)=>{
@@ -545,4 +572,6 @@ class CellList implements IObservableUndoableVector<ICellModel> {
   private _cellOrder: IObservableUndoableVector<string> = null;
   private _cellMap: IObservableMap<ICellModel> = null;
   private _changed = new Signal<this, ObservableVector.IChangedArgs<ICellModel>>(this);
+  private _modelDB: IModelDB = null;
+  private _factory: NotebookModel.IContentFactory = null;
 }

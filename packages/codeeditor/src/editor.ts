@@ -14,15 +14,8 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  IChangedArgs
-} from '@jupyterlab/coreutils';
-
-import {
-  IObservableString, ObservableString
-} from '@jupyterlab/coreutils';
-
-import {
-  IObservableMap, ObservableMap
+  IModelDB, ModelDB, IObservableValue,
+  IObservableMap, IObservableString, IChangedArgs
 } from '@jupyterlab/coreutils';
 
 
@@ -40,7 +33,7 @@ namespace CodeEditor {
    * A zero-based position in the editor.
    */
   export
-  interface IPosition {
+  interface IPosition extends JSONObject {
     /**
      * The cursor line number.
      */
@@ -78,7 +71,7 @@ namespace CodeEditor {
    * A range.
    */
   export
-  interface IRange {
+  interface IRange extends JSONObject {
     /**
      * The position of the first character in the current range.
      *
@@ -102,7 +95,7 @@ namespace CodeEditor {
    * A selection style.
    */
   export
-  interface ISelectionStyle {
+  interface ISelectionStyle extends JSONObject {
     /**
      * A class name added to a selection.
      */
@@ -186,8 +179,26 @@ namespace CodeEditor {
      */
     constructor(options?: Model.IOptions) {
       options = options || {};
-      this._value = new ObservableString(options.value);
-      this._mimetype = options.mimeType || 'text/plain';
+
+      if(options.modelDB) {
+        this.modelDB = options.modelDB;
+      } else {
+        this.modelDB = new ModelDB();
+      }
+
+      let value = this.modelDB.createString('value');
+      value.text = value.text || options.value || '';
+      let mimeType = this.modelDB.createValue('mimeType');
+      mimeType.set(options.mimeType || 'text/plain');
+      this.modelDB.createMap<ITextSelection[]>('selections');
+
+      mimeType.changed.connect((val, args)=>{
+        this._mimeTypeChanged.emit({
+          name: 'mimeType',
+          oldValue: args.oldValue as string,
+          newValue: args.newValue as string
+        });
+      });
     }
 
     /**
@@ -201,33 +212,28 @@ namespace CodeEditor {
      * Get the value of the model.
      */
     get value(): IObservableString {
-      return this._value;
+      return this.modelDB.get('value') as IObservableString;
     }
 
     /**
      * Get the selections for the model.
      */
     get selections(): IObservableMap<ITextSelection[]> {
-      return this._selections;
+      return this.modelDB.get('selections') as IObservableMap<ITextSelection[]>;
     }
 
     /**
      * A mime type of the model.
      */
     get mimeType(): string {
-      return this._mimetype;
+      return (this.modelDB.get('mimeType') as IObservableValue).get() as string;
     }
     set mimeType(newValue: string) {
-      const oldValue = this._mimetype;
+      const oldValue = this.mimeType;
       if (oldValue === newValue) {
         return;
       }
-      this._mimetype = newValue;
-      this._mimeTypeChanged.emit({
-        name: 'mimeType',
-        oldValue,
-        newValue
-      });
+      (this.modelDB.get('mimeType') as IObservableValue).set(newValue);
     }
 
     /**
@@ -246,13 +252,10 @@ namespace CodeEditor {
       }
       this._isDisposed = true;
       Signal.clearData(this);
-      this._selections.dispose();
-      this._value.dispose();
     }
 
-    private _value: ObservableString;
-    private _selections = new ObservableMap<ITextSelection[]>();
-    private _mimetype: string;
+
+    protected modelDB: IModelDB = null;
     private _isDisposed = false;
     private _mimeTypeChanged = new Signal<this, IChangedArgs<string>>(this);
   }
@@ -567,6 +570,11 @@ namespace CodeEditor {
        * The mimetype of the model.
        */
       mimeType?: string;
+
+      /**
+       * An optional modelDB for storing model state.
+       */
+      modelDB?: IModelDB;
     }
   }
 }
