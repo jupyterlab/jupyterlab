@@ -423,7 +423,10 @@ namespace NotebookModel {
         options.contentFactory = this.codeCellContentFactory;
       }
       if (this._modelDB) {
-        options.modelDB = this._modelDB.view(options.uuid || utils.uuid());
+        if (!options.id) {
+          options.id = utils.uuid();
+        }
+        options.modelDB = this._modelDB.view(options.id);
       }
       return new CodeCellModel(options);
     }
@@ -438,7 +441,10 @@ namespace NotebookModel {
      */
     createMarkdownCell(options: CellModel.IOptions): IMarkdownCellModel {
       if (this._modelDB) {
-        options.modelDB = this._modelDB.view(options.uuid || utils.uuid());
+        if (!options.id) {
+          options.id = utils.uuid();
+        }
+        options.modelDB = this._modelDB.view(options.id);
       }
       return new MarkdownCellModel(options);
     }
@@ -453,7 +459,10 @@ namespace NotebookModel {
      */
     createRawCell(options: CellModel.IOptions): IRawCellModel {
       if (this._modelDB) {
-        options.modelDB = this._modelDB.view(options.uuid || utils.uuid());
+        if (!options.id) {
+          options.id = utils.uuid();
+        }
+        options.modelDB = this._modelDB.view(options.id);
       }
      return new RawCellModel(options);
     }
