@@ -14,7 +14,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  IModelDB, ModelDB, IObservableValue,
+  IModelDB, ModelDB,
   IObservableMap, IObservableString, IChangedArgs
 } from '@jupyterlab/coreutils';
 
@@ -226,14 +226,14 @@ namespace CodeEditor {
      * A mime type of the model.
      */
     get mimeType(): string {
-      return (this.modelDB.get('mimeType') as IObservableValue).get() as string;
+      return this.modelDB.getValue('mimeType') as string;
     }
     set mimeType(newValue: string) {
       const oldValue = this.mimeType;
       if (oldValue === newValue) {
         return;
       }
-      (this.modelDB.get('mimeType') as IObservableValue).set(newValue);
+      this.modelDB.setValue('mimeType', newValue);
     }
 
     /**
