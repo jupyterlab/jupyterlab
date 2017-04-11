@@ -5,6 +5,10 @@ import {
   JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
+import {
+  TabBar
+} from '@phosphor/widgets';
+
 
 /**
  * The default tab manager extension.
@@ -12,7 +16,11 @@ import {
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.tab-manager',
   activate: (app: JupyterLab): void => {
-    console.log('hello world');
+    const tabs = new TabBar({ orientation: 'vertical' });
+
+    tabs.id = 'tab-manager';
+    tabs.title.label = 'Tabs';
+    app.shell.addToLeftArea(tabs, { rank: 600 });
   },
   autoStart: true
 };
