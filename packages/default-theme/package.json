@@ -38,6 +38,7 @@
     "@jupyterlab/outputarea": "^0.2.0",
     "@jupyterlab/rendermime": "^0.2.0",
     "@jupyterlab/running": "^0.2.0",
+    "@jupyterlab/tabmanager-extension": "^0.2.0",
     "@jupyterlab/terminal": "^0.2.0",
     "@jupyterlab/tooltip": "^0.2.0"
   },
