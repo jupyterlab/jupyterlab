@@ -65,7 +65,7 @@ interface IObservableValue extends IObservable {
   /**
    * The type of this object.
    */
-  type: 'Value';
+  readonly type: 'Value';
 
   /**
    * The changed signal.
@@ -185,7 +185,7 @@ interface IModelDB extends IDisposable {
    *
    * @param path: the path for the object.
    *
-   * @returns the object that wsa created.
+   * @returns the object that was created.
    */
   createJSON(path: string): IObservableJSON;
 
@@ -197,6 +197,24 @@ interface IModelDB extends IDisposable {
    * @returns the value that was created.
    */
   createValue(path: string): IObservableValue;
+
+  /**
+   * Get a value at a path. That value must already have
+   * been created using `createValue`.
+   *
+   * @param path: the path for the value.
+   */
+  getValue(path: string): JSONValue;
+
+  /**
+   * Set a value at a path. That value must already have
+   * been created using `createValue`.
+   *
+   * @param path: the path for the value.
+   *
+   * @param value: the new value.
+   */
+  setValue(path: string, value: JSONValue): void;
 
   /**
    * Create a view onto a subtree of the model database.
@@ -231,7 +249,9 @@ class ObservableValue implements IObservableValue {
   /**
    * The observable type.
    */
-  readonly type: 'Value';
+  get type(): 'Value' {
+    return 'Value';
+  }
 
   /**
    * Whether the value has been disposed.
@@ -475,6 +495,40 @@ class ModelDB implements IModelDB {
     this.set(path, val);
     return val;
   }
+
+  /**
+   * Get a value at a path. That value must already have
+   * been created using `createValue`.
+   *
+   * @param path: the path for the value.
+   */
+  getValue(path: string): JSONValue {
+    let val = this.get(path);
+    if (val.type !== 'Value') {
+        throw Error('Can only call getValue for an ObservableValue');
+    }
+    return (val as ObservableValue).get();
+  }
+
+
+  /**
+
+  /**
+   * Set a value at a path. That value must already have
+   * been created using `createValue`.
+   *
+   * @param path: the path for the value.
+   *
+   * @param value: the new value.
+   */
+  setValue(path: string, value: JSONValue): void {
+    let val = this.get(path);
+    if (val.type !== 'Value') {
+        throw Error('Can only call setValue on an ObservableValue');
+    }
+    (val as ObservableValue).set(value);
+  }
+
 
   /**
    * Create a view onto a subtree of the model database.

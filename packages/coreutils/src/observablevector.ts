@@ -322,7 +322,9 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
   /**
    * The type of the Observable.
    */
-  type: 'Vector';
+  get type(): 'Vector' {
+    return 'Vector';
+  }
 
   /**
    * A signal emitted when the vector has changed.

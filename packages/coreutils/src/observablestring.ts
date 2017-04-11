@@ -79,7 +79,9 @@ class ObservableString implements IObservableString {
   /**
    * The type of the Observable.
    */
-  type: 'String';
+  get type(): 'String' {
+    return 'String';
+  }
 
   /**
    * A signal emitted when the string has changed.

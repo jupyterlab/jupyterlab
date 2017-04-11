@@ -18,7 +18,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IObservableJSON, IModelDB, IObservableValue
+  IObservableJSON, IModelDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -193,7 +193,7 @@ class CellModel extends CodeEditor.Model implements ICellModel {
    * Get the trusted state of the model.
    */
   get trusted(): boolean {
-    return (this.modelDB.get('trusted') as IObservableValue).get() as boolean;
+    return this.modelDB.getValue('trusted') as boolean;
   }
 
   /**
@@ -204,7 +204,7 @@ class CellModel extends CodeEditor.Model implements ICellModel {
     if (oldValue === newValue) {
       return;
     }
-    (this.modelDB.get('trusted') as IObservableValue).set(newValue);
+    this.modelDB.setValue('trusted', newValue);
   }
 
   /**
@@ -358,14 +358,14 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
    * The execution count of the cell.
    */
   get executionCount(): nbformat.ExecutionCount {
-    return (this.modelDB.get('executionCount') as IObservableValue).get() as number || null;
+    return this.modelDB.getValue('executionCount') as nbformat.ExecutionCount;
   }
   set executionCount(newValue: nbformat.ExecutionCount) {
     let oldValue = this.executionCount;
     if (newValue === oldValue) {
       return;
     }
-    (this.modelDB.get('executionCount') as IObservableValue).set(newValue || null);
+    this.modelDB.setValue('executionCount', newValue || null);
   }
 
   /**

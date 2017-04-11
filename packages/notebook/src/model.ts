@@ -331,7 +331,6 @@ namespace NotebookModel {
      */
     contentFactory?: IContentFactory;
 
-
     /**
      * An optional modelDB for storing notebook data.
      */

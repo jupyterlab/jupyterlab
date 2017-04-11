@@ -120,7 +120,9 @@ class ObservableMap<T> implements IObservableMap<T> {
   /**
    * The type of the Observable.
    */
-  type: 'Map';
+  get type(): 'Map' {
+    return 'Map';
+  }
 
 
   /**
