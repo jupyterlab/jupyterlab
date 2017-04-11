@@ -26,19 +26,19 @@ TEMPLATE_ENVIRONMENT = Environment(
     trim_blocks=False)
 
 
-def install(extension):
+def install_extension(extension):
     """Install an extension package into JupyterLab.
 
     Follows the semantics of https://docs.npmjs.com/cli/install.
 
     The extension is first validated.
     """
-    tar_name = validate(extension)
+    tar_name = validate_extension(extension)
     path = pjoin(cache_dir, tar_name)
     check_call(['npm', 'install', path], cwd=build_dir)
 
 
-def uninstall(extension):
+def uninstall_extension(extension):
     """Uninstall an extension by name.
     """
     pkg = _read_package()
@@ -54,7 +54,7 @@ def list_extensions(extension):
     print(list(pkg['dependencies'].keys()))
 
 
-def validate(extension):
+def validate_extension(extension):
     """Verify that a JupyterLab extension is valid.
     """
     if osp.exists(extension):
@@ -76,7 +76,7 @@ def validate(extension):
     return name
 
 
-def link(package):
+def link_extension(package):
     """Link a package into JupyterLab
 
     Follows the semantics of https://docs.npmjs.com/cli/link.
