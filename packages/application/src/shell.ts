@@ -121,24 +121,10 @@ class ApplicationShell extends Widget {
   }
 
   /**
-   * A signal emitted when main area's current focus changes.
-   */
-  get currentChanged(): ISignal<this, ApplicationShell.IChangedArgs> {
-    return this._currentChanged;
-  }
-
-  /**
    * A signal emitted when main area's active focus changes.
    */
   get activeChanged(): ISignal<this, ApplicationShell.IChangedArgs> {
     return this._activeChanged;
-  }
-
-  /**
-   * The current widget in the shell's main area.
-   */
-  get currentWidget(): Widget | null {
-    return this._tracker.currentWidget;
   }
 
   /**
@@ -149,21 +135,17 @@ class ApplicationShell extends Widget {
   }
 
   /**
-   * True if the given area is empty.
+   * A signal emitted when main area's current focus changes.
    */
-  isEmpty(area: ApplicationShell.Area): boolean {
-    switch (area) {
-    case 'left':
-      return this._leftHandler.stackedPanel.widgets.length === 0;
-    case 'main':
-      return this._dockPanel.isEmpty;
-    case 'top':
-      return this._topPanel.widgets.length === 0;
-    case 'right':
-      return this._rightHandler.stackedPanel.widgets.length === 0;
-    default:
-      return true;
-    }
+  get currentChanged(): ISignal<this, ApplicationShell.IChangedArgs> {
+    return this._currentChanged;
+  }
+
+  /**
+   * The current widget in the shell's main area.
+   */
+  get currentWidget(): Widget | null {
+    return this._tracker.currentWidget;
   }
 
   /**
@@ -174,7 +156,7 @@ class ApplicationShell extends Widget {
   }
 
   /**
-   * Activate a widget in it's area.
+   * Activate a widget in its area.
    */
   activateById(id: string): void {
     if (this._leftHandler.has(id)) {
@@ -338,6 +320,24 @@ class ApplicationShell extends Widget {
     // before removing them because removing them while iterating through them
     // modifies the underlying data of the iterator.
     each(toArray(this._dockPanel.widgets()), widget => { widget.close(); });
+  }
+
+  /**
+   * True if the given area is empty.
+   */
+  isEmpty(area: ApplicationShell.Area): boolean {
+    switch (area) {
+    case 'left':
+      return this._leftHandler.stackedPanel.widgets.length === 0;
+    case 'main':
+      return this._dockPanel.isEmpty;
+    case 'top':
+      return this._topPanel.widgets.length === 0;
+    case 'right':
+      return this._rightHandler.stackedPanel.widgets.length === 0;
+    default:
+      return true;
+    }
   }
 
   /**
