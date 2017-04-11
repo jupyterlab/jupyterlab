@@ -545,7 +545,6 @@ class FileBrowserModel implements IDisposable {
     }
   }
 
-  private _blackoutId = -1;
   private _connectionFailure = new Signal<this, Error>(this);
   private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
   private _items: Contents.IModel[] = [];
@@ -558,7 +557,6 @@ class FileBrowserModel implements IDisposable {
   private _pending: Promise<void> = null;
   private _pendingPath: string = null;
   private _refreshed = new Signal<this, void>(this);
-  private _timeoutId = -1;
   private _lastRefresh = -1;
   private _requested = false;
   private _sessions: Session.IModel[] = [];
