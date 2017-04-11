@@ -336,7 +336,7 @@ class ModelDB implements IModelDB {
    */
   constructor(options: ModelDB.ICreateOptions = {}) {
     this._basePath = options.basePath || '';
-    if(options.baseDB) {
+    if (options.baseDB) {
       this._db = options.baseDB;
     } else {
       this._db = new ObservableMap<IObservable>();

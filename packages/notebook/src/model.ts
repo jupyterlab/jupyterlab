@@ -422,7 +422,7 @@ namespace NotebookModel {
       if (options.contentFactory) {
         options.contentFactory = this.codeCellContentFactory;
       }
-      if(this._modelDB) {
+      if (this._modelDB) {
         options.modelDB = this._modelDB.view(options.uuid || utils.uuid());
       }
       return new CodeCellModel(options);
@@ -437,7 +437,7 @@ namespace NotebookModel {
      *   new cell will be intialized with the data from the source.
      */
     createMarkdownCell(options: CellModel.IOptions): IMarkdownCellModel {
-      if(this._modelDB) {
+      if (this._modelDB) {
         options.modelDB = this._modelDB.view(options.uuid || utils.uuid());
       }
       return new MarkdownCellModel(options);
@@ -452,7 +452,7 @@ namespace NotebookModel {
      *   new cell will be intialized with the data from the source.
      */
     createRawCell(options: CellModel.IOptions): IRawCellModel {
-      if(this._modelDB) {
+      if (this._modelDB) {
         options.modelDB = this._modelDB.view(options.uuid || utils.uuid());
       }
      return new RawCellModel(options);
