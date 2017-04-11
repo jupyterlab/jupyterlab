@@ -149,6 +149,16 @@ class ApplicationShell extends Widget {
   }
 
   /**
+   * The main dock area's user interface mode.
+   */
+  get mode(): 'single-document' | 'multiple-document' {
+    return this._dockPanel.mode;
+  }
+  set mode(mode: 'single-document' | 'multiple-document') {
+    this._dockPanel.mode = mode;
+  }
+
+  /**
    * Promise that resolves when state is restored, returning layout description.
    */
   get restored(): Promise<ApplicationShell.ILayout> {
