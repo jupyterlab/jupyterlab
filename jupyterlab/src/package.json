@@ -11,6 +11,7 @@
     "extract-text-webpack-plugin": "^2.1.0",
     "file-loader": "^0.10.1",
     "font-awesome": "^4.7.0",
+    "fs-extra": "^2.1.2",
     "json-loader": "^0.5.4",
     "style-loader": "^0.13.1",
     "url-loader": "^0.5.7",
