@@ -35,7 +35,7 @@ def install_extension(extension):
     """
     tar_name = validate_extension(extension)
     path = pjoin(cache_dir, tar_name)
-    check_call(['npm', 'install', path], cwd=build_dir)
+    check_call(['npm', 'install', '--save', path], cwd=build_dir)
 
 
 def uninstall_extension(extension):
@@ -58,13 +58,15 @@ def list_extensions():
 def validate_extension(extension):
     """Verify that a JupyterLab extension is valid.
     """
+    extension = osp.expanduser(extension)
     if osp.exists(extension):
         extension = osp.abspath(extension)
     _ensure_package()
     # npm pack the extension
-    name = check_output(['npm', 'pack', extension], cwd=cache_dir)
+    output = check_output(['npm', 'pack', extension], cwd=cache_dir)
+    name = output.decode('utf8').splitlines()[-1]
     # read the package.json data from the file
-    tar = tarfile.open(name.decode('utf8').strip(), "r:gz")
+    tar = tarfile.open(pjoin(cache_dir, name), "r:gz")
     f = tar.extractfile('package/package.json')
     data = json.loads(f.read().decode('utf8'))
     msg = '%s is not a valid JupyterLab extension' % extension
@@ -72,7 +74,7 @@ def validate_extension(extension):
         raise ValueError(msg)
     if not isinstance(data['jupyterlab'], dict):
         raise ValueError(msg)
-    if not isinstance(data['jupyterlab'].get('extension', False)):
+    if not data['jupyterlab'].get('extension', False):
         raise ValueError(msg)
     return name
 
@@ -122,6 +124,8 @@ def _ensure_package():
         return
     if not osp.exists(build_dir):
         os.makedirs(build_dir)
+    if not osp.exists(cache_dir):
+        os.makedirs(cache_dir)
     shutil.copy2(pjoin(here, 'src', 'package.json'),
                  pjoin(build_dir, 'package.json'))
     shutil.copy2(pjoin(here, 'src', 'webpack.config.js'),
@@ -143,4 +147,5 @@ def _render_template(template_filename, context):
 
 
 if __name__ == '__main__':
+    #install_extension('~/workspace/jupyter/jupyterlab_geojson/labextension')
     build()
