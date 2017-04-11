@@ -13,7 +13,6 @@
     "@jupyterlab/completer-extension": "^0.2.0",
     "@jupyterlab/console-extension": "^0.2.0",
     "@jupyterlab/csvwidget-extension": "^0.2.0",
-    "@jupyterlab/default-theme": "^0.2.0",
     "@jupyterlab/docmanager-extension": "^0.2.0",
     "@jupyterlab/docregistry-extension": "^0.2.0",
     "@jupyterlab/editorwidget-extension": "^0.2.0",
@@ -34,6 +33,7 @@
     "@jupyterlab/tooltip-extension": "^0.2.0"
   },
   "devDependencies": {
+    "@jupyterlab/default-theme": "^0.2.0",
     "css-loader": "^0.27.3",
     "es6-promise": "^4.1.0",
     "extract-text-webpack-plugin": "^2.1.0",
