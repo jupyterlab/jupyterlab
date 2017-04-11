@@ -5,6 +5,7 @@
 # Distributed under the terms of the Modified BSD License.
 from jinja2 import Environment, FileSystemLoader
 import json
+import os
 from os import path as osp
 from os.path import join as pjoin
 from subprocess import check_call, check_output
@@ -15,10 +16,10 @@ from jupyter_core.paths import ENV_JUPYTER_PATH, ENV_CONFIG_PATH
 
 
 here = osp.dirname(osp.abspath(__file__))
-build_dir = pjoin(ENV_JUPYTER_PATH, 'lab')
+build_dir = pjoin(ENV_JUPYTER_PATH[0], 'lab')
 cache_dir = pjoin(build_dir, 'cache')
 pkg_path = pjoin(build_dir, 'package.json')
-config_dir = pjoin(ENV_CONFIG_PATH, 'labconfig')
+config_dir = pjoin(ENV_CONFIG_PATH[0], 'labconfig')
 TEMPLATE_ENVIRONMENT = Environment(
     autoescape=False,
     loader=FileSystemLoader(pjoin(here, 'src')),
@@ -46,7 +47,7 @@ def uninstall(extension):
         json.dump(pkg, fid)
 
 
-def list(extension):
+def list_extensions(extension):
     """List installed extensions.
     """
     pkg = _read_package()
@@ -89,7 +90,7 @@ def build():
     # Template and write the index.js
     names = list(pkg['dependencies'].keys())
     context = dict(jupyterlab_extensions=names)
-    with open(pjoin(here, 'build', 'index.js'), 'w') as fid:
+    with open(pjoin(build_dir, 'index.js'), 'w') as fid:
         fid.write(_render_template('index.js', context))
     check_call(['npm', 'run', 'build'], cwd=build_dir)
 
@@ -109,7 +110,7 @@ def list_config():
     pass
 
 
-def delete_config():
+def delete_config(name):
     """Deletes the key from the JupyterLab configuration."""
     pass
 
@@ -118,8 +119,12 @@ def _ensure_package():
     """Make sure there is a package.json file."""
     if osp.exists(pkg_path):
         return
-    shutil.copy2(pjoin(here, 'src', 'package.json'), build_dir)
-    shutil.copy2(pjoin(here, 'src', 'webpack.config.js', build_dir))
+    if not osp.exists(build_dir):
+        os.makedirs(build_dir)
+    shutil.copy2(pjoin(here, 'src', 'package.json'),
+                 pjoin(build_dir, 'package.json'))
+    shutil.copy2(pjoin(here, 'src', 'webpack.config.js'),
+                 pjoin(build_dir, 'webpack.config.js'))
     check_call(['npm', 'install'], cwd=build_dir)
 
 
@@ -134,3 +139,7 @@ def _read_package():
 def _render_template(template_filename, context):
     """Render a jinja template"""
     return TEMPLATE_ENVIRONMENT.get_template(template_filename).render(context)
+
+
+if __name__ == '__main__':
+    build()
