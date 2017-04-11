@@ -77,8 +77,8 @@ class LogStaticNotebook extends StaticNotebook {
     this.methods.push('onCellMoved');
   }
 
-  protected onCellRemoved(cell: BaseCellWidget): void {
-    super.onCellRemoved(cell);
+  protected onCellRemoved(index: number, cell: BaseCellWidget): void {
+    super.onCellRemoved(index, cell);
     this.methods.push('onCellRemoved');
   }
 }
@@ -125,8 +125,8 @@ class LogNotebook extends Notebook {
     this.methods.push('onCellMoved');
   }
 
-  protected onCellRemoved(cell: BaseCellWidget): void {
-    super.onCellRemoved(cell);
+  protected onCellRemoved(index: number, cell: BaseCellWidget): void {
+    super.onCellRemoved(index, cell);
     this.methods.push('onCellRemoved');
   }
 }
@@ -1128,6 +1128,15 @@ describe('notebook/widget', () => {
         expect(widget.activeCell).to.be(widget.widgets[0]);
       });
 
+      it('should keep the currently active cell active', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.activeCellIndex = 1;
+        let cell = widget.model.contentFactory.createCodeCell({});
+        widget.model.cells.insert(1, cell);
+        expect(widget.activeCell).to.be(widget.widgets[2]);
+      });
+
       context('`edgeRequested` signal', () => {
 
         it('should activate the previous cell if top is requested', () => {
@@ -1180,6 +1189,14 @@ describe('notebook/widget', () => {
         widget.model.fromJSON(DEFAULT_CONTENT);
         widget.model.cells.removeAt(0);
         expect(widget.activeCell).to.be(widget.widgets[0]);
+      });
+
+      it('should keep the currently active cell active', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.activeCellIndex = 2;
+        widget.model.cells.removeAt(1);
+        expect(widget.activeCell).to.be(widget.widgets[1]);
       });
 
     });
