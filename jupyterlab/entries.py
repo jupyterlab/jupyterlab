@@ -3,19 +3,26 @@
 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
+from jinja2 import Environment, FileSystemLoader
 import json
 from os import path as osp
-import tarfile
+from os.path import join as pjoin
 from subprocess import check_call, check_output
+import shutil
+import tarfile
 
 from jupyter_core.paths import ENV_JUPYTER_PATH, ENV_CONFIG_PATH
 
 
 here = osp.dirname(osp.abspath(__file__))
-build_dir = osp.join(ENV_JUPYTER_PATH, 'lab')
-cache_dir = osp.join(build_dir, 'cache')
-pkg_path = osp.join(build_dir, 'package.json')
-config_dir = osp.join(ENV_CONFIG_PATH, 'labconfig')
+build_dir = pjoin(ENV_JUPYTER_PATH, 'lab')
+cache_dir = pjoin(build_dir, 'cache')
+pkg_path = pjoin(build_dir, 'package.json')
+config_dir = pjoin(ENV_CONFIG_PATH, 'labconfig')
+TEMPLATE_ENVIRONMENT = Environment(
+    autoescape=False,
+    loader=FileSystemLoader(pjoin(here, 'src')),
+    trim_blocks=False)
 
 
 def install(extension):
@@ -26,7 +33,7 @@ def install(extension):
     The extension is first validated.
     """
     tar_name = validate(extension)
-    path = osp.join(cache_dir, tar_name)
+    path = pjoin(cache_dir, tar_name)
     check_call(['npm', 'install', path], cwd=build_dir)
 
 
@@ -78,9 +85,12 @@ def link(package):
 
 def build():
     """Build the JupyterLab application."""
-    _ensure_package()
-    # Template and copy the index.js
-    # TODO
+    pkg = _read_package()
+    # Template and write the index.js
+    names = list(pkg['dependencies'].keys())
+    context = dict(jupyterlab_extensions=names)
+    with open(pjoin(here, 'build', 'index.js'), 'w') as fid:
+        fid.write(_render_template('index.js', context))
     check_call(['npm', 'run', 'build'], cwd=build_dir)
 
 
@@ -106,12 +116,11 @@ def delete_config():
 
 def _ensure_package():
     """Make sure there is a package.json file."""
-    # TODO copy src/package.json
-    # TODO copy src/webpack.config.js
-    pkg_data = dict(name='jupyterlab_app', private=True, dependencies=dict())
-    if not osp.exists(pkg_path):
-        with open(pkg_path, 'w') as fid:
-            json.dump(pkg_data, fid)
+    if osp.exists(pkg_path):
+        return
+    shutil.copy2(pjoin(here, 'src', 'package.json'), build_dir)
+    shutil.copy2(pjoin(here, 'src', 'webpack.config.js', build_dir))
+    check_call(['npm', 'install'], cwd=build_dir)
 
 
 def _read_package():
@@ -120,3 +129,8 @@ def _read_package():
     _ensure_package()
     with open(pkg_path) as fid:
         return json.load(fid)
+
+
+def _render_template(template_filename, context):
+    """Render a jinja template"""
+    return TEMPLATE_ENVIRONMENT.get_template(template_filename).render(context)

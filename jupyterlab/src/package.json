@@ -1,0 +1,19 @@
+{
+  "private": true,
+  "name": "@jupyterlab/application-top",
+  "scripts": {
+    "build": "webpack"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "css-loader": "^0.27.3",
+    "es6-promise": "^4.1.0",
+    "extract-text-webpack-plugin": "^2.1.0",
+    "file-loader": "^0.10.1",
+    "font-awesome": "^4.7.0",
+    "json-loader": "^0.5.4",
+    "style-loader": "^0.13.1",
+    "url-loader": "^0.5.7",
+    "webpack": "^2.2.1"
+  }
+}
