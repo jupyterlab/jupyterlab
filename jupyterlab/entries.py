@@ -47,10 +47,10 @@ def validate(extension):
     # npm pack the extension
     name = check_output(['npm', 'pack', extension], cwd=cache_dir)
     # read the package.json data from the file
-    tar = tarfile.open(name.decode('utf8').strip())
+    tar = tarfile.open(name.decode('utf8').strip(), "r:gz")
     f = tar.extractfile('package/package.json')
     data = json.loads(f.read().decode('utf8'))
-    msg = '%s is not a valid JupyterLab' % extension
+    msg = '%s is not a valid JupyterLab extension' % extension
     if 'jupyterlab' not in data:
         raise ValueError(msg)
     if not isinstance(data['jupyterlab'], dict):
