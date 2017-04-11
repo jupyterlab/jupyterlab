@@ -37,7 +37,7 @@ from jupyterlab.labextensions import (
 )
 
 
-FILENAME = 'mockextension/mockextension.bundle.js'
+FILENAME = 'mockextension/package.json'
 
 
 def touch(file, mtime=None):
@@ -67,7 +67,8 @@ def test_help_output():
 def build_extension():
     shell = (sys.platform == 'win32')
     cwd = os.path.dirname(os.path.abspath(__file__))
-    cmd = 'node build_extension.js'
+    cmd = 'npm run build'
+    cwd = os.path.join(cwd, 'mockextension')
     check_call(cmd.split(), shell=shell, cwd=cwd, stdout=PIPE)
 
 
@@ -369,13 +370,5 @@ class TestInstallLabExtension(TestCase):
         self.check_manifest(manifest)
 
     def check_manifest(self, manifest):
-        assert 'mockextension' in manifest
-        mod = manifest['mockextension']
-        assert mod['name'] == 'mockextension'
-        modname = '@jupyterlab/python-tests@0.1.0/mockextension/index.js'
-        assert modname in mod['entry']
-        filename = 'mockextension.bundle.js'
-        assert mod['files'][0] == filename
-        assert mod['id'] == 0
-        assert len(mod['hash']) == 32
-        assert len(mod['modules']) == 1
+        assert manifest['name'] == '@jupyterlab/mockextension'
+        assert manifest['main'] == 'index.js'

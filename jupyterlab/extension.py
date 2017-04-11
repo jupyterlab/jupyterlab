@@ -15,7 +15,6 @@ from jupyter_core.paths import jupyter_path, jupyter_config_path
 from .labextensions import (
     find_labextension, validate_labextension_folder,
     get_labextension_manifest_data_by_name,
-    get_labextension_manifest_data_by_folder,
     get_labextension_config_python, CONFIG_DIR
 )
 
@@ -35,7 +34,7 @@ make changes.
 
 HERE = os.path.dirname(__file__)
 FILE_LOADER = FileSystemLoader(HERE)
-BUILT_FILES = os.path.join(HERE, 'build')
+BUILT_FILES = os.path.join(HERE, 'build', 'build')
 PREFIX = '/lab'
 EXTENSION_PREFIX = '/labextension'
 
@@ -50,8 +49,8 @@ class LabHandler(IPythonHandler):
 
     @web.authenticated
     def get(self):
-        manifest = get_labextension_manifest_data_by_folder(BUILT_FILES)
-        if 'main' not in manifest:
+        main_bundle = os.path.join(BUILT_FILES, 'main.bundle.js')
+        if not os.path.exists(main_bundle):
             msg = ('JupyterLab build artifacts not detected, please see ' +
                    'CONTRIBUTING.md for build instructions.')
             self.log.error(msg)
@@ -62,17 +61,15 @@ class LabHandler(IPythonHandler):
                        message=msg))
             return
 
-        config = self._get_lab_config(manifest)
+        config = self._get_lab_config(dict())
         self.write(self.render_template('lab.html', **config))
 
     def _get_lab_config(self, manifest):
         """Get the config data for the page template."""
         static_prefix = ujoin(self.base_url, PREFIX)
         labextensions = self.labextensions
-        main = manifest['main']['entry']
         bundles = [ujoin(static_prefix, name + '.bundle.js') for name in
-                   ['loader', 'main']]
-        entries = []
+                   ['main']]
 
         # Only load CSS files if they exist.
         css_files = []
@@ -85,22 +82,9 @@ class LabHandler(IPythonHandler):
             terminalsAvailable=self.settings.get('terminals_available', False),
         ))
 
-        # Gather the lab extension files and entry points.
+        # Gather the lab extension config
         for (name, data) in sorted(labextensions.items()):
-            for value in data.values():
-                if not isinstance(value, dict):
-                    continue
-                if value.get('entry', None):
-                    entries.append(value['entry'])
-                    bundles.append('%s/%s/%s' % (
-                        self.extension_prefix, name, value['files'][0]
-                    ))
-                for fname in value['files']:
-                    if os.path.splitext(fname)[1] == '.css':
-                        css_files.append('%s/%s/%s' % (
-                            self.extension_prefix, name, fname
-                        ))
-            python_module = data.get('python_module', None)
+            python_module = data['jupyter'].get('python_module', None)
             if python_module:
                 try:
                     value = get_labextension_config_python(python_module)
@@ -115,10 +99,8 @@ class LabHandler(IPythonHandler):
             page_title='JupyterLab Alpha Preview',
             mathjax_url=self.mathjax_url,
             mathjax_config=mathjax_config,
-            jupyterlab_main=main,
             jupyterlab_css=css_files,
             jupyterlab_bundles=bundles,
-            plugin_entries=entries,
         )
         config['jupyterlab_config'] = configData
         return config
@@ -157,7 +139,8 @@ def get_extensions(lab_config):
         data = get_labextension_manifest_data_by_name(name)
         if data is None:
             continue
-        data['python_module'] = ext_config.get('python_module', None)
+        modname = ext_config.get('python_module', None)
+        data['jupyter']['python_module'] = modname
         extensions[name] = data
     return extensions
 

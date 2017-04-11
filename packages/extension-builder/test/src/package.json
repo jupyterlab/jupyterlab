@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "name": "@jupyterlab/extension-builder-test",
+  "version": "0.2.0",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {}
+}

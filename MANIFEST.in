@@ -1,4 +1,6 @@
 recursive-include jupyterlab/build *
+recursive-include jupyterlab/node_modules *
+recursive-include jupyterlab/default-extensions *
 
 include jupyterlab/lab.html
 include package.json

@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "name": "@jupyterlab/application-manifest",
+  "version": "0.2.0",
+  "scripts": {
+    "build": "webpack"
+  },
+  "dependencies": {
+    "@jupyterlab/default-extensions": "^0.2.0"
+  },
+  "devDependencies": {}
+}

@@ -64,7 +64,8 @@ def find_package_data():
     Find package_data.
     """
     return {
-        'jupyterlab': ['build/*', 'lab.html']
+        'jupyterlab': ['build/*', 'lab.html', 'node_modules/*',
+                       'default_extensions/*']
     }
 
 
@@ -107,8 +108,10 @@ class NPM(Command):
 
     # Representative files that should exist after a successful build
     targets = [
-        os.path.join(here, 'jupyterlab', 'build', 'main.css'),
-        os.path.join(here, 'jupyterlab', 'build', 'main.bundle.js'),
+        os.path.join(here, 'jupyterlab', 'build', 'build', 'main.css'),
+        os.path.join(here, 'jupyterlab', 'build', 'build', 'main.bundle.js'),
+        os.path.join(here, 'jupyterlab', 'node_modules', 'webpack', 'package.json'),
+        os.path.join(here, 'jupyterlab', 'default-extensions', 'package.json')
     ]
 
     def initialize_options(self):
@@ -131,7 +134,8 @@ class NPM(Command):
         log.info("Installing build dependencies with npm. This may take a while...")
         main = os.path.join(here, 'jupyterlab')
         run(['npm', 'install'], cwd=here)
-        run(['npm', 'run', 'build'], cwd=main)
+        run(['npm', 'install'], cwd=main)
+        run(['npm', 'run', 'build:app'], cwd=here)
 
         for t in self.targets:
             if not os.path.exists(t):

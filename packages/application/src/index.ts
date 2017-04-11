@@ -6,14 +6,9 @@ import {
 } from '@phosphor/application';
 
 import {
-  ModuleLoader
-} from './loader';
-
-import {
   ApplicationShell
 } from './shell';
 
-export { ModuleLoader } from './loader';
 export { ApplicationShell } from './shell';
 
 
@@ -39,7 +34,6 @@ class JupyterLab extends Application<ApplicationShell> {
       namespace: options.namespace || 'jupyterlab',
       version:  options.version || 'unknown'
     };
-    this._loader = options.loader || null;
   }
 
   /**
@@ -47,13 +41,6 @@ class JupyterLab extends Application<ApplicationShell> {
    */
   get info(): JupyterLab.IInfo {
     return this._info;
-  }
-
-  /**
-   * The module loader used by the application.
-   */
-  get loader(): ModuleLoader | null {
-    return this._loader;
   }
 
   /**
@@ -71,25 +58,20 @@ class JupyterLab extends Application<ApplicationShell> {
    *
    * @param mod - The plugin module to register.
    */
-  registerPluginModule(mod: JupyterLab.IPluginModule): void {
-    let data = mod.default;
+  registerPluginModule(mod: JupyterLab.PluginModule): void {
+    let data: JupyterLabPlugin<any> | JupyterLabPlugin<any>[];
+    if (mod.hasOwnProperty('__esModule')) {
+      data = (mod as JupyterLab.IPluginModuleES6).default;
+    } else {
+      data = mod as JupyterLab.PluginModuleES5;
+    }
     if (!Array.isArray(data)) {
       data = [data];
     }
     data.forEach(item => { this.registerPlugin(item); });
   }
 
-  /**
-   * Register the plugins from multiple plugin modules.
-   *
-   * @param mods - The plugin modules to register.
-   */
-  registerPluginModules(mods: JupyterLab.IPluginModule[]): void {
-    mods.forEach(mod => { this.registerPluginModule(mod); });
-  }
-
   private _info: JupyterLab.IInfo;
-  private _loader: ModuleLoader | null;
 }
 
 
@@ -107,11 +89,6 @@ namespace JupyterLab {
      * The git description of the JupyterLab application.
      */
     gitDescription?: string;
-
-    /**
-     * The module loader used by the application.
-     */
-    loader?: ModuleLoader;
 
     /**
      * The namespace/prefix plugins may use to denote their origin.
@@ -152,14 +129,27 @@ namespace JupyterLab {
   }
 
   /**
-   * The interface for a module that exports a plugin or plugins as
-   * the default value.
+   * The type for a module that exports a plugin or plugins as
+   * the default value using ES5 syntax.
    */
   export
-  interface IPluginModule {
+  type PluginModuleES5 = JupyterLabPlugin<any> | JupyterLabPlugin<any>[];
+
+  /**
+   * The interface for a module that exports a plugin or plugins as
+   * the default value using ES6 syntax.
+   */
+  export
+  interface IPluginModuleES6 {
     /**
      * The default export.
      */
     default: JupyterLabPlugin<any> | JupyterLabPlugin<any>[];
   }
+
+  /**
+   * A type alias for a plugin module.
+   */
+  export
+  type PluginModule = PluginModuleES5 | IPluginModuleES6;
 }

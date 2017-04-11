@@ -1,0 +1,11 @@
+{
+  "name": "@jupyterlab/mockextension",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

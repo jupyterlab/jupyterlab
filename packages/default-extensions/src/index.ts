@@ -1,10 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import 'es6-promise/auto';  // polyfill Promise on IE
-
 import {
-  JupyterLab, ModuleLoader
+  JupyterLab
 } from '@jupyterlab/application';
 
 import * as aboutExtension
@@ -82,54 +80,35 @@ import * as terminalExtension
 import * as tooltipExtension
   from '@jupyterlab/tooltip-extension';
 
-import 'font-awesome/css/font-awesome.min.css';
 import '@jupyterlab/default-theme/style/index.css';
 
 
-const mods: JupyterLab.IPluginModule[] = [
-  aboutExtension,
-  applicationExtension,
-  apputilsExtension,
-  codemirrorExtension,
-  completerExtension,
-  consoleExtension,
-  csvwidgetExtension,
-  docmanagerExtension,
-  docregistryExtension,
-  editorwidgetExtension,
-  faqExtension,
-  filebrowserExtension,
-  helpExtension,
-  imagewidgetExtension,
-  inspectorExtension,
-  landingExtension,
-  launchExtension,
-  markdownwidgetExtension,
-  notebookExtension,
-  rendermimeExtension,
-  runningExtension,
-  servicesExtension,
-  shortcutsExtension,
-  terminalExtension,
-  tooltipExtension,
-];
+const extensions: JupyterLab.PluginModule = [].concat(
+  aboutExtension.default,
+  applicationExtension.default,
+  apputilsExtension.default,
+  codemirrorExtension.default,
+  completerExtension.default,
+  consoleExtension.default,
+  csvwidgetExtension.default,
+  docmanagerExtension.default,
+  docregistryExtension.default,
+  editorwidgetExtension.default,
+  faqExtension.default,
+  filebrowserExtension.default,
+  helpExtension.default,
+  imagewidgetExtension.default,
+  inspectorExtension.default,
+  landingExtension.default,
+  launchExtension.default,
+  markdownwidgetExtension.default,
+  notebookExtension.default,
+  rendermimeExtension.default,
+  runningExtension.default,
+  servicesExtension.default,
+  shortcutsExtension.default,
+  terminalExtension.default,
+  tooltipExtension.default
+);
 
-
-/**
- * Create an application object.
- *
- * @param loader - The module loader for the application.
- *
- * @returns A new application object.
- */
-export
-function createLab(loader: ModuleLoader): JupyterLab {
-  const lab = new JupyterLab({
-    loader,
-    gitDescription: process.env.GIT_DESCRIPTION,
-    namespace: 'jupyterlab',
-    version: process.env.JUPYTERLAB_VERSION
-  });
-  lab.registerPluginModules(mods);
-  return lab;
-}
+export default extensions;

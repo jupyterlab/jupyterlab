@@ -7,15 +7,12 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "ES5",
-    "outDir": "./build",
+    "outDir": "./lib",
     "lib": ["ES5", "ES2015.Collection", "ES2015.Promise", "DOM"],
     "types": ["node", "text-encoding"],
     "baseUrl": ".",
     "paths": {
-      "@jupyterlab/*": ["../packages/*/src"]
-    },
-    "rootDirs": [
-      "../packages"
-    ]
+      "@jupyterlab/*": ["../*/src"]
+    }
   }
 }
