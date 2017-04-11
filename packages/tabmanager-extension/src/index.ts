@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/application';
 
 import {
+  ILayoutRestorer
+} from '@jupyterlab/apputils';
+
+import {
   each
 } from '@phosphor/algorithm';
 
@@ -19,19 +23,23 @@ import {
  */
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.tab-manager',
-  activate: (app: JupyterLab): void => {
+  activate: (app: JupyterLab, restorer: ILayoutRestorer): void => {
     const tabs = new TabBar({ orientation: 'vertical' });
     const populate = () => {
+      tabs.clearTabs();
       each(app.shell.widgets('main'), widget => { tabs.addTab(widget.title); });
     };
 
+    restorer.add(tabs, 'tab-manager');
     tabs.id = 'tab-manager';
     tabs.title.label = 'Tabs';
     populate();
-    app.shell.currentChanged.connect(populate);
+    app.shell.activeChanged.connect(() => { tabs.update(); });
+    app.shell.currentChanged.connect(() => { populate(); });
     app.shell.addToLeftArea(tabs, { rank: 600 });
   },
-  autoStart: true
+  autoStart: true,
+  requires: [ILayoutRestorer]
 };
 
 
