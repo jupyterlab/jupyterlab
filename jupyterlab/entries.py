@@ -47,11 +47,12 @@ def uninstall_extension(extension):
         json.dump(pkg, fid)
 
 
-def list_extensions(extension):
+def list_extensions():
     """List installed extensions.
     """
     pkg = _read_package()
-    print(list(pkg['dependencies'].keys()))
+    for ext in sorted(pkg['dependencies']):
+        print(ext)
 
 
 def validate_extension(extension):
