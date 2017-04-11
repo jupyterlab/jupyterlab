@@ -14,7 +14,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  IModelDB, ModelDB,
+  IModelDB, ModelDB, IObservableValue, ObservableValue,
   IObservableMap, IObservableString, IChangedArgs
 } from '@jupyterlab/coreutils';
 
@@ -188,17 +188,12 @@ namespace CodeEditor {
 
       let value = this.modelDB.createString('value');
       value.text = value.text || options.value || '';
+
       let mimeType = this.modelDB.createValue('mimeType');
       mimeType.set(options.mimeType || 'text/plain');
-      this.modelDB.createMap<ITextSelection[]>('selections');
+      mimeType.changed.connect(this._onMimeTypeChanged, this);
 
-      mimeType.changed.connect((val, args)=>{
-        this._mimeTypeChanged.emit({
-          name: 'mimeType',
-          oldValue: args.oldValue as string,
-          newValue: args.newValue as string
-        });
-      });
+      this.modelDB.createMap<ITextSelection[]>('selections');
     }
 
     /**
@@ -254,6 +249,13 @@ namespace CodeEditor {
       Signal.clearData(this);
     }
 
+    private _onMimeTypeChanged(mimeType: IObservableValue, args: ObservableValue.IChangedArgs): void {
+      this._mimeTypeChanged.emit({
+        name: 'mimeType',
+        oldValue: args.oldValue as string,
+        newValue: args.newValue as string
+      });
+    }
 
     protected modelDB: IModelDB = null;
     private _isDisposed = false;
