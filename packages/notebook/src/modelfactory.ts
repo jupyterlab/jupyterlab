@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  IModelDB
+} from '@jupyterlab/coreutils';
+
+import {
   DocumentRegistry
 } from '@jupyterlab/docregistry';
 
@@ -80,9 +84,9 @@ class NotebookModelFactory implements DocumentRegistry.IModelFactory<INotebookMo
    *
    * @returns A new document model.
    */
-  createNew(languagePreference?: string): INotebookModel {
+  createNew(languagePreference?: string, modelDB?: IModelDB): INotebookModel {
     let contentFactory = this.contentFactory;
-    return new NotebookModel({ languagePreference, contentFactory });
+    return new NotebookModel({ languagePreference, contentFactory, modelDB });
   }
 
   /**
