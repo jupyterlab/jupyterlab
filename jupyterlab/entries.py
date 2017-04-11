@@ -44,6 +44,8 @@ def list(extension):
 def validate(extension):
     """Verify that a JupyterLab extension is valid.
     """
+    if osp.exists(extension):
+        extension = osp.abspath(extension)
     # npm pack the extension
     name = check_output(['npm', 'pack', extension], cwd=cache_dir)
     # read the package.json data from the file
