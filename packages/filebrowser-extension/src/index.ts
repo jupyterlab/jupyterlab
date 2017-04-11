@@ -191,7 +191,7 @@ function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, mana
   mainMenu.addMenu(menu, { rank: 1 });
 
   fbWidget.title.label = 'Files';
-  app.shell.addToLeftArea(fbWidget, { rank: 40 });
+  app.shell.addToLeftArea(fbWidget, { rank: 100 });
 
   // If the layout is a fresh session without saved data, open file browser.
   app.restored.then(layout => {

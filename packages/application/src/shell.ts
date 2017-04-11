@@ -45,6 +45,12 @@ const ACTIVE_CLASS = 'jp-mod-active';
 
 
 /**
+ * The default rank of items added to a sidebar.
+ */
+const DEFAULT_RANK = 500;
+
+
+/**
  * The application shell for JupyterLab.
  */
 export
@@ -252,7 +258,7 @@ class ApplicationShell extends Widget {
       console.error('widgets added to app shell must have unique id property');
       return;
     }
-    let rank = 'rank' in options ? options.rank : 100;
+    let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
     this._leftHandler.addWidget(widget, rank);
     this._save();
   }
@@ -285,7 +291,7 @@ class ApplicationShell extends Widget {
       console.error('widgets added to app shell must have unique id property');
       return;
     }
-    let rank = 'rank' in options ? options.rank : 100;
+    let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
     this._rightHandler.addWidget(widget, rank);
     this._save();
   }

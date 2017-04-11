@@ -65,5 +65,5 @@ function activate(app: JupyterLab, services: IServiceManager, restorer: ILayoutR
 
   // Rank has been chosen somewhat arbitrarily to give priority to the running
   // sessions widget in the sidebar.
-  app.shell.addToLeftArea(running, { rank: 50 });
+  app.shell.addToLeftArea(running, { rank: 200 });
 }
