@@ -32,7 +32,7 @@ def install_extension(extension):
     path = pjoin(cache_dir, tar_name)
     check_call(['npm', 'install', '--save', path], cwd=build_dir)
     data = _read_package()
-    data['jupyterlab']['extensions'].push(pkg_name)
+    data['jupyterlab']['extensions'].append(pkg_name)
     data['jupyterlab']['extensions'].sort()
     with open(pkg_path, 'w') as fid:
         json.dump(data, fid)
@@ -90,6 +90,7 @@ def link_extension(package):
 
 def build():
     """Build the JupyterLab application."""
+    _ensure_package()
     check_call(['npm', 'run', 'build'], cwd=build_dir)
 
 
@@ -140,5 +141,5 @@ def _read_package():
 
 
 if __name__ == '__main__':
-    #install_extension('~/workspace/jupyter/jupyterlab_geojson/labextension')
+    install_extension('~/workspace/jupyter/jupyterlab_geojson/labextension')
     build()
