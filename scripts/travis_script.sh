@@ -12,7 +12,7 @@ export PATH="$HOME/miniconda/bin:$PATH"
 
 if [[ $GROUP == tests ]]; then
     # Make sure we can start and kill the lab server
-    jupyter lab --no-browser &
+    jupyterlab launch --no-browser &
     TASK_PID=$!
     # Make sure the task is running
     ps -p $TASK_PID || exit 1
