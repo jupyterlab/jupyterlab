@@ -11,7 +11,7 @@ import sys
 
 from jupyter_core import paths
 from .commands import (
-    install_extension, uninstall_extension, link_extension,
+    install_extension, uninstall_extension,
     list_extensions, build
 )
 from .labapp import LabApp
@@ -36,7 +36,7 @@ class JupyterLabParser(argparse.ArgumentParser):
 
 def list_subcommands():
     return ['launch', 'install_extension', 'build', 'list_extensions',
-            'uninstall_extension', 'link_extension']
+            'uninstall_extension']
 
 
 def jupyterlab_parser():
@@ -112,11 +112,9 @@ def main():
     elif subcommand == 'install_extension':
         [install_extension(arg) for arg in args]
     elif subcommand == 'list_extensions':
-        list_extensions()
+        [print(ext) for ext in list_extensions()]
     elif subcommand == 'uninstall_extension':
         [uninstall_extension(arg) for arg in args]
-    elif subcommand == 'link_extension':
-        [link_extension(arg) for arg in args]
     elif subcommand == 'build':
         build()
     else:
