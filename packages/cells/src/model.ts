@@ -144,13 +144,14 @@ class CellModel extends CodeEditor.Model implements ICellModel {
 
     let cell = options.cell;
     let trusted = this.modelDB.createValue('trusted');
+    trusted.changed.connect(this.onTrustedChanged, this);
+
     if (!cell) {
       trusted.set(false);
       return;
     }
     trusted.set(!!cell.metadata['trusted']);
     delete cell.metadata['trusted'];
-    trusted.changed.connect(this.onTrustedChanged, this);
 
     if (Array.isArray(cell.source)) {
       this.value.text = (cell.source as string[]).join('\n');
