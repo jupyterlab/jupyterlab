@@ -9,12 +9,15 @@ from os import path as osp
 from os.path import join as pjoin
 from subprocess import check_call, check_output
 import shutil
+import sys
 import tarfile
 
 from jupyter_core.paths import ENV_JUPYTER_PATH
 
 
 here = osp.dirname(osp.abspath(__file__))
+_shell = sys.platform == 'win32'
+_env = dict(PATH=os.environ['PATH'])
 
 
 def install_extension(extension):
@@ -26,7 +29,8 @@ def install_extension(extension):
     """
     tar_name, pkg_name = validate_extension(extension)
     path = pjoin(_get_cache_dir(), tar_name)
-    check_call(['npm', 'install', '--save', path], cwd=_get_root_dir())
+    check_call(['npm', 'install', '--save', path],
+               cwd=_get_root_dir(), shell=_shell, env=_env)
     data = _read_package()
     data['jupyterlab']['extensions'].append(pkg_name)
     data['jupyterlab']['extensions'].sort()
@@ -60,7 +64,8 @@ def validate_extension(extension):
     _ensure_package()
     cache_dir = _get_cache_dir()
     # npm pack the extension
-    output = check_output(['npm', 'pack', extension], cwd=cache_dir)
+    output = check_output(['npm', 'pack', extension],
+                          cwd=cache_dir, shell=_shell, env=_env)
     name = output.decode('utf8').splitlines()[-1]
     # read the package.json data from the file
     tar = tarfile.open(pjoin(cache_dir, name), "r:gz")
@@ -79,7 +84,8 @@ def validate_extension(extension):
 def build():
     """Build the JupyterLab application."""
     _ensure_package()
-    check_call(['npm', 'run', 'build'], cwd=_get_root_dir())
+    check_call(['npm', 'run', 'build'],
+               cwd=_get_root_dir(), shell=_shell, env=_env)
 
 
 def _ensure_package():
@@ -93,7 +99,8 @@ def _ensure_package():
         if not osp.exists(dest):
             shutil.copy2(pjoin(here, name), dest)
     if not osp.exists(pjoin(root_dir, 'node_modules')):
-        check_call(['npm', 'install'], cwd=root_dir)
+        check_call(['npm', 'install'],
+                   cwd=root_dir, shell=_shell, env=_env)
 
 
 def _read_package():
