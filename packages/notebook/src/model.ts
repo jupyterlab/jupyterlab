@@ -151,6 +151,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       return;
     }
     let cells = this.cells;
+    this._cells = null;
     cells.dispose();
     super.dispose();
   }
