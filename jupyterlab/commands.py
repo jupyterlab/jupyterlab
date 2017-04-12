@@ -11,14 +11,10 @@ from subprocess import check_call, check_output
 import shutil
 import tarfile
 
-from jupyter_core.paths import ENV_JUPYTER_PATH, ENV_CONFIG_PATH
+from jupyter_core.paths import ENV_JUPYTER_PATH
 
 
 here = osp.dirname(osp.abspath(__file__))
-build_dir = pjoin(ENV_JUPYTER_PATH[0], 'lab')
-cache_dir = pjoin(build_dir, 'cache')
-pkg_path = pjoin(build_dir, 'package.json')
-config_dir = pjoin(ENV_CONFIG_PATH[0], 'labconfig')
 
 
 def install_extension(extension):
@@ -29,12 +25,12 @@ def install_extension(extension):
     The extension is first validated.
     """
     tar_name, pkg_name = validate_extension(extension)
-    path = pjoin(cache_dir, tar_name)
-    check_call(['npm', 'install', '--save', path], cwd=build_dir)
+    path = pjoin(_get_cache_dir(), tar_name)
+    check_call(['npm', 'install', '--save', path], cwd=_get_build_dir())
     data = _read_package()
     data['jupyterlab']['extensions'].append(pkg_name)
     data['jupyterlab']['extensions'].sort()
-    with open(pkg_path, 'w') as fid:
+    with open(_get_pkg_path(), 'w') as fid:
         json.dump(data, fid)
 
 
@@ -44,7 +40,7 @@ def uninstall_extension(extension):
     data = _read_package()
     data['jupyterlab']['extensions'].remove(extension)
     del data['dependencies'][extension]
-    with open(pkg_path, 'w') as fid:
+    with open(_get_pkg_path(), 'w') as fid:
         json.dump(data, fid)
 
 
@@ -63,6 +59,7 @@ def validate_extension(extension):
     if osp.exists(extension):
         extension = osp.abspath(extension)
     _ensure_package()
+    cache_dir = _get_cache_dir()
     # npm pack the extension
     output = check_output(['npm', 'pack', extension], cwd=cache_dir)
     name = output.decode('utf8').splitlines()[-1]
@@ -85,18 +82,20 @@ def link_extension(package):
 
     Follows the semantics of https://docs.npmjs.com/cli/link.
     """
-    check_call(['npm', 'link', package], cwd=build_dir)
+    check_call(['npm', 'link', package], cwd=_get_build_dir())
 
 
 def build():
     """Build the JupyterLab application."""
     _ensure_package()
-    check_call(['npm', 'run', 'build'], cwd=build_dir)
+    check_call(['npm', 'run', 'build'], cwd=_get_build_dir())
 
 
 def _ensure_package():
     """Make sure there is a package.json file."""
     run = False
+    build_dir = _get_build_dir()
+    cache_dir = _get_cache_dir()
     if not osp.exists(build_dir):
         os.makedirs(build_dir)
         run = True
@@ -116,5 +115,17 @@ def _read_package():
     """Read the JupyterLab package.json data.
     """
     _ensure_package()
-    with open(pkg_path) as fid:
+    with open(_get_pkg_path()) as fid:
         return json.load(fid)
+
+
+def _get_build_dir():
+    return pjoin(ENV_JUPYTER_PATH[0], 'lab')
+
+
+def _get_pkg_path():
+    return pjoin(_get_build_dir(), 'package.json')
+
+
+def _get_cache_dir():
+    return pjoin(_get_build_dir(), 'cache')

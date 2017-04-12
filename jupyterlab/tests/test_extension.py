@@ -64,20 +64,6 @@ class TestExtension(TestCase):
             for d in self.tempdirs:
                 d.cleanup()
 
-        self.src = self.tempdir()
-        self.name = 'mockextension'
-        self.files = files = [
-            pjoin(u'ƒile'),
-            pjoin(u'∂ir', u'ƒile1'),
-            pjoin(u'∂ir', u'∂ir2', u'ƒile2'),
-        ]
-        for file in files:
-            fullpath = os.path.join(self.src, file)
-            parent = os.path.dirname(fullpath)
-            if not os.path.exists(parent):
-                os.makedirs(parent)
-            touch(fullpath)
-
         self.test_dir = self.tempdir()
         self.data_dir = os.path.join(self.test_dir, 'data')
         self.config_dir = os.path.join(self.test_dir, 'config')
@@ -103,7 +89,6 @@ class TestExtension(TestCase):
         self.assertEqual(paths.ENV_CONFIG_PATH, [self.config_dir])
         self.assertEqual(paths.ENV_JUPYTER_PATH, [self.data_dir])
         self.assertEqual(extension.ENV_JUPYTER_PATH, [self.data_dir])
-        self.assertEqual(commands.ENV_CONFIG_PATH, [self.config_dir])
         self.assertEqual(commands.ENV_JUPYTER_PATH, [self.data_dir])
 
     def tearDown(self):
@@ -122,8 +107,12 @@ class TestExtension(TestCase):
     def test_link_extension(self):
         pass
 
-    def test_build(self):
-        pass
+    def test_build_clean(self):
+        if os.path.exists(self.data_dir):
+            os.removedirs(self.data_dir)
+        os.makedirs(self.data_dir)
+        build()
+        assert os.path.exists(os.path.join(self.data_dir, 'lab', 'build'))
 
     def test_add_handlers(self):
         app = NotebookApp()
