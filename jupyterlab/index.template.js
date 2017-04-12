@@ -11,13 +11,13 @@ function main() {
         namespace: 'jupyterlab',
         version: process.env.JUPYTERLAB_VERSION
     });
-    {% for extension in jupyterlab_extensions %}
+    {{#each jupyterlab_extensions}}
     try {
-        lab.registerPluginModule(require('{{extension}}'));
+        lab.registerPluginModule(require('{{this}}'));
     } catch (e) {
         console.error(e);
     }
-    {% endfor %}
+    {{/each}}
     lab.start();
 }
 
