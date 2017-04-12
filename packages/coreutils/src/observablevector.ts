@@ -30,7 +30,7 @@ interface IObservableVector<T> extends IDisposable, IObservable {
   /**
    * The type of the Observable.
    */
-  type: 'Vector';
+  type: 'Vector' | 'UndoableVector';
 
   /**
    * A signal emitted when the vector has changed.
@@ -322,7 +322,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
   /**
    * The type of the Observable.
    */
-  get type(): 'Vector' {
+  get type(): 'Vector' | 'UndoableVector' {
     return 'Vector';
   }
 

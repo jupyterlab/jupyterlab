@@ -43,7 +43,7 @@ import {
  * created and placed in the IModelDB interface.
  */
 export
-type ObservableType = 'Map' | 'Vector' | 'String' | 'Value';
+type ObservableType = 'Map' | 'JSON' | 'Vector' | 'UndoableVector' | 'String' | 'Value';
 
 /**
  * Base interface for Observable objects.
