@@ -29,15 +29,15 @@ make changes.
 
 HERE = os.path.dirname(__file__)
 FILE_LOADER = FileSystemLoader(HERE)
-BUILT_FILES = os.path.join(ENV_JUPYTER_PATH[0], 'lab', 'build')
 PREFIX = '/lab'
 
 
 class LabHandler(IPythonHandler):
     """Render the JupyterLab View."""
 
-    def initialize(self, page_config_data):
+    def initialize(self, page_config_data, built_files):
         self.page_config_data = page_config_data
+        self.built_files = built_files
 
     @web.authenticated
     def get(self):
@@ -49,12 +49,11 @@ class LabHandler(IPythonHandler):
         static_prefix = ujoin(self.base_url, PREFIX)
         bundles = [ujoin(static_prefix, name + '.bundle.js') for name in
                    ['main']]
-        entries = []
 
         # Only load CSS files if they exist.
         css_files = []
         for css_file in ['main.css']:
-            if os.path.isfile(os.path.join(BUILT_FILES, css_file)):
+            if os.path.isfile(os.path.join(self.built_files, css_file)):
                 css_files.append(ujoin(static_prefix, css_file))
 
         configData = dict(self.page_config_data)
@@ -71,7 +70,6 @@ class LabHandler(IPythonHandler):
             mathjax_config=mathjax_config,
             jupyterlab_css=css_files,
             jupyterlab_bundles=bundles,
-            plugin_entries=entries,
         )
         config['jupyterlab_config'] = configData
         return config
@@ -80,18 +78,27 @@ class LabHandler(IPythonHandler):
         return FILE_LOADER.load(self.settings['jinja2_env'], name)
 
 
-def add_handlers(web_app):
+def add_handlers(nbapp):
     """Add the appropriate handlers to the web app.
     """
+    web_app = nbapp.web_app
     base_url = web_app.settings['base_url']
     prefix = ujoin(base_url, PREFIX)
     page_config_data = web_app.settings.get('page_config_data', {})
+    built_files = os.path.join(ENV_JUPYTER_PATH[0], 'lab', 'build')
+
+    # Check for dev mode.
+    dev_mode = os.environ.get('JUPYTERLAB_DEV', False)
+    if not os.path.exists(built_files) or dev_mode:
+        built_files = os.path.join(HERE, 'build')
+
     handlers = [
         (prefix + r'/?', LabHandler, {
-            'page_config_data': page_config_data
+            'page_config_data': page_config_data,
+            'built_files': built_files
         }),
         (prefix + r"/(.*)", FileFindHandler, {
-            'path': BUILT_FILES
+            'path': built_files
         })
     ]
     web_app.add_handlers(".*$", handlers)
@@ -107,4 +114,4 @@ def load_jupyter_server_extension(nbapp):
     if dev_mode:
         nbapp.log.info(DEV_NOTE_NPM)
 
-    add_handlers(nbapp.web_app)
+    add_handlers(nbapp)
