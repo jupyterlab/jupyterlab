@@ -133,13 +133,7 @@ if 'setuptools' in sys.modules:
     # force entrypoints with setuptools (needed for Windows, unconditional because of wheels)
     setup_args['entry_points'] = {
         'console_scripts': [
-
-            'jupyterlab = jupyterlab.labapp:main',
-            'jupyterlab-install_extension = jupyterlab.entries:install_extension',
-            'jupyterlab-uninstall_extension = jupyterlab.entries:uninstall_extension',
-            'jupyterlab-list_extensions = jupyterlab.entries:list_extensions',
-            'jupyterlab-build = jupyterlab.entries:build',
-            'jupyterlab-link_extension = jupyterlab.entries:link_extension',
+            'jupyterlab = jupyterlab.main:main',
         ]
     }
     setup_args.pop('scripts', None)

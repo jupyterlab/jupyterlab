@@ -7,7 +7,6 @@ import json
 import os
 from os import path as osp
 from os.path import join as pjoin
-import sys
 from subprocess import check_call, check_output
 import shutil
 import tarfile
@@ -22,14 +21,13 @@ pkg_path = pjoin(build_dir, 'package.json')
 config_dir = pjoin(ENV_CONFIG_PATH[0], 'labconfig')
 
 
-def install_extension():
+def install_extension(extension):
     """Install an extension package into JupyterLab.
 
     Follows the semantics of https://docs.npmjs.com/cli/install.
 
     The extension is first validated.
     """
-    extension = sys.argv[-1]
     tar_name, pkg_name = validate_extension(extension)
     path = pjoin(cache_dir, tar_name)
     check_call(['npm', 'install', '--save', path], cwd=build_dir)
@@ -40,10 +38,9 @@ def install_extension():
         json.dump(data, fid)
 
 
-def uninstall_extension():
+def uninstall_extension(extension):
     """Uninstall an extension by name.
     """
-    extension = sys.argv[-1]
     data = _read_package()
     data['jupyterlab']['extensions'].remove(extension)
     del data['dependencies'][extension]
@@ -83,39 +80,18 @@ def validate_extension(extension):
     return name, data['name']
 
 
-def link_extension():
+def link_extension(package):
     """Link a package into JupyterLab
 
     Follows the semantics of https://docs.npmjs.com/cli/link.
     """
-    extension = sys.argv[-1]
-    check_call(['npm', 'link', extension], cwd=build_dir)
+    check_call(['npm', 'link', package], cwd=build_dir)
 
 
 def build():
     """Build the JupyterLab application."""
     _ensure_package()
     check_call(['npm', 'run', 'build'], cwd=build_dir)
-
-
-def set_config(name, value):
-    """Set a configuration value in the JupyterLab application."""
-    pass
-
-
-def get_config(name):
-    """Get a configuration value in the JupyterLab application."""
-    pass
-
-
-def list_config():
-    """Show all config settings."""
-    pass
-
-
-def delete_config(name):
-    """Deletes the key from the JupyterLab configuration."""
-    pass
 
 
 def _ensure_package():
