@@ -55,6 +55,13 @@ class ObservableJSON extends ObservableMap<JSONValue> {
   }
 
   /**
+   * The type of the Observable.
+   */
+  get type(): 'JSON' {
+    return 'JSON';
+  }
+
+  /**
    * Serialize the model to JSON.
    */
   toJSON(): JSONObject {
