@@ -3,7 +3,6 @@
 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
-from jinja2 import Environment, FileSystemLoader
 import json
 import os
 from os import path as osp
@@ -20,10 +19,6 @@ build_dir = pjoin(ENV_JUPYTER_PATH[0], 'lab')
 cache_dir = pjoin(build_dir, 'cache')
 pkg_path = pjoin(build_dir, 'package.json')
 config_dir = pjoin(ENV_CONFIG_PATH[0], 'labconfig')
-TEMPLATE_ENVIRONMENT = Environment(
-    autoescape=False,
-    loader=FileSystemLoader(pjoin(here, 'src')),
-    trim_blocks=False)
 
 
 def install_extension(extension):
@@ -33,25 +28,31 @@ def install_extension(extension):
 
     The extension is first validated.
     """
-    tar_name = validate_extension(extension)
+    tar_name, pkg_name = validate_extension(extension)
     path = pjoin(cache_dir, tar_name)
     check_call(['npm', 'install', '--save', path], cwd=build_dir)
+    data = _read_package()
+    data['jupyterlab']['extensions'].push(pkg_name)
+    data['jupyterlab']['extensions'].sort()
+    with open(pkg_path, 'w') as fid:
+        json.dump(data, fid)
 
 
 def uninstall_extension(extension):
     """Uninstall an extension by name.
     """
-    pkg = _read_package()
-    del pkg['dependencies'][extension]
+    data = _read_package()
+    data['jupyterlab']['extensions'].remove(extension)
+    del data['dependencies'][extension]
     with open(pkg_path, 'w') as fid:
-        json.dump(pkg, fid)
+        json.dump(data, fid)
 
 
 def list_extensions():
     """List installed extensions.
     """
-    pkg = _read_package()
-    for ext in sorted(pkg['dependencies']):
+    data = _read_package()
+    for ext in sorted(data['jupyterlab']['extensions']):
         print(ext)
 
 
@@ -76,7 +77,7 @@ def validate_extension(extension):
         raise ValueError(msg)
     if not data['jupyterlab'].get('extension', False):
         raise ValueError(msg)
-    return name
+    return name, data['name']
 
 
 def link_extension(package):
@@ -89,12 +90,6 @@ def link_extension(package):
 
 def build():
     """Build the JupyterLab application."""
-    pkg = _read_package()
-    # Template and write the index.js
-    names = list(pkg['dependencies'].keys())
-    context = dict(jupyterlab_extensions=names)
-    with open(pjoin(build_dir, 'index.js'), 'w') as fid:
-        fid.write(_render_template('index.js', context))
     check_call(['npm', 'run', 'build'], cwd=build_dir)
 
 
@@ -120,17 +115,20 @@ def delete_config(name):
 
 def _ensure_package():
     """Make sure there is a package.json file."""
-    if osp.exists(pkg_path):
-        return
+    run = False
     if not osp.exists(build_dir):
         os.makedirs(build_dir)
+        run = True
     if not osp.exists(cache_dir):
         os.makedirs(cache_dir)
-    shutil.copy2(pjoin(here, 'src', 'package.json'),
-                 pjoin(build_dir, 'package.json'))
-    shutil.copy2(pjoin(here, 'src', 'webpack.config.js'),
-                 pjoin(build_dir, 'webpack.config.js'))
-    check_call(['npm', 'install'], cwd=build_dir)
+        run = True
+    for name in ['package.json', 'index.template.js', 'webpack.config.js']:
+        dest = pjoin(build_dir, name)
+        if not osp.exists(dest):
+            shutil.copy2(pjoin(here, name), dest)
+            run = True
+    if run:
+        check_call(['npm', 'install'], cwd=build_dir)
 
 
 def _read_package():
@@ -139,11 +137,6 @@ def _read_package():
     _ensure_package()
     with open(pkg_path) as fid:
         return json.load(fid)
-
-
-def _render_template(template_filename, context):
-    """Render a jinja template"""
-    return TEMPLATE_ENVIRONMENT.get_template(template_filename).render(context)
 
 
 if __name__ == '__main__':
