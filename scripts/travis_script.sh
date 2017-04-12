@@ -22,7 +22,7 @@ if [[ $GROUP == tests ]]; then
 
     # Run the JS and python tests
     py.test
-    npm clean
+    npm run clean
     npm run build:src
     npm run build:test
     npm test
