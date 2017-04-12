@@ -17,7 +17,7 @@ from jupyter_core.paths import ENV_JUPYTER_PATH
 
 here = osp.dirname(osp.abspath(__file__))
 _shell = sys.platform == 'win32'
-_env = dict(PATH=os.environ['PATH'])
+_env = os.environ
 
 
 def install_extension(extension):
