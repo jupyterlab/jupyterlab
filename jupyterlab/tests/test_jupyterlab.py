@@ -3,7 +3,8 @@
 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
-
+import glob
+import json
 import os
 import sys
 from os.path import join as pjoin
@@ -25,8 +26,11 @@ from jupyterlab.extension import (
 )
 from jupyterlab.commands import (
     install_extension, uninstall_extension, list_extensions,
-    link_extension, build
+    build, _get_pkg_path, _get_cache_dir,
+    _get_build_dir
 )
+
+here = os.path.dirname(os.path.abspath(__file__))
 
 
 def touch(file, mtime=None):
@@ -65,8 +69,8 @@ class TestExtension(TestCase):
                 d.cleanup()
 
         self.test_dir = self.tempdir()
-        self.data_dir = os.path.join(self.test_dir, 'data')
-        self.config_dir = os.path.join(self.test_dir, 'config')
+        self.data_dir = pjoin(self.test_dir, 'data')
+        self.config_dir = pjoin(self.test_dir, 'config')
 
         self.patches = []
         p = patch.dict('os.environ', {
@@ -95,24 +99,36 @@ class TestExtension(TestCase):
         for modulename in self._mock_extensions:
             sys.modules.pop(modulename)
 
+    def _getData(self):
+        pkg_path = _get_pkg_path()
+        if os.path.exists(pkg_path):
+            with open(pkg_path) as fid:
+                return json.load(fid)
+
     def test_install_extension(self):
-        pass
+        install_extension(pjoin(here, 'mockextension'))
+        path = pjoin(_get_cache_dir(), '*.tgz')
+        assert glob.glob(path)
+        data = self._getData()
+        assert '@jupyterlab/python-tests' in data['jupyterlab']['extensions']
+        assert '@jupyterlab/python-tests' in data['dependencies']
 
     def test_uninstall_extension(self):
-        pass
+        install_extension(pjoin(here, 'mockextension'))
+        uninstall_extension('@jupyterlab/python-tests')
+        data = self._getData()
+        assert '@jupyterlab/python-tests' not in data['jupyterlab']['extensions']
+        assert '@jupyterlab/python-tests' not in data['dependencies']
 
     def test_list_extensions(self):
-        pass
+        install_extension(pjoin(here, 'mockextension'))
+        extensions = list_extensions()
+        assert '@jupyterlab/notebook-extension' in extensions
+        assert '@jupyterlab/python-tests' in extensions
 
-    def test_link_extension(self):
-        pass
-
-    def test_build_clean(self):
-        if os.path.exists(self.data_dir):
-            os.removedirs(self.data_dir)
-        os.makedirs(self.data_dir)
+    def test_build(self):
         build()
-        assert os.path.exists(os.path.join(self.data_dir, 'lab', 'build'))
+        assert os.path.exists(_get_build_dir())
 
     def test_add_handlers(self):
         app = NotebookApp()
