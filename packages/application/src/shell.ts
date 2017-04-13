@@ -123,7 +123,10 @@ class ApplicationShell extends Widget {
     this._tracker.activeChanged.connect(this._onActiveChanged, this);
 
     // Connect main layout change listener.
-    this._dockPanel.layoutModified.connect(this._save, this);
+    this._dockPanel.layoutModified.connect(() => {
+      this._layoutModified.emit(void 0);
+      this._save();
+    }, this);
   }
 
   /**
@@ -152,6 +155,13 @@ class ApplicationShell extends Widget {
    */
   get currentWidget(): Widget | null {
     return this._tracker.currentWidget;
+  }
+
+  /**
+   * A signal emitted when the main area's layout is modified.
+   */
+  get layoutModified(): ISignal<this, void> {
+    return this._layoutModified;
   }
 
   /**
@@ -543,18 +553,19 @@ class ApplicationShell extends Widget {
     this._activeChanged.emit(args);
   }
 
+  private _activeChanged = new Signal<this, ApplicationShell.IChangedArgs>(this);
+  private _currentChanged = new Signal<this, ApplicationShell.IChangedArgs>(this);
   private _database: ApplicationShell.ILayoutDB = null;
   private _dockPanel: DockPanel;
   private _hboxPanel: BoxPanel;
   private _hsplitPanel: SplitPanel;
   private _isRestored = false;
+  private _layoutModified = new Signal<this, void>(this);
   private _leftHandler: Private.SideBarHandler;
   private _restored = new PromiseDelegate<ApplicationShell.ILayout>();
   private _rightHandler: Private.SideBarHandler;
-  private _topPanel: Panel;
   private _tracker = new FocusTracker<Widget>();
-  private _currentChanged = new Signal<this, ApplicationShell.IChangedArgs>(this);
-  private _activeChanged = new Signal<this, ApplicationShell.IChangedArgs>(this);
+  private _topPanel: Panel;
 }
 
 
