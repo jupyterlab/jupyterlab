@@ -23,7 +23,7 @@ fs.writeFileSync('build/index.out.js', result);
 
 // Get the git description.
 try {
-  var notice = childProcess.execSync('jupyterlab --describe', { encoding: 'utf8' });
+  var notice = childProcess.execSync('jupyter lab describe', { encoding: 'utf8' });
 } catch (e) {
   var notice = 'unknown';
 }
@@ -33,7 +33,7 @@ try {
 var cwd = process.cwd();
 process.chdir('../..');
 try {
-  var version = childProcess.execSync('jupyterlab --version', { encoding: 'utf8' });
+  var version = childProcess.execSync('jupyter lab --version', { encoding: 'utf8' });
 } catch (e) {
   var version = 'unknown';
 }
