@@ -20,22 +20,22 @@ _shell = sys.platform == 'win32'
 _env = os.environ
 
 
-def install_extension(extension):
+def install_extension(extension, link=False):
     """Install an extension package into JupyterLab.
 
     Follows the semantics of https://docs.npmjs.com/cli/install.
 
     The extension is first validated.
+
+    If link is true, the source directory is linked using `npm link`.
     """
     tar_name, pkg_name = validate_extension(extension)
     path = pjoin(_get_cache_dir(), tar_name)
     check_call(['npm', 'install', '--save', path],
                cwd=_get_root_dir(), shell=_shell, env=_env)
-    data = _read_package()
-    data['jupyterlab']['extensions'].append(pkg_name)
-    data['jupyterlab']['extensions'].sort()
-    with open(_get_pkg_path(), 'w') as fid:
-        json.dump(data, fid)
+    if link:
+        check_call(['npm', 'link', extension],
+                   cwd=_get_root_dir(), shell=_shell, env=_env)
     build()
 
 
@@ -43,7 +43,6 @@ def uninstall_extension(extension):
     """Uninstall an extension by name.
     """
     data = _read_package()
-    data['jupyterlab']['extensions'].remove(extension)
     del data['dependencies'][extension]
     with open(_get_pkg_path(), 'w') as fid:
         json.dump(data, fid)
@@ -54,7 +53,10 @@ def list_extensions():
     """List installed extensions.
     """
     data = _read_package()
-    return sorted(data['jupyterlab']['extensions'])
+    extensions = sorted(data['dependencies'].keys())
+    ignore = data['notExtensions']
+    extensions = [e for e in extensions if e not in ignore]
+    return extensions
 
 
 def validate_extension(extension):
