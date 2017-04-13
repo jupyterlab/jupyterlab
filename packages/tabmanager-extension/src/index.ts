@@ -37,15 +37,17 @@ const plugin: JupyterLabPlugin<void> = {
     shell.addToLeftArea(tabs, { rank: 600 });
 
     app.restored.then(() => {
-      populate();
-      shell.activeChanged.connect(() => { tabs.update(); });
-      shell.currentChanged.connect(() => { populate(); });
+      // Connect signal handlers.
+      shell.layoutModified.connect(() => { populate(); });
       tabs.tabActivateRequested.connect((sender, tab) => {
         shell.activateById(tab.title.owner.id);
       });
       tabs.tabCloseRequested.connect((sender, tab) => {
         tab.title.owner.close();
       });
+
+      // Populate the tab manager.
+      populate();
     });
   },
   autoStart: true,
