@@ -157,10 +157,10 @@ class ApplicationShell extends Widget {
   /**
    * The main dock area's user interface mode.
    */
-  get mode(): 'single-document' | 'multiple-document' {
+  get mode(): DockPanel.Mode {
     return this._dockPanel.mode;
   }
-  set mode(mode: 'single-document' | 'multiple-document') {
+  set mode(mode: DockPanel.Mode) {
     this._dockPanel.mode = mode;
   }
 
@@ -373,11 +373,16 @@ class ApplicationShell extends Widget {
 
       // Rehydrate the main area.
       if (mainArea) {
-        if (mainArea.dock) {
+        const { currentWidget, dock, mode } = mainArea;
+
+        if (dock) {
           this._dockPanel.restoreLayout(mainArea.dock);
         }
-        if (mainArea.currentWidget) {
+        if (currentWidget) {
           this.activateById(mainArea.currentWidget.id);
+        }
+        if (mode) {
+          this._dockPanel.mode = mode;
         }
       }
 
@@ -499,7 +504,8 @@ class ApplicationShell extends Widget {
     let data: ApplicationShell.ILayout = {
       mainArea: {
         currentWidget: this._tracker.currentWidget,
-        dock: this._dockPanel.saveLayout()
+        dock: this._dockPanel.saveLayout(),
+        mode: this._dockPanel.mode
       },
       leftArea: this._leftHandler.dehydrate(),
       rightArea: this._rightHandler.dehydrate()
@@ -641,6 +647,11 @@ namespace ApplicationShell {
      * The contents of the main application dock panel.
      */
     readonly dock: DockLayout.ILayoutConfig | null;
+
+    /**
+     * The document mode (i.e., multiple/single) of the main dock panel.
+     */
+    readonly mode: DockPanel.Mode | null;
   };
 
   /**
