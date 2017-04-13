@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ArrayExt, each, find, toArray
+  ArrayExt, each, find, IIterator, iter, toArray
 } from '@phosphor/algorithm';
 
 import {
@@ -42,6 +42,12 @@ const CURRENT_CLASS = 'jp-mod-current';
  * The class name added to the active widget's title.
  */
 const ACTIVE_CLASS = 'jp-mod-active';
+
+
+/**
+ * The default rank of items added to a sidebar.
+ */
+const DEFAULT_RANK = 500;
 
 
 /**
@@ -117,14 +123,10 @@ class ApplicationShell extends Widget {
     this._tracker.activeChanged.connect(this._onActiveChanged, this);
 
     // Connect main layout change listener.
-    this._dockPanel.layoutModified.connect(this._save, this);
-  }
-
-  /**
-   * A signal emitted when main area's current focus changes.
-   */
-  get currentChanged(): ISignal<this, ApplicationShell.IChangedArgs> {
-    return this._currentChanged;
+    this._dockPanel.layoutModified.connect(() => {
+      this._layoutModified.emit(void 0);
+      this._save();
+    }, this);
   }
 
   /**
@@ -135,13 +137,6 @@ class ApplicationShell extends Widget {
   }
 
   /**
-   * The current widget in the shell's main area.
-   */
-  get currentWidget(): Widget | null {
-    return this._tracker.currentWidget;
-  }
-
-  /**
    * The active widget in the shell's main area.
    */
   get activeWidget(): Widget | null {
@@ -149,21 +144,34 @@ class ApplicationShell extends Widget {
   }
 
   /**
-   * True if the given area is empty.
+   * A signal emitted when main area's current focus changes.
    */
-  isEmpty(area: ApplicationShell.Area): boolean {
-    switch (area) {
-    case 'left':
-      return this._leftHandler.stackedPanel.widgets.length === 0;
-    case 'main':
-      return this._dockPanel.isEmpty;
-    case 'top':
-      return this._topPanel.widgets.length === 0;
-    case 'right':
-      return this._rightHandler.stackedPanel.widgets.length === 0;
-    default:
-      return true;
-    }
+  get currentChanged(): ISignal<this, ApplicationShell.IChangedArgs> {
+    return this._currentChanged;
+  }
+
+  /**
+   * The current widget in the shell's main area.
+   */
+  get currentWidget(): Widget | null {
+    return this._tracker.currentWidget;
+  }
+
+  /**
+   * A signal emitted when the main area's layout is modified.
+   */
+  get layoutModified(): ISignal<this, void> {
+    return this._layoutModified;
+  }
+
+  /**
+   * The main dock area's user interface mode.
+   */
+  get mode(): DockPanel.Mode {
+    return this._dockPanel.mode;
+  }
+  set mode(mode: DockPanel.Mode) {
+    this._dockPanel.mode = mode;
   }
 
   /**
@@ -174,7 +182,7 @@ class ApplicationShell extends Widget {
   }
 
   /**
-   * Activate a widget in it's area.
+   * Activate a widget in its area.
    */
   activateById(id: string): void {
     if (this._leftHandler.has(id)) {
@@ -260,7 +268,7 @@ class ApplicationShell extends Widget {
       console.error('widgets added to app shell must have unique id property');
       return;
     }
-    let rank = 'rank' in options ? options.rank : 100;
+    let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
     this._leftHandler.addWidget(widget, rank);
     this._save();
   }
@@ -293,7 +301,7 @@ class ApplicationShell extends Widget {
       console.error('widgets added to app shell must have unique id property');
       return;
     }
-    let rank = 'rank' in options ? options.rank : 100;
+    let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
     this._rightHandler.addWidget(widget, rank);
     this._save();
   }
@@ -341,6 +349,24 @@ class ApplicationShell extends Widget {
   }
 
   /**
+   * True if the given area is empty.
+   */
+  isEmpty(area: ApplicationShell.Area): boolean {
+    switch (area) {
+    case 'left':
+      return this._leftHandler.stackedPanel.widgets.length === 0;
+    case 'main':
+      return this._dockPanel.isEmpty;
+    case 'top':
+      return this._topPanel.widgets.length === 0;
+    case 'right':
+      return this._rightHandler.stackedPanel.widgets.length === 0;
+    default:
+      return true;
+    }
+  }
+
+  /**
    * Set the layout data store for the application shell.
    */
   setLayoutDB(database: ApplicationShell.ILayoutDB): void {
@@ -357,11 +383,16 @@ class ApplicationShell extends Widget {
 
       // Rehydrate the main area.
       if (mainArea) {
-        if (mainArea.dock) {
-          this._dockPanel.restoreLayout(mainArea.dock);
+        const { currentWidget, dock, mode } = mainArea;
+
+        if (dock) {
+          this._dockPanel.restoreLayout(dock);
         }
-        if (mainArea.currentWidget) {
-          this.activateById(mainArea.currentWidget.id);
+        if (currentWidget) {
+          this.activateById(currentWidget.id);
+        }
+        if (mode) {
+          this._dockPanel.mode = mode;
         }
       }
 
@@ -390,6 +421,24 @@ class ApplicationShell extends Widget {
     this._tracker.currentChanged.connect(this._save, this);
     this._leftHandler.sideBar.currentChanged.connect(this._save, this);
     this._rightHandler.sideBar.currentChanged.connect(this._save, this);
+  }
+
+  /**
+   * Returns the widgets for an application area.
+   */
+  widgets(area: ApplicationShell.Area): IIterator<Widget> {
+    switch (area) {
+      case 'main':
+        return this._dockPanel.widgets();
+      case 'left':
+        return iter(this._leftHandler.sideBar.titles.map(t => t.owner));
+      case 'right':
+        return iter(this._rightHandler.sideBar.titles.map(t => t.owner));
+      case 'top':
+        return this._topPanel.children();
+      default:
+        break;
+    }
   }
 
   /*
@@ -465,7 +514,8 @@ class ApplicationShell extends Widget {
     let data: ApplicationShell.ILayout = {
       mainArea: {
         currentWidget: this._tracker.currentWidget,
-        dock: this._dockPanel.saveLayout()
+        dock: this._dockPanel.saveLayout(),
+        mode: this._dockPanel.mode
       },
       leftArea: this._leftHandler.dehydrate(),
       rightArea: this._rightHandler.dehydrate()
@@ -503,18 +553,19 @@ class ApplicationShell extends Widget {
     this._activeChanged.emit(args);
   }
 
+  private _activeChanged = new Signal<this, ApplicationShell.IChangedArgs>(this);
+  private _currentChanged = new Signal<this, ApplicationShell.IChangedArgs>(this);
   private _database: ApplicationShell.ILayoutDB = null;
   private _dockPanel: DockPanel;
   private _hboxPanel: BoxPanel;
   private _hsplitPanel: SplitPanel;
   private _isRestored = false;
+  private _layoutModified = new Signal<this, void>(this);
   private _leftHandler: Private.SideBarHandler;
   private _restored = new PromiseDelegate<ApplicationShell.ILayout>();
   private _rightHandler: Private.SideBarHandler;
-  private _topPanel: Panel;
   private _tracker = new FocusTracker<Widget>();
-  private _currentChanged = new Signal<this, ApplicationShell.IChangedArgs>(this);
-  private _activeChanged = new Signal<this, ApplicationShell.IChangedArgs>(this);
+  private _topPanel: Panel;
 }
 
 
@@ -607,6 +658,11 @@ namespace ApplicationShell {
      * The contents of the main application dock panel.
      */
     readonly dock: DockLayout.ILayoutConfig | null;
+
+    /**
+     * The document mode (i.e., multiple/single) of the main dock panel.
+     */
+    readonly mode: DockPanel.Mode | null;
   };
 
   /**

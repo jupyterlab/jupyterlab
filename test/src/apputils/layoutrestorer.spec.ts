@@ -12,7 +12,7 @@ import {
 } from '@phosphor/commands';
 
 import {
-  Widget
+  DockPanel, Widget
 } from '@phosphor/widgets';
 
 import {
@@ -82,8 +82,9 @@ describe('apputils', () => {
           state: new StateDB({ namespace: NAMESPACE })
         });
         let currentWidget = new Widget();
+        let mode: DockPanel.Mode = 'single-document';
         let dehydrated: ApplicationShell.ILayout = {
-          mainArea: { currentWidget, dock: null },
+          mainArea: { currentWidget, dock: null, mode },
           leftArea: { collapsed: true, currentWidget: null, widgets: null },
           rightArea: { collapsed: true, currentWidget: null, widgets: null }
         };
@@ -93,6 +94,7 @@ describe('apputils', () => {
           .then(() => restorer.fetch())
           .then(layout => {
             expect(layout.mainArea.currentWidget).to.be(currentWidget);
+            expect(layout.mainArea.mode).to.be(mode);
             done();
           }).catch(done);
       });
@@ -124,7 +126,7 @@ describe('apputils', () => {
         // The `fresh` attribute is only here to check against the return value.
         let dehydrated: ApplicationShell.ILayout = {
           fresh: false,
-          mainArea: { currentWidget: null, dock: null },
+          mainArea: { currentWidget: null, dock: null, mode: null },
           leftArea: {
             currentWidget,
             collapsed: true,
@@ -188,7 +190,7 @@ describe('apputils', () => {
           state: new StateDB({ namespace: NAMESPACE })
         });
         let dehydrated: ApplicationShell.ILayout = {
-          mainArea: { currentWidget: null, dock: null },
+          mainArea: { currentWidget: null, dock: null, mode: null },
           leftArea: { currentWidget: null, collapsed: true, widgets: null },
           rightArea: { collapsed: true, currentWidget: null, widgets: null }
         };
@@ -208,7 +210,7 @@ describe('apputils', () => {
         // The `fresh` attribute is only here to check against the return value.
         let dehydrated: ApplicationShell.ILayout = {
           fresh: false,
-          mainArea: { currentWidget: null, dock: null },
+          mainArea: { currentWidget: null, dock: null, mode: null },
           leftArea: {
             currentWidget,
             collapsed: true,

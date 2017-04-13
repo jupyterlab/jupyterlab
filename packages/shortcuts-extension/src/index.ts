@@ -41,6 +41,11 @@ const SHORTCUTS = [
     keys: ['Ctrl Shift [']
   },
   {
+    command: 'main-jupyterlab:toggle-mode',
+    selector: 'body',
+    keys: ['Accel Shift Enter']
+  },
+  {
     command: 'command-palette:activate',
     selector: 'body',
     keys: ['Accel Shift P']
