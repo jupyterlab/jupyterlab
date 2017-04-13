@@ -7,7 +7,7 @@ import json
 import os
 from os import path as osp
 from os.path import join as pjoin
-from subprocess import check_call, check_output
+from subprocess import check_output
 import shutil
 import sys
 import tarfile
@@ -16,8 +16,14 @@ from jupyter_core.paths import ENV_JUPYTER_PATH
 
 
 here = osp.dirname(osp.abspath(__file__))
-_shell = sys.platform == 'win32'
-_env = os.environ
+
+
+def run(cmd, **kwargs):
+    """Run a command in the given working directory.
+    """
+    kwargs.setdefault('shell', sys.platform == 'win32')
+    kwargs.setdefault('env', os.environ)
+    return check_output(cmd, **kwargs)
 
 
 def install_extension(extension, link=False):
@@ -31,11 +37,10 @@ def install_extension(extension, link=False):
     """
     tar_name, pkg_name = validate_extension(extension)
     path = pjoin(_get_cache_dir(), tar_name)
-    check_call(['npm', 'install', '--save', path],
-               cwd=_get_root_dir(), shell=_shell, env=_env)
+    cwd = _get_root_dir()
+    run(['npm', 'install', '--save', path], cwd=cwd)
     if link:
-        check_call(['npm', 'link', extension],
-                   cwd=_get_root_dir(), shell=_shell, env=_env)
+        run(['npm', 'link', extension], cwd)
     build()
 
 
@@ -54,7 +59,7 @@ def list_extensions():
     """
     data = _read_package()
     extensions = sorted(data['dependencies'].keys())
-    ignore = data['notExtensions']
+    ignore = data['jupyterlab']['notExtensions']
     extensions = [e for e in extensions if e not in ignore]
     return extensions
 
@@ -68,8 +73,7 @@ def validate_extension(extension):
     _ensure_package()
     cache_dir = _get_cache_dir()
     # npm pack the extension
-    output = check_output(['npm', 'pack', extension],
-                          cwd=cache_dir, shell=_shell, env=_env)
+    output = run(['npm', 'pack', extension], cwd=cache_dir)
     name = output.decode('utf8').splitlines()[-1]
     # read the package.json data from the file
     tar = tarfile.open(pjoin(cache_dir, name), "r:gz")
@@ -85,11 +89,15 @@ def validate_extension(extension):
     return name, data['name']
 
 
+def clean():
+    """Clean the JupyterLab application directory."""
+    pass
+
+
 def build():
     """Build the JupyterLab application."""
     _ensure_package()
-    check_call(['npm', 'run', 'build'],
-               cwd=_get_root_dir(), shell=_shell, env=_env)
+    run(['npm', 'run', 'build'], cwd=_get_root_dir())
 
 
 def describe():
@@ -98,8 +106,7 @@ def describe():
     description = 'unknown'
     try:
         cwd = os.path.dirname(os.path.dirname(__file__))
-        description = check_output(['git', 'describe'],
-                                   cwd=cwd, shell=_shell, env=_env)
+        description = run(['git', 'describe'], cwd=cwd)
         description = description.decode('utf8').strip()
     except Exception:
         pass
@@ -117,8 +124,7 @@ def _ensure_package():
         if not osp.exists(dest) or name != 'package.json':
             shutil.copy2(pjoin(here, name), dest)
     if not osp.exists(pjoin(root_dir, 'node_modules')):
-        check_call(['npm', 'install'],
-                   cwd=root_dir, shell=_shell, env=_env)
+        run(['npm', 'install'], cwd=root_dir)
 
 
 def _read_package():

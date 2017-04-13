@@ -1,5 +1,5 @@
 # coding: utf-8
-"""A tornado based Jupyter lab server."""
+"""Jupyter LabExtension Entry Points."""
 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
@@ -41,9 +41,9 @@ class ListLabExtensionsApp(JupyterApp):
 
 
 _examples = """
-jupyter labextension list                          # list all configured labextensions
-jupyter labextension install --py <packagename>    # install a labextension from a Python package
-jupyter labextension uninstall --py <packagename>  # uninstall a labextension in a Python package
+jupyter labextension list                        # list all configured labextensions
+jupyter labextension install <extension name>    # install a labextension 
+jupyter labextension uninstall <extension name>  # uninstall a labextension
 """
 
 
