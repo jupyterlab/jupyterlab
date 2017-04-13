@@ -22,6 +22,14 @@ class LabBuildApp(JupyterApp):
         build()
 
 
+class LabCleanApp(JupyterApp):
+    version = __version__
+    description = "Clean the JupyterLab application"
+
+    def start(self):
+        build()
+
+
 class LabDescribeApp(JupyterApp):
     version = __version__
     description = "Git description the JupyterLab application"
@@ -47,6 +55,7 @@ class LabApp(NotebookApp):
 
     subcommands = dict(
         build=(LabBuildApp, LabBuildApp.description.splitlines()[0]),
+        clean=(LabCleanApp, LabCleanApp.description.splitlines()[0]),
         describe=(LabDescribeApp, LabBuildApp.description.splitlines()[0])
     )
 

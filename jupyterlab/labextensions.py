@@ -3,25 +3,43 @@
 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
+import os
 import sys
 
 from jupyter_core.application import JupyterApp
-from traitlets import Bool
 
 from ._version import __version__
 from .commands import (
-    install_extension, uninstall_extension, list_extensions
+    install_extension, uninstall_extension, list_extensions,
+    link_extension, unlink_extension
 )
 
 
 class InstallLabExtensionApp(JupyterApp):
     version = __version__
     description = "Install labextension(s)"
-    link = Bool(False, config=True,
-                help="Use an npm link to a local file path")
 
     def start(self):
-        [install_extension(arg, self.link) for arg in self.extra_args]
+        self.extra_args = self.extra_args or [os.getcwd()]
+        [install_extension(arg) for arg in self.extra_args]
+
+
+class LinkLabExtensionApp(JupyterApp):
+    version = __version__
+    description = "Link labextension(s)"
+
+    def start(self):
+        self.extra_args = self.extra_args or [os.getcwd()]
+        [link_extension(arg) for arg in self.extra_args]
+
+
+class UnlinkLabExtensionApp(JupyterApp):
+    version = __version__
+    description = "Unlink labextension(s)"
+
+    def start(self):
+        self.extra_args = self.extra_args or [os.getcwd()]
+        [unlink_extension(arg) for arg in self.extra_args]
 
 
 class UninstallLabExtensionApp(JupyterApp):
@@ -29,6 +47,7 @@ class UninstallLabExtensionApp(JupyterApp):
     description = "Uninstall labextension(s)"
 
     def start(self):
+        self.extra_args = self.extra_args or [os.getcwd()]
         [uninstall_extension(arg) for arg in self.extra_args]
 
 
@@ -57,7 +76,9 @@ class LabExtensionApp(JupyterApp):
     subcommands = dict(
         install=(InstallLabExtensionApp, "Install labextension(s)"),
         uninstall=(UninstallLabExtensionApp, "Uninstall labextension(s)"),
-        list=(ListLabExtensionsApp, "List labextensions")
+        list=(ListLabExtensionsApp, "List labextensions"),
+        link=(LinkLabExtensionApp, "Link labextension(s)"),
+        unlink=(UnlinkLabExtensionApp, "Unlink labextension(s)"),
     )
 
     def start(self):
