@@ -25,7 +25,7 @@ const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.tab-manager',
   activate: (app: JupyterLab, restorer: ILayoutRestorer): void => {
     const { commands, shell } = app;
-    const tabs = new TabBar({ orientation: 'vertical' });
+    const tabs = new TabBar<Widget>({ orientation: 'vertical' });
     const populate = () => {
       tabs.clearTabs();
       each(shell.widgets('main'), widget => { tabs.addTab(widget.title); });
@@ -40,7 +40,7 @@ const plugin: JupyterLabPlugin<void> = {
     shell.activeChanged.connect(() => { tabs.update(); });
     shell.currentChanged.connect(() => { populate(); });
     tabs.tabActivateRequested.connect((sender, tab) => {
-      const id = (tab.title.owner as Widget).id;
+      const id = tab.title.owner.id;
 
       // If the current widget is clicked, toggle shell mode.
       if (shell.currentWidget.id === id) {
@@ -53,7 +53,7 @@ const plugin: JupyterLabPlugin<void> = {
         .then(() => { shell.activateById(id); });
     });
     tabs.tabCloseRequested.connect((sender, tab) => {
-      (tab.title.owner as Widget).close();
+      tab.title.owner.close();
     });
   },
   autoStart: true,
