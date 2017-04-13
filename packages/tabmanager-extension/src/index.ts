@@ -26,17 +26,21 @@ const plugin: JupyterLabPlugin<void> = {
   activate: (app: JupyterLab, restorer: ILayoutRestorer): void => {
     const { shell } = app;
     const tabs = new TabBar<Widget>({ orientation: 'vertical' });
-    const populate = () => {
-      tabs.clearTabs();
-      each(shell.widgets('main'), widget => { tabs.addTab(widget.title); });
-    };
+    const header = document.createElement('header');
 
     restorer.add(tabs, 'tab-manager');
     tabs.id = 'tab-manager';
     tabs.title.label = 'Tabs';
+    header.textContent = 'Open Tabs';
+    tabs.node.insertBefore(header, tabs.contentNode);
     shell.addToLeftArea(tabs, { rank: 600 });
 
     app.restored.then(() => {
+      const populate = () => {
+        tabs.clearTabs();
+        each(shell.widgets('main'), widget => { tabs.addTab(widget.title); });
+      };
+
       // Connect signal handlers.
       shell.layoutModified.connect(() => { populate(); });
       tabs.tabActivateRequested.connect((sender, tab) => {
