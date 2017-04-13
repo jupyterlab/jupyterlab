@@ -37,8 +37,7 @@ def install_extension(extension):
     """
     tar_name, pkg_name = validate_extension(extension)
     path = pjoin(_get_cache_dir(), tar_name)
-    cwd = _get_root_dir()
-    run(['npm', 'install', '--save', path], cwd=cwd)
+    run(['npm', 'install', '--save', path], cwd=_get_root_dir())
     build()
 
 
@@ -77,6 +76,7 @@ def link_extension(extension):
             os.remove(dest)
         os.symlink(src, dest)
 
+    # Update JupyterLab metadata.
     data = _read_package()
     name = pkg_data['name']
     data['dependencies'][name] = 'file:' + extension
