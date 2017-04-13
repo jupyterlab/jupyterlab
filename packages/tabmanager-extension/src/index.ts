@@ -24,7 +24,7 @@ import {
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.tab-manager',
   activate: (app: JupyterLab, restorer: ILayoutRestorer): void => {
-    const { commands, shell } = app;
+    const { shell } = app;
     const tabs = new TabBar<Widget>({ orientation: 'vertical' });
     const populate = () => {
       tabs.clearTabs();
@@ -34,26 +34,18 @@ const plugin: JupyterLabPlugin<void> = {
     restorer.add(tabs, 'tab-manager');
     tabs.id = 'tab-manager';
     tabs.title.label = 'Tabs';
-    populate();
     shell.addToLeftArea(tabs, { rank: 600 });
 
-    shell.activeChanged.connect(() => { tabs.update(); });
-    shell.currentChanged.connect(() => { populate(); });
-    tabs.tabActivateRequested.connect((sender, tab) => {
-      const id = tab.title.owner.id;
-
-      // If the current widget is clicked, toggle shell mode.
-      if (shell.currentWidget.id === id) {
-        commands.execute('main-jupyterlab:toggle-mode');
-        return;
-      }
-
-      // If a new tab is picked, switch to single-document mode and show it.
-      commands.execute('main-jupyterlab:set-mode', { mode: 'single-document' })
-        .then(() => { shell.activateById(id); });
-    });
-    tabs.tabCloseRequested.connect((sender, tab) => {
-      tab.title.owner.close();
+    app.restored.then(() => {
+      populate();
+      shell.activeChanged.connect(() => { tabs.update(); });
+      shell.currentChanged.connect(() => { populate(); });
+      tabs.tabActivateRequested.connect((sender, tab) => {
+        shell.activateById(tab.title.owner.id);
+      });
+      tabs.tabCloseRequested.connect((sender, tab) => {
+        tab.title.owner.close();
+      });
     });
   },
   autoStart: true,
