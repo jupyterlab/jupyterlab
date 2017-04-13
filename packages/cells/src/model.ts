@@ -10,15 +10,11 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  utils
-} from '@jupyterlab/services';
-
-import {
   CodeEditor
 } from '@jupyterlab/codeeditor';
 
 import {
-  IChangedArgs, nbformat
+  IChangedArgs, nbformat, uuid
 } from '@jupyterlab/coreutils';
 
 import {
@@ -132,7 +128,7 @@ class CellModel extends CodeEditor.Model implements ICellModel {
   constructor(options: CellModel.IOptions) {
     super({modelDB: options.modelDB});
 
-    this._id = options.id || utils.uuid();
+    this._id = options.id || uuid();
 
     this.value.changed.connect(this.onGenericChange, this);
 
@@ -441,7 +437,8 @@ namespace CodeCellModel {
   /**
    * The options used to initialize a `CodeCellModel`.
    */
-  export interface IOptions extends CellModel.IOptions {
+  export
+  interface IOptions extends CellModel.IOptions {
     /**
      * The factory for output area model creation.
      */

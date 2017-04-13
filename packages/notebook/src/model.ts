@@ -6,10 +6,6 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  utils
-} from '@jupyterlab/services';
-
-import {
   DocumentModel, DocumentRegistry
 } from '@jupyterlab/docregistry';
 
@@ -19,7 +15,7 @@ import {
 } from '@jupyterlab/cells';
 
 import {
-  IObservableJSON, IObservableUndoableVector,
+  IObservableJSON, IObservableUndoableVector, uuid,
   IObservableVector, ObservableVector, nbformat, IModelDB
 } from '@jupyterlab/coreutils';
 
@@ -425,7 +421,7 @@ namespace NotebookModel {
       }
       if (this._modelDB) {
         if (!options.id) {
-          options.id = utils.uuid();
+          options.id = uuid();
         }
         options.modelDB = this._modelDB.view(options.id);
       }
@@ -443,7 +439,7 @@ namespace NotebookModel {
     createMarkdownCell(options: CellModel.IOptions): IMarkdownCellModel {
       if (this._modelDB) {
         if (!options.id) {
-          options.id = utils.uuid();
+          options.id = uuid();
         }
         options.modelDB = this._modelDB.view(options.id);
       }
@@ -461,7 +457,7 @@ namespace NotebookModel {
     createRawCell(options: CellModel.IOptions): IRawCellModel {
       if (this._modelDB) {
         if (!options.id) {
-          options.id = utils.uuid();
+          options.id = uuid();
         }
         options.modelDB = this._modelDB.view(options.id);
       }
