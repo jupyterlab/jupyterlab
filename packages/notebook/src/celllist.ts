@@ -34,7 +34,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
   constructor(modelDB: IModelDB, factory: NotebookModel.IContentFactory) {
     this._modelDB = modelDB;
     this._factory = factory;
-    this._cellOrder = modelDB.createUndoableVector<string>('cellOrder');
+    this._cellOrder = modelDB.createVector<string>('cellOrder');
     this._cellMap = new ObservableMap<ICellModel>();
 
     this._cellOrder.changed.connect(this._onOrderChanged, this);

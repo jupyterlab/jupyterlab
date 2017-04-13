@@ -30,10 +30,6 @@ import {
 } from './observablestring';
 
 import {
-  IObservableVector, ObservableVector
-} from './observablevector';
-
-import {
   IObservableUndoableVector, ObservableUndoableVector
 } from './undoablevector';
 
@@ -43,7 +39,7 @@ import {
  * created and placed in the IModelDB interface.
  */
 export
-type ObservableType = 'Map' | 'JSON' | 'Vector' | 'UndoableVector' | 'String' | 'Value';
+type ObservableType = 'Map' | 'JSON' | 'Vector' | 'String' | 'Value';
 
 /**
  * Base interface for Observable objects.
@@ -142,19 +138,6 @@ interface IModelDB extends IDisposable {
   createString(path: string): IObservableString;
 
   /**
-   * Create a vector and insert it in the database.
-   *
-   * @param path: the path for the vector.
-   *
-   * @returns the vector that was created.
-   *
-   * #### Notes
-   * The vector can only store objects that are simple
-   * JSON Objects and primitives.
-   */
-  createVector<T extends JSONValue>(path: string): IObservableVector<T>;
-
-  /**
    * Create an undoable vector and insert it in the database.
    *
    * @param path: the path for the vector.
@@ -165,7 +148,7 @@ interface IModelDB extends IDisposable {
    * The vector can only store objects that are simple
    * JSON Objects and primitives.
    */
-  createUndoableVector<T extends JSONValue>(path: string): IObservableUndoableVector<T>;
+  createVector<T extends JSONValue>(path: string): IObservableUndoableVector<T>;
 
   /**
    * Create a map and insert it in the database.
@@ -414,24 +397,6 @@ class ModelDB implements IModelDB {
   }
 
   /**
-   * Create a vector and insert it in the database.
-   *
-   * @param path: the path for the vector.
-   *
-   * @returns the vector that was created.
-   *
-   * #### Notes
-   * The vector can only store objects that are simple
-   * JSON Objects and primitives.
-   */
-  createVector(path: string): IObservableVector<JSONValue> {
-    let vec = new ObservableVector<JSONValue>();
-    this._disposables.add(vec);
-    this.set(path, vec);
-    return vec;
-  }
-
-  /**
    * Create an undoable vector and insert it in the database.
    *
    * @param path: the path for the vector.
@@ -442,7 +407,7 @@ class ModelDB implements IModelDB {
    * The vector can only store objects that are simple
    * JSON Objects and primitives.
    */
-  createUndoableVector(path: string): IObservableUndoableVector<JSONValue> {
+  createVector(path: string): IObservableUndoableVector<JSONValue> {
     let vec = new ObservableUndoableVector<JSONValue>(
       new ObservableUndoableVector.IdentitySerializer());
     this._disposables.add(vec);
