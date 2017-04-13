@@ -57,6 +57,7 @@ class LabHandler(IPythonHandler):
                 css_files.append(ujoin(static_prefix, css_file))
 
         configData = dict(self.page_config_data)
+        configData.setdefault('ignorePlugins', [])
         configData.update(dict(
             terminalsAvailable=self.settings.get('terminals_available', False),
         ))
@@ -69,7 +70,7 @@ class LabHandler(IPythonHandler):
             mathjax_url=self.mathjax_url,
             mathjax_config=mathjax_config,
             jupyterlab_css=css_files,
-            jupyterlab_bundles=bundles,
+            jupyterlab_bundles=bundles
         )
         config['jupyterlab_config'] = configData
         return config
