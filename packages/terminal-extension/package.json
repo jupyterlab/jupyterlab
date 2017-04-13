@@ -28,6 +28,9 @@
     "clean": "rimraf lib",
     "watch": "tsc -w"
   },
+  "jupyterlab": {
+    "extension": true
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/jupyterlab/jupyterlab.git"
