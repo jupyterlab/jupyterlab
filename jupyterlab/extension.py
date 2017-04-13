@@ -12,7 +12,6 @@ from notebook.utils import url_path_join as ujoin
 from jupyter_core.paths import ENV_JUPYTER_PATH
 
 
-
 #-----------------------------------------------------------------------------
 # Module globals
 #-----------------------------------------------------------------------------
@@ -47,6 +46,7 @@ class LabHandler(IPythonHandler):
     def _get_lab_config(self):
         """Get the config data for the page template."""
         static_prefix = ujoin(self.base_url, PREFIX)
+
         bundles = [ujoin(static_prefix, name + '.bundle.js') for name in
                    ['main']]
 

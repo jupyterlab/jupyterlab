@@ -3,9 +3,6 @@
 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
-import os
-from subprocess import check_output
-import sys
 
 from notebook.notebookapp import NotebookApp
 from jupyter_core.application import JupyterApp
@@ -14,7 +11,7 @@ from traitlets import Unicode
 
 from ._version import __version__
 from .extension import load_jupyter_server_extension
-from .commands import build
+from .commands import build, describe
 
 
 class LabBuildApp(JupyterApp):
@@ -30,17 +27,7 @@ class LabDescribeApp(JupyterApp):
     description = "Git description the JupyterLab application"
 
     def start(self):
-        description = 'unknown'
-        try:
-            cwd = os.path.dirname(os.path.dirname(__file__))
-            shell = sys.platform == 'win32'
-            description = check_output(['git', 'describe'],
-                                       cwd=cwd, shell=shell)
-            description = description.decode('utf8').strip()
-        except Exception:
-            pass
-        print(description)
-        return
+        print(describe())
 
 
 class LabApp(NotebookApp):

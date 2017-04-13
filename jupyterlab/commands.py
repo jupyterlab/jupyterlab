@@ -36,6 +36,7 @@ def install_extension(extension):
     data['jupyterlab']['extensions'].sort()
     with open(_get_pkg_path(), 'w') as fid:
         json.dump(data, fid)
+    build()
 
 
 def uninstall_extension(extension):
@@ -46,6 +47,7 @@ def uninstall_extension(extension):
     del data['dependencies'][extension]
     with open(_get_pkg_path(), 'w') as fid:
         json.dump(data, fid)
+    build()
 
 
 def list_extensions():
@@ -88,6 +90,20 @@ def build():
                cwd=_get_root_dir(), shell=_shell, env=_env)
 
 
+def describe():
+    """Get the git description of the JupyterLab application.
+    """
+    description = 'unknown'
+    try:
+        cwd = os.path.dirname(os.path.dirname(__file__))
+        description = check_output(['git', 'describe'],
+                                   cwd=cwd, shell=_shell, env=_env)
+        description = description.decode('utf8').strip()
+    except Exception:
+        pass
+    return description
+
+
 def _ensure_package():
     """Make sure there is a package.json file."""
     cache_dir = _get_cache_dir()
@@ -96,7 +112,7 @@ def _ensure_package():
         os.makedirs(cache_dir)
     for name in ['package.json', 'index.template.js', 'webpack.config.js']:
         dest = pjoin(root_dir, name)
-        if not osp.exists(dest):
+        if not osp.exists(dest) or name != 'package.json':
             shutil.copy2(pjoin(here, name), dest)
     if not osp.exists(pjoin(root_dir, 'node_modules')):
         check_call(['npm', 'install'],
