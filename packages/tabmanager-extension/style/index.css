@@ -47,15 +47,14 @@
   margin-left: 0;
 }
 
-/* This is a current tab of a tab bar in the dock panel: each tab bar has 1. */
-#tab-manager .p-TabBar-tab.p-mod-current {
+
+#tab-manager .p-TabBar-tab.jp-mod-active {
   background: var(--jp-layout-color0);
   color: var(--jp-ui-font-color0);
   transform: translateY(var(--jp-border-width));
 }
 
 
-/* This is the main application level active tab: only 1 exists. */
 #tab-manager .p-TabBar-tab.jp-mod-active:before {
   position: absolute;
   top: calc(-1 * var(--jp-border-width));
