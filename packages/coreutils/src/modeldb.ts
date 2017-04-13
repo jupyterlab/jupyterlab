@@ -438,7 +438,7 @@ class ModelDB implements IModelDB {
    *
    * @param path: the path for the object.
    *
-   * @returns the object that wsa created.
+   * @returns the object that was created.
    */
   createJSON(path: string): IObservableJSON {
     let json = new ObservableJSON();
