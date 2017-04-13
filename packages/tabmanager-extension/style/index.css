@@ -30,16 +30,15 @@
   margin-left: calc(-1*var(--jp-border-width));
   height: var(--jp-private-tab-manager-tab-height);
   padding: 0px 8px;
-  background: var(--jp-layout-color2);
-  border: var(--jp-border-width) 0;
-  border-bottom: none;
+  border-top: var(--jp-border-width) solid transparent;
+  border-bottom: var(--jp-border-width) solid transparent;
   position: relative;
   overflow: visible;
 }
 
 
-#tab-manager .p-TabBar-tab:hover:not(.p-mod-current) {
-  background: var(--jp-layout-color1);
+#tab-manager .p-TabBar-tab:hover:not(.jp-mod-active) {
+  background: var(--jp-layout-color2);
 }
 
 
@@ -49,25 +48,9 @@
 
 
 #tab-manager .p-TabBar-tab.jp-mod-active {
-  background: var(--jp-layout-color0);
+  border-top: var(--jp-border-width) solid var(--jp-brand-color1);
+  border-bottom: var(--jp-border-width) solid var(--jp-brand-color1);
   color: var(--jp-ui-font-color0);
-  transform: translateY(var(--jp-border-width));
-}
-
-
-#tab-manager .p-TabBar-tab.jp-mod-active:before {
-  position: absolute;
-  top: calc(-1 * var(--jp-border-width));
-  left: calc(-1 * var(--jp-border-width));
-  content: '';
-  height: var(--jp-private-tab-manager-active-top-border);
-  width: calc(100% + 2*var(--jp-border-width));
-  background: var(--jp-brand-color1);
-}
-
-
-#tab-manager .p-TabBar-tab.p-mod-current:hover {
-  background: var(--jp-layout-color1);
 }
 
 
@@ -96,7 +79,7 @@
 
 #tab-manager .p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon {
   margin-left: 4px;
-  padding-top: 8px;
+  padding-top: 10px;
   background-size: 16px;
   height: 16px;
   width: 16px;
