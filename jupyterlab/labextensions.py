@@ -6,6 +6,7 @@
 import sys
 
 from jupyter_core.application import JupyterApp
+from traitlets import Bool
 
 from ._version import __version__
 from .commands import (
@@ -16,9 +17,11 @@ from .commands import (
 class InstallLabExtensionApp(JupyterApp):
     version = __version__
     description = "Install labextension(s)"
+    link = Bool(False, config=True,
+                help="Use an npm link to a local file path")
 
     def start(self):
-        [install_extension(arg) for arg in self.extra_args]
+        [install_extension(arg, self.link) for arg in self.extra_args]
 
 
 class UninstallLabExtensionApp(JupyterApp):
