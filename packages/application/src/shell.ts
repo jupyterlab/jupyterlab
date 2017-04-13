@@ -376,10 +376,10 @@ class ApplicationShell extends Widget {
         const { currentWidget, dock, mode } = mainArea;
 
         if (dock) {
-          this._dockPanel.restoreLayout(mainArea.dock);
+          this._dockPanel.restoreLayout(dock);
         }
         if (currentWidget) {
-          this.activateById(mainArea.currentWidget.id);
+          this.activateById(currentWidget.id);
         }
         if (mode) {
           this._dockPanel.mode = mode;
