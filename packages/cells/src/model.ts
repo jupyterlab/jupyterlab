@@ -128,7 +128,7 @@ class CellModel extends CodeEditor.Model implements ICellModel {
   constructor(options: CellModel.IOptions) {
     super({modelDB: options.modelDB});
 
-    this._id = options.id || uuid();
+    this.id = options.id || uuid();
 
     this.value.changed.connect(this.onGenericChange, this);
 
@@ -186,9 +186,7 @@ class CellModel extends CodeEditor.Model implements ICellModel {
   /**
    * The id for the cell.
    */
-  get id(): string {
-    return this._id;
-  }
+  readonly id: string;
 
   /**
    * The metadata associated with the cell.
@@ -247,8 +245,6 @@ class CellModel extends CodeEditor.Model implements ICellModel {
   protected onGenericChange(): void {
     this.contentChanged.emit(void 0);
   }
-
-  private _id: string = '';
 }
 
 
