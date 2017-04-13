@@ -270,8 +270,9 @@ function activateCellTools(app: JupyterLab, tracker: INotebookTracker, editorSer
       case Widget.Msg.ActivateRequest:
         state.save(id, { open: true });
         break;
+      case Widget.Msg.AfterHide:
       case Widget.Msg.CloseRequest:
-        state.remove(celltools.id);
+        state.remove(id);
         break;
       default:
         break;
