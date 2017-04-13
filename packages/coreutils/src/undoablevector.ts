@@ -92,13 +92,6 @@ class ObservableUndoableVector<T> extends ObservableVector<T> implements IObserv
   }
 
   /**
-   * The type of the Observable.
-   */
-  get type(): 'UndoableVector' {
-    return 'UndoableVector';
-  }
-
-  /**
    * Whether the object can redo changes.
    */
   get canRedo(): boolean {
