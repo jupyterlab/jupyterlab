@@ -26,6 +26,18 @@
 }
 
 
+#tab-manager header {
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  flex: 0 0 auto;
+  font-size: var(--jp-ui-font-size0);
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin: 4px 0px;
+  padding: 4px 12px;
+  text-transform: uppercase;
+}
+
+
 #tab-manager .p-TabBar-tab {
   margin-left: calc(-1*var(--jp-border-width));
   height: var(--jp-private-tab-manager-tab-height);
@@ -79,7 +91,7 @@
 
 #tab-manager .p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon {
   margin-left: 4px;
-  padding-top: 10px;
+  padding-top: 12px;
   background-size: 16px;
   height: 16px;
   width: 16px;
