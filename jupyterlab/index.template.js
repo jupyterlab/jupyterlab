@@ -3,6 +3,7 @@ require('font-awesome/css/font-awesome.min.css');
 require('@jupyterlab/default-theme/style/index.css');
 
 var app = require('@jupyterlab/application').JupyterLab;
+var utils = require('@jupyterlab/services').utils;
 
 
 function main() {
@@ -18,7 +19,14 @@ function main() {
         console.error(e);
     }
     {{/each}}
-    lab.start();
+    var ignorePlugins = [];
+    try {
+        var option = utils.getConfigOption('ignorePlugins');
+        ignorePlugins = JSON.parse(option);
+    } catch (e) {
+        console.error("Invalid ignorePlugins config:", option);
+    }
+    lab.start({ "ignorePlugins": ignorePlugins });
 }
 
 window.onload = main;
