@@ -199,8 +199,10 @@ const notebookPlugin: JupyterLabPlugin<void> = {
     // Add notebook completer command.
     app.commands.addCommand(CommandIDs.invokeNotebook, {
       execute: () => {
-        const id = notebooks.currentWidget && notebooks.currentWidget.id;
-        return app.commands.execute(CommandIDs.invoke, { id });
+        const panel = notebooks.currentWidget;
+        if (panel && panel.notebook.activeCell.model.type === 'code') {
+          return app.commands.execute(CommandIDs.invoke, { id: panel.id });
+        }
       }
     });
 
