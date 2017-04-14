@@ -61,16 +61,9 @@ class EditorWidget extends CodeEditorWidget {
           color: realtime.localCollaborator.color
         };
 
-        //if there are selections corresponding to non-collaborators,
-        //they are stale and should be removed.
-        realtime.collaborators.changed.connect((collaborators, change) => {
-          this.editor.uuid = realtime.localCollaborator.sessionId;
-          for(let key of context.model.selections.keys()) {
-            if(!collaborators.has(key)) {
-              context.model.selections.delete(key);
-            }
-          }
-        });
+        realtime.collaborators.changed.connect(this._onCollaboratorsChanged, this);
+        //Trigger an initial onCollaboratorsChanged event.
+        this._onCollaboratorsChanged();
       });
     }
   }
@@ -142,6 +135,16 @@ class EditorWidget extends CodeEditorWidget {
     let path = this._context.path;
     editor.model.mimeType = this._mimeTypeService.getMimeTypeByFilePath(path);
     this.title.label = path.split('/').pop();
+  }
+
+  private _onCollaboratorsChanged(): void {
+    //if there are selections corresponding to non-collaborators,
+    //they are stale and should be removed.
+    for(let key of this.editor.model.selections.keys()) {
+      if(!this._context.realtimeHandler.collaborators.has(key)) {
+        this.editor.model.selections.delete(key);
+      }
+    }
   }
 
   protected _context: DocumentRegistry.Context;

@@ -204,6 +204,7 @@ class StaticNotebook extends Widget {
     return this._context;
   }
   set context(newValue: DocumentRegistry.IContext<INotebookModel>) {
+    let oldValue = this._context;
     this._context = newValue;
     if (this._model === newValue.model) {
       return;
@@ -215,6 +216,19 @@ class StaticNotebook extends Widget {
     this._onModelChanged(oldModel, newValue.model);
     this.onModelChanged(oldModel, newValue.model);
     this._modelChanged.emit(void 0);
+
+    if (oldValue && oldValue.realtimeHandler) {
+      oldValue.realtimeHandler.ready.then(() => {
+        oldValue.realtimeHandler.collaborators.changed.disconnect(
+          this._onCollaboratorsChanged, this);
+      });
+    }
+    if (newValue.realtimeHandler) {
+      newValue.realtimeHandler.ready.then(() => {
+        newValue.realtimeHandler.collaborators.changed.connect(
+          this._onCollaboratorsChanged, this);
+      });
+    }
   }
 
 
@@ -468,6 +482,23 @@ class StaticNotebook extends Widget {
       }
     });
   }
+
+  /**
+   * Handle an update to the collaborators.
+   */
+  private _onCollaboratorsChanged(): void {
+    // If there are selections corresponding to non-collaborators,
+    // they are stale and should be removed.
+    for (let i = 0; i < this.widgets.length; i++) {
+      let cell = this.widgets[i];
+      for(let key of cell.model.selections.keys()) {
+        if(!this.context.realtimeHandler.collaborators.has(key)) {
+          cell.model.selections.delete(key);
+        }
+      }
+    }
+  }
+
 
   private _mimetype = 'text/plain';
   private _model: INotebookModel = null;
@@ -1011,19 +1042,6 @@ class Notebook extends StaticNotebook {
             css: `background-color: rgba( ${r}, ${g}, ${b}, 0.1)`,
             color: realtime.localCollaborator.color
           };
-
-          //if there are selections corresponding to non-collaborators,
-          //they are stale and should be removed.
-          realtime.collaborators.changed.connect((collaborators, change) => {
-            if (!cell.isDisposed) {
-              cell.editor.uuid = realtime.localCollaborator.sessionId;
-              for(let key of cell.model.selections.keys()) {
-                if(!collaborators.has(key)) {
-                  cell.model.selections.delete(key);
-                }
-              }
-            }
-          });
         }
       });
     }
@@ -1489,13 +1507,14 @@ class Notebook extends StaticNotebook {
    * spurious cursors.
    */
   private _trimSelections(): void {
-    for(let i=0; i<this.widgets.length; i++) {
+    for(let i = 0; i < this.widgets.length; i++) {
       if(i !== this._activeCellIndex) {
         let cell = this.widgets[i];
         cell.model.selections.delete(cell.editor.uuid);
       }
     }
   }
+
 
   private _activeCellIndex = -1;
   private _activeCell: BaseCellWidget = null;
