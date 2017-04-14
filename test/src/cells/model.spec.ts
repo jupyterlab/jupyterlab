@@ -130,13 +130,12 @@ describe('cells/model', () => {
       it('should signal when model metadata has changed', () => {
         let model = new TestModel({});
         let listener = (sender: any, args: any) => {
-          value = args.newValue;
+          key = args.key;
         };
-        let value = '';
+        let key = '';
         model.metadata.changed.connect(listener);
-        expect(value).to.be.empty();
         model.metadata.set('foo', 'bar');
-        expect(value).to.be('bar');
+        expect(key).to.be('foo');
       });
 
       it('should not signal when model metadata has not changed', () => {

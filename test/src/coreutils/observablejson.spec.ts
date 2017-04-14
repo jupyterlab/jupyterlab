@@ -53,27 +53,39 @@ describe('coreutils', () => {
     describe('#constructor()', () => {
 
       it('should create a new message', () => {
-        let message = new ObservableJSON.ChangeMessage({
+        let sender = new ObservableJSON();
+        let message = new ObservableJSON.ChangeMessage(sender, {
           key: 'foo',
-          type: 'add',
-          oldValue: 1,
-          newValue: 2
+          type: 'add'
         });
         expect(message).to.be.a(ObservableJSON.ChangeMessage);
       });
 
     });
 
+    describe('#sender', () => {
+
+      it('should be the sender of the message', () => {
+        let sender = new ObservableJSON();
+        let message = new ObservableJSON.ChangeMessage(sender, {
+          key: 'foo',
+          type: 'add'
+        });
+        expect(message.sender).to.be(sender);
+      });
+
+    });
+
+
     describe('#args', () => {
 
       it('should be the args of the message', () => {
+        let sender = new ObservableJSON();
         let args: IObservableJSON.IChangedArgs = {
           key: 'foo',
-          type: 'add',
-          oldValue: 'ho',
-          newValue: 'hi'
+          type: 'add'
         };
-        let message = new ObservableJSON.ChangeMessage(args);
+        let message = new ObservableJSON.ChangeMessage(sender, args);
         expect(message.args).to.be(args);
       });
 

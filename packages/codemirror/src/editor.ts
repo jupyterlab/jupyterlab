@@ -29,7 +29,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IObservableMap, ObservableMap
+  IObservableMap
 } from '@jupyterlab/coreutils';
 
 import {
@@ -490,11 +490,11 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Handles a selections change.
    */
-  private _onSelectionsChanged(selections: IObservableMap<CodeEditor.ITextSelection[]>, args: ObservableMap.IChangedArgs<CodeEditor.ITextSelection[]>): void {
+  private _onSelectionsChanged(selections: IObservableMap<CodeEditor.ITextSelection[]>, args: IObservableMap.IChangedArgs): void {
     const uuid = args.key;
     if (uuid !== this.uuid) {
       this._cleanSelections(uuid);
-      this._markSelections(uuid, args.newValue);
+      this._markSelections(uuid, selections.get(uuid));
     }
   }
 

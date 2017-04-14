@@ -35,7 +35,7 @@ namespace IObservableJSON {
    * A type alias for observable JSON changed args.
    */
   export
-  type IChangedArgs = ObservableMap.IChangedArgs<JSONValue>;
+  type IChangedArgs = IObservableMap.IChangedArgs;
 }
 
 
@@ -96,10 +96,16 @@ namespace ObservableJSON {
     /**
      * Create a new metadata changed message.
      */
-    constructor(args: IObservableJSON.IChangedArgs) {
+    constructor(sender: IObservableJSON, args: IObservableJSON.IChangedArgs) {
       super('jsonvalue-changed');
+      this.sender = sender;
       this.args = args;
     }
+
+    /**
+     * The sender of the change.
+     */
+    readonly sender: IObservableJSON;
 
     /**
      * The arguments of the change.
