@@ -43,7 +43,7 @@ const serializer = new Serializer();
 const value: JSONObject = { name: 'foo' };
 
 
-describe('notebook/common/undo', () => {
+describe('@jupyterlab/coreutils', () => {
 
   describe('ObservableUndoableVector', () => {
 

@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 
-describe('common/ObservableString', () => {
+describe('@jupyterlab/coreutils', () => {
 
   describe('ObservableString', () => {
 

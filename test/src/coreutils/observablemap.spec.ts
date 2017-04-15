@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 
-describe('common/ObservableMap', () => {
+describe('@jupyterlab/coreutils', () => {
 
   describe('ObservableMap', () => {
 
