@@ -20,7 +20,7 @@ class TestObject {
 }
 
 
-describe('coreutils', () => {
+describe('@jupyterlab/coreutils', () => {
 
   describe('ActivityMonitor()', () => {
 

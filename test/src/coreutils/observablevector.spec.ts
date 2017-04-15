@@ -12,7 +12,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 
-describe('common/ObservableVector', () => {
+describe('@jupyterlab/coreutils', () => {
 
   describe('ObservableVector', () => {
 

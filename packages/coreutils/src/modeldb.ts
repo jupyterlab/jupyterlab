@@ -348,7 +348,7 @@ class ModelDB implements IModelDB {
    * any model values.
    */
   get isPrepopulated(): boolean {
-    return true;
+    return false;
   }
 
   /**
@@ -504,7 +504,9 @@ class ModelDB implements IModelDB {
    *   `IModelDB`, with `basePath` prepended to all paths.
    */
   view(basePath: string): ModelDB {
-    return new ModelDB({basePath, baseDB: this});
+    let view = new ModelDB({basePath, baseDB: this});
+    this._disposables.add(view);
+    return view;
   }
 
   /**
@@ -548,7 +550,7 @@ class ModelDB implements IModelDB {
 
   private _basePath: string;
   private _db: ModelDB | ObservableMap<IObservable> = null;
-  private _toDispose = true;
+  private _toDispose = false;
   private _disposables = new DisposableSet();
 }
 
