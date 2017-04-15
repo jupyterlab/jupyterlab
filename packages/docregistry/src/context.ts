@@ -26,7 +26,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  PathExt, URLExt
+  PathExt, URLExt, IModelDB, IRealtime, IRealtimeHandler
 } from '@jupyterlab/coreutils';
 
 import {
@@ -51,7 +51,15 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     this._path = options.path;
     let ext = DocumentRegistry.extname(this._path);
     let lang = this._factory.preferredLanguage(ext);
-    this._model = this._factory.createNew(lang);
+
+    if(options.realtimeServices) {
+      this._realtimeHandler = options.realtimeServices.createHandler(this._path);
+      this._modelDB = this._realtimeHandler.modelDB;
+      this._model = this._factory.createNew(lang, this._modelDB);
+    } else {
+      this._model = this._factory.createNew(lang);
+    }
+
     this._readyPromise = manager.ready.then(() => {
       return this._populatedPromise.promise;
     });
@@ -116,6 +124,13 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   }
 
   /**
+   * The realtime handler associated with the document.
+   */
+  get realtimeHandler(): IRealtimeHandler {
+    return this._realtimeHandler;
+  }
+
+  /**
    * Get the model factory name.
    *
    * #### Notes
@@ -141,9 +156,13 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     }
     let model = this._model;
     this.session.dispose();
+    if (this._realtimeHandler) {
+      this._realtimeHandler.dispose();
+    }
     this._model = null;
     this._manager = null;
     this._factory = null;
+    this._realtimeHandler = null;
 
     model.dispose();
     this._disposed.emit(void 0);
@@ -162,6 +181,26 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   */
   get ready(): Promise<void> {
     return this._readyPromise;
+  }
+
+  /**
+   * Populate the contents of the model, either from
+   * disk or from the realtime handler.
+   *
+   * @returns a promise that resolves upon model population.
+   */
+  fromStore(): Promise<void> {
+    if (this.realtimeHandler) {
+      return this._modelDB.connected.then(() => {
+        if (this._modelDB.isPrepopulated) {
+          return this.save();
+        } else {
+          return this.revert();
+        }
+      });
+    } else {
+      return this.revert();
+    }
   }
 
   /**
@@ -424,6 +463,8 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   private _manager: ServiceManager.IManager = null;
   private _opener: (widget: Widget) => void = null;
   private _model: T = null;
+  private _modelDB: IModelDB;
+  private _realtimeHandler: IRealtimeHandler = null;
   private _path = '';
   private _factory: DocumentRegistry.IModelFactory<T> = null;
   private _contentsModel: Contents.IModel = null;
@@ -465,6 +506,11 @@ export namespace Context {
      * The kernel preference associated with the context.
      */
     kernelPreference?: IClientSession.IKernelPreference;
+
+    /**
+     * Provider for realtime services.
+     */
+    realtimeServices?: IRealtime;
 
     /**
      * An optional callback for opening sibling widgets.

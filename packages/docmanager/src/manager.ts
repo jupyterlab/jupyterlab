@@ -34,6 +34,10 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
+  IRealtime
+} from '@jupyterlab/coreutils';
+
+import {
   DocumentRegistry, Context
 } from '@jupyterlab/docregistry';
 
@@ -79,6 +83,7 @@ class DocumentManager implements IDisposable {
     this._registry = options.registry;
     this._serviceManager = options.manager;
     this._opener = options.opener;
+    this._realtimeServices = options.realtimeServices;
     this._widgetManager = new DocumentWidgetManager({
       registry: this._registry
     });
@@ -305,7 +310,8 @@ class DocumentManager implements IDisposable {
       manager: this._serviceManager,
       factory,
       path,
-      kernelPreference
+      kernelPreference,
+      realtimeServices: this._realtimeServices
     });
     let handler = new SaveHandler({
       context,
@@ -375,8 +381,9 @@ class DocumentManager implements IDisposable {
       context = this._findContext(path, factory.name);
       if (!context) {
         context = this._createContext(path, factory, preference);
-        // Load the contents from disk.
-        context.revert();
+        // Populate the model, either from disk or a
+        // model backend.
+        context.fromStore();
       }
     } else if (which === 'create') {
       context = this._createContext(path, factory, preference);
@@ -402,6 +409,7 @@ class DocumentManager implements IDisposable {
   private _contexts: Private.IContext[] = [];
   private _opener: DocumentManager.IWidgetOpener = null;
   private _activateRequested = new Signal<this, string>(this);
+  private _realtimeServices: IRealtime;
 }
 
 
@@ -429,6 +437,11 @@ namespace DocumentManager {
      * A widget opener for sibling widgets.
      */
     opener: IWidgetOpener;
+
+    /**
+     * A provider for realtime services.
+     */
+    realtimeServices?: IRealtime;
   }
 
   /**
