@@ -54,6 +54,28 @@ describe('@jupyterlab/coreutils', () => {
     });
 
     describe('#changed', () => {
+
+      it('should be emitted when the map changes state', () => {
+        let called = false;
+        let value = new ObservableValue();
+        value.changed.connect(() => { called = true; });
+        value.set('set');
+        expect(called).to.be(true);
+      });
+
+      it('should have value changed args', () => {
+        let called = false;
+        let value = new ObservableValue();
+        value.changed.connect((sender, args) => {
+          expect(sender).to.be(value);
+          expect(args.newValue).to.be('set');
+          expect(args.oldValue).to.be(undefined);
+          called = true;
+        });
+        value.set('set');
+        expect(called).to.be(true);
+      });
+
     });
 
     describe('#get', () => {
