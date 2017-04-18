@@ -5,7 +5,7 @@
     "build": "webpack"
   },
   "dependencies": {
-    "@jupyterlab/all-packages": "file:///../packages/all-packages",
+    "@jupyterlab/all-packages": "file:../packages/all-packages",
     "es6-promise": "^4.1.0",
     "font-awesome": "^4.7.0"
   },
