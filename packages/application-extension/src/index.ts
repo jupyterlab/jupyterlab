@@ -80,7 +80,7 @@ const plugin: JupyterLabPlugin<void> = {
     app.commands.addCommand(command, {
       label: () => {
         return app.shell.mode === 'multiple-document' ?
-          'Enable Single-Document Mode' : 'Enable Multiple-Document Mode';
+          'Toggle Single-Document Mode' : 'Toggle Multiple-Document Mode';
       },
       execute: () => {
         const args = app.shell.mode === 'multiple-document' ?
