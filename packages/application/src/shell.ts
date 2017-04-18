@@ -219,7 +219,7 @@ class ApplicationShell extends Widget {
     }
 
     if (ci === current.titles.length - 1) {
-      let nextBar = this._nextTabBar();
+      let nextBar = this._adjacentBar('next');
       if (nextBar) {
         nextBar.currentIndex = 0;
         nextBar.currentTitle.owner.activate();
@@ -248,7 +248,7 @@ class ApplicationShell extends Widget {
     }
 
     if (ci === 0) {
-      let prevBar = this._previousTabBar();
+      let prevBar = this._adjacentBar('previous');
       if (prevBar) {
         let len = prevBar.titles.length;
         prevBar.currentIndex = len - 1;
@@ -442,85 +442,57 @@ class ApplicationShell extends Widget {
   }
 
   /*
+   * Return the tab bar adjacent to the current TabBar or `null`.
+   */
+  private _adjacentBar(direction: 'next' | 'previous'): TabBar<Widget> | null {
+    const current = this._currentTabBar();
+    if (!current) {
+      return null;
+    }
+
+    const bars = toArray(this._dockPanel.tabBars());
+    const len = bars.length;
+    const index = bars.indexOf(current);
+
+    if (direction === 'previous') {
+      return index > 0 ? bars[index - 1]
+        : index === 0 ? bars[len - 1]
+          : null;
+    }
+
+    // Otherwise, direction is 'next'.
+    return index < len - 1 ? bars[index + 1]
+      : index === len - 1 ? bars[0]
+        : null;
+  }
+
+  /*
    * Return the TabBar that has the currently active Widget or null.
    */
   private _currentTabBar(): TabBar<Widget> | null {
-    let current = this._tracker.currentWidget;
+    const current = this._tracker.currentWidget;
     if (!current) {
       return null;
     }
 
-    let title = current.title;
-    return find(this._dockPanel.tabBars(), bar => {
-      return ArrayExt.firstIndexOf(bar.titles, title) > -1;
-    }) || null;
+    const title = current.title;
+    const bars = this._dockPanel.tabBars();
+    return find(bars, bar => bar.titles.indexOf(title) > -1) || null;
   }
-
-  /*
-   * Return the TabBar previous to the current TabBar (see above) or null.
-   */
-  private _previousTabBar(): TabBar<Widget> | null {
-    let current = this._currentTabBar();
-    if (current) {
-      return null;
-    }
-    let bars = toArray(this._dockPanel.tabBars());
-    let len = bars.length;
-    let ci = ArrayExt.firstIndexOf(bars, current);
-
-    if (ci > 0) {
-      return bars[ci - 1];
-    }
-
-    if (ci === 0) {
-      return bars[len - 1];
-    }
-
-    return null;
-  }
-
-  /*
-   * Return the TabBar next to the current TabBar (see above) or null.
-   */
-  private _nextTabBar(): TabBar<Widget> | null {
-    let current = this._currentTabBar();
-    if (!current) {
-      return null;
-    }
-
-    let bars = toArray(this._dockPanel.tabBars());
-    let len = bars.length;
-    let ci = ArrayExt.firstIndexOf(bars, current);
-
-    if (ci < (len - 1)) {
-      return bars[ci + 1];
-    }
-
-    if (ci === len - 1) {
-      return bars[0];
-    }
-
-    return null;
-  }
-
 
   /**
-   * Save the dehydrated state of the application shell.
+   * Handle a change to the dock area active widget.
    */
-  private _save(): Promise<void> {
-    if (!this._database || !this._isRestored) {
-      return;
+  private _onActiveChanged(sender: any, args: FocusTracker.IChangedArgs<Widget>): void {
+    if (args.newValue) {
+      args.newValue.title.className += ` ${ACTIVE_CLASS}`;
     }
-    let data: ApplicationShell.ILayout = {
-      mainArea: {
-        currentWidget: this._tracker.currentWidget,
-        dock: this._dockPanel.saveLayout(),
-        mode: this._dockPanel.mode
-      },
-      leftArea: this._leftHandler.dehydrate(),
-      rightArea: this._rightHandler.dehydrate()
-    };
-    return this._database.save(data);
+    if (args.oldValue) {
+      args.oldValue.title.className = (
+        args.oldValue.title.className.replace(ACTIVE_CLASS, '')
+      );
+    }
+    this._activeChanged.emit(args);
   }
 
   /**
@@ -539,18 +511,22 @@ class ApplicationShell extends Widget {
   }
 
   /**
-   * Handle a change to the dock area active widget.
+   * Save the dehydrated state of the application shell.
    */
-  private _onActiveChanged(sender: any, args: FocusTracker.IChangedArgs<Widget>): void {
-    if (args.newValue) {
-      args.newValue.title.className += ` ${ACTIVE_CLASS}`;
+  private _save(): Promise<void> {
+    if (!this._database || !this._isRestored) {
+      return;
     }
-    if (args.oldValue) {
-      args.oldValue.title.className = (
-        args.oldValue.title.className.replace(ACTIVE_CLASS, '')
-      );
-    }
-    this._activeChanged.emit(args);
+    let data: ApplicationShell.ILayout = {
+      mainArea: {
+        currentWidget: this._tracker.currentWidget,
+        dock: this._dockPanel.saveLayout(),
+        mode: this._dockPanel.mode
+      },
+      leftArea: this._leftHandler.dehydrate(),
+      rightArea: this._rightHandler.dehydrate()
+    };
+    return this._database.save(data);
   }
 
   private _activeChanged = new Signal<this, ApplicationShell.IChangedArgs>(this);
@@ -836,7 +812,7 @@ namespace Private {
      * Find the index of the item with the given widget, or `-1`.
      */
     private _findWidgetIndex(widget: Widget): number {
-      return ArrayExt.findFirstIndex(this._items, item => item.widget === widget);
+      return ArrayExt.findFirstIndex(this._items, i => i.widget === widget);
     }
 
     /**
