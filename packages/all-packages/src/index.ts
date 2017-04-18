@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import "@jupyterlab/about-extension";
-import "@jupyterlab/all-packages";
 import "@jupyterlab/application";
 import "@jupyterlab/application-extension";
 import "@jupyterlab/apputils";
