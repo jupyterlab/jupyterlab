@@ -29,6 +29,7 @@
     "@jupyterlab/coreutils": "^0.2.0",
     "@jupyterlab/csvwidget": "^0.2.0",
     "@jupyterlab/csvwidget-extension": "^0.2.0",
+    "@jupyterlab/default-theme": "^0.2.0",
     "@jupyterlab/docmanager": "^0.2.0",
     "@jupyterlab/docmanager-extension": "^0.2.0",
     "@jupyterlab/docregistry": "^0.2.0",
