@@ -22,7 +22,7 @@ interface IObservableMap<T> extends IDisposable, IObservable {
   /**
    * The type of the Observable.
    */
-  type: 'Map' | 'JSON';
+  type: 'Map';
 
   /**
    * A signal emitted when the map has changed.
@@ -120,7 +120,7 @@ class ObservableMap<T> implements IObservableMap<T> {
   /**
    * The type of the Observable.
    */
-  get type(): 'Map' | 'JSON' {
+  get type(): 'Map' {
     return 'Map';
   }
 

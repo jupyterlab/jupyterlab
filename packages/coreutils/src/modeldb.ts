@@ -18,7 +18,7 @@ import {
 } from './path';
 
 import {
-  IObservableMap, ObservableMap
+  ObservableMap
 } from './observablemap';
 
 import {
@@ -39,7 +39,7 @@ import {
  * created and placed in the IModelDB interface.
  */
 export
-type ObservableType = 'Map' | 'JSON' | 'Vector' | 'String' | 'Value';
+type ObservableType = 'Map' | 'Vector' | 'String' | 'Value';
 
 /**
  * Base interface for Observable objects.
@@ -161,16 +161,7 @@ interface IModelDB extends IDisposable {
    * The map can only store objects that are simple
    * JSON Objects and primitives.
    */
-  createMap<T extends JSONValue>(path: string): IObservableMap<T>;
-
-  /**
-   * Create an `IObservableJSON` and insert it in the database.
-   *
-   * @param path: the path for the object.
-   *
-   * @returns the object that was created.
-   */
-  createJSON(path: string): IObservableJSON;
+  createMap(path: string): IObservableJSON;
 
   /**
    * Create an opaque value and insert it in the database.
@@ -426,25 +417,11 @@ class ModelDB implements IModelDB {
    * The map can only store objects that are simple
    * JSON Objects and primitives.
    */
-  createMap(path: string): IObservableMap<JSONValue> {
-    let map = new ObservableMap<JSONValue>();
+  createMap(path: string): IObservableJSON {
+    let map = new ObservableJSON();
     this._disposables.add(map);
     this.set(path, map);
     return map;
-  }
-
-  /**
-   * Create an `IObservableJSON` and insert it in the database.
-   *
-   * @param path: the path for the object.
-   *
-   * @returns the object that was created.
-   */
-  createJSON(path: string): IObservableJSON {
-    let json = new ObservableJSON();
-    this._disposables.add(json);
-    this.set(path, json);
-    return json;
   }
 
   /**
