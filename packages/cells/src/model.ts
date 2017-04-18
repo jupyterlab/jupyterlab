@@ -135,7 +135,7 @@ class CellModel extends CodeEditor.Model implements ICellModel {
     let cellType = this.modelDB.createValue('type');
     cellType.set(this.type);
 
-    let observableMetadata = this.modelDB.createJSON('metadata');
+    let observableMetadata = this.modelDB.createMap('metadata');
     observableMetadata.changed.connect(this.onGenericChange, this);
 
     let cell = options.cell;

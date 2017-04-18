@@ -193,7 +193,7 @@ namespace CodeEditor {
       mimeType.set(options.mimeType || 'text/plain');
       mimeType.changed.connect(this._onMimeTypeChanged, this);
 
-      this.modelDB.createMap<ITextSelection[]>('selections');
+      this.modelDB.createMap('selections');
     }
 
     /**

@@ -8,7 +8,7 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  ModelDB, ObservableString, ObservableMap, ObservableValue,
+  ModelDB, ObservableString, ObservableValue,
   ObservableUndoableVector, ObservableJSON
 } from '@jupyterlab/coreutils';
 
@@ -235,29 +235,13 @@ describe('@jupyterlab/coreutils', () => {
       it('should create an ObservableMap`', () => {
         let db = new ModelDB();
         let map = db.createMap('map');
-        expect(map instanceof ObservableMap).to.be(true);
+        expect(map instanceof ObservableJSON).to.be(true);
       });
 
       it('should be able to retrieve that map using `get`', () => {
         let db = new ModelDB();
         let map = db.createMap('map');
         expect(db.get('map')).to.be(map);
-      });
-
-    });
-
-    describe('#createJSON', () => {
-
-      it('should create an ObservableJSON`', () => {
-        let db = new ModelDB();
-        let json = db.createJSON('json');
-        expect(json instanceof ObservableJSON).to.be(true);
-      });
-
-      it('should be able to retrieve that JSON object using `get`', () => {
-        let db = new ModelDB();
-        let json = db.createJSON('json');
-        expect(db.get('json')).to.be(json);
       });
 
     });
