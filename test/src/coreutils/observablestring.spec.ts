@@ -31,6 +31,14 @@ describe('@jupyterlab/coreutils', () => {
 
     });
 
+    describe('#type', () => {
+
+      it('should return `String`', () => {
+        let value = new ObservableString();
+        expect(value.type).to.be('String');
+      });
+    });
+
     describe('#changed', () => {
 
       it('should be emitted when the string changes', () => {

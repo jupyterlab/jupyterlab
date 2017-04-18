@@ -20,6 +20,14 @@ describe('@jupyterlab/coreutils', () => {
       });
     });
 
+    describe('#type', () => {
+
+      it('should return `Map`', () => {
+        let value = new ObservableMap<number>();
+        expect(value.type).to.be('Map');
+      });
+    });
+
     describe('#size', ()=>{
       it('should return the number of entries in the map', ()=>{
         let value = new ObservableMap<number>();
