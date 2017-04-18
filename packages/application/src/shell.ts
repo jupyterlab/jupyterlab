@@ -171,7 +171,17 @@ class ApplicationShell extends Widget {
     return this._dockPanel.mode;
   }
   set mode(mode: DockPanel.Mode) {
-    this._dockPanel.mode = mode;
+    const dock = this._dockPanel;
+    if (mode === dock.mode) {
+      return;
+    }
+
+    dock.mode = mode;
+    if (mode === 'single-document') {
+      // In case the active widget in the dock panel is *not* the active widget
+      // of the application, defer to the application.
+      dock.activateWidget(this.currentWidget);
+    }
   }
 
   /**
@@ -190,8 +200,8 @@ class ApplicationShell extends Widget {
     } else if (this._rightHandler.has(id)) {
       this._rightHandler.activate(id);
     } else {
-      let dock = this._dockPanel;
-      let widget = find(dock.widgets(), value => value.id === id);
+      const dock = this._dockPanel;
+      const widget = find(dock.widgets(), value => value.id === id);
       if (widget) {
         dock.activateWidget(widget);
       }
