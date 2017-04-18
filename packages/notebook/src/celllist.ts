@@ -523,7 +523,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
       each(change.newValues, (id) => {
         if (!this._cellMap.has(id)) {
           let cellDB = this._factory.modelDB;
-          let cellType = cellDB.createValue(id+'/type');
+          let cellType = cellDB.createValue(id+'.type');
           let cell: ICellModel;
           switch (cellType.get()) {
             case 'code':
