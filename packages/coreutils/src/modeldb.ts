@@ -520,7 +520,7 @@ class ModelDB implements IModelDB {
    */
   private _resolvePath(path: string): string {
     if (this._basePath) {
-      path = this._basePath + '/' + path;
+      path = this._basePath + '.' + path;
     }
     return PathExt.normalize(path)
   }

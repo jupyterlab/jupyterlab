@@ -303,11 +303,11 @@ describe('@jupyterlab/coreutils', () => {
         let db = new ModelDB();
         let view = db.view('base');
 
-        db.createString('base/str1');
-        expect(db.get('base/str1')).to.be(view.get('str1'));
+        db.createString('base.str1');
+        expect(db.get('base.str1')).to.be(view.get('str1'));
 
         view.createString('str2');
-        expect(db.get('base/str2')).to.be(view.get('str2'));
+        expect(db.get('base.str2')).to.be(view.get('str2'));
       });
 
       it('should be stackable', () => {
@@ -319,8 +319,8 @@ describe('@jupyterlab/coreutils', () => {
         expect(viewView.basePath).to.be('two');
 
         viewView.createString('str');
-        expect(viewView.get('str')).to.be(view.get('two/str'));
-        expect(viewView.get('str')).to.be(db.get('one/two/str'));
+        expect(viewView.get('str')).to.be(view.get('two.str'));
+        expect(viewView.get('str')).to.be(db.get('one.two.str'));
       });
 
     });
