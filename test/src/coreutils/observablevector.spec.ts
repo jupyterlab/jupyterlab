@@ -31,6 +31,15 @@ describe('@jupyterlab/coreutils', () => {
 
     });
 
+    describe('#type', () => {
+
+      it('should return `Vector`', () => {
+        let value = new ObservableVector<number>();
+        expect(value.type).to.be('Vector');
+      });
+    });
+
+
     describe('#changed', () => {
 
       it('should be emitted when the vector changes state', () => {
