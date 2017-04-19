@@ -193,7 +193,7 @@ class ApplicationShell extends Widget {
     if (this._cachedLayout) {
 
       // Remove any disposed widgets in the cached layout and restore.
-      Private.normalizeAreaConfig(this._cachedLayout.main);
+      Private.normalizeAreaConfig(dock, this._cachedLayout.main);
       dock.restoreLayout(this._cachedLayout);
       this._cachedLayout = null;
     }
@@ -755,12 +755,13 @@ namespace Private {
    * Removes widgets that have been disposed from an area config, mutates area.
    */
   export
-  function normalizeAreaConfig(area: DockLayout.AreaConfig): void {
+  function normalizeAreaConfig(parent: DockPanel, area: DockLayout.AreaConfig): void {
     if (area.type === 'tab-area') {
-      area.widgets = area.widgets.filter(widget => !widget.isDisposed);
+      area.widgets = area.widgets
+        .filter(widget => !widget.isDisposed && widget.parent === parent);
       return;
     }
-    area.children.forEach(child => { normalizeAreaConfig(child); });
+    area.children.forEach(child => { normalizeAreaConfig(parent, child); });
   }
 
   /**
