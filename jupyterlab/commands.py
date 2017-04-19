@@ -97,6 +97,8 @@ def unlink_extension(extension):
         del config['linked_extensions'][name]
         _write_config(config)
         build()
+    else:
+        print('No labextension matching "%s" is linked' % extension)
 
 
 def uninstall_extension(name):
@@ -108,6 +110,8 @@ def uninstall_extension(name):
         del config['installed_extensions'][name]
         _write_config(config)
         build()
+    else:
+        print('No labextension named "%s" installed' % name)
 
 
 def list_extensions():
