@@ -4,7 +4,6 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 import glob
-import json
 import os
 import sys
 from os.path import join as pjoin
@@ -26,8 +25,8 @@ from jupyterlab.extension import (
 )
 from jupyterlab.commands import (
     install_extension, uninstall_extension, list_extensions,
-    build, _get_pkg_path, _get_cache_dir,
-    _get_build_dir
+    build, link_extension, unlink_extension, _get_cache_dir,
+    _get_build_dir, _get_config
 )
 
 here = os.path.dirname(os.path.abspath(__file__))
@@ -99,26 +98,34 @@ class TestExtension(TestCase):
         for modulename in self._mock_extensions:
             sys.modules.pop(modulename)
 
-    def _getData(self):
-        pkg_path = _get_pkg_path()
-        if os.path.exists(pkg_path):
-            with open(pkg_path) as fid:
-                return json.load(fid)
-
     def test_install_extension(self):
         install_extension(pjoin(here, 'mockextension'))
         path = pjoin(_get_cache_dir(), '*.tgz')
         assert glob.glob(path)
-        data = self._getData()
-        assert '@jupyterlab/python-tests' in data['jupyterlab']['extensions']
-        assert '@jupyterlab/python-tests' in data['dependencies']
+        data = _get_config()
+        exts = data['installed_extensions']
+        assert '@jupyterlab/python-tests' in exts
 
     def test_uninstall_extension(self):
         install_extension(pjoin(here, 'mockextension'))
         uninstall_extension('@jupyterlab/python-tests')
-        data = self._getData()
-        assert '@jupyterlab/python-tests' not in data['jupyterlab']['extensions']
-        assert '@jupyterlab/python-tests' not in data['dependencies']
+        data = _get_config()
+        exts = data['installed_extensions']
+        assert '@jupyterlab/python-tests' not in exts
+
+    def test_link_extension(self):
+        link_extension(pjoin(here, 'mockextension'))
+        data = _get_config()
+        exts = data['linked_extensions']
+        assert '@jupyterlab/python-tests' in exts
+
+    def test_unlink_extension(self):
+        target = pjoin(here, 'mockextension')
+        link_extension(target)
+        unlink_extension(target)
+        data = _get_config()
+        exts = data['linked_extensions']
+        assert '@jupyterlab/python-tests' not in exts
 
     def test_list_extensions(self):
         install_extension(pjoin(here, 'mockextension'))
@@ -126,8 +133,12 @@ class TestExtension(TestCase):
         assert '@jupyterlab/python-tests' in extensions
 
     def test_build(self):
+        install_extension(pjoin(here, 'mockextension'))
         build()
-        assert os.path.exists(_get_build_dir())
+        entry = pjoin(_get_build_dir(), 'index.out.js')
+        with open(entry) as fid:
+            data = fid.read()
+        assert '@jupyterlab/python-tests' in data
 
     def test_add_handlers(self):
         app = NotebookApp()
