@@ -11,7 +11,7 @@ from traitlets import Bool, Unicode
 
 from ._version import __version__
 from .extension import load_jupyter_server_extension
-from .commands import build, describe
+from .commands import build, clean, describe
 
 
 class LabBuildApp(JupyterApp):
@@ -27,7 +27,7 @@ class LabCleanApp(JupyterApp):
     description = "Clean the JupyterLab application"
 
     def start(self):
-        build()
+        clean()
 
 
 class LabDescribeApp(JupyterApp):
