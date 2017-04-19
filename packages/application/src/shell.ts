@@ -186,7 +186,10 @@ class ApplicationShell extends Widget {
       return;
     }
 
-    // Otherwise, toggle back to multiple document mode.
+    // Cache a reference to every widget currently in the dock panel.
+    const widgets = toArray(dock.widgets());
+
+    // Toggle back to multiple document mode.
     dock.mode = mode;
 
     // Restore the original layout.
@@ -198,13 +201,14 @@ class ApplicationShell extends Widget {
       this._cachedLayout = null;
     }
 
-    // Add any widgets created during single document mode.
-    this._cachedAddedWidgets.forEach(widget => {
-      if (!widget.isDisposed) {
+    // Add any widgets created during single document mode, which have
+    // subsequently been removed from the dock panel after the multiple document
+    // layout has been restored.
+    widgets.forEach(widget => {
+      if (!widget.parent) {
         this.addToMainArea(widget);
       }
     });
-    this._cachedAddedWidgets.length = 0;
 
     // In case the active widget in the dock panel is *not* the active widget
     // of the application, defer to the application.
@@ -323,13 +327,7 @@ class ApplicationShell extends Widget {
       console.error('widgets added to app shell must have unique id property');
       return;
     }
-    // If the application is in single document mode, track the newly added
-    // widgets so that they can be re-added to the application when the mode
-    // is switched back to multiple document and the original layout is
-    // restored.
-    if (this.mode === 'single-document') {
-      this._cachedAddedWidgets.push(widget);
-    }
+
     this._dockPanel.addWidget(widget, { mode: 'tab-after' });
     this._tracker.add(widget);
   }
@@ -579,7 +577,6 @@ class ApplicationShell extends Widget {
   }
 
   private _activeChanged = new Signal<this, ApplicationShell.IChangedArgs>(this);
-  private _cachedAddedWidgets: Widget[] = [];
   private _cachedLayout: DockLayout.ILayoutConfig | null = null;
   private _currentChanged = new Signal<this, ApplicationShell.IChangedArgs>(this);
   private _database: ApplicationShell.ILayoutDB = null;
