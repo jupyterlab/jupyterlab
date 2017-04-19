@@ -172,7 +172,7 @@ def _ensure_package(config):
         shutil.copy2(pjoin(here, name), dest)
 
     # Template the package.json file.
-    pkg_path = pjoin(root_dir, name)
+    pkg_path = pjoin(root_dir, 'package.json')
     with open(pkg_path) as fid:
         data = json.load(fid)
     for (key, value) in config['installed_extensions'].items():
