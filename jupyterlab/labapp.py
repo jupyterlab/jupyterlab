@@ -5,9 +5,9 @@
 # Distributed under the terms of the Modified BSD License.
 
 from notebook.notebookapp import NotebookApp
-from jupyter_core.application import JupyterApp
+from jupyter_core.application import base_flags, JupyterApp
 
-from traitlets import Unicode
+from traitlets import Bool, Unicode
 
 from ._version import __version__
 from .extension import load_jupyter_server_extension
@@ -38,6 +38,14 @@ class LabDescribeApp(JupyterApp):
         print(describe())
 
 
+
+flags = dict(base_flags)
+flags['dev-mode']= (
+    {'LabApp': {'dev_mode': True}},
+    "Start the app in dev mode."
+)
+
+
 class LabApp(NotebookApp):
     version = __version__
 
@@ -53,6 +61,8 @@ class LabApp(NotebookApp):
         jupyter lab --certfile=mycert.pem # use SSL/TLS certificate
     """
 
+    flags = flags
+
     subcommands = dict(
         build=(LabBuildApp, LabBuildApp.description.splitlines()[0]),
         clean=(LabCleanApp, LabCleanApp.description.splitlines()[0]),
@@ -61,6 +71,9 @@ class LabApp(NotebookApp):
 
     default_url = Unicode('/lab', config=True,
         help="The default URL to redirect to from `/`")
+
+    dev_mode = Bool(False, config=True,
+        help="Whether to start the app in dev mode")
 
     def init_server_extensions(self):
         """Load any extensions specified by config.
@@ -78,6 +91,7 @@ class LabApp(NotebookApp):
         if not self.nbserver_extensions.get('jupyterlab', False):
             self.log.warn(msg)
             load_jupyter_server_extension(self)
+
 
 #-----------------------------------------------------------------------------
 # Main entry point

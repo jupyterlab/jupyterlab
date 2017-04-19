@@ -79,16 +79,20 @@ class LabHandler(IPythonHandler):
         return FILE_LOADER.load(self.settings['jinja2_env'], name)
 
 
-def add_handlers(web_app):
+def add_handlers(app):
     """Add the appropriate handlers to the web app.
     """
+    web_app = app.web_app
     base_url = web_app.settings['base_url']
     prefix = ujoin(base_url, PREFIX)
     page_config_data = web_app.settings.get('page_config_data', {})
     built_files = os.path.join(ENV_JUPYTER_PATH[0], 'lab', 'build')
 
     # Check for dev mode.
-    dev_mode = os.environ.get('JUPYTERLAB_DEV', False)
+    dev_mode = False
+    if hasattr(app, 'dev_mode'):
+        dev_mode = app.dev_mode
+
     if not os.path.exists(built_files) or dev_mode:
         built_files = os.path.join(HERE, 'build')
 
@@ -114,4 +118,4 @@ def load_jupyter_server_extension(nbapp):
     if dev_mode:
         nbapp.log.info(DEV_NOTE_NPM)
 
-    add_handlers(nbapp.web_app)
+    add_handlers(nbapp)
