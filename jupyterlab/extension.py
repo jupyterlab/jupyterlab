@@ -3,13 +3,14 @@
 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
+import json
 import os
 from tornado import web
 
 from notebook.base.handlers import IPythonHandler, FileFindHandler
 from jinja2 import FileSystemLoader
 from notebook.utils import url_path_join as ujoin
-from jupyter_core.paths import ENV_JUPYTER_PATH
+from .commands import _get_build_dir, _get_config_dir
 
 
 #-----------------------------------------------------------------------------
@@ -85,8 +86,15 @@ def add_handlers(app):
     web_app = app.web_app
     base_url = web_app.settings['base_url']
     prefix = ujoin(base_url, PREFIX)
+
+    # Handle page config data.
     page_config_data = web_app.settings.get('page_config_data', {})
-    built_files = os.path.join(ENV_JUPYTER_PATH[0], 'lab', 'build')
+    page_config_file = os.path.join(_get_config_dir(), 'page_config_data.json')
+    if os.path.exists(page_config_file):
+        with open(page_config_file) as fid:
+            page_config_data.update(json.load(fid))
+
+    built_files = _get_build_dir()
 
     # Check for dev mode.
     dev_mode = False
