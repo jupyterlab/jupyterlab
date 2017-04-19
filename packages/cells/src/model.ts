@@ -401,7 +401,9 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
    * Handle a change to the trusted state.
    */
   onTrustedChanged(trusted: IObservableValue, args: ObservableValue.IChangedArgs): void {
-    this._outputs.trusted = args.newValue as boolean;
+    if (this._outputs) {
+      this._outputs.trusted = args.newValue as boolean;
+    }
     this.stateChanged.emit({
       name: 'trusted',
       oldValue: args.oldValue,
