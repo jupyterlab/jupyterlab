@@ -306,7 +306,7 @@ class ApplicationShell extends Widget {
    */
   addToLeftArea(widget: Widget, options: ApplicationShell.ISideAreaOptions = {}): void {
     if (!widget.id) {
-      console.error('widgets added to app shell must have unique id property');
+      console.error('Widgets added to app shell must have unique id property.');
       return;
     }
     let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
@@ -324,7 +324,7 @@ class ApplicationShell extends Widget {
    */
   addToMainArea(widget: Widget): void {
     if (!widget.id) {
-      console.error('widgets added to app shell must have unique id property');
+      console.error('Widgets added to app shell must have unique id property.');
       return;
     }
 
