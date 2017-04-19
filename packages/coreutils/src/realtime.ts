@@ -6,33 +6,12 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  JSONValue, Token
-} from '@phosphor/coreutils';
-
-import {
-  IObservableString
-} from './observablestring';
-
-import {
-  IObservableVector
-} from './observablevector';
-
-import {
   IObservableMap
 } from './observablemap';
 
 import {
   IModelDB
 } from './modeldb';
-
-/* tslint:disable */
-/**
- * The realtime service token.
- */
-export
-const IRealtime = new Token<IRealtime>('jupyter.services.realtime');
-/* tslint:enable */
-
 
 /**
  * Interface for a Realtime service.
