@@ -432,11 +432,11 @@ class ApplicationShell extends Widget {
         if (dock) {
           this._dockPanel.restoreLayout(dock);
         }
+        if (mode) {
+          this.mode = mode;
+        }
         if (currentWidget) {
           this.activateById(currentWidget.id);
-        }
-        if (mode) {
-          this._dockPanel.mode = mode;
         }
       }
 
@@ -561,10 +561,15 @@ class ApplicationShell extends Widget {
     if (!this._database || !this._isRestored) {
       return;
     }
-    let data: ApplicationShell.ILayout = {
+
+    // If the application is in single document mode, use the cached layout if
+    // available. Otherwise, default to querying the dock panel for layout.
+    const data: ApplicationShell.ILayout = {
       mainArea: {
         currentWidget: this._tracker.currentWidget,
-        dock: this._dockPanel.saveLayout(),
+        dock: this.mode === 'single-document' ?
+          this._cachedLayout || this._dockPanel.saveLayout()
+            : this._dockPanel.saveLayout(),
         mode: this._dockPanel.mode
       },
       leftArea: this._leftHandler.dehydrate(),
