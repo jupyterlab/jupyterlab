@@ -10,7 +10,7 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  MessageLoop
+  Message, MessageLoop
 } from '@phosphor/messaging';
 
 import {
@@ -43,11 +43,15 @@ const CURRENT_CLASS = 'jp-mod-current';
  */
 const ACTIVE_CLASS = 'jp-mod-active';
 
-
 /**
  * The default rank of items added to a sidebar.
  */
 const DEFAULT_RANK = 500;
+
+/**
+ * The data attribute added to the document body indicating shell's mode.
+ */
+const MODE_ATTRIBUTE = 'data-shell-mode';
 
 
 /**
@@ -171,7 +175,54 @@ class ApplicationShell extends Widget {
     return this._dockPanel.mode;
   }
   set mode(mode: DockPanel.Mode) {
-    this._dockPanel.mode = mode;
+    const dock = this._dockPanel;
+    if (mode === dock.mode) {
+      return;
+    }
+
+    if (mode === 'single-document') {
+      this._cachedLayout = dock.saveLayout();
+      dock.mode = mode;
+
+      // In case the active widget in the dock panel is *not* the active widget
+      // of the application, defer to the application.
+      dock.activateWidget(this.currentWidget);
+
+      // Set the mode data attribute on the document body.
+      document.body.setAttribute(MODE_ATTRIBUTE, mode);
+      return;
+    }
+
+    // Cache a reference to every widget currently in the dock panel.
+    const widgets = toArray(dock.widgets());
+
+    // Toggle back to multiple document mode.
+    dock.mode = mode;
+
+    // Restore the original layout.
+    if (this._cachedLayout) {
+
+      // Remove any disposed widgets in the cached layout and restore.
+      Private.normalizeAreaConfig(dock, this._cachedLayout.main);
+      dock.restoreLayout(this._cachedLayout);
+      this._cachedLayout = null;
+    }
+
+    // Add any widgets created during single document mode, which have
+    // subsequently been removed from the dock panel after the multiple document
+    // layout has been restored.
+    widgets.forEach(widget => {
+      if (!widget.parent) {
+        this.addToMainArea(widget);
+      }
+    });
+
+    // In case the active widget in the dock panel is *not* the active widget
+    // of the application, defer to the application.
+    dock.activateWidget(this.currentWidget);
+
+    // Set the mode data attribute on the document body.
+    document.body.setAttribute(MODE_ATTRIBUTE, mode);
   }
 
   /**
@@ -190,8 +241,8 @@ class ApplicationShell extends Widget {
     } else if (this._rightHandler.has(id)) {
       this._rightHandler.activate(id);
     } else {
-      let dock = this._dockPanel;
-      let widget = find(dock.widgets(), value => value.id === id);
+      const dock = this._dockPanel;
+      const widget = find(dock.widgets(), value => value.id === id);
       if (widget) {
         dock.activateWidget(widget);
       }
@@ -219,7 +270,7 @@ class ApplicationShell extends Widget {
     }
 
     if (ci === current.titles.length - 1) {
-      let nextBar = this._nextTabBar();
+      let nextBar = this._adjacentBar('next');
       if (nextBar) {
         nextBar.currentIndex = 0;
         nextBar.currentTitle.owner.activate();
@@ -248,7 +299,7 @@ class ApplicationShell extends Widget {
     }
 
     if (ci === 0) {
-      let prevBar = this._previousTabBar();
+      let prevBar = this._adjacentBar('previous');
       if (prevBar) {
         let len = prevBar.titles.length;
         prevBar.currentIndex = len - 1;
@@ -265,7 +316,7 @@ class ApplicationShell extends Widget {
    */
   addToLeftArea(widget: Widget, options: ApplicationShell.ISideAreaOptions = {}): void {
     if (!widget.id) {
-      console.error('widgets added to app shell must have unique id property');
+      console.error('Widgets added to app shell must have unique id property.');
       return;
     }
     let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
@@ -283,9 +334,10 @@ class ApplicationShell extends Widget {
    */
   addToMainArea(widget: Widget): void {
     if (!widget.id) {
-      console.error('widgets added to app shell must have unique id property');
+      console.error('Widgets added to app shell must have unique id property.');
       return;
     }
+
     this._dockPanel.addWidget(widget, { mode: 'tab-after' });
     this._tracker.add(widget);
   }
@@ -298,7 +350,7 @@ class ApplicationShell extends Widget {
    */
   addToRightArea(widget: Widget, options: ApplicationShell.ISideAreaOptions = {}): void {
     if (!widget.id) {
-      console.error('widgets added to app shell must have unique id property');
+      console.error('Widgets added to app shell must have unique id property.');
       return;
     }
     let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
@@ -314,7 +366,7 @@ class ApplicationShell extends Widget {
    */
   addToTopArea(widget: Widget, options: ApplicationShell.ISideAreaOptions = {}): void {
     if (!widget.id) {
-      console.error('widgets added to app shell must have unique id property');
+      console.error('Widgets added to app shell must have unique id property.');
       return;
     }
     // Temporary: widgets are added to the panel in order of insertion.
@@ -388,11 +440,11 @@ class ApplicationShell extends Widget {
         if (dock) {
           this._dockPanel.restoreLayout(dock);
         }
+        if (mode) {
+          this.mode = mode;
+        }
         if (currentWidget) {
           this.activateById(currentWidget.id);
-        }
-        if (mode) {
-          this._dockPanel.mode = mode;
         }
       }
 
@@ -441,86 +493,65 @@ class ApplicationShell extends Widget {
     }
   }
 
+  /**
+   * Handle `after-attach` messages for the application shell.
+   */
+  protected onAfterAttach(msg: Message): void {
+    document.body.setAttribute(MODE_ATTRIBUTE, this.mode);
+  }
+
+  /*
+   * Return the tab bar adjacent to the current TabBar or `null`.
+   */
+  private _adjacentBar(direction: 'next' | 'previous'): TabBar<Widget> | null {
+    const current = this._currentTabBar();
+    if (!current) {
+      return null;
+    }
+
+    const bars = toArray(this._dockPanel.tabBars());
+    const len = bars.length;
+    const index = bars.indexOf(current);
+
+    if (direction === 'previous') {
+      return index > 0 ? bars[index - 1]
+        : index === 0 ? bars[len - 1]
+          : null;
+    }
+
+    // Otherwise, direction is 'next'.
+    return index < len - 1 ? bars[index + 1]
+      : index === len - 1 ? bars[0]
+        : null;
+  }
+
   /*
    * Return the TabBar that has the currently active Widget or null.
    */
   private _currentTabBar(): TabBar<Widget> | null {
-    let current = this._tracker.currentWidget;
+    const current = this._tracker.currentWidget;
     if (!current) {
       return null;
     }
 
-    let title = current.title;
-    return find(this._dockPanel.tabBars(), bar => {
-      return ArrayExt.firstIndexOf(bar.titles, title) > -1;
-    }) || null;
+    const title = current.title;
+    const bars = this._dockPanel.tabBars();
+    return find(bars, bar => bar.titles.indexOf(title) > -1) || null;
   }
-
-  /*
-   * Return the TabBar previous to the current TabBar (see above) or null.
-   */
-  private _previousTabBar(): TabBar<Widget> | null {
-    let current = this._currentTabBar();
-    if (current) {
-      return null;
-    }
-    let bars = toArray(this._dockPanel.tabBars());
-    let len = bars.length;
-    let ci = ArrayExt.firstIndexOf(bars, current);
-
-    if (ci > 0) {
-      return bars[ci - 1];
-    }
-
-    if (ci === 0) {
-      return bars[len - 1];
-    }
-
-    return null;
-  }
-
-  /*
-   * Return the TabBar next to the current TabBar (see above) or null.
-   */
-  private _nextTabBar(): TabBar<Widget> | null {
-    let current = this._currentTabBar();
-    if (!current) {
-      return null;
-    }
-
-    let bars = toArray(this._dockPanel.tabBars());
-    let len = bars.length;
-    let ci = ArrayExt.firstIndexOf(bars, current);
-
-    if (ci < (len - 1)) {
-      return bars[ci + 1];
-    }
-
-    if (ci === len - 1) {
-      return bars[0];
-    }
-
-    return null;
-  }
-
 
   /**
-   * Save the dehydrated state of the application shell.
+   * Handle a change to the dock area active widget.
    */
-  private _save(): Promise<void> {
-    if (!this._database || !this._isRestored) {
-      return;
+  private _onActiveChanged(sender: any, args: FocusTracker.IChangedArgs<Widget>): void {
+    if (args.newValue) {
+      args.newValue.title.className += ` ${ACTIVE_CLASS}`;
     }
-    let data: ApplicationShell.ILayout = {
-      mainArea: {
-        currentWidget: this._tracker.currentWidget,
-        dock: this._dockPanel.saveLayout(),
-        mode: this._dockPanel.mode
-      },
-      leftArea: this._leftHandler.dehydrate(),
-      rightArea: this._rightHandler.dehydrate()
-    };
-    return this._database.save(data);
+    if (args.oldValue) {
+      args.oldValue.title.className = (
+        args.oldValue.title.className.replace(ACTIVE_CLASS, '')
+      );
+    }
+    this._activeChanged.emit(args);
   }
 
   /**
@@ -539,21 +570,31 @@ class ApplicationShell extends Widget {
   }
 
   /**
-   * Handle a change to the dock area active widget.
+   * Save the dehydrated state of the application shell.
    */
-  private _onActiveChanged(sender: any, args: FocusTracker.IChangedArgs<Widget>): void {
-    if (args.newValue) {
-      args.newValue.title.className += ` ${ACTIVE_CLASS}`;
+  private _save(): Promise<void> {
+    if (!this._database || !this._isRestored) {
+      return;
     }
-    if (args.oldValue) {
-      args.oldValue.title.className = (
-        args.oldValue.title.className.replace(ACTIVE_CLASS, '')
-      );
-    }
-    this._activeChanged.emit(args);
+
+    // If the application is in single document mode, use the cached layout if
+    // available. Otherwise, default to querying the dock panel for layout.
+    const data: ApplicationShell.ILayout = {
+      mainArea: {
+        currentWidget: this._tracker.currentWidget,
+        dock: this.mode === 'single-document' ?
+          this._cachedLayout || this._dockPanel.saveLayout()
+            : this._dockPanel.saveLayout(),
+        mode: this._dockPanel.mode
+      },
+      leftArea: this._leftHandler.dehydrate(),
+      rightArea: this._rightHandler.dehydrate()
+    };
+    return this._database.save(data);
   }
 
   private _activeChanged = new Signal<this, ApplicationShell.IChangedArgs>(this);
+  private _cachedLayout: DockLayout.ILayoutConfig | null = null;
   private _currentChanged = new Signal<this, ApplicationShell.IChangedArgs>(this);
   private _database: ApplicationShell.ILayoutDB = null;
   private _dockPanel: DockPanel;
@@ -725,6 +766,19 @@ namespace Private {
   }
 
   /**
+   * Removes widgets that have been disposed from an area config, mutates area.
+   */
+  export
+  function normalizeAreaConfig(parent: DockPanel, area: DockLayout.AreaConfig): void {
+    if (area.type === 'tab-area') {
+      area.widgets = area.widgets
+        .filter(widget => !widget.isDisposed && widget.parent === parent);
+      return;
+    }
+    area.children.forEach(child => { normalizeAreaConfig(parent, child); });
+  }
+
+  /**
    * A class which manages a side bar and related stacked panel.
    */
   export
@@ -836,7 +890,7 @@ namespace Private {
      * Find the index of the item with the given widget, or `-1`.
      */
     private _findWidgetIndex(widget: Widget): number {
-      return ArrayExt.findFirstIndex(this._items, item => item.widget === widget);
+      return ArrayExt.findFirstIndex(this._items, i => i.widget === widget);
     }
 
     /**
@@ -867,8 +921,8 @@ namespace Private {
      * Handle the `currentChanged` signal from the sidebar.
      */
     private _onCurrentChanged(sender: TabBar<Widget>, args: TabBar.ICurrentChangedArgs<Widget>): void {
-      let oldWidget = this._findWidgetByTitle(args.previousTitle);
-      let newWidget = this._findWidgetByTitle(args.currentTitle);
+      const oldWidget = this._findWidgetByTitle(args.previousTitle);
+      const newWidget = this._findWidgetByTitle(args.currentTitle);
       if (oldWidget) {
         oldWidget.hide();
       }
@@ -876,9 +930,10 @@ namespace Private {
         newWidget.show();
       }
       if (newWidget) {
-        document.body.setAttribute(`data-${this._side}Area`, newWidget.id);
+        const id = newWidget.id;
+        document.body.setAttribute(`data-${this._side}-sidebar-widget`, id);
       } else {
-        document.body.removeAttribute(`data-${this._side}Area`);
+        document.body.removeAttribute(`data-${this._side}-sidebar-widget`);
       }
       this._refreshVisibility();
     }
