@@ -202,7 +202,7 @@ def _validate_package(data, extension):
 def _get_config():
     """Get the JupyterLab config data.
     """
-    file = _get_config_path()
+    file = pjoin(_get_config_dir(), 'build_config.json')
     if not osp.exists(file):
         if not osp.exists(osp.basename(file)):
             os.makedirs(osp.basename(file))
@@ -219,7 +219,7 @@ def _get_config():
 def _write_config(data):
     """Write the JupyterLab config data.
     """
-    with open(_get_config_path(), 'w') as fid:
+    with open(pjoin(_get_config_dir(), 'build_config.json'), 'w') as fid:
         json.dump(data, fid)
 
 
@@ -230,21 +230,25 @@ def _normalize_path(extension):
     return extension
 
 
-def _get_config_path():
-    return pjoin(ENV_CONFIG_PATH[0], 'labconfig', 'build_config.json')
+def _get_config_dir():
+    return pjoin(ENV_CONFIG_PATH[0], 'labconfig')
 
 
-def _get_root_dir(config):
+def _get_root_dir(config=None):
+    config = config or _get_config()
     return config['location']
 
 
-def _get_build_dir(config):
+def _get_build_dir(config=None):
+    config = config or _get_config()
     return pjoin(_get_root_dir(config), 'build')
 
 
-def _get_pkg_path(config):
+def _get_pkg_path(config=None):
+    config = config or _get_config()
     return pjoin(_get_root_dir(config), 'package.json')
 
 
-def _get_cache_dir(config):
+def _get_cache_dir(config=None):
+    config = config or _get_config()
     return pjoin(_get_root_dir(config), 'cache')

@@ -38,9 +38,8 @@ class LabDescribeApp(JupyterApp):
         print(describe())
 
 
-
 flags = dict(base_flags)
-flags['dev-mode']= (
+flags['dev-mode'] = (
     {'LabApp': {'dev_mode': True}},
     "Start the app in dev mode."
 )
