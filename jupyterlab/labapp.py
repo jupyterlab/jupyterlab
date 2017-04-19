@@ -4,8 +4,8 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-from notebook.notebookapp import NotebookApp
-from jupyter_core.application import base_flags, JupyterApp
+from notebook.notebookapp import NotebookApp, flags
+from jupyter_core.application import JupyterApp
 
 from traitlets import Bool, Unicode
 
@@ -38,8 +38,8 @@ class LabDescribeApp(JupyterApp):
         print(describe())
 
 
-flags = dict(base_flags)
-flags['dev-mode'] = (
+lab_flags = dict(flags)
+lab_flags['dev-mode'] = (
     {'LabApp': {'dev_mode': True}},
     "Start the app in dev mode."
 )
@@ -60,7 +60,7 @@ class LabApp(NotebookApp):
         jupyter lab --certfile=mycert.pem # use SSL/TLS certificate
     """
 
-    flags = flags
+    flags = lab_flags
 
     subcommands = dict(
         build=(LabBuildApp, LabBuildApp.description.splitlines()[0]),
