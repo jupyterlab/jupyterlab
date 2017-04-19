@@ -140,9 +140,10 @@ def validate_extension(extension):
 def clean():
     """Clean the JupyterLab application directory."""
     config = _get_config()
-    target = pjoin(_get_root_dir(config), 'node_modules')
-    if osp.exists(target):
-        os.remove(target)
+    for name in ['node_modules', 'build']:
+        target = pjoin(_get_root_dir(config), name)
+        if osp.exists(target):
+            shutil.rmtree(target)
 
 
 def build():
