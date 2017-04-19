@@ -20,7 +20,7 @@ from ipython_genutils.tempdir import TemporaryDirectory
 from notebook.notebookapp import NotebookApp
 from jupyter_core import paths
 
-from jupyterlab import extension, commands
+from jupyterlab import commands
 from jupyterlab.extension import (
     add_handlers, load_jupyter_server_extension
 )
@@ -78,7 +78,7 @@ class TestExtension(TestCase):
             'JUPYTER_DATA_DIR': self.data_dir,
         })
         self.patches.append(p)
-        for mod in (paths, extension, commands):
+        for mod in (paths, commands):
             if hasattr(mod, 'ENV_JUPYTER_PATH'):
                 p = patch.object(mod, 'ENV_JUPYTER_PATH', [self.data_dir])
                 self.patches.append(p)
@@ -92,8 +92,8 @@ class TestExtension(TestCase):
         # verify our patches
         self.assertEqual(paths.ENV_CONFIG_PATH, [self.config_dir])
         self.assertEqual(paths.ENV_JUPYTER_PATH, [self.data_dir])
-        self.assertEqual(extension.ENV_JUPYTER_PATH, [self.data_dir])
         self.assertEqual(commands.ENV_JUPYTER_PATH, [self.data_dir])
+        self.assertEqual(commands.ENV_CONFIG_PATH, [self.config_dir])
 
     def tearDown(self):
         for modulename in self._mock_extensions:
@@ -123,7 +123,6 @@ class TestExtension(TestCase):
     def test_list_extensions(self):
         install_extension(pjoin(here, 'mockextension'))
         extensions = list_extensions()
-        assert '@jupyterlab/notebook-extension' in extensions
         assert '@jupyterlab/python-tests' in extensions
 
     def test_build(self):
@@ -138,7 +137,7 @@ class TestExtension(TestCase):
         sys.stderr = stderr
         web_app = app.web_app
         prev = len(web_app.handlers)
-        add_handlers(web_app)
+        add_handlers(app)
         assert len(web_app.handlers) > prev
 
     def test_load_extension(self):

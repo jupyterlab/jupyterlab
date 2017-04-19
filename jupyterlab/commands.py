@@ -61,7 +61,7 @@ def link_extension(extension):
 
     # Verify the package.json data.
     pkg_path = osp.join(path, 'package.json')
-    if not os.path.exists(pkg_path):
+    if not osp.exists(pkg_path):
         msg = 'Linked package must point to a directory with package.json'
         raise ValueError(msg)
 
@@ -220,10 +220,11 @@ def _validate_package(data, extension):
 def _get_config():
     """Get the JupyterLab config data.
     """
-    file = pjoin(_get_config_dir(), 'build_config.json')
+    config_dir = _get_config_dir()
+    file = pjoin(config_dir, 'build_config.json')
     if not osp.exists(file):
-        if not osp.exists(osp.basename(file)):
-            os.makedirs(osp.basename(file))
+        if not osp.exists(config_dir):
+            os.makedirs(config_dir)
         with open(file, 'w') as fid:
             json.dump(dict(), fid, indent=4)
     with open(file) as fid:
