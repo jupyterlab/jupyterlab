@@ -179,6 +179,7 @@ class ApplicationShell extends Widget {
     if (mode === 'single-document') {
       this._cachedLayout = dock.saveLayout();
       dock.mode = mode;
+
       // In case the active widget in the dock panel is *not* the active widget
       // of the application, defer to the application.
       dock.activateWidget(this.currentWidget);
@@ -187,13 +188,16 @@ class ApplicationShell extends Widget {
 
     // Otherwise, toggle back to multiple document mode.
     dock.mode = mode;
+
     // Restore the original layout.
     if (this._cachedLayout) {
-      // Remove any disposed widgets in the cached layout.
+
+      // Remove any disposed widgets in the cached layout and restore.
       Private.normalizeAreaConfig(this._cachedLayout.main);
       dock.restoreLayout(this._cachedLayout);
       this._cachedLayout = null;
     }
+
     // Add any widgets created during single document mode.
     this._cachedAddedWidgets.forEach(widget => {
       if (!widget.isDisposed) {
@@ -201,6 +205,7 @@ class ApplicationShell extends Widget {
       }
     });
     this._cachedAddedWidgets.length = 0;
+
     // In case the active widget in the dock panel is *not* the active widget
     // of the application, defer to the application.
     dock.activateWidget(this.currentWidget);
