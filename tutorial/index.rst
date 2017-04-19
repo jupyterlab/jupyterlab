@@ -19,8 +19,8 @@ Contents:
    :maxdepth: 2
 
    repo.md
-   plugins.md
-   labextensions.md
+   extensions_user.md
+   extensions_dev.md
    documents.md
    notebook.md
    patterns.md
