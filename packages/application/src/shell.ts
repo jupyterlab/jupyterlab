@@ -176,12 +176,32 @@ class ApplicationShell extends Widget {
       return;
     }
 
-    dock.mode = mode;
     if (mode === 'single-document') {
+      this._cachedLayout = dock.saveLayout();
+      dock.mode = mode;
       // In case the active widget in the dock panel is *not* the active widget
       // of the application, defer to the application.
       dock.activateWidget(this.currentWidget);
+      return;
     }
+
+    // Otherwise, toggle back to multiple document mode.
+    dock.mode = mode;
+    // Restore the original layout.
+    if (this._cachedLayout) {
+      dock.restoreLayout(this._cachedLayout);
+      this._cachedLayout = null;
+    }
+    // Add any widgets created during single document mode.
+    this._cachedAddedWidgets.forEach(widget => {
+      if (!widget.isDisposed) {
+        this.addToMainArea(widget);
+      }
+    });
+    this._cachedAddedWidgets.length = 0;
+    // In case the active widget in the dock panel is *not* the active widget
+    // of the application, defer to the application.
+    dock.activateWidget(this.currentWidget);
   }
 
   /**
@@ -296,6 +316,13 @@ class ApplicationShell extends Widget {
       console.error('widgets added to app shell must have unique id property');
       return;
     }
+    // If the application is in single document mode, track the newly added
+    // widgets so that they can be re-added to the application when the mode
+    // is switched back to multiple document and the original layout is
+    // restored.
+    if (this.mode === 'single-document') {
+      this._cachedAddedWidgets.push(widget);
+    }
     this._dockPanel.addWidget(widget, { mode: 'tab-after' });
     this._tracker.add(widget);
   }
@@ -308,7 +335,7 @@ class ApplicationShell extends Widget {
    */
   addToRightArea(widget: Widget, options: ApplicationShell.ISideAreaOptions = {}): void {
     if (!widget.id) {
-      console.error('widgets added to app shell must have unique id property');
+      console.error('Widgets added to app shell must have unique id property.');
       return;
     }
     let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
@@ -324,7 +351,7 @@ class ApplicationShell extends Widget {
    */
   addToTopArea(widget: Widget, options: ApplicationShell.ISideAreaOptions = {}): void {
     if (!widget.id) {
-      console.error('widgets added to app shell must have unique id property');
+      console.error('Widgets added to app shell must have unique id property.');
       return;
     }
     // Temporary: widgets are added to the panel in order of insertion.
@@ -540,6 +567,8 @@ class ApplicationShell extends Widget {
   }
 
   private _activeChanged = new Signal<this, ApplicationShell.IChangedArgs>(this);
+  private _cachedAddedWidgets: Widget[] = [];
+  private _cachedLayout: DockLayout.ILayoutConfig | null = null;
   private _currentChanged = new Signal<this, ApplicationShell.IChangedArgs>(this);
   private _database: ApplicationShell.ILayoutDB = null;
   private _dockPanel: DockPanel;
