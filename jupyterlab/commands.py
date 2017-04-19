@@ -51,7 +51,6 @@ def install_extension(extension):
     if pkg_name in config['linked_extensions']:
         del config['linked_extensions'][pkg_name]
     _write_config(config)
-    build()
 
 
 def link_extension(extension):
@@ -78,8 +77,6 @@ def link_extension(extension):
         del config['installed_extensions'][name]
     _write_config(config)
 
-    build()
-
 
 def unlink_extension(extension):
     """Unlink an extension from JupyterLab by path or name.
@@ -96,9 +93,10 @@ def unlink_extension(extension):
     if name:
         del config['linked_extensions'][name]
         _write_config(config)
-        build()
-    else:
-        print('No labextension matching "%s" is linked' % extension)
+        return True
+
+    print('No labextension matching "%s" is linked' % extension)
+    return False
 
 
 def uninstall_extension(name):
@@ -109,9 +107,10 @@ def uninstall_extension(name):
     if name in config['installed_extensions']:
         del config['installed_extensions'][name]
         _write_config(config)
-        build()
-    else:
-        print('No labextension named "%s" installed' % name)
+        return True
+
+    print('No labextension named "%s" installed' % name)
+    return False
 
 
 def list_extensions():
@@ -157,6 +156,9 @@ def build():
     _ensure_package(config)
     root = _get_root_dir(config)
 
+    # Make sure packages are installed.
+    run(['npm', 'install'], cwd=root)
+
     # Install the linked extensions.
     for value in config['linked_extensions'].values():
         run(['npm', 'install', value], cwd=root)
@@ -200,9 +202,6 @@ def _ensure_package(config):
         data['jupyterlab']['extensions'].append(key)
     with open(pkg_path, 'w') as fid:
         json.dump(data, fid, indent=4)
-
-    if not osp.exists(pjoin(root_dir, 'node_modules')):
-        run(['npm', 'install'], cwd=root_dir)
 
 
 def _validate_package(data, extension):
