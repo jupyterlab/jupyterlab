@@ -199,7 +199,7 @@ def _ensure_package(config):
     for key in config['linked_extensions']:
         data['jupyterlab']['extensions'].append(key)
     with open(pkg_path, 'w') as fid:
-        json.dump(data, fid)
+        json.dump(data, fid, indent=4)
 
     if not osp.exists(pjoin(root_dir, 'node_modules')):
         run(['npm', 'install'], cwd=root_dir)
@@ -225,7 +225,7 @@ def _get_config():
         if not osp.exists(osp.basename(file)):
             os.makedirs(osp.basename(file))
         with open(file, 'w') as fid:
-            json.dump(dict(), fid)
+            json.dump(dict(), fid, indent=4)
     with open(file) as fid:
         data = json.load(fid)
     data.setdefault('location', pjoin(ENV_JUPYTER_PATH[0], 'lab'))
@@ -238,7 +238,7 @@ def _write_config(data):
     """Write the JupyterLab config data.
     """
     with open(pjoin(_get_config_dir(), 'build_config.json'), 'w') as fid:
-        json.dump(data, fid)
+        json.dump(data, fid, indent=4)
 
 
 def _normalize_path(extension):
