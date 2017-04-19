@@ -78,10 +78,7 @@ const plugin: JupyterLabPlugin<void> = {
 
     command = CommandIDs.toggleMode;
     app.commands.addCommand(command, {
-      label: () => {
-        return app.shell.mode === 'multiple-document' ?
-          'Toggle Single-Document Mode' : 'Toggle Multiple-Document Mode';
-      },
+      label: 'Toggle Single-Document Mode',
       execute: () => {
         const args = app.shell.mode === 'multiple-document' ?
           { mode: 'single-document' } : { mode: 'multiple-document' };
