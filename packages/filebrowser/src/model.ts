@@ -524,7 +524,8 @@ class FileBrowserModel implements IDisposable {
   private _startTimer(): void {
     this._timeoutId = window.setInterval(() => {
       if (this._requested) {
-        return this.refresh();
+        this.refresh();
+        return;
       }
       let date = new Date().getTime();
       if ((date - this._lastRefresh) > REFRESH_DURATION) {
