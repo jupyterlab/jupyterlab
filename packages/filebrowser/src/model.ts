@@ -56,9 +56,7 @@ class FileBrowserModel implements IDisposable {
     this._manager.sessions.runningChanged.connect(this._onRunningChanged, this);
     this._state = options.state || null;
     this._scheduleUpdate();
-    this._refreshId = window.setInterval(() => {
-      this._scheduleUpdate();
-    }, REFRESH_DURATION);
+    this._startTimer();
   }
 
   /**
@@ -127,8 +125,6 @@ class FileBrowserModel implements IDisposable {
     this._model = null;
     this._manager = null;
     clearTimeout(this._timeoutId);
-    clearInterval(this._refreshId);
-    clearTimeout(this._blackoutId);
     this._sessions.length = 0;
     this._items.length = 0;
     Signal.clearData(this);
@@ -156,6 +152,8 @@ class FileBrowserModel implements IDisposable {
    * Force a refresh of the directory contents.
    */
   refresh(): Promise<void> {
+    this._lastRefresh = new Date().getTime();
+    this._requested = false;
     return this.cd('.');
   }
 
@@ -521,35 +519,33 @@ class FileBrowserModel implements IDisposable {
   }
 
   /**
+   * Start the internal refresh timer.
+   */
+  private _startTimer(): void {
+    this._timeoutId = window.setInterval(() => {
+      if (this._requested) {
+        this.refresh();
+        return;
+      }
+      let date = new Date().getTime();
+      if ((date - this._lastRefresh) > REFRESH_DURATION) {
+        this.refresh();
+      }
+    }, MIN_REFRESH);
+  }
+
+  /**
    * Handle internal model refresh logic.
    */
   private _scheduleUpdate(): void {
-    // Send immediately if there is no pending action, otherwise defer.
-    if (this._blackoutId !== -1) {
-      this._requested = true;
-      return;
-    }
-    this._timeoutId = window.setTimeout(() => {
+    let date = new Date().getTime();
+    if ((date - this._lastRefresh) > MIN_REFRESH) {
       this.refresh();
-      if (this._requested && this._blackoutId !== -1) {
-        this._requested = false;
-        clearTimeout(this._blackoutId);
-        this._blackoutId = -1;
-        this._timeoutId = window.setTimeout(() => {
-          this._scheduleUpdate();
-        }, MIN_REFRESH);
-      } else {
-        this._blackoutId = window.setTimeout(() => {
-          this._blackoutId = -1;
-          if (this._requested) {
-            this._scheduleUpdate();
-          }
-        }, MIN_REFRESH);
-      }
-    }, 0);
+    } else {
+      this._requested = true;
+    }
   }
 
-  private _blackoutId = -1;
   private _connectionFailure = new Signal<this, Error>(this);
   private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
   private _items: Contents.IModel[] = [];
@@ -562,7 +558,7 @@ class FileBrowserModel implements IDisposable {
   private _pending: Promise<void> = null;
   private _pendingPath: string = null;
   private _refreshed = new Signal<this, void>(this);
-  private _refreshId = -1;
+  private _lastRefresh = -1;
   private _requested = false;
   private _sessions: Session.IModel[] = [];
   private _sessionsChanged = new Signal<this, void>(this);
