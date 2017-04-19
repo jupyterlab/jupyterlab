@@ -921,8 +921,8 @@ namespace Private {
      * Handle the `currentChanged` signal from the sidebar.
      */
     private _onCurrentChanged(sender: TabBar<Widget>, args: TabBar.ICurrentChangedArgs<Widget>): void {
-      let oldWidget = this._findWidgetByTitle(args.previousTitle);
-      let newWidget = this._findWidgetByTitle(args.currentTitle);
+      const oldWidget = this._findWidgetByTitle(args.previousTitle);
+      const newWidget = this._findWidgetByTitle(args.currentTitle);
       if (oldWidget) {
         oldWidget.hide();
       }
@@ -930,9 +930,10 @@ namespace Private {
         newWidget.show();
       }
       if (newWidget) {
-        document.body.setAttribute(`data-${this._side}-area`, newWidget.id);
+        const id = newWidget.id;
+        document.body.setAttribute(`data-${this._side}-sidebar-widget`, id);
       } else {
-        document.body.removeAttribute(`data-${this._side}-area`);
+        document.body.removeAttribute(`data-${this._side}-sidebar-widget`);
       }
       this._refreshVisibility();
     }
