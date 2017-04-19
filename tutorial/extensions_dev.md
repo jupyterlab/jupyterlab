@@ -72,29 +72,30 @@ listeners to react to changes in an observed object.
 An Extension is a valid npm package that meets the following criteria:
   - Exports one or more Phosphor plugins as the default export in its 
     main file.
-  - Has a ``jupyterlab`` key in its ``package.json`` which has 
-    ``"extension": true`` metadata.
+  - Has a `jupyterlab` key in its `package.json` which has 
+    `"extension": true` metadata.
 
 While authoring the extension, you can use the command:
 
-..
-  jupyter labextension link <path>
+```
+jupyter labextension link <path>
+```
 
 This causes the builder to re-install the source folder before building
 the application files.
 
-You can also use ``jupyter labextension install <path>``, but that will
+You can also use `jupyter labextension install <path>`, but that will
 only copy the current contents of the source folder.
 
 Note that the application is built against **released** versions of the
 core JupyterLab extensions.  If your extension depends on JupyterLab
 extensions, it should be compatible with the versions used in the
-``jupyterlab/package.json`` entry point file.
+`jupyterlab/package.json` entry point file.
 
 The package should export EMCAScript 5 compatible JavaScript.  It can 
-import CSS using the syntax ``require('foo.css')``.  The CSS files
+import CSS using the syntax `require('foo.css')`.  The CSS files
 can also import CSS from other packages using the syntax 
-``@import url('~foo/index.css')``, where ``foo`` is the name of the package.
+`@import url('~foo/index.css')`, where `foo` is the name of the package.
 
 The following file types are also supported (both in JavaScript and CSS):
 json, html, jpg, png, gif, svg, js.map, woff2, ttf, eot.
@@ -106,8 +107,8 @@ EMCAScript 5 it must be converted using an appropriate tool.
 The package must only rely on other packages that are bundled with your extension or available on npm.org.
 
 If you publish your extension on npm.org, users will be able to 
-install it as simply ``jupyter labextension install <foo>``, where
-``<foo>`` is the name of the published npm package.  You can alternatively
+install it as simply `jupyter labextension install <foo>`, where
+`<foo>` is the name of the published npm package.  You can alternatively
 provide a script that runs `jupyter labextension install` against a 
 local folder path on the user's machine or a provided tarball.  Any
 valid `npm install` specifier can be used in `jupyter labextension install`.
