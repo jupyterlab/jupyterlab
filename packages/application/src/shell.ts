@@ -10,7 +10,7 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  MessageLoop
+  Message, MessageLoop
 } from '@phosphor/messaging';
 
 import {
@@ -43,11 +43,15 @@ const CURRENT_CLASS = 'jp-mod-current';
  */
 const ACTIVE_CLASS = 'jp-mod-active';
 
-
 /**
  * The default rank of items added to a sidebar.
  */
 const DEFAULT_RANK = 500;
+
+/**
+ * The data attribute added to the document body indicating shell's mode.
+ */
+const MODE_ATTRIBUTE = 'data-shell-mode';
 
 
 /**
@@ -183,6 +187,9 @@ class ApplicationShell extends Widget {
       // In case the active widget in the dock panel is *not* the active widget
       // of the application, defer to the application.
       dock.activateWidget(this.currentWidget);
+
+      // Set the mode data attribute on the document body.
+      document.body.setAttribute(MODE_ATTRIBUTE, mode);
       return;
     }
 
@@ -213,6 +220,9 @@ class ApplicationShell extends Widget {
     // In case the active widget in the dock panel is *not* the active widget
     // of the application, defer to the application.
     dock.activateWidget(this.currentWidget);
+
+    // Set the mode data attribute on the document body.
+    document.body.setAttribute(MODE_ATTRIBUTE, mode);
   }
 
   /**
@@ -481,6 +491,13 @@ class ApplicationShell extends Widget {
       default:
         break;
     }
+  }
+
+  /**
+   * Handle `after-attach` messages for the application shell.
+   */
+  protected onAfterAttach(msg: Message): void {
+    document.body.setAttribute(MODE_ATTRIBUTE, this.mode);
   }
 
   /*
@@ -913,9 +930,9 @@ namespace Private {
         newWidget.show();
       }
       if (newWidget) {
-        document.body.setAttribute(`data-${this._side}Area`, newWidget.id);
+        document.body.setAttribute(`data-${this._side}-area`, newWidget.id);
       } else {
-        document.body.removeAttribute(`data-${this._side}Area`);
+        document.body.removeAttribute(`data-${this._side}-area`);
       }
       this._refreshVisibility();
     }
