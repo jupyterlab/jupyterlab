@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 
-describe('coreutils', () => {
+describe('@jupyterlab/coreutils', () => {
 
   describe('ObservableJSON', () => {
 

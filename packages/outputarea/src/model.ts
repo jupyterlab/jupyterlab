@@ -10,7 +10,8 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  IObservableVector, ObservableVector, nbformat
+  IObservableVector, ObservableVector, nbformat,
+  IObservableValue, ObservableValue, IModelDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -40,6 +41,19 @@ class OutputAreaModel implements IOutputAreaModel {
       each(options.values, value => { this._add(value); });
     }
     this.list.changed.connect(this._onListChanged, this);
+
+    // If we are given a IModelDB, keep an up-to-date
+    // serialized copy of the OutputAreaModel in it.
+    if (options.modelDB) {
+      this._modelDB = options.modelDB;
+      this._serialized = this._modelDB.createValue('outputs');
+      if (this._serialized.get()) {
+        this.fromJSON(this._serialized.get() as nbformat.IOutput[]);
+      } else {
+        this._serialized.set(this.toJSON());
+      }
+      this._serialized.changed.connect(this._onSerializedChanged, this);
+    }
   }
 
   /**
@@ -233,8 +247,25 @@ class OutputAreaModel implements IOutputAreaModel {
    * Handle a change to the list.
    */
   private _onListChanged(sender: IObservableVector<IOutputModel>, args: ObservableVector.IChangedArgs<IOutputModel>) {
+    if (this._serialized && !this._changeGuard) {
+      this._changeGuard = true;
+      this._serialized.set(this.toJSON());
+      this._changeGuard = false;
+    }
     this._changed.emit(args);
     this._stateChanged.emit(void 0);
+  }
+
+  /**
+   * If the serialized version of the outputs have changed due to a remote
+   * action, then update the model accordingly.
+   */
+  private _onSerializedChanged(sender: IObservableValue, args: ObservableValue.IChangedArgs) {
+    if (!this._changeGuard) {
+      this._changeGuard = true;
+      this.fromJSON(args.newValue as nbformat.IOutput[]);
+      this._changeGuard = false;
+    }
   }
 
   /**
@@ -250,6 +281,9 @@ class OutputAreaModel implements IOutputAreaModel {
   private _isDisposed = false;
   private _stateChanged = new Signal<IOutputAreaModel, void>(this);
   private _changed = new Signal<this, IOutputAreaModel.ChangedArgs>(this);
+  private _modelDB: IModelDB = null;
+  private _serialized: IObservableValue = null;
+  private _changeGuard = false;
 }
 
 

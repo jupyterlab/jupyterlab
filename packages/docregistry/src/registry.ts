@@ -34,9 +34,8 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IChangedArgs as IChangedArgsGeneric, PathExt
+  IChangedArgs as IChangedArgsGeneric, PathExt, IModelDB
 } from '@jupyterlab/coreutils';
-
 
 /* tslint:disable */
 /**
@@ -873,7 +872,7 @@ namespace DocumentRegistry {
      *
      * @returns A new document model.
      */
-    createNew(languagePreference?: string): T;
+    createNew(languagePreference?: string, modelDB?: IModelDB): T;
 
     /**
      * Get the preferred kernel language given an extension.

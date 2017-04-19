@@ -12,7 +12,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 
-describe('common/ObservableVector', () => {
+describe('@jupyterlab/coreutils', () => {
 
   describe('ObservableVector', () => {
 
@@ -30,6 +30,15 @@ describe('common/ObservableVector', () => {
       });
 
     });
+
+    describe('#type', () => {
+
+      it('should return `Vector`', () => {
+        let value = new ObservableVector<number>();
+        expect(value.type).to.be('Vector');
+      });
+    });
+
 
     describe('#changed', () => {
 
