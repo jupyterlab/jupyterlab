@@ -6,49 +6,69 @@
 import os
 import sys
 
-from jupyter_core.application import JupyterApp
+from jupyter_core.application import JupyterApp, base_flags
+from traitlets import Bool
 
 from ._version import __version__
 from .commands import (
     install_extension, uninstall_extension, list_extensions,
-    link_extension, unlink_extension
+    link_extension, unlink_extension, build
 )
 
 
-class InstallLabExtensionApp(JupyterApp):
+flags = dict(base_flags)
+flags['should-build'] = (
+    {'BaseExtensionApp': {'should_build': True}},
+    "Build the app after the action."
+)
+
+
+class BaseExtensionApp(JupyterApp):
     version = __version__
+    flags = flags
+
+    should_build = Bool(True, config=True,
+        help="Whether to build the app after the action")
+
+
+class InstallLabExtensionApp(BaseExtensionApp):
     description = "Install labextension(s)"
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
         [install_extension(arg) for arg in self.extra_args]
+        if self.should_build:
+            build()
 
 
-class LinkLabExtensionApp(JupyterApp):
-    version = __version__
+class LinkLabExtensionApp(BaseExtensionApp):
     description = "Link labextension(s)"
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
         [link_extension(arg) for arg in self.extra_args]
+        if self.should_build:
+            build()
 
 
-class UnlinkLabExtensionApp(JupyterApp):
-    version = __version__
+class UnlinkLabExtensionApp(BaseExtensionApp):
     description = "Unlink labextension(s)"
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        [unlink_extension(arg) for arg in self.extra_args]
+        ans = any([unlink_extension(arg) for arg in self.extra_args])
+        if ans and self.should_build:
+            build()
 
 
-class UninstallLabExtensionApp(JupyterApp):
-    version = __version__
+class UninstallLabExtensionApp(BaseExtensionApp):
     description = "Uninstall labextension(s)"
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        [uninstall_extension(arg) for arg in self.extra_args]
+        ans = any([uninstall_extension(arg) for arg in self.extra_args])
+        if ans and self.should_build:
+            build()
 
 
 class ListLabExtensionsApp(JupyterApp):
