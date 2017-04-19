@@ -189,6 +189,8 @@ class ApplicationShell extends Widget {
     dock.mode = mode;
     // Restore the original layout.
     if (this._cachedLayout) {
+      // Remove any disposed widgets in the cached layout.
+      Private.normalizeAreaConfig(this._cachedLayout.main);
       dock.restoreLayout(this._cachedLayout);
       this._cachedLayout = null;
     }
@@ -737,6 +739,18 @@ namespace Private {
   export
   function itemCmp(first: IRankItem, second: IRankItem): number {
     return first.rank - second.rank;
+  }
+
+  /**
+   * Removes widgets that have been disposed from an area config, mutates area.
+   */
+  export
+  function normalizeAreaConfig(area: DockLayout.AreaConfig): void {
+    if (area.type === 'tab-area') {
+      area.widgets = area.widgets.filter(widget => !widget.isDisposed);
+      return;
+    }
+    area.children.forEach(child => { normalizeAreaConfig(child); });
   }
 
   /**
