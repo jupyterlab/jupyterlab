@@ -4,6 +4,7 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 import json
+import pipes
 import os
 from os import path as osp
 from os.path import join as pjoin
@@ -11,8 +12,14 @@ from subprocess import check_output
 import shutil
 import sys
 import tarfile
-
 from jupyter_core.paths import ENV_JUPYTER_PATH, ENV_CONFIG_PATH
+
+
+if sys.platform == 'win32':
+    from subprocess import list2cmdline
+else:
+    def list2cmdline(cmd_list):
+        return ' '.join(map(pipes.quote, cmd_list))
 
 
 here = osp.dirname(osp.abspath(__file__))
@@ -21,6 +28,7 @@ here = osp.dirname(osp.abspath(__file__))
 def run(cmd, **kwargs):
     """Run a command in the given working directory.
     """
+    print('> ' + list2cmdline(cmd))
     kwargs.setdefault('shell', sys.platform == 'win32')
     kwargs.setdefault('env', os.environ)
     return check_output(cmd, **kwargs)
@@ -40,6 +48,8 @@ def install_extension(extension):
     path = pjoin(_get_cache_dir(config), tar_name)
     run(['npm', 'install', '--save', path], cwd=_get_root_dir(config))
     config['installed_extensions'][pkg_name] = path
+    if pkg_name in config['linked_extensions']:
+        del config['linked_extensions'][pkg_name]
     _write_config(config)
     build()
 
@@ -55,14 +65,17 @@ def link_extension(extension):
         msg = 'Linked package must point to a directory with package.json'
         raise ValueError(msg)
 
-    with open(extension) as fid:
+    with open(pkg_path) as fid:
         data = json.load(fid)
 
     _validate_package(data, path)
 
     # Update JupyterLab metadata.
     config = _get_config()
-    config['linked_extensions'][data['name']] = path
+    name = data['name']
+    config['linked_extensions'][name] = path
+    if name in config['installed_extensions']:
+        del config['installed_extensions'][name]
     _write_config(config)
 
     build()
@@ -120,7 +133,7 @@ def validate_extension(extension):
     tar = tarfile.open(pjoin(cache_dir, name), "r:gz")
     f = tar.extractfile('package/package.json')
     data = json.loads(f.read().decode('utf8'))
-    _validate_package(data)
+    _validate_package(data, extension)
     return name, data['name']
 
 
@@ -176,10 +189,10 @@ def _ensure_package(config):
     with open(pkg_path) as fid:
         data = json.load(fid)
     for (key, value) in config['installed_extensions'].items():
-        data['dependences'][key] = value
-        data['extensions'].append(key)
+        data['dependencies'][key] = value
+        data['jupyterlab']['extensions'].append(key)
     for key in config['linked_extensions']:
-        data['extensions'].append(key)
+        data['jupyterlab']['extensions'].append(key)
     with open(pkg_path, 'w') as fid:
         json.dump(data, fid)
 
