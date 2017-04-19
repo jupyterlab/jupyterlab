@@ -12,7 +12,7 @@ import shutil
 import sys
 import tarfile
 
-from jupyter_core.paths import ENV_JUPYTER_PATH
+from jupyter_core.paths import ENV_JUPYTER_PATH, ENV_CONFIG_PATH
 
 
 here = osp.dirname(osp.abspath(__file__))
@@ -36,52 +36,35 @@ def install_extension(extension):
     If link is true, the source directory is linked using `npm link`.
     """
     tar_name, pkg_name = validate_extension(extension)
-    path = pjoin(_get_cache_dir(), tar_name)
-    run(['npm', 'install', '--save', path], cwd=_get_root_dir())
+    config = _get_config()
+    path = pjoin(_get_cache_dir(config), tar_name)
+    run(['npm', 'install', '--save', path], cwd=_get_root_dir(config))
+    config['extensions'].append(pkg_name)
+    _write_config(config)
     build()
 
 
 def link_extension(extension):
     """Link against JupyterLab master.
     """
-    # Make sure we have the ability to create a symlink.
-    if not hasattr(os, 'symlink'):
-        raise TypeError('Symlink is not supported')
-
-    # Normalize the path.
     extension = _normalize_path(extension)
 
-    # Verify a package.json
-    pkg_path = pjoin(extension, 'package.json')
-    if not osp.exists(pkg_path):
-        raise TypeError('Cannot install an extension without a package.json')
+    # Verify the package.json data.
+    pkg_path = osp.join(extension, 'package.json')
+    if not os.path.exists(pkg_path):
+        msg = 'Linked package must point to a directory with package.json'
+        raise ValueError(msg)
 
-    # Get the package data.
-    with open(pkg_path) as fid:
-        pkg_data = json.load(fid)
+    with open(extension) as fid:
+        data = json.load(fid)
 
-    # Make sure it is an extension.
-    _validate_package(pkg_data)
-
-    # Fill in the symlinks
-    target = osp.join(extension, 'node_modules', '@jupyterlab')
-    if not osp.exists(target):
-        os.makedirs(target)
-    for f in os.listdir(osp.join(here, '..', 'packages')):
-        # Get the real path of the source.
-        src = osp.join(here, '..', 'packages', f)
-        src = osp.realpath(src)
-        dest = osp.join(target, f)
-        if osp.exists(dest):
-            os.remove(dest)
-        os.symlink(src, dest)
+    _validate_package(data, extension)
 
     # Update JupyterLab metadata.
-    data = _read_package()
-    name = pkg_data['name']
-    data['dependencies'][name] = 'file:' + extension
-    data['jupyterlab']['symlinks'][name] = extension
-    _write_package(data)
+    config = _get_config()
+    config['extensions'].append(data['name'])
+    config['links'][data['name']] = extension
+    _write_config(config)
 
     build()
 
@@ -89,6 +72,7 @@ def link_extension(extension):
 def unlink_extension(extension):
     """Unlink an extension from JupyterLab.
     """
+    config = _get_config()
     data = _read_package()
 
     # Check if given the name of an extension.
@@ -189,18 +173,17 @@ def describe():
 
 
 def _ensure_package():
-    """Make sure there is a package.json file."""
-    # Make sure we have the ability to create a symlink.
-    if not hasattr(os, 'symlink'):
-        raise TypeError('Symlink is not supported')
+    """Make sure the build dir is set up.
+    """
     cache_dir = _get_cache_dir()
     root_dir = _get_root_dir()
     if not osp.exists(cache_dir):
         os.makedirs(cache_dir)
-    for name in ['package.json', 'index.template.js', 'webpack.config.js']:
+    for name in ['index.template.js', 'webpack.config.js']:
         dest = pjoin(root_dir, name)
-        if not osp.exists(dest) or name != 'package.json':
-            shutil.copy2(pjoin(here, name), dest)
+        shutil.copy2(pjoin(here, name), dest)
+    # Template the package.json file
+    # TODO
     if not osp.exists(pjoin(root_dir, 'node_modules')):
         run(['npm', 'install'], cwd=root_dir)
 
@@ -232,6 +215,30 @@ def _write_package(data):
         json.dump(data, fid)
 
 
+def _get_config():
+    """Get the JupyterLab config data.
+    """
+    file = _get_config_path()
+    if not osp.exists(file):
+        if not osp.exists(osp.basename(file)):
+            os.makedirs(osp.basename(file))
+        with open(file, 'w') as fid:
+            json.dump(dict(), fid)
+    with open(file) as fid:
+        data = json.load(fid)
+    data.setdefault('location', pjoin(ENV_JUPYTER_PATH[0], 'lab'))
+    data.setdefault('extensions', [])
+    data.setdefault('links', dict())
+    return data
+
+
+def _write_config(data):
+    """Write the JupyterLab config data.
+    """
+    with open(_get_config_path(), 'w') as fid:
+        json.dump(data, fid)
+
+
 def _normalize_path(extension):
     extension = osp.expanduser(extension)
     if osp.exists(extension):
@@ -239,17 +246,21 @@ def _normalize_path(extension):
     return extension
 
 
-def _get_root_dir():
-    return pjoin(ENV_JUPYTER_PATH[0], 'lab')
+def _get_config_path():
+    return pjoin(ENV_CONFIG_PATH[0], 'labconfig', 'build_config.json')
 
 
-def _get_build_dir():
-    return pjoin(_get_root_dir(), 'build')
+def _get_root_dir(config):
+    return config['location']
 
 
-def _get_pkg_path():
-    return pjoin(_get_root_dir(), 'package.json')
+def _get_build_dir(config):
+    return pjoin(_get_root_dir(config), 'build')
 
 
-def _get_cache_dir():
-    return pjoin(_get_root_dir(), 'cache')
+def _get_pkg_path(config):
+    return pjoin(_get_root_dir(config), 'package.json')
+
+
+def _get_cache_dir(config):
+    return pjoin(_get_root_dir(config), 'cache')
