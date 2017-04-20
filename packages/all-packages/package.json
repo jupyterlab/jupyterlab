@@ -59,6 +59,7 @@
     "@jupyterlab/services": "^0.41.0",
     "@jupyterlab/services-extension": "^0.2.0",
     "@jupyterlab/shortcuts-extension": "^0.2.0",
+    "@jupyterlab/tabmanager-extension": "^0.2.1",
     "@jupyterlab/terminal": "^0.2.0",
     "@jupyterlab/terminal-extension": "^0.2.0",
     "@jupyterlab/tooltip": "^0.2.0",
