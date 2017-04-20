@@ -33,8 +33,10 @@ list.
 
 ## Advanced usage
 The behavior of the application can be customized through configuration.
-The configuration is stored in `<sys-prefix>/etc/jupyter/labconfig/`.
+The configuration is stored by default in `<sys-prefix>/etc/jupyter/labconfig/`.
 In this directory, we use `build_config.json` and `page_config.json`.
+The configuration directory can be overridden using `--lab-config-dir` in
+any of the JupyterLab commands.
 The `build_config.json` stores the location of the build directory in
 `location` (defaults to `<sys-prefix>/share/jupyter/lab`), as well
 as `installed_extensions` and `linked_extensions` metadata.
