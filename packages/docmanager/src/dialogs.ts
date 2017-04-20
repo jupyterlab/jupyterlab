@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  PathExt
+  PathExt, uuid
 } from '@jupyterlab/coreutils';
 
 import {
@@ -85,8 +85,9 @@ function newUntitled(manager: DocumentManager, options: Contents.ICreateOptions)
  * Rename a file with optional dialog.
  */
 export
-function renameFile(manager: DocumentManager, container: IFileContainer, oldPath: string, newPath: string): Promise<Contents.IModel> {
-  const rename = Private.rename(manager.services, container, oldPath, newPath);
+function renameFile(manager: DocumentManager, oldPath: string, newPath: string, basePath = ''): Promise<Contents.IModel> {
+  let { services } = manager;
+  let rename = Private.rename(services, oldPath, newPath, basePath);
   return rename.catch(error => {
     if (error.xhr) {
       error.message = `${error.xhr.statusText} ${error.xhr.status}`;
@@ -100,7 +101,7 @@ function renameFile(manager: DocumentManager, container: IFileContainer, oldPath
       };
       return showDialog(options).then(button => {
         if (button.accept) {
-          return Private.overwrite(oldPath, newPath);
+          return Private.overwrite(services, oldPath, newPath, basePath);
         }
       });
     } else {
@@ -262,7 +263,8 @@ class CreateFromHandler extends Widget {
       kernelId = JSON.parse(kernelValue) as Kernel.IModel;
     }
     if (file !== oldPath) {
-      let promise = renameFile(this._manager, this._container, oldPath, file);
+      let basePath = this._container.path;
+      let promise = renameFile(this._manager, oldPath, file, basePath);
       return promise.then((contents: Contents.IModel) => {
         if (!contents) {
           return null;
@@ -306,38 +308,72 @@ namespace Private {
   }
 
   /**
+   * Delete a file.
+   *
+   * @param manager - The service manager used to delete.
+   *
+   * @param: path - The path to the file to be deleted.
+   *
+   * @param basePath - The base path to resolve against, defaults to ''.
+   *
+   * @returns A promise which resolves when the file is deleted.
+   *
+   * #### Notes
+   * If there is a running session associated with the file and no other
+   * sessions are using the kernel, the session will be shut down.
+   */
+  function deleteFile(manager: IServiceManager, path: string, basePath = ''): Promise<void> {
+    path = PathExt.resolve(basePath, path);
+    return this.stopIfNeeded(path).then(() => {
+      return this._manager.contents.delete(path);
+    });
+  }
+
+  /**
    * Overwrite a file.
    *
-   * @param path - The path to the original file.
+   * @param manager - The service manager used to overwrite.
+   *
+   * @param oldPath - The path to the original file.
    *
    * @param newPath - The path to the new file.
+   *
+   * @param basePath - The base path to resolve against, defaults to ''.
    *
    * @returns A promise containing the new file contents model.
    */
   export
-  function overwrite(path: string, newPath: string): Promise<Contents.IModel> {
-    return Promise.reject('temporary');
+  function overwrite(manager: IServiceManager, oldPath: string, newPath: string, basePath = ''): Promise<Contents.IModel> {
+    // Cleanly overwrite the file by moving it, making sure the original
+    // does not exist, and then renaming to the new path.
+    const tempPath = `${newPath}.${uuid()}`;
+    const cb = () => rename(manager, tempPath, newPath, basePath);
+    return rename(manager, oldPath, tempPath, basePath).then(() => {
+      return deleteFile(manager, newPath);
+    }).then(cb, cb);
   }
 
   /**
    * Rename a file or directory.
    *
-   * @param path - The path to the original file.
+   * @param manager - The service manager used to rename.
+   *
+   * @param oldPath - The path to the original file.
    *
    * @param newPath - The path to the new file.
+   *
+   * @param basePath - The base path to resolve against, defaults to ''.
    *
    * @returns A promise containing the new file contents model.  The promise
    *   will reject if the newPath already exists.  Use [[overwrite]] to
    *   overwrite a file.
    */
   export
-  function rename(manager: IServiceManager, container: IFileContainer, path: string, newPath: string): Promise<Contents.IModel> {
-    const base = container.path;
-
+  function rename(manager: IServiceManager, oldPath: string, newPath: string, basePath = ''): Promise<Contents.IModel> {
     // Normalize paths.
-    path = PathExt.resolve(base, path);
-    newPath = PathExt.resolve(base, newPath);
+    oldPath = PathExt.resolve(basePath, oldPath);
+    newPath = PathExt.resolve(basePath, newPath);
 
-    return manager.contents.rename(path, newPath);
+    return manager.contents.rename(oldPath, newPath);
   }
 }
