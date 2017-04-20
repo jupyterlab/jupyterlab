@@ -17,9 +17,9 @@ from .commands import (
 
 
 flags = dict(base_flags)
-flags['should-build'] = (
-    {'BaseExtensionApp': {'should_build': True}},
-    "Build the app after the action."
+flags['no-build'] = (
+    {'BaseExtensionApp': {'should_build': False}},
+    "Defer building the app after the action."
 )
 
 
