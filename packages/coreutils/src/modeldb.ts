@@ -268,25 +268,6 @@ interface IModelDB extends IDisposable {
   dispose(): void;
 }
 
-export
-interface IModelDBFactory {
-  /**
-   * The IModelDB backend may require some setup before
-   * it can be used (e.g., loading external APIs, authorization).
-   * This promise is resolved when the services are ready to
-   * be used.
-   */
-  ready: Promise<void>;
-
-  /**
-   * Create an IModelDB for use with a document or other
-   * model.
-   *
-   * @param path: a path that identifies the location of the
-   *   store in the backend.
-   */
-  createModelDB(path: string): IModelDB;
-}
 
 /**
  * A concrete implementation of an `IObservableValue`.
