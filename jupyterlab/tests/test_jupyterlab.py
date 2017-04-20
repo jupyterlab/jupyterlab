@@ -21,7 +21,7 @@ from jupyter_core import paths
 
 from jupyterlab import commands
 from jupyterlab.extension import (
-    add_handlers, load_jupyter_server_extension
+    load_jupyter_server_extension
 )
 from jupyterlab.commands import (
     install_extension, uninstall_extension, list_extensions,
@@ -140,24 +140,10 @@ class TestExtension(TestCase):
             data = fid.read()
         assert '@jupyterlab/python-tests' in data
 
-    def test_add_handlers(self):
-        app = NotebookApp()
-        stderr = sys.stderr
-        sys.stderr = self.devnull
-        app.initialize()
-        sys.stderr = stderr
-        web_app = app.web_app
-        prev = len(web_app.handlers)
-        add_handlers(app)
-        assert len(web_app.handlers) > prev
-
     def test_load_extension(self):
         app = NotebookApp()
         stderr = sys.stderr
         sys.stderr = self.devnull
         app.initialize()
         sys.stderr = stderr
-        web_app = app.web_app
-        prev = len(web_app.handlers)
         load_jupyter_server_extension(app)
-        assert len(web_app.handlers) > prev
