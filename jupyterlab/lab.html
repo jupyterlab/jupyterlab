@@ -41,38 +41,6 @@ Distributed under the terms of the Modified BSD License.
 
 <body>
 
-{% block script %}
-<script>
-  var loader = jupyter.loader;
-  delete jupyter.loader;
-
-  var createLab = loader.require("{{ jupyterlab_main }}").createLab;
-  var lab = jupyter.lab = createLab(loader);
-  var plugins = [];
-
-  /**
-   * Get the plugins for an entry point.
-   */
-  var getEntryPoint = function (entryPoint) {
-    var plugins = loader.require(entryPoint);
-    try {
-      plugins = loader.extractPlugins(plugins);
-    } catch (err) {
-      console.error(err);
-      plugins = [];
-    }
-    return plugins;
-  }
-
-  {% for plugin_entry in plugin_entries %}
-  plugins = plugins.concat(getEntryPoint("{{ plugin_entry }}"));
-  {% endfor %}
-
-  lab.registerPlugins(plugins);
-  lab.start();
-</script>
-{% endblock %}
-
 <script type="text/javascript">
   function _remove_token_from_url() {
     if (window.location.search.length <= 1) {

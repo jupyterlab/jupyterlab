@@ -1,20 +1,35 @@
-// Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
-
-// Support for Node 0.10
-// See https://github.com/webpack/css-loader/issues/144
-require('es6-promise/auto');
 
 var childProcess = require('child_process');
-var buildExtension = require('./build/packages/extension-builder/src/builder').buildExtension;
 var webpack = require('webpack');
 var path = require('path');
 var fs = require('fs-extra');
+var ExtractTextPlugin = require('extract-text-webpack-plugin');
+var Handlebars = require('handlebars');
+var crypto = require('crypto');
+var package_data = require('./package.json');
+
+// Ensure a clear build directory.
+fs.removeSync('./build');
+fs.ensureDirSync('./build');
+
+
+// Create the entry point file.
+var source = fs.readFileSync('index.template.js').toString();
+var template = Handlebars.compile(source);
+var data = { jupyterlab_extensions: package_data.jupyterlab.extensions };
+var result = template(data);
+fs.writeFileSync('build/index.out.js', result);
+
+
+// Create the hash
+var hash = crypto.createHash('md5');
+hash.update(fs.readFileSync('./package.json'));
+fs.writeFileSync('build/hash.md5', hash.digest('hex'));
 
 
 // Get the git description.
 try {
-  var notice = childProcess.execSync('git describe', { encoding: 'utf8' });
+  var notice = childProcess.execSync('jupyter lab describe', { encoding: 'utf8' });
 } catch (e) {
   var notice = 'unknown';
 }
@@ -22,72 +37,59 @@ try {
 
 // Get the python package version.
 var cwd = process.cwd();
-process.chdir('..');
+process.chdir('../..');
 try {
-  var version = childProcess.execSync('python setup.py --version', { encoding: 'utf8' });
+  var version = childProcess.execSync('jupyter lab --version', { encoding: 'utf8' });
 } catch (e) {
   var version = 'unknown';
 }
 process.chdir(cwd);
 
 
-// Build the main extension.
-console.log('Generating bundles...');
-
-// Get the module aliases and copy styles.
-var alias = {};
-var files = fs.readdirSync('./build/packages');
-for (var i = 0; i < files.length; i++) {
-  var package = path.basename(files[i]);
-  var target = path.resolve('./build/packages/' + files[i] + '/src');
-  if (fs.existsSync(path.join('../packages', package, 'style'))) {
-    var source = path.join('../packages', package, 'style');
-    var styleTarget = path.join(target, 'style');
-    fs.copySync(source, styleTarget);
-  }
-  alias['@jupyterlab/' + package] = target;
-}
-
-
-buildExtension({
-  name: 'main',
-  entry: './build/jupyterlab/src/main',
-  outputDir: './build',
-  config: {
-    output: {
-      publicPath: 'lab/',
-    },
-    resolve: {
-      alias
-    },
-    plugins: [
-      new webpack.DefinePlugin({
-        'process.env': {
-          'GIT_DESCRIPTION': JSON.stringify(notice.trim()),
-          'JUPYTERLAB_VERSION': JSON.stringify(version.trim())
-        }
-      })
-    ]
-  }
+// Note that we have to use an explicit local public path
+// otherwise the urls in the extracted CSS will point to the wrong
+// location.
+// See https://github.com/webpack-contrib/extract-text-webpack-plugin/tree/75cb09eed13d15cec8f974b1210920a7f249f8e2
+var cssLoader = ExtractTextPlugin.extract({
+  use: 'css-loader',
+  fallback: 'style-loader',
+  publicPath: './'
 });
 
 
 module.exports = {
-  entry: {
-    loader: './build/jupyterlab/src/loader'
-  },
+  entry:  './build/index.out.js',
   output: {
     path: __dirname + '/build',
     filename: '[name].bundle.js',
-    libraryTarget: 'this',
-    library: 'jupyter'
+    publicPath: 'lab/'
   },
-  resolve: {
-    alias
+  module: {
+    rules: [
+      { test: /\.css$/, use: cssLoader },
+      { test: /\.json$/, use: 'json-loader' },
+      { test: /\.html$/, use: 'file-loader' },
+      { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
+      { test: /\.js.map$/, use: 'file-loader' },
+      { test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/, use: 'url-loader?limit=10000&mimetype=application/font-woff' },
+      { test: /\.woff(\?v=\d+\.\d+\.\d+)?$/, use: 'url-loader?limit=10000&mimetype=application/font-woff' },
+      { test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, use: 'url-loader?limit=10000&mimetype=application/octet-stream' },
+      { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, use: 'file-loader' },
+      { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, use: 'url-loader?limit=10000&mimetype=image/svg+xml' }
+    ],
   },
   node: {
     fs: 'empty'
   },
   bail: true,
-  devtool: 'source-map'
+  devtool: 'source-map',
+  plugins: [
+      new webpack.DefinePlugin({
+        'process.env': {
+          'GIT_DESCRIPTION': JSON.stringify(notice.trim()),
+          'JUPYTERLAB_VERSION': JSON.stringify(version.trim())
+        }
+      }),
+      new ExtractTextPlugin('[name].css')
+    ]
 }

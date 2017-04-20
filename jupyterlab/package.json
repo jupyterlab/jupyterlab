@@ -1,14 +1,10 @@
 {
   "private": true,
-  "name": "@jupyterlab/main",
-  "version": "0.2.0",
+  "name": "@jupyterlab/application-top",
   "scripts": {
-    "build": "tsc && webpack",
-    "clean": "rimraf build",
-    "watch": "watch \"npm run build\" ../packages --wait 10 --filter=../scripts/watch-filter.js"
+    "build": "webpack"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.2.0",
     "@jupyterlab/about-extension": "^0.2.0",
     "@jupyterlab/application-extension": "^0.2.0",
     "@jupyterlab/apputils-extension": "^0.2.0",
@@ -16,7 +12,6 @@
     "@jupyterlab/completer-extension": "^0.2.0",
     "@jupyterlab/console-extension": "^0.2.0",
     "@jupyterlab/csvwidget-extension": "^0.2.0",
-    "@jupyterlab/default-theme": "^0.2.0",
     "@jupyterlab/docmanager-extension": "^0.2.0",
     "@jupyterlab/docregistry-extension": "^0.2.0",
     "@jupyterlab/editorwidget-extension": "^0.2.0",
@@ -31,21 +26,56 @@
     "@jupyterlab/notebook-extension": "^0.2.0",
     "@jupyterlab/rendermime-extension": "^0.2.0",
     "@jupyterlab/running-extension": "^0.2.0",
+    "@jupyterlab/services": "^0.41.0",
     "@jupyterlab/services-extension": "^0.2.0",
     "@jupyterlab/shortcuts-extension": "^0.2.0",
     "@jupyterlab/tabmanager-extension": "^0.2.0",
     "@jupyterlab/terminal-extension": "^0.2.0",
     "@jupyterlab/tooltip-extension": "^0.2.0",
+    "@jupyterlab/application": "^0.2.0",
+    "@jupyterlab/default-theme": "^0.2.0",
     "es6-promise": "^4.1.0",
     "font-awesome": "^4.6.3"
   },
   "devDependencies": {
-    "@jupyterlab/extension-builder": "^0.12.0",
+    "css-loader": "^0.27.3",
+    "extract-text-webpack-plugin": "^2.1.0",
     "file-loader": "^0.10.1",
-    "rimraf": "^2.5.2",
-    "typescript": "^2.2.1",
+    "fs-extra": "^2.1.2",
+    "handlebars": "^4.0.6",
+    "json-loader": "^0.5.4",
+    "style-loader": "^0.13.1",
     "url-loader": "^0.5.7",
-    "watch": "^1.0.2",
     "webpack": "^2.2.1"
+  },
+  "jupyterlab": {
+    "extensions": [
+      "@jupyterlab/about-extension",
+      "@jupyterlab/application-extension",
+      "@jupyterlab/apputils-extension",
+      "@jupyterlab/codemirror-extension",
+      "@jupyterlab/completer-extension",
+      "@jupyterlab/console-extension",
+      "@jupyterlab/csvwidget-extension",
+      "@jupyterlab/docmanager-extension",
+      "@jupyterlab/docregistry-extension",
+      "@jupyterlab/editorwidget-extension",
+      "@jupyterlab/faq-extension",
+      "@jupyterlab/filebrowser-extension",
+      "@jupyterlab/help-extension",
+      "@jupyterlab/imagewidget-extension",
+      "@jupyterlab/inspector-extension",
+      "@jupyterlab/landing-extension",
+      "@jupyterlab/launcher-extension",
+      "@jupyterlab/markdownwidget-extension",
+      "@jupyterlab/notebook-extension",
+      "@jupyterlab/rendermime-extension",
+      "@jupyterlab/running-extension",
+      "@jupyterlab/services-extension",
+      "@jupyterlab/shortcuts-extension",
+      "@jupyterlab/tabmanager-extension",
+      "@jupyterlab/terminal-extension",
+      "@jupyterlab/tooltip-extension"
+    ]
   }
 }

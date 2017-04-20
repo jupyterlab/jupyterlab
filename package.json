@@ -2,9 +2,9 @@
   "private": true,
   "scripts": {
     "install": "lerna bootstrap --hoist",
-    "build": "lerna run build",
+    "build": "cd packages/all-packages && npm run build",
     "build:examples": "lerna run build --scope \"@jupyterlab/example-*\"",
-    "build:main": "cd jupyterlab && npm run build",
+    "build:main": "npm run build && cd jupyterlab && npm run build",
     "build:src": "lerna run build --scope \"@jupyterlab/!(test-|example-)*\"",
     "build:test": "lerna run build:test",
     "clean": "node scripts/clean-packages.js examples packages",
@@ -13,14 +13,15 @@
     "clean:src": "node scripts/clean-packages.js packages",
     "clean:tests": "lerna run clean --scope \"@jupyterlab/test-*\"",
     "coverage": "lerna run coverage --stream",
-    "test": "cd packages/extension-builder && npm test && cd ../../test && npm test",
+    "test": "cd test && npm test",
     "test:services": "cd packages/services && npm run build:examples && npm test && npm run test:integration",
     "test:chrome": "lerna run test:chrome --stream",
     "test:firefox": "lerna run test:firefox --stream",
     "test:ie": "lerna run test:ie --concurrency 1 --stream",
     "publish": "npm update && npm install && npm run clean && npm run build && lerna publish -m \"Publish\"",
     "update:dependency": "node scripts/update-dependency.js",
-    "watch": "cd jupyterlab && npm run watch"
+    "watch": "watch \"npm run build\" packages --wait 10 --filter=scripts/watch-filter.js",
+    "watch:main": "watch \"npm run build:main\" packages --wait 10 --filter=scripts/watch-filter.js"
   },
   "dependencies": {},
   "devDependencies": {

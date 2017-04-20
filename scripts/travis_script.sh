@@ -22,7 +22,8 @@ if [[ $GROUP == tests ]]; then
 
     # Run the JS and python tests
     py.test
-    npm run build
+    npm run clean
+    npm run build:src
     npm run build:test
     npm test
     npm run test:services || npm run test:services
@@ -44,3 +45,4 @@ if [[ $GROUP == coverage ]]; then
     pip install -q pytest-check-links
     py.test --check-links -k .md .
 fi
+
