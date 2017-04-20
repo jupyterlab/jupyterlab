@@ -44,6 +44,10 @@ import {
 
 /**
  * A composite renderer.
+ *
+ * The renderer is used to render mime models using registered
+ * mime renderers, selecting the preferred mime renderer to
+ * render the model into a widget.
  */
 export
 class RenderMime {
