@@ -26,7 +26,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  PathExt, URLExt, IModelDB, IRealtime, IRealtimeHandler
+  PathExt, URLExt, IModelDB, IModelDBFactory
 } from '@jupyterlab/coreutils';
 
 import {
@@ -52,9 +52,8 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     let ext = DocumentRegistry.extname(this._path);
     let lang = this._factory.preferredLanguage(ext);
 
-    if(options.realtimeServices) {
-      this._realtimeHandler = options.realtimeServices.createHandler(this._path);
-      this._modelDB = this._realtimeHandler.modelDB;
+    if(options.modelDBFactory) {
+      this._modelDB = options.modelDBFactory.createModelDB(this._path);
       this._model = this._factory.createNew(lang, this._modelDB);
     } else {
       this._model = this._factory.createNew(lang);
@@ -124,13 +123,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   }
 
   /**
-   * The realtime handler associated with the document.
-   */
-  get realtimeHandler(): IRealtimeHandler {
-    return this._realtimeHandler;
-  }
-
-  /**
    * Get the model factory name.
    *
    * #### Notes
@@ -156,13 +148,13 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     }
     let model = this._model;
     this.session.dispose();
-    if (this._realtimeHandler) {
-      this._realtimeHandler.dispose();
+    if (this._modelDB) {
+      this._modelDB.dispose();
     }
     this._model = null;
     this._manager = null;
     this._factory = null;
-    this._realtimeHandler = null;
+    this._modelDB = null;
 
     model.dispose();
     this._disposed.emit(void 0);
@@ -185,12 +177,12 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
 
   /**
    * Populate the contents of the model, either from
-   * disk or from the realtime handler.
+   * disk or from the modelDB backend.
    *
    * @returns a promise that resolves upon model population.
    */
   fromStore(): Promise<void> {
-    if (this.realtimeHandler) {
+    if (this._modelDB) {
       return this._modelDB.connected.then(() => {
         if (this._modelDB.isPrepopulated) {
           return this.save();
@@ -463,8 +455,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   private _manager: ServiceManager.IManager = null;
   private _opener: (widget: Widget) => void = null;
   private _model: T = null;
-  private _modelDB: IModelDB;
-  private _realtimeHandler: IRealtimeHandler = null;
+  private _modelDB: IModelDB = null;
   private _path = '';
   private _factory: DocumentRegistry.IModelFactory<T> = null;
   private _contentsModel: Contents.IModel = null;
@@ -508,9 +499,9 @@ export namespace Context {
     kernelPreference?: IClientSession.IKernelPreference;
 
     /**
-     * Provider for realtime services.
+     * An IModelDB factory which may be used for the document.
      */
-    realtimeServices?: IRealtime;
+    modelDBFactory?: IModelDBFactory;
 
     /**
      * An optional callback for opening sibling widgets.

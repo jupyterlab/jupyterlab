@@ -34,7 +34,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IRealtime
+  IModelDBFactory
 } from '@jupyterlab/coreutils';
 
 import {
@@ -83,7 +83,7 @@ class DocumentManager implements IDisposable {
     this._registry = options.registry;
     this._serviceManager = options.manager;
     this._opener = options.opener;
-    this._realtimeServices = options.realtimeServices;
+    this._modelDBFactory = options.modelDBFactory;
     this._widgetManager = new DocumentWidgetManager({
       registry: this._registry
     });
@@ -311,7 +311,7 @@ class DocumentManager implements IDisposable {
       factory,
       path,
       kernelPreference,
-      realtimeServices: this._realtimeServices
+      modelDBFactory: this._modelDBFactory
     });
     let handler = new SaveHandler({
       context,
@@ -409,7 +409,7 @@ class DocumentManager implements IDisposable {
   private _contexts: Private.IContext[] = [];
   private _opener: DocumentManager.IWidgetOpener = null;
   private _activateRequested = new Signal<this, string>(this);
-  private _realtimeServices: IRealtime;
+  private _modelDBFactory: IModelDBFactory = null;
 }
 
 
@@ -439,9 +439,9 @@ namespace DocumentManager {
     opener: IWidgetOpener;
 
     /**
-     * A provider for realtime services.
+     * An `IModelDB backend factory`.
      */
-    realtimeServices?: IRealtime;
+    modelDBFactory?: IModelDBFactory;
   }
 
   /**
