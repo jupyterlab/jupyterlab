@@ -23,6 +23,8 @@ else:
 
 
 here = osp.dirname(osp.abspath(__file__))
+DEFAULT_CONFIG_PATH = ENV_CONFIG_PATH[0]
+DEFAULT_BUILD_PATH = ENV_JUPYTER_PATH[0]
 
 
 def run(cmd, **kwargs):
@@ -228,7 +230,7 @@ def _get_config(config_dir=None):
             json.dump(dict(), fid, indent=4)
     with open(file) as fid:
         data = json.load(fid)
-    data.setdefault('location', pjoin(ENV_JUPYTER_PATH[0], 'lab'))
+    data.setdefault('location', pjoin(DEFAULT_BUILD_PATH, 'lab'))
     data.setdefault('installed_extensions', dict())
     data.setdefault('linked_extensions', dict())
     return data
@@ -250,7 +252,7 @@ def _normalize_path(extension):
 
 
 def _get_config_dir():
-    return pjoin(ENV_CONFIG_PATH[0], 'labconfig')
+    return pjoin(DEFAULT_CONFIG_PATH, 'labconfig')
 
 
 def _get_root_dir(config=None):
