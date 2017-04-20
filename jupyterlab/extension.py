@@ -10,7 +10,7 @@ from tornado import web
 from notebook.base.handlers import IPythonHandler, FileFindHandler
 from jinja2 import FileSystemLoader
 from notebook.utils import url_path_join as ujoin
-from .commands import _get_build_dir, _get_config
+from .commands import _get_build_dir, _get_config, DEFAULT_CONFIG_PATH
 
 
 #-----------------------------------------------------------------------------
@@ -88,7 +88,11 @@ def add_handlers(app):
     prefix = ujoin(base_url, PREFIX)
 
     # Handle page config data.
-    config_dir = app.lab_config_dir
+    config_dir = getattr(app, 'lab_config_dir', DEFAULT_CONFIG_PATH)
+    if 'LabApp' in app.config:
+        if 'lab_config_dir' in app.config['LabApp']:
+            config_dir = app.config['LabApp']['lab_config_dir']
+
     config = _get_config(config_dir)
     page_config_data = web_app.settings.get('page_config_data', {})
     page_config_file = os.path.join(config_dir, 'page_config_data.json')
