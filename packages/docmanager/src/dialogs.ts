@@ -100,7 +100,7 @@ function renameFile(manager: DocumentManager, container: IFileContainer, oldPath
       };
       return showDialog(options).then(button => {
         if (button.accept) {
-          return model.overwrite(oldPath, newPath);
+          return Private.overwrite(oldPath, newPath);
         }
       });
     } else {
@@ -252,6 +252,7 @@ class CreateFromHandler extends Widget {
    * Open the file and return the document widget.
    */
   private _open(): Promise<Widget> {
+    let oldPath = this._orig.name;
     let file = this.inputNode.value;
     let widgetName = this._widgetName;
     let kernelValue = this.kernelDropdownNode ? this.kernelDropdownNode.value
@@ -260,8 +261,8 @@ class CreateFromHandler extends Widget {
     if (kernelValue !== 'null') {
       kernelId = JSON.parse(kernelValue) as Kernel.IModel;
     }
-    if (file !== this._orig.name) {
-      let promise = renameFile(this._model, this._orig.name, file);
+    if (file !== oldPath) {
+      let promise = renameFile(this._manager, this._container, oldPath, file);
       return promise.then((contents: Contents.IModel) => {
         if (!contents) {
           return null;
@@ -302,6 +303,20 @@ namespace Private {
     body.appendChild(kernelTitle);
     body.appendChild(kernelDropdownNode);
     return body;
+  }
+
+  /**
+   * Overwrite a file.
+   *
+   * @param path - The path to the original file.
+   *
+   * @param newPath - The path to the new file.
+   *
+   * @returns A promise containing the new file contents model.
+   */
+  export
+  function overwrite(path: string, newPath: string): Promise<Contents.IModel> {
+    return Promise.reject('temporary');
   }
 
   /**

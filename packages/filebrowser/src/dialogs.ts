@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Contents, Kernel
+  Kernel
 } from '@jupyterlab/services';
 
 import {

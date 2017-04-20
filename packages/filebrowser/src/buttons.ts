@@ -26,12 +26,8 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  DocumentManager
+  createFromDialog, DocumentManager
 } from '@jupyterlab/docmanager';
-
-import {
-  createFromDialog
-} from './dialogs';
 
 import {
   FileBrowserModel

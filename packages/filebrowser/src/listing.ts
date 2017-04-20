@@ -38,12 +38,8 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  DocumentManager
+  DocumentManager, renameFile
 } from '@jupyterlab/docmanager';
-
-import {
-  renameFile
-} from './dialogs';
 
 import {
   FileBrowserModel
@@ -986,7 +982,7 @@ class DirListing extends Widget {
     let names = event.mimeData.getData(utils.CONTENTS_MIME) as string[];
     for (let name of names) {
       let newPath = path + name;
-      promises.push(renameFile(this._model, name, newPath));
+      promises.push(renameFile(this._manager, this._model, name, newPath));
     }
     Promise.all(promises).catch(error => {
       utils.showErrorMessage('Move Error', error);
@@ -1216,7 +1212,9 @@ class DirListing extends Widget {
       if (this.isDisposed) {
         return;
       }
-      return renameFile(this._model, original, newName).catch(error => {
+
+      const promise = renameFile(this._manager, this._model, original, newName);
+      return promise.catch(error => {
         utils.showErrorMessage('Rename Error', error);
         return original;
       }).then(() => {
