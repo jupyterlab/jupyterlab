@@ -8,7 +8,7 @@ import sys
 
 from jupyter_core.application import JupyterApp, base_flags
 from jupyter_core.paths import ENV_CONFIG_PATH
-from traitlets import Bool
+from traitlets import Bool, Unicode
 
 from ._version import __version__
 from .commands import (
@@ -28,7 +28,7 @@ class BaseExtensionApp(JupyterApp):
     version = __version__
     flags = flags
 
-    lab_config_dir = Bool(ENV_CONFIG_PATH[0], config=True,
+    lab_config_dir = Unicode(ENV_CONFIG_PATH[0], config=True,
         help="The lab configuration directory")
 
     should_build = Bool(True, config=True,
@@ -77,12 +77,9 @@ class UninstallLabExtensionApp(BaseExtensionApp):
             build()
 
 
-class ListLabExtensionsApp(JupyterApp):
-    version = __version__
+class ListLabExtensionsApp(BaseExtensionApp):
     description = "Install a labextension"
-
-    lab_config_dir = Bool(ENV_CONFIG_PATH[0], config=True,
-        help="The lab configuration directory")
+    should_build = False
 
     def start(self):
         [print(ext) for ext in list_extensions(self.config_dir)]
