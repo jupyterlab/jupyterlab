@@ -982,7 +982,7 @@ class DirListing extends Widget {
     let names = event.mimeData.getData(utils.CONTENTS_MIME) as string[];
     for (let name of names) {
       let newPath = path + name;
-      promises.push(renameFile(this._manager, this._model, name, newPath));
+      promises.push(renameFile(this._manager, name, newPath, this._model.path));
     }
     Promise.all(promises).catch(error => {
       utils.showErrorMessage('Move Error', error);
@@ -1213,7 +1213,8 @@ class DirListing extends Widget {
         return;
       }
 
-      const promise = renameFile(this._manager, this._model, original, newName);
+      const basePath = this._model.path;
+      const promise = renameFile(this._manager, original, newName, basePath);
       return promise.catch(error => {
         utils.showErrorMessage('Rename Error', error);
         return original;

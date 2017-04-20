@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
+  IChangedArgs, PathExt, uuid
+} from '@jupyterlab/coreutils';
+
+import {
   Contents, Kernel, ServiceManager, Session
 } from '@jupyterlab/services';
 
@@ -20,10 +24,6 @@ import {
 import {
   ISignal, Signal
 } from '@phosphor/signaling';
-
-import {
-  IChangedArgs, PathExt, uuid
-} from '@jupyterlab/coreutils';
 
 
 /**
