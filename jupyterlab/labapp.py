@@ -6,12 +6,13 @@
 
 from notebook.notebookapp import NotebookApp, flags
 from jupyter_core.application import JupyterApp
+from jupyter_core.paths import ENV_CONFIG_PATH
 
 from traitlets import Bool, Unicode
 
 from ._version import __version__
 from .extension import load_jupyter_server_extension
-from .commands import build, clean, describe
+from .commands import build, clean, describe, DEFAULT_CONFIG_PATH
 
 
 class LabBuildApp(JupyterApp):
@@ -73,6 +74,9 @@ class LabApp(NotebookApp):
 
     dev_mode = Bool(False, config=True,
         help="Whether to start the app in dev mode")
+
+    lab_config_dir = Unicode(DEFAULT_CONFIG_PATH, config=True,
+        help="The lab configuration directory")
 
     def init_server_extensions(self):
         """Load any extensions specified by config.
