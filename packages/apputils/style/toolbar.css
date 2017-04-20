@@ -15,7 +15,6 @@
   display: flex;
   flex-direction: row;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
-  height: 24px;
   height: calc(var(--jp-private-toolbar-height) + var(--jp-border-width));
 }
 
