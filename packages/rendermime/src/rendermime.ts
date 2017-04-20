@@ -44,19 +44,6 @@ import {
 
 /**
  * A composite renderer.
- *
- * #### Notes
- * When rendering a mimebundle, a mimeType is selected from the mimeTypes by
- * searching through the `this.order` list. The first mimeType found in the
- * bundle determines the renderer that will be used.
- *
- * You can add a renderer by adding it to the `renderers` object and
- * registering the mimeType in the `order` array.
- *
- * Untrusted bundles are handled differently from trusted ones.  Untrusted
- * bundles will only render outputs that can be rendered "safely"
- * (see [[RenderMime.IRenderer.isSafe]]) or can be "sanitized"
- * (see [[RenderMime.IRenderer.isSanitizable]]).
  */
 export
 class RenderMime {
