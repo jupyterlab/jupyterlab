@@ -75,7 +75,7 @@ class LabApp(NotebookApp):
     dev_mode = Bool(False, config=True,
         help="Whether to start the app in dev mode")
 
-    lab_config_dir = Bool(ENV_CONFIG_PATH[0], config=True,
+    lab_config_dir = Unicode(ENV_CONFIG_PATH[0], config=True,
         help="The lab configuration directory")
 
     def init_server_extensions(self):
