@@ -34,7 +34,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IModelDBFactory
+  IModelDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -409,7 +409,7 @@ class DocumentManager implements IDisposable {
   private _contexts: Private.IContext[] = [];
   private _opener: DocumentManager.IWidgetOpener = null;
   private _activateRequested = new Signal<this, string>(this);
-  private _modelDBFactory: IModelDBFactory = null;
+  private _modelDBFactory: (path: string) => IModelDB = null;
 }
 
 
@@ -439,9 +439,9 @@ namespace DocumentManager {
     opener: IWidgetOpener;
 
     /**
-     * An `IModelDB backend factory`.
+     * An `IModelDB` backend factory method.
      */
-    modelDBFactory?: IModelDBFactory;
+    modelDBFactory?: (path: string) => IModelDB;
   }
 
   /**
