@@ -168,7 +168,7 @@ interface IModelDB extends IDisposable {
 
   /**
    * A map of the currently active collaborators
-   * for the handler, including the local user.
+   * for the database, including the local user.
    */
   readonly collaborators?: ICollaboratorMap;
 
@@ -282,7 +282,7 @@ interface IModelDBFactory {
    * Create an IModelDB for use with a document or other
    * model.
    *
-   * @param path: a path that identifies the location of the realtime
+   * @param path: a path that identifies the location of the
    *   store in the backend.
    */
   createModelDB(path: string): IModelDB;
