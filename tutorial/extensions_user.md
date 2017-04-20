@@ -24,7 +24,7 @@ jupyter labextension list
 An installed extension can be uninstalled by running the command:
 
 ```
-jupyter labextension <bar>
+jupyter labextension uninstall <bar>
 ```
 
 Where `<bar>` is the name of the extension, as printed in the extension

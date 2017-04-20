@@ -69,8 +69,8 @@ listeners to react to changes in an observed object.
 
 
 ## Extension Authoring
-An Extension is a valid npm package that meets the following criteria:
-  - Exports one or more Phosphor plugins as the default export in its 
+An Extension is a valid [npm package](https://docs.npmjs.com/getting-started/what-is-npm) that meets the following criteria:
+  - Exports one or more JupyterLab plugins as the default export in its 
     main file.
   - Has a `jupyterlab` key in its `package.json` which has 
     `"extension": true` metadata.
@@ -101,17 +101,16 @@ The following file types are also supported (both in JavaScript and CSS):
 json, html, jpg, png, gif, svg, js.map, woff2, ttf, eot.
 
 If your package uses any other file type it must be converted to one of 
-the above types.  If you JavaScript is written in any other dialect than
+the above types.  If your JavaScript is written in any other dialect than
 EMCAScript 5 it must be converted using an appropriate tool.
-
-The package must only rely on other packages that are bundled with your extension or available on npm.org.
 
 If you publish your extension on npm.org, users will be able to 
 install it as simply `jupyter labextension install <foo>`, where
 `<foo>` is the name of the published npm package.  You can alternatively
 provide a script that runs `jupyter labextension install` against a 
 local folder path on the user's machine or a provided tarball.  Any
-valid `npm install` specifier can be used in `jupyter labextension install`.
+valid `npm install` specifier can be used in `jupyter labextension install` (e.g. `foo@latest`, `bar@3.0.0.0`, `path/to/folder`, and `path/to/tar.gz`).
+
 
 
 
