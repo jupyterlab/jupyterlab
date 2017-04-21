@@ -55,12 +55,12 @@ const TOOLBAR_RESTART_CLASS = 'jp-RefreshIcon';
 /**
  * The class name added to toolbar kernel name text.
  */
-const TOOLBAR_KERNEL_CLASS = 'jp-Toolbar-kernelName';
+const TOOLBAR_KERNEL_NAME_CLASS = 'jp-Toolbar-kernelName';
 
 /**
- * The class name added to toolbar kernel indicator icon.
+ * The class name added to toolbar kernel status icon.
  */
-const TOOLBAR_INDICATOR_CLASS = 'jp-Toolbar-kernelIndicator';
+const TOOLBAR_KERNEL_STATUS_CLASS = 'jp-Toolbar-kernelStatus';
 
 /**
  * The class name added to a busy kernel indicator.
@@ -249,7 +249,7 @@ namespace Toolbar {
    */
   export
   function createKernelStatusItem(session: IClientSession): Widget {
-    return new Private.KernelIndicator(session);
+    return new Private.KernelStatus(session);
   }
 }
 
@@ -385,7 +385,7 @@ namespace Private {
      */
     constructor(session: IClientSession) {
       super();
-      this.addClass(TOOLBAR_KERNEL_CLASS);
+      this.addClass(TOOLBAR_KERNEL_NAME_CLASS);
       this._onKernelChanged(session);
       session.kernelChanged.connect(this._onKernelChanged, this);
     }
@@ -402,13 +402,13 @@ namespace Private {
    * A toolbar item that displays kernel status.
    */
   export
-  class KernelIndicator extends Widget {
+  class KernelStatus extends Widget {
     /**
      * Construct a new kernel status widget.
      */
     constructor(session: IClientSession) {
       super();
-      this.addClass(TOOLBAR_INDICATOR_CLASS);
+      this.addClass(TOOLBAR_KERNEL_STATUS_CLASS);
       this._onStatusChanged(session);
       session.statusChanged.connect(this._onStatusChanged, this);
     }
