@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  Contents, IServiceManager, Kernel
+  Contents, IServiceManager, Kernel, Session
 } from '@jupyterlab/services';
 
 import {
@@ -322,10 +322,11 @@ namespace Private {
    * If there is a running session associated with the file and no other
    * sessions are using the kernel, the session will be shut down.
    */
+  export
   function deleteFile(manager: IServiceManager, path: string, basePath = ''): Promise<void> {
     path = PathExt.resolve(basePath, path);
-    return this.stopIfNeeded(path).then(() => {
-      return this._manager.contents.delete(path);
+    return stopIfNeeded(manager, path).then(() => {
+      return manager.contents.delete(path);
     });
   }
 
@@ -375,5 +376,20 @@ namespace Private {
     newPath = PathExt.resolve(basePath, newPath);
 
     return manager.contents.rename(oldPath, newPath);
+  }
+
+  /**
+   * Find a session associated with a path and stop it is the only
+   * session using that kernel.
+   */
+  export
+  function stopIfNeeded(manager: IServiceManager, path: string): Promise<void> {
+    return Session.listRunning().then(sessions => {
+      const matches = sessions.filter(value => value.notebook.path === path);
+      if (matches.length === 1) {
+        const id = matches[0].id;
+        return manager.sessions.shutdown(id).catch(() => { /* no-op */ });
+      }
+    }).catch(() => Promise.resolve(void 0)); // Always succeed.
   }
 }
