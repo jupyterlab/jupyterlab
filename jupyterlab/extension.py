@@ -3,7 +3,6 @@
 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
-import json
 import os
 
 from jinja2 import FileSystemLoader
