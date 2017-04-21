@@ -55,12 +55,12 @@ const TOOLBAR_RESTART_CLASS = 'jp-RefreshIcon';
 /**
  * The class name added to toolbar kernel name text.
  */
-const TOOLBAR_KERNEL_CLASS = 'jp-Kernel-toolbarKernelName';
+const TOOLBAR_KERNEL_CLASS = 'jp-Toolbar-kernelName';
 
 /**
  * The class name added to toolbar kernel indicator icon.
  */
-const TOOLBAR_INDICATOR_CLASS = 'jp-Kernel-toolbarKernelIndicator';
+const TOOLBAR_INDICATOR_CLASS = 'jp-Toolbar-kernelIndicator';
 
 /**
  * The class name added to a busy kernel indicator.
