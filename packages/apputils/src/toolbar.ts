@@ -65,7 +65,10 @@ const TOOLBAR_KERNEL_STATUS_CLASS = 'jp-Toolbar-kernelStatus';
 /**
  * The class name added to a busy kernel indicator.
  */
-const TOOLBAR_BUSY_CLASS = 'jp-mod-busy';
+const TOOLBAR_BUSY_CLASS = 'jp-FilledCircleIcon';
+
+
+const TOOLBAR_IDLE_CLASS = 'jp-CircleIcon';
 
 
 
@@ -421,6 +424,7 @@ namespace Private {
         return;
       }
       let status = session.status;
+      this.toggleClass(TOOLBAR_IDLE_CLASS, status === 'idle');
       this.toggleClass(TOOLBAR_BUSY_CLASS, status !== 'idle');
       let title = 'Kernel ' + status[0].toUpperCase() + status.slice(1);
       this.node.title = title;
