@@ -277,6 +277,7 @@ class ObservableValue implements IObservableValue {
   private _isDisposed = false;
 }
 
+
 /**
  * The namespace for the `ObservableValue` class statics.
  */
@@ -452,9 +453,6 @@ class ModelDB implements IModelDB {
     return (val as ObservableValue).get();
   }
 
-
-  /**
-
   /**
    * Set a value at a path. That value must already have
    * been created using `createValue`.
@@ -522,7 +520,7 @@ class ModelDB implements IModelDB {
     if (this._basePath) {
       path = this._basePath + '.' + path;
     }
-    return PathExt.normalize(path)
+    return PathExt.normalize(path);
   }
 
   private _basePath: string;
