@@ -28,7 +28,7 @@ class BaseExtensionApp(JupyterApp):
     flags = flags
 
     lab_config_dir = Unicode(ENV_CONFIG_PATH[0], config=True,
-         help="The lab configuration directory")
+        help="The lab configuration directory")
 
     should_build = Bool(True, config=True,
         help="Whether to build the app after the action")
