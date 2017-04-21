@@ -31,12 +31,12 @@ See the Python docs on [package uploading](https://packaging.python.org/distribu
 for twine setup instructions and for why twine is the recommended method.
 
 ```bash
-# this takes a while to ensure the latest builds of everything,
+# this ensures the latest builds of everything,
 # then prompts you to select package versions.  When one package has an 
 # effective major release, the packages that depend on it should also get a 
 # major release, to prevent consumers that are using the `^` semver 
 # requirement from getting a conflict.
-npm publish  
+npm run publish  
 rm -rf dist
 python setup.py sdist
 python setup.py bdist_wheel --universal
