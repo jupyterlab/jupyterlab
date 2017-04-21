@@ -3,6 +3,7 @@
 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
+import errno
 import json
 import pipes
 import os
@@ -224,12 +225,10 @@ def _get_config(config_dir=None):
     config_dir = config_dir or _get_config_dir()
     file = pjoin(config_dir, 'build_config.json')
     if not osp.exists(file):
-        if not osp.exists(config_dir):
-            os.makedirs(config_dir)
-        with open(file, 'w') as fid:
-            json.dump(dict(), fid, indent=4)
-    with open(file) as fid:
-        data = json.load(fid)
+        data = {}
+    else:
+        with open(file) as fid:
+            data = json.load(fid)
     data.setdefault('location', pjoin(DEFAULT_BUILD_PATH, 'lab'))
     data.setdefault('installed_extensions', dict())
     data.setdefault('linked_extensions', dict())
@@ -240,6 +239,12 @@ def _write_config(data, config_dir=None):
     """Write the JupyterLab config data.
     """
     config_dir = config_dir or _get_config_dir()
+    if not osp.exists(config_dir):
+        try:
+            os.makedirs(config_dir)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                pass
     with open(pjoin(config_dir, 'build_config.json'), 'w') as fid:
         json.dump(data, fid, indent=4)
 
