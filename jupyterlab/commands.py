@@ -24,7 +24,7 @@ else:
 
 
 here = osp.dirname(osp.abspath(__file__))
-CONFIG_PATH = os.environ.get('JUPYTER_CONFIG_DIR', ENV_CONFIG_PATH[0])
+CONFIG_PATH = os.environ.get('JUPYTERLAB_CONFIG_DIR', ENV_CONFIG_PATH[0])
 BUILD_PATH = ENV_JUPYTER_PATH[0]
 
 
