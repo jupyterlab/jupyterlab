@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/completer-extension",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "JupyterLab - Completer Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -12,10 +12,10 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.2.0",
-    "@jupyterlab/completer": "^0.2.0",
-    "@jupyterlab/console": "^0.2.0",
-    "@jupyterlab/notebook": "^0.2.0",
+    "@jupyterlab/application": "^0.3.0",
+    "@jupyterlab/completer": "^0.3.0",
+    "@jupyterlab/console": "^0.3.0",
+    "@jupyterlab/notebook": "^0.3.0",
     "@phosphor/widgets": "^1.0.0"
   },
   "devDependencies": {
