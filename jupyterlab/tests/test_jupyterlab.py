@@ -84,6 +84,12 @@ class TestExtension(TestCase):
             if hasattr(mod, 'ENV_CONFIG_PATH'):
                 p = patch.object(mod, 'ENV_CONFIG_PATH', [self.config_dir])
                 self.patches.append(p)
+            if hasattr(mod, 'CONFIG_PATH'):
+                p = patch.object(mod, 'CONFIG_PATH', self.config_dir)
+                self.patches.append(p)
+            if hasattr(mod, 'BUILD_PATH'):
+                p = patch.object(mod, 'BUILD_PATH', self.data_dir)
+                self.patches.append(p)
         for p in self.patches:
             p.start()
             self.addCleanup(p.stop)
@@ -93,6 +99,8 @@ class TestExtension(TestCase):
         self.assertEqual(paths.ENV_JUPYTER_PATH, [self.data_dir])
         self.assertEqual(commands.ENV_JUPYTER_PATH, [self.data_dir])
         self.assertEqual(commands.ENV_CONFIG_PATH, [self.config_dir])
+        self.assertEqual(commands.CONFIG_PATH, self.config_dir)
+        self.assertEqual(commands.BUILD_PATH, self.data_dir)
 
     def tearDown(self):
         for modulename in self._mock_extensions:
