@@ -9,7 +9,7 @@ import os
 from jinja2 import FileSystemLoader
 from jupyterlab_launcher import add_handlers
 
-from .commands import _get_build_dir, _get_config, DEFAULT_CONFIG_PATH
+from .commands import _get_build_dir, _get_config, _get_config_dir
 
 
 #-----------------------------------------------------------------------------
@@ -44,12 +44,8 @@ def load_jupyter_server_extension(nbapp):
     web_app = nbapp.web_app
 
     # Handle page config data.
-    config_dir = getattr(nbapp, 'lab_config_dir', DEFAULT_CONFIG_PATH)
-    if 'LabApp' in nbapp.config:
-        if 'lab_config_dir' in nbapp.config['LabApp']:
-            config_dir = nbapp.config['LabApp']['lab_config_dir']
-
-    build_config = _get_config(config_dir)
+    config_dir = _get_config_dir()
+    build_config = _get_config()
     page_config_file = os.path.join(config_dir, 'page_config_data.json')
     build_dir = _get_build_dir(build_config)
 
