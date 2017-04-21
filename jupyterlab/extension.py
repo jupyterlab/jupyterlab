@@ -5,12 +5,11 @@
 # Distributed under the terms of the Modified BSD License.
 import json
 import os
-from tornado import web
 
-from notebook.base.handlers import IPythonHandler, FileFindHandler
 from jinja2 import FileSystemLoader
-from notebook.utils import url_path_join as ujoin
-from .commands import _get_build_dir, _get_config, _get_config_dir
+from jupyterlab_launcher import add_handlers
+
+from .commands import _get_build_dir, _get_config, DEFAULT_CONFIG_PATH
 
 
 #-----------------------------------------------------------------------------
@@ -32,91 +31,6 @@ FILE_LOADER = FileSystemLoader(HERE)
 PREFIX = '/lab'
 
 
-class LabHandler(IPythonHandler):
-    """Render the JupyterLab View."""
-
-    def initialize(self, page_config_data, built_files):
-        self.page_config_data = page_config_data
-        self.built_files = built_files
-
-    @web.authenticated
-    def get(self):
-        config = self._get_lab_config()
-        self.write(self.render_template('lab.html', **config))
-
-    def _get_lab_config(self):
-        """Get the config data for the page template."""
-        static_prefix = ujoin(self.base_url, PREFIX)
-
-        bundles = [ujoin(static_prefix, name + '.bundle.js') for name in
-                   ['main']]
-
-        # Only load CSS files if they exist.
-        css_files = []
-        for css_file in ['main.css']:
-            if os.path.isfile(os.path.join(self.built_files, css_file)):
-                css_files.append(ujoin(static_prefix, css_file))
-
-        configData = dict(self.page_config_data)
-        configData.setdefault('ignorePlugins', [])
-        configData.update(dict(
-            terminalsAvailable=self.settings.get('terminals_available', False),
-        ))
-
-        mathjax_config = self.settings.get('mathjax_config',
-                                           'TeX-AMS_HTML-full,Safe')
-        config = dict(
-            static_prefix=static_prefix,
-            page_title='JupyterLab Alpha Preview',
-            mathjax_url=self.mathjax_url,
-            mathjax_config=mathjax_config,
-            jupyterlab_css=css_files,
-            jupyterlab_bundles=bundles
-        )
-        config['jupyterlab_config'] = configData
-        return config
-
-    def get_template(self, name):
-        return FILE_LOADER.load(self.settings['jinja2_env'], name)
-
-
-def add_handlers(app):
-    """Add the appropriate handlers to the web app.
-    """
-    web_app = app.web_app
-    base_url = web_app.settings['base_url']
-    prefix = ujoin(base_url, PREFIX)
-
-    # Handle page config data.
-    config = _get_config()
-    page_config_data = web_app.settings.get('page_config_data', {})
-    page_config_file = os.path.join(_get_config_dir(), 'page_config_data.json')
-    if os.path.exists(page_config_file):
-        with open(page_config_file) as fid:
-            page_config_data.update(json.load(fid))
-
-    built_files = _get_build_dir(config)
-
-    # Check for dev mode.
-    dev_mode = False
-    if hasattr(app, 'dev_mode'):
-        dev_mode = app.dev_mode
-
-    if not os.path.exists(built_files) or dev_mode:
-        built_files = os.path.join(HERE, 'build')
-
-    handlers = [
-        (prefix + r'/?', LabHandler, {
-            'page_config_data': page_config_data,
-            'built_files': built_files
-        }),
-        (prefix + r"/(.*)", FileFindHandler, {
-            'path': built_files
-        })
-    ]
-    web_app.add_handlers(".*$", handlers)
-
-
 def load_jupyter_server_extension(nbapp):
     """Load the JupyterLab server extension.
     """
@@ -127,4 +41,28 @@ def load_jupyter_server_extension(nbapp):
     if dev_mode:
         nbapp.log.info(DEV_NOTE_NPM)
 
-    add_handlers(nbapp)
+    web_app = nbapp.web_app
+
+    # Handle page config data.
+    config_dir = getattr(nbapp, 'lab_config_dir', DEFAULT_CONFIG_PATH)
+    if 'LabApp' in nbapp.config:
+        if 'lab_config_dir' in nbapp.config['LabApp']:
+            config_dir = nbapp.config['LabApp']['lab_config_dir']
+
+    build_config = _get_config(config_dir)
+    page_config_file = os.path.join(config_dir, 'page_config_data.json')
+    build_dir = _get_build_dir(build_config)
+
+    # Check for dev mode.
+    dev_mode = False
+    if hasattr(nbapp, 'dev_mode'):
+        dev_mode = nbapp.dev_mode
+
+    if not os.path.exists(build_dir) or dev_mode:
+        print('Serving local JupyterLab files')
+        build_dir = os.path.join(HERE, 'build')
+
+    add_handlers(
+        web_app, page_config_file, build_dir, 'JupyterLab Alpha Preview',
+        PREFIX
+    )
