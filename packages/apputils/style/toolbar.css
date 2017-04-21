@@ -23,7 +23,6 @@
   flex: 0 0 auto;
   padding-left: 8px;
   padding-right: 8px;
-  vertical-align: middle;
   font-size: var(--jp-ui-font-size1);
   line-height: var(--jp-private-toolbar-height);
   height: 100%;
@@ -31,8 +30,6 @@
 
 
 .jp-Toolbar-item.jp-Toolbar-button {
-  font-family: FontAwesome;
-  text-align: center;
   display: inline-block;
   width: 32px;
   background-repeat: no-repeat;
@@ -58,17 +55,15 @@
   flex-grow: 1;
   flex-shrink: 1;
   font-size: var(--jp-ui-font-size1);
+  line-height: calc( var(--jp-private-toolbar-height) + 1px );
 }
 
 
-.jp-Toolbar-item.jp-Toolbar-kernelIndicator {
-  font-family: FontAwesome;
-  text-align: center;
+.jp-Toolbar-item.jp-Toolbar-kernelStatus {
   display: inline-block;
-}
-
-
-.jp-Toolbar-item.jp-Toolbar-kernelIndicator {
-  border-right: none;
+  width: 32px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 16px;
 }
 
