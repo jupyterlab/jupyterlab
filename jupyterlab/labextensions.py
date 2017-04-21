@@ -7,8 +7,7 @@ import os
 import sys
 
 from jupyter_core.application import JupyterApp, base_flags
-from jupyter_core.paths import ENV_CONFIG_PATH
-from traitlets import Bool, Unicode
+from traitlets import Bool
 
 from ._version import __version__
 from .commands import (
@@ -28,9 +27,6 @@ class BaseExtensionApp(JupyterApp):
     version = __version__
     flags = flags
 
-    lab_config_dir = Unicode(ENV_CONFIG_PATH[0], config=True,
-        help="The lab configuration directory")
-
     should_build = Bool(True, config=True,
         help="Whether to build the app after the action")
 
@@ -40,7 +36,7 @@ class InstallLabExtensionApp(BaseExtensionApp):
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        [install_extension(arg, self.config_dir) for arg in self.extra_args]
+        [install_extension(arg) for arg in self.extra_args]
         if self.should_build:
             build()
 
@@ -50,7 +46,7 @@ class LinkLabExtensionApp(BaseExtensionApp):
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        [link_extension(arg, self.config_dir) for arg in self.extra_args]
+        [link_extension(arg) for arg in self.extra_args]
         if self.should_build:
             build()
 
@@ -60,7 +56,7 @@ class UnlinkLabExtensionApp(BaseExtensionApp):
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        ans = any([unlink_extension(arg, self.config_dir)
+        ans = any([unlink_extension(arg)
                    for arg in self.extra_args])
         if ans and self.should_build:
             build()
@@ -71,7 +67,7 @@ class UninstallLabExtensionApp(BaseExtensionApp):
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        ans = any([uninstall_extension(arg, self.config_dir)
+        ans = any([uninstall_extension(arg)
                    for arg in self.extra_args])
         if ans and self.should_build:
             build()

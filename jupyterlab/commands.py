@@ -24,8 +24,8 @@ else:
 
 
 here = osp.dirname(osp.abspath(__file__))
-DEFAULT_CONFIG_PATH = ENV_CONFIG_PATH[0]
-DEFAULT_BUILD_PATH = ENV_JUPYTER_PATH[0]
+CONFIG_PATH = os.environ.get('JUPYTER_CONFIG_DIR', ENV_CONFIG_PATH[0])
+BUILD_PATH = ENV_JUPYTER_PATH[0]
 
 
 def run(cmd, **kwargs):
@@ -37,7 +37,7 @@ def run(cmd, **kwargs):
     return check_output(cmd, **kwargs)
 
 
-def install_extension(extension, config_dir=None):
+def install_extension(extension):
     """Install an extension package into JupyterLab.
 
     Follows the semantics of https://docs.npmjs.com/cli/install.
@@ -47,16 +47,16 @@ def install_extension(extension, config_dir=None):
     If link is true, the source directory is linked using `npm link`.
     """
     tar_name, pkg_name = validate_extension(extension)
-    config = _get_config(config_dir)
+    config = _get_config()
     path = pjoin(_get_cache_dir(config), tar_name)
     run(['npm', 'install', '--save', path], cwd=_get_root_dir(config))
     config['installed_extensions'][pkg_name] = path
     if pkg_name in config['linked_extensions']:
         del config['linked_extensions'][pkg_name]
-    _write_config(config, config_dir)
+    _write_config(config)
 
 
-def link_extension(extension, config_dir=None):
+def link_extension(extension):
     """Link an extension against the JupyterLab build.
     """
     path = _normalize_path(extension)
@@ -73,19 +73,19 @@ def link_extension(extension, config_dir=None):
     _validate_package(data, path)
 
     # Update JupyterLab metadata.
-    config = _get_config(config_dir)
+    config = _get_config()
     name = data['name']
     config['linked_extensions'][name] = path
     if name in config['installed_extensions']:
         del config['installed_extensions'][name]
-    _write_config(config, config_dir)
+    _write_config(config)
 
 
-def unlink_extension(extension, config_dir=None):
+def unlink_extension(extension):
     """Unlink an extension from JupyterLab by path or name.
     """
     extension = _normalize_path(extension)
-    config = _get_config(config_dir)
+    config = _get_config()
 
     name = None
     for (key, value) in config['linked_extensions'].items():
@@ -95,40 +95,40 @@ def unlink_extension(extension, config_dir=None):
 
     if name:
         del config['linked_extensions'][name]
-        _write_config(config, config_dir)
+        _write_config(config)
         return True
 
     print('No labextension matching "%s" is linked' % extension)
     return False
 
 
-def uninstall_extension(name, config_dir=None):
+def uninstall_extension(name):
     """Uninstall an extension by name.
     """
-    config = _get_config(config_dir)
+    config = _get_config()
 
     if name in config['installed_extensions']:
         del config['installed_extensions'][name]
-        _write_config(config, config_dir)
+        _write_config(config)
         return True
 
     print('No labextension named "%s" installed' % name)
     return False
 
 
-def list_extensions(config_dir=None):
+def list_extensions():
     """List installed extensions.
     """
-    config = _get_config(config_dir)
+    config = _get_config()
     installed = list(config['installed_extensions'])
     linked = list(config['linked_extensions'])
     return sorted(installed + linked)
 
 
-def validate_extension(extension, config_dir=None):
+def validate_extension(extension):
     """Verify that a JupyterLab extension is valid.
     """
-    config = _get_config(config_dir)
+    config = _get_config()
     extension = _normalize_path(extension)
     _ensure_package(config)
     cache_dir = _get_cache_dir(config)
@@ -143,19 +143,19 @@ def validate_extension(extension, config_dir=None):
     return name, data['name']
 
 
-def clean(config_dir=None):
+def clean():
     """Clean the JupyterLab application directory."""
-    config = _get_config(config_dir)
+    config = _get_config()
     for name in ['node_modules', 'build']:
         target = pjoin(_get_root_dir(config), name)
         if osp.exists(target):
             shutil.rmtree(target)
 
 
-def build(config_dir=None):
+def build():
     """Build the JupyterLab application."""
     # Set up the build directory.
-    config = _get_config(config_dir)
+    config = _get_config()
     _ensure_package(config)
     root = _get_root_dir(config)
 
@@ -229,7 +229,7 @@ def _get_config(config_dir=None):
     else:
         with open(file) as fid:
             data = json.load(fid)
-    data.setdefault('location', pjoin(DEFAULT_BUILD_PATH, 'lab'))
+    data.setdefault('location', pjoin(BUILD_PATH, 'lab'))
     data.setdefault('installed_extensions', dict())
     data.setdefault('linked_extensions', dict())
     return data
@@ -257,7 +257,7 @@ def _normalize_path(extension):
 
 
 def _get_config_dir():
-    return pjoin(DEFAULT_CONFIG_PATH, 'labconfig')
+    return pjoin(CONFIG_PATH, 'labconfig')
 
 
 def _get_root_dir(config=None):
