@@ -26,6 +26,7 @@
   vertical-align: middle;
   font-size: var(--jp-ui-font-size1);
   line-height: var(--jp-private-toolbar-height);
+  height: 100%;
 }
 
 
