@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/docmanager-extension",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "JupyterLab - Document Manager Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -12,11 +12,11 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.2.0",
-    "@jupyterlab/apputils": "^0.2.0",
-    "@jupyterlab/docmanager": "^0.2.0",
-    "@jupyterlab/docregistry": "^0.2.0",
-    "@jupyterlab/services": "^0.41.0"
+    "@jupyterlab/application": "^0.3.0",
+    "@jupyterlab/apputils": "^0.3.0",
+    "@jupyterlab/docmanager": "^0.3.0",
+    "@jupyterlab/docregistry": "^0.3.0",
+    "@jupyterlab/services": "^0.42.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
