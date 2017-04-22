@@ -158,7 +158,7 @@ npm run build
 
 ```bash
 npm run clean
-npm run build:all
+npm run build
 ```
 
 ## The Jupyter Server Extension
