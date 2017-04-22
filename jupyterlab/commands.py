@@ -244,7 +244,7 @@ def _write_config(data, config_dir=None):
             os.makedirs(config_dir)
         except OSError as e:
             if e.errno != errno.EEXIST:
-                pass
+                raise
     with open(pjoin(config_dir, 'build_config.json'), 'w') as fid:
         json.dump(data, fid, indent=4)
 
