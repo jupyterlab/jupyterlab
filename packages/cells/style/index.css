@@ -20,22 +20,11 @@
 
 .jp-Cell {
   padding: var(--jp-cell-padding);
-  padding-left: 0px;
   margin: 0px;
   /*border: var(--jp-border-width) solid transparent;*/
   border: none;
   outline: none;
   background: transparent;
-}
-
-
-.jp-Cell-cursor {
-  flex-grow: 0;
-  flex-shrink: 0;
-  flex-basis: 12px;
-  background: var(--jp-ui-layout-color1);
-  padding: 0px;
-  border: none;
 }
 
 
@@ -54,6 +43,25 @@
   border: var(--jp-border-width) solid transparent;
 }
 
+
+/*-----------------------------------------------------------------------------
+| Input Collapser
+|----------------------------------------------------------------------------*/
+
+
+.jp-InputArea .jp-Collapser {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 8px;
+  height: 100%;
+  padding: 0px;
+  margin: 0px;
+  border-left: 1px solid var(--jp-brand-color1);
+  border-top: 1px solid var(--jp-brand-color1);
+  border-bottom: 1px solid var(--jp-brand-color1);
+
+}
 
 /*-----------------------------------------------------------------------------
 | CodeCell

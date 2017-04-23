@@ -32,8 +32,7 @@
 
 
 .jp-Notebook {
-  /*padding-left: var(--jp-notebook-padding);*/
-  padding-left: 0px;
+  padding-left: var(--jp-notebook-padding);
   padding-right: var(--jp-notebook-padding);
   padding-top: var(--jp-notebook-padding);
   padding-bottom: calc( 4 * var(--jp-notebook-padding) );

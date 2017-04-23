@@ -22,7 +22,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IClientSession
+  IClientSession, Collapser
 } from '@jupyterlab/apputils';
 
 import {
@@ -750,12 +750,16 @@ class InputAreaWidget extends Widget {
     this.layout = new PanelLayout();
     let prompt = this._prompt = new Widget();
     prompt.addClass(PROMPT_CLASS);
-    let cellCursor = this._cellCursor = new Widget();
-    cellCursor.addClass('jp-Cell-cursor');
+    let inputCollapser = this._inputCollapser = new Collapser();
     let layout = this.layout as PanelLayout;
-    layout.addWidget(cellCursor);
+    layout.addWidget(inputCollapser);
     layout.addWidget(prompt);
     layout.addWidget(editor);
+    this._inputCollapser.collapsedChanged.connect(this.onCollapse, this);
+  }
+
+  protected onCollapse(collapser: Collapser, collapsed: boolean): void {
+    console.log('Collapse!', collapsed);
   }
 
   /**
@@ -802,7 +806,7 @@ class InputAreaWidget extends Widget {
   }
 
   private _prompt: Widget;
-  private _cellCursor: Widget;
+  private _inputCollapser: Collapser;
   private _editor: CodeEditorWidget;
   private _rendered: Widget;
 }
