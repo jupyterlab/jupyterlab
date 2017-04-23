@@ -68,7 +68,25 @@
 }
 
 
-.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected:before {
+.jp-Notebook.jp-mod-editMode .jp-Cell.jp-mod-active .jp-CellEditor {
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color-edit);
+  background: var(--jp-cell-editor-background-edit);
+}
+
+
+.jp-Notebook .jp-Cell.jp-mod-active .jp-Cell-prompt {
+  color: var(--jp-cell-inprompt-font-color-active);
+  opacity: var(--jp-cell-prompt-opacity-active);
+}
+
+
+.jp-Notebook .jp-Cell.jp-mod-active .jp-OutputAreaWidget-gutter {
+  color: var(--jp-cell-inprompt-font-color-active);
+  opacity: var(--jp-cell-prompt-opacity-active);
+}
+
+
+/*.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected:before {
   position: absolute;
   display: block;
   top: calc( -1 * var(--jp-border-width) );
@@ -77,7 +95,7 @@
   height: calc( 100% + 2 * var(--jp-border-width) );
   content: '';
   background: var(--jp-private-notebook-selected-color);
-}
+}*/
 
 
 .jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-selected {
@@ -92,11 +110,12 @@
 
 
 .jp-Notebook.jp-mod-editMode .jp-Notebook-cell.jp-mod-active {
-  border-color: var(--jp-private-notebook-active-color);
+  /*border-color: var(--jp-private-notebook-active-color);*/
+  border-color: transparent;
 }
 
 
-.jp-Notebook.jp-mod-editMode .jp-Notebook-cell.jp-mod-active:before {
+/*.jp-Notebook.jp-mod-editMode .jp-Notebook-cell.jp-mod-active:before {
   position: absolute;
   display: block;
   top: calc( -1 * var(--jp-border-width) );
@@ -105,7 +124,7 @@
   height: calc( 100% + 2 * var(--jp-border-width) );
   content: '';
   background: var(--jp-private-notebook-active-color);
-}
+}*/
 
 
 .jp-Notebook {
@@ -144,7 +163,7 @@
 }
 
 
-.jp-dragImage:before {
+/*.jp-dragImage:before {
   position: absolute;
   display: block;
   top: calc( -1 * var(--jp-border-width) );
@@ -153,7 +172,7 @@
   height: calc( 100% + 2 * var(--jp-border-width) );
   content: '';
   background: var(--jp-private-notebook-selected-color);
-}
+}*/
 
 
 .jp-dragImage .jp-filledCircle {
