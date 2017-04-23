@@ -750,7 +750,10 @@ class InputAreaWidget extends Widget {
     this.layout = new PanelLayout();
     let prompt = this._prompt = new Widget();
     prompt.addClass(PROMPT_CLASS);
+    let cellCursor = this._cellCursor = new Widget();
+    cellCursor.addClass('jp-Cell-cursor');
     let layout = this.layout as PanelLayout;
+    layout.addWidget(cellCursor);
     layout.addWidget(prompt);
     layout.addWidget(editor);
   }
@@ -799,6 +802,7 @@ class InputAreaWidget extends Widget {
   }
 
   private _prompt: Widget;
+  private _cellCursor: Widget;
   private _editor: CodeEditorWidget;
   private _rendered: Widget;
 }

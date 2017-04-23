@@ -32,7 +32,8 @@
 
 
 .jp-Notebook {
-  padding-left: var(--jp-notebook-padding);
+  /*padding-left: var(--jp-notebook-padding);*/
+  padding-left: 0px;
   padding-right: var(--jp-notebook-padding);
   padding-top: var(--jp-notebook-padding);
   padding-bottom: calc( 4 * var(--jp-notebook-padding) );
@@ -83,6 +84,11 @@
 .jp-Notebook .jp-Cell.jp-mod-active .jp-OutputAreaWidget-gutter {
   color: var(--jp-cell-inprompt-font-color-active);
   opacity: var(--jp-cell-prompt-opacity-active);
+}
+
+
+.jp-Notebook .jp-Cell.jp-mod-active .jp-Cell-cursor {
+  background: var(--jp-brand-color1);
 }
 
 
