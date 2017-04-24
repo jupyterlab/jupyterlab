@@ -36,7 +36,8 @@ import {
 import {
   BaseCellWidget, CodeCellWidget, RawCellWidget,
   ICodeCellModel, IRawCellModel, CellModel,
-  RawCellModel, CodeCellModel
+  RawCellModel, CodeCellModel, IMarkdownCellModel,
+  MarkdownCellModel, MarkdownCellWidget
 } from '@jupyterlab/cells';
 
 import {
@@ -59,27 +60,22 @@ import {
 /**
  * The class name added to chatbox widgets.
  */
-const CONSOLE_CLASS = 'jp-CodeConsole';
-
-/**
- * The class name added to the chatbox banner.
- */
-const BANNER_CLASS = 'jp-CodeConsole-banner';
+const CHATBOX_CLASS = 'jp-Chatbox';
 
 /**
  * The class name of the active prompt
  */
-const PROMPT_CLASS = 'jp-CodeConsole-prompt';
+const PROMPT_CLASS = 'jp-Chatbox-prompt';
 
 /**
  * The class name of the panel that holds cell content.
  */
-const CONTENT_CLASS = 'jp-CodeConsole-content';
+const CONTENT_CLASS = 'jp-Chatbox-content';
 
 /**
  * The class name of the panel that holds prompts.
  */
-const INPUT_CLASS = 'jp-CodeConsole-input';
+const INPUT_CLASS = 'jp-Chatbox-input';
 
 /**
  * The timeout in ms for execution requests to the kernel.
@@ -91,7 +87,7 @@ const EXECUTION_TIMEOUT = 250;
  * A widget containing a Jupyter chatbox.
  *
  * #### Notes
- * The CodeChatbox class is intended to be used within a ChatboxPanel
+ * The Chatbox class is intended to be used within a ChatboxPanel
  * instance. Under most circumstances, it is not instantiated by user code.
  */
 export
@@ -101,7 +97,7 @@ class CodeChatbox extends Widget {
    */
   constructor(options: CodeChatbox.IOptions) {
     super();
-    this.addClass(CONSOLE_CLASS);
+    this.addClass(CHATBOX_CLASS);
 
     // Create the panels that hold the content and input.
     let layout = this.layout = new PanelLayout();
@@ -110,7 +106,7 @@ class CodeChatbox extends Widget {
     this._input = new Panel();
 
     let factory = this.contentFactory = options.contentFactory;
-    let modelFactory = this.modelFactory = (
+    this.modelFactory = (
       options.modelFactory || CodeChatbox.defaultModelFactory
     );
     this.rendermime = options.rendermime;
@@ -124,17 +120,6 @@ class CodeChatbox extends Widget {
     // Insert the content and input panes into the widget.
     layout.addWidget(this._content);
     layout.addWidget(this._input);
-
-    // Create the banner.
-    let model = modelFactory.createRawCell({});
-    model.value.text = '...';
-    let banner = this.banner = factory.createBanner({
-      model,
-      contentFactory: factory.rawCellContentFactory
-    }, this);
-    banner.addClass(BANNER_CLASS);
-    banner.readOnly = true;
-    this._content.addWidget(banner);
 
     this._history = factory.createChatboxHistory({
       session: this.session
@@ -154,7 +139,7 @@ class CodeChatbox extends Widget {
   /**
    * A signal emitted when a new prompt is created.
    */
-  get promptCreated(): ISignal<this, CodeCellWidget> {
+  get promptCreated(): ISignal<this, MarkdownCellWidget> {
     return this._promptCreated;
   }
 
@@ -179,15 +164,7 @@ class CodeChatbox extends Widget {
   readonly session: IClientSession;
 
   /**
-   * The chatbox banner widget.
-   */
-  readonly banner: RawCellWidget;
-
-  /**
    * The list of content cells in the chatbox.
-   *
-   * #### Notes
-   * This list does not include the banner or the prompt for a chatbox.
    */
   get cells(): IObservableVector<BaseCellWidget> {
     return this._cells;
@@ -196,9 +173,9 @@ class CodeChatbox extends Widget {
   /*
    * The chatbox input prompt.
    */
-  get prompt(): CodeCellWidget | null {
+  get prompt(): MarkdownCellWidget | null {
     let inputLayout = (this._input.layout as PanelLayout);
-    return inputLayout.widgets[0] as CodeCellWidget || null;
+    return inputLayout.widgets[0] as MarkdownCellWidget || null;
   }
 
   /**
@@ -222,9 +199,9 @@ class CodeChatbox extends Widget {
    * Clear the code cells.
    */
   clear(): void {
-    // Dispose all the content cells except the first, which is the banner.
+    // Dispose all the content cells.
     let cells = this._content.widgets;
-    while (cells.length > 1) {
+    while (cells.length) {
       cells[1].dispose();
     }
   }
@@ -309,7 +286,7 @@ class CodeChatbox extends Widget {
     let layout = this._content.layout as PanelLayout;
     // Serialize content.
     let output = map(layout.widgets, widget => {
-      return (widget as CodeCellWidget).model.toJSON() as nbformat.ICodeCell;
+      return (widget as MarkdownCellWidget).model.toJSON() as nbformat.ICodeCell;
     });
     // Serialize prompt and return.
     return toArray(output).concat(prompt.model.toJSON() as nbformat.ICodeCell);
@@ -385,10 +362,11 @@ class CodeChatbox extends Widget {
 
     // Create the new prompt.
     let factory = this.contentFactory;
-    let options = this._createCodeCellOptions();
+    let options = this._createMarkdownCellOptions();
     prompt = factory.createPrompt(options, this);
     prompt.model.mimeType = this._mimetype;
     prompt.addClass(PROMPT_CLASS);
+    prompt.rendered = false;
     this._input.addWidget(prompt);
 
     // Suppress the default "Enter" key handling.
@@ -423,48 +401,17 @@ class CodeChatbox extends Widget {
   /**
    * Execute the code in the current prompt.
    */
-  private _execute(cell: CodeCellWidget): Promise<void> {
+  private _execute(cell: MarkdownCellWidget): Promise<void> {
     this._history.push(cell.model.value.text);
     cell.model.contentChanged.connect(this.update, this);
-    let onSuccess = (value: KernelMessage.IExecuteReplyMsg) => {
-      if (this.isDisposed) {
-        return;
-      }
-      if (value && value.content.status === 'ok') {
-        let content = value.content as KernelMessage.IExecuteOkReply;
-        // Use deprecated payloads for backwards compatibility.
-        if (content.payload && content.payload.length) {
-          let setNextInput = content.payload.filter(i => {
-            return (i as any).source === 'set_next_input';
-          })[0];
-          if (setNextInput) {
-            let text = (setNextInput as any).text;
-            // Ignore the `replace` value and always set the next cell.
-            cell.model.value.text = text;
-          }
-        }
-      }
-      cell.model.contentChanged.disconnect(this.update, this);
-      this.update();
-      this._executed.emit(new Date());
-    };
-    let onFailure = () => {
-      if (this.isDisposed) {
-        return;
-      }
-      cell.model.contentChanged.disconnect(this.update, this);
-      this.update();
-    };
-    return cell.execute(this.session).then(onSuccess, onFailure);
+    cell.rendered = true;
+    return Promise.resolve(void 0);
   }
 
   /**
    * Update the chatbox based on the kernel info.
    */
   private _handleInfo(info: KernelMessage.IInfoReply): void {
-    let layout = this._content.layout as PanelLayout;
-    let banner = layout.widgets[0] as RawCellWidget;
-    banner.model.value.text = info.banner;
     let lang = info.language_info as nbformat.ILanguageInfoMetadata;
     this._mimetype = this._mimeTypeService.getMimeTypeByLanguage(lang);
     if (this.prompt) {
@@ -473,13 +420,13 @@ class CodeChatbox extends Widget {
   }
 
   /**
-   * Create the options used to initialize a code cell widget.
+   * Create the options used to initialize markdown cell widget.
    */
-  private _createCodeCellOptions(): CodeCellWidget.IOptions {
+  private _createMarkdownCellOptions(): MarkdownCellWidget.IOptions {
     let factory = this.contentFactory;
     let contentFactory = factory.codeCellContentFactory;
     let modelFactory = this.modelFactory;
-    let model = modelFactory.createCodeCell({ });
+    let model = modelFactory.createMarkdownCell({ });
     let rendermime = this.rendermime;
     return { model, rendermime, contentFactory };
   }
@@ -489,7 +436,7 @@ class CodeChatbox extends Widget {
    */
   private _onCellDisposed(sender: Widget, args: void): void {
     if (!this.isDisposed) {
-      this._cells.remove(sender as CodeCellWidget);
+      this._cells.remove(sender as MarkdownCellWidget);
     }
   }
 
@@ -552,7 +499,7 @@ class CodeChatbox extends Widget {
   private _input: Panel = null;
   private _mimetype = 'text/x-ipython';
   private _executed = new Signal<this, Date>(this);
-  private _promptCreated = new Signal<this, CodeCellWidget>(this);
+  private _promptCreated = new Signal<this, MarkdownCellWidget>(this);
 }
 
 
@@ -618,14 +565,10 @@ namespace CodeChatbox {
     createChatboxHistory(options: ChatboxHistory.IOptions): IChatboxHistory;
 
     /**
-     * Create a new banner widget.
-     */
-    createBanner(options: RawCellWidget.IOptions, parent: CodeChatbox): RawCellWidget;
-
-    /**
      * Create a new prompt widget.
      */
-    createPrompt(options: CodeCellWidget.IOptions, parent: CodeChatbox): CodeCellWidget;
+    createPrompt(options: MarkdownCellWidget.IOptions, parent: CodeChatbox): MarkdownCellWidget;
+
   }
 
   /**
@@ -675,17 +618,10 @@ namespace CodeChatbox {
     }
 
     /**
-     * Create a new banner widget.
-     */
-    createBanner(options: RawCellWidget.IOptions, parent: CodeChatbox): RawCellWidget {
-      return new RawCellWidget(options);
-    }
-
-    /**
      * Create a new prompt widget.
      */
-    createPrompt(options: CodeCellWidget.IOptions, parent: CodeChatbox): CodeCellWidget {
-      return new CodeCellWidget(options);
+    createPrompt(options: MarkdownCellWidget.IOptions, parent: CodeChatbox): MarkdownCellWidget {
+      return new MarkdownCellWidget(options);
     }
   }
   /**
@@ -736,6 +672,17 @@ namespace CodeChatbox {
     createCodeCell(options: CodeCellModel.IOptions): ICodeCellModel;
 
     /**
+     * Create a new markdown cell.
+     *
+     * @param options - The options used to create the cell.
+     *
+     * @returns A new code cell. If a source cell is provided, the
+     *   new cell will be intialized with the data from the source.
+     */
+    createMarkdownCell(options: CellModel.IOptions): IMarkdownCellModel;
+
+
+    /**
      * Create a new raw cell.
      *
      * @param options - The options used to create the cell.
@@ -780,6 +727,18 @@ namespace CodeChatbox {
         options.contentFactory = this.codeCellContentFactory;
       }
       return new CodeCellModel(options);
+    }
+
+    /**
+     * Create a new markdown cell.
+     *
+     * @param source - The data to use for the original source data.
+     *
+     * @returns A new markdown cell. If a source cell is provided, the
+     *   new cell will be intialized with the data from the source.
+     */
+    createMarkdownCell(options: CellModel.IOptions): IMarkdownCellModel {
+      return new MarkdownCellModel(options);
     }
 
     /**

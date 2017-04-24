@@ -54,10 +54,7 @@ namespace CommandIDs {
   const clear = 'chatbox:clear';
 
   export
-  const run = 'chatbox:run';
-
-  export
-  const runForced = 'chatbox:run-forced';
+  const run = 'chatbox:push';
 
   export
   const linebreak = 'chatbox:linebreak';
@@ -176,7 +173,7 @@ function activateChatbox(app: JupyterLab, manager: IServiceManager, rendermime: 
 
       // Add the chatbox panel to the tracker.
       tracker.add(panel);
-      shell.addToMainArea(panel);
+      shell.addToLeftArea(panel);
       tracker.activate(panel);
     });
   }
@@ -247,19 +244,6 @@ function activateChatbox(app: JupyterLab, manager: IServiceManager, rendermime: 
         return;
       }
       return current.chatbox.execute();
-    }
-  });
-  palette.addItem({ command, category });
-
-  command = CommandIDs.runForced;
-  commands.addCommand(command, {
-    label: 'Run Cell (forced)',
-    execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
-      }
-      current.chatbox.execute(true);
     }
   });
   palette.addItem({ command, category });
@@ -344,7 +328,6 @@ function activateChatbox(app: JupyterLab, manager: IServiceManager, rendermime: 
   palette.addItem({ command, category });
 
   menu.addItem({ command: CommandIDs.run });
-  menu.addItem({ command: CommandIDs.runForced });
   menu.addItem({ command: CommandIDs.linebreak });
   menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.clear });

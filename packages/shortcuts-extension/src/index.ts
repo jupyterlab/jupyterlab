@@ -61,6 +61,16 @@ const SHORTCUTS = [
     keys: ['Tab']
   },
   {
+    command: 'chatbox:push',
+    selector: '.jp-Chatbox-prompt',
+    keys: ['Shift Enter']
+  },
+  {
+    command: 'chatbox:linebreak',
+    selector: '.jp-Chatbox-prompt',
+    keys: ['Enter']
+  },
+  {
     command: 'console:run',
     selector: '.jp-CodeConsole-promptCell',
     keys: ['Enter']

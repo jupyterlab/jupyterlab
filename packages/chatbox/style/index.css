@@ -9,7 +9,7 @@
 }
 
 
-.jp-ConsolePanel {
+.jp-ChatboxPanel {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
@@ -18,7 +18,7 @@
 }
 
 
-.jp-CodeConsole {
+.jp-Chatbox {
   height: 100%;
   padding: 0;
   display: flex;
@@ -26,26 +26,19 @@
 }
 
 
-.jp-CodeConsole-content {
+.jp-Chatbox-content {
   background-color: var(--jp-layout-color2);
   flex: 1 1 auto;
   overflow: auto;
 }
 
 
-.jp-CodeConsole-content .jp-Cell.jp-CodeConsole-foreignCell {
-  background-color: var(--jp-layout-color3);
-  flex: 1 1 auto;
-  overflow: auto;
-}
-
-
-.jp-CodeConsole-content .jp-Cell.jp-CodeCell.jp-mod-collapsed.jp-mod-readOnly {
+.jp-Chatbox-content .jp-Cell.jp-Cell.jp-mod-collapsed.jp-mod-readOnly {
   padding-left: calc(2*var(--jp-private-console-cell-padding))
 }
 
 
-.jp-CodeConsole-input {
+.jp-Chatbox-input {
   max-height: 80%;
   flex: 0 0 auto;
   overflow: auto;
@@ -59,26 +52,26 @@
 }
 
 
-.jp-CodeConsole-content .jp-InputArea-editor.jp-CellEditor {
+.jp-Chatbox-content .jp-InputArea-editor.jp-CellEditor {
   background: transparent;
   border-color: transparent;
 }
 
 
 /* TODO: we should be able to use notebook styles for this */
-.jp-CodeConsole-input .jp-CodeConsole-prompt.jp-Cell {
+.jp-Chatbox-input .jp-Chatbox-prompt.jp-Cell {
   background: linear-gradient(to right, #66BB6A -40px, #66BB6A 5px, transparent 5px, transparent 100%);
   border-color: #66BB6A;
   border-left-width: var(--jp-border-width);
 }
 
 
-.jp-CodeConsole-input .jp-CodeConsole-prompt .jp-InputArea {
+.jp-Chatbox-input .jp-Chatbox-prompt .jp-InputArea {
   height: 100%;
   min-height: 100%;
 }
 
 
-.jp-CodeConsole-content .jp-CodeConsole-banner .jp-Cell-prompt {
+.jp-Chatbox-content .jp-Chatbox-banner .jp-Cell-prompt {
   display: none;
 }
