@@ -206,6 +206,7 @@ def _ensure_package(config):
         data['jupyterlab']['extensions'].append(key)
     for key in config['linked_extensions']:
         data['jupyterlab']['extensions'].append(key)
+    data['scripts']['build'] = 'webpack'
     with open(pkg_path, 'w') as fid:
         json.dump(data, fid, indent=4)
 

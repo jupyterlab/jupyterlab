@@ -1,5 +1,4 @@
 
-var childProcess = require('child_process');
 var webpack = require('webpack');
 var path = require('path');
 var fs = require('fs-extra');
@@ -25,25 +24,6 @@ fs.writeFileSync('build/index.out.js', result);
 var hash = crypto.createHash('md5');
 hash.update(fs.readFileSync('./package.json'));
 fs.writeFileSync('build/hash.md5', hash.digest('hex'));
-
-
-// Get the git description.
-try {
-  var notice = childProcess.execSync('jupyter lab describe', { encoding: 'utf8' });
-} catch (e) {
-  var notice = 'unknown';
-}
-
-
-// Get the python package version.
-var cwd = process.cwd();
-process.chdir('../..');
-try {
-  var version = childProcess.execSync('jupyter lab --version', { encoding: 'utf8' });
-} catch (e) {
-  var version = 'unknown';
-}
-process.chdir(cwd);
 
 
 // Note that we have to use an explicit local public path
@@ -86,8 +66,8 @@ module.exports = {
   plugins: [
       new webpack.DefinePlugin({
         'process.env': {
-          'GIT_DESCRIPTION': JSON.stringify(notice.trim()),
-          'JUPYTERLAB_VERSION': JSON.stringify(version.trim())
+          'GIT_DESCRIPTION': '"' + package_data.jupyterlab.gitDescription + '"',
+          'JUPYTERLAB_VERSION': '"' + package_data.jupyterlab.version + '"'
         }
       }),
       new ExtractTextPlugin('[name].css')
