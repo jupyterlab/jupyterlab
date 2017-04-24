@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  DocumentManager, IDocumentManager, showErrorMessage
+  Actions, DocumentManager, IDocumentManager, showErrorMessage
 } from '@jupyterlab/docmanager';
 
 import {
@@ -26,6 +26,9 @@ import {
  * The command IDs used by the document manager plugin.
  */
 namespace CommandIDs {
+  export
+  const deleteFile = 'file-operations:delete-file';
+
   export
   const save = 'file-operations:save';
 
@@ -108,6 +111,19 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   commands.addCommand(CommandIDs.closeAllFiles, {
     label: 'Close All',
     execute: () => { app.shell.closeAll(); }
+  });
+
+  commands.addCommand(CommandIDs.deleteFile, {
+    execute: args => {
+      const path = args['path'] as string;
+      const basePath = (args['basePath'] as string) || '';
+
+      if (!path) {
+        const command = CommandIDs.deleteFile;
+        throw new Error(`A non-empty path is required for ${command}.`);
+      }
+      return Actions.deleteFile(docManager.services, path, basePath);
+    }
   });
 
   commands.addCommand(CommandIDs.open, {

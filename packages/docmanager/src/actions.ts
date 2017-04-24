@@ -45,7 +45,7 @@ namespace Actions {
    *
    * @param manager - The service manager used to delete.
    *
-   * @param: path - The path to the file to be deleted.
+   * @param path - The path to the file to be deleted.
    *
    * @param basePath - The base path to resolve against, defaults to ''.
    *
