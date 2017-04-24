@@ -49,7 +49,7 @@ import {
 /**
  * The class name added to chatbox panels.
  */
-const PANEL_CLASS = 'jp-ChatboxPanel';
+const PANEL_CLASS = 'jp-ConsolePanel';
 
 
 /**

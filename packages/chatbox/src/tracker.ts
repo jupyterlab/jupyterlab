@@ -19,7 +19,7 @@ import {
  * The chatbox tracker token.
  */
 export
-const IChatboxTracker = new Token<IChatboxTracker>('jupyter.services.chatboxs');
+const IChatboxTracker = new Token<IChatboxTracker>('jupyter.services.chatbox');
 /* tslint:enable */
 
 

@@ -52,10 +52,6 @@ import {
 } from '@jupyterlab/rendermime';
 
 import {
-  ForeignHandler
-} from './foreign';
-
-import {
   ChatboxHistory, IChatboxHistory
 } from './history';
 
@@ -63,32 +59,27 @@ import {
 /**
  * The class name added to chatbox widgets.
  */
-const CONSOLE_CLASS = 'jp-CodeChatbox';
+const CONSOLE_CLASS = 'jp-CodeConsole';
 
 /**
  * The class name added to the chatbox banner.
  */
-const BANNER_CLASS = 'jp-CodeChatbox-banner';
-
-/**
- * The class name of a cell whose input originated from a foreign session.
- */
-const FOREIGN_CELL_CLASS = 'jp-CodeChatbox-foreignCell';
+const BANNER_CLASS = 'jp-CodeConsole-banner';
 
 /**
  * The class name of the active prompt
  */
-const PROMPT_CLASS = 'jp-CodeChatbox-prompt';
+const PROMPT_CLASS = 'jp-CodeConsole-prompt';
 
 /**
  * The class name of the panel that holds cell content.
  */
-const CONTENT_CLASS = 'jp-CodeChatbox-content';
+const CONTENT_CLASS = 'jp-CodeConsole-content';
 
 /**
  * The class name of the panel that holds prompts.
  */
-const INPUT_CLASS = 'jp-CodeChatbox-input';
+const INPUT_CLASS = 'jp-CodeConsole-input';
 
 /**
  * The timeout in ms for execution requests to the kernel.
@@ -144,13 +135,6 @@ class CodeChatbox extends Widget {
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
     this._content.addWidget(banner);
-
-    // Set up the foreign iopub handler.
-    this._foreignHandler = factory.createForeignHandler({
-      session: this.session,
-      parent: this,
-      cellFactory: () => this._createForeignCell(),
-    });
 
     this._history = factory.createChatboxHistory({
       session: this.session
@@ -250,17 +234,14 @@ class CodeChatbox extends Widget {
    */
   dispose() {
     // Do nothing if already disposed.
-    if (this._foreignHandler === null) {
+    if (this._cells === null) {
       return;
     }
-    let foreignHandler = this._foreignHandler;
-    let history = this._history;
     let cells = this._cells;
-    this._foreignHandler = null;
+    let history = this._history;
     this._history = null;
     this._cells = null;
 
-    foreignHandler.dispose();
     history.dispose();
     cells.clear();
 
@@ -302,20 +283,6 @@ class CodeChatbox extends Widget {
         return this._execute(prompt);
       }
     });
-  }
-
-  /**
-   * Inject arbitrary code for the chatbox to execute immediately.
-   *
-   * @param code - The code contents of the cell being injected.
-   *
-   * @returns A promise that indicates when the injected cell's execution ends.
-   */
-  inject(code: string): Promise<void> {
-    let cell = this._createForeignCell();
-    cell.model.value.text = code;
-    this.addCell(cell);
-    return this._execute(cell);
   }
 
   /**
@@ -506,19 +473,6 @@ class CodeChatbox extends Widget {
   }
 
   /**
-   * Create a new foreign cell.
-   */
-  private _createForeignCell(): CodeCellWidget {
-    let factory = this.contentFactory;
-    let options = this._createCodeCellOptions();
-    let cell = factory.createForeignCell(options, this);
-    cell.readOnly = true;
-    cell.model.mimeType = this._mimetype;
-    cell.addClass(FOREIGN_CELL_CLASS);
-    return cell;
-  }
-
-  /**
    * Create the options used to initialize a code cell widget.
    */
   private _createCodeCellOptions(): CodeCellWidget.IOptions {
@@ -594,7 +548,6 @@ class CodeChatbox extends Widget {
   private _mimeTypeService: IEditorMimeTypeService;
   private _cells: IObservableVector<BaseCellWidget> = null;
   private _content: Panel = null;
-  private _foreignHandler: ForeignHandler =  null;
   private _history: IChatboxHistory = null;
   private _input: Panel = null;
   private _mimetype = 'text/x-ipython';
@@ -665,11 +618,6 @@ namespace CodeChatbox {
     createChatboxHistory(options: ChatboxHistory.IOptions): IChatboxHistory;
 
     /**
-     * The foreign handler for a chatbox widget.
-     */
-    createForeignHandler(options: ForeignHandler.IOptions): ForeignHandler;
-
-    /**
      * Create a new banner widget.
      */
     createBanner(options: RawCellWidget.IOptions, parent: CodeChatbox): RawCellWidget;
@@ -678,11 +626,6 @@ namespace CodeChatbox {
      * Create a new prompt widget.
      */
     createPrompt(options: CodeCellWidget.IOptions, parent: CodeChatbox): CodeCellWidget;
-
-    /**
-     * Create a code cell whose input originated from a foreign session.
-     */
-    createForeignCell(options: CodeCellWidget.IOptions, parent: CodeChatbox): CodeCellWidget;
   }
 
   /**
@@ -732,13 +675,6 @@ namespace CodeChatbox {
     }
 
     /**
-     * The foreign handler for a chatbox widget.
-     */
-    createForeignHandler(options: ForeignHandler.IOptions):
-    ForeignHandler {
-      return new ForeignHandler(options);
-    }
-    /**
      * Create a new banner widget.
      */
     createBanner(options: RawCellWidget.IOptions, parent: CodeChatbox): RawCellWidget {
@@ -749,13 +685,6 @@ namespace CodeChatbox {
      * Create a new prompt widget.
      */
     createPrompt(options: CodeCellWidget.IOptions, parent: CodeChatbox): CodeCellWidget {
-      return new CodeCellWidget(options);
-    }
-
-    /**
-     * Create a new code cell widget for an input from a foreign session.
-     */
-    createForeignCell(options: CodeCellWidget.IOptions, parent: CodeChatbox): CodeCellWidget {
       return new CodeCellWidget(options);
     }
   }

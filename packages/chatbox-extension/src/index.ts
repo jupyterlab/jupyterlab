@@ -75,9 +75,6 @@ namespace CommandIDs {
   const open = 'chatbox:open';
 
   export
-  const inject = 'chatbox:inject';
-
-  export
   const switchKernel = 'chatbox:switch-kernel';
 };
 
@@ -330,22 +327,6 @@ function activateChatbox(app: JupyterLab, manager: IServiceManager, rendermime: 
           return false;
         }
     });
-    }
-  });
-
-  command = CommandIDs.inject;
-  commands.addCommand(command, {
-    execute: (args: JSONObject) => {
-      let path = args['path'];
-      tracker.find(widget => {
-        if (widget.chatbox.session.path === path) {
-          if (args['activate'] !== false) {
-            tracker.activate(widget);
-          }
-          widget.chatbox.inject(args['code'] as string);
-          return true;
-        }
-      });
     }
   });
 
