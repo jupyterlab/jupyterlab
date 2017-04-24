@@ -42,7 +42,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  CodeChatbox
+  Chatbox
 } from './widget';
 
 
@@ -101,7 +101,7 @@ class ChatboxPanel extends Panel {
     session.kernelChanged.connect(this._updateTitle, this);
     session.propertyChanged.connect(this._updateTitle, this);
 
-    this.title.icon = 'jp-ImageCodeChatbox';
+    this.title.icon = 'jp-ImageChatbox';
     this.title.closable = true;
     this.id = `chatbox-${count}`;
   }
@@ -109,7 +109,7 @@ class ChatboxPanel extends Panel {
   /**
    * The chatbox widget used by the panel.
    */
-  readonly chatbox: CodeChatbox;
+  readonly chatbox: Chatbox;
 
   /**
    * The session used by the panel.
@@ -151,7 +151,7 @@ class ChatboxPanel extends Panel {
   /**
    * Handle a chatbox execution.
    */
-  private _onExecuted(sender: CodeChatbox, args: Date) {
+  private _onExecuted(sender: Chatbox, args: Date) {
     this._executed = args;
     this._updateTitle();
   }
@@ -218,7 +218,7 @@ namespace ChatboxPanel {
     /**
      * The model factory for the chatbox widget.
      */
-    modelFactory?: CodeChatbox.IModelFactory;
+    modelFactory?: Chatbox.IModelFactory;
 
     /**
      * The service used to look up mime types.
@@ -239,12 +239,12 @@ namespace ChatboxPanel {
     /**
      * The factory for code chatbox content.
      */
-    readonly chatboxContentFactory: CodeChatbox.IContentFactory;
+    readonly chatboxContentFactory: Chatbox.IContentFactory;
 
     /**
      * Create a new chatbox panel.
      */
-    createChatbox(options: CodeChatbox.IOptions): CodeChatbox;
+    createChatbox(options: Chatbox.IOptions): Chatbox;
   }
 
   /**
@@ -258,7 +258,7 @@ namespace ChatboxPanel {
     constructor(options: ContentFactory.IOptions) {
       this.editorFactory = options.editorFactory;
       this.chatboxContentFactory = (options.chatboxContentFactory ||
-        new CodeChatbox.ContentFactory({
+        new Chatbox.ContentFactory({
           editorFactory: this.editorFactory,
           outputAreaContentFactory: options.outputAreaContentFactory,
           codeCellContentFactory: options.codeCellContentFactory,
@@ -275,13 +275,13 @@ namespace ChatboxPanel {
     /**
      * The factory for code chatbox content.
      */
-    readonly chatboxContentFactory: CodeChatbox.IContentFactory;
+    readonly chatboxContentFactory: Chatbox.IContentFactory;
 
     /**
      * Create a new chatbox panel.
      */
-    createChatbox(options: CodeChatbox.IOptions): CodeChatbox {
-      return new CodeChatbox(options);
+    createChatbox(options: Chatbox.IOptions): Chatbox {
+      return new Chatbox(options);
     }
   }
 
@@ -321,7 +321,7 @@ namespace ChatboxPanel {
        * The factory for chatbox widget content.  If given, this will
        * take precedence over the output area and cell factories.
        */
-      chatboxContentFactory?: CodeChatbox.IContentFactory;
+      chatboxContentFactory?: Chatbox.IContentFactory;
     }
   }
 

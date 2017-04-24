@@ -91,11 +91,11 @@ const EXECUTION_TIMEOUT = 250;
  * instance. Under most circumstances, it is not instantiated by user code.
  */
 export
-class CodeChatbox extends Widget {
+class Chatbox extends Widget {
   /**
    * Construct a chatbox widget.
    */
-  constructor(options: CodeChatbox.IOptions) {
+  constructor(options: Chatbox.IOptions) {
     super();
     this.addClass(CHATBOX_CLASS);
 
@@ -107,7 +107,7 @@ class CodeChatbox extends Widget {
 
     let factory = this.contentFactory = options.contentFactory;
     this.modelFactory = (
-      options.modelFactory || CodeChatbox.defaultModelFactory
+      options.modelFactory || Chatbox.defaultModelFactory
     );
     this.rendermime = options.rendermime;
     this.session = options.session;
@@ -146,12 +146,12 @@ class CodeChatbox extends Widget {
   /**
    * The content factory used by the chatbox.
    */
-  readonly contentFactory: CodeChatbox.IContentFactory;
+  readonly contentFactory: Chatbox.IContentFactory;
 
   /**
    * The model factory for the chatbox widget.
    */
-  readonly modelFactory: CodeChatbox.IModelFactory;
+  readonly modelFactory: Chatbox.IModelFactory;
 
   /**
    * The rendermime instance used by the chatbox.
@@ -507,7 +507,7 @@ class CodeChatbox extends Widget {
  * A namespace for CodeChatbox statics.
  */
 export
-namespace CodeChatbox {
+namespace Chatbox {
   /**
    * The initialization options for a chatbox widget.
    */
@@ -567,7 +567,7 @@ namespace CodeChatbox {
     /**
      * Create a new prompt widget.
      */
-    createPrompt(options: MarkdownCellWidget.IOptions, parent: CodeChatbox): MarkdownCellWidget;
+    createPrompt(options: MarkdownCellWidget.IOptions, parent: Chatbox): MarkdownCellWidget;
 
   }
 
@@ -620,7 +620,7 @@ namespace CodeChatbox {
     /**
      * Create a new prompt widget.
      */
-    createPrompt(options: MarkdownCellWidget.IOptions, parent: CodeChatbox): MarkdownCellWidget {
+    createPrompt(options: MarkdownCellWidget.IOptions, parent: Chatbox): MarkdownCellWidget {
       return new MarkdownCellWidget(options);
     }
   }

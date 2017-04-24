@@ -51,6 +51,9 @@
   padding-bottom: 8px;
 }
 
+.jp-Chatbox .jp-Cell-prompt {
+  display: none;
+}
 
 .jp-Chatbox-content .jp-InputArea-editor.jp-CellEditor {
   background: transparent;
@@ -69,9 +72,4 @@
 .jp-Chatbox-input .jp-Chatbox-prompt .jp-InputArea {
   height: 100%;
   min-height: 100%;
-}
-
-
-.jp-Chatbox-content .jp-Chatbox-banner .jp-Cell-prompt {
-  display: none;
 }
