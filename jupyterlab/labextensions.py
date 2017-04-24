@@ -9,7 +9,9 @@ import os
 import sys
 
 from jupyter_core.application import JupyterApp, base_flags
-from traitlets import Bool
+from jupyter_core.paths import ENV_CONFIG_PATH
+
+from traitlets import Bool, Unicode
 
 from ._version import __version__
 from .commands import (
