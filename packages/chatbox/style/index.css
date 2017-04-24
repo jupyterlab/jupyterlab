@@ -1,0 +1,84 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+:root {
+  --jp-private-console-cell-padding: 5px;
+}
+
+
+.jp-ConsolePanel {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  border-top: var(--jp-border-width) solid var(--jp-border-color1);
+  margin-top: -1px;
+}
+
+
+.jp-CodeConsole {
+  height: 100%;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+
+.jp-CodeConsole-content {
+  background-color: var(--jp-layout-color2);
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+
+.jp-CodeConsole-content .jp-Cell.jp-CodeConsole-foreignCell {
+  background-color: var(--jp-layout-color3);
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+
+.jp-CodeConsole-content .jp-Cell.jp-CodeCell.jp-mod-collapsed.jp-mod-readOnly {
+  padding-left: calc(2*var(--jp-private-console-cell-padding))
+}
+
+
+.jp-CodeConsole-input {
+  max-height: 80%;
+  flex: 0 0 auto;
+  overflow: auto;
+  border-top: var(--jp-border-width) solid var(--jp-border-color1);
+  padding-top: var(--jp-private-console-cell-padding);
+  padding-right: var(--jp-private-console-cell-padding);
+  padding-left: var(--jp-private-console-cell-padding);
+  /* The weird 8px bottom padding is needed because of the 2px margin in the panel
+  that lets the shadow in the dock panel show */
+  padding-bottom: 8px;
+}
+
+
+.jp-CodeConsole-content .jp-InputArea-editor.jp-CellEditor {
+  background: transparent;
+  border-color: transparent;
+}
+
+
+/* TODO: we should be able to use notebook styles for this */
+.jp-CodeConsole-input .jp-CodeConsole-prompt.jp-Cell {
+  background: linear-gradient(to right, #66BB6A -40px, #66BB6A 5px, transparent 5px, transparent 100%);
+  border-color: #66BB6A;
+  border-left-width: var(--jp-border-width);
+}
+
+
+.jp-CodeConsole-input .jp-CodeConsole-prompt .jp-InputArea {
+  height: 100%;
+  min-height: 100%;
+}
+
+
+.jp-CodeConsole-content .jp-CodeConsole-banner .jp-Cell-prompt {
+  display: none;
+}
