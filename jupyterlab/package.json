@@ -76,9 +76,7 @@
       "@jupyterlab/tabmanager-extension",
       "@jupyterlab/terminal-extension",
       "@jupyterlab/tooltip-extension"
-    ],
-    "version": "0.20.1",
-    "gitDescription": "v0.18.0-0-937-g35b86e85"
+    ]
   },
   "version": "0.1.2"
 }
