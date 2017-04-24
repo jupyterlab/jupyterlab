@@ -42,42 +42,42 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  CodeConsole
+  CodeChatbox
 } from './widget';
 
 
 /**
- * The class name added to console panels.
+ * The class name added to chatbox panels.
  */
-const PANEL_CLASS = 'jp-ConsolePanel';
+const PANEL_CLASS = 'jp-ChatboxPanel';
 
 
 /**
- * A panel which contains a console and the ability to add other children.
+ * A panel which contains a chatbox and the ability to add other children.
  */
 export
-class ConsolePanel extends Panel {
+class ChatboxPanel extends Panel {
   /**
-   * Construct a console panel.
+   * Construct a chatbox panel.
    */
-  constructor(options: ConsolePanel.IOptions) {
+  constructor(options: ChatboxPanel.IOptions) {
     super();
     this.addClass(PANEL_CLASS);
     let {
       rendermime, mimeTypeService, path, basePath, name, manager, modelFactory
     } = options;
     let factory = options.contentFactory;
-    let contentFactory = factory.consoleContentFactory;
+    let contentFactory = factory.chatboxContentFactory;
     let count = Private.count++;
     if (!path) {
-      path = `${basePath || ''}/console-${count}-${uuid()}`;
+      path = `${basePath || ''}/chatbox-${count}-${uuid()}`;
     }
 
     let session = this._session = new ClientSession({
       manager: manager.sessions,
       path,
-      name: name || `Console ${count}`,
-      type: 'console',
+      name: name || `Chatbox ${count}`,
+      type: 'chatbox',
       kernelPreference: options.kernelPreference
     });
 
@@ -86,10 +86,10 @@ class ConsolePanel extends Panel {
       contents: manager.contents
     });
 
-    this.console = factory.createConsole({
+    this.chatbox = factory.createChatbox({
       rendermime, session, mimeTypeService, contentFactory, modelFactory
     });
-    this.addWidget(this.console);
+    this.addWidget(this.chatbox);
 
     session.ready.then(() => {
       this._connected = new Date();
@@ -97,19 +97,19 @@ class ConsolePanel extends Panel {
     });
 
     this._manager = manager;
-    this.console.executed.connect(this._onExecuted, this);
+    this.chatbox.executed.connect(this._onExecuted, this);
     session.kernelChanged.connect(this._updateTitle, this);
     session.propertyChanged.connect(this._updateTitle, this);
 
-    this.title.icon = 'jp-ImageCodeConsole';
+    this.title.icon = 'jp-ImageCodeChatbox';
     this.title.closable = true;
-    this.id = `console-${count}`;
+    this.id = `chatbox-${count}`;
   }
 
   /**
-   * The console widget used by the panel.
+   * The chatbox widget used by the panel.
    */
-  readonly console: CodeConsole;
+  readonly chatbox: CodeChatbox;
 
   /**
    * The session used by the panel.
@@ -122,7 +122,7 @@ class ConsolePanel extends Panel {
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
-    this.console.dispose();
+    this.chatbox.dispose();
     super.dispose();
   }
 
@@ -137,7 +137,7 @@ class ConsolePanel extends Panel {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this.console.prompt.editor.focus();
+    this.chatbox.prompt.editor.focus();
   }
 
   /**
@@ -149,15 +149,15 @@ class ConsolePanel extends Panel {
   }
 
   /**
-   * Handle a console execution.
+   * Handle a chatbox execution.
    */
-  private _onExecuted(sender: CodeConsole, args: Date) {
+  private _onExecuted(sender: CodeChatbox, args: Date) {
     this._executed = args;
     this._updateTitle();
   }
 
   /**
-   * Update the console panel title.
+   * Update the chatbox panel title.
    */
   private _updateTitle(): void {
     Private.updateTitle(this, this._connected, this._executed);
@@ -171,12 +171,12 @@ class ConsolePanel extends Panel {
 
 
 /**
- * A namespace for ConsolePanel statics.
+ * A namespace for ChatboxPanel statics.
  */
 export
-namespace ConsolePanel {
+namespace ChatboxPanel {
   /**
-   * The initialization options for a console panel.
+   * The initialization options for a chatbox panel.
    */
   export
   interface IOptions {
@@ -196,17 +196,17 @@ namespace ConsolePanel {
     manager: ServiceManager.IManager;
 
     /**
-     * The path of an existing console.
+     * The path of an existing chatbox.
      */
     path?: string;
 
     /**
-     * The base path for a new console.
+     * The base path for a new chatbox.
      */
     basePath?: string;
 
     /**
-     * The name of the console.
+     * The name of the chatbox.
      */
     name?: string;
 
@@ -216,9 +216,9 @@ namespace ConsolePanel {
     kernelPreference?: IClientSession.IKernelPreference;
 
     /**
-     * The model factory for the console widget.
+     * The model factory for the chatbox widget.
      */
-    modelFactory?: CodeConsole.IModelFactory;
+    modelFactory?: CodeChatbox.IModelFactory;
 
     /**
      * The service used to look up mime types.
@@ -227,7 +227,7 @@ namespace ConsolePanel {
   }
 
   /**
-   * The console panel renderer.
+   * The chatbox panel renderer.
    */
   export
   interface IContentFactory {
@@ -237,14 +237,14 @@ namespace ConsolePanel {
     readonly editorFactory: CodeEditor.Factory;
 
     /**
-     * The factory for code console content.
+     * The factory for code chatbox content.
      */
-    readonly consoleContentFactory: CodeConsole.IContentFactory;
+    readonly chatboxContentFactory: CodeChatbox.IContentFactory;
 
     /**
-     * Create a new console panel.
+     * Create a new chatbox panel.
      */
-    createConsole(options: CodeConsole.IOptions): CodeConsole;
+    createChatbox(options: CodeChatbox.IOptions): CodeChatbox;
   }
 
   /**
@@ -257,8 +257,8 @@ namespace ConsolePanel {
      */
     constructor(options: ContentFactory.IOptions) {
       this.editorFactory = options.editorFactory;
-      this.consoleContentFactory = (options.consoleContentFactory ||
-        new CodeConsole.ContentFactory({
+      this.chatboxContentFactory = (options.chatboxContentFactory ||
+        new CodeChatbox.ContentFactory({
           editorFactory: this.editorFactory,
           outputAreaContentFactory: options.outputAreaContentFactory,
           codeCellContentFactory: options.codeCellContentFactory,
@@ -273,15 +273,15 @@ namespace ConsolePanel {
     readonly editorFactory: CodeEditor.Factory;
 
     /**
-     * The factory for code console content.
+     * The factory for code chatbox content.
      */
-    readonly consoleContentFactory: CodeConsole.IContentFactory;
+    readonly chatboxContentFactory: CodeChatbox.IContentFactory;
 
     /**
-     * Create a new console panel.
+     * Create a new chatbox panel.
      */
-    createConsole(options: CodeConsole.IOptions): CodeConsole {
-      return new CodeConsole(options);
+    createChatbox(options: CodeChatbox.IOptions): CodeChatbox {
+      return new CodeChatbox(options);
     }
   }
 
@@ -291,13 +291,13 @@ namespace ConsolePanel {
   export
   namespace ContentFactory {
     /**
-     * An initialization options for a console panel factory.
+     * An initialization options for a chatbox panel factory.
      */
     export
     interface IOptions {
       /**
        * The editor factory.  This will be used to create a
-       * consoleContentFactory if none is given.
+       * chatboxContentFactory if none is given.
        */
       editorFactory: CodeEditor.Factory;
 
@@ -318,19 +318,19 @@ namespace ConsolePanel {
       rawCellContentFactory?: BaseCellWidget.IContentFactory;
 
       /**
-       * The factory for console widget content.  If given, this will
+       * The factory for chatbox widget content.  If given, this will
        * take precedence over the output area and cell factories.
        */
-      consoleContentFactory?: CodeConsole.IContentFactory;
+      chatboxContentFactory?: CodeChatbox.IContentFactory;
     }
   }
 
   /* tslint:disable */
   /**
-   * The console renderer token.
+   * The chatbox renderer token.
    */
   export
-  const IContentFactory = new Token<IContentFactory>('jupyter.services.console.content-factory');
+  const IContentFactory = new Token<IContentFactory>('jupyter.services.chatbox.content-factory');
   /* tslint:enable */
 }
 
@@ -340,17 +340,17 @@ namespace ConsolePanel {
  */
 namespace Private {
   /**
-   * The counter for new consoles.
+   * The counter for new chatboxs.
    */
   export
   let count = 1;
 
   /**
-   * Update the title of a console panel.
+   * Update the title of a chatbox panel.
    */
   export
-  function updateTitle(panel: ConsolePanel, connected: Date | null, executed: Date | null) {
-    let session = panel.console.session;
+  function updateTitle(panel: ChatboxPanel, connected: Date | null, executed: Date | null) {
+    let session = panel.chatbox.session;
     let caption = (
       `Name: ${session.name}\n` +
       `Directory: ${PathExt.dirname(session.path)}\n` +

@@ -10,21 +10,21 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  ConsolePanel
+  ChatboxPanel
 } from './';
 
 
 /* tslint:disable */
 /**
- * The console tracker token.
+ * The chatbox tracker token.
  */
 export
-const IConsoleTracker = new Token<IConsoleTracker>('jupyter.services.consoles');
+const IChatboxTracker = new Token<IChatboxTracker>('jupyter.services.chatboxs');
 /* tslint:enable */
 
 
 /**
- * A class that tracks console widgets.
+ * A class that tracks chatbox widgets.
  */
 export
-interface IConsoleTracker extends IInstanceTracker<ConsolePanel> {}
+interface IChatboxTracker extends IInstanceTracker<ChatboxPanel> {}

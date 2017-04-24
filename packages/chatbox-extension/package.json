@@ -15,7 +15,7 @@
     "@jupyterlab/application": "^0.3.1",
     "@jupyterlab/apputils": "^0.3.1",
     "@jupyterlab/codeeditor": "^0.3.1",
-    "@jupyterlab/console": "^0.3.1",
+    "@jupyterlab/chatbox": "^0.1.0",
     "@jupyterlab/coreutils": "^0.3.1",
     "@jupyterlab/docregistry": "^0.3.1",
     "@jupyterlab/filebrowser": "^0.3.1",

@@ -43,7 +43,7 @@ class ForeignHandler implements IDisposable {
   }
 
   /**
-   * Set whether the handler is able to inject foreign cells into a console.
+   * Set whether the handler is able to inject foreign cells into a chatbox.
    */
   get enabled(): boolean {
     return this._enabled;

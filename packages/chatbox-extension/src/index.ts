@@ -31,8 +31,8 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IConsoleTracker, ConsolePanel
-} from '@jupyterlab/console';
+  IChatboxTracker, ChatboxPanel
+} from '@jupyterlab/chatbox';
 
 import {
   ILauncher
@@ -44,78 +44,78 @@ import {
 
 
 /**
- * The command IDs used by the console plugin.
+ * The command IDs used by the chatbox plugin.
  */
 namespace CommandIDs {
   export
-  const create = 'console:create';
+  const create = 'chatbox:create';
 
   export
-  const clear = 'console:clear';
+  const clear = 'chatbox:clear';
 
   export
-  const run = 'console:run';
+  const run = 'chatbox:run';
 
   export
-  const runForced = 'console:run-forced';
+  const runForced = 'chatbox:run-forced';
 
   export
-  const linebreak = 'console:linebreak';
+  const linebreak = 'chatbox:linebreak';
 
   export
-  const interrupt = 'console:interrupt-kernel';
+  const interrupt = 'chatbox:interrupt-kernel';
 
   export
-  const restart = 'console:restart-kernel';
+  const restart = 'chatbox:restart-kernel';
 
   export
-  const closeAndShutdown = 'console:close-and-shutdown';
+  const closeAndShutdown = 'chatbox:close-and-shutdown';
 
   export
-  const open = 'console:open';
+  const open = 'chatbox:open';
 
   export
-  const inject = 'console:inject';
+  const inject = 'chatbox:inject';
 
   export
-  const switchKernel = 'console:switch-kernel';
+  const switchKernel = 'chatbox:switch-kernel';
 };
 
 /**
- * The console widget tracker provider.
+ * The chatbox widget tracker provider.
  */
 export
-const trackerPlugin: JupyterLabPlugin<IConsoleTracker> = {
-  id: 'jupyter.services.console-tracker',
-  provides: IConsoleTracker,
+const trackerPlugin: JupyterLabPlugin<IChatboxTracker> = {
+  id: 'jupyter.services.chatbox-tracker',
+  provides: IChatboxTracker,
   requires: [
     IServiceManager,
     IRenderMime,
     IMainMenu,
     ICommandPalette,
-    ConsolePanel.IContentFactory,
+    ChatboxPanel.IContentFactory,
     IEditorServices,
     ILayoutRestorer
   ],
   optional: [ILauncher],
-  activate: activateConsole,
+  activate: activateChatbox,
   autoStart: true
 };
 
 
 /**
- * The console widget content factory.
+ * The chatbox widget content factory.
  */
 export
-const contentFactoryPlugin: JupyterLabPlugin<ConsolePanel.IContentFactory> = {
-  id: 'jupyter.services.console-renderer',
-  provides: ConsolePanel.IContentFactory,
+const contentFactoryPlugin: JupyterLabPlugin<ChatboxPanel.IContentFactory> = {
+  id: 'jupyter.services.chatbox-renderer',
+  provides: ChatboxPanel.IContentFactory,
   requires: [IEditorServices],
   autoStart: true,
   activate: (app: JupyterLab, editorServices: IEditorServices) => {
     let editorFactory = editorServices.factoryService.newInlineEditor.bind(
       editorServices.factoryService);
-    return new ConsolePanel.ContentFactory({ editorFactory });
+    return new ChatboxPanel.ContentFactory({ editorFactory });
   }
 };
 
@@ -128,17 +128,17 @@ export default plugins;
 
 
 /**
- * Activate the console extension.
+ * Activate the chatbox extension.
  */
-function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): IConsoleTracker {
+function activateChatbox(app: JupyterLab, manager: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: ChatboxPanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): IChatboxTracker {
   let { commands, shell } = app;
-  let category = 'Console';
+  let category = 'Chatbox';
   let command: string;
   let menu = new Menu({ commands });
 
-  // Create an instance tracker for all console panels.
-  const tracker = new InstanceTracker<ConsolePanel>({
-    namespace: 'console',
+  // Create an instance tracker for all chatbox panels.
+  const tracker = new InstanceTracker<ChatboxPanel>({
+    namespace: 'chatbox',
     shell
   });
 
@@ -146,17 +146,17 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
   restorer.restore(tracker, {
     command: CommandIDs.open,
     args: panel => ({
-      path: panel.console.session.path,
-      name: panel.console.session.name
+      path: panel.chatbox.session.path,
+      name: panel.chatbox.session.name
     }),
-    name: panel => panel.console.session.path,
+    name: panel => panel.chatbox.session.path,
     when: manager.ready
   });
 
   // Add a launcher item if the launcher is available.
   if (launcher) {
     launcher.add({
-      name: 'Code Console',
+      name: 'Chatbox',
       command: CommandIDs.create
     });
   }
@@ -165,11 +165,11 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
   menu.title.label = category;
 
   /**
-   * Create a console for a given path.
+   * Create a chatbox for a given path.
    */
-  function createConsole(options: Partial<ConsolePanel.IOptions>): Promise<void> {
+  function createChatbox(options: Partial<ChatboxPanel.IOptions>): Promise<void> {
     return manager.ready.then(() => {
-      let panel = new ConsolePanel({
+      let panel = new ChatboxPanel({
         manager,
         rendermime: rendermime.clone(),
         contentFactory,
@@ -177,7 +177,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
         ...options
       });
 
-      // Add the console panel to the tracker.
+      // Add the chatbox panel to the tracker.
       tracker.add(panel);
       shell.addToMainArea(panel);
       tracker.activate(panel);
@@ -186,10 +186,10 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
 
   command = CommandIDs.open;
   commands.addCommand(command, {
-    execute: (args: Partial<ConsolePanel.IOptions>) => {
+    execute: (args: Partial<ChatboxPanel.IOptions>) => {
       let path = args['path'];
       let widget = tracker.find(value => {
-        if (value.console.session.path === path) {
+        if (value.chatbox.session.path === path) {
           return true;
         }
       });
@@ -201,7 +201,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
             return item.path === path;
           });
           if (model) {
-            return createConsole(args);
+            return createChatbox(args);
           }
         });
       }
@@ -210,16 +210,16 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
 
   command = CommandIDs.create;
   commands.addCommand(command, {
-    label: 'Start New Console',
-    execute: (args: Partial<ConsolePanel.IOptions>) => {
+    label: 'Start New Chatbox',
+    execute: (args: Partial<ChatboxPanel.IOptions>) => {
       args.basePath = args.basePath || '.';
-      return createConsole(args);
+      return createChatbox(args);
     }
   });
   palette.addItem({ command, category });
 
   // Get the current widget and activate unless the args specify otherwise.
-  function getCurrent(args: JSONObject): ConsolePanel | null {
+  function getCurrent(args: JSONObject): ChatboxPanel | null {
     let widget = tracker.currentWidget;
     let activate = args['activate'] !== false;
     if (activate && widget) {
@@ -236,7 +236,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
       if (!current) {
         return;
       }
-      current.console.clear();
+      current.chatbox.clear();
     }
   });
   palette.addItem({ command, category });
@@ -249,7 +249,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
       if (!current) {
         return;
       }
-      return current.console.execute();
+      return current.chatbox.execute();
     }
   });
   palette.addItem({ command, category });
@@ -262,7 +262,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
       if (!current) {
         return;
       }
-      current.console.execute(true);
+      current.chatbox.execute(true);
     }
   });
   palette.addItem({ command, category });
@@ -275,7 +275,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
       if (!current) {
         return;
       }
-      current.console.insertLinebreak();
+      current.chatbox.insertLinebreak();
     }
   });
   palette.addItem({ command, category });
@@ -288,7 +288,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
       if (!current) {
         return;
       }
-      let kernel = current.console.session.kernel;
+      let kernel = current.chatbox.session.kernel;
       if (kernel) {
         return kernel.interrupt();
       }
@@ -304,7 +304,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
       if (!current) {
         return;
       }
-      return current.console.session.restart();
+      return current.chatbox.session.restart();
     }
   });
   palette.addItem({ command, category });
@@ -318,12 +318,12 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
         return;
       }
       return showDialog({
-        title: 'Shutdown the console?',
+        title: 'Shutdown the chatbox?',
         body: `Are you sure you want to close "${current.title.label}"?`,
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
         if (result.accept) {
-          current.console.session.shutdown().then(() => {
+          current.chatbox.session.shutdown().then(() => {
             current.dispose();
           });
         } else {
@@ -338,11 +338,11 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
     execute: (args: JSONObject) => {
       let path = args['path'];
       tracker.find(widget => {
-        if (widget.console.session.path === path) {
+        if (widget.chatbox.session.path === path) {
           if (args['activate'] !== false) {
             tracker.activate(widget);
           }
-          widget.console.inject(args['code'] as string);
+          widget.chatbox.inject(args['code'] as string);
           return true;
         }
       });
@@ -357,7 +357,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
       if (!current) {
         return;
       }
-      return current.console.session.selectKernel();
+      return current.chatbox.session.selectKernel();
     }
   });
   palette.addItem({ command, category });

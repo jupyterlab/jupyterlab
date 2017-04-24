@@ -23,10 +23,10 @@ import {
 
 
 /**
- * The definition of a console history manager object.
+ * The definition of a chatbox history manager object.
  */
 export
-interface IConsoleHistory extends IDisposable {
+interface IChatboxHistory extends IDisposable {
   /**
    * The client session used by the foreign handler.
    */
@@ -43,24 +43,24 @@ interface IConsoleHistory extends IDisposable {
   readonly placeholder: string;
 
   /**
-   * Get the previous item in the console history.
+   * Get the previous item in the chatbox history.
    *
    * @param placeholder - The placeholder string that gets temporarily added
    * to the history only for the duration of one history session. If multiple
    * placeholders are sent within a session, only the first one is accepted.
    *
-   * @returns A Promise for console command text or `undefined` if unavailable.
+   * @returns A Promise for chatbox command text or `undefined` if unavailable.
    */
   back(placeholder: string): Promise<string>;
 
   /**
-   * Get the next item in the console history.
+   * Get the next item in the chatbox history.
    *
    * @param placeholder - The placeholder string that gets temporarily added
    * to the history only for the duration of one history session. If multiple
    * placeholders are sent within a session, only the first one is accepted.
    *
-   * @returns A Promise for console command text or `undefined` if unavailable.
+   * @returns A Promise for chatbox command text or `undefined` if unavailable.
    */
   forward(placeholder: string): Promise<string>;
 
@@ -72,7 +72,7 @@ interface IConsoleHistory extends IDisposable {
    * #### Notes
    * If the item being added is undefined or empty, it is ignored. If the item
    * being added is the same as the last item in history, it is ignored as well
-   * so that the console's history will consist of no contiguous repetitions.
+   * so that the chatbox's history will consist of no contiguous repetitions.
    */
   push(item: string): void;
 
@@ -84,14 +84,14 @@ interface IConsoleHistory extends IDisposable {
 
 
 /**
- * A console history manager object.
+ * A chatbox history manager object.
  */
 export
-class ConsoleHistory implements IConsoleHistory {
+class ChatboxHistory implements IChatboxHistory {
   /**
-   * Construct a new console history object.
+   * Construct a new chatbox history object.
    */
-  constructor(options: ConsoleHistory.IOptions) {
+  constructor(options: ChatboxHistory.IOptions) {
     this.session = options.session;
     this._handleKernel();
     this.session.kernelChanged.connect(this._handleKernel, this);
@@ -132,14 +132,14 @@ class ConsoleHistory implements IConsoleHistory {
   }
 
   /**
-   * Get whether the console history manager is disposed.
+   * Get whether the chatbox history manager is disposed.
    */
   get isDisposed(): boolean {
     return this._isDisposed;
   }
 
   /**
-   * Dispose of the resources held by the console history manager.
+   * Dispose of the resources held by the chatbox history manager.
    */
   dispose(): void {
     this._isDisposed = true;
@@ -148,13 +148,13 @@ class ConsoleHistory implements IConsoleHistory {
   }
 
   /**
-   * Get the previous item in the console history.
+   * Get the previous item in the chatbox history.
    *
    * @param placeholder - The placeholder string that gets temporarily added
    * to the history only for the duration of one history session. If multiple
    * placeholders are sent within a session, only the first one is accepted.
    *
-   * @returns A Promise for console command text or `undefined` if unavailable.
+   * @returns A Promise for chatbox command text or `undefined` if unavailable.
    */
   back(placeholder: string): Promise<string> {
     if (!this._hasSession) {
@@ -168,13 +168,13 @@ class ConsoleHistory implements IConsoleHistory {
   }
 
   /**
-   * Get the next item in the console history.
+   * Get the next item in the chatbox history.
    *
    * @param placeholder - The placeholder string that gets temporarily added
    * to the history only for the duration of one history session. If multiple
    * placeholders are sent within a session, only the first one is accepted.
    *
-   * @returns A Promise for console command text or `undefined` if unavailable.
+   * @returns A Promise for chatbox command text or `undefined` if unavailable.
    */
   forward(placeholder: string): Promise<string> {
     if (!this._hasSession) {
@@ -195,7 +195,7 @@ class ConsoleHistory implements IConsoleHistory {
    * #### Notes
    * If the item being added is undefined or empty, it is ignored. If the item
    * being added is the same as the last item in history, it is ignored as well
-   * so that the console's history will consist of no contiguous repetitions.
+   * so that the chatbox's history will consist of no contiguous repetitions.
    */
   push(item: string): void {
     if (item && item !== this._history[this._history.length - 1]) {
@@ -309,12 +309,12 @@ class ConsoleHistory implements IConsoleHistory {
 
 
 /**
- * A namespace for ConsoleHistory statics.
+ * A namespace for ChatboxHistory statics.
  */
 export
-namespace ConsoleHistory {
+namespace ChatboxHistory {
   /**
-   * The initialization options for a console history object.
+   * The initialization options for a chatbox history object.
    */
   export
   interface IOptions {

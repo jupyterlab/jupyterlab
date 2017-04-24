@@ -56,39 +56,39 @@ import {
 } from './foreign';
 
 import {
-  ConsoleHistory, IConsoleHistory
+  ChatboxHistory, IChatboxHistory
 } from './history';
 
 
 /**
- * The class name added to console widgets.
+ * The class name added to chatbox widgets.
  */
-const CONSOLE_CLASS = 'jp-CodeConsole';
+const CONSOLE_CLASS = 'jp-CodeChatbox';
 
 /**
- * The class name added to the console banner.
+ * The class name added to the chatbox banner.
  */
-const BANNER_CLASS = 'jp-CodeConsole-banner';
+const BANNER_CLASS = 'jp-CodeChatbox-banner';
 
 /**
  * The class name of a cell whose input originated from a foreign session.
  */
-const FOREIGN_CELL_CLASS = 'jp-CodeConsole-foreignCell';
+const FOREIGN_CELL_CLASS = 'jp-CodeChatbox-foreignCell';
 
 /**
  * The class name of the active prompt
  */
-const PROMPT_CLASS = 'jp-CodeConsole-prompt';
+const PROMPT_CLASS = 'jp-CodeChatbox-prompt';
 
 /**
  * The class name of the panel that holds cell content.
  */
-const CONTENT_CLASS = 'jp-CodeConsole-content';
+const CONTENT_CLASS = 'jp-CodeChatbox-content';
 
 /**
  * The class name of the panel that holds prompts.
  */
-const INPUT_CLASS = 'jp-CodeConsole-input';
+const INPUT_CLASS = 'jp-CodeChatbox-input';
 
 /**
  * The timeout in ms for execution requests to the kernel.
@@ -97,18 +97,18 @@ const EXECUTION_TIMEOUT = 250;
 
 
 /**
- * A widget containing a Jupyter console.
+ * A widget containing a Jupyter chatbox.
  *
  * #### Notes
- * The CodeConsole class is intended to be used within a ConsolePanel
+ * The CodeChatbox class is intended to be used within a ChatboxPanel
  * instance. Under most circumstances, it is not instantiated by user code.
  */
 export
-class CodeConsole extends Widget {
+class CodeChatbox extends Widget {
   /**
-   * Construct a console widget.
+   * Construct a chatbox widget.
    */
-  constructor(options: CodeConsole.IOptions) {
+  constructor(options: CodeChatbox.IOptions) {
     super();
     this.addClass(CONSOLE_CLASS);
 
@@ -120,7 +120,7 @@ class CodeConsole extends Widget {
 
     let factory = this.contentFactory = options.contentFactory;
     let modelFactory = this.modelFactory = (
-      options.modelFactory || CodeConsole.defaultModelFactory
+      options.modelFactory || CodeChatbox.defaultModelFactory
     );
     this.rendermime = options.rendermime;
     this.session = options.session;
@@ -152,7 +152,7 @@ class CodeConsole extends Widget {
       cellFactory: () => this._createForeignCell(),
     });
 
-    this._history = factory.createConsoleHistory({
+    this._history = factory.createChatboxHistory({
       session: this.session
     });
 
@@ -161,7 +161,7 @@ class CodeConsole extends Widget {
   }
 
   /**
-   * A signal emitted when the console finished executing its prompt.
+   * A signal emitted when the chatbox finished executing its prompt.
    */
   get executed(): ISignal<this, Date> {
     return this._executed;
@@ -175,42 +175,42 @@ class CodeConsole extends Widget {
   }
 
   /**
-   * The content factory used by the console.
+   * The content factory used by the chatbox.
    */
-  readonly contentFactory: CodeConsole.IContentFactory;
+  readonly contentFactory: CodeChatbox.IContentFactory;
 
   /**
-   * The model factory for the console widget.
+   * The model factory for the chatbox widget.
    */
-  readonly modelFactory: CodeConsole.IModelFactory;
+  readonly modelFactory: CodeChatbox.IModelFactory;
 
   /**
-   * The rendermime instance used by the console.
+   * The rendermime instance used by the chatbox.
    */
   readonly rendermime: IRenderMime;
 
   /**
-   * The client session used by the console.
+   * The client session used by the chatbox.
    */
   readonly session: IClientSession;
 
   /**
-   * The console banner widget.
+   * The chatbox banner widget.
    */
   readonly banner: RawCellWidget;
 
   /**
-   * The list of content cells in the console.
+   * The list of content cells in the chatbox.
    *
    * #### Notes
-   * This list does not include the banner or the prompt for a console.
+   * This list does not include the banner or the prompt for a chatbox.
    */
   get cells(): IObservableVector<BaseCellWidget> {
     return this._cells;
   }
 
   /*
-   * The console input prompt.
+   * The chatbox input prompt.
    */
   get prompt(): CodeCellWidget | null {
     let inputLayout = (this._input.layout as PanelLayout);
@@ -224,7 +224,7 @@ class CodeConsole extends Widget {
    *
    * #### Notes
    * This method is meant for use by outside classes that want to inject content
-   * into a console. It is distinct from the `inject` method in that it requires
+   * into a chatbox. It is distinct from the `inject` method in that it requires
    * rendered code cell widgets and does not execute them.
    */
   addCell(cell: BaseCellWidget) {
@@ -305,7 +305,7 @@ class CodeConsole extends Widget {
   }
 
   /**
-   * Inject arbitrary code for the console to execute immediately.
+   * Inject arbitrary code for the chatbox to execute immediately.
    *
    * @param code - The code contents of the cell being injected.
    *
@@ -492,7 +492,7 @@ class CodeConsole extends Widget {
   }
 
   /**
-   * Update the console based on the kernel info.
+   * Update the chatbox based on the kernel info.
    */
   private _handleInfo(info: KernelMessage.IInfoReply): void {
     let layout = this._content.layout as PanelLayout;
@@ -595,7 +595,7 @@ class CodeConsole extends Widget {
   private _cells: IObservableVector<BaseCellWidget> = null;
   private _content: Panel = null;
   private _foreignHandler: ForeignHandler =  null;
-  private _history: IConsoleHistory = null;
+  private _history: IChatboxHistory = null;
   private _input: Panel = null;
   private _mimetype = 'text/x-ipython';
   private _executed = new Signal<this, Date>(this);
@@ -604,32 +604,32 @@ class CodeConsole extends Widget {
 
 
 /**
- * A namespace for CodeConsole statics.
+ * A namespace for CodeChatbox statics.
  */
 export
-namespace CodeConsole {
+namespace CodeChatbox {
   /**
-   * The initialization options for a console widget.
+   * The initialization options for a chatbox widget.
    */
   export
   interface IOptions {
     /**
-     * The content factory for the console widget.
+     * The content factory for the chatbox widget.
      */
     contentFactory: IContentFactory;
 
     /**
-     * The model factory for the console widget.
+     * The model factory for the chatbox widget.
      */
     modelFactory?: IModelFactory;
 
     /**
-     * The mime renderer for the console widget.
+     * The mime renderer for the chatbox widget.
      */
     rendermime: IRenderMime;
 
     /**
-     * The client session for the console widget.
+     * The client session for the chatbox widget.
      */
     session: IClientSession;
 
@@ -640,7 +640,7 @@ namespace CodeConsole {
   }
 
   /**
-   * A content factory for console children.
+   * A content factory for chatbox children.
    */
   export
   interface IContentFactory {
@@ -660,29 +660,29 @@ namespace CodeConsole {
     readonly rawCellContentFactory: BaseCellWidget.IContentFactory;
 
     /**
-     * The history manager for a console widget.
+     * The history manager for a chatbox widget.
      */
-    createConsoleHistory(options: ConsoleHistory.IOptions): IConsoleHistory;
+    createChatboxHistory(options: ChatboxHistory.IOptions): IChatboxHistory;
 
     /**
-     * The foreign handler for a console widget.
+     * The foreign handler for a chatbox widget.
      */
     createForeignHandler(options: ForeignHandler.IOptions): ForeignHandler;
 
     /**
      * Create a new banner widget.
      */
-    createBanner(options: RawCellWidget.IOptions, parent: CodeConsole): RawCellWidget;
+    createBanner(options: RawCellWidget.IOptions, parent: CodeChatbox): RawCellWidget;
 
     /**
      * Create a new prompt widget.
      */
-    createPrompt(options: CodeCellWidget.IOptions, parent: CodeConsole): CodeCellWidget;
+    createPrompt(options: CodeCellWidget.IOptions, parent: CodeChatbox): CodeCellWidget;
 
     /**
      * Create a code cell whose input originated from a foreign session.
      */
-    createForeignCell(options: CodeCellWidget.IOptions, parent: CodeConsole): CodeCellWidget;
+    createForeignCell(options: CodeCellWidget.IOptions, parent: CodeChatbox): CodeCellWidget;
   }
 
   /**
@@ -725,14 +725,14 @@ namespace CodeConsole {
     readonly rawCellContentFactory: BaseCellWidget.IContentFactory;
 
     /**
-     * The history manager for a console widget.
+     * The history manager for a chatbox widget.
      */
-    createConsoleHistory(options: ConsoleHistory.IOptions): IConsoleHistory {
-      return new ConsoleHistory(options);
+    createChatboxHistory(options: ChatboxHistory.IOptions): IChatboxHistory {
+      return new ChatboxHistory(options);
     }
 
     /**
-     * The foreign handler for a console widget.
+     * The foreign handler for a chatbox widget.
      */
     createForeignHandler(options: ForeignHandler.IOptions):
     ForeignHandler {
@@ -741,21 +741,21 @@ namespace CodeConsole {
     /**
      * Create a new banner widget.
      */
-    createBanner(options: RawCellWidget.IOptions, parent: CodeConsole): RawCellWidget {
+    createBanner(options: RawCellWidget.IOptions, parent: CodeChatbox): RawCellWidget {
       return new RawCellWidget(options);
     }
 
     /**
      * Create a new prompt widget.
      */
-    createPrompt(options: CodeCellWidget.IOptions, parent: CodeConsole): CodeCellWidget {
+    createPrompt(options: CodeCellWidget.IOptions, parent: CodeChatbox): CodeCellWidget {
       return new CodeCellWidget(options);
     }
 
     /**
      * Create a new code cell widget for an input from a foreign session.
      */
-    createForeignCell(options: CodeCellWidget.IOptions, parent: CodeConsole): CodeCellWidget {
+    createForeignCell(options: CodeCellWidget.IOptions, parent: CodeChatbox): CodeCellWidget {
       return new CodeCellWidget(options);
     }
   }
@@ -787,7 +787,7 @@ namespace CodeConsole {
   }
 
   /**
-   * A model factory for a console widget.
+   * A model factory for a chatbox widget.
    */
   export
   interface IModelFactory {
@@ -886,7 +886,7 @@ namespace CodeConsole {
 
 
 /**
- * A namespace for console widget private data.
+ * A namespace for chatbox widget private data.
  */
 namespace Private {
   /**
