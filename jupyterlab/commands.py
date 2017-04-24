@@ -14,6 +14,7 @@ import shutil
 import sys
 import tarfile
 from jupyter_core.paths import ENV_JUPYTER_PATH, ENV_CONFIG_PATH
+from ._version import __version__
 
 
 if sys.platform == 'win32':
@@ -207,6 +208,7 @@ def _ensure_package(config):
     for key in config['linked_extensions']:
         data['jupyterlab']['extensions'].append(key)
     data['scripts']['build'] = 'webpack'
+    data['jupyterlab']['version'] = __version__
     with open(pkg_path, 'w') as fid:
         json.dump(data, fid, indent=4)
 
