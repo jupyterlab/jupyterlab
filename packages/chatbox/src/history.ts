@@ -2,20 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  KernelMessage
-} from '@jupyterlab/services';
-
-import {
   IDisposable
 } from '@phosphor/disposable';
 
 import {
   Signal
 } from '@phosphor/signaling';
-
-import {
-  IClientSession
-} from '@jupyterlab/apputils';
 
 import {
   CodeEditor
@@ -27,11 +19,6 @@ import {
  */
 export
 interface IChatboxHistory extends IDisposable {
-  /**
-   * The client session used by the foreign handler.
-   */
-  readonly session: IClientSession;
-
   /**
    * The current editor used by the history widget.
    */
@@ -88,20 +75,6 @@ interface IChatboxHistory extends IDisposable {
  */
 export
 class ChatboxHistory implements IChatboxHistory {
-  /**
-   * Construct a new chatbox history object.
-   */
-  constructor(options: ChatboxHistory.IOptions) {
-    this.session = options.session;
-    this._handleKernel();
-    this.session.kernelChanged.connect(this._handleKernel, this);
-  }
-
-  /**
-   * The client session used by the foreign handler.
-   */
-  readonly session: IClientSession;
-
   /**
    * The current editor used by the history manager.
    */
@@ -214,30 +187,6 @@ class ChatboxHistory implements IChatboxHistory {
   }
 
   /**
-   * Populate the history collection on history reply from a kernel.
-   *
-   * @param value The kernel message history reply.
-   *
-   * #### Notes
-   * History entries have the shape:
-   * [session: number, line: number, input: string]
-   * Contiguous duplicates are stripped out of the API response.
-   */
-  protected onHistory(value: KernelMessage.IHistoryReplyMsg): void {
-    this._history.length = 0;
-    let last = '';
-    let current = '';
-    for (let i = 0; i < value.content.history.length; i++) {
-      current = (value.content.history[i] as string[])[2];
-      if (current !== last) {
-        this._history.push(last = current);
-      }
-    }
-    // Reset the history navigation cursor back to the bottom.
-    this._cursor = this._history.length;
-  }
-
-  /**
    * Handle a text change signal from the editor.
    */
   protected onTextChange(): void {
@@ -283,21 +232,6 @@ class ChatboxHistory implements IChatboxHistory {
     }
   }
 
-  /**
-   * Handle the current kernel changing.
-   */
-  private _handleKernel(): void {
-    let kernel = this.session.kernel;
-    if (!kernel) {
-      this._history.length = 0;
-      return;
-    }
-
-    kernel.requestHistory(Private.initialRequest).then(v => {
-      this.onHistory(v);
-    });
-  }
-
   private _cursor = 0;
   private _hasSession = false;
   private _history: string[] = [];
@@ -305,36 +239,4 @@ class ChatboxHistory implements IChatboxHistory {
   private _setByHistory = false;
   private _isDisposed = false;
   private _editor: CodeEditor.IEditor = null;
-}
-
-
-/**
- * A namespace for ChatboxHistory statics.
- */
-export
-namespace ChatboxHistory {
-  /**
-   * The initialization options for a chatbox history object.
-   */
-  export
-  interface IOptions {
-    /**
-     * The client session used by the foreign handler.
-     */
-    session: IClientSession;
-  }
-}
-
-
-/**
- * A namespace for private data.
- */
-namespace Private {
-  export
-  const initialRequest: KernelMessage.IHistoryRequest = {
-    output: false,
-    raw: true,
-    hist_access_type: 'tail',
-    n: 500
-  };
 }

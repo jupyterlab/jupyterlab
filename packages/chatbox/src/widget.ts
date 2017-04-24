@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  KernelMessage
-} from '@jupyterlab/services';
-
-import {
   map, toArray
 } from '@phosphor/algorithm';
 
@@ -26,27 +22,18 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IClientSession
-} from '@jupyterlab/apputils';
-
-import {
   IEditorMimeTypeService, CodeEditor
 } from '@jupyterlab/codeeditor';
 
 import {
-  BaseCellWidget, CodeCellWidget, RawCellWidget,
-  ICodeCellModel, IRawCellModel, CellModel,
-  RawCellModel, CodeCellModel, IMarkdownCellModel,
+  BaseCellWidget,
+  CellModel, IMarkdownCellModel,
   MarkdownCellModel, MarkdownCellWidget
 } from '@jupyterlab/cells';
 
 import {
   nbformat, IObservableVector, ObservableVector
 } from '@jupyterlab/coreutils';
-
-import {
-  OutputAreaWidget
-} from '@jupyterlab/outputarea';
 
 import {
   IRenderMime
@@ -77,11 +64,6 @@ const CONTENT_CLASS = 'jp-Chatbox-content';
  */
 const INPUT_CLASS = 'jp-Chatbox-input';
 
-/**
- * The timeout in ms for execution requests to the kernel.
- */
-const EXECUTION_TIMEOUT = 250;
-
 
 /**
  * A widget containing a Jupyter chatbox.
@@ -110,7 +92,6 @@ class Chatbox extends Widget {
       options.modelFactory || Chatbox.defaultModelFactory
     );
     this.rendermime = options.rendermime;
-    this.session = options.session;
     this._mimeTypeService = options.mimeTypeService;
 
     // Add top-level CSS classes.
@@ -121,12 +102,7 @@ class Chatbox extends Widget {
     layout.addWidget(this._content);
     layout.addWidget(this._input);
 
-    this._history = factory.createChatboxHistory({
-      session: this.session
-    });
-
-    this._onKernelChanged();
-    this.session.kernelChanged.connect(this._onKernelChanged, this);
+    this._history = factory.createChatboxHistory();
   }
 
   /**
@@ -157,11 +133,6 @@ class Chatbox extends Widget {
    * The rendermime instance used by the chatbox.
    */
   readonly rendermime: IRenderMime;
-
-  /**
-   * The client session used by the chatbox.
-   */
-  readonly session: IClientSession;
 
   /**
    * The list of content cells in the chatbox.
@@ -235,31 +206,16 @@ class Chatbox extends Widget {
    * should wait for the API to determine whether code being submitted is
    * incomplete before attempting submission anyway. The default value is `250`.
    */
-  execute(force = false, timeout = EXECUTION_TIMEOUT): Promise<void> {
-    if (this.session.status === 'dead') {
-      return Promise.resolve(void 0);
-    }
-
+  execute(): void {
     let prompt = this.prompt;
-    prompt.model.trusted = true;
 
-    if (force) {
-      // Create a new prompt before kernel execution to allow typeahead.
+    if (prompt.model.value.text.trim() !== '') {
       this.newPrompt();
-      return this._execute(prompt);
+      prompt.model.trusted = true;
+      this._execute(prompt);
+    } else {
+      return;
     }
-
-    // Check whether we should execute.
-    return this._shouldExecute(timeout).then(should => {
-      if (this.isDisposed) {
-        return;
-      }
-      if (should) {
-        // Create a new prompt before kernel execution to allow typeahead.
-        this.newPrompt();
-        return this._execute(prompt);
-      }
-    });
   }
 
   /**
@@ -401,30 +357,17 @@ class Chatbox extends Widget {
   /**
    * Execute the code in the current prompt.
    */
-  private _execute(cell: MarkdownCellWidget): Promise<void> {
+  private _execute(cell: MarkdownCellWidget): void {
     this._history.push(cell.model.value.text);
     cell.model.contentChanged.connect(this.update, this);
     cell.rendered = true;
-    return Promise.resolve(void 0);
-  }
-
-  /**
-   * Update the chatbox based on the kernel info.
-   */
-  private _handleInfo(info: KernelMessage.IInfoReply): void {
-    let lang = info.language_info as nbformat.ILanguageInfoMetadata;
-    this._mimetype = this._mimeTypeService.getMimeTypeByLanguage(lang);
-    if (this.prompt) {
-      this.prompt.model.mimeType = this._mimetype;
-    }
   }
 
   /**
    * Create the options used to initialize markdown cell widget.
    */
   private _createMarkdownCellOptions(): MarkdownCellWidget.IOptions {
-    let factory = this.contentFactory;
-    let contentFactory = factory.codeCellContentFactory;
+    let contentFactory = this.contentFactory.markdownCellContentFactory;
     let modelFactory = this.modelFactory;
     let model = modelFactory.createMarkdownCell({ });
     let rendermime = this.rendermime;
@@ -441,55 +384,11 @@ class Chatbox extends Widget {
   }
 
   /**
-   * Test whether we should execute the prompt.
-   */
-  private _shouldExecute(timeout: number): Promise<boolean> {
-    let prompt = this.prompt;
-    let model = prompt.model;
-    let code = model.value.text + '\n';
-    return new Promise<boolean>((resolve, reject) => {
-      let timer = setTimeout(() => { resolve(true); }, timeout);
-      this.session.kernel.requestIsComplete({ code }).then(isComplete => {
-        clearTimeout(timer);
-        if (this.isDisposed) {
-          resolve(false);
-        }
-        if (isComplete.content.status !== 'incomplete') {
-          resolve(true);
-          return;
-        }
-        model.value.text = code + isComplete.content.indent;
-        let editor = prompt.editor;
-        let pos = editor.getPositionAt(model.value.text.length);
-        editor.setCursorPosition(pos);
-        resolve(false);
-      }).catch(() => { resolve(true); });
-    });
-  }
-
-  /**
    * Handle a keydown event on an editor.
    */
   private _onEditorKeydown(editor: CodeEditor.IEditor, event: KeyboardEvent) {
     // Suppress "Enter" events.
     return event.keyCode === 13;
-  }
-
-  /**
-   * Handle a change to the kernel.
-   */
-  private _onKernelChanged(): void {
-    this.clear();
-    let kernel = this.session.kernel;
-    if (!kernel) {
-      return;
-    }
-    kernel.ready.then(() => {
-      if (this.isDisposed) {
-        return;
-      }
-      this._handleInfo(kernel.info);
-    });
   }
 
   private _mimeTypeService: IEditorMimeTypeService;
@@ -529,11 +428,6 @@ namespace Chatbox {
     rendermime: IRenderMime;
 
     /**
-     * The client session for the chatbox widget.
-     */
-    session: IClientSession;
-
-    /**
      * The service used to look up mime types.
      */
     mimeTypeService: IEditorMimeTypeService;
@@ -550,19 +444,14 @@ namespace Chatbox {
     readonly editorFactory: CodeEditor.Factory;
 
     /**
-     * The factory for code cell widget content.
+     * The factory for a markdown cell widget.
      */
-    readonly codeCellContentFactory: CodeCellWidget.IContentFactory;
-
-    /**
-     * The factory for raw cell widget content.
-     */
-    readonly rawCellContentFactory: BaseCellWidget.IContentFactory;
+    readonly markdownCellContentFactory: BaseCellWidget.IContentFactory;
 
     /**
      * The history manager for a chatbox widget.
      */
-    createChatboxHistory(options: ChatboxHistory.IOptions): IChatboxHistory;
+    createChatboxHistory(): IChatboxHistory;
 
     /**
      * Create a new prompt widget.
@@ -580,19 +469,11 @@ namespace Chatbox {
      * Create a new content factory.
      */
     constructor(options: IContentFactoryOptions) {
-      let editorFactory = options.editorFactory;
-      let outputAreaContentFactory = (options.outputAreaContentFactory ||
-        OutputAreaWidget.defaultContentFactory
-      );
-      this.codeCellContentFactory = (options.codeCellContentFactory ||
-        new CodeCellWidget.ContentFactory({
-          editorFactory,
-          outputAreaContentFactory
-        })
-      );
-      this.rawCellContentFactory = (options.rawCellContentFactory ||
-        new RawCellWidget.ContentFactory({ editorFactory })
-      );
+      this.editorFactory = options.editorFactory;
+
+      this.markdownCellContentFactory = new MarkdownCellWidget.ContentFactory({
+        editorFactory: this.editorFactory,
+      });
     }
 
     /**
@@ -601,20 +482,15 @@ namespace Chatbox {
     readonly editorFactory: CodeEditor.Factory;
 
     /**
-     * The factory for code cell widget content.
+     * The factory for a markdown cell widget.
      */
-    readonly codeCellContentFactory: CodeCellWidget.IContentFactory;
-
-    /**
-     * The factory for raw cell widget content.
-     */
-    readonly rawCellContentFactory: BaseCellWidget.IContentFactory;
+    readonly markdownCellContentFactory: BaseCellWidget.IContentFactory;
 
     /**
      * The history manager for a chatbox widget.
      */
-    createChatboxHistory(options: ChatboxHistory.IOptions): IChatboxHistory {
-      return new ChatboxHistory(options);
+    createChatboxHistory(): IChatboxHistory {
+      return new ChatboxHistory();
     }
 
     /**
@@ -633,22 +509,6 @@ namespace Chatbox {
      * The editor factory.
      */
     editorFactory: CodeEditor.Factory;
-
-    /**
-     * The factory for output area content.
-     */
-    outputAreaContentFactory?: OutputAreaWidget.IContentFactory;
-
-    /**
-     * The factory for code cell widget content.  If given, this will
-     * take precedence over the `outputAreaContentFactory`.
-     */
-    codeCellContentFactory?: CodeCellWidget.IContentFactory;
-
-    /**
-     * The factory for raw cell widget content.
-     */
-    rawCellContentFactory?: BaseCellWidget.IContentFactory;
   }
 
   /**
@@ -656,21 +516,6 @@ namespace Chatbox {
    */
   export
   interface IModelFactory {
-   /**
-    * The factory for code cell content.
-    */
-    readonly codeCellContentFactory: CodeCellModel.IContentFactory;
-
-    /**
-     * Create a new code cell.
-     *
-     * @param options - The options used to create the cell.
-     *
-     * @returns A new code cell. If a source cell is provided, the
-     *   new cell will be intialized with the data from the source.
-     */
-    createCodeCell(options: CodeCellModel.IOptions): ICodeCellModel;
-
     /**
      * Create a new markdown cell.
      *
@@ -680,17 +525,6 @@ namespace Chatbox {
      *   new cell will be intialized with the data from the source.
      */
     createMarkdownCell(options: CellModel.IOptions): IMarkdownCellModel;
-
-
-    /**
-     * Create a new raw cell.
-     *
-     * @param options - The options used to create the cell.
-     *
-     * @returns A new raw cell. If a source cell is provided, the
-     *   new cell will be intialized with the data from the source.
-     */
-    createRawCell(options: CellModel.IOptions): IRawCellModel;
   }
 
   /**
@@ -698,37 +532,6 @@ namespace Chatbox {
    */
   export
   class ModelFactory {
-    /**
-     * Create a new cell model factory.
-     */
-    constructor(options: IModelFactoryOptions) {
-      this.codeCellContentFactory = (options.codeCellContentFactory ||
-        CodeCellModel.defaultContentFactory
-      );
-    }
-
-    /**
-     * The factory for output area models.
-     */
-    readonly codeCellContentFactory: CodeCellModel.IContentFactory;
-
-    /**
-     * Create a new code cell.
-     *
-     * @param source - The data to use for the original source data.
-     *
-     * @returns A new code cell. If a source cell is provided, the
-     *   new cell will be intialized with the data from the source.
-     *   If the contentFactory is not provided, the instance
-     *   `codeCellContentFactory` will be used.
-     */
-    createCodeCell(options: CodeCellModel.IOptions): ICodeCellModel {
-      if (!options.contentFactory) {
-        options.contentFactory = this.codeCellContentFactory;
-      }
-      return new CodeCellModel(options);
-    }
-
     /**
      * Create a new markdown cell.
      *
@@ -740,36 +543,13 @@ namespace Chatbox {
     createMarkdownCell(options: CellModel.IOptions): IMarkdownCellModel {
       return new MarkdownCellModel(options);
     }
-
-    /**
-     * Create a new raw cell.
-     *
-     * @param source - The data to use for the original source data.
-     *
-     * @returns A new raw cell. If a source cell is provided, the
-     *   new cell will be intialized with the data from the source.
-     */
-    createRawCell(options: CellModel.IOptions): IRawCellModel {
-     return new RawCellModel(options);
-    }
-  }
-
-  /**
-   * The options used to initialize a `ModelFactory`.
-   */
-  export
-  interface IModelFactoryOptions {
-    /**
-     * The factory for output area models.
-     */
-    codeCellContentFactory?: CodeCellModel.IContentFactory;
   }
 
   /**
    * The default `ModelFactory` instance.
    */
   export
-  const defaultModelFactory = new ModelFactory({});
+  const defaultModelFactory = new ModelFactory();
 }
 
 

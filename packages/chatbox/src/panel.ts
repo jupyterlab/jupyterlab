@@ -2,32 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ClientSession, IClientSession
-} from '@jupyterlab/apputils';
-
-import {
-  BaseCellWidget, CodeCellWidget
-} from '@jupyterlab/cells';
-
-import {
   IEditorMimeTypeService, CodeEditor
 } from '@jupyterlab/codeeditor';
 
 import {
-  PathExt, Time, uuid
+  uuid
 } from '@jupyterlab/coreutils';
 
 import {
-  OutputAreaWidget
-} from '@jupyterlab/outputarea';
-
-import {
-  IRenderMime, RenderMime
+  IRenderMime
 } from '@jupyterlab/rendermime';
-
-import {
-  ServiceManager
-} from '@jupyterlab/services';
 
 import {
   Token
@@ -64,7 +48,7 @@ class ChatboxPanel extends Panel {
     super();
     this.addClass(PANEL_CLASS);
     let {
-      rendermime, mimeTypeService, path, basePath, name, manager, modelFactory
+      rendermime, mimeTypeService, path, basePath, modelFactory
     } = options;
     let factory = options.contentFactory;
     let contentFactory = factory.chatboxContentFactory;
@@ -73,33 +57,12 @@ class ChatboxPanel extends Panel {
       path = `${basePath || ''}/chatbox-${count}-${uuid()}`;
     }
 
-    let session = this._session = new ClientSession({
-      manager: manager.sessions,
-      path,
-      name: name || `Chatbox ${count}`,
-      type: 'chatbox',
-      kernelPreference: options.kernelPreference
-    });
-
-    rendermime.resolver = new RenderMime.UrlResolver({
-      session,
-      contents: manager.contents
-    });
-
     this.chatbox = factory.createChatbox({
-      rendermime, session, mimeTypeService, contentFactory, modelFactory
+      rendermime, mimeTypeService, contentFactory, modelFactory
     });
     this.addWidget(this.chatbox);
 
-    session.ready.then(() => {
-      this._connected = new Date();
-      this._updateTitle();
-    });
-
-    this._manager = manager;
     this.chatbox.executed.connect(this._onExecuted, this);
-    session.kernelChanged.connect(this._updateTitle, this);
-    session.propertyChanged.connect(this._updateTitle, this);
 
     this.title.icon = 'jp-ImageChatbox';
     this.title.closable = true;
@@ -112,25 +75,11 @@ class ChatboxPanel extends Panel {
   readonly chatbox: Chatbox;
 
   /**
-   * The session used by the panel.
-   */
-  get session(): IClientSession {
-    return this._session;
-  }
-
-  /**
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
     this.chatbox.dispose();
     super.dispose();
-  }
-
-  /**
-   * Handle `'after-attach'` messages.
-   */
-  protected onAfterAttach(msg: Message): void {
-    this._session.initialize();
   }
 
   /**
@@ -153,20 +102,9 @@ class ChatboxPanel extends Panel {
    */
   private _onExecuted(sender: Chatbox, args: Date) {
     this._executed = args;
-    this._updateTitle();
   }
 
-  /**
-   * Update the chatbox panel title.
-   */
-  private _updateTitle(): void {
-    Private.updateTitle(this, this._connected, this._executed);
-  }
-
-  private _manager: ServiceManager.IManager;
   private _executed: Date = null;
-  private _connected: Date = null;
-  private _session: ClientSession;
 }
 
 
@@ -191,11 +129,6 @@ namespace ChatboxPanel {
     contentFactory: IContentFactory;
 
     /**
-     * The service manager used by the panel.
-     */
-    manager: ServiceManager.IManager;
-
-    /**
      * The path of an existing chatbox.
      */
     path?: string;
@@ -209,11 +142,6 @@ namespace ChatboxPanel {
      * The name of the chatbox.
      */
     name?: string;
-
-    /**
-     * A kernel preference.
-     */
-    kernelPreference?: IClientSession.IKernelPreference;
 
     /**
      * The model factory for the chatbox widget.
@@ -259,10 +187,7 @@ namespace ChatboxPanel {
       this.editorFactory = options.editorFactory;
       this.chatboxContentFactory = (options.chatboxContentFactory ||
         new Chatbox.ContentFactory({
-          editorFactory: this.editorFactory,
-          outputAreaContentFactory: options.outputAreaContentFactory,
-          codeCellContentFactory: options.codeCellContentFactory,
-          rawCellContentFactory: options.rawCellContentFactory
+          editorFactory: this.editorFactory
         })
       );
     }
@@ -302,22 +227,6 @@ namespace ChatboxPanel {
       editorFactory: CodeEditor.Factory;
 
       /**
-       * The factory for output area content.
-       */
-      outputAreaContentFactory?: OutputAreaWidget.IContentFactory;
-
-      /**
-       * The factory for code cell widget content.  If given, this will
-       * take precedence over the `outputAreaContentFactory`.
-       */
-      codeCellContentFactory?: CodeCellWidget.IContentFactory;
-
-      /**
-       * The factory for raw cell widget content.
-       */
-      rawCellContentFactory?: BaseCellWidget.IContentFactory;
-
-      /**
        * The factory for chatbox widget content.  If given, this will
        * take precedence over the output area and cell factories.
        */
@@ -344,25 +253,4 @@ namespace Private {
    */
   export
   let count = 1;
-
-  /**
-   * Update the title of a chatbox panel.
-   */
-  export
-  function updateTitle(panel: ChatboxPanel, connected: Date | null, executed: Date | null) {
-    let session = panel.chatbox.session;
-    let caption = (
-      `Name: ${session.name}\n` +
-      `Directory: ${PathExt.dirname(session.path)}\n` +
-      `Kernel: ${session.kernelDisplayName}`
-    );
-    if (connected) {
-      caption += `\nConnected: ${Time.format(connected.toISOString())}`;
-    }
-    if (executed) {
-      caption += `\nLast Execution: ${Time.format(executed.toISOString())}`;
-    }
-    panel.title.label = session.name;
-    panel.title.caption = caption;
-  }
 }

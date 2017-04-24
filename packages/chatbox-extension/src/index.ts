@@ -2,14 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IServiceManager
-} from '@jupyterlab/services';
-
-import {
-  find
-} from '@phosphor/algorithm';
-
-import {
   JSONObject
 } from '@phosphor/coreutils';
 
@@ -22,8 +14,8 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, InstanceTracker, ILayoutRestorer,
-  IMainMenu, showDialog
+  ICommandPalette, InstanceTracker, ILayoutRestorer,
+  IMainMenu
 } from '@jupyterlab/apputils';
 
 import {
@@ -58,21 +50,6 @@ namespace CommandIDs {
 
   export
   const linebreak = 'chatbox:linebreak';
-
-  export
-  const interrupt = 'chatbox:interrupt-kernel';
-
-  export
-  const restart = 'chatbox:restart-kernel';
-
-  export
-  const closeAndShutdown = 'chatbox:close-and-shutdown';
-
-  export
-  const open = 'chatbox:open';
-
-  export
-  const switchKernel = 'chatbox:switch-kernel';
 };
 
 /**
@@ -83,7 +60,6 @@ const trackerPlugin: JupyterLabPlugin<IChatboxTracker> = {
   id: 'jupyter.services.chatbox-tracker',
   provides: IChatboxTracker,
   requires: [
-    IServiceManager,
     IRenderMime,
     IMainMenu,
     ICommandPalette,
@@ -124,7 +100,7 @@ export default plugins;
 /**
  * Activate the chatbox extension.
  */
-function activateChatbox(app: JupyterLab, manager: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: ChatboxPanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): IChatboxTracker {
+function activateChatbox(app: JupyterLab, rendermime: IRenderMime, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: ChatboxPanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): IChatboxTracker {
   let { commands, shell } = app;
   let category = 'Chatbox';
   let command: string;
@@ -134,17 +110,6 @@ function activateChatbox(app: JupyterLab, manager: IServiceManager, rendermime: 
   const tracker = new InstanceTracker<ChatboxPanel>({
     namespace: 'chatbox',
     shell
-  });
-
-  // Handle state restoration.
-  restorer.restore(tracker, {
-    command: CommandIDs.open,
-    args: panel => ({
-      path: panel.chatbox.session.path,
-      name: panel.chatbox.session.name
-    }),
-    name: panel => panel.chatbox.session.path,
-    when: manager.ready
   });
 
   // Add a launcher item if the launcher is available.
@@ -161,53 +126,28 @@ function activateChatbox(app: JupyterLab, manager: IServiceManager, rendermime: 
   /**
    * Create a chatbox for a given path.
    */
-  function createChatbox(options: Partial<ChatboxPanel.IOptions>): Promise<void> {
-    return manager.ready.then(() => {
-      let panel = new ChatboxPanel({
-        manager,
-        rendermime: rendermime.clone(),
-        contentFactory,
-        mimeTypeService: editorServices.mimeTypeService,
-        ...options
-      });
-
-      // Add the chatbox panel to the tracker.
-      tracker.add(panel);
-      shell.addToLeftArea(panel);
-      tracker.activate(panel);
+  function createChatbox(options: Partial<ChatboxPanel.IOptions>): void {
+    let panel = new ChatboxPanel({
+      rendermime: rendermime.clone(),
+      contentFactory,
+      mimeTypeService: editorServices.mimeTypeService,
+      ...options
     });
-  }
 
-  command = CommandIDs.open;
-  commands.addCommand(command, {
-    execute: (args: Partial<ChatboxPanel.IOptions>) => {
-      let path = args['path'];
-      let widget = tracker.find(value => {
-        if (value.chatbox.session.path === path) {
-          return true;
-        }
-      });
-      if (widget) {
-        tracker.activate(widget);
-      } else {
-        return manager.ready.then(() => {
-          let model = find(manager.sessions.running(), item => {
-            return item.path === path;
-          });
-          if (model) {
-            return createChatbox(args);
-          }
-        });
-      }
-    }
-  });
+    // Add the chatbox panel to the tracker.
+    panel.title.label = 'Chatbox';
+    tracker.add(panel);
+    shell.addToLeftArea(panel);
+    tracker.activate(panel);
+  }
 
   command = CommandIDs.create;
   commands.addCommand(command, {
     label: 'Start New Chatbox',
     execute: (args: Partial<ChatboxPanel.IOptions>) => {
       args.basePath = args.basePath || '.';
-      return createChatbox(args);
+      createChatbox(args);
+      return Promise.resolve(void 0);
     }
   });
   palette.addItem({ command, category });
@@ -261,82 +201,11 @@ function activateChatbox(app: JupyterLab, manager: IServiceManager, rendermime: 
   });
   palette.addItem({ command, category });
 
-  command = CommandIDs.interrupt;
-  commands.addCommand(command, {
-    label: 'Interrupt Kernel',
-    execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
-      }
-      let kernel = current.chatbox.session.kernel;
-      if (kernel) {
-        return kernel.interrupt();
-      }
-    }
-  });
-  palette.addItem({ command, category });
-
-  command = CommandIDs.restart;
-  commands.addCommand(command, {
-    label: 'Restart Kernel',
-    execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
-      }
-      return current.chatbox.session.restart();
-    }
-  });
-  palette.addItem({ command, category });
-
-  command = CommandIDs.closeAndShutdown;
-  commands.addCommand(command, {
-    label: 'Close and Shutdown',
-    execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
-      }
-      return showDialog({
-        title: 'Shutdown the chatbox?',
-        body: `Are you sure you want to close "${current.title.label}"?`,
-        buttons: [Dialog.cancelButton(), Dialog.warnButton()]
-      }).then(result => {
-        if (result.accept) {
-          current.chatbox.session.shutdown().then(() => {
-            current.dispose();
-          });
-        } else {
-          return false;
-        }
-    });
-    }
-  });
-
-  command = CommandIDs.switchKernel;
-  commands.addCommand(command, {
-    label: 'Switch Kernel',
-    execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
-      }
-      return current.chatbox.session.selectKernel();
-    }
-  });
-  palette.addItem({ command, category });
-
   menu.addItem({ command: CommandIDs.run });
   menu.addItem({ command: CommandIDs.linebreak });
   menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.clear });
   menu.addItem({ type: 'separator' });
-  menu.addItem({ command: CommandIDs.interrupt });
-  menu.addItem({ command: CommandIDs.restart });
-  menu.addItem({ command: CommandIDs.switchKernel });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ command: CommandIDs.closeAndShutdown });
 
   mainMenu.addMenu(menu, {rank: 50});
   return tracker;
