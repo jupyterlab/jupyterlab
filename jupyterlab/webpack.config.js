@@ -7,8 +7,9 @@ var crypto = require('crypto');
 var package_data = require('./package.json');
 
 // Ensure a clear build directory.
-fs.removeSync('./build');
-fs.ensureDirSync('./build');
+var buildDir = package_data.jupyterlab.buildDir;
+fs.removeSync(buildDir);
+fs.ensureDirSync(buildDir);
 
 
 // Create the entry point file.
@@ -16,13 +17,14 @@ var source = fs.readFileSync('index.template.js').toString();
 var template = Handlebars.compile(source);
 var data = { jupyterlab_extensions: package_data.jupyterlab.extensions };
 var result = template(data);
-fs.writeFileSync('build/index.out.js', result);
+
+fs.writeFileSync(path.resolve(buildDir, 'index.out.js'), result);
 
 
 // Create the hash
 var hash = crypto.createHash('md5');
 hash.update(fs.readFileSync('./package.json'));
-fs.writeFileSync('build/hash.md5', hash.digest('hex'));
+fs.writeFileSync(path.resolve(buildDir, 'hash.md5'), hash.digest('hex'));
 
 
 // Note that we have to use an explicit local public path
@@ -37,11 +39,11 @@ var cssLoader = ExtractTextPlugin.extract({
 
 
 module.exports = {
-  entry:  './build/index.out.js',
+  entry:  path.resolve(buildDir, 'index.out.js'),
   output: {
-    path: __dirname + '/build',
+    path: path.resolve(buildDir),
     filename: '[name].bundle.js',
-    publicPath: 'lab/'
+    publicPath: package_data.jupyterlab.publicPath
   },
   module: {
     rules: [
