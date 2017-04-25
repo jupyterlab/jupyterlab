@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  JSONObject
+} from '@phosphor/coreutils';
+
+import {
   map, toArray
 } from '@phosphor/algorithm';
 
@@ -14,11 +18,10 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  Panel, PanelLayout
+  Panel, PanelLayout, Widget
 } from '@phosphor/widgets';
 
 import {
-  Widget
 } from '@phosphor/widgets';
 
 import {
@@ -38,10 +41,6 @@ import {
 import {
   IRenderMime
 } from '@jupyterlab/rendermime';
-
-import {
-  ChatboxHistory, IChatboxHistory
-} from './history';
 
 
 /**
@@ -86,8 +85,9 @@ class Chatbox extends Widget {
     this._cells = new ObservableVector<BaseCellWidget>();
     this._content = new Panel();
     this._input = new Panel();
+    this._log = new ObservableVector<Chatbox.IChatEntry>();
 
-    let factory = this.contentFactory = options.contentFactory;
+    this.contentFactory = options.contentFactory;
     this.modelFactory = (
       options.modelFactory || Chatbox.defaultModelFactory
     );
@@ -101,8 +101,6 @@ class Chatbox extends Widget {
     // Insert the content and input panes into the widget.
     layout.addWidget(this._content);
     layout.addWidget(this._input);
-
-    this._history = factory.createChatboxHistory();
   }
 
   /**
@@ -110,13 +108,6 @@ class Chatbox extends Widget {
    */
   get executed(): ISignal<this, Date> {
     return this._executed;
-  }
-
-  /**
-   * A signal emitted when a new prompt is created.
-   */
-  get promptCreated(): ISignal<this, MarkdownCellWidget> {
-    return this._promptCreated;
   }
 
   /**
@@ -186,11 +177,11 @@ class Chatbox extends Widget {
       return;
     }
     let cells = this._cells;
-    let history = this._history;
-    this._history = null;
+    let log = this._log;
+    this._log = null;
     this._cells = null;
 
-    history.dispose();
+    log.dispose();
     cells.clear();
 
     super.dispose();
@@ -325,15 +316,9 @@ class Chatbox extends Widget {
     prompt.rendered = false;
     this._input.addWidget(prompt);
 
-    // Suppress the default "Enter" key handling.
-    let editor = prompt.editor;
-    editor.addKeydownHandler(this._onEditorKeydown);
-
-    this._history.editor = editor;
     if (this.isAttached) {
       this.activate();
     }
-    this._promptCreated.emit(prompt);
   }
 
   /**
@@ -358,7 +343,7 @@ class Chatbox extends Widget {
    * Execute the code in the current prompt.
    */
   private _execute(cell: MarkdownCellWidget): void {
-    this._history.push(cell.model.value.text);
+    this._log.pushBack({ text: cell.model.value.text, author: null });
     cell.model.contentChanged.connect(this.update, this);
     cell.rendered = true;
   }
@@ -383,22 +368,13 @@ class Chatbox extends Widget {
     }
   }
 
-  /**
-   * Handle a keydown event on an editor.
-   */
-  private _onEditorKeydown(editor: CodeEditor.IEditor, event: KeyboardEvent) {
-    // Suppress "Enter" events.
-    return event.keyCode === 13;
-  }
-
   private _mimeTypeService: IEditorMimeTypeService;
   private _cells: IObservableVector<BaseCellWidget> = null;
   private _content: Panel = null;
-  private _history: IChatboxHistory = null;
+  private _log: IObservableVector<Chatbox.IChatEntry> = null;
   private _input: Panel = null;
   private _mimetype = 'text/x-ipython';
   private _executed = new Signal<this, Date>(this);
-  private _promptCreated = new Signal<this, MarkdownCellWidget>(this);
 }
 
 
@@ -449,15 +425,26 @@ namespace Chatbox {
     readonly markdownCellContentFactory: BaseCellWidget.IContentFactory;
 
     /**
-     * The history manager for a chatbox widget.
-     */
-    createChatboxHistory(): IChatboxHistory;
-
-    /**
      * Create a new prompt widget.
      */
     createPrompt(options: MarkdownCellWidget.IOptions, parent: Chatbox): MarkdownCellWidget;
 
+  }
+
+  /**
+   * An interface for an entry in the chat log.
+   */
+  export
+  interface IChatEntry extends JSONObject {
+    /**
+     * The text of the chat entry.
+     */
+    text: string;
+
+    /**
+     * The collaborator who logged the entry.
+     */
+    author: any;
   }
 
   /**
@@ -485,13 +472,6 @@ namespace Chatbox {
      * The factory for a markdown cell widget.
      */
     readonly markdownCellContentFactory: BaseCellWidget.IContentFactory;
-
-    /**
-     * The history manager for a chatbox widget.
-     */
-    createChatboxHistory(): IChatboxHistory {
-      return new ChatboxHistory();
-    }
 
     /**
      * Create a new prompt widget.
