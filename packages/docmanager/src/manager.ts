@@ -1,8 +1,21 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+
 import {
-  Kernel, ServiceManager
+  IClientSession
+} from '@jupyterlab/apputils';
+
+import {
+  ModelDB, PathExt, uuid
+} from '@jupyterlab/coreutils';
+
+import {
+  DocumentRegistry, Context
+} from '@jupyterlab/docregistry';
+
+import {
+  Contents, Kernel, ServiceManager
 } from '@jupyterlab/services';
 
 import {
@@ -30,24 +43,13 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IClientSession
-} from '@jupyterlab/apputils';
-
-import {
-  ModelDB
-} from '@jupyterlab/coreutils';
-
-import {
-  DocumentRegistry, Context
-} from '@jupyterlab/docregistry';
-
-import {
   SaveHandler
 } from './savehandler';
 
 import {
   DocumentWidgetManager
 } from './widgetmanager';
+
 
 /* tslint:disable */
 /**
@@ -197,6 +199,26 @@ class DocumentManager implements IDisposable {
   }
 
   /**
+   * Delete a file.
+   *
+   * @param path - The path to the file to be deleted.
+   *
+   * @param basePath - The base path to resolve against, defaults to ''.
+   *
+   * @returns A promise which resolves when the file is deleted.
+   *
+   * #### Notes
+   * If there is a running session associated with the file and no other
+   * sessions are using the kernel, the session will be shut down.
+   */
+  deleteFile(path: string, basePath = ''): Promise<void> {
+    path = PathExt.resolve(basePath, path);
+    return this.services.sessions.stopIfNeeded(path).then(() => {
+      return this.services.contents.delete(path);
+    });
+  }
+
+  /**
    * See if a widget already exists for the given path and widget name.
    *
    * @param path - The file path to use.
@@ -272,6 +294,58 @@ class DocumentManager implements IDisposable {
         return this._widgetManager.closeWidgets(context);
       }))
     ).then(() => undefined);
+  }
+
+  /**
+   * Create a new untitled file.
+   *
+   * @param options - The file content creation options.
+   */
+  newUntitled(options: Contents.ICreateOptions): Promise<Contents.IModel> {
+    if (options.type === 'file') {
+      options.ext = options.ext || '.txt';
+    }
+    return this.services.contents.newUntitled(options);
+  }
+
+  /**
+   * Overwrite a file.
+   *
+   * @param oldPath - The path to the original file.
+   *
+   * @param newPath - The path to the new file.
+   *
+   * @param basePath - The base path to resolve against, defaults to ''.
+   *
+   * @returns A promise containing the new file contents model.
+   */
+  overwrite(oldPath: string, newPath: string, basePath = ''): Promise<Contents.IModel> {
+    // Cleanly overwrite the file by moving it, making sure the original does
+    // not exist, and then renaming to the new path.
+    const tempPath = `${newPath}.${uuid()}`;
+    const cb = () => this.rename(tempPath, newPath, basePath);
+    return this.rename(oldPath, tempPath, basePath).then(() => {
+      return this.deleteFile(newPath, basePath);
+    }).then(cb, cb);
+  }
+
+  /**
+   * Rename a file or directory.
+   *
+   * @param oldPath - The path to the original file.
+   *
+   * @param newPath - The path to the new file.
+   *
+   * @param basePath - The base path to resolve against, defaults to ''.
+   *
+   * @returns A promise containing the new file contents model.  The promise
+   * will reject if the newPath already exists.  Use [[overwrite]] to overwrite
+   * a file.
+   */
+  rename(oldPath: string, newPath: string, basePath = ''): Promise<Contents.IModel> {
+    oldPath = PathExt.resolve(basePath, oldPath);
+    newPath = PathExt.resolve(basePath, newPath);
+    return this.services.contents.rename(oldPath, newPath);
   }
 
   /**
