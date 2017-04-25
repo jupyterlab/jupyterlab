@@ -95,13 +95,6 @@ class FileBrowserModel implements IDisposable {
   }
 
   /**
-   * A signal emitted when the running sessions in the directory changes.
-   */
-  get sessionsChanged(): ISignal<this, void> {
-    return this._sessionsChanged;
-  }
-
-  /**
    * Get the kernel spec models.
    */
   get specs(): Kernel.ISpecModels | null {
@@ -538,7 +531,6 @@ class FileBrowserModel implements IDisposable {
   private _lastRefresh = -1;
   private _requested = false;
   private _sessions: Session.IModel[] = [];
-  private _sessionsChanged = new Signal<this, void>(this);
   private _state: IStateDB | null = null;
   private _timeoutId = -1;
 }
