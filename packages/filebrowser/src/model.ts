@@ -10,6 +10,10 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
+  IDocumentManager
+} from '@jupyterlab/docmanager';
+
+import {
   Contents, Kernel, ServiceManager, Session
 } from '@jupyterlab/services';
 
@@ -52,9 +56,12 @@ class FileBrowserModel implements IDisposable {
   constructor(options: FileBrowserModel.IOptions) {
     this._manager = options.manager;
     this._model = { path: '', name: '/', type: 'directory' };
-    this._manager.contents.fileChanged.connect(this._onFileChanged, this);
-    this._manager.sessions.runningChanged.connect(this._onRunningChanged, this);
     this._state = options.state || null;
+
+    const { services } = options.manager;
+    services.contents.fileChanged.connect(this._onFileChanged, this);
+    services.sessions.runningChanged.connect(this._onRunningChanged, this);
+
     this._scheduleUpdate();
     this._startTimer();
   }
@@ -98,7 +105,7 @@ class FileBrowserModel implements IDisposable {
    * Get the kernel spec models.
    */
   get specs(): Kernel.ISpecModels | null {
-    return this._manager.sessions.specs;
+    return this._manager.services.sessions.specs;
   }
 
   /**
@@ -245,69 +252,13 @@ class FileBrowserModel implements IDisposable {
    *   downloading.
    */
   download(path: string): Promise<void> {
-    return this._manager.contents.getDownloadUrl(path).then(url => {
+    return this._manager.services.contents.getDownloadUrl(path).then(url => {
       let element = document.createElement('a');
       element.setAttribute('href', url);
       element.setAttribute('download', '');
       element.click();
       return void 0;
     });
-  }
-
-  /**
-   * Create a new untitled file or directory in the current directory.
-   *
-   * @param type - The type of file object to create. One of
-   *  `['file', 'notebook', 'directory']`.
-   *
-   * @param ext - Optional extension for `'file'` types (defaults to `'.txt'`).
-   *
-   * @returns A promise containing the new file contents model.
-   */
-  newUntitled(options: Contents.ICreateOptions): Promise<Contents.IModel> {
-    if (options.type === 'file') {
-      options.ext = options.ext || '.txt';
-    }
-    options.path = options.path || this._model.path;
-    return this._manager.contents.newUntitled(options);
-  }
-
-  /**
-   * Rename a file or directory.
-   *
-   * @param path - The path to the original file.
-   *
-   * @param newPath - The path to the new file.
-   *
-   * @returns A promise containing the new file contents model.  The promise
-   *   will reject if the newPath already exists.  Use [[overwrite]] to
-   *   overwrite a file.
-   */
-  rename(path: string, newPath: string): Promise<Contents.IModel> {
-    // Handle relative paths.
-    path = Private.normalizePath(this._model.path, path);
-    newPath = Private.normalizePath(this._model.path, newPath);
-
-    return this._manager.contents.rename(path, newPath);
-  }
-
-  /**
-   * Overwrite a file.
-   *
-   * @param path - The path to the original file.
-   *
-   * @param newPath - The path to the new file.
-   *
-   * @returns A promise containing the new file contents model.
-   */
-  overwrite(path: string, newPath: string): Promise<Contents.IModel> {
-    // Cleanly overwrite the file by moving it, making sure the original
-    // does not exist, and then renaming to the new path.
-    let tempPath = `${newPath}.${uuid()}`;
-    let cb = () => { return this.rename(tempPath, newPath); };
-    return this.rename(path, tempPath).then(() => {
-      return this.deleteFile(newPath);
-    }).then(cb, cb);
   }
 
   /**
@@ -330,28 +281,18 @@ class FileBrowserModel implements IDisposable {
 
     const manager = this._manager;
     const key = `file-browser-${id}:cwd`;
-    return Promise.all([state.fetch(key), manager.ready]).then(([cwd]) => {
+    const ready = manager.services.ready;
+    return Promise.all([state.fetch(key), ready]).then(([cwd]) => {
       if (!cwd) {
         return;
       }
 
       const path = cwd['path'] as string;
-      return manager.contents.get(path)
+      return manager.services.contents.get(path)
         .then(() => this.cd(path))
         .catch(() => state.remove(key));
     }).catch(() => state.remove(key))
       .then(() => { this._key = key; }); // Set key after restoration is done.
-  }
-
-  /**
-   * Shut down a session by session id.
-   *
-   * @param id - The id of the session.
-   *
-   * @returns A promise that resolves when the action is complete.
-   */
-  shutdown(id: string): Promise<void> {
-    return this._manager.sessions.shutdown(id);
   }
 
   /**
@@ -382,7 +323,7 @@ class FileBrowserModel implements IDisposable {
 
     let path = this._model.path;
     path = path ? path + '/' + file.name : file.name;
-    return this._manager.contents.get(path, {}).then(() => {
+    return this._manager.services.contents.get(path, {}).then(() => {
       let msg = `"${file.name}" already exists`;
       throw new Error(msg);
     }, () => {
@@ -422,7 +363,7 @@ class FileBrowserModel implements IDisposable {
           content: Private.getContent(reader)
         };
 
-        this._manager.contents.save(path, model).then(contents => {
+        this._manager.services.contents.save(path, model).then(contents => {
           resolve(contents);
         }).catch(reject);
       };
@@ -520,7 +461,7 @@ class FileBrowserModel implements IDisposable {
   private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
   private _items: Contents.IModel[] = [];
   private _key: string = '';
-  private _manager: ServiceManager.IManager = null;
+  private _manager: IDocumentManager = null;
   private _maxUploadSizeMb = 15;
   private _model: Contents.IModel;
   private _pathChanged = new Signal<this, IChangedArgs<string>>(this);
@@ -547,9 +488,9 @@ namespace FileBrowserModel {
   export
   interface IOptions {
     /**
-     * A service manager instance.
+     * A document manager instance.
      */
-    manager: ServiceManager.IManager;
+    manager: IDocumentManager;
 
     /**
      * An optional state database. If provided, the model will restore which
