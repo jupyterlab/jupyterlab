@@ -58,8 +58,6 @@ class ChatboxPanel extends Panel {
     });
     this.addWidget(this.chatbox);
 
-    this.chatbox.executed.connect(this._onExecuted, this);
-
     this.title.icon = 'jp-ImageChatbox';
     this.title.closable = true;
     this.id = `chatbox-${count}`;
@@ -92,15 +90,6 @@ class ChatboxPanel extends Panel {
     super.onCloseRequest(msg);
     this.dispose();
   }
-
-  /**
-   * Handle a chatbox execution.
-   */
-  private _onExecuted(sender: Chatbox, args: Date) {
-    this._executed = args;
-  }
-
-  private _executed: Date = null;
 }
 
 

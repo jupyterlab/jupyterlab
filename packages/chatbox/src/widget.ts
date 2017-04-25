@@ -14,10 +14,6 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  ISignal, Signal
-} from '@phosphor/signaling';
-
-import {
   Panel, PanelLayout, Widget
 } from '@phosphor/widgets';
 
@@ -82,7 +78,6 @@ class Chatbox extends Widget {
 
     // Create the panels that hold the content and input.
     let layout = this.layout = new PanelLayout();
-    this._cells = new ObservableVector<BaseCellWidget>();
     this._content = new Panel();
     this._input = new Panel();
     this._log = new ObservableVector<Chatbox.IChatEntry>();
@@ -104,13 +99,6 @@ class Chatbox extends Widget {
   }
 
   /**
-   * A signal emitted when the chatbox finished executing its prompt.
-   */
-  get executed(): ISignal<this, Date> {
-    return this._executed;
-  }
-
-  /**
    * The content factory used by the chatbox.
    */
   readonly contentFactory: Chatbox.IContentFactory;
@@ -124,13 +112,6 @@ class Chatbox extends Widget {
    * The rendermime instance used by the chatbox.
    */
   readonly rendermime: IRenderMime;
-
-  /**
-   * The list of content cells in the chatbox.
-   */
-  get cells(): IObservableVector<BaseCellWidget> {
-    return this._cells;
-  }
 
   /*
    * The chatbox input prompt.
@@ -152,9 +133,6 @@ class Chatbox extends Widget {
    */
   addCell(cell: BaseCellWidget) {
     this._content.addWidget(cell);
-    this._cells.pushBack(cell);
-    cell.disposed.connect(this._onCellDisposed, this);
-    this.update();
   }
 
   /**
@@ -173,56 +151,33 @@ class Chatbox extends Widget {
    */
   dispose() {
     // Do nothing if already disposed.
-    if (this._cells === null) {
+    if (this._log === null) {
       return;
     }
-    let cells = this._cells;
     let log = this._log;
     this._log = null;
-    this._cells = null;
 
     log.dispose();
-    cells.clear();
-
     super.dispose();
   }
 
   /**
    * Execute the current prompt.
    *
-   * @param force - Whether to force execution without checking code
-   * completeness.
-   *
    * @param timeout - The length of time, in milliseconds, that the execution
    * should wait for the API to determine whether code being submitted is
    * incomplete before attempting submission anyway. The default value is `250`.
    */
-  execute(): void {
+  post(): void {
     let prompt = this.prompt;
 
     if (prompt.model.value.text.trim() !== '') {
       this.newPrompt();
       prompt.model.trusted = true;
-      this._execute(prompt);
+      this._post(prompt);
     } else {
       return;
     }
-  }
-
-  /**
-   * Insert a line break in the prompt.
-   */
-  insertLinebreak(): void {
-    let prompt = this.prompt;
-    let model = prompt.model;
-    let editor = prompt.editor;
-    // Insert the line break at the cursor position, and move cursor forward.
-    let pos = editor.getCursorPosition();
-    let offset = editor.getOffsetAt(pos);
-    let text = model.value.text;
-    model.value.text = text.substr(0, offset) + '\n' + text.substr(offset);
-    pos = editor.getPositionAt(offset + 1);
-    editor.setCursorPosition(pos);
   }
 
   /**
@@ -302,7 +257,6 @@ class Chatbox extends Widget {
     if (prompt) {
       prompt.readOnly = true;
       prompt.removeClass(PROMPT_CLASS);
-      Signal.clearData(prompt.editor);
       (input.layout as PanelLayout).removeWidgetAt(0);
       this.addCell(prompt);
     }
@@ -342,7 +296,7 @@ class Chatbox extends Widget {
   /**
    * Execute the code in the current prompt.
    */
-  private _execute(cell: MarkdownCellWidget): void {
+  private _post(cell: MarkdownCellWidget): void {
     this._log.pushBack({ text: cell.model.value.text, author: null });
     cell.model.contentChanged.connect(this.update, this);
     cell.rendered = true;
@@ -359,22 +313,11 @@ class Chatbox extends Widget {
     return { model, rendermime, contentFactory };
   }
 
-  /**
-   * Handle cell disposed signals.
-   */
-  private _onCellDisposed(sender: Widget, args: void): void {
-    if (!this.isDisposed) {
-      this._cells.remove(sender as MarkdownCellWidget);
-    }
-  }
-
   private _mimeTypeService: IEditorMimeTypeService;
-  private _cells: IObservableVector<BaseCellWidget> = null;
   private _content: Panel = null;
   private _log: IObservableVector<Chatbox.IChatEntry> = null;
   private _input: Panel = null;
   private _mimetype = 'text/x-ipython';
-  private _executed = new Signal<this, Date>(this);
 }
 
 

@@ -61,7 +61,7 @@ const SHORTCUTS = [
     keys: ['Tab']
   },
   {
-    command: 'chatbox:push',
+    command: 'chatbox:post',
     selector: '.jp-Chatbox-prompt',
     keys: ['Shift Enter']
   },

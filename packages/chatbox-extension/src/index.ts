@@ -33,7 +33,7 @@ namespace CommandIDs {
   const clear = 'chatbox:clear';
 
   export
-  const run = 'chatbox:push';
+  const run = 'chatbox:post';
 
   export
   const linebreak = 'chatbox:linebreak';
@@ -84,7 +84,7 @@ function activateChatbox(app: JupyterLab, rendermime: IRenderMime, palette: ICom
 
   command = CommandIDs.clear;
   commands.addCommand(command, {
-    label: 'Clear Cells',
+    label: 'Clear Chat',
     execute: args => {
       panel.chatbox.clear();
     }
@@ -93,18 +93,9 @@ function activateChatbox(app: JupyterLab, rendermime: IRenderMime, palette: ICom
 
   command = CommandIDs.run;
   commands.addCommand(command, {
-    label: 'Run Cell',
+    label: 'Post Chat Entry',
     execute: args => {
-      return panel.chatbox.execute();
-    }
-  });
-  palette.addItem({ command, category });
-
-  command = CommandIDs.linebreak;
-  commands.addCommand(command, {
-    label: 'Insert Line Break',
-    execute: args => {
-      panel.chatbox.insertLinebreak();
+      return panel.chatbox.post();
     }
   });
   palette.addItem({ command, category });
