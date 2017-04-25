@@ -48,19 +48,6 @@ function createFromDialog(container: IFileContainer, manager: DocumentManager, c
 
 
 /**
- * Create a new untitled file.
- */
-export
-function newUntitled(manager: DocumentManager, options: Contents.ICreateOptions): Promise<Contents.IModel> {
-  if (options.type === 'file') {
-    options.ext = options.ext || '.txt';
-  }
-
-  return manager.services.contents.newUntitled(options);
-}
-
-
-/**
  * Rename a file with optional dialog.
  */
 export
@@ -223,7 +210,7 @@ class CreateFromHandler extends Widget {
     }
 
     let path = container.path;
-    return newUntitled(manager, { ext, path, type }).then(contents => {
+    return Actions.newUntitled(manager, { ext, path, type }).then(contents => {
       let value = this.inputNode.value = contents.name;
       this.inputNode.setSelectionRange(0, value.length - ext.length);
       this._orig = contents;
