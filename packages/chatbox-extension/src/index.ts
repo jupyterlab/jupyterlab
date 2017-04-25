@@ -10,6 +10,10 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
+  IDocumentManager
+} from '@jupyterlab/docmanager';
+
+import {
   IEditorServices
 } from '@jupyterlab/codeeditor';
 
@@ -45,7 +49,7 @@ namespace CommandIDs {
 export
 const chatboxPlugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.chatbox',
-  requires: [IRenderMime, ICommandPalette, IEditorServices, ILayoutRestorer],
+  requires: [IRenderMime, ICommandPalette, IEditorServices, IDocumentManager, ILayoutRestorer],
   autoStart: true,
   activate: activateChatbox
 }
@@ -60,7 +64,7 @@ export default chatboxPlugin;
 /**
  * Activate the chatbox extension.
  */
-function activateChatbox(app: JupyterLab, rendermime: IRenderMime, palette: ICommandPalette, editorServices: IEditorServices, restorer: ILayoutRestorer): void {
+function activateChatbox(app: JupyterLab, rendermime: IRenderMime, palette: ICommandPalette, editorServices: IEditorServices, docManager: IDocumentManager, restorer: ILayoutRestorer): void {
   let { commands, shell } = app;
   let category = 'Chatbox';
   let command: string;
@@ -99,4 +103,12 @@ function activateChatbox(app: JupyterLab, rendermime: IRenderMime, palette: ICom
     }
   });
   palette.addItem({ command, category });
+
+  let updateDocumentModel = function (): void {
+    let context = docManager.contextForWidget(shell.currentWidget);
+    if (context && context.model !== panel.chatbox.model) {
+      panel.chatbox.model = context.model;
+    }
+  }
+  shell.currentChanged.connect(updateDocumentModel);
 }

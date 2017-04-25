@@ -6,7 +6,7 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  map, toArray
+  map, toArray, each
 } from '@phosphor/algorithm';
 
 import {
@@ -19,6 +19,10 @@ import {
 
 import {
 } from '@phosphor/widgets';
+
+import {
+  DocumentRegistry
+} from '@jupyterlab/docregistry';
 
 import {
   IEditorMimeTypeService, CodeEditor
@@ -119,6 +123,38 @@ class Chatbox extends Widget {
   get prompt(): MarkdownCellWidget | null {
     let inputLayout = (this._input.layout as PanelLayout);
     return inputLayout.widgets[0] as MarkdownCellWidget || null;
+  }
+
+  /**
+   * The document model associated with the chatbox.
+   */
+  get model(): DocumentRegistry.IModel {
+    return this._model;
+  }
+  set model(model: DocumentRegistry.IModel) {
+    this._model = model;
+    let modelDB: any = (this._model as any).modelDB;
+    if (modelDB) {
+      modelDB.connected.then(() => {
+        // Update the chatlog vector.
+        if (modelDB.has('internal:chat')) {
+          this._log = modelDB.get('internal:chat') as IObservableVector<Chatbox.IChatEntry>;
+        } else {
+          this._log = modelDB.createVector('internal:chat');
+        }
+        // Remove any existing widgets.
+        while (this._content.widgets.length) {
+          (this._content.layout as PanelLayout).removeWidgetAt(0);
+        }
+        each(this._log, entry => {
+          let options = this._createMarkdownCellOptions(entry.text);
+          let cellWidget = this.contentFactory.createPrompt(options, this);
+          cellWidget.readOnly = true;
+          cellWidget.rendered = true;
+          this.addCell(cellWidget);
+        });
+      });
+    }
   }
 
   /**
@@ -305,11 +341,12 @@ class Chatbox extends Widget {
   /**
    * Create the options used to initialize markdown cell widget.
    */
-  private _createMarkdownCellOptions(): MarkdownCellWidget.IOptions {
+  private _createMarkdownCellOptions(text: string = ''): MarkdownCellWidget.IOptions {
     let contentFactory = this.contentFactory.markdownCellContentFactory;
     let modelFactory = this.modelFactory;
     let model = modelFactory.createMarkdownCell({ });
     let rendermime = this.rendermime;
+    model.value.text = text || '';
     return { model, rendermime, contentFactory };
   }
 
@@ -318,6 +355,7 @@ class Chatbox extends Widget {
   private _log: IObservableVector<Chatbox.IChatEntry> = null;
   private _input: Panel = null;
   private _mimetype = 'text/x-ipython';
+  private _model: DocumentRegistry.IModel = null;
 }
 
 

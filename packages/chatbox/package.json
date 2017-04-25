@@ -17,6 +17,7 @@
     "@jupyterlab/cells": "^0.3.1",
     "@jupyterlab/codeeditor": "^0.3.1",
     "@jupyterlab/coreutils": "^0.3.1",
+    "@jupyterlab/docregistry": "^0.3.1",
     "@jupyterlab/outputarea": "^0.3.1",
     "@jupyterlab/rendermime": "^0.3.1",
     "@jupyterlab/services": "^0.42.1",
