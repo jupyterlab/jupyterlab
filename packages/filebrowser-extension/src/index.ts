@@ -77,7 +77,7 @@ const factoryPlugin: JupyterLabPlugin<IFileBrowserFactory> = {
   activate: activateFactory,
   id: 'jupyter.services.filebrowser',
   provides: IFileBrowserFactory,
-  requires: [IServiceManager, IDocumentManager, IStateDB],
+  requires: [IDocumentManager, IStateDB],
   autoStart: true
 };
 
@@ -97,7 +97,7 @@ export default plugins;
 /**
  * Activate the file browser factory provider.
  */
-function activateFactory(app: JupyterLab, serviceManager: IServiceManager, documentManager: IDocumentManager, state: IStateDB): IFileBrowserFactory {
+function activateFactory(app: JupyterLab, documentManager: IDocumentManager, state: IStateDB): IFileBrowserFactory {
   const { commands, shell } = app;
   const tracker = new InstanceTracker<FileBrowser>({ namespace, shell });
 
@@ -108,7 +108,7 @@ function activateFactory(app: JupyterLab, serviceManager: IServiceManager, docum
         id: id,
         manager: options.documentManager || documentManager,
         model: new FileBrowserModel({
-          manager: options.serviceManager || serviceManager,
+          manager: options.documentManager || documentManager,
           state: options.state === null ? null : options.state || state
         })
       });
@@ -127,9 +127,7 @@ function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, mana
   const { commands } = app;
   const category = 'File Operations';
   const fbWidget = factory.createFileBrowser('filebrowser', {
-    commands: commands,
-    documentManager: documentManager,
-    serviceManager: manager
+    commands, documentManager
   });
 
   // Let the application restorer track the primary file browser (that is

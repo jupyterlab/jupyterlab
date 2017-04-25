@@ -96,14 +96,6 @@ namespace IFileBrowserFactory {
     documentManager?: IDocumentManager;
 
     /**
-     * The service manager used by the file browser.
-     *
-     * #### Notes
-     * If no manager is provided, the application default will be used.
-     */
-    serviceManager?: IServiceManager;
-
-    /**
      * The state database to use for saving file browser state and restoring it.
      *
      * #### Notes
