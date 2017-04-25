@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
- each
+ each, IIterator
 } from '@phosphor/algorithm';
 
 import {
@@ -18,7 +18,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  Actions, DocumentManager, IFileContainer
+  DocumentManager
 } from './';
 
 
@@ -31,6 +31,23 @@ const FILE_DIALOG_CLASS = 'jp-FileDialog';
  * The class name added for a file conflict.
  */
 const FILE_CONFLICT_CLASS = 'jp-mod-conflict';
+
+
+/**
+ * A stripped-down interface for a file container.
+ */
+export
+interface IFileContainer {
+  /**
+   * Returns an iterator over the container's items.
+   */
+  items(): IIterator<Contents.IModel>;
+
+  /**
+   * The current working directory of the file container.
+   */
+  path: string;
+}
 
 
 /**
@@ -52,8 +69,7 @@ function createFromDialog(container: IFileContainer, manager: DocumentManager, c
  */
 export
 function renameFile(manager: DocumentManager, oldPath: string, newPath: string, basePath = ''): Promise<Contents.IModel> {
-  let { services } = manager;
-  return Actions.rename(services, oldPath, newPath, basePath).catch(error => {
+  return manager.rename(oldPath, newPath, basePath).catch(error => {
     if (error.xhr) {
       error.message = `${error.xhr.statusText} ${error.xhr.status}`;
     }
@@ -66,7 +82,7 @@ function renameFile(manager: DocumentManager, oldPath: string, newPath: string, 
       };
       return showDialog(options).then(button => {
         if (button.accept) {
-          return Actions.overwrite(services, oldPath, newPath, basePath);
+          return manager.overwrite(oldPath, newPath, basePath);
         }
       });
     } else {
@@ -164,8 +180,7 @@ class CreateFromHandler extends Widget {
       }
 
       const basePath = this._container.path;
-      const services = this._manager.services;
-      Actions.deleteFile(services, '/' + this._orig.path, basePath);
+      this._manager.deleteFile('/' + this._orig.path, basePath);
       return null;
     });
   }
@@ -210,7 +225,7 @@ class CreateFromHandler extends Widget {
     }
 
     let path = container.path;
-    return Actions.newUntitled(manager, { ext, path, type }).then(contents => {
+    return manager.newUntitled({ ext, path, type }).then(contents => {
       let value = this.inputNode.value = contents.name;
       this.inputNode.setSelectionRange(0, value.length - ext.length);
       this._orig = contents;
