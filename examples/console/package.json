@@ -7,9 +7,9 @@
   },
   "dependencies": {
     "@jupyterlab/codemirror": "^0.3.1",
-    "@jupyterlab/console": "^0.3.1",
-    "@jupyterlab/default-theme": "^0.3.1",
-    "@jupyterlab/rendermime": "^0.3.1",
+    "@jupyterlab/console": "^0.3.2",
+    "@jupyterlab/default-theme": "^0.3.2",
+    "@jupyterlab/rendermime": "^0.3.2",
     "@jupyterlab/services": "^0.42.1",
     "@phosphor/commands": "^1.0.0",
     "@phosphor/widgets": "^1.0.0",
@@ -25,5 +25,5 @@
     "watch": "^1.0.2",
     "webpack": "^2.2.1"
   },
-  "version": "0.3.1"
+  "version": "0.3.2"
 }
