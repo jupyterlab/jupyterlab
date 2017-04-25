@@ -7,7 +7,7 @@ var crypto = require('crypto');
 var package_data = require('./package.json');
 
 // Ensure a clear build directory.
-var buildDir = package_data.jupyterlab.buildDir;
+var buildDir = './build';
 fs.removeSync(buildDir);
 fs.ensureDirSync(buildDir);
 
