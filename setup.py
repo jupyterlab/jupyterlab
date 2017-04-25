@@ -43,9 +43,7 @@ from setuptools.command.bdist_egg import bdist_egg
 from setupbase import (
     bdist_egg_disabled,
     find_packages,
-    find_package_data,
-    js_prerelease,
-    NPM
+    find_package_data
 )
 
 # BEFORE importing distutils, remove MANIFEST. distutils doesn't properly
@@ -96,14 +94,13 @@ setup_args = dict(
 
 
 cmdclass = dict(
-    build_ext = js_prerelease(build_ext),
-    sdist  = js_prerelease(sdist, strict=True),
-    jsdeps = NPM,
+    build_ext = build_ext,
+    sdist  = sdist,
     bdist_egg = bdist_egg if 'bdist_egg' in sys.argv else bdist_egg_disabled,
 )
 try:
     from wheel.bdist_wheel import bdist_wheel
-    cmdclass['bdist_wheel'] = js_prerelease(bdist_wheel, strict=True)
+    cmdclass['bdist_wheel'] = bdist_wheel
 except ImportError:
     pass
 
