@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  Actions, DocumentManager, IDocumentManager, showErrorMessage
+  DocumentManager, IDocumentManager, showErrorMessage
 } from '@jupyterlab/docmanager';
 
 import {
@@ -122,7 +122,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
         const command = CommandIDs.deleteFile;
         throw new Error(`A non-empty path is required for ${command}.`);
       }
-      return Actions.deleteFile(docManager.services, path, basePath);
+      return docManager.deleteFile(path, basePath);
     }
   });
 
