@@ -163,7 +163,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     'editor:line-wrap',
     CommandIDs.matchBrackets,
     CommandIDs.vimMode,
-    'editor-create-console',
+    'editor:create-console',
     'editor:run-code'
   ].forEach(command => palette.addItem({ command, category: 'Editor' }));
 
