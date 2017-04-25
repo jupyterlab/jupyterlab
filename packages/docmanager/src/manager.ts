@@ -66,6 +66,7 @@ const IDocumentManager = new Token<IDocumentManager>('jupyter.services.document-
 export
 interface IDocumentManager extends DocumentManager {}
 
+
 /**
  * The document manager.
  *
@@ -84,12 +85,13 @@ class DocumentManager implements IDisposable {
   constructor(options: DocumentManager.IOptions) {
     this.registry = options.registry;
     this.services = options.manager;
+
     this._opener = options.opener;
     this._modelDBFactory = options.modelDBFactory;
-    this._widgetManager = new DocumentWidgetManager({
-      registry: this.registry
-    });
-    this._widgetManager.activateRequested.connect(this._onActivateRequested, this);
+
+    let widgetManager = new DocumentWidgetManager({ registry: this.registry });
+    widgetManager.activateRequested.connect(this._onActivateRequested, this);
+    this._widgetManager = widgetManager;
   }
 
   /**
