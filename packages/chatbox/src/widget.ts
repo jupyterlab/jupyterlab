@@ -237,15 +237,15 @@ class Chatbox extends Widget {
   /**
    * Serialize the output.
    */
-  serialize(): nbformat.ICodeCell[] {
+  serialize(): nbformat.IMarkdownCell[] {
     let prompt = this.prompt;
     let layout = this._content.layout as PanelLayout;
     // Serialize content.
     let output = map(layout.widgets, widget => {
-      return (widget as MarkdownCellWidget).model.toJSON() as nbformat.ICodeCell;
+      return (widget as MarkdownCellWidget).model.toJSON() as nbformat.IMarkdownCell;
     });
     // Serialize prompt and return.
-    return toArray(output).concat(prompt.model.toJSON() as nbformat.ICodeCell);
+    return toArray(output).concat(prompt.model.toJSON() as nbformat.IMarkdownCell);
   }
 
 
@@ -403,7 +403,7 @@ class Chatbox extends Widget {
 
 
 /**
- * A namespace for CodeChatbox statics.
+ * A namespace for Chatbox statics.
  */
 export
 namespace Chatbox {

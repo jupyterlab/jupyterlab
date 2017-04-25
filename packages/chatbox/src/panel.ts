@@ -14,10 +14,6 @@ import {
 } from '@jupyterlab/rendermime';
 
 import {
-  Token
-} from '@phosphor/coreutils';
-
-import {
   Message
 } from '@phosphor/messaging';
 
@@ -233,14 +229,6 @@ namespace ChatboxPanel {
       chatboxContentFactory?: Chatbox.IContentFactory;
     }
   }
-
-  /* tslint:disable */
-  /**
-   * The chatbox renderer token.
-   */
-  export
-  const IContentFactory = new Token<IContentFactory>('jupyter.services.chatbox.content-factory');
-  /* tslint:enable */
 }
 
 
