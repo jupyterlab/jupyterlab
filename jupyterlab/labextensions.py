@@ -9,6 +9,7 @@ import os
 import sys
 
 from jupyter_core.application import JupyterApp, base_flags
+
 from traitlets import Bool
 
 from ._version import __version__
@@ -28,9 +29,6 @@ flags['no-build'] = (
 class BaseExtensionApp(JupyterApp):
     version = __version__
     flags = flags
-
-    lab_config_dir = Unicode(ENV_CONFIG_PATH[0], config=True,
-        help="The lab configuration directory")
 
     should_build = Bool(True, config=True,
         help="Whether to build the app after the action")
