@@ -375,5 +375,9 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
   menu.addItem({ command: CommandIDs.closeAndShutdown });
 
   mainMenu.addMenu(menu, {rank: 50});
+
+  app.contextMenu.addItem({command: CommandIDs.clear, selector: '.jp-CodeConsole'});
+  app.contextMenu.addItem({command: CommandIDs.restart, selector: '.jp-CodeConsole'});
+
   return tracker;
 }

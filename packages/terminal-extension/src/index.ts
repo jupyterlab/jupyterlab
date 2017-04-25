@@ -179,5 +179,8 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
     });
   }
 
+  app.contextMenu.addItem({command: CommandIDs.createNew, selector: '.jp-TerminalWidget', rank: 0});
+  app.contextMenu.addItem({command: CommandIDs.refresh, selector: '.jp-TerminalWidget', rank: 1});
+
   return tracker;
 }
