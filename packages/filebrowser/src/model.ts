@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  ArrayExt, ArrayIterator, IterableOrArrayLike, IIterator, each, toArray
+  ArrayIterator, each, IIterator, IterableOrArrayLike
 } from '@phosphor/algorithm';
 
 import {
@@ -238,7 +238,7 @@ class FileBrowserModel implements IDisposable {
   deleteFile(path: string): Promise<void> {
     let normalizePath = Private.normalizePath;
     path = normalizePath(this._model.path, path);
-    return this.stopIfNeeded(path).then(() => {
+    return this._manager.sessions.stopIfNeeded(path).then(() => {
       return this._manager.contents.delete(path);
     });
   }
@@ -398,29 +398,6 @@ class FileBrowserModel implements IDisposable {
       }
       return this._upload(file);
     });
-  }
-
-  /**
-   * Find a session associated with a path and stop it is the only
-   * session using that kernel.
-   */
-  protected stopIfNeeded(path: string): Promise<void> {
-    let sessions = toArray(this._sessions);
-    let index = ArrayExt.findFirstIndex(sessions, value => value.notebook.path === path);
-    if (index !== -1) {
-      let count = 0;
-      let model = sessions[index];
-      each(sessions, value => {
-        if (model.kernel.id === value.kernel.id) {
-          count++;
-        }
-      });
-      if (count === 1) {
-        // Try to delete the session, but succeed either way.
-        return this.shutdown(model.id).catch(() => { /* no-op */ });
-      }
-    }
-    return Promise.resolve(void 0);
   }
 
   /**
