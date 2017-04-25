@@ -145,8 +145,8 @@ function activateChatbox(app: JupyterLab, rendermime: IRenderMime, mainMenu: IMa
   commands.addCommand(command, {
     label: 'Start New Chatbox',
     execute: (args: Partial<ChatboxPanel.IOptions>) => {
-      args.basePath = args.basePath || '.';
-      createChatbox(args);
+      let basePath = args.basePath || '.';
+      createChatbox({ basePath, ...args });
       return Promise.resolve(void 0);
     }
   });
