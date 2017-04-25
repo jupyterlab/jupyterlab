@@ -44,7 +44,7 @@ class Collapser extends Widget {
       } else {
         this.removeClass(COLLAPSED_CLASS);
       }
-      this._collapsedChanged.emit(void 0);
+      this._collapsedChanged.emit(newValue);
   }
 
 
