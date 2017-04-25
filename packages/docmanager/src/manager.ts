@@ -135,48 +135,53 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * Open a file and return the widget used to view it.
-   * Reveals an already existing editor.
+   * Clone a widget.
    *
-   * @param path - The file path to open.
+   * @param widget - The source widget.
    *
-   * @param widgetName - The name of the widget factory to use. 'default' will use the default widget.
-   *
-   * @param kernel - An optional kernel name/id to override the default.
-   *
-   * @returns The created widget, or `undefined`.
+   * @returns A new widget or `undefined`.
    *
    * #### Notes
-   * This function will return `undefined` if a valid widget factory
-   * cannot be found.
+   *  Uses the same widget factory and context as the source, or returns
+   *  `undefined` if the source widget is not managed by this manager.
    */
-  openOrReveal(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
-    let widget = this.findWidget(path, widgetName);
-    if (!widget) {
-      widget = this.open(path, widgetName, kernel);
-    } else {
-      this._opener.open(widget);
-    }
-    return widget;
+  cloneWidget(widget: Widget): Widget {
+    return this._widgetManager.cloneWidget(widget);
   }
 
   /**
-   * Open a file and return the widget used to view it.
-   *
-   * @param path - The file path to open.
-   *
-   * @param widgetName - The name of the widget factory to use. 'default' will use the default widget.
-   *
-   * @param kernel - An optional kernel name/id to override the default.
-   *
-   * @returns The created widget, or `undefined`.
-   *
-   * #### Notes
-   * This function will return `undefined` if a valid widget factory
-   * cannot be found.
+   * Close all of the open documents.
    */
-  open(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
-    return this._createOrOpenDocument('open', path, widgetName, kernel);
+  closeAll(): Promise<void> {
+    return Promise.all(
+      toArray(map(this._contexts, context => {
+        return this._widgetManager.closeWidgets(context);
+      }))
+    ).then(() => undefined);
+  }
+
+  /**
+   * Close the widgets associated with a given path.
+   *
+   * @param path - The target path.
+   */
+  closeFile(path: string): Promise<void> {
+    let context = this._contextForPath(path);
+    if (context) {
+      return this._widgetManager.closeWidgets(context);
+    }
+    return Promise.resolve(void 0);
+  }
+
+  /**
+   * Get the document context for a widget.
+   *
+   * @param widget - The widget of interest.
+   *
+   * @returns The context associated with the widget, or `undefined`.
+   */
+  contextForWidget(widget: Widget): DocumentRegistry.Context {
+    return this._widgetManager.contextForWidget(widget);
   }
 
   /**
@@ -247,56 +252,6 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * Get the document context for a widget.
-   *
-   * @param widget - The widget of interest.
-   *
-   * @returns The context associated with the widget, or `undefined`.
-   */
-  contextForWidget(widget: Widget): DocumentRegistry.Context {
-    return this._widgetManager.contextForWidget(widget);
-  }
-
-  /**
-   * Clone a widget.
-   *
-   * @param widget - The source widget.
-   *
-   * @returns A new widget or `undefined`.
-   *
-   * #### Notes
-   *  Uses the same widget factory and context as the source, or returns
-   *  `undefined` if the source widget is not managed by this manager.
-   */
-  cloneWidget(widget: Widget): Widget {
-    return this._widgetManager.cloneWidget(widget);
-  }
-
-  /**
-   * Close the widgets associated with a given path.
-   *
-   * @param path - The target path.
-   */
-  closeFile(path: string): Promise<void> {
-    let context = this._contextForPath(path);
-    if (context) {
-      return this._widgetManager.closeWidgets(context);
-    }
-    return Promise.resolve(void 0);
-  }
-
-  /**
-   * Close all of the open documents.
-   */
-  closeAll(): Promise<void> {
-    return Promise.all(
-      toArray(map(this._contexts, context => {
-        return this._widgetManager.closeWidgets(context);
-      }))
-    ).then(() => undefined);
-  }
-
-  /**
    * Create a new untitled file.
    *
    * @param options - The file content creation options.
@@ -306,6 +261,51 @@ class DocumentManager implements IDisposable {
       options.ext = options.ext || '.txt';
     }
     return this.services.contents.newUntitled(options);
+  }
+
+  /**
+   * Open a file and return the widget used to view it.
+   *
+   * @param path - The file path to open.
+   *
+   * @param widgetName - The name of the widget factory to use. 'default' will use the default widget.
+   *
+   * @param kernel - An optional kernel name/id to override the default.
+   *
+   * @returns The created widget, or `undefined`.
+   *
+   * #### Notes
+   * This function will return `undefined` if a valid widget factory
+   * cannot be found.
+   */
+  open(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
+    return this._createOrOpenDocument('open', path, widgetName, kernel);
+  }
+
+  /**
+   * Open a file and return the widget used to view it.
+   * Reveals an already existing editor.
+   *
+   * @param path - The file path to open.
+   *
+   * @param widgetName - The name of the widget factory to use. 'default' will use the default widget.
+   *
+   * @param kernel - An optional kernel name/id to override the default.
+   *
+   * @returns The created widget, or `undefined`.
+   *
+   * #### Notes
+   * This function will return `undefined` if a valid widget factory
+   * cannot be found.
+   */
+  openOrReveal(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
+    let widget = this.findWidget(path, widgetName);
+    if (!widget) {
+      widget = this.open(path, widgetName, kernel);
+    } else {
+      this._opener.open(widget);
+    }
+    return widget;
   }
 
   /**
@@ -353,8 +353,7 @@ class DocumentManager implements IDisposable {
    */
   private _findContext(path: string, factoryName: string): Private.IContext {
     return find(this._contexts, context => {
-      return (context.factoryName === factoryName &&
-              context.path === path);
+      return context.factoryName === factoryName && context.path === path;
     });
   }
 
@@ -362,9 +361,7 @@ class DocumentManager implements IDisposable {
    * Get a context for a given path.
    */
   private _contextForPath(path: string): Private.IContext {
-    return find(this._contexts, context => {
-      return context.path === path;
-    });
+    return find(this._contexts, context => context.path === path);
   }
 
   /**
