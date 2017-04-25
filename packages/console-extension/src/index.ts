@@ -212,7 +212,8 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
   commands.addCommand(command, {
     label: 'Start New Console',
     execute: (args: Partial<ConsolePanel.IOptions>) => {
-      args.basePath = args.basePath || '.';
+      let basePath = args.basePath || '.';
+      args = { basePath, ...args };
       return createConsole(args);
     }
   });
