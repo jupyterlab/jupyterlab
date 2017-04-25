@@ -53,7 +53,7 @@ def install_extension(extension):
     tar_name, pkg_name = validate_extension(extension)
     config = _get_config()
     path = pjoin(_get_cache_dir(config), tar_name)
-    run(['npm', 'install', '--save', path], cwd=_get_root_dir(config))
+    run(['npm', 'install', '--save', path], cwd=_get_runtime_dir(config))
     config['installed_extensions'][pkg_name] = path
     if pkg_name in config['linked_extensions']:
         del config['linked_extensions'][pkg_name]
@@ -151,7 +151,7 @@ def clean():
     """Clean the JupyterLab application directory."""
     config = _get_config()
     for name in ['node_modules', 'build']:
-        target = pjoin(_get_root_dir(config), name)
+        target = pjoin(_get_runtime_dir(config), name)
         if osp.exists(target):
             shutil.rmtree(target)
 
@@ -161,7 +161,7 @@ def build():
     # Set up the build directory.
     config = _get_config()
     _ensure_package(config)
-    root = _get_root_dir(config)
+    root = _get_runtime_dir(config)
 
     # Make sure packages are installed.
     run(['npm', 'install'], cwd=root)
@@ -191,7 +191,7 @@ def _ensure_package(config):
     """Make sure the build dir is set up.
     """
     cache_dir = _get_cache_dir(config)
-    root_dir = _get_root_dir(config)
+    root_dir = _get_runtime_dir(config)
     if not osp.exists(cache_dir):
         os.makedirs(cache_dir)
     for name in ['package.json', 'index.template.js', 'webpack.config.js']:
@@ -267,21 +267,21 @@ def _get_config_dir():
     return pjoin(CONFIG_PATH, 'labconfig')
 
 
-def _get_root_dir(config=None):
+def _get_runtime_dir(config=None):
     config = config or _get_config()
     return config['location']
 
 
 def _get_build_dir(config=None):
     config = config or _get_config()
-    return pjoin(_get_root_dir(config), 'build')
+    return pjoin(_get_runtime_dir(config), 'build')
 
 
 def _get_pkg_path(config=None):
     config = config or _get_config()
-    return pjoin(_get_root_dir(config), 'package.json')
+    return pjoin(_get_runtime_dir(config), 'package.json')
 
 
 def _get_cache_dir(config=None):
     config = config or _get_config()
-    return pjoin(_get_root_dir(config), 'cache')
+    return pjoin(_get_runtime_dir(config), 'cache')

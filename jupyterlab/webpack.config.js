@@ -1,4 +1,4 @@
-var childProcess = require('child-process');
+var childProcess = require('child_process');
 var webpack = require('webpack');
 var path = require('path');
 var fs = require('fs-extra');

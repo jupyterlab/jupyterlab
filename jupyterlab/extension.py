@@ -6,10 +6,10 @@
 import os
 
 from jinja2 import FileSystemLoader
-from jupyterlab_launcher import add_handlers
+from jupyterlab_launcher import add_handlers, LabConfig
 
-from .commands import _get_build_dir, _get_config, _get_config_dir
-
+from .commands import describe, _get_config_dir, _get_runtime_dir
+from ._version import __version__
 
 #-----------------------------------------------------------------------------
 # Module globals
@@ -35,29 +35,25 @@ def load_jupyter_server_extension(nbapp):
     """
     # Print messages.
     nbapp.log.info('JupyterLab alpha preview extension loaded from %s' % HERE)
-    base_dir = os.path.realpath(os.path.join(HERE, '..'))
-    dev_mode = os.path.exists(os.path.join(base_dir, '.git'))
-    if dev_mode:
-        nbapp.log.info(DEV_NOTE_NPM)
 
     web_app = nbapp.web_app
-
-    # Handle page config data.
-    config_dir = _get_config_dir()
-    build_config = _get_config()
-    page_config_file = os.path.join(config_dir, 'page_config_data.json')
-    build_dir = _get_build_dir(build_config)
+    config = LabConfig()
+    config.runtime_dir = _get_runtime_dir()
+    config.config_dir = _get_config_dir()
+    config.page_title = 'JupyterLab Alpha Preview'
+    config.name = 'JupyterLab'
+    config.prefix = PREFIX
+    config.version = __version__
 
     # Check for dev mode.
     dev_mode = False
     if hasattr(nbapp, 'dev_mode'):
         dev_mode = nbapp.dev_mode
 
-    if not os.path.exists(build_dir) or dev_mode:
-        print('Serving local JupyterLab files')
-        build_dir = os.path.join(HERE, 'build')
+    if dev_mode:
+        nbapp.log.info(DEV_NOTE_NPM)
+        config.runtime_dir = HERE
+        config.config_dir = ''
+        config.version = describe()
 
-    add_handlers(
-        web_app, page_config_file, build_dir, 'JupyterLab Alpha Preview',
-        PREFIX
-    )
+    add_handlers(web_app, config)

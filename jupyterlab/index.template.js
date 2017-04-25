@@ -7,10 +7,17 @@ var utils = require('@jupyterlab/services').utils;
 
 
 function main() {
+    var version = utils.getConfigOption('appVersion') || 'unknown';
+    var name = utils.getConfigOption('appName') || 'JupyterLab';
+    var namespace = utils.getConfigOption('appNamespace') || 'jupyterlab';
+    if (version[0] === 'v') {
+        version = version.slice(1);
+    }
+
     lab = new app({
-        gitDescription: process.env.GIT_DESCRIPTION,
-        namespace: 'jupyterlab',
-        version: process.env.JUPYTERLAB_VERSION
+        namespace: namespace,
+        name: name,
+        version: version
     });
     {{#each jupyterlab_extensions}}
     try {

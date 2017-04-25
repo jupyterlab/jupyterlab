@@ -30,7 +30,7 @@ class JupyterLab extends Application<ApplicationShell> {
   constructor(options: JupyterLab.IOptions = {}) {
     super({ shell: new ApplicationShell() });
     this._info = {
-      gitDescription: options.gitDescription || 'unknown',
+      name: options.name || 'JupyterLab',
       namespace: options.namespace || 'jupyterlab',
       version:  options.version || 'unknown'
     };
@@ -90,9 +90,9 @@ namespace JupyterLab {
   export
   interface IOptions {
     /**
-     * The git description of the JupyterLab application.
+     * The name of the JupyterLab application.
      */
-    gitDescription?: string;
+    name?: string;
 
     /**
      * The namespace/prefix plugins may use to denote their origin.
@@ -117,9 +117,9 @@ namespace JupyterLab {
   export
   interface IInfo {
     /**
-     * The git description of the JupyterLab application.
+     * The name of the JupyterLab application.
      */
-    readonly gitDescription: string;
+    readonly name: string;
 
     /**
      * The namespace/prefix plugins may use to denote their origin.
