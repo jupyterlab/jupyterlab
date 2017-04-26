@@ -6,6 +6,10 @@ import {
 } from '@phosphor/algorithm';
 
 import {
+  DisposableSet
+} from '@phosphor/disposable';
+
+import {
   Message
 } from '@phosphor/messaging';
 
@@ -107,6 +111,13 @@ class Chatbox extends Widget {
    */
   readonly rendermime: IRenderMime;
 
+  /**
+   * Whether the chatbox has been disposed.
+   */
+  get isDisposed(): boolean {
+    return this._disposables === null;
+  }
+
   /*
    * The chatbox input prompt.
    */
@@ -129,7 +140,6 @@ class Chatbox extends Widget {
         // Update the chatlog vector.
         if (this._log) {
           this._log.changed.disconnect(this._onLogChanged, this);
-          this._log.dispose();
         }
         if (modelDB.has('internal:chat')) {
           this._log = modelDB.get('internal:chat') as IObservableVector<ChatEntry.IModel>;
@@ -139,9 +149,7 @@ class Chatbox extends Widget {
         this._log.changed.connect(this._onLogChanged, this);
 
         // Remove any existing widgets.
-        while (this._content.widgets.length) {
-          (this._content.layout as PanelLayout).removeWidgetAt(0);
-        }
+        this.clear();
         each(this._log, entry => {
           let entryWidget = this._entryWidgetFromModel(entry);
           this._content.addWidget(entryWidget);
@@ -155,9 +163,9 @@ class Chatbox extends Widget {
    */
   clear(): void {
     // Dispose all the content cells.
-    let cells = this._content.widgets;
-    while (cells.length) {
-      cells[0].dispose();
+    let entries = this._content.widgets;
+    while (entries.length) {
+      entries[0].dispose();
     }
   }
 
@@ -166,13 +174,14 @@ class Chatbox extends Widget {
    */
   dispose() {
     // Do nothing if already disposed.
-    if (this._log === null) {
+    if (this._disposables === null) {
       return;
     }
-    let log = this._log;
+    let disposables = this._disposables;
+    this._disposables = null;
+    disposables.dispose();
     this._log = null;
 
-    log.dispose();
     super.dispose();
   }
 
@@ -296,7 +305,9 @@ class Chatbox extends Widget {
         break;
       case 'remove':
         each(args.oldValues, entry => {
+          let widget = layout.widgets[args.oldIndex];
           layout.removeWidgetAt(args.oldIndex);
+          widget.dispose();
         });
         break;
       case 'move':
@@ -334,6 +345,7 @@ class Chatbox extends Widget {
   private _entryWidgetFromModel(entry: ChatEntry.IModel): ChatEntry {
     let options = this._createMarkdownCellOptions(entry.text);
     let cellWidget = this.contentFactory.createCell(options);
+    this._disposables.add(cellWidget);
     cellWidget.readOnly = true;
     cellWidget.rendered = true;
     let entryWidget = new ChatEntry({
@@ -349,6 +361,7 @@ class Chatbox extends Widget {
   private _createMarkdownCellOptions(text: string = ''): MarkdownCellWidget.IOptions {
     let contentFactory = this.contentFactory.markdownCellContentFactory;
     let model = new MarkdownCellModel({ });
+    this._disposables.add(model);
     let rendermime = this.rendermime;
     model.value.text = text || '';
     return { model, rendermime, contentFactory };
@@ -358,8 +371,9 @@ class Chatbox extends Widget {
   private _content: Panel = null;
   private _log: IObservableVector<ChatEntry.IModel> = null;
   private _input: Panel = null;
-  private _mimetype = 'text/x-ipython';
+  private _mimetype = 'text/x-ipythongfm';
   private _model: DocumentRegistry.IModel = null;
+  private _disposables = new DisposableSet();
 }
 
 
