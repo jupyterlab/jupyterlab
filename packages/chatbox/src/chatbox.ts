@@ -2,11 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject
-} from '@phosphor/coreutils';
-
-import {
-  map, toArray, each
+  each
 } from '@phosphor/algorithm';
 
 import {
@@ -34,7 +30,7 @@ import {
 } from '@jupyterlab/cells';
 
 import {
-  nbformat, IObservableVector, ObservableVector
+  IObservableVector, ObservableVector
 } from '@jupyterlab/coreutils';
 
 import {
@@ -87,7 +83,6 @@ class Chatbox extends Widget {
     let layout = this.layout = new PanelLayout();
     this._content = new Panel();
     this._input = new Panel();
-    this._log = new ObservableVector<Chatbox.IChatEntry>();
 
     this.contentFactory = options.contentFactory;
     this.rendermime = options.rendermime;
@@ -132,11 +127,17 @@ class Chatbox extends Widget {
     if (modelDB) {
       modelDB.connected.then(() => {
         // Update the chatlog vector.
+        if (this._log) {
+          this._log.changed.disconnect(this._onLogChanged, this);
+          this._log.dispose();
+        }
         if (modelDB.has('internal:chat')) {
-          this._log = modelDB.get('internal:chat') as IObservableVector<Chatbox.IChatEntry>;
+          this._log = modelDB.get('internal:chat') as IObservableVector<ChatEntry.IModel>;
         } else {
           this._log = modelDB.createVector('internal:chat');
         }
+        this._log.changed.connect(this._onLogChanged, this);
+
         // Remove any existing widgets.
         while (this._content.widgets.length) {
           (this._content.layout as PanelLayout).removeWidgetAt(0);
@@ -150,24 +151,10 @@ class Chatbox extends Widget {
             model: entry,
             cell: cellWidget
           });
-          this.addEntry(entryWidget);
+          this._content.addWidget(entryWidget);
         });
       });
     }
-  }
-
-  /**
-   * Add a new cell to the content panel.
-   *
-   * @param cell - The cell widget being added to the content panel.
-   *
-   * #### Notes
-   * This method is meant for use by outside classes that want to inject content
-   * into a chatbox. It is distinct from the `inject` method in that it requires
-   * rendered code cell widgets and does not execute them.
-   */
-  addEntry(entry: ChatEntry) {
-    this._content.addWidget(entry);
   }
 
   /**
@@ -177,7 +164,7 @@ class Chatbox extends Widget {
     // Dispose all the content cells.
     let cells = this._content.widgets;
     while (cells.length) {
-      cells[1].dispose();
+      cells[0].dispose();
     }
   }
 
@@ -207,28 +194,13 @@ class Chatbox extends Widget {
     let prompt = this.prompt;
 
     if (prompt.model.value.text.trim() !== '') {
-      this.newPrompt();
+      this._newPrompt();
       prompt.model.trusted = true;
       this._post(prompt);
     } else {
       return;
     }
   }
-
-  /**
-   * Serialize the output.
-   */
-  serialize(): nbformat.IMarkdownCell[] {
-    let prompt = this.prompt;
-    let layout = this._content.layout as PanelLayout;
-    // Serialize content.
-    let output = map(layout.widgets, widget => {
-      return (widget as MarkdownCellWidget).model.toJSON() as nbformat.IMarkdownCell;
-    });
-    // Serialize prompt and return.
-    return toArray(output).concat(prompt.model.toJSON() as nbformat.IMarkdownCell);
-  }
-
 
   /**
    * Handle the DOM events for the widget.
@@ -258,7 +230,7 @@ class Chatbox extends Widget {
     node.addEventListener('keydown', this, true);
     // Create a prompt if necessary.
     if (!this.prompt) {
-      this.newPrompt();
+      this._newPrompt();
     } else {
       this.prompt.editor.focus();
       this.update();
@@ -284,7 +256,7 @@ class Chatbox extends Widget {
   /**
    * Make a new prompt.
    */
-  protected newPrompt(): void {
+  private _newPrompt(): void {
     let prompt = this.prompt;
     let input = this._input;
 
@@ -305,7 +277,7 @@ class Chatbox extends Widget {
         },
         cell: prompt
       });
-      this.addEntry(entryWidget);
+      this._content.addWidget(entryWidget);
     }
 
     // Create the new prompt.
@@ -340,6 +312,9 @@ class Chatbox extends Widget {
     }
   }
 
+  private _onLogChanged(log: IObservableVector<ChatEntry.IModel>, args: ObservableVector.IChangedArgs<ChatEntry.IModel>) {
+  }
+
   /**
    * Execute the code in the current prompt.
    */
@@ -362,7 +337,7 @@ class Chatbox extends Widget {
 
   private _mimeTypeService: IEditorMimeTypeService;
   private _content: Panel = null;
-  private _log: IObservableVector<Chatbox.IChatEntry> = null;
+  private _log: IObservableVector<ChatEntry.IModel> = null;
   private _input: Panel = null;
   private _mimetype = 'text/x-ipython';
   private _model: DocumentRegistry.IModel = null;
@@ -415,22 +390,6 @@ namespace Chatbox {
      */
     createCell(options: MarkdownCellWidget.IOptions): MarkdownCellWidget;
 
-  }
-
-  /**
-   * An interface for an entry in the chat log.
-   */
-  export
-  interface IChatEntry extends JSONObject {
-    /**
-     * The text of the chat entry.
-     */
-    text: string;
-
-    /**
-     * The collaborator who logged the entry.
-     */
-    author: any;
   }
 
   /**
