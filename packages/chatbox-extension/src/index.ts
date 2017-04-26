@@ -106,18 +106,18 @@ function activateChatbox(app: JupyterLab, rendermime: IRenderMime, palette: ICom
   });
   palette.addItem({ command, category });
 
-  let updateDocumentModel = function (): void {
+  let updateDocumentContext = function (): void {
     let context = docManager.contextForWidget(shell.currentWidget);
-    if (context && context.model !== panel.chatbox.model) {
+    if (context) {
       if(!panel.isAttached) {
         shell.addToLeftArea(panel);
       }
-      panel.chatbox.model = context.model;
+      panel.context = context;
     }
   }
 
   app.restored.then(() => {
-    updateDocumentModel();
+    updateDocumentContext();
   });
-  shell.currentChanged.connect(updateDocumentModel);
+  shell.currentChanged.connect(updateDocumentContext);
 }

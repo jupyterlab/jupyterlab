@@ -2,11 +2,19 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Panel, Widget
+} from '@phosphor/widgets';
+
+import {
+  Message
+} from '@phosphor/messaging';
+
+import {
   IEditorMimeTypeService, CodeEditor
 } from '@jupyterlab/codeeditor';
 
 import {
-  uuid
+  uuid, PathExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -14,12 +22,8 @@ import {
 } from '@jupyterlab/rendermime';
 
 import {
-  Message
-} from '@phosphor/messaging';
-
-import {
-  Panel
-} from '@phosphor/widgets';
+  DocumentRegistry
+} from '@jupyterlab/docregistry';
 
 import {
   Chatbox
@@ -30,6 +34,11 @@ import {
  * The class name added to chatbox panels.
  */
 const PANEL_CLASS = 'jp-ChatboxPanel';
+
+/**
+ * The class name added to the document info widget.
+ */
+const DOCUMENT_INFO_CLASS = 'jp-ChatboxDocumentInfo';
 
 
 /**
@@ -53,6 +62,9 @@ class ChatboxPanel extends Panel {
       path = `${basePath || ''}/chatbox-${count}-${uuid()}`;
     }
 
+    this._documentInfo = new ChatboxDocumentInfo();
+    this.addWidget(this._documentInfo);
+
     this.chatbox = new Chatbox({
       rendermime, mimeTypeService, contentFactory
     });
@@ -69,10 +81,25 @@ class ChatboxPanel extends Panel {
   readonly chatbox: Chatbox;
 
   /**
+   * The current document context for the chat.
+   */
+  get context(): DocumentRegistry.IContext<DocumentRegistry.IModel> {
+    return this._context;
+  }
+  set context(value: DocumentRegistry.IContext<DocumentRegistry.IModel>) {
+    if (this._context === value) {
+      return;
+    }
+    this.chatbox.model = value.model;
+    this._documentInfo.context = value;
+  }
+
+  /**
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
     this.chatbox.dispose();
+    this._documentInfo.dispose();
     super.dispose();
   }
 
@@ -90,6 +117,45 @@ class ChatboxPanel extends Panel {
     super.onCloseRequest(msg);
     this.dispose();
   }
+
+  private _documentInfo: ChatboxDocumentInfo;
+  private _context: DocumentRegistry.IContext<DocumentRegistry.IModel> = null;
+}
+
+/**
+ * A class representing a widget displaying document information
+ * for the chatbox.
+ */
+export
+class ChatboxDocumentInfo extends Widget {
+  constructor() {
+    super();
+    this.addClass(DOCUMENT_INFO_CLASS);
+  }
+
+  /**
+   * The current document context for the chat.
+   */
+  get context(): DocumentRegistry.IContext<DocumentRegistry.IModel> {
+    return this._context;
+  }
+  set context(value: DocumentRegistry.IContext<DocumentRegistry.IModel>) {
+    if (this._context) {
+      this._context.pathChanged.disconnect(this._onPathChanged, this);
+    }
+    this._context = value;
+    this._context.pathChanged.connect(this._onPathChanged, this);
+    this.node.textContent = PathExt.basename(value.path);
+  }
+
+  /**
+   * Handle a file moving/renaming.
+   */
+  private _onPathChanged(sender: DocumentRegistry.IContext<DocumentRegistry.IModel>, path: string): void {
+    this.node.textContent = PathExt.basename(path);
+  }
+
+  private _context: DocumentRegistry.IContext<DocumentRegistry.IModel> = null;
 }
 
 
