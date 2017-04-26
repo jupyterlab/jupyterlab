@@ -319,14 +319,17 @@ class DirListing extends Widget {
     if (!this._clipboard.length) {
       return;
     }
+
+    const basePath = this._model.path;
     let promises: Promise<Contents.IModel>[] = [];
+
     each(this._clipboard, path => {
       if (this._isCut) {
-        let parts = path.split('/');
-        let name = parts[parts.length - 1];
-        promises.push(this._model.rename(path, name));
+        const parts = path.split('/');
+        const name = parts[parts.length - 1];
+        promises.push(this._model.manager.rename(path, name, basePath));
       } else {
-        promises.push(this._model.copy(path, '.'));
+        promises.push(this._model.manager.copy(path, '.', basePath));
       }
     });
 
@@ -379,10 +382,12 @@ class DirListing extends Widget {
    * @returns A promise that resolves when the operation is complete.
    */
   duplicate(): Promise<void> {
+    const basePath = this._model.path;
     let promises: Promise<Contents.IModel>[] = [];
+
     for (let item of this._getSelectedItems()) {
       if (item.type !== 'directory') {
-        promises.push(this._model.copy(item.name, '.'));
+        promises.push(this._model.manager.copy(item.name, '.', basePath));
       }
     }
     return Promise.all(promises).catch(error => {
@@ -410,13 +415,14 @@ class DirListing extends Widget {
    * @returns A promise that resolves when the operation is complete.
    */
   shutdownKernels(): Promise<void> {
-    let promises: Promise<void>[] = [];
-    let items = this._sortedItems;
-    let paths = toArray(map(items, item => item.path));
+    const model = this._model;
+    const promises: Promise<void>[] = [];
+    const items = this._sortedItems;
+    const paths = items.map(item => item.path);
     each(this._model.sessions(), session => {
       let index = ArrayExt.firstIndexOf(paths, session.notebook.path);
       if (this._selection[items[index].name]) {
-        promises.push(this._model.shutdown(session.id));
+        promises.push(model.manager.services.sessions.shutdown(session.id));
       }
     });
     return Promise.all(promises).catch(error => {
@@ -1183,9 +1189,10 @@ class DirListing extends Widget {
    * Delete the files with the given names.
    */
   private _delete(names: string[]): Promise<void> {
-    let promises: Promise<void>[] = [];
+    const promises: Promise<void>[] = [];
+    const basePath = this._model.path;
     for (let name of names) {
-      promises.push(this._model.deleteFile(name));
+      promises.push(this._model.manager.deleteFile(name, basePath));
     }
     return Promise.all(promises).catch(error => {
       utils.showErrorMessage('Delete file', error);

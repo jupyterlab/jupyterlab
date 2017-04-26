@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IChangedArgs, PathExt, uuid
+  IChangedArgs, PathExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/docmanager';
 
 import {
-  Contents, Kernel, ServiceManager, Session
+  Contents, Kernel, Session
 } from '@jupyterlab/services';
 
 import {
