@@ -6,16 +6,12 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  createFromDialog, IDocumentManager
+  IDocumentManager
 } from '@jupyterlab/docmanager';
 
 import {
   Kernel
 } from '@jupyterlab/services';
-
-import {
-  each
-} from '@phosphor/algorithm';
 
 import {
   CommandRegistry
@@ -176,17 +172,6 @@ class FileButtons extends Widget {
   }
 
   /**
-   * Create a file from a creator.
-   *
-   * @param creatorName - The name of the file creator.
-   *
-   * @returns A promise that resolves with the created widget.
-   */
-  createFrom(creatorName: string): Promise<Widget> {
-    return createFromDialog(this.model, this.manager, creatorName);
-  }
-
-  /**
    * Open a file by path.
    *
    * @param path - The path of the file.
@@ -330,16 +315,6 @@ namespace FileButtons {
  */
 namespace Private {
   /**
-   * The ID counter prefix for new commands.
-   *
-   * #### Notes
-   * Even though the commands are disposed when the dropdown menu is disposed,
-   * in order to guarantee there are no race conditions with other `FileButtons`
-   * instances, each set of commands is prefixed.
-   */
-  let id = 0;
-
-  /**
    * An object which holds the button nodes for a file buttons widget.
    */
   export
@@ -419,10 +394,7 @@ namespace Private {
   export
   function createDropdownMenu(widget: FileButtons, commands: CommandRegistry): Menu {
     let menu = new Menu({ commands });
-    let prefix = `file-buttons-${++id}`;
     let disposables = new DisposableSet();
-    let registry = widget.manager.registry;
-    let command: string;
 
     // Remove all the commands associated with this menu upon disposal.
     menu.disposed.connect(() => disposables.dispose());
@@ -438,17 +410,21 @@ namespace Private {
       command: 'file-operations:new-untitled'
     });
 
-    each(registry.creators(), creator => {
-      console.log('boom', creator.name);
-      command = `${prefix}:new-${creator.name}`;
-      disposables.add(commands.addCommand(command, {
-        execute: () => {
-          widget.createFrom(creator.name);
-        },
-        label: creator.name
-      }));
-      menu.addItem({ command });
-    });
+    console.log('TODO: implement create from menu in file browser buttons');
+    // let prefix = `file-buttons-${++id}`;
+    // let registry = widget.manager.registry;
+    // let command: string;
+    // each(registry.creators(), creator => {
+    //   console.log('boom', creator.name);
+    //   command = `${prefix}:new-${creator.name}`;
+    //   disposables.add(commands.addCommand(command, {
+    //     execute: () => {
+    //       widget.createFrom(creator.name);
+    //     },
+    //     label: creator.name
+    //   }));
+    //   menu.addItem({ command });
+    // });
     return menu;
   }
 

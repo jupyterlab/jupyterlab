@@ -26,7 +26,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  each, map, toArray
+  map, toArray
 } from '@phosphor/algorithm';
 
 import {
@@ -123,7 +123,6 @@ function activateFactory(app: JupyterLab, documentManager: IDocumentManager, sta
  */
 function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, manager: IServiceManager, documentManager: IDocumentManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer): void {
   const { commands } = app;
-  const category = 'File Operations';
   const fbWidget = factory.createFileBrowser('filebrowser', {
     commands, documentManager
   });
@@ -136,18 +135,19 @@ function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, mana
   // responsible for their own restoration behavior, if any.
   restorer.add(fbWidget, namespace);
 
-  let creatorCmds: { [key: string]: DisposableSet } = Object.create(null);
-  let addCreator = (name: string) => {
-    let disposables = creatorCmds[name] = new DisposableSet();
-    let command = Private.commandForName(name);
-    disposables.add(commands.addCommand(command, {
-      execute: () => fbWidget.createFrom(name),
-      label: `New ${name}`
-    }));
-    disposables.add(palette.addItem({ command, category }));
-  };
+  console.log('TODO: implement creator from file browser context menu');
+  // let creatorCmds: { [key: string]: DisposableSet } = Object.create(null);
+  // let addCreator = (name: string) => {
+  //   let disposables = creatorCmds[name] = new DisposableSet();
+  //   let command = Private.commandForName(name);
+  //   disposables.add(commands.addCommand(command, {
+  //     execute: () => fbWidget.createFrom(name),
+  //     label: `New ${name}`
+  //   }));
+  //   disposables.add(palette.addItem({ command, category }));
+  // };
 
-  each(registry.creators(), creator => { addCreator(creator.name); });
+  // each(registry.creators(), creator => { addCreator(creator.name); });
 
   // Add a context menu to the dir listing.
   let node = fbWidget.node.getElementsByClassName('jp-DirListing-content')[0];
@@ -183,8 +183,9 @@ function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, mana
 
   addCommands(app, fbWidget);
 
-  let menu = createMenu(app, Object.keys(creatorCmds));
-  mainMenu.addMenu(menu, { rank: 1 });
+  console.log('TODO: create file menu in doc manager extension');
+  // let menu = createMenu(app, Object.keys(creatorCmds));
+  // mainMenu.addMenu(menu, { rank: 1 });
 
   fbWidget.title.label = 'Files';
   app.shell.addToLeftArea(fbWidget, { rank: 100 });
@@ -196,21 +197,23 @@ function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, mana
     }
   });
 
+
+  console.log('TODO: move registry changed handler to doc manager extension');
   // Handle fileCreator items as they are added.
-  registry.changed.connect((sender, args) => {
-    if (args.type === 'fileCreator') {
-      menu.dispose();
-      let name = args.name;
-      if (args.change === 'added') {
-        addCreator(name);
-      } else {
-        creatorCmds[name].dispose();
-        delete creatorCmds[name];
-      }
-      menu = createMenu(app, Object.keys(creatorCmds));
-      mainMenu.addMenu(menu, { rank: 1 });
-    }
-  });
+  // registry.changed.connect((sender, args) => {
+  //   if (args.type === 'fileCreator') {
+  //     menu.dispose();
+  //     let name = args.name;
+  //     if (args.change === 'added') {
+  //       addCreator(name);
+  //     } else {
+  //       creatorCmds[name].dispose();
+  //       delete creatorCmds[name];
+  //     }
+  //     menu = createMenu(app, Object.keys(creatorCmds));
+  //     mainMenu.addMenu(menu, { rank: 1 });
+  //   }
+  // });
 }
 
 
@@ -247,23 +250,23 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser): void {
 /**
  * Create a top level menu for the file browser.
  */
-function createMenu(app: JupyterLab, creatorCmds: string[]): Menu {
-  let { commands } = app;
-  let menu = new Menu({ commands });
-  menu.title.label = 'File';
-  creatorCmds.forEach(name => {
-    menu.addItem({ command: Private.commandForName(name) });
-  });
-  [
-    'file-operations:save',
-    'file-operations:restore-checkpoint',
-    'file-operations:save-as',
-    'file-operations:close',
-    'file-operations:close-all-files'
-  ].forEach(command => { menu.addItem({ command }); });
+// function createMenu(app: JupyterLab, creatorCmds: string[]): Menu {
+//   let { commands } = app;
+//   let menu = new Menu({ commands });
+//   menu.title.label = 'File';
+//   creatorCmds.forEach(name => {
+//     menu.addItem({ command: Private.commandForName(name) });
+//   });
+//   [
+//     'file-operations:save',
+//     'file-operations:restore-checkpoint',
+//     'file-operations:save-as',
+//     'file-operations:close',
+//     'file-operations:close-all-files'
+//   ].forEach(command => { menu.addItem({ command }); });
 
-  return menu;
-}
+//   return menu;
+// }
 
 
 /**

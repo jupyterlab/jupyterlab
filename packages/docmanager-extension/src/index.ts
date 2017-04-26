@@ -10,7 +10,8 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  DocumentManager, IDocumentManager, showErrorMessage
+  createFromDialog, DocumentManager, IDocumentManager, IFileContainer,
+  showErrorMessage
 } from '@jupyterlab/docmanager';
 
 import {
@@ -27,28 +28,31 @@ import {
  */
 namespace CommandIDs {
   export
-  const deleteFile = 'file-operations:delete-file';
-
-  export
-  const save = 'file-operations:save';
-
-  export
-  const restoreCheckpoint = 'file-operations:restore-checkpoint';
-
-  export
-  const saveAs = 'file-operations:save-as';
-
-  export
   const close = 'file-operations:close';
 
   export
   const closeAllFiles = 'file-operations:close-all-files';
 
   export
+  const createFrom = 'file-operations:create-from';
+
+  export
+  const deleteFile = 'file-operations:delete-file';
+
+  export
   const newUntitled = 'file-operations:new-untitled';
 
   export
   const open = 'file-operations:open';
+
+  export
+  const restoreCheckpoint = 'file-operations:restore-checkpoint';
+
+  export
+  const save = 'file-operations:save';
+
+  export
+  const saveAs = 'file-operations:save-as';
 };
 
 
@@ -111,6 +115,35 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   commands.addCommand(CommandIDs.closeAllFiles, {
     label: 'Close All',
     execute: () => { app.shell.closeAll(); }
+  });
+
+  commands.addCommand(CommandIDs.createFrom, {
+    label: args => (args['label'] as string) ||
+      `Create ${args['creatorName'] as string}`,
+    execute: args => {
+      const path = args['path'] as string;
+      const creatorName = args['creatorName'] as string;
+      if (!path || !creatorName) {
+        const command = CommandIDs.createFrom;
+        throw new Error(`${command} requires path and creatorName.`);
+      }
+
+      const items = args['items'] as string[];
+      if (items) {
+        const container: IFileContainer = { items, path };
+        return createFromDialog(container, docManager, creatorName);
+      }
+
+      const { services } = docManager;
+      return services.contents.get(path, { content: true }).then(contents => {
+        const items = contents.content.map((item: Contents.IModel) => {
+          return item.name;
+        });
+        const container: IFileContainer = { items, path };
+
+        return createFromDialog(container, docManager, creatorName);
+      });
+    }
   });
 
   commands.addCommand(CommandIDs.deleteFile, {
