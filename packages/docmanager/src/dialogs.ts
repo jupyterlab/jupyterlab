@@ -91,7 +91,7 @@ function renameFileDialog(manager: IDocumentManager, oldPath: string, newPath: s
 
 
 /**
- * An error message dialog to show in the filebrowser widget.
+ * An error message dialog to upon document manager errors.
  */
 export
 function showErrorMessage(title: string, error: Error): Promise<void> {
