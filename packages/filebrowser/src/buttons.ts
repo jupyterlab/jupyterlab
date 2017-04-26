@@ -439,6 +439,7 @@ namespace Private {
     });
 
     each(registry.creators(), creator => {
+      console.log('boom', creator.name);
       command = `${prefix}:new-${creator.name}`;
       disposables.add(commands.addCommand(command, {
         execute: () => {
