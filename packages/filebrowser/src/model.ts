@@ -221,7 +221,7 @@ class FileBrowserModel implements IDisposable {
    *   downloading.
    */
   download(path: string): Promise<void> {
-    return this._manager.services.contents.getDownloadUrl(path).then(url => {
+    return this.manager.services.contents.getDownloadUrl(path).then(url => {
       let element = document.createElement('a');
       element.setAttribute('href', url);
       element.setAttribute('download', '');
@@ -248,7 +248,7 @@ class FileBrowserModel implements IDisposable {
       return Promise.resolve(void 0);
     }
 
-    const manager = this._manager;
+    const manager = this.manager;
     const key = `file-browser-${id}:cwd`;
     const ready = manager.services.ready;
     return Promise.all([state.fetch(key), ready]).then(([cwd]) => {
@@ -292,7 +292,7 @@ class FileBrowserModel implements IDisposable {
 
     let path = this._model.path;
     path = path ? path + '/' + file.name : file.name;
-    return this._manager.services.contents.get(path, {}).then(() => {
+    return this.manager.services.contents.get(path, {}).then(() => {
       let msg = `"${file.name}" already exists`;
       throw new Error(msg);
     }, () => {
@@ -332,7 +332,7 @@ class FileBrowserModel implements IDisposable {
           content: Private.getContent(reader)
         };
 
-        this._manager.services.contents.save(path, model).then(contents => {
+        this.manager.services.contents.save(path, model).then(contents => {
           resolve(contents);
         }).catch(reject);
       };
@@ -361,7 +361,7 @@ class FileBrowserModel implements IDisposable {
     };
     this._items = contents.content;
     this._paths.clear();
-    each(contents.content, (model: Contents.IModel) => {
+    contents.content.forEach((model: Contents.IModel) => {
       this._paths.add(model.path);
     });
   }
@@ -430,7 +430,6 @@ class FileBrowserModel implements IDisposable {
   private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
   private _items: Contents.IModel[] = [];
   private _key: string = '';
-  private _manager: IDocumentManager = null;
   private _maxUploadSizeMb = 15;
   private _model: Contents.IModel;
   private _pathChanged = new Signal<this, IChangedArgs<string>>(this);

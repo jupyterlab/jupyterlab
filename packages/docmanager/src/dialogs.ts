@@ -10,8 +10,8 @@ import {
 } from '@jupyterlab/services';
 
 import {
- each, IIterator
-} from '@phosphor/algorithm';
+  JSONObject
+} from '@phosphor/coreutils'
 
 import {
   Widget
@@ -37,12 +37,11 @@ const FILE_CONFLICT_CLASS = 'jp-mod-conflict';
  * A stripped-down interface for a file container.
  */
 export
-interface IFileContainer {
+interface IFileContainer extends JSONObject {
   /**
-   * Returns an iterator over the container's items.
+   * The list of item names in the current working directory.
    */
-  items(): IIterator<Contents.IModel>;
-
+  items: string[];
   /**
    * The current working directory of the file container.
    */
@@ -120,18 +119,22 @@ class CreateFromHandler extends Widget {
     this._manager = manager;
     this._creatorName = creatorName;
 
-    // Check for name conflicts when the inputNode changes.
-    this.inputNode.addEventListener('input', () => {
-      let value = this.inputNode.value;
-      if (value !== this._orig) {
-        each(this._container.items(), item => {
-          if (item.name === value) {
-            this.addClass(FILE_CONFLICT_CLASS);
-            return;
-          }
-        });
-      }
-      this.removeClass(FILE_CONFLICT_CLASS);
+    const { services } = manager;
+    services.contents.get(container.path, { content: true }).then(contents => {
+      // Check for name conflicts when the inputNode changes.
+      this.inputNode.addEventListener('input', () => {
+        console.log('on input');
+        const value = this.inputNode.value;
+        if (value !== this._orig) {
+          contents.content.forEach((item: Contents.IModel) => {
+            if (item.name === value) {
+              this.addClass(FILE_CONFLICT_CLASS);
+              return;
+            }
+          });
+        }
+        this.removeClass(FILE_CONFLICT_CLASS);
+      });
     });
   }
 
