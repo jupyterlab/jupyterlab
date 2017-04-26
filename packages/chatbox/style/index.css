@@ -55,8 +55,22 @@
   display: none;
 }
 
-.jp-Chatbox .jp-InputArea {
-  background-color: pink;
+.jp-Chatbox-content .jp-Cell {
+  margin: 5px;
+  border-radius: 10px;
+  flex-grow: 1;
+}
+
+.jp-Chatbox .jp-ChatEntry {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 2px;
+}
+
+.jp-Chatbox .jp-ChatEntry-badge {
+  border-radius: 10px;
+  padding: 2px;
 }
 
 .jp-Chatbox-content .jp-InputArea-editor.jp-CellEditor {

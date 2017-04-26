@@ -41,6 +41,10 @@ import {
   IRenderMime
 } from '@jupyterlab/rendermime';
 
+import {
+  ChatEntry
+} from './entry';
+
 
 /**
  * The class name added to chatbox widgets.
@@ -142,7 +146,11 @@ class Chatbox extends Widget {
           let cellWidget = this.contentFactory.createCell(options);
           cellWidget.readOnly = true;
           cellWidget.rendered = true;
-          this.addCell(cellWidget);
+          let entryWidget = new ChatEntry({
+            model: entry,
+            cell: cellWidget
+          });
+          this.addEntry(entryWidget);
         });
       });
     }
@@ -158,8 +166,8 @@ class Chatbox extends Widget {
    * into a chatbox. It is distinct from the `inject` method in that it requires
    * rendered code cell widgets and does not execute them.
    */
-  addCell(cell: BaseCellWidget) {
-    this._content.addWidget(cell);
+  addEntry(entry: ChatEntry) {
+    this._content.addWidget(entry);
   }
 
   /**
@@ -280,12 +288,24 @@ class Chatbox extends Widget {
     let prompt = this.prompt;
     let input = this._input;
 
+    let localCollaborator = {
+      shortName: 'IR',
+      color: '#0022FF'
+    };
+
     // Make the last prompt read-only, clear its signals, and move to content.
     if (prompt) {
       prompt.readOnly = true;
       prompt.removeClass(PROMPT_CLASS);
       (input.layout as PanelLayout).removeWidgetAt(0);
-      this.addCell(prompt);
+      let entryWidget = new ChatEntry({
+        model: {
+          text: prompt.model.value.text,
+          author: localCollaborator
+        },
+        cell: prompt
+      });
+      this.addEntry(entryWidget);
     }
 
     // Create the new prompt.
