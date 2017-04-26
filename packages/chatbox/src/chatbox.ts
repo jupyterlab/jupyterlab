@@ -154,6 +154,7 @@ class Chatbox extends Widget {
           let entryWidget = this._entryWidgetFromModel(entry);
           this._content.addWidget(entryWidget);
         });
+        this.update();
       });
     }
   }
