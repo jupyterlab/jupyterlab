@@ -45,6 +45,10 @@ import {
   IOutputModel, RenderMime
 } from '@jupyterlab/rendermime';
 
+import {
+  IOutputAreaModel
+} from './model';
+
 
 /**
  * The threshold in pixels to start a drag event.
@@ -776,124 +780,6 @@ namespace OutputAreaWidget {
     private _drag: Drag = null;
     private _dragData: { pressX: number, pressY: number } = null;
     private _executionCount: nbformat.ExecutionCount = null;
-  }
-}
-
-
-/**
- * The model for an output area.
- */
-export
-interface IOutputAreaModel extends IDisposable {
-  /**
-   * A signal emitted when the model state changes.
-   */
-  readonly stateChanged: ISignal<IOutputAreaModel, void>;
-
-  /**
-   * A signal emitted when the model changes.
-   */
-  readonly changed: ISignal<IOutputAreaModel, IOutputAreaModel.ChangedArgs>;
-
-  /**
-   * The length of the items in the model.
-   */
-  readonly length: number;
-
-  /**
-   * Whether the output area is trusted.
-   */
-  trusted: boolean;
-
-  /**
-   * The output content factory used by the model.
-   */
-  readonly contentFactory: IOutputAreaModel.IContentFactory;
-
-  /**
-   * Get an item at the specified index.
-   */
-  get(index: number): IOutputModel;
-
-  /**
-   * Add an output, which may be combined with previous output.
-   *
-   * #### Notes
-   * The output bundle is copied.
-   * Contiguous stream outputs of the same `name` are combined.
-   */
-  add(output: nbformat.IOutput): number;
-
-  /**
-   * Clear all of the output.
-   *
-   * @param wait - Delay clearing the output until the next message is added.
-   */
-  clear(wait?: boolean): void;
-
-  /**
-   * Deserialize the model from JSON.
-   *
-   * #### Notes
-   * This will clear any existing data.
-   */
-  fromJSON(values: nbformat.IOutput[]): void;
-
-  /**
-   * Serialize the model to JSON.
-   */
-  toJSON(): nbformat.IOutput[];
-}
-
-
-/**
- * The namespace for IOutputAreaModel interfaces.
- */
-export
-namespace IOutputAreaModel {
-  /**
-   * The options used to create a output area model.
-   */
-  export
-  interface IOptions {
-    /**
-     * The initial values for the model.
-     */
-    values?: nbformat.IOutput[];
-
-    /**
-     * Whether the output is trusted.  The default is false.
-     */
-    trusted?: boolean;
-
-    /**
-     * The output content factory used by the model.
-     *
-     * If not given, a default factory will be used.
-     */
-    contentFactory?: IContentFactory;
-
-    /**
-     * An optional IModelDB to store the output area model.
-     */
-    modelDB?: IModelDB;
-  }
-
-  /**
-   * A type alias for changed args.
-   */
-  export
-  type ChangedArgs = ObservableVector.IChangedArgs<IOutputModel>;
-
-  /**
-   * The interface for an output content factory.
-   */
-  export
-  interface IContentFactory {
-    /**
-     * Create an output model.
-     */
-    createOutputModel(options: IOutputModel.IOptions): IOutputModel;
   }
 }
 
