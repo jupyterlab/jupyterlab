@@ -65,6 +65,7 @@ export default chatboxPlugin;
  * Activate the chatbox extension.
  */
 function activateChatbox(app: JupyterLab, rendermime: IRenderMime, palette: ICommandPalette, editorServices: IEditorServices, docManager: IDocumentManager, restorer: ILayoutRestorer): void {
+  const id = 'chatbox';
   let { commands, shell } = app;
   let category = 'Chatbox';
   let command: string;
@@ -83,8 +84,9 @@ function activateChatbox(app: JupyterLab, rendermime: IRenderMime, palette: ICom
 
   // Add the chatbox panel to the tracker.
   panel.title.label = 'Chat';
-  shell.addToLeftArea(panel);
+  panel.id = id;
 
+  restorer.add(panel, 'chatbox');
 
   command = CommandIDs.clear;
   commands.addCommand(command, {
@@ -107,8 +109,15 @@ function activateChatbox(app: JupyterLab, rendermime: IRenderMime, palette: ICom
   let updateDocumentModel = function (): void {
     let context = docManager.contextForWidget(shell.currentWidget);
     if (context && context.model !== panel.chatbox.model) {
+      if(!panel.isAttached) {
+        shell.addToLeftArea(panel);
+      }
       panel.chatbox.model = context.model;
     }
   }
+
+  app.restored.then(() => {
+    updateDocumentModel();
+  });
   shell.currentChanged.connect(updateDocumentModel);
 }
