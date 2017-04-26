@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IDocumentManager, renameFile
+  IDocumentManager, renameFileDialog
 } from '@jupyterlab/docmanager';
 
 import {
@@ -980,16 +980,17 @@ class DirListing extends Widget {
     }
 
     // Get the path based on the target node.
-    let index = ArrayExt.firstIndexOf(this._items, target);
-    let items = this._sortedItems;
-    let path = items[index].name + '/';
+    const index = ArrayExt.firstIndexOf(this._items, target);
+    const items = this._sortedItems;
+    const path = items[index].name + '/';
+    const manager = this._manager;
 
     // Move all of the items.
-    let promises: Promise<Contents.IModel>[] = [];
-    let names = event.mimeData.getData(utils.CONTENTS_MIME) as string[];
+    const promises: Promise<Contents.IModel>[] = [];
+    const names = event.mimeData.getData(utils.CONTENTS_MIME) as string[];
     for (let name of names) {
       let newPath = path + name;
-      promises.push(renameFile(this._manager, name, newPath, this._model.path));
+      promises.push(renameFileDialog(manager, name, newPath, this._model.path));
     }
     Promise.all(promises).catch(error => {
       utils.showErrorMessage('Move Error', error);
@@ -1221,8 +1222,9 @@ class DirListing extends Widget {
         return;
       }
 
+      const manager = this._manager;
       const basePath = this._model.path;
-      const promise = renameFile(this._manager, original, newName, basePath);
+      const promise = renameFileDialog(manager, original, newName, basePath);
       return promise.catch(error => {
         utils.showErrorMessage('Rename Error', error);
         return original;
