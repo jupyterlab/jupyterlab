@@ -56,11 +56,9 @@ interface IFileContainer {
 export
 function createFromDialog(container: IFileContainer, manager: IDocumentManager, creatorName: string): Promise<Widget> {
   let handler = new CreateFromHandler(container, manager, creatorName);
-  return manager.services.ready.then(() => {
-    return handler.populate();
-  }).then(() => {
-    return handler.showDialog();
-  });
+  return manager.services.ready
+    .then(() => handler.populate())
+    .then(() => handler.showDialog());
 }
 
 
@@ -68,7 +66,7 @@ function createFromDialog(container: IFileContainer, manager: IDocumentManager, 
  * Rename a file with optional dialog.
  */
 export
-function renameFile(manager: IDocumentManager, oldPath: string, newPath: string, basePath = ''): Promise<Contents.IModel> {
+function renameFileDialog(manager: IDocumentManager, oldPath: string, newPath: string, basePath = ''): Promise<Contents.IModel> {
   return manager.rename(oldPath, newPath, basePath).catch(error => {
     if (error.xhr) {
       error.message = `${error.xhr.statusText} ${error.xhr.status}`;
@@ -247,7 +245,7 @@ class CreateFromHandler extends Widget {
     }
     if (file !== oldPath) {
       let basePath = this._container.path;
-      let promise = renameFile(this._manager, oldPath, file, basePath);
+      let promise = renameFileDialog(this._manager, oldPath, file, basePath);
       return promise.then((contents: Contents.IModel) => {
         if (!contents) {
           return null;
