@@ -10,6 +10,8 @@ function main() {
     var version = utils.getConfigOption('appVersion') || 'unknown';
     var name = utils.getConfigOption('appName') || 'JupyterLab';
     var namespace = utils.getConfigOption('appNamespace') || 'jupyterlab';
+    var devMode = utils.getConfigOption('devMode') || 'false';
+
     if (version[0] === 'v') {
         version = version.slice(1);
     }
@@ -17,7 +19,8 @@ function main() {
     lab = new app({
         namespace: namespace,
         name: name,
-        version: version
+        version: version,
+        devMode: devMode.toLowerCase() === 'true'
     });
     {{#each jupyterlab_extensions}}
     try {

@@ -32,8 +32,12 @@ class JupyterLab extends Application<ApplicationShell> {
     this._info = {
       name: options.name || 'JupyterLab',
       namespace: options.namespace || 'jupyterlab',
-      version:  options.version || 'unknown'
+      version:  options.version || 'unknown',
+      devMode: options.devMode || false
     };
+    if (options.devMode) {
+      this.shell.addClass('jp-mod-devMode');
+    }
   }
 
   /**
@@ -109,6 +113,11 @@ namespace JupyterLab {
      * The version of the JupyterLab application.
      */
     version?: string;
+
+    /**
+     * Whether the application is in dev mode.
+     */
+    devMode?: boolean;
   }
 
   /**
@@ -130,6 +139,11 @@ namespace JupyterLab {
      * The version of the JupyterLab application.
      */
     readonly version: string;
+
+    /**
+     * Whether the application is in dev mode.
+     */
+    readonly devMode: boolean;
   }
 
   /**

@@ -55,5 +55,6 @@ def load_jupyter_server_extension(nbapp):
         config.runtime_dir = HERE
         config.config_dir = ''
         config.version = describe()
+        config.dev_mode = True
 
     add_handlers(web_app, config)
