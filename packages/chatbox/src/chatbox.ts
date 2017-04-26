@@ -143,14 +143,7 @@ class Chatbox extends Widget {
           (this._content.layout as PanelLayout).removeWidgetAt(0);
         }
         each(this._log, entry => {
-          let options = this._createMarkdownCellOptions(entry.text);
-          let cellWidget = this.contentFactory.createCell(options);
-          cellWidget.readOnly = true;
-          cellWidget.rendered = true;
-          let entryWidget = new ChatEntry({
-            model: entry,
-            cell: cellWidget
-          });
+          let entryWidget = this._entryWidgetFromModel(entry);
           this._content.addWidget(entryWidget);
         });
       });
@@ -194,9 +187,8 @@ class Chatbox extends Widget {
     let prompt = this.prompt;
 
     if (prompt.model.value.text.trim() !== '') {
+      this._post();
       this._newPrompt();
-      prompt.model.trusted = true;
-      this._post(prompt);
     } else {
       return;
     }
@@ -258,27 +250,6 @@ class Chatbox extends Widget {
    */
   private _newPrompt(): void {
     let prompt = this.prompt;
-    let input = this._input;
-
-    let localCollaborator = {
-      shortName: 'IR',
-      color: '#0022FF'
-    };
-
-    // Make the last prompt read-only, clear its signals, and move to content.
-    if (prompt) {
-      prompt.readOnly = true;
-      prompt.removeClass(PROMPT_CLASS);
-      (input.layout as PanelLayout).removeWidgetAt(0);
-      let entryWidget = new ChatEntry({
-        model: {
-          text: prompt.model.value.text,
-          author: localCollaborator
-        },
-        cell: prompt
-      });
-      this._content.addWidget(entryWidget);
-    }
 
     // Create the new prompt.
     let factory = this.contentFactory;
@@ -313,15 +284,63 @@ class Chatbox extends Widget {
   }
 
   private _onLogChanged(log: IObservableVector<ChatEntry.IModel>, args: ObservableVector.IChangedArgs<ChatEntry.IModel>) {
+    let index = 0;
+    let layout = this._content.layout as PanelLayout;
+    switch (args.type) {
+      case 'add':
+        index = args.newIndex;
+        each(args.newValues, entry => {
+          let entryWidget = this._entryWidgetFromModel(entry);
+          layout.insertWidget(index++, entryWidget);
+        });
+        break;
+      case 'remove':
+        each(args.oldValues, entry => {
+          layout.removeWidgetAt(args.oldIndex);
+        });
+        break;
+      case 'move':
+        layout.insertWidget(args.newIndex, layout.widgets[args.oldIndex]);
+        break;
+      case 'set':
+        index = args.newIndex;
+        each(args.newValues, entry => {
+          let entryWidget = this._entryWidgetFromModel(entry);
+          layout.insertWidget(index, entryWidget);
+          layout.removeWidgetAt(index+1);
+          index++;
+        });
+        break;
+    }
   }
 
   /**
-   * Execute the code in the current prompt.
+   * Post the text current prompt.
    */
-  private _post(cell: MarkdownCellWidget): void {
-    this._log.pushBack({ text: cell.model.value.text, author: null });
-    cell.model.contentChanged.connect(this.update, this);
-    cell.rendered = true;
+  private _post(): void {
+    // Dispose of the current input widget.
+    let prompt = this.prompt;
+    (this._input.layout as PanelLayout).removeWidgetAt(0);
+
+    // Add the chat entry to the log.
+    let localCollaborator = {
+      shortName: 'IR',
+      color: '#0022FF'
+    };
+    this._log.pushBack({ text: prompt.model.value.text, author: localCollaborator });
+    prompt.dispose();
+  }
+
+  private _entryWidgetFromModel(entry: ChatEntry.IModel): ChatEntry {
+    let options = this._createMarkdownCellOptions(entry.text);
+    let cellWidget = this.contentFactory.createCell(options);
+    cellWidget.readOnly = true;
+    cellWidget.rendered = true;
+    let entryWidget = new ChatEntry({
+      model: entry,
+      cell: cellWidget
+    });
+    return entryWidget;
   }
 
   /**
