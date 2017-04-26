@@ -11,7 +11,7 @@ import {
 
 import {
   JSONObject
-} from '@phosphor/coreutils'
+} from '@phosphor/coreutils';
 
 import {
   Widget
@@ -119,22 +119,18 @@ class CreateFromHandler extends Widget {
     this._manager = manager;
     this._creatorName = creatorName;
 
-    const { services } = manager;
-    services.contents.get(container.path, { content: true }).then(contents => {
-      // Check for name conflicts when the inputNode changes.
-      this.inputNode.addEventListener('input', () => {
-        console.log('on input');
-        const value = this.inputNode.value;
-        if (value !== this._orig) {
-          contents.content.forEach((item: Contents.IModel) => {
-            if (item.name === value) {
-              this.addClass(FILE_CONFLICT_CLASS);
-              return;
-            }
-          });
-        }
-        this.removeClass(FILE_CONFLICT_CLASS);
-      });
+    // Check for name conflicts when the inputNode changes.
+    this.inputNode.addEventListener('input', () => {
+      const value = this.inputNode.value;
+      if (value !== this._orig) {
+        this._container.items.forEach(item => {
+          if (item === value) {
+            this.addClass(FILE_CONFLICT_CLASS);
+            return;
+          }
+        });
+      }
+      this.removeClass(FILE_CONFLICT_CLASS);
     });
   }
 

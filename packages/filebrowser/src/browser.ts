@@ -167,17 +167,6 @@ class FileBrowser extends Widget {
   }
 
   /**
-   * Create a file from a creator.
-   *
-   * @param creatorName - The name of the widget creator.
-   *
-   * @returns A promise that resolves with the created widget.
-   */
-  createFrom(creatorName: string): Promise<Widget> {
-    return this._buttons.createFrom(creatorName);
-  }
-
-  /**
    * Create a new untitled file in the current directory.
    *
    * @param options - The options used to create the file.
