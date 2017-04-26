@@ -82,17 +82,15 @@ class FileBrowser extends Widget {
     this.addClass(FILE_BROWSER_CLASS);
     this.id = options.id;
 
-    let commands = this._commands = options.commands;
-    let manager = this._manager = options.manager;
-    let model = this._model = options.model;
-    let renderer = options.renderer;
+    const commands = this._commands = options.commands;
+    const model = this._model = options.model;
+    const renderer = options.renderer;
 
     model.connectionFailure.connect(this._onConnectionFailure, this);
+    this._manager = model.manager;
     this._crumbs = new BreadCrumbs({ model });
-    this._buttons = new FileButtons({
-      commands, manager, model
-    });
-    this._listing = new DirListing({ manager, model, renderer });
+    this._buttons = new FileButtons({ commands, model });
+    this._listing = new DirListing({ model, renderer });
 
     this._crumbs.addClass(CRUMBS_CLASS);
     this._buttons.addClass(BUTTON_CLASS);
@@ -125,11 +123,11 @@ class FileBrowser extends Widget {
    * Dispose of the resources held by the file browser.
    */
   dispose() {
-    this._model = null;
-    this._crumbs = null;
     this._buttons = null;
+    this._crumbs = null;
     this._listing = null;
     this._manager = null;
+    this._model = null;
     super.dispose();
   }
 
@@ -332,11 +330,6 @@ namespace FileBrowser {
      * A file browser model instance.
      */
     model: FileBrowserModel;
-
-    /**
-     * A document manager instance.
-     */
-    manager: DocumentManager;
 
     /**
      * An optional renderer for the directory listing area.

@@ -187,6 +187,23 @@ class DocumentManager implements IDisposable {
   }
 
   /**
+   * Copy a file.
+   *
+   * @param fromFile - The path of the original file.
+   *
+   * @param toDir - The path to the target directory.
+   *
+   * @param basePath - The base path to resolve against, defaults to ''.
+   *
+   * @returns A promise which resolves to the contents of the file.
+   */
+  copy(fromFile: string, toDir: string, basePath = ''): Promise<Contents.IModel> {
+    fromFile = PathExt.resolve(basePath, fromFile);
+    toDir = PathExt.resolve(basePath, toDir);
+    return this.services.contents.copy(fromFile, toDir);
+  }
+
+  /**
    * Create a new file and return the widget used to view it.
    *
    * @param path - The file path to create.

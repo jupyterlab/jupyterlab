@@ -54,7 +54,7 @@ class FileBrowserModel implements IDisposable {
    * Construct a new file browser model.
    */
   constructor(options: FileBrowserModel.IOptions) {
-    this._manager = options.manager;
+    this.manager = options.manager;
     this._model = { path: '', name: '/', type: 'directory' };
     this._state = options.state || null;
 
@@ -65,6 +65,11 @@ class FileBrowserModel implements IDisposable {
     this._scheduleUpdate();
     this._startTimer();
   }
+
+  /**
+   * The document manager instance used by the file browser model.
+   */
+  readonly manager: IDocumentManager;
 
   /**
    * A signal emitted when the file browser model loses connection.
@@ -105,7 +110,7 @@ class FileBrowserModel implements IDisposable {
    * Get the kernel spec models.
    */
   get specs(): Kernel.ISpecModels | null {
-    return this._manager.services.sessions.specs;
+    return this.manager.services.sessions.specs;
   }
 
   /**
@@ -123,7 +128,6 @@ class FileBrowserModel implements IDisposable {
       return;
     }
     this._model = null;
-    this._manager = null;
     clearTimeout(this._timeoutId);
     this._sessions.length = 0;
     this._items.length = 0;
@@ -180,8 +184,8 @@ class FileBrowserModel implements IDisposable {
     if (oldValue !== newValue) {
       this._sessions.length = 0;
     }
-    let manager = this._manager;
-    this._pending = manager.contents.get(newValue, options).then(contents => {
+    let services = this.manager.services;
+    this._pending = services.contents.get(newValue, options).then(contents => {
       if (this.isDisposed) {
         return;
       }
@@ -199,48 +203,13 @@ class FileBrowserModel implements IDisposable {
           newValue
         });
       }
-      this._onRunningChanged(manager.sessions, manager.sessions.running());
+      this._onRunningChanged(services.sessions, services.sessions.running());
       this._refreshed.emit(void 0);
     }).catch(error => {
       this._pendingPath = null;
       this._connectionFailure.emit(error);
     });
     return this._pending;
-  }
-
-  /**
-   * Copy a file.
-   *
-   * @param fromFile - The path of the original file.
-   *
-   * @param toDir - The path to the target directory.
-   *
-   * @returns A promise which resolves to the contents of the file.
-   */
-  copy(fromFile: string, toDir: string): Promise<Contents.IModel> {
-    let normalizePath = Private.normalizePath;
-    fromFile = normalizePath(this._model.path, fromFile);
-    toDir = normalizePath(this._model.path, toDir);
-    return this._manager.contents.copy(fromFile, toDir);
-  }
-
-  /**
-   * Delete a file.
-   *
-   * @param: path - The path to the file to be deleted.
-   *
-   * @returns A promise which resolves when the file is deleted.
-   *
-   * #### Notes
-   * If there is a running session associated with the file and no other
-   * sessions are using the kernel, the session will be shut down.
-   */
-  deleteFile(path: string): Promise<void> {
-    let normalizePath = Private.normalizePath;
-    path = normalizePath(this._model.path, path);
-    return this._manager.sessions.stopIfNeeded(path).then(() => {
-      return this._manager.contents.delete(path);
-    });
   }
 
   /**

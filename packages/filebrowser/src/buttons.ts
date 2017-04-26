@@ -2,6 +2,14 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Dialog, showDialog
+} from '@jupyterlab/apputils';
+
+import {
+  createFromDialog, IDocumentManager
+} from '@jupyterlab/docmanager';
+
+import {
   Kernel
 } from '@jupyterlab/services';
 
@@ -10,24 +18,16 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  DisposableSet
-} from '@phosphor/disposable';
-
-import {
   CommandRegistry
 } from '@phosphor/commands';
 
 import {
+  DisposableSet
+} from '@phosphor/disposable';
+
+import {
   Menu, Widget
 } from '@phosphor/widgets';
-
-import {
-  Dialog, showDialog
-} from '@jupyterlab/apputils';
-
-import {
-  createFromDialog, DocumentManager
-} from '@jupyterlab/docmanager';
 
 import {
   FileBrowserModel
@@ -119,21 +119,30 @@ class FileButtons extends Widget {
   constructor(options: FileButtons.IOptions) {
     super();
     this.addClass(FILE_BUTTONS_CLASS);
-    this._model = options.model;
+    this.model = options.model;
+    this.manager = this.model.manager;
 
     this._buttons.create.onmousedown = this._onCreateButtonPressed.bind(this);
     this._buttons.upload.onclick = this._onUploadButtonClicked.bind(this);
     this._buttons.refresh.onclick = this._onRefreshButtonClicked.bind(this);
     this._input.onchange = this._onInputChanged.bind(this);
 
-    let node = this.node;
-    node.appendChild(this._buttons.create);
-    node.appendChild(this._buttons.upload);
-    node.appendChild(this._buttons.refresh);
+    this.node.appendChild(this._buttons.create);
+    this.node.appendChild(this._buttons.upload);
+    this.node.appendChild(this._buttons.refresh);
 
     this._commands = options.commands;
-    this._manager = options.manager;
   }
+
+  /**
+   * The document manager used by the widget.
+   */
+  readonly manager: IDocumentManager;
+
+  /**
+   * The underlying file browser model for the widget.
+   */
+  readonly model: FileBrowserModel;
 
   /**
    * Dispose of the resources held by the widget.
@@ -142,23 +151,7 @@ class FileButtons extends Widget {
     this._buttons = null;
     this._commands = null;
     this._input = null;
-    this._manager = null;
-    this._model = null;
     super.dispose();
-  }
-
-  /**
-   * Get the model used by the widget.
-   */
-  get model(): FileBrowserModel {
-    return this._model;
-  }
-
-  /**
-   * Get the document manager used by the widget.
-   */
-  get manager(): DocumentManager {
-    return this._manager;
   }
 
   /**
@@ -205,7 +198,7 @@ class FileButtons extends Widget {
    * @return The widget for the path.
    */
   open(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
-    let widget = this._manager.openOrReveal(path, widgetName, kernel);
+    let widget = this.manager.openOrReveal(path, widgetName, kernel);
     return widget;
   }
 
@@ -221,7 +214,7 @@ class FileButtons extends Widget {
    * @return The widget for the path.
    */
   createNew(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
-    return this._manager.createNew(path, widgetName, kernel);
+    return this.manager.createNew(path, widgetName, kernel);
   }
 
   /**
@@ -292,7 +285,7 @@ class FileButtons extends Widget {
       return;
     }
     // Force a refresh of the current directory.
-    this._model.refresh();
+    this.model.refresh();
   }
 
   /**
@@ -306,8 +299,6 @@ class FileButtons extends Widget {
   private _buttons = Private.createButtons();
   private _commands: CommandRegistry = null;
   private _input = Private.createUploadInput();
-  private _manager: DocumentManager = null;
-  private _model: FileBrowserModel;
 }
 
 
@@ -330,11 +321,6 @@ namespace FileButtons {
      * A file browser model instance.
      */
     model: FileBrowserModel;
-
-    /**
-     * A document manager instance.
-     */
-    manager: DocumentManager;
   }
 }
 
