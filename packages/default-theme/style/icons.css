@@ -19,6 +19,15 @@
 }
 
 
+.jp-ChatIcon {
+  background-image: url(icons/md/chat.svg);
+}
+
+.jp-CloseIcon {
+  background-image: url(icons/md/close.svg);
+}
+
+
 .jp-CloseIcon {
   background-image: url(icons/md/close.svg);
 }

@@ -17,6 +17,15 @@
   margin-top: -1px;
 }
 
+.jp-ChatboxPanel .jp-ChatboxDocumentInfo {
+  display: inline-block;
+  padding: 5px;
+}
+
+.jp-ChatboxPanel .jp-ChatboxDocumentInfo .span {
+  margin-left: 10px;
+}
+
 .jp-Chatbox {
   height: 100%;
   padding: 0;

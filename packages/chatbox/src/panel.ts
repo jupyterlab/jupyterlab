@@ -40,6 +40,21 @@ const PANEL_CLASS = 'jp-ChatboxPanel';
  */
 const DOCUMENT_INFO_CLASS = 'jp-ChatboxDocumentInfo';
 
+/**
+ * The class name added to a button icon node.
+ */
+const ICON_CLASS = 'jp-FileButtons-buttonIcon';
+
+/**
+ * The class name added to a material icon button.
+ */
+const MATERIAL_CLASS = 'jp-MaterialIcon';
+
+/**
+ * The class name added to the add button.
+ */
+const CHAT_ICON = 'jp-ChatIcon';
+
 
 /**
  * A panel which contains a chatbox and the ability to add other children.
@@ -69,9 +84,6 @@ class ChatboxPanel extends Panel {
       rendermime, mimeTypeService, contentFactory
     });
     this.addWidget(this.chatbox);
-
-    this.title.icon = 'jp-ImageChatbox';
-    this.title.closable = true;
     this.id = `chatbox-${count}`;
   }
 
@@ -90,6 +102,7 @@ class ChatboxPanel extends Panel {
     if (this._context === value) {
       return;
     }
+    this._context = value;
     this.chatbox.model = value.model;
     this._documentInfo.context = value;
   }
@@ -131,6 +144,11 @@ class ChatboxDocumentInfo extends Widget {
   constructor() {
     super();
     this.addClass(DOCUMENT_INFO_CLASS);
+    let chatIcon = document.createElement('span');
+    chatIcon.className = ICON_CLASS + ' ' + MATERIAL_CLASS + ' ' + CHAT_ICON;
+    let fileName = document.createElement('span');
+    this.node.appendChild(chatIcon);
+    this.node.appendChild(fileName);
   }
 
   /**
@@ -145,14 +163,14 @@ class ChatboxDocumentInfo extends Widget {
     }
     this._context = value;
     this._context.pathChanged.connect(this._onPathChanged, this);
-    this.node.textContent = PathExt.basename(value.path);
+    this.node.children[1].textContent = PathExt.basename(value.path);
   }
 
   /**
    * Handle a file moving/renaming.
    */
   private _onPathChanged(sender: DocumentRegistry.IContext<DocumentRegistry.IModel>, path: string): void {
-    this.node.textContent = PathExt.basename(path);
+    this.node.children[1].textContent = PathExt.basename(path);
   }
 
   private _context: DocumentRegistry.IContext<DocumentRegistry.IModel> = null;
