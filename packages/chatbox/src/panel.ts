@@ -23,7 +23,7 @@ import {
 
 import {
   Chatbox
-} from './widget';
+} from './chatbox';
 
 
 /**
@@ -44,7 +44,7 @@ class ChatboxPanel extends Panel {
     super();
     this.addClass(PANEL_CLASS);
     let {
-      rendermime, mimeTypeService, path, basePath, modelFactory
+      rendermime, mimeTypeService, path, basePath
     } = options;
     let factory = options.contentFactory;
     let contentFactory = factory.chatboxContentFactory;
@@ -53,8 +53,8 @@ class ChatboxPanel extends Panel {
       path = `${basePath || ''}/chatbox-${count}-${uuid()}`;
     }
 
-    this.chatbox = factory.createChatbox({
-      rendermime, mimeTypeService, contentFactory, modelFactory
+    this.chatbox = new Chatbox({
+      rendermime, mimeTypeService, contentFactory
     });
     this.addWidget(this.chatbox);
 
@@ -129,11 +129,6 @@ namespace ChatboxPanel {
     name?: string;
 
     /**
-     * The model factory for the chatbox widget.
-     */
-    modelFactory?: Chatbox.IModelFactory;
-
-    /**
      * The service used to look up mime types.
      */
     mimeTypeService: IEditorMimeTypeService;
@@ -153,11 +148,6 @@ namespace ChatboxPanel {
      * The factory for code chatbox content.
      */
     readonly chatboxContentFactory: Chatbox.IContentFactory;
-
-    /**
-     * Create a new chatbox panel.
-     */
-    createChatbox(options: Chatbox.IOptions): Chatbox;
   }
 
   /**
@@ -186,13 +176,6 @@ namespace ChatboxPanel {
      * The factory for code chatbox content.
      */
     readonly chatboxContentFactory: Chatbox.IContentFactory;
-
-    /**
-     * Create a new chatbox panel.
-     */
-    createChatbox(options: Chatbox.IOptions): Chatbox {
-      return new Chatbox(options);
-    }
   }
 
   /**

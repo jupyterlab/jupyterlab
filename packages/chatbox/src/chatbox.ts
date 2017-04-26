@@ -30,7 +30,6 @@ import {
 
 import {
   BaseCellWidget,
-  CellModel, IMarkdownCellModel,
   MarkdownCellModel, MarkdownCellWidget
 } from '@jupyterlab/cells';
 
@@ -87,9 +86,6 @@ class Chatbox extends Widget {
     this._log = new ObservableVector<Chatbox.IChatEntry>();
 
     this.contentFactory = options.contentFactory;
-    this.modelFactory = (
-      options.modelFactory || Chatbox.defaultModelFactory
-    );
     this.rendermime = options.rendermime;
     this._mimeTypeService = options.mimeTypeService;
 
@@ -106,11 +102,6 @@ class Chatbox extends Widget {
    * The content factory used by the chatbox.
    */
   readonly contentFactory: Chatbox.IContentFactory;
-
-  /**
-   * The model factory for the chatbox widget.
-   */
-  readonly modelFactory: Chatbox.IModelFactory;
 
   /**
    * The rendermime instance used by the chatbox.
@@ -148,7 +139,7 @@ class Chatbox extends Widget {
         }
         each(this._log, entry => {
           let options = this._createMarkdownCellOptions(entry.text);
-          let cellWidget = this.contentFactory.createPrompt(options, this);
+          let cellWidget = this.contentFactory.createCell(options);
           cellWidget.readOnly = true;
           cellWidget.rendered = true;
           this.addCell(cellWidget);
@@ -300,7 +291,7 @@ class Chatbox extends Widget {
     // Create the new prompt.
     let factory = this.contentFactory;
     let options = this._createMarkdownCellOptions();
-    prompt = factory.createPrompt(options, this);
+    prompt = factory.createCell(options);
     prompt.model.mimeType = this._mimetype;
     prompt.addClass(PROMPT_CLASS);
     prompt.rendered = false;
@@ -343,8 +334,7 @@ class Chatbox extends Widget {
    */
   private _createMarkdownCellOptions(text: string = ''): MarkdownCellWidget.IOptions {
     let contentFactory = this.contentFactory.markdownCellContentFactory;
-    let modelFactory = this.modelFactory;
-    let model = modelFactory.createMarkdownCell({ });
+    let model = new MarkdownCellModel({ });
     let rendermime = this.rendermime;
     model.value.text = text || '';
     return { model, rendermime, contentFactory };
@@ -375,11 +365,6 @@ namespace Chatbox {
     contentFactory: IContentFactory;
 
     /**
-     * The model factory for the chatbox widget.
-     */
-    modelFactory?: IModelFactory;
-
-    /**
      * The mime renderer for the chatbox widget.
      */
     rendermime: IRenderMime;
@@ -406,9 +391,9 @@ namespace Chatbox {
     readonly markdownCellContentFactory: BaseCellWidget.IContentFactory;
 
     /**
-     * Create a new prompt widget.
+     * Create a new cell widget.
      */
-    createPrompt(options: MarkdownCellWidget.IOptions, parent: Chatbox): MarkdownCellWidget;
+    createCell(options: MarkdownCellWidget.IOptions): MarkdownCellWidget;
 
   }
 
@@ -457,7 +442,7 @@ namespace Chatbox {
     /**
      * Create a new prompt widget.
      */
-    createPrompt(options: MarkdownCellWidget.IOptions, parent: Chatbox): MarkdownCellWidget {
+    createCell(options: MarkdownCellWidget.IOptions): MarkdownCellWidget {
       return new MarkdownCellWidget(options);
     }
   }
@@ -471,46 +456,6 @@ namespace Chatbox {
      */
     editorFactory: CodeEditor.Factory;
   }
-
-  /**
-   * A model factory for a chatbox widget.
-   */
-  export
-  interface IModelFactory {
-    /**
-     * Create a new markdown cell.
-     *
-     * @param options - The options used to create the cell.
-     *
-     * @returns A new code cell. If a source cell is provided, the
-     *   new cell will be intialized with the data from the source.
-     */
-    createMarkdownCell(options: CellModel.IOptions): IMarkdownCellModel;
-  }
-
-  /**
-   * The default implementation of an `IModelFactory`.
-   */
-  export
-  class ModelFactory {
-    /**
-     * Create a new markdown cell.
-     *
-     * @param source - The data to use for the original source data.
-     *
-     * @returns A new markdown cell. If a source cell is provided, the
-     *   new cell will be intialized with the data from the source.
-     */
-    createMarkdownCell(options: CellModel.IOptions): IMarkdownCellModel {
-      return new MarkdownCellModel(options);
-    }
-  }
-
-  /**
-   * The default `ModelFactory` instance.
-   */
-  export
-  const defaultModelFactory = new ModelFactory();
 }
 
 

@@ -55,6 +55,10 @@
   display: none;
 }
 
+.jp-Chatbox .jp-InputArea {
+  background-color: pink;
+}
+
 .jp-Chatbox-content .jp-InputArea-editor.jp-CellEditor {
   background: transparent;
   border-color: transparent;
@@ -63,7 +67,7 @@
 
 /* TODO: we should be able to use notebook styles for this */
 .jp-Chatbox-input .jp-Chatbox-prompt.jp-Cell {
-  background: linear-gradient(to right, #66BB6A -40px, #66BB6A 5px, transparent 5px, transparent 100%);
+  background: transparent;
   border-color: #66BB6A;
   border-left-width: var(--jp-border-width);
 }
