@@ -10,10 +10,6 @@ import {
 } from '@jupyterlab/docmanager';
 
 import {
-  IServiceManager
-} from '@jupyterlab/services';
-
-import {
   CommandRegistry
 } from '@phosphor/commands';
 

@@ -2,16 +2,24 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Dialog, DOMUtils, showDialog
+} from '@jupyterlab/apputils';
+
+import {
+  PathExt, Time
+} from '@jupyterlab/coreutils';
+
+import {
+  IDocumentManager, renameFile
+} from '@jupyterlab/docmanager';
+
+import {
   Contents
 } from '@jupyterlab/services';
 
 import {
   ArrayExt, ArrayIterator, IIterator, each, filter, find, map, toArray
 } from '@phosphor/algorithm';
-
-import {
-  Message, MessageLoop
-} from '@phosphor/messaging';
 
 import {
   MimeData
@@ -26,20 +34,12 @@ import {
 } from '@phosphor/domutils';
 
 import {
+  Message, MessageLoop
+} from '@phosphor/messaging';
+
+import {
   Widget
 } from '@phosphor/widgets';
-
-import {
-  Dialog, DOMUtils, showDialog
-} from '@jupyterlab/apputils';
-
-import {
-  PathExt, Time
-} from '@jupyterlab/coreutils';
-
-import {
-  DocumentManager, renameFile
-} from '@jupyterlab/docmanager';
 
 import {
   FileBrowserModel
@@ -202,9 +202,10 @@ class DirListing extends Widget {
     this._model.pathChanged.connect(this._onPathChanged, this);
     this._editNode = document.createElement('input');
     this._editNode.className = EDITOR_CLASS;
-    this._manager = options.manager;
+    this._manager = this._model.manager;
     this._renderer = options.renderer || DirListing.defaultRenderer;
-    let headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
+
+    const headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
     this._renderer.populateHeaderNode(headerNode);
     this._manager.activateRequested.connect(this._onActivateRequested, this);
   }
@@ -1286,7 +1287,7 @@ class DirListing extends Widget {
   /**
    * Handle an `activateRequested` signal from the manager.
    */
-  private _onActivateRequested(sender: DocumentManager, args: string): void {
+  private _onActivateRequested(sender: IDocumentManager, args: string): void {
     let dirname = PathExt.dirname(args);
     if (dirname === '.') {
       dirname = '';
@@ -1310,7 +1311,7 @@ class DirListing extends Widget {
   private _isCut = false;
   private _prevPath = '';
   private _clipboard: string[] = [];
-  private _manager: DocumentManager = null;
+  private _manager: IDocumentManager = null;
   private _softSelection = '';
   private _inContext = false;
   private _selection: { [key: string]: boolean; } = Object.create(null);
@@ -1332,11 +1333,6 @@ namespace DirListing {
      * A file browser model instance.
      */
     model: FileBrowserModel;
-
-    /**
-     * A document manager instance.
-     */
-    manager: DocumentManager;
 
     /**
      * A renderer for file items.

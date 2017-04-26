@@ -18,7 +18,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  DocumentManager
+  IDocumentManager
 } from './';
 
 
@@ -54,7 +54,7 @@ interface IFileContainer {
  * Create a file using a file creator.
  */
 export
-function createFromDialog(container: IFileContainer, manager: DocumentManager, creatorName: string): Promise<Widget> {
+function createFromDialog(container: IFileContainer, manager: IDocumentManager, creatorName: string): Promise<Widget> {
   let handler = new CreateFromHandler(container, manager, creatorName);
   return manager.services.ready.then(() => {
     return handler.populate();
@@ -68,7 +68,7 @@ function createFromDialog(container: IFileContainer, manager: DocumentManager, c
  * Rename a file with optional dialog.
  */
 export
-function renameFile(manager: DocumentManager, oldPath: string, newPath: string, basePath = ''): Promise<Contents.IModel> {
+function renameFile(manager: IDocumentManager, oldPath: string, newPath: string, basePath = ''): Promise<Contents.IModel> {
   return manager.rename(oldPath, newPath, basePath).catch(error => {
     if (error.xhr) {
       error.message = `${error.xhr.statusText} ${error.xhr.status}`;
@@ -115,7 +115,7 @@ class CreateFromHandler extends Widget {
   /**
    * Construct a new "create from" dialog.
    */
-  constructor(container: IFileContainer, manager: DocumentManager, creatorName: string) {
+  constructor(container: IFileContainer, manager: IDocumentManager, creatorName: string) {
     super({ node: Private.createCreateFromNode() });
     this.addClass(FILE_DIALOG_CLASS);
     this._container = container;
@@ -261,7 +261,7 @@ class CreateFromHandler extends Widget {
 
   private _container: IFileContainer = null;
   private _creatorName: string;
-  private _manager: DocumentManager;
+  private _manager: IDocumentManager;
   private _orig: Contents.IModel = null;
   private _widgetName: string;
 }
