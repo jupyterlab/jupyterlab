@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  BaseCellWidget
+  Cell
 } from '@jupyterlab/cells';
 
 import {
@@ -33,7 +33,7 @@ interface INotebookTracker extends IInstanceTracker<NotebookPanel> {
    * #### Notes
    * If there is no cell with the focus, then this value is `null`.
    */
-  readonly activeCell: BaseCellWidget;
+  readonly activeCell: Cell;
 
   /**
    * A signal emitted when the current active cell changes.
@@ -41,7 +41,7 @@ interface INotebookTracker extends IInstanceTracker<NotebookPanel> {
    * #### Notes
    * If there is no cell with the focus, then `null` will be emitted.
    */
-  readonly activeCellChanged: ISignal<this, BaseCellWidget>;
+  readonly activeCellChanged: ISignal<this, Cell>;
 
   /**
    * A signal emitted when the selection state changes.
@@ -68,7 +68,7 @@ class NotebookTracker extends InstanceTracker<NotebookPanel> implements INoteboo
    * This is a read-only property. If there is no cell with the focus, then this
    * value is `null`.
    */
-  get activeCell(): BaseCellWidget {
+  get activeCell(): Cell {
     let widget = this.currentWidget;
     if (!widget) {
       return null;
@@ -82,7 +82,7 @@ class NotebookTracker extends InstanceTracker<NotebookPanel> implements INoteboo
    * #### Notes
    * If there is no cell with the focus, then `null` will be emitted.
    */
-  get activeCellChanged(): ISignal<this, BaseCellWidget> {
+  get activeCellChanged(): ISignal<this, Cell> {
     return this._activeCellChanged;
   }
 
@@ -132,7 +132,7 @@ class NotebookTracker extends InstanceTracker<NotebookPanel> implements INoteboo
     this._activeCellChanged.emit(widget.notebook.activeCell || null);
   }
 
-  private _onActiveCellChanged(sender: Notebook, cell: BaseCellWidget): void {
+  private _onActiveCellChanged(sender: Notebook, cell: Cell): void {
     // Check if the active cell change happened for the current notebook.
     if (this.currentWidget && this.currentWidget.notebook === sender) {
       this._activeCell = cell || null;
@@ -147,7 +147,7 @@ class NotebookTracker extends InstanceTracker<NotebookPanel> implements INoteboo
     }
   }
 
-  private _activeCell: BaseCellWidget | null = null;
-  private _activeCellChanged = new Signal<this, BaseCellWidget>(this);
+  private _activeCell: Cell | null = null;
+  private _activeCellChanged = new Signal<this, Cell>(this);
   private _selectionChanged = new Signal<this, void>(this);
 }

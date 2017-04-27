@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  BaseCellWidget, CodeCellWidget
+  Cell, CodeCell
 } from '@jupyterlab/cells';
 
 import {
@@ -18,7 +18,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  OutputAreaWidget
+  OutputArea
 } from '@jupyterlab/outputarea';
 
 import {
@@ -304,18 +304,18 @@ namespace ConsolePanel {
       /**
        * The factory for output area content.
        */
-      outputAreaContentFactory?: OutputAreaWidget.IContentFactory;
+      outputAreaContentFactory?: OutputArea.IContentFactory;
 
       /**
        * The factory for code cell widget content.  If given, this will
        * take precedence over the `outputAreaContentFactory`.
        */
-      codeCellContentFactory?: CodeCellWidget.IContentFactory;
+      codeCellContentFactory?: CodeCell.IContentFactory;
 
       /**
        * The factory for raw cell widget content.
        */
-      rawCellContentFactory?: BaseCellWidget.IContentFactory;
+      rawCellContentFactory?: Cell.IContentFactory;
 
       /**
        * The factory for console widget content.  If given, this will

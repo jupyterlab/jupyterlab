@@ -38,8 +38,8 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  ICellModel, BaseCellWidget, IMarkdownCellModel,
-  CodeCellWidget, MarkdownCellWidget,
+  ICellModel, Cell, IMarkdownCellModel,
+  CodeCell, MarkdownCellWidget,
   ICodeCellModel, RawCellWidget, IRawCellModel,
 } from '@jupyterlab/cells';
 
@@ -57,7 +57,7 @@ import {
 } from '@jupyterlab/rendermime';
 
 import {
-  OutputAreaWidget
+  OutputArea
 } from '@jupyterlab/outputarea';
 
 import {
@@ -222,8 +222,8 @@ class StaticNotebook extends Widget {
   /**
    * A read-only sequence of the widgets in the notebook.
    */
-  get widgets(): ReadonlyArray<BaseCellWidget> {
-    return (this.layout as PanelLayout).widgets as ReadonlyArray<BaseCellWidget>;
+  get widgets(): ReadonlyArray<Cell> {
+    return (this.layout as PanelLayout).widgets as ReadonlyArray<Cell>;
   }
 
   /**
@@ -282,7 +282,7 @@ class StaticNotebook extends Widget {
    *
    * The default implementation is a no-op
    */
-  protected onCellInserted(index: number, cell: BaseCellWidget): void {
+  protected onCellInserted(index: number, cell: Cell): void {
     // This is a no-op.
   }
 
@@ -300,7 +300,7 @@ class StaticNotebook extends Widget {
    *
    * The default implementation is a no-op
    */
-  protected onCellRemoved(index: number, cell: BaseCellWidget): void {
+  protected onCellRemoved(index: number, cell: Cell): void {
     // This is a no-op.
   }
 
@@ -373,7 +373,7 @@ class StaticNotebook extends Widget {
    * Create a cell widget and insert into the notebook.
    */
   private _insertCell(index: number, cell: ICellModel): void {
-    let widget: BaseCellWidget;
+    let widget: Cell;
     switch (cell.type) {
     case 'code':
       widget = this._createCodeCell(cell as ICodeCellModel);
@@ -394,7 +394,7 @@ class StaticNotebook extends Widget {
   /**
    * Create a code cell widget from a code cell model.
    */
-  private _createCodeCell(model: ICodeCellModel): CodeCellWidget {
+  private _createCodeCell(model: ICodeCellModel): CodeCell {
     let factory = this.contentFactory;
     let contentFactory = factory.codeCellContentFactory;
     let rendermime = this.rendermime;
@@ -437,7 +437,7 @@ class StaticNotebook extends Widget {
    */
   private _removeCell(index: number): void {
     let layout = this.layout as PanelLayout;
-    let widget = layout.widgets[index] as BaseCellWidget;
+    let widget = layout.widgets[index] as Cell;
     widget.parent = null;
     this.onCellRemoved(index, widget);
     widget.dispose();
@@ -511,22 +511,22 @@ namespace StaticNotebook {
     /**
      * The factory for code cell widget content.
      */
-    readonly codeCellContentFactory?: CodeCellWidget.IContentFactory;
+    readonly codeCellContentFactory?: CodeCell.IContentFactory;
 
     /**
      * The factory for raw cell widget content.
      */
-    readonly rawCellContentFactory?: BaseCellWidget.IContentFactory;
+    readonly rawCellContentFactory?: Cell.IContentFactory;
 
     /**
      * The factory for markdown cell widget content.
      */
-    readonly markdownCellContentFactory?: BaseCellWidget.IContentFactory;
+    readonly markdownCellContentFactory?: Cell.IContentFactory;
 
     /**
      * Create a new code cell widget.
      */
-    createCodeCell(options: CodeCellWidget.IOptions, parent: StaticNotebook): CodeCellWidget;
+    createCodeCell(options: CodeCell.IOptions, parent: StaticNotebook): CodeCell;
 
     /**
      * Create a new markdown cell widget.
@@ -550,10 +550,10 @@ namespace StaticNotebook {
     constructor(options: IContentFactoryOptions) {
       let editorFactory = options.editorFactory;
       let outputAreaContentFactory = (options.outputAreaContentFactory ||
-        OutputAreaWidget.defaultContentFactory
+        OutputArea.defaultContentFactory
       );
       this.codeCellContentFactory = (options.codeCellContentFactory ||
-        new CodeCellWidget.ContentFactory({
+        new CodeCell.ContentFactory({
           editorFactory,
           outputAreaContentFactory
         })
@@ -574,23 +574,23 @@ namespace StaticNotebook {
     /**
      * The factory for code cell widget content.
      */
-    readonly codeCellContentFactory: CodeCellWidget.IContentFactory;
+    readonly codeCellContentFactory: CodeCell.IContentFactory;
 
     /**
      * The factory for raw cell widget content.
      */
-    readonly rawCellContentFactory: BaseCellWidget.IContentFactory;
+    readonly rawCellContentFactory: Cell.IContentFactory;
 
     /**
      * The factory for markdown cell widget content.
      */
-    readonly markdownCellContentFactory: BaseCellWidget.IContentFactory;
+    readonly markdownCellContentFactory: Cell.IContentFactory;
 
     /**
      * Create a new code cell widget.
      */
-    createCodeCell(options: CodeCellWidget.IOptions, parent: StaticNotebook): CodeCellWidget {
-      return new CodeCellWidget(options);
+    createCodeCell(options: CodeCell.IOptions, parent: StaticNotebook): CodeCell {
+      return new CodeCell(options);
     }
 
     /**
@@ -621,23 +621,23 @@ namespace StaticNotebook {
     /**
      * The factory for output area content.
      */
-    outputAreaContentFactory?: OutputAreaWidget.IContentFactory;
+    outputAreaContentFactory?: OutputArea.IContentFactory;
 
     /**
      * The factory for code cell widget content.  If given, this will
      * take precedence over the `outputAreaContentFactory`.
      */
-    codeCellContentFactory?: CodeCellWidget.IContentFactory;
+    codeCellContentFactory?: CodeCell.IContentFactory;
 
     /**
      * The factory for raw cell widget content.
      */
-    rawCellContentFactory?: BaseCellWidget.IContentFactory;
+    rawCellContentFactory?: Cell.IContentFactory;
 
     /**
      * The factory for markdown cell widget content.
      */
-    markdownCellContentFactory?: BaseCellWidget.IContentFactory;
+    markdownCellContentFactory?: Cell.IContentFactory;
   }
 }
 
@@ -664,7 +664,7 @@ class Notebook extends StaticNotebook {
    * This can be due to the active index changing or the
    * cell at the active index changing.
    */
-  get activeCellChanged(): ISignal<this, BaseCellWidget> {
+  get activeCellChanged(): ISignal<this, Cell> {
     return this._activeCellChanged;
   }
 
@@ -758,7 +758,7 @@ class Notebook extends StaticNotebook {
   /**
    * Get the active cell widget.
    */
-  get activeCell(): BaseCellWidget {
+  get activeCell(): Cell {
     return this._activeCell;
   }
 
@@ -780,7 +780,7 @@ class Notebook extends StaticNotebook {
    * It is a no-op if the value does not change.
    * It will emit the `selectionChanged` signal.
    */
-  select(widget: BaseCellWidget): void {
+  select(widget: Cell): void {
     if (Private.selectedProperty.get(widget)) {
       return;
     }
@@ -796,7 +796,7 @@ class Notebook extends StaticNotebook {
    * It is a no-op if the value does not change.
    * It will emit the `selectionChanged` signal.
    */
-  deselect(widget: BaseCellWidget): void {
+  deselect(widget: Cell): void {
     if (!Private.selectedProperty.get(widget)) {
       return;
     }
@@ -808,7 +808,7 @@ class Notebook extends StaticNotebook {
   /**
    * Whether a cell is selected or is the active cell.
    */
-  isSelected(widget: BaseCellWidget): boolean {
+  isSelected(widget: Cell): boolean {
     if (widget === this._activeCell) {
       return true;
     }
@@ -984,7 +984,7 @@ class Notebook extends StaticNotebook {
   /**
    * Handle a cell being inserted.
    */
-  protected onCellInserted(index: number, cell: BaseCellWidget): void {
+  protected onCellInserted(index: number, cell: Cell): void {
     cell.editor.edgeRequested.connect(this._onEdgeRequest, this);
     // If the insertion happened above, increment the active cell
     // index, otherwise it stays the same.
@@ -1004,7 +1004,7 @@ class Notebook extends StaticNotebook {
   /**
    * Handle a cell being removed.
    */
-  protected onCellRemoved(index: number, cell: BaseCellWidget): void {
+  protected onCellRemoved(index: number, cell: Cell): void {
     // If the removal happened above, decrement the active
     // cell index, otherwise it stays the same.
     this.activeCellIndex = index <= this.activeCellIndex ?
@@ -1248,7 +1248,7 @@ class Notebook extends StaticNotebook {
       // Handle the case where we are moving cells within
       // the same notebook.
       event.dropAction = 'move';
-      let toMove: BaseCellWidget[] = event.mimeData.getData('internal:cells');
+      let toMove: Cell[] = event.mimeData.getData('internal:cells');
 
       //Compute the to/from indices for the move.
       let fromIndex = ArrayExt.firstIndexOf(this.widgets, toMove[0]);
@@ -1320,7 +1320,7 @@ class Notebook extends StaticNotebook {
   private _startDrag(index: number, clientX: number, clientY: number): void {
     let cells = this.model.cells;
     let selected: nbformat.ICell[] = [];
-    let toMove: BaseCellWidget[] = [];
+    let toMove: Cell[] = [];
 
     each(this.widgets, (widget, i) => {
       let cell = cells.at(i);
@@ -1443,11 +1443,11 @@ class Notebook extends StaticNotebook {
   }
 
   private _activeCellIndex = -1;
-  private _activeCell: BaseCellWidget = null;
+  private _activeCell: Cell = null;
   private _mode: NotebookMode = 'command';
   private _drag: Drag = null;
   private _dragData: { pressX: number, pressY: number, index: number } = null;
-  private _activeCellChanged = new Signal<this, BaseCellWidget>(this);
+  private _activeCellChanged = new Signal<this, Cell>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
   private _selectionChanged = new Signal<this, void>(this);
 }
@@ -1487,7 +1487,7 @@ namespace Private {
    * An attached property for the selected state of a cell.
    */
   export
-  const selectedProperty = new AttachedProperty<BaseCellWidget, boolean>({
+  const selectedProperty = new AttachedProperty<Cell, boolean>({
     name: 'selected',
     create: () => false
   });

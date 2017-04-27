@@ -16,8 +16,8 @@ import {
 } from 'simulate-event';
 
 import {
-  CodeCellModel, CodeCellWidget, MarkdownCellModel, MarkdownCellWidget,
-  RawCellModel, RawCellWidget, BaseCellWidget
+  CodeCellModel, CodeCell, MarkdownCellModel, MarkdownCellWidget,
+  RawCellModel, RawCellWidget, Cell
 } from '@jupyterlab/cells';
 
 import {
@@ -67,7 +67,7 @@ class LogStaticNotebook extends StaticNotebook {
     this.methods.push('onMetadataChanged');
   }
 
-  protected onCellInserted(index: number, cell: BaseCellWidget): void {
+  protected onCellInserted(index: number, cell: Cell): void {
     super.onCellInserted(index, cell);
     this.methods.push('onCellInserted');
   }
@@ -77,7 +77,7 @@ class LogStaticNotebook extends StaticNotebook {
     this.methods.push('onCellMoved');
   }
 
-  protected onCellRemoved(index: number, cell: BaseCellWidget): void {
+  protected onCellRemoved(index: number, cell: Cell): void {
     super.onCellRemoved(index, cell);
     this.methods.push('onCellRemoved');
   }
@@ -115,7 +115,7 @@ class LogNotebook extends Notebook {
     this.methods.push('onUpdateRequest');
   }
 
-  protected onCellInserted(index: number, cell: BaseCellWidget): void {
+  protected onCellInserted(index: number, cell: Cell): void {
     super.onCellInserted(index, cell);
     this.methods.push('onCellInserted');
   }
@@ -125,7 +125,7 @@ class LogNotebook extends Notebook {
     this.methods.push('onCellMoved');
   }
 
-  protected onCellRemoved(index: number, cell: BaseCellWidget): void {
+  protected onCellRemoved(index: number, cell: Cell): void {
     super.onCellRemoved(index, cell);
     this.methods.push('onCellRemoved');
   }
@@ -352,7 +352,7 @@ describe('notebook/widget', () => {
       it('should get the child widget at a specified index', () => {
         let widget = createWidget();
         let child = widget.widgets[0];
-        expect(child).to.be.a(CodeCellWidget);
+        expect(child).to.be.a(CodeCell);
       });
 
       it('should return `undefined` if out of range', () => {
@@ -476,41 +476,41 @@ describe('notebook/widget', () => {
 
       describe('#codeCellContentFactory', () => {
 
-        it('should be a CodeCellWidget.ContentFactory', () => {
+        it('should be a CodeCell.ContentFactory', () => {
           let factory = new StaticNotebook.ContentFactory({ editorFactory });
-          expect(factory.codeCellContentFactory).to.be.a(CodeCellWidget.ContentFactory);
+          expect(factory.codeCellContentFactory).to.be.a(CodeCell.ContentFactory);
         });
 
       });
 
       describe('#markdownCellContentFactory', () => {
 
-        it('should be a BaseCellWidget.ContentFactory', () => {
+        it('should be a Cell.ContentFactory', () => {
           let factory = new StaticNotebook.ContentFactory({ editorFactory });
-          expect(factory.markdownCellContentFactory).to.be.a(BaseCellWidget.ContentFactory);
+          expect(factory.markdownCellContentFactory).to.be.a(Cell.ContentFactory);
         });
 
       });
 
       describe('#rawCellContentFactory', () => {
 
-        it('should be a BaseCellWidget.ContentFactory', () => {
+        it('should be a Cell.ContentFactory', () => {
           let factory = new StaticNotebook.ContentFactory({ editorFactory });
-          expect(factory.rawCellContentFactory).to.be.a(BaseCellWidget.ContentFactory);
+          expect(factory.rawCellContentFactory).to.be.a(Cell.ContentFactory);
         });
 
       });
 
       describe('#createCodeCell({})', () => {
 
-        it('should create a `CodeCellWidget`', () => {
+        it('should create a `CodeCell`', () => {
           let factory = new StaticNotebook.ContentFactory({ editorFactory });
           let contentFactory = factory.codeCellContentFactory;
           let model = new CodeCellModel({});
           let codeOptions = { model, rendermime, contentFactory };
           let parent = new StaticNotebook(options);
           let widget = factory.createCodeCell(codeOptions, parent);
-          expect(widget).to.be.a(CodeCellWidget);
+          expect(widget).to.be.a(CodeCell);
         });
 
       });

@@ -20,7 +20,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IOutputAreaModel, OutputAreaModel, OutputAreaWidget
+  IOutputAreaModel, OutputAreaModel, OutputArea
 } from '@jupyterlab/outputarea';
 
 import {
@@ -34,7 +34,7 @@ import {
 const rendermime = defaultRenderMime();
 
 
-class LogOutputAreaWidget extends OutputAreaWidget {
+class LogOutputArea extends OutputArea {
 
   methods: string[] = [];
 
@@ -52,12 +52,12 @@ class LogOutputAreaWidget extends OutputAreaWidget {
 
 describe('outputarea/widget', () => {
 
-  let widget: LogOutputAreaWidget;
+  let widget: LogOutputArea;
   let model: OutputAreaModel;
 
   beforeEach(() => {
     model = new OutputAreaModel({ values: DEFAULT_OUTPUTS, trusted: true });
-    widget = new LogOutputAreaWidget({ rendermime, model });
+    widget = new LogOutputArea({ rendermime, model });
   });
 
   afterEach(() => {
@@ -65,18 +65,18 @@ describe('outputarea/widget', () => {
     widget.dispose();
   });
 
-  describe('OutputAreaWidget', () => {
+  describe('OutputArea', () => {
 
     describe('#constructor()', () => {
 
       it('should create an output area widget', () => {
-        expect(widget).to.be.an(OutputAreaWidget);
-        expect(widget.hasClass('jp-OutputAreaWidget')).to.be(true);
+        expect(widget).to.be.an(OutputArea);
+        expect(widget.hasClass('jp-OutputArea')).to.be(true);
       });
 
       it('should take an optional contentFactory', () => {
-        let contentFactory = Object.create(OutputAreaWidget.defaultContentFactory);
-        let widget = new OutputAreaWidget({ rendermime, contentFactory, model });
+        let contentFactory = Object.create(OutputArea.defaultContentFactory);
+        let widget = new OutputArea({ rendermime, contentFactory, model });
         expect(widget.contentFactory).to.be(contentFactory);
       });
 
@@ -101,7 +101,7 @@ describe('outputarea/widget', () => {
     describe('#contentFactory', () => {
 
       it('should be the contentFactory used by the widget', () => {
-        expect(widget.contentFactory).to.be(OutputAreaWidget.defaultContentFactory);
+        expect(widget.contentFactory).to.be(OutputArea.defaultContentFactory);
       });
 
     });
@@ -259,7 +259,7 @@ describe('outputarea/widget', () => {
       describe('#createGutter()', () => {
 
         it('should create a gutter widget', () => {
-          let factory = new OutputAreaWidget.ContentFactory();
+          let factory = new OutputArea.ContentFactory();
           expect(factory.createGutter().executionCount).to.be(null);
         });
 
@@ -269,7 +269,7 @@ describe('outputarea/widget', () => {
 
         it('should create a stdin widget', () => {
           return Kernel.startNew().then(kernel => {
-            let factory = new OutputAreaWidget.ContentFactory();
+            let factory = new OutputArea.ContentFactory();
             let options = {
               prompt: 'hello',
               password: false,
@@ -287,7 +287,7 @@ describe('outputarea/widget', () => {
     describe('.defaultContentFactory', () => {
 
       it('should be a `contentFactory` instance', () => {
-        expect(OutputAreaWidget.defaultContentFactory).to.be.an(OutputAreaWidget.ContentFactory);
+        expect(OutputArea.defaultContentFactory).to.be.an(OutputArea.ContentFactory);
       });
 
     });

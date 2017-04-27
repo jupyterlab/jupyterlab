@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  BaseCellWidget
+  Cell
 } from '@jupyterlab/cells';
 
 import {
@@ -89,7 +89,7 @@ describe('notebook/tracker', () => {
         tracker.add(panel);
         panel.context = context;
         panel.notebook.model.fromJSON(DEFAULT_CONTENT);
-        expect(tracker.activeCell).to.be.a(BaseCellWidget);
+        expect(tracker.activeCell).to.be.a(Cell);
         panel.dispose();
       });
 

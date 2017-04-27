@@ -31,7 +31,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  BaseCellWidget, CodeCellWidget
+  Cell, CodeCell
 } from '@jupyterlab/cells';
 
 import {
@@ -47,7 +47,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  OutputAreaWidget
+  OutputArea
 } from '@jupyterlab/outputarea';
 
 import {
@@ -445,23 +445,23 @@ export namespace NotebookPanel {
       /**
        * The factory for output area content.
        */
-      outputAreaContentFactory?: OutputAreaWidget.IContentFactory;
+      outputAreaContentFactory?: OutputArea.IContentFactory;
 
       /**
        * The factory for code cell widget content.  If given, this will
        * take precedence over the `outputAreaContentFactory`.
        */
-      codeCellContentFactory?: CodeCellWidget.IContentFactory;
+      codeCellContentFactory?: CodeCell.IContentFactory;
 
       /**
        * The factory for raw cell widget content.
        */
-      rawCellContentFactory?: BaseCellWidget.IContentFactory;
+      rawCellContentFactory?: Cell.IContentFactory;
 
       /**
        * The factory for markdown cell widget content.
        */
-      markdownCellContentFactory?: BaseCellWidget.IContentFactory;
+      markdownCellContentFactory?: Cell.IContentFactory;
 
       /**
        * The factory for notebook cell widget content. If given, this will

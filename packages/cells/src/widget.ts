@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  CodeEditor, CodeEditorWidget
+  CodeEditor, CodeEditorWrapper
 } from '@jupyterlab/codeeditor';
 
 import {
@@ -42,7 +42,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  OutputAreaWidget
+  OutputArea
 } from '@jupyterlab/outputarea';
 
 import {
@@ -121,31 +121,34 @@ const DEFAULT_MARKDOWN_TEXT = 'Type Markdown and LaTeX: $ α^2 $';
  * A base cell widget.
  */
 export
-class BaseCellWidget extends Widget {
+class Cell extends Widget {
   /**
    * Construct a new base cell widget.
    */
-  constructor(options: BaseCellWidget.IOptions) {
+  constructor(options: Cell.IOptions) {
     super();
     this.addClass(CELL_CLASS);
     this.layout = new PanelLayout();
 
     let model = this._model = options.model;
 
-    let factory = this.contentFactory = options.contentFactory;
-    let editorOptions = { model, factory: factory.editorFactory };
+    let contentFactory = this.contentFactory = options.contentFactory;
+    let editorFactory = this.editorFactory = options.editorFactory;
+    let editorOptions = { model, factory: editorFactory };
 
-    let editor = this._editor = factory.createCellEditor(editorOptions);
+    let editor = this._editor = contentFactory.createCellEditorWrapper(editorOptions);
     editor.addClass(CELL_EDITOR_CLASS);
 
-    this._input = factory.createInputArea({ editor });
+    this._input = contentFactory.createInputArea({ editor });
     (this.layout as PanelLayout).addWidget(this._input);
   }
 
   /**
    * The content factory used by the widget.
    */
-  readonly contentFactory: BaseCellWidget.IContentFactory;
+  readonly contentFactory: Cell.IContentFactory;
+
+  readonly editorFactory: CodeEditor.Factory;
 
   /**
    * Get the prompt node used by the cell.
@@ -157,7 +160,7 @@ class BaseCellWidget extends Widget {
   /**
    * Get the editor widget used by the cell.
    */
-  get editorWidget(): CodeEditorWidget {
+  get editorWidget(): CodeEditorWrapper {
     return this._editor;
   }
 
@@ -252,18 +255,18 @@ class BaseCellWidget extends Widget {
     this._input.showEditor();
   }
 
-  private _input: InputAreaWidget = null;
-  private _editor: CodeEditorWidget = null;
+  private _input: InputArea = null;
+  private _editor: CodeEditorWrapper = null;
   private _model: ICellModel = null;
   private _readOnly = false;
 }
 
 
 /**
- * The namespace for the `BaseCellWidget` class statics.
+ * The namespace for the `Cell` class statics.
  */
 export
-namespace BaseCellWidget {
+namespace Cell {
   /**
    * An options object for initializing a base cell widget.
    */
@@ -277,78 +280,53 @@ namespace BaseCellWidget {
     /**
      * The factory object for cell components.
      */
-    contentFactory: BaseCellWidget.IContentFactory;
+    contentFactory: Cell.IContentFactory;
+
+    /**
+     * The factory object for creating actual editors.
+     */
+    editorFactory: CodeEditor.Factory;
   }
 
   /**
    * The factory object for cell components.
    */
   export
-  interface IContentFactory {
-    /**
-     * The editor factory.
-     */
-    readonly editorFactory: CodeEditor.Factory;
+  interface IContentFactory extends OutputArea.IContentFactory {
 
     /**
      * Create a new cell editor for the widget.
      */
-    createCellEditor(options: CodeEditorWidget.IOptions): CodeEditorWidget;
+    createCellEditorWrapper(options: CodeEditorWrapper.IOptions): CodeEditorWrapper;
 
     /**
      * Create a new input area for the widget.
      */
-    createInputArea(options: InputAreaWidget.IOptions): InputAreaWidget;
+    createInputArea(options: InputArea.IOptions): InputArea;
   }
 
   /**
    * The default implementation of an `IContentFactory`.
    */
   export
-  class ContentFactory implements IContentFactory {
-    /**
-     * Creates a new renderer.
-     */
-    constructor(options: ContentFactory.IOptions) {
-      this.editorFactory = options.editorFactory;
-    }
-
-    /**
-     * The editor factory.
-     */
-    readonly editorFactory: CodeEditor.Factory;
+  class ContentFactory extends OutputArea.ContentFactory implements IContentFactory {
 
     /**
      * Create a new cell editor for the widget.
      */
-    createCellEditor(options: CodeEditorWidget.IOptions): CodeEditorWidget {
-      return new CodeEditorWidget(options);
+    createCellEditorWrapper(options: CodeEditorWrapper.IOptions): CodeEditorWrapper {
+      return new CodeEditorWrapper(options);
     }
 
     /**
      * Create a new input area for the widget.
      */
-    createInputArea(options: InputAreaWidget.IOptions): InputAreaWidget {
-      return new InputAreaWidget(options);
+    createInputArea(options: InputArea.IOptions): InputArea {
+      return new InputArea(options);
     }
+
   }
 
-  /**
-   * The namespace for the `ContentFactory` class statics.
-   */
-  export
-  namespace ContentFactory {
-    /**
-     * An options object for initializing a renderer.
-     */
-    export
-    interface IOptions {
-      /**
-       * A code editor factory.
-       */
-      readonly editorFactory: CodeEditor.Factory;
-    }
-  }
 }
 
 
@@ -356,20 +334,20 @@ namespace BaseCellWidget {
  * A widget for a code cell.
  */
 export
-class CodeCellWidget extends BaseCellWidget {
+class CodeCell extends Cell {
   /**
    * Construct a code cell widget.
    */
-  constructor(options: CodeCellWidget.IOptions) {
+  constructor(options: CodeCell.IOptions) {
     super(options);
     this.addClass(CODE_CELL_CLASS);
     let rendermime = this._rendermime = options.rendermime;
-    let factory = options.contentFactory;
+    let contentFactory = options.contentFactory;
     let model = this.model;
-    this._output = factory.createOutputArea({
+    this._output = contentFactory.createOutputArea({
       model: model.outputs,
       rendermime,
-      contentFactory: factory.outputAreaContentFactory
+      contentFactory: contentFactory
     });
     (this.layout as PanelLayout).addWidget(this._output);
     this.setPrompt(`${model.executionCount || ''}`);
@@ -385,7 +363,7 @@ class CodeCellWidget extends BaseCellWidget {
   /**
    * The content factory used by the widget.
    */
-  readonly contentFactory: CodeCellWidget.IContentFactory;
+  readonly contentFactory: Cell.IContentFactory;
 
   /**
    * Dispose of the resources used by the widget.
@@ -465,15 +443,15 @@ class CodeCellWidget extends BaseCellWidget {
   }
 
   private _rendermime: RenderMime = null;
-  private _output: OutputAreaWidget = null;
+  private _output: OutputArea = null;
 }
 
 
 /**
- * The namespace for the `CodeCellWidget` class statics.
+ * The namespace for the `CodeCell` class statics.
  */
 export
-namespace CodeCellWidget {
+namespace CodeCell {
   /**
    * An options object for initializing a base cell widget.
    */
@@ -492,74 +470,9 @@ namespace CodeCellWidget {
     /**
      * The factory used to create code cell components.
      */
-    contentFactory: IContentFactory;
+    contentFactory: Cell.IContentFactory;
   }
 
-  /**
-   * A factory for creating code cell widget components.
-   */
-  export
-  interface IContentFactory extends BaseCellWidget.IContentFactory {
-    /**
-     * The factory for output area content.
-     */
-    readonly outputAreaContentFactory: OutputAreaWidget.IContentFactory;
-
-    /**
-     * Create a new output area for the widget.
-     */
-    createOutputArea(options: OutputAreaWidget.IOptions): OutputAreaWidget;
-  }
-
-  /**
-   * The default implementation of an `IContentFactory`.
-   */
-  export
-  class ContentFactory extends BaseCellWidget.ContentFactory implements IContentFactory {
-    /**
-     * Construct a new code cell content factory
-     */
-    constructor(options: ContentFactory.IOptions) {
-      super(options);
-      this.outputAreaContentFactory = (options.outputAreaContentFactory ||
-        OutputAreaWidget.defaultContentFactory
-      );
-    }
-
-    /**
-     * The factory for output area content.
-     */
-    readonly outputAreaContentFactory: OutputAreaWidget.IContentFactory;
-
-    /**
-     * Create an output area widget.
-     */
-    createOutputArea(options: OutputAreaWidget.IOptions): OutputAreaWidget {
-      return new OutputAreaWidget(options);
-    }
-  }
-
-  /**
-   * The namespace for the `ContentFactory` class statics.
-   */
-  export
-  namespace ContentFactory {
-    /**
-     * An options object for initializing a renderer.
-     */
-    export
-    interface IOptions {
-      /**
-       * A code editor factory.
-       */
-      editorFactory: CodeEditor.Factory;
-
-      /**
-       * The factory to use for output area widget content.
-       */
-      outputAreaContentFactory?: OutputAreaWidget.IContentFactory;
-    }
-  }
 }
 
 
@@ -573,7 +486,7 @@ namespace CodeCellWidget {
  * updating the rendered text in all of these cases.
  */
 export
-class MarkdownCellWidget extends BaseCellWidget {
+class MarkdownCellWidget extends Cell {
   /**
    * Construct a Markdown cell widget.
    */
@@ -664,7 +577,7 @@ class MarkdownCellWidget extends BaseCellWidget {
 
 
 /**
- * The namespace for the `CodeCellWidget` class statics.
+ * The namespace for the `CodeCell` class statics.
  */
 export
 namespace MarkdownCellWidget {
@@ -686,7 +599,7 @@ namespace MarkdownCellWidget {
     /**
      * The factory object for cell components.
      */
-    contentFactory: BaseCellWidget.IContentFactory;
+    contentFactory: Cell.IContentFactory;
   }
 }
 
@@ -695,11 +608,11 @@ namespace MarkdownCellWidget {
  * A widget for a raw cell.
  */
 export
-class RawCellWidget extends BaseCellWidget {
+class RawCellWidget extends Cell {
   /**
    * Construct a raw cell widget.
    */
-  constructor(options: BaseCellWidget.IOptions) {
+  constructor(options: Cell.IOptions) {
     super(options);
     this.addClass(RAW_CELL_CLASS);
   }
@@ -729,7 +642,7 @@ namespace RawCellWidget {
     /**
      * The factory object for cell components.
      */
-    contentFactory: BaseCellWidget.IContentFactory;
+    contentFactory: Cell.IContentFactory;
   }
 }
 
@@ -738,11 +651,11 @@ namespace RawCellWidget {
  * An input area widget, which hosts a prompt and an editor widget.
  */
 export
-class InputAreaWidget extends Widget {
+class InputArea extends Widget {
   /**
    * Construct an input area widget.
    */
-  constructor(options: InputAreaWidget.IOptions) {
+  constructor(options: InputArea.IOptions) {
     super();
     this.addClass(INPUT_CLASS);
     let editor = this._editor = options.editor;
@@ -799,24 +712,24 @@ class InputAreaWidget extends Widget {
   }
 
   private _prompt: Widget;
-  private _editor: CodeEditorWidget;
+  private _editor: CodeEditorWrapper;
   private _rendered: Widget;
 }
 
 
 /**
- * The namespace for `InputAreaWidget` statics.
+ * The namespace for `InputArea` statics.
  */
 export
-namespace InputAreaWidget {
+namespace InputArea {
   /**
-   * The options used to create an `InputAreaWidget`.
+   * The options used to create an `InputArea`.
    */
   export
   interface IOptions {
     /**
      * The editor widget contained by the input area.
      */
-    editor: CodeEditorWidget;
+    editor: CodeEditorWrapper;
   }
 }

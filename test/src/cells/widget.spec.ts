@@ -16,17 +16,17 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  CodeEditorWidget
+  CodeEditorWrapper
 } from '@jupyterlab/codeeditor';
 
 import {
-  BaseCellWidget, CellModel, InputAreaWidget,
-  CodeCellWidget, CodeCellModel, MarkdownCellWidget,
+  Cell, CellModel, InputArea,
+  CodeCell, CodeCellModel, MarkdownCellWidget,
   RawCellWidget, RawCellModel, MarkdownCellModel
 } from '@jupyterlab/cells';
 
 import {
-  OutputAreaModel, OutputAreaWidget
+  OutputAreaModel, OutputArea
 } from '@jupyterlab/outputarea';
 
 import {
@@ -44,7 +44,7 @@ const RENDERED_CLASS = 'jp-mod-rendered';
 const PROMPT_CLASS = 'jp-Cell-prompt';
 
 
-class LogBaseCell extends BaseCellWidget {
+class LogBaseCell extends Cell {
 
   methods: string[] = [];
 
@@ -79,7 +79,7 @@ class LogBaseCell extends BaseCellWidget {
 }
 
 
-class LogCodeCell extends CodeCellWidget {
+class LogCodeCell extends CodeCell {
 
   methods: string[] = [];
 
@@ -114,7 +114,7 @@ class LogMarkdownCell extends MarkdownCellWidget {
 
 describe('cells/widget', () => {
 
-  describe('BaseCellWidget', () => {
+  describe('Cell', () => {
 
     let contentFactory = createBaseCellFactory();
     let model = new CellModel({});
@@ -122,14 +122,14 @@ describe('cells/widget', () => {
     describe('#constructor()', () => {
 
       it('should create a base cell widget', () => {
-        let widget = new BaseCellWidget({ model, contentFactory });
-        expect(widget).to.be.a(BaseCellWidget);
+        let widget = new Cell({ model, contentFactory });
+        expect(widget).to.be.a(Cell);
       });
 
       it('should accept a custom contentFactory', () => {
         contentFactory = createBaseCellFactory();
-        let widget = new BaseCellWidget({ model, contentFactory });
-        expect(widget).to.be.a(BaseCellWidget);
+        let widget = new Cell({ model, contentFactory });
+        expect(widget).to.be.a(Cell);
       });
 
     });
@@ -138,7 +138,7 @@ describe('cells/widget', () => {
 
       it('should be the model used by the widget', () => {
         let model = new CellModel({});
-        let widget = new BaseCellWidget({ model, contentFactory });
+        let widget = new Cell({ model, contentFactory });
         expect(widget.model).to.be(model);
       });
 
@@ -147,8 +147,8 @@ describe('cells/widget', () => {
     describe('#editorWidget', () => {
 
       it('should be a code editor widget', () => {
-        let widget = new BaseCellWidget({ model, contentFactory });
-        expect(widget.editorWidget).to.be.a(CodeEditorWidget);
+        let widget = new Cell({ model, contentFactory });
+        expect(widget.editorWidget).to.be.a(CodeEditorWrapper);
       });
 
     });
@@ -156,7 +156,7 @@ describe('cells/widget', () => {
     describe('#editor', () => {
 
       it('should be a cell editor', () => {
-        let widget = new BaseCellWidget({ model, contentFactory });
+        let widget = new Cell({ model, contentFactory });
         expect(widget.editor.uuid).to.be.ok();
       });
 
@@ -165,17 +165,17 @@ describe('cells/widget', () => {
     describe('#readOnly', () => {
 
       it('should be a boolean', () => {
-        let widget = new BaseCellWidget({ model, contentFactory });
+        let widget = new Cell({ model, contentFactory });
         expect(typeof widget.readOnly).to.be('boolean');
       });
 
       it('should default to false', () => {
-        let widget = new BaseCellWidget({ model, contentFactory });
+        let widget = new Cell({ model, contentFactory });
         expect(widget.readOnly).to.be(false);
       });
 
       it('should be settable', () => {
-        let widget = new BaseCellWidget({
+        let widget = new Cell({
           model,
           contentFactory
         });
@@ -216,7 +216,7 @@ describe('cells/widget', () => {
     describe('#setPrompt()', () => {
 
       it('should not throw an error (full test in input area)', () => {
-        let widget = new BaseCellWidget({ model, contentFactory });
+        let widget = new Cell({ model, contentFactory });
         expect(() => { widget.setPrompt(void 0); }).to.not.throwError();
         expect(() => { widget.setPrompt(null); }).to.not.throwError();
         expect(() => { widget.setPrompt(''); }).to.not.throwError();
@@ -253,13 +253,13 @@ describe('cells/widget', () => {
     describe('#dispose()', () => {
 
       it('should dispose of the resources held by the widget', () => {
-        let widget = new BaseCellWidget({ model, contentFactory });
+        let widget = new Cell({ model, contentFactory });
         widget.dispose();
         expect(widget.isDisposed).to.be(true);
       });
 
       it('should be safe to call multiple times', () => {
-        let widget = new BaseCellWidget({ model, contentFactory });
+        let widget = new Cell({ model, contentFactory });
         widget.dispose();
         widget.dispose();
         expect(widget.isDisposed).to.be(true);
@@ -293,7 +293,7 @@ describe('cells/widget', () => {
     describe('#contentFactory', () => {
 
       it('should be a contentFactory', () => {
-        expect(contentFactory).to.be.a(BaseCellWidget.ContentFactory);
+        expect(contentFactory).to.be.a(Cell.ContentFactory);
       });
 
     });
@@ -303,8 +303,8 @@ describe('cells/widget', () => {
       describe('#constructor', () => {
 
         it('should create a ContentFactory', () => {
-          let factory = new BaseCellWidget.ContentFactory({ editorFactory });
-          expect(factory).to.be.a(BaseCellWidget.ContentFactory);
+          let factory = new Cell.ContentFactory({ editorFactory });
+          expect(factory).to.be.a(Cell.ContentFactory);
         });
 
       });
@@ -312,7 +312,7 @@ describe('cells/widget', () => {
       describe('#editorFactory', () => {
 
         it('should be the editor factory used by the content factory', () => {
-          let factory = new BaseCellWidget.ContentFactory({ editorFactory });
+          let factory = new Cell.ContentFactory({ editorFactory });
           expect(factory.editorFactory).to.be(editorFactory);
         });
 
@@ -321,12 +321,12 @@ describe('cells/widget', () => {
       describe('#createCellEditor()', () => {
 
         it('should create a code editor widget', () => {
-          let factory = new BaseCellWidget.ContentFactory({ editorFactory });
+          let factory = new Cell.ContentFactory({ editorFactory });
           let editor = factory.createCellEditor({
             model,
             factory: editorFactory
           });
-          expect(editor).to.be.a(CodeEditorWidget);
+          expect(editor).to.be.a(CodeEditorWrapper);
         });
 
       });
@@ -334,12 +334,12 @@ describe('cells/widget', () => {
       describe('#createInputArea()', () => {
 
         it('should create an input area widget', () => {
-          let factory = new BaseCellWidget.ContentFactory({ editorFactory });
+          let factory = new Cell.ContentFactory({ editorFactory });
           let editor = factory.createCellEditor({
             model,
             factory: editorFactory });
           let input = contentFactory.createInputArea({ editor });
-          expect(input).to.be.an(InputAreaWidget);
+          expect(input).to.be.an(InputArea);
         });
 
       });
@@ -348,7 +348,7 @@ describe('cells/widget', () => {
 
   });
 
-  describe('CodeCellWidget', () => {
+  describe('CodeCell', () => {
 
     let contentFactory = createCodeCellFactory();
     let model = new CodeCellModel({});
@@ -356,14 +356,14 @@ describe('cells/widget', () => {
     describe('#constructor()', () => {
 
       it('should create a code cell widget', () => {
-        let widget = new CodeCellWidget({ model, rendermime, contentFactory });
-        expect(widget).to.be.a(CodeCellWidget);
+        let widget = new CodeCell({ model, rendermime, contentFactory });
+        expect(widget).to.be.a(CodeCell);
       });
 
       it('should accept a custom contentFactory', () => {
         contentFactory = createCodeCellFactory();
-        let widget = new CodeCellWidget({ model, contentFactory, rendermime });
-        expect(widget).to.be.a(CodeCellWidget);
+        let widget = new CodeCell({ model, contentFactory, rendermime });
+        expect(widget).to.be.a(CodeCell);
       });
 
     });
@@ -371,13 +371,13 @@ describe('cells/widget', () => {
     describe('#dispose()', () => {
 
       it('should dispose of the resources held by the widget', () => {
-        let widget = new CodeCellWidget({ model, rendermime, contentFactory });
+        let widget = new CodeCell({ model, rendermime, contentFactory });
         widget.dispose();
         expect(widget.isDisposed).to.be(true);
       });
 
       it('should be safe to call multiple times', () => {
-        let widget = new CodeCellWidget({ model, rendermime, contentFactory });
+        let widget = new CodeCell({ model, rendermime, contentFactory });
         widget.dispose();
         widget.dispose();
         expect(widget.isDisposed).to.be(true);
@@ -403,12 +403,12 @@ describe('cells/widget', () => {
       });
 
       it('should fulfill a promise if there is no code to execute', () => {
-        let widget = new CodeCellWidget({ model, rendermime, contentFactory });
+        let widget = new CodeCell({ model, rendermime, contentFactory });
         return widget.execute(session);
       });
 
       it('should fulfill a promise if there is code to execute', () => {
-        let widget = new CodeCellWidget({ model, rendermime, contentFactory });
+        let widget = new CodeCell({ model, rendermime, contentFactory });
         let originalCount: number;
         widget.model.value.text = 'foo';
         originalCount = (widget.model).executionCount;
@@ -446,7 +446,7 @@ describe('cells/widget', () => {
     describe('#contentFactory', () => {
 
       it('should be a ContentFactory', () => {
-        expect(contentFactory).to.be.a(CodeCellWidget.ContentFactory);
+        expect(contentFactory).to.be.a(CodeCell.ContentFactory);
       });
 
     });
@@ -456,9 +456,9 @@ describe('cells/widget', () => {
       describe('#constructor', () => {
 
         it('should create a ContentFactory', () => {
-          let factory = new CodeCellWidget.ContentFactory({ editorFactory });
-          expect(factory).to.be.a(CodeCellWidget.ContentFactory);
-          expect(factory).to.be.a(BaseCellWidget.ContentFactory);
+          let factory = new CodeCell.ContentFactory({ editorFactory });
+          expect(factory).to.be.a(CodeCell.ContentFactory);
+          expect(factory).to.be.a(Cell.ContentFactory);
         });
 
       });
@@ -466,14 +466,14 @@ describe('cells/widget', () => {
       describe('#createOutputArea()', () => {
 
         it('should create an output area widget', () => {
-          let factory = new CodeCellWidget.ContentFactory({ editorFactory });
+          let factory = new CodeCell.ContentFactory({ editorFactory });
           let model = new OutputAreaModel();
           let output = factory.createOutputArea({
             model,
             rendermime,
-            contentFactory: OutputAreaWidget.defaultContentFactory
+            contentFactory: OutputArea.defaultContentFactory
           });
-          expect(output).to.be.an(OutputAreaWidget);
+          expect(output).to.be.an(OutputArea);
         });
 
       });
@@ -593,14 +593,14 @@ describe('cells/widget', () => {
 
   });
 
-  describe('InputAreaWidget', () => {
+  describe('InputArea', () => {
 
     describe('#constructor()', () => {
 
       it('should create an input area widget', () => {
         let editor = createCellEditor();
-        let widget = new InputAreaWidget({ editor });
-        expect(widget).to.be.an(InputAreaWidget);
+        let widget = new InputArea({ editor });
+        expect(widget).to.be.an(InputArea);
       });
 
     });
@@ -609,7 +609,7 @@ describe('cells/widget', () => {
 
       it('should change the value of the input prompt', () => {
         let editor = createCellEditor();
-        let widget = new InputAreaWidget({ editor });
+        let widget = new InputArea({ editor });
         let prompt = widget.node.querySelector(`.${PROMPT_CLASS}`);
         expect(prompt.textContent).to.be.empty();
         widget.setPrompt('foo');
@@ -618,7 +618,7 @@ describe('cells/widget', () => {
 
       it('should treat the string value "null" as special', () => {
         let editor = createCellEditor();
-        let widget = new InputAreaWidget({ editor });
+        let widget = new InputArea({ editor });
         let prompt = widget.node.querySelector(`.${PROMPT_CLASS}`);
         expect(prompt.textContent).to.be.empty();
         widget.setPrompt('null');

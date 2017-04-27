@@ -6,7 +6,7 @@
 |----------------------------------------------------------------------------*/
 
 
-.jp-JSONEditorWidget {
+.jp-JSONEditor {
   padding-left: 10px;
   padding-right: 10px;
   display: flex;
@@ -15,7 +15,7 @@
 }
 
 
-.jp-JSONEditorWidget-host {
+.jp-JSONEditor-host {
   flex: 1 1 auto;
   border: var(--jp-border-width) solid #cfcfcf;
   border-radius: 0px;
@@ -24,13 +24,13 @@
 }
 
 
-.jp-JSONEditorWidget.jp-mod-error .jp-JSONEditorWidget-host {
+.jp-JSONEditor.jp-mod-error .jp-JSONEditor-host {
   border-color: red;
   outline-color: red;
 }
 
 
-.jp-JSONEditorWidget-buttons {
+.jp-JSONEditor-buttons {
   font-family: FontAwesome;
   flex: 1 0 auto;
   min-height: 13px;
@@ -38,14 +38,14 @@
 }
 
 
-.jp-JSONEditorWidget-commitButton::before {
+.jp-JSONEditor-commitButton::before {
   content: '\f00c'; /* check */
   float: right;
   margin-right: 20px;
 }
 
 
-.jp-JSONEditorWidget-revertButton::before {
+.jp-JSONEditor-revertButton::before {
   content: '\f0e2'; /* undo */
   float: right;
   margin-right: 4px;

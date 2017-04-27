@@ -24,11 +24,11 @@ const HAS_SELECTION_CLASS = 'jp-mod-has-primary-selection';
  * A widget which hosts a code editor.
  */
 export
-class CodeEditorWidget extends Widget {
+class CodeEditorWrapper extends Widget {
   /**
    * Construct a new code editor widget.
    */
-  constructor(options: CodeEditorWidget.IOptions) {
+  constructor(options: CodeEditorWrapper.IOptions) {
     super();
     const editor = this._editor = options.factory({
       host: this.node,
@@ -165,10 +165,10 @@ class CodeEditorWidget extends Widget {
 
 
 /**
- * The namespace for the `CodeEditorWidget` statics.
+ * The namespace for the `CodeEditorWrapper` statics.
  */
 export
-namespace CodeEditorWidget {
+namespace CodeEditorWrapper {
   /**
    * The options used to initialize a code editor widget.
    */
