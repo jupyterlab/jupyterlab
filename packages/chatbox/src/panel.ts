@@ -138,9 +138,10 @@ class ChatboxDocumentInfo extends Widget {
   constructor() {
     super();
     this.addClass(DOCUMENT_INFO_CLASS);
-    let chatIcon = document.createElement('span');
+    let chatIcon = document.createElement('div');
     chatIcon.className = ICON_CLASS + ' ' + MATERIAL_CLASS + ' ' + CHAT_ICON;
-    let fileName = document.createElement('span');
+    let fileName = document.createElement('div');
+    fileName.className = 'jp-ChatboxDocumentInfo-name';
     this.node.appendChild(chatIcon);
     this.node.appendChild(fileName);
   }

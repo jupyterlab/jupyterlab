@@ -18,12 +18,13 @@
 }
 
 .jp-ChatboxPanel .jp-ChatboxDocumentInfo {
-  display: inline-block;
+  display: flex;
   padding: 5px;
 }
 
-.jp-ChatboxPanel .jp-ChatboxDocumentInfo .span {
+.jp-ChatboxPanel .jp-ChatboxDocumentInfo-name {
   margin-left: 10px;
+  flex-grow: 1;
 }
 
 .jp-Chatbox {

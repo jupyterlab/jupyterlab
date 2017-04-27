@@ -3,4 +3,5 @@
 
 export * from './panel';
 export * from './chatbox';
+export * from './entry'
 
