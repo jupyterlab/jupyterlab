@@ -12,7 +12,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  CodeCellWidget, MarkdownCellWidget, RawCellWidget
+  CodeCell, MarkdownCellWidget, RawCellWidget
 } from '@jupyterlab/cells';
 
 import {
@@ -192,7 +192,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should clear the outputs of a code cell', () => {
         NotebookActions.mergeCells(widget);
-        let cell = widget.activeCell as CodeCellWidget;
+        let cell = widget.activeCell as CodeCell;
         expect(cell.model.outputs.length).to.be(0);
       });
 
@@ -277,7 +277,7 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.deleteCells(widget);
         requestAnimationFrame(() => {
           expect(widget.widgets.length).to.be(1);
-          expect(widget.activeCell).to.be.a(CodeCellWidget);
+          expect(widget.activeCell).to.be.a(CodeCell);
           done();
         });
 
@@ -316,7 +316,7 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.insertAbove(widget);
         expect(widget.activeCellIndex).to.be(0);
         expect(widget.widgets.length).to.be(count + 1);
-        expect(widget.activeCell).to.be.a(CodeCellWidget);
+        expect(widget.activeCell).to.be.a(CodeCell);
       });
 
       it('should be a no-op if there is no model', () => {
@@ -367,7 +367,7 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.insertBelow(widget);
         expect(widget.activeCellIndex).to.be(1);
         expect(widget.widgets.length).to.be(count + 1);
-        expect(widget.activeCell).to.be.a(CodeCellWidget);
+        expect(widget.activeCell).to.be.a(CodeCell);
       });
 
       it('should be a no-op if there is no model', () => {
@@ -440,7 +440,7 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.changeCellType(widget, 'raw');
         NotebookActions.undo(widget);
         let cell = widget.widgets[0];
-        expect(cell).to.be.a(CodeCellWidget);
+        expect(cell).to.be.a(CodeCell);
       });
 
       it('should clear the existing selection', () => {
@@ -473,7 +473,7 @@ describe('@jupyterlab/notebook', () => {
       it('should run the selected cells', function (done) {
         let next = widget.widgets[1] as MarkdownCellWidget;
         widget.select(next);
-        let cell = widget.activeCell as CodeCellWidget;
+        let cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
         next.rendered = false;
         NotebookActions.run(widget, session).then(result => {
@@ -520,7 +520,7 @@ describe('@jupyterlab/notebook', () => {
       it('should handle no session', (done) => {
         NotebookActions.run(widget, null).then(result => {
           expect(result).to.be(true);
-          let cell = widget.activeCell as CodeCellWidget;
+          let cell = widget.activeCell as CodeCell;
           expect(cell.model.executionCount).to.be(null);
         }).then(done, done);
       });
@@ -563,7 +563,7 @@ describe('@jupyterlab/notebook', () => {
       it('should run the selected cells ', (done) => {
         let next = widget.widgets[1] as MarkdownCellWidget;
         widget.select(next);
-        let cell = widget.activeCell as CodeCellWidget;
+        let cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
         next.rendered = false;
         NotebookActions.runAndAdvance(widget, session).then(result => {
@@ -612,7 +612,7 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.runAndAdvance(widget, session).then(result => {
           expect(result).to.be(true);
           expect(widget.widgets.length).to.be(count + 1);
-          expect(widget.activeCell).to.be.a(CodeCellWidget);
+          expect(widget.activeCell).to.be.a(CodeCell);
           expect(widget.mode).to.be('edit');
         }).then(done, done);
       });
@@ -661,7 +661,7 @@ describe('@jupyterlab/notebook', () => {
       it('should run the selected cells ', (done) => {
         let next = widget.widgets[1] as MarkdownCellWidget;
         widget.select(next);
-        let cell = widget.activeCell as CodeCellWidget;
+        let cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
         next.rendered = false;
         NotebookActions.runAndInsert(widget, session).then(result => {
@@ -694,7 +694,7 @@ describe('@jupyterlab/notebook', () => {
         let count = widget.widgets.length;
         NotebookActions.runAndInsert(widget, session).then(result => {
           expect(result).to.be(true);
-          expect(widget.activeCell).to.be.a(CodeCellWidget);
+          expect(widget.activeCell).to.be.a(CodeCell);
           expect(widget.mode).to.be('edit');
           expect(widget.widgets.length).to.be(count + 1);
         }).then(done, done);
@@ -748,7 +748,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should run all of the cells in the notebok', (done) => {
         let next = widget.widgets[1] as MarkdownCellWidget;
-        let cell = widget.activeCell as CodeCellWidget;
+        let cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
         next.rendered = false;
         NotebookActions.runAll(widget, session).then(result => {
@@ -1107,7 +1107,7 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.cut(widget);
         requestAnimationFrame(() => {
           expect(widget.widgets.length).to.be(1);
-          expect(widget.activeCell).to.be.a(CodeCellWidget);
+          expect(widget.activeCell).to.be.a(CodeCell);
           done();
         });
       });
@@ -1307,16 +1307,16 @@ describe('@jupyterlab/notebook', () => {
         let index = 0;
         for (let i = 1; i < widget.widgets.length; i++) {
           let cell = widget.widgets[i];
-          if (cell instanceof CodeCellWidget && cell.model.outputs.length) {
+          if (cell instanceof CodeCell && cell.model.outputs.length) {
             widget.select(cell);
             index = i;
             break;
           }
         }
         NotebookActions.clearOutputs(widget);
-        let cell = widget.widgets[0] as CodeCellWidget;
+        let cell = widget.widgets[0] as CodeCell;
         expect(cell.model.outputs.length).to.be(0);
-        cell = widget.widgets[index] as CodeCellWidget;
+        cell = widget.widgets[index] as CodeCell;
         expect(cell.model.outputs.length).to.be(0);
       });
 
@@ -1344,7 +1344,7 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.clearAllOutputs(widget);
         for (let i = 0; i < widget.widgets.length; i++) {
           let cell = widget.widgets[i];
-          if (cell instanceof CodeCellWidget) {
+          if (cell instanceof CodeCell) {
             expect(cell.model.outputs.length).to.be(0);
           }
         }

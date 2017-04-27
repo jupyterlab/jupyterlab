@@ -20,7 +20,7 @@ import {
 } from 'simulate-event';
 
 import {
-  CodeEditor, CodeEditorWidget
+  CodeEditor, CodeEditorWrapper
 } from '@jupyterlab/codeeditor';
 
 import {
@@ -39,12 +39,12 @@ const ITEM_CLASS = 'jp-Completer-item';
 const ACTIVE_CLASS = 'jp-mod-active';
 
 
-function createEditorWidget(): CodeEditorWidget {
+function createEditorWidget(): CodeEditorWrapper {
   let model = new CodeEditor.Model();
   let factory = (options: CodeEditor.IOptions) => {
     return new CodeMirrorEditor(options);
   };
-  return new CodeEditorWidget({ factory, model });
+  return new CodeEditorWrapper({ factory, model });
 }
 
 

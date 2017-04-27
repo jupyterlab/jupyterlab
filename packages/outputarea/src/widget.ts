@@ -63,7 +63,7 @@ const FACTORY_MIME = 'application/vnd.phosphor.widget-factory';
 /**
  * The class name added to an output area widget.
  */
-const OUTPUT_AREA_CLASS = 'jp-OutputAreaWidget';
+const OUTPUT_AREA_CLASS = 'jp-OutputArea';
 
 /**
  * The class name added to a "mirrored" output area widget created by a drag.
@@ -73,27 +73,27 @@ const MIRRORED_OUTPUT_AREA_CLASS = 'jp-MirroredOutputArea';
 /**
  * The class name added to an child widget.
  */
-const CHILD_CLASS = 'jp-OutputAreaWidget-child';
+const CHILD_CLASS = 'jp-OutputArea-child';
 
 /**
  * The class name added to output area gutters.
  */
-const GUTTER_CLASS = 'jp-OutputAreaWidget-gutter';
+const GUTTER_CLASS = 'jp-OutputArea-gutter';
 
 /**
  * The class name added to output area outputs.
  */
-const OUTPUT_CLASS = 'jp-OutputAreaWidget-output';
+const OUTPUT_CLASS = 'jp-OutputArea-output';
 
 /**
  * The class name added to an execution result.
  */
-const EXECTUTE_CLASS = 'jp-OutputAreaWidget-executeResult';
+const EXECTUTE_CLASS = 'jp-OutputArea-executeResult';
 
 /**
  * The class name added to stdin data.
  */
-const STDIN_CLASS = 'jp-OutputAreaWidget-stdin';
+const STDIN_CLASS = 'jp-OutputArea-stdin';
 
 /**
  * The class name added to stdin data prompt nodes.
@@ -131,17 +131,17 @@ const COLLAPSED_CLASS = 'jp-mod-collapsed';
  * signal.
  */
 export
-class OutputAreaWidget extends Widget {
+class OutputArea extends Widget {
   /**
    * Construct an output area widget.
    */
-  constructor(options: OutputAreaWidget.IOptions) {
+  constructor(options: OutputArea.IOptions) {
     super();
     let model = this.model = options.model;
     this.addClass(OUTPUT_AREA_CLASS);
     this.rendermime = options.rendermime;
     this.contentFactory = (
-      options.contentFactory || OutputAreaWidget.defaultContentFactory
+      options.contentFactory || OutputArea.defaultContentFactory
     );
     this.layout = new PanelLayout();
     for (let i = 0; i < model.length; i++) {
@@ -154,11 +154,11 @@ class OutputAreaWidget extends Widget {
   /**
    * Create a mirrored output area widget.
    */
-  mirror(): OutputAreaWidget {
+  mirror(): OutputArea {
     let rendermime = this.rendermime;
     let contentFactory = this.contentFactory;
     let model = this.model;
-    let widget = new OutputAreaWidget({ model, rendermime, contentFactory });
+    let widget = new OutputArea({ model, rendermime, contentFactory });
     widget.title.label = 'Mirrored Output';
     widget.title.closable = true;
     widget.addClass(MIRRORED_OUTPUT_AREA_CLASS);
@@ -178,7 +178,7 @@ class OutputAreaWidget extends Widget {
   /**
    * The content factory used by the widget.
    */
-  readonly contentFactory: OutputAreaWidget.IContentFactory;
+  readonly contentFactory: OutputArea.IContentFactory;
 
   /**
    * A read-only sequence of the widgets in the output area.
@@ -457,12 +457,12 @@ class OutputAreaWidget extends Widget {
 
 
 /**
- * A namespace for OutputAreaWidget statics.
+ * A namespace for OutputArea statics.
  */
 export
-namespace OutputAreaWidget {
+namespace OutputArea {
   /**
-   * The options to pass to an `OutputAreaWidget`.
+   * The options to pass to an `OutputArea`.
    */
   export
   interface IOptions {
@@ -756,7 +756,7 @@ namespace OutputAreaWidget {
       });
 
       this._drag.mimeData.setData(FACTORY_MIME, () => {
-        let outputArea = this.parent.parent as OutputAreaWidget;
+        let outputArea = this.parent.parent as OutputArea;
         return outputArea.mirror();
       });
 

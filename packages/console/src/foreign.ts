@@ -18,7 +18,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  BaseCellWidget, CodeCellWidget
+  Cell, CodeCell
 } from '@jupyterlab/cells';
 
 import {
@@ -109,7 +109,7 @@ class ForeignHandler implements IDisposable {
     let msgType = msg.header.msg_type;
     let parentHeader = msg.parent_header as KernelMessage.IHeader;
     let parentMsgId = parentHeader.msg_id as string;
-    let cell: CodeCellWidget;
+    let cell: CodeCell;
     switch (msgType) {
     case 'execute_input':
       let inputMsg = msg as KernelMessage.IExecuteInputMsg;
@@ -149,17 +149,17 @@ class ForeignHandler implements IDisposable {
   /**
    * Create a new code cell for an input originated from a foreign session.
    */
-  private _newCell(parentMsgId: string): CodeCellWidget {
+  private _newCell(parentMsgId: string): CodeCell {
     let cell = this._factory();
     this._cells.set(parentMsgId, cell);
     this._parent.addCell(cell);
     return cell;
   }
 
-  private _cells = new Map<string, CodeCellWidget>();
+  private _cells = new Map<string, CodeCell>();
   private _enabled = true;
   private _parent: ForeignHandler.IReceiver = null;
-  private _factory: () => CodeCellWidget = null;
+  private _factory: () => CodeCell = null;
 }
 
 
@@ -186,7 +186,7 @@ namespace ForeignHandler {
     /**
      * The cell factory for foreign handlers.
      */
-    cellFactory: () => CodeCellWidget;
+    cellFactory: () => CodeCell;
   }
 
   /**
@@ -197,7 +197,7 @@ namespace ForeignHandler {
     /**
      * Add a newly created foreign cell.
      */
-    addCell(cell: BaseCellWidget): void;
+    addCell(cell: Cell): void;
 
     /**
      * Trigger a rendering update on the receiver.

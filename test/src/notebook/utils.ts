@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/codemirror';
 
 import {
-  CodeEditorWidget
+  CodeEditorWrapper
 } from '@jupyterlab/codeeditor';
 
 import {
@@ -22,7 +22,7 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
-  BaseCellWidget, CodeCellWidget, CodeCellModel
+  Cell, CodeCell, CodeCellModel
 } from '@jupyterlab/cells';
 
 import {
@@ -54,8 +54,8 @@ const clipboard = Clipboard.getInstance();
  * Create a base cell content factory.
  */
 export
-function createBaseCellFactory(): BaseCellWidget.IContentFactory {
-  return new BaseCellWidget.ContentFactory({ editorFactory });
+function createBaseCellFactory(): Cell.IContentFactory {
+  return new Cell.ContentFactory({ editorFactory });
 };
 
 
@@ -63,8 +63,8 @@ function createBaseCellFactory(): BaseCellWidget.IContentFactory {
  * Create a new code cell content factory.
  */
 export
-function createCodeCellFactory(): CodeCellWidget.IContentFactory {
-  return new CodeCellWidget.ContentFactory({ editorFactory });
+function createCodeCellFactory(): CodeCell.IContentFactory {
+  return new CodeCell.ContentFactory({ editorFactory });
 }
 
 
@@ -72,8 +72,8 @@ function createCodeCellFactory(): CodeCellWidget.IContentFactory {
  * Create a cell editor widget.
  */
 export
-function createCellEditor(model?: CodeCellModel): CodeEditorWidget {
-  return new CodeEditorWidget({
+function createCellEditor(model?: CodeCellModel): CodeEditorWrapper {
+  return new CodeEditorWrapper({
     model: model || new CodeCellModel({}),
     factory: editorFactory
   });

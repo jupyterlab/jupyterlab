@@ -20,7 +20,7 @@ import {
 } from '@jupyterlab/console';
 
 import {
-  BaseCellWidget, CodeCellWidget, CodeCellModel, RawCellModel, RawCellWidget
+  Cell, CodeCell, CodeCellModel, RawCellModel, RawCellWidget
 } from '@jupyterlab/cells';
 
 import {
@@ -136,7 +136,7 @@ describe('console/widget', () => {
 
       it('should be a code cell widget', () => {
         Widget.attach(widget, document.body);
-        expect(widget.prompt).to.be.a(CodeCellWidget);
+        expect(widget.prompt).to.be.a(CodeCell);
       });
 
       it('should be replaced after execution', () => {
@@ -144,12 +144,12 @@ describe('console/widget', () => {
         Widget.attach(widget, document.body);
 
         let old = widget.prompt;
-        expect(old).to.be.a(CodeCellWidget);
+        expect(old).to.be.a(CodeCell);
 
         return (widget.session as ClientSession).initialize().then(() => {
           return widget.execute(force);
         }).then(() => {
-          expect(widget.prompt).to.be.a(CodeCellWidget);
+          expect(widget.prompt).to.be.a(CodeCell);
           expect(widget.prompt).to.not.be(old);
         });
       });
@@ -177,7 +177,7 @@ describe('console/widget', () => {
       it('should add a code cell to the content widget', () => {
         let contentFactory = createCodeCellFactory();
         let model = new CodeCellModel({});
-        let cell = new CodeCellWidget({ model, contentFactory, rendermime });
+        let cell = new CodeCell({ model, contentFactory, rendermime });
         Widget.attach(widget, document.body);
         expect(widget.cells.length).to.be(0);
         widget.addCell(cell);
@@ -308,13 +308,13 @@ describe('console/widget', () => {
 
         let old = widget.prompt;
         let force = true;
-        expect(old).to.be.a(CodeCellWidget);
+        expect(old).to.be.a(CodeCell);
         widget.methods = [];
 
         return (widget.session as ClientSession).initialize().then(() => {
           return widget.execute(force);
         }).then(() => {
-          expect(widget.prompt).to.be.a(CodeCellWidget);
+          expect(widget.prompt).to.be.a(CodeCell);
           expect(widget.prompt).to.not.be(old);
           expect(widget.methods).to.contain('newPrompt');
         });
@@ -366,7 +366,7 @@ describe('console/widget', () => {
       describe('#rawCellContentFactory', () => {
 
         it('should be the raw cell ContentFactory used by the factory', () => {
-          expect(contentFactory.rawCellContentFactory).to.be.a(BaseCellWidget.ContentFactory);
+          expect(contentFactory.rawCellContentFactory).to.be.a(Cell.ContentFactory);
         });
 
       });
@@ -374,7 +374,7 @@ describe('console/widget', () => {
       describe('#codeCellContentFactory', () => {
 
         it('should be the code cell ContentFactory used by the factory', () => {
-          expect(contentFactory.codeCellContentFactory).to.be.a(CodeCellWidget.ContentFactory);
+          expect(contentFactory.codeCellContentFactory).to.be.a(CodeCell.ContentFactory);
         });
 
       });
@@ -397,7 +397,7 @@ describe('console/widget', () => {
             let model = new CodeCellModel({});
             let rendermime = widget.rendermime;
             let factory = contentFactory.codeCellContentFactory;
-            let options: CodeCellWidget.IOptions = {
+            let options: CodeCell.IOptions = {
               model, rendermime, contentFactory: factory
             };
             return contentFactory.createForeignCell(options, widget);
@@ -436,7 +436,7 @@ describe('console/widget', () => {
             model,
             contentFactory: contentFactory.codeCellContentFactory
           }, widget);
-          expect(prompt).to.be.a(CodeCellWidget);
+          expect(prompt).to.be.a(CodeCell);
         });
 
       });
@@ -450,7 +450,7 @@ describe('console/widget', () => {
             model,
             contentFactory: contentFactory.codeCellContentFactory
           }, widget);
-          expect(prompt).to.be.a(CodeCellWidget);
+          expect(prompt).to.be.a(CodeCell);
         });
 
       });
