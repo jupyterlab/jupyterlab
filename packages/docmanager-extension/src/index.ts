@@ -120,11 +120,11 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   commands.addCommand(CommandIDs.createFrom, {
     label: args => args['creatorName'] as string,
     execute: args => {
-      const path = args['path'] as string;
+      const path = (args['path'] as string) || '';
       const creatorName = args['creatorName'] as string;
-      if (!path || !creatorName) {
+      if (!creatorName) {
         const command = CommandIDs.createFrom;
-        throw new Error(`${command} requires path and creatorName.`);
+        throw new Error(`${command} requires creatorName.`);
       }
 
       const items = args['items'] as string[];
