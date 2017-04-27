@@ -186,11 +186,7 @@ class Chatbox extends Widget {
   }
 
   /**
-   * Execute the current prompt.
-   *
-   * @param timeout - The length of time, in milliseconds, that the execution
-   * should wait for the API to determine whether code being submitted is
-   * incomplete before attempting submission anyway. The default value is `250`.
+   * Post the current text in the prompt to the chat.
    */
   post(): void {
     let prompt = this.prompt;
@@ -201,6 +197,22 @@ class Chatbox extends Widget {
     } else {
       return;
     }
+  }
+
+  /**
+   * Insert a line break in the prompt.
+   */
+  insertLinebreak(): void {
+    let prompt = this.prompt;
+    let model = prompt.model;
+    let editor = prompt.editor;
+    // Insert the line break at the cursor position, and move cursor forward.
+    let pos = editor.getCursorPosition();
+    let offset = editor.getOffsetAt(pos);
+    let text = model.value.text;
+    model.value.text = text.substr(0, offset) + '\n' + text.substr(offset);
+    pos = editor.getPositionAt(offset + 1);
+    editor.setCursorPosition(pos);
   }
 
   /**

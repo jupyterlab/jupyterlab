@@ -70,6 +70,7 @@
 .jp-Chatbox .jp-ChatEntry-badge {
   border-radius: 10px;
   padding: 2px;
+  min-width: 22px;
 }
 
 .jp-Chatbox-content .jp-InputArea-editor.jp-CellEditor {

@@ -31,9 +31,6 @@ import {
  */
 namespace CommandIDs {
   export
-  const create = 'chatbox:create';
-
-  export
   const clear = 'chatbox:clear';
 
   export
@@ -100,7 +97,16 @@ function activateChatbox(app: JupyterLab, rendermime: IRenderMime, palette: ICom
   commands.addCommand(command, {
     label: 'Post Chat Entry',
     execute: args => {
-      return panel.chatbox.post();
+      panel.chatbox.post();
+    }
+  });
+  palette.addItem({ command, category });
+
+  command = CommandIDs.linebreak;
+  commands.addCommand(command, {
+    label: 'Insert Line Break',
+    execute: args => {
+      panel.chatbox.insertLinebreak();
     }
   });
   palette.addItem({ command, category });
