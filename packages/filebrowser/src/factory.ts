@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IStateDB
+  InstanceTracker, IStateDB
 } from '@jupyterlab/apputils';
 
 import {
@@ -55,6 +55,11 @@ interface IFileBrowserFactory {
    * instance.
    */
   createFileBrowser(id: string, options?: IFileBrowserFactory.IOptions): FileBrowser;
+
+  /**
+   * The instance tracker used by the factory to track file browsers.
+   */
+  readonly tracker: InstanceTracker<FileBrowser>;
 }
 
 
