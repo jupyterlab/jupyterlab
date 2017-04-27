@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
+  PathExt
+} from '@jupyterlab/coreutils';
+
+import {
   Contents, Kernel
 } from '@jupyterlab/services';
 
@@ -122,15 +126,18 @@ class CreateFromHandler extends Widget {
     // Check for name conflicts when the inputNode changes.
     this.inputNode.addEventListener('input', () => {
       const value = this.inputNode.value;
-      if (value !== this._orig) {
-        this._container.items.forEach(item => {
-          if (item === value) {
-            this.addClass(FILE_CONFLICT_CLASS);
-            return;
-          }
-        });
+      const orig = PathExt.basename(this._orig.name);
+      if (value === orig) {
+        return;
       }
-      this.removeClass(FILE_CONFLICT_CLASS);
+
+      const { items } = this._container;
+      const conflict = items.some(item => PathExt.basename(item) === value);
+      if (conflict) {
+        this.addClass(FILE_CONFLICT_CLASS);
+      } else {
+        this.removeClass(FILE_CONFLICT_CLASS);
+      }
     });
   }
 
