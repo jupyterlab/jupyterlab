@@ -22,10 +22,6 @@ import {
 } from '@jupyterlab/filebrowser';
 
 import {
-  IServiceManager
-} from '@jupyterlab/services';
-
-import {
   map, toArray
 } from '@phosphor/algorithm';
 
@@ -60,7 +56,6 @@ const fileBrowserPlugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.filebrowser',
   requires: [
     IFileBrowserFactory,
-    IServiceManager,
     IDocumentManager,
     IDocumentRegistry,
     IMainMenu,
@@ -121,7 +116,7 @@ function activateFactory(app: JupyterLab, documentManager: IDocumentManager, sta
 /**
  * Activate the file browser in the sidebar.
  */
-function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, manager: IServiceManager, documentManager: IDocumentManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer): void {
+function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, documentManager: IDocumentManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer): void {
   const { commands } = app;
   const fbWidget = factory.createFileBrowser('filebrowser', {
     commands, documentManager
