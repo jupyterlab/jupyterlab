@@ -14,12 +14,12 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  CommandRegistry
-} from '@phosphor/commands';
+  each, toArray
+} from '@phosphor/algorithm';
 
 import {
-  DisposableSet
-} from '@phosphor/disposable';
+  CommandRegistry
+} from '@phosphor/commands';
 
 import {
   Menu, Widget
@@ -393,11 +393,7 @@ namespace Private {
    */
   export
   function createDropdownMenu(widget: FileButtons, commands: CommandRegistry): Menu {
-    let menu = new Menu({ commands });
-    let disposables = new DisposableSet();
-
-    // Remove all the commands associated with this menu upon disposal.
-    menu.disposed.connect(() => disposables.dispose());
+    const menu = new Menu({ commands });
 
     // Add new folder menu item.
     menu.addItem({
@@ -410,21 +406,15 @@ namespace Private {
       command: 'file-operations:new-untitled'
     });
 
-    console.log('TODO: implement create from menu in file browser buttons');
-    // let prefix = `file-buttons-${++id}`;
-    // let registry = widget.manager.registry;
-    // let command: string;
-    // each(registry.creators(), creator => {
-    //   console.log('boom', creator.name);
-    //   command = `${prefix}:new-${creator.name}`;
-    //   disposables.add(commands.addCommand(command, {
-    //     execute: () => {
-    //       widget.createFrom(creator.name);
-    //     },
-    //     label: creator.name
-    //   }));
-    //   menu.addItem({ command });
-    // });
+    const { registry } = widget.manager;
+    const items = toArray(widget.model.items()).map(item => item.path);
+    const path = widget.model.path;
+    each(registry.creators(), creator => {
+      const command = 'file-operations:create-from';
+      const creatorName = creator.name;
+      const args = { creatorName, items, path };
+      menu.addItem({ args, command });
+    });
     return menu;
   }
 
