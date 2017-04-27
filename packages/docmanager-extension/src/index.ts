@@ -118,8 +118,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   commands.addCommand(CommandIDs.createFrom, {
-    label: args => (args['label'] as string) ||
-      `Create ${args['creatorName'] as string}`,
+    label: args => args['creatorName'] as string,
     execute: args => {
       const path = args['path'] as string;
       const creatorName = args['creatorName'] as string;
