@@ -37,7 +37,7 @@ def run(cmd, **kwargs):
     try:
         return check_output(cmd, **kwargs)
     except CalledProcessError as error:
-        print(error.output)
+        raise error
 
 
 def install_extension(extension):
