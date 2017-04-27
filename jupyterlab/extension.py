@@ -8,14 +8,14 @@ import os
 from jinja2 import FileSystemLoader
 from jupyterlab_launcher import add_handlers, LabConfig
 
-from .commands import describe, _get_config_dir, _get_runtime_dir
+from .commands import _get_config_dir, _get_runtime_dir
 from ._version import __version__
 
 #-----------------------------------------------------------------------------
 # Module globals
 #-----------------------------------------------------------------------------
 
-DEV_NOTE_NPM = """It looks like you're running JupyterLab from source.
+DEV_NOTE_NPM = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
 
     npm run watch
@@ -54,7 +54,6 @@ def load_jupyter_server_extension(nbapp):
         nbapp.log.info(DEV_NOTE_NPM)
         config.runtime_dir = HERE
         config.config_dir = ''
-        config.version = describe()
         config.dev_mode = True
 
     add_handlers(web_app, config)
