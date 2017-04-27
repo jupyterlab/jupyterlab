@@ -9,7 +9,7 @@ import pipes
 import os
 from os import path as osp
 from os.path import join as pjoin
-from subprocess import check_output, STDOUT, CalledProcessError
+from subprocess import check_output, CalledProcessError
 import shutil
 import sys
 import tarfile
