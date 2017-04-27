@@ -81,7 +81,7 @@ const SHORTCUTS = [
     keys: ['Shift Enter']
   },
   {
-    command: 'filebrowser:toggle',
+    command: 'filebrowser-main:toggle',
     selector: 'body',
     keys: ['Accel Shift F']
   },

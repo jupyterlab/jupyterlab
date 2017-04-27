@@ -39,13 +39,13 @@ import {
  */
 namespace CommandIDs {
   export
-  const showBrowser = 'filebrowser:activate';
+  const showBrowser = 'filebrowser-main:activate';
 
   export
-  const hideBrowser = 'filebrowser:hide';
+  const hideBrowser = 'filebrowser-main:hide';
 
   export
-  const toggleBrowser = 'filebrowser:toggle';
+  const toggleBrowser = 'filebrowser-main:toggle';
 };
 
 /**
@@ -108,7 +108,8 @@ function activateFactory(app: JupyterLab, documentManager: IDocumentManager, sta
 
       tracker.add(widget);
       return widget;
-    }
+    },
+    tracker
   };
 }
 
