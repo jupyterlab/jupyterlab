@@ -127,6 +127,8 @@ class CreateFromHandler extends Widget {
     this.inputNode.addEventListener('input', () => {
       const value = this.inputNode.value;
       const orig = PathExt.basename(this._orig.name);
+
+      this.removeClass(FILE_CONFLICT_CLASS);
       if (value === orig) {
         return;
       }
@@ -135,8 +137,6 @@ class CreateFromHandler extends Widget {
       const conflict = items.some(item => PathExt.basename(item) === value);
       if (conflict) {
         this.addClass(FILE_CONFLICT_CLASS);
-      } else {
-        this.removeClass(FILE_CONFLICT_CLASS);
       }
     });
   }
