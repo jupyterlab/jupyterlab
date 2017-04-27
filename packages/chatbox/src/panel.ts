@@ -10,11 +10,11 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  IEditorMimeTypeService, CodeEditor
+  CodeEditor
 } from '@jupyterlab/codeeditor';
 
 import {
-  uuid, PathExt
+  PathExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -67,24 +67,18 @@ class ChatboxPanel extends Panel {
   constructor(options: ChatboxPanel.IOptions) {
     super();
     this.addClass(PANEL_CLASS);
-    let {
-      rendermime, mimeTypeService, path, basePath
-    } = options;
     let factory = options.contentFactory;
+    let rendermime = options.rendermime;
     let contentFactory = factory.chatboxContentFactory;
-    let count = Private.count++;
-    if (!path) {
-      path = `${basePath || ''}/chatbox-${count}-${uuid()}`;
-    }
 
     this._documentInfo = new ChatboxDocumentInfo();
     this.addWidget(this._documentInfo);
 
     this.chatbox = new Chatbox({
-      rendermime, mimeTypeService, contentFactory
+      rendermime, contentFactory
     });
     this.addWidget(this.chatbox);
-    this.id = `chatbox-${count}`;
+    this.id = 'chatbox';
   }
 
   /**
@@ -196,26 +190,6 @@ namespace ChatboxPanel {
      * The content factory for the panel.
      */
     contentFactory: IContentFactory;
-
-    /**
-     * The path of an existing chatbox.
-     */
-    path?: string;
-
-    /**
-     * The base path for a new chatbox.
-     */
-    basePath?: string;
-
-    /**
-     * The name of the chatbox.
-     */
-    name?: string;
-
-    /**
-     * The service used to look up mime types.
-     */
-    mimeTypeService: IEditorMimeTypeService;
   }
 
   /**
@@ -285,16 +259,4 @@ namespace ChatboxPanel {
       chatboxContentFactory?: Chatbox.IContentFactory;
     }
   }
-}
-
-
-/**
- * A namespace for private data.
- */
-namespace Private {
-  /**
-   * The counter for new chatboxs.
-   */
-  export
-  let count = 1;
 }

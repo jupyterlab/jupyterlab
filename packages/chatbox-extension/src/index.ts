@@ -78,8 +78,7 @@ function activateChatbox(app: JupyterLab, rendermime: IRenderMime, palette: ICom
   let contentFactory = new ChatboxPanel.ContentFactory({ editorFactory });
   let panel = new ChatboxPanel({
     rendermime: rendermime.clone(),
-    contentFactory,
-    mimeTypeService: editorServices.mimeTypeService
+    contentFactory
   });
 
   // Add the chatbox panel to the tracker.

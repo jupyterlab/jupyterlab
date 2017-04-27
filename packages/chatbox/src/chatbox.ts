@@ -25,7 +25,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  IEditorMimeTypeService, CodeEditor
+  CodeEditor
 } from '@jupyterlab/codeeditor';
 
 import {
@@ -90,7 +90,6 @@ class Chatbox extends Widget {
 
     this.contentFactory = options.contentFactory;
     this.rendermime = options.rendermime;
-    this._mimeTypeService = options.mimeTypeService;
 
     // Add top-level CSS classes.
     this._content.addClass(CONTENT_CLASS);
@@ -368,7 +367,6 @@ class Chatbox extends Widget {
     return { model, rendermime, contentFactory };
   }
 
-  private _mimeTypeService: IEditorMimeTypeService;
   private _content: Panel = null;
   private _log: IObservableVector<ChatEntry.IModel> = null;
   private _input: Panel = null;
@@ -397,11 +395,6 @@ namespace Chatbox {
      * The mime renderer for the chatbox widget.
      */
     rendermime: IRenderMime;
-
-    /**
-     * The service used to look up mime types.
-     */
-    mimeTypeService: IEditorMimeTypeService;
   }
 
   /**
