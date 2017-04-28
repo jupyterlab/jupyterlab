@@ -115,11 +115,9 @@ function activateFactory(app: JupyterLab, docManager: IDocumentManager, state: I
         if (path && factories.length > 1) {
           openWith = new Menu({ commands });
           openWith.title.label = 'Open With...';
-
-          for (let factory of factories) {
-            const args = { factory, path };
-            openWith.addItem({ args, command });
-          }
+          factories.forEach(factory => {
+            openWith.addItem({ args: { factory, path }, command });
+          });
         }
 
         const menu = createContextMenu(widget, openWith);
@@ -215,14 +213,15 @@ function createContextMenu(fbWidget: FileBrowser, openWith: Menu):  Menu {
   // Remove all the commands associated with this menu upon disposal.
   menu.disposed.connect(() => { disposables.dispose(); });
 
-  command = `${prefix}:open`;
-  disposables.add(commands.addCommand(command, {
-    execute: () => { fbWidget.open(); },
-    icon: 'jp-MaterialIcon jp-OpenFolderIcon',
-    label: 'Open',
-    mnemonic: 0
-  }));
-  menu.addItem({ command });
+  command = 'file-operations:open';
+  menu.addItem({
+    command,
+    args: {
+      icon: 'jp-MaterialIcon jp-OpenFolderIcon',
+      label: 'Open',
+      mnemonic: 0
+    }
+  });
 
   if (openWith) {
     menu.addItem({ type: 'submenu', submenu: openWith });

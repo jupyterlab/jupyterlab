@@ -208,7 +208,9 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, registry: ID
       return docManager.services.contents.get(path)
         .then(() => docManager.openOrReveal(path, factory));
     },
-    label: args => (args['label'] || args['factory']) as string
+    icon: args => args['icon'] as string || '',
+    label: args => (args['label'] || args['factory']) as string,
+    mnemonic: args => args['mnemonic'] as number || -1
   });
 
   commands.addCommand(CommandIDs.restoreCheckpoint, {
