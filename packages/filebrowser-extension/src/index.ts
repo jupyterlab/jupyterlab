@@ -156,19 +156,17 @@ function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, docu
     let prefix = `${namespace}-contextmenu-${++Private.id}`;
     let openWith: Menu = null;
     if (path && widgetNames.length > 1) {
-      let disposables = new DisposableSet();
       let command: string;
 
       openWith = new Menu({ commands });
       openWith.title.label = 'Open With...';
-      openWith.disposed.connect(() => { disposables.dispose(); });
 
       for (let widgetName of widgetNames) {
         command = `${prefix}:${widgetName}`;
-        disposables.add(commands.addCommand(command, {
+        commands.addCommand(command, {
           execute: () => fbWidget.openPath(path, widgetName),
           label: widgetName
-        }));
+        });
         openWith.addItem({ command });
       }
     }
@@ -179,10 +177,6 @@ function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, docu
 
   addCommands(app, fbWidget);
 
-  console.log('TODO: create file menu in doc manager extension');
-  // let menu = createMenu(app, Object.keys(creatorCmds));
-  // mainMenu.addMenu(menu, { rank: 1 });
-
   fbWidget.title.label = 'Files';
   app.shell.addToLeftArea(fbWidget, { rank: 100 });
 
@@ -192,24 +186,6 @@ function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, docu
       app.commands.execute(CommandIDs.showBrowser, void 0);
     }
   });
-
-
-  console.log('TODO: move registry changed handler to doc manager extension');
-  // Handle fileCreator items as they are added.
-  // registry.changed.connect((sender, args) => {
-  //   if (args.type === 'fileCreator') {
-  //     menu.dispose();
-  //     let name = args.name;
-  //     if (args.change === 'added') {
-  //       addCreator(name);
-  //     } else {
-  //       creatorCmds[name].dispose();
-  //       delete creatorCmds[name];
-  //     }
-  //     menu = createMenu(app, Object.keys(creatorCmds));
-  //     mainMenu.addMenu(menu, { rank: 1 });
-  //   }
-  // });
 }
 
 
@@ -241,28 +217,6 @@ function addCommands(app: JupyterLab, fbWidget: FileBrowser): void {
     }
   });
 }
-
-
-/**
- * Create a top level menu for the file browser.
- */
-// function createMenu(app: JupyterLab, creatorCmds: string[]): Menu {
-//   let { commands } = app;
-//   let menu = new Menu({ commands });
-//   menu.title.label = 'File';
-//   creatorCmds.forEach(name => {
-//     menu.addItem({ command: Private.commandForName(name) });
-//   });
-//   [
-//     'file-operations:save',
-//     'file-operations:restore-checkpoint',
-//     'file-operations:save-as',
-//     'file-operations:close',
-//     'file-operations:close-all-files'
-//   ].forEach(command => { menu.addItem({ command }); });
-
-//   return menu;
-// }
 
 
 /**
@@ -383,13 +337,4 @@ namespace Private {
    */
   export
   let id = 0;
-
-  /**
-   * Get the command for a name.
-   */
-  export
-  function commandForName(name: string) {
-    name = name.split(' ').join('-').toLocaleLowerCase();
-    return `filebrowser:new-${name}`;
-  }
 }
