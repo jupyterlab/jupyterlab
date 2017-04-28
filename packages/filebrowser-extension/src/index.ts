@@ -22,10 +22,6 @@ import {
 } from '@jupyterlab/filebrowser';
 
 import {
-  DisposableSet
-} from '@phosphor/disposable';
-
-import {
   Menu
 } from '@phosphor/widgets';
 
@@ -35,13 +31,34 @@ import {
  */
 namespace CommandIDs {
   export
+  const copy = 'filebrowser:copy';
+
+  export
+  const cut = 'filebrowser:cut';
+
+  export
+  const del = 'filebrowser:delete';
+
+  export
+  const download = 'filebrowser:download';
+
+  export
+  const duplicate = 'filebrowser:duplicate';
+
+  export
   const hideBrowser = 'filebrowser-main:hide'; // For main browser only.
+
+  export
+  const paste = 'filebrowser:paste';
 
   export
   const rename = 'filebrowser:rename';
 
   export
   const showBrowser = 'filebrowser-main:activate'; // For main browser only.
+
+  export
+  const shutdown = 'filebrowser:shutdown';
 
   export
   const toggleBrowser = 'filebrowser-main:toggle'; // For main browser only.
@@ -175,12 +192,93 @@ function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, docM
 function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mainBrowser: FileBrowser): void {
   const { commands } = app;
 
+  commands.addCommand(CommandIDs.del, {
+    execute: () => {
+      const widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+
+      return widget.delete();
+    },
+    icon: 'jp-MaterialIcon jp-CloseIcon',
+    label: 'Delete',
+    mnemonic: 0
+  });
+
+  commands.addCommand(CommandIDs.copy, {
+    execute: () => {
+      const widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+
+      return widget.copy();
+    },
+    icon: 'jp-MaterialIcon jp-CopyIcon',
+    label: 'Copy',
+    mnemonic: 0
+  });
+
+  commands.addCommand(CommandIDs.cut, {
+    execute: () => {
+      const widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+
+      return widget.cut();
+    },
+    icon: 'jp-MaterialIcon jp-CutIcon',
+    label: 'Cut'
+  });
+
+  commands.addCommand(CommandIDs.download, {
+    execute: () => {
+      const widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+
+      return widget.download();
+    },
+    icon: 'jp-MaterialIcon jp-DownloadIcon',
+    label: 'Download'
+  });
+
+  commands.addCommand(CommandIDs.duplicate, {
+    execute: () => {
+      const widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+
+      return widget.duplicate();
+    },
+    icon: 'jp-MaterialIcon jp-CopyIcon',
+    label: 'Duplicate'
+  });
+
   commands.addCommand(CommandIDs.hideBrowser, {
     execute: () => {
       if (!mainBrowser.isHidden) {
         app.shell.collapseLeft();
       }
     }
+  });
+
+  commands.addCommand(CommandIDs.paste, {
+    execute: () => {
+      const widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+
+      return widget.paste();
+    },
+    icon: 'jp-MaterialIcon jp-PasteIcon',
+    label: 'Paste',
+    mnemonic: 0
   });
 
   commands.addCommand(CommandIDs.rename, {
@@ -199,6 +297,19 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
 
   commands.addCommand(CommandIDs.showBrowser, {
     execute: () => { app.shell.activateById(mainBrowser.id); }
+  });
+
+  commands.addCommand(CommandIDs.shutdown, {
+    execute: () => {
+      const widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+
+      return widget.shutdownKernels();
+    },
+    icon: 'jp-MaterialIcon jp-StopIcon',
+    label: 'Shutdown Kernel'
   });
 
   commands.addCommand(CommandIDs.toggleBrowser, {
@@ -223,12 +334,7 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
 function createContextMenu(fbWidget: FileBrowser, openWith: Menu):  Menu {
   let { commands } = fbWidget;
   let menu = new Menu({ commands });
-  let prefix = `${namespace}-${++Private.id}`;
-  let disposables = new DisposableSet();
   let command: string;
-
-  // Remove all the commands associated with this menu upon disposal.
-  menu.disposed.connect(() => { disposables.dispose(); });
 
   command = 'file-operations:open';
   menu.addItem({
@@ -244,86 +350,14 @@ function createContextMenu(fbWidget: FileBrowser, openWith: Menu):  Menu {
     menu.addItem({ type: 'submenu', submenu: openWith });
   }
 
-  command = CommandIDs.rename;
-  menu.addItem({ command });
-
-  command = `${prefix}:delete`;
-  disposables.add(commands.addCommand(command, {
-    execute: () => fbWidget.delete(),
-    icon: 'jp-MaterialIcon jp-CloseIcon',
-    label: 'Delete',
-    mnemonic: 0
-  }));
-  menu.addItem({ command });
-
-  command = `${prefix}:duplicate`;
-  disposables.add(commands.addCommand(command, {
-    execute: () => fbWidget.duplicate(),
-    icon: 'jp-MaterialIcon jp-CopyIcon',
-    label: 'Duplicate'
-  }));
-  menu.addItem({ command });
-
-  command = `${prefix}:cut`;
-  disposables.add(commands.addCommand(command, {
-    execute: () => { fbWidget.cut(); },
-    icon: 'jp-MaterialIcon jp-CutIcon',
-    label: 'Cut'
-  }));
-  menu.addItem({ command });
-
-  command = `${prefix}:copy`;
-  disposables.add(commands.addCommand(command, {
-    execute: () => { fbWidget.copy(); },
-    icon: 'jp-MaterialIcon jp-CopyIcon',
-    label: 'Copy',
-    mnemonic: 0
-  }));
-  menu.addItem({ command });
-
-  command = `${prefix}:paste`;
-  disposables.add(commands.addCommand(command, {
-    execute: () => fbWidget.paste(),
-    icon: 'jp-MaterialIcon jp-PasteIcon',
-    label: 'Paste',
-    mnemonic: 0
-  }));
-  menu.addItem({ command });
-
-  command = `${prefix}:download`;
-  disposables.add(commands.addCommand(command, {
-    execute: () => { fbWidget.download(); },
-    icon: 'jp-MaterialIcon jp-DownloadIcon',
-    label: 'Download'
-  }));
-  menu.addItem({ command });
-
-  command = `${prefix}:shutdown`;
-  disposables.add(commands.addCommand(command, {
-    execute: () => fbWidget.shutdownKernels(),
-    icon: 'jp-MaterialIcon jp-StopIcon',
-    label: 'Shutdown Kernel'
-  }));
-  menu.addItem({ command });
-
-  menu.disposed.connect(() => { disposables.dispose(); });
+  menu.addItem({ command: CommandIDs.rename });
+  menu.addItem({ command: CommandIDs.del });
+  menu.addItem({ command: CommandIDs.duplicate });
+  menu.addItem({ command: CommandIDs.cut });
+  menu.addItem({ command: CommandIDs.copy });
+  menu.addItem({ command: CommandIDs.paste });
+  menu.addItem({ command: CommandIDs.download });
+  menu.addItem({ command: CommandIDs.shutdown });
 
   return menu;
-}
-
-
-/**
- * A namespace for private data.
- */
-namespace Private {
-  /**
-   * The ID counter prefix for new commands.
-   *
-   * #### Notes
-   * Even though the commands are disposed when the menus are disposed,
-   * in order to guarantee there are no race conditions, each set of commands
-   * is prefixed.
-   */
-  export
-  let id = 0;
 }
