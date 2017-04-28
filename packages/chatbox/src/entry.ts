@@ -16,6 +16,7 @@ import {
 /**
  * The class name added to the chatbox entries.
  */
+export
 const CHAT_ENTRY_CLASS = 'jp-ChatEntry';
 
 /**
@@ -49,13 +50,13 @@ class ChatEntry extends Widget {
     this._badge.node.style.backgroundColor = `rgba(${r}, ${g}, ${b}, 0.1)`;
     this._badge.node.textContent = this.model.author.shortName;
 
-    this._cell = options.cell;
-    this._cell.node.style.backgroundColor =
+    this.cell = options.cell;
+    this.cell.node.style.backgroundColor =
       `rgba(${r}, ${g}, ${b}, 0.1)`;
 
     let layout = this.layout as PanelLayout;
     layout.addWidget(this._badge);
-    layout.addWidget(this._cell);
+    layout.addWidget(this.cell);
   }
 
   /**
@@ -63,8 +64,12 @@ class ChatEntry extends Widget {
    */
   readonly model: ChatEntry.IModel;
 
+  /**
+   * The underlying cell widget for the entry.
+   */
+  readonly cell: MarkdownCellWidget;
+
   private _badge: Widget = null;
-  private _cell: MarkdownCellWidget = null;
 }
 
 

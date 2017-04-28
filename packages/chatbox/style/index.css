@@ -60,6 +60,10 @@
   flex-grow: 1;
 }
 
+.jp-Chatbox .jp-ChatEntry * {
+  cursor: move;
+}
+
 .jp-Chatbox .jp-ChatEntry {
   display: flex;
   flex-direction: row;
@@ -73,7 +77,7 @@
   min-width: 22px;
 }
 
-.jp-Chatbox-content .jp-InputArea-editor.jp-CellEditor {
+.jp-Chatbox-content .jp-InputArea {
   background: transparent;
   border-color: transparent;
 }

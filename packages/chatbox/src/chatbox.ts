@@ -2,8 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  each
+  each, ArrayExt
 } from '@phosphor/algorithm';
+
+import {
+  MimeData
+} from '@phosphor/coreutils';
 
 import {
   DisposableSet
@@ -18,7 +22,8 @@ import {
 } from '@phosphor/widgets';
 
 import {
-} from '@phosphor/widgets';
+  Drag
+} from '@phosphor/dragdrop';
 
 import {
   DocumentRegistry
@@ -42,7 +47,7 @@ import {
 } from '@jupyterlab/rendermime';
 
 import {
-  ChatEntry
+  ChatEntry, CHAT_ENTRY_CLASS
 } from './entry';
 
 
@@ -65,6 +70,26 @@ const CONTENT_CLASS = 'jp-Chatbox-content';
  * The class name of the panel that holds prompts.
  */
 const INPUT_CLASS = 'jp-Chatbox-input';
+
+/**
+ * The class name added to drag images.
+ */
+const DRAG_IMAGE_CLASS = 'jp-dragImage';
+
+/**
+ * The class name added to a filled circle.
+ */
+const FILLED_CIRCLE_CLASS = 'jp-filledCircle';
+
+/**
+ * The mimetype used for Jupyter cell data.
+ */
+const JUPYTER_CELL_MIME: string = 'application/vnd.jupyter.cells';
+
+/**
+ * The threshold in pixels to start a drag event.
+ */
+const DRAG_THRESHOLD = 5;
 
 
 /**
@@ -230,6 +255,15 @@ class Chatbox extends Widget {
     case 'keydown':
       this._evtKeyDown(event as KeyboardEvent);
       break;
+    case 'mousedown':
+      this._evtMouseDown(event as MouseEvent);
+      break;
+    case 'mouseup':
+      this._evtMouseup(event as MouseEvent);
+      break;
+    case 'mousemove':
+      this._evtMousemove(event as MouseEvent);
+      break;
     default:
       break;
     }
@@ -241,6 +275,7 @@ class Chatbox extends Widget {
   protected onAfterAttach(msg: Message): void {
     let node = this.node;
     node.addEventListener('keydown', this, true);
+    node.addEventListener('mousedown', this);
     // Create a prompt if necessary.
     if (!this.prompt) {
       this._newPrompt();
@@ -256,6 +291,7 @@ class Chatbox extends Widget {
   protected onBeforeDetach(msg: Message): void {
     let node = this.node;
     node.removeEventListener('keydown', this, true);
+    node.removeEventListener('mousedown', this);
   }
 
   /**
@@ -304,6 +340,114 @@ class Chatbox extends Widget {
     }
   }
 
+  /**
+   * Find the chat entry containing the target html element.
+   *
+   * #### Notes
+   * Returns -1 if the entry is not found.
+   */
+  private _findEntry(node: HTMLElement): number {
+    // Trace up the DOM hierarchy to find the root cell node.
+    // Then find the corresponding child and select it.
+    while (node && node !== this.node) {
+      if (node.classList.contains(CHAT_ENTRY_CLASS)) {
+        let i = ArrayExt.findFirstIndex(this._content.widgets, widget => widget.node === node);
+        if (i !== -1) {
+          return i;
+        }
+        break;
+      }
+      node = node.parentElement;
+    }
+    return -1;
+  }
+
+  /**
+   * Handle `mousedown` events for the widget.
+   */
+  private _evtMouseDown(event: MouseEvent): void {
+    let target = event.target as HTMLElement;
+    let i = this._findEntry(target);
+
+    // Left mouse press for drag start.
+    if (event.button === 0 && i !== -1) {
+      this._dragData = { pressX: event.clientX, pressY: event.clientY, index: i};
+      document.addEventListener('mouseup', this, true);
+      document.addEventListener('mousemove', this, true);
+      event.preventDefault();
+    }
+  }
+
+  /**
+   * Handle the `'mouseup'` event for the widget.
+   */
+  private _evtMouseup(event: MouseEvent): void {
+    if (event.button !== 0 || !this._drag) {
+      document.removeEventListener('mousemove', this, true);
+      document.removeEventListener('mouseup', this, true);
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  /**
+   * Handle the `'mousemove'` event for the widget.
+   */
+  private _evtMousemove(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    // Bail if we are the one dragging.
+    if (this._drag) {
+      return;
+    }
+
+    // Check for a drag initialization.
+    let data = this._dragData;
+    let dx = Math.abs(event.clientX - data.pressX);
+    let dy = Math.abs(event.clientY - data.pressY);
+    if (dx < DRAG_THRESHOLD && dy < DRAG_THRESHOLD) {
+      return;
+    }
+
+    this._startDrag(data.index, event.clientX, event.clientY);
+  }
+
+  /**
+   * Start a drag event.
+   */
+  private _startDrag(index: number, clientX: number, clientY: number): void {
+    let toCopy = this._content.widgets[index] as ChatEntry;
+    let data = [toCopy.cell.model.toJSON()];
+
+    // Create the drag image.
+    let dragImage = Private.createDragImage();
+
+    // Set up the drag event.
+    this._drag = new Drag({
+      mimeData: new MimeData(),
+      supportedActions: 'copy',
+      proposedAction: 'copy',
+      dragImage,
+      source: this
+    });
+    this._drag.mimeData.setData(JUPYTER_CELL_MIME, data);
+
+    // Remove mousemove and mouseup listeners and start the drag.
+    document.removeEventListener('mousemove', this, true);
+    document.removeEventListener('mouseup', this, true);
+    this._drag.start(clientX, clientY).then(action => {
+      if (this.isDisposed) {
+        return;
+      }
+      this._drag = null;
+    });
+  }
+
+  /**
+   * Update the chat view after a change in the log vector.
+   */
   private _onLogChanged(log: IObservableVector<ChatEntry.IModel>, args: ObservableVector.IChangedArgs<ChatEntry.IModel>) {
     let index = 0;
     let layout = this._content.layout as PanelLayout;
@@ -385,6 +529,8 @@ class Chatbox extends Widget {
   private _mimetype = 'text/x-ipythongfm';
   private _model: DocumentRegistry.IModel = null;
   private _disposables = new DisposableSet();
+  private _drag: Drag = null;
+  private _dragData: { pressX: number, pressY: number, index: number } = null;
 }
 
 
@@ -489,5 +635,24 @@ namespace Private {
   export
   function scrollToBottom(node: HTMLElement): void {
     node.scrollTop = node.scrollHeight - node.clientHeight;
+  }
+}
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * Create a chat entry drag image.
+   */
+  export
+  function createDragImage(): HTMLElement {
+    let node = document.createElement('div');
+    let span = document.createElement('span');
+    span.textContent = '1';
+    span.className = FILLED_CIRCLE_CLASS;
+    node.appendChild(span);
+    node.className = DRAG_IMAGE_CLASS;
+    return node;
   }
 }
