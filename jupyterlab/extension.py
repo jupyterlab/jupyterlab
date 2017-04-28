@@ -27,7 +27,7 @@ make changes.
 
 HERE = os.path.dirname(__file__)
 FILE_LOADER = FileSystemLoader(HERE)
-PREFIX = '/lab'
+URL = '/lab'
 
 
 def load_jupyter_server_extension(nbapp):
@@ -42,7 +42,7 @@ def load_jupyter_server_extension(nbapp):
     config.config_dir = _get_config_dir()
     config.page_title = 'JupyterLab Alpha Preview'
     config.name = 'JupyterLab'
-    config.prefix = PREFIX
+    config.page_url = URL
     config.version = __version__
 
     # Check for dev mode.

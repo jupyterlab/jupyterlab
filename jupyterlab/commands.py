@@ -14,7 +14,6 @@ import shutil
 import sys
 import tarfile
 from jupyter_core.paths import ENV_JUPYTER_PATH, ENV_CONFIG_PATH
-from ._version import __version__
 
 
 if sys.platform == 'win32':
@@ -26,7 +25,7 @@ else:
 
 here = osp.dirname(osp.abspath(__file__))
 CONFIG_PATH = os.environ.get('JUPYTERLAB_CONFIG_DIR', ENV_CONFIG_PATH[0])
-BUILD_PATH = ENV_JUPYTER_PATH[0]
+RUNTIME_PATH = ENV_JUPYTER_PATH[0]
 
 
 def run(cmd, **kwargs):
@@ -194,12 +193,12 @@ def _ensure_package(config):
     root_dir = _get_runtime_dir(config)
     if not osp.exists(cache_dir):
         os.makedirs(cache_dir)
-    for name in ['package.json', 'index.template.js', 'webpack.config.js']:
+    for name in ['index.template.js', 'webpack.config.js']:
         dest = pjoin(root_dir, name)
         shutil.copy2(pjoin(here, name), dest)
 
     # Template the package.json file.
-    pkg_path = pjoin(root_dir, 'package.json')
+    pkg_path = pjoin(here, 'package.template.json')
     with open(pkg_path) as fid:
         data = json.load(fid)
     for (key, value) in config['installed_extensions'].items():
@@ -208,8 +207,9 @@ def _ensure_package(config):
     for key in config['linked_extensions']:
         data['jupyterlab']['extensions'].append(key)
     data['scripts']['build'] = 'webpack'
-    data['jupyterlab']['version'] = __version__
-    data['jupyterlab']['gitDescription'] = describe()
+    if 'pageUrl' in config:
+        data['jupyterlab']['publicPath'] = config['page_url']
+    pkg_path = pjoin(root_dir, 'package.json')
     with open(pkg_path, 'w') as fid:
         json.dump(data, fid, indent=4)
 
@@ -236,7 +236,7 @@ def _get_config(config_dir=None):
     else:
         with open(file) as fid:
             data = json.load(fid)
-    data.setdefault('location', pjoin(BUILD_PATH, 'lab'))
+    data.setdefault('runtime_dir', pjoin(RUNTIME_PATH, 'lab'))
     data.setdefault('installed_extensions', dict())
     data.setdefault('linked_extensions', dict())
     return data
