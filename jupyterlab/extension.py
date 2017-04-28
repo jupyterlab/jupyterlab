@@ -56,4 +56,11 @@ def load_jupyter_server_extension(nbapp):
         config.config_dir = ''
         config.dev_mode = True
 
+    if not dev_mode and not os.path.exists(config.config_dir):
+        config.runtime_dir = os.path.join(HERE, 'static')
+        if not os.path.exists(config.runtime_dir):
+            msg = 'Static assets not built, please see CONTRIBUTING.md'
+            raise ValueError(msg)
+        config.config_dir = ''
+
     add_handlers(web_app, config)

@@ -11,6 +11,8 @@ function main() {
     var name = utils.getConfigOption('appName') || 'JupyterLab';
     var namespace = utils.getConfigOption('appNamespace') || 'jupyterlab';
     var devMode = utils.getConfigOption('devMode') || 'false';
+    var configDir = utils.getConfigOption('configDir') || '';
+    var runtimeDir = utils.getConfigOption('runtimeDir') || '';
 
     if (version[0] === 'v') {
         version = version.slice(1);
@@ -20,7 +22,9 @@ function main() {
         namespace: namespace,
         name: name,
         version: version,
-        devMode: devMode.toLowerCase() === 'true'
+        devMode: devMode.toLowerCase() === 'true',
+        configDir: configDir,
+        runtimeDir: runtimeDir
     });
     {{#each jupyterlab_extensions}}
     try {

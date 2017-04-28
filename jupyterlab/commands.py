@@ -269,7 +269,7 @@ def _get_config_dir():
 
 def _get_runtime_dir(config=None):
     config = config or _get_config()
-    return config['location']
+    return config['runtime_dir']
 
 
 def _get_build_dir(config=None):
