@@ -281,10 +281,13 @@ function createMenu(app: JupyterLab, docManager: IDocumentManager, registry: IDo
  */
 function populateCreators(app: JupyterLab, docManager: IDocumentManager, registry: IDocumentRegistry, palette: ICommandPalette, menu: Menu): void {
   const category = 'File Operations';
+
+  // Clear any previously added creator palette items.
   if (Private.creators) {
     Private.creators.dispose();
-    Private.creators = new DisposableSet();
   }
+  Private.creators = new DisposableSet();
+
   // Add the "create from" commands.
   each(registry.creators(), creator => {
     const command = CommandIDs.createFrom;
