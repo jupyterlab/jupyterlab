@@ -35,13 +35,16 @@ import {
  */
 namespace CommandIDs {
   export
-  const showBrowser = 'filebrowser-main:activate';
+  const hideBrowser = 'filebrowser-main:hide'; // For main browser only.
 
   export
-  const hideBrowser = 'filebrowser-main:hide';
+  const rename = 'filebrowser:rename';
 
   export
-  const toggleBrowser = 'filebrowser-main:toggle';
+  const showBrowser = 'filebrowser-main:activate'; // For main browser only.
+
+  export
+  const toggleBrowser = 'filebrowser-main:toggle'; // For main browser only.
 };
 
 /**
@@ -152,7 +155,7 @@ function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, docM
   // responsible for their own restoration behavior, if any.
   restorer.add(fbWidget, namespace);
 
-  addCommands(app, fbWidget);
+  addCommands(app, factory.tracker, fbWidget);
 
   fbWidget.title.label = 'Files';
   app.shell.addToLeftArea(fbWidget, { rank: 100 });
@@ -169,24 +172,38 @@ function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, docM
 /**
  * Add the main file browser commands to the application's command registry.
  */
-function addCommands(app: JupyterLab, fbWidget: FileBrowser): void {
+function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mainBrowser: FileBrowser): void {
   const { commands } = app;
-
-  commands.addCommand(CommandIDs.showBrowser, {
-    execute: () => { app.shell.activateById(fbWidget.id); }
-  });
 
   commands.addCommand(CommandIDs.hideBrowser, {
     execute: () => {
-      if (!fbWidget.isHidden) {
+      if (!mainBrowser.isHidden) {
         app.shell.collapseLeft();
       }
     }
   });
 
+  commands.addCommand(CommandIDs.rename, {
+    execute: () => {
+      const widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+
+      return widget.rename();
+    },
+    icon: 'jp-MaterialIcon jp-EditIcon',
+    label: 'Rename',
+    mnemonic: 0
+  });
+
+  commands.addCommand(CommandIDs.showBrowser, {
+    execute: () => { app.shell.activateById(mainBrowser.id); }
+  });
+
   commands.addCommand(CommandIDs.toggleBrowser, {
     execute: () => {
-      if (fbWidget.isHidden) {
+      if (mainBrowser.isHidden) {
         return commands.execute(CommandIDs.showBrowser, void 0);
       } else {
         return commands.execute(CommandIDs.hideBrowser, void 0);
@@ -227,13 +244,7 @@ function createContextMenu(fbWidget: FileBrowser, openWith: Menu):  Menu {
     menu.addItem({ type: 'submenu', submenu: openWith });
   }
 
-  command = `${prefix}:rename`;
-  disposables.add(commands.addCommand(command, {
-    execute: () => fbWidget.rename(),
-    icon: 'jp-MaterialIcon jp-EditIcon',
-    label: 'Rename',
-    mnemonic: 0
-  }));
+  command = CommandIDs.rename;
   menu.addItem({ command });
 
   command = `${prefix}:delete`;
