@@ -131,20 +131,6 @@ function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, docu
   // responsible for their own restoration behavior, if any.
   restorer.add(fbWidget, namespace);
 
-  console.log('TODO: implement creator from file browser context menu');
-  // let creatorCmds: { [key: string]: DisposableSet } = Object.create(null);
-  // let addCreator = (name: string) => {
-  //   let disposables = creatorCmds[name] = new DisposableSet();
-  //   let command = Private.commandForName(name);
-  //   disposables.add(commands.addCommand(command, {
-  //     execute: () => fbWidget.createFrom(name),
-  //     label: `New ${name}`
-  //   }));
-  //   disposables.add(palette.addItem({ command, category }));
-  // };
-
-  // each(registry.creators(), creator => { addCreator(creator.name); });
-
   // Add a context menu to the dir listing.
   let node = fbWidget.node.getElementsByClassName('jp-DirListing-content')[0];
   node.addEventListener('contextmenu', (event: MouseEvent) => {
