@@ -112,6 +112,22 @@ class DocumentManager implements IDisposable {
   }
 
   /**
+   * The current working directory of the document manager.
+   *
+   * #### Notes
+   * This attribute is DEPRECATED. It is intended for use as a stopgap measure
+   * to create some notion of an application-level working directory for
+   * launching activities that need a sensible starting directory. It will be
+   * replaced with another concept in later releases.
+   */
+  get cwd(): string {
+    return this._cwd;
+  }
+  set cwd(cwd: string) {
+    this._cwd = cwd;
+  }
+
+  /**
    * Get whether the document manager has been disposed.
    */
   get isDisposed(): boolean {
@@ -491,6 +507,7 @@ class DocumentManager implements IDisposable {
 
   private _activateRequested = new Signal<this, string>(this);
   private _contexts: Private.IContext[] = [];
+  private _cwd: string = '';
   private _modelDBFactory: ModelDB.IFactory = null;
   private _opener: DocumentManager.IWidgetOpener = null;
   private _widgetManager: DocumentWidgetManager = null;
