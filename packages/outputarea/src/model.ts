@@ -6,6 +6,10 @@ import {
 } from '@phosphor/algorithm';
 
 import {
+  IDisposable
+} from '@phosphor/disposable';
+
+import {
   ISignal, Signal
 } from '@phosphor/signaling';
 

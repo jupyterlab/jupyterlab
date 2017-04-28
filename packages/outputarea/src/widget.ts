@@ -6,14 +6,6 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  IDisposable
-} from '@phosphor/disposable';
-
-import {
-  ISignal
-} from '@phosphor/signaling';
-
-import {
   Message
 } from '@phosphor/messaging';
 
@@ -38,7 +30,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  ObservableVector, nbformat, IModelDB
+  nbformat
 } from '@jupyterlab/coreutils';
 
 import {
@@ -364,7 +356,7 @@ class OutputArea extends Widget {
     if (!payload || !payload.length) {
       return;
     }
-    let pages = payload.filter(i => (i as any).source === 'page');
+    let pages = payload.filter((i: any) => (i as any).source === 'page');
     if (!pages.length) {
       return;
     }
