@@ -27,6 +27,10 @@ import {
 } from '@phosphor/algorithm';
 
 import {
+  DisposableSet
+} from '@phosphor/disposable';
+
+import {
   Menu
 } from '@phosphor/widgets';
 
@@ -86,16 +90,18 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
     const docManager = new DocumentManager({ registry, manager, opener });
     let menu = createMenu(app, docManager, registry);
 
+    populateCreators(app, docManager, registry, palette, menu);
     mainMenu.addMenu(menu, { rank: 1 });
 
     // Register the file operations commands.
-    addCommands(app, docManager, palette);
+    addCommands(app, docManager, registry, palette);
 
     // Handle fileCreator items as they are added.
     registry.changed.connect((sender, args) => {
       if (args.type === 'fileCreator') {
         menu.dispose();
         menu = createMenu(app, docManager, registry);
+        populateCreators(app, docManager, registry, palette, menu);
         mainMenu.addMenu(menu, { rank: 1 });
       }
     });
@@ -114,7 +120,7 @@ export default plugin;
 /**
  * Add the file operations commands to the application's command registry.
  */
-function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICommandPalette): void {
+function addCommands(app: JupyterLab, docManager: IDocumentManager, registry: IDocumentRegistry, palette: ICommandPalette): void {
   const { commands } = app;
   const category = 'File Operations';
   const isEnabled = () => {
@@ -259,16 +265,6 @@ function createMenu(app: JupyterLab, docManager: IDocumentManager, registry: IDo
   const { commands } = app;
   const menu = new Menu({ commands });
   menu.title.label = 'File';
-
-  each(registry.creators(), creator => {
-    const command = CommandIDs.createFrom;
-    const creatorName = creator.name;
-    const label = `New ${creatorName}`;
-    const path = docManager.cwd;
-    const args = { creatorName, label, path };
-    menu.addItem({ args, command });
-  });
-
   [
     CommandIDs.save,
     CommandIDs.saveAs,
@@ -281,9 +277,35 @@ function createMenu(app: JupyterLab, docManager: IDocumentManager, registry: IDo
 }
 
 /**
+ * Populate the command palette and the file menu with the registered creators.
+ */
+function populateCreators(app: JupyterLab, docManager: IDocumentManager, registry: IDocumentRegistry, palette: ICommandPalette, menu: Menu): void {
+  const category = 'File Operations';
+  if (Private.creators) {
+    Private.creators.dispose();
+    Private.creators = new DisposableSet();
+  }
+  // Add the "create from" commands.
+  each(registry.creators(), creator => {
+    const command = CommandIDs.createFrom;
+    const creatorName = creator.name;
+    const label = `New ${creatorName}`;
+    const path = docManager.cwd;
+    const args = { creatorName, label, path };
+    menu.insertItem(0, { args, command });
+    Private.creators.add(palette.addItem({ args, category, command }));
+  });
+}
+
+/**
  * A namespace for private module data.
  */
 namespace Private {
+  /**
+   */
+  export
+  let creators: DisposableSet | null = null;
+
   /**
    * A counter for unique IDs.
    */
