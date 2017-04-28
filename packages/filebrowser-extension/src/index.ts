@@ -14,16 +14,12 @@ import {
 } from '@jupyterlab/docmanager';
 
 import {
-  IDocumentRegistry, DocumentRegistry
+  DocumentRegistry
 } from '@jupyterlab/docregistry';
 
 import {
   FileBrowserModel, FileBrowser, IFileBrowserFactory
 } from '@jupyterlab/filebrowser';
-
-import {
-  map, toArray
-} from '@phosphor/algorithm';
 
 import {
   DisposableSet
@@ -57,7 +53,6 @@ const fileBrowserPlugin: JupyterLabPlugin<void> = {
   requires: [
     IFileBrowserFactory,
     IDocumentManager,
-    IDocumentRegistry,
     IMainMenu,
     ICommandPalette,
     ILayoutRestorer
@@ -92,21 +87,48 @@ export default plugins;
 /**
  * Activate the file browser factory provider.
  */
-function activateFactory(app: JupyterLab, documentManager: IDocumentManager, state: IStateDB): IFileBrowserFactory {
+function activateFactory(app: JupyterLab, docManager: IDocumentManager, state: IStateDB): IFileBrowserFactory {
   const { commands, shell } = app;
   const tracker = new InstanceTracker<FileBrowser>({ namespace, shell });
 
   return {
     createFileBrowser(id: string, options: IFileBrowserFactory.IOptions = {}): FileBrowser {
       const model = new FileBrowserModel({
-        manager: options.documentManager || documentManager,
+        manager: options.documentManager || docManager,
         state: options.state === null ? null : options.state || state
       });
       const widget = new FileBrowser({
         id, model, commands: options.commands || commands
       });
+      const { registry } = docManager;
 
+      // Add a context menu handler to the file browser's directory listing.
+      let node = widget.node.getElementsByClassName('jp-DirListing-content')[0];
+      node.addEventListener('contextmenu', (event: MouseEvent) => {
+        event.preventDefault();
+        let command =  'file-operations:open';
+        let path = widget.pathForClick(event) || '';
+        let ext = DocumentRegistry.extname(path);
+        let factories = registry.preferredWidgetFactories(ext).map(f => f.name);
+        let openWith: Menu = null;
+
+        if (path && factories.length > 1) {
+          openWith = new Menu({ commands });
+          openWith.title.label = 'Open With...';
+
+          for (let factory of factories) {
+            const args = { factory, path };
+            openWith.addItem({ args, command });
+          }
+        }
+
+        const menu = createContextMenu(widget, openWith);
+        menu.open(event.clientX, event.clientY);
+      });
+
+      // Track the newly created file browser.
       tracker.add(widget);
+
       return widget;
     },
     tracker
@@ -117,10 +139,11 @@ function activateFactory(app: JupyterLab, documentManager: IDocumentManager, sta
 /**
  * Activate the file browser in the sidebar.
  */
-function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, documentManager: IDocumentManager, registry: IDocumentRegistry, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer): void {
+function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, docManager: IDocumentManager, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer): void {
   const { commands } = app;
   const fbWidget = factory.createFileBrowser('filebrowser', {
-    commands, documentManager
+    commands,
+    documentManager: docManager
   });
 
   // Let the application restorer track the primary file browser (that is
@@ -130,36 +153,6 @@ function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, docu
   // All other file browsers created by using the factory function are
   // responsible for their own restoration behavior, if any.
   restorer.add(fbWidget, namespace);
-
-  // Add a context menu to the dir listing.
-  let node = fbWidget.node.getElementsByClassName('jp-DirListing-content')[0];
-  node.addEventListener('contextmenu', (event: MouseEvent) => {
-    event.preventDefault();
-    let path = fbWidget.pathForClick(event) || '';
-    let ext = DocumentRegistry.extname(path);
-    let factories = registry.preferredWidgetFactories(ext);
-    let widgetNames = toArray(map(factories, factory => factory.name));
-    let prefix = `${namespace}-contextmenu-${++Private.id}`;
-    let openWith: Menu = null;
-    if (path && widgetNames.length > 1) {
-      let command: string;
-
-      openWith = new Menu({ commands });
-      openWith.title.label = 'Open With...';
-
-      for (let widgetName of widgetNames) {
-        command = `${prefix}:${widgetName}`;
-        commands.addCommand(command, {
-          execute: () => fbWidget.openPath(path, widgetName),
-          label: widgetName
-        });
-        openWith.addItem({ command });
-      }
-    }
-
-    let menu = createContextMenu(fbWidget, openWith);
-    menu.open(event.clientX, event.clientY);
-  });
 
   addCommands(app, fbWidget);
 
@@ -176,7 +169,7 @@ function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, docu
 
 
 /**
- * Add the filebrowser commands to the application's command registry.
+ * Add the main file browser commands to the application's command registry.
  */
 function addCommands(app: JupyterLab, fbWidget: FileBrowser): void {
   const { commands } = app;
