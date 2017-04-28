@@ -183,15 +183,6 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, registry: ID
     }
   });
 
-  commands.addCommand(CommandIDs.open, {
-    execute: args => {
-      let path = args['path'] as string;
-      let factory = args['factory'] as string || void 0;
-      return docManager.services.contents.get(path)
-        .then(() => docManager.openOrReveal(path, factory));
-    }
-  });
-
   commands.addCommand(CommandIDs.newUntitled, {
     execute: args => {
       const errorTitle = args['error'] as string || 'Error';
@@ -208,6 +199,16 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, registry: ID
         .catch(error => showErrorMessage(errorTitle, error));
     },
     label: args => args['label'] as string || `New ${args['type'] as string}`
+  });
+
+  commands.addCommand(CommandIDs.open, {
+    execute: args => {
+      let path = args['path'] as string;
+      let factory = args['factory'] as string || void 0;
+      return docManager.services.contents.get(path)
+        .then(() => docManager.openOrReveal(path, factory));
+    },
+    label: args => (args['label'] || args['factory']) as string
   });
 
   commands.addCommand(CommandIDs.restoreCheckpoint, {
