@@ -332,13 +332,11 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
  * commands are disposed when the menu itself is disposed.
  */
 function createContextMenu(fbWidget: FileBrowser, openWith: Menu):  Menu {
-  let { commands } = fbWidget;
-  let menu = new Menu({ commands });
-  let command: string;
+  const { commands } = fbWidget;
+  const menu = new Menu({ commands });
 
-  command = 'file-operations:open';
   menu.addItem({
-    command,
+    command: 'file-operations:open',
     args: {
       icon: 'jp-MaterialIcon jp-OpenFolderIcon',
       label: 'Open',
