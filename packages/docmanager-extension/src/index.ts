@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette
+  ICommandPalette, IMainMenu
 } from '@jupyterlab/apputils';
 
 import {
@@ -21,6 +21,14 @@ import {
 import {
   Contents, IServiceManager
 } from '@jupyterlab/services';
+
+import {
+  each
+} from '@phosphor/algorithm';
+
+import {
+  Menu
+} from '@phosphor/widgets';
 
 
 /**
@@ -62,8 +70,8 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<IDocumentManager> = {
   id: 'jupyter.services.document-manager',
   provides: IDocumentManager,
-  requires: [IServiceManager, IDocumentRegistry, ICommandPalette],
-  activate: (app: JupyterLab, manager: IServiceManager, registry: IDocumentRegistry, palette: ICommandPalette): IDocumentManager => {
+  requires: [IServiceManager, IDocumentRegistry, ICommandPalette, IMainMenu],
+  activate: (app: JupyterLab, manager: IServiceManager, registry: IDocumentRegistry, palette: ICommandPalette, mainMenu: IMainMenu): IDocumentManager => {
     const opener: DocumentManager.IWidgetOpener = {
       open: widget => {
         if (!widget.id) {
@@ -75,11 +83,22 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
         app.shell.activateById(widget.id);
       }
     };
-
     const docManager = new DocumentManager({ registry, manager, opener });
+    let menu = createMenu(app, docManager, registry);
+
+    mainMenu.addMenu(menu, { rank: 1 });
 
     // Register the file operations commands.
     addCommands(app, docManager, palette);
+
+    // Handle fileCreator items as they are added.
+    registry.changed.connect((sender, args) => {
+      if (args.type === 'fileCreator') {
+        menu.dispose();
+        menu = createMenu(app, docManager, registry);
+        mainMenu.addMenu(menu, { rank: 1 });
+      }
+    });
 
     return docManager;
   }
@@ -232,6 +251,34 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   ].forEach(command => { palette.addItem({ command, category }); });
 }
 
+
+/**
+ * Create a top level menu for the file browser.
+ */
+function createMenu(app: JupyterLab, docManager: IDocumentManager, registry: IDocumentRegistry): Menu {
+  const { commands } = app;
+  const menu = new Menu({ commands });
+  menu.title.label = 'File';
+
+  each(registry.creators(), creator => {
+    const command = CommandIDs.createFrom;
+    const creatorName = creator.name;
+    const label = `New ${creatorName}`;
+    const path = docManager.cwd;
+    const args = { creatorName, label, path };
+    menu.addItem({ args, command });
+  });
+
+  [
+    CommandIDs.save,
+    CommandIDs.saveAs,
+    CommandIDs.restoreCheckpoint,
+    CommandIDs.close,
+    CommandIDs.closeAllFiles
+  ].forEach(command => { menu.addItem({ command }); });
+
+  return menu;
+}
 
 /**
  * A namespace for private module data.
