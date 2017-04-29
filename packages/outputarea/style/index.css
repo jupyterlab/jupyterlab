@@ -38,14 +38,14 @@
 }
 
 
-.jp-StdinWidget-prompt {
+.jp-Stdin-prompt {
   padding-right: var(--jp-code-padding);
   vertical-align: baseline;
   flex: 0 0 auto;
 }
 
 
-.jp-StdinWidget-input {
+.jp-Stdin-input {
   font-family: var(--jp-code-font-family);
   font-size: inherit;
   color: inherit;
@@ -59,12 +59,12 @@
 }
 
 
-.jp-StdinWidget-input:focus {
+.jp-Stdin-input:focus {
     box-shadow: none;
 }
 
 
-.jp-OutputArea-gutter {
+.jp-OutputArea-prompt {
   color: var(--jp-private-outputarea-prompt-color);
   font-family: var(--jp-code-font-family);
   text-align: right;
@@ -78,7 +78,7 @@
 }
 
 
-.jp-OutputArea-gutter:hover {
+.jp-OutputArea-prompt:hover {
   background: var(--md-grey-100);
 }
 
@@ -92,18 +92,8 @@
  *  - nested output areas (e.g. in the case of output widgets)
  *  - mirrored output areas
  */
-.jp-OutputArea .jp-OutputArea .jp-OutputArea-gutter, 
-.jp-MirroredOutputArea .jp-OutputArea-gutter {
+.jp-OutputArea .jp-OutputArea .jp-OutputArea-prompt {
   display: none;
-}
-
-
-/**
- * Allow outputs to expand in mirrored output areas.
- */
-.jp-MirroredOutputArea .jp-OutputArea-output {
-  width: 100%;
-  height: 100%;
 }
 
 
