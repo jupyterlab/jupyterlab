@@ -34,6 +34,10 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
+  CodeMirrorEditorFactory
+} from '@jupyterlab/codemirror';
+
+import {
   MimeModel, RenderMime
 } from '@jupyterlab/rendermime';
 
@@ -158,7 +162,7 @@ class Cell extends Widget {
     this.addClass(CELL_CLASS);
     let model = this._model = options.model;
     let contentFactory = this.contentFactory = (options.contentFactory || Cell.defaultContentFactory);
-    let editorFactory = this.editorFactory = options.editorFactory;
+    let editorFactory = contentFactory.editorFactory;
     this.layout = new PanelLayout();
 
     // Header
@@ -171,15 +175,15 @@ class Cell extends Widget {
     inputWrapper.addClass(CELL_INPUT_WRAPPER_CLASS);
     let inputCollapser = this._inputCollapser = contentFactory.createCollapser();
     let editorOptions = { model, factory: editorFactory };
-    let editor = this._editor = contentFactory.createCellEditorWrapper(editorOptions);
+    let editor = this._editor = new CodeEditorWrapper(editorOptions);
     editor.addClass(INPUT_EDITOR_CLASS);
-    let input = this._input = contentFactory.createInputArea({ editor });
+    let input = this._input = new InputArea({ editor });
     inputWrapper.addWidget(inputCollapser);
     inputWrapper.addWidget(input);
     (this.layout as PanelLayout).addWidget(this._input);
 
     // Output and footer
-    this.finishCell();
+    this.finishCell(options);
   }
 
   /**
@@ -248,16 +252,6 @@ class Cell extends Widget {
     this._inputCollapsed = value;
   }
 
-  /** 
-   * The view state of output being collapsed.
-  */
-  get outputCollapsed(): boolean {
-    return this._outputCollapsed;
-  }
-  set outputCollapsed(value: boolean) {
-    this._outputCollapsed = value;
-  }
-
   /**
    * Dispose of the resources held by the widget.
    */
@@ -314,7 +308,7 @@ class Cell extends Widget {
     this._input.showEditor();
   }
 
-  protected finishCell(): void {
+  protected finishCell(options: Cell.IOptions): void {
     let footer = this._footer = this.contentFactory.createCellFooter();
     (this.layout as PanelLayout).addWidget(footer);
   }
@@ -328,9 +322,8 @@ class Cell extends Widget {
   private _header: ICellHeader = null;
   private _footer: ICellFooter = null;
   private _inputCollapser: ICollapser = null;
-  private _outputCollapser: ICollapser = null;
   private _inputWrapper: Widget = null;
-  private _outputWrapper: Widget = null;
+
 }
 
 
@@ -354,10 +347,6 @@ namespace Cell {
      */
     contentFactory: Cell.IContentFactory;
 
-    /**
-     * The factory object for creating actual editors.
-     */
-    editorFactory: CodeEditor.Factory;
   }
 
   /**
@@ -365,16 +354,13 @@ namespace Cell {
    */
   export
   interface IContentFactory extends OutputArea.IContentFactory {
-
     /**
-     * Create a new cell editor for the parent widget.
+     * The editor factory we need to include in CodeEditorWratter.IOptions.
+     * 
+     * A separate readonly attribute rather than a factory method as we need
+     * to pass it around.
      */
-    createCellEditorWrapper(options: CodeEditorWrapper.IOptions): CodeEditorWrapper;
-
-    /**
-     * Create a new input area for the parent widget.
-     */
-    createInputArea(options: InputArea.IOptions): InputArea;
+    readonly editorFactory: CodeEditor.Factory;
 
     /**
      * Create a new cell header for the parent widget.
@@ -387,29 +373,35 @@ namespace Cell {
     createCellFooter(): ICellFooter;
 
     /**
-     * Create a collapser for input and output.
+     * Create a new input/output collaper for the parent widget.
      */
     createCollapser(): ICollapser;
   }
 
   /**
    * The default implementation of an `IContentFactory`.
+   * 
+   * This includes a CodeMirror editor factory to make it easy to use out of the box.
    */
   export
   class ContentFactory extends OutputArea.ContentFactory implements IContentFactory {
-
     /**
-     * Create a new cell editor for the widget.
+     * Create a content factory for a cell.
+     * 
+     * This inherits from OutputArea.ContentFactory to avoid needless nesting and
+     * provide a single factory object for all notebook/cell/outputarea related
+     * widgets.
      */
-    createCellEditorWrapper(options: CodeEditorWrapper.IOptions): CodeEditorWrapper {
-      return new CodeEditorWrapper(options);
+    constructor(options?: IContentFactoryOptions) {
+      super();
+      this._editorFactory = (options.editorFactory || defaultEditorFactory);
     }
 
     /**
-     * Create a new input area for the widget.
+     * The readonly editor factory that create code editors
      */
-    createInputArea(options: InputArea.IOptions): InputArea {
-      return new InputArea(options);
+    get editorFactory(): CodeEditor.Factory {
+      return this._editorFactory;
     }
 
     /**
@@ -432,10 +424,36 @@ namespace Cell {
     createCollapser(): ICollapser {
       return new Collapser();
     }
+
+    private _editorFactory: CodeEditor.Factory = null;
   }
 
   export
+  interface IContentFactoryOptions {
+
+    editorFactory?: CodeEditor.Factory;
+
+  }
+
+  /**
+   * The default content factory for cells.
+   */
+  export
   const defaultContentFactory = new ContentFactory();
+
+  /**
+   * A function to create the default CodeMirror editor factory.
+   */
+  function _createDefaultEditorFactory(): CodeEditor.Factory {
+    let editorServices = new CodeMirrorEditorFactory();
+    return editorServices.newInlineEditor.bind(editorServices);
+  }
+
+  /**
+   * The default editor factory.
+   */
+  export
+  const defaultEditorFactory = _createDefaultEditorFactory();
 
 }
 
@@ -450,16 +468,9 @@ class CodeCell extends Cell {
    */
   constructor(options: CodeCell.IOptions) {
     super(options);
+    this._rendermime = options.rendermime;
+    let model = this._model;
     this.addClass(CODE_CELL_CLASS);
-    let rendermime = this._rendermime = options.rendermime;
-    let contentFactory = options.contentFactory;
-    let model = this.model;
-    this._output = contentFactory.createOutputArea({
-      model: model.outputs,
-      rendermime,
-      contentFactory: contentFactory
-    });
-    (this.layout as PanelLayout).addWidget(this._output);
     this.setPrompt(`${model.executionCount || ''}`);
     model.stateChanged.connect(this.onStateChanged, this);
     model.metadata.changed.connect(this.onMetadataChanged, this);
@@ -474,6 +485,16 @@ class CodeCell extends Cell {
    * The content factory used by the widget.
    */
   readonly contentFactory: Cell.IContentFactory;
+
+  /** 
+   * The view state of output being collapsed.
+  */
+  get outputCollapsed(): boolean {
+    return this._outputCollapsed;
+  }
+  set outputCollapsed(value: boolean) {
+    this._outputCollapsed = value;
+  }
 
   /**
    * Dispose of the resources used by the widget.
@@ -552,8 +573,23 @@ class CodeCell extends Cell {
     }
   }
 
+  protected finishCell(options: CodeCell.IOptions): void {
+    let rendermime = this._rendermime = options.rendermime;
+    let contentFactory = options.contentFactory;
+    let model = this.model;
+
+    this._output = new OutputArea({
+      model: model.outputs,
+      rendermime,
+      contentFactory: contentFactory
+    });
+    (this.layout as PanelLayout).addWidget(this._output);
+  }
+
   private _rendermime: RenderMime = null;
   private _output: OutputArea = null;
+  private _outputCollapser: ICollapser = null;
+  private _outputWrapper: Widget = null;
 }
 
 
