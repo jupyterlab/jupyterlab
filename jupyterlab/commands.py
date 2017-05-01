@@ -9,7 +9,7 @@ import pipes
 import os
 from os import path as osp
 from os.path import join as pjoin
-from subprocess import check_output
+from subprocess import check_output, CalledProcessError
 import shutil
 import sys
 import tarfile
@@ -34,7 +34,10 @@ def run(cmd, **kwargs):
     print('> ' + list2cmdline(cmd))
     kwargs.setdefault('shell', sys.platform == 'win32')
     kwargs.setdefault('env', os.environ)
-    return check_output(cmd, **kwargs)
+    try:
+        return check_output(cmd, **kwargs)
+    except CalledProcessError as error:
+        raise error
 
 
 def install_extension(extension):
