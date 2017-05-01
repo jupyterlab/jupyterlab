@@ -304,15 +304,10 @@ class ToolbarButton extends Widget {
       break;
     case 'mousedown':
       this.addClass(TOOLBAR_PRESSED_CLASS);
-      this._originalNode = document.activeElement as HTMLElement;
       break;
     case 'mouseup':
     case 'mouseout':
       this.removeClass(TOOLBAR_PRESSED_CLASS);
-      if (this._originalNode) {
-        this._originalNode.focus();
-        this._originalNode = null;
-      }
       break;
     default:
       break;
@@ -340,7 +335,6 @@ class ToolbarButton extends Widget {
   }
 
   private _onClick: () => void;
-  private _originalNode: HTMLElement;
 }
 
 
