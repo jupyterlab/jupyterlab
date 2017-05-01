@@ -4,7 +4,11 @@
 import encoding = require('text-encoding');
 
 import {
-  JSONPrimitive, PromiseDelegate
+  uuid
+} from '@jupyterlab/coreutils';
+
+import {
+  JSONObject, JSONPrimitive, PromiseDelegate
 } from '@phosphor/coreutils';
 
 import * as WebSocket
@@ -19,12 +23,16 @@ import {
 } from '../../lib';
 
 import {
-  IAjaxSettings, uuid, IAjaxError
+  IAjaxSettings, IAjaxError
 } from '../../lib/utils';
 
 import {
   deserialize, serialize
 } from '../../lib/kernel/serialize';
+
+import {
+  validateSpecModels
+} from '../../lib/kernel/validate';
 
 import {
   MockXMLHttpRequest
@@ -115,7 +123,7 @@ const DEFAULT_FILE: Contents.IModel = {
 
 
 export
-const KERNELSPECS: any = {
+const KERNELSPECS: JSONObject = {
   default: 'python',
   kernelspecs: {
     python: PYTHON_SPEC,
@@ -152,7 +160,7 @@ interface IFakeRequest {
 
 export
 class RequestHandler {
-  specs: Kernel.ISpecModels = KERNELSPECS;
+  specs: Kernel.ISpecModels = validateSpecModels(KERNELSPECS);
   runningKernels: Kernel.IModel[] = [];
   runningSessions: Session.IModel[] = [];
   runningTerminals: TerminalSession.IModel[] = [];

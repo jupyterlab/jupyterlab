@@ -2,11 +2,15 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  URLExt, uuid
+} from '@jupyterlab/coreutils';
+
+import {
   ArrayExt, each, find, toArray
 } from '@phosphor/algorithm';
 
 import {
-  JSONObject, PromiseDelegate
+  JSONExt, JSONObject, PromiseDelegate
 } from '@phosphor/coreutils';
 
 import {
@@ -75,7 +79,7 @@ class DefaultKernel implements Kernel.IKernel {
       utils.ajaxSettingsWithToken(options.ajaxSettings, options.token)
     );
     this._token = options.token || utils.getConfigOption('token');
-    this._clientId = options.clientId || utils.uuid();
+    this._clientId = options.clientId || uuid();
     this._username = options.username || '';
     this._futures = new Map<string, KernelFutureHandler>();
     this._commPromises = new Map<string, Promise<Kernel.IComm>>();
@@ -496,7 +500,7 @@ class DefaultKernel implements Kernel.IKernel {
       allow_stdin : true,
       stop_on_error : false
     };
-    content = utils.extend(defaults, content);
+    content = { ...defaults, ...content };
     let msg = KernelMessage.createShellMessage(options, content);
     return this.sendShellMessage(msg, true, disposeOnDone);
   }
@@ -626,7 +630,7 @@ class DefaultKernel implements Kernel.IKernel {
    */
   connectToComm(targetName: string, commId?: string): Kernel.IComm {
     if (commId === void 0) {
-      commId = utils.uuid();
+      commId = uuid();
     }
     let comm = this._comms.get(commId);
     if (!comm) {
@@ -645,13 +649,13 @@ class DefaultKernel implements Kernel.IKernel {
    * Create the kernel websocket connection and add socket status handlers.
    */
   private _createSocket(): void {
-    let partialUrl = utils.urlPathJoin(this._wsUrl, KERNEL_SERVICE_URL,
-                                       encodeURIComponent(this._id));
+    let partialUrl = URLExt.join(this._wsUrl, KERNEL_SERVICE_URL,
+                                 encodeURIComponent(this._id));
     // Strip any authentication from the display string.
-    let parsed = utils.urlParse(partialUrl);
-    console.log('Starting websocket', parsed.hostname);
+    let parsed = URLExt.parse(partialUrl);
+    console.log('Starting websocket', parsed.host);
 
-    let url = utils.urlPathJoin(
+    let url = URLExt.join(
         partialUrl,
         'channels?session_id=' + encodeURIComponent(this._clientId)
     );
@@ -1096,7 +1100,7 @@ namespace Private {
   export
   function getSpecs(options: Kernel.IOptions = {}): Promise<Kernel.ISpecModels> {
     let baseUrl = options.baseUrl || utils.getBaseUrl();
-    let url = utils.urlPathJoin(baseUrl, KERNELSPEC_SERVICE_URL);
+    let url = URLExt.join(baseUrl, KERNELSPEC_SERVICE_URL);
     let ajaxSettings: IAjaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
     ajaxSettings.method = 'GET';
     ajaxSettings.dataType = 'json';
@@ -1125,7 +1129,7 @@ namespace Private {
   export
   function listRunning(options: Kernel.IOptions = {}): Promise<Kernel.IModel[]> {
     let baseUrl = options.baseUrl || utils.getBaseUrl();
-    let url = utils.urlPathJoin(baseUrl, KERNEL_SERVICE_URL);
+    let url = URLExt.join(baseUrl, KERNEL_SERVICE_URL);
     let ajaxSettings: IAjaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
     ajaxSettings.method = 'GET';
     ajaxSettings.dataType = 'json';
@@ -1176,7 +1180,7 @@ namespace Private {
   function startNew(options?: Kernel.IOptions): Promise<Kernel.IKernel> {
     options = options || {};
     let baseUrl = options.baseUrl || utils.getBaseUrl();
-    let url = utils.urlPathJoin(baseUrl, KERNEL_SERVICE_URL);
+    let url = URLExt.join(baseUrl, KERNEL_SERVICE_URL);
     let ajaxSettings: IAjaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
     ajaxSettings.method = 'POST';
     ajaxSettings.data = JSON.stringify({ name: options.name });
@@ -1189,7 +1193,7 @@ namespace Private {
         throw utils.makeAjaxError(success);
       }
       validate.validateModel(success.data);
-      options = utils.copy(options) as Kernel.IOptions;
+      options = JSONExt.deepCopy(options) as Kernel.IOptions;
       options.name = success.data.name;
       return new DefaultKernel(options, success.data.id);
     }, onKernelError);
@@ -1220,7 +1224,7 @@ namespace Private {
     }
 
     return getKernelModel(id, options).then(model => {
-      options = utils.copy(options) as Kernel.IOptions;
+      options = JSONExt.deepCopy(options) as Kernel.IOptions;
       options.name = model.name;
       return new DefaultKernel(options, id);
     }).catch(() => {
@@ -1246,7 +1250,7 @@ namespace Private {
     if (kernel.status === 'dead') {
       return Promise.reject(new Error('Kernel is dead'));
     }
-    let url = utils.urlPathJoin(
+    let url = URLExt.join(
       baseUrl, KERNEL_SERVICE_URL,
       encodeURIComponent(kernel.id), 'restart'
     );
@@ -1275,7 +1279,7 @@ namespace Private {
     if (kernel.status === 'dead') {
       return Promise.reject(new Error('Kernel is dead'));
     }
-    let url = utils.urlPathJoin(
+    let url = URLExt.join(
       baseUrl, KERNEL_SERVICE_URL,
       encodeURIComponent(kernel.id), 'interrupt'
     );
@@ -1296,7 +1300,7 @@ namespace Private {
    */
   export
   function shutdownKernel(id: string, baseUrl: string, ajaxSettings?: IAjaxSettings): Promise<void> {
-    let url = utils.urlPathJoin(baseUrl, KERNEL_SERVICE_URL,
+    let url = URLExt.join(baseUrl, KERNEL_SERVICE_URL,
                                 encodeURIComponent(id));
     ajaxSettings = ajaxSettings || { };
     ajaxSettings.method = 'DELETE';
@@ -1338,7 +1342,7 @@ namespace Private {
   function getKernelModel(id: string, options?: Kernel.IOptions): Promise<Kernel.IModel> {
     options = options || {};
     let baseUrl = options.baseUrl || utils.getBaseUrl();
-    let url = utils.urlPathJoin(baseUrl, KERNEL_SERVICE_URL,
+    let url = URLExt.join(baseUrl, KERNEL_SERVICE_URL,
                                 encodeURIComponent(id));
     let ajaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
     ajaxSettings.method = 'GET';

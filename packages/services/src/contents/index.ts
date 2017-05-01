@@ -2,7 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject
+  URLExt
+} from '@jupyterlab/coreutils';
+
+import {
+  JSONExt, JSONObject
 } from '@phosphor/coreutils';
 
 import {
@@ -392,13 +396,13 @@ class ContentsManager implements Contents.IManager {
    * Get a copy of the default ajax settings for the contents manager.
    */
   get ajaxSettings(): IAjaxSettings {
-    return utils.copy(this._ajaxSettings);
+    return JSONExt.deepCopy(this._ajaxSettings);
   }
   /**
    * Set the default ajax settings for the contents manager.
    */
   set ajaxSettings(value: IAjaxSettings) {
-    this._ajaxSettings = utils.copy(value);
+    this._ajaxSettings = JSONExt.deepCopy(value);
   }
 
   /**
@@ -425,9 +429,9 @@ class ContentsManager implements Contents.IManager {
       if (options.type === 'notebook') {
         delete options['format'];
       }
-      let params: any = utils.copy(options);
+      let params: any = JSONExt.deepCopy(options);
       params.content = options.content ? '1' : '0';
-      url += utils.jsonToQueryString(params);
+      url += URLExt.objectToQueryString(params);
     }
 
     return utils.ajaxRequest(url, ajaxSettings).then((success: utils.IAjaxSuccess): Contents.IModel => {
@@ -452,8 +456,8 @@ class ContentsManager implements Contents.IManager {
    * It is expected that the path contains no relative paths.
    */
   getDownloadUrl(path: string): Promise<string> {
-    return Promise.resolve(utils.urlPathJoin(this._baseUrl, FILES_URL,
-                                             utils.urlEncodeParts(path)));
+    return Promise.resolve(URLExt.join(this._baseUrl, FILES_URL,
+                           URLExt.encodeParts(path)));
   }
 
   /**
@@ -785,9 +789,9 @@ class ContentsManager implements Contents.IManager {
    * Get a REST url for a file given a path.
    */
   private _getUrl(...args: string[]): string {
-    let parts = args.map(path => utils.urlEncodeParts(path));
-    return utils.urlPathJoin(this._baseUrl, SERVICE_CONTENTS_URL,
-                             ...parts);
+    let parts = args.map(path => URLExt.encodeParts(path));
+    return URLExt.join(this._baseUrl, SERVICE_CONTENTS_URL,
+                       ...parts);
   }
 
   private _baseUrl = '';
