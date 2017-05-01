@@ -348,6 +348,17 @@ describe('jupyter.services - Comm', () => {
           done();
         };
       });
+
+      it('should pass through a buffers field', (done) => {
+        let comm = kernel.connectToComm('test');
+        tester.onMessage((msg: KernelMessage.ICommMsgMsg) => {
+          expect(msg.content.data).to.eql({ buffers: 'bar' });
+          done();
+        });
+        comm.send({ buffers: 'bar' });
+      });
+
+
     });
 
     context('#close()', () => {

@@ -79,12 +79,16 @@ function serializeBinary(msg: KernelMessage.IMessage): ArrayBuffer {
   let offsets: number[] = [];
   let buffers: ArrayBuffer[] = [];
   let encoder = new TextEncoder('utf8');
-  let jsonUtf8 = encoder.encode(JSON.stringify(msg, replaceBuffers));
+  let origBuffers = msg.buffers || [];
+  if (origBuffers.length) {
+    delete msg['buffers'];
+  }
+  let jsonUtf8 = encoder.encode(JSON.stringify(msg));
   buffers.push(jsonUtf8.buffer);
-  for (let i = 0; i < msg.buffers.length; i++) {
+  for (let i = 0; i < origBuffers.length; i++) {
     // msg.buffers elements could be either views or ArrayBuffers
     // buffers elements are ArrayBuffers
-    let b: any = msg.buffers[i];
+    let b: any = origBuffers[i];
     buffers.push(b instanceof ArrayBuffer ? b : b.buffer);
   }
   let nbufs = buffers.length;
@@ -108,15 +112,4 @@ function serializeBinary(msg: KernelMessage.IMessage): ArrayBuffer {
     msgBuf.set(new Uint8Array(buffers[i]), offsets[i]);
   }
   return msgBuf.buffer;
-}
-
-
-/**
- * Filter `"buffers"` key for `JSON.stringify`.
- */
-function replaceBuffers(key: string, value: any) {
-  if (key === 'buffers') {
-    return undefined;
-  }
-  return value;
 }
