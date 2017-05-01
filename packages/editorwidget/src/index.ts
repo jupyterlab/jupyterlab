@@ -10,10 +10,6 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  AttachedProperty
-} from '@phosphor/properties';
-
-import {
   IInstanceTracker
 } from '@jupyterlab/apputils';
 
@@ -73,14 +69,6 @@ function addDefaultCommands(tracker: IEditorTracker, commands: CommandRegistry) 
     }
   }
 
-  /**
-   * An attached property for the session id associated with an editor widget.
-   */
-  const sessionIdProperty = new AttachedProperty<EditorWidget, string>({
-    name: 'sessionId',
-    create: () => ''
-  });
-
   commands.addCommand('editor:line-numbers', {
     execute: args => { toggleLineNums(args); },
     label: 'Toggle Line Numbers'
@@ -102,8 +90,7 @@ function addDefaultCommands(tracker: IEditorTracker, commands: CommandRegistry) 
         preferredLanguage: widget.context.model.defaultKernelLanguage,
         activate: args['activate']
       };
-      return commands.execute('console:create', options)
-        .then(id => { sessionIdProperty.set(widget, id); });
+      return commands.execute('console:create', options);
     },
     label: 'Create Console for Editor'
   });
@@ -114,18 +101,13 @@ function addDefaultCommands(tracker: IEditorTracker, commands: CommandRegistry) 
       if (!widget) {
         return;
       }
-      // Get the session id.
-      let id = sessionIdProperty.get(widget);
-      if (!id) {
-        return;
-      }
       // Get the selected code from the editor.
       const editor = widget.editor;
       const selection = editor.getSelection();
       const start = editor.getOffsetAt(selection.start);
       const end = editor.getOffsetAt(selection.end);
       const options: JSONObject = {
-        id,
+        path: widget.context.path,
         code: editor.model.value.text.substring(start, end),
         activate: args['activate']
       };
