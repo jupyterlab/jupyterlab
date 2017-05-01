@@ -39,6 +39,8 @@ import {
 import 'codemirror/addon/edit/matchbrackets.js';
 import 'codemirror/addon/edit/closebrackets.js';
 import 'codemirror/addon/comment/comment.js';
+import 'codemirror/keymap/emacs.js';
+import 'codemirror/keymap/sublime.js';
 import 'codemirror/keymap/vim.js';
 
 
