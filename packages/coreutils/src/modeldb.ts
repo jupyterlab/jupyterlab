@@ -115,6 +115,13 @@ interface ICollaborator {
    * UI elements.
    */
   readonly color: string;
+
+  /**
+   * A human-readable short name for a collaborator, for
+   * use in places where the full `displayName` would take
+   * too much space.
+   */
+  readonly shortName?: string;
 }
 
 
