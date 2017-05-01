@@ -199,7 +199,7 @@ describe('@jupyterlab/apputils', () => {
         let future = session.kernel.requestExecute({ code: 'a = 1' });
         future.onIOPub = msg => {
           if (session.status === 'busy') {
-            expect(item.hasClass('jp-mod-busy')).to.be(true);
+            expect(item.hasClass('jp-FilledCircleIcon')).to.be(true);
             called = true;
           }
         };
@@ -233,7 +233,7 @@ describe('@jupyterlab/apputils', () => {
         }).then(session => {
           let item = Toolbar.createKernelStatusItem(session);
           expect(item.node.title).to.be('Kernel Starting');
-          expect(item.hasClass('jp-mod-busy')).to.be(true);
+          expect(item.hasClass('jp-FilledCircleIcon')).to.be(true);
         });
       });
 
