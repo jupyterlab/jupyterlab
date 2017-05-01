@@ -91,6 +91,9 @@ class LabApp(NotebookApp):
             self.log.warn(msg)
             load_jupyter_server_extension(self)
 
+    def write_default_config(self):
+        print('hi hi')
+
 
 #-----------------------------------------------------------------------------
 # Main entry point
