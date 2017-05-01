@@ -80,7 +80,7 @@ namespace KernelMessage {
     metadata: JSONObject;
     content: JSONObject;
     channel: Channel;
-    buffers: (ArrayBuffer | ArrayBufferView)[];
+    buffers?: (ArrayBuffer | ArrayBufferView)[];
   }
 
   /**
