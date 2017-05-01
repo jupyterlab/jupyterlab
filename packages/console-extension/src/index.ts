@@ -81,6 +81,7 @@ namespace CommandIDs {
   const switchKernel = 'console:switch-kernel';
 };
 
+
 /**
  * The console widget tracker provider.
  */
@@ -184,6 +185,13 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
     });
   }
 
+  /**
+   * Whether there is an active console.
+   */
+  function hasWidget(): boolean {
+    return tracker.currentWidget !== null;
+  }
+
   command = CommandIDs.open;
   commands.addCommand(command, {
     execute: (args: Partial<ConsolePanel.IOptions>) => {
@@ -205,7 +213,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
           }
         });
       }
-    }
+    },
   });
 
   command = CommandIDs.create;
@@ -237,7 +245,8 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
         return;
       }
       current.console.clear();
-    }
+    },
+    isEnabled: hasWidget
   });
   palette.addItem({ command, category });
 
@@ -250,7 +259,8 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
         return;
       }
       return current.console.execute();
-    }
+    },
+    isEnabled: hasWidget
   });
   palette.addItem({ command, category });
 
@@ -263,7 +273,8 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
         return;
       }
       current.console.execute(true);
-    }
+    },
+    isEnabled: hasWidget
   });
   palette.addItem({ command, category });
 
@@ -276,7 +287,8 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
         return;
       }
       current.console.insertLinebreak();
-    }
+    },
+    isEnabled: hasWidget
   });
   palette.addItem({ command, category });
 
@@ -292,7 +304,8 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
       if (kernel) {
         return kernel.interrupt();
       }
-    }
+    },
+    isEnabled: hasWidget
   });
   palette.addItem({ command, category });
 
@@ -305,7 +318,8 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
         return;
       }
       return current.console.session.restart();
-    }
+    },
+    isEnabled: hasWidget
   });
   palette.addItem({ command, category });
 
@@ -330,7 +344,8 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
           return false;
         }
     });
-    }
+    },
+    isEnabled: hasWidget
   });
 
   command = CommandIDs.inject;
@@ -346,7 +361,8 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
           return true;
         }
       });
-    }
+    },
+    isEnabled: hasWidget
   });
 
   command = CommandIDs.switchKernel;
@@ -358,7 +374,8 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
         return;
       }
       return current.console.session.selectKernel();
-    }
+    },
+    isEnabled: hasWidget
   });
   palette.addItem({ command, category });
 
