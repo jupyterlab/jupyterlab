@@ -36,7 +36,8 @@ fi
 
 
 if [[ $GROUP == coverage ]]; then
-    # Run the coverage check.
+    # Run the coverage and python tests.
+    py.test
     npm run build
     npm run build:test
     npm run coverage
