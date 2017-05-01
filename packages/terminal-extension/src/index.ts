@@ -153,7 +153,8 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
       return current.refresh().then(() => {
         current.activate();
       });
-    }
+    },
+    isEnabled: () => { return tracker.currentWidget !== null; }
   });
 
   // Add command palette and menu items.
