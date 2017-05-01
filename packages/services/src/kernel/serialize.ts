@@ -79,7 +79,7 @@ function serializeBinary(msg: KernelMessage.IMessage): ArrayBuffer {
   let offsets: number[] = [];
   let buffers: ArrayBuffer[] = [];
   let encoder = new TextEncoder('utf8');
-  let origBuffers = [];
+  let origBuffers: ArrayBuffer[] = [];
   if (msg.buffers !== undefined) {
     origBuffers = msg.buffers;
     delete msg['buffers'];
