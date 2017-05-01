@@ -18,7 +18,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IClientSession
+  IClientSession, Styling
 } from '.';
 
 
@@ -266,7 +266,8 @@ class ToolbarButton extends Widget {
    * Construct a new toolbar button.
    */
   constructor(options: ToolbarButton.IOptions = {}) {
-    super({ node: document.createElement('span') });
+    super({ node: document.createElement('button') });
+    Styling.styleNodeByTag(this.node, 'button');
     options = options || {};
     this.addClass(TOOLBAR_BUTTON_CLASS);
     this._onClick = options.onClick;
@@ -303,10 +304,15 @@ class ToolbarButton extends Widget {
       break;
     case 'mousedown':
       this.addClass(TOOLBAR_PRESSED_CLASS);
+      this._originalNode = document.activeElement as HTMLElement;
       break;
     case 'mouseup':
     case 'mouseout':
       this.removeClass(TOOLBAR_PRESSED_CLASS);
+      if (this._originalNode) {
+        this._originalNode.focus();
+        this._originalNode = null;
+      }
       break;
     default:
       break;
@@ -334,6 +340,7 @@ class ToolbarButton extends Widget {
   }
 
   private _onClick: () => void;
+  private _originalNode: HTMLElement;
 }
 
 

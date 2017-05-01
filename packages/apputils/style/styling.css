@@ -7,15 +7,20 @@
 
 button.jp-mod-styled {
   font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color0);
   border: none;
   box-sizing: border-box;
-  outline: none;
   text-transform: uppercase;
+  text-align: center;
   line-height: 32px;
   height: 32px;
   padding: 0px 4px;
   letter-spacing: 1px;
   outline: none;
+  background-color: white;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 16px;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -55,14 +60,17 @@ button.jp-mod-styled:focus {
 }
 
 
-.jp-select-wrapper.jp-mod-focused{
+.jp-select-wrapper.jp-mod-focused {
   border: var(--jp-border-width) solid var(--md-blue-500);
   box-shadow: inset 0 0 4px var(--md-blue-300);
 }
 
 
 .jp-select-wrapper:hover,
- input.jp-mod-styled:hover {
+ input.jp-mod-styled:hover,
+ button.jp-mod-styled:hover {
+  cursor: pointer;
+  color: var(--jp-ui-font-color0);
   background-color: var(--md-grey-200);
   box-shadow: inset 0 0px 1px rgba(0, 0, 0, 0.5);
 }
