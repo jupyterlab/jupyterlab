@@ -812,7 +812,10 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
       return NotebookActions.undo(current.notebook);
     },
-    isEnabled: hasWidget
+    isEnabled: () => {
+      let current = tracker.currentWidget;
+      return current && current.notebook.model.cells.canUndo;
+    }
   });
   commands.addCommand(CommandIDs.redo, {
     label: 'Redo Cell Operation',
@@ -823,7 +826,10 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
       return NotebookActions.redo(current.notebook);
     },
-    isEnabled: hasWidget
+    isEnabled: () => {
+      let current = tracker.currentWidget;
+      return current && current.notebook.model.cells.canRedo;
+    }
   });
   commands.addCommand(CommandIDs.switchKernel, {
     label: 'Switch Kernel',
