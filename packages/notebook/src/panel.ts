@@ -58,7 +58,11 @@ import {
 /**
  * The class name added to notebook panels.
  */
-const NB_PANEL = 'jp-Notebook-panel';
+const NOTEBOOK_PANEL_CLASS = 'jp-NotebookPanel';
+
+const NOTEBOOK_PANEL_TOOLBAR_CLASS = 'jp-NotebookPanel-toolbar';
+
+const NOTEBOOK_PANEL_NOTEBOOK_CLASS = 'jp-NotebookPanel-notebook';
 
 /**
  * The class name added to a dirty widget.
@@ -80,22 +84,28 @@ class NotebookPanel extends Widget {
    */
   constructor(options: NotebookPanel.IOptions) {
     super();
-    this.addClass(NB_PANEL);
+    this.addClass(NOTEBOOK_PANEL_CLASS);
     this.rendermime = options.rendermime;
-
-    let layout = this.layout = new PanelLayout();
     let contentFactory = this.contentFactory = (
       options.contentFactory || NotebookPanel.defaultContentFactory
     );
+
+    let layout = this.layout = new PanelLayout();
+
+    // Toolbar
+    let toolbar = new Toolbar();
+    toolbar.addClass(NOTEBOOK_PANEL_TOOLBAR_CLASS);
+
+    // Notebook
     let nbOptions = {
       rendermime: this.rendermime,
       languagePreference: options.languagePreference,
       contentFactory: contentFactory,
       mimeTypeService: options.mimeTypeService
     };
-    let toolbar = new Toolbar();
+    let notebook = this.notebook = contentFactory.createNotebook(nbOptions);
+    notebook.addClass(NOTEBOOK_PANEL_NOTEBOOK_CLASS);
 
-    this.notebook = contentFactory.createNotebook(nbOptions);
     layout.addWidget(toolbar);
     layout.addWidget(this.notebook);
   }
