@@ -158,7 +158,9 @@ class Cell extends Widget {
     super();
     this.addClass(CELL_CLASS);
     let model = this._model = options.model;
-    let contentFactory = this.contentFactory = (options.contentFactory || Cell.defaultContentFactory);
+    let contentFactory = this.contentFactory = (
+      options.contentFactory || Cell.defaultContentFactory
+    );
     this.layout = new PanelLayout();
 
     // Header
@@ -212,6 +214,13 @@ class Cell extends Widget {
    */
   get model(): ICellModel {
     return this._model;
+  }
+
+  /**
+   * Get the input area for the cell.
+   */
+  get inputArea(): InputArea {
+    return this._input;
   }
 
   /**
@@ -286,22 +295,6 @@ class Cell extends Widget {
     // Handle read only state.
     this.editor.readOnly = this._readOnly;
     this.toggleClass(READONLY_CLASS, this._readOnly);
-  }
-
-  /**
-   * Render an input instead of the text editor.
-   */
-  protected renderInput(widget: Widget): void {
-    this.addClass(RENDERED_CLASS);
-    this._input.renderInput(widget);
-  }
-
-  /**
-   * Show the text editor.
-   */
-  protected showEditor(): void {
-    this.removeClass(RENDERED_CLASS);
-    this._input.showEditor();
   }
 
   protected finishCell(options: Cell.IOptions): void {
@@ -487,6 +480,13 @@ class CodeCell extends Cell {
    * The model used by the widget.
    */
   readonly model: ICodeCellModel;
+
+  /**
+   * Get the output area for the cell.
+   */
+  get outputArea(): OutputArea {
+    return this._output;
+  }
 
   /** 
    * The view state of output being collapsed.
@@ -686,6 +686,22 @@ class MarkdownCell extends Cell {
   }
 
   /**
+   * Render an input instead of the text editor.
+   */
+  protected renderInput(widget: Widget): void {
+    this.addClass(RENDERED_CLASS);
+    this.inputArea.renderInput(widget);
+  }
+
+  /**
+   * Show the text editor instead of rendered input.
+   */
+  protected showEditor(): void {
+    this.removeClass(RENDERED_CLASS);
+    this.inputArea.showEditor();
+  }
+
+  /**
    * Dispose of the resource held by the widget.
    */
   dispose(): void {
@@ -719,7 +735,7 @@ class MarkdownCell extends Cell {
   }
 
   /**
-   * Update the output.
+   * Update the rendered input.
    */
   private _updateRenderedInput(): void {
     let model = this.model;
