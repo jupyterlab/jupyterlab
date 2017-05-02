@@ -26,7 +26,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  PathExt, URLExt, IModelDB
+  PathExt, URLExt, IModelDB, ModelDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -53,7 +53,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     let lang = this._factory.preferredLanguage(ext);
 
     if (options.modelDBFactory) {
-      this._modelDB = options.modelDBFactory(this._path);
+      this._modelDB = options.modelDBFactory.createNew(this._path);
       this._model = this._factory.createNew(lang, this._modelDB);
     } else {
       this._model = this._factory.createNew(lang);
@@ -501,7 +501,7 @@ export namespace Context {
     /**
      * An IModelDB factory method which may be used for the document.
      */
-    modelDBFactory?: (path: string) => IModelDB;
+    modelDBFactory?: ModelDB.IFactory;
 
     /**
      * An optional callback for opening sibling widgets.
