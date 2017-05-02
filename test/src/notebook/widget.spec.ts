@@ -16,7 +16,7 @@ import {
 } from 'simulate-event';
 
 import {
-  CodeCellModel, CodeCell, MarkdownCellModel, MarkdownCellWidget,
+  CodeCellModel, CodeCell, MarkdownCellModel, MarkdownCell,
   RawCellModel, RawCellWidget, Cell
 } from '@jupyterlab/cells';
 
@@ -517,14 +517,14 @@ describe('notebook/widget', () => {
 
       describe('#createMarkdownCell({})', () => {
 
-        it('should create a `MarkdownCellWidget`', () => {
+        it('should create a `MarkdownCell`', () => {
           let factory = new StaticNotebook.ContentFactory({ editorFactory });
           let contentFactory = factory.markdownCellContentFactory;
           let model = new MarkdownCellModel({});
           let mdOptions = { model, rendermime, contentFactory };
           let parent = new StaticNotebook(options);
           let widget = factory.createMarkdownCell(mdOptions, parent);
-          expect(widget).to.be.a(MarkdownCellWidget);
+          expect(widget).to.be.a(MarkdownCell);
         });
 
       });
@@ -693,7 +693,7 @@ describe('notebook/widget', () => {
         MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
         let cell = widget.model.contentFactory.createMarkdownCell({});
         widget.model.cells.pushBack(cell);
-        let child = widget.widgets[widget.widgets.length - 1] as MarkdownCellWidget;
+        let child = widget.widgets[widget.widgets.length - 1] as MarkdownCell;
         expect(child.rendered).to.be(true);
         widget.activeCellIndex = widget.widgets.length - 1;
         widget.mode = 'edit';
@@ -886,7 +886,7 @@ describe('notebook/widget', () => {
           let cell = widget.model.contentFactory.createMarkdownCell({});
           widget.model.cells.pushBack(cell);
           let count = widget.widgets.length;
-          let child = widget.widgets[count - 1] as MarkdownCellWidget;
+          let child = widget.widgets[count - 1] as MarkdownCell;
           expect(child.rendered).to.be(true);
           simulate(child.node, 'mousedown');
           expect(child.rendered).to.be(true);
@@ -900,7 +900,7 @@ describe('notebook/widget', () => {
         it('should unrender a markdown cell', () => {
           let cell = widget.model.contentFactory.createMarkdownCell({});
           widget.model.cells.pushBack(cell);
-          let child = widget.widgets[widget.widgets.length - 1] as MarkdownCellWidget;
+          let child = widget.widgets[widget.widgets.length - 1] as MarkdownCell;
           expect(child.rendered).to.be(true);
           expect(widget.mode).to.be('command');
           simulate(child.node, 'dblclick');
@@ -912,7 +912,7 @@ describe('notebook/widget', () => {
           let cell = widget.model.contentFactory.createMarkdownCell({});
           widget.model.cells.pushBack(cell);
           widget.model.readOnly = true;
-          let child = widget.widgets[widget.widgets.length - 1] as MarkdownCellWidget;
+          let child = widget.widgets[widget.widgets.length - 1] as MarkdownCell;
           expect(child.rendered).to.be(true);
           simulate(child.node, 'dblclick');
           expect(child.rendered).to.be(true);

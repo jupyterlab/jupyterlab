@@ -90,6 +90,11 @@ const STDIN_INPUT_CLASS = 'jp-Stdin-input';
 const STDIN_RENDERED_CLASS = 'jp-Stdin-rendered';
 
 
+/******************************************************************************
+ * OutputArea
+ ******************************************************************************/
+
+
 /**
  * An output area widget.
  *
@@ -309,7 +314,7 @@ class OutputArea extends Widget {
     panel.addClass(OUTPUT_AREA_ITEM_CLASS);
     panel.addClass(OUTPUT_AREA_STDIN_ITEM_CLASS);
 
-    let prompt = factory.createPrompt();
+    let prompt = factory.createOutputPrompt();
     prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
     panel.addWidget(prompt);
 
@@ -355,7 +360,7 @@ class OutputArea extends Widget {
     let panel = new Panel();
     panel.addClass(OUTPUT_AREA_ITEM_CLASS);
 
-    let prompt = this.contentFactory.createPrompt();
+    let prompt = this.contentFactory.createOutputPrompt();
     prompt.executionCount = model.executionCount;
     prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
     panel.addWidget(prompt);
@@ -405,15 +410,15 @@ namespace OutputArea {
   export
   interface IContentFactory {
     /**
-     * Create a gutter for an output or input.
+     * Create an output prompt.
      *
      */
-    createPrompt(): IOutputPrompt;
+    createOutputPrompt(): IOutputPrompt;
 
     /**
      * Create an stdin widget.
      */
-    createStdin(options: IStdinOptions): Widget;
+    createStdin(options: Stdin.IOptions): Widget;
   }
 
   /**
@@ -422,16 +427,16 @@ namespace OutputArea {
   export
   class ContentFactory implements IContentFactory {
     /**
-     * Create the gutter for the widget.
+     * Create the output prompt for the widget.
      */
-    createPrompt(): IOutputPrompt {
+    createOutputPrompt(): IOutputPrompt {
       return new OutputPrompt();
     }
 
     /**
      * Create an stdin widget.
      */
-    createStdin(options: IStdinOptions): IStdin {
+    createStdin(options: Stdin.IOptions): IStdin {
       return new Stdin(options);
     }
   }
@@ -441,54 +446,150 @@ namespace OutputArea {
    */
   export
   const defaultContentFactory = new ContentFactory();
+}
 
+
+/******************************************************************************
+ * OutputPrompt
+ ******************************************************************************/
+
+
+/**
+ * The interface for an output prompt.
+ */
+export
+interface IOutputPrompt extends Widget {
   /**
-   * The interface for a gutter widget.
+   * The execution count for the widget.
    */
-  export
-  interface IOutputPrompt extends Widget {
-    /**
-     * The execution count for the widget.
-     */
-    executionCount: nbformat.ExecutionCount;
+  executionCount: nbformat.ExecutionCount;
+}
+
+/**
+ * The default output prompt implementation
+ */
+export
+class OutputPrompt extends Widget implements IOutputPrompt {
+  /*
+    * Create an output prompt widget.
+    */
+  constructor() {
+    super();
+    this.addClass(OUTPUT_PROMPT_CLASS);
   }
 
   /**
-   * The default output prompt implementation
+   * The execution count for the widget.
    */
-  export
-  class OutputPrompt extends Widget implements IOutputPrompt {
-    /*
-     * Create an output prompt widget.
-     */
-    constructor() {
-      super();
-      this.addClass(OUTPUT_PROMPT_CLASS);
+  get executionCount(): nbformat.ExecutionCount {
+    return this._executionCount;
+  }
+  set executionCount(value: nbformat.ExecutionCount) {
+    this._executionCount = value;
+    if (value === null) {
+      this.node.textContent = '';
+    } else {
+        this.node.textContent = `Out[${value}]:`;
     }
+  }
 
-    /**
-     * The execution count for the widget.
-     */
-    get executionCount(): nbformat.ExecutionCount {
-      return this._executionCount;
+  private _executionCount: nbformat.ExecutionCount = null;
+}
+
+
+/******************************************************************************
+ * Stdin
+ ******************************************************************************/
+
+
+/**
+ * The stdin interface
+ */
+export
+interface IStdin extends Widget {}
+
+/**
+ * The default stdin widget.
+ */
+export
+class Stdin extends Widget implements IStdin {
+  /**
+   * Construct a new input widget.
+   */
+  constructor(options: Stdin.IOptions) {
+    super({ node: Private.createInputWidgetNode() });
+    this.addClass(STDIN_CLASS);
+    let text = this.node.firstChild as HTMLElement;
+    text.textContent = options.prompt;
+    this._input = this.node.lastChild as HTMLInputElement;
+    if (options.password) {
+      this._input.type = 'password';
     }
-    set executionCount(value: nbformat.ExecutionCount) {
-      this._executionCount = value;
-      if (value === null) {
-        this.node.textContent = '';
-      } else {
-         this.node.textContent = `Out[${value}]:`;
+    this._kernel = options.kernel;
+  }
+
+  /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the dock panel's node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    let input = this._input;
+    if (event.type === 'keydown') {
+      if ((event as KeyboardEvent).keyCode === 13) {  // Enter
+        this._kernel.sendInputReply({
+          value: input.value
+        });
+        let rendered = document.createElement('span');
+        rendered.className = STDIN_RENDERED_CLASS;
+        if (input.type === 'password') {
+          rendered.textContent = Array(input.value.length + 1).join('·');
+        } else {
+          rendered.textContent = input.value;
+        }
+        this.node.replaceChild(rendered, input);
       }
     }
-
-    private _executionCount: nbformat.ExecutionCount = null;
   }
 
+  /**
+   * Handle `after-attach` messages sent to the widget.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this._input.addEventListener('keydown', this);
+    this.update();
+  }
+
+  /**
+   * Handle `update-request` messages sent to the widget.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    this._input.focus();
+  }
+
+  /**
+   * Handle `before-detach` messages sent to the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this._input.removeEventListener('keydown', this);
+  }
+
+  private _kernel: Kernel.IKernelConnection = null;
+  private _input: HTMLInputElement = null;
+}
+
+export
+namespace Stdin {
   /**
    * The options to create a stdin widget.
    */
   export
-  interface IStdinOptions {
+  interface IOptions {
     /**
      * The prompt text.
      */
@@ -504,89 +605,12 @@ namespace OutputArea {
      */
     kernel: Kernel.IKernelConnection;
   }
-
-  /**
-   * The stdin interface
-   */
-  export
-  interface IStdin extends Widget {}
-
-  /**
-   * The default stdin widget.
-   */
-  export
-  class Stdin extends Widget implements IStdin {
-    /**
-     * Construct a new input widget.
-     */
-    constructor(options: IStdinOptions) {
-      super({ node: Private.createInputWidgetNode() });
-      this.addClass(STDIN_CLASS);
-      let text = this.node.firstChild as HTMLElement;
-      text.textContent = options.prompt;
-      this._input = this.node.lastChild as HTMLInputElement;
-      if (options.password) {
-        this._input.type = 'password';
-      }
-      this._kernel = options.kernel;
-    }
-
-    /**
-     * Handle the DOM events for the widget.
-     *
-     * @param event - The DOM event sent to the widget.
-     *
-     * #### Notes
-     * This method implements the DOM `EventListener` interface and is
-     * called in response to events on the dock panel's node. It should
-     * not be called directly by user code.
-     */
-    handleEvent(event: Event): void {
-      let input = this._input;
-      if (event.type === 'keydown') {
-        if ((event as KeyboardEvent).keyCode === 13) {  // Enter
-          this._kernel.sendInputReply({
-            value: input.value
-          });
-          let rendered = document.createElement('span');
-          rendered.className = STDIN_RENDERED_CLASS;
-          if (input.type === 'password') {
-            rendered.textContent = Array(input.value.length + 1).join('·');
-          } else {
-            rendered.textContent = input.value;
-          }
-          this.node.replaceChild(rendered, input);
-        }
-      }
-    }
-
-    /**
-     * Handle `after-attach` messages sent to the widget.
-     */
-    protected onAfterAttach(msg: Message): void {
-      this._input.addEventListener('keydown', this);
-      this.update();
-    }
-
-    /**
-     * Handle `update-request` messages sent to the widget.
-     */
-    protected onUpdateRequest(msg: Message): void {
-      this._input.focus();
-    }
-
-    /**
-     * Handle `before-detach` messages sent to the widget.
-     */
-    protected onBeforeDetach(msg: Message): void {
-      this._input.removeEventListener('keydown', this);
-    }
-
-    private _kernel: Kernel.IKernelConnection = null;
-    private _input: HTMLInputElement = null;
-  }
-
 }
+
+
+/******************************************************************************
+ * Private namespace
+ ******************************************************************************/
 
 
 /**

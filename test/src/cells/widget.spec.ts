@@ -21,7 +21,7 @@ import {
 
 import {
   Cell, CellModel, InputArea,
-  CodeCell, CodeCellModel, MarkdownCellWidget,
+  CodeCell, CodeCellModel, MarkdownCell,
   RawCellWidget, RawCellModel, MarkdownCellModel
 } from '@jupyterlab/cells';
 
@@ -101,7 +101,7 @@ class LogCodeCell extends CodeCell {
 }
 
 
-class LogMarkdownCell extends MarkdownCellWidget {
+class LogMarkdownCell extends MarkdownCell {
 
   methods: string[] = [];
 
@@ -482,7 +482,7 @@ describe('cells/widget', () => {
 
   });
 
-  describe('MarkdownCellWidget', () => {
+  describe('MarkdownCell', () => {
 
     let contentFactory = createBaseCellFactory();
     let model = new MarkdownCellModel({});
@@ -490,17 +490,17 @@ describe('cells/widget', () => {
     describe('#constructor()', () => {
 
       it('should create a markdown cell widget', () => {
-        let widget = new MarkdownCellWidget({ model, rendermime, contentFactory });
-        expect(widget).to.be.a(MarkdownCellWidget);
+        let widget = new MarkdownCell({ model, rendermime, contentFactory });
+        expect(widget).to.be.a(MarkdownCell);
       });
 
       it('should accept a custom contentFactory', () => {
-        let widget = new MarkdownCellWidget({ model, rendermime, contentFactory });
-        expect(widget).to.be.a(MarkdownCellWidget);
+        let widget = new MarkdownCell({ model, rendermime, contentFactory });
+        expect(widget).to.be.a(MarkdownCell);
       });
 
       it('should set the default mimetype to text/x-ipythongfm', () => {
-        let widget = new MarkdownCellWidget({ model, rendermime, contentFactory });
+        let widget = new MarkdownCell({ model, rendermime, contentFactory });
         expect(widget.model.mimeType).to.be('text/x-ipythongfm');
       });
 
@@ -509,7 +509,7 @@ describe('cells/widget', () => {
     describe('#rendered', () => {
 
       it('should default to true', (done) => {
-        let widget = new MarkdownCellWidget({ model, rendermime, contentFactory });
+        let widget = new MarkdownCell({ model, rendermime, contentFactory });
         Widget.attach(widget, document.body);
         expect(widget.rendered).to.be(true);
         requestAnimationFrame(() => {
@@ -520,7 +520,7 @@ describe('cells/widget', () => {
       });
 
       it('should unrender the widget', (done) => {
-        let widget = new MarkdownCellWidget({ model, rendermime, contentFactory });
+        let widget = new MarkdownCell({ model, rendermime, contentFactory });
         Widget.attach(widget, document.body);
         widget.rendered = false;
         requestAnimationFrame(() => {
@@ -550,13 +550,13 @@ describe('cells/widget', () => {
     describe('#dispose()', () => {
 
       it('should dispose of the resources held by the widget', () => {
-        let widget = new MarkdownCellWidget({ model, rendermime, contentFactory });
+        let widget = new MarkdownCell({ model, rendermime, contentFactory });
         widget.dispose();
         expect(widget.isDisposed).to.be(true);
       });
 
       it('should be safe to call multiple times', () => {
-        let widget = new MarkdownCellWidget({ model, rendermime, contentFactory });
+        let widget = new MarkdownCell({ model, rendermime, contentFactory });
         widget.dispose();
         widget.dispose();
         expect(widget.isDisposed).to.be(true);

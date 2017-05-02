@@ -12,7 +12,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  CodeCell, MarkdownCellWidget, RawCellWidget
+  CodeCell, MarkdownCell, RawCellWidget
 } from '@jupyterlab/cells';
 
 import {
@@ -121,9 +121,9 @@ describe('@jupyterlab/notebook', () => {
       it('should preserve the types of each cell', () => {
         NotebookActions.changeCellType(widget, 'markdown');
         NotebookActions.splitCell(widget);
-        expect(widget.activeCell).to.be.a(MarkdownCellWidget);
+        expect(widget.activeCell).to.be.a(MarkdownCell);
         let prev = widget.widgets[0];
-        expect(prev).to.be.a(MarkdownCellWidget);
+        expect(prev).to.be.a(MarkdownCell);
       });
 
       it('should create two empty cells if there is no content', () => {
@@ -217,10 +217,10 @@ describe('@jupyterlab/notebook', () => {
 
       it('should unrender a markdown cell', () => {
         NotebookActions.changeCellType(widget, 'markdown');
-        let cell = widget.activeCell as MarkdownCellWidget;
+        let cell = widget.activeCell as MarkdownCell;
         cell.rendered = true;
         NotebookActions.mergeCells(widget);
-        cell = widget.activeCell as MarkdownCellWidget;
+        cell = widget.activeCell as MarkdownCell;
         expect(cell.rendered).to.be(false);
         expect(widget.mode).to.be('command');
       });
@@ -458,7 +458,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should unrender markdown cells', () => {
         NotebookActions.changeCellType(widget, 'markdown');
-        let cell = widget.activeCell as MarkdownCellWidget;
+        let cell = widget.activeCell as MarkdownCell;
         expect(cell.rendered).to.be(false);
       });
 
@@ -471,7 +471,7 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should run the selected cells', function (done) {
-        let next = widget.widgets[1] as MarkdownCellWidget;
+        let next = widget.widgets[1] as MarkdownCell;
         widget.select(next);
         let cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
@@ -542,7 +542,7 @@ describe('@jupyterlab/notebook', () => {
       it('should render all markdown cells on an error', (done) => {
         let cell = widget.model.contentFactory.createMarkdownCell({});
         widget.model.cells.pushBack(cell);
-        let child = widget.widgets[widget.widgets.length - 1] as MarkdownCellWidget;
+        let child = widget.widgets[widget.widgets.length - 1] as MarkdownCell;
         child.rendered = false;
         widget.select(child);
         widget.activeCell.model.value.text = ERROR_INPUT;
@@ -561,7 +561,7 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should run the selected cells ', (done) => {
-        let next = widget.widgets[1] as MarkdownCellWidget;
+        let next = widget.widgets[1] as MarkdownCell;
         widget.select(next);
         let cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
@@ -598,7 +598,7 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should activate the cell after the last selected cell', (done) => {
-        let next = widget.widgets[3] as MarkdownCellWidget;
+        let next = widget.widgets[3] as MarkdownCell;
         widget.select(next);
         NotebookActions.runAndAdvance(widget, session).then(result => {
           expect(result).to.be(true);
@@ -640,7 +640,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should render all markdown cells on an error', (done) => {
         widget.activeCell.model.value.text = ERROR_INPUT;
-        let cell = widget.widgets[1] as MarkdownCellWidget;
+        let cell = widget.widgets[1] as MarkdownCell;
         cell.rendered = false;
         widget.select(cell);
         NotebookActions.runAndAdvance(widget, session).then(result => {
@@ -659,7 +659,7 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should run the selected cells ', (done) => {
-        let next = widget.widgets[1] as MarkdownCellWidget;
+        let next = widget.widgets[1] as MarkdownCell;
         widget.select(next);
         let cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
@@ -725,7 +725,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should render all markdown cells on an error', (done) => {
         widget.activeCell.model.value.text = ERROR_INPUT;
-        let cell = widget.widgets[1] as MarkdownCellWidget;
+        let cell = widget.widgets[1] as MarkdownCell;
         cell.rendered = false;
         widget.select(cell);
         NotebookActions.runAndInsert(widget, session).then(result => {
@@ -747,7 +747,7 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should run all of the cells in the notebok', (done) => {
-        let next = widget.widgets[1] as MarkdownCellWidget;
+        let next = widget.widgets[1] as MarkdownCell;
         let cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
         next.rendered = false;
@@ -801,7 +801,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should render all markdown cells on an error', (done) => {
         widget.activeCell.model.value.text = ERROR_INPUT;
-        let cell = widget.widgets[1] as MarkdownCellWidget;
+        let cell = widget.widgets[1] as MarkdownCell;
         cell.rendered = false;
         NotebookActions.runAll(widget, session).then(result => {
           expect(result).to.be(false);
@@ -1378,7 +1378,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should convert the cells to markdown type', () => {
         NotebookActions.setMarkdownHeader(widget, 2);
-        expect(widget.activeCell).to.be.a(MarkdownCellWidget);
+        expect(widget.activeCell).to.be.a(MarkdownCell);
       });
 
       it('should be clamped between 1 and 6', () => {
@@ -1408,7 +1408,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should unrender the cells', () => {
         NotebookActions.setMarkdownHeader(widget, 1);
-        expect((widget.activeCell as MarkdownCellWidget).rendered).to.be(false);
+        expect((widget.activeCell as MarkdownCell).rendered).to.be(false);
       });
 
     });

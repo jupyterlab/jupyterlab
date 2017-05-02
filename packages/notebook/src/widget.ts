@@ -39,7 +39,7 @@ import {
 
 import {
   ICellModel, Cell, IMarkdownCellModel,
-  CodeCell, MarkdownCellWidget,
+  CodeCell, MarkdownCell,
   ICodeCellModel, RawCellWidget, IRawCellModel,
 } from '@jupyterlab/cells';
 
@@ -405,7 +405,7 @@ class StaticNotebook extends Widget {
   /**
    * Create a markdown cell widget from a markdown cell model.
    */
-  private _createMarkdownCell(model: IMarkdownCellModel): MarkdownCellWidget {
+  private _createMarkdownCell(model: IMarkdownCellModel): MarkdownCell {
     let factory = this.contentFactory;
     let contentFactory = factory.markdownCellContentFactory;
     let rendermime = this.rendermime;
@@ -531,7 +531,7 @@ namespace StaticNotebook {
     /**
      * Create a new markdown cell widget.
      */
-    createMarkdownCell(options: MarkdownCellWidget.IOptions, parent: StaticNotebook): MarkdownCellWidget;
+    createMarkdownCell(options: MarkdownCell.IOptions, parent: StaticNotebook): MarkdownCell;
 
     /**
      * Create a new raw cell widget.
@@ -562,7 +562,7 @@ namespace StaticNotebook {
         new RawCellWidget.ContentFactory({ editorFactory })
       );
       this.markdownCellContentFactory = (options.markdownCellContentFactory ||
-        new MarkdownCellWidget.ContentFactory({ editorFactory })
+        new MarkdownCell.ContentFactory({ editorFactory })
       );
     }
 
@@ -596,8 +596,8 @@ namespace StaticNotebook {
     /**
      * Create a new markdown cell widget.
      */
-    createMarkdownCell(options: MarkdownCellWidget.IOptions, parent: StaticNotebook): MarkdownCellWidget {
-      return new MarkdownCellWidget(options);
+    createMarkdownCell(options: MarkdownCell.IOptions, parent: StaticNotebook): MarkdownCell {
+      return new MarkdownCell(options);
     }
 
     /**
@@ -709,7 +709,7 @@ class Notebook extends StaticNotebook {
       // Edit mode deselects all cells.
       each(this.widgets, widget => { this.deselect(widget); });
       //  Edit mode unrenders an active markdown widget.
-      if (activeCell instanceof MarkdownCellWidget) {
+      if (activeCell instanceof MarkdownCell) {
         activeCell.rendered = false;
       }
     }
@@ -745,7 +745,7 @@ class Notebook extends StaticNotebook {
       this._activeCell = cell;
       this._activeCellChanged.emit(cell);
     }
-    if (this.mode === 'edit' && cell instanceof MarkdownCellWidget) {
+    if (this.mode === 'edit' && cell instanceof MarkdownCell) {
       cell.rendered = false;
     }
     this._ensureFocus();
@@ -1413,7 +1413,7 @@ class Notebook extends StaticNotebook {
     }
     this.activeCellIndex = i;
     if (model.cells.at(i).type === 'markdown') {
-      let widget = this.widgets[i] as MarkdownCellWidget;
+      let widget = this.widgets[i] as MarkdownCell;
       widget.rendered = false;
     } else if (target.localName === 'img') {
       target.classList.toggle(UNCONFINED_CLASS);
