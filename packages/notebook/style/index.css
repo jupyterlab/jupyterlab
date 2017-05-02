@@ -50,7 +50,7 @@
 }
 
 
-.jp-Notebook-panel {
+.jp-NotebookPanel {
   display: flex;
   flex-direction: column;
   height: 100%;
