@@ -15,7 +15,7 @@ import {
 
 import {
   ICellModel, ICodeCellModel,
-  CodeCell, Cell, MarkdownCellWidget
+  CodeCell, Cell, MarkdownCell
 } from '@jupyterlab/cells';
 
 import {
@@ -162,8 +162,8 @@ namespace NotebookActions {
 
     // If the original cell is a markdown cell, make sure
     // the new cell is unrendered.
-    if (primary instanceof MarkdownCellWidget) {
-      let cell = widget.activeCell as MarkdownCellWidget;
+    if (primary instanceof MarkdownCell) {
+      let cell = widget.activeCell as MarkdownCell;
       cell.rendered = false;
     }
 
@@ -800,7 +800,7 @@ namespace NotebookActions {
     level = Math.min(Math.max(level, 1), 6);
     let cells = widget.model.cells;
     let i = 0;
-    each(widget.widgets, (child: MarkdownCellWidget) => {
+    each(widget.widgets, (child: MarkdownCell) => {
       if (widget.isSelected(child)) {
         Private.setMarkdownHeader(cells.at(i), level);
       }
@@ -927,7 +927,7 @@ namespace Private {
 
     switch (child.model.type) {
     case 'markdown':
-      (child as MarkdownCellWidget).rendered = true;
+      (child as MarkdownCell).rendered = true;
       break;
     case 'code':
       if (session) {
@@ -1067,7 +1067,7 @@ namespace Private {
       if (value === 'markdown') {
         // Fetch the new widget and unrender it.
         child = widget.widgets[i];
-        (child as MarkdownCellWidget).rendered = false;
+        (child as MarkdownCell).rendered = false;
       }
     });
     cells.endCompoundOperation();
