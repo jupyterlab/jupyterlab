@@ -18,6 +18,10 @@ import {
 } from '@jupyterlab/codemirror';
 
 import {
+  nbformat
+} from '@jupyterlab/coreutils';
+
+import {
   ICellModel
 } from './model';
 
@@ -30,12 +34,17 @@ const INPUT_AREA_CLASS = 'jp-InputArea';
 /**
  * The class name added to the prompt area of cell.
  */
-const INPUT_PROMPT_CLASS = 'jp-InputArea-prompt';
+const INPUT_AREA_PROMPT_CLASS = 'jp-InputArea-prompt';
+
+/**
+ * The class name added to OutputPrompt.
+ */
+const INPUT_PROMPT_CLASS = 'jp-InputPrompt';
 
 /**
  * The class name added to the editor area of the cell.
  */
-const INPUT_EDITOR_CLASS = 'jp-InputArea-editor';
+const INPUT_AREA_EDITOR_CLASS = 'jp-InputArea-editor';
 
 
 /******************************************************************************
@@ -55,14 +64,21 @@ class InputArea extends Widget {
     super();
     this.addClass(INPUT_AREA_CLASS);
     let model = this.model = options.model;
-    let contentFactory = this.contentFactory = (options.contentFactory || InputArea.defaultContentFactory);
+    let contentFactory = this.contentFactory = (
+        options.contentFactory || InputArea.defaultContentFactory
+    );
+
+    // Prompt
+    let prompt = this._prompt = contentFactory.createInputPrompt();
+    prompt.addClass(INPUT_AREA_PROMPT_CLASS);
+
+    // Editor
     let editorOptions = { model, factory: contentFactory.editorFactory };
     let editor = this._editor = new CodeEditorWrapper(editorOptions);
-    editor.addClass(INPUT_EDITOR_CLASS);
+    editor.addClass(INPUT_AREA_EDITOR_CLASS);
     this.layout = new PanelLayout();
-    let prompt = this._prompt = contentFactory.createInputPrompt();
-    prompt.addClass(INPUT_PROMPT_CLASS);
-    let layout = this.layout as PanelLayout;
+
+    let layout = this.layout = new PanelLayout();
     layout.addWidget(prompt);
     layout.addWidget(editor);
   }
@@ -127,7 +143,7 @@ class InputArea extends Widget {
    * Set the prompt of the input area.
    */
   setPrompt(value: string): void {
-    this._prompt.setPrompt(value);;
+    this._prompt.executionCount = value;
   }
 
  /**
@@ -151,7 +167,7 @@ class InputArea extends Widget {
 
 
 /**
- * The namespace for `InputArea` statics.
+ * A namespace for `InputArea` statics.
  */
 export
 namespace InputArea {
@@ -160,12 +176,25 @@ namespace InputArea {
    */
   export
   interface IOptions {
-
+    /**
+     * The model used by the widget.
+     */
     model: ICellModel;
 
+    /** 
+     * The content factory used by the widget to create children. 
+     * 
+     * Defaults to one that uses CodeMirror.
+     */
     contentFactory?: IContentFactory;
   }
 
+  /**
+   * An input area widget content factory.
+   * 
+   * The content factory is used to create children in a way 
+   * that can be customized.
+   */
   export
   interface IContentFactory {
     /**
@@ -182,22 +211,35 @@ namespace InputArea {
     createInputPrompt(): IInputPrompt;
   }
 
+  /**
+   * Default implementation of `IContentFactory`.
+   * 
+   * This defaults to using an `editorFactory` based on CodeMirror.
+   */
   export
   class ContentFactory implements IContentFactory {
+    /**
+     * Construct a `ContentFactory`.
+     */
+    constructor(options?: IContentFactoryOptions) {
+      this._editor = (options.editorFactory || defaultEditorFactory);
+    }
 
-      constructor(options?: IContentFactoryOptions) {
-          this._editor = (options.editorFactory || defaultEditorFactory);
-      }
+    /**
+     * Return the `CodeEditor.Factory` being used.
+     */
+    get editorFactory(): CodeEditor.Factory {
+      return this._editor;
+    }
 
-      get editorFactory(): CodeEditor.Factory {
-          return this._editor;
-      }
+    /**
+     * Create an input prompt.
+     */
+    createInputPrompt(): IInputPrompt {
+      return new InputPrompt();
+    }
 
-      createInputPrompt(): IInputPrompt {
-          return new InputPrompt();
-      }
-
-      private _editor: CodeEditor.Factory = null;
+    private _editor: CodeEditor.Factory = null;
   }
 
   /**
@@ -214,6 +256,9 @@ namespace InputArea {
     editorFactory?: CodeEditor.Factory;
   }
 
+  /**
+   * The default `ContentFactory` instance.
+   */
   export
   const defaultContentFactory = new ContentFactory();
 
@@ -226,41 +271,56 @@ namespace InputArea {
   }
 
   /**
-   * The default editor factory.
+   * The default editor factory singleton based on CodeMirror.
    */
   export
   const defaultEditorFactory = _createDefaultEditorFactory();
 }
 
 
+/******************************************************************************
+ * InputPrompt
+ ******************************************************************************/
 
+
+/**
+ * The interface for the input prompt.
+ */
+export
+interface IInputPrompt extends Widget {
   /**
-   * The interface for the input prompt.
+   * The execution count of the prompt.
    */
-  export
-  interface IInputPrompt extends Widget {
+  executionCount: string;
+}
 
-    /**
-     * Set the prompt number of the prompt.
-     */
-    setPrompt(value: string): void;
-  
+/**
+ * The default input prompt implementation.
+ */
+export
+class InputPrompt extends Widget implements IInputPrompt {
+  /*
+   * Create an output prompt widget.
+   */
+  constructor() {
+    super();
+    this.addClass(INPUT_PROMPT_CLASS);
   }
 
   /**
-   * The default input prompt implementation.
+   * The execution count for the prompt.
    */
-  export
-  class InputPrompt extends Widget implements IInputPrompt {
-
-    /**
-     * Set the prompt number of the prompt.
-     */
-    setPrompt(value: string): void {
-      if (value === 'null') {
-        value = ' ';
-      }
-      let text = `In [${value || ' '}]:`;
-      this.node.textContent = text;
+  get executionCount(): string {
+    return this._executionCount;
+  }
+  set executionCount(value: string) {
+    this._executionCount = value;
+    if (value === null) {
+      this.node.textContent = ' ';
+    } else {
+        this.node.textContent = `In [${value || ' '}]:`;
     }
   }
+
+  private _executionCount: string = null;
+}
