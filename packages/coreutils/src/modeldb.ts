@@ -33,6 +33,10 @@ import {
   IObservableUndoableVector, ObservableUndoableVector
 } from './undoablevector';
 
+import {
+  IObservableMap
+} from './observablemap';
+
 
 /**
  * String type annotations for Observable objects that can be
@@ -40,6 +44,7 @@ import {
  */
 export
 type ObservableType = 'Map' | 'Vector' | 'String' | 'Value';
+
 
 /**
  * Base interface for Observable objects.
@@ -51,6 +56,7 @@ interface IObservable extends IDisposable {
    */
   readonly type: ObservableType;
 }
+
 
 /**
  * Interface for an Observable object that represents
@@ -79,6 +85,58 @@ interface IObservableValue extends IObservable {
   set(value: JSONValue): void;
 }
 
+
+/**
+ * Interface for an object representing a single collaborator
+ * on a realtime model.
+ */
+export
+interface ICollaborator {
+  /**
+   * A user id for the collaborator.
+   * This might not be unique, if the user has more than
+   * one editing session at a time.
+   */
+  readonly userId: string;
+
+  /**
+   * A session id, which should be unique to a
+   * particular view on a collaborative model.
+   */
+  readonly sessionId: string;
+
+  /**
+   * A human-readable display name for a collaborator.
+   */
+  readonly displayName: string;
+
+  /**
+   * A color to be used to identify the collaborator in
+   * UI elements.
+   */
+  readonly color: string;
+
+  /**
+   * A human-readable short name for a collaborator, for
+   * use in places where the full `displayName` would take
+   * too much space.
+   */
+  readonly shortName?: string;
+}
+
+
+/**
+ * Interface for an IObservableMap that tracks collaborators.
+ */
+export
+interface ICollaboratorMap extends IObservableMap<ICollaborator> {
+  /**
+   * The local collaborator on a model.
+   */
+  readonly localCollaborator: ICollaborator;
+}
+
+
 /**
  * An interface for a path based database for
  * creating and storing values, which is agnostic
@@ -105,10 +163,21 @@ interface IModelDB extends IDisposable {
   readonly isPrepopulated: boolean;
 
   /**
+   * Whether the database is collaborative.
+   */
+  readonly isCollaborative: boolean;
+
+  /**
    * A promise that resolves when the database
    * has connected to its backend, if any.
    */
   readonly connected: Promise<void>;
+
+  /**
+   * A map of the currently active collaborators
+   * for the database, including the local user.
+   */
+  readonly collaborators?: ICollaboratorMap;
 
   /**
    * Get a value for a path.
@@ -205,6 +274,7 @@ interface IModelDB extends IDisposable {
    */
   dispose(): void;
 }
+
 
 /**
  * A concrete implementation of an `IObservableValue`.
@@ -339,18 +409,19 @@ class ModelDB implements IModelDB {
    * Whether the model has been populated with
    * any model values.
    */
-  get isPrepopulated(): boolean {
-    return false;
-  }
+  readonly isPrepopulated: boolean = false;
+
+  /**
+   * Whether the model is collaborative.
+   */
+  readonly isCollaborative: boolean = false;
 
   /**
    * A promise resolved when the model is connected
    * to its backend. For the in-memory ModelDB it
    * is immediately resolved.
    */
-  get connected(): Promise<void> {
-    return Promise.resolve(void 0);
-  }
+  readonly connected: Promise<void> = Promise.resolve(void 0);
 
   /**
    * Get a value for a path.
@@ -549,5 +620,16 @@ namespace ModelDB {
      * ModelDB. If none is given, it uses its own store.
      */
     baseDB?: ModelDB;
+  }
+
+  /**
+   * A factory interface for creating `IModelDB` objects.
+   */
+  export
+  interface IFactory {
+    /**
+     * Create a new `IModelDB` instance.
+     */
+    createNew(path: string): IModelDB;
   }
 }

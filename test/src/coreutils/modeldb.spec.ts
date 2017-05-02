@@ -158,6 +158,15 @@ describe('@jupyterlab/coreutils', () => {
 
     });
 
+    describe('#isCollaborative', () => {
+
+      it('should return false for an in-memory database', () => {
+        let db = new ModelDB();
+        expect(db.isCollaborative).to.be(false);
+      });
+
+    });
+
     describe('#connected', () => {
 
       it('should resolve immediately for an in-memory database', (done) => {
