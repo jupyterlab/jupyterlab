@@ -203,6 +203,20 @@ class StaticNotebook extends Widget {
     }
     let oldValue = this._model;
     this._model = newValue;
+
+    if (oldValue && oldValue.modelDB.isCollaborative) {
+      oldValue.modelDB.connected.then(() => {
+        oldValue.modelDB.collaborators.changed.disconnect(
+          this._onCollaboratorsChanged, this);
+      });
+    }
+    if (newValue.modelDB.isCollaborative) {
+      newValue.modelDB.connected.then(() => {
+        newValue.modelDB.collaborators.changed.connect(
+          this._onCollaboratorsChanged, this);
+      });
+    }
+
     // Trigger private, protected, and public changes.
     this._onModelChanged(oldValue, newValue);
     this.onModelChanged(oldValue, newValue);
@@ -453,6 +467,23 @@ class StaticNotebook extends Widget {
     });
   }
 
+  /**
+   * Handle an update to the collaborators.
+   */
+  private _onCollaboratorsChanged(): void {
+    // If there are selections corresponding to non-collaborators,
+    // they are stale and should be removed.
+    for (let i = 0; i < this.widgets.length; i++) {
+      let cell = this.widgets[i];
+      for (let key of cell.model.selections.keys()) {
+        if (!this._model.modelDB.collaborators.has(key)) {
+          cell.model.selections.delete(key);
+        }
+      }
+    }
+  }
+
+
   private _mimetype = 'text/plain';
   private _model: INotebookModel = null;
   private _mimetypeService: IEditorMimeTypeService;
@@ -695,6 +726,7 @@ class Notebook extends StaticNotebook {
     if (newValue === oldValue) {
       return;
     }
+    this._trimSelections();
     this._stateChanged.emit({ name: 'activeCellIndex', oldValue, newValue });
   }
 
@@ -928,6 +960,24 @@ class Notebook extends StaticNotebook {
    * Handle a cell being inserted.
    */
   protected onCellInserted(index: number, cell: Cell): void {
+    if (this.model.modelDB.isCollaborative) {
+      let modelDB = this.model.modelDB;
+      modelDB.connected.then(() => {
+        if (!cell.isDisposed) {
+          //Setup the selection style for collaborators
+          let localCollaborator = modelDB.collaborators.localCollaborator;
+          cell.editor.uuid = localCollaborator.sessionId;
+          let color = localCollaborator.color;
+          let r = parseInt(color.slice(1,3), 16);
+          let g  = parseInt(color.slice(3,5), 16);
+          let b  = parseInt(color.slice(5,7), 16);
+          cell.editor.selectionStyle = {
+            css: `background-color: rgba( ${r}, ${g}, ${b}, 0.1)`,
+            color: localCollaborator.color
+          };
+        }
+      });
+    }
     cell.editor.edgeRequested.connect(this._onEdgeRequest, this);
     // If the insertion happened above, increment the active cell
     // index, otherwise it stays the same.
@@ -1383,6 +1433,20 @@ class Notebook extends StaticNotebook {
     Private.selectedProperty.set(this.widgets[activeIndex], true);
     this._selectionChanged.emit(void 0);
   }
+
+  /**
+   * Remove selections from inactive cells to avoid
+   * spurious cursors.
+   */
+  private _trimSelections(): void {
+    for (let i = 0; i < this.widgets.length; i++) {
+      if (i !== this._activeCellIndex) {
+        let cell = this.widgets[i];
+        cell.model.selections.delete(cell.editor.uuid);
+      }
+    }
+  }
+
 
   private _activeCellIndex = -1;
   private _activeCell: Cell = null;

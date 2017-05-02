@@ -48,6 +48,27 @@ class FileEditor extends CodeEditorWrapper {
     context.pathChanged.connect(this._onPathChanged, this);
     context.ready.then(() => { this._onContextReady(); });
     this._onPathChanged();
+
+    if (context.model.modelDB.isCollaborative) {
+      let modelDB = context.model.modelDB;
+      modelDB.connected.then(() => {
+        //Setup the selection style for collaborators
+        let localCollaborator = modelDB.collaborators.localCollaborator;
+        this.editor.uuid = localCollaborator.sessionId;
+        let color = localCollaborator.color;
+        let r = parseInt(color.slice(1,3), 16);
+        let g  = parseInt(color.slice(3,5), 16);
+        let b  = parseInt(color.slice(5,7), 16);
+        this.editor.selectionStyle = {
+          css: `background-color: rgba( ${r}, ${g}, ${b}, 0.1)`,
+          color: localCollaborator.color
+        };
+
+        modelDB.collaborators.changed.connect(this._onCollaboratorsChanged, this);
+        //Trigger an initial onCollaboratorsChanged event.
+        this._onCollaboratorsChanged();
+      });
+    }
   }
 
   /**
@@ -122,6 +143,16 @@ class FileEditor extends CodeEditorWrapper {
 
     editor.model.mimeType = this._mimeTypeService.getMimeTypeByFilePath(path);
     this.title.label = path.split('/').pop();
+  }
+
+  private _onCollaboratorsChanged(): void {
+    //if there are selections corresponding to non-collaborators,
+    //they are stale and should be removed.
+    for (let key of this.editor.model.selections.keys()) {
+      if (!this._context.model.modelDB.collaborators.has(key)) {
+        this.editor.model.selections.delete(key);
+      }
+    }
   }
 
   protected _context: DocumentRegistry.Context;

@@ -22,7 +22,6 @@ import {
 } from '@phosphor/widgets';
 
 import {
-<<<<<<< HEAD
   IClientSession
 } from '@jupyterlab/apputils';
 
@@ -681,7 +680,7 @@ class MarkdownCell extends Cell {
       timeout: RENDER_TIMEOUT
     });
     this._monitor.activityStopped.connect(()=>{
-      if(this._rendered) {
+      if (this._rendered) {
         this.update();
       }
     }, this);

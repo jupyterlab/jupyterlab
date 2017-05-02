@@ -66,6 +66,15 @@
   margin-left: calc(-1 * var(--jp-code-padding));
 }
 
+.jp-CollaboratorCursor {
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: none;
+  border-bottom: 3px solid;
+  position: absolute;
+  width: 0;
+}
+
 
 /*
   Here is our jupyter theme for CodeMirror syntax highlighting
