@@ -621,4 +621,15 @@ namespace ModelDB {
      */
     baseDB?: ModelDB;
   }
+
+  /**
+   * A factory interface for creating `IModelDB` objects.
+   */
+  export
+  interface IFactory {
+    /**
+     * Create a new `IModelDB` instance.
+     */
+    createNew(path: string): IModelDB;
+  }
 }
