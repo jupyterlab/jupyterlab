@@ -131,17 +131,17 @@ class OutputArea extends Widget {
   readonly model: IOutputAreaModel;
 
   /**
-   * Te rendermime instance used by the widget.
-   */
-  readonly rendermime: RenderMime;
-
-  /**
    * The content factory used by the widget.
    */
   readonly contentFactory: OutputArea.IContentFactory;
 
   /**
-   * A read-only sequence of the widgets in the output area.
+   * Te rendermime instance used by the widget.
+   */
+  readonly rendermime: RenderMime;
+
+  /**
+   * A read-only sequence of the chidren widgets in the output area.
    */
   get widgets(): ReadonlyArray<Widget> {
     return (this.layout as PanelLayout).widgets;
@@ -382,36 +382,36 @@ class OutputArea extends Widget {
 export
 namespace OutputArea {
   /**
-   * The options to pass to an `OutputArea`.
+   * The options to create an `OutputArea`.
    */
   export
   interface IOptions {
-    /**
-     * The rendermime instance used by the widget.
-     */
-    rendermime: RenderMime;
-
     /**
      * The model used by the widget.
      */
     model: IOutputAreaModel;
 
     /**
-     * The output widget content factory.
-     *
-     * Defaults to a shared `IContentFactory` instance.
+     * The content factory used by the widget to create children.
      */
     contentFactory?: IContentFactory;
+
+    /**
+     * The rendermime instance used by the widget.
+     */
+    rendermime: RenderMime;
   }
 
   /**
-   * An output widget content factory.
+   * An output area widget content factory.
+   * 
+   * The content factory is used to create children in a way 
+   * that can be customized.
    */
   export
   interface IContentFactory {
     /**
      * Create an output prompt.
-     *
      */
     createOutputPrompt(): IOutputPrompt;
 
@@ -460,7 +460,7 @@ namespace OutputArea {
 export
 interface IOutputPrompt extends Widget {
   /**
-   * The execution count for the widget.
+   * The execution count for the prompt.
    */
   executionCount: nbformat.ExecutionCount;
 }
@@ -479,7 +479,7 @@ class OutputPrompt extends Widget implements IOutputPrompt {
   }
 
   /**
-   * The execution count for the widget.
+   * The execution count for the prompt.
    */
   get executionCount(): nbformat.ExecutionCount {
     return this._executionCount;
