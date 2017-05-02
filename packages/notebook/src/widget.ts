@@ -1422,7 +1422,6 @@ namespace Notebook {
    */
   export
   class ContentFactory extends StaticNotebook.ContentFactory { }
-
 }
 
 
