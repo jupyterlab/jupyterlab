@@ -283,9 +283,9 @@ class KernelManager implements Kernel.IManager {
    * Get optionally overidden options.
    */
   private _getOptions(options: Kernel.IOptions = {}): Kernel.IOptions {
-    options.baseUrl = this._baseUrl;
-    options.wsUrl = this._wsUrl;
-    options.token = this._token;
+    options.baseUrl = this._baseUrl || '';
+    options.wsUrl = this._wsUrl || '';
+    options.token = this._token || '';
     options.ajaxSettings = options.ajaxSettings || this.ajaxSettings;
     return options;
   }

@@ -96,7 +96,7 @@ const AJAX_KERNEL_OPTIONS: Kernel.IOptions = {
 
 
 export
-const PYTHON_SPEC: any = {
+const PYTHON_SPEC: JSONObject = {
   name: 'Python',
   spec: {
     language: 'python',
@@ -160,7 +160,7 @@ interface IFakeRequest {
 
 export
 class RequestHandler {
-  specs: Kernel.ISpecModels = validateSpecModels(KERNELSPECS);
+  specs: JSONObject = KERNELSPECS;
   runningKernels: Kernel.IModel[] = [];
   runningSessions: Session.IModel[] = [];
   runningTerminals: TerminalSession.IModel[] = [];
