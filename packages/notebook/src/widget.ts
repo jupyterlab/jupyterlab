@@ -57,10 +57,6 @@ import {
 } from '@jupyterlab/rendermime';
 
 import {
-  OutputArea
-} from '@jupyterlab/outputarea';
-
-import {
   INotebookModel
 } from './model';
 
@@ -398,7 +394,8 @@ class StaticNotebook extends Widget {
    */
   private _createCodeCell(model: ICodeCellModel): CodeCell {
     let rendermime = this.rendermime;
-    let options = { model, rendermime };
+    let contentFactory = this.contentFactory.cellContentFactory;
+    let options = { model, rendermime, contentFactory };
     return this.contentFactory.createCodeCell(options, this);
   }
 
@@ -407,7 +404,8 @@ class StaticNotebook extends Widget {
    */
   private _createMarkdownCell(model: IMarkdownCellModel): MarkdownCell {
     let rendermime = this.rendermime;
-    let options = { model, rendermime };
+    let contentFactory = this.contentFactory.cellContentFactory;
+    let options = { model, rendermime, contentFactory };
     return this.contentFactory.createMarkdownCell(options, this);
   }
 
@@ -415,7 +413,8 @@ class StaticNotebook extends Widget {
    * Create a raw cell widget from a raw cell model.
    */
   private _createRawCell(model: IRawCellModel): RawCellWidget {
-    let options = { model };
+    let contentFactory = this.contentFactory.cellContentFactory;
+    let options = { model, contentFactory };
     return this.contentFactory.createRawCell(options, this);
   }
 
@@ -539,14 +538,14 @@ namespace StaticNotebook {
     /**
      * The factory for code cell widget content.
      */
-    readonly cellContentFactory: CodeCell.IContentFactory;
+    readonly cellContentFactory: Cell.IContentFactory;
 
     /**
      * Create a new code cell widget.
      */
     createCodeCell(options: CodeCell.IOptions, parent: StaticNotebook): CodeCell {
-      if (!options.cellContentFactory) {
-        options.cellContentFactory = this.cellContentFactory;
+      if (!options.contentFactory) {
+        options.contentFactory = this.cellContentFactory;
       }
       return new CodeCell(options);
     }
@@ -555,8 +554,8 @@ namespace StaticNotebook {
      * Create a new markdown cell widget.
      */
     createMarkdownCell(options: MarkdownCell.IOptions, parent: StaticNotebook): MarkdownCell {
-      if (!options.cellContentFactory) {
-        options.cellContentFactory = this.cellContentFactory;
+      if (!options.contentFactory) {
+        options.contentFactory = this.cellContentFactory;
       }
       return new MarkdownCell(options);
     }
@@ -565,8 +564,8 @@ namespace StaticNotebook {
      * Create a new raw cell widget.
      */
     createRawCell(options: RawCellWidget.IOptions, parent: StaticNotebook): RawCellWidget {
-      if (!options.cellContentFactory) {
-        options.cellContentFactory = this.cellContentFactory;
+      if (!options.contentFactory) {
+        options.contentFactory = this.cellContentFactory;
       }
       return new RawCellWidget(options);
     }
