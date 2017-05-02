@@ -14,6 +14,7 @@ import {
 
 
 declare var global: any;
+let path = require('path') as any;
 global.requirejs = require('requirejs');
 
 
@@ -55,7 +56,7 @@ describe('@jupyterlab/services', () => {
         expect(request.method).to.be('GET');
         expect(request.password).to.be('');
         expect(request.async).to.be(true);
-        expect(Object.keys(request.requestHeaders)).to.eql([]);
+        expect(Object.keys(request.requestHeaders)).to.eql(['Content-Type']);
         let url = request.url;
         expect(url.indexOf('hello?')).to.be(0);
         called = true;
@@ -120,7 +121,8 @@ describe('@jupyterlab/services', () => {
 
     it('should accept a name and a module name to load', done => {
       // The path is relative to mocha.
-      loadObject('test', '../../../test/build/target').then(func => {
+      let target = path.resolve('test/build/target');
+      loadObject('test', target).then(func => {
         expect(func()).to.be(1);
       }).then(done, done);
     });
@@ -132,8 +134,9 @@ describe('@jupyterlab/services', () => {
     });
 
     it('should reject if the object is not found', done => {
-      loadObject('foo', '../../../test/build/target').catch(error => {
-        expect(error.message).to.be("Object 'foo' not found in module '../../../test/build/target'");
+      let target = path.resolve('test/build/target');
+      loadObject('foo', target).catch(error => {
+        expect(error.message).to.contain("Object 'foo' not found in module");
       }).then(done, done);
     });
 
