@@ -17,7 +17,7 @@ import {
 
 import {
   CodeCellModel, CodeCell, MarkdownCellModel, MarkdownCell,
-  RawCellModel, RawCellWidget, Cell
+  RawCellModel, RawCell, Cell
 } from '@jupyterlab/cells';
 
 import {
@@ -531,14 +531,14 @@ describe('notebook/widget', () => {
 
       describe('#createRawCell()', () => {
 
-        it('should create a `RawCellWidget`', () => {
+        it('should create a `RawCell`', () => {
           let factory = new StaticNotebook.ContentFactory({ editorFactory });
           let contentFactory = factory.rawCellContentFactory;
           let model = new RawCellModel({});
           let rawOptions = { model, contentFactory };
           let parent = new StaticNotebook(options);
           let widget = factory.createRawCell(rawOptions, parent);
-          expect(widget).to.be.a(RawCellWidget);
+          expect(widget).to.be.a(RawCell);
         });
 
       });

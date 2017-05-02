@@ -12,7 +12,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  CodeCell, MarkdownCell, RawCellWidget
+  CodeCell, MarkdownCell, RawCell
 } from '@jupyterlab/cells';
 
 import {
@@ -228,7 +228,7 @@ describe('@jupyterlab/notebook', () => {
       it('should preserve the cell type of the active cell', () => {
         NotebookActions.changeCellType(widget, 'raw');
         NotebookActions.mergeCells(widget);
-        expect(widget.activeCell).to.be.a(RawCellWidget);
+        expect(widget.activeCell).to.be.a(RawCell);
         expect(widget.mode).to.be('command');
       });
 
@@ -417,9 +417,9 @@ describe('@jupyterlab/notebook', () => {
         let next = widget.widgets[1];
         widget.select(next);
         NotebookActions.changeCellType(widget, 'raw');
-        expect(widget.activeCell).to.be.a(RawCellWidget);
+        expect(widget.activeCell).to.be.a(RawCell);
         next = widget.widgets[widget.activeCellIndex + 1];
-        expect(next).to.be.a(RawCellWidget);
+        expect(next).to.be.a(RawCell);
       });
 
       it('should be a no-op if there is no model', () => {
