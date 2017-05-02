@@ -394,7 +394,7 @@ class StaticNotebook extends Widget {
    */
   private _createCodeCell(model: ICodeCellModel): CodeCell {
     let rendermime = this.rendermime;
-    let contentFactory = this.contentFactory.cellContentFactory;
+    let contentFactory = this.contentFactory;
     let options = { model, rendermime, contentFactory };
     return this.contentFactory.createCodeCell(options, this);
   }
@@ -404,7 +404,7 @@ class StaticNotebook extends Widget {
    */
   private _createMarkdownCell(model: IMarkdownCellModel): MarkdownCell {
     let rendermime = this.rendermime;
-    let contentFactory = this.contentFactory.cellContentFactory;
+    let contentFactory = this.contentFactory;
     let options = { model, rendermime, contentFactory };
     return this.contentFactory.createMarkdownCell(options, this);
   }
@@ -413,7 +413,7 @@ class StaticNotebook extends Widget {
    * Create a raw cell widget from a raw cell model.
    */
   private _createRawCell(model: IRawCellModel): RawCellWidget {
-    let contentFactory = this.contentFactory.cellContentFactory;
+    let contentFactory = this.contentFactory;
     let options = { model, contentFactory };
     return this.contentFactory.createRawCell(options, this);
   }
@@ -495,13 +495,14 @@ namespace StaticNotebook {
 
   /**
    * A factory for creating notebook content.
+   * 
+   * #### Notes
+   * This extends the content factory of the cell itself, which extends the content
+   * factory of the output area and input area. The result is that there is a single
+   * factory for creating all child content of a notebook.
    */
   export
-  interface IContentFactory {
-    /**
-     * The factory for code cell widget content.
-     */
-    readonly cellContentFactory?: Cell.IContentFactory;
+  interface IContentFactory extends Cell.IContentFactory {
 
     /**
      * Create a new code cell widget.
@@ -523,66 +524,60 @@ namespace StaticNotebook {
    * The default implementation of an `IContentFactory`.
    */
   export
-  class ContentFactory implements IContentFactory {
-    /**
-     * Creates a new renderer.
-     */
-    constructor(options?: IContentFactoryOptions) {
-      if (options) {
-        this.cellContentFactory = (options.cellContentFactory || Cell.defaultContentFactory);
-      } else {
-        this.cellContentFactory = Cell.defaultContentFactory;
-      }
-    }
-
-    /**
-     * The factory for code cell widget content.
-     */
-    readonly cellContentFactory: Cell.IContentFactory;
+  class ContentFactory extends Cell.ContentFactory implements IContentFactory {
 
     /**
      * Create a new code cell widget.
+     * 
+     * #### Notes
+     * If no cell content factory is passed in with the options, the one on the
+     * notebook content factory is used.
      */
     createCodeCell(options: CodeCell.IOptions, parent: StaticNotebook): CodeCell {
       if (!options.contentFactory) {
-        options.contentFactory = this.cellContentFactory;
+        options.contentFactory = this;
       }
       return new CodeCell(options);
     }
 
     /**
      * Create a new markdown cell widget.
+     * 
+     * #### Notes
+     * If no cell content factory is passed in with the options, the one on the
+     * notebook content factory is used.
      */
     createMarkdownCell(options: MarkdownCell.IOptions, parent: StaticNotebook): MarkdownCell {
       if (!options.contentFactory) {
-        options.contentFactory = this.cellContentFactory;
+        options.contentFactory = this;
       }
       return new MarkdownCell(options);
     }
 
     /**
      * Create a new raw cell widget.
+     * 
+     * #### Notes
+     * If no cell content factory is passed in with the options, the one on the
+     * notebook content factory is used.
      */
     createRawCell(options: RawCellWidget.IOptions, parent: StaticNotebook): RawCellWidget {
       if (!options.contentFactory) {
-        options.contentFactory = this.cellContentFactory;
+        options.contentFactory = this;
       }
       return new RawCellWidget(options);
     }
   }
 
   /**
-   * An options object for initializing a notebook content factory.
+   * Options for the content factory.
    */
   export
-  interface IContentFactoryOptions {
-    /**
-     * The factory for code cell widget content.  If given, this will
-     * take precedence over the `outputAreaContentFactory`.
-     */
-    cellContentFactory?: Cell.IContentFactory;
-  }
+  interface IContentFactoryOptions extends Cell.IContentFactoryOptions { }
 
+  /**
+   * Default content factory for the static notebook widget.
+   */
   export
   const defaultContentFactory: IContentFactory = new ContentFactory();
 }
@@ -596,8 +591,8 @@ class Notebook extends StaticNotebook {
   /**
    * Construct a notebook widget.
    */
-  constructor(options: StaticNotebook.IOptions) {
-    super(options);
+  constructor(options: Notebook.IOptions) {
+    super( Private.processNotebookOptions(options) );
     this.node.tabIndex = -1;  // Allow the widget to take focus.
     // Allow the node to scroll while dragging items.
     this.node.setAttribute('data-p-dragscroll', 'true');
@@ -1405,22 +1400,35 @@ class Notebook extends StaticNotebook {
 export
 namespace Notebook {
   /**
-   * An options object for initializing a notebook.
+   * An options object for initializing a notebook widget.
    */
   export
   interface IOptions extends StaticNotebook.IOptions { }
 
   /**
-   * The cell factory for the notebook
+   * The content factory for the notebook widget.
    */
   export
   interface IContentFactory extends StaticNotebook.IContentFactory { }
 
   /**
-   * The default implementation of an `IFactory`.
+   * The default implementation of a notebook content factory..
+   * 
+   * #### Notes
+   * Override methods on this class to customize the default notebook factory
+   * methods that create notebook content.
    */
   export
   class ContentFactory extends StaticNotebook.ContentFactory { }
+
+  /**
+   * An options object for initializing a notebook content factory.
+   */
+  export
+  interface IContentFactoryOptions extends StaticNotebook.IContentFactoryOptions { }
+
+  export
+  const defaultContentFactory: IContentFactory = new ContentFactory();
 }
 
 
@@ -1466,5 +1474,26 @@ namespace Private {
     node.appendChild(span);
     node.className = DRAG_IMAGE_CLASS;
     return node;
+  }
+
+  /**
+   * Process the `IOptions` passed to the notebook widget.
+   * 
+   * #### Notes
+   * This defaults the content factory to that in the `Notebook` namespace.
+   */
+  export 
+  function processNotebookOptions(options: Notebook.IOptions) {
+    if (options.contentFactory) {
+      return options;
+    } else {
+      return {
+        rendermime: options.rendermime,
+        languagePreference: options.languagePreference,
+        contentFactory: Notebook.defaultContentFactory,
+        mimeTypeService: options.mimeTypeService
+        
+      }
+    }
   }
 }
