@@ -10,6 +10,10 @@ import {
 } from '@phosphor/coreutils';
 
 import {
+  ICollaborator
+} from '@jupyterlab/coreutils';
+
+import {
   MarkdownCellWidget
 } from '@jupyterlab/cells';
 
@@ -107,6 +111,6 @@ namespace ChatEntry {
     /**
      * The collaborator who logged the entry.
      */
-    author: any;
+    author: ICollaborator;
   }
 }

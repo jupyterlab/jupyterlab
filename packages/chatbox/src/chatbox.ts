@@ -490,11 +490,14 @@ class Chatbox extends Widget {
     (this._input.layout as PanelLayout).removeWidgetAt(0);
 
     // Add the chat entry to the log.
-    let localCollaborator = {
-      shortName: 'IR',
-      color: '#0022FF'
-    };
-    this._log.pushBack({ text: prompt.model.value.text, author: localCollaborator });
+    let collaborators = this._model.modelDB.collaborators;
+    if (!collaborators) {
+      throw Error('Cannot post chat entry to non-collaborative document.');
+    }
+    this._log.pushBack({
+      text: prompt.model.value.text,
+      author: collaborators.localCollaborator
+    });
     prompt.dispose();
   }
 
