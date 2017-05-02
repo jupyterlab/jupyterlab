@@ -13,6 +13,10 @@ import * as path
   from 'path-posix';
 
 
+// Stub for requirejs.
+declare var requirejs: any;
+
+
 /**
  * Input settings for an AJAX request.
  */
@@ -253,10 +257,10 @@ function loadObject(name: string, moduleName: string, registry?: { [key: string]
   return new Promise((resolve, reject) => {
     // Try loading the view module using require.js
     if (moduleName) {
-      if (typeof (window as any).requirejs === 'undefined') {
+      if (typeof requirejs === 'undefined') {
         throw new Error('requirejs not found');
       }
-      (window as any).requirejs([moduleName], (mod: any) => {
+      requirejs([moduleName], (mod: any) => {
         if (mod[name] === void 0) {
           let msg = `Object '${name}' not found in module '${moduleName}'`;
           reject(new Error(msg));

@@ -47,6 +47,7 @@ class ServiceManager implements ServiceManager.IManager {
     options.wsUrl = options.wsUrl || getWsUrl();
     options.baseUrl = options.baseUrl || getBaseUrl();
     options.ajaxSettings = ajaxSettingsWithToken(options.ajaxSettings, options.token);
+    console.log(JSON.stringify(options, null, 2));
     this._sessionManager = new SessionManager(options);
     this._contentsManager = new ContentsManager(options);
     this._terminalManager = new TerminalManager(options);
