@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  JSONObject
+} from '@phosphor/coreutils';
+
+import {
   Kernel, KernelMessage
 } from '../../../lib/kernel';
 
@@ -135,7 +139,7 @@ describe('kernel/validate', () => {
   describe('#validateSpecModel', () => {
 
     it('should pass with valid data', () => {
-      const model: Kernel.ISpecModels = {
+      const model: JSONObject = {
         default: 'python',
         kernelspecs: {
           python: PYTHON_SPEC
