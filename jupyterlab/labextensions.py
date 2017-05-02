@@ -81,12 +81,12 @@ class ListLabExtensionsApp(BaseExtensionApp):
     should_build = False
 
     def start(self):
-        [print(ext) for ext in list_extensions(self.config_dir)]
+        [print(ext) for ext in list_extensions()]
 
 
 _examples = """
 jupyter labextension list                        # list all configured labextensions
-jupyter labextension install <extension name>    # install a labextension 
+jupyter labextension install <extension name>    # install a labextension
 jupyter labextension uninstall <extension name>  # uninstall a labextension
 """
 
