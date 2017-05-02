@@ -31,11 +31,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  Cell, CodeCell
-} from '@jupyterlab/cells';
-
-import {
-  IEditorMimeTypeService, CodeEditor
+  IEditorMimeTypeService
 } from '@jupyterlab/codeeditor';
 
 import {
@@ -45,10 +41,6 @@ import {
 import {
   DocumentRegistry
 } from '@jupyterlab/docregistry';
-
-import {
-  OutputArea
-} from '@jupyterlab/outputarea';
 
 import {
   RenderMime
@@ -92,16 +84,18 @@ class NotebookPanel extends Widget {
     this.rendermime = options.rendermime;
 
     let layout = this.layout = new PanelLayout();
-    let factory = this.contentFactory = options.contentFactory;
+    let contentFactory = this.contentFactory = (
+      options.contentFactory || NotebookPanel.defaultContentFactory
+    );
     let nbOptions = {
       rendermime: this.rendermime,
       languagePreference: options.languagePreference,
-      contentFactory: factory.notebookContentFactory,
+      contentFactory: contentFactory,
       mimeTypeService: options.mimeTypeService
     };
-    let toolbar = factory.createToolbar();
+    let toolbar = new Toolbar();
 
-    this.notebook = factory.createNotebook(nbOptions);
+    this.notebook = contentFactory.createNotebook(nbOptions);
     layout.addWidget(toolbar);
     layout.addWidget(this.notebook);
   }
@@ -359,117 +353,32 @@ export namespace NotebookPanel {
    * A content factory interface for NotebookPanel.
    */
   export
-  interface IContentFactory {
-    /**
-     * The editor factory.
-     */
-    readonly editorFactory: CodeEditor.Factory;
-
-    /**
-     * The factory for notebook cell widget content.
-     */
-    readonly notebookContentFactory: Notebook.IContentFactory;
-
+  interface IContentFactory extends Notebook.IContentFactory {
     /**
      * Create a new content area for the panel.
      */
     createNotebook(options: Notebook.IOptions): Notebook;
 
-    /**
-     * Create a new toolbar for the panel.
-     */
-    createToolbar(): Toolbar<Widget>;
   }
 
   /**
    * The default implementation of an `IContentFactory`.
    */
   export
-  class ContentFactory implements IContentFactory {
-    /**
-     * Creates a new renderer.
-     */
-    constructor(options: ContentFactory.IOptions) {
-      this.editorFactory = options.editorFactory;
-      this.notebookContentFactory = (options.notebookContentFactory ||
-        new Notebook.ContentFactory({
-          editorFactory: this.editorFactory,
-          outputAreaContentFactory: options.outputAreaContentFactory,
-          codeCellContentFactory: options.codeCellContentFactory,
-          rawCellContentFactory: options.rawCellContentFactory,
-          markdownCellContentFactory: options.markdownCellContentFactory
-        })
-      );
-    }
-
-    /**
-     * The editor factory.
-     */
-    readonly editorFactory: CodeEditor.Factory;
-
-    /**
-     * The factory for notebook cell widget content.
-     */
-    readonly notebookContentFactory: Notebook.IContentFactory;
-
+  class ContentFactory extends Notebook.ContentFactory implements IContentFactory {
     /**
      * Create a new content area for the panel.
      */
     createNotebook(options: Notebook.IOptions): Notebook {
       return new Notebook(options);
     }
-
-    /**
-     * Create a new toolbar for the panel.
-     */
-    createToolbar(): Toolbar<Widget> {
-      return new Toolbar();
-    }
   }
 
   /**
-   * The namespace for `ContentFactory`.
+   * Default content factory for the notebook panel.
    */
   export
-  namespace ContentFactory {
-    /**
-     * An initialization options for a notebook panel content factory.
-     */
-    export
-    interface IOptions {
-      /**
-       * The editor factory.
-       */
-      editorFactory: CodeEditor.Factory;
-
-      /**
-       * The factory for output area content.
-       */
-      outputAreaContentFactory?: OutputArea.IContentFactory;
-
-      /**
-       * The factory for code cell widget content.  If given, this will
-       * take precedence over the `outputAreaContentFactory`.
-       */
-      codeCellContentFactory?: CodeCell.IContentFactory;
-
-      /**
-       * The factory for raw cell widget content.
-       */
-      rawCellContentFactory?: Cell.IContentFactory;
-
-      /**
-       * The factory for markdown cell widget content.
-       */
-      markdownCellContentFactory?: Cell.IContentFactory;
-
-      /**
-       * The factory for notebook cell widget content. If given, this will
-       * take precedence over the the cell and output area factories.
-       */
-      notebookContentFactory?: Notebook.IContentFactory;
-    }
-  }
+  const defaultContentFactory: ContentFactory = new ContentFactory();
 
   /* tslint:disable */
   /**
