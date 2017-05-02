@@ -179,8 +179,10 @@ class Cell extends Widget {
     inputWrapper.addWidget(input);
     (this.layout as PanelLayout).addWidget(this._input);
 
-    // Output and footer
-    this.finishCell(options);
+    // Footer
+    let footer = this._footer = this.contentFactory.createCellFooter();
+    footer.addClass(CELL_FOOTER_CLASS);
+    (this.layout as PanelLayout).addWidget(footer);
   }
 
   /**
@@ -295,16 +297,6 @@ class Cell extends Widget {
     // Handle read only state.
     this.editor.readOnly = this._readOnly;
     this.toggleClass(READONLY_CLASS, this._readOnly);
-  }
-
-  protected finishCell(options: Cell.IOptions): void {
-    this.addFooter();
-  }
-
-  protected addFooter(): void {
-    let footer = this._footer = this.contentFactory.createCellFooter();
-    footer.addClass(CELL_FOOTER_CLASS);
-    (this.layout as PanelLayout).addWidget(footer);
   }
 
   private _readOnly = false;
@@ -467,10 +459,29 @@ class CodeCell extends Cell {
    */
   constructor(options: CodeCell.IOptions) {
     super(options);
-    // Only save options not handled by parent constructor.
-    this._rendermime = options.rendermime;
     this.addClass(CODE_CELL_CLASS);
+
+    // Only save options not handled by parent constructor.
+    let rendermime = this._rendermime = options.rendermime;
+    let contentFactory = this.contentFactory;
     let model = this.model;
+
+    // Insert the output before the cell footer.
+    let outputWrapper = this._outputWrapper = new Panel();
+    outputWrapper.addClass(CELL_OUTPUT_WRAPPER_CLASS);
+    let outputCollapser = this._outputCollapser = contentFactory.createCollapser();
+    outputCollapser.addClass(CELL_OUTPUT_COLLAPSER_CLASS);
+    let output = this._output = new OutputArea({
+      model: model.outputs,
+      rendermime,
+      contentFactory: contentFactory
+    });
+    output.addClass(CELL_OUTPUT_AREA_CLASS);
+    outputWrapper.addWidget(outputCollapser);
+    outputWrapper.addWidget(output);
+    (this.layout as PanelLayout).insertWidget(2, outputWrapper);
+
+    // Modify state
     this.setPrompt(`${model.executionCount || ''}`);
     model.stateChanged.connect(this.onStateChanged, this);
     model.metadata.changed.connect(this.onMetadataChanged, this);
@@ -576,36 +587,6 @@ class CodeCell extends Cell {
     default:
       break;
     }
-  }
-
-  /**
-   * Finish the cell widget construction, adding the output and footer.
-   */
-  protected finishCell(options: CodeCell.IOptions): void {
-    // Cell.constructor has been called, but it doesn't deal with options.rendermime
-    // we need to pass options into this method to use rendermime.
-    let rendermime = options.rendermime;
-    // Parent constructor has already saved these.
-    let contentFactory = options.contentFactory;
-    let model = this.model;
-
-    // Output
-    let outputWrapper = this._outputWrapper = new Panel();
-    outputWrapper.addClass(CELL_OUTPUT_WRAPPER_CLASS);
-    let outputCollapser = this._outputCollapser = contentFactory.createCollapser();
-    outputCollapser.addClass(CELL_OUTPUT_COLLAPSER_CLASS);
-    let output = this._output = new OutputArea({
-      model: model.outputs,
-      rendermime,
-      contentFactory: contentFactory
-    });
-    output.addClass(CELL_OUTPUT_AREA_CLASS);
-    outputWrapper.addWidget(outputCollapser);
-    outputWrapper.addWidget(output);
-    (this.layout as PanelLayout).addWidget(outputWrapper);
-
-    // Now add the footer
-    this.addFooter();
   }
 
   private _rendermime: RenderMime = null;
