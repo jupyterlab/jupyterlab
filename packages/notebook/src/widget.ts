@@ -162,7 +162,9 @@ class StaticNotebook extends Widget {
     this.addClass(NB_CLASS);
     this.rendermime = options.rendermime;
     this.layout = new Private.NotebookPanelLayout();
-    this.contentFactory = options.contentFactory;
+    this.contentFactory = (
+      options.contentFactory || StaticNotebook.defaultContentFactory
+    );
     this._mimetypeService = options.mimeTypeService;
   }
 
@@ -395,32 +397,26 @@ class StaticNotebook extends Widget {
    * Create a code cell widget from a code cell model.
    */
   private _createCodeCell(model: ICodeCellModel): CodeCell {
-    let factory = this.contentFactory;
-    let contentFactory = factory.codeCellContentFactory;
     let rendermime = this.rendermime;
-    let options = { model, rendermime, contentFactory };
-    return factory.createCodeCell(options, this);
+    let options = { model, rendermime };
+    return this.contentFactory.createCodeCell(options, this);
   }
 
   /**
    * Create a markdown cell widget from a markdown cell model.
    */
   private _createMarkdownCell(model: IMarkdownCellModel): MarkdownCell {
-    let factory = this.contentFactory;
-    let contentFactory = factory.markdownCellContentFactory;
     let rendermime = this.rendermime;
-    let options = { model, rendermime, contentFactory };
-    return factory.createMarkdownCell(options, this);
+    let options = { model, rendermime };
+    return this.contentFactory.createMarkdownCell(options, this);
   }
 
   /**
    * Create a raw cell widget from a raw cell model.
    */
   private _createRawCell(model: IRawCellModel): RawCellWidget {
-    let factory = this.contentFactory;
-    let contentFactory = factory.rawCellContentFactory;
-    let options = { model, contentFactory };
-    return factory.createRawCell(options, this);
+    let options = { model };
+    return this.contentFactory.createRawCell(options, this);
   }
 
   /**
@@ -504,24 +500,9 @@ namespace StaticNotebook {
   export
   interface IContentFactory {
     /**
-     * The editor factory.
-     */
-    readonly editorFactory: CodeEditor.Factory;
-
-    /**
      * The factory for code cell widget content.
      */
-    readonly codeCellContentFactory?: CodeCell.IContentFactory;
-
-    /**
-     * The factory for raw cell widget content.
-     */
-    readonly rawCellContentFactory?: Cell.IContentFactory;
-
-    /**
-     * The factory for markdown cell widget content.
-     */
-    readonly markdownCellContentFactory?: Cell.IContentFactory;
+    readonly cellContentFactory?: Cell.IContentFactory;
 
     /**
      * Create a new code cell widget.
@@ -547,49 +528,26 @@ namespace StaticNotebook {
     /**
      * Creates a new renderer.
      */
-    constructor(options: IContentFactoryOptions) {
-      let editorFactory = options.editorFactory;
-      let outputAreaContentFactory = (options.outputAreaContentFactory ||
-        OutputArea.defaultContentFactory
-      );
-      this.codeCellContentFactory = (options.codeCellContentFactory ||
-        new CodeCell.ContentFactory({
-          editorFactory,
-          outputAreaContentFactory
-        })
-      );
-      this.rawCellContentFactory = (options.rawCellContentFactory ||
-        new RawCellWidget.ContentFactory({ editorFactory })
-      );
-      this.markdownCellContentFactory = (options.markdownCellContentFactory ||
-        new MarkdownCell.ContentFactory({ editorFactory })
-      );
+    constructor(options?: IContentFactoryOptions) {
+      if (options) {
+        this.cellContentFactory = (options.cellContentFactory || Cell.defaultContentFactory);
+      } else {
+        this.cellContentFactory = Cell.defaultContentFactory;
+      }
     }
-
-    /**
-     * The editor factory.
-     */
-    readonly editorFactory: CodeEditor.Factory;
 
     /**
      * The factory for code cell widget content.
      */
-    readonly codeCellContentFactory: CodeCell.IContentFactory;
-
-    /**
-     * The factory for raw cell widget content.
-     */
-    readonly rawCellContentFactory: Cell.IContentFactory;
-
-    /**
-     * The factory for markdown cell widget content.
-     */
-    readonly markdownCellContentFactory: Cell.IContentFactory;
+    readonly cellContentFactory: CodeCell.IContentFactory;
 
     /**
      * Create a new code cell widget.
      */
     createCodeCell(options: CodeCell.IOptions, parent: StaticNotebook): CodeCell {
+      if (!options.cellContentFactory) {
+        options.cellContentFactory = this.cellContentFactory;
+      }
       return new CodeCell(options);
     }
 
@@ -597,6 +555,9 @@ namespace StaticNotebook {
      * Create a new markdown cell widget.
      */
     createMarkdownCell(options: MarkdownCell.IOptions, parent: StaticNotebook): MarkdownCell {
+      if (!options.cellContentFactory) {
+        options.cellContentFactory = this.cellContentFactory;
+      }
       return new MarkdownCell(options);
     }
 
@@ -604,6 +565,9 @@ namespace StaticNotebook {
      * Create a new raw cell widget.
      */
     createRawCell(options: RawCellWidget.IOptions, parent: StaticNotebook): RawCellWidget {
+      if (!options.cellContentFactory) {
+        options.cellContentFactory = this.cellContentFactory;
+      }
       return new RawCellWidget(options);
     }
   }
@@ -614,31 +578,14 @@ namespace StaticNotebook {
   export
   interface IContentFactoryOptions {
     /**
-     * The editor factory.
-     */
-    editorFactory: CodeEditor.Factory;
-
-    /**
-     * The factory for output area content.
-     */
-    outputAreaContentFactory?: OutputArea.IContentFactory;
-
-    /**
      * The factory for code cell widget content.  If given, this will
      * take precedence over the `outputAreaContentFactory`.
      */
-    codeCellContentFactory?: CodeCell.IContentFactory;
-
-    /**
-     * The factory for raw cell widget content.
-     */
-    rawCellContentFactory?: Cell.IContentFactory;
-
-    /**
-     * The factory for markdown cell widget content.
-     */
-    markdownCellContentFactory?: Cell.IContentFactory;
+    cellContentFactory?: Cell.IContentFactory;
   }
+
+  export
+  const defaultContentFactory: IContentFactory = new ContentFactory();
 }
 
 
