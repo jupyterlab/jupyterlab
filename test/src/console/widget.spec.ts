@@ -20,7 +20,7 @@ import {
 } from '@jupyterlab/console';
 
 import {
-  Cell, CodeCell, CodeCellModel, RawCellModel, RawCellWidget
+  Cell, CodeCell, CodeCellModel, RawCellModel, RawCell
 } from '@jupyterlab/cells';
 
 import {
@@ -422,7 +422,7 @@ describe('console/widget', () => {
             model,
             contentFactory: contentFactory.rawCellContentFactory
           }, widget);
-          expect(banner).to.be.a(RawCellWidget);
+          expect(banner).to.be.a(RawCell);
         });
 
       });

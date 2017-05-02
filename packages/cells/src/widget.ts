@@ -776,7 +776,7 @@ namespace MarkdownCell {
  * A widget for a raw cell.
  */
 export
-class RawCellWidget extends Cell {
+class RawCell extends Cell {
   /**
    * Construct a raw cell widget.
    */
@@ -793,10 +793,10 @@ class RawCellWidget extends Cell {
 
 
 /**
- * The namespace for the `RawCellWidget` class statics.
+ * The namespace for the `RawCell` class statics.
  */
 export
-namespace RawCellWidget {
+namespace RawCell {
   /**
    * An options object for initializing a base cell widget.
    */

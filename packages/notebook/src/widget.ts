@@ -40,7 +40,7 @@ import {
 import {
   ICellModel, Cell, IMarkdownCellModel,
   CodeCell, MarkdownCell,
-  ICodeCellModel, RawCellWidget, IRawCellModel,
+  ICodeCellModel, RawCell, IRawCellModel,
 } from '@jupyterlab/cells';
 
 import {
@@ -412,7 +412,7 @@ class StaticNotebook extends Widget {
   /**
    * Create a raw cell widget from a raw cell model.
    */
-  private _createRawCell(model: IRawCellModel): RawCellWidget {
+  private _createRawCell(model: IRawCellModel): RawCell {
     let contentFactory = this.contentFactory;
     let options = { model, contentFactory };
     return this.contentFactory.createRawCell(options, this);
@@ -517,7 +517,7 @@ namespace StaticNotebook {
     /**
      * Create a new raw cell widget.
      */
-    createRawCell(options: RawCellWidget.IOptions, parent: StaticNotebook): RawCellWidget;
+    createRawCell(options: RawCell.IOptions, parent: StaticNotebook): RawCell;
   }
 
   /**
@@ -561,11 +561,11 @@ namespace StaticNotebook {
      * If no cell content factory is passed in with the options, the one on the
      * notebook content factory is used.
      */
-    createRawCell(options: RawCellWidget.IOptions, parent: StaticNotebook): RawCellWidget {
+    createRawCell(options: RawCell.IOptions, parent: StaticNotebook): RawCell {
       if (!options.contentFactory) {
         options.contentFactory = this;
       }
-      return new RawCellWidget(options);
+      return new RawCell(options);
     }
   }
 

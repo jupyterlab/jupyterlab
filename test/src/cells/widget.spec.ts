@@ -22,7 +22,7 @@ import {
 import {
   Cell, CellModel, InputArea,
   CodeCell, CodeCellModel, MarkdownCell,
-  RawCellWidget, RawCellModel, MarkdownCellModel
+  RawCell, RawCellModel, MarkdownCellModel
 } from '@jupyterlab/cells';
 
 import {
@@ -577,7 +577,7 @@ describe('cells/widget', () => {
 
   });
 
-  describe('RawCellWidget', () => {
+  describe('RawCell', () => {
 
     let contentFactory = createBaseCellFactory();
 
@@ -585,8 +585,8 @@ describe('cells/widget', () => {
 
       it('should create a raw cell widget', () => {
         let model = new RawCellModel({});
-        let widget = new RawCellWidget({ model, contentFactory });
-        expect(widget).to.be.a(RawCellWidget);
+        let widget = new RawCell({ model, contentFactory });
+        expect(widget).to.be.a(RawCell);
       });
 
     });

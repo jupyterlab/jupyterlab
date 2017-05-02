@@ -34,7 +34,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  Cell, CodeCell, RawCellWidget,
+  Cell, CodeCell, RawCell,
   ICodeCellModel, IRawCellModel, CellModel,
   RawCellModel, CodeCellModel
 } from '@jupyterlab/cells';
@@ -137,7 +137,7 @@ class CodeConsole extends Widget {
     // Create the banner.
     let model = modelFactory.createRawCell({});
     model.value.text = '...';
-    let banner = this.banner = factory.createBanner({
+    let banner = this.banner = new RawCell({
       model,
       contentFactory: factory.rawCellContentFactory
     }, this);
@@ -146,13 +146,13 @@ class CodeConsole extends Widget {
     this._content.addWidget(banner);
 
     // Set up the foreign iopub handler.
-    this._foreignHandler = factory.createForeignHandler({
+    this._foreignHandler = new ForeignHandler({
       session: this.session,
       parent: this,
-      cellFactory: () => this._createForeignCell(),
+      cellFactory: () => this._createCodeCell(),
     });
 
-    this._history = factory.createConsoleHistory({
+    this._history = new ConsoleHistory({
       session: this.session
     });
 
@@ -197,7 +197,7 @@ class CodeConsole extends Widget {
   /**
    * The console banner widget.
    */
-  readonly banner: RawCellWidget;
+  readonly banner: RawCell;
 
   /**
    * The list of content cells in the console.
@@ -312,7 +312,7 @@ class CodeConsole extends Widget {
    * @returns A promise that indicates when the injected cell's execution ends.
    */
   inject(code: string): Promise<void> {
-    let cell = this._createForeignCell();
+    let cell = this._createCodeCell();
     cell.model.value.text = code;
     this.addCell(cell);
     return this._execute(cell);
@@ -496,7 +496,7 @@ class CodeConsole extends Widget {
    */
   private _handleInfo(info: KernelMessage.IInfoReply): void {
     let layout = this._content.layout as PanelLayout;
-    let banner = layout.widgets[0] as RawCellWidget;
+    let banner = layout.widgets[0] as RawCell;
     banner.model.value.text = info.banner;
     let lang = info.language_info as nbformat.ILanguageInfoMetadata;
     this._mimetype = this._mimeTypeService.getMimeTypeByLanguage(lang);
@@ -508,10 +508,10 @@ class CodeConsole extends Widget {
   /**
    * Create a new foreign cell.
    */
-  private _createForeignCell(): CodeCell {
+  private _createCodeCell(): CodeCell {
     let factory = this.contentFactory;
     let options = this._createCodeCellOptions();
-    let cell = factory.createForeignCell(options, this);
+    let cell = factory.createCodeCell(options, this);
     cell.readOnly = true;
     cell.model.mimeType = this._mimetype;
     cell.addClass(FOREIGN_CELL_CLASS);
@@ -643,148 +643,65 @@ namespace CodeConsole {
    * A content factory for console children.
    */
   export
-  interface IContentFactory {
-    /**
-     * The editor factory.
+  interface IContentFactory extends Cell.IContentFactory {
+ 
+     /**
+     * Create a new code cell widget.
      */
-    readonly editorFactory: CodeEditor.Factory;
+    createCodeCell(options: CodeCell.IOptions): CodeCell;
 
     /**
-     * The factory for code cell widget content.
+     * Create a new raw cell widget.
      */
-    readonly codeCellContentFactory: CodeCell.IContentFactory;
-
-    /**
-     * The factory for raw cell widget content.
-     */
-    readonly rawCellContentFactory: Cell.IContentFactory;
-
-    /**
-     * The history manager for a console widget.
-     */
-    createConsoleHistory(options: ConsoleHistory.IOptions): IConsoleHistory;
-
-    /**
-     * The foreign handler for a console widget.
-     */
-    createForeignHandler(options: ForeignHandler.IOptions): ForeignHandler;
+    createRawCell(options: RawCell.IOptions): RawCell;
 
     /**
      * Create a new banner widget.
      */
-    createBanner(options: RawCellWidget.IOptions, parent: CodeConsole): RawCellWidget;
+    createBanner(options: RawCell.IOptions, parent: CodeConsole): RawCell;
 
-    /**
-     * Create a new prompt widget.
-     */
-    createPrompt(options: CodeCell.IOptions, parent: CodeConsole): CodeCell;
-
-    /**
-     * Create a code cell whose input originated from a foreign session.
-     */
-    createForeignCell(options: CodeCell.IOptions, parent: CodeConsole): CodeCell;
   }
 
   /**
    * Default implementation of `IContentFactory`.
    */
   export
-  class ContentFactory implements IContentFactory {
-    /**
-     * Create a new content factory.
-     */
-    constructor(options: IContentFactoryOptions) {
-      let editorFactory = options.editorFactory;
-      let outputAreaContentFactory = (options.outputAreaContentFactory ||
-        OutputArea.defaultContentFactory
-      );
-      this.codeCellContentFactory = (options.codeCellContentFactory ||
-        new CodeCell.ContentFactory({
-          editorFactory,
-          outputAreaContentFactory
-        })
-      );
-      this.rawCellContentFactory = (options.rawCellContentFactory ||
-        new RawCellWidget.ContentFactory({ editorFactory })
-      );
-    }
+  class ContentFactory extends Cell.ContentFactory implements IContentFactory {
 
     /**
-     * The editor factory.
+     * Create a new code cell widget.
+     * 
+     * #### Notes
+     * If no cell content factory is passed in with the options, the one on the
+     * notebook content factory is used.
      */
-    readonly editorFactory: CodeEditor.Factory;
-
-    /**
-     * The factory for code cell widget content.
-     */
-    readonly codeCellContentFactory: CodeCell.IContentFactory;
-
-    /**
-     * The factory for raw cell widget content.
-     */
-    readonly rawCellContentFactory: Cell.IContentFactory;
-
-    /**
-     * The history manager for a console widget.
-     */
-    createConsoleHistory(options: ConsoleHistory.IOptions): IConsoleHistory {
-      return new ConsoleHistory(options);
-    }
-
-    /**
-     * The foreign handler for a console widget.
-     */
-    createForeignHandler(options: ForeignHandler.IOptions):
-    ForeignHandler {
-      return new ForeignHandler(options);
-    }
-    /**
-     * Create a new banner widget.
-     */
-    createBanner(options: RawCellWidget.IOptions, parent: CodeConsole): RawCellWidget {
-      return new RawCellWidget(options);
-    }
-
-    /**
-     * Create a new prompt widget.
-     */
-    createPrompt(options: CodeCell.IOptions, parent: CodeConsole): CodeCell {
+    createCodeCell(options: CodeCell.IOptions): CodeCell {
+      if (!options.contentFactory) {
+        options.contentFactory = this;
+      }
       return new CodeCell(options);
     }
 
     /**
-     * Create a new code cell widget for an input from a foreign session.
+     * Create a new raw cell widget.
+     * 
+     * #### Notes
+     * If no cell content factory is passed in with the options, the one on the
+     * notebook content factory is used.
      */
-    createForeignCell(options: CodeCell.IOptions, parent: CodeConsole): CodeCell {
-      return new CodeCell(options);
+    createRawCell(options: RawCell.IOptions): RawCell {
+      if (!options.contentFactory) {
+        options.contentFactory = this;
+      }
+      return new RawCell(options);
     }
   }
+
   /**
    * An initialize options for `ContentFactory`.
    */
   export
-  interface IContentFactoryOptions {
-    /**
-     * The editor factory.
-     */
-    editorFactory: CodeEditor.Factory;
-
-    /**
-     * The factory for output area content.
-     */
-    outputAreaContentFactory?: OutputArea.IContentFactory;
-
-    /**
-     * The factory for code cell widget content.  If given, this will
-     * take precedence over the `outputAreaContentFactory`.
-     */
-    codeCellContentFactory?: CodeCell.IContentFactory;
-
-    /**
-     * The factory for raw cell widget content.
-     */
-    rawCellContentFactory?: Cell.IContentFactory;
-  }
+  interface IContentFactoryOptions extends Cell.IContentFactory { }
 
   /**
    * A model factory for a console widget.
