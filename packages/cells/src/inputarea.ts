@@ -18,10 +18,6 @@ import {
 } from '@jupyterlab/codemirror';
 
 import {
-  nbformat
-} from '@jupyterlab/coreutils';
-
-import {
   ICellModel
 } from './model';
 
