@@ -10,6 +10,10 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
+  IChangedArgs
+} from '@jupyterlab/coreutils';
+
+import {
   IDocumentManager
 } from '@jupyterlab/docmanager';
 
@@ -173,6 +177,10 @@ function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, docM
   restorer.add(fbWidget, namespace);
 
   addCommands(app, factory.tracker, fbWidget);
+
+  fbWidget.model.pathChanged.connect((sender: any, args: IChangedArgs<string>) => {
+    docManager.cwd = args.newValue;
+  });
 
   fbWidget.title.label = 'Files';
   app.shell.addToLeftArea(fbWidget, { rank: 100 });
