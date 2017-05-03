@@ -251,10 +251,16 @@ namespace ConsolePanel {
   }
 
   /**
-   * Options for the code console content factory.
+   * A namespace for the console panel content factory.
    */
   export
-  interface IContentFactoryOptions extends CodeConsole.IContentFactoryOptions { }
+  namespace ContentFactory {
+    /**
+     * Options for the code console content factory.
+     */
+    export
+    interface IOptions extends CodeConsole.ContentFactory.IOptions { }
+  }
 
   /**
    * A default code console content factory.

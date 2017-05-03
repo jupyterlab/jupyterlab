@@ -690,10 +690,16 @@ namespace CodeConsole {
   }
 
   /**
-   * An initialize options for `ContentFactory`.
+   * A namespace for the code console content factory.
    */
   export
-  interface IContentFactoryOptions extends Cell.IContentFactory { }
+  namespace ContentFactory {
+    /**
+     * An initialize options for `ContentFactory`.
+     */
+    export
+    interface IOptions extends Cell.IContentFactory { }
+  }
 
   /**
    * A default content factory for the code console.

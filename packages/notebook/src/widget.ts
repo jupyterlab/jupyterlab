@@ -569,19 +569,22 @@ namespace StaticNotebook {
     }
   }
 
-  /**
-   * Options for the content factory.
-   */
   export
-  interface IContentFactoryOptions extends Cell.IContentFactoryOptions { }
+  namespace ContentFactory {
+    /**
+     * Options for the content factory.
+     */
+    export
+    interface IOptions extends Cell.ContentFactory.IOptions { }
+  }
 
   /**
    * Default content factory for the static notebook widget.
    */
   export
   const defaultContentFactory: IContentFactory = new ContentFactory();
-}
 
+}
 
 /**
  * A notebook widget that supports interactivity.
@@ -1422,10 +1425,16 @@ namespace Notebook {
   class ContentFactory extends StaticNotebook.ContentFactory { }
 
   /**
-   * An options object for initializing a notebook content factory.
+   * A namespace for the notebook content factory.
    */
   export
-  interface IContentFactoryOptions extends StaticNotebook.IContentFactoryOptions { }
+  namespace ContentFactory {
+    /**
+     * An options object for initializing a notebook content factory.
+     */
+    export
+    interface IOptions extends StaticNotebook.ContentFactory.IOptions { }
+  }
 
   export
   const defaultContentFactory: IContentFactory = new ContentFactory();
