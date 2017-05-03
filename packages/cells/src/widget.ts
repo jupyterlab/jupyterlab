@@ -370,7 +370,7 @@ namespace Cell {
     /**
      * Create a content factory for a cell.
      */
-    constructor(options?: IContentFactoryOptions) {
+    constructor(options: IContentFactoryOptions = {}) {
       this._editorFactory = (options.editorFactory || InputArea.defaultEditorFactory);
     }
 

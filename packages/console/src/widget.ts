@@ -740,7 +740,7 @@ namespace CodeConsole {
     /**
      * Create a new cell model factory.
      */
-    constructor(options: IModelFactoryOptions) {
+    constructor(options: IModelFactoryOptions = {}) {
       this.codeCellContentFactory = (options.codeCellContentFactory ||
         CodeCellModel.defaultContentFactory
       );
