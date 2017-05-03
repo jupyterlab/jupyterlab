@@ -238,7 +238,7 @@ namespace InputArea {
   }
 
   /**
-   * A namespace for the content factory.
+   * A namespace for the input area content factory.
    */
   export
   namespace ContentFactory {

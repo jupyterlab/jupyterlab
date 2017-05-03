@@ -569,6 +569,9 @@ namespace StaticNotebook {
     }
   }
 
+  /**
+   * A namespace for the staic notebook content factory.
+   */
   export
   namespace ContentFactory {
     /**

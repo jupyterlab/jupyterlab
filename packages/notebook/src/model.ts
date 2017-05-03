@@ -468,7 +468,7 @@ namespace NotebookModel {
   }
 
   /**
-   * A namespace for the content factory.
+   * A namespace for the notebook model content factory.
    */
   export
   namespace ContentFactory {

@@ -424,7 +424,7 @@ namespace Cell {
   }
 
   /**
-   * A namespace for content factory.
+   * A namespace for cell content factory.
    */
   export
   namespace ContentFactory {
