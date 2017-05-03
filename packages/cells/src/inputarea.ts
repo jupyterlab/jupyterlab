@@ -72,7 +72,6 @@ class InputArea extends Widget {
     let editorOptions = { model, factory: contentFactory.editorFactory };
     let editor = this._editor = new CodeEditorWrapper(editorOptions);
     editor.addClass(INPUT_AREA_EDITOR_CLASS);
-    this.layout = new PanelLayout();
 
     let layout = this.layout = new PanelLayout();
     layout.addWidget(prompt);
