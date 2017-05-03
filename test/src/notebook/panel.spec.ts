@@ -341,31 +341,15 @@ describe('@jupyterlab/notebook', () => {
 
       });
 
-      describe('#notebookContentFactory', () => {
-
-        it('should be the content factory for notebook widgets', () => {
-          expect(contentFactory.notebookContentFactory).to.be.a(Notebook.ContentFactory);
-        });
-
-      });
-
       describe('#createNotebook()', () => {
 
         it('should create a notebook widget', () => {
           let options = {
-            contentFactory: contentFactory.notebookContentFactory,
+            contentFactory: contentFactory,
             rendermime,
             mimeTypeService
           };
           expect(contentFactory.createNotebook(options)).to.be.a(Notebook);
-        });
-
-      });
-
-      describe('#createToolbar()', () => {
-
-        it('should create a notebook toolbar', () => {
-          expect(contentFactory.createToolbar()).to.be.a(Toolbar);
         });
 
       });

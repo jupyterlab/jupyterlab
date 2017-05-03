@@ -642,8 +642,7 @@ namespace CodeConsole {
    */
   export
   interface IContentFactory extends Cell.IContentFactory {
- 
-     /**
+    /**
      * Create a new code cell widget.
      */
     createCodeCell(options: CodeCell.IOptions): CodeCell;
@@ -662,7 +661,7 @@ namespace CodeConsole {
 
     /**
      * Create a new code cell widget.
-     * 
+     *
      * #### Notes
      * If no cell content factory is passed in with the options, the one on the
      * notebook content factory is used.
@@ -676,7 +675,7 @@ namespace CodeConsole {
 
     /**
      * Create a new raw cell widget.
-     * 
+     *
      * #### Notes
      * If no cell content factory is passed in with the options, the one on the
      * notebook content factory is used.

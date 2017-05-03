@@ -122,7 +122,7 @@ describe('console/panel', () => {
         Widget.attach(panel, document.body);
         MessageLoop.sendMessage(panel, Widget.Msg.ActivateRequest);
         expect(panel.methods).to.contain('onActivateRequest');
-        expect(panel.console.prompt.editor.hasFocus()).to.be(true);
+        expect(panel.console.promptCell.editor.hasFocus()).to.be(true);
         return dismissDialog();
       });
 
@@ -153,19 +153,11 @@ describe('console/panel', () => {
 
       });
 
-      describe('#consoleContentFactory', () => {
-
-        it('should be the console content factory used by the panel factory', () => {
-          expect(contentFactory.consoleContentFactory).to.be.a(CodeConsole.ContentFactory);
-        });
-
-      });
-
       describe('#createConsole()', () => {
 
         it('should create a console widget', () => {
           let options = {
-            contentFactory: contentFactory.consoleContentFactory,
+            contentFactory: contentFactory,
             rendermime,
             mimeTypeService,
             session: panel.session
