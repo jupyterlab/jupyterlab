@@ -52,7 +52,7 @@ const SHORTCUTS = [
   },
   {
     command: 'completer:invoke-console',
-    selector: '.jp-CodeConsole-prompt .jp-mod-completer-enabled',
+    selector: '.jp-CodeConsole-promptCell .jp-mod-completer-enabled',
     keys: ['Tab']
   },
   {
@@ -62,17 +62,17 @@ const SHORTCUTS = [
   },
   {
     command: 'console:run',
-    selector: '.jp-CodeConsole-prompt',
+    selector: '.jp-CodeConsole-promptCell',
     keys: ['Enter']
   },
   {
     command: 'console:run-forced',
-    selector: '.jp-CodeConsole-prompt',
+    selector: '.jp-CodeConsole-promptCell',
     keys: ['Shift Enter']
   },
   {
     command: 'console:linebreak',
-    selector: '.jp-CodeConsole-prompt',
+    selector: '.jp-CodeConsole-promptCell',
     keys: ['Ctrl Enter']
   },
   {
@@ -132,7 +132,7 @@ const SHORTCUTS = [
   },
   {
     command: 'inspector:open',
-    selector: '.jp-CodeConsole-prompt',
+    selector: '.jp-CodeConsole-promptCell',
     keys: ['Accel I']
   },
   {
@@ -337,7 +337,7 @@ const SHORTCUTS = [
   },
   {
     command: 'tooltip:launch-console',
-    selector: '.jp-CodeConsole-prompt .jp-InputArea-editor:not(.jp-mod-has-primary-selection)',
+    selector: '.jp-CodeConsole-promptCell .jp-InputArea-editor:not(.jp-mod-has-primary-selection)',
     keys: ['Shift Tab']
   }
 ];
