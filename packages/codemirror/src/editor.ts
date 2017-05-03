@@ -45,7 +45,7 @@ import 'codemirror/keymap/vim.js';
 /**
  * The class name added to CodeMirrorWidget instances.
  */
-const EDITOR_CLASS = 'jp-CodeMirrorWidget';
+const EDITOR_CLASS = 'jp-CodeMirrorEditor';
 
 /**
  * The class name added to read only cell editor widgets.

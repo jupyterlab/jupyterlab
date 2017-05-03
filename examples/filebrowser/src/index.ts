@@ -204,7 +204,7 @@ function createApp(manager: ServiceManager.IManager): void {
   });
   commands.addKeyBinding({
     keys: ['Accel S'],
-    selector: '.jp-CodeMirrorWidget',
+    selector: '.jp-CodeMirrorEditor',
     command: 'file-save'
   });
   window.addEventListener('keydown', (event) => {
