@@ -63,8 +63,8 @@ function createBaseCellFactory(): Cell.IContentFactory {
  * Create a new code cell content factory.
  */
 export
-function createCodeCellFactory(): CodeCell.IContentFactory {
-  return new CodeCell.ContentFactory({ editorFactory });
+function createCodeCellFactory(): Cell.IContentFactory {
+  return new Cell.ContentFactory({ editorFactory });
 }
 
 

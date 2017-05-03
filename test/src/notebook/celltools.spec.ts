@@ -259,7 +259,6 @@ describe('notebook/celltools', () => {
       let widget = tracker.currentWidget;
       widget.notebook.activeCellIndex++;
       widget.notebook.activeCell.model.metadata.set('bar', 1);
-      expect(tool.node.querySelector('.jp-CellEditor')).to.be.ok();
       expect(tool.node.querySelector('.jp-InputArea-editor')).to.be.ok();
     });
 

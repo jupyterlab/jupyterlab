@@ -20,17 +20,18 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  Cell, CellModel, InputArea,
+  Cell, CellModel, InputPrompt, Collapser,
   CodeCell, CodeCellModel, MarkdownCell,
-  RawCell, RawCellModel, MarkdownCellModel
+  RawCell, RawCellModel, MarkdownCellModel,
+  CellFooter, CellHeader, InputArea
 } from '@jupyterlab/cells';
 
 import {
-  OutputAreaModel, OutputArea
+  OutputArea, OutputPrompt
 } from '@jupyterlab/outputarea';
 
 import {
-  createBaseCellFactory, createCodeCellFactory, createCellEditor, rendermime,
+  createBaseCellFactory, createCodeCellFactory, rendermime,
   editorFactory
 } from '../notebook/utils';
 
@@ -41,8 +42,6 @@ import {
 
 const RENDERED_CLASS = 'jp-mod-rendered';
 
-const PROMPT_CLASS = 'jp-Cell-prompt';
-
 
 class LogBaseCell extends Cell {
 
@@ -50,16 +49,6 @@ class LogBaseCell extends Cell {
 
   constructor() {
     super({ model: new CellModel({}), contentFactory: createBaseCellFactory() });
-  }
-
-  renderInput(widget: Widget): void {
-    super.renderInput(widget);
-    this.methods.push('renderInput');
-  }
-
-  showEditor(): void {
-    super.showEditor();
-    this.methods.push('showEditor');
   }
 
   protected onAfterAttach(msg: Message): void {
@@ -162,6 +151,15 @@ describe('cells/widget', () => {
 
     });
 
+    describe('#inputArea', () => {
+
+      it('should be the input area for the cell', () => {
+        let widget = new Cell({ model });
+        expect(widget.inputArea).to.be.an(InputArea);
+      });
+
+    });
+
     describe('#readOnly', () => {
 
       it('should be a boolean', () => {
@@ -195,6 +193,17 @@ describe('cells/widget', () => {
 
     });
 
+    describe('#inputCollapsed', () => {
+
+      it('should be the view state of the input being collapsed', () => {
+        let widget = new LogBaseCell();
+        expect(widget.inputCollapsed).to.be(false);
+        widget.inputCollapsed = true;
+        expect(widget.inputCollapsed).to.be(true);
+      });
+
+    });
+
     describe('#onActivateRequest()', () => {
 
       it('should focus the cell editor', (done) => {
@@ -222,30 +231,6 @@ describe('cells/widget', () => {
         expect(() => { widget.setPrompt(''); }).to.not.throwError();
         expect(() => { widget.setPrompt('null'); }).to.not.throwError();
         expect(() => { widget.setPrompt('test'); }).to.not.throwError();
-      });
-
-    });
-
-    describe('#renderInput()', () => {
-
-      it('should render the widget', () => {
-        let widget = new LogBaseCell();
-        let rendered = new Widget();
-        widget.renderInput(rendered);
-        expect(widget.hasClass('jp-mod-rendered')).to.be(true);
-      });
-
-    });
-
-    describe('#showEditor()', () => {
-
-      it('should be called to show the editor', () => {
-        let widget = new LogBaseCell();
-        let rendered = new Widget();
-        widget.renderInput(rendered);
-        expect(widget.hasClass('jp-mod-rendered')).to.be(true);
-        widget.showEditor();
-        expect(widget.hasClass('jp-mod-rendered')).to.be(false);
       });
 
     });
@@ -290,10 +275,10 @@ describe('cells/widget', () => {
 
     });
 
-    describe('#contentFactory', () => {
+    describe('#.defaultContentFactory', () => {
 
       it('should be a contentFactory', () => {
-        expect(contentFactory).to.be.a(Cell.ContentFactory);
+        expect(Cell.defaultContentFactory).to.be.a(Cell.ContentFactory);
       });
 
     });
@@ -318,28 +303,47 @@ describe('cells/widget', () => {
 
       });
 
-      describe('#createCellEditor()', () => {
+      describe('#createCellHeader()', () => {
 
-        it('should create a code editor widget', () => {
-          let factory = new Cell.ContentFactory({ editorFactory });
-          let editor = factory.createCellEditor({
-            model,
-            factory: editorFactory
-          });
-          expect(editor).to.be.a(CodeEditorWrapper);
+        it('should create a new cell header', () => {
+          let factory = new Cell.ContentFactory();
+          expect(factory.createCellHeader()).to.be.a(CellHeader);
         });
 
       });
 
-      describe('#createInputArea()', () => {
+      describe('#createCellFooter()', () => {
 
-        it('should create an input area widget', () => {
-          let factory = new Cell.ContentFactory({ editorFactory });
-          let editor = factory.createCellEditor({
-            model,
-            factory: editorFactory });
-          let input = contentFactory.createInputArea({ editor });
-          expect(input).to.be.an(InputArea);
+        it('should create a new cell footer', () => {
+          let factory = new Cell.ContentFactory();
+          expect(factory.createCellFooter()).to.be.a(CellFooter);
+        });
+
+      });
+
+      describe('#createCollapser()', () => {
+
+        it('should create a new collapser', () => {
+          let factory = new Cell.ContentFactory();
+          expect(factory.createCollapser()).to.be.a(Collapser);
+        });
+
+      });
+
+      describe('#createOutputPrompt()', () => {
+
+        it('should create a new output prompt', () => {
+          let factory = new Cell.ContentFactory();
+          expect(factory.createOutputPrompt()).to.be.an(OutputPrompt);
+        });
+
+      });
+
+      describe('#createInputPrompt()', () => {
+
+        it('should create a new input prompt', () => {
+          let factory = new Cell.ContentFactory();
+          expect(factory.createInputPrompt()).to.be.an(InputPrompt);
         });
 
       });
@@ -364,6 +368,26 @@ describe('cells/widget', () => {
         contentFactory = createCodeCellFactory();
         let widget = new CodeCell({ model, contentFactory, rendermime });
         expect(widget).to.be.a(CodeCell);
+      });
+
+    });
+
+    describe('#outputArea', () => {
+
+      it('should be the output area used by the cell', () => {
+        let widget = new CodeCell({ model, rendermime });
+        expect(widget.outputArea).to.be.an(OutputArea);
+      });
+
+    });
+
+    describe('#outputCollapsed', () => {
+
+      it('should be the view state of the output being collapsed', () => {
+        let widget = new CodeCell({ model, rendermime });
+        expect(widget.outputCollapsed).to.be(false);
+        widget.outputCollapsed = true;
+        expect(widget.outputCollapsed).to.be(true);
       });
 
     });
@@ -439,43 +463,6 @@ describe('cells/widget', () => {
         expect(widget.methods).to.not.contain(method);
         widget.model.metadata.set('foo', 1);
         expect(widget.methods).to.contain(method);
-      });
-
-    });
-
-    describe('#contentFactory', () => {
-
-      it('should be a ContentFactory', () => {
-        expect(contentFactory).to.be.a(CodeCell.ContentFactory);
-      });
-
-    });
-
-    describe('.ContentFactory', () => {
-
-      describe('#constructor', () => {
-
-        it('should create a ContentFactory', () => {
-          let factory = new CodeCell.ContentFactory({ editorFactory });
-          expect(factory).to.be.a(CodeCell.ContentFactory);
-          expect(factory).to.be.a(Cell.ContentFactory);
-        });
-
-      });
-
-      describe('#createOutputArea()', () => {
-
-        it('should create an output area widget', () => {
-          let factory = new CodeCell.ContentFactory({ editorFactory });
-          let model = new OutputAreaModel();
-          let output = factory.createOutputArea({
-            model,
-            rendermime,
-            contentFactory: OutputArea.defaultContentFactory
-          });
-          expect(output).to.be.an(OutputArea);
-        });
-
       });
 
     });
@@ -593,36 +580,36 @@ describe('cells/widget', () => {
 
   });
 
-  describe('InputArea', () => {
+  describe('CellHeader', () => {
 
     describe('#constructor()', () => {
 
-      it('should create an input area widget', () => {
-        let editor = createCellEditor();
-        let widget = new InputArea({ editor });
-        expect(widget).to.be.an(InputArea);
+      it('should create a new cell header', () => {
+        expect(new CellHeader()).to.be.a(CellHeader);
       });
 
     });
 
-    describe('#setPrompt()', () => {
+  });
 
-      it('should change the value of the input prompt', () => {
-        let editor = createCellEditor();
-        let widget = new InputArea({ editor });
-        let prompt = widget.node.querySelector(`.${PROMPT_CLASS}`);
-        expect(prompt.textContent).to.be.empty();
-        widget.setPrompt('foo');
-        expect(prompt.textContent).to.contain('foo');
+  describe('CellFooter', () => {
+
+    describe('#constructor()', () => {
+
+      it('should create a new cell footer', () => {
+        expect(new CellFooter()).to.be.a(CellFooter);
       });
 
-      it('should treat the string value "null" as special', () => {
-        let editor = createCellEditor();
-        let widget = new InputArea({ editor });
-        let prompt = widget.node.querySelector(`.${PROMPT_CLASS}`);
-        expect(prompt.textContent).to.be.empty();
-        widget.setPrompt('null');
-        expect(prompt.textContent).to.not.contain('null');
+    });
+
+  });
+
+  describe('Collapser', () => {
+
+    describe('#constructor()', () => {
+
+      it('should create a new collapser', () => {
+        expect(new Collapser()).to.be.a(Collapser);
       });
 
     });
