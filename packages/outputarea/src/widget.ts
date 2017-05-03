@@ -42,7 +42,7 @@ const OUTPUT_AREA_CLASS = 'jp-OutputArea';
 /**
  * The class name added to the direction children of OutputArea
  */
-const OUTPUT_AREA_ITEM_CLASS = 'jp-OutputArea-item';
+const OUTPUT_AREA_ITEM_CLASS = 'jp-OutputArea-child';
 
 /**
  * The class name added to actual outputs
