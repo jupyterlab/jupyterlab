@@ -217,7 +217,7 @@ namespace InputArea {
     /**
      * Construct a `ContentFactory`.
      */
-    constructor(options?: IContentFactoryOptions) {
+    constructor(options: IContentFactoryOptions = {}) {
       this._editor = (options.editorFactory || defaultEditorFactory);
     }
 
@@ -256,7 +256,7 @@ namespace InputArea {
    * The default `ContentFactory` instance.
    */
   export
-  const defaultContentFactory = new ContentFactory();
+  const defaultContentFactory = new ContentFactory({});
 
   /**
    * A function to create the default CodeMirror editor factory.

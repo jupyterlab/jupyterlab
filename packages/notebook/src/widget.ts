@@ -485,7 +485,7 @@ namespace StaticNotebook {
     /**
      * A factory for creating content.
      */
-    contentFactory: IContentFactory;
+    contentFactory?: IContentFactory;
 
     /**
      * The service used to look up mime types.

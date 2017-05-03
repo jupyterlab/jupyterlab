@@ -351,7 +351,7 @@ export namespace NotebookPanel {
     /**
      * The content factory for the panel.
      */
-    contentFactory: IContentFactory;
+    contentFactory?: IContentFactory;
 
     /**
      * The mimeType service.
