@@ -45,30 +45,34 @@
 
 
 /*-----------------------------------------------------------------------------
-| Input/output wrapper/collapser
+| Common input/output
 |----------------------------------------------------------------------------*/
 
 
 .jp-Cell-inputWrapper, .jp-Cell-outputWrapper  {
   display: flex;
-  direction: row;
+  flex-direction: row;
   padding: 0px;
   margin: 0px;
 }
 
 
 .jp-Cell-inputCollapser, .jp-Cell-outputCollapser {
-  flex-grow: 0;
-  flex-shrink: 0;
-  flex-basis: 10px;
+  flex: 0 0 10px;
   background: var(--jp-brand-color1);
   padding: 0px;
   margin: 0px;
 }
 
 
+/* Only input areas inside cells */
+.jp-Cell-inputArea, .jp-Cell-outputArea {
+  flex: 1 1 auto;
+}
+
+
 /*-----------------------------------------------------------------------------
-| InputArea
+| Input
 |----------------------------------------------------------------------------*/
 
 
@@ -79,18 +83,8 @@
 }
 
 
-/* Only input areas inside cells */
-.jp-Cell-inputArea {
-  flex-grow: 1;
-  flex-shrink: 1;
-  height: auto;
-}
-
-
 .jp-InputArea-editor {
-  flex-grow: 1;
-  flex-shrink: 1;
-  height: auto;
+  flex: 1 1 auto;;
 }
 
 
@@ -102,9 +96,7 @@
 
 
 .jp-InputPrompt {
-  flex-grow: 0;
-  flex-shrink: 0;
-  flex-basis: var(--jp-private-cell-prompt-width);
+  flex: 0 0 var(--jp-private-cell-prompt-width);
   color: var(--jp-private-cell-inprompt-color);
   font-family: var(--jp-private-cell-font-family);
   padding: var(--jp-code-padding);
@@ -115,6 +107,22 @@
   border: var(--jp-border-width) solid transparent;
 }
 
+
+/*-----------------------------------------------------------------------------
+| Output
+|----------------------------------------------------------------------------*/
+
+/* Put a scape between input and output. */
+.jp-Cell-outputWrapper {
+  margin: 5px 0 0 0;
+}
+
+/* Text output with the Out[] prompt needs a top padding to match the
+ * alignment of the Out[] prompt itself.
+ */
+.jp-OutputArea-executeResult .jp-RenderedText.jp-OutputArea-output {
+  padding-top: var(--jp-code-padding);
+}
 
 /*-----------------------------------------------------------------------------
 | CodeCell
