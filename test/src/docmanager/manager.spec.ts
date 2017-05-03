@@ -133,7 +133,6 @@ describe('@jupyterlab/docmanager', () => {
 
       it('should start a kernel if one is given', () => {
         return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
-          console.log('2', model.path);
           return services.sessions.startNew({ path: model.path });
         }).then(session => {
           let id = session.kernel.id;
@@ -148,7 +147,6 @@ describe('@jupyterlab/docmanager', () => {
 
       it('should not auto-start a kernel if there is none given', () => {
         return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
-          console.log('3', model.path);
           widget = manager.open(model.path, 'default');
           context = manager.contextForWidget(widget);
           return dismissDialog();
@@ -159,7 +157,6 @@ describe('@jupyterlab/docmanager', () => {
 
       it('should return undefined if the factory is not found', () => {
         return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
-          console.log('4', model.path);
           widget = manager.open(model.path, 'foo');
           expect(widget).to.be(void 0);
         });
@@ -173,7 +170,6 @@ describe('@jupyterlab/docmanager', () => {
         });
         manager.registry.addWidgetFactory(widgetFactory2);
         return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
-          console.log('5', model.path);
           widget = manager.open(model.path, 'foo');
           expect(widget).to.be(void 0);
         });
