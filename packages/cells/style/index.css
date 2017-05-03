@@ -37,6 +37,29 @@
 
 
 /*-----------------------------------------------------------------------------
+| Input wrapper/collapser
+|----------------------------------------------------------------------------*/
+
+
+.jp-Cell-inputWrapper {
+  display: flex;
+  direction: row;
+  padding: 0px;
+  margin: 0px;
+}
+
+
+.jp-Cell-inputCollapser {
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: 10px;
+  background: var(--jp-brand-color1);
+  padding: 0px;
+  margin: 0px;
+}
+
+
+/*-----------------------------------------------------------------------------
 | InputArea
 |----------------------------------------------------------------------------*/
 
@@ -44,6 +67,9 @@
 .jp-InputArea {
   display: flex;
   flex-direction: row;
+  flex-grow: 1;
+  flex-shrink: 1;
+  height: auto;
 }
 
 
