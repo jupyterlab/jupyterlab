@@ -13,7 +13,9 @@ from subprocess import check_output, CalledProcessError
 import shutil
 import sys
 import tarfile
+
 from jupyter_core.paths import ENV_JUPYTER_PATH, ENV_CONFIG_PATH
+from .builder import get_build_tool
 
 
 if sys.platform == 'win32':
@@ -26,6 +28,10 @@ else:
 here = osp.dirname(osp.abspath(__file__))
 CONFIG_PATH = os.environ.get('JUPYTERLAB_CONFIG_DIR', ENV_CONFIG_PATH[0])
 BUILD_PATH = ENV_JUPYTER_PATH[0]
+BUILD_TOOL = os.environ.get('JUPYTERLAB_BUILD_TOOL')
+
+
+builder = get_build_tool(BUILD_TOOL)
 
 
 def run(cmd, **kwargs):
@@ -52,7 +58,8 @@ def install_extension(extension):
     tar_name, pkg_name = validate_extension(extension)
     config = _get_config()
     path = pjoin(_get_cache_dir(config), tar_name)
-    run(['npm', 'install', '--save', path], cwd=_get_root_dir(config))
+    #run([NPM_CMD, 'install', '--save', path], cwd=_get_root_dir(config))
+    builder.install([path], save=True, cwd=_get_root_dir(config))
     config['installed_extensions'][pkg_name] = path
     if pkg_name in config['linked_extensions']:
         del config['linked_extensions'][pkg_name]
@@ -136,7 +143,8 @@ def validate_extension(extension):
     _ensure_package(config)
     cache_dir = _get_cache_dir(config)
     # npm pack the extension
-    output = run(['npm', 'pack', extension], cwd=cache_dir)
+    # output = run([NPM_CMD, 'pack', extension], cwd=cache_dir)
+    output = builder.pack(extension, cwd=cache_dir)
     name = output.decode('utf8').splitlines()[-1]
     # read the package.json data from the file
     tar = tarfile.open(pjoin(cache_dir, name), "r:gz")
@@ -163,14 +171,15 @@ def build():
     root = _get_root_dir(config)
 
     # Make sure packages are installed.
-    run(['npm', 'install'], cwd=root)
+    builder.install(cwd=root)
 
     # Install the linked extensions.
-    for value in config['linked_extensions'].values():
-        run(['npm', 'install', value], cwd=root)
+    linked = list(config['linked_extensions'].values())
+    if linked:
+        builder.install(linked, cwd=root)
 
     # Build the app.
-    run(['npm', 'run', 'build'], cwd=root)
+    builder.run('build', cwd=root)
 
 
 def describe():
