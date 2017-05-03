@@ -25,7 +25,7 @@
 }
 
 
-.jp-OutputArea-item {
+.jp-OutputArea-child {
   display: flex;
   flex-direction: row;
 }
