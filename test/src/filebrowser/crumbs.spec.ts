@@ -4,6 +4,14 @@
 import expect = require('expect.js');
 
 import {
+  DocumentManager, IDocumentManager
+} from '@jupyterlab/docmanager';
+
+import {
+  DocumentRegistry, IDocumentRegistry
+} from '@jupyterlab/docregistry';
+
+import {
   ServiceManager
 } from '@jupyterlab/services';
 
@@ -56,7 +64,9 @@ class LogCrumbs extends BreadCrumbs {
 
 describe('filebrowser/model', () => {
 
-  let manager: ServiceManager.IManager;
+  let manager: IDocumentManager;
+  let serviceManager: ServiceManager.IManager;
+  let registry: IDocumentRegistry;
   let model: FileBrowserModel;
   let crumbs: LogCrumbs;
   let first: string;
@@ -65,8 +75,18 @@ describe('filebrowser/model', () => {
   let path: string;
 
   before((done) => {
-    manager = new ServiceManager();
-    let contents = manager.contents;
+    let opener: DocumentManager.IWidgetOpener = {
+      open: widget => { /* no op */ }
+    };
+
+    registry = new DocumentRegistry();
+    serviceManager = new ServiceManager();
+    manager = new DocumentManager({
+      registry, opener,
+      manager: serviceManager
+    });
+
+    let contents = serviceManager.contents;
     contents.newUntitled({ type: 'directory' }).then(cModel => {
       first = cModel.name;
       return contents.newUntitled({ path: cModel.path, type: 'directory' });
