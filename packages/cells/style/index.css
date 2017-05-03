@@ -35,13 +35,21 @@
   background: transparent;
 }
 
+.jp-Cell-header, .jp-Cell-footer  {
+  height: 0px;
+  width: 100%;
+  border: none;
+  padding: 0px;
+  margin: 0px;
+}
+
 
 /*-----------------------------------------------------------------------------
-| Input wrapper/collapser
+| Input/output wrapper/collapser
 |----------------------------------------------------------------------------*/
 
 
-.jp-Cell-inputWrapper {
+.jp-Cell-inputWrapper, .jp-Cell-outputWrapper  {
   display: flex;
   direction: row;
   padding: 0px;
@@ -49,7 +57,7 @@
 }
 
 
-.jp-Cell-inputCollapser {
+.jp-Cell-inputCollapser, .jp-Cell-outputCollapser {
   flex-grow: 0;
   flex-shrink: 0;
   flex-basis: 10px;
@@ -64,9 +72,15 @@
 |----------------------------------------------------------------------------*/
 
 
+/* All input areas */
 .jp-InputArea {
   display: flex;
   flex-direction: row;
+}
+
+
+/* Only input areas inside cells */
+.jp-Cell-inputArea {
   flex-grow: 1;
   flex-shrink: 1;
   height: auto;
