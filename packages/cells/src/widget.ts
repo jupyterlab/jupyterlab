@@ -370,7 +370,7 @@ namespace Cell {
     /**
      * Create a content factory for a cell.
      */
-    constructor(options: IContentFactoryOptions = {}) {
+    constructor(options: ContentFactory.IOptions = {}) {
       this._editorFactory = (options.editorFactory || InputArea.defaultEditorFactory);
     }
 
@@ -424,18 +424,24 @@ namespace Cell {
   }
 
   /**
-   * Options for the content factory.
+   * A namespace for content factory.
    */
   export
-  interface IContentFactoryOptions {
+  namespace ContentFactory {
     /**
-     * The editor factory used by the content factory.
-     * 
-     * If this is not passed, a default CodeMirror editor factory
-     * will be used.
-    */
-    editorFactory?: CodeEditor.Factory;
+     * Options for the content factory.
+     */
+    export
+    interface IOptions {
+      /**
+       * The editor factory used by the content factory.
+       * 
+       * If this is not passed, a default CodeMirror editor factory
+       * will be used.
+      */
+      editorFactory?: CodeEditor.Factory;
 
+    }
   }
 
   /**
