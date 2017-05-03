@@ -382,8 +382,9 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
   // Add a launcher item if the launcher is available.
   if (launcher) {
     launcher.add({
-      name: 'Notebook',
-      command: 'filebrowser:new-notebook'
+      args: { creatorName: 'Notebook' },
+      command: 'file-operations:create-from',
+      name: 'Notebook'
     });
   }
 

@@ -93,8 +93,9 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   // Add a launcher item if the launcher is available.
   if (launcher) {
     launcher.add({
-      name: 'Text Editor',
-      command: 'filebrowser:new-text-file'
+      args: { creatorName: 'Text File' },
+      command: 'file-operations:create-from',
+      name: 'Text Editor'
     });
   }
 
