@@ -138,7 +138,7 @@ class CodeConsole extends Widget {
     let banner = this._banner = new RawCell({
       model,
       contentFactory: contentFactory
-    }, this);
+    });
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
     this._content.addWidget(banner);

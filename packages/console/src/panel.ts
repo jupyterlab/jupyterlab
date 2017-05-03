@@ -6,20 +6,12 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  Cell, CodeCell
-} from '@jupyterlab/cells';
-
-import {
-  IEditorMimeTypeService, CodeEditor
+  IEditorMimeTypeService
 } from '@jupyterlab/codeeditor';
 
 import {
   PathExt, Time, uuid
 } from '@jupyterlab/coreutils';
-
-import {
-  OutputArea
-} from '@jupyterlab/outputarea';
 
 import {
   IRenderMime, RenderMime
@@ -51,6 +43,8 @@ import {
  */
 const PANEL_CLASS = 'jp-ConsolePanel';
 
+const CONSOLE_ICON_CLASS = 'jp-ImageCodeConsole';
+
 
 /**
  * A panel which contains a console and the ability to add other children.
@@ -66,8 +60,9 @@ class ConsolePanel extends Panel {
     let {
       rendermime, mimeTypeService, path, basePath, name, manager, modelFactory
     } = options;
-    let factory = options.contentFactory;
-    let contentFactory = factory.consoleContentFactory;
+    let contentFactory = this.contentFactory = (
+      options.contentFactory || ConsolePanel.defaultContentFactory
+    )
     let count = Private.count++;
     if (!path) {
       path = `${basePath || ''}/console-${count}-${uuid()}`;
@@ -86,7 +81,7 @@ class ConsolePanel extends Panel {
       contents: manager.contents
     });
 
-    this.console = factory.createConsole({
+    this.console = contentFactory.createConsole({
       rendermime, session, mimeTypeService, contentFactory, modelFactory
     });
     this.addWidget(this.console);
@@ -101,10 +96,15 @@ class ConsolePanel extends Panel {
     session.kernelChanged.connect(this._updateTitle, this);
     session.propertyChanged.connect(this._updateTitle, this);
 
-    this.title.icon = 'jp-ImageCodeConsole';
+    this.title.icon = CONSOLE_ICON_CLASS;
     this.title.closable = true;
     this.id = `console-${count}`;
   }
+
+  /**
+   * The content factory used by the console panel.
+   */
+  readonly contentFactory: ConsolePanel.IContentFactory;
 
   /**
    * The console widget used by the panel.
@@ -230,17 +230,7 @@ namespace ConsolePanel {
    * The console panel renderer.
    */
   export
-  interface IContentFactory {
-    /**
-     * The editor factory used by the content factory.
-     */
-    readonly editorFactory: CodeEditor.Factory;
-
-    /**
-     * The factory for code console content.
-     */
-    readonly consoleContentFactory: CodeConsole.IContentFactory;
-
+  interface IContentFactory extends CodeConsole.IContentFactory {
     /**
      * Create a new console panel.
      */
@@ -251,32 +241,7 @@ namespace ConsolePanel {
    * Default implementation of `IContentFactory`.
    */
   export
-  class ContentFactory implements IContentFactory {
-    /**
-     * Create a new content factory.
-     */
-    constructor(options: ContentFactory.IOptions) {
-      this.editorFactory = options.editorFactory;
-      this.consoleContentFactory = (options.consoleContentFactory ||
-        new CodeConsole.ContentFactory({
-          editorFactory: this.editorFactory,
-          outputAreaContentFactory: options.outputAreaContentFactory,
-          codeCellContentFactory: options.codeCellContentFactory,
-          rawCellContentFactory: options.rawCellContentFactory
-        })
-      );
-    }
-
-    /**
-     * The editor factory used by the content factory.
-     */
-    readonly editorFactory: CodeEditor.Factory;
-
-    /**
-     * The factory for code console content.
-     */
-    readonly consoleContentFactory: CodeConsole.IContentFactory;
-
+  class ContentFactory extends CodeConsole.ContentFactory implements IContentFactory {
     /**
      * Create a new console panel.
      */
@@ -286,44 +251,16 @@ namespace ConsolePanel {
   }
 
   /**
-   * The namespace for `ContentFactory`.
+   * Options for the code console content factory.
    */
   export
-  namespace ContentFactory {
-    /**
-     * An initialization options for a console panel factory.
-     */
-    export
-    interface IOptions {
-      /**
-       * The editor factory.  This will be used to create a
-       * consoleContentFactory if none is given.
-       */
-      editorFactory: CodeEditor.Factory;
+  interface IContentFactoryOptions extends CodeConsole.IContentFactoryOptions { }
 
-      /**
-       * The factory for output area content.
-       */
-      outputAreaContentFactory?: OutputArea.IContentFactory;
-
-      /**
-       * The factory for code cell widget content.  If given, this will
-       * take precedence over the `outputAreaContentFactory`.
-       */
-      codeCellContentFactory?: CodeCell.IContentFactory;
-
-      /**
-       * The factory for raw cell widget content.
-       */
-      rawCellContentFactory?: Cell.IContentFactory;
-
-      /**
-       * The factory for console widget content.  If given, this will
-       * take precedence over the output area and cell factories.
-       */
-      consoleContentFactory?: CodeConsole.IContentFactory;
-    }
-  }
+  /**
+   * A default code console content factory.
+   */
+  export
+  const defaultContentFactory: IContentFactory = new ContentFactory();
 
   /* tslint:disable */
   /**
