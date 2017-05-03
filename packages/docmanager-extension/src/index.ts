@@ -145,7 +145,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, registry: ID
   commands.addCommand(CommandIDs.createFrom, {
     label: args => (args['label'] || args['creatorName']) as string,
     execute: args => {
-      const path = args['path'] === void 0 ? docManager.cwd
+      const path = typeof args['path'] === 'undefined' ? docManager.cwd
         : args['path'] as string;
       const creatorName = args['creatorName'] as string;
       if (!creatorName) {
@@ -173,7 +173,8 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, registry: ID
 
   commands.addCommand(CommandIDs.deleteFile, {
     execute: args => {
-      const path = args['path'] as string;
+      const path = typeof args['path'] === 'undefined' ? docManager.cwd
+        : args['path'] as string;
       const basePath = (args['basePath'] as string) || '';
 
       if (!path) {
@@ -187,9 +188,11 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, registry: ID
   commands.addCommand(CommandIDs.newUntitled, {
     execute: args => {
       const errorTitle = args['error'] as string || 'Error';
+      const path = typeof args['path'] === 'undefined' ? docManager.cwd
+        : args['path'] as string;
       let options: Partial<Contents.ICreateOptions> = {
         type: args['type'] as Contents.ContentType,
-        path: args['path'] as string
+        path
       };
 
       if (args['type'] === 'file') {
@@ -204,8 +207,9 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, registry: ID
 
   commands.addCommand(CommandIDs.open, {
     execute: args => {
-      let path = args['path'] as string;
-      let factory = args['factory'] as string || void 0;
+      const path = typeof args['path'] === 'undefined' ? docManager.cwd
+        : args['path'] as string;
+      const factory = args['factory'] as string || void 0;
       return docManager.services.contents.get(path)
         .then(() => docManager.openOrReveal(path, factory));
     },
@@ -245,9 +249,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, registry: ID
     execute: () => {
       if (isEnabled()) {
         let context = docManager.contextForWidget(app.shell.currentWidget);
-        return context.saveAs().then(() => {
-          return context.createCheckpoint();
-        });
+        return context.saveAs().then(() => context.createCheckpoint());
       }
     }
   });
@@ -297,8 +299,7 @@ function populateCreators(app: JupyterLab, docManager: IDocumentManager, registr
     const command = CommandIDs.createFrom;
     const creatorName = creator.name;
     const label = `New ${creatorName}`;
-    const path = docManager.cwd;
-    const args = { creatorName, label, path };
+    const args = { creatorName, label };
     menu.insertItem(0, { args, command });
     Private.creators.add(palette.addItem({ args, category, command }));
   });
