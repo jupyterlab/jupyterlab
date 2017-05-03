@@ -19,15 +19,68 @@
 | OutputArea has a list of Outputs
 |----------------------------------------------------------------------------*/
 
+
 .jp-OutputArea {
   overflow-y: auto;
 }
 
+
+.jp-OutputArea-item {
+  display: flex;
+  direction: row;
+}
+
+
+.jp-OutputPrompt {
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: var(--jp-private-cell-prompt-width);
+  color: var(--jp-private-outputarea-prompt-color);
+  font-family: var(--jp-private-cell-font-family);
+  padding: var(--jp-code-padding);
+  text-align: right;
+  letter-spacing: var(--jp-private-cell-prompt-letter-spacing);
+  line-height: var(--jp-code-line-height);
+  font-size: var(--jp-code-font-size);
+  border: var(--jp-border-width) solid transparent;
+}
+
+
+.jp-OutputArea-output {
+  flex-grow: 1;
+  flex-shrink: 1;
+  height: auto;
+}
+
+
+/* Hide the gutter in case of
+ *  - nested output areas (e.g. in the case of output widgets)
+ *  - mirrored output areas
+ */
+.jp-OutputArea .jp-OutputArea .jp-OutputArea-prompt {
+  display: none;
+}
+
 /*-----------------------------------------------------------------------------
-| Individual OutputWidget(s) and their prompts
-| OutputWidget[
-|   OutputWidget-prompt, OutputWidget-result
-| ]
+| executeResult is added to any Output-result for the display of the object
+| returned by a cell
+|----------------------------------------------------------------------------*/
+
+
+.jp-OutputArea-output.jp-OutputArea-executeResult {
+  margin-left: 0px;
+  flex: 1 1 auto;
+}
+
+
+.jp-OutputArea-executeResult.jp-RenderedText {
+  padding-top: var(--jp-code-padding);
+}
+
+
+
+/*-----------------------------------------------------------------------------
+| The Stdin output
 |----------------------------------------------------------------------------*/
 
 
@@ -62,54 +115,3 @@
 .jp-Stdin-input:focus {
     box-shadow: none;
 }
-
-
-.jp-OutputArea-prompt {
-  color: var(--jp-private-outputarea-prompt-color);
-  font-family: var(--jp-code-font-family);
-  text-align: right;
-  vertical-align: middle;
-  padding: var(--jp-code-padding);
-  font-size: var(--jp-code-font-size);
-  line-height: var(--jp-code-line-height);
-  border: var(--jp-border-width) solid transparent;
-  flex: 0 0 var(--jp-private-outputarea-prompt-width);
-  box-sizing: border-box;
-}
-
-
-.jp-OutputArea-prompt:hover {
-  background: var(--md-grey-100);
-}
-
-
-.jp-OutputArea-output {
-  display: flex;
-}
-
-
-/* Hide the gutter in case of
- *  - nested output areas (e.g. in the case of output widgets)
- *  - mirrored output areas
- */
-.jp-OutputArea .jp-OutputArea .jp-OutputArea-prompt {
-  display: none;
-}
-
-
-/*-----------------------------------------------------------------------------
-| executeResult is added to any Output-result for the display of the object
-| returned by a cell
-|----------------------------------------------------------------------------*/
-
-
-.jp-OutputArea-output.jp-OutputArea-executeResult {
-  margin-left: 0px;
-  flex: 1 1 auto;
-}
-
-
-.jp-OutputArea-executeResult.jp-RenderedText {
-  padding-top: var(--jp-code-padding);
-}
-
