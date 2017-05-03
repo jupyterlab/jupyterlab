@@ -60,7 +60,7 @@
   flex-grow: 1;
 }
 
-.jp-Chatbox .jp-ChatEntry * {
+.jp-Chatbox .jp-ChatEntry .p-Widget {
   cursor: move;
 }
 
