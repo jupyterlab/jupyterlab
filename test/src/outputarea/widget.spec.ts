@@ -120,59 +120,6 @@ describe('outputarea/widget', () => {
 
     });
 
-    describe('#collapsed', () => {
-
-      it('should get the collapsed state of the widget', () => {
-        expect(widget.collapsed).to.be(false);
-      });
-
-      it('should set the collapsed state of the widget', () => {
-        widget.collapsed = true;
-        expect(widget.collapsed).to.be(true);
-      });
-
-      it('should post an update request', (done) => {
-        widget.collapsed = true;
-        requestAnimationFrame(() => {
-          expect(widget.methods).to.contain('onUpdateRequest');
-          done();
-        });
-      });
-
-    });
-
-    describe('#fixedHeight', () => {
-
-      it('should get the fixed height state of the widget', () => {
-        expect(widget.fixedHeight).to.be(false);
-      });
-
-      it('should set the fixed height state of the widget', () => {
-        widget.fixedHeight = true;
-        expect(widget.fixedHeight).to.be(true);
-      });
-
-      it('should post an update request', (done) => {
-        widget.fixedHeight = true;
-        requestAnimationFrame(() => {
-          expect(widget.methods).to.contain('onUpdateRequest');
-          done();
-        });
-      });
-
-    });
-
-    describe('#dispose()', () => {
-
-      it('should dispose of the resources held by the widget', () => {
-        widget.dispose();
-        expect(widget.isDisposed).to.be(true);
-        widget.dispose();
-        expect(widget.isDisposed).to.be(true);
-      });
-
-    });
-
     describe('#execute()', () => {
 
       let session: ClientSession;
@@ -210,21 +157,6 @@ describe('outputarea/widget', () => {
 
     });
 
-    describe('#onUpdateRequest()', () => {
-
-      it('should set the appropriate classes on the widget', (done) => {
-        widget.collapsed = true;
-        widget.fixedHeight = true;
-        requestAnimationFrame(() => {
-          expect(widget.methods).to.contain('onUpdateRequest');
-          expect(widget.hasClass('jp-mod-fixedHeight')).to.be(true);
-          expect(widget.hasClass('jp-mod-collapsed')).to.be(true);
-          done();
-        });
-      });
-
-    });
-
     describe('#onModelChanged()', () => {
 
       it('should handle an added output', () => {
@@ -254,13 +186,13 @@ describe('outputarea/widget', () => {
 
     });
 
-    describe('.contentFactory', () => {
+    describe('.ContentFactory', () => {
 
-      describe('#createGutter()', () => {
+      describe('#createOutputPrompt()', () => {
 
-        it('should create a gutter widget', () => {
+        it('should create an output prompt', () => {
           let factory = new OutputArea.ContentFactory();
-          expect(factory.createGutter().executionCount).to.be(null);
+          expect(factory.createOutputPrompt().executionCount).to.be(null);
         });
 
       });
