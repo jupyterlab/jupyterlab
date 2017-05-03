@@ -358,7 +358,7 @@ namespace CellTools {
       }
       if (!activeCell) {
         let cell = new Widget();
-        cell.addClass('jp-CellEditor');
+        cell.addClass('jp-InputArea-editor');
         cell.addClass('jp-InputArea-editor');
         layout.addWidget(cell);
         this._cellModel = null;
@@ -376,7 +376,7 @@ namespace CellTools {
 
       let model = this._model;
       let editorWidget = new CodeEditorWrapper({ model, factory });
-      editorWidget.addClass('jp-CellEditor');
+      editorWidget.addClass('jp-InputArea-editor');
       editorWidget.addClass('jp-InputArea-editor');
       editorWidget.editor.readOnly = true;
       layout.addWidget(prompt);

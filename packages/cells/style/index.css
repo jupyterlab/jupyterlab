@@ -54,7 +54,7 @@
 }
 
 
-.jp-CellEditor {
+.jp-InputArea-editor {
   border: var(--jp-border-width) solid var(--jp-private-cell-editor-border);
   border-radius: 0px;
   background: var(--jp-private-cell-editor-background);
