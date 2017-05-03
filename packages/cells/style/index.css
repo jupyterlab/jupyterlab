@@ -36,7 +36,32 @@
 }
 
 
-.jp-Cell-prompt {
+/*-----------------------------------------------------------------------------
+| InputArea
+|----------------------------------------------------------------------------*/
+
+
+.jp-InputArea {
+  display: flex;
+  flex-direction: row;
+}
+
+
+.jp-InputArea-editor {
+  flex-grow: 1;
+  flex-shrink: 1;
+  height: auto;
+}
+
+
+.jp-CellEditor {
+  border: var(--jp-border-width) solid var(--jp-private-cell-editor-border);
+  border-radius: 0px;
+  background: var(--jp-private-cell-editor-background);
+}
+
+
+.jp-InputPrompt {
   flex-grow: 0;
   flex-shrink: 0;
   flex-basis: var(--jp-private-cell-prompt-width);
@@ -71,29 +96,4 @@
 
 .jp-MarkdownOutput.jp-RenderedHTMLCommon {
   overflow: visible;
-}
-
-
-/*-----------------------------------------------------------------------------
-| InputArea
-|----------------------------------------------------------------------------*/
-
-
-.jp-InputArea {
-  display: flex;
-  flex-direction: row;
-}
-
-
-.jp-InputArea-editor {
-  flex-grow: 1;
-  flex-shrink: 1;
-  height: auto;
-}
-
-
-.jp-CellEditor {
-  border: var(--jp-border-width) solid var(--jp-private-cell-editor-border);
-  border-radius: 0px;
-  background: var(--jp-private-cell-editor-background);
 }
