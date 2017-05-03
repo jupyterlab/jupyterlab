@@ -270,7 +270,7 @@ namespace InputArea {
    * The default editor factory singleton based on CodeMirror.
    */
   export
-  const defaultEditorFactory = _createDefaultEditorFactory();
+  const defaultEditorFactory: CodeEditor.Factory = _createDefaultEditorFactory();
 }
 
 
