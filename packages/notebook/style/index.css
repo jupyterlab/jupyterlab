@@ -194,7 +194,7 @@
 }
 
 
-.jp-ActiveCellTool .jp-CellEditor {
+.jp-ActiveCellTool .jp-InputArea-editor {
   flex: 1 1 auto;
   background-color: white;
   border-color: var(--jp-border-color1);

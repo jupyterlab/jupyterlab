@@ -332,12 +332,12 @@ const SHORTCUTS = [
   },
   {
     command: 'tooltip:launch-notebook',
-    selector: '.jp-Notebook.jp-mod-editMode .jp-CellEditor:not(.jp-mod-has-primary-selection)',
+    selector: '.jp-Notebook.jp-mod-editMode .jp-InputArea-editor:not(.jp-mod-has-primary-selection)',
     keys: ['Shift Tab']
   },
   {
     command: 'tooltip:launch-console',
-    selector: '.jp-CodeConsole-prompt .jp-CellEditor:not(.jp-mod-has-primary-selection)',
+    selector: '.jp-CodeConsole-prompt .jp-InputArea-editor:not(.jp-mod-has-primary-selection)',
     keys: ['Shift Tab']
   }
 ];
