@@ -216,7 +216,7 @@ namespace InputArea {
     /**
      * Construct a `ContentFactory`.
      */
-    constructor(options: IContentFactoryOptions = {}) {
+    constructor(options: ContentFactory.IOptions = {}) {
       this._editor = (options.editorFactory || defaultEditorFactory);
     }
 
@@ -238,17 +238,23 @@ namespace InputArea {
   }
 
   /**
-   * Options for the content factory.
+   * A namespace for the content factory.
    */
   export
-  interface IContentFactoryOptions {
+  namespace ContentFactory {
     /**
-     * The editor factory used by the content factory.
-     * 
-     * If this is not passed, a default CodeMirror editor factory
-     * will be used.
-    */
-    editorFactory?: CodeEditor.Factory;
+     * Options for the content factory.
+     */
+    export
+    interface IOptions {
+      /**
+       * The editor factory used by the content factory.
+       * 
+       * If this is not passed, a default CodeMirror editor factory
+       * will be used.
+      */
+      editorFactory?: CodeEditor.Factory;
+    }
   }
 
   /**
