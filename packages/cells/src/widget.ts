@@ -177,7 +177,7 @@ class Cell extends Widget {
     input.addClass(CELL_INPUT_AREA_CLASS);
     inputWrapper.addWidget(inputCollapser);
     inputWrapper.addWidget(input);
-    (this.layout as PanelLayout).addWidget(this._input);
+    (this.layout as PanelLayout).addWidget(inputWrapper);
 
     // Footer
     let footer = this._footer = this.contentFactory.createCellFooter();
