@@ -3,6 +3,7 @@
 
 export * from './clientsession';
 export * from './clipboard';
+export * from './collapser';
 export * from './commandlinker';
 export * from './commandpalette';
 export * from './dialog';

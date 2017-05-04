@@ -22,7 +22,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IClientSession
+  IClientSession, Collapser
 } from '@jupyterlab/apputils';
 
 import {
@@ -117,6 +117,8 @@ const RENDERED_CLASS = 'jp-mod-rendered';
 const DEFAULT_MARKDOWN_TEXT = 'Type Markdown and LaTeX: $ α^2 $';
 
 
+const CELL_HEADER_CLASS = 'jp-Cell-header';
+
 /**
  * A base cell widget.
  */
@@ -137,6 +139,12 @@ class BaseCellWidget extends Widget {
 
     let editor = this._editor = factory.createCellEditor(editorOptions);
     editor.addClass(CELL_EDITOR_CLASS);
+
+    this._header = factory.createCellHeader();
+    if (this._header) {
+      this._header.addClass(CELL_HEADER_CLASS);
+    }
+    (this.layout as PanelLayout).addWidget(this._header);
 
     this._input = factory.createInputArea({ editor });
     (this.layout as PanelLayout).addWidget(this._input);
@@ -254,6 +262,7 @@ class BaseCellWidget extends Widget {
 
   private _input: InputAreaWidget = null;
   private _editor: CodeEditorWidget = null;
+  private _header: Widget = null;
   private _model: ICellModel = null;
   private _readOnly = false;
 }
@@ -299,6 +308,8 @@ namespace BaseCellWidget {
      * Create a new input area for the widget.
      */
     createInputArea(options: InputAreaWidget.IOptions): InputAreaWidget;
+
+    createCellHeader(): Widget;
   }
 
   /**
@@ -330,6 +341,10 @@ namespace BaseCellWidget {
      */
     createInputArea(options: InputAreaWidget.IOptions): InputAreaWidget {
       return new InputAreaWidget(options);
+    }
+
+    createCellHeader(): Widget {
+      return void 0;
     }
   }
 
@@ -750,9 +765,16 @@ class InputAreaWidget extends Widget {
     this.layout = new PanelLayout();
     let prompt = this._prompt = new Widget();
     prompt.addClass(PROMPT_CLASS);
+    let inputCollapser = this._inputCollapser = new Collapser();
     let layout = this.layout as PanelLayout;
+    layout.addWidget(inputCollapser);
     layout.addWidget(prompt);
     layout.addWidget(editor);
+    this._inputCollapser.collapsedChanged.connect(this.onCollapse, this);
+  }
+
+  protected onCollapse(collapser: Collapser, collapsed: boolean): void {
+    console.log('Collapse!', collapsed);
   }
 
   /**
@@ -799,6 +821,7 @@ class InputAreaWidget extends Widget {
   }
 
   private _prompt: Widget;
+  private _inputCollapser: Collapser;
   private _editor: CodeEditorWidget;
   private _rendered: Widget;
 }

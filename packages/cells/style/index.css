@@ -10,16 +10,7 @@
 
 
 :root {
-  --jp-private-padding: 10px;
-  --jp-private-cell-editor-background: #f7f7f7;
-  --jp-private-cell-editor-border: #cfcfcf;
-  --jp-private-cell-prompt-width: 90px;
-  --jp-private-cell-inprompt-color: #303F9F;
-  --jp-private-cell-outprompt-color: #D84315;
-  --jp-private-cell-font-family: var(--jp-ui-font-family);
-  --jp-private-cell-prompt-letter-spacing: 2px;
 }
-
 
 
 /*-----------------------------------------------------------------------------
@@ -28,9 +19,10 @@
 
 
 .jp-Cell {
-  padding: 5px;
+  padding: var(--jp-cell-padding);
   margin: 0px;
-  border: var(--jp-border-width) solid transparent;
+  /*border: var(--jp-border-width) solid transparent;*/
+  border: none;
   outline: none;
   background: transparent;
 }
@@ -39,17 +31,37 @@
 .jp-Cell-prompt {
   flex-grow: 0;
   flex-shrink: 0;
-  flex-basis: var(--jp-private-cell-prompt-width);
-  color: var(--jp-private-cell-inprompt-color);
-  font-family: var(--jp-private-cell-font-family);
+  flex-basis: var(--jp-cell-prompt-width);
+  color: var(--jp-cell-inprompt-font-color);
+  font-family: var(--jp-cell-prompt-font-family);
   padding: var(--jp-code-padding);
   text-align: right;
-  letter-spacing: var(--jp-private-cell-prompt-letter-spacing);
+  letter-spacing: var(--jp-cell-prompt-letter-spacing);
+  opacity: var(--jp-cell-prompt-opacity);
   line-height: var(--jp-code-line-height);
   font-size: var(--jp-code-font-size);
   border: var(--jp-border-width) solid transparent;
 }
 
+
+/*-----------------------------------------------------------------------------
+| Input Collapser
+|----------------------------------------------------------------------------*/
+
+
+.jp-InputArea .jp-Collapser {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 8px;
+  height: 100%;
+  padding: 0px;
+  margin: 0px;
+  border-left: 1px solid var(--jp-brand-color1);
+  border-top: 1px solid var(--jp-brand-color1);
+  border-bottom: 1px solid var(--jp-brand-color1);
+
+}
 
 /*-----------------------------------------------------------------------------
 | CodeCell
@@ -93,7 +105,7 @@
 
 
 .jp-CellEditor {
-  border: var(--jp-border-width) solid var(--jp-private-cell-editor-border);
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
   border-radius: 0px;
-  background: var(--jp-private-cell-editor-background);
+  background: var(--jp-cell-editor-background);
 }

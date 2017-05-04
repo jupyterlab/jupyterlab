@@ -24,6 +24,8 @@ Material Design when selecting colors. We are not, however, following
 all of MD as it is not optimized for dense, information rich UIs.
 */
 
+@import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
+
 
 :root {
 
@@ -139,12 +141,31 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-info-color2: var(--md-cyan-300);
   --jp-info-color3: var(--md-cyan-100);
 
+  /* Cell specific styles */
+ 
+  --jp-cell-editor-background: #f7f7f7;
+  --jp-cell-editor-border-color: #cfcfcf;
+  --jp-cell-editor-background-edit: var(--jp-ui-layout-color1);
+  --jp-cell-editor-border-color-edit: var(--jp-brand-color1);
+  --jp-cell-prompt-width: 90px;
+  --jp-cell-prompt-font-family: 'Roboto Mono', monospace;
+  --jp-cell-prompt-letter-spacing: 0px;
+  --jp-cell-prompt-opacity: 0.7;
+  --jp-cell-prompt-opacity-active: 1.0;
+  --jp-cell-inprompt-font-color: var(--md-grey-700);
+  --jp-cell-inprompt-font-color-active: var(--md-grey-700);
+  --jp-cell-outprompt-font-color: var(--md-grey-700);
+  --jp-cell-outprompt-font-color-active: var(--md-grey-700);
+  --jp-cell-padding: 5px;
+ 
   /* Notebook specific styles */
-
+  
+  --jp-notebook-padding: 10px;
+  --jp-notebook-cell-border-color: transparent;
   --jp-notebook-scroll-padding: 100px;
 
-
   /* The caret used for select dropdown styling. */
+
   --jp-ui-select-caret: url('./images/down_caret.svg');
 
   /* Icons used in the application. */
