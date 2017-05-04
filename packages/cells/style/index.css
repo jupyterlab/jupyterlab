@@ -113,9 +113,17 @@
 | Output
 |----------------------------------------------------------------------------*/
 
-/* Put a scape between input and output. */
-.jp-Cell-outputWrapper {
-  margin: 0 0 0 0;
+/* Put a space between input and output when there IS output */
+.jp-Cell:not(.jp-mod-noOutputs) .jp-Cell-outputWrapper {
+  margin-top: 5px;
+}
+
+/* Make the output collapser disappear when there is not output, but do so
+ * in a manner that leaves it in the layout and preserves its width.
+ */
+.jp-Cell.jp-mod-noOutputs .jp-Cell-outputCollapser {
+  border: none !important;
+  background: transparent !important;
 }
 
 /* Text output with the Out[] prompt needs a top padding to match the
@@ -124,6 +132,8 @@
 .jp-OutputArea-executeResult .jp-RenderedText.jp-OutputArea-output {
   padding-top: var(--jp-code-padding);
 }
+
+
 
 /*-----------------------------------------------------------------------------
 | CodeCell
