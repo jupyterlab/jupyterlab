@@ -246,9 +246,9 @@ class Cell extends Widget {
     this._input.setPrompt(value);
   }
 
-  /** 
+  /**
    * The view state of input being collapsed.
-  */
+   */
   get inputCollapsed(): boolean {
     return this._inputCollapsed;
   }
@@ -264,7 +264,7 @@ class Cell extends Widget {
     if (this.isDisposed) {
       return;
     }
-    this._input= null;
+    this._input = null;
     this._model = null;
     this._header = null;
     this._footer = null;
@@ -329,15 +329,14 @@ namespace Cell {
     /**
      * The factory object for customizable cell children.
      */
-    contentFactory: IContentFactory;
-  
+    contentFactory?: IContentFactory;
   }
 
   /**
    * The factory object for customizable cell children.
-   * 
+   *
    * This is used to allow users of cells to customize child content.
-   * 
+   *
    * This inherits from `OutputArea.IContentFactory` to avoid needless nesting and
    * provide a single factory object for all notebook/cell/outputarea related
    * widgets.
@@ -362,7 +361,7 @@ namespace Cell {
 
   /**
    * The default implementation of an `IContentFactory`.
-   * 
+   *
    * This includes a CodeMirror editor factory to make it easy to use out of the box.
    */
   export
@@ -396,7 +395,7 @@ namespace Cell {
     }
 
     /**
-     * Create a new input/output collaper for the parent widget.
+     * Create a new input/output collapser for the parent widget.
      */
     createCollapser(): ICollapser {
       return new Collapser();
@@ -416,6 +415,9 @@ namespace Cell {
       return new Stdin(options);
     }
 
+    /**
+     * Create an input prompt.
+     */
     createInputPrompt(): IInputPrompt {
       return new InputPrompt();
     }
@@ -435,12 +437,11 @@ namespace Cell {
     interface IOptions {
       /**
        * The editor factory used by the content factory.
-       * 
+       *
        * If this is not passed, a default CodeMirror editor factory
        * will be used.
-      */
+       */
       editorFactory?: CodeEditor.Factory;
-
     }
   }
 
@@ -505,9 +506,9 @@ class CodeCell extends Cell {
     return this._output;
   }
 
-  /** 
+  /**
    * The view state of output being collapsed.
-  */
+   */
   get outputCollapsed(): boolean {
     return this._outputCollapsed;
   }
@@ -622,7 +623,6 @@ namespace CodeCell {
      * The mime renderer for the cell widget.
      */
     rendermime: RenderMime;
-
   }
 
 }
@@ -758,7 +758,7 @@ namespace MarkdownCell {
    * An options object for initializing a base cell widget.
    */
   export
-  interface IOptions extends Cell.IOptions{
+  interface IOptions extends Cell.IOptions {
     /**
      * The model used by the cell.
      */
@@ -827,6 +827,7 @@ namespace RawCell {
 export
 interface ICellHeader extends Widget {}
 
+
 /**
  * Default implementation of the cell header is a Widget with a class
  */
@@ -852,11 +853,12 @@ class CellFooter extends Widget implements ICellFooter {
 
 /**
  * A collapser for input and output.
- * 
+ *
  * This is the element that gets clicked on.
  */
 export
 interface ICollapser extends Widget {}
+
 
 /**
  * Default implementation of the collapser.

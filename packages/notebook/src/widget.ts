@@ -358,7 +358,7 @@ class StaticNotebook extends Widget {
         // is important for getting the active cell
         // index for the editable notebook correct.
         this._insertCell(index, value);
-        this._removeCell(index+1);
+        this._removeCell(index + 1);
         index++;
       });
       break;
@@ -495,7 +495,7 @@ namespace StaticNotebook {
 
   /**
    * A factory for creating notebook content.
-   * 
+   *
    * #### Notes
    * This extends the content factory of the cell itself, which extends the content
    * factory of the output area and input area. The result is that there is a single
@@ -528,7 +528,7 @@ namespace StaticNotebook {
 
     /**
      * Create a new code cell widget.
-     * 
+     *
      * #### Notes
      * If no cell content factory is passed in with the options, the one on the
      * notebook content factory is used.
@@ -542,7 +542,7 @@ namespace StaticNotebook {
 
     /**
      * Create a new markdown cell widget.
-     * 
+     *
      * #### Notes
      * If no cell content factory is passed in with the options, the one on the
      * notebook content factory is used.
@@ -556,7 +556,7 @@ namespace StaticNotebook {
 
     /**
      * Create a new raw cell widget.
-     * 
+     *
      * #### Notes
      * If no cell content factory is passed in with the options, the one on the
      * notebook content factory is used.
@@ -1419,7 +1419,7 @@ namespace Notebook {
 
   /**
    * The default implementation of a notebook content factory..
-   * 
+   *
    * #### Notes
    * Override methods on this class to customize the default notebook factory
    * methods that create notebook content.
@@ -1490,11 +1490,11 @@ namespace Private {
 
   /**
    * Process the `IOptions` passed to the notebook widget.
-   * 
+   *
    * #### Notes
    * This defaults the content factory to that in the `Notebook` namespace.
    */
-  export 
+  export
   function processNotebookOptions(options: Notebook.IOptions) {
     if (options.contentFactory) {
       return options;
@@ -1504,7 +1504,7 @@ namespace Private {
         languagePreference: options.languagePreference,
         contentFactory: Notebook.defaultContentFactory,
         mimeTypeService: options.mimeTypeService
-        
+
       }
     }
   }

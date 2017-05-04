@@ -141,7 +141,7 @@ class InputArea extends Widget {
     this._prompt.executionCount = value;
   }
 
- /**
+  /**
    * Dispose of the resources held by the widget.
    */
   dispose() {
@@ -176,9 +176,9 @@ namespace InputArea {
      */
     model: ICellModel;
 
-    /** 
-     * The content factory used by the widget to create children. 
-     * 
+    /**
+     * The content factory used by the widget to create children.
+     *
      * Defaults to one that uses CodeMirror.
      */
     contentFactory?: IContentFactory;
@@ -186,15 +186,15 @@ namespace InputArea {
 
   /**
    * An input area widget content factory.
-   * 
-   * The content factory is used to create children in a way 
+   *
+   * The content factory is used to create children in a way
    * that can be customized.
    */
   export
   interface IContentFactory {
     /**
      * The editor factory we need to include in `CodeEditorWratter.IOptions`.
-     * 
+     *
      * This is a separate readonly attribute rather than a factory method as we need
      * to pass it around.
      */
@@ -208,7 +208,7 @@ namespace InputArea {
 
   /**
    * Default implementation of `IContentFactory`.
-   * 
+   *
    * This defaults to using an `editorFactory` based on CodeMirror.
    */
   export
@@ -249,19 +249,13 @@ namespace InputArea {
     interface IOptions {
       /**
        * The editor factory used by the content factory.
-       * 
+       *
        * If this is not passed, a default CodeMirror editor factory
        * will be used.
-      */
+       */
       editorFactory?: CodeEditor.Factory;
     }
   }
-
-  /**
-   * The default `ContentFactory` instance.
-   */
-  export
-  const defaultContentFactory = new ContentFactory({});
 
   /**
    * A function to create the default CodeMirror editor factory.
@@ -276,6 +270,12 @@ namespace InputArea {
    */
   export
   const defaultEditorFactory: CodeEditor.Factory = _createDefaultEditorFactory();
+
+  /**
+   * The default `ContentFactory` instance.
+   */
+  export
+  const defaultContentFactory = new ContentFactory({});
 }
 
 

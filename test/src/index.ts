@@ -18,6 +18,7 @@ import './apputils/styling.spec';
 import './apputils/toolbar.spec';
 import './apputils/vdom.spec';
 
+import './cells/inputarea.spec';
 import './cells/model.spec';
 import './cells/widget.spec';
 

@@ -197,7 +197,7 @@ describe('notebook/widget', () => {
         widget.model = new NotebookModel();
         let called = false;
         widget.modelContentChanged.connect(() => { called = true; });
-        let cursor = widget.model.metadata.set('foo', 1);
+        widget.model.metadata.set('foo', 1);
         expect(called).to.be(true);
       });
 
@@ -474,42 +474,14 @@ describe('notebook/widget', () => {
 
       });
 
-      describe('#codeCellContentFactory', () => {
-
-        it('should be a CodeCell.ContentFactory', () => {
-          let factory = new StaticNotebook.ContentFactory({ editorFactory });
-          expect(factory.codeCellContentFactory).to.be.a(CodeCell.ContentFactory);
-        });
-
-      });
-
-      describe('#markdownCellContentFactory', () => {
-
-        it('should be a Cell.ContentFactory', () => {
-          let factory = new StaticNotebook.ContentFactory({ editorFactory });
-          expect(factory.markdownCellContentFactory).to.be.a(Cell.ContentFactory);
-        });
-
-      });
-
-      describe('#rawCellContentFactory', () => {
-
-        it('should be a Cell.ContentFactory', () => {
-          let factory = new StaticNotebook.ContentFactory({ editorFactory });
-          expect(factory.rawCellContentFactory).to.be.a(Cell.ContentFactory);
-        });
-
-      });
-
       describe('#createCodeCell({})', () => {
 
         it('should create a `CodeCell`', () => {
-          let factory = new StaticNotebook.ContentFactory({ editorFactory });
-          let contentFactory = factory.codeCellContentFactory;
+          let contentFactory = new StaticNotebook.ContentFactory();
           let model = new CodeCellModel({});
           let codeOptions = { model, rendermime, contentFactory };
           let parent = new StaticNotebook(options);
-          let widget = factory.createCodeCell(codeOptions, parent);
+          let widget = contentFactory.createCodeCell(codeOptions, parent);
           expect(widget).to.be.a(CodeCell);
         });
 
@@ -518,12 +490,11 @@ describe('notebook/widget', () => {
       describe('#createMarkdownCell({})', () => {
 
         it('should create a `MarkdownCell`', () => {
-          let factory = new StaticNotebook.ContentFactory({ editorFactory });
-          let contentFactory = factory.markdownCellContentFactory;
+          let contentFactory = new StaticNotebook.ContentFactory();
           let model = new MarkdownCellModel({});
           let mdOptions = { model, rendermime, contentFactory };
           let parent = new StaticNotebook(options);
-          let widget = factory.createMarkdownCell(mdOptions, parent);
+          let widget = contentFactory.createMarkdownCell(mdOptions, parent);
           expect(widget).to.be.a(MarkdownCell);
         });
 
@@ -532,12 +503,11 @@ describe('notebook/widget', () => {
       describe('#createRawCell()', () => {
 
         it('should create a `RawCell`', () => {
-          let factory = new StaticNotebook.ContentFactory({ editorFactory });
-          let contentFactory = factory.rawCellContentFactory;
+          let contentFactory = new StaticNotebook.ContentFactory();
           let model = new RawCellModel({});
           let rawOptions = { model, contentFactory };
           let parent = new StaticNotebook(options);
-          let widget = factory.createRawCell(rawOptions, parent);
+          let widget = contentFactory.createRawCell(rawOptions, parent);
           expect(widget).to.be.a(RawCell);
         });
 
