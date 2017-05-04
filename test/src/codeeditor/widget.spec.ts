@@ -16,7 +16,7 @@ import {
 } from 'simulate-event';
 
 import {
-  CodeEditor, CodeEditorWidget
+  CodeEditor, CodeEditorWrapper
 } from '@jupyterlab/codeeditor';
 
 import {
@@ -46,7 +46,7 @@ class LogEditor extends CodeMirrorEditor {
 }
 
 
-class LogWidget extends CodeEditorWidget {
+class LogWidget extends CodeEditorWrapper {
 
   methods: string[] = [];
 
@@ -77,7 +77,7 @@ class LogWidget extends CodeEditorWidget {
 }
 
 
-describe('CodeEditorWidget', () => {
+describe('CodeEditorWrapper', () => {
 
   let widget: LogWidget;
   let editorFactory = (options: CodeEditor.IOptions) => {
@@ -96,8 +96,8 @@ describe('CodeEditorWidget', () => {
 
   describe('#constructor()', () => {
 
-    it('should be a CodeEditorWidget', () => {
-      expect(widget).to.be.a(CodeEditorWidget);
+    it('should be a CodeEditorWrapper', () => {
+      expect(widget).to.be.a(CodeEditorWrapper);
     });
 
     it('should add a focus listener', () => {

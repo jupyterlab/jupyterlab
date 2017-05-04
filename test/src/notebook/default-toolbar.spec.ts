@@ -20,7 +20,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
- CodeCellWidget, MarkdownCellWidget
+ CodeCell, MarkdownCell
 } from '@jupyterlab/cells';
 
 import {
@@ -121,7 +121,7 @@ describe('@jupyterlab/notebook', () => {
         Widget.attach(button, document.body);
         button.node.click();
         expect(panel.notebook.activeCellIndex).to.be(1);
-        expect(panel.notebook.activeCell).to.be.a(CodeCellWidget);
+        expect(panel.notebook.activeCell).to.be.a(CodeCell);
         button.dispose();
       });
 
@@ -197,9 +197,9 @@ describe('@jupyterlab/notebook', () => {
       it('should run and advance when clicked', (done) => {
         let button = ToolbarItems.createRunButton(panel);
         let widget = panel.notebook;
-        let next = widget.widgets[1] as MarkdownCellWidget;
+        let next = widget.widgets[1] as MarkdownCell;
         widget.select(next);
-        let cell = widget.activeCell as CodeCellWidget;
+        let cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
         next.rendered = false;
         Widget.attach(button, document.body);

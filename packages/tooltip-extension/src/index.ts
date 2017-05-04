@@ -94,7 +94,7 @@ const consolePlugin: JupyterLabPlugin<void> = {
         }
 
         const anchor = parent.console;
-        const editor = anchor.prompt.editor;
+        const editor = anchor.promptCell.editor;
         const kernel = anchor.session.kernel;
         const rendermime = anchor.rendermime;
 

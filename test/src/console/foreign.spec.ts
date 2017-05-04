@@ -24,7 +24,7 @@ import {
 } from '@jupyterlab/console';
 
 import {
-  CodeCellModel, CodeCellWidget
+  CodeCellModel, CodeCell
 } from '@jupyterlab/cells';
 
 import {
@@ -37,7 +37,7 @@ import {
 
 
 class TestParent extends Panel implements ForeignHandler.IReceiver {
-  addCell(cell: CodeCellWidget): void {
+  addCell(cell: CodeCell): void {
     this.addWidget(cell);
   }
 }
@@ -74,10 +74,10 @@ class TestHandler extends ForeignHandler {
 
 const rendermime = defaultRenderMime();
 
-function cellFactory(): CodeCellWidget {
+function cellFactory(): CodeCell {
   let contentFactory = createCodeCellFactory();
   let model = new CodeCellModel({});
-  let cell = new CodeCellWidget({ model, rendermime, contentFactory });
+  let cell = new CodeCell({ model, rendermime, contentFactory });
   return cell;
 };
 const relevantTypes = [

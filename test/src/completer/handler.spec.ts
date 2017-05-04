@@ -16,7 +16,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  CodeEditor, CodeEditorWidget
+  CodeEditor, CodeEditorWrapper
 } from '@jupyterlab/codeeditor';
 
 import {
@@ -32,12 +32,12 @@ import {
 } from '../utils';
 
 
-function createEditorWidget(): CodeEditorWidget {
+function createEditorWidget(): CodeEditorWrapper {
   let model = new CodeEditor.Model();
   let factory = (options: CodeEditor.IOptions) => {
     return new CodeMirrorEditor(options);
   };
-  return new CodeEditorWidget({ factory, model });
+  return new CodeEditorWrapper({ factory, model });
 }
 
 
