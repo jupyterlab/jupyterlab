@@ -41,6 +41,13 @@ const ITerminalTracker = new Token<ITerminalTracker>('jupyter.services.terminal-
 export
 function addDefaultCommands(tracker: ITerminalTracker, commands: CommandRegistry) {
 
+  /**
+   * Whether there is an active terminal.
+   */
+  function hasWidget(): boolean {
+    return tracker.currentWidget !== null;
+  }
+
   commands.addCommand('terminal:increase-font', {
     label: 'Increase Terminal Font Size',
     execute: () => {
@@ -49,7 +56,8 @@ function addDefaultCommands(tracker: ITerminalTracker, commands: CommandRegistry
         options.fontSize++;
         tracker.forEach(widget => { widget.fontSize = options.fontSize; });
       }
-    }
+    },
+    isEnabled: hasWidget
   });
 
   commands.addCommand('terminal:decrease-font', {
@@ -60,7 +68,8 @@ function addDefaultCommands(tracker: ITerminalTracker, commands: CommandRegistry
         options.fontSize--;
         tracker.forEach(widget => { widget.fontSize = options.fontSize; });
       }
-    }
+    },
+    isEnabled: hasWidget
   });
 
   commands.addCommand('terminal:toggle-theme', {
@@ -79,6 +88,7 @@ function addDefaultCommands(tracker: ITerminalTracker, commands: CommandRegistry
         widget.background = options.background;
         widget.color = options.color;
       });
-    }
+    },
+    isEnabled: hasWidget
   });
 }
