@@ -39,7 +39,6 @@
     "example:browser": "cd examples/browser && npm run update && npm run build",
     "example:node": "cd examples/node && npm install",
     "build:examples": "npm run example:browser && npm run example:node",
-    "docs": "typedoc --options typedoc.json src",
     "test:coverage": "istanbul cover --dir test/coverage _mocha -- --retries 3 test/build/**/*.spec.js --foo bar --terminalsAvailable True",
     "test:integration": "cd test && python integration_test.py",
     "test:devtool": "devtool node_modules/mocha/bin/_mocha -qc test/build/**/**.spec.js --foo bar --terminalsAvailable True",
