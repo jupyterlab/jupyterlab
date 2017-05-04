@@ -194,6 +194,47 @@ class NotebookPanel extends Widget {
   }
 
   /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the dock panel's node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+    case 'mouseup':
+    case 'mouseout':
+      let target = event.target as HTMLElement;
+      if (this.toolbar.node.contains(document.activeElement) &&
+          target.localName !== 'select') {
+        this.notebook.node.focus();
+      }
+      break;
+    default:
+      break;
+    }
+  }
+
+  /**
+   * Handle `after-attach` messages for the widget.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this.toolbar.node.addEventListener('mouseup', this);
+    this.toolbar.node.addEventListener('mouseout', this);
+  }
+
+  /**
+   * Handle `before-detach` messages for the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this.toolbar.node.removeEventListener('mouseup', this);
+    this.toolbar.node.removeEventListener('mouseout', this);
+  }
+
+  /**
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
