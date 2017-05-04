@@ -22,11 +22,11 @@ if [[ $GROUP == tests ]]; then
 
     # Run the JS and python tests
     py.test
-    npm run clean
-    npm run build:src
-    npm run build:test
+    yarn clean
+    yarn build:src
+    yarn build:test
     npm test
-    npm run test:services || npm run test:services
+    yarn test:services || yarn test:services
 
     # Make sure we have CSS that can be converted with postcss
     npm install -g postcss-cli
@@ -38,12 +38,11 @@ fi
 if [[ $GROUP == coverage ]]; then
     # Run the coverage and python tests.
     py.test
-    npm run build
-    npm run build:test
-    npm run coverage
+    yarn build
+    yarn build:test
+    yarn coverage
 
     # Run the link check
     pip install -q pytest-check-links
     py.test --check-links -k .md .
 fi
-

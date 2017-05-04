@@ -15,10 +15,10 @@ from .commands import _get_build_dir, _get_config, _get_config_dir
 # Module globals
 #-----------------------------------------------------------------------------
 
-DEV_NOTE_NPM = """It looks like you're running JupyterLab from source.
+DEV_NOTE_YARN = """It looks like you're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
 
-    npm run watch
+    yarn watch
 
 from the JupyterLab repo directory in another terminal window to have the
 system incrementally watch and build JupyterLab's TypeScript for you, as you
@@ -38,7 +38,7 @@ def load_jupyter_server_extension(nbapp):
     base_dir = os.path.realpath(os.path.join(HERE, '..'))
     dev_mode = os.path.exists(os.path.join(base_dir, '.git'))
     if dev_mode:
-        nbapp.log.info(DEV_NOTE_NPM)
+        nbapp.log.info(DEV_NOTE_YARN)
 
     web_app = nbapp.web_app
 

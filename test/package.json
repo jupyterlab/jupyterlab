@@ -4,12 +4,12 @@
   "scripts": {
     "build:test": "tsc && webpack",
     "coverage": "webpack --config webpack-cov.conf.js && python run-test.py karma-cov.conf.js",
-    "test": "npm run test:firefox",
+    "test": "yarn test:firefox",
     "test:chrome": "python run-test.py --browsers=Chrome karma.conf.js",
     "test:debug": "python run-test.py  --browsers=Chrome --singleRun=false --debug=true karma.conf.js",
     "test:firefox": "python run-test.py --browsers=Firefox karma.conf.js",
     "test:ie": "python run-test.py  --browsers=IE karma.conf.js",
-    "watch": "watch \"npm run build:test && npm test\" src --wait 10 --filter=../scripts/watch-filter.js"
+    "watch": "watch \"yarn build:test && npm test\" src --wait 10 --filter=../scripts/watch-filter.js"
   },
   "dependencies": {
     "@jupyterlab/application": "^0.3.1",

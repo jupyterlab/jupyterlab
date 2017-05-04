@@ -13,6 +13,8 @@ from subprocess import check_output, CalledProcessError
 import shutil
 import sys
 import tarfile
+from pathlib import Path
+import hashlib
 
 from jupyter_core.paths import ENV_JUPYTER_PATH, ENV_CONFIG_PATH
 from .builder import get_build_tool
@@ -57,9 +59,10 @@ def install_extension(extension):
     """
     tar_name, pkg_name = validate_extension(extension)
     config = _get_config()
-    path = pjoin(_get_cache_dir(config), tar_name)
-    #run([NPM_CMD, 'install', '--save', path], cwd=_get_root_dir(config))
-    builder.install([path], save=True, cwd=_get_root_dir(config))
+    path = pjoin(_get_extension_dir(config), tar_name)
+    path = "./{}".format(Path(path).relative_to(_get_root_dir(config)))
+    builder.install(['{}@file:{}'.format(pkg_name, path)],
+                    save=True, cwd=_get_root_dir(config))
     config['installed_extensions'][pkg_name] = path
     if pkg_name in config['linked_extensions']:
         del config['linked_extensions'][pkg_name]
@@ -141,13 +144,12 @@ def validate_extension(extension):
     config = _get_config()
     extension = _normalize_path(extension)
     _ensure_package(config)
-    cache_dir = _get_cache_dir(config)
+    extensions_dir = _get_extension_dir(config)
     # npm pack the extension
-    # output = run([NPM_CMD, 'pack', extension], cwd=cache_dir)
-    output = builder.pack(extension, cwd=cache_dir)
+    output = builder.pack(extension, cwd=extensions_dir)
     name = output.decode('utf8').splitlines()[-1]
     # read the package.json data from the file
-    tar = tarfile.open(pjoin(cache_dir, name), "r:gz")
+    tar = tarfile.open(pjoin(extensions_dir, name), "r:gz")
     f = tar.extractfile('package/package.json')
     data = json.loads(f.read().decode('utf8'))
     _validate_package(data, extension)
@@ -198,11 +200,11 @@ def describe():
 def _ensure_package(config):
     """Make sure the build dir is set up.
     """
-    cache_dir = _get_cache_dir(config)
+    extensions_dir = _get_extension_dir(config)
     root_dir = _get_root_dir(config)
-    if not osp.exists(cache_dir):
-        os.makedirs(cache_dir)
-    for name in ['package.json', 'index.template.js', 'webpack.config.js']:
+    if not osp.exists(extensions_dir):
+        os.makedirs(extensions_dir)
+    for name in ['package.json', 'index.template.js', 'webpack.config.js', '.yarnrc', 'yarn.lock']:
         dest = pjoin(root_dir, name)
         shutil.copy2(pjoin(here, name), dest)
 
@@ -287,6 +289,6 @@ def _get_pkg_path(config=None):
     return pjoin(_get_root_dir(config), 'package.json')
 
 
-def _get_cache_dir(config=None):
+def _get_extension_dir(config=None):
     config = config or _get_config()
-    return pjoin(_get_root_dir(config), 'cache')
+    return pjoin(_get_root_dir(config), 'extensions')

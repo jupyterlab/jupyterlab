@@ -72,7 +72,7 @@
   "scripts": {
     "build": "tsc && node build.js",
     "clean": "rimraf lib",
-    "watch": "watch \"npm run build\" .. --wait 10 --filter=../../scripts/watch-filter.js"
+    "watch": "watch \"yarn build\" .. --wait 10 --filter=../../scripts/watch-filter.js"
   },
   "repository": {
     "type": "git",

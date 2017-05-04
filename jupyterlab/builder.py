@@ -4,26 +4,30 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 from pathlib import Path
+import shutil
 from subprocess import check_output, CalledProcessError, Popen, PIPE
+import json
+from tempfile import mkdtemp
 
 
-def get_build_tool(use=None, verbose=True, silent=None):
-    """Detect the right asset manager to use"""
+def get_build_tool(use=None, verbose=False, silent=None):
+    """Detect the right asset manager to use
 
-    commands = ['yarnpkg', 'yarn', 'npm']
+    due to a collision between Apache YARN, `yarnpkg` is the preferred name
+    """
 
-    if use:
-        commands = [use] + commands
+    for Manager in [Yarn]:
+        commands = Manager.possible_cmds
+        # always try the user-specified command first
+        if use:
+            commands = [use] + commands
 
-    for cmd in commands:
-        try:
-            check_output([cmd, '--version'])
-            if 'yarn' in Path(cmd).name:
-                return YarnpkgManager(cmd, verbose=verbose, silent=silent)
-            else:
-                return NPMManager(cmd, verbose=verbose, silent=silent)
-        except CalledProcessError:
-            pass
+        for cmd in commands:
+            try:
+                check_output([cmd, '--version'])
+                return Manager(cmd, verbose=verbose, silent=silent)
+            except FileNotFoundError:
+                pass
 
     raise ImportError(
         'No compatible frontend build tool was found, tried: {}'.format(
@@ -32,7 +36,7 @@ def get_build_tool(use=None, verbose=True, silent=None):
 
 
 class FrontendAssetManager(object):
-    """base wrapper class for <user command>, yarnpkg, yarn or npm
+    """base wrapper class for <user command>, yarnpkg, yarn
        (in order of preference)
     """
     verbose = False
@@ -55,6 +59,7 @@ class FrontendAssetManager(object):
         final_cmd = (self._cmd,) + cmd_args
 
         if self.verbose:
+            print(">>> ./cwd", popen_kwargs.get("cwd"))
             print(">>>", " ".join(final_cmd))
 
         p = Popen(final_cmd, stdout=PIPE, stderr=PIPE, **popen_kwargs)
@@ -70,18 +75,18 @@ class FrontendAssetManager(object):
         has_err = error or p.returncode or p.returncode is None
 
         if self.verbose or has_err:
-            print("Command returned (code: {}):".format(p.returncode))
+            print(">>> Command returned (code: {}):".format(p.returncode))
 
             if stdout:
-                print("\nCommand Output:")
+                print("\n>>> Command Output:")
                 print(stdout.decode('utf-8'))
 
             if stderr:
-                print("\nCommand Error:")
+                print("\n>>> Command Error:")
                 print(stderr.decode('utf-8'))
 
             if error:
-                print("\nCommand Exception:")
+                print("\n>>> Command Exception:")
                 print(error)
 
             if has_err:
@@ -97,45 +102,56 @@ class FrontendAssetManager(object):
             ('run', user_command,) + extra_args,
             **popen_kwargs)
 
-    def pack(self, path):
-        return self._run(('pack', path))
 
-
-class NPMManager(FrontendAssetManager):
-    """npm is very widely distributed, but pretty slow, somewhat unreliable.
-       when you use it, you are giving your data to the npm company.
-    """
-    cmd = 'npm'
-
-    def install(self, packages=None, save=None, save_dev=None, *extra_args, **popen_kwargs):
-        args = ('install',)
-        if packages is None:
-            packages = tuple()
-        elif save_dev:
-            args = args + ('--save-dev',)
-        elif save:
-            args = args + ('--save',)
-        return self._run(args + tuple(packages) + extra_args, **popen_kwargs)
-
-
-class YarnpkgManager(FrontendAssetManager):
+class Yarn(FrontendAssetManager):
     """yarn is newer than npm, and not as widely distributed, but is far faster
        and more reproducible, and better at offline operations.
        when you use it, you are giving your data to the facebook, and maybe
        the npm company.
     """
     cmd = 'yarnpkg'
+    possible_cmds = ['yarnpkg', 'yarn']
 
-    def install(self, packages=None, save=True, save_dev=None, *extra_args, **popen_kwargs):
+    def install(self, packages=tuple(), save=True, save_dev=None, *extra_args, **popen_kwargs):
         """Yarn only supports saving"""
-        args = ('add',)
+        args = ('add', '--force')
 
-        if packages is None:
+        if not packages:
             return self._run(tuple() + extra_args, **popen_kwargs)
         elif save_dev:
             args = args + ('--dev',)
 
-        print(args, packages, extra_args)
+        cache_dir = Path(
+            self._run(('cache', 'dir'), **popen_kwargs)
+            .decode('utf-8')
+            .strip())
 
-        return self._run(args + packages + extra_args,
+        shutil.rmtree(str(cache_dir / '.tmp'))
+
+        for pkg in packages:
+            # manually clear the cache for local tarsball
+            if '@file:' in pkg:
+                pkg_name, tar_file = pkg.split('@file:')
+                cache_files = list(cache_dir.glob('npm-{}-*-*/'.format(pkg_name)))
+                for cache_file in cache_files:
+                    print("clearing cache file", cache_file)
+                    shutil.rmtree(str(cache_file))
+
+        return self._run(args + tuple(packages) + extra_args,
                          **popen_kwargs)
+
+    def pack(self, path, cwd=None, *extra_args, **popen_kwargs):
+        self._run(('pack',) + extra_args, cwd=path, **popen_kwargs)
+        tars = list(Path(path).glob("*.tgz"))
+        tmp_file = tars[0]
+        dst_file = Path(cwd) / tmp_file.name
+        if dst_file.exists():
+            if self.verbose:
+                print("removing", dst_file)
+            dst_file.unlink()
+
+        if self.verbose:
+            print("moving", tmp_file, "to", dst_file)
+        shutil.move(str(tmp_file), cwd)
+
+        return tmp_file.name.encode('utf-8')

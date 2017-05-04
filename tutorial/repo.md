@@ -15,8 +15,8 @@ See the [Contributing Guidelines](https://github.com/jupyterlab/jupyterlab/blob/
 ### NPM package: `src/`, `lib/`, `typings/`, `scripts/`
 
 * `src/`: the source typescript files.
-    - `npm run build` builds the source files into javascript files in `lib/`.
-    - `npm run clean` deletes the `lib/` directory.
+    - `yarn build` builds the source files into javascript files in `lib/`.
+    - `yarn clean` deletes the `lib/` directory.
 * `typings/`: type definitions for external libraries that typescript needs.
 * `scripts/`: various scripts that the npm commands invoke.
 
@@ -49,6 +49,6 @@ rebuild the npm package and server extension every time you check out or merge
 
 ### Documentation: `docs/`
 
-After building the docs (`npm run docs`), `docs/index.html` is the entry
+After building the docs (`yarn docs`), `docs/index.html` is the entry
 point to the documentation.
 

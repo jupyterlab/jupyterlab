@@ -5,6 +5,7 @@ lib
 jupyterlab/index.js
 
 node_modules
+envs/
 .cache
 .vscode
 *.py[co]
@@ -12,6 +13,7 @@ __pycache__
 *.egg-info
 *~
 *.bak
+*.log
 .ipynb_checkpoints
 .DS_Store
 \#*#
@@ -23,3 +25,5 @@ __pycache__
 
 test/coverage
 docs
+
+jupyterlab/.mirror/

@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc && webpack",
     "clean": "rimraf build && rimraf node_modules",
-    "prepublish": "npm run build",
+    "prepublish": "yarn build",
     "update": "rimraf node_modules/@jupyterlab/services && npm install"
   },
   "devDependencies": {

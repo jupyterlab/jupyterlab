@@ -20,5 +20,5 @@ files (see [Documents](documents.md)).
 to the application.  In this case registering the widget factory using
 the document registry.
 
-- Run `npm run build` from `jupyterlab/jupyterlab`
+- Run `yarn build` from `jupyterlab/jupyterlab`
 - Run `jupyter lab` and verify changes.
