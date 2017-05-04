@@ -88,6 +88,14 @@ describe('kernel/validate', () => {
       expect(() => validateMessage(msg)).to.throwError();
     });
 
+    it('should handle no buffers field', () => {
+      let msg = KernelMessage.createMessage({
+        msgType: 'comm_msg', channel: 'iopub', session: 'foo'
+      }, { comm_id: 'foo', data: {} });
+      delete msg['buffers'];
+      validateMessage(msg);
+    });
+
   });
 
   describe('#validateModel()', () => {
