@@ -135,6 +135,8 @@ const RAW_CELL_CLASS = 'jp-RawCell';
  */
 const RENDERED_CLASS = 'jp-mod-rendered';
 
+const NO_OUTPUTS_CLASS = 'jp-mod-noOutputs';
+
 /**
  * The text applied to an empty markdown cell.
  */
@@ -484,6 +486,13 @@ class CodeCell extends Cell {
       contentFactory: contentFactory
     });
     output.addClass(CELL_OUTPUT_AREA_CLASS);
+    // Set a CSS if there are no outputs, and connect a signal for future
+    // changes to the number of outputs. This is for conditional styling
+    // if there are no outputs.
+    if (model.outputs.length===0) {
+      this.addClass(NO_OUTPUTS_CLASS);
+    }
+    output.outputLengthChanged.connect(this._outputLengthHandler, this);
     outputWrapper.addWidget(outputCollapser);
     outputWrapper.addWidget(output);
     (this.layout as PanelLayout).insertWidget(2, outputWrapper);
@@ -523,6 +532,7 @@ class CodeCell extends Cell {
     if (this.isDisposed) {
       return;
     }
+    this._output.outputLengthChanged.disconnect(this._outputLengthHandler, this);
     this._rendermime = null;
     this._output = null;
     this._outputWrapper = null;
@@ -594,6 +604,14 @@ class CodeCell extends Cell {
     default:
       break;
     }
+  }
+
+  /**
+   * Handle changes in the number of outputs in the output area.
+   */
+  private _outputLengthHandler(sender: OutputArea, args: number) {
+    let force = args === 0 ? true : false;
+    this.toggleClass(NO_OUTPUTS_CLASS, force);
   }
 
   private _rendermime: RenderMime = null;

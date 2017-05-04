@@ -2,12 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel, KernelMessage
-} from '@jupyterlab/services';
-
-import {
   Message
 } from '@phosphor/messaging';
+
+import {
+  Signal
+} from '@phosphor/signaling';
 
 import {
   Panel, PanelLayout
@@ -28,6 +28,10 @@ import {
 import {
   IOutputModel, RenderMime
 } from '@jupyterlab/rendermime';
+
+import {
+  Kernel, KernelMessage
+} from '@jupyterlab/services';
 
 import {
   IOutputAreaModel
@@ -148,6 +152,15 @@ class OutputArea extends Widget {
   }
 
   /**
+   * A public signal used to indicate the number of outputs has changed.
+   * 
+   * #### Notes
+   * This is useful for parents who want to apply styling based on the number
+   * of outputs. Emits the current number of outputs.
+   */
+  readonly outputLengthChanged = new Signal<this, number>(this);
+
+  /**
    * Execute code on a client session and handle response messages.
    */
   execute(code: string, session: IClientSession): Promise<KernelMessage.IExecuteReplyMsg> {
@@ -172,6 +185,7 @@ class OutputArea extends Widget {
     // Make sure there were no input widgets.
     if (this.widgets.length) {
       this._clear();
+      this.outputLengthChanged.emit(this.model.length);
     }
 
     return new Promise<KernelMessage.IExecuteReplyMsg>((resolve, reject) => {
@@ -201,15 +215,18 @@ class OutputArea extends Widget {
     switch (args.type) {
     case 'add':
       this._insertOutput(args.newIndex, args.newValues[0]);
+      this.outputLengthChanged.emit(this.model.length);
       break;
     case 'remove':
       // Only clear is supported by the model.
       if (this.widgets.length) {
         this._clear();
+        this.outputLengthChanged.emit(this.model.length);
       }
       break;
     case 'set':
       this._setOutput(args.newIndex, args.newValues[0]);
+      this.outputLengthChanged.emit(this.model.length);
       break;
     default:
       break;
