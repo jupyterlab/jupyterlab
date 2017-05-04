@@ -54,18 +54,21 @@ def install_extension(extension):
     Follows the semantics of https://docs.npmjs.com/cli/install.
 
     The extension is first validated.
-
-    If link is true, the source directory is linked using `npm link`.
     """
     tar_name, pkg_name = validate_extension(extension)
     config = _get_config()
     path = pjoin(_get_extension_dir(config), tar_name)
     path = "./{}".format(Path(path).relative_to(_get_root_dir(config)))
+
+    # this is apparently the most bulletproof way to reference a local tarball
     builder.install(['{}@file:{}'.format(pkg_name, path)],
                     save=True, cwd=_get_root_dir(config))
+
     config['installed_extensions'][pkg_name] = path
+
     if pkg_name in config['linked_extensions']:
         del config['linked_extensions'][pkg_name]
+
     _write_config(config)
 
 
@@ -165,7 +168,7 @@ def clean():
             shutil.rmtree(target)
 
 
-def build():
+def build(watch=False):
     """Build the JupyterLab application."""
     # Set up the build directory.
     config = _get_config()
@@ -176,12 +179,20 @@ def build():
     builder.install(cwd=root)
 
     # Install the linked extensions.
-    linked = list(config['linked_extensions'].values())
+    linked = config.get('linked_extensions', {})
+
     if linked:
-        builder.install(linked, cwd=root)
+        munged = ['{}@file:{}'.format(name, path)
+                  for name, path in linked.items()]
+        builder.install(munged, cwd=root)
+
+    args = ('build',)
+
+    if watch:
+        args = args + ('--', '--watch', '--progress')
 
     # Build the app.
-    builder.run('build', cwd=root)
+    builder.run(args, no_capture=watch, cwd=root)
 
 
 def describe():

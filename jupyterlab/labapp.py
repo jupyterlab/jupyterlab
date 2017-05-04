@@ -22,6 +22,14 @@ class LabBuildApp(JupyterApp):
         build()
 
 
+class LabWatchApp(JupyterApp):
+    version = __version__
+    description = "Continuously rebuild the JupyterLab application with extensions"
+
+    def start(self):
+        build(watch=True)
+
+
 class LabCleanApp(JupyterApp):
     version = __version__
     description = "Clean the JupyterLab application"
@@ -65,7 +73,8 @@ class LabApp(NotebookApp):
     subcommands = dict(
         build=(LabBuildApp, LabBuildApp.description.splitlines()[0]),
         clean=(LabCleanApp, LabCleanApp.description.splitlines()[0]),
-        describe=(LabDescribeApp, LabBuildApp.description.splitlines()[0])
+        describe=(LabDescribeApp, LabBuildApp.description.splitlines()[0]),
+        watch=(LabWatchApp, LabWatchApp.description.splitlines()[0]),
     )
 
     default_url = Unicode('/lab', config=True,

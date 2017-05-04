@@ -10,7 +10,7 @@ import json
 from tempfile import mkdtemp
 
 
-def get_build_tool(use=None, verbose=False, silent=None):
+def get_build_tool(use=None, verbose=True, silent=None):
     """Detect the right asset manager to use
 
     due to a collision between Apache YARN, `yarnpkg` is the preferred name
@@ -52,7 +52,7 @@ class FrontendAssetManager(object):
         if self.silent is not None:
             self.silent = silent
 
-    def _run(self, cmd_args, **popen_kwargs):
+    def _run(self, cmd_args, no_capture=False, **popen_kwargs):
         """execute a command, returning the result of stdout
            `verbose` and `silent` affect how much output we give back
         """
@@ -62,7 +62,11 @@ class FrontendAssetManager(object):
             print(">>> ./cwd", popen_kwargs.get("cwd"))
             print(">>>", " ".join(final_cmd))
 
-        p = Popen(final_cmd, stdout=PIPE, stderr=PIPE, **popen_kwargs)
+        if no_capture:
+            p = Popen(final_cmd, **popen_kwargs)
+        else:
+            p = Popen(final_cmd, stdout=PIPE, stderr=PIPE, **popen_kwargs)
+
         error = None
         stdout = None
         stderr = None
@@ -94,13 +98,11 @@ class FrontendAssetManager(object):
 
         return stdout
 
-    def run(self, user_command, *extra_args, **popen_kwargs):
+    def run(self, user_command=tuple(), *extra_args, **popen_kwargs):
         """run a command in the `scripts` section of package.json
-           not strictly required with yarn, but namespaces are generally good
         """
-        return self._run(
-            ('run', user_command,) + extra_args,
-            **popen_kwargs)
+        result = self._run(user_command + extra_args, **popen_kwargs)
+        return result
 
 
 class Yarn(FrontendAssetManager):
@@ -126,13 +128,20 @@ class Yarn(FrontendAssetManager):
             .decode('utf-8')
             .strip())
 
+        # this seems to be a bit sticky
         shutil.rmtree(str(cache_dir / '.tmp'))
 
         for pkg in packages:
-            # manually clear the cache for local tarsball
             if '@file:' in pkg:
-                pkg_name, tar_file = pkg.split('@file:')
-                cache_files = list(cache_dir.glob('npm-{}-*-*/'.format(pkg_name)))
+                pkg_name, local_path = pkg.split('@file:')
+                try:
+                    # remove the package from node_modules
+                    self._run(('remove', pkg_name),
+                              **popen_kwargs)
+                except:
+                    pass
+                # clear associated packages
+                cache_files = list(cache_dir.glob('npm-{}-*/'.format(pkg_name)))
                 for cache_file in cache_files:
                     print("clearing cache file", cache_file)
                     shutil.rmtree(str(cache_file))
