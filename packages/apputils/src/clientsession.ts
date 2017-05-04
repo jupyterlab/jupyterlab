@@ -948,7 +948,7 @@ namespace Private {
     if (language) {
       for (let specName in specs.kernelspecs) {
         if (name !== specName && languages[specName] === language) {
-          names.push(name);
+          names.push(specName);
         }
       }
     }
