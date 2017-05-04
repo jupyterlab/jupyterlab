@@ -35,12 +35,14 @@ if [[ $GROUP == tests ]]; then
 fi
 
 
-if [[ $GROUP == coverage ]]; then
+if [[ $GROUP == coverage_and_docs ]]; then
     # Run the coverage and python tests.
     py.test
     npm run build
     npm run build:test
     npm run coverage
+
+    npm run docs
 
     # Run the link check
     pip install -q pytest-check-links
