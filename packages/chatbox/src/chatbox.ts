@@ -544,29 +544,65 @@ class Chatbox extends Widget {
     switch (args.type) {
       case 'add':
         index = args.newIndex;
-        each(args.newValues, entry => {
-          let entryWidget = this._entryWidgetFromModel(entry);
-          layout.insertWidget(index++, entryWidget);
-        });
+        if (index < this._start) {
+          // If it is inserted before the view,
+          // just update the `_start` index.
+          this._start += args.newValues.length;
+        } else {
+          // Otherwise insert the widgets into the view.
+          each(args.newValues, entry => {
+            let entryWidget = this._entryWidgetFromModel(entry);
+            layout.insertWidget(index++, entryWidget);
+          });
+        }
         break;
       case 'remove':
-        each(args.oldValues, entry => {
-          let widget = layout.widgets[args.oldIndex];
-          layout.removeWidgetAt(args.oldIndex);
-          widget.dispose();
-        });
+        index = args.oldIndex;
+        if (index < this._start) {
+          // If the removal is before the view,
+          // just update the `_start` index.
+          this._start -= args.oldValues.length;
+        } else {
+          // Otherwise remove the widgets from the view.
+          each(args.oldValues, entry => {
+            let widget = layout.widgets[args.oldIndex];
+            layout.removeWidgetAt(args.oldIndex);
+            widget.dispose();
+          });
+        }
         break;
       case 'move':
-        layout.insertWidget(args.newIndex, layout.widgets[args.oldIndex]);
+        if (args.newIndex >= this._start && args.oldIndex >= this._start) {
+          // If both are in the view, it is a straightforward move.
+          let fromIndex = args.oldIndex - this._start;
+          let toIndex = args.newIndex - this._start;
+          layout.insertWidget(toIndex, layout.widgets[fromIndex]);
+        } else if (args.newIndex >= this._start) {
+          // If it is moving into the view, create the widget and
+          // update the `_start` index.
+          let entry = args.oldValues[0];
+          let entryWidget = this._entryWidgetFromModel(entry);
+          layout.insertWidget(args.newIndex - this._start, entryWidget);
+          this._start--;
+        } else if (args.oldIndex >= this._start) {
+          // If it is moving out of the view, remove the widget
+          // and update the `_start index.`
+          layout.removeWidgetAt(args.oldIndex - this._start);
+          this._start++;
+        }
+        // If both are before `_start`, this is a no-op.
         break;
       case 'set':
         index = args.newIndex;
-        each(args.newValues, entry => {
-          let entryWidget = this._entryWidgetFromModel(entry);
-          layout.insertWidget(index, entryWidget);
-          layout.removeWidgetAt(index+1);
-          index++;
-        });
+        if (index >= this._start) {
+          // Only need to update the widgets if they are in the view.
+          each(args.newValues, entry => {
+            let entryWidget = this._entryWidgetFromModel(entry);
+            layout.insertWidget(index, entryWidget);
+            layout.removeWidgetAt(index+1);
+            index++;
+          });
+        }
         break;
     }
   }
