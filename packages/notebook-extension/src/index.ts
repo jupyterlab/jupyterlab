@@ -387,6 +387,12 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     });
   }
 
+  app.contextMenu.addItem({command: CommandIDs.clearOutputs, selector: '.jp-Notebook .jp-Cell'});
+  app.contextMenu.addItem({command: CommandIDs.split, selector: '.jp-Notebook .jp-Cell'});
+  app.contextMenu.addItem({ type: 'separator', selector: '.jp-Notebook', rank: 0 });
+  app.contextMenu.addItem({command: CommandIDs.undo, selector: '.jp-Notebook', rank: 1});
+  app.contextMenu.addItem({command: CommandIDs.redo, selector: '.jp-Notebook', rank: 2});
+
   return tracker;
 }
 
