@@ -146,13 +146,13 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-info-color3: var(--md-cyan-100);
 
   /* Cell specific styles */
- 
+
   --jp-cell-padding: 5px;
   --jp-cell-editor-background: #f7f7f7;
   --jp-cell-editor-border-color: #cfcfcf;
   --jp-cell-editor-background-edit: var(--jp-ui-layout-color1);
   --jp-cell-editor-border-color-edit: var(--jp-brand-color1);
-  --jp-cell-prompt-width: 90px;
+  --jp-cell-prompt-width: 68px;
   --jp-cell-prompt-font-family: 'Roboto Mono', monospace;
   --jp-cell-prompt-letter-spacing: 0px;
   --jp-cell-prompt-opacity: 1.0;
@@ -161,7 +161,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-cell-outprompt-font-color: var(--md-grey-700);
 
   /* Notebook specific styles */
-  
+
   --jp-notebook-padding: 10px;
   --jp-notebook-scroll-padding: 100px;
 
