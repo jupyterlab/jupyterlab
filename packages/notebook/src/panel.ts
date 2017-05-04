@@ -31,11 +31,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  BaseCellWidget, CodeCellWidget
-} from '@jupyterlab/cells';
-
-import {
-  IEditorMimeTypeService, CodeEditor
+  IEditorMimeTypeService
 } from '@jupyterlab/codeeditor';
 
 import {
@@ -45,10 +41,6 @@ import {
 import {
   DocumentRegistry
 } from '@jupyterlab/docregistry';
-
-import {
-  OutputAreaWidget
-} from '@jupyterlab/outputarea';
 
 import {
   RenderMime
@@ -66,7 +58,11 @@ import {
 /**
  * The class name added to notebook panels.
  */
-const NB_PANEL = 'jp-Notebook-panel';
+const NOTEBOOK_PANEL_CLASS = 'jp-NotebookPanel';
+
+const NOTEBOOK_PANEL_TOOLBAR_CLASS = 'jp-NotebookPanel-toolbar';
+
+const NOTEBOOK_PANEL_NOTEBOOK_CLASS = 'jp-NotebookPanel-notebook';
 
 /**
  * The class name added to a dirty widget.
@@ -88,20 +84,28 @@ class NotebookPanel extends Widget {
    */
   constructor(options: NotebookPanel.IOptions) {
     super();
-    this.addClass(NB_PANEL);
+    this.addClass(NOTEBOOK_PANEL_CLASS);
     this.rendermime = options.rendermime;
+    let contentFactory = this.contentFactory = (
+      options.contentFactory || NotebookPanel.defaultContentFactory
+    );
 
     let layout = this.layout = new PanelLayout();
-    let factory = this.contentFactory = options.contentFactory;
+
+    // Toolbar
+    let toolbar = new Toolbar();
+    toolbar.addClass(NOTEBOOK_PANEL_TOOLBAR_CLASS);
+
+    // Notebook
     let nbOptions = {
       rendermime: this.rendermime,
       languagePreference: options.languagePreference,
-      contentFactory: factory.notebookContentFactory,
+      contentFactory: contentFactory,
       mimeTypeService: options.mimeTypeService
     };
-    let toolbar = factory.createToolbar();
+    let notebook = this.notebook = contentFactory.createNotebook(nbOptions);
+    notebook.addClass(NOTEBOOK_PANEL_NOTEBOOK_CLASS);
 
-    this.notebook = factory.createNotebook(nbOptions);
     layout.addWidget(toolbar);
     layout.addWidget(this.notebook);
   }
@@ -347,7 +351,7 @@ export namespace NotebookPanel {
     /**
      * The content factory for the panel.
      */
-    contentFactory: IContentFactory;
+    contentFactory?: IContentFactory;
 
     /**
      * The mimeType service.
@@ -359,117 +363,32 @@ export namespace NotebookPanel {
    * A content factory interface for NotebookPanel.
    */
   export
-  interface IContentFactory {
-    /**
-     * The editor factory.
-     */
-    readonly editorFactory: CodeEditor.Factory;
-
-    /**
-     * The factory for notebook cell widget content.
-     */
-    readonly notebookContentFactory: Notebook.IContentFactory;
-
+  interface IContentFactory extends Notebook.IContentFactory {
     /**
      * Create a new content area for the panel.
      */
     createNotebook(options: Notebook.IOptions): Notebook;
 
-    /**
-     * Create a new toolbar for the panel.
-     */
-    createToolbar(): Toolbar<Widget>;
   }
 
   /**
    * The default implementation of an `IContentFactory`.
    */
   export
-  class ContentFactory implements IContentFactory {
-    /**
-     * Creates a new renderer.
-     */
-    constructor(options: ContentFactory.IOptions) {
-      this.editorFactory = options.editorFactory;
-      this.notebookContentFactory = (options.notebookContentFactory ||
-        new Notebook.ContentFactory({
-          editorFactory: this.editorFactory,
-          outputAreaContentFactory: options.outputAreaContentFactory,
-          codeCellContentFactory: options.codeCellContentFactory,
-          rawCellContentFactory: options.rawCellContentFactory,
-          markdownCellContentFactory: options.markdownCellContentFactory
-        })
-      );
-    }
-
-    /**
-     * The editor factory.
-     */
-    readonly editorFactory: CodeEditor.Factory;
-
-    /**
-     * The factory for notebook cell widget content.
-     */
-    readonly notebookContentFactory: Notebook.IContentFactory;
-
+  class ContentFactory extends Notebook.ContentFactory implements IContentFactory {
     /**
      * Create a new content area for the panel.
      */
     createNotebook(options: Notebook.IOptions): Notebook {
       return new Notebook(options);
     }
-
-    /**
-     * Create a new toolbar for the panel.
-     */
-    createToolbar(): Toolbar<Widget> {
-      return new Toolbar();
-    }
   }
 
   /**
-   * The namespace for `ContentFactory`.
+   * Default content factory for the notebook panel.
    */
   export
-  namespace ContentFactory {
-    /**
-     * An initialization options for a notebook panel content factory.
-     */
-    export
-    interface IOptions {
-      /**
-       * The editor factory.
-       */
-      editorFactory: CodeEditor.Factory;
-
-      /**
-       * The factory for output area content.
-       */
-      outputAreaContentFactory?: OutputAreaWidget.IContentFactory;
-
-      /**
-       * The factory for code cell widget content.  If given, this will
-       * take precedence over the `outputAreaContentFactory`.
-       */
-      codeCellContentFactory?: CodeCellWidget.IContentFactory;
-
-      /**
-       * The factory for raw cell widget content.
-       */
-      rawCellContentFactory?: BaseCellWidget.IContentFactory;
-
-      /**
-       * The factory for markdown cell widget content.
-       */
-      markdownCellContentFactory?: BaseCellWidget.IContentFactory;
-
-      /**
-       * The factory for notebook cell widget content. If given, this will
-       * take precedence over the the cell and output area factories.
-       */
-      notebookContentFactory?: Notebook.IContentFactory;
-    }
-  }
+  const defaultContentFactory: ContentFactory = new ContentFactory();
 
   /* tslint:disable */
   /**

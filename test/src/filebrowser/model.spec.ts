@@ -8,6 +8,14 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
+  DocumentManager, IDocumentManager
+} from '@jupyterlab/docmanager';
+
+import {
+  DocumentRegistry, IDocumentRegistry
+} from '@jupyterlab/docregistry';
+
+import {
   ServiceManager, Session
 } from '@jupyterlab/services';
 
@@ -22,20 +30,31 @@ import {
 
 describe('filebrowser/model', () => {
 
-  let manager: ServiceManager.IManager;
+  let manager: IDocumentManager;
+  let serviceManager: ServiceManager.IManager;
+  let registry: IDocumentRegistry;
   let model: FileBrowserModel;
   let name: string;
   let state: StateDB;
 
   before(() => {
-    manager = new ServiceManager();
+    let opener: DocumentManager.IWidgetOpener = {
+      open: widget => { /* no op */ }
+    };
+
+    registry = new DocumentRegistry();
+    serviceManager = new ServiceManager();
+    manager = new DocumentManager({
+      registry, opener,
+      manager: serviceManager
+    });
     state = new StateDB({ namespace: 'filebrowser/model' });
   });
 
   beforeEach(() => {
     state.clear();
     model = new FileBrowserModel({ manager, state });
-    return model.newUntitled({ type: 'file' }).then(contents => {
+    return manager.newUntitled({ type: 'file' }).then(contents => {
       name = contents.name;
       return model.cd();
     });
@@ -103,7 +122,7 @@ describe('filebrowser/model', () => {
           expect(args.newValue.type).to.be('file');
           done();
         });
-        model.newUntitled({ type: 'file' }).catch(done);
+        manager.newUntitled({ type: 'file' }).catch(done);
       });
 
       it('should be emitted when a file is renamed', (done) => {
@@ -114,16 +133,18 @@ describe('filebrowser/model', () => {
           expect(args.newValue.path).to.be(name + '.bak');
           done();
         });
-        model.rename(name, name + '.bak').catch(done);
+        manager.rename(name, name + '.bak').catch(done);
       });
 
-      it('should be emitted when a file is created outside of the model', (done) => {
+      it('should be emitted when a file is deleted', (done) => {
         model.fileChanged.connect((sender, args) => {
+          expect(sender).to.be(model);
+          expect(args.type).to.be('delete');
+          expect(args.oldValue.path).to.be(name);
+          expect(args.newValue).to.be(null);
           done();
         });
-        manager.contents.newUntitled({ path: 'src' }).then(value => {
-          manager.contents.rename(value.path, name + 'bak');
-        }).catch(done);
+        manager.deleteFile(name).catch(done);
       });
 
     });
@@ -163,8 +184,8 @@ describe('filebrowser/model', () => {
 
       it('should be the session models for the active notebooks', (done) => {
         let session: Session.ISession;
-        model.newUntitled({ type: 'notebook' }).then(contents => {
-          return manager.sessions.startNew({ path: contents.path });
+        manager.newUntitled({ type: 'notebook' }).then(contents => {
+          return serviceManager.sessions.startNew({ path: contents.path });
         }).then(s => {
           session = s;
           return model.cd();
@@ -263,93 +284,10 @@ describe('filebrowser/model', () => {
 
     });
 
-    describe('#copy()', () => {
-
-      it('should copy a file', (done) => {
-        model.copy(name, 'src').then(contents => {
-          expect(contents.path).to.be(`src/${name}`);
-          done();
-        }).catch(done);
-      });
-
-    });
-
-    describe('#deleteFile()', () => {
-
-      it('should delete a file ', (done) => {
-        let len = toArray(model.items()).length;
-        model.deleteFile(name).then(() => {
-          return model.cd();
-        }).then(() => {
-          expect(toArray(model.items()).length).to.be(len - 1);
-          done();
-        }).catch(done);
-      });
-
-      it('should emit a fileChanged signal', (done) => {
-        model.fileChanged.connect((sender, args) => {
-          expect(sender).to.be(model);
-          expect(args.type).to.be('delete');
-          expect(args.oldValue.path).to.be(name);
-          expect(args.newValue).to.be(null);
-          done();
-        });
-        model.deleteFile(name).catch(done);
-      });
-
-    });
-
     describe('#download()', () => {
 
       it('should download the file without error', () => {
         // TODO: how to test this?
-      });
-
-    });
-
-    describe('#newUntitled()', () => {
-
-      it('should create a new untitled file in the current directory', (done) => {
-        model.cd('src').then(() => {
-          return model.newUntitled({ type: 'file', ext: '.py' });
-        }).then(contents => {
-          expect(contents.path.indexOf('src/')).to.be(0);
-          expect(contents.path.indexOf('.py')).to.not.be(-1);
-          done();
-        }).catch(done);
-      });
-
-      it('should emit a fileChanged signal', (done) => {
-        model.fileChanged.connect((sender, args) => {
-          expect(sender).to.be(model);
-          expect(args.type).to.be('new');
-          expect(args.oldValue).to.be(null);
-          expect(args.newValue.type).to.be('directory');
-          done();
-        });
-        model.newUntitled({ type: 'directory' }).catch(done);
-      });
-
-    });
-
-    describe('#rename()', () => {
-
-      it('should rename a file', (done) => {
-        model.rename(name, name + '.bak').then(contents => {
-          expect(contents.name).to.be(name + '.bak');
-          done();
-        }).catch(done);
-      });
-
-      it('should emit the fileChanged signal', (done) => {
-        model.fileChanged.connect((sender, args) => {
-          expect(sender).to.be(model);
-          expect(args.type).to.be('rename');
-          expect(args.oldValue.path).to.be(name);
-          expect(args.newValue.path).to.be(name + '.new');
-          done();
-        });
-        model.rename(name, name + '.new').catch(done);
       });
 
     });
@@ -400,26 +338,6 @@ describe('filebrowser/model', () => {
         let file = new File(['<p>Hello world!</p>'], 'hello3.html',
                             { type: 'text/html' });
         model.upload(file).catch(done);
-      });
-
-    });
-
-    describe('#shutdown()', () => {
-
-      it('should shut down a session by session id', () => {
-        let length = 0;
-        let sessions = manager.sessions;
-        length = toArray(sessions.running()).length;
-        return model.newUntitled({ type: 'notebook' }).then(contents => {
-          return sessions.startNew({ path: contents.path });
-        }).then(session => {
-          session.dispose();
-          return model.shutdown(session.id);
-        }).then(() => {
-          return sessions.refreshRunning();
-        }).then(() => {
-          expect(toArray(sessions.running()).length).to.be(length);
-        });
       });
 
     });

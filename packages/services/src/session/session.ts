@@ -471,6 +471,16 @@ namespace Session {
      * since the manager maintains its internal state.
      */
     refreshRunning(): Promise<void>;
+
+    /**
+     * Find a session associated with a path and stop it is the only session
+     * using that kernel.
+     *
+     * @param path - The path in question.
+     *
+     * @returns A promise that resolves when the relevant sessions are stopped.
+     */
+    stopIfNeeded(path: string): Promise<void>;
   }
 
   /**

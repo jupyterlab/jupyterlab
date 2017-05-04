@@ -385,7 +385,7 @@ namespace NotebookModel {
     /**
      * Create a new cell model factory.
      */
-    constructor(options: IContentFactoryOptions) {
+    constructor(options: ContentFactory.IOptions) {
       this.codeCellContentFactory = (options.codeCellContentFactory ||
         CodeCellModel.defaultContentFactory
       );
@@ -468,19 +468,25 @@ namespace NotebookModel {
   }
 
   /**
-   * The options used to initialize a `ContentFactory`.
+   * A namespace for the notebook model content factory.
    */
   export
-  interface IContentFactoryOptions {
+  namespace ContentFactory {
     /**
-     * The factory for code cell model content.
+     * The options used to initialize a `ContentFactory`.
      */
-    codeCellContentFactory?: CodeCellModel.IContentFactory;
+    export
+    interface IOptions {
+      /**
+       * The factory for code cell model content.
+       */
+      codeCellContentFactory?: CodeCellModel.IContentFactory;
 
-    /**
-     * The modelDB in which to place new content.
-     */
-    modelDB?: IModelDB;
+      /**
+       * The modelDB in which to place new content.
+       */
+      modelDB?: IModelDB;
+    }
   }
 
   /**

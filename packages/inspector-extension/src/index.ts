@@ -125,11 +125,11 @@ const consolePlugin: JupyterLabPlugin<void> = {
       handlers[parent.id] = handler;
 
       // Set the initial editor.
-      let cell = parent.console.prompt;
+      let cell = parent.console.promptCell;
       handler.editor = cell && cell.editor;
 
       // Listen for prompt creation.
-      parent.console.promptCreated.connect((sender, cell) => {
+      parent.console.promptCellCreated.connect((sender, cell) => {
         handler.editor = cell && cell.editor;
       });
 

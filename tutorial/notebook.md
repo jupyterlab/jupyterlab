@@ -76,17 +76,17 @@ the next cell, merge or split cells at the cursor, delete selected cells, etc.
 A Notebook widget contains a list of [cell widgets](http://jupyterlab.github.io/jupyterlab/modules/_cells_widget_.html),
 corresponding to the cell models in its cell list.
 
-- Each cell widget contains an [InputAreaWidget](http://jupyterlab.github.io/jupyterlab/classes/_cells_widget_.inputareawidget.html),
+- Each cell widget contains an [InputArea](http://jupyterlab.github.io/jupyterlab/classes/_cells_widget_.inputareawidget.html),
 
-    + which contains n [CodeEditorWidget](http://jupyterlab.github.io/jupyterlab/classes/_codeeditor_widget_.codeeditorwidget.html),
+    + which contains n [CodeEditorWrapper](http://jupyterlab.github.io/jupyterlab/classes/_codeeditor_widget_.CodeEditorWrapper.html),
 
         - which contains a JavaScript CodeMirror instance.
 
-A [CodeCellWidget](http://jupyterlab.github.io/jupyterlab/classes/_cells_widget_.codecellwidget.html)
-also contains an [OutputAreaWidget](http://jupyterlab.github.io/jupyterlab/classes/_outputarea_widget_.outputareawidget.html).
-An OutputAreaWidget is responsible for rendering the outputs in the
+A [CodeCell](http://jupyterlab.github.io/jupyterlab/classes/_cells_widget_.codecellwidget.html)
+also contains an [OutputArea](http://jupyterlab.github.io/jupyterlab/classes/_outputarea_widget_.OutputArea.html).
+An OutputArea is responsible for rendering the outputs in the
 [OutputAreaModel](http://jupyterlab.github.io/jupyterlab/classes/_outputarea_model_.outputareamodel.html)
-list. An OutputAreaWidget uses a
+list. An OutputArea uses a
 notebook-specific [RenderMime](http://jupyterlab.github.io/jupyterlab/classes/_rendermime_rendermime_.rendermime.html)
 object to render `display_data` output messages.
 
@@ -217,7 +217,7 @@ registered in that notebook's rendermime is asked to render the output. The
 renderer asks the ipywidget manager instance to render the corresponding
 model, which returns a JavaScript promise. The renderer creates a container
 **phosphor widget** which it hands back synchronously to the
-OutputAreaWidget, and then fills the container with the rendered *ipywidget*
+OutputArea, and then fills the container with the rendered *ipywidget*
 when the promise resolves.
 
 Note: The ipywidgets third party extension has not yet been released.

@@ -14,7 +14,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  PanelLayout
+  PanelLayout, Panel
 } from '@phosphor/widgets';
 
 import {
@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  CodeEditor, CodeEditorWidget
+  CodeEditor, CodeEditorWrapper
 } from '@jupyterlab/codeeditor';
 
 import {
@@ -42,7 +42,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  OutputAreaWidget
+  OutputArea, IOutputPrompt, OutputPrompt, IStdin, Stdin
 } from '@jupyterlab/outputarea';
 
 import {
@@ -50,26 +50,55 @@ import {
   IMarkdownCellModel, IRawCellModel
 } from './model';
 
+import {
+  InputArea, IInputPrompt, InputPrompt
+} from './inputarea';
+
 
 /**
- * The class name added to cell widgets.
+ * The CSS class added to cell widgets.
  */
 const CELL_CLASS = 'jp-Cell';
 
 /**
- * The class name added to the prompt area of cell.
+ * The CSS class added to the cell header.
  */
-const PROMPT_CLASS = 'jp-Cell-prompt';
+const CELL_HEADER_CLASS = 'jp-Cell-header';
 
 /**
- * The class name added to input area widgets.
+ * The CSS class added to the cell footer.
  */
-const INPUT_CLASS = 'jp-InputArea';
+const CELL_FOOTER_CLASS = 'jp-Cell-footer';
 
 /**
- * The class name added to the editor area of the cell.
+ * The CSS class added to the cell input wrapper.
  */
-const EDITOR_CLASS = 'jp-InputArea-editor';
+const CELL_INPUT_WRAPPER_CLASS = 'jp-Cell-inputWrapper';
+
+/**
+ * The CSS class added to the cell output wrapper.
+ */
+const CELL_OUTPUT_WRAPPER_CLASS = 'jp-Cell-outputWrapper';
+
+/**
+ * The CSS class added to the cell input area.
+ */
+const CELL_INPUT_AREA_CLASS = 'jp-Cell-inputArea';
+
+/**
+ * The CSS class added to the cell output area.
+ */
+const CELL_OUTPUT_AREA_CLASS = 'jp-Cell-outputArea';
+
+/**
+ * The CSS class added to the cell input collapser.
+ */
+const CELL_INPUT_COLLAPSER_CLASS = 'jp-Cell-inputCollapser';
+
+/**
+ * The CSS class added to the cell output collapser.
+ */
+const CELL_OUTPUT_COLLAPSER_CLASS = 'jp-Cell-outputCollapser';
 
 /**
  * The class name added to the cell when collapsed.
@@ -102,14 +131,11 @@ const MARKDOWN_OUTPUT_CLASS = 'jp-MarkdownOutput';
 const RAW_CELL_CLASS = 'jp-RawCell';
 
 /**
- * The class name added to cell editor widget nodes.
- */
-const CELL_EDITOR_CLASS = 'jp-CellEditor';
-
-/**
  * The class name added to a rendered input area.
  */
 const RENDERED_CLASS = 'jp-mod-rendered';
+
+const NO_OUTPUTS_CLASS = 'jp-mod-noOutputs';
 
 /**
  * The text applied to an empty markdown cell.
@@ -117,35 +143,54 @@ const RENDERED_CLASS = 'jp-mod-rendered';
 const DEFAULT_MARKDOWN_TEXT = 'Type Markdown and LaTeX: $ α^2 $';
 
 
+/******************************************************************************
+ * Cell
+ ******************************************************************************/
+
+
 /**
  * A base cell widget.
  */
 export
-class BaseCellWidget extends Widget {
+class Cell extends Widget {
   /**
    * Construct a new base cell widget.
    */
-  constructor(options: BaseCellWidget.IOptions) {
+  constructor(options: Cell.IOptions) {
     super();
     this.addClass(CELL_CLASS);
+    let model = this._model = options.model;
+    let contentFactory = this.contentFactory = (
+      options.contentFactory || Cell.defaultContentFactory
+    );
     this.layout = new PanelLayout();
 
-    let model = this._model = options.model;
+    // Header
+    let header = this._header = contentFactory.createCellHeader();
+    header.addClass(CELL_HEADER_CLASS);
+    (this.layout as PanelLayout).addWidget(header);
 
-    let factory = this.contentFactory = options.contentFactory;
-    let editorOptions = { model, factory: factory.editorFactory };
+    // Input
+    let inputWrapper = this._inputWrapper = new Panel();
+    inputWrapper.addClass(CELL_INPUT_WRAPPER_CLASS);
+    let inputCollapser = this._inputCollapser = contentFactory.createCollapser();
+    inputCollapser.addClass(CELL_INPUT_COLLAPSER_CLASS);
+    let input = this._input = new InputArea({model, contentFactory });
+    input.addClass(CELL_INPUT_AREA_CLASS);
+    inputWrapper.addWidget(inputCollapser);
+    inputWrapper.addWidget(input);
+    (this.layout as PanelLayout).addWidget(inputWrapper);
 
-    let editor = this._editor = factory.createCellEditor(editorOptions);
-    editor.addClass(CELL_EDITOR_CLASS);
-
-    this._input = factory.createInputArea({ editor });
-    (this.layout as PanelLayout).addWidget(this._input);
+    // Footer
+    let footer = this._footer = this.contentFactory.createCellFooter();
+    footer.addClass(CELL_FOOTER_CLASS);
+    (this.layout as PanelLayout).addWidget(footer);
   }
 
   /**
    * The content factory used by the widget.
    */
-  readonly contentFactory: BaseCellWidget.IContentFactory;
+  readonly contentFactory: Cell.IContentFactory;
 
   /**
    * Get the prompt node used by the cell.
@@ -155,17 +200,17 @@ class BaseCellWidget extends Widget {
   }
 
   /**
-   * Get the editor widget used by the cell.
+   * Get the CodeEditorWrapper used by the cell.
    */
-  get editorWidget(): CodeEditorWidget {
-    return this._editor;
+  get editorWidget(): CodeEditorWrapper {
+    return this._input.editorWidget;
   }
 
   /**
-   * Get the editor used by the cell.
+   * Get the CodeEditor used by the cell.
    */
   get editor(): CodeEditor.IEditor {
-    return this._editor.editor;
+    return this._input.editor;
   }
 
   /**
@@ -173,6 +218,13 @@ class BaseCellWidget extends Widget {
    */
   get model(): ICellModel {
     return this._model;
+  }
+
+  /**
+   * Get the input area for the cell.
+   */
+  get inputArea(): InputArea {
+    return this._input;
   }
 
   /**
@@ -197,6 +249,16 @@ class BaseCellWidget extends Widget {
   }
 
   /**
+   * The view state of input being collapsed.
+   */
+  get inputCollapsed(): boolean {
+    return this._inputCollapsed;
+  }
+  set inputCollapsed(value: boolean) {
+    this._inputCollapsed = value;
+  }
+
+  /**
    * Dispose of the resources held by the widget.
    */
   dispose() {
@@ -204,9 +266,12 @@ class BaseCellWidget extends Widget {
     if (this.isDisposed) {
       return;
     }
-    this._model = null;
     this._input = null;
-    this._editor = null;
+    this._model = null;
+    this._header = null;
+    this._footer = null;
+    this._inputCollapser = null;
+    this._inputWrapper = null;
     super.dispose();
   }
 
@@ -221,7 +286,7 @@ class BaseCellWidget extends Widget {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this._editor.editor.focus();
+    this.editor.focus();
   }
 
   /**
@@ -232,40 +297,29 @@ class BaseCellWidget extends Widget {
       return;
     }
     // Handle read only state.
-    this._editor.editor.readOnly = this._readOnly;
+    this.editor.readOnly = this._readOnly;
     this.toggleClass(READONLY_CLASS, this._readOnly);
   }
 
-  /**
-   * Render an input instead of the text editor.
-   */
-  protected renderInput(widget: Widget): void {
-    this.addClass(RENDERED_CLASS);
-    this._input.renderInput(widget);
-  }
-
-  /**
-   * Show the text editor.
-   */
-  protected showEditor(): void {
-    this.removeClass(RENDERED_CLASS);
-    this._input.showEditor();
-  }
-
-  private _input: InputAreaWidget = null;
-  private _editor: CodeEditorWidget = null;
-  private _model: ICellModel = null;
   private _readOnly = false;
+  private _inputCollapsed = false;
+  private _input: InputArea = null;
+  private _model: ICellModel = null;
+  private _header: ICellHeader = null;
+  private _footer: ICellFooter = null;
+  private _inputCollapser: ICollapser = null;
+  private _inputWrapper: Widget = null;
+
 }
 
 
 /**
- * The namespace for the `BaseCellWidget` class statics.
+ * The namespace for the `Cell` class statics.
  */
 export
-namespace BaseCellWidget {
+namespace Cell {
   /**
-   * An options object for initializing a base cell widget.
+   * An options object for initializing a cell widget.
    */
   export
   interface IOptions {
@@ -275,103 +329,175 @@ namespace BaseCellWidget {
     model: ICellModel;
 
     /**
-     * The factory object for cell components.
+     * The factory object for customizable cell children.
      */
-    contentFactory: BaseCellWidget.IContentFactory;
+    contentFactory?: IContentFactory;
   }
 
   /**
-   * The factory object for cell components.
+   * The factory object for customizable cell children.
+   *
+   * This is used to allow users of cells to customize child content.
+   *
+   * This inherits from `OutputArea.IContentFactory` to avoid needless nesting and
+   * provide a single factory object for all notebook/cell/outputarea related
+   * widgets.
    */
   export
-  interface IContentFactory {
+  interface IContentFactory extends OutputArea.IContentFactory, InputArea.IContentFactory {
     /**
-     * The editor factory.
+     * Create a new cell header for the parent widget.
      */
-    readonly editorFactory: CodeEditor.Factory;
+    createCellHeader(): ICellHeader;
 
     /**
-     * Create a new cell editor for the widget.
+     * Create a new cell header for the parent widget.
      */
-    createCellEditor(options: CodeEditorWidget.IOptions): CodeEditorWidget;
+    createCellFooter(): ICellFooter;
 
     /**
-     * Create a new input area for the widget.
+     * Create a new input/output collaper for the parent widget.
      */
-    createInputArea(options: InputAreaWidget.IOptions): InputAreaWidget;
+    createCollapser(): ICollapser;
   }
 
   /**
    * The default implementation of an `IContentFactory`.
+   *
+   * This includes a CodeMirror editor factory to make it easy to use out of the box.
    */
   export
   class ContentFactory implements IContentFactory {
     /**
-     * Creates a new renderer.
+     * Create a content factory for a cell.
      */
-    constructor(options: ContentFactory.IOptions) {
-      this.editorFactory = options.editorFactory;
+    constructor(options: ContentFactory.IOptions = {}) {
+      this._editorFactory = (options.editorFactory || InputArea.defaultEditorFactory);
     }
 
     /**
-     * The editor factory.
+     * The readonly editor factory that create code editors
      */
-    readonly editorFactory: CodeEditor.Factory;
-
-    /**
-     * Create a new cell editor for the widget.
-     */
-    createCellEditor(options: CodeEditorWidget.IOptions): CodeEditorWidget {
-      return new CodeEditorWidget(options);
+    get editorFactory(): CodeEditor.Factory {
+      return this._editorFactory;
     }
 
     /**
-     * Create a new input area for the widget.
+     * Create a new cell header for the parent widget.
      */
-    createInputArea(options: InputAreaWidget.IOptions): InputAreaWidget {
-      return new InputAreaWidget(options);
+    createCellHeader(): ICellHeader {
+      return new CellHeader();
     }
+
+    /**
+     * Create a new cell header for the parent widget.
+     */
+    createCellFooter(): ICellFooter {
+      return new CellFooter();
+    }
+
+    /**
+     * Create a new input/output collapser for the parent widget.
+     */
+    createCollapser(): ICollapser {
+      return new Collapser();
+    }
+
+    /**
+     * Create the output prompt for the widget.
+     */
+    createOutputPrompt(): IOutputPrompt {
+      return new OutputPrompt();
+    }
+
+    /**
+     * Create an stdin widget.
+     */
+    createStdin(options: Stdin.IOptions): IStdin {
+      return new Stdin(options);
+    }
+
+    /**
+     * Create an input prompt.
+     */
+    createInputPrompt(): IInputPrompt {
+      return new InputPrompt();
+    }
+
+    private _editorFactory: CodeEditor.Factory = null;
   }
 
   /**
-   * The namespace for the `ContentFactory` class statics.
+   * A namespace for cell content factory.
    */
   export
   namespace ContentFactory {
     /**
-     * An options object for initializing a renderer.
+     * Options for the content factory.
      */
     export
     interface IOptions {
       /**
-       * A code editor factory.
+       * The editor factory used by the content factory.
+       *
+       * If this is not passed, a default CodeMirror editor factory
+       * will be used.
        */
-      readonly editorFactory: CodeEditor.Factory;
+      editorFactory?: CodeEditor.Factory;
     }
   }
+
+  /**
+   * The default content factory for cells.
+   */
+  export
+  const defaultContentFactory = new ContentFactory();
 }
 
+/******************************************************************************
+ * CodeCell
+ ******************************************************************************/
 
 /**
  * A widget for a code cell.
  */
 export
-class CodeCellWidget extends BaseCellWidget {
+class CodeCell extends Cell {
   /**
    * Construct a code cell widget.
    */
-  constructor(options: CodeCellWidget.IOptions) {
+  constructor(options: CodeCell.IOptions) {
     super(options);
     this.addClass(CODE_CELL_CLASS);
+
+    // Only save options not handled by parent constructor.
     let rendermime = this._rendermime = options.rendermime;
-    let factory = options.contentFactory;
+    let contentFactory = this.contentFactory;
     let model = this.model;
-    this._output = factory.createOutputArea({
+
+    // Insert the output before the cell footer.
+    let outputWrapper = this._outputWrapper = new Panel();
+    outputWrapper.addClass(CELL_OUTPUT_WRAPPER_CLASS);
+    let outputCollapser = this._outputCollapser = contentFactory.createCollapser();
+    outputCollapser.addClass(CELL_OUTPUT_COLLAPSER_CLASS);
+    let output = this._output = new OutputArea({
       model: model.outputs,
       rendermime,
-      contentFactory: factory.outputAreaContentFactory
+      contentFactory: contentFactory
     });
-    (this.layout as PanelLayout).addWidget(this._output);
+    output.addClass(CELL_OUTPUT_AREA_CLASS);
+    // Set a CSS if there are no outputs, and connect a signal for future
+    // changes to the number of outputs. This is for conditional styling
+    // if there are no outputs.
+    if (model.outputs.length===0) {
+      this.addClass(NO_OUTPUTS_CLASS);
+    }
+    output.outputLengthChanged.connect(this._outputLengthHandler, this);
+    outputWrapper.addWidget(outputCollapser);
+    outputWrapper.addWidget(output);
+    (this.layout as PanelLayout).insertWidget(2, outputWrapper);
+
+    // Modify state
     this.setPrompt(`${model.executionCount || ''}`);
     model.stateChanged.connect(this.onStateChanged, this);
     model.metadata.changed.connect(this.onMetadataChanged, this);
@@ -383,9 +509,21 @@ class CodeCellWidget extends BaseCellWidget {
   readonly model: ICodeCellModel;
 
   /**
-   * The content factory used by the widget.
+   * Get the output area for the cell.
    */
-  readonly contentFactory: CodeCellWidget.IContentFactory;
+  get outputArea(): OutputArea {
+    return this._output;
+  }
+
+  /**
+   * The view state of output being collapsed.
+   */
+  get outputCollapsed(): boolean {
+    return this._outputCollapsed;
+  }
+  set outputCollapsed(value: boolean) {
+    this._outputCollapsed = value;
+  }
 
   /**
    * Dispose of the resources used by the widget.
@@ -394,7 +532,11 @@ class CodeCellWidget extends BaseCellWidget {
     if (this.isDisposed) {
       return;
     }
+    this._output.outputLengthChanged.disconnect(this._outputLengthHandler, this);
+    this._rendermime = null;
     this._output = null;
+    this._outputWrapper = null;
+    this._outputCollapser = null;
     super.dispose();
   }
 
@@ -464,21 +606,32 @@ class CodeCellWidget extends BaseCellWidget {
     }
   }
 
+  /**
+   * Handle changes in the number of outputs in the output area.
+   */
+  private _outputLengthHandler(sender: OutputArea, args: number) {
+    let force = args === 0 ? true : false;
+    this.toggleClass(NO_OUTPUTS_CLASS, force);
+  }
+
   private _rendermime: RenderMime = null;
-  private _output: OutputAreaWidget = null;
+  private _outputCollapsed = false;
+  private _outputWrapper: Widget = null;
+  private _outputCollapser: ICollapser = null;
+  private _output: OutputArea = null;
 }
 
 
 /**
- * The namespace for the `CodeCellWidget` class statics.
+ * The namespace for the `CodeCell` class statics.
  */
 export
-namespace CodeCellWidget {
+namespace CodeCell {
   /**
    * An options object for initializing a base cell widget.
    */
   export
-  interface IOptions {
+  interface IOptions extends Cell.IOptions {
     /**
      * The model used by the cell.
      */
@@ -488,80 +641,14 @@ namespace CodeCellWidget {
      * The mime renderer for the cell widget.
      */
     rendermime: RenderMime;
-
-    /**
-     * The factory used to create code cell components.
-     */
-    contentFactory: IContentFactory;
   }
 
-  /**
-   * A factory for creating code cell widget components.
-   */
-  export
-  interface IContentFactory extends BaseCellWidget.IContentFactory {
-    /**
-     * The factory for output area content.
-     */
-    readonly outputAreaContentFactory: OutputAreaWidget.IContentFactory;
-
-    /**
-     * Create a new output area for the widget.
-     */
-    createOutputArea(options: OutputAreaWidget.IOptions): OutputAreaWidget;
-  }
-
-  /**
-   * The default implementation of an `IContentFactory`.
-   */
-  export
-  class ContentFactory extends BaseCellWidget.ContentFactory implements IContentFactory {
-    /**
-     * Construct a new code cell content factory
-     */
-    constructor(options: ContentFactory.IOptions) {
-      super(options);
-      this.outputAreaContentFactory = (options.outputAreaContentFactory ||
-        OutputAreaWidget.defaultContentFactory
-      );
-    }
-
-    /**
-     * The factory for output area content.
-     */
-    readonly outputAreaContentFactory: OutputAreaWidget.IContentFactory;
-
-    /**
-     * Create an output area widget.
-     */
-    createOutputArea(options: OutputAreaWidget.IOptions): OutputAreaWidget {
-      return new OutputAreaWidget(options);
-    }
-  }
-
-  /**
-   * The namespace for the `ContentFactory` class statics.
-   */
-  export
-  namespace ContentFactory {
-    /**
-     * An options object for initializing a renderer.
-     */
-    export
-    interface IOptions {
-      /**
-       * A code editor factory.
-       */
-      editorFactory: CodeEditor.Factory;
-
-      /**
-       * The factory to use for output area widget content.
-       */
-      outputAreaContentFactory?: OutputAreaWidget.IContentFactory;
-    }
-  }
 }
 
+
+/******************************************************************************
+ * MarkdownCell
+ ******************************************************************************/
 
 /**
  * A widget for a Markdown cell.
@@ -573,11 +660,11 @@ namespace CodeCellWidget {
  * updating the rendered text in all of these cases.
  */
 export
-class MarkdownCellWidget extends BaseCellWidget {
+class MarkdownCell extends Cell {
   /**
    * Construct a Markdown cell widget.
    */
-  constructor(options: MarkdownCellWidget.IOptions) {
+  constructor(options: MarkdownCell.IOptions) {
     super(options);
     this.addClass(MARKDOWN_CELL_CLASS);
     this._rendermime = options.rendermime;
@@ -604,13 +691,30 @@ class MarkdownCellWidget extends BaseCellWidget {
   }
 
   /**
+   * Render an input instead of the text editor.
+   */
+  protected renderInput(widget: Widget): void {
+    this.addClass(RENDERED_CLASS);
+    this.inputArea.renderInput(widget);
+  }
+
+  /**
+   * Show the text editor instead of rendered input.
+   */
+  protected showEditor(): void {
+    this.removeClass(RENDERED_CLASS);
+    this.inputArea.showEditor();
+  }
+
+  /**
    * Dispose of the resource held by the widget.
    */
   dispose(): void {
     if (this.isDisposed) {
       return;
     }
-    this._output = null;
+    this._renderedInput = null;
+    this._rendermime = null;
     super.dispose();
   }
 
@@ -630,15 +734,15 @@ class MarkdownCellWidget extends BaseCellWidget {
     if (!this._rendered) {
       this.showEditor();
     } else {
-      this._updateOutput();
-      this.renderInput(this._output);
+      this._updateRenderedInput();
+      this.renderInput(this._renderedInput);
     }
   }
 
   /**
-   * Update the output.
+   * Update the rendered input.
    */
-  private _updateOutput(): void {
+  private _updateRenderedInput(): void {
     let model = this.model;
     let text = model && model.value.text || DEFAULT_MARKDOWN_TEXT;
     let trusted = this.model.trusted;
@@ -648,15 +752,15 @@ class MarkdownCellWidget extends BaseCellWidget {
       let data: JSONObject = { 'text/markdown': text };
       let bundle = new MimeModel({ data, trusted });
       let widget = this._rendermime.render(bundle);
-      this._output = widget || new Widget();
-      this._output.addClass(MARKDOWN_OUTPUT_CLASS);
+      this._renderedInput = widget || new Widget();
+      this._renderedInput.addClass(MARKDOWN_OUTPUT_CLASS);
     }
     this._prevText = text;
     this._prevTrusted = trusted;
   }
 
   private _rendermime: RenderMime = null;
-  private _output: Widget = null;
+  private _renderedInput: Widget = null;
   private _rendered = true;
   private _prevText = '';
   private _prevTrusted = false;
@@ -664,15 +768,15 @@ class MarkdownCellWidget extends BaseCellWidget {
 
 
 /**
- * The namespace for the `CodeCellWidget` class statics.
+ * The namespace for the `CodeCell` class statics.
  */
 export
-namespace MarkdownCellWidget {
+namespace MarkdownCell {
   /**
    * An options object for initializing a base cell widget.
    */
   export
-  interface IOptions {
+  interface IOptions extends Cell.IOptions {
     /**
      * The model used by the cell.
      */
@@ -683,23 +787,24 @@ namespace MarkdownCellWidget {
      */
     rendermime: RenderMime;
 
-    /**
-     * The factory object for cell components.
-     */
-    contentFactory: BaseCellWidget.IContentFactory;
   }
 }
+
+
+/******************************************************************************
+ * RawCell
+ ******************************************************************************/
 
 
 /**
  * A widget for a raw cell.
  */
 export
-class RawCellWidget extends BaseCellWidget {
+class RawCell extends Cell {
   /**
    * Construct a raw cell widget.
    */
-  constructor(options: BaseCellWidget.IOptions) {
+  constructor(options: Cell.IOptions) {
     super(options);
     this.addClass(RAW_CELL_CLASS);
   }
@@ -712,111 +817,73 @@ class RawCellWidget extends BaseCellWidget {
 
 
 /**
- * The namespace for the `RawCellWidget` class statics.
+ * The namespace for the `RawCell` class statics.
  */
 export
-namespace RawCellWidget {
+namespace RawCell {
   /**
    * An options object for initializing a base cell widget.
    */
   export
-  interface IOptions {
+  interface IOptions extends Cell.IOptions {
     /**
      * The model used by the cell.
      */
     model: IRawCellModel;
-
-    /**
-     * The factory object for cell components.
-     */
-    contentFactory: BaseCellWidget.IContentFactory;
   }
 }
 
 
+/******************************************************************************
+ * Cell children
+ ******************************************************************************/
+
+
 /**
- * An input area widget, which hosts a prompt and an editor widget.
+ * The cell header interface.
  */
 export
-class InputAreaWidget extends Widget {
-  /**
-   * Construct an input area widget.
-   */
-  constructor(options: InputAreaWidget.IOptions) {
+interface ICellHeader extends Widget {}
+
+
+/**
+ * Default implementation of the cell header is a Widget with a class
+ */
+export
+class CellHeader extends Widget implements ICellHeader {
+}
+
+
+/**
+ * The cell footer interface.
+ */
+export
+interface ICellFooter extends Widget {}
+
+
+/**
+ * Default implementation of the cell footer is a Widget with a class
+ */
+export
+class CellFooter extends Widget implements ICellFooter {
+}
+
+
+/**
+ * A collapser for input and output.
+ *
+ * This is the element that gets clicked on.
+ */
+export
+interface ICollapser extends Widget {}
+
+
+/**
+ * Default implementation of the collapser.
+ */
+export
+class Collapser extends Widget {
+  constructor() {
     super();
-    this.addClass(INPUT_CLASS);
-    let editor = this._editor = options.editor;
-    editor.addClass(EDITOR_CLASS);
-    this.layout = new PanelLayout();
-    let prompt = this._prompt = new Widget();
-    prompt.addClass(PROMPT_CLASS);
-    let layout = this.layout as PanelLayout;
-    layout.addWidget(prompt);
-    layout.addWidget(editor);
-  }
-
-  /**
-   * Get the prompt node used by the cell.
-   */
-  get promptNode(): HTMLElement {
-    return this._prompt.node;
-  }
-
-  /**
-   * Render an input instead of the text editor.
-   */
-  renderInput(widget: Widget): void {
-    let layout = this.layout as PanelLayout;
-    if (this._rendered) {
-      layout.removeWidget(this._rendered);
-    } else {
-      layout.removeWidget(this._editor);
-    }
-    this._rendered = widget;
-    layout.addWidget(widget);
-  }
-
-  /**
-   * Show the text editor.
-   */
-  showEditor(): void {
-    let layout = this.layout as PanelLayout;
-    if (this._rendered) {
-      layout.removeWidget(this._rendered);
-      layout.addWidget(this._editor);
-    }
-  }
-
-  /**
-   * Set the prompt of the input area.
-   */
-  setPrompt(value: string): void {
-    if (value === 'null') {
-      value = ' ';
-    }
-    let text = `In [${value || ' '}]:`;
-    this._prompt.node.textContent = text;
-  }
-
-  private _prompt: Widget;
-  private _editor: CodeEditorWidget;
-  private _rendered: Widget;
-}
-
-
-/**
- * The namespace for `InputAreaWidget` statics.
- */
-export
-namespace InputAreaWidget {
-  /**
-   * The options used to create an `InputAreaWidget`.
-   */
-  export
-  interface IOptions {
-    /**
-     * The editor widget contained by the input area.
-     */
-    editor: CodeEditorWidget;
   }
 }

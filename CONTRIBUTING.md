@@ -99,9 +99,10 @@ Alternatively, you can run JupyterLab in debug mode:
 jupyter lab --debug
 ```
 
-### Run the tests
+### Build and run the tests
 
 ```bash
+npm run build:test
 npm test
 ```
 

@@ -52,7 +52,7 @@ const SHORTCUTS = [
   },
   {
     command: 'completer:invoke-console',
-    selector: '.jp-CodeConsole-prompt .jp-mod-completer-enabled',
+    selector: '.jp-CodeConsole-promptCell .jp-mod-completer-enabled',
     keys: ['Tab']
   },
   {
@@ -62,17 +62,17 @@ const SHORTCUTS = [
   },
   {
     command: 'console:run',
-    selector: '.jp-CodeConsole-prompt',
+    selector: '.jp-CodeConsole-promptCell',
     keys: ['Enter']
   },
   {
     command: 'console:run-forced',
-    selector: '.jp-CodeConsole-prompt',
+    selector: '.jp-CodeConsole-promptCell',
     keys: ['Shift Enter']
   },
   {
     command: 'console:linebreak',
-    selector: '.jp-CodeConsole-prompt',
+    selector: '.jp-CodeConsole-promptCell',
     keys: ['Ctrl Enter']
   },
   {
@@ -81,17 +81,19 @@ const SHORTCUTS = [
     keys: ['Shift Enter']
   },
   {
-    command: 'filebrowser:toggle',
+    command: 'filebrowser-main:toggle',
     selector: 'body',
     keys: ['Accel Shift F']
   },
   {
-    command: 'filebrowser:new-text-file',
+    command: 'file-operations:create-from',
+    args: { creatorName: 'Text File' },
     selector: 'body',
     keys: ['Ctrl O']
   },
   {
-    command: 'filebrowser:new-notebook',
+    command: 'file-operations:create-from',
+    args: { creatorName: 'Notebook' },
     selector: 'body',
     keys: ['Ctrl Shift N']
   },
@@ -132,7 +134,7 @@ const SHORTCUTS = [
   },
   {
     command: 'inspector:open',
-    selector: '.jp-CodeConsole-prompt',
+    selector: '.jp-CodeConsole-promptCell',
     keys: ['Accel I']
   },
   {
@@ -332,12 +334,12 @@ const SHORTCUTS = [
   },
   {
     command: 'tooltip:launch-notebook',
-    selector: '.jp-Notebook.jp-mod-editMode .jp-CellEditor:not(.jp-mod-has-primary-selection)',
+    selector: '.jp-Notebook.jp-mod-editMode .jp-InputArea-editor:not(.jp-mod-has-primary-selection)',
     keys: ['Shift Tab']
   },
   {
     command: 'tooltip:launch-console',
-    selector: '.jp-CodeConsole-prompt .jp-CellEditor:not(.jp-mod-has-primary-selection)',
+    selector: '.jp-CodeConsole-promptCell .jp-InputArea-editor:not(.jp-mod-has-primary-selection)',
     keys: ['Shift Tab']
   }
 ];

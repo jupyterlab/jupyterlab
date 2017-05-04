@@ -257,15 +257,16 @@ class BreadCrumbs extends Widget {
     if (index === -1) {
       return;
     }
-    let path = BREAD_CRUMB_PATHS[index];
-    let model = this._model;
+
+    const path = BREAD_CRUMB_PATHS[index];
+    const model = this._model;
 
     // Move all of the items.
     let promises: Promise<any>[] = [];
     let names = event.mimeData.getData(utils.CONTENTS_MIME) as string[];
     for (let name of names) {
       let newPath = path + name;
-      promises.push(this._model.rename(name, newPath).catch(error => {
+      promises.push(model.manager.rename(name, newPath).catch(error => {
         if (error.xhr) {
           error.message = `${error.xhr.status}: error.statusText`;
         }
@@ -278,9 +279,9 @@ class BreadCrumbs extends Widget {
           };
           return showDialog(options).then(button => {
             if (!model.isDisposed && button.accept) {
-              return model.deleteFile(newPath).then(() => {
+              return model.manager.deleteFile(newPath).then(() => {
                 if (!model.isDisposed) {
-                  return this._model.rename(name, newPath);
+                  return model.manager.rename(name, newPath);
                 }
               });
             }

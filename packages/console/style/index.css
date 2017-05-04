@@ -59,7 +59,7 @@
 }
 
 
-.jp-CodeConsole-content .jp-InputArea-editor.jp-CellEditor {
+.jp-CodeConsole-content .jp-InputArea-editor.jp-InputArea-editor {
   background: transparent;
   border-color: transparent;
 }
