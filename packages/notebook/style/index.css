@@ -38,6 +38,14 @@
 }
 
 
+.jp-NotebookPanel-toolbar {
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+              0 3px 1px -2px rgba(0, 0, 0, 0.2),
+              0 1px 5px 0 rgba(0, 0, 0, 0.12);
+  z-index: 1;
+}
+
+
 .jp-Notebook {
   flex: 1 1 auto;
   padding: var(--jp-notebook-padding);
@@ -91,6 +99,7 @@
 |   - Active (only one can be active)
 |   - Selected (the cells actions are applied to)
 |   - Multiselected (when multiple selected, the cursor)
+|   - No outputs
 |----------------------------------------------------------------------------*/
 
 /* Command or edit modes */
