@@ -1,8 +1,21 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+
 import {
-  Kernel, ServiceManager
+  IClientSession
+} from '@jupyterlab/apputils';
+
+import {
+  ModelDB, PathExt, uuid
+} from '@jupyterlab/coreutils';
+
+import {
+  DocumentRegistry, Context
+} from '@jupyterlab/docregistry';
+
+import {
+  Contents, Kernel, ServiceManager
 } from '@jupyterlab/services';
 
 import {
@@ -30,24 +43,13 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IClientSession
-} from '@jupyterlab/apputils';
-
-import {
-  ModelDB
-} from '@jupyterlab/coreutils';
-
-import {
-  DocumentRegistry, Context
-} from '@jupyterlab/docregistry';
-
-import {
   SaveHandler
 } from './savehandler';
 
 import {
   DocumentWidgetManager
 } from './widgetmanager';
+
 
 /* tslint:disable */
 /**
@@ -63,6 +65,7 @@ const IDocumentManager = new Token<IDocumentManager>('jupyter.services.document-
  */
 export
 interface IDocumentManager extends DocumentManager {}
+
 
 /**
  * The document manager.
@@ -80,15 +83,26 @@ class DocumentManager implements IDisposable {
    * Construct a new document manager.
    */
   constructor(options: DocumentManager.IOptions) {
-    this._registry = options.registry;
-    this._serviceManager = options.manager;
+    this.registry = options.registry;
+    this.services = options.manager;
+
     this._opener = options.opener;
     this._modelDBFactory = options.modelDBFactory;
-    this._widgetManager = new DocumentWidgetManager({
-      registry: this._registry
-    });
-    this._widgetManager.activateRequested.connect(this._onActivateRequested, this);
+
+    let widgetManager = new DocumentWidgetManager({ registry: this.registry });
+    widgetManager.activateRequested.connect(this._onActivateRequested, this);
+    this._widgetManager = widgetManager;
   }
+
+  /**
+   * The registry used by the manager.
+   */
+  readonly registry: DocumentRegistry;
+
+  /**
+   * The service manager used by the manager.
+   */
+  readonly services: ServiceManager.IManager;
 
   /**
    * A signal emitted when one of the documents is activated.
@@ -98,35 +112,37 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * Get the registry used by the manager.
+   * The current working directory of the document manager.
+   *
+   * #### Notes
+   * This attribute is DEPRECATED. It is intended for use as a stopgap measure
+   * to create some notion of an application-level working directory for
+   * launching activities that need a sensible starting directory. It will be
+   * replaced with another concept in later releases.
    */
-  get registry(): DocumentRegistry {
-    return this._registry;
+  get cwd(): string {
+    return this._cwd;
   }
-
-  /**
-   * Get the service manager used by the manager.
-   */
-  get services(): ServiceManager.IManager {
-    return this._serviceManager;
+  set cwd(cwd: string) {
+    this._cwd = cwd;
   }
 
   /**
    * Get whether the document manager has been disposed.
    */
   get isDisposed(): boolean {
-    return this._serviceManager === null;
+    return this._widgetManager === null;
   }
 
   /**
    * Dispose of the resources held by the document manager.
    */
   dispose(): void {
-    if (this._serviceManager === null) {
+    if (this._widgetManager === null) {
       return;
     }
+
     let widgetManager = this._widgetManager;
-    this._serviceManager = null;
     this._widgetManager = null;
     Signal.clearData(this);
     each(toArray(this._contexts), context => {
@@ -137,48 +153,70 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * Open a file and return the widget used to view it.
-   * Reveals an already existing editor.
+   * Clone a widget.
    *
-   * @param path - The file path to open.
+   * @param widget - The source widget.
    *
-   * @param widgetName - The name of the widget factory to use. 'default' will use the default widget.
-   *
-   * @param kernel - An optional kernel name/id to override the default.
-   *
-   * @returns The created widget, or `undefined`.
+   * @returns A new widget or `undefined`.
    *
    * #### Notes
-   * This function will return `undefined` if a valid widget factory
-   * cannot be found.
+   *  Uses the same widget factory and context as the source, or returns
+   *  `undefined` if the source widget is not managed by this manager.
    */
-  openOrReveal(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
-    let widget = this.findWidget(path, widgetName);
-    if (!widget) {
-      widget = this.open(path, widgetName, kernel);
-    } else {
-      this._opener.open(widget);
-    }
-    return widget;
+  cloneWidget(widget: Widget): Widget {
+    return this._widgetManager.cloneWidget(widget);
   }
 
   /**
-   * Open a file and return the widget used to view it.
-   *
-   * @param path - The file path to open.
-   *
-   * @param widgetName - The name of the widget factory to use. 'default' will use the default widget.
-   *
-   * @param kernel - An optional kernel name/id to override the default.
-   *
-   * @returns The created widget, or `undefined`.
-   *
-   * #### Notes
-   * This function will return `undefined` if a valid widget factory
-   * cannot be found.
+   * Close all of the open documents.
    */
-  open(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
-    return this._createOrOpenDocument('open', path, widgetName, kernel);
+  closeAll(): Promise<void> {
+    return Promise.all(
+      toArray(map(this._contexts, context => {
+        return this._widgetManager.closeWidgets(context);
+      }))
+    ).then(() => undefined);
+  }
+
+  /**
+   * Close the widgets associated with a given path.
+   *
+   * @param path - The target path.
+   */
+  closeFile(path: string): Promise<void> {
+    let context = this._contextForPath(path);
+    if (context) {
+      return this._widgetManager.closeWidgets(context);
+    }
+    return Promise.resolve(void 0);
+  }
+
+  /**
+   * Get the document context for a widget.
+   *
+   * @param widget - The widget of interest.
+   *
+   * @returns The context associated with the widget, or `undefined`.
+   */
+  contextForWidget(widget: Widget): DocumentRegistry.Context {
+    return this._widgetManager.contextForWidget(widget);
+  }
+
+  /**
+   * Copy a file.
+   *
+   * @param fromFile - The path of the original file.
+   *
+   * @param toDir - The path to the target directory.
+   *
+   * @param basePath - The base path to resolve against, defaults to ''.
+   *
+   * @returns A promise which resolves to the contents of the file.
+   */
+  copy(fromFile: string, toDir: string, basePath = ''): Promise<Contents.IModel> {
+    fromFile = PathExt.resolve(basePath, fromFile);
+    toDir = PathExt.resolve(basePath, toDir);
+    return this.services.contents.copy(fromFile, toDir);
   }
 
   /**
@@ -201,6 +239,26 @@ class DocumentManager implements IDisposable {
   }
 
   /**
+   * Delete a file.
+   *
+   * @param path - The path to the file to be deleted.
+   *
+   * @param basePath - The base path to resolve against, defaults to ''.
+   *
+   * @returns A promise which resolves when the file is deleted.
+   *
+   * #### Notes
+   * If there is a running session associated with the file and no other
+   * sessions are using the kernel, the session will be shut down.
+   */
+  deleteFile(path: string, basePath = ''): Promise<void> {
+    path = PathExt.resolve(basePath, path);
+    return this.services.sessions.stopIfNeeded(path).then(() => {
+      return this.services.contents.delete(path);
+    });
+  }
+
+  /**
    * See if a widget already exists for the given path and widget name.
    *
    * @param path - The file path to use.
@@ -216,7 +274,7 @@ class DocumentManager implements IDisposable {
   findWidget(path: string, widgetName='default'): Widget {
     if (widgetName === 'default') {
       let extname = DocumentRegistry.extname(path);
-      let factory = this._registry.defaultWidgetFactory(extname);
+      let factory = this.registry.defaultWidgetFactory(extname);
       if (!factory) {
         return;
       }
@@ -229,53 +287,99 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * Get the document context for a widget.
+   * Create a new untitled file.
    *
-   * @param widget - The widget of interest.
-   *
-   * @returns The context associated with the widget, or `undefined`.
+   * @param options - The file content creation options.
    */
-  contextForWidget(widget: Widget): DocumentRegistry.Context {
-    return this._widgetManager.contextForWidget(widget);
+  newUntitled(options: Contents.ICreateOptions): Promise<Contents.IModel> {
+    if (options.type === 'file') {
+      options.ext = options.ext || '.txt';
+    }
+    return this.services.contents.newUntitled(options);
   }
 
   /**
-   * Clone a widget.
+   * Open a file and return the widget used to view it.
    *
-   * @param widget - The source widget.
+   * @param path - The file path to open.
    *
-   * @returns A new widget or `undefined`.
+   * @param widgetName - The name of the widget factory to use. 'default' will use the default widget.
+   *
+   * @param kernel - An optional kernel name/id to override the default.
+   *
+   * @returns The created widget, or `undefined`.
    *
    * #### Notes
-   *  Uses the same widget factory and context as the source, or returns
-   *  `undefined` if the source widget is not managed by this manager.
+   * This function will return `undefined` if a valid widget factory
+   * cannot be found.
    */
-  cloneWidget(widget: Widget): Widget {
-    return this._widgetManager.cloneWidget(widget);
+  open(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
+    return this._createOrOpenDocument('open', path, widgetName, kernel);
   }
 
   /**
-   * Close the widgets associated with a given path.
+   * Open a file and return the widget used to view it.
+   * Reveals an already existing editor.
    *
-   * @param path - The target path.
+   * @param path - The file path to open.
+   *
+   * @param widgetName - The name of the widget factory to use. 'default' will use the default widget.
+   *
+   * @param kernel - An optional kernel name/id to override the default.
+   *
+   * @returns The created widget, or `undefined`.
+   *
+   * #### Notes
+   * This function will return `undefined` if a valid widget factory
+   * cannot be found.
    */
-  closeFile(path: string): Promise<void> {
-    let context = this._contextForPath(path);
-    if (context) {
-      return this._widgetManager.closeWidgets(context);
+  openOrReveal(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
+    let widget = this.findWidget(path, widgetName);
+    if (widget) {
+      this._opener.open(widget);
+      return widget;
     }
-    return Promise.resolve(void 0);
+    return this.open(path, widgetName, kernel);
   }
 
   /**
-   * Close all of the open documents.
+   * Overwrite a file.
+   *
+   * @param oldPath - The path to the original file.
+   *
+   * @param newPath - The path to the new file.
+   *
+   * @param basePath - The base path to resolve against, defaults to ''.
+   *
+   * @returns A promise containing the new file contents model.
    */
-  closeAll(): Promise<void> {
-    return Promise.all(
-      toArray(map(this._contexts, context => {
-        return this._widgetManager.closeWidgets(context);
-      }))
-    ).then(() => undefined);
+  overwrite(oldPath: string, newPath: string, basePath = ''): Promise<Contents.IModel> {
+    // Cleanly overwrite the file by moving it, making sure the original does
+    // not exist, and then renaming to the new path.
+    const tempPath = `${newPath}.${uuid()}`;
+    const cb = () => this.rename(tempPath, newPath, basePath);
+    return this.rename(oldPath, tempPath, basePath).then(() => {
+      return this.deleteFile(newPath, basePath);
+    }).then(cb, cb);
+  }
+
+  /**
+   * Rename a file or directory.
+   *
+   * @param oldPath - The path to the original file.
+   *
+   * @param newPath - The path to the new file.
+   *
+   * @param basePath - The base path to resolve against, defaults to ''.
+   *
+   * @returns A promise containing the new file contents model.  The promise
+   * will reject if the newPath already exists.  Use [[overwrite]] to overwrite
+   * a file.
+   */
+  rename(oldPath: string, newPath: string, basePath = ''): Promise<Contents.IModel> {
+    oldPath = PathExt.resolve(basePath, oldPath);
+    newPath = PathExt.resolve(basePath, newPath);
+    return this.services.contents.rename(oldPath, newPath);
   }
 
   /**
@@ -283,8 +387,7 @@ class DocumentManager implements IDisposable {
    */
   private _findContext(path: string, factoryName: string): Private.IContext {
     return find(this._contexts, context => {
-      return (context.factoryName === factoryName &&
-              context.path === path);
+      return context.factoryName === factoryName && context.path === path;
     });
   }
 
@@ -292,9 +395,7 @@ class DocumentManager implements IDisposable {
    * Get a context for a given path.
    */
   private _contextForPath(path: string): Private.IContext {
-    return find(this._contexts, context => {
-      return context.path === path;
-    });
+    return find(this._contexts, context => context.path === path);
   }
 
   /**
@@ -307,7 +408,7 @@ class DocumentManager implements IDisposable {
     };
     let context = new Context({
       opener: adopter,
-      manager: this._serviceManager,
+      manager: this.services,
       factory,
       path,
       kernelPreference,
@@ -315,7 +416,7 @@ class DocumentManager implements IDisposable {
     });
     let handler = new SaveHandler({
       context,
-      manager: this._serviceManager
+      manager: this.services
     });
     Private.saveHandlerProperty.set(context, handler);
     context.ready.then(() => {
@@ -337,7 +438,7 @@ class DocumentManager implements IDisposable {
    * Get the model factory for a given widget name.
    */
   private _widgetFactoryFor(path: string, widgetName: string): DocumentRegistry.WidgetFactory {
-    let registry = this._registry;
+    let { registry } = this;
     if (widgetName === 'default') {
       let extname = DocumentRegistry.extname(path);
       let factory = registry.defaultWidgetFactory(extname);
@@ -362,14 +463,14 @@ class DocumentManager implements IDisposable {
     if (!widgetFactory) {
       return;
     }
-    let factory = this._registry.getModelFactory(widgetFactory.modelName);
+    let factory = this.registry.getModelFactory(widgetFactory.modelName);
     if (!factory) {
       return;
     }
 
     // Handle the kernel pereference.
     let ext = DocumentRegistry.extname(path);
-    let preference = this._registry.getKernelPreference(
+    let preference = this.registry.getKernelPreference(
       ext, widgetFactory.name, kernel
     );
 
@@ -403,13 +504,12 @@ class DocumentManager implements IDisposable {
     this._activateRequested.emit(args);
   }
 
-  private _serviceManager: ServiceManager.IManager = null;
-  private _widgetManager: DocumentWidgetManager = null;
-  private _registry: DocumentRegistry = null;
-  private _contexts: Private.IContext[] = [];
-  private _opener: DocumentManager.IWidgetOpener = null;
   private _activateRequested = new Signal<this, string>(this);
+  private _contexts: Private.IContext[] = [];
+  private _cwd: string = '';
   private _modelDBFactory: ModelDB.IFactory = null;
+  private _opener: DocumentManager.IWidgetOpener = null;
+  private _widgetManager: DocumentWidgetManager = null;
 }
 
 

@@ -81,17 +81,19 @@ const SHORTCUTS = [
     keys: ['Shift Enter']
   },
   {
-    command: 'filebrowser:toggle',
+    command: 'filebrowser-main:toggle',
     selector: 'body',
     keys: ['Accel Shift F']
   },
   {
-    command: 'filebrowser:new-text-file',
+    command: 'file-operations:create-from',
+    args: { creatorName: 'Text File' },
     selector: 'body',
     keys: ['Ctrl O']
   },
   {
-    command: 'filebrowser:new-notebook',
+    command: 'file-operations:create-from',
+    args: { creatorName: 'Notebook' },
     selector: 'body',
     keys: ['Ctrl Shift N']
   },

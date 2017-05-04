@@ -2,16 +2,24 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Dialog, DOMUtils, showDialog
+} from '@jupyterlab/apputils';
+
+import {
+  PathExt, Time
+} from '@jupyterlab/coreutils';
+
+import {
+  IDocumentManager, renameFileDialog
+} from '@jupyterlab/docmanager';
+
+import {
   Contents
 } from '@jupyterlab/services';
 
 import {
   ArrayExt, ArrayIterator, IIterator, each, filter, find, map, toArray
 } from '@phosphor/algorithm';
-
-import {
-  Message, MessageLoop
-} from '@phosphor/messaging';
 
 import {
   MimeData
@@ -26,24 +34,12 @@ import {
 } from '@phosphor/domutils';
 
 import {
+  Message, MessageLoop
+} from '@phosphor/messaging';
+
+import {
   Widget
 } from '@phosphor/widgets';
-
-import {
-  Dialog, DOMUtils, showDialog
-} from '@jupyterlab/apputils';
-
-import {
-  PathExt, Time
-} from '@jupyterlab/coreutils';
-
-import {
-  DocumentManager
-} from '@jupyterlab/docmanager';
-
-import {
-  renameFile
-} from './dialogs';
 
 import {
   FileBrowserModel
@@ -206,9 +202,10 @@ class DirListing extends Widget {
     this._model.pathChanged.connect(this._onPathChanged, this);
     this._editNode = document.createElement('input');
     this._editNode.className = EDITOR_CLASS;
-    this._manager = options.manager;
+    this._manager = this._model.manager;
     this._renderer = options.renderer || DirListing.defaultRenderer;
-    let headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
+
+    const headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
     this._renderer.populateHeaderNode(headerNode);
     this._manager.activateRequested.connect(this._onActivateRequested, this);
   }
@@ -322,14 +319,17 @@ class DirListing extends Widget {
     if (!this._clipboard.length) {
       return;
     }
+
+    const basePath = this._model.path;
     let promises: Promise<Contents.IModel>[] = [];
+
     each(this._clipboard, path => {
       if (this._isCut) {
-        let parts = path.split('/');
-        let name = parts[parts.length - 1];
-        promises.push(this._model.rename(path, name));
+        const parts = path.split('/');
+        const name = parts[parts.length - 1];
+        promises.push(this._model.manager.rename(path, name, basePath));
       } else {
-        promises.push(this._model.copy(path, '.'));
+        promises.push(this._model.manager.copy(path, '.', basePath));
       }
     });
 
@@ -382,10 +382,12 @@ class DirListing extends Widget {
    * @returns A promise that resolves when the operation is complete.
    */
   duplicate(): Promise<void> {
+    const basePath = this._model.path;
     let promises: Promise<Contents.IModel>[] = [];
+
     for (let item of this._getSelectedItems()) {
       if (item.type !== 'directory') {
-        promises.push(this._model.copy(item.name, '.'));
+        promises.push(this._model.manager.copy(item.name, '.', basePath));
       }
     }
     return Promise.all(promises).catch(error => {
@@ -413,13 +415,14 @@ class DirListing extends Widget {
    * @returns A promise that resolves when the operation is complete.
    */
   shutdownKernels(): Promise<void> {
-    let promises: Promise<void>[] = [];
-    let items = this._sortedItems;
-    let paths = toArray(map(items, item => item.path));
+    const model = this._model;
+    const promises: Promise<void>[] = [];
+    const items = this._sortedItems;
+    const paths = items.map(item => item.path);
     each(this._model.sessions(), session => {
       let index = ArrayExt.firstIndexOf(paths, session.notebook.path);
       if (this._selection[items[index].name]) {
-        promises.push(this._model.shutdown(session.id));
+        promises.push(model.manager.services.sessions.shutdown(session.id));
       }
     });
     return Promise.all(promises).catch(error => {
@@ -977,16 +980,17 @@ class DirListing extends Widget {
     }
 
     // Get the path based on the target node.
-    let index = ArrayExt.firstIndexOf(this._items, target);
-    let items = this._sortedItems;
-    let path = items[index].name + '/';
+    const index = ArrayExt.firstIndexOf(this._items, target);
+    const items = this._sortedItems;
+    const path = items[index].name + '/';
+    const manager = this._manager;
 
     // Move all of the items.
-    let promises: Promise<Contents.IModel>[] = [];
-    let names = event.mimeData.getData(utils.CONTENTS_MIME) as string[];
+    const promises: Promise<Contents.IModel>[] = [];
+    const names = event.mimeData.getData(utils.CONTENTS_MIME) as string[];
     for (let name of names) {
       let newPath = path + name;
-      promises.push(renameFile(this._model, name, newPath));
+      promises.push(renameFileDialog(manager, name, newPath, this._model.path));
     }
     Promise.all(promises).catch(error => {
       utils.showErrorMessage('Move Error', error);
@@ -1186,9 +1190,10 @@ class DirListing extends Widget {
    * Delete the files with the given names.
    */
   private _delete(names: string[]): Promise<void> {
-    let promises: Promise<void>[] = [];
+    const promises: Promise<void>[] = [];
+    const basePath = this._model.path;
     for (let name of names) {
-      promises.push(this._model.deleteFile(name));
+      promises.push(this._model.manager.deleteFile(name, basePath));
     }
     return Promise.all(promises).catch(error => {
       utils.showErrorMessage('Delete file', error);
@@ -1216,7 +1221,11 @@ class DirListing extends Widget {
       if (this.isDisposed) {
         return;
       }
-      return renameFile(this._model, original, newName).catch(error => {
+
+      const manager = this._manager;
+      const basePath = this._model.path;
+      const promise = renameFileDialog(manager, original, newName, basePath);
+      return promise.catch(error => {
         utils.showErrorMessage('Rename Error', error);
         return original;
       }).then(() => {
@@ -1287,7 +1296,7 @@ class DirListing extends Widget {
   /**
    * Handle an `activateRequested` signal from the manager.
    */
-  private _onActivateRequested(sender: DocumentManager, args: string): void {
+  private _onActivateRequested(sender: IDocumentManager, args: string): void {
     let dirname = PathExt.dirname(args);
     if (dirname === '.') {
       dirname = '';
@@ -1311,7 +1320,7 @@ class DirListing extends Widget {
   private _isCut = false;
   private _prevPath = '';
   private _clipboard: string[] = [];
-  private _manager: DocumentManager = null;
+  private _manager: IDocumentManager = null;
   private _softSelection = '';
   private _inContext = false;
   private _selection: { [key: string]: boolean; } = Object.create(null);
@@ -1333,11 +1342,6 @@ namespace DirListing {
      * A file browser model instance.
      */
     model: FileBrowserModel;
-
-    /**
-     * A document manager instance.
-     */
-    manager: DocumentManager;
 
     /**
      * A renderer for file items.
