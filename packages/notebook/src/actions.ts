@@ -15,7 +15,7 @@ import {
 
 import {
   ICellModel, ICodeCellModel,
-  CodeCellWidget, BaseCellWidget, MarkdownCellWidget
+  CodeCell, Cell, MarkdownCell
 } from '@jupyterlab/cells';
 
 import {
@@ -162,8 +162,8 @@ namespace NotebookActions {
 
     // If the original cell is a markdown cell, make sure
     // the new cell is unrendered.
-    if (primary instanceof MarkdownCellWidget) {
-      let cell = widget.activeCell as MarkdownCellWidget;
+    if (primary instanceof MarkdownCell) {
+      let cell = widget.activeCell as MarkdownCell;
       cell.rendered = false;
     }
 
@@ -800,7 +800,7 @@ namespace NotebookActions {
     level = Math.min(Math.max(level, 1), 6);
     let cells = widget.model.cells;
     let i = 0;
-    each(widget.widgets, (child: MarkdownCellWidget) => {
+    each(widget.widgets, (child: MarkdownCell) => {
       if (widget.isSelected(child)) {
         Private.setMarkdownHeader(cells.at(i), level);
       }
@@ -829,7 +829,7 @@ namespace Private {
     /**
      * The active cell before the action.
      */
-    activeCell: BaseCellWidget;
+    activeCell: Cell;
   }
 
   /**
@@ -888,7 +888,7 @@ namespace Private {
   export
   function runSelected(widget: Notebook, session?: IClientSession): Promise<boolean> {
     widget.mode = 'command';
-    let selected: BaseCellWidget[] = [];
+    let selected: Cell[] = [];
     let lastIndex = widget.activeCellIndex;
     let i = 0;
     each(widget.widgets, child => {
@@ -923,15 +923,15 @@ namespace Private {
   /**
    * Run a cell.
    */
-  function runCell(parent: Notebook, child: BaseCellWidget, session?: IClientSession): Promise<boolean> {
+  function runCell(parent: Notebook, child: Cell, session?: IClientSession): Promise<boolean> {
 
     switch (child.model.type) {
     case 'markdown':
-      (child as MarkdownCellWidget).rendered = true;
+      (child as MarkdownCell).rendered = true;
       break;
     case 'code':
       if (session) {
-        return (child as CodeCellWidget).execute(session).then(reply => {
+        return (child as CodeCell).execute(session).then(reply => {
           if (child.isDisposed) {
             return false;
           }
@@ -960,7 +960,7 @@ namespace Private {
    * the kernel type definitions.
    * See [Payloads (DEPRECATED)](https://jupyter-client.readthedocs.io/en/latest/messaging.html#payloads-deprecated).
    */
-  function handlePayload(content: KernelMessage.IExecuteOkReply, parent: Notebook, child: BaseCellWidget) {
+  function handlePayload(content: KernelMessage.IExecuteOkReply, parent: Notebook, child: Cell) {
     let setNextInput = content.payload.filter(i => {
       return (i as any).source === 'set_next_input';
     })[0];
@@ -1067,7 +1067,7 @@ namespace Private {
       if (value === 'markdown') {
         // Fetch the new widget and unrender it.
         child = widget.widgets[i];
-        (child as MarkdownCellWidget).rendered = false;
+        (child as MarkdownCell).rendered = false;
       }
     });
     cells.endCompoundOperation();

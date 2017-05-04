@@ -47,17 +47,17 @@
 }
 
 
-.jp-CodeMirrorWidget-static {
+.jp-CodeMirrorEditor-static {
   margin: var(--jp-code-padding);
 }
 
 
-.jp-CodeMirrorWidget, .jp-CodeMirrorWidget-static {
+.jp-CodeMirrorEditor, .jp-CodeMirrorEditor-static {
   cursor: text;
 }
 
 
-.jp-CodeMirrorWidget.jp-mod-readOnly .CodeMirror-cursor {
+.jp-CodeMirrorEditor.jp-mod-readOnly .CodeMirror-cursor {
   display: none;
 }
 

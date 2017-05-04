@@ -382,10 +382,17 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
   // Add a launcher item if the launcher is available.
   if (launcher) {
     launcher.add({
-      name: 'Notebook',
-      command: 'filebrowser:new-notebook'
+      args: { creatorName: 'Notebook' },
+      command: 'file-operations:create-from',
+      name: 'Notebook'
     });
   }
+
+  app.contextMenu.addItem({command: CommandIDs.clearOutputs, selector: '.jp-Notebook .jp-Cell'});
+  app.contextMenu.addItem({command: CommandIDs.split, selector: '.jp-Notebook .jp-Cell'});
+  app.contextMenu.addItem({ type: 'separator', selector: '.jp-Notebook', rank: 0 });
+  app.contextMenu.addItem({command: CommandIDs.undo, selector: '.jp-Notebook', rank: 1});
+  app.contextMenu.addItem({command: CommandIDs.redo, selector: '.jp-Notebook', rank: 2});
 
   return tracker;
 }

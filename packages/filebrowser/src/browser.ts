@@ -38,9 +38,14 @@ import {
 } from './model';
 
 import {
-  FILE_BROWSER_CLASS, showErrorMessage
+  showErrorMessage
 } from './utils';
 
+
+/**
+ * The class name added to file browsers.
+ */
+const FILE_BROWSER_CLASS = 'jp-FileBrowser';
 
 /**
  * The class name added to the filebrowser crumbs node.
@@ -77,17 +82,15 @@ class FileBrowser extends Widget {
     this.addClass(FILE_BROWSER_CLASS);
     this.id = options.id;
 
-    let commands = this._commands = options.commands;
-    let manager = this._manager = options.manager;
-    let model = this._model = options.model;
-    let renderer = options.renderer;
+    const commands = this._commands = options.commands;
+    const model = this._model = options.model;
+    const renderer = options.renderer;
 
     model.connectionFailure.connect(this._onConnectionFailure, this);
+    this._manager = model.manager;
     this._crumbs = new BreadCrumbs({ model });
-    this._buttons = new FileButtons({
-      commands, manager, model
-    });
-    this._listing = new DirListing({ manager, model, renderer });
+    this._buttons = new FileButtons({ commands, model });
+    this._listing = new DirListing({ model, renderer });
 
     this._crumbs.addClass(CRUMBS_CLASS);
     this._buttons.addClass(BUTTON_CLASS);
@@ -120,11 +123,11 @@ class FileBrowser extends Widget {
    * Dispose of the resources held by the file browser.
    */
   dispose() {
-    this._model = null;
-    this._crumbs = null;
     this._buttons = null;
+    this._crumbs = null;
     this._listing = null;
     this._manager = null;
+    this._model = null;
     super.dispose();
   }
 
@@ -164,17 +167,6 @@ class FileBrowser extends Widget {
   }
 
   /**
-   * Create a file from a creator.
-   *
-   * @param creatorName - The name of the widget creator.
-   *
-   * @returns A promise that resolves with the created widget.
-   */
-  createFrom(creatorName: string): Promise<Widget> {
-    return this._buttons.createFrom(creatorName);
-  }
-
-  /**
    * Create a new untitled file in the current directory.
    *
    * @param options - The options used to create the file.
@@ -182,8 +174,7 @@ class FileBrowser extends Widget {
    * @returns A promise that resolves with the created widget.
    */
   createNew(options: Contents.ICreateOptions): Promise<Widget> {
-    let model = this.model;
-    return model.newUntitled(options).then(contents => {
+    return this._manager.newUntitled(options).then(contents => {
       if (!this.isDisposed) {
         return this._buttons.createNew(contents.path);
       }
@@ -328,11 +319,6 @@ namespace FileBrowser {
      * A file browser model instance.
      */
     model: FileBrowserModel;
-
-    /**
-     * A document manager instance.
-     */
-    manager: DocumentManager;
 
     /**
      * An optional renderer for the directory listing area.

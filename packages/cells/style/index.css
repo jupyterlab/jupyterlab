@@ -5,19 +5,11 @@
 
 
 /*-----------------------------------------------------------------------------
-| Variables
+| Private CSS variables
 |----------------------------------------------------------------------------*/
 
 
 :root {
-  --jp-private-padding: 10px;
-  --jp-private-cell-editor-background: #f7f7f7;
-  --jp-private-cell-editor-border: #cfcfcf;
-  --jp-private-cell-prompt-width: 90px;
-  --jp-private-cell-inprompt-color: #303F9F;
-  --jp-private-cell-outprompt-color: #D84315;
-  --jp-private-cell-font-family: var(--jp-ui-font-family);
-  --jp-private-cell-prompt-letter-spacing: 2px;
 }
 
 
@@ -28,27 +20,119 @@
 
 
 .jp-Cell {
-  padding: 5px;
+  padding: var(--jp-cell-padding);
   margin: 0px;
-  border: var(--jp-border-width) solid transparent;
+  border: none;
   outline: none;
   background: transparent;
 }
 
 
-.jp-Cell-prompt {
-  flex-grow: 0;
-  flex-shrink: 0;
-  flex-basis: var(--jp-private-cell-prompt-width);
-  color: var(--jp-private-cell-inprompt-color);
-  font-family: var(--jp-private-cell-font-family);
+/* Hidden by zero height be default */
+.jp-Cell-header, .jp-Cell-footer  {
+  height: 0px;
+  width: 100%;
+  padding: 0px;
+  margin: 0px;
+  border: none;
+  outline: none;
+  background: transparent;
+}
+
+
+/*-----------------------------------------------------------------------------
+| Common input/output
+|----------------------------------------------------------------------------*/
+
+
+.jp-Cell-inputWrapper, .jp-Cell-outputWrapper  {
+  display: flex;
+  flex-direction: row;
+  padding: 0px;
+  margin: 0px;
+}
+
+
+/* Hidden by zero width be default */
+.jp-Cell-inputCollapser, .jp-Cell-outputCollapser {
+  flex: 0 0 0px;
+  padding: 0px;
+  margin: 0px;
+  border: none;
+  outline: none;
+  background: transparent;
+}
+
+
+/* Only input areas inside cells */
+.jp-Cell-inputArea, .jp-Cell-outputArea {
+  flex: 1 1 auto;
+}
+
+
+/*-----------------------------------------------------------------------------
+| Input
+|----------------------------------------------------------------------------*/
+
+
+/* All input areas */
+.jp-InputArea {
+  display: flex;
+  flex-direction: row;
+}
+
+
+.jp-InputArea-editor {
+  flex: 1 1 auto;;
+}
+
+
+.jp-InputArea-editor {
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
+  border-radius: 0px;
+  background: var(--jp-cell-editor-background);
+}
+
+
+.jp-InputPrompt {
+  flex: 0 0 var(--jp-cell-prompt-width);
+  color: var(--jp-cell-inprompt-font-color);
+  font-family: var(--jp-cell-prompt-font-family);
   padding: var(--jp-code-padding);
   text-align: right;
-  letter-spacing: var(--jp-private-cell-prompt-letter-spacing);
+  letter-spacing: var(--jp-cell-prompt-letter-spacing);
+  opacity: var(--jp-cell-prompt-opacity);
   line-height: var(--jp-code-line-height);
   font-size: var(--jp-code-font-size);
   border: var(--jp-border-width) solid transparent;
+  opacity: var(--jp-cell-prompt-opacity);
 }
+
+
+/*-----------------------------------------------------------------------------
+| Output
+|----------------------------------------------------------------------------*/
+
+/* Put a space between input and output when there IS output */
+.jp-Cell:not(.jp-mod-noOutputs) .jp-Cell-outputWrapper {
+  margin-top: 5px;
+}
+
+/* Make the output collapser disappear when there is not output, but do so
+ * in a manner that leaves it in the layout and preserves its width.
+ */
+.jp-Cell.jp-mod-noOutputs .jp-Cell-outputCollapser {
+  border: none !important;
+  background: transparent !important;
+}
+
+/* Text output with the Out[] prompt needs a top padding to match the
+ * alignment of the Out[] prompt itself.
+ */
+.jp-OutputArea-executeResult .jp-RenderedText.jp-OutputArea-output {
+  padding-top: var(--jp-code-padding);
+}
+
 
 
 /*-----------------------------------------------------------------------------
@@ -69,31 +153,7 @@
   padding-left: var(--jp-code-padding);
 }
 
+
 .jp-MarkdownOutput.jp-RenderedHTMLCommon {
   overflow: visible;
-}
-
-
-/*-----------------------------------------------------------------------------
-| InputArea
-|----------------------------------------------------------------------------*/
-
-
-.jp-InputArea {
-  display: flex;
-  flex-direction: row;
-}
-
-
-.jp-InputArea-editor {
-  flex-grow: 1;
-  flex-shrink: 1;
-  height: auto;
-}
-
-
-.jp-CellEditor {
-  border: var(--jp-border-width) solid var(--jp-private-cell-editor-border);
-  border-radius: 0px;
-  background: var(--jp-private-cell-editor-background);
 }

@@ -24,11 +24,11 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  JSONEditorWidget
+  JSONEditor
   } from '@jupyterlab/codeeditor';
 
 
-class LogEditor extends JSONEditorWidget {
+class LogEditor extends JSONEditor {
 
   methods: string[] = [];
 
@@ -53,7 +53,7 @@ class LogEditor extends JSONEditorWidget {
 
 describe('apputils', () => {
 
-  describe('JSONEditorWidget', () => {
+  describe('JSONEditor', () => {
 
     let editor: LogEditor;
     let editorServices = new CodeMirrorEditorFactory();
@@ -70,8 +70,8 @@ describe('apputils', () => {
     describe('#constructor', () => {
 
       it('should create a new metadata editor', () => {
-        let newEditor = new JSONEditorWidget({ editorFactory });
-        expect(newEditor).to.be.a(JSONEditorWidget);
+        let newEditor = new JSONEditor({ editorFactory });
+        expect(newEditor).to.be.a(JSONEditor);
       });
 
     });
@@ -79,7 +79,7 @@ describe('apputils', () => {
     describe('#editorHostNode', () => {
 
       it('should be the editor host node used by the editor', () => {
-        expect(editor.editorHostNode.classList).to.contain('jp-JSONEditorWidget-host');
+        expect(editor.editorHostNode.classList).to.contain('jp-JSONEditor-host');
       });
 
     });
@@ -87,7 +87,7 @@ describe('apputils', () => {
     describe('#revertButtonNode', () => {
 
       it('should be the revert button node used by the editor', () => {
-        expect(editor.revertButtonNode.classList).to.contain('jp-JSONEditorWidget-revertButton');
+        expect(editor.revertButtonNode.classList).to.contain('jp-JSONEditor-revertButton');
       });
 
     });
@@ -95,7 +95,7 @@ describe('apputils', () => {
     describe('#commitButtonNode', () => {
 
       it('should be the commit button node used by the editor', () => {
-        expect(editor.commitButtonNode.classList).to.contain('jp-JSONEditorWidget-commitButton');
+        expect(editor.commitButtonNode.classList).to.contain('jp-JSONEditor-commitButton');
       });
 
     });

@@ -131,14 +131,14 @@ const consolePlugin: JupyterLabPlugin<void> = {
     // Create a handler for each console that is created.
     consoles.widgetAdded.connect((sender, panel) => {
       const anchor = panel.console;
-      const cell = anchor.prompt;
+      const cell = anchor.promptCell;
       const editor = cell && cell.editor;
       const session = anchor.session;
       const parent = panel;
       const handler = manager.register({ editor, session, parent });
 
       // Listen for prompt creation.
-      anchor.promptCreated.connect((sender, cell) => {
+      anchor.promptCellCreated.connect((sender, cell) => {
         handler.editor = cell && cell.editor;
       });
     });

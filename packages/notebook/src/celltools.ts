@@ -26,11 +26,11 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  BaseCellWidget, ICellModel
+  Cell, ICellModel
 } from '@jupyterlab/cells';
 
 import {
-  CodeEditor, CodeEditorWidget, JSONEditorWidget
+  CodeEditor, CodeEditorWrapper, JSONEditor
 } from '@jupyterlab/codeeditor';
 
 import {
@@ -121,15 +121,15 @@ class CellTools extends Widget {
   /**
    * The active cell widget.
    */
-  get activeCell(): BaseCellWidget | null {
+  get activeCell(): Cell | null {
     return this._tracker.activeCell;
   }
 
   /**
    * The currently selected cells.
    */
-  get selectedCells(): BaseCellWidget[] {
-    let selected: BaseCellWidget[] = [];
+  get selectedCells(): Cell[] {
+    let selected: Cell[] = [];
     let panel = this._tracker.currentWidget;
     if (!panel) {
       return selected;
@@ -358,7 +358,7 @@ namespace CellTools {
       }
       if (!activeCell) {
         let cell = new Widget();
-        cell.addClass('jp-CellEditor');
+        cell.addClass('jp-InputArea-editor');
         cell.addClass('jp-InputArea-editor');
         layout.addWidget(cell);
         this._cellModel = null;
@@ -375,8 +375,8 @@ namespace CellTools {
       this._model.mimeType = cellModel.mimeType;
 
       let model = this._model;
-      let editorWidget = new CodeEditorWidget({ model, factory });
-      editorWidget.addClass('jp-CellEditor');
+      let editorWidget = new CodeEditorWrapper({ model, factory });
+      editorWidget.addClass('jp-InputArea-editor');
       editorWidget.addClass('jp-InputArea-editor');
       editorWidget.editor.readOnly = true;
       layout.addWidget(prompt);
@@ -416,7 +416,7 @@ namespace CellTools {
       let layout = this.layout = new PanelLayout();
       let header = Private.createMetadataHeader();
       layout.addWidget(header);
-      this.editor = new JSONEditorWidget({ editorFactory });
+      this.editor = new JSONEditor({ editorFactory });
       layout.addWidget(this.editor);
       header.addClass(COLLAPSED_CLASS);
       this.editor.addClass(COLLAPSED_CLASS);
@@ -426,7 +426,7 @@ namespace CellTools {
     /**
      * The editor used by the tool.
      */
-    readonly editor: JSONEditorWidget;
+    readonly editor: JSONEditor;
 
     /**
      * Get the toggle node used by the editor.

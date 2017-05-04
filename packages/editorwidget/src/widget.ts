@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  CodeEditor, IEditorServices, IEditorMimeTypeService, CodeEditorWidget
+  CodeEditor, IEditorServices, IEditorMimeTypeService, CodeEditorWrapper
 } from '@jupyterlab/codeeditor';
 
 
@@ -29,7 +29,7 @@ const EDITOR_CLASS = 'jp-EditorWidget';
  * A document widget for editors.
  */
 export
-class EditorWidget extends CodeEditorWidget {
+class EditorWidget extends CodeEditorWrapper {
   /**
    * Construct a new editor widget.
    */
