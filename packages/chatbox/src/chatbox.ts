@@ -10,6 +10,10 @@ import {
 } from '@phosphor/coreutils';
 
 import {
+  Signal
+} from '@phosphor/signaling';
+
+import {
   DisposableSet
 } from '@phosphor/disposable';
 
@@ -39,7 +43,7 @@ import {
 } from '@jupyterlab/cells';
 
 import {
-  IObservableVector, ObservableVector
+  IObservableVector, ObservableVector, ActivityMonitor
 } from '@jupyterlab/coreutils';
 
 import {
@@ -97,6 +101,16 @@ const DRAG_THRESHOLD = 5;
  */
 const PAGE_LENGTH = 20;
 
+/**
+ * The scroll position at which to request a new page.
+ */
+const NEW_PAGE_POSITION = 300;
+
+/**
+ * Throttle for scrolling for a new page.
+ */
+const SCROLL_THROTTLE = 1000;
+
 
 /**
  * A widget containing a Jupyter chatbox.
@@ -129,6 +143,13 @@ class Chatbox extends Widget {
     // Insert the content and input panes into the widget.
     layout.addWidget(this._content);
     layout.addWidget(this._input);
+
+    // Throttle the scroll paging of the widget.
+    this._monitor = new ActivityMonitor({
+      signal: this._scrollSignal,
+      timeout: SCROLL_THROTTLE
+    });
+    this._monitor.activityStopped.connect(this._handleScroll, this);
   }
 
   /**
@@ -180,19 +201,16 @@ class Chatbox extends Widget {
         this._log.clear();
         let localCollaborator = { shortName: 'IR', color: '#3300FF' };
         for (let i = 0; i < 100; i++ ) {
-          this._log.pushBack({ text: String(i)+'$$E=mc^2$$', author: localCollaborator as any});
+          this._log.pushBack({ text: String(i) + '$$E = mc^2$$', author: localCollaborator as any});
         }
         this._log.changed.connect(this._onLogChanged, this);
         this._start = this._log.length;
 
         if (this.isVisible) {
-          // Ignore any page adds due to scrollinig
-          // if we are in the paging phase itself.
           this._scrollGuard = true;
-          // Remove any existing widgets.
           this.clear();
           this._addPage(PAGE_LENGTH);
-          this.update();
+          Private.scrollToBottom(this._content.node);
           this._scrollGuard = false;
         }
       });
@@ -222,6 +240,7 @@ class Chatbox extends Widget {
     this._disposables = null;
     disposables.dispose();
     this._log = null;
+    Signal.clearData(this);
 
     super.dispose();
   }
@@ -281,7 +300,7 @@ class Chatbox extends Widget {
       this._evtMousemove(event as MouseEvent);
       break;
     case 'scroll':
-      this._evtScroll(event as WheelEvent);
+      this._scrollSignal.emit(void 0);
       break;
     default:
       break;
@@ -301,7 +320,7 @@ class Chatbox extends Widget {
       // Add a page.
       this._addPage(PAGE_LENGTH);
       // Scroll to bottom.
-      this.update();
+      Private.scrollToBottom(this._content.node);
       this._scrollGuard = false;
     }
   }
@@ -381,29 +400,28 @@ class Chatbox extends Widget {
       this._content.insertWidget(0, entryWidget);
       numAdded++;
     }
-    this._start = index;
+    this._start = index + 1;
   }
 
 
   /**
    * Handle a `'scroll'` event for the content panel.
    */
-  private _evtScroll(event: WheelEvent): void {
+  private _handleScroll(): void {
     // If we are adding entries right now,
     // ignore any scroll event.
     if (this._scrollGuard) {
       return;
     }
     // Only page if we hit the top.
-    if (this._content.node.scrollTop === 0 && this._start > 0) {
-      this._scrollGuard = true;
-      //let startingHeight = this._content.node.scrollHeight;
+    if (this._content.node.scrollTop <= NEW_PAGE_POSITION && this._start > 0) {
+      let startingHeight = this._content.node.scrollHeight;
+      let startingPosition = this._content.node.scrollTop;
       this._addPage(PAGE_LENGTH);
       // Attempt to place the scroll position at
       // same entry where we started.
-      //this._content.node.scrollTop =
-      //  this._content.node.scrollHeight - startingHeight;
-      this._scrollGuard = false;
+      this._content.node.scrollTop =
+        this._content.node.scrollHeight - startingHeight + startingPosition;
     }
   }
 
@@ -580,6 +598,10 @@ class Chatbox extends Widget {
     prompt.dispose();
   }
 
+
+  /**
+   * Given a chat entry model, create a new entry widget.
+   */
   private _entryWidgetFromModel(entry: ChatEntry.IModel): ChatEntry {
     let options = this._createMarkdownCellOptions(entry.text);
     let cellWidget = this.contentFactory.createCell(options);
@@ -608,7 +630,9 @@ class Chatbox extends Widget {
   private _content: Panel = null;
   private _log: IObservableVector<ChatEntry.IModel> = null;
   private _start: number = null;
-  private _scrollGuard: boolean = false;
+  private _scrollGuard: boolean = true;
+  private _monitor: ActivityMonitor<any, any> = null;
+  private _scrollSignal = new Signal<this, void>(this);
   private _input: Panel = null;
   private _mimetype = 'text/x-ipythongfm';
   private _model: DocumentRegistry.IModel = null;
