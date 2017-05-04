@@ -10,7 +10,7 @@ if [[ $GROUP == tests ]]; then
     wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
 fi
 
-if [[ $GROUP == coverage ]]; then
+if [[ $GROUP == coverage_and_docs ]]; then
     wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
 fi
 
@@ -20,7 +20,7 @@ hash -r
 conda config --set always_yes yes --set changeps1 no
 conda update -q conda
 conda info -a
-conda install -c conda-forge notebook pytest pip
+conda install -c conda-forge notebook pytest
 
 # create jupyter base dir (needed for config retreival)
 mkdir ~/.jupyter
