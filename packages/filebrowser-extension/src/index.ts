@@ -53,6 +53,9 @@ namespace CommandIDs {
   const hideBrowser = 'filebrowser-main:hide'; // For main browser only.
 
   export
+  const open = 'filebrowser:open';
+
+  export
   const paste = 'filebrowser:paste';
 
   export
@@ -275,6 +278,20 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
     }
   });
 
+  commands.addCommand(CommandIDs.open, {
+    execute: () => {
+      const widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+
+      return widget.open();
+    },
+    icon: 'jp-MaterialIcon jp-OpenFolderIcon',
+    label: 'Open',
+    mnemonic: 0,
+  });
+
   commands.addCommand(CommandIDs.paste, {
     execute: () => {
       const widget = tracker.currentWidget;
@@ -343,14 +360,7 @@ function createContextMenu(fbWidget: FileBrowser, openWith: Menu):  Menu {
   const { commands } = fbWidget;
   const menu = new Menu({ commands });
 
-  menu.addItem({
-    command: 'file-operations:open',
-    args: {
-      icon: 'jp-MaterialIcon jp-OpenFolderIcon',
-      label: 'Open',
-      mnemonic: 0
-    }
-  });
+  menu.addItem({ command: CommandIDs.open });
 
   if (openWith) {
     menu.addItem({ type: 'submenu', submenu: openWith });
