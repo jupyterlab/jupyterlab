@@ -4,13 +4,11 @@
 |----------------------------------------------------------------------------*/
 
 /*-----------------------------------------------------------------------------
-| Variables
+| Private CSS variables
 |----------------------------------------------------------------------------*/
 
 
 :root {
-  --jp-private-outputarea-prompt-color: #D84315;
-  --jp-private-outputarea-prompt-width: 90px;
 }
 
 
@@ -32,7 +30,7 @@
 
 
 .jp-OutputPrompt {
-  flex: 0 0 var(--jp-private-cell-prompt-width);
+  flex: 0 0 var(--jp-cell-prompt-width);
   color: var(--jp-cell-outprompt-font-color);
   font-family: var(--jp-cell-prompt-font-family);
   padding: var(--jp-code-padding);
