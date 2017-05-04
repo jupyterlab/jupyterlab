@@ -45,7 +45,7 @@ if [[ $GROUP == coverage_and_docs ]]; then
     npm run docs
 
     # Run the link check
-    pip install -q pytest-check-links
-    py.test --check-links -k .md .
+    #pip install -q pytest-check-links
+    #py.test --check-links -k .md .
 fi
 
