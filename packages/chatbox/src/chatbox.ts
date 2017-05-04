@@ -197,12 +197,6 @@ class Chatbox extends Widget {
         } else {
           this._log = modelDB.createVector('internal:chat');
         }
-
-        this._log.clear();
-        let localCollaborator = { shortName: 'IR', color: '#3300FF' };
-        for (let i = 0; i < 100; i++ ) {
-          this._log.pushBack({ text: String(i) + '$$E = mc^2$$', author: localCollaborator as any});
-        }
         this._log.changed.connect(this._onLogChanged, this);
         this._start = this._log.length;
 
@@ -586,14 +580,13 @@ class Chatbox extends Widget {
     (this._input.layout as PanelLayout).removeWidgetAt(0);
 
     // Add the chat entry to the log.
-    //let collaborators = this._model.modelDB.collaborators;
-    //if (!collaborators) {
-    //  throw Error('Cannot post chat entry to non-collaborative document.');
-    //}
-    let localCollaborator = { shortName: 'IR', color: '#3300FF' };
+    let collaborators = this._model.modelDB.collaborators;
+    if (!collaborators) {
+      throw Error('Cannot post chat entry to non-collaborative document.');
+    }
     this._log.pushBack({
       text: prompt.model.value.text,
-      author: localCollaborator as any
+      author: collaborators.localCollaborator
     });
     prompt.dispose();
   }
