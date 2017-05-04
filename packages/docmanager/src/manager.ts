@@ -335,12 +335,11 @@ class DocumentManager implements IDisposable {
    */
   openOrReveal(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
     let widget = this.findWidget(path, widgetName);
-    if (!widget) {
-      widget = this.open(path, widgetName, kernel);
-    } else {
+    if (widget) {
       this._opener.open(widget);
+      return widget;
     }
-    return widget;
+    return this.open(path, widgetName, kernel);
   }
 
   /**
