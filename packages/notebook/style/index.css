@@ -9,23 +9,21 @@
 
 
 :root {
-  --jp-private-notebook-padding: 10px;
-  --jp-private-notebook-dragImage-width: 90px;
+  --jp-private-notebook-dragImage-width: var(--jp-cell-prompt-width);
   --jp-private-notebook-dragImage-height: 39px;
   --jp-private-notebook-dragImage-circleRadius: 20px;
   --jp-private-notebook-selected-color: var(--md-blue-400);
   --jp-private-notebook-multiselected-color: var(--md-blue-50);
-  --jp-private-notebook-active-color: var(--md-green-400);
-  --jp-private-notebook-cell-border-color: #ABABAB;
   --jp-private-notebook-left-border-width: 5px;
+  --jp-private-notebook-active-color: var(--md-green-400);
 }
 
 /*-----------------------------------------------------------------------------
 | Imports
 |----------------------------------------------------------------------------*/
 
-@import './toolbar.css';
 
+@import './toolbar.css';
 
 
 /*-----------------------------------------------------------------------------
@@ -34,7 +32,10 @@
 
 
 .jp-Notebook {
-  padding: var(--jp-private-notebook-padding);
+  padding-left: var(--jp-notebook-padding);
+  padding-right: var(--jp-notebook-padding);
+  padding-top: var(--jp-notebook-padding);
+  padding-bottom: calc( 4 * var(--jp-notebook-padding) );
   min-width: 50px;
   min-height: 50px;
   outline: none;
@@ -63,11 +64,33 @@
 
 
 .jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected {
-  border-color: var(--jp-private-notebook-cell-border-color);
+  border-color: var(--jp-notebook-cell-border-color);
 }
 
 
-.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected:before {
+.jp-Notebook.jp-mod-editMode .jp-Cell.jp-mod-active .jp-CellEditor {
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color-edit);
+  background: var(--jp-cell-editor-background-edit);
+}
+
+
+.jp-Notebook .jp-Cell.jp-mod-active .jp-Cell-prompt {
+  color: var(--jp-cell-inprompt-font-color-active);
+  opacity: var(--jp-cell-prompt-opacity-active);
+}
+
+
+.jp-Notebook .jp-Cell.jp-mod-active .jp-OutputAreaWidget-gutter {
+  color: var(--jp-cell-inprompt-font-color-active);
+  opacity: var(--jp-cell-prompt-opacity-active);
+}
+
+
+.jp-Notebook .jp-Cell.jp-mod-active .jp-Cell-cursor {
+  background: var(--jp-brand-color1);
+}
+
+/*.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected:before {
   position: absolute;
   display: block;
   top: calc( -1 * var(--jp-border-width) );
@@ -76,7 +99,7 @@
   height: calc( 100% + 2 * var(--jp-border-width) );
   content: '';
   background: var(--jp-private-notebook-selected-color);
-}
+}*/
 
 
 .jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-selected {
@@ -91,11 +114,11 @@
 
 
 .jp-Notebook.jp-mod-editMode .jp-Notebook-cell.jp-mod-active {
-  border-color: var(--jp-private-notebook-active-color);
+  border-color: transparent;
 }
 
 
-.jp-Notebook.jp-mod-editMode .jp-Notebook-cell.jp-mod-active:before {
+/*.jp-Notebook.jp-mod-editMode .jp-Notebook-cell.jp-mod-active:before {
   position: absolute;
   display: block;
   top: calc( -1 * var(--jp-border-width) );
@@ -104,7 +127,7 @@
   height: calc( 100% + 2 * var(--jp-border-width) );
   content: '';
   background: var(--jp-private-notebook-active-color);
-}
+}*/
 
 
 .jp-Notebook {
@@ -137,13 +160,13 @@
   position: absolute;
   width: var(--jp-private-notebook-dragImage-width);
   height: var(--jp-private-notebook-dragImage-height);
-  border: var(--jp-border-width) solid var(--jp-private-notebook-cell-border-color);
+  border: var(--jp-border-width) solid var(--jp-notebook-cell-border-color);
   background: var(--jp-layout-color1);
   overflow: visible;
 }
 
 
-.jp-dragImage:before {
+/*.jp-dragImage:before {
   position: absolute;
   display: block;
   top: calc( -1 * var(--jp-border-width) );
@@ -152,7 +175,7 @@
   height: calc( 100% + 2 * var(--jp-border-width) );
   content: '';
   background: var(--jp-private-notebook-selected-color);
-}
+}*/
 
 
 .jp-dragImage .jp-filledCircle {
