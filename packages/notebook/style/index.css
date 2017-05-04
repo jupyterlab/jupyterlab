@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 /*-----------------------------------------------------------------------------
-| Variables
+| Private CSS variables
 |----------------------------------------------------------------------------*/
 
 
@@ -31,11 +31,16 @@
 |----------------------------------------------------------------------------*/
 
 
+.jp-NotebookPanel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+
 .jp-Notebook {
-  padding-left: var(--jp-notebook-padding);
-  padding-right: var(--jp-notebook-padding);
-  padding-top: var(--jp-notebook-padding);
-  padding-bottom: calc( 4 * var(--jp-notebook-padding) );
+  flex: 1 1 auto;
+  padding: var(--jp-notebook-padding);
   min-width: 50px;
   min-height: 50px;
   outline: none;
@@ -51,88 +56,83 @@
 }
 
 
-.jp-NotebookPanel {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-
-.jp-Notebook .jp-Cell.jp-Notebook-cell {
+.jp-Notebook .jp-Cell {
   overflow: visible
 }
 
 
-.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected {
-  border-color: var(--jp-notebook-cell-border-color);
+.jp-Notebook .jp-Cell .jp-InputPrompt {
+  cursor: move;
 }
 
 
-.jp-Notebook.jp-mod-editMode .jp-Cell.jp-mod-active .jp-CellEditor {
+.jp-Notebook .jp-Cell .jp-OutputArea {
+  max-height: 1000px;
+}
+
+
+.jp-Notebook .jp-Cell .jp-Cell-inputCollapser,
+.jp-Notebook .jp-Cell .jp-Cell-outputCollapser {
+  flex: 0 0 12px;
+}
+
+
+
+/*-----------------------------------------------------------------------------
+| Notebook state related styling
+| 
+| The notebook and cells each have states, here are the possibilities:
+|
+| - Notebook
+|   - Command
+|   - Edit
+| - Cell
+|   - None
+|   - Active (only one can be active)
+|   - Selected (the cells actions are applied to)
+|   - Multiselected (when multiple selected, the cursor)
+|----------------------------------------------------------------------------*/
+
+/* Command or edit modes */
+
+.jp-Notebook .jp-Cell:not(.jp-mod-active) .jp-InputPrompt {
+  opacity: var(--jp-cell-prompt-opacity-not-active);
+}
+
+.jp-Notebook .jp-Cell:not(.jp-mod-active) .jp-OutputPrompt {
+  opacity: var(--jp-cell-prompt-opacity-not-active);
+}
+
+.jp-Notebook .jp-Cell.jp-mod-active .jp-Cell-inputCollapser,
+.jp-Notebook .jp-Cell.jp-mod-active .jp-Cell-outputCollapser {
+  border-left: 2px solid var(--jp-brand-color1);
+  border-top: 2px solid var(--jp-brand-color1);
+  border-bottom: 2px solid var(--jp-brand-color1);
+}
+
+
+/* Command mode */
+
+.jp-Notebook.jp-mod-commandMode .jp-Cell.jp-mod-selected {
+  background: var(--jp-private-notebook-multiselected-color);
+}
+
+.jp-Notebook.jp-mod-commandMode .jp-Cell.jp-mod-active.jp-mod-selected:not(.jp-mod-multiSelected) {
+  background: transparent;
+}
+
+
+/* Edit mode */
+
+.jp-Notebook.jp-mod-editMode .jp-Cell.jp-mod-active .jp-InputArea-editor {
   border: var(--jp-border-width) solid var(--jp-cell-editor-border-color-edit);
   background: var(--jp-cell-editor-background-edit);
 }
 
 
-.jp-Notebook .jp-Cell.jp-mod-active .jp-Cell-prompt {
-  color: var(--jp-cell-inprompt-font-color-active);
-  opacity: var(--jp-cell-prompt-opacity-active);
-}
-
-
-.jp-Notebook .jp-Cell.jp-mod-active .jp-OutputAreaWidget-gutter {
-  color: var(--jp-cell-inprompt-font-color-active);
-  opacity: var(--jp-cell-prompt-opacity-active);
-}
-
-
-.jp-Notebook .jp-Cell.jp-mod-active .jp-Cell-cursor {
-  background: var(--jp-brand-color1);
-}
-
-/*.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected:before {
-  position: absolute;
-  display: block;
-  top: calc( -1 * var(--jp-border-width) );
-  left: calc( -1 * var(--jp-border-width) );
-  width: var(--jp-private-notebook-left-border-width);
-  height: calc( 100% + 2 * var(--jp-border-width) );
-  content: '';
-  background: var(--jp-private-notebook-selected-color);
-}*/
-
-
-.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-selected {
-  background: var(--jp-private-notebook-multiselected-color);
-}
-
-
-.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected:not(.jp-mod-multiSelected) {
-  background: transparent;
-}
-
-
-
-.jp-Notebook.jp-mod-editMode .jp-Notebook-cell.jp-mod-active {
-  border-color: transparent;
-}
-
-
-/*.jp-Notebook.jp-mod-editMode .jp-Notebook-cell.jp-mod-active:before {
-  position: absolute;
-  display: block;
-  top: calc( -1 * var(--jp-border-width) );
-  left: calc( -1 * var(--jp-border-width) );
-  width: var(--jp-private-notebook-left-border-width);
-  height: calc( 100% + 2 * var(--jp-border-width) );
-  content: '';
-  background: var(--jp-private-notebook-active-color);
-}*/
-
-
-.jp-Notebook {
-  flex: 1 1 auto;
-}
+/*-----------------------------------------------------------------------------
+| Notebook drag and drop
+|----------------------------------------------------------------------------*/
 
 
 .jp-Notebook-cell.jp-mod-dropSource {
@@ -146,36 +146,14 @@
 }
 
 
-.jp-Notebook-cell .jp-Cell-prompt {
-  cursor: move;
-}
-
-
-.jp-Notebook-cell .jp-OutputArea {
-  max-height: 1000px;
-}
-
-
 .jp-dragImage {
   position: absolute;
   width: var(--jp-private-notebook-dragImage-width);
   height: var(--jp-private-notebook-dragImage-height);
-  border: var(--jp-border-width) solid var(--jp-notebook-cell-border-color);
+  border: var(--jp-border-width) solid black;
   background: var(--jp-layout-color1);
   overflow: visible;
 }
-
-
-/*.jp-dragImage:before {
-  position: absolute;
-  display: block;
-  top: calc( -1 * var(--jp-border-width) );
-  left: calc( -1 * var(--jp-border-width) );
-  width: var(--jp-private-notebook-left-border-width);
-  height: calc( 100% + 2 * var(--jp-border-width) );
-  content: '';
-  background: var(--jp-private-notebook-selected-color);
-}*/
 
 
 .jp-dragImage .jp-filledCircle {
@@ -192,6 +170,11 @@
     text-align: center;
     line-height: var(--jp-private-notebook-dragImage-circleRadius);
 }
+
+
+/*-----------------------------------------------------------------------------
+| Cell toolbar
+|----------------------------------------------------------------------------*/
 
 
 .jp-CellTools {

@@ -5,7 +5,7 @@
 
 
 /*-----------------------------------------------------------------------------
-| Variables
+| Private CSS variables
 |----------------------------------------------------------------------------*/
 
 
@@ -27,12 +27,16 @@
   background: transparent;
 }
 
+
+/* Hidden by zero height be default */
 .jp-Cell-header, .jp-Cell-footer  {
   height: 0px;
   width: 100%;
-  border: none;
   padding: 0px;
   margin: 0px;
+  border: none;
+  outline: none;
+  background: transparent;
 }
 
 
@@ -49,11 +53,14 @@
 }
 
 
+/* Hidden by zero width be default */
 .jp-Cell-inputCollapser, .jp-Cell-outputCollapser {
-  flex: 0 0 10px;
-  background: var(--jp-brand-color1);
+  flex: 0 0 0px;
   padding: 0px;
   margin: 0px;
+  border: none;
+  outline: none;
+  background: transparent;
 }
 
 
@@ -98,6 +105,7 @@
   line-height: var(--jp-code-line-height);
   font-size: var(--jp-code-font-size);
   border: var(--jp-border-width) solid transparent;
+  opacity: var(--jp-cell-prompt-opacity);
 }
 
 
@@ -107,7 +115,7 @@
 
 /* Put a scape between input and output. */
 .jp-Cell-outputWrapper {
-  margin: 5px 0 0 0;
+  margin: 0 0 0 0;
 }
 
 /* Text output with the Out[] prompt needs a top padding to match the
@@ -134,6 +142,7 @@
   margin-bottom: 0.5em;
   padding-left: var(--jp-code-padding);
 }
+
 
 .jp-MarkdownOutput.jp-RenderedHTMLCommon {
   overflow: visible;
