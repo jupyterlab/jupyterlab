@@ -1,9 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+ import {
+   URLExt, uuid
+ } from '@jupyterlab/coreutils';
+
 import {
   ArrayExt, each, find, toArray
 } from '@phosphor/algorithm';
+
+ import {
+   JSONExt
+ } from '@phosphor/coreutils';
 
 import {
   ISignal, Signal
@@ -48,14 +56,14 @@ class DefaultSession implements Session.ISession {
     this._id = id;
     this._path = options.path;
     this._baseUrl = options.baseUrl || utils.getBaseUrl();
-    this._uuid = utils.uuid();
+    this._uuid = uuid();
     this._ajaxSettings = JSON.stringify(
       utils.ajaxSettingsWithToken(options.ajaxSettings || {}, options.token)
     );
     this._token = options.token || utils.getConfigOption('token');
     Private.runningSessions.push(this);
     this.setupKernel(kernel);
-    this._options = utils.copy(options);
+    this._options = JSONExt.deepCopy(options);
     this.terminated = new Signal<this, void>(this);
   }
 
@@ -182,7 +190,7 @@ class DefaultSession implements Session.ISession {
   clone(): Promise<Session.ISession> {
     let options = this._getKernelOptions();
     return Kernel.connectTo(this.kernel.id, options).then(kernel => {
-      options = utils.copy(this._options);
+      options = JSONExt.deepCopy(this._options);
       options.ajaxSettings = this.ajaxSettings;
       return new DefaultSession(options, this._id, kernel);
     });
@@ -332,8 +340,8 @@ class DefaultSession implements Session.ISession {
    */
   private _getKernelOptions(): Kernel.IOptions {
     return {
-      baseUrl: this._options.baseUrl,
-      wsUrl: this._options.wsUrl,
+      baseUrl: this._options.baseUrl || '',
+      wsUrl: this._options.wsUrl || '',
       username: this.kernel.username,
       ajaxSettings: this.ajaxSettings
     };
@@ -474,13 +482,13 @@ namespace Private {
    */
   function createKernel(options: Session.IOptions): Promise<Kernel.IKernel> {
     let kernelOptions: Kernel.IOptions = {
-      name: options.kernelName,
+      name: options.kernelName || '',
       baseUrl: options.baseUrl || utils.getBaseUrl(),
-      wsUrl: options.wsUrl,
-      username: options.username,
-      clientId: options.clientId,
-      token: options.token,
-      ajaxSettings: options.ajaxSettings
+      wsUrl: options.wsUrl || '',
+      username: options.username || '',
+      clientId: options.clientId || '',
+      token: options.token || '',
+      ajaxSettings: options.ajaxSettings || {}
     };
     return Kernel.connectTo(options.kernelId, kernelOptions);
   }
@@ -572,7 +580,7 @@ namespace Private {
    */
   export
   function getSessionUrl(baseUrl: string, id: string): string {
-    return utils.urlPathJoin(baseUrl, SESSION_SERVICE_URL, id);
+    return URLExt.join(baseUrl, SESSION_SERVICE_URL, id);
   }
 
   /**
@@ -593,7 +601,7 @@ namespace Private {
   export
   function listRunning(options: Session.IOptions = {}): Promise<Session.IModel[]> {
     let baseUrl = options.baseUrl || utils.getBaseUrl();
-    let url = utils.urlPathJoin(baseUrl, SESSION_SERVICE_URL);
+    let url = URLExt.join(baseUrl, SESSION_SERVICE_URL);
     let ajaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
     ajaxSettings.method = 'GET';
     ajaxSettings.dataType = 'json';
@@ -690,7 +698,7 @@ namespace Private {
   export
   function startSession(options: Session.IOptions): Promise<Session.IModel> {
     let baseUrl = options.baseUrl || utils.getBaseUrl();
-    let url = utils.urlPathJoin(baseUrl, SESSION_SERVICE_URL);
+    let url = URLExt.join(baseUrl, SESSION_SERVICE_URL);
     let model = {
       kernel: { name: options.kernelName, id: options.kernelId },
       notebook: { path: options.path }
