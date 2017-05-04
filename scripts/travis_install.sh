@@ -20,13 +20,12 @@ hash -r
 conda config --set always_yes yes --set changeps1 no
 conda update -q conda
 conda info -a
-conda install -c conda-forge notebook pytest
+conda install -c conda-forge notebook pytest pip
 
 # create jupyter base dir (needed for config retreival)
 mkdir ~/.jupyter
 
 
 # Install and enable the server extension
-pip install -U pip
 pip install -v -e ".[test]"
 jupyter serverextension enable --py jupyterlab
