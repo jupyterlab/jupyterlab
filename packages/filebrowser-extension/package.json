@@ -20,6 +20,7 @@
     "@jupyterlab/filebrowser": "^0.3.1",
     "@jupyterlab/services": "^0.42.1",
     "@phosphor/algorithm": "^1.0.0",
+    "@phosphor/commands": "^1.0.0",
     "@phosphor/disposable": "^1.0.0",
     "@phosphor/widgets": "^1.0.0"
   },

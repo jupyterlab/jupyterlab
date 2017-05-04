@@ -18,12 +18,16 @@ import {
 } from '@jupyterlab/docmanager';
 
 import {
-  DocumentRegistry
+  DocumentRegistry, IDocumentRegistry
 } from '@jupyterlab/docregistry';
 
 import {
   FileBrowserModel, FileBrowser, IFileBrowserFactory
 } from '@jupyterlab/filebrowser';
+
+import {
+  CommandRegistry
+} from '@phosphor/commands';
 
 import {
   Menu
@@ -133,21 +137,8 @@ function activateFactory(app: JupyterLab, docManager: IDocumentManager, state: I
       let node = widget.node.getElementsByClassName('jp-DirListing-content')[0];
       node.addEventListener('contextmenu', (event: MouseEvent) => {
         event.preventDefault();
-        let command =  'file-operations:open';
-        let path = widget.pathForClick(event) || '';
-        let ext = DocumentRegistry.extname(path);
-        let factories = registry.preferredWidgetFactories(ext).map(f => f.name);
-        let openWith: Menu = null;
-
-        if (path && factories.length > 1) {
-          openWith = new Menu({ commands });
-          openWith.title.label = 'Open With...';
-          factories.forEach(factory => {
-            openWith.addItem({ args: { factory, path }, command });
-          });
-        }
-
-        const menu = createContextMenu(widget, openWith);
+        const path = widget.pathForClick(event) || '';
+        const menu = createContextMenu(path, commands, registry);
         menu.open(event.clientX, event.clientY);
       });
 
@@ -356,13 +347,20 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
  * This function generates temporary commands with an incremented name. These
  * commands are disposed when the menu itself is disposed.
  */
-function createContextMenu(fbWidget: FileBrowser, openWith: Menu):  Menu {
-  const { commands } = fbWidget;
+function createContextMenu(path: string, commands: CommandRegistry, registry: IDocumentRegistry):  Menu {
   const menu = new Menu({ commands });
 
   menu.addItem({ command: CommandIDs.open });
 
-  if (openWith) {
+  const ext = DocumentRegistry.extname(path);
+  const factories = registry.preferredWidgetFactories(ext).map(f => f.name);
+  if (path && factories.length > 1) {
+    const command =  'file-operations:open';
+    const openWith = new Menu({ commands });
+    openWith.title.label = 'Open With...';
+    factories.forEach(factory => {
+      openWith.addItem({ args: { factory, path }, command });
+    });
     menu.addItem({ type: 'submenu', submenu: openWith });
   }
 
