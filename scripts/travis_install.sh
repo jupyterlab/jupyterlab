@@ -22,7 +22,7 @@ conda update -q conda
 conda info -a
 conda install -c conda-forge notebook pytest
 
-# create jupyter base dir (needed for config retreival)
+# create jupyter base dir (needed for config retrieval)
 mkdir ~/.jupyter
 
 
