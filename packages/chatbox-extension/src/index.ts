@@ -113,7 +113,7 @@ function activateChatbox(app: JupyterLab, rendermime: IRenderMime, palette: ICom
 
   let updateDocumentContext = function (): void {
     let context = docManager.contextForWidget(shell.currentWidget);
-    if (context && context.model.modelDB.isCollaborative) {
+    if (context) {// && context.model.modelDB.isCollaborative) {
       if (!panel.isAttached) {
         shell.addToLeftArea(panel);
       }

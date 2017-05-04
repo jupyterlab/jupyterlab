@@ -91,6 +91,12 @@ const JUPYTER_CELL_MIME: string = 'application/vnd.jupyter.cells';
  */
 const DRAG_THRESHOLD = 5;
 
+/**
+ * The number of new entries to render upon loading a
+ * new page of the chatlog.
+ */
+const PAGE_LENGTH = 20;
+
 
 /**
  * A widget containing a Jupyter chatbox.
@@ -170,21 +176,31 @@ class Chatbox extends Widget {
         } else {
           this._log = modelDB.createVector('internal:chat');
         }
-        this._log.changed.connect(this._onLogChanged, this);
 
-        // Remove any existing widgets.
-        this.clear();
-        each(this._log, entry => {
-          let entryWidget = this._entryWidgetFromModel(entry);
-          this._content.addWidget(entryWidget);
-        });
-        this.update();
+        this._log.clear();
+        let localCollaborator = { shortName: 'IR', color: '#3300FF' };
+        for (let i = 0; i < 100; i++ ) {
+          this._log.pushBack({ text: String(i)+'$$E=mc^2$$', author: localCollaborator as any});
+        }
+        this._log.changed.connect(this._onLogChanged, this);
+        this._start = this._log.length;
+
+        if (this.isVisible) {
+          // Ignore any page adds due to scrollinig
+          // if we are in the paging phase itself.
+          this._scrollGuard = true;
+          // Remove any existing widgets.
+          this.clear();
+          this._addPage(PAGE_LENGTH);
+          this.update();
+          this._scrollGuard = false;
+        }
       });
     }
   }
 
   /**
-   * Clear the code cells.
+   * Clear the chat entries.
    */
   clear(): void {
     // Dispose all the content cells.
@@ -264,8 +280,29 @@ class Chatbox extends Widget {
     case 'mousemove':
       this._evtMousemove(event as MouseEvent);
       break;
+    case 'scroll':
+      this._evtScroll(event as WheelEvent);
+      break;
     default:
       break;
+    }
+  }
+
+  /**
+   * Handle `after_show` messages for the widget.
+   */
+  protected onAfterShow(msg: Message): void {
+    // Put entries on the screen if we have
+    // not yet done that.
+    if (this._log && this._start === this._log.length) {
+      this._scrollGuard = true;
+      // Remove any existing widgets.
+      this.clear();
+      // Add a page.
+      this._addPage(PAGE_LENGTH);
+      // Scroll to bottom.
+      this.update();
+      this._scrollGuard = false;
     }
   }
 
@@ -276,6 +313,8 @@ class Chatbox extends Widget {
     let node = this.node;
     node.addEventListener('keydown', this, true);
     node.addEventListener('mousedown', this);
+    this._content.node.addEventListener('scroll', this);
+
     // Create a prompt if necessary.
     if (!this.prompt) {
       this._newPrompt();
@@ -292,6 +331,7 @@ class Chatbox extends Widget {
     let node = this.node;
     node.removeEventListener('keydown', this, true);
     node.removeEventListener('mousedown', this);
+    this._content.node.removeEventListener('scroll', this);
   }
 
   /**
@@ -300,6 +340,13 @@ class Chatbox extends Widget {
   protected onActivateRequest(msg: Message): void {
     this.prompt.editor.focus();
     this.update();
+  }
+
+  /**
+   * Handle `update-request` messages.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    Private.scrollToBottom(this._content.node);
   }
 
   /**
@@ -323,10 +370,41 @@ class Chatbox extends Widget {
   }
 
   /**
-   * Handle `update-request` messages.
+   * Add another page of entries.
    */
-  protected onUpdateRequest(msg: Message): void {
-    Private.scrollToBottom(this._content.node);
+  private _addPage(count: number): void {
+    // Add `count` widgets to the panel.
+    let index = this._start - 1;
+    let numAdded = 0;
+    while (index >= 0 && numAdded < count) {
+      let entryWidget = this._entryWidgetFromModel(this._log.at(index--));
+      this._content.insertWidget(0, entryWidget);
+      numAdded++;
+    }
+    this._start = index;
+  }
+
+
+  /**
+   * Handle a `'scroll'` event for the content panel.
+   */
+  private _evtScroll(event: WheelEvent): void {
+    // If we are adding entries right now,
+    // ignore any scroll event.
+    if (this._scrollGuard) {
+      return;
+    }
+    // Only page if we hit the top.
+    if (this._content.node.scrollTop === 0 && this._start > 0) {
+      this._scrollGuard = true;
+      //let startingHeight = this._content.node.scrollHeight;
+      this._addPage(PAGE_LENGTH);
+      // Attempt to place the scroll position at
+      // same entry where we started.
+      //this._content.node.scrollTop =
+      //  this._content.node.scrollHeight - startingHeight;
+      this._scrollGuard = false;
+    }
   }
 
   /**
@@ -490,13 +568,14 @@ class Chatbox extends Widget {
     (this._input.layout as PanelLayout).removeWidgetAt(0);
 
     // Add the chat entry to the log.
-    let collaborators = this._model.modelDB.collaborators;
-    if (!collaborators) {
-      throw Error('Cannot post chat entry to non-collaborative document.');
-    }
+    //let collaborators = this._model.modelDB.collaborators;
+    //if (!collaborators) {
+    //  throw Error('Cannot post chat entry to non-collaborative document.');
+    //}
+    let localCollaborator = { shortName: 'IR', color: '#3300FF' };
     this._log.pushBack({
       text: prompt.model.value.text,
-      author: collaborators.localCollaborator
+      author: localCollaborator as any
     });
     prompt.dispose();
   }
@@ -528,6 +607,8 @@ class Chatbox extends Widget {
 
   private _content: Panel = null;
   private _log: IObservableVector<ChatEntry.IModel> = null;
+  private _start: number = null;
+  private _scrollGuard: boolean = false;
   private _input: Panel = null;
   private _mimetype = 'text/x-ipythongfm';
   private _model: DocumentRegistry.IModel = null;
