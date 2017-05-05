@@ -80,20 +80,6 @@ class SessionManager implements Session.IManager {
   }
 
   /**
-   * Dispose of the resources used by the manager.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    this._isDisposed = true;
-    clearInterval(this._runningTimer);
-    clearInterval(this._specsTimer);
-    Signal.clearData(this);
-    this._running = [];
-  }
-
-  /**
    * The base url of the manager.
    */
   get baseUrl(): string {
@@ -113,10 +99,6 @@ class SessionManager implements Session.IManager {
   get ajaxSettings(): IAjaxSettings {
     return JSON.parse(this._ajaxSettings);
   }
-
-  /**
-   * Set the default ajax settings for the manager.
-   */
   set ajaxSettings(value: IAjaxSettings) {
     this._ajaxSettings = JSON.stringify(value);
   }
@@ -140,6 +122,20 @@ class SessionManager implements Session.IManager {
    */
   get ready(): Promise<void> {
     return this._readyPromise;
+  }
+
+  /**
+   * Dispose of the resources used by the manager.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    clearInterval(this._runningTimer);
+    clearInterval(this._specsTimer);
+    Signal.clearData(this);
+    this._running.length = 0;
   }
 
   /**
@@ -188,6 +184,24 @@ class SessionManager implements Session.IManager {
       this._onStarted(session);
       return session;
     });
+  }
+
+  /**
+   * Find a session associated with a path and stop it is the only session using
+   * that kernel.
+   *
+   * @param path - The path in question.
+   *
+   * @returns A promise that resolves when the relevant sessions are stopped.
+   */
+  stopIfNeeded(path: string): Promise<void> {
+    return Session.listRunning().then(sessions => {
+      const matches = sessions.filter(value => value.notebook.path === path);
+      if (matches.length === 1) {
+        const id = matches[0].id;
+        return this.shutdown(id).catch(() => { /* no-op */ });
+      }
+    }).catch(() => Promise.resolve(void 0)); // Always succeed.
   }
 
   /**

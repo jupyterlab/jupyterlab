@@ -79,7 +79,6 @@ steps::
 
     git clone https://github.com/<your-github-username>/jupyterlab.git
     cd jupyterlab
-    npm install
     pip install -e . # will take a long time to build everything
     jupyter serverextension enable --py jupyterlab
 
@@ -100,9 +99,10 @@ Alternatively, you can run JupyterLab in debug mode:
 jupyter lab --debug
 ```
 
-### Run the tests
+### Build and run the tests
 
 ```bash
+npm run build:test
 npm test
 ```
 
@@ -146,20 +146,20 @@ build tool.  The npm package source files are in the `packages/` subdirectory.
 npm install --save jupyterlab
 ```
 
-### Build the NPM Package from Source
+### Build the NPM Packages from Source
 
 ```bash
 git clone https://github.com/jupyterlab/jupyterlab.git
 cd jupyterlab
 npm install
-npm run build:all
+npm run build
 ```
 
 **Rebuild**
 
 ```bash
 npm run clean
-npm run build:all
+npm run build
 ```
 
 ## The Jupyter Server Extension
@@ -181,18 +181,17 @@ to build the changes and then refresh your browser to see the changes.
 To have the system build after each source file change, run:
 
 ```bash
-npm run watch
+npm run watch:main
 ```
 
 and refresh the browser.
 
-## Bundle for the Browser
+## Notes
+- By default, the application will load from the JupyterLab staging directory (default is `<sys-prefix>/share/jupyter/lab/build`.  If you wish to run
+the core application in `<git root>/jupyterlab/build`, 
+run `jupyter lab --dev-mode`.  This is the core application that will
+be shipped.
 
-Follow the package install instructions first.
-
-Any bundler that understands how to `require()` files with `.js` and `.css`
-extensions can be used with this package.
-
-**Note:** The npm modules are fully compatible with Node/Babel/ES6/ES5. Simply
+- The npm modules are fully compatible with Node/Babel/ES6/ES5. Simply
 omit the type declarations when using a language other than TypeScript.
 

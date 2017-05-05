@@ -34,9 +34,8 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IChangedArgs as IChangedArgsGeneric, PathExt
+  IChangedArgs as IChangedArgsGeneric, PathExt, IModelDB
 } from '@jupyterlab/coreutils';
-
 
 /* tslint:disable */
 /**
@@ -582,6 +581,16 @@ namespace DocumentRegistry {
     readonly defaultKernelLanguage: string;
 
     /**
+     * The underlying `IModelDB` instance in which model
+     * data is stored.
+     *
+     * ### Notes
+     * Making direct edits to the values stored in the`IModelDB`
+     * is not recommended, and may produce unpredictable results.
+     */
+    readonly modelDB: IModelDB;
+
+    /**
      * Serialize the model to a string.
      */
     toString(): string;
@@ -873,7 +882,7 @@ namespace DocumentRegistry {
      *
      * @returns A new document model.
      */
-    createNew(languagePreference?: string): T;
+    createNew(languagePreference?: string, modelDB?: IModelDB): T;
 
     /**
      * Get the preferred kernel language given an extension.

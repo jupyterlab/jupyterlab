@@ -2,6 +2,7 @@ MANIFEST
 build
 dist
 lib
+jupyterlab/index.js
 
 node_modules
 .cache

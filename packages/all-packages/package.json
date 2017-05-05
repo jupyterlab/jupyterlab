@@ -1,0 +1,88 @@
+{
+  "name": "@jupyterlab/all-packages",
+  "private": true,
+  "version": "0.2.2",
+  "description": "JupyterLab - All Packages",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js"
+  ],
+  "directories": {
+    "lib": "lib/"
+  },
+  "dependencies": {
+    "@jupyterlab/about-extension": "^0.3.1",
+    "@jupyterlab/application": "^0.3.1",
+    "@jupyterlab/application-extension": "^0.3.1",
+    "@jupyterlab/apputils": "^0.3.1",
+    "@jupyterlab/apputils-extension": "^0.3.1",
+    "@jupyterlab/cells": "^0.3.2",
+    "@jupyterlab/codeeditor": "^0.3.1",
+    "@jupyterlab/codemirror": "^0.3.1",
+    "@jupyterlab/codemirror-extension": "^0.3.2",
+    "@jupyterlab/completer": "^0.3.1",
+    "@jupyterlab/completer-extension": "^0.3.2",
+    "@jupyterlab/console": "^0.3.2",
+    "@jupyterlab/console-extension": "^0.3.2",
+    "@jupyterlab/coreutils": "^0.3.1",
+    "@jupyterlab/csvwidget": "^0.3.1",
+    "@jupyterlab/csvwidget-extension": "^0.3.1",
+    "@jupyterlab/default-theme": "^0.3.2",
+    "@jupyterlab/docmanager": "^0.3.1",
+    "@jupyterlab/docmanager-extension": "^0.3.1",
+    "@jupyterlab/docregistry": "^0.3.1",
+    "@jupyterlab/docregistry-extension": "^0.3.1",
+    "@jupyterlab/editorwidget": "^0.3.1",
+    "@jupyterlab/editorwidget-extension": "^0.3.1",
+    "@jupyterlab/faq-extension": "^0.3.1",
+    "@jupyterlab/filebrowser": "^0.3.1",
+    "@jupyterlab/filebrowser-extension": "^0.3.1",
+    "@jupyterlab/help-extension": "^0.3.1",
+    "@jupyterlab/imagewidget": "^0.3.1",
+    "@jupyterlab/imagewidget-extension": "^0.3.1",
+    "@jupyterlab/inspector": "^0.3.2",
+    "@jupyterlab/inspector-extension": "^0.3.2",
+    "@jupyterlab/landing-extension": "^0.3.1",
+    "@jupyterlab/launcher": "^0.3.1",
+    "@jupyterlab/launcher-extension": "^0.3.1",
+    "@jupyterlab/markdownwidget": "^0.3.2",
+    "@jupyterlab/markdownwidget-extension": "^0.3.2",
+    "@jupyterlab/notebook": "^0.3.2",
+    "@jupyterlab/notebook-extension": "^0.3.2",
+    "@jupyterlab/outputarea": "^0.3.2",
+    "@jupyterlab/rendermime": "^0.3.2",
+    "@jupyterlab/rendermime-extension": "^0.3.2",
+    "@jupyterlab/running": "^0.3.1",
+    "@jupyterlab/running-extension": "^0.3.1",
+    "@jupyterlab/services": "^0.42.1",
+    "@jupyterlab/services-extension": "^0.3.1",
+    "@jupyterlab/shortcuts-extension": "^0.3.1",
+    "@jupyterlab/tabmanager-extension": "^0.3.1",
+    "@jupyterlab/terminal": "^0.3.1",
+    "@jupyterlab/terminal-extension": "^0.3.1",
+    "@jupyterlab/tooltip": "^0.3.2",
+    "@jupyterlab/tooltip-extension": "^0.3.2"
+  },
+  "devDependencies": {
+    "rimraf": "^2.5.2",
+    "typescript": "^2.2.1"
+  },
+  "scripts": {
+    "build": "tsc && node build.js",
+    "clean": "rimraf lib",
+    "docs": "typedoc --mode modules --module commonjs --excludeNotExported --target es5 --moduleResolution node --name JupyterLab --out ../../docs/ .",
+    "watch": "watch \"npm run build\" .. --wait 10 --filter=../../scripts/watch-filter.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "author": "Project Jupyter",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "homepage": "https://github.com/jupyterlab/jupyterlab"
+}

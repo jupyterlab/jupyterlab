@@ -4,28 +4,24 @@
 import expect = require('expect.js');
 
 import {
-  utils
-} from '@jupyterlab/services';
+  ApplicationShell
+} from '@jupyterlab/application';
+
+import {
+  InstanceTracker, LayoutRestorer, StateDB
+} from '@jupyterlab/apputils';
 
 import {
   CommandRegistry
 } from '@phosphor/commands';
 
 import {
-  Widget
+  PromiseDelegate
+} from '@phosphor/coreutils';
+
+import {
+  DockPanel, Widget
 } from '@phosphor/widgets';
-
-import {
-  ApplicationShell
-} from '@jupyterlab/application';
-
-import {
-  InstanceTracker, LayoutRestorer
-} from '@jupyterlab/apputils';
-
-import {
-  StateDB
-} from '@jupyterlab/apputils';
 
 
 const NAMESPACE = 'jupyterlab-layout-restorer-tests';
@@ -60,7 +56,7 @@ describe('apputils', () => {
       });
 
       it('should resolve when restorer is done', done => {
-        let ready = new utils.PromiseDelegate<void>();
+        let ready = new PromiseDelegate<void>();
         let restorer = new LayoutRestorer({
           first: ready.promise,
           registry: new CommandRegistry(),
@@ -75,15 +71,16 @@ describe('apputils', () => {
     describe('#add()', () => {
 
       it('should add a widget to be tracked by the restorer', done => {
-        let ready = new utils.PromiseDelegate<void>();
+        let ready = new PromiseDelegate<void>();
         let restorer = new LayoutRestorer({
           first: ready.promise,
           registry: new CommandRegistry(),
           state: new StateDB({ namespace: NAMESPACE })
         });
         let currentWidget = new Widget();
+        let mode: DockPanel.Mode = 'single-document';
         let dehydrated: ApplicationShell.ILayout = {
-          mainArea: { currentWidget, dock: null },
+          mainArea: { currentWidget, dock: null, mode },
           leftArea: { collapsed: true, currentWidget: null, widgets: null },
           rightArea: { collapsed: true, currentWidget: null, widgets: null }
         };
@@ -93,6 +90,7 @@ describe('apputils', () => {
           .then(() => restorer.fetch())
           .then(layout => {
             expect(layout.mainArea.currentWidget).to.be(currentWidget);
+            expect(layout.mainArea.mode).to.be(mode);
             done();
           }).catch(done);
       });
@@ -114,7 +112,7 @@ describe('apputils', () => {
       });
 
       it('should fetch saved data', done => {
-        let ready = new utils.PromiseDelegate<void>();
+        let ready = new PromiseDelegate<void>();
         let restorer = new LayoutRestorer({
           first: ready.promise,
           registry: new CommandRegistry(),
@@ -124,7 +122,7 @@ describe('apputils', () => {
         // The `fresh` attribute is only here to check against the return value.
         let dehydrated: ApplicationShell.ILayout = {
           fresh: false,
-          mainArea: { currentWidget: null, dock: null },
+          mainArea: { currentWidget: null, dock: null, mode: null },
           leftArea: {
             currentWidget,
             collapsed: true,
@@ -153,7 +151,7 @@ describe('apputils', () => {
         });
         let registry = new CommandRegistry();
         let state = new StateDB({ namespace: NAMESPACE });
-        let ready = new utils.PromiseDelegate<void>();
+        let ready = new PromiseDelegate<void>();
         let restorer = new LayoutRestorer({
           first: ready.promise, registry, state
         });
@@ -188,7 +186,7 @@ describe('apputils', () => {
           state: new StateDB({ namespace: NAMESPACE })
         });
         let dehydrated: ApplicationShell.ILayout = {
-          mainArea: { currentWidget: null, dock: null },
+          mainArea: { currentWidget: null, dock: null, mode: null },
           leftArea: { currentWidget: null, collapsed: true, widgets: null },
           rightArea: { collapsed: true, currentWidget: null, widgets: null }
         };
@@ -198,7 +196,7 @@ describe('apputils', () => {
       });
 
       it('should save data', done => {
-        let ready = new utils.PromiseDelegate<void>();
+        let ready = new PromiseDelegate<void>();
         let restorer = new LayoutRestorer({
           first: ready.promise,
           registry: new CommandRegistry(),
@@ -208,7 +206,7 @@ describe('apputils', () => {
         // The `fresh` attribute is only here to check against the return value.
         let dehydrated: ApplicationShell.ILayout = {
           fresh: false,
-          mainArea: { currentWidget: null, dock: null },
+          mainArea: { currentWidget: null, dock: null, mode: null },
           leftArea: {
             currentWidget,
             collapsed: true,

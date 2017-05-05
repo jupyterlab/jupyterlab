@@ -16,7 +16,7 @@ import {
 } from '@phosphor/properties';
 
 import {
-  Widget
+  DockPanel, Widget
 } from '@phosphor/widgets';
 
 import {
@@ -445,6 +445,11 @@ namespace Private {
      * The main application dock panel.
      */
     dock?: ISplitArea | ITabArea | null;
+
+    /**
+     * The document mode (i.e., multiple/single) of the main dock panel.
+     */
+    mode?: DockPanel.Mode | null;
   }
 
   /**
@@ -558,10 +563,13 @@ namespace Private {
     let dehydrated: IMainArea = {
       dock: area && area.dock && serializeArea(area.dock.main) || null
     };
-    if (area && area.currentWidget) {
-      let current = Private.nameProperty.get(area.currentWidget);
-      if (current) {
-        dehydrated.current = current;
+    if (area) {
+      dehydrated.mode = area.mode;
+      if (area.currentWidget) {
+        let current = Private.nameProperty.get(area.currentWidget);
+        if (current) {
+          dehydrated.current = current;
+        }
       }
     }
     return dehydrated;
@@ -637,10 +645,13 @@ namespace Private {
 
     const name = (area as any).current || null;
     const dock = (area as any).dock || null;
+    const mode = (area as any).mode || null;
 
     return {
       currentWidget: name && names.has(name) && names.get(name) || null,
-      dock: dock ? { main: deserializeArea(dock, names) } : null
+      dock: dock ? { main: deserializeArea(dock, names) } : null,
+      mode: mode === 'multiple-document' || mode === 'single-document' ? mode
+        : null
     };
   }
 }

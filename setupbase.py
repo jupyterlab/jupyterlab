@@ -64,7 +64,7 @@ def find_package_data():
     Find package_data.
     """
     return {
-        'jupyterlab': ['build/*', 'lab.html']
+        'jupyterlab': ['build/*', 'lab.html', 'package.json', 'index.template.js', 'webpack.config.js']
     }
 
 
@@ -131,7 +131,7 @@ class NPM(Command):
         log.info("Installing build dependencies with npm. This may take a while...")
         main = os.path.join(here, 'jupyterlab')
         run(['npm', 'install'], cwd=here)
-        run(['npm', 'run', 'build'], cwd=main)
+        run(['npm', 'run', 'build:main'], cwd=here)
 
         for t in self.targets:
             if not os.path.exists(t):

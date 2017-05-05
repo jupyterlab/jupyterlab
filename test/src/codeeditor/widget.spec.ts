@@ -16,7 +16,7 @@ import {
 } from 'simulate-event';
 
 import {
-  CodeEditor, CodeEditorWidget
+  CodeEditor, CodeEditorWrapper
 } from '@jupyterlab/codeeditor';
 
 import {
@@ -27,6 +27,12 @@ import {
 class LogEditor extends CodeMirrorEditor {
 
   methods: string[] = [];
+  events: string[] = [];
+
+  handleEvent(event: Event): void {
+    super.handleEvent(event);
+    this.events.push(event.type);
+  }
 
   refresh(): void {
     super.refresh();
@@ -40,15 +46,9 @@ class LogEditor extends CodeMirrorEditor {
 }
 
 
-class LogWidget extends CodeEditorWidget {
+class LogWidget extends CodeEditorWrapper {
 
   methods: string[] = [];
-  events: string[] = [];
-
-  handleEvent(event: Event): void {
-    super.handleEvent(event);
-    this.events.push(event.type);
-  }
 
   protected onActivateRequest(msg: Message): void {
     super.onActivateRequest(msg);
@@ -77,7 +77,7 @@ class LogWidget extends CodeEditorWidget {
 }
 
 
-describe('CodeEditorWidget', () => {
+describe('CodeEditorWrapper', () => {
 
   let widget: LogWidget;
   let editorFactory = (options: CodeEditor.IOptions) => {
@@ -96,8 +96,15 @@ describe('CodeEditorWidget', () => {
 
   describe('#constructor()', () => {
 
-    it('should be a CodeEditorWidget', () => {
-      expect(widget).to.be.a(CodeEditorWidget);
+    it('should be a CodeEditorWrapper', () => {
+      expect(widget).to.be.a(CodeEditorWrapper);
+    });
+
+    it('should add a focus listener', () => {
+      widget.node.tabIndex = -1;
+      simulate(widget.node, 'focus');
+      let editor = widget.editor as LogEditor;
+      expect(editor.events).to.contain('focus');
     });
 
   });
@@ -118,6 +125,17 @@ describe('CodeEditorWidget', () => {
       expect(widget.isDisposed).to.be(true);
       widget.dispose();
       expect(widget.isDisposed).to.be(true);
+    });
+
+    it('should remove the focus listener', () => {
+      let editor = widget.editor as LogEditor;
+      expect(editor.isDisposed).to.be(false);
+      widget.dispose();
+      expect(editor.isDisposed).to.be(true);
+
+      widget.node.tabIndex = -1;
+      simulate(widget.node, 'focus');
+      expect(editor.events).to.not.contain('focus');
     });
 
   });
@@ -160,31 +178,10 @@ describe('CodeEditorWidget', () => {
 
   describe('#onAfterAttach()', () => {
 
-    it('should add a focus listener', () => {
-      Widget.attach(widget, document.body);
-      expect(widget.methods).to.contain('onAfterAttach');
-      widget.node.tabIndex = -1;
-      simulate(widget.node, 'focus');
-      expect(widget.events).to.contain('focus');
-    });
-
     it('should refresh the editor', () => {
       Widget.attach(widget, document.body);
       let editor = widget.editor as LogEditor;
       expect(editor.methods).to.contain('refresh');
-    });
-
-  });
-
-  describe('#onBeforeDetach()', () => {
-
-    it('should remove the focus listener', () => {
-      Widget.attach(widget, document.body);
-      Widget.detach(widget);
-      expect(widget.methods).to.contain('onBeforeDetach');
-      widget.node.tabIndex = -1;
-      simulate(widget.node, 'focus');
-      expect(widget.events).to.not.contain('focus');
     });
 
   });

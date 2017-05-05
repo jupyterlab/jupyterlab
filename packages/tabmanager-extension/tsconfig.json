@@ -3,11 +3,13 @@
     "declaration": true,
     "noImplicitAny": true,
     "noEmitOnError": true,
-    "lib": ["dom", "es5", "es2015.promise"],
+    "noUnusedLocals": true,
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "ES5",
-    "outDir": "../lib"
+    "outDir": "./lib",
+    "lib": ["ES5", "ES2015.Promise", "DOM", "ES2015.Collection"],
+    "types": []
   },
-  "exclude": ["typedoc.d.ts"]
+  "include": ["src/*"]
 }

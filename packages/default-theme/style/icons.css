@@ -141,3 +141,13 @@
 .jp-UploadIcon {
   background-image: url(icons/md/upload.svg);
 }
+
+
+.jp-CircleIcon {
+  background-image: url(icons/md/panorama_fish_eye.svg);
+}
+
+
+.jp-FilledCircleIcon {
+  background-image: url(icons/md/lens.svg);
+}

@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  uuid
+} from '@jupyterlab/coreutils';
+
+import {
   toArray
 } from '@phosphor/algorithm';
 
@@ -12,7 +16,7 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  uuid, getBaseUrl
+  getBaseUrl
 } from '../../../lib/utils';
 
 import {

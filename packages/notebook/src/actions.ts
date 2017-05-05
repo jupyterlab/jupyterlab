@@ -15,7 +15,7 @@ import {
 
 import {
   ICellModel, ICodeCellModel,
-  CodeCellWidget, BaseCellWidget, MarkdownCellWidget
+  CodeCell, Cell, MarkdownCell
 } from '@jupyterlab/cells';
 
 import {
@@ -120,7 +120,6 @@ namespace NotebookActions {
     let cells = model.cells;
     let primary = widget.activeCell;
     let index = widget.activeCellIndex;
-    let offset = 0;
 
     // Get the cells to merge.
     each(widget.widgets, (child, i) => {
@@ -128,9 +127,6 @@ namespace NotebookActions {
         toMerge.push(child.model.value.text);
         if (i !== index) {
           toDelete.push(child.model);
-          if (i < index) {
-            offset += 1;
-          }
         }
       }
     });
@@ -166,12 +162,11 @@ namespace NotebookActions {
 
     // If the original cell is a markdown cell, make sure
     // the new cell is unrendered.
-    if (primary instanceof MarkdownCellWidget) {
-      let cell = widget.activeCell as MarkdownCellWidget;
+    if (primary instanceof MarkdownCell) {
+      let cell = widget.activeCell as MarkdownCell;
       cell.rendered = false;
     }
 
-    widget.activeCellIndex -= offset;
     Private.handleState(widget, state);
   }
 
@@ -214,7 +209,10 @@ namespace NotebookActions {
     let state = Private.getState(widget);
     let model = widget.model;
     let cell = model.contentFactory.createCodeCell({ });
-    model.cells.insert(widget.activeCellIndex, cell);
+    let index = widget.activeCellIndex;
+    model.cells.insert(index, cell);
+    // Make the newly inserted cell active.
+    widget.activeCellIndex = index;
     widget.deselectAll();
     Private.handleState(widget, state);
   }
@@ -239,6 +237,7 @@ namespace NotebookActions {
     let model = widget.model;
     let cell = model.contentFactory.createCodeCell({});
     model.cells.insert(widget.activeCellIndex + 1, cell);
+    // Make the newly inserted cell active.
     widget.activeCellIndex++;
     widget.deselectAll();
     Private.handleState(widget, state);
@@ -801,7 +800,7 @@ namespace NotebookActions {
     level = Math.min(Math.max(level, 1), 6);
     let cells = widget.model.cells;
     let i = 0;
-    each(widget.widgets, (child: MarkdownCellWidget) => {
+    each(widget.widgets, (child: MarkdownCell) => {
       if (widget.isSelected(child)) {
         Private.setMarkdownHeader(cells.at(i), level);
       }
@@ -830,7 +829,7 @@ namespace Private {
     /**
      * The active cell before the action.
      */
-    activeCell: BaseCellWidget;
+    activeCell: Cell;
   }
 
   /**
@@ -889,7 +888,7 @@ namespace Private {
   export
   function runSelected(widget: Notebook, session?: IClientSession): Promise<boolean> {
     widget.mode = 'command';
-    let selected: BaseCellWidget[] = [];
+    let selected: Cell[] = [];
     let lastIndex = widget.activeCellIndex;
     let i = 0;
     each(widget.widgets, child => {
@@ -924,15 +923,15 @@ namespace Private {
   /**
    * Run a cell.
    */
-  function runCell(parent: Notebook, child: BaseCellWidget, session?: IClientSession): Promise<boolean> {
+  function runCell(parent: Notebook, child: Cell, session?: IClientSession): Promise<boolean> {
 
     switch (child.model.type) {
     case 'markdown':
-      (child as MarkdownCellWidget).rendered = true;
+      (child as MarkdownCell).rendered = true;
       break;
     case 'code':
       if (session) {
-        return (child as CodeCellWidget).execute(session).then(reply => {
+        return (child as CodeCell).execute(session).then(reply => {
           if (child.isDisposed) {
             return false;
           }
@@ -961,7 +960,7 @@ namespace Private {
    * the kernel type definitions.
    * See [Payloads (DEPRECATED)](https://jupyter-client.readthedocs.io/en/latest/messaging.html#payloads-deprecated).
    */
-  function handlePayload(content: KernelMessage.IExecuteOkReply, parent: Notebook, child: BaseCellWidget) {
+  function handlePayload(content: KernelMessage.IExecuteOkReply, parent: Notebook, child: Cell) {
     let setNextInput = content.payload.filter(i => {
       return (i as any).source === 'set_next_input';
     })[0];
@@ -1068,7 +1067,7 @@ namespace Private {
       if (value === 'markdown') {
         // Fetch the new widget and unrender it.
         child = widget.widgets[i];
-        (child as MarkdownCellWidget).rendered = false;
+        (child as MarkdownCell).rendered = false;
       }
     });
     cells.endCompoundOperation();
@@ -1110,7 +1109,7 @@ namespace Private {
       // Add a new cell if the notebook is empty. This is done
       // within the compound operation to make the deletion of
       // a notebook's last cell undoable.
-      if(!cells.length) {
+      if (!cells.length) {
         cells.pushBack(model.contentFactory.createCodeCell({}));
       }
       cells.endCompoundOperation();

@@ -6,21 +6,139 @@ import {
 } from '@phosphor/algorithm';
 
 import {
+  IDisposable
+} from '@phosphor/disposable';
+
+import {
   ISignal, Signal
 } from '@phosphor/signaling';
 
 import {
-  IObservableVector, ObservableVector, nbformat
+  IObservableVector, ObservableVector, nbformat,
+  IObservableValue, ObservableValue, IModelDB
 } from '@jupyterlab/coreutils';
 
 import {
   IOutputModel, OutputModel
 } from '@jupyterlab/rendermime';
 
-import {
-  IOutputAreaModel
-} from './widget';
 
+/**
+ * The model for an output area.
+ */
+export
+interface IOutputAreaModel extends IDisposable {
+  /**
+   * A signal emitted when the model state changes.
+   */
+  readonly stateChanged: ISignal<IOutputAreaModel, void>;
+
+  /**
+   * A signal emitted when the model changes.
+   */
+  readonly changed: ISignal<IOutputAreaModel, IOutputAreaModel.ChangedArgs>;
+
+  /**
+   * The length of the items in the model.
+   */
+  readonly length: number;
+
+  /**
+   * Whether the output area is trusted.
+   */
+  trusted: boolean;
+
+  /**
+   * The output content factory used by the model.
+   */
+  readonly contentFactory: IOutputAreaModel.IContentFactory;
+
+  /**
+   * Get an item at the specified index.
+   */
+  get(index: number): IOutputModel;
+
+  /**
+   * Add an output, which may be combined with previous output.
+   *
+   * #### Notes
+   * The output bundle is copied.
+   * Contiguous stream outputs of the same `name` are combined.
+   */
+  add(output: nbformat.IOutput): number;
+
+  /**
+   * Clear all of the output.
+   *
+   * @param wait - Delay clearing the output until the next message is added.
+   */
+  clear(wait?: boolean): void;
+
+  /**
+   * Deserialize the model from JSON.
+   *
+   * #### Notes
+   * This will clear any existing data.
+   */
+  fromJSON(values: nbformat.IOutput[]): void;
+
+  /**
+   * Serialize the model to JSON.
+   */
+  toJSON(): nbformat.IOutput[];
+}
+
+
+/**
+ * The namespace for IOutputAreaModel interfaces.
+ */
+export
+namespace IOutputAreaModel {
+  /**
+   * The options used to create a output area model.
+   */
+  export
+  interface IOptions {
+    /**
+     * The initial values for the model.
+     */
+    values?: nbformat.IOutput[];
+
+    /**
+     * Whether the output is trusted.  The default is false.
+     */
+    trusted?: boolean;
+
+    /**
+     * The output content factory used by the model.
+     *
+     * If not given, a default factory will be used.
+     */
+    contentFactory?: IContentFactory;
+
+    /**
+     * An optional IModelDB to store the output area model.
+     */
+    modelDB?: IModelDB;
+  }
+
+  /**
+   * A type alias for changed args.
+   */
+  export
+  type ChangedArgs = ObservableVector.IChangedArgs<IOutputModel>;
+
+  /**
+   * The interface for an output content factory.
+   */
+  export
+  interface IContentFactory {
+    /**
+     * Create an output model.
+     */
+    createOutputModel(options: IOutputModel.IOptions): IOutputModel;
+  }
+}
 
 /**
  * The default implementation of the IOutputAreaModel.
@@ -40,6 +158,19 @@ class OutputAreaModel implements IOutputAreaModel {
       each(options.values, value => { this._add(value); });
     }
     this.list.changed.connect(this._onListChanged, this);
+
+    // If we are given a IModelDB, keep an up-to-date
+    // serialized copy of the OutputAreaModel in it.
+    if (options.modelDB) {
+      this._modelDB = options.modelDB;
+      this._serialized = this._modelDB.createValue('outputs');
+      if (this._serialized.get()) {
+        this.fromJSON(this._serialized.get() as nbformat.IOutput[]);
+      } else {
+        this._serialized.set(this.toJSON());
+      }
+      this._serialized.changed.connect(this._onSerializedChanged, this);
+    }
   }
 
   /**
@@ -233,8 +364,25 @@ class OutputAreaModel implements IOutputAreaModel {
    * Handle a change to the list.
    */
   private _onListChanged(sender: IObservableVector<IOutputModel>, args: ObservableVector.IChangedArgs<IOutputModel>) {
+    if (this._serialized && !this._changeGuard) {
+      this._changeGuard = true;
+      this._serialized.set(this.toJSON());
+      this._changeGuard = false;
+    }
     this._changed.emit(args);
     this._stateChanged.emit(void 0);
+  }
+
+  /**
+   * If the serialized version of the outputs have changed due to a remote
+   * action, then update the model accordingly.
+   */
+  private _onSerializedChanged(sender: IObservableValue, args: ObservableValue.IChangedArgs) {
+    if (!this._changeGuard) {
+      this._changeGuard = true;
+      this.fromJSON(args.newValue as nbformat.IOutput[]);
+      this._changeGuard = false;
+    }
   }
 
   /**
@@ -250,6 +398,9 @@ class OutputAreaModel implements IOutputAreaModel {
   private _isDisposed = false;
   private _stateChanged = new Signal<IOutputAreaModel, void>(this);
   private _changed = new Signal<this, IOutputAreaModel.ChangedArgs>(this);
+  private _modelDB: IModelDB = null;
+  private _serialized: IObservableValue = null;
+  private _changeGuard = false;
 }
 
 

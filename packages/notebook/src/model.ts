@@ -15,8 +15,8 @@ import {
 } from '@jupyterlab/cells';
 
 import {
-  IObservableJSON, ObservableJSON, IObservableUndoableVector,
-  IObservableVector, ObservableVector, nbformat
+  IObservableJSON, IObservableUndoableVector, uuid,
+  IObservableVector, ObservableVector, nbformat, IModelDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -65,21 +65,28 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    * Construct a new notebook model.
    */
   constructor(options: NotebookModel.IOptions = {}) {
-    super(options.languagePreference);
+    super(options.languagePreference, options.modelDB);
     let factory = (
       options.contentFactory || NotebookModel.defaultContentFactory
     );
+    let cellDB = this.modelDB.view('cells');
+    factory.modelDB = cellDB;
     this.contentFactory = factory;
-    this._cells = new CellList();
+    this._cells = new CellList(this.modelDB, this.contentFactory);
     // Add an initial code cell by default.
-    this._cells.pushBack(factory.createCodeCell({}));
+    if (!this._cells.length) {
+      this._cells.pushBack(factory.createCodeCell({}));
+    }
     this._cells.changed.connect(this._onCellsChanged, this);
 
     // Handle initial metadata.
-    let name = options.languagePreference || '';
-    this._metadata.set('language_info', { name });
+    let metadata = this.modelDB.createMap('metadata');
+    if (!metadata.has('language_info')) {
+      let name = options.languagePreference || '';
+      metadata.set('language_info', { name });
+    }
     this._ensureMetadata();
-    this._metadata.changed.connect(this.triggerContentChange, this);
+    metadata.changed.connect(this.triggerContentChange, this);
   }
 
   /**
@@ -91,7 +98,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    * The metadata associated with the notebook.
    */
   get metadata(): IObservableJSON {
-    return this._metadata;
+    return this.modelDB.get('metadata') as IObservableJSON;
   }
 
   /**
@@ -119,7 +126,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    * The default kernel name of the document.
    */
   get defaultKernelName(): string {
-    let spec = this._metadata.get('kernelspec') as nbformat.IKernelspecMetadata;
+    let spec = this.metadata.get('kernelspec') as nbformat.IKernelspecMetadata;
     return spec ? spec.name : '';
   }
 
@@ -127,7 +134,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    * The default kernel language of the document.
    */
   get defaultKernelLanguage(): string {
-    let info = this._metadata.get('language_info') as nbformat.ILanguageInfoMetadata;
+    let info = this.metadata.get('language_info') as nbformat.ILanguageInfoMetadata;
     return info ? info.name : '';
   }
 
@@ -136,12 +143,11 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    */
   dispose(): void {
     // Do nothing if already disposed.
-    if (this._cells === null) {
+    if (this.cells === null) {
       return;
     }
-    let cells = this._cells;
+    let cells = this.cells;
     this._cells = null;
-    this._metadata.dispose();
     cells.dispose();
     super.dispose();
   }
@@ -230,14 +236,14 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       this.triggerStateChange({ name: 'nbformatMinor', oldValue, newValue });
     }
     // Update the metadata.
-    this._metadata.clear();
+    this.metadata.clear();
     let metadata = value.metadata;
     for (let key in metadata) {
       // orig_nbformat is not intended to be stored per spec.
       if (key === 'orig_nbformat') {
         continue;
       }
-      this._metadata.set(key, metadata[key]);
+      this.metadata.set(key, metadata[key]);
     }
     this._ensureMetadata();
     this.dirty = true;
@@ -269,12 +275,12 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     }
     let factory = this.contentFactory;
     // Add code cell if there are no cells remaining.
-    if (!this._cells.length) {
+    if (!this.cells.length) {
       // Add the cell in a new context to avoid triggering another
       // cell changed event during the handling of this signal.
       requestAnimationFrame(() => {
-        if (!this.isDisposed && !this._cells.length) {
-          this._cells.pushBack(factory.createCodeCell({}));
+        if (!this.isDisposed && !this.cells.length) {
+          this.cells.pushBack(factory.createCodeCell({}));
         }
       });
     }
@@ -285,7 +291,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    * Make sure we have the required metadata fields.
    */
   private _ensureMetadata(): void {
-    let metadata = this._metadata;
+    let metadata = this.metadata;
     if (!metadata.has('language_info')) {
       metadata.set('language_info', { name: '' });
     }
@@ -294,10 +300,9 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     }
   }
 
-  private _cells: IObservableUndoableVector<ICellModel> = null;
+  private _cells: CellList;
   private _nbformat = nbformat.MAJOR_VERSION;
   private _nbformatMinor = nbformat.MINOR_VERSION;
-  private _metadata = new ObservableJSON();
 }
 
 
@@ -322,6 +327,11 @@ namespace NotebookModel {
      * The default is a shared factory instance.
      */
     contentFactory?: IContentFactory;
+
+    /**
+     * An optional modelDB for storing notebook data.
+     */
+    modelDB?: IModelDB;
   }
 
   /**
@@ -333,6 +343,8 @@ namespace NotebookModel {
      * The factory for output area models.
      */
     readonly codeCellContentFactory: CodeCellModel.IContentFactory;
+
+    modelDB: IModelDB;
 
     /**
      * Create a new code cell.
@@ -373,16 +385,25 @@ namespace NotebookModel {
     /**
      * Create a new cell model factory.
      */
-    constructor(options: IContentFactoryOptions) {
+    constructor(options: ContentFactory.IOptions) {
       this.codeCellContentFactory = (options.codeCellContentFactory ||
         CodeCellModel.defaultContentFactory
       );
+      this._modelDB = options.modelDB || null;
     }
 
     /**
      * The factory for code cell content.
      */
     readonly codeCellContentFactory: CodeCellModel.IContentFactory;
+
+    get modelDB(): IModelDB {
+      return this._modelDB;
+    }
+
+    set modelDB(db: IModelDB) {
+      this._modelDB = db;
+    }
 
     /**
      * Create a new code cell.
@@ -398,6 +419,12 @@ namespace NotebookModel {
       if (options.contentFactory) {
         options.contentFactory = this.codeCellContentFactory;
       }
+      if (this._modelDB) {
+        if (!options.id) {
+          options.id = uuid();
+        }
+        options.modelDB = this._modelDB.view(options.id);
+      }
       return new CodeCellModel(options);
     }
 
@@ -410,6 +437,12 @@ namespace NotebookModel {
      *   new cell will be intialized with the data from the source.
      */
     createMarkdownCell(options: CellModel.IOptions): IMarkdownCellModel {
+      if (this._modelDB) {
+        if (!options.id) {
+          options.id = uuid();
+        }
+        options.modelDB = this._modelDB.view(options.id);
+      }
       return new MarkdownCellModel(options);
     }
 
@@ -422,19 +455,38 @@ namespace NotebookModel {
      *   new cell will be intialized with the data from the source.
      */
     createRawCell(options: CellModel.IOptions): IRawCellModel {
+      if (this._modelDB) {
+        if (!options.id) {
+          options.id = uuid();
+        }
+        options.modelDB = this._modelDB.view(options.id);
+      }
      return new RawCellModel(options);
     }
+
+    private _modelDB: IModelDB;
   }
 
   /**
-   * The options used to initialize a `ContentFactory`.
+   * A namespace for the notebook model content factory.
    */
   export
-  interface IContentFactoryOptions {
+  namespace ContentFactory {
     /**
-     * The factory for code cell model content.
+     * The options used to initialize a `ContentFactory`.
      */
-    codeCellContentFactory?: CodeCellModel.IContentFactory;
+    export
+    interface IOptions {
+      /**
+       * The factory for code cell model content.
+       */
+      codeCellContentFactory?: CodeCellModel.IContentFactory;
+
+      /**
+       * The modelDB in which to place new content.
+       */
+      modelDB?: IModelDB;
+    }
   }
 
   /**

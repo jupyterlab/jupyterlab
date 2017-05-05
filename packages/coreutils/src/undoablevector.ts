@@ -296,3 +296,29 @@ class ObservableUndoableVector<T> extends ObservableVector<T> implements IObserv
   private _stack: ObservableVector.IChangedArgs<JSONValue>[][] = [];
   private _serializer: ISerializer<T> = null;
 }
+
+/**
+ * Namespace for ObservableUndoableVector utilities.
+ */
+export
+namespace ObservableUndoableVector {
+  /**
+   * A default, identity serializer.
+   */
+  export
+  class IdentitySerializer implements ISerializer<JSONValue> {
+    /**
+     * Identity serialize.
+     */
+    toJSON(value: JSONValue): JSONValue {
+      return value;
+    }
+
+    /**
+     * Identity deserialize.
+     */
+    fromJSON(value: JSONValue): JSONValue {
+      return value;
+    }
+  }
+}

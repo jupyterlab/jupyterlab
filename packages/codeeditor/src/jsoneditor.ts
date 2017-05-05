@@ -26,9 +26,9 @@ import {
 } from '.';
 
 /**
- * The class name added to a JSONEditorWidget instance.
+ * The class name added to a JSONEditor instance.
  */
-const METADATA_CLASS = 'jp-JSONEditorWidget';
+const METADATA_CLASS = 'jp-JSONEditor';
 
 /**
  * The class name added when the Metadata editor contains invalid JSON.
@@ -38,33 +38,33 @@ const ERROR_CLASS = 'jp-mod-error';
 /**
  * The class name added to the editor host node.
  */
-const HOST_CLASS = 'jp-JSONEditorWidget-host';
+const HOST_CLASS = 'jp-JSONEditor-host';
 
 /**
  * The class name added to the button area.
  */
-const BUTTON_AREA_CLASS = 'jp-JSONEditorWidget-buttons';
+const BUTTON_AREA_CLASS = 'jp-JSONEditor-buttons';
 
 /**
  * The class name added to the revert button.
  */
-const REVERT_CLASS = 'jp-JSONEditorWidget-revertButton';
+const REVERT_CLASS = 'jp-JSONEditor-revertButton';
 
 /**
  * The class name added to the commit button.
  */
-const COMMIT_CLASS = 'jp-JSONEditorWidget-commitButton';
+const COMMIT_CLASS = 'jp-JSONEditor-commitButton';
 
 
 /**
  * A widget for editing observable JSON.
  */
 export
-class JSONEditorWidget extends Widget {
+class JSONEditor extends Widget {
   /**
    * Construct a new metadata editor.
    */
-  constructor(options: JSONEditorWidget.IOptions) {
+  constructor(options: JSONEditor.IOptions) {
     super({ node: Private.createEditorNode() });
     this.addClass(METADATA_CLASS);
     let host = this.editorHostNode;
@@ -320,10 +320,10 @@ class JSONEditorWidget extends Widget {
 
 
 /**
- * The static namespace JSONEditorWidget class statics.
+ * The static namespace JSONEditor class statics.
  */
 export
-namespace JSONEditorWidget {
+namespace JSONEditor {
   /**
    * The options used to initialize a metadata editor.
    */

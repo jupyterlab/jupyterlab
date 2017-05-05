@@ -10,6 +10,10 @@ import {
 } from '@phosphor/coreutils';
 
 import {
+  ElementExt
+} from '@phosphor/domutils';
+
+import {
   Message
 } from '@phosphor/messaging';
 
@@ -38,9 +42,9 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  ICellModel, BaseCellWidget, IMarkdownCellModel,
-  CodeCellWidget, MarkdownCellWidget,
-  ICodeCellModel, RawCellWidget, IRawCellModel,
+  ICellModel, Cell, IMarkdownCellModel,
+  CodeCell, MarkdownCell,
+  ICodeCellModel, RawCell, IRawCellModel,
 } from '@jupyterlab/cells';
 
 import {
@@ -55,10 +59,6 @@ import {
 import {
   RenderMime
 } from '@jupyterlab/rendermime';
-
-import {
-  OutputAreaWidget
-} from '@jupyterlab/outputarea';
 
 import {
   INotebookModel
@@ -162,7 +162,9 @@ class StaticNotebook extends Widget {
     this.addClass(NB_CLASS);
     this.rendermime = options.rendermime;
     this.layout = new Private.NotebookPanelLayout();
-    this.contentFactory = options.contentFactory;
+    this.contentFactory = (
+      options.contentFactory || StaticNotebook.defaultContentFactory
+    );
     this._mimetypeService = options.mimeTypeService;
   }
 
@@ -222,8 +224,8 @@ class StaticNotebook extends Widget {
   /**
    * A read-only sequence of the widgets in the notebook.
    */
-  get widgets(): ReadonlyArray<BaseCellWidget> {
-    return (this.layout as PanelLayout).widgets as ReadonlyArray<BaseCellWidget>;
+  get widgets(): ReadonlyArray<Cell> {
+    return (this.layout as PanelLayout).widgets as ReadonlyArray<Cell>;
   }
 
   /**
@@ -282,7 +284,7 @@ class StaticNotebook extends Widget {
    *
    * The default implementation is a no-op
    */
-  protected onCellInserted(index: number, cell: BaseCellWidget): void {
+  protected onCellInserted(index: number, cell: Cell): void {
     // This is a no-op.
   }
 
@@ -300,7 +302,7 @@ class StaticNotebook extends Widget {
    *
    * The default implementation is a no-op
    */
-  protected onCellRemoved(cell: BaseCellWidget): void {
+  protected onCellRemoved(index: number, cell: Cell): void {
     // This is a no-op.
   }
 
@@ -356,8 +358,11 @@ class StaticNotebook extends Widget {
       // TODO: reuse existing widgets if possible.
       index = args.newIndex;
       each(args.newValues, value => {
-        this._removeCell(index);
+        // Note: this ordering (insert then remove)
+        // is important for getting the active cell
+        // index for the editable notebook correct.
         this._insertCell(index, value);
+        this._removeCell(index + 1);
         index++;
       });
       break;
@@ -370,7 +375,7 @@ class StaticNotebook extends Widget {
    * Create a cell widget and insert into the notebook.
    */
   private _insertCell(index: number, cell: ICellModel): void {
-    let widget: BaseCellWidget;
+    let widget: Cell;
     switch (cell.type) {
     case 'code':
       widget = this._createCodeCell(cell as ICodeCellModel);
@@ -391,33 +396,30 @@ class StaticNotebook extends Widget {
   /**
    * Create a code cell widget from a code cell model.
    */
-  private _createCodeCell(model: ICodeCellModel): CodeCellWidget {
-    let factory = this.contentFactory;
-    let contentFactory = factory.codeCellContentFactory;
+  private _createCodeCell(model: ICodeCellModel): CodeCell {
     let rendermime = this.rendermime;
+    let contentFactory = this.contentFactory;
     let options = { model, rendermime, contentFactory };
-    return factory.createCodeCell(options, this);
+    return this.contentFactory.createCodeCell(options, this);
   }
 
   /**
    * Create a markdown cell widget from a markdown cell model.
    */
-  private _createMarkdownCell(model: IMarkdownCellModel): MarkdownCellWidget {
-    let factory = this.contentFactory;
-    let contentFactory = factory.markdownCellContentFactory;
+  private _createMarkdownCell(model: IMarkdownCellModel): MarkdownCell {
     let rendermime = this.rendermime;
+    let contentFactory = this.contentFactory;
     let options = { model, rendermime, contentFactory };
-    return factory.createMarkdownCell(options, this);
+    return this.contentFactory.createMarkdownCell(options, this);
   }
 
   /**
    * Create a raw cell widget from a raw cell model.
    */
-  private _createRawCell(model: IRawCellModel): RawCellWidget {
-    let factory = this.contentFactory;
-    let contentFactory = factory.rawCellContentFactory;
+  private _createRawCell(model: IRawCellModel): RawCell {
+    let contentFactory = this.contentFactory;
     let options = { model, contentFactory };
-    return factory.createRawCell(options, this);
+    return this.contentFactory.createRawCell(options, this);
   }
 
   /**
@@ -434,9 +436,9 @@ class StaticNotebook extends Widget {
    */
   private _removeCell(index: number): void {
     let layout = this.layout as PanelLayout;
-    let widget = layout.widgets[index] as BaseCellWidget;
+    let widget = layout.widgets[index] as Cell;
     widget.parent = null;
-    this.onCellRemoved(widget);
+    this.onCellRemoved(index, widget);
     widget.dispose();
   }
 
@@ -487,7 +489,7 @@ namespace StaticNotebook {
     /**
      * A factory for creating content.
      */
-    contentFactory: IContentFactory;
+    contentFactory?: IContentFactory;
 
     /**
      * The service used to look up mime types.
@@ -497,147 +499,99 @@ namespace StaticNotebook {
 
   /**
    * A factory for creating notebook content.
+   *
+   * #### Notes
+   * This extends the content factory of the cell itself, which extends the content
+   * factory of the output area and input area. The result is that there is a single
+   * factory for creating all child content of a notebook.
    */
   export
-  interface IContentFactory {
-    /**
-     * The editor factory.
-     */
-    readonly editorFactory: CodeEditor.Factory;
-
-    /**
-     * The factory for code cell widget content.
-     */
-    readonly codeCellContentFactory?: CodeCellWidget.IContentFactory;
-
-    /**
-     * The factory for raw cell widget content.
-     */
-    readonly rawCellContentFactory?: BaseCellWidget.IContentFactory;
-
-    /**
-     * The factory for markdown cell widget content.
-     */
-    readonly markdownCellContentFactory?: BaseCellWidget.IContentFactory;
+  interface IContentFactory extends Cell.IContentFactory {
 
     /**
      * Create a new code cell widget.
      */
-    createCodeCell(options: CodeCellWidget.IOptions, parent: StaticNotebook): CodeCellWidget;
+    createCodeCell(options: CodeCell.IOptions, parent: StaticNotebook): CodeCell;
 
     /**
      * Create a new markdown cell widget.
      */
-    createMarkdownCell(options: MarkdownCellWidget.IOptions, parent: StaticNotebook): MarkdownCellWidget;
+    createMarkdownCell(options: MarkdownCell.IOptions, parent: StaticNotebook): MarkdownCell;
 
     /**
      * Create a new raw cell widget.
      */
-    createRawCell(options: RawCellWidget.IOptions, parent: StaticNotebook): RawCellWidget;
+    createRawCell(options: RawCell.IOptions, parent: StaticNotebook): RawCell;
   }
 
   /**
    * The default implementation of an `IContentFactory`.
    */
   export
-  class ContentFactory implements IContentFactory {
-    /**
-     * Creates a new renderer.
-     */
-    constructor(options: IContentFactoryOptions) {
-      let editorFactory = options.editorFactory;
-      let outputAreaContentFactory = (options.outputAreaContentFactory ||
-        OutputAreaWidget.defaultContentFactory
-      );
-      this.codeCellContentFactory = (options.codeCellContentFactory ||
-        new CodeCellWidget.ContentFactory({
-          editorFactory,
-          outputAreaContentFactory
-        })
-      );
-      this.rawCellContentFactory = (options.rawCellContentFactory ||
-        new RawCellWidget.ContentFactory({ editorFactory })
-      );
-      this.markdownCellContentFactory = (options.markdownCellContentFactory ||
-        new MarkdownCellWidget.ContentFactory({ editorFactory })
-      );
-    }
-
-    /**
-     * The editor factory.
-     */
-    readonly editorFactory: CodeEditor.Factory;
-
-    /**
-     * The factory for code cell widget content.
-     */
-    readonly codeCellContentFactory: CodeCellWidget.IContentFactory;
-
-    /**
-     * The factory for raw cell widget content.
-     */
-    readonly rawCellContentFactory: BaseCellWidget.IContentFactory;
-
-    /**
-     * The factory for markdown cell widget content.
-     */
-    readonly markdownCellContentFactory: BaseCellWidget.IContentFactory;
+  class ContentFactory extends Cell.ContentFactory implements IContentFactory {
 
     /**
      * Create a new code cell widget.
+     *
+     * #### Notes
+     * If no cell content factory is passed in with the options, the one on the
+     * notebook content factory is used.
      */
-    createCodeCell(options: CodeCellWidget.IOptions, parent: StaticNotebook): CodeCellWidget {
-      return new CodeCellWidget(options);
+    createCodeCell(options: CodeCell.IOptions, parent: StaticNotebook): CodeCell {
+      if (!options.contentFactory) {
+        options.contentFactory = this;
+      }
+      return new CodeCell(options);
     }
 
     /**
      * Create a new markdown cell widget.
+     *
+     * #### Notes
+     * If no cell content factory is passed in with the options, the one on the
+     * notebook content factory is used.
      */
-    createMarkdownCell(options: MarkdownCellWidget.IOptions, parent: StaticNotebook): MarkdownCellWidget {
-      return new MarkdownCellWidget(options);
+    createMarkdownCell(options: MarkdownCell.IOptions, parent: StaticNotebook): MarkdownCell {
+      if (!options.contentFactory) {
+        options.contentFactory = this;
+      }
+      return new MarkdownCell(options);
     }
 
     /**
      * Create a new raw cell widget.
+     *
+     * #### Notes
+     * If no cell content factory is passed in with the options, the one on the
+     * notebook content factory is used.
      */
-    createRawCell(options: RawCellWidget.IOptions, parent: StaticNotebook): RawCellWidget {
-      return new RawCellWidget(options);
+    createRawCell(options: RawCell.IOptions, parent: StaticNotebook): RawCell {
+      if (!options.contentFactory) {
+        options.contentFactory = this;
+      }
+      return new RawCell(options);
     }
   }
 
   /**
-   * An options object for initializing a notebook content factory.
+   * A namespace for the staic notebook content factory.
    */
   export
-  interface IContentFactoryOptions {
+  namespace ContentFactory {
     /**
-     * The editor factory.
+     * Options for the content factory.
      */
-    editorFactory: CodeEditor.Factory;
-
-    /**
-     * The factory for output area content.
-     */
-    outputAreaContentFactory?: OutputAreaWidget.IContentFactory;
-
-    /**
-     * The factory for code cell widget content.  If given, this will
-     * take precedence over the `outputAreaContentFactory`.
-     */
-    codeCellContentFactory?: CodeCellWidget.IContentFactory;
-
-    /**
-     * The factory for raw cell widget content.
-     */
-    rawCellContentFactory?: BaseCellWidget.IContentFactory;
-
-    /**
-     * The factory for markdown cell widget content.
-     */
-    markdownCellContentFactory?: BaseCellWidget.IContentFactory;
+    export
+    interface IOptions extends Cell.ContentFactory.IOptions { }
   }
-}
 
+  /**
+   * Default content factory for the static notebook widget.
+   */
+  export
+  const defaultContentFactory: IContentFactory = new ContentFactory();
+
+}
 
 /**
  * A notebook widget that supports interactivity.
@@ -647,8 +601,8 @@ class Notebook extends StaticNotebook {
   /**
    * Construct a notebook widget.
    */
-  constructor(options: StaticNotebook.IOptions) {
-    super(options);
+  constructor(options: Notebook.IOptions) {
+    super( Private.processNotebookOptions(options) );
     this.node.tabIndex = -1;  // Allow the widget to take focus.
     // Allow the node to scroll while dragging items.
     this.node.setAttribute('data-p-dragscroll', 'true');
@@ -661,7 +615,7 @@ class Notebook extends StaticNotebook {
    * This can be due to the active index changing or the
    * cell at the active index changing.
    */
-  get activeCellChanged(): ISignal<this, BaseCellWidget> {
+  get activeCellChanged(): ISignal<this, Cell> {
     return this._activeCellChanged;
   }
 
@@ -700,13 +654,12 @@ class Notebook extends StaticNotebook {
     this._mode = newValue;
 
     if (newValue === 'edit') {
-      let node = this.activeCell.editorWidget.node;
-      this.scrollToPosition(node.getBoundingClientRect().top);
+      ElementExt.scrollIntoViewIfNeeded(this.node, this.activeCell.node);
 
       // Edit mode deselects all cells.
       each(this.widgets, widget => { this.deselect(widget); });
       //  Edit mode unrenders an active markdown widget.
-      if (activeCell instanceof MarkdownCellWidget) {
+      if (activeCell instanceof MarkdownCell) {
         activeCell.rendered = false;
       }
     }
@@ -742,7 +695,7 @@ class Notebook extends StaticNotebook {
       this._activeCell = cell;
       this._activeCellChanged.emit(cell);
     }
-    if (this.mode === 'edit' && cell instanceof MarkdownCellWidget) {
+    if (this.mode === 'edit' && cell instanceof MarkdownCell) {
       cell.rendered = false;
     }
     this._ensureFocus();
@@ -755,7 +708,7 @@ class Notebook extends StaticNotebook {
   /**
    * Get the active cell widget.
    */
-  get activeCell(): BaseCellWidget {
+  get activeCell(): Cell {
     return this._activeCell;
   }
 
@@ -777,7 +730,7 @@ class Notebook extends StaticNotebook {
    * It is a no-op if the value does not change.
    * It will emit the `selectionChanged` signal.
    */
-  select(widget: BaseCellWidget): void {
+  select(widget: Cell): void {
     if (Private.selectedProperty.get(widget)) {
       return;
     }
@@ -793,7 +746,7 @@ class Notebook extends StaticNotebook {
    * It is a no-op if the value does not change.
    * It will emit the `selectionChanged` signal.
    */
-  deselect(widget: BaseCellWidget): void {
+  deselect(widget: Cell): void {
     if (!Private.selectedProperty.get(widget)) {
       return;
     }
@@ -805,7 +758,7 @@ class Notebook extends StaticNotebook {
   /**
    * Whether a cell is selected or is the active cell.
    */
-  isSelected(widget: BaseCellWidget): boolean {
+  isSelected(widget: Cell): boolean {
     if (widget === this._activeCell) {
       return true;
     }
@@ -981,10 +934,12 @@ class Notebook extends StaticNotebook {
   /**
    * Handle a cell being inserted.
    */
-  protected onCellInserted(index: number, cell: BaseCellWidget): void {
+  protected onCellInserted(index: number, cell: Cell): void {
     cell.editor.edgeRequested.connect(this._onEdgeRequest, this);
-    // Trigger an update of the active cell.
-    this.activeCellIndex = this.activeCellIndex;
+    // If the insertion happened above, increment the active cell
+    // index, otherwise it stays the same.
+    this.activeCellIndex = index <= this.activeCellIndex ?
+      this.activeCellIndex + 1 : this.activeCellIndex ;
   }
 
   /**
@@ -999,9 +954,11 @@ class Notebook extends StaticNotebook {
   /**
    * Handle a cell being removed.
    */
-  protected onCellRemoved(cell: BaseCellWidget): void {
-    // Trigger an update of the active cell.
-    this.activeCellIndex = this.activeCellIndex;
+  protected onCellRemoved(index: number, cell: Cell): void {
+    // If the removal happened above, decrement the active
+    // cell index, otherwise it stays the same.
+    this.activeCellIndex = index <= this.activeCellIndex ?
+      this.activeCellIndex - 1 : this.activeCellIndex ;
     if (this.isSelected(cell)) {
       this._selectionChanged.emit(void 0);
     }
@@ -1241,7 +1198,7 @@ class Notebook extends StaticNotebook {
       // Handle the case where we are moving cells within
       // the same notebook.
       event.dropAction = 'move';
-      let toMove: BaseCellWidget[] = event.mimeData.getData('internal:cells');
+      let toMove: Cell[] = event.mimeData.getData('internal:cells');
 
       //Compute the to/from indices for the move.
       let fromIndex = ArrayExt.firstIndexOf(this.widgets, toMove[0]);
@@ -1313,7 +1270,7 @@ class Notebook extends StaticNotebook {
   private _startDrag(index: number, clientX: number, clientY: number): void {
     let cells = this.model.cells;
     let selected: nbformat.ICell[] = [];
-    let toMove: BaseCellWidget[] = [];
+    let toMove: Cell[] = [];
 
     each(this.widgets, (widget, i) => {
       let cell = cells.at(i);
@@ -1371,7 +1328,7 @@ class Notebook extends StaticNotebook {
       let node = widget.editorWidget.node;
       if (node.contains(target)) {
         this.mode = 'edit';
-        this.scrollToPosition(node.getBoundingClientRect().top);
+        ElementExt.scrollIntoViewIfNeeded(this.node, widget.node);
       }
     } else {
       // No cell has focus, ensure command mode.
@@ -1406,7 +1363,7 @@ class Notebook extends StaticNotebook {
     }
     this.activeCellIndex = i;
     if (model.cells.at(i).type === 'markdown') {
-      let widget = this.widgets[i] as MarkdownCellWidget;
+      let widget = this.widgets[i] as MarkdownCell;
       widget.rendered = false;
     } else if (target.localName === 'img') {
       target.classList.toggle(UNCONFINED_CLASS);
@@ -1436,11 +1393,11 @@ class Notebook extends StaticNotebook {
   }
 
   private _activeCellIndex = -1;
-  private _activeCell: BaseCellWidget = null;
+  private _activeCell: Cell = null;
   private _mode: NotebookMode = 'command';
   private _drag: Drag = null;
   private _dragData: { pressX: number, pressY: number, index: number } = null;
-  private _activeCellChanged = new Signal<this, BaseCellWidget>(this);
+  private _activeCellChanged = new Signal<this, Cell>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
   private _selectionChanged = new Signal<this, void>(this);
 }
@@ -1452,23 +1409,41 @@ class Notebook extends StaticNotebook {
 export
 namespace Notebook {
   /**
-   * An options object for initializing a notebook.
+   * An options object for initializing a notebook widget.
    */
   export
   interface IOptions extends StaticNotebook.IOptions { }
 
   /**
-   * The cell factory for the notebook
+   * The content factory for the notebook widget.
    */
   export
   interface IContentFactory extends StaticNotebook.IContentFactory { }
 
   /**
-   * The default implementation of an `IFactory`.
+   * The default implementation of a notebook content factory..
+   *
+   * #### Notes
+   * Override methods on this class to customize the default notebook factory
+   * methods that create notebook content.
    */
   export
   class ContentFactory extends StaticNotebook.ContentFactory { }
 
+  /**
+   * A namespace for the notebook content factory.
+   */
+  export
+  namespace ContentFactory {
+    /**
+     * An options object for initializing a notebook content factory.
+     */
+    export
+    interface IOptions extends StaticNotebook.ContentFactory.IOptions { }
+  }
+
+  export
+  const defaultContentFactory: IContentFactory = new ContentFactory();
 }
 
 
@@ -1480,7 +1455,7 @@ namespace Private {
    * An attached property for the selected state of a cell.
    */
   export
-  const selectedProperty = new AttachedProperty<BaseCellWidget, boolean>({
+  const selectedProperty = new AttachedProperty<Cell, boolean>({
     name: 'selected',
     create: () => false
   });
@@ -1514,5 +1489,26 @@ namespace Private {
     node.appendChild(span);
     node.className = DRAG_IMAGE_CLASS;
     return node;
+  }
+
+  /**
+   * Process the `IOptions` passed to the notebook widget.
+   *
+   * #### Notes
+   * This defaults the content factory to that in the `Notebook` namespace.
+   */
+  export
+  function processNotebookOptions(options: Notebook.IOptions) {
+    if (options.contentFactory) {
+      return options;
+    } else {
+      return {
+        rendermime: options.rendermime,
+        languagePreference: options.languagePreference,
+        contentFactory: Notebook.defaultContentFactory,
+        mimeTypeService: options.mimeTypeService
+
+      }
+    }
   }
 }

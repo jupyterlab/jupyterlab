@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/launcher-extension",
-  "version": "0.2.0",
+  "version": "0.3.1",
   "description": "JupyterLab - Launcher Page Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -12,11 +12,11 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.2.0",
-    "@jupyterlab/apputils": "^0.2.0",
-    "@jupyterlab/filebrowser": "^0.2.0",
-    "@jupyterlab/launcher": "^0.2.0",
-    "@jupyterlab/services": "^0.41.0"
+    "@jupyterlab/application": "^0.3.1",
+    "@jupyterlab/apputils": "^0.3.1",
+    "@jupyterlab/filebrowser": "^0.3.1",
+    "@jupyterlab/launcher": "^0.3.1",
+    "@jupyterlab/services": "^0.42.1"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
@@ -26,6 +26,9 @@
     "build": "tsc",
     "clean": "rimraf lib",
     "watch": "tsc -w"
+  },
+  "jupyterlab": {
+    "extension": true
   },
   "repository": {
     "type": "git",

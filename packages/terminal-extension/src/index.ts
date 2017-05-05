@@ -153,7 +153,8 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
       return current.refresh().then(() => {
         current.activate();
       });
-    }
+    },
+    isEnabled: () => { return tracker.currentWidget !== null; }
   });
 
   // Add command palette and menu items.
@@ -178,6 +179,8 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
       command: CommandIDs.createNew
     });
   }
+
+  app.contextMenu.addItem({command: CommandIDs.refresh, selector: '.jp-TerminalWidget', rank: 1});
 
   return tracker;
 }

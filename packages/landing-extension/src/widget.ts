@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  JSONObject
+} from '@phosphor/coreutils';
+
+import {
   Message
 } from '@phosphor/messaging';
 
@@ -99,7 +103,7 @@ class LandingModel extends VDomModel {
   /**
    * The names of activities and their associated commands.
    */
-  readonly activities: string[][];
+  readonly activities: [string, string, JSONObject][];
 
   /**
    * Construct a new landing model.
@@ -110,14 +114,16 @@ class LandingModel extends VDomModel {
       Math.floor(Math.random() * previewMessages.length)
     ];
     this.headerText = 'Start a new activity';
+
+    const createFrom = 'file-operations:create-from';
     this.activities = [
-      ['Notebook', 'filebrowser:new-notebook'],
-      ['Code Console', 'console:create'],
-      ['Text Editor', 'filebrowser:new-text-file']
+      ['Notebook', createFrom, { creatorName: 'Notebook' }],
+      ['Code Console', 'console:create', undefined],
+      ['Text Editor', createFrom, { creatorName: 'Text File' }]
     ];
 
     if (terminalsAvailable) {
-      this.activities.push(['Terminal', 'terminal:create-new']);
+      this.activities.push(['Terminal', 'terminal:create-new', undefined]);
     }
   }
 }
@@ -158,14 +164,16 @@ class LandingWidget extends VDomWidget<LandingModel> {
     let activitiesList: VirtualNode[] = [];
     let activites = this.model.activities;
     for (let activityName of activites) {
-      let imgName = activityName[0].replace(' ', '');
-      let column =
-      h.div({ className: LANDING_COLUMN_CLASS },
+      let name = activityName[0];
+      let command = activityName[1];
+      let args = activityName[2];
+      let imgName = name.replace(' ', '');
+      let column = h.div({ className: LANDING_COLUMN_CLASS },
         h.span({
           className: LANDING_ICON_CLASS + ` jp-Image${imgName}` ,
-          dataset: this._linker.populateVNodeDataset(activityName[1], {})
+          dataset: this._linker.populateVNodeDataset(command, args)
         }),
-        h.span({ className: LANDING_TEXT_CLASS }, activityName[0])
+        h.span({ className: LANDING_TEXT_CLASS }, name)
       );
       activitiesList.push(column);
     }

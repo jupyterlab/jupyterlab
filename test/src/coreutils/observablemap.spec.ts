@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 
-describe('common/ObservableMap', () => {
+describe('@jupyterlab/coreutils', () => {
 
   describe('ObservableMap', () => {
 
@@ -17,6 +17,14 @@ describe('common/ObservableMap', () => {
       it('should accept no arguments', () => {
         let value = new ObservableMap<number>();
         expect(value instanceof ObservableMap).to.be(true);
+      });
+    });
+
+    describe('#type', () => {
+
+      it('should return `Map`', () => {
+        let value = new ObservableMap<number>();
+        expect(value.type).to.be('Map');
       });
     });
 

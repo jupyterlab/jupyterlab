@@ -3,7 +3,6 @@
 
 import '@phosphor/widgets/style/index.css';
 
-import './application/loader.spec';
 import './application/shell.spec';
 
 import './apputils/clientsession.spec';
@@ -19,6 +18,7 @@ import './apputils/styling.spec';
 import './apputils/toolbar.spec';
 import './apputils/vdom.spec';
 
+import './cells/inputarea.spec';
 import './cells/model.spec';
 import './cells/widget.spec';
 
@@ -38,6 +38,7 @@ import './console/panel.spec';
 import './console/widget.spec';
 
 import './coreutils/activitymonitor.spec';
+import './coreutils/modeldb.spec';
 import './coreutils/nbformat.spec';
 import './coreutils/observablejson.spec';
 import './coreutils/observablemap.spec';

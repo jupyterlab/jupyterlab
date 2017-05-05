@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 
-describe('common/ObservableString', () => {
+describe('@jupyterlab/coreutils', () => {
 
   describe('ObservableString', () => {
 
@@ -29,6 +29,14 @@ describe('common/ObservableString', () => {
         expect(value.text).to.eql("hello");
       });
 
+    });
+
+    describe('#type', () => {
+
+      it('should return `String`', () => {
+        let value = new ObservableString();
+        expect(value.type).to.be('String');
+      });
     });
 
     describe('#changed', () => {

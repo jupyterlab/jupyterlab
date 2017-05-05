@@ -17,12 +17,21 @@ import {
   Vector
 } from './vector';
 
+import {
+  IObservable
+} from './modeldb';
+
 
 /**
  * A vector which can be observed for changes.
  */
 export
-interface IObservableVector<T> extends IDisposable {
+interface IObservableVector<T> extends IDisposable, IObservable {
+  /**
+   * The type of the Observable.
+   */
+  type: 'Vector';
+
   /**
    * A signal emitted when the vector has changed.
    */
@@ -311,6 +320,13 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
   }
 
   /**
+   * The type of the Observable.
+   */
+  get type(): 'Vector' {
+    return 'Vector';
+  }
+
+  /**
    * A signal emitted when the vector has changed.
    */
   get changed(): ISignal<this, ObservableVector.IChangedArgs<T>> {
@@ -547,7 +563,7 @@ class ObservableVector<T> extends Vector<T> implements IObservableVector<T> {
    * A `fromIndex` or a `toIndex` which is non-integral.
    */
   move(fromIndex: number, toIndex: number): void {
-    if(this.length <= 1 || fromIndex === toIndex) {
+    if (this.length <= 1 || fromIndex === toIndex) {
       return;
     }
     let value = this.at(fromIndex);

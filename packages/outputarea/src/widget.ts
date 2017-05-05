@@ -2,28 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel, KernelMessage
-} from '@jupyterlab/services';
-
-import {
-  IDisposable
-} from '@phosphor/disposable';
-
-import {
-  ISignal
-} from '@phosphor/signaling';
-
-import {
   Message
 } from '@phosphor/messaging';
 
 import {
-  MimeData
-} from '@phosphor/coreutils';
-
-import {
-  Drag
-} from '@phosphor/dragdrop';
+  Signal
+} from '@phosphor/signaling';
 
 import {
   Panel, PanelLayout
@@ -38,83 +22,81 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  ObservableVector, nbformat
+  nbformat
 } from '@jupyterlab/coreutils';
 
 import {
   IOutputModel, RenderMime
 } from '@jupyterlab/rendermime';
 
+import {
+  Kernel, KernelMessage
+} from '@jupyterlab/services';
 
-/**
- * The threshold in pixels to start a drag event.
- */
-const DRAG_THRESHOLD = 5;
+import {
+  IOutputAreaModel
+} from './model';
 
-/**
- * The factory MIME type supported by phosphor dock panels.
- */
-const FACTORY_MIME = 'application/vnd.phosphor.widget-factory';
 
 /**
  * The class name added to an output area widget.
  */
-const OUTPUT_AREA_CLASS = 'jp-OutputAreaWidget';
+const OUTPUT_AREA_CLASS = 'jp-OutputArea';
 
 /**
- * The class name added to a "mirrored" output area widget created by a drag.
+ * The class name added to the direction children of OutputArea
  */
-const MIRRORED_OUTPUT_AREA_CLASS = 'jp-MirroredOutputArea';
+const OUTPUT_AREA_ITEM_CLASS = 'jp-OutputArea-child';
 
 /**
- * The class name added to an child widget.
+ * The class name added to actual outputs
  */
-const CHILD_CLASS = 'jp-OutputAreaWidget-child';
+const OUTPUT_AREA_OUTPUT_CLASS = 'jp-OutputArea-output';
 
 /**
- * The class name added to output area gutters.
+ * The class name added to prompt children of OutputArea.
  */
-const GUTTER_CLASS = 'jp-OutputAreaWidget-gutter';
+const OUTPUT_AREA_PROMPT_CLASS = 'jp-OutputArea-prompt';
 
 /**
- * The class name added to output area outputs.
+ * The class name added to OutputPrompt.
  */
-const OUTPUT_CLASS = 'jp-OutputAreaWidget-output';
+const OUTPUT_PROMPT_CLASS = 'jp-OutputPrompt';
 
 /**
  * The class name added to an execution result.
  */
-const EXECTUTE_CLASS = 'jp-OutputAreaWidget-executeResult';
+const EXECUTE_CLASS = 'jp-OutputArea-executeResult';
 
 /**
- * The class name added to stdin data.
+ * The class name added stdin items of OutputArea
  */
-const STDIN_CLASS = 'jp-OutputAreaWidget-stdin';
+const OUTPUT_AREA_STDIN_ITEM_CLASS = 'jp-OutputArea-stdin-item';
+
+/**
+ * The class name added to stdin widgets.
+ */
+const STDIN_CLASS = 'jp-Stdin';
 
 /**
  * The class name added to stdin data prompt nodes.
  */
-const STDIN_PROMPT_CLASS = 'jp-StdinWidget-prompt';
+const STDIN_PROMPT_CLASS = 'jp-Stdin-prompt';
 
 /**
  * The class name added to stdin data input nodes.
  */
-const STDIN_INPUT_CLASS = 'jp-StdinWidget-input';
+const STDIN_INPUT_CLASS = 'jp-Stdin-input';
 
 /**
  * The class name added to stdin rendered text nodes.
  */
-const STDIN_RENDERED_CLASS = 'jp-StdinWidget-rendered';
+const STDIN_RENDERED_CLASS = 'jp-Stdin-rendered';
 
-/**
- * The class name added to fixed height output areas.
- */
-const FIXED_HEIGHT_CLASS = 'jp-mod-fixedHeight';
 
-/**
- * The class name added to collaped output areas.
- */
-const COLLAPSED_CLASS = 'jp-mod-collapsed';
+/******************************************************************************
+ * OutputArea
+ ******************************************************************************/
 
 
 /**
@@ -127,17 +109,17 @@ const COLLAPSED_CLASS = 'jp-mod-collapsed';
  * signal.
  */
 export
-class OutputAreaWidget extends Widget {
+class OutputArea extends Widget {
   /**
    * Construct an output area widget.
    */
-  constructor(options: OutputAreaWidget.IOptions) {
+  constructor(options: OutputArea.IOptions) {
     super();
     let model = this.model = options.model;
     this.addClass(OUTPUT_AREA_CLASS);
     this.rendermime = options.rendermime;
     this.contentFactory = (
-      options.contentFactory || OutputAreaWidget.defaultContentFactory
+      options.contentFactory || OutputArea.defaultContentFactory
     );
     this.layout = new PanelLayout();
     for (let i = 0; i < model.length; i++) {
@@ -148,23 +130,14 @@ class OutputAreaWidget extends Widget {
   }
 
   /**
-   * Create a mirrored output area widget.
-   */
-  mirror(): OutputAreaWidget {
-    let rendermime = this.rendermime;
-    let contentFactory = this.contentFactory;
-    let model = this.model;
-    let widget = new OutputAreaWidget({ model, rendermime, contentFactory });
-    widget.title.label = 'Mirrored Output';
-    widget.title.closable = true;
-    widget.addClass(MIRRORED_OUTPUT_AREA_CLASS);
-    return widget;
-  }
-
-  /**
    * The model used by the widget.
    */
   readonly model: IOutputAreaModel;
+
+  /**
+   * The content factory used by the widget.
+   */
+  readonly contentFactory: OutputArea.IContentFactory;
 
   /**
    * Te rendermime instance used by the widget.
@@ -172,44 +145,20 @@ class OutputAreaWidget extends Widget {
   readonly rendermime: RenderMime;
 
   /**
-   * The content factory used by the widget.
-   */
-  readonly contentFactory: OutputAreaWidget.IContentFactory;
-
-  /**
-   * A read-only sequence of the widgets in the output area.
+   * A read-only sequence of the chidren widgets in the output area.
    */
   get widgets(): ReadonlyArray<Widget> {
     return (this.layout as PanelLayout).widgets;
   }
 
   /**
-   * The collapsed state of the widget.
+   * A public signal used to indicate the number of outputs has changed.
+   * 
+   * #### Notes
+   * This is useful for parents who want to apply styling based on the number
+   * of outputs. Emits the current number of outputs.
    */
-  get collapsed(): boolean {
-    return this._collapsed;
-  }
-  set collapsed(value: boolean) {
-    if (this._collapsed === value) {
-      return;
-    }
-    this._collapsed = value;
-    this.update();
-  }
-
-  /**
-   * The fixed height state of the widget.
-   */
-  get fixedHeight(): boolean {
-    return this._fixedHeight;
-  }
-  set fixedHeight(value: boolean) {
-    if (this._fixedHeight === value) {
-      return;
-    }
-    this._fixedHeight = value;
-    this.update();
-  }
+  readonly outputLengthChanged = new Signal<this, number>(this);
 
   /**
    * Execute code on a client session and handle response messages.
@@ -236,6 +185,7 @@ class OutputAreaWidget extends Widget {
     // Make sure there were no input widgets.
     if (this.widgets.length) {
       this._clear();
+      this.outputLengthChanged.emit(this.model.length);
     }
 
     return new Promise<KernelMessage.IExecuteReplyMsg>((resolve, reject) => {
@@ -259,29 +209,24 @@ class OutputAreaWidget extends Widget {
   }
 
   /**
-   * Handle `update-request` messages.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    this.toggleClass(COLLAPSED_CLASS, this.collapsed);
-    this.toggleClass(FIXED_HEIGHT_CLASS, this.fixedHeight);
-  }
-
-  /**
    * Follow changes on the model state.
    */
   protected onModelChanged(sender: IOutputAreaModel, args: IOutputAreaModel.ChangedArgs): void {
     switch (args.type) {
     case 'add':
       this._insertOutput(args.newIndex, args.newValues[0]);
+      this.outputLengthChanged.emit(this.model.length);
       break;
     case 'remove':
       // Only clear is supported by the model.
       if (this.widgets.length) {
         this._clear();
+        this.outputLengthChanged.emit(this.model.length);
       }
       break;
     case 'set':
       this._setOutput(args.newIndex, args.newValues[0]);
+      this.outputLengthChanged.emit(this.model.length);
       break;
     default:
       break;
@@ -360,7 +305,7 @@ class OutputAreaWidget extends Widget {
     if (!payload || !payload.length) {
       return;
     }
-    let pages = payload.filter(i => (i as any).source === 'page');
+    let pages = payload.filter((i: any) => (i as any).source === 'page');
     if (!pages.length) {
       return;
     }
@@ -379,45 +324,24 @@ class OutputAreaWidget extends Widget {
   private _onInputRequest(msg: KernelMessage.IInputRequestMsg, session: IClientSession): void {
     // Add an output widget to the end.
     let factory = this.contentFactory;
-    let prompt = msg.content.prompt;
+    let stdinPrompt = msg.content.prompt;
     let password = msg.content.password;
 
     let panel = new Panel();
-    panel.addClass(CHILD_CLASS);
-    panel.addClass(STDIN_CLASS);
+    panel.addClass(OUTPUT_AREA_ITEM_CLASS);
+    panel.addClass(OUTPUT_AREA_STDIN_ITEM_CLASS);
 
-    let gutter = factory.createGutter();
-    gutter.addClass(GUTTER_CLASS);
-    panel.addWidget(gutter);
+    let prompt = factory.createOutputPrompt();
+    prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
+    panel.addWidget(prompt);
 
     let kernel = session.kernel;
-    let input = factory.createStdin({ prompt, password, kernel });
-    input.addClass(STDIN_CLASS);
+    let input = factory.createStdin({ prompt: stdinPrompt, password, kernel });
+    input.addClass(OUTPUT_AREA_OUTPUT_CLASS);
     panel.addWidget(input);
 
     let layout = this.layout as PanelLayout;
     layout.addWidget(panel);
-  }
-
-  /**
-   * Insert an output to the layout.
-   */
-  private _insertOutput(index: number, model: IOutputModel): void {
-    let panel = new Panel();
-    panel.addClass(CHILD_CLASS);
-    panel.addClass(OUTPUT_CLASS);
-
-    let gutter = this.contentFactory.createGutter();
-    gutter.executionCount = model.executionCount;
-    gutter.addClass(GUTTER_CLASS);
-    panel.addWidget(gutter);
-
-    let output = this._createOutput(model);
-    output.toggleClass(EXECTUTE_CLASS, model.executionCount !== null);
-    panel.addWidget(output);
-
-    let layout = this.layout as PanelLayout;
-    layout.insertWidget(index, panel);
   }
 
   /**
@@ -428,7 +352,7 @@ class OutputAreaWidget extends Widget {
     let widgets = this.widgets;
     // Skip any stdin widgets to find the correct index.
     for (let i = 0; i < index; i++) {
-      if (widgets[i].hasClass(STDIN_CLASS)) {
+      if (widgets[i].hasClass(OUTPUT_AREA_STDIN_ITEM_CLASS)) {
         index++;
       }
     }
@@ -437,65 +361,252 @@ class OutputAreaWidget extends Widget {
   }
 
   /**
-   * Create an output.
+   * Render and insert a single output into the layout.
    */
-  private _createOutput(model: IOutputModel): Widget {
-    let widget = this.rendermime.render(model);
-    widget.addClass(CHILD_CLASS);
-    widget.addClass(OUTPUT_CLASS);
-    return widget;
+  private _insertOutput(index: number, model: IOutputModel): void {
+    let output = this._createOutputItem(model);
+    output.toggleClass(EXECUTE_CLASS, model.executionCount !== null);
+    let layout = this.layout as PanelLayout;
+    layout.insertWidget(index, output);
   }
 
-  private _fixedHeight = false;
-  private _collapsed = false;
+  /**
+   * Create an output item with a prompt and actual output
+   */
+  private _createOutputItem(model: IOutputModel): Widget {
+    let panel = new Panel();
+    panel.addClass(OUTPUT_AREA_ITEM_CLASS);
+
+    let prompt = this.contentFactory.createOutputPrompt();
+    prompt.executionCount = model.executionCount;
+    prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
+    panel.addWidget(prompt);
+
+    let output = this.rendermime.render(model);
+    output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
+    panel.addWidget(output);
+
+    return panel;
+  }
+
   private _minHeightTimeout: number = null;
 }
 
 
 /**
- * A namespace for OutputAreaWidget statics.
+ * A namespace for OutputArea statics.
  */
 export
-namespace OutputAreaWidget {
+namespace OutputArea {
   /**
-   * The options to pass to an `OutputAreaWidget`.
+   * The options to create an `OutputArea`.
    */
   export
   interface IOptions {
-    /**
-     * The rendermime instance used by the widget.
-     */
-    rendermime: RenderMime;
-
     /**
      * The model used by the widget.
      */
     model: IOutputAreaModel;
 
     /**
-     * The output widget content factory.
-     *
-     * Defaults to a shared `IContentFactory` instance.
+     * The content factory used by the widget to create children.
      */
     contentFactory?: IContentFactory;
+
+    /**
+     * The rendermime instance used by the widget.
+     */
+    rendermime: RenderMime;
   }
 
   /**
-   * The interface for a gutter widget.
+   * An output area widget content factory.
+   * 
+   * The content factory is used to create children in a way 
+   * that can be customized.
    */
   export
-  interface IGutterWidget extends Widget {
+  interface IContentFactory {
     /**
-     * The execution count for the widget.
+     * Create an output prompt.
      */
-    executionCount: nbformat.ExecutionCount;
+    createOutputPrompt(): IOutputPrompt;
+
+    /**
+     * Create an stdin widget.
+     */
+    createStdin(options: Stdin.IOptions): Widget;
   }
 
+  /**
+   * The default implementation of `IContentFactory`.
+   */
+  export
+  class ContentFactory implements IContentFactory {
+    /**
+     * Create the output prompt for the widget.
+     */
+    createOutputPrompt(): IOutputPrompt {
+      return new OutputPrompt();
+    }
+
+    /**
+     * Create an stdin widget.
+     */
+    createStdin(options: Stdin.IOptions): IStdin {
+      return new Stdin(options);
+    }
+  }
+
+  /**
+   * The default `ContentFactory` instance.
+   */
+  export
+  const defaultContentFactory = new ContentFactory();
+}
+
+
+/******************************************************************************
+ * OutputPrompt
+ ******************************************************************************/
+
+
+/**
+ * The interface for an output prompt.
+ */
+export
+interface IOutputPrompt extends Widget {
+  /**
+   * The execution count for the prompt.
+   */
+  executionCount: nbformat.ExecutionCount;
+}
+
+/**
+ * The default output prompt implementation
+ */
+export
+class OutputPrompt extends Widget implements IOutputPrompt {
+  /*
+    * Create an output prompt widget.
+    */
+  constructor() {
+    super();
+    this.addClass(OUTPUT_PROMPT_CLASS);
+  }
+
+  /**
+   * The execution count for the prompt.
+   */
+  get executionCount(): nbformat.ExecutionCount {
+    return this._executionCount;
+  }
+  set executionCount(value: nbformat.ExecutionCount) {
+    this._executionCount = value;
+    if (value === null) {
+      this.node.textContent = '';
+    } else {
+        this.node.textContent = `Out[${value}]:`;
+    }
+  }
+
+  private _executionCount: nbformat.ExecutionCount = null;
+}
+
+
+/******************************************************************************
+ * Stdin
+ ******************************************************************************/
+
+
+/**
+ * The stdin interface
+ */
+export
+interface IStdin extends Widget {}
+
+/**
+ * The default stdin widget.
+ */
+export
+class Stdin extends Widget implements IStdin {
+  /**
+   * Construct a new input widget.
+   */
+  constructor(options: Stdin.IOptions) {
+    super({ node: Private.createInputWidgetNode() });
+    this.addClass(STDIN_CLASS);
+    let text = this.node.firstChild as HTMLElement;
+    text.textContent = options.prompt;
+    this._input = this.node.lastChild as HTMLInputElement;
+    if (options.password) {
+      this._input.type = 'password';
+    }
+    this._kernel = options.kernel;
+  }
+
+  /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the dock panel's node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    let input = this._input;
+    if (event.type === 'keydown') {
+      if ((event as KeyboardEvent).keyCode === 13) {  // Enter
+        this._kernel.sendInputReply({
+          value: input.value
+        });
+        let rendered = document.createElement('span');
+        rendered.className = STDIN_RENDERED_CLASS;
+        if (input.type === 'password') {
+          rendered.textContent = Array(input.value.length + 1).join('·');
+        } else {
+          rendered.textContent = input.value;
+        }
+        this.node.replaceChild(rendered, input);
+      }
+    }
+  }
+
+  /**
+   * Handle `after-attach` messages sent to the widget.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this._input.addEventListener('keydown', this);
+    this.update();
+  }
+
+  /**
+   * Handle `update-request` messages sent to the widget.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    this._input.focus();
+  }
+
+  /**
+   * Handle `before-detach` messages sent to the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this._input.removeEventListener('keydown', this);
+  }
+
+  private _kernel: Kernel.IKernelConnection = null;
+  private _input: HTMLInputElement = null;
+}
+
+export
+namespace Stdin {
   /**
    * The options to create a stdin widget.
    */
   export
-  interface IStdinOptions {
+  interface IOptions {
     /**
      * The prompt text.
      */
@@ -511,386 +622,12 @@ namespace OutputAreaWidget {
      */
     kernel: Kernel.IKernelConnection;
   }
-
-  /**
-   * An output widget content factory.
-   */
-  export
-  interface IContentFactory {
-    /**
-     * Create a gutter for an output or input.
-     *
-     */
-    createGutter(): IGutterWidget;
-
-    /**
-     * Create an stdin widget.
-     */
-    createStdin(options: IStdinOptions): Widget;
-  }
-
-  /**
-   * The default implementation of `IContentFactory`.
-   */
-  export
-  class ContentFactory implements IContentFactory {
-    /**
-     * Create the gutter for the widget.
-     */
-    createGutter(): IGutterWidget {
-      return new GutterWidget();
-    }
-
-    /**
-     * Create an stdin widget.
-     */
-    createStdin(options: IStdinOptions): Widget {
-      return new StdinWidget(options);
-    }
-  }
-
-  /**
-   * The default `ContentFactory` instance.
-   */
-  export
-  const defaultContentFactory = new ContentFactory();
-
-  /**
-   * The default stdin widget.
-   */
-  export
-  class StdinWidget extends Widget {
-    /**
-     * Construct a new input widget.
-     */
-    constructor(options: IStdinOptions) {
-      super({ node: Private.createInputWidgetNode() });
-      let text = this.node.firstChild as HTMLElement;
-      text.textContent = options.prompt;
-      this._input = this.node.lastChild as HTMLInputElement;
-      if (options.password) {
-        this._input.type = 'password';
-      }
-      this._kernel = options.kernel;
-    }
-
-    /**
-     * Handle the DOM events for the widget.
-     *
-     * @param event - The DOM event sent to the widget.
-     *
-     * #### Notes
-     * This method implements the DOM `EventListener` interface and is
-     * called in response to events on the dock panel's node. It should
-     * not be called directly by user code.
-     */
-    handleEvent(event: Event): void {
-      let input = this._input;
-      if (event.type === 'keydown') {
-        if ((event as KeyboardEvent).keyCode === 13) {  // Enter
-          this._kernel.sendInputReply({
-            value: input.value
-          });
-          let rendered = document.createElement('span');
-          rendered.className = STDIN_RENDERED_CLASS;
-          if (input.type === 'password') {
-            rendered.textContent = Array(input.value.length + 1).join('·');
-          } else {
-            rendered.textContent = input.value;
-          }
-          this.node.replaceChild(rendered, input);
-        }
-      }
-    }
-
-    /**
-     * Handle `after-attach` messages sent to the widget.
-     */
-    protected onAfterAttach(msg: Message): void {
-      this._input.addEventListener('keydown', this);
-      this.update();
-    }
-
-    /**
-     * Handle `update-request` messages sent to the widget.
-     */
-    protected onUpdateRequest(msg: Message): void {
-      this._input.focus();
-    }
-
-    /**
-     * Handle `before-detach` messages sent to the widget.
-     */
-    protected onBeforeDetach(msg: Message): void {
-      this._input.removeEventListener('keydown', this);
-    }
-
-    private _kernel: Kernel.IKernelConnection = null;
-    private _input: HTMLInputElement = null;
-  }
-
-  /**
-   * The default output gutter.
-   */
-  export
-  class GutterWidget extends Widget {
-    /**
-     * The execution count for the widget.
-     */
-    get executionCount(): nbformat.ExecutionCount {
-      return this._executionCount;
-    }
-    set executionCount(value: nbformat.ExecutionCount) {
-      this._executionCount = value;
-      if (value === null) {
-        this.node.textContent = '';
-      } else {
-         this.node.textContent = `Out[${value}]:`;
-      }
-    }
-
-    /**
-     * Handle the DOM events for the output gutter widget.
-     *
-     * @param event - The DOM event sent to the widget.
-     *
-     * #### Notes
-     * This method implements the DOM `EventListener` interface and is
-     * called in response to events on the panel's DOM node. It should
-     * not be called directly by user code.
-     */
-    handleEvent(event: Event): void {
-      switch (event.type) {
-      case 'mousedown':
-        this._evtMousedown(event as MouseEvent);
-        break;
-      case 'mouseup':
-        this._evtMouseup(event as MouseEvent);
-        break;
-      case 'mousemove':
-        this._evtMousemove(event as MouseEvent);
-        break;
-      default:
-        break;
-      }
-    }
-
-    /**
-     * A message handler invoked on an `'after-attach'` message.
-     */
-    protected onAfterAttach(msg: Message): void {
-      super.onAfterAttach(msg);
-      this.node.addEventListener('mousedown', this);
-    }
-
-    /**
-     * A message handler invoked on a `'before-detach'` message.
-     */
-    protected onBeforeDetach(msg: Message): void {
-      super.onBeforeDetach(msg);
-      let node = this.node;
-      node.removeEventListener('mousedown', this);
-    }
-
-    /**
-     * Handle the `'mousedown'` event for the widget.
-     */
-    private _evtMousedown(event: MouseEvent): void {
-      // Left mouse press for drag start.
-      if (event.button === 0) {
-        this._dragData = { pressX: event.clientX, pressY: event.clientY };
-        document.addEventListener('mouseup', this, true);
-        document.addEventListener('mousemove', this, true);
-      }
-    }
-
-    /**
-     * Handle the `'mouseup'` event for the widget.
-     */
-    private _evtMouseup(event: MouseEvent): void {
-      if (event.button !== 0 || !this._drag) {
-        document.removeEventListener('mousemove', this, true);
-        document.removeEventListener('mouseup', this, true);
-        return;
-      }
-      event.preventDefault();
-      event.stopPropagation();
-    }
-
-    /**
-     * Handle the `'mousemove'` event for the widget.
-     */
-    private _evtMousemove(event: MouseEvent): void {
-      event.preventDefault();
-      event.stopPropagation();
-
-      // Bail if we are the one dragging.
-      if (this._drag) {
-        return;
-      }
-
-      // Check for a drag initialization.
-      let data = this._dragData;
-      let dx = Math.abs(event.clientX - data.pressX);
-      let dy = Math.abs(event.clientY - data.pressY);
-      if (dx < DRAG_THRESHOLD && dy < DRAG_THRESHOLD) {
-        return;
-      }
-
-      this._startDrag(event.clientX, event.clientY);
-    }
-
-    /**
-     * Start a drag event.
-     */
-    private _startDrag(clientX: number, clientY: number): void {
-      // Set up the drag event.
-      this._drag = new Drag({
-        mimeData: new MimeData(),
-        supportedActions: 'copy',
-        proposedAction: 'copy'
-      });
-
-      this._drag.mimeData.setData(FACTORY_MIME, () => {
-        let outputArea = this.parent.parent as OutputAreaWidget;
-        return outputArea.mirror();
-      });
-
-      // Remove mousemove and mouseup listeners and start the drag.
-      document.removeEventListener('mousemove', this, true);
-      document.removeEventListener('mouseup', this, true);
-      this._drag.start(clientX, clientY).then(action => {
-        this._drag = null;
-      });
-    }
-
-    /**
-     * Dispose of the resources held by the widget.
-     */
-    dispose() {
-      this._dragData = null;
-      this._drag = null;
-      super.dispose();
-    }
-
-    private _drag: Drag = null;
-    private _dragData: { pressX: number, pressY: number } = null;
-    private _executionCount: nbformat.ExecutionCount = null;
-  }
 }
 
 
-/**
- * The model for an output area.
- */
-export
-interface IOutputAreaModel extends IDisposable {
-  /**
-   * A signal emitted when the model state changes.
-   */
-  readonly stateChanged: ISignal<IOutputAreaModel, void>;
-
-  /**
-   * A signal emitted when the model changes.
-   */
-  readonly changed: ISignal<IOutputAreaModel, IOutputAreaModel.ChangedArgs>;
-
-  /**
-   * The length of the items in the model.
-   */
-  readonly length: number;
-
-  /**
-   * Whether the output area is trusted.
-   */
-  trusted: boolean;
-
-  /**
-   * The output content factory used by the model.
-   */
-  readonly contentFactory: IOutputAreaModel.IContentFactory;
-
-  /**
-   * Get an item at the specified index.
-   */
-  get(index: number): IOutputModel;
-
-  /**
-   * Add an output, which may be combined with previous output.
-   *
-   * #### Notes
-   * The output bundle is copied.
-   * Contiguous stream outputs of the same `name` are combined.
-   */
-  add(output: nbformat.IOutput): number;
-
-  /**
-   * Clear all of the output.
-   *
-   * @param wait - Delay clearing the output until the next message is added.
-   */
-  clear(wait?: boolean): void;
-
-  /**
-   * Deserialize the model from JSON.
-   *
-   * #### Notes
-   * This will clear any existing data.
-   */
-  fromJSON(values: nbformat.IOutput[]): void;
-
-  /**
-   * Serialize the model to JSON.
-   */
-  toJSON(): nbformat.IOutput[];
-}
-
-
-/**
- * The namespace for IOutputAreaModel interfaces.
- */
-export
-namespace IOutputAreaModel {
-  /**
-   * The options used to create a output area model.
-   */
-  export
-  interface IOptions {
-    /**
-     * The initial values for the model.
-     */
-    values?: nbformat.IOutput[];
-
-    /**
-     * Whether the output is trusted.  The default is false.
-     */
-    trusted?: boolean;
-
-    /**
-     * The output content factory used by the model.
-     *
-     * If not given, a default factory will be used.
-     */
-    contentFactory?: IContentFactory;
-  }
-
-  /**
-   * A type alias for changed args.
-   */
-  export
-  type ChangedArgs = ObservableVector.IChangedArgs<IOutputModel>;
-
-  /**
-   * The interface for an output content factory.
-   */
-  export
-  interface IContentFactory {
-    /**
-     * Create an output model.
-     */
-    createOutputModel(options: IOutputModel.IOptions): IOutputModel;
-  }
-}
+/******************************************************************************
+ * Private namespace
+ ******************************************************************************/
 
 
 /**

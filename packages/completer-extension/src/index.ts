@@ -131,14 +131,14 @@ const consolePlugin: JupyterLabPlugin<void> = {
     // Create a handler for each console that is created.
     consoles.widgetAdded.connect((sender, panel) => {
       const anchor = panel.console;
-      const cell = anchor.prompt;
+      const cell = anchor.promptCell;
       const editor = cell && cell.editor;
       const session = anchor.session;
       const parent = panel;
       const handler = manager.register({ editor, session, parent });
 
       // Listen for prompt creation.
-      anchor.promptCreated.connect((sender, cell) => {
+      anchor.promptCellCreated.connect((sender, cell) => {
         handler.editor = cell && cell.editor;
       });
     });
@@ -199,8 +199,10 @@ const notebookPlugin: JupyterLabPlugin<void> = {
     // Add notebook completer command.
     app.commands.addCommand(CommandIDs.invokeNotebook, {
       execute: () => {
-        const id = notebooks.currentWidget && notebooks.currentWidget.id;
-        return app.commands.execute(CommandIDs.invoke, { id });
+        const panel = notebooks.currentWidget;
+        if (panel && panel.notebook.activeCell.model.type === 'code') {
+          return app.commands.execute(CommandIDs.invoke, { id: panel.id });
+        }
       }
     });
 

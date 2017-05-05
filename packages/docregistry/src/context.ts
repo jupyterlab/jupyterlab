@@ -26,7 +26,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  PathExt, URLExt
+  PathExt, URLExt, IModelDB, ModelDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -51,7 +51,14 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     this._path = options.path;
     let ext = DocumentRegistry.extname(this._path);
     let lang = this._factory.preferredLanguage(ext);
-    this._model = this._factory.createNew(lang);
+
+    if (options.modelDBFactory) {
+      this._modelDB = options.modelDBFactory.createNew(this._path);
+      this._model = this._factory.createNew(lang, this._modelDB);
+    } else {
+      this._model = this._factory.createNew(lang);
+    }
+
     this._readyPromise = manager.ready.then(() => {
       return this._populatedPromise.promise;
     });
@@ -141,9 +148,13 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     }
     let model = this._model;
     this.session.dispose();
+    if (this._modelDB) {
+      this._modelDB.dispose();
+    }
     this._model = null;
     this._manager = null;
     this._factory = null;
+    this._modelDB = null;
 
     model.dispose();
     this._disposed.emit(void 0);
@@ -162,6 +173,26 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   */
   get ready(): Promise<void> {
     return this._readyPromise;
+  }
+
+  /**
+   * Populate the contents of the model, either from
+   * disk or from the modelDB backend.
+   *
+   * @returns a promise that resolves upon model population.
+   */
+  fromStore(): Promise<void> {
+    if (this._modelDB) {
+      return this._modelDB.connected.then(() => {
+        if (this._modelDB.isPrepopulated) {
+          return this.save();
+        } else {
+          return this.revert();
+        }
+      });
+    } else {
+      return this.revert();
+    }
   }
 
   /**
@@ -424,6 +455,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   private _manager: ServiceManager.IManager = null;
   private _opener: (widget: Widget) => void = null;
   private _model: T = null;
+  private _modelDB: IModelDB = null;
   private _path = '';
   private _factory: DocumentRegistry.IModelFactory<T> = null;
   private _contentsModel: Contents.IModel = null;
@@ -465,6 +497,11 @@ export namespace Context {
      * The kernel preference associated with the context.
      */
     kernelPreference?: IClientSession.IKernelPreference;
+
+    /**
+     * An IModelDB factory method which may be used for the document.
+     */
+    modelDBFactory?: ModelDB.IFactory;
 
     /**
      * An optional callback for opening sibling widgets.

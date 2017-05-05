@@ -39,13 +39,15 @@ import {
 import 'codemirror/addon/edit/matchbrackets.js';
 import 'codemirror/addon/edit/closebrackets.js';
 import 'codemirror/addon/comment/comment.js';
+import 'codemirror/keymap/emacs.js';
+import 'codemirror/keymap/sublime.js';
 import 'codemirror/keymap/vim.js';
 
 
 /**
  * The class name added to CodeMirrorWidget instances.
  */
-const EDITOR_CLASS = 'jp-CodeMirrorWidget';
+const EDITOR_CLASS = 'jp-CodeMirrorEditor';
 
 /**
  * The class name added to read only cell editor widgets.
@@ -74,6 +76,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   constructor(options: CodeEditor.IOptions, config: CodeMirror.EditorConfiguration={}) {
     let host = this.host = options.host;
     host.classList.add(EDITOR_CLASS);
+    host.addEventListener('focus', this, true);
 
     this._uuid = options.uuid || uuid();
     this._selectionStyle = options.selectionStyle || {};
@@ -106,7 +109,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       }
     });
     CodeMirror.on(editor, 'cursorActivity', () => this._onCursorActivity());
-    CodeMirror.on(editor.getDoc(), 'change', (instance, change) => {
+    CodeMirror.on(editor.getDoc(), 'beforeChange', (instance, change) => {
       this._onDocChanged(instance, change);
     });
   }
@@ -233,6 +236,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     if (this._editor === null) {
       return;
     }
+    this.host.removeEventListener('focus', this, true);
     this._editor = null;
     this._model = null;
     this._keydownHandlers.length = 0;
@@ -311,6 +315,19 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   refresh(): void {
     this._editor.refresh();
+    this._needsRefresh = false;
+  }
+
+  /**
+   * Refresh the editor if it is focused;
+   * otherwise postpone refreshing till focusing.
+   */
+  resizeToFit(): void {
+    if (this.hasFocus()) {
+      this.refresh();
+    } else {
+      this._needsRefresh = true;
+    }
   }
 
   /**
@@ -336,6 +353,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     } else {
       this._editor.setSize(null, null);
     }
+    this._needsRefresh = false;
   }
 
   /**
@@ -603,7 +621,23 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       return;
     }
     this._changeGuard = true;
-    this.doc.setValue(this._model.value.text);
+    let doc = this.doc;
+    switch (args.type) {
+     case 'insert':
+       let pos = doc.posFromIndex(args.start);
+       doc.replaceRange(args.value, pos, pos);
+       break;
+     case 'remove':
+       let from = doc.posFromIndex(args.start);
+       let to = doc.posFromIndex(args.end);
+       doc.replaceRange('', from, to);
+       break;
+     case 'set':
+       doc.setValue(args.value);
+       break;
+     default:
+       break;
+    }
     this._changeGuard = false;
   }
 
@@ -615,8 +649,47 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       return;
     }
     this._changeGuard = true;
-    this._model.value.text = this.doc.getValue();
+    let value = this._model.value;
+    let start = doc.indexFromPos(change.from);
+    let end = doc.indexFromPos(change.to);
+    let inserted = change.text.join('\n');
+
+    if (end !== start) {
+      value.remove(start, end);
+    }
+    if (inserted) {
+      value.insert(start, inserted);
+    }
     this._changeGuard = false;
+  }
+
+  /**
+   * Handle the DOM events for the editor.
+   *
+   * @param event - The DOM event sent to the editor.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the editor's DOM node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+    case 'focus':
+      this._evtFocus(event as FocusEvent);
+      break;
+    default:
+      break;
+    }
+  }
+
+  /**
+   * Handle `focus` events for the editor.
+   */
+  private _evtFocus(event: FocusEvent): void {
+    if (this._needsRefresh) {
+      this.refresh();
+    }
   }
 
   private _model: CodeEditor.IModel;
@@ -626,6 +699,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   private _changeGuard = false;
   private _selectionStyle: CodeEditor.ISelectionStyle;
   private _uuid = '';
+  private _needsRefresh = false;
 }
 
 

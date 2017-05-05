@@ -2,16 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IStateDB
+  InstanceTracker, IStateDB
 } from '@jupyterlab/apputils';
 
 import {
   IDocumentManager
 } from '@jupyterlab/docmanager';
-
-import {
-  IServiceManager
-} from '@jupyterlab/services';
 
 import {
   CommandRegistry
@@ -59,6 +55,11 @@ interface IFileBrowserFactory {
    * instance.
    */
   createFileBrowser(id: string, options?: IFileBrowserFactory.IOptions): FileBrowser;
+
+  /**
+   * The instance tracker used by the factory to track file browsers.
+   */
+  readonly tracker: InstanceTracker<FileBrowser>;
 }
 
 
@@ -94,14 +95,6 @@ namespace IFileBrowserFactory {
      * If no manager is provided, the application default will be used.
      */
     documentManager?: IDocumentManager;
-
-    /**
-     * The service manager used by the file browser.
-     *
-     * #### Notes
-     * If no manager is provided, the application default will be used.
-     */
-    serviceManager?: IServiceManager;
 
     /**
      * The state database to use for saving file browser state and restoring it.

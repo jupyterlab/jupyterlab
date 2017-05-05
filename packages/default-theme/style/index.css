@@ -32,6 +32,7 @@
 @import url('~@jupyterlab/outputarea/style/index.css');
 @import url('~@jupyterlab/rendermime/style/index.css');
 @import url('~@jupyterlab/running/style/index.css');
+@import url('~@jupyterlab/tabmanager-extension/style/index.css');
 @import url('~@jupyterlab/terminal/style/index.css');
 @import url('~@jupyterlab/tooltip/style/index.css');
 

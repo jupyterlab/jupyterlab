@@ -16,8 +16,8 @@ import {
 } from 'simulate-event';
 
 import {
-  CodeCellModel, CodeCellWidget, MarkdownCellModel, MarkdownCellWidget,
-  RawCellModel, RawCellWidget, BaseCellWidget
+  CodeCellModel, CodeCell, MarkdownCellModel, MarkdownCell,
+  RawCellModel, RawCell, Cell
 } from '@jupyterlab/cells';
 
 import {
@@ -67,7 +67,7 @@ class LogStaticNotebook extends StaticNotebook {
     this.methods.push('onMetadataChanged');
   }
 
-  protected onCellInserted(index: number, cell: BaseCellWidget): void {
+  protected onCellInserted(index: number, cell: Cell): void {
     super.onCellInserted(index, cell);
     this.methods.push('onCellInserted');
   }
@@ -77,8 +77,8 @@ class LogStaticNotebook extends StaticNotebook {
     this.methods.push('onCellMoved');
   }
 
-  protected onCellRemoved(cell: BaseCellWidget): void {
-    super.onCellRemoved(cell);
+  protected onCellRemoved(index: number, cell: Cell): void {
+    super.onCellRemoved(index, cell);
     this.methods.push('onCellRemoved');
   }
 }
@@ -115,7 +115,7 @@ class LogNotebook extends Notebook {
     this.methods.push('onUpdateRequest');
   }
 
-  protected onCellInserted(index: number, cell: BaseCellWidget): void {
+  protected onCellInserted(index: number, cell: Cell): void {
     super.onCellInserted(index, cell);
     this.methods.push('onCellInserted');
   }
@@ -125,8 +125,8 @@ class LogNotebook extends Notebook {
     this.methods.push('onCellMoved');
   }
 
-  protected onCellRemoved(cell: BaseCellWidget): void {
-    super.onCellRemoved(cell);
+  protected onCellRemoved(index: number, cell: Cell): void {
+    super.onCellRemoved(index, cell);
     this.methods.push('onCellRemoved');
   }
 }
@@ -197,7 +197,7 @@ describe('notebook/widget', () => {
         widget.model = new NotebookModel();
         let called = false;
         widget.modelContentChanged.connect(() => { called = true; });
-        let cursor = widget.model.metadata.set('foo', 1);
+        widget.model.metadata.set('foo', 1);
         expect(called).to.be(true);
       });
 
@@ -352,7 +352,7 @@ describe('notebook/widget', () => {
       it('should get the child widget at a specified index', () => {
         let widget = createWidget();
         let child = widget.widgets[0];
-        expect(child).to.be.a(CodeCellWidget);
+        expect(child).to.be.a(CodeCell);
       });
 
       it('should return `undefined` if out of range', () => {
@@ -474,71 +474,41 @@ describe('notebook/widget', () => {
 
       });
 
-      describe('#codeCellContentFactory', () => {
-
-        it('should be a CodeCellWidget.ContentFactory', () => {
-          let factory = new StaticNotebook.ContentFactory({ editorFactory });
-          expect(factory.codeCellContentFactory).to.be.a(CodeCellWidget.ContentFactory);
-        });
-
-      });
-
-      describe('#markdownCellContentFactory', () => {
-
-        it('should be a BaseCellWidget.ContentFactory', () => {
-          let factory = new StaticNotebook.ContentFactory({ editorFactory });
-          expect(factory.markdownCellContentFactory).to.be.a(BaseCellWidget.ContentFactory);
-        });
-
-      });
-
-      describe('#rawCellContentFactory', () => {
-
-        it('should be a BaseCellWidget.ContentFactory', () => {
-          let factory = new StaticNotebook.ContentFactory({ editorFactory });
-          expect(factory.rawCellContentFactory).to.be.a(BaseCellWidget.ContentFactory);
-        });
-
-      });
-
       describe('#createCodeCell({})', () => {
 
-        it('should create a `CodeCellWidget`', () => {
-          let factory = new StaticNotebook.ContentFactory({ editorFactory });
-          let contentFactory = factory.codeCellContentFactory;
+        it('should create a `CodeCell`', () => {
+          let contentFactory = new StaticNotebook.ContentFactory();
           let model = new CodeCellModel({});
           let codeOptions = { model, rendermime, contentFactory };
           let parent = new StaticNotebook(options);
-          let widget = factory.createCodeCell(codeOptions, parent);
-          expect(widget).to.be.a(CodeCellWidget);
+          let widget = contentFactory.createCodeCell(codeOptions, parent);
+          expect(widget).to.be.a(CodeCell);
         });
 
       });
 
       describe('#createMarkdownCell({})', () => {
 
-        it('should create a `MarkdownCellWidget`', () => {
-          let factory = new StaticNotebook.ContentFactory({ editorFactory });
-          let contentFactory = factory.markdownCellContentFactory;
+        it('should create a `MarkdownCell`', () => {
+          let contentFactory = new StaticNotebook.ContentFactory();
           let model = new MarkdownCellModel({});
           let mdOptions = { model, rendermime, contentFactory };
           let parent = new StaticNotebook(options);
-          let widget = factory.createMarkdownCell(mdOptions, parent);
-          expect(widget).to.be.a(MarkdownCellWidget);
+          let widget = contentFactory.createMarkdownCell(mdOptions, parent);
+          expect(widget).to.be.a(MarkdownCell);
         });
 
       });
 
       describe('#createRawCell()', () => {
 
-        it('should create a `RawCellWidget`', () => {
-          let factory = new StaticNotebook.ContentFactory({ editorFactory });
-          let contentFactory = factory.rawCellContentFactory;
+        it('should create a `RawCell`', () => {
+          let contentFactory = new StaticNotebook.ContentFactory();
           let model = new RawCellModel({});
           let rawOptions = { model, contentFactory };
           let parent = new StaticNotebook(options);
-          let widget = factory.createRawCell(rawOptions, parent);
-          expect(widget).to.be.a(RawCellWidget);
+          let widget = contentFactory.createRawCell(rawOptions, parent);
+          expect(widget).to.be.a(RawCell);
         });
 
       });
@@ -693,7 +663,7 @@ describe('notebook/widget', () => {
         MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
         let cell = widget.model.contentFactory.createMarkdownCell({});
         widget.model.cells.pushBack(cell);
-        let child = widget.widgets[widget.widgets.length - 1] as MarkdownCellWidget;
+        let child = widget.widgets[widget.widgets.length - 1] as MarkdownCell;
         expect(child.rendered).to.be(true);
         widget.activeCellIndex = widget.widgets.length - 1;
         widget.mode = 'edit';
@@ -886,7 +856,7 @@ describe('notebook/widget', () => {
           let cell = widget.model.contentFactory.createMarkdownCell({});
           widget.model.cells.pushBack(cell);
           let count = widget.widgets.length;
-          let child = widget.widgets[count - 1] as MarkdownCellWidget;
+          let child = widget.widgets[count - 1] as MarkdownCell;
           expect(child.rendered).to.be(true);
           simulate(child.node, 'mousedown');
           expect(child.rendered).to.be(true);
@@ -900,7 +870,7 @@ describe('notebook/widget', () => {
         it('should unrender a markdown cell', () => {
           let cell = widget.model.contentFactory.createMarkdownCell({});
           widget.model.cells.pushBack(cell);
-          let child = widget.widgets[widget.widgets.length - 1] as MarkdownCellWidget;
+          let child = widget.widgets[widget.widgets.length - 1] as MarkdownCell;
           expect(child.rendered).to.be(true);
           expect(widget.mode).to.be('command');
           simulate(child.node, 'dblclick');
@@ -912,7 +882,7 @@ describe('notebook/widget', () => {
           let cell = widget.model.contentFactory.createMarkdownCell({});
           widget.model.cells.pushBack(cell);
           widget.model.readOnly = true;
-          let child = widget.widgets[widget.widgets.length - 1] as MarkdownCellWidget;
+          let child = widget.widgets[widget.widgets.length - 1] as MarkdownCell;
           expect(child.rendered).to.be(true);
           simulate(child.node, 'dblclick');
           expect(child.rendered).to.be(true);
@@ -1128,6 +1098,15 @@ describe('notebook/widget', () => {
         expect(widget.activeCell).to.be(widget.widgets[0]);
       });
 
+      it('should keep the currently active cell active', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.activeCellIndex = 1;
+        let cell = widget.model.contentFactory.createCodeCell({});
+        widget.model.cells.insert(1, cell);
+        expect(widget.activeCell).to.be(widget.widgets[2]);
+      });
+
       context('`edgeRequested` signal', () => {
 
         it('should activate the previous cell if top is requested', () => {
@@ -1180,6 +1159,14 @@ describe('notebook/widget', () => {
         widget.model.fromJSON(DEFAULT_CONTENT);
         widget.model.cells.removeAt(0);
         expect(widget.activeCell).to.be(widget.widgets[0]);
+      });
+
+      it('should keep the currently active cell active', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.activeCellIndex = 2;
+        widget.model.cells.removeAt(1);
+        expect(widget.activeCell).to.be(widget.widgets[1]);
       });
 
     });

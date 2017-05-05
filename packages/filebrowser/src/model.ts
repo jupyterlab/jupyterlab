@@ -6,11 +6,19 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  Contents, Kernel, ServiceManager, Session
+  IChangedArgs, PathExt
+} from '@jupyterlab/coreutils';
+
+import {
+  IDocumentManager
+} from '@jupyterlab/docmanager';
+
+import {
+  Contents, Kernel, Session
 } from '@jupyterlab/services';
 
 import {
-  ArrayExt, ArrayIterator, IterableOrArrayLike, IIterator, each, toArray
+  ArrayIterator, each, IIterator, IterableOrArrayLike
 } from '@phosphor/algorithm';
 
 import {
@@ -20,10 +28,6 @@ import {
 import {
   ISignal, Signal
 } from '@phosphor/signaling';
-
-import {
-  IChangedArgs, PathExt, uuid
-} from '@jupyterlab/coreutils';
 
 
 /**
@@ -50,16 +54,22 @@ class FileBrowserModel implements IDisposable {
    * Construct a new file browser model.
    */
   constructor(options: FileBrowserModel.IOptions) {
-    this._manager = options.manager;
+    this.manager = options.manager;
     this._model = { path: '', name: '/', type: 'directory' };
-    this._manager.contents.fileChanged.connect(this._onFileChanged, this);
-    this._manager.sessions.runningChanged.connect(this._onRunningChanged, this);
     this._state = options.state || null;
+
+    const { services } = options.manager;
+    services.contents.fileChanged.connect(this._onFileChanged, this);
+    services.sessions.runningChanged.connect(this._onRunningChanged, this);
+
     this._scheduleUpdate();
-    this._refreshId = window.setInterval(() => {
-      this._scheduleUpdate();
-    }, REFRESH_DURATION);
+    this._startTimer();
   }
+
+  /**
+   * The document manager instance used by the file browser model.
+   */
+  readonly manager: IDocumentManager;
 
   /**
    * A signal emitted when the file browser model loses connection.
@@ -97,17 +107,10 @@ class FileBrowserModel implements IDisposable {
   }
 
   /**
-   * A signal emitted when the running sessions in the directory changes.
-   */
-  get sessionsChanged(): ISignal<this, void> {
-    return this._sessionsChanged;
-  }
-
-  /**
    * Get the kernel spec models.
    */
   get specs(): Kernel.ISpecModels | null {
-    return this._manager.sessions.specs;
+    return this.manager.services.sessions.specs;
   }
 
   /**
@@ -125,10 +128,7 @@ class FileBrowserModel implements IDisposable {
       return;
     }
     this._model = null;
-    this._manager = null;
     clearTimeout(this._timeoutId);
-    clearInterval(this._refreshId);
-    clearTimeout(this._blackoutId);
     this._sessions.length = 0;
     this._items.length = 0;
     Signal.clearData(this);
@@ -156,6 +156,8 @@ class FileBrowserModel implements IDisposable {
    * Force a refresh of the directory contents.
    */
   refresh(): Promise<void> {
+    this._lastRefresh = new Date().getTime();
+    this._requested = false;
     return this.cd('.');
   }
 
@@ -182,8 +184,8 @@ class FileBrowserModel implements IDisposable {
     if (oldValue !== newValue) {
       this._sessions.length = 0;
     }
-    let manager = this._manager;
-    this._pending = manager.contents.get(newValue, options).then(contents => {
+    let services = this.manager.services;
+    this._pending = services.contents.get(newValue, options).then(contents => {
       if (this.isDisposed) {
         return;
       }
@@ -201,48 +203,13 @@ class FileBrowserModel implements IDisposable {
           newValue
         });
       }
-      this._onRunningChanged(manager.sessions, manager.sessions.running());
+      this._onRunningChanged(services.sessions, services.sessions.running());
       this._refreshed.emit(void 0);
     }).catch(error => {
       this._pendingPath = null;
       this._connectionFailure.emit(error);
     });
     return this._pending;
-  }
-
-  /**
-   * Copy a file.
-   *
-   * @param fromFile - The path of the original file.
-   *
-   * @param toDir - The path to the target directory.
-   *
-   * @returns A promise which resolves to the contents of the file.
-   */
-  copy(fromFile: string, toDir: string): Promise<Contents.IModel> {
-    let normalizePath = Private.normalizePath;
-    fromFile = normalizePath(this._model.path, fromFile);
-    toDir = normalizePath(this._model.path, toDir);
-    return this._manager.contents.copy(fromFile, toDir);
-  }
-
-  /**
-   * Delete a file.
-   *
-   * @param: path - The path to the file to be deleted.
-   *
-   * @returns A promise which resolves when the file is deleted.
-   *
-   * #### Notes
-   * If there is a running session associated with the file and no other
-   * sessions are using the kernel, the session will be shut down.
-   */
-  deleteFile(path: string): Promise<void> {
-    let normalizePath = Private.normalizePath;
-    path = normalizePath(this._model.path, path);
-    return this.stopIfNeeded(path).then(() => {
-      return this._manager.contents.delete(path);
-    });
   }
 
   /**
@@ -254,69 +221,13 @@ class FileBrowserModel implements IDisposable {
    *   downloading.
    */
   download(path: string): Promise<void> {
-    return this._manager.contents.getDownloadUrl(path).then(url => {
+    return this.manager.services.contents.getDownloadUrl(path).then(url => {
       let element = document.createElement('a');
       element.setAttribute('href', url);
       element.setAttribute('download', '');
       element.click();
       return void 0;
     });
-  }
-
-  /**
-   * Create a new untitled file or directory in the current directory.
-   *
-   * @param type - The type of file object to create. One of
-   *  `['file', 'notebook', 'directory']`.
-   *
-   * @param ext - Optional extension for `'file'` types (defaults to `'.txt'`).
-   *
-   * @returns A promise containing the new file contents model.
-   */
-  newUntitled(options: Contents.ICreateOptions): Promise<Contents.IModel> {
-    if (options.type === 'file') {
-      options.ext = options.ext || '.txt';
-    }
-    options.path = options.path || this._model.path;
-    return this._manager.contents.newUntitled(options);
-  }
-
-  /**
-   * Rename a file or directory.
-   *
-   * @param path - The path to the original file.
-   *
-   * @param newPath - The path to the new file.
-   *
-   * @returns A promise containing the new file contents model.  The promise
-   *   will reject if the newPath already exists.  Use [[overwrite]] to
-   *   overwrite a file.
-   */
-  rename(path: string, newPath: string): Promise<Contents.IModel> {
-    // Handle relative paths.
-    path = Private.normalizePath(this._model.path, path);
-    newPath = Private.normalizePath(this._model.path, newPath);
-
-    return this._manager.contents.rename(path, newPath);
-  }
-
-  /**
-   * Overwrite a file.
-   *
-   * @param path - The path to the original file.
-   *
-   * @param newPath - The path to the new file.
-   *
-   * @returns A promise containing the new file contents model.
-   */
-  overwrite(path: string, newPath: string): Promise<Contents.IModel> {
-    // Cleanly overwrite the file by moving it, making sure the original
-    // does not exist, and then renaming to the new path.
-    let tempPath = `${newPath}.${uuid()}`;
-    let cb = () => { return this.rename(tempPath, newPath); };
-    return this.rename(path, tempPath).then(() => {
-      return this.deleteFile(newPath);
-    }).then(cb, cb);
   }
 
   /**
@@ -337,30 +248,20 @@ class FileBrowserModel implements IDisposable {
       return Promise.resolve(void 0);
     }
 
-    const manager = this._manager;
+    const manager = this.manager;
     const key = `file-browser-${id}:cwd`;
-    return Promise.all([state.fetch(key), manager.ready]).then(([cwd]) => {
+    const ready = manager.services.ready;
+    return Promise.all([state.fetch(key), ready]).then(([cwd]) => {
       if (!cwd) {
         return;
       }
 
       const path = cwd['path'] as string;
-      return manager.contents.get(path)
+      return manager.services.contents.get(path)
         .then(() => this.cd(path))
         .catch(() => state.remove(key));
     }).catch(() => state.remove(key))
       .then(() => { this._key = key; }); // Set key after restoration is done.
-  }
-
-  /**
-   * Shut down a session by session id.
-   *
-   * @param id - The id of the session.
-   *
-   * @returns A promise that resolves when the action is complete.
-   */
-  shutdown(id: string): Promise<void> {
-    return this._manager.sessions.shutdown(id);
   }
 
   /**
@@ -391,7 +292,7 @@ class FileBrowserModel implements IDisposable {
 
     let path = this._model.path;
     path = path ? path + '/' + file.name : file.name;
-    return this._manager.contents.get(path, {}).then(() => {
+    return this.manager.services.contents.get(path, {}).then(() => {
       let msg = `"${file.name}" already exists`;
       throw new Error(msg);
     }, () => {
@@ -400,29 +301,6 @@ class FileBrowserModel implements IDisposable {
       }
       return this._upload(file);
     });
-  }
-
-  /**
-   * Find a session associated with a path and stop it is the only
-   * session using that kernel.
-   */
-  protected stopIfNeeded(path: string): Promise<void> {
-    let sessions = toArray(this._sessions);
-    let index = ArrayExt.findFirstIndex(sessions, value => value.notebook.path === path);
-    if (index !== -1) {
-      let count = 0;
-      let model = sessions[index];
-      each(sessions, value => {
-        if (model.kernel.id === value.kernel.id) {
-          count++;
-        }
-      });
-      if (count === 1) {
-        // Try to delete the session, but succeed either way.
-        return this.shutdown(model.id).catch(() => { /* no-op */ });
-      }
-    }
-    return Promise.resolve(void 0);
   }
 
   /**
@@ -454,7 +332,7 @@ class FileBrowserModel implements IDisposable {
           content: Private.getContent(reader)
         };
 
-        this._manager.contents.save(path, model).then(contents => {
+        this.manager.services.contents.save(path, model).then(contents => {
           resolve(contents);
         }).catch(reject);
       };
@@ -483,7 +361,7 @@ class FileBrowserModel implements IDisposable {
     };
     this._items = contents.content;
     this._paths.clear();
-    each(contents.content, (model: Contents.IModel) => {
+    contents.content.forEach((model: Contents.IModel) => {
       this._paths.add(model.path);
     });
   }
@@ -521,40 +399,37 @@ class FileBrowserModel implements IDisposable {
   }
 
   /**
+   * Start the internal refresh timer.
+   */
+  private _startTimer(): void {
+    this._timeoutId = window.setInterval(() => {
+      if (this._requested) {
+        this.refresh();
+        return;
+      }
+      let date = new Date().getTime();
+      if ((date - this._lastRefresh) > REFRESH_DURATION) {
+        this.refresh();
+      }
+    }, MIN_REFRESH);
+  }
+
+  /**
    * Handle internal model refresh logic.
    */
   private _scheduleUpdate(): void {
-    // Send immediately if there is no pending action, otherwise defer.
-    if (this._blackoutId !== -1) {
-      this._requested = true;
-      return;
-    }
-    this._timeoutId = window.setTimeout(() => {
+    let date = new Date().getTime();
+    if ((date - this._lastRefresh) > MIN_REFRESH) {
       this.refresh();
-      if (this._requested && this._blackoutId !== -1) {
-        this._requested = false;
-        clearTimeout(this._blackoutId);
-        this._blackoutId = -1;
-        this._timeoutId = window.setTimeout(() => {
-          this._scheduleUpdate();
-        }, MIN_REFRESH);
-      } else {
-        this._blackoutId = window.setTimeout(() => {
-          this._blackoutId = -1;
-          if (this._requested) {
-            this._scheduleUpdate();
-          }
-        }, MIN_REFRESH);
-      }
-    }, 0);
+    } else {
+      this._requested = true;
+    }
   }
 
-  private _blackoutId = -1;
   private _connectionFailure = new Signal<this, Error>(this);
   private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
   private _items: Contents.IModel[] = [];
   private _key: string = '';
-  private _manager: ServiceManager.IManager = null;
   private _maxUploadSizeMb = 15;
   private _model: Contents.IModel;
   private _pathChanged = new Signal<this, IChangedArgs<string>>(this);
@@ -562,10 +437,9 @@ class FileBrowserModel implements IDisposable {
   private _pending: Promise<void> = null;
   private _pendingPath: string = null;
   private _refreshed = new Signal<this, void>(this);
-  private _refreshId = -1;
+  private _lastRefresh = -1;
   private _requested = false;
   private _sessions: Session.IModel[] = [];
-  private _sessionsChanged = new Signal<this, void>(this);
   private _state: IStateDB | null = null;
   private _timeoutId = -1;
 }
@@ -582,9 +456,9 @@ namespace FileBrowserModel {
   export
   interface IOptions {
     /**
-     * A service manager instance.
+     * A document manager instance.
      */
-    manager: ServiceManager.IManager;
+    manager: IDocumentManager;
 
     /**
      * An optional state database. If provided, the model will restore which

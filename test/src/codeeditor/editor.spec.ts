@@ -117,6 +117,14 @@ describe('CodeEditor.Model', () => {
 
   });
 
+  describe('#modelDB', () => {
+
+    it('should get the modelDB object associated with the model', () => {
+      expect(model.modelDB.has('value')).to.be(true);
+    });
+
+  });
+
   describe('#isDisposed', () => {
 
     it('should test whether the model is disposed', () => {

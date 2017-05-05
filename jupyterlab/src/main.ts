@@ -76,6 +76,9 @@ import * as servicesExtension
 import * as shortcutsExtension
   from '@jupyterlab/shortcuts-extension';
 
+import * as tabmanagerExtension
+  from '@jupyterlab/tabmanager-extension';
+
 import * as terminalExtension
   from '@jupyterlab/terminal-extension';
 
@@ -110,6 +113,7 @@ const mods: JupyterLab.IPluginModule[] = [
   runningExtension,
   servicesExtension,
   shortcutsExtension,
+  tabmanagerExtension,
   terminalExtension,
   tooltipExtension,
 ];

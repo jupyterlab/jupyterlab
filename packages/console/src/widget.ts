@@ -34,7 +34,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  BaseCellWidget, CodeCellWidget, RawCellWidget,
+  Cell, CodeCell, RawCell,
   ICodeCellModel, IRawCellModel, CellModel,
   RawCellModel, CodeCellModel
 } from '@jupyterlab/cells';
@@ -42,10 +42,6 @@ import {
 import {
   nbformat, IObservableVector, ObservableVector
 } from '@jupyterlab/coreutils';
-
-import {
-  OutputAreaWidget
-} from '@jupyterlab/outputarea';
 
 import {
   IRenderMime
@@ -76,9 +72,9 @@ const BANNER_CLASS = 'jp-CodeConsole-banner';
 const FOREIGN_CELL_CLASS = 'jp-CodeConsole-foreignCell';
 
 /**
- * The class name of the active prompt
+ * The class name of the active prompt cell.
  */
-const PROMPT_CLASS = 'jp-CodeConsole-prompt';
+const PROMPT_CLASS = 'jp-CodeConsole-promptCell';
 
 /**
  * The class name of the panel that holds cell content.
@@ -114,11 +110,13 @@ class CodeConsole extends Widget {
 
     // Create the panels that hold the content and input.
     let layout = this.layout = new PanelLayout();
-    this._cells = new ObservableVector<BaseCellWidget>();
+    this._cells = new ObservableVector<Cell>();
     this._content = new Panel();
     this._input = new Panel();
 
-    let factory = this.contentFactory = options.contentFactory;
+    let contentFactory = this.contentFactory = (
+      options.contentFactory || CodeConsole.defaultContentFactory
+    );
     let modelFactory = this.modelFactory = (
       options.modelFactory || CodeConsole.defaultModelFactory
     );
@@ -137,22 +135,22 @@ class CodeConsole extends Widget {
     // Create the banner.
     let model = modelFactory.createRawCell({});
     model.value.text = '...';
-    let banner = this.banner = factory.createBanner({
+    let banner = this._banner = new RawCell({
       model,
-      contentFactory: factory.rawCellContentFactory
-    }, this);
+      contentFactory: contentFactory
+    });
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
     this._content.addWidget(banner);
 
     // Set up the foreign iopub handler.
-    this._foreignHandler = factory.createForeignHandler({
+    this._foreignHandler = new ForeignHandler({
       session: this.session,
       parent: this,
-      cellFactory: () => this._createForeignCell(),
+      cellFactory: () => this._createCodeCell(),
     });
 
-    this._history = factory.createConsoleHistory({
+    this._history = new ConsoleHistory({
       session: this.session
     });
 
@@ -161,17 +159,17 @@ class CodeConsole extends Widget {
   }
 
   /**
-   * A signal emitted when the console finished executing its prompt.
+   * A signal emitted when the console finished executing its prompt cell.
    */
   get executed(): ISignal<this, Date> {
     return this._executed;
   }
 
   /**
-   * A signal emitted when a new prompt is created.
+   * A signal emitted when a new prompt cell is created.
    */
-  get promptCreated(): ISignal<this, CodeCellWidget> {
-    return this._promptCreated;
+  get promptCellCreated(): ISignal<this, CodeCell> {
+    return this._promptCellCreated;
   }
 
   /**
@@ -195,26 +193,21 @@ class CodeConsole extends Widget {
   readonly session: IClientSession;
 
   /**
-   * The console banner widget.
-   */
-  readonly banner: RawCellWidget;
-
-  /**
    * The list of content cells in the console.
    *
    * #### Notes
    * This list does not include the banner or the prompt for a console.
    */
-  get cells(): IObservableVector<BaseCellWidget> {
+  get cells(): IObservableVector<Cell> {
     return this._cells;
   }
 
   /*
-   * The console input prompt.
+   * The console input prompt cell.
    */
-  get prompt(): CodeCellWidget | null {
+  get promptCell(): CodeCell | null {
     let inputLayout = (this._input.layout as PanelLayout);
-    return inputLayout.widgets[0] as CodeCellWidget || null;
+    return inputLayout.widgets[0] as CodeCell || null;
   }
 
   /**
@@ -227,7 +220,7 @@ class CodeConsole extends Widget {
    * into a console. It is distinct from the `inject` method in that it requires
    * rendered code cell widgets and does not execute them.
    */
-  addCell(cell: BaseCellWidget) {
+  addCell(cell: Cell) {
     this._content.addWidget(cell);
     this._cells.pushBack(cell);
     cell.disposed.connect(this._onCellDisposed, this);
@@ -253,16 +246,22 @@ class CodeConsole extends Widget {
     if (this._foreignHandler === null) {
       return;
     }
-    let foreignHandler = this._foreignHandler;
-    let history = this._history;
+
     let cells = this._cells;
+    let history = this._history;
+    let foreignHandler = this._foreignHandler;
+
+    this._banner = null;
+    this._cells = null;
+    this._content = null;
+    this._input = null;
+    this._mimeTypeService = null;
     this._foreignHandler = null;
     this._history = null;
-    this._cells = null;
 
-    foreignHandler.dispose();
-    history.dispose();
     cells.clear();
+    history.dispose();
+    foreignHandler.dispose();
 
     super.dispose();
   }
@@ -282,13 +281,13 @@ class CodeConsole extends Widget {
       return Promise.resolve(void 0);
     }
 
-    let prompt = this.prompt;
-    prompt.model.trusted = true;
+    let promptCell = this.promptCell;
+    promptCell.model.trusted = true;
 
     if (force) {
-      // Create a new prompt before kernel execution to allow typeahead.
-      this.newPrompt();
-      return this._execute(prompt);
+      // Create a new prompt cell before kernel execution to allow typeahead.
+      this.newPromptCell();
+      return this._execute(promptCell);
     }
 
     // Check whether we should execute.
@@ -297,9 +296,9 @@ class CodeConsole extends Widget {
         return;
       }
       if (should) {
-        // Create a new prompt before kernel execution to allow typeahead.
-        this.newPrompt();
-        return this._execute(prompt);
+        // Create a new prompt cell before kernel execution to allow typeahead.
+        this.newPromptCell();
+        return this._execute(promptCell);
       }
     });
   }
@@ -312,19 +311,19 @@ class CodeConsole extends Widget {
    * @returns A promise that indicates when the injected cell's execution ends.
    */
   inject(code: string): Promise<void> {
-    let cell = this._createForeignCell();
+    let cell = this._createCodeCell();
     cell.model.value.text = code;
     this.addCell(cell);
     return this._execute(cell);
   }
 
   /**
-   * Insert a line break in the prompt.
+   * Insert a line break in the prompt cell.
    */
   insertLinebreak(): void {
-    let prompt = this.prompt;
-    let model = prompt.model;
-    let editor = prompt.editor;
+    let promptCell = this.promptCell;
+    let model = promptCell.model;
+    let editor = promptCell.editor;
     // Insert the line break at the cursor position, and move cursor forward.
     let pos = editor.getCursorPosition();
     let offset = editor.getOffsetAt(pos);
@@ -338,16 +337,15 @@ class CodeConsole extends Widget {
    * Serialize the output.
    */
   serialize(): nbformat.ICodeCell[] {
-    let prompt = this.prompt;
+    let promptCell = this.promptCell;
     let layout = this._content.layout as PanelLayout;
     // Serialize content.
     let output = map(layout.widgets, widget => {
-      return (widget as CodeCellWidget).model.toJSON() as nbformat.ICodeCell;
+      return (widget as CodeCell).model.toJSON() as nbformat.ICodeCell;
     });
-    // Serialize prompt and return.
-    return toArray(output).concat(prompt.model.toJSON() as nbformat.ICodeCell);
+    // Serialize prompt cell and return.
+    return toArray(output).concat(promptCell.model.toJSON() as nbformat.ICodeCell);
   }
-
 
   /**
    * Handle the DOM events for the widget.
@@ -376,10 +374,10 @@ class CodeConsole extends Widget {
     let node = this.node;
     node.addEventListener('keydown', this, true);
     // Create a prompt if necessary.
-    if (!this.prompt) {
-      this.newPrompt();
+    if (!this.promptCell) {
+      this.newPromptCell();
     } else {
-      this.prompt.editor.focus();
+      this.promptCell.editor.focus();
       this.update();
     }
   }
@@ -396,43 +394,43 @@ class CodeConsole extends Widget {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this.prompt.editor.focus();
+    this.promptCell.editor.focus();
     this.update();
   }
 
   /**
-   * Make a new prompt.
+   * Make a new prompt cell.
    */
-  protected newPrompt(): void {
-    let prompt = this.prompt;
+  protected newPromptCell(): void {
+    let promptCell = this.promptCell;
     let input = this._input;
 
     // Make the last prompt read-only, clear its signals, and move to content.
-    if (prompt) {
-      prompt.readOnly = true;
-      prompt.removeClass(PROMPT_CLASS);
-      Signal.clearData(prompt.editor);
+    if (promptCell) {
+      promptCell.readOnly = true;
+      promptCell.removeClass(PROMPT_CLASS);
+      Signal.clearData(promptCell.editor);
       (input.layout as PanelLayout).removeWidgetAt(0);
-      this.addCell(prompt);
+      this.addCell(promptCell);
     }
 
-    // Create the new prompt.
+    // Create the new prompt cell.
     let factory = this.contentFactory;
     let options = this._createCodeCellOptions();
-    prompt = factory.createPrompt(options, this);
-    prompt.model.mimeType = this._mimetype;
-    prompt.addClass(PROMPT_CLASS);
-    this._input.addWidget(prompt);
+    promptCell = factory.createCodeCell(options);
+    promptCell.model.mimeType = this._mimetype;
+    promptCell.addClass(PROMPT_CLASS);
+    this._input.addWidget(promptCell);
 
     // Suppress the default "Enter" key handling.
-    let editor = prompt.editor;
+    let editor = promptCell.editor;
     editor.addKeydownHandler(this._onEditorKeydown);
 
     this._history.editor = editor;
     if (this.isAttached) {
       this.activate();
     }
-    this._promptCreated.emit(prompt);
+    this._promptCellCreated.emit(promptCell);
   }
 
   /**
@@ -446,7 +444,7 @@ class CodeConsole extends Widget {
    * Handle the `'keydown'` event for the widget.
    */
   private _evtKeyDown(event: KeyboardEvent): void {
-    let editor = this.prompt.editor;
+    let editor = this.promptCell.editor;
     if (event.keyCode === 13 && !editor.hasFocus()) {
       event.preventDefault();
       editor.focus();
@@ -454,9 +452,9 @@ class CodeConsole extends Widget {
   }
 
   /**
-   * Execute the code in the current prompt.
+   * Execute the code in the current prompt cell.
    */
-  private _execute(cell: CodeCellWidget): Promise<void> {
+  private _execute(cell: CodeCell): Promise<void> {
     this._history.push(cell.model.value.text);
     cell.model.contentChanged.connect(this.update, this);
     let onSuccess = (value: KernelMessage.IExecuteReplyMsg) => {
@@ -496,22 +494,22 @@ class CodeConsole extends Widget {
    */
   private _handleInfo(info: KernelMessage.IInfoReply): void {
     let layout = this._content.layout as PanelLayout;
-    let banner = layout.widgets[0] as RawCellWidget;
+    let banner = layout.widgets[0] as RawCell;
     banner.model.value.text = info.banner;
     let lang = info.language_info as nbformat.ILanguageInfoMetadata;
     this._mimetype = this._mimeTypeService.getMimeTypeByLanguage(lang);
-    if (this.prompt) {
-      this.prompt.model.mimeType = this._mimetype;
+    if (this.promptCell) {
+      this.promptCell.model.mimeType = this._mimetype;
     }
   }
 
   /**
    * Create a new foreign cell.
    */
-  private _createForeignCell(): CodeCellWidget {
+  private _createCodeCell(): CodeCell {
     let factory = this.contentFactory;
     let options = this._createCodeCellOptions();
-    let cell = factory.createForeignCell(options, this);
+    let cell = factory.createCodeCell(options);
     cell.readOnly = true;
     cell.model.mimeType = this._mimetype;
     cell.addClass(FOREIGN_CELL_CLASS);
@@ -521,9 +519,8 @@ class CodeConsole extends Widget {
   /**
    * Create the options used to initialize a code cell widget.
    */
-  private _createCodeCellOptions(): CodeCellWidget.IOptions {
-    let factory = this.contentFactory;
-    let contentFactory = factory.codeCellContentFactory;
+  private _createCodeCellOptions(): CodeCell.IOptions {
+    let contentFactory = this.contentFactory;
     let modelFactory = this.modelFactory;
     let model = modelFactory.createCodeCell({ });
     let rendermime = this.rendermime;
@@ -535,16 +532,16 @@ class CodeConsole extends Widget {
    */
   private _onCellDisposed(sender: Widget, args: void): void {
     if (!this.isDisposed) {
-      this._cells.remove(sender as CodeCellWidget);
+      this._cells.remove(sender as CodeCell);
     }
   }
 
   /**
-   * Test whether we should execute the prompt.
+   * Test whether we should execute the prompt cell.
    */
   private _shouldExecute(timeout: number): Promise<boolean> {
-    let prompt = this.prompt;
-    let model = prompt.model;
+    let promptCell = this.promptCell;
+    let model = promptCell.model;
     let code = model.value.text + '\n';
     return new Promise<boolean>((resolve, reject) => {
       let timer = setTimeout(() => { resolve(true); }, timeout);
@@ -558,7 +555,7 @@ class CodeConsole extends Widget {
           return;
         }
         model.value.text = code + isComplete.content.indent;
-        let editor = prompt.editor;
+        let editor = promptCell.editor;
         let pos = editor.getPositionAt(model.value.text.length);
         editor.setCursorPosition(pos);
         resolve(false);
@@ -591,15 +588,16 @@ class CodeConsole extends Widget {
     });
   }
 
-  private _mimeTypeService: IEditorMimeTypeService;
-  private _cells: IObservableVector<BaseCellWidget> = null;
+  private _banner: RawCell = null;
+  private _cells: IObservableVector<Cell> = null;
   private _content: Panel = null;
+  private _executed = new Signal<this, Date>(this);
   private _foreignHandler: ForeignHandler =  null;
   private _history: IConsoleHistory = null;
   private _input: Panel = null;
   private _mimetype = 'text/x-ipython';
-  private _executed = new Signal<this, Date>(this);
-  private _promptCreated = new Signal<this, CodeCellWidget>(this);
+  private _mimeTypeService: IEditorMimeTypeService = null;
+  private _promptCellCreated = new Signal<this, CodeCell>(this);
 }
 
 
@@ -643,148 +641,70 @@ namespace CodeConsole {
    * A content factory for console children.
    */
   export
-  interface IContentFactory {
+  interface IContentFactory extends Cell.IContentFactory {
     /**
-     * The editor factory.
+     * Create a new code cell widget.
      */
-    readonly editorFactory: CodeEditor.Factory;
+    createCodeCell(options: CodeCell.IOptions): CodeCell;
 
     /**
-     * The factory for code cell widget content.
+     * Create a new raw cell widget.
      */
-    readonly codeCellContentFactory: CodeCellWidget.IContentFactory;
-
-    /**
-     * The factory for raw cell widget content.
-     */
-    readonly rawCellContentFactory: BaseCellWidget.IContentFactory;
-
-    /**
-     * The history manager for a console widget.
-     */
-    createConsoleHistory(options: ConsoleHistory.IOptions): IConsoleHistory;
-
-    /**
-     * The foreign handler for a console widget.
-     */
-    createForeignHandler(options: ForeignHandler.IOptions): ForeignHandler;
-
-    /**
-     * Create a new banner widget.
-     */
-    createBanner(options: RawCellWidget.IOptions, parent: CodeConsole): RawCellWidget;
-
-    /**
-     * Create a new prompt widget.
-     */
-    createPrompt(options: CodeCellWidget.IOptions, parent: CodeConsole): CodeCellWidget;
-
-    /**
-     * Create a code cell whose input originated from a foreign session.
-     */
-    createForeignCell(options: CodeCellWidget.IOptions, parent: CodeConsole): CodeCellWidget;
+    createRawCell(options: RawCell.IOptions): RawCell;
   }
 
   /**
    * Default implementation of `IContentFactory`.
    */
   export
-  class ContentFactory implements IContentFactory {
+  class ContentFactory extends Cell.ContentFactory implements IContentFactory {
+
     /**
-     * Create a new content factory.
+     * Create a new code cell widget.
+     *
+     * #### Notes
+     * If no cell content factory is passed in with the options, the one on the
+     * notebook content factory is used.
      */
-    constructor(options: IContentFactoryOptions) {
-      let editorFactory = options.editorFactory;
-      let outputAreaContentFactory = (options.outputAreaContentFactory ||
-        OutputAreaWidget.defaultContentFactory
-      );
-      this.codeCellContentFactory = (options.codeCellContentFactory ||
-        new CodeCellWidget.ContentFactory({
-          editorFactory,
-          outputAreaContentFactory
-        })
-      );
-      this.rawCellContentFactory = (options.rawCellContentFactory ||
-        new RawCellWidget.ContentFactory({ editorFactory })
-      );
+    createCodeCell(options: CodeCell.IOptions): CodeCell {
+      if (!options.contentFactory) {
+        options.contentFactory = this;
+      }
+      return new CodeCell(options);
     }
 
     /**
-     * The editor factory.
+     * Create a new raw cell widget.
+     *
+     * #### Notes
+     * If no cell content factory is passed in with the options, the one on the
+     * notebook content factory is used.
      */
-    readonly editorFactory: CodeEditor.Factory;
-
-    /**
-     * The factory for code cell widget content.
-     */
-    readonly codeCellContentFactory: CodeCellWidget.IContentFactory;
-
-    /**
-     * The factory for raw cell widget content.
-     */
-    readonly rawCellContentFactory: BaseCellWidget.IContentFactory;
-
-    /**
-     * The history manager for a console widget.
-     */
-    createConsoleHistory(options: ConsoleHistory.IOptions): IConsoleHistory {
-      return new ConsoleHistory(options);
-    }
-
-    /**
-     * The foreign handler for a console widget.
-     */
-    createForeignHandler(options: ForeignHandler.IOptions):
-    ForeignHandler {
-      return new ForeignHandler(options);
-    }
-    /**
-     * Create a new banner widget.
-     */
-    createBanner(options: RawCellWidget.IOptions, parent: CodeConsole): RawCellWidget {
-      return new RawCellWidget(options);
-    }
-
-    /**
-     * Create a new prompt widget.
-     */
-    createPrompt(options: CodeCellWidget.IOptions, parent: CodeConsole): CodeCellWidget {
-      return new CodeCellWidget(options);
-    }
-
-    /**
-     * Create a new code cell widget for an input from a foreign session.
-     */
-    createForeignCell(options: CodeCellWidget.IOptions, parent: CodeConsole): CodeCellWidget {
-      return new CodeCellWidget(options);
+    createRawCell(options: RawCell.IOptions): RawCell {
+      if (!options.contentFactory) {
+        options.contentFactory = this;
+      }
+      return new RawCell(options);
     }
   }
+
   /**
-   * An initialize options for `ContentFactory`.
+   * A namespace for the code console content factory.
    */
   export
-  interface IContentFactoryOptions {
+  namespace ContentFactory {
     /**
-     * The editor factory.
+     * An initialize options for `ContentFactory`.
      */
-    editorFactory: CodeEditor.Factory;
-
-    /**
-     * The factory for output area content.
-     */
-    outputAreaContentFactory?: OutputAreaWidget.IContentFactory;
-
-    /**
-     * The factory for code cell widget content.  If given, this will
-     * take precedence over the `outputAreaContentFactory`.
-     */
-    codeCellContentFactory?: CodeCellWidget.IContentFactory;
-
-    /**
-     * The factory for raw cell widget content.
-     */
-    rawCellContentFactory?: BaseCellWidget.IContentFactory;
+    export
+    interface IOptions extends Cell.IContentFactory { }
   }
+
+  /**
+   * A default content factory for the code console.
+   */
+  export
+  const defaultContentFactory: IContentFactory = new ContentFactory();
 
   /**
    * A model factory for a console widget.
@@ -825,7 +745,7 @@ namespace CodeConsole {
     /**
      * Create a new cell model factory.
      */
-    constructor(options: IModelFactoryOptions) {
+    constructor(options: IModelFactoryOptions = {}) {
       this.codeCellContentFactory = (options.codeCellContentFactory ||
         CodeCellModel.defaultContentFactory
       );

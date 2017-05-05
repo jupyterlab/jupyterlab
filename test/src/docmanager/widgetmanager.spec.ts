@@ -4,7 +4,11 @@
 import expect = require('expect.js');
 
 import {
-  ServiceManager, utils
+  uuid
+} from '@jupyterlab/coreutils';
+
+import {
+  ServiceManager
 } from '@jupyterlab/services';
 
 import {
@@ -82,7 +86,7 @@ describe('docmanager/widgetmanager', () => {
     context = new Context({
       manager: services,
       factory: modelFactory,
-      path: utils.uuid()
+      path: uuid()
     });
   });
 

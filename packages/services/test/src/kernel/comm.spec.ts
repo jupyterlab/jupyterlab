@@ -3,8 +3,9 @@
 
 import expect = require('expect.js');
 
-import * as utils
-  from '../../../lib/utils';
+import {
+  uuid
+} from '@jupyterlab/coreutils';
 
 import {
   KernelMessage, Kernel
@@ -85,7 +86,7 @@ describe('jupyter.services - Comm', () => {
         });
         let contents = {
           target_name: 'test',
-          comm_id: utils.uuid(),
+          comm_id: uuid(),
           data: { foo: 'bar'}
         };
         sendCommMessage(tester, kernel, 'comm_open', contents);
@@ -348,6 +349,17 @@ describe('jupyter.services - Comm', () => {
           done();
         };
       });
+
+      it('should pass through a buffers field', (done) => {
+        let comm = kernel.connectToComm('test');
+        tester.onMessage((msg: KernelMessage.ICommMsgMsg) => {
+          expect(msg.content.data).to.eql({ buffers: 'bar' });
+          done();
+        });
+        comm.send({ buffers: 'bar' });
+      });
+
+
     });
 
     context('#close()', () => {
