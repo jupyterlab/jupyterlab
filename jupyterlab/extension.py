@@ -39,15 +39,11 @@ def load_jupyter_server_extension(nbapp):
 
     app_dir = APP_DIR
     if hasattr(nbapp, 'app_dir'):
-        app_dir = nbapp.app_dir
+        app_dir = nbapp.app_dir or APP_DIR
 
     web_app = nbapp.web_app
     config = LabConfig()
 
-    from PyQt5.QtCore import pyqtRemoveInputHook; pyqtRemoveInputHook()
-    import ipdb; ipdb.set_trace()
-    pass
-    
     config.assets_dir = os.path.join(app_dir, 'static')
     config.settings_dir = os.path.join(app_dir, 'settings')
     config.page_title = 'JupyterLab Alpha Preview'

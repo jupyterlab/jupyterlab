@@ -66,6 +66,10 @@ class JupyterLab extends Application<ApplicationShell> {
    */
   registerPluginModule(mod: JupyterLab.IPluginModule): void {
     let data = mod.default;
+    // Handle commonjs exports.
+    if (!Object.hasOwnProperty('__esModule')) {
+      data = mod as any;
+    }
     if (!Array.isArray(data)) {
       data = [data];
     }

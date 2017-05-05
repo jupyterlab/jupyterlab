@@ -6,6 +6,7 @@
 import json
 import pipes
 import os
+import glob
 from os import path as osp
 from os.path import join as pjoin
 from subprocess import check_output, CalledProcessError
@@ -53,11 +54,9 @@ def install_extension(extension, app_dir=None):
     target = pjoin(app_dir, 'extensions')
     # npm pack the extension
     output = run(['npm', 'pack', extension], cwd=target)
+
     name = output.decode('utf8').splitlines()[-1]
-    # read the package.json data from the file
-    tar = tarfile.open(pjoin(target, name), "r:gz")
-    f = tar.extractfile('package/package.json')
-    data = json.loads(f.read().decode('utf8'))
+    data = _read_package(pjoin(target, name))
     _validate_package(data, extension)
 
 
@@ -93,6 +92,7 @@ def unlink_package(package, app_dir=None):
     """
     package = _normalize_path(package)
     name = None
+    app_dir = app_dir or APP_DIR
     linked = _get_linked_packages(app_dir)
     for (key, value) in linked.items():
         if value == package or key == package:
@@ -118,6 +118,7 @@ def unlink_package(package, app_dir=None):
 def uninstall_extension(name, app_dir=None):
     """Uninstall an extension by name.
     """
+    app_dir = app_dir or APP_DIR
     for (name, path) in _get_extensions(app_dir).items():
         if name == name:
             os.remove(path)
@@ -153,8 +154,8 @@ def build(app_dir=None):
     run(['npm', 'install'], cwd=staging)
 
     # Install the linked extensions.
-    for value in _get_linked_packages(app_dir):
-        run(['npm', 'install', value], cwd=staging)
+    for path in _get_linked_packages(app_dir).values():
+        run(['npm', 'install', path], cwd=staging)
 
     # Build the app.
     run(['npm', 'run', 'build'], cwd=staging)
@@ -226,32 +227,33 @@ def _get_extensions(app_dir):
 
     # Look in sys_prefix and app_dir if different
     sys_path = pjoin(ENV_JUPYTER_PATH[0], 'lab', 'extensions')
-    if os.path.exists(sys_path):
-        for item in os.listdir(sys_path):
-            target = pjoin(sys_path, item)
-            tar = tarfile.open(target, "r:gz")
-            f = tar.extractfile('package/package.json')
-            data = json.loads(f.read().decode('utf8'))
-            extensions[data['name']] = target
+    for target in glob.glob(pjoin(sys_path, '*.tgz')):
+        data = _read_package(target)
+        extensions[data['name']] = target
 
     app_path = pjoin(app_dir, 'extensions')
     if app_path == sys_path or not os.path.exists(app_path):
         return extensions
 
-    for item in os.listdir(app_path):
-        target = pjoin(app_path, item)
-        tar = tarfile.open(target, "r:gz")
-        f = tar.extractfile('package/package.json')
-        data = json.loads(f.read().decode('utf8'))
+    for target in glob.glob(pjoin(app_path, '*.tgz')):
+        data = _read_package(target)
         extensions[data['name']] = target
 
     return extensions
 
 
+def _read_package(target):
+    """Read the package data in a given target tarball.
+    """
+    tar = tarfile.open(target, "r:gz")
+    f = tar.extractfile('package/package.json')
+    return json.loads(f.read().decode('utf8'))
+
+
 def _get_linked_packages(app_dir):
     """Get the linked packages in the app dir.
     """
-    extensions = []
+    extensions = dict()
 
     link_file = pjoin(app_dir, 'settings', 'linked_packages.json')
     if not os.path.exists(link_file):
