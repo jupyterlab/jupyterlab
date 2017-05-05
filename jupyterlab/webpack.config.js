@@ -24,7 +24,8 @@ fs.writeFileSync(path.resolve(buildDir, 'index.out.js'), result);
 // Create the hash
 var hash = crypto.createHash('md5');
 hash.update(fs.readFileSync('./package.json'));
-fs.writeFileSync(path.resolve(buildDir, 'hash.md5'), hash.digest('hex'));
+var digest = hash.digest('hex');
+fs.writeFileSync(path.resolve(buildDir, 'hash.md5'), digest);
 
 
 // Note that we have to use an explicit local public path
@@ -43,7 +44,7 @@ module.exports = {
   output: {
     path: path.resolve(buildDir),
     filename: '[name].bundle.js',
-    publicPath: package_data.jupyterlab.publicPath
+    publicPath: digest + '/'
   },
   module: {
     rules: [

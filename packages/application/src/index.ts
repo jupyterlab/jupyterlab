@@ -34,8 +34,8 @@ class JupyterLab extends Application<ApplicationShell> {
       namespace: options.namespace || 'jupyterlab',
       version:  options.version || 'unknown',
       devMode: options.devMode || false,
-      configDir: options.configDir || '',
-      runtimeDir: options.runtimeDir || ''
+      settingsDir: options.settingsDir || '',
+      assetsDir: options.assetsDir || ''
     };
     if (options.devMode) {
       this.shell.addClass('jp-mod-devMode');
@@ -122,14 +122,14 @@ namespace JupyterLab {
     devMode?: boolean;
 
     /**
-     * The configuration directory of the app on the server.
+     * The settings directory of the app on the server.
      */
-    configDir?: string;
+    settingsDir?: string;
 
     /**
-     * The runtime directory of the app on the server.
+     * The assets directory of the app on the server.
      */
-    runtimeDir?: string;
+    assetsDir?: string;
   }
 
   /**
@@ -158,14 +158,14 @@ namespace JupyterLab {
     readonly devMode: boolean;
 
     /**
-     * The configuration directory of the app on the server.
+     * The settings directory of the app on the server.
      */
-    readonly configDir: string;
+    readonly settingsDir: string;
 
     /**
-     * The runtime directory of the app on the server.
+     * The assets directory of the app on the server.
      */
-    readonly runtimeDir: string;
+    readonly assetsDir: string;
   }
 
   /**

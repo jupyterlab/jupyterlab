@@ -38,8 +38,8 @@ def load_jupyter_server_extension(nbapp):
 
     web_app = nbapp.web_app
     config = LabConfig()
-    config.runtime_dir = _get_runtime_dir()
-    config.config_dir = _get_config_dir()
+    config.assets_dir = _get_runtime_dir()
+    config.settings_dir = _get_config_dir()
     config.page_title = 'JupyterLab Alpha Preview'
     config.name = 'JupyterLab'
     config.page_url = URL
@@ -52,15 +52,15 @@ def load_jupyter_server_extension(nbapp):
 
     if dev_mode:
         nbapp.log.info(DEV_NOTE_NPM)
-        config.runtime_dir = HERE
-        config.config_dir = ''
+        config.assets_dir = os.path.join(HERE, 'build')
+        config.settings_dir = ''
         config.dev_mode = True
 
-    if not dev_mode and not os.path.exists(config.config_dir):
-        config.runtime_dir = os.path.join(HERE, 'static')
-        if not os.path.exists(config.runtime_dir):
+    if not dev_mode and not os.path.exists(config.settings_dir):
+        config.assets_dir = os.path.join(HERE, 'static')
+        if not os.path.exists(config.assets_dir):
             msg = 'Static assets not built, please see CONTRIBUTING.md'
             raise ValueError(msg)
-        config.config_dir = ''
+        config.settings_dir = ''
 
     add_handlers(web_app, config)
