@@ -62,7 +62,7 @@ def install_extension(extension):
 
     # this is apparently the most bulletproof way to reference a local tarball
     builder.install(['{}@file:{}'.format(pkg_name, path)],
-                    save=True, cwd=_get_root_dir(config))
+                    cwd=_get_root_dir(config))
 
     config['installed_extensions'][pkg_name] = path
 
@@ -70,11 +70,15 @@ def install_extension(extension):
         del config['linked_extensions'][pkg_name]
 
     _write_config(config)
+    _ensure_package(config)
 
 
 def link_extension(extension):
     """Link an extension against the JupyterLab build.
     """
+    config = _get_config()
+    root = _get_root_dir(config)
+
     path = _normalize_path(extension)
 
     # Verify the package.json data.
@@ -86,10 +90,13 @@ def link_extension(extension):
     with open(pkg_path) as fid:
         data = json.load(fid)
 
-    _validate_package(data, path)
+    _validate_package(data, extension)
+
+    # Use normal yarn link semantics
+    builder.link(cwd=path)
+    builder.link([data['name']], cwd=root)
 
     # Update JupyterLab metadata.
-    config = _get_config()
     name = data['name']
     config['linked_extensions'][name] = path
     if name in config['installed_extensions']:
@@ -102,14 +109,18 @@ def unlink_extension(extension):
     """
     extension = _normalize_path(extension)
     config = _get_config()
-
+    root = _get_root_dir(config)
     name = None
+    path = None
     for (key, value) in config['linked_extensions'].items():
         if value == extension or key == extension:
             name = key
+            path = value
             break
 
     if name:
+        builder.unlink([name], cwd=root)
+        builder.unlink(cwd=path)
         del config['linked_extensions'][name]
         _write_config(config)
         return True
@@ -120,11 +131,16 @@ def unlink_extension(extension):
 
 def uninstall_extension(name):
     """Uninstall an extension by name.
+
+       This will be the full npm name, perhaps including a scope: @jupyterlab/some-extension
     """
     config = _get_config()
+    root = _get_root_dir(config)
 
     if name in config['installed_extensions']:
-        del config['installed_extensions'][name]
+        builder.remove([name], cwd=root)
+        path = config['installed_extensions'].pop(name)
+        (Path(root) / path).unlink()
         _write_config(config)
         return True
 
@@ -178,18 +194,10 @@ def build(watch=False):
     # Make sure packages are installed.
     builder.install(cwd=root)
 
-    # Install the linked extensions.
-    linked = config.get('linked_extensions', {})
-
-    if linked:
-        munged = ['{}@file:{}'.format(name, path)
-                  for name, path in linked.items()]
-        builder.install(munged, cwd=root)
-
     args = ('build',)
 
     if watch:
-        args = args + ('--', '--watch', '--progress')
+        args = args + ('--', '--watch')
 
     # Build the app.
     builder.run(args, no_capture=watch, cwd=root)
@@ -208,6 +216,13 @@ def describe():
     return description
 
 
+def template():
+    config = _get_config()
+    _ensure_package(config)
+    root = _get_root_dir(config)
+    builder.run(('template',), cwd=root)
+
+
 def _ensure_package(config):
     """Make sure the build dir is set up.
     """
@@ -215,7 +230,7 @@ def _ensure_package(config):
     root_dir = _get_root_dir(config)
     if not osp.exists(extensions_dir):
         os.makedirs(extensions_dir)
-    for name in ['package.json', 'index.template.js', 'webpack.config.js', '.yarnrc', 'yarn.lock']:
+    for name in ['package.json', 'index.template.js', 'webpack.config.js', '.yarnrc', 'yarn.lock', 'make_template.js']:
         dest = pjoin(root_dir, name)
         shutil.copy2(pjoin(here, name), dest)
 
@@ -272,6 +287,7 @@ def _write_config(data, config_dir=None):
                 raise
     with open(pjoin(config_dir, 'build_config.json'), 'w') as fid:
         json.dump(data, fid, indent=4)
+    template()
 
 
 def _normalize_path(extension):

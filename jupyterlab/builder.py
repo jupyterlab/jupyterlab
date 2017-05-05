@@ -10,7 +10,7 @@ import json
 from tempfile import mkdtemp
 
 
-def get_build_tool(use=None, verbose=True, silent=None):
+def get_build_tool(use=None, verbose=False):
     """Detect the right asset manager to use
 
     due to a collision between Apache YARN, `yarnpkg` is the preferred name
@@ -25,7 +25,7 @@ def get_build_tool(use=None, verbose=True, silent=None):
         for cmd in commands:
             try:
                 check_output([cmd, '--version'])
-                return Manager(cmd, verbose=verbose, silent=silent)
+                return Manager(cmd, verbose=verbose)
             except FileNotFoundError:
                 pass
 
@@ -40,21 +40,17 @@ class FrontendAssetManager(object):
        (in order of preference)
     """
     verbose = False
-    silent = False
 
-    def __init__(self, cmd=None, verbose=None, silent=None):
+    def __init__(self, cmd=None, verbose=None):
         if cmd is not None:
             self._cmd = cmd
 
         if self.verbose is not None:
             self.verbose = verbose
 
-        if self.silent is not None:
-            self.silent = silent
-
     def _run(self, cmd_args, no_capture=False, **popen_kwargs):
         """execute a command, returning the result of stdout
-           `verbose` and `silent` affect how much output we give back
+           `verbose` affects how much output we give back
         """
         final_cmd = (self._cmd,) + cmd_args
 
@@ -164,3 +160,12 @@ class Yarn(FrontendAssetManager):
         shutil.move(str(tmp_file), cwd)
 
         return tmp_file.name.encode('utf-8')
+
+    def remove(self, packages, **popen_kwargs):
+        self._run(("remove", ) + tuple(packages), **popen_kwargs)
+
+    def link(self, packages=tuple(), **popen_kwargs):
+        self._run(("link", ) + tuple(packages), **popen_kwargs)
+
+    def unlink(self, packages=tuple(), **popen_kwargs):
+        self._run(("unlink", ) + tuple(packages), **popen_kwargs)
