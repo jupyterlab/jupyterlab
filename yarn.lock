@@ -4110,7 +4110,7 @@ typedoc-default-themes@^0.4.2:
   version "0.4.4"
   resolved "https://registry.yarnpkg.com/typedoc-default-themes/-/typedoc-default-themes-0.4.4.tgz#abe997dcf17462b627438bc63b65c50d363c252f"
 
-typedoc@^0.5.0:
+typedoc@^0.5.10:
   version "0.5.10"
   resolved "https://registry.yarnpkg.com/typedoc/-/typedoc-0.5.10.tgz#4bd60c53c423811931fc519ffb36e58338824335"
   dependencies:
