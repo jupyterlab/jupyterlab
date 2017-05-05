@@ -74,9 +74,4 @@ def load_jupyter_server_extension(nbapp):
         else:
             nbapp.log.info(CORE_NOTE.strip())
 
-    from PyQt5.QtCore import pyqtRemoveInputHook; pyqtRemoveInputHook()
-    import ipdb; ipdb.set_trace()
-    pass
-    
-
     add_handlers(web_app, config)
