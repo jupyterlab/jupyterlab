@@ -22,4 +22,4 @@ __pycache__
 .idea/
 
 test/coverage
-docs
+docs/_build
