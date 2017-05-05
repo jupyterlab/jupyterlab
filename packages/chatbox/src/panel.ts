@@ -204,7 +204,7 @@ namespace ChatboxPanel {
     readonly editorFactory: CodeEditor.Factory;
 
     /**
-     * The factory for code chatbox content.
+     * The factory for chatbox content.
      */
     readonly chatboxContentFactory: Chatbox.IContentFactory;
   }

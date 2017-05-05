@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  MarkdownCellWidget
+  MarkdownCell
 } from '@jupyterlab/cells';
 
 /**
@@ -71,7 +71,7 @@ class ChatEntry extends Widget {
   /**
    * The underlying cell widget for the entry.
    */
-  readonly cell: MarkdownCellWidget;
+  readonly cell: MarkdownCell;
 
   private _badge: Widget = null;
 }
@@ -95,7 +95,7 @@ namespace ChatEntry {
     /**
      * A markdown widget for rendering the entry.
      */
-    cell: MarkdownCellWidget;
+    cell: MarkdownCell;
   }
 
   /**

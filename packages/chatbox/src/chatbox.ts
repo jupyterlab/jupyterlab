@@ -38,8 +38,8 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  BaseCellWidget,
-  MarkdownCellModel, MarkdownCellWidget
+  Cell,
+  MarkdownCellModel, MarkdownCell
 } from '@jupyterlab/cells';
 
 import {
@@ -172,9 +172,9 @@ class Chatbox extends Widget {
   /*
    * The chatbox input prompt.
    */
-  get prompt(): MarkdownCellWidget | null {
+  get prompt(): MarkdownCell | null {
     let inputLayout = (this._input.layout as PanelLayout);
-    return inputLayout.widgets[0] as MarkdownCellWidget || null;
+    return inputLayout.widgets[0] as MarkdownCell || null;
   }
 
   /**
@@ -647,7 +647,7 @@ class Chatbox extends Widget {
   /**
    * Create the options used to initialize markdown cell widget.
    */
-  private _createMarkdownCellOptions(text: string = ''): MarkdownCellWidget.IOptions {
+  private _createMarkdownCellOptions(text: string = ''): MarkdownCell.IOptions {
     let contentFactory = this.contentFactory.markdownCellContentFactory;
     let model = new MarkdownCellModel({ });
     this._disposables.add(model);
@@ -705,12 +705,12 @@ namespace Chatbox {
     /**
      * The factory for a markdown cell widget.
      */
-    readonly markdownCellContentFactory: BaseCellWidget.IContentFactory;
+    readonly markdownCellContentFactory: Cell.IContentFactory;
 
     /**
      * Create a new cell widget.
      */
-    createCell(options: MarkdownCellWidget.IOptions): MarkdownCellWidget;
+    createCell(options: MarkdownCell.IOptions): MarkdownCell;
 
   }
 
@@ -725,7 +725,7 @@ namespace Chatbox {
     constructor(options: IContentFactoryOptions) {
       this.editorFactory = options.editorFactory;
 
-      this.markdownCellContentFactory = new MarkdownCellWidget.ContentFactory({
+      this.markdownCellContentFactory = new MarkdownCell.ContentFactory({
         editorFactory: this.editorFactory,
       });
     }
@@ -738,13 +738,13 @@ namespace Chatbox {
     /**
      * The factory for a markdown cell widget.
      */
-    readonly markdownCellContentFactory: BaseCellWidget.IContentFactory;
+    readonly markdownCellContentFactory: Cell.IContentFactory;
 
     /**
      * Create a new prompt widget.
      */
-    createCell(options: MarkdownCellWidget.IOptions): MarkdownCellWidget {
-      return new MarkdownCellWidget(options);
+    createCell(options: MarkdownCell.IOptions): MarkdownCell {
+      return new MarkdownCell(options);
     }
   }
   /**

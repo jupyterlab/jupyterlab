@@ -50,7 +50,7 @@
 /**
  * No reason to include space for the In/Out prompt here.
  */
-.jp-Chatbox .jp-Cell-prompt {
+.jp-Chatbox .jp-InputPrompt {
   display: none;
 }
 
