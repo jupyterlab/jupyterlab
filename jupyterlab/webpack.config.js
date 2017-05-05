@@ -64,6 +64,15 @@ module.exports = {
     filename: '[name].bundle.js',
     publicPath: 'lab/'
   },
+  resolve: {
+    modules: [
+      // Handle duplicate modules in webpack build with `npm`-linked local dev modules
+      // From https://github.com/webpack/webpack/issues/1643
+      // See https://webpack.js.org/configuration/resolve/#resolve-modules
+      path.resolve(__dirname, "node_modules"),
+      "node_modules"
+    ]
+  },
   module: {
     rules: [
       { test: /\.css$/, use: cssLoader },

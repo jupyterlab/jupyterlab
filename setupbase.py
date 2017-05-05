@@ -141,7 +141,7 @@ class YARN(Command):
         for t in self.targets:
             if not os.path.exists(t):
                 msg = 'Missing file: %s' % t
-                if not has_yarn:
+                if not yarn_cmd:
                     msg += '\nyarnpkg or yarn is required to build the development version'
                 raise ValueError(msg)
 

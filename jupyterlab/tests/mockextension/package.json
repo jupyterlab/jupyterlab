@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "jupyterlab": { "extension": true },
-  "dependencies": {},
+  "dependencies": {
+    "@phosphor/widgets": "^1.1.0"
+  },
   "devDependencies": {}
 }
