@@ -48,5 +48,14 @@ if [[ $GROUP == coverage_and_docs ]]; then
 
     # Build the api docs
     npm run docs
+    cp jupyter-plugins-demo.gif docs
+
+    # Verify tutorial docs build
+    pushd tutorial
+    conda env create -n test_docs -f environment.yml
+    source activate test_docs
+    make html
+    source deactivate
+    popd
 fi
 
