@@ -10,6 +10,10 @@ import {
 } from '@phosphor/coreutils';
 
 import {
+  ElementExt
+} from '@phosphor/domutils';
+
+import {
   Message
 } from '@phosphor/messaging';
 
@@ -650,8 +654,7 @@ class Notebook extends StaticNotebook {
     this._mode = newValue;
 
     if (newValue === 'edit') {
-      let node = this.activeCell.editorWidget.node;
-      this.scrollToPosition(node.getBoundingClientRect().top);
+      ElementExt.scrollIntoViewIfNeeded(this.node, this.activeCell.node);
 
       // Edit mode deselects all cells.
       each(this.widgets, widget => { this.deselect(widget); });
@@ -1325,7 +1328,7 @@ class Notebook extends StaticNotebook {
       let node = widget.editorWidget.node;
       if (node.contains(target)) {
         this.mode = 'edit';
-        this.scrollToPosition(node.getBoundingClientRect().top);
+        ElementExt.scrollIntoViewIfNeeded(this.node, widget.node);
       }
     } else {
       // No cell has focus, ensure command mode.

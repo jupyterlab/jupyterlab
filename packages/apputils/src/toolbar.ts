@@ -18,7 +18,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IClientSession
+  IClientSession, Styling
 } from '.';
 
 
@@ -266,7 +266,8 @@ class ToolbarButton extends Widget {
    * Construct a new toolbar button.
    */
   constructor(options: ToolbarButton.IOptions = {}) {
-    super({ node: document.createElement('span') });
+    super({ node: document.createElement('button') });
+    Styling.styleNodeByTag(this.node, 'button');
     options = options || {};
     this.addClass(TOOLBAR_BUTTON_CLASS);
     this._onClick = options.onClick;

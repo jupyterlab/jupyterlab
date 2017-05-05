@@ -23,7 +23,7 @@ A plugin adds a core functionality to the application:
 activated.
 - Plugins require and provide `Token` objects, which are used to provide
 a typed value to the plugin's `activate()` method.
-- The module providing plugin(s) must meet the [JupyterLab.IPluginModule](http://jupyterlab.github.io/jupyterlab/interfaces/_application_index_.jupyterlab.ipluginmodule.html) interface, by
+- The module providing plugin(s) must meet the [JupyterLab.IPluginModule](http://jupyterlab.github.io/jupyterlab/interfaces/_application_src_index_.jupyterlab.ipluginmodule.html) interface, by
 exporting a plugin object or array of plugin objects as the default export.
 
 The default plugins in the JupyterLab application include:
@@ -47,7 +47,7 @@ its `activate()` function.  The Application object has a:
 - shell - a JupyterLab shell instance.
 
 ## JupyterLab Shell
-The JupyterLab [shell](http://jupyterlab.github.io/jupyterlab/classes/_application_shell_.applicationshell.html) is used to add and interact with content in the
+The JupyterLab [shell](http://jupyterlab.github.io/jupyterlab/classes/_application_src_shell_.applicationshell.html) is used to add and interact with content in the
 application.  The application consists of:
 
 - A top area for things like top level menus and toolbars
