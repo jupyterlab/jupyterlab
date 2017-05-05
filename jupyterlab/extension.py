@@ -7,7 +7,7 @@ import os
 
 from jupyterlab_launcher import add_handlers, LabConfig
 
-from .commands import _get_config_dir, _get_runtime_dir
+from .commands import APP_DIR
 from ._version import __version__
 
 #-----------------------------------------------------------------------------
@@ -37,10 +37,19 @@ def load_jupyter_server_extension(nbapp):
     here = os.path.dirname(__file__)
     nbapp.log.info('JupyterLab alpha preview extension loaded from %s' % here)
 
+    app_dir = APP_DIR
+    if hasattr(nbapp, 'app_dir'):
+        app_dir = nbapp.app_dir
+
     web_app = nbapp.web_app
     config = LabConfig()
-    config.assets_dir = _get_runtime_dir()
-    config.settings_dir = _get_config_dir()
+
+    from PyQt5.QtCore import pyqtRemoveInputHook; pyqtRemoveInputHook()
+    import ipdb; ipdb.set_trace()
+    pass
+    
+    config.assets_dir = os.path.join(app_dir, 'static')
+    config.settings_dir = os.path.join(app_dir, 'settings')
     config.page_title = 'JupyterLab Alpha Preview'
     config.name = 'JupyterLab'
     config.page_url = '/lab'

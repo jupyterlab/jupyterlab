@@ -76,8 +76,7 @@
       "@jupyterlab/tabmanager-extension",
       "@jupyterlab/terminal-extension",
       "@jupyterlab/tooltip-extension"
-    ],
-    "publicPath": "/lab/"
+    ]
   },
   "version": "0.1.1"
 }

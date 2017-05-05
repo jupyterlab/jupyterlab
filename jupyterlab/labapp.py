@@ -11,7 +11,7 @@ from traitlets import Bool, Unicode
 
 from ._version import __version__
 from .extension import load_jupyter_server_extension
-from .commands import build, clean, describe
+from .commands import build, clean
 
 
 class LabBuildApp(JupyterApp):
@@ -39,6 +39,7 @@ lab_flags['core-mode'] = (
 
 lab_aliases = dict(aliases)
 lab_aliases['dev-dir'] = 'LabApp.dev_dir'
+lab_aliases['app-dir'] = 'LabApp.app_dir'
 
 
 class LabApp(NotebookApp):
@@ -69,6 +70,9 @@ class LabApp(NotebookApp):
 
     dev_dir = Unicode('', config=True,
         help="The dev directory to launch")
+
+    app_dir = Unicode('', config=True,
+        help="The app directory to launch")
 
     core_mode = Bool(False, config=True,
         help="Whether to start the app in core mode")

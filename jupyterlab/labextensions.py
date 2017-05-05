@@ -8,14 +8,14 @@ from __future__ import print_function
 import os
 import sys
 
-from jupyter_core.application import JupyterApp, base_flags
+from jupyter_core.application import JupyterApp, base_flags, base_aliases
 
-from traitlets import Bool
+from traitlets import Bool, Unicode
 
 from ._version import __version__
 from .commands import (
     install_extension, uninstall_extension, list_extensions,
-    link_extension, unlink_extension, build
+    link_package, unlink_package, build
 )
 
 
@@ -25,10 +25,17 @@ flags['no-build'] = (
     "Defer building the app after the action."
 )
 
+aliases = dict(base_aliases)
+aliases['app-dir'] = 'BaseExtensionApp.app_dir'
+
 
 class BaseExtensionApp(JupyterApp):
     version = __version__
     flags = flags
+    aliases = aliases
+
+    app_dir = Unicode('', config=True,
+        help="The app directory to target")
 
     should_build = Bool(True, config=True,
         help="Whether to build the app after the action")
@@ -49,7 +56,7 @@ class LinkLabExtensionApp(BaseExtensionApp):
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        [link_extension(arg) for arg in self.extra_args]
+        [link_package(arg) for arg in self.extra_args]
         if self.should_build:
             build()
 
@@ -59,7 +66,7 @@ class UnlinkLabExtensionApp(BaseExtensionApp):
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        ans = any([unlink_extension(arg)
+        ans = any([unlink_package(arg)
                    for arg in self.extra_args])
         if ans and self.should_build:
             build()
