@@ -13,7 +13,7 @@
     "clean:src": "node scripts/clean-packages.js packages",
     "clean:tests": "lerna run clean --scope \"@jupyterlab/test-*\"",
     "coverage": "lerna run coverage --stream",
-    "docs": "typedoc --mode modules --module commonjs --excludeNotExported --target es5 --moduleResolution node --out docs/ packages/all-packages/src",
+    "docs": "lerna run docs",
     "test": "cd test && npm test",
     "test:services": "cd packages/services && npm run build:examples && npm test && npm run test:integration",
     "test:chrome": "lerna run test:chrome --stream",
