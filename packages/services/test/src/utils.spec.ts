@@ -5,13 +5,7 @@
 import expect = require('expect.js');
 
 import {
-  JSONObject
-} from '@phosphor/coreutils';
-
-import {
-  extend, copy, uuid, urlPathJoin, urlEncodeParts,
-  jsonToQueryString, getConfigOption,
-  getBaseUrl, getWsUrl, ajaxRequest, loadObject
+  getConfigOption, getBaseUrl, getWsUrl, ajaxRequest, loadObject
 } from '../../lib/utils';
 
 import {
@@ -20,83 +14,11 @@ import {
 
 
 declare var global: any;
+let path = require('path') as any;
 global.requirejs = require('requirejs');
 
 
-describe('jupyter-js-utils', () => {
-
-  describe('extend()', () => {
-
-    it('should copy the contents of one object to another', () => {
-      let target = {
-        foo: 'bar',
-        baz: { fizz: 0, buzz: 1}
-      };
-      let source = {
-        baz: { buzz: 2}
-      };
-      let newObj = extend(target, source);
-      expect(newObj.foo).to.be('bar');
-      expect(newObj.baz.buzz).to.be(2);
-      expect(newObj.baz.fizz).to.be(0);
-    });
-
-  });
-
-  describe('copy()', () => {
-
-    it('should get a copy of an object', () => {
-      let source: JSONObject = {
-        foo: 'bar',
-        baz: { fizz: 0, buzz: [1, 2]}
-      };
-      let newObj: any = copy(source);
-      expect(newObj.baz.buzz).to.eql([1, 2]);
-      newObj.baz.fizz = 4;
-      expect((source as any).baz.fizz).to.be(0);
-    });
-
-  });
-
-  describe('uuid()', () => {
-
-    it('should generate a random 32 character hex string', () => {
-      let id0 = uuid();
-      let id1 = uuid();
-      expect(id0.length).to.be(32);
-      expect(id1.length).to.be(32);
-      expect(id0).to.not.eql(id1);
-    });
-
-  });
-
-  describe('#urlPathJoin()', () => {
-
-    it('should join a sequence of url components', () => {
-      expect(urlPathJoin('/foo/', 'bar/')).to.be('/foo/bar/');
-    });
-
-  });
-
-  describe('urlEncodeParts()', () => {
-
-    it('should encode and join a sequence of url components', () => {
-      expect(urlEncodeParts('>/>')).to.be('%3E/%3E');
-    });
-
-  });
-
-  describe('jsonToQueryString()', () => {
-
-    it('should return a serialized object string suitable for a query', () => {
-      let obj: JSONObject = {
-        name: 'foo',
-        id: 'baz'
-      };
-      expect(jsonToQueryString(obj)).to.be('?name=foo&id=baz');
-    });
-
-  });
+describe('@jupyterlab/services', () => {
 
   describe('getConfigOption()', () => {
 
@@ -134,7 +56,7 @@ describe('jupyter-js-utils', () => {
         expect(request.method).to.be('GET');
         expect(request.password).to.be('');
         expect(request.async).to.be(true);
-        expect(Object.keys(request.requestHeaders)).to.eql([]);
+        expect(Object.keys(request.requestHeaders)).to.eql(['Content-Type']);
         let url = request.url;
         expect(url.indexOf('hello?')).to.be(0);
         called = true;
@@ -199,7 +121,8 @@ describe('jupyter-js-utils', () => {
 
     it('should accept a name and a module name to load', done => {
       // The path is relative to mocha.
-      loadObject('test', '../../../test/build/target').then(func => {
+      let target = path.resolve('test/build/target');
+      loadObject('test', target).then(func => {
         expect(func()).to.be(1);
       }).then(done, done);
     });
@@ -211,8 +134,9 @@ describe('jupyter-js-utils', () => {
     });
 
     it('should reject if the object is not found', done => {
-      loadObject('foo', '../../../test/build/target').catch(error => {
-        expect(error.message).to.be("Object 'foo' not found in module '../../../test/build/target'");
+      let target = path.resolve('test/build/target');
+      loadObject('foo', target).catch(error => {
+        expect(error.message).to.contain("Object 'foo' not found in module");
       }).then(done, done);
     });
 

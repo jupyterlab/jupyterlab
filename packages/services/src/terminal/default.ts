@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  URLExt
+} from '@jupyterlab/coreutils';
+
+import {
   ArrayExt, each, map, toArray
 } from '@phosphor/algorithm';
 
@@ -188,7 +192,7 @@ class DefaultTerminalSession implements TerminalSession.ISession {
     this._isReady = false;
     this._url = Private.getTermUrl(this._baseUrl, this._name);
     Private.running[this._url] = this;
-    let wsUrl = utils.urlPathJoin(this._wsUrl, `terminals/websocket/${name}`);
+    let wsUrl = URLExt.join(this._wsUrl, `terminals/websocket/${name}`);
     if (this._token) {
       wsUrl = wsUrl + `?token=${this._token}`;
     }
@@ -345,7 +349,7 @@ namespace DefaultTerminalSession {
       }
       // Update the local data store.
       let urls = toArray(map(data, item => {
-          return utils.urlPathJoin(url, item.name);
+          return URLExt.join(url, item.name);
       }));
       each(Object.keys(Private.running), runningUrl => {
         if (urls.indexOf(runningUrl) === -1) {
@@ -415,7 +419,7 @@ namespace Private {
    */
   export
   function getTermUrl(baseUrl: string, name: string): string {
-    return utils.urlPathJoin(baseUrl, TERMINAL_SERVICE_URL, name);
+    return URLExt.join(baseUrl, TERMINAL_SERVICE_URL, name);
   }
 
   /**
@@ -423,7 +427,7 @@ namespace Private {
    */
   export
   function getBaseUrl(baseUrl: string): string {
-    return utils.urlPathJoin(baseUrl, TERMINAL_SERVICE_URL);
+    return URLExt.join(baseUrl, TERMINAL_SERVICE_URL);
   }
 
   /**

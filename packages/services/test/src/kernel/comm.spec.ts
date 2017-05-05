@@ -3,8 +3,9 @@
 
 import expect = require('expect.js');
 
-import * as utils
-  from '../../../lib/utils';
+import {
+  uuid
+} from '@jupyterlab/coreutils';
 
 import {
   KernelMessage, Kernel
@@ -85,7 +86,7 @@ describe('jupyter.services - Comm', () => {
         });
         let contents = {
           target_name: 'test',
-          comm_id: utils.uuid(),
+          comm_id: uuid(),
           data: { foo: 'bar'}
         };
         sendCommMessage(tester, kernel, 'comm_open', contents);
