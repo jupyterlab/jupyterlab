@@ -42,10 +42,20 @@ if [[ $GROUP == coverage_and_docs ]]; then
     npm run build:test
     npm run coverage
 
-    npm run docs
-
     # Run the link check
-    #pip install -q pytest-check-links
-    #py.test --check-links -k .md .
+    pip install -q pytest-check-links
+    py.test --check-links -k .md .
+
+    # Build the api docs
+    npm run docs
+    cp jupyter_plugins.png docs
+
+    # Verify tutorial docs build
+    pushd tutorial
+    conda env create -n test_docs -f environment.yml
+    source activate test_docs
+    make html
+    source deactivate
+    popd
 fi
 
