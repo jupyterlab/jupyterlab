@@ -39,6 +39,7 @@ needs_sphinx = '1.4'
 # ones.
 extensions = [
     'sphinx.ext.mathjax',
+    'jupyter_alabaster_theme'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -53,7 +54,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'JupyterLab Tutorial'
-copyright = '2016, Project Jupyter'
+copyright = '2017, Project Jupyter'
 author = 'Project Jupyter'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -130,7 +131,7 @@ source_suffix = ['.rst', '.md']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'jupyter_alabaster_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -164,7 +165,7 @@ html_theme = 'sphinx_rtd_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+#html_static_path = ['_static']
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
@@ -342,19 +343,6 @@ texinfo_documents = [
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #
 # texinfo_no_detailmenu = False
-
-# -- Read The Docs --------------------------------------------------------
-
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-
-if not on_rtd:
-    # only import and set the theme if we're building docs locally
-    import sphinx_rtd_theme
-    html_theme = 'sphinx_rtd_theme'
-    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-
-# readthedocs.org uses their theme by default, so no need to specify it
-
 
 # See http://recommonmark.readthedocs.io/en/latest/auto_structify.html
 def setup(app):
