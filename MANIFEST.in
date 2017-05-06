@@ -8,8 +8,11 @@ include README.md
 include package.json
 include setupbase.py
 
+include jupyterlab/.yarnrc
+include jupyterlab/index.template.js
+include jupyterlab/make_template.js
 include jupyterlab/package.json
 include jupyterlab/webpack.config.js
-include jupyterlab/index.template.js
+include jupyterlab/yarn.lock
 
 prune jupyterlab/tests
