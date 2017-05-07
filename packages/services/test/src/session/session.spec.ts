@@ -4,11 +4,15 @@
 import expect = require('expect.js');
 
 import {
+  uuid
+} from '@jupyterlab/coreutils';
+
+import {
   toArray
 } from '@phosphor/algorithm';
 
 import {
-  IAjaxError, getBaseUrl, uuid
+  IAjaxError, getBaseUrl
 } from '../../../lib/utils';
 
 import {

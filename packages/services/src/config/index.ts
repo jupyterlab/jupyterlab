@@ -2,7 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject, JSONValue
+  URLExt
+} from '@jupyterlab/coreutils';
+
+import {
+  JSONObject, JSONValue, JSONExt
 } from '@phosphor/coreutils';
 
 import {
@@ -10,7 +14,7 @@ import {
 } from '../utils';
 
 import * as utils
-   from '../utils';
+ from '../utils';
 
 
 /**
@@ -102,21 +106,21 @@ class DefaultConfigSection implements IConfigSection {
   constructor(options: ConfigSection.IOptions) {
     let baseUrl = options.baseUrl || utils.getBaseUrl();
     this.ajaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
-    this._url = utils.urlPathJoin(baseUrl, SERVICE_CONFIG_URL,
-                                  encodeURIComponent(options.name));
+    this._url = URLExt.join(baseUrl, SERVICE_CONFIG_URL,
+                            encodeURIComponent(options.name));
   }
 
   /**
    * Get a copy of the default ajax settings for the section.
    */
   get ajaxSettings(): IAjaxSettings {
-    return utils.copy(this._ajaxSettings);
+    return JSONExt.deepCopy(this._ajaxSettings);
   }
   /**
    * Set the default ajax settings for the section.
    */
   set ajaxSettings(value: IAjaxSettings) {
-    this._ajaxSettings = utils.copy(value);
+    this._ajaxSettings = JSONExt.deepCopy(value);
   }
 
   /**
@@ -160,7 +164,7 @@ class DefaultConfigSection implements IConfigSection {
    * with that data.
    */
   update(newdata: JSONObject): Promise<JSONObject> {
-    this._data = utils.extend(this._data, newdata);
+    this._data = {...this._data, ...newdata};
     let ajaxSettings = this.ajaxSettings;
     ajaxSettings.method = 'PATCH';
     ajaxSettings.data = JSON.stringify(newdata);

@@ -143,7 +143,9 @@ describe('jupyter.services - Integration', () => {
             resolve(void 0);
           };
         });
-      }).then(() => kernel.shutdown());
+      }).then(() => {
+        return kernel.shutdown();
+      });
     });
 
   });
@@ -280,7 +282,9 @@ describe('jupyter.services - Integration', () => {
         ].join('\n');
         kernel.requestExecute({ code: code });
         return promise;
-      }).then(() => kernel.shutdown());
+      }).then(() => {
+        return kernel.shutdown();
+      });
     });
 
   });

@@ -4,8 +4,8 @@
 import expect = require('expect.js');
 
 import {
-  utils
-} from '@jupyterlab/services';
+  uuid
+} from '@jupyterlab/coreutils';
 
 import {
   toArray
@@ -42,7 +42,7 @@ class WidgetExtension implements DocumentRegistry.WidgetExtension {
 
 function createFactory() {
   return new WidgetFactory({
-    name: utils.uuid(),
+    name: uuid(),
     fileExtensions: ['.txt', '.foo.bar'],
     defaultFor: ['.txt', '.foo.bar']
   });

@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  JSONObject
+} from '@phosphor/coreutils';
+
+import {
   Kernel, KernelMessage
 } from '../../../lib/kernel';
 
@@ -88,6 +92,14 @@ describe('kernel/validate', () => {
       expect(() => validateMessage(msg)).to.throwError();
     });
 
+    it('should handle no buffers field', () => {
+      let msg = KernelMessage.createMessage({
+        msgType: 'comm_msg', channel: 'iopub', session: 'foo'
+      }, { comm_id: 'foo', data: {} });
+      delete msg['buffers'];
+      validateMessage(msg);
+    });
+
   });
 
   describe('#validateModel()', () => {
@@ -127,7 +139,7 @@ describe('kernel/validate', () => {
   describe('#validateSpecModel', () => {
 
     it('should pass with valid data', () => {
-      const model: Kernel.ISpecModels = {
+      const model: JSONObject = {
         default: 'python',
         kernelspecs: {
           python: PYTHON_SPEC

@@ -27,15 +27,15 @@ import {
 
 describe('manager', () => {
 
-  describe('SessionManager', () => {
+  describe('ServiceManager', () => {
 
     let manager: ServiceManager.IManager;
     let tester: KernelTester;
 
-    beforeEach((done) => {
+    beforeEach(() => {
       tester = new KernelTester();
       manager = new ServiceManager();
-      manager.ready.then(done, done);
+      return manager.ready;
     });
 
     afterEach(() => {

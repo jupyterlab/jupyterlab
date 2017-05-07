@@ -4,7 +4,11 @@
 import expect = require('expect.js');
 
 import {
-  KernelMessage, utils, Session
+  uuid
+} from '@jupyterlab/coreutils';
+
+import {
+  KernelMessage, Session
 } from '@jupyterlab/services';
 
 import {
@@ -103,7 +107,7 @@ describe('@jupyterlab/console', () => {
     let session: IClientSession;
 
     before(() => {
-      let path = utils.uuid();
+      let path = uuid();
       let sessions = [Session.startNew({ path }), Session.startNew({ path })];
       return Promise.all(sessions).then(([one, two]) => {
         local = one;

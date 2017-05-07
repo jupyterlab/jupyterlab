@@ -3,7 +3,7 @@
 'use strict';
 
 import {
-  JSONObject
+  JSONExt, JSONObject
 } from '@phosphor/coreutils';
 
 import * as minimist
@@ -12,150 +12,9 @@ import * as minimist
 import * as path
   from 'path-posix';
 
-import * as urlparse
-  from 'url-parse';
-
 
 // Stub for requirejs.
 declare var requirejs: any;
-
-
-// Export the Promise Delegate for now to preserve API.
-export { PromiseDelegate } from '@phosphor/coreutils';
-
-
-/**
- * Copy the contents of one object to another, recursively.
- *
- * From [stackoverflow](http://stackoverflow.com/a/12317051).
- */
-export
-function extend(target: any, source: any): any {
-  target = target || {};
-  for (let prop in source) {
-    if (typeof source[prop] === 'object') {
-      target[prop] = extend(target[prop], source[prop]);
-    } else {
-      target[prop] = source[prop];
-    }
-  }
-  return target;
-}
-
-
-/**
- * Get a deep copy of a JSON object.
- */
-export
-function copy(object: JSONObject): JSONObject {
-  return JSON.parse(JSON.stringify(object));
-}
-
-
-/**
- * Get a random 32 character hex string (not a formal UUID)
- */
-export
-function uuid(): string {
-  let s: string[] = [];
-  let hexDigits = '0123456789abcdef';
-  let nChars = hexDigits.length;
-  for (let i = 0; i < 32; i++) {
-    s[i] = hexDigits.charAt(Math.floor(Math.random() * nChars));
-  }
-  return s.join('');
-}
-
-
-/**
- * A URL object.
- *
- * This interface is from the npm package URL object interface. We
- * include it here so that downstream libraries do not have to include
- * the `url` typing files, since the npm `url` package is not in the
- * @types system.
- */
-
-export interface IUrl {
-    href?: string;
-    protocol?: string;
-    hostname?: string;
-    port?: string;
-    host?: string;
-    pathname?: string;
-    hash?: string;
-    search?: string;
-}
-
-/**
- * Parse a url into a URL object.
- *
- * @param url - The URL string to parse.
- *
- * @returns A URL object.
- */
-
-export
-function urlParse(url: string): IUrl {
-  if (typeof document !== 'undefined') {
-    let a = document.createElement('a');
-    a.href = url;
-    return a;
-  }
-  return urlparse(url);
-}
-
-
-/**
- * Join a sequence of url components with `'/'`.
- */
-export
-function urlPathJoin(...parts: string[]): string {
-  // Adapted from url-join.
-  // Copyright (c) 2016 José F. Romaniello, MIT License.
-  // https://github.com/jfromaniello/url-join/blob/v1.1.0/lib/url-join.js
-  let str = [].slice.call(parts, 0).join('/');
-
-  // make sure protocol is followed by two slashes
-  str = str.replace(/:\//g, '://');
-
-  // remove consecutive slashes
-  str = str.replace(/([^:\s])\/+/g, '$1/');
-
-  // remove trailing slash before parameters or hash
-  str = str.replace(/\/(\?|&|#[^!])/g, '$1');
-
-  // replace ? in parameters with &
-  str = str.replace(/(\?.+)\?/g, '$1&');
-
-  return str;
-}
-
-
-/**
- * Encode the components of a multi-segment url.
- *
- * #### Notes
- * Preserves the `'/'` separators.
- * Should not include the base url, since all parts are escaped.
- */
-export
-function urlEncodeParts(uri: string): string {
-  return urlPathJoin(...uri.split('/').map(encodeURIComponent));
-}
-
-
-/**
- * Return a serialized object string suitable for a query.
- *
- * From [stackoverflow](http://stackoverflow.com/a/30707423).
- */
-export
-function jsonToQueryString(json: JSONObject): string {
-  return '?' + Object.keys(json).map(key =>
-    encodeURIComponent(key) + '=' + encodeURIComponent(String(json[key]))
-  ).join('&');
-}
 
 
 /**
@@ -527,7 +386,7 @@ function ajaxSettingsWithToken(ajaxSettings?: IAjaxSettings, token?: string): IA
   if (!ajaxSettings) {
     ajaxSettings = {};
   } else {
-    ajaxSettings = copy(ajaxSettings);
+    ajaxSettings = JSONExt.deepCopy(ajaxSettings);
   }
   if (!token) {
     token = getConfigOption('token');

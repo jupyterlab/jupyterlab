@@ -4,7 +4,11 @@
 import expect = require('expect.js');
 
 import {
-  Contents, ServiceManager, utils
+  uuid
+} from '@jupyterlab/coreutils';
+
+import {
+  Contents, ServiceManager
 } from '@jupyterlab/services';
 
 import {
@@ -48,7 +52,7 @@ class LogImage extends ImageWidget {
  * The common image model.
  */
 const IMAGE: Contents.IModel = {
-  path: utils.uuid() + '.png',
+  path: uuid() + '.png',
   type: 'file',
   mimetype: 'image/png',
   content:  'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
@@ -96,7 +100,7 @@ describe('ImageWidget', () => {
     });
 
     it('should keep the title in sync with the file name', (done) => {
-      let newPath = (IMAGE as any).path = utils.uuid() + '.png';
+      let newPath = (IMAGE as any).path = uuid() + '.png';
       expect(widget.title.label).to.be(context.path);
       context.pathChanged.connect(() => {
         expect(widget.title.label).to.be(newPath);
