@@ -10,7 +10,7 @@ import json
 from tempfile import mkdtemp
 
 
-def get_build_tool(use=None, verbose=False):
+def get_build_tool(use=None, verbose=True):
     """Detect the right asset manager to use
 
     due to a collision between Apache YARN, `yarnpkg` is the preferred name
@@ -52,6 +52,7 @@ class FrontendAssetManager(object):
         """execute a command, returning the result of stdout
            `verbose` affects how much output we give back
         """
+        self.print_mirror_stats()
         final_cmd = (self._cmd,) + cmd_args
 
         if self.verbose:
@@ -92,6 +93,8 @@ class FrontendAssetManager(object):
             if has_err:
                 raise CalledProcessError(p.returncode, final_cmd)
 
+        self.print_mirror_stats()
+
         return stdout
 
     def run(self, user_command=tuple(), *extra_args, **popen_kwargs):
@@ -99,6 +102,10 @@ class FrontendAssetManager(object):
         """
         result = self._run(user_command + extra_args, **popen_kwargs)
         return result
+
+    def print_mirror_stats(self):
+        path = Path("/Users/nbollweg/Documents/projects/jupyterlab-dev/envs/dev/")
+        print("MIRROR", len(list(Path(path / "share/jupyter/lab/.mirror").glob("*"))))
 
 
 class Yarn(FrontendAssetManager):
