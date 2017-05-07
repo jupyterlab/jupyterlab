@@ -156,7 +156,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-cell-prompt-font-family: 'Roboto Mono', monospace;
   --jp-cell-prompt-letter-spacing: 0px;
   --jp-cell-prompt-opacity: 1.0;
-  --jp-cell-prompt-opacity-not-active: 0.6;
+  --jp-cell-prompt-opacity-not-active: 0.4;
   --jp-cell-inprompt-font-color: var(--md-grey-700);
   --jp-cell-outprompt-font-color: var(--md-grey-700);
 
