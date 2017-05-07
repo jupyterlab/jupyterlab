@@ -4,7 +4,11 @@
 import expect = require('expect.js');
 
 import {
-  ServiceManager, utils
+  uuid
+} from '@jupyterlab/coreutils';
+
+import {
+  ServiceManager
 } from '@jupyterlab/services';
 
 import {
@@ -38,7 +42,7 @@ describe('editorwidget', () => {
     let widget: EditorWidget;
 
     beforeEach(() => {
-      let path = utils.uuid() + '.py';
+      let path = uuid() + '.py';
       context = new Context({ manager, factory: modelFactory, path });
       widget = new EditorWidget({
         factory: options => factoryService.newDocumentEditor(options),
@@ -75,7 +79,7 @@ describe('editorwidget', () => {
           done();
         });
         context.save().then(() => {
-          return manager.contents.rename(context.path, utils.uuid() + '.jl');
+          return manager.contents.rename(context.path, uuid() + '.jl');
         }).catch(done);
       });
 
@@ -92,7 +96,7 @@ describe('editorwidget', () => {
       });
 
       it('should update the title when the path changes', (done) => {
-        let path = utils.uuid() + '.jl';
+        let path = uuid() + '.jl';
         context.pathChanged.connect((sender, args) => {
           expect(widget.title.label).to.be(path);
           done();
