@@ -51,12 +51,12 @@ def load_jupyter_server_extension(nbapp):
     config.page_url = '/lab'
     config.version = __version__
 
-    # Check for dev dir.
-    dev_dir = ''
-    if hasattr(nbapp, 'dev_dir'):
-        dev_dir = nbapp.dev_dir
+    # Check for dev mode.
+    dev_mode = ''
+    if hasattr(nbapp, 'dev_mode'):
+        dev_mode = nbapp.dev_mode
 
-    if dev_dir:
+    if dev_mode:
         nbapp.log.info(DEV_NOTE_NPM)
         config.assets_dir = os.path.join(here, 'build')
         config.settings_dir = ''
