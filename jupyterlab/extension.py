@@ -7,7 +7,7 @@ import os
 
 from jupyterlab_launcher import add_handlers, LabConfig
 
-from .commands import APP_DIR
+from .commands import APP_DIR, list_extensions
 from ._version import __version__
 
 #-----------------------------------------------------------------------------
@@ -70,8 +70,11 @@ def load_jupyter_server_extension(nbapp):
     if hasattr(nbapp, 'core_mode'):
         core_mode = nbapp.core_mode
 
-    # Run core mode if explicit or there is no settings directory.
-    if core_mode or not os.path.exists(config.settings_dir):
+    # Run core mode if explicit or there is no static dir and no
+    # installed extensions.
+    installed = list_extensions(app_dir)
+    fallback = not installed and not os.path.exists(config.assets_dir)
+    if core_mode or fallback:
         config.assets_dir = os.path.join(here, 'static', 'build')
         if not os.path.exists(config.assets_dir):
             msg = 'Static assets not built, please see CONTRIBUTING.md'
