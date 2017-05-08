@@ -17,7 +17,7 @@ import {
 
 import {
   CommandLinker, ICommandLinker, ICommandPalette, ILayoutRestorer,
-  IMainMenu, IStateDB, LayoutRestorer, MainMenu, StateDB
+  IMainMenu, ISettingDB, IStateDB, LayoutRestorer, MainMenu, SettingDB, StateDB
 } from '@jupyterlab/apputils';
 
 import {
@@ -31,18 +31,6 @@ import {
 namespace CommandIDs {
   export
   const clearStateDB = 'statedb:clear';
-};
-
-
-
-/**
- * The default commmand linker provider.
- */
-const linkerPlugin: JupyterLabPlugin<ICommandLinker> = {
-  id: 'jupyter.services.command-linker',
-  provides: ICommandLinker,
-  activate: (app: JupyterLab) => new CommandLinker({ commands: app.commands }),
-  autoStart: true
 };
 
 
@@ -63,6 +51,17 @@ const layoutPlugin: JupyterLabPlugin<ILayoutRestorer> = {
   },
   autoStart: true,
   provides: ILayoutRestorer
+};
+
+
+/**
+ * The default commmand linker provider.
+ */
+const linkerPlugin: JupyterLabPlugin<ICommandLinker> = {
+  id: 'jupyter.services.command-linker',
+  provides: ICommandLinker,
+  activate: (app: JupyterLab) => new CommandLinker({ commands: app.commands }),
+  autoStart: true
 };
 
 
@@ -103,6 +102,21 @@ const palettePlugin: JupyterLabPlugin<ICommandPalette> = {
 /**
  * The default state database for storing application state.
  */
+const settingDBPlugin: JupyterLabPlugin<ISettingDB> = {
+  id: 'jupyter.services.settingdb',
+  autoStart: true,
+  provides: ISettingDB,
+  requires: [IStateDB],
+  activate: (app: JupyterLab, state: IStateDB) => {
+    const database = new SettingDB({ adapter: state });
+    return database;
+  }
+};
+
+
+/**
+ * The default state database for storing application state.
+ */
 const stateDBPlugin: JupyterLabPlugin<IStateDB> = {
   id: 'jupyter.services.statedb',
   autoStart: true,
@@ -136,7 +150,12 @@ const stateDBPlugin: JupyterLabPlugin<IStateDB> = {
  * Export the plugins as default.
  */
 const plugins: JupyterLabPlugin<any>[] = [
-  linkerPlugin, layoutPlugin, palettePlugin, mainMenuPlugin, stateDBPlugin
+  linkerPlugin,
+  layoutPlugin,
+  palettePlugin,
+  mainMenuPlugin,
+  settingDBPlugin,
+  stateDBPlugin
 ];
 export default plugins;
 

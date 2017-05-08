@@ -112,14 +112,18 @@ interface ISettingDB {
  */
 export
 class SettingDB implements ISettingDB {
+  /**
+   * Instantiate a setting database.
+   */
   constructor(options: SettingDB.IOptions) {
-    this.state = options.state;
+    this.adapter = options.adapter;
   }
 
   /**
-   * The underlying state databse used by the setting database for data access.
+   * An adapter conforming to the state database interface and allows data
+   * saving and retrieval for a setting database.
    */
-  readonly state: IStateDB;
+  readonly adapter: IStateDB;
 
   /**
    * Retrieve a saved setting from the database.
@@ -179,8 +183,9 @@ namespace SettingDB {
   export
   interface IOptions {
     /**
-     * The state database instance that underlies a setting database.
+     * An adapter conforming to the state database interface and allows data
+     * saving and retrieval for a setting database.
      */
-    state: IStateDB;
+    adapter: IStateDB;
   }
 }
