@@ -2,7 +2,8 @@
   "private": true,
   "name": "@jupyterlab/application-top",
   "scripts": {
-    "build": "webpack"
+    "build": "webpack",
+    "publish": "node make-release.js"
   },
   "dependencies": {
     "@jupyterlab/about-extension": "^0.3.1",
@@ -76,7 +77,8 @@
       "@jupyterlab/tabmanager-extension",
       "@jupyterlab/terminal-extension",
       "@jupyterlab/tooltip-extension"
-    ]
+    ],
+    "publicPath": "/lab"
   },
-  "version": "0.1.1"
+  "version": "0.20.3"
 }

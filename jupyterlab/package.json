@@ -1,10 +1,9 @@
 {
   "private": true,
-  "name": "@jupyterlab/application-dev",
+  "name": "@jupyterlab/application-top",
   "scripts": {
     "build": "webpack",
-    "build:static": "node build-static.js && cd static && npm install && npm update && npm run build",
-    "update:static": "node update-static.js && npm run build:static"
+    "publish": "node make-release.js"
   },
   "dependencies": {
     "@jupyterlab/about-extension": "^0.3.1",
@@ -81,5 +80,5 @@
     ],
     "publicPath": "/lab"
   },
-  "version": "0.1.2"
+  "version": "0.20.3"
 }
