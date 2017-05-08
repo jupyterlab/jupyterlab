@@ -108,7 +108,7 @@ const settingDBPlugin: JupyterLabPlugin<ISettingDB> = {
   provides: ISettingDB,
   requires: [IStateDB],
   activate: (app: JupyterLab, state: IStateDB) => {
-    const database = new SettingDB({ adapter: state });
+    const database = new SettingDB({ datastore: state });
     return database;
   }
 };

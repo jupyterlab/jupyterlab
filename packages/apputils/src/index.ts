@@ -7,6 +7,7 @@ export * from './clientsession';
 export * from './clipboard';
 export * from './commandlinker';
 export * from './commandpalette';
+export * from './datastore';
 export * from './dialog';
 export * from './domutils';
 export * from './hoverbox';

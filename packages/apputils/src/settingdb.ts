@@ -6,7 +6,7 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  IStateDB
+  IDatastore
 } from '.';
 
 /* tslint:disable */
@@ -116,14 +116,13 @@ class SettingDB implements ISettingDB {
    * Instantiate a setting database.
    */
   constructor(options: SettingDB.IOptions) {
-    this.adapter = options.adapter;
+    this.datastore = options.datastore;
   }
 
   /**
-   * An adapter conforming to the state database interface and allows data
-   * saving and retrieval for a setting database.
+   * The underlying datastore of the setting database.
    */
-  readonly adapter: IStateDB;
+  readonly datastore: IDatastore;
 
   /**
    * Retrieve a saved setting from the database.
@@ -183,9 +182,8 @@ namespace SettingDB {
   export
   interface IOptions {
     /**
-     * An adapter conforming to the state database interface and allows data
-     * saving and retrieval for a setting database.
+     * The underlying datastore of the setting database.
      */
-    adapter: IStateDB;
+    datastore: IDatastore;
   }
 }
