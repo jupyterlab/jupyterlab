@@ -122,7 +122,23 @@ class Yarn(FrontendAssetManager):
         args = ('add', '--force', '--prefer-offline')
 
         if not packages:
-            return self._run(('--prefer-offline', ) + extra_args, **popen_kwargs)
+            # attempt some install types:
+            attempts = [
+                ('--offline',),
+                ('--prefer-offline',),
+                tuple(),
+                ('--verbose',),
+            ]
+
+            for attempt in attempts:
+                try:
+                    print("ATTEMPTING", attempt)
+                    return self._run(attempt + extra_args, **popen_kwargs)
+                except:
+                    pass
+
+            raise Exception('No install type worked!')
+
         elif save_dev:
             args = args + ('--dev',)
 
