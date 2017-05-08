@@ -19,7 +19,7 @@ class LabBuildApp(JupyterApp):
     description = "Build the JupyterLab application"
 
     def start(self):
-        build()
+        build(self.app_dir)
 
 
 class LabCleanApp(JupyterApp):
@@ -27,7 +27,7 @@ class LabCleanApp(JupyterApp):
     description = "Clean the JupyterLab application"
 
     def start(self):
-        clean()
+        clean(self.app_dir)
 
 
 lab_flags = dict(flags)

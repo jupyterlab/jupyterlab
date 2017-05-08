@@ -119,8 +119,9 @@ def uninstall_extension(name, app_dir=None):
     """Uninstall an extension by name.
     """
     app_dir = app_dir or APP_DIR
-    for (name, path) in _get_extensions(app_dir).items():
-        if name == name:
+    for (extname, path) in _get_extensions(app_dir).items():
+        if extname == name:
+            print('Uninstalling %s from %s' % (name, os.path.dirname(path)))
             os.remove(path)
             return True
 
@@ -229,7 +230,7 @@ def _get_extensions(app_dir):
     sys_path = pjoin(ENV_JUPYTER_PATH[0], 'lab', 'extensions')
     for target in glob.glob(pjoin(sys_path, '*.tgz')):
         data = _read_package(target)
-        extensions[data['name']] = target
+        extensions[data['name']] = os.path.realpath(target)
 
     app_path = pjoin(app_dir, 'extensions')
     if app_path == sys_path or not os.path.exists(app_path):
@@ -237,7 +238,7 @@ def _get_extensions(app_dir):
 
     for target in glob.glob(pjoin(app_path, '*.tgz')):
         data = _read_package(target)
-        extensions[data['name']] = target
+        extensions[data['name']] = os.path.realpath(target)
 
     return extensions
 

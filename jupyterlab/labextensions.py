@@ -46,9 +46,9 @@ class InstallLabExtensionApp(BaseExtensionApp):
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        [install_extension(arg) for arg in self.extra_args]
+        [install_extension(arg, self.app_dir) for arg in self.extra_args]
         if self.should_build:
-            build()
+            build(self.app_dir)
 
 
 class LinkLabExtensionApp(BaseExtensionApp):
@@ -56,9 +56,9 @@ class LinkLabExtensionApp(BaseExtensionApp):
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        [link_package(arg) for arg in self.extra_args]
+        [link_package(arg, self.app_dir) for arg in self.extra_args]
         if self.should_build:
-            build()
+            build(self.app_dir)
 
 
 class UnlinkLabExtensionApp(BaseExtensionApp):
@@ -66,10 +66,10 @@ class UnlinkLabExtensionApp(BaseExtensionApp):
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        ans = any([unlink_package(arg)
+        ans = any([unlink_package(arg, self.app_dir)
                    for arg in self.extra_args])
         if ans and self.should_build:
-            build()
+            build(self.app_dir)
 
 
 class UninstallLabExtensionApp(BaseExtensionApp):
@@ -77,10 +77,10 @@ class UninstallLabExtensionApp(BaseExtensionApp):
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        ans = any([uninstall_extension(arg)
+        ans = any([uninstall_extension(arg, self.app_dir)
                    for arg in self.extra_args])
         if ans and self.should_build:
-            build()
+            build(self.app_dir)
 
 
 class ListLabExtensionsApp(BaseExtensionApp):
