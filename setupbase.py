@@ -83,12 +83,12 @@ def js_prerelease(command, strict=False):
             except Exception as e:
                 missing = [t for t in jsdeps.targets if not os.path.exists(t)]
                 if strict or missing:
-                    log.warn('rebuilding js and css failed')
+                    log.warn('js check failed')
                     if missing:
                         log.error('missing files: %s' % missing)
                     raise e
                 else:
-                    log.warn('rebuilding js and css failed (not a problem)')
+                    log.warn('js check failed (not a problem)')
                     log.warn(str(e))
             command.run(self)
     return DecoratedCommand
@@ -100,15 +100,15 @@ def update_package_data(distribution):
     build_py.finalize_options()
 
 
-class NPM(Command):
-    description = 'install package.json dependencies using npm'
+class CheckAssets(Command):
+    description = 'check for required assets'
 
     user_options = []
 
     # Representative files that should exist after a successful build
     targets = [
-        os.path.join(here, 'jupyterlab', 'static', 'build', 'main.css'),
-        os.path.join(here, 'jupyterlab', 'static', 'build', 'main.bundle.js'),
+        os.path.join(here, 'jupyterlab', 'build', 'release_data.json'),
+        os.path.join(here, 'jupyterlab', 'build', 'main.bundle.js'),
     ]
 
     def initialize_options(self):
@@ -117,26 +117,10 @@ class NPM(Command):
     def finalize_options(self):
         pass
 
-    def has_npm(self):
-        try:
-            run(['npm', '--version'])
-            return True
-        except:
-            return False
-
     def run(self):
-        has_npm = self.has_npm()
-        if not has_npm:
-            log.error("`npm` unavailable. If you're running this command using sudo, make sure `npm` is available to sudo")
-        log.info("Installing build dependencies with npm. This may take a while...")
-        target = os.path.join(here, 'jupyterlab')
-        run(['npm', 'run', 'build:static'], cwd=target)
-
         for t in self.targets:
             if not os.path.exists(t):
                 msg = 'Missing file: %s' % t
-                if not has_npm:
-                    msg += '\nnpm is required to build the development version'
                 raise ValueError(msg)
 
         # update package data in case this created new files

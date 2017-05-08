@@ -45,7 +45,7 @@ from setupbase import (
     find_packages,
     find_package_data,
     js_prerelease,
-    NPM
+    CheckAssets
 )
 
 # BEFORE importing distutils, remove MANIFEST. distutils doesn't properly
@@ -96,10 +96,10 @@ setup_args = dict(
 
 
 cmdclass = dict(
-    build_ext = js_prerelease(build_ext),
+    build_ext = build_ext,
     sdist  = js_prerelease(sdist, strict=True),
-    jsdeps = NPM,
     bdist_egg = bdist_egg if 'bdist_egg' in sys.argv else bdist_egg_disabled,
+    jsdeps = CheckAssets
 )
 try:
     from wheel.bdist_wheel import bdist_wheel
