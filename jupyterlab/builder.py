@@ -119,10 +119,10 @@ class Yarn(FrontendAssetManager):
 
     def install(self, packages=tuple(), save=True, save_dev=None, *extra_args, **popen_kwargs):
         """Yarn only supports saving"""
-        args = ('add', '--force')
+        args = ('add', '--force', '--prefer-offline')
 
         if not packages:
-            return self._run(tuple() + extra_args, **popen_kwargs)
+            return self._run(('--prefer-offline', ) + extra_args, **popen_kwargs)
         elif save_dev:
             args = args + ('--dev',)
 
