@@ -1,6 +1,15 @@
-var fs = require('fs-extra');
+var fs = require('fs');
+
+if (!fs.existsSync('./static')){
+    fs.mkdirSync('./static');
+}
 
 // Copy the templates.
-fs.copySync('./package.template.json', './static/package.json')
-fs.copySync('./webpack.config.js', './static/webpack.config.js')
-fs.copySync('./index.template.js', './static/index.template.js')
+fs.createReadStream('./package.template.json')
+    .pipe(fs.createWriteStream('./static/package.json'));
+
+fs.createReadStream('./webpack.config.js')
+    .pipe(fs.createWriteStream('./static/webpack.config.js'));
+
+fs.createReadStream('./index.template.js')
+    .pipe(fs.createWriteStream('./static/index.template.js'));
