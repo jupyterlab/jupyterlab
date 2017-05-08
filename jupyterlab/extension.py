@@ -7,7 +7,7 @@ import os
 
 from jupyterlab_launcher import add_handlers, LabConfig
 
-from .commands import APP_DIR, list_extensions
+from .commands import get_app_dir, list_extensions
 from ._version import __version__
 
 #-----------------------------------------------------------------------------
@@ -37,9 +37,9 @@ def load_jupyter_server_extension(nbapp):
     here = os.path.dirname(__file__)
     nbapp.log.info('JupyterLab alpha preview extension loaded from %s' % here)
 
-    app_dir = APP_DIR
+    app_dir = get_app_dir()
     if hasattr(nbapp, 'app_dir'):
-        app_dir = nbapp.app_dir or APP_DIR
+        app_dir = nbapp.app_dir or get_app_dir()
 
     web_app = nbapp.web_app
     config = LabConfig()

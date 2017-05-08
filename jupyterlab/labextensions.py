@@ -15,7 +15,7 @@ from traitlets import Bool, Unicode
 from ._version import __version__
 from .commands import (
     install_extension, uninstall_extension, list_extensions,
-    link_package, unlink_package, build
+    link_package, unlink_package, build, _get_linked_packages
 )
 
 
@@ -84,11 +84,20 @@ class UninstallLabExtensionApp(BaseExtensionApp):
 
 
 class ListLabExtensionsApp(BaseExtensionApp):
-    description = "Install a labextension"
+    description = "List the installed labextension"
     should_build = False
 
     def start(self):
-        [print(ext) for ext in list_extensions()]
+        [print(ext) for ext in list_extensions(self.app_dir)]
+
+
+class ListLinkedLabExtensionsApp(BaseExtensionApp):
+    description = "List the linked packages"
+    should_build = False
+
+    def start(self):
+        for path in _get_linked_packages(self.app_dir).values():
+            print(path)
 
 
 _examples = """
@@ -111,6 +120,7 @@ class LabExtensionApp(JupyterApp):
         list=(ListLabExtensionsApp, "List labextensions"),
         link=(LinkLabExtensionApp, "Link labextension(s)"),
         unlink=(UnlinkLabExtensionApp, "Unlink labextension(s)"),
+        listlinked=(ListLinkedLabExtensionsApp, "List linked extensions")
     )
 
     def start(self):

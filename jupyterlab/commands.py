@@ -24,7 +24,12 @@ else:
 
 
 here = osp.dirname(osp.abspath(__file__))
-APP_DIR = os.environ.get('JUPYTERLAB_DIR', pjoin(ENV_JUPYTER_PATH[0], 'lab'))
+
+
+def get_app_dir():
+    """Get the configured JupyterLab app directory.
+    """
+    return os.environ.get('JUPYTERLAB_DIR', pjoin(ENV_JUPYTER_PATH[0], 'lab'))
 
 
 def run(cmd, **kwargs):
@@ -48,7 +53,7 @@ def install_extension(extension, app_dir=None):
 
     If link is true, the source directory is linked using `npm link`.
     """
-    app_dir = app_dir or APP_DIR
+    app_dir = app_dir or get_app_dir()
     extension = _normalize_path(extension)
     _ensure_package(app_dir)
     target = pjoin(app_dir, 'extensions')
@@ -63,7 +68,7 @@ def install_extension(extension, app_dir=None):
 def link_package(path, app_dir=None):
     """Link a package against the JupyterLab build.
     """
-    app_dir = app_dir or APP_DIR
+    app_dir = app_dir or get_app_dir()
     path = _normalize_path(path)
     _ensure_package(app_dir)
 
@@ -92,7 +97,7 @@ def unlink_package(package, app_dir=None):
     """
     package = _normalize_path(package)
     name = None
-    app_dir = app_dir or APP_DIR
+    app_dir = app_dir or get_app_dir()
     linked = _get_linked_packages(app_dir)
     for (key, value) in linked.items():
         if value == package or key == package:
@@ -118,7 +123,7 @@ def unlink_package(package, app_dir=None):
 def uninstall_extension(name, app_dir=None):
     """Uninstall an extension by name.
     """
-    app_dir = app_dir or APP_DIR
+    app_dir = app_dir or get_app_dir()
     for (extname, path) in _get_extensions(app_dir).items():
         if extname == name:
             print('Uninstalling %s from %s' % (name, os.path.dirname(path)))
@@ -132,12 +137,12 @@ def uninstall_extension(name, app_dir=None):
 def list_extensions(app_dir=None):
     """List installed extensions.
     """
-    return sorted(_get_extensions(app_dir or APP_DIR).keys())
+    return sorted(_get_extensions(app_dir or get_app_dir()).keys())
 
 
 def clean(app_dir=None):
     """Clean the JupyterLab application directory."""
-    app_dir = app_dir or APP_DIR
+    app_dir = app_dir or get_app_dir()
     for name in ['static', 'build']:
         target = pjoin(app_dir, name)
         if osp.exists(target):
@@ -147,7 +152,7 @@ def clean(app_dir=None):
 def build(app_dir=None):
     """Build the JupyterLab application."""
     # Set up the build directory.
-    app_dir = app_dir or APP_DIR
+    app_dir = app_dir or get_app_dir()
     _ensure_package(app_dir)
     staging = pjoin(app_dir, 'staging')
 
@@ -251,9 +256,10 @@ def _read_package(target):
     return json.loads(f.read().decode('utf8'))
 
 
-def _get_linked_packages(app_dir):
+def _get_linked_packages(app_dir=None):
     """Get the linked packages in the app dir.
     """
+    app_dir = app_dir or get_app_dir()
     extensions = dict()
 
     link_file = pjoin(app_dir, 'settings', 'linked_packages.json')
