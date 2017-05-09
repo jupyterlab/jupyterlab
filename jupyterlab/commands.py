@@ -231,7 +231,8 @@ def _ensure_package(app_dir, name='JupyterLab', version=None, publicPath=None):
         data['jupyterlab']['extensions'].append(key)
 
     data['jupyterlab']['name'] = name
-    data['version'] = version or __version__
+    if version:
+        data['jupyterlab']['version'] = version
 
     publicPath = publicPath or uuid4().hex
     if not publicPath.endswith('/'):
