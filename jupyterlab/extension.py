@@ -39,7 +39,7 @@ def load_jupyter_server_extension(nbapp):
 
     app_dir = get_app_dir()
     if hasattr(nbapp, 'app_dir'):
-        app_dir = nbapp.app_dir or get_app_dir()
+        app_dir = get_app_dir(nbapp.app_dir)
 
     web_app = nbapp.web_app
     config = LabConfig()
@@ -76,7 +76,7 @@ def load_jupyter_server_extension(nbapp):
 
     if config.dev_mode:
         nbapp.log.info(DEV_NOTE_NPM)
-    else:
+    elif core_mode or fallback:
         nbapp.log.info(CORE_NOTE.strip())
 
     add_handlers(web_app, config)

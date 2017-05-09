@@ -152,8 +152,6 @@ def list_extensions(app_dir=None):
     """List installed extensions.
     """
     app_dir = get_app_dir(app_dir)
-    if app_dir == here:
-        raise ValueError('Cannot install packages in core app')
     return sorted(_get_extensions(app_dir).keys())
 
 
