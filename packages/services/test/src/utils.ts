@@ -4,7 +4,11 @@
 import encoding = require('text-encoding');
 
 import {
-  JSONPrimitive, PromiseDelegate
+  uuid
+} from '@jupyterlab/coreutils';
+
+import {
+  JSONObject, JSONPrimitive, PromiseDelegate
 } from '@phosphor/coreutils';
 
 import * as WebSocket
@@ -19,7 +23,7 @@ import {
 } from '../../lib';
 
 import {
-  IAjaxSettings, uuid, IAjaxError
+  IAjaxSettings, IAjaxError
 } from '../../lib/utils';
 
 import {
@@ -88,7 +92,7 @@ const AJAX_KERNEL_OPTIONS: Kernel.IOptions = {
 
 
 export
-const PYTHON_SPEC: any = {
+const PYTHON_SPEC: JSONObject = {
   name: 'Python',
   spec: {
     language: 'python',
@@ -115,7 +119,7 @@ const DEFAULT_FILE: Contents.IModel = {
 
 
 export
-const KERNELSPECS: any = {
+const KERNELSPECS: JSONObject = {
   default: 'python',
   kernelspecs: {
     python: PYTHON_SPEC,
@@ -152,7 +156,7 @@ interface IFakeRequest {
 
 export
 class RequestHandler {
-  specs: Kernel.ISpecModels = KERNELSPECS;
+  specs: JSONObject = KERNELSPECS;
   runningKernels: Kernel.IModel[] = [];
   runningSessions: Session.IModel[] = [];
   runningTerminals: TerminalSession.IModel[] = [];
@@ -217,7 +221,7 @@ class RequestHandler {
     if (url.indexOf('api/sessions') !== -1) {
       this._handleSessionRequest(request);
     } else if (url.indexOf('api/kernelspecs') !== -1) {
-      this.respond(200, this.specs);
+      request.respond(200, this.specs);
     } else if (url.indexOf('api/kernels') !== -1) {
       this._handleKernelRequest(request);
     } else if (url.indexOf('api/terminals') !== -1) {
@@ -234,30 +238,30 @@ class RequestHandler {
     case 'POST':
       let data = { id: uuid(), name: KERNEL_OPTIONS.name };
       if (url.indexOf('interrupt') !== -1) {
-        this.respond(204, data);
+        request.respond(204, data);
       } else if (url.indexOf('restart') !== -1) {
-        this.respond(200, data);
+        request.respond(200, data);
       } else {
-        this.respond(201, data);
+        request.respond(201, data);
       }
       break;
     case 'GET':
       for (let model of this.runningKernels) {
         if (request.url.indexOf(model.id) !== -1) {
-          this.respond(200, model);
+          request.respond(200, model);
           return;
         }
       }
       for (let model of this.runningSessions) {
         if (request.url.indexOf(model.kernel.id) !== -1) {
-          this.respond(200, model.kernel);
+          request.respond(200, model.kernel);
           return;
         }
       }
-      this.respond(200, this.runningKernels);
+      request.respond(200, this.runningKernels);
       break;
     case 'DELETE':
-      this.respond(204, {});
+      request.respond(204, {});
       break;
     default:
       break;
@@ -294,10 +298,10 @@ class RequestHandler {
     case 'POST':
       let model = { name: session.kernel.name, id: session.kernel.id };
       this.runningKernels.push(model);
-      this.respond(201, session);
+      request.respond(201, session);
       break;
     case 'DELETE':
-      this.respond(204, {});
+      request.respond(204, {});
       break;
     default:
       break;
@@ -310,13 +314,13 @@ class RequestHandler {
   private _handleTerminalRequst(request: MockXMLHttpRequest): void {
     switch (request.method) {
     case 'POST':
-      this.respond(200, { name: uuid() });
+      request.respond(200, { name: uuid() });
       break;
     case 'GET':
-      this.respond(200, this.runningTerminals);
+      request.respond(200, this.runningTerminals);
       break;
     case 'DELETE':
-      this.respond(204, {});
+      request.respond(204, {});
       break;
     default:
       break;

@@ -4,7 +4,11 @@
 import expect = require('expect.js');
 
 import {
-  ServiceManager, utils
+  uuid
+} from '@jupyterlab/coreutils';
+
+import {
+  ServiceManager
 } from '@jupyterlab/services';
 
 import {
@@ -27,7 +31,7 @@ import {
 function createContext(): Context<DocumentRegistry.IModel> {
   let factory = new TextModelFactory();
   let manager = new ServiceManager();
-  let path = utils.uuid() + '.csv';
+  let path = uuid() + '.csv';
   return new Context({ factory, manager, path });
 }
 

@@ -4,16 +4,16 @@
 import expect = require('expect.js');
 
 import {
+  uuid
+} from '@jupyterlab/coreutils';
+
+import {
   toArray
 } from '@phosphor/algorithm';
 
 import {
   JSONExt
 } from '@phosphor/coreutils';
-
-import {
-  uuid, copy
-} from '../../../lib/utils';
 
 import {
   KernelManager, Kernel
@@ -118,7 +118,7 @@ describe('kernel/manager', () => {
     describe('#specsChanged', () => {
 
       it('should be emitted when the specs change', (done) => {
-        let specs = copy(KERNELSPECS) as Kernel.ISpecModels;
+        let specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
         specs.default = 'shell';
         tester.specs = specs;
         manager.specsChanged.connect((sender, args) => {
@@ -181,7 +181,7 @@ describe('kernel/manager', () => {
     describe('#refreshSpecs()', () => {
 
       it('should update list of kernel specs', (done) => {
-        let specs = copy(KERNELSPECS) as Kernel.ISpecModels;
+        let specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
         specs.default = 'shell';
         tester.specs = specs;
         manager.refreshSpecs().then(() => {

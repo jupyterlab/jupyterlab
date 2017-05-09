@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  uuid
+} from '@jupyterlab/coreutils';
+
+import {
   toArray
 } from '@phosphor/algorithm';
 
@@ -18,10 +22,6 @@ import {
 import {
   SessionManager, Session
 } from '../../../lib/session';
-
-import {
-  uuid, copy
-} from '../../../lib/utils';
 
 import {
   KernelTester, KERNELSPECS
@@ -151,7 +151,7 @@ describe('session/manager', () => {
     describe('#specsChanged', () => {
 
       it('should be emitted when the specs change', (done) => {
-        let specs = copy(KERNELSPECS) as Kernel.ISpecModels;
+        let specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
         specs.default = 'shell';
         tester.specs = specs;
         manager.specsChanged.connect((sender, args) => {
@@ -252,7 +252,7 @@ describe('session/manager', () => {
     describe('#refreshSpecs()', () => {
 
       it('should refresh the specs', (done) => {
-        let specs = copy(KERNELSPECS) as Kernel.ISpecModels;
+        let specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
         specs.default = 'shell';
         tester.specs = specs;
         manager.refreshSpecs().then(() => {
