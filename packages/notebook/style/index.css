@@ -88,7 +88,7 @@
 
 /*-----------------------------------------------------------------------------
 | Notebook state related styling
-| 
+|
 | The notebook and cells each have states, here are the possibilities:
 |
 | - Notebook
@@ -136,6 +136,7 @@
 .jp-Notebook.jp-mod-editMode .jp-Cell.jp-mod-active .jp-InputArea-editor {
   border: var(--jp-border-width) solid var(--jp-cell-editor-border-color-edit);
   background: var(--jp-cell-editor-background-edit);
+  box-shadow: inset 0 0 2px var(--md-blue-300);
 }
 
 
