@@ -22,7 +22,7 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
-  TerminalWidget, ITerminalTracker, addDefaultCommands
+  Terminal, ITerminalTracker, addDefaultCommands
 } from '@jupyterlab/terminal';
 
 
@@ -92,7 +92,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
   const { commands, shell } = app;
   const category = 'Terminal';
   const namespace = 'terminal';
-  const tracker = new InstanceTracker<TerminalWidget>({ namespace, shell });
+  const tracker = new InstanceTracker<Terminal>({ namespace, shell });
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -109,7 +109,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
     caption: 'Start a new terminal session',
     execute: args => {
       let name = args ? args['name'] as string : '';
-      let term = new TerminalWidget();
+      let term = new Terminal();
       term.title.closable = true;
       term.title.icon = TERMINAL_ICON_CLASS;
       term.title.label = '...';
@@ -180,7 +180,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
     });
   }
 
-  app.contextMenu.addItem({command: CommandIDs.refresh, selector: '.jp-TerminalWidget', rank: 1});
+  app.contextMenu.addItem({command: CommandIDs.refresh, selector: '.jp-Terminal', rank: 1});
 
   return tracker;
 }

@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  TerminalWidget
+  Terminal
 } from './widget';
 
 export * from './widget';
@@ -23,7 +23,7 @@ export * from './widget';
  * A class that tracks editor widgets.
  */
 export
-interface ITerminalTracker extends IInstanceTracker<TerminalWidget> {}
+interface ITerminalTracker extends IInstanceTracker<Terminal> {}
 
 
 /* tslint:disable */
@@ -51,7 +51,7 @@ function addDefaultCommands(tracker: ITerminalTracker, commands: CommandRegistry
   commands.addCommand('terminal:increase-font', {
     label: 'Increase Terminal Font Size',
     execute: () => {
-      let options = TerminalWidget.defaultOptions;
+      let options = Terminal.defaultOptions;
       if (options.fontSize < 72) {
         options.fontSize++;
         tracker.forEach(widget => { widget.fontSize = options.fontSize; });
@@ -63,7 +63,7 @@ function addDefaultCommands(tracker: ITerminalTracker, commands: CommandRegistry
   commands.addCommand('terminal:decrease-font', {
     label: 'Decrease Terminal Font Size',
     execute: () => {
-      let options = TerminalWidget.defaultOptions;
+      let options = Terminal.defaultOptions;
       if (options.fontSize > 9) {
         options.fontSize--;
         tracker.forEach(widget => { widget.fontSize = options.fontSize; });
@@ -76,7 +76,7 @@ function addDefaultCommands(tracker: ITerminalTracker, commands: CommandRegistry
     label: 'Toggle Terminal Theme',
     caption: 'Switch Terminal Background and Font Colors',
     execute: () => {
-      let options = TerminalWidget.defaultOptions;
+      let options = Terminal.defaultOptions;
       if (options.background === 'black') {
         options.background = 'white';
         options.color = 'black';
