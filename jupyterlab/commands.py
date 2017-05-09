@@ -29,10 +29,12 @@ else:
 here = osp.dirname(osp.abspath(__file__))
 
 
-def get_app_dir():
+def get_app_dir(app_dir=None):
     """Get the configured JupyterLab app directory.
     """
-    return os.environ.get('JUPYTERLAB_DIR', pjoin(ENV_JUPYTER_PATH[0], 'lab'))
+    app_dir = app_dir or os.environ.get('JUPYTERLAB_DIR')
+    app_dir = app_dir or pjoin(ENV_JUPYTER_PATH[0], 'lab')
+    return os.path.realpath(app_dir)
 
 
 def run(cmd, **kwargs):
@@ -56,7 +58,7 @@ def install_extension(extension, app_dir=None):
 
     If link is true, the source directory is linked using `npm link`.
     """
-    app_dir = app_dir or get_app_dir()
+    app_dir = get_app_dir(app_dir)
     if app_dir == here:
         raise ValueError('Cannot install extensions in core app')
     extension = _normalize_path(extension)
@@ -73,7 +75,7 @@ def install_extension(extension, app_dir=None):
 def link_package(path, app_dir=None):
     """Link a package against the JupyterLab build.
     """
-    app_dir = app_dir or get_app_dir()
+    app_dir = get_app_dir(app_dir)
     if app_dir == here:
         raise ValueError('Cannot link packages in core app')
 
@@ -105,7 +107,7 @@ def unlink_package(package, app_dir=None):
     """
     package = _normalize_path(package)
     name = None
-    app_dir = app_dir or get_app_dir()
+    app_dir = get_app_dir(app_dir)
     if app_dir == here:
         raise ValueError('Cannot link packages in core app')
     linked = _get_linked_packages(app_dir)
@@ -133,7 +135,7 @@ def unlink_package(package, app_dir=None):
 def uninstall_extension(name, app_dir=None):
     """Uninstall an extension by name.
     """
-    app_dir = app_dir or get_app_dir()
+    app_dir = get_app_dir(app_dir)
     if app_dir == here:
         raise ValueError('Cannot install packages in core app')
     for (extname, path) in _get_extensions(app_dir).items():
@@ -149,14 +151,15 @@ def uninstall_extension(name, app_dir=None):
 def list_extensions(app_dir=None):
     """List installed extensions.
     """
+    app_dir = get_app_dir(app_dir)
     if app_dir == here:
         raise ValueError('Cannot install packages in core app')
-    return sorted(_get_extensions(app_dir or get_app_dir()).keys())
+    return sorted(_get_extensions(app_dir).keys())
 
 
 def clean(app_dir=None):
     """Clean the JupyterLab application directory."""
-    app_dir = app_dir or get_app_dir()
+    app_dir = get_app_dir(app_dir)
     if app_dir == here:
         raise ValueError('Cannot clean the core app')
     for name in ['static', 'build']:
@@ -168,7 +171,7 @@ def clean(app_dir=None):
 def build(app_dir=None, name=None, version=None, publicPath=None):
     """Build the JupyterLab application."""
     # Set up the build directory.
-    app_dir = app_dir or get_app_dir()
+    app_dir = get_app_dir(app_dir)
     if app_dir == here:
         raise ValueError('Cannot build extensions in the core app')
 
@@ -294,7 +297,7 @@ def _read_package(target):
 def _get_linked_packages(app_dir=None):
     """Get the linked packages in the app dir.
     """
-    app_dir = app_dir or get_app_dir()
+    app_dir = get_app_dir(app_dir)
     extensions = dict()
 
     link_file = pjoin(app_dir, 'settings', 'linked_packages.json')
