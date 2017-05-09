@@ -6,20 +6,20 @@ import {
 } from 'chai';
 
 import {
-  IFrameWidget
+  IFrame
 } from '@jupyterlab/apputils';
 
 
 describe('@jupyterlab/domutils', () => {
 
-  describe('IFrameWidget', () => {
+  describe('IFrame', () => {
 
     describe('#constructor()', () => {
 
       it('should create a new iframe widget', () => {
-        let iframe = new IFrameWidget();
-        expect(iframe).to.be.an.instanceof(IFrameWidget);
-        expect(iframe.hasClass('jp-IFrameWidget')).to.equal(true);
+        let iframe = new IFrame();
+        expect(iframe).to.be.an.instanceof(IFrame);
+        expect(iframe.hasClass('jp-IFrame')).to.equal(true);
         expect(iframe.node.querySelector('iframe')).to.be.ok;
       });
 
@@ -28,7 +28,7 @@ describe('@jupyterlab/domutils', () => {
     describe('#url', () => {
 
       it('should be the url of the iframe', () => {
-        let iframe = new IFrameWidget();
+        let iframe = new IFrame();
         expect(iframe.url).to.equal(null);
         iframe.url = 'foo';
         expect(iframe.url).to.equal('foo');

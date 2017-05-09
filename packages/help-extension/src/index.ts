@@ -18,7 +18,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, IFrameWidget, ILayoutRestorer, InstanceTracker,
+  ICommandPalette, IFrame, ILayoutRestorer, InstanceTracker,
   IMainMenu
 } from '@jupyterlab/apputils';
 
@@ -135,14 +135,14 @@ const plugin: JupyterLabPlugin<void> = {
 export default plugin;
 
 /*
-  * An IFrameWidget the disposes itself when closed.
+  * An IFrame the disposes itself when closed.
   *
   * This is needed to clear the state restoration db when IFrames are closed.
  */
-class ClosableIFrame extends IFrameWidget {
+class ClosableIFrame extends IFrame {
 
   /**
-   * Dispose of the IFrameWidget when closing.
+   * Dispose of the IFrame when closing.
    */
   protected onCloseRequest(msg: Message): void {
     this.dispose();
