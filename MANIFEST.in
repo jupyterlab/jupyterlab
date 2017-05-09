@@ -7,7 +7,7 @@ include README.md
 include package.json
 include setupbase.py
 
-include jupyterlab/package.json
+include jupyterlab/package.template.json
 include jupyterlab/webpack.config.js
 include jupyterlab/index.template.js
 
