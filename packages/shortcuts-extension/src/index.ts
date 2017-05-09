@@ -119,17 +119,17 @@ const SHORTCUTS = [
   },
   {
     command: 'imagewidget:zoom-in',
-    selector: '.jp-ImageWidget',
+    selector: '.jp-ImageViewer',
     keys: ['=']
   },
   {
     command: 'imagewidget:zoom-out',
-    selector: '.jp-ImageWidget',
+    selector: '.jp-ImageViewer',
     keys: ['-']
   },
   {
     command: 'imagewidget:reset-zoom',
-    selector: '.jp-ImageWidget',
+    selector: '.jp-ImageViewer',
     keys: ['0']
   },
   {
