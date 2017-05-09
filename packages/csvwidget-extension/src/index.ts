@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  CSVWidget, CSVWidgetFactory
+  CSVViewer, CSVViewerFactory
 } from '@jupyterlab/csvwidget';
 
 import {
@@ -45,12 +45,12 @@ export default plugin;
  * Activate the table widget extension.
  */
 function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayoutRestorer): void {
-  const factory = new CSVWidgetFactory({
+  const factory = new CSVViewerFactory({
     name: FACTORY,
     fileExtensions: ['.csv'],
     defaultFor: ['.csv']
   });
-  const tracker = new InstanceTracker<CSVWidget>({
+  const tracker = new InstanceTracker<CSVViewer>({
     namespace: 'csvwidget',
     shell: app.shell
   });
