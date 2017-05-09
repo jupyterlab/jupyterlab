@@ -1,5 +1,3 @@
-
-var childProcess = require('child_process');
 var webpack = require('webpack');
 var path = require('path');
 var fs = require('fs-extra');
@@ -9,41 +7,26 @@ var crypto = require('crypto');
 var package_data = require('./package.json');
 
 // Ensure a clear build directory.
-fs.removeSync('./build');
-fs.ensureDirSync('./build');
+var buildDir = './build';
+fs.removeSync(buildDir);
+fs.ensureDirSync(buildDir);
 
+fs.copySync('./package.json', './build/package.json');
 
 // Create the entry point file.
 var source = fs.readFileSync('index.template.js').toString();
 var template = Handlebars.compile(source);
 var data = { jupyterlab_extensions: package_data.jupyterlab.extensions };
 var result = template(data);
-fs.writeFileSync('build/index.out.js', result);
+
+fs.writeFileSync(path.resolve(buildDir, 'index.out.js'), result);
 
 
 // Create the hash
 var hash = crypto.createHash('md5');
 hash.update(fs.readFileSync('./package.json'));
-fs.writeFileSync('build/hash.md5', hash.digest('hex'));
-
-
-// Get the git description.
-try {
-  var notice = childProcess.execSync('jupyter lab describe', { encoding: 'utf8' });
-} catch (e) {
-  var notice = 'unknown';
-}
-
-
-// Get the python package version.
-var cwd = process.cwd();
-process.chdir('../..');
-try {
-  var version = childProcess.execSync('jupyter lab --version', { encoding: 'utf8' });
-} catch (e) {
-  var version = 'unknown';
-}
-process.chdir(cwd);
+var digest = hash.digest('hex');
+fs.writeFileSync(path.resolve(buildDir, 'hash.md5'), digest);
 
 
 // Note that we have to use an explicit local public path
@@ -58,11 +41,11 @@ var cssLoader = ExtractTextPlugin.extract({
 
 
 module.exports = {
-  entry:  './build/index.out.js',
+  entry:  path.resolve(buildDir, 'index.out.js'),
   output: {
-    path: __dirname + '/build',
+    path: path.resolve(buildDir),
     filename: '[name].bundle.js',
-    publicPath: 'lab/'
+    publicPath: package_data['jupyterlab']['publicPath']
   },
   module: {
     rules: [
@@ -84,12 +67,6 @@ module.exports = {
   bail: true,
   devtool: 'source-map',
   plugins: [
-      new webpack.DefinePlugin({
-        'process.env': {
-          'GIT_DESCRIPTION': JSON.stringify(notice.trim()),
-          'JUPYTERLAB_VERSION': JSON.stringify(version.trim())
-        }
-      }),
       new ExtractTextPlugin('[name].css')
     ]
 }

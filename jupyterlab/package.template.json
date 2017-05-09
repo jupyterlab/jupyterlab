@@ -78,8 +78,7 @@
       "@jupyterlab/terminal-extension",
       "@jupyterlab/tooltip-extension"
     ],
-    "publicPath": "/lab",
-    "name": "JupyterLab"
+    "publicPath": "/lab"
   },
   "version": "0.20.3"
 }

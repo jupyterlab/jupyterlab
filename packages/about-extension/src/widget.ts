@@ -130,11 +130,6 @@ const FILEBROWSER_IMAGE_CLASS = 'jp-About-fb';
 const NOTEBOOK_IMAGE_CLASS = 'jp-About-nb';
 
 /**
- * Title of About page.
- */
-const TITLE = 'Welcome to the JupyterLab alpha preview';
-
-/**
  * Text on the first page that gives a high level overview of JupyterLab.
  */
 const HEADER_TEXT = [
@@ -231,12 +226,13 @@ class AboutModel extends VDomModel {
   constructor(options: AboutModel.IOptions) {
     super();
     this.version = options.version;
+    this.title = options.title;
   }
 
   /**
    * Title of About page.
    */
-  readonly title = TITLE;
+  readonly title: string;
 
   /**
    * The current JupyterLab version.
@@ -289,6 +285,11 @@ namespace AboutModel {
      * The lab application version.
      */
     version: string;
+
+    /**
+     * The title of the about page.
+     */
+    title: string;
   }
 }
 
