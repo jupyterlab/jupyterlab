@@ -7,7 +7,7 @@ import {
 
 import {
   IDatastore
-} from '.';
+} from '@jupyterlab/coreutils';
 
 
 /* tslint:disable */
