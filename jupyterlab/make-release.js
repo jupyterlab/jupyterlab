@@ -9,7 +9,7 @@ version = version.toString().trim();
 
 // Update our package.json files.
 var data = require('./package.json');
-data['version'] = version;
+data['jupyterlab']['version'] = version;
 
 var text = JSON.stringify(data, null, 2) + '\n';
 fs.writeFileSync('./package.json', text);
