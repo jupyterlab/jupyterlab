@@ -36,6 +36,8 @@ install:
   - 'SET "PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"'
   # Install our package:
   - 'pip install --upgrade -e ".[test]"'
+  - 'npm install'
+  - 'npm run build:main'
 
 build: off
 
