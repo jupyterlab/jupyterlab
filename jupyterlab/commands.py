@@ -204,7 +204,7 @@ def _ensure_package(app_dir, name='JupyterLab', version=None, publicPath=None):
         data['dependencies'][key] = value
         data['jupyterlab']['extensions'].append(key)
 
-    data['name'] = name
+    data['jupyterlab']['name'] = name
     data['version'] = version or __version__
 
     publicPath = publicPath or uuid4().hex
