@@ -3,6 +3,7 @@
 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
+import errno
 import json
 import pipes
 import os
@@ -195,11 +196,19 @@ def _ensure_package(app_dir, name='JupyterLab', version=None, publicPath=None):
     """Make sure the build dir is set up.
     """
     if not os.path.exists(pjoin(app_dir, 'extensions')):
-        os.makedirs(pjoin(app_dir, 'extensions'))
+        try:
+            os.makedirs(pjoin(app_dir, 'extensions'))
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
 
     settings = pjoin(app_dir, 'settings')
     if not os.path.exists(settings):
-        os.makedirs(settings)
+        try:
+            os.makedirs(settings)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
 
     staging = pjoin(app_dir, 'staging')
     if not os.path.exists(staging):
