@@ -50,23 +50,10 @@ def load_jupyter_server_extension(nbapp):
     config.name = 'JupyterLab'
     config.page_url = '/lab'
     config.version = __version__
+    config.dev_mode = False
 
-    # Check for dev mode.
-    dev_mode = ''
-    if hasattr(nbapp, 'dev_mode'):
-        dev_mode = nbapp.dev_mode
-
-    if dev_mode:
-        nbapp.log.info(DEV_NOTE_NPM)
-        config.assets_dir = os.path.join(here, 'build')
-        config.settings_dir = ''
-        config.dev_mode = True
-
-        add_handlers(web_app, config)
-        return
-
-    # Check for explicit core mode.
-    core_mode = False
+    # Check for core mode.
+    core_mode = ''
     if hasattr(nbapp, 'core_mode'):
         core_mode = nbapp.core_mode
 
@@ -74,12 +61,19 @@ def load_jupyter_server_extension(nbapp):
     # installed extensions.
     installed = list_extensions(app_dir)
     fallback = not installed and not os.path.exists(config.assets_dir)
+
     if core_mode or fallback:
-        config.assets_dir = os.path.join(here, 'static', 'build')
+        config.assets_dir = os.path.join(here, 'build')
         if not os.path.exists(config.assets_dir):
             msg = 'Static assets not built, please see CONTRIBUTING.md'
             nbapp.log.error(msg)
         else:
-            nbapp.log.info(CORE_NOTE.strip())
+            sentinel = os.path.join(here, 'build', 'release_data.json')
+            config.dev_mode = not os.path.exists(sentinel)
+
+    if config.dev_mode:
+        nbapp.log.info(DEV_NOTE_NPM)
+    else:
+        nbapp.log.info(CORE_NOTE.strip())
 
     add_handlers(web_app, config)

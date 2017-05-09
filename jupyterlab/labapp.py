@@ -31,10 +31,6 @@ class LabCleanApp(JupyterApp):
 
 
 lab_flags = dict(flags)
-lab_flags['dev-mode'] = (
-    {'LabApp': {'dev_mode': True}},
-    "Start the app in dev mode."
-)
 lab_flags['core-mode'] = (
     {'LabApp': {'core_mode': True}},
     "Start the app in core mode."
@@ -70,9 +66,6 @@ class LabApp(NotebookApp):
 
     default_url = Unicode('/lab', config=True,
         help="The default URL to redirect to from `/`")
-
-    dev_mode = Bool(False, config=True,
-        help="Launch JupyterLab in dev mode")
 
     app_dir = Unicode('', config=True,
         help="The app directory to launch")
