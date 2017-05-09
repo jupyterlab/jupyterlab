@@ -56,6 +56,8 @@ def install_extension(extension, app_dir=None):
     If link is true, the source directory is linked using `npm link`.
     """
     app_dir = app_dir or get_app_dir()
+    if app_dir == here:
+        raise ValueError('Cannot install extensions in core app')
     extension = _normalize_path(extension)
     _ensure_package(app_dir)
     target = pjoin(app_dir, 'extensions')
@@ -71,6 +73,9 @@ def link_package(path, app_dir=None):
     """Link a package against the JupyterLab build.
     """
     app_dir = app_dir or get_app_dir()
+    if app_dir == here:
+        raise ValueError('Cannot link packages in core app')
+
     path = _normalize_path(path)
     _ensure_package(app_dir)
 
@@ -100,6 +105,8 @@ def unlink_package(package, app_dir=None):
     package = _normalize_path(package)
     name = None
     app_dir = app_dir or get_app_dir()
+    if app_dir == here:
+        raise ValueError('Cannot link packages in core app')
     linked = _get_linked_packages(app_dir)
     for (key, value) in linked.items():
         if value == package or key == package:
@@ -126,6 +133,8 @@ def uninstall_extension(name, app_dir=None):
     """Uninstall an extension by name.
     """
     app_dir = app_dir or get_app_dir()
+    if app_dir == here:
+        raise ValueError('Cannot install packages in core app')
     for (extname, path) in _get_extensions(app_dir).items():
         if extname == name:
             print('Uninstalling %s from %s' % (name, os.path.dirname(path)))
@@ -139,12 +148,16 @@ def uninstall_extension(name, app_dir=None):
 def list_extensions(app_dir=None):
     """List installed extensions.
     """
+    if app_dir == here:
+        raise ValueError('Cannot install packages in core app')
     return sorted(_get_extensions(app_dir or get_app_dir()).keys())
 
 
 def clean(app_dir=None):
     """Clean the JupyterLab application directory."""
     app_dir = app_dir or get_app_dir()
+    if app_dir == here:
+        raise ValueError('Cannot clean the core app')
     for name in ['static', 'build']:
         target = pjoin(app_dir, name)
         if osp.exists(target):
@@ -155,6 +168,9 @@ def build(app_dir=None, name=None, version=None, publicPath=None):
     """Build the JupyterLab application."""
     # Set up the build directory.
     app_dir = app_dir or get_app_dir()
+    if app_dir == here:
+        raise ValueError('Cannot build extensions in the core app')
+
     _ensure_package(app_dir, name, version, publicPath)
     staging = pjoin(app_dir, 'staging')
 

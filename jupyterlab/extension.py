@@ -55,6 +55,11 @@ def load_jupyter_server_extension(nbapp):
     if hasattr(nbapp, 'core_mode'):
         core_mode = nbapp.core_mode
 
+    # Check for an app dir that is local.
+    if app_dir == here or app_dir == os.path.join(here, 'build'):
+        core_mode = True
+        config.settings_dir = ''
+
     # Run core mode if explicit or there is no static dir and no
     # installed extensions.
     installed = list_extensions(app_dir)
