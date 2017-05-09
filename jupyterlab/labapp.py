@@ -5,7 +5,7 @@
 # Distributed under the terms of the Modified BSD License.
 
 from notebook.notebookapp import NotebookApp, aliases, flags
-from jupyter_core.application import JupyterApp
+from jupyter_core.application import JupyterApp, base_aliases
 
 from traitlets import Bool, Unicode
 
@@ -14,31 +14,58 @@ from .extension import load_jupyter_server_extension
 from .commands import build, clean
 
 
+build_aliases = dict(base_aliases)
+build_aliases['app-dir'] = 'LabBuildApp.app_dir'
+build_aliases['name'] = 'LabBuildApp.name'
+build_aliases['version'] = 'LabBuildApp.version'
+build_aliases['publicPath'] = 'LabBuildApp.publicPath'
+
+
 class LabBuildApp(JupyterApp):
     version = __version__
     description = "Build the JupyterLab application"
+    aliases = build_aliases
+
+    app_dir = Unicode('', config=True,
+        help="The app directory to build in")
+
+    name = Unicode('JupyterLab', config=True,
+        help="The name of the built application")
+
+    version = Unicode('', config=True,
+        help="The version of the built application")
+
+    publicPath = Unicode('', config=True,
+        help="The public path for assets in the built application")
 
     def start(self):
-        build(self.app_dir)
+        build(self.app_dir, self.name, self.version, self.publicPath)
+
+
+clean_aliases = dict(base_aliases)
+clean_aliases['app-dir'] = 'LabCleanApp.app_dir'
 
 
 class LabCleanApp(JupyterApp):
     version = __version__
     description = "Clean the JupyterLab application"
+    aliases = clean_aliases
+
+    app_dir = Unicode('', config=True,
+        help="The app directory to clean")
 
     def start(self):
         clean(self.app_dir)
 
+
+lab_aliases = dict(aliases)
+lab_aliases['app-dir'] = 'LabApp.app_dir'
 
 lab_flags = dict(flags)
 lab_flags['core-mode'] = (
     {'LabApp': {'core_mode': True}},
     "Start the app in core mode."
 )
-
-
-lab_aliases = dict(aliases)
-lab_aliases['app-dir'] = 'LabApp.app_dir'
 
 
 class LabApp(NotebookApp):

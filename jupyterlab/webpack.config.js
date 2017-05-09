@@ -11,6 +11,7 @@ var buildDir = './build';
 fs.removeSync(buildDir);
 fs.ensureDirSync(buildDir);
 
+fs.copySync('./package.json', './build/package.json');
 
 // Create the entry point file.
 var source = fs.readFileSync('index.template.js').toString();
@@ -44,7 +45,7 @@ module.exports = {
   output: {
     path: path.resolve(buildDir),
     filename: '[name].bundle.js',
-    publicPath: digest + '/'
+    publicPath: package_data['jupyterlab']['publicPath']
   },
   module: {
     rules: [

@@ -7,6 +7,7 @@ import json
 import pipes
 import os
 import glob
+from uuid import uuid4
 from os import path as osp
 from os.path import join as pjoin
 from subprocess import check_output, CalledProcessError
@@ -15,6 +16,7 @@ import sys
 import tarfile
 from jupyter_core.paths import ENV_JUPYTER_PATH
 
+from ._version import __version__
 
 if sys.platform == 'win32':
     from subprocess import list2cmdline
@@ -149,11 +151,11 @@ def clean(app_dir=None):
             shutil.rmtree(target)
 
 
-def build(app_dir=None):
+def build(app_dir=None, name=None, version=None, publicPath=None):
     """Build the JupyterLab application."""
     # Set up the build directory.
     app_dir = app_dir or get_app_dir()
-    _ensure_package(app_dir)
+    _ensure_package(app_dir, name, version, publicPath)
     staging = pjoin(app_dir, 'staging')
 
     # Make sure packages are installed.
@@ -173,7 +175,7 @@ def build(app_dir=None):
     shutil.copytree(pjoin(staging, 'build'), static)
 
 
-def _ensure_package(app_dir):
+def _ensure_package(app_dir, name='JupyterLab', version=None, publicPath=None):
     """Make sure the build dir is set up.
     """
     if not os.path.exists(pjoin(app_dir, 'extensions')):
@@ -201,6 +203,14 @@ def _ensure_package(app_dir):
     for (key, value) in extensions.items():
         data['dependencies'][key] = value
         data['jupyterlab']['extensions'].append(key)
+
+    data['name'] = name
+    data['version'] = version or __version__
+
+    publicPath = publicPath or uuid4().hex
+    if not publicPath.endswith('/'):
+        publicPath += '/'
+    data['jupyterlab']['publicPath'] = publicPath
     data['scripts']['build'] = 'webpack'
 
     pkg_path = pjoin(staging, 'package.json')
