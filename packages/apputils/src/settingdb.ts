@@ -27,7 +27,7 @@ namespace ISettingDB {
    * A collection of setting data for a specific key.
    */
   export
-  interface ISettingBundle {
+  interface ISettingBundle extends JSONObject {
     /**
      * The data value for a user-level setting item.
      */
@@ -43,7 +43,7 @@ namespace ISettingDB {
   /**
    */
   export
-  interface ISettingItem {
+  interface ISettingItem extends JSONObject {
     /**
      * The identifier key for a setting item.
      */
@@ -51,9 +51,6 @@ namespace ISettingDB {
 
     /**
      * The collection of values for a specified setting.
-     *
-     * #### Notes
-     * This collection may include a `user` or a `system` value for a setting.
      */
     data: ISettingBundle | null;
   }
@@ -64,11 +61,9 @@ namespace ISettingDB {
  * The description of a setting database.
  */
 export
-interface ISettingDB {
+interface ISettingDB extends IDatastore {
   /**
    * Retrieve a saved setting from the database.
-   *
-   * @param namespace - The identifier used to prefix settings for an extension.
    *
    * @param id - The identifier used to specify a setting bundle.
    *
@@ -79,23 +74,19 @@ interface ISettingDB {
    * The promise returned by this method may be rejected if an error occurs in
    * retrieving the data. Non-existence of an `id` will succeed, however.
    */
-  fetch(namespace: string, id: string): Promise<ISettingDB.ISettingBundle>;
+  fetch(id: string): Promise<ISettingDB.ISettingItem>;
 
   /**
    * Remove a value from the setting database.
-   *
-   * @param namespace - The identifier used to prefix settings for an extension.
    *
    * @param id - The identifier used to specify a setting bundle.
    *
    * @returns A promise that is rejected if remove fails and succeeds otherwise.
    */
-  remove(namespace: string, id: string): Promise<void>;
+  remove(id: string): Promise<void>;
 
   /**
    * Save a value in the database.
-   *
-   * @param namespace - The identifier used to prefix settings for an extension.
    *
    * @param id - The identifier used to specify a setting bundle.
    *
@@ -103,7 +94,7 @@ interface ISettingDB {
    *
    * @returns A promise that is rejected if saving fails and succeeds otherwise.
    */
-  save(namespace: string, id: string, value: ISettingDB.ISettingBundle): Promise<void>;
+  save(id: string, value: ISettingDB.ISettingBundle): Promise<void>;
 }
 
 
@@ -127,8 +118,6 @@ class SettingDB implements ISettingDB {
   /**
    * Retrieve a saved setting from the database.
    *
-   * @param namespace - The identifier used to prefix settings for an extension.
-   *
    * @param id - The identifier used to specify a setting bundle.
    *
    * @returns A promise that bears a data payload if available.
@@ -138,27 +127,23 @@ class SettingDB implements ISettingDB {
    * The promise returned by this method may be rejected if an error occurs in
    * retrieving the data. Non-existence of an `id` will succeed, however.
    */
-  fetch(namespace: string, id: string): Promise<ISettingDB.ISettingBundle> {
+  fetch(id: string): Promise<ISettingDB.ISettingItem> {
     return Promise.reject(new Error('SettingDB#fetch is not implemented.'));
   }
 
   /**
    * Remove a value from the setting database.
    *
-   * @param namespace - The identifier used to prefix settings for an extension.
-   *
    * @param id - The identifier used to specify a setting bundle.
    *
    * @returns A promise that is rejected if remove fails and succeeds otherwise.
    */
-  remove(namespace: string, id: string): Promise<void> {
+  remove(id: string): Promise<void> {
     return Promise.reject(new Error('SettingDB#remove is not implemented.'));
   }
 
   /**
    * Save a value in the database.
-   *
-   * @param namespace - The identifier used to prefix settings for an extension.
    *
    * @param id - The identifier used to specify a setting bundle.
    *
@@ -166,7 +151,7 @@ class SettingDB implements ISettingDB {
    *
    * @returns A promise that is rejected if saving fails and succeeds otherwise.
    */
-  save(namespace: string, id: string, value: ISettingDB.ISettingBundle): Promise<void> {
+  save(id: string, value: ISettingDB.ISettingBundle): Promise<void> {
     return Promise.reject(new Error('SettingDB#save is not implemented.'));
   }
 }
