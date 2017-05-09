@@ -33,7 +33,7 @@ import json
 import os
 from glob import glob
 from distutils.command.build_ext import build_ext
-from distutils.command.sdist import sdist
+from setuptools.command.sdist import sdist
 from setuptools import setup
 from setuptools.command.bdist_egg import bdist_egg
 
