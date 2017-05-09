@@ -29,23 +29,23 @@ import {
 /**
  * The class name added to a CSV widget.
  */
-const CSV_CLASS = 'jp-CSVWidget';
+const CSV_CLASS = 'jp-CSVViewer';
 
 /**
  * The class name added to a CSV widget warning.
  */
-const CSV_WARNING_CLASS = 'jp-CSVWidget-warning';
+const CSV_WARNING_CLASS = 'jp-CSVViewer-warning';
 
 
 /**
  * A widget for CSV tables.
  */
 export
-class CSVWidget extends Widget {
+class CSVViewer extends Widget {
   /**
    * Construct a new CSV widget.
    */
-  constructor(options: CSVWidget.IOptions) {
+  constructor(options: CSVViewer.IOptions) {
     super();
 
     let context = this._context = options.context;
@@ -157,10 +157,10 @@ class CSVWidget extends Widget {
 
 
 /**
- * A namespace for `CSVWidget` statics.
+ * A namespace for `CSVViewer` statics.
  */
 export
-namespace CSVWidget {
+namespace CSVViewer {
   /**
    * Instantiation options for CSV widgets.
    */
@@ -178,11 +178,11 @@ namespace CSVWidget {
  * A widget factory for CSV widgets.
  */
 export
-class CSVWidgetFactory extends ABCWidgetFactory<CSVWidget, DocumentRegistry.IModel> {
+class CSVViewerFactory extends ABCWidgetFactory<CSVViewer, DocumentRegistry.IModel> {
   /**
    * Create a new widget given a context.
    */
-  protected createNewWidget(context: DocumentRegistry.Context): CSVWidget {
-    return new CSVWidget({ context });
+  protected createNewWidget(context: DocumentRegistry.Context): CSVViewer {
+    return new CSVViewer({ context });
   }
 }

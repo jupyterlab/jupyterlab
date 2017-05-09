@@ -16,7 +16,7 @@ import {
 } from '@jupyterlab/csvwidget';
 
 import {
-  CSVWidget
+  CSVViewer
 } from '@jupyterlab/csvwidget';
 
 import {
@@ -40,19 +40,19 @@ describe('csvwidget/widget', () => {
 
   const context = createContext();
 
-  describe('CSVWidget', () => {
+  describe('CSVViewer', () => {
 
     describe('#constructor()', () => {
 
-      it('should instantiate a `CSVWidget`', () => {
-        let widget = new CSVWidget({ context });
-        expect(widget).to.be.a(CSVWidget);
+      it('should instantiate a `CSVViewer`', () => {
+        let widget = new CSVViewer({ context });
+        expect(widget).to.be.a(CSVViewer);
         widget.dispose();
       });
 
       it('should set a max exceeded listener on its warning area', done => {
-        let widget = new CSVWidget({ context });
-        let warning = widget.node.querySelector('.jp-CSVWidget-warning');
+        let widget = new CSVViewer({ context });
+        let warning = widget.node.querySelector('.jp-CSVViewer-warning');
         expect(warning).to.be.ok();
         expect(warning.innerHTML).to.be.empty();
         widget.model.content = CSV_DATA;
@@ -68,7 +68,7 @@ describe('csvwidget/widget', () => {
     describe('#model', () => {
 
       it('should be a `CSVModel`', () => {
-        let widget = new CSVWidget({ context });
+        let widget = new CSVViewer({ context });
         expect(widget.model).to.be.a(CSVModel);
         widget.dispose();
       });
@@ -78,7 +78,7 @@ describe('csvwidget/widget', () => {
     describe('#dispose()', () => {
 
       it('should dispose of the resources held by the widget', () => {
-        let widget = new CSVWidget({ context });
+        let widget = new CSVViewer({ context });
         expect(widget.isDisposed).to.be(false);
         expect(widget.model).to.be.ok();
         widget.dispose();
@@ -87,7 +87,7 @@ describe('csvwidget/widget', () => {
       });
 
       it('should be safe to call multiple times', () => {
-        let widget = new CSVWidget({ context });
+        let widget = new CSVViewer({ context });
         expect(widget.isDisposed).to.be(false);
         expect(widget.model).to.be.ok();
         widget.dispose();
