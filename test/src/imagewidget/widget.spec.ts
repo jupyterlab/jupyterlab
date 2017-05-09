@@ -24,7 +24,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  ImageWidget, ImageWidgetFactory
+  ImageViewer, ImageViewerFactory
 } from '@jupyterlab/imagewidget';
 
 import {
@@ -32,7 +32,7 @@ import {
 } from '../utils';
 
 
-class LogImage extends ImageWidget {
+class LogImage extends ImageViewer {
 
   methods: string[] = [];
 
@@ -69,7 +69,7 @@ const OTHER = ('iVBORw0KGgoAAAANSUhEUgAAAAUA' +
 );
 
 
-describe('ImageWidget', () => {
+describe('ImageViewer', () => {
 
   let factory = new Base64ModelFactory();
   let context: DocumentRegistry.Context;
@@ -95,8 +95,8 @@ describe('ImageWidget', () => {
 
   describe('#constructor()', () => {
 
-    it('should create an ImageWidget', () => {
-      expect(widget).to.be.an(ImageWidget);
+    it('should create an ImageViewer', () => {
+      expect(widget).to.be.an(ImageViewer);
     });
 
     it('should keep the title in sync with the file name', (done) => {
@@ -192,19 +192,19 @@ describe('ImageWidget', () => {
 });
 
 
-describe('ImageWidgetFactory', () => {
+describe('ImageViewerFactory', () => {
 
   describe('#createNewWidget', () => {
 
     it('should create an image widget', () => {
-      let factory = new ImageWidgetFactory({
+      let factory = new ImageViewerFactory({
         name: 'Image',
         modelName: 'base64',
         fileExtensions: ['.png'],
         defaultFor: ['.png']
       });
       let context = createFileContext(IMAGE.path);
-      expect(factory.createNew(context)).to.be.an(ImageWidget);
+      expect(factory.createNew(context)).to.be.an(ImageViewer);
     });
 
   });

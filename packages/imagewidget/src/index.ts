@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  ImageWidget
+  ImageViewer
 } from './widget';
 
 export * from './widget';
@@ -24,7 +24,7 @@ export * from './widget';
  * A class that tracks editor widgets.
  */
 export
-interface IImageTracker extends IInstanceTracker<ImageWidget> {}
+interface IImageTracker extends IInstanceTracker<ImageViewer> {}
 
 
 /* tslint:disable */

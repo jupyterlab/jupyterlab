@@ -16,14 +16,14 @@ import {
 /**
  * The class name added to a imagewidget.
  */
-const IMAGE_CLASS = 'jp-ImageWidget';
+const IMAGE_CLASS = 'jp-ImageViewer';
 
 
 /**
  * A widget for images.
  */
 export
-class ImageWidget extends Widget {
+class ImageViewer extends Widget {
   /**
    * Construct a new image widget.
    */
@@ -112,12 +112,12 @@ class ImageWidget extends Widget {
  * A widget factory for images.
  */
 export
-class ImageWidgetFactory extends ABCWidgetFactory<ImageWidget, DocumentRegistry.IModel> {
+class ImageViewerFactory extends ABCWidgetFactory<ImageViewer, DocumentRegistry.IModel> {
   /**
    * Create a new widget given a context.
    */
-  protected createNewWidget(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): ImageWidget {
-    return new ImageWidget(context);
+  protected createNewWidget(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): ImageViewer {
+    return new ImageViewer(context);
   }
 }
 

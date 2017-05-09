@@ -4,15 +4,15 @@
 |----------------------------------------------------------------------------*/
 
 
-.jp-ImageWidget {
+.jp-ImageViewer {
   overflow: auto;
   padding: 0 4px 4px 4px;
 }
-.jp-ImageWidget > div {
+.jp-ImageViewer > div {
   transform-origin: top left;
 }
 
-.jp-ImageWidget img {
+.jp-ImageViewer img {
   max-width: 100%;
   max-height: 100%;
   margin: auto;
