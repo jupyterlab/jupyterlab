@@ -28,7 +28,7 @@ import {
 } from '@jupyterlab/codemirror';
 
 import {
-  CompleterWidget, CompleterModel
+  Completer, CompleterModel
 } from '@jupyterlab/completer';
 
 
@@ -48,8 +48,8 @@ function createEditorWidget(): CodeEditorWrapper {
 }
 
 
-class CustomRenderer extends CompleterWidget.Renderer {
-  createItemNode(item: CompleterWidget.IItem): HTMLLIElement {
+class CustomRenderer extends Completer.Renderer {
+  createItemNode(item: Completer.IItem): HTMLLIElement {
     let li = super.createItemNode(item);
     li.classList.add(TEST_ITEM_CLASS);
     return li;
@@ -57,7 +57,7 @@ class CustomRenderer extends CompleterWidget.Renderer {
 }
 
 
-class LogWidget extends CompleterWidget {
+class LogWidget extends Completer {
   events: string[] = [];
 
   methods: string[] = [];
@@ -81,36 +81,36 @@ class LogWidget extends CompleterWidget {
 
 describe('completer/widget', () => {
 
-  describe('CompleterWidget', () => {
+  describe('Completer', () => {
 
     describe('#constructor()', () => {
 
       it('should create a completer widget', () => {
-        let widget = new CompleterWidget({ editor: null });
-        expect(widget).to.be.a(CompleterWidget);
+        let widget = new Completer({ editor: null });
+        expect(widget).to.be.a(Completer);
         expect(widget.node.classList).to.contain('jp-Completer');
       });
 
       it('should accept options with a model', () => {
-        let options: CompleterWidget.IOptions = {
+        let options: Completer.IOptions = {
           editor: null,
           model: new CompleterModel()
         };
-        let widget = new CompleterWidget(options);
-        expect(widget).to.be.a(CompleterWidget);
+        let widget = new Completer(options);
+        expect(widget).to.be.a(Completer);
         expect(widget.model).to.equal(options.model);
       });
 
       it('should accept options with a renderer', () => {
-        let options: CompleterWidget.IOptions = {
+        let options: Completer.IOptions = {
           editor: null,
           model: new CompleterModel(),
           renderer: new CustomRenderer()
         };
         options.model.setOptions(['foo', 'bar']);
 
-        let widget = new CompleterWidget(options);
-        expect(widget).to.be.a(CompleterWidget);
+        let widget = new Completer(options);
+        expect(widget).to.be.a(Completer);
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
 
         let items = widget.node.querySelectorAll(`.${ITEM_CLASS}`);
@@ -124,7 +124,7 @@ describe('completer/widget', () => {
 
       it('should emit a signal when an item is selected', () => {
         let anchor = createEditorWidget();
-        let options: CompleterWidget.IOptions = {
+        let options: Completer.IOptions = {
           editor: anchor.editor,
           model: new CompleterModel()
         };
@@ -133,7 +133,7 @@ describe('completer/widget', () => {
         options.model.setOptions(['foo', 'bar']);
         Widget.attach(anchor, document.body);
 
-        let widget = new CompleterWidget(options);
+        let widget = new Completer(options);
 
         widget.selected.connect(listener);
         Widget.attach(widget, document.body);
@@ -171,7 +171,7 @@ describe('completer/widget', () => {
 
           editor.setCursorPosition(position);
 
-          let request: CompleterWidget.ITextState = {
+          let request: Completer.ITextState = {
             column: position.column,
             lineHeight: editor.lineHeight,
             charWidth: editor.charWidth,
@@ -183,7 +183,7 @@ describe('completer/widget', () => {
           model.cursor = { start: 0, end: 1 };
           model.setOptions(['abc', 'abd', 'abe', 'abi']);
 
-          let widget = new CompleterWidget({ model, editor: code.editor });
+          let widget = new Completer({ model, editor: code.editor });
           widget.hide();
           expect(called).to.be(false);
           widget.visibilityChanged.connect(() => { called = true; });
@@ -204,12 +204,12 @@ describe('completer/widget', () => {
     describe('#model', () => {
 
       it('should default to null', () => {
-        let widget = new CompleterWidget({ editor: null });
+        let widget = new Completer({ editor: null });
         expect(widget.model).to.be(null);
       });
 
       it('should be settable', () => {
-        let widget = new CompleterWidget({ editor: null });
+        let widget = new Completer({ editor: null });
         expect(widget.model).to.be(null);
         widget.model = new CompleterModel();
         expect(widget.model).to.be.a(CompleterModel);
@@ -217,7 +217,7 @@ describe('completer/widget', () => {
 
       it('should be safe to set multiple times', () => {
         let model = new CompleterModel();
-        let widget = new CompleterWidget({ editor: null });
+        let widget = new Completer({ editor: null });
         widget.model = model;
         widget.model = model;
         expect(widget.model).to.be(model);
@@ -225,7 +225,7 @@ describe('completer/widget', () => {
 
       it('should be safe to reset', () => {
         let model = new CompleterModel();
-        let widget = new CompleterWidget({
+        let widget = new Completer({
           editor: null,
           model: new CompleterModel()
         });
@@ -239,13 +239,13 @@ describe('completer/widget', () => {
     describe('#editor', () => {
 
       it('should default to null', () => {
-        let widget = new CompleterWidget({ editor: null });
+        let widget = new Completer({ editor: null });
         expect(widget.editor).to.be(null);
       });
 
       it('should be settable', () => {
         let anchor = createEditorWidget();
-        let widget = new CompleterWidget({ editor: null });
+        let widget = new Completer({ editor: null });
         expect(widget.editor).to.be(null);
         widget.editor = anchor.editor;
         expect(widget.editor).to.be.ok();
@@ -256,13 +256,13 @@ describe('completer/widget', () => {
     describe('#dispose()', () => {
 
       it('should dispose of the resources held by the widget', () => {
-        let widget = new CompleterWidget({ editor: null });
+        let widget = new Completer({ editor: null });
         widget.dispose();
         expect(widget.isDisposed).to.be(true);
       });
 
       it('should be safe to call multiple times', () => {
-        let widget = new CompleterWidget({ editor: null });
+        let widget = new Completer({ editor: null });
         widget.dispose();
         widget.dispose();
         expect(widget.isDisposed).to.be(true);
@@ -275,13 +275,13 @@ describe('completer/widget', () => {
       it('should reset the completer widget', () => {
         let anchor = createEditorWidget();
         let model = new CompleterModel();
-        let options: CompleterWidget.IOptions = {
+        let options: Completer.IOptions = {
           editor: anchor.editor, model
         };
         model.setOptions(['foo', 'bar']);
         Widget.attach(anchor, document.body);
 
-        let widget = new CompleterWidget(options);
+        let widget = new Completer(options);
 
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
@@ -317,13 +317,13 @@ describe('completer/widget', () => {
         it('should reset if keydown is outside anchor', () => {
           let model = new CompleterModel();
           let anchor = createEditorWidget();
-          let options: CompleterWidget.IOptions = {
+          let options: Completer.IOptions = {
             editor: anchor.editor, model
           };
           model.setOptions(['foo', 'bar']);
           Widget.attach(anchor, document.body);
 
-          let widget = new CompleterWidget(options);
+          let widget = new Completer(options);
 
           Widget.attach(widget, document.body);
           MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
@@ -340,13 +340,13 @@ describe('completer/widget', () => {
         it('should select the item below and not progress past last', () => {
           let anchor = createEditorWidget();
           let model = new CompleterModel();
-          let options: CompleterWidget.IOptions = {
+          let options: Completer.IOptions = {
             editor: anchor.editor, model
           };
           model.setOptions(['foo', 'bar', 'baz']);
           Widget.attach(anchor, document.body);
 
-          let widget = new CompleterWidget(options);
+          let widget = new Completer(options);
           let target = document.createElement('div');
 
           anchor.node.appendChild(target);
@@ -377,13 +377,13 @@ describe('completer/widget', () => {
         it('should select the item above and not progress beyond first', () => {
           let anchor = createEditorWidget();
           let model = new CompleterModel();
-          let options: CompleterWidget.IOptions = {
+          let options: Completer.IOptions = {
             editor: anchor.editor, model
           };
           model.setOptions(['foo', 'bar', 'baz']);
           Widget.attach(anchor, document.body);
 
-          let widget = new CompleterWidget(options);
+          let widget = new Completer(options);
 
           Widget.attach(widget, document.body);
           MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
@@ -420,7 +420,7 @@ describe('completer/widget', () => {
         it('should mark common subset on start and select on tab', (done) => {
           let anchor = createEditorWidget();
           let model = new CompleterModel();
-          let options: CompleterWidget.IOptions = {
+          let options: Completer.IOptions = {
             editor: anchor.editor, model
           };
           let value = '';
@@ -430,7 +430,7 @@ describe('completer/widget', () => {
           model.setOptions(['fo', 'foo', 'foo', 'fooo']);
           Widget.attach(anchor, document.body);
 
-          let widget = new CompleterWidget(options);
+          let widget = new Completer(options);
 
           widget.selected.connect(listener);
           Widget.attach(widget, document.body);
@@ -459,7 +459,7 @@ describe('completer/widget', () => {
         it('should trigger a selected signal on mouse down', () => {
           let anchor = createEditorWidget();
           let model = new CompleterModel();
-          let options: CompleterWidget.IOptions = {
+          let options: Completer.IOptions = {
             editor: anchor.editor, model
           };
           let value = '';
@@ -470,7 +470,7 @@ describe('completer/widget', () => {
           model.query = 'b';
           Widget.attach(anchor, document.body);
 
-          let widget = new CompleterWidget(options);
+          let widget = new Completer(options);
 
           widget.selected.connect(listener);
           Widget.attach(widget, document.body);
@@ -488,7 +488,7 @@ describe('completer/widget', () => {
         it('should ignore nonstandard mouse clicks (e.g., right click)', () => {
           let anchor = createEditorWidget();
           let model = new CompleterModel();
-          let options: CompleterWidget.IOptions = {
+          let options: Completer.IOptions = {
             editor: anchor.editor, model
           };
           let value = '';
@@ -498,7 +498,7 @@ describe('completer/widget', () => {
           model.setOptions(['foo', 'bar']);
           Widget.attach(anchor, document.body);
 
-          let widget = new CompleterWidget(options);
+          let widget = new Completer(options);
 
           widget.selected.connect(listener);
           Widget.attach(widget, document.body);
@@ -513,7 +513,7 @@ describe('completer/widget', () => {
         it('should ignore a mouse down that misses an item', () => {
           let anchor = createEditorWidget();
           let model = new CompleterModel();
-          let options: CompleterWidget.IOptions = {
+          let options: Completer.IOptions = {
             editor: anchor.editor, model
           };
           let value = '';
@@ -523,7 +523,7 @@ describe('completer/widget', () => {
           model.setOptions(['foo', 'bar']);
           Widget.attach(anchor, document.body);
 
-          let widget = new CompleterWidget(options);
+          let widget = new Completer(options);
 
           widget.selected.connect(listener);
           Widget.attach(widget, document.body);
@@ -538,7 +538,7 @@ describe('completer/widget', () => {
         it('should hide widget if mouse down misses it', () => {
           let anchor = createEditorWidget();
           let model = new CompleterModel();
-          let options: CompleterWidget.IOptions = {
+          let options: Completer.IOptions = {
             editor: anchor.editor, model
           };
           let value = '';
@@ -548,7 +548,7 @@ describe('completer/widget', () => {
           model.setOptions(['foo', 'bar']);
           Widget.attach(anchor, document.body);
 
-          let widget = new CompleterWidget(options);
+          let widget = new Completer(options);
 
           widget.selected.connect(listener);
           Widget.attach(widget, document.body);
@@ -595,7 +595,7 @@ describe('completer/widget', () => {
 
           editor.setCursorPosition(position);
 
-          let request: CompleterWidget.ITextState = {
+          let request: Completer.ITextState = {
             column: position.column,
             lineHeight: editor.lineHeight,
             charWidth: editor.charWidth,
@@ -607,7 +607,7 @@ describe('completer/widget', () => {
           model.cursor = { start: text.length - 1, end: text.length };
           model.setOptions(['abc', 'abd', 'abe', 'abi']);
 
-          let widget = new CompleterWidget({ model, editor: code.editor });
+          let widget = new Completer({ model, editor: code.editor });
           Widget.attach(widget, document.body);
           MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
           simulate(document.body, 'scroll');
@@ -633,7 +633,7 @@ describe('completer/widget', () => {
         let anchor = createEditorWidget();
         let model = new CompleterModel();
         let coords = { left: 0, right: 0, top: 100, bottom: 120 };
-        let request: CompleterWidget.ITextState = {
+        let request: Completer.ITextState = {
             column: 0,
             lineHeight: 0,
             charWidth: 0,
@@ -643,7 +643,7 @@ describe('completer/widget', () => {
           };
 
         let value = '';
-        let options: CompleterWidget.IOptions = {
+        let options: Completer.IOptions = {
           editor: anchor.editor, model
         };
         let listener = (sender: any, selected: string) => { value = selected; };
@@ -652,7 +652,7 @@ describe('completer/widget', () => {
         model.original = request;
         model.setOptions(['foo']);
 
-        let widget = new CompleterWidget(options);
+        let widget = new Completer(options);
         widget.selected.connect(listener);
         Widget.attach(widget, document.body);
 
@@ -673,7 +673,7 @@ describe('completer/widget', () => {
         let anchor = createEditorWidget();
         let model = new CompleterModel();
         let coords = { left: 0, right: 0, top: 100, bottom: 120 };
-        let request: CompleterWidget.ITextState = {
+        let request: Completer.ITextState = {
           column: 0,
           lineHeight: 0,
           charWidth: 0,
@@ -682,7 +682,7 @@ describe('completer/widget', () => {
           text: 'f'
         };
 
-        let options: CompleterWidget.IOptions = {
+        let options: Completer.IOptions = {
           editor: anchor.editor, model
         };
 
@@ -690,7 +690,7 @@ describe('completer/widget', () => {
         model.original = request;
         model.setOptions(['foo', 'bar', 'baz']);
 
-        let widget = new CompleterWidget(options);
+        let widget = new Completer(options);
         widget.hide();
         expect(widget.isHidden).to.be(true);
         Widget.attach(widget, document.body);

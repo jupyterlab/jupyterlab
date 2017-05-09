@@ -73,13 +73,13 @@ const USE_CAPTURE = true;
  * A widget that enables text completion.
  */
 export
-class CompleterWidget extends Widget {
+class Completer extends Widget {
   /**
    * Construct a text completer menu widget.
    */
-  constructor(options: CompleterWidget.IOptions) {
+  constructor(options: Completer.IOptions) {
     super({ node: document.createElement('ul') });
-    this._renderer = options.renderer || CompleterWidget.defaultRenderer;
+    this._renderer = options.renderer || Completer.defaultRenderer;
     this.model = options.model;
     this._editor = options.editor;
     this.addClass(COMPLETER_CLASS);
@@ -116,10 +116,10 @@ class CompleterWidget extends Widget {
   /**
    * The model used by the completer widget.
    */
-  get model(): CompleterWidget.IModel {
+  get model(): Completer.IModel {
     return this._model;
   }
-  set model(model: CompleterWidget.IModel) {
+  set model(model: Completer.IModel) {
     if (!model && !this._model || model === this._model) {
       return;
     }
@@ -465,8 +465,8 @@ class CompleterWidget extends Widget {
 
   private _activeIndex = 0;
   private _editor: CodeEditor.IEditor | null = null;
-  private _model: CompleterWidget.IModel | null = null;
-  private _renderer: CompleterWidget.IRenderer | null = null;
+  private _model: Completer.IModel | null = null;
+  private _renderer: Completer.IRenderer | null = null;
   private _resetFlag = false;
   private _selected = new Signal<this, string>(this);
   private _visibilityChanged = new Signal<this, void>(this);
@@ -474,7 +474,7 @@ class CompleterWidget extends Widget {
 
 
 export
-namespace CompleterWidget {
+namespace Completer {
   /**
    * The initialization options for a completer widget.
    */
@@ -581,12 +581,12 @@ namespace CompleterWidget {
     /**
      * Handle a cursor change.
      */
-    handleCursorChange(change: CompleterWidget.ITextState): void;
+    handleCursorChange(change: Completer.ITextState): void;
 
     /**
      * Handle a completion request.
      */
-    handleTextChange(change: CompleterWidget.ITextState): void;
+    handleTextChange(change: Completer.ITextState): void;
 
     /**
      * Create a resolved patch between the original state and a patch string.

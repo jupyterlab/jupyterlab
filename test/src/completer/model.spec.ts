@@ -12,11 +12,11 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  CompleterModel, CompleterWidget
+  CompleterModel, Completer
 } from '@jupyterlab/completer';
 
 
-function makeState(text: string): CompleterWidget.ITextState {
+function makeState(text: string): Completer.ITextState {
   return {
     column: 0,
     lineHeight: 0,
@@ -100,7 +100,7 @@ describe('completer/model', () => {
         let called = 0;
         let currentValue = 'foo';
         let newValue = 'foob';
-        let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
+        let cursor: Completer.ICursorSpan = { start: 0, end: 0 };
         let request = makeState(currentValue);
         let change = makeState(newValue);
         let listener = (sender: any, args: void) => { called++; };
@@ -120,7 +120,7 @@ describe('completer/model', () => {
         let called = 0;
         let currentValue = 'foo';
         let newValue = 'foob';
-        let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
+        let cursor: Completer.ICursorSpan = { start: 0, end: 0 };
         let request = makeState(currentValue);
         let change = makeState(newValue);
         let listener = (sender: any, args: void) => { called++; };
@@ -143,7 +143,7 @@ describe('completer/model', () => {
 
       it('should return an unfiltered list of items if query is blank', () => {
         let model = new CompleterModel();
-        let want: CompleterWidget.IItem[] = [
+        let want: Completer.IItem[] = [
           { raw: 'foo', text: 'foo' },
           { raw: 'bar', text: 'bar' },
           { raw: 'baz', text: 'baz' }
@@ -154,7 +154,7 @@ describe('completer/model', () => {
 
       it('should return a filtered list of items if query is set', () => {
         let model = new CompleterModel();
-        let want: CompleterWidget.IItem[] = [
+        let want: Completer.IItem[] = [
           { raw: 'foo', text: '<mark>f</mark>oo' }
         ];
         model.setOptions(['foo', 'bar', 'baz']);
@@ -164,7 +164,7 @@ describe('completer/model', () => {
 
       it('should order list based on score', () => {
         let model = new CompleterModel();
-        let want: CompleterWidget.IItem[] = [
+        let want: Completer.IItem[] = [
           { raw: 'qux', text: '<mark>qux</mark>' },
           { raw: 'quux', text: '<mark>qu</mark>u<mark>x</mark>' }
         ];
@@ -175,7 +175,7 @@ describe('completer/model', () => {
 
       it('should break ties in score by locale sort', () => {
         let model = new CompleterModel();
-        let want: CompleterWidget.IItem[] = [
+        let want: Completer.IItem[] = [
           { raw: 'quux', text: '<mark>qu</mark>ux' },
           { raw: 'qux', text: '<mark>qu</mark>x' }
         ];
@@ -230,7 +230,7 @@ describe('completer/model', () => {
         let model = new CompleterModel();
         let currentValue = 'foo';
         let newValue = 'foob';
-        let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
+        let cursor: Completer.ICursorSpan = { start: 0, end: 0 };
         let request = makeState(currentValue);
         let change = makeState(newValue);
         model.current = change;
@@ -245,7 +245,7 @@ describe('completer/model', () => {
         let model = new CompleterModel();
         let currentValue = 'foo';
         let newValue = 'foob';
-        let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
+        let cursor: Completer.ICursorSpan = { start: 0, end: 0 };
         let request = makeState(currentValue);
         let change = makeState(newValue);
         model.original = request;
@@ -260,7 +260,7 @@ describe('completer/model', () => {
         let model = new CompleterModel();
         let currentValue = 'foo';
         let newValue = 'fo';
-        let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
+        let cursor: Completer.ICursorSpan = { start: 0, end: 0 };
         let request = makeState(currentValue);
         let change = makeState(newValue);
         model.original = request;
@@ -282,7 +282,7 @@ describe('completer/model', () => {
 
       it('should not set if original request is nonexistent', () => {
         let model = new CompleterModel();
-        let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
+        let cursor: Completer.ICursorSpan = { start: 0, end: 0 };
         let request = makeState('foo');
         model.cursor = cursor;
         expect(model.cursor).to.be(null);
@@ -330,7 +330,7 @@ describe('completer/model', () => {
         let model = new CompleterModel();
         let currentValue = 'foo';
         let newValue = 'foob';
-        let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 0 };
+        let cursor: Completer.ICursorSpan = { start: 0, end: 0 };
         let request = makeState(currentValue);
         let change = makeState(newValue);
         (change as any).column = 4;
@@ -361,11 +361,11 @@ describe('completer/model', () => {
       it('should return a patch value', () => {
         let model = new CompleterModel();
         let patch = 'foobar';
-        let want: CompleterWidget.IPatch = {
+        let want: Completer.IPatch = {
           text: patch,
           offset: patch.length
         };
-        let cursor: CompleterWidget.ICursorSpan = { start: 0, end: 3 };
+        let cursor: Completer.ICursorSpan = { start: 0, end: 3 };
         model.original = makeState('foo');
         model.cursor = cursor;
         expect(model.createPatch(patch)).to.eql(want);
@@ -382,11 +382,11 @@ describe('completer/model', () => {
         let patch = 'barbaz';
         let start = currentValue.length;
         let end = currentValue.length;
-        let want: CompleterWidget.IPatch = {
+        let want: Completer.IPatch = {
           text: currentValue + patch,
           offset: currentValue.length + patch.length
         };
-        let cursor: CompleterWidget.ICursorSpan = { start, end };
+        let cursor: Completer.ICursorSpan = { start, end };
         model.original = makeState(currentValue);
         model.cursor = cursor;
         expect(model.createPatch(patch)).to.eql(want);
