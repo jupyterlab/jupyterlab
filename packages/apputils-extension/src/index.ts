@@ -106,9 +106,20 @@ const settingDBPlugin: JupyterLabPlugin<ISettingDB> = {
   id: 'jupyter.services.settingdb',
   autoStart: true,
   provides: ISettingDB,
-  requires: [IStateDB],
-  activate: (app: JupyterLab, state: IStateDB) => {
-    const database = new SettingDB({ datastore: state });
+  activate: (app: JupyterLab) => {
+    const database = new SettingDB({
+      datastore: {
+        fetch: (id: string): Promise<JSONObject | null> => {
+          return Promise.reject(new Error('fetch not implemented'));
+        },
+        remove: (id: string): Promise<void> => {
+          return Promise.reject(new Error('remove not implemented'));
+        },
+        save: (id: string, value: JSONObject): Promise<void> => {
+          return Promise.reject(new Error('save not implemented'));
+        }
+      }
+    });
     return database;
   }
 };
