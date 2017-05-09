@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
-  ITooltipManager, TooltipWidget
+  ITooltipManager, Tooltip
 } from '@jupyterlab/tooltip';
 
 
@@ -55,7 +55,7 @@ const service: JupyterLabPlugin<ITooltipManager> = {
   autoStart: true,
   provides: ITooltipManager,
   activate: (app: JupyterLab): ITooltipManager => {
-    let tooltip: TooltipWidget | null = null;
+    let tooltip: Tooltip | null = null;
     return {
       invoke(options: ITooltipManager.IOptions): Promise<void> {
         const detail: 0 | 1 = 0;
@@ -67,7 +67,7 @@ const service: JupyterLabPlugin<ITooltipManager> = {
         }
 
         return Private.fetch({ detail, editor, kernel }).then(bundle => {
-          tooltip = new TooltipWidget({ anchor, bundle, editor, rendermime });
+          tooltip = new Tooltip({ anchor, bundle, editor, rendermime });
           Widget.attach(tooltip, document.body);
         }).catch(() => { /* Fails silently. */ });
       }
