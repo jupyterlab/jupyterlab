@@ -1,6 +1,6 @@
 #!/bin/bash
 set -ex
-npm install
+yarn
 wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
 bash miniconda.sh -b -p $HOME/miniconda
 export PATH="$HOME/miniconda/bin:$PATH"
@@ -12,7 +12,7 @@ conda install pip pyzmq
 
 if [[ $TRAVIS_NODE_VERSION == "0.12" ]]; then
     conda install notebook
-else 
+else
     # Install the development version of the notebook
     git clone https://github.com/jupyter/notebook
     cd notebook

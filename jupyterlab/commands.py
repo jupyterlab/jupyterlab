@@ -13,7 +13,11 @@ from subprocess import check_output, CalledProcessError
 import shutil
 import sys
 import tarfile
+from pathlib import Path
+import hashlib
+
 from jupyter_core.paths import ENV_JUPYTER_PATH, ENV_CONFIG_PATH
+from .builder import get_build_tool
 
 
 if sys.platform == 'win32':
@@ -26,6 +30,10 @@ else:
 here = osp.dirname(osp.abspath(__file__))
 CONFIG_PATH = os.environ.get('JUPYTERLAB_CONFIG_DIR', ENV_CONFIG_PATH[0])
 BUILD_PATH = ENV_JUPYTER_PATH[0]
+BUILD_TOOL = os.environ.get('JUPYTERLAB_BUILD_TOOL')
+
+
+builder = get_build_tool(BUILD_TOOL)
 
 
 def run(cmd, **kwargs):
@@ -46,22 +54,53 @@ def install_extension(extension):
     Follows the semantics of https://docs.npmjs.com/cli/install.
 
     The extension is first validated.
-
-    If link is true, the source directory is linked using `npm link`.
     """
     tar_name, pkg_name = validate_extension(extension)
     config = _get_config()
-    path = pjoin(_get_cache_dir(config), tar_name)
-    run(['npm', 'install', '--save', path], cwd=_get_root_dir(config))
-    config['installed_extensions'][pkg_name] = path
+    path = pjoin(_get_extension_dir(config), tar_name)
+    path = "./{}".format(Path(path).relative_to(_get_root_dir(config)))
+
+    # this is apparently the most bulletproof way to reference a local tarball
+    builder.install(['{}@file:{}'.format(pkg_name, path)],
+                    cwd=_get_root_dir(config))
+
+    # config['installed_extensions'][pkg_name] = path
+
     if pkg_name in config['linked_extensions']:
         del config['linked_extensions'][pkg_name]
+
     _write_config(config)
+    _ensure_package(config)
+
+
+def installed_extensions():
+    config = _get_config()
+    root = _get_root_dir(config)
+    extensions_dir = Path(root) / 'extensions'
+
+    installed = {}
+
+    for extension in extensions_dir.glob('*.tgz'):
+        try:
+            tar = tarfile.open(str(extension), "r:gz")
+            f = tar.extractfile('package/package.json')
+            data = json.loads(f.read().decode('utf8'))
+            installed[data['name']] = {
+                "tarfile": str(extension.relative_to(extensions_dir)),
+                "data": data
+            }
+        except err:
+            print("Some error with", extension_tarball, err)
+
+    return installed
 
 
 def link_extension(extension):
     """Link an extension against the JupyterLab build.
     """
+    config = _get_config()
+    root = _get_root_dir(config)
+
     path = _normalize_path(extension)
 
     # Verify the package.json data.
@@ -73,14 +112,15 @@ def link_extension(extension):
     with open(pkg_path) as fid:
         data = json.load(fid)
 
-    _validate_package(data, path)
+    _validate_package(data, extension)
+
+    # Use normal yarn link semantics
+    builder.link(cwd=path)
+    builder.link([data['name']], cwd=root)
 
     # Update JupyterLab metadata.
-    config = _get_config()
     name = data['name']
     config['linked_extensions'][name] = path
-    if name in config['installed_extensions']:
-        del config['installed_extensions'][name]
     _write_config(config)
 
 
@@ -89,14 +129,18 @@ def unlink_extension(extension):
     """
     extension = _normalize_path(extension)
     config = _get_config()
-
+    root = _get_root_dir(config)
     name = None
+    path = None
     for (key, value) in config['linked_extensions'].items():
         if value == extension or key == extension:
             name = key
+            path = value
             break
 
     if name:
+        builder.unlink([name], cwd=root)
+        builder.unlink(cwd=path)
         del config['linked_extensions'][name]
         _write_config(config)
         return True
@@ -107,13 +151,15 @@ def unlink_extension(extension):
 
 def uninstall_extension(name):
     """Uninstall an extension by name.
+
+       This will be the full npm name, perhaps including a scope: @jupyterlab/some-extension
     """
     config = _get_config()
+    root = _get_root_dir(config)
 
-    if name in config['installed_extensions']:
-        del config['installed_extensions'][name]
-        _write_config(config)
-        return True
+    for extension_name, extension in installed_extensions().items():
+        if extension['data']['name'] == name:
+            builder.remove([name], cwd=root)
 
     print('No labextension named "%s" installed' % name)
     return False
@@ -123,7 +169,7 @@ def list_extensions():
     """List installed extensions.
     """
     config = _get_config()
-    installed = list(config['installed_extensions'])
+    installed = list(installed_extensions().keys())
     linked = list(config['linked_extensions'])
     return sorted(installed + linked)
 
@@ -134,12 +180,12 @@ def validate_extension(extension):
     config = _get_config()
     extension = _normalize_path(extension)
     _ensure_package(config)
-    cache_dir = _get_cache_dir(config)
+    extensions_dir = _get_extension_dir(config)
     # npm pack the extension
-    output = run(['npm', 'pack', extension], cwd=cache_dir)
+    output = builder.pack(extension, cwd=extensions_dir)
     name = output.decode('utf8').splitlines()[-1]
     # read the package.json data from the file
-    tar = tarfile.open(pjoin(cache_dir, name), "r:gz")
+    tar = tarfile.open(pjoin(extensions_dir, name), "r:gz")
     f = tar.extractfile('package/package.json')
     data = json.loads(f.read().decode('utf8'))
     _validate_package(data, extension)
@@ -155,7 +201,7 @@ def clean():
             shutil.rmtree(target)
 
 
-def build():
+def build(watch=False):
     """Build the JupyterLab application."""
     # Set up the build directory.
     config = _get_config()
@@ -163,14 +209,15 @@ def build():
     root = _get_root_dir(config)
 
     # Make sure packages are installed.
-    run(['npm', 'install'], cwd=root)
+    builder.install(cwd=root)
 
-    # Install the linked extensions.
-    for value in config['linked_extensions'].values():
-        run(['npm', 'install', value], cwd=root)
+    args = ('build',)
+
+    if watch:
+        args = args + ('--', '--watch')
 
     # Build the app.
-    run(['npm', 'run', 'build'], cwd=root)
+    builder.run(args, no_capture=watch, cwd=root)
 
 
 def describe():
@@ -186,14 +233,21 @@ def describe():
     return description
 
 
+def template():
+    config = _get_config()
+    _ensure_package(config)
+    root = _get_root_dir(config)
+    builder.run(('template',), cwd=root)
+
+
 def _ensure_package(config):
     """Make sure the build dir is set up.
     """
-    cache_dir = _get_cache_dir(config)
+    extensions_dir = _get_extension_dir(config)
     root_dir = _get_root_dir(config)
-    if not osp.exists(cache_dir):
-        os.makedirs(cache_dir)
-    for name in ['package.json', 'index.template.js', 'webpack.config.js']:
+    if not osp.exists(extensions_dir):
+        os.makedirs(extensions_dir)
+    for name in ['package.json', 'index.template.js', 'webpack.config.js', '.yarnrc', 'make_template.js', 'yarn.lock']:
         dest = pjoin(root_dir, name)
         shutil.copy2(pjoin(here, name), dest)
 
@@ -201,11 +255,14 @@ def _ensure_package(config):
     pkg_path = pjoin(root_dir, 'package.json')
     with open(pkg_path) as fid:
         data = json.load(fid)
-    for (key, value) in config['installed_extensions'].items():
-        data['dependencies'][key] = value
-        data['jupyterlab']['extensions'].append(key)
-    for key in config['linked_extensions']:
-        data['jupyterlab']['extensions'].append(key)
+
+    for (extension_name, extension) in installed_extensions().items():
+        data['dependencies'][extension_name] = 'file:./extensions/{}'.format(extension['tarfile'])
+        data['jupyterlab']['extensions'].append(extension_name)
+
+    for extension_name in config['linked_extensions']:
+        data['jupyterlab']['extensions'].append(extension_name)
+
     with open(pkg_path, 'w') as fid:
         json.dump(data, fid, indent=4)
 
@@ -233,7 +290,6 @@ def _get_config(config_dir=None):
         with open(file) as fid:
             data = json.load(fid)
     data.setdefault('location', pjoin(BUILD_PATH, 'lab'))
-    data.setdefault('installed_extensions', dict())
     data.setdefault('linked_extensions', dict())
     return data
 
@@ -250,6 +306,7 @@ def _write_config(data, config_dir=None):
                 raise
     with open(pjoin(config_dir, 'build_config.json'), 'w') as fid:
         json.dump(data, fid, indent=4)
+    template()
 
 
 def _normalize_path(extension):
@@ -278,6 +335,6 @@ def _get_pkg_path(config=None):
     return pjoin(_get_root_dir(config), 'package.json')
 
 
-def _get_cache_dir(config=None):
+def _get_extension_dir(config=None):
     config = config or _get_config()
-    return pjoin(_get_root_dir(config), 'cache')
+    return pjoin(_get_root_dir(config), 'extensions')

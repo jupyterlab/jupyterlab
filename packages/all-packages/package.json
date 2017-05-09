@@ -73,7 +73,7 @@
     "build": "tsc && node build.js",
     "clean": "rimraf lib",
     "docs": "typedoc --mode modules --module commonjs --excludeNotExported --target es5 --moduleResolution node --name JupyterLab --out ../../docs/ .",
-    "watch": "watch \"npm run build\" .. --wait 10 --filter=../../scripts/watch-filter.js"
+    "watch": "watch \"yarn build\" .. --wait 10 --filter=../../scripts/watch-filter.js"
   },
   "repository": {
     "type": "git",

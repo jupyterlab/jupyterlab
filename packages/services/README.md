@@ -36,14 +36,14 @@ Source Build
 git clone https://github.com/jupyterlab/services.git
 cd services
 npm install
-npm run build
+yarn build
 conda install notebook  # notebook 4.2+ required
 ```
 
 **Rebuild**
 ```bash
-npm run clean
-npm run build
+yarn clean
+yarn build
 ```
 
 
@@ -63,7 +63,7 @@ Build Docs
 Follow the source build instructions first.
 
 ```bash
-npm run docs
+yarn docs
 ```
 
 Navigate to `docs/index.html`.

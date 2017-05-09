@@ -1,10 +1,11 @@
 {
-  "name": "@jupyterlab/python-tests",
+  "name": "@jupyterlab/python-tests-extension",
   "version": "0.1.0",
   "private": true,
   "jupyterlab": { "extension": true },
   "dependencies": {
-    "@phosphor/widgets": "^1.1.0"
+    "@phosphor/widgets": "^1.1.0",
+    "@jupyterlab/python-tests": "^0.1.0"
   },
   "devDependencies": {}
 }

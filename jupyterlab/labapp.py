@@ -11,15 +11,32 @@ from traitlets import Bool, Unicode
 
 from ._version import __version__
 from .extension import load_jupyter_server_extension
-from .commands import build, clean, describe
+from .commands import build, clean, describe, template
+
 
 
 class LabBuildApp(JupyterApp):
     version = __version__
+    flags = dict(
+        watch=(
+            {'LabBuildApp': {'watch': True}},
+            'Watch core and extensions and rebuild on changes'),
+        template=(
+            {'LabBuildApp': {'template': True}},
+            'Just build the index.js template and package.json'),
+        **flags
+    )
     description = "Build the JupyterLab application"
+    watch = Bool(False, config=True,
+        help="Watch local files and rebuild on change")
+    template = Bool(False, config=True,
+        help="just rebuild the template")
 
     def start(self):
-        build()
+        if self.template:
+            template()
+        else:
+            build(watch=self.watch)
 
 
 class LabCleanApp(JupyterApp):
@@ -58,6 +75,9 @@ class LabApp(NotebookApp):
     examples = """
         jupyter lab                       # start JupyterLab
         jupyter lab --certfile=mycert.pem # use SSL/TLS certificate
+        jupyter lab build                 # rebuild the js app
+        jupyter lab build --watch         # watch linked extensions
+        jupyter lab build --template      # rebuild with newly added/linked
     """
 
     flags = lab_flags
@@ -65,7 +85,7 @@ class LabApp(NotebookApp):
     subcommands = dict(
         build=(LabBuildApp, LabBuildApp.description.splitlines()[0]),
         clean=(LabCleanApp, LabCleanApp.description.splitlines()[0]),
-        describe=(LabDescribeApp, LabBuildApp.description.splitlines()[0])
+        describe=(LabDescribeApp, LabBuildApp.description.splitlines()[0]),
     )
 
     default_url = Unicode('/lab', config=True,

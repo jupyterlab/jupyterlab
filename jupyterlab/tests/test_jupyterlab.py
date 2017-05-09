@@ -25,7 +25,7 @@ from jupyterlab.extension import (
 )
 from jupyterlab.commands import (
     install_extension, uninstall_extension, list_extensions,
-    build, link_extension, unlink_extension, _get_cache_dir,
+    build, link_extension, unlink_extension, _get_extension_dir,
     _get_build_dir, _get_config
 )
 
@@ -108,7 +108,7 @@ class TestExtension(TestCase):
 
     def test_install_extension(self):
         install_extension(pjoin(here, 'mockextension'))
-        path = pjoin(_get_cache_dir(), '*.tgz')
+        path = pjoin(_get_extension_dir(), '*.tgz')
         assert glob.glob(path)
         data = _get_config()
         exts = data['installed_extensions']

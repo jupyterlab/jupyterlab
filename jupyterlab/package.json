@@ -2,7 +2,8 @@
   "private": true,
   "name": "@jupyterlab/application-top",
   "scripts": {
-    "build": "webpack"
+    "build": "webpack",
+    "template": "node -e 'require(\"./make_template\")()'"
   },
   "dependencies": {
     "@jupyterlab/about-extension": "^0.3.1",

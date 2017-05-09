@@ -7,9 +7,9 @@ Please take a look at the Contributor documentation, familiarize yourself with
 using the Jupyter Notebook, and introduce yourself on the mailing list and share
 what area of the project you are interested in working on.
 
-We have labeled some issues as [sprint friendly](https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aopen+is%3Aissue+label%3Asprint-friendly) 
+We have labeled some issues as [sprint friendly](https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aopen+is%3Aissue+label%3Asprint-friendly)
 that we believe are good examples of small, self contained changes.  
-We encourage those that are new to the code base to implement and/or ask 
+We encourage those that are new to the code base to implement and/or ask
 questions about these issues.
 
 
@@ -23,22 +23,22 @@ All source code is written in [TypeScript](http://www.typescriptlang.org/Handboo
 
 ## Setting Up a Development Environment
 
-### Installing Node.js and npm
+### Installing Node.js and yarn
 
 Building the Notebook from its GitHub source code requires some tools to
 create and minify JavaScript components and the CSS.
-Namely, that's Node.js and Node's package manager, ``npm``.
+Namely, that's Node.js and the package manager ``yarn``.
 
 If you use ``conda``, you can get them with:
 
 ```bash
-conda install -c javascript nodejs
+conda install -c javascript nodejs yarnpkg
 ```
 
 If you use [Homebrew](http://brew.sh/) on Mac OS X:
 
 ```bash
-brew install node
+brew install node yarn
 ```
 
 For Debian/Ubuntu systems, you should use the ``nodejs-legacy`` package instead
@@ -46,7 +46,7 @@ of the ``node`` package:
 
 ```bash
 sudo apt-get update
-sudo apt-get install nodejs-legacy npm
+sudo apt-get install nodejs-legacy npm yarn
 ```
 
 You can also use the installer from the [Node.js](https://nodejs.org) website.
@@ -82,7 +82,7 @@ steps::
     pip install -e . # will take a long time to build everything
     jupyter serverextension enable --py jupyterlab
 
-Note: At times, it may be necessary to clean your local repo with the 
+Note: At times, it may be necessary to clean your local repo with the
 command ``git clean -fdx``.
 
 ### Run JupyterLab
@@ -102,8 +102,8 @@ jupyter lab --debug
 ### Build and run the tests
 
 ```bash
-npm run build:test
-npm test
+yarn build:test
+yarn test
 ```
 
 ### Build and run the stand-alone examples
@@ -111,7 +111,7 @@ npm test
 To install and build the examples in the `examples` directory:
 
 ```bash
-npm run build:examples
+yarn build:examples
 ```
 
 To run a specific example, change to the example's directory (i.e.
@@ -143,7 +143,7 @@ build tool.  The npm package source files are in the `packages/` subdirectory.
 - Jupyter notebook server version 4.2 or later (to run examples)
 
 ```bash
-npm install --save jupyterlab
+yarn add --save jupyterlab
 ```
 
 ### Build the NPM Packages from Source
@@ -151,15 +151,15 @@ npm install --save jupyterlab
 ```bash
 git clone https://github.com/jupyterlab/jupyterlab.git
 cd jupyterlab
-npm install
-npm run build
+yarn install
+yarn build
 ```
 
 **Rebuild**
 
 ```bash
-npm run clean
-npm run build
+yarn clean
+yarn build
 ```
 
 ## The Jupyter Server Extension
@@ -173,7 +173,7 @@ version 4.2 or later is installed.
 When you make a change to JupyterLab npm package source files, run:
 
 ```bash
-npm run build:main
+yarn build:main
 ```
 
 to build the changes and then refresh your browser to see the changes.
@@ -181,17 +181,16 @@ to build the changes and then refresh your browser to see the changes.
 To have the system build after each source file change, run:
 
 ```bash
-npm run watch:main
+yarn watch:main
 ```
 
 and refresh the browser.
 
 ## Notes
 - By default, the application will load from the JupyterLab staging directory (default is `<sys-prefix>/share/jupyter/lab/build`.  If you wish to run
-the core application in `<git root>/jupyterlab/build`, 
+the core application in `<git root>/jupyterlab/build`,
 run `jupyter lab --dev-mode`.  This is the core application that will
 be shipped.
 
 - The npm modules are fully compatible with Node/Babel/ES6/ES5. Simply
 omit the type declarations when using a language other than TypeScript.
-

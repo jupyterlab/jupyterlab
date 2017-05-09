@@ -12,7 +12,7 @@ After installing the jupyter notebook server 4.2+, follow the steps for
 installing the development version of JupyterLab. To build the examples,
 enter from the ``jupyterlab`` repo root directory: 
 
-    npm run build:examples
+    yarn build:examples
 
 To run a particular example, navigate to the example's subdirectory in the
 ``examples`` directory and enter: 

@@ -64,7 +64,7 @@ def find_package_data():
     Find package_data.
     """
     return {
-        'jupyterlab': ['build/*', 'lab.html', 'package.json', 'index.template.js', 'webpack.config.js']
+        'jupyterlab': ['build/*', 'lab.html', 'package.json', 'index.template.js', 'webpack.config.js', 'yarn.lock', '.yarnrc', 'make_template.js']
     }
 
 
@@ -100,8 +100,8 @@ def update_package_data(distribution):
     build_py.finalize_options()
 
 
-class NPM(Command):
-    description = 'install package.json dependencies using npm'
+class YARN(Command):
+    description = 'install package.json dependencies using yarn'
 
     user_options = []
 
@@ -117,27 +117,32 @@ class NPM(Command):
     def finalize_options(self):
         pass
 
-    def has_npm(self):
-        try:
-            run(['npm', '--version'])
-            return True
-        except:
-            return False
+    def yarn_cmd(self):
+        cmds = ['yarnpkg', 'yarn']
+        if os.environ.get('JUPYTERLAB_BUILD_TOOL'):
+            cmds = [os.environ.get('JUPYTERLAB_BUILD_TOOL')] + cmds
+        for cmd in cmds:
+            try:
+                run([cmd, '--version'])
+                return cmd
+            except:
+                pass
 
     def run(self):
-        has_npm = self.has_npm()
-        if not has_npm:
-            log.error("`npm` unavailable. If you're running this command using sudo, make sure `npm` is available to sudo")
-        log.info("Installing build dependencies with npm. This may take a while...")
+        yarn_cmd = self.yarn_cmd()
+        if not yarn_cmd:
+            log.error("`yarn` unavailable. If you're running this command using sudo, make sure `yarn` is available to sudo")
+        log.info("Installing build dependencies with %s. This may take a while...", yarn_cmd)
         main = os.path.join(here, 'jupyterlab')
-        run(['npm', 'install'], cwd=here)
-        run(['npm', 'run', 'build:main'], cwd=here)
+
+        run([yarn_cmd, 'install'], cwd=here)
+        run([yarn_cmd, 'run', 'build:main'], cwd=here)
 
         for t in self.targets:
             if not os.path.exists(t):
                 msg = 'Missing file: %s' % t
-                if not has_npm:
-                    msg += '\nnpm is required to build the development version'
+                if not yarn_cmd:
+                    msg += '\nyarnpkg or yarn is required to build the development version'
                 raise ValueError(msg)
 
         # update package data in case this created new files
