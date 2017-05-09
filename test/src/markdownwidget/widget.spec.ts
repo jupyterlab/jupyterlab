@@ -16,7 +16,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  MarkdownWidget, MarkdownWidgetFactory
+  MarkdownViewer, MarkdownViewerFactory
 } from '@jupyterlab/markdownwidget';
 
 import {
@@ -30,7 +30,7 @@ import {
 const RENDERMIME = defaultRenderMime();
 
 
-class LogWidget extends MarkdownWidget {
+class LogWidget extends MarkdownViewer {
   methods: string[] = [];
 
   protected onAfterAttach(msg: Message): void {
@@ -57,30 +57,30 @@ describe('markdownwidget/widget', () => {
     context.dispose();
   });
 
-  describe('MarkdownWidgetFactory', () => {
+  describe('MarkdownViewerFactory', () => {
 
     describe('#createNew()', () => {
 
       it('should require a context parameter', () => {
-        let widgetFactory = new MarkdownWidgetFactory({
+        let widgetFactory = new MarkdownViewerFactory({
           name: 'markdown',
           fileExtensions: ['.md'],
           rendermime: RENDERMIME
         });
-        expect(widgetFactory.createNew(context)).to.be.a(MarkdownWidget);
+        expect(widgetFactory.createNew(context)).to.be.a(MarkdownViewer);
       });
 
     });
 
   });
 
-  describe('MarkdownWidget', () => {
+  describe('MarkdownViewer', () => {
 
     describe('#constructor()', () => {
 
       it('should require a context parameter', () => {
-        let widget = new MarkdownWidget(context, RENDERMIME);
-        expect(widget).to.be.a(MarkdownWidget);
+        let widget = new MarkdownViewer(context, RENDERMIME);
+        expect(widget).to.be.a(MarkdownViewer);
       });
 
     });
