@@ -11,7 +11,7 @@ from traitlets import Bool, Unicode
 
 from ._version import __version__
 from .extension import load_jupyter_server_extension
-from .commands import build, clean
+from .commands import build, clean, get_app_dir
 
 
 build_aliases = dict(base_aliases)
@@ -58,6 +58,14 @@ class LabCleanApp(JupyterApp):
         clean(self.app_dir)
 
 
+class LabPathApp(JupyterApp):
+    version = __version__
+    description = "Print the configured path to the JupyterLab application"
+
+    def start(self):
+        print(get_app_dir())
+
+
 lab_aliases = dict(aliases)
 lab_aliases['app-dir'] = 'LabApp.app_dir'
 
@@ -88,7 +96,8 @@ class LabApp(NotebookApp):
 
     subcommands = dict(
         build=(LabBuildApp, LabBuildApp.description.splitlines()[0]),
-        clean=(LabCleanApp, LabCleanApp.description.splitlines()[0])
+        clean=(LabCleanApp, LabCleanApp.description.splitlines()[0]),
+        path=(LabPathApp, LabPathApp.description.splitlines()[0])
     )
 
     default_url = Unicode('/lab', config=True,
