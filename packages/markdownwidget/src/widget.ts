@@ -27,9 +27,9 @@ import {
 
 
 /**
- * The class name added to a Jupyter MarkdownWidget
+ * The class name added to a Jupyter MarkdownViewer
  */
-const MD_CLASS = 'jp-MarkdownWidget';
+const MD_CLASS = 'jp-MarkdownViewer';
 
 /**
  * The timeout to wait for change activity to have ceased before rendering.
@@ -41,7 +41,7 @@ const RENDER_TIMEOUT = 1000;
  * A widget for rendered markdown.
  */
 export
-class MarkdownWidget extends Widget {
+class MarkdownViewer extends Widget {
   /**
    * Construct a new markdown widget.
    */
@@ -130,11 +130,11 @@ class MarkdownWidget extends Widget {
  * A widget factory for Markdown.
  */
 export
-class MarkdownWidgetFactory extends ABCWidgetFactory<MarkdownWidget, DocumentRegistry.IModel> {
+class MarkdownViewerFactory extends ABCWidgetFactory<MarkdownViewer, DocumentRegistry.IModel> {
   /**
    * Construct a new markdown widget factory.
    */
-  constructor(options: MarkdownWidgetFactory.IOptions) {
+  constructor(options: MarkdownViewerFactory.IOptions) {
     super(options);
     this._rendermime = options.rendermime;
   }
@@ -142,8 +142,8 @@ class MarkdownWidgetFactory extends ABCWidgetFactory<MarkdownWidget, DocumentReg
   /**
    * Create a new widget given a context.
    */
-  protected createNewWidget(context: DocumentRegistry.Context): MarkdownWidget {
-    return new MarkdownWidget(context, this._rendermime.clone());
+  protected createNewWidget(context: DocumentRegistry.Context): MarkdownViewer {
+    return new MarkdownViewer(context, this._rendermime.clone());
   }
 
   private _rendermime: RenderMime = null;
@@ -151,10 +151,10 @@ class MarkdownWidgetFactory extends ABCWidgetFactory<MarkdownWidget, DocumentReg
 
 
 /**
- * A namespace for `MarkdownWidgetFactory` statics.
+ * A namespace for `MarkdownViewerFactory` statics.
  */
 export
-namespace MarkdownWidgetFactory {
+namespace MarkdownViewerFactory {
   /**
    * The options used to create a markdown widget factory.
    */
