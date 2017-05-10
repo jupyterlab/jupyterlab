@@ -1,7 +1,7 @@
 {
   "name": "@jupyterlab/default-theme",
   "version": "0.4.0",
-  "description": "JupyterLab - Theme Assets",
+  "description": "JupyterLab - Default Theme",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
