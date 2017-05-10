@@ -25,8 +25,8 @@ import * as completerExtension
 import * as consoleExtension
   from '@jupyterlab/console-extension';
 
-import * as csvwidgetExtension
-  from '@jupyterlab/csvwidget-extension';
+import * as csvviewerExtension
+  from '@jupyterlab/csvviewer-extension';
 
 import * as docmanagerExtension
   from '@jupyterlab/docmanager-extension';
@@ -34,8 +34,8 @@ import * as docmanagerExtension
 import * as docregistryExtension
   from '@jupyterlab/docregistry-extension';
 
-import * as editorwidgetExtension
-  from '@jupyterlab/editorwidget-extension';
+import * as fileeditorExtension
+  from '@jupyterlab/fileeditor-extension';
 
 import * as faqExtension
   from '@jupyterlab/faq-extension';
@@ -46,8 +46,8 @@ import * as filebrowserExtension
 import * as helpExtension
   from '@jupyterlab/help-extension';
 
-import * as imagewidgetExtension
-  from '@jupyterlab/imagewidget-extension';
+import * as imageviewerExtension
+  from '@jupyterlab/imageviewer-extension';
 
 import * as inspectorExtension
   from '@jupyterlab/inspector-extension';
@@ -58,8 +58,8 @@ import * as landingExtension
 import * as launchExtension
   from '@jupyterlab/launcher-extension';
 
-import * as markdownwidgetExtension
-  from '@jupyterlab/markdownwidget-extension';
+import * as markdownviewerExtension
+  from '@jupyterlab/markdownviewer-extension';
 
 import * as notebookExtension
   from '@jupyterlab/notebook-extension';
@@ -96,18 +96,18 @@ const mods: JupyterLab.IPluginModule[] = [
   codemirrorExtension,
   completerExtension,
   consoleExtension,
-  csvwidgetExtension,
+  csvviewerExtension,
   docmanagerExtension,
   docregistryExtension,
-  editorwidgetExtension,
+  fileeditorExtension,
   faqExtension,
   filebrowserExtension,
   helpExtension,
-  imagewidgetExtension,
+  imageviewerExtension,
   inspectorExtension,
   landingExtension,
   launchExtension,
-  markdownwidgetExtension,
+  markdownviewerExtension,
   notebookExtension,
   rendermimeExtension,
   runningExtension,

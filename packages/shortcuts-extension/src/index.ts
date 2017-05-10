@@ -77,7 +77,7 @@ const SHORTCUTS = [
   },
   {
     command: 'editor:run-code',
-    selector: '.jp-EditorWidget',
+    selector: '.jp-FileEditor',
     keys: ['Shift Enter']
   },
   {
@@ -118,18 +118,18 @@ const SHORTCUTS = [
     keys: ['Accel Shift H']
   },
   {
-    command: 'imagewidget:zoom-in',
-    selector: '.jp-ImageWidget',
+    command: 'imageviewer:zoom-in',
+    selector: '.jp-ImageViewer',
     keys: ['=']
   },
   {
-    command: 'imagewidget:zoom-out',
-    selector: '.jp-ImageWidget',
+    command: 'imageviewer:zoom-out',
+    selector: '.jp-ImageViewer',
     keys: ['-']
   },
   {
-    command: 'imagewidget:reset-zoom',
-    selector: '.jp-ImageWidget',
+    command: 'imageviewer:reset-zoom',
+    selector: '.jp-ImageViewer',
     keys: ['0']
   },
   {
