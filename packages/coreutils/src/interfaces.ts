@@ -1,10 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  JSONObject
-} from '@phosphor/coreutils';
-
 
 /**
  * A generic interface for change emitter payloads.
@@ -32,7 +28,7 @@ interface IChangedArgs<T> {
  * The description of a general purpose datastore.
  */
 export
-interface IDatastore {
+interface IDatastore<T, U> {
   /**
    * Retrieve a saved bundle from the datastore.
    *
@@ -44,7 +40,7 @@ interface IDatastore {
    * The promise returned by this method may be rejected if an error occurs in
    * retrieving the data. Non-existence of an `id` will succeed with `null`.
    */
-  fetch(id: string): Promise<JSONObject | null>;
+  fetch(id: string): Promise<T | null>;
 
   /**
    * Remove a value from the datastore.
@@ -64,5 +60,5 @@ interface IDatastore {
    *
    * @returns A promise that is rejected if saving fails and succeeds otherwise.
    */
-  save(id: string, value: JSONObject): Promise<void>;
+  save(id: string, value: U): Promise<void>;
 }

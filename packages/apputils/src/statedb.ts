@@ -39,7 +39,7 @@ interface IStateItem {
  * The description of a state database.
  */
 export
-interface IStateDB extends IDatastore {
+interface IStateDB extends IDatastore<JSONObject, JSONObject> {
   /**
    * The maximum allowed length of the data after it has been serialized.
    */

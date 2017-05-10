@@ -15,7 +15,6 @@ export * from './instancetracker';
 export * from './layoutrestorer';
 export * from './mainmenu';
 export * from './sanitizer';
-export * from './settingdb';
 export * from './statedb';
 export * from './styling';
 export * from './toolbar';

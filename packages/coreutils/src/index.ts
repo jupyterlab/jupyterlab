@@ -12,6 +12,7 @@ export * from './observablestring';
 export * from './observablelist';
 export * from './pageconfig';
 export * from './path';
+export * from './settingregistry';
 export * from './time';
 export * from './undoablelist';
 export * from './url';
