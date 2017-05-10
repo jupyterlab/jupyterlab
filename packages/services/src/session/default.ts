@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
  import {
-   URLExt, uuid
+   PageConfig, URLExt, uuid
  } from '@jupyterlab/coreutils';
 
 import {
@@ -55,12 +55,12 @@ class DefaultSession implements Session.ISession {
   constructor(options: Session.IOptions, id: string, kernel: Kernel.IKernel) {
     this._id = id;
     this._path = options.path;
-    this._baseUrl = options.baseUrl || utils.getBaseUrl();
+    this._baseUrl = options.baseUrl || PageConfig.getBaseUrl();
     this._uuid = uuid();
     this._ajaxSettings = JSON.stringify(
       utils.ajaxSettingsWithToken(options.ajaxSettings || {}, options.token)
     );
-    this._token = options.token || utils.getConfigOption('token');
+    this._token = options.token || PageConfig.getOption('token');
     Private.runningSessions.push(this);
     this.setupKernel(kernel);
     this._options = JSONExt.deepCopy(options);
@@ -483,7 +483,7 @@ namespace Private {
   function createKernel(options: Session.IOptions): Promise<Kernel.IKernel> {
     let kernelOptions: Kernel.IOptions = {
       name: options.kernelName || '',
-      baseUrl: options.baseUrl || utils.getBaseUrl(),
+      baseUrl: options.baseUrl || PageConfig.getBaseUrl(),
       wsUrl: options.wsUrl || '',
       username: options.username || '',
       clientId: options.clientId || '',
@@ -554,7 +554,7 @@ namespace Private {
   export
   function getSessionModel(id: string, options?: Session.IOptions): Promise<Session.IModel> {
     options = options || {};
-    let baseUrl = options.baseUrl || utils.getBaseUrl();
+    let baseUrl = options.baseUrl || PageConfig.getBaseUrl();
     let url = getSessionUrl(baseUrl, id);
     let ajaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
     ajaxSettings.method = 'GET';
@@ -600,7 +600,7 @@ namespace Private {
    */
   export
   function listRunning(options: Session.IOptions = {}): Promise<Session.IModel[]> {
-    let baseUrl = options.baseUrl || utils.getBaseUrl();
+    let baseUrl = options.baseUrl || PageConfig.getBaseUrl();
     let url = URLExt.join(baseUrl, SESSION_SERVICE_URL);
     let ajaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
     ajaxSettings.method = 'GET';
@@ -644,7 +644,7 @@ namespace Private {
    */
   export
   function shutdown(id: string, options: Session.IOptions = {}): Promise<void> {
-    let baseUrl = options.baseUrl || utils.getBaseUrl();
+    let baseUrl = options.baseUrl || PageConfig.getBaseUrl();
     let ajaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
     return shutdownSession(id, baseUrl, ajaxSettings);
   }
@@ -697,7 +697,7 @@ namespace Private {
    */
   export
   function startSession(options: Session.IOptions): Promise<Session.IModel> {
-    let baseUrl = options.baseUrl || utils.getBaseUrl();
+    let baseUrl = options.baseUrl || PageConfig.getBaseUrl();
     let url = URLExt.join(baseUrl, SESSION_SERVICE_URL);
     let model = {
       kernel: { name: options.kernelName, id: options.kernelId },

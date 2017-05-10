@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  uuid
+  PageConfig, uuid
 } from '@jupyterlab/coreutils';
 
 import {
@@ -14,10 +14,6 @@ import {
 import {
   JSONObject
 } from '@phosphor/coreutils';
-
-import {
-  getBaseUrl
-} from '../../../lib/utils';
 
 import {
   Kernel, KernelMessage
@@ -434,7 +430,7 @@ describe('kernel', () => {
     context('#baseUrl', () => {
 
       it('should be the base url of the server', () => {
-        expect(kernel.baseUrl).to.be(getBaseUrl());
+        expect(kernel.baseUrl).to.be(PageConfig.getBaseUrl());
       });
 
     });

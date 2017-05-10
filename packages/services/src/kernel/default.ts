@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  URLExt, uuid
+  PageConfig, URLExt, uuid
 } from '@jupyterlab/coreutils';
 
 import {
@@ -73,12 +73,12 @@ class DefaultKernel implements Kernel.IKernel {
   constructor(options: Kernel.IOptions, id: string) {
     this._name = options.name;
     this._id = id;
-    this._baseUrl = options.baseUrl || utils.getBaseUrl();
-    this._wsUrl = options.wsUrl || utils.getWsUrl(this._baseUrl);
+    this._baseUrl = options.baseUrl || PageConfig.getBaseUrl();
+    this._wsUrl = options.wsUrl || PageConfig.getWsUrl(this._baseUrl);
     this._ajaxSettings = JSON.stringify(
       utils.ajaxSettingsWithToken(options.ajaxSettings, options.token)
     );
-    this._token = options.token || utils.getConfigOption('token');
+    this._token = options.token || PageConfig.getOption('token');
     this._clientId = options.clientId || uuid();
     this._username = options.username || '';
     this._futures = new Map<string, KernelFutureHandler>();
@@ -1099,7 +1099,7 @@ namespace Private {
    */
   export
   function getSpecs(options: Kernel.IOptions = {}): Promise<Kernel.ISpecModels> {
-    let baseUrl = options.baseUrl || utils.getBaseUrl();
+    let baseUrl = options.baseUrl || PageConfig.getBaseUrl();
     let url = URLExt.join(baseUrl, KERNELSPEC_SERVICE_URL);
     let ajaxSettings: IAjaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
     ajaxSettings.method = 'GET';
@@ -1128,7 +1128,7 @@ namespace Private {
    */
   export
   function listRunning(options: Kernel.IOptions = {}): Promise<Kernel.IModel[]> {
-    let baseUrl = options.baseUrl || utils.getBaseUrl();
+    let baseUrl = options.baseUrl || PageConfig.getBaseUrl();
     let url = URLExt.join(baseUrl, KERNEL_SERVICE_URL);
     let ajaxSettings: IAjaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
     ajaxSettings.method = 'GET';
@@ -1179,7 +1179,7 @@ namespace Private {
   export
   function startNew(options?: Kernel.IOptions): Promise<Kernel.IKernel> {
     options = options || {};
-    let baseUrl = options.baseUrl || utils.getBaseUrl();
+    let baseUrl = options.baseUrl || PageConfig.getBaseUrl();
     let url = URLExt.join(baseUrl, KERNEL_SERVICE_URL);
     let ajaxSettings: IAjaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
     ajaxSettings.method = 'POST';
@@ -1237,7 +1237,7 @@ namespace Private {
    */
   export
   function shutdown(id: string, options: Kernel.IOptions = {}): Promise<void> {
-    let baseUrl = options.baseUrl || utils.getBaseUrl();
+    let baseUrl = options.baseUrl || PageConfig.getBaseUrl();
     let ajaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
     return shutdownKernel(id, baseUrl, ajaxSettings);
   }
@@ -1341,7 +1341,7 @@ namespace Private {
   export
   function getKernelModel(id: string, options?: Kernel.IOptions): Promise<Kernel.IModel> {
     options = options || {};
-    let baseUrl = options.baseUrl || utils.getBaseUrl();
+    let baseUrl = options.baseUrl || PageConfig.getBaseUrl();
     let url = URLExt.join(baseUrl, KERNEL_SERVICE_URL,
                                 encodeURIComponent(id));
     let ajaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);

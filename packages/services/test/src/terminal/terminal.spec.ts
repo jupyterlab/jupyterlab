@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  PageConfig
+} from '@jupyterlab/coreutils';
+
+import {
   toArray
 } from '@phosphor/algorithm';
 
@@ -14,10 +18,6 @@ import {
 import {
   TerminalSession
 } from '../../../lib/terminal';
-
-import {
-  getBaseUrl
-} from '../../../lib/utils';
 
 import {
   TerminalTester
@@ -186,7 +186,7 @@ describe('terminals', () => {
     context('#baseUrl', () => {
 
       it('should be the base url of the server', () => {
-        expect(session.baseUrl).to.be(getBaseUrl());
+        expect(session.baseUrl).to.be(PageConfig.getBaseUrl());
       });
 
     });

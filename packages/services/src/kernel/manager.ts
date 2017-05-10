@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  PageConfig
+} from '@jupyterlab/coreutils';
+
+import {
   ArrayExt, IIterator, iter
 } from '@phosphor/algorithm';
 
@@ -36,9 +40,9 @@ class KernelManager implements Kernel.IManager {
    * @param options - The default options for kernel.
    */
   constructor(options: Kernel.IOptions = {}) {
-    this._baseUrl = options.baseUrl || utils.getBaseUrl();
-    this._wsUrl = options.wsUrl || utils.getWsUrl(this._baseUrl);
-    this._token = options.token || utils.getConfigOption('token');
+    this._baseUrl = options.baseUrl || PageConfig.getBaseUrl();
+    this._wsUrl = options.wsUrl || PageConfig.getWsUrl(this._baseUrl);
+    this._token = options.token || PageConfig.getOption('token');
     this._ajaxSettings = JSON.stringify(utils.ajaxSettingsWithToken(options.ajaxSettings, options.token));
 
     // Initialize internal data.

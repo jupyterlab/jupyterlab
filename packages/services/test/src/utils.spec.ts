@@ -5,7 +5,7 @@
 import expect = require('expect.js');
 
 import {
-  getConfigOption, getBaseUrl, getWsUrl, ajaxRequest, loadObject
+  ajaxRequest, loadObject
 } from '../../lib/utils';
 
 import {
@@ -19,34 +19,6 @@ global.requirejs = require('requirejs');
 
 
 describe('@jupyterlab/services', () => {
-
-  describe('getConfigOption()', () => {
-
-    it('should get a config option passed on the command line', () => {
-      expect(getConfigOption('foo')).to.be('bar');
-    });
-
-    it('should return `undefined` for a option that was not given', () => {
-      expect(getConfigOption('baz')).to.be(void 0);
-    });
-
-  });
-
-  describe('getBaseUrl()', () => {
-
-    it('should get the default base url', () => {
-      expect(getBaseUrl()).to.be('http://localhost:8888/');
-    });
-
-  });
-
-  describe('getWsUrl()', () => {
-
-    it('should get the default ws url', () => {
-      expect(getWsUrl()).to.be('ws://localhost:8888/');
-    });
-
-  });
 
   describe('ajaxRequest()', () => {
 
