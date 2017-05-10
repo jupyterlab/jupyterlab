@@ -1,5 +1,5 @@
 {
-  "name": "@jupyterlab/markdownwidget",
+  "name": "@jupyterlab/markdownviewer",
   "version": "0.4.0",
   "description": "JupyterLab - Markdown Renderer",
   "main": "lib/index.js",

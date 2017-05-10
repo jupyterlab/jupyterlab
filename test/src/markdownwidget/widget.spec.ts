@@ -17,7 +17,7 @@ import {
 
 import {
   MarkdownViewer, MarkdownViewerFactory
-} from '@jupyterlab/markdownwidget';
+} from '@jupyterlab/markdownviewer';
 
 import {
   DocumentRegistry, Context
@@ -45,7 +45,7 @@ class LogWidget extends MarkdownViewer {
 }
 
 
-describe('markdownwidget/widget', () => {
+describe('markdownviewer/widget', () => {
 
   let context: Context<DocumentRegistry.IModel>;
 
