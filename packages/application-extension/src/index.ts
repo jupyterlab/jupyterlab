@@ -47,7 +47,7 @@ const plugin: JupyterLabPlugin<void> = {
   requires: [ICommandPalette],
   activate: (app: JupyterLab, palette: ICommandPalette) => {
     // Set the datastore required by the application's setting registry.
-    app.settings.setDatastore({
+    app.settings.setDB({
       fetch: (id: string): Promise<JSONObject | null> => {
         return Promise.reject(new Error('fetch not implemented'));
       },

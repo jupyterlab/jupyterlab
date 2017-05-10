@@ -71,18 +71,28 @@ class SettingRegistry {
    */
   constructor(options?: SettingRegistry.IOptions) {
     if (options.datastore) {
-      this.setDatastore(options.datastore);
+      this.setDB(options.datastore);
     }
   }
 
   /**
    * Add a setting to the registry.
    */
-  add(): IDisposable {
-    return new DisposableDelegate(() => { /* no op */ });
+  add(): Promise<IDisposable> {
+    if (!this._isReady) {
+      return this._ready.promise.then(() => this.add());
+    }
+    return Promise.resolve(new DisposableDelegate(() => { /* no op */ }));
   }
 
-  setDatastore(datastore: IDatastore<ISettingRegistry.ISettingFile, ISettingRegistry.ISettingFile>) {
+  /**
+   * Set the setting registry data store.
+   *
+   * @param datastore - The datastore for the setting registry.
+   *
+   * @throws If a datastore has already been set.
+   */
+  setDB(datastore: IDatastore<ISettingRegistry.ISettingFile, ISettingRegistry.ISettingFile>) {
     if (this._isReady) {
       throw new Error('Setting registry already has a datastore.');
     }
