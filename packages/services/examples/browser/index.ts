@@ -3,13 +3,12 @@
 |
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-'use strict';
 
 // Polyfill for ES6 Promises
 import 'es6-promise';
 
 import {
-  Session, utils
+  Session
 } from '@jupyterlab/services';
 
 
