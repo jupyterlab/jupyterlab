@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ISettingRegistry, SettingRegistry
+} from '@jupyterlab/coreutils';
+
+import {
   Application, IPlugin
 } from '@phosphor/application';
 
@@ -59,6 +63,11 @@ class JupyterLab extends Application<ApplicationShell> {
   get restored(): Promise<ApplicationShell.ILayout> {
     return this.shell.restored;
   }
+
+  /**
+   * The setting registry for the application.
+   */
+  readonly settings: ISettingRegistry = new SettingRegistry();
 
   /**
    * Register plugins from a plugin module.

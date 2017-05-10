@@ -2,8 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject
+  JSONObject, PromiseDelegate
 } from '@phosphor/coreutils';
+
+import {
+  DisposableDelegate, IDisposable
+} from '@phosphor/disposable';
 
 import {
   IDatastore
@@ -35,7 +39,7 @@ namespace ISettingRegistry {
   /**
    */
   export
-  interface ISettingItem extends JSONObject {
+  interface ISettingFile extends JSONObject {
     /**
      * The identifier key for a setting item.
      */
@@ -65,14 +69,40 @@ class SettingRegistry {
   /**
    * Instantiate a setting registry.
    */
-  constructor(options: SettingRegistry.IOptions) {
-    this.datastore = options.datastore;
+  constructor(options?: SettingRegistry.IOptions) {
+    if (options.datastore) {
+      this.datastore = options.datastore;
+    }
   }
 
   /**
    * The underlying datastore of the setting registry.
    */
-  readonly datastore: IDatastore<ISettingRegistry.ISettingItem, ISettingRegistry.ISettingBundle>;
+  get datastore(): IDatastore<ISettingRegistry.ISettingFile, ISettingRegistry.ISettingFile> {
+    return this._datastore;
+  }
+  set datastore(datastore: IDatastore<ISettingRegistry.ISettingFile, ISettingRegistry.ISettingFile>) {
+    this._datastore = datastore;
+
+    // If the registry is ready already or if it has no datastore, bail.
+    if (this._isReady || !datastore) {
+      return;
+    }
+
+    this._isReady = true;
+    this._ready.resolve(void 0);
+  }
+
+  /**
+   * Add a setting to the registry.
+   */
+  add(): IDisposable {
+    return new DisposableDelegate(() => { /* no op */ });
+  }
+
+  private _datastore: IDatastore<ISettingRegistry.ISettingFile, ISettingRegistry.ISettingFile> | null = null;
+  private _isReady = false;
+  private _ready = new PromiseDelegate<void>();
 }
 
 /**
@@ -88,6 +118,6 @@ namespace SettingRegistry {
     /**
      * The underlying datastore of a setting registry.
      */
-    datastore: IDatastore<ISettingRegistry.ISettingItem, ISettingRegistry.ISettingBundle>;
+    datastore?: IDatastore<ISettingRegistry.ISettingFile, ISettingRegistry.ISettingFile>;
   }
 }
