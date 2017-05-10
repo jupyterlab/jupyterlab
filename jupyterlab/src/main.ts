@@ -58,8 +58,8 @@ import * as landingExtension
 import * as launchExtension
   from '@jupyterlab/launcher-extension';
 
-import * as markdownwidgetExtension
-  from '@jupyterlab/markdownwidget-extension';
+import * as markdownviewerExtension
+  from '@jupyterlab/markdownviewer-extension';
 
 import * as notebookExtension
   from '@jupyterlab/notebook-extension';
@@ -107,7 +107,7 @@ const mods: JupyterLab.IPluginModule[] = [
   inspectorExtension,
   landingExtension,
   launchExtension,
-  markdownwidgetExtension,
+  markdownviewerExtension,
   notebookExtension,
   rendermimeExtension,
   runningExtension,

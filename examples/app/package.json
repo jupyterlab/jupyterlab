@@ -25,7 +25,7 @@
     "@jupyterlab/inspector-extension": "^0.4.0",
     "@jupyterlab/landing-extension": "^0.4.0",
     "@jupyterlab/launcher-extension": "^0.4.0",
-    "@jupyterlab/markdownwidget-extension": "^0.4.0",
+    "@jupyterlab/markdownviewer-extension": "^0.4.0",
     "@jupyterlab/notebook-extension": "^0.4.0",
     "@jupyterlab/rendermime-extension": "^0.4.0",
     "@jupyterlab/running-extension": "^0.4.0",

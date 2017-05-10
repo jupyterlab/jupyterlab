@@ -27,7 +27,7 @@
     "@jupyterlab/filebrowser": "^0.4.0",
     "@jupyterlab/imageviewer": "^0.4.0",
     "@jupyterlab/inspector": "^0.4.0",
-    "@jupyterlab/markdownwidget": "^0.4.0",
+    "@jupyterlab/markdownviewer": "^0.4.0",
     "@jupyterlab/notebook": "^0.4.0",
     "@jupyterlab/outputarea": "^0.4.0",
     "@jupyterlab/rendermime": "^0.4.0",
