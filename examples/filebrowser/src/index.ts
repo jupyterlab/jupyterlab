@@ -39,7 +39,7 @@ import {
   EditorWidgetFactory
 } from '@jupyterlab/editorwidget';
 
-import '@jupyterlab/default-theme/style/index.css';
+import '@jupyterlab/theme-assets/style/index.css';
 import '../index.css';
 
 

@@ -29,7 +29,7 @@ const LANDING_WRAPPER_CLASS = 'jp-Landing-wrapper';
 const LANDING_DIALOG_CLASS = 'jp-Landing-dialog';
 
 /**
- * The class name for the JupyterLab icon from default-theme.
+ * The class name for the JupyterLab icon from theme-assets.
  */
 const JUPYTERLAB_ICON_CLASS = 'jp-ImageJupyterLab';
 
@@ -44,7 +44,7 @@ const LANDING_LOGO_CLASS = 'jp-Landing-logo';
 const LANDING_SUBTITLE_CLASS = 'jp-Landing-subtitle';
 
 /**
- * The class name added for the tour icon from default-theme.
+ * The class name added for the tour icon from theme-assets.
  */
 const TOUR_ICON_CLASS = 'jp-Landing-tour';
 

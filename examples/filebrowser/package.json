@@ -8,7 +8,7 @@
   "dependencies": {
     "@jupyterlab/apputils": "^0.4.0",
     "@jupyterlab/codemirror": "^0.4.0",
-    "@jupyterlab/default-theme": "^0.4.0",
+    "@jupyterlab/theme-assets": "^0.4.0",
     "@jupyterlab/docmanager": "^0.4.0",
     "@jupyterlab/docregistry": "^0.4.0",
     "@jupyterlab/editorwidget": "^0.4.0",

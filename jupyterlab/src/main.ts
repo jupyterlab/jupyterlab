@@ -86,7 +86,7 @@ import * as tooltipExtension
   from '@jupyterlab/tooltip-extension';
 
 import 'font-awesome/css/font-awesome.min.css';
-import '@jupyterlab/default-theme/style/index.css';
+import '@jupyterlab/theme-assets/style/index.css';
 
 
 const mods: JupyterLab.IPluginModule[] = [

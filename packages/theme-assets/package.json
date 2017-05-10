@@ -1,5 +1,5 @@
 {
-  "name": "@jupyterlab/default-theme",
+  "name": "@jupyterlab/theme-assets",
   "version": "0.4.0",
   "description": "JupyterLab - Theme Assets",
   "main": "lib/index.js",

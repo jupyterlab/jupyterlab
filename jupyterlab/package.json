@@ -35,7 +35,7 @@
     "@jupyterlab/terminal-extension": "^0.4.0",
     "@jupyterlab/tooltip-extension": "^0.4.0",
     "@jupyterlab/application": "^0.4.0",
-    "@jupyterlab/default-theme": "^0.4.0",
+    "@jupyterlab/theme-assets": "^0.4.0",
     "es6-promise": "^4.1.0",
     "font-awesome": "^4.6.3"
   },
