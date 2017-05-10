@@ -18,7 +18,7 @@
 @import url('~@jupyterlab/codemirror/style/index.css');
 @import url('~@jupyterlab/completer/style/index.css');
 @import url('~@jupyterlab/console/style/index.css');
-@import url('~@jupyterlab/csvwidget/style/index.css');
+@import url('~@jupyterlab/csvviewer/style/index.css');
 @import url('~@jupyterlab/fileeditor/style/index.css');
 @import url('~@jupyterlab/faq-extension/style/index.css');
 @import url('~@jupyterlab/filebrowser/style/index.css');

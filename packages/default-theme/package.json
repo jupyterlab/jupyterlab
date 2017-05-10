@@ -24,7 +24,7 @@
     "@jupyterlab/codemirror": "^0.4.0",
     "@jupyterlab/completer": "^0.4.0",
     "@jupyterlab/console": "^0.4.0",
-    "@jupyterlab/csvwidget": "^0.4.0",
+    "@jupyterlab/csvviewer": "^0.4.0",
     "@jupyterlab/fileeditor": "^0.4.0",
     "@jupyterlab/faq-extension": "^0.4.0",
     "@jupyterlab/filebrowser": "^0.4.0",

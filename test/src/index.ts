@@ -50,9 +50,9 @@ import './coreutils/undoablevector.spec';
 import './coreutils/url.spec';
 import './coreutils/uuid.spec';
 
-import './csvwidget/table.spec';
-import './csvwidget/toolbar.spec';
-import './csvwidget/widget.spec';
+import './csvviewer/table.spec';
+import './csvviewer/toolbar.spec';
+import './csvviewer/widget.spec';
 
 import './docmanager/manager.spec';
 import './docmanager/savehandler.spec';

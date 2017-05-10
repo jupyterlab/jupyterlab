@@ -17,7 +17,7 @@ var mods = [
   require('@jupyterlab/codemirror-extension'),
   require('@jupyterlab/completer-extension'),
   require('@jupyterlab/console-extension'),
-  require('@jupyterlab/csvwidget-extension'),
+  require('@jupyterlab/csvviewer-extension'),
   require('@jupyterlab/docmanager-extension'),
   require('@jupyterlab/docregistry-extension'),
   require('@jupyterlab/fileeditor-extension'),

@@ -9,7 +9,7 @@ import {
 
 import {
   CSVModel, CSVTable, DISPLAY_LIMIT
-} from '@jupyterlab/csvwidget';
+} from '@jupyterlab/csvviewer';
 
 import {
   CSV_DATA
@@ -23,7 +23,7 @@ class TestTable extends CSVTable {
 }
 
 
-describe('csvwidget/table', () => {
+describe('csvviewer/table', () => {
 
   describe('CSVModel', () => {
 
