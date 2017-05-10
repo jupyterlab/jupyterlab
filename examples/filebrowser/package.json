@@ -11,7 +11,7 @@
     "@jupyterlab/default-theme": "^0.4.0",
     "@jupyterlab/docmanager": "^0.4.0",
     "@jupyterlab/docregistry": "^0.4.0",
-    "@jupyterlab/editorwidget": "^0.4.0",
+    "@jupyterlab/fileeditor": "^0.4.0",
     "@jupyterlab/filebrowser": "^0.4.0",
     "@jupyterlab/services": "^0.43.0",
     "@phosphor/commands": "^1.0.0",

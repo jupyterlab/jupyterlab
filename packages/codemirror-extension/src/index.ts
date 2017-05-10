@@ -23,7 +23,7 @@ import {
 
 import {
   IEditorTracker
-} from '@jupyterlab/editorwidget';
+} from '@jupyterlab/fileeditor';
 
 
 /**

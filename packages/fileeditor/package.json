@@ -1,0 +1,42 @@
+{
+  "name": "@jupyterlab/fileeditor",
+  "version": "0.4.0",
+  "description": "JupyterLab - Editor Widget",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js",
+    "style/*.css"
+  ],
+  "directories": {
+    "lib": "lib/"
+  },
+  "dependencies": {
+    "@jupyterlab/apputils": "^0.4.0",
+    "@jupyterlab/codeeditor": "^0.4.0",
+    "@jupyterlab/coreutils": "^0.4.0",
+    "@jupyterlab/docregistry": "^0.4.0",
+    "@phosphor/commands": "^1.0.0",
+    "@phosphor/coreutils": "^1.0.0"
+  },
+  "devDependencies": {
+    "rimraf": "^2.5.2",
+    "typescript": "^2.2.1"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib",
+    "watch": "tsc -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "author": "Project Jupyter",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "homepage": "https://github.com/jupyterlab/jupyterlab"
+}

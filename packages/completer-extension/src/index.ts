@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  CompleterModel, CompleterWidget, CompletionHandler, ICompletionManager
+  CompleterModel, Completer, CompletionHandler, ICompletionManager
 } from '@jupyterlab/completer';
 
 import {
@@ -89,7 +89,7 @@ const service: JupyterLabPlugin<ICompletionManager> = {
       register: (completable: ICompletionManager.ICompletable): ICompletionManager.ICompletableAttributes => {
         const { editor, session, parent } = completable;
         const model = new CompleterModel();
-        const completer = new CompleterWidget({ editor, model });
+        const completer = new Completer({ editor, model });
         const handler = new CompletionHandler({ completer, session });
         const id = parent.id;
 

@@ -24,7 +24,7 @@ import {
 } from '@jupyterlab/codemirror';
 
 import {
-  CompleterWidget, CompletionHandler, CompleterModel
+  Completer, CompletionHandler, CompleterModel
 } from '@jupyterlab/completer';
 
 import {
@@ -44,12 +44,12 @@ function createEditorWidget(): CodeEditorWrapper {
 class TestCompleterModel extends CompleterModel {
   methods: string[] = [];
 
-  createPatch(patch: string): CompleterWidget.IPatch {
+  createPatch(patch: string): Completer.IPatch {
     this.methods.push('createPatch');
     return super.createPatch(patch);
   }
 
-  handleTextChange(change: CompleterWidget.ITextState): void {
+  handleTextChange(change: Completer.ITextState): void {
     this.methods.push('handleTextChange');
     super.handleTextChange(change);
   }
@@ -65,7 +65,7 @@ class TestCompletionHandler extends CompletionHandler {
     return promise;
   }
 
-  onReply(state: CompleterWidget.ITextState, reply: KernelMessage.ICompleteReplyMsg): void {
+  onReply(state: Completer.ITextState, reply: KernelMessage.ICompleteReplyMsg): void {
     super.onReply(state, reply);
     this.methods.push('onReply');
   }
@@ -75,7 +75,7 @@ class TestCompletionHandler extends CompletionHandler {
     this.methods.push('onTextChanged');
   }
 
-  onCompletionSelected(widget: CompleterWidget, value: string): void {
+  onCompletionSelected(widget: Completer, value: string): void {
     super.onCompletionSelected(widget, value);
     this.methods.push('onCompletionSelected');
   }
@@ -104,7 +104,7 @@ describe('@jupyterlab/completer', () => {
       it('should create a completer handler', () => {
         let handler = new CompletionHandler({
           session,
-          completer: new CompleterWidget({ editor: null })
+          completer: new Completer({ editor: null })
         });
         expect(handler).to.be.a(CompletionHandler);
       });
@@ -116,7 +116,7 @@ describe('@jupyterlab/completer', () => {
       it('should be the client session object', () => {
         let handler = new CompletionHandler({
           session,
-          completer: new CompleterWidget({ editor: null })
+          completer: new Completer({ editor: null })
         });
         expect(handler.session).to.be(session);
       });
@@ -129,7 +129,7 @@ describe('@jupyterlab/completer', () => {
       it('should default to null', () => {
         let handler = new CompletionHandler({
           session,
-          completer: new CompleterWidget({ editor: null })
+          completer: new Completer({ editor: null })
         });
         expect(handler.editor).to.be(null);
       });
@@ -137,7 +137,7 @@ describe('@jupyterlab/completer', () => {
       it('should be settable', () => {
         let handler = new CompletionHandler({
           session,
-          completer: new CompleterWidget({ editor: null })
+          completer: new Completer({ editor: null })
         });
         let widget = createEditorWidget();
         expect(handler.editor).to.be(null);
@@ -148,7 +148,7 @@ describe('@jupyterlab/completer', () => {
       it('should be resettable', () => {
         let handler = new CompletionHandler({
           session,
-          completer: new CompleterWidget({ editor: null })
+          completer: new Completer({ editor: null })
         });
         let one = createEditorWidget();
         let two = createEditorWidget();
@@ -166,7 +166,7 @@ describe('@jupyterlab/completer', () => {
       it('should be true if handler has been disposed', () => {
         let handler = new CompletionHandler({
           session,
-          completer: new CompleterWidget({ editor: null })
+          completer: new Completer({ editor: null })
         });
         expect(handler.isDisposed).to.be(false);
         handler.dispose();
@@ -179,7 +179,7 @@ describe('@jupyterlab/completer', () => {
 
       it('should dispose of the handler resources', () => {
         let handler = new CompletionHandler({
-          completer: new CompleterWidget({ editor: null }),
+          completer: new Completer({ editor: null }),
           session
         });
         expect(handler.isDisposed).to.be(false);
@@ -190,7 +190,7 @@ describe('@jupyterlab/completer', () => {
       it('should be safe to call multiple times', () => {
         let handler = new CompletionHandler({
           session,
-          completer: new CompleterWidget({ editor: null })
+          completer: new Completer({ editor: null })
         });
         expect(handler.isDisposed).to.be(false);
         handler.dispose();
@@ -206,7 +206,7 @@ describe('@jupyterlab/completer', () => {
         return createClientSession().then(session => {
           let handler = new TestCompletionHandler({
             session,
-            completer: new CompleterWidget({ editor: null })
+            completer: new Completer({ editor: null })
           });
           handler.editor = createEditorWidget().editor;
           let request = {
@@ -223,7 +223,7 @@ describe('@jupyterlab/completer', () => {
       it('should reject if handler has no active cell', () => {
         let handler = new TestCompletionHandler({
           session,
-          completer: new CompleterWidget({ editor: null })
+          completer: new Completer({ editor: null })
         });
         let request = {
           column: 0,
@@ -238,7 +238,7 @@ describe('@jupyterlab/completer', () => {
       it('should resolve if handler has a kernel and an active cell', () => {
         let handler = new TestCompletionHandler({
           session,
-          completer: new CompleterWidget({ editor: null })
+          completer: new Completer({ editor: null })
         });
         let request = {
           column: 0,
@@ -255,10 +255,10 @@ describe('@jupyterlab/completer', () => {
     describe('#onReply()', () => {
 
       it('should reset model if status is not ok', () => {
-        let completer = new CompleterWidget({ editor: null });
+        let completer = new Completer({ editor: null });
         let handler = new TestCompletionHandler({ session, completer });
         let options = ['a', 'b', 'c'];
-        let request: CompleterWidget.ITextState = {
+        let request: Completer.ITextState = {
           column: 0,
           lineHeight: 0,
           charWidth: 0,
@@ -288,10 +288,10 @@ describe('@jupyterlab/completer', () => {
       });
 
       it('should update model if status is ok', () => {
-        let completer = new CompleterWidget({ editor: null });
+        let completer = new Completer({ editor: null });
         let handler = new TestCompletionHandler({ session, completer });
         let options = ['a', 'b', 'c'];
-        let request: CompleterWidget.ITextState = {
+        let request: Completer.ITextState = {
           column: 0,
           lineHeight: 0,
           charWidth: 0,
@@ -327,7 +327,7 @@ describe('@jupyterlab/completer', () => {
       it('should fire when the active editor emits a text change', () => {
         let handler = new TestCompletionHandler({
           session,
-          completer: new CompleterWidget({ editor: null })
+          completer: new Completer({ editor: null })
         });
         handler.editor = createEditorWidget().editor;
         expect(handler.methods).to.not.contain('onTextChanged');
@@ -336,7 +336,7 @@ describe('@jupyterlab/completer', () => {
       });
 
       it('should call model change handler if model exists', () => {
-        let completer = new CompleterWidget({
+        let completer = new Completer({
           editor: null,
           model: new TestCompleterModel()
         });
@@ -359,7 +359,7 @@ describe('@jupyterlab/completer', () => {
     describe('#onCompletionSelected()', () => {
 
       it('should fire when the completer widget emits a signal', () => {
-        let completer = new CompleterWidget({ editor: null });
+        let completer = new Completer({ editor: null });
         let handler = new TestCompletionHandler({ session, completer });
 
         expect(handler.methods).to.not.contain('onCompletionSelected');
@@ -368,7 +368,7 @@ describe('@jupyterlab/completer', () => {
       });
 
       it('should call model create patch method if model exists', () => {
-        let completer = new CompleterWidget({
+        let completer = new Completer({
           editor: null,
           model: new TestCompleterModel()
         });
@@ -384,12 +384,12 @@ describe('@jupyterlab/completer', () => {
       it('should update cell if patch exists', () => {
         let model = new CompleterModel();
         let patch = 'foobar';
-        let completer = new CompleterWidget({ editor: null, model });
+        let completer = new Completer({ editor: null, model });
         let handler = new TestCompletionHandler({ session, completer });
         let editor = createEditorWidget().editor;
         let text = 'eggs\nfoo # comment\nbaz';
         let want = 'eggs\nfoobar # comment\nbaz';
-        let request: CompleterWidget.ITextState = {
+        let request: Completer.ITextState = {
           column: 5,
           line: 1,
           lineHeight: 0,

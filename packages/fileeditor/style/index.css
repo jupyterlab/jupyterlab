@@ -1,0 +1,10 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+.jp-FileEditor {
+    border-top: var(--jp-border-width) solid var(--jp-border-color1);
+    margin-top: -1px;
+}

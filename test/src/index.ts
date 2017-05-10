@@ -51,9 +51,9 @@ import './coreutils/undoablevector.spec';
 import './coreutils/url.spec';
 import './coreutils/uuid.spec';
 
-import './csvwidget/table.spec';
-import './csvwidget/toolbar.spec';
-import './csvwidget/widget.spec';
+import './csvviewer/table.spec';
+import './csvviewer/toolbar.spec';
+import './csvviewer/widget.spec';
 
 import './docmanager/manager.spec';
 import './docmanager/savehandler.spec';
@@ -63,16 +63,16 @@ import './docregistry/context.spec';
 import './docregistry/default.spec';
 import './docregistry/registry.spec';
 
-import './editorwidget/widget.spec';
+import './fileeditor/widget.spec';
 
 import './filebrowser/crumbs.spec';
 import './filebrowser/model.spec';
 
-import './imagewidget/widget.spec';
+import './imageviewer/widget.spec';
 
 import './inspector/inspector.spec';
 
-import './markdownwidget/widget.spec';
+import './markdownviewer/widget.spec';
 
 import './notebook/actions.spec';
 import './notebook/celltools.spec';

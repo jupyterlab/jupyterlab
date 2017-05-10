@@ -20,11 +20,11 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  TerminalWidget
+  Terminal
 } from '@jupyterlab/terminal';
 
 
-class LogTerminal extends TerminalWidget {
+class LogTerminal extends Terminal {
 
   methods: string[] = [];
 
@@ -68,7 +68,7 @@ class LogTerminal extends TerminalWidget {
 
 describe('terminal/index', () => {
 
-  describe('TerminalWidget', () => {
+  describe('Terminal', () => {
 
     let widget: LogTerminal;
     let session: TerminalSession.ISession;
@@ -95,7 +95,7 @@ describe('terminal/index', () => {
     describe('#constructor()', () => {
 
       it('should create a terminal widget', () => {
-        expect(widget).to.be.a(TerminalWidget);
+        expect(widget).to.be.a(Terminal);
       });
 
     });

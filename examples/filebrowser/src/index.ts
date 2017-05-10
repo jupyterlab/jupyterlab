@@ -36,8 +36,8 @@ import {
 } from '@jupyterlab/codemirror';
 
 import {
-  EditorWidgetFactory
-} from '@jupyterlab/editorwidget';
+  FileEditorFactory
+} from '@jupyterlab/fileeditor';
 
 import '@jupyterlab/default-theme/style/index.css';
 import '../index.css';
@@ -81,7 +81,7 @@ function createApp(manager: ServiceManager.IManager): void {
     factoryService: new CodeMirrorEditorFactory(),
     mimeTypeService: new CodeMirrorMimeTypeService()
   };
-  let wFactory = new EditorWidgetFactory({
+  let wFactory = new FileEditorFactory({
     editorServices,
     factoryOptions: {
       name: 'Editor',

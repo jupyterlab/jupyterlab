@@ -10,13 +10,13 @@ import {
  * A phosphor widget which wraps an IFrame.
  */
 export
-class IFrameWidget extends Widget {
+class IFrame extends Widget {
   /**
    * Create a new IFrame widget.
    */
   constructor() {
     super({ node: Private.createNode() });
-    this.addClass('jp-IFrameWidget');
+    this.addClass('jp-IFrame');
   }
 
   /**

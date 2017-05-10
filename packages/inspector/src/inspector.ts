@@ -232,7 +232,7 @@ class InspectorPanel extends TabPanel implements IInspector {
    * @returns A disposable that removes the child item from the inspector.
    */
   add(item: IInspector.IInspectorItem): IDisposable {
-    const widget = new InspectorItemWidget();
+    const widget = new InspectorItem();
 
     widget.rank = item.rank;
     widget.remembers = !!item.remembers;
@@ -349,7 +349,7 @@ class InspectorPanel extends TabPanel implements IInspector {
     this.source = null;
   }
 
-  private _items: { [type: string]: InspectorItemWidget } = Object.create(null);
+  private _items: { [type: string]: InspectorItem } = Object.create(null);
   private _source: IInspector.IInspectable = null;
 }
 
@@ -357,7 +357,7 @@ class InspectorPanel extends TabPanel implements IInspector {
 /**
  * A code inspector child widget.
  */
-class InspectorItemWidget extends Widget {
+class InspectorItem extends Widget {
   /**
    * Construct an inspector widget.
    */
