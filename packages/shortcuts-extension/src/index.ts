@@ -77,7 +77,7 @@ const SHORTCUTS = [
   },
   {
     command: 'editor:run-code',
-    selector: '.jp-EditorWidget',
+    selector: '.jp-FileEditor',
     keys: ['Shift Enter']
   },
   {

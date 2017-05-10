@@ -20,7 +20,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  EditorWidget, EditorWidgetFactory
+  FileEditor, FileEditorFactory
 } from '@jupyterlab/editorwidget';
 
 
@@ -37,14 +37,14 @@ describe('editorwidget', () => {
     manager.ready.then(done, done);
   });
 
-  describe('EditorWidget', () => {
+  describe('FileEditor', () => {
 
-    let widget: EditorWidget;
+    let widget: FileEditor;
 
     beforeEach(() => {
       let path = uuid() + '.py';
       context = new Context({ manager, factory: modelFactory, path });
-      widget = new EditorWidget({
+      widget = new FileEditor({
         factory: options => factoryService.newDocumentEditor(options),
         mimeTypeService,
         context
@@ -58,7 +58,7 @@ describe('editorwidget', () => {
     describe('#constructor()', () => {
 
       it('should create an editor widget', () => {
-        expect(widget).to.be.an(EditorWidget);
+        expect(widget).to.be.an(FileEditor);
       });
 
       it('should update the editor text when the model changes', (done) => {
@@ -118,9 +118,9 @@ describe('editorwidget', () => {
 
   });
 
-  describe('EditorWidgetFactory', () => {
+  describe('FileEditorFactory', () => {
 
-    let widgetFactory = new EditorWidgetFactory({
+    let widgetFactory = new FileEditorFactory({
       editorServices: {
         factoryService,
         mimeTypeService
@@ -134,8 +134,8 @@ describe('editorwidget', () => {
 
     describe('#constructor()', () => {
 
-      it('should create an EditorWidgetFactory', () => {
-        expect(widgetFactory).to.be.an(EditorWidgetFactory);
+      it('should create an FileEditorFactory', () => {
+        expect(widgetFactory).to.be.an(FileEditorFactory);
       });
 
     });
@@ -143,7 +143,7 @@ describe('editorwidget', () => {
     describe('#createNewWidget()', () => {
 
       it('should create an editor widget', () => {
-        expect(widgetFactory.createNew(context)).to.be.an(EditorWidget);
+        expect(widgetFactory.createNew(context)).to.be.an(FileEditor);
       });
 
     });
