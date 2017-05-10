@@ -21,7 +21,7 @@ rendering following best practices. This API can be found in `common/vdom.ts`
 and offers two classes:
 
 * `VDomModel`
-* `VDomWidget`
+* `VDomRenderer`
 
 To use these classes, we recommend the following approach.
 
@@ -33,7 +33,7 @@ import {
 } from 'phosphor/lib/ui/vdom';
 
 import {
-  VDomModel, VDomWidget
+  VDomModel, VDomRenderer
 } from '../common/vdom'; // From another JupyterLab plugin
 ```
 
@@ -59,11 +59,11 @@ For each attribute that is part of your model, you will implement a `get` and `s
 method as we have done here for the `myvalue` attribute. All of the `set` methods
 in your model should end by calling `this.stateChanged.emit(void 0)`.
 
-Third, create a subclass of `VDomWidget` that has a `render()` method that uses Phosphor's
+Third, create a subclass of `VDomRenderer` that has a `render()` method that uses Phosphor's
 virtual DOM API and returns a PhosphorJS `VNode` or an array of them:
 
 ```typescript
-class TestWidget extends VDomWidget<TestModel> {
+class TestWidget extends VDomRenderer<TestModel> {
   protected render(): VNode | VNode[] {
     return h.span(this.model.myvalue);
   } 

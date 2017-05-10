@@ -12,7 +12,7 @@ import {
 } from '@phosphor/virtualdom';
 
 import {
-  VDomModel, VDomWidget
+  VDomModel, VDomRenderer
 } from '@jupyterlab/apputils';
 
 
@@ -148,7 +148,7 @@ namespace CSVModel {
  * A CSV table content widget.
  */
 export
-class CSVTable extends VDomWidget<CSVModel> {
+class CSVTable extends VDomRenderer<CSVModel> {
   /**
    * Instantiate a new CSV table widget.
    */

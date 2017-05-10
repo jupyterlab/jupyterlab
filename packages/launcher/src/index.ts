@@ -18,7 +18,7 @@ import {
 } from '@phosphor/virtualdom';
 
 import {
-  ICommandLinker, VDomModel, VDomWidget
+  ICommandLinker, VDomModel, VDomRenderer
 } from '@jupyterlab/apputils';
 
 
@@ -177,7 +177,7 @@ class LauncherModel extends VDomModel implements ILauncher {
  * A virtual-DOM-based widget for the Launcher.
  */
 export
-class LauncherWidget extends VDomWidget<LauncherModel> {
+class LauncherWidget extends VDomRenderer<LauncherModel> {
   /**
    * Construct a new launcher widget.
    */
