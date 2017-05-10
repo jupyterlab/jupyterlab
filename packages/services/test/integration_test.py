@@ -40,10 +40,16 @@ def get_command(nbapp):
     cmd = ['mocha', '--timeout', '20000',
            '--retries', '2',
            'build/integration.js',
-           '--baseUrl=%s' % nbapp.connection_url,
-           '--terminalsAvailable=%s' % terminalsAvailable]
-    if nbapp.token:
-        cmd.append('--token=%s' % token)
+           '--jupyter-config-data=./build/config.json']
+
+    config = dict(baseUrl=nbapp.connection_url,
+                  terminalsAvailable=str(terminalsAvailable))
+    if token:
+        config['token'] = nbapp.token
+
+    with open('build/config.json', 'w') as fid:
+        json.dump(config, fid)
+
     return cmd
 
 

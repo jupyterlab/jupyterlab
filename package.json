@@ -15,7 +15,7 @@
     "coverage": "lerna run coverage --stream",
     "docs": "lerna run docs",
     "test": "cd test && npm test",
-    "test:services": "cd packages/services && npm run build:examples && npm test && npm run test:integration",
+    "test:services": "cd packages/services && npm test && npm run test:integration && cd examples/node && python main.py",
     "test:chrome": "lerna run test:chrome --stream",
     "test:firefox": "lerna run test:firefox --stream",
     "test:ie": "lerna run test:ie --concurrency 1 --stream",
