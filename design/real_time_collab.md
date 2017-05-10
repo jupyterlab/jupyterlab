@@ -8,14 +8,14 @@ and usage cases, rather than on the implementation details.
 
 ### Jon the Academic Data Scientist
 
-Jon is a academic researcher and data scientist. He has been using the Jupyter Notebook daily 
+Jon is an academic researcher and data scientist. He has been using the Jupyter Notebook daily 
 for many years and is an advanced user, teacher and book author. He uses the Notebook
 exclusively on his local system and stores his notebooks on GitHub, in including blog posts
 and full length books.
 
 Jon regularly works with students, postdocs and other faculty at his own and other universities
 on a wide range of projects. These projects involve the collaborative creation of notebooks,
-markdown files, documentation (Sphinx) and soruce code files (Python, C, C++). His collaborators
+markdown files, documentation (Sphinx) and source code files (Python, C, C++). His collaborators
 also run the notebook their local systems.
 
 Jon and his collaborators need the ability to do ad-hoc collaboration on particular documents. They 
@@ -27,9 +27,9 @@ one or more files or a diretory of files with a group of individuals.
 During the RTC sessions, the participants are focused on the following aspects of their
 work:
 
-* Collaborative editing of content
-* Side channel live discussions (Bluejeans, appear.in, phonecalls)
-* Discussion and exploration of results
+* Collaborative editing of content.
+* Side channel live discussions (Bluejeans, appear.in, phonecalls).
+* Discussion and exploration of results.
 
 All individuals in the collaboration already have access to the files (Git/GitHub).
 Because of this, during the RTC they need to be able to collaborative edit the same exact
@@ -46,28 +46,21 @@ accessed by thousands of scientific users.
 
 The collaboration has a software stack based on Python and C++ and is embracing modern, 
 software engieering practices (version control with Git/GitHub, Travis, Slack, etc.). They version
-control everything and run an extensive test suite on each commit and have a custom server based
-on Bokeh and a SQL Database that allows them to monitor metrics related to their software stack.
-Once the telescope goes live, they will also run regular software based tests on the telescope.
-
-The collaboration is exploring the possibility of using JupyterHub to provide a unified user-experience
-for their users to access data and their analysis software. Initially, that would be used by the
-software groups themselves, later during commissioning and testing of the experiment and finally by
-scientists.
+control everything and run an extensive test suite on each commit. The collaboration is exploring the possibility of using JupyterHub to provide a unified user-experience for their users to access data
+and their analysis software. 
 
 The collaboration would run JupyterLab with JuptyerHub, and build custom JupyterLab extensions that
-have custom front-end UIs that talk to their various backend service, such as data stores, their
-Bokeh/SQL based service, etc. They want to provide RTC capabilities for all of their services to enable
-the users and scientists to work with the backend services in a collaborative manner. None of these
-service have filesystem representation. Most of their RTC session will take place on shared
-single-user notebook servers managed by JupyterHub. This style of collaboration will also extend
-to Jupyter Notebook, Sphinx based documentation, Python/C++ source code files. In their JupyterHub
-deployment these files are managed on a massive scale shared file system that is deployed on their
-compute infrastructure. Again, all files are version controlled at the end of the day.
+have custom front-end UIs that talk to their various backend services. They want to provide RTC
+capabilities for all of their services to enable the users and scientists to work with notebooks,
+text files and their custom backend services in a collaborative manner. Most of their RTC session will
+take place on shared single-user notebook servers managed by JupyterHub. This style of collaboration
+will also extend to Jupyter Notebook, Sphinx based documentation, Python/C++ source code files.
+In their JupyterHub deployment these files are managed on a massive scale shared file system that is
+deployed on their compute infrastructure. Again, all files are version controlled at the end of the day.
 
-## Arya the Data Science students
+## Arya the Data Science student
 
-Emma is a Junion Computer Science Major taking an introductory course in Data Science with Python.
+Emma is a Junior Computer Science Major taking an introductory course in Data Science with Python.
 Her professor uses the Jupyter Notebook for all course materials and homework. The notebook is
 deployed on a single server using JupyterHub and nbgrader is used for all course material.
 This is the first time Emma has used the Jupyter Notebook and she is enjoying the experience.
