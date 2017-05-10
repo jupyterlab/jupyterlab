@@ -25,8 +25,8 @@ import * as completerExtension
 import * as consoleExtension
   from '@jupyterlab/console-extension';
 
-import * as csvwidgetExtension
-  from '@jupyterlab/csvwidget-extension';
+import * as csvviewerExtension
+  from '@jupyterlab/csvviewer-extension';
 
 import * as docmanagerExtension
   from '@jupyterlab/docmanager-extension';
@@ -96,7 +96,7 @@ const mods: JupyterLab.IPluginModule[] = [
   codemirrorExtension,
   completerExtension,
   consoleExtension,
-  csvwidgetExtension,
+  csvviewerExtension,
   docmanagerExtension,
   docregistryExtension,
   fileeditorExtension,

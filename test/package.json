@@ -20,7 +20,7 @@
     "@jupyterlab/completer": "^0.4.0",
     "@jupyterlab/console": "^0.4.0",
     "@jupyterlab/coreutils": "^0.4.0",
-    "@jupyterlab/csvwidget": "^0.4.0",
+    "@jupyterlab/csvviewer": "^0.4.0",
     "@jupyterlab/docmanager": "^0.4.0",
     "@jupyterlab/docregistry": "^0.4.0",
     "@jupyterlab/fileeditor": "^0.4.0",
