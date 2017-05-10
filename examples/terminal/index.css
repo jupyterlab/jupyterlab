@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-@import url('~@jupyterlab/default-theme/style/index.css');
+@import url('~@jupyterlab/theme-assets/style/index.css');
 
 
 body {

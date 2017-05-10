@@ -11,7 +11,7 @@ depend on CSS variables dfined in a main theme package.
   class naming convention described below.
 * CSS files for packages are located within the `src/style` subdirecotory and
   imported into the plugin's `index.css`.
-* The JupyterLab default CSS variables in the `default-theme` package
+* The JupyterLab default CSS variables in the `theme-assets` package
   are used to style packages where ever possible. Individual packages should not
   depend on this package though, to allow the theme to be swaped out.
 * Additional public/private CSS variables are defined by plugins sparingly and in
@@ -54,7 +54,7 @@ The difference between public and private variables is simple:
 
 JupyterLab includes a default set of CSS variables in the file:
 
-`packages/default-theme/style/variables.css`
+`packages/theme-assets/style/variables.css`
 
 To ensure consistent design in JupyterLab, all built-in and third party
 extensions should use these variables in their styles if at all possible.
@@ -76,7 +76,7 @@ We are organizing our CSS files in the following manner:
 * Multiple CSS files may be used and organized as needed, but they should be
   imported into a single `index.css` at the top-level of the plugin.
 * The `index.css` of each plugin should be imported inside
-  `packages/default-theme/style/index.css`.
+  `packages/theme-assets/style/index.css`.
 
 ## CSS class names
 
