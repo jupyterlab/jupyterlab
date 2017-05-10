@@ -18,7 +18,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  CompleterWidget
+  Completer
 } from './widget';
 
 
@@ -26,7 +26,7 @@ import {
  * An implementation of a completer model.
  */
 export
-class CompleterModel implements CompleterWidget.IModel {
+class CompleterModel implements Completer.IModel {
   /**
    * A signal emitted when state of the completer menu changes.
    */
@@ -37,10 +37,10 @@ class CompleterModel implements CompleterWidget.IModel {
   /**
    * The original completion request details.
    */
-  get original(): CompleterWidget.ITextState {
+  get original(): Completer.ITextState {
     return this._original;
   }
-  set original(newValue: CompleterWidget.ITextState) {
+  set original(newValue: Completer.ITextState) {
     let unchanged = this._original === newValue ||
       this._original && newValue &&
       JSONExt.deepEqual(newValue, this._original);
@@ -56,10 +56,10 @@ class CompleterModel implements CompleterWidget.IModel {
   /**
    * The current text change details.
    */
-  get current(): CompleterWidget.ITextState {
+  get current(): Completer.ITextState {
     return this._current;
   }
-  set current(newValue: CompleterWidget.ITextState) {
+  set current(newValue: Completer.ITextState) {
     let unchanged = this._current === newValue ||
       this._current && newValue &&
       JSONExt.deepEqual(newValue, this._current);
@@ -112,10 +112,10 @@ class CompleterModel implements CompleterWidget.IModel {
   /**
    * The cursor details that the API has used to return matching options.
    */
-  get cursor(): CompleterWidget.ICursorSpan {
+  get cursor(): Completer.ICursorSpan {
     return this._cursor;
   }
-  set cursor(newValue: CompleterWidget.ICursorSpan) {
+  set cursor(newValue: Completer.ICursorSpan) {
     // Original request must always be set before a cursor change. If it isn't
     // the model fails silently.
     if (!this.original) {
@@ -169,7 +169,7 @@ class CompleterModel implements CompleterWidget.IModel {
    * #### Notes
    * This is a read-only property.
    */
-  items(): IIterator<CompleterWidget.IItem> {
+  items(): IIterator<Completer.IItem> {
     return this._filter();
   }
 
@@ -200,7 +200,7 @@ class CompleterModel implements CompleterWidget.IModel {
   /**
    * Handle a cursor change.
    */
-  handleCursorChange(change: CompleterWidget.ITextState): void {
+  handleCursorChange(change: Completer.ITextState): void {
     // If there is no active completion, return.
     if (!this._original) {
       return;
@@ -239,7 +239,7 @@ class CompleterModel implements CompleterWidget.IModel {
   /**
    * Handle a text change.
    */
-  handleTextChange(change: CompleterWidget.ITextState): void {
+  handleTextChange(change: Completer.ITextState): void {
     // If there is no active completion, return.
     if (!this._original) {
       return;
@@ -271,7 +271,7 @@ class CompleterModel implements CompleterWidget.IModel {
    *
    * @returns A patched text change or null if original value did not exist.
    */
-  createPatch(patch: string): CompleterWidget.IPatch {
+  createPatch(patch: string): Completer.IPatch {
     let original = this._original;
     let cursor = this._cursor;
 
@@ -305,7 +305,7 @@ class CompleterModel implements CompleterWidget.IModel {
   /**
    * Apply the query to the complete options list to return the matching subset.
    */
-  private _filter(): IIterator<CompleterWidget.IItem> {
+  private _filter(): IIterator<Completer.IItem> {
     let options = this._options || [];
     let query = this._query;
     if (!query) {
@@ -340,11 +340,11 @@ class CompleterModel implements CompleterWidget.IModel {
     this._subsetMatch = false;
   }
 
-  private _current: CompleterWidget.ITextState = null;
-  private _cursor: CompleterWidget.ICursorSpan = null;
+  private _current: Completer.ITextState = null;
+  private _cursor: Completer.ICursorSpan = null;
   private _isDisposed = false;
   private _options: string[] = [];
-  private _original: CompleterWidget.ITextState = null;
+  private _original: Completer.ITextState = null;
   private _query = '';
   private _subsetMatch = false;
   private _stateChanged = new Signal<this, void>(this);

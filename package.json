@@ -15,11 +15,11 @@
     "coverage": "lerna run coverage --stream",
     "docs": "lerna run docs",
     "test": "cd test && npm test",
-    "test:services": "cd packages/services && npm run build:examples && npm test && npm run test:integration",
+    "test:services": "cd packages/services && npm test && npm run test:integration && cd examples/node && python main.py",
     "test:chrome": "lerna run test:chrome --stream",
     "test:firefox": "lerna run test:firefox --stream",
     "test:ie": "lerna run test:ie --concurrency 1 --stream",
-    "publish": "npm update && npm install && npm run clean && npm run build && lerna publish -m \"Publish\"",
+    "publish": "npm update && npm install && npm run clean && npm run build && lerna publish -m \"Publish\" && cd jupyterlab && npm run publish",
     "update:dependency": "node scripts/update-dependency.js",
     "watch": "watch \"npm run build\" ./packages/** --wait 10 --filter=scripts/watch-filter.js",
     "watch:main": "watch \"npm run build:main\" ./packages/** --wait 10 --filter=scripts/watch-filter.js"
@@ -87,7 +87,7 @@
     "watch": "^1.0.2",
     "webpack": "^2.2.1",
     "webpack-config": "^6.2.0",
-    "ws": "^1.0.1",
+    "ws": "^1.1.1",
     "xmlhttprequest": "^1.8.0",
     "xterm": "^2.4.0"
   }

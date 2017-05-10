@@ -7,7 +7,7 @@ if [[ $TRAVIS_PULL_REQUEST == false && $TRAVIS_BRANCH == "master" && $GROUP == "
 then
     echo "-- pushing docs --"
 
-    ( cd docs
+    ( cd docs/api
     git init
     git config user.email "travis@travis-ci.com"
     git config user.name "Travis Bot"

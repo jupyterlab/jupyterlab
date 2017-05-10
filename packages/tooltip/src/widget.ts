@@ -59,11 +59,11 @@ const USE_CAPTURE = true;
  * A tooltip widget.
  */
 export
-class TooltipWidget extends Widget {
+class Tooltip extends Widget {
   /**
    * Instantiate a tooltip.
    */
-  constructor(options: TooltipWidget.IOptions) {
+  constructor(options: Tooltip.IOptions) {
     super();
 
     this.layout = new PanelLayout();
@@ -229,7 +229,7 @@ class TooltipWidget extends Widget {
  * A namespace for tooltip widget statics.
  */
 export
-namespace TooltipWidget {
+namespace Tooltip {
   /**
    * Instantiation options for a tooltip widget.
    */

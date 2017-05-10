@@ -42,7 +42,10 @@ export default plugin;
 
 function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRestorer): void {
   const namespace = 'about-jupyterlab';
-  const model = new AboutModel({ version: app.info.version });
+  const model = new AboutModel({
+    version: app.info.version,
+    title: `Welcome to ${app.info.name}`
+  });
   const command = CommandIDs.open;
   const category = 'Help';
   const { shell, commands } = app;

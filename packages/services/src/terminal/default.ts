@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  URLExt
+  PageConfig, URLExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -45,12 +45,12 @@ class DefaultTerminalSession implements TerminalSession.ISession {
    */
   constructor(name: string, options: TerminalSession.IOptions = {}) {
     this._name = name;
-    this._baseUrl = options.baseUrl || utils.getBaseUrl();
-    this._token = options.token || utils.getConfigOption('token');
+    this._baseUrl = options.baseUrl || PageConfig.getBaseUrl();
+    this._token = options.token || PageConfig.getOption('token');
     this._ajaxSettings = JSON.stringify(
       utils.ajaxSettingsWithToken(options.ajaxSettings, this._token)
     );
-    this._wsUrl = options.wsUrl || utils.getWsUrl(this._baseUrl);
+    this._wsUrl = options.wsUrl || PageConfig.getWsUrl(this._baseUrl);
     this._readyPromise = this._initializeSocket();
     this.terminated = new Signal<this, void>(this);
   }
@@ -251,7 +251,7 @@ namespace DefaultTerminalSession {
    */
   export
   function isAvailable(): boolean {
-    let available = String(utils.getConfigOption('terminalsAvailable'));
+    let available = String(PageConfig.getOption('terminalsAvailable'));
     return available.toLowerCase() === 'true';
   }
 
@@ -267,7 +267,7 @@ namespace DefaultTerminalSession {
     if (!TerminalSession.isAvailable()) {
       throw Private.unavailableMsg;
     }
-    let baseUrl = options.baseUrl || utils.getBaseUrl();
+    let baseUrl = options.baseUrl || PageConfig.getBaseUrl();
     let url = Private.getBaseUrl(baseUrl);
     let ajaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
     ajaxSettings.method = 'POST';
@@ -305,7 +305,7 @@ namespace DefaultTerminalSession {
     if (!TerminalSession.isAvailable()) {
       return Promise.reject(Private.unavailableMsg);
     }
-    let baseUrl = options.baseUrl || utils.getBaseUrl();
+    let baseUrl = options.baseUrl || PageConfig.getBaseUrl();
     let url = Private.getTermUrl(baseUrl, name);
     if (url in Private.running) {
       return Promise.resolve(Private.running[url]);

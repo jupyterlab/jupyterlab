@@ -9,9 +9,12 @@ This includes:
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+import io
+import json
 import os
 import pipes
 import sys
+from os.path import join as pjoin
 
 from distutils import log
 from distutils.cmd import Command
@@ -25,9 +28,16 @@ else:
     def list2cmdline(cmd_list):
         return ' '.join(map(pipes.quote, cmd_list))
 
+# the name of the project
+name = 'jupyterlab'
+
 
 here = os.path.dirname(os.path.abspath(__file__))
-is_repo = os.path.exists(os.path.join(here, '.git'))
+is_repo = os.path.exists(pjoin(here, '.git'))
+
+version_ns = {}
+with io.open(pjoin(here, name, '_version.py'), encoding="utf8") as f:
+    exec(f.read(), {}, version_ns)
 
 
 def run(cmd, *args, **kwargs):
@@ -64,13 +74,15 @@ def find_package_data():
     Find package_data.
     """
     return {
-        'jupyterlab': ['build/*', 'lab.html', 'package.json', 'index.template.js', 'webpack.config.js']
+        'jupyterlab': ['build/*', 'index.template.js', 'webpack.config.js',
+                       'package.template.json']
     }
 
 
 def js_prerelease(command, strict=False):
     """decorator for building minified js/css prior to another command"""
     class DecoratedCommand(command):
+
         def run(self):
             jsdeps = self.distribution.get_command_obj('jsdeps')
             if not is_repo and all(os.path.exists(t) for t in jsdeps.targets):
@@ -83,12 +95,12 @@ def js_prerelease(command, strict=False):
             except Exception as e:
                 missing = [t for t in jsdeps.targets if not os.path.exists(t)]
                 if strict or missing:
-                    log.warn('rebuilding js and css failed')
+                    log.warn('js check failed')
                     if missing:
                         log.error('missing files: %s' % missing)
                     raise e
                 else:
-                    log.warn('rebuilding js and css failed (not a problem)')
+                    log.warn('js check failed (not a problem)')
                     log.warn(str(e))
             command.run(self)
     return DecoratedCommand
@@ -100,15 +112,15 @@ def update_package_data(distribution):
     build_py.finalize_options()
 
 
-class NPM(Command):
-    description = 'install package.json dependencies using npm'
+class CheckAssets(Command):
+    description = 'check for required assets'
 
     user_options = []
 
     # Representative files that should exist after a successful build
     targets = [
-        os.path.join(here, 'jupyterlab', 'build', 'main.css'),
-        os.path.join(here, 'jupyterlab', 'build', 'main.bundle.js'),
+        pjoin(here, 'jupyterlab', 'build', 'release_data.json'),
+        pjoin(here, 'jupyterlab', 'build', 'main.bundle.js'),
     ]
 
     def initialize_options(self):
@@ -117,28 +129,20 @@ class NPM(Command):
     def finalize_options(self):
         pass
 
-    def has_npm(self):
-        try:
-            run(['npm', '--version'])
-            return True
-        except:
-            return False
-
     def run(self):
-        has_npm = self.has_npm()
-        if not has_npm:
-            log.error("`npm` unavailable. If you're running this command using sudo, make sure `npm` is available to sudo")
-        log.info("Installing build dependencies with npm. This may take a while...")
-        main = os.path.join(here, 'jupyterlab')
-        run(['npm', 'install'], cwd=here)
-        run(['npm', 'run', 'build:main'], cwd=here)
-
         for t in self.targets:
             if not os.path.exists(t):
                 msg = 'Missing file: %s' % t
-                if not has_npm:
-                    msg += '\nnpm is required to build the development version'
                 raise ValueError(msg)
+
+        target = pjoin(here, 'jupyterlab', 'build', 'release_data.json')
+        with open(target) as fid:
+            data = json.load(fid)
+
+        if data['version'] != version_ns['__version__']:
+            msg = 'Release assets version mismatch, please run npm publish'
+            raise ValueError(msg)
+
 
         # update package data in case this created new files
         update_package_data(self.distribution)

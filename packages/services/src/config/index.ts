@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  URLExt
+  PageConfig, URLExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -104,7 +104,7 @@ class DefaultConfigSection implements IConfigSection {
    * Construct a new config section.
    */
   constructor(options: ConfigSection.IOptions) {
-    let baseUrl = options.baseUrl || utils.getBaseUrl();
+    let baseUrl = options.baseUrl || PageConfig.getBaseUrl();
     this.ajaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
     this._url = URLExt.join(baseUrl, SERVICE_CONFIG_URL,
                             encodeURIComponent(options.name));

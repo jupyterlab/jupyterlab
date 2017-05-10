@@ -6,6 +6,7 @@ module.exports = [
   id: 'mockextension',
   autoStart: true,
   activate: function(application) {
+    console.log('mock extension activated')
     window.commands = application.commands;
   }
 }

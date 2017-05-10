@@ -2,17 +2,15 @@
   "private": true,
   "name": "browser-example",
   "dependencies": {
-    "es6-promise": "^3.2.1",
-    "@jupyterlab/services": "file:../.."
+    "es6-promise": "^4.1.0",
+    "@jupyterlab/services": "^0.43.0"
   },
   "scripts": {
     "build": "tsc && webpack",
-    "clean": "rimraf build && rimraf node_modules",
-    "prepublish": "npm run build",
-    "update": "rimraf node_modules/@jupyterlab/services && npm install"
+    "clean": "rimraf build"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
-    "webpack": "^1.12.14"
+    "webpack": "^2.2.1"
   }
 }

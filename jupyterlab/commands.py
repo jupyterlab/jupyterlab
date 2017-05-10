@@ -7,14 +7,17 @@ import errno
 import json
 import pipes
 import os
+import glob
+from uuid import uuid4
 from os import path as osp
 from os.path import join as pjoin
 from subprocess import check_output, CalledProcessError
 import shutil
 import sys
 import tarfile
-from jupyter_core.paths import ENV_JUPYTER_PATH, ENV_CONFIG_PATH
+from jupyter_core.paths import ENV_JUPYTER_PATH
 
+from ._version import __version__
 
 if sys.platform == 'win32':
     from subprocess import list2cmdline
@@ -24,8 +27,14 @@ else:
 
 
 here = osp.dirname(osp.abspath(__file__))
-CONFIG_PATH = os.environ.get('JUPYTERLAB_CONFIG_DIR', ENV_CONFIG_PATH[0])
-BUILD_PATH = ENV_JUPYTER_PATH[0]
+
+
+def get_app_dir(app_dir=None):
+    """Get the configured JupyterLab app directory.
+    """
+    app_dir = app_dir or os.environ.get('JUPYTERLAB_DIR')
+    app_dir = app_dir or pjoin(ENV_JUPYTER_PATH[0], 'lab')
+    return os.path.realpath(app_dir)
 
 
 def run(cmd, **kwargs):
@@ -40,7 +49,7 @@ def run(cmd, **kwargs):
         raise error
 
 
-def install_extension(extension):
+def install_extension(extension, app_dir=None):
     """Install an extension package into JupyterLab.
 
     Follows the semantics of https://docs.npmjs.com/cli/install.
@@ -49,20 +58,33 @@ def install_extension(extension):
 
     If link is true, the source directory is linked using `npm link`.
     """
-    tar_name, pkg_name = validate_extension(extension)
-    config = _get_config()
-    path = pjoin(_get_cache_dir(config), tar_name)
-    run(['npm', 'install', '--save', path], cwd=_get_root_dir(config))
-    config['installed_extensions'][pkg_name] = path
-    if pkg_name in config['linked_extensions']:
-        del config['linked_extensions'][pkg_name]
-    _write_config(config)
+    app_dir = get_app_dir(app_dir)
+    if app_dir == here:
+        raise ValueError('Cannot install extensions in core app')
+    extension = _normalize_path(extension)
+    _ensure_package(app_dir)
+    target = pjoin(app_dir, 'extensions')
+    # npm pack the extension
+    output = run(['npm', 'pack', extension], cwd=target)
+
+    name = output.decode('utf8').splitlines()[-1]
+    data = _read_package(pjoin(target, name))
+    _validate_package(data, extension)
+
+    _ensure_package(app_dir)
+    staging = pjoin(app_dir, 'staging')
+    run(['npm', 'install', pjoin(target, name)], cwd=staging)
 
 
-def link_extension(extension):
-    """Link an extension against the JupyterLab build.
+def link_package(path, app_dir=None):
+    """Link a package against the JupyterLab build.
     """
-    path = _normalize_path(extension)
+    app_dir = get_app_dir(app_dir)
+    if app_dir == here:
+        raise ValueError('Cannot link packages in core app')
+
+    path = _normalize_path(path)
+    _ensure_package(app_dir)
 
     # Verify the package.json data.
     pkg_path = osp.join(path, 'package.json')
@@ -73,211 +95,257 @@ def link_extension(extension):
     with open(pkg_path) as fid:
         data = json.load(fid)
 
-    _validate_package(data, path)
+    is_extension = _is_extension(data)
+    if is_extension:
+        install_extension(path, app_dir)
 
-    # Update JupyterLab metadata.
-    config = _get_config()
-    name = data['name']
-    config['linked_extensions'][name] = path
-    if name in config['installed_extensions']:
-        del config['installed_extensions'][name]
-    _write_config(config)
+    config = _get_build_config(app_dir)
+    config.setdefault('linked_packages', dict())
+    config['linked_packages'][data['name']] = path
+    _write_build_config(config, app_dir)
 
 
-def unlink_extension(extension):
-    """Unlink an extension from JupyterLab by path or name.
+def unlink_package(package, app_dir=None):
+    """Unlink a package from JupyterLab by path or name.
     """
-    extension = _normalize_path(extension)
-    config = _get_config()
-
+    package = _normalize_path(package)
     name = None
-    for (key, value) in config['linked_extensions'].items():
-        if value == extension or key == extension:
+    app_dir = get_app_dir(app_dir)
+    if app_dir == here:
+        raise ValueError('Cannot link packages in core app')
+
+    config = _get_build_config(app_dir)
+    linked = config.setdefault('linked_packages', dict())
+    for (key, value) in linked.items():
+        if value == package or key == package:
             name = key
             break
 
-    if name:
-        del config['linked_extensions'][name]
-        _write_config(config)
-        return True
+    if not name:
+        print('No package matching "%s" is linked' % package)
+        return False
 
-    print('No labextension matching "%s" is linked' % extension)
-    return False
+    del linked[name]
+    config['linked_packages'] = linked
+    _write_build_config(config, app_dir)
+
+    extensions = _get_extensions(app_dir)
+    if name in extensions:
+        uninstall_extension(name, app_dir)
+
+    return True
 
 
-def uninstall_extension(name):
+def _get_build_config(app_dir):
+    """Get the build config data for the given app dir
+    """
+    target = pjoin(app_dir, 'settings', 'build_config.json')
+    if not os.path.exists(target):
+        return {}
+    else:
+        with open(target) as fid:
+            return json.load(fid)
+
+
+def _write_build_config(config, app_dir):
+    """Write the build config to the app dir.
+    """
+    _ensure_package(app_dir)
+    target = pjoin(app_dir, 'settings', 'build_config.json')
+    with open(target, 'w') as fid:
+        json.dump(config, fid, indent=4)
+
+
+def uninstall_extension(name, app_dir=None):
     """Uninstall an extension by name.
     """
-    config = _get_config()
+    app_dir = get_app_dir(app_dir)
+    if app_dir == here:
+        raise ValueError('Cannot install packages in core app')
+    # Allow for uninstalled core extensions here.
+    with open(pjoin(here, 'package.json')) as fid:
+        data = json.load(fid)
+        if name in data['jupyterlab']['extensions']:
+            print('Uninstalling core extension %s' % name)
+            config = _get_build_config(app_dir)
+            uninstalled = config.get('uninstalled_core_extensions', [])
+            if name not in uninstalled:
+                uninstalled.append(name)
+                config['uninstalled_core_extensions'] = uninstalled
+                _write_build_config(config, app_dir)
+            return True
 
-    if name in config['installed_extensions']:
-        del config['installed_extensions'][name]
-        _write_config(config)
-        return True
+    for (extname, path) in _get_extensions(app_dir).items():
+        if extname == name:
+            print('Uninstalling %s from %s' % (name, os.path.dirname(path)))
+            os.remove(path)
+            return True
 
     print('No labextension named "%s" installed' % name)
     return False
 
 
-def list_extensions():
+def list_extensions(app_dir=None):
     """List installed extensions.
     """
-    config = _get_config()
-    installed = list(config['installed_extensions'])
-    linked = list(config['linked_extensions'])
-    return sorted(installed + linked)
+    app_dir = get_app_dir(app_dir)
+    return sorted(_get_extensions(app_dir).keys())
 
 
-def validate_extension(extension):
-    """Verify that a JupyterLab extension is valid.
-    """
-    config = _get_config()
-    extension = _normalize_path(extension)
-    _ensure_package(config)
-    cache_dir = _get_cache_dir(config)
-    # npm pack the extension
-    output = run(['npm', 'pack', extension], cwd=cache_dir)
-    name = output.decode('utf8').splitlines()[-1]
-    # read the package.json data from the file
-    tar = tarfile.open(pjoin(cache_dir, name), "r:gz")
-    f = tar.extractfile('package/package.json')
-    data = json.loads(f.read().decode('utf8'))
-    _validate_package(data, extension)
-    return name, data['name']
-
-
-def clean():
+def clean(app_dir=None):
     """Clean the JupyterLab application directory."""
-    config = _get_config()
-    for name in ['node_modules', 'build']:
-        target = pjoin(_get_root_dir(config), name)
+    app_dir = get_app_dir(app_dir)
+    if app_dir == here:
+        raise ValueError('Cannot clean the core app')
+    for name in ['static', 'staging']:
+        target = pjoin(app_dir, name)
         if osp.exists(target):
             shutil.rmtree(target)
 
 
-def build():
+def build(app_dir=None, name=None, version=None, publicPath=None):
     """Build the JupyterLab application."""
     # Set up the build directory.
-    config = _get_config()
-    _ensure_package(config)
-    root = _get_root_dir(config)
+    app_dir = get_app_dir(app_dir)
+    if app_dir == here:
+        raise ValueError('Cannot build extensions in the core app')
+
+    _ensure_package(app_dir, name, version, publicPath)
+    staging = pjoin(app_dir, 'staging')
 
     # Make sure packages are installed.
-    run(['npm', 'install'], cwd=root)
+    run(['npm', 'install'], cwd=staging)
 
     # Install the linked extensions.
-    for value in config['linked_extensions'].values():
-        run(['npm', 'install', value], cwd=root)
+    for path in _get_linked_packages(app_dir).values():
+        run(['npm', 'install', path], cwd=staging)
 
     # Build the app.
-    run(['npm', 'run', 'build'], cwd=root)
+    run(['npm', 'run', 'build'], cwd=staging)
+
+    # Move the app to the static dir.
+    static = pjoin(app_dir, 'static')
+    if os.path.exists(static):
+        shutil.rmtree(static)
+    shutil.copytree(pjoin(staging, 'build'), static)
 
 
-def describe():
-    """Get the git description of the JupyterLab application.
-    """
-    description = 'unknown'
-    try:
-        cwd = os.path.dirname(os.path.dirname(__file__))
-        description = run(['git', 'describe'], cwd=cwd)
-        description = description.decode('utf8').strip()
-    except Exception:
-        pass
-    return description
-
-
-def _ensure_package(config):
+def _ensure_package(app_dir, name='JupyterLab', version=None, publicPath=None):
     """Make sure the build dir is set up.
     """
-    cache_dir = _get_cache_dir(config)
-    root_dir = _get_root_dir(config)
-    if not osp.exists(cache_dir):
-        os.makedirs(cache_dir)
-    for name in ['package.json', 'index.template.js', 'webpack.config.js']:
-        dest = pjoin(root_dir, name)
+    if not os.path.exists(pjoin(app_dir, 'extensions')):
+        try:
+            os.makedirs(pjoin(app_dir, 'extensions'))
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+
+    settings = pjoin(app_dir, 'settings')
+    if not os.path.exists(settings):
+        try:
+            os.makedirs(settings)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+
+    staging = pjoin(app_dir, 'staging')
+    if not os.path.exists(staging):
+        os.makedirs(staging)
+
+    for name in ['index.template.js', 'webpack.config.js']:
+        dest = pjoin(staging, name)
         shutil.copy2(pjoin(here, name), dest)
 
     # Template the package.json file.
-    pkg_path = pjoin(root_dir, 'package.json')
+    pkg_path = pjoin(here, 'package.template.json')
     with open(pkg_path) as fid:
         data = json.load(fid)
-    for (key, value) in config['installed_extensions'].items():
+
+    extensions = _get_extensions(app_dir)
+
+    for (key, value) in extensions.items():
         data['dependencies'][key] = value
         data['jupyterlab']['extensions'].append(key)
-    for key in config['linked_extensions']:
-        data['jupyterlab']['extensions'].append(key)
+
+    config = _get_build_config(app_dir)
+    for item in config.get('uninstalled_core_extensions', []):
+        data['jupyterlab']['extensions'].remove(item)
+
+    data['jupyterlab']['name'] = name
+    if version:
+        data['jupyterlab']['version'] = version
+
+    publicPath = publicPath or uuid4().hex
+    if not publicPath.endswith('/'):
+        publicPath += '/'
+    data['jupyterlab']['publicPath'] = publicPath
+    data['scripts']['build'] = 'webpack'
+
+    pkg_path = pjoin(staging, 'package.json')
     with open(pkg_path, 'w') as fid:
         json.dump(data, fid, indent=4)
+
+
+def _is_extension(data):
+    """Detect if a package is an extension using its metadata.
+    """
+    if 'jupyterlab' not in data:
+        return False
+    if not isinstance(data['jupyterlab'], dict):
+        return False
+    return data['jupyterlab'].get('extension', False)
 
 
 def _validate_package(data, extension):
     """Validate package.json data.
     """
     msg = '%s is not a valid JupyterLab extension' % extension
-    if 'jupyterlab' not in data:
-        raise ValueError(msg)
-    if not isinstance(data['jupyterlab'], dict):
-        raise ValueError(msg)
-    if not data['jupyterlab'].get('extension', False):
+    if not _is_extension(data):
         raise ValueError(msg)
 
 
-def _get_config(config_dir=None):
-    """Get the JupyterLab config data.
+def _get_extensions(app_dir):
+    """Get the extensions in a given app dir.
     """
-    config_dir = config_dir or _get_config_dir()
-    file = pjoin(config_dir, 'build_config.json')
-    if not osp.exists(file):
-        data = {}
-    else:
-        with open(file) as fid:
-            data = json.load(fid)
-    data.setdefault('location', pjoin(BUILD_PATH, 'lab'))
-    data.setdefault('installed_extensions', dict())
-    data.setdefault('linked_extensions', dict())
-    return data
+    extensions = dict()
+
+    # Look in sys_prefix and app_dir if different
+    sys_path = pjoin(ENV_JUPYTER_PATH[0], 'lab', 'extensions')
+    for target in glob.glob(pjoin(sys_path, '*.tgz')):
+        data = _read_package(target)
+        extensions[data['name']] = os.path.realpath(target)
+
+    app_path = pjoin(app_dir, 'extensions')
+    if app_path == sys_path or not os.path.exists(app_path):
+        return extensions
+
+    for target in glob.glob(pjoin(app_path, '*.tgz')):
+        data = _read_package(target)
+        extensions[data['name']] = os.path.realpath(target)
+
+    return extensions
 
 
-def _write_config(data, config_dir=None):
-    """Write the JupyterLab config data.
+def _get_linked_packages(app_dir=None):
+    """Get the linked packages metadata.
     """
-    config_dir = config_dir or _get_config_dir()
-    if not osp.exists(config_dir):
-        try:
-            os.makedirs(config_dir)
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                raise
-    with open(pjoin(config_dir, 'build_config.json'), 'w') as fid:
-        json.dump(data, fid, indent=4)
+    app_dir = get_app_dir(app_dir)
+    config = _get_build_config(app_dir)
+    return config.get('linked_packages', dict())
+
+
+def _read_package(target):
+    """Read the package data in a given target tarball.
+    """
+    tar = tarfile.open(target, "r:gz")
+    f = tar.extractfile('package/package.json')
+    return json.loads(f.read().decode('utf8'))
 
 
 def _normalize_path(extension):
+    """Normalize a given extension if it is a path.
+    """
     extension = osp.expanduser(extension)
     if osp.exists(extension):
         extension = osp.abspath(extension)
     return extension
-
-
-def _get_config_dir():
-    return pjoin(CONFIG_PATH, 'labconfig')
-
-
-def _get_root_dir(config=None):
-    config = config or _get_config()
-    return config['location']
-
-
-def _get_build_dir(config=None):
-    config = config or _get_config()
-    return pjoin(_get_root_dir(config), 'build')
-
-
-def _get_pkg_path(config=None):
-    config = config or _get_config()
-    return pjoin(_get_root_dir(config), 'package.json')
-
-
-def _get_cache_dir(config=None):
-    config = config or _get_config()
-    return pjoin(_get_root_dir(config), 'cache')

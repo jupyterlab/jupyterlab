@@ -25,9 +25,8 @@ All source code is written in [TypeScript](http://www.typescriptlang.org/Handboo
 
 ### Installing Node.js and npm
 
-Building the Notebook from its GitHub source code requires some tools to
-create and minify JavaScript components and the CSS.
-Namely, that's Node.js and Node's package manager, ``npm``.
+Building the JupyterLab from its GitHub source code requires Node.js and 
+Node's package manager, ``npm``.
 
 If you use ``conda``, you can get them with:
 
@@ -80,6 +79,8 @@ steps::
     git clone https://github.com/<your-github-username>/jupyterlab.git
     cd jupyterlab
     pip install -e . # will take a long time to build everything
+    npm install
+    npm run build:main
     jupyter serverextension enable --py jupyterlab
 
 Note: At times, it may be necessary to clean your local repo with the 
@@ -87,17 +88,15 @@ command ``git clean -fdx``.
 
 ### Run JupyterLab
 
-Start JupyterLab:
+Start JupyterLab in Core Mode:
 
 ```bash
-jupyter lab
+jupyter lab --core-mode
 ```
 
-Alternatively, you can run JupyterLab in debug mode:
-
-```bash
-jupyter lab --debug
-```
+Core mode ensures that you are running the core application.  When
+running from source, the page will have a red banner at the top to
+indicate it is an unreleased version.
 
 ### Build and run the tests
 
@@ -189,7 +188,7 @@ and refresh the browser.
 ## Notes
 - By default, the application will load from the JupyterLab staging directory (default is `<sys-prefix>/share/jupyter/lab/build`.  If you wish to run
 the core application in `<git root>/jupyterlab/build`, 
-run `jupyter lab --dev-mode`.  This is the core application that will
+run `jupyter lab --core-mode`.  This is the core application that will
 be shipped.
 
 - The npm modules are fully compatible with Node/Babel/ES6/ES5. Simply

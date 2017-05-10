@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  uuid
+  PageConfig, uuid
 } from '@jupyterlab/coreutils';
 
 import {
@@ -12,7 +12,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  IAjaxError, getBaseUrl
+  IAjaxError
 } from '../../../lib/utils';
 
 import {
@@ -487,7 +487,7 @@ describe('session', () => {
     context('#baseUrl', () => {
 
       it('should be the base url of the server', () => {
-        expect(session.baseUrl).to.be(getBaseUrl());
+        expect(session.baseUrl).to.be(PageConfig.getBaseUrl());
       });
 
     });

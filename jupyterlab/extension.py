@@ -5,17 +5,16 @@
 # Distributed under the terms of the Modified BSD License.
 import os
 
-from jinja2 import FileSystemLoader
-from jupyterlab_launcher import add_handlers
+from jupyterlab_launcher import add_handlers, LabConfig
 
-from .commands import _get_build_dir, _get_config, _get_config_dir
-
+from .commands import get_app_dir, list_extensions
+from ._version import __version__
 
 #-----------------------------------------------------------------------------
 # Module globals
 #-----------------------------------------------------------------------------
 
-DEV_NOTE_NPM = """It looks like you're running JupyterLab from source.
+DEV_NOTE_NPM = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
 
     npm run watch
@@ -25,39 +24,59 @@ system incrementally watch and build JupyterLab's TypeScript for you, as you
 make changes.
 """
 
-HERE = os.path.dirname(__file__)
-FILE_LOADER = FileSystemLoader(HERE)
-PREFIX = '/lab'
+
+CORE_NOTE = """
+Running the core application with no additional extensions or settings
+"""
 
 
 def load_jupyter_server_extension(nbapp):
     """Load the JupyterLab server extension.
     """
     # Print messages.
-    nbapp.log.info('JupyterLab alpha preview extension loaded from %s' % HERE)
-    base_dir = os.path.realpath(os.path.join(HERE, '..'))
-    dev_mode = os.path.exists(os.path.join(base_dir, '.git'))
-    if dev_mode:
-        nbapp.log.info(DEV_NOTE_NPM)
+    here = os.path.dirname(__file__)
+    nbapp.log.info('JupyterLab alpha preview extension loaded from %s' % here)
+
+    app_dir = get_app_dir()
+    if hasattr(nbapp, 'app_dir'):
+        app_dir = get_app_dir(nbapp.app_dir)
 
     web_app = nbapp.web_app
+    config = LabConfig()
 
-    # Handle page config data.
-    config_dir = _get_config_dir()
-    build_config = _get_config()
-    page_config_file = os.path.join(config_dir, 'page_config_data.json')
-    build_dir = _get_build_dir(build_config)
+    config.assets_dir = os.path.join(app_dir, 'static')
+    config.settings_dir = os.path.join(app_dir, 'settings')
+    config.page_title = 'JupyterLab Alpha Preview'
+    config.page_url = '/lab'
+    config.dev_mode = False
 
-    # Check for dev mode.
-    dev_mode = False
-    if hasattr(nbapp, 'dev_mode'):
-        dev_mode = nbapp.dev_mode
+    # Check for core mode.
+    core_mode = ''
+    if hasattr(nbapp, 'core_mode'):
+        core_mode = nbapp.core_mode
 
-    if not os.path.exists(build_dir) or dev_mode:
-        print('Serving local JupyterLab files')
-        build_dir = os.path.join(HERE, 'build')
+    # Check for an app dir that is local.
+    if app_dir == here or app_dir == os.path.join(here, 'build'):
+        core_mode = True
+        config.settings_dir = ''
 
-    add_handlers(
-        web_app, page_config_file, build_dir, 'JupyterLab Alpha Preview',
-        PREFIX
-    )
+    # Run core mode if explicit or there is no static dir and no
+    # installed extensions.
+    installed = list_extensions(app_dir)
+    fallback = not installed and not os.path.exists(config.assets_dir)
+
+    if core_mode or fallback:
+        config.assets_dir = os.path.join(here, 'build')
+        if not os.path.exists(config.assets_dir):
+            msg = 'Static assets not built, please see CONTRIBUTING.md'
+            nbapp.log.error(msg)
+        else:
+            sentinel = os.path.join(here, 'build', 'release_data.json')
+            config.dev_mode = not os.path.exists(sentinel)
+
+    if config.dev_mode:
+        nbapp.log.info(DEV_NOTE_NPM)
+    elif core_mode or fallback:
+        nbapp.log.info(CORE_NOTE.strip())
+
+    add_handlers(web_app, config)

@@ -28,4 +28,6 @@ mkdir ~/.jupyter
 
 # Install and enable the server extension
 pip install -v -e ".[test]"
+npm install
+npm run build:main
 jupyter serverextension enable --py jupyterlab

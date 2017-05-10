@@ -358,13 +358,13 @@ class DirListing extends Widget {
         names.push(item.name);
       }
     });
-    let message = `Permanently delete these ${names.length} files?`;
+    let message = `Are you sure you want to permanently delete the ${names.length} files/folders selected?`;
     if (names.length === 1) {
-      message = `Permanently delete file "${names[0]}"?`;
+      message = `Are you sure you want to permanently delete: ${names[0]}?`;
     }
     if (names.length) {
       return showDialog({
-        title: 'Delete file?',
+        title: 'Delete',
         body: message,
         buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'DELETE'})]
       }).then(result => {
@@ -1193,11 +1193,12 @@ class DirListing extends Widget {
     const promises: Promise<void>[] = [];
     const basePath = this._model.path;
     for (let name of names) {
-      promises.push(this._model.manager.deleteFile(name, basePath));
+      let promise = this._model.manager.deleteFile(name, basePath).catch(err => {
+        utils.showErrorMessage('Delete Failed', err);
+      });
+      promises.push(promise);
     }
-    return Promise.all(promises).catch(error => {
-      utils.showErrorMessage('Delete file', error);
-    });
+    return Promise.all(promises).then(() => undefined);
   }
 
   /**

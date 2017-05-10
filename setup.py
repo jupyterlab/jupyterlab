@@ -6,9 +6,6 @@
 
 from __future__ import print_function
 
-# the name of the project
-name = 'jupyterlab'
-
 #-----------------------------------------------------------------------------
 # Minimal Python version sanity check
 #-----------------------------------------------------------------------------
@@ -28,12 +25,11 @@ PY3 = (sys.version_info[0] >= 3)
 #-----------------------------------------------------------------------------
 
 from distutils import log
-import io
 import json
 import os
 from glob import glob
 from distutils.command.build_ext import build_ext
-from distutils.command.sdist import sdist
+from setuptools.command.sdist import sdist
 from setuptools import setup
 from setuptools.command.bdist_egg import bdist_egg
 
@@ -45,7 +41,9 @@ from setupbase import (
     find_packages,
     find_package_data,
     js_prerelease,
-    NPM
+    CheckAssets,
+    version_ns,
+    name
 )
 
 # BEFORE importing distutils, remove MANIFEST. distutils doesn't properly
@@ -58,11 +56,6 @@ pjoin = os.path.join
 
 DESCRIPTION = 'An alpha preview of the JupyterLab notebook server extension.'
 LONG_DESCRIPTION = 'This is an alpha preview of JupyterLab. It is not ready for general usage yet. Development happens on https://github.com/jupyter/jupyterlab, with chat on https://gitter.im/jupyter/jupyterlab.'
-
-
-version_ns = {}
-with io.open(pjoin(here, name, '_version.py'), encoding="utf8") as f:
-    exec(f.read(), {}, version_ns)
 
 
 setup_args = dict(
@@ -96,10 +89,10 @@ setup_args = dict(
 
 
 cmdclass = dict(
-    build_ext = js_prerelease(build_ext),
+    build_ext = build_ext,
     sdist  = js_prerelease(sdist, strict=True),
-    jsdeps = NPM,
     bdist_egg = bdist_egg if 'bdist_egg' in sys.argv else bdist_egg_disabled,
+    jsdeps = CheckAssets
 )
 try:
     from wheel.bdist_wheel import bdist_wheel
@@ -114,7 +107,7 @@ setup_args['cmdclass'] = cmdclass
 setuptools_args = {}
 install_requires = setuptools_args['install_requires'] = [
     'notebook>=4.2.0',
-    'jupyterlab_launcher>=0.1.1'
+    'jupyterlab_launcher>=0.2.3'
 ]
 
 extras_require = setuptools_args['extras_require'] = {

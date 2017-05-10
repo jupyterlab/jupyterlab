@@ -10,7 +10,7 @@ import {
 } from '@phosphor/virtualdom';
 
 import {
-  ICommandLinker, VDomModel, VDomWidget
+  ICommandLinker, VDomModel, VDomRenderer
 } from '@jupyterlab/apputils';
 
 
@@ -152,7 +152,7 @@ class FaqModel extends VDomModel {
  * A virtual-DOM-based widget for the FAQ plugin.
  */
 export
-class FaqWidget extends VDomWidget<FaqModel> {
+class FaqWidget extends VDomRenderer<FaqModel> {
   /**
    * Construct a new faq widget.
    */

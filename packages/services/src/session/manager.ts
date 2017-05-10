@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  PageConfig
+} from '@jupyterlab/coreutils';
+
+import {
   ArrayExt, IIterator, iter
 } from '@phosphor/algorithm';
 
@@ -16,9 +20,6 @@ import {
 import {
   Kernel
 } from '../kernel';
-
-import * as utils
-  from '../utils';
 
 import {
   IAjaxSettings
@@ -40,8 +41,8 @@ class SessionManager implements Session.IManager {
    * @param options - The default options for each session.
    */
   constructor(options: Session.IOptions = {}) {
-    this._baseUrl = options.baseUrl || utils.getBaseUrl();
-    this._wsUrl = options.wsUrl || utils.getWsUrl(this._baseUrl);
+    this._baseUrl = options.baseUrl || PageConfig.getBaseUrl();
+    this._wsUrl = options.wsUrl || PageConfig.getWsUrl(this._baseUrl);
     this._ajaxSettings = JSON.stringify(options.ajaxSettings || {});
 
     // Initialize internal data.

@@ -14,7 +14,7 @@ import {
 } from '@phosphor/virtualdom';
 
 import {
-  ICommandLinker, VDomModel, VDomWidget
+  ICommandLinker, VDomModel, VDomRenderer
 } from '@jupyterlab/apputils';
 
 
@@ -132,7 +132,7 @@ class LandingModel extends VDomModel {
  * A virtual-DOM-based widget for the Landing plugin.
  */
 export
-class LandingWidget extends VDomWidget<LandingModel> {
+class LandingWidget extends VDomRenderer<LandingModel> {
   /**
    * Construct a new landing widget.
    */

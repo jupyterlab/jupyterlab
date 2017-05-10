@@ -23,7 +23,7 @@ const DOWN_ARROW = 40;
 const ENTER = 13;
 
 
-class LogEditorWidget extends CodeMirrorEditor {
+class LogFileEditor extends CodeMirrorEditor {
 
   methods: string[] = [];
 
@@ -37,7 +37,7 @@ class LogEditorWidget extends CodeMirrorEditor {
 
 describe('CodeMirrorEditor', () => {
 
-  let editor: LogEditorWidget;
+  let editor: LogFileEditor;
   let host: HTMLElement;
   let model: CodeEditor.IModel;
   const TEXT = new Array(100).join('foo bar baz\n');
@@ -47,7 +47,7 @@ describe('CodeMirrorEditor', () => {
     host.style.height = '200px';
     document.body.appendChild(host);
     model = new CodeEditor.Model();
-    editor = new LogEditorWidget({ host, model }, {});
+    editor = new LogFileEditor({ host, model }, {});
   });
 
   afterEach(() => {
@@ -92,7 +92,7 @@ describe('CodeMirrorEditor', () => {
     it('should be the unique id of the editor', () => {
       expect(editor.uuid).to.be.ok();
       let uuid = 'foo';
-      editor = new LogEditorWidget({ model, host, uuid });
+      editor = new LogFileEditor({ model, host, uuid });
       expect(editor.uuid).to.be('foo');
     });
 
