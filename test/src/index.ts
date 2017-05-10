@@ -44,6 +44,7 @@ import './coreutils/observablejson.spec';
 import './coreutils/observablemap.spec';
 import './coreutils/observablestring.spec';
 import './coreutils/observablevector.spec';
+import './coreutils/pageconfig.spec';
 import './coreutils/path.spec';
 import './coreutils/time.spec';
 import './coreutils/undoablevector.spec';
