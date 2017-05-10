@@ -71,6 +71,10 @@ def install_extension(extension, app_dir=None):
     data = _read_package(pjoin(target, name))
     _validate_package(data, extension)
 
+    _ensure_package(app_dir)
+    staging = pjoin(app_dir, 'staging')
+    run(['npm', 'install', pjoin(target, name)], cwd=staging)
+
 
 def link_package(path, app_dir=None):
     """Link a package against the JupyterLab build.
