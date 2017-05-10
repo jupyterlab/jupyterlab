@@ -2,12 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONValue, PromiseDelegate
-} from '@phosphor/coreutils';
+  PageConfig
+} from '@jupyterlab/coreutils';
 
 import {
-  PageConfig
-} from './pageconfig';
+  JSONValue, PromiseDelegate
+} from '@phosphor/coreutils';
 
 
 /**
@@ -25,22 +25,17 @@ namespace ServerConnection {
    * @returns a Promise that resolves with the success data.
    */
   export
-  function makeRequest(request: IRequest, settings: ISettings={}): Promise<ISuccess> {
+  function makeRequest(request: IRequest, settings: ISettings): Promise<ISuccess> {
     let url = request.url;
     if (request.cache !== false) {
       // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest#Bypassing_the_cache.
       url += ((/\?/).test(url) ? '&' : '?') + (new Date()).getTime();
     }
-    settings = Private.handleSettings(settings);
-    let xhr: XMLHttpRequest;
-    if (settings.factory) {
-      xhr = new settings.factory();
-    } else {
-      xhr = new XMLHttpRequest();
-    }
-    xhr.open(settings.method!, url, true, settings.user!, settings.password!);
-    Private.populateRequest(xhr, settings);
-    return Private.handleRequest(xhr, settings);
+    let xhr = new XMLHttpRequest();
+    xhr.open(request.method || 'GET', url, true,
+             settings.user, settings.password);
+    Private.populateRequest(xhr, request, settings);
+    return Private.handleRequest(xhr, request, settings);
   }
 
   /**
@@ -52,7 +47,7 @@ namespace ServerConnection {
    */
   export
   function makeSettings(options: Partial<ISettings> = {}) {
-
+    return Private.makeSettings(options);
   }
 
   /**
@@ -65,9 +60,9 @@ namespace ServerConnection {
    */
   export
   function makeError(success: ISuccess, message?: string): IError {
-    let { xhr, settings, event } = success;
+    let { xhr, request, settings, event } = success;
     message = message || `Invalid Status: ${xhr.status}`;
-    return { xhr, settings, event, message };
+    return { xhr, request, settings, event, message };
   }
 
   /**
@@ -115,7 +110,7 @@ namespace ServerConnection {
     /**
      * A mapping of request headers, used via `setRequestHeader`.
      */
-    requestHeaders?: { [key: string]: string; };
+    headers?: { [key: string]: string; };
   }
 
   /**
@@ -230,61 +225,63 @@ namespace ServerConnection {
  */
 namespace Private {
   /**
-   * Handle the ajax settings, returning a new value.
+   * Handle the server connection settings, returning a new value.
    */
   export
-  function handleSettings(settings: AJAX.ISettings): AJAX.ISettings {
-    settings = {...settings};
-    if (settings.requestHeaders) {
-      settings.requestHeaders = {...settings.requestHeaders};
-    } else {
-      settings.requestHeaders = {};
-    }
-
-    // Handle default values.
-    settings.method = settings.method || 'GET';
-    settings.user = settings.user || '';
-    settings.password = settings.password || '';
-    settings.withCredentials = !!settings.withCredentials;
-    settings.token = settings.token || PageConfig.getOption('token');
-
-    // Ensure that requests have applied data.
-    if (!settings.data) {
-      settings.data = '{}';
-      settings.contentType = 'application/json';
-    }
-
-    // Handle authorization.
-    if (settings.token) {
-      settings.requestHeaders['Authorization'] = `token ${settings.token}`;
-    } else if (typeof document !== 'undefined' && document.cookie) {
-      let xsrfToken = getCookie('_xsrf');
-      if (xsrfToken !== void 0) {
-        settings.requestHeaders['X-XSRFToken'] = xsrfToken;
-      }
-    }
-    return settings;
+  function makeSettings(options: Partial<ServerConnection.ISettings> = {}): ServerConnection.ISettings {
+    let baseUrl = options.baseUrl || PageConfig.getBaseUrl();
+    return {
+      baseUrl,
+      wsUrl: options.wsUrl || PageConfig.getWsUrl(baseUrl),
+      user: options.user || '',
+      password: options.password || '',
+      withCredentials: !!options.withCredentials,
+      token: options.token || PageConfig.getOption('token'),
+      requestHeaders: { ...options.requestHeaders || {} }
+    };
   }
 
   /**
    * Make an xhr request using settings.
    */
   export
-  function populateRequest(xhr: XMLHttpRequest, settings: AJAX.ISettings): void {
-    if (settings.contentType !== void 0) {
-      xhr.setRequestHeader('Content-Type', settings.contentType);
+  function populateRequest(xhr: XMLHttpRequest, request: ServerConnection.IRequest, settings: ServerConnection.ISettings): void {
+    if (request.contentType !== void 0) {
+      xhr.setRequestHeader('Content-Type', request.contentType);
     }
-    if (settings.timeout !== void 0) {
-      xhr.timeout = settings.timeout;
+    if (request.timeout !== void 0) {
+      xhr.timeout = request.timeout;
     }
     if (settings.withCredentials) {
       xhr.withCredentials = true;
     }
 
+    // Set the content type if there is no given data.
+    if (!request.data) {
+      xhr.setRequestHeader('Content-Type', 'application/json');
+    }
+
     // Write the request headers.
-    let headers = settings.requestHeaders!;
+    let headers = request.headers;
+    if (headers) {
+      for (let prop in headers) {
+        xhr.setRequestHeader(prop, headers[prop]);
+      }
+    }
+
+    headers = settings.requestHeaders;
     for (let prop in headers) {
       xhr.setRequestHeader(prop, headers[prop]);
+    }
+
+    // Handle authorization.
+    if (settings.token) {
+      xhr.setRequestHeader('Authorization', `token ${settings.token}`);
+    } else if (typeof document !== 'undefined' && document.cookie) {
+      let xsrfToken = getCookie('_xsrf');
+      if (xsrfToken !== void 0) {
+        xhr.setRequestHeader('X-XSRFToken', xsrfToken);
+      }
     }
   }
 
@@ -292,13 +289,13 @@ namespace Private {
    * Handle a request.
    */
   export
-  function handleRequest(xhr: XMLHttpRequest, settings: AJAX.ISettings): Promise<AJAX.ISuccess> {
+  function handleRequest(xhr: XMLHttpRequest, request: ServerConnection.IRequest, settings: ServerConnection.ISettings): Promise<ServerConnection.ISuccess> {
     let delegate = new PromiseDelegate();
 
     xhr.onload = (event: ProgressEvent) => {
       if (xhr.status >= 300) {
         let message = `Invalid Status: ${xhr.status}`;
-        delegate.reject({ event, xhr, settings, message });
+        delegate.reject({ event, xhr, request, settings, message });
       }
       let data = xhr.responseText;
       try {
@@ -306,26 +303,22 @@ namespace Private {
       } catch (err) {
         // no-op
       }
-      delegate.resolve({ xhr, settings, data, event });
+      delegate.resolve({ xhr, request, settings, data, event });
     };
 
     xhr.onabort = (event: Event) => {
-      delegate.reject({ xhr, event, settings, message: 'Aborted' });
+      delegate.reject({ xhr, event, request, settings, message: 'Aborted' });
     };
 
     xhr.onerror = (event: ErrorEvent) => {
-      delegate.reject({ xhr, event, settings, message: event.message });
+      delegate.reject({ xhr, event, request, settings, message: event.message });
     };
 
     xhr.ontimeout = (ev: ProgressEvent) => {
-      delegate.reject({ xhr, event, settings, message: 'Timed Out' });
+      delegate.reject({ xhr, event, request, settings, message: 'Timed Out' });
     };
 
-    if (settings.data) {
-      xhr.send(settings.data);
-    } else {
-      xhr.send();
-    }
+    xhr.send(request.data || '{}');
 
     return delegate.promise;
   }
