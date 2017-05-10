@@ -4,9 +4,6 @@
 |----------------------------------------------------------------------------*/
 
 
-/* Variables */
-@import './variables.css';
-
 /* Main application (1st) */
 @import url('~@jupyterlab/application/style/index.css');
 
