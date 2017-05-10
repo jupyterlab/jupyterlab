@@ -21,10 +21,10 @@ import {
 
 import {
   FileEditor, FileEditorFactory
-} from '@jupyterlab/editorwidget';
+} from '@jupyterlab/fileeditor';
 
 
-describe('editorwidget', () => {
+describe('fileeditor', () => {
 
   let factoryService = new CodeMirrorEditorFactory();
   let modelFactory = new TextModelFactory();

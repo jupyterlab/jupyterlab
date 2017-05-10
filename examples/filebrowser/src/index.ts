@@ -37,7 +37,7 @@ import {
 
 import {
   FileEditorFactory
-} from '@jupyterlab/editorwidget';
+} from '@jupyterlab/fileeditor';
 
 import '@jupyterlab/default-theme/style/index.css';
 import '../index.css';

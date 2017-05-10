@@ -23,7 +23,7 @@ import {
 
 import {
   IEditorTracker, FileEditor, FileEditorFactory
-} from '@jupyterlab/editorwidget';
+} from '@jupyterlab/fileeditor';
 
 import {
   ILauncher
@@ -42,7 +42,7 @@ const FACTORY = 'Editor';
 
 
 /**
- * The command IDs used by the editorwidget plugin.
+ * The command IDs used by the fileeditor plugin.
  */
 namespace CommandIDs {
   export
