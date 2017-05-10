@@ -118,17 +118,17 @@ const SHORTCUTS = [
     keys: ['Accel Shift H']
   },
   {
-    command: 'imagewidget:zoom-in',
+    command: 'imageviewer:zoom-in',
     selector: '.jp-ImageViewer',
     keys: ['=']
   },
   {
-    command: 'imagewidget:zoom-out',
+    command: 'imageviewer:zoom-out',
     selector: '.jp-ImageViewer',
     keys: ['-']
   },
   {
-    command: 'imagewidget:reset-zoom',
+    command: 'imageviewer:reset-zoom',
     selector: '.jp-ImageViewer',
     keys: ['0']
   },

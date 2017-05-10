@@ -25,7 +25,7 @@ import {
 
 import {
   ImageViewer, ImageViewerFactory
-} from '@jupyterlab/imagewidget';
+} from '@jupyterlab/imageviewer';
 
 import {
   createFileContext

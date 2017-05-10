@@ -24,7 +24,7 @@ var mods = [
   require('@jupyterlab/faq-extension'),
   require('@jupyterlab/filebrowser-extension'),
   require('@jupyterlab/help-extension'),
-  require('@jupyterlab/imagewidget-extension'),
+  require('@jupyterlab/imageviewer-extension'),
   require('@jupyterlab/inspector-extension'),
   require('@jupyterlab/landing-extension'),
   require('@jupyterlab/launcher-extension'),

@@ -46,8 +46,8 @@ import * as filebrowserExtension
 import * as helpExtension
   from '@jupyterlab/help-extension';
 
-import * as imagewidgetExtension
-  from '@jupyterlab/imagewidget-extension';
+import * as imageviewerExtension
+  from '@jupyterlab/imageviewer-extension';
 
 import * as inspectorExtension
   from '@jupyterlab/inspector-extension';
@@ -103,7 +103,7 @@ const mods: JupyterLab.IPluginModule[] = [
   faqExtension,
   filebrowserExtension,
   helpExtension,
-  imagewidgetExtension,
+  imageviewerExtension,
   inspectorExtension,
   landingExtension,
   launchExtension,
