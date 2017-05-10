@@ -2,19 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  PageConfig, URLExt
+  URLExt
 } from '@jupyterlab/coreutils';
 
 import {
-  JSONObject, JSONValue, JSONExt
+  JSONObject, JSONValue
 } from '@phosphor/coreutils';
 
 import {
-  IAjaxSettings
-} from '../utils';
-
-import * as utils
- from '../utils';
+  ServerConnection
+} from '..';
 
 
 /**
@@ -44,9 +41,9 @@ interface IConfigSection {
   update(newdata: JSONObject): Promise<JSONObject>;
 
   /**
-   * Optional default settings for ajax requests, if applicable.
+   * The server settings for the section.
    */
-  ajaxSettings?: IAjaxSettings;
+  readonly serverSettings: ServerConnection.ISettings;
 }
 
 
@@ -79,19 +76,9 @@ namespace ConfigSection {
     name: string;
 
     /**
-     * The server base url.
+     * The optional server settings.
      */
-    baseUrl?: string;
-
-    /**
-     * The authentication token for the API.
-     */
-    token?: string;
-
-    /**
-     * The default ajax settings.
-     */
-    ajaxSettings?: IAjaxSettings;
+    serverSettings?: ServerConnection.ISettings;
   }
 }
 
@@ -104,24 +91,17 @@ class DefaultConfigSection implements IConfigSection {
    * Construct a new config section.
    */
   constructor(options: ConfigSection.IOptions) {
-    let baseUrl = options.baseUrl || PageConfig.getBaseUrl();
-    this.ajaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
-    this._url = URLExt.join(baseUrl, SERVICE_CONFIG_URL,
+    let settings = this.serverSettings = (
+      options.serverSettings || ServerConnection.makeSettings()
+    );
+    this._url = URLExt.join(settings.baseUrl, SERVICE_CONFIG_URL,
                             encodeURIComponent(options.name));
   }
 
   /**
-   * Get a copy of the default ajax settings for the section.
+   * The server settings for the section.
    */
-  get ajaxSettings(): IAjaxSettings {
-    return JSONExt.deepCopy(this._ajaxSettings);
-  }
-  /**
-   * Set the default ajax settings for the section.
-   */
-  set ajaxSettings(value: IAjaxSettings) {
-    this._ajaxSettings = JSONExt.deepCopy(value);
-  }
+  readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Get the data for this section.
@@ -139,15 +119,17 @@ class DefaultConfigSection implements IConfigSection {
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
   load(): Promise<void> {
-    let ajaxSettings = this.ajaxSettings;
-    ajaxSettings.method = 'GET';
-    ajaxSettings.dataType = 'json';
-    ajaxSettings.cache = false;
-    return utils.ajaxRequest(this._url, ajaxSettings).then(success => {
+    let request = {
+      url: this._url,
+      method: 'GET',
+      dataType: 'json',
+      cache: false
+    };
+    return ServerConnection.makeRequest(request, this.serverSettings).then(success => {
       if (success.xhr.status !== 200) {
-         throw utils.makeAjaxError(success);
+         throw ServerConnection.makeError(success);
       }
-      this._data = success.data;
+      this._data = success.data as JSONObject;
     });
   }
 
@@ -165,25 +147,24 @@ class DefaultConfigSection implements IConfigSection {
    */
   update(newdata: JSONObject): Promise<JSONObject> {
     this._data = {...this._data, ...newdata};
-    let ajaxSettings = this.ajaxSettings;
-    ajaxSettings.method = 'PATCH';
-    ajaxSettings.data = JSON.stringify(newdata);
-    ajaxSettings.dataType = 'json';
-    ajaxSettings.contentType = 'application/json';
-
-    return utils.ajaxRequest(this._url, ajaxSettings).then(success => {
+    let request = {
+      url: this._url,
+      method: 'PATCH',
+      dataType: 'json',
+      contentType: 'application/json'
+    };
+    return ServerConnection.makeRequest(request, this.serverSettings).then(success => {
       if (success.xhr.status !== 200) {
-       throw utils.makeAjaxError(success);
+       throw ServerConnection.makeError(success);
       }
 
-      this._data = success.data;
+      this._data = success.data as JSONObject;
       return this._data;
     });
   }
 
   private _url = 'unknown';
   private _data: JSONObject = null;
-  private _ajaxSettings: IAjaxSettings = null;
 }
 
 
