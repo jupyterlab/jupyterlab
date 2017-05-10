@@ -1,5 +1,5 @@
 {
-  "name": "@jupyterlab/imagewidget-extension",
+  "name": "@jupyterlab/imageviewer-extension",
   "version": "0.4.0",
   "description": "JupyterLab - Image Widget Extension",
   "main": "lib/index.js",
@@ -15,7 +15,7 @@
     "@jupyterlab/application": "^0.4.0",
     "@jupyterlab/apputils": "^0.4.0",
     "@jupyterlab/docregistry": "^0.4.0",
-    "@jupyterlab/imagewidget": "^0.4.0"
+    "@jupyterlab/imageviewer": "^0.4.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",

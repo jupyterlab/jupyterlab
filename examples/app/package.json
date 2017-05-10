@@ -21,7 +21,7 @@
     "@jupyterlab/faq-extension": "^0.4.0",
     "@jupyterlab/filebrowser-extension": "^0.4.0",
     "@jupyterlab/help-extension": "^0.4.0",
-    "@jupyterlab/imagewidget-extension": "^0.4.0",
+    "@jupyterlab/imageviewer-extension": "^0.4.0",
     "@jupyterlab/inspector-extension": "^0.4.0",
     "@jupyterlab/landing-extension": "^0.4.0",
     "@jupyterlab/launcher-extension": "^0.4.0",

@@ -1,9 +1,9 @@
-# Design of the imagewidget plugin
-This document describes the design of the imagewidget plugin. This document illustrates how our research on personas and other solutions translates into the design decisions made to improve the imagewidget plugin.
+# Design of the imageviewer plugin
+This document describes the design of the imageviewer plugin. This document illustrates how our research on personas and other solutions translates into the design decisions made to improve the imageviewer plugin.
 
 # Personas
 ### Jackie Lair
-Jackie Lair is an experienced data scientist who is familiar with JupyterLab and uses it regularly. She uses the imagewidget to compare MRI scans alongside her code and write programs that outputs the information found in the MRI scans. 
+Jackie Lair is an experienced data scientist who is familiar with JupyterLab and uses it regularly. She uses the imageviewer to compare MRI scans alongside her code and write programs that outputs the information found in the MRI scans. 
 
 **Goal:** To be able to manipulate images in JupyterLab to view alongside other tabs and support data analysis.
 

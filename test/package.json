@@ -25,7 +25,7 @@
     "@jupyterlab/docregistry": "^0.4.0",
     "@jupyterlab/editorwidget": "^0.4.0",
     "@jupyterlab/filebrowser": "^0.4.0",
-    "@jupyterlab/imagewidget": "^0.4.0",
+    "@jupyterlab/imageviewer": "^0.4.0",
     "@jupyterlab/inspector": "^0.4.0",
     "@jupyterlab/markdownwidget": "^0.4.0",
     "@jupyterlab/notebook": "^0.4.0",

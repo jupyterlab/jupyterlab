@@ -23,7 +23,7 @@
 @import url('~@jupyterlab/faq-extension/style/index.css');
 @import url('~@jupyterlab/filebrowser/style/index.css');
 @import url('~@jupyterlab/help-extension/style/index.css');
-@import url('~@jupyterlab/imagewidget/style/index.css');
+@import url('~@jupyterlab/imageviewer/style/index.css');
 @import url('~@jupyterlab/inspector/style/index.css');
 @import url('~@jupyterlab/landing-extension/style/index.css');
 @import url('~@jupyterlab/launcher/style/index.css');
