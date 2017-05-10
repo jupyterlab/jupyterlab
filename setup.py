@@ -6,9 +6,6 @@
 
 from __future__ import print_function
 
-# the name of the project
-name = 'jupyterlab'
-
 #-----------------------------------------------------------------------------
 # Minimal Python version sanity check
 #-----------------------------------------------------------------------------
@@ -28,7 +25,6 @@ PY3 = (sys.version_info[0] >= 3)
 #-----------------------------------------------------------------------------
 
 from distutils import log
-import io
 import json
 import os
 from glob import glob
@@ -45,7 +41,9 @@ from setupbase import (
     find_packages,
     find_package_data,
     js_prerelease,
-    CheckAssets
+    CheckAssets,
+    version_ns,
+    name
 )
 
 # BEFORE importing distutils, remove MANIFEST. distutils doesn't properly
@@ -58,11 +56,6 @@ pjoin = os.path.join
 
 DESCRIPTION = 'An alpha preview of the JupyterLab notebook server extension.'
 LONG_DESCRIPTION = 'This is an alpha preview of JupyterLab. It is not ready for general usage yet. Development happens on https://github.com/jupyter/jupyterlab, with chat on https://gitter.im/jupyter/jupyterlab.'
-
-
-version_ns = {}
-with io.open(pjoin(here, name, '_version.py'), encoding="utf8") as f:
-    exec(f.read(), {}, version_ns)
 
 
 setup_args = dict(
