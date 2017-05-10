@@ -13,6 +13,10 @@ import {
   PageConfig
 } from '@jupyterlab/coreutils';
 
+import {
+  JSONObject
+} from '@phosphor/coreutils';
+
 
 /**
  * The command IDs used by the application plugin.
@@ -42,6 +46,20 @@ const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.main',
   requires: [ICommandPalette],
   activate: (app: JupyterLab, palette: ICommandPalette) => {
+    // Set the datastore required by the application's setting registry.
+    app.settings.setDatastore({
+      fetch: (id: string): Promise<JSONObject | null> => {
+        return Promise.reject(new Error('fetch not implemented'));
+      },
+      remove: (id: string): Promise<void> => {
+        return Promise.reject(new Error('remove not implemented'));
+      },
+      save: (id: string, value: JSONObject): Promise<void> => {
+        return Promise.reject(new Error('save not implemented'));
+      }
+    });
+
+    // Add the main application commands.
     const category = 'Main Area';
     let command = CommandIDs.activateNextTab;
     app.commands.addCommand(command, {

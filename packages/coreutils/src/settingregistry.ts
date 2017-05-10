@@ -71,26 +71,8 @@ class SettingRegistry {
    */
   constructor(options?: SettingRegistry.IOptions) {
     if (options.datastore) {
-      this.datastore = options.datastore;
+      this.setDatastore(options.datastore);
     }
-  }
-
-  /**
-   * The underlying datastore of the setting registry.
-   */
-  get datastore(): IDatastore<ISettingRegistry.ISettingFile, ISettingRegistry.ISettingFile> {
-    return this._datastore;
-  }
-  set datastore(datastore: IDatastore<ISettingRegistry.ISettingFile, ISettingRegistry.ISettingFile>) {
-    this._datastore = datastore;
-
-    // If the registry is ready already or if it has no datastore, bail.
-    if (this._isReady || !datastore) {
-      return;
-    }
-
-    this._isReady = true;
-    this._ready.resolve(void 0);
   }
 
   /**
@@ -98,6 +80,16 @@ class SettingRegistry {
    */
   add(): IDisposable {
     return new DisposableDelegate(() => { /* no op */ });
+  }
+
+  setDatastore(datastore: IDatastore<ISettingRegistry.ISettingFile, ISettingRegistry.ISettingFile>) {
+    if (this._isReady) {
+      throw new Error('Setting registry already has a datastore.');
+    }
+
+    this._datastore = datastore;
+    this._isReady = true;
+    this._ready.resolve(void 0);
   }
 
   private _datastore: IDatastore<ISettingRegistry.ISettingFile, ISettingRegistry.ISettingFile> | null = null;
