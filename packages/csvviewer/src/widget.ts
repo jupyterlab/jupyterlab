@@ -27,23 +27,28 @@ import {
 
 
 /**
- * The class name added to a CSV widget.
+ * The class name added to a CSV viewer.
  */
 const CSV_CLASS = 'jp-CSVViewer';
 
 /**
- * The class name added to a CSV widget warning.
+ * The class name added to a CSV viewer warning.
  */
 const CSV_WARNING_CLASS = 'jp-CSVViewer-warning';
 
+/**
+ * The class name added to a CSV viewer toolbar.
+ */
+const CSV_VIEWER_CLASS = 'jp-CSVViewer-toolbar';
+
 
 /**
- * A widget for CSV tables.
+ * A viewer for CSV tables.
  */
 export
 class CSVViewer extends Widget {
   /**
-   * Construct a new CSV widget.
+   * Construct a new CSV viewer.
    */
   constructor(options: CSVViewer.IOptions) {
     super();
@@ -64,6 +69,7 @@ class CSVViewer extends Widget {
 
     this._toolbar = new CSVToolbar();
     this._toolbar.delimiterChanged.connect(this._onDelimiterChanged, this);
+    this._toolbar.addClass(CSV_VIEWER_CLASS);
     layout.addWidget(this._toolbar);
     layout.addWidget(this._table);
     layout.addWidget(this._warning);

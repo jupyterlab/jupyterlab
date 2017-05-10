@@ -22,6 +22,7 @@
     /* Add the border width because this is border-box sized */
     height: calc(var(--jp-private-csvviewer-toolbar-height) + var(--jp-border-width));
     background: var(--jp-layout-color1);
+    font-size: var(--jp-code-font-size);
 }
 
 .jp-CSVViewer-toolbar span {
