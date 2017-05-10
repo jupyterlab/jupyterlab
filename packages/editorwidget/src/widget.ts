@@ -22,18 +22,18 @@ const DIRTY_CLASS = 'jp-mod-dirty';
 /**
  * The class name added to a jupyter editor widget.
  */
-const EDITOR_CLASS = 'jp-EditorWidget';
+const EDITOR_CLASS = 'jp-FileEditor';
 
 
 /**
  * A document widget for editors.
  */
 export
-class EditorWidget extends CodeEditorWrapper {
+class FileEditor extends CodeEditorWrapper {
   /**
    * Construct a new editor widget.
    */
-  constructor(options: EditorWidget.IOptions) {
+  constructor(options: FileEditor.IOptions) {
     super({
       factory: options.factory,
       model: options.context.model
@@ -133,7 +133,7 @@ class EditorWidget extends CodeEditorWrapper {
  * The namespace for editor widget statics.
  */
 export
-namespace EditorWidget {
+namespace FileEditor {
   /**
    * The options used to create an editor widget.
    */
@@ -161,11 +161,11 @@ namespace EditorWidget {
  * A widget factory for editors.
  */
 export
-class EditorWidgetFactory extends ABCWidgetFactory<EditorWidget, DocumentRegistry.ICodeModel> {
+class FileEditorFactory extends ABCWidgetFactory<FileEditor, DocumentRegistry.ICodeModel> {
   /**
    * Construct a new editor widget factory.
    */
-  constructor(options: EditorWidgetFactory.IOptions) {
+  constructor(options: FileEditorFactory.IOptions) {
     super(options.factoryOptions);
     this._services = options.editorServices;
   }
@@ -173,7 +173,7 @@ class EditorWidgetFactory extends ABCWidgetFactory<EditorWidget, DocumentRegistr
   /**
    * Create a new widget given a context.
    */
-  protected createNewWidget(context: DocumentRegistry.CodeContext): EditorWidget {
+  protected createNewWidget(context: DocumentRegistry.CodeContext): FileEditor {
     let func = this._services.factoryService.newDocumentEditor.bind(
       this._services.factoryService);
     let factory: CodeEditor.Factory = options => {
@@ -182,7 +182,7 @@ class EditorWidgetFactory extends ABCWidgetFactory<EditorWidget, DocumentRegistr
       options.wordWrap = true;
       return func(options);
     };
-    return new EditorWidget({
+    return new FileEditor({
       factory,
       context,
       mimeTypeService: this._services.mimeTypeService
@@ -194,10 +194,10 @@ class EditorWidgetFactory extends ABCWidgetFactory<EditorWidget, DocumentRegistr
 
 
 /**
- * The namespace for `EditorWidgetFactory` class statics.
+ * The namespace for `FileEditorFactory` class statics.
  */
 export
-namespace EditorWidgetFactory {
+namespace FileEditorFactory {
   /**
    * The options used to create an editor widget factory.
    */

@@ -22,7 +22,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  IEditorTracker, EditorWidget, EditorWidgetFactory
+  IEditorTracker, FileEditor, FileEditorFactory
 } from '@jupyterlab/editorwidget';
 
 import {
@@ -81,7 +81,7 @@ export default plugin;
  * Activate the editor tracker plugin.
  */
 function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayoutRestorer, editorServices: IEditorServices, state: IStateDB, launcher: ILauncher | null): IEditorTracker {
-  const factory = new EditorWidgetFactory({
+  const factory = new FileEditorFactory({
     editorServices,
     factoryOptions: {
       name: FACTORY,
@@ -91,7 +91,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   });
   const { commands, shell } = app;
   const id = 'editor:settings';
-  const tracker = new InstanceTracker<EditorWidget>({
+  const tracker = new InstanceTracker<FileEditor>({
     namespace: 'editor',
     shell
   });

@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  EditorWidget
+  FileEditor
 } from './widget';
 
 export * from './widget';
@@ -20,7 +20,7 @@ export * from './widget';
  * A class that tracks editor widgets.
  */
 export
-interface IEditorTracker extends IInstanceTracker<EditorWidget> {}
+interface IEditorTracker extends IInstanceTracker<FileEditor> {}
 
 
 /* tslint:disable */
