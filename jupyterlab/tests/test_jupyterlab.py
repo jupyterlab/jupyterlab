@@ -125,7 +125,8 @@ class TestExtension(TestCase):
         _ensure_package(app_dir)
         with open(pjoin(app_dir, 'staging', 'package.json')) as fid:
             data = json.load(fid)
-        assert '@jupyterlab/console-extension' not in data['extensions']
+        extensions = data['jupyterlab']['extensions']
+        assert '@jupyterlab/console-extension' not in extensions
 
     def test_link_package(self):
         link_package(self.source_dir)
