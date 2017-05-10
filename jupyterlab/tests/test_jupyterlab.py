@@ -121,8 +121,8 @@ class TestExtension(TestCase):
 
     def test_uninstall_core_extension(self):
         uninstall_extension('@jupyterlab/console-extension')
-        _ensure_package()
         app_dir = get_app_dir()
+        _ensure_package(app_dir)
         with open(pjoin(app_dir, 'staging', 'package.json')) as fid:
             data = json.load(fid)
         assert '@jupyterlab/console-extension' not in data['extensions']
