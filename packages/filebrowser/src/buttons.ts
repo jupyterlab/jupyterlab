@@ -122,6 +122,7 @@ class FileButtons extends Widget {
     this._buttons.upload.onclick = this._onUploadButtonClicked.bind(this);
     this._buttons.refresh.onclick = this._onRefreshButtonClicked.bind(this);
     this._input.onchange = this._onInputChanged.bind(this);
+    this._input.onclick = this._onInputClicked.bind(this);
 
     this.node.appendChild(this._buttons.create);
     this.node.appendChild(this._buttons.upload);
@@ -279,6 +280,15 @@ class FileButtons extends Widget {
   private _onInputChanged(): void {
     let files = Array.prototype.slice.call(this._input.files);
     Private.uploadFiles(this, files as File[]);
+  }
+
+  /**
+   * The 'click' handler for the input field.
+  */
+  private _onInputClicked(): void {
+    // In order to allow repeated uploads of the same file (with delete in between),
+    // we need to null out the input value to trigger a change event.
+    this._input.value = null;
   }
 
   private _buttons = Private.createButtons();
