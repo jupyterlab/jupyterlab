@@ -65,12 +65,25 @@ variable.  If not specified, it will default to
 site-specific directory prefix of the current Python environment.  You can
 query the current application path using `jupyter lab path`.
 
-The `settings` directory contains `page_config.json` and `linked_packages.json`
+The `settings` directory contains `page_config.json` and `build_config.json`
 files.
 The `page_config.json` data is used to provide config data to the application
 environment.  For example, the `ignoredPlugins` data is used to ignore registered plugins by the name of the token they provide.
-The `linked_packages.json` file is used to track the folders that have been
-added using `jupyter labextension link <folder>`.
+The `build_config.json` file is used to track the folders that have been
+added using `jupyter labextension link <folder>`, as well as core extensions
+that have been explicitly uninstalled.  e.g.
+
+```bash
+$ cat settings/build_config.json
+{
+    "uninstalled_core_extensions": [
+        "@jupyterlab/markdownwidget-extension"
+    ],
+    "linked_packages": {
+        "@jupyterlab/python-tests": "/path/to/my/extension"
+    }
+}
+```
 
 The other folders in the app directory are: `extensions`, `static`, and
 `staging`.  The `extensions` folder has the packed tarballs for each of the

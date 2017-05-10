@@ -4,6 +4,7 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 import glob
+import json
 import os
 import sys
 from os.path import join as pjoin
@@ -26,7 +27,7 @@ from jupyterlab.extension import (
 from jupyterlab.commands import (
     install_extension, uninstall_extension, list_extensions,
     build, link_package, unlink_package, get_app_dir,
-    _get_linked_packages
+    _get_linked_packages, _ensure_package
 )
 
 here = os.path.dirname(os.path.abspath(__file__))
@@ -117,6 +118,14 @@ class TestExtension(TestCase):
         path = pjoin(get_app_dir(), 'extensions', '*python_tests*.tgz')
         assert not glob.glob(path)
         assert '@jupyterlab/python-tests' not in list_extensions()
+
+    def test_uninstall_core_extension(self):
+        uninstall_extension('@jupyterlab/console-extension')
+        _ensure_package()
+        app_dir = get_app_dir()
+        with open(pjoin(app_dir, 'staging', 'package.json')) as fid:
+            data = json.load(fid)
+        assert '@jupyterlab/console-extension' not in data['extensions']
 
     def test_link_package(self):
         link_package(self.source_dir)

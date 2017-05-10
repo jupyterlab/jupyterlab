@@ -95,11 +95,10 @@ def link_package(path, app_dir=None):
     if is_extension:
         install_extension(path, app_dir)
 
-    linked = _get_linked_packages(app_dir)
-    linked[data['name']] = path
-    target = pjoin(app_dir, 'settings', 'linked_packages.json')
-    with open(target, 'w') as fid:
-        json.dump(linked, fid)
+    config = _get_build_config(app_dir)
+    config.setdefault('linked_packages', dict())
+    config['linked_packages'][data['name']] = path
+    _write_build_config(config, app_dir)
 
 
 def unlink_package(package, app_dir=None):
@@ -110,7 +109,9 @@ def unlink_package(package, app_dir=None):
     app_dir = get_app_dir(app_dir)
     if app_dir == here:
         raise ValueError('Cannot link packages in core app')
-    linked = _get_linked_packages(app_dir)
+
+    config = _get_build_config(app_dir)
+    linked = config.setdefault('linked_packages', dict())
     for (key, value) in linked.items():
         if value == package or key == package:
             name = key
@@ -121,9 +122,8 @@ def unlink_package(package, app_dir=None):
         return False
 
     del linked[name]
-    target = pjoin(app_dir, 'settings', 'linked_packages.json')
-    with open(target, 'w') as fid:
-        json.dump(linked, fid)
+    config['linked_packages'] = linked
+    _write_build_config(config, app_dir)
 
     extensions = _get_extensions(app_dir)
     if name in extensions:
@@ -132,12 +132,45 @@ def unlink_package(package, app_dir=None):
     return True
 
 
+def _get_build_config(app_dir):
+    """Get the build config data for the given app dir
+    """
+    target = pjoin(app_dir, 'settings', 'build_config.json')
+    if not os.path.exists(target):
+        return {}
+    else:
+        with open(target) as fid:
+            return json.load(fid)
+
+
+def _write_build_config(config, app_dir):
+    """Write the build config to the app dir.
+    """
+    _ensure_package(app_dir)
+    target = pjoin(app_dir, 'settings', 'build_config.json')
+    with open(target, 'w') as fid:
+        json.dump(config, fid, indent=4)
+
+
 def uninstall_extension(name, app_dir=None):
     """Uninstall an extension by name.
     """
     app_dir = get_app_dir(app_dir)
     if app_dir == here:
         raise ValueError('Cannot install packages in core app')
+    # Allow for uninstalled core extensions here.
+    with open(pjoin(here, 'package.json')) as fid:
+        data = json.load(fid)
+        if name in data['jupyterlab']['extensions']:
+            print('Uninstalling core extension %s' % name)
+            config = _get_build_config(app_dir)
+            uninstalled = config.get('uninstalled_core_extensions', [])
+            if name not in uninstalled:
+                uninstalled.append(name)
+                config['uninstalled_core_extensions'] = uninstalled
+                _write_build_config(config, app_dir)
+            return True
+
     for (extname, path) in _get_extensions(app_dir).items():
         if extname == name:
             print('Uninstalling %s from %s' % (name, os.path.dirname(path)))
@@ -160,7 +193,7 @@ def clean(app_dir=None):
     app_dir = get_app_dir(app_dir)
     if app_dir == here:
         raise ValueError('Cannot clean the core app')
-    for name in ['static', 'build']:
+    for name in ['static', 'staging']:
         target = pjoin(app_dir, name)
         if osp.exists(target):
             shutil.rmtree(target)
@@ -230,6 +263,10 @@ def _ensure_package(app_dir, name='JupyterLab', version=None, publicPath=None):
         data['dependencies'][key] = value
         data['jupyterlab']['extensions'].append(key)
 
+    config = _get_build_config(app_dir)
+    for item in config.get('uninstalled_core_extensions', []):
+        data['jupyterlab']['extensions'].remove(item)
+
     data['jupyterlab']['name'] = name
     if version:
         data['jupyterlab']['version'] = version
@@ -285,6 +322,14 @@ def _get_extensions(app_dir):
     return extensions
 
 
+def _get_linked_packages(app_dir=None):
+    """Get the linked packages metadata.
+    """
+    app_dir = get_app_dir(app_dir)
+    config = _get_build_config(app_dir)
+    return config.get('linked_packages', dict())
+
+
 def _read_package(target):
     """Read the package data in a given target tarball.
     """
@@ -293,21 +338,9 @@ def _read_package(target):
     return json.loads(f.read().decode('utf8'))
 
 
-def _get_linked_packages(app_dir=None):
-    """Get the linked packages in the app dir.
-    """
-    app_dir = get_app_dir(app_dir)
-    extensions = dict()
-
-    link_file = pjoin(app_dir, 'settings', 'linked_packages.json')
-    if not os.path.exists(link_file):
-        return extensions
-
-    with open(link_file) as fid:
-        return json.load(fid)
-
-
 def _normalize_path(extension):
+    """Normalize a given extension if it is a path.
+    """
     extension = osp.expanduser(extension)
     if osp.exists(extension):
         extension = osp.abspath(extension)
