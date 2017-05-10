@@ -1,5 +1,5 @@
 {
-  "name": "@jupyterlab/editorwidget",
+  "name": "@jupyterlab/fileeditor",
   "version": "0.4.0",
   "description": "JupyterLab - Editor Widget",
   "main": "lib/index.js",

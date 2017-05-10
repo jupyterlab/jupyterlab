@@ -20,7 +20,7 @@ var mods = [
   require('@jupyterlab/csvwidget-extension'),
   require('@jupyterlab/docmanager-extension'),
   require('@jupyterlab/docregistry-extension'),
-  require('@jupyterlab/editorwidget-extension'),
+  require('@jupyterlab/fileeditor-extension'),
   require('@jupyterlab/faq-extension'),
   require('@jupyterlab/filebrowser-extension'),
   require('@jupyterlab/help-extension'),

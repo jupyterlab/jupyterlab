@@ -34,8 +34,8 @@ import * as docmanagerExtension
 import * as docregistryExtension
   from '@jupyterlab/docregistry-extension';
 
-import * as editorwidgetExtension
-  from '@jupyterlab/editorwidget-extension';
+import * as fileeditorExtension
+  from '@jupyterlab/fileeditor-extension';
 
 import * as faqExtension
   from '@jupyterlab/faq-extension';
@@ -99,7 +99,7 @@ const mods: JupyterLab.IPluginModule[] = [
   csvwidgetExtension,
   docmanagerExtension,
   docregistryExtension,
-  editorwidgetExtension,
+  fileeditorExtension,
   faqExtension,
   filebrowserExtension,
   helpExtension,

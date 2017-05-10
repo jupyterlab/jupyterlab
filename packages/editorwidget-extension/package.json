@@ -1,5 +1,5 @@
 {
-  "name": "@jupyterlab/editorwidget-extension",
+  "name": "@jupyterlab/fileeditor-extension",
   "version": "0.4.0",
   "description": "JupyterLab - Editor Widget Extension",
   "main": "lib/index.js",
@@ -16,7 +16,7 @@
     "@jupyterlab/apputils": "^0.4.0",
     "@jupyterlab/codeeditor": "^0.4.0",
     "@jupyterlab/docregistry": "^0.4.0",
-    "@jupyterlab/editorwidget": "^0.4.0",
+    "@jupyterlab/fileeditor": "^0.4.0",
     "@jupyterlab/launcher": "^0.4.0"
   },
   "devDependencies": {

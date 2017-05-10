@@ -62,7 +62,7 @@ import './docregistry/context.spec';
 import './docregistry/default.spec';
 import './docregistry/registry.spec';
 
-import './editorwidget/widget.spec';
+import './fileeditor/widget.spec';
 
 import './filebrowser/crumbs.spec';
 import './filebrowser/model.spec';

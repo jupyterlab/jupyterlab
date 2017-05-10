@@ -17,7 +17,7 @@
     "@jupyterlab/default-theme": "^0.4.0",
     "@jupyterlab/docmanager-extension": "^0.4.0",
     "@jupyterlab/docregistry-extension": "^0.4.0",
-    "@jupyterlab/editorwidget-extension": "^0.4.0",
+    "@jupyterlab/fileeditor-extension": "^0.4.0",
     "@jupyterlab/faq-extension": "^0.4.0",
     "@jupyterlab/filebrowser-extension": "^0.4.0",
     "@jupyterlab/help-extension": "^0.4.0",
