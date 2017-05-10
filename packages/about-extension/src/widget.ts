@@ -10,7 +10,7 @@ import {
 } from '@phosphor/virtualdom';
 
 import {
-  VDomModel, VDomWidget
+  VDomModel, VDomRenderer
 } from '@jupyterlab/apputils';
 
 
@@ -298,7 +298,7 @@ namespace AboutModel {
  * A virtual-DOM-based widget for the About plugin.
  */
 export
-class AboutWidget extends VDomWidget<AboutModel> {
+class AboutWidget extends VDomRenderer<AboutModel> {
   /**
    * Handle `'activate-request'` messages.
    */
