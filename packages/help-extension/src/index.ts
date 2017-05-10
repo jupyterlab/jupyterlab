@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  utils
-} from '@jupyterlab/services';
-
-import {
   Message
 } from '@phosphor/messaging';
 
@@ -23,7 +19,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  URLExt
+  PageConfig, URLExt
 } from '@jupyterlab/coreutils';
 
 
@@ -227,7 +223,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
 
   commands.addCommand(CommandIDs.launchClassic, {
     label: 'Launch Classic Notebook',
-    execute: () => { window.open(utils.getBaseUrl() + 'tree'); }
+    execute: () => { window.open(PageConfig.getBaseUrl() + 'tree'); }
   });
 
   RESOURCES.forEach(args => { palette.addItem({ args, command, category }); });

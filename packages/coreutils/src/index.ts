@@ -8,6 +8,7 @@ export * from './observablejson';
 export * from './observablemap';
 export * from './observablestring';
 export * from './observablevector';
+export * from './pageconfig';
 export * from './path';
 export * from './time';
 export * from './undoablevector';

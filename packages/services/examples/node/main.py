@@ -4,6 +4,7 @@
 from __future__ import print_function, absolute_import
 
 import atexit
+import json
 import shutil
 import subprocess
 import sys
@@ -45,9 +46,14 @@ class TestApp(NotebookApp):
 
 def run_node(base_url, token):
     # Run the node script with command arguments.
-    node_command = ['node', 'index.js', '--baseUrl', base_url]
+    node_command = ['node', 'index.js', '--jupyter-config-data=./config.json']
+
+    config = dict(baseUrl=base_url)
     if token:
-        node_command.append('--token=%s' % token)
+        config['token'] = token
+
+    with open('config.json', 'w') as fid:
+        json.dump(config, fid)
 
     print('*' * 60)
     print(' '.join(node_command))

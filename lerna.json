@@ -4,6 +4,7 @@
     "jupyterlab",
     "examples/*",
     "packages/*",
+    "packages/services/examples/*",
     "test"
   ],
   "version": "independent"
