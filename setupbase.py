@@ -9,9 +9,12 @@ This includes:
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+import io
+import json
 import os
 import pipes
 import sys
+from os.path import join as pjoin
 
 from distutils import log
 from distutils.cmd import Command
@@ -25,9 +28,16 @@ else:
     def list2cmdline(cmd_list):
         return ' '.join(map(pipes.quote, cmd_list))
 
+# the name of the project
+name = 'jupyterlab'
+
 
 here = os.path.dirname(os.path.abspath(__file__))
-is_repo = os.path.exists(os.path.join(here, '.git'))
+is_repo = os.path.exists(pjoin(here, '.git'))
+
+version_ns = {}
+with io.open(pjoin(here, name, '_version.py'), encoding="utf8") as f:
+    exec(f.read(), {}, version_ns)
 
 
 def run(cmd, *args, **kwargs):
@@ -109,8 +119,8 @@ class CheckAssets(Command):
 
     # Representative files that should exist after a successful build
     targets = [
-        os.path.join(here, 'jupyterlab', 'build', 'release_data.json'),
-        os.path.join(here, 'jupyterlab', 'build', 'main.bundle.js'),
+        pjoin(here, 'jupyterlab', 'build', 'release_data.json'),
+        pjoin(here, 'jupyterlab', 'build', 'main.bundle.js'),
     ]
 
     def initialize_options(self):
@@ -124,6 +134,15 @@ class CheckAssets(Command):
             if not os.path.exists(t):
                 msg = 'Missing file: %s' % t
                 raise ValueError(msg)
+
+        target = pjoin(here, 'jupyterlab', 'build', 'release_data.json')
+        with open(target) as fid:
+            data = json.load(fid)
+
+        if data['version'] != version_ns['__version__']:
+            msg = 'Release assets version mismatch, please run npm publish'
+            raise ValueError(msg)
+
 
         # update package data in case this created new files
         update_package_data(self.distribution)
