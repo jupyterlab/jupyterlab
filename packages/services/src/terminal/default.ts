@@ -268,7 +268,7 @@ namespace DefaultTerminalSession {
       throw Private.unavailableMsg;
     }
     let baseUrl = options.baseUrl || PageConfig.getBaseUrl();
-    let url = baseUrl || PageConfig.getBaseUrl();
+    let url = Private.getBaseUrl(baseUrl);
     let ajaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
     ajaxSettings.method = 'POST';
     ajaxSettings.dataType = 'json';

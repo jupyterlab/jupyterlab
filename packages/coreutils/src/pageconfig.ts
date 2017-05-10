@@ -16,7 +16,6 @@ import {
 /**
  * Declare stubs for the node variables.
  */
-declare var global: any;
 declare var process: any;
 declare var require: any;
 
@@ -48,25 +47,32 @@ namespace PageConfig {
       return configData[name] || '';
     }
     configData = Object.create(null);
-    // Use CLI if on node.
-    if (typeof window === 'undefined') {
-      let cli = minimist(process.argv.slice(2));
-      if ('jupyter-config-data' in cli) {
-        let path: any = require('path');
-        let fullPath = path.resolve(cli['jupyter-config-data']);
-        try {
-          configData = global.require(fullPath) as { [key: string]: string };
-        } catch (e) {
-          console.error(e);
-        }
-      }
-    // Use script tag if in the browser.
-    } else {
+    let found = false;
+
+    // Use script tag if available.
+    if (typeof document !== 'undefined') {
       let el = document.getElementById('jupyter-config-data');
       if (el) {
         configData = JSON.parse(el.textContent || '') as { [key: string]: string };
+        console.log('\n\n\n******ho');
+        found = true;
       }
     }
+    // Otherwise use CLI if given.
+    if (!found && typeof process !== 'undefined') {
+      try {
+        let cli = minimist(process.argv.slice(2));
+        if ('jupyter-config-data' in cli) {
+          let path: any = require('path');
+          let fullPath = path.resolve(cli['jupyter-config-data']);
+          // Force Webpack to ignore this require.
+          configData = eval('require')(fullPath) as { [key: string]: string };
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     if (!JSONExt.isObject(configData)) {
       configData = Object.create(null);
     } else {
@@ -74,6 +80,8 @@ namespace PageConfig {
         configData[key] = String(configData[key]);
       }
     }
+    console.log('\n\n\n******');
+    console.log(JSON.stringify(configData, null, 2));
     return configData[name] || '';
   }
 

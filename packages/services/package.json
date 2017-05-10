@@ -40,11 +40,11 @@
     "example:browser": "cd examples/browser && npm run update && npm run build",
     "example:node": "cd examples/node && npm install",
     "build:examples": "npm run example:browser && npm run example:node",
-    "test:coverage": "istanbul cover --dir test/coverage _mocha -- --retries 3 test/build/**/*.spec.js test/build*.spec.js --foo bar --terminalsAvailable True",
+    "test:coverage": "istanbul cover --dir test/coverage _mocha -- --retries 3 test/build/**/*.spec.js test/build/*.spec.js --jupyter-config-data=./test/config.json",
     "test:integration": "cd test && python integration_test.py",
-    "test:devtool": "devtool node_modules/.bin/_mocha -qc test/build/*.spec.js test/build/**/*.spec.js --foo bar --terminalsAvailable True",
-    "test:debug": "mocha test/build/**/*.spec.js test/build*.spec.js --foo bar --terminalsAvailable True --debug-brk",
-    "test": "mocha --retries 3 test/build/**.spec.js test/build/**/*.spec.js --foo bar --terminalsAvailable True"
+    "test:devtool": "devtool node_modules/.bin/_mocha -qc test/build/**/*.spec.js test/build*.spec.js --jupyter-config-data=./test/config.json",
+    "test:debug": "mocha test/build/**/*.spec.js test/build*.spec.js  --jupyter-config-data=./test/config.json --debug-brk",
+    "test": "mocha --retries 3 test/build/**/*.spec.js test/build*.spec.js --jupyter-config-data=./test/config.json"
   },
   "repository": {
     "type": "git",
