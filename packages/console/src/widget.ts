@@ -457,6 +457,8 @@ class CodeConsole extends Widget {
   private _execute(cell: CodeCell): Promise<void> {
     let source = cell.model.value.text;
     this._history.push(source);
+    // If the source of the console is just "clear", clear the console as we
+    // do in IPython or QtConsole.
     if (source === 'clear') {
       this.clear();
       return Promise.resolve(void 0)
