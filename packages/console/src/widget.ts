@@ -459,7 +459,7 @@ class CodeConsole extends Widget {
     this._history.push(source);
     // If the source of the console is just "clear", clear the console as we
     // do in IPython or QtConsole.
-    if (source === 'clear') {
+    if ( source === 'clear' || source === '%clear' ) {
       this.clear();
       return Promise.resolve(void 0)
     }
