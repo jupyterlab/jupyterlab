@@ -58,6 +58,11 @@ const TOOLBAR_RESTART_CLASS = 'jp-RefreshIcon';
 const TOOLBAR_KERNEL_NAME_CLASS = 'jp-Toolbar-kernelName';
 
 /**
+ * The class name added to toolbar spacer.
+ */
+const TOOLBAR_SPACER_CLASS = 'jp-Toolbar-spacer';
+
+/**
  * The class name added to toolbar kernel status icon.
  */
 const TOOLBAR_KERNEL_STATUS_CLASS = 'jp-Toolbar-kernelStatus';
@@ -228,6 +233,19 @@ namespace Toolbar {
 
 
   /**
+   * Create a toolbar spacer item.
+   *
+   * #### Notes
+   * It is a flex spacer that separates the left toolbar items
+   * from the right toolbar items.
+   */
+  export
+  function createSpacerItem(session: IClientSession): Widget {
+    return new Private.Spacer(session);
+  }
+
+
+  /**
    * Create a kernel name indicator item.
    *
    * #### Notes
@@ -236,7 +254,7 @@ namespace Toolbar {
    * It can handle a change in context or kernel.
    */
   export
-  function createKernelNameItem(session: IClientSession): Widget {
+  function createKernelNameItem(session: IClientSession): ToolbarButton {
     return new Private.KernelName(session);
   }
 
@@ -380,16 +398,35 @@ namespace Private {
   });
 
   /**
+   * A spacer widget.
+   */
+  export
+  class Spacer extends Widget {
+    /**
+     * Construct a new spacer widget.
+     */
+    constructor(session: IClientSession) {
+      super();
+      this.addClass(TOOLBAR_SPACER_CLASS);
+    }
+  }
+
+  /**
    * A kernel name widget.
    */
   export
-  class KernelName extends Widget {
+  class KernelName extends ToolbarButton {
     /**
      * Construct a new kernel name widget.
      */
     constructor(session: IClientSession) {
-      super();
-      this.addClass(TOOLBAR_KERNEL_NAME_CLASS);
+      super({
+        className: TOOLBAR_KERNEL_NAME_CLASS,
+        onClick: () => {
+          session.selectKernel();
+        },
+        tooltip: 'Switch kernel'
+        });
       this._onKernelChanged(session);
       session.kernelChanged.connect(this._onKernelChanged, this);
     }
