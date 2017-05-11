@@ -214,7 +214,7 @@ class TerminalManager implements TerminalSession.IManager {
    * Get a set of options to pass.
    */
   private _getOptions(options: TerminalSession.IOptions = {}): TerminalSession.IOptions {
-    return { serverSettings: this.serverSettings, ...options };
+    return { ...options, serverSettings: this.serverSettings };
   };
 
   private _running: TerminalSession.IModel[] = [];
