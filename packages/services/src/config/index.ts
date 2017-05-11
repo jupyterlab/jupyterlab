@@ -122,7 +122,6 @@ class DefaultConfigSection implements IConfigSection {
     let request = {
       url: this._url,
       method: 'GET',
-      dataType: 'json',
       cache: false
     };
     return ServerConnection.makeRequest(request, this.serverSettings).then(success => {
@@ -149,9 +148,7 @@ class DefaultConfigSection implements IConfigSection {
     this._data = {...this._data, ...newdata};
     let request = {
       url: this._url,
-      method: 'PATCH',
-      dataType: 'json',
-      contentType: 'application/json'
+      method: 'PATCH'
     };
     return ServerConnection.makeRequest(request, this.serverSettings).then(success => {
       if (success.xhr.status !== 200) {
