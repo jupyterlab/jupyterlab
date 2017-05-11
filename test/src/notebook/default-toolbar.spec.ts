@@ -267,7 +267,7 @@ describe('@jupyterlab/notebook', () => {
         ToolbarItems.populateDefaults(panel);
         expect(toArray(panel.toolbar.names())).to.eql(['save', 'insert', 'cut',
           'copy', 'paste', 'run', 'interrupt', 'restart', 'cellType',
-          'kernelName', 'kernelStatus']);
+          'spacer', 'kernelName', 'kernelStatus']);
       });
 
     });

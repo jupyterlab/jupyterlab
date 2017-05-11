@@ -51,10 +51,17 @@
 }
 
 
-.jp-Toolbar > .jp-Toolbar-item.jp-Toolbar-kernelName {
-  text-align: right;
+.jp-Toolbar > .jp-Toolbar-item.jp-Toolbar-spacer {
   flex-grow: 1;
   flex-shrink: 1;
+}
+
+
+.jp-Toolbar > .jp-Toolbar-item.jp-Toolbar-kernelName {
+  width: auto;
+  text-transform: none; /* kernel names can benefit from visible case */
+  letter-spacing: normal;
+  text-align: left;
   font-size: var(--jp-ui-font-size1);
   line-height: calc( var(--jp-private-toolbar-height) + 1px );
 }
