@@ -31,6 +31,7 @@ namespace MarkdownCodeBlocks {
     constructor(startLine: number) {
       this.startLine = startLine;
       this.code = "";
+      this.endLine = -1;
     }
   }
 
