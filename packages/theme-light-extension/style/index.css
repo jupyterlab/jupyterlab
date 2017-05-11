@@ -3,6 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-/* Theme images */
-@import './images.css';
-@import './icons.css';
+
+/* Variables */
+@import './variables.css';

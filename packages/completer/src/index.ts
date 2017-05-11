@@ -17,6 +17,8 @@ import {
   Widget
 } from '@phosphor/widgets';
 
+import '../style/index.css';
+
 export * from './handler';
 export * from './model';
 export * from './widget';

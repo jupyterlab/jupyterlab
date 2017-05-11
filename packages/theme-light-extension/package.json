@@ -1,21 +1,19 @@
 {
-  "name": "@jupyterlab/theme-assets",
-  "version": "0.5.1",
-  "description": "JupyterLab - Theme Assets",
+  "name": "@jupyterlab/theme-light-extension",
+  "version": "0.4.0",
+  "description": "JupyterLab - Default Light Theme",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
     "lib/*.d.ts",
     "lib/*.js",
     "style/*.css",
-    "style/images/*.*",
-    "style/icons/*.*",
-    "style/icons/**/*.*"
   ],
   "directories": {
     "lib": "lib/"
   },
   "dependencies": {
+    "@jupyterlab/application": "^0.4.0",
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
