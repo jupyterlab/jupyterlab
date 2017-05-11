@@ -46,7 +46,14 @@ namespace ServerConnection {
    * @returns The full settings object.
    */
   export
-  function makeSettings(options: Partial<ISettings> = {}) {
+  function makeSettings(options?: Partial<ISettings>) {
+    // Use the singleton default settings if no options are given.
+    if (options === void 0) {
+      if (Private.defaultSettings === null) {
+        Private.defaultSettings = Private.makeSettings();
+      }
+      return Private.defaultSettings;
+    }
     return Private.makeSettings(options);
   }
 
@@ -234,6 +241,9 @@ namespace ServerConnection {
  * The namespace for module private data.
  */
 namespace Private {
+  export
+  let defaultSettings: ServerConnection.ISettings = null;
+
   /**
    * Handle the server connection settings, returning a new value.
    */
@@ -332,6 +342,7 @@ namespace Private {
 
     // Send the request, adding data if needed.
     switch (request.method) {
+    case 'GET':
     case 'DELETE':
     case 'HEAD':
     case 'CONNECT':
@@ -348,22 +359,6 @@ namespace Private {
     }
 
     return delegate.promise;
-  }
-
-  /**
-   * The default xhr factory.
-   */
-  export
-  function createXHR(): XMLHttpRequest {
-    return new XMLHttpRequest();
-  }
-
-  /**
-   * The default socket factory.
-   */
-  export
-  function createSocket(url: string, protocols?: string | string[]): WebSocket {
-    return new WebSocket(url, protocols);
   }
 
   /**

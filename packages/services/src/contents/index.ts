@@ -348,7 +348,7 @@ class ContentsManager implements Contents.IManager {
    * @param options - The options used to initialize the object.
    */
   constructor(options: ContentsManager.IOptions = {}) {
-    this.serverSettings = ServerConnection.makeSettings(options.serverSettings || {});
+    this.serverSettings = options.serverSettings || ServerConnection.makeSettings();
   }
 
   /**
