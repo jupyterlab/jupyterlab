@@ -256,8 +256,16 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
       const options: JSONObject = {
         path: widget.context.path,
         code: code,
-        activate: args['activate']
+        activate: false
       };
+      // Advance cursor to the next line.
+      const cursor = editor.getCursorPosition();
+      if (cursor.line + 1 == editor.lineCount) {
+        let text = editor.model.value.text;
+        editor.model.value.text = text + '\n';
+      }
+      editor.setCursorPosition({ line: cursor.line + 1, column: cursor.column });
+
       return commands.execute('console:inject', options);
     },
     isEnabled: hasWidget,

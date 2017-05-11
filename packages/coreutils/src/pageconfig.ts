@@ -54,7 +54,6 @@ namespace PageConfig {
       let el = document.getElementById('jupyter-config-data');
       if (el) {
         configData = JSON.parse(el.textContent || '') as { [key: string]: string };
-        console.log('\n\n\n******ho');
         found = true;
       }
     }
@@ -80,8 +79,6 @@ namespace PageConfig {
         configData[key] = String(configData[key]);
       }
     }
-    console.log('\n\n\n******');
-    console.log(JSON.stringify(configData, null, 2));
     return configData[name] || '';
   }
 

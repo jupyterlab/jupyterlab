@@ -48,6 +48,10 @@ import {
   Menu, Widget
 } from '@phosphor/widgets';
 
+import {
+  URLExt
+} from '@jupyterlab/coreutils';
+
 
 
 /**
@@ -70,6 +74,9 @@ namespace CommandIDs {
   const switchKernel = 'notebook:switch-kernel';
 
   export
+  const createConsole = 'notebook:create-console';
+
+  export
   const clearAllOutputs = 'notebook:clear-outputs';
 
   export
@@ -77,6 +84,9 @@ namespace CommandIDs {
 
   export
   const trust = 'notebook:trust';
+
+  export
+  const exportToFormat = 'notebook:export-to-format';
 
   export
   const run = 'notebook-cells:run';
@@ -191,6 +201,19 @@ const NOTEBOOK_ICON_CLASS = 'jp-ImageNotebook';
  * The name of the factory that creates notebooks.
  */
 const FACTORY = 'Notebook';
+
+/**
+ * The allowed Export To ... formats and their human readable labels.
+ */
+const EXPORT_TO_FORMATS = [
+  { 'format': 'html', 'label': 'HTML' },
+  { 'format': 'latex', 'label': 'LaTeX' },
+  { 'format': 'markdown', 'label': 'Markdown' },
+  { 'format': 'pdf', 'label': 'PDF' },
+  { 'format': 'rst', 'label': 'ReStructured Text' },
+  { 'format': 'script', 'label': 'Executable Script' },
+  { 'format': 'slides', 'label': 'Reveal JS' }
+];
 
 
 /**
@@ -393,6 +416,8 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
   app.contextMenu.addItem({ type: 'separator', selector: '.jp-Notebook', rank: 0 });
   app.contextMenu.addItem({command: CommandIDs.undo, selector: '.jp-Notebook', rank: 1});
   app.contextMenu.addItem({command: CommandIDs.redo, selector: '.jp-Notebook', rank: 2});
+  app.contextMenu.addItem({ type: 'separator', selector: '.jp-Notebook', rank: 0 });
+  app.contextMenu.addItem({command: CommandIDs.createConsole, selector: '.jp-Notebook', rank: 3});
 
   return tracker;
 }
@@ -514,6 +539,38 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       return trustNotebook(current.context.model).then(() => {
         return current.context.save();
       });
+    },
+    isEnabled: hasWidget
+  });
+  commands.addCommand(CommandIDs.exportToFormat, {
+    label: args => {
+        let formatLabel = (args['label']) as string;
+        return (args['isPalette'] ? 'Export To ' : '') + formatLabel;
+    },
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+
+      let notebookPath = URLExt.encodeParts(current.context.path);
+      let url = URLExt.join(
+        services.baseUrl,
+        'nbconvert',
+        (args['format']) as string,
+        notebookPath
+      ) + '?download=true';
+
+      let w = window.open('', '_blank');
+      if (current.context.model.dirty && !current.context.model.readOnly) {
+        return current.context.save().then(() => {
+          w.location.assign(url);
+        });
+      } else {
+        return new Promise((resolve, reject) => {
+          w.location.assign(url);
+        });
+      }
     },
     isEnabled: hasWidget
   });
@@ -849,6 +906,26 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     },
     isEnabled: hasWidget
   });
+  commands.addCommand(CommandIDs.createConsole, {
+    label: 'Create Console for Notebook',
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      let widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+      let options: JSONObject = {
+        path: widget.context.path,
+        preferredLanguage: widget.context.model.defaultKernelLanguage,
+        activate: args['activate']
+      };
+      return commands.execute('console:create', options);
+    },
+    isEnabled: hasWidget
+  });
   commands.addCommand(CommandIDs.markdown1, {
     label: 'Markdown Header 1',
     execute: args => {
@@ -934,9 +1011,15 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.editMode,
     CommandIDs.commandMode,
     CommandIDs.switchKernel,
+    CommandIDs.createConsole,
     CommandIDs.closeAndShutdown,
     CommandIDs.trust
   ].forEach(command => { palette.addItem({ command, category }); });
+
+  EXPORT_TO_FORMATS.forEach(exportToFormat => {
+    let args = { 'format': exportToFormat['format'], 'label': exportToFormat['label'], 'isPalette': true };
+    palette.addItem({ command: CommandIDs.exportToFormat, category: category, args: args });
+  });
 
   category = 'Notebook Cell Operations';
   [
@@ -981,11 +1064,17 @@ function createMenu(app: JupyterLab): Menu {
   let { commands } = app;
   let menu = new Menu({ commands });
   let settings = new Menu({ commands });
+  let exportTo = new Menu({ commands } );
 
   menu.title.label = 'Notebook';
   settings.title.label = 'Settings';
   settings.addItem({ command: CommandIDs.toggleAllLines });
 
+  exportTo.title.label = "Export to ...";
+  EXPORT_TO_FORMATS.forEach(exportToFormat => {
+    exportTo.addItem({ command: CommandIDs.exportToFormat, args: exportToFormat });
+  });
+  
   menu.addItem({ command: CommandIDs.undo });
   menu.addItem({ command: CommandIDs.redo });
   menu.addItem({ type: 'separator' });
@@ -1004,8 +1093,11 @@ function createMenu(app: JupyterLab): Menu {
   menu.addItem({ command: CommandIDs.restart });
   menu.addItem({ command: CommandIDs.switchKernel });
   menu.addItem({ type: 'separator' });
+  menu.addItem({ command: CommandIDs.createConsole });
+  menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.closeAndShutdown });
   menu.addItem({ command: CommandIDs.trust });
+  menu.addItem({ type: 'submenu', submenu: exportTo });
   menu.addItem({ type: 'separator' });
   menu.addItem({ type: 'submenu', submenu: settings });
 
