@@ -256,11 +256,6 @@ namespace Private {
       xhr.withCredentials = true;
     }
 
-    // Set the content type if there is no given data.
-    if (!request.data) {
-      xhr.setRequestHeader('Content-Type', 'application/json');
-    }
-
     // Write the request headers.
     let headers = request.headers;
     if (headers) {
@@ -318,7 +313,20 @@ namespace Private {
       delegate.reject({ xhr, event, request, settings, message: 'Timed Out' });
     };
 
-    xhr.send(request.data || '{}');
+    switch (request.type) {
+    case 'DELETE':
+    case 'HEAD':
+    case 'CONNECT':
+    case 'TRACE':
+      xhr.send();
+      break;
+    default:
+      // Set the content type if there is no given data.
+      if (!request.data) {
+        xhr.setRequestHeader('Content-Type', 'application/json');
+      }
+      xhr.send(request.data || '{}');
+    }
 
     return delegate.promise;
   }
