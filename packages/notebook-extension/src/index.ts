@@ -48,6 +48,10 @@ import {
   Menu, Widget
 } from '@phosphor/widgets';
 
+import {
+  URLExt
+} from '@jupyterlab/coreutils';
+
 
 
 /**
@@ -80,6 +84,9 @@ namespace CommandIDs {
 
   export
   const trust = 'notebook:trust';
+
+  export
+  const exportToFormat = 'notebook:export-to-format';
 
   export
   const run = 'notebook-cells:run';
@@ -519,6 +526,66 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       return trustNotebook(current.context.model).then(() => {
         return current.context.save();
       });
+    },
+    isEnabled: hasWidget
+  });
+  commands.addCommand(CommandIDs.exportToFormat, {
+    label: args => {
+      var labelSuffix = '';
+      let format = (args['format']) as string;
+      switch (format) {
+        case 'html':
+          labelSuffix =  'HTML';
+          break;
+        case 'rst':
+          labelSuffix = 'ReStructured Text';
+          break;
+        case 'latex':
+          labelSuffix = 'LaTeX';
+          break;
+        case 'pdf':
+          labelSuffix = 'PDF';
+          break;
+        case 'slides':
+          labelSuffix = 'Reveal JS';
+          break;
+        case 'script':
+          labelSuffix = 'Executable Script';
+          break;
+        case 'markdown':
+          labelSuffix = 'Markdown';
+          break;
+        default:
+          labelSuffix = 'Unsupported Format' ;
+          break;
+        }
+
+        return (args['isPalette'] ? 'Export To ' : '') + labelSuffix;
+    },
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+
+      let notebookPath = URLExt.encodeParts(current.context.path);
+      let url = URLExt.join(
+        services.baseUrl,
+        'nbconvert',
+        (args['format']) as string,
+        notebookPath
+      ) + '?download=true';
+
+      let w = window.open('', '_blank');
+      if (current.context.model.dirty && !current.context.model.readOnly) {
+        return current.context.save().then(() => {
+          w.location.assign(url);
+        });
+      } else {
+        return new Promise((resolve, reject) => {
+          w.location.assign(url);
+        });
+      }
     },
     isEnabled: hasWidget
   });
@@ -964,6 +1031,16 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.trust
   ].forEach(command => { palette.addItem({ command, category }); });
 
+  [
+    'html',
+    'latex',
+    'pdf',
+    'rst',
+    'slides',
+    'markdown',
+    'script'
+  ].forEach(format => { palette.addItem({ command: CommandIDs.exportToFormat, category: category, args: { 'format': format, 'isPalette': true } }); });
+
   category = 'Notebook Cell Operations';
   [
     CommandIDs.run,
@@ -1007,10 +1084,19 @@ function createMenu(app: JupyterLab): Menu {
   let { commands } = app;
   let menu = new Menu({ commands });
   let settings = new Menu({ commands });
+  let exportTo = new Menu({ commands } );
 
   menu.title.label = 'Notebook';
   settings.title.label = 'Settings';
   settings.addItem({ command: CommandIDs.toggleAllLines });
+  exportTo.title.label = "Export to ...";
+  exportTo.addItem({ command: CommandIDs.exportToFormat, args: { 'format': 'html' } });
+  exportTo.addItem({ command: CommandIDs.exportToFormat, args: { 'format': 'latex' } });
+  exportTo.addItem({ command: CommandIDs.exportToFormat, args: { 'format': 'pdf' } });
+  exportTo.addItem({ command: CommandIDs.exportToFormat, args: { 'format': 'slides' } });
+  exportTo.addItem({ command: CommandIDs.exportToFormat, args: { 'format': 'markdown' } });
+  exportTo.addItem({ command: CommandIDs.exportToFormat, args: { 'format': 'rst' } });
+  exportTo.addItem({ command: CommandIDs.exportToFormat, args: { 'format': 'script' } });
 
   menu.addItem({ command: CommandIDs.undo });
   menu.addItem({ command: CommandIDs.redo });
@@ -1034,6 +1120,7 @@ function createMenu(app: JupyterLab): Menu {
   menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.closeAndShutdown });
   menu.addItem({ command: CommandIDs.trust });
+  menu.addItem({ type: 'submenu', submenu: exportTo });
   menu.addItem({ type: 'separator' });
   menu.addItem({ type: 'submenu', submenu: settings });
 
