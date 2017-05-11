@@ -555,7 +555,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
           break;
         }
 
-        return (args['isPallete'] ? 'Export To ' : '') + labelSuffix;
+        return (args['isPalette'] ? 'Export To ' : '') + labelSuffix;
     },
     execute: args => {
       let current = getCurrent(args);
@@ -1013,7 +1013,7 @@ function populatePalette(palette: ICommandPalette): void {
     'slides',
     'markdown',
     'script'
-  ].forEach(format => { palette.addItem({ command: CommandIDs.exportToFormat, category: category, args: { 'format': format, 'isPallete': true } }); });
+  ].forEach(format => { palette.addItem({ command: CommandIDs.exportToFormat, category: category, args: { 'format': format, 'isPalette': true } }); });
 
   category = 'Notebook Cell Operations';
   [
