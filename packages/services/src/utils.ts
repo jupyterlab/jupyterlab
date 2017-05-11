@@ -154,6 +154,12 @@ function ajaxRequest(url: string, ajaxSettings: IAjaxSettings): Promise<IAjaxSuc
     ajaxSettings.contentType = 'application/json';
   }
 
+  // Ensure that GET and DELETE requests have no applied data.
+  if (method === 'GET' || method === 'DELETE') {
+    ajaxSettings.data = undefined;
+    ajaxSettings.contentType = undefined;
+  }
+
   let user = ajaxSettings.user || '';
   let password = ajaxSettings.password || '';
   let headers = ajaxSettings.requestHeaders || {};
