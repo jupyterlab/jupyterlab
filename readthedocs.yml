@@ -1,4 +1,4 @@
 conda:
-    file: tutorial/environment.yml
+    file: docs/environment.yml
 python:
     version: 3
