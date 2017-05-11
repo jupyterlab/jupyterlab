@@ -393,6 +393,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
   app.contextMenu.addItem({ type: 'separator', selector: '.jp-Notebook', rank: 0 });
   app.contextMenu.addItem({command: CommandIDs.undo, selector: '.jp-Notebook', rank: 1});
   app.contextMenu.addItem({command: CommandIDs.redo, selector: '.jp-Notebook', rank: 2});
+  app.contextMenu.addItem({command: CommandIDs.switchKernel, selector: '.jp-Toolbar-kernelName', rank: 0});
 
   return tracker;
 }
