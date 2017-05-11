@@ -22,6 +22,10 @@ import {
 } from '@phosphor/signaling';
 
 import {
+  ServerConnection
+} from '../utils';
+
+import {
   CommHandler
 } from './comm';
 
@@ -42,13 +46,6 @@ import * as serialize
 
 import * as validate
   from './validate';
-
-import {
-  IAjaxSettings
-} from '../utils';
-
-import * as utils
-  from '../utils';
 
 
 /**
@@ -73,12 +70,7 @@ class DefaultKernel implements Kernel.IKernel {
   constructor(options: Kernel.IOptions, id: string) {
     this._name = options.name;
     this._id = id;
-    this._baseUrl = options.baseUrl || PageConfig.getBaseUrl();
-    this._wsUrl = options.wsUrl || PageConfig.getWsUrl(this._baseUrl);
-    this._ajaxSettings = JSON.stringify(
-      utils.ajaxSettingsWithToken(options.ajaxSettings, options.token)
-    );
-    this._token = options.token || PageConfig.getOption('token');
+    this.serverSettings = options.serverSettings || ServerConnection.makeSettings();
     this._clientId = options.clientId || uuid();
     this._username = options.username || '';
     this._futures = new Map<string, KernelFutureHandler>();
@@ -93,6 +85,11 @@ class DefaultKernel implements Kernel.IKernel {
    * A signal emitted when the kernel is shut down.
    */
   readonly terminated: Signal<this, void>;
+
+  /**
+   * The server settings for the kernel.
+   */
+  readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * A signal emitted when the kernel status changes.
@@ -158,26 +155,6 @@ class DefaultKernel implements Kernel.IKernel {
   }
 
   /**
-   * The base url of the kernel.
-   */
-  get baseUrl(): string {
-    return this._baseUrl;
-  }
-
-  /**
-   * Get a copy of the default ajax settings for the kernel.
-   */
-  get ajaxSettings(): IAjaxSettings {
-    return JSON.parse(this._ajaxSettings);
-  }
-  /**
-   * Set the default ajax settings for the kernel.
-   */
-  set ajaxSettings(value: IAjaxSettings) {
-    this._ajaxSettings = JSON.stringify(value);
-  }
-
-  /**
    * Test whether the kernel has been disposed.
    */
   get isDisposed(): boolean {
@@ -217,11 +194,7 @@ class DefaultKernel implements Kernel.IKernel {
     if (this._specPromise) {
       return this._specPromise;
     }
-    let options = {
-      baseUrl: this._baseUrl,
-      ajaxSettings: this.ajaxSettings
-    };
-    this._specPromise = Private.findSpecs(options).then(specs => {
+    this._specPromise = Private.findSpecs(this.serverSettings).then(specs => {
       return specs.kernelspecs[this._name];
     });
     return this._specPromise;
@@ -232,12 +205,9 @@ class DefaultKernel implements Kernel.IKernel {
    */
   clone(): Kernel.IKernel {
     let options: Kernel.IOptions = {
-      baseUrl: this._baseUrl,
-      wsUrl: this._wsUrl,
       name: this._name,
       username: this._username,
-      token: this._token,
-      ajaxSettings: this.ajaxSettings
+      serverSettings: this.serverSettings
     };
     return new DefaultKernel(options, this._id);
   }
@@ -383,7 +353,7 @@ class DefaultKernel implements Kernel.IKernel {
     this._clearState();
     return this.ready.then(() => {
       return Private.shutdownKernel(
-        this.id, this._baseUrl, this.ajaxSettings
+        this.id, this.serverSettings
       );
     });
   }
@@ -649,7 +619,8 @@ class DefaultKernel implements Kernel.IKernel {
    * Create the kernel websocket connection and add socket status handlers.
    */
   private _createSocket(): void {
-    let partialUrl = URLExt.join(this._wsUrl, KERNEL_SERVICE_URL,
+    let settings = this.serverSettings;
+    let partialUrl = URLExt.join(settings.wsUrl, KERNEL_SERVICE_URL,
                                  encodeURIComponent(this._id));
     // Strip any authentication from the display string.
     let parsed = URLExt.parse(partialUrl);

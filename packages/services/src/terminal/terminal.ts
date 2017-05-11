@@ -251,8 +251,7 @@ namespace TerminalSession {
      * @returns A promise that resolves with the terminal instance.
      *
      * #### Notes
-     * The manager `serverSettings` will be used unless overridden in the
-     * options.
+     * The manager `serverSettings` will be always be used.
      */
     startNew(options?: IOptions): Promise<ISession>;
 
@@ -261,15 +260,9 @@ namespace TerminalSession {
      *
      * @param name - The name of the target session.
      *
-     * @param options - The options used to connect to the session.
-     *
      * @returns A promise that resolves with the new session instance.
-     *
-     * #### Notes
-     * The manager `serverSettings` will be used unless overridden in the
-     * options.
      */
-    connectTo(name: string, options?: IOptions): Promise<ISession>;
+    connectTo(name: string): Promise<ISession>;
 
     /**
      * Shut down a terminal session by name.
