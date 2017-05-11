@@ -1065,14 +1065,14 @@ namespace Private {
    * Find a kernel by id.
    */
   export
-  function findById(id: string, options?: Kernel.IOptions): Promise<Kernel.IModel> {
+  function findById(id: string, settings?: ServerConnection.ISettings): Promise<Kernel.IModel> {
     let kernel = find(runningKernels, value => {
       return (value.id === id);
     });
     if (kernel) {
       return Promise.resolve(kernel.model);
     }
-    return getKernelModel(id, options).catch(() => {
+    return getKernelModel(id, settings).catch(() => {
       throw new Error(`No running kernel with id: ${id}`);
     });
   }
@@ -1081,12 +1081,12 @@ namespace Private {
    * Get the cached kernel specs or fetch them.
    */
   export
-  function findSpecs(options: Kernel.IOptions): Promise<Kernel.ISpecModels> {
+  function findSpecs(settings?: ServerConnection.ISettings): Promise<Kernel.ISpecModels> {
     let promise = specs[options.baseUrl];
     if (promise) {
       return promise;
     }
-    return getSpecs(options);
+    return getSpecs(settings);
   }
 
   /**
@@ -1096,20 +1096,21 @@ namespace Private {
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernelspecs).
    */
   export
-  function getSpecs(options: Kernel.IOptions = {}): Promise<Kernel.ISpecModels> {
-    let baseUrl = options.baseUrl || PageConfig.getBaseUrl();
-    let url = URLExt.join(baseUrl, KERNELSPEC_SERVICE_URL);
-    let ajaxSettings: IAjaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
-    ajaxSettings.method = 'GET';
-    ajaxSettings.dataType = 'json';
-    let promise = utils.ajaxRequest(url, ajaxSettings).then(success => {
+  function getSpecs(settings?: ServerConnection.ISettings): Promise<Kernel.ISpecModels> {
+    settings = settings || ServerConnection.makeSettings();
+    let request = {
+      url: URLExt.join(settings.baseUrl, KERNELSPEC_SERVICE_URL),
+      method: 'GET',
+      cache: false
+    };
+    let promise = ServerConnection.makeRequest(request, settings).then(success => {
       if (success.xhr.status !== 200) {
-        throw utils.makeAjaxError(success);
+        throw ServerConnection.makeError(success);
       }
       try {
         return validate.validateSpecModels(success.data);
       } catch (err) {
-        throw utils.makeAjaxError(success, err.message);
+        throw ServerConnection.makeError(success, err.message);
       }
     });
     Private.specs[baseUrl] = promise;
@@ -1125,26 +1126,25 @@ namespace Private {
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
   export
-  function listRunning(options: Kernel.IOptions = {}): Promise<Kernel.IModel[]> {
-    let baseUrl = options.baseUrl || PageConfig.getBaseUrl();
-    let url = URLExt.join(baseUrl, KERNEL_SERVICE_URL);
-    let ajaxSettings: IAjaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
-    ajaxSettings.method = 'GET';
-    ajaxSettings.dataType = 'json';
-    ajaxSettings.cache = false;
-
-    return utils.ajaxRequest(url, ajaxSettings).then(success => {
+  function listRunning(settings?: ServerConnection.ISettings): Promise<Kernel.IModel[]> {
+    settings = settings || ServerConnection.makeSettings();
+    let request = {
+      url: URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL),
+      method: 'GET',
+      cache: false
+    };
+    return ServerConnection.makeRequest(request, settings).then(success => {
       if (success.xhr.status !== 200) {
-        throw utils.makeAjaxError(success);
+        throw ServerConnection.makeError(success);
       }
       if (!Array.isArray(success.data)) {
-        throw utils.makeAjaxError(success, 'Invalid kernel list');
+        throw ServerConnection.makeError(success, 'Invalid kernel list');
       }
       for (let i = 0; i < success.data.length; i++) {
         try {
           validate.validateModel(success.data[i]);
         } catch (err) {
-          throw utils.makeAjaxError(success, err.message);
+          throw ServerConnection.makeError(success, err.message);
         }
       }
       return updateRunningKernels(success.data);
@@ -1175,20 +1175,17 @@ namespace Private {
    * Start a new kernel.
    */
   export
-  function startNew(options?: Kernel.IOptions): Promise<Kernel.IKernel> {
-    options = options || {};
-    let baseUrl = options.baseUrl || PageConfig.getBaseUrl();
-    let url = URLExt.join(baseUrl, KERNEL_SERVICE_URL);
-    let ajaxSettings: IAjaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
-    ajaxSettings.method = 'POST';
-    ajaxSettings.data = JSON.stringify({ name: options.name });
-    ajaxSettings.dataType = 'json';
-    ajaxSettings.contentType = 'application/json';
-    ajaxSettings.cache = false;
-
-    return utils.ajaxRequest(url, ajaxSettings).then(success => {
+  function startNew(settings?: ServerConnection.ISettings): Promise<Kernel.IKernel> {
+    settings = settings || ServerConnection.makeSettings();
+    let request = {
+      url: URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL),
+      method: 'POST',
+      data: JSON.stringify({ name: options.name }),
+      cache: false
+    };
+    return ServerConnection.makeRequest(request, settings).then(success => {
       if (success.xhr.status !== 201) {
-        throw utils.makeAjaxError(success);
+        throw ServerConnection.makeError(success);
       }
       validate.validateModel(success.data);
       options = JSONExt.deepCopy(options) as Kernel.IOptions;
@@ -1213,7 +1210,7 @@ namespace Private {
    * the promise is rejected.
    */
   export
-  function connectTo(id: string, options?: Kernel.IOptions): Promise<Kernel.IKernel> {
+  function connectTo(id: string, settings?: ServerConnection.ISettings): Promise<Kernel.IKernel> {
     let kernel = find(runningKernels, value => {
       return value.id === id;
     });
@@ -1221,7 +1218,7 @@ namespace Private {
       return Promise.resolve(kernel.clone());
     }
 
-    return getKernelModel(id, options).then(model => {
+    return getKernelModel(id, settings).then(model => {
       options = JSONExt.deepCopy(options) as Kernel.IOptions;
       options.name = model.name;
       return new DefaultKernel(options, id);
@@ -1234,37 +1231,36 @@ namespace Private {
    * Shut down a kernel by id.
    */
   export
-  function shutdown(id: string, options: Kernel.IOptions = {}): Promise<void> {
-    let baseUrl = options.baseUrl || PageConfig.getBaseUrl();
-    let ajaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
-    return shutdownKernel(id, baseUrl, ajaxSettings);
+  function shutdown(id: string, settings?: ServerConnection.ISettings): Promise<void> {
+    return shutdownKernel(id, settings);
   }
 
   /**
    * Restart a kernel.
    */
   export
-  function restartKernel(kernel: Kernel.IKernel, baseUrl: string, ajaxSettings?: IAjaxSettings): Promise<void> {
+  function restartKernel(kernel: Kernel.IKernel, settings?: ServerConnection.ISettings): Promise<void> {
     if (kernel.status === 'dead') {
       return Promise.reject(new Error('Kernel is dead'));
     }
+    settings = settings || ServerConnection.makeSettings();
     let url = URLExt.join(
-      baseUrl, KERNEL_SERVICE_URL,
+      settings.baseUrl, KERNEL_SERVICE_URL,
       encodeURIComponent(kernel.id), 'restart'
     );
-    ajaxSettings = ajaxSettings || { };
-    ajaxSettings.method = 'POST';
-    ajaxSettings.dataType = 'json';
-    ajaxSettings.cache = false;
-
-    return utils.ajaxRequest(url, ajaxSettings).then(success => {
+    let request = {
+      url,
+      method: 'POST',
+      cache: false
+    };
+    return ServerConnection.makeRequest(request, settings).then(success => {
       if (success.xhr.status !== 200) {
-        throw utils.makeAjaxError(success);
+        throw ServerConnection.makeError(success);
       }
       try {
         validate.validateModel(success.data);
       } catch (err) {
-        throw utils.makeAjaxError(success, err.message);
+        throw ServerConnection.makeError(success, err.message);
       }
     }, onKernelError);
   }
@@ -1273,22 +1269,23 @@ namespace Private {
    * Interrupt a kernel.
    */
   export
-  function interruptKernel(kernel: Kernel.IKernel, baseUrl: string, ajaxSettings?: IAjaxSettings): Promise<void> {
+  function interruptKernel(kernel: Kernel.IKernel, settings?: ServerConnection.ISettings): Promise<void> {
     if (kernel.status === 'dead') {
       return Promise.reject(new Error('Kernel is dead'));
     }
+    settings = settings || ServerConnection.makeSettings();
     let url = URLExt.join(
       baseUrl, KERNEL_SERVICE_URL,
       encodeURIComponent(kernel.id), 'interrupt'
     );
-    ajaxSettings = ajaxSettings || { };
-    ajaxSettings.method = 'POST';
-    ajaxSettings.dataType = 'json';
-    ajaxSettings.cache = false;
-
-    return utils.ajaxRequest(url, ajaxSettings).then(success => {
+    let request = {
+      url,
+      method: 'POST',
+      cache: false
+    };
+    return ServerConnection.makeRequest(request, settings).then(success => {
       if (success.xhr.status !== 204) {
-        throw utils.makeAjaxError(success);
+        throw ServerConnection.makeError(success);
       }
     }, onKernelError);
   }
@@ -1305,9 +1302,9 @@ namespace Private {
     ajaxSettings.dataType = 'json';
     ajaxSettings.cache = false;
 
-    return utils.ajaxRequest(url, ajaxSettings).then(success => {
+    return ServerConnection.makeRequest(request, serverSettings).then(success => {
       if (success.xhr.status !== 204) {
-        throw utils.makeAjaxError(success);
+        throw ServerConnection.makeError(success);
       }
       killKernels(id);
     }, (error: utils.IAjaxError) => {
@@ -1347,15 +1344,15 @@ namespace Private {
     ajaxSettings.dataType = 'json';
     ajaxSettings.cache = false;
 
-    return utils.ajaxRequest(url, ajaxSettings).then(success => {
+    return ServerConnection.makeRequest(request, serverSettings).then(success => {
       if (success.xhr.status !== 200) {
-        throw utils.makeAjaxError(success);
+        throw ServerConnection.makeError(success);
       }
       let data = success.data as Kernel.IModel;
       try {
         validate.validateModel(data);
       } catch (err) {
-        throw utils.makeAjaxError(success, err.message);
+        throw ServerConnection.makeError(success, err.message);
       }
       return data;
     }, Private.onKernelError);
