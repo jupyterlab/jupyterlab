@@ -2,12 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject, PromiseDelegate
+  JSONObject, JSONValue, PromiseDelegate
 } from '@phosphor/coreutils';
-
-import {
-  DisposableDelegate, IDisposable
-} from '@phosphor/disposable';
 
 import {
   IDatastore
@@ -20,19 +16,45 @@ import {
 export
 namespace ISettingRegistry {
   /**
+   * The options for adding a new setting value.
+   */
+  export
+  interface IAddOptions {
+    /**
+     * The extension name where this setting resides.
+     */
+    file: string;
+
+     /**
+      * The name of the setting being added.
+      */
+     key: string;
+
+     /**
+      * The setting level.
+      */
+     level: 'user' | 'system';
+
+     /**
+      * The value of the setting being added.
+      */
+     value: JSONValue;
+  }
+
+  /**
    * A collection of setting data for a specific key.
    */
   export
   interface ISettingBundle extends JSONObject {
     /**
-     * The data value for a user-level setting item.
+     * The data value for a user-level setting items.
      */
-    user?: JSONObject | null;
+    user?: { [key: string]: JSONValue } | null;
 
     /**
-     * The data value for a system-level setting item.
+     * The data value for a system-level setting items.
      */
-    system?: JSONObject | null;
+    system?: { [key: string]: JSONValue } | null;
   }
 
 
@@ -41,9 +63,9 @@ namespace ISettingRegistry {
   export
   interface ISettingFile extends JSONObject {
     /**
-     * The identifier key for a setting item.
+     * The name of an extension whose settings are saved.
      */
-    id: string;
+    name: string;
 
     /**
      * The collection of values for a specified setting.
@@ -78,32 +100,49 @@ class SettingRegistry {
   /**
    * Add a setting to the registry.
    */
-  add(): Promise<IDisposable> {
-    if (!this._isReady) {
-      return this._ready.promise.then(() => this.add());
+  add(options: ISettingRegistry.IAddOptions): Promise<void> {
+    if (!this._datastore) {
+      return this._ready.promise.then(() => this.add(options));
     }
-    return Promise.resolve(new DisposableDelegate(() => { /* no op */ }));
+    return Promise.resolve(void 0);
   }
 
   /**
-   * Set the setting registry data store.
+   * Load an extension's settings into the setting registry.
+   */
+  load(file: string): Promise<ISettingRegistry.ISettingFile> {
+    if (!this._datastore) {
+      return this._ready.promise.then(() => this.load(file));
+    }
+    return this._datastore.fetch(file).then(contents => {
+      this._files[contents.name] = contents;
+      return contents;
+    });
+  }
+
+  /**
+   * Set the setting registry datastore.
    *
    * @param datastore - The datastore for the setting registry.
    *
    * @throws If a datastore has already been set.
+   *
+   * #### Notes
+   * The setting registry datastore must read, write, and delete settings for an
+   * entire extension at a time. It is comparable to a single file written to
+   * disk on a file system.
    */
   setDB(datastore: IDatastore<ISettingRegistry.ISettingFile, ISettingRegistry.ISettingFile>) {
-    if (this._isReady) {
+    if (this._datastore) {
       throw new Error('Setting registry already has a datastore.');
     }
 
     this._datastore = datastore;
-    this._isReady = true;
     this._ready.resolve(void 0);
   }
 
   private _datastore: IDatastore<ISettingRegistry.ISettingFile, ISettingRegistry.ISettingFile> | null = null;
-  private _isReady = false;
+  private _files: { [name: string]: ISettingRegistry.ISettingFile } = Object.create(null);
   private _ready = new PromiseDelegate<void>();
 }
 

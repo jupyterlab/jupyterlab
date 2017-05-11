@@ -10,12 +10,8 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  PageConfig
+  ISettingRegistry, PageConfig
 } from '@jupyterlab/coreutils';
-
-import {
-  JSONObject
-} from '@phosphor/coreutils';
 
 
 /**
@@ -48,13 +44,13 @@ const plugin: JupyterLabPlugin<void> = {
   activate: (app: JupyterLab, palette: ICommandPalette) => {
     // Set the datastore required by the application's setting registry.
     app.settings.setDB({
-      fetch: (id: string): Promise<JSONObject | null> => {
+      fetch: (file: string): Promise<ISettingRegistry.ISettingFile | null> => {
         return Promise.reject(new Error('fetch not implemented'));
       },
-      remove: (id: string): Promise<void> => {
+      remove: (file: string): Promise<void> => {
         return Promise.reject(new Error('remove not implemented'));
       },
-      save: (id: string, value: JSONObject): Promise<void> => {
+      save: (file: string, value: ISettingRegistry.ISettingFile): Promise<void> => {
         return Promise.reject(new Error('save not implemented'));
       }
     });
