@@ -31,7 +31,7 @@ namespace ServerConnection {
       // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest#Bypassing_the_cache.
       url += ((/\?/).test(url) ? '&' : '?') + (new Date()).getTime();
     }
-    let xhr = new XMLHttpRequest();
+    let xhr = new settings.xhr();
     xhr.open(request.method || 'GET', url, true,
              settings.user, settings.password);
     Private.populateRequest(xhr, request, settings);
@@ -154,6 +154,16 @@ namespace ServerConnection {
      * A mapping of request headers, used via `setRequestHeader`.
      */
     readonly requestHeaders: { readonly [key: string]: string; };
+
+    /**
+     * The XMLHttpRequest constructor to use.  Defaults to `window.XMLHttpRequest`.
+     */
+    readonly xhr: typeof XMLHttpRequest;
+
+    /**
+     * The WebSocket constructor to use.  Defaults to  `window.WebSocket`.
+     */
+    readonly webSocket: typeof WebSocket;
   }
 
   /**
@@ -237,7 +247,9 @@ namespace Private {
       password: options.password || '',
       withCredentials: !!options.withCredentials,
       token: options.token || PageConfig.getOption('token'),
-      requestHeaders: { ...options.requestHeaders || {} }
+      requestHeaders: { ...options.requestHeaders || {} },
+      xhr: options.xhr || XMLHttpRequest,
+      webSocket: options.webSocket || WebSocket
     };
   }
 
@@ -314,7 +326,7 @@ namespace Private {
     };
 
     // Send the request, adding data if needed.
-    switch (request.type) {
+    switch (request.method) {
     case 'DELETE':
     case 'HEAD':
     case 'CONNECT':
@@ -331,6 +343,22 @@ namespace Private {
     }
 
     return delegate.promise;
+  }
+
+  /**
+   * The default xhr factory.
+   */
+  export
+  function createXHR(): XMLHttpRequest {
+    return new XMLHttpRequest();
+  }
+
+  /**
+   * The default socket factory.
+   */
+  export
+  function createSocket(url: string, protocols?: string | string[]): WebSocket {
+    return new WebSocket(url, protocols);
   }
 
   /**
