@@ -240,8 +240,8 @@ namespace Toolbar {
    * from the right toolbar items.
    */
   export
-  function createSpacerItem(session: IClientSession): Widget {
-    return new Private.Spacer(session);
+  function createSpacerItem(): Widget {
+    return new Private.Spacer();
   }
 
 
@@ -405,7 +405,7 @@ namespace Private {
     /**
      * Construct a new spacer widget.
      */
-    constructor(session: IClientSession) {
+    constructor() {
       super();
       this.addClass(TOOLBAR_SPACER_CLASS);
     }

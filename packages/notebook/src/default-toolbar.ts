@@ -195,7 +195,7 @@ namespace ToolbarItems {
     toolbar.addItem('interrupt', Toolbar.createInterruptButton(panel.session));
     toolbar.addItem('restart', Toolbar.createRestartButton(panel.session));
     toolbar.addItem('cellType', createCellTypeItem(panel));
-    toolbar.addItem('spacer', Toolbar.createSpacerItem(panel.session));
+    toolbar.addItem('spacer', Toolbar.createSpacerItem());
     toolbar.addItem('kernelName', Toolbar.createKernelNameItem(panel.session));
     toolbar.addItem('kernelStatus', Toolbar.createKernelStatusItem(panel.session));
   }
