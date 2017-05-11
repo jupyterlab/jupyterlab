@@ -7,13 +7,13 @@
   "files": [
     "lib/*.d.ts",
     "lib/*.js",
-    "style/*.css",
+    "style/*.css"
   ],
   "directories": {
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.4.0",
+    "@jupyterlab/application": "^0.4.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
