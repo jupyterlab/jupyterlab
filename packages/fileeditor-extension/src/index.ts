@@ -216,9 +216,13 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
       const selection = editor.getSelection();
       const start = editor.getOffsetAt(selection.start);
       const end = editor.getOffsetAt(selection.end);
+      let targetText = editor.model.value.text.substring(start, end);
+      if (start == end) {
+        targetText = editor.getLine(selection.start.line); 
+      }
       const options: JSONObject = {
         path: widget.context.path,
-        code: editor.model.value.text.substring(start, end),
+        code: targetText,
         activate: args['activate']
       };
       return commands.execute('console:inject', options);
