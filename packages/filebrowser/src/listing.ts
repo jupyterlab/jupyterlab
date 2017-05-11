@@ -844,11 +844,6 @@ class DirListing extends Widget {
       event.preventDefault();
       event.stopPropagation();
 
-      if (IS_MAC) {
-        this._doRename();
-        return;
-      }
-
       let selected = Object.keys(this._selection);
       let name = selected[0];
       let items = this._sortedItems;
