@@ -70,7 +70,7 @@ namespace CommandIDs {
   const switchKernel = 'notebook:switch-kernel';
 
   export
-  const createConsoleForNotebook = 'notebook:create-console-for-notebook';
+  const createConsole = 'notebook:create-console';
 
   export
   const clearAllOutputs = 'notebook:clear-outputs';
@@ -397,7 +397,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
   app.contextMenu.addItem({command: CommandIDs.undo, selector: '.jp-Notebook', rank: 1});
   app.contextMenu.addItem({command: CommandIDs.redo, selector: '.jp-Notebook', rank: 2});
   app.contextMenu.addItem({ type: 'separator', selector: '.jp-Notebook', rank: 0 });
-  app.contextMenu.addItem({command: CommandIDs.createConsoleForNotebook, selector: '.jp-Notebook', rank: 3});
+  app.contextMenu.addItem({command: CommandIDs.createConsole, selector: '.jp-Notebook', rank: 3});
 
   return tracker;
 }
@@ -854,9 +854,13 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     },
     isEnabled: hasWidget
   });
-  commands.addCommand(CommandIDs.createConsoleForNotebook, {
+  commands.addCommand(CommandIDs.createConsole, {
     label: 'Create Console for Notebook',
     execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
       let widget = tracker.currentWidget;
       if (!widget) {
         return;
@@ -1025,7 +1029,7 @@ function createMenu(app: JupyterLab): Menu {
   menu.addItem({ command: CommandIDs.restart });
   menu.addItem({ command: CommandIDs.switchKernel });
   menu.addItem({ type: 'separator' });
-  menu.addItem({ command: CommandIDs.createConsoleForNotebook });
+  menu.addItem({ command: CommandIDs.createConsole });
   menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.closeAndShutdown });
   menu.addItem({ command: CommandIDs.trust });
