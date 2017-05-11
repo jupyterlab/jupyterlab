@@ -959,6 +959,7 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.editMode,
     CommandIDs.commandMode,
     CommandIDs.switchKernel,
+    CommandIDs.createConsole,
     CommandIDs.closeAndShutdown,
     CommandIDs.trust
   ].forEach(command => { palette.addItem({ command, category }); });
