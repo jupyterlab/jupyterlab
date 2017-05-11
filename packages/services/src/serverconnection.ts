@@ -313,11 +313,13 @@ namespace Private {
       delegate.reject({ xhr, event, request, settings, message: 'Timed Out' });
     };
 
+    // Send the request, adding data if needed.
     switch (request.type) {
     case 'DELETE':
     case 'HEAD':
     case 'CONNECT':
     case 'TRACE':
+      // These methods take no payload.
       xhr.send();
       break;
     default:
