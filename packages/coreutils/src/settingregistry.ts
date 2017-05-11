@@ -16,6 +16,20 @@ import {
 export
 namespace ISettingRegistry {
   /**
+   * The setting level: user or system.
+   */
+  export
+  type Level = 'user' | 'system';
+
+  /**
+   * A collection of setting data for a specific key.
+   */
+  export
+  type Bundle = {
+    [level in Level]?: { [key: string]: JSONValue } | null;
+  };
+
+  /**
    * The options for adding a new setting value.
    */
   export
@@ -33,30 +47,13 @@ namespace ISettingRegistry {
      /**
       * The setting level.
       */
-     level: 'user' | 'system';
+     level: Level;
 
      /**
       * The value of the setting being added.
       */
      value: JSONValue;
   }
-
-  /**
-   * A collection of setting data for a specific key.
-   */
-  export
-  interface ISettingBundle extends JSONObject {
-    /**
-     * The data values for user-level setting items.
-     */
-    user?: { [key: string]: JSONValue } | null;
-
-    /**
-     * The data values for system-level setting items.
-     */
-    system?: { [key: string]: JSONValue } | null;
-  }
-
 
   /**
    */
@@ -70,23 +67,7 @@ namespace ISettingRegistry {
     /**
      * The collection of values for a specified setting.
      */
-    data: ISettingBundle | null;
-  }
-
-  /**
-   * A collection of setting data for a specific key.
-   */
-  export
-  interface ISettingItem extends JSONObject {
-    /**
-     * The data value for a user-level setting item.
-     */
-    user?: JSONValue;
-
-    /**
-     * The data value for a system-level setting item.
-     */
-    system?: JSONValue;
+    data: Bundle | null;
   }
 }
 
@@ -117,16 +98,16 @@ class SettingRegistry {
    * Add a setting to the registry.
    */
   add(options: ISettingRegistry.IAddOptions): Promise<void> {
-    if (!this._datastore) {
-      return this._ready.promise.then(() => this.add(options));
+    if (this._datastore) {
+      return Promise.resolve(void 0);
     }
-    return Promise.resolve(void 0);
+    return this._ready.promise.then(() => this.add(options));
   }
 
   /**
    * Get an individual setting.
    */
-  get(file: string, key: string, level: 'user' | 'system' = 'user'): Promise<JSONValue> {
+  get(file: string, key: string, level: ISettingRegistry.Level = 'user'): Promise<JSONValue> {
     if (file in this._files) {
       const bundle = this._files[file] && this._files[file].data;
       const value = bundle && bundle[level] && bundle[level][key];
@@ -139,13 +120,11 @@ class SettingRegistry {
    * Load an extension's settings into the setting registry.
    */
   load(file: string): Promise<ISettingRegistry.ISettingFile> {
-    if (!this._datastore) {
-      return this._ready.promise.then(() => this.load(file));
+    if (this._datastore) {
+      return this._datastore.fetch(file)
+        .then(contents => this._files[contents.name] = contents);
     }
-    return this._datastore.fetch(file).then(contents => {
-      this._files[contents.name] = contents;
-      return contents;
-    });
+    return this._ready.promise.then(() => this.load(file));
   }
 
   /**
