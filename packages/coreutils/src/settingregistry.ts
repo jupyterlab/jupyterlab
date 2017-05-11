@@ -47,12 +47,12 @@ namespace ISettingRegistry {
   export
   interface ISettingBundle extends JSONObject {
     /**
-     * The data value for a user-level setting items.
+     * The data values for user-level setting items.
      */
     user?: { [key: string]: JSONValue } | null;
 
     /**
-     * The data value for a system-level setting items.
+     * The data values for system-level setting items.
      */
     system?: { [key: string]: JSONValue } | null;
   }
@@ -71,6 +71,22 @@ namespace ISettingRegistry {
      * The collection of values for a specified setting.
      */
     data: ISettingBundle | null;
+  }
+
+  /**
+   * A collection of setting data for a specific key.
+   */
+  export
+  interface ISettingItem extends JSONObject {
+    /**
+     * The data value for a user-level setting item.
+     */
+    user?: JSONValue;
+
+    /**
+     * The data value for a system-level setting item.
+     */
+    system?: JSONValue;
   }
 }
 
@@ -105,6 +121,18 @@ class SettingRegistry {
       return this._ready.promise.then(() => this.add(options));
     }
     return Promise.resolve(void 0);
+  }
+
+  /**
+   * Get an individual setting.
+   */
+  get(file: string, key: string, level: 'user' | 'system' = 'user'): Promise<JSONValue> {
+    if (file in this._files) {
+      const bundle = this._files[file] && this._files[file].data;
+      const value = bundle && bundle[level] && bundle[level][key];
+      return Promise.resolve(value);
+    }
+    return this.load(file).then(() => this.get(file, key, level));
   }
 
   /**
