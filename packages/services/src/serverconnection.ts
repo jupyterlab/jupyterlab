@@ -81,12 +81,12 @@ namespace ServerConnection {
     method?: string;
 
     /**
-     * The return data type (used to parse the return data).
+     * The return data type (used to parse the return data).  Defaults to 'json'.
      */
     dataType?: string;
 
     /**
-     * The outgoing content type, used to set the `Content-Type` header.
+     * The outgoing content type, used to set the `Content-Type` header.  Defaults to `'application/json'` when there is sent data.
      */
     contentType?: string;
 
@@ -194,7 +194,7 @@ namespace ServerConnection {
     /**
      * The data returned by the ajax call.
      */
-    readonly data: JSONValue;
+    readonly data: any;
   }
 
   /**
@@ -260,7 +260,10 @@ namespace Private {
   function populateRequest(xhr: XMLHttpRequest, request: ServerConnection.IRequest, settings: ServerConnection.ISettings): void {
     if (request.contentType !== void 0) {
       xhr.setRequestHeader('Content-Type', request.contentType);
+    } else if (request.data) {
+      xhr.setRequestHeader('Content-Type', 'application/json');
     }
+
     if (request.timeout !== void 0) {
       xhr.timeout = request.timeout;
     }
@@ -305,10 +308,12 @@ namespace Private {
         delegate.reject({ event, xhr, request, settings, message });
       }
       let data = xhr.responseText;
-      try {
-        data = JSON.parse(data);
-      } catch (err) {
-        // no-op
+      if (request.dataType === 'json' || request.dataType === undefined) {
+         try {
+          data = JSON.parse(data);
+        } catch (err) {
+          // no-op
+        }
       }
       delegate.resolve({ xhr, request, settings, data, event });
     };
