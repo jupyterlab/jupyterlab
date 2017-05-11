@@ -199,6 +199,19 @@ const NOTEBOOK_ICON_CLASS = 'jp-ImageNotebook';
  */
 const FACTORY = 'Notebook';
 
+/**
+ * The allowed Export To ... formats and their human readable labels.
+ */
+const EXPORT_TO_FORMATS = [
+  { 'format': 'html', 'label': 'HTML' },
+  { 'format': 'latex', 'label': 'LaTeX' },
+  { 'format': 'markdown', 'label': 'Markdown' },
+  { 'format': 'pdf', 'label': 'PDF' },
+  { 'format': 'rst', 'label': 'ReStructured Text' },
+  { 'format': 'script', 'label': 'Executable Script' },
+  { 'format': 'slides', 'label': 'Reveal JS' }
+];
+
 
 /**
  * The notebook widget tracker provider.
@@ -526,36 +539,8 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
   });
   commands.addCommand(CommandIDs.exportToFormat, {
     label: args => {
-      var labelSuffix = '';
-      let format = (args['format']) as string;
-      switch (format) {
-        case 'html':
-          labelSuffix =  'HTML';
-          break;
-        case 'rst':
-          labelSuffix = 'ReStructured Text';
-          break;
-        case 'latex':
-          labelSuffix = 'LaTeX';
-          break;
-        case 'pdf':
-          labelSuffix = 'PDF';
-          break;
-        case 'slides':
-          labelSuffix = 'Reveal JS';
-          break;
-        case 'script':
-          labelSuffix = 'Executable Script';
-          break;
-        case 'markdown':
-          labelSuffix = 'Markdown';
-          break;
-        default:
-          labelSuffix = 'Unsupported Format' ;
-          break;
-        }
-
-        return (args['isPalette'] ? 'Export To ' : '') + labelSuffix;
+        let formatLabel = (args['label']) as string;
+        return (args['isPalette'] ? 'Export To ' : '') + formatLabel;
     },
     execute: args => {
       let current = getCurrent(args);
@@ -1005,15 +990,10 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.trust
   ].forEach(command => { palette.addItem({ command, category }); });
 
-  [
-    'html',
-    'latex',
-    'pdf',
-    'rst',
-    'slides',
-    'markdown',
-    'script'
-  ].forEach(format => { palette.addItem({ command: CommandIDs.exportToFormat, category: category, args: { 'format': format, 'isPalette': true } }); });
+  EXPORT_TO_FORMATS.forEach(exportToFormat => {
+    let args = { 'format': exportToFormat['format'], 'label': exportToFormat['label'], 'isPalette': true };
+    palette.addItem({ command: CommandIDs.exportToFormat, category: category, args: args });
+  });
 
   category = 'Notebook Cell Operations';
   [
@@ -1063,15 +1043,12 @@ function createMenu(app: JupyterLab): Menu {
   menu.title.label = 'Notebook';
   settings.title.label = 'Settings';
   settings.addItem({ command: CommandIDs.toggleAllLines });
-  exportTo.title.label = "Export to ...";
-  exportTo.addItem({ command: CommandIDs.exportToFormat, args: { 'format': 'html' } });
-  exportTo.addItem({ command: CommandIDs.exportToFormat, args: { 'format': 'latex' } });
-  exportTo.addItem({ command: CommandIDs.exportToFormat, args: { 'format': 'pdf' } });
-  exportTo.addItem({ command: CommandIDs.exportToFormat, args: { 'format': 'slides' } });
-  exportTo.addItem({ command: CommandIDs.exportToFormat, args: { 'format': 'markdown' } });
-  exportTo.addItem({ command: CommandIDs.exportToFormat, args: { 'format': 'rst' } });
-  exportTo.addItem({ command: CommandIDs.exportToFormat, args: { 'format': 'script' } });
 
+  exportTo.title.label = "Export to ...";
+  EXPORT_TO_FORMATS.forEach(exportToFormat => {
+    exportTo.addItem({ command: CommandIDs.exportToFormat, args: exportToFormat });
+  });
+  
   menu.addItem({ command: CommandIDs.undo });
   menu.addItem({ command: CommandIDs.redo });
   menu.addItem({ type: 'separator' });
