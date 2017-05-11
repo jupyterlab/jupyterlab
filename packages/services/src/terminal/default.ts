@@ -18,11 +18,8 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  IAjaxSettings
-} from '../utils';
-
-import * as utils
-  from '../utils';
+  ServerConnection
+} from '..';
 
 import {
   TerminalSession
@@ -45,12 +42,7 @@ class DefaultTerminalSession implements TerminalSession.ISession {
    */
   constructor(name: string, options: TerminalSession.IOptions = {}) {
     this._name = name;
-    this._baseUrl = options.baseUrl || PageConfig.getBaseUrl();
-    this._token = options.token || PageConfig.getOption('token');
-    this._ajaxSettings = JSON.stringify(
-      utils.ajaxSettingsWithToken(options.ajaxSettings, this._token)
-    );
-    this._wsUrl = options.wsUrl || PageConfig.getWsUrl(this._baseUrl);
+    this.serverSettings = options.serverSettings || ServerConnection.makeSettings();
     this._readyPromise = this._initializeSocket();
     this.terminated = new Signal<this, void>(this);
   }
@@ -82,25 +74,9 @@ class DefaultTerminalSession implements TerminalSession.ISession {
   }
 
   /**
-   * The base url of the terminal.
+   * The server settings for the session.
    */
-  get baseUrl(): string {
-    return this._baseUrl;
-  }
-
-  /**
-   * Get a copy of the default ajax settings for the terminal.
-   */
-  get ajaxSettings(): IAjaxSettings {
-    return JSON.parse(this._ajaxSettings);
-  }
-
-  /**
-   * Set the default ajax settings for the terminal.
-   */
-  set ajaxSettings(value: IAjaxSettings) {
-    this._ajaxSettings = JSON.stringify(value);
-  }
+  readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Test whether the session is ready.
@@ -174,11 +150,7 @@ class DefaultTerminalSession implements TerminalSession.ISession {
    * Shut down the terminal session.
    */
   shutdown(): Promise<void> {
-    let options = {
-      baseUrl: this._baseUrl,
-      ajaxSettings: this.ajaxSettings
-    };
-    return DefaultTerminalSession.shutdown(this.name, options);
+    return DefaultTerminalSession.shutdown(this.name, this.serverSettings);
   }
 
   /**
@@ -190,13 +162,14 @@ class DefaultTerminalSession implements TerminalSession.ISession {
       this._ws.close();
     }
     this._isReady = false;
-    this._url = Private.getTermUrl(this._baseUrl, this._name);
+    let settings = this.serverSettings;
+    this._url = Private.getTermUrl(settings.baseUrl, this._name);
     Private.running[this._url] = this;
-    let wsUrl = URLExt.join(this._wsUrl, `terminals/websocket/${name}`);
+    let wsUrl = URLExt.join(settings.wsUrl, `terminals/websocket/${name}`);
     if (this._token) {
       wsUrl = wsUrl + `?token=${this._token}`;
     }
-    this._ws = new WebSocket(wsUrl);
+    this._ws = new settings.webSocket(wsUrl);
 
     this._ws.onmessage = (event: MessageEvent) => {
       if (this._isDisposed) {
@@ -228,11 +201,8 @@ class DefaultTerminalSession implements TerminalSession.ISession {
   }
 
   private _name: string;
-  private _baseUrl: string;
-  private _wsUrl: string;
   private _url: string;
   private _token = '';
-  private _ajaxSettings = '';
   private _ws: WebSocket = null;
   private _isDisposed = false;
   private _readyPromise: Promise<void>;
@@ -267,18 +237,17 @@ namespace DefaultTerminalSession {
     if (!TerminalSession.isAvailable()) {
       throw Private.unavailableMsg;
     }
-    let baseUrl = options.baseUrl || PageConfig.getBaseUrl();
-    let url = Private.getBaseUrl(baseUrl);
-    let ajaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
-    ajaxSettings.method = 'POST';
-    ajaxSettings.dataType = 'json';
-
-    return utils.ajaxRequest(url, ajaxSettings).then(success => {
+    let serverSettings = options.serverSettings || ServerConnection.makeSettings();
+    let request = {
+      url: Private.getServiceUrl(serverSettings.baseUrl),
+      method: 'POST'
+    };
+    return ServerConnection.makeRequest(request, serverSettings).then(success => {
       if (success.xhr.status !== 200) {
-        throw utils.makeAjaxError(success);
+        throw ServerConnection.makeError(success);
       }
       let name = (success.data as TerminalSession.IModel).name;
-      return new DefaultTerminalSession(name, options);
+      return new DefaultTerminalSession(name, {...options, serverSettings });
     });
   }
 
@@ -305,17 +274,17 @@ namespace DefaultTerminalSession {
     if (!TerminalSession.isAvailable()) {
       return Promise.reject(Private.unavailableMsg);
     }
-    let baseUrl = options.baseUrl || PageConfig.getBaseUrl();
-    let url = Private.getTermUrl(baseUrl, name);
+    let serverSettings = options.serverSettings || ServerConnection.makeSettings();
+    let url = Private.getTermUrl(serverSettings.baseUrl, name);
     if (url in Private.running) {
       return Promise.resolve(Private.running[url]);
     }
-    return listRunning(options).then(models => {
+    return listRunning(serverSettings).then(models => {
       let index = ArrayExt.findFirstIndex(models, model => {
         return model.name === name;
       });
       if (index !== -1) {
-        let session = new DefaultTerminalSession(name, options);
+        let session = new DefaultTerminalSession(name, { ...options, serverSettings});
         return Promise.resolve(session);
       }
       return Promise.reject<TerminalSession.ISession>('Could not find session');
@@ -325,27 +294,28 @@ namespace DefaultTerminalSession {
   /**
    * List the running terminal sessions.
    *
-   * @param options - The session options to use.
+   * @param settings - The server settings to use.
    *
    * @returns A promise that resolves with the list of running session models.
    */
   export
-  function listRunning(options: TerminalSession.IOptions = {}): Promise<TerminalSession.IModel[]> {
+  function listRunning(settings?: ServerConnection.ISettings): Promise<TerminalSession.IModel[]> {
     if (!TerminalSession.isAvailable()) {
       return Promise.reject(Private.unavailableMsg);
     }
-    let url = Private.getBaseUrl(options.baseUrl);
-    let ajaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
-    ajaxSettings.method = 'GET';
-    ajaxSettings.dataType = 'json';
-
-    return utils.ajaxRequest(url, ajaxSettings).then(success => {
+    settings = settings || ServerConnection.makeSettings();
+    let url = Private.getServiceUrl(settings.baseUrl);
+    let request = {
+      url,
+      method: 'GET'
+    };
+    return ServerConnection.makeRequest(request, settings).then(success => {
       if (success.xhr.status !== 200) {
-        throw utils.makeAjaxError(success);
+        throw ServerConnection.makeError(success);
       }
       let data = success.data as TerminalSession.IModel[];
       if (!Array.isArray(data)) {
-        throw utils.makeAjaxError(success, 'Invalid terminal data');
+        throw ServerConnection.makeError(success, 'Invalid terminal data');
       }
       // Update the local data store.
       let urls = toArray(map(data, item => {
@@ -367,21 +337,24 @@ namespace DefaultTerminalSession {
    *
    * @param name - The name of the target session.
    *
-   * @param options - The session options to use.
+   * @param settings - The server settings to use.
    *
    * @returns A promise that resolves when the session is shut down.
    */
   export
-  function shutdown(name: string, options: TerminalSession.IOptions = {}): Promise<void> {
+  function shutdown(name: string, settings?: ServerConnection.ISettings): Promise<void> {
     if (!TerminalSession.isAvailable()) {
       return Promise.reject(Private.unavailableMsg);
     }
-    let url = Private.getTermUrl(options.baseUrl, name);
-    let ajaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
-    ajaxSettings.method = 'DELETE';
-    return utils.ajaxRequest(url, ajaxSettings).then(success => {
+    settings = settings || ServerConnection.makeSettings();
+    let url = Private.getTermUrl(settings.baseUrl, name);
+    let request = {
+      url,
+      method: 'DELETE'
+    };
+    return ServerConnection.makeRequest(request, settings).then(success => {
       if (success.xhr.status !== 204) {
-        throw utils.makeAjaxError(success);
+        throw ServerConnection.makeError(success);
       }
       Private.killTerminal(url);
     }, err => {
@@ -426,7 +399,7 @@ namespace Private {
    * Get the base url.
    */
   export
-  function getBaseUrl(baseUrl: string): string {
+  function getServiceUrl(baseUrl: string): string {
     return URLExt.join(baseUrl, TERMINAL_SERVICE_URL);
   }
 
