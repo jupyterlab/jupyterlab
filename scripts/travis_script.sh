@@ -51,11 +51,10 @@ if [[ $GROUP == coverage_and_docs ]]; then
     cp jupyter_plugins.png docs
 
     # Verify tutorial docs build
-    pushd tutorial
+    pushd docs
     conda env create -n test_docs -f environment.yml
     source activate test_docs
     make html
     source deactivate
     popd
 fi
-

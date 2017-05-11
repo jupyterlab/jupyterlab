@@ -315,7 +315,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
       if (!widget) {
         return;
       }
-
+      
       var code = ""
       const editor = widget.editor;
       const extension = widget.context.path.substring(widget.context.path.lastIndexOf("."));
@@ -333,9 +333,11 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
         const selection = editor.getSelection();
         const start = editor.getOffsetAt(selection.start);
         const end = editor.getOffsetAt(selection.end);
-        code = editor.model.value.text.substring(start, end)
+        code = editor.model.value.text.substring(start, end);
+        if (start == end) {
+          code = editor.getLine(selection.start.line);
+        }
       }
-
       const options: JSONObject = {
         path: widget.context.path,
         code: code,
