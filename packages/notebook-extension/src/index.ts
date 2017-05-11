@@ -70,6 +70,9 @@ namespace CommandIDs {
   const switchKernel = 'notebook:switch-kernel';
 
   export
+  const createConsole = 'notebook:create-console';
+
+  export
   const clearAllOutputs = 'notebook:clear-outputs';
 
   export
@@ -393,6 +396,8 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
   app.contextMenu.addItem({ type: 'separator', selector: '.jp-Notebook', rank: 0 });
   app.contextMenu.addItem({command: CommandIDs.undo, selector: '.jp-Notebook', rank: 1});
   app.contextMenu.addItem({command: CommandIDs.redo, selector: '.jp-Notebook', rank: 2});
+  app.contextMenu.addItem({ type: 'separator', selector: '.jp-Notebook', rank: 0 });
+  app.contextMenu.addItem({command: CommandIDs.createConsole, selector: '.jp-Notebook', rank: 3});
 
   return tracker;
 }
@@ -849,6 +854,26 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     },
     isEnabled: hasWidget
   });
+  commands.addCommand(CommandIDs.createConsole, {
+    label: 'Create Console for Notebook',
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      let widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+      let options: JSONObject = {
+        path: widget.context.path,
+        preferredLanguage: widget.context.model.defaultKernelLanguage,
+        activate: args['activate']
+      };
+      return commands.execute('console:create', options);
+    },
+    isEnabled: hasWidget
+  });
   commands.addCommand(CommandIDs.markdown1, {
     label: 'Markdown Header 1',
     execute: args => {
@@ -934,6 +959,7 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.editMode,
     CommandIDs.commandMode,
     CommandIDs.switchKernel,
+    CommandIDs.createConsole,
     CommandIDs.closeAndShutdown,
     CommandIDs.trust
   ].forEach(command => { palette.addItem({ command, category }); });
@@ -1003,6 +1029,8 @@ function createMenu(app: JupyterLab): Menu {
   menu.addItem({ command: CommandIDs.interrupt });
   menu.addItem({ command: CommandIDs.restart });
   menu.addItem({ command: CommandIDs.switchKernel });
+  menu.addItem({ type: 'separator' });
+  menu.addItem({ command: CommandIDs.createConsole });
   menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.closeAndShutdown });
   menu.addItem({ command: CommandIDs.trust });
