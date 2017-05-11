@@ -166,6 +166,11 @@ const DESCENDING_CLASS = 'jp-mod-descending';
 const RENAME_DURATION = 1000;
 
 /**
+  * The maximum duration between two key presses when selecting files by prefix.
+  */
+const PREFIX_APPEND_DURATION = 1000;
+
+/**
  * The threshold in pixels to start a drag event.
  */
 const DRAG_THRESHOLD = 5;
@@ -488,6 +493,23 @@ class DirListing extends Widget {
     }
     if (index !== -1) {
       this._selectItem(index, keepExisting);
+      ElementExt.scrollIntoViewIfNeeded(this.contentNode, this._items[index]);
+    }
+  }
+
+  /**
+   * Select the first item that starts with prefix being typed.
+   */
+  selectByPrefix(): void {
+    const prefix = this._searchPrefix;
+    let items = this._sortedItems;
+
+    let index = ArrayExt.findFirstIndex(items, value => {
+      return value.name.toLowerCase().substr(0, prefix.length) === prefix
+    });
+
+    if (index !== -1) {
+      this._selectItem(index, false);
       ElementExt.scrollIntoViewIfNeeded(this.contentNode, this._items[index]);
     }
   }
@@ -822,11 +844,6 @@ class DirListing extends Widget {
       event.preventDefault();
       event.stopPropagation();
 
-      if (IS_MAC) {
-        this._doRename();
-        return;
-      }
-
       let selected = Object.keys(this._selection);
       let name = selected[0];
       let items = this._sortedItems;
@@ -859,6 +876,22 @@ class DirListing extends Widget {
       break;
     default:
       break;
+    }
+
+    // Detects printable characters typed by the user.
+    // Not all browsers support .key, but it discharges us from reconstructing
+    // characters from key codes.
+    if (event.key !== undefined && event.key.length === 1) {
+      this._searchPrefix += event.key;
+
+      clearTimeout(this._searchPrefixTimer);
+      this._searchPrefixTimer = window.setTimeout(() => {
+        this._searchPrefix = '';
+      }, PREFIX_APPEND_DURATION);
+
+      this.selectByPrefix();
+      event.stopPropagation();
+      event.preventDefault();
     }
   }
 
@@ -1326,6 +1359,8 @@ class DirListing extends Widget {
   private _inContext = false;
   private _selection: { [key: string]: boolean; } = Object.create(null);
   private _renderer: DirListing.IRenderer = null;
+  private _searchPrefix: string = '';
+  private _searchPrefixTimer = -1;
 }
 
 
