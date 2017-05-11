@@ -286,7 +286,7 @@ class DefaultKernel implements Kernel.IKernel {
    * request fails or the response is invalid.
    */
   interrupt(): Promise<void> {
-    return Private.interruptKernel(this, this._baseUrl, this.ajaxSettings);
+    return Private.interruptKernel(this, this.serverSettings);
   }
 
   /**
@@ -307,7 +307,7 @@ class DefaultKernel implements Kernel.IKernel {
   restart(): Promise<void> {
     this._clearState();
     this._updateStatus('restarting');
-    return Private.restartKernel(this, this._baseUrl, this.ajaxSettings);
+    return Private.restartKernel(this, this.serverSettings);
   }
 
   /**
@@ -630,13 +630,14 @@ class DefaultKernel implements Kernel.IKernel {
         partialUrl,
         'channels?session_id=' + encodeURIComponent(this._clientId)
     );
-    // if token authentication is in use
-    if (this._token !== '') {
-      url = url + `&token=${encodeURIComponent(this._token)}`;
+    // If token authentication is in use.
+    let token = settings.token;
+    if (token !== '') {
+      url = url + `&token=${encodeURIComponent(token)}`;
     }
 
     this._connectionPromise = new PromiseDelegate<void>();
-    this._ws = new WebSocket(url);
+    this._ws = new settings.webSocket(url);
 
     // Ensure incoming binary messages are not Blobs
     this._ws.binaryType = 'arraybuffer';
@@ -898,15 +899,11 @@ class DefaultKernel implements Kernel.IKernel {
   }
 
   private _id = '';
-  private _token = '';
   private _name = '';
-  private _baseUrl = '';
-  private _wsUrl = '';
   private _status: Kernel.Status = 'unknown';
   private _clientId = '';
   private _ws: WebSocket = null;
   private _username = '';
-  private _ajaxSettings = '{}';
   private _reconnectLimit = 7;
   private _reconnectAttempt = 0;
   private _isReady = false;
@@ -932,33 +929,47 @@ namespace DefaultKernel {
   /**
    * Find a kernel by id.
    *
+   * @param id - The id of the kernel of interest.
+   *
+   * @param settings - The optional server settings.
+   *
+   * @returns A promise that resolves with the model for the kernel.
+   *
    * #### Notes
    * If the kernel was already started via `startNewKernel`, we return its
    * `Kernel.IModel`.
    *
-   * Otherwise, if `options` are given, we attempt to find the existing
+   * Otherwise, we attempt to find to the existing
    * kernel.
    * The promise is fulfilled when the kernel is found,
    * otherwise the promise is rejected.
    */
   export
-  function findById(id: string, options?: Kernel.IOptions): Promise<Kernel.IModel> {
-    return Private.findById(id, options);
+  function findById(id: string, settings?: ServerConnection.ISettings): Promise<Kernel.IModel> {
+    return Private.findById(id, settings);
   }
 
   /**
    * Fetch all of the kernel specs.
    *
+   * @param settings - The optional server settings.
+   *
+   * @returns A promise that resolves with the kernel specs.
+   *
    * #### Notes
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernelspecs).
    */
   export
-  function getSpecs(options: Kernel.IOptions = {}): Promise<Kernel.ISpecModels> {
-    return Private.getSpecs(options);
+  function getSpecs(settings?: ServerConnection.ISettings): Promise<Kernel.ISpecModels> {
+    return Private.getSpecs(settings);
   }
 
   /**
    * Fetch the running kernels.
+   *
+   * @param settings - The optional server settings.
+   *
+   * @returns A promise that resolves with the list of running kernels.
    *
    * #### Notes
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels) and validates the response model.
@@ -966,12 +977,16 @@ namespace DefaultKernel {
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
   export
-  function listRunning(options: Kernel.IOptions = {}): Promise<Kernel.IModel[]> {
+  function listRunning(settings?: ServerConnection.ISettings): Promise<Kernel.IModel[]> {
     return Private.listRunning(options);
   }
 
   /**
    * Start a new kernel.
+   *
+   * @param options - The options used to create the kernel.
+   *
+   * @returns A promise that resolves with a kernel object.
    *
    * #### Notes
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels) and validates the response model.
@@ -991,6 +1006,12 @@ namespace DefaultKernel {
   /**
    * Connect to a running kernel.
    *
+   * @param id - The id of the running kernel.
+   *
+   * @param settings - The server settings for the request.
+   *
+   * @returns A promise that resolves with the kernel object.
+   *
    * #### Notes
    * If the kernel was already started via `startNewKernel`, the existing
    * Kernel object info is used to create another instance.
@@ -1004,15 +1025,21 @@ namespace DefaultKernel {
    * the promise is rejected.
    */
   export
-  function connectTo(id: string, options?: Kernel.IOptions): Promise<Kernel.IKernel> {
+  function connectTo(id: string, settings?: ServerConnection.ISettings): Promise<Kernel.IKernel> {
     return Private.connectTo(id, options);
   }
 
   /**
    * Shut down a kernel by id.
+   *
+   * @param id - The id of the running kernel.
+   *
+   * @param settings - The server settings for the request.
+   *
+   * @returns A promise that resolves when the kernel is shut down.
    */
   export
-  function shutdown(id: string, options: Kernel.IOptions = {}): Promise<void> {
+  function shutdown(id: string, settings?: ServerConnection.ISettings): Promise<void> {
     return Private.shutdown(id, options);
   }
 }
