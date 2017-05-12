@@ -101,6 +101,7 @@ class SettingRegistry {
     if (this._datastore) {
       return Promise.resolve(void 0);
     }
+
     return this._ready.promise.then(() => this.add(options));
   }
 
@@ -111,8 +112,10 @@ class SettingRegistry {
     if (file in this._files) {
       const bundle = this._files[file] && this._files[file].data;
       const value = bundle && bundle[level] && bundle[level][key];
+
       return Promise.resolve(value);
     }
+
     return this.load(file).then(() => this.get(file, key, level));
   }
 
@@ -125,14 +128,35 @@ class SettingRegistry {
    */
   load(file: string, reload = false): Promise<ISettingRegistry.ISettingFile> {
     const files = this._files;
+
     if (!reload && file in files) {
       return Promise.resolve(files[file]);
     }
+
     if (this._datastore) {
       return this._datastore.fetch(file)
         .then(contents => files[contents.name] = contents);
     }
+
     return this._ready.promise.then(() => this.load(file));
+  }
+
+  /**
+   * Set an individual setting.
+   */
+  set(file: string, key: string, value: JSONValue, level: ISettingRegistry.Level = 'user'): Promise<void> {
+    if (file in this._files) {
+      const bundle = this._files[file] && this._files[file].data;
+
+      if (!bundle[level]) {
+        bundle[level] = {};
+      }
+      bundle[level][key] = value;
+
+      return Promise.resolve(void 0);
+    }
+
+    return this.load(file).then(() => this.set(file, key, value, level));
   }
 
   /**
