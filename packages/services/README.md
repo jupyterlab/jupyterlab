@@ -20,7 +20,7 @@ Package Install
 
 ```bash
 npm install --save @jupyterlab/services
-conda install notebook  # notebook 4.2+ required
+conda install notebook  # notebook 4.3+ required
 ```
 
 
@@ -37,7 +37,7 @@ git clone https://github.com/jupyterlab/services.git
 cd services
 npm install
 npm run build
-conda install notebook  # notebook 4.2+ required
+conda install notebook  # notebook 4.3+ required
 ```
 
 **Rebuild**
