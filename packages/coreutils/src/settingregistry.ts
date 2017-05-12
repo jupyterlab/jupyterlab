@@ -6,6 +6,10 @@ import {
 } from '@phosphor/coreutils';
 
 import {
+  ISignal, Signal
+} from '@phosphor/signaling';
+
+import {
   IDatastore
 } from '.';
 
@@ -30,10 +34,10 @@ namespace ISettingRegistry {
   };
 
   /**
-   * The options for adding a new setting value.
+   * The value specification for a setting item.
    */
   export
-  interface IAddOptions {
+  interface IItem {
     /**
      * The extension name where this setting resides.
      */
@@ -58,7 +62,7 @@ namespace ISettingRegistry {
   /**
    */
   export
-  interface ISettingFile extends JSONObject {
+  interface IFile extends JSONObject {
     /**
      * The name of an extension whose settings are saved.
      */
@@ -95,31 +99,9 @@ class SettingRegistry {
   }
 
   /**
-   * Add a single setting to the registry.
-   *
-   * @param options - The setting values being added.
-   *
-   * @returns A promise that resolves when the setting has been added and saved.
-   *
+   * A signal that emits name of a setting file when one changes.
    */
-  add(options: ISettingRegistry.IAddOptions): Promise<void> {
-    const { file, key, level, value } = options;
-
-    if (file in this._files) {
-      const bundle = this._files[file] && this._files[file].data;
-
-      // Overwrite the relevant key.
-      if (!bundle[level]) {
-        bundle[level] = {};
-      }
-      bundle[level][key] = value;
-
-      // Save the file.
-      return this._save(file);
-    }
-
-    return this.load(file).then(() => this.add(options));
-  }
+  readonly fileChanged: ISignal<this, string> = new Signal<this, string>(this);
 
   /**
    * Get an individual setting.
@@ -152,7 +134,7 @@ class SettingRegistry {
    *
    * @returns A promise that resolves with the setting file after loading.
    */
-  load(file: string, reload = false): Promise<ISettingRegistry.ISettingFile> {
+  load(file: string, reload = false): Promise<ISettingRegistry.IFile> {
     const files = this._files;
 
     if (!reload && file in files) {
@@ -168,31 +150,31 @@ class SettingRegistry {
   }
 
   /**
-   * Set an individual setting.
+   * Set a single setting in the registry.
    *
-   * @param file - The name of the extension whose settings are being set.
+   * @param item - The setting item being set.
    *
-   * @param key - The name of the setting being set.
+   * @returns A promise that resolves when the setting has been saved.
    *
-   * @param value - The value of the setting being set.
-   *
-   * @param level - The setting level.
-   *
-   * @returns A promise that resolves when the setting is saved.
    */
-  set(file: string, key: string, value: JSONValue, level: ISettingRegistry.Level = 'user'): Promise<void> {
-    if (file in this._files) {
-      const bundle = this._files[file] && this._files[file].data;
+  set(item: ISettingRegistry.IItem): Promise<void> {
+    const { file } = item;
 
-      if (!bundle[level]) {
-        bundle[level] = {};
-      }
-      bundle[level][key] = value;
-
-      return Promise.resolve(void 0);
+    if (!(file in this._files)) {
+      return this.load(file).then(() => this.set(item));
     }
 
-    return this.load(file).then(() => this.set(file, key, value, level));
+    const { key, level, value } = item;
+    const bundle = this._files[file] && this._files[file].data;
+
+    // Overwrite the relevant key.
+    if (!bundle[level]) {
+      bundle[level] = {};
+    }
+    bundle[level][key] = value;
+
+    // Save the file.
+    return this._save(file);
   }
 
   /**
@@ -207,7 +189,7 @@ class SettingRegistry {
    * entire extension at a time. It is comparable to a single file written to
    * disk on a file system.
    */
-  setDB(datastore: IDatastore<ISettingRegistry.ISettingFile, ISettingRegistry.ISettingFile>) {
+  setDB(datastore: IDatastore<ISettingRegistry.IFile, ISettingRegistry.IFile>) {
     if (this._datastore) {
       throw new Error('Setting registry already has a datastore.');
     }
@@ -220,11 +202,12 @@ class SettingRegistry {
    * Save a file that is known to exist in the registry.
    */
   private _save(file: string): Promise<void> {
-    return this._datastore.save(file, this._files[file]);
+    return this._datastore.save(file, this._files[file])
+      .then(() => { (this.fileChanged as Signal<this, string>).emit(file); });
   }
 
-  private _datastore: IDatastore<ISettingRegistry.ISettingFile, ISettingRegistry.ISettingFile> | null = null;
-  private _files: { [name: string]: ISettingRegistry.ISettingFile } = Object.create(null);
+  private _datastore: IDatastore<ISettingRegistry.IFile, ISettingRegistry.IFile> | null = null;
+  private _files: { [name: string]: ISettingRegistry.IFile } = Object.create(null);
   private _ready = new PromiseDelegate<void>();
 }
 
@@ -241,6 +224,6 @@ namespace SettingRegistry {
     /**
      * The underlying datastore of a setting registry.
      */
-    datastore?: IDatastore<ISettingRegistry.ISettingFile, ISettingRegistry.ISettingFile>;
+    datastore?: IDatastore<ISettingRegistry.IFile, ISettingRegistry.IFile>;
   }
 }

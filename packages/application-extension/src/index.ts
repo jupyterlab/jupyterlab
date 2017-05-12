@@ -44,13 +44,13 @@ const plugin: JupyterLabPlugin<void> = {
   activate: (app: JupyterLab, palette: ICommandPalette) => {
     // Set the datastore required by the application's setting registry.
     app.settings.setDB({
-      fetch: (file: string): Promise<ISettingRegistry.ISettingFile | null> => {
+      fetch: (file: string): Promise<ISettingRegistry.IFile | null> => {
         return Promise.reject(new Error('fetch not implemented'));
       },
       remove: (file: string): Promise<void> => {
         return Promise.reject(new Error('remove not implemented'));
       },
-      save: (file: string, value: ISettingRegistry.ISettingFile): Promise<void> => {
+      save: (file: string, value: ISettingRegistry.IFile): Promise<void> => {
         return Promise.reject(new Error('save not implemented'));
       }
     });
