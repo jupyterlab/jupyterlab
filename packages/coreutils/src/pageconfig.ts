@@ -92,8 +92,7 @@ namespace PageConfig {
       baseUrl = (typeof location === 'undefined' ?
                  'http://localhost:8888/' : location.origin + '/');
     }
-    let parsed = URLExt.parse(baseUrl);
-    return `${parsed.protocol}//${parsed.host}`;
+    return URLExt.parse(baseUrl).toString();
   }
 
   /**
@@ -113,8 +112,7 @@ namespace PageConfig {
       }
       wsUrl = 'ws' + baseUrl.slice(4);
     }
-    let parsed = URLExt.parse(wsUrl);
-    return `${parsed.protocol}//${parsed.host}`;
+    return URLExt.parse(wsUrl).toString();
   }
 
   /**

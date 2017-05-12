@@ -5,6 +5,7 @@ require('@jupyterlab/default-theme/style/index.css');
 var app = require('@jupyterlab/application').JupyterLab;
 var PageConfig = require('@jupyterlab/coreutils').PageConfig;
 
+__webpack_public_path__ = PageConfig.getOption('publicUrl');
 
 function main() {
     var version = PageConfig.getOption('appVersion') || 'unknown';
