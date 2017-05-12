@@ -633,14 +633,11 @@ namespace Kernel {
     findById(id: string): Promise<IModel>;
 
     /**
-     * Connect to an existing kernel.
+     * Connect to an existing  kernel.
      *
      * @param id - The id of the target kernel.
      *
      * @returns A promise that resolves with the new kernel instance.
-     *
-     * #### Notes
-     * The manager `serverSettings` will be always be used.
      */
     connectTo(id: string): Promise<IKernel>;
 
