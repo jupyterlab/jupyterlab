@@ -36,6 +36,11 @@ namespace CommandIDs {
 
 
 /**
+ * The extension ID.
+ */
+
+
+/**
  * The main extension.
  */
 const plugin: JupyterLabPlugin<void> = {
@@ -53,6 +58,12 @@ const plugin: JupyterLabPlugin<void> = {
       save: (file: string, value: ISettingRegistry.IFile): Promise<void> => {
         return Promise.reject(new Error('save not implemented'));
       }
+    });
+
+    app.settings.load(plugin.id).then(file => {
+      console.log(file.name, file.data);
+    }).catch(reason => {
+      console.warn('settings load failure', reason);
     });
 
     // Add the main application commands.
