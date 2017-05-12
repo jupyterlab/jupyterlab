@@ -90,15 +90,6 @@ interface ISettingRegistry extends SettingRegistry {}
 export
 class SettingRegistry {
   /**
-   * Instantiate a setting registry.
-   */
-  constructor(options?: SettingRegistry.IOptions) {
-    if (options.datastore) {
-      this.setDB(options.datastore);
-    }
-  }
-
-  /**
    * A signal that emits name of a setting file when one changes.
    */
   get fileChanged(): ISignal<this, string> {
@@ -224,21 +215,4 @@ class SettingRegistry {
   private _fileChanged = new Signal<this, string>(this);
   private _files: { [name: string]: ISettingRegistry.IFile } = Object.create(null);
   private _ready = new PromiseDelegate<void>();
-}
-
-/**
- * A namespace for SettingRegistry statics.
- */
-export
-namespace SettingRegistry {
-  /**
-   * The instantiation options for a setting registry.
-   */
-  export
-  interface IOptions {
-    /**
-     * The underlying datastore of a setting registry.
-     */
-    datastore?: IDatastore<ISettingRegistry.IFile, ISettingRegistry.IFile>;
-  }
 }
