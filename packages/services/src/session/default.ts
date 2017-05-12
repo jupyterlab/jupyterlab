@@ -54,8 +54,7 @@ class DefaultSession implements Session.ISession {
     this._path = options.path;
     this.serverSettings = options.serverSettings || ServerConnection.makeSettings();
     this._uuid = uuid();
-    let running = Private.runningSessions.get(this.serverSettings.baseUrl, []);
-    running.push(this);
+    Private.addRunning(this);
     this.setupKernel(kernel);
     this.terminated = new Signal<this, void>(this);
   }
@@ -165,8 +164,7 @@ class DefaultSession implements Session.ISession {
    * Clone the current session with a new clientId.
    */
   clone(): Promise<Session.ISession> {
-    let options = this._getKernelOptions();
-    return Kernel.connectTo(this.kernel.id, options).then(kernel => {
+    return Kernel.connectTo(this.kernel.id, this.serverSettings).then(kernel => {
       return new DefaultSession({
         path: this._path,
         serverSettings: this.serverSettings
@@ -186,9 +184,7 @@ class DefaultSession implements Session.ISession {
     let newPath = this._path = model.notebook.path;
 
     if (this._kernel.isDisposed || model.kernel.id !== this._kernel.id) {
-      let options = this._getKernelOptions();
-      options.name = model.kernel.name;
-      return Kernel.connectTo(model.kernel.id, options).then(kernel => {
+      return Kernel.connectTo(model.kernel.id, this.serverSettings).then(kernel => {
         this.setupKernel(kernel);
         this._kernelChanged.emit(kernel);
         if (oldPath !== newPath) {
@@ -212,8 +208,7 @@ class DefaultSession implements Session.ISession {
     if (this._kernel) {
       this._kernel.dispose();
     }
-    let running = Private.runningSessions.get(this.serverSettings.baseUrl);
-    ArrayExt.removeFirstOf(running, this);
+    Private.removeRunning(this);
     this._kernel = null;
     Signal.clearData(this);
   }
@@ -417,7 +412,7 @@ namespace DefaultSession {
    */
   export
   function shutdown(id: string, settings?: ServerConnection.ISettings): Promise<void> {
-    return Private.shutdown(id, settings);
+    return Private.shutdownSession(id, settings);
   }
 }
 
@@ -429,8 +424,28 @@ namespace Private {
   /**
    * The running sessions mapped by base url.
    */
+  const runningSessions = new Map<string, DefaultSession[]>();
+
+  /**
+   * Add a session to the running sessions.
+   */
   export
-  const runningSessions: new Map<string, DefaultSession[]>();
+  function addRunning(session: DefaultSession): void {
+    let running: DefaultSession[] = (
+      runningSessions.get(session.serverSettings.baseUrl) || []
+    );
+    running.push(session);
+    runningSessions.set(session.serverSettings.baseUrl, running);
+  }
+
+  /**
+   * Remove a session from the running sessions.
+   */
+  export
+  function removeRunning(session: DefaultSession): void {
+    let running = runningSessions.get(session.serverSettings.baseUrl);
+    ArrayExt.removeFirstOf(running, session);
+  }
 
   /**
    * Connect to a running session.
@@ -438,7 +453,7 @@ namespace Private {
   export
   function connectTo(id: string, settings?: ServerConnection.ISettings): Promise<Session.ISession> {
     settings = settings || ServerConnection.makeSettings();
-    let running = runningSessions.get(settings.baseUrl, []);
+    let running = runningSessions.get(settings.baseUrl) || [];
     let session = find(running, value => value.id === id);
     if (session) {
       return Promise.resolve(session.clone());
@@ -460,7 +475,10 @@ namespace Private {
   function createSession(model: Session.IModel, options: Session.IOptions): Promise<DefaultSession> {
     let settings = options.serverSettings || ServerConnection.makeSettings();
     return Kernel.connectTo(model.kernel.id, settings).then(kernel => {
-      return new DefaultSession({ path: model.path, serverSettings: settings }, model.id, kernel);
+      return new DefaultSession({
+        path: model.notebook.path,
+        serverSettings: settings
+      }, model.id, kernel);
     }).catch(error => {
       return typedThrow('Session failed to start: ' + error.message);
     });
@@ -472,7 +490,7 @@ namespace Private {
   export
   function findById(id: string, settings?: ServerConnection.ISettings): Promise<Session.IModel> {
     settings = settings || ServerConnection.makeSettings();
-    let running = runningSessions.get(settings.baseUrl, []);
+    let running = runningSessions.get(settings.baseUrl) || [];
     let session = find(running, value => value.id === id);
     if (session) {
       return Promise.resolve(session.model);
@@ -490,7 +508,7 @@ namespace Private {
   export
   function findByPath(path: string, settings?: ServerConnection.ISettings): Promise<Session.IModel> {
     settings = settings || ServerConnection.makeSettings();
-    let running = runningSessions.get(settings.baseUrl, []);
+    let running = runningSessions.get(settings.baseUrl) || [];
     let session = find(running, value => value.path === path);
     if (session) {
       return Promise.resolve(session.model);
@@ -545,7 +563,7 @@ namespace Private {
    * Kill the sessions by id.
    */
   function killSessions(id: string, baseUrl: string): void {
-    let running = runningSessions.get(settings.baseUrl, []);
+    let running = runningSessions.get(baseUrl) || [];
     each(running.slice(), session => {
       if (session.id === id) {
         session.terminated.emit(void 0);
@@ -686,7 +704,7 @@ namespace Private {
   export
   function updateFromServer(model: Session.IModel, baseUrl: string): Promise<Session.IModel> {
     let promises: Promise<void>[] = [];
-    let running = runningSessions.get(settings.baseUrl, []);
+    let running = runningSessions.get(baseUrl) || [];
     each(running.slice(), session => {
       if (session.id === model.id) {
         promises.push(session.update(model));
@@ -699,9 +717,9 @@ namespace Private {
    * Update the running sessions based on new data from the server.
    */
   export
-  function updateRunningSessions(sessions: Session.IModel[]): Promise<Session.IModel[]> {
+  function updateRunningSessions(sessions: Session.IModel[], baseUrl: string): Promise<Session.IModel[]> {
     let promises: Promise<void>[] = [];
-    let running = runningSessions.get(settings.baseUrl, []);
+    let running = runningSessions.get(baseUrl) || [];
     each(running.slice(), session => {
       let updated = find(sessions, sId => {
         if (session.id === sId.id) {

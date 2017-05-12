@@ -273,7 +273,7 @@ namespace Session {
    */
   export
   function shutdown(id: string, settings?: ServerConnection.ISettings): Promise<void> {
-    return DefaultSession.shutdown(id, options);
+    return DefaultSession.shutdown(id, settings);
   }
 
   /**
