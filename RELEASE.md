@@ -36,6 +36,8 @@ for twine setup instructions and for why twine is the recommended method.
 # effective major release, the packages that depend on it should also get a 
 # major release, to prevent consumers that are using the `^` semver 
 # requirement from getting a conflict.
+#
+# *** First, update jupyterlab/_version.py
 npm run publish  
 rm -rf dist
 python setup.py sdist

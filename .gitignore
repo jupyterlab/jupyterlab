@@ -2,7 +2,7 @@ MANIFEST
 build
 dist
 lib
-jupyterlab/index.js
+jupyterlab/static
 
 node_modules
 .cache
@@ -22,4 +22,6 @@ __pycache__
 .idea/
 
 test/coverage
-docs
+docs/_build
+docs/api
+packages/services/examples/node/config.json

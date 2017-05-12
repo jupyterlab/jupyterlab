@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  PageConfig
+} from '@jupyterlab/coreutils';
+
+import {
   JSONObject
 } from '@phosphor/coreutils';
 
@@ -30,7 +34,7 @@ import {
 } from './terminal';
 
 import {
-  IAjaxSettings, getBaseUrl, getWsUrl, ajaxSettingsWithToken
+  IAjaxSettings, ajaxSettingsWithToken
 } from './utils';
 
 
@@ -44,8 +48,8 @@ class ServiceManager implements ServiceManager.IManager {
    */
   constructor(options?: ServiceManager.IOptions) {
     options = options || {};
-    options.wsUrl = options.wsUrl || getWsUrl();
-    options.baseUrl = options.baseUrl || getBaseUrl();
+    options.wsUrl = options.wsUrl || PageConfig.getWsUrl();
+    options.baseUrl = options.baseUrl || PageConfig.getBaseUrl();
     options.ajaxSettings = ajaxSettingsWithToken(options.ajaxSettings, options.token);
     this._sessionManager = new SessionManager(options);
     this._contentsManager = new ContentsManager(options);

@@ -580,7 +580,7 @@ class ClientSession implements IClientSession {
         return;
       }
       if (model === null && this._session) {
-        return this.shutdown();
+        return this.shutdown().then(() => this._kernelChanged.emit(null));
       }
       return this._changeKernel(model).then(() => void 0);
     }).then(() => void 0);
@@ -595,8 +595,8 @@ class ClientSession implements IClientSession {
     }
     return this.manager.startNew({
       path: this._path,
-      kernelName: model.name,
-      kernelId: model.id
+      kernelName: model ? model.name : null,
+      kernelId: model ? model.id : null
     }).then(session => this._handleNewSession(session))
     .catch(err => this._handleSessionError(err));
   }

@@ -1,11 +1,11 @@
 {
   "name": "@jupyterlab/services",
-  "version": "0.42.1",
+  "version": "0.43.0",
   "description": "Client APIs for the Jupyter services REST APIs",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "dependencies": {
-    "@jupyterlab/coreutils": "^0.3.1",
+    "@jupyterlab/coreutils": "^0.4.0",
     "@phosphor/algorithm": "^1.0.0",
     "@phosphor/coreutils": "^1.0.0",
     "@phosphor/disposable": "^1.0.0",
@@ -23,13 +23,13 @@
     "expect.js": "^0.3.1",
     "istanbul": "^0.3.18",
     "mocha": "^3.2.0",
-    "requirejs": "^2.3.3",
+    "requirejs": "^2.2.0",
     "rimraf": "^2.5.2",
     "text-encoding": "^0.5.2",
     "typedoc": "^0.5.0",
     "typescript": "^2.2.1",
     "webpack": "^2.2.1",
-    "ws": "^1.0.1",
+    "ws": "^1.1.1",
     "xmlhttprequest": "^1.8.0"
   },
   "scripts": {
@@ -37,14 +37,11 @@
     "build:src": "tsc --project src",
     "build:test": "tsc --project test/src",
     "build": "npm run build:src",
-    "example:browser": "cd examples/browser && npm run update && npm run build",
-    "example:node": "cd examples/node && npm install",
-    "build:examples": "npm run example:browser && npm run example:node",
-    "test:coverage": "istanbul cover --dir test/coverage _mocha -- --retries 3 test/build/**/*.spec.js test/build*.spec.js --foo bar --terminalsAvailable True",
+    "test:coverage": "istanbul cover --dir test/coverage _mocha -- --retries 3 test/build/**/*.spec.js test/build/*.spec.js --jupyter-config-data=./test/config.json",
     "test:integration": "cd test && python integration_test.py",
-    "test:devtool": "devtool node_modules/.bin/_mocha -qc test/build/*.spec.js test/build/**/*.spec.js --foo bar --terminalsAvailable True",
-    "test:debug": "mocha test/build/**/*.spec.js test/build*.spec.js --foo bar --terminalsAvailable True --debug-brk",
-    "test": "mocha --retries 3 test/build/**.spec.js test/build/**/*.spec.js --foo bar --terminalsAvailable True"
+    "test:devtool": "devtool node_modules/.bin/_mocha -qc test/build/**/*.spec.js test/build*.spec.js --jupyter-config-data=./test/config.json",
+    "test:debug": "mocha test/build/**/*.spec.js test/build*.spec.js  --jupyter-config-data=./test/config.json --debug-brk",
+    "test": "mocha --retries 3 test/build/**/*.spec.js test/build*.spec.js --jupyter-config-data=./test/config.json"
   },
   "repository": {
     "type": "git",

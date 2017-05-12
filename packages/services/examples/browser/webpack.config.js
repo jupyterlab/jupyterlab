@@ -4,5 +4,5 @@ module.exports = {
   output: {
     filename: './build/bundle.js'
   },
-  debug: true
+  bail: true
 }

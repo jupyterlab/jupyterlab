@@ -160,7 +160,8 @@ namespace HoverBox {
 
     // Position the box horizontally.
     const offsetHorizontal = options.offset && options.offset.horizontal || 0;
-    const left = anchor.left + offsetHorizontal;
+    let left = anchor.left + offsetHorizontal;
+
     node.style.left = `${Math.ceil(left)}px`;
     node.style.width = 'auto';
 
@@ -168,6 +169,13 @@ namespace HoverBox {
     if (node.scrollHeight >= maxHeight) {
       node.style.width = `${2 * node.offsetWidth - node.clientWidth}`;
       node.scrollTop = 0;
+    }
+
+    // Move left to fit in the window.
+    let right = node.getBoundingClientRect().right;
+    if (right > window.innerWidth) {
+      left -= right - window.innerWidth;
+      node.style.left = `${Math.ceil(left)}px`;
     }
   }
 }

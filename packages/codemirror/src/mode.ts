@@ -16,6 +16,7 @@ import 'codemirror/mode/css/css';
 import 'codemirror/mode/julia/julia';
 import 'codemirror/mode/r/r';
 import 'codemirror/mode/markdown/markdown';
+import 'codemirror/mode/clike/clike';
 
 
 // Stub for the require function.

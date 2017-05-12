@@ -8,14 +8,14 @@ from __future__ import print_function
 import os
 import sys
 
-from jupyter_core.application import JupyterApp, base_flags
+from jupyter_core.application import JupyterApp, base_flags, base_aliases
 
-from traitlets import Bool
+from traitlets import Bool, Unicode
 
 from ._version import __version__
 from .commands import (
     install_extension, uninstall_extension, list_extensions,
-    link_extension, unlink_extension, build
+    link_package, unlink_package, build, _get_linked_packages
 )
 
 
@@ -25,10 +25,17 @@ flags['no-build'] = (
     "Defer building the app after the action."
 )
 
+aliases = dict(base_aliases)
+aliases['app-dir'] = 'BaseExtensionApp.app_dir'
+
 
 class BaseExtensionApp(JupyterApp):
     version = __version__
     flags = flags
+    aliases = aliases
+
+    app_dir = Unicode('', config=True,
+        help="The app directory to target")
 
     should_build = Bool(True, config=True,
         help="Whether to build the app after the action")
@@ -39,9 +46,9 @@ class InstallLabExtensionApp(BaseExtensionApp):
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        [install_extension(arg) for arg in self.extra_args]
+        [install_extension(arg, self.app_dir) for arg in self.extra_args]
         if self.should_build:
-            build()
+            build(self.app_dir)
 
 
 class LinkLabExtensionApp(BaseExtensionApp):
@@ -49,9 +56,9 @@ class LinkLabExtensionApp(BaseExtensionApp):
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        [link_extension(arg) for arg in self.extra_args]
+        [link_package(arg, self.app_dir) for arg in self.extra_args]
         if self.should_build:
-            build()
+            build(self.app_dir)
 
 
 class UnlinkLabExtensionApp(BaseExtensionApp):
@@ -59,10 +66,10 @@ class UnlinkLabExtensionApp(BaseExtensionApp):
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        ans = any([unlink_extension(arg)
+        ans = any([unlink_package(arg, self.app_dir)
                    for arg in self.extra_args])
         if ans and self.should_build:
-            build()
+            build(self.app_dir)
 
 
 class UninstallLabExtensionApp(BaseExtensionApp):
@@ -70,18 +77,27 @@ class UninstallLabExtensionApp(BaseExtensionApp):
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        ans = any([uninstall_extension(arg)
+        ans = any([uninstall_extension(arg, self.app_dir)
                    for arg in self.extra_args])
         if ans and self.should_build:
-            build()
+            build(self.app_dir)
 
 
 class ListLabExtensionsApp(BaseExtensionApp):
-    description = "Install a labextension"
+    description = "List the installed labextension"
     should_build = False
 
     def start(self):
-        [print(ext) for ext in list_extensions()]
+        [print(ext) for ext in list_extensions(self.app_dir)]
+
+
+class ListLinkedLabExtensionsApp(BaseExtensionApp):
+    description = "List the linked packages"
+    should_build = False
+
+    def start(self):
+        for path in _get_linked_packages(self.app_dir).values():
+            print(path)
 
 
 _examples = """
@@ -104,6 +120,7 @@ class LabExtensionApp(JupyterApp):
         list=(ListLabExtensionsApp, "List labextensions"),
         link=(LinkLabExtensionApp, "Link labextension(s)"),
         unlink=(UnlinkLabExtensionApp, "Unlink labextension(s)"),
+        listlinked=(ListLinkedLabExtensionsApp, "List linked extensions")
     )
 
     def start(self):

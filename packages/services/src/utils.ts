@@ -1,16 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-'use strict';
+
+import {
+  PageConfig
+} from '@jupyterlab/coreutils';
 
 import {
   JSONExt, JSONObject
 } from '@phosphor/coreutils';
-
-import * as minimist
-  from 'minimist';
-
-import * as path
-  from 'path-posix';
 
 
 // Stub for requirejs.
@@ -280,104 +277,6 @@ function loadObject(name: string, moduleName: string, registry?: { [key: string]
 
 
 /**
- * Global config data for the Jupyter application.
- */
-let configData: any = null;
-
-
-/**
- * Declare a stub for the node process variable.
- */
-declare var process: any;
-
-
-/**
- *  Make an object fully immutable by freezing each object in it.
- */
-function deepFreeze(obj: any): any {
-
-  // Freeze properties before freezing self
-  Object.getOwnPropertyNames(obj).forEach(function(name) {
-    let prop = obj[name];
-
-    // Freeze prop if it is an object
-    if (typeof prop === 'object' && prop !== null && !Object.isFrozen(prop)) {
-      deepFreeze(prop);
-    }
-  });
-
-  // Freeze self
-  return Object.freeze(obj);
-}
-
-
-/**
- * Get global configuration data for the Jupyter application.
- *
- * @param name - The name of the configuration option.
- *
- * @returns The config value or `undefined` if not found.
- *
- * #### Notes
- * For browser based applications, it is assumed that the page HTML
- * includes a script tag with the id `jupyter-config-data` containing the
- * configuration as valid JSON.
- */
-export
-function getConfigOption(name: string): string {
-  if (configData) {
-    return configData[name];
-  }
-  if (typeof document === 'undefined') {
-    configData = minimist(process.argv.slice(2));
-  } else {
-    let el = document.getElementById('jupyter-config-data');
-    if (el) {
-      configData = JSON.parse(el.textContent);
-    } else {
-      configData = {};
-    }
-  }
-  configData = deepFreeze(configData);
-  return configData[name];
-}
-
-
-/**
- * Get the base URL for a Jupyter application.
- */
-export
-function getBaseUrl(): string {
-  let baseUrl = getConfigOption('baseUrl');
-  if (!baseUrl || baseUrl === '/') {
-    baseUrl = (typeof location === 'undefined' ?
-               'http://localhost:8888/' : location.origin + '/');
-  }
-  return baseUrl;
-}
-
-
-/**
- * Get the base websocket URL for a Jupyter application.
- */
-export
-function getWsUrl(baseUrl?: string): string {
-  let wsUrl = getConfigOption('wsUrl');
-  if (!wsUrl) {
-    baseUrl = baseUrl || getBaseUrl();
-    if (baseUrl.indexOf('http') !== 0) {
-      if (typeof location !== 'undefined') {
-        baseUrl = path.join(location.origin, baseUrl);
-      } else {
-        baseUrl = path.join('http://localhost:8888/', baseUrl);
-      }
-    }
-    wsUrl = 'ws' + baseUrl.slice(4);
-  }
-  return wsUrl;
-}
-
-/**
  * Add token to ajaxSettings.requestHeaders if defined.
  * Always returns a copy of ajaxSettings, and a dict.
  */
@@ -389,7 +288,7 @@ function ajaxSettingsWithToken(ajaxSettings?: IAjaxSettings, token?: string): IA
     ajaxSettings = JSONExt.deepCopy(ajaxSettings);
   }
   if (!token) {
-    token = getConfigOption('token');
+    token = PageConfig.getOption('token');
   }
   if (!token || token === '') {
     return ajaxSettings;

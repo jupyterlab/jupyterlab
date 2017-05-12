@@ -26,7 +26,7 @@ import {
  * Phosphor widget that encodes best practices for VDOM based rendering.
  */
 export
-abstract class VDomWidget<T extends VDomWidget.IModel> extends Widget {
+abstract class VDomRenderer<T extends VDomRenderer.IModel> extends Widget {
   /**
    * A signal emited when the model changes.
    */
@@ -97,10 +97,10 @@ abstract class VDomWidget<T extends VDomWidget.IModel> extends Widget {
 
 
 /**
- * The namespace for VDomWidget statics.
+ * The namespace for VDomRenderer statics.
  */
 export
-namespace VDomWidget {
+namespace VDomRenderer {
   /**
    * An interface for a model to be used with vdom rendering.
    */
@@ -115,10 +115,10 @@ namespace VDomWidget {
 
 
 /**
- * Concrete implementation of VDomWidget model.
+ * Concrete implementation of VDomRenderer model.
  */
 export
-class VDomModel implements VDomWidget.IModel {
+class VDomModel implements VDomRenderer.IModel {
   /**
    * A signal emitted when any model state changes.
    */

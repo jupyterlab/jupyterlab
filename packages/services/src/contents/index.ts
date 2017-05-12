@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  URLExt
+  PageConfig, URLExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -356,7 +356,7 @@ class ContentsManager implements Contents.IManager {
    * @param options - The options used to initialize the object.
    */
   constructor(options: ContentsManager.IOptions = {}) {
-    this._baseUrl = options.baseUrl || utils.getBaseUrl();
+    this._baseUrl = options.baseUrl || PageConfig.getBaseUrl();
     this._ajaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
   }
 

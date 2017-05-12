@@ -166,6 +166,11 @@ const DESCENDING_CLASS = 'jp-mod-descending';
 const RENAME_DURATION = 1000;
 
 /**
+  * The maximum duration between two key presses when selecting files by prefix.
+  */
+const PREFIX_APPEND_DURATION = 1000;
+
+/**
  * The threshold in pixels to start a drag event.
  */
 const DRAG_THRESHOLD = 5;
@@ -358,13 +363,13 @@ class DirListing extends Widget {
         names.push(item.name);
       }
     });
-    let message = `Permanently delete these ${names.length} files?`;
+    let message = `Are you sure you want to permanently delete the ${names.length} files/folders selected?`;
     if (names.length === 1) {
-      message = `Permanently delete file "${names[0]}"?`;
+      message = `Are you sure you want to permanently delete: ${names[0]}?`;
     }
     if (names.length) {
       return showDialog({
-        title: 'Delete file?',
+        title: 'Delete',
         body: message,
         buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'DELETE'})]
       }).then(result => {
@@ -488,6 +493,23 @@ class DirListing extends Widget {
     }
     if (index !== -1) {
       this._selectItem(index, keepExisting);
+      ElementExt.scrollIntoViewIfNeeded(this.contentNode, this._items[index]);
+    }
+  }
+
+  /**
+   * Select the first item that starts with prefix being typed.
+   */
+  selectByPrefix(): void {
+    const prefix = this._searchPrefix;
+    let items = this._sortedItems;
+
+    let index = ArrayExt.findFirstIndex(items, value => {
+      return value.name.toLowerCase().substr(0, prefix.length) === prefix
+    });
+
+    if (index !== -1) {
+      this._selectItem(index, false);
       ElementExt.scrollIntoViewIfNeeded(this.contentNode, this._items[index]);
     }
   }
@@ -822,11 +844,6 @@ class DirListing extends Widget {
       event.preventDefault();
       event.stopPropagation();
 
-      if (IS_MAC) {
-        this._doRename();
-        return;
-      }
-
       let selected = Object.keys(this._selection);
       let name = selected[0];
       let items = this._sortedItems;
@@ -859,6 +876,22 @@ class DirListing extends Widget {
       break;
     default:
       break;
+    }
+
+    // Detects printable characters typed by the user.
+    // Not all browsers support .key, but it discharges us from reconstructing
+    // characters from key codes.
+    if (event.key !== undefined && event.key.length === 1) {
+      this._searchPrefix += event.key;
+
+      clearTimeout(this._searchPrefixTimer);
+      this._searchPrefixTimer = window.setTimeout(() => {
+        this._searchPrefix = '';
+      }, PREFIX_APPEND_DURATION);
+
+      this.selectByPrefix();
+      event.stopPropagation();
+      event.preventDefault();
     }
   }
 
@@ -1193,11 +1226,12 @@ class DirListing extends Widget {
     const promises: Promise<void>[] = [];
     const basePath = this._model.path;
     for (let name of names) {
-      promises.push(this._model.manager.deleteFile(name, basePath));
+      let promise = this._model.manager.deleteFile(name, basePath).catch(err => {
+        utils.showErrorMessage('Delete Failed', err);
+      });
+      promises.push(promise);
     }
-    return Promise.all(promises).catch(error => {
-      utils.showErrorMessage('Delete file', error);
-    });
+    return Promise.all(promises).then(() => undefined);
   }
 
   /**
@@ -1325,6 +1359,8 @@ class DirListing extends Widget {
   private _inContext = false;
   private _selection: { [key: string]: boolean; } = Object.create(null);
   private _renderer: DirListing.IRenderer = null;
+  private _searchPrefix: string = '';
+  private _searchPrefixTimer = -1;
 }
 
 

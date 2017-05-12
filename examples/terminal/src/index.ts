@@ -12,18 +12,18 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  TerminalWidget
+  Terminal
 } from '@jupyterlab/terminal';
 
 import '../index.css';
 
 
 function main(): void {
-  let term1 = new TerminalWidget({
+  let term1 = new Terminal({
     background: 'black',
     color: 'white'
   });
-  let term2 = new TerminalWidget({
+  let term2 = new Terminal({
     background: 'white',
     color: 'black'
   });

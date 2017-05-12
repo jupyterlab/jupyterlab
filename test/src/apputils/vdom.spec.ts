@@ -10,7 +10,7 @@ import {
 } from '@phosphor/virtualdom';
 
 import {
-  VDomModel, VDomWidget
+  VDomModel, VDomRenderer
 } from '@jupyterlab/apputils';
 
 
@@ -27,7 +27,7 @@ class TestModel extends VDomModel {
   private _value = '';
 }
 
-class TestWidget extends VDomWidget<TestModel> {
+class TestWidget extends VDomRenderer<TestModel> {
   protected render(): VirtualNode {
     return h.span(this.model.value);
   }
@@ -71,7 +71,7 @@ describe('@jupyterlab/domutils', () => {
 
   });
 
-  describe('VDomWidget', () => {
+  describe('VDomRenderer', () => {
 
     describe('#constructor()', () => {
 

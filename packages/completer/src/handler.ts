@@ -22,7 +22,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  CompleterWidget
+  Completer
 } from './widget';
 
 
@@ -55,7 +55,7 @@ class CompletionHandler implements IDisposable {
   /**
    * The completer widget managed by the handler.
    */
-  get completer(): CompleterWidget {
+  get completer(): Completer {
     return this._completer;
   }
 
@@ -143,7 +143,7 @@ class CompletionHandler implements IDisposable {
   /**
    * Get the state of the text editor at the given position.
    */
-  protected getState(position: CodeEditor.IPosition): CompleterWidget.ITextState {
+  protected getState(position: CodeEditor.IPosition): Completer.ITextState {
     const editor = this.editor;
     return {
       text: editor.model.value.text,
@@ -192,7 +192,7 @@ class CompletionHandler implements IDisposable {
   /**
    * Handle a completion selected signal from the completion widget.
    */
-  protected onCompletionSelected(completer: CompleterWidget, value: string): void {
+  protected onCompletionSelected(completer: Completer, value: string): void {
     let model = completer.model;
     let editor = this._editor;
     if (!editor || !model) {
@@ -236,7 +236,7 @@ class CompletionHandler implements IDisposable {
    *
    * @param reply - The API response returned for a completion request.
    */
-  protected onReply(state: CompleterWidget.ITextState, reply: KernelMessage.ICompleteReplyMsg): void {
+  protected onReply(state: Completer.ITextState, reply: KernelMessage.ICompleteReplyMsg): void {
     const model = this._completer.model;
     if (!model) {
       return;
@@ -347,7 +347,7 @@ class CompletionHandler implements IDisposable {
   /**
    * Handle a visiblity change signal from a completer widget.
    */
-  protected onVisibilityChanged(completer: CompleterWidget): void {
+  protected onVisibilityChanged(completer: Completer): void {
     // Completer is not active.
     if (completer.isDisposed || completer.isHidden) {
       if (this._editor) {
@@ -365,7 +365,7 @@ class CompletionHandler implements IDisposable {
 
   private _editor: CodeEditor.IEditor | null = null;
   private _enabled = false;
-  private _completer: CompleterWidget | null = null;
+  private _completer: Completer | null = null;
   private _pending = 0;
 }
 
@@ -383,7 +383,7 @@ namespace CompletionHandler {
     /**
      * The completion widget the handler will connect to.
      */
-    completer: CompleterWidget;
+    completer: Completer;
 
     /**
      * The session for the completion handler.

@@ -26,7 +26,8 @@ def get_command(nbapp):
     # Compatibility with Notebook 4.2.
     token = getattr(nbapp, 'token', '')
     config = dict(baseUrl=nbapp.connection_url, token=token,
-                  terminalsAvailable=str(terminalsAvailable))
+                  terminalsAvailable=str(terminalsAvailable),
+                  foo='bar')
 
     print('\n\nNotebook config:')
     print(json.dumps(config))

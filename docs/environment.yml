@@ -1,0 +1,9 @@
+name: lab_tutorial
+channels:
+  - conda-forge
+dependencies:
+- python==3.5
+- sphinx>1.4
+- pip:
+  - recommonmark==0.4.0
+  - jupyter_alabaster_theme

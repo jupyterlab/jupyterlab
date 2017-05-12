@@ -23,12 +23,12 @@ import * as Xterm
 /**
  * The class name added to a terminal widget.
  */
-const TERMINAL_CLASS = 'jp-TerminalWidget';
+const TERMINAL_CLASS = 'jp-Terminal';
 
 /**
  * The class name added to a terminal body.
  */
-const TERMINAL_BODY_CLASS = 'jp-TerminalWidget-body';
+const TERMINAL_BODY_CLASS = 'jp-Terminal-body';
 
 /**
  * The number of rows to use in the dummy terminal.
@@ -45,13 +45,13 @@ const DUMMY_COLS = 80;
  * A widget which manages a terminal session.
  */
 export
-class TerminalWidget extends Widget {
+class Terminal extends Widget {
   /**
    * Construct a new terminal widget.
    *
    * @param options - The terminal configuration options.
    */
-  constructor(options: TerminalWidget.IOptions = {}) {
+  constructor(options: Terminal.IOptions = {}) {
     super();
     this.addClass(TERMINAL_CLASS);
 
@@ -63,11 +63,11 @@ class TerminalWidget extends Widget {
     this.node.appendChild(this._sheet);
 
     // Initialize settings.
-    let defaults = TerminalWidget.defaultOptions;
+    let defaults = Terminal.defaultOptions;
     this._fontSize = options.fontSize || defaults.fontSize;
     this._background = options.background || defaults.background;
     this._color = options.color || defaults.color;
-    this.id = `jp-TerminalWidget-${Private.id++}`;
+    this.id = `jp-Terminal-${Private.id++}`;
     this.title.label = 'Terminal';
   }
 
@@ -397,10 +397,10 @@ class TerminalWidget extends Widget {
 
 
 /**
- * The namespace for `TerminalWidget` class statics.
+ * The namespace for `Terminal` class statics.
  */
 export
-namespace TerminalWidget {
+namespace Terminal {
   /**
    * Options for the terminal widget.
    */
@@ -448,12 +448,12 @@ namespace Private {
    * Get term.js options from ITerminalOptions.
    */
   export
-  function getConfig(options: TerminalWidget.IOptions): Xterm.IOptions {
+  function getConfig(options: Terminal.IOptions): Xterm.IOptions {
     let config: Xterm.IOptions = {};
     if (options.cursorBlink !== void 0) {
       config.cursorBlink = options.cursorBlink;
     } else {
-      config.cursorBlink = TerminalWidget.defaultOptions.cursorBlink;
+      config.cursorBlink = Terminal.defaultOptions.cursorBlink;
     }
     return config;
   }

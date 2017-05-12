@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  PageConfig
+} from '@jupyterlab/coreutils';
+
+import {
   ArrayExt, IIterator, iter
 } from '@phosphor/algorithm';
 
@@ -34,8 +38,8 @@ class TerminalManager implements TerminalSession.IManager {
    * Construct a new terminal manager.
    */
   constructor(options: TerminalManager.IOptions = {}) {
-    this._baseUrl = options.baseUrl || utils.getBaseUrl();
-    this._wsUrl = options.wsUrl || utils.getWsUrl(this._baseUrl);
+    this._baseUrl = options.baseUrl || PageConfig.getBaseUrl();
+    this._wsUrl = options.wsUrl || PageConfig.getWsUrl(this._baseUrl);
     this._ajaxSettings = JSON.stringify(options.ajaxSettings || {});
 
     // Set up state handling if terminals are available.

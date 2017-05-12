@@ -455,7 +455,14 @@ class CodeConsole extends Widget {
    * Execute the code in the current prompt cell.
    */
   private _execute(cell: CodeCell): Promise<void> {
-    this._history.push(cell.model.value.text);
+    let source = cell.model.value.text;
+    this._history.push(source);
+    // If the source of the console is just "clear", clear the console as we
+    // do in IPython or QtConsole.
+    if ( source === 'clear' || source === '%clear' ) {
+      this.clear();
+      return Promise.resolve(void 0)
+    }
     cell.model.contentChanged.connect(this.update, this);
     let onSuccess = (value: KernelMessage.IExecuteReplyMsg) => {
       if (this.isDisposed) {
