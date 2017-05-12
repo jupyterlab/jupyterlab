@@ -22,8 +22,8 @@ import {
 } from '../kernel';
 
 import {
-  IAjaxSettings
-} from '../utils';
+  ServerConnection
+} from '..';
 
 import {
   DefaultSession
@@ -81,9 +81,9 @@ namespace Session {
     readonly path: string;
 
     /**
-     * The base url of the session.
+     * The server settings of the session.
      */
-    readonly baseUrl: string;
+    readonly serverSettings: ServerConnection.ISettings;
 
     /**
      * The model associated with the session.
@@ -105,11 +105,6 @@ namespace Session {
      * This is a delegate to the kernel status.
      */
     readonly status: Kernel.Status;
-
-    /**
-     * Optional default settings for ajax requests, if applicable.
-     */
-    ajaxSettings?: IAjaxSettings;
 
     /**
      * Change the session path.
@@ -152,7 +147,7 @@ namespace Session {
   /**
    * List the running sessions.
    *
-   * @param options - The options used for the request.
+   * @param settings - The server settings to use for the request.
    *
    * @returns A promise that resolves with the list of session models.
    *
@@ -164,8 +159,8 @@ namespace Session {
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
   export
-  function listRunning(options?: Session.IOptions): Promise<Session.IModel[]> {
-    return DefaultSession.listRunning(options);
+  function listRunning(settings?: ServerConnection.ISettings): Promise<Session.IModel[]> {
+    return DefaultSession.listRunning(settings);
   }
 
   /**
@@ -198,7 +193,7 @@ namespace Session {
    *
    * @param id - The id of the target session.
    *
-   * @param options - The options used to fetch the session.
+   * @param settings - The server settings.
    *
    * @returns A promise that resolves with the session model.
    *
@@ -206,14 +201,13 @@ namespace Session {
    * If the session was already started via `startNew`, the existing
    * Session object's information is used in the fulfillment value.
    *
-   * Otherwise, if `options` are given, we attempt to find to the existing
-   * session.
+   * Otherwise, we attempt to find to the existing session.
    * The promise is fulfilled when the session is found,
    * otherwise the promise is rejected.
    */
   export
-  function findById(id: string, options?: Session.IOptions): Promise<Session.IModel> {
-    return DefaultSession.findById(id, options);
+  function findById(id: string, settings?: ServerConnection.ISettings): Promise<Session.IModel> {
+    return DefaultSession.findById(id, settings);
   }
 
   /**
@@ -221,7 +215,7 @@ namespace Session {
    *
    * @param path - The path of the target session.
    *
-   * @param options - The options used to fetch the session.
+   * @param settings: The server settings.
    *
    * @returns A promise that resolves with the session model.
    *
@@ -229,7 +223,7 @@ namespace Session {
    * If the session was already started via `startNewSession`, the existing
    * Session object's info is used in the fulfillment value.
    *
-   * Otherwise, if `options` are given, we attempt to find to the existing
+   * Otherwise, we attempt to find to the existing
    * session using [listRunningSessions].
    * The promise is fulfilled when the session is found,
    * otherwise the promise is rejected.
@@ -238,8 +232,8 @@ namespace Session {
    * the promise is rejected.
    */
   export
-  function findByPath(path: string, options?: Session.IOptions): Promise<Session.IModel> {
-    return DefaultSession.findByPath(path, options);
+  function findByPath(path: string, settings?: ServerConnection.ISettings): Promise<Session.IModel> {
+    return DefaultSession.findByPath(path, settings);
   }
 
   /**
@@ -247,7 +241,7 @@ namespace Session {
    *
    * @param id - The id of the target session.
    *
-   * @param options - The options used to fetch the session.
+   * @param settigns - The server settings.
    *
    * @returns A promise that resolves with the session instance.
    *
@@ -255,8 +249,7 @@ namespace Session {
    * If the session was already started via `startNew`, the existing
    * Session object is used as the fulfillment value.
    *
-   * Otherwise, if `options` are given, we attempt to connect to the existing
-   * session.
+   * Otherwise, we attempt to connect to the existing session.
    * The promise is fulfilled when the session is ready on the server,
    * otherwise the promise is rejected.
    *
@@ -264,8 +257,8 @@ namespace Session {
    * the promise is rejected.
    */
   export
-  function connectTo(id: string, options?: Session.IOptions): Promise<ISession> {
-    return DefaultSession.connectTo(id, options);
+  function connectTo(id: string, settings?: ServerConnection.ISettings): Promise<ISession> {
+    return DefaultSession.connectTo(id, settings);
   }
 
   /**
@@ -273,13 +266,13 @@ namespace Session {
    *
    * @param id - The id of the target session.
    *
-   * @param options - The options used to fetch the session.
+   * @param settings - The server settings.
    *
    * @returns A promise that resolves when the session is shut down.
    *
    */
   export
-  function shutdown(id: string, options: Session.IOptions = {}): Promise<void> {
+  function shutdown(id: string, settings?: ServerConnection.ISettings): Promise<void> {
     return DefaultSession.shutdown(id, options);
   }
 
@@ -287,7 +280,7 @@ namespace Session {
    * The session initialization options.
    */
   export
-  interface IOptions extends JSONObject {
+  interface IOptions {
     /**
      * The path (not including name) to the session.
      */
@@ -304,14 +297,9 @@ namespace Session {
     kernelId?: string;
 
     /**
-     * The root url of the server.
+     * The server settings.
      */
-    baseUrl?: string;
-
-    /**
-     * The url to access websockets.
-     */
-    wsUrl?: string;
+    serverSettings?: ServerConnection.ISettings;
 
     /**
      * The username of the session client.
@@ -322,16 +310,6 @@ namespace Session {
      * The unique identifier for the session client.
      */
     clientId?: string;
-
-    /**
-     * The authentication token for the API.
-     */
-    token?: string;
-
-    /**
-     * The default ajax settings to use for the session.
-     */
-    ajaxSettings?: IAjaxSettings;
   }
 
   /**
@@ -354,19 +332,9 @@ namespace Session {
     runningChanged: ISignal<IManager, IModel[]>;
 
     /**
-     * The base url of the manager.
+     * The server settings for the manager.
      */
-    readonly baseUrl: string;
-
-    /**
-     * The base ws url of the manager.
-     */
-    readonly wsUrl: string;
-
-    /**
-     * The default ajax settings for the manager.
-     */
-    ajaxSettings?: IAjaxSettings;
+    serverSettings?: ServerConnection.ISettings;
 
     /**
      * The cached kernel specs.
@@ -401,9 +369,7 @@ namespace Session {
      * @returns A promise that resolves with the session instance.
      *
      * #### Notes
-     * The baseUrl and wsUrl of the options will be forced
-     * to the ones used by the manager. The ajaxSettings of the manager
-     * will be used unless overridden.
+     * The `serverSettings` of the manager will be used.
      */
     startNew(options: IOptions): Promise<ISession>;
 
@@ -433,13 +399,8 @@ namespace Session {
      * @param options - The session options to use.
      *
      * @returns A promise that resolves with the new session instance.
-     *
-     * #### Notes
-     * If options are given, the baseUrl and wsUrl will be forced
-     * to the ones used by the manager.  The ajaxSettings of the manager
-     * will be used unless overridden.
      */
-    connectTo(id: string, options?: IOptions): Promise<ISession>;
+    connectTo(id: string): Promise<ISession>;
 
     /**
      * Shut down a session by id.
