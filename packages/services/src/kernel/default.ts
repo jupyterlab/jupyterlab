@@ -1294,15 +1294,16 @@ namespace Private {
    * Delete a kernel.
    */
   export
-  function shutdownKernel(id: string, baseUrl: string, ajaxSettings?: IAjaxSettings): Promise<void> {
-    let url = URLExt.join(baseUrl, KERNEL_SERVICE_URL,
+  function shutdownKernel(id: string, settings?: ServerConnection.ISettings): Promise<void> {
+    settings = settings || ServerConnection.makeSettings();
+    let url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL,
                                 encodeURIComponent(id));
-    ajaxSettings = ajaxSettings || { };
-    ajaxSettings.method = 'DELETE';
-    ajaxSettings.dataType = 'json';
-    ajaxSettings.cache = false;
-
-    return ServerConnection.makeRequest(request, serverSettings).then(success => {
+    let request = {
+      url,
+      method: 'DELETE',
+      cache: false
+    };
+    return ServerConnection.makeRequest(request, settings).then(success => {
       if (success.xhr.status !== 204) {
         throw ServerConnection.makeError(success);
       }
@@ -1334,17 +1335,16 @@ namespace Private {
    * Get a full kernel model from the server by kernel id string.
    */
   export
-  function getKernelModel(id: string, options?: Kernel.IOptions): Promise<Kernel.IModel> {
-    options = options || {};
-    let baseUrl = options.baseUrl || PageConfig.getBaseUrl();
-    let url = URLExt.join(baseUrl, KERNEL_SERVICE_URL,
+  function getKernelModel(id: string, settings?: ServerConnection.ISettings): Promise<Kernel.IModel> {
+    settings = settings || ServerConnection.makeSettings();
+    let url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL,
                                 encodeURIComponent(id));
-    let ajaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
-    ajaxSettings.method = 'GET';
-    ajaxSettings.dataType = 'json';
-    ajaxSettings.cache = false;
-
-    return ServerConnection.makeRequest(request, serverSettings).then(success => {
+    let request = {
+      url,
+      method: 'GET',
+      cache: false
+    };
+    return ServerConnection.makeRequest(request, settings).then(success => {
       if (success.xhr.status !== 200) {
         throw ServerConnection.makeError(success);
       }
