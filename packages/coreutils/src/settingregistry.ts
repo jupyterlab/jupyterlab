@@ -118,11 +118,19 @@ class SettingRegistry {
 
   /**
    * Load an extension's settings into the setting registry.
+   *
+   * @param file - The name of the extension whose settings are being loaded.
+   *
+   * @param reload - Reload from server, ignoring cache. Defaults to false.
    */
-  load(file: string): Promise<ISettingRegistry.ISettingFile> {
+  load(file: string, reload = false): Promise<ISettingRegistry.ISettingFile> {
+    const files = this._files;
+    if (!reload && file in files) {
+      return Promise.resolve(files[file]);
+    }
     if (this._datastore) {
       return this._datastore.fetch(file)
-        .then(contents => this._files[contents.name] = contents);
+        .then(contents => files[contents.name] = contents);
     }
     return this._ready.promise.then(() => this.load(file));
   }
