@@ -95,14 +95,30 @@ class SettingRegistry {
   }
 
   /**
-   * Add a setting to the registry.
+   * Add a single setting to the registry.
+   *
+   * @param options - The setting values being added.
+   *
+   * @returns A promise that resolves when the setting has been added and saved.
+   *
    */
   add(options: ISettingRegistry.IAddOptions): Promise<void> {
-    if (this._datastore) {
-      return Promise.resolve(void 0);
+    const { file, key, level, value } = options;
+
+    if (file in this._files) {
+      const bundle = this._files[file] && this._files[file].data;
+
+      // Overwrite the relevant key.
+      if (!bundle[level]) {
+        bundle[level] = {};
+      }
+      bundle[level][key] = value;
+
+      // Save the file.
+      return this._save(file);
     }
 
-    return this._ready.promise.then(() => this.add(options));
+    return this.load(file).then(() => this.add(options));
   }
 
   /**
@@ -198,6 +214,13 @@ class SettingRegistry {
 
     this._datastore = datastore;
     this._ready.resolve(void 0);
+  }
+
+  /**
+   * Save a file that is known to exist in the registry.
+   */
+  private _save(file: string): Promise<void> {
+    return this._datastore.save(file, this._files[file]);
   }
 
   private _datastore: IDatastore<ISettingRegistry.ISettingFile, ISettingRegistry.ISettingFile> | null = null;
