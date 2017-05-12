@@ -107,6 +107,14 @@ class SettingRegistry {
 
   /**
    * Get an individual setting.
+   *
+   * @param file - The name of the extension whose setting is being retrieved.
+   *
+   * @param key - The name of the setting being retrieved.
+   *
+   * @param level - The setting level.
+   *
+   * @returns A promise that resolves when the setting is retrieved.
    */
   get(file: string, key: string, level: ISettingRegistry.Level = 'user'): Promise<JSONValue> {
     if (file in this._files) {
@@ -125,6 +133,8 @@ class SettingRegistry {
    * @param file - The name of the extension whose settings are being loaded.
    *
    * @param reload - Reload from server, ignoring cache. Defaults to false.
+   *
+   * @returns A promise that resolves with the setting file after loading.
    */
   load(file: string, reload = false): Promise<ISettingRegistry.ISettingFile> {
     const files = this._files;
@@ -143,6 +153,16 @@ class SettingRegistry {
 
   /**
    * Set an individual setting.
+   *
+   * @param file - The name of the extension whose settings are being set.
+   *
+   * @param key - The name of the setting being set.
+   *
+   * @param value - The value of the setting being set.
+   *
+   * @param level - The setting level.
+   *
+   * @returns A promise that resolves when the setting is saved.
    */
   set(file: string, key: string, value: JSONValue, level: ISettingRegistry.Level = 'user'): Promise<void> {
     if (file in this._files) {
