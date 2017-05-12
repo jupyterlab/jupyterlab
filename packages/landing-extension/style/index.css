@@ -20,17 +20,41 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  margin: 20px 0;
   width: 100%;
+  height: 100%;
+  background-color: var(--md-grey-50);
 }
 
 
-.jp-Landing-dialog {
-  padding-bottom: 12px;
+.jp-Landing-header-container {
+  width: 100%;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  background-color: var(--jp-layout-color0);
+}
+
+
+.jp-Landing-header {
+  width: 500px;
+  margin: auto;
   font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color1);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.jp-Landing-body-container {
+  width: 100%;
+  padding-top: 20px;
+}
+
+.jp-Landing-body {
+  padding-bottom: 12px;
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color1);
   margin-left: auto;
   margin-right: auto;
   text-align: center;
@@ -38,7 +62,11 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  box-shadow: 0 2px 7px 1px #BDBDBD;
+}
+
+.jp-Landing-header-wrapper {
+  width: 100%;
+  height: 120px;
 }
 
 
@@ -60,10 +88,10 @@
   font-size: var(--jp-ui-font-size2);
   width: 100%;
   margin-top: 4px;
-  font-weight: 300;
+  font-weight: 400;
 }
 
-.jp-Landing-header {
+.jp-Landing-body-header {
   padding-top: 16px;
   padding-bottom: 4px;
 }
@@ -74,14 +102,23 @@
   flex-direction: row;
   padding-left: 20px;
   padding-right: 20px;
+  width: 500px;
 }
 
 
 .jp-Landing-column {
-  padding-left: 20px;
-  padding-right: 20px;
+  height: 120px;
+  width: 120px;
+  margin: 8px;
   display: flex;
   flex-direction: column;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+}
+
+.jp-Landing-column:hover {
+  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
 }
 
 
@@ -92,7 +129,7 @@
   max-width: 56px;
   background-size: 56px 72px;
   background-repeat: no-repeat;
-
+  margin: auto;
 }
 
 .jp-Landing-image:hover {
@@ -101,7 +138,7 @@
 
 .jp-Landing-text {
   flex: 0 0 auto;
-  padding-top: 8px;
+  padding-bottom: 16px;
 }
 
 .jp-Landing-tour {
@@ -110,7 +147,6 @@
     width: 100%;
     cursor: pointer;
     padding-bottom: 14px;
-    border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
     background-position: top center;
     background-repeat: no-repeat;
 }
