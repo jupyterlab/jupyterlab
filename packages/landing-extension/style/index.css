@@ -48,7 +48,7 @@
 
 .jp-Landing-body-container {
   width: 100%;
-  padding-top: 20px;
+  padding-top: 8px;
 }
 
 .jp-Landing-body {
@@ -74,35 +74,39 @@
   flex: 0 0 50px;
   margin-left: auto;
   margin-right: auto;
-  width: 100%;
+  width: 232px;
   background-color: var(--jp-layout-color1);
   background-size: 232px 50px;
   background-repeat: no-repeat;
   background-position: center;
   margin-top: 20px;
-
 }
 
 .jp-Landing-subtitle {
+  color: var(--md-grey-600);
   background-color: var(--jp-layout-color1);
   font-size: var(--jp-ui-font-size2);
   width: 100%;
-  margin-top: 4px;
   font-weight: 400;
+  letter-spacing: .4px;
+  text-align: center;
+  padding-left: 40px;
 }
 
 .jp-Landing-body-header {
   padding-top: 16px;
   padding-bottom: 4px;
+  color: var(--md-grey-600);
+  letter-spacing: .4px;
 }
 
 
 .jp-Landing-body {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   padding-left: 20px;
   padding-right: 20px;
-  width: 500px;
 }
 
 
@@ -112,13 +116,14 @@
   margin: 8px;
   display: flex;
   flex-direction: column;
+  cursor: pointer;
   background-color: white;
   box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
   transition: all 0.3s cubic-bezier(.25,.8,.25,1);
 }
 
 .jp-Landing-column:hover {
-  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.25), 0 4px 12px rgba(0,0,0,0.22);
 }
 
 
@@ -142,11 +147,10 @@
 }
 
 .jp-Landing-tour {
-    margin-top: 14px;
     height: 14px;
     width: 100%;
     cursor: pointer;
     padding-bottom: 14px;
-    background-position: top center;
+    background-position: top right;
     background-repeat: no-repeat;
 }

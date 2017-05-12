@@ -206,7 +206,6 @@ class LandingWidget extends VDomRenderer<LandingModel> {
     );
 
     let body = h.div({ className: LANDING_BODY_CLASS },
-      bodyheader,
       activitiesList
     );
 
@@ -220,6 +219,7 @@ class LandingWidget extends VDomRenderer<LandingModel> {
 
     let landing = h.div({ className: LANDING_WRAPPER_CLASS },
       headercontainer,
+      bodyheader,
       bodycontainer
     );
     return landing;
