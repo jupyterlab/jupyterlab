@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  PageConfig
-} from '@jupyterlab/coreutils';
-
-import {
   JSONObject
 } from '@phosphor/coreutils';
 
@@ -34,8 +30,8 @@ import {
 } from './terminal';
 
 import {
-  IAjaxSettings, ajaxSettingsWithToken
-} from './utils';
+  ServerConnection
+} from './serverconnection';
 
 
 /**
@@ -46,11 +42,10 @@ class ServiceManager implements ServiceManager.IManager {
   /**
    * Construct a new services provider.
    */
-  constructor(options?: ServiceManager.IOptions) {
-    options = options || {};
-    options.wsUrl = options.wsUrl || PageConfig.getWsUrl();
-    options.baseUrl = options.baseUrl || PageConfig.getBaseUrl();
-    options.ajaxSettings = ajaxSettingsWithToken(options.ajaxSettings, options.token);
+  constructor(options: ServiceManager.IOptions = {}) {
+    this.serverSettings = (
+      options.serverSettings || ServerConnection.makeSettings()
+    );
     this._sessionManager = new SessionManager(options);
     this._contentsManager = new ContentsManager(options);
     this._terminalManager = new TerminalManager(options);
@@ -100,11 +95,9 @@ class ServiceManager implements ServiceManager.IManager {
   }
 
   /**
-   * Get the base url of the server.
+   * The server settings of the manager.
    */
-  get baseUrl(): string {
-    return this._sessionManager.baseUrl;
-  }
+  readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Get the session manager instance.
@@ -171,9 +164,9 @@ namespace ServiceManager {
     readonly specs: Kernel.ISpecModels | null;
 
     /**
-     * The base url of the manager.
+     * The server settings of the manager.
      */
-    readonly baseUrl: string;
+    readonly serverSettings: ServerConnection.ISettings;
 
     /**
      * The session manager for the manager.
@@ -205,25 +198,10 @@ namespace ServiceManager {
    * The options used to create a service manager.
    */
   export
-  interface IOptions extends JSONObject {
+  interface IOptions {
     /**
-     * The base url of the server.
+     * The server settings of the manager.
      */
-    baseUrl?: string;
-
-    /**
-     * The base ws url of the server.
-     */
-    wsUrl?: string;
-
-    /**
-     * The authentication token for the API.
-     */
-    token?: string;
-
-    /**
-     * The ajax settings for the manager.
-     */
-    ajaxSettings?: IAjaxSettings;
+    readonly serverSettings?: ServerConnection.ISettings;
   }
 }
