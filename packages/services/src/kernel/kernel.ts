@@ -448,8 +448,8 @@ namespace Kernel {
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
   export
-  function listRunning(settings?: ServerConnection.ISettings): Promise<ReadonlyArray<Kernel.IModel>> {
-    return DefaultKernel.listRunning(options);
+  function listRunning(settings?: ServerConnection.ISettings): Promise<Kernel.IModel[]> {
+    return DefaultKernel.listRunning(settings);
   }
 
   /**
@@ -497,7 +497,7 @@ namespace Kernel {
    */
   export
   function connectTo(id: string, settings?: ServerConnection.ISettings): Promise<IKernel> {
-    return DefaultKernel.connectTo(id, options);
+    return DefaultKernel.connectTo(id, settings);
   }
 
   /**
@@ -518,7 +518,7 @@ namespace Kernel {
    * The options object used to initialize a kernel.
    */
   export
-  interface IOptions extends JSONObject {
+  interface IOptions {
     /**
      * The kernel type (e.g. python3).
      */

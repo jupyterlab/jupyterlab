@@ -238,12 +238,7 @@ class KernelManager implements Kernel.IManager {
    * Refresh the specs.
    */
   private _refreshSpecs(): Promise<void> {
-    let options = {
-      baseUrl: this._baseUrl,
-      token: this._token,
-      ajaxSettings: this.ajaxSettings
-    };
-    return Kernel.getSpecs(options).then(specs => {
+    return Kernel.getSpecs(this.serverSettings).then(specs => {
       if (!JSONExt.deepEqual(specs, this._specs)) {
         this._specs = specs;
         this._specsChanged.emit(specs);
@@ -255,7 +250,7 @@ class KernelManager implements Kernel.IManager {
    * Refresh the running sessions.
    */
   private _refreshRunning(): Promise<void> {
-    return Kernel.listRunning(this._getOptions({})).then(running => {
+    return Kernel.listRunning(this.serverSettings).then(running => {
       this._isReady = true;
       if (!JSONExt.deepEqual(running, this._running)) {
         this._running = running.slice();

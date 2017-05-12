@@ -243,40 +243,6 @@ function makeAjaxError(success: IAjaxSuccess, throwError?: string): IAjaxError {
 
 
 /**
- * Try to load an object from a module or a registry.
- *
- * Try to load an object from a module asynchronously if a module
- * is specified, otherwise tries to load an object from the global
- * registry, if the global registry is provided.
- */
-export
-function loadObject(name: string, moduleName: string, registry?: { [key: string]: any }): Promise<any> {
-  return new Promise((resolve, reject) => {
-    // Try loading the view module using require.js
-    if (moduleName) {
-      if (typeof requirejs === 'undefined') {
-        throw new Error('requirejs not found');
-      }
-      requirejs([moduleName], (mod: any) => {
-        if (mod[name] === void 0) {
-          let msg = `Object '${name}' not found in module '${moduleName}'`;
-          reject(new Error(msg));
-        } else {
-          resolve(mod[name]);
-        }
-      }, reject);
-    } else {
-      if (registry && registry[name]) {
-        resolve(registry[name]);
-      } else {
-        reject(new Error(`Object '${name}' not found in registry`));
-      }
-    }
-  });
-};
-
-
-/**
  * Add token to ajaxSettings.requestHeaders if defined.
  * Always returns a copy of ajaxSettings, and a dict.
  */

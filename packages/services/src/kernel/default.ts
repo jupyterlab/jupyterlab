@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  PageConfig, URLExt, uuid
+  URLExt, uuid
 } from '@jupyterlab/coreutils';
 
 import {
@@ -10,7 +10,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONExt, JSONObject, PromiseDelegate
+  JSONObject, PromiseDelegate
 } from '@phosphor/coreutils';
 
 import {
@@ -23,7 +23,7 @@ import {
 
 import {
   ServerConnection
-} from '../utils';
+} from '..';
 
 import {
   CommHandler
@@ -57,6 +57,9 @@ const KERNEL_SERVICE_URL = 'api/kernels';
  * The url for the kernelspec service.
  */
 const KERNELSPEC_SERVICE_URL = 'api/kernelspecs';
+
+// Stub for requirejs.
+declare var requirejs: any;
 
 
 /**
@@ -204,12 +207,11 @@ class DefaultKernel implements Kernel.IKernel {
    * Clone the current kernel with a new clientId.
    */
   clone(): Kernel.IKernel {
-    let options: Kernel.IOptions = {
+    return new DefaultKernel({
       name: this._name,
       username: this._username,
       serverSettings: this.serverSettings
-    };
-    return new DefaultKernel(options, this._id);
+    }, this._id);
   }
 
   /**
@@ -352,9 +354,7 @@ class DefaultKernel implements Kernel.IKernel {
     }
     this._clearState();
     return this.ready.then(() => {
-      return Private.shutdownKernel(
-        this.id, this.serverSettings
-      );
+      return Private.shutdownKernel(this.id, this.serverSettings);
     });
   }
 
@@ -805,7 +805,7 @@ class DefaultKernel implements Kernel.IKernel {
    */
   private _handleCommOpen(msg: KernelMessage.ICommOpenMsg): void {
     let content = msg.content;
-    let promise = utils.loadObject(content.target_name, content.target_module,
+    let promise = Private.loadObject(content.target_name, content.target_module,
       this._targetRegistry).then(target => {
         let comm = new CommHandler(
           content.target_name,
@@ -978,7 +978,7 @@ namespace DefaultKernel {
    */
   export
   function listRunning(settings?: ServerConnection.ISettings): Promise<Kernel.IModel[]> {
-    return Private.listRunning(options);
+    return Private.listRunning(settings);
   }
 
   /**
@@ -999,7 +999,6 @@ namespace DefaultKernel {
    */
   export
   function startNew(options?: Kernel.IOptions): Promise<Kernel.IKernel> {
-    options = options || {};
     return Private.startNew(options);
   }
 
@@ -1026,7 +1025,7 @@ namespace DefaultKernel {
    */
   export
   function connectTo(id: string, settings?: ServerConnection.ISettings): Promise<Kernel.IKernel> {
-    return Private.connectTo(id, options);
+    return Private.connectTo(id, settings);
   }
 
   /**
@@ -1040,7 +1039,7 @@ namespace DefaultKernel {
    */
   export
   function shutdown(id: string, settings?: ServerConnection.ISettings): Promise<void> {
-    return Private.shutdown(id, options);
+    return Private.shutdownKernel(id, settings);
   }
 }
 
@@ -1082,7 +1081,8 @@ namespace Private {
    */
   export
   function findSpecs(settings?: ServerConnection.ISettings): Promise<Kernel.ISpecModels> {
-    let promise = specs[options.baseUrl];
+    settings = settings || ServerConnection.makeSettings();
+    let promise = specs[settings.baseUrl];
     if (promise) {
       return promise;
     }
@@ -1113,7 +1113,7 @@ namespace Private {
         throw ServerConnection.makeError(success, err.message);
       }
     });
-    Private.specs[baseUrl] = promise;
+    Private.specs[settings.baseUrl] = promise;
     return promise;
   }
 
@@ -1175,8 +1175,8 @@ namespace Private {
    * Start a new kernel.
    */
   export
-  function startNew(settings?: ServerConnection.ISettings): Promise<Kernel.IKernel> {
-    settings = settings || ServerConnection.makeSettings();
+  function startNew(options: Kernel.IOptions = {}): Promise<Kernel.IKernel> {
+    let settings = options.serverSettings || ServerConnection.makeSettings();
     let request = {
       url: URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL),
       method: 'POST',
@@ -1188,9 +1188,11 @@ namespace Private {
         throw ServerConnection.makeError(success);
       }
       validate.validateModel(success.data);
-      options = JSONExt.deepCopy(options) as Kernel.IOptions;
-      options.name = success.data.name;
-      return new DefaultKernel(options, success.data.id);
+      return new DefaultKernel({
+        ...options,
+        name: success.data.name,
+        serverSettings: settings
+      }, success.data.id);
     }, onKernelError);
   }
 
@@ -1211,6 +1213,7 @@ namespace Private {
    */
   export
   function connectTo(id: string, settings?: ServerConnection.ISettings): Promise<Kernel.IKernel> {
+    settings = settings || ServerConnection.makeSettings();
     let kernel = find(runningKernels, value => {
       return value.id === id;
     });
@@ -1219,20 +1222,13 @@ namespace Private {
     }
 
     return getKernelModel(id, settings).then(model => {
-      options = JSONExt.deepCopy(options) as Kernel.IOptions;
-      options.name = model.name;
-      return new DefaultKernel(options, id);
+      return new DefaultKernel({
+        name: model.name,
+        serverSettings: settings
+        }, id);
     }).catch(() => {
       throw new Error(`No running kernel with id: ${id}`);
     });
-  }
-
-  /**
-   * Shut down a kernel by id.
-   */
-  export
-  function shutdown(id: string, settings?: ServerConnection.ISettings): Promise<void> {
-    return shutdownKernel(id, settings);
   }
 
   /**
@@ -1275,7 +1271,7 @@ namespace Private {
     }
     settings = settings || ServerConnection.makeSettings();
     let url = URLExt.join(
-      baseUrl, KERNEL_SERVICE_URL,
+      settings.baseUrl, KERNEL_SERVICE_URL,
       encodeURIComponent(kernel.id), 'interrupt'
     );
     let request = {
@@ -1308,7 +1304,7 @@ namespace Private {
         throw ServerConnection.makeError(success);
       }
       killKernels(id);
-    }, (error: utils.IAjaxError) => {
+    }, error => {
       if (error.xhr.status === 404) {
         let response = JSON.parse(error.xhr.responseText) as any;
         console.warn(response['message']);
@@ -1378,8 +1374,8 @@ namespace Private {
    * Handle an error on a kernel Ajax call.
    */
   export
-  function onKernelError(error: utils.IAjaxError): Promise<any> {
-    let text = (error.throwError ||
+  function onKernelError(error: ServerConnection.IError): Promise<any> {
+    let text = (error.message ||
                 error.xhr.statusText ||
                 error.xhr.responseText);
     let msg = `API request failed: ${text}`;
@@ -1404,4 +1400,37 @@ namespace Private {
       };
     });
   }
+
+  /**
+   * Try to load an object from a module or a registry.
+   *
+   * Try to load an object from a module asynchronously if a module
+   * is specified, otherwise tries to load an object from the global
+   * registry, if the global registry is provided.
+   */
+  export
+  function loadObject(name: string, moduleName: string, registry?: { [key: string]: any }): Promise<any> {
+    return new Promise((resolve, reject) => {
+      // Try loading the view module using require.js
+      if (moduleName) {
+        if (typeof requirejs === 'undefined') {
+          throw new Error('requirejs not found');
+        }
+        requirejs([moduleName], (mod: any) => {
+          if (mod[name] === void 0) {
+            let msg = `Object '${name}' not found in module '${moduleName}'`;
+            reject(new Error(msg));
+          } else {
+            resolve(mod[name]);
+          }
+        }, reject);
+      } else {
+        if (registry && registry[name]) {
+          resolve(registry[name]);
+        } else {
+          reject(new Error(`Object '${name}' not found in registry`));
+        }
+      }
+    });
+  };
 }
