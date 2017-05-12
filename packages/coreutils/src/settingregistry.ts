@@ -101,7 +101,9 @@ class SettingRegistry {
   /**
    * A signal that emits name of a setting file when one changes.
    */
-  readonly fileChanged: ISignal<this, string> = new Signal<this, string>(this);
+  get fileChanged(): ISignal<this, string> {
+    return this._fileChanged;
+  }
 
   /**
    * Get an individual setting.
@@ -199,14 +201,27 @@ class SettingRegistry {
   }
 
   /**
+   * Upload a setting file for an extension.
+   *
+   * @param file - The file being uploaded.
+   *
+   * @returns A promise that resolves when the file has been saved.
+   */
+  upload(file: ISettingRegistry.IFile): Promise<void> {
+    this._files[file.name] = file;
+    return this._save(file.name);
+  }
+
+  /**
    * Save a file that is known to exist in the registry.
    */
   private _save(file: string): Promise<void> {
     return this._datastore.save(file, this._files[file])
-      .then(() => { (this.fileChanged as Signal<this, string>).emit(file); });
+      .then(() => { this._fileChanged.emit(file); });
   }
 
   private _datastore: IDatastore<ISettingRegistry.IFile, ISettingRegistry.IFile> | null = null;
+  private _fileChanged = new Signal<this, string>(this);
   private _files: { [name: string]: ISettingRegistry.IFile } = Object.create(null);
   private _ready = new PromiseDelegate<void>();
 }
