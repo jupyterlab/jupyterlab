@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject, JSONValue, PromiseDelegate
+  JSONExt, JSONObject, JSONValue, PromiseDelegate
 } from '@phosphor/coreutils';
 
 import {
@@ -102,6 +102,17 @@ class SettingRegistry {
   }
 
   /**
+   * Returns a list of setting files held in the registry.
+   */
+  files(): ISettingRegistry.IFile[] {
+    const files = this._files;
+    return Object.keys(files).map(key => {
+      const file = files[key];
+      return JSONExt.deepCopy(file) as ISettingRegistry.IFile;
+    });
+  }
+
+  /**
    * Get an individual setting.
    *
    * @param file - The name of the extension whose setting is being retrieved.
@@ -115,9 +126,9 @@ class SettingRegistry {
   get(file: string, key: string, level: ISettingRegistry.Level = LEVEL): Promise<JSONValue> {
     if (file in this._files) {
       const bundle = this._files[file] && this._files[file].data;
-      const value = bundle && bundle[level] && bundle[level][key];
+      const value = bundle && bundle[level] && bundle[level][key] || null;
 
-      return Promise.resolve(JSON.parse(JSON.stringify(value)));
+      return Promise.resolve(JSONExt.deepCopy(value));
     }
 
     return this.load(file).then(() => this.get(file, key, level));
@@ -136,7 +147,7 @@ class SettingRegistry {
     const files = this._files;
 
     if (!reload && file in files) {
-      return Promise.resolve(JSON.parse(JSON.stringify(files[file])));
+      return Promise.resolve(JSONExt.deepCopy(files[file]));
     }
 
     if (this._datastore) {
