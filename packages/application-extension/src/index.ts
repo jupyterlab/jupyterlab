@@ -13,6 +13,10 @@ import {
   ISettingRegistry, PageConfig
 } from '@jupyterlab/coreutils';
 
+import {
+  IDocumentManager
+} from '@jupyterlab/docmanager';
+
 
 /**
  * The command IDs used by the application plugin.
@@ -45,8 +49,8 @@ namespace CommandIDs {
  */
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.main',
-  requires: [ICommandPalette],
-  activate: (app: JupyterLab, palette: ICommandPalette) => {
+  requires: [ICommandPalette, IDocumentManager],
+  activate: (app: JupyterLab, palette: ICommandPalette, manager: IDocumentManager) => {
     // Set the datastore required by the application's setting registry.
     app.settings.setDB({
       fetch: (file: string): Promise<ISettingRegistry.IFile | null> => {
@@ -60,6 +64,7 @@ const plugin: JupyterLabPlugin<void> = {
       }
     });
 
+    console.log('manager', manager);
     app.settings.load(plugin.id).then(file => {
       console.log(file.name, file.data);
     }).catch(reason => {

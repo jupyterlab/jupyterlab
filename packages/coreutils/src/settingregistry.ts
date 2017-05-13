@@ -83,7 +83,6 @@ export
 interface ISettingRegistry extends SettingRegistry {}
 
 
-
 /**
  * The default concrete implementation of a setting registry.
  */
@@ -143,6 +142,32 @@ class SettingRegistry {
   }
 
   /**
+   * Remove a single setting in the registry.
+   *
+   * @param file - The name of the extension whose setting is being removed.
+   *
+   * @param key - The name of the setting being removed.
+   *
+   * @param level - The setting level.
+   *
+   * @returns A promise that resolves when the setting is removed.
+   */
+  remove(file: string, key: string, level: ISettingRegistry.Level = 'user'): Promise<void> {
+    if (!(file in this._files)) {
+      return Promise.resolve(void 0);
+    }
+
+    const bundle =  this._files[file].data;
+    if (!bundle[level]) {
+      return Promise.resolve(void 0);
+    }
+
+    delete bundle[level][key];
+
+    return this._save(file);
+  }
+
+  /**
    * Set a single setting in the registry.
    *
    * @param item - The setting item being set.
@@ -158,15 +183,13 @@ class SettingRegistry {
     }
 
     const { key, level, value } = item;
-    const bundle = this._files[file] && this._files[file].data;
+    const bundle = this._files[file].data;
 
-    // Overwrite the relevant key.
     if (!bundle[level]) {
       bundle[level] = {};
     }
     bundle[level][key] = value;
 
-    // Save the file.
     return this._save(file);
   }
 
