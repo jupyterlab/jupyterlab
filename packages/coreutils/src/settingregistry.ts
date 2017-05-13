@@ -15,6 +15,12 @@ import {
 
 
 /**
+ * The default level that is used when level is unspecified in a request.
+ */
+const LEVEL: ISettingRegistry.Level = 'user';
+
+
+/**
  * A namespace for setting registry interfaces.
  */
 export
@@ -106,12 +112,12 @@ class SettingRegistry {
    *
    * @returns A promise that resolves when the setting is retrieved.
    */
-  get(file: string, key: string, level: ISettingRegistry.Level = 'user'): Promise<JSONValue> {
+  get(file: string, key: string, level: ISettingRegistry.Level = LEVEL): Promise<JSONValue> {
     if (file in this._files) {
       const bundle = this._files[file] && this._files[file].data;
       const value = bundle && bundle[level] && bundle[level][key];
 
-      return Promise.resolve(value);
+      return Promise.resolve(JSON.parse(JSON.stringify(value)));
     }
 
     return this.load(file).then(() => this.get(file, key, level));
@@ -130,7 +136,7 @@ class SettingRegistry {
     const files = this._files;
 
     if (!reload && file in files) {
-      return Promise.resolve(files[file]);
+      return Promise.resolve(JSON.parse(JSON.stringify(files[file])));
     }
 
     if (this._datastore) {
@@ -152,7 +158,7 @@ class SettingRegistry {
    *
    * @returns A promise that resolves when the setting is removed.
    */
-  remove(file: string, key: string, level: ISettingRegistry.Level = 'user'): Promise<void> {
+  remove(file: string, key: string, level: ISettingRegistry.Level = LEVEL): Promise<void> {
     if (!(file in this._files)) {
       return Promise.resolve(void 0);
     }
@@ -227,7 +233,7 @@ class SettingRegistry {
   }
 
   /**
-   * Save a file that is known to exist in the registry.
+   * Save a file in the registry.
    */
   private _save(file: string): Promise<void> {
     return this._datastore.save(file, this._files[file])
