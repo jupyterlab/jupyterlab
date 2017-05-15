@@ -16,7 +16,11 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  KernelManager, Kernel, ServerConnection
+  KernelManager, Kernel
+} from '../../../lib/kernel';
+
+import {
+  ServerConnection
 } from '../../../lib';
 
 import {

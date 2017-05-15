@@ -1,4 +1,5 @@
 {
     "foo": "bar",
-    "terminalsAvailable": "True"
+    "terminalsAvailable": "True",
+    "baseUrl": "http://localhost:8888"
 }
