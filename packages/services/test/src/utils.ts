@@ -35,6 +35,13 @@ import {
 declare var global: any;
 
 global.WebSocket = WebSocket;
+if (typeof window === 'undefined') {
+  global.XMLHttpRequest = MockXMLHttpRequest;
+  global.TextEncoder = encoding.TextEncoder;
+  global.TextDecoder = encoding.TextDecoder;
+} else {
+  (window as any).XMLHttpRequest = MockXMLHttpRequest;
+}
 
 
 /**
@@ -158,13 +165,6 @@ class RequestHandler {
    * Create a new RequestHandler.
    */
   constructor(onRequest?: (request: MockXMLHttpRequest) => void) {
-    if (typeof window === 'undefined') {
-      global.XMLHttpRequest = MockXMLHttpRequest;
-      global.TextEncoder = encoding.TextEncoder;
-      global.TextDecoder = encoding.TextDecoder;
-    } else {
-      (window as any).XMLHttpRequest = MockXMLHttpRequest;
-    }
     MockXMLHttpRequest.requests = [];
 
     if (!onRequest) {

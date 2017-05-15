@@ -150,7 +150,7 @@ describe('contents', () => {
     });
 
     it('should get the url of a file', () => {
-      let contents = new ContentsManager(settings);
+      let contents = new ContentsManager({ serverSettings: settings });
       let test1 = contents.getDownloadUrl('bar.txt');
       let test2 = contents.getDownloadUrl('fizz/buzz/bar.txt');
       let test3 = contents.getDownloadUrl('/bar.txt');
@@ -162,14 +162,14 @@ describe('contents', () => {
     });
 
     it('should encode characters', () => {
-      let contents = new ContentsManager(settings);
+      let contents = new ContentsManager({ serverSettings: settings });
       return contents.getDownloadUrl('b ar?3.txt').then(url => {
         expect(url).to.be('http://foo/files/b%20ar%3F3.txt');
       });
     });
 
     it('should not handle relative paths', () => {
-      let contents = new ContentsManager(settings);
+      let contents = new ContentsManager({ serverSettings: settings });
       return contents.getDownloadUrl('fizz/../bar.txt').then(url => {
         expect(url).to.be('http://foo/files/fizz/../bar.txt');
       });
