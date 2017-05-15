@@ -157,7 +157,7 @@ class DefaultSession implements Session.ISession {
    * Test whether the session has been disposed.
    */
   get isDisposed(): boolean {
-    return this._options === null;
+    return this._isDisposed === true;
   }
 
   /**
@@ -204,7 +204,7 @@ class DefaultSession implements Session.ISession {
     if (this.isDisposed) {
       return;
     }
-    this._options = null;
+    this._isDisposed = true;
     if (this._kernel) {
       this._kernel.dispose();
     }
@@ -310,16 +310,6 @@ class DefaultSession implements Session.ISession {
   }
 
   /**
-   * Get the options used to create a new kernel.
-   */
-  private _getKernelOptions(): Kernel.IOptions {
-    return {
-      username: this.kernel.username,
-      serverSettings: this.serverSettings
-    };
-  }
-
-  /**
    * Send a PATCH to the server, updating the session path or the kernel.
    */
   private _patch(data: string): Promise<Session.IModel> {
@@ -353,7 +343,7 @@ class DefaultSession implements Session.ISession {
   private _path = '';
   private _kernel: Kernel.IKernel = null;
   private _uuid = '';
-  private _options: Session.IOptions = null;
+  private _isDisposed = false;
   private _updating = false;
   private _kernelChanged = new Signal<this, Kernel.IKernelConnection>(this);
   private _statusChanged = new Signal<this, Kernel.Status>(this);
