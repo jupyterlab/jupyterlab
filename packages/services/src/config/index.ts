@@ -148,7 +148,7 @@ class DefaultConfigSection implements IConfigSection {
     let request = {
       url: this._url,
       method: 'PATCH',
-      data = JSON.stringify(newdata)
+      data: JSON.stringify(newdata)
     };
     return ServerConnection.makeRequest(request, this.serverSettings).then(success => {
       if (success.xhr.status !== 200) {
