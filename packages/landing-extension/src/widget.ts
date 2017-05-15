@@ -24,9 +24,12 @@ import {
 const LANDING_WRAPPER_CLASS = 'jp-Landing-wrapper';
 
 /**
- * The class name added to the dialog.
+ * The class name added to the landing header section.
  */
-const LANDING_DIALOG_CLASS = 'jp-Landing-dialog';
+const LANDING_HEADER_CLASS = 'jp-Landing-header';
+
+
+const LANDING_HEADER_CONTAINER_CLASS = 'jp-Landing-header-container';
 
 /**
  * The class name for the JupyterLab icon from default-theme.
@@ -51,13 +54,15 @@ const TOUR_ICON_CLASS = 'jp-Landing-tour';
 /**
  * The class name added to the header text.
  */
-const LANDING_HEADER_CLASS = 'jp-Landing-header';
+const LANDING_BODY_HEADER_CLASS = 'jp-Landing-body-header';
 
 /**
  * The class name added to the dialog body.
  */
 const LANDING_BODY_CLASS = 'jp-Landing-body';
 
+
+const LANDING_BODY_CONTAINER_CLASS = 'jp-Landing-body-container';
 /**
  * The class name added to the column of the dialog.
  */
@@ -185,23 +190,39 @@ class LandingWidget extends VDomRenderer<LandingModel> {
       {className: LANDING_SUBTITLE_CLASS},
       this.model.previewMessage
     );
+
     let tour = h.span({
       className: TOUR_ICON_CLASS,
       dataset: this._linker.populateVNodeDataset('about-jupyterlab:open', {})
     });
-    let header = h.span({
-      className: LANDING_HEADER_CLASS
+    let bodyheader = h.span({
+      className: LANDING_BODY_HEADER_CLASS
     }, this.model.headerText);
-    let body = h.div({ className: LANDING_BODY_CLASS }, activitiesList);
 
-    let dialog = h.div({ className: LANDING_DIALOG_CLASS },
+    let header = h.div({ className: LANDING_HEADER_CLASS},
       logo,
       subtitle,
-      tour,
-      header,
+      tour
+    );
+
+    let body = h.div({ className: LANDING_BODY_CLASS },
+      activitiesList
+    );
+
+    let headercontainer = h.div({className: LANDING_HEADER_CONTAINER_CLASS},
+      header
+    );
+
+    let bodycontainer = h.div({ className: LANDING_BODY_CONTAINER_CLASS},
       body
     );
-    return h.div({ className: LANDING_WRAPPER_CLASS }, dialog);
+
+    let landing = h.div({ className: LANDING_WRAPPER_CLASS },
+      headercontainer,
+      bodyheader,
+      bodycontainer
+    );
+    return landing;
   }
 
   private _linker: ICommandLinker;
