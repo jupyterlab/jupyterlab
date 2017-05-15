@@ -108,13 +108,6 @@ namespace ServerConnection {
     cache?: boolean;
 
     /**
-     * The number of milliseconds a request can take before automatically
-     * being terminated.  A value of 0 (which is the default) means there is
-     * no timeout.
-     */
-    timeout?: number;
-
-    /**
      * A mapping of request headers, used via `setRequestHeader`.
      */
     headers?: { [key: string]: string; };
@@ -151,6 +144,11 @@ namespace ServerConnection {
      * The password associated with the request.  Defaults to `''`.
      */
     readonly password: string;
+
+    /**
+     * The timeout associated with requests.  Defaults to `0`.
+     */
+    readonly timeout: number;
 
     /**
      * The optional token for ajax requests. Defaults to PageConfig `token`.
@@ -256,6 +254,7 @@ namespace Private {
       user: options.user || '',
       password: options.password || '',
       withCredentials: !!options.withCredentials,
+      timeout: options.timeout || 0,
       token: options.token || PageConfig.getOption('token'),
       requestHeaders: { ...options.requestHeaders || {} },
       xhr: options.xhr || XMLHttpRequest,
@@ -274,9 +273,7 @@ namespace Private {
       xhr.setRequestHeader('Content-Type', 'application/json');
     }
 
-    if (request.timeout !== void 0) {
-      xhr.timeout = request.timeout;
-    }
+    xhr.timeout = settings.timeout;
     if (settings.withCredentials) {
       xhr.withCredentials = true;
     }
