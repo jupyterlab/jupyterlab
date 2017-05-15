@@ -11,14 +11,9 @@ export PATH="$HOME/miniconda/bin:$PATH"
 
 
 if [[ $GROUP == tests ]]; then
-    # Make sure we can start and kill the lab server
-    jupyter lab --no-browser &
-    TASK_PID=$!
-    # Make sure the task is running
-    ps -p $TASK_PID || exit 1
-    sleep 5
-    kill $TASK_PID
-    wait $TASK_PID
+    # Make sure we can successfully load the page
+    pip install selenium
+    python selenium_check.py
 
     # Run the JS and python tests
     py.test
