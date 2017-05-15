@@ -640,7 +640,7 @@ namespace Private {
         return;
       }
       if (err.xhr.status === 410) {
-        err.throwError = 'The kernel was deleted but the session was not';
+        err.message = 'The kernel was deleted but the session was not';
       }
       return onSessionError(err);
     });

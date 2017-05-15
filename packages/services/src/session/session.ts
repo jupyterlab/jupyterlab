@@ -81,11 +81,6 @@ namespace Session {
     readonly path: string;
 
     /**
-     * The type of the session.
-     */
-    readonly type: string;
-
-    /**
      * The server settings of the session.
      */
     readonly serverSettings: ServerConnection.ISettings;
@@ -461,8 +456,10 @@ namespace Session {
      * The unique identifier for the session client.
      */
     readonly id: string;
-    readonly type: string;
-    readonly path: string;
+    readonly notebook?: {
+      [ key: string ]: string;
+      path: string;
+    };
     readonly kernel?: Kernel.IModel;
   }
 }

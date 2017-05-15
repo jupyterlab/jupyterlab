@@ -79,6 +79,7 @@ interface IClientSession extends IDisposable {
    * The current path associated with the client sesssion.
    */
   readonly path: string;
+
   /**
    * The current name associated with the client sesssion.
    */

@@ -510,7 +510,7 @@ class ContentsManager implements Contents.IManager {
         if (error.xhr.status === 400) {
           let err = JSON.parse(error.xhr.response);
           if (err.message) {
-            error.throwError = err.message;
+            error.message = err.message;
           }
         }
         return Promise.reject(error);
