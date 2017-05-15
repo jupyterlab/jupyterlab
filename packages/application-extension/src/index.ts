@@ -154,23 +154,29 @@ namespace Private {
    */
   export
   function setDB(app: JupyterLab, manager: IDocumentManager): void {
-    const ready = manager.services.ready;
-    const root = '/';
     const folder = '.settings';
     const extension = PathExt.normalizeExtension('json');
+    const levels: ISettingRegistry.Level[] = ['system', 'user'];
+    const ready = manager.services.ready;
+    const root = '/';
+
     app.settings.setDB({
       fetch: (id: string): Promise<ISettingRegistry.IPlugin> => {
         const name = `${id}${extension}`;
-        const system = PathExt.resolve(root, folder, 'system', name);
-        const user = PathExt.resolve(root, folder, 'user', name);
+
         return ready.then(() => {
+
           const contents = manager.services.contents;
-          return Promise.all([
-            contents.get(system).catch(() => null),
-            contents.get(user).catch(() => null)
-          ]).then((files: Contents.IModel[]) => {
+          const requests = Promise.all(levels.map(level => {
+            const path = PathExt.resolve(root, folder, level, name);
+
+            return contents.get(path).catch(() => null);
+          }));
+
+          return requests.then((files: Contents.IModel[]) => {
             const result: ISettingRegistry.IPlugin = { id, data: {} };
-            ['system', 'user'].forEach((level: ISettingRegistry.Level, index) => {
+
+            levels.forEach((level, index) => {
               if (files[index]) {
                 try {
                   result.data[level] = JSON.parse(files[index].content);
@@ -180,6 +186,7 @@ namespace Private {
                 }
               }
             });
+
             return result;
           });
         });
