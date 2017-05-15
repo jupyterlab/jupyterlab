@@ -21,6 +21,7 @@ if [[ $GROUP == tests ]]; then
     wait $TASK_PID
 
     # Run the JS and python tests
+    npm run build:test
     npm run test:services || npm run test:services
     py.test
     npm run clean
