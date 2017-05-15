@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  ISettingRegistry, PageConfig
+  ISettingRegistry, PageConfig, PathExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -40,33 +40,15 @@ namespace CommandIDs {
 
 
 /**
- * The extension ID.
- */
-
-
-/**
  * The main extension.
  */
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.main',
   requires: [ICommandPalette, IDocumentManager],
   activate: (app: JupyterLab, palette: ICommandPalette, manager: IDocumentManager) => {
-    // Set the datastore required by the application's setting registry.
-    app.settings.setDB({
-      fetch: (file: string): Promise<ISettingRegistry.IPlugin | null> => {
-        return Promise.reject(new Error('fetch not implemented'));
-      },
-      remove: (file: string): Promise<void> => {
-        return Promise.reject(new Error('remove not implemented'));
-      },
-      save: (file: string, value: ISettingRegistry.IPlugin): Promise<void> => {
-        return Promise.reject(new Error('save not implemented'));
-      }
-    });
-
-    console.log('manager', manager);
-    app.settings.load(plugin.id).then(file => {
-      console.log(file.name, file.data);
+    Private.setDB(app, manager);
+    app.settings.load(plugin.id).then(settings => {
+      console.log(settings.id, settings.data);
     }).catch(reason => {
       console.warn('settings load failure', reason);
     });
@@ -157,3 +139,46 @@ const plugin: JupyterLabPlugin<void> = {
  * Export the plugin as default.
  */
 export default plugin;
+
+
+/**
+ * A namespace for private module data.
+ */
+namespace Private {
+  /**
+   * Set the datastore for the application setting registry.
+   */
+  export
+  function setDB(app: JupyterLab, manager: IDocumentManager): void {
+    const ready = manager.services.ready;
+    const root = '/';
+    const folder = '.settings';
+    const extension = PathExt.normalizeExtension('json');
+    app.settings.setDB({
+      fetch: (file: string): Promise<ISettingRegistry.IPlugin> => {
+        const name = `${file}${extension}`;
+        const system = PathExt.resolve(root, folder, 'system', name);
+        const user = PathExt.resolve(root, folder, 'user', name);
+        return ready.then(() => {
+          const contents = manager.services.contents;
+          const files = Promise.all([contents.get(system), contents.get(user)]);
+          return files.then(([system, user]) => {
+            return {
+              id: file,
+              data: { system, user }
+            };
+          }).catch(reason => {
+            console.warn(`Failed to fetch settings for: ${file}`, reason);
+            return { id: file, data: null };
+          });
+        });
+      },
+      remove: (file: string): Promise<void> => {
+        return Promise.reject(new Error('remove not implemented'));
+      },
+      save: (file: string, value: ISettingRegistry.IPlugin): Promise<void> => {
+        return Promise.reject(new Error('save not implemented'));
+      }
+    });
+  }
+}
