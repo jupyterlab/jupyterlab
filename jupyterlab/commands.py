@@ -203,14 +203,14 @@ def clean(app_dir=None):
             shutil.rmtree(target)
 
 
-def build(app_dir=None, name=None, version=None, publicPath=None):
+def build(app_dir=None, name=None, version=None):
     """Build the JupyterLab application."""
     # Set up the build directory.
     app_dir = get_app_dir(app_dir)
     if app_dir == here:
         raise ValueError('Cannot build extensions in the core app')
 
-    _ensure_package(app_dir, name, version, publicPath)
+    _ensure_package(app_dir, name, version)
     staging = pjoin(app_dir, 'staging')
 
     # Make sure packages are installed.
