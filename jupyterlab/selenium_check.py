@@ -29,6 +29,7 @@ class TestApp(NotebookApp):
 
     default_url = Unicode('/lab')
     open_browser = Bool(False)
+    base_url = '/foo'
 
     def start(self):
         self.io_loop = ioloop.IOLoop.current()
