@@ -16,8 +16,8 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  KernelManager, Kernel
-} from '../../../lib/kernel';
+  KernelManager, Kernel, ServerConnection
+} from '../../../lib';
 
 import {
   KernelTester, KERNEL_OPTIONS, PYTHON_SPEC, KERNELSPECS
@@ -67,33 +67,13 @@ describe('kernel/manager', () => {
 
     });
 
-    describe('#baseUrl', () => {
+    describe('#serverSettings', () => {
 
-      it('should get the base url of the server', () => {
+      it('should get the server settings', () => {
         manager.dispose();
-        manager = new KernelManager({ baseUrl: 'foo' });
-        expect(manager.baseUrl).to.be('foo');
-      });
-
-    });
-
-    describe('#wsUrl', () => {
-
-      it('should get the ws url of the server', () => {
-        manager.dispose();
-        manager = new KernelManager({ wsUrl: 'bar' });
-        expect(manager.wsUrl).to.be('bar');
-      });
-
-    });
-
-    describe('#ajaxSettings', () => {
-
-      it('should get the ajax sessions of the server', () => {
-        manager.dispose();
-        let ajaxSettings = { withCredentials: true };
-        manager = new KernelManager({ ajaxSettings });
-        expect(manager.ajaxSettings).to.eql(ajaxSettings);
+        let serverSettings = ServerConnection.makeSettings({ baseUrl: 'foo' });
+        manager = new KernelManager({ serverSettings});
+        expect(manager.serverSettings.baseUrl).to.be('foo');
       });
 
     });

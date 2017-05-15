@@ -20,7 +20,7 @@ import {
 } from '../../../lib/kernel';
 
 import {
-  ajaxSettings, doLater, expectFailure, expectAjaxError,
+  serverSettings, doLater, expectFailure, expectAjaxError,
   KernelTester,
   KERNEL_OPTIONS, AJAX_KERNEL_OPTIONS, EXAMPLE_KERNEL_INFO,
   PYTHON_SPEC
@@ -68,10 +68,7 @@ describe('kernel', () => {
         { id: uuid(), name: 'test2' }
       ];
       tester.runningKernels = data;
-      let options: Kernel.IOptions = {
-        baseUrl: 'http://localhost:8888',
-      };
-      Kernel.listRunning(options).then(response => {
+      Kernel.listRunning().then(response => {
         let running = toArray(response);
         expect(running[0]).to.eql(data[0]);
         expect(running[1]).to.eql(data[1]);
@@ -79,17 +76,13 @@ describe('kernel', () => {
       });
     });
 
-    it('should accept ajax options', (done) => {
+    it('should accept server settings', (done) => {
       let data = [
         { id: uuid(), name: 'test' },
         { id: uuid(), name: 'test2' }
       ];
       tester.runningKernels = data;
-      let options: Kernel.IOptions = {
-        baseUrl: 'http://localhost:8888',
-        ajaxSettings: ajaxSettings
-      };
-      Kernel.listRunning(options).then(response => {
+      Kernel.listRunning(serverSettings).then(response => {
         let running = toArray(response);
         expect(running[0]).to.eql(data[0]);
         expect(running[1]).to.eql(data[1]);
@@ -102,7 +95,7 @@ describe('kernel', () => {
         let data = { id: uuid(), name: 'test' };
         tester.respond(200, data);
       };
-      let promise = Kernel.listRunning({ baseUrl: 'http://localhost:8888' });
+      let promise = Kernel.listRunning();
       expectAjaxError(promise, done, 'Invalid kernel list');
     });
 
@@ -110,7 +103,7 @@ describe('kernel', () => {
       tester.onRequest = () => {
         tester.respond(201, { });
       };
-      let list = Kernel.listRunning({ baseUrl: 'http://localhost:8888' });
+      let list = Kernel.listRunning();
       expectAjaxError(list, done, 'Invalid Status: 201');
     });
 
@@ -118,7 +111,7 @@ describe('kernel', () => {
       tester.onRequest = () => {
         tester.respond(500, { });
       };
-      let list = Kernel.listRunning({ baseUrl: 'http://localhost:8888' });
+      let list = Kernel.listRunning();
       expectFailure(list, done, '');
     });
 
@@ -214,7 +207,7 @@ describe('kernel', () => {
     it('should reuse an exisiting kernel', (done) => {
       let id = uuid();
       tester.runningKernels = [{ name: 'foo', id }];
-      Kernel.connectTo(id, KERNEL_OPTIONS).then(k => {
+      Kernel.connectTo(id).then(k => {
         kernel = k;
         Kernel.connectTo(id).then(newKernel => {
           expect(newKernel.name).to.be(kernel.name);
@@ -228,7 +221,7 @@ describe('kernel', () => {
     it('should connect to a running kernel if given kernel options', (done) => {
       let id = uuid();
       tester.runningKernels = [{ name: KERNEL_OPTIONS.name, id }];
-      Kernel.connectTo(id, KERNEL_OPTIONS).then(k => {
+      Kernel.connectTo(id).then(k => {
         kernel = k;
         expect(kernel.name).to.be(KERNEL_OPTIONS.name);
         expect(kernel.id).to.be(id);
@@ -236,10 +229,10 @@ describe('kernel', () => {
       }).catch(done);
     });
 
-    it('should accept ajax options', (done) => {
+    it('should accept server settings', (done) => {
       let id = uuid();
       tester.runningKernels = [{ name: KERNEL_OPTIONS.name, id }];
-      Kernel.connectTo(id, AJAX_KERNEL_OPTIONS).then(k => {
+      Kernel.connectTo(id, serverSettings).then(k => {
         kernel = k;
         expect(kernel.name).to.be(KERNEL_OPTIONS.name);
         expect(kernel.id).to.be(id);
@@ -252,7 +245,7 @@ describe('kernel', () => {
       tester.onRequest = () => {
         tester.respond(400, { });
       };
-      let kernelPromise = Kernel.connectTo(id, KERNEL_OPTIONS);
+      let kernelPromise = Kernel.connectTo(id);
       expectFailure(kernelPromise, done, 'No running kernel with id: ' + id);
     });
 
@@ -427,10 +420,10 @@ describe('kernel', () => {
 
     });
 
-    context('#baseUrl', () => {
+    context('#serverSettings', () => {
 
-      it('should be the base url of the server', () => {
-        expect(kernel.baseUrl).to.be(PageConfig.getBaseUrl());
+      it('should be the server settings', () => {
+        expect(kernel.serverSettings.baseUrl).to.be(PageConfig.getBaseUrl());
       });
 
     });
@@ -1573,7 +1566,7 @@ describe('kernel', () => {
       };
       tester.specs =  { 'default': 'python',
                         'kernelspecs': ids };
-      Kernel.getSpecs({ baseUrl: 'localhost' }).then(specs => {
+      Kernel.getSpecs().then(specs => {
         let names = Object.keys(specs.kernelspecs);
         expect(names[0]).to.be('python');
         expect(names[1]).to.be('python3');
@@ -1588,7 +1581,7 @@ describe('kernel', () => {
       };
       tester.specs = { 'default': 'python',
                        'kernelspecs': ids };
-      Kernel.getSpecs({ ajaxSettings: ajaxSettings }).then(specs => {
+      Kernel.getSpecs(serverSettings).then(specs => {
         let names = Object.keys(specs.kernelspecs);
         expect(names[0]).to.be('python');
         expect(names[1]).to.be('python3');
