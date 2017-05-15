@@ -17,6 +17,10 @@ import {
   IDocumentManager
 } from '@jupyterlab/docmanager';
 
+import {
+  Contents
+} from '@jupyterlab/services';
+
 
 /**
  * The command IDs used by the application plugin.
@@ -48,7 +52,7 @@ const plugin: JupyterLabPlugin<void> = {
   activate: (app: JupyterLab, palette: ICommandPalette, manager: IDocumentManager) => {
     Private.setDB(app, manager);
     app.settings.load(plugin.id).then(settings => {
-      console.log(settings.id, settings.data);
+      console.log(settings.id, settings);
     }).catch(reason => {
       console.warn('settings load failure', reason);
     });
@@ -155,21 +159,28 @@ namespace Private {
     const folder = '.settings';
     const extension = PathExt.normalizeExtension('json');
     app.settings.setDB({
-      fetch: (file: string): Promise<ISettingRegistry.IPlugin> => {
-        const name = `${file}${extension}`;
+      fetch: (id: string): Promise<ISettingRegistry.IPlugin> => {
+        const name = `${id}${extension}`;
         const system = PathExt.resolve(root, folder, 'system', name);
         const user = PathExt.resolve(root, folder, 'user', name);
         return ready.then(() => {
           const contents = manager.services.contents;
-          const files = Promise.all([contents.get(system), contents.get(user)]);
-          return files.then(([system, user]) => {
-            return {
-              id: file,
-              data: { system, user }
-            };
-          }).catch(reason => {
-            console.warn(`Failed to fetch settings for: ${file}`, reason);
-            return { id: file, data: null };
+          return Promise.all([
+            contents.get(system).catch(() => null),
+            contents.get(user).catch(() => null)
+          ]).then((files: Contents.IModel[]) => {
+            const result: ISettingRegistry.IPlugin = { id, data: {} };
+            ['system', 'user'].forEach((level: ISettingRegistry.Level, index) => {
+              if (files[index]) {
+                try {
+                  result.data[level] = JSON.parse(files[index].content);
+                } catch (error) {
+                  console.warn(`Error fetching ${id} ${level} settings`, error);
+                  result.data[level] = null;
+                }
+              }
+            });
+            return result;
           });
         });
       },
