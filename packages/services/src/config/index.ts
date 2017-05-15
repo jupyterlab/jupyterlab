@@ -121,8 +121,7 @@ class DefaultConfigSection implements IConfigSection {
   load(): Promise<void> {
     let request = {
       url: this._url,
-      method: 'GET',
-      cache: false
+      method: 'GET'
     };
     return ServerConnection.makeRequest(request, this.serverSettings).then(success => {
       if (success.xhr.status !== 200) {
