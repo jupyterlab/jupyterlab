@@ -38,7 +38,6 @@ import {
 // stub for node global
 declare var global: any;
 
-console.log('****setting websocket');
 global.WebSocket = WebSocket;
 if (typeof window === 'undefined') {
   global.XMLHttpRequest = MockXMLHttpRequest;

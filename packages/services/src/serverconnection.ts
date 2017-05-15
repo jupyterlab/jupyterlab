@@ -27,7 +27,7 @@ namespace ServerConnection {
   export
   function makeRequest(request: IRequest, settings: ISettings): Promise<ISuccess> {
     let url = request.url;
-    if (request.cache !== false) {
+    if (request.cache !== true) {
       // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest#Bypassing_the_cache.
       url += ((/\?/).test(url) ? '&' : '?') + (new Date()).getTime();
     }
@@ -311,7 +311,7 @@ namespace Private {
 
     xhr.onload = (event: ProgressEvent) => {
       if (xhr.status >= 300) {
-        let message = `Invalid Status: ${xhr.status}`;
+        let message = xhr.statusText || `Invalid Status: ${xhr.status}`;
         delegate.reject({ event, xhr, request, settings, message });
       }
       let data = xhr.responseText;
@@ -333,7 +333,7 @@ namespace Private {
       delegate.reject({ xhr, event, request, settings, message: event.message });
     };
 
-    xhr.ontimeout = (ev: ProgressEvent) => {
+    xhr.ontimeout = (event: ProgressEvent) => {
       delegate.reject({ xhr, event, request, settings, message: 'Timed Out' });
     };
 
