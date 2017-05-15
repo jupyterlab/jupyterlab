@@ -17,7 +17,6 @@ import sys
 import tarfile
 from jupyter_core.paths import ENV_JUPYTER_PATH
 
-from ._version import __version__
 
 if sys.platform == 'win32':
     from subprocess import list2cmdline
@@ -98,7 +97,10 @@ def link_package(path, app_dir=None):
     is_extension = _is_extension(data)
     if is_extension:
         install_extension(path, app_dir)
-
+    else:
+        msg = ('*** Note: Linking non-extension package "%s" (lacks ' +
+               '`jupyterlab.extension` metadata)')
+        print(msg % data['name'])
     config = _get_build_config(app_dir)
     config.setdefault('linked_packages', dict())
     config['linked_packages'][data['name']] = path
@@ -331,6 +333,28 @@ def _get_linked_packages(app_dir=None):
     """
     app_dir = get_app_dir(app_dir)
     config = _get_build_config(app_dir)
+    linked = config.get('linked_packages', dict())
+    dead = []
+    for (name, path) in linked.items():
+        if not os.path.exists(path):
+            dead.append(name)
+
+    if dead:
+        extensions = _get_extensions(app_dir)
+
+    for name in dead:
+        path = linked[name]
+        if name in extensions:
+            uninstall_extension(name)
+            print('**Note: Removing dead linked extension "%s"' % name)
+        else:
+            print('**Note: Removing dead linked package "%s"' % name)
+        del linked[name]
+
+    if dead:
+        config['linked_packages'] = linked
+        _write_build_config(config, app_dir)
+
     return config.get('linked_packages', dict())
 
 
