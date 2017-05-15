@@ -230,7 +230,7 @@ def build(app_dir=None, name=None, version=None, publicPath=None):
     shutil.copytree(pjoin(staging, 'build'), static)
 
 
-def _ensure_package(app_dir, name='JupyterLab', version=None, publicPath=None):
+def _ensure_package(app_dir, name='JupyterLab', version=None):
     """Make sure the build dir is set up.
     """
     if not os.path.exists(pjoin(app_dir, 'extensions')):
@@ -275,10 +275,6 @@ def _ensure_package(app_dir, name='JupyterLab', version=None, publicPath=None):
     if version:
         data['jupyterlab']['version'] = version
 
-    publicPath = publicPath or uuid4().hex
-    if not publicPath.endswith('/'):
-        publicPath += '/'
-    data['jupyterlab']['publicPath'] = publicPath
     data['scripts']['build'] = 'webpack'
 
     pkg_path = pjoin(staging, 'package.json')
