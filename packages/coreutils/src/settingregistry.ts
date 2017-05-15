@@ -45,34 +45,34 @@ namespace ISettingRegistry {
   export
   interface IItem {
     /**
-     * The extension name where this setting resides.
+     * The plugin name where this setting resides.
      */
-    file: string;
+    plugin: string;
 
-     /**
-      * The name of the setting being added.
-      */
-     key: string;
+    /**
+     * The name of the setting being added.
+     */
+    key: string;
 
-     /**
-      * The setting level.
-      */
-     level: Level;
+    /**
+     * The setting level.
+     */
+    level: Level;
 
-     /**
-      * The value of the setting being added.
-      */
-     value: JSONValue;
+    /**
+     * The value of the setting being added.
+     */
+    value: JSONValue;
   }
 
   /**
    */
   export
-  interface IFile extends JSONObject {
+  interface IPlugin extends JSONObject {
     /**
      * The name of an extension whose settings are saved.
      */
-    name: string;
+    id: string;
 
     /**
      * The collection of values for a specified setting.
@@ -95,27 +95,27 @@ interface ISettingRegistry extends SettingRegistry {}
 export
 class SettingRegistry {
   /**
-   * A signal that emits name of a setting file when one changes.
+   * A signal that emits name of a plugin when its settings change.
    */
-  get fileChanged(): ISignal<this, string> {
-    return this._fileChanged;
+  get pluginChanged(): ISignal<this, string> {
+    return this._pluginChanged;
   }
 
   /**
-   * Returns a list of setting files held in the registry.
+   * Returns a list of plugin settings held in the registry.
    */
-  files(): ISettingRegistry.IFile[] {
-    const files = this._files;
-    return Object.keys(files).map(key => {
-      const file = files[key];
-      return JSONExt.deepCopy(file) as ISettingRegistry.IFile;
+  plugins(): ISettingRegistry.IPlugin[] {
+    const plugins = this._plugins;
+    return Object.keys(plugins).map(key => {
+      const plugin = plugins[key];
+      return JSONExt.deepCopy(plugin) as ISettingRegistry.IPlugin;
     });
   }
 
   /**
    * Get an individual setting.
    *
-   * @param file - The name of the extension whose setting is being retrieved.
+   * @param plugin - The name of the plugin whose settings are being retrieved.
    *
    * @param key - The name of the setting being retrieved.
    *
@@ -123,45 +123,45 @@ class SettingRegistry {
    *
    * @returns A promise that resolves when the setting is retrieved.
    */
-  get(file: string, key: string, level: ISettingRegistry.Level = LEVEL): Promise<JSONValue> {
-    if (file in this._files) {
-      const bundle = this._files[file] && this._files[file].data;
+  get(plugin: string, key: string, level: ISettingRegistry.Level = LEVEL): Promise<JSONValue> {
+    if (plugin in this._plugins) {
+      const bundle = this._plugins[plugin] && this._plugins[plugin].data;
       const value = bundle && bundle[level] && bundle[level][key] || null;
 
       return Promise.resolve(JSONExt.deepCopy(value));
     }
 
-    return this.load(file).then(() => this.get(file, key, level));
+    return this.load(plugin).then(() => this.get(plugin, key, level));
   }
 
   /**
-   * Load an extension's settings into the setting registry.
+   * Load a plugin's settings into the setting registry.
    *
-   * @param file - The name of the extension whose settings are being loaded.
+   * @param plugin - The name of the plugin whose settings are being loaded.
    *
    * @param reload - Reload from server, ignoring cache. Defaults to false.
    *
-   * @returns A promise that resolves with the setting file after loading.
+   * @returns A promise that resolves with the plugin after loading.
    */
-  load(file: string, reload = false): Promise<ISettingRegistry.IFile> {
-    const files = this._files;
+  load(plugin: string, reload = false): Promise<ISettingRegistry.IPlugin> {
+    const plugins = this._plugins;
 
-    if (!reload && file in files) {
-      return Promise.resolve(JSONExt.deepCopy(files[file]));
+    if (!reload && plugin in plugins) {
+      return Promise.resolve(JSONExt.deepCopy(plugins[plugin]));
     }
 
     if (this._datastore) {
-      return this._datastore.fetch(file)
-        .then(contents => files[contents.name] = contents);
+      return this._datastore.fetch(plugin)
+        .then(contents => plugins[contents.id] = contents);
     }
 
-    return this._ready.promise.then(() => this.load(file));
+    return this._ready.promise.then(() => this.load(plugin));
   }
 
   /**
    * Remove a single setting in the registry.
    *
-   * @param file - The name of the extension whose setting is being removed.
+   * @param plugin - The name of the plugin whose setting is being removed.
    *
    * @param key - The name of the setting being removed.
    *
@@ -169,19 +169,19 @@ class SettingRegistry {
    *
    * @returns A promise that resolves when the setting is removed.
    */
-  remove(file: string, key: string, level: ISettingRegistry.Level = LEVEL): Promise<void> {
-    if (!(file in this._files)) {
+  remove(plugin: string, key: string, level: ISettingRegistry.Level = LEVEL): Promise<void> {
+    if (!(plugin in this._plugins)) {
       return Promise.resolve(void 0);
     }
 
-    const bundle =  this._files[file].data;
+    const bundle =  this._plugins[plugin].data;
     if (!bundle[level]) {
       return Promise.resolve(void 0);
     }
 
     delete bundle[level][key];
 
-    return this._save(file);
+    return this._save(plugin);
   }
 
   /**
@@ -193,21 +193,21 @@ class SettingRegistry {
    *
    */
   set(item: ISettingRegistry.IItem): Promise<void> {
-    const { file } = item;
+    const { plugin } = item;
 
-    if (!(file in this._files)) {
-      return this.load(file).then(() => this.set(item));
+    if (!(plugin in this._plugins)) {
+      return this.load(plugin).then(() => this.set(item));
     }
 
     const { key, level, value } = item;
-    const bundle = this._files[file].data;
+    const bundle = this._plugins[plugin].data;
 
     if (!bundle[level]) {
       bundle[level] = {};
     }
     bundle[level][key] = value;
 
-    return this._save(file);
+    return this._save(plugin);
   }
 
   /**
@@ -222,7 +222,7 @@ class SettingRegistry {
    * entire extension at a time. It is comparable to a single file written to
    * disk on a file system.
    */
-  setDB(datastore: IDatastore<ISettingRegistry.IFile, ISettingRegistry.IFile>) {
+  setDB(datastore: IDatastore<ISettingRegistry.IPlugin, ISettingRegistry.IPlugin>) {
     if (this._datastore) {
       throw new Error('Setting registry already has a datastore.');
     }
@@ -232,27 +232,27 @@ class SettingRegistry {
   }
 
   /**
-   * Upload a setting file for an extension.
+   * Upload a plugin's settings.
    *
-   * @param file - The file being uploaded.
+   * @param plugin - The plugin settings being uploaded.
    *
-   * @returns A promise that resolves when the file has been saved.
+   * @returns A promise that resolves when the settings have been saved.
    */
-  upload(file: ISettingRegistry.IFile): Promise<void> {
-    this._files[file.name] = file;
-    return this._save(file.name);
+  upload(plugin: ISettingRegistry.IPlugin): Promise<void> {
+    this._plugins[plugin.id] = plugin;
+    return this._save(plugin.id);
   }
 
   /**
-   * Save a file in the registry.
+   * Save a plugin in the registry.
    */
-  private _save(file: string): Promise<void> {
-    return this._datastore.save(file, this._files[file])
-      .then(() => { this._fileChanged.emit(file); });
+  private _save(plugin: string): Promise<void> {
+    return this._datastore.save(plugin, this._plugins[plugin])
+      .then(() => { this._pluginChanged.emit(plugin); });
   }
 
-  private _datastore: IDatastore<ISettingRegistry.IFile, ISettingRegistry.IFile> | null = null;
-  private _fileChanged = new Signal<this, string>(this);
-  private _files: { [name: string]: ISettingRegistry.IFile } = Object.create(null);
+  private _datastore: IDatastore<ISettingRegistry.IPlugin, ISettingRegistry.IPlugin> | null = null;
+  private _pluginChanged = new Signal<this, string>(this);
+  private _plugins: { [name: string]: ISettingRegistry.IPlugin } = Object.create(null);
   private _ready = new PromiseDelegate<void>();
 }
