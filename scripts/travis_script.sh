@@ -13,7 +13,7 @@ export PATH="$HOME/miniconda/bin:$PATH"
 if [[ $GROUP == tests ]]; then
     # Make sure we can successfully load the page
     pip install selenium
-    python selenium_check.py
+    python jupyterlab/selenium_check.py
 
     # Run the JS and python tests
     py.test
