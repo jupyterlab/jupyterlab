@@ -340,7 +340,6 @@ class RequestSocketTester extends RequestHandler {
     this._server = new Server({ port: 8888 });
     this._promiseDelegate = new PromiseDelegate<void>();
     this._server.on('connection', ws => {
-      console.log('*****made a connection');
       this._ws = ws;
       this.onSocket(ws);
       this._promiseDelegate.resolve(void 0);
