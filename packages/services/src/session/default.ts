@@ -6,12 +6,8 @@
  } from '@jupyterlab/coreutils';
 
 import {
-  ArrayExt, each, find, toArray
+  ArrayExt, each, find
 } from '@phosphor/algorithm';
-
- import {
-   JSONExt
- } from '@phosphor/coreutils';
 
 import {
   ISignal, Signal

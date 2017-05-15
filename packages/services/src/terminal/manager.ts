@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  PageConfig
-} from '@jupyterlab/coreutils';
-
-import {
   ArrayExt, IIterator, iter
 } from '@phosphor/algorithm';
 
