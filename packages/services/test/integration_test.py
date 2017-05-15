@@ -20,6 +20,7 @@ from traitlets import Bool, Unicode
 
 
 HERE = os.path.dirname(__file__)
+DEBUG = False
 
 
 def create_notebook_dir():
@@ -37,10 +38,12 @@ def get_command(nbapp):
     terminalsAvailable = nbapp.web_app.settings['terminals_available']
     # Compatibility with Notebook 4.2.
     token = getattr(nbapp, 'token', '')
-    cmd = ['mocha', '--timeout', '20000',
+    cmd = ['mocha', '--timeout', '200000',
            '--retries', '2',
            'build/integration.js',
            '--jupyter-config-data=./build/config.json']
+    if DEBUG:
+        cmd = ['devtool', '../node_modules/.bin/_mocha', '-qc'] + cmd[1:]
 
     config = dict(baseUrl=nbapp.connection_url,
                   terminalsAvailable=str(terminalsAvailable))

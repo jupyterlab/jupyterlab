@@ -165,7 +165,7 @@ describe('jupyter.services - Integration', () => {
         // should grab the same session object
         return Session.connectTo(session.id);
       }).then(value => {
-        expect(value.path).to.be(options.path);
+        expect(value.path).to.be(session.path);
         session2 = value;
         if (session2.kernel.clientId === session.kernel.clientId) {
           throw Error('Did not clone the session');
