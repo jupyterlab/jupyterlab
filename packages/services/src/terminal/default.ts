@@ -166,8 +166,9 @@ class DefaultTerminalSession implements TerminalSession.ISession {
     this._url = Private.getTermUrl(settings.baseUrl, this._name);
     Private.running[this._url] = this;
     let wsUrl = URLExt.join(settings.wsUrl, `terminals/websocket/${name}`);
-    if (this._token) {
-      wsUrl = wsUrl + `?token=${this._token}`;
+    let token = this.serverSettings.token;
+    if (token) {
+      wsUrl = wsUrl + `?token=${token}`;
     }
     this._ws = new settings.webSocket(wsUrl);
 
@@ -202,7 +203,6 @@ class DefaultTerminalSession implements TerminalSession.ISession {
 
   private _name: string;
   private _url: string;
-  private _token = '';
   private _ws: WebSocket = null;
   private _isDisposed = false;
   private _readyPromise: Promise<void>;
