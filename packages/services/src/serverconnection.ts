@@ -103,7 +103,7 @@ namespace ServerConnection {
     data?: JSONValue;
 
     /**
-     * Whether to cache the response. Defaults to `true`.
+     * Whether to cache the response. Defaults to `false`.
      */
     cache?: boolean;
 

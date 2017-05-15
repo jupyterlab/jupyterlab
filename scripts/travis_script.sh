@@ -21,13 +21,13 @@ if [[ $GROUP == tests ]]; then
     wait $TASK_PID
 
     # Run the JS and python tests
+    npm run test:services || npm run test:services
     py.test
     npm run clean
     npm run build:src
     npm run build:test
     npm test
-    npm run test:services || npm run test:services
-
+    
     # Make sure we have CSS that can be converted with postcss
     npm install -g postcss-cli
     postcss jupyterlab/build/*.css > /dev/null

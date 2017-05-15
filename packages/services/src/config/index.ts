@@ -153,7 +153,8 @@ class DefaultConfigSection implements IConfigSection {
       if (success.xhr.status !== 200) {
        throw ServerConnection.makeError(success);
       }
-
+      console.log("\n\n\n***GOT UPDATED DATA", success.data);
+      console.log(JSON.stringify(success.data, null, 2));
       this._data = success.data as JSONObject;
       return this._data;
     });
