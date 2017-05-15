@@ -79,7 +79,7 @@ describe('session/manager', () => {
       it('should get the server settings', () => {
         manager.dispose();
         let serverSettings = ServerConnection.makeSettings({ baseUrl: 'foo' });
-        manager = new SessionManager(serverSettings);
+        manager = new SessionManager({ serverSettings });
         expect(manager.serverSettings.baseUrl).to.be('foo');
       });
 

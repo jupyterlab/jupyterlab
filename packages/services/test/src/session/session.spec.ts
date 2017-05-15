@@ -12,10 +12,6 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  IAjaxError
-} from '../../../lib/utils';
-
-import {
   KernelMessage
 } from '../../../lib/kernel';
 
@@ -666,9 +662,9 @@ describe('session', () => {
         tester.onRequest = () => {
           tester.respond(410, { });
         };
-        session.shutdown().catch((err: IAjaxError) => {
+        session.shutdown().catch(err => {
           let text ='The kernel was deleted but the session was not';
-          expect(err.throwError).to.contain(text);
+          expect(err.message).to.contain(text);
         }).then(done, done);
       });
 
