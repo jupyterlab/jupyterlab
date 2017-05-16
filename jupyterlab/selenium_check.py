@@ -8,21 +8,27 @@ import time
 import threading
 
 from tornado import ioloop
-from notebook.notebookapp import NotebookApp
+from notebook.notebookapp import NotebookApp, flags, aliases
 from traitlets import Bool, Unicode
 from jupyterlab_launcher import LabConfig, add_handlers
 
 from selenium import webdriver
 
-try:
-    import coloroma
-    coloroma.init()
-    COLOR = True
-except ImportError:
-    COLOR = os.name != 'nt'
+from .commands import get_app_dir
 
 
 here = os.path.dirname(__file__)
+
+
+test_flags = dict(flags)
+test_flags['core-mode'] = (
+    {'TestApp': {'core_mode': True}},
+    "Start the app in core mode."
+)
+
+
+test_aliases = dict(aliases)
+test_aliases['app-dir'] = 'TestApp.app_dir'
 
 
 class TestApp(NotebookApp):
@@ -30,11 +36,25 @@ class TestApp(NotebookApp):
     default_url = Unicode('/lab')
     open_browser = Bool(False)
     base_url = '/foo'
+    flags = test_flags
+    aliases = test_aliases
+
+    core_mode = Bool(False, config=True,
+        help="Whether to start the app in core mode")
+
+    app_dir = Unicode('', config=True,
+        help="The app directory to build in")
 
     def start(self):
         self.io_loop = ioloop.IOLoop.current()
         config = LabConfig()
-        config.assets_dir = os.path.join(here, 'build')
+        if self.core_mode:
+            config.assets_dir = os.path.join(here, 'build')
+        elif self.app_dir:
+            config.assets_dir = os.path.join(self.app_dir, 'static')
+        else:
+            config.assets_dir = os.path.join(get_app_dir(), 'static')
+
         config.settings_dir = ''
 
         add_handlers(self.web_app, config)
