@@ -63,7 +63,8 @@ any of the JupyterLab commands, or by setting the `JUPYTERLAB_DIR` environment
 variable.  If not specified, it will default to 
 `<sys-prefix/share/jupyter/lab`, where `sys-prefix` is the 
 site-specific directory prefix of the current Python environment.  You can
-query the current application path using `jupyter lab path`.
+query the current application path using `jupyter lab path`.  To create the
+app directory without installing any extensions, run `jupyter lab build`.
 
 The `settings` directory contains `page_config.json` and `build_config.json`
 files.
