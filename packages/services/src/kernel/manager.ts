@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  PageConfig
-} from '@jupyterlab/coreutils';
-
-import {
   ArrayExt, IIterator, iter
 } from '@phosphor/algorithm';
 
@@ -17,12 +13,9 @@ import {
   ISignal, Signal
 } from '@phosphor/signaling';
 
-import * as utils
-  from '../utils';
-
 import {
-  IAjaxSettings
-} from '../utils';
+  ServerConnection
+} from '..';
 
 import {
   Kernel
@@ -39,11 +32,10 @@ class KernelManager implements Kernel.IManager {
    *
    * @param options - The default options for kernel.
    */
-  constructor(options: Kernel.IOptions = {}) {
-    this._baseUrl = options.baseUrl || PageConfig.getBaseUrl();
-    this._wsUrl = options.wsUrl || PageConfig.getWsUrl(this._baseUrl);
-    this._token = options.token || PageConfig.getOption('token');
-    this._ajaxSettings = JSON.stringify(utils.ajaxSettingsWithToken(options.ajaxSettings, options.token));
+  constructor(options: KernelManager.IOptions = {}) {
+    this.serverSettings = (
+      options.serverSettings || ServerConnection.makeSettings()
+    );
 
     // Initialize internal data.
     this._readyPromise = this._refreshSpecs().then(() => {
@@ -96,32 +88,9 @@ class KernelManager implements Kernel.IManager {
   }
 
   /**
-   * Get the base url of the manager.
+   * The server settings for the manager.
    */
-  get baseUrl(): string {
-    return this._baseUrl;
-  }
-
-  /**
-   * Get the ws url of the manager.
-   */
-  get wsUrl(): string {
-    return this._wsUrl;
-  }
-
-  /**
-   * The default ajax settings for the manager.
-   */
-  get ajaxSettings(): IAjaxSettings {
-    return JSON.parse(this._ajaxSettings);
-  }
-
-  /**
-   * Set the default ajax settings for the manager.
-   */
-  set ajaxSettings(value: IAjaxSettings) {
-    this._ajaxSettings = JSON.stringify(value);
-  }
+  readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Get the most recently fetched kernel specs.
@@ -180,12 +149,18 @@ class KernelManager implements Kernel.IManager {
   }
 
   /**
-   * Start a new kernel.  See also [[startNewKernel]].
+   * Start a new kernel.
    *
-   * @param options - Overrides for the default options.
+   * @param options - The kernel options to use.
+   *
+   * @returns A promise that resolves with the kernel instance.
+   *
+   * #### Notes
+   * The manager `serverSettings` will be always be used.
    */
-  startNew(options?: Kernel.IOptions): Promise<Kernel.IKernel> {
-    return Kernel.startNew(this._getOptions(options)).then(kernel => {
+  startNew(options: Kernel.IOptions = {}): Promise<Kernel.IKernel> {
+    let newOptions = { ...options, serverSettings: this.serverSettings };
+    return Kernel.startNew(newOptions).then(kernel => {
       this._onStarted(kernel);
       return kernel;
     });
@@ -194,19 +169,23 @@ class KernelManager implements Kernel.IManager {
   /**
    * Find a kernel by id.
    *
-   * @param options - Overrides for the default options.
+   * @param id - The id of the target kernel.
+   *
+   * @returns A promise that resolves with the kernel's model.
    */
-  findById(id: string, options?: Kernel.IOptions): Promise<Kernel.IModel> {
-    return Kernel.findById(id, this._getOptions(options));
+  findById(id: string): Promise<Kernel.IModel> {
+    return Kernel.findById(id, this.serverSettings);
   }
 
   /**
-   * Connect to a running kernel.  See also [[connectToKernel]].
+   * Connect to an existing kernel.
    *
-   * @param options - Overrides for the default options.
+   * @param id - The id of the target kernel.
+   *
+   * @returns A promise that resolves with the new kernel instance.
    */
-  connectTo(id: string, options?: Kernel.IOptions): Promise<Kernel.IKernel> {
-    return Kernel.connectTo(id, this._getOptions(options)).then(kernel => {
+  connectTo(id: string): Promise<Kernel.IKernel> {
+    return Kernel.connectTo(id, this.serverSettings).then(kernel => {
       this._onStarted(kernel);
       return kernel;
     });
@@ -215,14 +194,16 @@ class KernelManager implements Kernel.IManager {
   /**
    * Shut down a kernel by id.
    *
-   * @param options - Overrides for the default options.
+   * @param id - The id of the target kernel.
+   *
+   * @returns A promise that resolves when the operation is complete.
    *
    * #### Notes
    * This will emit [[runningChanged]] if the running kernels list
    * changes.
    */
-  shutdown(id: string, options?: Kernel.IOptions): Promise<void> {
-    return Kernel.shutdown(id, this._getOptions(options)).then(() => {
+  shutdown(id: string): Promise<void> {
+    return Kernel.shutdown(id, this.serverSettings).then(() => {
       this._onTerminated(id);
     });
   }
@@ -257,12 +238,7 @@ class KernelManager implements Kernel.IManager {
    * Refresh the specs.
    */
   private _refreshSpecs(): Promise<void> {
-    let options = {
-      baseUrl: this._baseUrl,
-      token: this._token,
-      ajaxSettings: this.ajaxSettings
-    };
-    return Kernel.getSpecs(options).then(specs => {
+    return Kernel.getSpecs(this.serverSettings).then(specs => {
       if (!JSONExt.deepEqual(specs, this._specs)) {
         this._specs = specs;
         this._specsChanged.emit(specs);
@@ -274,7 +250,7 @@ class KernelManager implements Kernel.IManager {
    * Refresh the running sessions.
    */
   private _refreshRunning(): Promise<void> {
-    return Kernel.listRunning(this._getOptions({})).then(running => {
+    return Kernel.listRunning(this.serverSettings).then(running => {
       this._isReady = true;
       if (!JSONExt.deepEqual(running, this._running)) {
         this._running = running.slice();
@@ -283,21 +259,6 @@ class KernelManager implements Kernel.IManager {
     });
   }
 
-  /**
-   * Get optionally overidden options.
-   */
-  private _getOptions(options: Kernel.IOptions = {}): Kernel.IOptions {
-    options.baseUrl = this._baseUrl || '';
-    options.wsUrl = this._wsUrl || '';
-    options.token = this._token || '';
-    options.ajaxSettings = options.ajaxSettings || this.ajaxSettings;
-    return options;
-  }
-
-  private _baseUrl = '';
-  private _wsUrl = '';
-  private _token = '';
-  private _ajaxSettings = '';
   private _running: Kernel.IModel[] = [];
   private _specs: Kernel.ISpecModels = null;
   private _isDisposed = false;
@@ -307,4 +268,22 @@ class KernelManager implements Kernel.IManager {
   private _isReady = false;
   private _specsChanged = new Signal<this, Kernel.ISpecModels>(this);
   private _runningChanged = new Signal<this, Kernel.IModel[]>(this);
+}
+
+
+/**
+ * The namespace for `KernelManager` class statics.
+ */
+export
+namespace KernelManager {
+  /**
+   * The options used to initialize a KernelManager.
+   */
+  export
+  interface IOptions {
+    /**
+     * The server settings for the manager.
+     */
+    serverSettings?: ServerConnection.ISettings;
+  }
 }

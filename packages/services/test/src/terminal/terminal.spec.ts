@@ -183,10 +183,10 @@ describe('terminals', () => {
 
     });
 
-    context('#baseUrl', () => {
+    context('#serverSettings', () => {
 
-      it('should be the base url of the server', () => {
-        expect(session.baseUrl).to.be(PageConfig.getBaseUrl());
+      it('should be the server settings of the server', () => {
+        expect(session.serverSettings.baseUrl).to.be(PageConfig.getBaseUrl());
       });
 
     });

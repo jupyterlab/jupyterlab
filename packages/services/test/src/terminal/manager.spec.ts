@@ -12,8 +12,8 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  TerminalSession, TerminalManager
-} from '../../../lib/terminal';
+  ServerConnection, TerminalSession, TerminalManager
+} from '../../../lib';
 
 import {
   TerminalTester
@@ -53,42 +53,20 @@ describe('terminals', () => {
       it('should accept options', () => {
         manager.dispose();
         manager = new TerminalManager({
-          baseUrl: 'foo',
-          wsUrl: 'bar',
-          ajaxSettings: {}
+          serverSettings: ServerConnection.makeSettings()
         });
         expect(manager).to.be.a(TerminalManager);
       });
 
     });
 
-    describe('#baseUrl', () => {
+    describe('#serverSettings', () => {
 
-      it('should get the base url of the server', () => {
+      it('should be the server settings', () => {
         manager.dispose();
-        manager = new TerminalManager({ baseUrl: 'foo' });
-        expect(manager.baseUrl).to.be('foo');
-      });
-
-    });
-
-    describe('#wsUrl', () => {
-
-      it('should get the ws url of the server', () => {
-        manager.dispose();
-        manager = new TerminalManager({ wsUrl: 'bar' });
-        expect(manager.wsUrl).to.be('bar');
-      });
-
-    });
-
-    describe('#ajaxSettings', () => {
-
-      it('should get the ajax sessions of the server', () => {
-        let ajaxSettings = { withCredentials: true };
-        manager.dispose();
-        manager = new TerminalManager({ ajaxSettings });
-        expect(manager.ajaxSettings).to.eql(ajaxSettings);
+        let serverSettings = ServerConnection.makeSettings({ baseUrl: 'foo' });
+        manager = new TerminalManager({ serverSettings });
+        expect(manager.serverSettings.baseUrl).to.be('foo');
       });
 
     });

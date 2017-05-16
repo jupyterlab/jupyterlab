@@ -18,11 +18,8 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  IAjaxSettings
-} from '../utils';
-
-import * as utils
-  from '../utils';
+  ServerConnection
+} from '..';
 
 import {
   DefaultTerminalSession
@@ -60,14 +57,9 @@ namespace TerminalSession {
     readonly model: IModel;
 
     /**
-     * The base url of the session.
+     * The server settings for the session.
      */
-    readonly baseUrl: string;
-
-    /**
-     * The Ajax settings used for server requests.
-     */
-    ajaxSettings: utils.IAjaxSettings;
+    readonly serverSettings: ServerConnection.ISettings;
 
     /**
      * Test whether the session is ready.
@@ -143,13 +135,13 @@ namespace TerminalSession {
   /**
    * List the running terminal sessions.
    *
-   * @param options - The session options to use.
+   * @param settings - The server settings to use.
    *
    * @returns A promise that resolves with the list of running session models.
    */
   export
-  function listRunning(options?: IOptions): Promise<IModel[]> {
-    return DefaultTerminalSession.listRunning(options);
+  function listRunning(settings?: ServerConnection.ISettings): Promise<IModel[]> {
+    return DefaultTerminalSession.listRunning(settings);
   }
 
   /**
@@ -157,39 +149,24 @@ namespace TerminalSession {
    *
    * @param name - The name of the target session.
    *
-   * @param options - The session options to use.
+   * @param settings - The server settings to use.
    *
    * @returns A promise that resolves when the session is shut down.
    */
   export
-  function shutdown(name: string, options?: IOptions): Promise<void> {
-    return DefaultTerminalSession.shutdown(name, options);
+  function shutdown(name: string, settings?: ServerConnection.ISettings): Promise<void> {
+    return DefaultTerminalSession.shutdown(name, settings);
   }
 
   /**
    * The options for intializing a terminal session object.
    */
   export
-  interface IOptions extends JSONObject {
-    /**
-     * The base url.
-     */
-    baseUrl?: string;
-
-    /**
-     * The base websocket url.
-     */
-    wsUrl?: string;
-
-    /**
-     * The authentication token for the API.
-     */
-    token?: string;
-
-    /**
-     * The Ajax settings used for server requests.
-     */
-    ajaxSettings?: utils.IAjaxSettings;
+  interface IOptions {
+   /**
+    * The server settings for the session.
+    */
+    serverSettings?: ServerConnection.ISettings;
   }
 
   /**
@@ -240,19 +217,9 @@ namespace TerminalSession {
     runningChanged: ISignal<IManager, IModel[]>;
 
     /**
-     * The base url of the manager.
+     * The server settings for the manager.
      */
-    readonly baseUrl: string;
-
-    /**
-     * The base ws url of the manager.
-     */
-    readonly wsUrl: string;
-
-    /**
-     * The default ajax settings for the manager.
-     */
-    ajaxSettings?: IAjaxSettings;
+    readonly serverSettings: ServerConnection.ISettings;
 
     /**
      * Test whether the manager is ready.
@@ -284,9 +251,7 @@ namespace TerminalSession {
      * @returns A promise that resolves with the terminal instance.
      *
      * #### Notes
-     * The baseUrl and wsUrl of the options will be forced
-     * to the ones used by the manager. The ajaxSettings of the manager
-     * will be used unless overridden.
+     * The manager `serverSettings` will be always be used.
      */
     startNew(options?: IOptions): Promise<ISession>;
 
@@ -295,17 +260,9 @@ namespace TerminalSession {
      *
      * @param name - The name of the target session.
      *
-     * @param ajaxSettings - The ajaxSettings to use, overrides manager
-     *   settings.
-     *
      * @returns A promise that resolves with the new session instance.
-     *
-     * #### Notes
-     * The baseUrl and wsUrl of the options will be forced
-     * to the ones used by the manager. The ajaxSettings of the manager
-     * will be used unless overridden.
      */
-    connectTo(name: string, options?: IOptions): Promise<ISession>;
+    connectTo(name: string): Promise<ISession>;
 
     /**
      * Shut down a terminal session by name.

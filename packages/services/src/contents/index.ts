@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  PageConfig, URLExt
+  URLExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -17,12 +17,9 @@ import {
   ISignal, Signal
 } from '@phosphor/signaling';
 
-import * as utils
-  from '../utils';
-
 import {
-  IAjaxSettings
-} from '../utils';
+  ServerConnection
+} from '..';
 
 import * as validate
   from './validate';
@@ -210,9 +207,9 @@ namespace Contents {
   export
   interface IManager extends IDisposable {
     /**
-     * The base url of the manager.
+     * The server settings of the manager.
      */
-    readonly baseUrl: string;
+    readonly serverSettings: ServerConnection.ISettings;
 
     /**
      * A signal emitted when a file operation takes place.
@@ -334,11 +331,6 @@ namespace Contents {
      * @returns A promise which resolves when the checkpoint is deleted.
      */
     deleteCheckpoint(path: string, checkpointID: string): Promise<void>;
-
-    /**
-     * Optional default settings for ajax requests, if applicable.
-     */
-    ajaxSettings?: IAjaxSettings;
   }
 }
 
@@ -356,8 +348,7 @@ class ContentsManager implements Contents.IManager {
    * @param options - The options used to initialize the object.
    */
   constructor(options: ContentsManager.IOptions = {}) {
-    this._baseUrl = options.baseUrl || PageConfig.getBaseUrl();
-    this._ajaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
+    this.serverSettings = options.serverSettings || ServerConnection.makeSettings();
   }
 
   /**
@@ -366,6 +357,11 @@ class ContentsManager implements Contents.IManager {
   get fileChanged(): ISignal<this, Contents.IChangedArgs> {
     return this._fileChanged;
   }
+
+  /**
+   * The server settings of the manager.
+   */
+  readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Test whether the manager has been disposed.
@@ -386,26 +382,6 @@ class ContentsManager implements Contents.IManager {
   }
 
   /**
-   * Get the base url of the manager.
-   */
-  get baseUrl(): string {
-    return this._baseUrl;
-  }
-
-  /**
-   * Get a copy of the default ajax settings for the contents manager.
-   */
-  get ajaxSettings(): IAjaxSettings {
-    return JSONExt.deepCopy(this._ajaxSettings);
-  }
-  /**
-   * Set the default ajax settings for the contents manager.
-   */
-  set ajaxSettings(value: IAjaxSettings) {
-    this._ajaxSettings = JSONExt.deepCopy(value);
-  }
-
-  /**
    * Get a file or directory.
    *
    * @param path: The path to the file.
@@ -417,13 +393,7 @@ class ContentsManager implements Contents.IManager {
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents) and validates the response model.
    */
   get(path: string, options?: Contents.IFetchOptions): Promise<Contents.IModel> {
-    let ajaxSettings = this.ajaxSettings;
-    ajaxSettings.method = 'GET';
-    ajaxSettings.dataType = 'json';
-    ajaxSettings.cache = false;
-
     let url = this._getUrl(path);
-
     if (options) {
       // The notebook type cannot take an format option.
       if (options.type === 'notebook') {
@@ -434,16 +404,21 @@ class ContentsManager implements Contents.IManager {
       url += URLExt.objectToQueryString(params);
     }
 
-    return utils.ajaxRequest(url, ajaxSettings).then((success: utils.IAjaxSuccess): Contents.IModel => {
-      if (success.xhr.status !== 200) {
-        throw utils.makeAjaxError(success);
+    let request = {
+      url,
+      method: 'GET',
+      cache: false
+    };
+    return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
+      if (response.xhr.status !== 200) {
+        throw ServerConnection.makeError(response);
       }
       try {
-         validate.validateContentsModel(success.data);
+         validate.validateContentsModel(response.data);
        } catch (err) {
-         throw utils.makeAjaxError(success, err.message);
+         throw ServerConnection.makeError(response, err.message);
        }
-      return success.data;
+      return response.data;
     });
   }
 
@@ -456,7 +431,8 @@ class ContentsManager implements Contents.IManager {
    * It is expected that the path contains no relative paths.
    */
   getDownloadUrl(path: string): Promise<string> {
-    return Promise.resolve(URLExt.join(this._baseUrl, FILES_URL,
+    let baseUrl = this.serverSettings.baseUrl;
+    return Promise.resolve(URLExt.join(baseUrl, FILES_URL,
                            URLExt.encodeParts(path)));
   }
 
@@ -472,26 +448,27 @@ class ContentsManager implements Contents.IManager {
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents) and validates the response model.
    */
   newUntitled(options: Contents.ICreateOptions = {}): Promise<Contents.IModel> {
-    let ajaxSettings = this.ajaxSettings;
-    ajaxSettings.method = 'POST';
-    ajaxSettings.contentType = 'application/json';
-    ajaxSettings.dataType = 'json';
+    let data = '{}';
     if (options) {
       if (options.ext) {
         options.ext = Private.normalizeExtension(options.ext);
       }
-      ajaxSettings.data = JSON.stringify(options);
+      data = JSON.stringify(options);
     }
-    let url = this._getUrl(options.path || '');
-    return utils.ajaxRequest(url, ajaxSettings).then(success => {
-      if (success.xhr.status !== 201) {
-        throw utils.makeAjaxError(success);
+    let request = {
+      url: this._getUrl(options.path || ''),
+      method: 'POST',
+      data,
+    };
+    return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
+      if (response.xhr.status !== 201) {
+        throw ServerConnection.makeError(response);
       }
-      let data = success.data as Contents.IModel;
+      let data = response.data as Contents.IModel;
       try {
         validate.validateContentsModel(data);
       } catch (err) {
-        throw utils.makeAjaxError(success, err.message);
+        throw ServerConnection.makeError(response, err.message);
       }
       this._fileChanged.emit({
         type: 'new',
@@ -513,14 +490,13 @@ class ContentsManager implements Contents.IManager {
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents).
    */
   delete(path: string): Promise<void> {
-    let ajaxSettings = this.ajaxSettings;
-    ajaxSettings.method = 'DELETE';
-    ajaxSettings.dataType = 'json';
-
-    let url = this._getUrl(path);
-    return utils.ajaxRequest(url, ajaxSettings).then(success => {
-      if (success.xhr.status !== 204) {
-        throw utils.makeAjaxError(success);
+    let request = {
+      url: this._getUrl(path),
+      method: 'DELETE'
+    };
+    return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
+      if (response.xhr.status !== 204) {
+        throw ServerConnection.makeError(response);
       }
       this._fileChanged.emit({
         type: 'delete',
@@ -534,7 +510,7 @@ class ContentsManager implements Contents.IManager {
         if (error.xhr.status === 400) {
           let err = JSON.parse(error.xhr.response);
           if (err.message) {
-            error.throwError = err.message;
+            error.message = err.message;
           }
         }
         return Promise.reject(error);
@@ -556,22 +532,20 @@ class ContentsManager implements Contents.IManager {
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents) and validates the response model.
    */
   rename(path: string, newPath: string): Promise<Contents.IModel> {
-    let ajaxSettings = this.ajaxSettings;
-    ajaxSettings.method = 'PATCH';
-    ajaxSettings.dataType = 'json';
-    ajaxSettings.contentType = 'application/json';
-    ajaxSettings.data = JSON.stringify({ path: newPath });
-
-    let url = this._getUrl(path);
-    return utils.ajaxRequest(url, ajaxSettings).then(success => {
-      if (success.xhr.status !== 200) {
-        throw utils.makeAjaxError(success);
+    let request = {
+      url: this._getUrl(path),
+      method: 'PATCH',
+      data: JSON.stringify({ path: newPath })
+    };
+    return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
+      if (response.xhr.status !== 200) {
+        throw ServerConnection.makeError(response);
       }
-      let data = success.data as Contents.IModel;
+      let data = response.data as Contents.IModel;
       try {
         validate.validateContentsModel(data);
       } catch (err) {
-        throw utils.makeAjaxError(success, err.message);
+        throw ServerConnection.makeError(response, err.message);
       }
       this._fileChanged.emit({
         type: 'rename',
@@ -598,24 +572,22 @@ class ContentsManager implements Contents.IManager {
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents) and validates the response model.
    */
   save(path: string, options: Contents.IModel = {}): Promise<Contents.IModel> {
-    let ajaxSettings = this.ajaxSettings;
-    ajaxSettings.method = 'PUT';
-    ajaxSettings.dataType = 'json';
-    ajaxSettings.data = JSON.stringify(options);
-    ajaxSettings.contentType = 'application/json';
-    ajaxSettings.cache = false;
-
-    let url = this._getUrl(path);
-    return utils.ajaxRequest(url, ajaxSettings).then(success => {
+    let request = {
+      url: this._getUrl(path),
+      method: 'PUT',
+      cache: false,
+      data: JSON.stringify(options)
+    };
+    return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
       // will return 200 for an existing file and 201 for a new file
-      if (success.xhr.status !== 200 && success.xhr.status !== 201) {
-        throw utils.makeAjaxError(success);
+      if (response.xhr.status !== 200 && response.xhr.status !== 201) {
+        throw ServerConnection.makeError(response);
       }
-      let data = success.data as Contents.IModel;
+      let data = response.data as Contents.IModel;
       try {
         validate.validateContentsModel(data);
       } catch (err) {
-        throw utils.makeAjaxError(success, err.message);
+        throw ServerConnection.makeError(response, err.message);
       }
       this._fileChanged.emit({
         type: 'save',
@@ -642,22 +614,20 @@ class ContentsManager implements Contents.IManager {
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents) and validates the response model.
    */
   copy(fromFile: string, toDir: string): Promise<Contents.IModel> {
-    let ajaxSettings = this.ajaxSettings;
-    ajaxSettings.method = 'POST';
-    ajaxSettings.data = JSON.stringify({ copy_from: fromFile });
-    ajaxSettings.contentType = 'application/json';
-    ajaxSettings.dataType = 'json';
-
-    let url = this._getUrl(toDir);
-    return utils.ajaxRequest(url, ajaxSettings).then(success => {
-      if (success.xhr.status !== 201) {
-        throw utils.makeAjaxError(success);
+    let request = {
+      url: this._getUrl(toDir),
+      method: 'POST',
+      data: JSON.stringify({ copy_from: fromFile })
+    };
+    return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
+      if (response.xhr.status !== 201) {
+        throw ServerConnection.makeError(response);
       }
-      let data = success.data as Contents.IModel;
+      let data = response.data as Contents.IModel;
       try {
         validate.validateContentsModel(data);
       } catch (err) {
-        throw utils.makeAjaxError(success, err.message);
+        throw ServerConnection.makeError(response, err.message);
       }
       this._fileChanged.emit({
         type: 'new',
@@ -680,21 +650,21 @@ class ContentsManager implements Contents.IManager {
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents) and validates the response model.
    */
   createCheckpoint(path: string): Promise<Contents.ICheckpointModel> {
-    let ajaxSettings = this.ajaxSettings;
-    ajaxSettings.method = 'POST';
-    ajaxSettings.dataType = 'json';
-
-    let url = this._getUrl(path, 'checkpoints');
-    return utils.ajaxRequest(url, ajaxSettings).then(success => {
-      if (success.xhr.status !== 201) {
-        throw utils.makeAjaxError(success);
+    let request = {
+      url: this._getUrl(path, 'checkpoints'),
+      method: 'POST'
+    };
+    return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
+      if (response.xhr.status !== 201) {
+        throw ServerConnection.makeError(response);
       }
+      let data = response.data as Contents.ICheckpointModel;
       try {
-        validate.validateCheckpointModel(success.data);
+        validate.validateCheckpointModel(data);
       } catch (err) {
-        throw utils.makeAjaxError(success, err.message);
+        throw ServerConnection.makeError(response, err.message);
       }
-      return success.data;
+      return data;
     });
   }
 
@@ -710,27 +680,26 @@ class ContentsManager implements Contents.IManager {
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents) and validates the response model.
    */
   listCheckpoints(path: string): Promise<Contents.ICheckpointModel[]> {
-    let ajaxSettings = this.ajaxSettings;
-    ajaxSettings.method = 'GET';
-    ajaxSettings.dataType = 'json';
-    ajaxSettings.cache = false;
-
-    let url = this._getUrl(path, 'checkpoints');
-    return utils.ajaxRequest(url, ajaxSettings).then(success => {
-      if (success.xhr.status !== 200) {
-        throw utils.makeAjaxError(success);
+    let request = {
+      url: this._getUrl(path, 'checkpoints'),
+      method: 'GET',
+      cache: false
+    };
+    return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
+      if (response.xhr.status !== 200) {
+        throw ServerConnection.makeError(response);
       }
-      if (!Array.isArray(success.data)) {
-        throw utils.makeAjaxError(success, 'Invalid Checkpoint list');
+      if (!Array.isArray(response.data)) {
+        throw ServerConnection.makeError(response, 'Invalid Checkpoint list');
       }
-      for (let i = 0; i < success.data.length; i++) {
+      for (let i = 0; i < response.data.length; i++) {
         try {
-        validate.validateCheckpointModel(success.data[i]);
+        validate.validateCheckpointModel(response.data[i]);
         } catch (err) {
-          throw utils.makeAjaxError(success, err.message);
+          throw ServerConnection.makeError(response, err.message);
         }
       }
-      return success.data;
+      return response.data;
     });
   }
 
@@ -747,14 +716,13 @@ class ContentsManager implements Contents.IManager {
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents).
    */
   restoreCheckpoint(path: string, checkpointID: string): Promise<void> {
-    let ajaxSettings = this.ajaxSettings;
-    ajaxSettings.method = 'POST';
-    ajaxSettings.dataType = 'json';
-
-    let url = this._getUrl(path, 'checkpoints', checkpointID);
-    return utils.ajaxRequest(url, ajaxSettings).then(success => {
-      if (success.xhr.status !== 204) {
-        throw utils.makeAjaxError(success);
+    let request = {
+      url: this._getUrl(path, 'checkpoints', checkpointID),
+      method: 'POST'
+    };
+    return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
+      if (response.xhr.status !== 204) {
+        throw ServerConnection.makeError(response);
       }
     });
 
@@ -773,14 +741,13 @@ class ContentsManager implements Contents.IManager {
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents).
    */
   deleteCheckpoint(path: string, checkpointID: string): Promise<void> {
-    let ajaxSettings = this.ajaxSettings;
-    ajaxSettings.method = 'DELETE';
-    ajaxSettings.dataType = 'json';
-
-    let url = this._getUrl(path, 'checkpoints', checkpointID);
-    return utils.ajaxRequest(url, ajaxSettings).then(success => {
-      if (success.xhr.status !== 204) {
-        throw utils.makeAjaxError(success);
+    let request = {
+      url: this._getUrl(path, 'checkpoints', checkpointID),
+      method: 'DELETE'
+    };
+    return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
+      if (response.xhr.status !== 204) {
+        throw ServerConnection.makeError(response);
       }
     });
   }
@@ -790,13 +757,12 @@ class ContentsManager implements Contents.IManager {
    */
   private _getUrl(...args: string[]): string {
     let parts = args.map(path => URLExt.encodeParts(path));
-    return URLExt.join(this._baseUrl, SERVICE_CONTENTS_URL,
+    let baseUrl = this.serverSettings.baseUrl;
+    return URLExt.join(baseUrl, SERVICE_CONTENTS_URL,
                        ...parts);
   }
 
-  private _baseUrl = '';
   private _isDisposed = false;
-  private _ajaxSettings: IAjaxSettings = null;
   private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
 }
 
@@ -812,19 +778,9 @@ namespace ContentsManager {
   export
   interface IOptions {
     /**
-     * The root url of the server.
+     * The server settings for the server.
      */
-    baseUrl?: string;
-
-    /**
-     * The authentication token for the API.
-     */
-    token?: string;
-
-    /**
-     * The default ajax settings to use for the kernel.
-     */
-    ajaxSettings?: IAjaxSettings;
+    serverSettings?: ServerConnection.ISettings;
   }
 }
 

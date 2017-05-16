@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  Kernel, KernelMessage, Session, utils
+  Kernel, KernelMessage, ServerConnection, Session
 } from '@jupyterlab/services';
 
 import {
@@ -79,6 +79,7 @@ interface IClientSession extends IDisposable {
    * The current path associated with the client sesssion.
    */
   readonly path: string;
+
   /**
    * The current name associated with the client sesssion.
    */
@@ -627,7 +628,7 @@ class ClientSession implements IClientSession {
   /**
    * Handle an error in session startup.
    */
-  private _handleSessionError(err: utils.IAjaxError): Promise<void> {
+  private _handleSessionError(err: ServerConnection.IError): Promise<void> {
     let response = String(err.xhr.response);
     try {
       response = JSON.parse(err.xhr.response)['traceback'];

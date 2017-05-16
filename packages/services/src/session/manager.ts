@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  PageConfig
-} from '@jupyterlab/coreutils';
-
-import {
   ArrayExt, IIterator, iter
 } from '@phosphor/algorithm';
 
@@ -22,8 +18,8 @@ import {
 } from '../kernel';
 
 import {
-  IAjaxSettings
-} from '../utils';
+  ServerConnection
+} from '..';
 
 import {
   Session
@@ -41,9 +37,9 @@ class SessionManager implements Session.IManager {
    * @param options - The default options for each session.
    */
   constructor(options: Session.IOptions = {}) {
-    this._baseUrl = options.baseUrl || PageConfig.getBaseUrl();
-    this._wsUrl = options.wsUrl || PageConfig.getWsUrl(this._baseUrl);
-    this._ajaxSettings = JSON.stringify(options.ajaxSettings || {});
+    this.serverSettings = (
+      options.serverSettings || ServerConnection.makeSettings()
+    );
 
     // Initialize internal data.
     this._readyPromise = this._refreshSpecs().then(() => {
@@ -81,28 +77,9 @@ class SessionManager implements Session.IManager {
   }
 
   /**
-   * The base url of the manager.
+   * The server settings of the manager.
    */
-  get baseUrl(): string {
-    return this._baseUrl;
-  }
-
-  /**
-   * The base ws url of the manager.
-   */
-  get wsUrl(): string {
-    return this._wsUrl;
-  }
-
-  /**
-   * The default ajax settings for the manager.
-   */
-  get ajaxSettings(): IAjaxSettings {
-    return JSON.parse(this._ajaxSettings);
-  }
-  set ajaxSettings(value: IAjaxSettings) {
-    this._ajaxSettings = JSON.stringify(value);
-  }
+  readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Get the most recently fetched kernel specs.
@@ -181,7 +158,8 @@ class SessionManager implements Session.IManager {
    *   `'path'`.
    */
   startNew(options: Session.IOptions): Promise<Session.ISession> {
-    return Session.startNew(this._getOptions(options)).then(session => {
+    let serverSettings = this.serverSettings;
+    return Session.startNew({ ...options, serverSettings }).then(session => {
       this._onStarted(session);
       return session;
     });
@@ -196,7 +174,7 @@ class SessionManager implements Session.IManager {
    * @returns A promise that resolves when the relevant sessions are stopped.
    */
   stopIfNeeded(path: string): Promise<void> {
-    return Session.listRunning().then(sessions => {
+    return Session.listRunning(this.serverSettings).then(sessions => {
       const matches = sessions.filter(value => value.notebook.path === path);
       if (matches.length === 1) {
         const id = matches[0].id;
@@ -208,22 +186,22 @@ class SessionManager implements Session.IManager {
   /**
    * Find a session by id.
    */
-  findById(id: string, options?: Session.IOptions): Promise<Session.IModel> {
-    return Session.findById(id, this._getOptions(options));
+  findById(id: string): Promise<Session.IModel> {
+    return Session.findById(id, this.serverSettings);
   }
 
   /**
    * Find a session by path.
    */
-  findByPath(path: string, options?: Session.IOptions): Promise<Session.IModel> {
-    return Session.findByPath(path, this._getOptions(options));
+  findByPath(path: string): Promise<Session.IModel> {
+    return Session.findByPath(path, this.serverSettings);
   }
 
   /*
    * Connect to a running session.  See also [[connectToSession]].
    */
-  connectTo(id: string, options?: Session.IOptions): Promise<Session.ISession> {
-    return Session.connectTo(id, this._getOptions(options)).then(session => {
+  connectTo(id: string): Promise<Session.ISession> {
+    return Session.connectTo(id, this.serverSettings).then(session => {
       this._onStarted(session);
       return session;
     });
@@ -232,20 +210,10 @@ class SessionManager implements Session.IManager {
   /**
    * Shut down a session by id.
    */
-  shutdown(id: string, options?: Session.IOptions): Promise<void> {
-    return Session.shutdown(id, this._getOptions(options)).then(() => {
+  shutdown(id: string): Promise<void> {
+    return Session.shutdown(id, this.serverSettings).then(() => {
       this._onTerminated(id);
     });
-  }
-
-  /**
-   * Get optionally overidden options.
-   */
-  private _getOptions(options: Session.IOptions = {}): Session.IOptions {
-    options.baseUrl = this._baseUrl;
-    options.wsUrl = this._wsUrl;
-    options.ajaxSettings = options.ajaxSettings || this.ajaxSettings;
-    return options;
   }
 
   /**
@@ -295,11 +263,7 @@ class SessionManager implements Session.IManager {
    * Refresh the specs.
    */
   private _refreshSpecs(): Promise<void> {
-    let options = {
-      baseUrl: this._baseUrl,
-      ajaxSettings: this.ajaxSettings
-    };
-    return Kernel.getSpecs(options).then(specs => {
+    return Kernel.getSpecs(this.serverSettings).then(specs => {
       if (!JSONExt.deepEqual(specs, this._specs)) {
         this._specs = specs;
         this._specsChanged.emit(specs);
@@ -311,7 +275,7 @@ class SessionManager implements Session.IManager {
    * Refresh the running sessions.
    */
   private _refreshRunning(): Promise<void> {
-    return Session.listRunning(this._getOptions({})).then(running => {
+    return Session.listRunning(this.serverSettings).then(running => {
       if (!JSONExt.deepEqual(running, this._running)) {
         this._running = running.slice();
         this._runningChanged.emit(running);
@@ -319,9 +283,6 @@ class SessionManager implements Session.IManager {
     });
   }
 
-  private _baseUrl = '';
-  private _wsUrl = '';
-  private _ajaxSettings = '';
   private _isDisposed = false;
   private _running: Session.IModel[] = [];
   private _specs: Kernel.ISpecModels = null;

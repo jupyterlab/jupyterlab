@@ -120,14 +120,19 @@ Follow the package install instructions first.
 npm install --save xmlhttprequest ws
 ```
 
-Override the global `XMLHttpRequest` and `WebSocket` (in ES6 syntax):
+Use `XMLHttpRequest` and `WebSocket` in the server settings (in ES6 syntax):
 
 ```typescript
+import { Kernel, ServerConnection } from '@jupyterlab/services';
 import { XMLHttpRequest } from "xmlhttprequest";
 import { default as WebSocket } from 'ws';
 
-global.XMLHttpRequest = XMLHttpRequest;
-global.WebSocket = WebSocket;
+
+let serverSettings = ServerConnection.makeSettings({
+  xml: XMLHttpRequest,
+  webSocket: WebSocket
+});
+Kernel.startNew({ serverSettings }).then(...);
 ```
 
 See `examples/node` for an example of using an ES5 node script.
@@ -148,29 +153,21 @@ import {
   KernelMessage, Kernel
 } from '@jupyterlab/services';
 
-// The base url of the notebook server.
-const BASE_URL = 'http://localhost:8000';
 
-
-// Get a list of available kernels and connect to one.
-Kernel.listRunning({ baseUrl: BASE_URL }).then(kernelModels => {
-  let options: Kernel.IOptions = {
-    baseUrl: BASE_URL,
-    name: kernelModels[0].name
-  };
-  Kernel.connectTo(kernelModels[0].id, options).then((kernel) => {
+/ Get a list of available kernels and connect to one.
+Kernel.listRunning().then(kernelModels => {
+  Kernel.connectTo(kernelModels[0].id).then((kernel) => {
     console.log(kernel.name);
   });
 });
 
 
 // Get info about the available kernels and start a new one.
-Kernel.getSpecs({ baseUrl: BASE_URL }).then(kernelSpecs => {
+Kernel.getSpecs().then(kernelSpecs => {
   console.log('Default spec:', kernelSpecs.default);
   console.log('Available specs', Object.keys(kernelSpecs.kernelspecs));
   // use the default name
   let options: Kernel.IOptions = {
-    baseUrl: BASE_URL,
     name: kernelSpecs.default
   };
   Kernel.startNew(options).then(kernel => {
@@ -211,6 +208,7 @@ Kernel.getSpecs({ baseUrl: BASE_URL }).then(kernelSpecs => {
     });
   });
 });
+
 ```
 
 **Session**
@@ -221,25 +219,15 @@ import {
 } from '@jupyterlab/services';
 
 
-// The base url of the Jupyter server.
-const BASE_URL = 'http://localhost:8000';
-
-
 // Get a list of available sessions and connect to one.
-Session.listRunning({ baseUrl: BASE_URL }).then(sessionModels => {
-  let options = {
-    baseUrl: BASE_URL,
-    kernelName: sessionModels[0].kernel.name,
-    path: sessionModels[0].notebook.path
-  };
-  Session.connectTo(sessionModels[0].id, options).then((session) => {
+Session.listRunning().then(sessionModels => {
+  Session.connectTo(sessionModels[0].id).then((session) => {
     console.log(session.kernel.name);
   });
 });
 
 // Start a new session.
 let options = {
-  baseUrl: BASE_URL,
   kernelName: 'python',
   path: '/tmp/foo.ipynb'
 };
@@ -273,16 +261,12 @@ Session.startNew(options).then(session => {
 **Comm**
 
 ```typescript
-// The base url of the Jupyter server.
-const BASE_URL = 'http://localhost:8000';
-
 
 // Create a comm from the server side.
 //
 // Get info about the available kernels and connect to one.
-Kernel.getSpecs({ baseUrl: BASE_URL }).then(kernelSpecs => {
+Kernel.getSpecs().then(kernelSpecs => {
   return Kernel.startNew({
-    baseUrl: BASE_URL,
     name: kernelSpecs.default,
   });
 }).then(kernel => {
@@ -293,9 +277,8 @@ Kernel.getSpecs({ baseUrl: BASE_URL }).then(kernelSpecs => {
 });
 
 // Create a comm from the client side.
-Kernel.getSpecs({ baseUrl: BASE_URL }).then(kernelSpecs => {
+Kernel.getSpecs().then(kernelSpecs => {
   return Kernel.startNew({
-    baseUrl: BASE_URL,
     name: kernelSpecs.default,
   });
 }).then(kernel => {
@@ -328,11 +311,7 @@ import {
   ContentsManager
 } from '@jupyterlab/services';
 
-// The base url of the Jupyter server.
-let baseUrl = 'http://localhost:8000';
-
-
-let contents = new ContentsManager({ baseUrl });
+let contents = new ContentsManager();
 
 // Create a new python file.
 contents.newUntitled({ path: '/foo', type: 'file', ext: 'py' }).then(
@@ -387,9 +366,8 @@ import {
 } from '@jupyterlab/services';
 
 // The base url of the Jupyter server.
-let baseUrl = 'http://localhost:8000';
 
-ConfigSection.create({ name: 'notebook', baseUrl }).then(section => {
+ConfigSection.create({ name: 'notebook' }).then(section => {
   let config = new ConfigWithDefaults({
     section,
     defaults: { default_cell_type: 'code' },

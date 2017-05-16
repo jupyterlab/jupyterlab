@@ -38,9 +38,9 @@
     "build": "npm run build:src",
     "test:coverage": "istanbul cover --dir test/coverage _mocha -- --retries 3 test/build/**/*.spec.js test/build/*.spec.js --jupyter-config-data=./test/config.json",
     "test:integration": "cd test && python integration_test.py",
-    "test:devtool": "devtool node_modules/.bin/_mocha -qc test/build/**/*.spec.js test/build*.spec.js --jupyter-config-data=./test/config.json",
-    "test:debug": "mocha test/build/**/*.spec.js test/build*.spec.js  --jupyter-config-data=./test/config.json --debug-brk",
-    "test": "mocha --retries 3 test/build/**/*.spec.js test/build*.spec.js --jupyter-config-data=./test/config.json"
+    "test:devtool": "devtool node_modules/.bin/_mocha -qc ttest/build/**/*.spec.js test/build/*.spec.js --jupyter-config-data=./test/config.json --timeout=50000",
+    "test:debug": "mocha test/build/**/*.spec.js test/build/*.spec.js  --jupyter-config-data=./test/config.json --debug-brk",
+    "test": "mocha --retries 3 test/build/**/*.spec.js test/build/*.spec.js --jupyter-config-data=./test/config.json"
   },
   "repository": {
     "type": "git",

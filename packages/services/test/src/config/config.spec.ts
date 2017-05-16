@@ -12,7 +12,7 @@ import {
 } from '../../../lib/config';
 
 import {
-  RequestHandler, ajaxSettings, expectAjaxError
+  RequestHandler, serverSettings, expectAjaxError
 } from '../utils';
 
 
@@ -33,7 +33,7 @@ describe('config', () => {
       let handler = new RequestHandler(() => {
         handler.respond(200, {});
       });
-      ConfigSection.create({ name: 'test', ajaxSettings }).then(config => {
+      ConfigSection.create({ name: 'test', serverSettings }).then(config => {
         done();
       });
     });
@@ -79,11 +79,11 @@ describe('config', () => {
       });
     });
 
-    it('should accept ajaxOptions', (done) => {
+    it('should accept server settings', (done) => {
       let handler = new RequestHandler(() => {
         handler.respond(200, {});
       });
-      ConfigSection.create({ name: 'test', ajaxSettings }).then(config => {
+      ConfigSection.create({ name: 'test', serverSettings }).then(config => {
         handler.onRequest = () => {
           handler.respond(200, config.data );
         };

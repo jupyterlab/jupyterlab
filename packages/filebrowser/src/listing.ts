@@ -396,9 +396,6 @@ class DirListing extends Widget {
       }
     }
     return Promise.all(promises).catch(error => {
-      if (error.throwError) {
-        error.message = error.throwError;
-      }
       utils.showErrorMessage('Duplicate file', error);
     });
   }

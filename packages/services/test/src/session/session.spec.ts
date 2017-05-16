@@ -12,10 +12,6 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  IAjaxError
-} from '../../../lib/utils';
-
-import {
   KernelMessage
 } from '../../../lib/kernel';
 
@@ -24,7 +20,7 @@ import {
 } from '../../../lib/session';
 
 import {
-  ajaxSettings, expectFailure, KernelTester
+  serverSettings, expectFailure, KernelTester
 } from '../utils';
 
 
@@ -73,7 +69,7 @@ describe('session', () => {
     it('should yield a list of valid session models', (done) => {
       let sessionModels = [createSessionModel(), createSessionModel()];
       tester.runningSessions = sessionModels;
-      let list = Session.listRunning({ baseUrl: 'http://localhost:8888' });
+      let list = Session.listRunning();
       list.then(response => {
         let running = toArray(response);
         expect(running[0]).to.eql(sessionModels[0]);
@@ -85,7 +81,7 @@ describe('session', () => {
     it('should accept ajax options', (done) => {
       let sessionModels = [createSessionModel(), createSessionModel()];
       tester.runningSessions = sessionModels;
-      let list = Session.listRunning({ ajaxSettings: ajaxSettings });
+      let list = Session.listRunning(serverSettings);
       list.then(response => {
         let running = toArray(response);
         expect(running[0]).to.eql(sessionModels[0]);
@@ -99,7 +95,7 @@ describe('session', () => {
       tester.onRequest = () => {
         tester.respond(200, data);
       };
-      let list = Session.listRunning({ baseUrl: 'http://localhost:8888' });
+      let list = Session.listRunning();
       expectFailure(list, done);
     });
 
@@ -166,8 +162,7 @@ describe('session', () => {
     });
 
     it('should accept ajax options', (done) => {
-      let options: Session.IOptions = { path: 'foo' };
-      options.ajaxSettings = ajaxSettings;
+      let options: Session.IOptions = { path: 'foo', serverSettings };
       Session.startNew(options).then(s => {
         session = s;
         expect(session.id).to.ok();
@@ -278,23 +273,20 @@ describe('session', () => {
       });
     });
 
-    it('should connect to a client session if given session options', (done) => {
+    it('should connect to a client session if available', (done) => {
       let sessionModel = createSessionModel();
       tester.runningSessions = [sessionModel];
-      let options = createSessionOptions(sessionModel);
-      Session.connectTo(sessionModel.id, options).then(s => {
+      Session.connectTo(sessionModel.id, serverSettings).then(s => {
         session = s;
         expect(session.id).to.be(sessionModel.id);
         done();
       }).catch(done);
     });
 
-    it('should accept ajax options', (done) => {
+    it('should accept server settings', (done) => {
       let sessionModel = createSessionModel();
       tester.runningSessions = [sessionModel];
-      let options = createSessionOptions(sessionModel);
-      options.ajaxSettings = ajaxSettings;
-      Session.connectTo(sessionModel.id, options).then(s => {
+      Session.connectTo(sessionModel.id, serverSettings).then(s => {
         session = s;
         expect(session.id).to.be.ok();
         done();
@@ -306,8 +298,7 @@ describe('session', () => {
         tester.respond(500, {});
       };
       let sessionModel = createSessionModel();
-      let options = createSessionOptions(sessionModel);
-      let sessionPromise = Session.connectTo(sessionModel.id, options);
+      let sessionPromise = Session.connectTo(sessionModel.id, serverSettings);
       expectFailure(
         sessionPromise, done, 'No running session with id: ' + sessionModel.id
       );
@@ -484,10 +475,10 @@ describe('session', () => {
       });
     });
 
-    context('#baseUrl', () => {
+    context('#serverSettings', () => {
 
-      it('should be the base url of the server', () => {
-        expect(session.baseUrl).to.be(PageConfig.getBaseUrl());
+      it('should be the serverSettings', () => {
+        expect(session.serverSettings.baseUrl).to.be(PageConfig.getBaseUrl());
       });
 
     });
@@ -652,11 +643,6 @@ describe('session', () => {
         });
       });
 
-      it('should accept ajax options', (done) => {
-        session.ajaxSettings = ajaxSettings;
-        session.shutdown().then(done, done);
-      });
-
       it('should fail for an incorrect response status', (done) => {
         tester.onRequest = () => {
           tester.respond(200, { });
@@ -676,9 +662,9 @@ describe('session', () => {
         tester.onRequest = () => {
           tester.respond(410, { });
         };
-        session.shutdown().catch((err: IAjaxError) => {
+        session.shutdown().catch(err => {
           let text ='The kernel was deleted but the session was not';
-          expect(err.throwError).to.contain(text);
+          expect(err.message).to.contain(text);
         }).then(done, done);
       });
 

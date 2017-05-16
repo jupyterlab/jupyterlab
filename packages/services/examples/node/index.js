@@ -10,15 +10,18 @@ var ws = require('ws');
 var xhr = require('xmlhttprequest');
 
 
-// Override the global request and socket functions.
-global.XMLHttpRequest = xhr.XMLHttpRequest;
-global.WebSocket = ws;
-
+// Set the request and socket functions.
+var serverSettings = services.ServerConnection.makeSettings({
+  xhrFactory: function () { return new xhr.XMLHttpRequest() },
+  wsFactory: function (url, protocol) { return new ws(url, protocol); }
+});
 
 // Start a new session.
+
 var options = {
   kernelName: 'python',
-  path: 'foo.ipynb'
+  path: 'foo.ipynb',
+  serverSettings: serverSettings
 }
 
 

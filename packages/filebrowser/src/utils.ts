@@ -33,7 +33,7 @@ function showErrorMessage(title: string, error: any): Promise<void> {
   console.error(error);
   let options = {
     title: title,
-    body: error.throwError || error.message || `File ${title}`,
+    body: error.message || `File ${title}`,
     buttons: [Dialog.okButton()],
     okText: 'DISMISS'
   };

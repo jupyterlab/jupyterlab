@@ -555,7 +555,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
 
       let notebookPath = URLExt.encodeParts(current.context.path);
       let url = URLExt.join(
-        services.baseUrl,
+        services.serverSettings.baseUrl,
         'nbconvert',
         (args['format']) as string,
         notebookPath
@@ -1074,7 +1074,7 @@ function createMenu(app: JupyterLab): Menu {
   EXPORT_TO_FORMATS.forEach(exportToFormat => {
     exportTo.addItem({ command: CommandIDs.exportToFormat, args: exportToFormat });
   });
-  
+
   menu.addItem({ command: CommandIDs.undo });
   menu.addItem({ command: CommandIDs.redo });
   menu.addItem({ type: 'separator' });

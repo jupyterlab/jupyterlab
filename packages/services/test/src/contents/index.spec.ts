@@ -4,11 +4,11 @@
 import expect = require('expect.js');
 
 import {
-  Contents, ContentsManager
-} from '../../../lib/contents';
+  Contents, ContentsManager, ServerConnection
+} from '../../../lib';
 
 import {
-  DEFAULT_FILE, RequestHandler, ajaxSettings, expectFailure, expectAjaxError
+  DEFAULT_FILE, RequestHandler, serverSettings, expectFailure, expectAjaxError
 } from '../utils';
 
 
@@ -41,8 +41,7 @@ describe('contents', () => {
 
     it('should accept options', () => {
       let contents = new ContentsManager({
-        baseUrl: 'foo',
-        ajaxSettings: {}
+        serverSettings
       });
       expect(contents).to.be.a(ContentsManager);
     });
@@ -120,8 +119,8 @@ describe('contents', () => {
       });
     });
 
-    it('should accept ajax options', (done) => {
-      let contents = new ContentsManager({ ajaxSettings });
+    it('should accept server settings', (done) => {
+      let contents = new ContentsManager({ serverSettings });
       let handler = new RequestHandler(() => {
         handler.respond(200, DEFAULT_DIR);
       });
@@ -146,8 +145,12 @@ describe('contents', () => {
 
   describe('#getDownloadUrl()', () => {
 
+    let settings = ServerConnection.makeSettings({
+      baseUrl: 'http://foo'
+    });
+
     it('should get the url of a file', () => {
-      let contents = new ContentsManager({ baseUrl: 'http://foo', });
+      let contents = new ContentsManager({ serverSettings: settings });
       let test1 = contents.getDownloadUrl('bar.txt');
       let test2 = contents.getDownloadUrl('fizz/buzz/bar.txt');
       let test3 = contents.getDownloadUrl('/bar.txt');
@@ -159,14 +162,14 @@ describe('contents', () => {
     });
 
     it('should encode characters', () => {
-      let contents = new ContentsManager({ baseUrl: 'http://foo', });
+      let contents = new ContentsManager({ serverSettings: settings });
       return contents.getDownloadUrl('b ar?3.txt').then(url => {
         expect(url).to.be('http://foo/files/b%20ar%3F3.txt');
       });
     });
 
     it('should not handle relative paths', () => {
-      let contents = new ContentsManager({ baseUrl: 'http://foo', });
+      let contents = new ContentsManager({ serverSettings: settings });
       return contents.getDownloadUrl('fizz/../bar.txt').then(url => {
         expect(url).to.be('http://foo/files/fizz/../bar.txt');
       });
@@ -207,8 +210,8 @@ describe('contents', () => {
 
     });
 
-    it('should accept ajax options', (done) => {
-      let contents = new ContentsManager({ ajaxSettings });
+    it('should accept server settings', (done) => {
+      let contents = new ContentsManager({ serverSettings });
       let handler = new RequestHandler(() => {
         handler.respond(201, DEFAULT_DIR);
       });
@@ -276,8 +279,8 @@ describe('contents', () => {
       contents.delete(path).catch(done);
     });
 
-    it('should accept ajax options', (done) => {
-      let contents = new ContentsManager({ ajaxSettings });
+    it('should accept server settings', (done) => {
+      let contents = new ContentsManager({ serverSettings });
       let handler = new RequestHandler(() => {
         handler.respond(204, { });
       });
@@ -343,8 +346,8 @@ describe('contents', () => {
       contents.rename('/foo/bar.txt', '/foo/baz.txt').catch(done);
     });
 
-    it('should accept ajax options', (done) => {
-      let contents = new ContentsManager({ ajaxSettings });
+    it('should accept server settings', (done) => {
+      let contents = new ContentsManager({ serverSettings });
       let handler = new RequestHandler(() => {
         handler.respond(200, DEFAULT_FILE);
       });
@@ -417,8 +420,8 @@ describe('contents', () => {
       contents.save('/foo', { type: 'file', name: 'test' }).catch(done);
     });
 
-    it('should accept ajax options', (done) => {
-      let contents = new ContentsManager({ ajaxSettings });
+    it('should accept server settings', (done) => {
+      let contents = new ContentsManager({ serverSettings });
       let handler = new RequestHandler(() => {
         handler.respond(200, DEFAULT_FILE);
       });
@@ -478,8 +481,8 @@ describe('contents', () => {
       contents.copy('/foo/bar.txt', '/baz').catch(done);
     });
 
-    it('should accept ajax options', (done) => {
-      let contents = new ContentsManager({ ajaxSettings });
+    it('should accept server settings', (done) => {
+      let contents = new ContentsManager({ serverSettings });
       let handler = new RequestHandler(() => {
         handler.respond(201, DEFAULT_FILE);
       });
@@ -525,8 +528,8 @@ describe('contents', () => {
       });
     });
 
-    it('should accept ajax options', (done) => {
-      let contents = new ContentsManager({ ajaxSettings });
+    it('should accept server settings', (done) => {
+      let contents = new ContentsManager({ serverSettings });
       let handler = new RequestHandler(() => {
         handler.respond(201, DEFAULT_CP);
       });
@@ -573,8 +576,8 @@ describe('contents', () => {
       });
     });
 
-    it('should accept ajax options', (done) => {
-      let contents = new ContentsManager({ ajaxSettings });
+    it('should accept server settings', (done) => {
+      let contents = new ContentsManager({ serverSettings });
       let handler = new RequestHandler(() => {
         handler.respond(200, [DEFAULT_CP, DEFAULT_CP]);
       });
@@ -629,8 +632,8 @@ describe('contents', () => {
       });
     });
 
-    it('should accept ajax options', (done) => {
-      let contents = new ContentsManager({ ajaxSettings });
+    it('should accept server settings', (done) => {
+      let contents = new ContentsManager({ serverSettings });
       let handler = new RequestHandler(() => {
         handler.respond(204, { });
       });
@@ -664,8 +667,8 @@ describe('contents', () => {
       .then(() => { done(); });
     });
 
-    it('should accept ajax options', (done) => {
-      let contents = new ContentsManager({ ajaxSettings });
+    it('should accept server settings', (done) => {
+      let contents = new ContentsManager({ serverSettings });
       let handler = new RequestHandler(() => {
         handler.respond(204, { });
       });

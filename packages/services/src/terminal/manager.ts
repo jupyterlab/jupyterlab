@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  PageConfig
-} from '@jupyterlab/coreutils';
-
-import {
   ArrayExt, IIterator, iter
 } from '@phosphor/algorithm';
 
@@ -18,11 +14,8 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  IAjaxSettings
-} from '../utils';
-
-import * as utils
-  from '../utils';
+  ServerConnection
+} from '..';
 
 import {
   TerminalSession
@@ -38,9 +31,7 @@ class TerminalManager implements TerminalSession.IManager {
    * Construct a new terminal manager.
    */
   constructor(options: TerminalManager.IOptions = {}) {
-    this._baseUrl = options.baseUrl || PageConfig.getBaseUrl();
-    this._wsUrl = options.wsUrl || PageConfig.getWsUrl(this._baseUrl);
-    this._ajaxSettings = JSON.stringify(options.ajaxSettings || {});
+    this.serverSettings = options.serverSettings || ServerConnection.makeSettings();
 
     // Set up state handling if terminals are available.
     if (TerminalSession.isAvailable()) {
@@ -69,32 +60,9 @@ class TerminalManager implements TerminalSession.IManager {
   }
 
   /**
-   * The base url of the manager.
+   * The server settings of the manager.
    */
-  get baseUrl(): string {
-    return this._baseUrl;
-  }
-
-  /**
-   * The base ws url of the manager.
-   */
-  get wsUrl(): string {
-    return this._wsUrl;
-  }
-
-  /**
-   * The default ajax settings for the manager.
-   */
-  get ajaxSettings(): IAjaxSettings {
-    return JSON.parse(this._ajaxSettings);
-  }
-
-  /**
-   * Set the default ajax settings for the manager.
-   */
-  set ajaxSettings(value: IAjaxSettings) {
-    this._ajaxSettings = JSON.stringify(value);
-  }
+  readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Test whether the manger is ready.
@@ -142,15 +110,13 @@ class TerminalManager implements TerminalSession.IManager {
   /**
    * Create a new terminal session.
    *
-   * @param ajaxSettings - The ajaxSettings to use, overrides manager
-   *   settings.
+   * @param options - The options used to connect to the session.
    *
    * @returns A promise that resolves with the terminal instance.
    *
    * #### Notes
-   * The baseUrl and wsUrl of the options will be forced
-   * to the ones used by the manager. The ajaxSettings of the manager
-   * will be used unless overridden.
+   * The manager `serverSettings` will be used unless overridden in the
+   * options.
    */
   startNew(options?: TerminalSession.IOptions): Promise<TerminalSession.ISession> {
     return TerminalSession.startNew(this._getOptions(options)).then(session => {
@@ -164,17 +130,15 @@ class TerminalManager implements TerminalSession.IManager {
    *
    * @param name - The name of the target session.
    *
-   * @param ajaxSettings - The ajaxSettings to use, overrides manager
-   *   settings.
+   * @param options - The options used to connect to the session.
    *
    * @returns A promise that resolves with the new session instance.
    *
    * #### Notes
-   * The baseUrl and wsUrl of the options will be forced
-   * to the ones used by the manager. The ajaxSettings of the manager
-   * will be used unless overridden.
+   * The manager `serverSettings` will be used unless overridden in the
+   * options.
    */
-  connectTo(name: string, options?: IAjaxSettings): Promise<TerminalSession.ISession> {
+  connectTo(name: string, options?: TerminalSession.IOptions): Promise<TerminalSession.ISession> {
     return TerminalSession.connectTo(name, this._getOptions(options)).then(session => {
       this._onStarted(session);
       return session;
@@ -185,7 +149,7 @@ class TerminalManager implements TerminalSession.IManager {
    * Shut down a terminal session by name.
    */
   shutdown(name: string): Promise<void> {
-    return TerminalSession.shutdown(name, this._getOptions()).then(() => {
+    return TerminalSession.shutdown(name, this.serverSettings).then(() => {
       this._onTerminated(name);
     });
   }
@@ -202,7 +166,6 @@ class TerminalManager implements TerminalSession.IManager {
   refreshRunning(): Promise<void> {
     return this._refreshRunning();
   }
-
 
   /**
    * Handle a session terminating.
@@ -234,7 +197,7 @@ class TerminalManager implements TerminalSession.IManager {
    * Refresh the running sessions.
    */
   private _refreshRunning(): Promise<void> {
-    return TerminalSession.listRunning(this._getOptions({})).then(running => {
+    return TerminalSession.listRunning(this.serverSettings).then(running => {
       this._isReady = true;
       if (!JSONExt.deepEqual(running, this._running)) {
         this._running = running.slice();
@@ -247,15 +210,9 @@ class TerminalManager implements TerminalSession.IManager {
    * Get a set of options to pass.
    */
   private _getOptions(options: TerminalSession.IOptions = {}): TerminalSession.IOptions {
-    options.baseUrl = this.baseUrl;
-    options.wsUrl = this.wsUrl;
-    options.ajaxSettings = options.ajaxSettings || this.ajaxSettings;
-    return options;
-  }
+    return { ...options, serverSettings: this.serverSettings };
+  };
 
-  private _baseUrl = '';
-  private _wsUrl = '';
-  private _ajaxSettings = '';
   private _running: TerminalSession.IModel[] = [];
   private _isDisposed = false;
   private _isReady = false;
@@ -277,23 +234,8 @@ namespace TerminalManager {
   export
   interface IOptions {
     /**
-     * The base url.
+     * The server settings used by the manager.
      */
-    baseUrl?: string;
-
-    /**
-     * The base websocket url.
-     */
-    wsUrl?: string;
-
-    /**
-     * The authentication token for the API.
-     */
-    token?: string;
-
-    /**
-     * The Ajax settings used for server requests.
-     */
-    ajaxSettings?: utils.IAjaxSettings;
+    serverSettings?: ServerConnection.ISettings;
   }
 }

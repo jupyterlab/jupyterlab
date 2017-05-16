@@ -18,8 +18,8 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  IAjaxSettings
-} from '../utils';
+  ServerConnection
+} from '..';
 
 import {
   DefaultKernel
@@ -373,14 +373,9 @@ namespace Kernel {
     unhandledMessage: ISignal<this, KernelMessage.IMessage>;
 
     /**
-     * The base url of the kernel.
+     * The server settings for the kernel.
      */
-    readonly baseUrl: string;
-
-    /**
-     * The Ajax settings used for server requests.
-     */
-    ajaxSettings: IAjaxSettings;
+    readonly serverSettings: ServerConnection.ISettings;
 
     /**
      * Shutdown a kernel.
@@ -405,33 +400,47 @@ namespace Kernel {
   /**
    * Find a kernel by id.
    *
+   * @param id - The id of the kernel of interest.
+   *
+   * @param settings - The optional server settings.
+   *
+   * @returns A promise that resolves with the model for the kernel.
+   *
    * #### Notes
    * If the kernel was already started via `startNewKernel`, we return its
    * `Kernel.IModel`.
    *
-   * Otherwise, if `options` are given, we attempt to find to the existing
+   * Otherwise, we attempt to find to the existing
    * kernel.
    * The promise is fulfilled when the kernel is found,
    * otherwise the promise is rejected.
    */
   export
-  function findById(id: string, options?: IOptions): Promise<IModel> {
-    return DefaultKernel.findById(id, options);
+  function findById(id: string, settings?: ServerConnection.ISettings): Promise<IModel> {
+    return DefaultKernel.findById(id, settings);
   }
 
   /**
    * Fetch all of the kernel specs.
    *
+   * @param settings - The optional server settings.
+   *
+   * @returns A promise that resolves with the kernel specs.
+   *
    * #### Notes
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernelspecs).
    */
   export
-  function getSpecs(options: Kernel.IOptions = {}): Promise<Kernel.ISpecModels> {
-    return DefaultKernel.getSpecs(options);
+  function getSpecs(settings?: ServerConnection.ISettings): Promise<Kernel.ISpecModels> {
+    return DefaultKernel.getSpecs(settings);
   }
 
   /**
    * Fetch the running kernels.
+   *
+   * @param settings - The optional server settings.
+   *
+   * @returns A promise that resolves with the list of running kernels.
    *
    * #### Notes
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels) and validates the response model.
@@ -439,12 +448,16 @@ namespace Kernel {
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
   export
-  function listRunning(options: Kernel.IOptions = {}): Promise<Kernel.IModel[]> {
-    return DefaultKernel.listRunning(options);
+  function listRunning(settings?: ServerConnection.ISettings): Promise<Kernel.IModel[]> {
+    return DefaultKernel.listRunning(settings);
   }
 
   /**
    * Start a new kernel.
+   *
+   * @param options - The options used to create the kernel.
+   *
+   * @returns A promise that resolves with a kernel object.
    *
    * #### Notes
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels) and validates the response model.
@@ -464,6 +477,12 @@ namespace Kernel {
   /**
    * Connect to a running kernel.
    *
+   * @param id - The id of the running kernel.
+   *
+   * @param settings - The server settings for the request.
+   *
+   * @returns A promise that resolves with the kernel object.
+   *
    * #### Notes
    * If the kernel was already started via `startNewKernel`, the existing
    * Kernel object info is used to create another instance.
@@ -477,40 +496,38 @@ namespace Kernel {
    * the promise is rejected.
    */
   export
-  function connectTo(id: string, options?: Kernel.IOptions): Promise<IKernel> {
-    return DefaultKernel.connectTo(id, options);
+  function connectTo(id: string, settings?: ServerConnection.ISettings): Promise<IKernel> {
+    return DefaultKernel.connectTo(id, settings);
   }
 
   /**
    * Shut down a kernel by id.
+   *
+   * @param id - The id of the running kernel.
+   *
+   * @param settings - The server settings for the request.
+   *
+   * @returns A promise that resolves when the kernel is shut down.
    */
   export
-  function shutdown(id: string, options: Kernel.IOptions = {}): Promise<void> {
-    return DefaultKernel.shutdown(id, options);
+  function shutdown(id: string, settings?: ServerConnection.ISettings): Promise<void> {
+    return DefaultKernel.shutdown(id, settings);
   }
 
-  /**
-   * The interface of a kernel
   /**
    * The options object used to initialize a kernel.
    */
   export
-  interface IOptions extends JSONObject {
+  interface IOptions {
     /**
      * The kernel type (e.g. python3).
      */
     name?: string;
 
     /**
-     * The root url of the kernel server.
-     * Default is location.origin in browsers, notebook-server default otherwise.
+     * The server settings for the kernel.
      */
-    baseUrl?: string;
-
-    /**
-     * The url to access websockets, if different from baseUrl.
-     */
-    wsUrl?: string;
+    serverSettings?: ServerConnection.ISettings;
 
     /**
      * The username of the kernel client.
@@ -521,16 +538,6 @@ namespace Kernel {
      * The unique identifier for the kernel client.
      */
     clientId?: string;
-
-    /**
-     * The authentication token for the API.
-     */
-    token?: string;
-
-    /**
-     * The default ajax settings to use for the kernel.
-     */
-    ajaxSettings?: IAjaxSettings;
   }
 
   /**
@@ -553,19 +560,9 @@ namespace Kernel {
     runningChanged: ISignal<IManager, IModel[]>;
 
     /**
-     * The base url of the manager.
+     * The server settings for the manager.
      */
-    readonly baseUrl: string;
-
-    /**
-     * The base ws url of the manager.
-     */
-    readonly wsUrl: string;
-
-    /**
-     * The default ajax settings for the manager.
-     */
-    ajaxSettings?: IAjaxSettings;
+    serverSettings?: ServerConnection.ISettings;
 
     /**
      * The kernel spec models.
@@ -622,9 +619,7 @@ namespace Kernel {
      * @returns A promise that resolves with the kernel instance.
      *
      * #### Notes
-     * If options are given, the baseUrl and wsUrl will be forced
-     * to the ones used by the manager.  The ajaxSettings of the manager
-     * will be used unless overridden.
+     * The manager `serverSettings` will be always be used.
      */
     startNew(options?: IOptions): Promise<IKernel>;
 
@@ -638,20 +633,13 @@ namespace Kernel {
     findById(id: string): Promise<IModel>;
 
     /**
-     * Connect to an existing kernel.
+     * Connect to an existing  kernel.
      *
      * @param id - The id of the target kernel.
      *
-     * @param options - The kernel options to use.
-     *
      * @returns A promise that resolves with the new kernel instance.
-     *
-     * #### Notes
-     * If options are given, the baseUrl and wsUrl will be forced
-     * to the ones used by the manager. The ajaxSettings of the manager
-     * will be used unless overridden.
      */
-    connectTo(id: string, options?: IOptions): Promise<IKernel>;
+    connectTo(id: string): Promise<IKernel>;
 
     /**
      * Shut down a kernel by id.

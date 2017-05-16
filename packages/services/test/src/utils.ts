@@ -19,12 +19,12 @@ import {
 } from 'ws';
 
 import {
-  Contents, Kernel, KernelMessage, TerminalSession, Session
+  Contents, TerminalSession, Session, ServerConnection
 } from '../../lib';
 
 import {
-  IAjaxSettings, IAjaxError
-} from '../../lib/utils';
+  Kernel, KernelMessage
+} from '../../lib/kernel';
 
 import {
   deserialize, serialize
@@ -39,19 +39,25 @@ import {
 declare var global: any;
 
 global.WebSocket = WebSocket;
+if (typeof window === 'undefined') {
+  global.XMLHttpRequest = MockXMLHttpRequest;
+  global.TextEncoder = encoding.TextEncoder;
+  global.TextDecoder = encoding.TextDecoder;
+} else {
+  (window as any).XMLHttpRequest = MockXMLHttpRequest;
+}
 
 
 /**
  * Optional ajax arguments.
  */
 export
-const ajaxSettings: IAjaxSettings = {
-  timeout: 10,
+const serverSettings: ServerConnection.ISettings = ServerConnection.makeSettings({
   requestHeaders: { foo: 'bar', fizz: 'buzz' },
   withCredentials: true,
   user: 'foo',
   password: 'bar'
-};
+});
 
 
 export
@@ -76,7 +82,6 @@ const EXAMPLE_KERNEL_INFO: KernelMessage.IInfoReply = {
 
 export
 const KERNEL_OPTIONS: Kernel.IOptions = {
-  baseUrl: 'http://localhost:8888',
   name: 'python',
   username: 'testUser',
 };
@@ -84,10 +89,9 @@ const KERNEL_OPTIONS: Kernel.IOptions = {
 
 export
 const AJAX_KERNEL_OPTIONS: Kernel.IOptions = {
-  baseUrl: 'http://localhost:8888',
   name: 'python',
   username: 'testUser',
-  ajaxSettings: ajaxSettings
+  serverSettings
 };
 
 
@@ -165,13 +169,6 @@ class RequestHandler {
    * Create a new RequestHandler.
    */
   constructor(onRequest?: (request: MockXMLHttpRequest) => void) {
-    if (typeof window === 'undefined') {
-      global.XMLHttpRequest = MockXMLHttpRequest;
-      global.TextEncoder = encoding.TextEncoder;
-      global.TextDecoder = encoding.TextDecoder;
-    } else {
-      (window as any).XMLHttpRequest = MockXMLHttpRequest;
-    }
     MockXMLHttpRequest.requests = [];
 
     if (!onRequest) {
@@ -511,15 +508,15 @@ function expectFailure(promise: Promise<any>, done: () => void, message?: string
 
 
 /**
- * Expect an Ajax failure with a given throwError.
+ * Expect an Ajax failure with a given message.
  */
 export
-function expectAjaxError(promise: Promise<any>, done: () => void, throwError: string): Promise<any> {
+function expectAjaxError(promise: Promise<any>, done: () => void, message: string): Promise<any> {
   return promise.then((msg: any) => {
     throw Error('Expected failure did not occur');
-  }, (error: IAjaxError) => {
-    if (error.throwError !== throwError) {
-      throw Error(`Error "${throwError}" not equal to "${error.throwError}"`);
+  }, (error: ServerConnection.IError) => {
+    if (error.message !== message) {
+      throw Error(`Error "${message}" not equal to "${error.message}"`);
     }
   }).then(done, done);
 }

@@ -2,16 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
  import {
-   PageConfig, URLExt, uuid
+  URLExt, uuid
  } from '@jupyterlab/coreutils';
 
 import {
-  ArrayExt, each, find, toArray
+  ArrayExt, each, find
 } from '@phosphor/algorithm';
-
- import {
-   JSONExt
- } from '@phosphor/coreutils';
 
 import {
   ISignal, Signal
@@ -22,11 +18,8 @@ import {
 } from '../kernel';
 
 import {
-  IAjaxSettings
-} from '../utils';
-
-import * as utils
-  from '../utils';
+  ServerConnection
+} from '..';
 
 import {
   Session
@@ -55,15 +48,10 @@ class DefaultSession implements Session.ISession {
   constructor(options: Session.IOptions, id: string, kernel: Kernel.IKernel) {
     this._id = id;
     this._path = options.path;
-    this._baseUrl = options.baseUrl || PageConfig.getBaseUrl();
+    this.serverSettings = options.serverSettings || ServerConnection.makeSettings();
     this._uuid = uuid();
-    this._ajaxSettings = JSON.stringify(
-      utils.ajaxSettingsWithToken(options.ajaxSettings || {}, options.token)
-    );
-    this._token = options.token || PageConfig.getOption('token');
-    Private.runningSessions.push(this);
+    Private.addRunning(this);
     this.setupKernel(kernel);
-    this._options = JSONExt.deepCopy(options);
     this.terminated = new Signal<this, void>(this);
   }
 
@@ -157,42 +145,26 @@ class DefaultSession implements Session.ISession {
   }
 
   /**
-   * Get the base url of the session.
+   * The server settings of the session.
    */
-  get baseUrl(): string {
-    return this._baseUrl;
-  }
-
-  /**
-   * Get a copy of the default ajax settings for the session.
-   */
-  get ajaxSettings(): IAjaxSettings {
-    return JSON.parse(this._ajaxSettings);
-  }
-
-  /**
-   * Set the default ajax settings for the session.
-   */
-  set ajaxSettings(value: IAjaxSettings) {
-    this._ajaxSettings = JSON.stringify(value);
-  }
+  readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Test whether the session has been disposed.
    */
   get isDisposed(): boolean {
-    return this._options === null;
+    return this._isDisposed === true;
   }
 
   /**
    * Clone the current session with a new clientId.
    */
   clone(): Promise<Session.ISession> {
-    let options = this._getKernelOptions();
-    return Kernel.connectTo(this.kernel.id, options).then(kernel => {
-      options = JSONExt.deepCopy(this._options);
-      options.ajaxSettings = this.ajaxSettings;
-      return new DefaultSession(options, this._id, kernel);
+    return Kernel.connectTo(this.kernel.id, this.serverSettings).then(kernel => {
+      return new DefaultSession({
+        path: this._path,
+        serverSettings: this.serverSettings
+      }, this._id, kernel);
     });
   }
 
@@ -208,9 +180,7 @@ class DefaultSession implements Session.ISession {
     let newPath = this._path = model.notebook.path;
 
     if (this._kernel.isDisposed || model.kernel.id !== this._kernel.id) {
-      let options = this._getKernelOptions();
-      options.name = model.kernel.name;
-      return Kernel.connectTo(model.kernel.id, options).then(kernel => {
+      return Kernel.connectTo(model.kernel.id, this.serverSettings).then(kernel => {
         this.setupKernel(kernel);
         this._kernelChanged.emit(kernel);
         if (oldPath !== newPath) {
@@ -230,11 +200,11 @@ class DefaultSession implements Session.ISession {
     if (this.isDisposed) {
       return;
     }
-    this._options = null;
+    this._isDisposed = true;
     if (this._kernel) {
       this._kernel.dispose();
     }
-    ArrayExt.removeFirstOf(Private.runningSessions, this);
+    Private.removeRunning(this);
     this._kernel = null;
     Signal.clearData(this);
   }
@@ -297,11 +267,11 @@ class DefaultSession implements Session.ISession {
     if (this._kernel) {
       return this._kernel.ready.then(() => {
         return Private.shutdownSession(
-          this.id, this._baseUrl, this.ajaxSettings
+          this.id, this.serverSettings
         );
       });
     }
-    return Private.shutdownSession(this.id, this._baseUrl, this.ajaxSettings);
+    return Private.shutdownSession(this.id, this.serverSettings);
   }
 
   /**
@@ -336,42 +306,29 @@ class DefaultSession implements Session.ISession {
   }
 
   /**
-   * Get the options used to create a new kernel.
-   */
-  private _getKernelOptions(): Kernel.IOptions {
-    return {
-      baseUrl: this._options.baseUrl || '',
-      wsUrl: this._options.wsUrl || '',
-      username: this.kernel.username,
-      ajaxSettings: this.ajaxSettings
-    };
-  }
-
-  /**
    * Send a PATCH to the server, updating the session path or the kernel.
    */
   private _patch(data: string): Promise<Session.IModel> {
-    let url = Private.getSessionUrl(this._baseUrl, this._id);
-    let ajaxSettings = this.ajaxSettings;
-    ajaxSettings.method = 'PATCH';
-    ajaxSettings.dataType = 'json';
-    ajaxSettings.data = data;
-    ajaxSettings.contentType = 'application/json';
-    ajaxSettings.cache = false;
     this._updating = true;
-
-    return utils.ajaxRequest(url, ajaxSettings).then(success => {
+    let settings = this.serverSettings;
+    let request = {
+      url: Private.getSessionUrl(settings.baseUrl, this._id),
+      method: 'PATCH',
+      data,
+      cache: false
+    };
+    return ServerConnection.makeRequest(request, settings).then(response => {
       this._updating = false;
-      if (success.xhr.status !== 200) {
-        throw utils.makeAjaxError(success);
+      if (response.xhr.status !== 200) {
+        throw ServerConnection.makeError(response);
       }
-      let value = success.data as Session.IModel;
+      let value = response.data as Session.IModel;
       try {
         validate.validateModel(value);
       } catch (err) {
-        throw utils.makeAjaxError(success, err.message);
+        throw ServerConnection.makeError(response, err.message);
       }
-      return Private.updateFromServer(value);
+      return Private.updateFromServer(value, settings.baseUrl);
     }, error => {
       this._updating = false;
       return Private.onSessionError(error);
@@ -380,12 +337,9 @@ class DefaultSession implements Session.ISession {
 
   private _id = '';
   private _path = '';
-  private _ajaxSettings = '';
-  private _token = '';
   private _kernel: Kernel.IKernel = null;
   private _uuid = '';
-  private _baseUrl = '';
-  private _options: Session.IOptions = null;
+  private _isDisposed = false;
   private _updating = false;
   private _kernelChanged = new Signal<this, Kernel.IKernelConnection>(this);
   private _statusChanged = new Signal<this, Kernel.Status>(this);
@@ -403,8 +357,8 @@ namespace DefaultSession {
    * List the running sessions.
    */
   export
-  function listRunning(options?: Session.IOptions): Promise<Session.IModel[]> {
-    return Private.listRunning(options);
+  function listRunning(settings?: ServerConnection.ISettings): Promise<Session.IModel[]> {
+    return Private.listRunning(settings);
   }
 
   /**
@@ -419,32 +373,32 @@ namespace DefaultSession {
    * Find a session by id.
    */
   export
-  function findById(id: string, options?: Session.IOptions): Promise<Session.IModel> {
-    return Private.findById(id, options);
+  function findById(id: string, settings?: ServerConnection.ISettings): Promise<Session.IModel> {
+    return Private.findById(id, settings);
   }
 
   /**
    * Find a session by path.
    */
   export
-  function findByPath(path: string, options?: Session.IOptions): Promise<Session.IModel> {
-    return Private.findByPath(path, options);
+  function findByPath(path: string, settings?: ServerConnection.ISettings): Promise<Session.IModel> {
+    return Private.findByPath(path, settings);
   }
 
   /**
    * Connect to a running session.
    */
   export
-  function connectTo(id: string, options?: Session.IOptions): Promise<Session.ISession> {
-    return Private.connectTo(id, options);
+  function connectTo(id: string, settings?: ServerConnection.ISettings): Promise<Session.ISession> {
+    return Private.connectTo(id, settings);
   }
 
   /**
    * Shut down a session by id.
    */
   export
-  function shutdown(id: string, options: Session.IOptions = {}): Promise<void> {
-    return Private.shutdown(id, options);
+  function shutdown(id: string, settings?: ServerConnection.ISettings): Promise<void> {
+    return Private.shutdownSession(id, settings);
   }
 }
 
@@ -454,43 +408,48 @@ namespace DefaultSession {
  */
 namespace Private {
   /**
-   * The running sessions.
+   * The running sessions mapped by base url.
+   */
+  const runningSessions = new Map<string, DefaultSession[]>();
+
+  /**
+   * Add a session to the running sessions.
    */
   export
-  const runningSessions: DefaultSession[] = [];
+  function addRunning(session: DefaultSession): void {
+    let running: DefaultSession[] = (
+      runningSessions.get(session.serverSettings.baseUrl) || []
+    );
+    running.push(session);
+    runningSessions.set(session.serverSettings.baseUrl, running);
+  }
+
+  /**
+   * Remove a session from the running sessions.
+   */
+  export
+  function removeRunning(session: DefaultSession): void {
+    let running = runningSessions.get(session.serverSettings.baseUrl);
+    ArrayExt.removeFirstOf(running, session);
+  }
 
   /**
    * Connect to a running session.
    */
   export
-  function connectTo(id: string, options: Session.IOptions = {}): Promise<Session.ISession> {
-    let session = find(runningSessions, value => value.id === id);
+  function connectTo(id: string, settings?: ServerConnection.ISettings): Promise<Session.ISession> {
+    settings = settings || ServerConnection.makeSettings();
+    let running = runningSessions.get(settings.baseUrl) || [];
+    let session = find(running, value => value.id === id);
     if (session) {
       return Promise.resolve(session.clone());
     }
-
-    return getSessionModel(id, options).then(model => {
-      return createSession(model, options);
+    return getSessionModel(id, settings).then(model => {
+      return createSession(model, settings);
     }).catch(() => {
       let msg = `No running session with id: ${id}`;
       return typedThrow<Session.ISession>(msg);
     });
-  }
-
-  /**
-   * Create a Promise for a kernel object given a session model and options.
-   */
-  function createKernel(options: Session.IOptions): Promise<Kernel.IKernel> {
-    let kernelOptions: Kernel.IOptions = {
-      name: options.kernelName || '',
-      baseUrl: options.baseUrl || PageConfig.getBaseUrl(),
-      wsUrl: options.wsUrl || '',
-      username: options.username || '',
-      clientId: options.clientId || '',
-      token: options.token || '',
-      ajaxSettings: options.ajaxSettings || {}
-    };
-    return Kernel.connectTo(options.kernelId, kernelOptions);
   }
 
   /**
@@ -500,11 +459,12 @@ namespace Private {
    */
   export
   function createSession(model: Session.IModel, options: Session.IOptions): Promise<DefaultSession> {
-    options.kernelName = model.kernel.name;
-    options.kernelId = model.kernel.id;
-    options.path = model.notebook.path;
-    return createKernel(options).then(kernel => {
-      return new DefaultSession(options, model.id, kernel);
+    let settings = options.serverSettings || ServerConnection.makeSettings();
+    return Kernel.connectTo(model.kernel.id, settings).then(kernel => {
+      return new DefaultSession({
+        path: model.notebook.path,
+        serverSettings: settings
+      }, model.id, kernel);
     }).catch(error => {
       return typedThrow('Session failed to start: ' + error.message);
     });
@@ -514,13 +474,15 @@ namespace Private {
    * Find a session by id.
    */
   export
-  function findById(id: string, options: Session.IOptions = {}): Promise<Session.IModel> {
-    let session = find(runningSessions, value => value.id === id);
+  function findById(id: string, settings?: ServerConnection.ISettings): Promise<Session.IModel> {
+    settings = settings || ServerConnection.makeSettings();
+    let running = runningSessions.get(settings.baseUrl) || [];
+    let session = find(running, value => value.id === id);
     if (session) {
       return Promise.resolve(session.model);
     }
 
-    return getSessionModel(id, options).catch(() => {
+    return getSessionModel(id, settings).catch(() => {
       let msg = `No running session for id: ${id}`;
       return typedThrow<Session.IModel>(msg);
     });
@@ -530,13 +492,15 @@ namespace Private {
    * Find a session by path.
    */
   export
-  function findByPath(path: string, options: Session.IOptions = {}): Promise<Session.IModel> {
-    let session = find(runningSessions, value => value.path === path);
+  function findByPath(path: string, settings?: ServerConnection.ISettings): Promise<Session.IModel> {
+    settings = settings || ServerConnection.makeSettings();
+    let running = runningSessions.get(settings.baseUrl) || [];
+    let session = find(running, value => value.path === path);
     if (session) {
       return Promise.resolve(session.model);
     }
 
-    return listRunning(options).then(models => {
+    return listRunning(settings).then(models => {
       let model = find(models, value => {
         return value.notebook.path === path;
       });
@@ -552,26 +516,24 @@ namespace Private {
    * Get a full session model from the server by session id string.
    */
   export
-  function getSessionModel(id: string, options?: Session.IOptions): Promise<Session.IModel> {
-    options = options || {};
-    let baseUrl = options.baseUrl || PageConfig.getBaseUrl();
-    let url = getSessionUrl(baseUrl, id);
-    let ajaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
-    ajaxSettings.method = 'GET';
-    ajaxSettings.dataType = 'json';
-    ajaxSettings.cache = false;
-
-    return utils.ajaxRequest(url, ajaxSettings).then(success => {
-      if (success.xhr.status !== 200) {
-        throw utils.makeAjaxError(success);
+  function getSessionModel(id: string, settings?: ServerConnection.ISettings): Promise<Session.IModel> {
+    settings = settings || ServerConnection.makeSettings();
+    let request = {
+      url: getSessionUrl(settings.baseUrl, id),
+      method: 'GET',
+      cache: false
+    };
+    return ServerConnection.makeRequest(request, settings).then(response => {
+      if (response.xhr.status !== 200) {
+        throw ServerConnection.makeError(response);
       }
-      let data = success.data as Session.IModel;
+      let data = response.data as Session.IModel;
       try {
         validate.validateModel(data);
       } catch (err) {
-        throw utils.makeAjaxError(success, err.message);
+        throw ServerConnection.makeError(response, err.message);
       }
-      return updateFromServer(data);
+      return updateFromServer(data, settings.baseUrl);
     }, Private.onSessionError);
   }
 
@@ -586,8 +548,9 @@ namespace Private {
   /**
    * Kill the sessions by id.
    */
-  function killSessions(id: string): void {
-    each(toArray(runningSessions), session => {
+  function killSessions(id: string, baseUrl: string): void {
+    let running = runningSessions.get(baseUrl) || [];
+    each(running.slice(), session => {
       if (session.id === id) {
         session.terminated.emit(void 0);
         session.dispose();
@@ -599,30 +562,29 @@ namespace Private {
    * List the running sessions.
    */
   export
-  function listRunning(options: Session.IOptions = {}): Promise<Session.IModel[]> {
-    let baseUrl = options.baseUrl || PageConfig.getBaseUrl();
-    let url = URLExt.join(baseUrl, SESSION_SERVICE_URL);
-    let ajaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
-    ajaxSettings.method = 'GET';
-    ajaxSettings.dataType = 'json';
-    ajaxSettings.cache = false;
-
-    return utils.ajaxRequest(url, ajaxSettings).then(success => {
-      if (success.xhr.status !== 200) {
-        throw utils.makeAjaxError(success);
+  function listRunning(settings?: ServerConnection.ISettings): Promise<Session.IModel[]> {
+    settings = settings || ServerConnection.makeSettings();
+    let request = {
+      url: URLExt.join(settings.baseUrl, SESSION_SERVICE_URL),
+      method: 'GET',
+      cache: false
+    };
+    return ServerConnection.makeRequest(request, settings).then(response => {
+      if (response.xhr.status !== 200) {
+        throw ServerConnection.makeError(response);
       }
-      let data = success.data as Session.IModel[];
-      if (!Array.isArray(success.data)) {
-        throw utils.makeAjaxError(success, 'Invalid Session list');
+      let data = response.data as Session.IModel[];
+      if (!Array.isArray(response.data)) {
+        throw ServerConnection.makeError(response, 'Invalid Session list');
       }
       for (let i = 0; i < data.length; i++) {
         try {
           validate.validateModel(data[i]);
         } catch (err) {
-          throw utils.makeAjaxError(success, err.message);
+          throw ServerConnection.makeError(response, err.message);
         }
       }
-      return updateRunningSessions(data);
+      return updateRunningSessions(data, settings.baseUrl);
     }, Private.onSessionError);
   }
 
@@ -630,8 +592,8 @@ namespace Private {
    * Handle an error on a session Ajax call.
    */
   export
-  function onSessionError(error: utils.IAjaxError): Promise<any> {
-    let text = (error.throwError ||
+  function onSessionError(error: ServerConnection.IError): Promise<any> {
+    let text = (error.message ||
                 error.xhr.statusText ||
                 error.xhr.responseText);
     let msg = `API request failed: ${text}`;
@@ -643,36 +605,28 @@ namespace Private {
    * Shut down a session by id.
    */
   export
-  function shutdown(id: string, options: Session.IOptions = {}): Promise<void> {
-    let baseUrl = options.baseUrl || PageConfig.getBaseUrl();
-    let ajaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
-    return shutdownSession(id, baseUrl, ajaxSettings);
-  }
+  function shutdownSession(id: string, settings?: ServerConnection.ISettings): Promise<void> {
+    settings = settings || ServerConnection.makeSettings();
+    let request = {
+      url: getSessionUrl(settings.baseUrl, id),
+      method: 'DELETE',
+      cache: false
+    };
 
-  /**
-   * Shut down a session by id.
-   */
-  export
-  function shutdownSession(id: string, baseUrl: string, ajaxSettings: IAjaxSettings = {}): Promise<void> {
-    let url = getSessionUrl(baseUrl, id);
-    ajaxSettings.method = 'DELETE';
-    ajaxSettings.dataType = 'json';
-    ajaxSettings.cache = false;
-
-    return utils.ajaxRequest(url, ajaxSettings).then(success => {
-      if (success.xhr.status !== 204) {
-        throw utils.makeAjaxError(success);
+    return ServerConnection.makeRequest(request, settings).then(response => {
+      if (response.xhr.status !== 204) {
+        throw ServerConnection.makeError(response);
       }
-      killSessions(id);
+      killSessions(id, settings.baseUrl);
     }, err => {
       if (err.xhr.status === 404) {
         let response = JSON.parse(err.xhr.responseText) as any;
         console.warn(response['message']);
-        killSessions(id);
+        killSessions(id, settings.baseUrl);
         return;
       }
       if (err.xhr.status === 410) {
-        err.throwError = 'The kernel was deleted but the session was not';
+        err.message = 'The kernel was deleted but the session was not';
       }
       return onSessionError(err);
     });
@@ -697,30 +651,28 @@ namespace Private {
    */
   export
   function startSession(options: Session.IOptions): Promise<Session.IModel> {
-    let baseUrl = options.baseUrl || PageConfig.getBaseUrl();
-    let url = URLExt.join(baseUrl, SESSION_SERVICE_URL);
+    let settings = options.serverSettings || ServerConnection.makeSettings();
     let model = {
       kernel: { name: options.kernelName, id: options.kernelId },
       notebook: { path: options.path }
     };
-    let ajaxSettings: IAjaxSettings = utils.ajaxSettingsWithToken(options.ajaxSettings, options.token);
-    ajaxSettings.method = 'POST';
-    ajaxSettings.dataType = 'json';
-    ajaxSettings.data = JSON.stringify(model);
-    ajaxSettings.contentType = 'application/json';
-    ajaxSettings.cache = false;
-
-    return utils.ajaxRequest(url, ajaxSettings).then(success => {
-      if (success.xhr.status !== 201) {
-        throw utils.makeAjaxError(success);
+    let request = {
+      url: URLExt.join(settings.baseUrl, SESSION_SERVICE_URL),
+      method: 'POST',
+      cache: false,
+      data: JSON.stringify(model)
+    };
+    return ServerConnection.makeRequest(request, settings).then(response => {
+      if (response.xhr.status !== 201) {
+        throw ServerConnection.makeError(response);
       }
       try {
-        validate.validateModel(success.data);
+        validate.validateModel(response.data);
       } catch (err) {
-        throw utils.makeAjaxError(success, err.message);
+        throw ServerConnection.makeError(response, err.message);
       }
-      let data = success.data as Session.IModel;
-      return updateFromServer(data);
+      let data = response.data as Session.IModel;
+      return updateFromServer(data, settings.baseUrl);
     }, onSessionError);
   }
 
@@ -736,9 +688,10 @@ namespace Private {
    * Update the running sessions given an updated session Id.
    */
   export
-  function updateFromServer(model: Session.IModel): Promise<Session.IModel> {
+  function updateFromServer(model: Session.IModel, baseUrl: string): Promise<Session.IModel> {
     let promises: Promise<void>[] = [];
-    each(runningSessions, session => {
+    let running = runningSessions.get(baseUrl) || [];
+    each(running.slice(), session => {
       if (session.id === model.id) {
         promises.push(session.update(model));
       }
@@ -750,10 +703,10 @@ namespace Private {
    * Update the running sessions based on new data from the server.
    */
   export
-  function updateRunningSessions(sessions: Session.IModel[]): Promise<Session.IModel[]> {
+  function updateRunningSessions(sessions: Session.IModel[], baseUrl: string): Promise<Session.IModel[]> {
     let promises: Promise<void>[] = [];
-
-    each(runningSessions, session => {
+    let running = runningSessions.get(baseUrl) || [];
+    each(running.slice(), session => {
       let updated = find(sessions, sId => {
         if (session.id === sId.id) {
           promises.push(session.update(sId));
@@ -768,3 +721,4 @@ namespace Private {
     return Promise.all(promises).then(() => { return sessions; });
   }
 }
+
