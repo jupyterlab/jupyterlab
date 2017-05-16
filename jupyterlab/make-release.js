@@ -18,7 +18,7 @@ fs.writeFileSync('./package.json', text);
 fs.writeFileSync('./package.template.json', text);
 
 // Update our template file.
-fs.copyFileSync('./index.js', './index.template.js')
+fs.copySync('./index.js', './index.template.js')
 
 // Run a standard build.
 childProcess.execSync('npm run build');
