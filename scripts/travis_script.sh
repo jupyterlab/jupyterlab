@@ -81,7 +81,7 @@ if [[ $GROUP == cli ]]; then
 
     # Make sure we can call help on all the cli apps.
     jupyter lab -h 
-    juypter lab build -h 
+    jupyter lab build -h 
     jupyter lab clean -h
     jupyter lab path -h 
     jupyter labextension link -h
