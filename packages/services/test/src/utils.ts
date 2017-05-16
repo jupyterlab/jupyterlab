@@ -275,9 +275,9 @@ class RequestHandler {
         name: 'python',
         id: uuid()
       },
-      notebook: {
-        path: uuid()
-      }
+      path: uuid(),
+      type: '',
+      name: ''
     };
     switch (request.method) {
     case 'PATCH':

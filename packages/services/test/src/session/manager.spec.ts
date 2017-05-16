@@ -30,7 +30,9 @@ import {
 function createSessionModel(id = ''): Session.IModel {
   return {
     id: id || uuid(),
-    notebook: { path: uuid() },
+    path: uuid(),
+    type: '',
+    name: '',
     kernel: { id: uuid(), name: uuid() }
   };
 }
@@ -177,7 +179,7 @@ describe('session/manager', () => {
             manager.dispose();
             done();
           });
-          return s.rename(model.notebook.path);
+          return s.setPath(model.notebook.path);
         }).catch(done);
       });
 

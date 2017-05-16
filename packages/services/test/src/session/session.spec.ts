@@ -30,7 +30,9 @@ import {
 function createSessionModel(id?: string): Session.IModel {
   return {
     id: id || uuid(),
-    notebook: { path: uuid() },
+    path: uuid(),
+    name: '',
+    type: '',
     kernel: { id: uuid(), name: uuid() }
   };
 }
@@ -42,7 +44,7 @@ function createSessionModel(id?: string): Session.IModel {
 function createSessionOptions(sessionModel?: Session.IModel): Session.IOptions {
   sessionModel = sessionModel || createSessionModel();
   return {
-    path: sessionModel.notebook.path,
+    path: sessionModel.path,
     kernelName: sessionModel.kernel.name
   };
 }
@@ -236,8 +238,8 @@ describe('session', () => {
     it('should find an existing session by path', (done) => {
       let sessionModel = createSessionModel();
       tester.runningSessions = [sessionModel];
-      Session.findByPath(sessionModel.notebook.path).then(newId => {
-        expect(newId.notebook.path).to.be(sessionModel.notebook.path);
+      Session.findByPath(sessionModel.path).then(newId => {
+        expect(newId.path).to.be(sessionModel.path);
         done();
       }).catch(done);
     });
@@ -416,7 +418,7 @@ describe('session', () => {
       });
     });
 
-    context('#pathChanged', () => {
+    context('#propertyChanged', () => {
 
       it('should be emitted when the session path changes', () => {
         // TODO: reinstate after switching to mock-socket
@@ -425,11 +427,11 @@ describe('session', () => {
         //   tester.respond(200, model);
         // };
         // session.pathChanged.connect((s, path) => {
-        //   // expect(session.path).to.be(model.notebook.path);
-        //   // expect(path).to.be(model.notebook.path);
+        //   // expect(session.path).to.be(model.path);
+        //   // expect(path).to.be(model.path);
         //   done();
         // });
-        // session.rename(model.notebook.path);
+        // session.rename(model.path);
       });
 
     });
@@ -448,12 +450,26 @@ describe('session', () => {
       });
     });
 
+    context('#name', () => {
+
+      it('should be a string', () => {
+        expect(typeof session.name).to.be('string');
+      });
+    });
+
+    context('#type', () => {
+
+      it('should be a string', () => {
+        expect(typeof session.name).to.be('string');
+      });
+    });
+
     context('#model', () => {
 
       it('should be an IModel', () => {
         let model = session.model;
         expect(typeof model.id).to.be('string');
-        expect(typeof model.notebook.path).to.be('string');
+        expect(typeof model.path).to.be('string');
         expect(typeof model.kernel.name).to.be('string');
         expect(typeof model.kernel.id).to.be('string');
       });
@@ -524,23 +540,21 @@ describe('session', () => {
 
     });
 
-    context('#rename()', () => {
+    context('#setPath()', () => {
 
-      it('should rename the session', (done) => {
-        let model = session.model;
-        let path = model.notebook.path = 'foo.ipynb';
+      it('should set the path of the session', () => {
+        let model = { ...session.model, path: 'foo.ipynb' };
         tester.onRequest = () => {
           tester.respond(200, model);
         };
-        session.rename(path).then(() => {
-          expect(session.path).to.be(path);
+        return session.setPath(model.path).then(() => {
+          expect(session.path).to.be(model.path);
           session.dispose();
-          done();
-        }).catch(done);
+        });
       });
 
       it('should fail for improper response status', (done) => {
-        let promise = session.rename('foo');
+        let promise = session.setPath('foo');
         tester.onRequest = () => {
           tester.respond(201, { });
           expectFailure(promise, done);
@@ -548,7 +562,7 @@ describe('session', () => {
       });
 
       it('should fail for error response status', (done) => {
-        let promise = session.rename('foo');
+        let promise = session.setPath('foo');
         tester.onRequest = () => {
           tester.respond(500, { });
           expectFailure(promise, done, '');
@@ -556,7 +570,7 @@ describe('session', () => {
       });
 
       it('should fail for improper model', (done) => {
-        let promise = session.rename('foo');
+        let promise = session.setPath('foo');
         tester.onRequest = () => {
           tester.respond(200, { });
           expectFailure(promise, done);
@@ -565,7 +579,97 @@ describe('session', () => {
 
       it('should fail if the session is disposed', (done) => {
         session.dispose();
-        let promise = session.rename('foo');
+        let promise = session.setPath('foo');
+        expectFailure(promise, done, 'Session is disposed');
+      });
+
+    });
+
+    context('#setType()', () => {
+
+      it('should set the type of the session', () => {
+        let model = { ...session.model, type: 'foo' };
+        tester.onRequest = () => {
+          tester.respond(200, model);
+        };
+        return session.setType(model.type).then(() => {
+          expect(session.type).to.be(model.type);
+          session.dispose();
+        });
+      });
+
+      it('should fail for improper response status', (done) => {
+        let promise = session.setType('foo');
+        tester.onRequest = () => {
+          tester.respond(201, { });
+          expectFailure(promise, done);
+        };
+      });
+
+      it('should fail for error response status', (done) => {
+        let promise = session.setType('foo');
+        tester.onRequest = () => {
+          tester.respond(500, { });
+          expectFailure(promise, done, '');
+        };
+      });
+
+      it('should fail for improper model', (done) => {
+        let promise = session.setType('foo');
+        tester.onRequest = () => {
+          tester.respond(200, { });
+          expectFailure(promise, done);
+        };
+      });
+
+      it('should fail if the session is disposed', (done) => {
+        session.dispose();
+        let promise = session.setPath('foo');
+        expectFailure(promise, done, 'Session is disposed');
+      });
+
+    });
+
+    context('#setName()', () => {
+
+      it('should set the name of the session', () => {
+        let model = { ...session.model, name: 'foo' };
+        tester.onRequest = () => {
+          tester.respond(200, model);
+        };
+        return session.setName(model.name).then(() => {
+          expect(session.name).to.be(model.name);
+          session.dispose();
+        });
+      });
+
+      it('should fail for improper response status', (done) => {
+        let promise = session.setName('foo');
+        tester.onRequest = () => {
+          tester.respond(201, { });
+          expectFailure(promise, done);
+        };
+      });
+
+      it('should fail for error response status', (done) => {
+        let promise = session.setName('foo');
+        tester.onRequest = () => {
+          tester.respond(500, { });
+          expectFailure(promise, done, '');
+        };
+      });
+
+      it('should fail for improper model', (done) => {
+        let promise = session.setName('foo');
+        tester.onRequest = () => {
+          tester.respond(200, { });
+          expectFailure(promise, done);
+        };
+      });
+
+      it('should fail if the session is disposed', (done) => {
+        session.dispose();
+        let promise = session.setPath('foo');
         expectFailure(promise, done, 'Session is disposed');
       });
 
@@ -610,8 +714,7 @@ describe('session', () => {
       });
 
       it('should update the session path if it has changed', () => {
-        let model = session.model;
-        model.notebook.path = 'foo.ipynb';
+        let model = { ...session.model, path: 'foo.ipynb' };
         let name = model.kernel.name;
         let id = model.kernel.id;
         tester.onRequest = request => {
@@ -623,7 +726,7 @@ describe('session', () => {
         };
         return session.changeKernel({ name }).then(kernel => {
           expect(kernel.name).to.be(name);
-          expect(session.path).to.be(model.notebook.path);
+          expect(session.path).to.be(model.path);
           session.dispose();
         });
       });

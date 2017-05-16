@@ -159,7 +159,7 @@ describe('jupyter.services - Integration', () => {
       let id = '';
       return Session.startNew(options).then(value => {
         session = value;
-        return session.rename('Untitled2.ipynb');
+        return session.setPath('Untitled2.ipynb');
       }).then(() => {
         expect(session.path).to.be('Untitled2.ipynb');
         // should grab the same session object
@@ -238,10 +238,10 @@ describe('jupyter.services - Integration', () => {
       let newPath = 'Untitled2b.ipynb';
       return Session.startNew(options).then(s => {
         session = s;
-        return session.rename(newPath);
+        return session.setPath(newPath);
       }).then(() => {
         expect(session.path).to.be(newPath);
-        expect(session.model.notebook.path).to.be(newPath);
+        expect(session.model.path).to.be(newPath);
         return session.shutdown();
       });
     });
