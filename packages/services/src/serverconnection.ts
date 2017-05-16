@@ -22,16 +22,16 @@ namespace ServerConnection {
    *
    * @param settings - The server settings to apply to the request.
    *
-   * @returns a Promise that resolves with the success data.
+   * @returns a Promise that resolves with the response data.
    */
   export
-  function makeRequest(request: IRequest, settings: ISettings): Promise<ISuccess> {
+  function makeRequest(request: IRequest, settings: ISettings): Promise<IResponse> {
     let url = request.url;
     if (request.cache !== true) {
       // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest#Bypassing_the_cache.
       url += ((/\?/).test(url) ? '&' : '?') + (new Date()).getTime();
     }
-    let xhr = new settings.xhr();
+    let xhr = settings.xhrFactory();
     xhr.open(request.method || 'GET', url, true,
              settings.user, settings.password);
     Private.populateRequest(xhr, request, settings);
@@ -60,14 +60,14 @@ namespace ServerConnection {
   /**
    * Create an AJAX error from an AJAX success.
    *
-   * @param success - The original success object.
+   * @param response - The response object.
    *
    * @param message - The optional new error message.  If not given
    *  we use "Invalid Status: <xhr.status>"
    */
   export
-  function makeError(success: ISuccess, message?: string): IError {
-    let { xhr, request, settings, event } = success;
+  function makeError(response: IResponse, message?: string): IError {
+    let { xhr, request, settings, event } = response;
     message = message || `Invalid Status: ${xhr.status}`;
     return { xhr, request, settings, event, message };
   }
@@ -161,21 +161,21 @@ namespace ServerConnection {
     readonly requestHeaders: { readonly [key: string]: string; };
 
     /**
-     * The XMLHttpRequest constructor to use.  Defaults to `window.XMLHttpRequest`.
+     * The XMLHttpRequest factory to use.  Defaults creating a new `XMLHttpRequest`.
      */
-    readonly xhr: typeof XMLHttpRequest;
+    readonly xhrFactory: () => XMLHttpRequest;
 
     /**
-     * The WebSocket constructor to use.  Defaults to  `window.WebSocket`.
+     * The WebSocket factory to use.  Defaults to creating a new `WebSocket`.
      */
-    readonly webSocket: typeof WebSocket;
+    readonly wsFactory: (url: string, protocols?: string | string[]) => WebSocket;
   }
 
   /**
    * Data for a successful  AJAX request.
    */
   export
-  interface ISuccess {
+  interface IResponse {
     /**
      * The `onload` event.
      */
@@ -257,8 +257,8 @@ namespace Private {
       timeout: options.timeout || 0,
       token: options.token || PageConfig.getOption('token'),
       requestHeaders: { ...options.requestHeaders || {} },
-      xhr: options.xhr || XMLHttpRequest,
-      webSocket: options.webSocket || WebSocket
+      xhrFactory: options.xhrFactory || xhrFactory,
+      wsFactory: options.wsFactory || wsFactory
     };
   }
 
@@ -306,7 +306,7 @@ namespace Private {
    * Handle a request.
    */
   export
-  function handleRequest(xhr: XMLHttpRequest, request: ServerConnection.IRequest, settings: ServerConnection.ISettings): Promise<ServerConnection.ISuccess> {
+  function handleRequest(xhr: XMLHttpRequest, request: ServerConnection.IRequest, settings: ServerConnection.ISettings): Promise<ServerConnection.IResponse> {
     let delegate = new PromiseDelegate();
 
     xhr.onload = (event: ProgressEvent) => {
@@ -356,6 +356,20 @@ namespace Private {
     }
 
     return delegate.promise;
+  }
+
+  /**
+   * Create a new xhr object.
+   */
+  function xhrFactory(): XMLHttpRequest {
+    return new XMLHttpRequest();
+  }
+
+  /**
+   * Create a new ws object.
+   */
+  function wsFactory(url: string, protocols?: string | string[]): WebSocket {
+    return new WebSocket(url, protocols);
   }
 
   /**

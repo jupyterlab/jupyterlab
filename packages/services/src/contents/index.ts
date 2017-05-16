@@ -409,16 +409,16 @@ class ContentsManager implements Contents.IManager {
       method: 'GET',
       cache: false
     };
-    return ServerConnection.makeRequest(request, this.serverSettings).then(success => {
-      if (success.xhr.status !== 200) {
-        throw ServerConnection.makeError(success);
+    return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
+      if (response.xhr.status !== 200) {
+        throw ServerConnection.makeError(response);
       }
       try {
-         validate.validateContentsModel(success.data);
+         validate.validateContentsModel(response.data);
        } catch (err) {
-         throw ServerConnection.makeError(success, err.message);
+         throw ServerConnection.makeError(response, err.message);
        }
-      return success.data;
+      return response.data;
     });
   }
 
@@ -460,15 +460,15 @@ class ContentsManager implements Contents.IManager {
       method: 'POST',
       data,
     };
-    return ServerConnection.makeRequest(request, this.serverSettings).then(success => {
-      if (success.xhr.status !== 201) {
-        throw ServerConnection.makeError(success);
+    return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
+      if (response.xhr.status !== 201) {
+        throw ServerConnection.makeError(response);
       }
-      let data = success.data as Contents.IModel;
+      let data = response.data as Contents.IModel;
       try {
         validate.validateContentsModel(data);
       } catch (err) {
-        throw ServerConnection.makeError(success, err.message);
+        throw ServerConnection.makeError(response, err.message);
       }
       this._fileChanged.emit({
         type: 'new',
@@ -494,9 +494,9 @@ class ContentsManager implements Contents.IManager {
       url: this._getUrl(path),
       method: 'DELETE'
     };
-    return ServerConnection.makeRequest(request, this.serverSettings).then(success => {
-      if (success.xhr.status !== 204) {
-        throw ServerConnection.makeError(success);
+    return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
+      if (response.xhr.status !== 204) {
+        throw ServerConnection.makeError(response);
       }
       this._fileChanged.emit({
         type: 'delete',
@@ -537,15 +537,15 @@ class ContentsManager implements Contents.IManager {
       method: 'PATCH',
       data: JSON.stringify({ path: newPath })
     };
-    return ServerConnection.makeRequest(request, this.serverSettings).then(success => {
-      if (success.xhr.status !== 200) {
-        throw ServerConnection.makeError(success);
+    return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
+      if (response.xhr.status !== 200) {
+        throw ServerConnection.makeError(response);
       }
-      let data = success.data as Contents.IModel;
+      let data = response.data as Contents.IModel;
       try {
         validate.validateContentsModel(data);
       } catch (err) {
-        throw ServerConnection.makeError(success, err.message);
+        throw ServerConnection.makeError(response, err.message);
       }
       this._fileChanged.emit({
         type: 'rename',
@@ -578,16 +578,16 @@ class ContentsManager implements Contents.IManager {
       cache: false,
       data: JSON.stringify(options)
     };
-    return ServerConnection.makeRequest(request, this.serverSettings).then(success => {
+    return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
       // will return 200 for an existing file and 201 for a new file
-      if (success.xhr.status !== 200 && success.xhr.status !== 201) {
-        throw ServerConnection.makeError(success);
+      if (response.xhr.status !== 200 && response.xhr.status !== 201) {
+        throw ServerConnection.makeError(response);
       }
-      let data = success.data as Contents.IModel;
+      let data = response.data as Contents.IModel;
       try {
         validate.validateContentsModel(data);
       } catch (err) {
-        throw ServerConnection.makeError(success, err.message);
+        throw ServerConnection.makeError(response, err.message);
       }
       this._fileChanged.emit({
         type: 'save',
@@ -619,15 +619,15 @@ class ContentsManager implements Contents.IManager {
       method: 'POST',
       data: JSON.stringify({ copy_from: fromFile })
     };
-    return ServerConnection.makeRequest(request, this.serverSettings).then(success => {
-      if (success.xhr.status !== 201) {
-        throw ServerConnection.makeError(success);
+    return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
+      if (response.xhr.status !== 201) {
+        throw ServerConnection.makeError(response);
       }
-      let data = success.data as Contents.IModel;
+      let data = response.data as Contents.IModel;
       try {
         validate.validateContentsModel(data);
       } catch (err) {
-        throw ServerConnection.makeError(success, err.message);
+        throw ServerConnection.makeError(response, err.message);
       }
       this._fileChanged.emit({
         type: 'new',
@@ -654,15 +654,15 @@ class ContentsManager implements Contents.IManager {
       url: this._getUrl(path, 'checkpoints'),
       method: 'POST'
     };
-    return ServerConnection.makeRequest(request, this.serverSettings).then(success => {
-      if (success.xhr.status !== 201) {
-        throw ServerConnection.makeError(success);
+    return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
+      if (response.xhr.status !== 201) {
+        throw ServerConnection.makeError(response);
       }
-      let data = success.data as Contents.ICheckpointModel;
+      let data = response.data as Contents.ICheckpointModel;
       try {
         validate.validateCheckpointModel(data);
       } catch (err) {
-        throw ServerConnection.makeError(success, err.message);
+        throw ServerConnection.makeError(response, err.message);
       }
       return data;
     });
@@ -685,21 +685,21 @@ class ContentsManager implements Contents.IManager {
       method: 'GET',
       cache: false
     };
-    return ServerConnection.makeRequest(request, this.serverSettings).then(success => {
-      if (success.xhr.status !== 200) {
-        throw ServerConnection.makeError(success);
+    return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
+      if (response.xhr.status !== 200) {
+        throw ServerConnection.makeError(response);
       }
-      if (!Array.isArray(success.data)) {
-        throw ServerConnection.makeError(success, 'Invalid Checkpoint list');
+      if (!Array.isArray(response.data)) {
+        throw ServerConnection.makeError(response, 'Invalid Checkpoint list');
       }
-      for (let i = 0; i < success.data.length; i++) {
+      for (let i = 0; i < response.data.length; i++) {
         try {
-        validate.validateCheckpointModel(success.data[i]);
+        validate.validateCheckpointModel(response.data[i]);
         } catch (err) {
-          throw ServerConnection.makeError(success, err.message);
+          throw ServerConnection.makeError(response, err.message);
         }
       }
-      return success.data;
+      return response.data;
     });
   }
 
@@ -720,9 +720,9 @@ class ContentsManager implements Contents.IManager {
       url: this._getUrl(path, 'checkpoints', checkpointID),
       method: 'POST'
     };
-    return ServerConnection.makeRequest(request, this.serverSettings).then(success => {
-      if (success.xhr.status !== 204) {
-        throw ServerConnection.makeError(success);
+    return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
+      if (response.xhr.status !== 204) {
+        throw ServerConnection.makeError(response);
       }
     });
 
@@ -745,9 +745,9 @@ class ContentsManager implements Contents.IManager {
       url: this._getUrl(path, 'checkpoints', checkpointID),
       method: 'DELETE'
     };
-    return ServerConnection.makeRequest(request, this.serverSettings).then(success => {
-      if (success.xhr.status !== 204) {
-        throw ServerConnection.makeError(success);
+    return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
+      if (response.xhr.status !== 204) {
+        throw ServerConnection.makeError(response);
       }
     });
   }

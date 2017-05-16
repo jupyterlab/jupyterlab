@@ -637,7 +637,7 @@ class DefaultKernel implements Kernel.IKernel {
     }
 
     this._connectionPromise = new PromiseDelegate<void>();
-    this._ws = new settings.webSocket(url);
+    this._ws = settings.wsFactory(url);
 
     // Ensure incoming binary messages are not Blobs
     this._ws.binaryType = 'arraybuffer';
@@ -1103,14 +1103,14 @@ namespace Private {
       method: 'GET',
       cache: false
     };
-    let promise = ServerConnection.makeRequest(request, settings).then(success => {
-      if (success.xhr.status !== 200) {
-        throw ServerConnection.makeError(success);
+    let promise = ServerConnection.makeRequest(request, settings).then(response => {
+      if (response.xhr.status !== 200) {
+        throw ServerConnection.makeError(response);
       }
       try {
-        return validate.validateSpecModels(success.data);
+        return validate.validateSpecModels(response.data);
       } catch (err) {
-        throw ServerConnection.makeError(success, err.message);
+        throw ServerConnection.makeError(response, err.message);
       }
     });
     Private.specs[settings.baseUrl] = promise;
@@ -1133,21 +1133,21 @@ namespace Private {
       method: 'GET',
       cache: false
     };
-    return ServerConnection.makeRequest(request, settings).then(success => {
-      if (success.xhr.status !== 200) {
-        throw ServerConnection.makeError(success);
+    return ServerConnection.makeRequest(request, settings).then(response => {
+      if (response.xhr.status !== 200) {
+        throw ServerConnection.makeError(response);
       }
-      if (!Array.isArray(success.data)) {
-        throw ServerConnection.makeError(success, 'Invalid kernel list');
+      if (!Array.isArray(response.data)) {
+        throw ServerConnection.makeError(response, 'Invalid kernel list');
       }
-      for (let i = 0; i < success.data.length; i++) {
+      for (let i = 0; i < response.data.length; i++) {
         try {
-          validate.validateModel(success.data[i]);
+          validate.validateModel(response.data[i]);
         } catch (err) {
-          throw ServerConnection.makeError(success, err.message);
+          throw ServerConnection.makeError(response, err.message);
         }
       }
-      return updateRunningKernels(success.data);
+      return updateRunningKernels(response.data);
     }, onKernelError);
   }
 
@@ -1183,16 +1183,16 @@ namespace Private {
       data: JSON.stringify({ name: options.name }),
       cache: false
     };
-    return ServerConnection.makeRequest(request, settings).then(success => {
-      if (success.xhr.status !== 201) {
-        throw ServerConnection.makeError(success);
+    return ServerConnection.makeRequest(request, settings).then(response => {
+      if (response.xhr.status !== 201) {
+        throw ServerConnection.makeError(response);
       }
-      validate.validateModel(success.data);
+      validate.validateModel(response.data);
       return new DefaultKernel({
         ...options,
-        name: success.data.name,
+        name: response.data.name,
         serverSettings: settings
-      }, success.data.id);
+      }, response.data.id);
     }, onKernelError);
   }
 
@@ -1249,14 +1249,14 @@ namespace Private {
       method: 'POST',
       cache: false
     };
-    return ServerConnection.makeRequest(request, settings).then(success => {
-      if (success.xhr.status !== 200) {
-        throw ServerConnection.makeError(success);
+    return ServerConnection.makeRequest(request, settings).then(response => {
+      if (response.xhr.status !== 200) {
+        throw ServerConnection.makeError(response);
       }
       try {
-        validate.validateModel(success.data);
+        validate.validateModel(response.data);
       } catch (err) {
-        throw ServerConnection.makeError(success, err.message);
+        throw ServerConnection.makeError(response, err.message);
       }
     }, onKernelError);
   }
@@ -1279,9 +1279,9 @@ namespace Private {
       method: 'POST',
       cache: false
     };
-    return ServerConnection.makeRequest(request, settings).then(success => {
-      if (success.xhr.status !== 204) {
-        throw ServerConnection.makeError(success);
+    return ServerConnection.makeRequest(request, settings).then(response => {
+      if (response.xhr.status !== 204) {
+        throw ServerConnection.makeError(response);
       }
     }, onKernelError);
   }
@@ -1299,9 +1299,9 @@ namespace Private {
       method: 'DELETE',
       cache: false
     };
-    return ServerConnection.makeRequest(request, settings).then(success => {
-      if (success.xhr.status !== 204) {
-        throw ServerConnection.makeError(success);
+    return ServerConnection.makeRequest(request, settings).then(response => {
+      if (response.xhr.status !== 204) {
+        throw ServerConnection.makeError(response);
       }
       killKernels(id);
     }, error => {
@@ -1340,15 +1340,15 @@ namespace Private {
       method: 'GET',
       cache: false
     };
-    return ServerConnection.makeRequest(request, settings).then(success => {
-      if (success.xhr.status !== 200) {
-        throw ServerConnection.makeError(success);
+    return ServerConnection.makeRequest(request, settings).then(response => {
+      if (response.xhr.status !== 200) {
+        throw ServerConnection.makeError(response);
       }
-      let data = success.data as Kernel.IModel;
+      let data = response.data as Kernel.IModel;
       try {
         validate.validateModel(data);
       } catch (err) {
-        throw ServerConnection.makeError(success, err.message);
+        throw ServerConnection.makeError(response, err.message);
       }
       return data;
     }, Private.onKernelError);

@@ -29,12 +29,12 @@ describe('@jupyterlab/services', () => {
           request.respond(200, 'hi');
         };
         let request = { url: 'foo', data: 'hi' };
-        return ServerConnection.makeRequest(request, settings).then(success => {
-          expect(success.request.url).to.be('foo');
-          expect(success.xhr).to.be.ok();
-          expect(success.settings.baseUrl).to.be.ok();
-          expect(success.data).to.be('hi');
-          expect(success.hasOwnProperty('event')).to.be(true);
+        return ServerConnection.makeRequest(request, settings).then(response => {
+          expect(response.request.url).to.be('foo');
+          expect(response.xhr).to.be.ok();
+          expect(response.settings.baseUrl).to.be.ok();
+          expect(response.data).to.be('hi');
+          expect(response.hasOwnProperty('event')).to.be(true);
         });
       });
 
@@ -150,20 +150,20 @@ describe('@jupyterlab/services', () => {
 
     describe('.makeError()', () => {
 
-      it('should create a server error from a server success', () => {
+      it('should create a server error from a server response', () => {
         let settings = ServerConnection.makeSettings();
         MockXMLHttpRequest.onRequest = request => {
           expect(request.method).to.be('GET');
           request.respond(200, 'hi');
         };
         let request = { url: 'foo', data: 'hi' };
-        return ServerConnection.makeRequest(request, settings).then(success => {
-          let err = ServerConnection.makeError(success, 'foo');
+        return ServerConnection.makeRequest(request, settings).then(response => {
+          let err = ServerConnection.makeError(response, 'foo');
           expect(err.message).to.be('foo');
-          expect(err.xhr).to.be(success.xhr);
-          expect(err.request).to.be(success.request);
-          expect(err.settings).to.be(success.settings);
-          expect(err.event).to.be(success.event);
+          expect(err.xhr).to.be(response.xhr);
+          expect(err.request).to.be(response.request);
+          expect(err.settings).to.be(response.settings);
+          expect(err.event).to.be(response.event);
         });
       });
 

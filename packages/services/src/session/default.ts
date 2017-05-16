@@ -317,16 +317,16 @@ class DefaultSession implements Session.ISession {
       data,
       cache: false
     };
-    return ServerConnection.makeRequest(request, settings).then(success => {
+    return ServerConnection.makeRequest(request, settings).then(response => {
       this._updating = false;
-      if (success.xhr.status !== 200) {
-        throw ServerConnection.makeError(success);
+      if (response.xhr.status !== 200) {
+        throw ServerConnection.makeError(response);
       }
-      let value = success.data as Session.IModel;
+      let value = response.data as Session.IModel;
       try {
         validate.validateModel(value);
       } catch (err) {
-        throw ServerConnection.makeError(success, err.message);
+        throw ServerConnection.makeError(response, err.message);
       }
       return Private.updateFromServer(value, settings.baseUrl);
     }, error => {
@@ -523,15 +523,15 @@ namespace Private {
       method: 'GET',
       cache: false
     };
-    return ServerConnection.makeRequest(request, settings).then(success => {
-      if (success.xhr.status !== 200) {
-        throw ServerConnection.makeError(success);
+    return ServerConnection.makeRequest(request, settings).then(response => {
+      if (response.xhr.status !== 200) {
+        throw ServerConnection.makeError(response);
       }
-      let data = success.data as Session.IModel;
+      let data = response.data as Session.IModel;
       try {
         validate.validateModel(data);
       } catch (err) {
-        throw ServerConnection.makeError(success, err.message);
+        throw ServerConnection.makeError(response, err.message);
       }
       return updateFromServer(data, settings.baseUrl);
     }, Private.onSessionError);
@@ -569,19 +569,19 @@ namespace Private {
       method: 'GET',
       cache: false
     };
-    return ServerConnection.makeRequest(request, settings).then(success => {
-      if (success.xhr.status !== 200) {
-        throw ServerConnection.makeError(success);
+    return ServerConnection.makeRequest(request, settings).then(response => {
+      if (response.xhr.status !== 200) {
+        throw ServerConnection.makeError(response);
       }
-      let data = success.data as Session.IModel[];
-      if (!Array.isArray(success.data)) {
-        throw ServerConnection.makeError(success, 'Invalid Session list');
+      let data = response.data as Session.IModel[];
+      if (!Array.isArray(response.data)) {
+        throw ServerConnection.makeError(response, 'Invalid Session list');
       }
       for (let i = 0; i < data.length; i++) {
         try {
           validate.validateModel(data[i]);
         } catch (err) {
-          throw ServerConnection.makeError(success, err.message);
+          throw ServerConnection.makeError(response, err.message);
         }
       }
       return updateRunningSessions(data, settings.baseUrl);
@@ -613,9 +613,9 @@ namespace Private {
       cache: false
     };
 
-    return ServerConnection.makeRequest(request, settings).then(success => {
-      if (success.xhr.status !== 204) {
-        throw ServerConnection.makeError(success);
+    return ServerConnection.makeRequest(request, settings).then(response => {
+      if (response.xhr.status !== 204) {
+        throw ServerConnection.makeError(response);
       }
       killSessions(id, settings.baseUrl);
     }, err => {
@@ -662,16 +662,16 @@ namespace Private {
       cache: false,
       data: JSON.stringify(model)
     };
-    return ServerConnection.makeRequest(request, settings).then(success => {
-      if (success.xhr.status !== 201) {
-        throw ServerConnection.makeError(success);
+    return ServerConnection.makeRequest(request, settings).then(response => {
+      if (response.xhr.status !== 201) {
+        throw ServerConnection.makeError(response);
       }
       try {
-        validate.validateModel(success.data);
+        validate.validateModel(response.data);
       } catch (err) {
-        throw ServerConnection.makeError(success, err.message);
+        throw ServerConnection.makeError(response, err.message);
       }
-      let data = success.data as Session.IModel;
+      let data = response.data as Session.IModel;
       return updateFromServer(data, settings.baseUrl);
     }, onSessionError);
   }

@@ -170,7 +170,7 @@ class DefaultTerminalSession implements TerminalSession.ISession {
     if (token) {
       wsUrl = wsUrl + `?token=${token}`;
     }
-    this._ws = new settings.webSocket(wsUrl);
+    this._ws = settings.wsFactory(wsUrl);
 
     this._ws.onmessage = (event: MessageEvent) => {
       if (this._isDisposed) {
@@ -242,11 +242,11 @@ namespace DefaultTerminalSession {
       url: Private.getServiceUrl(serverSettings.baseUrl),
       method: 'POST'
     };
-    return ServerConnection.makeRequest(request, serverSettings).then(success => {
-      if (success.xhr.status !== 200) {
-        throw ServerConnection.makeError(success);
+    return ServerConnection.makeRequest(request, serverSettings).then(response => {
+      if (response.xhr.status !== 200) {
+        throw ServerConnection.makeError(response);
       }
-      let name = (success.data as TerminalSession.IModel).name;
+      let name = (response.data as TerminalSession.IModel).name;
       return new DefaultTerminalSession(name, {...options, serverSettings });
     });
   }
@@ -309,13 +309,13 @@ namespace DefaultTerminalSession {
       url,
       method: 'GET'
     };
-    return ServerConnection.makeRequest(request, settings).then(success => {
-      if (success.xhr.status !== 200) {
-        throw ServerConnection.makeError(success);
+    return ServerConnection.makeRequest(request, settings).then(response => {
+      if (response.xhr.status !== 200) {
+        throw ServerConnection.makeError(response);
       }
-      let data = success.data as TerminalSession.IModel[];
+      let data = response.data as TerminalSession.IModel[];
       if (!Array.isArray(data)) {
-        throw ServerConnection.makeError(success, 'Invalid terminal data');
+        throw ServerConnection.makeError(response, 'Invalid terminal data');
       }
       // Update the local data store.
       let urls = toArray(map(data, item => {
@@ -352,9 +352,9 @@ namespace DefaultTerminalSession {
       url,
       method: 'DELETE'
     };
-    return ServerConnection.makeRequest(request, settings).then(success => {
-      if (success.xhr.status !== 204) {
-        throw ServerConnection.makeError(success);
+    return ServerConnection.makeRequest(request, settings).then(response => {
+      if (response.xhr.status !== 204) {
+        throw ServerConnection.makeError(response);
       }
       Private.killTerminal(url);
     }, err => {

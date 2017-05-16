@@ -123,11 +123,11 @@ class DefaultConfigSection implements IConfigSection {
       url: this._url,
       method: 'GET'
     };
-    return ServerConnection.makeRequest(request, this.serverSettings).then(success => {
-      if (success.xhr.status !== 200) {
-         throw ServerConnection.makeError(success);
+    return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
+      if (response.xhr.status !== 200) {
+         throw ServerConnection.makeError(response);
       }
-      this._data = success.data as JSONObject;
+      this._data = response.data as JSONObject;
     });
   }
 
@@ -150,11 +150,11 @@ class DefaultConfigSection implements IConfigSection {
       method: 'PATCH',
       data: JSON.stringify(newdata)
     };
-    return ServerConnection.makeRequest(request, this.serverSettings).then(success => {
-      if (success.xhr.status !== 200) {
-       throw ServerConnection.makeError(success);
+    return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
+      if (response.xhr.status !== 200) {
+       throw ServerConnection.makeError(response);
       }
-      this._data = success.data as JSONObject;
+      this._data = response.data as JSONObject;
       return this._data;
     });
   }
