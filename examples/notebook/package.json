@@ -8,6 +8,7 @@
   "dependencies": {
     "@jupyterlab/apputils": "^0.4.0",
     "@jupyterlab/codemirror": "^0.4.0",
+    "@jupyterlab/completer": "^0.4.0",
     "@jupyterlab/docmanager": "^0.4.0",
     "@jupyterlab/docregistry": "^0.4.0",
     "@jupyterlab/notebook": "^0.4.0",
