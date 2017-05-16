@@ -110,7 +110,11 @@ We'll walk through two notebook extensions:
 
 ### Adding a button to the toolbar
 
-Coming soon!
+Start from the cookie cutter extension template.
+
+```
+pip install cookiecutter
+cookiecutter https://github.com/jupyterlab/extension-cookiecutter-ts
 
 
 ### The *ipywidgets* third party extension
