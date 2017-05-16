@@ -150,13 +150,37 @@ export default plugin;
  */
 namespace Private {
   /**
+   * The setting registry levels.
+   */
+  const levels: ISettingRegistry.Level[] = ['system', 'user'];
+
+  /**
+   * Process a list of files into a setting registry plugin.
+   */
+  function fileHandler(id: string, files: Contents.IModel[]): ISettingRegistry.IPlugin {
+    const result: ISettingRegistry.IPlugin = { id, data: {} };
+
+    levels.forEach((level, index) => {
+      if (files[index]) {
+        try {
+          result.data[level] = JSON.parse(files[index].content);
+        } catch (error) {
+          console.warn(`Error parse ${id} ${level} settings`, error);
+          result.data[level] = null;
+        }
+      }
+    });
+
+    return result;
+  }
+
+  /**
    * Set the datastore for the application setting registry.
    */
   export
   function setDB(app: JupyterLab, manager: IDocumentManager): void {
     const folder = '.settings';
     const extension = PathExt.normalizeExtension('json');
-    const levels: ISettingRegistry.Level[] = ['system', 'user'];
     const ready = manager.services.ready;
     const root = '/';
 
@@ -165,7 +189,6 @@ namespace Private {
         const name = `${id}${extension}`;
 
         return ready.then(() => {
-
           const contents = manager.services.contents;
           const requests = Promise.all(levels.map(level => {
             const path = PathExt.resolve(root, folder, level, name);
@@ -173,30 +196,33 @@ namespace Private {
             return contents.get(path).catch(() => null);
           }));
 
-          return requests.then((files: Contents.IModel[]) => {
-            const result: ISettingRegistry.IPlugin = { id, data: {} };
-
-            levels.forEach((level, index) => {
-              if (files[index]) {
-                try {
-                  result.data[level] = JSON.parse(files[index].content);
-                } catch (error) {
-                  console.warn(`Error fetching ${id} ${level} settings`, error);
-                  result.data[level] = null;
-                }
-              }
-            });
-
-            return result;
-          });
+          return requests.then(files => fileHandler(id, files));
         });
       },
-      remove: (file: string): Promise<void> => {
+      remove: (id: string): Promise<void> => {
         return Promise.reject(new Error('remove not implemented'));
       },
-      save: (file: string, value: ISettingRegistry.IPlugin): Promise<void> => {
-        return Promise.reject(new Error('save not implemented'));
+      save: (id: string, value: ISettingRegistry.IPlugin): Promise<ISettingRegistry.IPlugin> => {
+        const name = `${id}${extension}`;
+
+        return ready.then(() => {
+          const contents = manager.services.contents;
+          const requests = Promise.all(levels.map(level => {
+            const path = PathExt.resolve(root, folder, level, name);
+
+            return contents.save(path, {
+              content: JSON.stringify(value.data[level]),
+              format: 'text',
+              name,
+              path: path,
+              type: 'file'
+            }).catch(() => null);
+          }));
+
+          return requests.then(files => fileHandler(id, files));
+        });
       }
     });
   }
 }
+
