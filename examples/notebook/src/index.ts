@@ -21,6 +21,10 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
+  CompleterModel, Completer, CompletionHandler
+} from '@jupyterlab/completer';
+
+import {
   editorServices
 } from '@jupyterlab/codemirror';
 
@@ -47,6 +51,10 @@ let NOTEBOOK = 'test.ipynb';
  * The map of command ids used by the notebook.
  */
 const cmdIds = {
+  invoke: 'completer:invoke',
+  select: 'completer:select',
+  invokeNotebook: 'completer:invoke-notebook',
+  selectNotebook: 'completer:select-notebook',
   save: 'notebook:save',
   interrupt: 'notebook:interrupt-kernel',
   restart: 'notebook:restart-kernel',
@@ -118,11 +126,28 @@ function createApp(manager: ServiceManager.IManager): void {
   let nbWidget = docManager.open(NOTEBOOK) as NotebookPanel;
   let palette = new CommandPalette({ commands });
 
+  const editor = nbWidget.notebook.activeCell && nbWidget.notebook.activeCell.editor;
+  const model = new CompleterModel();
+  const completer = new Completer({ editor, model });
+  const handler = new CompletionHandler({ completer, session: nbWidget.session });
+
+  // Set the handler's editor.
+  handler.editor = editor;
+
+  // Listen for active cell changes.
+  nbWidget.notebook.activeCellChanged.connect((sender, cell) => {
+    handler.editor = cell && cell.editor;
+  });
+
+  // Hide the widget when it first loads.
+  completer.hide();
+
   let panel = new SplitPanel();
   panel.id = 'main';
   panel.orientation = 'horizontal';
   panel.spacing = 0;
   SplitPanel.setStretch(palette, 0);
+  panel.addWidget(completer);
   panel.addWidget(palette);
   panel.addWidget(nbWidget);
   Widget.attach(panel, document.body);
@@ -130,6 +155,30 @@ function createApp(manager: ServiceManager.IManager): void {
   SplitPanel.setStretch(nbWidget, 1);
   window.onresize = () => panel.update();
 
+  commands.addCommand(cmdIds.invoke, {
+    label: 'Completer: Invoke',
+    execute: () => handler.invoke()
+  });
+  commands.addCommand(cmdIds.select, {
+    label: 'Completer: Select',
+    execute: () => handler.completer.selectActive()
+  });
+  commands.addCommand(cmdIds.invokeNotebook, {
+    label: 'Invoke Notebook',
+    execute: () => {
+      if (nbWidget.notebook.activeCell.model.type === 'code') {
+        return commands.execute(cmdIds.invoke);
+      }
+    }
+  });
+  commands.addCommand(cmdIds.selectNotebook, {
+    label: 'Select Notebook',
+    execute: () => {
+      if (nbWidget.notebook.activeCell.model.type === 'code') {
+        return commands.execute(cmdIds.select);
+      }
+    }
+  });
   commands.addCommand(cmdIds.save, {
     label: 'Save',
     execute: () => nbWidget.context.save()
@@ -220,6 +269,16 @@ function createApp(manager: ServiceManager.IManager): void {
   ].forEach(command => palette.addItem({ command, category }));
 
   let bindings = [
+  {
+    selector: '.jp-Notebook.jp-mod-editMode .jp-mod-completer-enabled',
+    keys: ['Tab'],
+    command: cmdIds.invokeNotebook
+  },
+  {
+    selector: `.jp-mod-completer-enabled`,
+    keys: ['Enter'],
+    command: cmdIds.selectNotebook
+  },
   {
     selector: '.jp-Notebook',
     keys: ['Shift Enter'],
