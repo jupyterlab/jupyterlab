@@ -44,8 +44,7 @@ module.exports = {
   entry:  path.resolve(buildDir, 'index.out.js'),
   output: {
     path: path.resolve(buildDir),
-    filename: '[name].bundle.js',
-    publicPath: package_data['jupyterlab']['publicPath']
+    filename: '[name].bundle.js'
   },
   module: {
     rules: [
