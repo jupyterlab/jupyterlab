@@ -14,10 +14,10 @@
   },
   "dependencies": {
     "@jupyterlab/apputils": "^0.4.0",
-    "@phosphor/algorithm": "^1.0.0",
-    "@phosphor/coreutils": "^1.0.0",
-    "@phosphor/disposable": "^1.0.0",
-    "@phosphor/virtualdom": "^1.0.0"
+    "@phosphor/algorithm": "^1.1.0",
+    "@phosphor/coreutils": "^1.1.0",
+    "@phosphor/disposable": "^1.1.0",
+    "@phosphor/virtualdom": "^1.1.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
