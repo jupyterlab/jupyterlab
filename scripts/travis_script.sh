@@ -73,9 +73,11 @@ if [[ $GROUP == cli ]]; then
     jupyter lab clean
     jupyter lab build
     jupyter lab path
-    jupyter labextension link jupyterlab/tests/mock_extension
-    jupyter labextension unlink jupyterlab/tests/mock_extension
-    jupyter labextension install jupyterlab/tests/mock_extension
+    jupyter labextension link jupyterlab/tests/mockextension --no-build
+    jupyter labextension unlink jupyterlab/tests/mockextension --no-build
+    jupyter labextension link jupyterlab/tests/mockextension --no-build
+    jupyter labextension unlink  @jupyterlab/python-tests --no-build
+    jupyter labextension install jupyterlab/tests/mockextension  --no-build
     jupyter labextension list
     jupyter labextension uninstall @jupyterlab/python-tests
 

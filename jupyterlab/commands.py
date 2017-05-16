@@ -42,7 +42,6 @@ def run(cmd, **kwargs):
     kwargs.setdefault('shell', sys.platform == 'win32')
     kwargs.setdefault('env', os.environ)
     kwargs.setdefault('stderr', STDOUT)
-    kwargs.setdefault('universal_newlines', True)
     try:
         return check_output(cmd, **kwargs)
     except CalledProcessError as error:
