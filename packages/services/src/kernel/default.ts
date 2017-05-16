@@ -222,10 +222,7 @@ class DefaultKernel implements Kernel.IKernel {
       return;
     }
     this._status = 'dead';
-    if (this._ws !== null) {
-      this._ws.close();
-    }
-    this._ws = null;
+    this._clearSocket();
     this._futures.forEach((future, key) => {
       future.dispose();
     });
@@ -353,9 +350,8 @@ class DefaultKernel implements Kernel.IKernel {
       return Promise.reject(new Error('Kernel is dead'));
     }
     this._clearState();
-    return this.ready.then(() => {
-      return Private.shutdownKernel(this.id, this.serverSettings);
-    });
+    this._clearSocket();
+    return Private.shutdownKernel(this.id, this.serverSettings);
   }
 
   /**
@@ -637,6 +633,7 @@ class DefaultKernel implements Kernel.IKernel {
     }
 
     this._connectionPromise = new PromiseDelegate<void>();
+    this._wsStopped = false;
     this._ws = settings.wsFactory(url);
 
     // Ensure incoming binary messages are not Blobs
@@ -668,7 +665,7 @@ class DefaultKernel implements Kernel.IKernel {
    * Handle a websocket message, validating and routing appropriately.
    */
   private _onWSMessage(evt: MessageEvent) {
-    if (this.status === 'dead') {
+    if (this._wsStopped) {
       // If the socket is being closed, ignore any messages
       return;
     }
@@ -717,7 +714,7 @@ class DefaultKernel implements Kernel.IKernel {
    * Handle a websocket close event.
    */
   private _onWSClose(evt: Event) {
-    if (this.status === 'dead') {
+    if (this._wsStopped) {
       return;
     }
     // Clear the websocket event handlers and the socket itself.
@@ -735,6 +732,17 @@ class DefaultKernel implements Kernel.IKernel {
       this._updateStatus('dead');
       this._connectionPromise.reject(new Error('Could not establish connection'));
     }
+  }
+
+  /**
+   * Clear the socket state.
+   */
+  private _clearSocket(): void {
+    this._wsStopped = true;
+    if (this._ws !== null) {
+      this._ws.close();
+    }
+    this._ws = null;
   }
 
   /**
@@ -902,6 +910,7 @@ class DefaultKernel implements Kernel.IKernel {
   private _name = '';
   private _status: Kernel.Status = 'unknown';
   private _clientId = '';
+  private _wsStopped = false;
   private _ws: WebSocket = null;
   private _username = '';
   private _reconnectLimit = 7;
