@@ -22,7 +22,13 @@ build_aliases['version'] = 'LabBuildApp.version'
 
 class LabBuildApp(JupyterApp):
     version = __version__
-    description = "Build the JupyterLab application"
+    description = """
+    Build the JupyterLab application
+
+    The application is built in the JupyterLab app directory in `/staging`.
+    When the build is complete it is put in the JupyterLab app `/static`
+    directory, where it is used to server the application.
+    """
     aliases = build_aliases
 
     app_dir = Unicode('', config=True,
@@ -44,7 +50,12 @@ clean_aliases['app-dir'] = 'LabCleanApp.app_dir'
 
 class LabCleanApp(JupyterApp):
     version = __version__
-    description = "Clean the JupyterLab application"
+    description = """
+    Clean the JupyterLab application
+
+    This will clean the app directory by removing the `staging` and `static`
+    directories.
+    """
     aliases = clean_aliases
 
     app_dir = Unicode('', config=True,
@@ -56,7 +67,11 @@ class LabCleanApp(JupyterApp):
 
 class LabPathApp(JupyterApp):
     version = __version__
-    description = "Print the configured path to the JupyterLab application"
+    description = """
+    Print the configured path to the JupyterLab application
+
+    The path can be configured using the JUPYTERLAB_DIR environment variable.
+    """
 
     def start(self):
         print(get_app_dir())
@@ -76,10 +91,17 @@ class LabApp(NotebookApp):
     version = __version__
 
     description = """
-        JupyterLab - An extensible computational environment for Jupyter.
+    JupyterLab - An extensible computational environment for Jupyter.
 
-        This launches a Tornado based HTML Server that serves up an
-        HTML5/Javascript JupyterLab client.
+    This launches a Tornado based HTML Server that serves up an
+    HTML5/Javascript JupyterLab client.
+
+    If run in core mode (e.g. `jupyter lab --core-mode`), it will run
+    the shipped JupyterLab application with no installed extensions.
+
+    Otherwise, it will run using the assets in the JupyterLab app
+    directory (found using `jupyter lab path`), if present.
+    If not present, it will fall back to the core application.
     """
 
     examples = """

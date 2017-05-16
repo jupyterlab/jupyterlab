@@ -191,6 +191,9 @@ the core application in `<git root>/jupyterlab/build`,
 run `jupyter lab --core-mode`.  This is the core application that will
 be shipped.
 
+- If working with extensions, see the extension documentation on
+https://jupyterlab-tutorial.readthedocs.io/en/latest/index.html.
+
 - The npm modules are fully compatible with Node/Babel/ES6/ES5. Simply
 omit the type declarations when using a language other than TypeScript.
 
