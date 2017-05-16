@@ -203,14 +203,14 @@ def clean(app_dir=None):
             shutil.rmtree(target)
 
 
-def build(app_dir=None, name=None, version=None, publicPath=None):
+def build(app_dir=None, name=None, version=None):
     """Build the JupyterLab application."""
     # Set up the build directory.
     app_dir = get_app_dir(app_dir)
     if app_dir == here:
         raise ValueError('Cannot build extensions in the core app')
 
-    _ensure_package(app_dir, name, version, publicPath)
+    _ensure_package(app_dir, name, version)
     staging = pjoin(app_dir, 'staging')
 
     # Make sure packages are installed.
@@ -230,7 +230,7 @@ def build(app_dir=None, name=None, version=None, publicPath=None):
     shutil.copytree(pjoin(staging, 'build'), static)
 
 
-def _ensure_package(app_dir, name='JupyterLab', version=None, publicPath=None):
+def _ensure_package(app_dir, name='JupyterLab', version=None):
     """Make sure the build dir is set up.
     """
     if not os.path.exists(pjoin(app_dir, 'extensions')):
@@ -253,7 +253,7 @@ def _ensure_package(app_dir, name='JupyterLab', version=None, publicPath=None):
         os.makedirs(staging)
 
     for name in ['index.template.js', 'webpack.config.js']:
-        dest = pjoin(staging, name)
+        dest = pjoin(staging, name.replace('.template', ''))
         shutil.copy2(pjoin(here, name), dest)
 
     # Template the package.json file.
@@ -275,10 +275,6 @@ def _ensure_package(app_dir, name='JupyterLab', version=None, publicPath=None):
     if version:
         data['jupyterlab']['version'] = version
 
-    publicPath = publicPath or uuid4().hex
-    if not publicPath.endswith('/'):
-        publicPath += '/'
-    data['jupyterlab']['publicPath'] = publicPath
     data['scripts']['build'] = 'webpack'
 
     pkg_path = pjoin(staging, 'package.json')

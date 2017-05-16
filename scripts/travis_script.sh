@@ -11,14 +11,14 @@ export PATH="$HOME/miniconda/bin:$PATH"
 
 
 if [[ $GROUP == tests ]]; then
-    # Make sure we can start and kill the lab server
-    jupyter lab --no-browser &
-    TASK_PID=$!
-    # Make sure the task is running
-    ps -p $TASK_PID || exit 1
-    sleep 5
-    kill $TASK_PID
-    wait $TASK_PID
+    # Make sure we can successfully load the core app.
+    pip install selenium
+    python -m jupyterlab.selenium_check --core-mode
+
+    # Make sure we can build and run the app.
+    jupyter lab build
+    python -m jupyterlab.selenium_check 
+    jupyter labextension list
 
     # Run the JS and python tests
     py.test
@@ -32,6 +32,13 @@ if [[ $GROUP == tests ]]; then
     npm install -g postcss-cli
     postcss jupyterlab/build/*.css > /dev/null
 
+    # Run the publish script in jupyterlab
+    cd jupyterlab
+    npm run publish
+
+    if [ ! -f ./build/release_data.json ]; then
+        echo "npm publish in jupyterlab unsucessful!"
+    fi
 fi
 
 

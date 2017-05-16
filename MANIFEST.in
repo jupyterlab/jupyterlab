@@ -10,5 +10,6 @@ include setupbase.py
 include jupyterlab/package.template.json
 include jupyterlab/webpack.config.js
 include jupyterlab/index.template.js
+include jupyterlab/package_list.txt
 
 prune jupyterlab/tests

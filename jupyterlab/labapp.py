@@ -35,11 +35,8 @@ class LabBuildApp(JupyterApp):
     version = Unicode('', config=True,
         help="The version of the built application")
 
-    publicPath = Unicode('', config=True,
-        help="The public path for assets in the built application")
-
     def start(self):
-        build(self.app_dir, self.name, self.version, self.publicPath)
+        build(self.app_dir, self.name, self.version)
 
 
 clean_aliases = dict(base_aliases)

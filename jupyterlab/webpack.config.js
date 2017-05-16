@@ -14,7 +14,7 @@ fs.ensureDirSync(buildDir);
 fs.copySync('./package.json', './build/package.json');
 
 // Create the entry point file.
-var source = fs.readFileSync('index.template.js').toString();
+var source = fs.readFileSync('index.js').toString();
 var template = Handlebars.compile(source);
 var data = { jupyterlab_extensions: package_data.jupyterlab.extensions };
 var result = template(data);
@@ -44,8 +44,7 @@ module.exports = {
   entry:  path.resolve(buildDir, 'index.out.js'),
   output: {
     path: path.resolve(buildDir),
-    filename: '[name].bundle.js',
-    publicPath: package_data['jupyterlab']['publicPath']
+    filename: '[name].bundle.js'
   },
   module: {
     rules: [

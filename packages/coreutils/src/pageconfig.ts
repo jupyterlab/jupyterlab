@@ -76,7 +76,8 @@ namespace PageConfig {
       configData = Object.create(null);
     } else {
       for (let key in configData) {
-        configData[key] = String(configData[key]);
+        // Quote characters are escaped, unescape them.
+        configData[key] = String(configData[key]).split('&#39;').join('"');
       }
     }
     return configData[name] || '';
