@@ -18,7 +18,6 @@ build_aliases = dict(base_aliases)
 build_aliases['app-dir'] = 'LabBuildApp.app_dir'
 build_aliases['name'] = 'LabBuildApp.name'
 build_aliases['version'] = 'LabBuildApp.version'
-build_aliases['publicPath'] = 'LabBuildApp.publicPath'
 
 
 class LabBuildApp(JupyterApp):

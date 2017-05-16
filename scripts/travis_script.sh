@@ -64,4 +64,15 @@ if [[ $GROUP == coverage_and_docs ]]; then
     make html
     source deactivate
     popd
+
+    # Make sure we can call help on all the cli apps.
+    jupyter lab -h 
+    juypter lab build -h 
+    jupyter lab clean -h
+    jupyter lab path -h 
+    jupyter labextension link -h
+    jupyter labextension unlink -h
+    jupyter labextension install -h 
+    jupyter labextension uninstall -h 
+    jupyter labextension list -h
 fi
