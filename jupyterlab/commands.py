@@ -8,16 +8,14 @@ import json
 import pipes
 import os
 import glob
-from uuid import uuid4
 from os import path as osp
 from os.path import join as pjoin
-from subprocess import check_output, CalledProcessError
+from subprocess import check_output, CalledProcessError, STDOUT
 import shutil
 import sys
 import tarfile
 from jupyter_core.paths import ENV_JUPYTER_PATH
 
-from ._version import __version__
 
 if sys.platform == 'win32':
     from subprocess import list2cmdline
@@ -43,9 +41,12 @@ def run(cmd, **kwargs):
     print('> ' + list2cmdline(cmd))
     kwargs.setdefault('shell', sys.platform == 'win32')
     kwargs.setdefault('env', os.environ)
+    kwargs.setdefault('stderr', STDOUT)
+    kwargs.setdefault('universal_newlines', True)
     try:
         return check_output(cmd, **kwargs)
     except CalledProcessError as error:
+        print(error.output)
         raise error
 
 
