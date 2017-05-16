@@ -129,6 +129,7 @@ if 'setuptools' in sys.modules:
         'console_scripts': [
             'jupyter-lab = jupyterlab.labapp:main',
             'jupyter-labextension = jupyterlab.labextensions:main',
+            'jupyter-labhub = jupyterlab.labapp:main'
         ]
     }
     setup_args.pop('scripts', None)
