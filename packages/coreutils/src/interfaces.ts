@@ -60,5 +60,5 @@ interface IDatastore<T, U> {
    *
    * @returns A promise that is rejected if saving fails and succeeds otherwise.
    */
-  save(id: string, value: U): Promise<void>;
+  save(id: string, value: U): Promise<T | void>;
 }
