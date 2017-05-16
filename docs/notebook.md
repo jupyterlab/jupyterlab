@@ -116,8 +116,102 @@ Start from the cookie cutter extension template.
 pip install cookiecutter
 cookiecutter https://github.com/jupyterlab/extension-cookiecutter-ts
 cd my-cookie-cutter-name
-# Install the dependencies
+```
+
+Install the dependencies.
+
+```
 npm install --save @jupyterlab/notebook @jupyterlab/apputils @jupyterlab/docregistry @phosphor/disposable
+```
+
+Copy the following to `src/index.ts`:
+
+
+```typescript
+import {
+  IDisposable, DisposableDelegate
+} from '@phosphor/disposable';
+
+import {
+  JupyterLab, JupyterLabPlugin
+} from '@jupyterlab/application';
+
+import {
+  ToolbarButton
+} from '@jupyterlab/apputils';
+
+import {
+  DocumentRegistry, IDocumentRegistry
+} from '@jupyterlab/docregistry';
+
+import {
+  NotebookActions, NotebookPanel, INotebookModel
+} from '@jupyterlab/notebook';
+
+
+/**
+ * The plugin registration information.
+ */
+const plugin: JupyterLabPlugin<void> = {
+  activate,
+  id: 'jupyter.extensions.new-button',
+  autoStart: true,
+  requires: [IDocumentRegistry]
+};
+
+
+/**
+ * A notebook widget extension that adds a button to the toolbar.
+ */
+export
+class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
+  /**
+   * Create a new extension object.
+   */
+  createNew(panel: NotebookPanel, context: DocumentRegistry.IContext<INotebookModel>): IDisposable {
+    let callback = () => {
+      NotebookActions.runAll(panel.notebook, context.session);
+    };
+    let button = new ToolbarButton({
+      className: 'myButton',
+      onClick: callback,
+      tooltip: 'Run All'
+    });
+
+    let i = document.createElement('i');
+    i.classList.add('fa', 'fa-fast-forward');
+    button.node.appendChild(i);
+
+    panel.toolbar.insertItem(0, 'runAll', button);
+    return new DisposableDelegate(() => {
+      button.dispose();
+    });
+  }
+}
+
+/**
+ * Activate the extension.
+ */
+function activate(lab: JupyterLab, registry: IDocumentRegistry) {
+  registry.addWidgetExtension('Notebook', new ButtonExtension());
+};
+
+
+/**
+ * Export the plugin as default.
+ */
+export default plugin;
+```
+
+Run the following commands:
+
+```
+npm run build
+jupyter labextension install .
+jupyter lab
+```
+
+Open a notebook and observe the new "Run All" button.
 
 
 ### The *ipywidgets* third party extension
