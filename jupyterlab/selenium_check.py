@@ -55,6 +55,8 @@ class TestApp(NotebookApp):
         else:
             config.assets_dir = os.path.join(get_app_dir(), 'static')
 
+        print('****Testing assets dir %s' % config.assets_dir)
+
         config.settings_dir = ''
 
         add_handlers(self.web_app, config)

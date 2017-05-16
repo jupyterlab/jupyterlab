@@ -11,9 +11,14 @@ export PATH="$HOME/miniconda/bin:$PATH"
 
 
 if [[ $GROUP == tests ]]; then
-    # Make sure we can successfully load the page
+    # Make sure we can successfully load the core app.
     pip install selenium
-    python jupyterlab/selenium_check.py
+    python -m jupyterlab.selenium_check --core-mode
+
+    # Make sure we can build and run the app.
+    jupyter lab build
+    python -m jupyterlab.selenium_check 
+    jupyter labextension list
 
     # Run the JS and python tests
     py.test
