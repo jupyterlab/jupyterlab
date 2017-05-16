@@ -115,6 +115,9 @@ Start from the cookie cutter extension template.
 ```
 pip install cookiecutter
 cookiecutter https://github.com/jupyterlab/extension-cookiecutter-ts
+cd my-cookie-cutter-name
+# Install the dependencies
+npm install --save @jupyterlab/notebook @jupyterlab/apputils @jupyterlab/docregistry @phosphor/disposable
 
 
 ### The *ipywidgets* third party extension
