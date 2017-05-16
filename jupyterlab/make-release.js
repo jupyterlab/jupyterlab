@@ -11,9 +11,13 @@ version = version.toString().trim();
 var data = require('./package.json');
 data['jupyterlab']['version'] = version;
 
+// Update our package.json files.
 var text = JSON.stringify(data, null, 2) + '\n';
 fs.writeFileSync('./package.json', text);
 fs.writeFileSync('./package.template.json', text);
+
+// Update our template file.
+fs.copyFileSync('./index.js', './index.template.js')
 
 // Run a standard build.
 childProcess.execSync('npm run build');

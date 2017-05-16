@@ -3,16 +3,17 @@ require('font-awesome/css/font-awesome.min.css');
 require('@jupyterlab/default-theme/style/index.css');
 
 var app = require('@jupyterlab/application').JupyterLab;
-var utils = require('@jupyterlab/services').utils;
+var PageConfig = require('@jupyterlab/coreutils').PageConfig;
 
+__webpack_public_path__ = PageConfig.getOption('publicUrl');
 
 function main() {
-    var version = utils.getConfigOption('appVersion') || 'unknown';
-    var name = utils.getConfigOption('appName') || 'JupyterLab';
-    var namespace = utils.getConfigOption('appNamespace') || 'jupyterlab';
-    var devMode = utils.getConfigOption('devMode') || 'false';
-    var settingsDir = utils.getConfigOption('settingsDir') || '';
-    var assetsDir = utils.getConfigOption('assetsDir') || '';
+    var version = PageConfig.getOption('appVersion') || 'unknown';
+    var name = PageConfig.getOption('appName') || 'JupyterLab';
+    var namespace = PageConfig.getOption('appNamespace') || 'jupyterlab';
+    var devMode = PageConfig.getOption('devMode') || 'false';
+    var settingsDir = PageConfig.getOption('settingsDir') || '';
+    var assetsDir = PageConfig.getOption('assetsDir') || '';
 
     if (version[0] === 'v') {
         version = version.slice(1);
@@ -35,7 +36,7 @@ function main() {
     {{/each}}
     var ignorePlugins = [];
     try {
-        var option = utils.getConfigOption('ignorePlugins');
+        var option = PageConfig.getOption('ignorePlugins');
         ignorePlugins = JSON.parse(option);
     } catch (e) {
         console.error("Invalid ignorePlugins config:", option);
