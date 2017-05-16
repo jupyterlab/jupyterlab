@@ -131,6 +131,9 @@ class InputArea extends Widget {
     if (this._rendered) {
       layout.removeWidget(this._rendered);
       layout.addWidget(this._editor);
+      // Make sure there is a single cursor position.
+      let pos = this._editor.editor.getCursorPosition();
+      this._editor.editor.setCursorPosition(pos);
     }
   }
 
