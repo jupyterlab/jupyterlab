@@ -150,9 +150,24 @@ export default plugin;
  */
 namespace Private {
   /**
+   * The settings folder.
+   */
+  const folder = '.settings';
+
+  /**
+   * The settings file extension.
+   */
+  const extension = PathExt.normalizeExtension('json');
+
+  /**
    * The setting registry levels.
    */
   const levels: ISettingRegistry.Level[] = ['system', 'user'];
+
+  /**
+   * The settings base path.
+   */
+  const root = '/';
 
   /**
    * Process a list of files into a setting registry plugin.
@@ -165,7 +180,7 @@ namespace Private {
         try {
           result.data[level] = JSON.parse(files[index].content);
         } catch (error) {
-          console.warn(`Error parse ${id} ${level} settings`, error);
+          console.warn(`Error parsing ${id} ${level} settings`, error);
           result.data[level] = null;
         }
       }
@@ -179,21 +194,15 @@ namespace Private {
    */
   export
   function setDB(app: JupyterLab, manager: IDocumentManager): void {
-    const folder = '.settings';
-    const extension = PathExt.normalizeExtension('json');
-    const ready = manager.services.ready;
-    const root = '/';
-
     app.settings.setDB({
       fetch: (id: string): Promise<ISettingRegistry.IPlugin> => {
         const name = `${id}${extension}`;
 
-        return ready.then(() => {
-          const contents = manager.services.contents;
+        return manager.services.ready.then(() => {
           const requests = Promise.all(levels.map(level => {
             const path = PathExt.resolve(root, folder, level, name);
 
-            return contents.get(path).catch(() => null);
+            return manager.services.contents.get(path).catch(() => null);
           }));
 
           return requests.then(files => fileHandler(id, files));
@@ -205,12 +214,11 @@ namespace Private {
       save: (id: string, value: ISettingRegistry.IPlugin): Promise<ISettingRegistry.IPlugin> => {
         const name = `${id}${extension}`;
 
-        return ready.then(() => {
-          const contents = manager.services.contents;
+        return manager.services.ready.then(() => {
           const requests = Promise.all(levels.map(level => {
             const path = PathExt.resolve(root, folder, level, name);
 
-            return contents.save(path, {
+            return manager.services.contents.save(path, {
               content: JSON.stringify(value.data[level]),
               format: 'text',
               name,
