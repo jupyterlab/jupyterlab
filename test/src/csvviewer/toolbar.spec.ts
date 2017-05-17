@@ -12,8 +12,11 @@ import {
 } from 'simulate-event';
 
 import {
-  CSVToolbar, DELIMITERS
+  CSVToolbar
 } from '@jupyterlab/csvviewer';
+
+
+const DELIMITERS = [',', ';', '\t'];
 
 
 describe('csvviewer/toolbar', () => {

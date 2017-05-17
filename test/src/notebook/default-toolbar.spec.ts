@@ -36,10 +36,6 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
-  JUPYTER_CELL_MIME
-} from '@jupyterlab/notebook';
-
-import {
  NotebookPanel
 } from '@jupyterlab/notebook';
 
@@ -51,6 +47,9 @@ import {
   DEFAULT_CONTENT, createNotebookPanelFactory, rendermime, clipboard,
   mimeTypeService
 } from './utils';
+
+
+const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
 
 function startSession(context: DocumentRegistry.IContext<INotebookModel>): Promise<IClientSession> {
