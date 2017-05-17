@@ -49,7 +49,7 @@ import * as utils
   from './utils';
 
 import {
-  SELECTED_CLASS, showErrorMessage
+  showErrorMessage
 } from './utils';
 
 
@@ -124,6 +124,21 @@ const MODIFIED_ID_CLASS = 'jp-id-modified';
 const FILE_TYPE_CLASS = 'jp-FileIcon';
 
 /**
+ * The mime type for a contents drag object.
+ */
+const CONTENTS_MIME = 'application/x-jupyter-icontents';
+
+/**
+ * The class name added to drop targets.
+ */
+const DROP_TARGET_CLASS = 'jp-mod-dropTarget';
+
+/**
+ * The class name added to selected rows.
+ */
+const SELECTED_CLASS = 'jp-mod-selected';
+
+/**
  * The class name added to a material icon content item.
  */
 const FOLDER_MATERIAL_ICON_CLASS = 'jp-OpenFolderIcon';
@@ -166,8 +181,8 @@ const DESCENDING_CLASS = 'jp-mod-descending';
 const RENAME_DURATION = 1000;
 
 /**
-  * The maximum duration between two key presses when selecting files by prefix.
-  */
+ * The maximum duration between two key presses when selecting files by prefix.
+ */
 const PREFIX_APPEND_DURATION = 1000;
 
 /**
@@ -941,7 +956,7 @@ class DirListing extends Widget {
    * Handle the `'p-dragenter'` event for the widget.
    */
   private _evtDragEnter(event: IDragEvent): void {
-    if (event.mimeData.hasData(utils.CONTENTS_MIME)) {
+    if (event.mimeData.hasData(CONTENTS_MIME)) {
       let index = Private.hitTestNodes(this._items, event.clientX, event.clientY);
       if (index === -1) {
         return;
@@ -951,7 +966,7 @@ class DirListing extends Widget {
         return;
       }
       let target = event.target as HTMLElement;
-      target.classList.add(utils.DROP_TARGET_CLASS);
+      target.classList.add(DROP_TARGET_CLASS);
       event.preventDefault();
       event.stopPropagation();
     }
@@ -963,9 +978,9 @@ class DirListing extends Widget {
   private _evtDragLeave(event: IDragEvent): void {
     event.preventDefault();
     event.stopPropagation();
-    let dropTarget = DOMUtils.findElement(this.node, utils.DROP_TARGET_CLASS);
+    let dropTarget = DOMUtils.findElement(this.node, DROP_TARGET_CLASS);
     if (dropTarget) {
-      dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
+      dropTarget.classList.remove(DROP_TARGET_CLASS);
     }
   }
 
@@ -976,12 +991,12 @@ class DirListing extends Widget {
     event.preventDefault();
     event.stopPropagation();
     event.dropAction = event.proposedAction;
-    let dropTarget = DOMUtils.findElement(this.node, utils.DROP_TARGET_CLASS);
+    let dropTarget = DOMUtils.findElement(this.node, DROP_TARGET_CLASS);
     if (dropTarget) {
-      dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
+      dropTarget.classList.remove(DROP_TARGET_CLASS);
     }
     let index = Private.hitTestNodes(this._items, event.clientX, event.clientY);
-    this._items[index].classList.add(utils.DROP_TARGET_CLASS);
+    this._items[index].classList.add(DROP_TARGET_CLASS);
   }
 
   /**
@@ -995,15 +1010,15 @@ class DirListing extends Widget {
       event.dropAction = 'none';
       return;
     }
-    if (!event.mimeData.hasData(utils.CONTENTS_MIME)) {
+    if (!event.mimeData.hasData(CONTENTS_MIME)) {
       return;
     }
     event.dropAction = event.proposedAction;
 
     let target = event.target as HTMLElement;
     while (target && target.parentElement) {
-      if (target.classList.contains(utils.DROP_TARGET_CLASS)) {
-        target.classList.remove(utils.DROP_TARGET_CLASS);
+      if (target.classList.contains(DROP_TARGET_CLASS)) {
+        target.classList.remove(DROP_TARGET_CLASS);
         break;
       }
       target = target.parentElement;
@@ -1017,7 +1032,7 @@ class DirListing extends Widget {
 
     // Move all of the items.
     const promises: Promise<Contents.IModel>[] = [];
-    const names = event.mimeData.getData(utils.CONTENTS_MIME) as string[];
+    const names = event.mimeData.getData(CONTENTS_MIME) as string[];
     for (let name of names) {
       let newPath = path + name;
       promises.push(renameFileDialog(manager, name, newPath, this._model.path));
@@ -1055,7 +1070,7 @@ class DirListing extends Widget {
       supportedActions: 'move',
       proposedAction: 'move'
     });
-    this._drag.mimeData.setData(utils.CONTENTS_MIME, selectedNames);
+    this._drag.mimeData.setData(CONTENTS_MIME, selectedNames);
     if (item && item.type !== 'directory') {
       this._drag.mimeData.setData(FACTORY_MIME, () => {
         let path = item.path;

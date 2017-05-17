@@ -67,6 +67,16 @@ const BREADCRUMB_ITEM_CLASS = 'jp-BreadCrumbs-item';
  */
 const BREAD_CRUMB_PATHS = ['/', '../../', '../', ''];
 
+/**
+ * The mime type for a contents drag object.
+ */
+const CONTENTS_MIME = 'application/x-jupyter-icontents';
+
+/**
+ * The class name added to drop targets.
+ */
+const DROP_TARGET_CLASS = 'jp-mod-dropTarget';
+
 
 /**
  * A class which hosts folder breadcrumbs.
@@ -187,11 +197,11 @@ class BreadCrumbs extends Widget {
    * Handle the `'p-dragenter'` event for the widget.
    */
   private _evtDragEnter(event: IDragEvent): void {
-    if (event.mimeData.hasData(utils.CONTENTS_MIME)) {
+    if (event.mimeData.hasData(CONTENTS_MIME)) {
       let index = ArrayExt.findFirstIndex(this._crumbs, node => ElementExt.hitTest(node, event.clientX, event.clientY));
       if (index !== -1) {
         if (index !== Private.Crumb.Current) {
-          this._crumbs[index].classList.add(utils.DROP_TARGET_CLASS);
+          this._crumbs[index].classList.add(DROP_TARGET_CLASS);
           event.preventDefault();
           event.stopPropagation();
         }
@@ -205,9 +215,9 @@ class BreadCrumbs extends Widget {
   private _evtDragLeave(event: IDragEvent): void {
     event.preventDefault();
     event.stopPropagation();
-    let dropTarget = DOMUtils.findElement(this.node, utils.DROP_TARGET_CLASS);
+    let dropTarget = DOMUtils.findElement(this.node, DROP_TARGET_CLASS);
     if (dropTarget) {
-      dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
+      dropTarget.classList.remove(DROP_TARGET_CLASS);
     }
   }
 
@@ -218,13 +228,13 @@ class BreadCrumbs extends Widget {
     event.preventDefault();
     event.stopPropagation();
     event.dropAction = event.proposedAction;
-    let dropTarget = DOMUtils.findElement(this.node, utils.DROP_TARGET_CLASS);
+    let dropTarget = DOMUtils.findElement(this.node, DROP_TARGET_CLASS);
     if (dropTarget) {
-      dropTarget.classList.remove(utils.DROP_TARGET_CLASS);
+      dropTarget.classList.remove(DROP_TARGET_CLASS);
     }
     let index = ArrayExt.findFirstIndex(this._crumbs, node => ElementExt.hitTest(node, event.clientX, event.clientY));
     if (index !== -1) {
-      this._crumbs[index].classList.add(utils.DROP_TARGET_CLASS);
+      this._crumbs[index].classList.add(DROP_TARGET_CLASS);
     }
   }
 
@@ -238,15 +248,15 @@ class BreadCrumbs extends Widget {
       event.dropAction = 'none';
       return;
     }
-    if (!event.mimeData.hasData(utils.CONTENTS_MIME)) {
+    if (!event.mimeData.hasData(CONTENTS_MIME)) {
       return;
     }
     event.dropAction = event.proposedAction;
 
     let target = event.target as HTMLElement;
     while (target && target.parentElement) {
-      if (target.classList.contains(utils.DROP_TARGET_CLASS)) {
-        target.classList.remove(utils.DROP_TARGET_CLASS);
+      if (target.classList.contains(DROP_TARGET_CLASS)) {
+        target.classList.remove(DROP_TARGET_CLASS);
         break;
       }
       target = target.parentElement;
@@ -263,7 +273,7 @@ class BreadCrumbs extends Widget {
 
     // Move all of the items.
     let promises: Promise<any>[] = [];
-    let names = event.mimeData.getData(utils.CONTENTS_MIME) as string[];
+    let names = event.mimeData.getData(CONTENTS_MIME) as string[];
     for (let name of names) {
       let newPath = path + name;
       promises.push(model.manager.rename(name, newPath).catch(error => {
