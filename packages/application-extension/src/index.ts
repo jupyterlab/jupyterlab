@@ -52,7 +52,7 @@ const plugin: JupyterLabPlugin<void> = {
   activate: (app: JupyterLab, palette: ICommandPalette, manager: IDocumentManager) => {
     Private.setDB(app, manager);
     app.settings.load(plugin.id).then(settings => {
-      console.log(settings.id, settings);
+      console.log(settings.plugin, settings);
     }).catch(reason => {
       console.warn('settings load failure', reason);
     });

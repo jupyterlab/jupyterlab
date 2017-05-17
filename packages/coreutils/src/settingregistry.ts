@@ -6,6 +6,10 @@ import {
 } from '@phosphor/coreutils';
 
 import {
+  IDisposable
+} from '@phosphor/disposable';
+
+import {
   ISignal, Signal
 } from '@phosphor/signaling';
 
@@ -84,7 +88,7 @@ namespace ISettingRegistry {
    * An interface for manipulating the settings of a specific plugin.
    */
   export
-  interface ISettings {
+  interface ISettings extends IDisposable {
     /**
      * The plugin name.
      */
@@ -188,18 +192,23 @@ class SettingRegistry {
    *
    * @param reload - Reload from server, ignoring cache. Defaults to false.
    *
-   * @returns A promise that resolves with the plugin after loading.
+   * @returns A promise that resolves with a plugin settings object.
    */
-  load(plugin: string, reload = false): Promise<ISettingRegistry.IPlugin> {
+  load(plugin: string, reload = false): Promise<ISettingRegistry.ISettings> {
     const plugins = this._plugins;
 
     if (!reload && plugin in plugins) {
-      return Promise.resolve(JSONExt.deepCopy(plugins[plugin]));
+      const content = plugins[plugin];
+
+      return Promise.resolve(new Settings({ content, plugin }));
     }
 
     if (this._datastore) {
-      return this._datastore.fetch(plugin)
-        .then(contents => plugins[contents.id] = contents);
+      return this._datastore.fetch(plugin).then(result => {
+        const content = plugins[result.id] = result;
+
+        return new Settings({ content, plugin });
+      });
     }
 
     return this._ready.promise.then(() => this.load(plugin));
@@ -302,4 +311,107 @@ class SettingRegistry {
   private _pluginChanged = new Signal<this, string>(this);
   private _plugins: { [name: string]: ISettingRegistry.IPlugin } = Object.create(null);
   private _ready = new PromiseDelegate<void>();
+}
+
+
+/**
+ * A manager for a specific plugin's settings.
+ */
+class Settings implements ISettingRegistry.ISettings {
+  /**
+   * Instantiate a new plugin settings manager.
+   */
+  constructor(options: Settings.IOptions) {
+    this._content = options.content;
+    this.plugin = options.plugin;
+  }
+
+  /**
+   * Test whether the plugin settings manager disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * The plugin name.
+   */
+  readonly plugin: string;
+
+  /**
+   * Dispose of the plugin settings resources.
+   */
+  dispose(): void {
+    if (this._isDisposed) {
+      return;
+    }
+    this._content = null;
+  }
+
+  /**
+   * Get an individual setting.
+   *
+   * @param key - The name of the setting being retrieved.
+   *
+   * @param level - The setting level. Defaults to `user`.
+   *
+   * @returns A promise that resolves when the setting is retrieved.
+   */
+  get(key: string, level?: ISettingRegistry.Level): Promise<JSONValue> {
+    return Promise.reject(new Error('Settings#get not implemented yet.'));
+  }
+
+  /**
+   * Remove a single setting.
+   *
+   * @param key - The name of the setting being removed.
+   *
+   * @param level - The setting level. Defaults to `user`.
+   *
+   * @returns A promise that resolves when the setting is removed.
+   */
+  remove(key: string, level?: ISettingRegistry.Level): Promise<void> {
+    return Promise.reject(new Error('Settings#remove not implemented yet.'));
+  }
+
+  /**
+   * Set a single setting.
+   *
+   * @param key - The name of the setting being set.
+   *
+   * @param value - The value of the setting.
+   *
+   * @param level - The setting level. Defaults to `user`.
+   *
+   * @returns A promise that resolves when the setting has been saved.
+   *
+   */
+  set(key: string, value: JSONValue, level?: ISettingRegistry.Level): Promise<void> {
+    return Promise.reject(new Error('Settings#set not implemented yet.'));
+  }
+
+  private _content: ISettingRegistry.IPlugin | null = null;
+  private _isDisposed = false;
+}
+
+
+/**
+ * A namespace for `Settings` statics.
+ */
+namespace Settings {
+  /**
+   * The instantiation options for a `Settings` object.
+   */
+  export
+  interface IOptions {
+    /**
+     * The actual setting values for a plugin.
+     */
+    content?: ISettingRegistry.IPlugin;
+
+    /**
+     * The plugin that the settings object references.
+     */
+    plugin: string;
+  }
 }
