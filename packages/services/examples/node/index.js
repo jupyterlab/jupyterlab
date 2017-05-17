@@ -31,7 +31,7 @@ var session;
 services.Session.startNew(options).then(function(s) {
   // Rename the session.
   session = s;
-  return session.rename('bar.ipynb');
+  return session.setPath('bar.ipynb');
 }).then(function() {
   console.log('Session renamed to', session.path);
   // Execute and handle replies on the kernel.
