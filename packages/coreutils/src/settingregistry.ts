@@ -79,6 +79,53 @@ namespace ISettingRegistry {
      */
     data: Bundle | null;
   }
+
+  /**
+   * An interface for manipulating the settings of a specific plugin.
+   */
+  export
+  interface ISettings {
+    /**
+     * The plugin name.
+     */
+    readonly plugin: string;
+
+    /**
+     * Get an individual setting.
+     *
+     * @param key - The name of the setting being retrieved.
+     *
+     * @param level - The setting level. Defaults to `user`.
+     *
+     * @returns A promise that resolves when the setting is retrieved.
+     */
+    get(key: string, level?: ISettingRegistry.Level): Promise<JSONValue>;
+
+    /**
+     * Remove a single setting.
+     *
+     * @param key - The name of the setting being removed.
+     *
+     * @param level - The setting level. Defaults to `user`.
+     *
+     * @returns A promise that resolves when the setting is removed.
+     */
+    remove(key: string, level?: ISettingRegistry.Level): Promise<void>;
+
+    /**
+     * Set a single setting.
+     *
+     * @param key - The name of the setting being set.
+     *
+     * @param value - The value of the setting.
+     *
+     * @param level - The setting level. Defaults to `user`.
+     *
+     * @returns A promise that resolves when the setting has been saved.
+     *
+     */
+    set(key: string, value: JSONValue, level?: ISettingRegistry.Level): Promise<void>;
+  };
 }
 
 

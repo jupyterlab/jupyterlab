@@ -215,15 +215,14 @@ namespace Private {
         const name = `${id}${extension}`;
 
         return manager.services.ready.then(() => {
+          const format = 'text';
+          const type = 'file';
           const requests = Promise.all(levels.map(level => {
+            const content = JSON.stringify(value.data[level]);
             const path = PathExt.resolve(root, folder, level, name);
 
             return manager.services.contents.save(path, {
-              content: JSON.stringify(value.data[level]),
-              format: 'text',
-              name,
-              path: path,
-              type: 'file'
+              content, format, name, path, type
             }).catch(() => null);
           }));
 
