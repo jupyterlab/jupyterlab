@@ -44,7 +44,7 @@ describe('notebook/notebook/model', () => {
       it('should add a single code cell by default', () => {
         let model = new NotebookModel();
         expect(model.cells.length).to.be(1);
-        expect(model.cells.at(0)).to.be.a(CodeCellModel);
+        expect(model.cells.get(0)).to.be.a(CodeCellModel);
       });
 
       it('should accept an optional factory', () => {
@@ -87,13 +87,13 @@ describe('notebook/notebook/model', () => {
       it('should add an empty code cell by default', () => {
         let model = new NotebookModel();
         expect(model.cells.length).to.be(1);
-        expect(model.cells.at(0)).to.be.a(CodeCellModel);
+        expect(model.cells.get(0)).to.be.a(CodeCellModel);
       });
 
       it('should be reset when loading from disk', () => {
         let model = new NotebookModel();
         let cell = model.contentFactory.createCodeCell({});
-        model.cells.pushBack(cell);
+        model.cells.push(cell);
         model.fromJSON(DEFAULT_CONTENT);
         expect(ArrayExt.firstIndexOf(toArray(model.cells), cell)).to.be(-1);
         expect(model.cells.length).to.be(6);
@@ -103,12 +103,12 @@ describe('notebook/notebook/model', () => {
         let model = new NotebookModel();
         let cell = model.contentFactory.createCodeCell({});
         cell.value.text = 'foo';
-        model.cells.pushBack(cell);
+        model.cells.push(cell);
         model.fromJSON(DEFAULT_CONTENT);
         model.cells.undo();
         expect(model.cells.length).to.be(2);
-        expect(model.cells.at(1).value.text).to.be('foo');
-        expect(model.cells.at(1)).to.be(cell);  // should be ===.
+        expect(model.cells.get(1).value.text).to.be('foo');
+        expect(model.cells.get(1)).to.be(cell);  // should be ===.
       });
 
       context('cells `changed` signal', () => {
@@ -118,14 +118,14 @@ describe('notebook/notebook/model', () => {
           let cell = model.contentFactory.createCodeCell({});
           let called = false;
           model.contentChanged.connect(() => { called = true; });
-          model.cells.pushBack(cell);
+          model.cells.push(cell);
           expect(called).to.be(true);
         });
 
         it('should set the dirty flag', () => {
           let model = new NotebookModel();
           let cell = model.contentFactory.createCodeCell({});
-          model.cells.pushBack(cell);
+          model.cells.push(cell);
           expect(model.dirty).to.be(true);
         });
 
@@ -134,7 +134,7 @@ describe('notebook/notebook/model', () => {
           model.cells.clear();
           requestAnimationFrame(() => {
             expect(model.cells.length).to.be(1);
-            expect(model.cells.at(0)).to.be.a(CodeCellModel);
+            expect(model.cells.get(0)).to.be.a(CodeCellModel);
             done();
           });
         });
@@ -146,14 +146,14 @@ describe('notebook/notebook/model', () => {
         it('should be called when a cell content changes', () => {
           let model = new NotebookModel();
           let cell = model.contentFactory.createCodeCell({});
-          model.cells.pushBack(cell);
+          model.cells.push(cell);
           cell.value.text = 'foo';
         });
 
         it('should emit the `contentChanged` signal', () => {
           let model = new NotebookModel();
           let cell = model.contentFactory.createCodeCell({});
-          model.cells.pushBack(cell);
+          model.cells.push(cell);
           let called = false;
           model.contentChanged.connect(() => { called = true; });
           model.metadata.set('foo', 'bar');
@@ -163,7 +163,7 @@ describe('notebook/notebook/model', () => {
         it('should set the dirty flag', () => {
           let model = new NotebookModel();
           let cell = model.contentFactory.createCodeCell({});
-          model.cells.pushBack(cell);
+          model.cells.push(cell);
           model.dirty = false;
           cell.value.text = 'foo';
           expect(model.dirty).to.be(true);
