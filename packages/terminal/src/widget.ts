@@ -264,7 +264,7 @@ class Terminal extends Widget {
    * Create the terminal object.
    */
   private _initializeTerm(): void {
-    this._term.open(this.node);
+    this._term.open(this.node, false);
     this._term.element.classList.add(TERMINAL_BODY_CLASS);
 
     this._term.on('data', (data: string) => {

@@ -1,4 +1,4 @@
-// Type definitions for xterm.js 2.0.1
+// Type definitions for xterm.js 2.6.0
 // Project: https://github.com/sourcelair/xterm.js/
 // Definitions by: Steven Silvester <https://github.com/blink1073>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
@@ -33,7 +33,7 @@ declare class Terminal {
 
   off(event: string, callback: (...args: any[]) => void): void;
 
-  open(parent: HTMLElement): void;
+  open(parent: HTMLElement, focus?: boolean): void;
 
   refresh(start: number, end: number, queue?: boolean): void;
 

@@ -45,7 +45,12 @@ handlePackage(basePath);
 function handlePackage(packagePath) {
   // Read in the package.json.
   var packagePath = path.join(packagePath, 'package.json');
-  var package = require(packagePath);
+  try {
+    var package = require(packagePath);
+  } catch (e) {
+    console.log('Skipping package ' + packagePath);
+    return;
+  }
 
   // Update dependencies as appropriate.
   if (target in package['dependencies']) {
