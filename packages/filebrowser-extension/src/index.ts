@@ -203,7 +203,7 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
 
       return widget.delete();
     },
-    icon: 'jp-MaterialIcon jp-CloseIcon',
+    iconClass: 'jp-MaterialIcon jp-CloseIcon',
     label: 'Delete',
     mnemonic: 0
   });
@@ -217,7 +217,7 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
 
       return widget.copy();
     },
-    icon: 'jp-MaterialIcon jp-CopyIcon',
+    iconClass: 'jp-MaterialIcon jp-CopyIcon',
     label: 'Copy',
     mnemonic: 0
   });
@@ -231,7 +231,7 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
 
       return widget.cut();
     },
-    icon: 'jp-MaterialIcon jp-CutIcon',
+    iconClass: 'jp-MaterialIcon jp-CutIcon',
     label: 'Cut'
   });
 
@@ -244,7 +244,7 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
 
       return widget.download();
     },
-    icon: 'jp-MaterialIcon jp-DownloadIcon',
+    iconClass: 'jp-MaterialIcon jp-DownloadIcon',
     label: 'Download'
   });
 
@@ -257,7 +257,7 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
 
       return widget.duplicate();
     },
-    icon: 'jp-MaterialIcon jp-CopyIcon',
+    iconClass: 'jp-MaterialIcon jp-CopyIcon',
     label: 'Duplicate'
   });
 
@@ -278,7 +278,7 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
 
       return widget.open();
     },
-    icon: 'jp-MaterialIcon jp-OpenFolderIcon',
+    iconClass: 'jp-MaterialIcon jp-OpenFolderIcon',
     label: 'Open',
     mnemonic: 0,
   });
@@ -292,7 +292,7 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
 
       return widget.paste();
     },
-    icon: 'jp-MaterialIcon jp-PasteIcon',
+    iconClass: 'jp-MaterialIcon jp-PasteIcon',
     label: 'Paste',
     mnemonic: 0
   });
@@ -306,7 +306,7 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
 
       return widget.rename();
     },
-    icon: 'jp-MaterialIcon jp-EditIcon',
+    iconClass: 'jp-MaterialIcon jp-EditIcon',
     label: 'Rename',
     mnemonic: 0
   });
@@ -324,7 +324,7 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
 
       return widget.shutdownKernels();
     },
-    icon: 'jp-MaterialIcon jp-StopIcon',
+    iconClass: 'jp-MaterialIcon jp-StopIcon',
     label: 'Shutdown Kernel'
   });
 
