@@ -15,8 +15,8 @@
     "@jupyterlab/rendermime": "^0.4.0",
     "@jupyterlab/default-theme": "^0.4.0",
     "@jupyterlab/services": "^0.43.0",
-    "@phosphor/commands": "^1.0.0",
-    "@phosphor/widgets": "^1.0.0",
+    "@phosphor/commands": "^1.2.0",
+    "@phosphor/widgets": "^1.2.0",
     "es6-promise": "^4.1.0"
   },
   "devDependencies": {

@@ -17,11 +17,11 @@
     "@jupyterlab/codemirror": "^0.4.0",
     "@jupyterlab/coreutils": "^0.4.0",
     "@jupyterlab/services": "^0.43.0",
-    "@phosphor/algorithm": "^1.0.0",
-    "@phosphor/coreutils": "^1.0.0",
-    "@phosphor/disposable": "^1.0.0",
-    "@phosphor/signaling": "^1.0.0",
-    "@phosphor/widgets": "^1.0.0",
+    "@phosphor/algorithm": "^1.1.0",
+    "@phosphor/coreutils": "^1.1.0",
+    "@phosphor/disposable": "^1.1.0",
+    "@phosphor/signaling": "^1.2.0",
+    "@phosphor/widgets": "^1.2.0",
     "codemirror": "^5.24.2"
   },
   "devDependencies": {

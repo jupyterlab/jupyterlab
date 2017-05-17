@@ -15,11 +15,11 @@
   "dependencies": {
     "@jupyterlab/apputils": "^0.4.0",
     "@jupyterlab/services": "^0.43.0",
-    "@phosphor/commands": "^1.0.0",
-    "@phosphor/coreutils": "^1.0.0",
-    "@phosphor/domutils": "^1.0.0",
-    "@phosphor/messaging": "^1.0.0",
-    "@phosphor/widgets": "^1.0.0",
+    "@phosphor/commands": "^1.2.0",
+    "@phosphor/coreutils": "^1.1.0",
+    "@phosphor/domutils": "^1.1.0",
+    "@phosphor/messaging": "^1.2.0",
+    "@phosphor/widgets": "^1.2.0",
     "xterm": "^2.6.0"
   },
   "devDependencies": {
