@@ -47,7 +47,7 @@ namespace ISettingRegistry {
    * An annotation for a specific setting.
    */
   export
-  interface IAnnotation {
+  interface IAnnotation extends JSONObject {
     /**
      * The caption for the setting.
      */
@@ -80,9 +80,14 @@ namespace ISettingRegistry {
   export
   interface IPlugin extends JSONObject {
     /**
-     * The name of an extension whose settings are saved.
+     * The name of a plugin whose settings are saved.
      */
     id: string;
+
+    /**
+     * The style and icon annotation for all settings in this plugin.
+     */
+    annotation?: IAnnotation | null;
 
     /**
      * The collection of values for a specified setting.
@@ -162,10 +167,17 @@ class SettingRegistry {
    * Returns a list of plugin settings held in the registry.
    */
   get plugins(): ISettingRegistry.IPlugin[] {
+    const annotations = this._annotations;
     const plugins = this._plugins;
-    return Object.keys(plugins).map(key => {
-      const plugin = plugins[key];
-      return JSONExt.deepCopy(plugin) as ISettingRegistry.IPlugin;
+
+    return Object.keys(plugins).map(plugin => {
+      // Create a copy of the plugin data.
+      const result = JSONExt.deepCopy(plugins[plugin]);
+
+      // Copy over any annotations that may be available.
+      result.annotations = JSONExt.deepCopy(annotations[plugin] || null);
+
+      return result as ISettingRegistry.IPlugin;
     });
   }
 
@@ -183,6 +195,7 @@ class SettingRegistry {
       this._annotations[plugin] = Object.create(null);
     }
     this._annotations[plugin][key] = annotation;
+    this._pluginChanged.emit(plugin);
   }
 
   /**
@@ -217,23 +230,39 @@ class SettingRegistry {
    * @returns A promise that resolves with a plugin settings object.
    */
   load(plugin: string, reload = false): Promise<ISettingRegistry.ISettings> {
+    const annotations = this._annotations;
     const plugins = this._plugins;
     const registry = this;
+    const copy = JSONExt.deepCopy;
 
+    // If the plugin exists and does not need to be reloaded, resolve.
     if (!reload && plugin in plugins) {
-      const content = plugins[plugin];
+      // Create a copy of the plugin data.
+      const content = copy(plugins[plugin]) as ISettingRegistry.IPlugin;
+
+      // Copy over any annotations that may be available.
+      content.annotations = copy(annotations[plugin] || null);
 
       return Promise.resolve(new Settings({ content, plugin, registry }));
     }
 
+    // If the plugin needs to be loaded from the datastore, fetch.
     if (this._datastore) {
       return this._datastore.fetch(plugin).then(result => {
-        const content = plugins[result.id] = result;
+        // Set the local copy.
+        plugins[result.id] = result;
+
+        // Create a copy of the plugin data.
+        const content = copy(result) as ISettingRegistry.IPlugin;
+
+        // Copy over any annotations that may be available.
+        content.annotations = copy(annotations[plugin] || null);
 
         return new Settings({ content, plugin, registry });
       });
     }
 
+    // If the setting registry is not ready yet, wait.
     return this._ready.promise.then(() => this.load(plugin));
   }
 
