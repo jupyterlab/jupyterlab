@@ -163,11 +163,6 @@ describe('@jupyterlab/coreutils', () => {
         expect(toArray(value)).to.eql([1, 4, 2, 3]);
       });
 
-      it('should return the new length in the list', () => {
-        let value = new ObservableList<number>({ values: [1, 2, 3] });
-        expect(value.insert(1, 4)).to.be(4);
-      });
-
       it('should trigger a changed signal', () => {
         let called = false;
         let value = new ObservableList<number>({ values: [1, 2, 3] });
@@ -356,11 +351,6 @@ describe('@jupyterlab/coreutils', () => {
         let value = new ObservableList<number>({ values: [1, 2, 3] });
         value.insertAll(1, [2, 3, 4]);
         expect(toArray(value)).to.eql([1, 2, 3, 4, 2, 3]);
-      });
-
-      it('should return the new length of the list', () => {
-        let value = new ObservableList<number>({ values: [1, 2, 3] });
-        expect(value.insertAll(1, [2, 3, 4])).to.be(6);
       });
 
       it('should trigger a changed signal', () => {
