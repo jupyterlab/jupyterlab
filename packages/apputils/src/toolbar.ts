@@ -114,6 +114,9 @@ class Toolbar<T extends Widget> extends Widget {
    *
    * @returns Whether the item was added to toolbar.  Returns false if
    *   an item of the same name is already in the toolbar.
+   *
+   * #### Notes
+   * The item can be removed from the toolbar by setting its parent to `null`.
    */
   addItem(name: string, widget: T): boolean {
     let layout = this.layout as PanelLayout;
@@ -134,6 +137,7 @@ class Toolbar<T extends Widget> extends Widget {
    *
    * #### Notes
    * The index will be clamped to the bounds of the items.
+   * The item can be removed from the toolbar by setting its parent to `null`.
    */
   insertItem(index: number, name: string, widget: T): boolean {
     let existing = find(this.names(), value => value === name);
@@ -145,16 +149,6 @@ class Toolbar<T extends Widget> extends Widget {
     layout.insertWidget(index, widget);
     Private.nameProperty.set(widget, name);
     return true;
-  }
-
-  /**
-   * Remove an item in the toolbar by value.
-   *
-   *  @param name - The name of the widget to remove from the toolbar.
-   */
-  removeItem(widget: T): void {
-    let layout = this.layout as PanelLayout;
-    layout.removeWidget(widget);
   }
 
   /**
