@@ -196,18 +196,19 @@ class SettingRegistry {
    */
   load(plugin: string, reload = false): Promise<ISettingRegistry.ISettings> {
     const plugins = this._plugins;
+    const registry = this;
 
     if (!reload && plugin in plugins) {
       const content = plugins[plugin];
 
-      return Promise.resolve(new Settings({ content, plugin }));
+      return Promise.resolve(new Settings({ content, plugin, registry }));
     }
 
     if (this._datastore) {
       return this._datastore.fetch(plugin).then(result => {
         const content = plugins[result.id] = result;
 
-        return new Settings({ content, plugin });
+        return new Settings({ content, plugin, registry });
       });
     }
 
@@ -324,6 +325,7 @@ class Settings implements ISettingRegistry.ISettings {
   constructor(options: Settings.IOptions) {
     this._content = options.content;
     this.plugin = options.plugin;
+    this.registry = options.registry;
   }
 
   /**
@@ -339,12 +341,19 @@ class Settings implements ISettingRegistry.ISettings {
   readonly plugin: string;
 
   /**
+   * The system registry instance used by the settings manager.
+   */
+  readonly registry: SettingRegistry;
+
+  /**
    * Dispose of the plugin settings resources.
    */
   dispose(): void {
     if (this._isDisposed) {
       return;
     }
+
+    this._isDisposed = true;
     this._content = null;
   }
 
@@ -413,5 +422,10 @@ namespace Settings {
      * The plugin that the settings object references.
      */
     plugin: string;
+
+    /**
+     * The system registry instance used by the settings manager.
+     */
+    registry: SettingRegistry;
   }
 }
