@@ -111,12 +111,6 @@ const FILE_ICON_CLASS = 'jp-mod-file';
  */
 const TERMINAL_ICON_CLASS = 'jp-mod-terminal';
 
-/**
- * A regex for console names.
- */
-export
-const CONSOLE_REGEX = /^console-(\d)+-[0-9a-f]+$/;
-
 
 /**
  * A class that exposes the running terminal and kernel sessions.
