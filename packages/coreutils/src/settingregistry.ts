@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  find
+} from '@phosphor/algorithm';
+
+import {
   JSONExt, JSONObject, JSONValue, PromiseDelegate
 } from '@phosphor/coreutils';
 
@@ -381,6 +385,8 @@ class Settings implements ISettingRegistry.ISettings {
     this._content = options.content;
     this.plugin = options.plugin;
     this.registry = options.registry;
+
+    this.registry.pluginChanged.connect(this.onPluginChanged, this);
   }
 
   /**
@@ -410,6 +416,7 @@ class Settings implements ISettingRegistry.ISettings {
 
     this._isDisposed = true;
     this._content = null;
+    Signal.clearData(this);
   }
 
   /**
@@ -422,6 +429,10 @@ class Settings implements ISettingRegistry.ISettings {
    * @returns A promise that resolves when the setting is retrieved.
    */
   get(key: string, level: ISettingRegistry.Level = LEVEL): Promise<JSONValue> {
+    if (key in this._content.data[level]) {
+      return Promise.resolve(this._content.data[level][key]);
+    }
+
     return this.registry.get(this.plugin, key, level);
   }
 
@@ -452,6 +463,15 @@ class Settings implements ISettingRegistry.ISettings {
    */
   set(key: string, value: JSONValue, level: ISettingRegistry.Level = LEVEL): Promise<void> {
     return this.registry.set(this.plugin, key, value, level);
+  }
+
+  /**
+   * Handle plugin changes in the setting registry.
+   */
+  protected onPluginChanged(sender: any, plugin: string): void {
+    if (plugin === this.plugin) {
+      this._content = find(this.registry.plugins, p => p.id === plugin);
+    }
   }
 
   private _content: ISettingRegistry.IPlugin | null = null;
