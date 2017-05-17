@@ -456,6 +456,7 @@ class ClientSession implements IClientSession {
     if (this._session) {
       return this._session.setPath(path);
     }
+    this._propertyChanged.emit('path');
     return Promise.resolve(void 0);
   }
 
@@ -470,6 +471,7 @@ class ClientSession implements IClientSession {
     if (this._session) {
       return this._session.setName(name);
     }
+    this._propertyChanged.emit('name');
     return Promise.resolve(void 0);
   }
 
@@ -484,6 +486,7 @@ class ClientSession implements IClientSession {
     if (this._session) {
       return this._session.setType(name);
     }
+    this._propertyChanged.emit('type');
     return Promise.resolve(void 0);
   }
 
