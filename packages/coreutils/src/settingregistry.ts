@@ -161,7 +161,7 @@ interface ISettingRegistry extends SettingRegistry {}
 export
 class SettingRegistry {
   /**
-   * A signal that emits name of a plugin when its settings change.
+   * A signal that emits the name of a plugin when its settings change.
    */
   get pluginChanged(): ISignal<this, string> {
     return this._pluginChanged;
@@ -390,6 +390,13 @@ class Settings implements ISettingRegistry.ISettings {
   }
 
   /**
+   * A signal that emits when the plugin's settings have changed.
+   */
+  get changed(): ISignal<this, void> {
+    return this._changed;
+  }
+
+  /**
    * Test whether the plugin settings manager disposed.
    */
   get isDisposed(): boolean {
@@ -471,9 +478,11 @@ class Settings implements ISettingRegistry.ISettings {
   protected onPluginChanged(sender: any, plugin: string): void {
     if (plugin === this.plugin) {
       this._content = find(this.registry.plugins, p => p.id === plugin);
+      this._changed.emit(void 0);
     }
   }
 
+  private _changed = new Signal<this, void>(this);
   private _content: ISettingRegistry.IPlugin | null = null;
   private _isDisposed = false;
 }
