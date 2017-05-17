@@ -302,13 +302,6 @@ class DefaultSession implements Session.ISession {
     if (this.isDisposed) {
       return Promise.reject(new Error('Session is disposed'));
     }
-    if (this._kernel) {
-      return this._kernel.ready.then(() => {
-        return Private.shutdownSession(
-          this.id, this.serverSettings
-        );
-      });
-    }
     return Private.shutdownSession(this.id, this.serverSettings);
   }
 
