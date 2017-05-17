@@ -44,6 +44,33 @@ namespace ISettingRegistry {
   };
 
   /**
+   * An annotation for a specific setting.
+   */
+  export
+  interface IAnnotation {
+    /**
+     * The caption for the setting.
+     */
+    caption?: string;
+
+    /**
+     * The extra class name for the setting.
+     */
+    className?: string;
+
+    /**
+     * The label for the setting.
+     */
+    label?: string;
+
+    /**
+     * The icon class for the setting.
+     */
+    icon?: string;
+  }
+
+  /**
+   * The settings for a specific plugin.
    */
   export
   interface IPlugin extends JSONObject {
@@ -129,12 +156,28 @@ class SettingRegistry {
   /**
    * Returns a list of plugin settings held in the registry.
    */
-  plugins(): ISettingRegistry.IPlugin[] {
+  get plugins(): ISettingRegistry.IPlugin[] {
     const plugins = this._plugins;
     return Object.keys(plugins).map(key => {
       const plugin = plugins[key];
       return JSONExt.deepCopy(plugin) as ISettingRegistry.IPlugin;
     });
+  }
+
+  /**
+   * Annotate a specific setting item for places where it might be displayed.
+   *
+   * @param plugin - The name of the plugin whose setting is being annotated.
+   *
+   * @param key - The name of the setting being annotated.
+   *
+   * @param annotation - The annotation describing an individual setting.
+   */
+  annotate(plugin: string, key: string, annotation: ISettingRegistry.IAnnotation): void {
+    if (!this._annotations[plugin]) {
+      this._annotations[plugin] = Object.create(null);
+    }
+    this._annotations[plugin][key] = annotation;
   }
 
   /**
@@ -285,6 +328,7 @@ class SettingRegistry {
       .then(() => { this._pluginChanged.emit(plugin); });
   }
 
+  private _annotations: { [plugin: string]: { [key: string]: ISettingRegistry.IAnnotation } } = Object.create(null);
   private _datastore: IDatastore<ISettingRegistry.IPlugin, ISettingRegistry.IPlugin> | null = null;
   private _pluginChanged = new Signal<this, string>(this);
   private _plugins: { [name: string]: ISettingRegistry.IPlugin } = Object.create(null);
