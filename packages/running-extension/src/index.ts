@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  RunningSessions, CONSOLE_REGEX
+  RunningSessions
 } from '@jupyterlab/running';
 
 
@@ -49,14 +49,12 @@ function activate(app: JupyterLab, services: IServiceManager, restorer: ILayoutR
   restorer.add(running, 'running-sessions');
 
   running.sessionOpenRequested.connect((sender, model) => {
-    let path = model.notebook.path;
-    let name = path.split('/').pop();
-    if (CONSOLE_REGEX.test(name)) {
+    let path = model.path;
+    if (model.type.toLowerCase() === 'console') {
       app.commands.execute('console:open', { id: model.id });
     } else {
       app.commands.execute('file-operations:open', { path });
     }
-
   });
 
   running.terminalOpenRequested.connect((sender, model) => {

@@ -453,9 +453,8 @@ class ClientSession implements IClientSession {
       return Promise.resolve(void 0);
     }
     this._path = path;
-    this._propertyChanged.emit('path');
     if (this._session) {
-      return this._session.rename(path);
+      return this._session.setPath(path);
     }
     return Promise.resolve(void 0);
   }
@@ -468,8 +467,9 @@ class ClientSession implements IClientSession {
       return Promise.resolve(void 0);
     }
     this._name = name;
-    // no-op until supported.
-    this._propertyChanged.emit('name');
+    if (this._session) {
+      return this._session.setName(name);
+    }
     return Promise.resolve(void 0);
   }
 
@@ -481,8 +481,9 @@ class ClientSession implements IClientSession {
       return Promise.resolve(void 0);
     }
     this._type = type;
-    // no-op until supported.
-    this._propertyChanged.emit('type');
+    if (this._session) {
+      return this._session.setType(name);
+    }
     return Promise.resolve(void 0);
   }
 
@@ -505,7 +506,7 @@ class ClientSession implements IClientSession {
     let manager = this.manager;
     return manager.ready.then(() => {
       let model = find(manager.running(), item => {
-        return item.notebook.path === this._path;
+        return item.path === this._path;
       });
       if (!model) {
         return;
@@ -596,6 +597,8 @@ class ClientSession implements IClientSession {
     }
     return this.manager.startNew({
       path: this._path,
+      type: this._type,
+      name: this._name,
       kernelName: model ? model.name : null,
       kernelId: model ? model.id : null
     }).then(session => this._handleNewSession(session))
@@ -613,9 +616,21 @@ class ClientSession implements IClientSession {
       this._session.dispose();
     }
     this._session = session;
-    this._onPathChanged(session, session.path);
+    if (session.path !== this._path) {
+      this._path = session.path;
+      this._propertyChanged.emit('path');
+    }
+    if (session.name !== this._name) {
+      this._name = session.name;
+      this._propertyChanged.emit('name');
+    }
+    if (session.type !== this._type) {
+      this._type = session.type;
+      this._propertyChanged.emit('type');
+    }
+
     session.terminated.connect(this._onTerminated, this);
-    session.pathChanged.connect(this._onPathChanged, this);
+    session.propertyChanged.connect(this._onPropertyChanged, this);
     session.kernelChanged.connect(this._onKernelChanged, this);
     session.statusChanged.connect(this._onStatusChanged, this);
     session.iopubMessage.connect(this._onIopubMessage, this);
@@ -656,13 +671,21 @@ class ClientSession implements IClientSession {
   }
 
   /**
-   * Handle a change to a session path.
+   * Handle a change to a session property.
    */
-  private _onPathChanged(sender: Session.ISession, path: string) {
-    if (path !== this._path) {
-      this._path = path;
-      this._propertyChanged.emit('path');
+  private _onPropertyChanged(sender: Session.ISession, property: 'path' | 'name' | 'type') {
+    switch (property) {
+    case 'path':
+      this._path = sender.path;
+      break;
+    case 'name':
+      this._name = sender.name;
+      break;
+    default:
+      this._type = sender.type;
+      break;
     }
+    this._propertyChanged.emit(property);
   }
 
   /**
@@ -1027,7 +1050,7 @@ namespace Private {
 
     if (matchingSessions.length) {
       matchingSessions.sort((a, b) => {
-        return a.notebook.path.localeCompare(b.notebook.path);
+        return a.path.localeCompare(b.path);
       });
 
       each(matchingSessions, session => {
@@ -1043,7 +1066,7 @@ namespace Private {
 
     if (otherSessions.length) {
       otherSessions.sort((a, b) => {
-        return a.notebook.path.localeCompare(b.notebook.path);
+        return a.path.localeCompare(b.path);
       });
 
       each(otherSessions, session => {
@@ -1092,17 +1115,14 @@ namespace Private {
    */
   function optionForSession(session: Session.IModel, displayName: string, maxLength: number): HTMLOptionElement {
     let option = document.createElement('option');
-    let sessionName = session.notebook.path.split('/').pop();
-    const CONSOLE_REGEX = /^console-(\d)+-[0-9a-f]+$/;
-    if (CONSOLE_REGEX.test(sessionName)) {
-      sessionName = `Console ${sessionName.match(CONSOLE_REGEX)[1]}`;
-    }
+    let sessionName = session.name || session.path.split('/').pop();
     if (sessionName.length > maxLength) {
       sessionName = sessionName.slice(0, maxLength - 3) + '...';
     }
     option.text = sessionName;
     option.value = JSON.stringify({ id: session.kernel.id });
-    option.title = `Path: ${session.notebook.path}\n` +
+    option.title = `Path: ${session.path}\n` +
+      `Name: ${sessionName}\n` +
       `Kernel Name: ${displayName}\n` +
       `Kernel Id: ${session.kernel.id}`;
     return option;
