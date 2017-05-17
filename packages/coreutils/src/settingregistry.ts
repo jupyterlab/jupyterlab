@@ -59,14 +59,19 @@ namespace ISettingRegistry {
     className?: string;
 
     /**
+     * The icon class for the setting.
+     */
+    iconClass?: string;
+
+    /**
+     * The icon label for the setting.
+     */
+    iconLabel?: string;
+
+    /**
      * The label for the setting.
      */
     label?: string;
-
-    /**
-     * The icon class for the setting.
-     */
-    icon?: string;
   }
 
   /**
