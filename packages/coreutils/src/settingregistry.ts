@@ -44,32 +44,6 @@ namespace ISettingRegistry {
   };
 
   /**
-   * The value specification for a setting item.
-   */
-  export
-  interface IItem {
-    /**
-     * The plugin name where this setting resides.
-     */
-    plugin: string;
-
-    /**
-     * The name of the setting being added.
-     */
-    key: string;
-
-    /**
-     * The setting level.
-     */
-    level: Level;
-
-    /**
-     * The value of the setting being added.
-     */
-    value: JSONValue;
-  }
-
-  /**
    */
   export
   interface IPlugin extends JSONObject {
@@ -170,7 +144,7 @@ class SettingRegistry {
    *
    * @param key - The name of the setting being retrieved.
    *
-   * @param level - The setting level.
+   * @param level - The setting level. Defaults to `user`.
    *
    * @returns A promise that resolves when the setting is retrieved.
    */
@@ -222,7 +196,7 @@ class SettingRegistry {
    *
    * @param key - The name of the setting being removed.
    *
-   * @param level - The setting level.
+   * @param level - The setting level. Defaults to `user`.
    *
    * @returns A promise that resolves when the setting is removed.
    */
@@ -244,19 +218,22 @@ class SettingRegistry {
   /**
    * Set a single setting in the registry.
    *
-   * @param item - The setting item being set.
+   * @param plugin - The name of the plugin whose setting is being set.
+   *
+   * @param key - The name of the setting being set.
+   *
+   * @param value - The value of the setting being set.
+   *
+   * @param level - The setting level. Defaults to `user`.
    *
    * @returns A promise that resolves when the setting has been saved.
    *
    */
-  set(item: ISettingRegistry.IItem): Promise<void> {
-    const { plugin } = item;
-
+  set(plugin: string, key: string, value: JSONValue, level: ISettingRegistry.Level = LEVEL): Promise<void> {
     if (!(plugin in this._plugins)) {
-      return this.load(plugin).then(() => this.set(item));
+      return this.load(plugin).then(() => this.set(plugin, key, value, level));
     }
 
-    const { key, level, value } = item;
     const bundle = this._plugins[plugin].data;
 
     if (!bundle[level]) {
@@ -366,8 +343,8 @@ class Settings implements ISettingRegistry.ISettings {
    *
    * @returns A promise that resolves when the setting is retrieved.
    */
-  get(key: string, level?: ISettingRegistry.Level): Promise<JSONValue> {
-    return Promise.reject(new Error('Settings#get not implemented yet.'));
+  get(key: string, level: ISettingRegistry.Level = LEVEL): Promise<JSONValue> {
+    return this.registry.get(this.plugin, key, level);
   }
 
   /**
@@ -379,8 +356,8 @@ class Settings implements ISettingRegistry.ISettings {
    *
    * @returns A promise that resolves when the setting is removed.
    */
-  remove(key: string, level?: ISettingRegistry.Level): Promise<void> {
-    return Promise.reject(new Error('Settings#remove not implemented yet.'));
+  remove(key: string, level: ISettingRegistry.Level = LEVEL): Promise<void> {
+    return this.registry.remove(this.plugin, key, level);
   }
 
   /**
@@ -395,8 +372,8 @@ class Settings implements ISettingRegistry.ISettings {
    * @returns A promise that resolves when the setting has been saved.
    *
    */
-  set(key: string, value: JSONValue, level?: ISettingRegistry.Level): Promise<void> {
-    return Promise.reject(new Error('Settings#set not implemented yet.'));
+  set(key: string, value: JSONValue, level: ISettingRegistry.Level = LEVEL): Promise<void> {
+    return this.registry.set(this.plugin, key, value, level);
   }
 
   private _content: ISettingRegistry.IPlugin | null = null;
