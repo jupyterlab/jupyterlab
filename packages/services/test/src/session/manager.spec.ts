@@ -170,7 +170,9 @@ describe('session/manager', () => {
           let model = {
             id: s.id,
             kernel: s.kernel.model,
-            notebook: { path: 'bar' }
+            path: 'bar',
+            type: '',
+            name: ''
           };
           tester.onRequest = () => {
             tester.respond(200, model);
@@ -179,7 +181,7 @@ describe('session/manager', () => {
             manager.dispose();
             done();
           });
-          return s.setPath(model.notebook.path);
+          return s.setPath(model.path);
         }).catch(done);
       });
 
@@ -191,7 +193,9 @@ describe('session/manager', () => {
               name: 'foo',
               id: uuid()
             },
-            notebook: { path: 'bar' }
+            path: 'bar',
+            name: '',
+            type: ''
           };
           let name = model.kernel.name;
           tester.onRequest = request => {

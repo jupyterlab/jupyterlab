@@ -93,7 +93,7 @@ describe('session', () => {
     });
 
     it('should throw an error for an invalid model', (done) => {
-      let data = { id: '1234', notebook: { path: 'test' } };
+      let data = { id: '1234', path: 'test' };
       tester.onRequest = () => {
         tester.respond(200, data);
       };
@@ -102,7 +102,7 @@ describe('session', () => {
     });
 
     it('should throw an error for another invalid model', (done) => {
-      let data = [{ id: '1234', kernel: { id: '', name: '' }, notebook: { } }];
+      let data = [{ id: '1234', kernel: { id: '', name: '' }, path: '' }];
       tester.onRequest = () => {
         tester.respond(200, data);
       };
@@ -133,7 +133,9 @@ describe('session', () => {
         tester.onRequest = request => {
           tester.respond(200, [ {
             id: session.model.id,
-            notebook: { path : 'foo/bar.ipynb' },
+            path: 'foo/bar.ipynb',
+            name: '',
+            type: '',
             kernel: newKernel
           } ]);
           tester.onRequest = () => {
@@ -203,7 +205,7 @@ describe('session', () => {
     it('should fail for wrong response model', (done) => {
       let sessionModel = createSessionModel();
       let data = {
-        id: 1, kernel: { name: '', id: '' }, notebook: { path: ''}
+        id: 1, kernel: { name: '', id: '' }, path: '', type: '', name: ''
       };
       tester.onRequest = request => {
         if (request.method === 'POST') {
