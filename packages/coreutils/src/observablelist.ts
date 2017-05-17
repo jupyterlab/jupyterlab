@@ -326,7 +326,9 @@ class ObservableList<T> implements IObservableList<T> {
   /**
    * The type of this object.
    */
-  readonly type: 'List';
+  get type(): 'List' {
+    return 'List';
+  }
 
   /**
    * A signal emitted when the list has changed.
