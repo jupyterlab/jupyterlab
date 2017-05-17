@@ -421,7 +421,8 @@ describe('@jupyterlab/domutils', () => {
 
         const data: Dialog.IButton = {
           label: 'foo',
-          icon: 'bar',
+          iconClass: 'bar',
+          iconLabel: 'foo',
           caption: 'hello',
           className: 'baz',
           accept: false,
@@ -503,6 +504,7 @@ describe('@jupyterlab/domutils', () => {
           it('should render an icon element for a dialog item', () => {
             let node = VirtualDOM.realize(renderer.renderIcon(data));
             expect(node.className).to.contain('jp-Dialog-buttonIcon');
+            expect(node.textContent).to.equal('foo');
           });
 
         });
@@ -523,7 +525,7 @@ describe('@jupyterlab/domutils', () => {
           it('should create the class name for the button icon', () => {
             let value = renderer.createIconClass(data);
             expect(value).to.contain('jp-Dialog-buttonIcon');
-            expect(value).to.contain(data.icon);
+            expect(value).to.contain(data.iconClass);
           });
 
         });

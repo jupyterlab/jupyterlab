@@ -367,7 +367,12 @@ namespace Dialog {
     /**
      * The icon class for the button.
      */
-    icon: string;
+    iconClass: string;
+
+    /**
+     * The icon label for the button.
+     */
+    iconLabel: string;
 
     /**
      * The caption for the button.
@@ -438,7 +443,8 @@ namespace Dialog {
     let defaultLabel = value.accept ? 'OK' : 'CANCEL';
     return {
       label: value.label || defaultLabel,
-      icon: value.icon || '',
+      iconClass: value.iconClass || '',
+      iconLabel: value.iconLabel || '',
       caption: value.caption || '',
       className: value.className || '',
       accept: value.accept,
@@ -608,7 +614,8 @@ namespace Dialog {
      * @returns A virtual element representing the icon.
      */
     renderIcon(data: IButton): VirtualElement {
-      return h.div({ className: this.createIconClass(data) });
+      return h.div({ className: this.createIconClass(data) },
+                   data.iconLabel);
     }
 
     /**
@@ -620,7 +627,7 @@ namespace Dialog {
      */
     createIconClass(data: IButton): string {
       let name = 'jp-Dialog-buttonIcon';
-      let extra = data.icon;
+      let extra = data.iconClass;
       return extra ? `${name} ${extra}` : name;
     }
 
