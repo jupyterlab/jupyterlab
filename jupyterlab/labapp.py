@@ -27,7 +27,7 @@ class LabBuildApp(JupyterApp):
 
     The application is built in the JupyterLab app directory in `/staging`.
     When the build is complete it is put in the JupyterLab app `/static`
-    directory, where it is used to server the application.
+    directory, where it is used to serve the application.
     """
     aliases = build_aliases
 
