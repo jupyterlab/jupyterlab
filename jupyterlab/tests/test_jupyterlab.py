@@ -9,6 +9,7 @@ import os
 import sys
 from os.path import join as pjoin
 from unittest import TestCase
+import pytest
 
 try:
     from unittest.mock import patch
@@ -100,7 +101,7 @@ class TestExtension(TestCase):
         self.assertEqual(paths.ENV_CONFIG_PATH, [self.config_dir])
         self.assertEqual(paths.ENV_JUPYTER_PATH, [self.data_dir])
         self.assertEqual(commands.ENV_JUPYTER_PATH, [self.data_dir])
-        self.assertEqual(commands.get_app_dir(), pjoin(self.data_dir, 'lab'))
+        self.assertEqual(commands.get_app_dir(), os.path.realpath(pjoin(self.data_dir, 'lab')))
 
     def tearDown(self):
         for modulename in self._mock_extensions:
@@ -111,6 +112,14 @@ class TestExtension(TestCase):
         path = pjoin(get_app_dir(), 'extensions', '*python-tests*.tgz')
         assert glob.glob(path)
         assert '@jupyterlab/python-tests' in list_extensions()
+
+    def test_install_failed(self):
+        path = os.path.realpath(pjoin(here, '..'))
+        with pytest.raises(ValueError):
+            install_extension(path)
+        with open(pjoin(path, 'package.json')) as fid:
+            data = json.load(fid)
+        assert not data['name'] in list_extensions()
 
     def test_uninstall_extension(self):
         install_extension(self.source_dir)
@@ -128,11 +137,23 @@ class TestExtension(TestCase):
         extensions = data['jupyterlab']['extensions']
         assert '@jupyterlab/console-extension' not in extensions
 
-    def test_link_package(self):
+    def test_link_extension(self):
         link_package(self.source_dir)
         linked = _get_linked_packages().keys()
         assert '@jupyterlab/python-tests' in linked
         assert '@jupyterlab/python-tests' in list_extensions()
+
+    def test_link_package(self):
+        path = os.path.realpath(pjoin(here, '..'))
+        link_package(path)
+        linked = _get_linked_packages().keys()
+        with open(pjoin(path, 'package.json')) as fid:
+            data = json.load(fid)
+        assert data['name'] in linked
+        assert not data['name'] in list_extensions()
+        unlink_package(path)
+        linked = _get_linked_packages().keys()
+        assert not data['name'] in linked
 
     def test_unlink_package(self):
         target = self.source_dir

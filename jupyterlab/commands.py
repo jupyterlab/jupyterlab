@@ -69,9 +69,13 @@ def install_extension(extension, app_dir=None):
 
     name = output.decode('utf8').splitlines()[-1]
     data = _read_package(pjoin(target, name))
-    _validate_package(data, extension)
 
-    _ensure_package(app_dir)
+    # Remove the tarball if the package is not an extension.
+    if not _is_extension(data):
+        os.remove(pjoin(target, name))
+        msg = '%s is not a valid JupyterLab extension' % extension
+        raise ValueError(msg)
+
     staging = pjoin(app_dir, 'staging')
     run(['npm', 'install', pjoin(target, name)], cwd=staging)
 
