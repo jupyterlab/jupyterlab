@@ -23,10 +23,6 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  ElementExt
-} from '@phosphor/domutils';
-
-import {
   INotebookModel
 } from './model';
 
@@ -851,7 +847,6 @@ namespace Private {
     if (state.wasFocused || widget.mode === 'edit') {
       widget.activate();
     }
-    ElementExt.scrollIntoViewIfNeeded(widget.node, widget.activeCell.node);
   }
 
   /**
