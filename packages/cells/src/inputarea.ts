@@ -115,9 +115,9 @@ class InputArea extends Widget {
   renderInput(widget: Widget): void {
     let layout = this.layout as PanelLayout;
     if (this._rendered) {
-      layout.removeWidget(this._rendered);
+      this._rendered.parent = null;
     } else {
-      layout.removeWidget(this._editor);
+      this._editor.parent = null;
     }
     this._rendered = widget;
     layout.addWidget(widget);
@@ -129,7 +129,7 @@ class InputArea extends Widget {
   showEditor(): void {
     let layout = this.layout as PanelLayout;
     if (this._rendered) {
-      layout.removeWidget(this._rendered);
+      this._rendered.parent = null;
       layout.addWidget(this._editor);
     }
   }

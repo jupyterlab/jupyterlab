@@ -410,7 +410,8 @@ class CodeConsole extends Widget {
       promptCell.readOnly = true;
       promptCell.removeClass(PROMPT_CLASS);
       Signal.clearData(promptCell.editor);
-      (input.layout as PanelLayout).removeWidgetAt(0);
+      let child = input.widgets[0];
+      child.parent = null;
       this.addCell(promptCell);
     }
 

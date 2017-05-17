@@ -134,22 +134,6 @@ describe('@jupyterlab/apputils', () => {
 
     });
 
-    describe('#removeItem()', () => {
-
-      it('should remove the item from the toolbar', () => {
-        widget.addItem('a', new Widget());
-        let b = new Widget();
-        widget.addItem('b', b);
-        expect(widget.removeItem(b)).to.be(void 0);
-      });
-
-      it('should be a no-op the widget is not in the toolbar', () => {
-        widget.addItem('a', new Widget());
-        expect(widget.removeItem(new Widget())).to.be(void 0);
-      });
-
-    });
-
     describe('.createInterruptButton()', () => {
 
       it('should have the `\'jp-StopIcon\'` class', () => {
