@@ -504,7 +504,7 @@ describe('@jupyterlab/domutils', () => {
           it('should render an icon element for a dialog item', () => {
             let node = VirtualDOM.realize(renderer.renderIcon(data));
             expect(node.className).to.contain('jp-Dialog-buttonIcon');
-            expect(node.textContent).to.be('foo');
+            expect(node.textContent).to.equal('foo');
           });
 
         });
