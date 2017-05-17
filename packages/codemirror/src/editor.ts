@@ -21,15 +21,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  uuid
-} from '@jupyterlab/coreutils';
-
-import {
-  IObservableString, ObservableString
-} from '@jupyterlab/coreutils';
-
-import {
-  IObservableMap, ObservableMap
+  IObservableMap, IObservableString, uuid
 } from '@jupyterlab/coreutils';
 
 import {
@@ -510,7 +502,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Handles a selections change.
    */
-  private _onSelectionsChanged(selections: IObservableMap<CodeEditor.ITextSelection[]>, args: ObservableMap.IChangedArgs<CodeEditor.ITextSelection[]>): void {
+  private _onSelectionsChanged(selections: IObservableMap<CodeEditor.ITextSelection[]>, args: IObservableMap.IChangedArgs<CodeEditor.ITextSelection[]>): void {
     const uuid = args.key;
     if (uuid !== this.uuid) {
       this._cleanSelections(uuid);
@@ -618,7 +610,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Handle model value changes.
    */
-  private _onValueChanged(value: IObservableString, args: ObservableString.IChangedArgs): void {
+  private _onValueChanged(value: IObservableString, args: IObservableString.IChangedArgs): void {
     if (this._changeGuard) {
       return;
     }

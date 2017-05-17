@@ -144,7 +144,7 @@ namespace NotebookActions {
         return;
       }
       // Otherwise merge with the next cell.
-      let cellModel = cells.at(index + 1);
+      let cellModel = cells.get(index + 1);
       toMerge.push(cellModel.value.text);
       toDelete.push(cellModel);
     }
@@ -162,7 +162,7 @@ namespace NotebookActions {
     cells.beginCompoundOperation();
     cells.set(index, newModel);
     each(toDelete, cell => {
-      cells.remove(cell);
+      cells.removeValue(cell);
     });
     cells.endCompoundOperation();
 
@@ -381,7 +381,7 @@ namespace NotebookActions {
     let model = widget.model;
     if (widget.activeCellIndex === widget.widgets.length - 1) {
       let cell = model.contentFactory.createCodeCell({});
-      model.cells.pushBack(cell);
+      model.cells.push(cell);
       widget.activeCellIndex++;
       widget.mode = 'edit';
     } else {
@@ -808,7 +808,7 @@ namespace NotebookActions {
     let i = 0;
     each(widget.widgets, (child: MarkdownCell) => {
       if (widget.isSelected(child)) {
-        Private.setMarkdownHeader(cells.at(i), level);
+        Private.setMarkdownHeader(cells.get(i), level);
       }
       i++;
     });
@@ -1032,7 +1032,7 @@ namespace Private {
     let cells = parent.model.cells;
     let i = ArrayExt.firstIndexOf(toArray(cells), child.model);
     if (i === -1) {
-      cells.pushBack(cell);
+      cells.push(cell);
     } else {
       cells.insert(i + 1, cell);
     }
@@ -1153,13 +1153,13 @@ namespace Private {
       // Delete the cells as one undo event.
       cells.beginCompoundOperation();
       each(toDelete.reverse(), i => {
-        cells.removeAt(i);
+        cells.remove(i);
       });
       // Add a new cell if the notebook is empty. This is done
       // within the compound operation to make the deletion of
       // a notebook's last cell undoable.
       if (!cells.length) {
-        cells.pushBack(model.contentFactory.createCodeCell({}));
+        cells.push(model.contentFactory.createCodeCell({}));
       }
       cells.endCompoundOperation();
 

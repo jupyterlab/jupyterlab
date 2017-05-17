@@ -30,8 +30,8 @@ import {
 } from './observablestring';
 
 import {
-  IObservableUndoableVector, ObservableUndoableVector
-} from './undoablevector';
+  IObservableUndoableList, ObservableUndoableList
+} from './undoablelist';
 
 import {
   IObservableMap
@@ -43,7 +43,7 @@ import {
  * created and placed in the IModelDB interface.
  */
 export
-type ObservableType = 'Map' | 'Vector' | 'String' | 'Value';
+type ObservableType = 'Map' | 'List' | 'String' | 'Value';
 
 
 /**
@@ -207,17 +207,17 @@ interface IModelDB extends IDisposable {
   createString(path: string): IObservableString;
 
   /**
-   * Create an undoable vector and insert it in the database.
+   * Create an undoable list and insert it in the database.
    *
-   * @param path: the path for the vector.
+   * @param path: the path for the list.
    *
-   * @returns the vector that was created.
+   * @returns the list that was created.
    *
    * #### Notes
-   * The vector can only store objects that are simple
+   * The list can only store objects that are simple
    * JSON Objects and primitives.
    */
-  createVector<T extends JSONValue>(path: string): IObservableUndoableVector<T>;
+  createList<T extends JSONValue>(path: string): IObservableUndoableList<T>;
 
   /**
    * Create a map and insert it in the database.
@@ -460,19 +460,19 @@ class ModelDB implements IModelDB {
   }
 
   /**
-   * Create an undoable vector and insert it in the database.
+   * Create an undoable list and insert it in the database.
    *
-   * @param path: the path for the vector.
+   * @param path: the path for the list.
    *
-   * @returns the vector that was created.
+   * @returns the list that was created.
    *
    * #### Notes
-   * The vector can only store objects that are simple
+   * The list can only store objects that are simple
    * JSON Objects and primitives.
    */
-  createVector(path: string): IObservableUndoableVector<JSONValue> {
-    let vec = new ObservableUndoableVector<JSONValue>(
-      new ObservableUndoableVector.IdentitySerializer());
+  createList(path: string): IObservableUndoableList<JSONValue> {
+    let vec = new ObservableUndoableList<JSONValue>(
+      new ObservableUndoableList.IdentitySerializer());
     this._disposables.add(vec);
     this.set(path, vec);
     return vec;

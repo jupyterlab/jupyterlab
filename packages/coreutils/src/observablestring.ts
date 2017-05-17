@@ -27,7 +27,7 @@ interface IObservableString extends IDisposable, IObservable {
   /**
    * A signal emitted when the string has changed.
    */
-  readonly changed: ISignal<this, ObservableString.IChangedArgs>;
+  readonly changed: ISignal<this, IObservableString.IChangedArgs>;
 
   /**
    * The value of the string.
@@ -65,6 +65,69 @@ interface IObservableString extends IDisposable, IObservable {
 
 
 /**
+ * The namespace for `IObservableString` associate interfaces.
+ */
+export
+namespace IObservableString {
+  /**
+   * The change types which occur on an observable string.
+   */
+  export
+  type ChangeType =
+    /**
+     * Text was inserted.
+     */
+    'insert' |
+
+    /**
+     * Text was removed.
+     */
+    'remove' |
+
+    /**
+     * Text was set.
+     */
+    'set';
+
+  /**
+   * The changed args object which is emitted by an observable string.
+   */
+  export
+  interface IChangedArgs {
+    /**
+     * The type of change undergone by the list.
+     */
+    type: ChangeType;
+
+    /**
+     * The starting index of the change.
+     */
+    start: number;
+
+    /**
+     * The end index of the change.
+     */
+    end: number;
+
+    /**
+     * The value of the change.
+     *
+     * ### Notes
+     * If `ChangeType` is `set`, then
+     * this is the new value of the string.
+     *
+     * If `ChangeType` is `insert` this is
+     * the value of the inserted string.
+     *
+     * If `ChangeType` is remove this is the
+     * value of the removed substring.
+     */
+    value: string;
+  }
+}
+
+
+/**
  * A concrete implementation of [[IObservableString]]
  */
 export
@@ -86,7 +149,7 @@ class ObservableString implements IObservableString {
   /**
    * A signal emitted when the string has changed.
    */
-  get changed(): ISignal<this, ObservableString.IChangedArgs> {
+  get changed(): ISignal<this, IObservableString.IChangedArgs> {
     return this._changed;
   }
 
@@ -179,68 +242,5 @@ class ObservableString implements IObservableString {
 
   private _text = '';
   private _isDisposed : boolean = false;
-  private _changed = new Signal<this, ObservableString.IChangedArgs>(this);
-}
-
-
-/**
- * The namespace for `ObservableVector` class statics.
- */
-export
-namespace ObservableString {
-  /**
-   * The change types which occur on an observable string.
-   */
-  export
-  type ChangeType =
-    /**
-     * Text was inserted.
-     */
-    'insert' |
-
-    /**
-     * Text was removed.
-     */
-    'remove' |
-
-    /**
-     * Text was set.
-     */
-    'set';
-
-  /**
-   * The changed args object which is emitted by an observable string.
-   */
-  export
-  interface IChangedArgs {
-    /**
-     * The type of change undergone by the list.
-     */
-    type: ChangeType;
-
-    /**
-     * The starting index of the change.
-     */
-    start: number;
-
-    /**
-     * The end index of the change.
-     */
-    end: number;
-
-    /**
-     * The value of the change.
-     *
-     * ### Notes
-     * If `ChangeType` is `set`, then
-     * this is the new value of the string.
-     *
-     * If `ChangeType` is `insert` this is
-     * the value of the inserted string.
-     *
-     * If `ChangeType` is remove this is the
-     * value of the removed substring.
-     */
-    value: string;
-  }
+  private _changed = new Signal<this, IObservableString.IChangedArgs>(this);
 }

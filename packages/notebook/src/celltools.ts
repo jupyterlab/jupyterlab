@@ -34,7 +34,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IObservableMap, nbformat, ObservableJSON, ObservableMap
+  IObservableMap, nbformat, ObservableJSON
 } from '@jupyterlab/coreutils';
 
 import {
@@ -186,7 +186,7 @@ class CellTools extends Widget {
   /**
    * Handle a change in the metadata.
    */
-  private _onMetadataChanged(sender: IObservableMap<JSONValue>, args: ObservableMap.IChangedArgs<JSONValue>): void {
+  private _onMetadataChanged(sender: IObservableMap<JSONValue>, args: IObservableMap.IChangedArgs<JSONValue>): void {
     let message = new ObservableJSON.ChangeMessage(args);
     each(this.children(), widget => {
       MessageLoop.sendMessage(widget, message);

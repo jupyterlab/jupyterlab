@@ -27,7 +27,7 @@ interface IObservableMap<T> extends IDisposable, IObservable {
   /**
    * A signal emitted when the map has changed.
    */
-  readonly changed: ISignal<this, ObservableMap.IChangedArgs<T>>;
+  readonly changed: ISignal<this, IObservableMap.IChangedArgs<T>>;
 
   /**
    * The number of key-value pairs in the map.
@@ -101,6 +101,59 @@ interface IObservableMap<T> extends IDisposable, IObservable {
 
 
 /**
+ * The interfaces associated with an IObservableMap.
+ */
+export
+namespace IObservableMap {
+  /**
+   * The change types which occur on an observable map.
+   */
+  export
+  type ChangeType =
+    /**
+     * An entry was added.
+     */
+    'add' |
+
+    /**
+     * An entry was removed.
+     */
+    'remove' |
+
+    /**
+     * An entry was changed.
+     */
+    'change';
+
+  /**
+   * The changed args object which is emitted by an observable map.
+   */
+  export
+  interface IChangedArgs<T> {
+    /**
+     * The type of change undergone by the map.
+     */
+    type: ChangeType;
+
+    /**
+     * The key of the change.
+     */
+    key: string;
+
+    /**
+     * The old value of the change.
+     */
+    oldValue: T;
+
+    /**
+     * The new value of the change.
+     */
+    newValue: T;
+  }
+}
+
+
+/**
  * A concrete implementation of IObservbleMap<T>.
  */
 export
@@ -128,7 +181,7 @@ class ObservableMap<T> implements IObservableMap<T> {
   /**
    * A signal emitted when the map has changed.
    */
-  get changed(): ISignal<this, ObservableMap.IChangedArgs<T>> {
+  get changed(): ISignal<this, IObservableMap.IChangedArgs<T>> {
     return this._changed;
   }
 
@@ -275,7 +328,7 @@ class ObservableMap<T> implements IObservableMap<T> {
 
   private _map: Map<string, T> = new Map<string, T>();
   private _itemCmp: (first: T, second: T) => boolean;
-  private _changed = new Signal<this, ObservableMap.IChangedArgs<T>>(this);
+  private _changed = new Signal<this, IObservableMap.IChangedArgs<T>>(this);
 }
 
 
@@ -300,52 +353,6 @@ namespace ObservableMap {
      * If not given, strict `===` equality will be used.
      */
     itemCmp?: (first: T, second: T) => boolean;
-  }
-
-  /**
-   * The change types which occur on an observable map.
-   */
-  export
-  type ChangeType =
-    /**
-     * An entry was added.
-     */
-    'add' |
-
-    /**
-     * An entry was removed.
-     */
-    'remove' |
-
-    /**
-     * An entry was changed.
-     */
-    'change';
-
-  /**
-   * The changed args object which is emitted by an observable map.
-   */
-  export
-  interface IChangedArgs<T> {
-    /**
-     * The type of change undergone by the map.
-     */
-    type: ChangeType;
-
-    /**
-     * The key of the change.
-     */
-    key: string;
-
-    /**
-     * The old value of the change.
-     */
-    oldValue: T;
-
-    /**
-     * The new value of the change.
-     */
-    newValue: T;
   }
 }
 

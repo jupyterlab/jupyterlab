@@ -10,8 +10,8 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  IObservableMap, ObservableMap, ObservableVector,
-  IObservableUndoableVector, IModelDB
+  IObservableMap, ObservableMap, IObservableList,
+  IObservableUndoableList, IModelDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -27,25 +27,25 @@ import {
  * A cell list object that supports undo/redo.
  */
 export
-class CellList implements IObservableUndoableVector<ICellModel> {
+class CellList implements IObservableUndoableList<ICellModel> {
   /**
    * Construct the cell list.
    */
   constructor(modelDB: IModelDB, factory: NotebookModel.IContentFactory) {
     this._modelDB = modelDB;
     this._factory = factory;
-    this._cellOrder = modelDB.createVector<string>('cellOrder');
+    this._cellOrder = modelDB.createList<string>('cellOrder');
     this._cellMap = new ObservableMap<ICellModel>();
 
     this._cellOrder.changed.connect(this._onOrderChanged, this);
   }
 
-  type: 'Vector';
+  type: 'List';
 
   /**
    * A signal emitted when the cell list has changed.
    */
-  get changed(): ISignal<this, ObservableVector.IChangedArgs<ICellModel>> {
+  get changed(): ISignal<this, IObservableList.IChangedArgs<ICellModel>> {
     return this._changed;
   }
 
@@ -90,44 +90,6 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    */
   get length(): number {
     return this._cellOrder.length;
-  }
-
-  /**
-   * Get the cell at the front of the cell list.
-   *
-   * @returns The cell at the front of the cell list, or `undefined` if
-   *   the cell list is empty.
-   *
-   * #### Notes
-   * This is a read-only property.
-   *
-   * #### Complexity
-   * Constant.
-   *
-   * #### Iterator Validity
-   * No changes.
-   */
-  get front(): ICellModel {
-    return this.at(0);
-  }
-
-  /**
-   * Get the cell at the back of the cell list.
-   *
-   * @returns The cell at the back of the cell list, or `undefined` if
-   *   the cell list is empty.
-   *
-   * #### Notes
-   * This is a read-only property.
-   *
-   * #### Complexity
-   * Constant.
-   *
-   * #### Iterator Validity
-   * No changes.
-   */
-  get back(): ICellModel {
-    return this.at(this.length-1);
   }
 
   /**
@@ -182,8 +144,8 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    * #### Undefined Behavior
    * An `index` which is non-integral or out of range.
    */
-  at(index: number): ICellModel {
-    return this._cellMap.get(this._cellOrder.at(index)) as ICellModel;
+  get(index: number): ICellModel {
+    return this._cellMap.get(this._cellOrder.get(index)) as ICellModel;
   }
 
   /**
@@ -231,30 +193,11 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    * cell to the `CellList`. As such, `cell.dispose()` should
    * not be called by other actors.
    */
-  pushBack(cell: ICellModel): number {
+  push(cell: ICellModel): number {
     // Set the internal data structures.
     this._cellMap.set(cell.id, cell);
-    let num = this._cellOrder.pushBack(cell.id);
+    let num = this._cellOrder.push(cell.id);
     return num;
-  }
-
-  /**
-   * Remove and return the cell at the back of the cell list.
-   *
-   * @returns The cell at the back of the cell list, or `undefined` if
-   *   the cell list is empty.
-   *
-   * #### Complexity
-   * Constant.
-   *
-   * #### Iterator Validity
-   * Iterators pointing at the removed cell are invalidated.
-   */
-  popBack(): ICellModel {
-    //Don't clear the map in case we need to reinstate the cell
-    let id = this._cellOrder.popBack();
-    let cell = this._cellMap.get(id);
-    return cell;
   }
 
   /**
@@ -283,11 +226,10 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    * cell to the `CellList`. As such, `cell.dispose()` should
    * not be called by other actors.
    */
-  insert(index: number, cell: ICellModel): number {
+  insert(index: number, cell: ICellModel): void {
     // Set the internal data structures.
     this._cellMap.set(cell.id, cell);
-    let num = this._cellOrder.insert(index, cell.id);
-    return num;
+    this._cellOrder.insert(index, cell.id);
   }
 
   /**
@@ -304,10 +246,10 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    * #### Iterator Validity
    * Iterators pointing at the removed cell and beyond are invalidated.
    */
-  remove(cell: ICellModel): number {
+  removeValue(cell: ICellModel): number {
     let index = ArrayExt.findFirstIndex(
-      toArray(this._cellOrder), id => (this._cellMap.get(id)===cell));
-    this.removeAt(index);
+      toArray(this._cellOrder), id => (this._cellMap.get(id) === cell));
+    this.remove(index);
     return index;
   }
 
@@ -328,8 +270,9 @@ class CellList implements IObservableUndoableVector<ICellModel> {
    * #### Undefined Behavior
    * An `index` which is non-integral.
    */
-  removeAt(index: number): ICellModel {
-    let id= this._cellOrder.removeAt(index);
+  remove(index: number): ICellModel {
+    let id = this._cellOrder.get(index);
+    this._cellOrder.remove(index);
     let cell = this._cellMap.get(id);
     return cell;
   }
@@ -391,7 +334,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
     each(newValues, cell => {
       // Set the internal data structures.
       this._cellMap.set(cell.id, cell);
-      this._cellOrder.pushBack(cell.id);
+      this._cellOrder.push(cell.id);
     });
     return this.length;
   }
@@ -509,7 +452,7 @@ class CellList implements IObservableUndoableVector<ICellModel> {
     // cell order.
     for (let key of this._cellMap.keys()) {
       if (ArrayExt.findFirstIndex(
-         toArray(this._cellOrder), id => id===key) === -1) {
+         toArray(this._cellOrder), id => id === key) === -1) {
         let cell = this._cellMap.get(key) as ICellModel;
         cell.dispose();
         this._cellMap.delete(key);
@@ -518,12 +461,12 @@ class CellList implements IObservableUndoableVector<ICellModel> {
     this._cellOrder.clearUndo();
   }
 
-  private _onOrderChanged(order: IObservableUndoableVector<string>, change: ObservableVector.IChangedArgs<string>): void {
+  private _onOrderChanged(order: IObservableUndoableList<string>, change: IObservableList.IChangedArgs<string>): void {
     if (change.type === 'add' || change.type === 'set') {
       each(change.newValues, (id) => {
         if (!this._cellMap.has(id)) {
           let cellDB = this._factory.modelDB;
-          let cellType = cellDB.createValue(id+'.type');
+          let cellType = cellDB.createValue(id + '.type');
           let cell: ICellModel;
           switch (cellType.get()) {
             case 'code':
@@ -532,7 +475,6 @@ class CellList implements IObservableUndoableVector<ICellModel> {
             case 'markdown':
               cell = this._factory.createMarkdownCell({ id: id});
               break;
-            case 'raw':
             default:
               cell = this._factory.createRawCell({ id: id});
               break;
@@ -543,10 +485,10 @@ class CellList implements IObservableUndoableVector<ICellModel> {
     }
     let newValues: ICellModel[] = [];
     let oldValues: ICellModel[] = [];
-    each(change.newValues, (id)=>{
+    each(change.newValues, (id) => {
       newValues.push(this._cellMap.get(id));
     });
-    each(change.oldValues, (id)=>{
+    each(change.oldValues, (id) => {
       oldValues.push(this._cellMap.get(id));
     });
     this._changed.emit({
@@ -559,9 +501,9 @@ class CellList implements IObservableUndoableVector<ICellModel> {
   }
 
   private _isDisposed: boolean = false;
-  private _cellOrder: IObservableUndoableVector<string> = null;
+  private _cellOrder: IObservableUndoableList<string> = null;
   private _cellMap: IObservableMap<ICellModel> = null;
-  private _changed = new Signal<this, ObservableVector.IChangedArgs<ICellModel>>(this);
+  private _changed = new Signal<this, IObservableList.IChangedArgs<ICellModel>>(this);
   private _modelDB: IModelDB = null;
   private _factory: NotebookModel.IContentFactory = null;
 }

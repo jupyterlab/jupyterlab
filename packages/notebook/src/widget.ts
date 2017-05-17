@@ -48,8 +48,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IChangedArgs, IObservableMap, ObservableMap, IObservableVector,
-  ObservableVector, nbformat
+  IChangedArgs, IObservableMap, IObservableList, nbformat
 } from '@jupyterlab/coreutils';
 
 import {
@@ -264,7 +263,7 @@ class StaticNotebook extends Widget {
    * The default implementation updates the mimetypes of the code cells
    * when the `language_info` metadata changes.
    */
-  protected onMetadataChanged(sender: IObservableMap<JSONValue>, args: ObservableMap.IChangedArgs<JSONValue>): void {
+  protected onMetadataChanged(sender: IObservableMap<JSONValue>, args: IObservableMap.IChangedArgs<JSONValue>): void {
     switch (args.key) {
     case 'language_info':
       this._updateMimetype();
@@ -332,7 +331,7 @@ class StaticNotebook extends Widget {
   /**
    * Handle a change cells event.
    */
-  private _onCellsChanged(sender: IObservableVector<ICellModel>, args: ObservableVector.IChangedArgs<ICellModel>) {
+  private _onCellsChanged(sender: IObservableList<ICellModel>, args: IObservableList.IChangedArgs<ICellModel>) {
     let index = 0;
     switch (args.type) {
     case 'add':
@@ -1266,7 +1265,7 @@ class Notebook extends StaticNotebook {
     let toMove: Cell[] = [];
 
     each(this.widgets, (widget, i) => {
-      let cell = cells.at(i);
+      let cell = cells.get(i);
       if (this.isSelected(widget)) {
         widget.addClass(DROP_SOURCE_CLASS);
         selected.push(cell.toJSON());
@@ -1354,7 +1353,7 @@ class Notebook extends StaticNotebook {
       return;
     }
     this.activeCellIndex = i;
-    if (model.cells.at(i).type === 'markdown') {
+    if (model.cells.get(i).type === 'markdown') {
       let widget = this.widgets[i] as MarkdownCell;
       widget.rendered = false;
     } else if (target.localName === 'img') {

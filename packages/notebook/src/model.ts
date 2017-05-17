@@ -15,8 +15,8 @@ import {
 } from '@jupyterlab/cells';
 
 import {
-  IObservableJSON, IObservableUndoableVector, uuid,
-  IObservableVector, ObservableVector, nbformat, IModelDB
+  IObservableJSON, IObservableUndoableList, uuid,
+  IObservableList, nbformat, IModelDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -32,7 +32,7 @@ interface INotebookModel extends DocumentRegistry.IModel {
   /**
    * The list of cells in the notebook.
    */
-  readonly cells: IObservableUndoableVector<ICellModel>;
+  readonly cells: IObservableUndoableList<ICellModel>;
 
   /**
    * The cell model factory for the notebook.
@@ -75,7 +75,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     this._cells = new CellList(this.modelDB, this.contentFactory);
     // Add an initial code cell by default.
     if (!this._cells.length) {
-      this._cells.pushBack(factory.createCodeCell({}));
+      this._cells.push(factory.createCodeCell({}));
     }
     this._cells.changed.connect(this._onCellsChanged, this);
 
@@ -104,7 +104,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   /**
    * Get the observable list of notebook cells.
    */
-  get cells(): IObservableUndoableVector<ICellModel> {
+  get cells(): IObservableUndoableList<ICellModel> {
     return this._cells;
   }
 
@@ -175,7 +175,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   toJSON(): nbformat.INotebookContent {
     let cells: nbformat.ICell[] = [];
     for (let i = 0; i < this.cells.length; i++) {
-      let cell = this.cells.at(i);
+      let cell = this.cells.get(i);
       cells.push(cell.toJSON());
     }
     this._ensureMetadata();
@@ -252,7 +252,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   /**
    * Handle a change in the cells list.
    */
-  private _onCellsChanged(list: IObservableVector<ICellModel>, change: ObservableVector.IChangedArgs<ICellModel>): void {
+  private _onCellsChanged(list: IObservableList<ICellModel>, change: IObservableList.IChangedArgs<ICellModel>): void {
     switch (change.type) {
     case 'add':
       each(change.newValues, cell => {
@@ -280,7 +280,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       // cell changed event during the handling of this signal.
       requestAnimationFrame(() => {
         if (!this.isDisposed && !this.cells.length) {
-          this.cells.pushBack(factory.createCodeCell({}));
+          this.cells.push(factory.createCodeCell({}));
         }
       });
     }
