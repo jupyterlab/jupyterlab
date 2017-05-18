@@ -37,8 +37,12 @@ for twine setup instructions and for why twine is the recommended method.
 # major release, to prevent consumers that are using the `^` semver 
 # requirement from getting a conflict.
 #
-# *** First, update jupyterlab/_version.py
+# Publish the npm packages:
 npm run publish  
+# Update jupyterlab/_version.py
+# Commit and tag and push the tag
+# Prep the static assets for release:
+cd jupyterlab && npm run publish && cd ..
 rm -rf dist
 python setup.py sdist
 python setup.py bdist_wheel --universal
