@@ -1,61 +1,61 @@
-@jupyterlab/application-top          v0.3.0     (private)
-@jupyterlab/example-app              v0.4.0     (private)
-@jupyterlab/example-console          v0.4.0     (private)
-@jupyterlab/example-filebrowser      v0.4.0     (private)
-@jupyterlab/example-notebook         v0.4.0     (private)
-jupyterlab-example-terminal          v0.4.0     (private)
-@jupyterlab/about-extension          v0.4.0              
-@jupyterlab/all-packages             v0.3.0     (private)
-@jupyterlab/application-extension    v0.4.0              
-@jupyterlab/application              v0.4.0              
-@jupyterlab/apputils-extension       v0.4.0              
-@jupyterlab/apputils                 v0.4.0              
-@jupyterlab/cells                    v0.4.0              
-@jupyterlab/codeeditor               v0.4.0              
-@jupyterlab/codemirror-extension     v0.4.0              
-@jupyterlab/codemirror               v0.4.0              
-@jupyterlab/completer-extension      v0.4.0              
-@jupyterlab/completer                v0.4.0              
-@jupyterlab/console-extension        v0.4.0              
-@jupyterlab/console                  v0.4.0              
-@jupyterlab/coreutils                v0.4.0              
-@jupyterlab/csvviewer-extension      v0.4.0              
-@jupyterlab/csvviewer                v0.4.0              
-@jupyterlab/default-theme            v0.4.0              
-@jupyterlab/docmanager-extension     v0.4.0              
-@jupyterlab/docmanager               v0.4.0              
-@jupyterlab/docregistry-extension    v0.4.0              
-@jupyterlab/docregistry              v0.4.0              
-@jupyterlab/faq-extension            v0.4.0              
-@jupyterlab/filebrowser-extension    v0.4.0              
-@jupyterlab/filebrowser              v0.4.0              
-@jupyterlab/fileeditor-extension     v0.4.0              
-@jupyterlab/fileeditor               v0.4.0              
-@jupyterlab/help-extension           v0.4.0              
-@jupyterlab/imageviewer-extension    v0.4.0              
-@jupyterlab/imageviewer              v0.4.0              
-@jupyterlab/inspector-extension      v0.4.0              
-@jupyterlab/inspector                v0.4.0              
-@jupyterlab/landing-extension        v0.4.0              
-@jupyterlab/launcher-extension       v0.4.0              
-@jupyterlab/launcher                 v0.4.0              
-@jupyterlab/markdownviewer-extension v0.4.0              
-@jupyterlab/markdownviewer           v0.4.0              
-@jupyterlab/notebook-extension       v0.4.0              
-@jupyterlab/notebook                 v0.4.0              
-@jupyterlab/outputarea               v0.4.0              
-@jupyterlab/rendermime-extension     v0.4.0              
-@jupyterlab/rendermime               v0.4.0              
-@jupyterlab/running-extension        v0.4.0              
-@jupyterlab/running                  v0.4.0              
-@jupyterlab/services-extension       v0.4.0              
-@jupyterlab/services                 v0.43.0             
-@jupyterlab/shortcuts-extension      v0.4.0              
-@jupyterlab/tabmanager-extension     v0.4.0              
-@jupyterlab/terminal-extension       v0.4.0              
-@jupyterlab/terminal                 v0.4.0              
-@jupyterlab/tooltip-extension        v0.4.0              
-@jupyterlab/tooltip                  v0.4.0              
-browser-example                      vundefined (private)
-node-example                         vundefined (private)
-@jupyterlab/test-all                 v0.4.0     (private)
+@jupyterlab/application-top          v0.4.0  (private)
+@jupyterlab/example-app              v0.5.0  (private)
+@jupyterlab/example-console          v0.5.0  (private)
+@jupyterlab/example-filebrowser      v0.5.0  (private)
+@jupyterlab/example-notebook         v0.5.0  (private)
+jupyterlab-example-terminal          v0.5.0  (private)
+@jupyterlab/about-extension          v0.5.0           
+@jupyterlab/all-packages             v0.4.0  (private)
+@jupyterlab/application-extension    v0.5.0           
+@jupyterlab/application              v0.5.0           
+@jupyterlab/apputils-extension       v0.5.0           
+@jupyterlab/apputils                 v0.5.0           
+@jupyterlab/cells                    v0.5.0           
+@jupyterlab/codeeditor               v0.5.0           
+@jupyterlab/codemirror-extension     v0.5.0           
+@jupyterlab/codemirror               v0.5.0           
+@jupyterlab/completer-extension      v0.5.0           
+@jupyterlab/completer                v0.5.0           
+@jupyterlab/console-extension        v0.5.0           
+@jupyterlab/console                  v0.5.0           
+@jupyterlab/coreutils                v0.5.0           
+@jupyterlab/csvviewer-extension      v0.5.0           
+@jupyterlab/csvviewer                v0.5.0           
+@jupyterlab/default-theme            v0.5.0           
+@jupyterlab/docmanager-extension     v0.5.0           
+@jupyterlab/docmanager               v0.5.0           
+@jupyterlab/docregistry-extension    v0.5.0           
+@jupyterlab/docregistry              v0.5.0           
+@jupyterlab/faq-extension            v0.5.0           
+@jupyterlab/filebrowser-extension    v0.5.0           
+@jupyterlab/filebrowser              v0.5.0           
+@jupyterlab/fileeditor-extension     v0.5.0           
+@jupyterlab/fileeditor               v0.5.0           
+@jupyterlab/help-extension           v0.5.0           
+@jupyterlab/imageviewer-extension    v0.5.0           
+@jupyterlab/imageviewer              v0.5.0           
+@jupyterlab/inspector-extension      v0.5.0           
+@jupyterlab/inspector                v0.5.0           
+@jupyterlab/landing-extension        v0.5.0           
+@jupyterlab/launcher-extension       v0.5.0           
+@jupyterlab/launcher                 v0.5.0           
+@jupyterlab/markdownviewer-extension v0.5.0           
+@jupyterlab/markdownviewer           v0.5.0           
+@jupyterlab/notebook-extension       v0.5.0           
+@jupyterlab/notebook                 v0.5.0           
+@jupyterlab/outputarea               v0.5.0           
+@jupyterlab/rendermime-extension     v0.5.0           
+@jupyterlab/rendermime               v0.5.0           
+@jupyterlab/running-extension        v0.5.0           
+@jupyterlab/running                  v0.5.0           
+@jupyterlab/services-extension       v0.5.0           
+@jupyterlab/services                 v0.44.0          
+@jupyterlab/shortcuts-extension      v0.5.0           
+@jupyterlab/tabmanager-extension     v0.5.0           
+@jupyterlab/terminal-extension       v0.5.0           
+@jupyterlab/terminal                 v0.5.0           
+@jupyterlab/tooltip-extension        v0.5.0           
+@jupyterlab/tooltip                  v0.5.0           
+node-example                         v0.1.0  (private)
+browser-example                      v0.1.0  (private)
+@jupyterlab/test-all                 v0.5.0  (private)
