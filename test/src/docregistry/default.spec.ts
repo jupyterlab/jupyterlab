@@ -28,7 +28,7 @@ class WidgetFactory extends ABCWidgetFactory<Widget, DocumentRegistry.IModel> {
 function createFactory(): WidgetFactory {
   return new WidgetFactory({
     name: 'test',
-    fileExtensions: []
+    fileExtensions: ['.txt']
   });
 }
 
@@ -46,6 +46,134 @@ describe('docmanager/default', () => {
   });
 
   describe('ABCWidgetFactory', () => {
+
+    describe('#fileExtensions', () => {
+
+      it('should be the value passed in', () => {
+        let factory = new WidgetFactory({
+          name: 'test',
+          fileExtensions: ['.txt'],
+        });
+        expect(factory.fileExtensions).to.eql(['.txt']);
+      });
+
+    });
+
+    describe('#name', () => {
+
+      it('should be the value passed in', () => {
+        let factory = new WidgetFactory({
+          name: 'test',
+          fileExtensions: ['.txt'],
+        });
+        expect(factory.name).to.be('test');
+      });
+
+    });
+
+    describe('#defaultFor', () => {
+
+      it('should default to an empty array', () => {
+        let factory = new WidgetFactory({
+          name: 'test',
+          fileExtensions: ['.txt'],
+        });
+        expect(factory.defaultFor).to.eql([]);
+      });
+
+      it('should be the value passed in', () => {
+        let factory = new WidgetFactory({
+          name: 'test',
+          fileExtensions: ['.txt'],
+          defaultFor: ['.md']
+        });
+        expect(factory.defaultFor).to.eql(['.md']);
+      });
+
+    });
+
+    describe('#readOnly', () => {
+
+      it('should default to false', () => {
+        let factory = new WidgetFactory({
+          name: 'test',
+          fileExtensions: ['.txt'],
+        });
+        expect(factory.readOnly).to.be(false);
+      });
+
+      it('should be the value passed in', () => {
+        let factory = new WidgetFactory({
+          name: 'test',
+          fileExtensions: ['.txt'],
+          readOnly: true
+        });
+        expect(factory.readOnly).to.be(true);
+      });
+
+    });
+
+    describe('#modelName', () => {
+
+      it('should default to `text`', () => {
+        let factory = new WidgetFactory({
+          name: 'test',
+          fileExtensions: ['.txt'],
+        });
+        expect(factory.modelName).to.be('text');
+      });
+
+      it('should be the value passed in', () => {
+        let factory = new WidgetFactory({
+          name: 'test',
+          fileExtensions: ['.txt'],
+          modelName: 'notebook'
+        });
+        expect(factory.modelName).to.be('notebook');
+      });
+    });
+
+    describe('#preferKernel', () => {
+
+      it('should default to false', () => {
+        let factory = new WidgetFactory({
+          name: 'test',
+          fileExtensions: ['.txt'],
+        });
+        expect(factory.preferKernel).to.be(false);
+      });
+
+      it('should be the value passed in', () => {
+        let factory = new WidgetFactory({
+          name: 'test',
+          fileExtensions: ['.txt'],
+          preferKernel: true
+        });
+        expect(factory.preferKernel).to.be(true);
+      });
+
+    });
+
+    describe('#canStartKernel', () => {
+
+      it('should default to false', () => {
+        let factory = new WidgetFactory({
+          name: 'test',
+          fileExtensions: ['.txt'],
+        });
+        expect(factory.canStartKernel).to.be(false);
+      });
+
+      it('should be the value passed in', () => {
+        let factory = new WidgetFactory({
+          name: 'test',
+          fileExtensions: ['.txt'],
+          canStartKernel: true
+        });
+        expect(factory.canStartKernel).to.be(true);
+      });
+
+    });
 
     describe('#isDisposed', () => {
 
