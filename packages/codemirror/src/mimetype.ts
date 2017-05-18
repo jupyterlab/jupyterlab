@@ -25,10 +25,14 @@ class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
    * If a mime type cannot be found returns the defaul mime type `text/plain`, never `null`.
    */
   getMimeTypeByLanguage(info: nbformat.ILanguageInfoMetadata): string {
+    let mode: Mode.ISpec;
     if (info.codemirror_mode) {
-      return Mode.find(info.codemirror_mode as any).mime;
+      mode = Mode.findBest(info.codemirror_mode as any);
+      if (mode) {
+        return mode.mime;
+      }
     }
-    let mode = Mode.findByMIME(info.mimetype || '');
+    mode = Mode.findByMIME(info.mimetype || '');
     if (mode) {
       return info.mimetype!;
     }
@@ -41,6 +45,7 @@ class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
     mode = Mode.findByName(info.name || '');
     return mode ? mode.mime : IEditorMimeTypeService.defaultMimeType;
   }
+
   /**
    * Returns a mime type for the given file path.
    *

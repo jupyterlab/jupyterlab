@@ -50,17 +50,14 @@ namespace Mode {
   /**
    * Ensure a codemirror mode is available by name or Codemirror spec.
    *
-   * @param mode - The mode to ensure.  If it is a string, uses [find]
+   * @param mode - The mode to ensure.  If it is a string, uses [findBest]
    *   to get the appropriate spec.
    *
    * @returns A promise that resolves when the mode is available.
    */
   export
   function ensure(mode: string | ISpec): Promise<ISpec> {
-    let spec = find(mode);
-    if (!spec) {
-      return CodeMirror.modes['null'];
-    }
+    let spec = findBest(mode);
 
     // Simplest, cheapest check by mode name.
     if (CodeMirror.modes.hasOwnProperty(spec.mode)) {
@@ -79,15 +76,15 @@ namespace Mode {
    * Find a codemirror mode by name or CodeMirror spec.
    */
   export
-  function find(mode: string | ISpec): ISpec {
+  function findBest(mode: string | ISpec): ISpec {
     let modename = (typeof mode === 'string') ? mode :
         mode.mode || mode.name;
-    let mimetype = (typeof mode !== 'string') ? mode.mime : '';
+    let mimetype = (typeof mode !== 'string') ? mode.mime : modename;
 
     return (
       CodeMirror.findModeByName(modename) ||
       CodeMirror.findModeByMIME(mimetype) ||
-      CodeMirror.modes['null']
+      CodeMirror.findModeByMIME('text/plain')
     );
   }
 

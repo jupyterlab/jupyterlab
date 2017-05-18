@@ -803,6 +803,6 @@ namespace Private {
  * character or first multiple of tabsize tabstop.
  */
 CodeMirrorEditor.addCommand(
-  'delSpaceToPrevTabStop'], Private.delSpaceToPrevTabStop
+  'delSpaceToPrevTabStop', Private.delSpaceToPrevTabStop
 );
 
