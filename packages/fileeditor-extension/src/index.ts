@@ -29,6 +29,10 @@ import {
   ILauncher
 } from '@jupyterlab/launcher';
 
+import {
+   MarkdownCodeBlocks
+} from '@jupyterlab/coreutils'
+
 
 /**
  * The class name for the text editor icon from the default theme.
@@ -174,6 +178,21 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
     return tracker.currentWidget !== null;
   }
 
+  /** To detect if there is no current selection */
+  function hasSelection(): boolean {
+    let widget = tracker.currentWidget;
+    if (!widget) {
+      return false;
+    }
+    const editor = widget.editor;
+    const selection = editor.getSelection();
+    if (selection.start.column == selection.end.column &&
+      selection.start.line == selection.end.line) {
+      return false;
+    }
+    return true;
+  }
+
   commands.addCommand(CommandIDs.lineNumbers, {
     execute: toggleLineNums,
     isEnabled: hasWidget,
@@ -211,18 +230,32 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
       if (!widget) {
         return;
       }
-      // Get the selected code from the editor.
+      
+      var code = ""
       const editor = widget.editor;
-      const selection = editor.getSelection();
-      const start = editor.getOffsetAt(selection.start);
-      const end = editor.getOffsetAt(selection.end);
-      let targetText = editor.model.value.text.substring(start, end);
-      if (start == end) {
-        targetText = editor.getLine(selection.start.line); 
+      const extension = widget.context.path.substring(widget.context.path.lastIndexOf("."));
+      if (!hasSelection() && MarkdownCodeBlocks.isMarkdown(extension)) {
+        var codeBlocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(editor.model.value.text);
+        for (let codeBlock of codeBlocks) {
+          if (codeBlock.startLine <= editor.getSelection().start.line &&
+            editor.getSelection().start.line <= codeBlock.endLine) {
+            code = codeBlock.code;
+            break;
+          }
+        }
+      } else {
+        // Get the selected code from the editor.
+        const selection = editor.getSelection();
+        const start = editor.getOffsetAt(selection.start);
+        const end = editor.getOffsetAt(selection.end);
+        code = editor.model.value.text.substring(start, end);
+        if (start == end) {
+          code = editor.getLine(selection.start.line);
+        }
       }
       const options: JSONObject = {
         path: widget.context.path,
-        code: targetText,
+        code: code,
         activate: false
       };
       // Advance cursor to the next line.
