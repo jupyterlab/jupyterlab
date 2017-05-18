@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/fileeditor",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "JupyterLab - Editor Widget",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -13,10 +13,10 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^0.4.0",
-    "@jupyterlab/codeeditor": "^0.4.0",
-    "@jupyterlab/coreutils": "^0.4.0",
-    "@jupyterlab/docregistry": "^0.4.0",
+    "@jupyterlab/apputils": "^0.5.0",
+    "@jupyterlab/codeeditor": "^0.5.0",
+    "@jupyterlab/coreutils": "^0.5.0",
+    "@jupyterlab/docregistry": "^0.5.0",
     "@phosphor/commands": "^1.2.0",
     "@phosphor/coreutils": "^1.1.0"
   },

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/about-extension",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "JupyterLab - About Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -14,8 +14,8 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.4.0",
-    "@jupyterlab/apputils": "^0.4.0",
+    "@jupyterlab/application": "^0.5.0",
+    "@jupyterlab/apputils": "^0.5.0",
     "@phosphor/messaging": "^1.2.0",
     "@phosphor/virtualdom": "^1.1.0"
   },

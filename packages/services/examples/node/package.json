@@ -2,7 +2,7 @@
   "private": true,
   "name": "node-example",
   "dependencies": {
-    "@jupyterlab/services": "^0.43.0",
+    "@jupyterlab/services": "^0.44.0",
     "requirejs": "^2.2.0",
     "ws": "^1.1.1",
     "xmlhttprequest": "^1.8.0"
@@ -13,5 +13,6 @@
   },
   "devDependencies": {
     "rimraf": "^2.5.2"
-  }
+  },
+  "version": "0.1.0"
 }

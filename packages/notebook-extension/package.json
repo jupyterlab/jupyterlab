@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/notebook-extension",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "JupyterLab - Notebook Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -12,15 +12,15 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.4.0",
-    "@jupyterlab/apputils": "^0.4.0",
-    "@jupyterlab/codeeditor": "^0.4.0",
-    "@jupyterlab/coreutils": "^0.4.0",
-    "@jupyterlab/docregistry": "^0.4.0",
-    "@jupyterlab/launcher": "^0.4.0",
-    "@jupyterlab/notebook": "^0.4.0",
-    "@jupyterlab/rendermime": "^0.4.0",
-    "@jupyterlab/services": "^0.43.0",
+    "@jupyterlab/application": "^0.5.0",
+    "@jupyterlab/apputils": "^0.5.0",
+    "@jupyterlab/codeeditor": "^0.5.0",
+    "@jupyterlab/coreutils": "^0.5.0",
+    "@jupyterlab/docregistry": "^0.5.0",
+    "@jupyterlab/launcher": "^0.5.0",
+    "@jupyterlab/notebook": "^0.5.0",
+    "@jupyterlab/rendermime": "^0.5.0",
+    "@jupyterlab/services": "^0.44.0",
     "@phosphor/coreutils": "^1.1.0",
     "@phosphor/widgets": "^1.2.0"
   },

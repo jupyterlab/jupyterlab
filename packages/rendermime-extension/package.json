@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/rendermime-extension",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "JupyterLab - RenderMime Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -12,10 +12,10 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.4.0",
-    "@jupyterlab/apputils": "^0.4.0",
-    "@jupyterlab/coreutils": "^0.4.0",
-    "@jupyterlab/rendermime": "^0.4.0"
+    "@jupyterlab/application": "^0.5.0",
+    "@jupyterlab/apputils": "^0.5.0",
+    "@jupyterlab/coreutils": "^0.5.0",
+    "@jupyterlab/rendermime": "^0.5.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",

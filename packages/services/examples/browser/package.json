@@ -3,7 +3,7 @@
   "name": "browser-example",
   "dependencies": {
     "es6-promise": "^4.1.0",
-    "@jupyterlab/services": "^0.43.0"
+    "@jupyterlab/services": "^0.44.0"
   },
   "scripts": {
     "build": "tsc && webpack",
@@ -12,5 +12,6 @@
   "devDependencies": {
     "rimraf": "^2.5.2",
     "webpack": "^2.2.1"
-  }
+  },
+  "version": "0.1.0"
 }
