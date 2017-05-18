@@ -24,110 +24,102 @@ declare var require: any;
 
 
 /**
- * The interface of a codemirror mode.
+ * The namespace for CodeMirror Mode functionality.
  */
 export
-interface IModeSpec {
-  [ key: string ]: string;
-  name?: string;
-  mode: string;
-  mime: string;
-}
-
-
-/**
- * Running a CodeMirror mode outside of an editor.
- */
-export
-function runMode(code: string, mode: string | IModeSpec, el: HTMLElement): void {
-  CodeMirror.runMode(code, mode, el);
-}
-
-
-/**
- * Find a mode name by extension.
- */
-export
-function findModeByExtension(ext: string): string {
-  let mode = CodeMirror.findModeByExtension(ext);
-  return mode && mode.mode;
-}
-
-
-/**
- * Load a codemirror mode by file name.
- */
-export
-function loadModeByFileName(editor: CodeMirror.Editor, filename: string): void {
-  loadInfo(editor, CodeMirror.findModeByFileName(filename));
-}
-
-
-/**
- * Load a codemirror mode by mime type.
- */
-export
-function loadModeByMIME(editor: CodeMirror.Editor, mimetype: string): void {
-  loadInfo(editor, CodeMirror.findModeByMIME(mimetype));
-}
-
-
-/**
- * Load a codemirror mode by mode name.
- */
-export
-function loadModeByName(editor: CodeMirror.Editor, mode: string): void {
-  loadInfo(editor, CodeMirror.findModeByName(mode));
-}
-
-
-/**
- * Find a codemirror mode by name or CodeMirror spec.
- */
-export
-function findMode(mode: string | IModeSpec): IModeSpec {
-  let modename = (typeof mode === 'string') ? mode :
-      mode.mode || mode.name;
-  let mimetype = (typeof mode !== 'string') ? mode.mime : '';
-
-  return (
-    CodeMirror.findModeByName(modename) ||
-    CodeMirror.findModeByMIME(mimetype) ||
-    CodeMirror.modes['null']
-  );
-}
-
-
-/**
- * Require a codemirror mode by name or Codemirror spec.
- */
-export
-function requireMode(mode: string | IModeSpec): Promise<IModeSpec> {
-  let info = findMode(mode);
-
-  // Simplest, cheapest check by mode name.
-  if (CodeMirror.modes.hasOwnProperty(info.mode)) {
-    return Promise.resolve(info);
+namespace Mode {
+  /**
+   * The interface of a codemirror mode spec.
+   */
+  export
+  interface ISpec {
+    [ key: string ]: string;
+    name?: string;
+    mode: string;
+    mime: string;
   }
 
-  // Fetch the mode asynchronously.
-  return new Promise<CodeMirror.modespec>((resolve, reject) => {
-    require([`codemirror/mode/${info.mode}/${info.mode}.js`], () => {
-      resolve(info);
+  /**
+   * Running a CodeMirror mode outside of an editor.
+   */
+  export
+  function run(code: string, mode: string | ISpec, el: HTMLElement): void {
+    CodeMirror.runMode(code, mode, el);
+  }
+
+  /**
+   * Ensure a codemirror mode is available by name or Codemirror spec.
+   *
+   * @param mode - The mode to ensure.  If it is a string, uses [find]
+   *   to get the appropriate spec.
+   *
+   * @returns A promise that resolves when the mode is available.
+   */
+  export
+  function ensure(mode: string | ISpec): Promise<ISpec> {
+    let spec = find(mode);
+    if (!spec) {
+      return CodeMirror.modes['null'];
+    }
+
+    // Simplest, cheapest check by mode name.
+    if (CodeMirror.modes.hasOwnProperty(spec.mode)) {
+      return Promise.resolve(mode);
+    }
+
+    // Fetch the mode asynchronously.
+    return new Promise<CodeMirror.modespec>((resolve, reject) => {
+      require([`codemirror/mode/${spec.mode}/${spec.mode}.js`], () => {
+        resolve(spec);
+      });
     });
-  });
-}
-
-
-/**
- * Load a CodeMirror mode based on a mode spec.
- */
-function loadInfo(editor: CodeMirror.Editor, info: CodeMirror.modespec): void {
-  if (!info) {
-    editor.setOption('mode', 'null');
-    return;
   }
-  requireMode(info).then(() => {
-    editor.setOption('mode', info.mime);
-  });
+
+  /**
+   * Find a codemirror mode by name or CodeMirror spec.
+   */
+  export
+  function find(mode: string | ISpec): ISpec {
+    let modename = (typeof mode === 'string') ? mode :
+        mode.mode || mode.name;
+    let mimetype = (typeof mode !== 'string') ? mode.mime : '';
+
+    return (
+      CodeMirror.findModeByName(modename) ||
+      CodeMirror.findModeByMIME(mimetype) ||
+      CodeMirror.modes['null']
+    );
+  }
+
+  /**
+   * Find a codemirror mode by MIME.
+   */
+  export
+  function findByMIME(mime: string): ISpec {
+    return CodeMirror.findModeByMIME(mime);
+  }
+
+  /**
+   * Find a codemirror mode by name.
+   */
+  export
+  function findByName(mime: string): ISpec {
+    return CodeMirror.findModeByName(mime);
+  }
+
+  /**
+   * Find a codemirror mode by filename.
+   */
+  export
+  function findByFileName(name: string): ISpec {
+    return CodeMirror.findModeByFileName(name);
+  }
+
+  /**
+   * Find a codemirror mode by extension.
+   */
+  export
+  function findByExtension(name: string): ISpec {
+    return CodeMirror.findModeByExtension(name);
+  }
 }
