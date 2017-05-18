@@ -228,7 +228,8 @@ class TextModelFactory implements DocumentRegistry.CodeModelFactory {
    * Get the preferred kernel language given an extension.
    */
   preferredLanguage(ext: string): string {
-    return Mode.findByExtension(ext.slice(1)).mode;
+    let mode = Mode.findByExtension(ext.slice(1));
+    return mode && mode.mode;
   }
 
   private _isDisposed = false;
