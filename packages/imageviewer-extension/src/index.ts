@@ -71,7 +71,8 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, palette: IComman
     name: FACTORY,
     modelName: 'base64',
     fileExtensions: EXTENSIONS,
-    defaultFor: EXTENSIONS
+    defaultFor: EXTENSIONS,
+    readOnly: true
   });
   const { shell } = app;
   const tracker = new InstanceTracker<ImageViewer>({ namespace, shell });

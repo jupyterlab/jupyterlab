@@ -48,7 +48,8 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   const factory = new CSVViewerFactory({
     name: FACTORY,
     fileExtensions: ['.csv'],
-    defaultFor: ['.csv']
+    defaultFor: ['.csv'],
+    readOnly: true
   });
   const tracker = new InstanceTracker<CSVViewer>({
     namespace: 'csvviewer',

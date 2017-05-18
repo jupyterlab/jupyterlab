@@ -435,7 +435,7 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * Get the model factory for a given widget name.
+   * Get the widget factory for a given widget name.
    */
   private _widgetFactoryFor(path: string, widgetName: string): DocumentRegistry.WidgetFactory {
     let { registry } = this;
@@ -492,7 +492,7 @@ class DocumentManager implements IDisposable {
       context.save();
     }
 
-    let widget = this._widgetManager.createWidget(widgetFactory.name, context);
+    let widget = this._widgetManager.createWidget(widgetFactory, context);
     this._opener.open(widget);
     return widget;
   }

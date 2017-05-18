@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ArrayExt, each, map, find, toArray
+  ArrayExt, each, map, find, filter, toArray
 } from '@phosphor/algorithm';
 
 import {
@@ -84,7 +84,7 @@ class DocumentWidgetManager implements IDisposable {
   /**
    * Create a widget for a document and handle its lifecycle.
    *
-   * @param name - The name of the widget factory.
+   * @param factory - The widget factory.
    *
    * @param context - The document context object.
    *
@@ -92,13 +92,9 @@ class DocumentWidgetManager implements IDisposable {
    *
    * @throws If the factory is not registered.
    */
-  createWidget(name: string, context: DocumentRegistry.Context): Widget {
-    let factory = this._registry.getWidgetFactory(name);
-    if (!factory) {
-      throw new Error(`Factory is not registered: ${name}`);
-    }
+  createWidget(factory: DocumentRegistry.WidgetFactory, context: DocumentRegistry.Context): Widget {
     let widget = factory.createNew(context);
-    Private.nameProperty.set(widget, name);
+    Private.factoryProperty.set(widget, factory);
 
     // Handle widget extensions.
     let disposables = new DisposableSet();
@@ -151,7 +147,7 @@ class DocumentWidgetManager implements IDisposable {
   findWidget(context: DocumentRegistry.Context, widgetName: string): Widget {
     let widgets = Private.widgetsProperty.get(context);
     return find(widgets, widget => {
-      let name = Private.nameProperty.get(widget);
+      let name = Private.factoryProperty.get(widget).name;
       if (name === widgetName) {
         return true;
       }
@@ -185,8 +181,8 @@ class DocumentWidgetManager implements IDisposable {
     if (!context) {
       return;
     }
-    let name = Private.nameProperty.get(widget);
-    let newWidget = this.createWidget(name, context);
+    let factory = Private.factoryProperty.get(widget);
+    let newWidget = this.createWidget(factory, context);
     this.adoptWidget(context, newWidget);
     return widget;
   }
@@ -294,8 +290,14 @@ class DocumentWidgetManager implements IDisposable {
       return Promise.resolve(true);
     }
     let widgets = Private.widgetsProperty.get(context);
+    // Filter by whether the factories are read only.
+    widgets = toArray(filter(widgets, widget => {
+      let factory = Private.factoryProperty.get(widget);
+      return factory.readOnly === false;
+    }));
+    let factory = Private.factoryProperty.get(widget);
     let model = context.model;
-    if (!model.dirty || widgets.length > 1) {
+    if (!model.dirty || widgets.length > 1 || factory.readOnly) {
       return Promise.resolve(true);
     }
     let fileName = widget.title.label;
@@ -384,12 +386,12 @@ namespace Private {
   });
 
   /**
-   * A private attached property for a widget factory name.
+   * A private attached property for a widget factory.
    */
   export
-  const nameProperty = new AttachedProperty<Widget, string>({
-    name: 'name',
-    create: () => ''
+  const factoryProperty = new AttachedProperty<Widget, DocumentRegistry.WidgetFactory> ({
+    name: 'factory',
+    create: () => null
   });
 
   /**
