@@ -18,6 +18,7 @@ from os.path import join as pjoin
 
 from distutils import log
 from distutils.cmd import Command
+from distutils.version import LooseVersion
 from setuptools.command.bdist_egg import bdist_egg
 from subprocess import check_call
 
@@ -139,7 +140,8 @@ class CheckAssets(Command):
         with open(target) as fid:
             data = json.load(fid)
 
-        if data['version'] != version_ns['__version__']:
+        if (LooseVersion(data['version']) !=
+                LooseVersion(version_ns['__version__'])):
             msg = 'Release assets version mismatch, please run npm publish'
             raise ValueError(msg)
 
