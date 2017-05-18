@@ -116,9 +116,13 @@ namespace ISettingRegistry {
      *
      * @param level - The setting level. Defaults to `user`.
      *
-     * @returns A promise that resolves when the setting is retrieved.
+     * @returns The setting value.
+     *
+     * #### Notes
+     * This method returns synchronously because it uses a cached copy of the
+     * plugin settings that is synchronized with the registry.
      */
-    get(key: string, level?: ISettingRegistry.Level): Promise<JSONValue>;
+    get(key: string, level?: ISettingRegistry.Level): JSONValue;
 
     /**
      * Remove a single setting.
@@ -128,6 +132,9 @@ namespace ISettingRegistry {
      * @param level - The setting level. Defaults to `user`.
      *
      * @returns A promise that resolves when the setting is removed.
+     *
+     * #### Notes
+     * This function is asynchronous because it writes to the setting registry.
      */
     remove(key: string, level?: ISettingRegistry.Level): Promise<void>;
 
@@ -142,6 +149,8 @@ namespace ISettingRegistry {
      *
      * @returns A promise that resolves when the setting has been saved.
      *
+     * #### Notes
+     * This function is asynchronous because it writes to the setting registry.
      */
     set(key: string, value: JSONValue, level?: ISettingRegistry.Level): Promise<void>;
   };
@@ -386,7 +395,7 @@ class Settings implements ISettingRegistry.ISettings {
     this.plugin = options.plugin;
     this.registry = options.registry;
 
-    this.registry.pluginChanged.connect(this.onPluginChanged, this);
+    this.registry.pluginChanged.connect(this._onPluginChanged, this);
   }
 
   /**
@@ -433,14 +442,15 @@ class Settings implements ISettingRegistry.ISettings {
    *
    * @param level - The setting level. Defaults to `user`.
    *
-   * @returns A promise that resolves when the setting is retrieved.
+   * @returns The setting value.
+   *
+   * #### Notes
+   * This method returns synchronously because it uses a cached copy of the
+   * plugin settings that is synchronized with the registry.
    */
-  get(key: string, level: ISettingRegistry.Level = LEVEL): Promise<JSONValue> {
-    if (key in this._content.data[level]) {
-      return Promise.resolve(this._content.data[level][key]);
-    }
-
-    return this.registry.get(this.plugin, key, level);
+  get(key: string, level: ISettingRegistry.Level = LEVEL): JSONValue {
+    const data = this._content.data;
+    return data[level] && data[level][key];
   }
 
   /**
@@ -451,6 +461,9 @@ class Settings implements ISettingRegistry.ISettings {
    * @param level - The setting level. Defaults to `user`.
    *
    * @returns A promise that resolves when the setting is removed.
+   *
+   * #### Notes
+   * This function is asynchronous because it writes to the setting registry.
    */
   remove(key: string, level: ISettingRegistry.Level = LEVEL): Promise<void> {
     return this.registry.remove(this.plugin, key, level);
@@ -467,6 +480,8 @@ class Settings implements ISettingRegistry.ISettings {
    *
    * @returns A promise that resolves when the setting has been saved.
    *
+   * #### Notes
+   * This function is asynchronous because it writes to the setting registry.
    */
   set(key: string, value: JSONValue, level: ISettingRegistry.Level = LEVEL): Promise<void> {
     return this.registry.set(this.plugin, key, value, level);
@@ -475,7 +490,7 @@ class Settings implements ISettingRegistry.ISettings {
   /**
    * Handle plugin changes in the setting registry.
    */
-  protected onPluginChanged(sender: any, plugin: string): void {
+  private _onPluginChanged(sender: any, plugin: string): void {
     if (plugin === this.plugin) {
       this._content = find(this.registry.plugins, p => p.id === plugin);
       this._changed.emit(void 0);
