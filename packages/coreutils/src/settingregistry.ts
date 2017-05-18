@@ -134,14 +134,12 @@ namespace ISettingRegistry {
      *
      * @param key - The name of the setting being removed.
      *
-     * @param level - The setting level. Defaults to `user`.
-     *
      * @returns A promise that resolves when the setting is removed.
      *
      * #### Notes
      * This function is asynchronous because it writes to the setting registry.
      */
-    remove(key: string, level?: ISettingRegistry.Level): Promise<void>;
+    remove(key: string): Promise<void>;
 
     /**
      * Set a single setting.
@@ -150,14 +148,12 @@ namespace ISettingRegistry {
      *
      * @param value - The value of the setting.
      *
-     * @param level - The setting level. Defaults to `user`.
-     *
      * @returns A promise that resolves when the setting has been saved.
      *
      * #### Notes
      * This function is asynchronous because it writes to the setting registry.
      */
-    set(key: string, value: JSONValue, level?: ISettingRegistry.Level): Promise<void>;
+    set(key: string, value: JSONValue): Promise<void>;
   };
 }
 
@@ -291,16 +287,16 @@ class SettingRegistry {
    *
    * @param key - The name of the setting being removed.
    *
-   * @param level - The setting level. Defaults to `user`.
-   *
    * @returns A promise that resolves when the setting is removed.
    */
-  remove(plugin: string, key: string, level: ISettingRegistry.Level = LEVEL): Promise<void> {
+  remove(plugin: string, key: string): Promise<void> {
     if (!(plugin in this._plugins)) {
       return Promise.resolve(void 0);
     }
 
     const bundle =  this._plugins[plugin].data;
+    const level = 'user';
+
     if (!bundle[level]) {
       return Promise.resolve(void 0);
     }
@@ -319,17 +315,16 @@ class SettingRegistry {
    *
    * @param value - The value of the setting being set.
    *
-   * @param level - The setting level. Defaults to `user`.
-   *
    * @returns A promise that resolves when the setting has been saved.
    *
    */
-  set(plugin: string, key: string, value: JSONValue, level: ISettingRegistry.Level = LEVEL): Promise<void> {
+  set(plugin: string, key: string, value: JSONValue): Promise<void> {
     if (!(plugin in this._plugins)) {
-      return this.load(plugin).then(() => this.set(plugin, key, value, level));
+      return this.load(plugin).then(() => this.set(plugin, key, value));
     }
 
     const bundle = this._plugins[plugin].data;
+    const level = 'user';
 
     if (!bundle[level]) {
       bundle[level] = {};
@@ -464,15 +459,13 @@ class Settings implements ISettingRegistry.ISettings {
    *
    * @param key - The name of the setting being removed.
    *
-   * @param level - The setting level. Defaults to `user`.
-   *
    * @returns A promise that resolves when the setting is removed.
    *
    * #### Notes
    * This function is asynchronous because it writes to the setting registry.
    */
-  remove(key: string, level: ISettingRegistry.Level = LEVEL): Promise<void> {
-    return this.registry.remove(this.plugin, key, level);
+  remove(key: string): Promise<void> {
+    return this.registry.remove(this.plugin, key);
   }
 
   /**
@@ -482,15 +475,13 @@ class Settings implements ISettingRegistry.ISettings {
    *
    * @param value - The value of the setting.
    *
-   * @param level - The setting level. Defaults to `user`.
-   *
    * @returns A promise that resolves when the setting has been saved.
    *
    * #### Notes
    * This function is asynchronous because it writes to the setting registry.
    */
-  set(key: string, value: JSONValue, level: ISettingRegistry.Level = LEVEL): Promise<void> {
-    return this.registry.set(this.plugin, key, value, level);
+  set(key: string, value: JSONValue): Promise<void> {
+    return this.registry.set(this.plugin, key, value);
   }
 
   /**
