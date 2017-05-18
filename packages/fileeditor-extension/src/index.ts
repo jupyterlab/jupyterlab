@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ILayoutRestorer, InstanceTracker, IStateDB
+  ILayoutRestorer, InstanceTracker
 } from '@jupyterlab/apputils';
 
 import {
@@ -69,7 +69,7 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<IEditorTracker> = {
   activate,
   id: 'jupyter.services.editor-tracker',
-  requires: [IDocumentRegistry, ILayoutRestorer, IEditorServices, IStateDB],
+  requires: [IDocumentRegistry, ILayoutRestorer, IEditorServices],
   optional: [ILauncher],
   provides: IEditorTracker,
   autoStart: true
@@ -84,7 +84,7 @@ export default plugin;
 /**
  * Activate the editor tracker plugin.
  */
-function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayoutRestorer, editorServices: IEditorServices, state: IStateDB, launcher: ILauncher | null): IEditorTracker {
+function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayoutRestorer, editorServices: IEditorServices, launcher: ILauncher | null): IEditorTracker {
   const factory = new FileEditorFactory({
     editorServices,
     factoryOptions: {
@@ -94,7 +94,6 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
     }
   });
   const { commands, shell } = app;
-  const id = 'editor:settings';
   const tracker = new InstanceTracker<FileEditor>({
     namespace: 'editor',
     shell
@@ -111,24 +110,17 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   });
 
   // Fetch the initial state of the settings.
-  state.fetch(id).then(settings => {
-    if (!settings) {
-      return;
+  app.settings.load(plugin.id).then(settings => {
+    wordWrap = !!settings.get('wordWrap');
+    if (!wordWrap) {
+      commands.execute(CommandIDs.wordWrap);
     }
-    if (typeof settings['wordWrap'] === 'string') {
-      commands.execute(CommandIDs.wordWrap, settings);
-    }
-    if (typeof settings['lineNumbers'] === 'string') {
-      commands.execute(CommandIDs.lineNumbers, settings);
+
+    lineNumbers = !!settings.get('lineNumbers');
+    if (!lineNumbers) {
+      commands.execute(CommandIDs.lineNumbers);
     }
   });
-
-  /**
-   * Save the editor widget settings state.
-   */
-  function saveState(): Promise<void> {
-    return state.save(id, { lineNumbers, wordWrap });
-  }
 
   factory.widgetCreated.connect((sender, widget) => {
     widget.title.icon = EDITOR_ICON_CLASS;
@@ -157,28 +149,6 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   });
 
   /**
-   * Toggle editor line numbers
-   */
-  function toggleLineNums(args: JSONObject): Promise<void> {
-    lineNumbers = !lineNumbers;
-    tracker.forEach(widget => {
-      widget.editor.lineNumbers = lineNumbers;
-    });
-    return saveState();
-  }
-
-  /**
-   * Toggle editor line wrap
-   */
-  function toggleLineWrap(args: JSONObject): Promise<void> {
-    wordWrap = !wordWrap;
-    tracker.forEach(widget => {
-      widget.editor.wordWrap = wordWrap;
-    });
-    return saveState();
-  }
-
-  /**
    * A test for whether the tracker has an active widget.
    */
   function hasWidget(): boolean {
@@ -201,16 +171,24 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   }
 
   commands.addCommand(CommandIDs.lineNumbers, {
-    execute: toggleLineNums,
+    execute: (): Promise<void> => {
+      lineNumbers = !lineNumbers;
+      tracker.forEach(widget => { widget.editor.lineNumbers = lineNumbers; });
+      return app.settings.set(plugin.id, 'lineNumbers', lineNumbers);
+    },
     isEnabled: hasWidget,
-    isToggled: () => { return lineNumbers; },
+    isToggled: () => lineNumbers,
     label: 'Line Numbers'
   });
 
   commands.addCommand(CommandIDs.wordWrap, {
-    execute: toggleLineWrap,
+    execute: (): Promise<void> => {
+      wordWrap = !wordWrap;
+      tracker.forEach(widget => { widget.editor.wordWrap = wordWrap; });
+      return app.settings.set(plugin.id, 'wordWrap', wordWrap);
+    },
     isEnabled: hasWidget,
-    isToggled: () => { return wordWrap; },
+    isToggled: () => wordWrap,
     label: 'Word Wrap'
   });
 
@@ -256,7 +234,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
         const start = editor.getOffsetAt(selection.start);
         const end = editor.getOffsetAt(selection.end);
         code = editor.model.value.text.substring(start, end);
-        if (start == end) {
+        if (start === end) {
           code = editor.getLine(selection.start.line);
         }
       }
@@ -268,7 +246,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
       };
       // Advance cursor to the next line.
       const cursor = editor.getCursorPosition();
-      if (cursor.line + 1 == editor.lineCount) {
+      if (cursor.line + 1 === editor.lineCount) {
         let text = editor.model.value.text;
         editor.model.value.text = text + '\n';
       }
