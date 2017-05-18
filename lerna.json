@@ -4,7 +4,8 @@
     "jupyterlab",
     "examples/*",
     "packages/*",
-    "packages/services/examples/*",
+    "packages/services/examples/node",
+    "packages/services/examples/browser",
     "test"
   ],
   "version": "independent"
