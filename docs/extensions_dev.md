@@ -82,8 +82,8 @@ jupyter labextension link <path>
 ```
 
 This causes the builder to re-install the source folder before building
-the application files.  You can also link other npm packages that
-you are working on simultaneously; they will be re-installed but not
+the application files.  You can re-build at any time using `jupyter lab build` and it will reinstall these packages.  You can also link other npm packages 
+that you are working on simultaneously; they will be re-installed but not
 considered as extensions if they lack the metadata.
 
 You can see the list of linked extensions using:

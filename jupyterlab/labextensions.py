@@ -52,7 +52,14 @@ class InstallLabExtensionApp(BaseExtensionApp):
 
 
 class LinkLabExtensionApp(BaseExtensionApp):
-    description = "Link labextension(s)"
+    description = """
+    Link labextension(s) or packages.
+
+    Links a package to the JupyterLab build process.  If the package is
+    an extension, it will also be installed as an extension.  A linked
+    package is manually re-installed from its source location when
+    `jupyter lab build` is run.
+    """
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
@@ -62,7 +69,7 @@ class LinkLabExtensionApp(BaseExtensionApp):
 
 
 class UnlinkLabExtensionApp(BaseExtensionApp):
-    description = "Unlink labextension(s)"
+    description = "Unlink labextension(s) or packages by name or path"
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
@@ -73,7 +80,7 @@ class UnlinkLabExtensionApp(BaseExtensionApp):
 
 
 class UninstallLabExtensionApp(BaseExtensionApp):
-    description = "Uninstall labextension(s)"
+    description = "Uninstall labextension(s) by name"
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
@@ -84,7 +91,7 @@ class UninstallLabExtensionApp(BaseExtensionApp):
 
 
 class ListLabExtensionsApp(BaseExtensionApp):
-    description = "List the installed labextension"
+    description = "List the installed labextensions"
     should_build = False
 
     def start(self):

@@ -11,14 +11,6 @@ export PATH="$HOME/miniconda/bin:$PATH"
 
 
 if [[ $GROUP == tests ]]; then
-    # Make sure we can successfully load the core app.
-    pip install selenium
-    python -m jupyterlab.selenium_check --core-mode
-
-    # Make sure we can build and run the app.
-    jupyter lab build
-    python -m jupyterlab.selenium_check 
-    jupyter labextension list
 
     # Run the JS and python tests
     py.test
@@ -64,4 +56,39 @@ if [[ $GROUP == coverage_and_docs ]]; then
     make html
     source deactivate
     popd
+fi
+
+
+if [[ $GROUP == cli ]]; then
+    # Make sure we can successfully load the core app.
+    pip install selenium
+    python -m jupyterlab.selenium_check --core-mode
+
+    # Make sure we can build and run the app.
+    jupyter lab build
+    python -m jupyterlab.selenium_check 
+    jupyter labextension list
+
+    # Test the cli apps.
+    jupyter lab clean
+    jupyter lab build
+    jupyter lab path
+    jupyter labextension link jupyterlab/tests/mockextension --no-build
+    jupyter labextension unlink jupyterlab/tests/mockextension --no-build
+    jupyter labextension link jupyterlab/tests/mockextension --no-build
+    jupyter labextension unlink  @jupyterlab/python-tests --no-build
+    jupyter labextension install jupyterlab/tests/mockextension  --no-build
+    jupyter labextension list
+    jupyter labextension uninstall @jupyterlab/python-tests
+
+    # Make sure we can call help on all the cli apps.
+    jupyter lab -h 
+    jupyter lab build -h 
+    jupyter lab clean -h
+    jupyter lab path -h 
+    jupyter labextension link -h
+    jupyter labextension unlink -h
+    jupyter labextension install -h 
+    jupyter labextension uninstall -h 
+    jupyter labextension list -h
 fi
