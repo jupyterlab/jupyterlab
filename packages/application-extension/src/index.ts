@@ -180,6 +180,7 @@ namespace Private {
         try {
           result.data[level] = JSON.parse(files[index].content);
         } catch (error) {
+          console.log('content', files[index].content);
           console.warn(`Error parsing ${id} ${level} settings`, error);
           result.data[level] = null;
         }
@@ -194,42 +195,41 @@ namespace Private {
    */
   export
   function setDB(app: JupyterLab, manager: IDocumentManager): void {
-    app.settings.setDB({
-      fetch: (id: string): Promise<ISettingRegistry.IPlugin> => {
-        const name = `${id}${extension}`;
+    function fetch(id: string): Promise<ISettingRegistry.IPlugin> {
+      const name = `${id}${extension}`;
 
-        return manager.services.ready.then(() => {
-          const requests = Promise.all(levels.map(level => {
-            const path = PathExt.resolve(root, folder, level, name);
+      return manager.services.ready.then(() => {
+        const requests = Promise.all(levels.map(level => {
+          const path = PathExt.resolve(root, folder, level, name);
 
-            return manager.services.contents.get(path).catch(() => null);
-          }));
+          return manager.services.contents.get(path).catch(() => null);
+        }));
 
-          return requests.then(files => fileHandler(id, files));
-        });
-      },
-      remove: (id: string): Promise<void> => {
-        return Promise.reject(new Error('remove not implemented'));
-      },
-      save: (id: string, value: ISettingRegistry.IPlugin): Promise<ISettingRegistry.IPlugin> => {
-        const name = `${id}${extension}`;
+        return requests.then(files => fileHandler(id, files));
+      });
+    }
 
-        return manager.services.ready.then(() => {
-          const format = 'text';
-          const type = 'file';
-          const requests = Promise.all(levels.map(level => {
-            const content = JSON.stringify(value.data[level]);
-            const path = PathExt.resolve(root, folder, level, name);
+    function remove(id: string): Promise<void> {
+      return Promise.reject(new Error('remove not implemented'));
+    }
 
-            return manager.services.contents.save(path, {
-              content, format, name, path, type
-            }).catch(() => null);
-          }));
+    function save(id: string, value: ISettingRegistry.IPlugin): Promise<ISettingRegistry.IPlugin> {
+      const name = `${id}${extension}`;
+      const format = 'text';
+      const type = 'file';
+      const level = 'user';
+      const path = PathExt.resolve(root, folder, level, name);
 
-          return requests.then(files => fileHandler(id, files));
-        });
-      }
-    });
+      return manager.services.ready.then(() => {
+        const content = JSON.stringify(value.data[level]);
+
+        return manager.services.contents.save(path, {
+          content, format, name, path, type
+        }).then(() => fetch(id));
+      });
+    }
+
+    app.settings.setDB({ fetch, remove, save });
   }
 }
 
