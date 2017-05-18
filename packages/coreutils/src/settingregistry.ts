@@ -105,6 +105,11 @@ namespace ISettingRegistry {
   export
   interface ISettings extends IDisposable {
     /**
+     * A signal that emits when the plugin's settings have changed.
+     */
+    readonly changed: ISignal<this, void>;
+
+    /**
      * The plugin name.
      */
     readonly plugin: string;
@@ -449,7 +454,8 @@ class Settings implements ISettingRegistry.ISettings {
    * plugin settings that is synchronized with the registry.
    */
   get(key: string, level: ISettingRegistry.Level = LEVEL): JSONValue {
-    const data = this._content.data;
+    const { data } = this._content;
+
     return data[level] && data[level][key];
   }
 
