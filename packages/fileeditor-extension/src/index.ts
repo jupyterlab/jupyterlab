@@ -18,7 +18,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  IEditorTracker, FileEditor, FileEditorFactory
+  FileEditor, FileEditorFactory, IEditorTracker
 } from '@jupyterlab/fileeditor';
 
 import {
