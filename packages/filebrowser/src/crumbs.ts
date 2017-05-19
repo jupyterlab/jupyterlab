@@ -347,6 +347,8 @@ namespace Private {
       node.removeChild(node.firstChild.nextSibling);
     }
 
+    let localPath = path.split(':').pop();
+    let localParts = localPath.split('/');
     let parts = path.split('/');
     if (parts.length > 2) {
       node.appendChild(separators[0]);
@@ -358,13 +360,13 @@ namespace Private {
     if (path) {
       if (parts.length >= 2) {
         node.appendChild(separators[1]);
-        breadcrumbs[Crumb.Parent].textContent = parts[parts.length - 2];
+        breadcrumbs[Crumb.Parent].textContent = localParts[localParts.length - 2];
         node.appendChild(breadcrumbs[Crumb.Parent]);
         let parent = parts.slice(0, parts.length - 1).join('/');
         breadcrumbs[Crumb.Parent].title = parent;
       }
       node.appendChild(separators[2]);
-      breadcrumbs[Crumb.Current].textContent = parts[parts.length - 1];
+      breadcrumbs[Crumb.Current].textContent = localParts[localParts.length - 1];
       node.appendChild(breadcrumbs[Crumb.Current]);
       breadcrumbs[Crumb.Current].title = path;
     }
