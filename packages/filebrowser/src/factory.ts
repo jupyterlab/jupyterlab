@@ -97,6 +97,13 @@ namespace IFileBrowserFactory {
     documentManager?: IDocumentManager;
 
     /**
+     * An optional `Contents.IDrive` name for the model.
+     * If given, the model will prepend `driveName:` to
+     * all paths used in file operations.
+     */
+    driveName?: string;
+
+    /**
      * The state database to use for saving file browser state and restoring it.
      *
      * #### Notes
