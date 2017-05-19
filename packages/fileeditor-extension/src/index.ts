@@ -85,6 +85,8 @@ export default plugin;
  * Activate the editor tracker plugin.
  */
 function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayoutRestorer, editorServices: IEditorServices, launcher: ILauncher | null): IEditorTracker {
+  const id = plugin.id;
+  const namespace = 'editor';
   const factory = new FileEditorFactory({
     editorServices,
     factoryOptions: {
@@ -93,11 +95,9 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
       defaultFor: ['*']
     }
   });
-  const { commands, shell } = app;
-  const tracker = new InstanceTracker<FileEditor>({
-    namespace: 'editor',
-    shell
-  });
+  const { commands, settings, shell, restored } = app;
+  const tracker = new InstanceTracker<FileEditor>({ namespace, shell });
+  const hasWidget = () => tracker.currentWidget !== null;
 
   let lineNumbers = true;
   let wordWrap = true;
@@ -110,16 +110,17 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   });
 
   // Fetch the initial state of the settings.
-  app.settings.load(plugin.id).then(settings => {
-    wordWrap = !!settings.get('wordWrap');
-    if (!wordWrap) {
-      commands.execute(CommandIDs.wordWrap);
-    }
+  Promise.all([settings.load(id), restored]).then(([settings]) => {
+    let cached = settings.get('lineNumbers') as boolean | null;
+    lineNumbers = cached === null ? lineNumbers : cached as boolean;
 
-    lineNumbers = !!settings.get('lineNumbers');
-    if (!lineNumbers) {
-      commands.execute(CommandIDs.lineNumbers);
-    }
+    cached = settings.get('wordWrap') as boolean | null;
+    wordWrap = cached === null ? wordWrap : cached as boolean;
+
+    tracker.forEach(widget => {
+      widget.editor.lineNumbers = lineNumbers;
+      widget.editor.wordWrap = wordWrap;
+    });
   });
 
   factory.widgetCreated.connect((sender, widget) => {
@@ -132,9 +133,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   });
   registry.addWidgetFactory(factory);
 
-  /**
-   * Handle the settings of new widgets.
-   */
+  // Handle the settings of new widgets.
   tracker.widgetAdded.connect((sender, widget) => {
     let editor = widget.editor;
     editor.lineNumbers = lineNumbers;
@@ -149,13 +148,8 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   });
 
   /**
-   * A test for whether the tracker has an active widget.
+   * Detect if there is a selection.
    */
-  function hasWidget(): boolean {
-    return tracker.currentWidget !== null;
-  }
-
-  /** To detect if there is no current selection */
   function hasSelection(): boolean {
     let widget = tracker.currentWidget;
     if (!widget) {
@@ -171,10 +165,10 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   }
 
   commands.addCommand(CommandIDs.lineNumbers, {
-    execute: (): Promise<void> => {
+    execute: (args: JSONObject): Promise<void> => {
       lineNumbers = !lineNumbers;
       tracker.forEach(widget => { widget.editor.lineNumbers = lineNumbers; });
-      return app.settings.set(plugin.id, 'lineNumbers', lineNumbers);
+      return settings.set(id, 'lineNumbers', lineNumbers);
     },
     isEnabled: hasWidget,
     isToggled: () => lineNumbers,
@@ -182,10 +176,10 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   });
 
   commands.addCommand(CommandIDs.wordWrap, {
-    execute: (): Promise<void> => {
+    execute: (args: JSONObject): Promise<void> => {
       wordWrap = !wordWrap;
       tracker.forEach(widget => { widget.editor.wordWrap = wordWrap; });
-      return app.settings.set(plugin.id, 'wordWrap', wordWrap);
+      return settings.set(id, 'wordWrap', wordWrap);
     },
     isEnabled: hasWidget,
     isToggled: () => wordWrap,
