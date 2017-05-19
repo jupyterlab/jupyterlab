@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  URLExt
+  URLExt, PathExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -588,7 +588,10 @@ class ContentsManager implements Contents.IManager {
     if (options.path) {
       let [drive, localPath] = this._driveForPath(options.path);
       return drive.newUntitled({ ...options, path: localPath }).then( contentsModel => {
-        return { ...contentsModel, path: options.path } as Contents.IModel;
+        return {
+          ...contentsModel,
+          path: PathExt.join(options.path, contentsModel.name)
+        } as Contents.IModel;
       });
     } else {
       return this._defaultDrive.newUntitled(options);
