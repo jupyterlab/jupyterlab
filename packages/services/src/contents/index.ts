@@ -10,6 +10,10 @@ import {
 } from '@phosphor/coreutils';
 
 import {
+  each 
+} from '@phosphor/algorithm';
+
+import {
   IDisposable
 } from '@phosphor/disposable';
 
@@ -207,14 +211,14 @@ namespace Contents {
   export
   interface IManager extends IDisposable {
     /**
-     * The server settings of the manager.
-     */
-    readonly serverSettings: ServerConnection.ISettings;
-
-    /**
      * A signal emitted when a file operation takes place.
      */
     fileChanged: ISignal<IManager, IChangedArgs>;
+
+    /**
+     * Add an `IDrive` to the manager.
+     */
+    addDrive(drive: IDrive): void;
 
     /**
      * Get a file or directory.
@@ -332,11 +336,153 @@ namespace Contents {
      */
     deleteCheckpoint(path: string, checkpointID: string): Promise<void>;
   }
+
+  /**
+   * The interface for a network drive that can be mounted
+   * in the contents manager.
+   */
+  export
+  interface IDrive extends IDisposable {
+    /**
+     * The name of the drive, which is used at the leading
+     * component of file paths.
+     */
+    readonly name: string;
+
+    /**
+     * The server settings of the manager.
+     */
+    readonly serverSettings: ServerConnection.ISettings;
+
+    /**
+     * A signal emitted when a file operation takes place.
+     */
+    fileChanged: ISignal<IDrive, IChangedArgs>;
+
+    /**
+     * Get a file or directory.
+     *
+     * @param localPath: The path to the file.
+     *
+     * @param options: The options used to fetch the file.
+     *
+     * @returns A promise which resolves with the file content.
+     */
+    get(localPath: string, options?: IFetchOptions): Promise<IModel>;
+
+    /**
+     * Get an encoded download url given a file path.
+     *
+     * @param A promise which resolves with the absolute POSIX
+     *   file path on the server.
+     */
+    getDownloadUrl(localPath: string): Promise<string>;
+
+    /**
+     * Create a new untitled file or directory in the specified directory path.
+     *
+     * @param options: The options used to create the file.
+     *
+     * @returns A promise which resolves with the created file content when the
+     *    file is created.
+     */
+    newUntitled(options?: ICreateOptions): Promise<IModel>;
+
+    /**
+     * Delete a file.
+     *
+     * @param localPath - The path to the file.
+     *
+     * @returns A promise which resolves when the file is deleted.
+     */
+    delete(localPath: string): Promise<void>;
+
+    /**
+     * Rename a file or directory.
+     *
+     * @param oldLocalPath - The original file path.
+     *
+     * @param newLocalPath - The new file path.
+     *
+     * @returns A promise which resolves with the new file content model when the
+     *   file is renamed.
+     */
+    rename(oldLocalPath: string, newLocalPath: string): Promise<IModel>;
+
+    /**
+     * Save a file.
+     *
+     * @param localPath - The desired file path.
+     *
+     * @param options - Optional overrrides to the model.
+     *
+     * @returns A promise which resolves with the file content model when the
+     *   file is saved.
+     */
+    save(localPath: string, options?: IModel): Promise<IModel>;
+
+    /**
+     * Copy a file into a given directory.
+     *
+     * @param localPath - The original file path.
+     *
+     * @param toLocalDir - The destination directory path.
+     *
+     * @returns A promise which resolves with the new content model when the
+     *  file is copied.
+     */
+    copy(localPath: string, toLocalDir: string): Promise<IModel>;
+
+    /**
+     * Create a checkpoint for a file.
+     *
+     * @param localPath - The path of the file.
+     *
+     * @returns A promise which resolves with the new checkpoint model when the
+     *   checkpoint is created.
+     */
+    createCheckpoint(localPath: string): Promise<IModel>;
+
+    /**
+     * List available checkpoints for a file.
+     *
+     * @param localPath - The path of the file.
+     *
+     * @returns A promise which resolves with a list of checkpoint models for
+     *    the file.
+     */
+    listCheckpoints(localPath: string): Promise<ICheckpointModel[]>;
+
+    /**
+     * Restore a file to a known checkpoint state.
+     *
+     * @param localPath - The path of the file.
+     *
+     * @param checkpointID - The id of the checkpoint to restore.
+     *
+     * @returns A promise which resolves when the checkpoint is restored.
+     */
+    restoreCheckpoint(localPath: string, checkpointID: string): Promise<void>;
+
+    /**
+     * Delete a checkpoint for a file.
+     *
+     * @param localPath - The path of the file.
+     *
+     * @param checkpointID - The id of the checkpoint to delete.
+     *
+     * @returns A promise which resolves when the checkpoint is deleted.
+     */
+    deleteCheckpoint(localPath: string, checkpointID: string): Promise<void>;
+  }
 }
 
 
 /**
  * A contents manager that passes file operations to the server.
+ * Multiple servers implementing the `IDrive` interface can be
+ * attached to the contents manager, so that the same session can
+ * perform file operations on multiple backends.
  *
  * This includes checkpointing with the normal file operations.
  */
@@ -348,8 +494,330 @@ class ContentsManager implements Contents.IManager {
    * @param options - The options used to initialize the object.
    */
   constructor(options: ContentsManager.IOptions = {}) {
-    this.serverSettings = options.serverSettings || ServerConnection.makeSettings();
+    this._defaultDrive = options.defaultDrive || new Drive();
+    this._defaultDrive.fileChanged.connect(this._onFileChanged, this);
   }
+
+  /**
+   * A signal emitted when a file operation takes place.
+   */
+  get fileChanged(): ISignal<this, Contents.IChangedArgs> {
+    return this._fileChanged;
+  }
+
+  /**
+   * Test whether the manager has been disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose of the resources held by the manager.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    Signal.clearData(this);
+  }
+
+
+  /**
+   * Add an `IDrive` to the manager.
+   */
+  addDrive(drive: Contents.IDrive): void {
+    this._additionalDrives.set(drive.name, drive);
+    drive.fileChanged.connect(this._onFileChanged, this);
+  }
+
+  /**
+   * Get a file or directory.
+   *
+   * @param path: The path to the file.
+   *
+   * @param options: The options used to fetch the file.
+   *
+   * @returns A promise which resolves with the file content.
+   */
+  get(path: string, options?: Contents.IFetchOptions): Promise<Contents.IModel> {
+    let [drive, localPath] = this._driveForPath(path);
+    return drive.get(localPath, options).then( contentsModel => {
+      let listing: Contents.IModel[] = [];
+      if (contentsModel.type === 'directory') {
+        each(contentsModel.content, (item: Contents.IModel) => {
+          listing.push({
+            path: this._toGlobalPath(drive, item.path),
+            ...item
+          } as Contents.IModel);
+        });
+        return {
+          path: path,
+          content: listing,
+          ...contentsModel
+        } as Contents.IModel;
+      } else {
+        return { path: path, ...contentsModel } as Contents.IModel;
+      }
+    }); 
+  }
+
+  /**
+   * Get an encoded download url given a file path.
+   *
+   * @param path - An absolute POSIX file path on the server.
+   *
+   * #### Notes
+   * It is expected that the path contains no relative paths.
+   */
+  getDownloadUrl(path: string): Promise<string> {
+    let [drive, localPath] = this._driveForPath(path);
+    return drive.getDownloadUrl(localPath);
+  }
+
+  /**
+   * Create a new untitled file or directory in the specified directory path.
+   *
+   * @param options: The options used to create the file.
+   *
+   * @returns A promise which resolves with the created file content when the
+   *    file is created.
+   */
+  newUntitled(options: Contents.ICreateOptions = {}): Promise<Contents.IModel> {
+    if (options.path) {
+      let [drive, localPath] = this._driveForPath(options.path);
+      return drive.newUntitled({path: localPath, ...options}).then( contentsModel => {
+        return { path: options.path, ...contentsModel } as Contents.IModel;
+      });
+    } else {
+      return this._defaultDrive.newUntitled(options);
+    }
+  }
+
+  /**
+   * Delete a file.
+   *
+   * @param path - The path to the file.
+   *
+   * @returns A promise which resolves when the file is deleted.
+   */
+  delete(path: string): Promise<void> {
+    let [drive, localPath] = this._driveForPath(path);
+    return drive.delete(localPath);
+  }
+
+  /**
+   * Rename a file or directory.
+   *
+   * @param path - The original file path.
+   *
+   * @param newPath - The new file path.
+   *
+   * @returns A promise which resolves with the new file contents model when
+   *   the file is renamed.
+   */
+  rename(path: string, newPath: string): Promise<Contents.IModel> {
+    let [drive1, path1] = this._driveForPath(path);
+    let [drive2, path2] = this._driveForPath(newPath);
+    if (drive1 !== drive2) {
+      throw Error('ContentsManager: renaming files must occur within a Drive');
+    }
+    return drive1.rename(path1, path2).then(contentsModel => {
+      return { path: path, ...contentsModel } as Contents.IModel;
+    });
+  }
+
+  /**
+   * Save a file.
+   *
+   * @param path - The desired file path.
+   *
+   * @param options - Optional overrides to the model.
+   *
+   * @returns A promise which resolves with the file content model when the
+   *   file is saved.
+   *
+   * #### Notes
+   * Ensure that `model.content` is populated for the file.
+   */
+  save(path: string, options: Contents.IModel = {}): Promise<Contents.IModel> {
+    let [drive, localPath] = this._driveForPath(path);
+    return drive.save(localPath, {path: localPath, ...options}).then(contentsModel => {
+      return {path: path, ...contentsModel} as Contents.IModel;
+    });
+  }
+
+  /**
+   * Copy a file into a given directory.
+   *
+   * @param path - The original file path.
+   *
+   * @param toDir - The destination directory path.
+   *
+   * @returns A promise which resolves with the new contents model when the
+   *  file is copied.
+   *
+   * #### Notes
+   * The server will select the name of the copied file.
+   */
+  copy(fromFile: string, toDir: string): Promise<Contents.IModel> {
+    let [drive1, path1] = this._driveForPath(fromFile);
+    let [drive2, path2] = this._driveForPath(toDir);
+    if (drive1 === drive2) {
+      return drive1.copy(path1, path2).then(contentsModel => {
+        return {
+          path: this._toGlobalPath(drive1, contentsModel.path),
+          ...contentsModel
+        } as Contents.IModel;
+      });
+    } else {
+      //TODO
+      return drive1.get(path1);
+    }
+  }
+
+  /**
+   * Create a checkpoint for a file.
+   *
+   * @param path - The path of the file.
+   *
+   * @returns A promise which resolves with the new checkpoint model when the
+   *   checkpoint is created.
+   */
+  createCheckpoint(path: string): Promise<Contents.ICheckpointModel> {
+    let [drive, localPath] = this._driveForPath(path);
+    return drive.createCheckpoint(localPath);
+  }
+
+  /**
+   * List available checkpoints for a file.
+   *
+   * @param path - The path of the file.
+   *
+   * @returns A promise which resolves with a list of checkpoint models for
+   *    the file.
+   */
+  listCheckpoints(path: string): Promise<Contents.ICheckpointModel[]> {
+    let [drive, localPath] = this._driveForPath(path);
+    return drive.listCheckpoints(localPath);
+  }
+
+  /**
+   * Restore a file to a known checkpoint state.
+   *
+   * @param path - The path of the file.
+   *
+   * @param checkpointID - The id of the checkpoint to restore.
+   *
+   * @returns A promise which resolves when the checkpoint is restored.
+   */
+  restoreCheckpoint(path: string, checkpointID: string): Promise<void> {
+    let [drive, localPath] = this._driveForPath(path);
+    return drive.restoreCheckpoint(localPath, checkpointID);
+  }
+
+  /**
+   * Delete a checkpoint for a file.
+   *
+   * @param path - The path of the file.
+   *
+   * @param checkpointID - The id of the checkpoint to delete.
+   *
+   * @returns A promise which resolves when the checkpoint is deleted.
+   */
+  deleteCheckpoint(path: string, checkpointID: string): Promise<void> {
+    let [drive, localPath] = this._driveForPath(path);
+    return drive.deleteCheckpoint(localPath, checkpointID);
+  }
+
+  /**
+   * Given a drive and a local path, construct a fully qualified
+   * path. The inverse of `_driveForPath`.
+   *
+   * @param drive: an `IDrive`.
+   *
+   * @param localPath: the local path on the drive.
+   *
+   * @returns the fully qualified path.
+   */
+  private _toGlobalPath(drive: Contents.IDrive, localPath: string): string {
+    return drive.name + ':' + localPath;
+  }
+
+  /**
+   * Given a path, get the `IDrive to which it refers,
+   * where the path satisfies the pattern
+   * `'driveName:path/to/file'`. If there is no `driveName`
+   * prepended to the path, it returns the default drive.
+   *
+   * @param path: a path to a file.
+   *
+   * @returns A tuple containing an `IDrive` object for the path,
+   * and a local path for that drive.
+   */
+  private _driveForPath(path: string): [Contents.IDrive, string] {
+    // Split the path at ':'
+    let parts = path.split(':')
+    if (parts.length === 1) {
+      return [this._defaultDrive, path]
+    } else {
+      let drive = this._additionalDrives.get(parts[0]);
+      if (!drive) {
+        throw Error('ContentsManager: cannot find requested drive');
+      }
+      return [drive, parts[1]];
+    }
+  }
+  private _onFileChanged(sender: Contents.IDrive, args: Contents.IChangedArgs) {
+    if (sender === this._defaultDrive) {
+      this._fileChanged.emit(args);
+    } else {
+      let newValue: Contents.IModel = null;
+      let oldValue: Contents.IModel = null;
+      if (args.newValue) {
+        newValue = { path: args.newValue.path, ...args.newValue };
+      }
+      if (args.oldValue) {
+        oldValue = { path: args.oldValue.path, ...args.oldValue };
+      }
+      this._fileChanged.emit({
+        type: args.type,
+        newValue,
+        oldValue
+      });
+    }
+  }
+
+  private _isDisposed = false;
+  private _additionalDrives = new Map<string, Contents.IDrive>();
+  private _defaultDrive: Contents.IDrive = null;
+
+  private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
+}
+
+
+/**
+ * A default implementation for an `IDrive`, talking to the
+ * server using the Jupyter REST API.
+ */
+export
+class Drive implements Contents.IDrive {
+  /**
+   * Construct a new contents manager object.
+   *
+   * @param options - The options used to initialize the object.
+   */
+  constructor(options: Drive.IOptions = {}) {
+    this.serverSettings = options.serverSettings || ServerConnection.makeSettings();
+    this.name = 'Default'
+  }
+
+  /**
+   * The name of the drive, which is used at the leading
+   * component of file paths.
+   */
+  readonly name: string;
 
   /**
    * A signal emitted when a file operation takes place.
@@ -384,7 +852,7 @@ class ContentsManager implements Contents.IManager {
   /**
    * Get a file or directory.
    *
-   * @param path: The path to the file.
+   * @param localPath: The path to the file.
    *
    * @param options: The options used to fetch the file.
    *
@@ -392,8 +860,8 @@ class ContentsManager implements Contents.IManager {
    *
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents) and validates the response model.
    */
-  get(path: string, options?: Contents.IFetchOptions): Promise<Contents.IModel> {
-    let url = this._getUrl(path);
+  get(localPath: string, options?: Contents.IFetchOptions): Promise<Contents.IModel> {
+    let url = this._getUrl(localPath);
     if (options) {
       // The notebook type cannot take an format option.
       if (options.type === 'notebook') {
@@ -425,15 +893,15 @@ class ContentsManager implements Contents.IManager {
   /**
    * Get an encoded download url given a file path.
    *
-   * @param path - An absolute POSIX file path on the server.
+   * @param localPath - An absolute POSIX file path on the server.
    *
    * #### Notes
    * It is expected that the path contains no relative paths.
    */
-  getDownloadUrl(path: string): Promise<string> {
+  getDownloadUrl(localPath: string): Promise<string> {
     let baseUrl = this.serverSettings.baseUrl;
     return Promise.resolve(URLExt.join(baseUrl, FILES_URL,
-                           URLExt.encodeParts(path)));
+                           URLExt.encodeParts(localPath)));
   }
 
   /**
@@ -482,16 +950,16 @@ class ContentsManager implements Contents.IManager {
   /**
    * Delete a file.
    *
-   * @param path - The path to the file.
+   * @param localPath - The path to the file.
    *
    * @returns A promise which resolves when the file is deleted.
    *
    * #### Notes
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents).
    */
-  delete(path: string): Promise<void> {
+  delete(localPath: string): Promise<void> {
     let request = {
-      url: this._getUrl(path),
+      url: this._getUrl(localPath),
       method: 'DELETE'
     };
     return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
@@ -500,7 +968,7 @@ class ContentsManager implements Contents.IManager {
       }
       this._fileChanged.emit({
         type: 'delete',
-        oldValue: { path },
+        oldValue: { path: localPath },
         newValue: null
       });
     }, error => {
@@ -521,9 +989,9 @@ class ContentsManager implements Contents.IManager {
   /**
    * Rename a file or directory.
    *
-   * @param path - The original file path.
+   * @param oldLocalPath - The original file path.
    *
-   * @param newPath - The new file path.
+   * @param newLocalPath - The new file path.
    *
    * @returns A promise which resolves with the new file contents model when
    *   the file is renamed.
@@ -531,11 +999,11 @@ class ContentsManager implements Contents.IManager {
    * #### Notes
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents) and validates the response model.
    */
-  rename(path: string, newPath: string): Promise<Contents.IModel> {
+  rename(oldLocalPath: string, newLocalPath: string): Promise<Contents.IModel> {
     let request = {
-      url: this._getUrl(path),
+      url: this._getUrl(oldLocalPath),
       method: 'PATCH',
-      data: JSON.stringify({ path: newPath })
+      data: JSON.stringify({ localPath: newLocalPath })
     };
     return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
       if (response.xhr.status !== 200) {
@@ -549,7 +1017,7 @@ class ContentsManager implements Contents.IManager {
       }
       this._fileChanged.emit({
         type: 'rename',
-        oldValue: { path },
+        oldValue: { path: oldLocalPath },
         newValue: data
       });
       return data;
@@ -559,7 +1027,7 @@ class ContentsManager implements Contents.IManager {
   /**
    * Save a file.
    *
-   * @param path - The desired file path.
+   * @param localPath - The desired file path.
    *
    * @param options - Optional overrides to the model.
    *
@@ -571,9 +1039,9 @@ class ContentsManager implements Contents.IManager {
    *
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents) and validates the response model.
    */
-  save(path: string, options: Contents.IModel = {}): Promise<Contents.IModel> {
+  save(localPath: string, options: Contents.IModel = {}): Promise<Contents.IModel> {
     let request = {
-      url: this._getUrl(path),
+      url: this._getUrl(localPath),
       method: 'PUT',
       cache: false,
       data: JSON.stringify(options)
@@ -601,7 +1069,7 @@ class ContentsManager implements Contents.IManager {
   /**
    * Copy a file into a given directory.
    *
-   * @param path - The original file path.
+   * @param localPath - The original file path.
    *
    * @param toDir - The destination directory path.
    *
@@ -641,7 +1109,7 @@ class ContentsManager implements Contents.IManager {
   /**
    * Create a checkpoint for a file.
    *
-   * @param path - The path of the file.
+   * @param localPath - The path of the file.
    *
    * @returns A promise which resolves with the new checkpoint model when the
    *   checkpoint is created.
@@ -649,9 +1117,9 @@ class ContentsManager implements Contents.IManager {
    * #### Notes
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents) and validates the response model.
    */
-  createCheckpoint(path: string): Promise<Contents.ICheckpointModel> {
+  createCheckpoint(localPath: string): Promise<Contents.ICheckpointModel> {
     let request = {
-      url: this._getUrl(path, 'checkpoints'),
+      url: this._getUrl(localPath, 'checkpoints'),
       method: 'POST'
     };
     return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
@@ -671,7 +1139,7 @@ class ContentsManager implements Contents.IManager {
   /**
    * List available checkpoints for a file.
    *
-   * @param path - The path of the file.
+   * @param localPath - The path of the file.
    *
    * @returns A promise which resolves with a list of checkpoint models for
    *    the file.
@@ -679,9 +1147,9 @@ class ContentsManager implements Contents.IManager {
    * #### Notes
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents) and validates the response model.
    */
-  listCheckpoints(path: string): Promise<Contents.ICheckpointModel[]> {
+  listCheckpoints(localPath: string): Promise<Contents.ICheckpointModel[]> {
     let request = {
-      url: this._getUrl(path, 'checkpoints'),
+      url: this._getUrl(localPath, 'checkpoints'),
       method: 'GET',
       cache: false
     };
@@ -706,7 +1174,7 @@ class ContentsManager implements Contents.IManager {
   /**
    * Restore a file to a known checkpoint state.
    *
-   * @param path - The path of the file.
+   * @param localPath - The path of the file.
    *
    * @param checkpointID - The id of the checkpoint to restore.
    *
@@ -715,9 +1183,9 @@ class ContentsManager implements Contents.IManager {
    * #### Notes
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents).
    */
-  restoreCheckpoint(path: string, checkpointID: string): Promise<void> {
+  restoreCheckpoint(localPath: string, checkpointID: string): Promise<void> {
     let request = {
-      url: this._getUrl(path, 'checkpoints', checkpointID),
+      url: this._getUrl(localPath, 'checkpoints', checkpointID),
       method: 'POST'
     };
     return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
@@ -731,7 +1199,7 @@ class ContentsManager implements Contents.IManager {
   /**
    * Delete a checkpoint for a file.
    *
-   * @param path - The path of the file.
+   * @param localPath - The path of the file.
    *
    * @param checkpointID - The id of the checkpoint to delete.
    *
@@ -740,9 +1208,9 @@ class ContentsManager implements Contents.IManager {
    * #### Notes
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents).
    */
-  deleteCheckpoint(path: string, checkpointID: string): Promise<void> {
+  deleteCheckpoint(localPath: string, checkpointID: string): Promise<void> {
     let request = {
-      url: this._getUrl(path, 'checkpoints', checkpointID),
+      url: this._getUrl(localPath, 'checkpoints', checkpointID),
       method: 'DELETE'
     };
     return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
@@ -774,6 +1242,23 @@ export
 namespace ContentsManager {
   /**
    * The options used to intialize a contents manager.
+   */
+  export
+  interface IOptions {
+    /**
+     * The default drive backend for the contents manager.
+     */
+    defaultDrive?: Contents.IDrive;
+  }
+}
+
+/**
+ * A namespace for Drive statics.
+ */
+export
+namespace Drive {
+  /**
+   * The options used to intialize a `Drive`.
    */
   export
   interface IOptions {
