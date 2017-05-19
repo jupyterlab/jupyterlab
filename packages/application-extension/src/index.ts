@@ -6,20 +6,12 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, showDialog
+  Dialog, ICommandPalette, showDialog, StateDB
 } from '@jupyterlab/apputils';
 
 import {
-  ISettingRegistry, PageConfig, PathExt
+  PageConfig
 } from '@jupyterlab/coreutils';
-
-import {
-  IDocumentManager
-} from '@jupyterlab/docmanager';
-
-import {
-  Contents
-} from '@jupyterlab/services';
 
 
 /**
@@ -48,9 +40,9 @@ namespace CommandIDs {
  */
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.main',
-  requires: [ICommandPalette, IDocumentManager],
-  activate: (app: JupyterLab, palette: ICommandPalette, manager: IDocumentManager) => {
-    Private.setDB(app, manager);
+  requires: [ICommandPalette],
+  activate: (app: JupyterLab, palette: ICommandPalette) => {
+    app.settings.setDB(new StateDB({ namespace: 'jupyter.db.settings' }));
     app.settings.load(plugin.id).then(settings => {
       console.log(settings.plugin, settings);
     }).catch(reason => {
@@ -143,93 +135,3 @@ const plugin: JupyterLabPlugin<void> = {
  * Export the plugin as default.
  */
 export default plugin;
-
-
-/**
- * A namespace for private module data.
- */
-namespace Private {
-  /**
-   * The settings folder.
-   */
-  const folder = '.settings';
-
-  /**
-   * The settings file extension.
-   */
-  const extension = PathExt.normalizeExtension('json');
-
-  /**
-   * The setting registry levels.
-   */
-  const levels: ISettingRegistry.Level[] = ['system', 'user'];
-
-  /**
-   * The settings base path.
-   */
-  const root = '/';
-
-  /**
-   * Process a list of files into a setting registry plugin.
-   */
-  function fileHandler(id: string, files: Contents.IModel[]): ISettingRegistry.IPlugin {
-    const result: ISettingRegistry.IPlugin = { id, data: {} };
-
-    levels.forEach((level, index) => {
-      if (files[index]) {
-        try {
-          result.data[level] = JSON.parse(files[index].content);
-        } catch (error) {
-          console.log('content', files[index].content);
-          console.warn(`Error parsing ${id} ${level} settings`, error);
-          result.data[level] = null;
-        }
-      }
-    });
-
-    return result;
-  }
-
-  /**
-   * Set the datastore for the application setting registry.
-   */
-  export
-  function setDB(app: JupyterLab, manager: IDocumentManager): void {
-    function fetch(id: string): Promise<ISettingRegistry.IPlugin> {
-      const name = `${id}${extension}`;
-
-      return manager.services.ready.then(() => {
-        const requests = Promise.all(levels.map(level => {
-          const path = PathExt.resolve(root, folder, level, name);
-
-          return manager.services.contents.get(path).catch(() => null);
-        }));
-
-        return requests.then(files => fileHandler(id, files));
-      });
-    }
-
-    function remove(id: string): Promise<void> {
-      return Promise.reject(new Error('remove not implemented'));
-    }
-
-    function save(id: string, value: ISettingRegistry.IPlugin): Promise<ISettingRegistry.IPlugin> {
-      const name = `${id}${extension}`;
-      const format = 'text';
-      const type = 'file';
-      const level = 'user';
-      const path = PathExt.resolve(root, folder, level, name);
-
-      return manager.services.ready.then(() => {
-        const content = JSON.stringify(value.data[level]);
-
-        return manager.services.contents.save(path, {
-          content, format, name, path, type
-        }).then(() => fetch(id));
-      });
-    }
-
-    app.settings.setDB({ fetch, remove, save });
-  }
-}
-
