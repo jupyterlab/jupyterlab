@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject
-} from '@phosphor/coreutils';
-
-import {
   JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
@@ -89,11 +85,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   const namespace = 'editor';
   const factory = new FileEditorFactory({
     editorServices,
-    factoryOptions: {
-      name: FACTORY,
-      fileExtensions: ['*'],
-      defaultFor: ['*']
-    }
+    factoryOptions: { name: FACTORY, fileExtensions: ['*'], defaultFor: ['*'] }
   });
   const { commands, settings, shell, restored } = app;
   const tracker = new InstanceTracker<FileEditor>({ namespace, shell });
@@ -125,6 +117,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
 
   factory.widgetCreated.connect((sender, widget) => {
     widget.title.icon = EDITOR_ICON_CLASS;
+
     // Notify the instance tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => { tracker.save(widget); });
     tracker.add(widget);
@@ -135,7 +128,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
 
   // Handle the settings of new widgets.
   tracker.widgetAdded.connect((sender, widget) => {
-    let editor = widget.editor;
+    const editor = widget.editor;
     editor.lineNumbers = lineNumbers;
     editor.wordWrap = wordWrap;
   });
@@ -165,7 +158,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   }
 
   commands.addCommand(CommandIDs.lineNumbers, {
-    execute: (args: JSONObject): Promise<void> => {
+    execute: (): Promise<void> => {
       lineNumbers = !lineNumbers;
       tracker.forEach(widget => { widget.editor.lineNumbers = lineNumbers; });
       return settings.set(id, 'lineNumbers', lineNumbers);
@@ -176,7 +169,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   });
 
   commands.addCommand(CommandIDs.wordWrap, {
-    execute: (args: JSONObject): Promise<void> => {
+    execute: (): Promise<void> => {
       wordWrap = !wordWrap;
       tracker.forEach(widget => { widget.editor.wordWrap = wordWrap; });
       return settings.set(id, 'wordWrap', wordWrap);
@@ -188,24 +181,26 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
 
   commands.addCommand(CommandIDs.createConsole, {
     execute: args => {
-      let widget = tracker.currentWidget;
+      const widget = tracker.currentWidget;
+
       if (!widget) {
         return;
       }
-      let options: JSONObject = {
+
+      return commands.execute('console:create', {
+        activate: args['activate'],
         path: widget.context.path,
-        preferredLanguage: widget.context.model.defaultKernelLanguage,
-        activate: args['activate']
-      };
-      return commands.execute('console:create', options);
+        preferredLanguage: widget.context.model.defaultKernelLanguage
+      });
     },
     isEnabled: hasWidget,
     label: 'Create Console for Editor'
   });
 
   commands.addCommand(CommandIDs.runCode, {
-    execute: args => {
-      let widget = tracker.currentWidget;
+    execute: () => {
+      const widget = tracker.currentWidget;
+
       if (!widget) {
         return;
       }
@@ -238,13 +233,18 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
         code: code,
         activate: false
       };
+
       // Advance cursor to the next line.
       const cursor = editor.getCursorPosition();
+
       if (cursor.line + 1 === editor.lineCount) {
-        let text = editor.model.value.text;
+        const text = editor.model.value.text;
         editor.model.value.text = text + '\n';
       }
-      editor.setCursorPosition({ line: cursor.line + 1, column: cursor.column });
+      editor.setCursorPosition({
+        column: cursor.column,
+        line: cursor.line + 1
+      });
 
       return commands.execute('console:inject', options);
     },
