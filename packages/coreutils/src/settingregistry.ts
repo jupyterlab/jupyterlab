@@ -245,9 +245,9 @@ class SettingRegistry {
    */
   load(plugin: string, reload = false): Promise<ISettingRegistry.ISettings> {
     const annotations = this._annotations;
+    const copy = JSONExt.deepCopy;
     const plugins = this._plugins;
     const registry = this;
-    const copy = JSONExt.deepCopy;
 
     // If the plugin exists and does not need to be reloaded, resolve.
     if (!reload && plugin in plugins) {
@@ -264,10 +264,10 @@ class SettingRegistry {
     if (this._datastore) {
       return this._datastore.fetch(plugin).then(result => {
         // Set the local copy.
-        plugins[result.id] = result;
+        plugins[plugin] = result || { id: plugin, data: { } };
 
         // Create a copy of the plugin data.
-        const content = copy(result) as ISettingRegistry.IPlugin;
+        const content = copy(plugins[plugin]) as ISettingRegistry.IPlugin;
 
         // Copy over any annotations that may be available.
         content.annotations = copy(annotations[plugin] || null);
