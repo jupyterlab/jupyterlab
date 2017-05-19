@@ -126,6 +126,7 @@ function activateFactory(app: JupyterLab, docManager: IDocumentManager, state: I
     createFileBrowser(id: string, options: IFileBrowserFactory.IOptions = {}): FileBrowser {
       const model = new FileBrowserModel({
         manager: options.documentManager || docManager,
+        driveName: options.driveName || '',
         state: options.state === null ? null : options.state || state
       });
       const widget = new FileBrowser({
