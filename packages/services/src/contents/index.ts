@@ -548,17 +548,17 @@ class ContentsManager implements Contents.IManager {
       if (contentsModel.type === 'directory') {
         each(contentsModel.content, (item: Contents.IModel) => {
           listing.push({
-            path: this._toGlobalPath(drive, item.path),
-            ...item
+            ...item,
+            path: this._toGlobalPath(drive, item.path)
           } as Contents.IModel);
         });
         return {
+          ...contentsModel,
           path: path,
-          content: listing,
-          ...contentsModel
+          content: listing
         } as Contents.IModel;
       } else {
-        return { path: path, ...contentsModel } as Contents.IModel;
+        return { ...contentsModel, path: path } as Contents.IModel;
       }
     }); 
   }
@@ -587,8 +587,8 @@ class ContentsManager implements Contents.IManager {
   newUntitled(options: Contents.ICreateOptions = {}): Promise<Contents.IModel> {
     if (options.path) {
       let [drive, localPath] = this._driveForPath(options.path);
-      return drive.newUntitled({path: localPath, ...options}).then( contentsModel => {
-        return { path: options.path, ...contentsModel } as Contents.IModel;
+      return drive.newUntitled({ ...options, path: localPath }).then( contentsModel => {
+        return { ...contentsModel, path: options.path } as Contents.IModel;
       });
     } else {
       return this._defaultDrive.newUntitled(options);
@@ -624,7 +624,7 @@ class ContentsManager implements Contents.IManager {
       throw Error('ContentsManager: renaming files must occur within a Drive');
     }
     return drive1.rename(path1, path2).then(contentsModel => {
-      return { path: path, ...contentsModel } as Contents.IModel;
+      return { ...contentsModel, path: path } as Contents.IModel;
     });
   }
 
@@ -643,8 +643,8 @@ class ContentsManager implements Contents.IManager {
    */
   save(path: string, options: Contents.IModel = {}): Promise<Contents.IModel> {
     let [drive, localPath] = this._driveForPath(path);
-    return drive.save(localPath, {path: localPath, ...options}).then(contentsModel => {
-      return {path: path, ...contentsModel} as Contents.IModel;
+    return drive.save(localPath, { ...options, path: localPath }).then(contentsModel => {
+      return { ...contentsModel, path: path } as Contents.IModel;
     });
   }
 
@@ -667,8 +667,8 @@ class ContentsManager implements Contents.IManager {
     if (drive1 === drive2) {
       return drive1.copy(path1, path2).then(contentsModel => {
         return {
-          path: this._toGlobalPath(drive1, contentsModel.path),
-          ...contentsModel
+          ...contentsModel,
+          path: this._toGlobalPath(drive1, contentsModel.path)
         } as Contents.IModel;
       });
     } else {
@@ -742,7 +742,11 @@ class ContentsManager implements Contents.IManager {
    * @returns the fully qualified path.
    */
   private _toGlobalPath(drive: Contents.IDrive, localPath: string): string {
-    return drive.name + ':' + localPath;
+    if (drive === this._defaultDrive) {
+      return localPath;
+    } else {
+      return drive.name + ':' + localPath;
+    }
   }
 
   /**
@@ -776,10 +780,10 @@ class ContentsManager implements Contents.IManager {
       let newValue: Contents.IModel = null;
       let oldValue: Contents.IModel = null;
       if (args.newValue) {
-        newValue = { path: args.newValue.path, ...args.newValue };
+        newValue = { ...args.newValue, path: args.newValue.path };
       }
       if (args.oldValue) {
-        oldValue = { path: args.oldValue.path, ...args.oldValue };
+        oldValue = { ...args.oldValue, path: args.oldValue.path };
       }
       this._fileChanged.emit({
         type: args.type,
