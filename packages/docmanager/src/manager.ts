@@ -406,13 +406,14 @@ class DocumentManager implements IDisposable {
       this._widgetManager.adoptWidget(context, widget);
       this._opener.open(widget);
     };
+    let modelDBFactory = this.services.contents.getModelDBFactory(path) || null;
     let context = new Context({
       opener: adopter,
       manager: this.services,
       factory,
       path,
       kernelPreference,
-      modelDBFactory: this._modelDBFactory
+      modelDBFactory
     });
     let handler = new SaveHandler({
       context,

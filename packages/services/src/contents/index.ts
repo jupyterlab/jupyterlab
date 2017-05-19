@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  URLExt, PathExt
+  URLExt, PathExt, ModelDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -221,6 +221,13 @@ namespace Contents {
     addDrive(drive: IDrive): void;
 
     /**
+     * Given a path, get a ModelDB.IFactory from the
+     * relevant backend. Returns `null` if the backend
+     * does not provide one.
+     */
+    getModelDBFactory(path: string): ModelDB.IFactory;
+
+    /**
      * Get a file or directory.
      *
      * @param path: The path to the file.
@@ -353,6 +360,12 @@ namespace Contents {
      * The server settings of the manager.
      */
     readonly serverSettings: ServerConnection.ISettings;
+
+    /**
+     * An optional ModelDB.IFactory instance for the
+     * drive.
+     */
+    readonly modelDBFactory?: ModelDB.IFactory;
 
     /**
      * A signal emitted when a file operation takes place.
@@ -523,13 +536,22 @@ class ContentsManager implements Contents.IManager {
     Signal.clearData(this);
   }
 
-
   /**
    * Add an `IDrive` to the manager.
    */
   addDrive(drive: Contents.IDrive): void {
     this._additionalDrives.set(drive.name, drive);
     drive.fileChanged.connect(this._onFileChanged, this);
+  }
+
+  /**
+   * Given a path, get a ModelDB.IFactory from the
+   * relevant backend. Returns `null` if the backend
+   * does not provide one.
+   */
+  getModelDBFactory(path: string): ModelDB.IFactory {
+    let [drive,] = this._driveForPath(path);
+    return drive.modelDBFactory || null;
   }
 
   /**

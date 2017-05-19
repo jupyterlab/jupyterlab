@@ -53,7 +53,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     let lang = this._factory.preferredLanguage(ext);
 
     if (options.modelDBFactory) {
-      this._modelDB = options.modelDBFactory.createNew(this._path);
+      this._modelDB = options.modelDBFactory.createNew(this._path.split(':').pop());
       this._model = this._factory.createNew(lang, this._modelDB);
     } else {
       this._model = this._factory.createNew(lang);
