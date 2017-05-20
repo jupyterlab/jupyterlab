@@ -878,7 +878,7 @@ class DirListing extends Widget {
     // Detects printable characters typed by the user.
     // Not all browsers support .key, but it discharges us from reconstructing
     // characters from key codes.
-    if (event.key !== undefined && event.key.length === 1) {
+    if (!this._inRename && event.key !== undefined && event.key.length === 1) {
       this._searchPrefix += event.key;
 
       clearTimeout(this._searchPrefixTimer);
@@ -1235,6 +1235,7 @@ class DirListing extends Widget {
    * Allow the user to rename item on a given row.
    */
   private _doRename(): Promise<string> {
+    this._inRename = true;
     let items = this._sortedItems;
     let name = Object.keys(this._selection)[0];
     let index = ArrayExt.findFirstIndex(items, value => value.name === name);
@@ -1247,9 +1248,11 @@ class DirListing extends Widget {
 
     return Private.doRename(nameNode, this._editNode).then(newName => {
       if (newName === original) {
+        this._inRename = false;
         return original;
       }
       if (this.isDisposed) {
+        this._inRename = false;
         return;
       }
 
@@ -1258,12 +1261,15 @@ class DirListing extends Widget {
       const promise = renameFileDialog(manager, original, newName, basePath);
       return promise.catch(error => {
         utils.showErrorMessage('Rename Error', error);
+        this._inRename = false;
         return original;
       }).then(() => {
         if (this.isDisposed) {
+          this._inRename = false;
           return;
         }
         this._selectItemByName(newName);
+        this._inRename = false;
         return newName;
       });
     });
@@ -1358,6 +1364,7 @@ class DirListing extends Widget {
   private _renderer: DirListing.IRenderer = null;
   private _searchPrefix: string = '';
   private _searchPrefixTimer = -1;
+  private _inRename = false;
 }
 
 
