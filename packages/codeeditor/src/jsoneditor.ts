@@ -233,7 +233,7 @@ class JSONEditor extends Widget {
   protected onBeforeDetach(msg: Message): void {
     let node = this.editorHostNode;
     node.removeEventListener('blur', this, true);
-    this.headerNode.addEventListener('click', this);
+    this.headerNode.removeEventListener('click', this);
   }
 
   /**
