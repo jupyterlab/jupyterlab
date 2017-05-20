@@ -76,6 +76,61 @@ describe('apputils', () => {
 
     });
 
+    describe('#collapsable', () => {
+
+      it('should default to false', () => {
+        expect(editor.collapsable).to.be(false);
+      });
+
+      it ('should be settable in the constructor', () => {
+        let newEditor = new JSONEditor({ editorFactory, collapsable: true });
+        expect(newEditor.collapsable).to.be(true);
+      });
+
+    });
+
+    describe('#editorTitle', () => {
+
+      it('should default to empty string', () => {
+        expect(editor.editorTitle).to.be('');
+      });
+
+      it ('should be settable in the constructor', () => {
+        let newEditor = new JSONEditor({ editorFactory, title: 'foo' });
+        expect(newEditor.editorTitle).to.be('foo');
+      });
+
+      it('should be settable', () => {
+        editor.editorTitle = 'foo';
+        expect(edit.editorTitle).to.be('foo');
+      });
+
+    });
+
+    describe('#headerNode', () => {
+
+      it('should be the header node used by the editor', () => {
+        expect(editor.headerNode.classList).to.contain('jp-JSONEditor-header');
+      });
+
+    });
+
+    describe('#titleNode', () => {
+
+      it('should be the title node used by the editor', () => {
+        expect(editor.titleNode.classList).to.contain('jp-JSONEditor-title');
+      });
+
+    });
+
+    describe('#collapserNode', () => {
+
+      it('should be the collapser node used by the editor', () => {
+        expect(editor.collapserNode.classList).to.contain('jp-JSONEditor-collapser');
+      });
+
+    });
+
     describe('#editorHostNode', () => {
 
       it('should be the editor host node used by the editor', () => {
@@ -306,6 +361,20 @@ describe('apputils', () => {
           let expected = '{\n  "foo": 2,\n  "bar": 3\n}';
           expect(editor.model.value.text).to.be(expected);
         });
+
+        it('should collapse the editor', () => {
+          editor.dispose();
+          editor = new LogEditor({ editorFactory, collapsable: true });
+          Widget.attach(editor, document.body);
+          simulate(editor.titleNode, 'click');
+          expect(editor.editorHostNode.classList).to.contain('jp-mod-collapsed');
+        });
+
+        it('should have no effect if the editor is not collapsable', () => {
+          simulate(editor.titleNode, 'click');
+          expect(editor.editorHostNode.classList).to.not.contain('jp-mod-collapsed');
+        });
+
 
       });
 
