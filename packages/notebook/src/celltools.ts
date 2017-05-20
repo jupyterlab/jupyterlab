@@ -401,7 +401,7 @@ namespace CellTools {
       let layout = this.layout = new PanelLayout();
       this.editor = new JSONEditor({
         editorFactory,
-        title: 'Cell Metadata',
+        title: 'Edit Metadata',
         collapsable: true
       });
       layout.addWidget(this.editor);
