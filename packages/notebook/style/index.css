@@ -227,39 +227,6 @@
 }
 
 
-.jp-MetadataEditorTool-header {
-  flex: 1 0 auto;
-  padding: 10px;
-  padding-bottom: 16px;
-}
-
-
-.jp-MetadataEditorTool-header label {
-  flex: 0 0 auto;
-}
-
-
-.jp-MetadataEditorTool-toggleButton {
-  padding-left: 6px;
-  font-family: FontAwesome;
-}
-
-
-.jp-MetadataEditorTool-toggleButton::before {
-  content: '\f0d8'; /* caret-up */
-}
-
-
-.jp-MetadataEditorTool-toggleButton.jp-mod-collapsed::before {
-  content: '\f0d7'; /* caret-down */
-}
-
-
-.jp-MetadataEditorTool .jp-JSONEditor.jp-mod-collapsed {
-  display: none;
-}
-
-
 .jp-KeySelector {
   padding: 12px;
 }

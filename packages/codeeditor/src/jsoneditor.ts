@@ -25,10 +25,11 @@ import {
   CodeEditor
 } from '.';
 
+
 /**
  * The class name added to a JSONEditor instance.
  */
-const METADATA_CLASS = 'jp-JSONEditor';
+const JSONEDITOR_CLASS = 'jp-JSONEditor';
 
 /**
  * The class name added when the Metadata editor contains invalid JSON.
@@ -41,9 +42,24 @@ const ERROR_CLASS = 'jp-mod-error';
 const HOST_CLASS = 'jp-JSONEditor-host';
 
 /**
- * The class name added to the button area.
+ * The class name added to the header area.
  */
-const BUTTON_AREA_CLASS = 'jp-JSONEditor-buttons';
+const HEADER_CLASS = 'jp-JSONEditor-header';
+
+/**
+ * The class name added to the title node.
+ */
+const TITLE_CLASS = 'jp-JSONEditor-title';
+
+/**
+ * The class name added to the collapser node.
+ */
+const COLLAPSER_CLASS = 'jp-JSONEditor-collapser';
+
+/**
+ * The class name added to the collapser node that is enabled.
+ */
+const COLLAPSE_ENABLED_CLASS = 'jp-mod-collapse-enabled';
 
 /**
  * The class name added to the revert button.
@@ -55,6 +71,11 @@ const REVERT_CLASS = 'jp-JSONEditor-revertButton';
  */
 const COMMIT_CLASS = 'jp-JSONEditor-commitButton';
 
+/**
+ * The class name added to collapsed items.
+ */
+const COLLAPSED_CLASS = 'jp-mod-collapsed';
+
 
 /**
  * A widget for editing observable JSON.
@@ -65,8 +86,7 @@ class JSONEditor extends Widget {
    * Construct a new metadata editor.
    */
   constructor(options: JSONEditor.IOptions) {
-    super({ node: Private.createEditorNode() });
-    this.addClass(METADATA_CLASS);
+    super({ node: Private.createEditorNode(options) });
     let host = this.editorHostNode;
     let model = new CodeEditor.Model();
     model.value.text = 'No data!';
@@ -75,6 +95,7 @@ class JSONEditor extends Widget {
     this.model = model;
     this.editor = options.editorFactory({ host, model });
     this.editor.readOnly = true;
+    this.collapsable = options.collapsable === true;
   }
 
   /**
@@ -88,10 +109,46 @@ class JSONEditor extends Widget {
   readonly model: CodeEditor.IModel;
 
   /**
+   * Whether the editor is collapsable.
+   */
+  readonly collapsable: boolean;
+
+  /**
+   * The title of the editor.
+   */
+  get editorTitle(): string {
+    return this.titleNode.textContent;
+  }
+  set editorTitle(value: string) {
+    this.titleNode.textContent = value;
+  }
+
+  /**
    * Get the editor host node used by the metadata editor.
    */
   get editorHostNode(): HTMLElement {
     return this.node.getElementsByClassName(HOST_CLASS)[0] as HTMLElement;
+  }
+
+  /**
+   * Get the header node used by the metadata editor.
+   */
+  get headerNode(): HTMLElement {
+    return this.node.getElementsByClassName(HEADER_CLASS)[0] as HTMLElement;
+  }
+
+  /**
+   * Get the title node used by the metadata editor.
+   */
+  get titleNode(): HTMLElement {
+    return this.node.getElementsByClassName(TITLE_CLASS)[0] as HTMLElement;
+  }
+
+  /**
+   * Get the collapser node used by the metadata editor.
+   */
+  get collapserNode(): HTMLElement {
+    return this.node.getElementsByClassName(COLLAPSER_CLASS)[0] as HTMLElement;
   }
 
   /**
@@ -167,8 +224,7 @@ class JSONEditor extends Widget {
     node.addEventListener('blur', this, true);
     this.revertButtonNode.hidden = true;
     this.commitButtonNode.hidden = true;
-    this.revertButtonNode.addEventListener('click', this);
-    this.commitButtonNode.addEventListener('click', this);
+    this.headerNode.addEventListener('click', this);
   }
 
   /**
@@ -177,8 +233,7 @@ class JSONEditor extends Widget {
   protected onBeforeDetach(msg: Message): void {
     let node = this.editorHostNode;
     node.removeEventListener('blur', this, true);
-    this.revertButtonNode.removeEventListener('click', this);
-    this.commitButtonNode.removeEventListener('click', this);
+    this.headerNode.addEventListener('click', this);
   }
 
   /**
@@ -230,15 +285,33 @@ class JSONEditor extends Widget {
    */
   private _evtClick(event: MouseEvent): void {
     let target = event.target as HTMLElement;
-    if (target === this.revertButtonNode) {
+    switch (target) {
+    case this.revertButtonNode:
       this._setValue();
-    } else if (target === this.commitButtonNode) {
+      break;
+    case this.commitButtonNode:
       if (!this.commitButtonNode.hidden && !this.hasClass(ERROR_CLASS)) {
         this._changeGuard = true;
         this._mergeContent();
         this._changeGuard = false;
         this._setValue();
       }
+      break;
+    case this.titleNode:
+    case this.collapserNode:
+      if (this.collapsable) {
+        let collapser = this.collapserNode;
+        if (collapser.classList.contains(COLLAPSED_CLASS)) {
+          collapser.classList.remove(COLLAPSED_CLASS);
+          this.editorHostNode.classList.remove(COLLAPSED_CLASS);
+        } else {
+          collapser.classList.add(COLLAPSED_CLASS);
+          this.editorHostNode.classList.add(COLLAPSED_CLASS);
+        }
+      }
+      break;
+    default:
+      break;
     }
   }
 
@@ -325,14 +398,24 @@ class JSONEditor extends Widget {
 export
 namespace JSONEditor {
   /**
-   * The options used to initialize a metadata editor.
+   * The options used to initialize a json editor.
    */
   export
   interface IOptions {
     /**
-     * The editor factory used by the tool.
+     * The editor factory used by the editor.
      */
     editorFactory: CodeEditor.Factory;
+
+    /**
+     * The title of the editor.  Defaults to an empty string.
+     */
+    title?: string;
+
+    /**
+     * Whether the title should be collapsable. Defaults to `false`.
+     */
+    collapsable?: boolean;
   }
 }
 
@@ -342,16 +425,22 @@ namespace JSONEditor {
  */
 namespace Private {
   /**
-   * Create the node for the EditorWdiget.
+   * Create the node for the JSON Editor.
    */
   export
-  function createEditorNode(): HTMLElement {
-    let cancelTitle = 'Revert changes to data';
+  function createEditorNode(options: JSONEditor.IOptions): HTMLElement {
+    let revertTitle = 'Revert changes to data';
     let confirmTitle = 'Commit changes to data';
+    let collapseClass = COLLAPSER_CLASS;
+    if (options.collapsable === true) {
+      collapseClass += ` ${COLLAPSE_ENABLED_CLASS}`;
+    }
     return VirtualDOM.realize(
-      h.div({ className: METADATA_CLASS },
-        h.div({ className: BUTTON_AREA_CLASS },
-          h.span({ className: REVERT_CLASS, title: cancelTitle }),
+      h.div({ className: JSONEDITOR_CLASS },
+        h.div({ className: HEADER_CLASS },
+          h.span({ className: TITLE_CLASS }, options.title || ''),
+          h.span({ className: collapseClass }),
+          h.span({ className: REVERT_CLASS, title: revertTitle }),
           h.span({ className: COMMIT_CLASS, title: confirmTitle })),
         h.div({ className: HOST_CLASS }))
     );

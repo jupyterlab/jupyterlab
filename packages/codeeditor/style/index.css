@@ -7,8 +7,6 @@
 
 
 .jp-JSONEditor {
-  padding-left: 10px;
-  padding-right: 10px;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -21,6 +19,8 @@
   border-radius: 0px;
   background: #f7f7f7;
   min-height: 50px;
+  margin-left: 12px;
+  margin-right: 12px;
 }
 
 
@@ -30,23 +30,51 @@
 }
 
 
-.jp-JSONEditor-buttons {
-  font-family: FontAwesome;
+.jp-JSONEditor-header {
+  display: flex;
   flex: 1 0 auto;
   min-height: 13px;
-  padding-bottom: 6px;
+  padding: 12px;
+}
+
+
+.jp-JSONEditor-header label {
+  flex: 0 0 auto;
 }
 
 
 .jp-JSONEditor-commitButton::before {
+  font-family: FontAwesome;
   content: '\f00c'; /* check */
-  float: right;
-  margin-right: 20px;
+  padding-left: 4px;
 }
 
 
 .jp-JSONEditor-revertButton::before {
+  font-family: FontAwesome;
   content: '\f0e2'; /* undo */
-  float: right;
-  margin-right: 4px;
+}
+
+
+.jp-JSONEditor-collapser {
+  flex: 1 1 auto;
+}
+
+
+.jp-JSONEditor-collapser.jp-mod-collapse-enabled::before {
+  padding-left: 6px;
+  font-family: FontAwesome;
+  content: '\f0d8'; /* caret-up */
+}
+
+
+.jp-JSONEditor-collapser.jp-mod-collapse-enabled.jp-mod-collapsed::before {
+  padding-left: 6px;
+  font-family: FontAwesome;
+  content: '\f0d7'; /* caret-down */
+}
+
+
+.jp-JSONEditor-host.jp-mod-collapsed {
+  display: none;
 }

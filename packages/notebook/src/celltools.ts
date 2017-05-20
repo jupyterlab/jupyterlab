@@ -58,24 +58,9 @@ const CHILD_CLASS = 'jp-CellTools-tool';
 const ACTIVE_CELL_CLASS = 'jp-ActiveCellTool';
 
 /**
- * The class name added to the Metadata editor tool.
- */
-const EDITOR_CLASS = 'jp-MetadataEditorTool';
-
-/**
  * The class name added to an Editor instance.
  */
-const EDITOR_TITLE_CLASS = 'jp-MetadataEditorTool-header';
-
-/**
- * The class name added to the toggle button.
- */
-const TOGGLE_CLASS = 'jp-MetadataEditorTool-toggleButton';
-
-/**
- * The class name added to collapsed elements.
- */
-const COLLAPSED_CLASS = 'jp-mod-collapsed';
+const EDITOR_CLASS = 'jp-MetadataEditorTool';
 
 /**
  * The class name added to a KeySelector instance.
@@ -414,68 +399,17 @@ namespace CellTools {
       let editorFactory = options.editorFactory;
       this.addClass(EDITOR_CLASS);
       let layout = this.layout = new PanelLayout();
-      let header = Private.createMetadataHeader();
-      layout.addWidget(header);
-      this.editor = new JSONEditor({ editorFactory });
+      this.editor = new JSONEditor({
+        editorFactory,
+        title: 'Cell Metadata'
+      });
       layout.addWidget(this.editor);
-      header.addClass(COLLAPSED_CLASS);
-      this.editor.addClass(COLLAPSED_CLASS);
-      this.toggleNode.classList.add(COLLAPSED_CLASS);
     }
 
     /**
      * The editor used by the tool.
      */
     readonly editor: JSONEditor;
-
-    /**
-     * Get the toggle node used by the editor.
-     */
-    get toggleNode(): HTMLElement {
-      return this.node.getElementsByClassName(TOGGLE_CLASS)[0] as HTMLElement;
-    }
-
-    /**
-     * Handle the DOM events for the widget.
-     *
-     * @param event - The DOM event sent to the widget.
-     *
-     * #### Notes
-     * This method implements the DOM `EventListener` interface and is
-     * called in response to events on the notebook panel's node. It should
-     * not be called directly by user code.
-     */
-    handleEvent(event: Event): void {
-      if (event.type !== 'click') {
-        return;
-      }
-      each(this.children(), widget => {
-        widget.toggleClass(COLLAPSED_CLASS);
-      });
-      let toggleNode = this.toggleNode;
-      if (this.editor.hasClass(COLLAPSED_CLASS)) {
-        toggleNode.classList.add(COLLAPSED_CLASS);
-      } else {
-        toggleNode.classList.remove(COLLAPSED_CLASS);
-      }
-      this.editor.editor.refresh();
-    }
-
-    /**
-     * Handle `after-attach` messages for the widget.
-     */
-    protected onAfterAttach(msg: Message): void {
-      this.toggleNode.addEventListener('click', this);
-      let cell = this.parent.activeCell;
-      this.editor.source = cell ? cell.model.metadata : null;
-    }
-
-    /**
-     * Handle `before-detach` messages for the widget.
-     */
-    protected onBeforeDetach(msg: Message): void {
-      this.toggleNode.removeEventListener('click', this);
-    }
 
     /**
      * Handle a change to the active cell.
@@ -746,18 +680,5 @@ namespace Private {
     );
     Styling.styleNode(node);
     return node;
-  }
-
-  /**
-   * Create the metadata header widget.
-   */
-  export
-  function createMetadataHeader(): Widget {
-    let node = VirtualDOM.realize(
-      h.div({ className: EDITOR_TITLE_CLASS },
-        h.label({}, 'Edit Metadata'),
-        h.span({ className: TOGGLE_CLASS }))
-    );
-    return new Widget({ node });
   }
 }
