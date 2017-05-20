@@ -102,7 +102,7 @@ describe('apputils', () => {
 
       it('should be settable', () => {
         editor.editorTitle = 'foo';
-        expect(edit.editorTitle).to.be('foo');
+        expect(editor.editorTitle).to.be('foo');
       });
 
     });
