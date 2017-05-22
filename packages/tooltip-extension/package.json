@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/tooltip-extension",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "JupyterLab - Tooltip Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -14,8 +14,8 @@
   "dependencies": {
     "@jupyterlab/application": "^0.5.0",
     "@jupyterlab/codeeditor": "^0.5.0",
-    "@jupyterlab/console": "^0.5.0",
-    "@jupyterlab/notebook": "^0.5.0",
+    "@jupyterlab/console": "^0.5.1",
+    "@jupyterlab/notebook": "^0.5.1",
     "@jupyterlab/services": "^0.44.0",
     "@jupyterlab/tooltip": "^0.5.0",
     "@phosphor/coreutils": "^1.1.0",

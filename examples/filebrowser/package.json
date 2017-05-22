@@ -8,11 +8,11 @@
   "dependencies": {
     "@jupyterlab/apputils": "^0.5.0",
     "@jupyterlab/codemirror": "^0.5.0",
-    "@jupyterlab/default-theme": "^0.5.0",
+    "@jupyterlab/default-theme": "^0.5.1",
     "@jupyterlab/docmanager": "^0.5.0",
     "@jupyterlab/docregistry": "^0.5.0",
     "@jupyterlab/fileeditor": "^0.5.0",
-    "@jupyterlab/filebrowser": "^0.5.0",
+    "@jupyterlab/filebrowser": "^0.5.1",
     "@jupyterlab/services": "^0.44.0",
     "@phosphor/commands": "^1.2.0",
     "@phosphor/widgets": "^1.2.0",
@@ -30,5 +30,5 @@
     "watch": "^1.0.2",
     "webpack": "^1.13.0"
   },
-  "version": "0.5.0"
+  "version": "0.5.1"
 }

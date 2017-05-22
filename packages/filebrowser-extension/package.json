@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/filebrowser-extension",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "JupyterLab - Filebrowser Widget Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -17,7 +17,7 @@
     "@jupyterlab/coreutils": "^0.5.0",
     "@jupyterlab/docmanager": "^0.5.0",
     "@jupyterlab/docregistry": "^0.5.0",
-    "@jupyterlab/filebrowser": "^0.5.0",
+    "@jupyterlab/filebrowser": "^0.5.1",
     "@jupyterlab/services": "^0.44.0",
     "@phosphor/algorithm": "^1.1.0",
     "@phosphor/commands": "^1.2.0",
