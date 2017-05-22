@@ -576,11 +576,14 @@ class ContentsManager implements Contents.IManager {
         });
         return {
           ...contentsModel,
-          path: path,
+          path: Private.normalize(path),
           content: listing
         } as Contents.IModel;
       } else {
-        return { ...contentsModel, path: path } as Contents.IModel;
+        return {
+          ...contentsModel,
+          path: Private.normalize(path)
+        } as Contents.IModel;
       }
     }); 
   }
@@ -608,11 +611,12 @@ class ContentsManager implements Contents.IManager {
    */
   newUntitled(options: Contents.ICreateOptions = {}): Promise<Contents.IModel> {
     if (options.path) {
-      let [drive, localPath] = this._driveForPath(options.path);
+      let globalPath = Private.normalize(options.path);
+      let [drive, localPath] = this._driveForPath(globalPath);
       return drive.newUntitled({ ...options, path: localPath }).then( contentsModel => {
         return {
           ...contentsModel,
-          path: PathExt.join(options.path, contentsModel.name)
+          path: PathExt.join(globalPath, contentsModel.name)
         } as Contents.IModel;
       });
     } else {
@@ -669,7 +673,7 @@ class ContentsManager implements Contents.IManager {
   save(path: string, options: Contents.IModel = {}): Promise<Contents.IModel> {
     let [drive, localPath] = this._driveForPath(path);
     return drive.save(localPath, { ...options, path: localPath }).then(contentsModel => {
-      return { ...contentsModel, path: path } as Contents.IModel;
+      return { ...contentsModel, path: Private.normalize(path) } as Contents.IModel;
     });
   }
 
@@ -697,8 +701,7 @@ class ContentsManager implements Contents.IManager {
         } as Contents.IModel;
       });
     } else {
-      //TODO
-      return drive1.get(path1);
+      throw Error('Copying files between drives is not currently implemented');
     }
   }
 
@@ -768,9 +771,9 @@ class ContentsManager implements Contents.IManager {
    */
   private _toGlobalPath(drive: Contents.IDrive, localPath: string): string {
     if (drive === this._defaultDrive) {
-      return localPath;
+      return PathExt.normalize(localPath);
     } else {
-      return drive.name + ':' + localPath;
+      return drive.name + ':' + PathExt.normalize(localPath);
     }
   }
 
@@ -795,7 +798,7 @@ class ContentsManager implements Contents.IManager {
       if (!drive) {
         throw Error('ContentsManager: cannot find requested drive');
       }
-      return [drive, parts[1]];
+      return [drive, Private.normalize(parts[1])];
     }
   }
   private _onFileChanged(sender: Contents.IDrive, args: Contents.IChangedArgs) {
@@ -805,10 +808,16 @@ class ContentsManager implements Contents.IManager {
       let newValue: Contents.IModel = null;
       let oldValue: Contents.IModel = null;
       if (args.newValue) {
-        newValue = { ...args.newValue, path: args.newValue.path };
+        newValue = {
+          ...args.newValue,
+          path: this._toGlobalPath(sender, args.newValue.path)
+        };
       }
       if (args.oldValue) {
-        oldValue = { ...args.oldValue, path: args.oldValue.path };
+        oldValue = {
+          ...args.oldValue,
+          path: this._toGlobalPath(sender, args.oldValue.path)
+        };
       }
       this._fileChanged.emit({
         type: args.type,
@@ -838,8 +847,8 @@ class Drive implements Contents.IDrive {
    * @param options - The options used to initialize the object.
    */
   constructor(options: Drive.IOptions = {}) {
+    this.name = options.name || 'Default';
     this.serverSettings = options.serverSettings || ServerConnection.makeSettings();
-    this.name = 'Default'
   }
 
   /**
@@ -1292,6 +1301,12 @@ namespace Drive {
   export
   interface IOptions {
     /**
+     * The name for the `Drive`, which is used in file
+     * paths to disambiguate it from other drives.
+     */
+    name?: string;
+
+    /**
      * The server settings for the server.
      */
     serverSettings?: ServerConnection.ISettings;
@@ -1314,5 +1329,22 @@ namespace Private {
       extension = `.${extension}`;
     }
     return extension;
+  }
+
+  /**
+   * Normalize a global path. Reduces '..' and '.' parts, and removes
+   * leading slashes from the local part of the path, while retaining
+   * the drive name if it exists.
+   */
+  export
+  function normalize(path: string): string {
+    let parts = path.split(':');
+    if (parts.length === 1) {
+      return PathExt.normalize(path);
+    } else if (parts.length === 2) {
+      return parts[0] + ':' + PathExt.normalize(parts[1]);
+    } else {
+      throw Error('Malformed path: '+path);
+    }
   }
 }
