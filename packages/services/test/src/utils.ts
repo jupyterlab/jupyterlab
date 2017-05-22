@@ -111,7 +111,7 @@ const PYTHON_SPEC: JSONObject = {
 export
 const DEFAULT_FILE: Contents.IModel = {
   name: 'test',
-  path: '',
+  path: 'foo/test',
   type: 'file',
   created: 'yesterday',
   last_modified: 'today',
