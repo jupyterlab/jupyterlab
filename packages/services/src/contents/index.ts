@@ -30,9 +30,9 @@ import * as validate
 
 
 /**
- * The url for the contents service.
+ * The url for the default drive service.
  */
-const SERVICE_CONTENTS_URL = 'api/contents';
+const SERVICE_DRIVE_URL = 'api/contents';
 
 /**
  * The url for the file access.
@@ -848,6 +848,7 @@ class Drive implements Contents.IDrive {
    */
   constructor(options: Drive.IOptions = {}) {
     this.name = options.name || 'Default';
+    this._apiEndpoint = options.apiEndpoint || SERVICE_DRIVE_URL;
     this.serverSettings = options.serverSettings || ServerConnection.makeSettings();
   }
 
@@ -1264,10 +1265,11 @@ class Drive implements Contents.IDrive {
   private _getUrl(...args: string[]): string {
     let parts = args.map(path => URLExt.encodeParts(path));
     let baseUrl = this.serverSettings.baseUrl;
-    return URLExt.join(baseUrl, SERVICE_CONTENTS_URL,
+    return URLExt.join(baseUrl, this._apiEndpoint,
                        ...parts);
   }
 
+  private _apiEndpoint: string;
   private _isDisposed = false;
   private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
 }
@@ -1310,6 +1312,13 @@ namespace Drive {
      * The server settings for the server.
      */
     serverSettings?: ServerConnection.ISettings;
+
+    /**
+     * A REST endpoint for drive requests.
+     * If not given, defaults to the Jupyter
+     * REST API given by [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents).
+     */
+    apiEndpoint?: string;
   }
 }
 
