@@ -81,7 +81,6 @@ import './notebook/model.spec';
 import './notebook/modelfactory.spec';
 import './notebook/panel.spec';
 import './notebook/tracker.spec';
-import './notebook/trust.spec';
 import './notebook/widget.spec';
 import './notebook/widgetfactory.spec';
 
