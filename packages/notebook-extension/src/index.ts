@@ -448,7 +448,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
   }
 
   commands.addCommand(CommandIDs.runAndAdvance, {
-    label: 'Run Cell(s) and Advance',
+    label: 'Run Cell(s) and Select Below',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
@@ -471,7 +471,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.runAndInsert, {
-    label: 'Run Cell(s) and Insert',
+    label: 'Run Cell(s) and Insert Below',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
@@ -637,7 +637,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.toCode, {
-    label: 'Convert to Code',
+    label: 'Change to Code Cell Type',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
@@ -648,7 +648,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.toMarkdown, {
-    label: 'Convert to Markdown',
+    label: 'Change to Markdown Cell Type',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
@@ -659,7 +659,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.toRaw, {
-    label: 'Convert to Raw',
+    label: 'Change to Raw Cell Type',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
@@ -692,7 +692,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.paste, {
-    label: 'Paste Cell(s)',
+    label: 'Paste Cell(s) Below',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {

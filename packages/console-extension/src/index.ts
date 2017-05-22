@@ -367,7 +367,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
 
   command = CommandIDs.switchKernel;
   commands.addCommand(command, {
-    label: 'Switch Kernel',
+    label: 'Change Kernel',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
