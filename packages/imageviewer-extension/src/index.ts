@@ -17,6 +17,10 @@ import {
   ImageViewer, ImageViewerFactory, IImageTracker
 } from '@jupyterlab/imageviewer';
 
+import {
+  CommandRegistry
+} from '@phosphor/commands';
+
 
 /**
  * The command IDs used by the image widget plugin.
@@ -73,7 +77,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, palette: IComman
     fileExtensions: EXTENSIONS,
     defaultFor: EXTENSIONS
   });
-  const { shell } = app;
+  const { shell, commands } = app;
   const tracker = new InstanceTracker<ImageViewer>({ namespace, shell });
 
   // Handle state restoration.
@@ -91,9 +95,66 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, palette: IComman
     tracker.add(widget);
   });
 
+  addCommands(tracker, commands);
+
   let category = 'Image Widget';
   [CommandIDs.zoomIn, CommandIDs.zoomOut, CommandIDs.resetZoom]
     .forEach(command => { palette.addItem({ command, category }); });
 
   return tracker;
 }
+
+
+/**
+ * Add the commands for the image widget.
+ */
+export
+function addCommands(tracker: IImageTracker, commands: CommandRegistry) {
+  commands.addCommand('imageviewer:zoom-in', {
+    execute: zoomIn,
+    label: 'Zoom In'
+  });
+
+  commands.addCommand('imageviewer:zoom-out', {
+    execute: zoomOut,
+    label: 'Zoom Out'
+  });
+
+  commands.addCommand('imageviewer:reset-zoom', {
+    execute: resetZoom,
+    label: 'Reset Zoom'
+  });
+
+  function zoomIn(): void {
+    let widget = tracker.currentWidget;
+    if (!widget) {
+      return;
+    }
+    if (widget.scale > 1) {
+      widget.scale += .5;
+    } else {
+      widget.scale *= 2;
+    }
+  }
+
+  function zoomOut(): void {
+    let widget = tracker.currentWidget;
+    if (!widget) {
+      return;
+    }
+    if (widget.scale > 1) {
+      widget.scale -= .5;
+    } else {
+      widget.scale /= 2;
+    }
+  }
+
+  function resetZoom(): void {
+    let widget = tracker.currentWidget;
+    if (!widget) {
+      return;
+    }
+    widget.scale = 1;
+  }
+}
+
