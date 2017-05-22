@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@jupyterlab/application-top",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "scripts": {
     "build": "webpack",
     "publish": "node make-release.js"
@@ -11,22 +11,22 @@
     "@jupyterlab/application-extension": "^0.5.0",
     "@jupyterlab/apputils-extension": "^0.5.0",
     "@jupyterlab/codemirror-extension": "^0.5.0",
-    "@jupyterlab/completer-extension": "^0.5.0",
+    "@jupyterlab/completer-extension": "^0.5.1",
     "@jupyterlab/coreutils": "^0.5.0",
-    "@jupyterlab/console-extension": "^0.5.0",
+    "@jupyterlab/console-extension": "^0.5.1",
     "@jupyterlab/csvviewer-extension": "^0.5.0",
     "@jupyterlab/docmanager-extension": "^0.5.0",
     "@jupyterlab/docregistry-extension": "^0.5.0",
     "@jupyterlab/fileeditor-extension": "^0.5.0",
     "@jupyterlab/faq-extension": "^0.5.0",
-    "@jupyterlab/filebrowser-extension": "^0.5.0",
+    "@jupyterlab/filebrowser-extension": "^0.5.1",
     "@jupyterlab/help-extension": "^0.5.0",
     "@jupyterlab/imageviewer-extension": "^0.5.0",
-    "@jupyterlab/inspector-extension": "^0.5.0",
-    "@jupyterlab/landing-extension": "^0.5.0",
-    "@jupyterlab/launcher-extension": "^0.5.0",
+    "@jupyterlab/inspector-extension": "^0.5.1",
+    "@jupyterlab/landing-extension": "^0.5.1",
+    "@jupyterlab/launcher-extension": "^0.5.1",
     "@jupyterlab/markdownviewer-extension": "^0.5.0",
-    "@jupyterlab/notebook-extension": "^0.5.0",
+    "@jupyterlab/notebook-extension": "^0.5.1",
     "@jupyterlab/rendermime-extension": "^0.5.0",
     "@jupyterlab/running-extension": "^0.5.0",
     "@jupyterlab/services": "^0.44.0",
@@ -34,9 +34,9 @@
     "@jupyterlab/shortcuts-extension": "^0.5.0",
     "@jupyterlab/tabmanager-extension": "^0.5.0",
     "@jupyterlab/terminal-extension": "^0.5.0",
-    "@jupyterlab/tooltip-extension": "^0.5.0",
+    "@jupyterlab/tooltip-extension": "^0.5.1",
     "@jupyterlab/application": "^0.5.0",
-    "@jupyterlab/default-theme": "^0.5.0",
+    "@jupyterlab/default-theme": "^0.5.1",
     "es6-promise": "^4.1.0",
     "font-awesome": "^4.6.3"
   },
@@ -81,6 +81,6 @@
       "@jupyterlab/tooltip-extension"
     ],
     "name": "JupyterLab",
-    "version": "0.22.0"
+    "version": "0.22.1"
   }
 }
