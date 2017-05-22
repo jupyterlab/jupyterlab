@@ -858,7 +858,7 @@ namespace Private {
       widget.activate();
     }
     // Scroll to the top of the previous active cell output.
-    let er = state.activeCell.editorWidget.node.getBoundingClientRect();
+    let er = state.activeCell.inputArea.node.getBoundingClientRect();
     widget.scrollToPosition(er.bottom);
   }
 

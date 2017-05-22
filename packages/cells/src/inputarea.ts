@@ -116,9 +116,8 @@ class InputArea extends Widget {
     let layout = this.layout as PanelLayout;
     if (this._rendered) {
       this._rendered.parent = null;
-    } else {
-      this._editor.parent = null;
     }
+    this._editor.hide();
     this._rendered = widget;
     layout.addWidget(widget);
   }
@@ -127,11 +126,10 @@ class InputArea extends Widget {
    * Show the text editor.
    */
   showEditor(): void {
-    let layout = this.layout as PanelLayout;
     if (this._rendered) {
       this._rendered.parent = null;
-      layout.addWidget(this._editor);
     }
+    this._editor.show();
   }
 
   /**
