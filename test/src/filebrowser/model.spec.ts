@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   StateDB
-} from '@jupyterlab/apputils';
+} from '@jupyterlab/coreutils';
 
 import {
   DocumentManager, IDocumentManager
@@ -18,10 +18,6 @@ import {
 import {
   ServiceManager, Session
 } from '@jupyterlab/services';
-
-import {
-  toArray
-} from '@phosphor/algorithm';
 
 import {
   FileBrowserModel
