@@ -804,6 +804,12 @@ class ContentsManager implements Contents.IManager {
       return [drive, Private.normalize(parts[1])];
     }
   }
+
+  /**
+   * Respond to fileChanged signals from the drives attached to
+   * the manager. This prepends the drive name to the path if necessary,
+   * and then forwards the signal.
+   */
   private _onFileChanged(sender: Contents.IDrive, args: Contents.IChangedArgs) {
     if (sender === this._defaultDrive) {
       this._fileChanged.emit(args);
@@ -833,7 +839,6 @@ class ContentsManager implements Contents.IManager {
   private _isDisposed = false;
   private _additionalDrives = new Map<string, Contents.IDrive>();
   private _defaultDrive: Contents.IDrive = null;
-
   private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
 }
 
