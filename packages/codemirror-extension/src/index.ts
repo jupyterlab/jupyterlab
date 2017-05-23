@@ -34,7 +34,7 @@ namespace CommandIDs {
   const matchBrackets = 'codemirror:match-brackets';
 
   export
-  const changeKeyMap = 'codemirror:change-keyMap';
+  const changeKeyMap = 'codemirror:change-keymap';
 
   export
   const changeTheme = 'codemirror:change-theme';
@@ -85,7 +85,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
   Promise.all([settings.load(id), restored]).then(([settings]) => {
     const matched = settings.get('matchBrackets') as boolean | null;
     matchBrackets = matched === null ? matchBrackets : matched as boolean;
-    keyMap = settings.get('keyMap') as string | null || theme;
+    keyMap = settings.get('keyMap') as string | null || keyMap;
     theme = settings.get('theme') as string | null || theme;
 
     tracker.forEach(widget => {
