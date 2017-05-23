@@ -835,7 +835,7 @@ namespace NotebookActions {
     let cells = widget.model.cells;
     let trusted = true;
     for (let i = 0; i < cells.length; i++) {
-      let cell = cells.at(i);
+      let cell = cells.get(i);
       if (!cell.trusted) {
         trusted = false;
       }
@@ -853,7 +853,7 @@ namespace NotebookActions {
     }).then(result => {
       if (result.accept) {
         for (let i = 0; i < cells.length; i++) {
-          let cell = cells.at(i);
+          let cell = cells.get(i);
           cell.trusted = true;
         }
       }
