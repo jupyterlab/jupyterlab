@@ -266,7 +266,7 @@ class DefaultKernel implements Kernel.IKernel {
     }
     let future = new KernelFutureHandler(() => {
       this._futures.delete(msg.header.msg_id);
-    }, msg, expectReply, disposeOnDone);
+    }, msg, expectReply, disposeOnDone, this);
     this._futures.set(msg.header.msg_id, future);
     return future;
   }

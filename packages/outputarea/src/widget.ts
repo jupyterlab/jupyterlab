@@ -18,10 +18,6 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IClientSession
-} from '@jupyterlab/apputils';
-
-import {
   nbformat
 } from '@jupyterlab/coreutils';
 
@@ -153,7 +149,7 @@ class OutputArea extends Widget {
 
   /**
    * A public signal used to indicate the number of outputs has changed.
-   * 
+   *
    * #### Notes
    * This is useful for parents who want to apply styling based on the number
    * of outputs. Emits the current number of outputs.
@@ -161,25 +157,9 @@ class OutputArea extends Widget {
   readonly outputLengthChanged = new Signal<this, number>(this);
 
   /**
-   * Execute code on a client session and handle response messages.
+   * Clear the output area.
    */
-  execute(code: string, session: IClientSession): Promise<KernelMessage.IExecuteReplyMsg> {
-    // Bail if the model is disposed.
-    if (this.model.isDisposed) {
-      return Promise.reject('Model is disposed');
-    }
-
-    // Bail if there is no kernel.
-    let kernel = session.kernel;
-    if (!kernel) {
-      return Promise.reject('No kernel exists on the session');
-    }
-
-    // Override the default for `stop_on_error`.
-    let content: KernelMessage.IExecuteRequest = {
-      code,
-      stop_on_error: true
-    };
+  clear(): void {
     this.model.clear();
 
     // Make sure there were no input widgets.
@@ -187,25 +167,33 @@ class OutputArea extends Widget {
       this._clear();
       this.outputLengthChanged.emit(this.model.length);
     }
+  }
 
-    return new Promise<KernelMessage.IExecuteReplyMsg>((resolve, reject) => {
-      let future = kernel.requestExecute(content);
-      // Handle published messages.
-      future.onIOPub = (msg: KernelMessage.IIOPubMessage) => {
-        this._onIOPub(msg);
-      };
-      // Handle the execute reply.
-      future.onReply = (msg: KernelMessage.IExecuteReplyMsg) => {
-        this._onExecuteReply(msg);
-        resolve(msg);
-      };
-      // Handle stdin.
-      future.onStdin = (msg: KernelMessage.IStdinMessage) => {
-        if (KernelMessage.isInputRequestMsg(msg)) {
-          this._onInputRequest(msg, session);
-        }
-      };
-    });
+  /**
+   * Handle messages from code execution.
+   */
+  handleExecution(future: Kernel.IFuture): Promise<void> {
+    // Bail if the model is disposed.
+    if (this.model.isDisposed) {
+      return Promise.reject('Model is disposed');
+    }
+
+    // Handle published messages.
+    future.onIOPub = (msg: KernelMessage.IIOPubMessage) => {
+      this._onIOPub(msg);
+    };
+    // Handle the execute reply.
+    future.onReply = (msg: KernelMessage.IExecuteReplyMsg) => {
+      this._onExecuteReply(msg);
+    };
+    // Handle stdin.
+    future.onStdin = (msg: KernelMessage.IStdinMessage) => {
+      if (KernelMessage.isInputRequestMsg(msg)) {
+        this._onInputRequest(msg, future);
+      }
+    };
+
+    return future.done;
   }
 
   /**
@@ -321,7 +309,7 @@ class OutputArea extends Widget {
   /**
    * Handle an input request from a kernel.
    */
-  private _onInputRequest(msg: KernelMessage.IInputRequestMsg, session: IClientSession): void {
+  private _onInputRequest(msg: KernelMessage.IInputRequestMsg, future: Kernel.IFuture): void {
     // Add an output widget to the end.
     let factory = this.contentFactory;
     let stdinPrompt = msg.content.prompt;
@@ -335,8 +323,7 @@ class OutputArea extends Widget {
     prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
     panel.addWidget(prompt);
 
-    let kernel = session.kernel;
-    let input = factory.createStdin({ prompt: stdinPrompt, password, kernel });
+    let input = factory.createStdin({ prompt: stdinPrompt, password, future });
     input.addClass(OUTPUT_AREA_OUTPUT_CLASS);
     panel.addWidget(input);
 
@@ -421,8 +408,8 @@ namespace OutputArea {
 
   /**
    * An output area widget content factory.
-   * 
-   * The content factory is used to create children in a way 
+   *
+   * The content factory is used to create children in a way
    * that can be customized.
    */
   export
@@ -542,7 +529,7 @@ class Stdin extends Widget implements IStdin {
     if (options.password) {
       this._input.type = 'password';
     }
-    this._kernel = options.kernel;
+    this._future = options.future;
   }
 
   /**
@@ -559,7 +546,7 @@ class Stdin extends Widget implements IStdin {
     let input = this._input;
     if (event.type === 'keydown') {
       if ((event as KeyboardEvent).keyCode === 13) {  // Enter
-        this._kernel.sendInputReply({
+        this._future.sendInputReply({
           value: input.value
         });
         let rendered = document.createElement('span');
@@ -596,9 +583,10 @@ class Stdin extends Widget implements IStdin {
     this._input.removeEventListener('keydown', this);
   }
 
-  private _kernel: Kernel.IKernelConnection = null;
+  private _future: Kernel.IFuture = null;
   private _input: HTMLInputElement = null;
 }
+
 
 export
 namespace Stdin {
@@ -618,9 +606,9 @@ namespace Stdin {
     password: boolean;
 
     /**
-     * The kernel associated with the request.
+     * The kernel future associated with the request.
      */
-    kernel: Kernel.IKernelConnection;
+    future: Kernel.IFuture;
   }
 }
 
