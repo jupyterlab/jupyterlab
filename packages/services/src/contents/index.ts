@@ -576,13 +576,13 @@ class ContentsManager implements Contents.IManager {
         });
         return {
           ...contentsModel,
-          path: Private.normalize(path),
+          path: this._toGlobalPath(drive, localPath),
           content: listing
         } as Contents.IModel;
       } else {
         return {
           ...contentsModel,
-          path: Private.normalize(path)
+          path: this._toGlobalPath(drive, localPath)
         } as Contents.IModel;
       }
     }); 
@@ -653,7 +653,10 @@ class ContentsManager implements Contents.IManager {
       throw Error('ContentsManager: renaming files must occur within a Drive');
     }
     return drive1.rename(path1, path2).then(contentsModel => {
-      return { ...contentsModel, path: path } as Contents.IModel;
+      return {
+        ...contentsModel,
+        path: this._toGlobalPath(drive1, path2)
+      } as Contents.IModel;
     });
   }
 
@@ -771,9 +774,9 @@ class ContentsManager implements Contents.IManager {
    */
   private _toGlobalPath(drive: Contents.IDrive, localPath: string): string {
     if (drive === this._defaultDrive) {
-      return PathExt.normalize(localPath);
+      return PathExt.removeSlash(localPath);
     } else {
-      return drive.name + ':' + PathExt.normalize(localPath);
+      return drive.name + ':' + PathExt.removeSlash(localPath);
     }
   }
 
@@ -1042,7 +1045,7 @@ class Drive implements Contents.IDrive {
     let request = {
       url: this._getUrl(oldLocalPath),
       method: 'PATCH',
-      data: JSON.stringify({ localPath: newLocalPath })
+      data: JSON.stringify({ path: newLocalPath })
     };
     return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
       if (response.xhr.status !== 200) {
