@@ -1,9 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as CodeMirror
-  from 'codemirror';
-
 import {
   IEditorMimeTypeService
 } from '@jupyterlab/codeeditor';
@@ -13,7 +10,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  findMode
+  Mode
 } from '.';
 
 /**
@@ -28,22 +25,27 @@ class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
    * If a mime type cannot be found returns the defaul mime type `text/plain`, never `null`.
    */
   getMimeTypeByLanguage(info: nbformat.ILanguageInfoMetadata): string {
+    let mode: Mode.ISpec;
     if (info.codemirror_mode) {
-      return findMode(info.codemirror_mode as any).mime;
+      mode = Mode.findBest(info.codemirror_mode as any);
+      if (mode) {
+        return mode.mime;
+      }
     }
-    let mode = CodeMirror.findModeByMIME(info.mimetype || '');
+    mode = Mode.findByMIME(info.mimetype || '');
     if (mode) {
       return info.mimetype!;
     }
     let ext = info.file_extension || '';
     ext = ext.split('.').slice(-1)[0];
-    mode = CodeMirror.findModeByExtension(ext || '');
+    mode = Mode.findByExtension(ext || '');
     if (mode) {
       return mode.mime;
     }
-    mode = CodeMirror.findModeByName(info.name || '');
+    mode = Mode.findByName(info.name || '');
     return mode ? mode.mime : IEditorMimeTypeService.defaultMimeType;
   }
+
   /**
    * Returns a mime type for the given file path.
    *
@@ -54,7 +56,7 @@ class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
     if (PathExt.extname(path) === '.ipy') {
       return 'text/x-python';
     }
-    const mode = CodeMirror.findModeByFileName(path);
+    const mode = Mode.findByFileName(path);
     return mode ? mode.mime : IEditorMimeTypeService.defaultMimeType;
   }
 }

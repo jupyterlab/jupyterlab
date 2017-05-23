@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  findModeByExtension
+  Mode
 } from '@jupyterlab/codemirror';
 
 import {
@@ -228,7 +228,8 @@ class TextModelFactory implements DocumentRegistry.CodeModelFactory {
    * Get the preferred kernel language given an extension.
    */
   preferredLanguage(ext: string): string {
-    return findModeByExtension(ext.slice(1));
+    let mode = Mode.findByExtension(ext.slice(1));
+    return mode && mode.mode;
   }
 
   private _isDisposed = false;

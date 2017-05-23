@@ -33,7 +33,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  loadModeByMIME
+  Mode
 } from './mode';
 
 import 'codemirror/addon/edit/matchbrackets.js';
@@ -492,7 +492,9 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   private _onMimeTypeChanged(): void {
     const mime = this._model.mimeType;
     let editor = this._editor;
-    loadModeByMIME(editor, mime);
+    Mode.ensure(mime).then(spec => {
+      editor.setOption('mode', spec.mime);
+    });
     let isCode = (mime !== 'text/plain') && (mime !== 'text/x-ipythongfm');
     editor.setOption('matchBrackets', isCode);
     editor.setOption('autoCloseBrackets', isCode);
@@ -713,6 +715,18 @@ namespace CodeMirrorEditor {
    */
   export
   const DEFAULT_THEME: string = 'jupyter';
+
+  /**
+   * Add a command to CodeMirror.
+   *
+   * @param name - The name of the command to add.
+   *
+   * @param command - The command function.
+   */
+  export
+  function addCommand(name: string, command: (cm: CodeMirror.Editor) => void) {
+    CodeMirror.commands[name] = command;
+  }
 }
 
 
@@ -786,7 +800,9 @@ namespace Private {
 
 /**
  * Add a CodeMirror command to delete until previous non blanking space
- * character or first multiple of 4 tabstop.
+ * character or first multiple of tabsize tabstop.
  */
-CodeMirror.commands['delSpaceToPrevTabStop'] = Private.delSpaceToPrevTabStop;
+CodeMirrorEditor.addCommand(
+  'delSpaceToPrevTabStop', Private.delSpaceToPrevTabStop
+);
 

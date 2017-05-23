@@ -6,7 +6,7 @@ import {
 } from 'ansi_up';
 
 import {
-  requireMode, runMode, CodeMirrorEditor
+  Mode, CodeMirrorEditor
 } from '@jupyterlab/codemirror';
 
 import * as marked
@@ -478,7 +478,7 @@ namespace Private {
                 return code;
             }
         }
-        requireMode(lang).then(spec => {
+        Mode.ensure(lang).then(spec => {
           let el = document.createElement('div');
           if (!spec) {
               console.log(`No CodeMirror mode: ${lang}`);
@@ -486,7 +486,7 @@ namespace Private {
               return;
           }
           try {
-            runMode(code, spec.mime, el);
+            Mode.run(code, spec.mime, el);
             callback(null, el.innerHTML);
           } catch (err) {
             console.log(`Failed to highlight ${lang} code`, err);
