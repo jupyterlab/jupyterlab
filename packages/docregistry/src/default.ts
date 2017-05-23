@@ -281,6 +281,7 @@ abstract class ABCWidgetFactory<T extends Widget, U extends DocumentRegistry.IMo
    */
   constructor(options: DocumentRegistry.IWidgetFactoryOptions) {
     this._name = options.name;
+    this._readOnly = options.readOnly === undefined ? false : options.readOnly;
     this._defaultFor = options.defaultFor ? options.defaultFor.slice() : [];
     this._fileExtensions = options.fileExtensions.slice();
     this._modelName = options.modelName || 'text';
@@ -307,6 +308,13 @@ abstract class ABCWidgetFactory<T extends Widget, U extends DocumentRegistry.IMo
    */
   dispose(): void {
     this._isDisposed = true;
+  }
+
+  /**
+   * Whether the widget factory is read only.
+   */
+  get readOnly(): boolean {
+    return this._readOnly;
   }
 
   /**
@@ -370,6 +378,7 @@ abstract class ABCWidgetFactory<T extends Widget, U extends DocumentRegistry.IMo
 
   private _isDisposed = false;
   private _name: string;
+  private _readOnly: boolean;
   private _canStartKernel: boolean;
   private _preferKernel: boolean;
   private _modelName: string;

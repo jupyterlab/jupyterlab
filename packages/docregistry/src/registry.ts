@@ -798,6 +798,11 @@ namespace DocumentRegistry {
     readonly defaultFor?: string[];
 
     /**
+     * Whether the widget factory is read only.
+     */
+    readonly readOnly?: boolean;
+
+    /**
      * The registered name of the model type used to create the widgets.
      */
     readonly modelName?: string;
@@ -926,7 +931,12 @@ namespace DocumentRegistry {
     /**
      * The optional icon class to use for the file type.
      */
-    readonly icon?: string;
+    readonly iconClass?: string;
+
+    /**
+     * The optional icon label to use for the file type.
+     */
+    readonly iconLabel?: string;
 
     /**
      * The content type of the new file (defaults to `"file"`).

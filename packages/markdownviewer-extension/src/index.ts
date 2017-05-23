@@ -51,6 +51,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, rendermime: IRen
     const factory = new MarkdownViewerFactory({
       name: FACTORY,
       fileExtensions: ['.md'],
+      readOnly: true,
       rendermime
     });
     const shell = app.shell;

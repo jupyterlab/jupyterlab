@@ -63,7 +63,7 @@ class LoggingManager extends DocumentWidgetManager {
 }
 
 
-describe('docmanager/widgetmanager', () => {
+describe('@jupyterlab/docmanager', () => {
 
   let manager: LoggingManager;
   let services: ServiceManager.IManager;
@@ -72,6 +72,11 @@ describe('docmanager/widgetmanager', () => {
   let widgetFactory = new WidgetFactory({
     name: 'test',
     fileExtensions: ['.txt']
+  });
+  let readOnlyFactory = new WidgetFactory({
+    name: 'readonly',
+    fileExtensions: ['.txt'],
+    readOnly: true
   });
 
   before(() => {
@@ -130,14 +135,8 @@ describe('docmanager/widgetmanager', () => {
     describe('#createWidget()', () => {
 
       it('should create a widget', () => {
-        let widget = manager.createWidget('test', context);
+        let widget = manager.createWidget(widgetFactory, context);
         expect(widget).to.be.a(Widget);
-      });
-
-      it('should throw an error if the name is not registered', () => {
-        expect(() => {
-          manager.createWidget('foo', context);
-        }).to.throwError();
       });
 
       it('should emit the widgetCreated signal', () => {
@@ -145,7 +144,7 @@ describe('docmanager/widgetmanager', () => {
         widgetFactory.widgetCreated.connect(() => {
           called = true;
         });
-        manager.createWidget('test', context);
+        manager.createWidget(widgetFactory, context);
         expect(called).to.be(true);
       });
 
@@ -177,7 +176,7 @@ describe('docmanager/widgetmanager', () => {
     describe('#findWidget()', () => {
 
       it('should find a registered widget', () => {
-        let widget = manager.createWidget('test', context);
+        let widget = manager.createWidget(widgetFactory, context);
         expect(manager.findWidget(context, 'test')).to.be(widget);
       });
 
@@ -190,7 +189,7 @@ describe('docmanager/widgetmanager', () => {
     describe('#contextForWidget()', () => {
 
       it('should return the context for a widget', () => {
-        let widget = manager.createWidget('test', context);
+        let widget = manager.createWidget(widgetFactory, context);
         expect(manager.contextForWidget(widget)).to.be(context);
       });
 
@@ -203,7 +202,7 @@ describe('docmanager/widgetmanager', () => {
     describe('#cloneWidget()', () => {
 
       it('should create a new widget with the same context using the same factory', () => {
-        let widget = manager.createWidget('test', context);
+        let widget = manager.createWidget(widgetFactory, context);
         let clone = manager.cloneWidget(widget);
         expect(clone.hasClass('WidgetFactory')).to.be(true);
         expect(clone.hasClass('jp-Document')).to.be(true);
@@ -220,7 +219,7 @@ describe('docmanager/widgetmanager', () => {
 
       it('should close all of the widgets associated with a context', () => {
         let called = 0;
-        let widget = manager.createWidget('test', context);
+        let widget = manager.createWidget(widgetFactory, context);
         let clone = manager.cloneWidget(widget);
         widget.disposed.connect(() => { called++; });
         clone.disposed.connect(() => { called++; });
@@ -241,13 +240,13 @@ describe('docmanager/widgetmanager', () => {
       });
 
       it('should return false for close-request messages', () => {
-        let widget = manager.createWidget('test', context);
+        let widget = manager.createWidget(widgetFactory, context);
         let msg = new Message('close-request');
         expect(manager.filterMessage(widget, msg)).to.be(false);
       });
 
       it('should return true for other messages', () => {
-        let widget = manager.createWidget('test', context);
+        let widget = manager.createWidget(widgetFactory, context);
         let msg = new Message('foo');
         expect(manager.filterMessage(widget, msg)).to.be(true);
       });
@@ -258,7 +257,7 @@ describe('docmanager/widgetmanager', () => {
 
       it('should set the title of the widget', (done) => {
         context.save().then(() => {
-          let widget = manager.createWidget('test', context);
+          let widget = manager.createWidget(widgetFactory, context);
           widget.title.changed.connect(() => {
             expect(manager.methods).to.contain('setCaption');
             expect(widget.title.caption).to.contain('Last Checkpoint');
@@ -272,7 +271,7 @@ describe('docmanager/widgetmanager', () => {
     describe('#onClose()', () => {
 
       it('should be called when a widget is closed', (done) => {
-        let widget = manager.createWidget('test', context);
+        let widget = manager.createWidget(widgetFactory, context);
         widget.disposed.connect(() => {
           expect(manager.methods).to.contain('onClose');
           done();
@@ -282,7 +281,7 @@ describe('docmanager/widgetmanager', () => {
 
       it('should prompt the user before closing', (done) => {
         context.model.fromString('foo');
-        let widget = manager.createWidget('test', context);
+        let widget = manager.createWidget(widgetFactory, context);
         manager.onClose(widget).then(() => {
           expect(widget.isDisposed).to.be(true);
           done();
@@ -290,9 +289,39 @@ describe('docmanager/widgetmanager', () => {
         acceptDialog();
       });
 
+      it('should not prompt if the factory is readonly', () => {
+        context.model.fromString('foo');
+        let widget = manager.createWidget(readOnlyFactory, context);
+        return manager.onClose(widget).then(() => {
+          expect(widget.isDisposed).to.be(true);
+        });
+      });
+
+      it('should not prompt if the other widget is writable', () => {
+        context.model.fromString('foo');
+        let widget0 = manager.createWidget(widgetFactory, context);
+        let widget1 = manager.createWidget(widgetFactory, context);
+        return manager.onClose(widget0).then(() => {
+          expect(widget0.isDisposed).to.be(true);
+          widget1.dispose();
+        });
+      });
+
+      it('should prompt if the only other widget has a readonly factory', (done) => {
+        context.model.fromString('foo');
+        let widget0 = manager.createWidget(widgetFactory, context);
+        let widget1 = manager.createWidget(readOnlyFactory, context);
+        manager.onClose(widget1).then(() => {
+          expect(widget1.isDisposed).to.be(true);
+          widget0.dispose();
+          done();
+        });
+        acceptDialog();
+      });
+
       it('should close the widget', (done) => {
         context.model.fromString('foo');
-        let widget = manager.createWidget('test', context);
+        let widget = manager.createWidget(widgetFactory, context);
         manager.onClose(widget).then(() => {
           expect(widget.isDisposed).to.be(false);
           done();
