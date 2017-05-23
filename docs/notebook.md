@@ -118,7 +118,8 @@ cookiecutter https://github.com/jupyterlab/extension-cookiecutter-ts
 cd my-cookie-cutter-name
 ```
 
-Install the dependencies.
+Install the dependencies.  Note that extensions are built against the released
+npm packages, not the development versions.
 
 ```
 npm install --save @jupyterlab/notebook @jupyterlab/apputils @jupyterlab/docregistry @phosphor/disposable
