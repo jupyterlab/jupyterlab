@@ -99,7 +99,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, palette: IComman
     tracker.add(widget);
   });
 
-  addCommands(tracker, commands);
+  addCommands(tracker, app.commands);
 
   let category = 'Image Viewer';
   [CommandIDs.zoomIn, CommandIDs.zoomOut, CommandIDs.resetZoom]

@@ -92,7 +92,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
     return;
   }
 
-  const { commands, shell } = app;
+  const { commands } = app;
   const category = 'Terminal';
   const namespace = 'terminal';
   const tracker = new InstanceTracker<Terminal>({ namespace });
