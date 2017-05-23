@@ -24,8 +24,7 @@ import {
 
 import {
   CellTools, ICellTools, INotebookTracker, NotebookActions,
-  NotebookModelFactory,  NotebookPanel, NotebookTracker, NotebookWidgetFactory,
-  trustNotebook
+  NotebookModelFactory,  NotebookPanel, NotebookTracker, NotebookWidgetFactory
 } from '@jupyterlab/notebook';
 
 import {
@@ -536,7 +535,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       if (!current) {
         return;
       }
-      return trustNotebook(current.context.model).then(() => {
+      return NotebookActions.trust(current.notebook).then(() => {
         return current.context.save();
       });
     },

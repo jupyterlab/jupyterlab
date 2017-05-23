@@ -8,6 +8,5 @@ export * from './model';
 export * from './modelfactory';
 export * from './panel';
 export * from './tracker';
-export * from './trust';
 export * from './widget';
 export * from './widgetfactory';

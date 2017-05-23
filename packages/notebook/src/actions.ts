@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  IClientSession, Clipboard
+  IClientSession, Clipboard, Dialog, showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -29,6 +29,10 @@ import {
 import {
   Notebook
 } from './widget';
+
+
+// The message to display to the user when prompting to trust the notebook.
+const TRUST_MESSAGE = '<p>A trusted Jupyter notebook may execute hidden malicious code when you open it.<br>Selecting trust will re-render this notebook in a trusted state.<br>For more information, see the <a href="http://ipython.org/ipython-doc/2/notebook/security.html">Jupyter security documentation</a>.</p>';
 
 
 /**
@@ -402,7 +406,7 @@ namespace NotebookActions {
    * The cell insert can be undone.
    */
   export
-  function runAndInsert(widget: Notebook, session: IClientSession): Promise<boolean> {
+  function runAndInsert(widget: Notebook, session?: IClientSession): Promise<boolean> {
     if (!widget.model || !widget.activeCell) {
       return Promise.resolve(false);
     }
@@ -810,6 +814,50 @@ namespace NotebookActions {
     });
     Private.changeCellType(widget, 'markdown');
     Private.handleState(widget, state);
+  }
+
+  /**
+   * Trust the notebook after prompting the user.
+   *
+   * @param widget - The target notebook widget.
+   *
+   * @returns a promise that resolves when the transaction is finished.
+   *
+   * #### Notes
+   * No dialog will be presented if the notebook is already trusted.
+   */
+  export
+  function trust(widget: Notebook): Promise<void> {
+    if (!widget.model) {
+      return Promise.resolve(void 0);
+    }
+    // Do nothing if already trusted.
+    let cells = widget.model.cells;
+    let trusted = true;
+    for (let i = 0; i < cells.length; i++) {
+      let cell = cells.at(i);
+      if (!cell.trusted) {
+        trusted = false;
+      }
+    }
+    if (trusted) {
+      return showDialog({
+        body: 'Notebook is already trusted',
+        buttons: [Dialog.okButton()]
+      }).then(() => void 0);
+    }
+    return showDialog({
+      body: TRUST_MESSAGE,
+      title: 'Trust this notebook?',
+      buttons: [Dialog.cancelButton(), Dialog.warnButton()]
+    }).then(result => {
+      if (result.accept) {
+        for (let i = 0; i < cells.length; i++) {
+          let cell = cells.at(i);
+          cell.trusted = true;
+        }
+      }
+    });
   }
 }
 

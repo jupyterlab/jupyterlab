@@ -28,7 +28,7 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
-  createClientSession
+  acceptDialog, createClientSession, dismissDialog
 } from '../utils';
 
 import {
@@ -1411,6 +1411,51 @@ describe('@jupyterlab/notebook', () => {
       it('should unrender the cells', () => {
         NotebookActions.setMarkdownHeader(widget, 1);
         expect((widget.activeCell as MarkdownCell).rendered).to.be(false);
+      });
+
+    });
+
+    describe('#trust()', () => {
+
+      it('should trust the notebook cells if the user accepts', (done) => {
+        let model = widget.model;
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        let cell = model.cells.at(0);
+        expect(cell.trusted).to.not.be(true);
+        NotebookActions.trust(widget).then(() => {
+          expect(cell.trusted).to.be(true);
+          done();
+        });
+        acceptDialog();
+      });
+
+      it('should not trust the notebook cells if the user aborts', (done) => {
+        let model = widget.model;
+        model.fromJSON(DEFAULT_CONTENT);
+        let cell = model.cells.at(0);
+        expect(cell.trusted).to.not.be(true);
+        NotebookActions.trust(widget).then(() => {
+          expect(cell.trusted).to.not.be(true);
+          done();
+        });
+        dismissDialog();
+      });
+
+      it('should bail if the model is `null`', (done) => {
+        widget.model = null;
+        NotebookActions.trust(widget).then(() => { done(); });
+      });
+
+      it('should show a dialog if all cells are trusted', (done) => {
+        let model = widget.model;
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        model.fromJSON(DEFAULT_CONTENT);
+        for (let i = 0; i < model.cells.length; i++) {
+          let cell = model.cells.at(i);
+          cell.trusted = true;
+        }
+        NotebookActions.trust(widget).then(() => { done(); });
+        acceptDialog();
       });
 
     });
