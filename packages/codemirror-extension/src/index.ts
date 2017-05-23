@@ -75,36 +75,28 @@ export default plugins;
  * Set up the editor widget menu and commands.
  */
 function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB): void {
-  let { commands } = app;
+  const { commands, restored, settings } = app;
   let theme: string = CodeMirrorEditor.DEFAULT_THEME;
   let keyMap: string = 'default';
   let matchBrackets = false;
-  let id = 'codemirror:settings';
 
   // Fetch the initial state of the settings.
-  state.fetch(id).then(settings => {
-    if (!settings) {
-      return;
-    }
-    if (typeof settings['theme'] === 'string') {
-      commands.execute(CommandIDs.changeTheme, settings);
-    }
-    if (typeof settings['keyMap'] === 'string') {
-      commands.execute(CommandIDs.changeKeyMap, settings);
-    }
-    if (typeof settings['matchBrackets'] === 'boolean') {
-      if (settings['matchBrackets'] !== matchBrackets) {
-        commands.execute(CommandIDs.matchBrackets);
-      }
-    }
-  });
+  const { id } = commandsPlugin;
+  Promise.all([settings.load(id), restored]).then(([settings]) => {
+    const matched = settings.get('matchBrackets') as boolean | null;
+    matchBrackets = matched === null ? matchBrackets : matched as boolean;
+    keyMap = settings.get('keyMap') as string | null || theme;
+    theme = settings.get('theme') as string | null || theme;
 
-  /**
-   * Save the codemirror settings state.
-   */
-  function saveState(): Promise<void> {
-    return state.save(id, { theme, keyMap, matchBrackets });
-  }
+    tracker.forEach(widget => {
+      if (widget.editor instanceof CodeMirrorEditor) {
+        let cm = widget.editor.editor;
+        cm.setOption('keyMap', keyMap);
+        cm.setOption('theme', theme);
+        cm.setOption('matchBrackets', matchBrackets);
+      }
+    });
+  });
 
   /**
    * Handle the settings of new widgets.
@@ -133,27 +125,12 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
   }
 
   /**
-   * Toggle editor matching brackets
-   */
-  function toggleMatchBrackets(): Promise<void> {
-    matchBrackets = !matchBrackets;
-    tracker.forEach(widget => {
-      let editor = widget.editor;
-      if (editor instanceof CodeMirrorEditor) {
-        let cm = editor.editor;
-        cm.setOption('matchBrackets', matchBrackets);
-      }
-    });
-    return saveState();
-  }
-
-  /**
    * Create a menu for the editor.
    */
   function createMenu(): Menu {
-    let menu = new Menu({ commands });
-    let themeMenu = new Menu({ commands });
-    let keyMapMenu = new Menu({ commands });
+    const menu = new Menu({ commands });
+    const themeMenu = new Menu({ commands });
+    const keyMapMenu = new Menu({ commands });
 
     menu.title.label = 'Editor';
     themeMenu.title.label = 'Theme';
@@ -169,10 +146,10 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
             cm.setOption('theme', theme);
           }
         });
-        return saveState();
+        return settings.set(id, 'theme', theme);
       },
       isEnabled: hasWidget,
-      isToggled: args => { return args['theme'] === theme; }
+      isToggled: args => args['theme'] === theme
     });
 
 
@@ -189,10 +166,10 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
             cm.setOption('keyMap', keyMap);
           }
         });
-        return saveState();
+        return settings.set(id, 'keyMap', keyMap);
       },
       isEnabled: hasWidget,
-      isToggled: args => { return args['keyMap'] === keyMap; }
+      isToggled: args => args['keyMap'] === keyMap
     });
 
     [
@@ -204,12 +181,12 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
       args: { theme: name }
     }));
 
-    [
-     'default', 'sublime', 'vim', 'emacs'
-    ].forEach(name => keyMapMenu.addItem({
-      command: CommandIDs.changeKeyMap,
-      args: { keyMap: name }
-    }));
+    ['default', 'sublime', 'vim', 'emacs'].forEach(name => {
+      keyMapMenu.addItem({
+        command: CommandIDs.changeKeyMap,
+        args: { keyMap: name }
+      });
+    });
 
     menu.addItem({ command: 'editor:line-numbers' });
     menu.addItem({ command: 'editor:word-wrap' });
@@ -224,10 +201,20 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
   mainMenu.addMenu(createMenu(), { rank: 30 });
 
   commands.addCommand(CommandIDs.matchBrackets, {
-    execute: toggleMatchBrackets,
+    execute: () => {
+      matchBrackets = !matchBrackets;
+      tracker.forEach(widget => {
+        const editor = widget.editor;
+        if (editor instanceof CodeMirrorEditor) {
+          const cm = editor.editor;
+          cm.setOption('matchBrackets', matchBrackets);
+        }
+      });
+      return settings.set(id, 'matchBrackets', matchBrackets);
+    },
     label: 'Match Brackets',
     isEnabled: hasWidget,
-    isToggled: () => { return !matchBrackets; }
+    isToggled: () => !matchBrackets
   });
 
   [
