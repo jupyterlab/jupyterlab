@@ -2,14 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IServiceManager
-} from '@jupyterlab/services';
-
-import {
-  Menu
-} from '@phosphor/widgets';
-
-import {
   JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
@@ -22,9 +14,16 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
-  Terminal, ITerminalTracker, addDefaultCommands
+  IServiceManager
+} from '@jupyterlab/services';
+
+import {
+  Terminal, ITerminalTracker
 } from '@jupyterlab/terminal';
 
+import {
+  Menu
+} from '@phosphor/widgets';
 
 
 /**
@@ -101,7 +100,50 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
     name: widget => widget.session && widget.session.name
   });
 
-  addDefaultCommands(tracker, commands);
+  addCommands(app, services, tracker);
+
+  // Add command palette and menu items.
+  let menu = new Menu({ commands });
+  menu.title.label = category;
+  [
+    CommandIDs.createNew,
+    CommandIDs.refresh,
+    CommandIDs.increaseFont,
+    CommandIDs.decreaseFont,
+    CommandIDs.toggleTheme
+  ].forEach(command => {
+    palette.addItem({ command, category });
+    menu.addItem({ command });
+  });
+  mainMenu.addMenu(menu, {rank: 40});
+
+  // Add a launcher item if the launcher is available.
+  if (launcher) {
+    launcher.add({
+      name: 'Terminal',
+      command: CommandIDs.createNew
+    });
+  }
+
+  app.contextMenu.addItem({command: CommandIDs.refresh, selector: '.jp-Terminal', rank: 1});
+
+  return tracker;
+}
+
+
+/**
+ * Add the commands for the terminal.
+ */
+export
+function addCommands(app: JupyterLab, services: IServiceManager, tracker: InstanceTracker<Terminal>) {
+  let { commands, shell } = app;
+
+  /**
+   * Whether there is an active terminal.
+   */
+  function hasWidget(): boolean {
+    return tracker.currentWidget !== null;
+  }
 
   // Add terminal commands.
   commands.addCommand(CommandIDs.createNew, {
@@ -157,30 +199,48 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
     isEnabled: () => { return tracker.currentWidget !== null; }
   });
 
-  // Add command palette and menu items.
-  let menu = new Menu({ commands });
-  menu.title.label = category;
-  [
-    CommandIDs.createNew,
-    CommandIDs.refresh,
-    CommandIDs.increaseFont,
-    CommandIDs.decreaseFont,
-    CommandIDs.toggleTheme
-  ].forEach(command => {
-    palette.addItem({ command, category });
-    menu.addItem({ command });
+  commands.addCommand('terminal:increase-font', {
+    label: 'Increase Terminal Font Size',
+    execute: () => {
+      let options = Terminal.defaultOptions;
+      if (options.fontSize < 72) {
+        options.fontSize++;
+        tracker.forEach(widget => { widget.fontSize = options.fontSize; });
+      }
+    },
+    isEnabled: hasWidget
   });
-  mainMenu.addMenu(menu, {rank: 40});
 
-  // Add a launcher item if the launcher is available.
-  if (launcher) {
-    launcher.add({
-      name: 'Terminal',
-      command: CommandIDs.createNew
-    });
-  }
+  commands.addCommand('terminal:decrease-font', {
+    label: 'Decrease Terminal Font Size',
+    execute: () => {
+      let options = Terminal.defaultOptions;
+      if (options.fontSize > 9) {
+        options.fontSize--;
+        tracker.forEach(widget => { widget.fontSize = options.fontSize; });
+      }
+    },
+    isEnabled: hasWidget
+  });
 
-  app.contextMenu.addItem({command: CommandIDs.refresh, selector: '.jp-Terminal', rank: 1});
-
-  return tracker;
+  commands.addCommand('terminal:toggle-theme', {
+    label: 'Toggle Terminal Theme',
+    caption: 'Switch Terminal Background and Font Colors',
+    execute: () => {
+      let options = Terminal.defaultOptions;
+      if (options.background === 'black') {
+        options.background = 'white';
+        options.color = 'black';
+      } else {
+        options.background = 'black';
+        options.color = 'white';
+      }
+      tracker.forEach(widget => {
+        widget.background = options.background;
+        widget.color = options.color;
+      });
+    },
+    isEnabled: hasWidget
+  });
 }
+
