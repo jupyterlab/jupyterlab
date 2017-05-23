@@ -149,6 +149,8 @@ def should_build(app_dir=None):
     """Determine whether JupyterLab should be built.
 
     Note: Linked packages should be updated by manually building.
+
+    Returns a tuple of whether a build is necessary, and an associated message.
     """
     app_dir = get_app_dir(app_dir)
 
@@ -157,18 +159,19 @@ def should_build(app_dir=None):
 
     # No linked and no extensions and no built version.
     if not extensions and not os.path.exists(pjoin(app_dir, 'static')):
-        return False
+        return False, ''
 
     pkg_path = pjoin(app_dir, 'static', 'package.json')
     if not pkg_path:
-        return True
+        return True, 'Installed extensions with no built application'
 
     with open(pkg_path) as fid:
         data = json.load(fid)
 
     # Look for mismatched version.
     if not data['jupyterlab'].get('version', '') == __version__:
-        return True
+        msg = 'Version mismatch: %s (built), %s (current)'
+        return True, msg % (data['jupyterlab'].get('version', ''), __version__)
 
     # Look for mismatched extensions.
     _ensure_package(app_dir)
@@ -180,14 +183,14 @@ def should_build(app_dir=None):
     staging_exts = staging_data['jupyterlab']['extensions']
 
     if set(staging_exts) != set(data['jupyterlab']['extensions']):
-        return True
+        return True, 'Installed extensions changed'
 
     # Look for mismatched extension paths.
     for name in extensions:
         if data['dependencies'][name] != staging_data['dependencies'][name]:
-            return True
+            return True, 'Installed extensions changed'
 
-    return False
+    return False, ''
 
 
 def _get_build_config(app_dir):

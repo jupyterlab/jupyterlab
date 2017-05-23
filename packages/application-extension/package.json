@@ -13,7 +13,8 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^0.5.0",
-    "@jupyterlab/apputils": "^0.5.0"
+    "@jupyterlab/apputils": "^0.5.0",
+    "@jupyterlab/coreutils": "^0.5.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",

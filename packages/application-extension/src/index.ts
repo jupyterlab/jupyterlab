@@ -6,8 +6,12 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette
+  Dialog, ICommandPalette, showDialog
 } from '@jupyterlab/apputils';
+
+import {
+  PageConfig
+} from '@jupyterlab/coreutils';
 
 
 /**
@@ -86,6 +90,22 @@ const plugin: JupyterLabPlugin<void> = {
       }
     });
     palette.addItem({ command, category });
+
+    // Temporary build message for manual rebuild.
+    let buildMessage = PageConfig.getOption('buildRequired');
+    if (buildMessage) {
+      let body = document.createElement('pre');
+      body.textContent = (
+        'JupyterLab is out of date.\n' +
+        'Please run "jupyter lab build" from\n' +
+        'the command line and relaunch.'
+      );
+      showDialog({
+        title: 'Build Recommended',
+        body,
+        buttons: [Dialog.okButton()]
+      });
+    }
 
     const message = 'Are you sure you want to exit JupyterLab?\n' +
                     'Any unsaved changes will be lost.';

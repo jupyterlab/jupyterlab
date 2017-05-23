@@ -7,7 +7,7 @@ import os
 
 from jupyterlab_launcher import add_handlers, LabConfig
 
-from .commands import get_app_dir, list_extensions
+from .commands import get_app_dir, list_extensions, should_build
 from ._version import __version__
 
 #-----------------------------------------------------------------------------
@@ -64,6 +64,14 @@ def load_jupyter_server_extension(nbapp):
     # installed extensions.
     installed = list_extensions(app_dir)
     fallback = not installed and not os.path.exists(config.assets_dir)
+
+    web_app.settings.setdefault('page_config_data', dict())
+
+    if not core_mode:
+        build_needed, msg = should_build(app_dir)
+        if build_needed:
+            nbapp.log.warn('Build required: %s' % msg)
+            web_app.settings['page_config_data']['buildRequired'] = msg
 
     if core_mode or fallback:
         config.assets_dir = os.path.join(here, 'build')
