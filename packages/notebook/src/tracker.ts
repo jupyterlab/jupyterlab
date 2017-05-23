@@ -11,7 +11,7 @@ import {
 
 import {
   IInstanceTracker, InstanceTracker
-} from '@jupyterlab/apputils';
+} from '@jupyterlab/coreutils';
 
 import {
   Cell

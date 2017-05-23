@@ -14,6 +14,7 @@
   "dependencies": {
     "@jupyterlab/application": "^0.6.0",
     "@jupyterlab/apputils": "^0.6.0",
+    "@jupyterlab/coreutils": "^0.6.0",
     "@jupyterlab/docregistry": "^0.6.0",
     "@jupyterlab/markdownviewer": "^0.6.0",
     "@jupyterlab/rendermime": "^0.6.0"

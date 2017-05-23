@@ -6,8 +6,12 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ILayoutRestorer, InstanceTracker
+  ILayoutRestorer
 } from '@jupyterlab/apputils';
+
+import {
+  InstanceTracker
+} from '@jupyterlab/coreutils';
 
 import {
   IEditorServices
@@ -87,8 +91,8 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
     editorServices,
     factoryOptions: { name: FACTORY, fileExtensions: ['*'], defaultFor: ['*'] }
   });
-  const { commands, settings, shell, restored } = app;
-  const tracker = new InstanceTracker<FileEditor>({ namespace, shell });
+  const { commands, settings, restored } = app;
+  const tracker = new InstanceTracker<FileEditor>({ namespace });
   const hasWidget = () => tracker.currentWidget !== null;
 
   let lineNumbers = true;

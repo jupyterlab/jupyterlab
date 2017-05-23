@@ -17,8 +17,12 @@ import {
 
 import {
   CommandLinker, ICommandLinker, ICommandPalette, ILayoutRestorer,
-  IMainMenu, IStateDB, LayoutRestorer, MainMenu, StateDB
+  IMainMenu, LayoutRestorer, MainMenu
 } from '@jupyterlab/apputils';
+
+import {
+  IStateDB, StateDB
+} from '@jupyterlab/coreutils';
 
 import {
   activatePalette

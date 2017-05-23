@@ -8,8 +8,12 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  InstanceTracker, LayoutRestorer, StateDB
+  LayoutRestorer
 } from '@jupyterlab/apputils';
+
+import {
+  InstanceTracker, StateDB
+} from '@jupyterlab/coreutils';
 
 import {
   CommandRegistry

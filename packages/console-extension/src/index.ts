@@ -22,7 +22,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, InstanceTracker, ILayoutRestorer,
+  Dialog, ICommandPalette, ILayoutRestorer,
   IMainMenu, showDialog
 } from '@jupyterlab/apputils';
 
@@ -33,6 +33,10 @@ import {
 import {
   IConsoleTracker, ConsolePanel
 } from '@jupyterlab/console';
+
+import {
+  InstanceTracker
+} from '@jupyterlab/coreutils';
 
 import {
   ILauncher
@@ -138,10 +142,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
   let menu = new Menu({ commands });
 
   // Create an instance tracker for all console panels.
-  const tracker = new InstanceTracker<ConsolePanel>({
-    namespace: 'console',
-    shell
-  });
+  const tracker = new InstanceTracker<ConsolePanel>({ namespace: 'console' });
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -188,7 +189,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
       // Add the console panel to the tracker.
       tracker.add(panel);
       shell.addToMainArea(panel);
-      tracker.activate(panel);
+      shell.activateById(panel.id);
     });
   }
 
@@ -209,7 +210,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
         }
       });
       if (widget) {
-        tracker.activate(widget);
+        shell.activateById(widget.id);
       } else {
         return manager.ready.then(() => {
           let model = find(manager.sessions.running(), item => {
@@ -238,7 +239,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
     let widget = tracker.currentWidget;
     let activate = args['activate'] !== false;
     if (activate && widget) {
-      tracker.activate(widget);
+      shell.activateById(widget.id);
     }
     return widget;
   }
@@ -362,7 +363,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
       tracker.find(widget => {
         if (widget.console.session.path === path) {
           if (args['activate'] !== false) {
-            tracker.activate(widget);
+            shell.activateById(widget.id);
           }
           widget.console.inject(args['code'] as string);
           return true;

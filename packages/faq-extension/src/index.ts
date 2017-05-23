@@ -6,8 +6,12 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandLinker, ICommandPalette, ILayoutRestorer, InstanceTracker
+  ICommandLinker, ICommandPalette, ILayoutRestorer
 } from '@jupyterlab/apputils';
+
+import {
+  InstanceTracker
+} from '@jupyterlab/coreutils';
 
 import {
   FaqModel, FaqWidget
@@ -49,7 +53,7 @@ function activate(app: JupyterLab, palette: ICommandPalette, linker: ICommandLin
   const command = CommandIDs.open;
   const model = new FaqModel();
   const { commands, shell } = app;
-  const tracker = new InstanceTracker<FaqWidget>({ namespace: 'faq', shell  });
+  const tracker = new InstanceTracker<FaqWidget>({ namespace: 'faq' });
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -77,7 +81,7 @@ function activate(app: JupyterLab, palette: ICommandPalette, linker: ICommandLin
         widget = newWidget();
         shell.addToMainArea(widget);
       }
-      tracker.activate(widget);
+      shell.activateById(widget.id);
     }
   });
 

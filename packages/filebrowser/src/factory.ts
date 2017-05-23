@@ -3,7 +3,7 @@
 
 import {
   InstanceTracker, IStateDB
-} from '@jupyterlab/apputils';
+} from '@jupyterlab/coreutils';
 
 import {
   CommandRegistry

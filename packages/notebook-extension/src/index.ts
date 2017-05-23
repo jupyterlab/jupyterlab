@@ -6,13 +6,16 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, ILayoutRestorer, IMainMenu, IStateDB,
-  showDialog
+  Dialog, ICommandPalette, ILayoutRestorer, IMainMenu, showDialog
 } from '@jupyterlab/apputils';
 
 import {
   IEditorServices
 } from '@jupyterlab/codeeditor';
+
+import {
+  IStateDB
+} from '@jupyterlab/coreutils';
 
 import {
   IDocumentRegistry
@@ -357,9 +360,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     contentFactory,
     mimeTypeService: editorServices.mimeTypeService
   });
-
-  const { shell, commands } = app;
-  const tracker = new NotebookTracker({ namespace: 'notebook', shell });
+  const tracker = new NotebookTracker({ namespace: 'notebook' });
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -434,14 +435,14 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
  * Add the notebook commands to the application's command registry.
  */
 function addCommands(app: JupyterLab, services: IServiceManager, tracker: NotebookTracker): void {
-  let { commands } = app;
+  const { commands, shell } = app;
 
   // Get the current widget and activate unless the args specify otherwise.
   function getCurrent(args: JSONObject): NotebookPanel | null {
     let widget = tracker.currentWidget;
     let activate = args['activate'] !== false;
     if (activate && widget) {
-      tracker.activate(widget);
+      shell.activateById(widget.id);
     }
     return widget;
   }

@@ -6,11 +6,11 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, ILayoutRestorer, IMainMenu, InstanceTracker, IStateDB
+  ICommandPalette, ILayoutRestorer, IMainMenu
 } from '@jupyterlab/apputils';
 
 import {
-  IChangedArgs
+  IChangedArgs, InstanceTracker, IStateDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -119,8 +119,8 @@ export default plugins;
  * Activate the file browser factory provider.
  */
 function activateFactory(app: JupyterLab, docManager: IDocumentManager, state: IStateDB): IFileBrowserFactory {
-  const { commands, shell } = app;
-  const tracker = new InstanceTracker<FileBrowser>({ namespace, shell });
+  const { commands } = app;
+  const tracker = new InstanceTracker<FileBrowser>({ namespace });
 
   return {
     createFileBrowser(id: string, options: IFileBrowserFactory.IOptions = {}): FileBrowser {

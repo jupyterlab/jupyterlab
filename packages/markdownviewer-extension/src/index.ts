@@ -6,8 +6,12 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ILayoutRestorer, InstanceTracker
+  ILayoutRestorer
 } from '@jupyterlab/apputils';
+
+import {
+  InstanceTracker
+} from '@jupyterlab/coreutils';
 
 import {
   IDocumentRegistry
@@ -54,9 +58,8 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, rendermime: IRen
       readOnly: true,
       rendermime
     });
-    const shell = app.shell;
     const namespace = 'rendered-markdown';
-    const tracker = new InstanceTracker<MarkdownViewer>({ namespace, shell });
+    const tracker = new InstanceTracker<MarkdownViewer>({ namespace });
 
     // Handle state restoration.
     restorer.restore(tracker, {

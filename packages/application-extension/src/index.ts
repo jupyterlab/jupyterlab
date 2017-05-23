@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, showDialog, StateDB
+  Dialog, ICommandPalette, showDialog
 } from '@jupyterlab/apputils';
 
 import {

@@ -10,8 +10,12 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, IMainMenu, IStateDB
+  ICommandPalette, IMainMenu
 } from '@jupyterlab/apputils';
+
+import {
+  IStateDB
+} from '@jupyterlab/coreutils';
 
 import {
   IEditorServices

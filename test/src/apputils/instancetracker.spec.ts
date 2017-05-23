@@ -16,16 +16,11 @@ import {
 } from 'simulate-event';
 
 import {
-  ApplicationShell
-} from '@jupyterlab/application';
-
-import {
   InstanceTracker
-} from '@jupyterlab/apputils';
+} from '@jupyterlab/coreutils';
 
 
 const namespace = 'instance-tracker-test';
-const shell = new ApplicationShell();
 
 
 class TestTracker<T extends Widget> extends InstanceTracker<T> {
@@ -55,7 +50,7 @@ describe('common/instancetracker', () => {
     describe('#constructor()', () => {
 
       it('should create an InstanceTracker', () => {
-        let tracker = new InstanceTracker<Widget>({ namespace, shell });
+        let tracker = new InstanceTracker<Widget>({ namespace });
         expect(tracker).to.be.an(InstanceTracker);
       });
 
@@ -64,7 +59,7 @@ describe('common/instancetracker', () => {
     describe('#currentChanged', () => {
 
       it('should emit when the current widget has been updated', () => {
-        let tracker = new InstanceTracker<Widget>({ namespace, shell });
+        let tracker = new InstanceTracker<Widget>({ namespace });
         let widget = new Widget();
         widget.node.tabIndex = -1;
         let called = false;
@@ -82,7 +77,7 @@ describe('common/instancetracker', () => {
     describe('#widgetAdded', () => {
 
       it('should emit when a widget has been added', done => {
-        let tracker = new InstanceTracker<Widget>({ namespace, shell });
+        let tracker = new InstanceTracker<Widget>({ namespace });
         let widget = new Widget();
         tracker.widgetAdded.connect((sender, added) => {
           expect(added).to.be(widget);
@@ -92,7 +87,7 @@ describe('common/instancetracker', () => {
       });
 
       it('should not emit when a widget has been injected', done => {
-        let tracker = new InstanceTracker<Widget>({ namespace, shell });
+        let tracker = new InstanceTracker<Widget>({ namespace });
         let one = new Widget();
         let two = new Widget();
         two.node.tabIndex = -1;
@@ -115,12 +110,12 @@ describe('common/instancetracker', () => {
     describe('#currentWidget', () => {
 
       it('should default to null', () => {
-        let tracker = new InstanceTracker<Widget>({ namespace, shell });
+        let tracker = new InstanceTracker<Widget>({ namespace });
         expect(tracker.currentWidget).to.be(null);
       });
 
       it('should be updated when a widget is added', () => {
-        let tracker = new InstanceTracker<Widget>({ namespace, shell });
+        let tracker = new InstanceTracker<Widget>({ namespace });
         let widget = new Widget();
         widget.node.tabIndex = -1;
         tracker.add(widget);
@@ -129,7 +124,7 @@ describe('common/instancetracker', () => {
       });
 
       it('should be updated if when the first widget is focused', () => {
-        let tracker = new InstanceTracker<Widget>({ namespace, shell });
+        let tracker = new InstanceTracker<Widget>({ namespace });
         let panel = new Panel();
         let widget0 = createWidget();
         tracker.add(widget0);
@@ -148,7 +143,7 @@ describe('common/instancetracker', () => {
       });
 
       it('should revert to the previously added widget on widget disposal', () => {
-        let tracker = new TestTracker<Widget>({ namespace, shell });
+        let tracker = new TestTracker<Widget>({ namespace });
         let widget0 = new Widget();
         tracker.add(widget0);
         let widget1 = new Widget();
@@ -160,7 +155,7 @@ describe('common/instancetracker', () => {
 
       it('should preserve the tracked widget on widget disposal', () => {
         let panel = new Panel();
-        let tracker = new InstanceTracker<Widget>({ namespace, shell });
+        let tracker = new InstanceTracker<Widget>({ namespace });
         let widgets = [createWidget(), createWidget(), createWidget()];
         each(widgets, widget => {
           tracker.add(widget);
@@ -185,7 +180,7 @@ describe('common/instancetracker', () => {
 
       it('should select the previously added widget on widget disposal', () => {
         let panel = new Panel();
-        let tracker = new InstanceTracker<Widget>({ namespace, shell });
+        let tracker = new InstanceTracker<Widget>({ namespace });
         let widgets = [createWidget(), createWidget(), createWidget()];
         each(widgets, widget => {
           tracker.add(widget);
@@ -209,7 +204,7 @@ describe('common/instancetracker', () => {
     describe('#isDisposed', () => {
 
       it('should test whether the tracker is disposed', () => {
-        let tracker = new InstanceTracker<Widget>({ namespace, shell });
+        let tracker = new InstanceTracker<Widget>({ namespace });
         expect(tracker.isDisposed).to.be(false);
         tracker.dispose();
         expect(tracker.isDisposed).to.be(true);
@@ -220,7 +215,7 @@ describe('common/instancetracker', () => {
     describe('#add()', () => {
 
       it('should add a widget to the tracker', () => {
-        let tracker = new InstanceTracker<Widget>({ namespace, shell });
+        let tracker = new InstanceTracker<Widget>({ namespace });
         let widget = new Widget();
         expect(tracker.has(widget)).to.be(false);
         tracker.add(widget);
@@ -228,7 +223,7 @@ describe('common/instancetracker', () => {
       });
 
       it('should remove an added widget if it is disposed', () => {
-        let tracker = new InstanceTracker<Widget>({ namespace, shell });
+        let tracker = new InstanceTracker<Widget>({ namespace });
         let widget = new Widget();
         tracker.add(widget);
         expect(tracker.has(widget)).to.be(true);
@@ -241,14 +236,14 @@ describe('common/instancetracker', () => {
     describe('#dispose()', () => {
 
       it('should dispose of the resources used by the tracker', () => {
-        let tracker = new InstanceTracker<Widget>({ namespace, shell });
+        let tracker = new InstanceTracker<Widget>({ namespace });
         expect(tracker.isDisposed).to.be(false);
         tracker.dispose();
         expect(tracker.isDisposed).to.be(true);
       });
 
       it('should be safe to call multiple times', () => {
-        let tracker = new InstanceTracker<Widget>({ namespace, shell });
+        let tracker = new InstanceTracker<Widget>({ namespace });
         expect(tracker.isDisposed).to.be(false);
         tracker.dispose();
         tracker.dispose();
@@ -260,7 +255,7 @@ describe('common/instancetracker', () => {
     describe('#find()', () => {
 
       it('should find a tracked item that matches a filter function', () => {
-        let tracker = new InstanceTracker<Widget>({ namespace, shell });
+        let tracker = new InstanceTracker<Widget>({ namespace });
         let widgetA = new Widget();
         let widgetB = new Widget();
         let widgetC = new Widget();
@@ -274,7 +269,7 @@ describe('common/instancetracker', () => {
       });
 
       it('should return a void if no item is found', () => {
-        let tracker = new InstanceTracker<Widget>({ namespace, shell });
+        let tracker = new InstanceTracker<Widget>({ namespace });
         let widgetA = new Widget();
         let widgetB = new Widget();
         let widgetC = new Widget();
@@ -292,7 +287,7 @@ describe('common/instancetracker', () => {
     describe('#forEach()', () => {
 
       it('should iterate through all the tracked items', () => {
-        let tracker = new InstanceTracker<Widget>({ namespace, shell });
+        let tracker = new InstanceTracker<Widget>({ namespace });
         let widgetA = new Widget();
         let widgetB = new Widget();
         let widgetC = new Widget();
@@ -312,7 +307,7 @@ describe('common/instancetracker', () => {
     describe('#has()', () => {
 
       it('should return `true` if an item exists in the tracker', () => {
-        let tracker = new InstanceTracker<Widget>({ namespace, shell });
+        let tracker = new InstanceTracker<Widget>({ namespace });
         let widget = new Widget();
         expect(tracker.has(widget)).to.be(false);
         tracker.add(widget);
@@ -324,7 +319,7 @@ describe('common/instancetracker', () => {
     describe('#inject()', () => {
 
       it('should inject a widget into the tracker', () => {
-        let tracker = new InstanceTracker<Widget>({ namespace, shell });
+        let tracker = new InstanceTracker<Widget>({ namespace });
         let widget = new Widget();
         expect(tracker.has(widget)).to.be(false);
         tracker.inject(widget);
@@ -332,7 +327,7 @@ describe('common/instancetracker', () => {
       });
 
       it('should remove an injected widget if it is disposed', () => {
-        let tracker = new InstanceTracker<Widget>({ namespace, shell });
+        let tracker = new InstanceTracker<Widget>({ namespace });
         let widget = new Widget();
         tracker.inject(widget);
         expect(tracker.has(widget)).to.be(true);
@@ -345,7 +340,7 @@ describe('common/instancetracker', () => {
     describe('#onCurrentChanged()', () => {
 
       it('should be called when the current widget is changed', () => {
-        let tracker = new TestTracker<Widget>({ namespace, shell });
+        let tracker = new TestTracker<Widget>({ namespace });
         let widget = new Widget();
         tracker.add(widget);
         expect(tracker.methods).to.contain('onCurrentChanged');

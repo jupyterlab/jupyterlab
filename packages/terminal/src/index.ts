@@ -7,7 +7,7 @@ import {
 
 import {
   IInstanceTracker
-} from '@jupyterlab/apputils';
+} from '@jupyterlab/coreutils';
 
 import {
   Terminal

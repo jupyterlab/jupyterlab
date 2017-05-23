@@ -6,8 +6,12 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, ILayoutRestorer, InstanceTracker
+  ICommandPalette, ILayoutRestorer
 } from '@jupyterlab/apputils';
+
+import {
+  InstanceTracker
+} from '@jupyterlab/coreutils';
 
 import {
   IDocumentRegistry
@@ -78,8 +82,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, palette: IComman
     defaultFor: EXTENSIONS,
     readOnly: true
   });
-  const { shell, commands } = app;
-  const tracker = new InstanceTracker<ImageViewer>({ namespace, shell });
+  const tracker = new InstanceTracker<ImageViewer>({ namespace });
 
   // Handle state restoration.
   restorer.restore(tracker, {

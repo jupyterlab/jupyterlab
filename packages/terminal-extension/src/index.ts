@@ -6,8 +6,12 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, ILayoutRestorer, InstanceTracker, IMainMenu
+  ICommandPalette, ILayoutRestorer, IMainMenu
 } from '@jupyterlab/apputils';
+
+import {
+  InstanceTracker
+} from '@jupyterlab/coreutils';
 
 import {
   ILauncher
@@ -91,7 +95,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
   const { commands, shell } = app;
   const category = 'Terminal';
   const namespace = 'terminal';
-  const tracker = new InstanceTracker<Terminal>({ namespace, shell });
+  const tracker = new InstanceTracker<Terminal>({ namespace });
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -173,18 +177,18 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Instan
       return promise.then(session => {
         term.session = session;
         tracker.add(term);
-        tracker.activate(term);
+        shell.activateById(term.id);
       }).catch(() => { term.dispose(); });
     }
   });
 
   commands.addCommand(CommandIDs.open, {
     execute: args => {
-      let name = args['name'] as string;
+      const name = args['name'] as string;
       // Check for a running terminal with the given name.
-      let widget = tracker.find(value => value.session.name === name);
+      const widget = tracker.find(value => value.session.name === name);
       if (widget) {
-        tracker.activate(widget);
+        shell.activateById(widget.id);
       } else {
         // Otherwise, create a new terminal with a given name.
         return commands.execute(CommandIDs.createNew, { name });
@@ -200,12 +204,11 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Instan
       if (!current) {
         return;
       }
-      tracker.activate(current);
-      return current.refresh().then(() => {
-        current.activate();
-      });
+      shell.activateById(current.id);
+
+      return current.refresh().then(() => { current.activate(); });
     },
-    isEnabled: () => { return tracker.currentWidget !== null; }
+    isEnabled: () => tracker.currentWidget !== null
   });
 
   commands.addCommand('terminal:increase-font', {

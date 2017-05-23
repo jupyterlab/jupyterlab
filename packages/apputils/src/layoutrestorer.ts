@@ -25,7 +25,7 @@ import {
 
 import {
   InstanceTracker, IStateDB
-} from './';
+} from '@jupyterlab/coreutils';
 
 
 /* tslint:disable */

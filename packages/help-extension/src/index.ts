@@ -14,9 +14,12 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, IFrame, ILayoutRestorer, InstanceTracker,
-  IMainMenu
+  ICommandPalette, IFrame, ILayoutRestorer, IMainMenu
 } from '@jupyterlab/apputils';
+
+import {
+  InstanceTracker
+} from '@jupyterlab/coreutils';
 
 import {
   PageConfig, URLExt
@@ -161,7 +164,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   const command = CommandIDs.open;
   const menu = createMenu();
   const { commands, shell } = app;
-  const tracker = new InstanceTracker<ClosableIFrame>({ namespace, shell });
+  const tracker = new InstanceTracker<ClosableIFrame>({ namespace });
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -217,7 +220,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
 
       let iframe = newClosableIFrame(url, text);
       shell.addToMainArea(iframe);
-      tracker.activate(iframe);
+      shell.activateById(iframe.id);
     }
   });
 

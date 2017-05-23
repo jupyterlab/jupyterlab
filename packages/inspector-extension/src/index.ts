@@ -6,8 +6,12 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, ILayoutRestorer, InstanceTracker
+  ICommandPalette, ILayoutRestorer
 } from '@jupyterlab/apputils';
+
+import {
+  InstanceTracker
+} from '@jupyterlab/coreutils';
 
 import {
   IConsoleTracker
@@ -49,10 +53,8 @@ const service: JupyterLabPlugin<IInspector> = {
     const category = 'Inspector';
     const command = CommandIDs.open;
     const label = 'Open Inspector';
-    const tracker = new InstanceTracker<InspectorPanel>({
-      namespace: 'inspector',
-      shell
-    });
+    const namespace = 'inspector';
+    const tracker = new InstanceTracker<InspectorPanel>({ namespace });
 
     /**
      * Create and track a new inspector.
@@ -94,7 +96,7 @@ const service: JupyterLabPlugin<IInspector> = {
           shell.addToMainArea(manager.inspector);
         }
         if (manager.inspector.isAttached) {
-          tracker.activate(manager.inspector);
+          shell.activateById(manager.inspector.id);
         }
       }
     });

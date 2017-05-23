@@ -6,8 +6,12 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ILayoutRestorer, InstanceTracker
+  ILayoutRestorer
 } from '@jupyterlab/apputils';
+
+import {
+  InstanceTracker
+} from '@jupyterlab/coreutils';
 
 import {
   CSVViewer, CSVViewerFactory
@@ -51,10 +55,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
     defaultFor: ['.csv'],
     readOnly: true
   });
-  const tracker = new InstanceTracker<CSVViewer>({
-    namespace: 'csvviewer',
-    shell: app.shell
-  });
+  const tracker = new InstanceTracker<CSVViewer>({ namespace: 'csvviewer' });
 
   // Handle state restoration.
   restorer.restore(tracker, {

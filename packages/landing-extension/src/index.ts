@@ -10,8 +10,12 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandLinker, ICommandPalette, ILayoutRestorer, InstanceTracker
+  ICommandLinker, ICommandPalette, ILayoutRestorer
 } from '@jupyterlab/apputils';
+
+import {
+  InstanceTracker
+} from '@jupyterlab/coreutils';
 
 import {
   LandingModel, LandingWidget
@@ -62,10 +66,7 @@ function activate(app: JupyterLab, linker: ICommandLinker, palette: ICommandPale
   const model = new LandingModel(
     services.terminals.isAvailable(), app.info.version
   );
-  const tracker = new InstanceTracker<LandingWidget>({
-    namespace: 'landing',
-    shell
-  });
+  const tracker = new InstanceTracker<LandingWidget>({ namespace: 'landing' });
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -94,7 +95,7 @@ function activate(app: JupyterLab, linker: ICommandLinker, palette: ICommandPale
         widget = newWidget();
         shell.addToMainArea(widget);
       }
-      tracker.activate(widget);
+      shell.activateById(widget.id);
     }
   });
 
