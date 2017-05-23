@@ -42,7 +42,6 @@
   },
   "devDependencies": {
     "css-loader": "^0.27.3",
-    "extract-text-webpack-plugin": "^2.1.0",
     "file-loader": "^0.10.1",
     "fs-extra": "^2.1.2",
     "handlebars": "^4.0.6",

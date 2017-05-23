@@ -29,17 +29,6 @@ var digest = hash.digest('hex');
 fs.writeFileSync(path.resolve(buildDir, 'hash.md5'), digest);
 
 
-// Note that we have to use an explicit local public path
-// otherwise the urls in the extracted CSS will point to the wrong
-// location.
-// See https://github.com/webpack-contrib/extract-text-webpack-plugin/tree/75cb09eed13d15cec8f974b1210920a7f249f8e2
-var cssLoader = ExtractTextPlugin.extract({
-  use: 'css-loader',
-  fallback: 'style-loader',
-  publicPath: './'
-});
-
-
 module.exports = {
   entry:  path.resolve(buildDir, 'index.out.js'),
   output: {
@@ -48,7 +37,7 @@ module.exports = {
   },
   module: {
     rules: [
-      { test: /\.css$/, use: cssLoader },
+      { test: /\.css$/, use: ['style-loader', 'css-loader'] },
       { test: /\.json$/, use: 'json-loader' },
       { test: /\.html$/, use: 'file-loader' },
       { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
@@ -64,8 +53,5 @@ module.exports = {
     fs: 'empty'
   },
   bail: true,
-  devtool: 'source-map',
-  plugins: [
-      new ExtractTextPlugin('[name].css')
-    ]
+  devtool: 'cheap-source-map'
 }
