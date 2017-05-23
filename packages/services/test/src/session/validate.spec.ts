@@ -16,21 +16,25 @@ describe('session/validate', () => {
 
   describe('#validateModel()', () => {
 
-    it('should pass a valid id', () => {
-      let id: Session.IModel = {
+    it('should pass a valid model', () => {
+      let model: Session.IModel = {
         id: 'foo',
         kernel: { name: 'foo', id: '123'},
-        notebook: { path: 'bar' }
+        path: 'bar',
+        name: '',
+        type: ''
       };
-      validateModel(id);
+      validateModel(model);
     });
 
     it('should fail on missing data', () => {
-      let id: Session.IModel = {
+      let model: any = {
         id: 'foo',
         kernel: { name: 'foo', id: '123'},
+        path: 'bar',
+        name: ''
       };
-      expect(() => validateModel(id)).to.throwError();
+      expect(() => validateModel(model)).to.throwError();
     });
 
   });

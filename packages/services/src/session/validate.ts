@@ -44,8 +44,10 @@ function validateProperty(object: any, name: string, typeName?: string): void {
 export
 function validateModel(model: Session.IModel): void {
   validateProperty(model, 'id', 'string');
-  validateProperty(model, 'notebook', 'object');
+  validateProperty(model, 'path', 'string');
+  validateProperty(model, 'type', 'string');
+  validateProperty(model, 'name', 'string');
   validateProperty(model, 'kernel', 'object');
   validateKernelModel(model.kernel);
-  validateProperty(model.notebook, 'path', 'string');
+
 }

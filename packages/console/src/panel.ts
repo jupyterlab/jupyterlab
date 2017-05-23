@@ -62,7 +62,7 @@ class ConsolePanel extends Panel {
     } = options;
     let contentFactory = this.contentFactory = (
       options.contentFactory || ConsolePanel.defaultContentFactory
-    )
+    );
     let count = Private.count++;
     if (!path) {
       path = `${basePath || ''}/console-${count}-${uuid()}`;

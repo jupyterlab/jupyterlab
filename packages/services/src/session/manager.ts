@@ -175,7 +175,7 @@ class SessionManager implements Session.IManager {
    */
   stopIfNeeded(path: string): Promise<void> {
     return Session.listRunning(this.serverSettings).then(sessions => {
-      const matches = sessions.filter(value => value.notebook.path === path);
+      const matches = sessions.filter(value => value.path === path);
       if (matches.length === 1) {
         const id = matches[0].id;
         return this.shutdown(id).catch(() => { /* no-op */ });
@@ -240,7 +240,7 @@ class SessionManager implements Session.IManager {
     session.terminated.connect(() => {
       this._onTerminated(id);
     });
-    session.pathChanged.connect(() => {
+    session.propertyChanged.connect(() => {
       this._onChanged(session.model);
     });
     session.kernelChanged.connect(() => {

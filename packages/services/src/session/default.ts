@@ -48,6 +48,8 @@ class DefaultSession implements Session.ISession {
   constructor(options: Session.IOptions, id: string, kernel: Kernel.IKernel) {
     this._id = id;
     this._path = options.path;
+    this._type = options.type;
+    this._name = options.name;
     this.serverSettings = options.serverSettings || ServerConnection.makeSettings();
     this._uuid = uuid();
     Private.addRunning(this);
@@ -89,10 +91,10 @@ class DefaultSession implements Session.ISession {
   }
 
   /**
-   * A signal emitted when the session path changes.
+   * A signal emitted when a session property changes.
    */
-  get pathChanged(): ISignal<this, string> {
-    return this._pathChanged;
+  get propertyChanged(): ISignal<this, 'path' | 'name' | 'type'> {
+    return this._propertyChanged;
   }
 
   /**
@@ -122,15 +124,29 @@ class DefaultSession implements Session.ISession {
   }
 
   /**
+   * Get the session type.
+   */
+  get type(): string {
+    return this._type;
+  }
+
+  /**
+   * Get the session name.
+   */
+  get name(): string {
+    return this._name;
+  }
+
+  /**
    * Get the model associated with the session.
    */
   get model(): Session.IModel {
     return {
       id: this.id,
       kernel: this.kernel.model,
-      notebook: {
-        path: this.path
-      }
+      path: this._path,
+      type: this._type,
+      name: this._name
     };
   }
 
@@ -176,20 +192,20 @@ class DefaultSession implements Session.ISession {
     if (this._updating) {
       return Promise.resolve(void 0);
     }
-    let oldPath = this._path;
-    let newPath = this._path = model.notebook.path;
+    let oldModel = this.model;
+    this._path = model.path;
+    this._name = model.name;
+    this._type = model.type;
 
     if (this._kernel.isDisposed || model.kernel.id !== this._kernel.id) {
       return Kernel.connectTo(model.kernel.id, this.serverSettings).then(kernel => {
         this.setupKernel(kernel);
         this._kernelChanged.emit(kernel);
-        if (oldPath !== newPath) {
-          this._pathChanged.emit(newPath);
-        }
+        this._handleModelChange(oldModel);
       });
-    } else if (oldPath !== newPath) {
-      this._pathChanged.emit(newPath);
     }
+
+    this._handleModelChange(oldModel);
     return Promise.resolve(void 0);
   }
 
@@ -214,17 +230,39 @@ class DefaultSession implements Session.ISession {
    *
    * @param path - The new session path.
    *
+   * @returns A promise that resolves when the session has renamed.
+   *
    * #### Notes
    * This uses the Jupyter REST API, and the response is validated.
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
-  rename(path: string): Promise<void> {
+  setPath(path: string): Promise<void> {
     if (this.isDisposed) {
       return Promise.reject(new Error('Session is disposed'));
     }
-    let data = JSON.stringify({
-      notebook: { path }
-    });
+    let data = JSON.stringify({ path });
+    return this._patch(data).then(() => { return void 0; });
+  }
+
+  /**
+   * Change the session name.
+   */
+  setName(name: string): Promise<void> {
+    if (this.isDisposed) {
+      return Promise.reject(new Error('Session is disposed'));
+    }
+    let data = JSON.stringify({ name });
+    return this._patch(data).then(() => { return void 0; });
+  }
+
+  /**
+   * Change the session type.
+   */
+  setType(type: string): Promise<void> {
+    if (this.isDisposed) {
+      return Promise.reject(new Error('Session is disposed'));
+    }
+    let data = JSON.stringify({ type });
     return this._patch(data).then(() => { return void 0; });
   }
 
@@ -263,13 +301,6 @@ class DefaultSession implements Session.ISession {
   shutdown(): Promise<void> {
     if (this.isDisposed) {
       return Promise.reject(new Error('Session is disposed'));
-    }
-    if (this._kernel) {
-      return this._kernel.ready.then(() => {
-        return Private.shutdownSession(
-          this.id, this.serverSettings
-        );
-      });
     }
     return Private.shutdownSession(this.id, this.serverSettings);
   }
@@ -335,8 +366,25 @@ class DefaultSession implements Session.ISession {
     });
   }
 
+  /**
+   * Handle a change to the model.
+   */
+  private _handleModelChange(oldModel: Session.IModel): void {
+    if (oldModel.name !== this._name) {
+      this._propertyChanged.emit('name');
+    }
+    if (oldModel.type !== this._type) {
+      this._propertyChanged.emit('type');
+    }
+    if (oldModel.path !== this._path) {
+      this._propertyChanged.emit('path');
+    }
+  }
+
   private _id = '';
   private _path = '';
+  private _name = '';
+  private _type = '';
   private _kernel: Kernel.IKernel = null;
   private _uuid = '';
   private _isDisposed = false;
@@ -345,8 +393,9 @@ class DefaultSession implements Session.ISession {
   private _statusChanged = new Signal<this, Kernel.Status>(this);
   private _iopubMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
-  private _pathChanged = new Signal<this, string>(this);
+  private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);
 }
+
 
 /**
  * The namespace for `DefaultSession` statics.
@@ -462,7 +511,9 @@ namespace Private {
     let settings = options.serverSettings || ServerConnection.makeSettings();
     return Kernel.connectTo(model.kernel.id, settings).then(kernel => {
       return new DefaultSession({
-        path: model.notebook.path,
+        path: model.path,
+        type: model.type,
+        name: model.name,
         serverSettings: settings
       }, model.id, kernel);
     }).catch(error => {
@@ -502,7 +553,7 @@ namespace Private {
 
     return listRunning(settings).then(models => {
       let model = find(models, value => {
-        return value.notebook.path === path;
+        return value.path === path;
       });
       if (model) {
         return model;
@@ -654,7 +705,9 @@ namespace Private {
     let settings = options.serverSettings || ServerConnection.makeSettings();
     let model = {
       kernel: { name: options.kernelName, id: options.kernelId },
-      notebook: { path: options.path }
+      path: options.path,
+      type: options.type || '',
+      name: options.name || ''
     };
     let request = {
       url: URLExt.join(settings.baseUrl, SESSION_SERVICE_URL),

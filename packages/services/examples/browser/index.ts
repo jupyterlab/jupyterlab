@@ -31,7 +31,7 @@ function main() {
     log('Session started');
     session = s;
     // Rename the session.
-    return session.rename('bar.ipynb');
+    return session.setPath('bar.ipynb');
   }).then(() => {
     log(`Session renamed to ${session.path}`);
     // Execute and handle replies on the kernel.

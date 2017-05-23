@@ -56,9 +56,9 @@ namespace Session {
     statusChanged: ISignal<ISession, Kernel.Status>;
 
     /**
-     * A signal emitted when the session path changes.
+     * A signal emitted when a session property changes.
      */
-    pathChanged: ISignal<ISession, string>;
+    readonly propertyChanged: ISignal<this, 'path' | 'name' | 'type'>;
 
     /**
      * A signal emitted for iopub kernel messages.
@@ -76,9 +76,19 @@ namespace Session {
     readonly id: string;
 
     /**
-     * The path associated with the session.
+     * The current path associated with the sesssion.
      */
     readonly path: string;
+
+    /**
+     * The current name associated with the sesssion.
+     */
+    readonly name: string;
+
+    /**
+     * The type of the session.
+     */
+    readonly type: string;
 
     /**
      * The server settings of the session.
@@ -117,7 +127,17 @@ namespace Session {
      * This uses the Jupyter REST API, and the response is validated.
      * The promise is fulfilled on a valid response and rejected otherwise.
      */
-    rename(path: string): Promise<void>;
+    setPath(path: string): Promise<void>;
+
+    /**
+     * Change the session name.
+     */
+    setName(name: string): Promise<void>;
+
+    /**
+     * Change the session type.
+     */
+    setType(type: string): Promise<void>;
 
     /**
      * Change the kernel.
@@ -285,6 +305,16 @@ namespace Session {
      * The path (not including name) to the session.
      */
     path?: string;
+
+    /**
+     * The name of the session.
+     */
+    name?: string;
+
+    /**
+     * The type of the session.
+     */
+    type?: string;
 
     /**
      * The type of kernel (e.g. python3).
@@ -456,10 +486,9 @@ namespace Session {
      * The unique identifier for the session client.
      */
     readonly id: string;
-    readonly notebook?: {
-      [ key: string ]: string;
-      path: string;
-    };
+    readonly name: string;
+    readonly path: string;
+    readonly type: string;
     readonly kernel?: Kernel.IModel;
   }
 }

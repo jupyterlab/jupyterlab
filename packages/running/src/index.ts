@@ -111,12 +111,6 @@ const FILE_ICON_CLASS = 'jp-mod-file';
  */
 const TERMINAL_ICON_CLASS = 'jp-mod-terminal';
 
-/**
- * A regex for console names.
- */
-export
-const CONSOLE_REGEX = /^console-(\d)+-[0-9a-f]+$/;
-
 
 /**
  * A class that exposes the running terminal and kernel sessions.
@@ -349,8 +343,8 @@ class RunningSessions extends Widget {
     // Strip out non-file backed sessions.
     this._runningSessions = [];
     for (let session of models) {
-      let name = session.notebook.path.split('/').pop();
-      if (name.indexOf('.') !== -1 || CONSOLE_REGEX.test(name)) {
+      let name = session.name || session.path.split('/').pop();
+      if (name.indexOf('.') !== -1 || session.name) {
         this._runningSessions.push(session);
       }
     }
@@ -664,20 +658,18 @@ namespace RunningSessions {
      */
     updateSessionNode(node: HTMLLIElement, model: Session.IModel, kernelName: string): void {
       let icon = DOMUtils.findElement(node, ITEM_ICON_CLASS);
-      let path = model.notebook.path;
-      let name = path.split('/').pop();
+      let name = model.name || model.path.split('/').pop();
       if (name.indexOf('.ipynb') !== -1) {
         icon.className = `${ITEM_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
-      } else if (CONSOLE_REGEX.test(name)) {
+      } else if (model.type.toLowerCase() === 'console') {
         icon.className = `${ITEM_ICON_CLASS} ${CONSOLE_ICON_CLASS}`;
-        path = `Console ${name.match(CONSOLE_REGEX)[1]}`;
       } else {
         icon.className = `${ITEM_ICON_CLASS} ${FILE_ICON_CLASS}`;
       }
       let label = DOMUtils.findElement(node, ITEM_LABEL_CLASS);
-      label.textContent = path;
+      label.textContent = name;
       let title = (
-        `Path: ${model.notebook.path}\n` +
+        `Path: ${model.path}\n` +
         `Kernel: ${kernelName}`
       );
       label.title = title;

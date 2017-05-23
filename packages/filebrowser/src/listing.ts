@@ -437,7 +437,7 @@ class DirListing extends Widget {
     const items = this._sortedItems;
     const paths = items.map(item => item.path);
     each(this._model.sessions(), session => {
-      let index = ArrayExt.firstIndexOf(paths, session.notebook.path);
+      let index = ArrayExt.firstIndexOf(paths, session.path);
       if (this._selection[items[index].name]) {
         promises.push(model.manager.services.sessions.shutdown(session.id));
       }
@@ -701,10 +701,10 @@ class DirListing extends Widget {
       this.addClass(SELECTED_CLASS);
     }
 
-    // Handle notebook session statuses.
+    // Handle file session statuses.
     let paths = toArray(map(items, item => item.path));
     each(this._model.sessions(), session => {
-      let index = ArrayExt.firstIndexOf(paths, session.notebook.path);
+      let index = ArrayExt.firstIndexOf(paths, session.path);
       let node = nodes[index];
       node.classList.add(RUNNING_CLASS);
       let name = session.kernel.name;

@@ -372,7 +372,7 @@ class FileBrowserModel implements IDisposable {
   private _onRunningChanged(sender: Session.IManager, models: IterableOrArrayLike<Session.IModel>): void {
     this._sessions.length = 0;
     each(models, model => {
-      if (this._paths.has(model.notebook.path)) {
+      if (this._paths.has(model.path)) {
         this._sessions.push(model);
       }
     });
