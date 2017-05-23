@@ -8,12 +8,15 @@ import {
 } from '@phosphor/virtualdom';
 
 import {
-  CSVModel, CSVTable, DISPLAY_LIMIT
+  CSVModel, CSVTable
 } from '@jupyterlab/csvviewer';
 
 import {
   CSV_DATA
 } from './data.csv';
+
+
+const DISPLAY_LIMIT: number = 1000;
 
 
 class TestTable extends CSVTable {

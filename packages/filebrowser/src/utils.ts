@@ -5,26 +5,6 @@ import {
   Dialog, showDialog
 } from '@jupyterlab/apputils';
 
-
-/**
- * The class name added to drop targets.
- */
-export
-const DROP_TARGET_CLASS = 'jp-mod-dropTarget';
-
-/**
- * The class name added to selected rows.
- */
-export
-const SELECTED_CLASS = 'jp-mod-selected';
-
-/**
- * The mime type for a contents drag object.
- */
-export
-const CONTENTS_MIME = 'application/x-jupyter-icontents';
-
-
 /**
  * An error message dialog to show in the filebrowser widget.
  */

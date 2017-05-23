@@ -32,7 +32,6 @@ import {
 /*
  * The class name added to common rendered HTML.
  */
-export
 const HTML_COMMON_CLASS = 'jp-RenderedHTMLCommon';
 
 /*

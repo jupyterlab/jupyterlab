@@ -21,13 +21,11 @@ import {
 /**
  * The supported parsing delimiters.
  */
-export
 const DELIMITERS = [',', ';', '\t'];
 
 /**
  * The labels for each delimiter as they appear in the dropdown menu.
  */
-export
 const LABELS = [',', ';', '\\t'];
 
 /**

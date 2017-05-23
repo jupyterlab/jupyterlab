@@ -19,7 +19,6 @@ import {
 /**
  * The hard limit on the number of rows to display.
  */
-export
 const DISPLAY_LIMIT: number = 1000;
 
 /**

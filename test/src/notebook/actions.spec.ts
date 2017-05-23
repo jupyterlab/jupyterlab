@@ -24,7 +24,7 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
-  Notebook, JUPYTER_CELL_MIME
+  Notebook
 } from '@jupyterlab/notebook';
 
 import {
@@ -38,6 +38,8 @@ import {
 
 
 const ERROR_INPUT = 'a = foo';
+
+const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
 
 describe('@jupyterlab/notebook', () => {
