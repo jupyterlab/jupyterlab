@@ -1403,11 +1403,7 @@ namespace Private {
     } catch (e) {
       return Promise.reject(e);
     }
-    return new Promise<any>((resolve, reject) => {
-      future.onReply = (reply: KernelMessage.IMessage) => {
-        resolve(reply);
-      };
-    });
+    return future.done;
   }
 
   /**
