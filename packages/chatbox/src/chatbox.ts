@@ -134,7 +134,7 @@ class Chatbox extends Widget {
     this._input = new Panel();
 
     this.contentFactory = options.contentFactory;
-    this.rendermime = options.rendermime;
+    this._rendermime = options.rendermime;
 
     // Add top-level CSS classes.
     this._content.addClass(CONTENT_CLASS);
@@ -158,11 +158,6 @@ class Chatbox extends Widget {
   readonly contentFactory: Chatbox.IContentFactory;
 
   /**
-   * The rendermime instance used by the chatbox.
-   */
-  readonly rendermime: IRenderMime;
-
-  /**
    * Whether the chatbox has been disposed.
    */
   get isDisposed(): boolean {
@@ -184,31 +179,55 @@ class Chatbox extends Widget {
     return this._model;
   }
   set model(model: DocumentRegistry.IModel) {
-    this._model = model;
-    let modelDB: any = (this._model as any).modelDB;
-    if (modelDB) {
-      modelDB.connected.then(() => {
-        // Update the chatlog vector.
-        if (this._log) {
-          this._log.changed.disconnect(this._onLogChanged, this);
-        }
-        if (modelDB.has('internal:chat')) {
-          this._log = modelDB.get('internal:chat') as IObservableVector<ChatEntry.IModel>;
-        } else {
-          this._log = modelDB.createVector('internal:chat');
-        }
-        this._log.changed.connect(this._onLogChanged, this);
-        this._start = this._log.length;
-
-        if (this.isVisible) {
-          this._scrollGuard = true;
-          this.clear();
-          this._addPage(PAGE_LENGTH);
-          Private.scrollToBottom(this._content.node);
-          this._scrollGuard = false;
-        }
-      });
+    // Do nothing if it is the same model.
+    if (model === this._model) {
+      return;
     }
+    // Clean up after the previous model.
+    if (this._log) {
+      this._log.changed.disconnect(this._onLogChanged, this);
+    }
+    this.clear();
+
+    // Set the new model.
+    this._model = model;
+    if (!model) {
+      this._log = null;
+      return;
+    }
+
+    // Populate with the new model values.
+    let modelDB = this._model.modelDB;
+    // Update the chatlog vector.
+    if (!modelDB.has('internal:chat')) {
+      modelDB.createVector('internal:chat');
+    }
+    this._log = modelDB.get('internal:chat') as IObservableVector<ChatEntry.IModel>;
+    this._log.changed.connect(this._onLogChanged, this);
+    modelDB.connected.then(() => {
+      this._start = this._log.length;
+
+      if (this.isVisible) {
+        this._scrollGuard = true;
+        this._addPage(PAGE_LENGTH);
+        Private.scrollToBottom(this._content.node);
+        this._scrollGuard = false;
+      }
+    });
+  }
+
+  /**
+   * The log of chat entries for the current document model.
+   */
+  get log(): IObservableVector<ChatEntry.IModel> {
+    return this._log;
+  }
+
+  /**
+   * The list of currently rendered widgets for the chatbox.
+   */
+  get widgets(): ReadonlyArray<Widget> {
+    return this._content.widgets;
   }
 
   /**
@@ -243,6 +262,9 @@ class Chatbox extends Widget {
    * Post the current text in the prompt to the chat.
    */
   post(): void {
+    if (!this._model) {
+      return;
+    }
     let prompt = this.prompt;
 
     if (prompt.model.value.text.trim() !== '') {
@@ -651,11 +673,12 @@ class Chatbox extends Widget {
     let contentFactory = this.contentFactory.markdownCellContentFactory;
     let model = new MarkdownCellModel({ });
     this._disposables.add(model);
-    let rendermime = this.rendermime;
+    let rendermime = this._rendermime;
     model.value.text = text || '';
     return { model, rendermime, contentFactory };
   }
 
+  private _rendermime: IRenderMime = null;
   private _content: Panel = null;
   private _log: IObservableVector<ChatEntry.IModel> = null;
   private _start: number = null;
