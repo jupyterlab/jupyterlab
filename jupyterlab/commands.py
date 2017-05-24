@@ -162,7 +162,7 @@ def should_build(app_dir=None):
         return False, ''
 
     pkg_path = pjoin(app_dir, 'static', 'package.json')
-    if not pkg_path:
+    if not os.path.exists(pkg_path):
         return True, 'Installed extensions with no built application'
 
     with open(pkg_path) as fid:

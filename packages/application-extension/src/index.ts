@@ -96,7 +96,7 @@ const plugin: JupyterLabPlugin<void> = {
     if (buildMessage) {
       let body = document.createElement('pre');
       body.textContent = (
-        'JupyterLab is out of date.\n' +
+        'JupyterLab build is out of date.\n' +
         'Please run "jupyter lab build" from\n' +
         'the command line and relaunch.'
       );

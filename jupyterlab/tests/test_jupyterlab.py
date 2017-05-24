@@ -27,7 +27,7 @@ from jupyterlab.extension import (
 )
 from jupyterlab.commands import (
     install_extension, uninstall_extension, list_extensions,
-    build, link_package, unlink_package, get_app_dir,
+    build, link_package, unlink_package, get_app_dir, should_build,
     _get_linked_packages, _ensure_package
 )
 
@@ -248,3 +248,12 @@ class TestExtension(TestCase):
         app.initialize()
         sys.stderr = stderr
         load_jupyter_server_extension(app)
+
+    def test_should_build(self):
+        assert not should_build()[0]
+        install_extension(self.source_dir)
+        assert should_build()[0]
+        build()
+        assert not should_build()[0]
+        uninstall_extension('@jupyterlab/python-tests')
+        assert should_build()[0]
