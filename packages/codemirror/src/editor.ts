@@ -560,8 +560,12 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Handles a cursor activity event.
    */
   private _onCursorActivity(): void {
-    const selections = this.getSelections();
-    this.model.selections.set(this.uuid, selections);
+    // Only add selections if the editor has focus. This avoids unwanted
+    // triggering of cursor activity due to collaborator actions.
+    if (this._editor.hasFocus()) {
+      const selections = this.getSelections();
+      this.model.selections.set(this.uuid, selections);
+    }
   }
 
   /**
