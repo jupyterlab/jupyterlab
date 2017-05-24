@@ -18,6 +18,9 @@ import {
 } from './widget';
 
 
+import '../style/index.css';
+
+
 /**
  * The command IDs used by the landing plugin.
  */
