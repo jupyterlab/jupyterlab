@@ -61,7 +61,7 @@ namespace Mode {
 
     // Simplest, cheapest check by mode name.
     if (CodeMirror.modes.hasOwnProperty(spec.mode)) {
-      return Promise.resolve(mode);
+      return Promise.resolve(spec);
     }
 
     // Fetch the mode asynchronously.
