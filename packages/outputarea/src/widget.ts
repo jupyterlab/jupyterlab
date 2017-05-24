@@ -157,9 +157,25 @@ class OutputArea extends Widget {
   readonly outputLengthChanged = new Signal<this, number>(this);
 
   /**
-   * Clear the output area.
+   * The kernel future associated with the output area.
    */
-  clear(): void {
+  get future(): Kernel.IFuture {
+    return this._future;
+  }
+
+  set future(value: Kernel.IFuture) {
+    // Bail if the model is disposed.
+    if (this.model.isDisposed) {
+      throw Error('Model is disposed');
+    }
+    if (this._future === value) {
+      return;
+    }
+    if (this._future) {
+      this._future.dispose();
+    }
+    this._future = value;
+
     this.model.clear();
 
     // Make sure there were no input widgets.
@@ -167,33 +183,30 @@ class OutputArea extends Widget {
       this._clear();
       this.outputLengthChanged.emit(this.model.length);
     }
+
+    // Handle published messages.
+    value.onIOPub = this._onIOPub.bind(this);
+
+    // Handle the execute reply.
+    value.onReply = this._onExecuteReply.bind(this);
+
+    // Handle stdin.
+    value.onStdin = msg => {
+      if (KernelMessage.isInputRequestMsg(msg)) {
+        this._onInputRequest(msg, value);
+      }
+    };
   }
 
   /**
-   * Handle messages from code execution.
+   * Dispose of the resources used by the output area.
    */
-  handleExecution(future: Kernel.IFuture): Promise<void> {
-    // Bail if the model is disposed.
-    if (this.model.isDisposed) {
-      return Promise.reject('Model is disposed');
+  dispose(): void {
+    if (this._future) {
+      this._future.dispose();
     }
-
-    // Handle published messages.
-    future.onIOPub = (msg: KernelMessage.IIOPubMessage) => {
-      this._onIOPub(msg);
-    };
-    // Handle the execute reply.
-    future.onReply = (msg: KernelMessage.IExecuteReplyMsg) => {
-      this._onExecuteReply(msg);
-    };
-    // Handle stdin.
-    future.onStdin = (msg: KernelMessage.IStdinMessage) => {
-      if (KernelMessage.isInputRequestMsg(msg)) {
-        this._onInputRequest(msg, future);
-      }
-    };
-
-    return future.done;
+    this._future = null;
+    super.dispose();
   }
 
   /**
@@ -283,7 +296,12 @@ class OutputArea extends Widget {
   /**
    * Handle an execute reply message.
    */
-  private _onExecuteReply(msg: KernelMessage.IExecuteReplyMsg): void {
+  private _onExecuteReply(msg: KernelMessage.IExecuteReplyMsg): nbformat.ExecutionCount {
+    let count: nbformat.ExecutionCount;
+    let status = msg.content.status;
+    if (status !== 'abort') {
+      count = msg.content.execution_count;
+    }
     // API responses that contain a pager are special cased and their type
     // is overriden from 'execute_reply' to 'display_data' in order to
     // render output.
@@ -291,11 +309,11 @@ class OutputArea extends Widget {
     let content = msg.content as KernelMessage.IExecuteOkReply;
     let payload = content && content.payload;
     if (!payload || !payload.length) {
-      return;
+      return count;
     }
     let pages = payload.filter((i: any) => (i as any).source === 'page');
     if (!pages.length) {
-      return;
+      return count;
     }
     let page = JSON.parse(JSON.stringify(pages[0]));
     let output: nbformat.IOutput = {
@@ -304,6 +322,7 @@ class OutputArea extends Widget {
       metadata: {}
     };
     model.add(output);
+    return count;
   }
 
   /**
@@ -377,6 +396,7 @@ class OutputArea extends Widget {
   }
 
   private _minHeightTimeout: number = null;
+  private _future: Kernel.IFuture = null;
 }
 
 
