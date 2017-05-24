@@ -588,7 +588,7 @@ class Chatbox extends Widget {
           // Otherwise remove the widgets from the view.
           each(args.oldValues, entry => {
             let widget = layout.widgets[args.oldIndex];
-            layout.removeWidgetAt(args.oldIndex);
+            widget.parent = null;
             widget.dispose();
           });
         }
@@ -609,7 +609,8 @@ class Chatbox extends Widget {
         } else if (args.oldIndex >= this._start) {
           // If it is moving out of the view, remove the widget
           // and update the `_start index.`
-          layout.removeWidgetAt(args.oldIndex - this._start);
+          let widget = layout.widgets[args.oldIndex - this._start];
+          widget.parent = null;
           this._start++;
         }
         // If both are before `_start`, this is a no-op.
@@ -621,7 +622,8 @@ class Chatbox extends Widget {
           each(args.newValues, entry => {
             let entryWidget = this._entryWidgetFromModel(entry);
             layout.insertWidget(index, entryWidget);
-            layout.removeWidgetAt(index+1);
+            let toRemove = layout.widgets[index+1];
+            toRemove.parent = null;
             index++;
           });
         }
@@ -635,7 +637,7 @@ class Chatbox extends Widget {
   private _post(): void {
     // Dispose of the current input widget.
     let prompt = this.prompt;
-    (this._input.layout as PanelLayout).removeWidgetAt(0);
+    (this._input.layout as PanelLayout).widgets[0].parent = null;
 
     // Add the chat entry to the log.
     let collaborators = this._model.modelDB.collaborators;
