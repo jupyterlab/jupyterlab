@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  nbformat
-} from '@jupyterlab/coreutils';
-
-import {
   IIterator
 } from '@phosphor/algorithm';
 

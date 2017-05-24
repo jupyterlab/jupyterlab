@@ -462,7 +462,7 @@ class CodeConsole extends Widget {
     // do in IPython or QtConsole.
     if ( source === 'clear' || source === '%clear' ) {
       this.clear();
-      return Promise.resolve(void 0)
+      return Promise.resolve(void 0);
     }
     cell.model.contentChanged.connect(this.update, this);
     let onSuccess = (value: KernelMessage.IExecuteReplyMsg) => {
@@ -494,7 +494,7 @@ class CodeConsole extends Widget {
       cell.model.contentChanged.disconnect(this.update, this);
       this.update();
     };
-    return cell.execute(this.session).then(onSuccess, onFailure);
+    return CodeCell.execute(cell, this.session).then(onSuccess, onFailure);
   }
 
   /**
