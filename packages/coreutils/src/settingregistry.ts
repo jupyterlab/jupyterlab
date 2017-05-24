@@ -6,7 +6,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONExt, JSONObject, JSONValue, PromiseDelegate
+  JSONExt, JSONObject, JSONValue, PromiseDelegate, Token
 } from '@phosphor/coreutils';
 
 import {
@@ -29,6 +29,73 @@ const LEVEL: ISettingRegistry.Level = 'user';
 
 
 /**
+ * An interface for manipulating the settings of a specific plugin.
+ */
+export
+interface ISettings extends IDisposable {
+  /*
+   * A signal that emits when the plugin's settings have changed.
+   */
+  readonly changed: ISignal<this, void>;
+
+  /*
+   * The plugin name.
+   */
+  readonly plugin: string;
+
+  /**
+   * Get an individual setting.
+   *
+   * @param key - The name of the setting being retrieved.
+   *
+   * @param level - The setting level. Defaults to `user`.
+   *
+   * @returns The setting value.
+   *
+   * #### Notes
+   * This method returns synchronously because it uses a cached copy of the
+   * plugin settings that is synchronized with the registry.
+   */
+  get(key: string, level?: ISettingRegistry.Level): JSONValue;
+
+  /**
+   * Remove a single setting.
+   *
+   * @param key - The name of the setting being removed.
+   *
+   * @returns A promise that resolves when the setting is removed.
+   *
+   * #### Notes
+   * This function is asynchronous because it writes to the setting registry.
+   */
+  remove(key: string): Promise<void>;
+
+  /**
+   * Set a single setting.
+   *
+   * @param key - The name of the setting being set.
+   *
+   * @param value - The value of the setting.
+   *
+   * @returns A promise that resolves when the setting has been saved.
+   *
+   * #### Notes
+   * This function is asynchronous because it writes to the setting registry.
+   */
+  set(key: string, value: JSONValue): Promise<void>;
+};
+
+
+/* tslint:disable */
+/**
+ * The setting registry token.
+ */
+export
+const ISettingRegistry = new Token<ISettingRegistry>('jupyter.services.settings');
+/* tslint:enable */
+
+
+/**
  * A namespace for setting registry interfaces.
  */
 export
@@ -38,6 +105,7 @@ namespace ISettingRegistry {
    */
   export
   type Level = 'user' | 'system';
+
 
   /**
    * A collection of setting data for a specific key.
@@ -98,63 +166,6 @@ namespace ISettingRegistry {
      */
     data: Bundle | null;
   }
-
-  /**
-   * An interface for manipulating the settings of a specific plugin.
-   */
-  export
-  interface ISettings extends IDisposable {
-    /**
-     * A signal that emits when the plugin's settings have changed.
-     */
-    readonly changed: ISignal<this, void>;
-
-    /**
-     * The plugin name.
-     */
-    readonly plugin: string;
-
-    /**
-     * Get an individual setting.
-     *
-     * @param key - The name of the setting being retrieved.
-     *
-     * @param level - The setting level. Defaults to `user`.
-     *
-     * @returns The setting value.
-     *
-     * #### Notes
-     * This method returns synchronously because it uses a cached copy of the
-     * plugin settings that is synchronized with the registry.
-     */
-    get(key: string, level?: ISettingRegistry.Level): JSONValue;
-
-    /**
-     * Remove a single setting.
-     *
-     * @param key - The name of the setting being removed.
-     *
-     * @returns A promise that resolves when the setting is removed.
-     *
-     * #### Notes
-     * This function is asynchronous because it writes to the setting registry.
-     */
-    remove(key: string): Promise<void>;
-
-    /**
-     * Set a single setting.
-     *
-     * @param key - The name of the setting being set.
-     *
-     * @param value - The value of the setting.
-     *
-     * @returns A promise that resolves when the setting has been saved.
-     *
-     * #### Notes
-     * This function is asynchronous because it writes to the setting registry.
-     */
-    set(key: string, value: JSONValue): Promise<void>;
-  };
 }
 
 
@@ -243,7 +254,7 @@ class SettingRegistry {
    *
    * @returns A promise that resolves with a plugin settings object.
    */
-  load(plugin: string, reload = false): Promise<ISettingRegistry.ISettings> {
+  load(plugin: string, reload = false): Promise<ISettings> {
     const annotations = this._annotations;
     const copy = JSONExt.deepCopy;
     const plugins = this._plugins;
@@ -386,7 +397,7 @@ class SettingRegistry {
 /**
  * A manager for a specific plugin's settings.
  */
-class Settings implements ISettingRegistry.ISettings {
+class Settings implements ISettings {
   /**
    * Instantiate a new plugin settings manager.
    */
