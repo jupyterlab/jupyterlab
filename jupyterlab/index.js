@@ -1,11 +1,12 @@
 require('es6-promise/auto');  // polyfill Promise on IE'
 require('font-awesome/css/font-awesome.min.css');
-require('@jupyterlab/theme-assets/style/index.css');
 
 var app = require('@jupyterlab/application').JupyterLab;
 var PageConfig = require('@jupyterlab/coreutils').PageConfig;
 
 __webpack_public_path__ = PageConfig.getOption('publicUrl');
+
+require('@jupyterlab/theme-assets/style/index.css');
 
 function main() {
     var version = PageConfig.getOption('appVersion') || 'unknown';
