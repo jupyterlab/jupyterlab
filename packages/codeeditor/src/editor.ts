@@ -107,12 +107,7 @@ namespace CodeEditor {
     displayName?: string;
 
     /**
-     * A CSS string to apply to the selection.
-     */
-    css?: string;
-
-    /**
-     * A color for cursors.
+     * A color for UI elements.
      */
     color?: string;
   }

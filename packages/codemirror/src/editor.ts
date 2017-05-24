@@ -585,10 +585,17 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   private _toTextMarkerOptions(style: CodeEditor.ISelectionStyle | undefined): CodeMirror.TextMarkerOptions | undefined {
     if (style) {
+      let css: string;
+      if (style.color) {
+        let r = parseInt(style.color.slice(1,3), 16);
+        let g  = parseInt(style.color.slice(3,5), 16);
+        let b  = parseInt(style.color.slice(5,7), 16);
+        css = `background-color: rgba( ${r}, ${g}, ${b}, 0.1)`;
+      }
       return {
         className: style.className,
         title: style.displayName,
-        css: style.css
+        css
       };
     }
     return undefined;

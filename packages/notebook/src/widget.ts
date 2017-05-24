@@ -967,12 +967,7 @@ class Notebook extends StaticNotebook {
           //Setup the selection style for collaborators
           let localCollaborator = modelDB.collaborators.localCollaborator;
           cell.editor.uuid = localCollaborator.sessionId;
-          let color = localCollaborator.color;
-          let r = parseInt(color.slice(1,3), 16);
-          let g  = parseInt(color.slice(3,5), 16);
-          let b  = parseInt(color.slice(5,7), 16);
           cell.editor.selectionStyle = {
-            css: `background-color: rgba( ${r}, ${g}, ${b}, 0.1)`,
             color: localCollaborator.color
           };
         }
