@@ -414,6 +414,12 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   setCursorPosition(position: CodeEditor.IPosition): void {
     const cursor = this._toCodeMirrorPosition(position);
     this.doc.setCursor(cursor);
+    // If the editor does not have focus, this cursor change
+    // will get screened out in _onCursorsChanged(). Make an
+    // exception for this method.
+    if (!this.editor.hasFocus()) {
+      this.model.selections.set(this.uuid, this.getSelections());
+    }
   }
 
   /**

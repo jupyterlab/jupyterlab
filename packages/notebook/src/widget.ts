@@ -210,7 +210,7 @@ class StaticNotebook extends Widget {
           this._onCollaboratorsChanged, this);
       });
     }
-    if (newValue.modelDB.isCollaborative) {
+    if (newValue && newValue.modelDB.isCollaborative) {
       newValue.modelDB.connected.then(() => {
         newValue.modelDB.collaborators.changed.connect(
           this._onCollaboratorsChanged, this);
@@ -960,7 +960,7 @@ class Notebook extends StaticNotebook {
    * Handle a cell being inserted.
    */
   protected onCellInserted(index: number, cell: Cell): void {
-    if (this.model.modelDB.isCollaborative) {
+    if (this.model && this.model.modelDB.isCollaborative) {
       let modelDB = this.model.modelDB;
       modelDB.connected.then(() => {
         if (!cell.isDisposed) {
