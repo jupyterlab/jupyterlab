@@ -63,6 +63,7 @@
     "@jupyterlab/terminal-extension": "^0.5.0",
     "@jupyterlab/theme-assets": "^0.5.1",
     "@jupyterlab/theme-light-extension": "^0.5.1",
+    "@jupyterlab/theme-dark-extension": "^0.5.1",
     "@jupyterlab/tooltip": "^0.5.0",
     "@jupyterlab/tooltip-extension": "^0.5.1"
   },
