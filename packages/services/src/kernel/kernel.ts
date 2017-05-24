@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  nbformat
+} from '@jupyterlab/coreutils';
+
+import {
   IIterator
 } from '@phosphor/algorithm';
 
@@ -671,8 +675,10 @@ namespace Kernel {
 
     /**
      * A promise that resolves when the future is done.
+     *
+     * The contents of the promise is the reply message.
      */
-    readonly done: Promise<void>;
+    readonly done: Promise<KernelMessage.IShellMessage>;
 
     /**
      * The reply handler for the kernel future.

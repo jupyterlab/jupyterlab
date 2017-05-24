@@ -633,6 +633,14 @@ namespace KernelMessage {
   }
 
   /**
+   * Test whether a kernel message is an `'execute_reply'` message.
+   */
+  export
+  function isExecuteReplyMsg(msg: IMessage): msg is IExecuteReplyMsg {
+    return msg.header.msg_type === 'execute_reply';
+  }
+
+  /**
    * An `'input_request'` message on the `'stdin'` channel.
    *
    * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#messages-on-the-stdin-router-dealer-sockets).

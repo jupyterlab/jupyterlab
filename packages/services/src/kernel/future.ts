@@ -46,7 +46,7 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
   /**
    * A promise that resolves when the future is done.
    */
-  get done(): Promise<void> {
+  get done(): Promise<KernelMessage.IShellMessage> {
     return this._done.promise;
   }
 
@@ -167,6 +167,7 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
   private _handleReply(msg: KernelMessage.IShellMessage): void {
     let reply = this._reply;
     if (reply) { reply(msg); }
+    this._replyMsg = msg;
     this._setFlag(Private.KernelFutureFlag.GotReply);
     if (this._testFlag(Private.KernelFutureFlag.GotIdle)) {
       this._handleDone();
@@ -196,7 +197,7 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
       return;
     }
     this._setFlag(Private.KernelFutureFlag.IsDone);
-    this._done.resolve(void 0);
+    this._done.resolve(this._replyMsg);
     if (this._disposeOnDone) {
       this.dispose();
     }
@@ -221,7 +222,8 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
   private _stdin: (msg: KernelMessage.IStdinMessage) => void = null;
   private _iopub: (msg: KernelMessage.IIOPubMessage) => void = null;
   private _reply: (msg: KernelMessage.IShellMessage) => void = null;
-  private _done = new PromiseDelegate<void>();
+  private _done = new PromiseDelegate<KernelMessage.IShellMessage>();
+  private _replyMsg: KernelMessage.IShellMessage;
   private _hooks = new Private.HookList<KernelMessage.IIOPubMessage>();
   private _disposeOnDone = true;
   private _kernel: Kernel.IKernel;
