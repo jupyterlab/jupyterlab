@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/theme-light-extension",
-  "version": "0.4.0",
+  "version": "0.5.1",
   "description": "JupyterLab - Default Light Theme",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
