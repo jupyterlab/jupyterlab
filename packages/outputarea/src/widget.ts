@@ -18,6 +18,10 @@ import {
 } from '@phosphor/widgets';
 
 import {
+  IClientSession
+} from '@jupyterlab/apputils';
+
+import {
   nbformat
 } from '@jupyterlab/coreutils';
 
@@ -296,12 +300,7 @@ class OutputArea extends Widget {
   /**
    * Handle an execute reply message.
    */
-  private _onExecuteReply(msg: KernelMessage.IExecuteReplyMsg): nbformat.ExecutionCount {
-    let count: nbformat.ExecutionCount;
-    let status = msg.content.status;
-    if (status !== 'abort') {
-      count = msg.content.execution_count;
-    }
+  private _onExecuteReply(msg: KernelMessage.IExecuteReplyMsg): void {
     // API responses that contain a pager are special cased and their type
     // is overriden from 'execute_reply' to 'display_data' in order to
     // render output.
@@ -309,11 +308,11 @@ class OutputArea extends Widget {
     let content = msg.content as KernelMessage.IExecuteOkReply;
     let payload = content && content.payload;
     if (!payload || !payload.length) {
-      return count;
+      return;
     }
     let pages = payload.filter((i: any) => (i as any).source === 'page');
     if (!pages.length) {
-      return count;
+      return;
     }
     let page = JSON.parse(JSON.stringify(pages[0]));
     let output: nbformat.IOutput = {
@@ -322,7 +321,6 @@ class OutputArea extends Widget {
       metadata: {}
     };
     model.add(output);
-    return count;
   }
 
   /**
@@ -424,6 +422,25 @@ namespace OutputArea {
      * The rendermime instance used by the widget.
      */
     rendermime: RenderMime;
+  }
+
+  /**
+   * Execute code on an output area.
+   */
+  export
+  function execute(output: OutputArea, code: string, session: IClientSession): Promise<KernelMessage.IExecuteReplyMsg> {
+    // Override the default for `stop_on_error`.
+    let content: KernelMessage.IExecuteRequest = {
+      code,
+      stop_on_error: true
+    };
+
+    if (!session.kernel) {
+      return Promise.resolve(void 0);
+    }
+    let future = session.kernel.requestExecute(content);
+    output.future = future;
+    return future.done;
   }
 
   /**

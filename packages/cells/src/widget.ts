@@ -631,18 +631,9 @@ namespace CodeCell {
 
     model.executionCount = null;
     cell.setPrompt('*');
-
-    // Override the default for `stop_on_error`.
-    let content: KernelMessage.IExecuteRequest = {
-      code,
-      stop_on_error: true
-    };
-
-    let future = session.kernel.requestExecute(content);
     model.trusted = true;
-    cell.outputArea.future = future;
 
-    return future.done.then((msg: KernelMessage.IExecuteReplyMsg) => {
+    return OutputArea.execute(cell.outputArea, code, session).then(msg => {
       model.executionCount = msg.content.execution_count;
       return msg;
     });
