@@ -33,6 +33,8 @@ import {
  */
 const rendermime = defaultRenderMime();
 
+const CODE = 'print("hello")';
+
 
 class LogOutputArea extends OutputArea {
 
@@ -120,7 +122,7 @@ describe('outputarea/widget', () => {
 
     });
 
-    describe('#execute()', () => {
+    describe('#future', () => {
 
       let session: ClientSession;
 
@@ -139,17 +141,23 @@ describe('outputarea/widget', () => {
 
       it('should execute code on a kernel and send outputs to the model', () => {
         return session.kernel.ready.then(() => {
-          return widget.execute('print("hello")', session).then(reply => {
-            expect(reply.content.execution_count).to.be.ok();
-            expect(reply.content.status).to.be('ok');
-            expect(model.length).to.be(1);
-          });
+          let future = session.kernel.requestExecute({ code: CODE });
+          widget.future = future;
+          return future.done;
+        }).then(reply => {
+          expect(reply.content.execution_count).to.be.ok();
+          expect(reply.content.status).to.be('ok');
+          expect(model.length).to.be(1);
         });
       });
 
       it('should clear existing outputs', () => {
         widget.model.fromJSON(DEFAULT_OUTPUTS);
-        return widget.execute('print("hello")', session).then(reply => {
+        return session.kernel.ready.then(() => {
+          let future = session.kernel.requestExecute({ code: CODE });
+          widget.future = future;
+          return future.done;
+        }).then(reply => {
           expect(reply.content.execution_count).to.be.ok();
           expect(model.length).to.be(1);
         });
@@ -186,6 +194,43 @@ describe('outputarea/widget', () => {
 
     });
 
+    describe('.execute()', () => {
+
+      let session: ClientSession;
+
+      beforeEach(() => {
+        return createClientSession().then(s => {
+          session = s;
+          return session.initialize();
+        });
+      });
+
+      afterEach(() => {
+        return session.shutdown().then(() => {
+          session.dispose();
+        });
+      });
+
+      it('should execute code on a kernel and send outputs to the model', () => {
+        return session.kernel.ready.then(() => {
+          return OutputArea.execute(widget, CODE, session).then(reply => {
+            expect(reply.content.execution_count).to.be.ok();
+            expect(reply.content.status).to.be('ok');
+            expect(model.length).to.be(1);
+          });
+        });
+      });
+
+      it('should clear existing outputs', () => {
+        widget.model.fromJSON(DEFAULT_OUTPUTS);
+        return OutputArea.execute(widget, CODE, session).then(reply => {
+          expect(reply.content.execution_count).to.be.ok();
+          expect(model.length).to.be(1);
+        });
+      });
+
+    });
+
     describe('.ContentFactory', () => {
 
       describe('#createOutputPrompt()', () => {
@@ -202,10 +247,11 @@ describe('outputarea/widget', () => {
         it('should create a stdin widget', () => {
           return Kernel.startNew().then(kernel => {
             let factory = new OutputArea.ContentFactory();
+            let future = kernel.requestExecute({ code: CODE });
             let options = {
               prompt: 'hello',
               password: false,
-              kernel
+              future
             };
             expect(factory.createStdin(options)).to.be.a(Widget);
             return kernel.shutdown().then(() => { kernel.dispose(); });

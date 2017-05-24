@@ -177,7 +177,7 @@ describe('@jupyterlab/apputils', () => {
         });
       });
 
-      it('should display a busy status if the kernel status is not idle', (done) => {
+      it('should display a busy status if the kernel status is not idle', () => {
         let item = Toolbar.createKernelStatusItem(session);
         let called = false;
         let future = session.kernel.requestExecute({ code: 'a = 1' });
@@ -187,13 +187,12 @@ describe('@jupyterlab/apputils', () => {
             called = true;
           }
         };
-        future.onDone = () => {
+        return future.done.then(() => {
           expect(called).to.be(true);
-          done();
-        };
+        });
       });
 
-      it('should show the current status in the node title', (done) => {
+      it('should show the current status in the node title', () => {
         let item = Toolbar.createKernelStatusItem(session);
         let status = session.status;
         expect(item.node.title.toLowerCase()).to.contain(status);
@@ -205,10 +204,9 @@ describe('@jupyterlab/apputils', () => {
             called = true;
           }
         };
-        future.onDone = () => {
+        return future.done.then(() => {
           expect(called).to.be(true);
-          done();
-        };
+        });
       });
 
       it('should handle a starting session', () => {
