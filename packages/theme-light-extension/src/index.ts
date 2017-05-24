@@ -2,6 +2,9 @@ import {
   JupyterLabPlugin
 } from '@jupyterlab/application';
 
+// All themes need to import the theme assets index.css.
+import '@jupyterlab/theme-assets/style/index.css'
+
 import '../style/index.css';
 
 /**
