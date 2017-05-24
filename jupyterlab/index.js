@@ -6,8 +6,6 @@ var PageConfig = require('@jupyterlab/coreutils').PageConfig;
 
 __webpack_public_path__ = PageConfig.getOption('publicUrl');
 
-require('@jupyterlab/theme-assets/style/index.css');
-
 function main() {
     var version = PageConfig.getOption('appVersion') || 'unknown';
     var name = PageConfig.getOption('appName') || 'JupyterLab';
