@@ -1,7 +1,6 @@
 var webpack = require('webpack');
 var path = require('path');
 var fs = require('fs-extra');
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var Handlebars = require('handlebars');
 var crypto = require('crypto');
 var package_data = require('./package.json');
