@@ -133,17 +133,10 @@ describe('jupyter.services - Integration', () => {
         };
         return kernel.requestHistory(options);
       }).then(msg => {
-        return new Promise<void>((resolve, reject) => {
-          let future = kernel.requestExecute({ code: 'a = 1\n' });
-          future.onReply = (reply: KernelMessage.IExecuteReplyMsg) => {
-            expect(reply.content.status).to.be('ok');
-          };
-          future.onDone = () => {
-            console.log('Execute finished');
-            resolve(void 0);
-          };
-        });
-      }).then(() => {
+        let future = kernel.requestExecute({ code: 'a = 1\n' });
+        return future.done;
+      }).then(msg => {
+        expect(msg.content.status).to.be('ok');
         return kernel.shutdown();
       });
     });

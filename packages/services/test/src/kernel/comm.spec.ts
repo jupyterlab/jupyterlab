@@ -21,14 +21,13 @@ describe('jupyter.services - Comm', () => {
   let tester: KernelTester;
   let kernel: Kernel.IKernel;
 
-  beforeEach((done) => {
+  beforeEach(() => {
     tester = new KernelTester();
-    Kernel.startNew().then(k => {
+    debugger;
+    return Kernel.startNew().then(k => {
       kernel = k;
       return kernel.ready;
-    }).then(() => {
-      done();
-    }).catch(done);
+    });
   });
 
   afterEach(() => {
