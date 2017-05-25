@@ -18,6 +18,10 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
+   MarkdownCodeBlocks, PathExt
+} from '@jupyterlab/coreutils';
+
+import {
   IDocumentRegistry
 } from '@jupyterlab/docregistry';
 
@@ -28,10 +32,6 @@ import {
 import {
   ILauncher
 } from '@jupyterlab/launcher';
-
-import {
-   MarkdownCodeBlocks
-} from '@jupyterlab/coreutils'
 
 
 /**
@@ -137,30 +137,6 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
     editor.wordWrap = wordWrap;
   });
 
-  // Update the command registry when the notebook state changes.
-  tracker.currentChanged.connect(() => {
-    if (tracker.size <= 1) {
-      commands.notifyCommandChanged(CommandIDs.lineNumbers);
-    }
-  });
-
-  /**
-   * Detect if there is a selection.
-   */
-  function hasSelection(): boolean {
-    let widget = tracker.currentWidget;
-    if (!widget) {
-      return false;
-    }
-    const editor = widget.editor;
-    const selection = editor.getSelection();
-    if (selection.start.column === selection.end.column &&
-      selection.start.line === selection.end.line) {
-      return false;
-    }
-    return true;
-  }
-
   commands.addCommand(CommandIDs.lineNumbers, {
     execute: () => {
       lineNumbers = !lineNumbers;
@@ -209,48 +185,47 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
         return;
       }
 
-      var code = ""
+      let code = '';
+
       const editor = widget.editor;
-      const extension = widget.context.path.substring(widget.context.path.lastIndexOf("."));
-      if (!hasSelection() && MarkdownCodeBlocks.isMarkdown(extension)) {
-        var codeBlocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(editor.model.value.text);
-        for (let codeBlock of codeBlocks) {
-          if (codeBlock.startLine <= editor.getSelection().start.line &&
-            editor.getSelection().start.line <= codeBlock.endLine) {
-            code = codeBlock.code;
-            break;
-          }
-        }
-      } else {
+      const path = widget.context.path;
+      const extension = PathExt.extname(path);
+      const selection = editor.getSelection();
+      const { start, end } = selection;
+      const selected = start.column !== end.column || start.line !== end.line;
+
+      if (selected) {
         // Get the selected code from the editor.
-        const selection = editor.getSelection();
         const start = editor.getOffsetAt(selection.start);
         const end = editor.getOffsetAt(selection.end);
+
         code = editor.model.value.text.substring(start, end);
         if (start === end) {
           code = editor.getLine(selection.start.line);
         }
+      } else if (MarkdownCodeBlocks.isMarkdown(extension)) {
+        const { text } = editor.model.value;
+        const blocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(text);
+
+        for (let block of blocks) {
+          if (block.startLine <= start.line && start.line <= block.endLine) {
+            code = block.code;
+            break;
+          }
+        }
       }
 
-      const options: JSONObject = {
-        path: widget.context.path,
-        code: code,
-        activate: false
-      };
+      const { column, line } = editor.getCursorPosition();
+      const activate = false;
 
       // Advance cursor to the next line.
-      const cursor = editor.getCursorPosition();
-
-      if (cursor.line + 1 === editor.lineCount) {
+      if (line + 1 === editor.lineCount) {
         const text = editor.model.value.text;
         editor.model.value.text = text + '\n';
       }
-      editor.setCursorPosition({
-        column: cursor.column,
-        line: cursor.line + 1
-      });
+      editor.setCursorPosition({ column, line: line + 1 });
 
-      return commands.execute('console:inject', options);
+      return commands.execute('console:inject', { activate, code, path });
     },
     isEnabled: hasWidget,
     label: 'Run Code'
