@@ -2,28 +2,24 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  JupyterLab, JupyterLabPlugin
+} from '@jupyterlab/application';
+
+import {
+  ICommandPalette, IFrame, ILayoutRestorer, IMainMenu, InstanceTracker
+} from '@jupyterlab/apputils';
+
+import {
+  PageConfig, URLExt
+} from '@jupyterlab/coreutils';
+
+import {
   Message
 } from '@phosphor/messaging';
 
 import {
   Menu
 } from '@phosphor/widgets';
-
-import {
-  JupyterLab, JupyterLabPlugin
-} from '@jupyterlab/application';
-
-import {
-  ICommandPalette, IFrame, ILayoutRestorer, IMainMenu
-} from '@jupyterlab/apputils';
-
-import {
-  InstanceTracker
-} from '@jupyterlab/coreutils';
-
-import {
-  PageConfig, URLExt
-} from '@jupyterlab/coreutils';
 
 import '../style/index.css';
 

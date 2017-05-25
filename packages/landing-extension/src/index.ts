@@ -2,20 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IServiceManager
-} from '@jupyterlab/services';
-
-import {
   JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
 import {
-  ICommandLinker, ICommandPalette, ILayoutRestorer
+  ICommandLinker, ICommandPalette, ILayoutRestorer, InstanceTracker
 } from '@jupyterlab/apputils';
 
 import {
-  InstanceTracker
-} from '@jupyterlab/coreutils';
+  IServiceManager
+} from '@jupyterlab/services';
 
 import {
   LandingModel, LandingWidget

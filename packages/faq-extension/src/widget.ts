@@ -2,16 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ICommandLinker, VDomModel, VDomRenderer
+} from '@jupyterlab/apputils';
+
+import {
   Message
 } from '@phosphor/messaging';
 
 import {
   h, VirtualNode
 } from '@phosphor/virtualdom';
-
-import {
-  ICommandLinker, VDomModel, VDomRenderer
-} from '@jupyterlab/apputils';
 
 
 /**

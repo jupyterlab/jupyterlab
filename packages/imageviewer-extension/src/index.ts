@@ -6,12 +6,8 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, ILayoutRestorer
+  ICommandPalette, ILayoutRestorer, InstanceTracker
 } from '@jupyterlab/apputils';
-
-import {
-  InstanceTracker
-} from '@jupyterlab/coreutils';
 
 import {
   IDocumentRegistry

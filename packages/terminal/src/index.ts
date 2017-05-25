@@ -2,12 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Token
-} from '@phosphor/coreutils';
+  IInstanceTracker
+} from '@jupyterlab/apputils';
 
 import {
-  IInstanceTracker
-} from '@jupyterlab/coreutils';
+  Token
+} from '@phosphor/coreutils';
 
 import {
   Terminal

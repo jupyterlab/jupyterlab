@@ -8,11 +8,11 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  LayoutRestorer
+  InstanceTracker, LayoutRestorer
 } from '@jupyterlab/apputils';
 
 import {
-  InstanceTracker, StateDB
+  StateDB
 } from '@jupyterlab/coreutils';
 
 import {

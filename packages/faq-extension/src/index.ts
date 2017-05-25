@@ -6,12 +6,8 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandLinker, ICommandPalette, ILayoutRestorer
+  ICommandLinker, ICommandPalette, ILayoutRestorer, InstanceTracker
 } from '@jupyterlab/apputils';
-
-import {
-  InstanceTracker
-} from '@jupyterlab/coreutils';
 
 import {
   FaqModel, FaqWidget

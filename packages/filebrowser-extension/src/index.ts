@@ -6,11 +6,11 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, ILayoutRestorer, IMainMenu
+  ICommandPalette, ILayoutRestorer, IMainMenu, InstanceTracker
 } from '@jupyterlab/apputils';
 
 import {
-  IChangedArgs, InstanceTracker, IStateDB
+  IChangedArgs, IStateDB
 } from '@jupyterlab/coreutils';
 
 import {

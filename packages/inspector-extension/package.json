@@ -14,7 +14,6 @@
   "dependencies": {
     "@jupyterlab/application": "^0.6.0",
     "@jupyterlab/apputils": "^0.6.0",
-    "@jupyterlab/coreutils": "^0.6.0",
     "@jupyterlab/console": "^0.6.0",
     "@jupyterlab/inspector": "^0.6.0",
     "@jupyterlab/notebook": "^0.6.0",

@@ -2,6 +2,31 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  JupyterLab, JupyterLabPlugin
+} from '@jupyterlab/application';
+
+import {
+  Dialog, ICommandPalette, ILayoutRestorer, IMainMenu, InstanceTracker,
+  showDialog
+} from '@jupyterlab/apputils';
+
+import {
+  IEditorServices
+} from '@jupyterlab/codeeditor';
+
+import {
+  IConsoleTracker, ConsolePanel
+} from '@jupyterlab/console';
+
+import {
+  ILauncher
+} from '@jupyterlab/launcher';
+
+import {
+  IRenderMime
+} from '@jupyterlab/rendermime';
+
+import {
   IServiceManager
 } from '@jupyterlab/services';
 
@@ -16,35 +41,6 @@ import {
 import {
   Menu
 } from '@phosphor/widgets';
-
-import {
-  JupyterLab, JupyterLabPlugin
-} from '@jupyterlab/application';
-
-import {
-  Dialog, ICommandPalette, ILayoutRestorer,
-  IMainMenu, showDialog
-} from '@jupyterlab/apputils';
-
-import {
-  IEditorServices
-} from '@jupyterlab/codeeditor';
-
-import {
-  IConsoleTracker, ConsolePanel
-} from '@jupyterlab/console';
-
-import {
-  InstanceTracker
-} from '@jupyterlab/coreutils';
-
-import {
-  ILauncher
-} from '@jupyterlab/launcher';
-
-import {
-  IRenderMime
-} from '@jupyterlab/rendermime';
 
 
 /**

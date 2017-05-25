@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ABCWidgetFactory, DocumentRegistry
+} from '@jupyterlab/docregistry';
+
+import {
   Message
 } from '@phosphor/messaging';
 
@@ -9,9 +13,6 @@ import {
   Widget
 } from '@phosphor/widgets';
 
-import {
-  ABCWidgetFactory, DocumentRegistry
-} from '@jupyterlab/docregistry';
 
 /**
  * The class name added to a imageviewer.

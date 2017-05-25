@@ -6,11 +6,11 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ILayoutRestorer
+  ILayoutRestorer, InstanceTracker
 } from '@jupyterlab/apputils';
 
 import {
-  InstanceTracker, ISettingRegistry
+  ISettingRegistry
 } from '@jupyterlab/coreutils';
 
 import {

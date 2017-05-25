@@ -2,8 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IStateDB
+} from '@jupyterlab/coreutils';
+
+import {
   ArrayExt, each, find
 } from '@phosphor/algorithm';
+
+import {
+  CommandRegistry
+} from '@phosphor/commands';
 
 import {
   JSONObject
@@ -22,20 +30,8 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  CommandRegistry
-} from '@phosphor/commands';
-
-import {
-  FocusTracker
+  FocusTracker, Widget
 } from '@phosphor/widgets';
-
-import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
-  IStateDB
-} from './statedb';
 
 
 /**

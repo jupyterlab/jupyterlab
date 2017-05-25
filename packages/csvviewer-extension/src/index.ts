@@ -6,12 +6,8 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ILayoutRestorer
+  ILayoutRestorer, InstanceTracker
 } from '@jupyterlab/apputils';
-
-import {
-  InstanceTracker
-} from '@jupyterlab/coreutils';
 
 import {
   CSVViewer, CSVViewerFactory

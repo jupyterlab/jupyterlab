@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  InstanceTracker
+} from '@jupyterlab/apputils';
+
+import {
   each
 } from '@phosphor/algorithm';
 
@@ -14,10 +18,6 @@ import {
 import {
   simulate
 } from 'simulate-event';
-
-import {
-  InstanceTracker
-} from '@jupyterlab/coreutils';
 
 
 const namespace = 'instance-tracker-test';

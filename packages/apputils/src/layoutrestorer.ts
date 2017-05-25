@@ -24,8 +24,12 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  InstanceTracker, IStateDB
+  IStateDB
 } from '@jupyterlab/coreutils';
+
+import {
+  InstanceTracker
+} from '.';
 
 
 /* tslint:disable */
