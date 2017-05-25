@@ -60,9 +60,8 @@
 
 
 #tab-manager .p-TabBar-tab.jp-mod-active {
-  border-top: var(--jp-border-width) solid var(--jp-brand-color1);
-  border-bottom: var(--jp-border-width) solid var(--jp-brand-color1);
-  color: var(--jp-ui-font-color0);
+  color: var(--jp-inverse-ui-font-color0);
+  background: var(--jp-brand-color1);
 }
 
 
