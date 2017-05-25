@@ -74,6 +74,7 @@
 
 #tab-manager .p-TabBar-tabLabel {
   padding-top: var(--jp-private-tab-manager-tab-padding-top);
+  padding-left: 4px;
 }
 
 
