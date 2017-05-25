@@ -611,9 +611,9 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Converts an editor selection to a code mirror selection.
    */
   private _toCodeMirrorSelection(selection: CodeEditor.IRange): CodeMirror.Selection {
-    //Selections only appear to render correctly if the anchor
-    //is before the head in the document. That is, reverse selections
-    //do not appear as intended.
+    // Selections only appear to render correctly if the anchor
+    // is before the head in the document. That is, reverse selections
+    // do not appear as intended.
     let forward: boolean = (selection.start.line < selection.end.line) ||
                            (selection.start.line === selection.end.line &&
                             selection.start.column <= selection.end.column);

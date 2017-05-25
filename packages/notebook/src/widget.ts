@@ -964,7 +964,7 @@ class Notebook extends StaticNotebook {
       let modelDB = this.model.modelDB;
       modelDB.connected.then(() => {
         if (!cell.isDisposed) {
-          //Setup the selection style for collaborators
+          // Setup the selection style for collaborators.
           let localCollaborator = modelDB.collaborators.localCollaborator;
           cell.editor.uuid = localCollaborator.sessionId;
           cell.editor.selectionStyle = {
