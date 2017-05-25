@@ -9,7 +9,7 @@ import {
 
 import {
   ModelDB, ObservableString, ObservableValue,
-  ObservableUndoableVector, ObservableJSON
+  ObservableUndoableList, ObservableJSON
 } from '@jupyterlab/coreutils';
 
 
@@ -223,17 +223,17 @@ describe('@jupyterlab/coreutils', () => {
 
     });
 
-    describe('#createVector', () => {
+    describe('#createList', () => {
 
-      it('should create an ObservableUndoableVector`', () => {
+      it('should create an ObservableUndoableList`', () => {
         let db = new ModelDB();
-        let str = db.createVector('vec');
-        expect(str instanceof ObservableUndoableVector).to.be(true);
+        let str = db.createList('vec');
+        expect(str instanceof ObservableUndoableList).to.be(true);
       });
 
       it('should be able to retrieve that vector using `get`', () => {
         let db = new ModelDB();
-        let vec = db.createVector('vec');
+        let vec = db.createList('vec');
         expect(db.get('vec')).to.be(vec);
       });
 

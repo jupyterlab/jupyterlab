@@ -88,7 +88,7 @@ describe('@jupyterlab/notebook', () => {
         editor.setCursorPosition(editor.getPositionAt(10));
         NotebookActions.splitCell(widget);
         let cells = widget.model.cells;
-        let newSource = cells.at(index).value.text + cells.at(index + 1).value.text;
+        let newSource = cells.get(index).value.text + cells.get(index + 1).value.text;
         expect(newSource).to.be(source);
       });
 
@@ -533,7 +533,7 @@ describe('@jupyterlab/notebook', () => {
         widget.model.cells.insert(2, cell);
         widget.select(widget.widgets[2]);
         cell = widget.model.contentFactory.createCodeCell({});
-        widget.model.cells.pushBack(cell);
+        widget.model.cells.push(cell);
         widget.select(widget.widgets[widget.widgets.length - 1]);
         NotebookActions.run(widget, session).then(result => {
           expect(result).to.be(false);
@@ -543,7 +543,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should render all markdown cells on an error', (done) => {
         let cell = widget.model.contentFactory.createMarkdownCell({});
-        widget.model.cells.pushBack(cell);
+        widget.model.cells.push(cell);
         let child = widget.widgets[widget.widgets.length - 1] as MarkdownCell;
         child.rendered = false;
         widget.select(child);
@@ -632,7 +632,7 @@ describe('@jupyterlab/notebook', () => {
       it('should stop executing code cells on an error', (done) => {
         widget.activeCell.model.value.text = ERROR_INPUT;
         let cell = widget.model.contentFactory.createCodeCell({});
-        widget.model.cells.pushBack(cell);
+        widget.model.cells.push(cell);
         widget.select(widget.widgets[widget.widgets.length - 1]);
         NotebookActions.runAndAdvance(widget, session).then(result => {
           expect(result).to.be(false);
@@ -717,7 +717,7 @@ describe('@jupyterlab/notebook', () => {
       it('should stop executing code cells on an error', (done) => {
         widget.activeCell.model.value.text = ERROR_INPUT;
         let cell = widget.model.contentFactory.createCodeCell({});
-        widget.model.cells.pushBack(cell);
+        widget.model.cells.push(cell);
         widget.select(widget.widgets[widget.widgets.length - 1]);
         NotebookActions.runAndInsert(widget, session).then(result => {
           expect(result).to.be(false);
@@ -793,7 +793,7 @@ describe('@jupyterlab/notebook', () => {
       it('should stop executing code cells on an error', (done) => {
         widget.activeCell.model.value.text = ERROR_INPUT;
         let cell = widget.model.contentFactory.createCodeCell({});
-        widget.model.cells.pushBack(cell);
+        widget.model.cells.push(cell);
         NotebookActions.runAll(widget, session).then(result => {
           expect(result).to.be(false);
           expect(cell.executionCount).to.be(null);
@@ -1008,9 +1008,9 @@ describe('@jupyterlab/notebook', () => {
         widget.activeCellIndex++;
         let source = widget.activeCell.model.value.text;
         NotebookActions.moveUp(widget);
-        expect(widget.model.cells.at(0).value.text).to.be(source);
+        expect(widget.model.cells.get(0).value.text).to.be(source);
         NotebookActions.undo(widget);
-        expect(widget.model.cells.at(1).value.text).to.be(source);
+        expect(widget.model.cells.get(1).value.text).to.be(source);
       });
 
     });
@@ -1041,9 +1041,9 @@ describe('@jupyterlab/notebook', () => {
       it('should be undo-able', () => {
         let source = widget.activeCell.model.value.text;
         NotebookActions.moveDown(widget);
-        expect(widget.model.cells.at(1).value.text).to.be(source);
+        expect(widget.model.cells.get(1).value.text).to.be(source);
         NotebookActions.undo(widget);
-        expect(widget.model.cells.at(0).value.text).to.be(source);
+        expect(widget.model.cells.get(0).value.text).to.be(source);
       });
 
     });
@@ -1420,7 +1420,7 @@ describe('@jupyterlab/notebook', () => {
       it('should trust the notebook cells if the user accepts', (done) => {
         let model = widget.model;
         widget.model.fromJSON(DEFAULT_CONTENT);
-        let cell = model.cells.at(0);
+        let cell = model.cells.get(0);
         expect(cell.trusted).to.not.be(true);
         NotebookActions.trust(widget).then(() => {
           expect(cell.trusted).to.be(true);
@@ -1432,7 +1432,7 @@ describe('@jupyterlab/notebook', () => {
       it('should not trust the notebook cells if the user aborts', (done) => {
         let model = widget.model;
         model.fromJSON(DEFAULT_CONTENT);
-        let cell = model.cells.at(0);
+        let cell = model.cells.get(0);
         expect(cell.trusted).to.not.be(true);
         NotebookActions.trust(widget).then(() => {
           expect(cell.trusted).to.not.be(true);
@@ -1451,7 +1451,7 @@ describe('@jupyterlab/notebook', () => {
         widget.model.fromJSON(DEFAULT_CONTENT);
         model.fromJSON(DEFAULT_CONTENT);
         for (let i = 0; i < model.cells.length; i++) {
-          let cell = model.cells.at(i);
+          let cell = model.cells.get(i);
           cell.trusted = true;
         }
         NotebookActions.trust(widget).then(() => { done(); });

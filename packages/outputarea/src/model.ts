@@ -14,7 +14,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  IObservableVector, ObservableVector, nbformat,
+  IObservableList, ObservableList, nbformat,
   IObservableValue, ObservableValue, IModelDB
 } from '@jupyterlab/coreutils';
 
@@ -126,7 +126,7 @@ namespace IOutputAreaModel {
    * A type alias for changed args.
    */
   export
-  type ChangedArgs = ObservableVector.IChangedArgs<IOutputModel>;
+  type ChangedArgs = IObservableList.IChangedArgs<IOutputModel>;
 
   /**
    * The interface for an output content factory.
@@ -153,7 +153,7 @@ class OutputAreaModel implements IOutputAreaModel {
     this.contentFactory = (options.contentFactory ||
       OutputAreaModel.defaultContentFactory
     );
-    this.list = new ObservableVector<IOutputModel>();
+    this.list = new ObservableList<IOutputModel>();
     if (options.values) {
       each(options.values, value => { this._add(value); });
     }
@@ -213,7 +213,7 @@ class OutputAreaModel implements IOutputAreaModel {
     }
     let trusted = this._trusted = value;
     for (let i = 0; i < this.list.length; i++) {
-      let item = this.list.at(i);
+      let item = this.list.get(i);
       let value = item.toJSON();
       item.dispose();
       item = this._createItem({ value, trusted });
@@ -249,7 +249,7 @@ class OutputAreaModel implements IOutputAreaModel {
    * Get an item at the specified index.
    */
   get(index: number): IOutputModel {
-    return this.list.at(index);
+    return this.list.get(index);
   }
 
   /**
@@ -325,7 +325,7 @@ class OutputAreaModel implements IOutputAreaModel {
       value.text = this._lastStream;
       let item = this._createItem({ value, trusted });
       let index = this.length - 1;
-      let prev = this.list.at(index);
+      let prev = this.list.get(index);
       prev.dispose();
       this.list.set(index, item);
       return index;
@@ -343,11 +343,11 @@ class OutputAreaModel implements IOutputAreaModel {
     }
 
     // Add the item to our list and return the new length.
-    return this.list.pushBack(item);
+    return this.list.push(item);
   }
 
   protected clearNext = false;
-  protected list: IObservableVector<IOutputModel> = null;
+  protected list: IObservableList<IOutputModel> = null;
 
   /**
    * Create an output item and hook up its signals.
@@ -363,7 +363,7 @@ class OutputAreaModel implements IOutputAreaModel {
   /**
    * Handle a change to the list.
    */
-  private _onListChanged(sender: IObservableVector<IOutputModel>, args: ObservableVector.IChangedArgs<IOutputModel>) {
+  private _onListChanged(sender: IObservableList<IOutputModel>, args: IObservableList.IChangedArgs<IOutputModel>) {
     if (this._serialized && !this._changeGuard) {
       this._changeGuard = true;
       this._serialized.set(this.toJSON());

@@ -10,8 +10,8 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  IObservableVector, ObservableVector
-} from './observablevector';
+  IObservableList, ObservableList
+} from './observablelist';
 
 
 /**
@@ -33,10 +33,10 @@ interface ISerializer<T> {
 
 
 /**
- * An observable vector that supports undo/redo.
+ * An observable list that supports undo/redo.
  */
 export
-interface IObservableUndoableVector<T> extends IObservableVector<T> {
+interface IObservableUndoableList<T> extends IObservableList<T> {
   /**
    * Whether the object can redo changes.
    */
@@ -78,17 +78,17 @@ interface IObservableUndoableVector<T> extends IObservableVector<T> {
 
 
 /**
- * A concrete implementation of an observable undoable vector.
+ * A concrete implementation of an observable undoable list.
  */
 export
-class ObservableUndoableVector<T> extends ObservableVector<T> implements IObservableUndoableVector<T> {
+class ObservableUndoableList<T> extends ObservableList<T> implements IObservableUndoableList<T> {
   /**
-   * Construct a new undoable observable vector.
+   * Construct a new undoable observable list.
    */
   constructor(serializer: ISerializer<T>) {
     super();
     this._serializer = serializer;
-    this.changed.connect(this._onVectorChanged, this);
+    this.changed.connect(this._onListChanged, this);
   }
 
   /**
@@ -178,9 +178,9 @@ class ObservableUndoableVector<T> extends ObservableVector<T> implements IObserv
   }
 
   /**
-   * Handle a change in the vector.
+   * Handle a change in the list.
    */
-  private _onVectorChanged(list: IObservableVector<T>, change: ObservableVector.IChangedArgs<T>): void {
+  private _onListChanged(list: IObservableList<T>, change: IObservableList.IChangedArgs<T>): void {
     if (this.isDisposed || !this._isUndoable) {
       return;
     }
@@ -207,13 +207,13 @@ class ObservableUndoableVector<T> extends ObservableVector<T> implements IObserv
   /**
    * Undo a change event.
    */
-  private _undoChange(change: ObservableVector.IChangedArgs<JSONValue>): void {
+  private _undoChange(change: IObservableList.IChangedArgs<JSONValue>): void {
     let index = 0;
     let serializer = this._serializer;
     switch (change.type) {
     case 'add':
       each(change.newValues, () => {
-        this.removeAt(change.newIndex);
+        this.remove(change.newIndex);
       });
       break;
     case 'set':
@@ -239,7 +239,7 @@ class ObservableUndoableVector<T> extends ObservableVector<T> implements IObserv
   /**
    * Redo a change event.
    */
-  private _redoChange(change: ObservableVector.IChangedArgs<JSONValue>): void {
+  private _redoChange(change: IObservableList.IChangedArgs<JSONValue>): void {
     let index = 0;
     let serializer = this._serializer;
     switch (change.type) {
@@ -257,7 +257,7 @@ class ObservableUndoableVector<T> extends ObservableVector<T> implements IObserv
       break;
     case 'remove':
       each(change.oldValues, () => {
-        this.removeAt(change.oldIndex);
+        this.remove(change.oldIndex);
       });
       break;
     case 'move':
@@ -271,7 +271,7 @@ class ObservableUndoableVector<T> extends ObservableVector<T> implements IObserv
   /**
    * Copy a change as JSON.
    */
-  private _copyChange(change: ObservableVector.IChangedArgs<T>): ObservableVector.IChangedArgs<JSONValue> {
+  private _copyChange(change: IObservableList.IChangedArgs<T>): IObservableList.IChangedArgs<JSONValue> {
     let oldValues: JSONValue[] = [];
     each(change.oldValues, value => {
       oldValues.push(this._serializer.toJSON(value));
@@ -293,15 +293,15 @@ class ObservableUndoableVector<T> extends ObservableVector<T> implements IObserv
   private _isUndoable = true;
   private _madeCompoundChange = false;
   private _index = -1;
-  private _stack: ObservableVector.IChangedArgs<JSONValue>[][] = [];
+  private _stack: IObservableList.IChangedArgs<JSONValue>[][] = [];
   private _serializer: ISerializer<T> = null;
 }
 
 /**
- * Namespace for ObservableUndoableVector utilities.
+ * Namespace for ObservableUndoableList utilities.
  */
 export
-namespace ObservableUndoableVector {
+namespace ObservableUndoableList {
   /**
    * A default, identity serializer.
    */
