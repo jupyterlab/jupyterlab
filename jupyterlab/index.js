@@ -5,10 +5,9 @@ __webpack_public_path__ = PageConfig.getOption('publicUrl');
 
 // This needs to come after __webpack_public_path__ is set.
 require('font-awesome/css/font-awesome.min.css');
-// All themes need to import the theme assets index.css.
-require('@jupyterlab/themes/style/index.css');
+// Load the core theming before any other package.
+require('@jupyterlab/theming/style/index.css');
 
-// This needs to come after the core theming is loaded.
 var app = require('@jupyterlab/application').JupyterLab;
 
 function main() {
