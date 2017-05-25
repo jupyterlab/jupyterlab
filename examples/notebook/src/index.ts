@@ -41,8 +41,8 @@ import {
 } from '@jupyterlab/rendermime';
 
 
-import '@jupyterlab/theme-assets/style/index.css';
-import '@jupyterlab/theme-light-extension/style/index.css';
+import '@jupyterlab/theming/style/index.css';
+import '@jupyterlab/theming/style/variables-light.css';
 import '../index.css';
 
 

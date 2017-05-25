@@ -1,7 +1,7 @@
 {
-  "name": "@jupyterlab/theme-assets",
+  "name": "@jupyterlab/theming",
   "version": "0.5.1",
-  "description": "JupyterLab - Theme Assets",
+  "description": "JupyterLab - Theming",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [

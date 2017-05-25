@@ -72,14 +72,6 @@
 }
 
 
-#jp-top-panel {
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
-  background: var(--jp-layout-color1);
-  display: flex;
-  min-height: var(--jp-private-menubar-height);
-}
-
-
 /*-----------------------------------------------------------------------------
 | Menu
 |----------------------------------------------------------------------------*/

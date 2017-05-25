@@ -8,8 +8,7 @@
   "dependencies": {
     "@jupyterlab/codemirror": "^0.5.0",
     "@jupyterlab/console": "^0.5.1",
-    "@jupyterlab/theme-assets": "^0.5.1",
-    "@jupyterlab/theme-light-extension": "^0.5.1",
+    "@jupyterlab/theming": "^0.5.1",
     "@jupyterlab/rendermime": "^0.5.0",
     "@jupyterlab/services": "^0.44.0",
     "@phosphor/commands": "^1.2.0",

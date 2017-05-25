@@ -38,8 +38,8 @@
 }
 
 
-.jp-SideBar .p-TabBar-content,
-.jp-SideBar .p-TabBar-content {
+.jp-SideBar.p-TabBar .p-TabBar-content,
+.jp-SideBar.p-TabBar .p-TabBar-content {
   margin: 0;
   padding: 0;
   display: flex;
@@ -50,7 +50,7 @@
 }
 
 
-.jp-SideBar.jp-mod-left .p-TabBar-content {
+.jp-SideBar[data-orientation='horizontal'].jp-mod-left .p-TabBar-content {
   flex-direction: row-reverse;
   transform: rotate(-90deg) translateX(-100%);
 }
@@ -62,7 +62,7 @@
 }
 
 
-.jp-SideBar .p-TabBar-tab {
+.jp-SideBar.p-TabBar .p-TabBar-tab {
   padding: 0 18px;
   background: var(--jp-layout-color2);
   border: none;
@@ -70,12 +70,12 @@
 }
 
 
-.jp-SideBar .p-TabBar-tabLabel {
+.jp-SideBar.p-TabBar .p-TabBar-tabLabel {
   line-height: var(--jp-private-sidebar-tab-width);
 }
 
 
-.jp-SideBar .p-TabBar-tab:hover:not(.p-mod-current) {
+.jp-SideBar.p-TabBar .p-TabBar-tab:hover:not(.p-mod-current) {
   background: var(--jp-layout-color1);
 }
 

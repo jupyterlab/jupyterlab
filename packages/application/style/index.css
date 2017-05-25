@@ -4,10 +4,6 @@
 |----------------------------------------------------------------------------*/
 
 
-@import url('~@phosphor/widgets/style/index.css');
-
-
-
 /*-----------------------------------------------------------------------------
 | General
 |----------------------------------------------------------------------------*/
@@ -17,12 +13,11 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  font-family: var(--jp-ui-font-family);
   background: var(--jp-layout-color3);
 }
 
 
-.jp-ApplicationShell {
+.jp-ApplicationShell.p-Widget {
   position: absolute;
   top: 0;
   left: 0;
@@ -36,19 +31,24 @@ body {
 }
 
 
-.p-Widget.p-mod-hidden {
-  display: none !important;
+#jp-main-dock-panel {
+  padding: 5px;
 }
+
+
+#jp-top-panel {
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
+  background: var(--jp-layout-color1);
+  display: flex;
+  min-height: var(--jp-private-menubar-height);
+}
+
 
 
 /*-----------------------------------------------------------------------------
 | Import children style files
 |----------------------------------------------------------------------------*/
 
-
-@import './dockpanel.css';
-@import './menus.css';
 @import './sidepanel.css';
-@import './tabs.css';
 
 

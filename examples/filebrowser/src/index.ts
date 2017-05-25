@@ -40,8 +40,8 @@ import {
 } from '@jupyterlab/fileeditor';
 
 import '../index.css';
-import '@jupyterlab/theme-light-extension/style/index.css';
-import '@jupyterlab/application/style/index.css';
+import '@jupyterlab/theming/style/index.css';
+import '@jupyterlab/theming/style/variables-light.css';
 
 
 

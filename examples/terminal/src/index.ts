@@ -15,6 +15,8 @@ import {
   Terminal
 } from '@jupyterlab/terminal';
 
+import '@jupyterlab/theming/style/index.css';
+import '@jupyterlab/theming/style/variables-light.css';
 import '../index.css';
 
 

@@ -3,9 +3,26 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-/* Theme images */
+@import url('~@phosphor/widgets/style/index.css');
+
+
+.p-Widget.p-mod-hidden {
+  display: none !important;
+}
+
+
+.p-Widget {
+  font-family: var(--jp-ui-font-family);
+}
+
+
+/* Sibling imports */
+@import './dockpanel.css';
 @import './images.css';
 @import './icons.css';
+@import './menus.css';
+@import './tabs.css';
+
 
 :root {
 
