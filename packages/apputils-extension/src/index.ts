@@ -21,7 +21,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IStateDB, StateDB
+  ISettingRegistry, IStateDB, SettingRegistry, StateDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -104,6 +104,21 @@ const palettePlugin: JupyterLabPlugin<ICommandPalette> = {
 
 
 /**
+ * The default layout restorer provider.
+ */
+const settingPlugin: JupyterLabPlugin<ISettingRegistry> = {
+  id: 'jupyter.services.setting-registry',
+  requires: [IStateDB],
+  activate: (app: JupyterLab, state: IStateDB) => {
+    const registry = new SettingRegistry();
+    return registry;
+  },
+  autoStart: true,
+  provides: ISettingRegistry
+};
+
+
+/**
  * The default state database for storing application state.
  */
 const stateDBPlugin: JupyterLabPlugin<IStateDB> = {
@@ -139,7 +154,12 @@ const stateDBPlugin: JupyterLabPlugin<IStateDB> = {
  * Export the plugins as default.
  */
 const plugins: JupyterLabPlugin<any>[] = [
-  linkerPlugin, layoutPlugin, palettePlugin, mainMenuPlugin, stateDBPlugin
+  layoutPlugin,
+  linkerPlugin,
+  mainMenuPlugin,
+  palettePlugin,
+  settingPlugin,
+  stateDBPlugin
 ];
 export default plugins;
 

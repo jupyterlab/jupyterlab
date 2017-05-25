@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  InstanceTracker
+  InstanceTracker, ISettingRegistry
 } from '@jupyterlab/coreutils';
 
 import {
@@ -69,7 +69,7 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<IEditorTracker> = {
   activate,
   id: 'jupyter.services.editor-tracker',
-  requires: [IDocumentRegistry, ILayoutRestorer, IEditorServices],
+  requires: [IDocumentRegistry, ILayoutRestorer, IEditorServices, ISettingRegistry],
   optional: [ILauncher],
   provides: IEditorTracker,
   autoStart: true
@@ -84,14 +84,14 @@ export default plugin;
 /**
  * Activate the editor tracker plugin.
  */
-function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayoutRestorer, editorServices: IEditorServices, launcher: ILauncher | null): IEditorTracker {
+function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayoutRestorer, editorServices: IEditorServices, settings: ISettingRegistry, launcher: ILauncher | null): IEditorTracker {
   const id = plugin.id;
   const namespace = 'editor';
   const factory = new FileEditorFactory({
     editorServices,
     factoryOptions: { name: FACTORY, fileExtensions: ['*'], defaultFor: ['*'] }
   });
-  const { commands, settings, restored } = app;
+  const { commands, restored } = app;
   const tracker = new InstanceTracker<FileEditor>({ namespace });
   const hasWidget = () => tracker.currentWidget !== null;
 

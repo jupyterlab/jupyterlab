@@ -6,7 +6,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONExt, JSONObject, JSONValue, PromiseDelegate, Token
+  JSONExt, JSONObject, JSONValue, Token
 } from '@phosphor/coreutils';
 
 import {
@@ -18,7 +18,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  IDatastore
+  IDatastore, StateDB
 } from '.';
 
 
@@ -182,6 +182,14 @@ interface ISettingRegistry extends SettingRegistry {}
 export
 class SettingRegistry {
   /**
+   * Create a new setting registry.
+   */
+  constructor(options: SettingRegistry.IOptions = { datastore: null }) {
+    const namespace = 'jupyter.db.settings';
+    this._datastore = options.datastore || new StateDB({ namespace });
+  }
+
+  /**
    * A signal that emits the name of a plugin when its settings change.
    */
   get pluginChanged(): ISignal<this, string> {
@@ -272,23 +280,18 @@ class SettingRegistry {
     }
 
     // If the plugin needs to be loaded from the datastore, fetch.
-    if (this._datastore) {
-      return this._datastore.fetch(plugin).then(result => {
-        // Set the local copy.
-        plugins[plugin] = result || { id: plugin, data: { } };
+    return this._datastore.fetch(plugin).then(result => {
+      // Set the local copy.
+      plugins[plugin] = result || { id: plugin, data: { } };
 
-        // Create a copy of the plugin data.
-        const content = copy(plugins[plugin]) as ISettingRegistry.IPlugin;
+      // Create a copy of the plugin data.
+      const content = copy(plugins[plugin]) as ISettingRegistry.IPlugin;
 
-        // Copy over any annotations that may be available.
-        content.annotations = copy(annotations[plugin] || null);
+      // Copy over any annotations that may be available.
+      content.annotations = copy(annotations[plugin] || null);
 
-        return new Settings({ content, plugin, registry });
-      });
-    }
-
-    // If the setting registry is not ready yet, wait.
-    return this._ready.promise.then(() => this.load(plugin));
+      return new Settings({ content, plugin, registry });
+    });
   }
 
   /**
@@ -346,27 +349,6 @@ class SettingRegistry {
   }
 
   /**
-   * Set the setting registry datastore.
-   *
-   * @param datastore - The datastore for the setting registry.
-   *
-   * @throws If a datastore has already been set.
-   *
-   * #### Notes
-   * The setting registry datastore must read, write, and delete settings for an
-   * entire extension at a time. It is comparable to a single file written to
-   * disk on a file system.
-   */
-  setDB(datastore: IDatastore<ISettingRegistry.IPlugin, ISettingRegistry.IPlugin>) {
-    if (this._datastore) {
-      throw new Error('Setting registry already has a datastore.');
-    }
-
-    this._datastore = datastore;
-    this._ready.resolve(void 0);
-  }
-
-  /**
    * Upload a plugin's settings.
    *
    * @param plugin - The plugin settings being uploaded.
@@ -390,7 +372,6 @@ class SettingRegistry {
   private _datastore: IDatastore<ISettingRegistry.IPlugin, ISettingRegistry.IPlugin> | null = null;
   private _pluginChanged = new Signal<this, string>(this);
   private _plugins: { [name: string]: ISettingRegistry.IPlugin } = Object.create(null);
-  private _ready = new PromiseDelegate<void>();
 }
 
 
@@ -508,6 +489,24 @@ class Settings implements ISettings {
   private _changed = new Signal<this, void>(this);
   private _content: ISettingRegistry.IPlugin | null = null;
   private _isDisposed = false;
+}
+
+
+/**
+ * A namespace for `SettingRegistry` statics.
+ */
+export
+namespace SettingRegistry {
+  /**
+   * The instantiation options for a setting registry
+   */
+  export
+  interface IOptions {
+    /**
+     * The datastore used by the setting registry.
+     */
+    datastore: IDatastore<ISettingRegistry.IPlugin, ISettingRegistry.IPlugin>;
+  }
 }
 
 

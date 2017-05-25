@@ -14,16 +14,16 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IStateDB
-} from '@jupyterlab/coreutils';
-
-import {
   IEditorServices
 } from '@jupyterlab/codeeditor';
 
 import {
   editorServices, CodeMirrorEditor
 } from '@jupyterlab/codemirror';
+
+import {
+  ISettingRegistry, IStateDB
+} from '@jupyterlab/coreutils';
 
 import {
   IEditorTracker
@@ -62,7 +62,7 @@ const servicesPlugin: JupyterLabPlugin<IEditorServices> = {
 export
 const commandsPlugin: JupyterLabPlugin<void> = {
   id: 'jupyter.services.codemirror-commands',
-  requires: [IEditorTracker, IMainMenu, ICommandPalette, IStateDB],
+  requires: [IEditorTracker, IMainMenu, ICommandPalette, IStateDB, ISettingRegistry],
   activate: activateEditorCommands,
   autoStart: true
 };
@@ -78,8 +78,8 @@ export default plugins;
 /**
  * Set up the editor widget menu and commands.
  */
-function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB): void {
-  const { commands, restored, settings } = app;
+function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB, settings: ISettingRegistry): void {
+  const { commands, restored } = app;
   let theme: string = CodeMirrorEditor.DEFAULT_THEME;
   let keyMap: string = 'default';
   let matchBrackets = false;
