@@ -24,6 +24,9 @@
     "type": "git",
     "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
+  "jupyterlab": {
+    "extension": true
+  },
   "author": "Project Jupyter",
   "license": "BSD-3-Clause",
   "bugs": {
