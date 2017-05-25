@@ -679,7 +679,7 @@ class MarkdownCell extends Cell {
       signal: this.model.contentChanged,
       timeout: RENDER_TIMEOUT
     });
-    this._monitor.activityStopped.connect(()=>{
+    this._monitor.activityStopped.connect(() => {
       if (this._rendered) {
         this.update();
       }

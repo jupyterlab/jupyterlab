@@ -140,6 +140,10 @@ class FileEditor extends CodeEditorWrapper {
     this.title.label = path.split('/').pop();
   }
 
+  /**
+   * Handle a change to the collaborators on the model
+   * by updating UI elements associated with them.
+   */
   private _onCollaboratorsChanged(): void {
     // If there are selections corresponding to non-collaborators,
     // they are stale and should be removed.
