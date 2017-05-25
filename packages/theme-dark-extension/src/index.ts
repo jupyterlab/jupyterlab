@@ -2,8 +2,7 @@ import {
   JupyterLabPlugin
 } from '@jupyterlab/application';
 
-// All themes need to import the theme assets index.css.
-import '@jupyterlab/themes/style/index.css';
+
 import '@jupyterlab/themes/style/variables-dark.css';
 
 
