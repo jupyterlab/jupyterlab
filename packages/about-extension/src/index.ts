@@ -13,6 +13,7 @@ import {
   AboutModel, AboutWidget
 } from './widget';
 
+import '../style/index.css';
 
 /**
  * The command IDs used by the about plugin.

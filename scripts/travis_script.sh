@@ -10,6 +10,9 @@ sh -e /etc/init.d/xvfb start || true
 export PATH="$HOME/miniconda/bin:$PATH"
 
 
+npm run build:examples
+
+
 if [[ $GROUP == tests ]]; then
 
     # Run the JS and python tests

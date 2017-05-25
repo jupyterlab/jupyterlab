@@ -7,8 +7,6 @@ var JupyterLab = require('@jupyterlab/application').JupyterLab;
 require('es6-promise/auto');
 
 require('font-awesome/css/font-awesome.min.css');
-require('@jupyterlab/default-theme/style/index.css');
-
 
 var mods = [
   require('@jupyterlab/about-extension'),
@@ -36,6 +34,7 @@ var mods = [
   require('@jupyterlab/shortcuts-extension'),
   require('@jupyterlab/tabmanager-extension'),
   require('@jupyterlab/terminal-extension'),
+  require('@jupyterlab/theme-light-extension'),
   require('@jupyterlab/tooltip-extension')
 ];
 

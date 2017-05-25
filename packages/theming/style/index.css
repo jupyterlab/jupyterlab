@@ -1,0 +1,48 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+@import url('~@phosphor/widgets/style/index.css');
+
+
+.p-Widget.p-mod-hidden {
+  display: none !important;
+}
+
+
+.p-Widget {
+  font-family: var(--jp-ui-font-family);
+}
+
+
+/* Sibling imports */
+@import './dockpanel.css';
+@import './images.css';
+@import './icons.css';
+@import './menus.css';
+@import './tabs.css';
+
+
+:root {
+
+  /* The caret used for select dropdown styling. */
+
+  --jp-ui-select-caret: url('./images/down_caret.svg');
+
+  /* Icons used in the application. */
+
+  --jp-icon-book-running: url('./icons/md/book_running.svg');
+  --jp-icon-book-selected: url('./icons/md/book_selected.svg');
+  --jp-icon-directory-selected: url('./icons/md/directory_selected.svg');
+  --jp-icon-file-selected: url('./icons/md/file_selected.svg');
+  --jp-icon-book: url('./icons/md/book.svg');
+  --jp-icon-terminal: url('./icons/md/terminal.svg');
+  --jp-icon-file: url('./icons/md/file.svg');
+  --jp-icon-refresh: url('./icons/md/refresh.svg');
+  --jp-icon-close: url('./icons/md/close.svg');
+  --jp-icon-circle: url('./icons/md/circle.svg');
+  --jp-icon-close-black: url('./icons/md/close-black.svg');
+  --jp-icon-search: url('./icons/md/search.svg');
+
+}

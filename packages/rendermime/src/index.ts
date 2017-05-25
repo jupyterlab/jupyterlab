@@ -9,6 +9,8 @@ import {
   RenderMime
 } from './rendermime';
 
+import '../style/index.css';
+
 export * from './latex';
 export * from './mimemodel';
 export * from './outputmodel';

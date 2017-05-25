@@ -22,6 +22,7 @@ import {
   PageConfig, URLExt
 } from '@jupyterlab/coreutils';
 
+import '../style/index.css';
 
 /**
  * The command IDs used by the help plugin.
