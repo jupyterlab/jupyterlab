@@ -14,10 +14,6 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  PathExt
-} from './path';
-
-import {
   ObservableMap
 } from './observablemap';
 
@@ -591,7 +587,7 @@ class ModelDB implements IModelDB {
     if (this._basePath) {
       path = this._basePath + '.' + path;
     }
-    return PathExt.normalize(path);
+    return path;
   }
 
   private _basePath: string;
