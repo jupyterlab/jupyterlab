@@ -43,7 +43,7 @@ import {
 } from '@jupyterlab/cells';
 
 import {
-  IObservableVector, ObservableVector, ActivityMonitor
+  IObservableList, ActivityMonitor
 } from '@jupyterlab/coreutils';
 
 import {
@@ -200,9 +200,9 @@ class Chatbox extends Widget {
     let modelDB = this._model.modelDB;
     // Update the chatlog vector.
     if (!modelDB.has('internal:chat')) {
-      modelDB.createVector('internal:chat');
+      modelDB.createList('internal:chat');
     }
-    this._log = modelDB.get('internal:chat') as IObservableVector<ChatEntry.IModel>;
+    this._log = modelDB.get('internal:chat') as IObservableList<ChatEntry.IModel>;
     this._log.changed.connect(this._onLogChanged, this);
     modelDB.connected.then(() => {
       this._start = this._log.length;
@@ -219,7 +219,7 @@ class Chatbox extends Widget {
   /**
    * The log of chat entries for the current document model.
    */
-  get log(): IObservableVector<ChatEntry.IModel> {
+  get log(): IObservableList<ChatEntry.IModel> {
     return this._log;
   }
 
@@ -412,7 +412,7 @@ class Chatbox extends Widget {
     let index = this._start - 1;
     let numAdded = 0;
     while (index >= 0 && numAdded < count) {
-      let entryWidget = this._entryWidgetFromModel(this._log.at(index--));
+      let entryWidget = this._entryWidgetFromModel(this._log.get(index--));
       this._content.insertWidget(0, entryWidget);
       numAdded++;
     }
@@ -560,7 +560,7 @@ class Chatbox extends Widget {
   /**
    * Update the chat view after a change in the log vector.
    */
-  private _onLogChanged(log: IObservableVector<ChatEntry.IModel>, args: ObservableVector.IChangedArgs<ChatEntry.IModel>) {
+  private _onLogChanged(log: IObservableList<ChatEntry.IModel>, args: IObservableList.IChangedArgs<ChatEntry.IModel>) {
     let index = 0;
     let layout = this._content.layout as PanelLayout;
     switch (args.type) {
@@ -644,7 +644,7 @@ class Chatbox extends Widget {
     if (!collaborators) {
       throw Error('Cannot post chat entry to non-collaborative document.');
     }
-    this._log.pushBack({
+    this._log.push({
       text: prompt.model.value.text,
       author: collaborators.localCollaborator
     });
@@ -682,7 +682,7 @@ class Chatbox extends Widget {
 
   private _rendermime: IRenderMime = null;
   private _content: Panel = null;
-  private _log: IObservableVector<ChatEntry.IModel> = null;
+  private _log: IObservableList<ChatEntry.IModel> = null;
   private _start: number = null;
   private _scrollGuard: boolean = true;
   private _monitor: ActivityMonitor<any, any> = null;

@@ -32,7 +32,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  ModelDB, ObservableMap, ObservableVector, ICollaborator
+  ModelDB, ObservableMap, ObservableList, ICollaborator
 } from '@jupyterlab/coreutils';
 
 import {
@@ -137,7 +137,7 @@ describe('chatbox/chatbox', () => {
     describe('#log', () => {
 
       it('should get the log of chat entries', () => {
-        expect(chatbox.log).to.be.a(ObservableVector);
+        expect(chatbox.log).to.be.a(ObservableList);
       });
 
     });
