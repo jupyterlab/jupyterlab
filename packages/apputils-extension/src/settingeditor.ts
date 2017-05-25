@@ -28,11 +28,41 @@ import {
  */
 class SettingEditor extends Widget {
   /**
+   * Create a new setting editor.
+   */
+  constructor(options: SettingEditor.IOptions) {
+    super();
+    this.settings = options.settings;
+  }
+
+  /**
+   * The setting registry modified by the editor.
+   */
+  readonly settings: ISettingRegistry;
+
+  /**
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
     this.node.tabIndex = -1;
     this.node.focus();
+  }
+}
+
+
+/**
+ * A namespace for `SettingEditor` statics.
+ */
+namespace SettingEditor {
+  /**
+   * The instantiation options for a setting editor.
+   */
+  export
+  interface IOptions {
+    /**
+     * The setting registry the editor modifies.
+     */
+    settings: ISettingRegistry;
   }
 }
 
@@ -47,13 +77,13 @@ namespace CommandIDs {
 
 
 /**
- * Activate the command palette.
+ * Activate the setting editor.
  */
 export
 function activateSettingEditor(app: JupyterLab, restorer: ILayoutRestorer, settings: ISettingRegistry): void {
   const { commands, shell } = app;
   const namespace = 'setting-editor';
-  const editor = new SettingEditor();
+  const editor = new SettingEditor({ settings });
   const tracker = new InstanceTracker<SettingEditor>({ namespace });
 
   editor.id = namespace;

@@ -123,11 +123,7 @@ const settingEditorPlugin: JupyterLabPlugin<void> = {
  */
 const settingPlugin: JupyterLabPlugin<ISettingRegistry> = {
   id: 'jupyter.services.setting-registry',
-  requires: [IStateDB],
-  activate: (app: JupyterLab, state: IStateDB) => {
-    const registry = new SettingRegistry();
-    return registry;
-  },
+  activate: () => new SettingRegistry(),
   autoStart: true,
   provides: ISettingRegistry
 };
