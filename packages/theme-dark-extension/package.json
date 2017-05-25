@@ -29,5 +29,8 @@
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
   },
-  "homepage": "https://github.com/jupyterlab/jupyterlab"
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "jupyterlab": {
+    "extension": true
+  },
 }
