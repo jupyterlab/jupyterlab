@@ -447,7 +447,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
   }
 
   commands.addCommand(CommandIDs.runAndAdvance, {
-    label: 'Run Cell(s) and Advance',
+    label: 'Run Cell(s) and Select Below',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
@@ -470,7 +470,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.runAndInsert, {
-    label: 'Run Cell(s) and Insert',
+    label: 'Run Cell(s) and Insert Below',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
@@ -636,7 +636,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.toCode, {
-    label: 'Convert to Code',
+    label: 'Change to Code Cell Type',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
@@ -647,7 +647,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.toMarkdown, {
-    label: 'Convert to Markdown',
+    label: 'Change to Markdown Cell Type',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
@@ -658,7 +658,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.toRaw, {
-    label: 'Convert to Raw',
+    label: 'Change to Raw Cell Type',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
@@ -691,7 +691,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.paste, {
-    label: 'Paste Cell(s)',
+    label: 'Paste Cell(s) Below',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
@@ -845,7 +845,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.commandMode, {
-    label: 'To Command Mode',
+    label: 'Enter Command Mode',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
@@ -856,7 +856,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.editMode, {
-    label: 'To Edit Mode',
+    label: 'Enter Edit Mode',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
@@ -895,7 +895,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     }
   });
   commands.addCommand(CommandIDs.switchKernel, {
-    label: 'Switch Kernel',
+    label: 'Change Kernel',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
@@ -926,7 +926,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.markdown1, {
-    label: 'Markdown Header 1',
+    label: 'Change to Heading 1',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
@@ -937,7 +937,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.markdown2, {
-    label: 'Markdown Header 2',
+    label: 'Change to Heading 2',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
@@ -948,7 +948,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.markdown3, {
-    label: 'Markdown Header 3',
+    label: 'Change to Heading 3',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
@@ -959,7 +959,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.markdown4, {
-    label: 'Markdown Header 4',
+    label: 'Change to Heading 4',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
@@ -970,7 +970,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.markdown5, {
-    label: 'Markdown Header 5',
+    label: 'Change to Heading 5',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
@@ -981,7 +981,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.markdown6, {
-    label: 'Markdown Header 6',
+    label: 'Change to Heading 6',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
