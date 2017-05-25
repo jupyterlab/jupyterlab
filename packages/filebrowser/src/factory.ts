@@ -6,10 +6,6 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IDocumentManager
-} from '@jupyterlab/docmanager';
-
-import {
   CommandRegistry
 } from '@phosphor/commands';
 
@@ -72,11 +68,11 @@ namespace IFileBrowserFactory {
    * The options for creating a file browser using a file browser factory.
    *
    * #### Notes
-   * In future versions of JupyterLab, these options may disappear altogether,
+   * In future versions of JupyterLab, some of these options may disappear,
    * which is a backward-incompatible API change and will necessitate a new
    * version release. This is because in future versions, there will likely be
-   * an application-wide notion of a singleton document manager, a single
-   * command registry, a single services manager, and a single state database.
+   * an application-wide notion of a singleton command registry and a singleton
+   * state database.
    */
   export
   interface IOptions {
@@ -89,12 +85,11 @@ namespace IFileBrowserFactory {
     commands?: CommandRegistry;
 
     /**
-     * The document manager used by the file browser.
-     *
-     * #### Notes
-     * If no manager is provided, the application default will be used.
+     * An optional `Contents.IDrive` name for the model.
+     * If given, the model will prepend `driveName:` to
+     * all paths used in file operations.
      */
-    documentManager?: IDocumentManager;
+    driveName?: string;
 
     /**
      * The state database to use for saving file browser state and restoring it.

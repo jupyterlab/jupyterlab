@@ -125,7 +125,8 @@ function activateFactory(app: JupyterLab, docManager: IDocumentManager, state: I
   return {
     createFileBrowser(id: string, options: IFileBrowserFactory.IOptions = {}): FileBrowser {
       const model = new FileBrowserModel({
-        manager: options.documentManager || docManager,
+        manager: docManager,
+        driveName: options.driveName || '',
         state: options.state === null ? null : options.state || state
       });
       const widget = new FileBrowser({
@@ -151,15 +152,13 @@ function activateFactory(app: JupyterLab, docManager: IDocumentManager, state: I
   };
 }
 
-
 /**
  * Activate the file browser in the sidebar.
  */
 function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, docManager: IDocumentManager, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer): void {
   const { commands } = app;
   const fbWidget = factory.createFileBrowser('filebrowser', {
-    commands,
-    documentManager: docManager
+    commands
   });
 
   // Let the application restorer track the primary file browser (that is

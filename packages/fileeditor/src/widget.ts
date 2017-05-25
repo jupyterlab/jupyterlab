@@ -137,7 +137,7 @@ class FileEditor extends CodeEditorWrapper {
     const path = this._context.path;
 
     editor.model.mimeType = this._mimeTypeService.getMimeTypeByFilePath(path);
-    this.title.label = path.split('/').pop();
+    this.title.label = path.split(':').pop().split('/').pop();
   }
 
   /**

@@ -55,7 +55,9 @@ class FileBrowserModel implements IDisposable {
    */
   constructor(options: FileBrowserModel.IOptions) {
     this.manager = options.manager;
-    this._model = { path: '', name: '/', type: 'directory' };
+    this._driveName = options.driveName || '';
+    let rootPath = this._driveName ? this._driveName + ':' : '';
+    this._model = { path: rootPath, name: '/', type: 'directory' };
     this._state = options.state || null;
 
     const { services } = options.manager;
@@ -257,8 +259,9 @@ class FileBrowserModel implements IDisposable {
       }
 
       const path = cwd['path'] as string;
+      const localPath = path.split(':').pop();
       return manager.services.contents.get(path)
-        .then(() => this.cd(path))
+        .then(() => this.cd(localPath))
         .catch(() => state.remove(key));
     }).catch(() => state.remove(key))
       .then(() => { this._key = key; }); // Set key after restoration is done.
@@ -442,6 +445,7 @@ class FileBrowserModel implements IDisposable {
   private _sessions: Session.IModel[] = [];
   private _state: IStateDB | null = null;
   private _timeoutId = -1;
+  private _driveName: string;
 }
 
 
@@ -459,6 +463,13 @@ namespace FileBrowserModel {
      * A document manager instance.
      */
     manager: IDocumentManager;
+
+    /**
+     * An optional `Contents.IDrive` name for the model.
+     * If given, the model will prepend `driveName:` to
+     * all paths used in file operations.
+     */
+    driveName?: string;
 
     /**
      * An optional state database. If provided, the model will restore which
@@ -500,6 +511,12 @@ namespace Private {
    */
   export
   function normalizePath(root: string, path: string): string {
-    return PathExt.resolve(root, path);
+    let parts = root.split(':');
+    if (parts.length === 1) {
+      return PathExt.resolve(root, path);
+    } else {
+      let resolved = PathExt.resolve(parts[1], path)
+      return parts[0] + ':' + resolved;
+    }
   }
 }
