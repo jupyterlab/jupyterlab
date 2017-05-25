@@ -105,6 +105,17 @@
   background-image: var(--jp-icon-circle);
 }
 
+
+#tab-manager .p-TabBar-tab.p-mod-closable.jp-mod-dirty.jp-mod-active > .p-TabBar-tabCloseIcon {
+  background-size: 10px;
+  background-image: var(--jp-inverse-icon-circle);
+}
+
+
+#tab-manager .p-TabBar-tab.p-mod-closable.jp-mod-active > .p-TabBar-tabCloseIcon {
+  background-image: var(--jp-inverse-icon-close);
+}
+
 #tab-manager .p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon:hover {
   background-size: 16px;
   background-image: var(--jp-icon-close-black);
