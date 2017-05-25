@@ -6,7 +6,7 @@
   --jp-private-running-button-height: 28px;
   --jp-private-running-button-width: 48px;
   --jp-private-running-item-height: 24px;
-  --jp-private-running-shutdown-button-height: 20px;
+  --jp-private-running-shutdown-button-height: 24px;
 }
 
 /*-----------------------------------------------------------------------------
@@ -98,11 +98,6 @@
 }
 
 
-.jp-RunningSessions-item:hover {
-    background: var(--jp-layout-color2);
-}
-
-
 .jp-RunningSessions-itemIcon {
   flex: 0 0 auto;
   padding: 0px 8px;
@@ -139,16 +134,44 @@
   font-size: var(--jp-ui-font-size1);
   flex: 1 1 auto;
   margin-right: 4px;
+  padding-left: 4px;
   text-overflow: ellipsis;
   overflow: hidden;
   direction: rtl;
   white-space: nowrap;
+  border-radius: 2px;
+  transition: background-color 0.1s ease;
+}
+
+
+.jp-RunningSessions-itemLabel:hover {
+  background-color: rgba(153,153,153,.1);
+}
+
+
+.jp-RunningSessions-itemLabel:focus {
+  background-color: rgba(153,153,153,.2);
 }
 
 .jp-RunningSessions-itemShutdown.jp-mod-styled {
-  margin: 2px 8px 2px 0px;
-  color: var(--jp-inverse-ui-font-color0);
-  background: var(--jp-warn-color1);
+  margin: 0px 4px;
+  color: var(--jp-warn-color1);
+  font-weight: 500;
+  background-color: transparent;
   height: var(--jp-private-running-shutdown-button-height);
   line-height: var(--jp-private-running-shutdown-button-height);
+  transition: background-color 0.1s ease;
+  border-radius: 2px;
+}
+
+
+.jp-RunningSessions-itemShutdown.jp-mod-styled:hover {
+  background-color: rgba(153,153,153,.1);
+}
+
+
+.jp-RunningSessions-itemShutdown.jp-mod-styled:focus {
+  border: none;
+  box-shadow: none;
+  background-color: rgba(153,153,153,.2);
 }

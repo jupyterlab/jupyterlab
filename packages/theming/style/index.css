@@ -41,7 +41,9 @@
   --jp-icon-file: url('./icons/md/file.svg');
   --jp-icon-refresh: url('./icons/md/refresh.svg');
   --jp-icon-close: url('./icons/md/close.svg');
+  --jp-inverse-icon-close: url('./icons/md/close-inverse.svg');
   --jp-icon-circle: url('./icons/md/circle.svg');
+  --jp-inverse-icon-circle: url('./icons/md/circle-inverse.svg');
   --jp-icon-close-black: url('./icons/md/close-black.svg');
   --jp-icon-search: url('./icons/md/search.svg');
 

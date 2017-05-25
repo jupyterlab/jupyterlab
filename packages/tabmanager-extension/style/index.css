@@ -60,9 +60,8 @@
 
 
 #tab-manager .p-TabBar-tab.jp-mod-active {
-  border-top: var(--jp-border-width) solid var(--jp-brand-color1);
-  border-bottom: var(--jp-border-width) solid var(--jp-brand-color1);
-  color: var(--jp-ui-font-color0);
+  color: var(--jp-inverse-ui-font-color0);
+  background: var(--jp-brand-color1);
 }
 
 
@@ -75,6 +74,7 @@
 
 #tab-manager .p-TabBar-tabLabel {
   padding-top: var(--jp-private-tab-manager-tab-padding-top);
+  padding-left: 4px;
 }
 
 
@@ -104,6 +104,17 @@
 #tab-manager .p-TabBar-tab.p-mod-closable.jp-mod-dirty > .p-TabBar-tabCloseIcon {
   background-size: 10px;
   background-image: var(--jp-icon-circle);
+}
+
+
+#tab-manager .p-TabBar-tab.p-mod-closable.jp-mod-dirty.jp-mod-active > .p-TabBar-tabCloseIcon {
+  background-size: 10px;
+  background-image: var(--jp-inverse-icon-circle);
+}
+
+
+#tab-manager .p-TabBar-tab.p-mod-closable.jp-mod-active > .p-TabBar-tabCloseIcon {
+  background-image: var(--jp-inverse-icon-close);
 }
 
 #tab-manager .p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon:hover {
