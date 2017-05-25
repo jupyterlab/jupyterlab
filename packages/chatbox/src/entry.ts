@@ -51,12 +51,17 @@ class ChatEntry extends Widget {
 
     this._badge = new Widget();
     this._badge.addClass(CHAT_BADGE_CLASS);
-    this._badge.node.style.backgroundColor = `rgba(${r}, ${g}, ${b}, 0.1)`;
-    this._badge.node.textContent = this.model.author.shortName;
+    let badgeName = this.model.author.shortName ||
+                    this.model.author.displayName.split(' ')
+                    .filter(s => s).map(s => s[0]).join('');
+    this._badge.node.textContent = badgeName;
 
     this.cell = options.cell;
-    this.cell.node.style.backgroundColor =
-      `rgba(${r}, ${g}, ${b}, 0.1)`;
+
+    if (!options.isMe) {
+      this._badge.node.style.backgroundColor = `rgba(${r}, ${g}, ${b}, 0.1)`;
+      this.cell.node.style.backgroundColor = `rgba(${r}, ${g}, ${b}, 0.1)`;
+    }
 
     let layout = this.layout as PanelLayout;
     layout.addWidget(this._badge);
@@ -96,6 +101,11 @@ namespace ChatEntry {
      * A markdown widget for rendering the entry.
      */
     cell: MarkdownCell;
+
+    /**
+     * Whether this author is the local collaborator.
+     */
+    isMe: boolean;
   }
 
   /**
