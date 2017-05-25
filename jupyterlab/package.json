@@ -38,7 +38,7 @@
     "@jupyterlab/tooltip-extension": "^0.5.1",
     "@jupyterlab/application": "^0.5.0",
     "@jupyterlab/theme-assets": "^0.5.1",
-    "@jupyterlab/theme-dark-extension": "^0.5.1",
+    "@jupyterlab/theme-light-extension": "^0.5.1",
     "es6-promise": "^4.1.0",
     "font-awesome": "^4.6.3"
   },
@@ -80,7 +80,7 @@
       "@jupyterlab/shortcuts-extension",
       "@jupyterlab/tabmanager-extension",
       "@jupyterlab/terminal-extension",
-      "@jupyterlab/theme-dark-extension",
+      "@jupyterlab/theme-light-extension",
       "@jupyterlab/tooltip-extension"
     ],
     "name": "JupyterLab",
