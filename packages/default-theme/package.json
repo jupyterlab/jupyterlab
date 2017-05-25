@@ -20,6 +20,7 @@
     "@jupyterlab/application": "^0.5.0",
     "@jupyterlab/apputils": "^0.5.0",
     "@jupyterlab/cells": "^0.5.1",
+    "@jupyterlab/chatbox": "^0.1.0",
     "@jupyterlab/codeeditor": "^0.5.0",
     "@jupyterlab/codemirror": "^0.5.0",
     "@jupyterlab/completer": "^0.5.0",

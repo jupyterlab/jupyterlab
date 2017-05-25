@@ -10,7 +10,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  JSONValue
+  JSONValue, JSONObject
 } from '@phosphor/coreutils';
 
 import {
@@ -91,7 +91,7 @@ interface IObservableValue extends IObservable {
  * on a realtime model.
  */
 export
-interface ICollaborator {
+interface ICollaborator extends JSONObject {
   /**
    * A user id for the collaborator.
    * This might not be unique, if the user has more than
