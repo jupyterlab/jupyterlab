@@ -13,6 +13,8 @@ import {
   IEditorMimeTypeService
 } from './mimetype';
 
+import '../style/index.css';
+
 export * from './editor';
 export * from './jsoneditor';
 export * from './widget';

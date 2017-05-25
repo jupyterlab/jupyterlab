@@ -17,6 +17,7 @@ import {
   TabBar, Widget
 } from '@phosphor/widgets';
 
+import '../style/index.css';
 
 /**
  * The default tab manager extension.

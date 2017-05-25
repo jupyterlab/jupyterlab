@@ -11,6 +11,7 @@ import {
 
 export { ApplicationShell } from './shell';
 
+import '../style/index.css';
 
 /**
  * The type for all JupyterLab plugins.

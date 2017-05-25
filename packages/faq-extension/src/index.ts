@@ -13,6 +13,7 @@ import {
   FaqModel, FaqWidget
 } from './widget';
 
+import '../style/index.css';
 
 /**
  * The command IDs used by the FAQ plugin.
