@@ -17,7 +17,8 @@
     "@jupyterlab/codeeditor": "^0.5.0",
     "@jupyterlab/docregistry": "^0.5.0",
     "@jupyterlab/fileeditor": "^0.5.0",
-    "@jupyterlab/launcher": "^0.5.0"
+    "@jupyterlab/launcher": "^0.5.0",
+    "@jupyterlab/coreutils": "^0.5.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",

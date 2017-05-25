@@ -50,6 +50,7 @@ import './coreutils/time.spec';
 import './coreutils/undoablevector.spec';
 import './coreutils/url.spec';
 import './coreutils/uuid.spec';
+import './coreutils/markdowncodeblocks.spec';
 
 import './csvviewer/table.spec';
 import './csvviewer/toolbar.spec';
