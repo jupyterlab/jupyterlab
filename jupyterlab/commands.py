@@ -16,6 +16,8 @@ import sys
 import tarfile
 from jupyter_core.paths import ENV_JUPYTER_PATH
 
+from ._version import __version__
+
 
 if sys.platform == 'win32':
     from subprocess import list2cmdline
@@ -143,6 +145,54 @@ def unlink_package(package, app_dir=None):
     return True
 
 
+def should_build(app_dir=None):
+    """Determine whether JupyterLab should be built.
+
+    Note: Linked packages should be updated by manually building.
+
+    Returns a tuple of whether a build is necessary, and an associated message.
+    """
+    app_dir = get_app_dir(app_dir)
+
+    # Check for installed extensions
+    extensions = _get_extensions(app_dir)
+
+    # No linked and no extensions and no built version.
+    if not extensions and not os.path.exists(pjoin(app_dir, 'static')):
+        return False, ''
+
+    pkg_path = pjoin(app_dir, 'static', 'package.json')
+    if not os.path.exists(pkg_path):
+        return True, 'Installed extensions with no built application'
+
+    with open(pkg_path) as fid:
+        data = json.load(fid)
+
+    # Look for mismatched version.
+    if not data['jupyterlab'].get('version', '') == __version__:
+        msg = 'Version mismatch: %s (built), %s (current)'
+        return True, msg % (data['jupyterlab'].get('version', ''), __version__)
+
+    # Look for mismatched extensions.
+    _ensure_package(app_dir)
+
+    staging_path = pjoin(app_dir, 'staging', 'package.json')
+    with open(staging_path) as fid:
+        staging_data = json.load(fid)
+
+    staging_exts = staging_data['jupyterlab']['extensions']
+
+    if set(staging_exts) != set(data['jupyterlab']['extensions']):
+        return True, 'Installed extensions changed'
+
+    # Look for mismatched extension paths.
+    for name in extensions:
+        if data['dependencies'][name] != staging_data['dependencies'][name]:
+            return True, 'Installed extensions changed'
+
+    return False, ''
+
+
 def _get_build_config(app_dir):
     """Get the build config data for the given app dir
     """
@@ -182,7 +232,8 @@ def uninstall_extension(name, app_dir=None):
                 _write_build_config(config, app_dir)
             return True
 
-    for (extname, path) in _get_extensions(app_dir).items():
+    for (extname, data) in _get_extensions(app_dir).items():
+        path = data['path']
         if extname == name:
             print('Uninstalling %s from %s' % (name, os.path.dirname(path)))
             os.remove(path)
@@ -271,7 +322,7 @@ def _ensure_package(app_dir, name='JupyterLab', version=None):
     extensions = _get_extensions(app_dir)
 
     for (key, value) in extensions.items():
-        data['dependencies'][key] = value
+        data['dependencies'][key] = value['path']
         data['jupyterlab']['extensions'].append(key)
 
     config = _get_build_config(app_dir)
@@ -316,7 +367,8 @@ def _get_extensions(app_dir):
     sys_path = pjoin(ENV_JUPYTER_PATH[0], 'lab', 'extensions')
     for target in glob.glob(pjoin(sys_path, '*.tgz')):
         data = _read_package(target)
-        extensions[data['name']] = os.path.realpath(target)
+        extensions[data['name']] = dict(path=os.path.realpath(target),
+                                        version=data['version'])
 
     app_path = pjoin(app_dir, 'extensions')
     if app_path == sys_path or not os.path.exists(app_path):
@@ -324,7 +376,8 @@ def _get_extensions(app_dir):
 
     for target in glob.glob(pjoin(app_path, '*.tgz')):
         data = _read_package(target)
-        extensions[data['name']] = os.path.realpath(target)
+        extensions[data['name']] = dict(path=os.path.realpath(target),
+                                        version=data['version'])
 
     return extensions
 
