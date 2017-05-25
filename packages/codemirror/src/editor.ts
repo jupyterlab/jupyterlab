@@ -5,6 +5,10 @@ import * as CodeMirror
   from 'codemirror';
 
 import {
+  JSONExt
+} from '@phosphor/coreutils';
+
+import {
   ArrayExt
 } from '@phosphor/algorithm';
 
@@ -410,6 +414,12 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   setCursorPosition(position: CodeEditor.IPosition): void {
     const cursor = this._toCodeMirrorPosition(position);
     this.doc.setCursor(cursor);
+    // If the editor does not have focus, this cursor change
+    // will get screened out in _onCursorsChanged(). Make an
+    // exception for this method.
+    if (!this.editor.hasFocus()) {
+      this.model.selections.set(this.uuid, this.getSelections());
+    }
   }
 
   /**
@@ -514,7 +524,9 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     const uuid = args.key;
     if (uuid !== this.uuid) {
       this._cleanSelections(uuid);
-      this._markSelections(uuid, args.newValue);
+      if (args.type !== 'remove') {
+        this._markSelections(uuid, args.newValue);
+      }
     }
   }
 
@@ -535,9 +547,17 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   private _markSelections(uuid: string, selections: CodeEditor.ITextSelection[]) {
     const markers: CodeMirror.TextMarker[] = [];
     selections.forEach(selection => {
-      const { anchor, head } = this._toCodeMirrorSelection(selection);
-      const markerOptions = this._toTextMarkerOptions(selection);
-      this.doc.markText(anchor, head, markerOptions);
+      // Only render selections if the start is not equal to the end.
+      // In that case, we don't need to render the cursor.
+      if (!JSONExt.deepEqual(selection.start, selection.end)) {
+        const { anchor, head } = this._toCodeMirrorSelection(selection);
+        const markerOptions = this._toTextMarkerOptions(selection.style);
+        markers.push(this.doc.markText(anchor, head, markerOptions));
+      } else {
+        let caret = this._getCaret(selection.uuid);
+        markers.push(this.doc.setBookmark(
+          this._toCodeMirrorPosition(selection.end), {widget: caret}));
+      }
     });
     this.selectionMarkers[uuid] = markers;
   }
@@ -546,8 +566,12 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Handles a cursor activity event.
    */
   private _onCursorActivity(): void {
-    const selections = this.getSelections();
-    this.model.selections.set(this.uuid, selections);
+    // Only add selections if the editor has focus. This avoids unwanted
+    // triggering of cursor activity due to collaborator actions.
+    if (this._editor.hasFocus()) {
+      const selections = this.getSelections();
+      this.model.selections.set(this.uuid, selections);
+    }
   }
 
   /**
@@ -567,9 +591,17 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   private _toTextMarkerOptions(style: CodeEditor.ISelectionStyle | undefined): CodeMirror.TextMarkerOptions | undefined {
     if (style) {
+      let css: string;
+      if (style.color) {
+        let r = parseInt(style.color.slice(1,3), 16);
+        let g  = parseInt(style.color.slice(3,5), 16);
+        let b  = parseInt(style.color.slice(5,7), 16);
+        css = `background-color: rgba( ${r}, ${g}, ${b}, 0.1)`;
+      }
       return {
         className: style.className,
-        title: style.displayName
+        title: style.displayName,
+        css
       };
     }
     return undefined;
@@ -579,9 +611,17 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Converts an editor selection to a code mirror selection.
    */
   private _toCodeMirrorSelection(selection: CodeEditor.IRange): CodeMirror.Selection {
+    // Selections only appear to render correctly if the anchor
+    // is before the head in the document. That is, reverse selections
+    // do not appear as intended.
+    let forward: boolean = (selection.start.line < selection.end.line) ||
+                           (selection.start.line === selection.end.line &&
+                            selection.start.column <= selection.end.column);
+    let anchor = forward ? selection.start : selection.end;
+    let head = forward ? selection.end : selection.start;
     return {
-      anchor: this._toCodeMirrorPosition(selection.start),
-      head: this._toCodeMirrorPosition(selection.end)
+      anchor: this._toCodeMirrorPosition(anchor),
+      head: this._toCodeMirrorPosition(head)
     };
   }
 
@@ -692,6 +732,18 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     if (this._needsRefresh) {
       this.refresh();
     }
+  }
+
+  /**
+   * Construct a caret element representing the position
+   * of a collaborator's cursor.
+   */
+  private _getCaret(uuid: string): HTMLElement {
+    let caret: HTMLElement = document.createElement('span');
+    caret.className = 'jp-CollaboratorCursor';
+    caret.style.borderBottomColor=`${this._selectionStyle.color}`
+    caret.appendChild(document.createTextNode('\u00a0'));
+    return caret;
   }
 
   private _model: CodeEditor.IModel;

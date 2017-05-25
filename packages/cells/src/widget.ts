@@ -26,7 +26,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IChangedArgs
+  IChangedArgs, ActivityMonitor
 } from '@jupyterlab/coreutils';
 
 import {
@@ -142,6 +142,10 @@ const NO_OUTPUTS_CLASS = 'jp-mod-noOutputs';
  */
 const DEFAULT_MARKDOWN_TEXT = 'Type Markdown and LaTeX: $ α^2 $';
 
+/**
+ * The timeout to wait for change activity to have ceased before rendering.
+ */
+const RENDER_TIMEOUT = 1000;
 
 /******************************************************************************
  * Cell
@@ -664,6 +668,17 @@ class MarkdownCell extends Cell {
     this.addClass(MARKDOWN_CELL_CLASS);
     this._rendermime = options.rendermime;
     this.editor.wordWrap = true;
+
+    // Throttle the rendering rate of the widget.
+    this._monitor = new ActivityMonitor({
+      signal: this.model.contentChanged,
+      timeout: RENDER_TIMEOUT
+    });
+    this._monitor.activityStopped.connect(() => {
+      if (this._rendered) {
+        this.update();
+      }
+    }, this);
   }
 
   /**
@@ -754,6 +769,7 @@ class MarkdownCell extends Cell {
     this._prevTrusted = trusted;
   }
 
+  private _monitor: ActivityMonitor<any, any> = null;
   private _rendermime: RenderMime = null;
   private _renderedInput: Widget = null;
   private _rendered = true;

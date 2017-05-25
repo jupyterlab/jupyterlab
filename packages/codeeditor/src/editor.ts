@@ -105,6 +105,11 @@ namespace CodeEditor {
      * A display name added to a selection.
      */
     displayName?: string;
+
+    /**
+     * A color for UI elements.
+     */
+    color?: string;
   }
 
   /**

@@ -48,6 +48,22 @@ class FileEditor extends CodeEditorWrapper {
     context.pathChanged.connect(this._onPathChanged, this);
     context.ready.then(() => { this._onContextReady(); });
     this._onPathChanged();
+
+    if (context.model.modelDB.isCollaborative) {
+      let modelDB = context.model.modelDB;
+      modelDB.connected.then(() => {
+        // Setup the selection style for collaborators
+        let localCollaborator = modelDB.collaborators.localCollaborator;
+        this.editor.uuid = localCollaborator.sessionId;
+        this.editor.selectionStyle = {
+          color: localCollaborator.color
+        };
+
+        modelDB.collaborators.changed.connect(this._onCollaboratorsChanged, this);
+        // Trigger an initial onCollaboratorsChanged event.
+        this._onCollaboratorsChanged();
+      });
+    }
   }
 
   /**
@@ -122,6 +138,20 @@ class FileEditor extends CodeEditorWrapper {
 
     editor.model.mimeType = this._mimeTypeService.getMimeTypeByFilePath(path);
     this.title.label = path.split('/').pop();
+  }
+
+  /**
+   * Handle a change to the collaborators on the model
+   * by updating UI elements associated with them.
+   */
+  private _onCollaboratorsChanged(): void {
+    // If there are selections corresponding to non-collaborators,
+    // they are stale and should be removed.
+    for (let key of this.editor.model.selections.keys()) {
+      if (!this._context.model.modelDB.collaborators.has(key)) {
+        this.editor.model.selections.delete(key);
+      }
+    }
   }
 
   protected _context: DocumentRegistry.Context;
