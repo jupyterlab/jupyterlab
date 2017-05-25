@@ -70,7 +70,6 @@ function activateSettingEditor(app: JupyterLab, restorer: ILayoutRestorer, setti
 
   commands.addCommand(CommandIDs.open, {
     execute: () => {
-      console.log('this command was called');
       if (editor.parent === null) {
         shell.addToMainArea(editor);
       }
