@@ -24,7 +24,6 @@ import {
 /**
  * The command IDs used by the apputils extension.
  */
-export
 namespace CommandIDs {
   export
   const activate = 'command-palette:activate';

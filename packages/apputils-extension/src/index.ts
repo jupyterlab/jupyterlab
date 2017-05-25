@@ -28,6 +28,10 @@ import {
   activatePalette
 } from './palette';
 
+import {
+  activateSettingEditor
+} from './settingeditor';
+
 
 /**
  * The command IDs used by the apputils plugin.
@@ -104,6 +108,17 @@ const palettePlugin: JupyterLabPlugin<ICommandPalette> = {
 
 
 /**
+ * The default setting editor extension.
+ */
+const settingEditorPlugin: JupyterLabPlugin<void> = {
+  activate: activateSettingEditor,
+  id: 'jupyter.extensions.setting-editor',
+  requires: [ILayoutRestorer, ISettingRegistry],
+  autoStart: true
+};
+
+
+/**
  * The default layout restorer provider.
  */
 const settingPlugin: JupyterLabPlugin<ISettingRegistry> = {
@@ -158,6 +173,7 @@ const plugins: JupyterLabPlugin<any>[] = [
   linkerPlugin,
   mainMenuPlugin,
   palettePlugin,
+  settingEditorPlugin,
   settingPlugin,
   stateDBPlugin
 ];

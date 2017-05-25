@@ -162,7 +162,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   }
 
   commands.addCommand(CommandIDs.lineNumbers, {
-    execute: (): Promise<void> => {
+    execute: () => {
       lineNumbers = !lineNumbers;
       tracker.forEach(widget => { widget.editor.lineNumbers = lineNumbers; });
       return settings.set(id, 'lineNumbers', lineNumbers);
@@ -173,7 +173,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   });
 
   commands.addCommand(CommandIDs.wordWrap, {
-    execute: (): Promise<void> => {
+    execute: () => {
       wordWrap = !wordWrap;
       tracker.forEach(widget => { widget.editor.wordWrap = wordWrap; });
       return settings.set(id, 'wordWrap', wordWrap);
