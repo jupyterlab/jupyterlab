@@ -13,7 +13,6 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^0.6.0",
     "@phosphor/algorithm": "^1.1.0",
     "@phosphor/application": "^1.2.0",
     "@phosphor/coreutils": "^1.1.0",

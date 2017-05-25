@@ -42,8 +42,6 @@ const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.main',
   requires: [ICommandPalette],
   activate: (app: JupyterLab, palette: ICommandPalette) => {
-    app.settings.setDB(new StateDB({ namespace: 'jupyter.db.settings' }));
-
     addCommands(app, palette);
 
     // Temporary build message for manual rebuild.
