@@ -489,7 +489,7 @@ class CodeCell extends Cell {
     // Set a CSS if there are no outputs, and connect a signal for future
     // changes to the number of outputs. This is for conditional styling
     // if there are no outputs.
-    if (model.outputs.length===0) {
+    if (model.outputs.length === 0) {
       this.addClass(NO_OUTPUTS_CLASS);
     }
     output.outputLengthChanged.connect(this._outputLengthHandler, this);
@@ -538,33 +538,6 @@ class CodeCell extends Cell {
     this._outputWrapper = null;
     this._outputCollapser = null;
     super.dispose();
-  }
-
-  /**
-   * Execute the cell given a client session.
-   */
-  execute(session: IClientSession): Promise<KernelMessage.IExecuteReplyMsg> {
-    let model = this.model;
-    let code = model.value.text;
-    if (!code.trim() || !session.kernel) {
-      model.executionCount = null;
-      model.outputs.clear();
-      return Promise.resolve(null);
-    }
-    model.executionCount = null;
-    this.setPrompt('*');
-    this.model.trusted = true;
-
-    return this._output.execute(code, session).then(reply => {
-      let status = reply.content.status;
-      if (status === 'abort') {
-        model.executionCount = null;
-        this.setPrompt(' ');
-      } else {
-        model.executionCount = reply.content.execution_count;
-      }
-      return reply;
-    });
   }
 
   /**
@@ -643,6 +616,28 @@ namespace CodeCell {
     rendermime: RenderMime;
   }
 
+  /**
+   * Execute a cell given a client session.
+   */
+  export
+  function execute(cell: CodeCell, session: IClientSession): Promise<KernelMessage.IExecuteReplyMsg> {
+    let model = cell.model;
+    let code = model.value.text;
+    if (!code.trim() || !session.kernel) {
+      model.executionCount = null;
+      model.outputs.clear();
+      return Promise.resolve(void 0);
+    }
+
+    model.executionCount = null;
+    cell.setPrompt('*');
+    model.trusted = true;
+
+    return OutputArea.execute(code, cell.outputArea, session).then(msg => {
+      model.executionCount = msg.content.execution_count;
+      return msg;
+    });
+  }
 }
 
 

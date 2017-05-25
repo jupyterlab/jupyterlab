@@ -638,7 +638,7 @@ describe('kernel', () => {
         });
       });
 
-      it('should handle out of order messages', (done) => {
+      it('should handle out of order messages', () => {
         let options: KernelMessage.IOptions = {
           msgType: 'custom',
           channel: 'shell',
@@ -664,11 +664,9 @@ describe('kernel', () => {
             newMsg.parent_header = msg.header;
             tester.send(newMsg);
           };
-
-          future.onDone = () => {
-            done();
-          };
         });
+
+        return future.done;
       });
     });
 
@@ -959,7 +957,7 @@ describe('kernel', () => {
 
     context('#requestExecute()', () => {
 
-      it('should send and handle incoming messages', (done) => {
+      it('should send and handle incoming messages', () => {
         let newMsg: KernelMessage.IMessage;
         let content: KernelMessage.IExecuteRequest = {
           code: 'test',
@@ -970,7 +968,6 @@ describe('kernel', () => {
           stop_on_error: false
         };
         let future = kernel.requestExecute(content);
-        expect(future.onDone).to.be(null);
         expect(future.onStdin).to.be(null);
         expect(future.onReply).to.be(null);
         expect(future.onIOPub).to.be(null);
@@ -1018,18 +1015,14 @@ describe('kernel', () => {
               tester.send(newMsg);
             }
           };
-
-          future.onDone = () => {
-            doLater(() => {
-              expect(future.isDisposed).to.be(true);
-              done();
-            });
-          };
         });
 
+        return future.done.then(() => {
+          expect(future.isDisposed).to.be(true);
+        });
       });
 
-      it('should not dispose of KernelFuture when disposeOnDone=false', (done) => {
+      it('should not dispose of KernelFuture when disposeOnDone=false', () => {
         let options: KernelMessage.IExecuteRequest = {
           code: 'test',
           silent: false,
@@ -1039,7 +1032,6 @@ describe('kernel', () => {
           stop_on_error: false
         };
         let future = kernel.requestExecute(options, false);
-        expect(future.onDone).to.be(null);
         expect(future.onStdin).to.be(null);
         expect(future.onReply).to.be(null);
         expect(future.onIOPub).to.be(null);
@@ -1068,19 +1060,14 @@ describe('kernel', () => {
               tester.send(msg);
             }
           };
+        });
 
-          future.onDone = () => {
-            doLater(() => {
-              expect(future.isDisposed).to.be(false);
-              expect(future.onDone).to.be(null);
-              expect(future.onIOPub).to.not.be(null);
-              future.dispose();
-              expect(future.onIOPub).to.be(null);
-              expect(future.isDisposed).to.be(true);
-              done();
-            });
-          };
-
+        return future.done.then(() => {
+          expect(future.isDisposed).to.be(false);
+          expect(future.onIOPub).to.not.be(null);
+          future.dispose();
+          expect(future.onIOPub).to.be(null);
+          expect(future.isDisposed).to.be(true);
         });
       });
 
@@ -1088,7 +1075,7 @@ describe('kernel', () => {
 
     context('#registerMessageHook()', () => {
 
-      it('should have the most recently registered hook run first', (done) => {
+      it('should have the most recently registered hook run first', () => {
         let options: KernelMessage.IExecuteRequest = {
           code: 'test',
           silent: false,
@@ -1097,6 +1084,7 @@ describe('kernel', () => {
           allow_stdin: false,
           stop_on_error: false
         };
+        let calls: string[] = [];
         let future = kernel.requestExecute(options, false);
         tester.onMessage((message) => {
           // send a reply
@@ -1117,7 +1105,6 @@ describe('kernel', () => {
             tester.send(msgDone);
           };
 
-          let calls: string[] = [];
           kernel.registerMessageHook(parent_header.msg_id, (msg) => {
             calls.push('last');
             return true;
@@ -1130,20 +1117,17 @@ describe('kernel', () => {
           });
 
           future.onIOPub = () => {
-            calls.push('iopub')
+            calls.push('iopub');
           };
+        });
 
-          future.onDone = () => {
-            // the last hook was called for the stream and the status message.
-            expect(calls).to.eql(['first', 'last', 'iopub', 'first', 'last', 'iopub']);
-            doLater(() => {
-              done();
-            });
-          };
+        return future.done.then(() => {
+          // the last hook was called for the stream and the status message.
+          expect(calls).to.eql(['first', 'last', 'iopub', 'first', 'last', 'iopub']);
         });
       });
 
-      it('should abort processing if a hook returns false, but the done logic should still work', (done) => {
+      it('should abort processing if a hook returns false, but the done logic should still work', () => {
         let options: KernelMessage.IExecuteRequest = {
           code: 'test',
           silent: false,
@@ -1152,6 +1136,7 @@ describe('kernel', () => {
           allow_stdin: false,
           stop_on_error: false
         };
+        let calls: string[] = [];
         let future = kernel.requestExecute(options, false);
         tester.onMessage((message) => {
           // send a reply
@@ -1172,7 +1157,6 @@ describe('kernel', () => {
             tester.send(msgDone);
           };
 
-          let calls: string[] = [];
           kernel.registerMessageHook(parent_header.msg_id, (msg) => {
             calls.push('last');
             return true;
@@ -1184,20 +1168,17 @@ describe('kernel', () => {
           });
 
           future.onIOPub = () => {
-            calls.push('iopub')
+            calls.push('iopub');
           };
+        });
 
-          future.onDone = () => {
-            // the last hook was called for the stream and the status message.
-            expect(calls).to.eql(['first', 'first']);
-            doLater(() => {
-              done();
-            });
-          };
+        return future.done.then(() => {
+          // the last hook was called for the stream and the status message.
+          expect(calls).to.eql(['first', 'first']);
         });
       });
 
-      it('should process additions on the next run', (done) => {
+      it('should process additions on the next run', () => {
         let options: KernelMessage.IExecuteRequest = {
           code: 'test',
           silent: false,
@@ -1206,6 +1187,7 @@ describe('kernel', () => {
           allow_stdin: false,
           stop_on_error: false
         };
+        let calls: string[] = [];
         let future = kernel.requestExecute(options, false);
         tester.onMessage((message) => {
           // send a reply
@@ -1226,7 +1208,6 @@ describe('kernel', () => {
             tester.send(msgDone);
           };
 
-          let calls: string[] = [];
           kernel.registerMessageHook(parent_header.msg_id, (msg) => {
             calls.push('last');
             kernel.registerMessageHook(parent_header.msg_id, (msg) => {
@@ -1237,19 +1218,16 @@ describe('kernel', () => {
           });
 
           future.onIOPub = () => {
-            calls.push('iopub')
+            calls.push('iopub');
           };
+        });
 
-          future.onDone = () => {
-            expect(calls).to.eql(['last', 'iopub', 'first', 'last', 'iopub']);
-            doLater(() => {
-              done();
-            });
-          };
+        return future.done.then(() => {
+          expect(calls).to.eql(['last', 'iopub', 'first', 'last', 'iopub']);
         });
       });
 
-      it('should deactivate a hook immediately on removal', (done) => {
+      it('should deactivate a hook immediately on removal', () => {
         let options: KernelMessage.IExecuteRequest = {
           code: 'test',
           silent: false,
@@ -1258,6 +1236,7 @@ describe('kernel', () => {
           allow_stdin: false,
           stop_on_error: false
         };
+        let calls: string[] = [];
         let future = kernel.requestExecute(options, false);
         tester.onMessage((message) => {
           // send a reply
@@ -1278,11 +1257,10 @@ describe('kernel', () => {
             tester.send(msgDone);
           };
 
-          let calls: string[] = [];
           let toDelete = (msg: KernelMessage.IIOPubMessage) => {
             calls.push('delete');
             return true;
-          }
+          };
           let toDeleteHook = kernel.registerMessageHook(parent_header.msg_id, toDelete);
 
           kernel.registerMessageHook(parent_header.msg_id, (msg) => {
@@ -1295,15 +1273,12 @@ describe('kernel', () => {
           });
 
           future.onIOPub = () => {
-            calls.push('iopub')
+            calls.push('iopub');
           };
+        });
 
-          future.onDone = () => {
-            expect(calls).to.eql(['first', 'delete', 'iopub', 'first', 'iopub']);
-            doLater(() => {
-              done();
-            });
-          };
+        return future.done.then(() => {
+          expect(calls).to.eql(['first', 'delete', 'iopub', 'first', 'iopub']);
         });
       });
 
@@ -1312,11 +1287,10 @@ describe('kernel', () => {
 
   describe('IFuture', () => {
 
-    beforeEach((done) => {
-      Kernel.startNew().then(k => {
+    beforeEach(() => {
+      return Kernel.startNew().then(k => {
         kernel = k;
-        done();
-      }).catch(done);
+      });
     });
 
     it('should have a msg attribute', () => {
@@ -1326,7 +1300,7 @@ describe('kernel', () => {
 
     describe('Message hooks', () => {
 
-      it('should have the most recently registered hook run first', (done) => {
+      it('should have the most recently registered hook run first', () => {
         let options: KernelMessage.IExecuteRequest = {
           code: 'test',
           silent: false,
@@ -1335,6 +1309,7 @@ describe('kernel', () => {
           allow_stdin: false,
           stop_on_error: false
         };
+        let calls: string[] = [];
         let future = kernel.requestExecute(options, false);
         tester.onMessage((message) => {
           // send a reply
@@ -1355,7 +1330,6 @@ describe('kernel', () => {
             tester.send(msgDone);
           };
 
-          let calls: string[] = [];
           future.registerMessageHook((msg) => {
             calls.push('last');
             return true;
@@ -1374,20 +1348,17 @@ describe('kernel', () => {
           });
 
           future.onIOPub = () => {
-            calls.push('iopub')
+            calls.push('iopub');
           };
+        });
 
-          future.onDone = () => {
-            // the last hook was called for the stream and the status message.
-            expect(calls).to.eql(['first', 'last', 'iopub', 'first', 'last', 'iopub']);
-            doLater(() => {
-              done();
-            });
-          };
+        return future.done.then(() => {
+          // the last hook was called for the stream and the status message.
+          expect(calls).to.eql(['first', 'last', 'iopub', 'first', 'last', 'iopub']);
         });
       });
 
-      it('should abort processing if a hook returns false, but the done logic should still work', (done) => {
+      it('should abort processing if a hook returns false, but the done logic should still work', () => {
         let options: KernelMessage.IExecuteRequest = {
           code: 'test',
           silent: false,
@@ -1396,11 +1367,12 @@ describe('kernel', () => {
           allow_stdin: false,
           stop_on_error: false
         };
+        let calls: string[] = [];
         let future = kernel.requestExecute(options, false);
         tester.onMessage((message) => {
           // send a reply
           let parent_header = message.header;
-          let msg = createMsg('shell', parent_header);
+          let msg = createMsg('shell',  parent_header);
           tester.send(msg);
 
           future.onReply = () => {
@@ -1416,7 +1388,6 @@ describe('kernel', () => {
             tester.send(msgDone);
           };
 
-          let calls: string[] = [];
           future.registerMessageHook((msg) => {
             calls.push('last');
             return true;
@@ -1428,20 +1399,17 @@ describe('kernel', () => {
           });
 
           future.onIOPub = () => {
-            calls.push('iopub')
+            calls.push('iopub');
           };
+        });
 
-          future.onDone = () => {
-            // the last hook was called for the stream and the status message.
-            expect(calls).to.eql(['first', 'first']);
-            doLater(() => {
-              done();
-            });
-          };
+        return future.done.then(() => {
+          // the last hook was called for the stream and the status message.
+          expect(calls).to.eql(['first', 'first']);
         });
       });
 
-      it('should process additions on the next run', (done) => {
+      it('should process additions on the next run', () => {
         let options: KernelMessage.IExecuteRequest = {
           code: 'test',
           silent: false,
@@ -1450,6 +1418,7 @@ describe('kernel', () => {
           allow_stdin: false,
           stop_on_error: false
         };
+        let calls: string[] = [];
         let future = kernel.requestExecute(options, false);
         tester.onMessage((message) => {
           // send a reply
@@ -1470,7 +1439,6 @@ describe('kernel', () => {
             tester.send(msgDone);
           };
 
-          let calls: string[] = [];
           future.registerMessageHook((msg) => {
             calls.push('last');
             future.registerMessageHook((msg) => {
@@ -1481,19 +1449,16 @@ describe('kernel', () => {
           });
 
           future.onIOPub = () => {
-            calls.push('iopub')
+            calls.push('iopub');
           };
+        });
 
-          future.onDone = () => {
-            expect(calls).to.eql(['last', 'iopub', 'first', 'last', 'iopub']);
-            doLater(() => {
-              done();
-            });
-          };
+        return future.done.then(() => {
+          expect(calls).to.eql(['last', 'iopub', 'first', 'last', 'iopub']);
         });
       });
 
-      it('should deactivate message hooks immediately on removal', (done) => {
+      it('should deactivate message hooks immediately on removal', () => {
         let options: KernelMessage.IExecuteRequest = {
           code: 'test',
           silent: false,
@@ -1502,7 +1467,21 @@ describe('kernel', () => {
           allow_stdin: false,
           stop_on_error: false
         };
+        let calls: string[] = [];
         let future = kernel.requestExecute(options, false);
+        let toDelete = (msg: KernelMessage.IIOPubMessage) => {
+          calls.push('delete');
+          return true;
+        };
+        let first = (msg: KernelMessage.IIOPubMessage) => {
+          if (calls.length > 0) {
+            // delete the hook the second time around
+            future.removeMessageHook(toDelete);
+          }
+          calls.push('first');
+          return true;
+        };
+
         tester.onMessage((message) => {
           // send a reply
           let parent_header = message.header;
@@ -1522,80 +1501,61 @@ describe('kernel', () => {
             tester.send(msgDone);
           };
 
-          let calls: string[] = [];
-          let toDelete = (msg: KernelMessage.IIOPubMessage) => {
-            calls.push('delete');
-            return true;
-          }
           future.registerMessageHook(toDelete);
-
-          let first = (msg: KernelMessage.IIOPubMessage) => {
-            if (calls.length > 0) {
-              // delete the hook the second time around
-              future.removeMessageHook(toDelete);
-            }
-            calls.push('first');
-            return true;
-          }
           future.registerMessageHook(first);
 
           future.onIOPub = () => {
-            calls.push('iopub')
+            calls.push('iopub');
           };
-
-          future.onDone = () => {
-            expect(calls).to.eql(['first', 'delete', 'iopub', 'first', 'iopub']);
-            doLater(() => {
-              future.dispose();
-              future.removeMessageHook(first);
-              done();
-            });
-          };
+        });
+        return future.done.then(() => {
+          expect(calls).to.eql(['first', 'delete', 'iopub', 'first', 'iopub']);
+          future.dispose();
+          future.removeMessageHook(first);
         });
       });
 
     });
+
   });
 
   describe('Kernel.getSpecs()', () => {
 
-    it('should load the kernelspecs', (done) => {
+    it('should load the kernelspecs', () => {
       let ids = {
         'python': PYTHON_SPEC,
         'python3': PYTHON3_SPEC
       };
       tester.specs =  { 'default': 'python',
                         'kernelspecs': ids };
-      Kernel.getSpecs().then(specs => {
+      return Kernel.getSpecs().then(specs => {
         let names = Object.keys(specs.kernelspecs);
         expect(names[0]).to.be('python');
         expect(names[1]).to.be('python3');
-        done();
-      }).catch(done);
+      });
     });
 
-    it('should accept ajax options', (done) => {
+    it('should accept ajax options', () => {
       let ids = {
         'python': PYTHON_SPEC,
         'python3': PYTHON3_SPEC
       };
       tester.specs = { 'default': 'python',
                        'kernelspecs': ids };
-      Kernel.getSpecs(serverSettings).then(specs => {
+      return Kernel.getSpecs(serverSettings).then(specs => {
         let names = Object.keys(specs.kernelspecs);
         expect(names[0]).to.be('python');
         expect(names[1]).to.be('python3');
-        done();
-      }).catch(done);
+      });
     });
 
-    it('should handle a missing default parameter', (done) => {
+    it('should handle a missing default parameter', () => {
       tester.onRequest = () => {
         tester.respond(200, { 'kernelspecs': { 'python': PYTHON_SPEC } });
       };
-      Kernel.getSpecs().then(specs => {
+      return Kernel.getSpecs().then(specs => {
         expect(specs.default).to.be('python');
-      }).then(done, done);
+      });
     });
 
     it('should throw for a missing kernelspecs parameter', (done) => {
@@ -1606,7 +1566,7 @@ describe('kernel', () => {
       expectAjaxError(promise, done, 'No kernelspecs found');
     });
 
-    it('should omit an invalid kernelspec', (done) => {
+    it('should omit an invalid kernelspec', () => {
       let R_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
       R_SPEC.name = 1;
       tester.onRequest = () => {
@@ -1615,10 +1575,10 @@ describe('kernel', () => {
                                                 'python': PYTHON_SPEC }
         });
       };
-      Kernel.getSpecs().then(specs => {
+      return Kernel.getSpecs().then(specs => {
         expect(specs.default).to.be('python');
         expect(specs.kernelspecs['R']).to.be(void 0);
-      }).then(done, done);
+      });
     });
 
     it('should handle an improper name', (done) => {

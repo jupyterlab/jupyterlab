@@ -266,7 +266,7 @@ class DefaultKernel implements Kernel.IKernel {
     }
     let future = new KernelFutureHandler(() => {
       this._futures.delete(msg.header.msg_id);
-    }, msg, expectReply, disposeOnDone);
+    }, msg, expectReply, disposeOnDone, this);
     this._futures.set(msg.header.msg_id, future);
     return future;
   }
@@ -813,6 +813,9 @@ class DefaultKernel implements Kernel.IKernel {
    */
   private _handleCommOpen(msg: KernelMessage.ICommOpenMsg): void {
     let content = msg.content;
+    if (this.isDisposed) {
+      return;
+    }
     let promise = Private.loadObject(content.target_name, content.target_module,
       this._targetRegistry).then(target => {
         let comm = new CommHandler(
@@ -830,6 +833,9 @@ class DefaultKernel implements Kernel.IKernel {
           throw(e);
         }
         return Promise.resolve(response).then(() => {
+          if (this.isDisposed) {
+            return;
+          }
           this._commPromises.delete(comm.commId);
           this._comms.set(comm.commId, comm);
           return comm;

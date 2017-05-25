@@ -409,41 +409,6 @@ describe('cells/widget', () => {
 
     });
 
-    describe('#execute()', () => {
-
-      let session: IClientSession;
-
-      beforeEach(() => {
-        return createClientSession().then(s => {
-          session = s;
-          return s.initialize();
-        }).then(() => {
-          return session.kernel.ready;
-        });
-      });
-
-      afterEach(() => {
-        return session.shutdown();
-      });
-
-      it('should fulfill a promise if there is no code to execute', () => {
-        let widget = new CodeCell({ model, rendermime, contentFactory });
-        return widget.execute(session);
-      });
-
-      it('should fulfill a promise if there is code to execute', () => {
-        let widget = new CodeCell({ model, rendermime, contentFactory });
-        let originalCount: number;
-        widget.model.value.text = 'foo';
-        originalCount = (widget.model).executionCount;
-        return widget.execute(session).then(() => {
-          let executionCount = (widget.model).executionCount;
-          expect(executionCount).to.not.equal(originalCount);
-        });
-      });
-
-    });
-
     describe('#onUpdateRequest()', () => {
 
       it('should update the widget', () => {
@@ -463,6 +428,41 @@ describe('cells/widget', () => {
         expect(widget.methods).to.not.contain(method);
         widget.model.metadata.set('foo', 1);
         expect(widget.methods).to.contain(method);
+      });
+
+    });
+
+    describe('.execute()', () => {
+
+      let session: IClientSession;
+
+      beforeEach(() => {
+        return createClientSession().then(s => {
+          session = s;
+          return s.initialize();
+        }).then(() => {
+          return session.kernel.ready;
+        });
+      });
+
+      afterEach(() => {
+        return session.shutdown();
+      });
+
+      it('should fulfill a promise if there is no code to execute', () => {
+        let widget = new CodeCell({ model, rendermime, contentFactory });
+        return CodeCell.execute(widget, session);
+      });
+
+      it('should fulfill a promise if there is code to execute', () => {
+        let widget = new CodeCell({ model, rendermime, contentFactory });
+        let originalCount: number;
+        widget.model.value.text = 'foo';
+        originalCount = (widget.model).executionCount;
+        return CodeCell.execute(widget, session).then(() => {
+          let executionCount = (widget.model).executionCount;
+          expect(executionCount).to.not.equal(originalCount);
+        });
       });
 
     });

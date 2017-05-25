@@ -39,14 +39,14 @@ function main() {
     future.onReply = (reply) => {
       log('Got execute reply');
     };
-    future.onDone = () => {
+    return future.done;
+  }).then(() => {
       log('Future is fulfilled');
       // Shut down the session.
-      session.shutdown().then(() => {
-        log('Session shut down');
-        log('Test Complete!');
-      });
-    };
+      return session.shutdown();
+  }).then(() => {
+      log('Session shut down');
+      log('Test Complete!');
   }).catch(err => {
     console.error(err);
     log('Test Failed! See the console output for details');

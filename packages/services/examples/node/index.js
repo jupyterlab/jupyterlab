@@ -39,14 +39,14 @@ services.Session.startNew(options).then(function(s) {
   future.onReply = function(reply) {
     console.log('Got execute reply');
   }
-  future.onDone = function() {
-    console.log('Future is fulfilled');
-    // Shut down the session.
-    session.shutdown().then(function() {
-      console.log('Session shut down');
-      process.exit(0);
-    });
-  };
+  return future.done;
+}).then(function() {
+  console.log('Future is fulfilled');
+  // Shut down the session.
+  return session.shutdown();
+}).then(function() {
+  console.log('Session shut down');
+  process.exit(0);
 }).catch(function(err) {
   console.error(err);
   process.exit(1);

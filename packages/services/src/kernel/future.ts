@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  PromiseDelegate
+} from '@phosphor/coreutils';
+
+import {
   DisposableDelegate
 } from '@phosphor/disposable';
 
@@ -22,13 +26,14 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
   /**
    * Construct a new KernelFutureHandler.
    */
-  constructor(cb: () => void, msg: KernelMessage.IShellMessage, expectShell: boolean, disposeOnDone: boolean) {
+  constructor(cb: () => void, msg: KernelMessage.IShellMessage, expectShell: boolean, disposeOnDone: boolean, kernel: Kernel.IKernel) {
     super(cb);
     this._msg = msg;
     if (!expectShell) {
       this._setFlag(Private.KernelFutureFlag.GotReply);
     }
     this._disposeOnDone = disposeOnDone;
+    this._kernel = kernel;
   }
 
   /**
@@ -39,10 +44,10 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
   }
 
   /**
-   * Check for message done state.
+   * A promise that resolves when the future is done.
    */
-  get isDone(): boolean {
-    return this._testFlag(Private.KernelFutureFlag.IsDone);
+  get done(): Promise<KernelMessage.IShellMessage> {
+    return this._done.promise;
   }
 
   /**
@@ -71,20 +76,6 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
    */
   set onIOPub(cb: (msg: KernelMessage.IIOPubMessage) => void) {
     this._iopub = cb;
-  }
-
-  /**
-   * Get the done handler.
-   */
-  get onDone(): () => void  {
-    return this._done;
-  }
-
-  /**
-   * Set the done handler.
-   */
-  set onDone(cb: () => void) {
-    this._done = cb;
   }
 
   /**
@@ -133,6 +124,14 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
     this._hooks.remove(hook);
   }
 
+
+  /**
+   * Send an `input_reply` message.
+   */
+  sendInputReply(content: KernelMessage.IInputReply): void {
+    this._kernel.sendInputReply(content);
+  }
+
   /**
    * Dispose and unregister the future.
    */
@@ -144,6 +143,7 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
     this._msg = null;
     if (this._hooks) { this._hooks.dispose(); }
     this._hooks = null;
+    this._kernel = null;
     super.dispose();
   }
 
@@ -167,6 +167,7 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
   private _handleReply(msg: KernelMessage.IShellMessage): void {
     let reply = this._reply;
     if (reply) { reply(msg); }
+    this._replyMsg = msg;
     this._setFlag(Private.KernelFutureFlag.GotReply);
     if (this._testFlag(Private.KernelFutureFlag.GotIdle)) {
       this._handleDone();
@@ -192,13 +193,11 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
   }
 
   private _handleDone(): void {
-    if (this.isDone) {
+    if (this._testFlag(Private.KernelFutureFlag.IsDone)) {
       return;
     }
     this._setFlag(Private.KernelFutureFlag.IsDone);
-    let done = this._done;
-    if (done) done();
-    this._done = null;
+    this._done.resolve(this._replyMsg);
     if (this._disposeOnDone) {
       this.dispose();
     }
@@ -223,9 +222,11 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
   private _stdin: (msg: KernelMessage.IStdinMessage) => void = null;
   private _iopub: (msg: KernelMessage.IIOPubMessage) => void = null;
   private _reply: (msg: KernelMessage.IShellMessage) => void = null;
-  private _done: () => void = null;
+  private _done = new PromiseDelegate<KernelMessage.IShellMessage>();
+  private _replyMsg: KernelMessage.IShellMessage;
   private _hooks = new Private.HookList<KernelMessage.IIOPubMessage>();
   private _disposeOnDone = true;
+  private _kernel: Kernel.IKernel;
 }
 
 namespace Private {

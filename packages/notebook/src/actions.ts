@@ -980,7 +980,7 @@ namespace Private {
       break;
     case 'code':
       if (session) {
-        return (child as CodeCell).execute(session).then(reply => {
+        return CodeCell.execute(child as CodeCell, session).then(reply => {
           if (child.isDisposed) {
             return false;
           }

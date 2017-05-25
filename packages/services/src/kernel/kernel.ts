@@ -670,9 +670,11 @@ namespace Kernel {
     readonly msg: KernelMessage.IShellMessage;
 
     /**
-     * Whether the future is done.
+     * A promise that resolves when the future is done.
+     *
+     * The contents of the promise is the reply message.
      */
-    readonly isDone: boolean;
+    readonly done: Promise<KernelMessage.IShellMessage>;
 
     /**
      * The reply handler for the kernel future.
@@ -688,11 +690,6 @@ namespace Kernel {
      * The iopub handler for the kernel future.
      */
     onIOPub: (msg: KernelMessage.IIOPubMessage) => void;
-
-    /**
-     * The done handler for the kernel future.
-     */
-    onDone: () => void;
 
     /**
      * Register hook for IOPub messages.
@@ -718,6 +715,11 @@ namespace Kernel {
      * If a hook is removed during the hook processing, it will be deactivated immediately.
      */
     removeMessageHook(hook: (msg: KernelMessage.IIOPubMessage) => boolean): void;
+
+    /**
+     * Send an `input_reply` message.
+     */
+    sendInputReply(content: KernelMessage.IInputReply): void;
   }
 
   /**
