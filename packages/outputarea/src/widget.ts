@@ -428,7 +428,7 @@ namespace OutputArea {
    * Execute code on an output area.
    */
   export
-  function execute(output: OutputArea, code: string, session: IClientSession): Promise<KernelMessage.IExecuteReplyMsg> {
+  function execute(code: string, output: OutputArea, session: IClientSession): Promise<KernelMessage.IExecuteReplyMsg> {
     // Override the default for `stop_on_error`.
     let content: KernelMessage.IExecuteRequest = {
       code,

@@ -633,7 +633,7 @@ namespace CodeCell {
     cell.setPrompt('*');
     model.trusted = true;
 
-    return OutputArea.execute(cell.outputArea, code, session).then(msg => {
+    return OutputArea.execute(code, cell.outputArea, session).then(msg => {
       model.executionCount = msg.content.execution_count;
       return msg;
     });

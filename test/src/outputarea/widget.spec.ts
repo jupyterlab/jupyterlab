@@ -213,7 +213,7 @@ describe('outputarea/widget', () => {
 
       it('should execute code on a kernel and send outputs to the model', () => {
         return session.kernel.ready.then(() => {
-          return OutputArea.execute(widget, CODE, session).then(reply => {
+          return OutputArea.execute(CODE, widget, session).then(reply => {
             expect(reply.content.execution_count).to.be.ok();
             expect(reply.content.status).to.be('ok');
             expect(model.length).to.be(1);
@@ -223,7 +223,7 @@ describe('outputarea/widget', () => {
 
       it('should clear existing outputs', () => {
         widget.model.fromJSON(DEFAULT_OUTPUTS);
-        return OutputArea.execute(widget, CODE, session).then(reply => {
+        return OutputArea.execute(CODE, widget, session).then(reply => {
           expect(reply.content.execution_count).to.be.ok();
           expect(model.length).to.be(1);
         });
