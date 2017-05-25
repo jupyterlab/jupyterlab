@@ -39,8 +39,10 @@ import {
   FileEditorFactory
 } from '@jupyterlab/fileeditor';
 
-import '@jupyterlab/default-theme/style/index.css';
 import '../index.css';
+import '@jupyterlab/theme-light-extension/style/index.css';
+import '@jupyterlab/application/style/index.css';
+
 
 
 function main(): void {
@@ -97,12 +99,11 @@ function createApp(manager: ServiceManager.IManager): void {
 
   let commands = new CommandRegistry();
 
-  let fbModel = new FileBrowserModel({ manager });
+  let fbModel = new FileBrowserModel({ manager: docManager });
   let fbWidget = new FileBrowser({
     id: 'filebrowser',
     commands,
-    model: fbModel,
-    manager: docManager,
+    model: fbModel
   });
 
   let panel = new SplitPanel();

@@ -40,7 +40,9 @@ import {
   RenderMime
 } from '@jupyterlab/rendermime';
 
-import '@jupyterlab/default-theme/style/index.css';
+
+import '@jupyterlab/theme-assets/style/index.css';
+import '@jupyterlab/theme-light-extension/style/index.css';
 import '../index.css';
 
 
