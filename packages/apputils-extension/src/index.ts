@@ -4,14 +4,6 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  JSONObject
-} from '@phosphor/coreutils';
-
-import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
   JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
@@ -23,6 +15,14 @@ import {
 import {
   ISettingRegistry, IStateDB, SettingRegistry, StateDB
 } from '@jupyterlab/coreutils';
+
+import {
+  JSONObject
+} from '@phosphor/coreutils';
+
+import {
+  Widget
+} from '@phosphor/widgets';
 
 import {
   activatePalette

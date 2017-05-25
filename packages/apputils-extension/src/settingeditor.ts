@@ -12,9 +12,12 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  ISettingRegistry
+  InstanceTracker, ISettingRegistry
 } from '@jupyterlab/coreutils';
 
+import {
+  Message
+} from '@phosphor/messaging';
 
 import {
   Widget
@@ -24,6 +27,13 @@ import {
  * An interface for modifying and saving application settings.
  */
 class SettingEditor extends Widget {
+  /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this.node.tabIndex = -1;
+    this.node.focus();
+  }
 }
 
 
@@ -32,7 +42,7 @@ class SettingEditor extends Widget {
  */
 namespace CommandIDs {
   export
-  const activate = 'setting-editor:activate';
+  const open = 'setting-editor:open';
 };
 
 
@@ -42,22 +52,30 @@ namespace CommandIDs {
 export
 function activateSettingEditor(app: JupyterLab, restorer: ILayoutRestorer, settings: ISettingRegistry): void {
   const { commands, shell } = app;
+  const namespace = 'setting-editor';
   const editor = new SettingEditor();
+  const tracker = new InstanceTracker<SettingEditor>({ namespace });
 
-  // Let the application restorer track the setting editor for restoration of
-  // application state.
-  restorer.add(editor, 'setting-editor');
-
-  editor.id = 'setting-editor';
+  editor.id = namespace;
   editor.title.label = 'Settings';
+  editor.title.closable = true;
 
-  commands.addCommand(CommandIDs.activate, {
+  // Handle state restoration.
+  restorer.restore(tracker, {
+    command: CommandIDs.open,
+    args: widget => ({ }),
+    name: widget => namespace
+  });
+  tracker.add(editor);
+
+  commands.addCommand(CommandIDs.open, {
     execute: () => {
+      console.log('this command was called');
       if (editor.parent === null) {
         shell.addToMainArea(editor);
       }
       shell.activateById(editor.id);
     },
-    label: 'Activate Setting Editor'
+    label: 'Settings'
   });
 }
