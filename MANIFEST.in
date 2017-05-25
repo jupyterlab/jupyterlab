@@ -11,5 +11,6 @@ include jupyterlab/package.template.json
 include jupyterlab/webpack.config.js
 include jupyterlab/index.template.js
 include jupyterlab/package_list.txt
+include jupyterlab/dedupe.js
 
 prune jupyterlab/tests

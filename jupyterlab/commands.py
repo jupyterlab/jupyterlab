@@ -333,7 +333,7 @@ def _ensure_package(app_dir, name=None, version=None):
     if version:
         data['jupyterlab']['version'] = version
 
-    data['scripts']['build'] = 'npm dedupe && webpack'
+    data['scripts']['build'] = 'webpack'
 
     pkg_path = pjoin(staging, 'package.json')
     with open(pkg_path, 'w') as fid:
