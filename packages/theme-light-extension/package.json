@@ -32,5 +32,5 @@
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "jupyterlab": {
     "extension": true
-  },
+  }
 }
