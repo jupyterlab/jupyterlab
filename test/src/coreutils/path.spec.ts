@@ -61,6 +61,11 @@ describe('@jupyterlab/coreutils', () => {
         expect(path).to.equal('fixtures/b/c.js');
       });
 
+      it('should not return "." for an empty path', () => {
+        let path = PathExt.normalize('');
+        expect(path).to.equal('');
+      });
+
     });
 
     describe('.resolve()', () => {

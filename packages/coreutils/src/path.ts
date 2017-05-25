@@ -68,11 +68,15 @@ namespace PathExt {
   /**
    * Normalize a string path, reducing '..' and '.' parts.
    * When multiple slashes are found, they're replaced by a single one; when the path contains a trailing slash, it is preserved. On Windows backslashes are used.
+   * When an empty path is given, returns the root path.
    *
    * @param path - The string path to normalize.
    */
   export
   function normalize(path: string): string {
+    if (path === '') {
+      return '';
+    }
     return removeSlash(posix.normalize(path));
   }
 
