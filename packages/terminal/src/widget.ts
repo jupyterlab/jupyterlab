@@ -74,7 +74,7 @@ class Terminal extends Widget {
     // Initialize settings.
     let defaults = Terminal.defaultOptions;
     this._fontSize = options.fontSize || defaults.fontSize;
-    this._theme = options.theme || defaults.theme;
+    this.theme = options.theme || defaults.theme;
     this.id = `jp-Terminal-${Private.id++}`;
     this.title.label = 'Terminal';
   }
@@ -133,12 +133,9 @@ class Terminal extends Widget {
    * Set the current theme, either light or dark.
    */
   set theme(value: Terminal.Theme) {
-    if (this._theme === value) {
-      return;
-    }
     this._theme = value;
-    this._needsStyle = true;
-    this.update();
+    this.toggleClass(TERMINAL_LIGHT_THEME, value === 'light');
+    this.toggleClass(TERMINAL_DARK_THEME, value === 'dark');
   }
 
   /**
@@ -227,9 +224,6 @@ class Terminal extends Widget {
     }
     if (this._needsResize) {
       this._resizeTerminal();
-    }
-    if (this._needsStyle) {
-      this._setStyle();
     }
   }
 
@@ -334,26 +328,11 @@ class Terminal extends Widget {
     }
   }
 
-  /**
-   * Set the stylesheet.
-   */
-  private _setStyle(): void {
-    if (this._theme === 'dark') {
-      this.removeClass(TERMINAL_LIGHT_THEME);
-      this.addClass(TERMINAL_DARK_THEME)
-    } else {
-      this.addClass(TERMINAL_LIGHT_THEME);
-      this.removeClass(TERMINAL_DARK_THEME) 
-    }
-    this._needsStyle = false;
-  }
-
   private _term: Xterm = null;
   private _dummyTerm: HTMLElement = null;
   private _fontSize = -1;
   private _needsSnap = true;
   private _needsResize = true;
-  private _needsStyle = true;
   private _rowHeight = -1;
   private _colWidth = -1;
   private _offsetWidth = -1;
