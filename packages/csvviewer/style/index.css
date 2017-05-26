@@ -18,10 +18,12 @@
     display: flex;
     flex: 0 0 auto;
     flex-direction: row;
-    border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
+    border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
     /* Add the border width because this is border-box sized */
     height: calc(var(--jp-private-csvviewer-toolbar-height) + var(--jp-border-width));
     background: var(--jp-layout-color1);
+    z-index: 1;
+    box-shadow: 0px 0.4px 6px 0px rgba(0,0,0,0.1);
 }
 
 .jp-CSVToolbar .jp-CSVToolbar-label {
