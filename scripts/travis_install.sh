@@ -22,6 +22,10 @@ conda update -q conda
 conda info -a
 conda install -c conda-forge notebook pytest
 
+if [[ $GROUP == cli ]]; then
+   conda install -c javascript nodejs
+fi
+
 # create jupyter base dir (needed for config retrieval)
 mkdir ~/.jupyter
 
