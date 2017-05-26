@@ -3,7 +3,7 @@
   "name": "@jupyterlab/application-top",
   "version": "0.4.1",
   "scripts": {
-    "build": "webpack",
+    "build": "node dedupe.js && webpack",
     "publish": "node make-release.js"
   },
   "dependencies": {
