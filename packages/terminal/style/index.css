@@ -30,3 +30,44 @@
 .terminal .xterm-viewport {
   overflow-y: auto;
 }
+
+
+.jp-Terminal-dark {
+  background: black;
+  color: white;
+}
+
+
+.jp-Terminal-dark .xterm-viewport, .jp-Terminal-dark .xterm-rows {
+  background: black;
+  color: white;
+}
+
+
+.jp-Terminal-dark .terminal.focus .terminal-cursor.blinking {
+  animation: .jp-Terminal-dark-blink-cursor 1.2s infinite step-end;
+}
+
+
+@keyframes .jp-Terminal-dark-blink-cursor {
+  0% {
+    background-color: white;
+    color: black;
+  }
+  50% {
+    background-color: transparent;
+    color: white;
+  }
+}
+
+
+.jp-Terminal-light {
+  background: white;
+  color: dark;
+}
+
+
+.jp-Terminal-light.xterm-viewport, .jp-Terminal-light .xterm-rows {
+  background: white;
+  color: dark;
+}

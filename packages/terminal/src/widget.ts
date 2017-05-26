@@ -30,6 +30,11 @@ const TERMINAL_CLASS = 'jp-Terminal';
  */
 const TERMINAL_BODY_CLASS = 'jp-Terminal-body';
 
+const TERMINAL_DARK_THEME = 'jp-Terminal-dark';
+
+const TERMINAL_LIGHT_THEME = 'jp-Terminal-light';
+
+
 /**
  * The number of rows to use in the dummy terminal.
  */
@@ -59,14 +64,11 @@ class Terminal extends Widget {
     this._term = new Xterm(Private.getConfig(options));
     this._initializeTerm();
     this._dummyTerm = Private.createDummyTerm();
-    this._sheet = document.createElement('style');
-    this.node.appendChild(this._sheet);
 
     // Initialize settings.
     let defaults = Terminal.defaultOptions;
     this._fontSize = options.fontSize || defaults.fontSize;
-    this._background = options.background || defaults.background;
-    this._color = options.color || defaults.color;
+    this._theme = options.theme || defaults.theme;
     this.id = `jp-Terminal-${Private.id++}`;
     this.title.label = 'Terminal';
   }
@@ -115,39 +117,20 @@ class Terminal extends Widget {
   }
 
   /**
-   * Get the background color of the terminal.
-   */
-  get background(): string {
-    return this._background;
-  }
-
-  /**
-   * Set the background color of the terminal.
-   */
-  set background(value: string) {
-    if (this._background === value) {
-      return;
-    }
-    this._background = value;
-    this._needsStyle = true;
-    this.update();
-  }
-
-  /**
    * Get the text color of the terminal.
    */
-  get color(): string {
-    return this._color;
+  get theme(): 'light' | 'dark' {
+    return this._theme;
   }
 
   /**
    * Set the text color of the terminal.
    */
-  set color(value: string) {
-    if (this._color === value) {
+  set theme(value: 'light' | 'dark') {
+    if (this._theme === value) {
       return;
     }
-    this._color = value;
+    this._theme = value;
     this._needsStyle = true;
     this.update();
   }
@@ -157,7 +140,6 @@ class Terminal extends Widget {
    */
   dispose(): void {
     this._session = null;
-    this._sheet = null;
     this._term = null;
     this._dummyTerm = null;
     this._box = null;
@@ -350,35 +332,17 @@ class Terminal extends Widget {
    * Set the stylesheet.
    */
   private _setStyle(): void {
-    // Set the fg and bg colors of the terminal and cursor.
-    this._sheet.innerHTML = (`
-      #${this.node.id} {
-        background: ${this._background};
-        color: ${this._color};
-      }
-      #${this.node.id} .xterm-viewport, #${this.node.id} .xterm-rows {
-        background-color: ${this._background};
-        color: ${this._color};
-      }
-      #${this.node.id} .terminal.focus .terminal-cursor.blinking {
-          animation: ${this.node.id}-blink-cursor 1.2s infinite step-end;
-      }
-      @keyframes ${this.node.id}-blink-cursor {
-          0% {
-              background-color: ${this._color};
-              color: ${this._background};
-          }
-          50% {
-              background-color: transparent;
-              color: ${this._color};
-          }
-      }
-    `);
+    if (this._theme === 'dark') {
+      this.removeClass(TERMINAL_LIGHT_THEME);
+      this.addClass(TERMINAL_DARK_THEME)
+    } else {
+      this.addClass(TERMINAL_LIGHT_THEME);
+      this.removeClass(TERMINAL_DARK_THEME) 
+    }
     this._needsStyle = false;
   }
 
   private _term: Xterm = null;
-  private _sheet: HTMLElement = null;
   private _dummyTerm: HTMLElement = null;
   private _fontSize = -1;
   private _needsSnap = true;
@@ -389,8 +353,7 @@ class Terminal extends Widget {
   private _offsetWidth = -1;
   private _offsetHeight = -1;
   private _sessionSize: [number, number, number, number] = [1, 1, 1, 1];
-  private _background = '';
-  private _color = '';
+  private _theme: 'light' | 'dark' = 'dark';
   private _box: ElementExt.IBoxSizing = null;
   private _session: TerminalSession.ISession = null;
 }
@@ -412,14 +375,9 @@ namespace Terminal {
     fontSize?: number;
 
     /**
-     * The background color of the terminal.
+     * The theme of the terminal.
      */
-    background?: string;
-
-    /**
-     * The text color of the terminal.
-     */
-    color?: string;
+    theme?: 'light' | 'dark';
 
     /**
      * Whether to blink the cursor.  Can only be set at startup.
@@ -432,8 +390,7 @@ namespace Terminal {
    */
   export
   const defaultOptions: IOptions = {
-    background: 'black',
-    color: 'white',
+    theme: 'dark',
     fontSize: 13,
     cursorBlink: true
   };
