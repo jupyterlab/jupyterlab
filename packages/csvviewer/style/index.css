@@ -14,7 +14,7 @@
   outline: none;
 }
 
-.jp-CSVViewer-toolbar {
+.jp-CSVToolbar {
     display: flex;
     flex: 0 0 auto;
     flex-direction: row;
@@ -24,7 +24,7 @@
     background: var(--jp-layout-color1);
 }
 
-.jp-CSVViewer-toolbar span {
+.jp-CSVToolbar .jp-CSVToolbar-label {
     color: var(--jp-ui-font-color1);
     font-size: var(--jp-ui-font-size1);
     line-height: var(--jp-private-csvviewer-toolbar-height);
@@ -32,26 +32,22 @@
     padding-right: 8px;
 }
 
-.jp-CSVViewer-toolbar select {
-    background: transparent;
-}
 
 .jp-CSVToolbar .jp-CSVToolbar-dropdown {
     flex: 0 0 auto;
-    padding-left: 8px;
-    padding-right: 8px;
     vertical-align: middle;
     border: var(--jp-border-width) solid var(--jp-border-color1);
     border-radius: 0;
     outline: none;
-    width: 60px;
+    width: 40px;
     height: 20px;
-    font-size: var(--jp-ui-font-size0);
-    color: var(--jp-ui-font-color1);
     margin-top: 2px;
     margin-bottom: 2px;
 }
 
+.jp-CSVToolbar .jp-CSVToolbar-dropdown select.jp-mod-styled {
+  font-size: var(--jp-ui-font-size1);
+}
 
 .jp-CSVTable {
   flex: 1 1 auto;
@@ -66,9 +62,10 @@
 
 .jp-CSVViewer-warning {
   flex: 0 0 auto;
-  padding-left: 4px;
+  padding-left: 8px;
   overflow: auto;
   color: var(--jp-warn-color1);
   line-height: 1.5;
   font-size: var(--jp-ui-font-size1);
+  background: transparent;
 }
