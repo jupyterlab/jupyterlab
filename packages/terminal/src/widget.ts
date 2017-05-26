@@ -125,14 +125,14 @@ class Terminal extends Widget {
   /**
    * Get the current theme, either light or dark.
    */
-  get theme(): 'light' | 'dark' {
+  get theme(): Terminal.Theme {
     return this._theme;
   }
 
   /**
    * Set the current theme, either light or dark.
    */
-  set theme(value: 'light' | 'dark') {
+  set theme(value: Terminal.Theme) {
     if (this._theme === value) {
       return;
     }
@@ -359,7 +359,7 @@ class Terminal extends Widget {
   private _offsetWidth = -1;
   private _offsetHeight = -1;
   private _sessionSize: [number, number, number, number] = [1, 1, 1, 1];
-  private _theme: 'light' | 'dark' = 'dark';
+  private _theme: Terminal.Theme = 'dark';
   private _box: ElementExt.IBoxSizing = null;
   private _session: TerminalSession.ISession = null;
 }
@@ -383,7 +383,7 @@ namespace Terminal {
     /**
      * The theme of the terminal.
      */
-    theme?: 'light' | 'dark';
+    theme?: Theme
 
     /**
      * Whether to blink the cursor.  Can only be set at startup.
@@ -400,6 +400,12 @@ namespace Terminal {
     fontSize: 13,
     cursorBlink: true
   };
+
+  /**
+   * A type for the terminal theme.
+   */
+  export
+  type Theme = 'light' | 'dark';
 }
 
 
