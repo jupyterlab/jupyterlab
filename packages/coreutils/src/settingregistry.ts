@@ -219,15 +219,22 @@ class SettingRegistry {
    *
    * @param plugin - The name of the plugin whose setting is being annotated.
    *
-   * @param key - The name of the setting being annotated.
+   * @param key - The name of the setting being annotated. If null, the
+   * annotation will apply to the plugin instead of a specific key within it.
    *
    * @param annotation - The annotation describing an individual setting.
    */
-  annotate(plugin: string, key: string, annotation: ISettingRegistry.IAnnotation): void {
+  annotate(plugin: string, key: string | null, annotation: ISettingRegistry.IAnnotation): void {
     if (!this._annotations[plugin]) {
-      this._annotations[plugin] = Object.create(null);
+      this._annotations[plugin] = { annotation: null, keys: { } };
     }
-    this._annotations[plugin][key] = annotation;
+
+    if (key) {
+      this._annotations[plugin].keys[key] = annotation;
+    } else {
+      this._annotations[plugin].annotation = annotation;
+    }
+
     this._pluginChanged.emit(plugin);
   }
 
@@ -258,18 +265,16 @@ class SettingRegistry {
    *
    * @param plugin - The name of the plugin whose settings are being loaded.
    *
-   * @param reload - Reload from server, ignoring cache. Defaults to false.
-   *
    * @returns A promise that resolves with a plugin settings object.
    */
-  load(plugin: string, reload = false): Promise<ISettings> {
+  load(plugin: string): Promise<ISettings> {
     const annotations = this._annotations;
     const copy = JSONExt.deepCopy;
     const plugins = this._plugins;
     const registry = this;
 
-    // If the plugin exists and does not need to be reloaded, resolve.
-    if (!reload && plugin in plugins) {
+    // If the plugin exists, resolve.
+    if (plugin in plugins) {
       // Create a copy of the plugin data.
       const content = copy(plugins[plugin]) as ISettingRegistry.IPlugin;
 
@@ -278,6 +283,23 @@ class SettingRegistry {
 
       return Promise.resolve(new Settings({ content, plugin, registry }));
     }
+
+    // If the plugin needs to be loaded from the datastore, fetch.
+    return this.reload(plugin);
+  }
+
+  /**
+   * Reload a plugin's settings into the registry even if they already exist.
+   *
+   * @param plugin - The name of the plugin whose settings are being reloaded.
+   *
+   * @returns A promise that resolves with a plugin settings object.
+   */
+  reload(plugin: string): Promise<ISettings> {
+    const annotations = this._annotations;
+    const copy = JSONExt.deepCopy;
+    const plugins = this._plugins;
+    const registry = this;
 
     // If the plugin needs to be loaded from the datastore, fetch.
     return this._datastore.fetch(plugin).then(result => {
@@ -368,7 +390,7 @@ class SettingRegistry {
       .then(() => { this._pluginChanged.emit(plugin); });
   }
 
-  private _annotations: { [plugin: string]: { [key: string]: ISettingRegistry.IAnnotation } } = Object.create(null);
+  private _annotations: Private.Annotations = Object.create(null);
   private _datastore: IDatastore<ISettingRegistry.IPlugin, ISettingRegistry.IPlugin> | null = null;
   private _pluginChanged = new Signal<this, string>(this);
   private _plugins: { [name: string]: ISettingRegistry.IPlugin } = Object.create(null);
@@ -534,4 +556,21 @@ namespace Settings {
      */
     registry: SettingRegistry;
   }
+}
+
+
+/**
+ * A namespace for private module data.
+ */
+namespace Private {
+  /**
+   * A collection of annotation data for plugins and their settings.
+   */
+  export
+  type Annotations = {
+    [plugin: string]: {
+      annotation: ISettingRegistry.IAnnotation,
+      keys: { [key: string]: ISettingRegistry.IAnnotation }
+    }
+  };
 }
