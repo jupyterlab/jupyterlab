@@ -273,6 +273,7 @@ def build(app_dir=None, name=None, version=None):
 
     # Make sure packages are installed.
     run(['npm', 'install'], cwd=staging)
+    run(['npm', 'install minimist'], cwd=staging)
 
     # Install the linked extensions.
     for path in _get_linked_packages(app_dir).values():
