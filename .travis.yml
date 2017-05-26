@@ -14,7 +14,7 @@ matrix:
       env: GROUP=coverage_and_docs
     - node_js: '5'
       env: GROUP=cli
-    - node_js: '4'
+    - node_js: '4.3'
       env: GROUP=legacy
 env:
   global:
