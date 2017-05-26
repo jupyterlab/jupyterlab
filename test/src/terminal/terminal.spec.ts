@@ -143,7 +143,7 @@ describe('terminal/index', () => {
         expect(widget.hasClass('jp-Terminal-dark')).to.be(true);
       });
 
-      it('should trigger an update request', (done) => {
+      it('should change to the light theme', (done) => {
         widget.theme = 'light';
         expect(widget.theme).to.be('light');
         expect(widget.hasClass('jp-Terminal-light')).to.be(true);
