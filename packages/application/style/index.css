@@ -13,11 +13,10 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  background: var(--jp-layout-color3);
 }
 
 
-.jp-ApplicationShell.p-Widget {
+.jp-ApplicationShell {
   position: absolute;
   top: 0;
   left: 0;
