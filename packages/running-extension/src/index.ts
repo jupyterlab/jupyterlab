@@ -51,7 +51,7 @@ function activate(app: JupyterLab, services: IServiceManager, restorer: ILayoutR
   running.sessionOpenRequested.connect((sender, model) => {
     let path = model.path;
     if (model.type.toLowerCase() === 'console') {
-      app.commands.execute('console:open', { id: model.id });
+      app.commands.execute('console:open', { path });
     } else {
       app.commands.execute('file-operations:open', { path });
     }
