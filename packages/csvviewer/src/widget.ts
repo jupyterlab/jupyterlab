@@ -14,6 +14,10 @@ import {
 } from '@phosphor/widgets';
 
 import {
+  ActivityMonitor
+} from '@jupyterlab/coreutils';
+
+import {
   ABCWidgetFactory, DocumentRegistry
 } from '@jupyterlab/docregistry';
 
@@ -41,6 +45,10 @@ const CSV_WARNING_CLASS = 'jp-CSVViewer-warning';
  */
 const CSV_VIEWER_CLASS = 'jp-CSVViewer-toolbar';
 
+/**
+ * The timeout to wait for change activity to have ceased before rendering.
+ */
+const RENDER_TIMEOUT = 1000;
 
 /**
  * A viewer for CSV tables.
@@ -75,7 +83,12 @@ class CSVViewer extends Widget {
     layout.addWidget(this._warning);
 
     context.pathChanged.connect(this._onPathChanged, this);
-    context.model.contentChanged.connect(this._onContentChanged, this);
+    // Throttle the rendering rate of the widget.
+    this._monitor = new ActivityMonitor({
+      signal: context.model.contentChanged,
+      timeout: RENDER_TIMEOUT
+    });
+    this._monitor.activityStopped.connect(this._onContentChanged, this);
   }
 
   /**
@@ -103,15 +116,19 @@ class CSVViewer extends Widget {
     let table = this._table;
     let toolbar = this._toolbar;
     let warning = this._warning;
+    let monitor = this._monitor;
     this._model = null;
     this._table = null;
     this._toolbar = null;
     this._warning = null;
+    this._monitor = null;
 
     model.dispose();
     table.dispose();
     toolbar.dispose();
     warning.dispose();
+    monitor.dispose();
+  
     super.dispose();
   }
 
@@ -159,6 +176,7 @@ class CSVViewer extends Widget {
   private _table: CSVTable = null;
   private _toolbar: CSVToolbar = null;
   private _warning: Widget = null;
+  private _monitor: ActivityMonitor<any, any> = null;
 }
 
 
