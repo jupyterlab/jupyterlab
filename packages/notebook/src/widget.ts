@@ -1319,7 +1319,7 @@ class Notebook extends StaticNotebook {
     });
 
     // Create the drag image.
-    let dragImage = Private.createDragImage(selected.length);
+    let dragImage = Private.createDragImage(selected.length, this.activeCell.model.executionCount, this.activeCell.model.value.text.split('\n')[0]);
 
     // Set up the drag event.
     this._drag = new Drag({
@@ -1531,7 +1531,9 @@ namespace Private {
    * Create a cell drag image.
    */
   export
-  function createDragImage(count: number): HTMLElement {
+  function createDragImage(count: number, promptNumber: number, cellContent: string): HTMLElement {
+    console.log("promptNumber = " + `${promptNumber}`);
+    console.log("CellContent = " + cellContent);
     let node = document.createElement('div');
     let span = document.createElement('span');
     span.textContent = `${count}`;
