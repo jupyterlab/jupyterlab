@@ -113,7 +113,9 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
     CommandIDs.toggleTheme
   ].forEach(command => {
     palette.addItem({ command, category });
-    menu.addItem({ command });
+    if (command !== CommandIDs.createNew) {
+      menu.addItem({ command });
+    }
   });
   mainMenu.addMenu(menu, {rank: 40});
 
@@ -225,19 +227,14 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Instan
 
   commands.addCommand('terminal:toggle-theme', {
     label: 'Toggle Terminal Theme',
-    caption: 'Switch Terminal Background and Font Colors',
+    caption: 'Switch Terminal Theme',
     execute: () => {
-      let options = Terminal.defaultOptions;
-      if (options.background === 'black') {
-        options.background = 'white';
-        options.color = 'black';
-      } else {
-        options.background = 'black';
-        options.color = 'white';
-      }
       tracker.forEach(widget => {
-        widget.background = options.background;
-        widget.color = options.color;
+        if (widget.theme === 'dark') {
+          widget.theme = 'light';
+        } else {
+          widget.theme = 'dark';
+        }
       });
     },
     isEnabled: hasWidget

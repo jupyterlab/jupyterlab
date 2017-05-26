@@ -136,34 +136,21 @@ describe('terminal/index', () => {
 
     });
 
-    describe('#background', () => {
+    describe('#theme', () => {
 
-      it('should be black by default', () => {
-        expect(widget.background).to.be('black');
-      });
-
-      it('should trigger an update request', (done) => {
-        widget.background = 'white';
-        expect(widget.background).to.be('white');
+      it('should be dark by default', (done) => {
+        expect(widget.theme).to.be('dark');
         requestAnimationFrame(() => {
-          expect(widget.methods).to.contain('onUpdateRequest');
+          expect(widget.hasClass('jp-Terminal-dark')).to.be(true);
           done();
         });
       });
 
-    });
-
-    describe('#color', () => {
-
-      it('should be white by default', () => {
-        expect(widget.color).to.be('white');
-      });
-
-      it('should trigger an update request', (done) => {
-        widget.color = 'black';
-        expect(widget.color).to.be('black');
+      it('should be light if we change it', (done) => {
+        widget.theme = 'light';
+        expect(widget.theme).to.be('light');
         requestAnimationFrame(() => {
-          expect(widget.methods).to.contain('onUpdateRequest');
+          expect(widget.hasClass('jp-Terminal-light')).to.be(true);
           done();
         });
       });
