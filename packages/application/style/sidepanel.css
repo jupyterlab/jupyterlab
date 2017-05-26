@@ -64,10 +64,15 @@
 
 .jp-SideBar .p-TabBar-tab {
   padding: 0 18px;
-  background: var(--jp-layout-color2);
   border: none;
   overflow: visible;
 }
+
+
+.jp-SideBar .p-TabBar-tab:not(.p-mod-current) {
+  background: var(--jp-layout-color2);
+}
+
 
 
 .jp-SideBar .p-TabBar-tabLabel {
