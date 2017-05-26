@@ -310,9 +310,9 @@ def _ensure_package(app_dir, name='JupyterLab', version=None):
     if not os.path.exists(staging):
         os.makedirs(staging)
 
-    for name in ['index.template.js', 'webpack.config.js']:
-        dest = pjoin(staging, name.replace('.template', ''))
-        shutil.copy2(pjoin(here, name), dest)
+    for fname in ['index.template.js', 'webpack.config.js']:
+        dest = pjoin(staging, fname.replace('.template', ''))
+        shutil.copy2(pjoin(here, fname), dest)
 
     # Template the package.json file.
     pkg_path = pjoin(here, 'package.template.json')
