@@ -56,6 +56,7 @@
 
 .jp-Chatbox-content .jp-Cell {
   margin: 5px;
+  background-color: var(--jp-layout-color1);
   border-radius: 10px;
   flex-grow: 1;
 }
@@ -72,6 +73,7 @@
 }
 
 .jp-Chatbox .jp-ChatEntry-badge {
+  background-color: var(--jp-layout-color1);
   border-radius: 10px;
   padding: 2px;
   min-width: 22px;

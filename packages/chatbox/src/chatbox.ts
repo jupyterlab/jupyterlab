@@ -198,13 +198,11 @@ class Chatbox extends Widget {
 
     // Populate with the new model values.
     let modelDB = this._model.modelDB;
-    // Update the chatlog vector.
-    if (!modelDB.has('internal:chat')) {
-      modelDB.createList('internal:chat');
-    }
-    this._log = modelDB.get('internal:chat') as IObservableList<ChatEntry.IModel>;
-    this._log.changed.connect(this._onLogChanged, this);
     modelDB.connected.then(() => {
+      // Update the chatlog vector.
+      modelDB.createList('internal:chat');
+      this._log = modelDB.get('internal:chat') as IObservableList<ChatEntry.IModel>;
+      this._log.changed.connect(this._onLogChanged, this);
       this._start = this._log.length;
 
       if (this.isVisible) {
@@ -629,6 +627,7 @@ class Chatbox extends Widget {
         }
         break;
     }
+    this.update();
   }
 
   /**
@@ -663,7 +662,9 @@ class Chatbox extends Widget {
     cellWidget.rendered = true;
     let entryWidget = new ChatEntry({
       model: entry,
-      cell: cellWidget
+      cell: cellWidget,
+      isMe: entry.author.userId ===
+            this._model.modelDB.collaborators.localCollaborator.userId
     });
     return entryWidget;
   }
