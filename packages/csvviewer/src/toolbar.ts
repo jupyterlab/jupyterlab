@@ -17,6 +17,10 @@ import {
   Widget
 } from '@phosphor/widgets';
 
+import {
+  Styling
+} from '@jupyterlab/apputils';
+
 
 /**
  * The supported parsing delimiters.
@@ -33,10 +37,13 @@ const LABELS = [',', ';', '\\t'];
  */
 const CSV_TOOLBAR_CLASS = 'jp-CSVToolbar';
 
+const CSV_TOOLBAR_LABEL_CLASS = 'jp-CSVToolbar-label';
+
 /**
  * The class name added to a csv toolbar's dropdown element.
  */
 const CSV_TOOLBAR_DROPDOWN_CLASS = 'jp-CSVToolbar-dropdown';
+
 
 
 /**
@@ -132,10 +139,10 @@ namespace Private {
   export
   function createNode(selected: string): HTMLElement {
     let div = document.createElement('div');
-    let label = document.createElement('label');
+    let label = document.createElement('span');
     let select = document.createElement('select');
-    select.className = CSV_TOOLBAR_DROPDOWN_CLASS;
     label.textContent = 'Delimiter: ';
+    label.className = CSV_TOOLBAR_LABEL_CLASS;
     each(zip(DELIMITERS, LABELS), ([delimiter, label]) => {
       let option = document.createElement('option');
       option.value = delimiter;
@@ -145,8 +152,10 @@ namespace Private {
       }
       select.appendChild(option);
     });
-    label.appendChild(select);
     div.appendChild(label);
+    let node = Styling.wrapSelect(select);
+    node.classList.add(CSV_TOOLBAR_DROPDOWN_CLASS);
+    div.appendChild(node);
     return div;
   }
 }
