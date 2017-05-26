@@ -140,13 +140,13 @@ describe('terminal/index', () => {
 
       it('should be black by default', () => {
         expect(widget.theme).to.be('dark');
-        expect(widget.hasClass('jp-Terminal-dark')).to.be(true);
+        expect(widget.hasClass('jp-Terminal-dark')).to.equal(true);
       });
 
       it('should change to the light theme', (done) => {
         widget.theme = 'light';
         expect(widget.theme).to.be('light');
-        expect(widget.hasClass('jp-Terminal-light')).to.be(true);
+        expect(widget.hasClass('jp-Terminal-light')).to.equal(true);
       });
 
     });
