@@ -344,6 +344,7 @@ def _ensure_package(app_dir, name='JupyterLab', version=None):
 
     data['scripts']['build'] = 'webpack'
 
+    pkg_path = pjoin(staging, 'package.json')
     with open(pkg_path, 'w') as fid:
         json.dump(data, fid, indent=4)
 
