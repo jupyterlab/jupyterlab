@@ -20,8 +20,25 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  Widget
+  Widget, BoxLayout
 } from '@phosphor/widgets';
+
+
+/**
+ * The class name added to all setting editors.
+ */
+const SETTING_EDITOR_CLASS = 'jp-SettingEditor';
+
+/**
+ * The class name added to all plugin editors.
+ */
+const PLUGIN_EDITOR_CLASS = 'jp-PluginEditor';
+
+/**
+ * The class name added to all plugin lists.
+ */
+const PLUGIN_LIST_CLASS = 'jp-PluginList';
+
 
 /**
  * An interface for modifying and saving application settings.
@@ -33,6 +50,15 @@ class SettingEditor extends Widget {
   constructor(options: SettingEditor.IOptions) {
     super();
     this.settings = options.settings;
+
+    const layout = this.layout = new BoxLayout({ direction: 'left-to-right' });
+
+    layout.addWidget(this._list = new PluginList());
+    layout.addWidget(this._editor = new PluginEditor());
+    BoxLayout.setStretch(this._list, 1);
+    BoxLayout.setStretch(this._editor, 3);
+
+    this.addClass(SETTING_EDITOR_CLASS);
   }
 
   /**
@@ -46,15 +72,24 @@ class SettingEditor extends Widget {
   protected onActivateRequest(msg: Message): void {
     this.node.tabIndex = -1;
     this.node.focus();
-    this.update();
+  }
+
+  /**
+   * Handle `'after-attach'` messages.
+   */
+  protected onAfterAttach(msg: Message): void {
+    /* no op */
   }
 
   /**
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    this.node.textContent = 'Setting Editor';
+    /* no op */
   }
+
+  private _editor: PluginEditor;
+  private _list: PluginList;
 }
 
 
@@ -71,6 +106,34 @@ namespace SettingEditor {
      * The setting registry the editor modifies.
      */
     settings: ISettingRegistry;
+  }
+}
+
+
+/**
+ * A list of plugins with editable settings.
+ */
+class PluginList extends Widget {
+  /**
+   * Create a new plugin list.
+   */
+  constructor() {
+    super();
+    this.addClass(PLUGIN_LIST_CLASS);
+  }
+}
+
+
+/**
+ * An individual plugin settings editor.
+ */
+class PluginEditor extends Widget {
+  /**
+   * Create a new plugin editor.
+   */
+  constructor() {
+    super();
+    this.addClass(PLUGIN_EDITOR_CLASS);
   }
 }
 

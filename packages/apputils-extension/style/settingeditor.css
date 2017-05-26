@@ -3,6 +3,16 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-#setting-editor {
+#setting-editor.jp-SettingEditor {
   outline: none;
+}
+
+
+#setting-editor.jp-SettingEditor .jp-PluginList {
+  background: yellow;
+}
+
+
+#setting-editor.jp-SettingEditor .jp-PluginEditor {
+  background: blue;
 }
