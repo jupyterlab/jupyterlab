@@ -144,7 +144,7 @@ const SHORTCUTS = [
   },
   {
     command: 'inspector:open',
-    selector: '.jp-CodeConsole-promptCell',
+    selector: 'body',
     keys: ['Accel I']
   },
   {
