@@ -30,8 +30,14 @@ const TERMINAL_CLASS = 'jp-Terminal';
  */
 const TERMINAL_BODY_CLASS = 'jp-Terminal-body';
 
+/**
+ * The class name add to the terminal widget when it has the dark theme.
+ */
 const TERMINAL_DARK_THEME = 'jp-Terminal-dark';
 
+/**
+ * The class name add to the terminal widget when it has the light theme.
+ */
 const TERMINAL_LIGHT_THEME = 'jp-Terminal-light';
 
 
@@ -117,14 +123,14 @@ class Terminal extends Widget {
   }
 
   /**
-   * Get the text color of the terminal.
+   * Get the current theme, either light or dark.
    */
   get theme(): 'light' | 'dark' {
     return this._theme;
   }
 
   /**
-   * Set the text color of the terminal.
+   * Set the current theme, either light or dark.
    */
   set theme(value: 'light' | 'dark') {
     if (this._theme === value) {
