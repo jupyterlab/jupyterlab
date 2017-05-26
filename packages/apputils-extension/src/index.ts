@@ -3,6 +3,8 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import '../style/settingeditor.css';
+
 import {
   JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';

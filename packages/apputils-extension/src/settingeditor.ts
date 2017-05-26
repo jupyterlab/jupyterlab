@@ -46,6 +46,14 @@ class SettingEditor extends Widget {
   protected onActivateRequest(msg: Message): void {
     this.node.tabIndex = -1;
     this.node.focus();
+    this.update();
+  }
+
+  /**
+   * Handle `'update-request'` messages.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    this.node.textContent = 'Setting Editor';
   }
 }
 
