@@ -59,6 +59,9 @@ import {
   INotebookModel
 } from './model';
 
+import {
+  h, VirtualDOM
+} from '@phosphor/virtualdom';
 
 /**
  * The class name added to notebook widgets.
@@ -1317,10 +1320,23 @@ class Notebook extends StaticNotebook {
         toMove.push(widget);
       }
     });
-
-    // Create the drag image.
-    let dragImage = Private.createDragImage(selected.length, this.activeCell.model.executionCount, this.activeCell.model.value.text.split('\n')[0]);
-
+    let activeCell = this.activeCell;
+    let dragImage: HTMLElement = null;
+    if (activeCell.model.type === 'code') {
+      let executionCount = (activeCell.model as ICodeCellModel).executionCount;
+      let countString: string;
+      if (executionCount) {
+        countString = executionCount.toString();
+      } else {
+        countString = '';
+      }
+      // Create the drag image.
+      dragImage = Private.createDragImage(selected.length, countString, activeCell.model.value.text.split('\n')[0]);
+    }
+    else {
+      // Create the drag image.
+      dragImage = Private.createDragImage(selected.length, '', activeCell.model.value.text.split('\n')[0]);
+    }
     // Set up the drag event.
     this._drag = new Drag({
       mimeData: new MimeData(),
@@ -1531,16 +1547,14 @@ namespace Private {
    * Create a cell drag image.
    */
   export
-  function createDragImage(count: number, promptNumber: number, cellContent: string): HTMLElement {
-    console.log("promptNumber = " + `${promptNumber}`);
+  function createDragImage(count: number, promptNumber: string, cellContent: string): HTMLElement {
+    console.log("promptNumber = " + promptNumber);
     console.log("CellContent = " + cellContent);
-    let node = document.createElement('div');
-    let span = document.createElement('span');
-    span.textContent = `${count}`;
-    span.className = FILLED_CIRCLE_CLASS;
-    node.appendChild(span);
-    node.className = DRAG_IMAGE_CLASS;
-    return node;
+    return VirtualDOM.realize(
+      h.div({className: DRAG_IMAGE_CLASS},
+        h.span({className: FILLED_CIRCLE_CLASS, title: `${count}`})
+      )
+    );
   }
 
   /**
