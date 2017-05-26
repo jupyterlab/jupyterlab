@@ -12,8 +12,10 @@ matrix:
       env: GROUP=tests
     - node_js: '5'
       env: GROUP=coverage_and_docs
-    - node_js: '4.3'
+    - node_js: '5'
       env: GROUP=cli
+    - node_js: '4'
+      env: GROUP=legacy
 env:
   global:
   - GH_REF: github.com/jupyterlab/jupyterlab.git

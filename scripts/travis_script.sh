@@ -95,3 +95,8 @@ if [[ $GROUP == cli ]]; then
     jupyter labextension uninstall -h 
     jupyter labextension list -h
 fi
+
+
+if [[ $GROUP == cli ]]; then
+    jupyter lab build
+fi
