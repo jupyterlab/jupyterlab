@@ -288,7 +288,7 @@ def build(app_dir=None, name=None, version=None):
     shutil.copytree(pjoin(staging, 'build'), static)
 
 
-def _ensure_package(app_dir, name='JupyterLab', version=None):
+def _ensure_package(app_dir, name=None, version=None):
     """Make sure the build dir is set up.
     """
     if not os.path.exists(pjoin(app_dir, 'extensions')):
@@ -310,9 +310,9 @@ def _ensure_package(app_dir, name='JupyterLab', version=None):
     if not os.path.exists(staging):
         os.makedirs(staging)
 
-    for name in ['index.template.js', 'webpack.config.js']:
-        dest = pjoin(staging, name.replace('.template', ''))
-        shutil.copy2(pjoin(here, name), dest)
+    for fname in ['index.template.js', 'webpack.config.js']:
+        dest = pjoin(staging, fname.replace('.template', ''))
+        shutil.copy2(pjoin(here, fname), dest)
 
     # Template the package.json file.
     pkg_path = pjoin(here, 'package.template.json')
@@ -329,7 +329,7 @@ def _ensure_package(app_dir, name='JupyterLab', version=None):
     for item in config.get('uninstalled_core_extensions', []):
         data['jupyterlab']['extensions'].remove(item)
 
-    data['jupyterlab']['name'] = name
+    data['jupyterlab']['name'] = name or 'JupyterLab'
     if version:
         data['jupyterlab']['version'] = version
 
