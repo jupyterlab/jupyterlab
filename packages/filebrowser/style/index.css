@@ -284,11 +284,11 @@
   padding-left: 4px;
   margin-left: 4px;
   width: 160px;
-  background-color: #FFFFFF;
+  background-color: rgba(255,255,255,.7);
   box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
   border-radius: 0px;
   color: var(--jp-ui-font-color1);
-  transform: translateX(-40%) translateY(-58%);
+  transform: translateX(-2%) translateY(4%);
 }
 
 
