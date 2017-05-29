@@ -6,26 +6,18 @@ output renderers for example.
 
 ### Installing Node.js and npm
 
-Installing JupyterLab extensions requires Node.js and Node's package manager, ``npm``.
+Installing JupyterLab extensions requires Node.js version 6+ and Node's package manager, ``npm``.
 
 If you use ``conda``, you can get them with:
 
 ```bash
-conda install -c javascript nodejs
+conda install -c conda-force nodejs
 ```
 
 If you use [Homebrew](http://brew.sh/) on Mac OS X:
 
 ```bash
 brew install node
-```
-
-For Debian/Ubuntu systems, you should use the ``nodejs-legacy`` package instead
-of the ``node`` package:
-
-```bash
-sudo apt-get update
-sudo apt-get install nodejs-legacy npm
 ```
 
 ### Installing Extensions

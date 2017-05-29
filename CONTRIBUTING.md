@@ -25,27 +25,19 @@ All source code is written in [TypeScript](http://www.typescriptlang.org/Handboo
 
 ### Installing Node.js and npm
 
-Building the JupyterLab from its GitHub source code requires Node.js and 
-Node's package manager, ``npm``.
+Building the JupyterLab from its GitHub source code requires Node.js version 
+6+ and Node's package manager, ``npm``.
 
 If you use ``conda``, you can get them with:
 
 ```bash
-conda install -c javascript nodejs
+conda install -c conda-forge nodejs
 ```
 
 If you use [Homebrew](http://brew.sh/) on Mac OS X:
 
 ```bash
 brew install node
-```
-
-For Debian/Ubuntu systems, you should use the ``nodejs-legacy`` package instead
-of the ``node`` package:
-
-```bash
-sudo apt-get update
-sudo apt-get install nodejs-legacy npm
 ```
 
 You can also use the installer from the [Node.js](https://nodejs.org) website.
