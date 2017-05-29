@@ -162,7 +162,7 @@ class DocumentWidgetManager implements IDisposable {
    * @returns The context associated with the widget, or `undefined`.
    */
   contextForWidget(widget: Widget): DocumentRegistry.Context {
-    return Private.contextProperty.get(widget);
+    return !widget ? void 0 : Private.contextProperty.get(widget);
   }
 
   /**
