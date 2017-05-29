@@ -358,7 +358,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     mimeTypeService: editorServices.mimeTypeService
   });
 
-  const shell = app.shell;
+  const { shell, commands } = app;
   const tracker = new NotebookTracker({ namespace: 'notebook', shell });
 
   // Handle state restoration.
@@ -367,6 +367,13 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     args: panel => ({ path: panel.context.path, factory: FACTORY }),
     name: panel => panel.context.path,
     when: services.ready
+  });
+
+  // Update the command registry when the notebook state changes.
+  tracker.currentChanged.connect(() => {
+    if (tracker.size <= 1) {
+      commands.notifyCommandChanged(CommandIDs.interrupt);
+    }
   });
 
   registry.addModelFactory(new NotebookModelFactory({}));
@@ -875,10 +882,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
       return NotebookActions.undo(current.notebook);
     },
-    isEnabled: () => {
-      let current = tracker.currentWidget;
-      return current && current.notebook.model.cells.canUndo;
-    }
+    isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.redo, {
     label: 'Redo Cell Operation',
@@ -889,10 +893,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       }
       return NotebookActions.redo(current.notebook);
     },
-    isEnabled: () => {
-      let current = tracker.currentWidget;
-      return current && current.notebook.model.cells.canRedo;
-    }
+    isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.switchKernel, {
     label: 'Change Kernel',

@@ -154,6 +154,13 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
     when: manager.ready
   });
 
+  // Update the command registry when the console state changes.
+  tracker.currentChanged.connect(() => {
+    if (tracker.size <= 1) {
+      commands.notifyCommandChanged(CommandIDs.interrupt);
+    }
+  });
+
   // Add a launcher item if the launcher is available.
   if (launcher) {
     launcher.add({
