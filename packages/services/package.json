@@ -10,11 +10,7 @@
     "@phosphor/coreutils": "^1.1.0",
     "@phosphor/disposable": "^1.1.0",
     "@phosphor/signaling": "^1.2.0",
-    "@types/minimist": "^1.2.0",
-    "@types/text-encoding": "0.0.30",
-    "minimist": "^1.2.0",
-    "path-posix": "^1.0.0",
-    "url-parse": "^1.1.8"
+    "@types/text-encoding": "0.0.30"
   },
   "devDependencies": {
     "@types/expect.js": "^0.3.29",

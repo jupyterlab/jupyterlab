@@ -87,6 +87,6 @@
     "webpack-config": "^6.2.0",
     "ws": "^1.1.1",
     "xmlhttprequest": "^1.8.0",
-    "xterm": "^2.4.0"
+    "xterm": "^2.6.0"
   }
 }
