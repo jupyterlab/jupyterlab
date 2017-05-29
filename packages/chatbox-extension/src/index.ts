@@ -119,7 +119,7 @@ function activateChatbox(app: JupyterLab, rendermime: IRenderMime, palette: ICom
       }
       panel.context = context;
     }
-  }
+  };
 
   app.restored.then(() => {
     updateDocumentContext();
