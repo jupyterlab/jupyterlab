@@ -20,7 +20,11 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  Widget, BoxLayout
+  ISignal, Signal
+} from '@phosphor/signaling';
+
+import {
+  BoxLayout, Widget
 } from '@phosphor/widgets';
 
 
@@ -64,12 +68,26 @@ class SettingEditor extends Widget {
     BoxLayout.setStretch(this._editor, 3);
 
     this.addClass(SETTING_EDITOR_CLASS);
+    settings.pluginChanged.connect(() => { this.update(); }, this);
   }
 
   /**
    * The setting registry modified by the editor.
    */
   readonly settings: ISettingRegistry;
+
+  /**
+   * Dispose of the resources held by the setting editor.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+
+    super.dispose();
+    this._editor.dispose();
+    this._list.dispose();
+  }
 
   /**
    * Handle `'activate-request'` messages.
@@ -90,7 +108,8 @@ class SettingEditor extends Widget {
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    /* no op */
+    this._editor.update();
+    this._list.update();
   }
 
   private _editor: PluginEditor;
@@ -134,10 +153,45 @@ class PluginList extends Widget {
   readonly settings: ISettingRegistry;
 
   /**
+   * A signal emitted when a selection is made from the plugin list.
+   */
+  get selected(): ISignal<this, string> {
+    return this._selected;
+  }
+
+  /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the dock panel's node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+    case 'click':
+      this._evtClick(event as MouseEvent);
+      break;
+    default:
+      break;
+    }
+  }
+
+  /**
    * Handle `'after-attach'` messages.
    */
   protected onAfterAttach(msg: Message): void {
+    this.node.addEventListener('click', this);
     this.update();
+  }
+
+  /**
+   * Handle `before-detach` messages for the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this.node.removeEventListener('click', this);
   }
 
   /**
@@ -148,14 +202,24 @@ class PluginList extends Widget {
     this.node.textContent = '';
     plugins.forEach(plugin => {
       const item = Private.createListItem(plugin);
-      if (plugin.id === this._selected) {
+      if (plugin.id === this._selection) {
         item.classList.add(SELECTED_CLASS);
       }
       this.node.appendChild(item);
     });
   }
 
-  private _selected: string = '';
+  /**
+   * Handle the `'click'` event for the plugin list.
+   *
+   * @param event - The DOM event sent to the widget
+   */
+  protected _evtClick(event: MouseEvent): void {
+    console.log('a click');
+  }
+
+  private _selected = new Signal<this, string>(this);
+  private _selection = '';
 }
 
 
@@ -243,7 +307,10 @@ namespace Private {
   export
   function createListItem(plugin: ISettingRegistry.IPlugin): HTMLLIElement {
     const li = document.createElement('li');
-    li.textContent = plugin.id;
+    const annotation = plugin.annotation;
+
+    li.textContent = (annotation && annotation.label) || plugin.id;
+
     return li;
   }
 

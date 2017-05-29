@@ -8,8 +8,11 @@
 }
 
 
-#setting-editor.jp-SettingEditor .jp-PluginList {
+#setting-editor.jp-SettingEditor ul.jp-PluginList {
   background: yellow;
+  list-style-type: none;
+  margin: 0;
+  padding: 2px;
 }
 
 
