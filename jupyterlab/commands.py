@@ -311,7 +311,7 @@ def _ensure_package(app_dir, name=None, version=None):
         os.makedirs(staging)
 
     for fname in ['index.template.js', 'webpack.config.js', 'dedupe.js']:
-        dest = pjoin(staging, name.replace('.template', ''))
+        dest = pjoin(staging, fname.replace('.template', ''))
         shutil.copy2(pjoin(here, fname), dest)
 
     # Template the package.json file.
