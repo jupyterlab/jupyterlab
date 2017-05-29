@@ -695,6 +695,10 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       value.insert(start, inserted);
     }
     this._changeGuard = false;
+
+    if (value.text !== doc.getValue()) {
+      console.error("Uh oh, the string model is out of sync: ", change);
+    }
   }
 
   /**
