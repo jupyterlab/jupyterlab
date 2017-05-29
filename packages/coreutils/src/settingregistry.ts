@@ -141,6 +141,15 @@ namespace ISettingRegistry {
     iconLabel?: string;
 
     /**
+     * The optional specific preference key being annotated.
+     *
+     * #### Notes
+     * If not set, the annotation will apply to the plugin instead of a specific
+     * key within it.
+     */
+    key?: string;
+
+    /**
      * The label for the setting.
      */
     label?: string;
@@ -219,12 +228,11 @@ class SettingRegistry {
    *
    * @param plugin - The name of the plugin whose setting is being annotated.
    *
-   * @param key - The name of the setting being annotated. If null, the
-   * annotation will apply to the plugin instead of a specific key within it.
-   *
    * @param annotation - The annotation describing an individual setting.
    */
-  annotate(plugin: string, key: string | null, annotation: ISettingRegistry.IAnnotation): void {
+  annotate(plugin: string, annotation: ISettingRegistry.IAnnotation): void {
+    const key = annotation.key;
+
     if (!this._annotations[plugin]) {
       this._annotations[plugin] = { annotation: null, keys: { } };
     }
@@ -363,7 +371,7 @@ class SettingRegistry {
     const level = 'user';
 
     if (!bundle[level]) {
-      bundle[level] = {};
+      bundle[level] = Object.create(null);
     }
     bundle[level][key] = value;
 
