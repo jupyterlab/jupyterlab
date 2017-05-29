@@ -69,6 +69,9 @@ class SettingEditor extends Widget {
 
     this.addClass(SETTING_EDITOR_CLASS);
     settings.pluginChanged.connect(() => { this.update(); }, this);
+    this._list.selected.connect((list, plugin) => {
+      console.log('plugin clicked', plugin);
+    }, this);
   }
 
   /**
@@ -215,7 +218,23 @@ class PluginList extends Widget {
    * @param event - The DOM event sent to the widget
    */
   protected _evtClick(event: MouseEvent): void {
-    console.log('a click');
+    let target = event.target as HTMLElement;
+    let id = target.getAttribute('data-id');
+    if (id && id === this._selection) {
+      return;
+    }
+    if (!id) {
+      while (target !== this.node) {
+        target = target.parentElement;
+        id = target.getAttribute('data-id');
+      }
+    }
+    if (id) {
+      this._selection = id;
+      this._selected.emit(id);
+      this.update();
+      return;
+    }
   }
 
   private _selected = new Signal<this, string>(this);
@@ -310,6 +329,7 @@ namespace Private {
     const annotation = plugin.annotation;
 
     li.textContent = (annotation && annotation.label) || plugin.id;
+    li.setAttribute('data-id', plugin.id);
 
     return li;
   }
