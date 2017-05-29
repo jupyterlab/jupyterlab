@@ -76,7 +76,8 @@ def find_package_data():
     """
     return {
         'jupyterlab': ['build/*', 'index.template.js', 'webpack.config.js',
-                       'package.template.json', 'package_list.txt']
+                       'package.template.json', 'package_list.txt',
+                       'dedupe.js']
     }
 
 

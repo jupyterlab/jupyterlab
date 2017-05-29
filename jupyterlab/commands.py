@@ -310,7 +310,7 @@ def _ensure_package(app_dir, name=None, version=None):
     if not os.path.exists(staging):
         os.makedirs(staging)
 
-    for fname in ['index.template.js', 'webpack.config.js']:
+    for fname in ['index.template.js', 'webpack.config.js', 'dedupe.js']:
         dest = pjoin(staging, fname.replace('.template', ''))
         shutil.copy2(pjoin(here, fname), dest)
 
@@ -332,8 +332,6 @@ def _ensure_package(app_dir, name=None, version=None):
     data['jupyterlab']['name'] = name or 'JupyterLab'
     if version:
         data['jupyterlab']['version'] = version
-
-    data['scripts']['build'] = 'webpack'
 
     pkg_path = pjoin(staging, 'package.json')
     with open(pkg_path, 'w') as fid:
