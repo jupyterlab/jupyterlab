@@ -211,24 +211,26 @@ class SettingRegistry {
   get plugins(): ISettingRegistry.IPlugin[] {
     const annotations = this._annotations;
     const plugins = this._plugins;
+    const copy = JSONExt.deepCopy;
 
     return Object.keys(plugins).map(plugin => {
       // Create a copy of the plugin data.
-      const result = JSONExt.deepCopy(plugins[plugin]);
+      const result = copy(plugins[plugin]) as ISettingRegistry.IPlugin;
+      const annotation = annotations[plugin] && annotations[plugin].annotation;
 
       // Copy over any annotations that may be available.
-      result.annotations = JSONExt.deepCopy(annotations[plugin] || null);
+      result.annotation = copy(annotation || null);
 
-      return result as ISettingRegistry.IPlugin;
+      return result;
     });
   }
 
   /**
-   * Annotate a specific setting item for places where it might be displayed.
+   * Annotate a plugin or a setting item for places where it might be displayed.
    *
    * @param plugin - The name of the plugin whose setting is being annotated.
    *
-   * @param annotation - The annotation describing an individual setting.
+   * @param annotation - The annotation describing a plugin or a setting.
    */
   annotate(plugin: string, annotation: ISettingRegistry.IAnnotation): void {
     const key = annotation.key;
@@ -443,6 +445,15 @@ class Settings implements ISettings {
    * The system registry instance used by the settings manager.
    */
   readonly registry: SettingRegistry;
+
+  /**
+   * Annotate a plugin or a setting item for places where it might be displayed.
+   *
+   * @param annotation - The annotation describing a plugin or a setting.
+   */
+  annotate(annotation: ISettingRegistry.IAnnotation): void {
+    this.registry.annotate(this.plugin, annotation);
+  }
 
   /**
    * Dispose of the plugin settings resources.
