@@ -83,6 +83,7 @@ def install_extension(extension, app_dir=None):
         raise ValueError(msg)
 
     shutil.move(pjoin(target, fname), pjoin(app_dir, 'extensions'))
+    shutil.rmtree(target)
 
     staging = pjoin(app_dir, 'staging')
     run(['npm', 'install', pjoin(app_dir, 'extensions', fname)], cwd=staging)
