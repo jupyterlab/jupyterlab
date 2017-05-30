@@ -6,6 +6,11 @@
  * is not included in the build. Intended for testing
  * adding/removing extensions against development
  * branches of JupyterLab.
+ *
+ * Note: this does not remove any files or submodules
+ * that may have been copied by the add-sibling.js
+ * script, and as such they are not true inverses of
+ * each other.
  */
 
 var fs = require('fs');

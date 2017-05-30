@@ -1,7 +1,18 @@
 #!/usr/bin/env node
-var fs = require('fs');
+var fs = require('fs-extra');
 var path = require('path');
 var childProcess = require('child_process');
+
+/**
+ * Add an extension to the source tree of JupyterLab.
+ * It takes as an argument either a path to a directory
+ * on the local filesystem or a URL to a git repository.
+ * In the former case, it copies the directory into the
+ * source tree, in the latter it adds the repository as
+ * a git submodule.
+ *
+ * It also adds the relevant metadata to the build files.
+ */
 
 // Make sure we have required command line arguments.
 if (process.argv.length < 3) {
@@ -20,9 +31,8 @@ if (target[0] === '.' || target[0] === '/') {
   packagePath = path.resolve(target);
   packageDirName = target.split('/').pop();
   // Copy the package directory contents to the sibling package.
-  var linkPath = path.join(basePath, 'packages', packageDirName);
-  childProcess.execSync('cp -r ' + packagePath + ' ' + linkPath);
-
+  var newPackagePath = path.join(basePath, 'packages', packageDirName);
+  fs.copySync(packagePath, newPackagePath);
 } else { 
   // Otherwise treat it as a git reposotory and try to add it.
   var packageDirName = target.split('/').pop().split('.')[0];
@@ -31,22 +41,22 @@ if (target[0] === '.' || target[0] === '/') {
   childProcess.execSync('git submodule add --force '+ target + ' ' + packagePath);
 }
 
-// Get the package.json of the submodule.
+// Get the package.json of the extension.
 var package = require(path.join(packagePath, 'package.json'));
 
-// Add the submodule to packages/all-packages/package.json
+// Add the extension to packages/all-packages/package.json
 var allPackagesPath = path.join(basePath, 'packages', 'all-packages', 'package.json');
 var allPackages = require(allPackagesPath);
 allPackages.dependencies[package.name] = '~'+String(package.version);
 fs.writeFileSync(allPackagesPath, JSON.stringify(allPackages, null, 2) + '\n');
 
-// Add the submodule to packages/all-packages/src/index.ts
+// Add the extension to packages/all-packages/src/index.ts
 var indexPath = path.join(basePath, 'packages', 'all-packages', 'src', 'index.ts');
-var index = fs.readFileSync(indexPath);
+var index = fs.readFileSync(indexPath, 'utf8');
 index = index + 'import "' + package.name + '";\n';
 fs.writeFileSync(indexPath, index);
 
-// Add the submodule to jupyterlab/package.json
+// Add the extension to jupyterlab/package.json
 var jupyterlabPackagePath = path.join(basePath, 'jupyterlab', 'package.json');
 var jupyterlabPackage = require(jupyterlabPackagePath);
 jupyterlabPackage.dependencies[package.name] = '~'+String(package.version);
