@@ -98,7 +98,18 @@ only copy the current contents of the source folder.
 Note that the application is built against **released** versions of the
 core JupyterLab extensions.  If your extension depends on JupyterLab
 extensions, it should be compatible with the versions used in the
-`jupyterlab/package.template.json` entry point file.
+`jupyterlab/package.template.json` entry point file.  If you must
+install a extension into a development branch of JupyterLab, you
+have to graft it into the source tree of JupyterLab itself.
+This may be done using the command
+
+```
+npm run addsibling <path-or-url>
+```
+
+in the JupyterLab root directory, where `<path-or-url>` refers either to an 
+extension npm package on the local filesystem, or a URL to a git 
+repository for an extension npm package.
 
 The package should export EMCAScript 5 compatible JavaScript.  It can 
 import CSS using the syntax `require('foo.css')`.  The CSS files

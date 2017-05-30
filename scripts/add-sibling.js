@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 var fs = require('fs');
 var path = require('path');
-var glob = require('glob');
 var childProcess = require('child_process');
 
 // Make sure we have required command line arguments.
@@ -20,7 +19,7 @@ if (target[0] === '.' || target[0] === '/') {
   // If the target starts with a '.' or a '/', treat it as a local path.
   packagePath = path.resolve(target);
   packageDirName = target.split('/').pop();
-  // Create a symbolic link to the package.
+  // Copy the package directory contents to the sibling package.
   var linkPath = path.join(basePath, 'packages', packageDirName);
   childProcess.execSync('cp -r ' + packagePath + ' ' + linkPath);
 
@@ -53,9 +52,3 @@ var jupyterlabPackage = require(jupyterlabPackagePath);
 jupyterlabPackage.dependencies[package.name] = '~'+String(package.version);
 jupyterlabPackage.jupyterlab.extensions.push(package.name);
 fs.writeFileSync(jupyterlabPackagePath, JSON.stringify(jupyterlabPackage, null, 2) + '\n');
-
-// Add the submodule to jupyterlab/package_list.txt
-var packageListPath = path.join(basePath, 'jupyterlab', 'package_list.txt');
-var packageList = fs.readFileSync(packageListPath);
-packageList = packageList + '    ~'+String(package.version)+'\n';
-fs.writeFileSync(packageListPath, packageList);
