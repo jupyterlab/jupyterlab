@@ -57,29 +57,20 @@ function activate(app: JupyterLab, services: IServiceManager, palette: ICommandP
   const { commands, shell } = app;
 
   let model = new LauncherModel();
-  let widget = new LauncherWidget({ linker });
-
-  widget.model = model;
-  widget.id = 'launcher';
-  widget.title.label = 'Launcher';
-
-  // Let the application restorer track the launcher for restoration of
-  // application state (e.g. setting the launcher as the current side bar
-  // widget).
-  restorer.add(widget, 'launcher');
 
   commands.addCommand(CommandIDs.show, {
-    label: 'Show Launcher',
+    label: 'New Launcher',
     execute: () => {
-      if (!widget.isAttached) {
-        shell.addToLeftArea(widget);
-      }
-      shell.activateById(widget.id);
+      let widget = new LauncherWidget({ linker });
+
+      widget.model = model;
+      widget.id = 'launcher';
+      widget.title.label = 'Launcher';
+      shell.addToMainArea(widget);
     }
   });
-  palette.addItem({ command: CommandIDs.show, category: 'Help' });
 
-  shell.addToLeftArea(widget);
+  palette.addItem({ command: CommandIDs.show, category: 'Launcher'});
 
   return model;
 }
