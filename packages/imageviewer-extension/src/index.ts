@@ -111,19 +111,37 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, palette: IComman
  */
 export
 function addCommands(tracker: IImageTracker, commands: CommandRegistry) {
+
+  /**
+   * Whether there is an active notebook.
+   */
+  function hasWidget(): boolean {
+    return tracker.currentWidget !== null;
+  }
+
+  // Update the command registry when the image viewer state changes.
+  tracker.currentChanged.connect(() => {
+    if (tracker.size <= 1) {
+      commands.notifyCommandChanged(CommandIDs.zoomIn);
+    }
+  });
+
   commands.addCommand('imageviewer:zoom-in', {
     execute: zoomIn,
     label: 'Zoom In'
+    isEnabled: hasWidget
   });
 
   commands.addCommand('imageviewer:zoom-out', {
     execute: zoomOut,
-    label: 'Zoom Out'
+    label: 'Zoom Out',
+    isEnabled: hasWidget
   });
 
   commands.addCommand('imageviewer:reset-zoom', {
     execute: resetZoom,
-    label: 'Reset Zoom'
+    label: 'Reset Zoom',
+    isEnabled: hasWidget
   });
 
   function zoomIn(): void {
