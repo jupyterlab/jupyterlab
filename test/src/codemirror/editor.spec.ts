@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  generate
+  generate, simulate
 } from 'simulate-event';
 
 import {
@@ -335,11 +335,11 @@ describe('CodeMirrorEditor', () => {
     context('focus', () => {
 
       it('should refresh the editor', () => {
-        Widget.attach(widget, document.body);
-        let editor = widget.editor as LogEditor;
+        document.body.appendChild(host);
         editor.methods = [];
         simulate(editor.editor.getInputField(), 'focus');
         expect(editor.methods).to.eql(['refresh']);
+        document.body.removeChild(host);
       });
 
     });
