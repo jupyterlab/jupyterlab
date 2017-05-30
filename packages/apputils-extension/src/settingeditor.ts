@@ -63,7 +63,7 @@ class SettingEditor extends Widget {
     const layout = this.layout = new BoxLayout({ direction: 'left-to-right' });
 
     layout.addWidget(this._list = new PluginList({ settings }));
-    layout.addWidget(this._editor = new PluginEditor());
+    layout.addWidget(this._editor = new PluginEditor({ settings }));
     BoxLayout.setStretch(this._list, 1);
     BoxLayout.setStretch(this._editor, 3);
 
@@ -266,9 +266,47 @@ class PluginEditor extends Widget {
   /**
    * Create a new plugin editor.
    */
-  constructor() {
+  constructor(options: PluginEditor.IOptions) {
     super();
+    this.settings = options.settings;
     this.addClass(PLUGIN_EDITOR_CLASS);
+  }
+
+  /**
+   * The setting registry.
+   */
+  readonly settings: ISettingRegistry;
+
+  /**
+   * The plugin being edited.
+   */
+  get plugin(): string {
+    return this._plugin;
+  }
+  set plugin(plugin: string) {
+    if (plugin === this._plugin) {
+      return;
+    }
+    this._plugin = plugin;
+  }
+
+  private _plugin = '';
+}
+
+
+/**
+ * A namespace for `PluginEditor` statics.
+ */
+namespace PluginEditor {
+  /**
+   * The instantiation options for a plugin editor.
+   */
+  export
+  interface IOptions {
+    /**
+     * The setting registry for the plugin editor.
+     */
+    settings: ISettingRegistry;
   }
 }
 
