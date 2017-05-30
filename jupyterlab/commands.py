@@ -307,6 +307,15 @@ def _ensure_package(app_dir, name=None, version=None):
                 raise
 
     staging = pjoin(app_dir, 'staging')
+
+    # Look for mismatched version.
+    pkg_path = pjoin(staging, 'package.json')
+    if os.path.exists(pkg_path):
+        with open(pkg_path) as fid:
+            data = json.load(fid)
+        if data['jupyterlab'].get('version', '') != __version__:
+            shutil.rmtree(staging)
+
     if not os.path.exists(staging):
         os.makedirs(staging)
 
