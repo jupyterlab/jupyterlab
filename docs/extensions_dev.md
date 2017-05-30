@@ -109,7 +109,17 @@ npm run addsibling <path-or-url>
 
 in the JupyterLab root directory, where `<path-or-url>` refers either to an 
 extension npm package on the local filesystem, or a URL to a git 
-repository for an extension npm package.
+repository for an extension npm package. This operation may be subsequently
+reversed by running
+
+```
+npm run addsibling <extension-name>
+```
+
+This will remove the package metadata from the source tree, but wil **not**
+remove any files added by the `addsibling` script, which should be removed
+manually.
+
 
 The package should export EMCAScript 5 compatible JavaScript.  It can 
 import CSS using the syntax `require('foo.css')`.  The CSS files
