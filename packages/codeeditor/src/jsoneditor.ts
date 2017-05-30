@@ -83,7 +83,7 @@ const COLLAPSED_CLASS = 'jp-mod-collapsed';
 export
 class JSONEditor extends Widget {
   /**
-   * Construct a new metadata editor.
+   * Construct a new JSON editor.
    */
   constructor(options: JSONEditor.IOptions) {
     super({ node: Private.createEditorNode(options) });
@@ -95,7 +95,7 @@ class JSONEditor extends Widget {
     this.model = model;
     this.editor = options.editorFactory({ host, model });
     this.editor.readOnly = true;
-    this.collapsable = options.collapsable === true;
+    this.collapsible = !!options.collapsible;
   }
 
   /**
@@ -109,9 +109,9 @@ class JSONEditor extends Widget {
   readonly model: CodeEditor.IModel;
 
   /**
-   * Whether the editor is collapsable.
+   * Whether the editor is collapsible.
    */
-  readonly collapsable: boolean;
+  readonly collapsible: boolean;
 
   /**
    * The title of the editor.
@@ -124,42 +124,42 @@ class JSONEditor extends Widget {
   }
 
   /**
-   * Get the editor host node used by the metadata editor.
+   * Get the editor host node used by the JSON editor.
    */
   get editorHostNode(): HTMLElement {
     return this.node.getElementsByClassName(HOST_CLASS)[0] as HTMLElement;
   }
 
   /**
-   * Get the header node used by the metadata editor.
+   * Get the header node used by the JSON editor.
    */
   get headerNode(): HTMLElement {
     return this.node.getElementsByClassName(HEADER_CLASS)[0] as HTMLElement;
   }
 
   /**
-   * Get the title node used by the metadata editor.
+   * Get the title node used by the JSON editor.
    */
   get titleNode(): HTMLElement {
     return this.node.getElementsByClassName(TITLE_CLASS)[0] as HTMLElement;
   }
 
   /**
-   * Get the collapser node used by the metadata editor.
+   * Get the collapser node used by the JSON editor.
    */
   get collapserNode(): HTMLElement {
     return this.node.getElementsByClassName(COLLAPSER_CLASS)[0] as HTMLElement;
   }
 
   /**
-   * Get the revert button used by the metadata editor.
+   * Get the revert button used by the JSON editor.
    */
   get revertButtonNode(): HTMLElement {
     return this.node.getElementsByClassName(REVERT_CLASS)[0] as HTMLElement;
   }
 
   /**
-   * Get the commit button used by the metadata editor.
+   * Get the commit button used by the JSON editor.
    */
   get commitButtonNode(): HTMLElement {
     return this.node.getElementsByClassName(COMMIT_CLASS)[0] as HTMLElement;
@@ -299,7 +299,7 @@ class JSONEditor extends Widget {
       break;
     case this.titleNode:
     case this.collapserNode:
-      if (this.collapsable) {
+      if (this.collapsible) {
         let collapser = this.collapserNode;
         if (collapser.classList.contains(COLLAPSED_CLASS)) {
           collapser.classList.remove(COLLAPSED_CLASS);
@@ -413,9 +413,9 @@ namespace JSONEditor {
     title?: string;
 
     /**
-     * Whether the title should be collapsable. Defaults to `false`.
+     * Whether the title should be collapsible. Defaults to `false`.
      */
-    collapsable?: boolean;
+    collapsible?: boolean;
   }
 }
 
@@ -432,7 +432,7 @@ namespace Private {
     let revertTitle = 'Revert changes to data';
     let confirmTitle = 'Commit changes to data';
     let collapseClass = COLLAPSER_CLASS;
-    if (options.collapsable === true) {
+    if (options.collapsible) {
       collapseClass += ` ${COLLAPSE_ENABLED_CLASS}`;
     }
     return VirtualDOM.realize(

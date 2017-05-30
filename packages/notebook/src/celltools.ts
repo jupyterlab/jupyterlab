@@ -402,7 +402,7 @@ namespace CellTools {
       this.editor = new JSONEditor({
         editorFactory,
         title: 'Edit Metadata',
-        collapsable: true
+        collapsible: true
       });
       layout.addWidget(this.editor);
     }

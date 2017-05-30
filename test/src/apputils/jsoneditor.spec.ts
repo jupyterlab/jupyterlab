@@ -4,18 +4,6 @@
 import expect = require('expect.js');
 
 import {
-  Message
-} from '@phosphor/messaging';
-
-import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
-  simulate
-} from 'simulate-event';
-
-import {
   CodeMirrorEditorFactory
 } from '@jupyterlab/codemirror';
 
@@ -26,6 +14,18 @@ import {
 import {
   JSONEditor
   } from '@jupyterlab/codeeditor';
+
+import {
+  Message
+} from '@phosphor/messaging';
+
+import {
+  Widget
+} from '@phosphor/widgets';
+
+import {
+  simulate
+} from 'simulate-event';
 
 
 class LogEditor extends JSONEditor {
@@ -76,15 +76,15 @@ describe('apputils', () => {
 
     });
 
-    describe('#collapsable', () => {
+    describe('#collapsible', () => {
 
       it('should default to false', () => {
-        expect(editor.collapsable).to.be(false);
+        expect(editor.collapsible).to.be(false);
       });
 
       it ('should be settable in the constructor', () => {
-        let newEditor = new JSONEditor({ editorFactory, collapsable: true });
-        expect(newEditor.collapsable).to.be(true);
+        let newEditor = new JSONEditor({ editorFactory, collapsible: true });
+        expect(newEditor.collapsible).to.be(true);
       });
 
     });
@@ -364,13 +364,13 @@ describe('apputils', () => {
 
         it('should collapse the editor', () => {
           editor.dispose();
-          editor = new LogEditor({ editorFactory, collapsable: true });
+          editor = new LogEditor({ editorFactory, collapsible: true });
           Widget.attach(editor, document.body);
           simulate(editor.titleNode, 'click');
           expect(editor.editorHostNode.classList).to.contain('jp-mod-collapsed');
         });
 
-        it('should have no effect if the editor is not collapsable', () => {
+        it('should have no effect if the editor is not collapsible', () => {
           simulate(editor.titleNode, 'click');
           expect(editor.editorHostNode.classList).to.not.contain('jp-mod-collapsed');
         });
