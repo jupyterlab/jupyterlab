@@ -10,7 +10,6 @@
 [![Greenkeeper badge](https://badges.greenkeeper.io/jupyterlab/jupyterlab.svg)](https://greenkeeper.io/)
 
 [![Build Status](https://travis-ci.org/jupyterlab/jupyterlab.svg?branch=master)](https://travis-ci.org/jupyterlab/jupyterlab)
-[![Binder](http://mybinder.org/badge.svg)](http://mybinder.org/repo/jupyterlab/jupyterlab/lab)
 [![Documentation Status](https://readthedocs.org/projects/jupyterlab-tutorial/badge/?version=latest)](https://jupyterlab-tutorial.readthedocs.io/en/latest/?badge=latest)
 [![Google Group](https://img.shields.io/badge/-Google%20Group-lightgrey.svg)](https://groups.google.com/forum/#!forum/jupyter)
 
