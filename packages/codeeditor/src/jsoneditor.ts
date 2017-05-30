@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IObservableJSON
+} from '@jupyterlab/coreutils';
+
+import {
   JSONExt, JSONObject
 } from '@phosphor/coreutils';
 
@@ -16,10 +20,6 @@ import {
 import {
   h, VirtualDOM
 } from '@phosphor/virtualdom';
-
-import {
-  IObservableJSON
-} from '@jupyterlab/coreutils';
 
 import {
   CodeEditor

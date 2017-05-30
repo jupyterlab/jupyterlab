@@ -15,6 +15,10 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
+  IEditorServices
+} from '@jupyterlab/codeeditor';
+
+import {
   ISettingRegistry, IStateDB, SettingRegistry, StateDB
 } from '@jupyterlab/coreutils';
 
@@ -115,7 +119,7 @@ const palettePlugin: JupyterLabPlugin<ICommandPalette> = {
 const settingEditorPlugin: JupyterLabPlugin<void> = {
   activate: activateSettingEditor,
   id: 'jupyter.extensions.setting-editor',
-  requires: [ILayoutRestorer, ISettingRegistry],
+  requires: [ILayoutRestorer, ISettingRegistry, IEditorServices],
   autoStart: true
 };
 

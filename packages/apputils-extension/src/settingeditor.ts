@@ -12,6 +12,10 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
+  CodeEditor, IEditorServices
+} from '@jupyterlab/codeeditor';
+
+import {
   ISettingRegistry
 } from '@jupyterlab/coreutils';
 
@@ -58,20 +62,21 @@ class SettingEditor extends Widget {
    */
   constructor(options: SettingEditor.IOptions) {
     super();
+    this.addClass(SETTING_EDITOR_CLASS);
 
+    const editorFactory = options.editorFactory;
     const settings = this.settings = options.settings;
     const layout = this.layout = new BoxLayout({ direction: 'left-to-right' });
+    const list = this._list = new PluginList({ settings });
+    const editor = this._editor = new PluginEditor({ editorFactory, settings });
 
-    layout.addWidget(this._list = new PluginList({ settings }));
-    layout.addWidget(this._editor = new PluginEditor({ settings }));
-    BoxLayout.setStretch(this._list, 1);
-    BoxLayout.setStretch(this._editor, 3);
+    layout.addWidget(list);
+    layout.addWidget(editor);
+    BoxLayout.setStretch(list, 1);
+    BoxLayout.setStretch(editor, 3);
 
-    this.addClass(SETTING_EDITOR_CLASS);
+    list.selected.connect(this._onSelected, this);
     settings.pluginChanged.connect(() => { this.update(); }, this);
-    this._list.selected.connect((list, plugin) => {
-      this._editor.plugin = plugin;
-    }, this);
   }
 
   /**
@@ -115,6 +120,13 @@ class SettingEditor extends Widget {
     this._list.update();
   }
 
+  /**
+   * Handle a new selection in the plugin list.
+   */
+  private _onSelected(sender: any, plugin: string): void {
+    this._editor.plugin = plugin;
+  }
+
   private _editor: PluginEditor;
   private _list: PluginList;
 }
@@ -129,6 +141,11 @@ namespace SettingEditor {
    */
   export
   interface IOptions {
+    /**
+     * The editor factory used by the setting editor.
+     */
+    editorFactory: CodeEditor.Factory;
+
     /**
      * The setting registry the editor modifies.
      */
@@ -315,6 +332,11 @@ namespace PluginEditor {
   export
   interface IOptions {
     /**
+     * The editor factory used by the plugin editor.
+     */
+    editorFactory: CodeEditor.Factory;
+
+    /**
      * The setting registry for the plugin editor.
      */
     settings: ISettingRegistry;
@@ -335,10 +357,12 @@ namespace CommandIDs {
  * Activate the setting editor.
  */
 export
-function activateSettingEditor(app: JupyterLab, restorer: ILayoutRestorer, settings: ISettingRegistry): void {
+function activateSettingEditor(app: JupyterLab, restorer: ILayoutRestorer, settings: ISettingRegistry, editorServices: IEditorServices): void {
   const { commands, shell } = app;
   const namespace = 'setting-editor';
-  const editor = new SettingEditor({ settings });
+  const factoryService = editorServices.factoryService;
+  const editorFactory = factoryService.newInlineEditor.bind(factoryService);
+  const editor = new SettingEditor({ editorFactory, settings });
   const tracker = new InstanceTracker<SettingEditor>({ namespace });
 
   editor.id = namespace;
