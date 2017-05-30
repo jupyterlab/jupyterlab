@@ -78,7 +78,7 @@ def install_extension(extension, app_dir=None):
 
     # Remove the tarball if the package is not an extension.
     if not _is_extension(data):
-        os.remove(target)
+        shutil.rmtree(target)
         msg = '%s is not a valid JupyterLab extension' % extension
         raise ValueError(msg)
 
