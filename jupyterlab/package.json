@@ -7,7 +7,6 @@
     "publish": "node make-release.js"
   },
   "dependencies": {
-    "@jupyterlab/about-extension": "^0.5.0",
     "@jupyterlab/application-extension": "^0.5.0",
     "@jupyterlab/apputils-extension": "^0.5.0",
     "@jupyterlab/chatbox-extension": "^0.1.0",
@@ -54,7 +53,6 @@
   },
   "jupyterlab": {
     "extensions": [
-      "@jupyterlab/about-extension",
       "@jupyterlab/application-extension",
       "@jupyterlab/apputils-extension",
       "@jupyterlab/chatbox-extension",

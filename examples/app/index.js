@@ -9,7 +9,6 @@ require('es6-promise/auto');
 require('font-awesome/css/font-awesome.min.css');
 
 var mods = [
-  require('@jupyterlab/about-extension'),
   require('@jupyterlab/application-extension'),
   require('@jupyterlab/apputils-extension'),
   require('@jupyterlab/codemirror-extension'),

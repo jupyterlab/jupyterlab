@@ -47,11 +47,6 @@ const LANDING_LOGO_CLASS = 'jp-Landing-logo';
 const LANDING_SUBTITLE_CLASS = 'jp-Landing-subtitle';
 
 /**
- * The class name added for the tour icon from default-theme.
- */
-const TOUR_ICON_CLASS = 'jp-Landing-tour';
-
-/**
  * The class name added to the header text.
  */
 const LANDING_BODY_HEADER_CLASS = 'jp-Landing-body-header';
@@ -191,10 +186,6 @@ class LandingWidget extends VDomRenderer<LandingModel> {
       this.model.previewMessage
     );
 
-    let tour = h.span({
-      className: TOUR_ICON_CLASS,
-      dataset: this._linker.populateVNodeDataset('about-jupyterlab:open', {})
-    });
     let bodyheader = h.span({
       className: LANDING_BODY_HEADER_CLASS
     }, this.model.headerText);
@@ -202,7 +193,6 @@ class LandingWidget extends VDomRenderer<LandingModel> {
     let header = h.div({ className: LANDING_HEADER_CLASS},
       logo,
       subtitle,
-      tour
     );
 
     let body = h.div({ className: LANDING_BODY_CLASS },
