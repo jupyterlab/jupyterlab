@@ -585,9 +585,9 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     if (style) {
       let css: string;
       if (style.color) {
-        let r = parseInt(style.color.slice(1,3), 16);
-        let g  = parseInt(style.color.slice(3,5), 16);
-        let b  = parseInt(style.color.slice(5,7), 16);
+        let r = parseInt(style.color.slice(1, 3), 16);
+        let g  = parseInt(style.color.slice(3, 5), 16);
+        let b  = parseInt(style.color.slice(5, 7), 16);
         css = `background-color: rgba( ${r}, ${g}, ${b}, 0.1)`;
       }
       return {
@@ -725,9 +725,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Handle `focus` events for the editor.
    */
   private _evtFocus(event: FocusEvent): void {
-    if (this._needsRefresh) {
-      this.refresh();
-    }
+    this.refresh();
   }
 
   /**
@@ -737,7 +735,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   private _getCaret(uuid: string): HTMLElement {
     let caret: HTMLElement = document.createElement('span');
     caret.className = 'jp-CollaboratorCursor';
-    caret.style.borderBottomColor=`${this._selectionStyle.color}`
+    caret.style.borderBottomColor = `${this._selectionStyle.color}`;
     caret.appendChild(document.createTextNode('\u00a0'));
     return caret;
   }
