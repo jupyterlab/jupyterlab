@@ -9,9 +9,8 @@
 
 
 :root {
-  --jp-private-notebook-dragImage-width: var(--jp-cell-prompt-width);
-  --jp-private-notebook-dragImage-height: 39px;
-  --jp-private-notebook-dragImage-circleRadius: 20px;
+  --jp-private-notebook-dragImage-width: 276px;
+  --jp-private-notebook-dragImage-height: 38px;
   --jp-private-notebook-selected-color: var(--md-blue-400);
   --jp-private-notebook-multiselected-color: var(--md-blue-50);
   --jp-private-notebook-left-border-width: 5px;
@@ -158,27 +157,53 @@
   position: absolute;
   width: var(--jp-private-notebook-dragImage-width);
   height: var(--jp-private-notebook-dragImage-height);
-  border: var(--jp-border-width) solid black;
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
   background: var(--jp-layout-color1);
   overflow: visible;
 }
 
 
-.jp-dragImage .jp-filledCircle {
+.jp-dragImage .jp-cellDragContent {
+    z-index: 2;
     position: absolute;
-    left: calc( ( var(--jp-private-notebook-dragImage-width) - var(--jp-private-notebook-dragImage-circleRadius) ) / 2 );
-    top: calc( ( var(--jp-private-notebook-dragImage-height) - var(--jp-private-notebook-dragImage-circleRadius) ) / 2 );
-    border-radius: 50%;
-
-    width: var(--jp-private-notebook-dragImage-circleRadius);
-    height: var(--jp-private-notebook-dragImage-circleRadius);
-
-    background: var(--jp-accent-color1);
-    color: white;
-    text-align: center;
-    line-height: var(--jp-private-notebook-dragImage-circleRadius);
+    left: 52px;
+    top: 4px;
+    width: 208px;
+    height: 18px;
+    font-size: var(--jp-code-font-size);
+    font-family: monospace;
+    line-height: var(--jp-code-line-height);
+    padding: var(--jp-code-padding);
+    border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
+    background: var(--jp-cell-editor-background);
+    color: var(--jp-content-font-color3);
+    text-align: left;
 }
 
+.jp-dragImage .jp-cellDragPrompt {
+  position: absolute;
+  top: 4px;
+  left: 10px;
+  color: var(--jp-content-font-color2);
+  padding: var(--jp-code-padding);
+  font-family: 'Roboto Mono', monospace;
+  letter-spacing: var(--jp-cell-prompt-letter-spacing);
+  line-height: var(--jp-code-line-height);
+  font-size: var(--jp-code-font-size);
+  border: var(--jp-border-width) solid transparent;
+}
+
+.jp-cellDragMultipleBack {
+  z-index: -1;
+  position: absolute;
+  height: 34px;
+  width: 272px;
+  top: 8px;
+  left: 8px;
+  background: var(--jp-cell-editor-background);
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
+  box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.12);
+}
 
 /*-----------------------------------------------------------------------------
 | Cell toolbar

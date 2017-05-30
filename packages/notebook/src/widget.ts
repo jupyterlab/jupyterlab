@@ -119,9 +119,19 @@ const DROP_SOURCE_CLASS = 'jp-mod-dropSource';
 const DRAG_IMAGE_CLASS = 'jp-dragImage';
 
 /**
- * The class name added to a filled circle.
+ * The class name added to the drag image cell content.
  */
-const FILLED_CIRCLE_CLASS = 'jp-filledCircle';
+const CELL_DRAG_CONTENT_CLASS = 'jp-cellDragContent';
+
+/**
+ * The class name added to the drag image cell content.
+ */
+const CELL_DRAG_PROMPT_CLASS = 'jp-cellDragPrompt';
+
+/**
+ * The class name added to the drag image cell content.
+ */
+const CELL_DRAG_MULTIPLE_BACK = 'jp-cellDragMultipleBack';
 
 /**
  * The mimetype used for Jupyter cell data.
@@ -1548,13 +1558,22 @@ namespace Private {
    */
   export
   function createDragImage(count: number, promptNumber: string, cellContent: string): HTMLElement {
-    console.log("promptNumber = " + promptNumber);
-    console.log("CellContent = " + cellContent);
-    return VirtualDOM.realize(
-      h.div({className: DRAG_IMAGE_CLASS},
-        h.span({className: FILLED_CIRCLE_CLASS, title: `${count}`})
-      )
-    );
+    if (count > 1) {
+      return VirtualDOM.realize(
+        h.div(
+          h.div({className: DRAG_IMAGE_CLASS},
+            h.span({className: CELL_DRAG_PROMPT_CLASS}, "[" + promptNumber + "]:"),
+            h.span({className: CELL_DRAG_CONTENT_CLASS}, cellContent)),
+          h.div({className: CELL_DRAG_MULTIPLE_BACK}, "")
+        )
+      );
+    } else {
+      return VirtualDOM.realize(
+        h.div({className: DRAG_IMAGE_CLASS},
+          h.span({className: CELL_DRAG_CONTENT_CLASS, title: `${count}`})
+        )
+      );
+    }
   }
 
   /**
