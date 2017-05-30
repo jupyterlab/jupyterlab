@@ -43,6 +43,8 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
+  padding-top: 28px;
+  padding-bottom: 28px;
 }
 
 .jp-Landing-body-container {
@@ -79,7 +81,6 @@
   background-size: 232px 50px;
   background-repeat: no-repeat;
   background-position: center;
-  margin-top: 20px;
 }
 
 .jp-Landing-subtitle {
@@ -148,13 +149,3 @@
   padding-bottom: 16px;
 }
 
-.jp-Landing-tour {
-    height: 14px;
-    width: 84px;
-    cursor: pointer;
-    padding-bottom: 14px;
-    background-position: top right;
-    background-repeat: no-repeat;
-    margin-top: 16px;
-    padding-bottom: 16px;
-}
