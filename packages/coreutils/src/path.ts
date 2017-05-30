@@ -38,11 +38,15 @@ namespace PathExt {
 
   /**
    * Get the directory name of a path, similar to the Unix dirname command.
+   * When an empty path is given, returns the root path.
    *
    * @param path - The file path.
    */
   export
   function dirname(path: string): string {
+    if (path === '') {
+      return '';
+    }
     return removeSlash(posix.dirname(path));
   }
 

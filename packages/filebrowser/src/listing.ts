@@ -1350,9 +1350,6 @@ class DirListing extends Widget {
    */
   private _onActivateRequested(sender: IDocumentManager, args: string): void {
     let dirname = PathExt.dirname(args);
-    if (dirname === '.') {
-      dirname = '';
-    }
     if (dirname !== this._model.path) {
       return;
     }
