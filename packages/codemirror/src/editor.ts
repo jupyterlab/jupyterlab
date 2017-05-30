@@ -106,7 +106,15 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     });
     CodeMirror.on(editor, 'cursorActivity', () => this._onCursorActivity());
     CodeMirror.on(editor.getDoc(), 'beforeChange', (instance, change) => {
-      this._onDocChanged(instance, change);
+      this._beforeDocChanged(instance, change);
+    });
+    CodeMirror.on(editor.getDoc(), 'change', () => {
+      if (this._model.value.text !== editor.getDoc().getValue()) {
+        console.error('Uh oh, the string model is out of sync: ', {
+          model: this._model.value.text,
+          view: editor.getDoc().getValue()
+        });
+      }
     });
   }
 
@@ -678,7 +686,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Handles document changes.
    */
-  private _onDocChanged(doc: CodeMirror.Doc, change: CodeMirror.EditorChange) {
+  private _beforeDocChanged(doc: CodeMirror.Doc, change: CodeMirror.EditorChange) {
     if (this._changeGuard) {
       return;
     }
@@ -695,10 +703,6 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       value.insert(start, inserted);
     }
     this._changeGuard = false;
-
-    if (value.text !== doc.getValue()) {
-      console.error("Uh oh, the string model is out of sync: ", change);
-    }
   }
 
   /**
