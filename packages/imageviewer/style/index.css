@@ -6,7 +6,6 @@
 
 .jp-ImageViewer {
   overflow: auto;
-  padding: 0 4px 4px 4px;
 }
 .jp-ImageViewer > div {
   transform-origin: top left;
