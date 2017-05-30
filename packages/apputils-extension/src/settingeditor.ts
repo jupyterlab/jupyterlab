@@ -70,7 +70,7 @@ class SettingEditor extends Widget {
     this.addClass(SETTING_EDITOR_CLASS);
     settings.pluginChanged.connect(() => { this.update(); }, this);
     this._list.selected.connect((list, plugin) => {
-      console.log('plugin clicked', plugin);
+      this._editor.plugin = plugin;
     }, this);
   }
 
@@ -187,7 +187,6 @@ class PluginList extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     this.node.addEventListener('click', this);
-    this.update();
   }
 
   /**
@@ -205,9 +204,11 @@ class PluginList extends Widget {
     this.node.textContent = '';
     plugins.forEach(plugin => {
       const item = Private.createListItem(plugin);
+
       if (plugin.id === this._selection) {
         item.classList.add(SELECTED_CLASS);
       }
+
       this.node.appendChild(item);
     });
   }
@@ -220,20 +221,22 @@ class PluginList extends Widget {
   protected _evtClick(event: MouseEvent): void {
     let target = event.target as HTMLElement;
     let id = target.getAttribute('data-id');
-    if (id && id === this._selection) {
+
+    if (id === this._selection) {
       return;
     }
+
     if (!id) {
       while (target !== this.node) {
         target = target.parentElement;
         id = target.getAttribute('data-id');
       }
     }
+
     if (id) {
       this._selection = id;
       this._selected.emit(id);
       this.update();
-      return;
     }
   }
 
@@ -288,6 +291,14 @@ class PluginEditor extends Widget {
       return;
     }
     this._plugin = plugin;
+    this.update();
+  }
+
+  /**
+   * Handle `'update-request'` messages.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    this.node.textContent = `Editing ${this._plugin}`;
   }
 
   private _plugin = '';
