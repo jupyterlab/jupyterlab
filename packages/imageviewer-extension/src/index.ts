@@ -128,7 +128,7 @@ function addCommands(tracker: IImageTracker, commands: CommandRegistry) {
 
   commands.addCommand('imageviewer:zoom-in', {
     execute: zoomIn,
-    label: 'Zoom In'
+    label: 'Zoom In',
     isEnabled: hasWidget
   });
 
