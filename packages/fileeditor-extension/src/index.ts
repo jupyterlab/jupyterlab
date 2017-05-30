@@ -149,6 +149,13 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
     editor.wordWrap = wordWrap;
   });
 
+  // Update the command registry when the notebook state changes.
+  tracker.currentChanged.connect(() => {
+    if (tracker.size <= 1) {
+      commands.notifyCommandChanged(CommandIDs.lineNumbers);
+    }
+  });
+
   /**
    * Toggle editor line numbers
    */
@@ -186,8 +193,8 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
     }
     const editor = widget.editor;
     const selection = editor.getSelection();
-    if (selection.start.column == selection.end.column &&
-      selection.start.line == selection.end.line) {
+    if (selection.start.column === selection.end.column &&
+      selection.start.line === selection.end.line) {
       return false;
     }
     return true;
@@ -250,7 +257,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
         const end = editor.getOffsetAt(selection.end);
         code = editor.model.value.text.substring(start, end);
         if (start == end) {
-          code = editor.getLine(selection.start.line); 
+          code = editor.getLine(selection.start.line);
         }
       }
 
