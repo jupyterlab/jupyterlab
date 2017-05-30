@@ -360,6 +360,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     contentFactory,
     mimeTypeService: editorServices.mimeTypeService
   });
+  const { commands } = app;
   const tracker = new NotebookTracker({ namespace: 'notebook' });
 
   // Handle state restoration.
