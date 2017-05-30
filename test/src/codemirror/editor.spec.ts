@@ -330,6 +330,23 @@ describe('CodeMirrorEditor', () => {
 
   });
 
+  describe('#handleEvent()', () => {
+
+    context('focus', () => {
+
+      it('should refresh the editor', () => {
+        Widget.attach(widget, document.body);
+        let editor = widget.editor as LogEditor;
+        editor.methods = [];
+        simulate(editor.editor.getInputField(), 'focus');
+        expect(editor.methods).to.eql(['refresh']);
+      });
+
+    });
+
+  });
+
+
   describe('#addKeydownHandler()', () => {
 
     it('should add a keydown handler to the editor', () => {

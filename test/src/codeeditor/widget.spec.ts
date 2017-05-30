@@ -140,31 +140,6 @@ describe('CodeEditorWrapper', () => {
 
   });
 
-  describe('#handleEvent()', () => {
-
-    context('focus', () => {
-
-      it('should be a no-op if the editor was not resized', () => {
-        Widget.attach(widget, document.body);
-        let editor = widget.editor as LogEditor;
-        editor.methods = [];
-        simulate(editor.editor.getInputField(), 'focus');
-        expect(editor.methods).to.eql([]);
-      });
-
-      it('should refresh if editor was resized', () => {
-        Widget.attach(widget, document.body);
-        let editor = widget.editor as LogEditor;
-        MessageLoop.sendMessage(widget, Widget.ResizeMessage.UnknownSize);
-        editor.methods = [];
-        simulate(editor.editor.getInputField(), 'focus');
-        expect(editor.methods).to.eql(['refresh']);
-      });
-
-    });
-
-  });
-
   describe('#onActivateRequest()', () => {
 
     it('should focus the editor', () => {
