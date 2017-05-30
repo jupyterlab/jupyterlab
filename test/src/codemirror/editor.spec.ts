@@ -27,6 +27,11 @@ class LogFileEditor extends CodeMirrorEditor {
 
   methods: string[] = [];
 
+  refresh(): void {
+    this.methods.push('refresh');
+    super.refresh();
+  }
+
   protected onKeydown(event: KeyboardEvent): boolean {
     let value = super.onKeydown(event);
     this.methods.push('onKeydown');
@@ -321,6 +326,20 @@ describe('CodeMirrorEditor', () => {
 
   });
 
+  describe('#handleEvent()', () => {
+
+    context('focus', () => {
+
+      it('should refresh the editor', () => {
+        editor.methods = [];
+        simulate(editor.editor.getInputField(), 'focus');
+        expect(editor.methods).to.eql(['refresh']);
+      });
+
+    });
+
+  });
+
   describe('#refresh()', () => {
 
     it('should repaint the editor', () => {
@@ -329,23 +348,6 @@ describe('CodeMirrorEditor', () => {
     });
 
   });
-
-  describe('#handleEvent()', () => {
-
-    context('focus', () => {
-
-      it('should refresh the editor', () => {
-        document.body.appendChild(host);
-        editor.methods = [];
-        simulate(editor.editor.getInputField(), 'focus');
-        expect(editor.methods).to.eql(['refresh']);
-        document.body.removeChild(host);
-      });
-
-    });
-
-  });
-
 
   describe('#addKeydownHandler()', () => {
 
