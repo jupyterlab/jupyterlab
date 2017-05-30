@@ -40,6 +40,11 @@ describe('@jupyterlab/coreutils', () => {
         expect(PathExt.dirname(TESTPATH)).to.equal('foo/test/simple');
       });
 
+      it('should not return "." for an empty path', () => {
+        let path = PathExt.dirname('');
+        expect(path).to.equal('');
+      });
+
     });
 
     describe('.extname()', () => {
