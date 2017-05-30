@@ -7,9 +7,9 @@ Please take a look at the Contributor documentation, familiarize yourself with
 using the Jupyter Notebook, and introduce yourself on the mailing list and share
 what area of the project you are interested in working on.
 
-We have labeled some issues as [sprint friendly](https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aopen+is%3Aissue+label%3Asprint-friendly) 
-that we believe are good examples of small, self contained changes.  
-We encourage those that are new to the code base to implement and/or ask 
+We have labeled some issues as [sprint friendly](https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aopen+is%3Aissue+label%3Asprint-friendly)
+that we believe are good examples of small, self contained changes.
+We encourage those that are new to the code base to implement and/or ask
 questions about these issues.
 
 
@@ -75,11 +75,20 @@ steps::
     npm run build:main
     jupyter serverextension enable --py jupyterlab
 
-Note: At times, it may be necessary to clean your local repo with the 
-command ``git clean -fdx``.
-If `pip` gives a `VersionConflict` error, it usually means that the installed
-version of `jupyterlab_launcher` is out of date. Run
-`pip install --upgrade jupyterlab_launcher` to get the latest version.
+Notes:
+
+* At times, it may be necessary to clean your local repo with the command ``git
+clean -fdx``.
+
+* If `pip` gives a `VersionConflict` error, it usually means that the installed
+version of `jupyterlab_launcher` is out of date. Run `pip install --upgrade
+jupyterlab_launcher` to get the latest version.
+
+* To install JupyterLab in isolation for a single conda/virtual environment, you can add the `--sys-prefix` flag to the extension activation above; this will tie the installation to the `sys.prefix` location of your environment, without writing anything in your user-wide settings area (which are visible to all your envs):
+
+```
+jupyter serverextension enable --py --sys-prefix jupyterlab
+```
 
 ### Run JupyterLab
 
@@ -182,7 +191,7 @@ and refresh the browser.
 
 ## Notes
 - By default, the application will load from the JupyterLab staging directory (default is `<sys-prefix>/share/jupyter/lab/build`.  If you wish to run
-the core application in `<git root>/jupyterlab/build`, 
+the core application in `<git root>/jupyterlab/build`,
 run `jupyter lab --core-mode`.  This is the core application that will
 be shipped.
 
