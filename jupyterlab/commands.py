@@ -326,12 +326,12 @@ def _ensure_package(app_dir, name=None, version=None):
     if not os.path.exists(staging):
         os.makedirs(staging)
 
-    for fname in ['index.template.js', 'webpack.config.js']:
-        dest = pjoin(staging, fname.replace('.template', ''))
+    for fname in ['index.app.js', 'webpack.config.js']:
+        dest = pjoin(staging, fname.replace('.app', ''))
         shutil.copy2(pjoin(here, fname), dest)
 
     # Template the package.json file.
-    pkg_path = pjoin(here, 'package.template.json')
+    pkg_path = pjoin(here, 'package.app.json')
     with open(pkg_path) as fid:
         data = json.load(fid)
 
