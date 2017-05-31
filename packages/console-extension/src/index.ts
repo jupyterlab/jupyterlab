@@ -347,7 +347,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
         } else {
           return false;
         }
-    });
+      });
     },
     isEnabled: hasWidget
   });

@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ILayoutRestorer, InstanceTracker
+  Dialog, ILayoutRestorer, InstanceTracker, showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -16,7 +16,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  ISettingRegistry, ISettings
+  ISettingRegistry, ISettings, ObservableJSON
 } from '@jupyterlab/coreutils';
 
 import {
@@ -324,12 +324,37 @@ class PluginEditor extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     if (!this._settings) {
-      this._editor.model.value.text = '';
+      this._confirm()
+        .then(() => { this._editor.source = null; })
+        .catch(() => { /* no op */ });
       return;
     }
 
-    const text = JSON.stringify(this._settings.raw.data.user || { }, null, 2);
-    this._editor.model.value.text = text;
+    const source = new ObservableJSON({
+      values: this._settings.raw.data.user || { }
+    });
+    this._confirm()
+      .then(() => { this._editor.source = source; })
+      .catch(() => { /* no op */ });
+  }
+
+  /**
+   * If the editor is in a dirty state, confirm that the user wants to leave.
+   */
+  private _confirm(): Promise<void> {
+    if (!this._editor.isDirty) {
+      return Promise.resolve(void 0);
+    }
+
+    return showDialog({
+      title: 'You have unsaved changes.',
+      body: 'Do you want to leave without saving?',
+      buttons: [Dialog.cancelButton(), Dialog.okButton()]
+    }).then(result => {
+      if (!result.accept) {
+        throw new Error();
+      }
+    });
   }
 
   private _editor: JSONEditor = null;
