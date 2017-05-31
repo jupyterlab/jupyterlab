@@ -328,7 +328,7 @@ class PluginEditor extends Widget {
       return;
     }
 
-    const text = JSON.stringify(this._settings.raw().data.user || { }, null, 2);
+    const text = JSON.stringify(this._settings.raw.data.user || { }, null, 2);
     this._editor.model.value.text = text;
   }
 

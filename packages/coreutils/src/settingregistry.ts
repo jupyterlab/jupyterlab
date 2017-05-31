@@ -44,6 +44,11 @@ interface ISettings extends IDisposable {
   readonly plugin: string;
 
   /**
+   * Get the raw plugin settings.
+   */
+  raw: ISettingRegistry.IPlugin;
+
+  /**
    * Get an individual setting.
    *
    * @param key - The name of the setting being retrieved.
@@ -59,11 +64,6 @@ interface ISettings extends IDisposable {
   get(key: string, level?: ISettingRegistry.Level): JSONValue;
 
   /**
-   * Return the raw plugin settings.
-   */
-  raw(): ISettingRegistry.IPlugin;
-
-  /**
    * Remove a single setting.
    *
    * @param key - The name of the setting being removed.
@@ -74,11 +74,6 @@ interface ISettings extends IDisposable {
    * This function is asynchronous because it writes to the setting registry.
    */
   remove(key: string): Promise<void>;
-
-  /**
-   * Save all of the settings in a plugin at once.
-   */
-  save(data: JSONObject): Promise<void>;
 
   /**
    * Set a single setting.
@@ -452,6 +447,18 @@ class Settings implements ISettings {
   readonly plugin: string;
 
   /**
+   * Get the raw plugin settings.
+   */
+  get raw(): ISettingRegistry.IPlugin {
+    return JSONExt.deepCopy(this._content) as ISettingRegistry.IPlugin;
+  }
+  set raw(raw: ISettingRegistry.IPlugin) {
+    const id = this.plugin;
+    const data = JSONExt.deepCopy(this._content) as ISettingRegistry.IPlugin;
+    this.registry.upload({ data, id });
+  }
+
+  /**
    * The system registry instance used by the settings manager.
    */
   readonly registry: SettingRegistry;
@@ -498,13 +505,6 @@ class Settings implements ISettings {
   }
 
   /**
-   * Return the raw plugin settings.
-   */
-  raw(): ISettingRegistry.IPlugin {
-    return JSONExt.deepCopy(this._content) as ISettingRegistry.IPlugin;
-  }
-
-  /**
    * Remove a single setting.
    *
    * @param key - The name of the setting being removed.
@@ -516,14 +516,6 @@ class Settings implements ISettings {
    */
   remove(key: string): Promise<void> {
     return this.registry.remove(this.plugin, key);
-  }
-
-  /**
-   * Save all of the settings in a plugin at once.
-   */
-  save(data: JSONObject): Promise<void> {
-    const id = this.plugin;
-    return this.registry.upload({ data, id });
   }
 
   /**
