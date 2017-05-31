@@ -59,9 +59,9 @@ interface ISettings extends IDisposable {
   get(key: string, level?: ISettingRegistry.Level): JSONValue;
 
   /**
-   * Return the raw JSON object representing the plugin settings.
+   * Return the raw plugin settings.
    */
-  raw(): JSONObject;
+  raw(): ISettingRegistry.IPlugin;
 
   /**
    * Remove a single setting.
@@ -498,10 +498,10 @@ class Settings implements ISettings {
   }
 
   /**
-   * Return the raw JSON object representing the plugin settings.
+   * Return the raw plugin settings.
    */
-  raw(): JSONObject {
-    return JSONExt.deepCopy(this._content);
+  raw(): ISettingRegistry.IPlugin {
+    return JSONExt.deepCopy(this._content) as ISettingRegistry.IPlugin;
   }
 
   /**
