@@ -67,6 +67,7 @@
 }
 
 .jp-CollaboratorCursor {
+  position: absolute;
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
   border-top: none;
@@ -80,7 +81,7 @@
   content: attr(data-name);
   position: absolute;
   z-index: 1;
-  transform: translateX(-50%) translateY(100%);
+  transform: translateX(-50%) translateY(3px);
   background-color: inherit;
   color: white;
   border-radius: 3px;
