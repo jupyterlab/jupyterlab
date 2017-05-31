@@ -12,11 +12,11 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  CodeEditor, IEditorServices
+  CodeEditor, IEditorServices, JSONEditor
 } from '@jupyterlab/codeeditor';
 
 import {
-  ISettingRegistry
+  ISettingRegistry, ISettings
 } from '@jupyterlab/coreutils';
 
 import {
@@ -28,7 +28,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  BoxLayout, Widget
+  BoxLayout, PanelLayout, Widget
 } from '@phosphor/widgets';
 
 
@@ -68,7 +68,7 @@ class SettingEditor extends Widget {
     const settings = this.settings = options.settings;
     const layout = this.layout = new BoxLayout({ direction: 'left-to-right' });
     const list = this._list = new PluginList({ settings });
-    const editor = this._editor = new PluginEditor({ editorFactory, settings });
+    const editor = this._editor = new PluginEditor({ editorFactory });
 
     layout.addWidget(list);
     layout.addWidget(editor);
@@ -124,7 +124,9 @@ class SettingEditor extends Widget {
    * Handle a new selection in the plugin list.
    */
   private _onSelected(sender: any, plugin: string): void {
-    this._editor.plugin = plugin;
+    this.settings.load(plugin)
+      .then(settings => this._editor.settings = settings)
+      .catch(reason => { console.error('Loading settings failed.', reason); });
   }
 
   private _editor: PluginEditor;
@@ -288,26 +290,32 @@ class PluginEditor extends Widget {
    */
   constructor(options: PluginEditor.IOptions) {
     super();
-    this.settings = options.settings;
     this.addClass(PLUGIN_EDITOR_CLASS);
+    this._editor = new JSONEditor({ editorFactory: options.editorFactory });
+
+    const layout = this.layout = new PanelLayout();
+    layout.addWidget(this._editor);
+    layout.addWidget(this._legend);
   }
 
   /**
-   * The setting registry.
+   * The plugin settings being edited.
    */
-  readonly settings: ISettingRegistry;
-
-  /**
-   * The plugin being edited.
-   */
-  get plugin(): string {
-    return this._plugin;
+  get settings(): ISettings {
+    return this._settings;
   }
-  set plugin(plugin: string) {
-    if (plugin === this._plugin) {
+  set settings(settings: ISettings) {
+    if (!settings && !this._settings) {
       return;
     }
-    this._plugin = plugin;
+
+    const samePlugin = (settings && this._settings) &&
+      settings.plugin === this._settings.plugin;
+    if (samePlugin) {
+      return;
+    }
+
+    this._settings = settings;
     this.update();
   }
 
@@ -315,10 +323,18 @@ class PluginEditor extends Widget {
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    this.node.textContent = `Editing ${this._plugin}`;
+    if (!this._settings) {
+      this._editor.model.value.text = '';
+      return;
+    }
+
+    const text = JSON.stringify(this._settings.raw().data.user || { }, null, 2);
+    this._editor.model.value.text = text;
   }
 
-  private _plugin = '';
+  private _editor: JSONEditor = null;
+  private _legend = new Widget();
+  private _settings: ISettings | null = null;
 }
 
 
@@ -335,11 +351,6 @@ namespace PluginEditor {
      * The editor factory used by the plugin editor.
      */
     editorFactory: CodeEditor.Factory;
-
-    /**
-     * The setting registry for the plugin editor.
-     */
-    settings: ISettingRegistry;
   }
 }
 
