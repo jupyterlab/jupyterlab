@@ -25,7 +25,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IObservableMap, IObservableString, uuid
+  IObservableMap, IObservableString, uuid, ICollaborator
 } from '@jupyterlab/coreutils';
 
 import {
@@ -551,6 +551,10 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   private _markSelections(uuid: string, selections: CodeEditor.ITextSelection[]) {
     const markers: CodeMirror.TextMarker[] = [];
+    let collaborator: ICollaborator;
+    if (this._model.modelDB.isCollaborative) {
+      collaborator = this._model.modelDB.collaborators.get(uuid);
+    }
     selections.forEach(selection => {
       // Only render selections if the start is not equal to the end.
       // In that case, we don't need to render the cursor.
@@ -559,7 +563,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
         const markerOptions = this._toTextMarkerOptions(selection.style);
         markers.push(this.doc.markText(anchor, head, markerOptions));
       } else {
-        let caret = this._getCaret(selection.uuid);
+        let caret = this._getCaret(collaborator);
         markers.push(this.doc.setBookmark(
           this._toCodeMirrorPosition(selection.end), {widget: caret}));
       }
@@ -743,10 +747,13 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Construct a caret element representing the position
    * of a collaborator's cursor.
    */
-  private _getCaret(uuid: string): HTMLElement {
+  private _getCaret(collaborator: ICollaborator): HTMLElement {
+    let name = collaborator ? collaborator.displayName : 'Anonymous';
+    let color = collaborator ? collaborator.color : this._selectionStyle.color;
     let caret: HTMLElement = document.createElement('span');
-    caret.className = 'jp-CollaboratorCursor';
-    caret.style.borderBottomColor=`${this._selectionStyle.color}`
+    caret.dataset.name = name;
+    caret.className = `jp-CollaboratorCursor`;
+    caret.style.borderBottomColor = color;
     caret.appendChild(document.createTextNode('\u00a0'));
     return caret;
   }

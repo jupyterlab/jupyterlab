@@ -75,6 +75,23 @@
   width: 0;
 }
 
+.jp-CollaboratorCursor:hover:after {
+  content: attr(data-name);
+  position: absolute;
+  bottom: -21px;
+  min-width: 30px;
+  height: var(--jp-code-line-height);
+  font-size: var(--jp-code-font-size);
+  background-color: var(--jp-brand-color2);
+  color: white;
+  border-radius: 3px;
+  padding: 1px;
+  text-align: center;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+
 
 /*
   Here is our jupyter theme for CodeMirror syntax highlighting
