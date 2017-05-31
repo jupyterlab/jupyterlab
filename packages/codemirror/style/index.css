@@ -71,6 +71,7 @@
   border-right: 5px solid transparent;
   border-top: none;
   border-bottom: 3px solid;
+  background-clip: content-box;
   margin-left: -5px;
   margin-right: -5px;
 }
@@ -80,7 +81,7 @@
   position: absolute;
   z-index: 1;
   transform: translateX(-50%) translateY(100%);
-  background-color: var(--jp-brand-color2);
+  background-color: inherit;
   color: white;
   border-radius: 3px;
   padding: 1px;

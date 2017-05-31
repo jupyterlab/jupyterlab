@@ -751,8 +751,9 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     let name = collaborator ? collaborator.displayName : 'Anonymous';
     let color = collaborator ? collaborator.color : this._selectionStyle.color;
     let caret: HTMLElement = document.createElement('span');
-    caret.dataset.name = name;
+    caret.dataset.name = name; // Allows getting from :after element.
     caret.className = `jp-CollaboratorCursor`;
+    caret.style.backgroundColor = color; // Allows inheritence in :after element.
     caret.style.borderBottomColor = color;
     return caret;
   }
