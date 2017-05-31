@@ -754,7 +754,6 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     caret.dataset.name = name;
     caret.className = `jp-CollaboratorCursor`;
     caret.style.borderBottomColor = color;
-    caret.appendChild(document.createTextNode('\u00a0'));
     return caret;
   }
 

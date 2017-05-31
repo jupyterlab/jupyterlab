@@ -71,24 +71,21 @@
   border-right: 5px solid transparent;
   border-top: none;
   border-bottom: 3px solid;
-  position: absolute;
-  width: 0;
+  margin-left: -5px;
+  margin-right: -5px;
 }
 
 .jp-CollaboratorCursor:hover:after {
   content: attr(data-name);
   position: absolute;
-  bottom: -21px;
-  min-width: 30px;
-  height: var(--jp-code-line-height);
-  font-size: var(--jp-code-font-size);
+  z-index: 1;
+  transform: translateX(-50%) translateY(100%);
   background-color: var(--jp-brand-color2);
   color: white;
   border-radius: 3px;
   padding: 1px;
   text-align: center;
   white-space: nowrap;
-  transform: translateX(-50%);
 }
 
 
