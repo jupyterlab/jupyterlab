@@ -15,10 +15,10 @@ data['jupyterlab']['version'] = version;
 // Update our package.json files.
 var text = JSON.stringify(data, null, 2) + '\n';
 fs.writeFileSync('./package.json', text);
-fs.writeFileSync('./package.template.json', text);
+fs.writeFileSync('./package.app.json', text);
 
-// Update our template file.
-fs.copySync('./index.js', './index.template.js')
+// Update our app index file.
+fs.copySync('./index.js', './index.app.js')
 
 // Run a standard build.
 childProcess.execSync('npm run build');
@@ -30,4 +30,4 @@ fs.writeFileSync('./build/release_data.json', text);
 
 // Get the lerna package data.
 var lerna_info = childProcess.execSync('lerna ls', { cwd: cwd });
-fs.writeFileSync('./package_list.txt', lerna_info);
+fs.writeFileSync('./released_packages.txt', lerna_info);
