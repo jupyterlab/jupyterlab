@@ -116,6 +116,11 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
         });
       }
     });
+
+    // Manually refresh on paste to make sure editor is properly sized.
+    editor.getWrapperElement().addEventListener('paste', () => {
+      this.refresh();
+    });
   }
 
   /**
