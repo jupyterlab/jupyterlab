@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/cells",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "JupyterLab - Notebook Cells",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -13,12 +13,12 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/codeeditor": "^0.5.0",
-    "@jupyterlab/codemirror": "^0.5.0",
-    "@jupyterlab/coreutils": "^0.5.0",
-    "@jupyterlab/outputarea": "^0.5.0",
-    "@jupyterlab/rendermime": "^0.5.0",
-    "@jupyterlab/services": "^0.44.0",
+    "@jupyterlab/codeeditor": "^0.6.0",
+    "@jupyterlab/codemirror": "^0.6.0",
+    "@jupyterlab/coreutils": "^0.6.0",
+    "@jupyterlab/outputarea": "^0.6.0",
+    "@jupyterlab/rendermime": "^0.6.0",
+    "@jupyterlab/services": "^0.45.0",
     "@phosphor/coreutils": "^1.1.0",
     "@phosphor/messaging": "^1.2.0",
     "@phosphor/signaling": "^1.2.0",

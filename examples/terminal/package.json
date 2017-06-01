@@ -6,9 +6,9 @@
     "clean": "rimraf build"
   },
   "dependencies": {
-    "@jupyterlab/theming": "^0.5.1",
-    "@jupyterlab/services": "^0.44.0",
-    "@jupyterlab/terminal": "^0.5.0",
+    "@jupyterlab/services": "^0.45.0",
+    "@jupyterlab/terminal": "^0.6.0",
+    "@jupyterlab/theming": "^0.6.0",
     "@phosphor/widgets": "^1.2.0",
     "es6-promise": "^4.1.0",
     "webpack": "^2.2.1"
@@ -24,5 +24,5 @@
     "watch": "^1.0.2",
     "webpack": "^1.13.0"
   },
-  "version": "0.5.1"
+  "version": "0.6.0"
 }

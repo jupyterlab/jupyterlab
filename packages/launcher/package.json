@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/launcher",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "JupyterLab - Launcher Panel",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -13,7 +13,7 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^0.5.0",
+    "@jupyterlab/apputils": "^0.6.0",
     "@phosphor/algorithm": "^1.1.0",
     "@phosphor/coreutils": "^1.1.0",
     "@phosphor/disposable": "^1.1.0",

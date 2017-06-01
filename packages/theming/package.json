@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/theming",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "JupyterLab - Theming",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -15,8 +15,7 @@
   "directories": {
     "lib": "lib/"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "rimraf": "^2.5.2",
     "typescript": "^2.2.1"

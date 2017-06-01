@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/inspector-extension",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "JupyterLab - Code Inspector Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -12,11 +12,11 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.5.0",
-    "@jupyterlab/apputils": "^0.5.0",
-    "@jupyterlab/console": "^0.5.1",
-    "@jupyterlab/inspector": "^0.5.0",
-    "@jupyterlab/notebook": "^0.5.1",
+    "@jupyterlab/application": "^0.6.0",
+    "@jupyterlab/apputils": "^0.6.0",
+    "@jupyterlab/console": "^0.6.0",
+    "@jupyterlab/inspector": "^0.6.0",
+    "@jupyterlab/notebook": "^0.6.0",
     "@phosphor/disposable": "^1.1.0"
   },
   "devDependencies": {

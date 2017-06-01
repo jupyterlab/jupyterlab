@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/theme-light-extension",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "JupyterLab - Default Light Theme",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -13,8 +13,8 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.5.0",
-    "@jupyterlab/theming": "^0.5.1"
+    "@jupyterlab/application": "^0.6.0",
+    "@jupyterlab/theming": "^0.6.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
@@ -32,8 +32,5 @@
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
   },
-  "homepage": "https://github.com/jupyterlab/jupyterlab",
-  "jupyterlab": {
-    "extension": true
-  }
+  "homepage": "https://github.com/jupyterlab/jupyterlab"
 }
