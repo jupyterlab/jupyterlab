@@ -28,7 +28,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  BoxLayout, PanelLayout, Widget
+  BoxLayout, Widget
 } from '@phosphor/widgets';
 
 
@@ -291,11 +291,16 @@ class PluginEditor extends Widget {
   constructor(options: PluginEditor.IOptions) {
     super();
     this.addClass(PLUGIN_EDITOR_CLASS);
-    this._editor = new JSONEditor({ editorFactory: options.editorFactory });
 
-    const layout = this.layout = new PanelLayout();
-    layout.addWidget(this._editor);
-    layout.addWidget(this._legend);
+    const { editorFactory } = options;
+    const editor = this._editor = new JSONEditor({ editorFactory });
+    const legend = this._legend = new Widget();
+    const layout = this.layout = new BoxLayout({ direction: 'top-to-bottom' });
+
+    layout.addWidget(editor);
+    layout.addWidget(legend);
+    BoxLayout.setStretch(editor, 3);
+    BoxLayout.setStretch(legend, 2);
   }
 
   /**
@@ -358,7 +363,7 @@ class PluginEditor extends Widget {
   }
 
   private _editor: JSONEditor = null;
-  private _legend = new Widget();
+  private _legend: Widget = null;
   private _settings: ISettings | null = null;
 }
 
