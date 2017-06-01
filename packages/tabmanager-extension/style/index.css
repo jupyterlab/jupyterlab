@@ -32,8 +32,8 @@
   font-size: var(--jp-ui-font-size0);
   font-weight: 600;
   letter-spacing: 1px;
-  margin: 4px 0px;
-  padding: 4px 12px;
+  margin: 0px;
+  padding: 12px 0 4px 12px;
   text-transform: uppercase;
 }
 
