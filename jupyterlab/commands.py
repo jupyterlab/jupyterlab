@@ -65,21 +65,28 @@ def install_extension(extension, app_dir=None):
         raise ValueError('Cannot install extensions in core app')
     extension = _normalize_path(extension)
     _ensure_package(app_dir)
-    target = pjoin(app_dir, 'extensions')
-    # npm pack the extension
-    output = run(['npm', 'pack', extension], cwd=target)
+    target = pjoin(app_dir, 'extensions', 'temp')
+    if os.path.exists(target):
+        shutil.rmtree(target)
+    os.makedirs(target)
 
-    name = output.decode('utf8').splitlines()[-1]
-    data = _read_package(pjoin(target, name))
+    # npm pack the extension
+    run(['npm', 'pack', extension], cwd=target)
+
+    fname = os.path.basename(glob.glob(pjoin(target, '*.*'))[0])
+    data = _read_package(pjoin(target, fname))
 
     # Remove the tarball if the package is not an extension.
     if not _is_extension(data):
-        os.remove(pjoin(target, name))
+        shutil.rmtree(target)
         msg = '%s is not a valid JupyterLab extension' % extension
         raise ValueError(msg)
 
+    shutil.move(pjoin(target, fname), pjoin(app_dir, 'extensions'))
+    shutil.rmtree(target)
+
     staging = pjoin(app_dir, 'staging')
-    run(['npm', 'install', pjoin(target, name)], cwd=staging)
+    run(['npm', 'install', pjoin(app_dir, 'extensions', fname)], cwd=staging)
 
 
 def link_package(path, app_dir=None):
