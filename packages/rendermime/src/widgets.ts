@@ -432,17 +432,35 @@ namespace Private {
    */
   function handleAnchor(anchor: HTMLAnchorElement, resolver: RenderMime.IResolver, linkHandler: RenderMime.ILinkHandler | null): Promise<void> {
     anchor.target = '_blank';
+    // Get the link path without the location prepended.
+    // (e.g. "./foo.md#Header 1" vs "http://localhost:8888/foo.md#Header 1")
     let href = anchor.getAttribute('href');
-    if (!href) {
+    // Bail if it is not a file-like url.
+    if (!href || href.indexOf('://') !== -1 && href.indexOf('//') === 0) {
       return Promise.resolve(void 0);
     }
+    // Remove the hash until we can handle it.
+    let hash = anchor.hash;
+    if (hash) {
+      // Handle internal link in the file.
+      if (hash === href) {
+        anchor.target = '_self';
+        return Promise.resolve(void 0);
+      }
+      // For external links, remove the hash until we have hash handling.
+      href = href.replace(hash, '');
+    }
+    // Get the appropriate file path.
     return resolver.resolveUrl(href).then(path => {
+      // Handle the click override.
       if (linkHandler) {
         linkHandler.handleLink(anchor, path);
       }
+      // Get the appropriate file download path.
       return resolver.getDownloadUrl(path);
     }).then(url => {
-      anchor.href = url;
+      // Set the visible anchor.
+      anchor.href = url + hash;
     });
   }
 }

@@ -10,10 +10,6 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  URLExt
-} from '@jupyterlab/coreutils';
-
-import {
   IRenderMime, RenderMime
 } from '@jupyterlab/rendermime';
 
@@ -41,9 +37,7 @@ export default plugin;
 function activate(app: JupyterLab, linker: ICommandLinker): IRenderMime {
   let linkHandler = {
     handleLink: (node: HTMLElement, path: string) => {
-      if (!URLExt.parse(path).protocol && path.indexOf('//') !== 0) {
-        linker.connectNode(node, 'file-operations:open', { path });
-      }
+      linker.connectNode(node, 'file-operations:open', { path });
     }
   };
   let items = RenderMime.getDefaultItems();
