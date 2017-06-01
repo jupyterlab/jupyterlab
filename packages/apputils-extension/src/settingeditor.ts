@@ -43,6 +43,11 @@ const SETTING_EDITOR_CLASS = 'jp-SettingEditor';
 const PLUGIN_EDITOR_CLASS = 'jp-PluginEditor';
 
 /**
+ * The class name added to all plugin fieldsets.
+ */
+const PLUGIN_FIELDSET_CLASS = 'jp-PluginFieldset';
+
+/**
  * The class name added to all plugin lists.
  */
 const PLUGIN_LIST_CLASS = 'jp-PluginList';
@@ -294,13 +299,13 @@ class PluginEditor extends Widget {
 
     const { editorFactory } = options;
     const editor = this._editor = new JSONEditor({ editorFactory });
-    const legend = this._legend = new Widget();
+    const fieldset = this._fieldset = new PluginFieldset();
     const layout = this.layout = new BoxLayout({ direction: 'top-to-bottom' });
 
     layout.addWidget(editor);
-    layout.addWidget(legend);
+    layout.addWidget(fieldset);
     BoxLayout.setStretch(editor, 3);
-    BoxLayout.setStretch(legend, 2);
+    BoxLayout.setStretch(fieldset, 2);
   }
 
   /**
@@ -320,7 +325,7 @@ class PluginEditor extends Widget {
       return;
     }
 
-    this._settings = settings;
+    this._settings = this._fieldset.settings = settings;
     this.update();
   }
 
@@ -363,7 +368,7 @@ class PluginEditor extends Widget {
   }
 
   private _editor: JSONEditor = null;
-  private _legend: Widget = null;
+  private _fieldset: PluginFieldset = null;
   private _settings: ISettings | null = null;
 }
 
@@ -382,6 +387,43 @@ namespace PluginEditor {
      */
     editorFactory: CodeEditor.Factory;
   }
+}
+
+
+/**
+ * An individual plugin settings fieldset.
+ */
+class PluginFieldset extends Widget {
+  /**
+   * Create a new plugin fieldset.
+   */
+  constructor() {
+    super();
+    this.addClass(PLUGIN_FIELDSET_CLASS);
+  }
+
+  /**
+   * The plugin settings.
+   */
+  get settings(): ISettings {
+    return this._settings;
+  }
+  set settings(settings: ISettings) {
+    this._settings = settings;
+    this.update();
+  }
+
+  /**
+   * Handle `'update-request'` messages.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    if (!this._settings) {
+      this.node.textContent = '';
+      return;
+    }
+  }
+
+  private _settings: ISettings | null = null;
 }
 
 
