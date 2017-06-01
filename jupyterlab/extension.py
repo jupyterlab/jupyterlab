@@ -51,13 +51,13 @@ def load_jupyter_server_extension(nbapp):
     config.dev_mode = False
 
     # Check for core mode.
-    core_mode = ''
-    if hasattr(nbapp, 'core_mode'):
-        core_mode = nbapp.core_mode
+    dev_mode = ''
+    if hasattr(nbapp, 'dev_mode'):
+        dev_mode = nbapp.dev_mode
 
     # Check for an app dir that is local.
     if app_dir == here or app_dir == os.path.join(here, 'build'):
-        core_mode = True
+        dev_mode = True
         config.settings_dir = ''
 
     # Run core mode if explicit or there is no static dir and no
@@ -67,13 +67,13 @@ def load_jupyter_server_extension(nbapp):
 
     web_app.settings.setdefault('page_config_data', dict())
 
-    if not core_mode:
+    if not dev_mode:
         build_needed, msg = should_build(app_dir)
         if build_needed:
             nbapp.log.warn('Build required: %s' % msg)
             web_app.settings['page_config_data']['buildRequired'] = msg
 
-    if core_mode or fallback:
+    if dev_mode or fallback:
         config.assets_dir = os.path.join(here, 'build')
         if not os.path.exists(config.assets_dir):
             msg = 'Static assets not built, please see CONTRIBUTING.md'
@@ -84,7 +84,7 @@ def load_jupyter_server_extension(nbapp):
 
     if config.dev_mode:
         nbapp.log.info(DEV_NOTE_NPM)
-    elif core_mode or fallback:
+    elif dev_mode or fallback:
         nbapp.log.info(CORE_NOTE.strip())
 
     add_handlers(web_app, config)

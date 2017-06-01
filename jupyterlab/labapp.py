@@ -81,9 +81,9 @@ lab_aliases = dict(aliases)
 lab_aliases['app-dir'] = 'LabApp.app_dir'
 
 lab_flags = dict(flags)
-lab_flags['core-mode'] = (
-    {'LabApp': {'core_mode': True}},
-    "Start the app in core mode."
+lab_flags['dev-mode'] = (
+    {'LabApp': {'dev_mode': True}},
+    "Start the app in dev mode."
 )
 
 
@@ -96,7 +96,7 @@ class LabApp(NotebookApp):
     This launches a Tornado based HTML Server that serves up an
     HTML5/Javascript JupyterLab client.
 
-    If run in core mode (e.g. `jupyter lab --core-mode`), it will run
+    If run in development mode (e.g. `jupyter lab --dev-mode`), it will run
     the shipped JupyterLab application with no installed extensions.
 
     Otherwise, it will run using the assets in the JupyterLab app
@@ -124,8 +124,8 @@ class LabApp(NotebookApp):
     app_dir = Unicode('', config=True,
         help="The app directory to launch")
 
-    core_mode = Bool(False, config=True,
-        help="Whether to start the app in core mode")
+    dev_mode = Bool(False, config=True,
+        help="Whether to start the app in dev mode")
 
     def init_server_extensions(self):
         """Load any extensions specified by config.

@@ -104,5 +104,5 @@ application.  The `staging` folder is used to create the build and then
 populate the `static` folder.
 
 Running `jupyter lab` will attempt to run the `static` assets in the 
-application folder if they exist.  You can run `jupyter lab --core-mode`
-to load the core JupyterLab application instead.
+application folder if they exist.  You can run `jupyter lab --dev-mode`
+to load the development JupyterLab application instead.
