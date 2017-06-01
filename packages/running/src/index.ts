@@ -310,6 +310,9 @@ class RunningSessions extends Widget {
       return;
     }
 
+    // Create a dummy div if terminals are not available.
+    termList = termList || document.createElement('div');
+
     // Check for a terminal item click.
     let index = DOMUtils.hitTestNodes(termList.children, clientX, clientY);
     if (index !== -1) {
