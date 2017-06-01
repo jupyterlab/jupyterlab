@@ -22,7 +22,7 @@ here = os.path.dirname(__file__)
 
 test_flags = dict(flags)
 test_flags['core-mode'] = (
-    {'TestApp': {'core_mode': True}},
+    {'TestApp': {'dev_mode': True}},
     "Start the app in core mode."
 )
 
@@ -39,7 +39,7 @@ class TestApp(NotebookApp):
     flags = test_flags
     aliases = test_aliases
 
-    core_mode = Bool(False, config=True,
+    dev_mode = Bool(False, config=True,
         help="Whether to start the app in core mode")
 
     app_dir = Unicode('', config=True,
@@ -48,7 +48,7 @@ class TestApp(NotebookApp):
     def start(self):
         self.io_loop = ioloop.IOLoop.current()
         config = LabConfig()
-        if self.core_mode:
+        if self.dev_mode:
             config.assets_dir = os.path.join(here, 'build')
         elif self.app_dir:
             config.assets_dir = os.path.join(self.app_dir, 'static')

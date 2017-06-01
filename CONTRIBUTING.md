@@ -83,15 +83,16 @@ version of `jupyterlab_launcher` is out of date. Run
 
 ### Run JupyterLab
 
-Start JupyterLab in Core Mode:
+Start JupyterLab in development mode:
 
 ```bash
-jupyter lab --core-mode
+jupyter lab --dev-mode
 ```
 
-Core mode ensures that you are running the core application.  When
-running from source, the page will have a red banner at the top to
-indicate it is an unreleased version.
+Development mode ensures that you are running the development/source version of the
+JupyterLab npm packages.  You can tell you are in development mode as the JupyterLab
+application will have a red stripe at the top of the page to indicate it is an
+unreleased version.
 
 ### Build and run the tests
 
@@ -182,9 +183,8 @@ and refresh the browser.
 
 ## Notes
 - By default, the application will load from the JupyterLab staging directory (default is `<sys-prefix>/share/jupyter/lab/build`.  If you wish to run
-the core application in `<git root>/jupyterlab/build`, 
-run `jupyter lab --core-mode`.  This is the core application that will
-be shipped.
+the development application in `<git root>/jupyterlab/build`, 
+run `jupyter lab --dev-mode`.
 
 - If working with extensions, see the extension documentation on
 https://jupyterlab-tutorial.readthedocs.io/en/latest/index.html.

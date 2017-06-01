@@ -65,7 +65,7 @@ fi
 if [[ $GROUP == cli ]]; then
     # Make sure we can successfully load the core app.
     pip install selenium
-    python -m jupyterlab.selenium_check --core-mode
+    python -m jupyterlab.selenium_check --dev-mode
 
     # Make sure we can build and run the app.
     jupyter lab build
