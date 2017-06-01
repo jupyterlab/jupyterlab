@@ -83,15 +83,15 @@ version of `jupyterlab_launcher` is out of date. Run
 
 ### Run JupyterLab
 
-Start JupyterLab in Core Mode:
+Start JupyterLab in development mode:
 
 ```bash
-jupyter lab --core-mode
+jupyter lab --dev-mode
 ```
 
-Core mode ensures that you are running the core application.  When
-running from source, the page will have a red banner at the top to
-indicate it is an unreleased version.
+Development mode ensures that you are running the JavaScript assets that are 
+built in the dev-installed Python package.  When running from source in development
+mode, the page will have a red stripe at the top to indicate it is an unreleased version.
 
 ### Build and run the tests
 
@@ -133,6 +133,7 @@ The repository consists of many npm packages that are managed using the lerna
 build tool.  The npm package source files are in the `packages/` subdirectory.
 
 **Prerequisites**
+
 - [node](http://nodejs.org/) (preferably version 5 or later)
 - Jupyter notebook server version 4.2 or later (to run examples)
 
@@ -181,6 +182,7 @@ npm run watch:main
 and refresh the browser.
 
 ## Notes
+
 - By default, the application will load from the JupyterLab staging directory (default is `<sys-prefix>/share/jupyter/lab/build`.  If you wish to run
 the core application in `<git root>/jupyterlab/build`, 
 run `jupyter lab --core-mode`.  This is the core application that will
