@@ -416,7 +416,7 @@ namespace Private {
       let headers = node.getElementsByTagName(headerType);
       for (let i=0; i < headers.length; i++) {
         let header = headers[i];
-        header.id = header.innerHTML.replace(/ /g, '_');
+        header.id = header.innerHTML.replace(/ /g, '-');
         let anchor = document.createElement('a');
         anchor.target = '_self';
         anchor.textContent = '¶';
@@ -442,6 +442,12 @@ namespace Private {
     // Remove the hash until we can handle it.
     let hash = anchor.hash;
     if (hash) {
+      // Handle internal link in the file.
+      if (hash === href) {
+        anchor.target = '_self';
+        return Promise.resolve(void 0);
+      }
+      // For external links, remove the hash until we have hash handling.
       href = href.replace(hash, '');
     }
     // Get the appropriate file path.
