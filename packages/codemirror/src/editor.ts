@@ -68,6 +68,11 @@ const UP_ARROW = 38;
  */
 const DOWN_ARROW = 40;
 
+/**
+ * The time that a collaborator name hover persists.
+ */
+const HOVER_TIMEOUT = 5000;
+
 
 /**
  * CodeMirror editor.
@@ -81,6 +86,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     let host = this.host = options.host;
     host.classList.add(EDITOR_CLASS);
     host.addEventListener('focus', this, true);
+    host.addEventListener('scroll', this, true);
 
     this._uuid = options.uuid || uuid();
     this._selectionStyle = options.selectionStyle || {};
@@ -254,6 +260,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       return;
     }
     this.host.removeEventListener('focus', this, true);
+    this.host.removeEventListener('scroll', this, true);
     this._editor = null;
     this._model = null;
     this._keydownHandlers.length = 0;
@@ -345,6 +352,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     } else {
       this._needsRefresh = true;
     }
+    this._clearHover();
   }
 
   /**
@@ -742,6 +750,9 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     case 'focus':
       this._evtFocus(event as FocusEvent);
       break;
+    case 'scroll':
+      this._evtScroll();
+      break;
     default:
       break;
     }
@@ -757,6 +768,26 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
+   * Handle `scroll` events for the editor.
+   */
+  private _evtScroll(): void {
+    // Remove any active hover.
+    this._clearHover();
+  }
+
+  /**
+   * Clear the hover for a caret, due to things like
+   * scrolling, resizing, deactivation, etc, where
+   * the position is no longer valid.
+   */
+  private _clearHover(): void {
+    if (this._caretHover) {
+      window.clearTimeout(this._hoverTimeout);
+      this._caretHover.dispose();
+    }
+  }
+
+  /**
    * Construct a caret element representing the position
    * of a collaborator's cursor.
    */
@@ -767,9 +798,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     caret.className = 'jp-CollaboratorCursor';
     caret.style.borderBottomColor = color;
     caret.onmouseenter = () => {
-      if (this._caretHover) {
-        this._caretHover.dispose();
-      }
+      this._clearHover();
       let hover = new Widget();
       hover.addClass('jp-CollaboratorCursor-hover');
       HoverBox.setGeometry({
@@ -785,9 +814,11 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       Widget.attach(hover, document.body);
     };
     caret.onmouseleave = () => {
-      if (this._caretHover) {
-        this._caretHover.dispose();
-      }
+      this._hoverTimeout = window.setTimeout(() => {
+        if (this._caretHover) {
+          this._caretHover.dispose();
+        }
+      }, HOVER_TIMEOUT);
     };
     return caret;
   }
@@ -796,6 +827,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   private _editor: CodeMirror.Editor;
   protected selectionMarkers: { [key: string]: CodeMirror.TextMarker[] | undefined } = {};
   private _caretHover: Widget = null;
+  private _hoverTimeout: number = null; 
   private _keydownHandlers = new Array<CodeEditor.KeydownHandler>();
   private _changeGuard = false;
   private _selectionStyle: CodeEditor.ISelectionStyle;
