@@ -442,11 +442,6 @@ namespace Private {
     // Remove the hash until we can handle it.
     let hash = anchor.hash;
     if (hash) {
-      // // Allow local links to work.
-      // if (href === hash) {
-      //   anchor.target = '_self';
-      //   return Promise.resolve(void 0);
-      // }
       href = href.replace(hash, '');
     }
     // Get the appropriate file path.

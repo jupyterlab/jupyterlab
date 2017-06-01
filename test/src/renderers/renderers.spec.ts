@@ -320,10 +320,10 @@ describe('renderers', () => {
         let loop = () => {
           if ((widget as any)._rendered) {
             Widget.attach(widget, document.body);
-            let node = document.getElementById('Title-third-level');
+            let node = document.getElementById('Title_third_level');
             expect(node.localName).to.be('h3');
             let anchor = node.firstChild.nextSibling as HTMLAnchorElement;
-            expect(anchor.href).to.contain('#Title-third-level');
+            expect(anchor.href).to.contain('#Title_third_level');
             expect(anchor.target).to.be('_self');
             expect(anchor.className).to.contain('jp-InternalAnchorLink');
             expect(anchor.textContent).to.be('¶');
