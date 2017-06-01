@@ -85,7 +85,10 @@ lab_flags['core-mode'] = (
     {'LabApp': {'core_mode': True}},
     "Start the app in core mode."
 )
-
+lab_flags['dev-mode'] = (
+    {'LabApp': {'core_mode': True}},
+    "Start the app in dev mode for running from source."
+)
 
 class LabApp(NotebookApp):
     version = __version__
@@ -96,16 +99,26 @@ class LabApp(NotebookApp):
     This launches a Tornado based HTML Server that serves up an
     HTML5/Javascript JupyterLab client.
 
-    If run in core mode (e.g. `jupyter lab --core-mode`), it will run
-    the shipped JupyterLab application with no installed extensions.
+    JupyterLab has three different modes of running:
 
-    Otherwise, it will run using the assets in the JupyterLab app
-    directory (found using `jupyter lab path`), if present.
-    If not present, it will fall back to the core application.
+    * Core mode (`--core-mode`): in this mode JupyterLab will run using the JavaScript
+      assets contained in the installed `jupyterlab` Python package. In core mode, no 
+      extensions are enabled. This is the default in a stable JupyterLab release if you
+      have no extensions installed.
+    * Dev mode (`--dev-mode`): like core mode, but when the `jupyterlab` Python package
+      is installed from source and installed using `pip install -e .`. In this case
+      JupyterLab will show a red stripe at the top of the page.
+    * App mode: JupyterLab allows multiple JupyterLab "applications" to be
+      created by the user with different combinations of extensions. The `--app-dir` can
+      be used to set a directory for different applications. The default application
+      path can be found using `jupyter lab path`.
     """
 
     examples = """
         jupyter lab                       # start JupyterLab
+        jupyter lab --dev-mode            # start JupyterLab in development mode, with no extensions
+        jupyter lab --core-mode           # start JupyterLab in core mode, with no extensions
+        jupyter lab --app-dir=~/myjupyterlabapp # start JupyterLab with a particular set of extensions
         jupyter lab --certfile=mycert.pem # use SSL/TLS certificate
     """
 
@@ -122,10 +135,15 @@ class LabApp(NotebookApp):
         help="The default URL to redirect to from `/`")
 
     app_dir = Unicode('', config=True,
-        help="The app directory to launch")
+        help="The app directory to launch JupyterLab from.")
 
     core_mode = Bool(False, config=True,
-        help="Whether to start the app in core mode")
+        help="""Whether to start the app in core mode. In this mode, JupyterLab
+        will run using the JavaScript assets that are within the installed
+        JupyterLab Python package. In core mode, third party extensions are disabled.
+        The `--dev-mode` flag is an alias to this to be used when the Python package
+        itself is installed in development mode (`pip install -e .`).
+        """)
 
     def init_server_extensions(self):
         """Load any extensions specified by config.

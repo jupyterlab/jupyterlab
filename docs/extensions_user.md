@@ -50,7 +50,9 @@ list.
 
 
 ## Advanced usage
-The JupyterLab application directory (where the application assets are built and the settings reside) can be overridden using `--app-dir` in
+
+The JupyterLab application directory (where the application assets are
+built and the settings reside) can be overridden using `--app-dir` in
 any of the JupyterLab commands, or by setting the `JUPYTERLAB_DIR` environment
 variable.  If not specified, it will default to 
 `<sys-prefix/share/jupyter/lab`, where `sys-prefix` is the 
@@ -62,6 +64,7 @@ The `install` and `link` commands already run the build, so it typically
 does not need to be called directly.
 
 Building consists of:
+
 - Populating the `staging/` directory using template files
 - Handling any linked packages (see `jupyter labextension link`)
 - Ensuring all install assets are available
