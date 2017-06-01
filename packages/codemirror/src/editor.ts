@@ -21,6 +21,14 @@ import {
 } from '@phosphor/signaling';
 
 import {
+  Widget
+} from '@phosphor/widgets';
+
+import {
+  HoverBox
+} from '@jupyterlab/apputils';
+
+import {
   CodeEditor
 } from '@jupyterlab/codeeditor';
 
@@ -544,11 +552,6 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       markers.forEach(marker => { marker.clear(); });
     }
     delete this.selectionMarkers[uuid];
-    const carets = this.caretMarkers[uuid];
-    if (carets) {
-      carets.forEach(caret => { document.body.removeChild(caret); });
-    }
-    delete this.caretMarkers[uuid];
   }
 
   /**
@@ -556,7 +559,6 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   private _markSelections(uuid: string, selections: CodeEditor.ITextSelection[]) {
     const markers: CodeMirror.TextMarker[] = [];
-    const carets: HTMLElement[] = [];
 
     // If we can id the selection to a specific collaborator,
     // use that information.
@@ -574,13 +576,12 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
         const markerOptions = this._toTextMarkerOptions(selection.style);
         markers.push(this.doc.markText(anchor, head, markerOptions));
       } else {
-        let caret = this._getCaret(selection.end, collaborator);
-        document.body.appendChild(caret);
-        carets.push(caret);
+        let caret = this._getCaret(collaborator);
+        markers.push(this.doc.setBookmark(
+          this._toCodeMirrorPosition(selection.end), {widget: caret}));
       }
     });
     this.selectionMarkers[uuid] = markers;
-    this.caretMarkers[uuid] = carets;
   }
 
   /**
@@ -759,24 +760,42 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Construct a caret element representing the position
    * of a collaborator's cursor.
    */
-  private _getCaret(position: CodeEditor.IPosition, collaborator: ICollaborator): HTMLElement {
+  private _getCaret(collaborator: ICollaborator): HTMLElement {
     let name = collaborator ? collaborator.displayName : 'Anonymous';
     let color = collaborator ? collaborator.color : this._selectionStyle.color;
     let caret: HTMLElement = document.createElement('span');
-    caret.dataset.name = name; // Allows getting from :after element.
-    caret.className = `jp-CollaboratorCursor`;
-    caret.style.backgroundColor = color; // Allows inheritence in :after element.
+    caret.className = 'jp-CollaboratorCursor';
     caret.style.borderBottomColor = color;
-    let coordinates = this.getCoordinateForPosition(position);
-    caret.style.top = `${coordinates.bottom}px`;
-    caret.style.left = `${coordinates.left}px`;
+    caret.onmouseenter = () => {
+      if (this._caretHover) {
+        this._caretHover.dispose();
+      }
+      let hover = new Widget();
+      hover.addClass('jp-CollaboratorCursor-hover');
+      HoverBox.setGeometry({
+        anchor: caret.getBoundingClientRect(),
+        host: this.host,
+        maxHeight: 100,
+        minHeight: 0,
+        node: hover.node
+      });
+      hover.node.textContent = name;
+      hover.node.style.backgroundColor = color;
+      this._caretHover = hover;
+      Widget.attach(hover, document.body);
+    };
+    caret.onmouseleave = () => {
+      if (this._caretHover) {
+        this._caretHover.dispose();
+      }
+    };
     return caret;
   }
 
   private _model: CodeEditor.IModel;
   private _editor: CodeMirror.Editor;
   protected selectionMarkers: { [key: string]: CodeMirror.TextMarker[] | undefined } = {};
-  protected caretMarkers: { [key: string]: HTMLElement[] | undefined } = {};
+  private _caretHover: Widget = null;
   private _keydownHandlers = new Array<CodeEditor.KeydownHandler>();
   private _changeGuard = false;
   private _selectionStyle: CodeEditor.ISelectionStyle;
