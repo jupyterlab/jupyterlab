@@ -16,7 +16,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  ISettingRegistry, ISettings, ObservableJSON
+  ISettingRegistry, ObservableJSON
 } from '@jupyterlab/coreutils';
 
 import {
@@ -224,10 +224,12 @@ class PluginList extends Widget {
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
+    const annotations = this.settings.annotations;
     const plugins = Private.sortPlugins(this.settings.plugins);
     this.node.textContent = '';
     plugins.forEach(plugin => {
-      const item = Private.createListItem(plugin);
+      const id = plugin.id;
+      const item = Private.createListItem(plugin, annotations[id] || null);
 
       if (plugin.id === this._selection) {
         item.classList.add(SELECTED_CLASS);
@@ -311,10 +313,10 @@ class PluginEditor extends Widget {
   /**
    * The plugin settings being edited.
    */
-  get settings(): ISettings {
+  get settings(): ISettingRegistry.ISettings {
     return this._settings;
   }
-  set settings(settings: ISettings) {
+  set settings(settings: ISettingRegistry.ISettings) {
     if (!settings && !this._settings) {
       return;
     }
@@ -369,7 +371,7 @@ class PluginEditor extends Widget {
 
   private _editor: JSONEditor = null;
   private _fieldset: PluginFieldset = null;
-  private _settings: ISettings | null = null;
+  private _settings: ISettingRegistry.ISettings | null = null;
 }
 
 
@@ -405,10 +407,10 @@ class PluginFieldset extends Widget {
   /**
    * The plugin settings.
    */
-  get settings(): ISettings {
+  get settings(): ISettingRegistry.ISettings {
     return this._settings;
   }
-  set settings(settings: ISettings) {
+  set settings(settings: ISettingRegistry.ISettings) {
     this._settings = settings;
     this.update();
   }
@@ -427,7 +429,7 @@ class PluginFieldset extends Widget {
     Private.populateFieldset(this.node, this._settings.raw);
   }
 
-  private _settings: ISettings | null = null;
+  private _settings: ISettingRegistry.ISettings | null = null;
 }
 
 
@@ -484,10 +486,10 @@ namespace Private {
    * Create a plugin list item.
    */
   export
-  function createListItem(plugin: ISettingRegistry.IPlugin): HTMLLIElement {
+  function createListItem(plugin: ISettingRegistry.IPlugin, annotations: ISettingRegistry.IPluginAnnotations): HTMLLIElement {
     console.log('list plugin', plugin);
     const li = document.createElement('li');
-    const annotation = plugin.annotations && plugin.annotations.annotation;
+    const annotation = annotations && annotations.annotation;
 
     li.textContent = (annotation && annotation.label) || plugin.id;
     li.setAttribute('data-id', plugin.id);

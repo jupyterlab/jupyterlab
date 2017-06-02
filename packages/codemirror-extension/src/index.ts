@@ -88,10 +88,10 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
   const { id } = commandsPlugin;
 
   // Annotate the plugin settings.
-  settings.annotate(id, { label: 'CodeMirror' });
-  settings.annotate(id, { key: 'keyMap', label: 'Key Map' });
-  settings.annotate(id, { key: 'matchBrackets', label: 'Match Brackets' });
-  settings.annotate(id, { key: 'theme', label: 'Theme' });
+  settings.annotate(id, '', { label: 'CodeMirror' });
+  settings.annotate(id, 'keyMap', { label: 'Key Map' });
+  settings.annotate(id, 'matchBrackets', { label: 'Match Brackets' });
+  settings.annotate(id, 'theme', { label: 'Theme' });
 
   Promise.all([settings.load(id), restored]).then(([settings]) => {
     const matched = settings.get('matchBrackets') as boolean | null;
