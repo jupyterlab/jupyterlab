@@ -113,7 +113,7 @@ repository for an extension npm package. This operation may be subsequently
 reversed by running
 
 ```
-npm run addsibling <extension-name>
+npm run removesibling <extension-dir-name>
 ```
 
 This will remove the package metadata from the source tree, but wil **not**
