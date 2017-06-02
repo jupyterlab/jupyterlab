@@ -1,10 +1,10 @@
-@jupyterlab/application-top          v0.5.0  (private)
-@jupyterlab/example-app              v0.6.0  (private)
+@jupyterlab/application-top          v0.6.0  (private)
+@jupyterlab/example-app              v0.7.0  (private)
 @jupyterlab/example-console          v0.6.0  (private)
 @jupyterlab/example-filebrowser      v0.6.0  (private)
 @jupyterlab/example-notebook         v0.6.0  (private)
 jupyterlab-example-terminal          v0.6.0  (private)
-@jupyterlab/all-packages             v0.5.0  (private)
+@jupyterlab/all-packages             v0.6.0  (private)
 @jupyterlab/application-extension    v0.6.0           
 @jupyterlab/application              v0.6.0           
 @jupyterlab/apputils-extension       v0.6.0           
@@ -36,7 +36,7 @@ jupyterlab-example-terminal          v0.6.0  (private)
 @jupyterlab/imageviewer              v0.6.0           
 @jupyterlab/inspector-extension      v0.6.0           
 @jupyterlab/inspector                v0.6.0           
-@jupyterlab/landing-extension        v0.6.0           
+@jupyterlab/landing-extension        v0.7.0           
 @jupyterlab/launcher-extension       v0.6.0           
 @jupyterlab/launcher                 v0.6.0           
 @jupyterlab/markdownviewer-extension v0.6.0           
