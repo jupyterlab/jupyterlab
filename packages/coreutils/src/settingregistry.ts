@@ -27,68 +27,10 @@ import {
  */
 const LEVEL: ISettingRegistry.Level = 'user';
 
-
 /**
- * An interface for manipulating the settings of a specific plugin.
+ * An alias for the JSON deep copy function.
  */
-export
-interface ISettings extends IDisposable {
-  /*
-   * A signal that emits when the plugin's settings have changed.
-   */
-  readonly changed: ISignal<this, void>;
-
-  /*
-   * The plugin name.
-   */
-  readonly plugin: string;
-
-  /**
-   * Get the raw plugin settings.
-   */
-  raw: ISettingRegistry.IPlugin;
-
-  /**
-   * Get an individual setting.
-   *
-   * @param key - The name of the setting being retrieved.
-   *
-   * @param level - The setting level. Defaults to `user`.
-   *
-   * @returns The setting value.
-   *
-   * #### Notes
-   * This method returns synchronously because it uses a cached copy of the
-   * plugin settings that is synchronized with the registry.
-   */
-  get(key: string, level?: ISettingRegistry.Level): JSONValue;
-
-  /**
-   * Remove a single setting.
-   *
-   * @param key - The name of the setting being removed.
-   *
-   * @returns A promise that resolves when the setting is removed.
-   *
-   * #### Notes
-   * This function is asynchronous because it writes to the setting registry.
-   */
-  remove(key: string): Promise<void>;
-
-  /**
-   * Set a single setting.
-   *
-   * @param key - The name of the setting being set.
-   *
-   * @param value - The value of the setting.
-   *
-   * @returns A promise that resolves when the setting has been saved.
-   *
-   * #### Notes
-   * This function is asynchronous because it writes to the setting registry.
-   */
-  set(key: string, value: JSONValue): Promise<void>;
-};
+const copy = JSONExt.deepCopy;
 
 
 /* tslint:disable */
@@ -109,19 +51,10 @@ namespace ISettingRegistry {
    * The setting level: user or system.
    */
   export
-  type Level = 'user' | 'system';
-
-
-  /**
-   * A collection of setting data for a specific key.
-   */
-  export
-  type Bundle = {
-    [level in Level]?: { [key: string]: JSONValue } | null;
-  };
+  type Level = 'system' | 'user';
 
   /**
-   * An annotation for a specific setting.
+   * An annotation for a specific setting or a plugin.
    */
   export
   interface IAnnotation extends JSONObject {
@@ -146,15 +79,6 @@ namespace ISettingRegistry {
     iconLabel?: string;
 
     /**
-     * The optional specific preference key being annotated.
-     *
-     * #### Notes
-     * If not set, the annotation will apply to the plugin instead of a specific
-     * key within it.
-     */
-    key?: string;
-
-    /**
      * The label for the setting.
      */
     label?: string;
@@ -166,19 +90,104 @@ namespace ISettingRegistry {
   export
   interface IPlugin extends JSONObject {
     /**
-     * The name of a plugin whose settings are saved.
+     * The name of the plugin.
      */
     id: string;
 
     /**
-     * The style and icon annotation for all settings in this plugin.
-     */
-    annotation?: IAnnotation | null;
-
-    /**
      * The collection of values for a specified setting.
      */
-    data: Bundle | null;
+    data: ISettingBundle | null;
+  }
+
+  /**
+   * The annotations for a plugin.
+   */
+  export
+  interface IPluginAnnotations extends JSONObject {
+    annotation: IAnnotation;
+    keys?: { [key: string]: IAnnotation };
+  }
+
+  /**
+   * The collection of user and system preferences for a plugin.
+   */
+  export
+  interface ISettingBundle extends JSONObject {
+    system?: { [key: string]: JSONValue };
+    user?: { [key: string]: JSONValue };
+  }
+
+  /**
+   * An interface for manipulating the settings of a specific plugin.
+   */
+  export
+  interface ISettings extends IDisposable {
+    /**
+     * The annotation hints for a plugin.
+     */
+    readonly annotations: IPluginAnnotations | null;
+
+    /**
+     * A signal that emits when the plugin's settings have changed.
+     */
+    readonly changed: ISignal<this, void>;
+
+    /*
+     * The plugin name.
+     */
+    readonly plugin: string;
+
+    /**
+     * Get the raw plugin settings.
+     */
+    readonly raw: IPlugin;
+
+    /**
+     * Remove a single setting.
+     *
+     * @param key - The name of the setting being removed.
+     *
+     * @returns A promise that resolves when the setting is removed.
+     *
+     * #### Notes
+     * This function is asynchronous because it writes to the setting registry.
+     */
+    remove(key: string): Promise<void>;
+
+    /**
+     * Get an individual setting.
+     *
+     * @param key - The name of the setting being retrieved.
+     *
+     * @param level - The setting level. Defaults to `user`.
+     *
+     * @returns The setting value.
+     *
+     * #### Notes
+     * This method returns synchronously because it uses a cached copy of the
+     * plugin settings that is synchronized with the registry.
+     */
+    get(key: string, level?: Level): JSONValue;
+
+    /**
+     * Save all of the plugin's settings at once.
+     */
+    save(raw: IPlugin): Promise<void>;
+
+    /**
+     * Set a single setting.
+     *
+     * @param key - The name of the setting being set.
+     *
+     * @param value - The value of the setting.
+     *
+     * @returns A promise that resolves when the setting has been saved.
+     *
+     * #### Notes
+     * This function is asynchronous because it writes to the setting registry.
+     */
+    set(key: string, value: JSONValue): Promise<void>;
   }
 }
 
@@ -204,6 +213,17 @@ class SettingRegistry {
   }
 
   /**
+   * Returns a map of annotation hints for plugins in the registry.
+   */
+  get annotations(): { [plugin: string]: ISettingRegistry.IPluginAnnotations } {
+    const annotations = this._annotations;
+
+    return copy(annotations) as {
+      [plugin: string]: ISettingRegistry.IPluginAnnotations
+    };
+  }
+
+  /**
    * A signal that emits the name of a plugin when its settings change.
    */
   get pluginChanged(): ISignal<this, string> {
@@ -214,20 +234,10 @@ class SettingRegistry {
    * Returns a list of plugin settings held in the registry.
    */
   get plugins(): ISettingRegistry.IPlugin[] {
-    const annotations = this._annotations;
     const plugins = this._plugins;
-    const copy = JSONExt.deepCopy;
 
-    return Object.keys(plugins).map(plugin => {
-      // Create a copy of the plugin data.
-      const result = copy(plugins[plugin]) as ISettingRegistry.IPlugin;
-      const annotation = annotations[plugin] && annotations[plugin].annotation;
-
-      // Copy over any annotations that may be available.
-      result.annotation = copy(annotation || null);
-
-      return result;
-    });
+    return Object.keys(plugins)
+      .map(p => copy(plugins[p]) as ISettingRegistry.IPlugin);
   }
 
   /**
@@ -235,11 +245,12 @@ class SettingRegistry {
    *
    * @param plugin - The name of the plugin whose setting is being annotated.
    *
+   * @param key - The name of the key being annotated. If `null` or empty, the
+   * annotation will be applied at the plugin level.
+   *
    * @param annotation - The annotation describing a plugin or a setting.
    */
-  annotate(plugin: string, annotation: ISettingRegistry.IAnnotation): void {
-    const key = annotation.key;
-
+  annotate(plugin: string, key: string, annotation: ISettingRegistry.IAnnotation): void {
     if (!this._annotations[plugin]) {
       this._annotations[plugin] = { annotation: null, keys: { } };
     }
@@ -265,11 +276,13 @@ class SettingRegistry {
    * @returns A promise that resolves when the setting is retrieved.
    */
   get(plugin: string, key: string, level: ISettingRegistry.Level = LEVEL): Promise<JSONValue> {
-    if (plugin in this._plugins) {
-      const bundle = this._plugins[plugin] && this._plugins[plugin].data;
+    const plugins = this._plugins;
+
+    if (plugin in plugins) {
+      const bundle = plugins[plugin] && plugins[plugin].data;
       const value = bundle && bundle[level] && bundle[level][key] || null;
 
-      return Promise.resolve(JSONExt.deepCopy(value));
+      return Promise.resolve(copy(value));
     }
 
     return this.load(plugin).then(() => this.get(plugin, key, level));
@@ -282,21 +295,17 @@ class SettingRegistry {
    *
    * @returns A promise that resolves with a plugin settings object.
    */
-  load(plugin: string): Promise<ISettings> {
-    const annotations = this._annotations;
-    const copy = JSONExt.deepCopy;
+  load(plugin: string): Promise<ISettingRegistry.ISettings> {
     const plugins = this._plugins;
     const registry = this;
 
     // If the plugin exists, resolve.
     if (plugin in plugins) {
-      // Create a copy of the plugin data.
-      const content = copy(plugins[plugin]) as ISettingRegistry.IPlugin;
+      const annotations = this._annotations[plugin] || null;
+      const content = plugins[plugin];
+      const settings = new Settings({ annotations, content, plugin, registry });
 
-      // Copy over any annotations that may be available.
-      content.annotations = copy(annotations[plugin] || null);
-
-      return Promise.resolve(new Settings({ content, plugin, registry }));
+      return Promise.resolve(settings);
     }
 
     // If the plugin needs to be loaded from the datastore, fetch.
@@ -310,24 +319,24 @@ class SettingRegistry {
    *
    * @returns A promise that resolves with a plugin settings object.
    */
-  reload(plugin: string): Promise<ISettings> {
-    const annotations = this._annotations;
-    const copy = JSONExt.deepCopy;
+  reload(plugin: string): Promise<ISettingRegistry.ISettings> {
+    const datastore = this._datastore;
     const plugins = this._plugins;
-    const registry = this;
 
     // If the plugin needs to be loaded from the datastore, fetch.
-    return this._datastore.fetch(plugin).then(result => {
+    return datastore.fetch(plugin).then(result => {
       // Set the local copy.
       plugins[plugin] = result || { id: plugin, data: { } };
 
-      // Create a copy of the plugin data.
-      const content = copy(plugins[plugin]) as ISettingRegistry.IPlugin;
-
       // Copy over any annotations that may be available.
-      content.annotations = copy(annotations[plugin] || null);
+      const annotations = copy(this._annotations[plugin]);
 
-      return new Settings({ content, plugin, registry });
+      return new Settings({
+        annotations: annotations as ISettingRegistry.IPluginAnnotations,
+        content: copy(plugins[plugin]) as ISettingRegistry.IPlugin,
+        plugin,
+        registry: this
+      });
     });
   }
 
@@ -341,11 +350,13 @@ class SettingRegistry {
    * @returns A promise that resolves when the setting is removed.
    */
   remove(plugin: string, key: string): Promise<void> {
-    if (!(plugin in this._plugins)) {
+    const plugins = this._plugins;
+
+    if (!(plugin in plugins)) {
       return Promise.resolve(void 0);
     }
 
-    const bundle =  this._plugins[plugin].data;
+    const bundle =  plugins[plugin].data;
     const level = 'user';
 
     if (!bundle[level]) {
@@ -370,11 +381,13 @@ class SettingRegistry {
    *
    */
   set(plugin: string, key: string, value: JSONValue): Promise<void> {
-    if (!(plugin in this._plugins)) {
+    const plugins = this._plugins;
+
+    if (!(plugin in plugins)) {
       return this.load(plugin).then(() => this.set(plugin, key, value));
     }
 
-    const bundle = this._plugins[plugin].data;
+    const bundle = plugins[plugin].data;
     const level = 'user';
 
     if (!bundle[level]) {
@@ -388,24 +401,36 @@ class SettingRegistry {
   /**
    * Upload a plugin's settings.
    *
-   * @param plugin - The plugin settings being uploaded.
+   * @param raw - The raw plugin settings being uploaded.
    *
    * @returns A promise that resolves when the settings have been saved.
+   *
+   * #### Notes
+   * Only the `user` level data will be saved.
    */
-  upload(plugin: ISettingRegistry.IPlugin): Promise<void> {
-    this._plugins[plugin.id] = plugin;
-    return this._save(plugin.id);
+  upload(raw: ISettingRegistry.IPlugin): Promise<void> {
+    const plugins = this._plugins;
+
+    plugins[raw.id] = copy(raw) as ISettingRegistry.IPlugin;
+
+    return this._save(raw.id);
   }
 
   /**
    * Save a plugin in the registry.
    */
   private _save(plugin: string): Promise<void> {
-    return this._datastore.save(plugin, this._plugins[plugin])
+    const plugins = this._plugins;
+
+    if (!(plugin in plugins)) {
+      return Promise.reject(`${plugin} does not exist in setting registry.`);
+    }
+
+    return this._datastore.save(plugin, plugins[plugin])
       .then(() => { this._pluginChanged.emit(plugin); });
   }
 
-  private _annotations: Private.Annotations = Object.create(null);
+  private _annotations: { [plugin: string]: ISettingRegistry.IPluginAnnotations } = Object.create(null);
   private _datastore: IDatastore<ISettingRegistry.IPlugin, ISettingRegistry.IPlugin> | null = null;
   private _pluginChanged = new Signal<this, string>(this);
   private _plugins: { [name: string]: ISettingRegistry.IPlugin } = Object.create(null);
@@ -415,16 +440,24 @@ class SettingRegistry {
 /**
  * A manager for a specific plugin's settings.
  */
-class Settings implements ISettings {
+class Settings implements ISettingRegistry.ISettings {
   /**
    * Instantiate a new plugin settings manager.
    */
   constructor(options: Settings.IOptions) {
+    this._annotations = options.annotations;
     this._content = options.content;
     this.plugin = options.plugin;
     this.registry = options.registry;
 
     this.registry.pluginChanged.connect(this._onPluginChanged, this);
+  }
+
+  /**
+   * The annotation hints for the plugin.
+   */
+  get annotations(): ISettingRegistry.IPluginAnnotations {
+    return this._annotations;
   }
 
   /**
@@ -450,12 +483,7 @@ class Settings implements ISettings {
    * Get the raw plugin settings.
    */
   get raw(): ISettingRegistry.IPlugin {
-    return JSONExt.deepCopy(this._content) as ISettingRegistry.IPlugin;
-  }
-  set raw(raw: ISettingRegistry.IPlugin) {
-    const id = this.plugin;
-    const data = JSONExt.deepCopy(this._content) as ISettingRegistry.IPlugin;
-    this.registry.upload({ data, id });
+    return copy(this._content) as ISettingRegistry.IPlugin;
   }
 
   /**
@@ -466,10 +494,13 @@ class Settings implements ISettings {
   /**
    * Annotate a plugin or a setting item for places where it might be displayed.
    *
+   * @param key - The name of the key being annotated. If `null` or empty, the
+   * annotation will be applied at the plugin level.
+   *
    * @param annotation - The annotation describing a plugin or a setting.
    */
-  annotate(annotation: ISettingRegistry.IAnnotation): void {
-    this.registry.annotate(this.plugin, annotation);
+  annotate(key: string, annotation: ISettingRegistry.IAnnotation): void {
+    this.registry.annotate(this.plugin, key, annotation);
   }
 
   /**
@@ -519,6 +550,13 @@ class Settings implements ISettings {
   }
 
   /**
+   * Save all of the plugin's settings at once.
+   */
+  save(raw: ISettingRegistry.IPlugin): Promise<void> {
+    return this.registry.upload({ data: raw, id: this.plugin });
+  }
+
+  /**
    * Set a single setting.
    *
    * @param key - The name of the setting being set.
@@ -544,6 +582,7 @@ class Settings implements ISettings {
     }
   }
 
+  private _annotations: ISettingRegistry.IPluginAnnotations | null = null;
   private _changed = new Signal<this, void>(this);
   private _content: ISettingRegistry.IPlugin | null = null;
   private _isDisposed = false;
@@ -578,9 +617,14 @@ namespace Settings {
   export
   interface IOptions {
     /**
-     * The actual setting values for a plugin.
+     * The annotation hints for a plugin.
      */
-    content?: ISettingRegistry.IPlugin;
+    annotations: ISettingRegistry.IPluginAnnotations | null;
+
+    /**
+     * The setting values for a plugin.
+     */
+    content: ISettingRegistry.IPlugin;
 
     /**
      * The plugin that the settings object references.
@@ -592,21 +636,4 @@ namespace Settings {
      */
     registry: SettingRegistry;
   }
-}
-
-
-/**
- * A namespace for private module data.
- */
-namespace Private {
-  /**
-   * A collection of annotation data for plugins and their settings.
-   */
-  export
-  type Annotations = {
-    [plugin: string]: {
-      annotation: ISettingRegistry.IAnnotation,
-      keys: { [key: string]: ISettingRegistry.IAnnotation }
-    }
-  };
 }
