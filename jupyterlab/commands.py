@@ -229,7 +229,7 @@ def uninstall_extension(name, app_dir=None):
     if app_dir == here:
         raise ValueError('Cannot install packages in core app')
     # Allow for uninstalled core extensions here.
-    with open(pjoin(here, 'package.json')) as fid:
+    with open(pjoin(here, 'package.app.json')) as fid:
         data = json.load(fid)
         if name in data['jupyterlab']['extensions']:
             print('Uninstalling core extension %s' % name)
