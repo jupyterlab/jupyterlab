@@ -22,7 +22,7 @@
     "@jupyterlab/help-extension": "^0.6.0",
     "@jupyterlab/imageviewer-extension": "^0.6.0",
     "@jupyterlab/inspector-extension": "^0.6.0",
-    "@jupyterlab/landing-extension": "^0.6.0",
+    "@jupyterlab/landing-extension": "^0.7.0",
     "@jupyterlab/launcher-extension": "^0.6.0",
     "@jupyterlab/markdownviewer-extension": "^0.6.0",
     "@jupyterlab/notebook-extension": "^0.6.0",
@@ -45,5 +45,5 @@
     "watch": "^1.0.2",
     "webpack": "^2.2.1"
   },
-  "version": "0.6.0"
+  "version": "0.7.0"
 }
