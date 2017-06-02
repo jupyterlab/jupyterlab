@@ -73,17 +73,6 @@ const LANDING_ICON_CLASS = 'jp-Landing-image';
  */
 const LANDING_TEXT_CLASS = 'jp-Landing-text';
 
-/**
- * The list of preview messages.
- */
-const previewMessages = [
-  'super alpha preview',
-  'very alpha preview',
-  'extremely alpha preview',
-  'exceedingly alpha preview',
-  'alpha alpha preview'
-];
-
 
 /**
  * LandingModel holds text data which the LandingWidget will render.
@@ -108,11 +97,9 @@ class LandingModel extends VDomModel {
   /**
    * Construct a new landing model.
    */
-  constructor(terminalsAvailable = false) {
+  constructor(terminalsAvailable = false, version: string) {
     super();
-    this.previewMessage = previewMessages[
-      Math.floor(Math.random() * previewMessages.length)
-    ];
+    this.previewMessage = `alpha (v${version})`;
     this.headerText = 'Start a new activity';
 
     const createFrom = 'file-operations:create-from';
