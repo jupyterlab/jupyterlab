@@ -300,13 +300,16 @@ class PluginEditor extends Widget {
     this.addClass(PLUGIN_EDITOR_CLASS);
 
     const { editorFactory } = options;
-    const editor = this._editor = new JSONEditor({ editorFactory });
+    const collapsible = false;
+    const editor = this._editor = new JSONEditor({
+      collapsible, editorFactory
+    });
     const fieldset = this._fieldset = new PluginFieldset();
     const layout = this.layout = new BoxLayout({ direction: 'top-to-bottom' });
 
     layout.addWidget(editor);
     layout.addWidget(fieldset);
-    BoxLayout.setStretch(editor, 3);
+    BoxLayout.setStretch(editor, 5);
     BoxLayout.setStretch(fieldset, 2);
   }
 
@@ -335,19 +338,27 @@ class PluginEditor extends Widget {
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    if (!this._settings) {
-      this._confirm()
-        .then(() => { this._editor.source = null; })
-        .catch(() => { /* no op */ });
+    const editor = this._editor;
+    const fieldset = this._fieldset;
+    const settings = this._settings;
+
+    if (!settings) {
+      this._confirm().then(() => {
+        editor.hide();
+        fieldset.hide();
+        editor.source = null;
+      }).catch(() => { /* no op */ });
       return;
     }
 
-    const source = new ObservableJSON({
-      values: this._settings.raw.data.user || { }
-    });
-    this._confirm()
-      .then(() => { this._editor.source = source; })
-      .catch(() => { /* no op */ });
+    const values = settings.raw.data && settings.raw.data.user || { };
+    const source = new ObservableJSON({ values });
+
+    this._confirm().then(() => {
+      editor.source = source;
+      editor.show();
+      fieldset.show();
+    }).catch(() => { /* no op */ });
   }
 
   /**
@@ -426,7 +437,9 @@ class PluginFieldset extends Widget {
       return;
     }
 
-    Private.populateFieldset(this.node, this._settings.raw);
+    const settings = this._settings;
+
+    Private.populateFieldset(this.node, settings.raw, settings.annotations);
   }
 
   private _settings: ISettingRegistry.ISettings | null = null;
@@ -487,7 +500,6 @@ namespace Private {
    */
   export
   function createListItem(plugin: ISettingRegistry.IPlugin, annotations: ISettingRegistry.IPluginAnnotations): HTMLLIElement {
-    console.log('list plugin', plugin);
     const li = document.createElement('li');
     const annotation = annotations && annotations.annotation;
 
@@ -501,15 +513,14 @@ namespace Private {
    * Populate the fieldset with a specific plugin's annotation.
    */
   export
-  function populateFieldset(node: HTMLElement, plugin: ISettingRegistry.IPlugin): void {
+  function populateFieldset(node: HTMLElement, plugin: ISettingRegistry.IPlugin, annotations: ISettingRegistry.IPluginAnnotations): void {
     console.log('fieldset plugin', plugin);
-    // const annotation = plugin;
-    // const heading = annotations && annotations.label || plugin.id;
-    // const legend = document.createElement('legend');
+    const heading = annotations && annotations.annotation &&
+      annotations.annotation.label || plugin.id;
+    const legend = document.createElement('legend');
 
-    // console.log(plugin);
-    // legend.appendChild(document.createTextNode(heading));
-    // node.appendChild(legend);
+    legend.appendChild(document.createTextNode(heading));
+    node.appendChild(legend);
   }
 
   /**

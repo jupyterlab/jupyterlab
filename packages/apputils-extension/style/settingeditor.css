@@ -4,12 +4,13 @@
 |----------------------------------------------------------------------------*/
 
 #setting-editor.jp-SettingEditor {
+  background-color: var(--md-grey-200);
   outline: none;
+  padding: 3px;
 }
 
 
 #setting-editor.jp-SettingEditor ul.jp-PluginList {
-  background: yellow;
   list-style-type: none;
   margin: 0;
   padding: 2px;
@@ -17,6 +18,23 @@
 
 
 #setting-editor.jp-SettingEditor .jp-PluginEditor {
-  background: blue;
-  color: white;
+  padding: 10px;
+}
+
+
+#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-JSONEditor-host {
+  height: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+
+#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset {
+  margin: 0;
+  padding: 0;
+}
+
+
+#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset legend {
+  font-weight: bold;
 }
