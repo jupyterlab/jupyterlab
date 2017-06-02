@@ -398,7 +398,7 @@ class PluginFieldset extends Widget {
    * Create a new plugin fieldset.
    */
   constructor() {
-    super();
+    super({ node: document.createElement('fieldset') });
     this.addClass(PLUGIN_FIELDSET_CLASS);
   }
 
@@ -417,10 +417,14 @@ class PluginFieldset extends Widget {
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
+    // Empty the node.
+    this.node.textContent = '';
+
     if (!this._settings) {
-      this.node.textContent = '';
       return;
     }
+
+    Private.populateFieldset(this.node, this._settings.raw);
   }
 
   private _settings: ISettings | null = null;
@@ -481,13 +485,29 @@ namespace Private {
    */
   export
   function createListItem(plugin: ISettingRegistry.IPlugin): HTMLLIElement {
+    console.log('list plugin', plugin);
     const li = document.createElement('li');
-    const annotation = plugin.annotation;
+    const annotation = plugin.annotations && plugin.annotations.annotation;
 
     li.textContent = (annotation && annotation.label) || plugin.id;
     li.setAttribute('data-id', plugin.id);
 
     return li;
+  }
+
+  /**
+   * Populate the fieldset with a specific plugin's annotation.
+   */
+  export
+  function populateFieldset(node: HTMLElement, plugin: ISettingRegistry.IPlugin): void {
+    console.log('fieldset plugin', plugin);
+    // const annotation = plugin;
+    // const heading = annotations && annotations.label || plugin.id;
+    // const legend = document.createElement('legend');
+
+    // console.log(plugin);
+    // legend.appendChild(document.createTextNode(heading));
+    // node.appendChild(legend);
   }
 
   /**
