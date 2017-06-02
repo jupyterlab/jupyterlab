@@ -59,7 +59,9 @@ function activate(app: JupyterLab, linker: ICommandLinker, palette: ICommandPale
   const { commands, shell } = app;
   const category = 'Help';
   const command = CommandIDs.open;
-  const model = new LandingModel(services.terminals.isAvailable());
+  const model = new LandingModel(
+    services.terminals.isAvailable(), app.info.version
+  );
   const tracker = new InstanceTracker<LandingWidget>({
     namespace: 'landing',
     shell

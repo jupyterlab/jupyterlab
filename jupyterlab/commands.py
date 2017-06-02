@@ -3,6 +3,7 @@
 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
+from distutils.version import LooseVersion
 import errno
 import json
 import pipes
@@ -176,9 +177,10 @@ def should_build(app_dir=None):
         data = json.load(fid)
 
     # Look for mismatched version.
-    if not data['jupyterlab'].get('version', '') == __version__:
+    version = data['jupyterlab'].get('version', '')
+    if LooseVersion(version) != LooseVersion(__version__):
         msg = 'Version mismatch: %s (built), %s (current)'
-        return True, msg % (data['jupyterlab'].get('version', ''), __version__)
+        return True, msg % (version, __version__)
 
     # Look for mismatched extensions.
     _ensure_package(app_dir)

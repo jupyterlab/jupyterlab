@@ -7,9 +7,9 @@ include README.md
 include package.json
 include setupbase.py
 
-include jupyterlab/package.template.json
+include jupyterlab/package.app.json
 include jupyterlab/webpack.config.js
-include jupyterlab/index.template.js
-include jupyterlab/package_list.txt
+include jupyterlab/index.app.js
+include jupyterlab/released_packages.txt
 
 prune jupyterlab/tests
