@@ -75,8 +75,8 @@ def find_package_data():
     Find package_data.
     """
     return {
-        'jupyterlab': ['build/*', 'index.template.js', 'webpack.config.js',
-                       'package.template.json', 'package_list.txt']
+        'jupyterlab': ['build/*', 'index.app.js', 'webpack.config.js',
+                       'package.app.json', 'released_packages.txt']
     }
 
 
