@@ -126,7 +126,8 @@ describe('apputils', () => {
     describe('#collapserNode', () => {
 
       it('should be the collapser node used by the editor', () => {
-        expect(editor.collapserNode.classList).to.contain('jp-JSONEditor-collapser');
+        expect(editor.collapserNode.classList)
+          .to.contain('jp-JSONEditor-collapser');
       });
 
     });
@@ -134,7 +135,8 @@ describe('apputils', () => {
     describe('#editorHostNode', () => {
 
       it('should be the editor host node used by the editor', () => {
-        expect(editor.editorHostNode.classList).to.contain('jp-JSONEditor-host');
+        expect(editor.editorHostNode.classList)
+          .to.contain('jp-JSONEditor-host');
       });
 
     });
@@ -142,7 +144,8 @@ describe('apputils', () => {
     describe('#revertButtonNode', () => {
 
       it('should be the revert button node used by the editor', () => {
-        expect(editor.revertButtonNode.classList).to.contain('jp-JSONEditor-revertButton');
+        expect(editor.revertButtonNode.classList)
+          .to.contain('jp-JSONEditor-revertButton');
       });
 
     });
@@ -150,7 +153,8 @@ describe('apputils', () => {
     describe('#commitButtonNode', () => {
 
       it('should be the commit button node used by the editor', () => {
-        expect(editor.commitButtonNode.classList).to.contain('jp-JSONEditor-commitButton');
+        expect(editor.commitButtonNode.classList)
+          .to.contain('jp-JSONEditor-commitButton');
       });
 
     });
@@ -250,7 +254,7 @@ describe('apputils', () => {
           let model = editor.model;
           expect(model.value.text).to.be('{}');
           simulate(editor.editorHostNode, 'blur');
-          expect(model.value.text).to.be('{\n  "foo": 1\n}');
+          expect(model.value.text).to.be('{\n    "foo": 1\n}');
         });
 
         it('should not revert to current data if there was a change', () => {
@@ -286,7 +290,7 @@ describe('apputils', () => {
           editor.model.value.text = 'foo';
           editor.source.set('foo', 1);
           simulate(editor.revertButtonNode, 'click');
-          expect(editor.model.value.text).to.be('{\n  "foo": 1\n}');
+          expect(editor.model.value.text).to.be('{\n    "foo": 1\n}');
         });
 
         it('should handle click events on the commit button', () => {
@@ -307,7 +311,7 @@ describe('apputils', () => {
           editor.model.value.text = '{"foo": 2}';
           editor.source.set('foo', 1);
           simulate(editor.commitButtonNode, 'click');
-          expect(editor.model.value.text).to.be('{\n  "foo": 2\n}');
+          expect(editor.model.value.text).to.be('{\n    "foo": 2\n}');
         });
 
         it('should allow a programmatic key to update', () => {
@@ -317,7 +321,7 @@ describe('apputils', () => {
           editor.model.value.text = '{"foo":1, "bar": 2}';
           editor.source.set('foo', 2);
           simulate(editor.commitButtonNode, 'click');
-          let expected = '{\n  "foo": 2,\n  "bar": 2\n}';
+          let expected = '{\n    "foo": 2,\n    "bar": 2\n}';
           expect(editor.model.value.text).to.be(expected);
         });
 
@@ -328,7 +332,7 @@ describe('apputils', () => {
           editor.model.value.text = '{"foo":1, "bar": 2, "baz": 3}';
           editor.source.set('foo', 2);
           simulate(editor.commitButtonNode, 'click');
-          let value = '{\n  "foo": 2,\n  "bar": 2,\n  "baz": 3\n}';
+          let value = '{\n    "foo": 2,\n    "bar": 2,\n    "baz": 3\n}';
           expect(editor.model.value.text).to.be(value);
         });
 
@@ -338,7 +342,7 @@ describe('apputils', () => {
           editor.source.set('bar', 1);
           editor.model.value.text = '{"foo": 1}';
           simulate(editor.commitButtonNode, 'click');
-          expect(editor.model.value.text).to.be('{\n  "foo": 1\n}');
+          expect(editor.model.value.text).to.be('{\n    "foo": 1\n}');
         });
 
         it('should allow a key to be removed programmatically that was not set by the user', () => {
@@ -348,7 +352,7 @@ describe('apputils', () => {
           editor.model.value.text = '{"foo": 1, "bar": 3}';
           editor.source.delete('foo');
           simulate(editor.commitButtonNode, 'click');
-          expect(editor.model.value.text).to.be('{\n  "bar": 3\n}');
+          expect(editor.model.value.text).to.be('{\n    "bar": 3\n}');
         });
 
         it('should keep a key that was removed programmatically that was changed by the user', () => {
@@ -358,7 +362,7 @@ describe('apputils', () => {
           editor.model.value.text = '{"foo": 2, "bar": 3}';
           editor.source.set('foo', null);
           simulate(editor.commitButtonNode, 'click');
-          let expected = '{\n  "foo": 2,\n  "bar": 3\n}';
+          let expected = '{\n    "foo": 2,\n    "bar": 3\n}';
           expect(editor.model.value.text).to.be(expected);
         });
 
@@ -414,7 +418,7 @@ describe('apputils', () => {
       it('should update the value', () => {
         editor.source = new ObservableJSON();
         editor.source.set('foo', 1);
-        expect(editor.model.value.text).to.be('{\n  "foo": 1\n}');
+        expect(editor.model.value.text).to.be('{\n    "foo": 1\n}');
       });
 
       it('should bail if the input is dirty', () => {
