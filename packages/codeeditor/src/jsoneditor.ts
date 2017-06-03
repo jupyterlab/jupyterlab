@@ -374,7 +374,7 @@ class JSONEditor extends Widget {
       model.value.text = 'No data!';
       this._originalValue = null;
     } else {
-      let value = JSON.stringify(content, null, 2);
+      let value = JSON.stringify(content, null, 4);
       model.value.text = value;
       this._originalValue = content;
     }
@@ -408,7 +408,7 @@ namespace JSONEditor {
     editorFactory: CodeEditor.Factory;
 
     /**
-     * The title of the editor.  Defaults to an empty string.
+     * The title of the editor. Defaults to an empty string.
      */
     title?: string;
 

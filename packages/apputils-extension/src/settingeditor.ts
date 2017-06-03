@@ -226,6 +226,7 @@ class PluginList extends Widget {
   protected onUpdateRequest(msg: Message): void {
     const annotations = this.settings.annotations;
     const plugins = Private.sortPlugins(this.settings.plugins);
+
     this.node.textContent = '';
     plugins.forEach(plugin => {
       const id = plugin.id;
@@ -514,7 +515,6 @@ namespace Private {
    */
   export
   function populateFieldset(node: HTMLElement, plugin: ISettingRegistry.IPlugin, annotations: ISettingRegistry.IPluginAnnotations): void {
-    console.log('fieldset plugin', plugin);
     const heading = annotations && annotations.annotation &&
       annotations.annotation.label || plugin.id;
     const legend = document.createElement('legend');

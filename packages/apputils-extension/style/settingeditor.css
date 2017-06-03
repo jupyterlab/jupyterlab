@@ -29,12 +29,21 @@
 }
 
 
+#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-JSONEditor-header {
+  height: 20px;
+}
+
+
 #setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset {
+  border: 1px solid var(--jp-brand-color1);
   margin: 0;
   padding: 0;
 }
 
 
 #setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset legend {
+  color: var(--jp-brand-color1);
+  font-size: 80%;
   font-weight: bold;
+  margin-left: 10px;
 }
