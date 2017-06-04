@@ -28,6 +28,10 @@ import {
 } from '@phosphor/signaling';
 
 import {
+  VirtualDOM, h
+} from '@phosphor/virtualdom';
+
+import {
   BoxLayout, Widget
 } from '@phosphor/widgets';
 
@@ -254,7 +258,7 @@ class PluginList extends Widget {
     }
 
     if (!id) {
-      while (target !== this.node) {
+      while (!id && target !== this.node) {
         target = target.parentElement;
         id = target.getAttribute('data-id');
       }
@@ -501,13 +505,18 @@ namespace Private {
    */
   export
   function createListItem(plugin: ISettingRegistry.IPlugin, annotations: ISettingRegistry.IPluginAnnotations): HTMLLIElement {
-    const li = document.createElement('li');
     const annotation = annotations && annotations.annotation;
+    const caption = annotation && annotation.caption || '';
+    const className = annotation && annotation.className || '';
+    const iconClass = annotation && annotation.iconClass || '';
+    const iconLabel = annotation && annotation.iconLabel || '';
+    const label = (annotation && annotation.label) || plugin.id;
 
-    li.textContent = (annotation && annotation.label) || plugin.id;
-    li.setAttribute('data-id', plugin.id);
-
-    return li;
+    return VirtualDOM.realize(
+      h.li({ className, dataset: { id: plugin.id }, title: caption },
+        h.span({ className: iconClass, title: iconLabel }),
+        h.span(label))
+    ) as HTMLLIElement;
   }
 
   /**
@@ -515,11 +524,11 @@ namespace Private {
    */
   export
   function populateFieldset(node: HTMLElement, plugin: ISettingRegistry.IPlugin, annotations: ISettingRegistry.IPluginAnnotations): void {
-    const heading = annotations && annotations.annotation &&
+    const label = annotations && annotations.annotation &&
       annotations.annotation.label || plugin.id;
     const legend = document.createElement('legend');
 
-    legend.appendChild(document.createTextNode(heading));
+    legend.appendChild(document.createTextNode(label));
     node.appendChild(legend);
   }
 
