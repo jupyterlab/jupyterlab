@@ -115,9 +115,9 @@ class SettingEditor extends Widget {
     this.addClass(SETTING_EDITOR_CLASS);
 
     const editorFactory = options.editorFactory;
-    const settings = this.settings = options.settings;
+    const registry = this.registry = options.registry;
     const layout = this.layout = new BoxLayout({ direction: 'left-to-right' });
-    const list = this._list = new PluginList({ settings });
+    const list = this._list = new PluginList({ registry });
     const instructions = this._instructions;
     const editor = this._editor = new PluginEditor({ editorFactory });
 
@@ -129,13 +129,13 @@ class SettingEditor extends Widget {
     BoxLayout.setStretch(editor, 3);
 
     list.selected.connect(this._onSelected, this);
-    settings.pluginChanged.connect(() => { this.update(); }, this);
+    registry.pluginChanged.connect(() => { this.update(); }, this);
   }
 
   /**
    * The setting registry modified by the editor.
    */
-  readonly settings: ISettingRegistry;
+  readonly registry: ISettingRegistry;
 
   /**
    * Dispose of the resources held by the setting editor.
@@ -159,10 +159,11 @@ class SettingEditor extends Widget {
   }
 
   /**
-   * Handle `'after-attach'` messages.
+   * Handle `'close-request'` messages.
    */
-  protected onAfterAttach(msg: Message): void {
-    /* no op */
+  protected onCloseRequest(msg: Message): void {
+    super.onCloseRequest(msg);
+    this._list.reset();
   }
 
   /**
@@ -190,7 +191,13 @@ class SettingEditor extends Widget {
    * Handle a new selection in the plugin list.
    */
   private _onSelected(sender: any, plugin: string): void {
-    this.settings.load(plugin)
+    if (!plugin) {
+      this._editor.settings = null;
+      this.update();
+      return;
+    }
+
+    this.registry.load(plugin)
       .then(settings => this._editor.settings = settings)
       .catch(reason => { console.error('Loading settings failed.', reason); });
   }
@@ -218,7 +225,7 @@ namespace SettingEditor {
     /**
      * The setting registry the editor modifies.
      */
-    settings: ISettingRegistry;
+    registry: ISettingRegistry;
   }
 }
 
@@ -232,14 +239,14 @@ class PluginList extends Widget {
    */
   constructor(options: PluginList.IOptions) {
     super({ node: document.createElement('ul') });
-    this.settings = options.settings;
+    this.registry = options.registry;
     this.addClass(PLUGIN_LIST_CLASS);
   }
 
   /**
    * The setting registry.
    */
-  readonly settings: ISettingRegistry;
+  readonly registry: ISettingRegistry;
 
   /**
    * A signal emitted when a selection is made from the plugin list.
@@ -269,6 +276,15 @@ class PluginList extends Widget {
   }
 
   /**
+   * Reset the list selection.
+   */
+  reset(): void {
+    this._selection = '';
+    this._selected.emit('');
+    this.update();
+  }
+
+  /**
    * Handle `'after-attach'` messages.
    */
   protected onAfterAttach(msg: Message): void {
@@ -286,8 +302,8 @@ class PluginList extends Widget {
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    const annotations = this.settings.annotations;
-    const plugins = Private.sortPlugins(this.settings.plugins);
+    const annotations = this.registry.annotations;
+    const plugins = Private.sortPlugins(this.registry.plugins);
 
     this.node.textContent = '';
     plugins.forEach(plugin => {
@@ -346,7 +362,7 @@ namespace PluginList {
     /**
      * The setting registry for the plugin list.
      */
-    settings: ISettingRegistry;
+    registry: ISettingRegistry;
   }
 }
 
@@ -432,7 +448,7 @@ class PluginEditor extends Widget {
    * If the editor is in a dirty state, confirm that the user wants to leave.
    */
   private _confirm(): Promise<void> {
-    if (!this._editor.isDirty) {
+    if (this.isHidden || !this.isAttached || !this._editor.isDirty) {
       return Promise.resolve(void 0);
     }
 
@@ -538,12 +554,12 @@ namespace CommandIDs {
  * Activate the setting editor.
  */
 export
-function activateSettingEditor(app: JupyterLab, restorer: ILayoutRestorer, settings: ISettingRegistry, editorServices: IEditorServices): void {
+function activateSettingEditor(app: JupyterLab, restorer: ILayoutRestorer, registry: ISettingRegistry, editorServices: IEditorServices): void {
   const { commands, shell } = app;
   const namespace = 'setting-editor';
   const factoryService = editorServices.factoryService;
   const editorFactory = factoryService.newInlineEditor.bind(factoryService);
-  const editor = new SettingEditor({ editorFactory, settings });
+  const editor = new SettingEditor({ editorFactory, registry });
   const tracker = new InstanceTracker<SettingEditor>({ namespace });
 
   editor.id = namespace;
