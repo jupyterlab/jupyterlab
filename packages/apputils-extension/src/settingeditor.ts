@@ -329,20 +329,14 @@ class PluginEditor extends Widget {
       return;
     }
 
-    const samePlugin = settings === this._settings ||
-      (settings && this._settings) && settings.plugin === this._settings.plugin;
+    const samePlugin = (settings && this._settings) &&
+      settings.plugin === this._settings.plugin;
+
     if (samePlugin) {
       return;
     }
 
     this._settings = this._fieldset.settings = settings;
-    if (settings) {
-      const values = settings.raw.data && settings.raw.data.user || { };
-
-      this._editor.source = new ObservableJSON({ values });
-    } else {
-      this._editor.source = null;
-    }
     this.update();
   }
 
@@ -355,12 +349,22 @@ class PluginEditor extends Widget {
     const settings = this._settings;
 
     this._confirm().then(() => {
+      // Disconnect old source change handler.
+      if (json.source) {
+        json.source.changed.disconnect(this._onSourceChanged, this);
+      }
+
       if (settings) {
+        const values = settings.raw.data && settings.raw.data.user || { };
+
+        json.source = new ObservableJSON({ values });
+        json.source.changed.connect(this._onSourceChanged, this);
         json.show();
         fieldset.show();
         return;
       }
 
+      json.source = null;
       json.hide();
       fieldset.hide();
     }).then(() => { json.editor.refresh(); }).catch(() => { /* no op */ });
@@ -383,6 +387,18 @@ class PluginEditor extends Widget {
         throw new Error();
       }
     });
+  }
+
+  /**
+   * Handle source changes in the underlying editor.
+   */
+  private _onSourceChanged(): void {
+    const editor = this._editor;
+    const settings = this._settings;
+    const id = settings.plugin;
+    const data = { user: editor.source.toJSON() };
+
+    settings.save({ id, data });
   }
 
   private _editor: JSONEditor = null;

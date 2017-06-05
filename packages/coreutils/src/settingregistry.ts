@@ -409,10 +409,7 @@ class SettingRegistry {
    * Only the `user` level data will be saved.
    */
   upload(raw: ISettingRegistry.IPlugin): Promise<void> {
-    const plugins = this._plugins;
-
-    plugins[raw.id] = copy(raw) as ISettingRegistry.IPlugin;
-
+    this._plugins[raw.id] = copy(raw) as ISettingRegistry.IPlugin;
     return this._save(raw.id);
   }
 
@@ -553,7 +550,7 @@ class Settings implements ISettingRegistry.ISettings {
    * Save all of the plugin's settings at once.
    */
   save(raw: ISettingRegistry.IPlugin): Promise<void> {
-    return this.registry.upload({ data: raw, id: this.plugin });
+    return this.registry.upload(raw);
   }
 
   /**
