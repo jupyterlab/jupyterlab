@@ -48,6 +48,7 @@
 
 
 #setting-editor.jp-SettingEditor ul.jp-PluginList li {
+  border: 1px solid transparent;
   overflow: hidden;
   padding: 2px 0 5px 5px;
   text-overflow: ellipsis;
@@ -56,6 +57,7 @@
 
 
 #setting-editor.jp-SettingEditor ul.jp-PluginList li:hover {
+  border: 1px solid var(--md-grey-300);
   background-color: var(--md-grey-200);
 }
 
@@ -101,9 +103,9 @@
 
 #setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset legend {
   color: var(--jp-brand-color1);
-  font-size: 80%;
+  font-size: 70%;
   font-weight: bold;
-  margin-left: 10px;
+  margin-left: 15px;
 }
 
 
@@ -117,8 +119,8 @@
 
 
 #setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset li {
-  background-color: var(--md-grey-300);
-  color: var(--jp-ui-font-color1);
+  background-color: var(--md-grey-400);
+  color: var(--jp-ui-font-color2);
   display: inline-block;
   margin: 3px;
   padding: 3px;
