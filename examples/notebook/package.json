@@ -9,7 +9,7 @@
     "@jupyterlab/apputils": "^0.6.0",
     "@jupyterlab/codemirror": "^0.6.0",
     "@jupyterlab/completer": "^0.6.0",
-    "@jupyterlab/docmanager": "^0.6.0",
+    "@jupyterlab/docmanager": "^0.6.1",
     "@jupyterlab/docregistry": "^0.6.0",
     "@jupyterlab/notebook": "^0.6.0",
     "@jupyterlab/rendermime": "^0.6.0",
@@ -29,5 +29,5 @@
     "watch": "^1.0.2",
     "webpack": "^2.2.1"
   },
-  "version": "0.6.0"
+  "version": "0.6.1"
 }

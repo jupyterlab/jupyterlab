@@ -8,9 +8,9 @@
   "dependencies": {
     "@jupyterlab/apputils": "^0.6.0",
     "@jupyterlab/codemirror": "^0.6.0",
-    "@jupyterlab/docmanager": "^0.6.0",
+    "@jupyterlab/docmanager": "^0.6.1",
     "@jupyterlab/docregistry": "^0.6.0",
-    "@jupyterlab/filebrowser": "^0.6.0",
+    "@jupyterlab/filebrowser": "^0.6.1",
     "@jupyterlab/fileeditor": "^0.6.0",
     "@jupyterlab/services": "^0.45.0",
     "@jupyterlab/theming": "^0.6.0",
@@ -30,5 +30,5 @@
     "watch": "^1.0.2",
     "webpack": "^1.13.0"
   },
-  "version": "0.6.0"
+  "version": "0.6.1"
 }
