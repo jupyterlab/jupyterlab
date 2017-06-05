@@ -329,13 +329,20 @@ class PluginEditor extends Widget {
       return;
     }
 
-    const samePlugin = (settings && this._settings) &&
-      settings.plugin === this._settings.plugin;
+    const samePlugin = settings === this._settings ||
+      (settings && this._settings) && settings.plugin === this._settings.plugin;
     if (samePlugin) {
       return;
     }
 
     this._settings = this._fieldset.settings = settings;
+    if (settings) {
+      const values = settings.raw.data && settings.raw.data.user || { };
+
+      this._editor.source = new ObservableJSON({ values });
+    } else {
+      this._editor.source = null;
+    }
     this.update();
   }
 
@@ -343,27 +350,20 @@ class PluginEditor extends Widget {
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    const editor = this._editor;
+    const json = this._editor;
     const fieldset = this._fieldset;
     const settings = this._settings;
 
-    if (!settings) {
-      this._confirm().then(() => {
-        editor.hide();
-        fieldset.hide();
-        editor.source = null;
-      }).catch(() => { /* no op */ });
-      return;
-    }
-
-    const values = settings.raw.data && settings.raw.data.user || { };
-    const source = new ObservableJSON({ values });
-
     this._confirm().then(() => {
-      editor.source = source;
-      editor.show();
-      fieldset.show();
-    }).catch(() => { /* no op */ });
+      if (settings) {
+        json.show();
+        fieldset.show();
+        return;
+      }
+
+      json.hide();
+      fieldset.hide();
+    }).then(() => { json.editor.refresh(); }).catch(() => { /* no op */ });
   }
 
   /**
