@@ -84,7 +84,6 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
   let keyMap: string = 'default';
   let matchBrackets = false;
 
-  // Fetch the initial state of the settings.
   const { id } = commandsPlugin;
 
   // Annotate the plugin settings.
@@ -93,12 +92,19 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
   settings.annotate(id, 'matchBrackets', { label: 'Match Brackets' });
   settings.annotate(id, 'theme', { label: 'Theme' });
 
-  Promise.all([settings.load(id), restored]).then(([settings]) => {
+  /**
+   * Update the setting values.
+   */
+  function updateSettings(settings: ISettingRegistry.ISettings): void {
     const matched = settings.get('matchBrackets') as boolean | null;
     matchBrackets = matched === null ? matchBrackets : matched as boolean;
     keyMap = settings.get('keyMap') as string | null || keyMap;
     theme = settings.get('theme') as string | null || theme;
+  }
 
+  Promise.all([settings.load(id), restored]).then(([settings]) => {
+    updateSettings(settings);
+    settings.changed.connect(() => { updateSettings(settings); });
     tracker.forEach(widget => {
       if (widget.editor instanceof CodeMirrorEditor) {
         let cm = widget.editor.editor;
@@ -163,7 +169,6 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
       isToggled: args => args['theme'] === theme
     });
 
-
     commands.addCommand(CommandIDs.changeKeyMap, {
       label: args => {
         let title = args['keyMap'] as string;
@@ -225,7 +230,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     },
     label: 'Match Brackets',
     isEnabled: hasWidget,
-    isToggled: () => !matchBrackets
+    isToggled: () => matchBrackets
   });
 
   [
