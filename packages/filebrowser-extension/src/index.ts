@@ -355,12 +355,12 @@ function createContextMenu(path: string, commands: CommandRegistry, registry: ID
   const factories = registry.preferredWidgetFactories(ext).map(f => f.name);
   if (path && factories.length > 1) {
     const command =  'file-operations:open';
-    const openWith = new Menu({ commands });
-    openWith.title.label = 'Open With...';
+    const openAs = new Menu({ commands });
+    openAs.title.label = 'Open As...';
     factories.forEach(factory => {
-      openWith.addItem({ args: { factory, path }, command });
+      openAs.addItem({ args: { factory, path }, command });
     });
-    menu.addItem({ type: 'submenu', submenu: openWith });
+    menu.addItem({ type: 'submenu', submenu: openAs });
   }
 
   menu.addItem({ command: CommandIDs.rename });
