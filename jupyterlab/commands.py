@@ -330,7 +330,7 @@ def _ensure_package(app_dir, name=None, version=None):
 
     for fname in ['index.app.js', 'webpack.config.js']:
         dest = pjoin(staging, fname.replace('.app', ''))
-        shutil.copy2(pjoin(here, fname), dest)
+        shutil.copy(pjoin(here, fname), dest)
 
     # Template the package.json file.
     pkg_path = pjoin(here, 'package.app.json')
