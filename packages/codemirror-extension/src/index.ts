@@ -78,19 +78,18 @@ export default plugins;
 /**
  * Set up the editor widget menu and commands.
  */
-function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB, settings: ISettingRegistry): void {
+function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB, registry: ISettingRegistry): void {
   const { commands, restored } = app;
+  const { id } = commandsPlugin;
   let theme: string = CodeMirrorEditor.DEFAULT_THEME;
   let keyMap: string = 'default';
   let matchBrackets = false;
 
-  const { id } = commandsPlugin;
-
   // Annotate the plugin settings.
-  settings.annotate(id, '', { label: 'CodeMirror' });
-  settings.annotate(id, 'keyMap', { label: 'Key Map' });
-  settings.annotate(id, 'matchBrackets', { label: 'Match Brackets' });
-  settings.annotate(id, 'theme', { label: 'Theme' });
+  registry.annotate(id, '', { label: 'CodeMirror' });
+  registry.annotate(id, 'keyMap', { label: 'Key Map' });
+  registry.annotate(id, 'matchBrackets', { label: 'Match Brackets' });
+  registry.annotate(id, 'theme', { label: 'Theme' });
 
   /**
    * Update the setting values.
@@ -102,7 +101,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     theme = settings.get('theme') as string | null || theme;
   }
 
-  Promise.all([settings.load(id), restored]).then(([settings]) => {
+  Promise.all([registry.load(id), restored]).then(([settings]) => {
     updateSettings(settings);
     settings.changed.connect(() => { updateSettings(settings); });
     tracker.forEach(widget => {
@@ -163,7 +162,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
             cm.setOption('theme', theme);
           }
         });
-        return settings.set(id, 'theme', theme);
+        return registry.set(id, 'theme', theme);
       },
       isEnabled: hasWidget,
       isToggled: args => args['theme'] === theme
@@ -182,7 +181,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
             cm.setOption('keyMap', keyMap);
           }
         });
-        return settings.set(id, 'keyMap', keyMap);
+        return registry.set(id, 'keyMap', keyMap);
       },
       isEnabled: hasWidget,
       isToggled: args => args['keyMap'] === keyMap
@@ -226,7 +225,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
           cm.setOption('matchBrackets', matchBrackets);
         }
       });
-      return settings.set(id, 'matchBrackets', matchBrackets);
+      return registry.set(id, 'matchBrackets', matchBrackets);
     },
     label: 'Match Brackets',
     isEnabled: hasWidget,
