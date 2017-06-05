@@ -30,7 +30,7 @@ const TEXTEDITOR_ICON_CLASS = 'jp-ImageTextEditor';
 /**
  * The name of the factory that creates markdown widgets.
  */
-const FACTORY = 'Rendered Markdown';
+const FACTORY = 'Markdown Preview';
 
 
 /**
