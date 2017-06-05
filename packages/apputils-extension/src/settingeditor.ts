@@ -57,9 +57,14 @@ const PLUGIN_FIELDSET_CLASS = 'jp-PluginFieldset';
 const PLUGIN_LIST_CLASS = 'jp-PluginList';
 
 /**
+ * The class name added to all plugin list icons.
+ */
+const PLUGIN_ICON_CLASS = 'jp-PluginList-icon';
+
+/**
  * The class name added to selected items.
  */
-const SELECTED_CLASS = 'jp-mode-selected';
+const SELECTED_CLASS = 'jp-mod-selected';
 
 
 /**
@@ -522,9 +527,11 @@ namespace Private {
   export
   function createListItem(plugin: ISettingRegistry.IPlugin, annotations: ISettingRegistry.IPluginAnnotations): HTMLLIElement {
     const annotation = annotations && annotations.annotation;
-    const caption = annotation && annotation.caption || '';
+    const caption = annotation && annotation.caption || plugin.id;
     const className = annotation && annotation.className || '';
-    const iconClass = annotation && annotation.iconClass || '';
+    const iconClass = `${PLUGIN_ICON_CLASS} ${
+      annotation && annotation.iconClass || ''
+    }`;
     const iconLabel = annotation && annotation.iconLabel || '';
     const label = (annotation && annotation.label) || plugin.id;
 
@@ -541,11 +548,9 @@ namespace Private {
   export
   function populateFieldset(node: HTMLElement, plugin: ISettingRegistry.IPlugin, annotations: ISettingRegistry.IPluginAnnotations): void {
     const label = annotations && annotations.annotation &&
-      annotations.annotation.label || plugin.id;
-    const legend = document.createElement('legend');
+      `${annotations.annotation.label} (${plugin.id})` || plugin.id;
 
-    legend.appendChild(document.createTextNode(label));
-    node.appendChild(legend);
+    node.appendChild(VirtualDOM.realize(h.legend(label)));
   }
 
   /**

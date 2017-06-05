@@ -6,14 +6,41 @@
 #setting-editor.jp-SettingEditor {
   background-color: var(--md-grey-200);
   outline: none;
-  padding: 3px;
 }
 
 
 #setting-editor.jp-SettingEditor ul.jp-PluginList {
+  background-color: var(--md-grey-300);
+  color: var(--jp-ui-font-color1);
+  font-size: var(--jp-ui-font-size1);
   list-style-type: none;
   margin: 0;
-  padding: 2px;
+  padding: 0;
+}
+
+
+#setting-editor.jp-SettingEditor ul.jp-PluginList li {
+  padding: 2px 0 5px 5px;
+}
+
+
+#setting-editor.jp-SettingEditor ul.jp-PluginList li:hover {
+  background-color: var(--md-grey-200);
+}
+
+
+#setting-editor.jp-SettingEditor ul.jp-PluginList li.jp-mod-selected {
+  background-color: var(--md-grey-200);
+}
+
+
+#setting-editor.jp-SettingEditor .jp-PluginList-icon {
+  display: inline-block;
+  height: 20px;
+  width: 20px;
+  margin-right: 3px;
+  position: relative;
+  top: 3px;
 }
 
 

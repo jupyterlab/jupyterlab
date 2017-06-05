@@ -86,7 +86,11 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
   let matchBrackets = false;
 
   // Annotate the plugin settings.
-  registry.annotate(id, '', { label: 'CodeMirror' });
+  registry.annotate(id, '', {
+    iconClass: 'jp-ImageTextEditor',
+    iconLabel: 'CodeMirror',
+    label: 'CodeMirror'
+  });
   registry.annotate(id, 'keyMap', { label: 'Key Map' });
   registry.annotate(id, 'matchBrackets', { label: 'Match Brackets' });
   registry.annotate(id, 'theme', { label: 'Theme' });
