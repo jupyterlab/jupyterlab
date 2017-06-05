@@ -46,6 +46,16 @@ const SHORTCUTS = [
     keys: ['Accel Shift Enter']
   },
   {
+    command: 'chatbox:post',
+    selector: '.jp-Chatbox-prompt',
+    keys: ['Enter']
+  },
+  {
+    command: 'chatbox:linebreak',
+    selector: '.jp-Chatbox-prompt',
+    keys: ['Ctrl Enter']
+  },
+  {
     command: 'command-palette:activate',
     selector: 'body',
     keys: ['Accel Shift P']
@@ -61,13 +71,8 @@ const SHORTCUTS = [
     keys: ['Tab']
   },
   {
-    command: 'chatbox:post',
-    selector: '.jp-Chatbox-prompt',
-    keys: ['Enter']
-  },
-  {
-    command: 'chatbox:linebreak',
-    selector: '.jp-Chatbox-prompt',
+    command: 'console:linebreak',
+    selector: '.jp-CodeConsole-promptCell',
     keys: ['Ctrl Enter']
   },
   {
@@ -76,18 +81,13 @@ const SHORTCUTS = [
     keys: ['Enter']
   },
   {
-    command: 'console:run-forced',
-    selector: '.jp-CodeConsole-promptCell',
+    command: 'editor:run-code',
+    selector: '.jp-FileEditor',
     keys: ['Shift Enter']
   },
   {
-    command: 'console:linebreak',
+    command: 'console:run-forced',
     selector: '.jp-CodeConsole-promptCell',
-    keys: ['Ctrl Enter']
-  },
-  {
-    command: 'editor:run-code',
-    selector: '.jp-FileEditor',
     keys: ['Shift Enter']
   },
   {
@@ -128,6 +128,11 @@ const SHORTCUTS = [
     keys: ['Accel Shift H']
   },
   {
+    command: 'imageviewer:reset-zoom',
+    selector: '.jp-ImageViewer',
+    keys: ['0']
+  },
+  {
     command: 'imageviewer:zoom-in',
     selector: '.jp-ImageViewer',
     keys: ['=']
@@ -136,11 +141,6 @@ const SHORTCUTS = [
     command: 'imageviewer:zoom-out',
     selector: '.jp-ImageViewer',
     keys: ['-']
-  },
-  {
-    command: 'imageviewer:reset-zoom',
-    selector: '.jp-ImageViewer',
-    keys: ['0']
   },
   {
     command: 'inspector:open',
@@ -341,6 +341,11 @@ const SHORTCUTS = [
     command: 'notebook:command-mode',
     selector: '.jp-Notebook.jp-mod-editMode',
     keys: ['Ctrl M']
+  },
+  {
+    command: 'setting-editor:open',
+    selector: 'body',
+    keys: ['Accel ,']
   },
   {
     command: 'tooltip:launch-notebook',
