@@ -9,6 +9,34 @@
 }
 
 
+#setting-editor.jp-SettingEditor .jp-SettingEditorInstructions {
+  text-align: center;
+}
+
+
+#setting-editor.jp-SettingEditor .jp-SettingEditorInstructions-icon {
+  display: inline-block;
+  background-size: 60px;
+  width: 60px;
+  height: 78px;
+  margin-right: 5px;
+
+}
+
+
+#setting-editor.jp-SettingEditor .jp-SettingEditorInstructions-title {
+  font-size: 32px;
+  font-weight: 200;
+  line-height: 78px;
+  vertical-align: top;
+}
+
+
+#setting-editor.jp-SettingEditor .jp-SettingEditorInstructions-text {
+  font-size: var(--jp-ui-font-size2);
+}
+
+
 #setting-editor.jp-SettingEditor ul.jp-PluginList {
   background-color: var(--md-grey-300);
   color: var(--jp-ui-font-color1);

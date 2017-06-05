@@ -71,6 +71,37 @@ const PLUGIN_ICON_CLASS = 'jp-PluginList-icon';
  */
 const SELECTED_CLASS = 'jp-mod-selected';
 
+/**
+ * The class name added to the instructions widget.
+ */
+const INSTRUCTIONS_CLASS = 'jp-SettingEditorInstructions';
+
+/**
+ * The class name added to the instructions icon.
+ */
+const INSTRUCTIONS_ICON_CLASS = 'jp-SettingEditorInstructions-icon';
+
+/**
+ * The class name added to the instructions title.
+ */
+const INSTRUCTIONS_TITLE_CLASS = 'jp-SettingEditorInstructions-title';
+
+/**
+ * The class name added to the instructions text.
+ */
+const INSTRUCTIONS_TEXT_CLASS = 'jp-SettingEditorInstructions-text';
+
+/**
+ * The title of the instructions pane.
+ */
+const INSTRUCTIONS_TITLE = 'Settings';
+
+/**
+ * The instructions for using the setting editor.
+ */
+const INSTRUCTIONS_TEXT = `
+Select a plugin from the list to view and edit its preferences.
+`;
 
 /**
  * An interface for modifying and saving application settings.
@@ -87,11 +118,14 @@ class SettingEditor extends Widget {
     const settings = this.settings = options.settings;
     const layout = this.layout = new BoxLayout({ direction: 'left-to-right' });
     const list = this._list = new PluginList({ settings });
+    const instructions = this._instructions;
     const editor = this._editor = new PluginEditor({ editorFactory });
 
     layout.addWidget(list);
+    layout.addWidget(instructions);
     layout.addWidget(editor);
     BoxLayout.setStretch(list, 1);
+    BoxLayout.setStretch(instructions, 3);
     BoxLayout.setStretch(editor, 3);
 
     list.selected.connect(this._onSelected, this);
@@ -135,8 +169,21 @@ class SettingEditor extends Widget {
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    this._editor.update();
-    this._list.update();
+    const list = this._list;
+    const instructions = this._instructions;
+    const editor = this._editor;
+
+    if (editor.settings) {
+      instructions.hide();
+      editor.show();
+    } else {
+      instructions.show();
+      editor.hide();
+    }
+
+    list.update();
+    instructions.update();
+    editor.update();
   }
 
   /**
@@ -149,6 +196,7 @@ class SettingEditor extends Widget {
   }
 
   private _editor: PluginEditor;
+  private _instructions = new Widget({ node: Private.createInstructionsNode() });
   private _list: PluginList;
 }
 
@@ -526,6 +574,17 @@ function activateSettingEditor(app: JupyterLab, restorer: ILayoutRestorer, setti
  * A namespace for private module data.
  */
 namespace Private {
+  /**
+   */
+  export
+  function createInstructionsNode(): HTMLElement {
+    return VirtualDOM.realize(h.div({ className: INSTRUCTIONS_CLASS },
+      h.h2(
+        h.span({ className: `${INSTRUCTIONS_ICON_CLASS} jp-JupyterIcon` }),
+        h.span({ className: INSTRUCTIONS_TITLE_CLASS }, INSTRUCTIONS_TITLE)),
+      h.span({ className: INSTRUCTIONS_TEXT_CLASS }, INSTRUCTIONS_TEXT)));
+  }
+
   /**
    * Create a plugin list item.
    */
