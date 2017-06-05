@@ -17,7 +17,8 @@ import 'codemirror/mode/julia/julia';
 import 'codemirror/mode/r/r';
 import 'codemirror/mode/markdown/markdown';
 import 'codemirror/mode/clike/clike';
-
+import 'codemirror/mode/shell/shell';
+import 'codemirror/mode/sql/sql';
 
 // Stub for the require function.
 declare var require: any;
