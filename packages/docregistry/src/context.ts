@@ -65,6 +65,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     this.session = new ClientSession({
       manager: manager.sessions,
       path: this._path,
+      type: ext === '.ipynb' ? 'notebook' : 'file',
       name: this._path.split('/').pop(),
       kernelPreference: options.kernelPreference || { shouldStart: false }
     });
