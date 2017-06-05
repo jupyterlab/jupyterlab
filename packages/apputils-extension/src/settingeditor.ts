@@ -28,7 +28,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  VirtualDOM, h
+  h, VirtualDOM, VirtualElement
 } from '@phosphor/virtualdom';
 
 import {
@@ -50,6 +50,11 @@ const PLUGIN_EDITOR_CLASS = 'jp-PluginEditor';
  * The class name added to all plugin fieldsets.
  */
 const PLUGIN_FIELDSET_CLASS = 'jp-PluginFieldset';
+
+/**
+ * The class name added to key labels in the fieldset.
+ */
+const KEY_LABEL_CLASS = 'jp-PluginFieldset-key';
 
 /**
  * The class name added to all plugin lists.
@@ -549,8 +554,32 @@ namespace Private {
   function populateFieldset(node: HTMLElement, plugin: ISettingRegistry.IPlugin, annotations: ISettingRegistry.IPluginAnnotations): void {
     const label = annotations && annotations.annotation &&
       `${annotations.annotation.label} (${plugin.id})` || plugin.id;
+    const fields: { [key: string]: VirtualElement } = Object.create(null);
+
+    Object.keys(annotations && annotations.keys || { }).forEach(key => {
+      const annotation = annotations.keys[key];
+      const label = annotation.label ? `(${annotation.label})` : '';
+
+      fields[key] = h.li(
+        h.code(key),
+        h.span({ className: KEY_LABEL_CLASS }, label));
+    });
+    Object.keys(plugin.data.system || { }).forEach(key => {
+      if (!fields[key]) {
+        fields[key] = h.li(h.code(key));
+      }
+    });
+    Object.keys(plugin.data.user || { }).forEach(key => {
+      if (!fields[key]) {
+        fields[key] = h.li(h.code(key));
+      }
+    });
+
+    const items: VirtualElement[] = Object.keys(fields)
+      .sort((a, b) => a.localeCompare(b)).map(key => fields[key]);
 
     node.appendChild(VirtualDOM.realize(h.legend(label)));
+    node.appendChild(VirtualDOM.realize(h.ul(items)));
   }
 
   /**

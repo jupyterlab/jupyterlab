@@ -74,3 +74,25 @@
   font-weight: bold;
   margin-left: 10px;
 }
+
+
+#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset ul {
+  color: var(--jp-ui-font-color1);
+  font-size: var(--jp-ui-font-size1);
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+
+#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset li {
+  background-color: var(--md-grey-300);
+  color: var(--jp-ui-font-color1);
+  display: inline-block;
+  margin: 3px;
+  padding: 3px;
+}
+
+#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset-key {
+  margin-left: 3px;
+}
