@@ -78,7 +78,7 @@ export default plugins;
 /**
  * Set up the editor widget menu and commands.
  */
-function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB, registry: ISettingRegistry): void {
+function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB, settingRegistry: ISettingRegistry): void {
   const { commands, restored } = app;
   const { id } = commandsPlugin;
   let theme: string = CodeMirrorEditor.DEFAULT_THEME;
@@ -86,14 +86,14 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
   let matchBrackets = false;
 
   // Annotate the plugin settings.
-  registry.annotate(id, '', {
+  settingRegistry.annotate(id, '', {
     iconClass: 'jp-ImageTextEditor',
     iconLabel: 'CodeMirror',
     label: 'CodeMirror'
   });
-  registry.annotate(id, 'keyMap', { label: 'Key Map' });
-  registry.annotate(id, 'matchBrackets', { label: 'Match Brackets' });
-  registry.annotate(id, 'theme', { label: 'Theme' });
+  settingRegistry.annotate(id, 'keyMap', { label: 'Key Map' });
+  settingRegistry.annotate(id, 'matchBrackets', { label: 'Match Brackets' });
+  settingRegistry.annotate(id, 'theme', { label: 'Theme' });
 
   /**
    * Update the setting values.
@@ -105,9 +105,10 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     theme = settings.get('theme') as string | null || theme;
   }
 
-  Promise.all([registry.load(id), restored]).then(([settings]) => {
-    updateSettings(settings);
-    settings.changed.connect(() => { updateSettings(settings); });
+  /**
+   * Update the settings of the current tracker instances.
+   */
+  function updateTracker(): void {
     tracker.forEach(widget => {
       if (widget.editor instanceof CodeMirrorEditor) {
         let cm = widget.editor.editor;
@@ -115,6 +116,16 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
         cm.setOption('theme', theme);
         cm.setOption('matchBrackets', matchBrackets);
       }
+    });
+  }
+
+  // Fetch the initial state of the settings.
+  Promise.all([settingRegistry.load(id), restored]).then(([settings]) => {
+    updateSettings(settings);
+    updateTracker();
+    settings.changed.connect(() => {
+      updateSettings(settings);
+      updateTracker();
     });
   });
 
@@ -166,7 +177,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
             cm.setOption('theme', theme);
           }
         });
-        return registry.set(id, 'theme', theme);
+        return settingRegistry.set(id, 'theme', theme);
       },
       isEnabled: hasWidget,
       isToggled: args => args['theme'] === theme
@@ -185,7 +196,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
             cm.setOption('keyMap', keyMap);
           }
         });
-        return registry.set(id, 'keyMap', keyMap);
+        return settingRegistry.set(id, 'keyMap', keyMap);
       },
       isEnabled: hasWidget,
       isToggled: args => args['keyMap'] === keyMap
@@ -229,7 +240,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
           cm.setOption('matchBrackets', matchBrackets);
         }
       });
-      return registry.set(id, 'matchBrackets', matchBrackets);
+      return settingRegistry.set(id, 'matchBrackets', matchBrackets);
     },
     label: 'Match Brackets',
     isEnabled: hasWidget,

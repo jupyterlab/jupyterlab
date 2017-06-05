@@ -84,7 +84,7 @@ export default plugin;
 /**
  * Activate the editor tracker plugin.
  */
-function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayoutRestorer, editorServices: IEditorServices, settings: ISettingRegistry, launcher: ILauncher | null): IEditorTracker {
+function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayoutRestorer, editorServices: IEditorServices, settingRegistry: ISettingRegistry, launcher: ILauncher | null): IEditorTracker {
   const id = plugin.id;
   const namespace = 'editor';
   const factory = new FileEditorFactory({
@@ -105,17 +105,34 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
     name: widget => widget.context.path
   });
 
-  // Fetch the initial state of the settings.
-  Promise.all([settings.load(id), restored]).then(([settings]) => {
+  /**
+   * Update the setting values.
+   */
+  function updateSettings(settings: ISettingRegistry.ISettings): void {
     let cached = settings.get('lineNumbers') as boolean | null;
     lineNumbers = cached === null ? lineNumbers : cached as boolean;
 
     cached = settings.get('wordWrap') as boolean | null;
     wordWrap = cached === null ? wordWrap : cached as boolean;
+  }
 
+  /**
+   * Update the settings of the current tracker instances.
+   */
+  function updateTracker(): void {
     tracker.forEach(widget => {
       widget.editor.lineNumbers = lineNumbers;
       widget.editor.wordWrap = wordWrap;
+    });
+  }
+
+  // Fetch the initial state of the settings.
+  Promise.all([settingRegistry.load(id), restored]).then(([settings]) => {
+    updateSettings(settings);
+    updateTracker();
+    settings.changed.connect(() => {
+      updateSettings(settings);
+      updateTracker();
     });
   });
 
@@ -141,7 +158,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
     execute: () => {
       lineNumbers = !lineNumbers;
       tracker.forEach(widget => { widget.editor.lineNumbers = lineNumbers; });
-      return settings.set(id, 'lineNumbers', lineNumbers);
+      return settingRegistry.set(id, 'lineNumbers', lineNumbers);
     },
     isEnabled: hasWidget,
     isToggled: () => lineNumbers,
@@ -152,7 +169,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
     execute: () => {
       wordWrap = !wordWrap;
       tracker.forEach(widget => { widget.editor.wordWrap = wordWrap; });
-      return settings.set(id, 'wordWrap', wordWrap);
+      return settingRegistry.set(id, 'wordWrap', wordWrap);
     },
     isEnabled: hasWidget,
     isToggled: () => wordWrap,
