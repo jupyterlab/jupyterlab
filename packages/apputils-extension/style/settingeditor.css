@@ -48,7 +48,10 @@
 
 
 #setting-editor.jp-SettingEditor ul.jp-PluginList li {
+  overflow: hidden;
   padding: 2px 0 5px 5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 
