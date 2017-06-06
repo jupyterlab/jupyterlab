@@ -224,10 +224,16 @@ class LauncherWidget extends VDomRenderer<LauncherModel> {
   /**
    * Construct a new launcher widget.
    */
-  constructor() {
+  constructor(options: LauncherWidget.IOptions) {
     super();
+    this.cwd = options.cwd;
     this.addClass(LAUNCHER_CLASS);
   }
+
+  /**
+   * The cwd of the launcher.
+   */
+  readonly cwd: string;
 
   /**
    * Render the launcher to virtual DOM nodes.
@@ -246,3 +252,23 @@ class LauncherWidget extends VDomRenderer<LauncherModel> {
     return h.div({ className: DIALOG_CLASS }, [body]);
   }
 }
+
+
+/**
+ * The namespace for `LauncherWidget` class statics.
+ */
+export
+namespace LauncherWidget {
+  /**
+   * The options used to create a LauncherWidget.
+   */
+  export
+  interface IOptions {
+    /**
+     * The cwd of the launcher.
+     */
+    cwd: string;
+  }
+}
+
+

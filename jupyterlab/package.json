@@ -68,7 +68,6 @@
       "@jupyterlab/help-extension",
       "@jupyterlab/imageviewer-extension",
       "@jupyterlab/inspector-extension",
-      "@jupyterlab/landing-extension",
       "@jupyterlab/launcher-extension",
       "@jupyterlab/markdownviewer-extension",
       "@jupyterlab/notebook-extension",

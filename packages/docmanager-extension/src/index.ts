@@ -57,6 +57,9 @@ namespace CommandIDs {
 
   export
   const saveAs = 'file-operations:save-as';
+
+  export
+  const createLauncher = 'file-operations:create-launcher';
 };
 
 
@@ -245,6 +248,15 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, registry: ID
     }
   });
 
+  commands.addCommand(CommandIDs.createLauncher, {
+    label: 'New...',
+    execute: () => {
+      return commands.execute('launcher-jupyterlab:create', {
+        cwd: docManager.cwd
+      });
+    }
+  });
+
   [
     CommandIDs.save,
     CommandIDs.restoreCheckpoint,
@@ -264,6 +276,7 @@ function createMenu(app: JupyterLab, docManager: IDocumentManager, registry: IDo
 
   menu.title.label = 'File';
   [
+    CommandIDs.createLauncher,
     CommandIDs.save,
     CommandIDs.saveAs,
     CommandIDs.restoreCheckpoint,

@@ -23,7 +23,7 @@ import {
  */
 namespace CommandIDs {
   export
-  const show = 'launcher-jupyterlab:show';
+  const create = 'launcher-jupyterlab:create';
 };
 
 
@@ -57,18 +57,35 @@ function activate(app: JupyterLab, services: IServiceManager, palette: ICommandP
 
   let model = new LauncherModel();
 
-  commands.addCommand(CommandIDs.show, {
+  commands.addCommand(CommandIDs.create, {
     label: 'New Launcher',
-    execute: () => {
-      let widget = new LauncherWidget();
+    execute: (args) => {
+      let cwd = args['cwd'] ? String(args['cwd']) : '';
+      let widget = new LauncherWidget({ cwd });
       widget.model = model;
-      widget.id = 'launcher';
+      widget.id = `launcher-${Private.id++}`;
       widget.title.label = 'Launcher';
+      widget.title.closable = true;
       shell.addToMainArea(widget);
+      if (args['activate'] !== false) {
+        shell.activateById(widget.id);
+      }
     }
   });
 
-  palette.addItem({ command: CommandIDs.show, category: 'Launcher'});
+  palette.addItem({ command: CommandIDs.create, category: 'Launcher'});
 
   return model;
+}
+
+
+/**
+ * The namespace for module private data.
+ */
+namespace Private {
+  /**
+   * The incrementing id used for launcher widgets.
+   */
+  export
+  let id = 0;
 }
