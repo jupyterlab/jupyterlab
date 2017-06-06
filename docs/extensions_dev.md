@@ -51,7 +51,7 @@ The JupyterLab [shell](http://jupyterlab.github.io/jupyterlab/classes/_applicati
 application.  The application consists of:
 
 - A top area for things like top level menus and toolbars
-- Left and right side bar areas for collapsable content
+- Left and right side bar areas for collapsible content
 - A main area for user activity.
 - A bottom area for things like status bars
 
@@ -70,9 +70,9 @@ listeners to react to changes in an observed object.
 
 ## Extension Authoring
 An Extension is a valid [npm package](https://docs.npmjs.com/getting-started/what-is-npm) that meets the following criteria:
-  - Exports one or more JupyterLab plugins as the default export in its 
+  - Exports one or more JupyterLab plugins as the default export in its
     main file.
-  - Has a `jupyterlab` key in its `package.json` which has 
+  - Has a `jupyterlab` key in its `package.json` which has
     `"extension": true` metadata.
 
 While authoring the extension, you can use the command:
@@ -82,7 +82,7 @@ jupyter labextension link <path>
 ```
 
 This causes the builder to re-install the source folder before building
-the application files.  You can re-build at any time using `jupyter lab build` and it will reinstall these packages.  You can also link other npm packages 
+the application files.  You can re-build at any time using `jupyter lab build` and it will reinstall these packages.  You can also link other npm packages
 that you are working on simultaneously; they will be re-installed but not
 considered as extensions if they lack the metadata.
 
@@ -107,8 +107,8 @@ This may be done using the command
 npm run addsibling <path-or-url>
 ```
 
-in the JupyterLab root directory, where `<path-or-url>` refers either to an 
-extension npm package on the local filesystem, or a URL to a git 
+in the JupyterLab root directory, where `<path-or-url>` refers either to an
+extension npm package on the local filesystem, or a URL to a git
 repository for an extension npm package. This operation may be subsequently
 reversed by running
 
@@ -120,22 +120,22 @@ This will remove the package metadata from the source tree, but wil **not**
 remove any files added by the `addsibling` script, which should be removed
 manually.
 
-The package should export EMCAScript 5 compatible JavaScript.  It can 
+The package should export EMCAScript 5 compatible JavaScript.  It can
 import CSS using the syntax `require('foo.css')`.  The CSS files
-can also import CSS from other packages using the syntax 
+can also import CSS from other packages using the syntax
 `@import url('~foo/index.css')`, where `foo` is the name of the package.
 
 The following file types are also supported (both in JavaScript and CSS):
 json, html, jpg, png, gif, svg, js.map, woff2, ttf, eot.
 
-If your package uses any other file type it must be converted to one of 
+If your package uses any other file type it must be converted to one of
 the above types.  If your JavaScript is written in any other dialect than
 EMCAScript 5 it must be converted using an appropriate tool.
 
-If you publish your extension on npm.org, users will be able to 
+If you publish your extension on npm.org, users will be able to
 install it as simply `jupyter labextension install <foo>`, where
 `<foo>` is the name of the published npm package.  You can alternatively
-provide a script that runs `jupyter labextension install` against a 
+provide a script that runs `jupyter labextension install` against a
 local folder path on the user's machine or a provided tarball.  Any
 valid `npm install` specifier can be used in `jupyter labextension install` (e.g. `foo@latest`, `bar@3.0.0.0`, `path/to/folder`, and `path/to/tar.gz`).
 

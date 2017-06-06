@@ -46,6 +46,7 @@ import "@jupyterlab/running";
 import "@jupyterlab/running-extension";
 import "@jupyterlab/services";
 import "@jupyterlab/services-extension";
+import "@jupyterlab/settingeditor-extension";
 import "@jupyterlab/shortcuts-extension";
 import "@jupyterlab/tabmanager-extension";
 import "@jupyterlab/terminal";

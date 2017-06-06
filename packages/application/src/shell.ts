@@ -242,14 +242,19 @@ class ApplicationShell extends Widget {
   activateById(id: string): void {
     if (this._leftHandler.has(id)) {
       this._leftHandler.activate(id);
-    } else if (this._rightHandler.has(id)) {
+      return;
+    }
+
+    if (this._rightHandler.has(id)) {
       this._rightHandler.activate(id);
-    } else {
-      const dock = this._dockPanel;
-      const widget = find(dock.widgets(), value => value.id === id);
-      if (widget) {
-        dock.activateWidget(widget);
-      }
+      return;
+    }
+
+    const dock = this._dockPanel;
+    const widget = find(dock.widgets(), value => value.id === id);
+
+    if (widget) {
+      dock.activateWidget(widget);
     }
   }
 
@@ -594,6 +599,7 @@ class ApplicationShell extends Widget {
       leftArea: this._leftHandler.dehydrate(),
       rightArea: this._rightHandler.dehydrate()
     };
+
     return this._database.save(data);
   }
 

@@ -23,17 +23,19 @@
   background-image: url(icons/md/chat.svg);
 }
 
+
 .jp-CloseIcon {
   background-image: url(icons/md/close.svg);
-}
-
-.jp-CutIcon {
-  background-image: url(icons/md/cut.svg);
 }
 
 
 .jp-CopyIcon {
   background-image: url(icons/md/copy.svg);
+}
+
+
+.jp-CutIcon {
+  background-image: url(icons/md/cut.svg);
 }
 
 

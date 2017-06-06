@@ -2,11 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IStateDB
-} from '@jupyterlab/apputils';
-
-import {
-  IChangedArgs, PathExt
+  IChangedArgs, IStateDB, PathExt
 } from '@jupyterlab/coreutils';
 
 import {

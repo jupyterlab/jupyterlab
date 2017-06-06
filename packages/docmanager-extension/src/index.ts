@@ -270,6 +270,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, registry: ID
 function createMenu(app: JupyterLab, docManager: IDocumentManager, registry: IDocumentRegistry): Menu {
   const { commands } = app;
   const menu = new Menu({ commands });
+
   menu.title.label = 'File';
   [
     CommandIDs.save,
@@ -278,6 +279,8 @@ function createMenu(app: JupyterLab, docManager: IDocumentManager, registry: IDo
     CommandIDs.close,
     CommandIDs.closeAllFiles
   ].forEach(command => { menu.addItem({ command }); });
+  menu.addItem({ type: 'separator' });
+  menu.addItem({ command: 'setting-editor:open' });
 
   return menu;
 }

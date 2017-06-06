@@ -2,8 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  InstanceTracker, IStateDB
+  InstanceTracker
 } from '@jupyterlab/apputils';
+
+import {
+  IStateDB
+} from '@jupyterlab/coreutils';
 
 import {
   CommandRegistry

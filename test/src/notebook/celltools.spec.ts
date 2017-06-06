@@ -16,10 +16,6 @@ import {
 } from 'simulate-event';
 
 import {
-  ApplicationShell
-} from '@jupyterlab/application';
-
-import {
   CodeMirrorEditorFactory
 } from '@jupyterlab/codemirror';
 
@@ -103,10 +99,7 @@ describe('notebook/celltools', () => {
   let panel1: NotebookPanel;
 
   beforeEach((done) => {
-    tracker = new NotebookTracker({
-      namespace: 'notebook',
-      shell: new ApplicationShell()
-    });
+    tracker = new NotebookTracker({ namespace: 'notebook' });
     panel0 = createNotebookPanel();
     populateNotebook(panel0.notebook);
     panel1 = createNotebookPanel();

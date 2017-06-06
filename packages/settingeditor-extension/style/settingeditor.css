@@ -1,0 +1,140 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+#setting-editor.jp-SettingEditor {
+  background-color: var(--md-grey-200);
+  outline: none;
+}
+
+
+#setting-editor.jp-SettingEditor .p-SplitPanel-handle {
+  background-color: var(--md-grey-400);
+}
+
+
+#setting-editor.jp-SettingEditor .jp-SettingEditorInstructions {
+  text-align: center;
+}
+
+
+#setting-editor.jp-SettingEditor .jp-SettingEditorInstructions-icon {
+  display: inline-block;
+  background-size: 60px;
+  width: 60px;
+  height: 78px;
+  margin-right: 5px;
+
+}
+
+
+#setting-editor.jp-SettingEditor .jp-SettingEditorInstructions-title {
+  font-size: 32px;
+  font-weight: 200;
+  line-height: 78px;
+  vertical-align: top;
+}
+
+
+#setting-editor.jp-SettingEditor .jp-SettingEditorInstructions-text {
+  font-size: var(--jp-ui-font-size2);
+}
+
+
+#setting-editor.jp-SettingEditor ul.jp-PluginList {
+  background-color: var(--jp-layout-color0);
+  color: var(--jp-ui-font-color1);
+  font-size: var(--jp-ui-font-size1);
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  min-width: 80px;
+  width: 200px;
+}
+
+
+#setting-editor.jp-SettingEditor ul.jp-PluginList li {
+  border: 1px solid transparent;
+  overflow: hidden;
+  padding: 2px 0 5px 5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+#setting-editor.jp-SettingEditor ul.jp-PluginList li:hover {
+  border: 1px solid var(--md-grey-300);
+  background-color: var(--md-grey-200);
+}
+
+
+#setting-editor.jp-SettingEditor ul.jp-PluginList li.jp-mod-selected {
+  background-color: var(--md-grey-200);
+}
+
+
+#setting-editor.jp-SettingEditor .jp-PluginList-icon {
+  display: inline-block;
+  height: 20px;
+  width: 20px;
+  margin-right: 3px;
+  position: relative;
+  top: 3px;
+}
+
+
+#setting-editor.jp-SettingEditor .jp-PluginEditor {
+  padding: 10px;
+}
+
+
+#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-JSONEditor-host {
+  height: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+
+#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-JSONEditor-header {
+  position: absolute;
+  right: 0;
+  z-index: 9999;
+}
+
+
+#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset {
+  border: 1px solid var(--jp-brand-color1);
+  margin: 0;
+  padding: 0;
+}
+
+
+#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset legend {
+  color: var(--jp-brand-color1);
+  font-size: 70%;
+  font-weight: bold;
+  margin-left: 15px;
+}
+
+
+#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset ul {
+  color: var(--jp-ui-font-color1);
+  font-size: var(--jp-ui-font-size1);
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+
+#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset li {
+  background-color: var(--md-grey-400);
+  color: var(--jp-ui-font-color2);
+  display: inline-block;
+  margin: 3px;
+  padding: 3px;
+}
+
+#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset-key {
+  margin-left: 3px;
+}

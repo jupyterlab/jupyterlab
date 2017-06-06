@@ -2,12 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Token
-} from '@phosphor/coreutils';
-
-import {
   IInstanceTracker
 } from '@jupyterlab/apputils';
+
+import {
+  Token
+} from '@phosphor/coreutils';
 
 import {
   ImageViewer

@@ -5,7 +5,7 @@ import expect = require('expect.js');
 
 import {
   StateDB
-} from '@jupyterlab/apputils';
+} from '@jupyterlab/coreutils';
 
 
 describe('StateDB', () => {

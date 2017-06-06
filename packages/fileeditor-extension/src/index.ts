@@ -2,36 +2,36 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject
-} from '@phosphor/coreutils';
-
-import {
   JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
 import {
-  ILayoutRestorer, InstanceTracker, IStateDB
+  ILayoutRestorer, InstanceTracker
 } from '@jupyterlab/apputils';
+
+import {
+  ISettingRegistry
+} from '@jupyterlab/coreutils';
 
 import {
   IEditorServices
 } from '@jupyterlab/codeeditor';
 
 import {
+   MarkdownCodeBlocks, PathExt
+} from '@jupyterlab/coreutils';
+
+import {
   IDocumentRegistry
 } from '@jupyterlab/docregistry';
 
 import {
-  IEditorTracker, FileEditor, FileEditorFactory
+  FileEditor, FileEditorFactory, IEditorTracker
 } from '@jupyterlab/fileeditor';
 
 import {
   ILauncher
 } from '@jupyterlab/launcher';
-
-import {
-   MarkdownCodeBlocks
-} from '@jupyterlab/coreutils'
 
 
 /**
@@ -69,7 +69,7 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<IEditorTracker> = {
   activate,
   id: 'jupyter.services.editor-tracker',
-  requires: [IDocumentRegistry, ILayoutRestorer, IEditorServices, IStateDB],
+  requires: [IDocumentRegistry, ILayoutRestorer, IEditorServices, ISettingRegistry],
   optional: [ILauncher],
   provides: IEditorTracker,
   autoStart: true
@@ -84,21 +84,16 @@ export default plugin;
 /**
  * Activate the editor tracker plugin.
  */
-function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayoutRestorer, editorServices: IEditorServices, state: IStateDB, launcher: ILauncher | null): IEditorTracker {
+function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayoutRestorer, editorServices: IEditorServices, settingRegistry: ISettingRegistry, launcher: ILauncher | null): IEditorTracker {
+  const id = plugin.id;
+  const namespace = 'editor';
   const factory = new FileEditorFactory({
     editorServices,
-    factoryOptions: {
-      name: FACTORY,
-      fileExtensions: ['*'],
-      defaultFor: ['*']
-    }
+    factoryOptions: { name: FACTORY, fileExtensions: ['*'], defaultFor: ['*'] }
   });
-  const { commands, shell } = app;
-  const id = 'editor:settings';
-  const tracker = new InstanceTracker<FileEditor>({
-    namespace: 'editor',
-    shell
-  });
+  const { commands, restored } = app;
+  const tracker = new InstanceTracker<FileEditor>({ namespace });
+  const hasWidget = () => tracker.currentWidget !== null;
 
   let lineNumbers = true;
   let wordWrap = true;
@@ -110,28 +105,39 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
     name: widget => widget.context.path
   });
 
-  // Fetch the initial state of the settings.
-  state.fetch(id).then(settings => {
-    if (!settings) {
-      return;
-    }
-    if (typeof settings['wordWrap'] === 'string') {
-      commands.execute(CommandIDs.wordWrap, settings);
-    }
-    if (typeof settings['lineNumbers'] === 'string') {
-      commands.execute(CommandIDs.lineNumbers, settings);
-    }
-  });
+  /**
+   * Update the setting values.
+   */
+  function updateSettings(settings: ISettingRegistry.ISettings): void {
+    let cached = settings.get('lineNumbers') as boolean | null;
+    lineNumbers = cached === null ? false : !!cached;
+    cached = settings.get('wordWrap') as boolean | null;
+    wordWrap = cached === null ? false : !!cached;
+  }
 
   /**
-   * Save the editor widget settings state.
+   * Update the settings of the current tracker instances.
    */
-  function saveState(): Promise<void> {
-    return state.save(id, { lineNumbers, wordWrap });
+  function updateTracker(): void {
+    tracker.forEach(widget => {
+      widget.editor.lineNumbers = lineNumbers;
+      widget.editor.wordWrap = wordWrap;
+    });
   }
+
+  // Fetch the initial state of the settings.
+  Promise.all([settingRegistry.load(id), restored]).then(([settings]) => {
+    updateSettings(settings);
+    updateTracker();
+    settings.changed.connect(() => {
+      updateSettings(settings);
+      updateTracker();
+    });
+  });
 
   factory.widgetCreated.connect((sender, widget) => {
     widget.title.icon = EDITOR_ICON_CLASS;
+
     // Notify the instance tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => { tracker.save(widget); });
     tracker.add(widget);
@@ -140,141 +146,102 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   });
   registry.addWidgetFactory(factory);
 
-  /**
-   * Handle the settings of new widgets.
-   */
+  // Handle the settings of new widgets.
   tracker.widgetAdded.connect((sender, widget) => {
-    let editor = widget.editor;
+    const editor = widget.editor;
     editor.lineNumbers = lineNumbers;
     editor.wordWrap = wordWrap;
   });
 
-  // Update the command registry when the notebook state changes.
-  tracker.currentChanged.connect(() => {
-    if (tracker.size <= 1) {
-      commands.notifyCommandChanged(CommandIDs.lineNumbers);
-    }
-  });
-
-  /**
-   * Toggle editor line numbers
-   */
-  function toggleLineNums(args: JSONObject): Promise<void> {
-    lineNumbers = !lineNumbers;
-    tracker.forEach(widget => {
-      widget.editor.lineNumbers = lineNumbers;
-    });
-    return saveState();
-  }
-
-  /**
-   * Toggle editor line wrap
-   */
-  function toggleLineWrap(args: JSONObject): Promise<void> {
-    wordWrap = !wordWrap;
-    tracker.forEach(widget => {
-      widget.editor.wordWrap = wordWrap;
-    });
-    return saveState();
-  }
-
-  /**
-   * A test for whether the tracker has an active widget.
-   */
-  function hasWidget(): boolean {
-    return tracker.currentWidget !== null;
-  }
-
-  /** To detect if there is no current selection */
-  function hasSelection(): boolean {
-    let widget = tracker.currentWidget;
-    if (!widget) {
-      return false;
-    }
-    const editor = widget.editor;
-    const selection = editor.getSelection();
-    if (selection.start.column === selection.end.column &&
-      selection.start.line === selection.end.line) {
-      return false;
-    }
-    return true;
-  }
-
   commands.addCommand(CommandIDs.lineNumbers, {
-    execute: toggleLineNums,
+    execute: () => {
+      lineNumbers = !lineNumbers;
+      tracker.forEach(widget => { widget.editor.lineNumbers = lineNumbers; });
+      return settingRegistry.set(id, 'lineNumbers', lineNumbers);
+    },
     isEnabled: hasWidget,
-    isToggled: () => { return lineNumbers; },
+    isToggled: () => lineNumbers,
     label: 'Line Numbers'
   });
 
   commands.addCommand(CommandIDs.wordWrap, {
-    execute: toggleLineWrap,
+    execute: () => {
+      wordWrap = !wordWrap;
+      tracker.forEach(widget => { widget.editor.wordWrap = wordWrap; });
+      return settingRegistry.set(id, 'wordWrap', wordWrap);
+    },
     isEnabled: hasWidget,
-    isToggled: () => { return wordWrap; },
+    isToggled: () => wordWrap,
     label: 'Word Wrap'
   });
 
   commands.addCommand(CommandIDs.createConsole, {
     execute: args => {
-      let widget = tracker.currentWidget;
+      const widget = tracker.currentWidget;
+
       if (!widget) {
         return;
       }
-      let options: JSONObject = {
+
+      return commands.execute('console:create', {
+        activate: args['activate'],
         path: widget.context.path,
-        preferredLanguage: widget.context.model.defaultKernelLanguage,
-        activate: args['activate']
-      };
-      return commands.execute('console:create', options);
+        preferredLanguage: widget.context.model.defaultKernelLanguage
+      });
     },
     isEnabled: hasWidget,
     label: 'Create Console for Editor'
   });
 
   commands.addCommand(CommandIDs.runCode, {
-    execute: args => {
-      let widget = tracker.currentWidget;
+    execute: () => {
+      const widget = tracker.currentWidget;
+
       if (!widget) {
         return;
       }
 
-      var code = ""
+      let code = '';
+
       const editor = widget.editor;
-      const extension = widget.context.path.substring(widget.context.path.lastIndexOf("."));
-      if (!hasSelection() && MarkdownCodeBlocks.isMarkdown(extension)) {
-        var codeBlocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(editor.model.value.text);
-        for (let codeBlock of codeBlocks) {
-          if (codeBlock.startLine <= editor.getSelection().start.line &&
-            editor.getSelection().start.line <= codeBlock.endLine) {
-            code = codeBlock.code;
+      const path = widget.context.path;
+      const extension = PathExt.extname(path);
+      const selection = editor.getSelection();
+      const { start, end } = selection;
+      const selected = start.column !== end.column || start.line !== end.line;
+
+      if (selected) {
+        // Get the selected code from the editor.
+        const start = editor.getOffsetAt(selection.start);
+        const end = editor.getOffsetAt(selection.end);
+
+        code = editor.model.value.text.substring(start, end);
+        if (start === end) {
+          code = editor.getLine(selection.start.line);
+        }
+      } else if (MarkdownCodeBlocks.isMarkdown(extension)) {
+        const { text } = editor.model.value;
+        const blocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(text);
+
+        for (let block of blocks) {
+          if (block.startLine <= start.line && start.line <= block.endLine) {
+            code = block.code;
             break;
           }
         }
-      } else {
-        // Get the selected code from the editor.
-        const selection = editor.getSelection();
-        const start = editor.getOffsetAt(selection.start);
-        const end = editor.getOffsetAt(selection.end);
-        code = editor.model.value.text.substring(start, end);
-        if (start == end) {
-          code = editor.getLine(selection.start.line);
-        }
       }
 
-      const options: JSONObject = {
-        path: widget.context.path,
-        code: code,
-        activate: false
-      };
+      const { column, line } = editor.getCursorPosition();
+      const activate = false;
+
       // Advance cursor to the next line.
-      const cursor = editor.getCursorPosition();
-      if (cursor.line + 1 == editor.lineCount) {
-        let text = editor.model.value.text;
+      if (line + 1 === editor.lineCount) {
+        const text = editor.model.value.text;
         editor.model.value.text = text + '\n';
       }
-      editor.setCursorPosition({ line: cursor.line + 1, column: cursor.column });
+      editor.setCursorPosition({ column, line: line + 1 });
 
-      return commands.execute('console:inject', options);
+      return commands.execute('console:inject', { activate, code, path });
     },
     isEnabled: hasWidget,
     label: 'Run Code'
