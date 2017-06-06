@@ -47,7 +47,8 @@
 
 
 .jp-BreadCrumbs-item.jp-mod-dropTarget {
-  background: var(--jp-brand-color2);
+  background-color: var(--jp-brand-color2);
+  opacity: 0.7;
 }
 
 /*-----------------------------------------------------------------------------
