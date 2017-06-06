@@ -241,10 +241,15 @@ class LauncherWidget extends VDomRenderer<LauncherModel> {
   protected render(): VirtualNode | VirtualNode[] {
     // Create an iterator that yields rendered item nodes.
     let children = map(this.model.items(), item => {
+      let icon = h.div({ className: item.iconClass }, item.iconLabel);
       let text = h.span({className: TEXT_CLASS }, item.displayName);
+      let onclick = () => {
+        console.log('hi clicked', item);
+      };
       return h.div({
+        onclick,
         className: ITEM_CLASS,
-      }, [text]);
+      }, [icon, text]);
     });
 
     let body = h.div({ className: BODY_CLASS  }, toArray(children));
