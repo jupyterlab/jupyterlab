@@ -632,7 +632,8 @@ namespace Private {
   export
   function populateFieldset(node: HTMLElement, plugin: ISettingRegistry.IPlugin, annotations: ISettingRegistry.IPluginAnnotations): void {
     const label = annotations && annotations.annotation &&
-      `${annotations.annotation.label} (${plugin.id})` || plugin.id;
+      `Available Fields: ${annotations.annotation.label}` ||
+      `Available Fields: ${plugin.id}`;
     const fields: { [key: string]: VirtualElement } = Object.create(null);
 
     Object.keys(annotations && annotations.keys || { }).forEach(key => {
@@ -657,7 +658,7 @@ namespace Private {
     const items: VirtualElement[] = Object.keys(fields)
       .sort((a, b) => a.localeCompare(b)).map(key => fields[key]);
 
-    node.appendChild(VirtualDOM.realize(h.legend(label)));
+    node.appendChild(VirtualDOM.realize(h.legend({ title: plugin.id }, label)));
     node.appendChild(VirtualDOM.realize(h.ul(items)));
   }
 
