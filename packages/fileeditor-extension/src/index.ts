@@ -289,5 +289,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
     });
   }
 
+  app.contextMenu.addItem({command: CommandIDs.createConsole, selector: '.jp-FileEditor'});
+
   return tracker;
 }
