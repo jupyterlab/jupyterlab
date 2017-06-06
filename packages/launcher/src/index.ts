@@ -6,7 +6,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONObject, Token
+  Token
 } from '@phosphor/coreutils';
 
 import {
@@ -18,7 +18,11 @@ import {
 } from '@phosphor/virtualdom';
 
 import {
-  ICommandLinker, VDomModel, VDomRenderer
+  Widget
+} from '@phosphor/widgets';
+
+import {
+  VDomModel, VDomRenderer
 } from '@jupyterlab/apputils';
 
 import '../style/index.css';
@@ -51,7 +55,7 @@ const LAUNCHER_CLASS = 'jp-LauncherWidget';
 /**
  * The class name added to LauncherWidget image nodes.
  */
-const IMAGE_CLASS = 'jp-LauncherWidget-image';
+//const IMAGE_CLASS = 'jp-LauncherWidget-image';
 
 /**
  * The class name added to LauncherWidget text nodes.
@@ -99,26 +103,65 @@ interface ILauncher {
 export
 interface ILauncherItem {
   /**
-   * The display name of the launcher item.
+   * The display name for the launcher item.
+   */
+  displayName: string;
+
+  /**
+   * The callback invoked to launch the item.
+   *
+   * The callback is invoked with a current working directory and the
+   * name of the selected launcher item and returns a promise that
+   * resolves to the widget that will replace the launcher widget.
+   */
+  callback: (cwd: string, name: string) => Promise<Widget>;
+
+  /**
+   * The icon class for the launcher item.
+   *
+   * #### Notes
+   * This class name will be added to the icon node for the visual
+   * representation of the launcher item.
+   *
+   * Multiple class names can be separated with white space.
+   *
+   * The default value is an empty string.
+   */
+  iconClass: string;
+
+  /**
+   * The icon label for the launcher item.
+   *
+   * #### Notes
+   * This label will be added as text to the icon node for the visual
+   * representation of the launcher item.
+   *
+   * The default value is an empty string.
+   */
+  iconLabel: string;
+
+  /**
+   * The identifier for the launcher item.
    */
   name: string;
 
   /**
-   * The ID of the command that is called to launch the item.
+   * The category for the launcher item.
    */
-  command: string;
+  category: string;
 
   /**
-   * The command arguments, if any, needed to launch the item.
+   * The rank for the launcher item.
+   *
+   * The rank is used as a tie-breaker when ordering launcher items
+   * for display. Items are sorted in the following order:
+   *   1. Category (locale order)
+   *   2. Rank (lower is better)
+   *   3. Label (locale order)
+   *
+   * The default rank is `Infinity`.
    */
-  args?: JSONObject;
-
-  /**
-   * The image class name to attach to the launcher item. Defaults to
-   * 'jp-Image' followed by the `name` with spaces removed. So if the name is
-   * 'Launch New Terminal' the class name will be 'jp-ImageLaunchNewTerminal'.
-   */
-  imgClassName?: string;
+  rank: number;
 }
 
 
@@ -149,10 +192,6 @@ class LauncherModel extends VDomModel implements ILauncher {
     // Create a copy of the options to circumvent mutations to the original.
     let item = JSON.parse(JSON.stringify(options));
 
-    // If image class name is not set, use the default value.
-    item.imgClassName = item.imgClassName ||
-      `jp-Image${item.name.replace(/\ /g, '')}`;
-
     this._items.push(item);
     this.stateChanged.emit(void 0);
 
@@ -181,10 +220,9 @@ class LauncherWidget extends VDomRenderer<LauncherModel> {
   /**
    * Construct a new launcher widget.
    */
-  constructor(options: LauncherWidget.IOptions) {
+  constructor() {
     super();
     this.addClass(LAUNCHER_CLASS);
-    this._linker = options.linker;
   }
 
   /**
@@ -192,38 +230,15 @@ class LauncherWidget extends VDomRenderer<LauncherModel> {
    */
   protected render(): VirtualNode | VirtualNode[] {
     // Create an iterator that yields rendered item nodes.
-    let linker = this._linker;
     let children = map(this.model.items(), item => {
-      let img = h.span({className: item.imgClassName + ' ' + IMAGE_CLASS});
-      let text = h.span({className: TEXT_CLASS }, item.name);
+      let text = h.span({className: TEXT_CLASS }, item.displayName);
       return h.div({
         className: ITEM_CLASS,
-        dataset: linker.populateVNodeDataset(item.command, item.args)
-      }, [img, text]);
+      }, [text]);
     });
 
     let body = h.div({ className: BODY_CLASS  }, toArray(children));
 
     return h.div({ className: DIALOG_CLASS }, [body]);
-  }
-
-  private _linker: ICommandLinker = null;
-}
-
-
-/**
- * A namespace for launcher widget statics.
- */
-export
-namespace LauncherWidget {
-  /**
-   * The instantiation option for a launcher widget.
-   */
-  export
-  interface IOptions {
-    /**
-     * Command linker instance.
-     */
-    linker: ICommandLinker;
   }
 }

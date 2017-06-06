@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandLinker, ICommandPalette, ILayoutRestorer
+  ICommandPalette, ILayoutRestorer
 } from '@jupyterlab/apputils';
 
 import {
@@ -36,7 +36,6 @@ const plugin: JupyterLabPlugin<ILauncher> = {
   requires: [
     IServiceManager,
     ICommandPalette,
-    ICommandLinker,
     ILayoutRestorer
   ],
   provides: ILauncher,
@@ -53,7 +52,7 @@ export default plugin;
 /**
  * Activate the launcher.
  */
-function activate(app: JupyterLab, services: IServiceManager, palette: ICommandPalette, linker: ICommandLinker, restorer: ILayoutRestorer): ILauncher {
+function activate(app: JupyterLab, services: IServiceManager, palette: ICommandPalette, restorer: ILayoutRestorer): ILauncher {
   const { commands, shell } = app;
 
   let model = new LauncherModel();
@@ -61,8 +60,7 @@ function activate(app: JupyterLab, services: IServiceManager, palette: ICommandP
   commands.addCommand(CommandIDs.show, {
     label: 'New Launcher',
     execute: () => {
-      let widget = new LauncherWidget({ linker });
-
+      let widget = new LauncherWidget();
       widget.model = model;
       widget.id = 'launcher';
       widget.title.label = 'Launcher';
