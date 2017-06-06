@@ -114,7 +114,7 @@ interface ILauncherItem {
    * name of the selected launcher item and returns a promise that
    * resolves to the widget that will replace the launcher widget.
    */
-  callback: (cwd: string, name: string) => Promise<Widget>;
+  callback: (cwd: string, name: string) => Widget | Promise<Widget>;
 
   /**
    * The icon class for the launcher item.

@@ -158,11 +158,30 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
     }
   });
 
+  let callback = (cwd: string, name: string) => {
+    return new ConsolePanel({
+      manager,
+      rendermime: rendermime.clone(),
+      contentFactory,
+      mimeTypeService: editorServices.mimeTypeService,
+      basePath: cwd,
+      kernelPreference: { name }
+    });
+  };
+
   // Add a launcher item if the launcher is available.
   if (launcher) {
-    launcher.add({
-      name: 'Code Console',
-      command: CommandIDs.create
+    manager.ready.then(() => {
+      let specs = manager.specs;
+      for (let name in specs.kernelspecs) {
+        let displayName = specs.kernelspecs[name].display_name;
+        launcher.add({
+          displayName: `${displayName} Console`,
+          name,
+          iconClass: '',
+          callback,
+        });
+      }
     });
   }
 

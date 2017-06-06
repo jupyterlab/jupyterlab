@@ -137,7 +137,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
         term.title.icon = TERMINAL_ICON_CLASS;
         term.title.label = '...';
         services.terminals.startNew();
-        return Promise.resolve(term);
+        return term;
       }
     });
   }
