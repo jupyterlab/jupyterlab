@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  generate
+  generate, simulate
 } from 'simulate-event';
 
 import {
@@ -26,6 +26,11 @@ const ENTER = 13;
 class LogFileEditor extends CodeMirrorEditor {
 
   methods: string[] = [];
+
+  refresh(): void {
+    this.methods.push('refresh');
+    super.refresh();
+  }
 
   protected onKeydown(event: KeyboardEvent): boolean {
     let value = super.onKeydown(event);
@@ -317,6 +322,20 @@ describe('CodeMirrorEditor', () => {
       expect(editor.hasFocus()).to.be(false);
       editor.focus();
       expect(editor.hasFocus()).to.be(true);
+    });
+
+  });
+
+  describe('#handleEvent()', () => {
+
+    context('focus', () => {
+
+      it('should refresh the editor', () => {
+        editor.methods = [];
+        simulate(editor.editor.getInputField(), 'focus');
+        expect(editor.methods).to.eql(['refresh']);
+      });
+
     });
 
   });
