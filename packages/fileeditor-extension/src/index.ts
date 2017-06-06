@@ -250,9 +250,17 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   // Add a launcher item if the launcher is available.
   if (launcher) {
     launcher.add({
-      args: { creatorName: 'Text File' },
-      command: 'file-operations:create-from',
-      name: 'Text Editor'
+      displayName: 'Text Editor',
+      iconClass: EDITOR_ICON_CLASS,
+      callback: cwd => {
+        return commands.execute('file-operations:new-untitled', {
+          path: cwd, type: 'file'
+        }).then(model => {
+          return commands.execute('file-operations:open', {
+            path: model.path, factory: FACTORY
+          });
+        });
+      }
     });
   }
 
