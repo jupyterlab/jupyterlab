@@ -23,7 +23,6 @@ var mods = [
   require('@jupyterlab/help-extension'),
   require('@jupyterlab/imageviewer-extension'),
   require('@jupyterlab/inspector-extension'),
-  require('@jupyterlab/landing-extension'),
   require('@jupyterlab/launcher-extension'),
   require('@jupyterlab/markdownviewer-extension'),
   require('@jupyterlab/notebook-extension'),

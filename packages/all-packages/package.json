@@ -44,7 +44,6 @@
     "@jupyterlab/imageviewer-extension": "^0.6.0",
     "@jupyterlab/inspector": "^0.6.0",
     "@jupyterlab/inspector-extension": "^0.6.0",
-    "@jupyterlab/landing-extension": "^0.7.1",
     "@jupyterlab/launcher": "^0.6.0",
     "@jupyterlab/launcher-extension": "^0.6.1",
     "@jupyterlab/markdownviewer": "^0.6.0",
