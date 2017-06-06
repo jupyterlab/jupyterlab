@@ -151,6 +151,7 @@
 .jp-Notebook-cell.jp-mod-dropTarget,
 .jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected.jp-mod-dropTarget {
   border-top-color: var(--jp-private-notebook-selected-color);
+  border-top-style: solid;
 }
 
 
