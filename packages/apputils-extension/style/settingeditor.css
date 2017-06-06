@@ -96,7 +96,9 @@
 
 
 #setting-editor.jp-SettingEditor .jp-PluginEditor .jp-JSONEditor-header {
-  height: 20px;
+  position: absolute;
+  right: 0;
+  z-index: 9999;
 }
 
 
