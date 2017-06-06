@@ -90,7 +90,6 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
     const docManager = new DocumentManager({ registry, manager, opener });
     let menu = createMenu(app, docManager, registry);
 
-    populateCreators(app, docManager, registry, palette, menu);
     mainMenu.addMenu(menu, { rank: 1 });
 
     // Register the file operations commands.
@@ -101,7 +100,6 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
       if (args.type === 'fileCreator') {
         menu.dispose();
         menu = createMenu(app, docManager, registry);
-        populateCreators(app, docManager, registry, palette, menu);
         mainMenu.addMenu(menu, { rank: 1 });
       }
     });
@@ -285,38 +283,11 @@ function createMenu(app: JupyterLab, docManager: IDocumentManager, registry: IDo
   return menu;
 }
 
-/**
- * Populate the command palette and the file menu with the registered creators.
- */
-function populateCreators(app: JupyterLab, docManager: IDocumentManager, registry: IDocumentRegistry, palette: ICommandPalette, menu: Menu): void {
-  const category = 'File Operations';
-
-  // Clear any previously added creator palette items.
-  if (Private.creators) {
-    Private.creators.dispose();
-  }
-  Private.creators = new DisposableSet();
-
-  // Add the "create from" commands.
-  each(registry.creators(), creator => {
-    const command = CommandIDs.createFrom;
-    const creatorName = creator.name;
-    const label = `New ${creatorName}`;
-    const args = { creatorName, label };
-    menu.insertItem(0, { args, command });
-    Private.creators.add(palette.addItem({ args, category, command }));
-  });
-}
 
 /**
  * A namespace for private module data.
  */
 namespace Private {
-  /**
-   */
-  export
-  let creators: DisposableSet | null = null;
-
   /**
    * A counter for unique IDs.
    */
