@@ -60,6 +60,9 @@ namespace CommandIDs {
 
   export
   const runCode = 'editor:run-code';
+
+  export
+  const markdownPreview = 'editor:markdown-preview';
 };
 
 
@@ -247,6 +250,18 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
     label: 'Run Code'
   });
 
+  commands.addCommand(CommandIDs.markdownPreview, {
+    execute: () => {
+      let path = tracker.currentWidget.context.path;
+      return commands.execute('markdown-preview:open', { path });
+    },
+    isVisible: () => {
+      let widget = tracker.currentWidget;
+      return widget && PathExt.extname(widget.context.path) === '.md';
+    },
+    label: 'Show Markdown Preview'
+  });
+
   // Add a launcher item if the launcher is available.
   if (launcher) {
     launcher.add({
@@ -256,7 +271,12 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
     });
   }
 
-  app.contextMenu.addItem({command: CommandIDs.createConsole, selector: '.jp-FileEditor'});
+  app.contextMenu.addItem({
+    command: CommandIDs.createConsole, selector: '.jp-FileEditor'
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.markdownPreview, selector: '.jp-FileEditor'
+  });
 
   return tracker;
 }

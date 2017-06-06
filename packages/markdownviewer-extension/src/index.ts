@@ -34,6 +34,15 @@ const FACTORY = 'Markdown Preview';
 
 
 /**
+ * The command IDs used by the document manager plugin.
+ */
+namespace CommandIDs {
+  export
+  const preview = 'markdown-preview:open';
+}
+
+
+/**
  * The markdown handler extension.
  */
 const plugin: JupyterLabPlugin<void> = {
@@ -54,6 +63,8 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, rendermime: IRen
       readOnly: true,
       rendermime
     });
+
+    const { commands } = app;
     const namespace = 'rendered-markdown';
     const tracker = new InstanceTracker<MarkdownViewer>({ namespace });
 
@@ -72,6 +83,19 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, rendermime: IRen
     });
 
     registry.addWidgetFactory(factory);
+
+    commands.addCommand(CommandIDs.preview, {
+      label: 'Markdown Preview',
+      execute: (args) => {
+        let path = args['path'];
+        if (typeof path !== 'string') {
+          return;
+        }
+        return commands.execute('file-operations:open', {
+          path, factory: FACTORY
+        });
+      }
+    });
   }
 
 
