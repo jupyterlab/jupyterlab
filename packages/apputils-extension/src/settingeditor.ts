@@ -164,7 +164,7 @@ class SettingEditor extends SplitPanel {
    */
   protected onCloseRequest(msg: Message): void {
     super.onCloseRequest(msg);
-    this._list.reset();
+    this.dispose();
   }
 
   /**
@@ -563,12 +563,7 @@ function activateSettingEditor(app: JupyterLab, restorer: ILayoutRestorer, regis
   const namespace = 'setting-editor';
   const factoryService = editorServices.factoryService;
   const editorFactory = factoryService.newInlineEditor.bind(factoryService);
-  const editor = new SettingEditor({ editorFactory, registry });
   const tracker = new InstanceTracker<SettingEditor>({ namespace });
-
-  editor.id = namespace;
-  editor.title.label = 'Settings';
-  editor.title.closable = true;
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -576,13 +571,21 @@ function activateSettingEditor(app: JupyterLab, restorer: ILayoutRestorer, regis
     args: widget => ({ }),
     name: widget => namespace
   });
-  tracker.add(editor);
 
   commands.addCommand(CommandIDs.open, {
     execute: () => {
-      if (editor.parent === null) {
-        shell.addToMainArea(editor);
+      if (tracker.currentWidget) {
+        shell.activateById(tracker.currentWidget.id);
+        return;
       }
+
+      const editor = new SettingEditor({ editorFactory, registry });
+
+      tracker.add(editor);
+      editor.id = namespace;
+      editor.title.label = 'Settings';
+      editor.title.closable = true;
+      shell.addToMainArea(editor);
       shell.activateById(editor.id);
     },
     label: 'Settings'
