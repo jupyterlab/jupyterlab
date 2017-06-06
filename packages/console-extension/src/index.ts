@@ -178,7 +178,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
         launcher.add({
           displayName: `${displayName} Console`,
           name,
-          iconClass: '',
+          iconClass: 'jp-ImageConsole',
           callback,
         });
       }
