@@ -19,7 +19,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  Contents, IServiceManager
+  Contents, Kernel, IServiceManager
 } from '@jupyterlab/services';
 
 import {
@@ -200,8 +200,9 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, registry: ID
       const path = typeof args['path'] === 'undefined' ? docManager.cwd
         : args['path'] as string;
       const factory = args['factory'] as string || void 0;
+      const kernel = args['kernel'] as Kernel.IModel || void 0;
       return docManager.services.contents.get(path)
-        .then(() => docManager.openOrReveal(path, factory));
+        .then(() => docManager.openOrReveal(path, factory, kernel));
     },
     icon: args => args['icon'] as string || '',
     label: args => (args['label'] || args['factory']) as string,

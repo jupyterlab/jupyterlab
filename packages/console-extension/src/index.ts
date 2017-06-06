@@ -158,6 +158,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
     }
   });
 
+  // The launcher callback.
   let callback = (cwd: string, name: string) => {
     return new ConsolePanel({
       manager,

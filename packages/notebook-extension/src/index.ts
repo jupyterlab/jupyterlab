@@ -410,12 +410,31 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
   // Add main menu notebook menu.
   mainMenu.addMenu(createMenu(app), { rank: 20 });
 
+  // The launcher callback.
+  let callback = (cwd: string, name: string) => {
+    return commands.execute(
+      'file-operations:new', { type: 'notebook' }
+    ).then(model => {
+      return commands.execute('file-operations:open', {
+        path: model.path, factory: FACTORY,
+        kernel: { name }
+      });
+    });
+  };
+
   // Add a launcher item if the launcher is available.
   if (launcher) {
-    launcher.add({
-      args: { creatorName: 'Notebook' },
-      command: 'file-operations:create-from',
-      name: 'Notebook'
+    services.ready.then(() => {
+      let specs = services.specs;
+      for (let name in specs.kernelspecs) {
+        let displayName = specs.kernelspecs[name].display_name;
+        launcher.add({
+          displayName: `${displayName} Notebook`,
+          name,
+          iconClass: 'jp-ImageNotebook',
+          callback,
+        });
+      }
     });
   }
 
