@@ -251,7 +251,7 @@ class LayoutRestorer implements ILayoutRestorer {
     tracker.widgetAdded.connect((sender: any, widget: Widget) => {
       const widgetName = name(widget);
       if (widgetName) {
-        this.add(widget, widgetName);
+        this.add(widget, `${namespace}:${widgetName}`);
       }
     }, this);
 
