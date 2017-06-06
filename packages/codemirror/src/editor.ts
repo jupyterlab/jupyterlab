@@ -570,6 +570,11 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   private _markSelections(uuid: string, selections: CodeEditor.ITextSelection[]) {
     const markers: CodeMirror.TextMarker[] = [];
 
+    // If we are marking selections corresponding to an active hover,
+    // remove it.
+    if (uuid === this._hoverId) {
+      this._clearHover();
+    }
     // If we can id the selection to a specific collaborator,
     // use that information.
     let collaborator: ICollaborator;
