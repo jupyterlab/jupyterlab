@@ -99,8 +99,8 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
    * Update the setting values.
    */
   function updateSettings(settings: ISettingRegistry.ISettings): void {
-    const matched = settings.get('matchBrackets') as boolean | null;
-    matchBrackets = matched === null ? matchBrackets : matched as boolean;
+    const cached = settings.get('matchBrackets') as boolean | null;
+    matchBrackets = cached === null ? false : !!cached;
     keyMap = settings.get('keyMap') as string | null || keyMap;
     theme = settings.get('theme') as string | null || theme;
   }

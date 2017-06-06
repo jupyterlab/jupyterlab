@@ -110,10 +110,9 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
    */
   function updateSettings(settings: ISettingRegistry.ISettings): void {
     let cached = settings.get('lineNumbers') as boolean | null;
-    lineNumbers = cached === null ? lineNumbers : !!cached;
-
+    lineNumbers = cached === null ? false : !!cached;
     cached = settings.get('wordWrap') as boolean | null;
-    wordWrap = cached === null ? wordWrap : !!cached;
+    wordWrap = cached === null ? false : !!cached;
   }
 
   /**
