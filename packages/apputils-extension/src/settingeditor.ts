@@ -121,15 +121,15 @@ class SettingEditor extends SplitPanel {
     const editorFactory = options.editorFactory;
     const registry = this.registry = options.registry;
     const layout = this.layout as SplitLayout;
-    const list = this._list = new PluginList({ registry });
-    const instructions = this._instructions;
 
     this._editor = new PluginEditor({ editorFactory });
-    layout.addWidget(list);
-    layout.addWidget(instructions);
-    this.setRelativeSizes([1, 3]);
+    this._instructions = new Widget({ node: Private.createInstructionsNode() });
+    this._list = new PluginList({ registry });
+    this._list.selected.connect(this._onSelected, this);
 
-    list.selected.connect(this._onSelected, this);
+    layout.addWidget(this._list);
+    layout.addWidget(this._instructions);
+    layout.setRelativeSizes([1, 3]);
     registry.pluginChanged.connect(() => { this.update(); }, this);
   }
 
@@ -207,7 +207,7 @@ class SettingEditor extends SplitPanel {
   }
 
   private _editor: PluginEditor;
-  private _instructions = new Widget({ node: Private.createInstructionsNode() });
+  private _instructions: Widget;
   private _list: PluginList;
 }
 
