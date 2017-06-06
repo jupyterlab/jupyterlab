@@ -10,7 +10,7 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  Message, MessageLoop, IMessageHook, IMessageHandler, MessageHook
+  Message, MessageLoop, IMessageHandler
 } from '@phosphor/messaging';
 
 import {
@@ -72,7 +72,7 @@ class ApplicationShell extends Widget {
     let topPanel = this._topPanel = new Panel();
     let hboxPanel = this._hboxPanel = new BoxPanel();
     let dockPanel = this._dockPanel = new DockPanel();
-    MessageLoop.installMessageHook(dockPanel, Private.ActivityClassHook as MessageHook);
+    MessageLoop.installMessageHook(dockPanel, Private.activityClassHook);
 
     let hsplitPanel = this._hsplitPanel = new SplitPanel();
     let leftHandler = this._leftHandler = new Private.SideBarHandler('left');
@@ -964,18 +964,17 @@ namespace Private {
     private _stackedPanel: StackedPanel;
   }
 
+  /**
+   * A message hook that adds and removes the .jp-Activity class to widgets in the dock panel.
+   */
   export
-  class ActivityClassHook implements IMessageHook {
-
-    messageHook(handler: IMessageHandler, msg: Message): boolean {
-      
-      if (msg.type === 'child-added') {
-        (handler as Widget).addClass(ACTIVITY_CLASS)
-      } else if (msg.type === 'child-removed') {
-        (handler as Widget).removeClass(ACTIVITY_CLASS)
-      }
-      return true;
+  var activityClassHook = (handler: IMessageHandler, msg: Message): boolean => {      
+    if (msg.type === 'child-added') {
+      (msg as Widget.ChildMessage).child.addClass(ACTIVITY_CLASS)
+    } else if (msg.type === 'child-removed') {
+      (msg as Widget.ChildMessage).child.removeClass(ACTIVITY_CLASS)
     }
+    return true;
   }
 
 }
