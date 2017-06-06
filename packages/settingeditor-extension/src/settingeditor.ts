@@ -121,7 +121,10 @@ class SettingEditor extends SplitPanel {
 
     this._editor = new PluginEditor({ editorFactory });
     this._instructions = new Widget({ node: Private.createInstructionsNode() });
-    this._list = new PluginList({ registry });
+
+    const confirm = () => this._editor.confirm();
+
+    this._list = new PluginList({ confirm, registry });
     this._list.selected.connect(this._onSelected, this);
 
     layout.addWidget(this._list);
@@ -245,6 +248,7 @@ class PluginList extends Widget {
     super({ node: document.createElement('ul') });
     this.registry = options.registry;
     this.addClass(PLUGIN_LIST_CLASS);
+    this._confirm = options.confirm;
   }
 
   /**
@@ -343,12 +347,15 @@ class PluginList extends Widget {
     }
 
     if (id) {
-      this._selection = id;
-      this._selected.emit(id);
-      this.update();
+      this._confirm().then(() => {
+        this._selection = id;
+        this._selected.emit(id);
+        this.update();
+      }).catch(() => { /* no op */ });
     }
   }
 
+  private _confirm: () => Promise<void> | null = null;
   private _selected = new Signal<this, string>(this);
   private _selection = '';
 }
@@ -363,6 +370,16 @@ namespace PluginList {
    */
   export
   interface IOptions {
+    /**
+     * A function that allows for asynchronously confirming a selection.
+     *
+     * #### Notest
+     * If the promise returned by the function resolves, then the selection will
+     * succeed and emit an event. If the promise rejects, the selection is not
+     * made.
+     */
+    confirm: () => Promise<void>;
+
     /**
      * The setting registry for the plugin list.
      */
@@ -414,7 +431,29 @@ class PluginEditor extends Widget {
       return;
     }
 
-    this._settings = this._fieldset.settings = settings;
+    const fieldset = this._fieldset;
+    const json = this._editor;
+
+    // Disconnect old source change handler.
+    if (json.source) {
+      json.source.changed.disconnect(this._onSourceChanged, this);
+    }
+
+    if (settings) {
+      const values = settings.raw.data && settings.raw.data.user || { };
+
+      json.source = new ObservableJSON({ values });
+      json.source.changed.connect(this._onSourceChanged, this);
+      this._settings = fieldset.settings = settings;
+      json.show();
+      fieldset.show();
+    } else {
+      this._settings = fieldset.settings = null;
+      json.source = null;
+      json.hide();
+      fieldset.hide();
+    }
+
     this.update();
   }
 
@@ -445,26 +484,15 @@ class PluginEditor extends Widget {
     const fieldset = this._fieldset;
     const settings = this._settings;
 
-    this.confirm().then(() => {
-      // Disconnect old source change handler.
-      if (json.source) {
-        json.source.changed.disconnect(this._onSourceChanged, this);
-      }
+    if (settings) {
+      json.show();
+      fieldset.show();
+      json.editor.refresh();
+      return;
+    }
 
-      if (settings) {
-        const values = settings.raw.data && settings.raw.data.user || { };
-
-        json.source = new ObservableJSON({ values });
-        json.source.changed.connect(this._onSourceChanged, this);
-        json.show();
-        fieldset.show();
-        return;
-      }
-
-      json.source = null;
-      json.hide();
-      fieldset.hide();
-    }).then(() => { json.editor.refresh(); }).catch(() => { /* no op */ });
+    json.hide();
+    fieldset.hide();
   }
 
   /**
