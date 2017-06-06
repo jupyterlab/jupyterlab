@@ -239,6 +239,8 @@
 
 .jp-DirListing-editor {
   flex: 1 0 64px;
+  outline: none;
+  border: none;
 }
 
 
