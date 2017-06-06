@@ -32,7 +32,7 @@ import {
 } from '@phosphor/virtualdom';
 
 import {
-  BoxLayout, Widget
+  BoxLayout, SplitLayout, SplitPanel, Widget
 } from '@phosphor/widgets';
 
 
@@ -106,27 +106,28 @@ Select a plugin from the list to view and edit its preferences.
 /**
  * An interface for modifying and saving application settings.
  */
-class SettingEditor extends Widget {
+class SettingEditor extends SplitPanel {
   /**
    * Create a new setting editor.
    */
   constructor(options: SettingEditor.IOptions) {
-    super();
+    super({
+      orientation: 'horizontal',
+      renderer: SplitPanel.defaultRenderer,
+      spacing: 1
+    });
     this.addClass(SETTING_EDITOR_CLASS);
 
     const editorFactory = options.editorFactory;
     const registry = this.registry = options.registry;
-    const layout = this.layout = new BoxLayout({ direction: 'left-to-right' });
+    const layout = this.layout as SplitLayout;
     const list = this._list = new PluginList({ registry });
     const instructions = this._instructions;
-    const editor = this._editor = new PluginEditor({ editorFactory });
 
+    this._editor = new PluginEditor({ editorFactory });
     layout.addWidget(list);
     layout.addWidget(instructions);
-    layout.addWidget(editor);
-    BoxLayout.setStretch(list, 1);
-    BoxLayout.setStretch(instructions, 3);
-    BoxLayout.setStretch(editor, 3);
+    this.setRelativeSizes([1, 3]);
 
     list.selected.connect(this._onSelected, this);
     registry.pluginChanged.connect(() => { this.update(); }, this);
@@ -174,14 +175,6 @@ class SettingEditor extends Widget {
     const instructions = this._instructions;
     const editor = this._editor;
 
-    if (editor.settings) {
-      instructions.hide();
-      editor.show();
-    } else {
-      instructions.show();
-      editor.hide();
-    }
-
     list.update();
     instructions.update();
     editor.update();
@@ -191,14 +184,25 @@ class SettingEditor extends Widget {
    * Handle a new selection in the plugin list.
    */
   private _onSelected(sender: any, plugin: string): void {
+    const layout = this.layout as SplitLayout;
+
     if (!plugin) {
+      const sizes = this.relativeSizes();
       this._editor.settings = null;
-      this.update();
+      layout.removeWidget(this._editor);
+      layout.addWidget(this._instructions);
+      this.setRelativeSizes(sizes);
       return;
     }
 
     this.registry.load(plugin)
-      .then(settings => this._editor.settings = settings)
+      .then(settings => {
+        const sizes = this.relativeSizes();
+        this._editor.settings = settings;
+        layout.removeWidget(this._instructions);
+        layout.addWidget(this._editor);
+        this.setRelativeSizes(sizes);
+      })
       .catch(reason => { console.error('Loading settings failed.', reason); });
   }
 
