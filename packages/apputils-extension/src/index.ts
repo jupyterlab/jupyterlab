@@ -104,7 +104,7 @@ const palettePlugin: JupyterLabPlugin<ICommandPalette> = {
 
 
 /**
- * The default layout restorer provider.
+ * The default setting registry provider.
  */
 const settingPlugin: JupyterLabPlugin<ISettingRegistry> = {
   id: 'jupyter.services.setting-registry',

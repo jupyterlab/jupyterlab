@@ -173,13 +173,9 @@ class SettingEditor extends SplitPanel {
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    const list = this._list;
-    const instructions = this._instructions;
-    const editor = this._editor;
-
-    list.update();
-    instructions.update();
-    editor.update();
+    this._list.update();
+    this._instructions.update();
+    this._editor.update();
   }
 
   /**
@@ -432,25 +428,29 @@ class PluginEditor extends Widget {
     }
 
     const fieldset = this._fieldset;
-    const json = this._editor;
+    const editor = this._editor;
 
     // Disconnect old source change handler.
-    if (json.source) {
-      json.source.changed.disconnect(this._onSourceChanged, this);
+    if (editor.source) {
+      editor.source.changed.disconnect(this._onSourceChanged, this);
+    }
+
+    // Disconnect old settings change handler.
+    if (this._settings) {
+      this._settings.changed.disconnect(this._onSettingsChanged, this);
     }
 
     if (settings) {
-      const values = settings.raw.data && settings.raw.data.user || { };
-
-      json.source = new ObservableJSON({ values });
-      json.source.changed.connect(this._onSourceChanged, this);
       this._settings = fieldset.settings = settings;
-      json.show();
+      this._settings.changed.connect(this._onSettingsChanged, this);
+      this._onSettingsChanged();
+
+      editor.show();
       fieldset.show();
     } else {
       this._settings = fieldset.settings = null;
-      json.source = null;
-      json.hide();
+      editor.source = null;
+      editor.hide();
       fieldset.hide();
     }
 
@@ -493,6 +493,18 @@ class PluginEditor extends Widget {
 
     json.hide();
     fieldset.hide();
+  }
+
+  /**
+   * Handle updates to the settings.
+   */
+  private _onSettingsChanged(): void {
+    const editor = this._editor;
+    const settings = this._settings;
+    const values = settings.raw.data && settings.raw.data.user || { };
+
+    editor.source = new ObservableJSON({ values });
+    editor.source.changed.connect(this._onSourceChanged, this);
   }
 
   /**
@@ -615,8 +627,8 @@ namespace Private {
   export
   function populateFieldset(node: HTMLElement, plugin: ISettingRegistry.IPlugin, annotations: ISettingRegistry.IPluginAnnotations): void {
     const label = annotations && annotations.annotation &&
-      `Available Fields: ${annotations.annotation.label}` ||
-      `Available Fields: ${plugin.id}`;
+      `Available Fields - ${annotations.annotation.label}` ||
+      `Available Fields - ${plugin.id}`;
     const fields: { [key: string]: VirtualElement } = Object.create(null);
 
     Object.keys(annotations && annotations.keys || { }).forEach(key => {
