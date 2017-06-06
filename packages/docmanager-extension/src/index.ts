@@ -23,14 +23,6 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  each
-} from '@phosphor/algorithm';
-
-import {
-  DisposableSet
-} from '@phosphor/disposable';
-
-import {
   Menu
 } from '@phosphor/widgets';
 

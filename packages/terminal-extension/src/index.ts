@@ -129,8 +129,16 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
   // Add a launcher item if the launcher is available.
   if (launcher) {
     launcher.add({
-      name: 'Terminal',
-      command: CommandIDs.createNew
+      displayName: 'Terminal',
+      iconClass: TERMINAL_ICON_CLASS,
+      callback: () => {
+        let term = new Terminal();
+        term.title.closable = true;
+        term.title.icon = TERMINAL_ICON_CLASS;
+        term.title.label = '...';
+        services.terminals.startNew();
+        return Promise.resolve(term);
+      }
     });
   }
 

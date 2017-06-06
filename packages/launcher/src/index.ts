@@ -127,7 +127,7 @@ interface ILauncherItem {
    *
    * The default value is an empty string.
    */
-  iconClass: string;
+  iconClass?: string;
 
   /**
    * The icon label for the launcher item.
@@ -138,17 +138,21 @@ interface ILauncherItem {
    *
    * The default value is an empty string.
    */
-  iconLabel: string;
+  iconLabel?: string;
 
   /**
    * The identifier for the launcher item.
+   *
+   * The default value is the displayName.
    */
-  name: string;
+  name?: string;
 
   /**
    * The category for the launcher item.
+   *
+   * The default value is the displayName.
    */
-  category: string;
+  category?: string;
 
   /**
    * The rank for the launcher item.
@@ -161,7 +165,7 @@ interface ILauncherItem {
    *
    * The default rank is `Infinity`.
    */
-  rank: number;
+  rank?: number;
 }
 
 
