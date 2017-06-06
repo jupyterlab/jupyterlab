@@ -9,6 +9,11 @@
 }
 
 
+#setting-editor.jp-SettingEditor .p-SplitPanel-handle {
+  background-color: var(--md-grey-400);
+}
+
+
 #setting-editor.jp-SettingEditor .jp-SettingEditorInstructions {
   text-align: center;
 }
@@ -43,6 +48,7 @@
   font-size: var(--jp-ui-font-size1);
   list-style-type: none;
   margin: 0;
+  min-width: 80px;
   padding: 0;
 }
 
