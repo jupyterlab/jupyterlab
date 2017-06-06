@@ -67,8 +67,12 @@ const HELP_CLASS = 'jp-Help';
 
 const RESOURCES = [
   {
-    text: 'Scipy Lecture Notes',
-    url: 'http://www.scipy-lectures.org/'
+    text: 'Notebook Reference',
+    url: 'https://jupyter-notebook.readthedocs.io/en/latest/'
+  },
+  {
+    text: 'IPython Reference',
+    url: 'http://ipython.readthedocs.io/en/stable/'
   },
   {
     text: 'Numpy Reference',
@@ -79,17 +83,8 @@ const RESOURCES = [
     url: 'https://docs.scipy.org/doc/scipy/reference/'
   },
   {
-    text: 'Notebook Tutorial',
-    url: 'https://nbviewer.jupyter.org/github/jupyter/notebook/' +
-      'blob/master/docs/source/examples/Notebook/Notebook Basics.ipynb'
-  },
-  {
     text: 'Python Reference',
     url: 'https://docs.python.org/3.5/'
-  },
-  {
-    text: 'IPython Reference',
-    url: 'https://ipython.org/documentation.html?v=20160707164940'
   },
   {
     text: 'Matplotlib Reference',
