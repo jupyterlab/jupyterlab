@@ -10,7 +10,7 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  Message, MessageLoop
+  Message, MessageLoop, IMessageHandler
 } from '@phosphor/messaging';
 
 import {
@@ -53,6 +53,8 @@ const DEFAULT_RANK = 500;
  */
 const MODE_ATTRIBUTE = 'data-shell-mode';
 
+const ACTIVITY_CLASS = 'jp-Activity';
+
 
 /**
  * The application shell for JupyterLab.
@@ -70,6 +72,8 @@ class ApplicationShell extends Widget {
     let topPanel = this._topPanel = new Panel();
     let hboxPanel = this._hboxPanel = new BoxPanel();
     let dockPanel = this._dockPanel = new DockPanel();
+    MessageLoop.installMessageHook(dockPanel, Private.activityClassHook);
+
     let hsplitPanel = this._hsplitPanel = new SplitPanel();
     let leftHandler = this._leftHandler = new Private.SideBarHandler('left');
     let rightHandler = this._rightHandler = new Private.SideBarHandler('right');
@@ -959,4 +963,19 @@ namespace Private {
     private _sideBar: TabBar<Widget>;
     private _stackedPanel: StackedPanel;
   }
+
+  /**
+   * A message hook that adds and removes the .jp-Activity class to widgets in the dock panel.
+   */
+  export
+  var activityClassHook = (handler: IMessageHandler, msg: Message): boolean => {      
+    if (msg.type === 'child-added') {
+      (msg as Widget.ChildMessage).child.addClass(ACTIVITY_CLASS)
+    } else if (msg.type === 'child-removed') {
+      (msg as Widget.ChildMessage).child.removeClass(ACTIVITY_CLASS)
+    }
+    return true;
+  }
+
 }
+

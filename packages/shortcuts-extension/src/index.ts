@@ -114,12 +114,12 @@ const SHORTCUTS = [
   },
   {
     command: 'file-operations:close',
-    selector: '.jp-Document',
+    selector: '.jp-Activity',
     keys: ['Ctrl Q']
   },
   {
     command: 'file-operations:close-all-files',
-    selector: '.jp-Document',
+    selector: 'body',
     keys: ['Ctrl Shift Q']
   },
   {
