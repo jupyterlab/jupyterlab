@@ -160,8 +160,10 @@ class SettingEditor extends SplitPanel {
    * Handle `'close-request'` messages.
    */
   protected onCloseRequest(msg: Message): void {
-    super.onCloseRequest(msg);
-    this.dispose();
+    this._editor.confirm().then(() => {
+      super.onCloseRequest(msg);
+      this.dispose();
+    }).catch(() => { /* no op */ });
   }
 
   /**
@@ -417,6 +419,25 @@ class PluginEditor extends Widget {
   }
 
   /**
+   * If the editor is in a dirty state, confirm that the user wants to leave.
+   */
+  confirm(): Promise<void> {
+    if (this.isHidden || !this.isAttached || !this._editor.isDirty) {
+      return Promise.resolve(void 0);
+    }
+
+    return showDialog({
+      title: 'You have unsaved changes.',
+      body: 'Do you want to leave without saving?',
+      buttons: [Dialog.cancelButton(), Dialog.okButton()]
+    }).then(result => {
+      if (!result.accept) {
+        throw new Error();
+      }
+    });
+  }
+
+  /**
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
@@ -424,7 +445,7 @@ class PluginEditor extends Widget {
     const fieldset = this._fieldset;
     const settings = this._settings;
 
-    this._confirm().then(() => {
+    this.confirm().then(() => {
       // Disconnect old source change handler.
       if (json.source) {
         json.source.changed.disconnect(this._onSourceChanged, this);
@@ -444,25 +465,6 @@ class PluginEditor extends Widget {
       json.hide();
       fieldset.hide();
     }).then(() => { json.editor.refresh(); }).catch(() => { /* no op */ });
-  }
-
-  /**
-   * If the editor is in a dirty state, confirm that the user wants to leave.
-   */
-  private _confirm(): Promise<void> {
-    if (this.isHidden || !this.isAttached || !this._editor.isDirty) {
-      return Promise.resolve(void 0);
-    }
-
-    return showDialog({
-      title: 'You have unsaved changes.',
-      body: 'Do you want to leave without saving?',
-      buttons: [Dialog.cancelButton(), Dialog.okButton()]
-    }).then(result => {
-      if (!result.accept) {
-        throw new Error();
-      }
-    });
   }
 
   /**
