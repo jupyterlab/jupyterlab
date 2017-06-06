@@ -3,8 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import '../style/settingeditor.css';
-
 import {
   JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
@@ -13,10 +11,6 @@ import {
   CommandLinker, ICommandLinker, ICommandPalette, ILayoutRestorer,
   IMainMenu, LayoutRestorer, MainMenu
 } from '@jupyterlab/apputils';
-
-import {
-  IEditorServices
-} from '@jupyterlab/codeeditor';
 
 import {
   ISettingRegistry, IStateDB, SettingRegistry, StateDB
@@ -33,10 +27,6 @@ import {
 import {
   activatePalette
 } from './palette';
-
-import {
-  activateSettingEditor
-} from './settingeditor';
 
 
 /**
@@ -114,17 +104,6 @@ const palettePlugin: JupyterLabPlugin<ICommandPalette> = {
 
 
 /**
- * The default setting editor extension.
- */
-const settingEditorPlugin: JupyterLabPlugin<void> = {
-  activate: activateSettingEditor,
-  id: 'jupyter.extensions.setting-editor',
-  requires: [ILayoutRestorer, ISettingRegistry, IEditorServices],
-  autoStart: true
-};
-
-
-/**
  * The default layout restorer provider.
  */
 const settingPlugin: JupyterLabPlugin<ISettingRegistry> = {
@@ -175,7 +154,6 @@ const plugins: JupyterLabPlugin<any>[] = [
   linkerPlugin,
   mainMenuPlugin,
   palettePlugin,
-  settingEditorPlugin,
   settingPlugin,
   stateDBPlugin
 ];

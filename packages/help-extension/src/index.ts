@@ -197,7 +197,6 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     menu.addItem({ type: 'separator' });
     RESOURCES.forEach(args => { menu.addItem({ args, command }); });
     menu.addItem({ type: 'separator' });
-    menu.addItem({ command: 'setting-editor:open' });
     menu.addItem({ command: 'statedb:clear' });
 
     return menu;
@@ -228,7 +227,6 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   });
 
   RESOURCES.forEach(args => { palette.addItem({ args, command, category }); });
-  palette.addItem({ command: 'setting-editor:open', category });
   palette.addItem({ command: 'statedb:clear', category });
   palette.addItem({ command: CommandIDs.launchClassic, category });
 

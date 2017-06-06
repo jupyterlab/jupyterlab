@@ -4,15 +4,11 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  JupyterLab
-} from '@jupyterlab/application';
-
-import {
-  Dialog, ILayoutRestorer, InstanceTracker, showDialog
+  Dialog, showDialog
 } from '@jupyterlab/apputils';
 
 import {
-  CodeEditor, IEditorServices, JSONEditor
+  CodeEditor, JSONEditor
 } from '@jupyterlab/codeeditor';
 
 import {
@@ -106,6 +102,7 @@ Select a plugin from the list to view and edit its preferences.
 /**
  * An interface for modifying and saving application settings.
  */
+export
 class SettingEditor extends SplitPanel {
   /**
    * Create a new setting editor.
@@ -215,6 +212,7 @@ class SettingEditor extends SplitPanel {
 /**
  * A namespace for `SettingEditor` statics.
  */
+export
 namespace SettingEditor {
   /**
    * The instantiation options for a setting editor.
@@ -542,54 +540,6 @@ class PluginFieldset extends Widget {
   }
 
   private _settings: ISettingRegistry.ISettings | null = null;
-}
-
-
-/**
- * The command IDs used by the setting editor.
- */
-namespace CommandIDs {
-  export
-  const open = 'setting-editor:open';
-};
-
-
-/**
- * Activate the setting editor.
- */
-export
-function activateSettingEditor(app: JupyterLab, restorer: ILayoutRestorer, registry: ISettingRegistry, editorServices: IEditorServices): void {
-  const { commands, shell } = app;
-  const namespace = 'setting-editor';
-  const factoryService = editorServices.factoryService;
-  const editorFactory = factoryService.newInlineEditor.bind(factoryService);
-  const tracker = new InstanceTracker<SettingEditor>({ namespace });
-
-  // Handle state restoration.
-  restorer.restore(tracker, {
-    command: CommandIDs.open,
-    args: widget => ({ }),
-    name: widget => namespace
-  });
-
-  commands.addCommand(CommandIDs.open, {
-    execute: () => {
-      if (tracker.currentWidget) {
-        shell.activateById(tracker.currentWidget.id);
-        return;
-      }
-
-      const editor = new SettingEditor({ editorFactory, registry });
-
-      tracker.add(editor);
-      editor.id = namespace;
-      editor.title.label = 'Settings';
-      editor.title.closable = true;
-      shell.addToMainArea(editor);
-      shell.activateById(editor.id);
-    },
-    label: 'Settings'
-  });
 }
 
 

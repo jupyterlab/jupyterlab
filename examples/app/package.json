@@ -29,6 +29,7 @@
     "@jupyterlab/rendermime-extension": "^0.6.0",
     "@jupyterlab/running-extension": "^0.6.0",
     "@jupyterlab/services-extension": "^0.6.0",
+    "@jupyterlab/settingeditor-extension": "^0.1.0",
     "@jupyterlab/shortcuts-extension": "^0.6.0",
     "@jupyterlab/tabmanager-extension": "^0.6.0",
     "@jupyterlab/terminal-extension": "^0.6.0",

@@ -30,6 +30,7 @@ var mods = [
   require('@jupyterlab/rendermime-extension'),
   require('@jupyterlab/running-extension'),
   require('@jupyterlab/services-extension'),
+  require('@jupyterlab/settingeditor-extension'),
   require('@jupyterlab/shortcuts-extension'),
   require('@jupyterlab/tabmanager-extension'),
   require('@jupyterlab/terminal-extension'),
