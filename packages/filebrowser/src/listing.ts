@@ -563,6 +563,30 @@ class DirListing extends Widget {
   }
 
   /**
+   * Select an item by name.
+   *
+   * @parem name - The name of the item to select.
+   *
+   * @returns A promise that resolves when the name is selected.
+   */
+  selectItemByName(name: string): Promise<void> {
+    // Make sure the file is available.
+    return this.model.refresh().then(() => {
+      if (this.isDisposed) {
+        return;
+      }
+      let items = this._sortedItems;
+      let index = ArrayExt.findFirstIndex(items, value => value.name === name);
+      if (index === -1) {
+        return;
+      }
+      this._selectItem(index, false);
+      MessageLoop.sendMessage(this, Widget.Msg.UpdateRequest);
+      ElementExt.scrollIntoViewIfNeeded(this.contentNode, this._items[index]);
+    });
+  }
+
+  /**
    * Handle the DOM events for the directory listing.
    *
    * @param event - The DOM event sent to the widget.
@@ -1159,30 +1183,6 @@ class DirListing extends Widget {
   }
 
   /**
-   * Select an item by name.
-   *
-   * @parem name - The name of the item to select.
-   *
-   * @returns A promise that resolves when the name is selected.
-   */
-  private _selectItemByName(name: string): Promise<void> {
-    // Make sure the file is available.
-    return this.model.refresh().then(() => {
-      if (this.isDisposed) {
-        return;
-      }
-      let items = this._sortedItems;
-      let index = ArrayExt.findFirstIndex(items, value => value.name === name);
-      if (index === -1) {
-        return;
-      }
-      this._selectItem(index, false);
-      MessageLoop.sendMessage(this, Widget.Msg.UpdateRequest);
-      ElementExt.scrollIntoViewIfNeeded(this.contentNode, this._items[index]);
-    });
-  }
-
-  /**
    * Handle a multiple select on a file item node.
    */
   private _handleMultiSelect(selected: string[], index: number): void {
@@ -1286,7 +1286,7 @@ class DirListing extends Widget {
           this._inRename = false;
           return;
         }
-        this._selectItemByName(newName);
+        this.selectItemByName(newName);
         this._inRename = false;
         return newName;
       });
@@ -1340,7 +1340,7 @@ class DirListing extends Widget {
    */
   private _onFileChanged(sender: FileBrowserModel, args: Contents.IChangedArgs) {
     if (args.type === 'new') {
-      this._selectItemByName(args.newValue.name).then(() => {
+      this.selectItemByName(args.newValue.name).then(() => {
         if (!this.isDisposed && args.newValue === 'directory') {
           this._doRename();
         }
@@ -1357,7 +1357,7 @@ class DirListing extends Widget {
       return;
     }
     let basename = PathExt.basename(args);
-    this._selectItemByName(basename);
+    this.selectItemByName(basename);
   }
 
   private _model: FileBrowserModel = null;

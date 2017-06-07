@@ -103,7 +103,22 @@ class FileBrowser extends Widget {
     this._manager = model.manager;
     this._crumbs = new BreadCrumbs({ model });
     this.toolbar = new Toolbar<Widget>();
+    let newFolder = new ToolbarButton({
+      className: 'jp-FolderIcon',
+      onClick: () => {
+        this._manager.newUntitled({
+          path: model.path,
+          type: 'directory'
+        }).then(model => {
+          this._listing.selectItemByName(model.name);
+        });
+      },
+      tooltip: 'New Folder'
+    });
+    newFolder.addClass(MATERIAL_CLASS);
+
     let uploader = new Uploader({ model });
+
     let refresher = new ToolbarButton({
       className: REFRESH_BUTTON,
       onClick: () => {
@@ -112,6 +127,8 @@ class FileBrowser extends Widget {
       tooltip: 'Refresh File List'
     });
     refresher.addClass(MATERIAL_CLASS);
+
+    this.toolbar.addItem('newFolder', newFolder);
     this.toolbar.addItem('upload', uploader);
     this.toolbar.addItem('refresher', refresher);
 
