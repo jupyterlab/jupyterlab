@@ -25,7 +25,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IObservableMap, IObservableString, uuid
+  IObservableMap, IObservableString, uuid, ICollaborator
 } from '@jupyterlab/coreutils';
 
 import {
@@ -51,6 +51,16 @@ const EDITOR_CLASS = 'jp-CodeMirrorEditor';
 const READ_ONLY_CLASS = 'jp-mod-readOnly';
 
 /**
+ * The class name for the hover box for collaborator cursors.
+ */
+const COLLABORATOR_CURSOR_CLASS = 'jp-CollaboratorCursor';
+
+/**
+ * The class name for the hover box for collaborator cursors.
+ */
+const COLLABORATOR_HOVER_CLASS = 'jp-CollaboratorCursor-hover';
+
+/**
  * The key code for the up arrow key.
  */
 const UP_ARROW = 38;
@@ -59,6 +69,11 @@ const UP_ARROW = 38;
  * The key code for the down arrow key.
  */
 const DOWN_ARROW = 40;
+
+/**
+ * The time that a collaborator name hover persists.
+ */
+const HOVER_TIMEOUT = 1000;
 
 
 /**
@@ -73,6 +88,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     let host = this.host = options.host;
     host.classList.add(EDITOR_CLASS);
     host.addEventListener('focus', this, true);
+    host.addEventListener('scroll', this, true);
 
     this._uuid = options.uuid || uuid();
     this._selectionStyle = options.selectionStyle || {};
@@ -246,6 +262,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       return;
     }
     this.host.removeEventListener('focus', this, true);
+    this.host.removeEventListener('scroll', this, true);
     this._editor = null;
     this._model = null;
     this._keydownHandlers.length = 0;
@@ -337,6 +354,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     } else {
       this._needsRefresh = true;
     }
+    this._clearHover();
   }
 
   /**
@@ -551,15 +569,37 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   private _markSelections(uuid: string, selections: CodeEditor.ITextSelection[]) {
     const markers: CodeMirror.TextMarker[] = [];
+
+    // If we are marking selections corresponding to an active hover,
+    // remove it.
+    if (uuid === this._hoverId) {
+      this._clearHover();
+    }
+    // If we can id the selection to a specific collaborator,
+    // use that information.
+    let collaborator: ICollaborator;
+    if (this._model.modelDB.collaborators) {
+      collaborator = this._model.modelDB.collaborators.get(uuid);
+    }
+
+    // Style each selection for the uuid.
     selections.forEach(selection => {
       // Only render selections if the start is not equal to the end.
       // In that case, we don't need to render the cursor.
       if (!JSONExt.deepEqual(selection.start, selection.end)) {
         const { anchor, head } = this._toCodeMirrorSelection(selection);
-        const markerOptions = this._toTextMarkerOptions(selection.style);
+        let markerOptions: CodeMirror.TextMarkerOptions;
+        if (collaborator) {
+          markerOptions = this._toTextMarkerOptions({
+            ...selection.style,
+            color: collaborator.color
+          });
+        } else {
+          markerOptions = this._toTextMarkerOptions(selection.style);
+        }
         markers.push(this.doc.markText(anchor, head, markerOptions));
       } else {
-        let caret = this._getCaret(selection.uuid);
+        let caret = this._getCaret(collaborator);
         markers.push(this.doc.setBookmark(
           this._toCodeMirrorPosition(selection.end), {widget: caret}));
       }
@@ -601,7 +641,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
         let r = parseInt(style.color.slice(1,3), 16);
         let g  = parseInt(style.color.slice(3,5), 16);
         let b  = parseInt(style.color.slice(5,7), 16);
-        css = `background-color: rgba( ${r}, ${g}, ${b}, 0.1)`;
+        css = `background-color: rgba( ${r}, ${g}, ${b}, 0.15)`;
       }
       return {
         className: style.className,
@@ -725,6 +765,9 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     case 'focus':
       this._evtFocus(event as FocusEvent);
       break;
+    case 'scroll':
+      this._evtScroll();
+      break;
     default:
       break;
     }
@@ -740,20 +783,74 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
+   * Handle `scroll` events for the editor.
+   */
+  private _evtScroll(): void {
+    // Remove any active hover.
+    this._clearHover();
+  }
+
+  /**
+   * Clear the hover for a caret, due to things like
+   * scrolling, resizing, deactivation, etc, where
+   * the position is no longer valid.
+   */
+  private _clearHover(): void {
+    if (this._caretHover) {
+      window.clearTimeout(this._hoverTimeout);
+      document.body.removeChild(this._caretHover);
+      this._caretHover = null;
+    }
+  }
+
+  /**
    * Construct a caret element representing the position
    * of a collaborator's cursor.
    */
-  private _getCaret(uuid: string): HTMLElement {
+  private _getCaret(collaborator: ICollaborator): HTMLElement {
+    let name = collaborator ? collaborator.displayName : 'Anonymous';
+    let color = collaborator ? collaborator.color : this._selectionStyle.color;
     let caret: HTMLElement = document.createElement('span');
-    caret.className = 'jp-CollaboratorCursor';
-    caret.style.borderBottomColor=`${this._selectionStyle.color}`
-    caret.appendChild(document.createTextNode('\u00a0'));
+    caret.className = COLLABORATOR_CURSOR_CLASS;
+    caret.style.borderBottomColor = color;
+    caret.onmouseenter = () => {
+      this._clearHover();
+      this._hoverId = collaborator.sessionId;
+      let rect = caret.getBoundingClientRect();
+      // Construct and place the hover box.
+      let hover = document.createElement('div');
+      hover.className = COLLABORATOR_HOVER_CLASS;
+      hover.style.left = String(rect.left)+'px';
+      hover.style.top = String(rect.bottom)+'px';
+      hover.textContent = name;
+      hover.style.backgroundColor = color;
+
+      // If the user mouses over the hover, take over the timer.
+      hover.onmouseenter = () => {
+        window.clearTimeout(this._hoverTimeout);
+      }
+      hover.onmouseleave = () => {
+        this._hoverTimeout = window.setTimeout(() => {
+          this._clearHover();
+        }, HOVER_TIMEOUT);
+      }
+      this._caretHover = hover;
+      document.body.appendChild(hover);
+    };
+    caret.onmouseleave = () => {
+      this._hoverTimeout = window.setTimeout(() => {
+        this._clearHover();
+      }, HOVER_TIMEOUT);
+    };
     return caret;
   }
 
   private _model: CodeEditor.IModel;
   private _editor: CodeMirror.Editor;
   protected selectionMarkers: { [key: string]: CodeMirror.TextMarker[] | undefined } = {};
+  private _caretHover: HTMLElement = null;
+  private _hoverTimeout: number = null; 
+  private _hoverId: string = null;
   private _keydownHandlers = new Array<CodeEditor.KeydownHandler>();
   private _changeGuard = false;
   private _selectionStyle: CodeEditor.ISelectionStyle;

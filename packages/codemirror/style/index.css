@@ -71,9 +71,22 @@
   border-right: 5px solid transparent;
   border-top: none;
   border-bottom: 3px solid;
-  position: absolute;
-  width: 0;
+  background-clip: content-box;
+  margin-left: -5px;
+  margin-right: -5px;
 }
+
+.jp-CollaboratorCursor-hover {
+  position: absolute;
+  z-index: 1;
+  transform: translateX(-50%);
+  color: white;
+  border-radius: 3px;
+  padding: 1px;
+  text-align: center;
+  white-space: nowrap;
+}
+
 
 
 /*
