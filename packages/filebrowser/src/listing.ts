@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IDocumentManager, renameFileDialog
+  IDocumentManager, renameFile
 } from '@jupyterlab/docmanager';
 
 import {
@@ -1069,7 +1069,7 @@ class DirListing extends Widget {
     const names = event.mimeData.getData(CONTENTS_MIME) as string[];
     for (let name of names) {
       let newPath = path + name;
-      promises.push(renameFileDialog(manager, name, newPath, this._model.path));
+      promises.push(renameFile(manager, name, newPath, this._model.path));
     }
     Promise.all(promises).catch(error => {
       utils.showErrorMessage('Move Error', error);
@@ -1276,7 +1276,7 @@ class DirListing extends Widget {
 
       const manager = this._manager;
       const basePath = this._model.path;
-      const promise = renameFileDialog(manager, original, newName, basePath);
+      const promise = renameFile(manager, original, newName, basePath);
       return promise.catch(error => {
         utils.showErrorMessage('Rename Error', error);
         this._inRename = false;

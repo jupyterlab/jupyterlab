@@ -316,12 +316,11 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
   });
 
   commands.addCommand(CommandIDs.rename, {
-    execute: () => {
+    execute: (args) => {
       const widget = tracker.currentWidget;
       if (!widget) {
         return;
       }
-
       return widget.rename();
     },
     iconClass: 'jp-MaterialIcon jp-EditIcon',

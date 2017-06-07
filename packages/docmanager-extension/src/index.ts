@@ -10,8 +10,8 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  createFromDialog, DocumentManager, IDocumentManager, IFileContainer,
-  showErrorMessage
+  createFromDialog, renameDialog, DocumentManager, IDocumentManager,
+  IFileContainer, showErrorMessage
 } from '@jupyterlab/docmanager';
 
 import {
@@ -59,6 +59,9 @@ namespace CommandIDs {
   const saveAs = 'file-operations:save-as';
 
   export
+  const rename = 'file-operations:rename';
+
+  export
   const createLauncher = 'file-operations:create-launcher';
 };
 
@@ -89,15 +92,6 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
 
     // Register the file operations commands.
     addCommands(app, docManager, registry, palette);
-
-    // Handle fileCreator items as they are added.
-    registry.changed.connect((sender, args) => {
-      if (args.type === 'fileCreator') {
-        menu.dispose();
-        menu = createMenu(app, docManager, registry);
-        mainMenu.addMenu(menu, { rank: 1 });
-      }
-    });
 
     return docManager;
   }
@@ -257,6 +251,30 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, registry: ID
     }
   });
 
+  commands.addCommand(CommandIDs.rename, {
+    isVisible: () => {
+      const widget = app.shell.currentWidget;
+      if (!widget) {
+        return;
+      }
+      // Find the context for the widget.
+      let context = docManager.contextForWidget(widget);
+      return context !== null;
+    },
+    execute: () => {
+      const widget = app.shell.currentWidget;
+      if (!widget) {
+        return;
+      }
+      // Find the context for the widget.
+      let context = docManager.contextForWidget(widget);
+      if (context) {
+        return renameDialog(docManager, context.path);
+      }
+    },
+    label: 'Rename'
+  });
+
   [
     CommandIDs.save,
     CommandIDs.restoreCheckpoint,
@@ -279,6 +297,7 @@ function createMenu(app: JupyterLab, docManager: IDocumentManager, registry: IDo
     CommandIDs.createLauncher,
     CommandIDs.save,
     CommandIDs.saveAs,
+    CommandIDs.rename,
     CommandIDs.restoreCheckpoint,
     CommandIDs.close,
     CommandIDs.closeAllFiles
