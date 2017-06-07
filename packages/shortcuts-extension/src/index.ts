@@ -109,7 +109,7 @@ const SHORTCUTS = [
   },
   {
     command: 'file-operations:save',
-    selector: '.jp-Document',
+    selector: 'body',
     keys: ['Accel S']
   },
   {
