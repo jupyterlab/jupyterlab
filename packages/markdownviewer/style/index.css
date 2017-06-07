@@ -5,7 +5,24 @@
 
 .jp-MarkdownViewer {
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
-  padding: 14px;
   outline: none;
+  overflow: hidden;
+  margin-top: -1px;
+}
+
+
+.jp-MarkdownViewer::before {
+    content: '';
+    display: block;
+    width: 100%;
+    height: var(--jp-toolbar-micro-height);
+    background: var(--jp-toolbar-background);
+    border-bottom: 1px solid var(--jp-toolbar-border-color);
+    box-shadow: var(--jp-toolbar-box-shadow);
+    z-index: 1;
+}
+
+.jp-MarkdownViewer .jp-RenderedMarkdown {
+  padding: 12px;
   overflow: auto;
 }

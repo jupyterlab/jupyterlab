@@ -172,5 +172,8 @@ all of MD as it is not optimized for dense, information rich UIs.
   /* Toolbar specific styles */
 
   --jp-toolbar-border-color: var(--md-grey-400);
+  --jp-toolbar-micro-height: 8px;
+  --jp-toolbar-background: var(--jp-layout-color0);
+  --jp-toolbar-box-shadow: 0px 0.4px 6px 0px rgba(0,0,0,0.1);
 
 }

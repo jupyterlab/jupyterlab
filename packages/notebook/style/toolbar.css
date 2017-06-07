@@ -13,6 +13,13 @@
 |----------------------------------------------------------------------------*/
 
 
+.jp-NotebookPanel-toolbar {
+  box-shadow: var(--jp-toolbar-box-shadow);
+  background: var(--jp-toolbar-background);
+  z-index: 1;
+}
+
+
 /* Top-level toolbar item */
 .jp-Toolbar-item.jp-Notebook-toolbarCellType  {
 }
