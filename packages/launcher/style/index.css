@@ -12,10 +12,12 @@
   align-items: center;
   margin: 0;
   padding: 0;
+  overflow: auto;
+  outline: none;
 }
 
 
-.jp-LauncherWidget-dialog {
+.jp-LauncherWidget-body {
   padding-bottom: 12px;
   font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color1);
@@ -88,7 +90,8 @@
 
 .jp-LauncherWidget-text {
   flex: 0 0 auto;
-  padding-top: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 

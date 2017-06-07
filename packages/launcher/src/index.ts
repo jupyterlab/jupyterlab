@@ -76,11 +76,6 @@ const ITEM_CLASS = 'jp-LauncherWidget-item';
  */
 const BODY_CLASS = 'jp-LauncherWidget-body';
 
-/**
- * The class name added to LauncherWidget dialog node.
- */
-const DIALOG_CLASS = 'jp-LauncherWidget-dialog';
-
 
 /**
  * The launcher interface.
@@ -154,7 +149,7 @@ interface ILauncherItem {
   /**
    * The category for the launcher item.
    *
-   * The default value is the displayName.
+   * The default value is the an empty string.
    */
   category?: string;
 
@@ -264,17 +259,15 @@ class LauncherWidget extends VDomRenderer<LauncherModel> {
         });
       };
       let imageClass = `${item.iconClass} ${IMAGE_CLASS}`;
-      let icon = h.div({ className: imageClass }, item.iconLabel);
-      let text = h.span({className: TEXT_CLASS }, item.displayName);
+      let icon = h.div({ className: imageClass, onclick }, item.iconLabel);
+      let text = h.span({className: TEXT_CLASS, onclick }, item.displayName);
+      let category = h.span({className: TEXT_CLASS, onclick }, item.category);
       return h.div({
-        onclick,
         className: ITEM_CLASS,
-      }, [icon, text]);
+      }, [icon, text, category]);
     });
 
-    let body = h.div({ className: BODY_CLASS  }, toArray(children));
-
-    return h.div({ className: DIALOG_CLASS }, [body]);
+    return h.div({ className: BODY_CLASS  }, toArray(children));
   }
 
   private _callback: (widget: Widget) => void;

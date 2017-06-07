@@ -170,7 +170,8 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
       for (let name in specs.kernelspecs) {
         let displayName = specs.kernelspecs[name].display_name;
         launcher.add({
-          displayName: `${displayName} Console`,
+          displayName,
+          category: 'Console',
           name,
           iconClass: 'jp-ImageCodeConsole',
           callback,

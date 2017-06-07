@@ -429,7 +429,8 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
       for (let name in specs.kernelspecs) {
         let displayName = specs.kernelspecs[name].display_name;
         launcher.add({
-          displayName: `${displayName} Notebook`,
+          displayName,
+          category: 'Notebook',
           name,
           iconClass: 'jp-ImageNotebook',
           callback,
