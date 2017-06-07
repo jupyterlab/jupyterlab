@@ -25,6 +25,10 @@ import {
 } from '@phosphor/coreutils';
 
 import {
+  URLExt
+} from '@jupyterlab/coreutils';
+
+import {
   RenderMime, typeset, removeMath, replaceMath
 } from '.';
 
@@ -453,7 +457,7 @@ namespace Private {
     // Get the appropriate file path.
     return resolver.resolveUrl(href).then(path => {
       // Handle the click override.
-      if (linkHandler) {
+      if (linkHandler && URLExt.isLocal(path)) {
         linkHandler.handleLink(anchor, path);
       }
       // Get the appropriate file download path.
