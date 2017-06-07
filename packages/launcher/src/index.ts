@@ -156,11 +156,11 @@ interface ILauncherItem {
   /**
    * The rank for the launcher item.
    *
-   * The rank is used as a tie-breaker when ordering launcher items
+   * The rank is used when ordering launcher items
    * for display. Items are sorted in the following order:
-   *   1. Category (locale order)
-   *   2. Rank (lower is better)
-   *   3. Label (locale order)
+   *   1. Rank (lower is better)
+   *   2. Category (locale order)
+   *   3. Display Name (locale order)
    *
    * The default rank is `Infinity`.
    */
@@ -193,7 +193,7 @@ class LauncherModel extends VDomModel implements ILauncher {
    */
   add(options: ILauncherItem): IDisposable {
     // Create a copy of the options to circumvent mutations to the original.
-    let item = {...options};
+    let item = Private.createItem(options);
 
     this._items.push(item);
     this.stateChanged.emit(void 0);
@@ -248,7 +248,8 @@ class LauncherWidget extends VDomRenderer<LauncherModel> {
    */
   protected render(): VirtualNode | VirtualNode[] {
     // Create an iterator that yields rendered item nodes.
-    let children = map(this.model.items(), item => {
+    let sorted = toArray(this.model.items()).sort(Private.sortCmp);
+    let children = map(sorted, item => {
       let onclick = () => {
         let callback = item.callback;
         let value = callback(this.cwd, item.name);
@@ -293,6 +294,49 @@ namespace LauncherWidget {
      * The callback used when an item is launched.
      */
     callback: (widget: Widget) => void;
+  }
+}
+
+
+/**
+ * The namespace for module private data.
+ */
+namespace Private {
+  /**
+   * Create an item given item options.
+   */
+  export
+  function createItem(options: ILauncherItem): ILauncherItem {
+    return {
+      ...options,
+      category: options.category || '',
+      name: options.category || options.displayName,
+      iconClass: options.iconClass || '',
+      iconLabel: options.iconLabel || '',
+      rank: options.rank !== undefined ? options.rank : Infinity
+    };
+  }
+
+  /**
+   * A sort comparison function for a launcher item.
+   */
+  export
+  function sortCmp(a: ILauncherItem, b: ILauncherItem): number {
+    // First, compare by rank.
+    let r1 = a.rank;
+    let r2 = b.rank;
+    if (r1 !== r2) {
+      return r1 < r2 ? -1 : 1;  // Infinity safe
+    }
+
+    // Next, compare based on category.
+    let d1 = a.category.localeCompare(b.category);
+    if (d1 !== 0) {
+      return d1;
+    }
+
+    // Finally, compare by display name.
+    return a.displayName.localeCompare(b.displayName);
   }
 }
 

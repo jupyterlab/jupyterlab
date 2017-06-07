@@ -169,12 +169,14 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
       let specs = manager.specs;
       for (let name in specs.kernelspecs) {
         let displayName = specs.kernelspecs[name].display_name;
+        let rank = name === specs.default ? 0 : Infinity;
         launcher.add({
           displayName,
           category: 'Console',
           name,
           iconClass: 'jp-ImageCodeConsole',
           callback,
+          rank
         });
       }
     });

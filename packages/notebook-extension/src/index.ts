@@ -428,12 +428,14 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
       let specs = services.specs;
       for (let name in specs.kernelspecs) {
         let displayName = specs.kernelspecs[name].display_name;
+        let rank = name === specs.default ? 0 : Infinity;
         launcher.add({
           displayName,
           category: 'Notebook',
           name,
           iconClass: 'jp-ImageNotebook',
           callback,
+          rank
         });
       }
     });
