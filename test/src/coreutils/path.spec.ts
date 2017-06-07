@@ -45,6 +45,11 @@ describe('@jupyterlab/coreutils', () => {
         expect(path).to.equal('');
       });
 
+      it('should not return "." for a path in the root directory', () => {
+        let path = PathExt.dirname('foo.txt');
+        expect(path).to.equal('');
+      });
+
     });
 
     describe('.extname()', () => {
