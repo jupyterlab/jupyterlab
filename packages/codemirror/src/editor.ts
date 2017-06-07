@@ -588,7 +588,15 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       // In that case, we don't need to render the cursor.
       if (!JSONExt.deepEqual(selection.start, selection.end)) {
         const { anchor, head } = this._toCodeMirrorSelection(selection);
-        const markerOptions = this._toTextMarkerOptions(selection.style);
+        let markerOptions: CodeMirror.TextMarkerOptions;
+        if (collaborator) {
+          markerOptions = this._toTextMarkerOptions({
+            ...selection.style,
+            color: collaborator.color
+          });
+        } else {
+          markerOptions = this._toTextMarkerOptions(selection.style);
+        }
         markers.push(this.doc.markText(anchor, head, markerOptions));
       } else {
         let caret = this._getCaret(collaborator);
@@ -633,7 +641,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
         let r = parseInt(style.color.slice(1,3), 16);
         let g  = parseInt(style.color.slice(3,5), 16);
         let b  = parseInt(style.color.slice(5,7), 16);
-        css = `background-color: rgba( ${r}, ${g}, ${b}, 0.1)`;
+        css = `background-color: rgba( ${r}, ${g}, ${b}, 0.15)`;
       }
       return {
         className: style.className,
