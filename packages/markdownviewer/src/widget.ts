@@ -48,7 +48,10 @@ class MarkdownViewer extends Widget {
   constructor(context: DocumentRegistry.Context, rendermime: RenderMime) {
     super();
     this.addClass(MD_CLASS);
-    this.layout = new PanelLayout();
+    let layout = this.layout = new PanelLayout();
+    let toolbar = new Widget();
+    toolbar.addClass('jp-Toolbar');
+    layout.addWidget(toolbar);
     this.title.label = context.path.split('/').pop();
     this._rendermime = rendermime;
     rendermime.resolver = context;
@@ -107,8 +110,9 @@ class MarkdownViewer extends Widget {
     let data = { 'text/markdown': model.toString() };
     let mimeModel = new MimeModel({ data, trusted: false });
     let widget = this._rendermime.render(mimeModel);
-    if (layout.widgets.length) {
-      layout.widgets[0].dispose();
+    if (layout.widgets.length === 2) {
+      // The toolbar is layout.widgets[0]
+      layout.widgets[1].dispose();
     }
     layout.addWidget(widget);
   }
