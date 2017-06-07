@@ -310,7 +310,7 @@ class ToolbarButton extends Widget {
   handleEvent(event: Event): void {
     switch (event.type) {
     case 'click':
-      if (this._onClick) {
+      if (this._onClick && (event as MouseEvent).button === 0) {
         this._onClick();
       }
       break;

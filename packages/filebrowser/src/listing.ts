@@ -289,6 +289,16 @@ class DirListing extends Widget {
   }
 
   /**
+   * Create an iterator over the listing's selected items.
+   *
+   * @returns A new iterator over the listing's selected items.
+   */
+  selectedItems(): IIterator<Contents.IModel> {
+    let items = this._sortedItems;
+    return filter(items, item => this._selection[item.name]);
+  }
+
+  /**
    * Create an iterator over the listing's sorted items.
    *
    * @returns A new iterator over the listing's sorted items.
@@ -405,11 +415,11 @@ class DirListing extends Widget {
     const basePath = this._model.path;
     let promises: Promise<Contents.IModel>[] = [];
 
-    for (let item of this._getSelectedItems()) {
+    each(this.selectedItems(), item => {
       if (item.type !== 'directory') {
         promises.push(this._model.manager.copy(item.name, '.', basePath));
       }
-    }
+    });
     return Promise.all(promises).catch(error => {
       utils.showErrorMessage('Duplicate file', error);
     });
@@ -419,11 +429,11 @@ class DirListing extends Widget {
    * Download the currently selected item(s).
    */
   download(): void {
-    for (let item of this._getSelectedItems()) {
+    each(this.selectedItems(), item => {
       if (item.type !== 'directory') {
         this._model.download(item.path);
       }
-    }
+    });
   }
 
   /**
@@ -1209,25 +1219,18 @@ class DirListing extends Widget {
     }
   }
 
-  /**
-   * Get the currently selected items.
-   */
-  private _getSelectedItems(): Contents.IModel[] {
-    let items = this._sortedItems;
-    return toArray(filter(items, item => this._selection[item.name]));
-  }
 
   /**
    * Copy the selected items, and optionally cut as well.
    */
   private _copy(): void {
     this._clipboard.length = 0;
-    for (let item of this._getSelectedItems()) {
+    each(this.selectedItems(), item => {
       if (item.type !== 'directory') {
         // Store the absolute path of the item.
         this._clipboard.push('/' + item.path);
       }
-    }
+    });
     this.update();
   }
 

@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Toolbar, ToolbarButton
+} from '@jupyterlab/apputils';
+
+import {
   DocumentManager
 } from '@jupyterlab/docmanager';
 
@@ -10,7 +14,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  each
+  IIterator
 } from '@phosphor/algorithm';
 
 import {
@@ -20,10 +24,6 @@ import {
 import {
   PanelLayout, Widget
 } from '@phosphor/widgets';
-
-import {
-  FileButtons
-} from './buttons';
 
 import {
   BreadCrumbs
@@ -36,6 +36,10 @@ import {
 import {
   FileBrowserModel
 } from './model';
+
+import {
+  Uploader
+} from './upload';
 
 import {
   showErrorMessage
@@ -53,14 +57,24 @@ const FILE_BROWSER_CLASS = 'jp-FileBrowser';
 const CRUMBS_CLASS = 'jp-FileBrowser-crumbs';
 
 /**
- * The class name added to the filebrowser buttons node.
+ * The class name added to the filebrowser toolbar node.
  */
-const BUTTON_CLASS = 'jp-FileBrowser-buttons';
+const TOOLBAR_CLASS = 'jp-FileBrowser-toolbar';
 
 /**
  * The class name added to the filebrowser listing node.
  */
 const LISTING_CLASS = 'jp-FileBrowser-listing';
+
+/**
+ * The class name added to the refresh button.
+ */
+const REFRESH_BUTTON = 'jp-RefreshIcon';
+
+/**
+ * The class name added to a material icon button.
+ */
+const MATERIAL_CLASS = 'jp-MaterialIcon';
 
 
 /**
@@ -82,22 +96,33 @@ class FileBrowser extends Widget {
     this.addClass(FILE_BROWSER_CLASS);
     this.id = options.id;
 
-    const commands = this._commands = options.commands;
-    const model = this._model = options.model;
+    const model = this.model = options.model;
     const renderer = options.renderer;
 
     model.connectionFailure.connect(this._onConnectionFailure, this);
     this._manager = model.manager;
     this._crumbs = new BreadCrumbs({ model });
-    this._buttons = new FileButtons({ commands, model });
+    this.toolbar = new Toolbar<Widget>();
+    let uploader = new Uploader({ model });
+    let refresher = new ToolbarButton({
+      className: REFRESH_BUTTON,
+      onClick: () => {
+        model.refresh();
+      },
+      tooltip: 'Refresh File List'
+    });
+    refresher.addClass(MATERIAL_CLASS);
+    this.toolbar.addItem('upload', uploader);
+    this.toolbar.addItem('refresher', refresher);
+
     this._listing = new DirListing({ model, renderer });
 
     this._crumbs.addClass(CRUMBS_CLASS);
-    this._buttons.addClass(BUTTON_CLASS);
+    this.toolbar.addClass(TOOLBAR_CLASS);
     this._listing.addClass(LISTING_CLASS);
 
     let layout = new PanelLayout();
-    layout.addWidget(this._buttons);
+    layout.addWidget(this.toolbar);
     layout.addWidget(this._crumbs);
     layout.addWidget(this._listing);
 
@@ -106,24 +131,19 @@ class FileBrowser extends Widget {
   }
 
   /**
-   * Get the command registry used by the file browser.
+   * The model used by the file browser.
    */
-  get commands(): CommandRegistry {
-    return this._commands;
-  }
+  readonly model: FileBrowserModel;
 
   /**
-   * Get the model used by the file browser.
+   * The toolbar used by the file browser.
    */
-  get model(): FileBrowserModel {
-    return this._model;
-  }
+  readonly toolbar: Toolbar<Widget>;
 
   /**
    * Dispose of the resources held by the file browser.
    */
   dispose() {
-    this._buttons = null;
     this._crumbs = null;
     this._listing = null;
     this._manager = null;
@@ -132,53 +152,12 @@ class FileBrowser extends Widget {
   }
 
   /**
-   * Open the currently selected item(s).
+   * Create an iterator over the listing's selected items.
    *
-   * Changes to the first directory encountered.
+   * @returns A new iterator over the listing's selected items.
    */
-  open(): void {
-    let foundDir = false;
-    each(this._model.items(), item => {
-      if (!this._listing.isSelected(item.name)) {
-        return;
-      }
-      if (item.type === 'directory') {
-        if (!foundDir) {
-          foundDir = true;
-          this._model.cd(item.name);
-        }
-      } else {
-        this.openPath(item.path);
-      }
-    });
-  }
-
-  /**
-   * Open a file by path.
-   *
-   * @param path - The path to of the file to open.
-   *
-   * @param widgetName - The name of the widget factory to use.
-   *
-   * @returns The widget for the file.
-   */
-  openPath(path: string, widgetName='default'): Widget {
-    return this._buttons.open(path, widgetName);
-  }
-
-  /**
-   * Create a new untitled file in the current directory.
-   *
-   * @param options - The options used to create the file.
-   *
-   * @returns A promise that resolves with the created widget.
-   */
-  createNew(options: Contents.ICreateOptions): Promise<Widget> {
-    return this._manager.newUntitled(options).then(contents => {
-      if (!this.isDisposed) {
-        return this._buttons.createNew(contents.path);
-      }
-    });
+  selectedItems(): IIterator<Contents.IModel> {
+    return this._listing.selectedItems();
   }
 
   /**
@@ -285,8 +264,6 @@ class FileBrowser extends Widget {
     });
   }
 
-  private _buttons: FileButtons | null = null;
-  private _commands: CommandRegistry | null = null;
   private _crumbs: BreadCrumbs | null = null;
   private _listing: DirListing | null = null;
   private _manager: DocumentManager | null = null;
