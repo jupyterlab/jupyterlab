@@ -8,12 +8,14 @@
   outline: none;
   overflow: hidden;
   margin-top: -1px;
+  display: flex;
 }
 
 
 .jp-MarkdownViewer::before {
     content: '';
     display: block;
+    position: absolute;
     width: 100%;
     height: var(--jp-toolbar-micro-height);
     background: var(--jp-toolbar-background);
