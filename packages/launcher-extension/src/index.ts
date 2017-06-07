@@ -9,6 +9,7 @@ import {
   JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
+
 import {
   ICommandPalette, ILayoutRestorer
 } from '@jupyterlab/apputils';
@@ -16,6 +17,10 @@ import {
 import {
   ILauncher, LauncherModel, LauncherWidget
 } from '@jupyterlab/launcher';
+
+import {
+  Widget
+} from '@phosphor/widgets';
 
 
 /**
@@ -61,9 +66,14 @@ function activate(app: JupyterLab, services: IServiceManager, palette: ICommandP
     label: 'New Launcher',
     execute: (args) => {
       let cwd = args['cwd'] ? String(args['cwd']) : '';
-      let widget = new LauncherWidget({ cwd });
+      let id = `launcher-${Private.id++}`;
+      let callback = (item: Widget) => {
+        shell.addToMainArea(item, { ref: id });
+        shell.activateById(item.id);
+      };
+      let widget = new LauncherWidget({ cwd, callback });
       widget.model = model;
-      widget.id = `launcher-${Private.id++}`;
+      widget.id = id;
       widget.title.label = 'Launcher';
       widget.title.closable = true;
       shell.addToMainArea(widget);

@@ -132,12 +132,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
       displayName: 'Terminal',
       iconClass: TERMINAL_ICON_CLASS,
       callback: () => {
-        let term = new Terminal();
-        term.title.closable = true;
-        term.title.icon = TERMINAL_ICON_CLASS;
-        term.title.label = '...';
-        services.terminals.startNew();
-        return term;
+        return commands.execute(CommandIDs.createNew);
       }
     });
   }
@@ -182,6 +177,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Instan
         term.session = session;
         tracker.add(term);
         shell.activateById(term.id);
+        return term;
       }).catch(() => { term.dispose(); });
     }
   });

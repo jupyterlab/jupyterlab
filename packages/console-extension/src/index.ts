@@ -160,14 +160,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
 
   // The launcher callback.
   let callback = (cwd: string, name: string) => {
-    return new ConsolePanel({
-      manager,
-      rendermime: rendermime.clone(),
-      contentFactory,
-      mimeTypeService: editorServices.mimeTypeService,
-      basePath: cwd,
-      kernelPreference: { name }
-    });
+    return createConsole({ basePath: cwd, kernelPreference: { name } });
   };
 
   // Add a launcher item if the launcher is available.
@@ -192,7 +185,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
   /**
    * Create a console for a given path.
    */
-  function createConsole(options: Partial<ConsolePanel.IOptions>): Promise<void> {
+  function createConsole(options: Partial<ConsolePanel.IOptions>): Promise<ConsolePanel> {
     return manager.ready.then(() => {
       let panel = new ConsolePanel({
         manager,
@@ -206,6 +199,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
       tracker.add(panel);
       shell.addToMainArea(panel);
       shell.activateById(panel.id);
+      return panel;
     });
   }
 

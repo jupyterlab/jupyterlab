@@ -16,7 +16,8 @@
     "@jupyterlab/apputils": "^0.6.0",
     "@jupyterlab/filebrowser": "^0.6.1",
     "@jupyterlab/launcher": "^0.6.0",
-    "@jupyterlab/services": "^0.45.0"
+    "@jupyterlab/services": "^0.45.0",
+    "@phosphor/widgets": "^1.2.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",

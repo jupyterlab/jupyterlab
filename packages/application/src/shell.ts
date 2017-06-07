@@ -341,13 +341,20 @@ class ApplicationShell extends Widget {
    * All widgets added to the main area should be disposed after removal (or
    * simply disposed in order to remove).
    */
-  addToMainArea(widget: Widget): void {
+  addToMainArea(widget: Widget, options: ApplicationShell.IMainAreaOptions = {}): void {
     if (!widget.id) {
       console.error('Widgets added to app shell must have unique id property.');
       return;
     }
 
-    this._dockPanel.addWidget(widget, { mode: 'tab-after' });
+    let dock = this._dockPanel;
+
+    let ref: Widget | null = null;
+    if (options.ref) {
+      ref = find(dock.widgets(), value => value.id === options.ref);
+    }
+
+    dock.addWidget(widget, { mode: 'tab-after', ref });
     this._tracker.add(widget);
   }
 
@@ -747,6 +754,19 @@ namespace ApplicationShell {
      */
     rank?: number;
   }
+
+  /**
+   * The options for adding a widget to a side area of the shell.
+   */
+  export
+  interface IMainAreaOptions {
+    /**
+     * The reference widget id for the insert location.
+     *
+     * The default is `null`.
+     */
+    ref?: string | null;
+  }
 }
 
 
@@ -974,7 +994,7 @@ namespace Private {
    * A message hook that adds and removes the .jp-Activity class to widgets in the dock panel.
    */
   export
-  var activityClassHook = (handler: IMessageHandler, msg: Message): boolean => {      
+  var activityClassHook = (handler: IMessageHandler, msg: Message): boolean => {
     if (msg.type === 'child-added') {
       (msg as Widget.ChildMessage).child.addClass(ACTIVITY_CLASS)
     } else if (msg.type === 'child-removed') {

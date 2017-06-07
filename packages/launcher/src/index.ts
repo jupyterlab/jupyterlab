@@ -14,12 +14,16 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  h, VirtualNode
-} from '@phosphor/virtualdom';
+  Message
+} from '@phosphor/messaging';
 
 import {
   Widget
 } from '@phosphor/widgets';
+
+import {
+  h, VirtualNode
+} from '@phosphor/virtualdom';
 
 import {
   VDomModel, VDomRenderer
@@ -55,7 +59,7 @@ const LAUNCHER_CLASS = 'jp-LauncherWidget';
 /**
  * The class name added to LauncherWidget image nodes.
  */
-//const IMAGE_CLASS = 'jp-LauncherWidget-image';
+const IMAGE_CLASS = 'jp-LauncherWidget-image';
 
 /**
  * The class name added to LauncherWidget text nodes.
@@ -111,8 +115,8 @@ interface ILauncherItem {
    * The callback invoked to launch the item.
    *
    * The callback is invoked with a current working directory and the
-   * name of the selected launcher item and returns a promise that
-   * resolves to the widget that will replace the launcher widget.
+   * name of the selected launcher item.  When the function returns
+   * the launcher will close.
    */
   callback: (cwd: string, name: string) => Widget | Promise<Widget>;
 
@@ -194,7 +198,7 @@ class LauncherModel extends VDomModel implements ILauncher {
    */
   add(options: ILauncherItem): IDisposable {
     // Create a copy of the options to circumvent mutations to the original.
-    let item = JSON.parse(JSON.stringify(options));
+    let item = {...options};
 
     this._items.push(item);
     this.stateChanged.emit(void 0);
@@ -227,6 +231,7 @@ class LauncherWidget extends VDomRenderer<LauncherModel> {
   constructor(options: LauncherWidget.IOptions) {
     super();
     this.cwd = options.cwd;
+    this._callback = options.callback;
     this.addClass(LAUNCHER_CLASS);
   }
 
@@ -236,16 +241,31 @@ class LauncherWidget extends VDomRenderer<LauncherModel> {
   readonly cwd: string;
 
   /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this.node.tabIndex = -1;
+    this.node.focus();
+  }
+
+  /**
    * Render the launcher to virtual DOM nodes.
    */
   protected render(): VirtualNode | VirtualNode[] {
     // Create an iterator that yields rendered item nodes.
     let children = map(this.model.items(), item => {
-      let icon = h.div({ className: item.iconClass }, item.iconLabel);
-      let text = h.span({className: TEXT_CLASS }, item.displayName);
       let onclick = () => {
-        console.log('hi clicked', item);
+        let callback = item.callback;
+        let value = callback(this.cwd, item.name);
+        Promise.resolve(value).then(widget => {
+          let callback = this._callback;
+          callback(widget);
+          this.dispose();
+        });
       };
+      let imageClass = `${item.iconClass} ${IMAGE_CLASS}`;
+      let icon = h.div({ className: imageClass }, item.iconLabel);
+      let text = h.span({className: TEXT_CLASS }, item.displayName);
       return h.div({
         onclick,
         className: ITEM_CLASS,
@@ -256,6 +276,8 @@ class LauncherWidget extends VDomRenderer<LauncherModel> {
 
     return h.div({ className: DIALOG_CLASS }, [body]);
   }
+
+  private _callback: (widget: Widget) => void;
 }
 
 
@@ -273,6 +295,11 @@ namespace LauncherWidget {
      * The cwd of the launcher.
      */
     cwd: string;
+
+    /**
+     * The callback used when an item is launched.
+     */
+    callback: (widget: Widget) => void;
   }
 }
 
