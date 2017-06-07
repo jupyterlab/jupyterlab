@@ -320,13 +320,13 @@ class JSONEditor extends Widget {
    */
   private _mergeContent(): void {
     let model = this.editor.model;
-    let current = this._getContent() || {};
-    let old = this._originalValue;
+    let current = this._getContent() || { };
+    let old = this._originalValue || { };
     let user = JSON.parse(model.value.text) as JSONObject;
     let source = this.source;
     // If it is in user and has changed from old, set in current.
     for (let key in user) {
-      if (!JSONExt.deepEqual(user[key], old[key])) {
+      if (!JSONExt.deepEqual(user[key], old[key] || null)) {
         current[key] = user[key];
       }
     }
