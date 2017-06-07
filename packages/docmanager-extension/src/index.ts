@@ -79,6 +79,10 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
         if (!widget.id) {
           widget.id = `document-manager-${++Private.id}`;
         }
+        widget.title.dataset = {
+          'type': 'document-title',
+          ...widget.title.dataset
+        };
         if (!widget.isAttached) {
           app.shell.addToMainArea(widget);
         }
@@ -273,6 +277,12 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, registry: ID
       }
     },
     label: 'Rename'
+  });
+
+  app.contextMenu.addItem({
+    command: CommandIDs.rename,
+    selector: '[data-type="document-title"]',
+    rank: 1
   });
 
   [
