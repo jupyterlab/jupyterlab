@@ -143,8 +143,9 @@ function activateFactory(app: JupyterLab, docManager: IDocumentManager, state: I
       let launcher = new ToolbarButton({
         className: 'jp-AddIcon',
         onClick: () => {
-          let cwd = widget.model.path;
-          commands.execute('launcher-jupyterlab:create', { cwd });
+          return commands.execute('launcher-jupyterlab:create', {
+            cwd: widget.model.path
+          });
         }
       });
       launcher.addClass('jp-MaterialIcon');

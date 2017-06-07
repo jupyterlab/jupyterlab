@@ -96,6 +96,11 @@ const SHORTCUTS = [
     keys: ['Accel Shift F']
   },
   {
+    command: 'file-operations:create-launcher',
+    selector: 'body',
+    keys: ['Accel Shift L']
+  },
+  {
     command: 'file-operations:create-from',
     args: { creatorName: 'Text File' },
     selector: 'body',
