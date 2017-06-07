@@ -27,16 +27,13 @@
 
 
 .jp-CodeConsole-content {
-  background-color: var(--jp-layout-color2);
+  background-color: var(--jp-console-background);
   flex: 1 1 auto;
   overflow: auto;
 }
 
 
 .jp-CodeConsole-content .jp-Cell.jp-CodeConsole-foreignCell {
-  background-color: var(--jp-layout-color3);
-  flex: 1 1 auto;
-  overflow: auto;
 }
 
 
@@ -49,13 +46,18 @@
   max-height: 80%;
   flex: 0 0 auto;
   overflow: auto;
-  border-top: var(--jp-border-width) solid var(--jp-border-color1);
+  border-top: var(--jp-border-width) solid var(--jp-toolbar-border-color);
   padding-top: var(--jp-private-console-cell-padding);
   padding-right: var(--jp-private-console-cell-padding);
   padding-left: var(--jp-private-console-cell-padding);
-  /* The weird 8px bottom padding is needed because of the 2px margin in the panel
-  that lets the shadow in the dock panel show */
-  padding-bottom: 8px;
+  /* We used to have a bottom padding of 8px that was supposedly related to
+   * our implementation of the 2px margin the the panel to let the shadow in the 
+   * dock panel show. But that doesn't seem to be relevant now, so using the 
+   * matching padding. */
+  padding-bottom: var(--jp-private-console-cell-padding);
+  /* This matches the box shadow on the notebook toolbar, eventually we should create
+   * CSS variables for this */
+  box-shadow: 0px 0.4px 6px 0px rgba(0,0,0,0.1);
 }
 
 
@@ -63,15 +65,6 @@
   background: transparent;
   border-color: transparent;
 }
-
-
-/* TODO: we should be able to use notebook styles for this */
-.jp-CodeConsole-input .jp-CodeConsole-prompt.jp-Cell {
-  background: linear-gradient(to right, #66BB6A -40px, #66BB6A 5px, transparent 5px, transparent 100%);
-  border-color: #66BB6A;
-  border-left-width: var(--jp-border-width);
-}
-
 
 .jp-CodeConsole-input .jp-CodeConsole-prompt .jp-InputArea {
   height: 100%;

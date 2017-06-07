@@ -165,4 +165,12 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-notebook-padding: 10px;
   --jp-notebook-scroll-padding: 100px;
 
+  /* Console specific styles */
+
+  --jp-console-background: var(--md-grey-100);
+
+  /* Toolbar specific styles */
+
+  --jp-toolbar-border-color: var(--md-grey-400);
+
 }
