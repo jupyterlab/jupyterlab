@@ -310,7 +310,7 @@ namespace Private {
     return {
       ...options,
       category: options.category || '',
-      name: options.category || options.displayName,
+      name: options.name || options.name,
       iconClass: options.iconClass || '',
       iconLabel: options.iconLabel || '',
       rank: options.rank !== undefined ? options.rank : Infinity
