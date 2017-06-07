@@ -38,6 +38,7 @@ class SaveHandler implements IDisposable {
     this._context = options.context;
     this._minInterval = options.saveInterval * 1000 || 120000;
     this._interval = this._minInterval;
+    this._warnOnConflict = !this._context.model.modelDB.isCollaborative;
     // Restart the timer when the contents model is updated.
     this._context.fileChanged.connect(this._setTimer, this);
     this._context.disposed.connect(this.dispose, this);
@@ -133,8 +134,8 @@ class SaveHandler implements IDisposable {
     // Make sure the file has not changed on disk.
     let promise = this._manager.contents.get(context.path);
     promise.then(model => {
-      if (!this.isDisposed && context.contentsModel &&
-          model.last_modified !== context.contentsModel.last_modified) {
+      if (!this.isDisposed && context.contentsModel && this._warnOnConflict
+          && model.last_modified !== context.contentsModel.last_modified) {
         return this._timeConflict(model.last_modified);
       }
       return this._finishSave();
@@ -197,6 +198,7 @@ class SaveHandler implements IDisposable {
   private _autosaveTimer = -1;
   private _minInterval = -1;
   private _interval = -1;
+  private _warnOnConflict = true;
   private _context: DocumentRegistry.Context = null;
   private _manager: ServiceManager.IManager = null;
   private _isActive = false;
