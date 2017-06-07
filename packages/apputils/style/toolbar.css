@@ -14,7 +14,7 @@
   flex: 0 0 auto;
   display: flex;
   flex-direction: row;
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  border-bottom: var(--jp-border-width) solid var(--jp-toolbar-border-color);
   height: calc(var(--jp-private-toolbar-height) + var(--jp-border-width));
 }
 
