@@ -15,6 +15,7 @@ from traitlets import Bool, Unicode
 from ._version import __version__
 from .commands import (
     install_extension, uninstall_extension, list_extensions,
+    enable_extension, disable_extension,    
     link_package, unlink_package, build, _get_linked_packages
 )
 
@@ -37,12 +38,13 @@ class BaseExtensionApp(JupyterApp):
     app_dir = Unicode('', config=True,
         help="The app directory to target")
 
-    should_build = Bool(True, config=True,
+    should_build = Bool(False, config=True,
         help="Whether to build the app after the action")
 
 
 class InstallLabExtensionApp(BaseExtensionApp):
     description = "Install labextension(s)"
+    should_build = True
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
@@ -60,6 +62,7 @@ class LinkLabExtensionApp(BaseExtensionApp):
     package is manually re-installed from its source location when
     `jupyter lab build` is run.
     """
+    should_build = True
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
@@ -70,6 +73,7 @@ class LinkLabExtensionApp(BaseExtensionApp):
 
 class UnlinkLabExtensionApp(BaseExtensionApp):
     description = "Unlink labextension(s) or packages by name or path"
+    should_build = True
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
@@ -81,6 +85,7 @@ class UnlinkLabExtensionApp(BaseExtensionApp):
 
 class UninstallLabExtensionApp(BaseExtensionApp):
     description = "Uninstall labextension(s) by name"
+    should_build = True
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
@@ -92,19 +97,31 @@ class UninstallLabExtensionApp(BaseExtensionApp):
 
 class ListLabExtensionsApp(BaseExtensionApp):
     description = "List the installed labextensions"
-    should_build = False
 
     def start(self):
-        [print(ext) for ext in list_extensions(self.app_dir)]
+        list_extensions(self.app_dir)
 
 
 class ListLinkedLabExtensionsApp(BaseExtensionApp):
     description = "List the linked packages"
-    should_build = False
 
     def start(self):
         for path in _get_linked_packages(self.app_dir).values():
             print(path)
+
+
+class EnableLabExtensionsApp(BaseExtensionApp):
+    description = "Enable labextension(s) by name"
+
+    def start(self):
+        [enable_extension(arg, self.app_dir) for arg in self.extra_args]
+
+
+class DisableLabExtensionsApp(BaseExtensionApp):
+    description = "Disable labextension(s) by name"
+
+    def start(self):
+        [disable_extension(arg, self.app_dir) for arg in self.extra_args]
 
 
 _examples = """
@@ -127,7 +144,9 @@ class LabExtensionApp(JupyterApp):
         list=(ListLabExtensionsApp, "List labextensions"),
         link=(LinkLabExtensionApp, "Link labextension(s)"),
         unlink=(UnlinkLabExtensionApp, "Unlink labextension(s)"),
-        listlinked=(ListLinkedLabExtensionsApp, "List linked extensions")
+        listlinked=(ListLinkedLabExtensionsApp, "List linked extensions"),
+        enable=(EnableLabExtensionsApp, "Enable labextension(s)"),
+        disable=(DisableLabExtensionsApp, "Disable labextensions(s)")
     )
 
     def start(self):
