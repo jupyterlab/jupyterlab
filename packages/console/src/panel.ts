@@ -89,6 +89,7 @@ class ConsolePanel extends Panel {
     session.ready.then(() => {
       this._connected = new Date();
       this._updateTitle();
+      this.console.promptCell.editor.focus();
     });
 
     this._manager = manager;
