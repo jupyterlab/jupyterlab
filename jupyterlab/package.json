@@ -81,6 +81,22 @@
       "@jupyterlab/theme-light-extension",
       "@jupyterlab/tooltip-extension"
     ],
+    "singletonPackages": [
+      "@jupyterlab/apputils",
+      "@jupyterlab/console",
+      "@jupyterlab/coreutils",
+      "@jupyterlab/docmanager", 
+      "@jupyterlab/filebrowser",
+      "@jupyterlab/fileeditor",
+      "@jupyterlab/imageviewer",
+      "@jupyterlab/launcher",
+      "@jupyterlab/notebook",
+      "@jupyterlab/rendermime",
+      "@jupyterlab/services",
+      "@jupyterlab/terminal",
+      "@jupyterlab/tooltip",
+      "@phosphor/widgets"
+    ],
     "name": "JupyterLab",
     "version": "0.23.2"
   }
