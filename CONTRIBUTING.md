@@ -156,14 +156,14 @@ npm install --save jupyterlab
 git clone https://github.com/jupyterlab/jupyterlab.git
 cd jupyterlab
 npm install
-npm run build
+npm run build:packages
 ```
 
 **Rebuild**
 
 ```bash
 npm run clean
-npm run build
+npm run build:packages
 ```
 
 ## The Jupyter Server Extension
@@ -177,7 +177,7 @@ version 4.2 or later is installed.
 When you make a change to JupyterLab npm package source files, run:
 
 ```bash
-npm run build:main
+npm run build
 ```
 
 to build the changes and then refresh your browser to see the changes.
@@ -185,7 +185,7 @@ to build the changes and then refresh your browser to see the changes.
 To have the system build after each source file change, run:
 
 ```bash
-npm run watch:main
+npm run watch
 ```
 
 and refresh the browser.
