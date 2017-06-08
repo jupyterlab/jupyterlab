@@ -13,8 +13,18 @@
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  border-top: var(--jp-border-width) solid var(--jp-border-color1);
   margin-top: -1px;
+}
+
+
+.jp-ConsolePanel::before {
+    content: '';
+    display: block;
+    height: var(--jp-toolbar-micro-height);
+    background: var(--jp-toolbar-background);
+    border-bottom: 1px solid var(--jp-toolbar-border-color);
+    box-shadow: var(--jp-toolbar-box-shadow);
+    z-index: 1;
 }
 
 
@@ -47,14 +57,11 @@
   flex: 0 0 auto;
   overflow: auto;
   border-top: var(--jp-border-width) solid var(--jp-toolbar-border-color);
-  padding-top: var(--jp-private-console-cell-padding);
-  padding-right: var(--jp-private-console-cell-padding);
-  padding-left: var(--jp-private-console-cell-padding);
   /* We used to have a bottom padding of 8px that was supposedly related to
    * our implementation of the 2px margin the the panel to let the shadow in the 
    * dock panel show. But that doesn't seem to be relevant now, so using the 
    * matching padding. */
-  padding-bottom: var(--jp-private-console-cell-padding);
+  padding: var(--jp-private-console-cell-padding);
   /* This matches the box shadow on the notebook toolbar, eventually we should create
    * CSS variables for this */
   box-shadow: 0px 0.4px 6px 0px rgba(0,0,0,0.1);
