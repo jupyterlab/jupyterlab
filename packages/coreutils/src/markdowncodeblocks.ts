@@ -89,8 +89,7 @@ namespace MarkdownCodeBlocks {
       } else {
         if (lineContainsMarker) {
           // End of block, finish it up.
-          currentBlock.code += line.substring(0, line.indexOf(CODE_BLOCK_MARKER));
-          currentBlock.endLine = lineIndex;
+          currentBlock.endLine = lineIndex-1;
           codeBlocks.push(currentBlock);
           currentBlock = null;
         } else {

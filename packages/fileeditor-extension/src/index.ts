@@ -198,6 +198,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
 
   commands.addCommand(CommandIDs.runCode, {
     execute: () => {
+      // This will run the current selection or the entire ```fenced``` code block.
       const widget = tracker.currentWidget;
 
       if (!widget) {
@@ -205,12 +206,12 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
       }
 
       let code = '';
-
       const editor = widget.editor;
       const path = widget.context.path;
       const extension = PathExt.extname(path);
       const selection = editor.getSelection();
       const { start, end } = selection;
+      console.log(start, end);
       const selected = start.column !== end.column || start.line !== end.line;
 
       if (selected) {
@@ -219,9 +220,6 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
         const end = editor.getOffsetAt(selection.end);
 
         code = editor.model.value.text.substring(start, end);
-        if (start === end) {
-          code = editor.getLine(selection.start.line);
-        }
       } else if (MarkdownCodeBlocks.isMarkdown(extension)) {
         const { text } = editor.model.value;
         const blocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(text);
@@ -234,17 +232,12 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
         }
       }
 
-      const { column, line } = editor.getCursorPosition();
       const activate = false;
-
-      // Advance cursor to the next line.
-      if (line + 1 === editor.lineCount) {
-        const text = editor.model.value.text;
-        editor.model.value.text = text + '\n';
+      if (code) {
+        return commands.execute('console:inject', { activate, code, path });
+      } else {
+        return Promise.resolve(void 0);
       }
-      editor.setCursorPosition({ column, line: line + 1 });
-
-      return commands.execute('console:inject', { activate, code, path });
     },
     isEnabled: hasWidget,
     label: 'Run Code'
