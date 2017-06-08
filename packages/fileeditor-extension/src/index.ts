@@ -211,7 +211,6 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
       const extension = PathExt.extname(path);
       const selection = editor.getSelection();
       const { start, end } = selection;
-      console.log(start, end);
       const selected = start.column !== end.column || start.line !== end.line;
 
       if (selected) {
