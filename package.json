@@ -2,9 +2,10 @@
   "private": true,
   "scripts": {
     "install": "lerna bootstrap --hoist",
-    "build": "cd packages/all-packages && npm run build",
+    "build:packages": "cd packages/all-packages && npm run build",
     "build:examples": "lerna run build --scope \"@jupyterlab/example-*\"",
-    "build:main": "npm run build && cd jupyterlab && npm run build",
+    "build": "npm run build:packages && cd jupyterlab && npm run build",
+    "build:main": "npm run build",
     "build:src": "lerna run build --scope \"@jupyterlab/!(test-|example-)*\"",
     "build:test": "lerna run build:test",
     "clean": "node scripts/clean-packages.js examples packages",
@@ -21,8 +22,9 @@
     "test:ie": "lerna run test:ie --concurrency 1 --stream",
     "publish": "npm update && npm install && npm run clean && npm run build && lerna publish -m \"Publish\"",
     "update:dependency": "node scripts/update-dependency.js",
+    "watch:packages": "watch \"npm run build:packages\" ./packages/** --wait 10 --filter=scripts/watch-filter.js --ignoreDotFiles",
     "watch": "watch \"npm run build\" ./packages/** --wait 10 --filter=scripts/watch-filter.js --ignoreDotFiles",
-    "watch:main": "watch \"npm run build:main\" ./packages/** --wait 10 --filter=scripts/watch-filter.js --ignoreDotFiles",
+    "watch:main": "npm run watch",
     "addsibling": "node scripts/add-sibling.js",
     "removesibling": "node scripts/remove-sibling.js"
   },
