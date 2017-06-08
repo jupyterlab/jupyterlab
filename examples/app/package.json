@@ -6,7 +6,6 @@
     "clean": "rimraf build"
   },
   "dependencies": {
-    "@jupyterlab/about-extension": "^0.5.0",
     "@jupyterlab/application": "^0.6.0",
     "@jupyterlab/application-extension": "^0.6.0",
     "@jupyterlab/apputils-extension": "^0.6.0",
