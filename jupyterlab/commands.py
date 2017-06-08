@@ -158,13 +158,13 @@ def unlink_package(package, app_dir=None):
 def enable_extension(extension, app_dir=None):
     """Enable a JupyterLab extension.
     """
-    _toggle_extension(extension, True, app_dir)
+    _toggle_extension(extension, False, app_dir)
 
 
 def disable_extension(extension, app_dir=None):
     """Disable a JupyterLab package.
     """
-    _toggle_extension(extension, False, app_dir)
+    _toggle_extension(extension, True, app_dir)
 
 
 def should_build(app_dir=None):
@@ -244,17 +244,19 @@ def _toggle_extension(extension, value, app_dir=None):
     app_dir = get_app_dir(app_dir)
     config = _get_page_config(app_dir)
     extensions = _get_extensions(app_dir)
-    if extension not in extensions:
+    core_extensions = _get_core_extensions()
+
+    if extension not in extensions and extension not in core_extensions:
         raise ValueError('Extension %s is not installed' % extension)
     disabled = config.get('disabled_extensions', dict())
     disabled[extension] = value
 
     # Prune extensions that are not installed.
     for key in list(disabled):
-        if (key not in extensions):
+        if (key not in extensions and key not in core_extensions):
             del disabled[key]
     config['disabled_extensions'] = disabled
-    _write_page_config(config)
+    _write_page_config(config, app_dir)
 
 
 def _write_build_config(config, app_dir):
@@ -359,8 +361,7 @@ def list_extensions(app_dir=None):
         print('\nUninstalled core extensiosn:')
         [print(item) for item in sorted(uninstalled_core)]
 
-    with open(pjoin(here, 'package.app.json')) as fid:
-        core_extensions = json.load(fid)['jupyterlab']['extensions']
+    core_extensions = _get_core_extensions()
 
     disabled_core = []
     for key in core_extensions:
@@ -500,6 +501,13 @@ def _get_disabled(app_dir):
     """
     config = _get_page_config(app_dir)
     return config.get('disabled_extensions', dict())
+
+
+def _get_core_extensions():
+    """Get the core extensions.
+    """
+    with open(pjoin(here, 'package.app.json')) as fid:
+        return json.load(fid)['jupyterlab']['extensions']
 
 
 def _get_extensions(app_dir):
