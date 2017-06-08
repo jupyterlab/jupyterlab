@@ -255,6 +255,16 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, registry: ID
     }
   });
 
+  // Create a launcher with a banner if ther are no open items.
+  app.restored.then(() => {
+    if (app.shell.isEmpty('main')) {
+      commands.execute('launcher-jupyterlab:create', {
+        cwd: docManager.cwd,
+        banner: true
+      });
+    }
+  });
+
   commands.addCommand(CommandIDs.rename, {
     isVisible: () => {
       const widget = app.shell.currentWidget;

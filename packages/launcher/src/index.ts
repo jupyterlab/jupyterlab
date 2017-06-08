@@ -227,6 +227,7 @@ class LauncherWidget extends VDomRenderer<LauncherModel> {
     super();
     this.cwd = options.cwd;
     this._callback = options.callback;
+    this._header = options.header;
     this.addClass(LAUNCHER_CLASS);
   }
 
@@ -249,7 +250,7 @@ class LauncherWidget extends VDomRenderer<LauncherModel> {
   protected render(): VirtualNode | VirtualNode[] {
     // Create an iterator that yields rendered item nodes.
     let sorted = toArray(this.model.items()).sort(Private.sortCmp);
-    let children = map(sorted, item => {
+    let items = map(sorted, item => {
       let onclick = () => {
         let callback = item.callback;
         let value = callback(this.cwd, item.name);
@@ -269,10 +270,17 @@ class LauncherWidget extends VDomRenderer<LauncherModel> {
       }, [icon, text, category]);
     });
 
-    return h.div({ className: BODY_CLASS  }, toArray(children));
+    let children: VirtualNode[];
+    if (this._header) {
+      children = [this._header].concat(toArray(items));
+    } else {
+      children = toArray(items);
+    }
+    return h.div({ className: BODY_CLASS  }, children);
   }
 
   private _callback: (widget: Widget) => void;
+  private _header: VirtualNode;
 }
 
 
@@ -295,6 +303,11 @@ namespace LauncherWidget {
      * The callback used when an item is launched.
      */
     callback: (widget: Widget) => void;
+
+    /**
+     * An optional header virtual node.
+     */
+    header?: VirtualNode;
   }
 }
 
