@@ -14,6 +14,7 @@ export * from './pageconfig';
 export * from './path';
 export * from './settingregistry';
 export * from './statedb';
+export * from './text';
 export * from './time';
 export * from './undoablelist';
 export * from './url';
