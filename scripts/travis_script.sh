@@ -79,10 +79,15 @@ if [[ $GROUP == cli ]]; then
     jupyter labextension link jupyterlab/tests/mockextension --no-build
     jupyter labextension unlink jupyterlab/tests/mockextension --no-build
     jupyter labextension link jupyterlab/tests/mockextension --no-build
+    jupyter labextension listlinked
     jupyter labextension unlink  @jupyterlab/python-tests --no-build
     jupyter labextension install jupyterlab/tests/mockextension  --no-build
     jupyter labextension list
-    jupyter labextension uninstall @jupyterlab/python-tests
+    jupyter labextension disable @jupyterlab/python-tests
+    jupyter labextension enable @jupyterlab/python-tests
+    jupyter labextension disable @jupyterlab/notebook-extension
+    jupyter labextension uninstall @jupyterlab/python-tests --no-build
+    jupyter labextension uninstall @jupyterlab/notebook-extension --no-build
 
     # Make sure we can call help on all the cli apps.
     jupyter lab -h 
@@ -94,4 +99,7 @@ if [[ $GROUP == cli ]]; then
     jupyter labextension install -h 
     jupyter labextension uninstall -h 
     jupyter labextension list -h
+    jupyter labextension listlinked -h
+    jupyter labextension enable -h
+    jupyter labextension disable -h
 fi
