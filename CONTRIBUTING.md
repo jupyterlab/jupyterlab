@@ -156,14 +156,14 @@ npm install --save jupyterlab
 git clone https://github.com/jupyterlab/jupyterlab.git
 cd jupyterlab
 npm install
-npm run build
+npm run build:packages
 ```
 
 **Rebuild**
 
 ```bash
 npm run clean
-npm run build
+npm run build:packages
 ```
 
 ## The Jupyter Server Extension
