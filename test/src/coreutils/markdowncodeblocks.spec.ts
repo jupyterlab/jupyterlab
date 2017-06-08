@@ -30,7 +30,7 @@ describe('@jupyterlab/coreutils', () => {
       it('should find a simple block', () => {
         let codeblocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(BLOCK1);
         expect(codeblocks.length).to.equal(1);
-        expect(codeblocks[0].code).to.equal('a = 10\nb = 20');
+        expect(codeblocks[0].code).to.equal('a = 10\nb = 20\n');
       });
 
       it('should find a single line block', () => {
@@ -42,7 +42,7 @@ describe('@jupyterlab/coreutils', () => {
       it('should find a block with a language', () => {
         let codeblocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(BLOCK1);
         expect(codeblocks.length).to.equal(1);
-        expect(codeblocks[0].code).to.equal('a = 10\nb = 20');
+        expect(codeblocks[0].code).to.equal('a = 10\nb = 20\n');
       });
 
     });
