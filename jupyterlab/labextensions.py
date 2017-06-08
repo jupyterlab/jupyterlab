@@ -15,7 +15,7 @@ from traitlets import Bool, Unicode
 from ._version import __version__
 from .commands import (
     install_extension, uninstall_extension, list_extensions,
-    enable_extension, disable_extension,    
+    enable_extension, disable_extension,
     link_package, unlink_package, build, _get_linked_packages
 )
 
