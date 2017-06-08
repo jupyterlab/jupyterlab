@@ -29,7 +29,6 @@ else:
 
 
 here = osp.dirname(osp.abspath(__file__))
-sys_path = pjoin(ENV_JUPYTER_PATH[0], 'lab', 'extensions')
 
 
 def get_app_dir(app_dir=None):
@@ -319,6 +318,7 @@ def list_extensions(app_dir=None):
     linked = []
 
     # We want to organize by dir.
+    sys_path = pjoin(get_app_dir(), 'extensions')
     for (key, value) in extensions.items():
         if key in linked:
             linked.append(key)
@@ -516,6 +516,7 @@ def _get_extensions(app_dir):
     extensions = dict()
 
     # Get system level packages
+    sys_path = pjoin(get_app_dir(), 'extensions')
     for target in glob.glob(pjoin(sys_path, '*.tgz')):
         data = _read_package(target)
         extensions[data['name']] = dict(path=os.path.realpath(target),
