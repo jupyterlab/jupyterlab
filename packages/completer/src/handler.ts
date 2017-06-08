@@ -14,6 +14,10 @@ import {
 } from '@phosphor/messaging';
 
 import {
+  Text
+} from '@jupyterlab/coreutils';
+
+import {
   IClientSession
 } from '@jupyterlab/apputils';
 
@@ -166,8 +170,9 @@ class CompletionHandler implements IDisposable {
     if (!editor) {
       return Promise.reject(new Error('No active editor'));
     }
-
-    let offset = editor.getOffsetAt(position);
+    
+    const code = editor.model.value.text;
+    const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), code);
     let content: KernelMessage.ICompleteRequest = {
       code: editor.model.value.text,
       cursor_pos: offset
@@ -256,7 +261,11 @@ class CompletionHandler implements IDisposable {
     model.setOptions(value.matches || []);
 
     // Update the cursor.
-    model.cursor = { start: value.cursor_start, end: value.cursor_end };
+    const text = state.text;
+    model.cursor = {
+      start: Text.charIndexToJsIndex(value.cursor_start, text),
+      end: Text.charIndexToJsIndex(value.cursor_end, text),
+    };
   }
 
   /**

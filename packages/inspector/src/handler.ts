@@ -10,6 +10,10 @@ import {
 } from '@phosphor/disposable';
 
 import {
+  Text
+} from '@jupyterlab/coreutils';
+
+import {
   ISignal, Signal
 } from '@phosphor/signaling';
 
@@ -143,7 +147,7 @@ class InspectionHandler implements IDisposable, IInspector.IInspectable {
     const editor = this.editor;
     const code = editor.model.value.text;
     const position = editor.getCursorPosition();
-    const offset = editor.getOffsetAt(position);
+    const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), code);
     let update: IInspector.IInspectorUpdate = { content: null, type: 'hints' };
 
     // Clear hints if the new text value is empty or kernel is unavailable.
