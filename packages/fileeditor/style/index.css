@@ -13,7 +13,6 @@
 .jp-FileEditor::before {
     content: '';
     display: block;
-    width: 100%;
     height: var(--jp-toolbar-micro-height);
     background: var(--jp-toolbar-background);
     border-bottom: 1px solid var(--jp-toolbar-border-color);
