@@ -45,6 +45,9 @@ namespace CommandIDs {
 
   export
   const changeMode = 'codemirror:change-mode';
+
+  export
+  const changeTabs = 'codemirror:change-tabs';
 };
 
 
@@ -166,11 +169,13 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     const themeMenu = new Menu({ commands });
     const keyMapMenu = new Menu({ commands });
     const modeMenu = new Menu({ commands });
+    const tabMenu = new Menu({ commands });
 
     menu.title.label = 'Editor';
     themeMenu.title.label = 'Theme';
     keyMapMenu.title.label = 'Key Map';
     modeMenu.title.label = 'Language';
+    tabMenu.title.label = 'Tabs';
 
     commands.addCommand(CommandIDs.changeTheme, {
       label: args => args['theme'] as string,
@@ -232,6 +237,47 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
       }
     });
 
+    commands.addCommand(CommandIDs.changeTabs, {
+      label: args => args['name'] as string,
+      execute: args => {
+        let widget = tracker.currentWidget;
+        if (!widget) {
+          return;
+        }
+        let editor = widget.editor as CodeMirrorEditor;
+        let size = args['size'] as number || 4;
+        let tabs = !!args['tabs'];
+        editor.editor.setOption('indentWithTabs', tabs);
+        editor.editor.setOption('indentUnit', size);
+      },
+      isEnabled: hasWidget,
+      isToggled: args => {
+        let widget = tracker.currentWidget;
+        if (!widget) {
+          return false;
+        }
+        let tabs = !!args['tabs'];
+        let size = args['size'] as number || 4;
+        let editor = widget.editor as CodeMirrorEditor;
+        if (editor.editor.getOption('indentWithTabs') !== tabs) {
+          return false;
+        }
+        return editor.editor.getOption('indentUnit') === size;
+      }
+    });
+
+    tabMenu.addItem({
+      command: CommandIDs.changeTabs, args: {
+        tabs: true, size: 4, name: 'Indent with Tab' }
+    });
+    for (let size = 1; size < 9; size++) {
+      tabMenu.addItem({
+        command: CommandIDs.changeTabs, args: {
+          tabs: false, size, name: `Spaces: ${size} `
+        }
+      });
+    }
+
     Mode.getModeInfo().sort((a, b) => {
       return a.name.localeCompare(b.name);
     }).forEach(spec => {
@@ -264,6 +310,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     menu.addItem({ type: 'submenu', submenu: keyMapMenu });
     menu.addItem({ type: 'submenu', submenu: themeMenu });
     menu.addItem({ type: 'submenu', submenu: modeMenu });
+    menu.addItem({ type: 'submenu', submenu: tabMenu });
 
     return menu;
   }
