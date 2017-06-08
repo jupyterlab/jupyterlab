@@ -16,7 +16,7 @@ declare module CodeMirror {
 
     // findMode* functions are from loading the codemirror/mode/meta module
     interface modespec {
-      [ key: string ]: string;
+      ext?: string[];
       name?: string;
       mode: string;
       mime: string;

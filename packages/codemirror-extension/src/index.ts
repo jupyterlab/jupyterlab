@@ -18,7 +18,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  editorServices, CodeMirrorEditor
+  editorServices, CodeMirrorEditor, Mode
 } from '@jupyterlab/codemirror';
 
 import {
@@ -42,6 +42,9 @@ namespace CommandIDs {
 
   export
   const changeTheme = 'codemirror:change-theme';
+
+  export
+  const changeMode = 'codemirror:change-mode';
 };
 
 
@@ -162,10 +165,12 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     const menu = new Menu({ commands });
     const themeMenu = new Menu({ commands });
     const keyMapMenu = new Menu({ commands });
+    const modeMenu = new Menu({ commands });
 
     menu.title.label = 'Editor';
     themeMenu.title.label = 'Theme';
     keyMapMenu.title.label = 'Key Map';
+    modeMenu.title.label = 'Language';
 
     commands.addCommand(CommandIDs.changeTheme, {
       label: args => args['theme'] as string,
@@ -202,6 +207,40 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
       isToggled: args => args['keyMap'] === keyMap
     });
 
+    commands.addCommand(CommandIDs.changeMode, {
+      label: args => args['name'] as string,
+      execute: args => {
+        let mode = args['mode'] as string;
+        if (mode) {
+          let widget = tracker.currentWidget;
+          let spec = Mode.findByName(mode);
+          if (spec) {
+            widget.model.mimeType = spec.mime;
+          }
+        }
+      },
+      isEnabled: hasWidget,
+      isToggled: args => {
+        let widget = tracker.currentWidget;
+        if (!widget) {
+          return false;
+        }
+        let mime = widget.model.mimeType;
+        let spec = Mode.findByMIME(mime);
+        let mode = spec && spec.mode;
+        return args['mode'] === mode;
+      }
+    });
+
+    Mode.getModeInfo().sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    }).forEach(spec => {
+      modeMenu.addItem({
+        command: CommandIDs.changeMode,
+        args: {...spec}
+      });
+    });
+
     [
      'jupyter', 'default', 'abcdef', 'base16-dark', 'base16-light',
      'hopscotch', 'material', 'mbo', 'mdn-like', 'seti', 'the-matrix',
@@ -224,6 +263,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     menu.addItem({ type: 'separator' });
     menu.addItem({ type: 'submenu', submenu: keyMapMenu });
     menu.addItem({ type: 'submenu', submenu: themeMenu });
+    menu.addItem({ type: 'submenu', submenu: modeMenu });
 
     return menu;
   }

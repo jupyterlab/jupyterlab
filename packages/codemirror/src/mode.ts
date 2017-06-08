@@ -34,10 +34,18 @@ namespace Mode {
    */
   export
   interface ISpec {
-    [ key: string ]: string;
+    ext?: string[];
     name?: string;
     mode: string;
     mime: string;
+  }
+
+  /**
+   * Get the raw list of available modes specs.
+   */
+  export
+  function getModeInfo(): ISpec[] {
+    return CodeMirror.modeInfo;
   }
 
   /**
@@ -66,7 +74,7 @@ namespace Mode {
     }
 
     // Fetch the mode asynchronously.
-    return new Promise<CodeMirror.modespec>((resolve, reject) => {
+    return new Promise<ISpec>((resolve, reject) => {
       require([`codemirror/mode/${spec.mode}/${spec.mode}.js`], () => {
         resolve(spec);
       });
