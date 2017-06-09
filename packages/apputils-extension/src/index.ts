@@ -28,6 +28,10 @@ import {
   activatePalette
 } from './palette';
 
+import {
+  SettingClientDatastore
+} from './settingclientdatastore';
+
 
 /**
  * The command IDs used by the apputils plugin.
@@ -88,7 +92,9 @@ const palettePlugin: JupyterLabPlugin<ICommandPalette> = {
  */
 const settingPlugin: JupyterLabPlugin<ISettingRegistry> = {
   id: 'jupyter.services.setting-registry',
-  activate: () => new SettingRegistry(),
+  activate: () => new SettingRegistry({
+    datastore: new SettingClientDatastore()
+  }),
   autoStart: true,
   provides: ISettingRegistry
 };
