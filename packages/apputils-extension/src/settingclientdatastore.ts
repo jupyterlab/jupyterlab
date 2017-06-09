@@ -13,35 +13,37 @@ import {
 
 
 /**
- * The default concrete implementation of a state database.
+ * A client-side datastore for setting schemas.
+ *
+ * #### Notes
+ * This class is deprecated. Its use is only as a storage mechanism of settings
+ * data while an API for server-side persistence is being implemented.
  */
 export
 class SettingClientDatastore extends StateDB {
   /**
-   * Create a new state database.
-   *
-   * @param options - The instantiation options for a state database.
+   * Create a new setting client datastore.
    */
   constructor() {
     super({ namespace: 'setting-client-datastore' });
   }
 
   /**
-   * Retrieve a saved bundle from the database.
+   * Retrieve a saved bundle from the datastore.
    */
   fetch(id: string): Promise<JSONObject | null> {
     return super.fetch(id);
   }
 
   /**
-   * Remove a value from the database.
+   * Remove a value from the datastore.
    */
   remove(id: string): Promise<void> {
     return super.remove(id);
   }
 
   /**
-   * Save a value in the database.
+   * Save a value in the datastore.
    */
   save(id: string, value: JSONObject): Promise<void> {
     return super.save(id, value);
