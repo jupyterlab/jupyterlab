@@ -97,8 +97,8 @@ only copy the current contents of the source folder.
 
 Note that the application is built against **released** versions of the
 core JupyterLab extensions.  If your extension depends on JupyterLab
-packages, it should be compatible with the versions listed in the
-`jupyterlab/released_packages.txt` file.  If you must
+packages, it should be compatible with the dependencies in the
+`jupyterlab/package.app.json` file.  If you must
 install a extension into a development branch of JupyterLab, you
 have to graft it into the source tree of JupyterLab itself.
 This may be done using the command
