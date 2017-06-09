@@ -1103,36 +1103,22 @@ namespace Private {
    */
   export
   function handleOptions(options: CodeMirrorEditor.IOptions): CodeMirror.EditorConfiguration {
-    return {
+    let config = {
+      ...options,
       readOnly: options.readOnly !== undefined ? options.readOnly : false,
       lineNumbers: options.lineNumbers !== undefined ? options.lineNumbers : false,
       lineWrapping: options.wordWrap !== undefined ? options.wordWrap : true,
-      mode: options.mode,
-      theme: options.theme || CodeMirrorEditor.DEFAULT_THEME,
-      indentUnit: options.indentUnit,
-      smartIndent: options.smartIndent,
-      tabSize: options.tabSize,
-      indentWithTabs: options.indentWithTabs,
-      electricChars: options.electricChars,
-      rtlMoveVisually: options.rtlMoveVisually,
-      keyMap: options.keyMap,
-      extraKeys: options.extraKeys,
-      firstLineNumber: options.firstLineNumber,
-      gutters: options.gutters,
-      showCursorWhenSelecting: options.showCursorWhenSelecting,
-      undoDepth: options.undoDepth,
-      historyEventDelay: options.historyEventDelay,
-      tabindex: options.tabindex,
-      autofocus: options.autofocus,
-      dragDrop: options.dragDrop,
-      cursorHeight: options.cursorHeight,
-      workTime: options.workTime,
-      workDelay: options.workDelay,
-      pollInterval: options.pollInterval,
-      flattenSpans: options.flattenSpans,
-      maxHighlightLength: options.maxHighlightLength,
-      viewportMargin: options.viewportMargin
-    };
+      theme: options.theme || CodeMirrorEditor.DEFAULT_THEME
+    } as CodeMirror.EditorConfiguration;
+
+    // Remove extra keys.
+    for (let key of ['host', 'model', 'uuid', 'wordWrap', 'selectionStyle']) {
+      if (config.hasOwnProperty(key)) {
+        delete (config as any)[key];
+      }
+    }
+
+    return config;
   }
 
   /**
