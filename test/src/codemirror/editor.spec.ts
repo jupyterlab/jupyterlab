@@ -47,7 +47,7 @@ describe('CodeMirrorEditor', () => {
     host.style.height = '200px';
     document.body.appendChild(host);
     model = new CodeEditor.Model();
-    editor = new LogFileEditor({ host, model }, {});
+    editor = new LogFileEditor({ host, model });
   });
 
   afterEach(() => {

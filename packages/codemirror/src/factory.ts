@@ -1,9 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as CodeMirror
-  from 'codemirror';
-
 import {
   CodeEditor, IEditorFactoryService
 } from '@jupyterlab/codeeditor';
@@ -18,11 +15,10 @@ import {
  */
 export
 class CodeMirrorEditorFactory implements IEditorFactoryService {
-
   /**
    * Construct an IEditorFactoryService for CodeMirrorEditors.
    */
-  constructor(codeMirrorOptions?: CodeMirror.EditorConfiguration) {
+  constructor(defaults: Partial<CodeMirrorEditor.IOptions> = {}) {
     this.inlineCodeMirrorOptions = {
       extraKeys: {
         'Cmd-Right': 'goLineRight',
@@ -34,7 +30,8 @@ class CodeMirrorEditorFactory implements IEditorFactoryService {
         'Ctrl-Alt-[': 'indentAuto',
         'Cmd-/': 'toggleComment',
         'Ctrl-/': 'toggleComment',
-      }
+      },
+      ...defaults
     };
     this.documentCodeMirrorOptions = {
       extraKeys: {
@@ -42,48 +39,26 @@ class CodeMirrorEditorFactory implements IEditorFactoryService {
         'Shift-Enter': () => { /* no-op */ }
       },
       lineNumbers: true,
-      lineWrapping: true
+      lineWrapping: true,
+      ...defaults
     };
-    if (codeMirrorOptions !== undefined) {
-      // Note: If codeMirrorOptions include `extraKeys`,
-      // existing option will be overwritten.
-      Private.assign(this.inlineCodeMirrorOptions, codeMirrorOptions);
-      Private.assign(this.documentCodeMirrorOptions, codeMirrorOptions);
-    }
   }
 
   /**
    * Create a new editor for inline code.
    */
   newInlineEditor(options: CodeEditor.IOptions): CodeEditor.IEditor {
-    return new CodeMirrorEditor(options, this.inlineCodeMirrorOptions);
+    return new CodeMirrorEditor({...this.inlineCodeMirrorOptions, ...options});
   }
 
   /**
    * Create a new editor for a full document.
    */
   newDocumentEditor(options: CodeEditor.IOptions): CodeEditor.IEditor {
-    return new CodeMirrorEditor(options, this.documentCodeMirrorOptions);
+    return new CodeMirrorEditor({...this.documentCodeMirrorOptions, ...options});
   }
 
-  protected inlineCodeMirrorOptions: CodeMirror.EditorConfiguration;
-  protected documentCodeMirrorOptions: CodeMirror.EditorConfiguration;
+  protected inlineCodeMirrorOptions: Partial<CodeMirrorEditor.IOptions>;
+  protected documentCodeMirrorOptions: Partial<CodeMirrorEditor.IOptions>;
 
-}
-
-
-namespace Private {
-  // Replace with Object.assign when available.
-  export
-  function assign<T>(target: T, ...configs: any[]): T {
-    for (const source of configs) {
-      if (source) {
-        Object.keys(source).forEach(key => {
-          (target as any)[key] = (source as any)[key];
-        });
-      }
-    }
-
-    return target;
-  }
 }
