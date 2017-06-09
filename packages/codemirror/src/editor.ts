@@ -125,7 +125,8 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       this._beforeDocChanged(instance, change);
     });
     CodeMirror.on(editor.getDoc(), 'change', (instance, change) => {
-      if (change.origin === 'setValue' && this.isVisible) {
+      // Manually refresh after setValue to make sure editor is properly sized.
+      if (change.origin === 'setValue' && this.hasFocus()) {
         this.refresh();
       }
       if (this._model.value.text !== editor.getDoc().getValue()) {
@@ -138,7 +139,9 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
 
     // Manually refresh on paste to make sure editor is properly sized.
     editor.getWrapperElement().addEventListener('paste', () => {
-      this.refresh();
+      if (this.hasFocus()) {
+        this.refresh();
+      }
     });
   }
 
