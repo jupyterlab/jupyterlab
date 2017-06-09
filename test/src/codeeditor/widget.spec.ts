@@ -82,7 +82,7 @@ describe('CodeEditorWrapper', () => {
   let widget: LogWidget;
   let editorFactory = (options: CodeEditor.IOptions) => {
     options.uuid = 'foo';
-    return new LogEditor(options, {});
+    return new LogEditor(options);
   };
 
   beforeEach(() => {
