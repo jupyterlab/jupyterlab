@@ -124,7 +124,11 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     CodeMirror.on(editor.getDoc(), 'beforeChange', (instance, change) => {
       this._beforeDocChanged(instance, change);
     });
-    CodeMirror.on(editor.getDoc(), 'change', () => {
+    CodeMirror.on(editor.getDoc(), 'change', (instance, change) => {
+      // Manually refresh after setValue to make sure editor is properly sized.
+      if (change.origin === 'setValue' && this.hasFocus()) {
+        this.refresh();
+      }
       if (this._model.value.text !== editor.getDoc().getValue()) {
         console.error('Uh oh, the string model is out of sync: ', {
           model: this._model.value.text,
@@ -135,7 +139,9 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
 
     // Manually refresh on paste to make sure editor is properly sized.
     editor.getWrapperElement().addEventListener('paste', () => {
-      this.refresh();
+      if (this.hasFocus()) {
+        this.refresh();
+      }
     });
   }
 
@@ -849,7 +855,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   private _editor: CodeMirror.Editor;
   protected selectionMarkers: { [key: string]: CodeMirror.TextMarker[] | undefined } = {};
   private _caretHover: HTMLElement = null;
-  private _hoverTimeout: number = null; 
+  private _hoverTimeout: number = null;
   private _hoverId: string = null;
   private _keydownHandlers = new Array<CodeEditor.KeydownHandler>();
   private _changeGuard = false;
