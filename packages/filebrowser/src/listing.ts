@@ -337,6 +337,7 @@ class DirListing extends Widget {
    */
   paste(): Promise<void> {
     if (!this._clipboard.length) {
+      this._isCut = false;
       return;
     }
 
@@ -1144,7 +1145,6 @@ class DirListing extends Widget {
       this._selection = Object.create(null);
       this._selection[name] = true;
     }
-    this._isCut = false;
     this.update();
   }
 
@@ -1301,7 +1301,6 @@ class DirListing extends Widget {
     }
     let name = items[index].name;
     this._selection[name] = true;
-    this._isCut = false;
     this.update();
   }
 
