@@ -19,6 +19,7 @@ import tarfile
 from jupyter_core.paths import ENV_JUPYTER_PATH
 from notebook.extensions import GREEN_ENABLED, RED_DISABLED
 
+from .semver import satisfies
 from ._version import __version__
 
 
@@ -223,6 +224,30 @@ def should_build(app_dir=None):
             return True, 'Installed extensions changed'
 
     return False, ''
+
+
+def validate_compatibility(extension, app_dir=None):
+    app_dir = get_app_dir(app_dir)
+    extensions = _get_extensions(app_dir)
+
+    if extension not in extensions:
+        raise ValueError('%s is not an installed extension')
+
+    with open(pjoin(here, 'package.app.json')) as fid:
+        core_data = json.load(fid)
+
+    core_deps = core_data['dependencies']
+    singletons = core_data['jupyterlab']['singletonPackages']
+    deps = extensions[extension].get('dependencies', dict())
+
+    errors = []
+
+    for (key, value) in deps.items():
+        if key in singletons:
+            if not satisfies(core_deps[key], value, True):
+                errors.push((key, core_deps[key], value))
+
+    return errors
 
 
 def _get_build_config(app_dir):
@@ -533,7 +558,8 @@ def _get_extensions(app_dir):
     for target in glob.glob(pjoin(sys_path, '*.tgz')):
         data = _read_package(target)
         extensions[data['name']] = dict(path=os.path.realpath(target),
-                                        version=data['version'])
+                                        version=data['version'],
+                                        dependencies=data['dependencies'])
 
     # Look in app_dir if different
     app_path = pjoin(app_dir, 'extensions')
@@ -543,7 +569,8 @@ def _get_extensions(app_dir):
     for target in glob.glob(pjoin(app_path, '*.tgz')):
         data = _read_package(target)
         extensions[data['name']] = dict(path=os.path.realpath(target),
-                                        version=data['version'])
+                                        version=data['version'],
+                                        dependencies=data['dependencies'])
 
     return extensions
 
@@ -593,3 +620,7 @@ def _normalize_path(extension):
     if osp.exists(extension):
         extension = osp.abspath(extension)
     return extension
+
+
+if __name__ == '__main__':
+    print(validate_compatibility('jupyterlab-hub'))
