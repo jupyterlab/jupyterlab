@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IDocumentManager, renameFileDialog
+  IDocumentManager, renameFile
 } from '@jupyterlab/docmanager';
 
 import {
@@ -289,6 +289,16 @@ class DirListing extends Widget {
   }
 
   /**
+   * Create an iterator over the listing's selected items.
+   *
+   * @returns A new iterator over the listing's selected items.
+   */
+  selectedItems(): IIterator<Contents.IModel> {
+    let items = this._sortedItems;
+    return filter(items, item => this._selection[item.name]);
+  }
+
+  /**
    * Create an iterator over the listing's sorted items.
    *
    * @returns A new iterator over the listing's sorted items.
@@ -406,11 +416,11 @@ class DirListing extends Widget {
     const basePath = this._model.path;
     let promises: Promise<Contents.IModel>[] = [];
 
-    for (let item of this._getSelectedItems()) {
+    each(this.selectedItems(), item => {
       if (item.type !== 'directory') {
         promises.push(this._model.manager.copy(item.name, '.', basePath));
       }
-    }
+    });
     return Promise.all(promises).catch(error => {
       utils.showErrorMessage('Duplicate file', error);
     });
@@ -420,11 +430,11 @@ class DirListing extends Widget {
    * Download the currently selected item(s).
    */
   download(): void {
-    for (let item of this._getSelectedItems()) {
+    each(this.selectedItems(), item => {
       if (item.type !== 'directory') {
         this._model.download(item.path);
       }
-    }
+    });
   }
 
   /**
@@ -551,6 +561,30 @@ class DirListing extends Widget {
     if (index !== -1) {
       return items[index].path;
     }
+  }
+
+  /**
+   * Select an item by name.
+   *
+   * @parem name - The name of the item to select.
+   *
+   * @returns A promise that resolves when the name is selected.
+   */
+  selectItemByName(name: string): Promise<void> {
+    // Make sure the file is available.
+    return this.model.refresh().then(() => {
+      if (this.isDisposed) {
+        return;
+      }
+      let items = this._sortedItems;
+      let index = ArrayExt.findFirstIndex(items, value => value.name === name);
+      if (index === -1) {
+        return;
+      }
+      this._selectItem(index, false);
+      MessageLoop.sendMessage(this, Widget.Msg.UpdateRequest);
+      ElementExt.scrollIntoViewIfNeeded(this.contentNode, this._items[index]);
+    });
   }
 
   /**
@@ -1036,7 +1070,7 @@ class DirListing extends Widget {
     const names = event.mimeData.getData(CONTENTS_MIME) as string[];
     for (let name of names) {
       let newPath = path + name;
-      promises.push(renameFileDialog(manager, name, newPath, this._model.path));
+      promises.push(renameFile(manager, name, newPath, this._model.path));
     }
     Promise.all(promises).catch(error => {
       utils.showErrorMessage('Move Error', error);
@@ -1149,30 +1183,6 @@ class DirListing extends Widget {
   }
 
   /**
-   * Select an item by name.
-   *
-   * @parem name - The name of the item to select.
-   *
-   * @returns A promise that resolves when the name is selected.
-   */
-  private _selectItemByName(name: string): Promise<void> {
-    // Make sure the file is available.
-    return this.model.refresh().then(() => {
-      if (this.isDisposed) {
-        return;
-      }
-      let items = this._sortedItems;
-      let index = ArrayExt.findFirstIndex(items, value => value.name === name);
-      if (index === -1) {
-        return;
-      }
-      this._selectItem(index, false);
-      MessageLoop.sendMessage(this, Widget.Msg.UpdateRequest);
-      ElementExt.scrollIntoViewIfNeeded(this.contentNode, this._items[index]);
-    });
-  }
-
-  /**
    * Handle a multiple select on a file item node.
    */
   private _handleMultiSelect(selected: string[], index: number): void {
@@ -1209,25 +1219,18 @@ class DirListing extends Widget {
     }
   }
 
-  /**
-   * Get the currently selected items.
-   */
-  private _getSelectedItems(): Contents.IModel[] {
-    let items = this._sortedItems;
-    return toArray(filter(items, item => this._selection[item.name]));
-  }
 
   /**
    * Copy the selected items, and optionally cut as well.
    */
   private _copy(): void {
     this._clipboard.length = 0;
-    for (let item of this._getSelectedItems()) {
+    each(this.selectedItems(), item => {
       if (item.type !== 'directory') {
         // Store the absolute path of the item.
         this._clipboard.push('/' + item.path);
       }
-    }
+    });
     this.update();
   }
 
@@ -1273,7 +1276,7 @@ class DirListing extends Widget {
 
       const manager = this._manager;
       const basePath = this._model.path;
-      const promise = renameFileDialog(manager, original, newName, basePath);
+      const promise = renameFile(manager, original, newName, basePath);
       return promise.catch(error => {
         utils.showErrorMessage('Rename Error', error);
         this._inRename = false;
@@ -1283,7 +1286,7 @@ class DirListing extends Widget {
           this._inRename = false;
           return;
         }
-        this._selectItemByName(newName);
+        this.selectItemByName(newName);
         this._inRename = false;
         return newName;
       });
@@ -1336,7 +1339,7 @@ class DirListing extends Widget {
    */
   private _onFileChanged(sender: FileBrowserModel, args: Contents.IChangedArgs) {
     if (args.type === 'new') {
-      this._selectItemByName(args.newValue.name).then(() => {
+      this.selectItemByName(args.newValue.name).then(() => {
         if (!this.isDisposed && args.newValue === 'directory') {
           this._doRename();
         }
@@ -1353,7 +1356,7 @@ class DirListing extends Widget {
       return;
     }
     let basename = PathExt.basename(args);
-    this._selectItemByName(basename);
+    this.selectItemByName(basename);
   }
 
   private _model: FileBrowserModel = null;

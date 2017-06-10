@@ -6,7 +6,8 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, ILayoutRestorer, IMainMenu, InstanceTracker
+  ICommandPalette, ILayoutRestorer, IMainMenu, InstanceTracker,
+  ToolbarButton
 } from '@jupyterlab/apputils';
 
 import {
@@ -24,6 +25,10 @@ import {
 import {
   FileBrowserModel, FileBrowser, IFileBrowserFactory
 } from '@jupyterlab/filebrowser';
+
+import {
+  each
+} from '@phosphor/algorithm';
 
 import {
   CommandRegistry
@@ -133,6 +138,18 @@ function activateFactory(app: JupyterLab, docManager: IDocumentManager, state: I
         id, model, commands: options.commands || commands
       });
       const { registry } = docManager;
+
+      // Add a launcher toolbar item.
+      let launcher = new ToolbarButton({
+        className: 'jp-AddIcon',
+        onClick: () => {
+          return commands.execute('launcher-jupyterlab:create', {
+            cwd: widget.model.path
+          });
+        }
+      });
+      launcher.addClass('jp-MaterialIcon');
+      widget.toolbar.insertItem(0, 'launch', launcher);
 
       // Add a context menu handler to the file browser's directory listing.
       let node = widget.node.getElementsByClassName('jp-DirListing-content')[0];
@@ -275,7 +292,10 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
         return;
       }
 
-      return widget.open();
+      each(widget.selectedItems(), item => {
+        let path = item.path;
+        commands.execute('file-operations:open', { path });
+      });
     },
     iconClass: 'jp-MaterialIcon jp-OpenFolderIcon',
     label: 'Open',
@@ -297,12 +317,11 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
   });
 
   commands.addCommand(CommandIDs.rename, {
-    execute: () => {
+    execute: (args) => {
       const widget = tracker.currentWidget;
       if (!widget) {
         return;
       }
-
       return widget.rename();
     },
     iconClass: 'jp-MaterialIcon jp-EditIcon',

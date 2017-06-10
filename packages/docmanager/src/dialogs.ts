@@ -66,10 +66,20 @@ function createFromDialog(container: IFileContainer, manager: IDocumentManager, 
 
 
 /**
+ * Rename a file with an optional dialog.
+ */
+export
+function renameDialog(manager: IDocumentManager, oldPath: string): Promise<Contents.IModel> {
+  let handler = new RenameHandler(manager, oldPath);
+  return handler.showDialog();
+}
+
+
+/**
  * Rename a file with optional dialog.
  */
 export
-function renameFileDialog(manager: IDocumentManager, oldPath: string, newPath: string, basePath = ''): Promise<Contents.IModel> {
+function renameFile(manager: IDocumentManager, oldPath: string, newPath: string, basePath = ''): Promise<Contents.IModel> {
   return manager.rename(oldPath, newPath, basePath).catch(error => {
     if (error.xhr) {
       error.message = `${error.xhr.statusText} ${error.xhr.status}`;
@@ -106,6 +116,62 @@ function showErrorMessage(title: string, error: Error): Promise<void> {
     okText: 'DISMISS'
   };
   return showDialog(options).then(() => { /* no-op */ });
+}
+
+
+
+/**
+ * A widget used to rename a file.
+ */
+class RenameHandler extends Widget {
+  /**
+   * Construct a new "rename" dialog.
+   */
+  constructor(manager: IDocumentManager, oldPath: string) {
+    super({ node: Private.createRenameNode(oldPath) });
+    this.addClass(FILE_DIALOG_CLASS);
+    this._manager = manager;
+    this._oldPath = oldPath;
+    let ext = PathExt.extname(oldPath);
+    let value = this.inputNode.value = PathExt.basename(oldPath);
+    this.inputNode.setSelectionRange(0, value.length - ext.length);
+  }
+
+  /**
+   * Dispose of the resources used by the widget.
+   */
+  dispose(): void {
+    this._manager = null;
+    super.dispose();
+  }
+
+  /**
+   * Get the input text node.
+   */
+  get inputNode(): HTMLInputElement {
+    return this.node.getElementsByTagName('input')[0] as HTMLInputElement;
+  }
+
+  /**
+   * Show the rename dialog.
+   */
+  showDialog(): Promise<Widget> {
+    return showDialog({
+      title: 'Rename File',
+      body: this.node,
+      primaryElement: this.inputNode,
+      buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'RENAME' })]
+    }).then(result => {
+      if (result.accept) {
+        let basePath = PathExt.dirname(this._oldPath);
+        let newPath = PathExt.join(basePath, this.inputNode.value);
+        return renameFile(this._manager, this._oldPath, newPath);
+      }
+    });
+  }
+
+  private _oldPath: string;
+  private _manager: IDocumentManager;
 }
 
 
@@ -251,7 +317,7 @@ class CreateFromHandler extends Widget {
     }
     if (file !== oldPath) {
       let basePath = this._container.path;
-      let promise = renameFileDialog(this._manager, oldPath, file, basePath);
+      let promise = renameFile(this._manager, oldPath, file, basePath);
       return promise.then((contents: Contents.IModel) => {
         if (!contents) {
           return null;
@@ -291,6 +357,28 @@ namespace Private {
     body.appendChild(name);
     body.appendChild(kernelTitle);
     body.appendChild(kernelDropdownNode);
+    return body;
+  }
+
+  /**
+   * Create the node for a rename handler.
+   */
+  export
+  function createRenameNode(oldPath: string): HTMLElement {
+    let body = document.createElement('div');
+    let existingLabel = document.createElement('label');
+    existingLabel.textContent = 'File Path';
+    let existingPath = document.createElement('span');
+    existingPath.textContent = oldPath;
+
+    let nameTitle = document.createElement('label');
+    nameTitle.textContent = 'New Name';
+    let name = document.createElement('input');
+
+    body.appendChild(existingLabel);
+    body.appendChild(existingPath);
+    body.appendChild(nameTitle);
+    body.appendChild(name);
     return body;
   }
 }

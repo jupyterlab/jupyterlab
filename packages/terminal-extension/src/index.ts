@@ -129,8 +129,11 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
   // Add a launcher item if the launcher is available.
   if (launcher) {
     launcher.add({
-      name: 'Terminal',
-      command: CommandIDs.createNew
+      displayName: 'Terminal',
+      iconClass: TERMINAL_ICON_CLASS,
+      callback: () => {
+        return commands.execute(CommandIDs.createNew);
+      }
     });
   }
 
@@ -174,6 +177,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Instan
         term.session = session;
         tracker.add(term);
         shell.activateById(term.id);
+        return term;
       }).catch(() => { term.dispose(); });
     }
   });

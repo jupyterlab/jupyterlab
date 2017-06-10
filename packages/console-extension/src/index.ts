@@ -158,11 +158,27 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
     }
   });
 
+  // The launcher callback.
+  let callback = (cwd: string, name: string) => {
+    return createConsole({ basePath: cwd, kernelPreference: { name } });
+  };
+
   // Add a launcher item if the launcher is available.
   if (launcher) {
-    launcher.add({
-      name: 'Code Console',
-      command: CommandIDs.create
+    manager.ready.then(() => {
+      let specs = manager.specs;
+      for (let name in specs.kernelspecs) {
+        let displayName = specs.kernelspecs[name].display_name;
+        let rank = name === specs.default ? 0 : Infinity;
+        launcher.add({
+          displayName,
+          category: 'Console',
+          name,
+          iconClass: 'jp-ImageCodeConsole',
+          callback,
+          rank
+        });
+      }
     });
   }
 
@@ -172,7 +188,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
   /**
    * Create a console for a given path.
    */
-  function createConsole(options: Partial<ConsolePanel.IOptions>): Promise<void> {
+  function createConsole(options: Partial<ConsolePanel.IOptions>): Promise<ConsolePanel> {
     return manager.ready.then(() => {
       let panel = new ConsolePanel({
         manager,
@@ -186,6 +202,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
       tracker.add(panel);
       shell.addToMainArea(panel);
       shell.activateById(panel.id);
+      return panel;
     });
   }
 

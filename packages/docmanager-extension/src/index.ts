@@ -10,8 +10,8 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  createFromDialog, DocumentManager, IDocumentManager, IFileContainer,
-  showErrorMessage
+  createFromDialog, renameDialog, DocumentManager, IDocumentManager,
+  IFileContainer, showErrorMessage
 } from '@jupyterlab/docmanager';
 
 import {
@@ -19,16 +19,8 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  Contents, IServiceManager
+  Contents, Kernel, IServiceManager
 } from '@jupyterlab/services';
-
-import {
-  each
-} from '@phosphor/algorithm';
-
-import {
-  DisposableSet
-} from '@phosphor/disposable';
 
 import {
   Menu
@@ -65,6 +57,12 @@ namespace CommandIDs {
 
   export
   const saveAs = 'file-operations:save-as';
+
+  export
+  const rename = 'file-operations:rename';
+
+  export
+  const createLauncher = 'file-operations:create-launcher';
 };
 
 
@@ -81,6 +79,10 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
         if (!widget.id) {
           widget.id = `document-manager-${++Private.id}`;
         }
+        widget.title.dataset = {
+          'type': 'document-title',
+          ...widget.title.dataset
+        };
         if (!widget.isAttached) {
           app.shell.addToMainArea(widget);
         }
@@ -90,21 +92,10 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
     const docManager = new DocumentManager({ registry, manager, opener });
     let menu = createMenu(app, docManager, registry);
 
-    populateCreators(app, docManager, registry, palette, menu);
     mainMenu.addMenu(menu, { rank: 1 });
 
     // Register the file operations commands.
     addCommands(app, docManager, registry, palette);
-
-    // Handle fileCreator items as they are added.
-    registry.changed.connect((sender, args) => {
-      if (args.type === 'fileCreator') {
-        menu.dispose();
-        menu = createMenu(app, docManager, registry);
-        populateCreators(app, docManager, registry, palette, menu);
-        mainMenu.addMenu(menu, { rank: 1 });
-      }
-    });
 
     return docManager;
   }
@@ -210,8 +201,9 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, registry: ID
       const path = typeof args['path'] === 'undefined' ? docManager.cwd
         : args['path'] as string;
       const factory = args['factory'] as string || void 0;
+      const kernel = args['kernel'] as Kernel.IModel || void 0;
       return docManager.services.contents.get(path)
-        .then(() => docManager.openOrReveal(path, factory));
+        .then(() => docManager.openOrReveal(path, factory, kernel));
     },
     icon: args => args['icon'] as string || '',
     label: args => (args['label'] || args['factory']) as string,
@@ -254,6 +246,55 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, registry: ID
     }
   });
 
+  commands.addCommand(CommandIDs.createLauncher, {
+    label: 'New...',
+    execute: () => {
+      return commands.execute('launcher-jupyterlab:create', {
+        cwd: docManager.cwd
+      });
+    }
+  });
+
+  // Create a launcher with a banner if ther are no open items.
+  app.restored.then(() => {
+    if (app.shell.isEmpty('main')) {
+      commands.execute('launcher-jupyterlab:create', {
+        cwd: docManager.cwd,
+        banner: true
+      });
+    }
+  });
+
+  commands.addCommand(CommandIDs.rename, {
+    isVisible: () => {
+      const widget = app.shell.currentWidget;
+      if (!widget) {
+        return;
+      }
+      // Find the context for the widget.
+      let context = docManager.contextForWidget(widget);
+      return context !== null;
+    },
+    execute: () => {
+      const widget = app.shell.currentWidget;
+      if (!widget) {
+        return;
+      }
+      // Find the context for the widget.
+      let context = docManager.contextForWidget(widget);
+      if (context) {
+        return renameDialog(docManager, context.path);
+      }
+    },
+    label: 'Rename'
+  });
+
+  app.contextMenu.addItem({
+    command: CommandIDs.rename,
+    selector: '[data-type="document-title"]',
+    rank: 1
+  });
+
   [
     CommandIDs.save,
     CommandIDs.restoreCheckpoint,
@@ -273,8 +314,10 @@ function createMenu(app: JupyterLab, docManager: IDocumentManager, registry: IDo
 
   menu.title.label = 'File';
   [
+    CommandIDs.createLauncher,
     CommandIDs.save,
     CommandIDs.saveAs,
+    CommandIDs.rename,
     CommandIDs.restoreCheckpoint,
     CommandIDs.close,
     CommandIDs.closeAllFiles
@@ -285,38 +328,11 @@ function createMenu(app: JupyterLab, docManager: IDocumentManager, registry: IDo
   return menu;
 }
 
-/**
- * Populate the command palette and the file menu with the registered creators.
- */
-function populateCreators(app: JupyterLab, docManager: IDocumentManager, registry: IDocumentRegistry, palette: ICommandPalette, menu: Menu): void {
-  const category = 'File Operations';
-
-  // Clear any previously added creator palette items.
-  if (Private.creators) {
-    Private.creators.dispose();
-  }
-  Private.creators = new DisposableSet();
-
-  // Add the "create from" commands.
-  each(registry.creators(), creator => {
-    const command = CommandIDs.createFrom;
-    const creatorName = creator.name;
-    const label = `New ${creatorName}`;
-    const args = { creatorName, label };
-    menu.insertItem(0, { args, command });
-    Private.creators.add(palette.addItem({ args, category, command }));
-  });
-}
 
 /**
  * A namespace for private module data.
  */
 namespace Private {
-  /**
-   */
-  export
-  let creators: DisposableSet | null = null;
-
   /**
    * A counter for unique IDs.
    */
