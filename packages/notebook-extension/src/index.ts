@@ -413,7 +413,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
   // The launcher callback.
   let callback = (cwd: string, name: string) => {
     return commands.execute(
-      'file-operations:new-untitled', { type: 'notebook' }
+      'file-operations:new-untitled', { path: cwd, type: 'notebook' }
     ).then(model => {
       return commands.execute('file-operations:open', {
         path: model.path, factory: FACTORY,
