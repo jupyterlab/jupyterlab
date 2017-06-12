@@ -4,11 +4,11 @@
 import expect = require('expect.js');
 
 import {
-  ApplicationShell
+  ApplicationShell, LayoutRestorer
 } from '@jupyterlab/application';
 
 import {
-  InstanceTracker, LayoutRestorer
+  InstanceTracker
 } from '@jupyterlab/apputils';
 
 import {

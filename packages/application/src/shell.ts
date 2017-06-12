@@ -191,7 +191,9 @@ class ApplicationShell extends Widget {
 
       // In case the active widget in the dock panel is *not* the active widget
       // of the application, defer to the application.
-      dock.activateWidget(this.currentWidget);
+      if (this.currentWidget) {
+        dock.activateWidget(this.currentWidget);
+      }
 
       // Set the mode data attribute on the document body.
       document.body.setAttribute(MODE_ATTRIBUTE, mode);

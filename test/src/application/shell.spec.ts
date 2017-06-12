@@ -102,6 +102,16 @@ describe('ApplicationShell', () => {
 
   });
 
+  describe('#restored', () => {
+
+    it('should resolve when the app is restored for the first time', () => {
+      let state = shell.saveLayout();
+      shell.restoreLayout(state);
+      return shell.restored;
+    });
+
+  });
+
   describe('#addToTopArea()', () => {
 
     it('should add a widget to the top area', () => {
@@ -293,4 +303,30 @@ describe('ApplicationShell', () => {
     });
 
   });
+
+  describe('#saveLayout', () => {
+
+    it('should save the layout of the shell', () => {
+      let foo = new Widget();
+      foo.id = 'foo';
+      shell.addToMainArea(foo);
+      let state = shell.saveLayout();
+      shell.activateById('foo');
+      expect(state.mainArea.mode).to.be('multiple-document');
+      expect(state.mainArea.currentWidget).to.be(null);
+    });
+
+  });
+
+  describe('#restoreLayout', () => {
+
+    it('should restore the layout of the shell', () => {
+      let state = shell.saveLayout();
+      shell.mode = 'single-document';
+      shell.restoreLayout(state);
+      expect(state.mainArea.mode).to.be('multiple-document');
+    });
+
+  });
+
 });
