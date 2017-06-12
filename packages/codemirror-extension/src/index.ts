@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  JSONObject
+} from '@phosphor/coreutils';
+
+import {
   Menu
 } from '@phosphor/widgets';
 
@@ -266,15 +270,19 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
       }
     });
 
-    tabMenu.addItem({
-      command: CommandIDs.changeTabs, args: {
-        tabs: true, size: 4, name: 'Indent with Tab' }
+    let args: JSONObject = { tabs: true, size: 4, name: 'Indent with Tab' };
+    tabMenu.addItem({ command: CommandIDs.changeTabs, args });
+    palette.addItem({
+      command: CommandIDs.changeTabs, args, category: 'Editor'
     });
-    for (let size = 1; size < 9; size++) {
-      tabMenu.addItem({
-        command: CommandIDs.changeTabs, args: {
-          tabs: false, size, name: `Spaces: ${size} `
-        }
+
+    for (let size of [1, 2, 4, 8]) {
+      let args: JSONObject = {
+        tabs: false, size, name: `Spaces: ${size} `
+      };
+      tabMenu.addItem({ command: CommandIDs.changeTabs, args });
+      palette.addItem({
+        command: CommandIDs.changeTabs, args, category: 'Editor'
       });
     }
 
@@ -303,14 +311,14 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
       });
     });
 
+    menu.addItem({ type: 'submenu', submenu: modeMenu });
+    menu.addItem({ type: 'submenu', submenu: tabMenu });
+    menu.addItem({ type: 'separator' });
     menu.addItem({ command: 'editor:line-numbers' });
     menu.addItem({ command: 'editor:word-wrap' });
     menu.addItem({ command: CommandIDs.matchBrackets });
-    menu.addItem({ type: 'separator' });
     menu.addItem({ type: 'submenu', submenu: keyMapMenu });
     menu.addItem({ type: 'submenu', submenu: themeMenu });
-    menu.addItem({ type: 'submenu', submenu: modeMenu });
-    menu.addItem({ type: 'submenu', submenu: tabMenu });
 
     return menu;
   }
