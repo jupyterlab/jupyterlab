@@ -7,7 +7,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  ModelDB, PathExt, uuid
+  ModelDB, uuid
 } from '@jupyterlab/coreutils';
 
 import {
@@ -112,22 +112,6 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * The current working directory of the document manager.
-   *
-   * #### Notes
-   * This attribute is DEPRECATED. It is intended for use as a stopgap measure
-   * to create some notion of an application-level working directory for
-   * launching activities that need a sensible starting directory. It will be
-   * replaced with another concept in later releases.
-   */
-  get cwd(): string {
-    return this._cwd;
-  }
-  set cwd(cwd: string) {
-    this._cwd = cwd;
-  }
-
-  /**
    * Get whether the document manager has been disposed.
    */
   get isDisposed(): boolean {
@@ -205,17 +189,13 @@ class DocumentManager implements IDisposable {
   /**
    * Copy a file.
    *
-   * @param fromFile - The path of the original file.
+   * @param fromFile - The full path of the original file.
    *
-   * @param toDir - The path to the target directory.
-   *
-   * @param basePath - The base path to resolve against, defaults to ''.
+   * @param toDir - The full path to the target directory.
    *
    * @returns A promise which resolves to the contents of the file.
    */
-  copy(fromFile: string, toDir: string, basePath = ''): Promise<Contents.IModel> {
-    fromFile = PathExt.resolve(basePath, fromFile);
-    toDir = PathExt.resolve(basePath, toDir);
+  copy(fromFile: string, toDir: string): Promise<Contents.IModel> {
     return this.services.contents.copy(fromFile, toDir);
   }
 
@@ -241,9 +221,7 @@ class DocumentManager implements IDisposable {
   /**
    * Delete a file.
    *
-   * @param path - The path to the file to be deleted.
-   *
-   * @param basePath - The base path to resolve against, defaults to ''.
+   * @param path - The full path to the file to be deleted.
    *
    * @returns A promise which resolves when the file is deleted.
    *
@@ -251,8 +229,7 @@ class DocumentManager implements IDisposable {
    * If there is a running session associated with the file and no other
    * sessions are using the kernel, the session will be shut down.
    */
-  deleteFile(path: string, basePath = ''): Promise<void> {
-    path = PathExt.resolve(basePath, path);
+  deleteFile(path: string): Promise<void> {
     return this.services.sessions.stopIfNeeded(path).then(() => {
       return this.services.contents.delete(path);
     });
@@ -345,40 +322,34 @@ class DocumentManager implements IDisposable {
   /**
    * Overwrite a file.
    *
-   * @param oldPath - The path to the original file.
+   * @param oldPath - The full path to the original file.
    *
-   * @param newPath - The path to the new file.
-   *
-   * @param basePath - The base path to resolve against, defaults to ''.
+   * @param newPath - The full path to the new file.
    *
    * @returns A promise containing the new file contents model.
    */
-  overwrite(oldPath: string, newPath: string, basePath = ''): Promise<Contents.IModel> {
+  overwrite(oldPath: string, newPath: string): Promise<Contents.IModel> {
     // Cleanly overwrite the file by moving it, making sure the original does
     // not exist, and then renaming to the new path.
     const tempPath = `${newPath}.${uuid()}`;
-    const cb = () => this.rename(tempPath, newPath, basePath);
-    return this.rename(oldPath, tempPath, basePath).then(() => {
-      return this.deleteFile(newPath, basePath);
+    const cb = () => this.rename(tempPath, newPath);
+    return this.rename(oldPath, tempPath).then(() => {
+      return this.deleteFile(newPath);
     }).then(cb, cb);
   }
 
   /**
    * Rename a file or directory.
    *
-   * @param oldPath - The path to the original file.
+   * @param oldPath - The full path to the original file.
    *
-   * @param newPath - The path to the new file.
-   *
-   * @param basePath - The base path to resolve against, defaults to ''.
+   * @param newPath - The full path to the new file.
    *
    * @returns A promise containing the new file contents model.  The promise
    * will reject if the newPath already exists.  Use [[overwrite]] to overwrite
    * a file.
    */
-  rename(oldPath: string, newPath: string, basePath = ''): Promise<Contents.IModel> {
-    oldPath = PathExt.resolve(basePath, oldPath);
-    newPath = PathExt.resolve(basePath, newPath);
+  rename(oldPath: string, newPath: string): Promise<Contents.IModel> {
     return this.services.contents.rename(oldPath, newPath);
   }
 
@@ -507,7 +478,6 @@ class DocumentManager implements IDisposable {
 
   private _activateRequested = new Signal<this, string>(this);
   private _contexts: Private.IContext[] = [];
-  private _cwd: string = '';
   private _modelDBFactory: ModelDB.IFactory = null;
   private _opener: DocumentManager.IWidgetOpener = null;
   private _widgetManager: DocumentWidgetManager = null;

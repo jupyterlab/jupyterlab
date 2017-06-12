@@ -358,9 +358,10 @@ class DirListing extends Widget {
       if (this._isCut) {
         const parts = path.split('/');
         const name = parts[parts.length - 1];
-        promises.push(this._model.manager.rename(path, name, basePath));
+        const newPath = PathExt.join(basePath, name);
+        promises.push(this._model.manager.rename(path, newPath));
       } else {
-        promises.push(this._model.manager.copy(path, '.', basePath));
+        promises.push(this._model.manager.copy(path, basePath));
       }
     });
 
@@ -418,7 +419,8 @@ class DirListing extends Widget {
 
     each(this.selectedItems(), item => {
       if (item.type !== 'directory') {
-        promises.push(this._model.manager.copy(item.name, '.', basePath));
+        let oldPath = PathExt.join(basePath, item.name);
+        promises.push(this._model.manager.copy(oldPath, basePath));
       }
     });
     return Promise.all(promises).catch(error => {
@@ -1062,15 +1064,23 @@ class DirListing extends Widget {
     // Get the path based on the target node.
     const index = ArrayExt.firstIndexOf(this._items, target);
     const items = this._sortedItems;
-    const path = items[index].name + '/';
+    let basePath = this._model.path;
+    if (items[index].type === 'directory') {
+      basePath = PathExt.join(basePath, items[index].name);
+    }
     const manager = this._manager;
 
-    // Move all of the items.
+    // Handle the items.
     const promises: Promise<Contents.IModel>[] = [];
-    const names = event.mimeData.getData(CONTENTS_MIME) as string[];
-    for (let name of names) {
-      let newPath = path + name;
-      promises.push(renameFile(manager, name, newPath, this._model.path));
+    const paths = event.mimeData.getData(CONTENTS_MIME) as string[];
+    for (let path of paths) {
+      let name = PathExt.basename(path);
+      let newPath = PathExt.join(basePath, name);
+      // Skip files that are not moving.
+      if (newPath === path) {
+        continue;
+      }
+      promises.push(renameFile(manager, path, newPath));
     }
     Promise.all(promises).catch(error => {
       utils.showErrorMessage('Move Error', error);
@@ -1105,7 +1115,11 @@ class DirListing extends Widget {
       supportedActions: 'move',
       proposedAction: 'move'
     });
-    this._drag.mimeData.setData(CONTENTS_MIME, selectedNames);
+    let basePath = this._model.path;
+    let paths = toArray(map(selectedNames, name => {
+      return PathExt.join(basePath, name);
+    }));
+    this._drag.mimeData.setData(CONTENTS_MIME, paths);
     if (item && item.type !== 'directory') {
       this._drag.mimeData.setData(FACTORY_MIME, () => {
         let path = item.path;
@@ -1241,7 +1255,8 @@ class DirListing extends Widget {
     const promises: Promise<void>[] = [];
     const basePath = this._model.path;
     for (let name of names) {
-      let promise = this._model.manager.deleteFile(name, basePath).catch(err => {
+      let newPath = PathExt.join(basePath, name);
+      let promise = this._model.manager.deleteFile(newPath).catch(err => {
         utils.showErrorMessage('Delete Failed', err);
       });
       promises.push(promise);
@@ -1275,8 +1290,9 @@ class DirListing extends Widget {
       }
 
       const manager = this._manager;
-      const basePath = this._model.path;
-      const promise = renameFile(manager, original, newName, basePath);
+      const oldPath = PathExt.join(this._model.path, original);
+      const newPath = PathExt.join(this._model.path, newName);
+      const promise = renameFile(manager, oldPath, newPath);
       return promise.catch(error => {
         utils.showErrorMessage('Rename Error', error);
         this._inRename = false;
