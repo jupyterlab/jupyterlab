@@ -32,7 +32,11 @@ class SettingClientDatastore extends StateDB {
    * Retrieve a saved bundle from the datastore.
    */
   fetch(id: string): Promise<JSONObject | null> {
-    return super.fetch(id);
+    return super.fetch(id).then(result => {
+      const schema = Private.schemas[id] || null;
+      console.log('schema', schema);
+      return result;
+    });
   }
 
   /**
@@ -48,4 +52,24 @@ class SettingClientDatastore extends StateDB {
   save(id: string, value: JSONObject): Promise<void> {
     return super.save(id, value);
   }
+}
+
+
+/**
+ * A namespace for private module data.
+ */
+namespace Private {
+  type Schema = JSONObject;
+
+  export
+  const schemas: Schema = {
+    'jupyter.services.codemirror-commands': {
+      'jupyter.lab': {
+        'jupyter.services.codemirror-commands': {
+          'iconClass': '',
+          'iconLabel': ''
+        }
+      }
+    }
+  };
 }
