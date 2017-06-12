@@ -264,7 +264,8 @@ class LauncherWidget extends VDomRenderer<LauncherModel> {
       let icon = h.div({ className: imageClass, onclick }, item.iconLabel);
       let title = item.displayName;
       let text = h.span({className: TEXT_CLASS, onclick, title }, title);
-      let category = h.span({className: TEXT_CLASS, onclick }, item.category);
+      let activityType = item.category ? ' ' + item.category : '';
+      let category = h.span({className: TEXT_CLASS, onclick }, activityType);
       return h.div({
         className: ITEM_CLASS,
       }, [icon, text, category]);
