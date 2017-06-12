@@ -2,11 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin
+  ILayoutRestorer, JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, ILayoutRestorer, IMainMenu, InstanceTracker,
+  Dialog, ICommandPalette, IMainMenu, InstanceTracker,
   showDialog
 } from '@jupyterlab/apputils';
 

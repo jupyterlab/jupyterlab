@@ -6,11 +6,11 @@
 import '../style/settingeditor.css';
 
 import {
-  JupyterLab, JupyterLabPlugin
+  ILayoutRestorer, JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
 import {
-  ILayoutRestorer, InstanceTracker
+  InstanceTracker
 } from '@jupyterlab/apputils';
 
 import {

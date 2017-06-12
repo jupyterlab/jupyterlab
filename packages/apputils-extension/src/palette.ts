@@ -12,11 +12,11 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  JupyterLab
+  ILayoutRestorer, JupyterLab
 } from '@jupyterlab/application';
 
 import {
-  ILayoutRestorer, ICommandPalette, IPaletteItem
+  ICommandPalette, IPaletteItem
 } from '@jupyterlab/apputils';
 
 
