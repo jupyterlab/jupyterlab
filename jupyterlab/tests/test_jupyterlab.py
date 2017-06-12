@@ -257,10 +257,10 @@ class TestExtension(TestCase):
         install_extension(self.source_dir, app_dir)
         disable_extension('@jupyterlab/python-tests', app_dir)
         disabled = _get_disabled(app_dir)
-        assert disabled['@jupyterlab/python-tests']
+        assert '@jupyterlab/python-tests' in disabled
         disable_extension('@jupyterlab/notebook-extension', app_dir)
         disabled = _get_disabled(app_dir)
-        assert disabled['@jupyterlab/notebook-extension']
+        assert '@jupyterlab/notebook-extension' in disabled
 
     def test_enable_extension(self):
         app_dir = self.tempdir()
@@ -268,7 +268,7 @@ class TestExtension(TestCase):
         disable_extension('@jupyterlab/python-tests', app_dir)
         enable_extension('@jupyterlab/python-tests', app_dir)
         disabled = _get_disabled(app_dir)
-        assert not disabled['@jupyterlab/python-tests']
+        assert '@jupyterlab/python-tests' not in disabled
 
     def test_should_build(self):
         assert not should_build()[0]
