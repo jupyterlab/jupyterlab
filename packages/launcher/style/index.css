@@ -70,9 +70,6 @@
 
 .jp-LauncherWidget-item {
   width: 100px;
-  height: 100px;
-  display: flex;
-  flex-direction: column;
 }
 
 
@@ -91,7 +88,6 @@
 .jp-LauncherWidget-text {
   flex: 0 0 auto;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 
