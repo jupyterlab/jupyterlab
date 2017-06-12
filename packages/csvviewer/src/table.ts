@@ -58,20 +58,22 @@ class CSVModel extends DataModel {
   }
 
   columnCount(region: DataModel.ColumnRegion): number {
-    return region === 'body' ?  this._data.columns.length : 1;
+    let count = this._data.columns ? this._data.columns.length : 1;
+    return region === 'body' ? count : 1;
   }
 
   data(region: DataModel.CellRegion, row: number, column: number): any {
+    let colName = this._data.columns ? this._data.columns[column] : '';
     if (region === 'row-header') {
-      return `${row}`;
+      return `${row + 1}`;
     }
     if (region === 'column-header') {
-      return `${this._data[column]}`;
+      return `${colName}`;
     }
     if (region === 'corner-header') {
       return '';
     }
-    return String(this._data[row][column]);
+    return String(this._data[row][colName]);
   }
 
   /**

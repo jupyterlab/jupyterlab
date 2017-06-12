@@ -47,27 +47,13 @@
     margin-bottom: 2px;
 }
 
+
 .jp-CSVToolbar .jp-CSVToolbar-dropdown select.jp-mod-styled {
   font-size: var(--jp-ui-font-size1);
 }
 
-.jp-CSVTable {
+
+.jp-CSVViewer-grid {
   flex: 1 1 auto;
   overflow: auto;
-}
-
-.jp-CSVTable.jp-RenderedHTMLCommon table {
-  margin-left: 0px;
-  margin-right: 0px;
-}
-
-
-.jp-CSVViewer-warning {
-  flex: 0 0 auto;
-  padding-left: 8px;
-  overflow: auto;
-  color: var(--jp-warn-color1);
-  line-height: 1.5;
-  font-size: var(--jp-ui-font-size1);
-  background: transparent;
 }

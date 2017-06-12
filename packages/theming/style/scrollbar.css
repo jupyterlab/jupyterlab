@@ -77,20 +77,20 @@
 
 
 .p-ScrollBar[data-orientation='horizontal'] .p-ScrollBar-button[data-action='decrement'] {
-  background-image: url(../images/caretleft.png);
+  background-image: url(./images/caretleft.png);
 }
 
 
 .p-ScrollBar[data-orientation='horizontal'] .p-ScrollBar-button[data-action='increment'] {
-  background-image: url(../images/caretright.png);
+  background-image: url(./images/caretright.png);
 }
 
 
 .p-ScrollBar[data-orientation='vertical'] .p-ScrollBar-button[data-action='decrement'] {
-  background-image: url(../images/caretup.png);
+  background-image: url(./images/caretup.png);
 }
 
 
 .p-ScrollBar[data-orientation='vertical'] .p-ScrollBar-button[data-action='increment'] {
-  background-image: url(../images/caretdown.png);
+  background-image: url(./images/caretdown.png);
 }

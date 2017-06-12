@@ -44,6 +44,11 @@ const CSV_CLASS = 'jp-CSVViewer';
  */
 const CSV_VIEWER_CLASS = 'jp-CSVViewer-toolbar';
 
+/**
+ * The class name added to a CSV viewer datagrid.
+ */
+const CSV_GRID_CLASS = 'jp-CSVViewer-grid';
+
 
 const RENDER_TIMEOUT = 1000;
 
@@ -67,6 +72,7 @@ class CSVViewer extends Widget {
 
     this._model = new CSVModel({ content: context.model.toString() });
     this._grid = new DataGrid();
+    this._grid.addClass(CSV_GRID_CLASS);
     this._grid.model = this._model;
 
     this._toolbar = new CSVToolbar();
