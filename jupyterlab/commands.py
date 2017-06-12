@@ -248,14 +248,14 @@ def _toggle_extension(extension, value, app_dir=None):
 
     if extension not in extensions and extension not in core_extensions:
         raise ValueError('Extension %s is not installed' % extension)
-    disabled = config.get('disabled_extensions', [])
+    disabled = config.get('disabledExtensions', [])
     if extension in disabled:
         disabled.remove(extension)
 
     # Prune extensions that are not installed.
     disabled = [ext for ext in disabled
                 if (ext not in extensions and ext not in core_extensions)]
-    config['disabled_extensions'] = disabled
+    config['disabledExtensions'] = disabled
     _write_page_config(config, app_dir)
 
 
@@ -502,7 +502,7 @@ def _get_disabled(app_dir):
     """Get the disabled extensions.
     """
     config = _get_page_config(app_dir)
-    return config.get('disabled_extensions', [])
+    return config.get('disabledExtensions', [])
 
 
 def _get_core_extensions():
