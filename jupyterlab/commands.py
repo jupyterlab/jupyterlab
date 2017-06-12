@@ -328,6 +328,7 @@ def list_extensions(app_dir=None):
             continue
         app.append(key)
 
+    print('JupyterLab v%s' % __version__)
     print('Known labextensions:')
     if app:
         print('   app dir: %s' % app_dir)
@@ -360,7 +361,7 @@ def list_extensions(app_dir=None):
     uninstalled_core = _get_uinstalled_core_extensions(app_dir)
     if uninstalled_core:
         print('\nUninstalled core extensiosn:')
-        [print(item) for item in sorted(uninstalled_core)]
+        [print('    %s' % item) for item in sorted(uninstalled_core)]
 
     core_extensions = _get_core_extensions()
 
@@ -371,7 +372,7 @@ def list_extensions(app_dir=None):
 
     if disabled_core:
         print('\nDisabled core extensions:')
-        [print(item) for item in sorted(disabled_core)]
+        [print('    %s' % item) for item in sorted(disabled_core)]
 
 
 def clean(app_dir=None):
