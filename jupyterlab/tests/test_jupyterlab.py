@@ -105,7 +105,6 @@ class TestExtension(TestCase):
         self.assertEqual(commands.get_app_dir(), os.path.realpath(pjoin(self.data_dir, 'lab')))
 
         self.app_dir = commands.get_app_dir()
-        print('****', self.app_dir)
 
     def tearDown(self):
         for modulename in self._mock_extensions:
