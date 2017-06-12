@@ -39,7 +39,7 @@ function main() {
     });
     {{#each jupyterlab_extensions}}
     try {
-        if (String(disabled['{{this}}']).toLowerCase() !== 'true') {
+        if (disabled.indexOf('{{this}}') === -1) {
             lab.registerPluginModule(require('{{this}}'));
         }
     } catch (e) {
