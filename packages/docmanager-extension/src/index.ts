@@ -10,8 +10,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  createFromDialog, renameDialog, DocumentManager, IDocumentManager,
-  IFileContainer, showErrorMessage
+  renameDialog, DocumentManager, IDocumentManager, showErrorMessage
 } from '@jupyterlab/docmanager';
 
 import {
@@ -21,10 +20,6 @@ import {
 import {
   Contents, Kernel, IServiceManager
 } from '@jupyterlab/services';
-
-import {
-  Menu
-} from '@phosphor/widgets';
 
 
 /**
@@ -60,9 +55,6 @@ namespace CommandIDs {
 
   export
   const rename = 'file-operations:rename';
-
-  export
-  const createLauncher = 'file-operations:create-launcher';
 };
 
 
@@ -90,9 +82,6 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
       }
     };
     const docManager = new DocumentManager({ registry, manager, opener });
-    let menu = createMenu(app, docManager, registry);
-
-    mainMenu.addMenu(menu, { rank: 1 });
 
     // Register the file operations commands.
     addCommands(app, docManager, registry, palette);
@@ -133,53 +122,23 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, registry: ID
     execute: () => { app.shell.closeAll(); }
   });
 
-  commands.addCommand(CommandIDs.createFrom, {
-    label: args => (args['label'] || args['creatorName']) as string,
-    execute: args => {
-      const path = typeof args['path'] === 'undefined' ? docManager.cwd
-        : args['path'] as string;
-      const creatorName = args['creatorName'] as string;
-      if (!creatorName) {
-        const command = CommandIDs.createFrom;
-        throw new Error(`${command} requires creatorName.`);
-      }
-
-      const items = args['items'] as string[];
-      if (items) {
-        const container: IFileContainer = { items, path };
-        return createFromDialog(container, docManager, creatorName);
-      }
-
-      const { services } = docManager;
-      return services.contents.get(path, { content: true }).then(contents => {
-        const items = contents.content.map((item: Contents.IModel) => {
-          return item.name;
-        });
-        const container: IFileContainer = { items, path };
-
-        return createFromDialog(container, docManager, creatorName);
-      });
-    }
-  });
-
   commands.addCommand(CommandIDs.deleteFile, {
     execute: args => {
-      const path = typeof args['path'] === 'undefined' ? docManager.cwd
+      const path = typeof args['path'] === 'undefined' ? ''
         : args['path'] as string;
-      const basePath = (args['basePath'] as string) || '';
 
       if (!path) {
         const command = CommandIDs.deleteFile;
         throw new Error(`A non-empty path is required for ${command}.`);
       }
-      return docManager.deleteFile(path, basePath);
+      return docManager.deleteFile(path);
     }
   });
 
   commands.addCommand(CommandIDs.newUntitled, {
     execute: args => {
       const errorTitle = args['error'] as string || 'Error';
-      const path = typeof args['path'] === 'undefined' ? docManager.cwd
+      const path = typeof args['path'] === 'undefined' ? ''
         : args['path'] as string;
       let options: Partial<Contents.ICreateOptions> = {
         type: args['type'] as Contents.ContentType,
@@ -198,7 +157,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, registry: ID
 
   commands.addCommand(CommandIDs.open, {
     execute: args => {
-      const path = typeof args['path'] === 'undefined' ? docManager.cwd
+      const path = typeof args['path'] === 'undefined' ? ''
         : args['path'] as string;
       const factory = args['factory'] as string || void 0;
       const kernel = args['kernel'] as Kernel.IModel || void 0;
@@ -246,25 +205,6 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, registry: ID
     }
   });
 
-  commands.addCommand(CommandIDs.createLauncher, {
-    label: 'New...',
-    execute: () => {
-      return commands.execute('launcher-jupyterlab:create', {
-        cwd: docManager.cwd
-      });
-    }
-  });
-
-  // Create a launcher with a banner if ther are no open items.
-  app.restored.then(() => {
-    if (app.shell.isEmpty('main')) {
-      commands.execute('launcher-jupyterlab:create', {
-        cwd: docManager.cwd,
-        banner: true
-      });
-    }
-  });
-
   commands.addCommand(CommandIDs.rename, {
     isVisible: () => {
       const widget = app.shell.currentWidget;
@@ -302,30 +242,6 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, registry: ID
     CommandIDs.close,
     CommandIDs.closeAllFiles
   ].forEach(command => { palette.addItem({ command, category }); });
-}
-
-
-/**
- * Create a top level menu for the file browser.
- */
-function createMenu(app: JupyterLab, docManager: IDocumentManager, registry: IDocumentRegistry): Menu {
-  const { commands } = app;
-  const menu = new Menu({ commands });
-
-  menu.title.label = 'File';
-  [
-    CommandIDs.createLauncher,
-    CommandIDs.save,
-    CommandIDs.saveAs,
-    CommandIDs.rename,
-    CommandIDs.restoreCheckpoint,
-    CommandIDs.close,
-    CommandIDs.closeAllFiles
-  ].forEach(command => { menu.addItem({ command }); });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ command: 'setting-editor:open' });
-
-  return menu;
 }
 
 

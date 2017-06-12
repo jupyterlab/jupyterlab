@@ -79,8 +79,8 @@ function renameDialog(manager: IDocumentManager, oldPath: string): Promise<Conte
  * Rename a file with optional dialog.
  */
 export
-function renameFile(manager: IDocumentManager, oldPath: string, newPath: string, basePath = ''): Promise<Contents.IModel> {
-  return manager.rename(oldPath, newPath, basePath).catch(error => {
+function renameFile(manager: IDocumentManager, oldPath: string, newPath: string): Promise<Contents.IModel> {
+  return manager.rename(oldPath, newPath).catch(error => {
     if (error.xhr) {
       error.message = `${error.xhr.statusText} ${error.xhr.status}`;
     }
@@ -93,7 +93,7 @@ function renameFile(manager: IDocumentManager, oldPath: string, newPath: string,
       };
       return showDialog(options).then(button => {
         if (button.accept) {
-          return manager.overwrite(oldPath, newPath, basePath);
+          return manager.overwrite(oldPath, newPath);
         }
       });
     } else {
@@ -249,8 +249,7 @@ class CreateFromHandler extends Widget {
         });
       }
 
-      const basePath = this._container.path;
-      this._manager.deleteFile('/' + this._orig.path, basePath);
+      this._manager.deleteFile('/' + this._orig.path);
       return null;
     });
   }
@@ -316,8 +315,7 @@ class CreateFromHandler extends Widget {
       kernelId = JSON.parse(kernelValue) as Kernel.IModel;
     }
     if (file !== oldPath) {
-      let basePath = this._container.path;
-      let promise = renameFile(this._manager, oldPath, file, basePath);
+      let promise = renameFile(this._manager, oldPath, file);
       return promise.then((contents: Contents.IModel) => {
         if (!contents) {
           return null;

@@ -101,18 +101,6 @@ const SHORTCUTS = [
     keys: ['Accel Shift L']
   },
   {
-    command: 'file-operations:create-from',
-    args: { creatorName: 'Text File' },
-    selector: 'body',
-    keys: ['Ctrl O']
-  },
-  {
-    command: 'file-operations:create-from',
-    args: { creatorName: 'Notebook' },
-    selector: 'body',
-    keys: ['Ctrl Shift N']
-  },
-  {
     command: 'file-operations:save',
     selector: 'body',
     keys: ['Accel S']
