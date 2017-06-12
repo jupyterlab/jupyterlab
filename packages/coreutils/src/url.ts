@@ -98,7 +98,7 @@ namespace URLExt {
   export
   function isLocal(url: string): boolean {
     switch (parse(url).hostname) {
-    case 'localhost':
+    case location.hostname:
     case '':
       return true;
     default:
