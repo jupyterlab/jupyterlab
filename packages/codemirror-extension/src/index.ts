@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  JSONObject
+} from '@phosphor/coreutils';
+
+import {
   Menu
 } from '@phosphor/widgets';
 
@@ -18,7 +22,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  editorServices, CodeMirrorEditor
+  editorServices, CodeMirrorEditor, Mode
 } from '@jupyterlab/codemirror';
 
 import {
@@ -42,6 +46,12 @@ namespace CommandIDs {
 
   export
   const changeTheme = 'codemirror:change-theme';
+
+  export
+  const changeMode = 'codemirror:change-mode';
+
+  export
+  const changeTabs = 'codemirror:change-tabs';
 };
 
 
@@ -162,10 +172,14 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     const menu = new Menu({ commands });
     const themeMenu = new Menu({ commands });
     const keyMapMenu = new Menu({ commands });
+    const modeMenu = new Menu({ commands });
+    const tabMenu = new Menu({ commands });
 
     menu.title.label = 'Editor';
     themeMenu.title.label = 'Theme';
     keyMapMenu.title.label = 'Key Map';
+    modeMenu.title.label = 'Language';
+    tabMenu.title.label = 'Tabs';
 
     commands.addCommand(CommandIDs.changeTheme, {
       label: args => args['theme'] as string,
@@ -202,6 +216,85 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
       isToggled: args => args['keyMap'] === keyMap
     });
 
+    commands.addCommand(CommandIDs.changeMode, {
+      label: args => args['name'] as string,
+      execute: args => {
+        let mode = args['mode'] as string;
+        if (mode) {
+          let widget = tracker.currentWidget;
+          let spec = Mode.findByName(mode);
+          if (spec) {
+            widget.model.mimeType = spec.mime;
+          }
+        }
+      },
+      isEnabled: hasWidget,
+      isToggled: args => {
+        let widget = tracker.currentWidget;
+        if (!widget) {
+          return false;
+        }
+        let mime = widget.model.mimeType;
+        let spec = Mode.findByMIME(mime);
+        let mode = spec && spec.mode;
+        return args['mode'] === mode;
+      }
+    });
+
+    commands.addCommand(CommandIDs.changeTabs, {
+      label: args => args['name'] as string,
+      execute: args => {
+        let widget = tracker.currentWidget;
+        if (!widget) {
+          return;
+        }
+        let editor = widget.editor as CodeMirrorEditor;
+        let size = args['size'] as number || 4;
+        let tabs = !!args['tabs'];
+        editor.editor.setOption('indentWithTabs', tabs);
+        editor.editor.setOption('indentUnit', size);
+      },
+      isEnabled: hasWidget,
+      isToggled: args => {
+        let widget = tracker.currentWidget;
+        if (!widget) {
+          return false;
+        }
+        let tabs = !!args['tabs'];
+        let size = args['size'] as number || 4;
+        let editor = widget.editor as CodeMirrorEditor;
+        if (editor.editor.getOption('indentWithTabs') !== tabs) {
+          return false;
+        }
+        return editor.editor.getOption('indentUnit') === size;
+      }
+    });
+
+    let args: JSONObject = { tabs: true, size: 4, name: 'Indent with Tab' };
+    tabMenu.addItem({ command: CommandIDs.changeTabs, args });
+    palette.addItem({
+      command: CommandIDs.changeTabs, args, category: 'Editor'
+    });
+
+    for (let size of [1, 2, 4, 8]) {
+      let args: JSONObject = {
+        tabs: false, size, name: `Spaces: ${size} `
+      };
+      tabMenu.addItem({ command: CommandIDs.changeTabs, args });
+      palette.addItem({
+        command: CommandIDs.changeTabs, args, category: 'Editor'
+      });
+    }
+
+    Mode.getModeInfo().sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    }).forEach(spec => {
+      modeMenu.addItem({
+        command: CommandIDs.changeMode,
+        args: {...spec}
+      });
+    });
+
     [
      'jupyter', 'default', 'abcdef', 'base16-dark', 'base16-light',
      'hopscotch', 'material', 'mbo', 'mdn-like', 'seti', 'the-matrix',
@@ -218,10 +311,12 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
       });
     });
 
+    menu.addItem({ type: 'submenu', submenu: modeMenu });
+    menu.addItem({ type: 'submenu', submenu: tabMenu });
+    menu.addItem({ type: 'separator' });
     menu.addItem({ command: 'editor:line-numbers' });
     menu.addItem({ command: 'editor:word-wrap' });
     menu.addItem({ command: CommandIDs.matchBrackets });
-    menu.addItem({ type: 'separator' });
     menu.addItem({ type: 'submenu', submenu: keyMapMenu });
     menu.addItem({ type: 'submenu', submenu: themeMenu });
 
