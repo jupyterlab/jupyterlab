@@ -460,7 +460,7 @@ describe('notebook/celltools', () => {
       simulate(select, 'focus');
       tool.selectNode.selectedIndex = 1;
       simulate(select, 'change');
-      expect(metadata.get('slideshow')).to.be('slide');
+      expect(metadata.get('slideshow')).to.eql({ 'slide_type': 'slide' });
     });
 
   });
