@@ -291,6 +291,11 @@ const SHORTCUTS = [
     keys: ['L']
   },
   {
+    command: 'notebook-cells:toggle-all-line-numbers',
+    selector: '.jp-Notebook:focus',
+    keys: ['Shift L']
+  },
+  {
     command: 'notebook-cells:markdown-header1',
     selector: '.jp-Notebook:focus',
     keys: ['1']
