@@ -52,7 +52,6 @@ import './coreutils/url.spec';
 import './coreutils/uuid.spec';
 import './coreutils/markdowncodeblocks.spec';
 
-import './csvviewer/table.spec';
 import './csvviewer/toolbar.spec';
 import './csvviewer/widget.spec';
 
