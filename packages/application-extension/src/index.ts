@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin
+  JupyterLab, JupyterLabPlugin, ILayoutRestorer, LayoutRestorer
 } from '@jupyterlab/application';
 
 import {
@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  PageConfig
+  IStateDB, PageConfig
 } from '@jupyterlab/coreutils';
 
 
@@ -38,7 +38,7 @@ namespace CommandIDs {
 /**
  * The main extension.
  */
-const plugin: JupyterLabPlugin<void> = {
+const mainPlugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.main',
   requires: [ICommandPalette],
   activate: (app: JupyterLab, palette: ICommandPalette) => {
@@ -73,6 +73,29 @@ const plugin: JupyterLabPlugin<void> = {
     });
   },
   autoStart: true
+};
+
+
+/**
+ * The default layout restorer provider.
+ */
+const layoutPlugin: JupyterLabPlugin<ILayoutRestorer> = {
+  id: 'jupyter.services.layout-restorer',
+  requires: [IStateDB],
+  activate: (app: JupyterLab, state: IStateDB) => {
+    const first = app.started;
+    const registry = app.commands;
+    let restorer = new LayoutRestorer({ first, registry, state });
+    restorer.fetch().then(saved => {
+      app.shell.restoreLayout(saved);
+      app.shell.layoutModified.connect(() => {
+        restorer.save(app.shell.saveLayout());
+      });
+    });
+    return restorer;
+  },
+  autoStart: true,
+  provides: ILayoutRestorer
 };
 
 
@@ -132,6 +155,10 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
 
 
 /**
- * Export the plugin as default.
+ * Export the plugins as default.
  */
-export default plugin;
+const plugins: JupyterLabPlugin<any>[] = [
+  mainPlugin,
+  layoutPlugin
+];
+export default plugins;

@@ -3,6 +3,7 @@
 
 import '@phosphor/widgets/style/index.css';
 
+import './application/layoutrestorer.spec';
 import './application/shell.spec';
 
 import './apputils/clientsession.spec';
@@ -11,7 +12,6 @@ import './apputils/dialog.spec';
 import './apputils/iframe.spec';
 import './apputils/instancetracker.spec';
 import './apputils/jsoneditor.spec';
-import './apputils/layoutrestorer.spec';
 import './apputils/sanitizer.spec';
 import './apputils/statedb.spec';
 import './apputils/styling.spec';

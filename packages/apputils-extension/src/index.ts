@@ -4,12 +4,12 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  JupyterLab, JupyterLabPlugin
+  ILayoutRestorer, JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
 import {
-  CommandLinker, ICommandLinker, ICommandPalette, ILayoutRestorer,
-  IMainMenu, LayoutRestorer, MainMenu
+  CommandLinker, ICommandLinker, ICommandPalette,
+  IMainMenu, MainMenu
 } from '@jupyterlab/apputils';
 
 import {
@@ -35,26 +35,6 @@ import {
 namespace CommandIDs {
   export
   const clearStateDB = 'statedb:clear';
-};
-
-
-/**
- * The default layout restorer provider.
- */
-const layoutPlugin: JupyterLabPlugin<ILayoutRestorer> = {
-  id: 'jupyter.services.layout-restorer',
-  requires: [IStateDB],
-  activate: (app: JupyterLab, state: IStateDB) => {
-    const first = app.started;
-    const registry = app.commands;
-    const shell = app.shell;
-    let restorer = new LayoutRestorer({ first, registry, state });
-    // Use the restorer as the application shell's layout database.
-    shell.setLayoutDB(restorer);
-    return restorer;
-  },
-  autoStart: true,
-  provides: ILayoutRestorer
 };
 
 
@@ -150,7 +130,6 @@ const stateDBPlugin: JupyterLabPlugin<IStateDB> = {
  * Export the plugins as default.
  */
 const plugins: JupyterLabPlugin<any>[] = [
-  layoutPlugin,
   linkerPlugin,
   mainMenuPlugin,
   palettePlugin,

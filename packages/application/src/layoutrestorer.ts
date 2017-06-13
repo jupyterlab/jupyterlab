@@ -20,16 +20,17 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  ApplicationShell
-} from '@jupyterlab/application';
+  InstanceTracker
+} from '@jupyterlab/apputils';
 
 import {
   IStateDB
 } from '@jupyterlab/coreutils';
 
 import {
-  InstanceTracker
+  ApplicationShell
 } from '.';
+
 
 
 /* tslint:disable */
@@ -170,7 +171,9 @@ class LayoutRestorer implements ILayoutRestorer {
       // Release the tracker set.
       this._trackers.clear();
       this._trackers = null;
-    }).then(() => { this._restored.resolve(void 0); });
+    }).then(() => {
+      this._restored.resolve(void 0);
+    });
   }
 
   /**
