@@ -4,26 +4,12 @@
 import expect = require('expect.js');
 
 import {
-  VirtualDOM, VirtualElement, VirtualNode
-} from '@phosphor/virtualdom';
-
-import {
-  CSVModel, CSVTable
+  CSVModel
 } from '@jupyterlab/csvviewer';
 
 import {
   CSV_DATA
 } from './data.csv';
-
-
-const DISPLAY_LIMIT: number = 1000;
-
-
-class TestTable extends CSVTable {
-  render(): VirtualNode | VirtualNode[] {
-    return super.render();
-  }
-}
 
 
 describe('csvviewer/table', () => {
@@ -35,7 +21,6 @@ describe('csvviewer/table', () => {
       it('should instantiate a `CSVModel`', () => {
         let model = new CSVModel();
         expect(model).to.be.a(CSVModel);
-        model.dispose();
       });
 
       it('should accept content and delimiter values', () => {
@@ -45,23 +30,6 @@ describe('csvviewer/table', () => {
         expect(model).to.be.a(CSVModel);
         expect(model.content).to.be(content);
         expect(model.delimiter).to.be(delimiter);
-        model.dispose();
-      });
-
-    });
-
-    describe('#maxExceeded', () => {
-
-      it('should emit the overflow', () => {
-        let model = new CSVModel({ content: CSV_DATA });
-        let excess: CSVModel.IOverflow;
-        model.maxExceeded.connect((sender, overflow) => { excess = overflow; });
-        expect(excess).to.not.be.ok();
-        model.parse();
-        expect(excess).to.be.ok();
-        expect(excess.available).to.be(1002);
-        expect(excess.maximum).to.be(DISPLAY_LIMIT);
-        model.dispose();
       });
 
     });
@@ -71,7 +39,6 @@ describe('csvviewer/table', () => {
       it('should default to empty', () => {
         let model = new CSVModel();
         expect(model.content).to.be.empty();
-        model.dispose();
       });
 
       it('should be settable', () => {
@@ -79,7 +46,6 @@ describe('csvviewer/table', () => {
         expect(model.content).to.be(CSV_DATA);
         model.content = 'foo';
         expect(model.content).to.be('foo');
-        model.dispose();
       });
 
     });
@@ -89,7 +55,6 @@ describe('csvviewer/table', () => {
       it('should default to `,`', () => {
         let model = new CSVModel();
         expect(model.delimiter).to.be(',');
-        model.dispose();
       });
 
       it('should be settable', () => {
@@ -97,72 +62,38 @@ describe('csvviewer/table', () => {
         expect(model.delimiter).to.be(',');
         model.delimiter = ';';
         expect(model.delimiter).to.be(';');
-        model.dispose();
       });
 
     });
 
-    describe('#dispose()', () => {
+    describe('#rowCount()', () => {
 
-      it('should dispose of the resources held by the model', () => {
-        let model = new CSVModel();
-        expect(model.isDisposed).to.be(false);
-        model.dispose();
-        expect(model.isDisposed).to.be(true);
-      });
-
-      it('should be safe to call multiple times', () => {
-        let model = new CSVModel();
-        expect(model.isDisposed).to.be(false);
-        model.dispose();
-        model.dispose();
-        expect(model.isDisposed).to.be(true);
-      });
-
-    });
-
-    describe('#parse()', () => {
-
-      it('should parse the model content', () => {
+      it('should be the number of rows in the region', () => {
         let model = new CSVModel({ content: CSV_DATA });
-        let rows = model.parse();
-        let cols = rows.columns;
-        expect(rows.length).to.be(DISPLAY_LIMIT);
-        expect(cols.length).to.be(4);
-        model.dispose();
+        expect(model.rowCount('column-header')).to.be(1);
+        expect(model.rowCount('body')).to.be(1002);
       });
 
     });
 
-  });
+    describe('#columnCount()', () => {
 
-  describe('CSVTable', () => {
-
-    describe('#constructor()', () => {
-
-      it('should instantiate a `CSVTable`', () => {
-        let table = new CSVTable();
-        expect(table).to.be.a(CSVTable);
-        table.dispose();
-      });
-
-    });
-
-    describe('#render()', () => {
-
-      it('should render the model into a virtual DOM table', () => {
+      it('should be the number of columns in the region', () => {
         let model = new CSVModel({ content: CSV_DATA });
-        let table = new TestTable();
-        table.model = model;
+        expect(model.columnCount('row-header')).to.be(1);
+        expect(model.columnCount('body')).to.be(4);
+      });
 
-        let rendered = VirtualDOM.realize(table.render() as VirtualElement);
-        let rows = rendered.getElementsByTagName('tr');
-        let cols = rendered.getElementsByTagName('th');
-        expect(rows).to.have.length(DISPLAY_LIMIT);
-        expect(cols).to.have.length(4);
+    });
 
-        model.dispose();
-        table.dispose();
+    describe('#data()', () => {
+
+      it('should get the data for the region', () => {
+        let model = new CSVModel({ content: CSV_DATA });
+        expect(model.data('row-header', 1, 1)).to.be('2');
+        expect(model.data('column-header', 1, 1)).to.be('name');
+        expect(model.data('corner-header', 1, 1)).to.be('');
+        expect(model.data('body', 2, 2)).to.be('49.71.100.63');
       });
 
     });

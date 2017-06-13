@@ -50,19 +50,6 @@ describe('csvviewer/widget', () => {
         widget.dispose();
       });
 
-      it('should set a max exceeded listener on its warning area', done => {
-        let widget = new CSVViewer({ context });
-        let warning = widget.node.querySelector('.jp-CSVViewer-warning');
-        expect(warning).to.be.ok();
-        expect(warning.innerHTML).to.be.empty();
-        widget.model.content = CSV_DATA;
-        requestAnimationFrame(() => {
-          expect(warning.innerHTML).to.not.be.empty();
-          widget.dispose();
-          done();
-        });
-      });
-
     });
 
     describe('#model', () => {
