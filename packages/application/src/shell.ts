@@ -133,7 +133,7 @@ class ApplicationShell extends Widget {
     // Connect main layout change listener.
     this._dockPanel.layoutModified.connect(this._onLayoutModified, this);
 
-        // Catch current changed events on the side handlers.
+    // Catch current changed events on the side handlers.
     this._leftHandler.sideBar.currentChanged.connect(this._onLayoutModified, this);
     this._rightHandler.sideBar.currentChanged.connect(this._onLayoutModified, this);
   }
