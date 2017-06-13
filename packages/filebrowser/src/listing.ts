@@ -1799,6 +1799,10 @@ namespace Private {
 
         let valA = new Date(a.last_modified).getTime();
         let valB = new Date(b.last_modified).getTime();
+
+        if (state.direction === 'descending') {
+          return valA - valB;
+        }
         return valB - valA;
       });
     } else {
@@ -1812,13 +1816,11 @@ namespace Private {
         }
 
         // Compare by display name.
+        if (state.direction === 'descending') {
+          return b.name.localeCompare(a.name);
+        }
         return a.name.localeCompare(b.name);
       });
-    }
-
-    // Reverse the order if descending.
-    if (state.direction === 'descending') {
-      copy.reverse();
     }
 
     return copy;
