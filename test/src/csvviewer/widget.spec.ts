@@ -12,20 +12,12 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  CSVModel
-} from '@jupyterlab/csvviewer';
-
-import {
   CSVViewer
 } from '@jupyterlab/csvviewer';
 
 import {
   Context, DocumentRegistry, TextModelFactory
 } from '@jupyterlab/docregistry';
-
-import {
-  CSV_DATA
-} from './data.csv';
 
 
 function createContext(): Context<DocumentRegistry.IModel> {
@@ -55,6 +47,7 @@ describe('csvviewer/widget', () => {
     describe('#context', () => {
 
       it('should be the context for the file', () => {
+        let widget = new CSVViewer({ context });
         expect(widget.context).to.be(context);
       });
 
@@ -65,20 +58,16 @@ describe('csvviewer/widget', () => {
       it('should dispose of the resources held by the widget', () => {
         let widget = new CSVViewer({ context });
         expect(widget.isDisposed).to.be(false);
-        expect(widget.model).to.be.ok();
         widget.dispose();
         expect(widget.isDisposed).to.be(true);
-        expect(widget.model).to.not.be.ok();
       });
 
       it('should be safe to call multiple times', () => {
         let widget = new CSVViewer({ context });
         expect(widget.isDisposed).to.be(false);
-        expect(widget.model).to.be.ok();
         widget.dispose();
         widget.dispose();
         expect(widget.isDisposed).to.be(true);
-        expect(widget.model).to.not.be.ok();
       });
 
     });
