@@ -52,12 +52,10 @@ describe('csvviewer/widget', () => {
 
     });
 
-    describe('#model', () => {
+    describe('#context', () => {
 
-      it('should be a `CSVModel`', () => {
-        let widget = new CSVViewer({ context });
-        expect(widget.model).to.be.a(CSVModel);
-        widget.dispose();
+      it('should be the context for the file', () => {
+        expect(widget.context).to.be(context);
       });
 
     });
