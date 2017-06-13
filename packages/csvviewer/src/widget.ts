@@ -47,7 +47,9 @@ const CSV_VIEWER_CLASS = 'jp-CSVViewer-toolbar';
  */
 const CSV_GRID_CLASS = 'jp-CSVViewer-grid';
 
-
+/**
+ * The timeout to wait for change activity to have ceased before rendering.
+ */
 const RENDER_TIMEOUT = 1000;
 
 
