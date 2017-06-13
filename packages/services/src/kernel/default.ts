@@ -10,7 +10,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONObject, PromiseDelegate
+  JSONExt, JSONObject, PromiseDelegate
 } from '@phosphor/coreutils';
 
 import {
@@ -265,7 +265,29 @@ class DefaultKernel implements Kernel.IKernel {
       this._ws.send(serialize.serialize(msg));
     }
     let future = new KernelFutureHandler(() => {
-      this._futures.delete(msg.header.msg_id);
+      let msgId = msg.header.msg_id;
+      this._futures.delete(msgId);
+      // Remove stored display id information.
+      let displayIds = this._msgIdToDisplayIds.get(msgId);
+      if (!displayIds) {
+        return;
+      }
+      displayIds.forEach(displayId => {
+        let msgIds = this._displayIdToParentIds.get(displayId);
+        if (msgIds) {
+          let idx = msgIds.indexOf(msgId);
+          if (idx === -1) {
+            return;
+          }
+          if (msgIds.length === 1) {
+            this._displayIdToParentIds.delete(displayId);
+          } else {
+            msgIds.splice(idx, 1);
+            this._displayIdToParentIds.set(displayId, msgIds);
+          }
+        }
+      });
+      this._msgIdToDisplayIds.delete(msgId);
     }, msg, expectReply, disposeOnDone, this);
     this._futures.set(msg.header.msg_id, future);
     return future;
@@ -676,7 +698,27 @@ class DefaultKernel implements Kernel.IKernel {
       console.error(`Invalid message: ${error.message}`);
       return;
     }
-    if (msg.parent_header) {
+
+    let handled = false;
+
+    if (msg.parent_header && msg.channel === 'iopub') {
+      switch (msg.header.msg_type) {
+      case 'display_data':
+      case 'update_display_data':
+      case 'execute_result':
+        // display_data messages may re-route based on their display_id
+        let transient = (msg.content.transient || {}) as JSONObject;
+        let displayId = transient['display_id'] as string;
+        if (displayId) {
+          handled = this._handleDisplayId(displayId, msg);
+        }
+        break;
+      default:
+        break;
+      }
+    }
+
+    if (!handled && msg.parent_header) {
       let parentHeader = msg.parent_header as KernelMessage.IHeader;
       let future = this._futures && this._futures.get(parentHeader.msg_id);
       if (future) {
@@ -708,6 +750,60 @@ class DefaultKernel implements Kernel.IKernel {
       }
       this._iopubMessage.emit(msg as KernelMessage.IIOPubMessage);
     }
+  }
+
+  /**
+   * Handle a message with a display id.
+   *
+   * @returns Whether the message was handled.
+   */
+  private _handleDisplayId(displayId: string, msg: KernelMessage.IMessage): boolean {
+    let msgId = (msg.parent_header as KernelMessage.IHeader).msg_id;
+    let parentIds = this._displayIdToParentIds.get(displayId);
+    if (parentIds) {
+      // We've seen it before, update existing outputs with same display_id
+      // by handling display_data as update_display_data
+      let updateMsg: KernelMessage.IMessage = {
+        header: JSONExt.deepCopy(msg.header) as KernelMessage.IHeader,
+        parent_header: JSONExt.deepCopy(msg.parent_header)  as KernelMessage.IHeader,
+        metadata: JSONExt.deepCopy(msg.metadata),
+        content: JSONExt.deepCopy(msg.content),
+        channel: msg.channel,
+        buffers: msg.buffers ? msg.buffers.slice() : []
+      };
+      (updateMsg.header as any).msg_type = 'update_display_data';
+
+      parentIds.map((parentId) => {
+        let future = this._futures && this._futures.get(parentId);
+        if (future) {
+          future.handleMsg(msg);
+        }
+      });
+    }
+
+    // We're done here if it's update_display.
+    if (msg.header.msg_type === 'update_display_data') {
+      // It's an update, don't proceed to the normal display.
+      return true;
+    }
+
+    // regular display_data with id, record it for future updating
+    // in _display_id_to_parent_ids for future lookup
+    parentIds = this._displayIdToParentIds.get(displayId) || [];
+    if (parentIds.indexOf(msgId) === -1) {
+      parentIds.push(msgId);
+    }
+    this._displayIdToParentIds.set(displayId, parentIds);
+
+    // Add to our map of display ids for this message.
+    let displayIds = this._msgIdToDisplayIds.get(msgId) || [];
+    if (displayIds.indexOf(msgId) === -1) {
+      displayIds.push(msgId);
+    }
+    this._msgIdToDisplayIds.set(msgId, displayIds);
+
+    // Let it propagate to the intended recipient.
+    return false;
   }
 
   /**
@@ -933,6 +1029,8 @@ class DefaultKernel implements Kernel.IKernel {
   private _statusChanged = new Signal<this, Kernel.Status>(this);
   private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
+  private _displayIdToParentIds = new Map<string, string[]>();
+  private _msgIdToDisplayIds = new Map<string, string[]>();
 }
 
 
