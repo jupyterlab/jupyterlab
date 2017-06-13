@@ -21,7 +21,7 @@ function main() {
     if (version[0] === 'v') {
         version = version.slice(1);
     }
-    var disabled = Object.create(null);
+    var disabled = [];
     try {
         var option = PageConfig.getOption('disabledExtensions');
         disabled = JSON.parse(option);
