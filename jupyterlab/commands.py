@@ -3,6 +3,7 @@
 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
+from __future__ import print_function
 from distutils.version import LooseVersion
 import errno
 import json
@@ -16,6 +17,7 @@ import shutil
 import sys
 import tarfile
 from jupyter_core.paths import ENV_JUPYTER_PATH
+from notebook.extensions import GREEN_ENABLED, RED_DISABLED
 
 from ._version import __version__
 
@@ -153,6 +155,18 @@ def unlink_package(package, app_dir=None):
     return True
 
 
+def enable_extension(extension, app_dir=None):
+    """Enable a JupyterLab extension.
+    """
+    _toggle_extension(extension, False, app_dir)
+
+
+def disable_extension(extension, app_dir=None):
+    """Disable a JupyterLab package.
+    """
+    _toggle_extension(extension, True, app_dir)
+
+
 def should_build(app_dir=None):
     """Determine whether JupyterLab should be built.
 
@@ -213,11 +227,54 @@ def _get_build_config(app_dir):
             return json.load(fid)
 
 
+def _get_page_config(app_dir):
+    """Get the page config data for the given app dir
+    """
+    target = pjoin(app_dir, 'settings', 'page_config.json')
+    if not os.path.exists(target):
+        return {}
+    else:
+        with open(target) as fid:
+            return json.load(fid)
+
+
+def _toggle_extension(extension, value, app_dir=None):
+    """Enable or disable a lab extension.
+    """
+    app_dir = get_app_dir(app_dir)
+    config = _get_page_config(app_dir)
+    extensions = _get_extensions(app_dir)
+    core_extensions = _get_core_extensions()
+
+    if extension not in extensions and extension not in core_extensions:
+        raise ValueError('Extension %s is not installed' % extension)
+    disabled = config.get('disabledExtensions', [])
+    if value and extension not in disabled:
+        disabled.append(extension)
+    if not value and extension in disabled:
+        disabled.remove(extension)
+
+    # Prune extensions that are not installed.
+    disabled = [ext for ext in disabled
+                if (ext in extensions or ext in core_extensions)]
+    config['disabledExtensions'] = disabled
+    _write_page_config(config, app_dir)
+
+
 def _write_build_config(config, app_dir):
     """Write the build config to the app dir.
     """
     _ensure_package(app_dir)
     target = pjoin(app_dir, 'settings', 'build_config.json')
+    with open(target, 'w') as fid:
+        json.dump(config, fid, indent=4)
+
+
+def _write_page_config(config, app_dir):
+    """Write the build config to the app dir.
+    """
+    _ensure_package(app_dir)
+    target = pjoin(app_dir, 'settings', 'page_config.json')
     with open(target, 'w') as fid:
         json.dump(config, fid, indent=4)
 
@@ -253,10 +310,71 @@ def uninstall_extension(name, app_dir=None):
 
 
 def list_extensions(app_dir=None):
-    """List installed extensions.
+    """List the extensions.
     """
     app_dir = get_app_dir(app_dir)
-    return sorted(_get_extensions(app_dir).keys())
+    extensions = _get_extensions(app_dir)
+    disabled = _get_disabled(app_dir)
+    linked = _get_linked_packages(app_dir)
+    app = []
+    sys = []
+    linked = []
+
+    # We want to organize by dir.
+    sys_path = pjoin(get_app_dir(), 'extensions')
+    for (key, value) in extensions.items():
+        if key in linked:
+            linked.append(key)
+        if value['path'] == sys_path and sys_path != app_dir:
+            sys.append(key)
+            continue
+        app.append(key)
+
+    print('JupyterLab v%s' % __version__)
+    print('Known labextensions:')
+    if app:
+        print('   app dir: %s' % app_dir)
+        for item in sorted(app):
+            extra = ''
+            if item in linked:
+                extra += '*'
+            if item in disabled:
+                extra += ' %s' % RED_DISABLED
+            else:
+                extra += ' %s' % GREEN_ENABLED
+            print('        %s%s' % (item, extra))
+
+    if sys:
+        print('   sys dir: %s' % sys_path)
+        for item in sorted(sys):
+            extra = ''
+            if item in linked:
+                extra += '*'
+            if item in disabled:
+                extra += ' %s' % RED_DISABLED
+            else:
+                extra += ' %s' % GREEN_ENABLED
+            print('        %s%s' % (item, extra))
+
+    if linked:
+        print('* Denotes linked packages')
+
+    # Handle uninstalled and disabled core packages
+    uninstalled_core = _get_uinstalled_core_extensions(app_dir)
+    if uninstalled_core:
+        print('\nUninstalled core extensiosn:')
+        [print('    %s' % item) for item in sorted(uninstalled_core)]
+
+    core_extensions = _get_core_extensions()
+
+    disabled_core = []
+    for key in core_extensions:
+        if key in disabled:
+            disabled_core.append(key)
+
+    if disabled_core:
+        print('\nDisabled core extensions:')
+        [print('    %s' % item) for item in sorted(disabled_core)]
 
 
 def clean(app_dir=None):
@@ -343,8 +461,7 @@ def _ensure_package(app_dir, name=None, version=None):
         data['dependencies'][key] = value['path']
         data['jupyterlab']['extensions'].append(key)
 
-    config = _get_build_config(app_dir)
-    for item in config.get('uninstalled_core_extensions', []):
+    for item in _get_uinstalled_core_extensions(app_dir):
         data['jupyterlab']['extensions'].remove(item)
 
     data['jupyterlab']['name'] = name or 'JupyterLab'
@@ -368,6 +485,13 @@ def _is_extension(data):
     return data['jupyterlab'].get('extension', False)
 
 
+def _get_uinstalled_core_extensions(app_dir):
+    """Get the uninstalled core extensions.
+    """
+    config = _get_build_config(app_dir)
+    return config.get('uninstalled_core_extensions', [])
+
+
 def _validate_package(data, extension):
     """Validate package.json data.
     """
@@ -376,18 +500,33 @@ def _validate_package(data, extension):
         raise ValueError(msg)
 
 
+def _get_disabled(app_dir):
+    """Get the disabled extensions.
+    """
+    config = _get_page_config(app_dir)
+    return config.get('disabledExtensions', [])
+
+
+def _get_core_extensions():
+    """Get the core extensions.
+    """
+    with open(pjoin(here, 'package.app.json')) as fid:
+        return json.load(fid)['jupyterlab']['extensions']
+
+
 def _get_extensions(app_dir):
     """Get the extensions in a given app dir.
     """
     extensions = dict()
 
-    # Look in sys_prefix and app_dir if different
-    sys_path = pjoin(ENV_JUPYTER_PATH[0], 'lab', 'extensions')
+    # Get system level packages
+    sys_path = pjoin(get_app_dir(), 'extensions')
     for target in glob.glob(pjoin(sys_path, '*.tgz')):
         data = _read_package(target)
         extensions[data['name']] = dict(path=os.path.realpath(target),
                                         version=data['version'])
 
+    # Look in app_dir if different
     app_path = pjoin(app_dir, 'extensions')
     if app_path == sys_path or not os.path.exists(app_path):
         return extensions

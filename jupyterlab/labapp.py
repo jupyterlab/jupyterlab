@@ -90,6 +90,7 @@ lab_flags['dev-mode'] = (
     "Start the app in dev mode for running from source."
 )
 
+
 class LabApp(NotebookApp):
     version = __version__
 
