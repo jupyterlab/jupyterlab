@@ -116,6 +116,13 @@ class TestExtension(TestCase):
         assert glob.glob(path)
         assert '@jupyterlab/python-tests' in _get_extensions(self.app_dir)
 
+    def test_install_twice(self):
+        install_extension(self.source_dir)
+        install_extension(self.source_dir)
+        path = pjoin(get_app_dir(), 'extensions', '*python-tests*.tgz')
+        assert glob.glob(path)
+        assert '@jupyterlab/python-tests' in list_extensions()
+
     def test_install_failed(self):
         path = os.path.realpath(pjoin(here, '..'))
         with pytest.raises(ValueError):
