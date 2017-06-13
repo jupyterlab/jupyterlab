@@ -73,6 +73,7 @@ class CSVViewer extends Widget {
     this._model = new CSVModel({ content: context.model.toString() });
     this._grid = new DataGrid();
     this._grid.addClass(CSV_GRID_CLASS);
+    this._grid.headerVisibility = 'column'
     this._grid.model = this._model;
 
     this._toolbar = new CSVToolbar();
