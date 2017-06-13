@@ -53,15 +53,24 @@ class CSVModel extends DataModel {
     this.emitChanged({ type: 'model-reset' });
   }
 
+  /**
+   * Get the number of rows in the given region.
+   */
   rowCount(region: DataModel.RowRegion): number {
     return region === 'body' ? this._data.length : 1;
   }
 
+  /**
+   * Get the number of columns in the given region.
+   */
   columnCount(region: DataModel.ColumnRegion): number {
     let count = this._data.columns ? this._data.columns.length : 1;
     return region === 'body' ? count : 1;
   }
 
+  /**
+   * Get the data value given a region and location.
+   */
   data(region: DataModel.CellRegion, row: number, column: number): any {
     let colName = this._data.columns ? this._data.columns[column] : '';
     if (region === 'row-header') {
@@ -78,10 +87,6 @@ class CSVModel extends DataModel {
 
   /**
    * Parse the content using the model's delimiter.
-   *
-   * #### Notes
-   * This method will always return parsed content that has at most the display
-   * limit worth of rows, currently maxing out at 1000 rows.
    */
   private _parse(): void {
     this._data = dsv.dsvFormat(this._delimiter).parse(this._content);
