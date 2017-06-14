@@ -22,7 +22,7 @@ from notebook.extensions import (
     GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 )
 
-from .semver import satisfies, parse_comparator
+from .semver import Range, gte, lt, lte, gt
 from ._version import __version__
 
 
@@ -466,20 +466,26 @@ def _validate_compatibility(extension, deps, core_data):
 
     for (key, value) in deps.items():
         if key in singletons:
-            # Look for a version that overlaps the required version.
-            range_ = core_deps[key]
-            comp = parse_comparator(value, True)
-            parts = comp.split()
-            found = False
-            for part in parts:
-                part = part.replace('>', '')
-                part = part.replace('=', '')
-                part = part.replace('>', '')
-                if satisfies(part, range_, True):
-                    found = True
-                    break
-            if not found:
-                errors.append((key, range_, value))
+            # Test for overlapping semver ranges.
+            r1 = Range(core_deps[key], True)
+            r2 = Range(value, True)
+            x1 = r1.set[0][0].semver
+            x2 = r1.set[0][-1].semver
+            y1 = r2.set[0][0].semver
+            y2 = r2.set[0][-1].semver
+
+            lx = lte if x1 == x2 else lt
+            ly = lte if y1 == y2 else lt
+            gx = gte if x1 == x2 else gt
+            gy = gte if x1 == x2 else gt
+
+            overlap = (gte(x1, y1, True) and ly(x1, y2, True) or
+                       gy(x2, y1, True) and ly(x2, y2, True) or
+                       gte(y1, x1, True) and lx(y1, x2, True) or
+                       gx(y2, x1, True) and lx(y2, x2, True))
+
+            if not overlap:
+                errors.append((key, core_deps[key], value))
 
     return errors
 
