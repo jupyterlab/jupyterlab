@@ -136,6 +136,7 @@
       "@jupyterlab/tooltip-extension"
     ],
     "singletonPackages": [
+      "@jupyterlab/application",
       "@jupyterlab/apputils",
       "@jupyterlab/console",
       "@jupyterlab/coreutils",
