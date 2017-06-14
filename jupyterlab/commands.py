@@ -22,7 +22,7 @@ from notebook.extensions import (
     GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 )
 
-from .semver import satisfies
+from .semver import satisfies, parse_comparator
 from ._version import __version__
 
 
@@ -466,11 +466,20 @@ def _validate_compatibility(extension, deps, core_data):
 
     for (key, value) in deps.items():
         if key in singletons:
-            version = core_deps[key]
-            version = version.replace('~', '')
-            version = version.replace('^', '')
-            if not satisfies(version, value, True):
-                errors.append((key, core_deps[key], value))
+            # Look for a version that overlaps the required version.
+            range_ = core_deps[key]
+            comp = parse_comparator(value, True)
+            parts = comp.split()
+            found = False
+            for part in parts:
+                part = part.replace('>', '')
+                part = part.replace('=', '')
+                part = part.replace('>', '')
+                if satisfies(part, range_, True):
+                    found = True
+                    break
+            if not found:
+                errors.append((key, range_, value))
 
     return errors
 
