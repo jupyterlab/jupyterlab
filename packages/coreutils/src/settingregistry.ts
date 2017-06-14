@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as Ajv from 'ajv';
+
 import {
   find
 } from '@phosphor/algorithm';
@@ -31,6 +33,13 @@ const LEVEL: ISettingRegistry.Level = 'user';
  * An alias for the JSON deep copy function.
  */
 const copy = JSONExt.deepCopy;
+
+
+/**
+ * An implementation of a schema validator.
+ */
+export
+interface ISchemaValidator {}
 
 
 /* tslint:disable */
@@ -199,6 +208,13 @@ export
 interface ISettingRegistry extends SettingRegistry {}
 
 
+class DefaultSchemaValidator implements ISchemaValidator {
+  constructor() {
+    const validator = new Ajv();
+    console.log('validator', validator);
+  }
+}
+
 /**
  * The default concrete implementation of a setting registry.
  */
@@ -207,9 +223,10 @@ class SettingRegistry {
   /**
    * Create a new setting registry.
    */
-  constructor(options: SettingRegistry.IOptions = { datastore: null }) {
+  constructor(options: SettingRegistry.IOptions = { }) {
     const namespace = 'jupyter.db.settings';
     this._datastore = options.datastore || new StateDB({ namespace });
+    this._validator = options.validator || new DefaultSchemaValidator();
   }
 
   /**
@@ -431,6 +448,7 @@ class SettingRegistry {
   private _datastore: IDatastore<ISettingRegistry.IPlugin, ISettingRegistry.IPlugin> | null = null;
   private _pluginChanged = new Signal<this, string>(this);
   private _plugins: { [name: string]: ISettingRegistry.IPlugin } = Object.create(null);
+  private _validator: ISchemaValidator | null = null;
 }
 
 
@@ -599,7 +617,12 @@ namespace SettingRegistry {
     /**
      * The datastore used by the setting registry.
      */
-    datastore: IDatastore<ISettingRegistry.IPlugin, ISettingRegistry.IPlugin>;
+    datastore?: IDatastore<ISettingRegistry.IPlugin, ISettingRegistry.IPlugin>;
+
+    /**
+     * The validator used to enforce the settings JSON schema.
+     */
+    validator?: ISchemaValidator;
   }
 }
 
