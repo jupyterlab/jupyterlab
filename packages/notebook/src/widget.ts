@@ -119,6 +119,11 @@ const DROP_SOURCE_CLASS = 'jp-mod-dropSource';
 const DRAG_IMAGE_CLASS = 'jp-dragImage';
 
 /**
+ * The class name added to singular drag images
+ */
+const SINGLE_DRAG_IMAGE_CLASS = 'jp-dragImageSinglePrompt';
+
+/**
  * The class name added to the drag image cell content.
  */
 const CELL_DRAG_CONTENT_CLASS = 'jp-cellDragContent';
@@ -1341,11 +1346,11 @@ class Notebook extends StaticNotebook {
         countString = '';
       }
       // Create the drag image.
-      dragImage = Private.createDragImage(selected.length, countString, activeCell.model.value.text.split('\n')[0]);
+      dragImage = Private.createDragImage(selected.length, countString, activeCell.model.value.text.split('\n')[0].slice(0,26));
     }
     else {
       // Create the drag image.
-      dragImage = Private.createDragImage(selected.length, '', activeCell.model.value.text.split('\n')[0]);
+      dragImage = Private.createDragImage(selected.length, '', activeCell.model.value.text.split('\n')[0].slice(0,26));
     }
     // Set up the drag event.
     this._drag = new Drag({
@@ -1559,20 +1564,45 @@ namespace Private {
   export
   function createDragImage(count: number, promptNumber: string, cellContent: string): HTMLElement {
     if (count > 1) {
-      return VirtualDOM.realize(
-        h.div(
-          h.div({className: DRAG_IMAGE_CLASS},
-            h.span({className: CELL_DRAG_PROMPT_CLASS}, "[" + promptNumber + "]:"),
-            h.span({className: CELL_DRAG_CONTENT_CLASS}, cellContent)),
-          h.div({className: CELL_DRAG_MULTIPLE_BACK}, "")
-        )
-      );
+      if (promptNumber !== '') {
+        return VirtualDOM.realize(
+          h.div(
+            h.div({className: DRAG_IMAGE_CLASS},
+              h.span({className: CELL_DRAG_PROMPT_CLASS}, "[" + promptNumber + "]:"),
+              h.span({className: CELL_DRAG_CONTENT_CLASS}, cellContent)),
+            h.div({className: CELL_DRAG_MULTIPLE_BACK}, "")
+          )
+        );
+      } else {
+        return VirtualDOM.realize(
+          h.div(
+            h.div({className: DRAG_IMAGE_CLASS},
+              h.span({className: CELL_DRAG_PROMPT_CLASS}),
+              h.span({className: CELL_DRAG_CONTENT_CLASS}, cellContent)),
+            h.div({className: CELL_DRAG_MULTIPLE_BACK}, "")
+          )
+        );
+      }
     } else {
-      return VirtualDOM.realize(
-        h.div({className: DRAG_IMAGE_CLASS},
-          h.span({className: CELL_DRAG_CONTENT_CLASS, title: `${count}`})
-        )
-      );
+      if (promptNumber !== '') {
+        return VirtualDOM.realize(
+          h.div(
+            h.div({className: `${DRAG_IMAGE_CLASS} ${SINGLE_DRAG_IMAGE_CLASS}`},
+              h.span({className: CELL_DRAG_PROMPT_CLASS}, "[" + promptNumber + "]:"),
+              h.span({className: CELL_DRAG_CONTENT_CLASS}, cellContent)
+            )
+          )
+        );
+      } else {
+        return VirtualDOM.realize(
+          h.div(
+            h.div({className: `${DRAG_IMAGE_CLASS} ${SINGLE_DRAG_IMAGE_CLASS}`},
+              h.span({className: CELL_DRAG_PROMPT_CLASS}),
+              h.span({className: CELL_DRAG_CONTENT_CLASS}, cellContent)
+            )
+          )
+        );
+      }
     }
   }
 

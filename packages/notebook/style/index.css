@@ -158,6 +158,11 @@
 }
 
 
+.jp-dragImageSinglePrompt {
+  box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.12);
+}
+
+
 .jp-dragImage .jp-cellDragContent {
     z-index: 2;
     position: absolute;
@@ -195,7 +200,7 @@
   width: 272px;
   top: 8px;
   left: 8px;
-  background: var(--jp-cell-editor-background);
+  background: #EEEEEE;
   border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
   box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.12);
 }
