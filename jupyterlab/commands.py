@@ -214,7 +214,12 @@ def should_build(app_dir=None):
 
     # Look for mismatched extension paths.
     for name in extensions:
-        if data['dependencies'][name] != staging_data['dependencies'][name]:
+        path = data['dependencies'][name]
+        if path.startswith('file:'):
+            path = path.replace('file:', '')
+            path = os.path.abspath(pjoin(app_dir, 'staging', path))
+
+        if path != staging_data['dependencies'][name]:
             return True, 'Installed extensions changed'
 
     return False, ''
