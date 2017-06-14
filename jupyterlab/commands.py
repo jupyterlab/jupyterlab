@@ -118,6 +118,7 @@ def install_extension(extension, app_dir=None, logger=None):
 def link_package(path, app_dir=None, logger=None):
     """Link a package against the JupyterLab build.
     """
+    logger = logger or logging
     app_dir = get_app_dir(app_dir)
     if app_dir == here:
         raise ValueError('Cannot link packages in core app')
@@ -210,7 +211,7 @@ def should_build(app_dir=None, logger=None):
     app_dir = get_app_dir(app_dir)
 
     # Check for installed extensions
-    extensions = _get_extensions(app_dir, logger)
+    extensions = _get_extensions(app_dir)
 
     # No linked and no extensions and no built version.
     if not extensions and not os.path.exists(pjoin(app_dir, 'static')):
@@ -465,7 +466,10 @@ def _validate_compatibility(extension, deps, core_data):
 
     for (key, value) in deps.items():
         if key in singletons:
-            if not satisfies(core_deps[key], value, True):
+            version = core_deps[key]
+            version = version.replace('~', '')
+            version = version.replace('^', '')
+            if not satisfies(version, value, True):
                 errors.append((key, core_deps[key], value))
 
     return errors
