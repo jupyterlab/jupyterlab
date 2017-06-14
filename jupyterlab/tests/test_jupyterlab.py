@@ -75,6 +75,7 @@ class TestExtension(TestCase):
         self.config_dir = pjoin(self.test_dir, 'config')
         self.source_dir = pjoin(here, 'mockextension')
         self.incompat_dir = pjoin(here, 'mockextension-incompat')
+        self.mock_package = pjoin(here, 'mockpackage')
 
         self.patches = []
         p = patch.dict('os.environ', {
@@ -129,7 +130,7 @@ class TestExtension(TestCase):
             install_extension(self.incompat_dir)
 
     def test_install_failed(self):
-        path = os.path.realpath(pjoin(here, '..'))
+        path = self.mockpackage
         with pytest.raises(ValueError):
             install_extension(path)
         with open(pjoin(path, 'package.json')) as fid:
@@ -159,7 +160,7 @@ class TestExtension(TestCase):
         assert '@jupyterlab/python-tests' in _get_extensions(self.app_dir)
 
     def test_link_package(self):
-        path = os.path.realpath(pjoin(here, '..'))
+        path = self.mockpackage
         link_package(path)
         linked = _get_linked_packages().keys()
         with open(pjoin(path, 'package.json')) as fid:
