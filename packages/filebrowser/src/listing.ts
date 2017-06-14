@@ -530,7 +530,7 @@ class DirListing extends Widget {
     let items = this._sortedItems;
 
     let index = ArrayExt.findFirstIndex(items, value => {
-      return value.name.toLowerCase().substr(0, prefix.length) === prefix
+      return value.name.toLowerCase().substr(0, prefix.length) === prefix;
     });
 
     if (index !== -1) {
@@ -1784,24 +1784,43 @@ namespace Private {
    */
   export
   function sort(items: IIterator<Contents.IModel>, state: DirListing.ISortState) : Contents.IModel[] {
-    // Shortcut for unmodified.
-    if (state.key !== 'last_modified' && state.direction === 'ascending') {
-      return toArray(items);
-    }
 
     let copy = toArray(items);
 
     if (state.key === 'last_modified') {
+      // Sort by type and then by last modified.
       copy.sort((a, b) => {
+        // Compare based on type.
+        let t1 = typeWeight(a);
+        let t2 = typeWeight(b);
+        if (t1 !== t2) {
+          return t1 < t2 ? -1 : 1;  // Infinity safe
+        }
+
         let valA = new Date(a.last_modified).getTime();
         let valB = new Date(b.last_modified).getTime();
+
+        if (state.direction === 'descending') {
+          return valA - valB;
+        }
         return valB - valA;
       });
-    }
+    } else {
+      // Sort by type and then by name.
+      copy.sort((a, b) => {
+        // Compare based on type.
+        let t1 = typeWeight(a);
+        let t2 = typeWeight(b);
+        if (t1 !== t2) {
+          return t1 < t2 ? -1 : 1;  // Infinity safe
+        }
 
-    // Reverse the order if descending.
-    if (state.direction === 'descending') {
-      copy.reverse();
+        // Compare by display name.
+        if (state.direction === 'descending') {
+          return b.name.localeCompare(a.name);
+        }
+        return a.name.localeCompare(b.name);
+      });
     }
 
     return copy;
@@ -1813,5 +1832,21 @@ namespace Private {
   export
   function hitTestNodes(nodes: HTMLElement[], x: number, y: number): number {
     return ArrayExt.findFirstIndex(nodes, node => ElementExt.hitTest(node, x, y));
+  }
+
+  /**
+   * Weight a contents model by type.
+   */
+  function typeWeight(model: Contents.IModel): number {
+    switch (model.type) {
+    case 'directory':
+      return 0;
+    case 'notebook':
+      return 1;
+    case 'file':
+      return 2;
+    default:
+      return Infinity;
+    }
   }
 }
