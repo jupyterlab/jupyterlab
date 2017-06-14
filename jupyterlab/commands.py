@@ -466,6 +466,10 @@ def _validate_compatibility(extension, deps, core_data):
 
     for (key, value) in deps.items():
         if key in singletons:
+            # Short circuit '*' depenendencies.
+            if core_deps[key] == '*' or value == '*':
+                continue
+
             # Test for overlapping semver ranges.
             r1 = Range(core_deps[key], True)
             r2 = Range(value, True)
@@ -474,11 +478,22 @@ def _validate_compatibility(extension, deps, core_data):
             y1 = r2.set[0][0].semver
             y2 = r2.set[0][-1].semver
 
+            # Handle single value specifiers.
             lx = lte if x1 == x2 else lt
             ly = lte if y1 == y2 else lt
             gx = gte if x1 == x2 else gt
             gy = gte if x1 == x2 else gt
 
+            # Handle unbounded (>) specifiers.
+            def noop(x, y, z):
+                return True
+
+            if x1 == x2 and r1.set[0][0].operator == '>=':
+                lx = noop
+            if y1 == y2 and r2.set[0][0].operator == '>=':
+                ly = noop
+
+            # Check for overlap.
             overlap = (gte(x1, y1, True) and ly(x1, y2, True) or
                        gy(x2, y1, True) and ly(x2, y2, True) or
                        gte(y1, x1, True) and lx(y1, x2, True) or
