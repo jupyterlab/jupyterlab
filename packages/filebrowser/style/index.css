@@ -29,6 +29,12 @@
 }
 
 
+.jp-FileBrowser-toolbar {
+  border-bottom: none;
+  height: auto;
+}
+
+
 .jp-BreadCrumbs {
   flex: 0 0 auto;
   margin: 4px 12px;

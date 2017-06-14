@@ -104,7 +104,7 @@ class FileBrowser extends Widget {
     this._crumbs = new BreadCrumbs({ model });
     this.toolbar = new Toolbar<Widget>();
     let newFolder = new ToolbarButton({
-      className: 'jp-FolderIcon',
+      className: 'jp-newFolderIcon',
       onClick: () => {
         this._manager.newUntitled({
           path: model.path,
