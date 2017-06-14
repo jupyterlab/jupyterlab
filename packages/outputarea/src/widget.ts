@@ -438,7 +438,7 @@ namespace OutputArea {
     if (!session.kernel) {
       return Promise.resolve(void 0);
     }
-    let future = session.kernel.requestExecute(content);
+    let future = session.kernel.requestExecute(content, false);
     output.future = future;
     return future.done;
   }
