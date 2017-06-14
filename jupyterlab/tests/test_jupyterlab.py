@@ -29,7 +29,8 @@ from jupyterlab.commands import (
     install_extension, uninstall_extension, list_extensions,
     build, link_package, unlink_package, should_build,
     disable_extension, enable_extension, _get_extensions,
-    _get_linked_packages, _ensure_package, _get_disabled
+    _get_linked_packages, _ensure_package, _get_disabled,
+    _test_overlap
 )
 
 here = os.path.dirname(os.path.abspath(__file__))
@@ -130,7 +131,7 @@ class TestExtension(TestCase):
             install_extension(self.incompat_dir)
 
     def test_install_failed(self):
-        path = self.mockpackage
+        path = self.mock_package
         with pytest.raises(ValueError):
             install_extension(path)
         with open(pjoin(path, 'package.json')) as fid:
@@ -160,7 +161,7 @@ class TestExtension(TestCase):
         assert '@jupyterlab/python-tests' in _get_extensions(self.app_dir)
 
     def test_link_package(self):
-        path = self.mockpackage
+        path = self.mock_package
         link_package(path)
         linked = _get_linked_packages().keys()
         with open(pjoin(path, 'package.json')) as fid:
@@ -310,3 +311,15 @@ class TestExtension(TestCase):
         assert not should_build()[0]
         uninstall_extension('@jupyterlab/python-tests')
         assert should_build()[0]
+
+    def test_compatibility(self):
+        assert _test_overlap('^0.6.0', '^0.6.1')
+        assert _test_overlap('>0.1', '0.6')
+        assert _test_overlap('~0.5.0', '~0.5.2')
+        assert _test_overlap('0.5.2', '^0.5.0')
+
+        assert not _test_overlap('^0.5.0', '^0.6.0')
+        assert not _test_overlap('~1.5.0', '^1.6.0')
+
+        assert _test_overlap('*', '0.6') is None
+        assert _test_overlap('<0.6', '0.1') is None

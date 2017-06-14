@@ -466,48 +466,8 @@ def _validate_compatibility(extension, deps, core_data):
 
     for (key, value) in deps.items():
         if key in singletons:
-            # Test for overlapping semver ranges.
-            r1 = Range(core_deps[key], True)
-            r2 = Range(value, True)
-
-            # If either range is empty, we cannot verify.
-            if not r1.range or not r2.range:
-                continue
-
-            x1 = r1.set[0][0].semver
-            x2 = r1.set[0][-1].semver
-            y1 = r2.set[0][0].semver
-            y2 = r2.set[0][-1].semver
-
-            o1 = r1.set[0][0].operator
-            o2 = r2.set[0][0].operator
-
-            # We do not handle (<) specifiers.
-            if (o1.startswith('<') or o2.startswith('<')):
-                continue
-
-            # Handle single value specifiers.
-            lx = lte if x1 == x2 else lt
-            ly = lte if y1 == y2 else lt
-            gx = gte if x1 == x2 else gt
-            gy = gte if x1 == x2 else gt
-
-            # Handle unbounded (>) specifiers.
-            def noop(x, y, z):
-                return True
-
-            if x1 == x2 and o1.startswith('>'):
-                lx = noop
-            if y1 == y2 and o2.startswith('>'):
-                ly = noop
-
-            # Check for overlap.
-            overlap = (gte(x1, y1, True) and ly(x1, y2, True) or
-                       gy(x2, y1, True) and ly(x2, y2, True) or
-                       gte(y1, x1, True) and lx(y1, x2, True) or
-                       gx(y2, x1, True) and lx(y2, x2, True))
-
-            if not overlap:
+            overlap = _test_overlap(core_deps[key], value)
+            if overlap is False:
                 errors.append((key, core_deps[key], value))
 
     return errors
@@ -519,6 +479,55 @@ def _get_core_data():
     with open(pjoin(here, 'package.app.json')) as fid:
         return json.load(fid)
 
+
+def _test_overlap(spec1, spec2):
+    """Test whether two version specs overlap.
+
+    Returns `None` if we cannot determine compatibility,
+    otherwise whether there is an overlap
+    """
+    # Test for overlapping semver ranges.
+    r1 = Range(spec1, True)
+    r2 = Range(spec2, True)
+
+    # If either range is empty, we cannot verify.
+    if not r1.range or not r2.range:
+        return
+
+    x1 = r1.set[0][0].semver
+    x2 = r1.set[0][-1].semver
+    y1 = r2.set[0][0].semver
+    y2 = r2.set[0][-1].semver
+
+    o1 = r1.set[0][0].operator
+    o2 = r2.set[0][0].operator
+
+    # We do not handle (<) specifiers.
+    if (o1.startswith('<') or o2.startswith('<')):
+        return
+
+    # Handle single value specifiers.
+    lx = lte if x1 == x2 else lt
+    ly = lte if y1 == y2 else lt
+    gx = gte if x1 == x2 else gt
+    gy = gte if x1 == x2 else gt
+
+    # Handle unbounded (>) specifiers.
+    def noop(x, y, z):
+        return True
+
+    if x1 == x2 and o1.startswith('>'):
+        lx = noop
+    if y1 == y2 and o2.startswith('>'):
+        ly = noop
+
+    # Check for overlap.
+    return (
+        gte(x1, y1, True) and ly(x1, y2, True) or
+        gy(x2, y1, True) and ly(x2, y2, True) or
+        gte(y1, x1, True) and lx(y1, x2, True) or
+        gx(y2, x1, True) and lx(y2, x2, True)
+    )
 
 def _format_compatibility_errors(name, version, errors):
     """Format a message for compatibility errors.
