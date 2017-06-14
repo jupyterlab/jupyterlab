@@ -776,7 +776,7 @@ class DefaultKernel implements Kernel.IKernel {
       parentIds.map((parentId) => {
         let future = this._futures && this._futures.get(parentId);
         if (future) {
-          future.handleMsg(msg);
+          future.handleMsg(updateMsg);
         }
       });
     }

@@ -342,7 +342,7 @@ namespace nbformat {
    * The valid output types.
    */
   export
-  type OutputType = 'execute_result' | 'display_data' | 'stream' | 'error';
+  type OutputType = 'execute_result' | 'display_data' | 'stream' | 'error' | 'update_display_data';
 
   /**
    * The base output type.
@@ -390,6 +390,27 @@ namespace nbformat {
      * Type of cell output.
      */
     output_type: 'display_data';
+
+    /**
+     * A mime-type keyed dictionary of data.
+     */
+    data: IMimeBundle;
+
+    /**
+     * Cell output metadata.
+     */
+    metadata: OutputMetadata;
+  }
+
+  /**
+   * Data displayed as an update to existing display data.
+   */
+  export
+  interface IDisplayUpdate extends IBaseOutput {
+    /**
+     * Type of cell output.
+     */
+    output_type: 'update_display_data';
 
     /**
      * A mime-type keyed dictionary of data.
@@ -475,6 +496,14 @@ namespace nbformat {
   export
   function isDisplayData(output: IOutput): output is IDisplayData {
     return output.output_type === 'display_data';
+  }
+
+  /**
+   * Test whether an output is from updated display data.
+   */
+  export
+  function isDisplayUpdate(output: IOutput): output is IDisplayUpdate {
+    return output.output_type === 'update_display_data';
   }
 
   /**
