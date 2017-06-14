@@ -74,6 +74,7 @@ class TestExtension(TestCase):
         self.data_dir = pjoin(self.test_dir, 'data')
         self.config_dir = pjoin(self.test_dir, 'config')
         self.source_dir = pjoin(here, 'mockextension')
+        self.incompat_dir = pjoin(here, 'mockextension-incompat')
 
         self.patches = []
         p = patch.dict('os.environ', {
@@ -123,6 +124,10 @@ class TestExtension(TestCase):
         assert glob.glob(path)
         assert '@jupyterlab/python-tests' in _get_extensions(self.app_dir)
 
+    def test_install_incompatible(self):
+        with pytest.raises(ValueError):
+            install_extension(self.incompat_dir)
+
     def test_install_failed(self):
         path = os.path.realpath(pjoin(here, '..'))
         with pytest.raises(ValueError):
@@ -164,6 +169,10 @@ class TestExtension(TestCase):
         unlink_package(path)
         linked = _get_linked_packages().keys()
         assert not data['name'] in linked
+
+    def test_link_incompatible(self):
+        with pytest.raises(ValueError):
+            install_extension(self.incompat_dir)
 
     def test_unlink_package(self):
         target = self.source_dir
@@ -249,6 +258,22 @@ class TestExtension(TestCase):
         with open(entry) as fid:
             data = fid.read()
         assert '@jupyterlab/python-tests' in data
+
+    def test_build_custom(self):
+        install_extension(self.source_dir)
+        build(name='foo', version='1.0')
+
+        # check static directory.
+        entry = pjoin(self.app_dir, 'static', 'index.out.js')
+        with open(entry) as fid:
+            data = fid.read()
+        assert '@jupyterlab/python-tests' in data
+
+        pkg = pjoin(self.app_dir, 'static', 'package.json')
+        with open(pkg) as fid:
+            data = json.load(fid)
+        assert data['jupyterlab']['name'] == 'foo'
+        assert data['jupyterlab']['version'] == '1.0'
 
     def test_load_extension(self):
         app = NotebookApp()
