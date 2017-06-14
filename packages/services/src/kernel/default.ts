@@ -229,6 +229,8 @@ class DefaultKernel implements Kernel.IKernel {
     this._comms.forEach((comm, key) => {
       comm.dispose();
     });
+    this._displayIdToParentIds.clear();
+    this._msgIdToDisplayIds.clear();
     this._futures = null;
     this._commPromises = null;
     this._comms = null;
@@ -902,6 +904,8 @@ class DefaultKernel implements Kernel.IKernel {
     this._futures = new Map<string, KernelFutureHandler>();
     this._commPromises = new Map<string, Promise<Kernel.IComm>>();
     this._comms = new Map<string, Kernel.IComm>();
+    this._displayIdToParentIds.clear();
+    this._msgIdToDisplayIds.clear();
   }
 
   /**

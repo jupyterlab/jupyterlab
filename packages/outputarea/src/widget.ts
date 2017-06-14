@@ -214,6 +214,7 @@ class OutputArea extends Widget {
       this._future.dispose();
     }
     this._future = null;
+    this._displayIdMap.clear();
     super.dispose();
   }
 
