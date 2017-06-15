@@ -1348,7 +1348,7 @@ class Notebook extends StaticNotebook {
     else {
       countString = '';
     }
-    console.log(countString);
+
     // Create the drag image.
     dragImage = Private.createDragImage(selected.length, countString, activeCell.model.value.text.split('\n')[0].slice(0,26));
 
