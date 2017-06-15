@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, IFrame, IMainMenu, InstanceTracker
+  ICommandPalette, IFrame, IMainMenu, InstanceTracker, showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -29,6 +29,9 @@ import '../style/index.css';
 namespace CommandIDs {
   export
   const open = 'help-jupyterlab:open';
+
+  export
+  const about = 'help-jupyterlab:about';
 
   export
   const activate = 'help-jupyterlab:activate';
@@ -152,14 +155,13 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   let counter = 0;
   const category = 'Help';
   const namespace = 'help-doc';
-  const command = CommandIDs.open;
   const menu = createMenu();
-  const { commands, shell } = app;
+  const { commands, shell, info} = app;
   const tracker = new InstanceTracker<ClosableIFrame>({ namespace });
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command,
+    command: CommandIDs.open,
     args: widget => ({ url: widget.url, text: widget.title.label }),
     name: widget => widget.url
   });
@@ -186,18 +188,29 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     let menu = new Menu({ commands });
     menu.title.label = category;
 
-    menu.addItem({ command: 'about-jupyterlab:open' });
+    menu.addItem({ command: CommandIDs.about });
     menu.addItem({ command: 'faq-jupyterlab:open' });
     menu.addItem({ command: CommandIDs.launchClassic });
     menu.addItem({ type: 'separator' });
-    RESOURCES.forEach(args => { menu.addItem({ args, command }); });
+    RESOURCES.forEach(args => {
+      menu.addItem({ args, command: CommandIDs.open });
+    });
     menu.addItem({ type: 'separator' });
     menu.addItem({ command: 'statedb:clear' });
 
     return menu;
   }
 
-  commands.addCommand(command, {
+  commands.addCommand(CommandIDs.about, {
+    label: `About ${info.name}`,
+    execute: () => {
+      showDialog({
+        title: `About ${info.name}`,
+      });
+    }
+  });
+
+  commands.addCommand(CommandIDs.open, {
     label: args => args['text'] as string,
     execute: args => {
       const url = args['url'] as string;
@@ -221,7 +234,9 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     execute: () => { window.open(PageConfig.getBaseUrl() + 'tree'); }
   });
 
-  RESOURCES.forEach(args => { palette.addItem({ args, command, category }); });
+  RESOURCES.forEach(args => {
+    palette.addItem({ args, command: CommandIDs.open, category });
+  });
   palette.addItem({ command: 'statedb:clear', category });
   palette.addItem({ command: CommandIDs.launchClassic, category });
 
