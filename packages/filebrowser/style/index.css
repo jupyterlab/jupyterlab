@@ -74,6 +74,11 @@
 }
 
 
+.jp-FileBrowser-toolbar > .jp-Toolbar-button:focus {
+  box-shadow: var(--jp-toolbar-box-shadow);
+  border-color: var(--jp-toolbar-border-color);
+}
+
 /*-----------------------------------------------------------------------------
 | DirListing
 |----------------------------------------------------------------------------*/
