@@ -41,6 +41,10 @@ class BaseExtensionApp(JupyterApp):
     should_build = Bool(False, config=True,
         help="Whether to build the app after the action")
 
+    def _log_format_default(self):
+        """A default format for messages"""
+        return "%(message)s"
+
 
 class InstallLabExtensionApp(BaseExtensionApp):
     description = "Install labextension(s)"

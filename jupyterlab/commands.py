@@ -380,7 +380,7 @@ def list_extensions(app_dir=None, logger=None):
     # Handle uninstalled and disabled core packages
     uninstalled_core = _get_uinstalled_core_extensions(app_dir)
     if uninstalled_core:
-        logger.info('\nUninstalled core extensiosn:')
+        logger.info('\nUninstalled core extensions:')
         [logger.info('    %s' % item) for item in sorted(uninstalled_core)]
 
     core_extensions = _get_core_extensions()
