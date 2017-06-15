@@ -1348,6 +1348,7 @@ class Notebook extends StaticNotebook {
     else {
       countString = '';
     }
+
     // Create the drag image.
     dragImage = Private.createDragImage(selected.length, countString, activeCell.model.value.text.split('\n')[0].slice(0,26));
 
@@ -1567,7 +1568,7 @@ namespace Private {
         return VirtualDOM.realize(
           h.div(
             h.div({className: DRAG_IMAGE_CLASS},
-              h.span({className: CELL_DRAG_PROMPT_CLASS}, "[" + promptNumber + "]:"),
+              h.span({className: CELL_DRAG_PROMPT_CLASS}, "In [" + promptNumber + "]:"),
               h.span({className: CELL_DRAG_CONTENT_CLASS}, cellContent)),
             h.div({className: CELL_DRAG_MULTIPLE_BACK}, "")
           )
@@ -1587,7 +1588,7 @@ namespace Private {
         return VirtualDOM.realize(
           h.div(
             h.div({className: `${DRAG_IMAGE_CLASS} ${SINGLE_DRAG_IMAGE_CLASS}`},
-              h.span({className: CELL_DRAG_PROMPT_CLASS}, "[" + promptNumber + "]:"),
+              h.span({className: CELL_DRAG_PROMPT_CLASS}, "In [" + promptNumber + "]:"),
               h.span({className: CELL_DRAG_CONTENT_CLASS}, cellContent)
             )
           )
