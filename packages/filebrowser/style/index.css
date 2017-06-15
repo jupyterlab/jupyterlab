@@ -32,6 +32,7 @@
 .jp-FileBrowser-toolbar {
   border-bottom: none;
   height: auto;
+  margin: 4px 4px 0px 4px;
 }
 
 
@@ -67,9 +68,9 @@
   height: var(--jp-private-filebrowser-button-height);
   line-height: var(--jp-private-filebrowser-button-height);
   color: var(--jp-ui-font-color1);
-  border: none;
   font-size: var(--jp-ui-icon-font-size);
   outline: 0;
+  margin-bottom: 4px;
 }
 
 
