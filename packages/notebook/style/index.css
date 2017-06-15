@@ -13,7 +13,6 @@
   --jp-private-notebook-dragImage-height: 38px;
   --jp-private-notebook-selected-color: var(--md-blue-400);
   --jp-private-notebook-multiselected-color: var(--md-blue-50);
-  --jp-private-notebook-left-border-width: 5px;
   --jp-private-notebook-active-color: var(--md-green-400);
 }
 
@@ -97,10 +96,12 @@
 
 .jp-Notebook .jp-Cell:not(.jp-mod-active) .jp-InputPrompt {
   opacity: var(--jp-cell-prompt-opacity-not-active);
+  color: var(--jp-cell-prompt-font-color-not-active);
 }
 
 .jp-Notebook .jp-Cell:not(.jp-mod-active) .jp-OutputPrompt {
   opacity: var(--jp-cell-prompt-opacity-not-active);
+  color: var(--jp-cell-prompt-font-color-not-active);
 }
 
 .jp-Notebook .jp-Cell.jp-mod-active .jp-Cell-inputCollapser,
@@ -145,6 +146,7 @@
 .jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected.jp-mod-dropTarget {
   border-top-color: var(--jp-private-notebook-selected-color);
   border-top-style: solid;
+  border-top-width: 2px;
 }
 
 
@@ -227,7 +229,7 @@
 }
 
 
-.jp-ActiveCellTool .jp-Cell-prompt {
+.jp-ActiveCellTool .jp-InputArea-prompt {
   flex: 0 0 auto;
   padding-left: 0px;
 }
