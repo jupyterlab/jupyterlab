@@ -9,8 +9,8 @@
 
 
 :root {
-  --jp-private-notebook-dragImage-width: 276px;
-  --jp-private-notebook-dragImage-height: 38px;
+  --jp-private-notebook-dragImage-width: 280px;
+  --jp-private-notebook-dragImage-height: 36px;
   --jp-private-notebook-selected-color: var(--md-blue-400);
   --jp-private-notebook-multiselected-color: var(--md-blue-50);
   --jp-private-notebook-active-color: var(--md-green-400);
@@ -151,7 +151,8 @@
 
 
 .jp-dragImage {
-  position: absolute;
+  display: flex;
+  flex-direction: row;
   width: var(--jp-private-notebook-dragImage-width);
   height: var(--jp-private-notebook-dragImage-height);
   border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
@@ -166,12 +167,8 @@
 
 
 .jp-dragImage .jp-dragImage-content {
+    flex: 1 1 auto;
     z-index: 2;
-    position: absolute;
-    left: 52px;
-    top: 4px;
-    width: 208px;
-    height: 18px;
     font-size: var(--jp-code-font-size);
     font-family: monospace;
     line-height: var(--jp-code-line-height);
@@ -180,17 +177,18 @@
     background: var(--jp-cell-editor-background);
     color: var(--jp-content-font-color3);
     text-align: left;
+    margin: 4px 4px 4px 0px;
 }
 
 .jp-dragImage .jp-dragImage-prompt {
-  position: absolute;
-  top: 4px;
-  left: 10px;
-  color: var(--jp-content-font-color2);
+  flex: 0 0 auto;
+  min-width: 36px;
+  color: var(--jp-cell-inprompt-font-color);
   padding: var(--jp-code-padding);
+  padding-left: 12px;
   font-family: 'Roboto Mono', monospace;
   letter-spacing: var(--jp-cell-prompt-letter-spacing);
-  line-height: var(--jp-code-line-height);
+  line-height: 1.9;
   font-size: var(--jp-code-font-size);
   border: var(--jp-border-width) solid transparent;
 }
@@ -198,8 +196,8 @@
 .jp-dragImage-multipleBack {
   z-index: -1;
   position: absolute;
-  height: 34px;
-  width: 272px;
+  height: 32px;
+  width: 276px;
   top: 8px;
   left: 8px;
   background: #EEEEEE;
