@@ -32,7 +32,7 @@
 .jp-FileBrowser-toolbar {
   border-bottom: none;
   height: auto;
-  margin: 4px 4px 0px 4px;
+  margin: var(--jp-toolbar-header-margin);
 }
 
 

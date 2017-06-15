@@ -5,7 +5,7 @@
 |----------------------------------------------------------------------------*/
 
 :root {
-  --jp-private-toolbar-height: 32px;
+  --jp-private-toolbar-height: 28px;
 }
 
 
@@ -56,9 +56,9 @@
 
 
 .jp-Toolbar-button:active {
-  border: 1px solid #BDBDBD;
-  background-color: #E0E0E0;
-  box-shadow: 0px 0px 2px 0px rgba(0,0,0,0.24);
+  border: 1px solid var(--jp-toolbar-border-color);
+  background-color: var(--jp-toolbar-active-background);
+  box-shadow: var(--jp-toolbar-box-shadow);
 }
 
 .jp-Toolbar > .jp-Toolbar-item.jp-Toolbar-spacer {
@@ -73,7 +73,7 @@
   letter-spacing: normal;
   text-align: left;
   font-size: var(--jp-ui-font-size1);
-  line-height: calc( var(--jp-private-toolbar-height) + 1px );
+  line-height: 22px;
 }
 
 
