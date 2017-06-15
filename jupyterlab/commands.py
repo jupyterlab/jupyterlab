@@ -73,6 +73,18 @@ def install_extension(extension, app_dir=None, logger=None):
     if app_dir == here:
         raise ValueError('Cannot install extensions in core app')
     extension = _normalize_path(extension)
+
+    # Check for a core extensions here.
+    data = _get_core_data()
+    if extension in data['jupyterlab']['extensions']:
+        config = _get_build_config(app_dir)
+        uninstalled = config.get('uninstalled_core_extensions', [])
+        if extension in uninstalled:
+            uninstalled.remove(extension)
+            config['uninstalled_core_extensions'] = uninstalled
+            _write_build_config(config, app_dir, logger=logger)
+        return
+
     _ensure_package(app_dir, logger=logger)
     target = pjoin(app_dir, 'extensions', 'temp')
     if os.path.exists(target):
