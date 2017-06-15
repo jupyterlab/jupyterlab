@@ -317,7 +317,7 @@ class InputPrompt extends Widget implements IInputPrompt {
     if (value === null) {
       this.node.textContent = ' ';
     } else {
-        this.node.textContent = `[${value || ' '}]:`;
+        this.node.textContent = `In [${value || ' '}]:`;
     }
   }
 

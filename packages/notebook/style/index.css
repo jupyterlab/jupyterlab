@@ -98,10 +98,12 @@
 
 .jp-Notebook .jp-Cell:not(.jp-mod-active) .jp-InputPrompt {
   opacity: var(--jp-cell-prompt-opacity-not-active);
+  color: var(--jp-cell-prompt-font-color-not-active);
 }
 
 .jp-Notebook .jp-Cell:not(.jp-mod-active) .jp-OutputPrompt {
   opacity: var(--jp-cell-prompt-opacity-not-active);
+  color: var(--jp-cell-prompt-font-color-not-active);
 }
 
 .jp-Notebook .jp-Cell.jp-mod-active .jp-Cell-inputCollapser,
