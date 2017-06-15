@@ -32,7 +32,7 @@ function handlePackage(packagePath, data) {
   }
 
   var deps = package.dependencies || [];
-  for (let dep in deps) {
+  for (var dep in deps) {
     data.dependencies[dep] = deps[dep];
   }
 }
