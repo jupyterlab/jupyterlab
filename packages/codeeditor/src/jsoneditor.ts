@@ -94,7 +94,7 @@ class JSONEditor extends Widget {
     model.value.changed.connect(this._onValueChanged, this);
     this.model = model;
     this.editor = options.editorFactory({ host, model });
-    this.editor.readOnly = true;
+    this.editor.setOption('readOnly', true);
     this.collapsible = !!options.collapsible;
   }
 
@@ -179,7 +179,7 @@ class JSONEditor extends Widget {
       this._source.changed.disconnect(this._onSourceChanged, this);
     }
     this._source = value;
-    this.editor.readOnly = !value;
+    this.editor.setOption('readOnly', !this.editor.getOption('readOnly'));
     if (value) {
       value.changed.connect(this._onSourceChanged, this);
     }

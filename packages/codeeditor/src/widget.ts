@@ -34,8 +34,7 @@ class CodeEditorWrapper extends Widget {
       host: this.node,
       model: options.model,
       uuid: options.uuid,
-      wordWrap: options.wordWrap,
-      readOnly: options.readOnly,
+      config: options.config,
       selectionStyle: options.selectionStyle
     });
     editor.model.selections.changed.connect(this._onSelectionsChanged, this);
@@ -149,19 +148,9 @@ namespace CodeEditorWrapper {
     uuid?: string;
 
     /**
-     * Whether line numbers should be displayed. Defaults to `false`.
+     * The configuration options for the editor.
      */
-    lineNumbers?: boolean;
-
-    /**
-     * Set to false for horizontal scrolling. Defaults to `true`.
-     */
-    wordWrap?: boolean;
-
-    /**
-     * Whether the editor is read-only. Defaults to `false`.
-     */
-    readOnly?: boolean;
+    config?: Partial<CodeEditor.IConfig>;
 
    /**
     * The default selection style for the editor.

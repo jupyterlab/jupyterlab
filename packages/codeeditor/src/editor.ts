@@ -395,12 +395,12 @@ namespace CodeEditor {
     /**
      * Get a config option for the editor.
      */
-    setOption(option: keyof IConfig): void;
+    getOption<K extends keyof IConfig>(option: K): IConfig[K];
 
     /**
      * Set a config option for the editor.
      */
-    setOption(option: keyof IConfig, value: ): void;
+    setOption<K extends keyof IConfig>(option: K, value: IConfig[K]): void;
 
     /**
      * Returns the content for the given line number.
@@ -583,7 +583,7 @@ namespace CodeEditor {
    */
   export
   let defaultConfig: IConfig = {
-    lineNumbers: true
+    lineNumbers: true,
     wordWrap: true,
     readOnly: false,
     tabSize: 4,
