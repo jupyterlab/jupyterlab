@@ -104,7 +104,7 @@ have to graft it into the source tree of JupyterLab itself.
 This may be done using the command
 
 ```
-npm run addsibling <path-or-url>
+npm run addsibling <path-or-url> && npm install
 ```
 
 in the JupyterLab root directory, where `<path-or-url>` refers either to an
