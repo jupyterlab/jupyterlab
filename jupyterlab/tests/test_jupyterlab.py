@@ -154,6 +154,13 @@ class TestExtension(TestCase):
         extensions = data['jupyterlab']['extensions']
         assert '@jupyterlab/console-extension' not in extensions
 
+        install_extension('@jupyterlab/console-extension')
+        _ensure_package(app_dir)
+        with open(pjoin(app_dir, 'staging', 'package.json')) as fid:
+            data = json.load(fid)
+        extensions = data['jupyterlab']['extensions']
+        assert '@jupyterlab/console-extension' in extensions
+
     def test_link_extension(self):
         link_package(self.source_dir)
         linked = _get_linked_packages().keys()
