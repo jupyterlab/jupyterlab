@@ -147,6 +147,11 @@ def link_package(path, app_dir=None, logger=None):
     with open(pkg_path) as fid:
         data = json.load(fid)
 
+    # Check for a core extensions here.
+    core_data = _get_core_data()
+    if data['name'] in core_data['jupyterlab']['extensions']:
+        raise ValueError('Cannot link a core extension')
+
     is_extension = _is_extension(data)
     if is_extension:
         install_extension(path, app_dir)
