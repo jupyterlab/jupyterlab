@@ -220,14 +220,9 @@ class DefaultSchemaValidator implements ISchemaValidator {
       if (typeof result === 'boolean') {
         return result ? Promise.resolve(void 0) : Promise.resolve(errors);
       } else {
-        const resolve = () => { /* no op */ };
-        const reject = (errors: Ajv.ErrorObject[]): Promise<void> => {
-          return Promise.reject(errors);
-        };
-
-        // The Ajv promise implementation doesn't use `Promise`, so it needs to
-        // be wrapped in a true `Promise` instance here.
-        return new Promise<void | Ajv.ErrorObject[]>(() => {
+        // The Ajv promise implementation uses `Thenable` instead of `Promise`,
+        // so it needs to be wrapped in a true `Promise` instance here.
+        return new Promise<void | Ajv.ErrorObject[]>((resolve, reject) => {
           result.then(resolve, reject);
         });
       }
