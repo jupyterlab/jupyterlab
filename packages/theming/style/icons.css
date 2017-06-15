@@ -74,6 +74,11 @@
 }
 
 
+.jp-newFolderIcon {
+  background-image: url(icons/md/new-folder.svg);
+}
+
+
 .jp-HomeIcon {
   background-image: url(icons/md/home.svg);
   min-width: 14px;

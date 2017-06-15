@@ -14,6 +14,8 @@
 
 
 .jp-NotebookPanel-toolbar {
+  padding: 2px;
+  height: 28px;
   box-shadow: var(--jp-toolbar-box-shadow);
   background: var(--jp-toolbar-background);
   z-index: 1;

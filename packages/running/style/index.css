@@ -28,6 +28,7 @@
   flex: 0 0 auto;
   display: flex;
   flex-direction: row;
+  margin: var(--jp-toolbar-header-margin);
 }
 
 
@@ -57,9 +58,19 @@
   flex-direction: column;
 }
 
+
 .jp-RunningSessions-headerRefresh:hover {
-  background-color: var(--jp-layout-color2);
+  background-color: var(--jp-layout-color0);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  border: 1px solid var(--jp-toolbar-border-color);
   z-index: 1; /* raise overlapping border */
+}
+
+
+.jp-RunningSessions-headerRefresh:active {
+  border: 1px solid var(--jp-toolbar-border-color);
+  background-color: var(--jp-toolbar-active-background);
+  box-shadow: var(--jp-toolbar-box-shadow);
 }
 
 

@@ -29,6 +29,13 @@
 }
 
 
+.jp-FileBrowser-toolbar {
+  border-bottom: none;
+  height: auto;
+  margin: var(--jp-toolbar-header-margin);
+}
+
+
 .jp-BreadCrumbs {
   flex: 0 0 auto;
   margin: 4px 12px;
@@ -61,11 +68,16 @@
   height: var(--jp-private-filebrowser-button-height);
   line-height: var(--jp-private-filebrowser-button-height);
   color: var(--jp-ui-font-color1);
-  border: none;
   font-size: var(--jp-ui-icon-font-size);
   outline: 0;
+  margin-bottom: 4px;
 }
 
+
+.jp-FileBrowser-toolbar > .jp-Toolbar-button:focus {
+  box-shadow: var(--jp-toolbar-box-shadow);
+  border-color: var(--jp-toolbar-border-color);
+}
 
 /*-----------------------------------------------------------------------------
 | DirListing
