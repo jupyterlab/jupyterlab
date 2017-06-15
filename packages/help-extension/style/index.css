@@ -24,3 +24,40 @@
 .jp-Help > iframe {
   border: none;
 }
+
+
+.jp-About {
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color1);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding-top: 14px;
+  padding-bottom: 14px;
+  width: 100%;
+}
+
+
+.jp-About-logo {
+  flex: 0 0 50px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  background-size: 232px 50px;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin-top: 20px;
+}
+
+
+.jp-About-subtitle {
+  color: var(--md-grey-600);
+  font-size: var(--jp-ui-font-size2);
+  width: 200px;
+  font-weight: 400;
+  letter-spacing: .4px;
+  text-align: left;
+  padding-left: 68px;
+}

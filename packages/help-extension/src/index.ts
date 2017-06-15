@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, IFrame, IMainMenu, InstanceTracker
+  Dialog, ICommandPalette, IFrame, IMainMenu, InstanceTracker, showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -16,6 +16,10 @@ import {
 import {
   Message
 } from '@phosphor/messaging';
+
+import {
+  h, VirtualDOM
+} from '@phosphor/virtualdom';
 
 import {
   Menu
@@ -29,6 +33,9 @@ import '../style/index.css';
 namespace CommandIDs {
   export
   const open = 'help-jupyterlab:open';
+
+  export
+  const about = 'help-jupyterlab:about';
 
   export
   const activate = 'help-jupyterlab:activate';
@@ -152,14 +159,13 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   let counter = 0;
   const category = 'Help';
   const namespace = 'help-doc';
-  const command = CommandIDs.open;
   const menu = createMenu();
-  const { commands, shell } = app;
+  const { commands, shell, info} = app;
   const tracker = new InstanceTracker<ClosableIFrame>({ namespace });
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command,
+    command: CommandIDs.open,
     args: widget => ({ url: widget.url, text: widget.title.label }),
     name: widget => widget.url
   });
@@ -186,18 +192,44 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     let menu = new Menu({ commands });
     menu.title.label = category;
 
-    menu.addItem({ command: 'about-jupyterlab:open' });
+    menu.addItem({ command: CommandIDs.about });
     menu.addItem({ command: 'faq-jupyterlab:open' });
     menu.addItem({ command: CommandIDs.launchClassic });
     menu.addItem({ type: 'separator' });
-    RESOURCES.forEach(args => { menu.addItem({ args, command }); });
+    RESOURCES.forEach(args => {
+      menu.addItem({ args, command: CommandIDs.open });
+    });
     menu.addItem({ type: 'separator' });
     menu.addItem({ command: 'statedb:clear' });
 
     return menu;
   }
 
-  commands.addCommand(command, {
+  commands.addCommand(CommandIDs.about, {
+    label: `About ${info.name}`,
+    execute: () => {
+      let previewMessage = `alpha (v${info.version})`;
+      let logo = h.span({
+        className: `jp-ImageJupyterLab jp-About-logo`
+      });
+      let subtitle = h.span(
+        {className: 'jp-About-subtitle'},
+        previewMessage
+      );
+
+      let body = VirtualDOM.realize(h.div({ className: 'jp-About' },
+        logo,
+        subtitle
+      ));
+      showDialog({
+        title: `About ${info.name}`,
+        body,
+        buttons: [Dialog.okButton()]
+      });
+    }
+  });
+
+  commands.addCommand(CommandIDs.open, {
     label: args => args['text'] as string,
     execute: args => {
       const url = args['url'] as string;
@@ -221,7 +253,9 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     execute: () => { window.open(PageConfig.getBaseUrl() + 'tree'); }
   });
 
-  RESOURCES.forEach(args => { palette.addItem({ args, command, category }); });
+  RESOURCES.forEach(args => {
+    palette.addItem({ args, command: CommandIDs.open, category });
+  });
   palette.addItem({ command: 'statedb:clear', category });
   palette.addItem({ command: CommandIDs.launchClassic, category });
 
