@@ -1071,6 +1071,48 @@ describe('kernel', () => {
         });
       });
 
+      it('should handle display_id messages', () => {
+        let options: KernelMessage.IExecuteRequest = {
+          code: 'test',
+          silent: false,
+          store_history: true,
+          user_expressions: {},
+          allow_stdin: false,
+          stop_on_error: false
+        };
+        let called0 = false;
+        let called1 = false;
+        let future0 = kernel.requestExecute(options, false);
+
+        tester.onMessage((msg) => {
+          if (msg.channel === 'shell') {
+            // send a reply
+            msg.parent_header = msg.header;
+            msg.channel = 'shell';
+            tester.send(msg);
+        }
+
+        future0.onReply = () => {
+          // trigger onIOPub with a 'display_data' message
+          msg.channel = 'iopub';
+          msg.header.msg_type = 'stream';
+          msg.content = { 'name': 'stdout', 'text': 'foo' };
+          tester.send(msg);
+        };
+
+        future0.onIOPub = () => {
+          if (msg.header.msg_type === 'display_data') {
+            called0 = true;
+          } else if (msg.header.msg_type === 'update_display_data') {
+            // trigger onDone
+            msg.header.msg_type = 'status';
+            (msg as KernelMessage.IStatusMsg).content.execution_state = 'idle';
+            tester.send(msg);
+          }
+        };
+
+      });
+
     });
 
     context('#registerMessageHook()', () => {
