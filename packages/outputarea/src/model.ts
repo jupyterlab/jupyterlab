@@ -68,6 +68,11 @@ interface IOutputAreaModel extends IDisposable {
   add(output: nbformat.IOutput): number;
 
   /**
+   * Set the value at the specified index.
+   */
+  set(index: number, output: nbformat.IOutput): void;
+
+  /**
    * Clear all of the output.
    *
    * @param wait - Delay clearing the output until the next message is added.
@@ -253,6 +258,16 @@ class OutputAreaModel implements IOutputAreaModel {
   }
 
   /**
+   * Set the value at the specified index.
+   */
+  set(index: number, value: nbformat.IOutput): void {
+    // Normalize stream data.
+    this._normalize(value);
+    let item = this._createItem({ value, trusted: this._trusted });
+    this.list.set(index, item);
+  }
+
+  /**
    * Add an output, which may be combined with previous output.
    *
    * #### Notes
@@ -308,12 +323,8 @@ class OutputAreaModel implements IOutputAreaModel {
   private _add(value: nbformat.IOutput): number {
     let trusted = this._trusted;
 
-    // Normalize stream data.
-    if (nbformat.isStream(value)) {
-      if (Array.isArray(value.text)) {
-        value.text = (value.text as string[]).join('\n');
-      }
-    }
+    // Normalize the value.
+    this._normalize(value);
 
     // Consolidate outputs if they are stream outputs of the same kind.
     if (nbformat.isStream(value) && this._lastStream &&
@@ -344,6 +355,17 @@ class OutputAreaModel implements IOutputAreaModel {
 
     // Add the item to our list and return the new length.
     return this.list.push(item);
+  }
+
+  /**
+   * Normalize an output.
+   */
+  private _normalize(value: nbformat.IOutput): void {
+    if (nbformat.isStream(value)) {
+      if (Array.isArray(value.text)) {
+        value.text = (value.text as string[]).join('\n');
+      }
+    }
   }
 
   protected clearNext = false;
