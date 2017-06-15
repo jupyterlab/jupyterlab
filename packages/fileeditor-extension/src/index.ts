@@ -123,8 +123,8 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
    */
   function updateTracker(): void {
     tracker.forEach(widget => {
-      widget.editor.lineNumbers = lineNumbers;
-      widget.editor.wordWrap = wordWrap;
+      widget.editor.setOption('lineNumbers', lineNumbers);
+      widget.editor.setOption('wordWrap', wordWrap);
     });
   }
 
@@ -144,22 +144,24 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
     // Notify the instance tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => { tracker.save(widget); });
     tracker.add(widget);
-    widget.editor.lineNumbers = lineNumbers;
-    widget.editor.wordWrap = wordWrap;
+    widget.editor.setOption('lineNumbers', lineNumbers);
+    widget.editor.setOption('wordWrap', wordWrap);
   });
   registry.addWidgetFactory(factory);
 
   // Handle the settings of new widgets.
   tracker.widgetAdded.connect((sender, widget) => {
     const editor = widget.editor;
-    editor.lineNumbers = lineNumbers;
-    editor.wordWrap = wordWrap;
+    editor.setOption('lineNumbers', lineNumbers);
+    editor.setOption('wordWrap', wordWrap);
   });
 
   commands.addCommand(CommandIDs.lineNumbers, {
     execute: () => {
       lineNumbers = !lineNumbers;
-      tracker.forEach(widget => { widget.editor.lineNumbers = lineNumbers; });
+      tracker.forEach(widget => {
+        widget.editor.setOption('lineNumbers', lineNumbers);
+      });
       return settingRegistry.set(id, 'lineNumbers', lineNumbers);
     },
     isEnabled: hasWidget,
@@ -170,7 +172,9 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   commands.addCommand(CommandIDs.wordWrap, {
     execute: () => {
       wordWrap = !wordWrap;
-      tracker.forEach(widget => { widget.editor.wordWrap = wordWrap; });
+      tracker.forEach(widget => {
+        widget.editor.setOption('wordWrap', wordWrap);
+      });
       return settingRegistry.set(id, 'wordWrap', wordWrap);
     },
     isEnabled: hasWidget,

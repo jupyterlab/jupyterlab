@@ -702,10 +702,10 @@ namespace NotebookActions {
       return;
     }
     let state = Private.getState(widget);
-    let lineNumbers = widget.activeCell.editor.lineNumbers;
+    let lineNumbers = widget.activeCell.editor.getOption('lineNumbers');
     each(widget.widgets, child => {
       if (widget.isSelected(child)) {
-        child.editor.lineNumbers = !lineNumbers;
+        child.editor.setOption('lineNumbers', !lineNumbers);
       }
     });
     Private.handleState(widget, state);
@@ -726,9 +726,9 @@ namespace NotebookActions {
       return;
     }
     let state = Private.getState(widget);
-    let lineNumbers = widget.activeCell.editor.lineNumbers;
+    let lineNumbers = widget.activeCell.editor.getOption('lineNumbers');
     each(widget.widgets, child => {
-      child.editor.lineNumbers = !lineNumbers;
+      child.editor.setOption('lineNumbers', !lineNumbers);
     });
     Private.handleState(widget, state);
   }

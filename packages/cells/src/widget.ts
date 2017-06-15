@@ -301,7 +301,7 @@ class Cell extends Widget {
       return;
     }
     // Handle read only state.
-    this.editor.readOnly = this._readOnly;
+    this.editor.setOption('readOnly', this._readOnly);
     this.toggleClass(READONLY_CLASS, this._readOnly);
   }
 
@@ -480,7 +480,7 @@ class CodeCell extends Cell {
     let model = this.model;
 
     // Code cells should not wrap lines.
-    this.editor.wordWrap = false;
+    this.editor.setOption('wordWrap', false);
 
     // Insert the output before the cell footer.
     let outputWrapper = this._outputWrapper = new Panel();
@@ -670,7 +670,7 @@ class MarkdownCell extends Cell {
     super(options);
     this.addClass(MARKDOWN_CELL_CLASS);
     this._rendermime = options.rendermime;
-    this.editor.wordWrap = true;
+    this.editor.setOption('wordWrap', true);
 
     // Throttle the rendering rate of the widget.
     this._monitor = new ActivityMonitor({
