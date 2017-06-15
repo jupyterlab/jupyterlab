@@ -96,7 +96,7 @@ describe('renderers', () => {
         let mimeType = 'application/vnd.jupyter.console-text';
         let model = createModel(mimeType, source);
         let widget = t.render({ mimeType, model, sanitizer });
-        expect(widget.node.innerHTML).to.be('<pre>There is no text but <span style="color:rgb(0, 255, 0);background-color:rgb(187, 0, 0)">text</span>.\nWoo.</pre>');
+        expect(widget.node.innerHTML).to.be('<pre>There is no text but <span class="ansi-bright-green-fg ansi-red-bg">text</span>.\nWoo.</pre>');
       });
 
       it('should escape inline html', () => {
@@ -105,7 +105,7 @@ describe('renderers', () => {
         let mimeType = 'application/vnd.jupyter.console-text';
         let model = createModel(mimeType, source);
         let widget = t.render({ mimeType, model, sanitizer });
-        expect(widget.node.innerHTML).to.be('<pre>There is no text &lt;script&gt;window.x=1&lt;/script&gt; but <span style="color:rgb(0, 255, 0);background-color:rgb(187, 0, 0)">text</span>.\nWoo.</pre>');
+        expect(widget.node.innerHTML).to.be('<pre>There is no text &lt;script&gt;window.x=1&lt;/script&gt; but <span class="ansi-bright-green-fg ansi-red-bg">text</span>.\nWoo.</pre>');
       });
 
     });

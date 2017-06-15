@@ -259,7 +259,7 @@ class RenderedText extends Widget {
     let source = Private.getSource(options);
     let data = escape_for_html(source);
     let pre = document.createElement('pre');
-    pre.innerHTML = ansi_to_html(data);
+    pre.innerHTML = ansi_to_html(data, {use_classes: true});
     this.node.appendChild(pre);
     this.addClass(TEXT_CLASS);
     if (options.mimeType === 'application/vnd.jupyter.stderr') {
