@@ -121,22 +121,22 @@ const DRAG_IMAGE_CLASS = 'jp-dragImage';
 /**
  * The class name added to singular drag images
  */
-const SINGLE_DRAG_IMAGE_CLASS = 'jp-dragImageSinglePrompt';
+const SINGLE_DRAG_IMAGE_CLASS = 'jp-dragImage-singlePrompt';
 
 /**
  * The class name added to the drag image cell content.
  */
-const CELL_DRAG_CONTENT_CLASS = 'jp-cellDragContent';
+const CELL_DRAG_CONTENT_CLASS = 'jp-dragImage-content';
 
 /**
  * The class name added to the drag image cell content.
  */
-const CELL_DRAG_PROMPT_CLASS = 'jp-cellDragPrompt';
+const CELL_DRAG_PROMPT_CLASS = 'jp-dragImage-prompt';
 
 /**
  * The class name added to the drag image cell content.
  */
-const CELL_DRAG_MULTIPLE_BACK = 'jp-cellDragMultipleBack';
+const CELL_DRAG_MULTIPLE_BACK = 'jp-dragImage-multipleBack';
 
 /**
  * The mimetype used for Jupyter cell data.
@@ -1337,21 +1337,20 @@ class Notebook extends StaticNotebook {
     });
     let activeCell = this.activeCell;
     let dragImage: HTMLElement = null;
+    let countString: string;
     if (activeCell.model.type === 'code') {
       let executionCount = (activeCell.model as ICodeCellModel).executionCount;
-      let countString: string;
+      countString = ' ';
       if (executionCount) {
         countString = executionCount.toString();
-      } else {
-        countString = '';
       }
-      // Create the drag image.
-      dragImage = Private.createDragImage(selected.length, countString, activeCell.model.value.text.split('\n')[0].slice(0,26));
     }
     else {
-      // Create the drag image.
-      dragImage = Private.createDragImage(selected.length, '', activeCell.model.value.text.split('\n')[0].slice(0,26));
+      countString = '';
     }
+    // Create the drag image.
+    dragImage = Private.createDragImage(selected.length, countString, activeCell.model.value.text.split('\n')[0].slice(0,26));
+
     // Set up the drag event.
     this._drag = new Drag({
       mimeData: new MimeData(),

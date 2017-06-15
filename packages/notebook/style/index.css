@@ -158,12 +158,12 @@
 }
 
 
-.jp-dragImageSinglePrompt {
+.jp-dragImage-singlePrompt {
   box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.12);
 }
 
 
-.jp-dragImage .jp-cellDragContent {
+.jp-dragImage .jp-dragImage-content {
     z-index: 2;
     position: absolute;
     left: 52px;
@@ -180,7 +180,7 @@
     text-align: left;
 }
 
-.jp-dragImage .jp-cellDragPrompt {
+.jp-dragImage .jp-dragImage-prompt {
   position: absolute;
   top: 4px;
   left: 10px;
@@ -193,7 +193,7 @@
   border: var(--jp-border-width) solid transparent;
 }
 
-.jp-cellDragMultipleBack {
+.jp-dragImage-multipleBack {
   z-index: -1;
   position: absolute;
   height: 34px;
