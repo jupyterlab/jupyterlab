@@ -708,7 +708,7 @@ class DefaultKernel implements Kernel.IKernel {
       case 'display_data':
       case 'update_display_data':
       case 'execute_result':
-        // display_data messages may re-route based on their display_id
+        // display_data messages may re-route based on their display_id.
         let transient = (msg.content.transient || {}) as JSONObject;
         let displayId = transient['display_id'] as string;
         if (displayId) {
@@ -764,7 +764,7 @@ class DefaultKernel implements Kernel.IKernel {
     let parentIds = this._displayIdToParentIds.get(displayId);
     if (parentIds) {
       // We've seen it before, update existing outputs with same display_id
-      // by handling display_data as update_display_data
+      // by handling display_data as update_display_data.
       let updateMsg: KernelMessage.IMessage = {
         header: JSONExt.deepCopy(msg.header) as KernelMessage.IHeader,
         parent_header: JSONExt.deepCopy(msg.parent_header)  as KernelMessage.IHeader,
@@ -789,8 +789,8 @@ class DefaultKernel implements Kernel.IKernel {
       return true;
     }
 
-    // regular display_data with id, record it for future updating
-    // in _display_id_to_parent_ids for future lookup
+    // Regular display_data with id, record it for future updating
+    // in _displayIdToParentIds for future lookup.
     parentIds = this._displayIdToParentIds.get(displayId) || [];
     if (parentIds.indexOf(msgId) === -1) {
       parentIds.push(msgId);
