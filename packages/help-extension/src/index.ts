@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, IFrame, IMainMenu, InstanceTracker, showDialog
+  Dialog, ICommandPalette, IFrame, IMainMenu, InstanceTracker, showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -16,6 +16,10 @@ import {
 import {
   Message
 } from '@phosphor/messaging';
+
+import {
+  h, VirtualDOM
+} from '@phosphor/virtualdom';
 
 import {
   Menu
@@ -204,8 +208,23 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   commands.addCommand(CommandIDs.about, {
     label: `About ${info.name}`,
     execute: () => {
+      let previewMessage = `alpha (v${info.version})`;
+      let logo = h.span({
+        className: `jp-ImageJupyterLab jp-About-logo`
+      });
+      let subtitle = h.span(
+        {className: 'jp-About-subtitle'},
+        previewMessage
+      );
+
+      let body = VirtualDOM.realize(h.div({ className: 'jp-About' },
+        logo,
+        subtitle
+      ));
       showDialog({
         title: `About ${info.name}`,
+        body,
+        buttons: [Dialog.okButton()]
       });
     }
   });
