@@ -562,7 +562,7 @@ class CodeCell extends Cell {
   protected onStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
     switch (args.name) {
     case 'executionCount':
-      this.setPrompt(`${(model as ICodeCellModel).executionCount}`);
+      this.setPrompt(`${(model as ICodeCellModel).executionCount} || ''`);
       break;
     default:
       break;
