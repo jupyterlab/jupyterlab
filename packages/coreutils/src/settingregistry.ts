@@ -40,6 +40,16 @@ const copy = JSONExt.deepCopy;
  */
 export
 interface ISchemaValidator {
+  /**
+   * Validate a data object against a JSON schema.
+   *
+   * @param schema - The JSON schema.
+   *
+   * @param data - The data being validated.
+   *
+   * @returns A promise that resolves with void if successful and rejects with a
+   * list of errors if either the schema or data fails to validate.
+   */
   validate(schema: JSONObject, data: JSONObject): Promise<void | Ajv.ErrorObject[]>;
 }
 
@@ -210,7 +220,20 @@ export
 interface ISettingRegistry extends SettingRegistry {}
 
 
+/**
+ * The default implementation of a schema validator.
+ */
 class DefaultSchemaValidator implements ISchemaValidator {
+  /**
+   * Validate a data object against a JSON schema.
+   *
+   * @param schema - The JSON schema.
+   *
+   * @param data - The data being validated.
+   *
+   * @returns A promise that resolves with void if successful and rejects with a
+   * list of errors if either the schema or data fails to validate.
+   */
   validate(schema: JSONObject, data: JSONObject): Promise<void | Ajv.ErrorObject[]> {
     try {
       const validate = this._validator.compile(schema);
