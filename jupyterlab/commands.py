@@ -85,6 +85,10 @@ def install_extension(extension, app_dir=None):
         msg = '%s is not a valid JupyterLab extension' % extension
         raise ValueError(msg)
 
+    ext_path = pjoin(app_dir, 'extensions', fname)
+    if os.path.exists(ext_path):
+        os.remove(ext_path)
+
     shutil.move(pjoin(target, fname), pjoin(app_dir, 'extensions'))
     shutil.rmtree(target)
 
@@ -210,7 +214,12 @@ def should_build(app_dir=None):
 
     # Look for mismatched extension paths.
     for name in extensions:
-        if data['dependencies'][name] != staging_data['dependencies'][name]:
+        path = data['dependencies'][name]
+        if path.startswith('file:'):
+            path = path.replace('file:', '')
+            path = os.path.abspath(pjoin(app_dir, 'staging', path))
+
+        if path != staging_data['dependencies'][name]:
             return True, 'Installed extensions changed'
 
     return False, ''
@@ -403,7 +412,7 @@ def build(app_dir=None, name=None, version=None):
 
     # Install the linked extensions.
     for path in _get_linked_packages(app_dir).values():
-        run(['npm', 'install', path], cwd=staging)
+        install_extension(path, app_dir)
 
     # Build the app.
     run(['npm', 'run', 'build'], cwd=staging)
