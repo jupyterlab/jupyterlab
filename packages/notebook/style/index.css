@@ -199,7 +199,7 @@
 }
 
 
-.jp-ActiveCellTool .jp-Cell-prompt {
+.jp-ActiveCellTool .jp-InputArea-prompt {
   flex: 0 0 auto;
   padding-left: 0px;
 }
