@@ -3,6 +3,12 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+
+/*-----------------------------------------------------------------------------
+| RenderedText
+|----------------------------------------------------------------------------*/
+
+
 .jp-RenderedText {
   text-align: left;
   padding-left: var(--jp-code-padding);
@@ -20,10 +26,52 @@
   overflow-y: auto;
 }
 
+/* ansi_up creates classed spans for console foregrounds and backgrounds. */
+.jp-RenderedText pre .ansi-black-fg { color: #3E424D; }
+.jp-RenderedText pre .ansi-red-fg { color: #E75C58; }
+.jp-RenderedText pre .ansi-green-fg { color: #00A250; }
+.jp-RenderedText pre .ansi-yellow-fg { color: #DDB62B; }
+.jp-RenderedText pre .ansi-blue-fg { color: #208FFB; }
+.jp-RenderedText pre .ansi-magenta-fg { color: #D160C4; }
+.jp-RenderedText pre .ansi-cyan-fg { color: #60C6C8; }
+.jp-RenderedText pre .ansi-white-fg { color: #C5C1B4; }
+
+.jp-RenderedText pre .ansi-black-bg { background-color: #3E424D; }
+.jp-RenderedText pre .ansi-red-bg { background-color: #E75C58; }
+.jp-RenderedText pre .ansi-green-bg { background-color: #00A250; }
+.jp-RenderedText pre .ansi-yellow-bg { background-color: #DDB62B; }
+.jp-RenderedText pre .ansi-blue-bg { background-color: #208FFB; }
+.jp-RenderedText pre .ansi-magenta-bg { background-color: #D160C4; }
+.jp-RenderedText pre .ansi-cyan-bg { background-color: #60C6C8; }
+.jp-RenderedText pre .ansi-white-bg { background-color: #C5C1B4; }
+
+.jp-RenderedText pre .ansi-bright-black-fg { color: #282C36; }
+.jp-RenderedText pre .ansi-bright-red-fg { color: #B22B31; }
+.jp-RenderedText pre .ansi-bright-green-fg { color: #007427; }
+.jp-RenderedText pre .ansi-bright-yellow-fg { color: #B27D12; }
+.jp-RenderedText pre .ansi-bright-blue-fg { color: #0065CA; }
+.jp-RenderedText pre .ansi-bright-magenta-fg { color: #A03196; }
+.jp-RenderedText pre .ansi-bright-cyan-fg { color: #258F8F; }
+.jp-RenderedText pre .ansi-bright-white-fg { color: #A1A6B2; }
+
+.jp-RenderedText pre .ansi-bright-black-bg { background-color: #282C36; }
+.jp-RenderedText pre .ansi-bright-red-bg { background-color: #B22B31; }
+.jp-RenderedText pre .ansi-bright-green-bg { background-color: #007427; }
+.jp-RenderedText pre .ansi-bright-yellow-bg { background-color: #B27D12; }
+.jp-RenderedText pre .ansi-bright-blue-bg { background-color: #0065CA; }
+.jp-RenderedText pre .ansi-bright-magenta-bg { background-color: #A03196; }
+.jp-RenderedText pre .ansi-bright-cyan-bg { background-color: #258F8F; }
+.jp-RenderedText pre .ansi-bright-white-bg { background-color: #A1A6B2; }
+
 
 .jp-RenderedText.jp-mod-error {
   background: #fdd;
 }
+
+
+/*-----------------------------------------------------------------------------
+| RenderedLatex
+|----------------------------------------------------------------------------*/
 
 
 .jp-RenderedLatex {
@@ -31,6 +79,11 @@
   font-size: var(--jp-content-font-size);
   line-height: var(--jp-content-line-height);
 }
+
+
+/*-----------------------------------------------------------------------------
+| RenderedHTML
+|----------------------------------------------------------------------------*/
 
 
 .jp-RenderedHTMLCommon {
