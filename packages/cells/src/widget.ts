@@ -479,6 +479,9 @@ class CodeCell extends Cell {
     let contentFactory = this.contentFactory;
     let model = this.model;
 
+    // Code cells should not wrap lines.
+    this.editor.wordWrap = false;
+
     // Insert the output before the cell footer.
     let outputWrapper = this._outputWrapper = new Panel();
     outputWrapper.addClass(CELL_OUTPUT_WRAPPER_CLASS);
