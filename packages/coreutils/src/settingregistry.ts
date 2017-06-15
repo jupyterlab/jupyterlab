@@ -39,7 +39,9 @@ const copy = JSONExt.deepCopy;
  * An implementation of a schema validator.
  */
 export
-interface ISchemaValidator {}
+interface ISchemaValidator {
+  validate(schema: JSONObject, data: JSONObject): Promise<void | Ajv.ErrorObject[]>;
+}
 
 
 /* tslint:disable */
@@ -209,10 +211,33 @@ interface ISettingRegistry extends SettingRegistry {}
 
 
 class DefaultSchemaValidator implements ISchemaValidator {
-  constructor() {
-    const validator = new Ajv();
-    console.log('validator', validator);
+  validate(schema: JSONObject, data: JSONObject): Promise<void | Ajv.ErrorObject[]> {
+    try {
+      const validate = this._validator.compile(schema);
+      const result = validate(data);
+      const { errors } = validate;
+
+      if (typeof result === 'boolean') {
+        return result ? Promise.resolve(void 0) : Promise.resolve(errors);
+      } else {
+        const resolve = () => { /* no op */ };
+        const reject = (errors: Ajv.ErrorObject[]): Promise<void> => {
+          return Promise.reject(errors);
+        };
+
+        // The Ajv promise implementation doesn't use `Promise`, so it needs to
+        // be wrapped in a true `Promise` instance here.
+        return new Promise<void | Ajv.ErrorObject[]>(() => {
+          result.then(resolve, reject);
+        });
+      }
+    } catch (error) {
+      console.error('Schema validation failed.', error);
+      return Promise.reject([error]);
+    }
   }
+
+  private _validator = new Ajv();
 }
 
 /**
