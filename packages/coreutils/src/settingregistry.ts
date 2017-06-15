@@ -24,6 +24,18 @@ import {
 } from '.';
 
 
+/* tslint:disable */
+/**
+ * The schema for settings.
+ */
+const SCHEMA = {
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$id": "http://jupyter.org/settings/0.1.0/schema#",
+  "title": "Jupyter Settings/Preferences Schema",
+  "type": "object"
+};
+/* tslint:enable */
+
 /**
  * The default level that is used when level is unspecified in a request.
  */
@@ -225,6 +237,13 @@ interface ISettingRegistry extends SettingRegistry {}
  */
 class DefaultSchemaValidator implements ISchemaValidator {
   /**
+   * Instantiate a schema validator.
+   */
+  constructor() {
+    console.log('main schema', SCHEMA);
+  }
+
+  /**
    * Validate a data object against a JSON schema.
    *
    * @param schema - The JSON schema.
@@ -242,13 +261,13 @@ class DefaultSchemaValidator implements ISchemaValidator {
 
       if (typeof result === 'boolean') {
         return result ? Promise.resolve(void 0) : Promise.resolve(errors);
-      } else {
-        // The Ajv promise implementation uses `Thenable` instead of `Promise`,
-        // so it needs to be wrapped in a true `Promise` instance here.
-        return new Promise<void | Ajv.ErrorObject[]>((resolve, reject) => {
-          result.then(resolve, reject);
-        });
       }
+
+      // The Ajv promise implementation uses `Thenable` instead of `Promise`,
+      // so it needs to be wrapped in a true `Promise` instance here.
+      return new Promise<void | Ajv.ErrorObject[]>((resolve, reject) => {
+        result.then(resolve, reject);
+      });
     } catch (error) {
       console.error('Schema validation failed.', error);
       return Promise.reject([error]);
@@ -298,30 +317,6 @@ class SettingRegistry {
 
     return Object.keys(plugins)
       .map(p => copy(plugins[p]) as ISettingRegistry.IPlugin);
-  }
-
-  /**
-   * Annotate a plugin or a setting item for places where it might be displayed.
-   *
-   * @param plugin - The name of the plugin whose setting is being annotated.
-   *
-   * @param key - The name of the key being annotated. If `null` or empty, the
-   * annotation will be applied at the plugin level.
-   *
-   * @param annotation - The annotation describing a plugin or a setting.
-   */
-  annotate(plugin: string, key: string, annotation: ISettingRegistry.IAnnotation): void {
-    if (!this._annotations[plugin]) {
-      this._annotations[plugin] = { annotation: null, keys: { } };
-    }
-
-    if (key) {
-      this._annotations[plugin].keys[key] = annotation;
-    } else {
-      this._annotations[plugin].annotation = annotation;
-    }
-
-    this._pluginChanged.emit(plugin);
   }
 
   /**
@@ -548,18 +543,6 @@ class Settings implements ISettingRegistry.ISettings {
    * The system registry instance used by the settings manager.
    */
   readonly registry: SettingRegistry;
-
-  /**
-   * Annotate a plugin or a setting item for places where it might be displayed.
-   *
-   * @param key - The name of the key being annotated. If `null` or empty, the
-   * annotation will be applied at the plugin level.
-   *
-   * @param annotation - The annotation describing a plugin or a setting.
-   */
-  annotate(key: string, annotation: ISettingRegistry.IAnnotation): void {
-    this.registry.annotate(this.plugin, key, annotation);
-  }
 
   /**
    * Dispose of the plugin settings resources.
