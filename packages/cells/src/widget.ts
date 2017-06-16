@@ -185,6 +185,8 @@ class Cell extends Widget {
     inputWrapper.addWidget(input);
     (this.layout as PanelLayout).addWidget(inputWrapper);
 
+    this._inputPlaceholder = new Widget();
+
     // Footer
     let footer = this._footer = this.contentFactory.createCellFooter();
     footer.addClass(CELL_FOOTER_CLASS);
@@ -255,11 +257,22 @@ class Cell extends Widget {
   /**
    * The view state of input being collapsed.
    */
-  get inputCollapsed(): boolean {
-    return this._inputCollapsed;
+  get sourceHidden(): boolean {
+    return this._sourceHidden;
   }
-  set inputCollapsed(value: boolean) {
-    this._inputCollapsed = value;
+  set sourceHidden(value: boolean) {
+    if (this._sourceHidden === value) {
+      return;
+    }
+    let layout = this.layout as PanelLayout;
+    if (value) {
+      layout.removeWidget(this._input);
+      layout.addWidget(this._inputPlaceholder);
+    } else {
+      layout.removeWidget(this._inputPlaceholder);
+      layout.addWidget(this._input);
+    }
+    this._sourceHidden = value;
   }
 
   /**
@@ -276,6 +289,7 @@ class Cell extends Widget {
     this._footer = null;
     this._inputCollapser = null;
     this._inputWrapper = null;
+    this._inputPlaceholder = null;
     super.dispose();
   }
 
@@ -306,13 +320,14 @@ class Cell extends Widget {
   }
 
   private _readOnly = false;
-  private _inputCollapsed = false;
+  private _sourceHidden = false;
   private _input: InputArea = null;
   private _model: ICellModel = null;
   private _header: ICellHeader = null;
   private _footer: ICellFooter = null;
   private _inputCollapser: ICollapser = null;
   private _inputWrapper: Widget = null;
+  private _inputPlaceholder: Widget = null;
 
 }
 
@@ -896,7 +911,7 @@ interface ICollapser extends Widget {}
  * Default implementation of the collapser.
  */
 export
-class Collapser extends Widget {
+class Collapser extends Widget implements ICollapser {
   constructor() {
     super();
   }
