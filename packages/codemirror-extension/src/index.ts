@@ -91,9 +91,7 @@ export default plugins;
 function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB, settingRegistry: ISettingRegistry): void {
   const { commands, restored } = app;
   const { id } = commandsPlugin;
-  let theme: string = CodeMirrorEditor.DEFAULT_THEME;
-  let keyMap: string = 'default';
-  let matchBrackets = false;
+  let { theme, keyMap, matchBrackets } = CodeMirrorEditor.defaultConfig;
 
   // Annotate the plugin settings.
   settingRegistry.annotate(id, '', {
@@ -184,7 +182,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     commands.addCommand(CommandIDs.changeTheme, {
       label: args => args['theme'] as string,
       execute: args => {
-        theme = args['theme'] as string || CodeMirrorEditor.DEFAULT_THEME;
+        theme = args['theme'] as string || theme;
         tracker.forEach(widget => {
           if (widget.editor instanceof CodeMirrorEditor) {
             let cm = widget.editor.editor;
@@ -203,7 +201,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
         return title === 'sublime' ? 'Sublime Text' : title;
       },
       execute: args => {
-        keyMap = args['keyMap'] as string || 'default';
+        keyMap = args['keyMap'] as string || keyMap;
         tracker.forEach(widget => {
           if (widget.editor instanceof CodeMirrorEditor) {
             let cm = widget.editor.editor;
@@ -251,8 +249,8 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
         let editor = widget.editor as CodeMirrorEditor;
         let size = args['size'] as number || 4;
         let tabs = !!args['tabs'];
-        editor.editor.setOption('indentWithTabs', tabs);
-        editor.editor.setOption('indentUnit', size);
+        editor.setOption('insertSpaces', !tabs);
+        editor.setOption('tabSize', size);
       },
       isEnabled: hasWidget,
       isToggled: args => {
@@ -263,10 +261,10 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
         let tabs = !!args['tabs'];
         let size = args['size'] as number || 4;
         let editor = widget.editor as CodeMirrorEditor;
-        if (editor.editor.getOption('indentWithTabs') !== tabs) {
+        if (editor.getOption('insertSpaces') === tabs) {
           return false;
         }
-        return editor.editor.getOption('indentUnit') === size;
+        return editor.getOption('tabSize') === size;
       }
     });
 
