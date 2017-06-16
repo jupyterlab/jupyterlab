@@ -306,13 +306,11 @@ class PluginList extends Widget {
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    const annotations = this.registry.annotations;
     const plugins = Private.sortPlugins(this.registry.plugins);
 
     this.node.textContent = '';
     plugins.forEach(plugin => {
-      const id = plugin.id;
-      const item = Private.createListItem(plugin, annotations[id] || null);
+      const item = Private.createListItem(plugin, null);
 
       if (plugin.id === this._selection) {
         item.classList.add(SELECTED_CLASS);

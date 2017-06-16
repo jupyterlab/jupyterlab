@@ -292,17 +292,6 @@ class SettingRegistry {
   }
 
   /**
-   * Returns a map of annotation hints for plugins in the registry.
-   */
-  get annotations(): { [plugin: string]: ISettingRegistry.IPluginAnnotations } {
-    const annotations = this._annotations;
-
-    return copy(annotations) as {
-      [plugin: string]: ISettingRegistry.IPluginAnnotations
-    };
-  }
-
-  /**
    * A signal that emits the name of a plugin when its settings change.
    */
   get pluginChanged(): ISignal<this, string> {
