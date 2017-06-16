@@ -12,7 +12,7 @@ environment:
 
 # build cache to preserve files/folders between builds
 cache:
-  - node_modules # NPM packages
+  - '%APPDATA%\npm-cache'  # npm cache
 
 # scripts that run after cloning repository
 install:
