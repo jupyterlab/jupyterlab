@@ -32,7 +32,6 @@ class CodeMirrorEditorFactory implements IEditorFactoryService {
         'Cmd-/': 'toggleComment',
         'Ctrl-/': 'toggleComment',
       },
-      lineNumbers: false,
       ...defaults
     };
     this.documentCodeMirrorOptions = {
@@ -41,6 +40,7 @@ class CodeMirrorEditorFactory implements IEditorFactoryService {
         'Tab': 'indentMore',
         'Shift-Enter': () => { /* no-op */ }
       },
+      lineNumbers: true,
       ...defaults
     };
   }

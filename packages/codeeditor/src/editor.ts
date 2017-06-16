@@ -583,7 +583,7 @@ namespace CodeEditor {
    */
   export
   let defaultConfig: IConfig = {
-    lineNumbers: true,
+    lineNumbers: false,
     wordWrap: true,
     readOnly: false,
     tabSize: 4,
