@@ -6,7 +6,6 @@ addons:
   firefox: latest
 cache:
   directories:
-    - node_modules
     - $HOME/.npm
 env:
   matrix:
