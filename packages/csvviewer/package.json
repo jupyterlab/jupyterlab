@@ -17,6 +17,7 @@
     "@jupyterlab/coreutils": "^0.7.0",
     "@jupyterlab/docregistry": "^0.7.0",
     "@phosphor/algorithm": "^1.1.1",
+    "@phosphor/datagrid": "^0.1.1",
     "@phosphor/messaging": "^1.2.1",
     "@phosphor/signaling": "^1.2.1",
     "@phosphor/virtualdom": "^1.1.1",
@@ -25,7 +26,6 @@
     "d3-dsv": "^1.0.5"
   },
   "devDependencies": {
-    "@phosphor/datagrid": "^0.1.1",
     "rimraf": "^2.5.2",
     "typescript": "^2.2.1"
   },
