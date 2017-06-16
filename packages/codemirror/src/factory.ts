@@ -18,8 +18,9 @@ class CodeMirrorEditorFactory implements IEditorFactoryService {
   /**
    * Construct an IEditorFactoryService for CodeMirrorEditors.
    */
-  constructor(defaults: Partial<CodeMirrorEditor.IOptions> = {}) {
+  constructor(defaults: Partial<CodeMirrorEditor.IConfig> = {}) {
     this.inlineCodeMirrorOptions = {
+      ...CodeMirrorEditor.defaultConfig,
       extraKeys: {
         'Cmd-Right': 'goLineRight',
         'End': 'goLineRight',
@@ -31,15 +32,15 @@ class CodeMirrorEditorFactory implements IEditorFactoryService {
         'Cmd-/': 'toggleComment',
         'Ctrl-/': 'toggleComment',
       },
+      lineNumbers: false,
       ...defaults
     };
     this.documentCodeMirrorOptions = {
+      ...CodeMirrorEditor.defaultConfig,
       extraKeys: {
         'Tab': 'indentMore',
         'Shift-Enter': () => { /* no-op */ }
       },
-      lineNumbers: true,
-      lineWrapping: true,
       ...defaults
     };
   }
@@ -58,7 +59,7 @@ class CodeMirrorEditorFactory implements IEditorFactoryService {
     return new CodeMirrorEditor({...this.documentCodeMirrorOptions, ...options});
   }
 
-  protected inlineCodeMirrorOptions: Partial<CodeMirrorEditor.IOptions>;
-  protected documentCodeMirrorOptions: Partial<CodeMirrorEditor.IOptions>;
+  protected inlineCodeMirrorOptions: Partial<CodeMirrorEditor.IConfig>;
+  protected documentCodeMirrorOptions: Partial<CodeMirrorEditor.IConfig>;
 
 }
