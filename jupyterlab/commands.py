@@ -18,7 +18,7 @@ import shutil
 import sys
 import tarfile
 from jupyter_core.paths import ENV_JUPYTER_PATH
-from notebook.extensions import (
+from notebook.nbextensions import (
     GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 )
 
