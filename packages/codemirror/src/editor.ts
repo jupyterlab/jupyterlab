@@ -95,7 +95,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
 
     let model = this._model = options.model;
     let editor = this._editor = CodeMirror(host, {});
-    Private.handleConfig(editor, options.config);
+    Private.handleConfig(editor, options.config || {});
 
     let doc = editor.getDoc();
 
@@ -892,7 +892,7 @@ namespace CodeMirrorEditor {
     /**
      * The configuration options for the editor.
      */
-    config?: IConfig;
+    config?: Partial<IConfig>;
   }
 
   /**
@@ -949,7 +949,7 @@ namespace CodeMirrorEditor {
      * (it will default to be to the right of all other gutters).
      * These class names are the keys passed to setGutterMarker.
      */
-    gutters?: string[];
+    gutters?: ReadonlyArray<string>;
 
     /**
      * Determines whether the gutter scrolls along with the content
@@ -1003,7 +1003,7 @@ namespace CodeMirrorEditor {
   export
   let defaultConfig: IConfig = {
     ...CodeEditor.defaultConfig,
-    mode: 'null'
+    mode: 'null',
     theme: 'jupyter',
     smartIndent: true,
     electricChars: true,
@@ -1038,34 +1038,18 @@ namespace CodeMirrorEditor {
  */
 namespace Private {
   /**
-   * Handle extra codemirror config from codeeditor options.
-   */
-  export
-  function handleOptions(options: CodeMirrorEditor.IOptions): CodeMirror.EditorConfiguration {
-    let config = {
-      ...options,
-      readOnly: options.readOnly !== undefined ? options.readOnly : false,
-      lineNumbers: options.lineNumbers !== undefined ? options.lineNumbers : false,
-      lineWrapping: options.wordWrap !== undefined ? options.wordWrap : true,
-      theme: options.theme || CodeMirrorEditor.DEFAULT_THEME
-    } as CodeMirror.EditorConfiguration;
-
-    // Remove extra keys.
-    for (let key of ['host', 'model', 'uuid', 'wordWrap', 'selectionStyle']) {
-      if (config.hasOwnProperty(key)) {
-        delete (config as any)[key];
-      }
-    }
-
-    return config;
-  }
-
-  /**
    * Handle the codemirror configuration options.
    */
   export
-  function handleConfig(editor: CodeMirror.Editor, config: CodeMirrorEditor.IConfig): void {
-
+  function handleConfig(editor: CodeMirror.Editor, config: Partial<CodeMirrorEditor.IConfig>): void {
+    config = {
+      ...CodeMirrorEditor.defaultConfig,
+      ...config
+    };
+    for (let key of Object.keys(config)) {
+      let option = key as keyof CodeMirrorEditor.IConfig;
+      Private.setOption(editor, option, config[option]);
+    }
   }
 
   /**
@@ -1110,16 +1094,42 @@ namespace Private {
    * Get a config option for the editor.
    */
   export
-  function getOption<K extends keyof CodeMirrorEditor.IConfig>(editor: CodeMirror.Editor, option: K): IConfig[K] {
-    return undefined;
+  function getOption<K extends keyof CodeMirrorEditor.IConfig>(editor: CodeMirror.Editor, option: K): CodeMirrorEditor.IConfig[K] {
+    switch (option) {
+    case 'wordWrap':
+      return editor.getOption('lineWrapping');
+    case 'insertSpaces':
+      return !editor.getOption('indentWithTabs');
+    case 'autoClosingBrackets':
+      return editor.getOption('autoCloseBrackets');
+    default:
+      return editor.getOption(option);
+    }
   }
 
   /**
    * Set a config option for the editor.
    */
   export
-  function setOption<K extends keyof IConfig>(editor: CodeMirror.Editor, option: K, value: IConfig[K]): void {
-    // no-op
+  function setOption<K extends keyof CodeMirrorEditor.IConfig>(editor: CodeMirror.Editor, option: K, value: CodeMirrorEditor.IConfig[K]): void {
+    switch (option) {
+    case 'wordWrap':
+      editor.setOption('lineWrapping', value);
+      break;
+    case 'tabSize':
+      editor.setOption('indentSize', value);
+      editor.setOption('tabSize', value);
+      break;
+    case 'insertSpaces':
+      editor.setOption('indentWithTabs', !value);
+      break;
+    case 'autoClosingBrackets':
+      editor.setOption('autoCloseBrackets', !value);
+      break;
+    default:
+      editor.setOption(option, value);
+      break;
+    }
   }
 }
 
