@@ -56,7 +56,8 @@ def run(cmd, **kwargs):
     try:
         return check_output(cmd, **kwargs)
     except CalledProcessError as error:
-        logger.info(error.output)
+        output = error.output.decode('utf-8')
+        logger.info(output)
         raise error
 
 
@@ -105,7 +106,7 @@ def install_extension(extension, app_dir=None, logger=None):
 
     # Remove the tarball if the package is not compatible.
     core_data = _get_core_data()
-    deps = data['dependencies']
+    deps = data.get('dependencies', dict())
     errors = _validate_compatibility(extension, deps, core_data)
     if errors:
         shutil.rmtree(target)
@@ -161,7 +162,7 @@ def link_package(path, app_dir=None, logger=None):
         logger.info(msg % data['name'])
 
     core_data = _get_core_data()
-    deps = data['dependencies']
+    deps = data.get('dependencies', dict())
     name = data['name']
     errors = _validate_compatibility(name, deps, core_data)
     if errors:
@@ -259,13 +260,15 @@ def should_build(app_dir=None, logger=None):
     if set(staging_exts) != set(data['jupyterlab']['extensions']):
         return True, 'Installed extensions changed'
 
+    deps = data.get('dependencies', dict())
+
     # Look for mismatched extension paths.
     for name in extensions:
         # Check for dependencies that were rejected as incompatible.
         if name not in staging_data['dependencies']:
             continue
 
-        path = data['dependencies'][name]
+        path = deps[name]
         if path.startswith('file:'):
             path = path.replace('file:', '')
             path = os.path.abspath(pjoin(app_dir, 'staging', path))
@@ -641,7 +644,8 @@ def _ensure_package(app_dir, name=None, version=None, logger=None):
 
     for (key, value) in extensions.items():
         # Reject incompatible extensions with a message.
-        errors = _validate_compatibility(key, value['dependencies'], data)
+        deps = value.get('dependencies', dict())
+        errors = _validate_compatibility(key, deps, data)
         if errors:
             msg = _format_compatibility_errors(key, value['version'], errors)
             logger.warn(msg + '\n')
@@ -710,9 +714,10 @@ def _get_extensions(app_dir):
     sys_path = pjoin(get_app_dir(), 'extensions')
     for target in glob.glob(pjoin(sys_path, '*.tgz')):
         data = _read_package(target)
+        deps = data.get('dependencies', dict())
         extensions[data['name']] = dict(path=os.path.realpath(target),
                                         version=data['version'],
-                                        dependencies=data['dependencies'])
+                                        dependencies=deps)
 
     # Look in app_dir if different
     app_path = pjoin(app_dir, 'extensions')
@@ -721,9 +726,10 @@ def _get_extensions(app_dir):
 
     for target in glob.glob(pjoin(app_path, '*.tgz')):
         data = _read_package(target)
+        deps = data.get('dependencies', dict())
         extensions[data['name']] = dict(path=os.path.realpath(target),
                                         version=data['version'],
-                                        dependencies=data['dependencies'])
+                                        dependencies=deps)
 
     return extensions
 
