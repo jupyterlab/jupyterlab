@@ -59,17 +59,25 @@ class SettingClientDatastore extends StateDB {
  * A namespace for private module data.
  */
 namespace Private {
-  type Schema = JSONObject;
-
+  /* tslint:disable */
   export
-  const schemas: Schema = {
-    'jupyter.services.codemirror-commands': {
-      'jupyter.lab': {
-        'jupyter.services.codemirror-commands': {
-          'iconClass': '',
-          'iconLabel': ''
+  const schemas: JSONObject = {
+    "jupyter.services.codemirror-commands": {
+      "jupyter.services.codemirror-commands": {
+        "title": "CodeMirror",
+        "type": "object",
+        "properties": {
+          "iconClass": {
+            "type": "string",
+            "default": "jp-ImageTextEditor"
+          },
+          "iconLabel": {
+            "type": "string",
+            "default": "CodeMirror"
+          }
         }
       }
     }
   };
+  /* tslint:enable */
 }
