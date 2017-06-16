@@ -25,7 +25,7 @@
     "d3-dsv": "^1.0.5"
   },
   "devDependencies": {
-    "@phosphor/datagrid": "^0.1.0",
+    "@phosphor/datagrid": "^0.1.1",
     "rimraf": "^2.5.2",
     "typescript": "^2.2.1"
   },
