@@ -197,42 +197,6 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
-   * Control the rendering of line numbers.
-   */
-  get lineNumbers(): boolean {
-    return this._editor.getOption('lineNumbers');
-  }
-  set lineNumbers(value: boolean) {
-    this._editor.setOption('lineNumbers', value);
-  }
-
-  /**
-   * Set to false for horizontal scrolling. Defaults to true.
-   */
-  get wordWrap(): boolean {
-    return this._editor.getOption('lineWrapping');
-  }
-  set wordWrap(value: boolean) {
-    this._editor.setOption('lineWrapping', value);
-  }
-
-  /**
-   * Should the editor be read only.
-   */
-  get readOnly(): boolean {
-    return this._editor.getOption('readOnly') !== false;
-  }
-  set readOnly(readOnly: boolean) {
-    this._editor.setOption('readOnly', readOnly);
-    if (readOnly) {
-      this.host.classList.add(READ_ONLY_CLASS);
-    } else {
-      this.host.classList.remove(READ_ONLY_CLASS);
-      this.blur();
-    }
-  }
-
-  /**
    * Returns a model for this editor.
    */
   get model(): CodeEditor.IModel {
@@ -1125,6 +1089,16 @@ namespace Private {
       break;
     case 'autoClosingBrackets':
       editor.setOption('autoCloseBrackets', !value);
+      break;
+    case 'readOnly':
+      let el = editor.getWrapperElement();
+      if (value) {
+        el.classList.add(READ_ONLY_CLASS);
+      } else {
+        el.classList.remove(READ_ONLY_CLASS);
+        editor.getInputField().blur();
+      }
+      editor.setOption(option, value);
       break;
     default:
       editor.setOption(option, value);
