@@ -143,41 +143,37 @@ describe('CodeMirrorEditor', () => {
 
   });
 
-  describe('#lineNumbers', () => {
+  describe('#getOption()', () => {
 
     it('should get whether line numbers should be shown', () => {
-      expect(editor.lineNumbers).to.be(false);
+      expect(editor.getOption('lineNumbers')).to.be(false);
     });
 
-    it('should set whether line numbers should be shown', () => {
-      editor.lineNumbers = true;
-      expect(editor.lineNumbers).to.be(true);
+    it('should get whether horizontally scrolling should be used', () => {
+      expect(editor.getOption('wordWrap')).to.be(true);
+    });
+
+    it('should get whether the editor is readonly', () => {
+      expect(editor.getOption('readOnly')).to.be(false);
     });
 
   });
 
-  describe('#wordWrap', () => {
+  describe('#setOption()', () => {
 
-    it('should get whether horizontally scrolling should be used', () => {
-      expect(editor.wordWrap).to.be(true);
+    it('should set whether line numbers should be shown', () => {
+      editor.setOption('lineNumbers', true);
+      expect(editor.getOption('lineNumbers')).to.be(true);
     });
 
     it('should set whether horizontally scrolling should be used', () => {
-      editor.wordWrap = false;
-      expect(editor.wordWrap).to.be(false);
-    });
-
-  });
-
-  describe('#readOnly', () => {
-
-    it('should get whether the editor is readonly', () => {
-      expect(editor.readOnly).to.be(false);
+      editor.setOption('wordWrap', false);
+      expect(editor.getOption('wordWrap')).to.be(false);
     });
 
     it('should set whether the editor is readonly', () => {
-      editor.readOnly = true;
-      expect(editor.readOnly).to.be(true);
+      editor.setOption('readOnly', true);
+      expect(editor.getOption('readOnly')).to.be(true);
     });
 
   });

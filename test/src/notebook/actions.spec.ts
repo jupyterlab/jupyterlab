@@ -1234,19 +1234,19 @@ describe('@jupyterlab/notebook', () => {
     describe('#toggleLineNumbers()', () => {
 
       it('should toggle line numbers on the selected cells', () => {
-        let state = widget.activeCell.editor.lineNumbers;
+        let state = widget.activeCell.editor.getOption('lineNumbers');
         NotebookActions.toggleLineNumbers(widget);
-        expect(widget.activeCell.editor.lineNumbers).to.be(!state);
+        expect(widget.activeCell.editor.getOption('lineNumbers')).to.be(!state);
       });
 
       it('should be based on the state of the active cell', () => {
-        let state = widget.activeCell.editor.lineNumbers;
+        let state = widget.activeCell.editor.getOption('lineNumbers');
         let next = widget.widgets[1];
-        next.editor.lineNumbers = !state;
+        next.editor.setOption('lineNumbers', !state);
         widget.select(next);
         NotebookActions.toggleLineNumbers(widget);
-        expect(widget.widgets[0].editor.lineNumbers).to.be(!state);
-        expect(widget.widgets[1].editor.lineNumbers).to.be(!state);
+        expect(widget.widgets[0].editor.getOption('lineNumbers')).to.be(!state);
+        expect(widget.widgets[1].editor.getOption('lineNumbers')).to.be(!state);
       });
 
       it('should preserve the widget mode', () => {
@@ -1268,21 +1268,23 @@ describe('@jupyterlab/notebook', () => {
     describe('#toggleAllLineNumbers()', () => {
 
       it('should toggle line numbers on all cells', () => {
-        let state = widget.activeCell.editor.lineNumbers;
+        let state = widget.activeCell.editor.getOption('lineNumbers');
         NotebookActions.toggleAllLineNumbers(widget);
         for (let i = 0; i < widget.widgets.length; i++) {
-          expect(widget.widgets[i].editor.lineNumbers).to.be(!state);
+          let lineNumbers = widget.widgets[i].editor.getOption('lineNumbers');
+          expect(lineNumbers).to.be(!state);
         }
       });
 
       it('should be based on the state of the active cell', () => {
-        let state = widget.activeCell.editor.lineNumbers;
+        let state = widget.activeCell.editor.getOption('lineNumbers');
         for (let i = 1; i < widget.widgets.length; i++) {
-          widget.widgets[i].editor.lineNumbers = !state;
+          widget.widgets[i].editor.setOption('lineNumbers', !state);
         }
         NotebookActions.toggleAllLineNumbers(widget);
         for (let i = 0; i < widget.widgets.length; i++) {
-          expect(widget.widgets[i].editor.lineNumbers).to.be(!state);
+          let lineNumbers = widget.widgets[i].editor.getOption('lineNumbers');
+          expect(lineNumbers).to.be(!state);
         }
       });
 

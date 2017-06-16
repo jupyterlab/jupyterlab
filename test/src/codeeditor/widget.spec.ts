@@ -112,7 +112,7 @@ describe('CodeEditorWrapper', () => {
   describe('#editor', () => {
 
     it('should be a a code editor', () => {
-      expect(widget.editor.lineNumbers).to.be(false);
+      expect(widget.editor.getOption('lineNumbers')).to.be(false);
     });
 
   });
