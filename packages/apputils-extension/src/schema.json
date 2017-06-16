@@ -1,0 +1,5 @@
+{
+  "$schema": "http://jupyter.org/v/0.1.0/settings/schema#",
+  "$id": "http://jupyter.org/v/0.1.0/settings/schema#",
+  "title": "Jupyter Settings Schema"
+}
