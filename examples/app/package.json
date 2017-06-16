@@ -12,7 +12,7 @@
     "@jupyterlab/codemirror-extension": "^0.7.0",
     "@jupyterlab/completer-extension": "^0.7.0",
     "@jupyterlab/console-extension": "^0.7.0",
-    "@jupyterlab/csvviewer-extension": "^0.7.0",
+    "@jupyterlab/csvviewer-extension": "^0.7.1",
     "@jupyterlab/docmanager-extension": "^0.7.0",
     "@jupyterlab/docregistry-extension": "^0.7.0",
     "@jupyterlab/faq-extension": "^0.7.0",
@@ -21,7 +21,7 @@
     "@jupyterlab/help-extension": "^0.7.0",
     "@jupyterlab/imageviewer-extension": "^0.7.0",
     "@jupyterlab/inspector-extension": "^0.7.0",
-    "@jupyterlab/launcher-extension": "^0.7.0",
+    "@jupyterlab/launcher-extension": "^0.7.1",
     "@jupyterlab/markdownviewer-extension": "^0.7.0",
     "@jupyterlab/notebook-extension": "^0.7.0",
     "@jupyterlab/rendermime-extension": "^0.7.0",
@@ -44,5 +44,5 @@
     "watch": "^1.0.2",
     "webpack": "^2.2.1"
   },
-  "version": "0.8.0"
+  "version": "0.8.1"
 }

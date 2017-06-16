@@ -21,7 +21,7 @@
     "@jupyterlab/completer": "^0.7.0",
     "@jupyterlab/console": "^0.7.0",
     "@jupyterlab/coreutils": "^0.7.0",
-    "@jupyterlab/csvviewer": "^0.7.0",
+    "@jupyterlab/csvviewer": "^0.7.1",
     "@jupyterlab/docmanager": "^0.7.0",
     "@jupyterlab/docregistry": "^0.7.0",
     "@jupyterlab/filebrowser": "^0.7.0",
@@ -83,5 +83,5 @@
     "watch": "^1.0.2",
     "webpack": "^2.2.1"
   },
-  "version": "0.7.0"
+  "version": "0.7.1"
 }

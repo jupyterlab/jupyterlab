@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/csvviewer",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "JupyterLab - CSV Widget",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

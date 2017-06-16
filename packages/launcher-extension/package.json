@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/launcher-extension",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "JupyterLab - Launcher Page Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
