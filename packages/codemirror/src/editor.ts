@@ -93,10 +93,10 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     this._uuid = options.uuid || uuid();
     this._selectionStyle = options.selectionStyle || {};
 
-    let config = Private.handleOptions(options);
-
     let model = this._model = options.model;
-    let editor = this._editor = CodeMirror(host, config);
+    let editor = this._editor = CodeMirror(host, {});
+    Private.handleConfig(editor, options.config);
+
     let doc = editor.getDoc();
 
     // Handle initial values for text, mimetype, and selections.
@@ -273,6 +273,20 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     this._model = null;
     this._keydownHandlers.length = 0;
     Signal.clearData(this);
+  }
+
+  /**
+   * Get a config option for the editor.
+   */
+  getOption<K extends keyof CodeMirrorEditor.IConfig>(option: K): CodeMirrorEditor.IConfig[K] {
+    return Private.getOption(this.editor, option);
+  }
+
+  /**
+   * Set a config option for the editor.
+   */
+  setOption<K extends keyof CodeMirrorEditor.IConfig>(option: K, value: CodeMirrorEditor.IConfig[K]): void {
+    Private.setOption(this.editor, option, value);
   }
 
   /**
@@ -876,8 +890,18 @@ namespace CodeMirrorEditor {
   export
   interface IOptions extends CodeEditor.IOptions {
     /**
-     * The mode to use. When not given, this will default to the first mode
-     * that was loaded.
+     * The configuration options for the editor.
+     */
+    config?: IConfig;
+  }
+
+  /**
+   * The configuration options for a codemirror editor.
+   */
+  export
+  interface IConfig extends CodeEditor.IConfig {
+    /**
+     * The mode to use.
      */
     mode?: string | Mode.ISpec;
 
@@ -885,49 +909,21 @@ namespace CodeMirrorEditor {
      * The theme to style the editor with.
      * You must make sure the CSS file defining the corresponding
      * .cm-s-[name] styles is loaded.
-     * The default is "jupyter".
      */
     theme?: string;
 
     /**
-     * How many spaces a block (whatever that means in the edited language)
-     * should be indented. The default is 2.
-     */
-    indentUnit?: number;
-
-    /**
      * Whether to use the context-sensitive indentation that the mode provides
-     * (or just indent the same as the line before). Defaults to true.
+     * (or just indent the same as the line before).
      */
     smartIndent?: boolean;
 
     /**
-     * The width of a tab character. Defaults to 4.
-     */
-    tabSize?: number;
-
-    /**
-     * Whether, when indenting, the first N*tabSize spaces should be replaced
-     * by N tabs. Default is false.
-     */
-    indentWithTabs?: boolean;
-
-    /**
      * Configures whether the editor should re-indent the current line when a
      * character is typed that might change its proper indentation
-     * (only works if the mode supports indentation). Default is true.
+     * (only works if the mode supports indentation).
      */
     electricChars?: boolean;
-
-    /**
-     * Determines whether horizontal cursor movement through right-to-left
-     * (Arabic, Hebrew) text is visual (pressing the left arrow moves the
-     * cursor left)
-     * or logical (pressing the left arrow moves to the next lower index in
-     * the string, which is visually right in right-to-left text).
-     * The default is false on Windows, and true on other platforms.
-     */
-    rtlMoveVisually?: boolean;
 
     /**
      * Configures the keymap to use. The default is "default", which is the
@@ -941,11 +937,6 @@ namespace CodeMirrorEditor {
      * ones defined by keyMap. Should be either null, or a valid keymap value.
      */
     extraKeys?: any;
-
-    /**
-     * At which number to start counting lines. Default is 1.
-     */
-    firstLineNumber?: number;
 
     /**
      * Can be used to add extra gutters (beyond or instead of the line number
@@ -970,115 +961,63 @@ namespace CodeMirrorEditor {
 
     /**
      * Whether the cursor should be drawn when a selection is active.
-     * Defaults to false.
      */
     showCursorWhenSelecting?: boolean;
 
     /**
-     * The maximum number of undo levels that the editor stores.
-     * Defaults to 40.
+     * When fixedGutter is on, and there is a horizontal scrollbar, by default
+     * the gutter will be visible to the left of this scrollbar. If this
+     * option is set to true, it will be covered by an element with class
+     * CodeMirror-gutter-filler.
      */
-    undoDepth?: number;
+    coverGutterNextToScrollbar: boolean;
 
     /**
-     * The period of inactivity (in milliseconds) that will cause a new
-     * history event to be started when typing or deleting. Defaults to 500.
+     * Explicitly set the line separator for the editor.
+     * By default (value null), the document will be split on CRLFs as well as
+     * lone CRs and LFs, and a single LF will be used as line separator in all
+     * output (such as getValue). When a specific string is given, lines will
+     * only be split on that string, and output will, by default, use that
+     * same separator.
      */
-    historyEventDelay?: number;
+    lineSeparator: string;
 
     /**
-     * The tab index to assign to the editor. If not given, no tab index will
-     * be assigned.
+     * Chooses a scrollbar implementation. The default is "native", showing
+     * native scrollbars. The core library also provides the "null" style,
+     * which completely hides the scrollbars. Addons can implement additional
+     * scrollbar models.
      */
-    tabindex?: number;
+    scrollbarStyle: string;
 
     /**
-     * Can be used to make CodeMirror focus itself on initialization.
-     * Defaults to off.
+     * When enabled, which is the default, doing copy or cut when there is no
+     * selection will copy or cut the whole lines that have cursors on them.
      */
-    autofocus?: boolean;
-
-    /**
-     * Controls whether drag-and - drop is enabled. On by default.
-     */
-    dragDrop?: boolean;
-
-    /**
-     * Half - period in milliseconds used for cursor blinking.
-     * The default blink rate is 530ms.
-     */
-    cursorBlinkRate?: number;
-
-    /**
-     * Determines the height of the cursor. Default is 1, meaning it spans
-     * the whole height of the line.
-     * For some fonts (and by some tastes) a smaller height (for example 0.85),
-     * which causes the cursor to not reach all the way to the bottom of the
-     * line, looks better
-     */
-    cursorHeight?: number;
-
-    /**
-     * Highlighting is done by a pseudo background - thread that will work for
-     * workTime milliseconds,
-     * and then use timeout to sleep for workDelay milliseconds.
-     * The defaults are 200 and 300, you can change these options to make the
-     * highlighting more or less aggressive.
-     */
-    workTime?: number;
-
-    /**
-     * See workTime.
-     */
-    workDelay?: number;
-
-    /**
-     * Indicates how quickly CodeMirror should poll its input textarea for
-     * changes(when focused).
-     * Most input is captured by events, but some things, like IME input on
-     * some browsers, don't generate events that allow CodeMirror to properly
-     * detect it.
-     * Thus, it polls. Default is 100 milliseconds.
-     */
-    pollInterval?: number;
-
-    /**
-     * By default, CodeMirror will combine adjacent tokens into a single span
-     * if they have the same class.
-     * This will result in a simpler DOM tree, and thus perform better. With
-     * some kinds of styling(such as rounded corners),
-     * this will change the way the document looks. You can set this option to
-     * false to disable this behavior.
-     */
-    flattenSpans?: boolean;
-
-    /**
-     * When highlighting long lines, in order to stay responsive, the editor
-     * will give up and simply style
-     * the rest of the line as plain text when it reaches a certain position.
-     * The default is 10000.
-     * You can set this to Infinity to turn off this behavior.
-     */
-    maxHighlightLength?: number;
-
-    /**
-     * Specifies the amount of lines that are rendered above and below the
-     * part of the document that's currently scrolled into view.
-     * This affects the amount of updates needed when scrolling, and the
-     * amount of work that such an update does.
-     * You should usually leave it at its default, 10. Can be set to Infinity
-     * to make sure the whole document is always rendered,
-     * and thus the browser's text search works on it. This will have bad
-     * effects on performance of big documents.
-     */
-    viewportMargin?: number;
+    lineWiseCopyCut: boolean;
   }
 
   /**
-   * The name of the default CodeMirror theme
+   * The default configuration options for an editor.
    */
   export
-  const DEFAULT_THEME: string = 'jupyter';
+  let defaultConfig: IConfig = {
+    ...CodeEditor.defaultConfig,
+    mode: 'null'
+    theme: 'jupyter',
+    smartIndent: true,
+    electricChars: true,
+    keyMap: 'default',
+    extraKeys: null,
+    gutters: Object.freeze([]),
+    fixedGutter: true,
+    showCursorWhenSelecting: false,
+    coverGutterNextToScrollbar: false,
+    dragDrop: true,
+    lineSeparator: null,
+    scrollbarStyle: 'native',
+    lineWiseCopyCut: true,
+  };
 
   /**
    * Add a command to CodeMirror.
@@ -1122,6 +1061,14 @@ namespace Private {
   }
 
   /**
+   * Handle the codemirror configuration options.
+   */
+  export
+  function handleConfig(editor: CodeMirror.Editor, config: CodeMirrorEditor.IConfig): void {
+
+  }
+
+  /**
    * Delete spaces to the previous tab stob in a codemirror editor.
    */
   export
@@ -1158,6 +1105,22 @@ namespace Private {
   function posEq(a: CodeMirror.Position, b: CodeMirror.Position): boolean {
     return a.line === b.line && a.ch === b.ch;
   };
+
+  /**
+   * Get a config option for the editor.
+   */
+  export
+  function getOption<K extends keyof CodeMirrorEditor.IConfig>(editor: CodeMirror.Editor, option: K): IConfig[K] {
+    return undefined;
+  }
+
+  /**
+   * Set a config option for the editor.
+   */
+  export
+  function setOption<K extends keyof IConfig>(editor: CodeMirror.Editor, option: K, value: IConfig[K]): void {
+    // no-op
+  }
 }
 
 
